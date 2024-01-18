@@ -1,0 +1,83 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start cabecera sombra border">
+         <div class="col-sm-6">
+            <h5 class="font-weight-bold mt-1 text-truncate"> <i class="bi-hdd-stack"></i> &nbsp;Actividad: {{estrfunc.codigo}} {{estrfunc.nombre}}</h5>
+         </div>
+         <div class="col-sm-2 mt-1">
+            <input class="form-control form-control-sm text-center" type="text" placeholder="Filtrar..."
+               [(ngModel)]="filtro" [ngModelOptions]="{standalone: true}" (ngModelChange)="onInputChange()"/>
+         </div>
+         <div class="btn-group ml-auto mt-0">
+            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
+               data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto ">
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#pdf">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+               <button class="dropdown-item" type="button"><i class="bi-file-earmark-arrow-up"></i>&nbsp;
+                  Exportar</button>
+            </div>
+            <div class="col-sm">
+               <button class="bg-transparent border-0" type="submit" (click)="regresar()">
+                  <i class="bi-arrow-left-circle text-white icoRegresar"></i>
+               </button>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-12">
+         <table *ngIf="totales" class="table table-hover table-bordered table-sm sombra">
+            <thead class="cabecera">
+               <tr>
+                  <th></th>
+                  <th class="text-center col-sm-2">Partida</th>
+                  <th class="text-center col-sm-5">Denominación</th>
+                  <th class="text-right">Codificado</th>
+                  <th class="text-right">Inicial</th>
+                  <th class="text-right">Reformas</th>
+                  <th class="text-center">Cod.Asocia.</th>
+                  <th></th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr *ngFor="let partida of _partidas | filter: filtro; let i=index" class="fila">
+                  <td class="text-center small font-weight-bold">{{i+1}}</td>
+                  <td>{{ partida.codpar }}</td>
+                  <td>{{ partida.nompar }}</td>
+                  <td class="text-right"  [ngClass]="{'transparente': partida.inicia + partida.totmod == 0}">{{ partida.inicia + partida.totmod | number:'1.2-2'}}</td>
+                  <td class="text-right" [ngClass]="{'transparente': partida.inicia == 0}">{{ partida.inicia | number:'1.2-2'}}</td>
+                  <td class="text-right" [ngClass]="{'transparente': partida.totmod == 0}">{{ partida.totmod | number:'1.2-2'}}</td>
+                  <td>{{ partida.codigo }}</td>
+                  <td>
+                     <div class="btn-group py-0">
+                        <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
+                           aria-expanded="false">
+                        </button>
+
+                        <div class="dropdown-menu dropdown-menu-right popLista">
+                           <button class="dropdown-item" type="button">
+                              <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
+                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalEliminar">
+                              <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
+                        </div>
+                     </div>
+                  </td>
+               </tr>
+               <tr *ngIf="!swfiltro" class="text-right font-weight-bold">
+                  <td colspan="3">TOTAL </td>
+                  <td>{{totCodificado | number: '1.2-2'}}</td>
+                  <td>{{totInicia | number: '1.2-2'}}</td>
+                  <td>{{totModifi | number: '1.2-2'}}</td>
+                  <td></td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+   </div>
+   
+</div>

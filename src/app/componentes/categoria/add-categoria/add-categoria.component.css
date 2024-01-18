@@ -1,0 +1,5 @@
+/* input:focus:required { border-color: #4db4d3;} */
+input:required:placeholder-shown { border-color: #d79ee4; }
+input:required:not(:placeholder-shown):invalid { border-color:  red; }
+input:required:not(:placeholder-shown):valid { border-color: rgb(2, 153, 23); }
+input:required:focus:invalid { border-color: red; }

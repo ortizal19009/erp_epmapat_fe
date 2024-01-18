@@ -1,0 +1,59 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class = "col-sm-7 pl-0">
+         <div class="row m-0 px-0 py-1 justify-content-start titDocumentos">
+            <div class="col-sm-6">
+               <h4 class="m-0 font-weight-bold"><i class="bi bi-eraser"></i> Comprobantes SRI</h4>
+            </div>
+            <div class="col-sm-3 text-center">
+               <input class="form-control form-control-sm text-center" type="text" placeholder="Filtrar..."
+                  [(ngModel)]="filtro" [ngModelOptions]="{standalone: true}" />
+            </div>
+            <div class="col-md-3 text-right">
+               <button class="btn btn-primary btn-sm" type="button" data-toggle="collapse" data-target="#nuevoTabla4"
+                  aria-expanded="false" aria-controls="nuevoTabla4">
+                  <i class="fa fa-plus-square"></i>&nbsp; Nuevo
+               </button>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-7">
+         <table class="table table-hover table-bordered table-sm">
+            <thead class="text-center">
+               <tr>
+                  <th></th>
+                  <th>Cod</th>
+                  <th>Nombre</th>
+                  <!-- <th class="col-sm-2"></th> -->
+               </tr>
+            </thead>
+            <tbody>
+               <tr *ngFor="let tabla4 of _tabla4  | filter: filtro; let i=index" (click)="info(tabla4.idtabla4)">
+                  <td class="text-center small font-weight-bold">{{i+1}}</td>
+                  <td class="text-center">{{ tabla4.tipocomprobante }}</td>
+                  <td>{{ tabla4.nomcomprobante}}</td>
+                  <!-- <td class="text-center">
+                     <button class="btn btn-outline-info btn-xs " >
+                        <i class="fa fa-info-circle"></i> Info&nbsp;&nbsp;</button>
+                  </td> -->
+               </tr>
+            </tbody>
+         </table>
+      </div>
+
+      <div class="col-md-5 mt-1">
+         <div class="collapse sombra" id="nuevoTabla4">
+            <div class="card card-body pt-0 pb-1 px-0 fondoDocumentos">
+               <h5 class="font-weight-bold py-1 text-center titDocumentos">Nuevo Comprobante SRI</h5>
+               <app-add-tabla4></app-add-tabla4>
+            </div>
+         </div>
+      </div>
+
+   </div>
+</div>

@@ -1,0 +1,229 @@
+<div class="content pt-1 pl-3">
+  <div class="container-fluid">
+    <div class="row mt-0 mb-2">
+      <div class="col-sm-5">
+        <h3 class="m-0 font-weight-bold">{{ titulo }}</h3>
+      </div>
+      <div class="col-sm-7 d-flex justify-content-end">
+        <button class="btn btn-outline-primary btn-xs" type="submit" (click)="regresar()">
+          <i class="fa fa-reply-all"></i> Regresar
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- /.container-fluid -->
+</div>
+<div class="container-fluid">
+  <div class="row mb-0">
+    <div class="col-sm-3">
+      <div class="card card-primary card-outline">
+        <div class="card-body box-profile">
+          <h3 class="profile-username text-center">Número suspensión</h3>
+          <p class="text-muted text-center">{{ numeroSuspension }}</p>
+          <ul class="list-group list-group-unbordered mb-3">
+            <li class="list-group-item">
+              <b>Nombre documento</b>
+              <a class="float-right">{{ nombreDocumento }} </a>
+            </li>
+          </ul>
+
+          <!-- <a href="#" class="btn btn-primary btn-block"><b>Follow</b></a> -->
+        </div>
+        <!-- /.card-body -->
+      </div>
+    </div>
+    <div class="col-sm-9">
+      <div class="card card-primary card-outline">
+        <div class="card-header p-2">
+          <ul class="nav nav-pills">
+            <li class="nav-item">
+              <a class="nav-link active" href="#prefacturas" data-toggle="tab">Medidores suspendidos</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#historialconsumo" data-toggle="tab">Medidores retirados</a>
+            </li>
+          </ul>
+        </div>
+        <!-- /.card-header -->
+        <div class="card-body">
+          <div class="tab-content">
+            <div class="active tab-pane" id="prefacturas">
+              <!-- Post -->
+              <div class="post">
+                <div class="user-block">
+                  <table class="table table-hover table-sm table-bordered">
+                    <thead class="bg-primary">
+                      <tr class="text-center">
+                        <th>Nro</th>
+                        <th>Cuenta</th>
+                        <th>Cliente</th>
+                        <th>Nro medidor</th>
+                        <th>Estado medidor</th>
+                        <th>Observaciones</th>
+                        <th>Acciones</th>
+
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr class="text-center" *ngFor="
+                          let d_suspensioin of l_suspension;
+                          let i = index
+                        ">
+                        <td>{{ i + 1 }}</td>
+                        <td class="text-center">
+                          {{ d_suspensioin.idabonado_abonados.idabonado }}
+                        </td>
+                        <td>
+                          {{
+                          d_suspensioin.idabonado_abonados.idcliente_clientes
+                          .nombre
+                          }}
+                        </td>
+                        <td class="text-center">
+                          {{ d_suspensioin.idabonado_abonados.nromedidor }}
+                        </td>
+                        <td class="text-center">
+                          {{ d_suspensioin.idabonado_abonados.estado }}
+                        </td>
+                        <td>
+                          {{ d_suspensioin.idsuspension_suspensiones.observa }}
+                        </td>
+                        <td class="text-center">
+                          <input type="checkbox" name="" value="{{d_suspensioin.idabonado_abonados.idabonado}}"
+                            (change)="seleccionarSuspendidos($event)">
+                        </td>
+                      </tr>
+
+                    </tbody>
+                  </table>
+                  <div class="row">
+                    <div class="col-sm">
+                      <div class="text-center">
+                        <button class="btn btn-outline-success btn-sm" (click)="retirarMedidor()">Retirar
+                          medidores</button>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+                <!-- /.user-block -->
+              </div>
+            </div>
+            <div class="tab-pane" id="historialconsumo">
+              <div class="post">
+                <div class="user-block">
+                  <table class="table table-hover table-sm table-bordered">
+                    <thead class="bg-primary">
+                      <tr class="text-center">
+                        <th>Nro</th>
+                        <th>Cuenta</th>
+                        <th>Cliente</th>
+                        <th>Nro medidor</th>
+                        <th>Estado medidor</th>
+                        <th>Observaciones</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr class="text-center" *ngFor="
+                          let d_suspensioin of l_suspendidos_retirados;
+                          let i = index
+                        ">
+                        <td>{{ i + 1 }}</td>
+                        <td class="text-center">
+                          {{ d_suspensioin.idabonado_abonados.idabonado }}
+                        </td>
+                        <td>
+                          {{
+                          d_suspensioin.idabonado_abonados.idcliente_clientes
+                          .nombre
+                          }}
+                        </td>
+                        <td class="text-center">
+                          {{ d_suspensioin.idabonado_abonados.nromedidor }}
+                        </td>
+                        <td class="text-center">
+                          {{ d_suspensioin.idabonado_abonados.estado }}
+                        </td>
+                        <td>
+                          {{ d_suspensioin.idsuspension_suspensiones.observa }}
+                        </td>
+                        <td class="text-center">
+                          <input type="checkbox" name="" value="{{d_suspensioin.idabonado_abonados.idabonado}}"
+                            (change)="seleccionarRetirados($event)">
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div class="row">
+                    <div class="col-sm">
+                      <div class="text-center">
+                        <button class="btn btn-outline-success btn-sm" (click)="pagar()">Realizar pago</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- /.user-block -->
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- /.card-body -->
+      </div>
+    </div>
+  </div>
+  <!-- Modal DETALLES FACTURAS -->
+  <div class="modal fade" id="facturaDetallesModal" tabindex="-1" aria-labelledby="facturaDetallesModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="facturaDetallesModalLabel">Factura:</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <table class="table table-hover table-sm table-bordered">
+            <thead class="bg-primary">
+              <tr class="text-center">
+                <th>Rubro</th>
+                <th>Valor unitario</th>
+                <th>Cantidad</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let rubroxfacDatos of f">
+                <td>{{ rubroxfacDatos.idrubro_rubros.descripcion }}</td>
+                <td class="text-center">{{ rubroxfacDatos.valorunitario }}</td>
+                <td class="text-center">{{ rubroxfacDatos.cantidad }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            Close
+          </button>
+          <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- MODAL SUSPENDER -->
+  <div class="modal fade" id="suspenderModal" tabindex="-1" aria-labelledby="suspenderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <!-- <h5 class="modal-title" id="suspenderModalLabel">Modal title</h5> -->
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!--  <app-add-suspensiones [v_abonados]="abonadoSeleccionado"></app-add-suspensiones> -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

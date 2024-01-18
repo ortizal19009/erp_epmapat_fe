@@ -1,0 +1,159 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start cabecera border sombra">
+         <div class="col-sm-2">
+            <h5 class="font-weight-bold mt-1 my-0"> <i class="bi-book-fill"></i>&nbsp; Cuentas</h5>
+         </div>
+         <div class="col-sm-7">
+            <form [formGroup]="formBuscar" (ngSubmit)="buscar()">
+               <div class="row col-sm-12 my-0">
+                  <div class="col-sm-2">
+                     <input class="form-control form-control-sm" type="text" autofocus formControlName="codcue"
+                        placeholder="Código">
+                  </div>
+                  <div class="col-sm-4">
+                     <input type="text" placeholder="Nombre" class="form-control form-control-sm text-center"
+                        formControlName="nomcue" />
+                  </div>
+                  <div class="col-sm-3">
+                     <button class="btn btn-primary btn-sm" [disabled]="disabled"><i class="fa fa-search"></i>
+                        Buscar</button>
+                  </div>
+                  <div class="col-sm-3">
+                     <input class="form-control form-control-sm text-center" type="text" placeholder="Filtrar..."
+                        [(ngModel)]="filtro" [ngModelOptions]="{standalone: true}" />
+                  </div>
+               </div>
+            </form>
+         </div>
+
+         <div class="btn-group ml-auto mt-0">
+            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
+               data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto ">
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#pdf">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+               <button class="dropdown-item" type="button"><i class="bi-file-earmark-arrow-up"></i>&nbsp;
+                  Exportar</button>
+            </div>
+         </div>
+
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-12">
+         <table class="table table-hover table-bordered table-sm sombra">
+            <thead class="text-center cabecera">
+               <tr class="text-center">
+                  <th></th>
+                  <th>Cuenta</th>
+                  <th class="col-md-4">Denominación</th>
+                  <th>Grupo</th>
+                  <th>Mov.</th>
+                  <th>Sinafip</th>
+                  <th>Tipo</th>
+                  <th>Aso.Debe</th>
+                  <th>Aso.Haber</th>
+                  <th></th>
+               </tr>
+            </thead>
+            <tbody class="detalle">
+               <tr *ngFor="let cuenta of _cuentas | filter: filtro; let i=index" class="fila">
+                  <td class="text-center small font-weight-bold">{{i+1}}</td>
+                  <td [ngClass]="{'font-weight-bold': !cuenta.movcue }">{{ cuenta.codcue}}</td>
+                  <td [ngClass]="{'font-weight-bold': !cuenta.movcue}">{{ cuenta.nomcue}}</td>
+                  <td [ngClass]="{'transparente': cuenta.grucue=='0', 'font-weight-bold': !cuenta.movcue}">{{
+                     cuenta.grucue}}</td>
+                  <td class="text-center"> <i class="bi-check" *ngIf="cuenta.movcue"></i> </td>
+                  <td class="text-center"> <i class="bi-check" *ngIf="cuenta.sigef == 1"></i> </td>
+                  <td class="text-center" [ngClass]="{'transparente': cuenta.tiptran=='0'}">{{ cuenta.tiptran}}</td>
+                  <td>{{ cuenta.asodebe}}</td>
+                  <td>{{ cuenta.asohaber}}</td>
+
+                  <td class="text-center">
+                     <div class="btn-group py-0">
+                        <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
+                           aria-expanded="false">
+                        </button>
+
+                        <div class="dropdown-menu dropdown-menu-right popLista">
+                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalUnico"
+                              (click)="addCuenta(cuenta.codcue, cuenta.nomcue, cuenta.idnivel.idnivel, cuenta.movcue )">
+                              <i class="bi-file-earmark-plus"></i>&nbsp; Nueva</button>
+                           <button class="dropdown-item" type="button">
+                              <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
+                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalUnico"
+                              (click)="eliminar(cuenta)">
+                              <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
+                        </div>
+                     </div>
+                  </td>
+
+               </tr>
+            </tbody>
+         </table>
+      </div>
+   </div>
+
+   <!-- Modal Unico -->
+   <div class='modal fade' id='modalUnico' tabindex='-1' aria-labelledby='modalUnico' aria-hidden='true'
+      data-backdrop="static">
+      <div class='modal-dialog modal-dialog-centered'>
+         <div class='modal-content detalle'>
+            <div class='modal-header cabecera justify-content-center'>
+               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Mensaje</h5>
+            </div>
+            <!-- Mensaje nueva (no movimiento) -->
+            <div class='modal-body' *ngIf="opcionModal === 1">
+               <div class="alert alert-warning text-center" role="alert">
+                  Para crear un nueva cuenta debe seleccionar una <span class="fantacygreen">Cuenta de Grupo</span> (no
+                  de movimiento)
+               </div>
+               <div class="text-center">
+                  <button type="button" class="btn btn-success" data-dismiss="modal"><i class="fa fa-check-circle"></i>
+                     Aceptar</button>
+               </div>
+            </div>
+            <!-- Eliminar o Mensajet Tiene movimientos -->
+            <div *ngIf="opcionModal === 2">
+               <div *ngIf="sweliminar; then thenBlock else elseBlock"></div>
+               <ng-template #thenBlock>
+                  <div class='modal-body'>
+                     <div class="alert alert-warning text-center" role="alert">
+                        ¿ Eliminar la Cuenta <span class="fantacygreen">{{cuenta.codcue}}</span> ?
+                     </div>
+                     <div class="text-center">
+                        <button type='button' class='btn btn-success btn-sm mx-2' data-dismiss='modal'
+                           (click)="elimina()">
+                           <i class="fa fa-check-circle" style="font-size:24pxi"></i> Aceptar
+                        </button>
+                        <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
+                           <i class="fa fa-times-circle"></i> Cancelar</button>
+                     </div>
+                  </div>
+               </ng-template>
+
+               <ng-template #elseBlock>
+                  <div class='modal-body'>
+                     <div class="alert alert-warning text-center" role="alert">
+                        No puede Eliminar la Cuenta <span class="fantacygreen">{{cuenta.codcue}} </span><br>Tiene
+                        movimientos.
+                     </div>
+                  </div>
+                  <div class='text-center'>
+                     <button type='button' class='btn btn-success btn-sm mb-3' data-dismiss='modal'>
+                        <i class="fa fa-check-circle"></i> Aceptar
+                     </button>
+                  </div>
+               </ng-template>
+
+            </div>
+         </div>
+      </div>
+   </div>
+
+</div>

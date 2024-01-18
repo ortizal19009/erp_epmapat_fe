@@ -1,0 +1,41 @@
+<div class="content pt-1 pl-3">
+   <div class="container-fluid">
+       <div class="row">
+           <div class="col-sm">
+               <h4>Lista de conciliaciones</h4>
+           </div>
+       </div>
+   </div>
+</div>
+<div class="container-fluid">
+   <div class="row">
+       <div class="col-sm">
+           <table class="table table-hover table-bordered table-sm">
+               <thead class="bg-primary">
+                   <tr>
+                       <th>BanInicial</th>
+                       <th>BanCreditos</th>
+                       <th>BanDebitos</th>
+                       <th>Cuenta</th>
+                       <th>LibInicial</th>
+                       <th>LibCreditos</th>
+                       <th>LibDebitos</th>
+                       <th>Mes</th>
+                   </tr>
+               </thead>
+               <tbody>
+                   <tr *ngFor="let conciliaBan of conciliaBans">
+                       <td>{{conciliaBan.baninicial}}</td>
+                       <td>{{conciliaBan.bancreditos}}</td>
+                       <td>{{conciliaBan.bandebitos}}</td>
+                       <td>{{conciliaBan.idcuenta.nomcue}}</td>
+                       <td>{{conciliaBan.libinicial}}</td>
+                       <td>{{conciliaBan.libcreditos}}</td>
+                       <td>{{conciliaBan.libdebitos}}</td>
+                       <td>{{conciliaBan.mes}}</td>
+                   </tr>
+               </tbody>
+           </table>
+       </div>
+   </div>
+</div>

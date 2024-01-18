@@ -1,0 +1,127 @@
+<div class="content pt-1 pl-3">
+   <div class="container-fluid">
+      <div class="row mt-0 mb-2">
+         <div class="col-sm-5">
+            <h4 class="m-0 font-weight-bold">Establecimiento</h4>
+         </div>
+         <div class="col-sm-7 d-flex justify-content-end">
+            <button class="btn btn-outline-primary btn-xs" type="submit" (click)="regresar()">
+               <i class="fa fa-reply-all"></i> Regresar
+            </button>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-3">
+         <div class="card card-info card-outline">
+            <div class="card-body box-profile">
+               <h3 class="profile-username text-center">{{ estab.codigo }}</h3>
+               <p class="text-muted text-center">{{ estab.direccion }}</p>
+               <ul class="list-group list-group-unbordered mb-3">
+                  <li class="list-group-item">
+                     <b>Autorización</b> <a class="float-right">{{ estab.nroautorizacion }}</a>
+                  </li>
+                  <li class="list-group-item">
+                     <b>Teléfono</b> <a class="float-right">{{ estab.telefono }}</a>
+                  </li>
+                  <li class="list-group-item">
+                     <b>Estado</b> <a class="float-right">{{ estab.estado }}</a>
+                  </li>
+               </ul>
+               <div class="row justify-content-center">
+                  <button class="btn btn-warning btn-xs mx-1" type="button" data-toggle="collapse"
+                     data-target="#modiEstablecimiento" aria-expanded="false" aria-controls="modiEstablecimiento">
+                     <i class="fa fa-edit"></i>
+                     Modificar
+                  </button>
+                  <button class="btn btn-danger btn-xs mx-1" [disabled]="elimdisabled" data-toggle="modal"
+                     data-target="#modalEliminar">
+                     <i class="fa fa-times-circle"></i> Eliminar
+                  </button>
+               </div>
+            </div> <!-- /.card-body -->
+         </div>
+      </div>
+
+      <div class="col-sm-5">
+         <div class="card card-info">
+            <div class="card-header">
+               <ul class="nav nav-tabs card-header-tabs">
+                  <li class="nav-item"><a class="nav-link active" href="#ptosemisión" data-toggle="tab">
+                        <i class="fa fa-th" style="font-size:24pxi"></i> Puntos de Emisión</a>
+                  </li>
+               </ul>
+            </div><!-- /.card-header -->
+
+            <div class="card-body">
+               <div class="tab-content">
+                  <div class="tab-pane active" id="ptosemisión">
+                     <div class="post">
+                        <div class="user-block">
+                           <table class="table table-hover table-sm table-bordered">
+                              <thead class="bg-primary">
+                                 <tr class="text-center">
+                                    <th></th>
+                                    <th>Cod.</th>
+                                    <th>Descripcion</th>
+                                    <th></th>
+                                 </tr>
+                              </thead>
+                              <tbody>
+                                 <tr *ngFor="let caja of _cajas; let i = index" class="text-center">
+                                    <td class="small font-weight-bold">{{ i+1 }}</td>
+                                    <td>{{ caja.codigo }}</td>
+                                    <td class="text-left">{{ caja.descripcion }}</td>
+                                    <td>
+                                       <button class="btn btn-outline-info btn-xs" data-toggle="modal"
+                                          data-target="#facturaDetallesModal">
+                                          <i class="fa fa-info-circle"></i> Info&nbsp;&nbsp;
+                                       </button>
+                                    </td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div><!-- /.card-body -->
+         </div>
+      </div>
+
+      <div class="col-md-4">
+         <div class="collapse" id="modiEstablecimiento">
+            <div class="card card-success card-outline card-body">
+               <app-modificar-ptoemision></app-modificar-ptoemision>
+            </div>
+         </div>
+      </div>
+
+      <!-- Modal Eliminar-->
+      <div class='modal fade' id='modalEliminar' tabindex='-1' aria-labelledby='modalEliminar' aria-hidden='true'>
+         <div class='modal-dialog modal-sm'>
+            <div class='modal-content'>
+               <div class='modal-header'>
+                  <h5 class='modal-title font-weight-bold' id='ModalLabel'>Mensaje</h5>
+               </div>
+               <div class='modal-body'>
+                  <div class="alert alert-info" role="alert">
+                     ¿Eliminar el Establecimiento {{ estab.codigo }}?
+                  </div>
+               </div>
+               <div class='modal-footer' id='idButtons'>
+                  <button type='button' class='btn btn-success btn-sm'
+                     (click)="eliminarEstablecimiento()" data-dismiss='modal' id='btnSi'>
+                     <i class="fa fa-check-circle" style="font-size:24pxi"></i>
+                     &nbsp;&nbsp;&nbsp;Si&nbsp;&nbsp;&nbsp;</button>
+                  <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
+                     <i class="fa fa-times-circle" style="font-size:24pxi"></i>&nbsp;&nbsp;No&nbsp;&nbsp;</button>
+               </div>
+            </div>
+         </div>
+      </div>
+
+   </div>

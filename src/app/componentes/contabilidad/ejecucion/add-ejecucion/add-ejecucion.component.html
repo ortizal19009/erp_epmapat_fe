@@ -1,0 +1,120 @@
+<div class="content detalle">
+   <div class="container-fluid">
+      <div class="row px-3 justify-content-start">
+         <form [formGroup]="formEjecucion">
+            <div class="row">
+
+               <div class="form-group col-md-6 mt-1">
+                  <div class="input-group input-group-sm mb-1 ">
+                     <div class="input-group-prepend">
+                        <label class="input-group-text" for="fecha">Partida</label>
+                     </div>
+                     <input type="text" class="form-control form-control-sm"
+                        formControlName="idpresupue" list="partidasList" (input)="listarxCodigoNombre($event)">
+                     <datalist role="listbox" id="partidasList">
+                        <option *ngFor="let partida of _partidas" value={{partida.codpar}}>
+                           {{ partida.nompar}}</option>
+                     </datalist>
+                  </div>
+               </div>
+
+               <div class="form-group col-md-5 mt-1">
+                  <div class="input-group input-group-sm mb-1 ">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold ">Reforma</span>
+                     </div>
+                     <input type="number" class="form-control text-right" formControlName="modifi" step="0.1">
+                  </div>
+               </div>
+
+               <div class="form-group col-md-12 mt-1">
+                  <div class="input-group input-group-sm mb-1">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold">Nombre</span>
+                     </div>
+                     <input type="text" class="form-control" formControlName="nompar" [value]="nompar" readonly>
+                  </div>
+               </div>
+            </div>
+            <div class="row">
+               <div class="row justify-content-start col-md-12">
+                  <div class="input-group input-group-sm mb-1 col-sm-12">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold">Concepto</span>
+                     </div>
+                     <textarea class="form-control" formControlName="concepto" rows="2"></textarea>
+
+                  </div>
+               </div>
+            </div>
+
+            <div class="text-center">
+               <button class="btn btn-success btn-sm mx-1 my-2" (click)="onSubmit()" [disabled]="!formEjecucion.valid" data-toggle="collapse"
+               data-target="#nuevaEjecucion">
+                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+
+               <button class="btn btn-outline-success btn-sm mx-1 my-2" data-toggle="collapse"
+                  data-target="#nuevaEjecucion">
+                  <i class="fa fa-times-circle"></i> Cancelar
+               </button>
+            </div>
+         </form>
+      </div>
+   </div>
+</div>
+
+<!-- Modal Buscar Partida -->
+<!-- <div class="modal fade" id="presupueModal" tabindex="-1" aria-labelledby="presupueModalLabel" aria-hidden="true"
+   data-backdrop="static">
+   <div class="modal-dialog modal-dialog-scrollable">
+      <div class="modal-content">
+         <div class="modal-body mt-0">
+            <div class="row">
+               <form [formGroup]="formBusPresupue" class="mb-0 col-md-9">
+                  <div class="row py-2">
+                     <div class="input-group col-sm-12">
+                        <input type="text" placeholder="Código o Nombre (Mínimo 3)" class="form-control form-control-sm"
+                           formControlName="codigoNombre" required minlength="3" />
+
+                        <div class="input-group-append">
+                           <button class="btn btn-sm btn-primary" (click)="buscarPresupue()"
+                              [disabled]="!formBusPresupue.valid">
+                              <i class="fa fa-search" aria-hidden="true"></i> Buscar</button>
+                        </div>
+                     </div>
+                  </div>
+               </form>
+
+               <div class="col-md-3 mt-2 pl-0">
+                  <input type="text" class="form-control form-control-sm text-center" placeholder="Filtrar..."
+                     [(ngModel)]="filtro" />
+               </div>
+
+            </div>
+            <div class="row mt-0 pt-0" *ngIf="!formBusPresupue.invalid">
+               <table class="table table-hover table-bordered table-sm mt-0 pt-0" id="tablaPartidas">
+                  <thead class="text-center">
+                     <tr>
+                        <th></th>
+                        <th>Nombre</th>
+                        <th>Identificación</th>
+                     </tr>
+                  </thead>
+                  <tbody id="id-tbody">
+                     <tr *ngFor="let partida of _presupue  | filter:filtro; let i= index"
+                        (click)="selecPresupue(partida)" data-dismiss="modal">
+                        <td class="text-center small font-weight-bold py-0">{{i+1}}</td>
+                        <td class="py-0">{{partida.codpar}}</td>
+                        <td class="py-0">{{partida.nompar}}</td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+         </div>
+         <div class="row justify-content-center mt-0 mb-3">
+            <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">
+               <i class="bi bi-x-circle"></i>&nbsp; Cancelar</button>
+         </div>
+      </div>
+   </div>
+</div> -->

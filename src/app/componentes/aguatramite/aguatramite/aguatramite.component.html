@@ -1,0 +1,128 @@
+<div class="content pt-1">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start cabecera sombra border">
+         <div class="col-sm-3">
+            <h5 class="m-0 font-weight-bold"><i class="fa fa-bath"></i> &nbsp;Trámites de Agua</h5>
+         </div>
+         <div class="col-sm-6">
+            <form action="" [formGroup]="formBuscar">
+               <div class="row">
+                  <div class="col-sm-6">
+                     <select name="" id="" class="form-control form-control-sm"
+                        formControlName="idtipotramite_tipotramite">
+                        <option *ngFor="let tipotramite of l_tipotramite" value={{tipotramite.idtipotramite}}>
+                           {{tipotramite.descripcion}}</option>
+                     </select>
+                  </div>
+                  <div class="col-sm-4">
+                     <select name="" id="" class="form-control form-control-sm" formControlName="estado">
+                        <option *ngFor="let estado of estados" value={{estado.valor}}>{{estado.estado}}</option>
+                     </select>
+                  </div>
+                  <div class="col-sm-2">
+                     <button type="submit" class="btn btn-sm btn-primary" (click)="listarByTipoTramite()">
+                        <i class="fa fa-search" aria-hidden="true"></i> Buscar
+                     </button>
+                  </div>
+               </div>
+            </form>
+         </div>
+         <div class="col-sm-2">
+            <input type="text" class="form-control form-control-sm text-center" placeholder="Filtrar..."
+               [(ngModel)]="filterTerm" />
+         </div>
+         <div class="col-sm">
+            <div class="btn-group ml-auto mt-0">
+               <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
+                  data-toggle="dropdown" aria-expanded="false">
+                  <i class="bi-menu-button-wide text-white"></i>
+               </button>
+               <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+                  <button class="dropdown-item" type="button" data-toggle="modal" data-target="#optTramites">
+                     <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo
+                  </button>
+                  <button class="dropdown-item" (click)="genPdf()" type="button" data-toggle="modal" data-target="#pdf">
+                     <i class="bi bi-printer"></i>&nbsp; Imprimir
+                  </button>
+                  <!-- <button class="dropdown-item" type="button">
+                     <i class="bi-file-earmark-arrow-down"></i>&nbsp; Exportar
+                  </button> -->
+               </div>
+            </div>
+
+         </div>
+      </div>
+   </div>
+</div>
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-12">
+         <table id="my-table" class="table table-hover table-bordered table-sm sombra">
+            <thead class="text-center cabecera">
+               <tr>
+                  <th class="col-sm-1"></th>
+                  <th class="col-sm-3">Cliente</th>
+                  <th class="col-sm-1">Medidor</th>
+                  <th class="col-sm-1">F.Inicia</th>
+                  <th class="col-sm-2">Estado</th>
+                  <th class="col-sm-4">Observaciones</th>
+                  <th class="col-sm-1" *ngIf="optAcciones"></th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr *ngFor="let aguatramite of _aguatramite | filter:filterTerm; let i= index">
+                  <td class="text-center font-weight-bold small">{{i+1}}</td>
+                  <td>{{ aguatramite.idcliente_clientes.nombre }}</td>
+                  <td>{{ aguatramite.codmedidor }}</td>
+                  <td class="text-center">{{ aguatramite.feccrea | date: 'dd-MM-y' }}</td>
+                  <td>{{ setEstado( aguatramite.estado) }}</td>
+                  <td>{{ aguatramite.observacion }}</td>
+                  <td *ngIf="optAcciones">
+                     <button class="badge badge-info mx-1" (click)="infoNuevoTramite( aguatramite )">
+                        Información
+                     </button>
+                  </td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+   </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="optTramites" data-backdrop="static" data-keyboard="false" tabindex="-1"
+   aria-labelledby="optTramitesLabel" aria-hidden="true">
+   <div class="modal-dialog">
+      <div class="modal-content detalle">
+         <div class="modal-header justify-content-center cabecera">
+            <h5 class="modal-title" id="optTramitesLabel">Seleccione el tipo de Trámite</h5>
+         </div>
+         <div class="modal-body">
+            <div class="row">
+               <div class="col-sm text-center">
+                  <form [formGroup]="f_Tipotramite">
+                     <label for="">
+                        <select class="custom-select" formControlName="idtitpotramite">
+                           <option *ngFor="let d_tipotramite of l_tipotramite" [ngValue]="d_tipotramite.idtipotramite">
+                              {{d_tipotramite.descripcion}}</option>
+                        </select>
+                     </label>
+                  </form>
+               </div>
+            </div>
+         </div>
+         <div class='modal-footer justify-content-center detalle border py-1'>
+            <button type='button' class='btn btn-success btn-sm' data-dismiss='modal' id='btnSi' (click)="addAguaTramite()">
+               <i class="fa fa-check-circle"></i> Aceptar
+            </button>
+            <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
+               <i class="fa fa-times-circle" style="font-size:24pxi"></i> Cancelar</button>
+         </div>
+         <!-- <div class="justify-content-center">
+            <button type="button" class="btn btn-outline-success btn-sm" data-dismiss="modal"
+               [disabled]="btnSelectTpTramite" (click)="addAguaTramite()">Aceptar</button>
+            <button type="button" class="btn btn-success btn-sm" data-dismiss="modal">Cancelar</button>
+         </div> -->
+      </div>
+   </div>
+</div>

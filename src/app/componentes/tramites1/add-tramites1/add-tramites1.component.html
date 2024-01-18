@@ -1,0 +1,325 @@
+<div class="content pt-1 pl-3 pb-0">
+   <div class="container-fluid">
+      <div class="row mt-0 mb-2">
+         <h4 class="m-0 font-weight-bold">Nuevo Tramite</h4>
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <form [formGroup]="f_tramite" class="borded">
+      <div class="container">
+         <div class="row mb-0">
+            <div class="col-sm-9">
+               <div class="row">
+                  <div class="col-sm-7">
+                     <label for="descripcion" class="col-sm-12 col-form-label-sm"> Descripción
+                        <input type="text" maxlength="100" class="form-control form-control-sm" id="descripcion"
+                           formControlName="descripcion" /> </label>
+                  </div>
+                  <div class="col-sm-3">
+                     <label for="validohasta" class="col-sm-12 col-form-label-sm"> Valido hasta
+                        <input type="date" min="today" class="form-control form-control-sm" id="validohasta"
+                           formControlName="validohasta" />
+                     </label>
+                  </div>
+                  <div class="col-sm-2 text-right">
+                     <label for="total" class="col-sm-12 col-form-label-sm"> Total
+                        <input type="text" class="form-control form-control-sm text-right" id="total"
+                           formControlName="valor" readonly />
+                     </label>
+                  </div>
+               </div>
+
+               <div class="row">
+                  <div class="col-sm-6">
+                     <label for="idcliente_clientes" class="col-sm-12 col-form-label-sm"> Cliente
+                        <div class="row">
+                           <div class="col-sm-9 pr-0">
+                              <input type="text" class="form-control form-control-sm" id="idcliente_clientes" readonly
+                                 formControlName="idcliente_clientes" />
+                           </div>
+                           <div class="col-sm-3 px-0">
+                              <button type="button" class="btn btn-outline-primary btn-sm" data-toggle="modal"
+                                 data-target="#clienteModal">
+                                 <i class="fa fa-search" aria-hidden="true"></i> Buscar
+                              </button>
+                           </div>
+                        </div>
+                     </label>
+                  </div>
+               </div>
+            </div>
+            <div class="col-sm-3">
+               <div class="form-group">
+                  <div class="custom-control">
+                     <span><strong>Cuenta(s)</strong></span>
+                     <select class="form-control form-control-sm" multiple formControlName="idabonado_abonados">
+                        <option [ngValue]="abonadoDatos" *ngFor="let abonadoDatos of v_abonado">
+                           {{abonadoDatos.idabonado}}
+                        </option>
+                     </select>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </form>
+
+   <div class="row mb-0">
+      <div class="container">
+         <div class="card card-success card-outline">
+            <div class="row">
+               <div class="card-body">
+                  <div class="row">
+                     <div class="col-sm-2">
+                        <h5 class="ml-2 font-weight-bold">Servicios</h5>
+                     </div>
+                     <div class="col-sm-10">
+                        <button type="button" class="btn btn-outline-primary btn-sm float-right" data-toggle="modal"
+                           data-target="#tramiteModal">
+                           <i class="fa fa-plus-square" aria-hidden="true"></i> Añadir
+                        </button>
+                     </div>
+                  </div>
+                  <div class="col-12" *ngIf="tp_servicios; else tp_rubros">
+                     <table class="table table-sm table-hover table-bordered">
+                        <thead class="bg-primary">
+                           <tr class="text-center">
+                              <th>Nro</th>
+                              <th>Nombre</th>
+                              <th>Servicios administración</th>
+                              <th>Descuento</th>
+                              <th>Otro</th>
+                              <th>Valor</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <tr *ngFor="let servDatos of arr_rubro; let i= index">
+                              <td class="text-center font-weight-bold">{{i+1}}</td>
+                              <td>{{servDatos.nombre}}</td>
+                              <td>{{servDatos.serviadmin}}</td>
+                              <td>{{servDatos.descuento}}</td>
+                              <td>{{servDatos.otro}}</td>
+                              <td><input type="text" class="form-control form-control-sm text-right"
+                                    value="{{servDatos.valor}}">
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+                  <ng-template #tp_rubros>
+                     <div class="col-12">
+                        <table class="table table-sm table-hover table-bordered">
+                           <thead class="bg-primary text-center">
+                              <tr>
+                                 <th>Nro</th>
+                                 <th>Descripción</th>
+                                 <th>Calculable</th>
+                                 <th>Tipo</th>
+                                 <th>Valor</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <tr *ngFor="let servDatos of arr_rubro; let i= index">
+                                 <td class="text-center font-weight-bold">{{i+1}}</td>
+                                 <td>{{servDatos.descripcion}}</td>
+                                 <td class="text-right">{{servDatos.calculable}}</td>
+                                 <td class="text-right">{{servDatos.tipo}}</td>
+                                 <td style="width:100px;">
+                                    <div class="text-right">
+                                       <input type="text"
+                                          class="form-control c-{{servDatos.calculable}} form-control-sm text-right"
+                                          (change)="selRubros($event)" id="{{servDatos.idrubro}}"
+                                          value="{{servDatos.valor | number:'1.2-2'}}">
+                                    </div>
+                                 </td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+                  </ng-template>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="text-center">
+   <button type="button" class="btn btn-success btn-sm" (click)="onSubmit()">
+      Aceptar
+   </button>
+   <button type="button" class="btn btn-outline-success btn-sm mx-3" (click)="retornarListarTramite()">
+      Cancelar
+   </button>
+</div>
+
+<div *ngIf="informacionTramite">
+   <hr>
+   <div class="row">
+      <div class="col-sm-3"></div>
+      <div class="col-sm-6">
+         <div class="alert alert-danger" role="alert">
+            <p class="text-center"> <strong> Mensaje! </strong>Verifique que la información sea correcta </p>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- Modal Buscar Clientes -->
+<div class="modal fade" data-backdrop="static" id="clienteModal" tabindex="-1" aria-labelledby="clienteModalLabel"
+   aria-hidden="true">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="clienteModalLabel"><strong>Buscar Cliente</strong></h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+               <span aria-hidden="true">&times;</span>
+            </button>
+         </div>
+         <div class="modal-body">
+            <div class="row">
+               <div class="col-sm-8">
+                  <form [formGroup]="f_clientes">
+                     <div class="row">
+                        <div class="col-sm-12">
+                           <div class="row">
+                              <div class="col-sm-10" id="idi-cliente">
+                                 <input type="text" placeholder="Nombre ó identificación"
+                                    class="form-control form-control-sm" id="buscarCliente"
+                                    formControlName="buscarCliente" />
+                              </div>
+                              <div class="col-sm-2 ">
+                                 <button class="btn btn-outline-primary btn-sm mx-0" (click)="buscarCliente()"><i
+                                       class="fa fa-search" aria-hidden="true"></i></button>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </form>
+               </div>
+               <div class="col-sm-4">
+                  <input type="text" class="form-control form-control-sm" placeholder="Filtrar.."
+                     [(ngModel)]="filterTerm">
+               </div>
+            </div>
+            <div *ngIf="informacionCliente" class="mt-1">
+               <div class="alertCliente">
+                  <strong>Mensaje!.</strong> El campo de texto no puede estar vacio.
+               </div>
+            </div>
+            <div class="row ">
+               <table class="table table-hover table-bordered table-sm mt-3">
+                  <thead class="text-center">
+                     <tr>
+                        <th class="bg-primary">Nombre</th>
+                        <th class="bg-primary">Identificacion</th>
+                        <th class="bg-primary">Acción</th>
+                     </tr>
+                  </thead>
+                  <tbody id="id-tbody">
+                     <tr *ngFor="let clienteDatos of v_cliente | filter:filterTerm" class="tr-res-pago">
+                        <td>{{clienteDatos.nombre}}</td>
+                        <td>{{clienteDatos.cedula}}</td>
+                        <td class="text-center">
+                           <button class="badge badge-pill badge-info btn-sm" data-dismiss="modal"
+                              (click)="obtenerValoresClientes(clienteDatos)">
+                              Seleccionar
+                           </button>
+                        </td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-success btn-sm" data-dismiss="modal">Cancelar</button>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- Modal Buscar Rubro/Servicios -->
+<div class="modal fade" data-backdrop="static" id="tramiteModal" tabindex="-1" aria-labelledby="tramiteModalLabel"
+   aria-hidden="true">
+   <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="tramiteModalLabel"><strong>Buscar servicio</strong></h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+               <span aria-hidden="true">&times;</span>
+            </button>
+         </div>
+         <div class="modal-body">
+            <form [formGroup]="f_buscarservicios">
+               <div class="row">
+                  <div class="col-sm-10">
+                     <div class="row">
+                        <div class="col-sm-6">
+                           <div class="row">
+                              <div class="col-sm-3 text-right">
+                                 <label>Módulo</label>
+                              </div>
+                              <div class="col-sm-8">
+                              <select class="form-control form-control-sm" formControlName="modulos" id="modulos">
+                                 <option value="{{datosModulos.idmodulo}}" id="bs-{{datosModulos.idmodulo}}"
+                                    *ngFor="let datosModulos of v_modulos">
+                                    {{datosModulos.descripcion}}</option>
+                              </select>
+                           </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="row ">
+                  <table class="table table-hover table-bordered table-sm mt-3" *ngIf="t_servicios; else t_rubros">
+                     <thead class="text-center">
+                        <tr>
+                           <th class="bg-primary">Nombre</th>
+                           <th class="bg-primary">Valor</th>
+                           <th class="bg-primary">Seleccionar</th>
+                        </tr>
+                     </thead>
+                     <tbody id="id-tbody">
+                        <tr *ngFor="let serviciosDatos of v_servicios" class="tr-res-pago">
+                           <td>{{serviciosDatos.nombre}}</td>
+                           <td class="text-right">{{serviciosDatos.valor | number:'1.2-2'}}</td>
+                           <td class="text-center">
+                              <input type="checkbox" class="form-check-input" (change)="obtenerServicios($event)"
+                                 value={{serviciosDatos.idservicio}}>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+                  <ng-template #t_rubros>
+                     <table class="table table-hover table-bordered table-sm mt-3">
+                        <thead class="text-center">
+                           <tr>
+                              <th class="bg-primary">Descripción</th>
+                              <th class="bg-primary">Valor</th>
+                              <th class="bg-primary">Seleccionar</th>
+                           </tr>
+                        </thead>
+                        <tbody id="id-tbody">
+                           <tr *ngFor="let rubrosDatos of v_rubros" class="tr-res-pago">
+                              <td>{{rubrosDatos.descripcion}}</td>
+                              <td class="text-right">{{rubrosDatos.valor | number:'1.2-2'}}</td>
+                              <td class="text-center">
+                                 <input type="checkbox" class="form-check-input" (change)="obtenerRubros($event)"
+                                    value={{rubrosDatos.idrubro}}>
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </ng-template>
+               </div>
+            </form>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-outline-success btn-sm" data-dismiss="modal">Aceptar</button>
+         </div>
+      </div>
+   </div>
+</div>

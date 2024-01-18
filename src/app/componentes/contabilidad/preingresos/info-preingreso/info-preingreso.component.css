@@ -1,0 +1,16 @@
+.container-fluid{
+   --bg1: rgb(109, 110, 15);
+   --bg2: rgb(215, 248, 188);
+}
+
+.paringreso{
+   background-color: var(--bg1);
+   color: white;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+}
+
+.cardpartida{
+   background-color: var(--bg2);
+   box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+}
+.cardpartida li{ background-color: var(--bg2); }

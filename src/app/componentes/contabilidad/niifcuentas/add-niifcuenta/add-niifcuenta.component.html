@@ -1,0 +1,50 @@
+<div class="content pt-1 pl-3">
+   <div class="container-fluid">
+       <div class="row mt-0 mb-2">
+           <div class="col-sm">
+               <h4 class="m-0 font-weight-bold">{{titulo}}</h4>
+           </div>
+       </div>
+   </div><!-- /.container-fluid -->
+</div>
+<div class="container-fluid">
+   <form action="" [formGroup]="f_niifhomologa">
+       <div class="row mb-0">
+           <div class="col-sm">
+               <label for="">Código
+                   <input type="text" class="form-control form-control-sm" (keyup)="getCuentas($event)"
+                       formControlName="codcue">
+               </label>
+           </div>
+           <div class="col-sm">
+               <label for="">Grupo
+                   <input type="text" class="form-control form-control-sm" formControlName="grucue" readonly>
+               </label>
+           </div>
+           <div class="col-sm">
+               <label for="">Nivel
+                   <input type="text" class="form-control form-control-sm" formControlName="nivcue" readonly>
+               </label>
+           </div>
+           <div class="col-sm">
+               <label for="">Movimiento
+                   <input type="checkbox" class="form-control form-control-sm" formControlName="movcue">
+               </label>
+           </div>
+       </div>
+       <div class="row">
+           <div class="col-sm">
+               <label for="" class="col-sm-12">Nombre
+                   <input type="text" class="form-control form-control-sm" formControlName="nomcue">
+               </label>
+           </div>
+       </div>
+       <div class="row">
+           <div class="col-sm text-right">
+               <button type="button" class="btn btn-success btn-sm" data-dismiss="modal" (click)="cancelar()">Cancelar</button>
+               <button type="submit" class="btn btn-outline-success btn-sm mx-3" data-dismiss="modal" [disabled]="btnSave"
+                   (click)="onSubmit()">Guardar</button>
+           </div>
+       </div>
+   </form>
+</div>

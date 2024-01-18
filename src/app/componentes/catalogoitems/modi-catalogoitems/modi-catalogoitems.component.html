@@ -1,0 +1,138 @@
+<div class="content">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="col-6 mt-4 pt-5">
+            <h4 class="font-weight-bold text-center titDocumentos">Modificar Producto</h4>
+            <div class="card card-body fondoDocumentos">
+               <form [formGroup]="formProducto" class=" mt-2">
+
+                  <div class="form-group col-md-8 mt-3 mb-0 py-0">
+                     <div class="input-group mb-3 input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Sección</label>
+                        </div>
+                        <select class="custom-select" formControlName="idmodulo" id="selectmodulo" required>
+                           <option *ngFor="let modulo of _modulos" value="{{modulo.idmodulo}}"
+                              id="idmodulo_{{modulo.idmodulo}}">
+                              {{ modulo.descripcion }}
+                           </option>
+                        </select>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-10 my-0 py-0">
+                     <div class="input-group mb-3 input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Uso</label>
+                        </div>
+                        <select class="custom-select" formControlName="idusoitems_usoitems" id="selectuso" required>
+                           <option *ngFor="let uso of _usos" id="idusoitems_{{uso.idusoitems}}"
+                              value="{{uso.idusoitem}}">
+                              {{ uso.descripcion }}
+                           </option>
+                        </select>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-12 mt-1">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <button type="button" class="btn btn-primary btn-sm" data-toggle="modal"
+                              data-target="#rubrosModal">Rubro </button>
+                        </div>
+                        <input type="text" class="form-control" formControlName="nomrubro"
+                           aria-describedby="inputGroup-sizing-sm" readonly>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-12 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
+                              data-toggle="tooltip" title="Obligatorio y mínimo 3 caracteres">Nombre</span>
+                        </div>
+                        <input type="text" class="form-control" formControlName="descripcion" id="descripcion"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" required minlength="3"
+                           maxlength="100" [ngClass]="{'is-invalid': f['descripcion'].invalid && f['descripcion'].touched,
+                           'is-valid': f['descripcion'].valid, '': f['descripcion'].untouched}">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-3 my-0 py-0">
+                     <div class="input-group input-group-sm mb-1">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Habilitado </span>
+                           <div class="input-group-text">
+                              <input type="checkbox" formControlName="estado">
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="text-center">
+                     <button class="btn btn-success btn-sm mx-1 mt-1" (click)="onSubmit()"
+                        [disabled]="!formProducto.valid">
+                        <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+                     <button class="btn btn-outline-success btn-sm mx-1 mt-1" (click)="retornar()">
+                        <i class="fa fa-times-circle"></i> Cancelar</button>
+                  </div>
+               </form>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- Modal para Buscar Rubros -->
+   <div class="modal fade" id="rubrosModal" tabindex="-1" aria-labelledby="rubrosModalLabel" aria-hidden="true"
+      data-backdrop="static">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+         <div class="modal-content rubros">
+            <div class="modal-body">
+               <div row class="ml-1 my-0">
+                  <form [formGroup]="formBuscaRubros" class="mb-0 formBuscaRubros">
+                     <div class="row py-2">
+                        <div class="input-group col-sm-8">
+                           <input type="text" placeholder="Nombre del rubro"
+                              class="form-control form-control-sm text-center col-sm-8 ml-2"
+                              formControlName="descripcion" />
+                           <div class="input-group-append">
+                              <button class="btn btn-sm btn-primary" (click)="buscaRubros()">
+                                 <i class="fa fa-search"></i> Buscar</button>
+                           </div>
+                        </div>
+                        <div class="col-md-3 mr-2">
+                           <input type="text" class="form-control form-control-sm text-center" formControlName="filtro"
+                              placeholder="Filtrar..." [(ngModel)]="filtro" />
+                        </div>
+                     </div>
+                  </form>
+               </div>
+               <div class="row ml-1 mr-0">
+                  <table class="table table-hover table-bordered table-sm mt-0 pt-0 cabeceraRubros">
+                     <thead>
+                        <tr>
+                           <th></th>
+                           <th class="col-sm-10">Rubro </th>
+                           <th class="col-sm-2 text-right">Valor</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr class="filas" *ngFor="let rubro of _rubros  | filter: filtro; let i= index"
+                           data-dismiss="modal" (click)="selRubro(rubro)">
+                           <td class="text-center small font-weight-bold py-0">{{i+1}}</td>
+                           <td class="py-0">{{ rubro.descripcion }}</td>
+                           <td class="text-right py-0">{{ rubro.valor | number:'1.2-2' }}</td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+            <div class="modal-footer">
+               <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">
+                  <i class="bi bi-x-circle"></i> Cancelar</button>
+            </div>
+         </div>
+      </div>
+   </div>
+
+</div>

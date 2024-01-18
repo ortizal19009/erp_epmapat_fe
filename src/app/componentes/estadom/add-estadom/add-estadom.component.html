@@ -1,0 +1,13 @@
+<div class="container">
+    <h3 class="m-0 font-weight-bold">Nuevo Estado</h3>
+    <form action="" (ngSubmit)="onSubmit()">
+        <div class="mb-3">
+            <label for="" class="form-label">Descripción</label>
+            <input type="text" class="form-control" id="descripcion" placeholder="Nuevo Estado"
+                [(ngModel)]="ems.descripcion" name="descripcion" />
+        </div>
+        <div class="mb-3 text-center">
+            <button class="btn btn-success">Aceptar</button>
+        </div>
+    </form>
+</div>

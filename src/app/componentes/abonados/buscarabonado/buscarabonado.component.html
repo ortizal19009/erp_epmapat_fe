@@ -1,0 +1,98 @@
+<div class="content pt-1 pl-3">
+  <div class="container-fluid">
+    <div class="row mt-0 mb-2">
+      <div class="col-sm-10">
+        <div class="container-sm">
+          <form
+            [formGroup]="f_abonado"
+            class="formGroup"
+            (ngSubmit)="onSubmit()"
+          >
+            <div class="row">
+              <div class="col-sm">
+                <select
+                  name=""
+                  id="selecTipoBusqueda"
+                  class="form-control form-control-sm"
+                  formControlName="catBusqueda"
+                >
+                  <option value="1">Cuenta</option>
+                  <option value="2">Nombre o apellido</option>
+                  <option value="3">Identificación</option>
+                </select>
+              </div>
+              <div class="col-sm">
+                <div class="container">
+                  <input
+                    type="text"
+                    placeholder="Buscar"
+                    class="form-control form-control-sm"
+                    autofocus
+                    id="buscarAbonado"
+                    formControlName="buscarAbonado"
+                  />
+                </div>
+              </div>
+              <div class="col-sm">
+                <button
+                  class="btn btn-outline-primary btn-sm"
+                  (click)="bAbonado()"
+                >
+                  <i class="fa fa-search" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="col-sm">
+        <input
+          type="text"
+          class="form-control mx-0 form-control-sm"
+          placeholder="Filtrar..."
+          [(ngModel)]="filterTerm"
+        />
+      </div>
+    </div>
+  </div>
+  <!-- /.container-fluid -->
+</div>
+<div class="container-fluid">
+  <div class="row mb-0">
+    <div class="col-sm">
+      <table class="table table-hover table-bordered table-sm">
+        <thead class="text-center">
+          <tr>
+            <th class="bg-primary text-center">Nro.</th>
+            <th class="col-sm-5 bg-primary text-center">Cliente</th>
+            <th class="bg-primary text-center">Cuenta</th>
+            <th class="bg-primary text-center">C.I/RUC</th>
+            <th class="col-sm-5 bg-primary text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="
+              let abonadoDatos of abonado | filter : filterTerm;
+              let i = index
+            "
+          >
+            <td class="text-center font-weight-bold">{{ i + 1 }}</td>
+            <td>{{ abonadoDatos.idcliente_clientes.nombre }}</td>
+            <td class="text-center">{{ abonadoDatos.idabonado }}</td>
+            <td>{{ abonadoDatos.idcliente_clientes.cedula }}</td>
+            <td class="text-center">
+              <button
+                class="badge badge-info mx-1"
+                data-dismiss="modal"
+                (click)="sAbonado(abonadoDatos)"
+              >
+                Seleccionar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

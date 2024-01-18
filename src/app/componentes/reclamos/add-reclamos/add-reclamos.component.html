@@ -1,0 +1,110 @@
+<!-- Content Header (Page header) -->
+<div class="content pt-1 pl-3">
+   <div class="container-fluid">
+      <div class="row mt-0 mb-2">
+         <h4 class="m-0 font-weight-bold">Nuevo Reclamo</h4>
+      </div>
+   </div><!-- /.container-fluid -->
+</div>
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm">
+         <form [formGroup]="reclamoForm">
+            <div class="row">
+               <div class="col-md-8 form-group-lg">
+                  <label for="" class="form-label form-label-sm">Descripción</label>
+                  <input class="form-control input-sm" type="text" id="observacion" formControlName="observacion">
+               </div>
+               <div class="col-md-4">
+                  <label for="" class="form-label">F.Asignación</label>
+                  <input type="Date" class="form-control" id="fechaasignacion" formControlName="fechaasignacion">
+               </div>
+               <div class="col-md-4">
+                  <label for="" class="form-label">Estado</label>
+                  <select class="form-control" id="estado" formControlName="estado">
+                     <option value="0">Inactivo</option>
+                     <option value="1">Activo</option>
+                  </select>
+               </div>
+               <div class="col-md-4">
+                  <label for="" class="form-label">Referencia dirección</label>
+                  <input type="text" class="form-control" id="referenciadireccion"
+                     formControlName="referenciadireccion">
+               </div>
+               <div class="col-md-4">
+                  <label for="" class="form-label">Piso</label>
+                  <input type="number" min="0" class="form-control" id="piso" formControlName="piso">
+               </div>
+               <div class="col-md-4">
+                  <label for="" class="form-label">Departamento</label>
+                  <input type="number" min="0" class="form-control" id="departamento" formControlName="departamento">
+               </div>
+               <div class="col-md-4">
+                  <label for="" class="form-label">F.Max Contesta</label>
+                  <input type="Date" class="form-control" id="fechamaxcontesta" formControlName="fechamaxcontesta">
+               </div>
+               <div class="col-md-4">
+                  <label for="" class="form-label">F.Contesta</label>
+                  <input type="Date" class="form-control" id="fechacontesta" formControlName="fechacontesta">
+               </div>
+               <div class="col-md-4">
+                  <label for="" class="form-label">CONTESTACION</label>
+                  <input type="text" class="form-control" id="contestacion" formControlName="contestacion">
+               </div>
+               <div class="col-md-4">
+                  <label for="" class="form-label">FECHA TERMINACION</label>
+                  <input type="Date" class="form-control" id="fechaterminacion" formControlName="fechaterminacion">
+               </div>
+               <div class="col-md-4">
+                  <label for="" class="form-label">RESPONSABLE RECLAMO</label>
+                  <input type="text" class="form-control" id="responsablereclamo" formControlName="responsablereclamo">
+               </div>
+               <div class="col-md-4">
+                  <label for="" class="form-label">MODULO</label>
+                  <input type="text" class="form-control" id="modulo" formControlName="modulo">
+               </div>
+               <div class="col-md-6">
+                  <label for="" class="form-label">Notificación
+                     <input type="text" class="form-control" id="notificacion" formControlName="notificacion">
+                  </label>
+               </div>
+               <div class="col-md-4">
+                  <label for="" class="form-label">ESTADO NOTIFICACION</label>
+                  <select class="form-control" id="estadonotificacion" formControlName="estadonotificacion">
+                     <option value="1">Activa</option>
+                     <option value="0">Inactiva</option>
+                  </select>
+               </div>
+               <div class="col-md-4">
+                  <label for="" class="form-label">Tipo de Reclamo</label>
+                  <select type="text" class="form-control" id="idtpreclamo_tpreclamo"
+                     formControlName="idtpreclamo_tpreclamo">
+                     <option *ngFor="let tpreclamosDatos of tpreclamo" id="id-tr{{tpreclamosDatos.idtpreclamo}}"
+                        [ngValue]="tpreclamosDatos">
+                        {{tpreclamosDatos.descripcion}}
+                     </option>
+                  </select>
+               </div>
+               <div class="col-md-4">
+                  <label for="" class="form-label">Módulo
+                     <select type="text" class="form-control form-control-sm" id="idmodulo_modulos"
+                        formControlName="idmodulo_modulos">
+                        <option *ngFor="let modulosDatos of modulos" id="id-m{{modulosDatos.idmodulo}}"
+                           [ngValue]="modulosDatos">{{modulosDatos.descripcion}}
+                        </option>
+                     </select>
+                  </label>
+               </div>
+            </div>
+            <div class="text-center mt-4">
+               <button type="button" class="btn btn-success mx-2" (click)="onSubmit()">
+                  Aceptar
+               </button>
+               <button type="button" class="btn btn-outline-success" (click)="retornarListaReclamos()">
+                  Cancelar
+               </button>
+            </div>
+         </form>
+      </div>
+   </div>
+</div>

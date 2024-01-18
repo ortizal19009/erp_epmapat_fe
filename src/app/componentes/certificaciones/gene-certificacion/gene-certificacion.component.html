@@ -1,0 +1,129 @@
+<div class="content-header">
+   <div class="container-fluid">
+      <div class="row mt-3 justify-content-center text-center">
+         <div class="col-sm-8 cabecera sombra border">
+            <h5 class="my-1 font-weight-bold">Generar Certificación</h5>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="card card-body col-sm-8 detalle sombra">
+            <div class="card card-header">
+               <div class="row">
+                  <div class="col-sm">
+                     <table class="table table-sm">
+                        <tbody>
+                           <tr>
+                              <!-- <td>Nro.Factura: {{factura.nrofactura}}</td> -->
+                              <td>Nro.Factura: {{factura.idfactura}}</td>
+                              <td>Cliente: {{cliente.nombre}}</td>
+                           </tr>
+                           <tr class="font-weight-bold">
+                              <td>{{tipcertificacion.descripcion}}</td>
+                              <td [ngClass]="{'text-danger': respuesta.substring(0, 2) === 'NO' || respuesta.substring(0, 2) === 'SI' }">{{respuesta}}</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+               </div>
+            </div>
+            <div class="row">
+               <div class="col-sm">
+                  <form [formGroup]="formGenera">
+                     <div class="row">
+                        <div class="col-sm">
+                           <div class="input-group mb-3 input-group-sm">
+                              <div class="input-group-append">
+                                 <span class="input-group-text" id="documento">Responder</span>
+                              </div>
+                              <select type="text" class="col-sm-2 form-control form-control-sm"
+                                 formControlName="sufijo">
+                                 <option *ngFor="let sufijo of sufijos" value={{sufijo.sufijo}}>{{sufijo.sufijo}}
+                                 </option>
+                              </select>
+                              <input type="text" class="col-sm-8 form-control form-control-sm" formControlName="nombre"
+                                 placeholder="Nombre" aria-label="Recipient's username" aria-describedby="egreso" />
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-sm">
+                           <div class="input-group mb-3 input-group-sm">
+                              <div class="input-group-append">
+                                 <span class="input-group-text" id="documento">Cargo</span>
+                              </div>
+                              <input type="text" class="col-sm form-control form-control-sm" formControlName="cargo" />
+                           </div>
+                        </div>
+                        <div class="col-sm">
+                           <div class="input-group mb-3 input-group-sm">
+                              <div class="input-group-append">
+                                 <span class="input-group-text" id="documento">Fecha solicitud</span>
+                              </div>
+                              <input type="date" class="col-sm form-control form-control-sm"
+                                 formControlName="fechaSolicitud" />
+                           </div>
+                        </div>
+                     </div>
+
+                  </form>
+               </div>
+            </div>
+            <div class="card card-footer">
+               <div class="mt-2 text-center">
+                  <button class="btn btn-sm btn-warning  mx-1 mb-0" (click)="verificar()"><i
+                        class="fa fa-check-circle"></i>
+                     Verificar</button>
+                  <button class="btn btn-sm btn-success mx-1 mb-0" (click)="generarCertificado()"
+                     [disabled]="respuesta == ''"><i class="fa fa-check-circle"></i>
+                     Aceptar</button>
+                  <button type="button" class="btn btn-outline-success btn-sm mx-1 mb-0" (click)="regresar()">
+                     <i class="fa fa-times-circle"></i> Cancelar
+                  </button>
+               </div>
+            </div>
+         </div>
+
+      </div>
+   </div>
+</div>
+
+<!-- Modal Mostrar deudas-->
+<div class="modal fade" id="deudasModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+   aria-labelledby="deudasModalLabel" aria-hidden="true">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="deudasModalLabel">Lista de deudas</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+               <span aria-hidden="true">&times;</span>
+            </button>
+         </div>
+         <div class="modal-body">
+            <table class="table table-sm table-hover table-striped table-bordered">
+               <thead>
+                  <tr class="text-center bg-primary">
+                     <th>Nro.</th>
+                     <th>Modulo</th>
+                     <th>Valor</th>
+                  </tr>
+               </thead>
+               <tbody>
+                  <tr *ngFor="let deuda of _deudas; let i = index">
+                     <td class="text-center">{{i+1}}</td>
+                     <td>{{deuda.idmodulo.descripcion}}</td>
+                     <td class="text-right">{{deuda.valorbase}}</td>
+                  </tr>
+               </tbody>
+            </table>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">Cerrar</button>
+         </div>
+      </div>
+   </div>
+</div>

@@ -1,0 +1,61 @@
+<div class="collapse" id="nuevaCaja">
+   <h4 class="font-weight-bold">Nueva Caja</h4>
+   <form [formGroup]="formCaja">
+      <div class="row">
+
+         <div class="form-group col-md-6">
+            <div class="input-group input-group-sm">
+               <div class="input-group-prepend">
+                  <label class="input-group-text">Establecimiento</label>
+               </div>
+               <select type="text" class="custom-select text-center" formControlName="idptoemision_ptoemision">
+                  <option [ngValue]="ptoemision" *ngFor="let ptoemision of _ptoemision"
+                     [ngValue]="ptoemision.idptoemision">
+                     {{ ptoemision.establecimiento }}
+                  </option>
+               </select>
+            </div>
+         </div>
+
+         <div class="form-group col-md-5">
+            <div class="input-group mb-1 input-group-sm">
+               <div class="input-group-prepend">
+                  <label class="input-group-text">Punto emision</label>
+               </div>
+               <input type="text" class="form-control text-center" formControlName="codigo" placeholder="000" id="codigo"
+                  aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+            </div>
+         </div>
+
+         <div class="form-group col-md-12">
+            <div class="input-group mb-0 input-group-sm">
+               <div class="input-group-prepend">
+                  <label class="input-group-text">Nombre</label>
+               </div>
+               <input type="text" class="form-control text-center" formControlName="descripcion" id="descripcion"
+                  aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+            </div>
+         </div>
+
+      </div>
+
+      <div class="mb-0 text-center">
+         <button type="button" class="btn btn-success btn-sm mb-1" [disabled]="disabled" (click)="onSubmit()">
+            <i class="fa fa-check-circle"></i> Aceptar</button>
+         <button class="btn btn-outline-success btn-sm mx-1 btn-sm mb-1" data-toggle="collapse"
+            data-target="#nuevaCaja">
+            <i class="fa fa-times-circle"></i> Cancelar</button>
+      </div>
+   </form>
+   <div *ngIf="rtn1 == 1">
+      <div class="alert alert-warning text-center" role="alert">
+         Ya existe la Caja <strong>{{ codigos }}</strong>
+      </div>
+   </div>
+   <div *ngIf="rtn2 == 1">
+      <div class="alert alert-warning text-center" role="alert">
+         Ya existe la Caja <strong>{{ descripcion }}</strong>
+      </div>
+   </div>
+
+</div>

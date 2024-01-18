@@ -1,0 +1,28 @@
+<div class="collapse" id="nuevaNovedad">
+   <div class="row justify-content-center">
+      <h5 class="font-weight-bold">Nueva Novedad</h5>
+   </div>
+   <form [formGroup]="novedadForm">
+      <div class="row">
+         <div class="form-group col-md-12 my-0 py-0">
+            <label for="descripcion" class="form-label col-form-label-sm col-12 my-1 py-1">Descripción
+               <input type="text" class="form-control form-control-sm" id="descripcion" 
+               [(ngModel)]="novedad.descripcion" formControlName="descripcion">
+            </label>
+         </div>
+      </div>
+
+      <div class="mt-2 mb-0 text-center">
+         <button type="button" class="btn btn-success btn-sm mb-3" [disabled]="disabled" (click)="onSubmit()">
+            <i class="fa fa-check-circle" style="font-size:24pxi"></i> Aceptar</button>
+         <button class="btn btn-outline-success btn-sm mx-2 btn-sm mb-3" data-toggle="collapse"
+            data-target="#nuevaNovedad">
+            <i class="fa fa-times-circle" style="font-size:24pxi"></i> Cancelar</button>
+      </div>
+   </form>
+   <div *ngIf="rtn1 == 1">
+      <div class="alert alert-warning text-center" role="alert">
+         ¡ Ya existe la Novedad <strong>{{ descripcion }} </strong>!
+      </div>
+   </div>
+</div>

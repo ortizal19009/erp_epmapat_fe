@@ -1,0 +1,113 @@
+<section class="content">
+   <div class="container-fluid">
+         <div class="row">
+            <div class="col-12">
+               <div class="invoice p-3 mb-3">
+                  <!-- <div class="row invoice-info">
+                     <div class="col-sm-6 invoice-col">
+                        <address>
+                           <strong>Cliente: </strong><br>{{ nomcli }}<br>
+                           <strong>Identificación: </strong> {{ cedula }} <br>
+                        </address>
+                     </div>
+                     <div class="col-sm-6 invoice-col">
+                        <strong>Dirección: </strong>{{ direccion }}<br>
+                        <b>Teléfono: </b>{{ telefono }}<br>
+                        <b>e-mail: </b>{{ email }}
+                     </div>
+                  </div> -->
+
+                  <!-- Table row -->
+                  <div class="row">
+                     <div class="col-12 table-responsive">
+                        <table class="table table-striped table-sm">
+                           <thead>
+                              <tr>
+                                 <th>Rubro</th>
+                                 <th class="col-md-1 text-center">Cant</th>
+                                 <th class="text-right">Valor</th>
+                                 <th class="text-right">Subtotal</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <tr *ngFor="let rubro of rubroxfac">
+                                 <td class="text-left">{{rubro.idrubro_rubros.descripcion}}</td>
+                                 <td class="text-center">{{rubro.cantidad}}</td>
+                                 <td class="text-right">{{rubro.valorunitario | number: '1.2-2'}}</td>
+                                 <td class="text-right">{{rubro.cantidad * rubro.valorunitario | number:'1.2-2'}}</td>
+                                 <!-- <td class="text-center">{{rubro.idrubro_rubros.swiva}}</td>
+                              <td class="text-center">{{rubro.idrubro_rubros.esiva}}</td> -->
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+                     <!-- /.col -->
+                  </div>
+                  <!-- /.row -->
+
+                  <div class="row">
+                     <!-- accepted payments column -->
+                     <div class="col-7">
+                        <!-- <p class="lead">Forma de Pago:</p>
+                     <p class="text-muted well well-sm shadow-none" style="margin-top: 10px;">
+                        Efectivo
+                     </p> -->
+                     </div>
+                     <!-- /.col -->
+                     <div class="col-5">
+                        <!-- <p class="lead">Monto Adeudado 2/22/2014</p> -->
+                        <div class="table-responsive table-sm">
+                           <table class="table">
+                              <tr>
+                                 <th style="width:50%">Subtotal 12%:</th>
+                                 <td class="text-right">{{ suma12 | number: '1.2-2'}}</td>
+                              </tr>
+                              <tr>
+                                 <th>Subtotal 0%:</th>
+                                 <td class="text-right">{{ suma0 | number: '1.2-2'}}</td>
+                              </tr>
+                              <tr>
+                                 <th>Subtotal sin IVA:</th>
+                                 <td class="text-right">{{ suma0 + suma12 | number: '1.2-2'}} </td>
+                              </tr>
+                              <tr>
+                                 <th>IVA:</th>
+                                 <td class="text-right">{{ valoriva | number: '1.2-2'}}</td>
+                              </tr>
+                              <tr>
+                                 <th>Total:</th>
+                                 <td class="text-right">{{ suma0 + suma12 + valoriva | number: '1.2-2'}}</td>
+                              </tr>
+                           </table>
+                        </div>
+                     </div>
+                     <!-- /.col -->
+                  </div>
+                  <!-- /.row -->
+
+                  <!-- this row will not appear when printing -->
+                  <div class="row no-print">
+                     <div class="col-12">
+                        <!-- <a href="invoice-print.html" rel="noopener" target="_blank" class="btn btn-default"><i
+                              class="fas fa-print"></i> Imprimir</a> -->
+                        <!-- <button type="button" class="btn btn-success float-right"><i class="far fa-credit-card"></i> Submit
+                        Payment
+                     </button>
+                     <button type="button" class="btn btn-primary float-right" style="margin-right: 5px;">
+                        <i class="fas fa-download"></i> Generate PDF
+                     </button> -->
+                     </div>
+                  </div>
+               </div>
+               <!-- /.invoice -->
+            </div><!-- /.col -->
+         </div><!-- /.row -->
+      <!-- </ng-template>
+      <ng-template #elseBlock>
+         <div>
+            <p>Nulo</p>
+         </div>
+      </ng-template> -->
+   </div><!-- /.container-fluid -->
+</section>
+<!-- /.content -->

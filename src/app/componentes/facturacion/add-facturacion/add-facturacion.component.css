@@ -1,0 +1,63 @@
+.container-fluid {
+   --bgcolor1: rgb(57, 95, 95);
+   --bgcolor2: rgba(196, 204, 207);
+   --productos1: rgb(95, 57, 95);
+   --productos2: rgba(207, 196, 204);
+   --rubros1: rgb(69, 100, 67);
+   --rubros2: rgba(202, 240, 198);
+   --clientecabecera: Olive;
+   --clientedetalle: Khaki;
+}
+
+.addFacturacion {
+   background-color: var(--bgcolor1);
+   color: white;
+}
+
+/* === Buscar Clientes === */
+.clientecabecera { background-color: var(--clientecabecera);}
+.clientedetalle { background-color: var(--clientedetalle);} 
+.clientecabecera th {
+   background-color: var(--clientecabecera);
+   color: white;
+}
+.clientedetalle tbody tr:hover {
+   background-color: #117a8B;
+   color: white;
+   cursor: pointer;
+} 
+
+.productos, .rubros{
+   box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+}
+
+/* === Productos === */
+.productos th {
+   background-color: var(--productos1);
+   color: white;
+}
+
+.productos tbody {
+   background-color: var(--productos2);
+}
+
+.productos tbody tr:hover {
+   background-color: #117a8B;
+   color: white;
+   cursor: pointer;
+}
+
+/* ==== Rubros ==== */
+.rubros th {
+   background-color: var(--rubros1);
+   color: white;
+}
+
+.rubros tbody {
+   background-color: var(--rubros2);
+}
+
+.filas:hover {
+   background-color: #117a8B;
+   color: white;
+}

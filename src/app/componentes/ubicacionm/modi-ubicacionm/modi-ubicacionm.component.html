@@ -1,0 +1,33 @@
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-8">
+            <div class="col-2"></div>
+            <div class="col-6">
+                <h4 class="font-weight-bold">Modificar Ubicación</h4>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div> <!-- /.content-header -->
+
+<div class="content">
+    <div class="container-fluid">
+        <div class="row mb-8">
+            <div class="col-2"></div>
+            <div class="col-5 border rounded p-3">
+                <form (ngSubmit)="onSubmit()">
+                    <div class="form-group">
+                        <label for="desubicacionm" class="col-sm-12  col-form-label-sm">Descripción
+                            <input type="text" class="form-control form-control-sm" id="desubicacionm"
+                                [(ngModel)]="ubi.descripcion" name="desubicacionm">
+                        </label>
+                    </div>
+                    <div class="mb-3 text-center">
+                    <button class="btn btn-success btn-sm ml-2" type="submit">Aceptar</button>
+                    <button class="btn btn-outline-success btn-sm mx-2" type="button"
+                        (click)="cancelar()">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,386 @@
+<div class="content">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="col-sm-11 pt-3">
+            <h4 class="font-weight-bold text-center border py-1 titAbonado">Modificar Abonado</h4>
+            <div class="card card-body fondoAbonado">
+               <form [formGroup]="abonadoForm">
+                  <div class="row">
+                     <div class="form-group col-md-2 my-0 py-0">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Cuenta</span>
+                           </div>
+                           <input type="text" class="form-control text-center" formControlName="idabonado"
+                              aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly>
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-3 my-0 py-0">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold"
+                                 id="inputGroup-sizing-sm">Nro.Medidor</span>
+                           </div>
+                           <input type="text" class="form-control text-center" formControlName="nromedidor"
+                              aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-3 my-0 py-0">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Marca</span>
+                           </div>
+                           <input type="text" class="form-control text-center" formControlName="marca"
+                              aria-label="Small">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-3 my-0 py-0">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Lectura
+                                 Inicial</span>
+                           </div>
+                           <input type="number" min="0" class="form-control text-center"
+                              formControlName="lecturainicial" aria-label="Small"
+                              aria-describedby="inputGroup-sizing-sm">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-3 my-0 py-0">
+                        <fieldset disabled>
+                           <div class="input-group input-group-sm mb-3">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text" for="estado">Estado</label>
+                              </div>
+                              <select class="custom-select" id="estado" formControlName="estado" [disabled]="true">
+                                 <option value="1">Habilitado</option>
+                                 <option value="2">Suspendido</option>
+                                 <option value="3">Retirado</option>
+                              </select>
+                           </div>
+                        </fieldset>
+                     </div>
+
+                     <div class="form-group col-md-3 my-0 py-0">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold"
+                                 id="inputGroup-sizing-sm">Instalación</span>
+                           </div>
+                           <input type="date" class="form-control text-center" formControlName="fechainstalacion"
+                              aria-label="Small">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-3 my-0 py-0">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Secuencia</span>
+                           </div>
+                           <input type="number" min="0" class="form-control text-center" formControlName="secuencia"
+                              aria-label="Small">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-6 my-0 py-0">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Dirección</span>
+                           </div>
+                           <input type="text" class="form-control" formControlName="direccionubicacion"
+                              aria-label="Small">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-6 my-0 py-0">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold"
+                                 id="inputGroup-sizing-sm">Localización</span>
+                           </div>
+                           <input type="text" class="form-control" formControlName="localizacion" aria-label="Small">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-12 my-0 py-0">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold"
+                                 id="inputGroup-sizing-sm">Observaciones</span>
+                           </div>
+                           <input type="text" class="form-control" formControlName="observacion" aria-label="Small">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-3 my-0 py-0">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold"
+                                 id="inputGroup-sizing-sm">Departamento</span>
+                           </div>
+                           <input type="text" class="form-control" formControlName="departamento" aria-label="Small">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-2 my-0 py-0">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Piso</span>
+                           </div>
+                           <input type="text" class="form-control" formControlName="piso" aria-label="Small">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-3 my-0 py-0">
+                        <div class="input-group mb-3 input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text" for="idcategoria_categorias">Categoría</label>
+                           </div>
+                           <select type="text" class="custom-select" formControlName="idcategoria_categorias"
+                              id="idcategoria_categorias" [compareWith]="compararCategorias">
+                              <option [ngValue]="cate" *ngFor="let cate of categoria">
+                                 {{ cate.descripcion }}
+                              </option>
+                           </select>
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-4 my-0 py-0">
+                        <div class="input-group mb-3 input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Ruta</label>
+                           </div>
+                           <select type="text" class="custom-select" formControlName="idruta_rutas"
+                              [compareWith]="compararCategorias">
+                              <option [ngValue]="rut" *ngFor="let rut of ruta">
+                                 {{ rut.descripcion }}
+                              </option>
+                           </select>
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-4 my-0 py-0">
+                        <div class="input-group mb-3 input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Ubicación medidor</label>
+                           </div>
+                           <select type="text" class="custom-select" formControlName="idubicacionm_ubicacionm"
+                              [compareWith]="compararUbicacion">
+                              <option [ngValue]="ubicacion" *ngFor="let ubicacion of ubicacionm">
+                                 {{ ubicacion.descripcion }}
+                              </option>
+                           </select>
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-3 my-0 py-0">
+                        <div class="input-group mb-3 input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Tipo pago</label>
+                           </div>
+                           <select type="text" class="custom-select" formControlName="idtipopago_tipopago"
+                              [compareWith]="compararTpPago">
+                              <option [ngValue]="tippag" *ngFor="let tippag of tipopago">
+                                 {{ tippag.descripcion }}
+                              </option>
+                           </select>
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-3 my-0 py-0">
+                        <div class="input-group mb-3 input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Estado medidor</label>
+                           </div>
+                           <select type="text" class="custom-select" formControlName="idestadom_estadom"
+                              [compareWith]="compararEstadoM">
+                              <option [ngValue]="estado" *ngFor="let estado of estadom">
+                                 {{ estado.descripcion }}
+                              </option>
+                           </select>
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-3 my-0 py-0">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Medidor
+                                 principal</span>
+                           </div>
+                           <input type="number" min="0" class="form-control text-center"
+                              formControlName="medidorprincipal" aria-label="Small">
+                        </div>
+                     </div>
+
+                     <div class="row col-md-12">
+                        <div class="form-group col-md-6 mt-1">
+                           <div class="input-group input-group-sm">
+                              <div class="input-group-prepend">
+                                 <button type="button" class="btn btn-primary btn-sm" data-toggle="modal"
+                                    data-target="#clienteModal">Cliente </button>
+                              </div>
+                              <input type="text" class="form-control" formControlName="idcliente_clientes"
+                                 aria-describedby="inputGroup-sizing-sm" readonly>
+                           </div>
+                        </div>
+
+                        <div class="form-group col-md-6 mt-1">
+                           <div class="input-group input-group-sm">
+                              <div class="input-group-prepend">
+                                 <button type="button" class="btn btn-primary btn-sm" data-toggle="modal"
+                                    data-target="#responsablePagoModal">Responsable pagos</button>
+                              </div>
+                              <input type="text" class="form-control" formControlName="idresponsable"
+                                 aria-describedby="inputGroup-sizing-sm" readonly>
+                           </div>
+                        </div>
+
+                     </div>
+                  </div>
+                  
+                  <div class="mb-1 text-center">
+                     <button type="button" class="btn btn-sm btn-success" data-toggle="modal"
+                        data-target="#serviciosModal" (click)="cargarDatos()">
+                        <i class="fa fa-check-circle"></i> Aceptar
+                     </button>
+                     <button class="btn btn-sm btn-outline-success mx-2" (click)="retornar()">
+                        <i class="fa fa-times-circle"></i> Cancelar</button>
+                  </div>
+               </form>
+            </div>
+         </div>
+         <!-- MODAL DE SERVICIOS -->
+         <div class="modal fade" id="serviciosModal" tabindex="-1" aria-labelledby="serviciosModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+               <div class="modal-content">
+                  <div class="modal-header">
+                     <h5 class="modal-title" id="serviciosModalLabel">Modal title</h5>
+                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                     </button>
+                  </div>
+                  <div class="modal-body">
+                     <!-- <app-modificar-servxabo [v_idabonado]=v_idabonado></app-modificar-servxabo> -->
+                  </div>
+                  <div class="modal-footer">
+                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                     <button type="button" class="btn btn-primary" (click)="onSubmit()" data-dismiss="modal"> Save
+                        changes</button>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <!-- Modal Responsable Pago -->
+         <div class="modal fade" id="responsablePagoModal" tabindex="-1" aria-labelledby="responsablePagoModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+               <div class="modal-content">
+                  <div class="modal-header">
+                     <h5 class="modal-title" id="responsablePagoModalLabel">Buscar responsable de pago</h5>
+                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                     </button>
+                  </div>
+                  <div class="modal-body">
+                     <form [formGroup]="f_responsablePago">
+                        <div class="row">
+                           <div class="col-sm-10" id="idi-responsable-pago">
+                              <input type="text" placeholder="Nombre ó identificación" class="form-control" autofocus
+                                 id="buscarResponsablePago" formControlName="buscarResponsablePago" />
+                           </div>
+                           <div class="col-sm-2">
+                              <button class="btn btn-outline-primary mx-1" (click)="buscarResponsablePago()"><i
+                                    class="fa fa-search" aria-hidden="true"></i></button>
+                           </div>
+                        </div>
+                        <div class="row ">
+                           <table class="table table-hover table-bordered table-sm mt-3">
+                              <thead class="text-center">
+                                 <tr>
+                                    <th class="bg-primary">Nombre</th>
+                                    <th class="bg-primary">Identificacion</th>
+                                    <th class="bg-primary">Seleccionar</th>
+                                 </tr>
+                              </thead>
+                              <tbody id="id-tbody">
+                                 <tr *ngFor="let responsablePagosDatos of v_resppago" class="tr-res-pago">
+                                    <td>{{responsablePagosDatos.nombre}}</td>
+                                    <td>{{responsablePagosDatos.cedula}}</td>
+                                    <td class="text-center">
+                                       <button class="badge badge-primary" data-dismiss="modal"
+                                          (click)="obtenerValoresResponsablePago(responsablePagosDatos)">
+                                          Seleccionar
+                                       </button>
+                                    </td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </div>
+                     </form>
+                  </div>
+                  <div class="modal-footer">
+                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <!-- Modal Buscar Clientes -->
+         <div class="modal fade" id="clienteModal" tabindex="-1" aria-labelledby="clienteModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+               <div class="modal-content">
+                  <div class="modal-header">
+                     <h5 class="modal-title" id="clienteModalLabel">Buscar cliente</h5>
+                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                     </button>
+                  </div>
+                  <div class="modal-body">
+                     <form [formGroup]="f_clientes">
+                        <div class="row">
+                           <div class="col-sm-10" id="idi-cliente">
+                              <input type="text" placeholder="Nombre ó identificación" class="form-control" autofocus
+                                 id="buscarCliente" formControlName="buscarCliente" />
+                           </div>
+                           <div class="col-sm-2">
+                              <button class="btn btn-outline-primary mx-1" (click)="buscarCliente()"><i
+                                    class="fa fa-search" aria-hidden="true"></i></button>
+                           </div>
+                        </div>
+                        <div class="row ">
+                           <table class="table table-hover table-bordered table-sm mt-3">
+                              <thead class="text-center">
+                                 <tr>
+                                    <th class="bg-primary">Nombre</th>
+                                    <th class="bg-primary">Identificacion</th>
+                                    <th class="bg-primary">Seleccionar</th>
+                                 </tr>
+                              </thead>
+                              <tbody id="id-tbody">
+                                 <tr *ngFor="let clienteDatos of v_cliente" class="tr-res-pago">
+                                    <td>{{clienteDatos.nombre}}</td>
+                                    <td>{{clienteDatos.cedula}}</td>
+                                    <td class="text-center">
+                                       <button class="badge badge-primary" data-dismiss="modal"
+                                          (click)="obtenerValoresClientes(clienteDatos)">
+                                          Seleccionar
+                                       </button>
+                                    </td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </div>
+                     </form>
+                  </div>
+                  <div class="modal-footer">
+                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

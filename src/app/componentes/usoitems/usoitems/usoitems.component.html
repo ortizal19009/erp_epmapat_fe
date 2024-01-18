@@ -1,0 +1,77 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="col-sm-12 px-0">
+         <div class="row m-0 px-0 py-1 justify-content-start titUsoitems">
+            <div class="col-sm-3">
+               <h5 class="m-0 font-weight-bold text-truncate"><i class="bi bi-diagram-3"></i> Usos <span
+                     class="small font-weight-bold">(de los productos)</span></h5>
+            </div>
+            <div class="col-sm-3">
+               <select id="selectmodulo" class="form-control form-control-sm">
+                  <option value={{modulo.idmodulo}} id="modulo{{modulo.idmodulo}}" *ngFor="let modulo of _modulos">
+                     {{modulo.descripcion}}</option>
+               </select>
+            </div>
+            <div class="col-sm-2 text-left">
+               <input type="text" class="form-control mx-0 form-control-sm text-center" placeholder="Filtrar..."
+                  [(ngModel)]="filtro" />
+            </div>
+
+            <div class="btn-group ml-auto mt-0">
+               <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
+                  aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+               </button>
+               <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+                  <button class="dropdown-item" type="button" data-toggle="collapse" data-target="#addUsoitems"
+                     aria-expanded="false" aria-controls="addRubro" (click)="addUsoitems()">
+                     <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+                  <button class="dropdown-item" type="button" data-toggle="modal" data-target="#pdf" (click)="pdf()">
+                     <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+                  <button class="dropdown-item" type="button" disabled>
+                     <i class="bi-file-earmark-arrow-up text-muted"></i><span class="text-muted">&nbsp;
+                        Importar</span></button>
+                  <button class="dropdown-item" type="button" disabled>
+                     <i class="bi-file-earmark-arrow-up text-muted"></i><span class="text-muted">&nbsp;
+                        Exportar</span></button>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-1">
+      <div class="col-md-6">
+         <table class="table table-hover table-bordered table-sm">
+            <thead class="text-center">
+               <tr>
+                  <th></th>
+                  <th>Nombre</th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr *ngFor="let usoitem of _usoitems | filter: filtro; let i = index" (click)="infoUsoitem(usoitem)">
+                  <td class="text-center font-weight-bold small">{{ i+1 }}</td>
+                  <td [ngClass]="{'tachado text-muted': usoitem.estado==0}">{{ usoitem.descripcion }}</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <div class="col-md-6 mt-2">
+         <div class="collapse sombra" id="addUsoitems">
+            <div class="card card-body pt-0 pb-1 px-0 fondoUsoitems">
+               <h5 class="font-weight-bold py-1 text-center titUsoitems">Nuevo Uso de los Productos</h5>
+               <app-add-usoitems [idmodulo]="idmodulo"></app-add-usoitems>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- MODAL PDF-->
+<div class='modal fade' id='pdf' tabindex='-1' aria-labelledby='pdf' aria-hidden='true'>
+   <div class='modal-dialog modal-sm'>
+   </div>
+</div>
+<!--Del Modal-->

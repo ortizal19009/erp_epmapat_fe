@@ -1,0 +1,22 @@
+.container-fluid{
+   --bgcolor1: rgb(50, 88, 51);
+   --bgcolor2: rgba(193, 224, 181 );
+}
+
+table { box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);}
+
+.barra, thead>tr {
+   /* background-color: rgb(50, 88, 51);  */
+   background-color: var(--bgcolor1); 
+   color: white;
+}
+
+table tbody tr:hover  { 
+   background-color: #117a8B;
+   color: white;
+   cursor: pointer; 
+}
+
+table tr:hover  { cursor: pointer; }
+
+tbody tr { background-color: var(--bgcolor2) ;}

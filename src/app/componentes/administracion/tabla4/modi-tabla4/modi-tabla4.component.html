@@ -1,0 +1,49 @@
+<div class="content-header">
+   <div class="row mt-3">
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="col-5 mt-4 pt-5">
+            <h4 class="font-weight-bold text-center titTabla4">Modificar Comprobante SRI</h4>
+            <div class="card card-body fondoTabla4">
+               <form [formGroup]="tab4Form" class=" mt-2">
+                  <div class="form-group col-md-5 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
+                              data-toggle="tooltip" title="Obligatorio y 2 caracteres">Código</span>
+                        </div>
+                        <input type="text" class="form-control text-center" formControlName="tipocomprobante" id="tipocomprobante" aria-label="Small"
+                           aria-describedby="inputGroup-sizing-sm" required minlength="2" maxlength="2"
+                           [ngClass]="{'is-invalid': this.tipocomprobante.invalid && this.tipocomprobante.touched,
+                           'is-valid': this.tipocomprobante.valid, '': this.tipocomprobante.untouched}">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-12 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
+                              data-toggle="tooltip" title="Obligatorio y mnimo 3 caracteres">Nombre</span>
+                        </div>
+                        <input type="text" class="form-control" formControlName="nomcomprobante" id="nomcomprobante" aria-label="Small"
+                           aria-describedby="inputGroup-sizing-sm" required minlength="3" maxlength="100"
+                           [ngClass]="{'is-invalid': this.nomcomprobante.invalid && this.nomcomprobante.touched,
+                           'is-valid': this.nomcomprobante.valid, '': this.nomcomprobante.untouched}">
+                     </div>
+                  </div>
+
+                  <div class="text-center">
+                     <button class="btn btn-success btn-sm mx-1 mt-1" (click)="onSubmit()" [disabled]="!tab4Form.valid">
+                        <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+                     <button class="btn btn-outline-success btn-sm mx-1 mt-1" (click)="retornar()"><i
+                           class="fa fa-times-circle"></i> Cancelar</button>
+                  </div>
+               </form>
+            </div>
+         </div>
+      </div>
+   </div>

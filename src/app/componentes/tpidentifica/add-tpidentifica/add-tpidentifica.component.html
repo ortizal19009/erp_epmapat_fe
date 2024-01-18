@@ -1,0 +1,16 @@
+<div class="container">
+    <h3 class="m-0 font-weight-bold">Nuevo Tipo de Identificación</h3>
+    <form action="" (ngSubmit)="onSubmit()">
+        <div class="mb-3">
+            <label for="" class="form-label">Código</label>
+            <input type="text" class="form-control" id="codigo" placeholder="Nuevo código" [(ngModel)]="tpi.codigo"
+                name="codtpidentifica" />
+            <label for="" class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="nombre" placeholder="Nuevo Nombre" [(ngModel)]="tpi.nombre"
+                name="nomtpidentifica" />
+        </div>
+        <div class="mb-3 text-center">
+            <button class="btn btn-success">Aceptar</button>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,39 @@
+/* .container-fluid{
+   --bgcolor1: rgb(148, 150, 63);
+   --bgcolor2: rgb(248, 248, 218);
+}
+
+table {
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
+}
+
+.barra, thead>tr {
+   background-color: var(--bgcolor1);
+   color: white;
+}
+
+tbody {
+   background-color: var(--bgcolor2);
+}
+
+
+table tbody tr:hover{
+   background-color: #117a8B;
+   color: white;
+   cursor: pointer;
+} */
+
+.cabecera {
+   background-color: var(--bgcolor1);
+   color: white;
+}
+.nuevoBG1 { background-color: var(--bgcolor1); }
+
+.detalle { background-color: var(--bgcolor2); }
+.nuevoBG2 { background-color: var(--bgcolor2); }
+
+.fila:hover {
+   background-color: #117a8B;
+   color: white;
+   cursor: pointer;
+}

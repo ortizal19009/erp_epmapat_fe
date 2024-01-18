@@ -1,0 +1,189 @@
+<div class="content-header" *ngIf="aguatamshow">
+   <div class="container-fluid">
+      <div class="row mt-0 justify-content-center text-center">
+         <div class="col-sm-11 cabecera sombra border">
+            <h5 class="mt-2 font-weight-bold">{{titulo}}</h5>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid mt-0">
+   <div class="content" *ngIf="aguatamshow; else aguahide">
+
+      <div class="container-fluid col-sm-11">
+         <table class="table table-bordered table-sm detalle sombra">
+            <tbody>
+               <tr>
+                  <td><button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalAbonados"><i
+                           class="fa fa-search" aria-hidden="true"></i>
+                        Cuenta&nbsp;&nbsp;</button>&nbsp;&nbsp;{{abonado.idabonado}}</td>
+                  <td colspan="2">Nombre y apellidos: {{cliente.nombre}}</td>
+                  <td>Identificación: {{cliente.cedula}}</td>
+               </tr>
+               <tr>
+                  <td colspan="2">Direccion: {{cliente.direccion}}</td>
+                  <td>Ruta: {{ruta.descripcion}}</td>
+                  <td>Piso: {{abonado.piso}} Departamento: {{abonado.departamento}}</td>
+               </tr>
+               <tr>
+                  <td>Nro. medidor: {{abonado.nromedidor}}</td>
+                  <td>Marca: {{abonado.marca}}</td>
+                  <td>Categoria: {{categoria.descripcion}}</td>
+                  <td>Estado medidor: {{estadom.descripcion}}</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+
+      <div *ngIf="retMedidor" class="ml-5 col-sm-11 detalle">
+         <form [formGroup]="f_retiroMedidor">
+            <div class="row">
+               <div class="col-sm-8">
+                  <label for="" class="col-sm-10">Ubicación medidor retirado
+                     <input type="text" class="form-control form-control-sm" formControlName="ubimedidor">
+                  </label>
+               </div>
+               <div class="col-sm-3">
+                  <label for="" class="col-sm-10">Fecha retiro medidor
+                     <input type="date" class="form-control form-control-sm" formControlName="fecmedidor">
+                  </label>
+               </div>
+            </div>
+            <div class="row mt-3">
+               <div class="col-sm text-center">
+                  <button class="btn btn-sm btn-success mx-1 mb-3" [disabled]="f_retiroMedidor.invalid"
+                     (click)="retiroMedidor()"><i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+                  <button class="btn btn-sm btn-success mx-1 mb-3" (click)="regresar()"><i
+                        class="fa fa-times-circle"></i>
+                     Cancelar</button>
+               </div>
+            </div>
+         </form>
+      </div>
+
+      <div *ngIf="cambioCategoria">
+
+         <div class="container-fluid">
+            <div class="row justify-content-center">
+               <div class="col-sm-4 detalle">
+                  <form [formGroup]="f_categoria" class="col-sm-12 d-flex justify-content-center my-2">
+                     <select name="" id="" class="form-control form-control-sm" formControlName="idcategoria_categorias"
+                        [compareWith]="compareCategoria">
+                        <option *ngFor="let categoria of categorias" [ngValue]="categoria">{{categoria.descripcion}}
+                        </option>
+                     </select>
+                  </form>
+               </div>
+            </div>
+
+            <div class="row justify-content-center text-center">
+               <div class="col-sm-4 detalle">
+                  <button class="btn btn-sm btn-outline-success mx-1 mb-3" (click)="actualizarCategoria()"><i
+                     class="fa fa-check-circle"></i>&nbsp;Aceptar</button>
+               <button class="btn btn-sm btn-success mx-1 mb-3" (click)="regresar()"><i class="fa fa-times-circle"></i>
+                  Cancelar</button>
+               </div>
+            </div>
+
+         </div>
+      </div>
+
+      <div *ngIf="cambioPropietario" class="m-0">
+         <div class="container-fluid">
+
+            <div class="row justify-content-center">
+               <div class="col-sm-8 detalle">
+                  <form [formGroup]="f_camPropietario">
+                     <div class="card detalle">
+                        <div class="card-header cabecera py-1">
+                           <h3 class="card-title font-weight-bold">Datos del nuevo propietario</h3>
+                           <div class="card-tools">
+                              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                 <i class="fas fa-minus"></i>
+                              </button>
+                           </div>
+                        </div>
+                        <div class="card-body">
+                           <div class="row">
+                              <div class="col-sm">
+                                 <label for="cliente" class="col-sm-6">
+                                    <input type="text" id="cliente" class="form-control form-control-sm"
+                                       value="{{selectClient.nombre}}" readonly>
+                                 </label>
+                                 <button class="btn btn-sm btn-outline-primary ml-2" data-toggle="modal"
+                                    data-target="#modalClientes"><i class="fa fa-search" aria-hidden="true"></i></button>
+                              </div>
+                           </div>
+                           <div class="row">
+                              <div class="col-sm">
+                                 <label for="" class="col-sm-12">Observaciones
+                                    <textarea class="form-control form-control-sm "
+                                       formControlName="observacion"></textarea>
+                                 </label>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </form>
+               </div>
+            </div>
+
+            <div class="row justify-content-center text-center">
+               <div class="col-sm-8 detalle">
+                  <button class="btn btn-sm btn-outline-success mx-1 mb-3" (click)="actualizarPropietario()"><i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+                  <button class="btn btn-sm btn-success mx-1 mb-3" (click)="regresar()"><i class="fa fa-times-circle"></i> Cancelar</button>
+               </div>
+            </div>
+
+         </div>
+
+      </div>
+
+   </div>
+   <ng-template #aguahide>
+      <app-add-aguatramite></app-add-aguatramite>
+   </ng-template>
+
+   <!-- Modal -->
+   <div class="modal fade" id="modalAbonados" data-backdrop="static" data-keyboard="false" tabindex="-1"
+      aria-labelledby="staticBackdropLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+         <div class="modal-content">
+            <div class="modal-header">
+               <div class="row">
+                  <div class="col-sm">
+                     <h5 class="modal-title" id="modalAbonadosLabel">Seleccionar cliente</h5>
+                  </div>
+               </div>
+            </div>
+            <div class="modal-body">
+               <app-buscarabonado (abonadoEvent)="setAbonado($event)"></app-buscarabonado>
+            </div>
+            <div class="modal-footer">
+               <button type="button" class="btn btn-success btn-sm" data-dismiss="modal">Close</button>
+            </div>
+         </div>
+      </div>
+   </div>
+   <!-- Modal -->
+   <!-- <div class="modal fade" id="modalClientes" data-backdrop="static" data-keyboard="false" tabindex="-1"
+      aria-labelledby="staticBackdropLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+         <div class="modal-content">
+            <div class="modal-header">
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+               </button>
+            </div>
+            <div class="modal-body">
+               <app-buscar-cliente (setCliente)="setClient($event)"></app-buscar-cliente>
+            </div>
+            <div class="modal-footer">
+               <button type="button" class="btn btn-success btn-sm" data-dismiss="modal">Close</button>
+            </div>
+         </div>
+      </div>
+   </div> -->
+
+</div>

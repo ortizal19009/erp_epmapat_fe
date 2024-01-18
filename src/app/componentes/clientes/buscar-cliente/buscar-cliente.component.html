@@ -1,0 +1,88 @@
+<div class="row clientecabecera">
+   <form [formGroup]="formBusClientes" class="mb-0 col-md-9">
+      <div class="row py-2">
+         <div class="input-group col-sm-12">
+            <input type="text" placeholder="Nombre ó identificación (Mínimo 5)"
+               class="form-control form-control-sm" autofocus
+               formControlName="nombre_identifica" required minlength="5" [ngClass]="{'is-invalid': formBusClientes.controls['nombre_identifica'].invalid && formBusClientes.controls['nombre_identifica'].touched,
+               'is-valid': formBusClientes.controls['nombre_identifica'].valid, '': formBusClientes.controls['nombre_identifica'].untouched}">
+            <div class="input-group-append">
+               <button class="btn btn-sm btn-primary" (click)="buscarClientes()"
+                  [disabled]="formBusClientes.invalid">
+                  <i class="fa fa-search" aria-hidden="true"></i> Buscar</button>
+            </div>
+         </div>
+      </div>
+   </form>
+
+   <div class="col-md-3 mt-2 pl-0">
+      <input type="text" class="form-control form-control-sm text-center" placeholder="Filtrar..."
+         [(ngModel)]="filtro" />
+   </div>
+
+</div>
+
+<div class="row mt-0 pt-0" *ngIf="!formBusClientes.invalid">
+<!-- <div class="row mt-0 pt-0" *ngIf="!formBusClientes.invalid"> -->
+   <table class="table table-hover table-bordered table-sm mt-0 pt-0 clientedetalle" id="tablaClientes">
+      <thead class="text-center clientecabecera">
+         <tr>
+            <th></th>
+            <th>Nombre</th>
+            <th>Identificación</th>
+         </tr>
+      </thead>
+      <tbody id="id-tbody" class="roboto small">
+         <tr *ngFor="let cliente of _clientes  | filter:filtro; let i= index" (click)="getClienteValue( cliente )"
+             data-dismiss="modal">
+            <td class="text-center small font-weight-bold py-0">{{i+1}}</td>
+            <td class="py-0">{{cliente.nombre}}</td>
+            <td class="py-0">{{cliente.cedula}}</td>
+         </tr>
+      </tbody>
+   </table>
+</div>
+
+<div class="row justify-content-center my-2">
+   <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">
+      <i class="bi bi-x-circle"></i>&nbsp; Cancelar</button>
+</div>
+
+<div class="container-fluid">
+   <form [formGroup]="formBusClientes">
+       <div class="row">
+           <div class="col-sm-10" id="idi-cliente">
+           </div>
+           <div class="col-sm-2">
+           </div>
+           <!-- <div class="col-sm">
+               <div class="form-group col-sm my-0 py-0">
+                   <div class="input-group mb-1 input-group-sm">
+                       <input type="text" placeholder="Nombre ó identificación (Mínimo 5)" class="form-control form-control-sm"
+                           autofocus id="buscarCliente" formControlName="nomidenti" (change)="validar($event)" />
+                       <div class="input-group-prepend">
+                           <button class="btn btn-outline-primary btn-sm mx-1" (click)="buscarCliente()"
+                               [disabled]="btn_search"><i class="fa fa-search" aria-hidden="true"></i></button>
+                       </div>
+                   </div>
+               </div>
+           </div> -->
+       </div>
+       <!-- <div class="row ">
+           <table class="table table-hover table-bordered table-sm mt-3 table-striped">
+               <thead class="text-center">
+                   <tr>
+                       <th>Nombre</th>
+                       <th>Identificacion</th>
+                   </tr>
+               </thead>
+               <tbody id="id-tbody">
+                   <tr *ngFor="let clienteDatos of _clientes" class="tr-res-pago">
+                       <td>{{clienteDatos.nombre}}</td>
+                       <td>{{clienteDatos.cedula}}</td>
+                   </tr>
+               </tbody>
+           </table>
+       </div> -->
+   </form>
+</div>

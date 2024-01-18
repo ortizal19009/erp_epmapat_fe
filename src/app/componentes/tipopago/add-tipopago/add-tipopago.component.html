@@ -1,0 +1,18 @@
+<div class="container">
+    <h4 class="m-0 font-weight-bold">Nuevo Tipo de pago</h4>
+    <form action="" (ngSubmit)="onSubmit()">
+        <div class="mb-3">
+            <label for="descripcion" class="col-sm-12 col-form-label-sm">Descripción
+            <input type="text" class="form-control" id="descripcion"
+                [(ngModel)]="tp.descripcion" name="descritipopago" />
+            </label>
+        </div>
+        <div class="mb-3 text-center">
+            <button class="btn btn-success btn-sm mx-2"
+              data-target="#collapseNacionalidad">Aceptar</button>
+            <button class="btn btn-outline-success mx-2 btn-sm"
+              data-toggle="collapse" data-target="#collapseNuevo">Cancelar</button>
+          </div>
+  
+    </form>
+</div>

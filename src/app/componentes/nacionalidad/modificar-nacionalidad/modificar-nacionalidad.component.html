@@ -1,0 +1,44 @@
+<div class="content-header">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <!-- <div class="col-4"></div> -->
+         <div class="col-md-3 mt-4 mb-0">
+            <h4 class="font-weight-bold">Modificar Nacionalidad</h4>
+         </div><!-- /.col -->
+      </div><!-- /.row -->
+   </div><!-- /.container-fluid -->
+</div> <!-- /.content-header -->
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="col-4">
+            <div class="card card-success card-outline card-body ">
+               <form [formGroup]="nacionalidadForm">
+                  <div class="mb-3">
+                     <label for="descripcion" class="col-sm-12 col-form-label-sm">Nombre
+                        <input type="text" class="form-control form-control-sm" id="descripcion"
+                           formControlName="descripcion" (keypress)="onKeypressEvent($event)" />
+                     </label>
+                  </div>
+                  <div class="mb-3 text-center">
+                     <button class="btn btn-success btn-sm mx-1" (click)="onSubmit()"
+                        [disabled]="disabled"> Aceptar</button>
+                     <button class="btn btn-outline-success btn-sm mx-1"
+                        (click)="retornarListaNacionalidad()"> Cancelar</button>
+                  </div>
+               </form>
+               <div *ngIf="rtn == 1">
+                  <div class="alert alert-danger text-center" role="alert">
+                     No ha digitado el <strong>Nombre</strong> de la Nacionalidad!
+                  </div>
+               </div>
+               <div *ngIf="rtn == 2">
+                  <div class="alert alert-warning text-center" role="alert">
+                     Ya existe la Nacionalidad <strong>{{descripcion}}</strong>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>

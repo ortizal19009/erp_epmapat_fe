@@ -1,0 +1,43 @@
+.container-fluid{
+   --bgcolor1: rgb(95, 57, 95);
+   --bgcolor2: rgba(231, 221, 228);
+   --bgplanillas1: rgb(50, 88, 51);
+   --bgplanillas2: rgba(193, 224, 181 );
+}
+
+.rubro {
+   background-color: var(--bgcolor1);
+   color: white;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+}
+
+.cardRubro{
+   background-color: var(--bgcolor2);
+   box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+}
+.cardRubro li, .bodyProductos{
+   background-color: var(--bgcolor2);
+}
+
+table {box-shadow: 0 0 10px rgba(0, 0, 0, 1);}
+
+.theadProductos{
+   background-color: var(--bgcolor1);
+   color: white;
+}
+.fila:hover {
+   background-color: #117a8B;
+   color: white;
+   /* cursor: pointer;  */
+}
+
+.tbodyPlanillas{ background-color: var(--bgplanillas2);}
+.theadPlanillas{
+   background-color: var(--bgplanillas1);
+   color: white;
+}
+
+.cardTab{
+   background-color: var(--bgcolor1);
+   color: white;
+}

@@ -1,0 +1,165 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start cabecera border sombra">
+         <div class="col-sm-2">
+            <h5 class="m-0 font-weight-bold"><i class="fa fa-certificate"></i> Certificaciones</h5>
+         </div>
+         <div class="col-sm-10">
+            <form [formGroup]="formBuscar">
+               <div class="row col-sm-12 mt-0 mb-0">
+                  <div class="col-sm-12">
+                     <div class="row">
+
+                        <div class="col-sm-1 mx-0 px-0">
+                           <input class="form-control form-control-sm text-center" type="text" min="0"
+                              placeholder="Desde" id="desde" formControlName="desde">
+                        </div>
+                        <div class="col-sm-1 ml-1 px-0">
+                           <input class="form-control form-control-sm text-center" type="text" min="0"
+                              placeholder="Hasta" id="hasta" formControlName="hasta">
+                        </div>
+
+                        <div class="col-sm-3 ml-1 px-0">
+                           <input class="form-control form-control-sm text-center" type="text" placeholder="Cliente"
+                              formControlName="cliente" (input)="iniDesdeHasta()">
+                        </div>
+
+                        <div class="col-sm-2">
+                           <button class="btn btn-primary btn-sm" type="submit" (click)="buscar()"><i
+                                 class="fa fa-search"></i> Buscar</button>
+                        </div>
+
+                        <div *ngIf="_certificaciones.length > 0" class="col-sm-2 px-0">
+                           <input type="text" class="form-control form-control-sm text-center" placeholder="Filtrar..."
+                              [(ngModel)]="filtro" [ngModelOptions]="{standalone: true}" />
+                        </div>
+
+                        <div class="btn-group ml-auto mt-0">
+                           <button type="button" class="bg-transparent border-0 dropdown-toggle text-white"
+                              data-toggle="dropdown" aria-expanded="false"> <i
+                                 class="bi-menu-button-wide text-white"></i>
+                           </button>
+                           <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+                              <button class="dropdown-item" type="button" (click)="nuevo()">
+                                 <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+                              <button class="dropdown-item" type="button" data-toggle="modal" data-target="#definir" disabled>
+                                 <i class="bi bi-printer"></i>&nbsp; Definir</button>
+                                 <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
+                                    <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+                           </div>
+                        </div>
+
+                     </div>
+                  </div>
+               </div>
+            </form>
+         </div>
+
+
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-12">
+         <div id="alertaCertificacion">
+         </div>
+         <table class="table table-hover table-bordered table-sm sombra">
+            <thead class="text-center">
+               <tr class="text-center cabecera">
+                  <th>Nro.</th>
+                  <th>Fecha</th>
+                  <th>Cliente</th>
+                  <th>Tipo</th>
+                  <th>Planilla</th>
+                  <th>Factura</th>
+                  <th></th>
+               </tr>
+            </thead>
+            <tbody class="detalle">
+               <tr *ngFor="let certificacion of _certificaciones | filter:filtro; let i= index"  (click)="info(certificacion.idcertificacion)" class="fila">
+                  <!-- <td class="text-center font-weight-bold">{{i+1}}</td> -->
+                  <td>{{certificacion.numero}}</td>
+                  <td class="text-center">{{certificacion.feccrea | date: "dd-MM-y"}}</td>
+                  <td>{{certificacion.idfactura_facturas.idcliente.nombre}}</td>
+                  <td>{{certificacion.idtpcertifica_tpcertifica.descripcion}}</td>
+                  <!-- <td>{{certificacionesDatos.idfactura_facturas.idfactura}}</td> -->
+                  <td class="text-center">{{certificacion.idfactura_facturas.idfactura}}</td>
+                  <td>{{certificacion.idfactura_facturas.nrofactura}}</td>
+                  <td class="text-center">
+                     <div class="btn-group py-0">
+                        <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
+                           aria-expanded="false">
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right popLista">
+                           <button class="dropdown-item" type="button"
+                              (click)="modiCertificacion(certificacion.idcertificacion)">
+                              <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
+                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalEliminar"
+                              (click)="eliminarCertificacion(certificacion)">
+                              <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
+                        </div>
+                     </div>
+                  </td>
+                  <!-- <td>
+                     <button (click)="modificarCertificaciones(certificacion)" class="badge badge-warning mx-1">
+                        Modificar
+                     </button>
+                     <button (click)="eliminarCertificaciones(certificacion.idcertificacion)"
+                        class="badge badge-danger mx-1" data-toggle="modal" data-target="#modalCertificacion">
+                        Eliminar
+                     </button>
+                     <button class="badge badge-info mx-1" data-toggle="collapse"
+                        data-target="#collapseInfCertificacion">
+                        &nbsp;&nbsp;&nbsp;&nbsp;Info&nbsp;&nbsp;&nbsp;&nbsp;
+                     </button>
+                  </td> -->
+               </tr>
+            </tbody>
+            <!-- MODAL -->
+            <div class='modal fade' id='modalCertificacion' tabindex='-1' aria-labelledby='modalCertificacionLabel'
+               aria-hidden='true'>
+               <div class='modal-dialog'>
+                  <div class='modal-content'>
+                     <div class='modal-header'>
+                        <h5 class='modal-title' id='modalCertificacionLabel'>CONFIRMACIÓN</h5>
+                        <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+                           <span aria-hidden='true'>&times;</span>
+                        </button>
+                     </div>
+                     <div class='modal-body'>
+                        ¿ Eliminar la Certificación ?
+                     </div>
+                     <div class='modal-footer' id='idButtons'>
+                        <button type='button' class='btn btn-secondary' data-dismiss='modal'>NO</button>
+                        <button type='button' class='btn btn-primary' data-dismiss='modal'
+                           (click)="aprobarEliminacionCertificacion()" id='btnSi'>SI</button>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+         </table>
+      </div>
+      <!-- <div class="col-md-5 mt-2">
+         <div class="container">
+            <div class="collapse" id="collapseCertificacion">
+               <div class="card card-body">
+                  <app-add-certificaciones></app-add-certificaciones>
+               </div>
+            </div>
+         </div>
+      </div> -->
+   </div>
+   <!-- <div class="row">
+    <div class="container">
+      <div class="collapse" id="collapseInfCertificacion">
+        <div class="card card-body">
+          <h2>Detalles</h2>
+          <p>Aquí se mostraran detalles relevantes del certificado seleccionado</p>
+        </div>
+      </div>
+    </div>
+  </div> -->
+</div>

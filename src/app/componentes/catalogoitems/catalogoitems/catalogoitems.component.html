@@ -1,0 +1,108 @@
+<div class="content mt-1 pt-1 px-0">
+   <div class="container-fluid">
+      <div class="row col-sm-12 m-0 py-1 px-0 titProductos">
+         <div class="col-sm-2">
+            <h4 class="m-0 font-weight-bold"><i class="bi bi-file-ruled"></i> Productos</h4>
+         </div>
+         <div class="row col-sm-10 px-0">
+            <form [formGroup]="buscarForm" class="col-sm-12 px-0">
+               <div class="row col-sm-12 px-0">
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" for="tipdoc">Sección</label>
+                        </div>
+                        <select class="custom-select" formControlName="idmodulo" id="selectmodulo">
+                           <option value=0>(Todas)</option>
+                           <option *ngFor="let modulo of _modulos" value={{modulo.idmodulo}}
+                              id="idmodulo_{{modulo.idmodulo}}">
+                              {{ modulo.descripcion }}
+                           </option>
+                        </select>
+                     </div>
+                  </div>
+
+                  <div class="col-sm-3">
+                     <input class="form-control form-control-sm text-center" type="text" placeholder="Nombre"
+                        formControlName="descripcion">
+                  </div>
+                  <div class="col-sm-2">
+                     <button class="btn btn-primary btn-sm" type="submit" (click)="buscar()">
+                        <i class="fa fa-search"></i> Buscar
+                     </button>
+                  </div>
+                  <div class="col-sm-2 pl-0 pr-1 text-center">
+                     <input class="form-control form-control-sm text-center" type="text" placeholder="Filtrar..."
+                        [(ngModel)]="filtro" [ngModelOptions]="{standalone: true}" />
+                  </div>
+
+                  <div class="btn-group ml-auto mt-0">
+                     <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
+                        data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+                     </button>
+                     <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+                        <button class="dropdown-item" type="button" (click)="addProducto()">
+                           <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+                        <button class="dropdown-item" type="button" data-toggle="modal" data-target="#pdf"
+                           (click)="pdf()">
+                           <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+                        <button class="dropdown-item text-muted" type="button" disabled><i
+                              class="bi-file-earmark-arrow-up text-muted"></i>
+                           <span class="text-muted">&nbsp;
+                              Importar</span></button>
+                        <button class="dropdown-item text-muted" type="button" disabled><i
+                              class="bi-file-earmark-arrow-up text-muted"></i>
+                           <span class="text-muted">&nbsp;
+                              Exportar</span></button>
+                     </div>
+                  </div>
+
+               </div>
+            </form>
+         </div>
+
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-md-12">
+         <table class="table table-hover table-bordered table-sm">
+            <thead class="text-center">
+               <tr>
+                  <th></th>
+                  <th class="col-md-2">Nombre</th>
+                  <th class="col-md-3">Sección</th>
+                  <th>Uso</th>
+                  <th>Rubro (planillas)</th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr *ngFor="let catitem of _catalogoitems  | filter: filtro; let i = index; "
+                  (click)="infoCatalogoitem(catitem)">
+                  <td class="text-center font-weight-bold small">{{ i+1 }}</td>
+                  <td [ngClass]="{'tachado': !catitem.estado }">{{ catitem.descripcion }}</td>
+                  <td>{{ catitem.idusoitems_usoitems.idmodulo_modulos.descripcion }}</td>
+                  <td>{{ catitem.idusoitems_usoitems.descripcion }}</td>
+                  <td>{{ catitem.idrubro_rubros.descripcion }}</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <div class="col-md-5">
+         <div class="collapse" id="collapseNuevo">
+            <div class="card card-body">
+               <!-- <app-add-convenio></app-add-convenio> -->
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- MODAL PDF-->
+<div class='modal fade' id='pdf' tabindex='-1' aria-labelledby='pdf' aria-hidden='true'>
+   <div class='modal-dialog modal-sm'>
+   </div>
+</div>
+<!--Del Modal-->

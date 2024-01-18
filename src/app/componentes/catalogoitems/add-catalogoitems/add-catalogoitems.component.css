@@ -1,0 +1,29 @@
+.container-fluid, .modal{
+   --color1: rgb(95, 57, 95);
+   --color2: rgba(207, 196, 204);
+   /* --bg1: rgb(36, 50, 56);
+   --bg2: rgb(231, 250, 252); */
+}
+
+.titProducto{
+   background-color: var(--color1);
+   color: white;
+   box-shadow: 0 0 10px rgba(0, 0, 0, .6);
+}
+
+.cardProducto{
+   background-color: var(--color2);
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+}
+
+/* === Modal: Buscar Rubros === */
+.rubros { background-color: var(--color2);}
+.formBuscaRubros, .cabeceraRubros thead{
+   background-color: var(--color1);
+   color: white;
+}
+.filas:hover {
+   background-color: #117a8B;
+   color: white;
+   cursor: pointer;
+}

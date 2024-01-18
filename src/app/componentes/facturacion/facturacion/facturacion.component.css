@@ -1,0 +1,32 @@
+.container-fluid{
+   --bgcolor1: rgb(57, 95, 95);
+   --bgcolor2: rgba(196, 204, 207);
+}
+
+.cabecera {
+   background-color: var(--bgcolor1);
+   color: white;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
+}
+
+.cuerpo{    background-color: var(--bgcolor2);}
+
+table {
+   background-color: var(--bgcolor2);
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
+}
+
+table>thead>tr {
+   background-color: var(--bgcolor1);
+   color: white;
+}
+
+table tbody tr:hover  { 
+   background-color: #117a8B;
+   color: white;
+   cursor: pointer; 
+}
+
+.transparente{ opacity: 0;}
+
+.sombra{ box-shadow: 0 0 10px rgba(0, 0, 0, 0.75); }

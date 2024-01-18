@@ -1,0 +1,58 @@
+<!-- Content Header (Page header) -->
+<div class="content pt-1 pl-3">
+    <div class="container-fluid">
+        <div class="row mb-1">
+            <div class="col-sm-2">
+                <h4 class="m-0 font-weight-bold">Emisión:  {{ emision.emision }}</h4> 
+            </div><!-- /.col -->
+            <div class="col-md-4">
+                <input type="text" class="form-control form-control-sm col-sm-8" placeholder="Filtrar..." [(ngModel)]="filtro" />
+            </div>
+            <div class="col-sm-6 d-flex justify-content-end">
+                <button class="btn btn-sm btn-outline-primary btn-xs" type="button" (click)="regresar()">
+                   <i class="fa fa-reply-all"></i> Regresar
+                </button>
+             </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</div> <!-- /.content-header -->
+
+<div class="container-fluid">
+    <div class="row mb-0">
+        <div class="col-sm-6">
+            <table class="table table-hover table-bordered table-sm">
+                <thead>
+                    <tr class="bg-primary text-center">
+                        <th></th>
+                        <th>Codigo</th>
+                        <th>Ruta</th>
+                        <th>F.Cierre</th>
+                        <th>M3</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let rutaxemi of _rutasxemi | filter:filtro; let i=index">
+                        <td class="small text-center font-weight-bold">{{i+1}}</td>
+                        <td>{{ rutaxemi.idruta_rutas.codigo }}</td>
+                        <td>{{ rutaxemi.idruta_rutas.descripcion }}</td>
+                        <td class="text-center">{{ rutaxemi.fechacierre | date:'dd-MM-y'}}</td>
+                        <td class="text-right">{{ rutaxemi.m3 | number: '1.2-2'}}</td>
+                        <!-- <td class="text-center"><button class="badge badge-info mr-1" (click)="lecturas(rutaxemi.idrutaxemision)">Lecturas</button></td> -->
+                        <td class="text-center"><button class="btn btn-outline-info btn-xs mx-1" type="button" (click)="lecturas(rutaxemi.idrutaxemision)">
+                            <i class="fa fa-book"></i> Lecturas
+                         </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-sm-6">
+            <div class="collapse" id="collapseNuevo">
+                <div class="card card-body">
+                    <!-- <app-add-emision></app-add-emision> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

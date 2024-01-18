@@ -1,0 +1,99 @@
+<div class="content">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="col-sm-6 mt-5">
+            <h4 class="font-weight-bold text-center titModi sombra border">Modificar Certificación</h4>
+            <div class="card card-body sombra fondo">
+               <form [formGroup]="formCertipresu">
+                  <div class="row">
+
+                     <div class="form-group col-md-5 ml-2 my-0 py-0">
+                        <div class="input-group mb-1 input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text" for="numero">Número</label>
+                           </div>
+                           <input type="number" class="form-control text-center" formControlName="numero" required min = "1"
+                              aria-label="Small" aria-describedby="inputGroup-sizing-sm" required [ngClass]="{'is-invalid': f['numero'].invalid && f['numero'].touched, 'is-valid': f['numero'].valid, '': f['numero'].untouched}">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-5 my-0 py-0">
+                        <div class="input-group mb-1 input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text" for="fecha">Fecha</label>
+                           </div>
+                           <input type="date" class="form-control" formControlName="fecha" id="fecha" aria-label="Small"
+                              aria-describedby="inputGroup-sizing-sm" required minlength="1">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-10 ml-2 my-2 py-2">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text" for="iddocumento">Documento</label>
+                           </div>
+                           <select type="text" class="custom-select" formControlName="iddocumento"
+                              [compareWith]="compararDocumentos">
+                              <option [ngValue]="documento" *ngFor="let documento of _documentos">
+                                 {{ documento.nomdoc }}
+                              </option>
+                           </select>
+                           <input type="text" class="form-control text-center" formControlName="numdoc" required minlength="1"
+                           [ngClass]="{'is-invalid': f['numdoc'].invalid && f['numdoc'].touched, 'is-valid': f['numdoc'].valid, '': f['numdoc'].untouched}">
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-12 mt-1">
+                     <div class="input-group input-group-sm mb-1 ">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" for="fecha">Beneficiario</label>
+                        </div>
+                        <input type="text" class="form-control form-control-sm" value='(Ninguno)'
+                           formControlName="idbene" list="benList" (keyup)="listarxNombre($event)"
+                           [ngClass]="{'is-invalid': f['idbene'].invalid && f['idbene'].touched, 'is-valid': f['idbene'].valid, '': f['idbene'].untouched}">
+                        <datalist role="listbox" id="benList">
+                           <option  *ngFor="let beneficiario of _beneficiarios" value={{beneficiario.nomben}} >
+                           {{ beneficiario.idgrupo.nomgru}}</option>
+                        </datalist>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-12 mt-1">
+                     <div class="input-group input-group-sm mb-1 ">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Responsable</label>
+                        </div>
+                        <input type="text" class="form-control form-control-sm" value='(Ninguno)'
+                           formControlName="idbeneres" list="resList" (keyup)="listarResponsables($event)"
+                           [ngClass]="{'is-invalid': f['idbeneres'].invalid && f['idbeneres'].touched, 'is-valid': f['idbeneres'].valid, '': f['idbeneres'].untouched}">
+                        <datalist role="listbox" id="resList">
+                           <option *ngFor="let responsable of _responsables" value={{responsable.nomben}}>
+                              {{responsable.idgrupo.nomgru}}</option>
+                        </datalist>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-12 my-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Descripción</label>
+                        </div>
+                        <textarea class="form-control" formControlName="descripcion" rows="3"></textarea>
+                     </div>
+                  </div>
+
+                  <div class="mt-3 text-center">
+                     <button type="button" class="btn btn-outline-success btn-sm" (click)="onSubmit()" [disabled]="!formCertipresu.valid">
+                        <i class="fa fa-check-circle"></i> Aceptar
+                     </button>
+                     <button type="button" class="btn btn-success mx-3 btn-sm" (click)="retornar()">
+                        <i class="fa fa-times-circle"></i> Cancelar
+                     </button>
+                  </div>
+               </form>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

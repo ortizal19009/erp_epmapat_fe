@@ -1,0 +1,92 @@
+<div class="content pt-1 pl-3">
+   <div class="container-fluid">
+      <div class="row mt-0 mb-1">
+         <div class="col-sm-3">
+            <h4 class="m-0 font-weight-bold">Convenios de Pago</h4>
+         </div>
+         <div class="col-sm-4">
+            <form [formGroup]="formBuscar">
+               <div class="row">
+                  <div class="col-sm-12">
+                     <div class="row">
+                        <div class="col-sm-4">
+                           <input class="form-control form-control-sm text-center" type="number" min="0"
+                              placeholder="Desde" id="desde" formControlName="desde">
+                        </div>
+                        <div class="col-sm-4">
+                           <input class="form-control form-control-sm text-center" type="number" min="0"
+                              placeholder="Hasta" id="hasta" formControlName="hasta">
+                        </div>
+                        <div class="col-sm-4">
+                           <button class="btn btn-outline-primary btn-sm" type="submit" (click)="buscaConvenios()">
+                              <i class="fa fa-search" style="font-size:24pxi"></i> Buscar
+                           </button>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </form>
+         </div>
+         <div class="col-sm-2 px-0">
+            <input class="form-control form-control-sm" type="text" placeholder="Filtrar..." [(ngModel)]="filtro"
+               [ngModelOptions]="{standalone: true}" />
+         </div>
+         <div class="col-sm-2 d-flex justify-content-firs">
+            <button class="btn btn-outline-primary btn-sm" type="button" data-toggle="collapse"
+               data-target="#collapseNuevo" aria-expanded="false" aria-controls="collapsePresioxCat">
+               <i class="fa fa-plus-square" style="font-size:24pxi"></i>
+               Nuevo
+            </button>
+         </div>
+         <div *ngIf="swbusca" class="col-sm-1 text-right">
+            <button type="button" class="btn btn-outline-primary btn-sm" (click)="listar()">
+               <i class="fa fa-search" style="font-size:24pxi"></i>
+               <span class="badge" data-toggle="tooltip" title="Ultimos">10</span></button> 
+         </div>
+      </div>
+   </div>
+ </div>
+ 
+ <div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-md-7">
+         <table class="table table-hover table-bordered table-sm">
+            <caption *ngIf="!swbusca" class="small mark">Fin de los <strong>10</strong> últimos Convenios</caption>
+            <thead>
+               <tr>
+                  <th class="bg-primary text-center"></th>
+                  <th class="bg-primary text-center">Nro.</th>
+                  <th class="bg-primary text-center">Referencia</th>
+                  <th class="bg-primary text-center">Autorización</th>
+                  <th class="bg-primary text-center">Total</th>
+                  <th class="bg-primary text-center">Inicial</th>
+                  <th class="bg-primary text-center">Final</th>
+                  <th class="bg-primary"></th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr *ngFor="let conv of _convenios | filter: filtro; let i = index">
+                  <td class="text-center font-weight-bold small">{{ i+1 }}</td>
+                  <td class="text-center">{{ conv.nroconvenio }}</td>
+                  <td class="text-center">{{ conv.referencia }}</td>
+                  <td class="text-center">{{ conv.nroautorizacion }}</td>
+                  <td class="text-right">{{ conv.totalconvenio | number: '.2-2'}}</td>
+                  <td class="text-right">{{ conv.cuotainicial | number: '.2-2'}}</td>
+                  <td class="text-right">{{ conv.cuotafinal | number: '.2-2'}}</td>
+                  <td class="text-center">
+                     <button class="badge badge-info badge-pill"
+                        (click)="info(conv.idconvenio)">&nbsp;&nbsp;Info&nbsp;&nbsp;</button>
+                  </td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <div class="col-md-5">
+         <div class="collapse" id="collapseNuevo">
+            <div class="card card-success card-outline card-body">
+               <app-add-convenio></app-add-convenio>
+            </div>
+         </div>
+      </div>
+   </div>
+ </div>

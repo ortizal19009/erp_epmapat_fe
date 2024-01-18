@@ -1,0 +1,41 @@
+<div class="collapse" id="nuevoEstablecimiento">
+   <h4 class="font-weight-bold">Nuevo Establecimiento</h4>
+   <form id="formularioPtoEmision">
+      <div class="row">
+         <div class="form-group col-md-2 my-0 py-0">
+            <label for="establecimiento" class="form-label form-label col-form-label-sm my-1 py-1 text-center">Código
+               <input type="text" class="form-control form-control-sm text-center" id="establecimiento"
+                  placeholder="000" [(ngModel)]="ptoemision.establecimiento" name="establecimiento" required />
+            </label>
+         </div>
+         <div class="form-group col-md-3 my-0 py-0">
+            <label for="nroautorizacion" class="form-label form-label col-form-label-sm my-1 py-1 text-center">
+               Autorización
+               <input type="text" class="form-control form-control-sm text-center" id="nroautorizacion"
+                  [(ngModel)]="ptoemision.nroautorizacion" name="nroautorizacion" />
+            </label>
+         </div>
+         <div class="form-group col-md-3 my-0 py-0">
+            <label for="telefono" class="form-label form-label col-form-label-sm my-1 py-1 text-center">
+               Teléfono
+               <input type="text" class="form-control form-control-sm text-center" id="telefono" [(ngModel)]="ptoemision.telefono"
+                  name="telefono" />
+            </label>
+         </div>
+         <div class="form-group col-md-12 my-0 py-0">
+            <label for="direccion" class="form-label form-label col-form-label-sm my-1 py-1 col-sm-12">
+               Dirección
+               <input type="text" class="form-control form-control-sm" id="direccion" [(ngModel)]="ptoemision.direccion"
+                  name="direccion"/>
+            </label>
+         </div>
+      </div>
+      <div class="mt-2 mb-0 text-center">
+         <button type="button" class="btn btn-success btn-sm mb-3" (click)="onSubmit()">
+            <i class="fa fa-check-circle" style="font-size:24pxi"></i> Aceptar</button>
+         <button class="btn btn-outline-success btn-sm mx-2 btn-sm mb-3" data-toggle="collapse"
+            data-target="#nuevoEstablecimiento">
+            <i class="fa fa-times-circle" style="font-size:24pxi"></i> Cancelar</button>
+      </div>
+   </form>
+</div>

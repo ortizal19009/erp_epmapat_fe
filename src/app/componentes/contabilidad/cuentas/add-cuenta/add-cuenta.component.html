@@ -1,0 +1,148 @@
+<div class="content-header">
+   <div class="container-fluid">
+      <div class="row mt-3 justify-content-center text-center">
+         <div class="col-sm-8 cabecera sombra border">
+            <h5 class="mt-2 font-weight-bold">Nueva Cuenta</h5>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="card card-body col-sm-8 detalle sombra">
+            <form [formGroup]="formCuenta" *ngIf="formCuenta">
+               <div class="row">
+
+                  <div class="form-group col-md-12 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Grupo </span>
+                        </div>
+                        <input type="text" class="form-control col-sm-2" formControlName="grucue" readonly>
+                        <input type="text" class="form-control" formControlName="nomgru" readonly>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group mb-3 input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" for="tipdoc">Nivel</label>
+                        </div>
+                        <select class="custom-select" formControlName="idnivel">
+                           <option *ngFor="let nivel of _niveles" [ngValue]="nivel" id="idnivel_{{nivel.idnivel}}" disabled>
+                              {{ nivel.nomniv }}
+                           </option>
+                        </select>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Código </span>
+                        </div>
+                        <input type="text" class="form-control form-control-sm" formControlName="codcue" [ngClass]="{'is-invalid': f['codcue'].invalid && f['codcue'].touched,
+                        'is-valid': f['codcue'].valid, '': f['codcue'].untouched}">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-12 mt-1 mb-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Nombre</span>
+                        </div>
+                        <input type="text" class="form-control" formControlName="nomcue" [ngClass]="{'is-invalid': f['nomcue'].invalid && f['nomcue'].touched,
+                        'is-valid': f['nomcue'].valid, '': f['nomcue'].untouched}">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-6 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Partida asociada al debe </span>
+                        </div>
+                        <input type="text" class="form-control form-control-sm" formControlName="asodebe">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-6 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Partida asociada al haber </span>
+                        </div>
+                        <input type="text" class="form-control" formControlName="asohaber">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-7 my-0 py-0">
+                     <div class="input-group mb-3 input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" for="tipdoc">Tipo de Transacción</label>
+                        </div>
+                        <select class="custom-select" id="tiptran" formControlName="tiptran">
+                           <option value="0" selected>(General)</option>
+                        <option value="1">Desde Trámite</option>
+                        <option value="2">Anticipo</option>
+                        <option value="3">Cuenta por Cobrar</option>
+                        <option value="4">Cuenta por Cobrar Año Anterior</option>
+                        <option value="5">Depósitos y Fondos de Terceros</option>
+                        <option value="6">Cuentas por Pagar</option>
+                        <option value="7">Cuentas por Pagar Año Anterior</option>
+                        </select>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-3 my-0 py-0">
+                     <div class="input-group input-group-sm mb-1">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Movimiento </span>
+                           <div class="input-group-text">
+                              <input type="checkbox" formControlName="movcue">
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-2 my-0 py-0">
+                     <div class="input-group input-group-sm mb-1">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Sinafip </span>
+                           <div class="input-group-text">
+                              <input type="checkbox" formControlName="sigef">
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-5 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Estado de situación / resultados </span>
+                        </div>
+                        <input type="text" class="form-control form-control-sm" formControlName="intgrupo">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Flujo del efectivo </span>
+                        </div>
+                        <input type="text" class="form-control form-control-sm" formControlName="grufluefec">
+                     </div>
+                  </div>
+
+               </div>
+               <div class="col-md-12 text-center">
+                  <button class="btn btn-success btn-sm mx-1 mt-1" (click)="onSubmit()" [disabled]="!formCuenta.valid">
+                     <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+                  <button class="btn btn-outline-success btn-sm mx-1 mt-1" (click)="regresar()"><i
+                        class="fa fa-times-circle"></i> Cancelar</button>
+               </div>
+            </form>
+         </div>
+      </div>
+   </div>
+</div>

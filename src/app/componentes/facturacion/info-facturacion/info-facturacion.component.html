@@ -1,0 +1,146 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row mt-0 mb-1 mx-0 px-0 py-1 justify-content-start facturacion border">
+         <div class="col-sm-5">
+            <h4 class="m-0 font-weight-bold"><i class="fa fa-bookmark"></i>&nbsp; Facturación</h4>
+         </div>
+         <div class="btn-group ml-auto mx-0">
+            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
+               aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+               <button class="dropdown-item" type="button">
+                  <i class="bi-file-earmark-arrow-down"></i><span class="">&nbsp;
+                     Exportar</span></button>
+            </div>
+
+            <div class="col-sm-1">
+               <button class="bg-transparent border-0" type="submit" (click)="regresarFacturacion()">
+                  <i class="bi-arrow-left-circle text-white icoRegresar"></i>
+               </button>
+            </div>
+         </div>
+
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-3">
+         <div class="card card-outline cardfacturacion">
+            <div class="card-body box-profile">
+               <h3 class="profile-username text-center"><span class="titulos">Nro</span>&nbsp;&nbsp;
+                  {{facturacion.idfacturacion}}</h3>
+               <p class="text-center">{{facturacion.descripcion}}</p>
+               <ul class="list-group list-group-unbordered mb-3">
+                  <li class="list-group-item">
+                     <b>Fecha</b> <a class="float-right">{{ facturacion.fecha | date:'dd-MM-y'}}</a>
+                  </li>
+                  <li class="list-group-item">
+                     <b>Cliente</b> <a class="float-right">{{facturacion.nomcli}}</a>
+                  </li>
+                  <li class="list-group-item">
+                     <b>Valor</b> <a class="float-right">{{facturacion.total | number:'1.2-2'}}</a>
+                  </li>
+               </ul>
+               <div class="row justify-content-center">
+                  <button class="btn btn-warning btn-xs mx-1" type="button" (click)="modiFacturacion()">
+                     <i class="fa fa-edit" style="font-size:24pxi"></i>
+                     Modificar
+                  </button>
+                  <button class="btn btn-danger btn-xs mx-1" [disabled]="elimdisabled" data-toggle="modal"
+                     data-target="#modalEliminar">
+                     <i class="fa fa-times-circle" style="font-size:24pxi"></i>
+                     Eliminar
+                  </button>
+               </div>
+
+            </div>
+         </div>
+      </div>
+      <div class="col-sm-9">
+         <div class="card text-center card-info">
+            <div class="card-header">
+               <!-- <ul class="nav nav-pills"> -->
+               <ul class="nav nav-tabs card-header-tabs">
+                  <li class="nav-item"><a class="nav-link active" href="#detalle" data-toggle="tab">Detalle</a></li>
+                  <li class="nav-item"><a class="nav-link" href="#planillas" data-toggle="tab"
+                        (click)="liquidafac( facturacion.idfacturacion )">Planillas ({{facturacion.cuotas}})</a></li>
+                  <!-- <li class="nav-item"><a class="nav-link" href="#facturas" data-toggle="tab">Factura electrónica</a></li> -->
+               </ul>
+            </div><!-- /.card-header -->
+
+            <div class="card-body">
+               <div class="tab-content">
+                  <div class="active tab-pane" id="detalle">
+                     <div class="post">
+                        <div class="user-block">
+                           <app-itemxfact></app-itemxfact>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="tab-pane" id="planillas">
+                     <div class="post">
+                        <div class="user-block">
+                           <table class="table table-hover table-sm table-bordered planillas">
+                              <thead>
+                                 <tr class="text-center">
+                                    <th>Cuota</th>
+                                    <th>Planilla</th>
+                                    <th>Fecha</th>
+                                    <th>Fac.Electrónica</th>
+                                    <th>F.Cobro</th>
+                                    <th>Valor</th>
+                                 </tr>
+                              </thead>
+                              <tbody>
+                                 <tr *ngFor="let liqfac of _liquidafac" class="fila">
+                                    <td>{{liqfac.cuota}}</td>
+                                    <td>{{ liqfac.idfactura_facturas.idfactura }}</td>
+                                    <td>{{ liqfac.idfactura_facturas.feccrea|date:'dd-MM-y' }}</td>
+                                    <td class="text-center">{{ liqfac.idfactura_facturas.nrofactura }}</td>
+                                    <td class="text-center">{{ liqfac.idfactura_facturas.fechacobro | date: 'dd-MM-y' }}
+                                    </td>
+                                    <td class="text-right">{{ liqfac.idfactura_facturas.totaltarifa | number:'1.2-2' }}</td>
+                                 </tr>
+                                 <tr class="text-right font-weight-bold">
+                                    <td colspan="4"></td>
+                                    <td class="">Total </td>
+                                    <td class="">{{totfac | number:'1.2-2'}}</td>
+                                 </tr>
+                           
+                              </tbody>
+                           </table>
+
+                        </div>
+                     </div>
+                  </div>
+                  <!-- /.tab-pane -->
+                  <div class="tab-pane" id="facturas">
+                     <div class="post">
+                        <div class="user-block">
+                           <h2>-AREA PARA FACTURAS-</h2>
+                        </div>
+                     </div>
+                  </div>
+                  <!-- /.tab-pane -->
+                  <!-- /.tab-pane -->
+                  <div class="tab-pane" id="historialconsumo">
+                     <div class="post">
+                        <div class="user-block">
+                           <h2>-AREA PARA HISTORIAL CONSUMO-</h2>
+                        </div>
+                     </div>
+                  </div>
+                  <!-- /.tab-pane -->
+               </div>
+               <!-- /.tab-content -->
+            </div><!-- /.card-body -->
+         </div>
+      </div>
+   </div>
+</div>

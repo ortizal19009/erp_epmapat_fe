@@ -1,0 +1,16 @@
+.fondo1-background{
+   background-color: #563d7c;  
+   /* background-color: #5a34a1;   */
+}
+
+.fondo1-input{
+   background-color: rgb(43, 7, 78);  
+}
+
+.fondo1-input:hover{
+   background-color: rgb(65, 15, 114);  
+}
+
+.fondo1-texto{
+   color: rgb(231, 214, 236);
+}

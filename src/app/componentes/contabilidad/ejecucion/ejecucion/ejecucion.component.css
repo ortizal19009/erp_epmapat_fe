@@ -1,0 +1,16 @@
+.container-fluid{
+   --bgcolor1: rgb(80, 83, 54);
+   --bgcolor2: rgb(228, 248, 205);
+}
+
+.cabecera {
+   background-color: var(--bgcolor1);
+   color: white;
+}
+
+.detalle{ background-color: var(--bgcolor2); }
+
+.fila:hover{
+   background-color: #117a8B;
+   color: white;
+}

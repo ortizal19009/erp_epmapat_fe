@@ -1,0 +1,171 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start sombra cabecera border">
+         <div class="col-sm-2 mt-1">
+            <h4 class="m-0 font-weight-bold text-truncate"> <i class="bi-calendar3-range-fill"></i> &nbsp;Asientos</h4>
+         </div>
+         <div class="col-sm-9">
+            <form [formGroup]="formBuscar" (ngSubmit)="buscar()">
+               <div class="row">
+                  <div class="col-sm">
+                     <select class="custom-select-sm" formControlName="asi_com"  (change)="changeAsi_com()">
+                        <option value=1 selected>Asientos</option>
+                        <option value=2>Comprobantes</option>
+                     </select>
+                  </div>
+                  <div  class="col-sm">
+                     <select class="custom-select-sm" formControlName="tipcom">
+                        <option value=0 [disabled]="disabTipcom" selected>Todos</option>
+                        <option value=1 [disabled]="disabTipcom">Ingreso</option>
+                        <option value=2 [disabled]="disabTipcom">Egreso</option>
+                        <option value=3 [disabled]="disabTipcom">Diario Contabilidad</option>
+                        <option value=4 [disabled]="disabTipcom">Diario Ingreso</option>
+                        <option value=5 [disabled]="disabTipcom">Diario Egreso</option>
+                     </select>
+                  </div>
+                  <div class="col-sm">
+                     <input type="number" class="form-control form-control-sm text-center" formControlName="desdeNum"
+                        placeholder="Desde" min="1" />
+                  </div>
+                  <div class="col-sm">
+                     <input type="number" class="form-control form-control-sm text-center" formControlName="hastaNum"
+                        placeholder="Hasta" min="1" />
+                  </div>
+                  <div class="col-sm">
+                     <input type="date" class="form-control form-control-sm text-center" formControlName="desdeFecha"
+                        max="{{ today | date : 'yyyy-MM-dd' }}" />
+                  </div>
+                  <div class="col-sm">
+                     <input type="date" class="form-control form-control-sm text-center" formControlName="hastaFecha"
+                        max="{{ date | date : 'yyyy-MM-dd' }}" />
+                  </div>
+                  <div class="col-sm">
+                     <button class="btn btn-primary btn-sm" type="submit" (click)="buscar()">
+                        <i class="fa fa-search" aria-hidden="true"></i> Buscar
+                     </button>
+                  </div>
+               </div>
+            </form>
+         </div>
+
+         <div class="btn-group ml-auto mt-0">
+            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
+               data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto ">
+               <button class="dropdown-item" type="button" (click)="addAsiento()">
+                  <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#pdf">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+               <button class="dropdown-item" type="button"><i class="bi-file-earmark-arrow-up"></i>
+                  &nbsp;Exportar</button>
+            </div>
+         </div>
+
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-12">
+         <table class="table table-hover table-bordered table-sm sombra">
+            <thead class="text-center cabecera">
+               <tr>
+                  <th>Asie.</th>
+                  <!-- <th>C</th> -->
+                  <th>Comprbn</th>
+                  <th>Fecha</th>
+                  <th>Documento</th>
+                  <th>Débito</th>
+                  <th>Crédito</th>
+                  <th>Rf</th>
+                  <th class="col-sm-2">Beneficiario</th>
+                  <th class="col-sm-2">Concepto</th>
+                  <th></th>
+               </tr>
+            </thead>
+            <tbody class="detalle">
+               <tr class="fila" *ngFor="let asiento of _asientos | filter: filtro; let i=index"
+                  (click)="onCellClick($event, asiento)">
+                  <td class="text-center">{{ asiento.asiento }}</td>
+                  <td *ngIf="asiento.tipcom === 1">I-{{asiento.compro}}</td>
+                  <td *ngIf="asiento.tipcom === 2">E-{{asiento.compro}}</td>
+                  <td *ngIf="asiento.tipcom === 3">DC-{{asiento.compro}}</td>
+                  <td *ngIf="asiento.tipcom === 4">DI-{{asiento.compro}}</td>
+                  <td *ngIf="asiento.tipcom === 5">DE-{{asiento.compro}}</td>
+
+                  <td class="text-center">{{ asiento.fecha | date: 'dd-MM-yyyy' }}</td>
+                  <td [ngClass]="{'transparente': asiento.iddocumento.iddocumento == 1}">{{
+                     asiento.iddocumento.nomdoc}}&nbsp; {{asiento.numdoc}} </td>
+                  <td class="text-right" [ngClass]="{'text-danger font-weight-bold': asiento.totdeb !== asiento.totcre, 'transparente': asiento.totdeb == 0}">{{ asiento.totdeb | number:'1.2-2' }}</td>
+                  <td class="text-right" [ngClass]="{'text-danger font-weight-bold': asiento.totdeb !== asiento.totcre, 'transparente': asiento.totcre == 0}">{{ asiento.totcre | number:'1.2-2' }}</td>
+                  <td class="text-center">
+                     <i class="bi-check" *ngIf="asiento.swretencion"></i>
+                  </td>
+                  <td [ngClass]="{'transparente': asiento.idbene.idbene == 1}" class="text-left ancho220 text-truncate">
+                     {{ asiento.idbene.nomben}}</td>
+                  <td class="text-left text-truncate ancho220">{{ asiento.glosa }}</td>
+
+                  <td class="text-center">
+                     <div class="btn-group py-0">
+                        <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
+                           aria-expanded="false">
+                        </button>
+
+                        <div class="dropdown-menu dropdown-menu-right popLista">
+                           <button class="dropdown-item" type="button" (click)="modiAsiento( asiento.idasiento )">
+                              <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
+                           <button class="dropdown-item" type="button" (click)="modiRetenciones( asiento.idasiento )">
+                              <i class="bi bi-pencil"></i>&nbsp; Retenciones</button>
+                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#elimAsiento"
+                              (click)="eliminar( asiento )">
+                              <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
+                        </div>
+                     </div>
+                  </td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+   </div>
+
+   <!-- Modal Eliminar-->
+   <div class='modal fade' id='elimAsiento' tabindex='-1' aria-hidden='true'>
+      <div class='modal-dialog modal-dialog-centered'>
+         <div class='modal-content'>
+            <div class='modal-header justify-content-center cabecera border py-2'>
+               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Mensaje</h5>
+            </div>
+            <div *ngIf="sweliminar; then thenBlock else elseBlock"></div>
+            <ng-template #thenBlock>
+               <div class='modal-body text-center roboto detalle'>
+                  ¿ Eliminar el Asiento <span class="fantacygreen"> {{iAsiento.asiento}} </span>?
+               </div>
+               <div class='modal-footer justify-content-center detalle border py-1'>
+                  <button type='button' class='btn btn-success btn-sm' data-dismiss='modal' id='btnSi'
+                     (click)="elimina()">
+                     <i class="fa fa-check-circle"></i> Aceptar
+                  </button>
+                  <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
+                     <i class="fa fa-times-circle"></i> Cancelar</button>
+               </div>
+            </ng-template>
+            <ng-template #elseBlock>
+               <div class='modal-body detalle'>
+                  <div class="alert alert-warning text-center" role="alert">
+                     No puede eliminar el Asiento <span class="fantacygreen"> {{iAsiento.asiento}}</span>
+                     <br>tiene Transacciones.
+                  </div>
+               </div>
+               <div class='text-center detalle'>
+                  <button type='button' class='btn btn-success btn-sm mb-3' data-dismiss='modal'>
+                     <i class="fa fa-check-circle"></i>&nbsp; Aceptar
+                  </button>
+               </div>
+            </ng-template>
+         </div>
+      </div>
+   </div>
+   
+</div>

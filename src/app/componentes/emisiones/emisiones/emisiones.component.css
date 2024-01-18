@@ -1,0 +1,50 @@
+.container-fluid{
+   --bgcolor1: rgb(68, 103, 114);
+   --bgcolor2: rgba(184, 247, 252);
+}
+
+.cabecera {
+   background-color: var(--bgcolor1);
+   color: white;
+}
+
+.cuerpo { background-color: var(--bgcolor2); }
+
+.titEmisiones {
+   background-color: var(--bgcolor1);
+   color: white;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+table {
+   background-color: var(--bgcolor2);
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+table>thead>tr {
+   background-color: var(--bgcolor1);
+   color: white;
+}
+
+table tbody tr:hover  { 
+   background-color: #117a8B;
+   color: white;
+   cursor: pointer; 
+}
+
+.titCerrar {
+   background-color: var(--bgcolor1);
+   color: white;
+}
+
+.fantacy{
+   font-weight: bold;
+   color: yellow; text-shadow: rgb(228, 3, 3) 0.2em 0.2em 0.3em;
+}
+
+.titNuevo {
+   background-color: var(--bgcolor1);
+   color: white;
+   font-weight: bold;
+}
+.bodyNuevo { background-color: var(--bgcolor2); }

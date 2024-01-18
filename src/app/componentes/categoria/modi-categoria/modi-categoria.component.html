@@ -1,0 +1,30 @@
+<!-- Content Header (Page header) -->
+<div class="content pt-1 pl-3">
+  <div class="container-fluid">
+    <div class="row mt-0 mb-2">
+      <h3 class="m-0 font-weight-bold">Modificar Categoria</h3>
+    </div>
+  </div><!-- /.container-fluid -->
+</div>
+<div class="container-fluid">
+  <div class="row mb-0">
+    <div class="col-sm">
+      <form [formGroup]="categoriaForm">
+        <div class="mb-3">
+          <label for="" class="form-label">Descripción</label>
+          <input type="text" class="form-control" id="descripcion" placeholder="Ingrese nueva nacionalidad"
+            formControlName="descripcion" />
+        </div>
+        <div class="mb-3">
+          <label for="" class="form-label">Porcentaje de descuento</label>
+          <input type="number" min="0" class="form-control" id="porcdescuento" placeholder="Ingrese porcentaje de descuento"
+            formControlName="porcdescuento" />
+        </div>
+        <div class="mb-3 text-center">
+          <button class="btn btn-secondary mx-3" (click)="retornarListaCategoria()">Cancelar</button>
+          <button ctype="button" class="btn btn-primary" (click)="onSubmit()">Actualizar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

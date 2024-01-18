@@ -1,0 +1,41 @@
+.container-fluid{
+   --bgcolor1: rgb(106, 106, 107);
+   --bgcolor2: rgb(208, 207, 211);
+   --bgAbonados1: rgb(148, 150, 63);
+   --bgAbonados2: rgb(248, 241, 201);
+}
+
+.ruta {
+   background-color: var(--bgcolor1);
+   color: white;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+}
+
+.cardRuta{
+   background-color: var(--bgcolor2);
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
+}
+.cardRuta li {
+   background-color: var(--bgcolor2);
+}
+
+.cardTab{
+   background-color: var(--bgcolor1);
+   color: white;
+}
+
+table { box-shadow: 0 0 10px rgba(0, 0, 0, 0.75); }
+
+.fila:hover {
+   background-color: #117a8B;
+   color: white;
+   cursor: pointer;
+}
+
+.theadAbonados{
+   background-color: var(--bgAbonados1);
+   color: white;
+}
+.bodyAbonados{
+   background-color: var(--bgAbonados2);
+}

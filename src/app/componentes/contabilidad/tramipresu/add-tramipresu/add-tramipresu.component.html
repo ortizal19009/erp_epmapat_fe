@@ -1,0 +1,87 @@
+<div class="content-header">
+   <div class="container-fluid">
+      <div class="row mt-3 justify-content-center text-center">
+         <div class="col-sm-8 cabecera sombra border">
+            <h5 class="mt-2 font-weight-bold">{{ titulo }}</h5>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="card card-body col-sm-8 detalle sombra">
+            <form [formGroup]="formTramipresu">
+               <div class="container">
+                  <div class="row">
+                     <div class="col-sm">
+                        <label for="" class="col-sm col-form-label-sm">Número
+                           <input type="number" id="id-numero" class="form-control form-control-sm"
+                              formControlName="numero" />
+                        </label>
+                     </div>
+                     <div class="col-sm">
+                        <label for="" class="col-sm col-form-label-sm">Fecha
+                           <input type="date" class="form-control form-control-sm" formControlName="fecha" />
+                        </label>
+                     </div>
+                     <div class="col-sm">
+                        <label for="" class="col-sm col-form-label-sm">Documento
+                           <select class="custom-select" [compareWith]="compareDocumentos"
+                              formControlName="iddocumento">
+                              <option [ngValue]="d_documentos" *ngFor="let d_documentos of documentos">
+                                 {{ d_documentos.nomdoc }}
+                              </option>
+                           </select>
+                        </label>
+                     </div>
+                     <div class="col-sm">
+                        <label for="" class="col-sm col-form-label-sm">N° Doc
+                           <input type="text" class="form-control form-control-sm" formControlName="numdoc" />
+                        </label>
+                     </div>
+                     <div class="col-sm">
+                        <label for="" class="col-sm col-form-label-sm">Fecha Doc
+                           <input type="date" class="form-control form-control-sm" formControlName="fecdoc" />
+                        </label>
+                     </div>
+                  </div>
+                  
+                  <div class="form-group col-md-12 mt-1">
+                     <div class="input-group input-group-sm mb-1 ">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Beneficiario<sup class="green">*</sup></label>
+                        </div>
+                        <input type="text" class="form-control form-control-sm"
+                           formControlName="idbene" list="benList" (input)="onIresponsableSelected($event); iresponsaxNombre($event)"
+                           [ngClass]="{'is-invalid': f['idbene'].invalid && f['idbene'].touched,'is-valid': f['idbene'].valid, '': f['idbene'].untouched}">
+                        <datalist role="listbox" id="benList">
+                           <option *ngFor="let beneficiario of _beneficiarios" value={{beneficiario.nomben}} > </option>
+                        </datalist>
+                     </div>
+                  </div>
+
+                  <div class="row">
+                     <div class="col-sm">
+                        <label for="" class="col-sm col-form-label-sm">Descripción
+                           <textarea type="text" class="form-control form-control-sm"
+                              formControlName="descripcion"></textarea>
+                        </label>
+                     </div>
+                  </div>
+               </div>
+
+               <div class="mt-1 mb-3 text-center">
+                  <button type="button" class="btn btn-success btn-sm mx-1 mt-1" (click)="onSubmit()">
+                     <i class="fa fa-check-circle"></i>&nbsp; Aceptar
+                  </button>
+                  <button type="button" (click)="retroceder()" class="btn btn-outline-success mt-1 mx-1 btn-sm">
+                     <i class="fa fa-times-circle"></i> Cancelar
+                  </button>
+               </div>
+            </form>
+         </div>
+      </div>
+   </div>
+</div>

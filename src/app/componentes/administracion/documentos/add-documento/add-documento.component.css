@@ -1,0 +1,9 @@
+.container-fluid{
+   --color1: rgb(109, 110, 15);
+}
+.green {color: green }
+/* input:required{
+   border-left-style: solid;
+   border-left-color: var(--color1);
+   border-left-width: 4px;
+} */

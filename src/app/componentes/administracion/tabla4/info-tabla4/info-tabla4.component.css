@@ -1,0 +1,26 @@
+.container-fluid{
+   --color1: rgb(144, 147, 148);
+}
+
+.tabla4{
+   background-color: var(--color1);
+   color: white;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+}
+
+.codigo{
+   color: rgb(211, 248, 3);
+}
+
+.tabla4 li{
+   background-color: var(--color1);
+   color: rgb(211, 248, 3);
+}
+
+.tabla4 a{
+   color: white;
+}
+
+.tabla4 a:hover{
+   color: rgb(45, 53, 2);
+}

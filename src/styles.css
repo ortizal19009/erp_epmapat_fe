@@ -1,0 +1,103 @@
+/* Estilos Globales. Tambien se pueden importar otros archivos*/
+
+.icoRegresar {
+   font-size: 20px;
+}
+
+.sombra {
+   box-shadow: 0 0 10px #000000bf;
+}
+
+.sombraClara {
+   box-shadow: 0 0 10px white;
+}
+
+.roboto {
+   font-family: 'Roboto', sans-serif;
+}
+
+.fila:hover {
+   background-color: #117a8B;
+   color: white;
+}
+
+/* === Popup de una Cabecera === */
+.dropdown-item {
+   font-family: 'Roboto', sans-serif;
+   font-size: small;
+   color: white;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+   font-size: small;
+   background-color: #117a8B;
+   color: white;
+}
+
+.fantacy {
+   font-weight: bold;
+   color: yellow;
+   text-shadow: rgb(228, 3, 3) 0.2em 0.2em 0.3em;
+}
+
+.fantacysombra {
+   font-weight: bold;
+   color: rgb(8, 8, 0);
+   text-shadow: rgb(49, 45, 45) 0.1em 0.1em 0.1em;
+}
+
+.fantacyblack {
+   font-weight: bold;
+   color: yellow;
+   text-shadow: black 0.1em 0.1em 0.1em;
+}
+
+.fantacygreen {
+   font-weight: bold;
+   color: black;
+   text-shadow: yellowgreen 0.1em 0.1em 0.1em;
+}
+
+.transparente {
+   opacity: 0;
+}
+
+.cursor {
+   cursor: pointer;
+}
+
+.green {
+   color: green
+}
+
+.red {
+   color: red
+}
+
+.tachado {
+   text-decoration-line: line-through;
+   text-decoration-color: rgb(250, 250, 250);
+   text-decoration-style: wavy;
+}
+
+/* === Popup de una lista === */
+.popLista {
+   background-color: #ffc107;
+   font-family: 'Roboto', sans-serif;
+   font-size: small;
+}
+
+.popLista button {
+   font-weight: bold;
+   color: black;
+}
+
+.popLista button:hover {
+   font-weight: normal;
+   color: white;
+}
+
+.nav-link.disabled {
+   opacity: 0.3;
+}

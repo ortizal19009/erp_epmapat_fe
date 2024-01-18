@@ -1,0 +1,36 @@
+.container-fluid{
+   --bgcolor1: rgb(57, 95, 95);
+   --bgcolor2: rgba(196, 204, 207);
+   --bgcolor3: rgb(50, 88, 51);
+   --bgcolor4: rgba(193, 224, 181);
+}
+
+.fila:hover{ 
+   background-color: #117a8B;
+   color: white;
+   cursor: pointer; 
+}
+
+.facturacion{
+   background-color: var(--bgcolor1);
+   color: white;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+}
+.cardfacturacion, .cardfacturacion li, .titulos{
+   background-color: var(--bgcolor2);
+   /* color: rgb(211, 248, 3); */
+}
+.facturacion a{   color: white;}
+.facturacion a:hover{   color: rgb(45, 53, 2);}
+
+/* Planillas */
+.planillas{
+   box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+}
+.planillas thead{
+   background-color: var(--bgcolor3);
+   color: white;
+}
+.planillas tbody{
+   background-color: var(--bgcolor4);
+}

@@ -1,0 +1,70 @@
+.container-fluid {
+   --recaudacabecera: DarkSlateGray;
+   --recaudadetalle: AliceBlue;
+   --clientecabecera: Olive;
+   --clientedetalle: Khaki;
+}
+
+.recaudacabecera {
+   background-color: var(--recaudacabecera);
+   color: white;
+}
+
+.recaudadetalle { background-color: var(--recaudadetalle); }
+.recaudadetalle li { background-color: var(--recaudadetalle); }
+
+.text-titulo {
+   font-size: 24px;
+   color: rgb(2, 68, 22);
+}
+
+input:required:placeholder-shown {
+   border-color: #d79ee4;
+}
+
+input:required:not(:placeholder-shown):invalid {
+   border-color: red;
+}
+
+input:required:not(:placeholder-shown):valid {
+   border-color: rgb(2, 153, 23);
+}
+
+input:required:focus:invalid {
+   border-color: red;
+}
+
+ul {
+   list-style: none;
+   padding: 0;
+   margin: 0;
+}
+
+
+form li+li {
+   margin-top: 1em;
+}
+
+label {
+   display: inline-block;
+   width: 90px;
+   text-align: right;
+}
+
+.fila:hover {
+   background-color: #117a8B;
+   color: white;
+}
+
+/* === Buscar Clientes === */
+.clientecabecera {   background-color: var(--clientecabecera);}
+.clientedetalle {   background-color: var(--clientedetalle);}
+.clientecabecera th {
+   background-color: var(--clientecabecera);
+   color: white;
+}
+.clientedetalle tbody tr:hover {
+   background-color: #117a8B;
+   color: white;
+   cursor: pointer;
+}

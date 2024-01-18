@@ -1,0 +1,21 @@
+.container-fluid{
+   --bg1: rgb(36, 50, 56);
+   --bg2: rgb(231, 250, 252);
+}
+
+.partidaCla, thead>tr {
+   background-color: var(--bg1);
+   color: white;
+}
+
+table { box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);}
+
+table tbody tr:hover  { 
+   background-color: #117a8b;;
+   color: white;
+   cursor: pointer; 
+}
+
+tbody tr {
+   background-color: var(--bg2)
+}

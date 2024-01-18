@@ -1,0 +1,48 @@
+.fondo1-background {
+   background-color: #563d7c;
+}
+
+.fondo1-texto {
+   color: white;
+}
+
+/* .roboto{
+   font-family: 'Roboto', sans-serif;
+   color:white;
+} */
+
+/* .dropdown-item {
+   font-family: 'Roboto', sans-serif;
+   font-size:small;
+   color: white;
+}
+
+.dropdown-item:hover, .dropdown-item:focus {
+   font-size:small;
+   background-color:#489dc4;
+   color: white;
+} */
+
+.disabled {
+   opacity: 0.4;
+}
+
+/* ======== Submenu ==========  */
+/* .dropdown-submenu .dropdown-menu {
+   top: 0;
+   left: 100%;
+   margin-top: -6px;
+   margin-left: -1px;
+ }
+
+ .dropdown-submenu:hover .dropdown-menu {
+   display: block;
+ } */
+
+.ancho {
+   width: 700%;
+}
+
+.fondoDefinir {
+   background-color: #434b4b;
+}

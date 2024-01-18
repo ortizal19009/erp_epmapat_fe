@@ -1,0 +1,203 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start sombra cabecera border">
+         <div class="col-sm-12 p-0.">
+            <div class="row p-0">
+               <div class="input-group input-group-sm col-sm-3 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Asiento</span>
+                  </div>
+                  <input type="text" class="form-control text-center" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.asiento" readonly>
+                  <input type="text" class="form-control text-center" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.comprobante" readonly>
+               </div>
+               <div class="input-group input-group-sm col-sm-2 mb-1 mr-0 ">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Fecha</span>
+                  </div>
+                  <input type="text" class="form-control text-center" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.fecha" readonly>
+               </div>
+               <div class="input-group input-group-sm col-sm-2 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Doc</span>
+                  </div>
+                  <input type="text" class="form-control" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.documento" readonly>
+               </div>
+               <div class="input-group input-group-sm col-sm-4 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Beneficiario</span>
+                  </div>
+                  <input type="text" class="form-control" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.beneficiario" readonly>
+               </div>
+
+               <div class="btn-group ml-auto mt-0 px-0">
+                  <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
+                     data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+                  </button>
+
+                  <div class="dropdown-menu dropdown-menu-right bg-dark roboto px-0">
+                     <button class="dropdown-item" type="button" data-toggle="modal" data-target="#addTransa">
+                        <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+                     <button class="dropdown-item" type="button" data-toggle="modal" data-target="#pdf">
+                        <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+                     <button class="dropdown-item" type="button"><i class="bi-file-earmark-arrow-up"></i>
+                        &nbsp;Exportar</button>
+                  </div>
+
+                  <div class="col-sm px-0">
+                     <button class="bg-transparent border-0" type="submit" (click)="regresar()">
+                        <i class="bi-arrow-left-circle text-white icoRegresar"></i>
+                     </button>
+                  </div>
+               </div>
+            </div>
+
+         </div>
+
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid" *ngIf="swhay">
+   <div class="row mb-0">
+      <div class="col-sm-12">
+         <table class="table table-hover table-bordered table-sm sombra">
+            <thead class="text-center cabecera">
+               <tr>
+                  <th>Cuenta</th>
+                  <th>Denominación</th>
+                  <th>Beneficiario</th>
+                  <th>Debe</th>
+                  <th>Haber</th>
+                  <th>T</th>
+                  <th>Documento</th>
+                  <th></th>
+               </tr>
+            </thead>
+            <tbody class="detalle">
+               <tr *ngFor="let transa of _transaci | filter: filtro; let i=index" class="fila">
+                  <td>{{transa.codcue}}</td>
+                  <td>{{transa.idcuenta.nomcue}}</td>
+                  <td [ngClass]="{'transparente': transa.idbene.idbene == 1}">{{transa.idbene.nomben}}</td>
+                  <td class="text-right"
+                     [ngClass]="{'transparente': transa.valor  * (transa.debcre === 1 ? 1 : 0) == 0}">{{ transa.valor *
+                     (transa.debcre === 1 ? 1 : 0) | number: '1.2-2'}}</td>
+                  <td class="text-right"
+                     [ngClass]="{'transparente': transa.valor  * (transa.debcre === 2 ? 1 : 0) == 0}">{{ transa.valor *
+                     (transa.debcre === 2 ? 1 : 0) | number: '1.2-2'}}</td>
+                  <td class="text-center" [ngClass]="{'transparente': transa.tiptran == 0}">{{transa.tiptran}}</td>
+                  <td *ngIf="transa.iddocumento.iddocumento > 1">{{transa.iddocumento.nomdoc + ' '+transa.numdoc}}</td>
+                  <td *ngIf="transa.iddocumento.iddocumento == 1">{{transa.numdoc}}</td>
+                  <td class="text-center">
+                     <div class="btn-group py-0">
+                        <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
+                           aria-expanded="false">
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right popLista">
+                           <button class="dropdown-item" type="button">
+                              <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
+                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalEliminar"
+                           (click)="eliminar( transa )">
+                              <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
+                        </div>
+                     </div>
+                  </td>
+               </tr>
+               <tr class="font-weight-bold" [ngClass]="{'text-danger': totDebe !== totHaber }">
+                  <td></td>
+                  <td></td>
+                  <td class="text-right">TOTAL </td>
+                  <td class="text-right">{{ totDebe | number:'1.2-2'}}</td>
+                  <td class="text-right">{{ totHaber | number:'1.2-2'}}</td>
+                  <td></td>
+                  <td *ngIf="totDebe !== totHaber">Diferencia: {{totDebe - totHaber | number:'1.2-2'}}</td>
+                  <td *ngIf="totDebe == totHaber"></td>
+                  <td></td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+   </div>
+
+   
+
+   <!-- Modal Eliminar-->
+   <div class='modal fade' id='modalEliminar' tabindex='-1' aria-hidden='true'>
+      <div class='modal-dialog modal-dialog-centered'>
+         <div class='modal-content'>
+            <div class='modal-header justify-content-center cabecera border py-2'>
+               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Mensaje</h5>
+            </div>
+            <div *ngIf="sweliminar; then thenBlock else elseBlock"></div>
+            <ng-template #thenBlock>
+               <div class='modal-body text-center roboto detalle'>
+                  ¿ Eliminar la Cuenta <span class="fantacygreen"> {{ codcue }} </span> de este Asiento ?
+               </div>
+               <div class='modal-footer justify-content-center detalle border py-1'>
+                  <button type='button' class='btn btn-success btn-sm' data-dismiss='modal' id='btnSi'
+                     (click)="elimina()">
+                     <i class="fa fa-check-circle"></i> Aceptar
+                  </button>
+                  <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
+                     <i class="fa fa-times-circle"></i> Cancelar</button>
+               </div>
+            </ng-template>
+            <ng-template #elseBlock>
+               <div class='modal-body detalle'>
+                  <div class="alert alert-warning text-center" role="alert">
+                     No puede eliminar la Cuenta <span class="fantacygreen"> {{codcue}}</span>
+                     <br>de este Asiento.
+                  </div>
+               </div>
+               <div class='text-center detalle'>
+                  <button type='button' class='btn btn-success btn-sm mb-3' data-dismiss='modal'>
+                     <i class="fa fa-check-circle"></i>&nbsp; Aceptar
+                  </button>
+               </div>
+            </ng-template>
+         </div>
+      </div>
+   </div>
+
+</div>
+
+<!-- Modal Tipo de Transacción (En nuevo) -->
+<div class='modal fade' id='addTransa' tabindex='-1' aria-hidden='true'>
+   <div class='modal-dialog modal-sm'>
+      <div class='modal-content'>
+         <div class='modal-header justify-content-center cabecera border py-2'>
+            <h5 class='modal-title font-weight-bold' id='ModalLabel'>Tipo de Transacción</h5>
+         </div>
+         <div class='modal-body text-center roboto detalle'>
+            <select class="form-control form-control-sm" id="tiptran" [(ngModel)]="selectedValue"
+               (change)="changeTiptran()">
+               <option value="0">General</option>
+               <option value="1">1 Desde trámite</option>
+               <option value="2">2 Anticipo</option>
+               <option value="3">3 Cuenta por cobrar</option>
+               <option value="4">4 Cuenta por cobrar año anterior</option>
+               <option value="5">5 Depósitos y fondos de terceros</option>
+               <option value="6">6 Cuenta por pagar</option>
+               <option value="7">7 Cuenta por pagar año anterior</option>
+               <option value="8">8 Liquidación de anticipo</option>
+               <option value="9">9 Cobro</option>
+               <option value="10">10 Cobro del año anterior</option>
+               <option value="11">11 Liquidación Depósitos o fondos de terceros</option>
+               <option value="12">12 Pago</option>
+               <option value="13">13 Pago año anterior (presupuestario)</option>
+            </select>
+         </div>
+         <div class='modal-footer justify-content-center detalle border py-1'>
+            <button type='button' class='btn btn-success btn-sm' data-dismiss='modal' id='btnSi' (click)="nuevo()">
+               <i class="fa fa-check-circle"></i> Aceptar
+            </button>
+            <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
+               <i class="fa fa-times-circle" style="font-size:24pxi"></i> Cancelar</button>
+         </div>
+      </div>
+   </div>
+</div>

@@ -1,0 +1,383 @@
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm">
+         <form [formGroup]="formTramitenuevo">
+            <div class="container">
+               <div class="card ">
+                  <div class="card-header cabecera">
+                     <h3 class="card-title font-weight-bold">Predio</h3>
+                     <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                           <i class="fas fa-minus"></i>
+                        </button>
+                     </div>
+                  </div>
+                  <div class="card-body detalle">
+                     <div class="row">
+                        <div class="col-sm">
+                           <div class="row">
+                              <div class="col-sm-6">
+                                 <div class="input-group mb-1 input-group-sm">
+                                    <div class="input-group-prepend">
+                                       <label class="input-group-text" for="nrocasa">Nro. Casa<sup
+                                             class="green">*</sup></label>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm" formControlName="nrocasa"
+                                       [ngClass]="{'is-invalid': f['nrocasa'].invalid && f['nrocasa'].touched,
+                                       'is-valid': f['nrocasa'].valid, '': f['nrocasa'].untouched}">
+                                 </div>
+                              </div>
+                              <div class="col-sm-6">
+                                 <div class="input-group mb-1 input-group-sm">
+                                    <div class="input-group-prepend">
+                                       <label class="input-group-text" for="nrodepar">Nro. departamento<sup
+                                             class="green">*</sup></label>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm" formControlName="nrodepar"
+                                       [ngClass]="{'is-invalid': f['nrodepar'].invalid && f['nrodepar'].touched,
+                                       'is-valid': f['nrodepar'].valid, '': f['nrodepar'].untouched}">
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-sm-4">
+                           <div class="input-group mb-1 input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text" for="barrio">Barrio<sup class="green">*</sup></label>
+                              </div>
+                              <input type="text" class="form-control form-control-sm" formControlName="barrio"
+                                 [ngClass]="{'is-invalid': f['barrio'].invalid && f['barrio'].touched,
+                              'is-valid': f['barrio'].valid, '': f['barrio'].untouched}">
+                           </div>
+                        </div>
+                        <div class="col-sm-8">
+                           <div class="input-group mb-1 input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text" for="referencia">Referencia<sup
+                                       class="green">*</sup></label>
+                              </div>
+                              <input type="text" class="form-control form-control-sm"
+                                 placeholder="Ingrese una referencia" formControlName="referencia" [ngClass]="{'is-invalid': f['referencia'].invalid && f['referencia'].touched,
+                                 'is-valid': f['referencia'].valid, '': f['referencia'].untouched}">
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="card">
+                  <div class="card-header cabecera">
+                     <h3 class="card-title">Factibilidad</h3>
+                     <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                           <i class="fas fa-minus"></i>
+                        </button>
+                     </div>
+                  </div>
+                  <div class="card-body detalle">
+                     <div class="row">
+                        <div class="col-sm">
+                           <div class="input-group mb-1 input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text" for="referencia">Tubería principal<sup
+                                       class="green">*</sup></label>
+                              </div>
+                              <input type="text" class="form-control form-control-sm" formControlName="tuberiaprincipal"
+                                 [ngClass]="{'is-invalid': f['tuberiaprincipal'].invalid && f['tuberiaprincipal'].touched,
+                                 'is-valid': f['tuberiaprincipal'].valid, '': f['tuberiaprincipal'].untouched}">
+                           </div>
+                        </div>
+                        <div class="col-sm">
+                           <div class="input-group mb-1 input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text" for="idcategoria_categorias">Categoría</label>
+                              </div>
+                              <select class="custom-select custom-select-sm" id="idcategoria_categorias"
+                                 formControlName="idcategoria_categorias" [compareWith]="compararCategoria">
+                                 <option [ngValue]="categoriaDatos" *ngFor="let categoriaDatos of v_categorias">
+                                    {{categoriaDatos.descripcion}}</option>
+                              </select>
+                           </div>
+                        </div>
+                        <div class="col-sm-3">
+                           <div class="input-group mb-1 input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text" for="tipovia">Tipo vía</label>
+                              </div>
+                              <select type="text" class="custom-select custom-select-sm" id="tipovia"
+                                 formControlName="tipovia">
+                                 <option value="{{tipovia.valor}}" *ngFor="let tipovia of estadoVia">{{tipovia.estado}}
+                                 </option>
+                              </select>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-sm-7">
+                           <div class="input-group mb-1 input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text" for="inspector">Inspector<sup
+                                       class="green">*</sup></label>
+                              </div>
+                              <input type="text" class="form-control form-control-sm" formControlName="inspector"
+                                 [ngClass]="{'is-invalid': f['inspector'].invalid && f['inspector'].touched,
+                                 'is-valid': f['inspector'].valid, '': f['inspector'].untouched}">
+                           </div>
+                        </div>
+                        <div class="col-sm-5">
+                           <div class="input-group mb-1 input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text" for="areaconstruccion">Área construcción<sup
+                                       class="green">*</sup></label>
+                              </div>
+                              <input type="number" class="form-control form-control-sm"
+                                 formControlName="areaconstruccion" [ngClass]="{'is-invalid': f['areaconstruccion'].invalid && f['areaconstruccion'].touched,
+                                 'is-valid': f['areaconstruccion'].valid, '': f['areaconstruccion'].untouched}">
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-sm-12">
+                           <label for="" class="col-sm-12"> Observaciones<sup class="green">*</sup>
+                              <textarea type="text" class="form-control form-control-sm" formControlName="observaciones"
+                                 [ngClass]="{'is-invalid': f['observaciones'].invalid && f['observaciones'].touched,'is-valid': f['observaciones'].valid, '': f['observaciones'].untouched}"></textarea>
+                           </label>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="card">
+                  <div class="card-header cabecera">
+                     <h3 class="card-title">Medidor</h3>
+                     <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                           <i class="fas fa-minus"></i>
+                        </button>
+                     </div>
+                  </div>
+                  <div class="card-body detalle">
+                     <div class="row">
+                        <div class="col-sm">
+                           <div class="row">
+                              <div class="col-sm">
+                                 <div class="input-group mb-1 input-group-sm">
+                                    <div class="input-group-prepend">
+                                       <label class="input-group-text" for="marca">Marca<sup
+                                             class="green">*</sup></label>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm"
+                                       formControlName="medidormarca"
+                                       [ngClass]="{'is-invalid': f['medidormarca'].invalid && f['medidormarca'].touched,'is-valid': f['medidormarca'].valid, '': f['medidormarca'].untouched}">
+                                 </div>
+                              </div>
+                              <div class="col-sm">
+                                 <div class="input-group mb-1 input-group-sm">
+                                    <div class="input-group-prepend">
+                                       <label class="input-group-text" for="medidornumero">Número<sup
+                                             class="green">*</sup></label>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm"
+                                       formControlName="medidornumero"
+                                       [ngClass]="{'is-invalid': f['medidornumero'].invalid && f['medidornumero'].touched, 'is-valid': f['medidornumero'].valid, '': f['medidornumero'].untouched}">
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="row">
+                              <div class="col-sm">
+                                 <div class="input-group mb-1 input-group-sm">
+                                    <div class="input-group-prepend">
+                                       <label class="input-group-text" for="codmedidor">Código<sup
+                                             class="green">*</sup></label>
+                                    </div>
+                                    <input type="number" class="form-control form-control-sm"
+                                       formControlName="codmedidor"
+                                       [ngClass]="{'is-invalid': f['codmedidor'].invalid && f['codmedidor'].touched, 'is-valid': f['codmedidor'].valid, '': f['codmedidor'].untouched}">
+                                 </div>
+                              </div>
+                              <div class="col-sm">
+                                 <div class="input-group mb-1 input-group-sm">
+                                    <div class="input-group-prepend">
+                                       <label class="input-group-text" for="medidordiametro">Diámetro<sup
+                                             class="green">*</sup></label>
+                                    </div>
+                                    <input type="number" class="form-control form-control-sm"
+                                       formControlName="medidordiametro"
+                                       [ngClass]="{'is-invalid': f['medidordiametro'].invalid && f['medidordiametro'].touched, 'is-valid': f['medidordiametro'].valid, '': f['medidordiametro'].untouched}">
+                                 </div>
+                              </div>
+                              <div class="col-sm">
+                                 <div class="input-group mb-1 input-group-sm">
+                                    <div class="input-group-prepend">
+                                       <label class="input-group-text" for="medidornroesferas">Nro esferas<sup
+                                             class="green">*</sup></label>
+                                    </div>
+                                    <input type="number" min="0" class="form-control form-control-sm"
+                                       formControlName="medidornroesferas"
+                                       [ngClass]="{'is-invalid': f['medidornroesferas'].invalid && f['medidornroesferas'].touched, 'is-valid': f['medidornroesferas'].valid, '': f['medidornroesferas'].untouched}">
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="card">
+                  <div class="card-header cabecera">
+                     <h3 class="card-title">Notificación</h3>
+                     <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                           <i class="fas fa-minus"></i>
+                        </button>
+                     </div>
+                  </div>
+                  <div class="card-body detalle">
+                     <div class="row">
+                        <div class="col-sm">
+                           <div class="input-group mb-1 input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text" for="Notificado">Notificado</label>
+                              </div>
+                              <input type="text" class="form-control form-control-sm" id="notificado"
+                                 formControlName="notificado" />
+                           </div>
+                        </div>
+                        <div class="col-sm">
+                           <div class="input-group mb-1 input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text" for="fechanotificacion">Fecha de notificación</label>
+                              </div>
+                              <input type="date" class="form-control form-control-sm" id="fechanotificacion"
+                                 formControlName="fechanotificacion" />
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-sm-6">
+                           <!-- <div class="input-group mb-1 input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text" for="fechanotificacion">Fecha de notificación</label>
+                              </div>
+                              <input type="date" class="form-control form-control-sm" id="fechanotificacion"
+                                 formControlName="fechanotificacion" />
+                           </div> -->
+                           <div class="input-group mb-1 input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label for="" class="col-sm-12">Cuenta afectada<sup class="green">*</sup>
+                                 </label>
+                              </div>
+                              <div class="row">
+                                 <div class="col-sm-11">
+                                    <input type="text" class="form-control form-control-sm"
+                                       formControlName="codmedidorvecino" readonly
+                                       [ngClass]="{'is-invalid': f['codmedidorvecino'].invalid && f['codmedidorvecino'].touched, 'is-valid': f['codmedidorvecino'].valid, '': f['codmedidorvecino'].untouched}">
+                                 </div>
+                                 <div class="col-sm-1">
+                                    <button class="btn btn-sm btn-outline-primary" data-toggle="modal"
+                                       data-target="#staticBackdrop">
+                                       <i class="fa fa-search" aria-hidden="true"></i>
+                                    </button>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-sm-6">
+                           <div class="row">
+                              <div class="col-sm">
+                                 <div class="input-group mb-1 input-group-sm">
+                                    <div class="input-group-prepend">
+                                       <label class="input-group-text" for="secuencia">Secuencia
+                                          {{secuenciaAfectada}}<sup class="green">*</sup></label>
+                                    </div>
+                                    <input type="number" min="0" class="form-control form-control-sm"
+                                       formControlName="secuencia"
+                                       [ngClass]="{'is-invalid': f['secuencia'].invalid && f['secuencia'].touched, 'is-valid': f['secuencia'].valid, '': f['secuencia'].untouched}">
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="card detalle">
+                  <div class="card-header cabecera">
+                     <h3 class="card-title">Aprobado</h3>
+                     <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                           <i class="fas fa-minus"></i>
+                        </button>
+                     </div>
+                  </div>
+                  <div class="card-body">
+                     <div class="row">
+                        <div class="col-sm-6">
+                           <!-- checkbox -->
+                           <div class="form-group">
+                              <div class="custom-control custom-checkbox">
+                                 <input class="custom-control-input" type="checkbox" id="aprobadoagua"
+                                    formControlName="aprobadoagua" (change)="aprobadoAgua($event)">
+                                 <label for="aprobadoagua" class="custom-control-label">Aprobado agua</label>
+                              </div>
+                              <div class="custom-control custom-checkbox">
+                                 <input class="custom-control-input " (change)="aprobadoAlcantarillado($event)"
+                                    type="checkbox" id="aprobadoalcantarillado"
+                                    formControlName="aprobadoalcantarillado">
+                                 <label for="aprobadoalcantarillado" class="custom-control-label">Aprobado
+                                    alcantarillado</label>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-sm-6">
+                           <div class="row">
+                              <div class="col-sm">
+                                 <div class="input-group mb-1 input-group-sm">
+                                    <div class="input-group-prepend">
+                                       <label class="input-group-text" for="fechanotificacion">Fecha
+                                          finalización<sup class="green">*</sup></label>
+                                    </div>
+                                    <input type="date" class="form-control form-control-sm"
+                                       formControlName="fechafinalizacion"
+                                       [ngClass]="{'is-invalid': f['fechafinalizacion'].invalid && f['fechafinalizacion'].touched, 'is-valid': f['fechafinalizacion'].valid, '': f['fechafinalizacion'].untouched}">
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <div class="mt-3 text-center">
+               <button type="button" class="btn btn-success btn-sm " (click)="onSubmit()"
+                  [disabled]="aguatramite.estado === 3 || formTramitenuevo.pristine || !formTramitenuevo.valid"><i
+                     class="fa fa-check-circle"></i> &nbsp;Aceptar
+               </button>
+               <button type="button" class="btn btn-outline-success btn-sm mx-3" (click)="retornarListaTramites()">
+                  <i class="fa fa-times-circle"></i> Cancelar
+               </button>
+            </div>
+         </form>
+      </div>
+   </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1"
+   aria-labelledby="staticBackdropLabel" aria-hidden="true">
+   <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="staticBackdropLabel">Buscar abonado</h5>
+         </div>
+         <div class="modal-body">
+            <app-buscarabonado (abonadoEvent)="setAbonado($event)"></app-buscarabonado>
+         </div>
+         <div class="modal-footer">
+            <div class="row">
+               <div class="col-sm text-right">
+                  <button class="btn btn-sm btn-success" data-dismiss="modal">Cancelar</button>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

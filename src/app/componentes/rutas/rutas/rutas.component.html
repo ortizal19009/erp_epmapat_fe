@@ -1,0 +1,100 @@
+<div class="content mt-1 pt-1 px-0">
+   <div class="container-fluid">
+      <div class="col-sm-12 px-0">
+         <div class="row  m-0 pl-0 py-1 pr-1 justify-content-start cabecera sombra border">
+            <div class="col-md-2">
+               <h4 class="m-0 font-weight-bold"><i class="fa fa-bus"></i>&nbsp; Rutas</h4>
+            </div>
+
+            <div class="btn-group ml-auto mt-0">
+               <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
+                  aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+               </button>
+               <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+                  <button class="dropdown-item" type="button" data-toggle="collapse" data-target="#addRuta"
+                     aria-expanded="false">
+                     <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+                  <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
+                     <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+                  <button class="dropdown-item" type="button">
+                     <i class="bi-file-earmark-arrow-up"></i>&nbsp;
+                        Exportar</button>
+               </div>
+            </div>
+
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-6">
+         <table class="table table-hover table-bordered table-sm sombra">
+            <thead>
+               <tr class="text-center font-weight-bold cabecera">
+                  <th>Ord</th>
+                  <th>Nombre</th>
+                  <th>Código</th>
+                  <th></th>
+               </tr>
+            </thead>
+            <tbody class="detalle">
+               <tr class="fila" *ngFor="let ruta of _rutas | filter: filtro;" (click)="onCellClick($event, ruta)">
+                  <td class="text-center">{{ ruta.orden }}</td>
+                  <td> {{ ruta.descripcion }} </td>
+                  <td class="text-center">{{ ruta.codigo }}</td>
+
+                  <td class="text-center">
+                     <div class="btn-group py-0">
+                        <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
+                           aria-expanded="false">
+                        </button>
+
+                        <div class="dropdown-menu dropdown-menu-right popLista">
+                           
+                           <button class="dropdown-item" type="button">
+                              <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
+                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalUnico"
+                              (click)="eliminarRuta(ruta)">
+                              <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
+                        </div>
+                     </div>
+                  </td>
+
+                  <!-- <td class="text-center"> -->
+                  <!-- <button (click)="modificarRuta(ruta)" class="badge badge-warning mx-1">Modificar</button>
+              <button (click)="eliminarRuta(ruta.idruta)" class="badge badge-danger mx-1">Eliminar</button> -->
+                  <!-- <button (click)="scrollToElement(target)" class="badge badge-pill badge-info mx-1" data-toggle="collapse"
+                data-target="#collapseInfRuta">&nbsp;&nbsp;&nbsp;&nbsp;Info&nbsp;&nbsp;&nbsp;&nbsp;</button> -->
+                  <!-- <button class="btn btn-outline-info btn-xs" (click)="info(ruta.idruta)">
+                  <i class="fa fa-info-circle"></i> Info&nbsp;&nbsp;</button> -->
+                  <!-- </td> -->
+               </tr>
+            </tbody>
+         </table>
+      </div>
+
+      <div class="col-sm-6 mt-3">
+         <div class="collapse sombra" id="addRuta">
+            <div class="card card-body pt-0 pb-1 px-0 detalle">
+               <h5 class="font-weight-bold py-1 text-center titDocumentos">Nueva Ruta</h5>
+               <app-add-rutas></app-add-rutas>
+            </div>
+         </div>
+      </div>
+
+   </div>
+
+   <!-- <div class="row">
+      <div class="container">
+         <div class="collapse" id="collapseInfRuta">
+            <div class="card card-body">
+               <h3 class="m-0 font-weight-bold">Lecturas de la Ruta</h3>
+               <p>Lorem ipsum......</p>
+            </div>
+         </div>
+      </div>
+      <div #target><br></div>
+   </div> -->
+</div>

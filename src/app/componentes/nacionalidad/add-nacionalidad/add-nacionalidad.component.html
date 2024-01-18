@@ -1,0 +1,39 @@
+<!-- Content Header (Page header) -->
+<div class="content pt-1 pl-3">
+   <div class="container-fluid">
+      <div class="row mt-0 mb-2">
+         <h4 class="m-0 font-weight-bold">Nueva Nacionalidad</h4>
+      </div>
+   </div><!-- /.container-fluid -->
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm">
+         <form id="formularioNacionalidad">
+            <div class="mb-3">
+               <label for="descripcion" class="col-sm-12  col-form-label-sm">Nombre
+                  <input type="text" class="form-control form-control-sm" id="descripcion" autofocus
+                     [(ngModel)]="nacionalidad.descripcion" name="descripcion" />
+               </label>
+            </div>
+            <div class="mb-3 text-center">
+               <button class="btn btn-success btn-sm mx-2" (click)="onSubmit()"
+                  data-target="#collapseNacionalidad">Aceptar</button>
+               <button class="btn btn-outline-success mx-2 btn-sm" (click)="retornarListarNacionalidad()"
+                  data-toggle="collapse" data-target="#collapseNuevo">Cancelar</button>
+            </div>
+         </form>
+      </div>
+   </div>
+   <div *ngIf="rtn == 1">
+      <div class="alert alert-danger text-center" role="alert">
+         No ha digitado el <strong>Nombre</strong> de la nueva Nacionalidad!
+      </div>
+   </div>
+   <div *ngIf="rtn == 2">
+      <div class="alert alert-warning text-center" role="alert">
+         Ya existe la Nacionalidad <strong>{{descripcion}}</strong>
+      </div>
+   </div>
+</div>

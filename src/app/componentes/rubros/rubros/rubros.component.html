@@ -1,0 +1,125 @@
+<div class="content mt-1 pt-1 px-0">
+   <div class="container-fluid">
+      <div class="col-sm-12 px-0">
+         <div class="row m-0 pl-0 py-1 pr-1 justify-content-start titRubros">
+            <div class="col-sm-3">
+               <h5 class="m-0 font-weight-bold text-truncate"><i class="bi-bullseye"></i> Rubros de las planillas</h5>
+            </div>
+            <div class="col-sm-3">
+               <select id="selectmodulo" class="form-control form-control-sm">
+                  <option value={{modulo.idmodulo}} id="modulo{{modulo.idmodulo}}" *ngFor="let modulo of _modulos">
+                     {{modulo.descripcion}}</option>
+               </select>
+            </div>
+            <div class="col-sm-2 text-left">
+               <input type="text" class="form-control mx-0 form-control-sm text-center" placeholder="Filtrar..."
+                  [(ngModel)]="filtro" />
+            </div>
+
+            <!-- <div class="col-sm-1 ml-auto mt-0"> -->
+               <div class="btn-group ml-auto">
+                  <button type="button" class="bg-transparent border-0 dropdown-toggle text-white"
+                     data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+                  </button>
+                  <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+                     <button class="dropdown-item" type="button" data-toggle="collapse" data-target="#addRubro"
+                        aria-expanded="false" aria-controls="addRubro" (click)="addRubro()">
+                        <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+                     <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
+                        <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+                     <button class="dropdown-item" type="button" disabled>
+                        <i class="bi-file-earmark-arrow-up text-muted"></i><span class="text-muted">&nbsp;
+                           Importar</span></button>
+                  </div>
+               </div>
+            <!-- </div> -->
+
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-md-7" #tableContainer>
+         <table class="table table-hover table-bordered table-sm">
+            <thead class="text-center">
+               <tr>
+                  <th></th>
+                  <th>Nombre</th>
+                  <th>Valor</th>
+                  <th>Calculable</th>
+                  <th>IVA</th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr *ngFor="let rubro of _rubros | filter: filtro; let i = index" (click)="infoRubro(rubro)">
+                  <td class="text-center font-weight-bold small">{{ i+1 }}</td>
+                  <td [ngClass]="{'tachado text-muted': rubro.estado==0, 'font-weight-bold': rubro.idrubro >= 1001 && rubro.idrubro <= 1004 }">{{ rubro.descripcion }}</td>
+                  <td class="text-right" [ngClass]="{'transparente': rubro.valor == 0, 'font-weight-bold': rubro.idrubro >= 1001 && rubro.idrubro <= 1004}">{{ rubro.valor|number: '.2-2'}}
+                  </td>
+                  <td class="text-center" [ngClass]="{'transparente': !rubro.calculable, 'font-weight-bold': rubro.idrubro >= 1001 && rubro.idrubro <= 1004}">{{ rubro.calculable|noSi}}
+                  </td>
+                  <td class="text-center" [ngClass]="{'transparente': !rubro.swiva}">{{ rubro.swiva|noSi}}</td>
+               </tr>
+
+            </tbody>
+         </table>
+      </div>
+      <div class="col-md-5 mt-5">
+         <div class="collapse sombra" id="addRubro">
+            <div class="card card-body pt-0 pb-1 px-0 fondoRubros">
+               <h5 class="font-weight-bold py-1 text-center titRubros">Nuevo Rubro</h5>
+               <app-add-rubro [idmodulo]="idmodulo"></app-add-rubro>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- MODAL Imprimir-->
+   <div class="modal fade" id="imprimir" tabindex="-1" aria-labelledby="imprimirLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+         <div class="modal-content">
+            <div class='modal-header py-2 justify-content-center titRubros'>
+               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Imprimir</h5>
+            </div>
+            <div class='modal-body'>
+
+               <div class="input-group mb-3 input-group-sm">
+                  <div class="input-group-prepend">
+                     <label class="input-group-text" for="inputGroupSelect01">Reporte</label>
+                  </div>
+                  <select class="custom-select" id="inputGroupSelect01">
+                     <option selected>Lista de rubros</option>
+                  </select>
+               </div>
+
+               <div class="input-group input-group-sm mb-0">
+                  <div class="input-group-prepend">
+                     <small class="input-group-text">Abrir en otra página</small>
+                     <div class="input-group-text">
+                        <input type="checkbox" [(ngModel)]="otraPagina">
+                     </div>
+                  </div>
+               </div>
+
+
+            </div>
+            <div class='modal-footer justify-content-center'>
+               <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="pdf()"
+                  [attr.data-target]="otraPagina ? null : '#pdf'" data-toggle="modal">
+                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+               <button type='button' class='btn btn-sm btn-outline-success' data-dismiss='modal'>
+                  <i class="bi bi-x-circle"></i> Cancelar</button>
+            </div>
+         </div>
+      </div>
+   </div>
+
+</div>
+
+<!-- MODAL PDF (En la misma página)-->
+<div class='modal fade' id='pdf' tabindex='-1' aria-labelledby='pdf' aria-hidden='true'>
+   <div class='modal-dialog modal-sm'>
+   </div>
+</div>

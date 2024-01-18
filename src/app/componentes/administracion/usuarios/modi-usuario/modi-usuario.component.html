@@ -1,0 +1,94 @@
+<div class="content-header">
+   <div class="container-fluid">
+      <div class="row mt-5 justify-content-center text-center">
+         <div class="col-sm-7 cabecera sombra border">
+            <h5 class="mt-2 font-weight-bold">Modificar Usuario</h5>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="card card-body col-sm-7 detalle sombra">
+            <form [formGroup]="formUsuario">
+               <div class="row">
+
+                  <div class="form-group col-md-6 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold"
+                              id="inputGroup-sizing-sm">Identificación</span>
+                        </div>
+                        <input type="text" class="form-control" formControlName="identificausu" aria-label="Small"
+                           aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['identificausu'].invalid && f['identificausu'].touched,
+                           'is-valid': f['identificausu'].valid, '': f['identificausu'].untouched}" />
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-6 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Alias</span>
+                        </div>
+                        <input type="text" class="form-control" formControlName="alias" aria-label="Small"
+                           aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['alias'].invalid && f['alias'].touched,
+                           'is-valid': f['alias'].valid, '': f['alias'].untouched}">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-12 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Nombre</span>
+                        </div>
+                        <input type="text" class="form-control" formControlName="nomusu" aria-label="Small"
+                           autocomplete="off" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['nomusu'].invalid && f['nomusu'].touched,
+                           'is-valid': f['nomusu'].valid, '': f['nomusu'].untouched}">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-10 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Contraseña</span>
+                        </div>
+                        <input type="password" class="form-control" formControlName="codusu" aria-label="Small"
+                           aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['codusu'].invalid && f['codusu'].touched,
+                           'is-valid': f['codusu'].valid, '': f['codusu'].untouched}" autocomplete="current-password">
+                        <input type="password" class="form-control" formControlName="reingreso" aria-label="Small"
+                           aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['reingreso'].invalid && f['reingreso'].touched,
+                           'is-valid': f['reingreso'].valid, '': f['reingreso'].untouched}"
+                           autocomplete="current-password">
+                     </div>
+                  </div>
+
+                  <div *ngIf="idusuarioModi > 1" class="form-group col-md-3 my-0 py-0">
+                     <div class="input-group input-group-sm mb-1">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Habilitado </span>
+                           <div class="input-group-text">
+                              <input type="checkbox" formControlName="estado">
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+               </div>
+
+               <div class="my-0 text-center">
+                  <button type="button" class="btn btn-success btn-sm mx-1"
+                     [disabled]="formUsuario.pristine || !formUsuario.valid" (click)="guardar()">
+                     <i class="fa fa-check-circle"></i> Aceptar
+                  </button>
+                  <button type="button" class="btn btn-outline-success btn-sm mx-1" (click)="regresar()">
+                     <i class="fa fa-times-circle"></i> Cancelar
+                  </button>
+               </div>
+
+            </form>
+         </div>
+      </div>
+   </div>
+</div>

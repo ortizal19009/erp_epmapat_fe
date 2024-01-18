@@ -1,0 +1,41 @@
+<table class="table table-hover table-sm table-bordered">
+   <!-- <caption><small class="font-weight-bold">Uso: {{usoitem}}</small></caption> -->
+   <thead>
+      <tr class="text-center">
+         <th>Producto</th>
+         <th>Rubro</th>
+         <th class="col-sm-1">Canti</th>
+         <th class="col-sm-1">Precio</th>
+         <th class="col-sm-1">Total</th>
+      </tr>
+   </thead>
+   <tbody>
+      <tr class="text-right font-weight-bold">
+         <td class="text-left" colspan="5">Uso: {{usoitem}}</td>
+      </tr>
+
+      <tr *ngFor="let item of _itemxfact" class="fila">
+         <td class="text-left">{{item.idcatalogoitems_catalogoitems.descripcion}}</td>
+         <td class="text-left">{{item.idcatalogoitems_catalogoitems.idrubro_rubros.descripcion}}</td>
+         <td class="text-center">{{item.cantidad}}</td>
+         <td class="text-right">{{item.valorunitario | number:'1.2-2'}}</td>
+         <td class="text-right">{{item.cantidad * item.valorunitario | number:'1.2-2'}}</td>
+         <!-- <td class="text-left">{{item.idcatalogoitems_catalogoitems.idrubro_rubros.swiva}}</td> -->
+      </tr>
+      <tr class="text-right font-weight-bold py-0">
+         <td colspan="3"></td>
+         <td class="">SubTOTAL </td>
+         <td class="">{{totfac | number:'1.2-2'}}</td>
+      </tr>
+      <tr class="text-right font-weight-bold py-0">
+         <td colspan="3"></td>
+         <td class="">IVA </td>
+         <td class="">{{totiva | number:'1.2-2'}}</td>
+      </tr>
+      <tr class="text-right font-weight-bold py-0">
+         <td colspan="3"></td>
+         <td class="">TOTAL </td>
+         <td class="">{{totfac + totiva | number:'1.2-2'}}</td>
+      </tr>
+   </tbody>
+</table>

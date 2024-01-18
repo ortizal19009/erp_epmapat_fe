@@ -1,0 +1,34 @@
+.container-fluid{
+   --color1: rgb(109, 110, 15);
+   --color2: rgba(223, 220, 162);
+}
+
+.titDocumentos {
+   background-color: var(--color1);
+   color: white;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.fondoDocumentos{
+   background-color: var(--color2);
+}
+
+table {
+   background-color: var(--color2);
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+table>thead>tr {
+   background-color: var(--color1);
+   color: white;
+}
+
+table tbody tr:hover  { 
+   background-color: #117a8B;
+   color: white;
+   cursor: pointer; 
+}
+
+.transparente{ opacity: 0;}
+
+.sombra{ box-shadow: 0 0 10px rgba(0, 0, 0, 0.75); }

@@ -1,0 +1,69 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 pt-1 pb-0 justify-content-start cabecera sombra border titDocumentos">
+         <div class="col-sm-3">
+            <h4 class="font-weight-bold mt-1"> <i class="bi bi-file-text-fill"></i> &nbsp;Documentos</h4>
+         </div>
+
+         <div class="col-sm-2 text-center">
+            <input class="form-control form-control-sm text-center my-1" type="text" placeholder="Filtrar..."
+               [(ngModel)]="filtro" [ngModelOptions]="{standalone: true}" />
+         </div>
+
+         <div class="btn-group ml-auto mt-0">
+            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
+               data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto ">
+               <button class="dropdown-item" type="button" data-toggle="collapse" data-target="#addDocumento">
+                  <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#pdf">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+               <button class="dropdown-item text-muted" type="button" disabled><i
+                     class="bi-file-earmark-arrow-down text-muted"></i>
+                  <span class="text-muted">&nbsp;
+                     Exportar</span></button>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-7">
+         <table class="table table-hover table-bordered table-sm">
+            <thead class="text-center">
+               <tr>
+                  <th></th>
+                  <th class="col-sm-3">Nombre</th>
+                  <th>Tipo</th>
+                  <th colspan="2">Comprobante autorizado SRI</th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr *ngFor="let documento of _documentos  | filter: filtro; let i=index"
+                  (click)="infoDocumento(documento)">
+                  <td class="text-center small font-weight-bold">{{i+1}}</td>
+                  <td>{{ documento.nomdoc}}</td>
+                  <td class="text-center" [ngClass]="{'transparente': documento.tipdoc == 0}">{{ documento.tipdoc}}
+                  </td>
+                  <td [ngClass]="{'transparente': documento.idtabla4.idtabla4 == 1}">{{
+                     documento.idtabla4.tipocomprobante }}</td>
+                  <td [ngClass]="{'transparente': documento.idtabla4.idtabla4 == 1}">{{
+                     documento.idtabla4.nomcomprobante }}</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+
+      <div class="col-md-5 mt-1">
+         <div class="collapse sombra" id="addDocumento">
+            <div class="card card-body pt-0 pb-1 px-0 fondoDocumentos">
+               <h5 class="font-weight-bold py-1 text-center titDocumentos">Nuevo Documento</h5>
+               <app-add-documento></app-add-documento>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

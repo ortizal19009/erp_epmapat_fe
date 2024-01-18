@@ -1,0 +1,133 @@
+<!-- Content Header (Page header) -->
+<div class="content pt-1 pl-3">
+    <div class="container-fluid border-bottom">
+        <div class="row mt-0 mb-2">
+            <h4 class="m-0 font-weight-bold">Modificar Reclamo</h4>
+        </div>
+    </div><!-- /.container-fluid -->
+</div>
+
+<div class="container-fluid">
+    <div class="row mb-0">
+        <div class="col-sm">
+            <form [formGroup]="reclamoForm">
+                <div class="row">
+                    <div class="col-md-2">
+                        <label for="feccrea" class="col-sm-12  col-form-label-sm">Fecha
+                            <input readonly type="date" class="form-control form-control-sm" id="feccrea"
+                                formControlName="feccrea">
+                        </label>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="idtpreclamo_tpreclamo" class="col-sm-12 col-form-label-sm">Tipo de Reclamo
+                            <select type="text" class="form-control form-control-sm" id="idtpreclamo_tpreclamo"
+                                formControlName="idtpreclamo_tpreclamo" [compareWith]="compararTpReclamo">
+                                <option *ngFor="let tpreclamosDatos of tpreclamo" [ngValue]="tpreclamosDatos">
+                                    {{tpreclamosDatos.descripcion}}</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="responsablereclamo" class="col-sm-12 col-form-label-sm">Responsable del Reclamo
+                            <input type="text" class="form-control form-control-sm" id="responsablereclamo"
+                                placeholder="Digite el responsable del reclamo" formControlName="responsablereclamo">
+                        </label>
+                    </div>
+                    <div class="col-md-10">
+                        <label class="col-sm-12 col-form-label-sm" for="observacion">Descripción
+                            <input type="text" class="form-control form-control-sm" id="observacion"
+                                placeholder="Digite la descripción del Reclamo" formControlName="observacion">
+                        </label>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="col-sm-12 col-form-label-sm" for="fechaasignacion">Fecha Asignación
+                            <input type="Date" class="form-control form-control-sm" id="fechaasignacion"
+                                formControlName="fechaasignacion">
+                        </label>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="estado" class="col-sm-12 col-form-label-sm">Estado
+                            <select class="form-control form-control-sm" id="estado" formControlName="estado">
+                                <option value="0">Inactivo</option>
+                                <option value="1">Activo</option>
+                                <option value="2">Asignado</option>
+                                <option value="3">Contestado</option>
+                                <option value="4">Calificado</option>
+                                <option value="5">Terminado</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="referenciadireccion" class="col-sm-12 col-form-label-sm">Referencia de la dirección
+                            <input type="text" class="form-control form-control-sm" id="referenciadireccion"
+                                formControlName="referenciadireccion">
+                        </label>
+                    </div>
+                    <div class="col-md-1">
+                        <label for="piso" class="col-sm-12 col-form-label-sm">Piso
+                            <input type="number" min="0" class="text-center form-control form-control-sm" id="piso"
+                                placeholder="Número de piso" formControlName="piso">
+                        </label>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="departamento" class="col-sm-12 col-form-label-sm">Departamento
+                            <input type="text" class="text-center form-control form-control-sm" id="departamento"
+                                placeholder="Número departamento" formControlName="departamento">
+                        </label>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="fechamaxcontesta" class="col-sm-12 col-form-label-sm">F.Max Contestación
+                            <input type="Date" class="form-control form-control-sm" id="fechamaxcontesta"
+                                formControlName="fechamaxcontesta">
+                        </label>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="fechacontesta" class="col-sm-12 col-form-label-sm">Fecha Contestación
+                            <input type="Date" class="form-control form-control-sm" id="fechacontesta"
+                                formControlName="fechacontesta">
+                        </label>
+                    </div>
+                    <div class="col-md-8">
+                        <label for="contestacion" class="col-sm-12 col-form-label-sm">Contestación
+                            <input type="text" class="form-control form-control-sm" id="contestacion"
+                                placeholder="Digite la contestación" formControlName="contestacion">
+                        </label>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="" class="col-sm-12 col-form-label-sm">Fecha Terminación
+                            <input type="Date" class="form-control form-control-sm" id="fechaterminacion"
+                                formControlName="fechaterminacion">
+                        </label>
+                    </div>
+                    <div class="col-md-8">
+                        <label for="notificacion" class="col-sm-12 col-form-label-sm">Notificación
+                            <input type="text" class="form-control form-control-sm" id="notificacion"
+                                placeholder="Ingrese notificacion" formControlName="notificacion">
+                        </label>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="estadonotificacion" class="col-sm-12 col-form-label-sm">Estado Notificación
+                            <select class="form-control form-control-sm" id="estadonotificacion"
+                                formControlName="estadonotificacion">
+                                <option value="1">Satisfactorio</option>
+                                <option value="2">No resuelto</option>
+                                <option value="2">No conforme</option>
+                                <option value="2">Otros</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+                <hr />
+                <div class="mb-3 text-center">
+                    <button type="button" class="btn btn-success mx-3 btn-sm" (click)="onSubmit()">
+                        Aceptar
+                    </button>
+                    <button type="button" class="btn btn-outline-success btn-sm" (click)="retornarListaReclamos()">
+                        Cancelar
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,103 @@
+<div class="content-header">
+   <div class="container-fluid">
+      <div class="row mt-5 justify-content-center text-center">
+         <div class="col-sm-6 cabecera sombra border">
+            <h5 class="mt-2 font-weight-bold">Nueva Partida de Gastos</h5>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="card card-body col-sm-6 detalle sombra">
+            <form [formGroup]="formPregasto">
+
+               <div class="form-group col-md-4 mt-1">
+                  <div class="input-group input-group-sm mb-1 ">
+                     <div class="input-group-prepend">
+                        <label class="input-group-text">Actividad</label>
+                     </div>
+                     <input type="text" class="form-control form-control-sm" formControlName="idestrfunc"
+                        list="actividadList" (input)="listaActividades($event)" required minlength="2" maxlength="2"
+                        [ngClass]="{'is-invalid': f['idestrfunc'].invalid && f['idestrfunc'].touched,
+                        'is-valid': f['idestrfunc'].valid, '': f['idestrfunc'].untouched}">
+                     <datalist role="listbox" id="actividadList">
+                        <option *ngFor=" let actividad of _actividades" value={{actividad.codigo}}>
+                           {{ actividad.nombre}}</option>
+                     </datalist>
+                  </div>
+               </div>
+
+               <div class="form-group col-md-7 mt-1">
+                  <div class="input-group input-group-sm mb-1 ">
+                     <div class="input-group-prepend">
+                        <label class="input-group-text">Partida del Clasificador</label>
+                     </div>
+                     <input type="text" class="form-control form-control-sm" formControlName="intcla" list="clasifiList"
+                        (input)="listaClasificador($event)" required minlength="8" maxlength="8" [ngClass]="{'is-invalid': f['intcla'].invalid && f['intcla'].touched,
+                        'is-valid': f['intcla'].valid, '': f['intcla'].untouched}">
+                     <datalist role="listbox" id="clasifiList">
+                        <option *ngFor="let clasifi of _clasificador" value={{clasifi.codpar}}>
+                           {{ clasifi.nompar}}</option>
+                     </datalist>
+                  </div>
+               </div>
+
+               <div class="form-group col-md-8 mt-1">
+                  <div class="input-group input-group-sm mb-3">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold">Código de la Partida</span>
+                     </div>
+                     <input type="text" class="form-control" formControlName="codpar" required minlength="17"
+                        maxlength="17" [ngClass]="{'is-invalid': f['codpar'].invalid && f['codpar'].touched,
+                      'is-valid': f['codpar'].valid, '': f['codpar'].untouched}" (blur)="reinicia()">
+                  </div>
+               </div>
+
+               <div class="form-group col-md-12 mt-1">
+                  <div class="input-group input-group-sm mb-3">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold">Nombre</span>
+                     </div>
+                     <input type="text" class="form-control" formControlName="nompar" [ngClass]="{'is-invalid': f['nompar'].invalid && f['nompar'].touched,
+                     'is-valid': f['nompar'].valid, '': f['nompar'].untouched}">
+                  </div>
+               </div>
+
+               <div class="row justify-content-start col-md-12">
+                  <div class="input-group input-group-sm mb-3 col-sm-5">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold ">Inicial</span>
+                     </div>
+                     <input type="text" class="form-control text-right" formControlName="inicia" min="0" mask="separator.2"
+                     [ngClass]="{'is-invalid': f['inicia'].invalid && f['inicia'].touched,
+                      'is-valid': f['inicia'].valid, '': f['inicia'].untouched}">
+                  </div>
+               </div>
+
+               <div class="form-group col-md-3 my-0 py-0">
+                  <div class="input-group input-group-sm mb-1">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold">Plurianual </span>
+                        <div class="input-group-text">
+                           <input type="checkbox" formControlName="swpluri">
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <div class="text-center">
+                  <button class="btn btn-success btn-sm mx-1 mt-1" (click)="onSubmit()"
+                     [disabled]="!formPregasto.valid">
+                     <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+                  <button class="btn btn-outline-success btn-sm mx-1 mt-1" (click)="regresar()">
+                     <i class="fa fa-times-circle"></i> Cancelar</button>
+               </div>
+            </form>
+
+         </div>
+      </div>
+   </div>
+</div>

@@ -1,0 +1,26 @@
+<div class="content pt-1 pl-3">
+    <div class="container-fluid">
+        <p>
+            <select class="form-select form-select-sm" [(ngModel)]="seleccionado">
+                <option [value]="item" *ngFor="let item of lista">{{item}}</option>
+            </select>
+        </p>
+        {{seleccionado}}
+    </div>
+</div>
+<div class="container mt-3">
+    <h2>Data List</h2>
+    <form action="">
+      <label for="browser" class="form-label">Choose your browser from the list:</label>
+      <input class="form-control" list="browsers" name="browser" id="browser">
+      <datalist id="browsers">
+        <option value="Edge">
+        <option value="Firefox">
+        <option value="Chrome">
+        <option value="Opera">
+        <option value="Safari">
+      </datalist>    
+      <button type="submit" class="btn btn-primary mt-3">Submit</button>
+    </form>
+  </div>
+  <p>Normal &nbsp; <small>Small</small></p>

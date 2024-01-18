@@ -1,0 +1,76 @@
+<div class="content mt-1 pt-1 px-2">
+   <div class="container-fluid">
+      <div class="row mt-0 px-1 py-1 justify-content-start titEmisiones border">
+         <div class="col-sm-3">
+            <h4 class="m-0 font-weight-bold text-truncate"><i class="fa fa-book"></i>&nbsp; Cargar Lecturas </h4>
+         </div>
+         <div class="col-sm-6 mt-1">
+            <h6 class="fantacy text-truncate">Emisión {{rutaxemision.emision|nombreEmision}} / Ruta {{ rutaxemision.ruta
+               }}</h6>
+         </div>
+      </div>
+      <div class='row pt-2 pb-0'>
+
+         <div class="input-group mb-1 col-sm-4">
+            <div class="custom-file">
+               <input #archivoInput type="file" class="custom-file-input" (change)="importExcel($event)">
+               <label class="custom-file-label" data-browse="Archivo">{{ selectedFile ? selectedFile.name :
+                  'Seleccionar'
+                  }}</label>
+            </div>
+         </div>
+
+         <div>
+            <button type='button' class='btn btn-warning btn-sm mr-1' [disabled]="!btnValidar" (click)="validar()">
+               <i class="bi-bug-fill"></i>&nbsp; Validar</button>
+            <button type='button' class='btn btn-success btn-sm mx-1' [disabled]="!btnImportar" (click)="cargar()">
+               <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+            <button type='button' class='btn btn-success btn-sm ml-1' (click)="regresar()">
+               <i class="bi bi-x-circle"></i> Cancelar</button>
+         </div>
+
+         <div *ngIf="barraProgreso" class="ml-4 mt-2 progress col-md-4">
+            <div class="progress-bar" [ngStyle]="{ 'width.%': progreso }">{{ progreso / 100 | percent : '1.2-2'
+               }}</div>
+         </div>
+      </div>
+      <table class="table table-hover table-bordered table-sm mb-0">
+         <thead class="titEmisiones">
+            <tr class="text-center">
+               <th>Cuenta</th>
+               <th>Nro.Medidor</th>
+               <th class="col-md-4">Abonado</th>
+               <th>Anterior</th>
+               <th>Actual</th>
+               <th>Consu.</th>
+               <th>Nvd</th>
+               <th class="col-md-3">Dirección</th>
+               <th>Secuencia</th>
+               <th *ngIf="btnValidar" class="small">Ok</th>
+            </tr>
+         </thead>
+         <tbody class="fondoEmisiones">
+            <tr *ngFor="let row of importedData; let i=index">
+               <td class="text-center">{{ row[0] }}</td>
+               <td>{{ row[1] }}</td>
+               <td>{{ row[2] }}</td>
+               <td class="text-right">{{ row[3] | number:'1.0'}}</td>
+               <td class="text-right">{{ row[4] | number:'1.0' }}</td>
+               <td class="text-right">{{ row[5] | number:'1.0' }}</td>
+               <td class="text-center" [ngClass]="{'font-weight-bold': row[6] > 1}">{{ row[6] }}</td>
+               <td >{{ row[7] }}</td>
+               <td class="text-center">{{ row[9] }}</td>
+               <td *ngIf="btnValidar"> <i class="bi-check-circle" *ngIf="row[11] == 1"></i>
+                  <i class="bi-x-circle red-icon" *ngIf="row[11] == 0"></i>
+               </td>
+            </tr>
+            <tr *ngIf="importedData.length > 0" class="font-weight-bold">
+               <td colspan="2" class="p-0"></td>
+               <td class="p-0">TOTAL: {{importedData.length}}</td>
+               <td colspan="3" class="p-0 text-right">{{sumCargar | number:'1.0'}}</td>
+            </tr>
+         </tbody>
+      </table>
+
+   </div>
+</div>

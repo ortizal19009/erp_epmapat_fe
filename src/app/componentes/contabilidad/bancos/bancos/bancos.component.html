@@ -1,0 +1,97 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-6">
+            <form [formGroup]="bscrControl">
+                <div class="row mt-2">
+                    <div class="col-sm-5">
+                        <select name="" id="" class="custom-select custom-select-sm" formControlName="banco">
+                            <option *ngFor="let banco of bancos" value={{banco.idcuenta}}>{{banco.nomcue}}</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-2">
+                        <select name="" id="" class="custom-select custom-select-sm" formControlName="mes">
+                            <option *ngFor="let mes of meses" value={{mes.valor}}>{{mes.nombre}}</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-5">
+                        <div class="row">
+                            <div class="col-sm-3 mr-2">
+                                <button class="btn btn-sm btn-outline-primary" (click)="onSubmit()">Buscar</button>
+                            </div>
+                            <div class="col-sm-8">
+                                <button class="btn btn-sm btn-outline-primary" *ngIf="btn_conciliar; else btnConciliar"
+                                    (click)="conciliarBanco()" [disabled]="btncondisable">Conciliar</button>
+                                <ng-template #btnConciliar>
+                                    <button class="btn btn-sm btn-outline-primary" (click)="infconciliarBanco()">Ver
+                                        conciliación</button>
+
+                                </ng-template>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row mt-2">
+        <div class="col-sm">
+            <table class="table table-sm table-hover table-bordered">
+                <thead class="bg-primary">
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Asie</th>
+                        <th>Comprobante</th>
+                        <th>Documento</th>
+                        <th>M</th>
+                        <th class="col-sm-1">Nro.</th>
+                        <th>Valor</th>
+                        <th>Concilia</th>
+                        <th>Mes</th>
+                        <th>Débito</th>
+                        <th>Crédito</th>
+                        <th>Beneficiario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let d_conBanco of controlBancos">
+                        <td>{{d_conBanco.idasiento.fecha}}</td>
+                        <td class="text-center">{{d_conBanco.idasiento.asiento}}</td>
+                        <td></td>
+                        <td>
+                            <select [(ngModel)]="d_conBanco.iddocumento" [compareWith]="comDocumentos"
+                                class="custom-select custom-select-sm" (change)="cambioDatos($event, d_conBanco)" [disabled]="optdisabled(d_conBanco.swconcili)">
+                                <option [ngValue]="documento" *ngFor="let documento of documentos">{{documento.nomdoc}}
+                                </option>
+                            </select>
+                        </td>
+                        <td>
+                            <div *ngIf="mal(d_conBanco)">
+                                <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <input type="text" class="form-control form-control-sm" [(ngModel)]="d_conBanco.numdoc"
+                                (change)="cambioDatos($event, d_conBanco)" [disabled]="optdisabled(d_conBanco.swconcili)">
+                        </td>
+                        <td class="text-right">{{d_conBanco.valor | number: '1.2-2'}}</td>
+                        <td class="text-center">
+                            <input type="checkbox" [(ngModel)]="d_conBanco.swconcili"
+                                (change)="cambioDatosCheck($event, d_conBanco)">
+                        </td>
+                        <td>{{d_conBanco.mesconcili}}</td>
+                        <td *ngIf="d_conBanco.debcre==1; else debe" class="text-right">{{d_conBanco.valor | number: '1.2-2'}}</td>
+                        <ng-template #debe>
+                            <td></td>
+                        </ng-template>
+                        <td *ngIf="d_conBanco.debcre==2; else haber" class="text-right">{{d_conBanco.valor | number: '1.2-2'}}</td>
+                        <ng-template #haber>
+                            <td></td>
+                        </ng-template>
+                        <td>{{d_conBanco.idbene.nomben}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,20 @@
+
+.container-fluid {
+   --clientecabecera: Olive;
+   --clientedetalle: Khaki;
+}
+
+/* === Buscar Clientes === */
+/* .clientecabecera { background-color: var(--clientecabecera);} */
+.clientecabecera { background-color: Olive;}
+/* .clientedetalle { background-color: var(--clientedetalle);}  */
+.clientedetalle { background-color: Khaki;} 
+.clientecabecera th {
+   background-color: Olive;
+   color: white;
+}
+.clientedetalle tbody tr:hover {
+   background-color: #117a8B;
+   color: white;
+   cursor: pointer;
+} 

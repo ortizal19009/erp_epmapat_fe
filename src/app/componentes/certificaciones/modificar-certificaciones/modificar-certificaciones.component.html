@@ -1,0 +1,115 @@
+<!-- Content Header (Page header) -->
+<div class="content pt-1 pl-3">
+    <div class="container-fluid">
+      <div class="row mt-0 mb-2">
+        <h4 class="m-0 font-weight-bold">Modificar Certificación</h4>
+      </div>
+    </div><!-- /.container-fluid -->
+  </div>
+  <div class="container-fluid">
+    <div class="row mb-0">
+      <div class="col-sm">
+        <form [formGroup]="certificacionesForm">
+          <div class="row">
+            <div class="col-md-4">
+              <label for="">Número</label>
+              <input type="number" min="0" class="form-control" id="numero" placeholder="Ingrese numero"
+                formControlName="numero" />
+            </div>
+            <div class="col-md-4">
+              <label for="">Año</label>
+              <input type="number" min="0" class="form-control" id="anio" placeholder="Ingrese año"
+                formControlName="anio" />
+            </div>
+            <div class="col-md-4">
+              <label for="">Archivo</label>
+              <input type="text" class="form-control" id="referenciadocumento"
+                placeholder="Ingrese la referencia de documento" formControlName="referenciadocumento" />
+            </div>
+            <div class="col-md-4">
+              <label for="">Tipo
+              <select formControlName="idtpcertifica_tpcertifica" class="form-control form-control-sm" id="idtpcertifica_tpcertifica"
+                [compareWith]="compararTpCertifica">
+                <option [ngValue]="tpcertificaDatos" *ngFor="let tpcertificaDatos of tpcertifica">
+                  {{tpcertificaDatos.descripcion}}</option>
+              </select></label>
+            </div>
+            <div class="col-md-4">
+              <label for="">Facturas</label>
+              <div class="row">
+                <div class="col-sm-8">
+                  <input type="text" readonly class="form-control" id="idfactura_facturas"
+                    formControlName="idfactura_facturas">
+                </div>
+                <div class="col-sm-3">
+                  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#facturasModal">
+                    <i class="fa fa-search" aria-hidden="true"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <br />
+          <div class="mb-3 text-center">
+            <button class="btn btn-secondary mx-3" (click)="retornarListarCertificaiones()">Cancelar</button>
+            <button type="button" class="btn btn-primary" (click)="onSubmit()">
+              Aceptar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <!-- Modal Buscar Clientes -->
+    <div class="modal fade" id="facturasModal" tabindex="-1" aria-labelledby="facturasModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="facturasModalLabel">Buscar factura</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form [formGroup]="f_facturas">
+              <div class="row">
+                <div class="col-sm-10" id="idi-facturas">
+                  <input type="text" placeholder="Nombre ó identificación" class="form-control" autofocus
+                    id="buscarFactura" formControlName="buscarFactura" />
+                </div>
+                <div class="col-sm-2">
+                  <button class="btn btn-outline-primary mx-1" (click)="buscarFacturas()"><i class="fa fa-search"
+                      aria-hidden="true"></i></button>
+                </div>
+              </div>
+              <div class="row ">
+                <table class="table table-hover table-bordered table-sm mt-3">
+                  <thead class="text-center">
+                    <tr>
+                      <th class="bg-primary">Nro.</th>
+                      <th class="bg-primary">Nro. Factura</th>
+                      <th class="bg-primary">Seleccionar</th>
+                    </tr>
+                  </thead>
+                  <tbody id="id-tbody">
+                    <tr *ngFor="let facturaDatos of facturas; let i= index" class="tr-res-pago">
+                      <td class="text-center font-weight-bold">{{i+1}}</td>
+                      <td>{{facturaDatos.nrofactura}}</td>
+                      <td class="text-center">
+                        <button class="badge badge-primary" data-dismiss="modal"
+                          (click)="obtenerValorFactura(facturaDatos)">
+                          Seleccionar
+                        </button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  

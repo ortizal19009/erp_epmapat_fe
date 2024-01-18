@@ -1,0 +1,125 @@
+<div class="content pt-1 ">
+   <div class="container-fluid">
+      <div class="row m-0 px-0  justify-content-start cabecera sombra border">
+         <div class="col-sm-5">
+            <h4 class="font-weight-bold">{{titulo}}</h4>
+         </div>
+
+         <div class="btn-group ml-auto mt-0">
+            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
+               data-toggle="dropdown" aria-expanded="false">
+               <i class="bi-menu-button-wide text-white"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+               <button class="dropdown-item" type="button" (click)="genHojaInspeccion()">
+                  <i class="bi-file-earmark-plus"></i>&nbsp; Hoja de inspección
+               </button>
+               <button class="dropdown-item" type="button" [disabled]="valEstado()" (click)="genContrato()">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir contrato
+               </button>
+               <!-- <button class="dropdown-item" type="button">
+                  <i class="bi-file-earmark-arrow-down"></i>&nbsp; Exportar
+               </button> -->
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-3">
+         <div class="card card-outline sombra">
+            <div class="card-body box-profile detalle">
+               <h3 class="profile-username text-center">{{cliente.nombre}} </h3>
+               <p class="text-muted text-center">Tramite Nro: {{tramitenuevo.idtramitenuevo}}<strong
+                     id="esmedidor"></strong></p>
+               <p class="text-muted text-center">Estado: {{estadoTramite}}<strong id="esmedidor"></strong>
+               </p>
+               <ul class="list-group list-group-unbordered mb-3">
+                  <li class="list-group-item detalle">
+                     <b>Dirección:</b> <a class="float-right">{{tramitenuevo.direccion}}</a>
+                  </li>
+                  <li class="list-group-item detalle">
+                     <b>Barrio:</b> <a class="float-right">{{tramitenuevo.barrio}}</a>
+                  </li>
+                  <li class="list-group-item detalle">
+                     <b>Fecha inicia:</b> <a class="float-right">{{tramitenuevo.feccrea}}</a>
+                  </li>
+                  <li class="list-group-item detalle">
+                     <b>Fecha inspección:</b> <a class="float-right">{{tramitenuevo.fechainspeccion}}</a>
+                  </li>
+                  <li class="list-group-item detalle">
+                     <div class="card card-outline detalle">
+                        <div class="card-header cabecera">
+                           <h3 class="card-title font-weight-bold">Solicitudes</h3>
+                           <div class="card-tools">
+                              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                 <i class="fas fa-minus"></i>
+                              </button>
+                           </div>
+                        </div>
+                        <div class="card-body">
+                           <ul class="list-group list-group-unbordered mb-3">
+                              <li class="list-group-item detalle">
+                                 <!-- <b>Agua:</b> <a class="float-right">{{tramitenuevo.solicitaagua}}</a> -->
+                                 <!-- <b>Agua:</b> <a class="float-right"><i class="bi-check-circle" *ngIf="tramitenuevo.solicitaagua == 1"></i></a> -->
+                                 Agua: <a class="float-right"> <i class="bi-check-circle float-right" *ngIf="tramitenuevo.solicitaagua == 1"></i> </a>
+                              </li>
+                              <li class="list-group-item detalle">
+                                 <!-- Alcantarillado: <a class="float-right">{{tramitenuevo.solicitaalcantarillado}}</a> -->
+                                 Alcantarillado: <a class="float-right"><i class="bi-check-circle float-right" *ngIf="tramitenuevo.solicitaalcantarillado == 1"></i></a>
+                              </li>
+                           </ul>
+                        </div>
+                     </div>
+                  </li>
+                  <li class="list-group-item detalle">
+                     <div class="card card-outline detalle">
+                        <div class="card-header cabecera">
+                           <h3 class="card-title font-weight-bold">Requisitos</h3>
+                           <div class="card-tools">
+                              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                 <i class="fas fa-minus"></i>
+                              </button>
+                              <!-- <button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="collapse" data-target="#requisitos">
+                                 <i class="fas fa-plus"></i> </button> -->
+                                 <!-- <button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="collapse" data-target="#requisitos" data-parent="#requisitos">
+                                    <i class="fas fa-minus"></i> </button> -->
+                           </div>
+                        </div>
+                        <div class="card-body detalle">
+                           <ul class="list-group list-group-unbordered mb-3">
+                              <li class="list-group-item detalle">
+                                 <!-- Cédula: <a class="float-right">{{tramitenuevo.presentacedula}}</a> -->
+                                 Cédula: <a class="float-right"> <i class="bi-check-circle float-right" *ngIf="tramitenuevo.presentacedula == 1"></i></a>
+                              </li>
+                              <li class="list-group-item detalle">
+                                 <!-- Escrituras: <a class="float-right">{{tramitenuevo.presentaescritura}}</a> -->
+                                 Escrituras: <a class="float-right"> <i class="bi-check-circle float-right" *ngIf="tramitenuevo.presentaescritura == 1"></i></a>
+                              </li>
+                           </ul>
+                        </div>
+                     </div>
+                  </li>
+               </ul>
+            </div>
+         </div>
+      </div>
+      <div class="col-sm-9 ">
+         <div class="card card-outline detalle sombra">
+            <div class="card-body">
+               <div class="tab-content">
+                  <div class="active tab-pane" id="prefacturas">
+                     <div class="post">
+                        <div class="user-block">
+                           <app-modificar-tramitenuevo [idTramite]="idtramite"></app-modificar-tramitenuevo>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

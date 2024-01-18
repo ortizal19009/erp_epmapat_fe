@@ -1,0 +1,114 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 py-1 justify-content-start cabecera border sombra">
+         <div class="col-sm-3">
+            <h5 class="m-0 font-weight-bold text-truncate">
+               <i class="bi-badge-tm-fill"></i>&nbsp; {{ titulo }}
+            </h5>
+         </div>
+         <div class="col-sm-6">
+            <form [formGroup]="f_buscar" (ngSubmit)="buscar()">
+
+               <div class="row">
+                  <div class="col-sm">
+                     <input type="number" class="form-control form-control-sm text-center" formControlName="desdeNum"
+                        placeholder="Desde" min="1" />
+                  </div>
+                  <div class="col-sm">
+                     <input type="number" class="form-control form-control-sm text-center" formControlName="hastaNum"
+                        placeholder="Hasta" min="1" max="{{f_buscar.value.hastaNum}}" />
+                  </div>
+                  <div class="col-sm">
+                     <input type="date" class="form-control form-control-sm text-center" formControlName="desdeFecha"
+                        max="{{ today | date : 'yyyy-MM-dd' }}" />
+                  </div>
+                  <div class="col-sm">
+                     <input type="date" class="form-control form-control-sm text-center" formControlName="hastaFecha"
+                        max="{{ today | date : 'yyyy-MM-dd' }}" />
+                  </div>
+                  <div class="col-sm">
+                     <button class="btn btn-primary btn-sm" data-dismiss="modal">
+                        <i class="fa fa-search" aria-hidden="true"></i> Buscar
+                     </button>
+                  </div>
+                  
+               </div>
+            </form>
+
+         </div>
+
+         <div class="col-sm-2">
+            <input class="form-control form-control-sm text-center" type="text" placeholder="Filtrar..."
+            [(ngModel)]="filtro" [ngModelOptions]="{standalone: true}" />
+         </div>
+
+         <div class="col-sm d-flex justify-content-end">
+            <div class="btn-group ml-auto mx-0">
+               <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
+                  aria-expanded="false">
+                  <i class="bi-menu-button-wide text-white"></i>
+               </button>
+               <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+                  <button class="dropdown-item" type="button" (click)="addTramite()">
+                     <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo
+                  </button>
+                  <button class="dropdown-item" type="button" data-toggle="modal" data-target="#PDFModal">
+                     <i class="bi bi-printer"></i>&nbsp; Imprimir
+                  </button>
+                  <button class="dropdown-item" type="button">
+                     <i class="bi-file-earmark-arrow-up"></i><span class="">&nbsp; Exportar</span>
+                  </button>
+               </div>
+            </div>
+         </div>
+
+      </div>
+   </div>
+   <div class="container-fluid">
+      <div class="row mb-0">
+         <div class="col-sm">
+            <table class="table table-hover table-bordered table-sm sombra">
+               <thead class="text-center cabecera">
+                  <tr>
+                     <th>Nro.</th>
+                     <th class="col-1">Fecha</th>
+                     <th class="col-2">Documento</th>
+                     <th class="col-sm-4">Beneficiario</th>
+                     <th>Total</th>
+                     <th>Descripción</th>
+                     <th></th>
+                  </tr>
+               </thead>
+               <tbody class="detalle">
+                  <tr *ngFor="let d_tramipresu of v_tramipresu | filter: filtro; let i = index"
+                     (click)="detallesTramipresu($event, d_tramipresu)" class="fila">
+                     <td class="text-center">{{ d_tramipresu.numero }}</td>
+                     <td class="text-center"> {{ d_tramipresu.fecha | date : "dd-MM-yyyy"}} </td>
+                     <td class="doc-{{ d_tramipresu.iddocumento.iddocumento }}"> {{ d_tramipresu.iddocumento.nomdoc }}
+                        {{ d_tramipresu.numdoc }} </td>
+                     <td class="bene-{{ d_tramipresu.idbene }}">{{d_tramipresu.idbene.nomben}}</td>
+                     <td class="text-right">{{d_tramipresu.totmiso | number: '1.2-2' }}</td>
+                     <td class="text-left text-truncate ancho200">{{d_tramipresu.descripcion }}</td>
+
+                     <td class="text-center">
+                        <div class="btn-group py-0">
+                           <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0"
+                              data-toggle="dropdown" aria-expanded="false">
+                           </button>
+
+                           <div class="dropdown-menu dropdown-menu-right popLista">
+                              <button class="dropdown-item" type="button" (click)="modiTramipresu( d_tramipresu )">
+                                 <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
+                              <button class="dropdown-item" type="button">
+                                 <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
+                           </div>
+                        </div>
+                     </td>
+
+                  </tr>
+               </tbody>
+            </table>
+         </div>
+      </div>
+   </div>
+</div>

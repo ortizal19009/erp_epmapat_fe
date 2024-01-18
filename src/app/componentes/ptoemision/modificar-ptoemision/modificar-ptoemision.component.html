@@ -1,0 +1,49 @@
+<div class="collapse" id="modiEstablecimiento">
+   <h4 class="font-weight-bold">Modificar Establecimiento</h4>
+
+   <form [formGroup]="ptoEmisionForm" (ngSubmit)="onSubmit()">
+      <div class="row">
+         <div class="form-group col-md-2 my-0 py-0">
+            <label for="establecimiento" class="form-label form-label col-form-label-sm my-1 py-1 text-center">Código
+               <input type="text" class="form-control form-control-sm" id="establecimiento"
+                  formControlName="establecimiento" />
+            </label>
+         </div>
+         <div class="form-group col-md-5 my-0 py-0">
+            <label for="nroautorizacion"
+               class="form-label form-label col-form-label-sm my-1 py-1 text-center">Autorización
+               <input type="text" class="form-control form-control-sm text-center" id="nroautorizacion"
+                  formControlName="nroautorizacion" />
+            </label>
+         </div>
+         <div class="form-group col-md-4 my-0 py-0">
+            <label for="telefono" class="form-label form-label col-form-label-sm my-1 py-1 text-center">Teléfono
+               <input type="text" class="form-control form-control-sm text-center" id="telefono"
+                  formControlName="telefono" />
+            </label>
+         </div>
+         <div class="form-group col-md-12 my-0 py-0">
+            <label for="direccion" class="form-label form-label col-form-label-sm my-1 py-1 col-md-12">Dirección
+               <input type="text" class="form-control form-control-sm" id="direccion" formControlName="direccion" />
+            </label>
+         </div>
+         <div class="form-group col-md-4 my-0 py-0">
+            <label for="estado" class="form-label form-label col-form-label-sm my-1 py-1 text-center">Estado
+               <select class="form-control form-control-sm" id="estado" formControlName="estado" name="estado">
+                  <option value='1'>Activo</option>
+                  <option value='0'>Inactivo</option>
+               </select>
+            </label>
+         </div>
+      </div>
+      <br />
+      <div class="mb-3 text-center">
+         <button class="btn btn-sm btn-success mx-2" data-toggle="collapse" data-target="#modiEstablecimiento">
+            <i class="fa fa-check-circle" style="font-size:24pxi"></i> Aceptar
+         </button>
+         <button class="btn btn-outline-success btn-sm btn-sm" data-toggle="collapse" data-target="#modiEstablecimiento">
+            <i class="fa fa-times-circle" style="font-size:24pxi"></i> Cancelar
+         </button>
+      </div>
+   </form>
+</div>

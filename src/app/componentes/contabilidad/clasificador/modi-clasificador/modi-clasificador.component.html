@@ -1,0 +1,54 @@
+<div class="content-header">
+   <div class="container-fluid">
+      <div class="row mt-5 justify-content-center text-center">
+         <div class="col-sm-6 partidaCla">
+            <h4 class="font-weight-bold">Modificar Partida del Clasificador</h4>
+         </div>
+      </div><!-- /.row -->
+   </div><!-- /.container-fluid -->
+</div><!-- /.content-header -->
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="card card-body col-sm-6 partidaCla">
+            <form [formGroup]="clasificadorForm">
+               <div class="row">
+                  <div class="form-group col-3 my-0 py-0">
+                     <label class="form-label col-form-label-sm text-center">Código
+                        <input class="form-control form-control-sm text-center" type="text" minlength="1" maxlength="8"
+                           id="codpar" formControlName="codpar" pattern="[0-9]{8}" title="Código" />
+                     </label>
+                  </div>
+                  <div class="form-group col-sm-9 my-0 py-0">
+                     <label for="nompar" class="form-label col-form-label-sm col-sm-12">Nombre
+                        <input type="text" class="form-control form-control-sm" id="nompar" formControlName="nompar" />
+                     </label>
+                  </div>
+                  <div class="form-group col-sm-12 my-0 py-0">
+                     <label for="despar" class="col-sm-12">Descripción
+                        <textarea class="form-control form-control-sm" id="despar" formControlName="despar"></textarea>
+                     </label>
+                  </div>
+               </div>
+               <div class="row justify-content-center mt-3 mb-3">
+                  <button type="button" class="btn btn-success btn-sm" (click)="onSubmit()" [disabled]="disabled">
+                     <i class="fa fa-check-circle" style="font-size:24pxi"></i> Aceptar </button>
+                  <button class="btn btn-sm btn-outline-success mx-2" (click)="retornar()">
+                     <i class="fa fa-times-circle" style="font-size:24pxi"></i> Cancelar</button>
+               </div>
+            </form>
+            <div *ngIf="rtn == 1">
+               <div class="alert alert-danger text-center" role="alert">
+                  <strong>Código</strong> de Partida Incorrecto !
+               </div>
+            </div>
+            <div *ngIf="rtn == 2">
+               <div class="alert alert-warning text-center" role="alert">
+                  Ya existe Nombre <strong>{{nompar}}</strong>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

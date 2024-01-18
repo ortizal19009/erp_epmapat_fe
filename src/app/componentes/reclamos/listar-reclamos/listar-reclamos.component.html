@@ -1,0 +1,95 @@
+<!-- Content Header (Page header) -->
+<div class="content pt-1 pl-3">
+  <div class="container-fluid">
+    <div class="row mt-0 mb-2">
+      <div class="col-md-2">
+        <h4 class="m-0 font-weight-bold">Reclamos</h4>
+      </div>
+      <div class="col-sm-2">
+        <input type="text" class="form-control form-control-sm" placeholder="Filtrar..." [(ngModel)]="filterTerm" />
+      </div>
+      <div class="col-sm-1"></div>
+      <div class="col-md-5">
+        <button class="btn btn-outline-primary btn-sm" type="button" (click)="irAddReclamo()">
+          <i class="fa fa-plus-square" style="font-size:24pxi"></i>
+          Nuevo
+        </button>
+      </div>
+    </div>
+  </div><!-- /.container-fluid -->
+</div>
+
+<div class="container-fluid">
+  <div class="row mb-0">
+    <div class="col-sm-12">
+      <div id="alertaReclamos">
+      </div>
+      <table class="table table-hover table-bordered table-sm">
+        <caption class="small mark">Fin de Reclamos</caption>
+        <thead class="text-center">
+          <tr>
+            <th class="bg-primary"></th>
+            <th class="col-sm-1 bg-primary text-center">Fecha</th>
+            <th class="col-sm-1 bg-primary text-center">F.Contesta</th>
+            <th class="col-sm-2 bg-primary text-center">Responsable</th>
+            <th class="bg-primary text-center">Observaciones</th>
+            <th class="col-sm-3 bg-primary text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let reclamo of reclamos | filter:filterTerm; let i=index" class="text-center">
+            <td class="text-center font-weight-bold">{{i+1}}</td>
+            <td class="text-center">{{reclamo.feccrea|date:"dd-MM-y"}}</td>
+            <td class="text-center">{{reclamo.fechacontesta|date:"dd-MM-y"}}</td>
+            <td class="text-left">{{reclamo.responsablereclamo}}</td>
+            <td class="text-left">{{reclamo.observacion}}</td>
+            <td>
+              <button class="badge badge-pill badge-warning mx-1" (click)="modificarReclamos(reclamo)">
+                Modificar
+              </button>
+              <button class="badge badge-pill badge-danger mx-1" (click)="eliminarReclamos(reclamo.idreclamo)"
+                data-toggle="modal" data-target="#modalReclamo">
+                Eliminar
+              </button>
+              <button class="badge badge-pill badge-info mx-1" data-toggle="collapse"
+                data-target="#collapseInfReclamos">
+                &nbsp;&nbsp;&nbsp;&nbsp;Info&nbsp;&nbsp;&nbsp;&nbsp;
+              </button>
+            </td>
+          </tr>
+        </tbody>
+        <!-- MODAL -->
+        <div class='modal fade' id='modalReclamo' tabindex='-1' aria-labelledby='modalReclamoLabel' aria-hidden='true'>
+          <div class='modal-dialog'>
+            <div class='modal-content'>
+              <div class='modal-header'>
+                <h5 class='modal-title' id='ModalLabel'>CONFIRMACIÓN</h5>
+                <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+                  <span aria-hidden='true'>&times;</span>
+                </button>
+              </div>
+              <div class='modal-body'>
+                ¿ Esta seguro de eliminar el RECLAMO ?
+              </div>
+              <div class='modal-footer' id='idButtons'>
+                <button type='button' class='btn btn-secondary' data-dismiss='modal'>NO</button>
+                <button type='button' class='btn btn-primary' data-dismiss='modal' (click)="aprobarEliminacionReclamo()"
+                  id='btnSi'>SI</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </table>
+    </div>
+  </div>
+  <div class="row">
+    <div class="container">
+      <div class="collapse" id="collapseInfReclamos">
+        <div class="card card-body">
+          <h2>Detalles</h2>
+          <p>Aquí se mostraran detalles relevantes del reclamo seleccionado</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,159 @@
+<div class="content  mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start cabecera border sombra">
+         <div class="col-sm-3">
+            <h4 class="m-0 font-weight-bold text-truncate"><i class="fa fa-inbox"></i> Tramites externos</h4>
+         </div>
+         <div class="col-sm-5">
+            <div class="container-fluid">
+               <select name="" id="b_tramites" class="form-control form-control-sm">
+                  <option value={{tptramitesDatos.idtptramite}} id="id-tpt{{tptramitesDatos.idtptramite}}"
+                     *ngFor="let tptramitesDatos of v_tptramites">{{tptramitesDatos.descripcion}}</option>
+               </select>
+            </div>
+         </div>
+         <div class="col-sm-2">
+            <input type="text" class="form-control mx-0 form-control-sm text-center" placeholder="Filtrar..."
+               [(ngModel)]="filterTerm" />
+         </div>
+
+         <div class="btn-group ml-auto mt-0">
+            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
+               aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+               <button class="dropdown-item" type="button" (click)="addTramite()">
+                  <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm">
+         <div id="alertaTramites">
+         </div>
+         <table class="table table-hover table-bordered table-sm sombra">
+            <thead class="text-center cabecera">
+               <tr>
+                  <th></th>
+                  <th class="col-sm-1">Número</th>
+                  <th class="col-sm-1">Fecha</th>
+                  <th *ngIf="tipo" class="col-sm-3 text-center">Tipo</th>
+                  <th class="col-sm-3">Cliente</th>
+                  <th>Descripción</th>
+                  <th class="col-sm-1">Hasta</th>
+                  <th class="col-sm-1">Total</th>
+                  <th></th>
+               </tr>
+            </thead>
+            <tbody class="detalle">
+               <tr *ngFor="let tramite of _tramites | filter:filterTerm; let i= index" class="fila" (click)="info($event, tramite.idtramite)">
+                  <td class="small text-center font-weight-bold">{{i+1}}</td>
+                  <td class="text-center">{{ tramite.idtramite }}</td>
+                  <td class="text-center">{{ tramite.feccrea | date: 'dd-MM-y'}}</td>
+                  <td *ngIf="tipo">{{ tramite.idtptramite_tptramite.descripcion }}</td>
+                  <td>{{ tramite.idcliente_clientes.nombre }}</td>
+                  <td>{{ tramite.descripcion }}</td>
+                  <td class="text-center">{{ tramite.validohasta | date: 'dd-MM-y'}}</td>
+                  <td class="text-right">{{ tramite.total | number: '1.2-2' }}</td>
+                  
+                  <td class="text-center">
+                     <div class="btn-group py-0">
+                        <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
+                           aria-expanded="false">
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right popLista">
+                           <button class="dropdown-item" type="button">
+                              <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
+                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalEliminar">
+                              <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
+                        </div>
+                     </div>
+                  </td>
+               </tr>
+            </tbody>
+
+         </table>
+      </div>
+   </div>
+
+   <!-- MODAL -->
+   <div class='modal fade' id='modalTramites' tabindex='-1' aria-labelledby='modalAbonadosLabel' aria-hidden='true'>
+      <div class='modal-dialog'>
+         <div class='modal-content'>
+            <div class='modal-header'>
+               <h5 class='modal-title' id='modalTramitesLabel'>CONFIRMACIÓN</h5>
+               <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+                  <span aria-hidden='true'>&times;</span>
+               </button>
+            </div>
+            <div class='modal-body'>
+               ¿ Esta seguro de eliminar el tramite ?
+            </div>
+            <div class='modal-footer' id='idButtons'>
+               <button type='button' class='btn btn-secondary' data-dismiss='modal'>NO</button>
+               <button type='button' class='btn btn-primary' data-dismiss='modal' (click)="aprobarEliminarTramite()"
+                  id='btnSi'>SI</button>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- Modal -->
+   <div class="modal fade" id="detallesTramiteModal" tabindex="-1" aria-labelledby="detallesTramiteModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog">
+         <div class="modal-content">
+            <div class="modal-header">
+               <h5 class="modal-title" id="detallesTramiteModalLabel">Detalles tramite</h5>
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+               </button>
+            </div>
+            <div class="modal-body" *ngIf="detalles;else elsedetalles">
+               <div class="row">
+                  <div class="col-sm-4">Número trámite:</div>
+                  <div class="col-sm-8">{{detalles_tramite.nrotramite}}</div>
+               </div>
+               <div class="row">
+                  <div class="col-sm-4">Cliente:</div>
+                  <div class="col-sm-8">{{detalles_tramite.cliente}}</div>
+               </div>
+
+               <div class="row">
+                  <div class="col-sm-4">Detalles:</div>
+                  <div class="col-sm-8">
+                     <div class="row" *ngFor="let detalles of detalles_tramite.detalles">
+                        <div class="col-sm-9">{{detalles.idrubro_rubros.descripcion}}</div>
+                        <div class="col-sm-3 text-right">$ {{detalles.valorunitario}}</div>
+                     </div>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-sm-4"><strong>Total:</strong> </div>
+                  <div class="col-sm-8 text-right"><strong> $ {{detalles_tramite.total}}</strong> </div>
+               </div>
+            </div>
+            <ng-template #elsedetalles>
+               <div class="modal-body">
+
+                  <div class="alert alert-warning" role="alert">
+                     <h5 class="alert-heading">MENSAJE...! </h5>
+                     <hr>
+                     No hay detalles de este tramite
+                  </div>
+               </div>
+            </ng-template>
+            <div class="modal-footer">
+               <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">Aceptar</button>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

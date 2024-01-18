@@ -1,0 +1,73 @@
+<div class="collapse px-3 pt-2 fondoDocumentos" id="addRubro">
+   <form [formGroup]="formRubro" id="formRubro" (ngSubmit)="onSubmit()">
+      <div class="row">
+         
+         <div class="form-group col-md-12 my-0 pt-3">
+            <div class="input-group mb-3 input-group-sm">
+               <div class="input-group-prepend">
+                  <label class="input-group-text" for="tipdoc">Sección</label>
+               </div>
+               <select class="custom-select" formControlName="idmodulo_modulos" id="selectModulo">
+                  <option *ngFor="let modulo of _modulos" value="{{modulo.idmodulo}}" id="idmodulo_{{modulo.idmodulo}}">
+                  {{ modulo.descripcion }}
+                  </option>
+               </select>
+            </div>
+         </div>
+
+         <div class="form-group col-md-12 my-0 py-0">
+            <div class="input-group input-group-sm mb-3">
+               <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm" data-toggle="tooltip"
+                     title="Obligatorio y mínimo 3 caracteres">Nombre<sup class="green">*</sup></span>
+               </div>
+               <input type="text" class="form-control" formControlName="descripcion" aria-label="Small"
+                  aria-describedby="inputGroup-sizing-sm" required minlength="3" #descripcion [ngClass]="{'is-invalid': f['descripcion'].invalid && f['descripcion'].touched,
+                  'is-valid': f['descripcion'].valid, '': f['descripcion'].untouched}">
+            </div>
+         </div>
+
+         <div class="form-group col-md-6 my-0 py-0">
+            <div class="input-group input-group-sm mb-3">
+               <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Valor</span>
+               </div>
+               <input type="number" class="form-control text-right" formControlName="valor" aria-label="Small"
+                  aria-describedby="inputGroup-sizing-sm">
+            </div>
+         </div>
+
+         <div class="form-group col-md-6 my-0 py-0">
+            <div class="input-group input-group-sm mb-3">
+               <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold">Calculable </span>
+                  <div class="input-group-text">
+                     <input type="checkbox" aria-label="Checkbox for following text input" formControlName="calculable">
+                  </div>
+               </div>
+            </div>
+         </div>
+
+         <div class="form-group col-md-6 my-0 py-0">
+            <div class="input-group input-group-sm mb-3">
+               <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold">I.V.A. </span>
+                  <div class="input-group-text">
+                     <input type="checkbox" formControlName="swiva">
+                  </div>
+               </div>
+            </div>
+         </div>
+
+      </div>
+   </form>
+
+   <div class="mt-0 mb-3 text-center">
+      <button type="submit" class="btn btn-success btn-sm mx-1" (click)="onSubmit()" [disabled]="!formRubro.valid"
+         data-toggle="collapse" data-target="#addRubro">
+         <i class="fa fa-check-circle"></i> Aceptar</button>
+      <button class="btn btn-outline-success btn-sm mx-1" data-toggle="collapse" data-target="#addRubro"
+         (click)="reset()"><i class="fa fa-times-circle"></i> Cancelar</button>
+   </div>
+   <span class="small ml-3" *ngIf="f['descripcion'].status === 'PENDING'">Validando...</span>
+</div>

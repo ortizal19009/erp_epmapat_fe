@@ -1,0 +1,336 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row mt-0 mb-1 mx-1 px-0 py-1 justify-content-start abonado border">
+         <div class="col-sm-5">
+            <h5 class="m-0 font-weight-bold"><i class="fa fa-building"></i> Abonado</h5>
+         </div>
+
+         <div class="btn-group ml-auto mx-0">
+            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
+               aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+               <button class="dropdown-item" type="button">
+                  <i class="bi-file-earmark-arrow-down"></i>&nbsp; Exportar</button>
+            </div>
+
+            <div class="col-sm-1">
+               <button class="bg-transparent border-0" type="submit" (click)="regresar()">
+                  <i class="bi-arrow-left-circle text-white icoRegresar"></i>
+               </button>
+            </div>
+         </div>
+
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-3">
+         <div class="card card-outline cardAbonado">
+            <div class="card-body box-profile">
+               <h3 class="profile-username text-center"><strong>Cuenta:</strong> {{abonado.idabonado}}</h3>
+               <p class="text-muted text-center"> {{abonado.nombre}} </p>
+               <ul class="list-group list-group-unbordered mb-3">
+                  <li class="list-group-item">
+                     <b>Categoría</b> <a class="float-right">{{abonado.categoria}}</a>
+                  </li>
+                  <li class="list-group-item">
+                     <b>Estado</b> <a class="float-right"
+                        [ngClass]="{'fontwarning': abonado.estado === 0,'fantacygreen': abonado.estado === 2 || abonado.estado === 3}">{{
+                        abonado.textestado }}</a>
+                  </li>
+                  <li class="list-group-item">
+                     <b>Nro. Medidor</b> <a class="float-right">{{abonado.nromedidor}}</a>
+                  </li>
+
+                  <li class="list-group-item">
+                     <b>Fecha instalación</b> <a class="float-right">{{ abonado.fechainstalacion | date: 'dd-MM-y'}}</a>
+                  </li>
+                  <li class="list-group-item">
+                     <b>Ruta</b> <a class="float-right">{{ abonado.ruta }}</a>
+                  </li>
+                  <li class="list-group-item">
+                     <b>Dirección</b> <a class="float-right">{{ abonado.direccionubicacion }}</a>
+                  </li>
+               </ul>
+               <div class="row justify-content-center">
+                  <button class="btn btn-warning btn-xs mx-1" type="button" (click)="modiAbonado( abonado.idabonado )">
+                     <i class="fa fa-edit" style="font-size:24pxi"></i>
+                     Modificar
+                  </button>
+                  <button class="btn btn-danger btn-xs mx-1" [disabled]="elimdisabled" data-toggle="modal"
+                     data-target="#modalEliminar">
+                     <i class="fa fa-times-circle" style="font-size:24pxi"></i>
+                     Eliminar
+                  </button>
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <div class="col-sm-9">
+         <div class="card mt-2">
+
+            <div class="card-header cardTab">
+               <ul class="nav nav-tabs card-header-tabs cardTab">
+                  <li class="nav-item"><a class="nav-link active cardTab" href="#planillas"
+                        data-toggle="tab">Planillas</a>
+                  </li>
+                  <li class="nav-item"><a class="nav-link cardTab" href="#historialconsumo"
+                        (click)="lecturasxAbonado( abonado.idabonado )" data-toggle="tab">Historial de Consumo</a>
+                  </li>
+               </ul>
+            </div>
+
+
+            <div class="card-body">
+               <div class="tab-content">
+
+                  <div class="active tab-pane" id="planillas">
+                     <div class="post">
+                        <div class="user-block mb-0">
+                           <table class="table table-hover table-sm table-bordered mb-0">
+                              <caption class="small mark">Últimas <strong>15</strong> Planillas&nbsp;&nbsp;&nbsp;&nbsp;
+                                 <button class="btn btn-outline-primary btn-xs">&nbsp;&nbsp;Rango&nbsp;&nbsp;</button>
+                              </caption>
+                              <thead class="theadPlanillas">
+                                 <tr class="text-center">
+                                    <th>Nro.</th>
+                                    <th>Fecha</th>
+                                    <th>Módulo</th>
+                                    <th>Factura</th>
+                                    <th>Valor</th>
+                                    <th>Fecha Cobro</th>
+                                 </tr>
+                              </thead>
+                              <tbody class="bodyPlanillas">
+                                 <tr *ngFor="let factura of _facturas" class="text-center fila" data-toggle="modal"
+                                    data-target="#DetalleFacturaModal" (click)="getRubroxfac( factura.idfactura )">
+                                    <td>{{ factura.idfactura }}</td>
+                                    <td>{{factura.feccrea | date: 'dd-MM-y'}}</td>
+                                    <td class="text-left">{{ factura.idmodulo.descripcion }}</td>
+                                    <td>{{factura.nrofactura}}</td>
+                                    <td class="text-right">{{ factura.totaltarifa | number: '1.2-2'}}</td>
+                                    <td>{{ factura.fechacobro | date: 'dd-MM-y'}}</td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="tab-pane" id="historialconsumo">
+                     <div class="post">
+                        <div class="user-block mb-0">
+                           <div *ngIf="!grafic" class="row">
+                              <div class="col-sm-11">
+                                 <table class="table table-hover table-sm table-bordered mb-0">
+                                    <thead class="theadHisconsumo">
+                                       <tr class="text-center">
+                                          <th>Emisión</th>
+                                          <th>Consumo</th>
+                                          <th>Anterior</th>
+                                          <th>Actual</th>
+                                          <th>Planilla</th>
+                                       </tr>
+                                    </thead>
+                                    <tbody class="bodyHisconsumo">
+                                       <tr *ngFor="let lectura of _lecturas" class="text-center fila"
+                                          data-toggle="modal" data-target="#DetalleFacturaModal"
+                                          (click)="getRubroxfac( lectura.idfactura )">
+                                          <td class="text-left">{{
+                                             lectura.idrutaxemision_rutasxemision.idemision_emisiones.emision |
+                                             nombreEmision
+                                             }}</td>
+                                          <td>{{ lectura.lecturaactual - lectura.lecturaanterior | number: '1.0'}}</td>
+                                          <td>{{lectura.lecturaanterior | number: '1.0'}}</td>
+                                          <td>{{ lectura.lecturaactual | number: '1.0' }}</td>
+                                          <td>{{lectura.idfactura}}</td>
+                                       </tr>
+                                    </tbody>
+                                 </table>
+                              </div>
+                              <div class="col-sm-1 mt-1 mx-0 px-0">
+                                 <button class="btn btn-sm theadHisconsumo sombra border"
+                                    (click)="grafico(abonado.idabonado)">
+                                    <i class="bi-bar-chart"></i></button>
+                              </div>
+                           </div>
+
+                           <!-- <div  class="row col-sm-12"> -->
+                           <div class="row col-sm-12 ml-1 mb-0">
+                              <div class="row" id="divHistorial">
+                                 <canvas id="myChart"></canvas>
+                              </div>
+                           </div>
+                           <!-- </div> -->
+                           <div *ngIf="grafic" class="row col-sm-12">
+                              <div class="col-sm-12 mx-0 px-0 text-right">
+                                 <button class="btn btn-sm theadHisconsumo sombra border" (click)="cerrarGrafico()">
+                                    <i class="bi-x-octagon"></i></button>
+                              </div>
+                           </div>
+
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="tab-pane" id="historialconsumo1">
+                     <div *ngIf="!grafic; then thenBlock else elseBlock"></div>
+                     <ng-template #thenBlock>
+                        <div class="col-sm-10 ml-5 mb-0">
+                           <div class="row">
+                              <div class="col-sm-11">
+                                 <table class="table table-hover table-sm table-bordered mb-0">
+                                    <thead class="theadHisconsumo">
+                                       <tr class="text-center">
+                                          <th>Emisión</th>
+                                          <th>Consumo</th>
+                                          <th>Anterior</th>
+                                          <th>Actual</th>
+                                          <th>Planilla</th>
+                                       </tr>
+                                    </thead>
+                                    <tbody class="bodyHisconsumo">
+                                       <tr *ngFor="let lectura of _lecturas" class="text-center fila"
+                                          data-toggle="modal" data-target="#DetalleFacturaModal"
+                                          (click)="getRubroxfac( lectura.idfactura )">
+                                          <td class="text-left">{{
+                                             lectura.idrutaxemision_rutasxemision.idemision_emisiones.emision |
+                                             nombreEmision
+                                             }}</td>
+                                          <td>{{ lectura.lecturaactual - lectura.lecturaanterior | number: '1.0'}}</td>
+                                          <td>{{lectura.lecturaanterior | number: '1.0'}}</td>
+                                          <td>{{ lectura.lecturaactual | number: '1.0' }}</td>
+                                          <td>{{lectura.idfactura}}</td>
+                                       </tr>
+                                    </tbody>
+                                 </table>
+                              </div>
+                              <div class="col-sm-1 mt-1 mx-0 px-0">
+                                 <button class="btn btn-sm theadHisconsumo sombra border"
+                                    (click)="grafico(abonado.idabonado)">
+                                    <i class="bi-bar-chart"></i></button>
+                              </div>
+                           </div>
+                        </div>
+                     </ng-template>
+                     <ng-template #elseBlock>
+                        <div class="row">
+                           <canvas *ngIf="grafic" id="myChart"></canvas>
+                        </div>
+                     </ng-template>
+
+                     <div class="col-sm-10 ml-5 mb-0">
+                        <div class="row">
+                           <div class="col-sm-11">
+                              <table class="table table-hover table-sm table-bordered mb-0">
+                                 <thead class="theadHisconsumo">
+                                    <tr class="text-center">
+                                       <th>Emisión</th>
+                                       <th>Consumo</th>
+                                       <th>Anterior</th>
+                                       <th>Actual</th>
+                                       <th>Planilla</th>
+                                    </tr>
+                                 </thead>
+                                 <tbody class="bodyHisconsumo">
+                                    <tr *ngFor="let lectura of _lecturas" class="text-center fila" data-toggle="modal"
+                                       data-target="#DetalleFacturaModal" (click)="getRubroxfac( lectura.idfactura )">
+                                       <td class="text-left">{{
+                                          lectura.idrutaxemision_rutasxemision.idemision_emisiones.emision |
+                                          nombreEmision
+                                          }}</td>
+                                       <td>{{ lectura.lecturaactual - lectura.lecturaanterior | number: '1.0'}}</td>
+                                       <td>{{lectura.lecturaanterior | number: '1.0'}}</td>
+                                       <td>{{ lectura.lecturaactual | number: '1.0' }}</td>
+                                       <td>{{lectura.idfactura}}</td>
+                                    </tr>
+                                 </tbody>
+                              </table>
+                           </div>
+                           <div class="col-sm-1 mt-1 mx-0 px-0">
+                              <button class="btn btn-sm theadHisconsumo sombra border"
+                                 (click)="grafico(abonado.idabonado)">
+                                 <i class="bi-bar-chart"></i></button>
+                           </div>
+                        </div>
+
+                        <!-- <div  class="row col-sm-12"> -->
+                        <!-- <div class="row col-sm-12 ml-1 mb-0">
+                           <div class="row" id="divHistorial">
+                              <canvas *ngIf="grafic" id="myChart"></canvas>
+                           </div>
+                        </div> -->
+                        <!-- </div> -->
+                        <!-- <div *ngIf="grafic" class="row col-sm-12">
+                              <div class="col-sm-12 mx-0 px-0 text-right">
+                                 <button class="btn btn-sm theadHisconsumo sombra border" (click)="cerrarGrafico()">
+                                    <i class="bi-x-octagon"></i></button>
+                              </div>
+                           </div> -->
+
+                     </div>
+                  </div>
+
+
+                  <!-- ===== No Borra: esto funciona en otro TAB ===== -->
+                  <!-- <div class="tab-pane" id="grafico">
+                     <div class="post">
+                        <div class="user-block col-sm-12 ml-1 mb-0">
+                           <div>
+                              <canvas id="myChart"></canvas>
+                           </div>
+                        </div>
+                     </div>
+                  </div> -->
+
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- Modal DETALLE Planilla -->
+   <div class="modal fade" id="DetalleFacturaModal" tabindex="-1" aria-labelledby="DetalleFacturaModal"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+         <div class="modal-content">
+            <div class="modal-header py-2 justify-content-center theadPlanillas">
+               <h5 class="modal-title" id="DetalleFacturaModalLabel"><strong>Planilla:</strong> {{idfactura}}</h5>
+            </div>
+            <div class="modal-body">
+               <table class="table table-hover table-sm table-bordered mb-0">
+                  <thead class="theadPlanillas">
+                     <tr class="text-center">
+                        <th></th>
+                        <th class="col-md-6">Rubro</th>
+                        <th>Valor</th>
+                     </tr>
+                  </thead>
+                  <tbody class="bodyPlanillas">
+                     <tr *ngFor="let rubroxfac of _rubrosxfac; let i=index">
+                        <td class="text-center font-weight-bold small">{{i+1}}</td>
+                        <td>{{ rubroxfac.idrubro_rubros.descripcion}}</td>
+                        <td class="text-right">{{ rubroxfac.valorunitario | number:'1.2-2'}}</td>
+                     </tr>
+                     <tr>
+                        <td></td>
+                        <td class="font-weight-bold">Total</td>
+                        <td class="font-weight-bold text-right">{{ totfac | number:'1.2-2'}}</td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+            <div class="modal-footer py-1">
+               <button type="button" class="btn btn-outline-success btn-sm" data-dismiss="modal">
+                  <i class="fa fa-times-circle"></i> Cerrar</button>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

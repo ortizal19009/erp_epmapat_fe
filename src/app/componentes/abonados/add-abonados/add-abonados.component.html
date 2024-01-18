@@ -1,0 +1,271 @@
+<div class="content pt-1 pl-3">
+   <div class="container-fluid">
+      <div class="row mt-0 mb-2">
+         <h3 class="m-0 font-weight-bold">Nuevo Abonado</h3>
+      </div>
+   </div>
+</div>
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm">
+         <form [formGroup]="abonadoForm">
+            <div class="container">
+               <div class="row">
+                  <div class="col-md-4">
+                     <label for=""> Número medidor </label>
+                     <input type="text" class="form-control" id="nromedidor" formControlName="nromedidor" />
+                  </div>
+                  <div class="col-md-4">
+                     <label for=""> Lectura Inicial </label>
+                     <input type="number" min="0" class="form-control" id="lecturainicial"
+                        formControlName="lecturainicial" />
+                  </div>
+                  <div class="col-md-4">
+                     <label for=""> Estado </label>
+                     <select class="form-control" id="estado" formControlName="estado">
+                        <option value="0">Inactivo</option>
+                        <option value="1">Activo</option>
+                     </select>
+                  </div>
+                  <div class="col-md-4">
+                     <label for=""> Fecha de instalacion </label>
+                     <input type="date" class="form-control" id="fechainstalacion" formControlName="fechainstalacion" />
+                  </div>
+                  <div class="col-md-4">
+                     <label for=""> Marca </label>
+                     <input type="text" class="form-control" id="marca" formControlName="marca" />
+                  </div>
+                  <div class="col-md-4">
+                     <label for=""> Secuencia </label>
+                     <input type="number" min="0" class="form-control" id="secuencia" formControlName="secuencia" />
+                  </div>
+                  <div class="col-md-4">
+                     <label for=""> Direccion </label>
+                     <input type="text" class="form-control" id="direccionubicacion"
+                        placeholder="Ca.principal-Ca.secundaria" formControlName="direccionubicacion" />
+                  </div>
+                  <div class="col-md-4">
+                     <label for=""> Localizacion </label>
+                     <input type="text" class="form-control" id="localizacion" formControlName="localizacion" />
+                  </div>
+                  <div class="col-md-4">
+                     <label for=""> Observaciones </label>
+                     <input type="text" class="form-control" id="observacion" formControlName="observacion" />
+                  </div>
+                  <div class="col-md-4">
+                     <label for=""> Departamento </label>
+                     <input type="text" class="form-control" id="departamento" formControlName="departamento" />
+                  </div>
+                  <div class="col-md-4">
+                     <label for=""> Piso </label>
+                     <input type="text" class="form-control" id="piso" formControlName="piso" />
+                  </div>
+                  <div class="col-md-4">
+                     <div class="row">
+                        <label for=""> Responsable de pagos </label>
+                        <div class="col-sm-10">
+                           <input type="text" class="form-control" id="idresponsable" readonly
+                              formControlName="idresponsable" />
+                        </div>
+                        <div class="col-sm-2">
+                           <!-- Button trigger modal -->
+                           <button type="button" class="btn btn-primary" data-toggle="modal"
+                              data-target="#responsablePagoModal">
+                              <i class="fa fa-search" aria-hidden="true"></i>
+                           </button>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <label for=""> Categoria </label>
+                     <select type="text" class="form-control" id="idcategoria_categorias"
+                        formControlName="idcategoria_categorias">
+                        <option [ngValue]="categoriaDatos" id="id-c{{categoriaDatos.idcategoria}}"
+                           *ngFor="let categoriaDatos of categoria">
+                           {{ categoriaDatos.descripcion }}
+                        </option>
+                     </select>
+                  </div>
+                  <div class="col-md-4">
+                     <label>Rutas</label>
+                     <select id="idruta_rutas" formControlName="idruta_rutas" class="form-control">
+                        <option *ngFor="let rutaDetalles of rutas" id="id-r{{rutaDetalles.idruta}}"
+                           [ngValue]="rutaDetalles">
+                           {{ rutaDetalles.descripcion }}
+                        </option>
+                     </select>
+                  </div>
+                  <div class="col-md-4">
+                     <label for="">Cliente</label>
+                     <div class="row">
+                        <div class="col-sm-10">
+                           <input type="text" class="form-control" id="idcliente_clientes" readonly
+                              formControlName="idcliente_clientes" />
+                        </div>
+                        <div class="col-sm-2">
+                           <!-- Button trigger modal -->
+                           <button type="button" class="btn btn-primary" data-toggle="modal"
+                              data-target="#clienteModal">
+                              <i class="fa fa-search" aria-hidden="true"></i>
+                           </button>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <label class="form-label col-form-label-sm" for=""> Ubicacion del medidor
+                        <select type="text" class="form-control form-control-sm" id="idubicacionm_ubicacionm"
+                           formControlName="idubicacionm_ubicacionm">
+                           <option [ngValue]="abonado" id="id-um{{abonado.idubicacionm}}"
+                              *ngFor="let abonado of ubicacionm">
+                              {{ abonado.descripcion }}
+                           </option>
+                        </select></label>
+                  </div>
+                  <div class="col-md-4">
+                     <label class="form-label col-form-label-sm" for=""> Tipo de pago
+                        <select type="text" class="form-control form-control-sm" id="idtipopago_tipopago"
+                           formControlName="idtipopago_tipopago">
+                           <option [ngValue]="tipopagoDatos" id="id-tp{{tipopagoDatos.idtipopago}}"
+                              *ngFor="let tipopagoDatos of tipopago">
+                              {{ tipopagoDatos.descripcion }}
+                           </option>
+                        </select></label>
+                  </div>
+                  <div class="col-md-4">
+                     <label class="form-label col-form-label-sm" for=""> Estado del medidor
+                        <select type="text" class="form-control form-control-sm" id="idestadom_estadom"
+                           formControlName="idestadom_estadom">
+                           <option [ngValue]="estadomDatos" id="id-em{{estadomDatos.idestadom}}"
+                              *ngFor="let estadomDatos of estadom">
+                              {{ estadomDatos.descripcion }}
+                           </option>
+                        </select></label>
+                  </div>
+                  <div class="col-md-4">
+                     <label class="form-label col-form-label-sm" for=""> Medidor principal
+                        <input type="number" min="0" class="form-control form-control-sm" id="medidorprincipal"
+                           formControlName="medidorprincipal" /></label>
+                  </div>
+               </div>
+            </div>
+            <div class="mt-3 text-center">
+               <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#serviciosModal"
+                  (click)="onSubmit()">
+                  <i class="fa fa-check-circle"></i> Aceptar
+               </button>
+               
+               <button class="btn btn-sm btn-outline-success mx-2" (click)="retornarListaAbonados()">
+                  <i class="fa fa-times-circle"></i> Cancelar</button>
+
+            </div>
+         </form>
+      </div>
+      <!-- Modal Responsable Pago -->
+      <div class="modal fade" id="responsablePagoModal" tabindex="-1" aria-labelledby="responsablePagoModalLabel"
+         aria-hidden="true">
+         <div class="modal-dialog">
+            <div class="modal-content">
+               <div class="modal-header">
+                  <h5 class="modal-title" id="responsablePagoModalLabel">Buscar responsable de pago</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                     <span aria-hidden="true">&times;</span>
+                  </button>
+               </div>
+               <div class="modal-body">
+                  <form [formGroup]="f_responsablePago">
+                     <div class="row">
+                        <div class="col-sm-10" id="idi-responsable-pago">
+                           <input type="text" placeholder="Nombre ó identificación" class="form-control" autofocus
+                              id="buscarResponsablePago" formControlName="buscarResponsablePago" />
+                        </div>
+                        <div class="col-sm-2">
+                           <button class="btn btn-outline-primary mx-1" (click)="buscarResponsablePago()"><i
+                                 class="fa fa-search" aria-hidden="true"></i></button>
+                        </div>
+                     </div>
+                     <div class="row ">
+                        <table class="table table-hover table-bordered table-sm mt-3">
+                           <thead class="text-center">
+                              <tr>
+                                 <th class="bg-primary">Nombre</th>
+                                 <th class="bg-primary">Identificacion</th>
+                                 <th class="bg-primary">Seleccionar</th>
+                              </tr>
+                           </thead>
+                           <tbody id="id-tbody">
+                              <tr *ngFor="let responsablePagosDatos of v_resppago" class="tr-res-pago">
+                                 <td>{{responsablePagosDatos.nombre}}</td>
+                                 <td>{{responsablePagosDatos.cedula}}</td>
+                                 <td class="text-center">
+                                    <button class="badge badge-primary" data-dismiss="modal"
+                                       (click)="obtenerValoresResponsablePago(responsablePagosDatos)">
+                                       Seleccionar
+                                    </button>
+                                 </td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+                  </form>
+               </div>
+               <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+               </div>
+            </div>
+         </div>
+      </div>
+      <!-- Modal Buscar Clientes -->
+      <div class="modal fade" id="clienteModal" tabindex="-1" aria-labelledby="clienteModalLabel" aria-hidden="true">
+         <div class="modal-dialog">
+            <div class="modal-content">
+               <div class="modal-header">
+                  <h5 class="modal-title" id="clienteModalLabel">Buscar cliente</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                     <span aria-hidden="true">&times;</span>
+                  </button>
+               </div>
+               <div class="modal-body">
+                  <form [formGroup]="f_clientes">
+                     <div class="row">
+                        <div class="col-sm-10" id="idi-cliente">
+                           <input type="text" placeholder="Nombre ó identificación" class="form-control" autofocus
+                              id="buscarCliente" formControlName="buscarCliente" />
+                        </div>
+                        <div class="col-sm-2">
+                           <button class="btn btn-outline-primary mx-1" (click)="buscarCliente()"><i
+                                 class="fa fa-search" aria-hidden="true"></i> Buscar</button>
+                        </div>
+                     </div>
+                     <div class="row ">
+                        <table class="table table-hover table-bordered table-sm mt-3">
+                           <thead class="text-center">
+                              <tr>
+                                 <th class="bg-primary">Nombre</th>
+                                 <th class="bg-primary">Identificacion</th>
+                                 <th class="bg-primary">Seleccionar</th>
+                              </tr>
+                           </thead>
+                           <tbody id="id-tbody">
+                              <tr *ngFor="let clienteDatos of v_cliente" class="tr-res-pago">
+                                 <td>{{clienteDatos.nombre}}</td>
+                                 <td>{{clienteDatos.cedula}}</td>
+                                 <td class="text-center">
+                                    <button class="badge badge-primary" data-dismiss="modal"
+                                    (click)="obtenerValoresClientes(clienteDatos)">
+                                       Seleccionar
+                                    </button>
+                                 </td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+                  </form>
+               </div>
+               <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

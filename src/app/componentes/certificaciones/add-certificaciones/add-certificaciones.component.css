@@ -1,0 +1,33 @@
+
+.cabecera {
+   background-color: var(--bgcolor1);
+   color: white;
+}
+.nuevoBG1 { background-color: var(--bgcolor1); }
+
+.detalle { background-color: var(--bgcolor2); }
+.nuevoBG2 { background-color: var(--bgcolor2); }
+
+.fila:hover {
+   background-color: #117a8B;
+   color: white;
+   cursor: pointer;
+}
+
+/* === Buscar Clientes === */
+#clientesModal {
+   --clientecabecera: Olive;
+   --clientedetalle: Khaki;
+}
+
+.clientecabecera { background-color: var(--clientecabecera);}
+.clientedetalle { background-color: var(--clientedetalle);} 
+.clientecabecera th {
+   background-color: var(--clientecabecera);
+   color: white;
+}
+.clientedetalle tbody tr:hover {
+   background-color: #117a8B;
+   color: white;
+   cursor: pointer;
+} 

@@ -1,0 +1,117 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start cabecera border sombra">
+         <div class="col-sm-2">
+            <h4 class="m-0 font-weight-bold">{{ titulo }}</h4>
+         </div>
+         <div class="col-sm-4">
+            <form action="" [formGroup]="formSuspensiones">
+               <div class="row">
+                  <div class="col-sm">
+                     <input type="date" class="form-control mx-0 form-control-sm text-center" id="desde"
+                        formControlName="desde" max="{{ today | date : 'yyyy-MM-dd' }}" />
+                  </div>
+                  <div class="col-sm">
+                     <input type="date" class="form-control mx-0 form-control-sm text-center" id="hasta"
+                        formControlName="hasta" max="{{ today | date : 'yyyy-MM-dd' }}" />
+                  </div>
+                  <div class="col-sm-3">
+                     <button class="btn btn-primary btn-sm" (click)="buscarxFecha()">
+                        <i class="fa fa-search" aria-hidden="true"></i> Buscar
+                     </button>
+                  </div>
+               </div>
+            </form>
+         </div>
+         <div class="col-sm-2">
+            <input type="text" class="form-control form-control-sm text-center" placeholder="Filtrar..."
+               [(ngModel)]="filterTerm" />
+         </div>
+         <div class="col-sm text-right">
+            <div class="btn-group ml-auto mt-0">
+               <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
+                  aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+               </button>
+               <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+                  <button class="dropdown-item" type="button" (click)="nuevaSuspension()">
+                     <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+                  <button class="dropdown-item" type="button" data-toggle="modal" data-target="#pdf">
+                     <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+                  <button class="dropdown-item text-muted" type="button" disabled><i
+                        class="bi-file-earmark-arrow-down text-muted"></i>
+                     <span class="text-muted">&nbsp;
+                        Exportar</span></button>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+<div class="container-fluid">
+   <div class="row">
+      <div class="col-sm">
+         <table class="table table-hover table-bordered table-sm sombra">
+            <thead class="text-center cabecera">
+               <tr>
+                  <th class="col-sm-1">Número</th>
+                  <th class="col-sm-1">Fecha</th>
+                  <th class="col-sm-1">Total</th>
+                  <th class="col-sm-1">Documento</th>
+                  <th class="col-sm-1">Doc#</th>
+                  <th class="col-sm-1">Tipo</th>
+                  <th>Observaciones</th>
+                  <th></th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr *ngFor="
+              let suspension of suspensiones | filter : filterTerm;
+              let i = index
+            ">
+                  <td class="text-center">{{ suspension.numero }}</td>
+                  <td class="text-center">
+                     {{ suspension.fecha | date : "dd-M-y" }}
+                  </td>
+                  <td class="text-center">{{ suspension.total }}</td>
+                  <td>{{ suspension.iddocumento_documentos.nomdoc }}</td>
+                  <td>{{ suspension.numdoc }}</td>
+                  <td>{{ suspension.tipo }}</td>
+                  <td>{{ suspension.observa }}</td>
+                  <td class="text-center">
+                     <button class="badge badge-info mx-1" (click)="info(suspension)">
+                        Info
+                     </button>
+                  </td>
+               </tr>
+            </tbody>
+            <!-- MODAL -->
+            <div class="modal fade" id="modalAbonados" tabindex="-1" aria-labelledby="modalAbonadosLabel"
+               aria-hidden="true">
+               <div class="modal-dialog">
+                  <div class="modal-content">
+                     <div class="modal-header">
+                        <h5 class="modal-title" id="modalAbonadosLabel">
+                           CONFIRMACIÓN
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                           <span aria-hidden="true">&times;</span>
+                        </button>
+                     </div>
+                     <div class="modal-body">
+                        ¿ Esta seguro de eliminar el abonado ?
+                     </div>
+                     <div class="modal-footer" id="idButtons">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                           NO
+                        </button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal" id="btnSi">
+                           SI
+                        </button>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </table>
+      </div>
+   </div>
+</div>

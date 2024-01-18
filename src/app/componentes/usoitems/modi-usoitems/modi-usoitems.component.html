@@ -1,0 +1,62 @@
+<div class="content-header">
+   <div class="row mt-3">
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="col-sm-7 mt-4 pt-5">
+            <h4 class="font-weight-bold text-center titDocumentos">Modificar Usos <span class="small font-weight-bold">(de los Productos)</span></h4>
+            <div class="card card-body fondoDocumentos">
+               <form [formGroup]="formUso" class=" mt-2">
+                  
+                  <div class="form-group col-md-6 my-0 py-0">
+                     <div class="input-group mb-3 input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Sección</label>
+                        </div>
+                        <select type="text" class="custom-select" formControlName="idmodulo_modulos" id="selectModulo"
+                           [compareWith]="compararModulo">
+                           <option [ngValue]="modulo" *ngFor="let modulo of _modulos">
+                              {{ modulo.descripcion }}
+                           </option>
+                        </select>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-12 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
+                              data-toggle="tooltip" title="Obligatorio y mínimo 3 caracteres">Nombre</span>
+                        </div>
+                        <input type="text" class="form-control" formControlName="descripcion" id="descripcion" aria-label="Small"
+                           aria-describedby="inputGroup-sizing-sm" required minlength="3" 
+                           [ngClass]="{'is-invalid': f['descripcion'].invalid && f['descripcion'].touched,
+                           'is-valid': f['descripcion'].valid, '': f['descripcion'].untouched}">
+                     </div>
+                  </div>
+                  
+                  <div class="form-group col-md-6 my-0 py-0">
+                     <div class="input-group input-group-sm mb-1">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Habilitado </span>
+                           <div class="input-group-text">
+                              <input type="checkbox" formControlName="estado">
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="text-center">
+                     <button class="btn btn-success btn-sm mx-1 mt-1" (click)="onSubmit()" [disabled]="!formUso.valid">
+                        <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+                     <button class="btn btn-outline-success btn-sm mx-1 mt-1" (click)="retornar()"><i
+                           class="fa fa-times-circle"></i> Cancelar</button>
+                  </div>
+               </form>
+            </div>
+         </div>
+      </div>
+   </div>

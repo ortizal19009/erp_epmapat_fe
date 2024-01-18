@@ -1,0 +1,178 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start sombra cabecera border">
+         <div class="col-sm-12 p-0.">
+            <div class="row p-0">
+               <div class="input-group input-group-sm col-sm-3 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Asiento</span>
+                  </div>
+                  <input type="text" class="form-control text-center" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.asiento" readonly>
+                  <input type="text" class="form-control text-center" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.comprobante" readonly>
+               </div>
+               <div class="input-group input-group-sm col-sm-2 mb-1 mr-0 ">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Fecha</span>
+                  </div>
+                  <input type="text" class="form-control text-center" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.fecha" readonly>
+               </div>
+               <div class="input-group input-group-sm col-sm-2 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Doc</span>
+                  </div>
+                  <input type="text" class="form-control" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.documento" readonly>
+               </div>
+               <div class="input-group input-group-sm col-sm-5 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Beneficiario</span>
+                  </div>
+                  <input type="text" class="form-control" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.benefi" readonly>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row">
+         <div class="col-sm-12 mt-0">
+            <div class="card card-body sombra detalle pt-0">
+               <form [formGroup]="formTransaci" class="pt-1">
+                  <h5 class="font-weight-bold text-center cabecera border mt-0 py-1">Liquidación de Anticipos</h5>
+                  <div class="row">
+
+                     <div class="form-group col-md-2 mb-1">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text" for="orden">Orden</label>
+                           </div>
+                           <input type="number" class="form-control text-center" formControlName="orden"
+                              aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-8 mb-1">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text" for="fecha">Cuenta</label>
+                           </div>
+                           <input type="text" class="form-control form-control-sm col-3" formControlName="idcuenta"
+                              list="cuentasList" (input)="onCuentaSelected($event); cuentasxTiptran($event)" [ngClass]="{'is-invalid': f['idcuenta'].invalid && f['idcuenta'].touched,
+                           'is-valid': f['idcuenta'].valid, '': f['idcuenta'].untouched}" [type]="'text'">
+                           <datalist role="listbox" id="cuentasList">
+                              <option *ngFor="let cuenta of _cuentas" value={{cuenta.codcue}}>
+                                 {{ cuenta.nomcue}}</option>
+                           </datalist>
+                           <input type="text" class="form-control" formControlName="nomcue" aria-label="Small"
+                              aria-describedby="inputGroup-sizing-sm" readonly>
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-2 mb-1">
+                        <div class="input-group mb-1 input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Total</label>
+                           </div>
+                           <input type="text" class="form-control text-right font-weight-bold" formControlName="valor" aria-label="Small"
+                              aria-describedby="inputGroup-sizing-sm" readonly mask="separator.2">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-4 mb-1">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text" for="iddocumento">Documento</label>
+                           </div>
+                           <select type="text" class="custom-select" formControlName="iddocumento">
+                              <option [ngValue]="documento" *ngFor="let documento of _documentos"
+                                 [ngValue]="documento.iddocumento"> {{ documento.nomdoc }}
+                              </option>
+                           </select>
+                           <input type="text" class="form-control text-center col-sm-4" formControlName="numdoc"
+                              [ngClass]="{'is-invalid': f['numdoc'].invalid && f['numdoc'].touched,
+                                       'is-valid': f['numdoc'].valid, '': f['numdoc'].untouched}">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-8 mb-2">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Concepto</label>
+                           </div>
+                           <textarea class="form-control" formControlName="descri" rows="1"></textarea>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="text-center">
+                     <button type="submit" class="btn btn-success btn-sm mx-1" [disabled]="!formTransaci.valid || swinvalido"
+                        (click)="onSubmit()">
+                        <i class="fa fa-check-circle"></i> Aceptar</button>
+                     <button type="button" class="btn btn-outline-success btn-sm mx-1" (click)="regresar()"><i
+                           class="fa fa-times-circle"></i> Cancelar
+                     </button>
+                     <button type="button" class="btn btn-success btn-sm mx-1 small" (click)="acfp()" [disabled]="idcuenta == null"><i
+                           class="bi-plus-circle"></i> Beneficiarios
+                     </button>
+                  </div>
+               </form>
+               <div class="row mt-2">
+                  <table class="table table-hover table-bordered table-sm">
+                     <thead class="text-center cabecera">
+                        <tr>
+                           <th class="py-0"></th>
+                           <th class="py-0">Beneficiario</th>
+                           <th class="py-0">Asiento</th>
+                           <th class="py-0">Cmprbnt</th>
+                           <th class="py-0">Fecha</th>
+                           <th class="py-0">Anticipo</th>
+                           <th class="py-0">Saldo</th>
+                           <th class="py-0">Liquida</th>
+                           <th></th>
+                           <th class="py-0">Nuevo Saldo</th>
+                        </tr>
+                     </thead>
+                     <tbody class="detalle">
+                        <tr class="robato" *ngFor="let benextran of _benextran; let i=index">
+                           <td class="text-center small">{{ i+1 }}</td>
+                           <td>{{ benextran.idbene.nomben }}</td>
+                           <td class="text-center">{{ benextran.idtransa.idasiento.asiento }}</td>
+                           <!-- <td>{{ benextran.idtransa.idasiento.compro }}</td> -->
+                           <td *ngIf="benextran.idtransa.idasiento.tipcom === 1">
+                              I-{{benextran.idtransa.idasiento.compro}}</td>
+                           <td *ngIf="benextran.idtransa.idasiento.tipcom === 2">
+                              E-{{benextran.idtransa.idasiento.compro}}</td>
+                           <td *ngIf="benextran.idtransa.idasiento.tipcom === 3">
+                              DC-{{benextran.idtransa.idasiento.compro}}</td>
+                           <td *ngIf="benextran.idtransa.idasiento.tipcom === 4">
+                              DI-{{benextran.idtransa.idasiento.compro}}</td>
+                           <td *ngIf="benextran.idtransa.idasiento.tipcom === 5">
+                              DE-{{benextran.idtransa.idasiento.compro}}</td>
+                           <td class="text-center">{{ benextran.idtransa.idasiento.fecha | date: 'dd-MM-yyyy' }}</td>
+                           <td class="text-right">{{ benextran.valor | number: '1.2-2' }}</td>
+                           <td class="text-right">{{ benextran.valor - benextran.totpagcob | number: '1.2-2' }}</td>
+                           <td><input type="text" class="form-control form-control-sm text-right" [(ngModel)]="valor[i]"
+                                 (dblclick)="dobleclick(i)" (change)="changeValor(i)" mask="separator.2"></td>
+                           <!-- <td><span *ngIf="swinvalido">Upps!</span></td> -->
+                           <td *ngIf="benextran.pagocobro === 0"><i class="bi bi-hourglass-half"></i></td>
+                           <td *ngIf="benextran.pagocobro === 1"><i class="bi bi-check-circle green"></i></td>
+                           <td *ngIf="benextran.pagocobro === 2"><i class="bi bi-x-circle red"></i></td>
+                           <td class="text-right"
+                              [ngClass]="{'transparente': benextran.valor - benextran.totpagcob - valor[i] == 0, 'red': benextran.pagocobro == 2}">{{
+                              benextran.valor - benextran.totpagcob - valor[i] | number: '1.2-2' }}</td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

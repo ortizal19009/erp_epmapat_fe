@@ -1,0 +1,56 @@
+<div class="collapse px-3 pt-2 fondoDocumentos" id="addTarifa">
+   <form [formGroup]="precioxcatForm">
+      <div class="row">
+
+         <div class="form-group col-md-6 my-0 pt-3">
+            <div class="input-group mb-3 input-group-sm">
+               <div class="input-group-prepend">
+                  <label class="input-group-text" for="idcategoria_categorias">Categoría</label>
+               </div>
+               <select class="custom-select" formControlName="idcategoria_categorias" id="idcategoria_categorias">
+                  <option *ngFor="let categoriaDatos of categoria" [ngValue]="categoriaDatos" id="id-c{{categoriaDatos.idcategoria}}">
+                  {{ categoriaDatos.descripcion }}
+                  </option>
+               </select>
+            </div>
+         </div>
+
+         <div class="form-group col-md-5 my-0 pt-3">
+            <div class="input-group input-group-sm mb-3">
+               <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Metros <sup>3</sup></span>
+               </div>
+               <input type="number" class="form-control text-center" formControlName="m3" aria-label="Small"
+                  aria-describedby="inputGroup-sizing-sm">
+            </div>
+         </div>
+
+         <div class="form-group col-md-6 my-0 pt-3">
+            <div class="input-group input-group-sm mb-3">
+               <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold">Precio base</span>
+               </div>
+               <input type="number" class="form-control text-right" formControlName="preciobase" aria-label="Small"
+                  aria-describedby="inputGroup-sizing-sm" placeholder="0.00">
+            </div>
+         </div>
+
+         <div class="form-group col-md-6 my-0 pt-3">
+            <div class="input-group input-group-sm mb-3">
+               <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold">Precio adicional</span>
+               </div>
+               <input type="number" class="form-control text-right" formControlName="precioadicional" aria-label="Small"
+                  aria-describedby="inputGroup-sizing-sm" placeholder="0.00">
+            </div>
+         </div>
+
+      </div>
+      <div class="mb-3 text-center">
+         <button type="button" class="btn btn-success btn-sm  mx-1" (click)="onSubmit()">
+            <i class="fa fa-check-circle"></i> Aceptar </button>
+            <button class="btn btn-outline-success btn-sm mx-1" data-toggle="collapse" data-target="#addTarifa">
+               <i class="fa fa-times-circle"></i> Cancelar</button>
+      </div>
+   </form>
+</div>

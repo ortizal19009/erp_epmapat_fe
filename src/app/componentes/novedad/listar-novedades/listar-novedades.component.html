@@ -1,0 +1,55 @@
+<div class="content pt-1 pl-3">
+   <div class="container-fluid">
+      <div class="row mt-0 mb-1">
+         <div class="col-md-2">
+            <h4 class="m-0 font-weight-bold">Novedades</h4>
+         </div>
+         <div class="col-sm-2">
+            <input type="text" class="form-control form-control-sm text-center" placeholder="Filtrar..." [(ngModel)]="filtro" />
+          </div>
+         <div class="col-md-1">
+            <button class="btn btn-outline-primary btn-sm" type="button" data-toggle="collapse"
+               data-target="#nuevaNovedad" aria-expanded="false" aria-controls="nuevaNovedad">
+               <i class="fa fa-plus-square" style="font-size:24pxi"></i>
+               Nuevo
+            </button>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-4">
+         <div id="alertaPtoEmision">
+         </div>
+         <table class="table table-hover table-bordered table-sm">
+            <thead class="text-center">
+               <tr>
+                  <th class="bg-primary text-center"></th>
+                  <th class="bg-primary text-center">Nombre</th>
+                  <th class="bg-primary"></th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr *ngFor="let novedad of _novedades | filter: filtro; let i= index" class="text-center">
+                  <td class="small text-center font-weight-bold">{{i+1}}</td>
+                  <td class="text-left">{{ novedad.descripcion }}</td>
+                  <td>
+                     <button class="btn btn-outline-info btn-xs" (click)="info(novedad.idnovedad)" type="button">
+                     <i class="fa fa-info-circle"></i> Info </button>
+                  </td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+
+      <div class="col-md-4 mt-1">
+         <div class="collapse" id="nuevaNovedad">
+            <div class="card card-success card-outline card-body">
+               <app-add-novedad></app-add-novedad>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

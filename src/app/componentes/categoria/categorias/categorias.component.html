@@ -1,0 +1,96 @@
+<div class="content pt-1">
+   <div class="container-fluid">
+      <div class="row ml-0 mb-0 pb-0 cabecera border sombra">
+         <div class="col-md-10">
+            <h4 class="font-weight-bold text-truncate"><i class="fa fa-compass pt-2"></i> &nbsp;Categorías</h4>
+         </div>
+
+         <div class="btn-group ml-auto mt-0">
+            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
+               data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+               <button class="dropdown-item" type="button" data-toggle="collapse" data-target="#nuevaCategoria">
+                  <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar">
+                  <i class="bi-file-earmark-arrow-up"></i> &nbsp; Exportar</button>
+            </div>
+         </div>
+
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-5">
+         <table class="table table-hover table-bordered table-sm sombra">
+            <thead class="text-center">
+               <tr class="text-center cabecera">
+                  <th></th>
+                  <th>Nombre</th>
+                  <th>Agua Potable</th>
+                  <th>Saneamiento</th>
+                  <th>Total Fijo</th>
+                  <th></th>
+               </tr>
+            </thead>
+            <tbody class="detalle">
+               <tr class="fila" *ngFor="let categoria of _categorias; let i= index">
+                  <td class="small text-center font-weight-bold">{{ i+1 }}</td>
+                  <td [ngClass]="{'tachado': !categoria.habilitado }">{{ categoria.descripcion }}</td>
+                  <td [ngClass]="{'transparente': categoria.fijoagua == 0}" class="text-right">{{ categoria.fijoagua | number: '1.2-2'}}</td>
+                  <td [ngClass]="{'transparente': categoria.fijosanea == 0}" class="text-right">{{ categoria.fijosanea | number: '1.2-2' }}</td>
+                  <td [ngClass]="{'transparente': categoria.fijoagua + categoria.fijoagua == 0}" class="text-right font-weight-bold">{{ categoria.fijoagua + categoria.fijosanea | number: '1.2-2' }}</td>
+                  <td class="text-center">
+                     <div class="btn-group py-0">
+                        <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
+                           aria-expanded="false">
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right popLista">
+                           <button class="dropdown-item" type="button" data-toggle="collapse" data-target="#addInteres">
+                              <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
+                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#elimInteres">
+                              <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
+                        </div>
+                     </div>
+                  </td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+
+      <div class="col-md-4 ml-5 mt-5">
+         <div class="collapse sombra" id="nuevaCategoria">
+            <div class="card card-body detalle">
+               <app-add-categoria></app-add-categoria>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- MODAL Eliminar -->
+   <div class='modal fade' id='modalCategoria' tabindex='-1' aria-labelledby='modalCategoriaLabel' aria-hidden='true'>
+      <div class='modal-dialog'>
+         <div class='modal-content'>
+            <div class='modal-header'>
+               <h5 class='modal-title' id='modalCategoriaLabel'>CONFIRMACIÓN</h5>
+               <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+                  <span aria-hidden='true'>&times;</span>
+               </button>
+            </div>
+            <div class='modal-body'>
+               ¿ Esta seguro de eliminar la CATEGORÍA ?
+            </div>
+            <div class='modal-footer' id='idButtons'>
+               <button type='button' class='btn btn-secondary' data-dismiss='modal'>NO</button>
+               <button type='button' class='btn btn-primary' data-dismiss='modal'
+                  (click)="aprobarEliminacionCategoria()" id='btnSi'>SI</button>
+            </div>
+         </div>
+      </div>
+   </div>
+
+</div>

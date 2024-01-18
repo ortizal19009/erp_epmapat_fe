@@ -1,0 +1,115 @@
+<!-- Content Header (Page header) -->
+<div class="content pt-1 pl-3">
+   <div class="container-fluid">
+      <div class="row mb-1">
+         <div class="col-sm-2">
+            <h4 class="m-0 font-weight-bold">Emisión Actual</h4>
+         </div>
+         <div class="col-md-4">
+            <input type="text" class="form-control form-control-sm col-sm-8" placeholder="Filtrar..."
+               [(ngModel)]="filtro" />
+         </div>
+         <div class="col-sm-6 d-flex justify-content-end">
+            <button class="btn btn-sm btn-outline-primary btn-xs" type="button" (click)="regresar()">
+               <i class="fa fa-reply-all"></i> Regresar
+            </button>
+         </div>
+
+      </div><!-- /.row -->
+   </div><!-- /.container-fluid -->
+</div> <!-- /.content-header -->
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-8">
+         <table class="table table-hover table-bordered table-sm">
+            <thead>
+               <tr class="bg-primary text-center">
+                  <th></th>
+                  <th>Código</th>
+                  <th class="bg-primary">Ruta</th>
+                  <th class="bg-primary text-center">F.Cierre</th>
+                  <th class="bg-primary text-center">M3</th>
+                  <th class="bg-primary text-center">Acciones</th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr *ngFor="let emiactual of _emiactual | filter:filtro; let i=index">
+                  <!-- <tr *ngFor=" let k of v_ruxemi; let i=index"> -->
+                  <td class="small text-center font-weight-bold">{{i+1}}</td>
+                  <td class="text-center">{{ emiactual.idruta_rutas.codigo }}</td>
+                  <td>{{ emiactual.idruta_rutas.descripcion }}</td>
+                  <td class="text-center">{{ emiactual.fechacierre | date:'dd-MM-y'}}</td>
+                  <td class="text-right">{{ emiactual.m3 | number:'1.2-2'}}</td>
+                  <td class="text-center">
+                     <button class="badge badge-info mr-1" type="button" data-toggle="collapse"
+                        data-target="#collapseLectura" aria-expanded="false" aria-controls="collapseLectura">
+                     </button>
+                     <button class="btn btn-outline-info btn-xs mx-1" type="button" (click)="lecturas(emiactual.idrutaxemision)">
+                        <i class="fa fa-book"></i> Lecturas
+                     </button>
+                     <button class="btn btn-outline-info btn-xs mx-1" data-toggle="modal" data-target="#modalCerrar"
+                        (click)="cerrar(emiactual.idruta_rutas.descripcion)">
+                        <i class="fa fa-times-circle"></i> Cerrar
+                     </button>
+                  </td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <div class="col-sm-4">
+         <div class="collapse" id="collapseLectura">
+            <div class="card card-body">
+               <div class="input-group mb-3">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text" id="inputGroupFileAddon01">Cargar</span>
+                  </div>
+                  <div class="custom-file">
+                     <input type="file" class="custom-file-input" id="inputGroupFile01"
+                        aria-describedby="inputGroupFileAddon01">
+                     <label class="custom-file-label" for="inputGroupFile01">Archivo</label>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <!-- Modal Cerrar -->
+   <div class='modal fade' id='modalCerrar' tabindex='-1' aria-labelledby='modalCerrar' aria-hidden='true'>
+      <div class='modal-dialog'>
+         <div class='modal-content'>
+            <div class='modal-header'>
+               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Mensaje</h5>
+            </div>
+
+            <div *ngIf="nocerrar; then thenBlock else elseBlock"></div>
+            <ng-template #thenBlock>
+               <div class='modal-body'>
+                  <div class="alert alert-warning text-center" role="alert">
+                     ¿ Cerrar las Lecturas de la Ruta: {{ ruta }} ?
+                  </div>
+               </div>
+               <div class='modal-footer' id='idButtons'>
+                  <button type='button' class='btn btn-success btn-sm' data-dismiss='modal' id='btnSi'>
+                     <i class="fa fa-check-circle" style="font-size:24pxi"></i>&nbsp;&nbsp;&nbsp;Si&nbsp;&nbsp;&nbsp;
+                  </button>
+                  <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
+                     <i class="fa fa-times-circle" style="font-size:24pxi"></i>&nbsp;&nbsp;No&nbsp;&nbsp;</button>
+               </div>
+            </ng-template>
+            <ng-template #elseBlock>
+               <div class='modal-body'>
+                  <div class="alert alert-info text-center" role="alert">
+                     No puede cerrar la Ruta: <strong> {{ ruta }}</strong>
+                  </div>
+               </div>
+               <div class='modal-footer' id='idButtons'>
+                  <button type='button' class='btn btn-success btn-sm' data-dismiss='modal' id='btnSi'>
+                     <i class="fa fa-check-circle" style="font-size:24pxi"></i> Aceptar
+                  </button>
+               </div>
+            </ng-template>
+         </div>
+      </div>
+   </div>
+</div>

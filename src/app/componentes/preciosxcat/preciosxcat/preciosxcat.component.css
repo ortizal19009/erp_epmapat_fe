@@ -1,0 +1,49 @@
+.container-fluid {
+   --bgcolor1: rgb(74, 87, 74);
+   --bgcolor2: rgb(188, 247, 196);
+}
+
+.titPliego {
+   background-color: var(--bgcolor1);
+   color: white;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.fondoTarifa {
+   background-color: var(--bgcolor2);
+}
+
+table {
+   background-color: var(--bgcolor2);
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+table>thead>tr {
+   background-color: var(--bgcolor1);
+   color: white;
+}
+
+table tbody tr:hover {
+   background-color: #117a8B;
+   color: white;
+   cursor: pointer;
+}
+
+.transparente {
+   opacity: 0;
+}
+
+.sombra {
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.tachado {
+   text-decoration: line-through;
+}
+
+.titImprimir {
+   background-color: var(--bgcolor1);
+   color: white
+}
+
+ 

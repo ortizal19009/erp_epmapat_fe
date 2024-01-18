@@ -1,0 +1,32 @@
+.container-fluid{
+   --bgcolor1: rgb(50, 88, 51);
+   --bgcolor2: rgba(193, 224, 181);
+   --rubroxfac1: rgb(140, 143, 78);
+   --rubroxfac2: rgb(248, 241, 201);
+}
+
+/* === Datos de la Factura (Planilla) === */
+.planilla{
+   background-color: var(--bgcolor1);
+   color: white;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+}
+
+.cardPlanilla{
+   background-color: var(--bgcolor2);
+   box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+}
+.cardPlanilla li, .modulo{ background-color: var(--bgcolor2); }
+
+/* === Tabla Detalle (Rubroxfac) === */
+.rubroxfac{ box-shadow: 0 0 10px rgba(0, 0, 0, 1);}
+.rubroxfac thead{
+   background-color: var(--rubroxfac1);
+   color: white;
+}
+.rubroxfac tbody{ background-color: var(--rubroxfac2);}
+.fila:hover{
+   background-color: #117a8B;
+   color: white;
+}
+.tachado { text-decoration: line-through; }

@@ -1,0 +1,109 @@
+<!-- Content Header (Page header) -->
+<div class="content pt-1 pl-3">
+  <div class="container-fluid">
+    <div class="row mt-0 mb-2">
+      <div class="col-md-2">
+        <h4 class="m-0 font-weight-bold">Nacionalidades</h4>
+      </div>
+      <div class="col-sm-2">
+        <input type="text" class="form-control form-control-sm text-center" placeholder="Filtrar..." [(ngModel)]="filtro" />
+      </div>
+      <div class="col-sm-1"></div>
+      <div class="col-md-5">
+        <button class="btn btn-outline-primary btn-sm" type="button" data-toggle="collapse" data-target="#collapseNuevo"
+          aria-expanded="false" aria-controls="collapseNuevo">
+          <i class="fa fa-plus-square" style="font-size:24pxi"></i> Nuevo
+        </button>
+      </div>
+    </div>
+  </div><!-- /.container-fluid -->
+</div>
+
+<div class="container-fluid">
+  <div class="row mb-0">
+      <div class="col-sm-5">
+          <table class="table table-hover table-bordered  table-sm">
+              <thead>
+                  <tr>
+                      <th class="bg-primary"></th>
+                      <th class="bg-primary">Nombre</th>
+                      <th class="bg-primary text-center">Acciones</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <tr *ngFor="let nacionalidad of nacionalidades | filter: filtro; let i=index">
+                      <td class="small text-center font-weight-bold">{{i+1}}</td>
+                      <td>{{ nacionalidad.descripcion }}</td>
+                      <td class="text-center">
+                          <button class="badge badge-warning mr-1" (click)="modificarNacionalidad(nacionalidad)">
+                              Modificar
+                          </button>
+                          <button class="badge badge-danger mx-1" data-toggle="modal" data-target="#modalEliminar"
+                              (click)="eliminarNacionalidad(nacionalidad.idnacionalidad, nacionalidad.descripcion)">Eliminar
+                          </button>
+                          <button class="badge badge-info badge-pill ml-1" data-toggle="collapse"
+                              data-target="#collapseInfo" aria-expanded="false" aria-controls="collapseInfo"
+                              (click)="info(nacionalidad.idnacionalidad, nacionalidad.descripcion)">
+                              &nbsp;&nbsp;&nbsp;&nbsp;Info&nbsp;&nbsp;&nbsp;&nbsp;
+                          </button>
+                      </td>
+                  </tr>
+                  <!-- MODAL para Eliminar-->
+                  <div class='modal fade' id='modalEliminar' tabindex='-1' aria-labelledby='modalEliminar'
+                      aria-hidden='true'>
+                      <div class='modal-dialog modal-sm'>
+                          <div class='modal-content'>
+                              <div class='modal-header'>
+                                  <h5 class='modal-title font-weight-bold' id='ModalLabel'>Mensaje</h5>
+                              </div>
+                              <div *ngIf="rtn==0; then thenBlock else elseBlock"></div>
+                              <ng-template #thenBlock>
+                                  <div class='modal-body'>
+                                      <div class="alert alert-info" role="alert">
+                                          ¿Eliminar la Nacionalidad:<br>{{descripcion}}?
+                                      </div>
+                                  </div>
+                                  <div class='modal-footer' id='idButtons'>
+                                      <button type='button' class='btn btn-success btn-sm' data-dismiss='modal'
+                                          (click)="confirmaEliminarNacionalidad()" id='btnSi'>Aceptar</button>
+                                      <button type='button' class='btn btn-outline-success btn-sm'
+                                          data-dismiss='modal'>Cancelar</button>
+                                  </div>
+                              </ng-template>
+                              <ng-template #elseBlock>
+                                  <div class='modal-body'>
+                                      <div class="alert alert-warning" role="alert">
+                                          <strong>No puede eliminar!</strong><br>Tiene registrado Clientes.
+                                      </div>
+                                  </div>
+                                  <div class='modal-footer' id='idButtons'>
+                                      <button type='button' class='btn btn-outline-success btn-sm'
+                                          data-dismiss='modal'>Cerrar</button>
+                                  </div>
+                              </ng-template>
+                          </div>
+                      </div>
+                  </div>
+                  <!--Del Modal de Eliminar-->
+              </tbody>
+          </table>
+      </div>
+      <div class="col-sm-5 mt-2">
+          <div class="collapse" id="collapseNuevo">
+              <div class="card card-success card-outline card-body">
+                  <app-add-nacionalidad></app-add-nacionalidad>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <div class="row mb-0">
+      <div class="col-sm-5">
+          <div class="collapse" id="collapseInfo">
+              <div class="alert alert-info text-center" role="alert">
+                  <strong>{{descripcion}}:</strong> Total de Clientes <strong>1</strong>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>

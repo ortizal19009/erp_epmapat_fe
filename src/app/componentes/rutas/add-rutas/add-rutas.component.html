@@ -1,0 +1,48 @@
+<div class="collapse px-3 pt-1 cabecera" id="addRuta">
+   <form [formGroup]="formRuta">
+      <div class="row">
+
+         <div class="form-group col-md-4 my-0 py-0">
+            <div class="input-group input-group-sm mb-3">
+               <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Orden<sup class="green">*</sup></span>
+               </div>
+               <input type="number" class="form-control" formControlName="orden" aria-label="Small"
+                  aria-describedby="inputGroup-sizing-sm"  [ngClass]="{'is-invalid': f['orden'].invalid && f['orden'].touched,
+                'is-valid': f['orden'].valid, '': f['orden'].untouched}">
+            </div>
+         </div>
+
+         <div class="form-group col-md-12 my-0 py-0">
+            <div class="input-group input-group-sm mb-3">
+               <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm" data-toggle="tooltip"
+                     title="Obligatorio y mínimo 5 caracteres">Nombre<sup class="green">*</sup></span>
+               </div>
+               <input type="text" class="form-control" formControlName="descripcion" aria-label="Small"
+                  aria-describedby="inputGroup-sizing-sm"  [ngClass]="{'is-invalid': f['descripcion'].invalid && f['descripcion'].touched,
+                'is-valid': f['descripcion'].valid, '': f['descripcion'].untouched}">
+            </div>
+         </div>
+
+         <div class="form-group col-md-6 my-0 py-0">
+            <div class="input-group input-group-sm mb-3">
+               <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Código<sup class="green">*</sup></span>
+               </div>
+               <input type="text" class="form-control" formControlName="codigo" aria-label="Small"
+                  aria-describedby="inputGroup-sizing-sm"  [ngClass]="{'is-invalid': f['codigo'].invalid && f['codigo'].touched,
+                'is-valid': f['codigo'].valid, '': f['codigo'].untouched}">
+            </div>
+         </div>
+
+      </div>
+      <div class="mt-1 text-center">
+         <button type="submit" class="btn btn-success btn-sm mx-1 mb-3" data-toggle="collapse" data-target="#addRuta"
+            [disabled]="!formRuta.valid" (click)="guardarRuta()"><i class="fa fa-check-circle"></i> Aceptar
+         </button>
+         <button class="btn btn-outline-success btn-sm mx-1 mb-3" data-toggle="collapse" data-target="#addRuta"
+            (click)="reset()"><i class="fa fa-times-circle"></i> Cancelar</button>
+      </div>
+   </form>
+</div>

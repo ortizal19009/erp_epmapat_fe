@@ -1,0 +1,131 @@
+<div class="content pt-1">
+   <div class="container-fluid">
+      <div class="row ml-0 mb-0 pb-1 cabecera border sombra">
+         <div class="col-md-5 pt-1">
+            <h5 class="font-weight-bold text-truncate"><i class="bi-kanban pt-5"></i> &nbsp;Proyección del nuevo Pliego
+               Tarifario </h5>
+         </div>
+
+         <div class="col-sm-2">
+            <form [formGroup]="formBuscar" class="formGroup">
+               <div class="row mt-1">
+                  <div class="col-sm-12">
+                     <select name="" id="selecGradualidad" class="form-control form-control-sm"
+                        formControlName="selecGradualidad">
+                        <option value="1">Año 1</option>
+                        <option value="2">Año 2</option>
+                        <!-- <option value="32">2do año de 3</option>
+                        <option value="1">3er año de 3</option>
+                        <option value="51">1er año de 5</option>
+                        <option value="52">2do año de 5</option>
+                        <option value="53">3er año de 5</option>
+                        <option value="54">4to año de 5</option>
+                        <option value="1">5to año de 5</option> -->
+                     </select>
+                  </div>
+               </div>
+            </form>
+         </div>
+
+         <div class="btn-group ml-auto mt-0">
+            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
+               data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+               <button class="dropdown-item" type="button" data-toggle="collapse" data-target="#calcular">
+                  <i class="bi-calculator"></i>&nbsp; Calcular</button>
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar">
+                  <i class="bi-file-earmark-arrow-up"></i> &nbsp; Exportar</button>
+            </div>
+         </div>
+
+         <div class="btn-group mx-1">
+            <button class="bg-transparent border-0" type="button" (click)="regresar()">
+               <i class="bi-arrow-left-circle text-white icoRegresar"></i>
+            </button>
+         </div>
+         
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-5">
+         <table class="table table-hover table-bordered table-sm sombra">
+            <thead class="cabecera">
+               <tr class="text-center">
+                  <th></th>
+                  <th>Código</th>
+                  <th>Ruta</th>
+                  <th></th>
+               </tr>
+            </thead>
+            <tbody class="detalle">
+               <tr class="fila" *ngFor="let rutasxemi of _rutasxemi; let i = index">
+                  <td class="small text-center font-weight-bold">{{ i+1 }}</td>
+                  <td class="text-center">{{ rutasxemi.idruta_rutas.codigo }}</td>
+                  <td>{{ rutasxemi.idruta_rutas.descripcion }}</td>
+                  <td class="text-center"><i class="" *ngIf="rutasxemi.m3 == 0"></i>
+                     <i class="bi-check" *ngIf="rutasxemi.m3 == 1"></i></td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+
+      <div class="col-md-6 mt-2 pr-3">
+         <div class="collapse sombra" id="calcular">
+            <div class="card-header mb-0 pb-0 justify-content-center cabecera">
+               <h5 class="text-center font-weight-bold">Calcular</h5>
+            </div>
+            <div class="card card-body detalle">
+               <div [ngSwitch]="boton" class="ml-2">
+                  <button *ngSwitchCase="1" (click)="iniciar()" type="button"
+                     class="btn btn-sm btn-success mt-2 mb-3"><i class="bi-collection-play-fill"></i>&nbsp;
+                     Iniciar</button>
+                  <button *ngSwitchCase="3" (click)="continuar()" type="button"
+                     class="btn btn-sm btn-success mt-2 mb-3"><i class="bi-caret-right-fill"></i>&nbsp;
+                     Continuar</button>
+               </div>
+
+               <form [formGroup]="formCalcular">
+                  <div class="row container-fluid">
+                     <div class="form-group col-md-12 my-0 py-0">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Ruta </span>
+                           </div>
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">{{ ruta }}</span>
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Abonados </span>
+                           </div>
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">{{ totlecturas
+                              }}</span>
+                        </div>
+                     </div>
+                  </div>
+               </form>
+
+               <div class="row ml-1">
+                  <button [disabled]="!solicitudCompletada" type="submit" class="btn btn-sm btn-success ml-2"
+                     (click)="calcula()">
+                     <i class="fa fa-check-circle"></i> Aceptar
+                  </button>
+
+                  <button type="button" class="btn btn-sm btn-outline-success ml-1" data-toggle="collapse"
+                     data-target="#calcular" (click)="cancelar()">
+                     <i class="fa fa-times-circle"></i> Cancelar</button>
+               </div>
+
+               <div class="mt-3 mx-2 progress">
+                  <div class="progress-bar" [ngStyle]="{ 'width.%': progreso }">{{ progreso / 100 | percent : '1.2-2'
+                     }}</div>
+               </div>
+
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

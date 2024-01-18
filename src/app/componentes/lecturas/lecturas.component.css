@@ -1,0 +1,48 @@
+.container-fluid{
+   --bgcolor1: rgb(68, 103, 114);
+   --bgcolor2: rgba(231, 251, 253);
+}
+
+.cabecera {
+   background-color: var(--bgcolor1);
+   color: white;
+}
+
+.cuerpo { background-color: var(--bgcolor2); }
+
+.disabled{ opacity: 0.4; }
+
+.titEmisiones {
+   background-color: var(--bgcolor1);
+   color: white;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+/* .fondoEmisiones{   background-color: var(--bgcolor2);} */
+
+table {
+   background-color: var(--bgcolor2);
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+table>thead>tr {
+   background-color: var(--bgcolor1);
+   color: white;
+}
+
+table tbody tr:hover  { 
+   background-color: #117a8B;
+   color: white;
+   cursor: pointer; 
+}
+
+.sombra{   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);}
+
+/* .fantacy{   color: yellow; text-shadow: rgb(73, 1, 1) 0.2em 0.2em 0.3em;} */
+
+.fontwarning{
+   font-weight: bold;
+   color: rgb(253, 2, 2); text-shadow: black 0.1em 0.1em 0.2em;
+}
+
+.red-icon { color: red; }

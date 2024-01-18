@@ -1,0 +1,307 @@
+<div class="content mt-1 mr-1 pt-1 px-1">
+   <div class="container-fluid">
+      <div class="row addFacturacion">
+         <form [formGroup]="formFacturacion">
+            <div class="row mx-1 col-sm-12 addFacturacion">
+               <div class="col-sm-2 mx-0 px-0 pt-1">
+                  <h5 class="font-weight-bold text-truncate">Nueva Facturación</h5>
+               </div>
+               <div class="form-group col-md-6 mt-1">
+                  <div class="input-group input-group-sm">
+                     <div class="input-group-prepend">
+                        <button type="button" class="btn btn-primary btn-sm" data-toggle="modal"
+                           data-target="#clientesModal" (click)="clientesModal()">Cliente<sup>*</sup></button>
+                     </div>
+                     <input type="text" class="form-control" formControlName="cliente" id="cliente" aria-label="Small"
+                        aria-describedby="inputGroup-sizing-sm" readonly>
+                  </div>
+               </div>
+               <div class="form-group col-md-2 mt-1">
+                  <div class="input-group input-group-sm">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm" data-toggle="tooltip"
+                           title="Obligatorio">Fecha</span>
+                     </div>
+                     <input type="date" class="form-control text-center" formControlName="fecha" id="fecha"
+                        aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+                  </div>
+               </div>
+
+               <div class="form-group col-md-9 mt-0">
+                  <div class="input-group input-group-sm">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm" data-toggle="tooltip"
+                           title="Obligatorio">Descripción</span>
+                     </div>
+                     <input type="text" class="form-control" formControlName="descripcion" id="descrifacturacion"
+                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" required>
+                  </div>
+               </div>
+               <div class="col-sm-3 mt-0 pb-2">
+                  <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#cuotasModal"
+                     (click)="onSubmit()">
+                     <i class="fa fa-check-circle"></i> Aceptar
+                  </button>
+                  <button type="button" class="btn btn-primary btn-sm mx-2" (click)="listarFacturacion()">
+                     <i class="bi bi-x-circle"></i> Cancelar
+                  </button>
+               </div>
+            </div>
+         </form>
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <form [formGroup]="formDetalle" class="mb-0">
+      <div class="row col-sm-12 mt-1 mb-0">
+         <div class="form-group col-sm-6 mb-0">
+            <div class="input-group input-group-sm">
+               <div class="input-group-prepend">
+                  <label class="input-group-text">Sección<sup class="green">*</sup></label>
+               </div>
+               <select class="custom-select" id="seccion" formControlName="seccion">
+                  <option *ngFor="let modulo of _modulos" [ngValue]="modulo" id="idmodulo{{modulo.idmodulo}}">
+                     {{modulo.descripcion}}</option>
+               </select>
+            </div>
+         </div>
+         <div class="form-group col-sm-6">
+            <div class="input-group input-group-sm">
+               <div class="input-group-prepend">
+                  <label class="input-group-text">Uso<sup class="green">*</sup></label>
+               </div>
+               <select class="custom-select" id="uso" formControlName="uso">
+                  <option *ngFor="let usoitem of _usoitems" [ngValue]="usoitem" id="idusoitems{{usoitem.idusoitems}}">
+                     {{ usoitem.descripcion }}
+                  </option>
+               </select>
+            </div>
+         </div>
+      </div>
+   </form>
+
+   <div class="row pt-0 mt-0">
+      <!-- Productos -->
+      <div class="col-sm-5">
+         <table class="table table-sm table-hover table-bordered small productos">
+            <thead class="text-center">
+               <tr>
+                  <th>
+                     <button *ngIf="totProductos > 1" class="btn btn-sm btn-primary py-0" type="button"
+                        (click)="todos()"> {{totProductos}}</button>
+                  </th>
+                  <th>Productos <small> (Bienes o Servicios)</small></th>
+                  <th>Valor</th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr *ngFor="let producto of _productos; let i= index" (click)="aniadir(producto)">
+                  <td class="font-weight-bold text-center">{{i+1}}</td>
+                  <td>{{ producto.descripcion }}</td>
+                  <td class="text-right">{{ producto.idrubro_rubros.valor | number: '1.2-2'}}</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+
+      <!-- Rubros -->
+      <div class="col-sm-7">
+         <table class="table table-sm table-hover table-bordered rubros">
+            <thead class="text-center">
+               <tr>
+                  <th>Rubro <small>(Planilla)</small></th>
+                  <th>Iva</th>
+                  <th>Ct</th>
+                  <th>Valor</th>
+                  <th>Total</th>
+                  <th></th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr class="filas" *ngFor="let elemento of arrRubros; let i= index">
+                  <td>{{ elemento[0] }}</td>
+                  <td class="text-center">{{ elemento[3] | noSi}}</td>
+                  <td class="text-center">{{elemento[1]}}</td>
+                  <td class="text-right">{{ elemento[2] | number: '1.2-2'}}</td>
+                  <td class="text-right font-weight-bold">{{ elemento[1]*elemento[2] | number: '1.2-2'}}</td>
+                  <!-- <td class="text-center">{{elemento[5]}}</td> -->
+                  <td class="text-center">
+                     <div class="btn-group py-0">
+                        <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
+                           aria-expanded="false">
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right popLista">
+                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modiValorModal"
+                              (click)="modiValor(i)">
+                              <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
+                           <button class="dropdown-item" type="button" (click)="quitar(i)">
+                              <i class="bi bi-file-minus"></i>&nbsp; Quitar</button>
+                        </div>
+                     </div>
+                  </td>
+               </tr>
+               <tr>
+                  <td class="text-right font-weight-bold py-0">SubTOTAL </td>
+                  <td colspan="4" class="text-right font-weight-bold py-0">{{totfac | number: '1.2-2'}} </td>
+                  <td></td>
+               </tr>
+               <tr>
+                  <td class="text-right font-weight-bold py-0">IVA </td>
+                  <td colspan="4" class="text-right font-weight-bold py-0">{{totiva | number: '1.2-2'}} </td>
+                  <td></td>
+               </tr>
+               <tr>
+                  <td class="text-right font-weight-bold py-0">TOTAL </td>
+                  <td colspan="4" class="text-right font-weight-bold py-0">{{totfac + totiva | number: '1.2-2'}} </td>
+                  <td></td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+   </div>
+
+
+   <!-- Modal Buscar Cliente -->
+   <div class="modal fade" id="clientesModal" tabindex="-1" aria-labelledby="clienteModalLabel" aria-hidden="true" data-backdrop="static">
+      <div class="modal-dialog modal-dialog-scrollable">
+         <div class="modal-content clientedetalle">
+            <div class="modal-body mt-0">
+               <div class="row clientecabecera">
+                  <form [formGroup]="formBusClientes" class="mb-0 col-md-9">
+                     <div class="row py-2">
+                        <div class="input-group col-sm-12">
+                           <input type="text" placeholder="Nombre ó identificación (Mínimo 5)"
+                              class="form-control form-control-sm" autofocus
+                              formControlName="nombre_identifica" required minlength="5" [ngClass]="{'is-invalid': formBusClientes.controls['nombre_identifica'].invalid && formBusClientes.controls['nombre_identifica'].touched,
+                              'is-valid': formBusClientes.controls['nombre_identifica'].valid, '': formBusClientes.controls['nombre_identifica'].untouched}">
+                           <div class="input-group-append">
+                              <button class="btn btn-sm btn-primary" (click)="buscarClientes()"
+                                 [disabled]="formBusClientes.invalid">
+                                 <i class="fa fa-search" aria-hidden="true"></i> Buscar</button>
+                           </div>
+                        </div>
+                     </div>
+                  </form>
+
+                  <div class="col-md-3 mt-2 pl-0">
+                     <input type="text" class="form-control form-control-sm text-center" placeholder="Filtrar..."
+                        [(ngModel)]="filtro" />
+                  </div>
+
+               </div>
+               <div class="row mt-0 pt-0" *ngIf="!formBusClientes.invalid">
+                  <table class="table table-hover table-bordered table-sm mt-0 pt-0 clientedetalle" id="tablaClientes">
+                     <thead class="text-center clientecabecera">
+                        <tr>
+                           <th></th>
+                           <th>Nombre</th>
+                           <th>Identificación</th>
+                        </tr>
+                     </thead>
+                     <tbody id="id-tbody" class="roboto small">
+                        <tr *ngFor="let cliente of _clientes  | filter:filtro; let i= index"
+                           (click)="selecCliente(cliente)" data-dismiss="modal">
+                           <td class="text-center small font-weight-bold py-0">{{i+1}}</td>
+                           <td class="py-0">{{cliente.nombre}}</td>
+                           <td class="py-0">{{cliente.cedula}}</td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+            <div class="row justify-content-center my-2">
+               <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">
+                  <i class="bi bi-x-circle"></i>&nbsp; Cancelar</button>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- Modal Modificar Cantidad y Valor -->
+   <div class="modal fade" id="modiValorModal" tabindex="-1" aria-labelledby="modiValorModalLabel" aria-hidden="true"
+      data-backdrop="static">
+      <div class="modal-dialog modal-dialog-centered">
+         <div class="modal-content">
+            <div class="modal-body col-md-12 ">
+               <form [formGroup]="formModiValor">
+                  <div class="col-md-12">
+                     <div class="input-group input-group-sm mb-2">
+                        <div class="input-group-prepend"> <label class="input-group-text">Rubro</label> </div>
+                        <input type="text" class="form-control text-left text-truncate" formControlName="rubro"
+                           readonly>
+                     </div>
+                     <div class="input-group input-group-sm mb-1 col-sm-4">
+                        <div class="input-group-prepend"><label class="input-group-text" for="cantidad">Cantidad</label>
+                        </div>
+                        <input type="number" class="form-control text-center" formControlName="cantidad" id="cantidad"
+                           autofocus min="1">
+                     </div>
+                     <div class="input-group input-group-sm mb-0 col-sm-4">
+                        <div class="input-group-prepend"> <label class="input-group-text">Valor</label></div>
+                        <input type="number" class="form-control text-center" formControlName="valor" min="0">
+                     </div>
+                  </div>
+               </form>
+            </div>
+            <div class="modal-footer">
+               <button type="button" class="btn btn-sm btn-success" data-dismiss="modal"
+                  (click)="aceptarModiValor(indice)"><i class="fa fa-check-circle"></i> Aceptar</button>
+               <button type="button" class="btn btn-sm btn-outline-success" data-dismiss="modal"><i
+                     class="bi bi-x-circle"></i> Cancelar</button>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- Modal Cuotas -->
+   <div class="modal fade" id="cuotasModal" tabindex="-1" aria-labelledby="cuotasModalLabel" aria-hidden="true"
+      data-backdrop="static">
+      <div class="modal-dialog modal-dialog-centered">
+         <div class="modal-content">
+            <div class="modal-body col-md-12 ">
+               <form [formGroup]="formCuotas">
+                  <div class="col-md-12">
+                     <div class="input-group input-group-sm mb-2">
+                        <div class="input-group-prepend"> <label class="input-group-text">Cliente</label> </div>
+                        <input type="text" class="form-control text-left text-truncate" formControlName="cliente"
+                           readonly required>
+                     </div>
+                     <div class="row justify-content-center">
+                        <div class="input-group input-group-sm mb-2 col-sm-4">
+                           <div class="input-group-prepend"><label class="input-group-text">Total</label>
+                           </div>
+                           <input type="number" class="form-control text-right" formControlName="total" readonly
+                              required>
+                        </div>
+
+                        <div class="input-group input-group-sm mb-2 col-sm-6">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Forma de pago</label>
+                           </div>
+                           <select class="custom-select" formControlName="formapago">
+                              <option selected value="1">Efectivo</option>
+                              <option value="2">Otro</option>
+                           </select>
+                        </div>
+                     </div>
+                     <div class="row justify-content-center">
+                        <div class="input-group input-group-sm mb-0 col-sm-4 justify-content-center">
+                           <div class="input-group-prepend"> <label class="input-group-text">Cuotas</label></div>
+                           <input type="number" class="form-control text-center" formControlName="cuotas" min="1"
+                              required>
+                        </div>
+                     </div>
+                  </div>
+               </form>
+            </div>
+            <div class="modal-footer justify-content-center">
+               <button type="button" class="btn btn-sm btn-success" data-dismiss="modal" [disabled]="!formCuotas.valid"
+                  (click)="guardar()"><i class="fa fa-check-circle"></i> Aceptar</button>
+               <button type="button" class="btn btn-sm btn-outline-success" data-dismiss="modal"><i
+                     class="bi bi-x-circle"></i> Cancelar</button>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

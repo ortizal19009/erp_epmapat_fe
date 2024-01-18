@@ -1,0 +1,60 @@
+<div class="collapse px-3 pt-4 fondoDocumentos" id="addDocumento">
+   <form [formGroup]="formDocumento" id="formDocumento" (ngSubmit)="onSubmit()">
+      <div class="row">
+         
+         <div class="form-group col-md-8 my-0 py-0">
+            <div class="input-group input-group-sm mb-3">
+               <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm" data-toggle="tooltip"
+                     title="Obligatorio y mínimo 3 caracteres">Nombre<sup class="green">*</sup></span>
+               </div>
+               <input type="text" class="form-control" formControlName="nomdoc" aria-label="Small"
+                  aria-describedby="inputGroup-sizing-sm" required minlength="3"
+                  [ngClass]="{'is-invalid': f['nomdoc'].invalid && f['nomdoc'].touched,
+                  'is-valid': f['nomdoc'].valid, '': f['nomdoc'].untouched}">
+            </div>
+         </div>
+
+         <div class="form-group col-md-7 my-0 py-0">
+            <div class="input-group mb-3 input-group-sm">
+               <div class="input-group-prepend">
+                  <label class="input-group-text" for="tipdoc">Tipo</label>
+               </div>
+               <select class="custom-select" id="tipdoc" formControlName="tipdoc">
+                  <option value="0" selected>(Ninguno)</option>
+                  <option value="1">Depósito</option>
+                  <option value="2">Nota de crédito</option>
+                  <option value="3">Nota de dédito</option>
+                  <option value="4">Cheque/Transferencia</option>
+                  <option value="5">Factura</option>
+                  <option value="6">Retención Fuente</option>
+               </select>
+            </div>
+         </div>
+
+         <div class="form-group col-md-12 my-0 py-0">
+            <div class="input-group mb-3 input-group-sm">
+               <div class="input-group-prepend">
+                  <label class="input-group-text" for="tipdoc">Comprobante SRI</label>
+               </div>
+               <select class="custom-select" formControlName="idtabla4">
+                  <option *ngFor="let comprobante of _comprobantes" [ngValue]="comprobante.idtabla4"
+                     id="idtabla4_{{comprobante.idtabla4}}">
+                     {{ comprobante.nomcomprobante }}
+                  </option>
+               </select>
+            </div>
+         </div>
+
+      </div>
+   </form>
+
+   <div class="mt-3 mb-3 text-center">
+      <button type="submit" class="btn btn-success btn-sm mx-1" (click)="onSubmit()" [disabled]="!formDocumento.valid"
+         data-toggle="collapse" data-target="#addDocumento">
+         <i class="fa fa-check-circle"></i> Aceptar</button>
+      <button class="btn btn-outline-success btn-sm mx-1" data-toggle="collapse" data-target="#addDocumento"
+         (click)="reset()"><i class="fa fa-times-circle"></i> Cancelar</button>
+   </div>
+   <span class="small ml-3" *ngIf="f['nomdoc'].status === 'PENDING'">Validando...</span>
+</div>

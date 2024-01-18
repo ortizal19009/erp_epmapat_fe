@@ -1,0 +1,172 @@
+<div class="collapse" id="collapseNuevo">
+   <h4 class="font-weight-bold">Nuevo Convenio</h4>
+   <div class="row">
+      <div class="col-sm-6">
+         <form [formGroup]="f_bFacxAbo">
+            <input type="text" placeholder="Nro cuenta" class="form-control form-control-sm" autofocus
+               id="cuentaAbonado" formControlName="cuentaAbonado" />
+         </form>
+      </div>
+      <div class="col-sm-6">
+         <!-- Button trigger modal -->
+         <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#buscarClienteModal"
+            id="btn_buscar" (click)="buscarFacxAbo()">
+            Buscar
+         </button>
+      </div>
+   </div>
+   <form class="form-group" id="formularioConvenio">
+      <div class="row">
+         <div class="form-group col-sm-3 my-0 py-0">
+            <label class="form-label col-form-label-sm">Número
+               <input class="form-control form-control-sm" type="number" id="nroconvenio" name="nroconvenio"
+                  [(ngModel)]="conv.nroconvenio" /></label>
+            <!-- <label for="" class="form-label col-form-label-sm">Número</label>
+                 <input type="number" class="form-control form-control-sm" id="nroconvenio"
+                     [(ngModel)]="conv.nroconvenio" name="nroconvenio" /> -->
+         </div>
+         <div class="form-group col-sm-3 my-0 py-0">
+            <label class="form-label col-form-label-sm">Autorización
+               <input class="form-control form-control-sm" type="text" id="Autorizacion" name="autorizacion"
+                  [(ngModel)]="conv.nroautorizacion" /></label>
+            <!-- <label for="" class="form-label col-form-label-sm">Referencia</label>
+                 <input type="text" class="form-control form-control-sm" id="referencia"
+                     [(ngModel)]="conv.referencia" name="referencia" /> -->
+         </div>
+         <div class="form-group col-sm-3 my-0 py-0">
+            <label class="form-label col-form-label-sm">Referencia
+               <input class="form-control form-control-sm" type="text" id="Referencia" name="referencia"
+                  [(ngModel)]="conv.referencia" /></label>
+            <!-- " -->
+            <!-- <label for="" class="form-label col-form-label-sm">Referencia</label>
+                 <input type="text" class="form-control form-control-sm" id="referencia"
+                     [(ngModel)]="conv.referencia" name="referencia" /> -->
+         </div>
+      </div>
+      <div class="row">
+         <div class="row mx-0">
+            <div class="form-group col-md-3 my-0 py-0">
+               <label class="form-label col-form-label-sm">Total<input class="form-control form-control-sm"
+                     type="number" id="Total" name="Total" [(ngModel)]="conv.totalconvenio" readOnly /></label>
+               <!-- <label for="total" class="form-label">Total</label>
+                     <input type="number" class="form-control form-control-sm" id="total" data-toggle="tooltip" data-placement="top" title="Total del convenio"> -->
+            </div>
+            <div class="col-sm-3 my-0 py-0">
+               <label class="form-label col-form-label-sm">Cuota inicial
+                  <input class="form-control form-control-sm" type="number" id="cuotainicial" name="cuotainicial"
+                     [(ngModel)]="c_inicial" /></label>
+               <!-- <label for="inputPass" class="form-label">Cuota inicial</label>
+                     <input type="text" class="form-control form-control-sm" id="cuotainicial"> -->
+            </div>
+            <div class="col-sm my-0 py-0">
+               <div class="row">
+                  <div class="col-sm-12">
+                     <label for="nrocuotas" class="form-label col-sm-10 col-form-label-sm">Nro cuotas
+                        <input type="number" min="2" max="12" class="form-control form-control-sm" id="nrocuotas"
+                           placeholder="min: 2 / max: 12"></label>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-sm-6">
+                     <label for="">Cuota inicial:</label>
+                  </div>
+                  <div class="col-sm-6">
+                     <label for="">{{c_inicial | number:'1.2-2'}}</label>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-sm-6">
+                     <label for="">Pagos({{nropagos}}):</label>
+                  </div>
+                  <div class="col-sm-6">
+                     <label for="">{{v_pagos | number:'1.2-2'}}</label>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-sm-6">
+                     <label for="">Cuota final:</label>
+                  </div>
+                  <div class="col-sm-6">
+                     <label for="">{{c_final | number:'1.2-3' }}</label>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div class="row ml-1">
+         <!-- <label class="form-label col-form-label-sm">Observaciones
+                 <textarea class="form-control form-control-sm" rows="2" 
+                 [(ngModel)]="conv.observaciones"></textarea></label> -->
+         <label class="col-sm-12 col-form-label-sm" for="observaciones">Observaciones
+            <textarea class="form-control" id="observaciones" rows="2" name="observaciones"
+               [(ngModel)]="conv.observaciones"></textarea>
+         </label>
+      </div>
+      <br>
+      <div *ngIf="rtn" class="alert alert-warning ml-1" role="alert">
+         <!-- <div class="alert alert-warning" role="alert"> -->
+         <strong>Mensaje:</strong> Ya existe el Convenio: <strong>{{conv.nroconvenio}}</strong>
+         <!-- </div> -->
+      </div>
+      <div class="mt-0 mb-3 text-center">
+         <button class="btn btn-success btn-sm mx-1" (click)="onSubmit()" data-target="#collapseNuevo"><i
+               class="fa fa-check-circle"></i> Aceptar</button>
+         <button class="btn btn-outline-success btn-sm mx-1" (click)="resetForm()" data-toggle="collapse"
+            data-target="#collapseNuevo"><i class="fa fa-times-circle"></i> Cancelar</button>
+      </div>
+   </form>
+
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="buscarClienteModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+   <div class="modal-dialog modal-md ">
+      <div class="modal-content card-success card-outline">
+         <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Facturas pendientes</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+               <span aria-hidden="true">&times;</span>
+            </button>
+         </div>
+         <div class="modal-body">
+            <div class="row">
+               <div class="col-sm-8">{{clienteNombre}}</div>
+               <div class="col-sm-4">{{clienteIdentificacion}}</div>
+            </div>
+            <hr>
+            <div class="row">
+               <div class="col-sm">
+                  <table class="table table-sm hover table-bordered">
+                     <thead class="text-center cabecera">
+                        <tr>
+                           <th>Nro factura</th>
+                           <th>Pagado</th>
+                           <th>Valor</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr *ngFor="let facturaDatos of v_facturas">
+                           <td>{{facturaDatos.idfactura}}</td>
+                           <td class="text-right">{{facturaDatos.pagado}}</td>
+                           <td class="text-right">{{facturaDatos.totaltarifa | number:'1.2-2'}}</td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+            <div class="row">
+               <div class="col-sm-6"><strong> Total:</strong></div>
+               <div class="col-sm-6 text-right"><strong>{{suma_facturas | number:'1.2-2'}}</strong></div>
+            </div>
+         </div>
+
+         <div class="modal-footer">
+            <button type="button" class="btn btn-success btn-sm" (click)="setValores()" data-dismiss="modal"><i
+                  class="fa fa-check-circle"></i> Aceptar</button>
+            <button type="button" class="btn btn-outline-success btn-sm" data-dismiss="modal" (click)="resetForm()"><i
+                  class="fa fa-times-circle"></i> Cancelar</button>
+         </div>
+      </div>
+   </div>
+</div>

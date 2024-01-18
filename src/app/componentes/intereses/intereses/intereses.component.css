@@ -1,0 +1,21 @@
+.container-fluid{
+   --bgcolor1: rgb(83, 67, 54);
+   --bgcolor2: rgb(248, 238, 205);
+}
+
+.cabecera {
+   background-color: var(--bgcolor1);
+   color: white;
+}
+
+table {
+   background-color: var(--bgcolor2);
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
+}
+
+table>thead>tr, .titInteres {
+   background-color: var(--bgcolor1);
+   color: white;
+}
+
+.fondo{    background-color: var(--bgcolor2); }

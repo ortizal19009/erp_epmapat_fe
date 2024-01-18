@@ -1,0 +1,15 @@
+.container-fluid{
+   --bgcolor1: rgb(68, 103, 114);
+   --bgcolor2: rgba(231, 251, 253);
+}
+
+/* .disabled{ opacity: 0.4; } */
+
+.titEmisiones {
+   background-color: var(--bgcolor1);
+   color: white;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.fondoEmisiones{   background-color: var(--bgcolor2);}
+.red-icon { color: red; }

@@ -1,0 +1,179 @@
+<div class="content pt-1 ">
+   <div class="container-fluid">
+      <div class="row  ml-1 mr-1 pl-1 pt-1 pb-0 border cabecera sombra">
+         <div class="col-md-5">
+            <h5 class="font-weight-bold text-truncate"><i class="fa fa-history "></i> &nbsp;Simulación del nuevo Pliego
+               Tarifario</h5>
+         </div>
+         <div class="col-sm-6">
+            <div class="container-fluid">
+               <form [formGroup]="formBuscar" class="formGroup">
+                  <div class="row">
+
+                     <div class="form-group col-md-2 mb-1">
+                        <div class="input-group input-group-sm">
+                           <select class="custom-select" formControlName="selecAnio" (change)="onSelectChange($event)">
+                              <option value="1">Año 1</option>
+                              <option value="2">Año 2</option>
+                           </select>
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-4 mb-1">
+                        <div class="input-group mb-1 input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text" for="fecha">Consumo m<sup>3</sup></label>
+                           </div>
+                           <input type="number" class="form-control text-center" formControlName="m3" aria-label="Small"
+                              aria-describedby="inputGroup-sizing-sm">
+                        </div>
+                     </div>
+
+                     <div class="text-center">
+                        <button type="submit" class="btn btn-success btn-sm mx-1" (click)="calcular()">
+                           <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+                        <button type="button" class="btn btn-outline-success btn-sm mb-0" (click)="regresar()"><i
+                              class="fa fa-times-circle"></i> Cancelar
+                        </button>
+                     </div>
+
+                  </div>
+               </form>
+            </div>
+         </div>
+
+         <div class="btn-group ml-auto mt-0 py-0">
+            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
+               data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar">
+                  <i class="bi-file-earmark-arrow-up"></i> &nbsp; Exportar</button>
+            </div>
+         </div>
+
+      </div>
+   </div>
+</div>
+
+<div class="col-md-12">
+   <table class="table table-hover table-bordered table-sm sombra mt-2">
+      <thead class="cabecera">
+         <tr class="text-center">
+            <th rowspan="2">Categoría</th>
+            <th colspan="2">Corriente (5)</th>
+            <th colspan="3">Operativo y de Inversión (6 y 7)</th>
+            <th rowspan="2">Conserv.Fuentes</th>
+            <th rowspan="2">Hidrosuccionador</th>
+            <th rowspan="2">Total por m<sup>3</sup></th>
+            <th rowspan="2"></th>
+         </tr>
+         <tr class="text-center">
+            <th>Agua Potable</th>
+            <th>Alcantarillado</th>
+            <th>Agua Potable</th>
+            <th>Alcantarillado</th>
+            <th>Saneamiento</th>
+         </tr>
+      </thead>
+      <tbody class="detalle">
+         <tr class="fila" *ngFor="let consumo of _consumos; let i=index" (click)="calcRubros(i)">
+            <td>{{consumo.idcategoria.descripcion}}</td>
+            <td class="text-center hand">{{ (anio == 1 ? (consumo.idcategoria.fijoagua - 0.1) * consumo.porc :
+               (consumo.idcategoria.fijoagua - 0.1)) | number: '1.2-2' }}</td>
+            <td class="text-center">{{ (anio == 1 ? (consumo.idcategoria.fijosanea - 0.5) * consumo.porc :
+               consumo.idcategoria.fijosanea - 0.5) | number: '1.2-2'}}</td>
+            <td class="text-center">{{ (anio == 1 ? (m3 * consumo.agua) * consumo.porc : m3 * consumo.agua) | number:
+               '1.2-2'}}</td>
+            <td class="text-center">{{ (anio == 1 ? (m3 * consumo.saneamiento / 2) * consumo.porc : m3 *
+               consumo.saneamiento / 2 )| number: '1.2-2'}}</td>
+            <td class="text-center">{{ (anio == 1 ? (m3 * consumo.saneamiento / 2) * consumo.porc : m3 *
+               consumo.saneamiento / 2 )| number: '1.2-2'}}</td>
+            <td class="text-center">{{ 0.1 | number: '1.2-2'}}</td>
+            <td class="text-center">{{ (anio == 1 ? 0.5 * consumo.porc : 0.5 ) | number: '1.2-2'}}</td>
+            <td class="text-right font-weight-bold">{{subtotales[i] | number: '1.2-2'}}</td>
+            <td class="text-center hand"> <i class="bi-bookmark-check-fill check" *ngIf="i == antIndice"></i> </td>
+         </tr>
+      </tbody>
+   </table>
+</div>
+
+<div class="container-fluid">
+   <div class="row ">
+      <div class="col-sm-6 border sombra detalle ml-4 mr-4">
+         <table class="table table-sm mx-0 mt-1 mb-0">
+            <tbody class="detalle">
+               <tr class="fila">
+                  <td class="text-left py-0 font-weight-bold">Corriente</td>
+                  <td class="text-left py-0">Agua Potable</td>
+                  <td class="text-right py-0">{{ formulas[0] }}</td>
+               </tr>
+               <tr class="fila">
+                  <td></td>
+                  <td class="text-left py-0">Alcantarillado</td>
+                  <td class="text-right py-0">{{ formulas[1] }}</td>
+               </tr>
+               <tr class="fila">
+                  <td class="text-left py-0 font-weight-bold">Operativo e Inversión</td>
+                  <td class="text-left py-0">Agua Potable</td>
+                  <td class="text-right py-0">{{ formulas[2] }}</td>
+               </tr>
+               <tr class="fila">
+                  <td></td>
+                  <td class="text-left py-0">Alcantarillado</td>
+                  <td class="text-right py-0">{{ formulas[3] }}</td>
+               </tr>
+               <tr class="fila">
+                  <td></td>
+                  <td class="text-left py-0">Saneamiento</td>
+                  <td class="text-right py-0">{{ formulas[4] }}</td>
+               </tr>
+               <tr class="fila">
+                  <td class="text-left py-0">Conservación Fuentes</td>
+                  <td></td>
+                  <td class="text-right py-0">0.10</td>
+               </tr>
+               <tr class="fila">
+                  <td class="text-left py-0">Hidrosuccionador</td>
+                  <td></td>
+                  <td class="text-right py-0">{{ formulas[6] }}</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <div class="col-sm-5">
+         <table class="table table-striped table-sm valorcalculo mb-0">
+            <thead>
+               <tr>
+                  <th class="text-left">Rubro</th>
+                  <th class="text-right">Valor</th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr class="fila">
+                  <td>Agua Potable</td>
+                  <td class="text-right">{{rubros[0] | number: '1.2-2'}}</td>
+               </tr>
+               <tr class="fila">
+                  <td>Alcantarillado</td>
+                  <td class="text-right">{{rubros[1] | number: '1.2-2'}}</td>
+               </tr>
+               <tr class="fila">
+                  <td>Saneamiento</td>
+                  <td class="text-right">{{rubros[2] | number: '1.2-2'}}</td>
+               </tr>
+               <tr class="fila">
+                  <td>Conservación Fuentes</td>
+                  <td class="text-right">{{rubros[3] | number: '1.2-2'}}</td>
+               </tr>
+               <tr>
+                  <td class="font-weight-bold">TOTAL </td>
+                  <td class="font-weight-bold text-right">{{ total | number:'1.2-2'}}</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+   </div>
+</div>

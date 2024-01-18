@@ -1,0 +1,22 @@
+.container-fluid{
+   --bgcolor1: rgb(95, 57, 95);
+   --bgcolor2: rgba(231, 221, 228);
+}
+
+.usoitem{
+   background-color: var(--bgcolor1);
+   color: white;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+}
+
+/* Card del Uso */
+.cardUsoitem{ 
+   background-color: var(--bgcolor2);
+   box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+}
+.cardUsoitem li{ background-color: var(--bgcolor2); }
+
+.cardTab{
+   background-color: var(--bgcolor1);
+   color: white;
+}

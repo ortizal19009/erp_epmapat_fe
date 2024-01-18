@@ -1,0 +1,23 @@
+.cabecera {
+   background-color: var(--bgcolor1);
+   color: white;
+}
+.nuevoBG1 { background-color: var(--bgcolor1); }
+
+.detalle { background-color: var(--bgcolor2); }
+.nuevoBG2 { background-color: var(--bgcolor2); }
+
+.hand {cursor: pointer;}
+.check{ color: rgb(140, 143, 78);}
+
+/* === Tabla Rubros de la Planilla === */ 
+.valorcalculo{ box-shadow: 0 0 10px rgba(0, 0, 0, 1);}
+.valorcalculo thead{
+   background-color: rgb(140, 143, 78);
+   color: white;
+}
+.valorcalculo tbody{ background-color: rgb(248, 241, 201);}
+.fila:hover{
+   background-color: #117a8B;
+   color: white;
+}

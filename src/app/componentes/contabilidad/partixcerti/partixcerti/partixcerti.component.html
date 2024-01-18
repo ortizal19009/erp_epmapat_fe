@@ -1,0 +1,193 @@
+<div class="content pt-1 pl-3">
+   <div class="container-fluid">
+       <div class="row mt-0 mb-2">
+           <div class="col-sm-8">
+               <h3 class="m-0 font-weight-bold">{{titulo}}</h3>
+           </div>
+           <div class="col-sm-2 d-flex justify-content-end ">
+               <button class="btn btn-sm btn-outline-primary" data-toggle="modal"
+                   data-target="#newCertificacionModal">+ Nuevo</button>
+           </div>
+           <div class="col-sm-2 d-flex justify-content-end ">
+               <button class="btn btn-sm btn-outline-primary" (click)="retroceder()">
+                   <i class="fa fa-reply-all"></i> Retroceder
+               </button>
+           </div>
+       </div>
+   </div><!-- /.container-fluid -->
+</div>
+<div class="container-fluid">
+   <div class="row mb-0">
+       <div class="col-sm">
+           <div class="card card-success card-outline">
+               <div class="card-body box-porfile">
+                   <div class="card-body box-porfile">
+                       <table class="table table-sm table-bordered">
+                           <tbody>
+                               <tr>
+                                   <td class="font-weight-bold">Número</td>
+                                   <td>{{presuDatos.numero}}</td>
+                                   <td class="font-weight-bold">Beneficiario</td>
+                                   <td>{{presuDatos.idbene.nomben}}</td>
+                                   <td class="font-weight-bold">Responsable</td>
+                                   <td>{{presuDatos.idbeneres.nomben}}</td>
+                               </tr>
+                               <tr>
+                                   <td class="font-weight-bold">Documento</td>
+                                   <td>{{presuDatos.iddocumento.nomdoc}} {{presuDatos.numdoc}}</td>
+                                   <td class="font-weight-bold">Valor</td>
+                                   <td>{{presuDatos.valor}}</td>
+                                   <td class="font-weight-bold">Fecha</td>
+                                   <td>{{presuDatos.fecha}}</td>
+                               </tr>
+                               <tr>
+                                   <td class="font-weight-bold">Descripción</td>
+                                   <td colspan="5">{{presuDatos.descripcion}}</td>
+                               </tr>
+                           </tbody>
+                       </table>
+                       <div class="row mt-2">
+                           <div class="col-sm d-flex justify-content-end">
+                               <button class="btn btn-sm btn-warning mx-2" data-toggle="modal"
+                                   data-target="#modPresupueModal" (click)="modPresupue()">Modificar</button>
+                               <button class="btn btn-sm btn-danger">Eliminar</button>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+           </div>
+       </div>
+   </div>
+   <div class="row">
+       <div class="col-sm">
+           <div class="card card-success card-outline">
+               <div class="card-body box-porfile">
+                   <table class="table table-sm table-hover table-bordered table-striped">
+                       <thead class="bg-primary text-center">
+                           <tr>
+                               <th>Código</th>
+                               <th>Partida</th>
+                               <th>Saldo</th>
+                               <th>Valor</th>
+                               <th>Nuevo saldo</th>
+                               <th>C</th>
+                               <th>Compromiso</th>
+                               <th class="col-sm-1">Acciones</th>
+                           </tr>
+                       </thead>
+                       <tbody>
+                           <tr *ngFor="let d_presupue of v_presupue">
+                               <td>{{d_presupue.idpresupue.codpar}}</td>
+                               <td>{{d_presupue.idpresupue.nompar}}</td>
+                               <td>{{d_presupue.saldo}}</td>
+                               <td>{{d_presupue.valor}}</td>
+                               <td>{{d_presupue.saldo - d_presupue.valor}}</td>
+                               <td>C</td>
+                               <td>COMPROMISO</td>
+                               <td class="text-center">
+                                   <div class="btn-group">
+                                       <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0"
+                                           data-toggle="dropdown" aria-expanded="false">
+                                       </button>
+                                       <div class="dropdown-menu dropdown-menu-right popLista">
+                                           <button class="dropdown-item" type="button" data-toggle="modal"
+                                               data-target="#modPartixCertiModal" (click)="modcertixpresu(d_presupue)">
+                                               <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
+                                           <button class="dropdown-item" type="button">
+                                               <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
+                                       </div>
+                                   </div>
+                               </td>
+                           </tr>
+                       </tbody>
+                   </table>
+
+               </div>
+           </div>
+       </div>
+   </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="newCertificacionModal" tabindex="-1" aria-labelledby="newCertificacionModalLabel"
+   aria-hidden="true">
+   <div class="modal-dialog modal-lg">
+       <div class="modal-content card-success card-outline">
+           <div class="modal-header">
+               <h5 class="modal-title" id="newCertificacionModalLabel">Detalles partida</h5>
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                   <span aria-hidden="true">&times;</span>
+               </button>
+           </div>
+           <div class="modal-body">
+               <form [formGroup]="f_presupue" *ngIf="t_presupue;else fs_presupue">
+                   <label for="">Buscar presupuesto
+                       <div class="row">
+                           <div class="col-sm-10">
+                               <input type="text" class="form-control form-control-sm" formControlName="cod_nom"
+                                   placeholder="Código / Nombre">
+                           </div>
+                           <div class="col-sm-2">
+                               <button class="btn btn-outline-primary btn-sm" (click)="obtenerPresupe()">
+                                   <i class="fa fa-search" aria-hidden="true"></i>
+                               </button>
+                           </div>
+                       </div>
+                   </label>
+               </form>
+               <table class="table table-hover table-sm table-bordered" *ngIf="d_presupue">
+                   <thead class="bg-primary">
+                       <tr>
+                           <th>Codigo partida</th>
+                           <th>Nombre partida</th>
+                       </tr>
+                   </thead>
+                   <tbody>
+                       <tr *ngFor="let d_partidas of dpartidas" (click)="setPresupue(d_partidas)">
+                           <td>{{d_partidas.codpar}}</td>
+                           <td>{{d_partidas.nompar}}</td>
+                       </tr>
+                   </tbody>
+               </table>
+               <ng-template #fs_presupue>
+                   <!-- <app-add-partixcerti [certipresu]="v_presupue" [presupue]="presupue"
+                       (d_presupue)="changeTipo($event)" (reloadPartidas)="reload($event)"></app-add-partixcerti> -->
+               </ng-template>
+           </div>
+       </div>
+   </div>
+</div>
+<!-- Modal MODIFICAR DATOS-->
+<div class="modal fade" id="modPartixCertiModal" tabindex="-1" aria-labelledby="modPartixCertiModalLabel"
+   aria-hidden="true">
+   <div class="modal-dialog modal-lg">
+       <div class="modal-content card-success card-outline">
+           <div class="modal-header">
+               <h5 class="modal-title" id="modPartixCertiModalLabel">Detalles partida</h5>
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                   <span aria-hidden="true">&times;</span>
+               </button>
+           </div>
+           <div class="modal-body">
+               <!-- <app-modificar-partixcerti *ngIf="modificar" [v_certixpresu]="certixpresu"></app-modificar-partixcerti> -->
+
+           </div>
+       </div>
+   </div>
+</div>
+<!-- Modal MODIFICAR CABECERA-->
+<div class="modal fade" id="modPresupueModal" tabindex="-1" aria-labelledby="modPresupueModalLabel" aria-hidden="true">
+   <div class="modal-dialog modal-lg">
+       <div class="modal-content card-success card-outline">
+           <div class="modal-header">
+               <h5 class="modal-title" id="modPresupueModalLabel">Modificar presupuesto</h5>
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                   <span aria-hidden="true">&times;</span>
+               </button>
+           </div>
+           <div class="modal-body">
+               <!-- <app-modificar-certipresu [presupue]="v_presupue" *ngIf="modpresupue"></app-modificar-certipresu> -->
+
+           </div>
+       </div>
+   </div>
+</div>

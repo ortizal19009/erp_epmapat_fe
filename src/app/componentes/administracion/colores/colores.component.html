@@ -1,0 +1,115 @@
+<div class="content">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="col-sm-10 pt-5">
+            <h5 class="font-weight-bold text-center py-1 cabecera sombra border">Modificar Color{{nomVentana}}</h5>
+            <div class="card card-body detalle sombra">
+               <form [formGroup]="colorForm" (ngSubmit)="updateColor()">
+                  <div class="row">
+
+                     <div class="col-sm-3 text-center">
+                        <h5 class="font-weight-bold text-center py-2 px-3 border blanco sombra"
+                           [style.background]="'rgb(' + red0  + ',' + green0 + ',' + blue0 + ')'">
+                           Cabecera Actual</h5>
+                     </div>
+
+                     <div class="form-group col-md-2 my-0 py-0">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Rojo</span>
+                           </div>
+                           <input type="number" class="form-control text-center" formControlName="red0"
+                              aria-label="Small" aria-describedby="inputGroup-sizing-sm" min="0" max="255"
+                              (input)="updateColor()">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-2 my-0 py-0">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Verde</span>
+                           </div>
+                           <input type="number" class="form-control text-center" formControlName="green0"
+                              aria-label="Small" aria-describedby="inputGroup-sizing-sm" min="0" max="255"
+                              (input)="updateColor()">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-2 my-0 py-0">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Azul</span>
+                           </div>
+                           <input type="number" class="form-control text-center" formControlName="blue0"
+                              aria-label="Small" aria-describedby="inputGroup-sizing-sm" min="0" max="255"
+                              (input)="updateColor()">
+                        </div>
+                     </div>
+
+                     <div class="col-sm-3 text-center">
+                        <h5 class="font-weight-bold text-center py-2 px-3 border blanco sombra"
+                           [style.background]="'rgb(' + colorForm.get('red0')?.value + ',' + colorForm.get('green0')?.value + ',' + colorForm.get('blue0')?.value + ')'">
+                           Cabecera Nueva</h5>
+                     </div>
+                  </div>
+                  <!-- ========== Detalle ============= -->
+                  <div class="row">
+                     <div class="col-sm-3 text-center">
+                        <h6 class="text-center py-2 px-3 border sombra"
+                           [style.background]="'rgb(' + red1  + ',' + green1 + ',' + blue1 + ')'">
+                           &nbsp;&nbsp;Detalle Actual&nbsp;&nbsp;&nbsp;</h6>
+                     </div>
+
+                     <div class="form-group col-md-2 my-0 py-0">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Rojo</span>
+                           </div>
+                           <input type="number" class="form-control text-center" formControlName="red1"
+                              aria-label="Small" aria-describedby="inputGroup-sizing-sm" min="0" max="255"
+                              (input)="updateColor()">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-2 my-0 py-0">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Verde</span>
+                           </div>
+                           <input type="number" class="form-control text-center" formControlName="green1"
+                              aria-label="Small" aria-describedby="inputGroup-sizing-sm" min="0" max="255"
+                              (input)="updateColor()">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-2 my-0 py-0">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Azul</span>
+                           </div>
+                           <input type="number" class="form-control text-center" formControlName="blue1"
+                              aria-label="Small" aria-describedby="inputGroup-sizing-sm" min="0" max="255"
+                              (input)="updateColor()">
+                        </div>
+                     </div>
+
+                     <div class="col-sm-3 text-center">
+                        <h6 class="text-center py-2 px-3 border sombra"
+                           [style.background]="'rgb(' + colorForm.get('red1')?.value + ',' + colorForm.get('green1')?.value + ',' + colorForm.get('blue1')?.value + ')'">
+                           Detalle Nuevo</h6>
+                     </div>
+
+                  </div>
+               </form>
+               <div class="mt-3 mb-1 text-center">
+                  <button type="button" class="btn btn-sm btn-success" (click)="actualizar()">
+                     <i class="fa fa-check-circle"></i> Aceptar
+                  </button>
+                  <button class="btn btn-sm btn-outline-success mx-2" (click)="regresar()">
+                     <i class="fa fa-times-circle"></i> Cancelar</button>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

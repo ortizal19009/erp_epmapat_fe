@@ -1,0 +1,64 @@
+<!-- Content Header (Page header) -->
+<div class="content pt-1 pl-3">
+    <div class="container-fluid">
+        <div class="row mb-0">
+            <div class="col-sm-6">
+                <h4 class="m-0 font-weight-bold">Estado de los Medidores</h4>
+            </div><!-- /.col -->
+            <div class="col-sm-4">
+                <button class="btn btn-sm btn-outline-primary float-left" type="button" data-toggle="collapse"
+                    data-target="#collapseNuevo" aria-expanded="false" aria-controls="collapseNuevo">
+                    <i class="fa fa-plus-square" style="font-size:24pxi"></i> Nuevo
+                </button>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div> <!-- /.content-header -->
+
+<div class="container-fluid">
+    <div class="row mb-0">
+        <div class="col-sm-4">
+            <table class="table table-hover table-bordered table-sm">
+                <thead>
+                    <tr class="bg-primary text-center">
+                        <th></th>
+                        <th>Descripción</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let em of v_estadom; let i = index">
+                        <td class="small text-center font-weight-bold">{{ i+1 }}</td>
+                        <td>{{ em.descripcion }}</td>
+                        <td >
+                            <!-- <button class="badge badge-danger mr-1" (click)="eliminarEstadom(em.idestadom)">
+                                Eliminar
+                            </button>
+                            <button class="badge badge-warning mr-1">
+                                Modificar
+                            </button> -->
+                            <!-- <button class="badge badge-info mr-1" data-toggle="collapse" data-target="#collapseMostrar"
+                                aria-expanded="false" aria-controls="collapseMostrar">
+                                Mostrar
+                            </button> -->
+                            <button class="btn btn-outline-info btn-xs">&nbsp;&nbsp;Info&nbsp;&nbsp;</button>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>
+                            <small class="font-weight-bold">Total: {{v_estadom.length}}</small>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-sm-6">
+            <div class="collapse" id="collapseNuevo">
+                <div class="card card-body">
+                    <app-add-estadom></app-add-estadom>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,43 @@
+.container-fluid{
+   --bgcolor1: rgb(74, 87, 74);
+   --bgcolor2: rgb(188, 247, 196);
+   --rubroxfac1: rgb(140, 143, 78);
+   --rubroxfac2: rgb(248, 241, 201);
+}
+
+.tarifa {
+   background-color: var(--bgcolor1);
+   color: white;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+}
+
+.cardTarifa{
+   background-color: var(--bgcolor2);
+   box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+}
+.cardTarifa li{ background-color: var(--bgcolor2);}
+
+table {box-shadow: 0 0 10px rgba(0, 0, 0, 1);}
+
+.tbodyPlanillas{ background-color: var(--bgplanillas2);}
+.theadPlanillas{
+   background-color: var(--bgplanillas1);
+   color: white;
+}
+
+.cardTab{
+  background-color: var(--bgcolor1);
+   color: white;
+}
+
+/* === Tabla Valores de Cálculo === */
+.valorcalculo{ box-shadow: 0 0 10px rgba(0, 0, 0, 1);}
+.valorcalculo thead{
+   background-color: var(--rubroxfac1);
+   color: white;
+}
+.valorcalculo tbody{ background-color: var(--rubroxfac2);}
+.fila:hover{
+   background-color: #117a8B;
+   color: white;
+}

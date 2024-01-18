@@ -1,0 +1,70 @@
+<div class="container">
+   <div class="row justify-content-center align-items-center minh-100">
+      <div class="col-md-12 mt-2">
+
+         <div *ngIf="authService.sessionlog; then thenBlock else elseBlock"></div>
+         <ng-template #thenBlock>
+            <div>
+               <img class="img-fluid rounded mx-auto d-block" src="assets/dist/img/logo.png" alt="logo" width="45%"
+                  height="45%">
+            </div>
+         </ng-template>
+
+         <ng-template #elseBlock>
+            <div class="content">
+               <div class="container-fluid">
+                  <div class="row justify-content-center">
+                     <div class="card card-body col-sm-4 detalle ">
+
+                        <form [formGroup]="formLogin">
+
+                           <div class="form-group col-md-12 mt-3">
+                              <div class="input-group input-group-sm mb-3">
+                                 <div class="input-group-prepend">
+                                    <span class="input-group-text font-weight-bold">Usuario</span>
+                                 </div>
+                                 <input type="text" class="form-control" formControlName="username" required autocomplete="off"
+                                    (keyup)="reinicia()"
+                                    [ngClass]="{'is-invalid': f['username'].invalid && f['username'].touched, 'is-valid': f['username'].valid, '': f['username'].untouched}">
+                              </div>
+                           </div>
+                           <div class="form-group col-md-12 mt-1">
+                              <div class="input-group input-group-sm mb-3">
+                                 <div class="input-group-prepend">
+                                    <span class="input-group-text font-weight-bold">Contraseña</span>
+                                 </div>
+                                 <input type="password" class="form-control" formControlName="codusu" required autocomplete="current-password"
+                                    (keyup)="reinicia()"
+                                    [ngClass]="{'is-invalid': f['codusu'].invalid && f['codusu'].touched, 'is-valid': f['codusu'].valid, '': f['codusu'].untouched}">
+                              </div>
+                           </div>
+                           <div class="text-center">
+                              <button class="btn btn-success btn-sm mx-1 mt-1" (click)="login()"
+                                 [disabled]="kont >= 4 || !formLogin.valid ">
+                                 <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+                           </div>
+                        </form>
+                        <div class="text-center" *ngIf="msg">
+                           <div *ngIf="kont < 4" class="alert alert-warning alert-dismissible fade show mt-2 px-0"
+                              role="alert">
+                              <strong>Usuario y/o contraseña incorrectos.</strong><sup
+                                 class="roboto small green">{{kont}}</sup>
+                              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                 <span aria-hidden="true">&times;</span>
+                              </button>
+                           </div>
+                        </div>
+                        <div class="text-center" *ngIf="bloqueado">
+                           <div class="alert alert-warning alert-dismissible fade show mt-2 px-0" role="alert">
+                              <strong>¡¡ Bloqueado !!</strong>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </ng-template>
+
+      </div>
+   </div>
+</div>

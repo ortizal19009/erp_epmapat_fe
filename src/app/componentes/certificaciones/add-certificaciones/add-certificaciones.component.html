@@ -1,0 +1,121 @@
+<div class="content-header">
+   <div class="container-fluid">
+      <div class="row mt-5 justify-content-center text-center">
+         <div class="col-sm-6 cabecera sombra border">
+            <h5 class="my-1 font-weight-bold">Nueva Certificación</h5>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="card card-body col-sm-6 detalle sombra">
+            <form [formGroup]="formCertificacion">
+               <div class="row">
+
+                  <div class="form-group col-md-12 mt-1">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <button type="button" class="btn btn-sm btn-primary" data-toggle="modal"
+                              data-target="#clientesModal" (click)="clientesModal()">Cliente<sup>*</sup>
+                           </button>
+                        </div>
+                        <input type="text" class="form-control" aria-label="Small" formControlName="nomcli"
+                           aria-describedby="inputGroup-sizing-sm" readonly [ngClass]="{'is-invalid': f['nomcli'].invalid && f['nomcli'].touched,
+                           'is-valid': f['nomcli'].valid, '': f['nomcli'].untouched}">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-8 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Tipo<sup
+                                 class="green">*</sup></span>
+                        </div>
+                        <select class="form-control form-control-sm" formControlName="idtpcertifica_tpcertifica"
+                           [ngClass]="{'is-invalid': f['idtpcertifica_tpcertifica'].invalid && f['idtpcertifica_tpcertifica'].touched,
+                           'is-valid': f['idtpcertifica_tpcertifica'].valid, '': f['idtpcertifica_tpcertifica'].untouched}">
+                           <option *ngFor="let tp of _tpcertifica" [ngValue]="tp.idtpcertifica">
+                              {{tp.descripcion}} </option>
+                        </select>
+                     </div>
+                  </div>
+
+               </div>
+
+               <div class="mt-2 mb-1 text-center">
+                  <button type="button" class="btn btn-success btn-sm mx-1 mb-0" (click)="onSubmit()"
+                     [disabled]="!formCertificacion.valid">
+                     <i class="fa fa-check-circle"></i> Aceptar
+                  </button>
+                  <button type="button" class="btn btn-outline-success btn-sm mx-1 mb-0" (click)="regresar()">
+                     <i class="fa fa-times-circle"></i> Cancelar
+                  </button>
+               </div>
+
+            </form>
+         </div>
+      </div>
+   </div>
+
+   <!-- Modal para seleccionar un Cliente -->
+   <div class="modal fade" id="clientesModal" tabindex="-1" aria-labelledby="clienteModalLabel" aria-hidden="true"
+      data-backdrop="static">
+      <div class="modal-dialog modal-dialog-scrollable">
+         <div class="modal-content clientedetalle">
+            <div class="modal-body mt-0">
+               <div class="row clientecabecera">
+                  <form [formGroup]="formBusClientes" class="mb-0 col-md-9">
+                     <div class="row py-2">
+                        <div class="input-group col-sm-12">
+                           <input type="text" placeholder="Nombre ó identificación (Mínimo 5)"
+                              class="form-control form-control-sm" autofocus formControlName="nombre_identifica"
+                              required minlength="5"
+                              [ngClass]="{'is-invalid': formBusClientes.controls['nombre_identifica'].invalid && formBusClientes.controls['nombre_identifica'].touched,
+                           'is-valid': formBusClientes.controls['nombre_identifica'].valid, '': formBusClientes.controls['nombre_identifica'].untouched}">
+
+                           <div class="input-group-append">
+                              <button class="btn btn-sm btn-primary" (click)="buscarClientes()"
+                                 [disabled]="formBusClientes.invalid">
+                                 <i class="fa fa-search" aria-hidden="true"></i> Buscar</button>
+                           </div>
+                        </div>
+                     </div>
+                  </form>
+
+                  <div class="col-md-3 mt-2 pl-0">
+                     <input type="text" class="form-control form-control-sm text-center" placeholder="Filtrar..."
+                        [(ngModel)]="filtro" />
+                  </div>
+
+               </div>
+               <div class="row mt-0 pt-0" *ngIf="!formBusClientes.invalid">
+                  <table class="table table-hover table-bordered table-sm mt-0 pt-0 clientedetalle" id="tablaClientes">
+                     <thead class="text-center clientecabecera">
+                        <tr>
+                           <th></th>
+                           <th>Nombre</th>
+                           <th>Identificación</th>
+                        </tr>
+                     </thead>
+                     <tbody id="id-tbody" class="roboto small">
+                        <tr *ngFor="let cliente of _clientes  | filter:filtro; let i= index" class="fila"
+                           (click)="selecCliente(cliente)" data-dismiss="modal">
+                           <td class="text-center small font-weight-bold py-0">{{i+1}}</td>
+                           <td class="py-0">{{cliente.nombre}}</td>
+                           <td class="py-0">{{cliente.cedula}}</td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+            <div class="row justify-content-center my-2">
+               <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">
+                  <i class="bi bi-x-circle"></i>&nbsp; Cancelar</button>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

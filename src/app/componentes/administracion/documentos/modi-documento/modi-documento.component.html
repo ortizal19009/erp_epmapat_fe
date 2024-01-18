@@ -1,0 +1,66 @@
+<div class="content-header">
+   <div class="row mt-3">
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="col-5 mt-4 pt-5">
+            <h4 class="font-weight-bold text-center titDocumentos">Modificar Documento</h4>
+            <div class="card card-body fondoDocumentos">
+               <form [formGroup]="formDocumento" class=" mt-2">
+                  
+                  <div class="form-group col-md-8 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
+                              data-toggle="tooltip" title="Obligatorio y mínimo 3 caracteres">Nombre</span>
+                        </div>
+                        <input type="text" class="form-control" formControlName="nomdoc" id="nomdoc" aria-label="Small"
+                           aria-describedby="inputGroup-sizing-sm" required minlength="3" maxlength="20"
+                           [ngClass]="{'is-invalid': f['nomdoc'].invalid && f['nomdoc'].touched,
+                           'is-valid': f['nomdoc'].valid, '': f['nomdoc'].untouched}">
+                     </div>
+                  </div>
+                  
+                  <div class="form-group col-md-7 my-0 py-0">
+                     <div class="input-group mb-3 input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" for="tipdoc">Tipo</label>
+                        </div>
+                        <select class="custom-select" id="tipdoc" formControlName="tipdoc">
+                           <option value="0" selected>(Ninguno)</option>
+                           <option value="1">Depósito</option>
+                           <option value="2">Nota de crédito</option>
+                           <option value="3">Nota de dédito</option>
+                           <option value="4">Cheque/Transferencia</option>
+                           <option value="5">Factura</option>
+                           <option value="6">Retención Fuente</option>
+                        </select>
+                     </div>
+                  </div>
+                  <div class="form-group col-md-12 my-0 py-0">
+                     <div class="input-group mb-3 input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" for="tipdoc">Comprobante SRI</label>
+                        </div>
+                        <select type="text" class="custom-select" formControlName="idtabla4"
+                           [compareWith]="compararTabla4">
+                           <option [ngValue]="tab4" *ngFor="let tab4 of _tabla4">
+                              {{ tab4.nomcomprobante }}
+                           </option>
+                        </select>
+                     </div>
+                  </div>
+                  <div class="text-center">
+                     <button class="btn btn-success btn-sm mx-1 mt-1" (click)="onSubmit()" [disabled]="!formDocumento.valid">
+                        <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+                     <button class="btn btn-outline-success btn-sm mx-1 mt-1" (click)="retornar()"><i
+                           class="fa fa-times-circle"></i> Cancelar</button>
+                  </div>
+               </form>
+            </div>
+         </div>
+      </div>
+   </div>

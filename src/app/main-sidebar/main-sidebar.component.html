@@ -1,0 +1,620 @@
+<!-- Main Sidebar Container -->
+<aside class="main-sidebar sidebar-dark elevation-4"
+   [ngClass]="{'fondo1-background': fondo1 == 1, 'sidebar-dark-primary': fondo1!=1}">
+   <!-- Brand Logo -->
+   <a class="brand-link" [ngClass]="{'fondo1-background': fondo1 == 1}">
+      <img src="assets/dist/img/E_3.png" alt="EpmapaT Logo" class="brand-image img-circle elevation-3"
+         style="opacity: .8">
+      <span class="brand-text font-weight-light">EpmapaT</span>
+   </a>
+
+   <!-- Sidebar -->
+   <div class="sidebar">
+
+      <!-- Sidebar user panel (optional) -->
+      <div class="user-panel mt-0 mb-3 d-flex" *ngIf="authService.modulo > 0">
+         <div class="image">
+            <img *ngIf="authService.idusuario == 1" src="assets/dist/img/FotoRcr_176.bmp" class="img-circle elevation-2"
+               alt="User Image">
+         </div>
+         <div class="info">
+            <span class="d-block text-white small roboto" [ngClass]="{'fondo1-texto': fondo1 == 1}"><span
+                  *ngIf="authService.idusuario != 1">Usuario:&nbsp;</span> <span class="text-warning">
+                  {{authService.alias}}</span></span>
+         </div>
+      </div>
+
+      <!-- SidebarSearch Form -->
+      <div class="form-inline" *ngIf="authService.modulo > 0">
+         <div class="input-group" data-widget="sidebar-search">
+            <input class="form-control form-control-sidebar" [ngClass]="{'fondo1-input': fondo1 == 1}" type="search"
+               placeholder="Buscar" aria-label="Search">
+            <div class="input-group-append" [ngClass]="{'fondo1-input': fondo1 == 1}">
+               <button class="btn btn-sidebar" [ngClass]="{'fondo1-input': fondo1 == 1}">
+                  <i class="fas fa-search fa-fw" [ngClass]="{'fondo1-i': fondo1 == 1}"></i>
+               </button>
+            </div>
+         </div>
+      </div>
+
+      <!-- Sidebar Menu -->
+      <nav class="mt-2">
+         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+
+            <li *ngIf="authService.modulo == 1" class="nav-item">
+               <a href="#" class="nav-link bg-info">
+                  <i class="bi-droplet-half nav-icon" style="font-size: 15px;"></i>
+                  <p> Consumo Agua
+                     <i class="fas fa-angle-right right"></i>
+                     <span class="badge badge-warning right">1</span>
+                  </p>
+               </a>
+               <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                     <a routerLink="/clientes" class="nav-link">
+                        &nbsp;<i class="bi-person-circle nav-icon" style="font-size: 15px;"></i>
+                        <p class="text-warning">&nbsp;&nbsp; Clientes</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/abonados" class="nav-link">
+                        <i class="fa fa-building nav-icon"></i>
+                        <p class="text-warning"> Abonados</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/emisiones" class="nav-link">
+                        <i class="bi bi-moisture nav-icon"></i>
+                        <p class="text-warning">&nbsp;&nbsp; Emisiones</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a href="#" class="nav-link">
+                        <i class="fa fa-calculator nav-icon"></i>
+                        <p class="text-warning font-weight-bold"> Medidores
+                           <i class="right fas fa-angle-right"></i>
+                        </p>
+                     </a>
+                     <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                           <a routerLink="/suspensiones" class="nav-link">
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                              <i class="fa fa-gavel nav-icon"></i>
+                              <p class="text-warning"> Suspensiones</p>
+                           </a>
+                        </li>
+                        <li class="nav-item">
+                           <a routerLink="/habilitaciones" class="nav-link">
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                              <i class="fa fa-gift nav-icon"></i>
+                              <p class="text-warning"> Habilitaciones</p>
+                           </a>
+                        </li>
+
+                     </ul>
+                  </li>
+
+                  <li class="nav-item">
+                     <a routerLink="/rutas" class="nav-link">
+                        <i class="fa fa-bus nav-icon"></i>
+                        <p class="text-warning"> Rutas</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/pliego" class="nav-link">
+                        <i class="bi-asterisk nav-icon"></i>
+                        <p class="text-warning"> Pliego tarifario</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/pliego24" class="nav-link">
+                        <i class="fa fa-history nav-icon"></i>
+                        <p class="text-warning"> Nuevo Pliego</p>
+                     </a>
+                  </li>
+               </ul>
+            </li>
+
+            <li *ngIf="authService.modulo == 1" class="nav-item">
+               <a href="#" class="nav-link bg-info">
+                  <i class="bi-bookmarks-fill nav-icon" style="font-size: 15px;"></i>
+                  <p> Facturación
+                     <i class="fas fa-angle-right right"></i>
+                     <span class="badge badge-warning right">2</span>
+                  </p>
+               </a>
+               <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                     <a routerLink="/facturacion" class="nav-link">
+                        <i class="fa fa-bookmark nav-icon"></i>
+                        <p class="text-warning"> Facturación</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/facelectro" class="nav-link">
+                        <i class="fa fa-laptop nav-icon"></i>
+                        <p class="text-warning"> Facturas electrónicas</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/facturas" class="nav-link">
+                        <i class="fa fa-calendar nav-icon"></i>
+                        <p class="text-warning"> Planillas</p>
+                     </a>
+                  </li>
+
+                  <li class="nav-item">
+                     <a href="#" class="nav-link">
+                        <i class="fa fa-shopping-basket nav-icon"></i>
+                        <p class="text-warning font-weight-bold"> Catálogo
+                           <i class="right fas fa-angle-right"></i>
+                        </p>
+                     </a>
+                     <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                           <a routerLink="/catalogoitems" class="nav-link py-0">
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                              <i class="bi-file-ruled nav-icon"></i>
+                              <p class="small text-warning">&nbsp; Productos</p>
+                           </a>
+                        </li>
+                        <li class="nav-item">
+                           <a routerLink="/usoitems" class="nav-link py-0">
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                              <i class="bi bi-diagram-3 nav-icon"></i>
+                              <p class="small text-warning">&nbsp; Usos de los productos</p>
+                           </a>
+                        </li>
+                        <li class="nav-item">
+                           <a routerLink="/rubros" class="nav-link pt-0">
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                              <i class="bi-bullseye nav-icon"></i>
+                              <p class="small text-warning">&nbsp; Rubros (planillas)</p>
+                           </a>
+                        </li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+            <li *ngIf="authService.modulo == 1" class="nav-item">
+               <a href="#" class="nav-link bg-info">
+                  <i class="bi-badge-tm-fill nav-icon" style="font-size: 15px; "></i>
+                  <p> Trámites
+                     <i class="fas fa-angle-right right"></i>
+                     <span class="badge badge-warning right">3</span>
+                  </p>
+               </a>
+               <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                     <a routerLink="/aguatramite" class="nav-link">
+                        <i class="fa fa-bath nav-icon"></i>
+                        <p class="text-warning"> Trámites de agua</p>
+                     </a>
+                  </li>
+
+                  <li class="nav-item">
+                     <a routerLink="/tramites" class="nav-link">
+                        <i class="fa fa-inbox nav-icon"></i>
+                        <p class="text-warning"> Trámites externos</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/reclamos" class="nav-link">
+                        <i class="fa fa-bug nav-icon"></i>
+                        <p class="text-warning"> Reclamos</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/certificaciones" class="nav-link">
+                        <i class="fa fa-certificate nav-icon"></i>
+                        <p class="text-warning"> Certificaciones</p>
+                     </a>
+                  </li>
+               </ul>
+            </li>
+            <li *ngIf="authService.modulo == 1" class="nav-item">
+               <a href="#" class="nav-link bg-info">
+                  <i class="bi-archive-fill nav-icon" style="font-size: 15px;"></i>
+                  <p> Recaudación
+                     <i class="fas fa-angle-right right"></i>
+                     <span class="badge badge-warning right">4</span>
+                  </p>
+               </a>
+               <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                     <a routerLink="recaudacion" class="nav-link">
+                        &nbsp;<i class="bi bi-cash-coin nav-icon"></i>
+                        <p class="text-warning"> &nbsp;Recaudación</p>
+                     </a>
+                  </li>
+               </ul>
+               <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                     <a routerLink="convenios" class="nav-link">
+                        <i class="fa fa-american-sign-language-interpreting nav-icon" aria-hidden="true"></i>
+                        <p class="text-warning"> Convenios de Pago</p>
+                     </a>
+                  </li>
+               </ul>
+               <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                     <a routerLink="cajas" class="nav-link">
+                        <i class="fa fa-th nav-icon" aria-hidden="true"></i>
+                        <p class="text-warning"> Cajas</p>
+                     </a>
+                  </li>
+               </ul>
+            </li>
+
+            <li *ngIf="authService.modulo == 1" class="nav-item">
+               <a href="#" class="nav-link bg-info">
+                  <i class="bi-wallet-fill nav-icon" style="font-size: 15px;"></i>
+                  <p> Catálogos
+                     <i class="fas fa-angle-right right"></i>
+                     <span class="badge badge-warning right">5</span>
+                  </p>
+               </a>
+               <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                     <a routerLink="/categorias" class="nav-link">
+                        <i class="fa fa-compass nav-icon"></i>
+                        <p class="text-warning"> Categorías</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/ptoemision" class="nav-link">
+                        <i class="fa fa-folder nav-icon"></i>
+                        <p class="text-warning"> Establecimientos</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/estadom" class="nav-link">
+                        <i class="fa fa-eye nav-icon"></i>
+                        <p class="text-warning"> Estado de los medidores</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/intereses" class="nav-link">
+                        <i class="fa fa-info nav-icon"></i>
+                        <p class="text-warning">Intereses</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/nacionalidades" class="nav-link">
+                        <i class="fa fa-globe nav-icon"></i>
+                        <p class="text-warning">Nacionalidades</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/novedades" class="nav-link">
+                        <i class="fa fa-bell nav-icon"></i>
+                        <p class="text-warning">Novedades</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/tpidentificas" class="nav-link">
+                        <i class="fa  fa-id-card nav-icon"></i>
+                        <p class="text-warning">Tipos de identificación</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/tipopago" class="nav-link">
+                        <i class="fa fa-credit-card nav-icon"></i>
+                        <p class="text-warning">Tipos de pago</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/tpreclamos" class="nav-link">
+                        <i class="fa fa-lemon nav-icon"></i>
+                        <p class="text-warning">Tipos de reclamo</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/ubicacionm" class="nav-link">
+                        <i class="fa fa-qrcode nav-icon"></i>
+                        <p class="text-warning">Ubicación medidores</p>
+                     </a>
+                  </li>
+                  <!-- <li class="nav-item">
+                     <a routerLink="/usoitems" class="nav-link">
+                        <i class="bi bi-diagram-3 nav-icon"></i>
+                        <p class="text-warning">&nbsp; Uso de los Items</p>
+                     </a>
+                  </li> -->
+               </ul>
+            </li>
+
+            <!-- =============== FINANCIERO ==================== -->
+            <li *ngIf="authService.modulo == 2" class="nav-item">
+               <a href="#" class="nav-link bg-info">
+                  <i class="bi-app-indicator nav-icon"></i>
+                  <p> Contabilidad
+                     <i class="fas fa-angle-right right"></i>
+                     <span class="badge badge-warning right">1</span>
+                  </p>
+               </a>
+               <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                     <a routerLink="/cuentas" class="nav-link">
+                        <i class="bi-book-fill nav-icon"></i>
+                        <p class="text-warning"> Cuentas</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/asientos" class="nav-link">
+                        <i class="bi-calendar3-range-fill"></i>
+                        <p class="text-warning"> &nbsp;Diario general</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/bancos" class="nav-link">
+                        <i class="bi-bank2 nav-icon"></i>
+                        <p class="text-warning"> Control de bancos</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/sinafip" class="nav-link">
+                        <i class="bi-hurricane nav-icon"></i>
+                        <p class="text-warning"> SINAFIP</p>
+                     </a>
+                  </li>
+
+                  <li class="nav-item">
+                     <a href="#" class="nav-link">
+                        <i class="bi-back nav-icon"></i>
+                        <p class="text-warning font-weight-bold"> Homologación NIIFs
+                           <i class="right fas fa-angle-right"></i>
+                        </p>
+                     </a>
+                     <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                           <a routerLink="/niifcuentas" class="nav-link py-0">
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                              <i class="bi-book-half nav-icon"></i>
+                              <p class="small text-warning">&nbsp; Plan de cuentas NIIF</p>
+                           </a>
+                        </li>
+                        <li class="nav-item">
+                           <a routerLink="/usoitems" class="nav-link py-0">
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                              <i class="bi-file-ruled-fill nav-icon"></i>
+                              <p class="small text-warning">&nbsp; Balance general</p>
+                           </a>
+                        </li>
+                        <li class="nav-item">
+                           <a routerLink="/rubros" class="nav-link pt-0">
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                              <i class="bi-file-diff-fill nav-icon"></i>
+                              <p class="small text-warning">&nbsp; Estado de resultados</p>
+                           </a>
+                        </li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+            <li *ngIf="authService.modulo == 2" class="nav-item">
+               <a href="#" class="nav-link bg-info">
+                  <i class="bi-piggy-bank nav-icon"></i>
+                  <p> Tesorería
+                     <i class="fas fa-angle-right right"></i>
+                     <span class="badge badge-warning right">2</span>
+                  </p>
+               </a>
+               <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                     <a href="pages/mailbox/mailbox.html" class="nav-link">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p>Ingresos</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a href="pages/mailbox/compose.html" class="nav-link">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p>Egresos</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a href="pages/mailbox/read-mail.html" class="nav-link">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p>Beneficiarios</p>
+                     </a>
+                  </li>
+               </ul>
+            </li>
+            <li *ngIf="authService.modulo == 2" class="nav-item">
+               <a href="#" class="nav-link bg-info">
+                  <i class="bi-table nav-icon"></i>
+                  <p> Presupuesto
+                     <i class="fas fa-angle-right right"></i>
+                     <span class="badge badge-warning right">3</span>
+                  </p>
+               </a>
+               <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                     <a routerLink="/preingresos" class="nav-link">
+                        <i class="bi-cone-striped nav-icon"></i>
+                        <p class="text-warning"> Presupuesto de ingresos</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/pregastos" class="nav-link">
+                        <i class="bi-file-earmark-ppt-fill nav-icon"></i>
+                        <p class="text-warning"> Presupuesto de gastos</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/certipresu" class="nav-link">
+                        <i class="bi-bookmark-check-fill nav-icon"></i>
+                        <p class="text-warning"> Certificaciones</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/tramipresu" class="nav-link">
+                        <i class="bi-badge-tm-fill nav-icon"></i>
+                        <p class="text-warning"> Trámites presupuestarios</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/reformas" class="nav-link">
+                        <i class="bi-bootstrap-reboot nav-icon"></i>
+                        <p class="text-warning"> Reformas</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/clasificador" class="nav-link">
+                        <i class="bi-bezier nav-icon"></i>
+                        <p class="text-warning"> Clasificador</p>
+                     </a>
+                  </li>
+               </ul>
+            </li>
+            <li *ngIf="authService.modulo == 2" class="nav-item">
+               <a href="#" class="nav-link bg-info">
+                  <i class="bi-card-list nav-icon"></i>
+                  <p> Estados financieros
+                     <i class="fas fa-angle-right right"></i>
+                     <span class="badge badge-warning right">4</span>
+                  </p>
+               </a>
+               <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                     <a routerLink="/bc" class="nav-link">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p> Balance comprobación</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/es" class="nav-link">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p> Estado situación</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/er" class="nav-link">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p> Estado resultados</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/es" class="nav-link">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p> Flujo del efectivo</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/er" class="nav-link">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p> Ejecución presupuestaria</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a href="#" class="nav-link">
+                        <i class="bi-back nav-icon"></i>
+                        <p class="font-weight-bold"> Costos
+                           <i class="right fas fa-angle-right"></i>
+                        </p>
+                     </a>
+                     <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                           <a routerLink="/niifcuentas" class="nav-link py-0">
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                              <i class="bi-book-half nav-icon"></i>
+                              <p class="small">&nbsp; Unidades y cuentas</p>
+                           </a>
+                        </li>
+                        <li class="nav-item">
+                           <a routerLink="/usoitems" class="nav-link py-0">
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                              <i class="bi-file-ruled-fill nav-icon"></i>
+                              <p class="small">&nbsp; Comparativo</p>
+                           </a>
+                        </li>
+                        <li class="nav-item">
+                           <a routerLink="/rubros" class="nav-link pt-0">
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                              <i class="bi-file-diff-fill nav-icon"></i>
+                              <p class="small">&nbsp; Estado de resultados</p>
+                           </a>
+                        </li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+            <li *ngIf="authService.modulo == 2" class="nav-item">
+               <a href="#" class="nav-link bg-info">
+                  <i class="fa fa-shopping-basket nav-icon"></i>
+                  <p> Catálogos
+                     <i class="fas fa-angle-right right"></i>
+                     <span class="badge badge-warning right">5</span>
+                  </p>
+               </a>
+               <ul class="nav nav-treeview">
+                  <!-- <li class="nav-item">
+                     <a href="pages/mailbox/compose.html" class="nav-link">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p> Niveles de las cuentas</p>
+                     </a>
+                  </li> -->
+                  <li class="nav-item">
+                     <a routerLink="/estrfunc" class="nav-link">
+                        <i class="bi-hdd-stack nav-icon"></i>
+                        <p class="text-warning"> Estructura Funcional</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a href="pages/mailbox/mailbox.html" class="nav-link">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p>Instituciones Financieras</p>
+                     </a>
+                  </li>
+               </ul>
+            </li>
+            <!-- =============== ADMINISTRACION CENTRAL ==================== -->
+            <li *ngIf="authService.modulo == 6" class="nav-item">
+               <a href="#" class="nav-link bg-info">
+                  <i class="bi-gear nav-icon"></i>
+                  <p> Utilería
+                     <i class="fas fa-angle-right right"></i>
+                     <span class="badge badge-warning right">1</span>
+                  </p>
+               </a>
+               <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                     <a routerLink="/documentos" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(5, 1)}">
+                        <i class="bi bi-file-text-fill nav-icon"></i>
+                        <p class="text-warning"> Documentos de respaldo</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <!-- <a routerLink="/usuarios" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(5, 2)}"> -->
+                     <!-- <a routerLink="/usuarios" class="nav-link" [ngClass]="{'disabled': this.authService.idusuario != 1}"> -->
+                     <a class="nav-link" (click)="navUsuario()" routerLink="">
+                        <i class="bi-people"></i>
+                        <p class="text-warning">&nbsp; Usuarios</p>
+                     </a>
+                  </li>
+               </ul>
+            </li>
+            <li *ngIf="authService.modulo == 6" class="nav-item">
+               <a href="#" class="nav-link bg-info">
+                  <i class="bi bi-scissors nav-icon"></i>
+                  <p> SRI
+                     <i class="fas fa-angle-right right"></i>
+                     <span class="badge badge-warning right">2</span>
+                  </p>
+               </a>
+               <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                     <a routerLink="/tabla4" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(5, 3)}">
+                        <i class="bi bi-eraser nav-icon"></i>
+                        <p class="text-warning"> Comprobantes SRI</p>
+                     </a>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </nav>
+      <!-- /.sidebar-menu -->
+   </div>
+   <!-- /.sidebar -->
+</aside>

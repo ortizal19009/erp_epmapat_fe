@@ -1,0 +1,66 @@
+<div class="collapse px-0 pt-0 fondoInteres sombra fondo" id="addInteres">
+   <div class="mb-3 pt-0 pb-0 fondoInteres border cabecera">
+      <h5 class="font-weight-bold mt-2 text-center titInteres">Modificar Interés</h5>
+   </div>
+   <form [formGroup]="formInteres" class="ml-4">
+      <div class="row">
+
+         <div class="form-group col-md-4 my-0 py-0">
+            <div class="input-group input-group-sm mb-3">
+               <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm" data-toggle="tooltip"
+                     title="Obligatorio y mínimo 3 caracteres">Año</span>
+               </div>
+               <input type="text" class="form-control text-center" formControlName="anio" aria-label="Small"
+                  aria-describedby="inputGroup-sizing-sm" required [ngClass]="{'is-invalid': f['anio'].invalid && f['anio'].touched,
+                        'is-valid': f['anio'].valid}">
+            </div>
+         </div>
+
+         <div class="form-group col-md-6 my-0 py-0">
+            <div class="input-group mb-3 input-group-sm">
+               <div class="input-group-prepend">
+                  <label class="input-group-text" for="mes">Mes</label>
+               </div>
+               <select class="custom-select" id="mes" formControlName="mes" [ngClass]="{'is-invalid': f['mes'].invalid && f['mes'].touched,
+                     'is-valid': f['mes'].valid, '': f['mes'].untouched}">
+                  <option value="1">Enero</option>
+                  <option value="2">Febrero</option>
+                  <option value="3">Marzo</option>
+                  <option value="4">Abril</option>
+                  <option value="5">Mayo</option>
+                  <option value="6">Junio</option>
+                  <option value="7">Julio</option>
+                  <option value="8">Agosto</option>
+                  <option value="9">Septiembre</option>
+                  <option value="10">Octubre</option>
+                  <option value="11">Noviembre</option>
+                  <option value="12">Diciembre</option>
+               </select>
+            </div>
+         </div>
+
+         <div class="form-group col-md-6 my-0 py-0">
+            <div class="input-group input-group-sm mb-1">
+               <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm" data-toggle="tooltip"
+                     title="Obligatorio y mínimo 3 caracteres">Porcentaje</span>
+               </div>
+               <input type="number" class="form-control text-center" formControlName="porcentaje" aria-label="Small"
+                  aria-describedby="inputGroup-sizing-sm" required [ngClass]="{'is-invalid': f['porcentaje'].invalid && f['porcentaje'].touched,
+                        'is-valid': f['porcentaje'].valid, '': f['porcentaje'].untouched}" min="0" step="0.1">
+            </div>
+         </div>
+
+      </div>
+   </form>
+
+   <div class="mt-3 text-center">
+      <button type="submit" class="btn btn-success btn-sm mx-1 mb-3" (click)="onSubmit()" [disabled]="!formInteres.valid"
+         data-toggle="collapse" data-target="#addInteres">
+         <i class="fa fa-check-circle"></i> Aceptar</button>
+      <button class="btn btn-outline-success btn-sm mx-1 mb-3" data-toggle="collapse" data-target="#addInteres" (click)="reset()">
+         <i class="fa fa-times-circle"></i> Cancelar</button>
+   </div>
+
+</div>

@@ -1,0 +1,15 @@
+.container-fluid{
+   --color1: rgb(109, 110, 15);
+   --color2: rgba(223, 220, 162);
+}
+
+.headDocumento{
+   background-color: var(--color1);
+   color: white;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+}
+
+/* Card Documento */
+.cardDocumento{box-shadow: 0 0 10px rgba(0, 0, 0, 1);}
+.cardDocumento, .cardDocumento li{ background-color: var(--color2);   }
+.cardDocumento a:hover{ color: rgb(45, 53, 2);}

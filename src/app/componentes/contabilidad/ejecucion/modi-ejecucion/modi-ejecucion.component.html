@@ -1,0 +1,140 @@
+<div class="content-header">
+   <div class="row mt-3">
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start  border">
+         <div class="card card-body col-sm-6 fondo">
+            <form [formGroup]="ejecucionForm">
+               <div class="row">
+                  <div class="form-group col-md-12 my-0 py-0">
+                     <label class="form-label col-form-label-sm ml-2 my-0 py-0">Modificar Partida Presupuestaria
+                     </label>
+                  </div>
+               </div>
+
+               <div class="form-group col-md-12 mt-1">
+                  <div class="input-group input-group-sm">
+                     <div class="input-group-prepend">
+                        <button type="button" class="btn btn-primary btn-sm" data-toggle="modal"
+                           data-target="#presupueModal" (click)="presupueModal()"><i class="fa fa-search"></i>
+                           Buscar </button>
+                     </div>
+                  </div>
+               </div>
+
+               <div class="row">
+
+                  <div class="form-group col-md-6 mt-1">
+                     <div class="input-group input-group-sm mb-1 ">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold ">Partida</span>
+                        </div>
+                        <input type="text" class="form-control" formControlName="codpar" required minlength="10"
+                           [ngClass]="{'is-invalid': this.codpar.invalid && this.codpar.touched,
+                    'is-valid': this.codpar.valid, '': this.codpar.untouched}" readonly>
+                     </div>
+                  </div>
+                  <div class="form-group col-md-12 mt-1">
+                     <div class="input-group input-group-sm mb-1 ">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold ">Nombre</span>
+                        </div>
+                        <input type="text" class="form-control" formControlName="nompar" readonly>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-5 mt-1">
+                     <div class="input-group input-group-sm mb-1 ">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold ">Reforma</span>
+                        </div>
+                        <input type="number" class="form-control text-right" formControlName="modifi" step="0.1">
+                     </div>
+                  </div>
+
+               </div>
+               <div class="row">
+                  <div class="row justify-content-start col-md-12">
+                     <div class="input-group input-group-sm mb-1 col-sm-12">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Concepto</span>
+                        </div>
+                        <textarea class="form-control" formControlName="concepto" rows="2"></textarea>
+
+                     </div>
+                  </div>
+               </div>
+
+               <div class="text-center">
+                  <button class="btn btn-success btn-sm mx-3 mt-3" (click)="onSubmit()"
+                     [disabled]="!ejecucionForm.valid">
+                     <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+
+                     
+                  <button class="btn btn-outline-success btn-sm mx-3 mt-3" (click)="retornar()">
+                     <i class="fa fa-times-circle"></i> Cancelar
+                  </button>
+               </div>
+            </form>
+         </div>
+      </div>
+   </div>
+</div>
+
+
+<!-- Modal Buscar Partida del Presupue -->
+<div class="modal fade" id="presupueModal" tabindex="-1" aria-labelledby="presupueModalLabel" aria-hidden="true"
+   data-backdrop="static">
+   <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content presupues">
+         <div class="modal-body">
+            <div row class="ml-1 my-0">
+               <form [formGroup]="formBusPresupue" class="mb-0 formPresupue">
+                  <div class="row py-2">
+                     <div class="input-group col-sm-8">
+
+                        <input type="text" placeholder="Partida" class="form-control form-control-sm col-sm-2 ml-2"
+                           autofocus formControlName="codpar" />
+                        <input type="text" placeholder="Nombre" class="form-control form-control-sm text-center"
+                           formControlName="nompar" />
+                        <div class="input-group-append">
+                           <button class="btn btn-sm btn-primary" (click)="buscarPresupue()">
+                              <i class="fa fa-search"></i> Buscar</button>
+                        </div>
+
+                     </div>
+                     <div class="col-md-3 mr-2">
+                        <input type="text" class="form-control form-control-sm text-center" formControlName="filtrar"
+                           placeholder="Filtrar..." [(ngModel)]="filtro" />
+                     </div>
+                  </div>
+               </form>
+            </div>
+            <div class="row ml-1 mr-0">
+               <table class="table table-hover table-bordered table-sm mt-0 pt-0 cabeceraPresupue">
+                  <thead>
+                     <tr>
+                        <th class="col-sm-2">Partida</th>
+                        <th class="col-sm-10">Nombre</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <tr class="filas" *ngFor="let partida of _presupue  | filter: filtro; let i= index"
+                        (click)="selecPresupue(partida)" data-dismiss="modal">
+                        <td class="py-0">{{ partida.codpar }}</td>
+                        <td class="py-0">{{ partida.nompar }}</td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">
+               <i class="bi bi-x-circle"></i> Cancelar</button>
+         </div>
+      </div>
+   </div>
+</div>

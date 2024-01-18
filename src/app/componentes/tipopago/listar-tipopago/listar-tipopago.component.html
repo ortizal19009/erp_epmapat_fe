@@ -1,0 +1,106 @@
+<!-- Content Header (Page header) -->
+<div class="content pt-1 pl-3">
+  <div class="container-fluid">
+      <div class="row mt-1">
+          <div class="col-sm-5">
+              <h4 class="m-0 font-weight-bold">Tipos de Pago</h4>
+          </div><!-- /.col -->
+          <div class="col-sm-6">
+              <button class="btn btn-outline-primary btn-sm float-left" type="button" data-toggle="collapse"
+                  data-target="#collapseNuevo" aria-expanded="false" aria-controls="collapseNuevo">
+                  <i class="fa fa-plus-square" style="font-size:24pxi"></i> Nuevo
+              </button>
+          </div><!-- /.col -->
+      </div><!-- /.row -->
+  </div><!-- /.container-fluid -->
+</div><!-- /.content-header -->
+
+<div class="container-fluid">
+  <div class="row mb-0">
+      <div class="col-sm-5">
+          <table class="table table-hover table-bordered table-sm">
+              <thead>
+                  <tr>
+                      <th class="bg-primary"></th>
+                      <th class="bg-primary text-center">Descripción</th>
+                      <th class="bg-primary text-center">Acciones</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <tr *ngFor="let tipopago of _tipopago; let i=index">
+                      <td class="text-center font-weight-bold">{{i+1}}</td>
+                      <td>{{ tipopago.descripcion }}</td>
+                      <td class="text-center">
+                          <button class="badge badge-warning mr-1" (click)="modificarTipopago(tipopago.idtipopago)">
+                              Modificar
+                          </button>
+                          <button class="badge badge-danger mx-1" data-toggle="modal" data-target="#modalEliminar"
+                              (click)="eliminarTipopago(tipopago.idtipopago, tipopago.descripcion)">Eliminar
+                          </button>
+                          <button (click)="info(tipopago.idtipopago, tipopago.descripcion)"
+                              class="badge badge-info badge-pill ml-1" data-toggle="collapse"
+                              data-target="#collapseInfo" aria-expanded="false" aria-controls="collapseInfo">
+                              &nbsp;&nbsp;&nbsp;&nbsp;Info&nbsp;&nbsp;&nbsp;&nbsp;
+                          </button>
+                      </td>
+                  </tr>
+                  <!-- MODAL para Eliminar-->
+                  <div class='modal fade' id='modalEliminar' tabindex='-1' aria-labelledby='modalEliminar'
+                      aria-hidden='true'>
+                      <div class='modal-dialog modal-sm'>
+                          <div class='modal-content'>
+                              <div class='modal-header'>
+                                  <h5 class='modal-title font-weight-bold' id='ModalLabel'>Mensaje</h5>
+                              </div>
+                              <div *ngIf="rtn==0; then thenBlock else elseBlock"></div>
+                              <ng-template #thenBlock>
+                                  <div class='modal-body'>
+                                      <div class="alert alert-info" role="alert">
+                                          ¿Eliminar el Tipo de Pago:<br>{{descripcion}}?
+                                      </div>
+                                  </div>
+                                  <div class='modal-footer' id='idButtons'>
+                                      <button type='button' class='btn btn-success btn-sm' data-dismiss='modal'
+                                          (click)="confirmaEliminarTipopago()" id='btnSi'>Aceptar</button>
+                                      <button type='button' class='btn btn-outline-success btn-sm'
+                                          data-dismiss='modal'>Cancelar</button>
+                                  </div>
+                              </ng-template>
+                              <ng-template #elseBlock>
+                                  <div class='modal-body'>
+                                      <div class="alert alert-warning" role="alert">
+                                          <strong>No puede eliminar!</strong><br>Tiene registrado Facturas.
+                                      </div>
+                                  </div>
+                                  <div class='modal-footer' id='idButtons'>
+                                      <button type='button' class='btn btn-outline-success btn-sm'
+                                          data-dismiss='modal'>Cerrar</button>
+                                  </div>
+                              </ng-template>
+                          </div>
+                      </div>
+                  </div>
+                  <!--Del Modal de Eliminar-->
+
+              </tbody>
+          </table>
+      </div>
+      <div class="col-sm-5 mt-2">
+          <div class="collapse" id="collapseNuevo">
+              <div class="card card-success card-outline card-body">
+                  <app-add-tipopago></app-add-tipopago>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <div class="row mb-0">
+      <div class="col-sm-5">
+          <div class="collapse" id="collapseInfo">
+              <div class="alert alert-info text-center" role="alert">
+                  <strong>{{descripcion}}:</strong> Total de Medidores <strong>335</strong>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>

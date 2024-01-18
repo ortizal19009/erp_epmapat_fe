@@ -1,0 +1,29 @@
+.partidaCla{
+   background-color: rgb(109, 110, 15);
+   color: white;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+}
+
+.partidaCla li{
+   background-color: rgb(109, 110, 15);
+   color: rgb(211, 248, 3);
+}
+
+.partidaCla a{
+   color: white;
+}
+
+.partidaCla a:hover{
+   color: rgb(45, 53, 2);
+}
+
+.movimientos{
+   background-color: rgb(109, 110, 15);
+   color: black;
+}
+.movimientos a{
+   color: rgb(248, 247, 247);
+}
+.movimientos a:link {
+   color: black;
+}

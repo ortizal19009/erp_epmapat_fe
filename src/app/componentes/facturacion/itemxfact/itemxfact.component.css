@@ -1,0 +1,19 @@
+.table {
+   --bgcolor1: rgb(122, 138, 32);
+   --bgcolor2: rgb(190, 230, 174);
+}
+
+table {
+   background-color: var(--bgcolor2);
+   box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+}
+
+thead {
+   background-color: var(--bgcolor1);
+   color: white;
+}
+
+.fila:hover {
+   background-color: #117a8B;
+   color: white;
+}

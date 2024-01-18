@@ -1,0 +1,65 @@
+<div class="container">
+    <div class="text-center">
+        <h2>Modificar Ruta</h2>
+    </div>
+    <hr/>
+    <form [formGroup]="rutasForm">
+        <div class="row">
+            <div class="col-md-4">
+                <label for="">Descripcion</label>
+                <input type="text" class="form-control" id="descripcion" placeholder="Ingrese descripcion de ruta" formControlName="descripcion"/>
+            </div>
+            <div class="col-md-4">
+                <label for="">Orden</label>
+                <input type="number" class="form-control" id="orden" placeholder="Ingrese orden de ruta" formControlName="orden"/>
+            </div>
+            <div class="col-md-4">
+                <label for="">Codigo</label>
+                <input type="number" class="form-control" id="codigo" placeholder="Ingrese codigo de ruta" formControlName="codigo"/>
+            </div>
+            <div class="modal fade" id="rutaModal" tabindex="-1" aria-labelledby="rutaModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="rutaModalLabel">
+                        CONFIRMACIÓN
+                      </h5>
+                      <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <div class="row">
+                        <div class="col-md-4 mb-3">
+                          <label for="" class="form-label">Usuario modifica</label>
+                          <input type="number" class="form-control" id="usumodi" placeholder="Usuario"
+                            formControlName="usumodi" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                          <label for="" class="form-label">Fecha modifica</label>
+                          <input type="date" class="form-control" id="fecmodi" formControlName="fecmodi" />
+                        </div>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal" >
+                        Cancelar
+                      </button>
+                      <button type="button" class="btn btn-primary" (click)="onSubmit()" data-dismiss="modal"
+                      data-toggle="collapse" data-target="#collapseruta">
+                      Aprobar
+                    </button>
+                  </div>
+                  </div>
+                </div>
+              </div>
+        </div>
+        <div class="mt-3 text-center">
+          <button type="button" class="btn btn-secondary mx-3" (click)="retornarListaRutas()">
+            Cancelar
+          </button>
+          <!-- Button trigger modal -->
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#rutaModal">
+              Aceptar
+            </button>
+          </div>
+    </form>
+</div>

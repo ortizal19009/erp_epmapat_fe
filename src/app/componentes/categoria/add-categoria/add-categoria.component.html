@@ -1,0 +1,50 @@
+<div class="collapse" id="nuevaCategoria">
+   <div class="row justify-content-center">
+      <h5 class="font-weight-bold">Nueva Categoría</h5>
+   </div>
+
+   <form [formGroup]="formCategoria" (ngSubmit)="onSubmit()" novalidate>
+      <div class="row">
+         <div class="form-group col-md-9 my-0 py-0">
+            <label for="descricategoria" class="form-label form-label col-form-label-sm my-1 py-1 col-12">Nombre
+               <input id="descricategoria" type="text" formControlName="descricategoria" placeholder=" "
+                  required minlength="3" class="form-control form-control-sm" 
+                  [ngClass]="{'is-invalid': this.formCategoria.get('descricategoria').invalid && this.formCategoria.get('descricategoria').touched,
+                  'is-valid': this.formCategoria.get('descricategoria').valid,
+                  '': this.formCategoria.get('descricategoria').untouched}">
+            </label>
+         </div>
+         <!-- <div *ngIf="formCategoria.get('descricategoria').status === 'PENDING'">Validando...</div> -->
+         
+         <div class="form-group col-md-3 my-0 py-0">
+            <label for="porcdescuento" class="form-label form-label col-form-label-sm my-1 py-1 text-center">
+               %Desc
+               <input class="form-control form-control-sm text-center" id="porcdescuento" name="porcdescuento"
+                  type="number">
+            </label>
+         </div>
+      </div>
+   </form>
+
+   <div class="mt-3 mb-3 text-center">
+      <button type="submit" class="btn btn-success btn-sm mx-1" [disabled]="formCategoria.invalid">
+         <i class="fa fa-check-circle"></i> Aceptar</button>
+      <button class="btn btn-outline-success btn-sm mx-1" data-toggle="collapse"
+         data-target="#nuevaCategoria" (click)="onReset()">
+         <i class="fa fa-times-circle" style="font-size:24pxi"></i> Cancelar</button>
+   </div>
+
+   <!-- <p>Valor del Formulario: {{ formCategoria.value | json }}</p>-->
+   <span class="small ml-3" *ngIf="formCategoria.get('descricategoria').status === 'PENDING'">Validando...</span>
+   <!-- <p class="small" id="estado">Formulario: <strong>{{ formCategoria.status | json }}</strong></p>  -->
+   <!-- <div *ngIf="formCategoria.get('descricategoria').hasError('usernameAlreadyExists')" >
+   Ya <strong>existe</strong>
+   </div> -->
+   <div *ngIf="formCategoria.get('descricategoria').hasError('notAvailable')" >
+      Ya <strong>existe</strong>
+      </div>
+      <!-- <div *ngIf="formCategoria.get('descricategoria').hasError('descripcionTaken')" >
+         Ya <strong>existe</strong>
+         </div> -->
+      
+</div>

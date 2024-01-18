@@ -1,0 +1,201 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start partidaCla">
+         <div class="col-sm-9">
+            <h5 class="m-0 font-weight-bold"><i class="bi bi-bezier"></i>&nbsp; Partida del clasificador presupuestario
+            </h5>
+         </div>
+         <div class="col-sm-3 mt-0 text-right">
+            <button class="btn btn-primary btn-sm text-right" type="button" (click)="regresar()">
+               <i class="fa fa-reply-all"></i> Regresar
+            </button>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-3">
+         <div class="card card-outline border-top partidaCla">
+            <div class="card-body box-profile">
+               <h3 class="profile-username text-center">{{ clasificador.codpar }}</h3>
+               <p class="text-center">{{ clasificador.nompar }}</p>
+               <ul class="list-group list-group-unbordered mb-3">
+                  <li class="list-group-item">
+                     <b>Nivel</b> <a class="float-right">{{ clasificador.nivpar }}</a>
+                  </li>
+                  <li class="list-group-item">
+                     <b>Grupo</b> <a class="float-right">{{ clasificador.grupar }}</a>
+                  </li>
+               </ul>
+               <div class="row justify-content-center">
+                  <button class="btn btn-warning btn-xs mx-1" type="button" (click)="modiClasificador()">
+                     <i class="fa fa-edit"></i> Modificar
+                  </button>
+                  <button class="btn btn-danger btn-xs mx-1" [disabled]="elimdisabled" data-toggle="modal"
+                     data-target="#modalEliminar">
+                     <i class="fa fa-times-circle"></i>
+                     Eliminar
+                  </button>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div class="col-sm-9">
+         <div class="card border-top ">
+            <div class="card-header movimientos">
+               <ul class="nav nav-tabs card-header-tabs">
+                  <li class="nav-item"><a class="nav-link active" href="#movimientos" data-toggle="tab">
+                        <i class="bi bi-calendar-range"></i> Movimientos</a></li>
+                  <li class="nav-item"><a class="nav-link" href="#datos" data-toggle="tab">
+                        <i class="bi bi-journal"></i> Datos</a></li>
+                  <li class="nav-item"><a class="nav-link" href="#auxiliares" data-toggle="tab">
+                        <i class="bi bi-text-indent-left"></i> Partidas auxiliares</a></li>
+               </ul>
+            </div><!-- /.card-header -->
+
+            <div class="card-body">
+               <div class="tab-content">
+                  <div class="tab-pane active" id="movimientos">
+                     <div class="post">
+                        <div class="user-block">
+                           <div *ngIf="noPartidas">
+                              <div class="row justify-content-center">
+                                 <div class="callout callout-info col-sm-6 text-center">
+                                    <div class="alert alert-info">
+                                       <h5><i class="fas fa-info"></i> <strong> Mensaje</strong></h5>
+                                       No tiene Movimientos !
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <table *ngIf="!noPartidas" class="table table-hover table-sm table-bordered">
+                              <thead class="">
+                                 <tr class="text-center">
+                                    <th>Fecha</th>
+                                    <th>Descripción</th>
+                                    <th>Valor</th>
+                                    <th></th>
+                                    <th></th>
+                                 </tr>
+                              </thead>
+                              <tbody>
+                                 <tr *ngFor="let movimiento of _movimientos" class="text-center">
+                                    <td>{{ movimiento.idabonado }}</td>
+                                    <td>{{ movimiento.nromedidor }}</td>
+                                    <td class="text-left">{{ movimiento.direccionubicacion }}</td>
+                                    <td class="text-left">{{ movimiento.idruta_rutas.descripcion }}</td>
+                                    <td>
+                                       <button class="btn btn-outline-info btn-xs" type="button">
+                                          <i class="fa fa-info-circle"></i> Info&nbsp;
+                                       </button>
+                                    </td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="tab-pane" id="facelectro">
+                     <div class="post">
+                        <div class="user-block">
+                           <div>
+                              <div class="row justify-content-center">
+                                 <div class="callout callout-info col-sm-6 text-center">
+                                    <div class="alert alert-info">
+                                       <h5><i class="fas fa-info"></i> <strong> Mensaje</strong></h5>
+                                       No tiene Facturas !
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <table class="table table-hover table-sm table-bordered">
+                              <thead class="bg-primary">
+                                 <tr class="text-center">
+                                    <th>Nro.Factura</th>
+                                    <th>Pre.Fac</th>
+                                    <th class="col-sm-5">Concepto</th>
+                                    <th class="col-sm-2">F.Cobro</th>
+                                    <th>Valor</th>
+                                    <th></th>
+                                 </tr>
+                              </thead>
+                              <tbody>
+                                 <tr *ngFor="let facele of _movimientos" class="text-center">
+                                    <td>{{ facele.nrofac }}</td>
+                                    <td>{{ facele.idfactura_facturas.idfactura }}</td>
+                                    <td class="text-left">{{ facele.concepto }}</td>
+                                    <td>{{ facele.idfactura_facturas.fechacobro | date: 'dd-MM-y'}}</td>
+                                    <td class="text-right">{{ facele.total | number: '1.2-2'}}</td>
+                                    <td>
+                                       <button class="btn btn-outline-info btn-xs" data-toggle="modal" data-target="#DetalleFacturaModal">
+                                          <i class="fa fa-info-circle"></i> Info
+                                       </button>
+                                    </td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="tab-pane" id="prefacturas">
+                     <div class="post">
+                        <div class="user-block">
+                           <div *ngIf="noPartidas">
+                              <div class="row justify-content-center">
+                                 <div class="callout callout-info col-sm-6 text-center">
+                                    <div class="alert alert-info">
+                                       <h5><i class="fas fa-info"></i> <strong> Mensaje</strong></h5>
+                                       No tiene Pre Facturas !
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <table class="table table-hover table-sm table-bordered">
+                              <thead class="bg-primary">
+                                 <tr class="text-center">
+                                    <th>Nro.</th>
+                                    <th>Fecha</th>
+                                    <th>Módulo</th>
+                                    <th>Factura</th>
+                                    <th>F.Cobro</th>
+                                    <th>Valor</th>
+                                    <th></th>
+                                 </tr>
+                              </thead>
+                              <tbody>
+                                 <tr *ngFor="let factura of _movimientos" class="text-center">
+                                    <td>{{ factura.idfactura }}</td>
+                                    <td>{{ factura.feccrea }}</td>
+                                    <td class="text-left">{{ factura.idmodulo.descripcion }}</td>
+                                    <td>{{ factura.nrofactura }}</td>
+                                    <td>{{ factura.fechacobro }}</td>
+                                    <td class="text-right">{{ factura.totaltarifa | number: '1.2-2'}}</td>
+                                    <td>
+                                       <!-- <button class="btn btn-outline-info btn-xs"
+                                          (click)="detallesFactura(factura)" data-toggle="modal"
+                                          data-target="#facturaDetallesModal">
+                                          <i class="fa fa-info-circle"></i> Info
+                                       </button> -->
+                                       <button class="btn btn-outline-info btn-xs" data-toggle="modal"
+                                          data-target="#DetalleFacturaModal">
+                                          <i class="fa fa-info-circle"></i> Info
+                                       </button>
+                                    </td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </div>
+                     </div>
+                  </div>
+
+                  
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

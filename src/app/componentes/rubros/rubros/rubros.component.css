@@ -1,0 +1,32 @@
+.container-fluid{
+   --bgcolor1: rgb(95, 57, 95);
+   --bgcolor2: rgba(207, 196, 204);
+}
+
+.titRubros {
+   background-color: var(--bgcolor1);
+   color: white;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.fondoRubros{ background-color: var(--bgcolor2);}
+
+table {
+   background-color: var(--bgcolor2);
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+table>thead>tr {
+   background-color: var(--bgcolor1);
+   color: white;
+}
+
+table tbody tr:hover  { 
+   background-color: #117a8B;
+   color: white;
+   cursor: pointer; 
+}
+
+.transparente{ opacity: 0;}
+.sombra{ box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);}
+.tachado{ text-decoration: line-through;}

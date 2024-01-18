@@ -1,0 +1,154 @@
+<div class="content pt-1 pl-3">
+    <div class="container-fluid">
+        <div class="row mt-0 mb-2">
+            <div class="col-sm-2">
+                <h4 class="m-0 font-weight-bold">Trámites</h4>
+            </div>
+            <div class="col-sm-6">
+                <div class="container-fluir">
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <input type="text" class="form-control form-control-sm mx-0" placeholder="Filtrar..." />
+            </div>
+            <div class="col-sm-2">
+                <button class="btn btn-outline-primary btn-sm" type="button" (click)="addTramite()">
+                    <i class="fa fa-plus-square" style="font-size:24pxi"></i>
+                    Nuevo
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row mb-0">
+        <div class="col-sm">
+            <table class="table table-hover table-bordered table-sm">
+                <thead class="text-center bg-primary">
+                    <tr class="h-25 tr-sm">
+                        <th>#</th>
+                        <th class="col-sm-1">Fecha</th>
+                        <th class="col-sm-4">Cliente</th>
+                        <th>Descripción</th>
+                        <th>Valor</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let tramiteDatos of v_tramites">
+                        <td class="text-center">{{tramiteDatos.idtramite}}</td>
+                        <td class="text-center">{{tramiteDatos.feccrea | date:'dd-MM-y'}}</td>
+                        <td>{{tramiteDatos.idcliente_clientes.nombre}}</td>
+                        <td>{{tramiteDatos.descripcion}}</td>
+                        <td class="text-right">{{tramiteDatos.valor | number: '0.2'}}</td>
+                        <td class="text-center">
+                            <button class="badge badge-pill badge-info mx-1" (click)="detallesTramite(tramiteDatos)"
+                                data-toggle="modal" data-target="#infTramiteModal">
+                                &nbsp;&nbsp;&nbsp;&nbsp;Info&nbsp;&nbsp;&nbsp;&nbsp;
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Informacion de tramite -->
+<div class="modal fade" id="infTramiteModal" tabindex="-1" aria-labelledby="infTramiteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="infTramiteModalLabel">Detalles</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm">
+                        <label for="">
+                            <h5>Nro tramite:</h5>
+                        </label>
+                    </div>
+                    <div class="col-sm">
+                        <p>{{f_detallestramite.value.nrotramtie}}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm">
+                        <label for="">
+                            <h5>Cliente: </h5>
+                        </label>
+                    </div>
+                    <div class="col-sm">
+                        <p>{{f_detallestramite.value.cliente}}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm">
+                        <label for="">
+                            <h5>Abonado: </h5>
+                        </label>
+                    </div>
+                    <div class="col-sm">
+                        <p>{{f_detallestramite.value.abonado}}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm">
+                        <label for="">
+                            <h5>Descripción: </h5>
+                        </label>
+                    </div>
+                    <div class="col-sm">
+                        <p>{{f_detallestramite.value.descripcion}}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm">
+                        <label for="">
+                            <h5>Pagado: </h5>
+                        </label>
+                    </div>
+                    <div class="col-sm">
+                        <p>{{f_detallestramite.value.pagado}}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm">
+                        <label for="">
+                            <h5>Servicios: </h5>
+                        </label>
+                    </div>
+                    <div class="col-sm">
+                        <div *ngFor="let datosRubros of l_rubros">
+                            <div class="row">
+                                <div class="col-sm">
+                                    <p>{{datosRubros.idrubro_rubros.descripcion}} </p>
+                                </div>
+                                <div class="col-sm text-right">
+                                    <p> <strong>{{datosRubros.idrubro_rubros.valor}}</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-9">
+                        <label for="">
+                            <h5>Total: </h5>
+                        </label>
+                    </div>
+                    <div class="col-sm-3 text-right">
+                        <p><strong>{{f_detallestramite.value.total}}</strong></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

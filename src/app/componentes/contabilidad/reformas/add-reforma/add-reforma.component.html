@@ -1,0 +1,91 @@
+<div class="content-header">
+   <div class="container-fluid mt-5">
+      <div class="row justify-content-center text-center">
+         <div class="col-sm-7 mb-0 pt-1 pb-0 titReforma border">
+            <h5 class="font-weight-bold">Nueva Reforma</h5>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row justify-content-center ">
+
+         <div class="card card-body col-sm-7 cardReforma">
+            <form [formGroup]="formReforma">
+               <div class="row">
+
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" for="numero">Número<sup class="green">*</sup></label>
+                        </div>
+                        <input type="number" class="form-control text-center" formControlName="numero" id="numero"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" required
+                           [ngClass]="{'is-invalid': f['numero'].invalid && f['numero'].touched, 'is-valid': f['numero'].valid, '': f['numero'].untouched}">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" for="fecha">Fecha<sup class="green">*</sup></label>
+                        </div>
+                        <input type="date" class="form-control" formControlName="fecha" id="fecha" aria-label="Small"
+                           aria-describedby="inputGroup-sizing-sm" required>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-3 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" for="tipo">Tipo</label>
+                        </div>
+                        <select class="custom-select" id="tipo" formControlName="tipo">
+                           <option value="G" selected>Gasto</option>
+                           <option value="I">Ingreso</option>
+                        </select>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-8 my-2 py-2">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" for="iddocumento">Documento<sup class="green">*</sup></label>
+                        </div>
+                        <select type="text" class="custom-select" formControlName="iddocumento">
+                           <option [ngValue]="documento" *ngFor="let documento of _documentos" [ngValue]="documento"
+                           id="iddocumento_{{documento.iddocumento}}">
+                              {{ documento.nomdoc }}
+                           </option>
+                        </select>
+                        <input type="text" class="form-control text-center" formControlName="numdoc" required
+                        [ngClass]="{'is-invalid': f['numdoc'].invalid && f['numdoc'].touched, 'is-valid': f['numdoc'].valid, '': f['numdoc'].untouched}">
+                     </div>
+                  </div>
+                  
+                  <div class="form-group col-md-12 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Concepto<sup class="green">*</sup></label>
+                        </div>
+                        <textarea class="form-control" formControlName="concepto" rows="2"></textarea>
+                     </div>
+                  </div>
+
+               </div>
+
+               <div class="mt-2 mb-0 text-center">
+                  <button type="submit" class="btn btn-success btn-sm mx-1" (click)="onSubmit()"
+                     [disabled]="!formReforma.valid">
+                     <i class="fa fa-check-circle"></i> Aceptar</button>
+                  <button class="btn btn-outline-success btn-sm mx-1" (click)="regresar()"><i
+                        class="fa fa-times-circle"></i> Cancelar</button>
+               </div>
+               <!-- <span class="small ml-3" *ngIf="numdoc.status === 'PENDING'">Validando...</span> -->
+            </form>
+         </div>
+      </div>
+   </div>
+</div>

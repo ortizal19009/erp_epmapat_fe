@@ -1,0 +1,46 @@
+.container-fluid{
+   --bgcolor1: rgb(95, 57, 95);
+   --bgcolor2: rgba(207, 196, 204);
+   --movimientos1: rgb(57, 95, 95);
+   --movimientos2: rgba(196, 204, 207);
+}
+
+.fila:hover{ 
+   background-color: #117a8B;
+   color: white;
+   cursor: pointer; 
+}
+
+/* === Producto === */
+.producto{
+   background-color: var(--bgcolor1);
+   color: white;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+}
+.cardProducto{
+   background-color: var(--bgcolor2);
+   box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+}
+.cardProducto li{
+   background-color: var(--bgcolor2);
+   /* color: rgb(211, 248, 3); */
+}
+.producto a{   color: white;}
+.producto a:hover{   color: rgb(45, 53, 2);}
+
+/* === Movimientos === */
+.movimientos{
+   box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+}
+.movimientos thead{
+   background-color: var(--movimientos1);
+   color: white;
+}
+.movimientos tbody{
+   background-color: var(--movimientos2);
+}
+
+.cardTab{
+   background-color: var(--bgcolor1);
+   color: white;
+}
