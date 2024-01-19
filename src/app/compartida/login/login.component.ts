@@ -32,7 +32,7 @@ export class LoginComponent implements OnInit{
    //  this.PDFOld = true;
    //  sessionStorage.setItem("PDFOld", this.PDFOld.toString());
     this.authService.enabModulos();
-    console.log(this.formLogin.value)
+
 
  }
 
