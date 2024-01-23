@@ -24,6 +24,10 @@ export class SimulacionComponent implements OnInit {
    subtotales: number[] = [];
    anio = 1
    formulas: string[] = [];
+   porcResidencial: number[] = [0.777, 0.78, 0.78, 0.78, 0.78, 0.778, 0.778, 0.778, 0.78, 0.78, 0.78, 0.68, 0.68, 0.678, 0.68, 0.68, 0.678, 0.678, 0.68,
+      0.68, 0.678, 0.676, 0.678, 0.678, 0.678, 0.68, 0.647, 0.65, 0.65, 0.647, 0.647, 0.65, 0.65, 0.647, 0.647, 0.65, 0.65, 0.65,
+      0.65, 0.65, 0.65, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7,
+      0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7]
 
    constructor(public fb: FormBuilder, private pli24Service: Pliego24Service, private coloresService: ColoresService,
       private router: Router) { }
@@ -52,8 +56,9 @@ export class SimulacionComponent implements OnInit {
       } catch (error) {
          console.error(error);
       }
-   }
 
+
+   }
 
    colocaColor(colores: any) {
       document.documentElement.style.setProperty('--bgcolor1', colores[0]);
@@ -81,33 +86,6 @@ export class SimulacionComponent implements OnInit {
       this.calcular()
    }
 
-
-
-   dobleClickOld(e: any, i: number) {
-      // Obtenemos el objeto MouseEvent
-      const event = e as MouseEvent;
-      // Obtenemos la fila de la celda
-      const fila = e.row;
-      // Obtenemos la columna de la celda
-      const columna = e.column;
-      console.log('fila: ', fila);
-      console.log('columna: ', columna);
-
-      const tagName = e.target.tagName;
-      console.log('tagName: ', tagName)
-
-      const id = e.target.getAttribute('id');
-      console.log('id: ', id);
-
-      if (tagName == 'TD' && id == 'AP' && i == 0) {
-         // console.log('Es TD, Agua y 0');
-         console.log('(consumo.idcategoria.fijoagua - 0.1) * consumo.porc')
-         console.log('Agua Potable Fijo: ', this._consumos[i].idcategoria.fijoagua)
-         console.log('%: ', this._consumos[i].porc)
-         console.log('Cálculo: (', this._consumos[i].idcategoria.fijoagua, '- 0.10) *', this._consumos[i].porc)
-      }
-   }
-
    regresar() { this.router.navigate(['/pliego24']); }
 
    calcular() {
@@ -126,15 +104,22 @@ export class SimulacionComponent implements OnInit {
       var i = 0;
       this._consumos.forEach(() => {
          let suma = 0;
+         let num1 = 0;
          if (this.anio == 1) {
-            let num1 = Math.round((this._consumos[i].idcategoria.fijoagua - 0.1) * this._consumos[i].porc * 100) / 100;
+
+            if (this._consumos[i].idcategoria.idcategoria == 1) { num1 = Math.round((this._consumos[i].idcategoria.fijoagua - 0.1) * this.porcResidencial[this.m3] * 100) / 100; }
+            else { num1 = Math.round((this._consumos[i].idcategoria.fijoagua - 0.1) * this._consumos[i].porc * 100) / 100; }
+
             let num2 = Math.round((this._consumos[i].idcategoria.fijosanea - 0.5) * this._consumos[i].porc * 100) / 100;
             let num3 = Math.round((this.m3 * this._consumos[i].agua) * this._consumos[i].porc * 100) / 100;
             let num4 = Math.round((this.m3 * this._consumos[i].saneamiento / 2) * this._consumos[i].porc * 100) / 100;
             let num5 = Math.round((this.m3 * this._consumos[i].saneamiento / 2) * this._consumos[i].porc * 100) / 100;
             let num7 = Math.round(0.5 * this._consumos[i].porc * 100) / 100;
             suma = suma + num1 + num2 + num3 + num4 + num5 + 0.1 + num7;
+
             this.subtotales[i] = suma;
+            this.subtotales[4] = this.subtotales[0] / 2; //Categoria 9 (Especial) no tiene tarifario es el 50% de la residencial
+
          } else {
             let num1 = Math.round((this._consumos[i].idcategoria.fijoagua - 0.1) * 100) / 100;
             let num2 = Math.round((this._consumos[i].idcategoria.fijosanea - 0.5) * 100) / 100;
@@ -151,7 +136,9 @@ export class SimulacionComponent implements OnInit {
 
    calcRubros(indice: number) {
       if (this.anio == 1) {
-         this.formulas[0] = ' (' + this._consumos[indice].idcategoria.fijoagua.toString() + ' - 0.10) * ' + this._consumos[indice].porc.toString()
+         if (this._consumos[indice].idcategoria.idcategoria == 1) { this.formulas[0] = ' (' + this._consumos[indice].idcategoria.fijoagua.toString() + ' - 0.10) * ' + this.porcResidencial[this.m3].toString() }
+         else { this.formulas[0] = ' (' + this._consumos[indice].idcategoria.fijoagua.toString() + ' - 0.10) * ' + this._consumos[indice].porc.toString() }
+
          this.formulas[1] = ' (' + this._consumos[indice].idcategoria.fijosanea.toString() + ' - 0.50) * ' + this._consumos[indice].porc.toString()
          this.formulas[2] = ' (' + this.m3.toString() + ' * ' + this._consumos[indice].agua.toString() + ' ) * ' + this._consumos[indice].porc.toString();
          this.formulas[3] = ' (' + this.m3.toString() + ' * ' + this._consumos[indice].saneamiento.toString() + ' / 2) * ' + this._consumos[indice].porc.toString()
@@ -165,26 +152,53 @@ export class SimulacionComponent implements OnInit {
          this.formulas[4] = this.m3.toString() + ' * ' + this._consumos[indice].saneamiento.toString() + ' / 2 '
          this.formulas[6] = ' 0.50 '
       }
-      let num1: number; let num2: number; let num3: number;
+      let num1: number = 0; let num2: number; let num3: number;
       this.antIndice = indice;
       if (this.anio == 1) {
-         num1 = Math.round((this._consumos[indice].idcategoria.fijoagua - 0.1) * this._consumos[indice].porc * 100) / 100;
-         num2 = Math.round((this.m3 * this._consumos[indice].agua) * this._consumos[indice].porc * 100) / 100;
-         this.rubros[0] = num1 + num2
+         if (this._consumos[indice].idcategoria.idcategoria != 9) {
+            if (this._consumos[indice].idcategoria.idcategoria == 1) { num1 = Math.round((this._consumos[indice].idcategoria.fijoagua - 0.1) * this.porcResidencial[this.m3] * 100) / 100; }
+            else { num1 = Math.round((this._consumos[indice].idcategoria.fijoagua - 0.1) * this._consumos[indice].porc * 100) / 100; }
 
-         num1 = (this._consumos[indice].idcategoria.fijosanea - 0.5) * this._consumos[indice].porc
-         num1 = Math.round(num1 * 100) / 100;
-         num2 = (this.m3 * this._consumos[indice].saneamiento / 2) * this._consumos[indice].porc
-         num2 = Math.round(num2 * 100) / 100;
-         num3 = 0.5 * this._consumos[indice].porc
-         num3 = Math.round(num3 * 100) / 100;
-         this.rubros[1] = num1 + num2 + num3
+            num2 = Math.round((this.m3 * this._consumos[indice].agua) * this._consumos[indice].porc * 100) / 100;
+            this.rubros[0] = num1 + num2
 
-         num1 = (this.m3 * this._consumos[indice].saneamiento / 2) * this._consumos[indice].porc;
-         this.rubros[2] = Math.round(num1 * 100) / 100;
+            num1 = (this._consumos[indice].idcategoria.fijosanea - 0.5) * this._consumos[indice].porc
+            num1 = Math.round(num1 * 100) / 100;
+            num2 = (this.m3 * this._consumos[indice].saneamiento / 2) * this._consumos[indice].porc
+            num2 = Math.round(num2 * 100) / 100;
+            num3 = 0.5 * this._consumos[indice].porc
+            num3 = Math.round(num3 * 100) / 100;
+            this.rubros[1] = num1 + num2 + num3
 
-         this.rubros[3] = .1;
-         this.total = this.rubros[0] + this.rubros[1] + this.rubros[2] + this.rubros[3]
+            num1 = (this.m3 * this._consumos[indice].saneamiento / 2) * this._consumos[indice].porc;
+            this.rubros[2] = Math.round(num1 * 100) / 100;
+
+            this.rubros[3] = .1;
+            this.total = this.rubros[0] + this.rubros[1] + this.rubros[2] + this.rubros[3]
+         } else {  //Categoria 9 Especial 50% de Residencial (No tiene tarifario propio)
+            let indEspecial = 0;
+            let x1 = Math.round((this._consumos[indEspecial].idcategoria.fijoagua - 0.1) * this.porcResidencial[this.m3] * 100) / 100;
+            let x2 = Math.round((this.m3 * this._consumos[indEspecial].agua) * this._consumos[indEspecial].porc * 100) / 100;
+            let rubros0 = Math.round((x1 + x2) * 100) / 100
+
+            let x3 = Math.round((this._consumos[indEspecial].idcategoria.fijosanea - 0.5) * this._consumos[indEspecial].porc * 100) / 100
+            let x4 = Math.round((this.m3 * this._consumos[indEspecial].saneamiento / 2) * this._consumos[indEspecial].porc * 100) / 100
+            let x5 = Math.round(0.5 * this._consumos[indEspecial].porc * 100) / 100;
+            let rubros1 = Math.round((x3 + x4 + x5) * 100) / 100
+
+            let x6 = Math.round((this.m3 * this._consumos[indEspecial].saneamiento / 2) * this._consumos[indEspecial].porc * 100) / 100 ;
+            let rubros2 = x6;
+
+            let rubros3 = .1;
+
+            this.total = Math.round((rubros0 + rubros1 + rubros2 + rubros3) / 2 * 100) / 100;
+            this.rubros[1] = Math.round(rubros1 / 2 * 100) / 100
+            this.rubros[2] = Math.round(rubros2 / 2 * 100) / 100
+            this.rubros[3] = .1;
+            // this.rubros[0] = Math.round((this.total - this.rubros[1] - this.rubros[2] - this.rubros[3] ) * 100) / 100;
+            this.rubros[0] = this.total - this.rubros[1] - this.rubros[2] - this.rubros[3]
+         }
+
       } else {
          num1 = Math.round((this._consumos[indice].idcategoria.fijoagua - 0.1) * 100) / 100;
          num2 = Math.round((this.m3 * this._consumos[indice].agua) * 100) / 100;

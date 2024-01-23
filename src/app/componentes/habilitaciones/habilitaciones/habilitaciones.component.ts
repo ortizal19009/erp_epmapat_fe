@@ -138,7 +138,6 @@ export class HabilitacionesComponent implements OnInit {
    getLastHabilitacion() {
       this.suspeService.getUltimo().subscribe({
          next: (datos: any) => {
-         console.log(datos)
             this.f_habilitacion.patchValue({
                numero: datos.numero + 1,
             });
@@ -175,6 +174,7 @@ export class HabilitacionesComponent implements OnInit {
    }
 
    setAbonado(abonado: any) {
+      console.log(abonado);
       this.abonado = abonado;
       this.cliente = abonado.idcliente_clientes;
       this.l_habilitaciones = false;

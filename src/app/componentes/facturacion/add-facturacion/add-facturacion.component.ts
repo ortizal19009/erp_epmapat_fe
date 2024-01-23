@@ -99,7 +99,7 @@ export class AddFacturacionComponent implements OnInit {
       setTimeout(() => {
          this.moduService.getListaModulos().subscribe({
             next: datos => {this._modulos = datos},
-            error: err => console.log(err.error)
+            error: err => console.error(err.error)
          });
       }, 1000);
       const seccion = document.getElementById("seccion") as HTMLSelectElement;
@@ -189,6 +189,7 @@ export class AddFacturacionComponent implements OnInit {
          planilla.formapago = this.formCuotas.value.formapago;
          planilla.valorbase = this.totfac / n;
          planilla.usucrea = 1;
+         planilla.estado = 1
          let fecha: Date = new Date();
          fecha.setMonth(fecha.getMonth() + (i-1));
          planilla.feccrea = fecha;

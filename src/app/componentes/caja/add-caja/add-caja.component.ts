@@ -28,9 +28,9 @@ export class AddCajaComponent implements OnInit {
 
    ngOnInit(): void {
       let date: Date = new Date();
-      
+
       this.ptoEmision.idptoemision = 1;
-      
+
       this.formCaja = this.fb.group({
          descripcion: ['', Validators.required],
          codigo: ['', Validators.required],
@@ -126,8 +126,10 @@ export class AddCajaComponent implements OnInit {
 
    listarPtoEmision() {
       this.ptoemiService.getListaPtoEmision().subscribe({
-         next: datos => {this._ptoemision = datos
-            this.formCaja.patchValue({ idptoemision_ptoemision: 1 });},
+         next: datos => {
+            this._ptoemision = datos
+            this.formCaja.patchValue({ idptoemision_ptoemision: 1 });
+         },
          error: err => console.error(err.error)
       });
    }

@@ -53,6 +53,8 @@ export class DetallesClienteComponent implements OnInit {
             this.cliente.direccion = datos.direccion;
             this.cliente.porcdiscapacidad = datos.porcdiscapacidad;
             this.cliente.porcexonera = datos.porcexonera;
+            this.cliente.fechanacimiento = datos.fechanacimiento;
+            
          },
          error: err => console.log(err.error)
       })
@@ -159,4 +161,5 @@ interface Cliente {
    email: String;
    porcexonera: number;
    porcdiscapacidad: number;
+   fechanacimiento: Date ;
 }

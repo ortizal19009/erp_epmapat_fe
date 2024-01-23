@@ -260,6 +260,8 @@ export class ModificarTramitenuevoComponent implements OnInit {
    }
 
    aprobadoAgua(e: any) {
+      console.log(e.target.value);
+      console.log(e.target.checked);
       if (e.target.checked === true) {
          this.formTramitenuevo.patchValue({
             aprobadoagua: 1,

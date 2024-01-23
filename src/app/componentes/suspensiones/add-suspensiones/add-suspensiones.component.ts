@@ -139,6 +139,8 @@ export class AddSuspensionesComponent implements OnInit {
       let month = date.getMonth();
       let current_s: any = `${year}-${month}-01`;
       let current_f: any = `${year}-${month + 1}-01`;
+      console.log(date.getFullYear());
+      console.log(current_s, current_f);
       // this.s_lecturas.getDeudores(current_s, current_f, ruta.idruta).subscribe({
       //    next: (datos: any) => {
       //       this.f_dsuspension.patchValue({

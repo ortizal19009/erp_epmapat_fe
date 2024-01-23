@@ -7,7 +7,7 @@ export const environment = {
   // apiUrl: 'http://localhost:8080',
   //API_URL: 'http://localhost:8080'
   //API_URL: 'http://192.168.100.239:9080'
-  API_URL: 'http://192.168.100.239:9080/erp_epmapat-v1'
+  API_URL: 'http://192.168.10.95:8080'
 };
 
 /*

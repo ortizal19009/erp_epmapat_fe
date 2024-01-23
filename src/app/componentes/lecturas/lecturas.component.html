@@ -59,11 +59,12 @@
                   <th>Cnsm</th>
                   <th>M.M</th>
                   <th>Novedades</th>
+                  <th>Acciones</th>
                </tr>
             </thead>
             <tbody>
                <tr *ngFor="let lectura of _lecturas | filter: filtro; let i=index" data-toggle="modal"
-                  data-target="#modalValor" (click)="valor(lectura.idlectura, i)">
+                  data-target="#modalValor" (click)="valor($event, lectura.idlectura, i, lectura.idabonado_abonados.idabonado)">
                   <td class="small text-center font-weight-bold">{{i+1}}</td>
                   <td class="text-center">{{ lectura.idabonado_abonados.idabonado }}</td>
                   <td>{{ lectura.idabonado_abonados.idcliente_clientes.nombre }}</td>
@@ -84,6 +85,20 @@
                         lectura.mesesmulta }}</span>
                   </td>
                   <td>{{ lectura.idnovedad_novedades.descripcion }}</td>
+                  <td class="text-center">
+                     <div class="btn-group py-0">
+                        <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
+                           aria-expanded="false">
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right popLista">
+                           <!-- <button class="dropdown-item" type="button">
+                              <i class="bi bi-pencil"></i>&nbsp; Modificar</button> -->
+                           <button class="dropdown-item" type="button" data-toggle="modal"
+                              data-target="#staticBackdrop">
+                              <i class="bi bi-file-minus"></i>&nbsp; Historial consumo</button>
+                        </div>
+                     </div>
+                  </td>
                </tr>
                <td *ngIf="!swfiltro" colspan="6" class="font-weight-bold text-right">TOTAL</td>
                <td *ngIf="!swfiltro && swcargado" class="font-weight-bold text-right">{{ sumtotal | number: '1.0' }}
@@ -175,14 +190,14 @@
    <!-- MODAL Valor -->
    <div class="modal fade" id="modalValor" tabindex="-1" aria-labelledby="modalValorLabel" data-backdrop="static"
       aria-hidden="true">
-      <div class="modal-dialog modal-sm modal-dialog-centered">
+      <div class="modal-dialog modal-sm modal-dialog-centered modal-dialog-scrollable modal-{{modalsizes}}">
          <div class="modal-content">
             <div class='modal-header py-2 justify-content-center titEmisiones'>
                <h5 class='modal-title font-weight-bold' id='ModalLabel'>Cuenta {{cuenta}}</h5>
             </div>
             <div class='modal-body'>
                <div class="modal-body col-md-12 ">
-                  <form [formGroup]="formValor">
+                  <form [formGroup]="formValor" *ngIf="modmodi;else modhistory">
                      <div class="col-md-8 ml-5">
                         <div class="input-group input-group-sm mb-3">
                            <div class="input-group-prepend"> <span class="input-group-text">Anterior</span> </div>
@@ -201,6 +216,10 @@
                         </div>
                      </div>
                   </form>
+
+                  <ng-template #modhistory>
+                     <app-historialconsumo [abonado]=idabonado></app-historialconsumo>
+                  </ng-template>
                </div>
             </div>
             <div class='modal-footer justify-content-center'>

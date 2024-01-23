@@ -208,7 +208,8 @@ import { ModiUsuarioComponent } from './componentes/administracion/usuarios/modi
 import { BuscarRutaComponent } from './componentes/suspensiones/buscar-ruta/buscar-ruta.component';
 import { HabilitacionesComponent } from './componentes/habilitaciones/habilitaciones/habilitaciones.component';
 import { AddHabilitacionComponent } from './componentes/habilitaciones/add-habilitacion/add-habilitacion.component';
-import { HashLocationStrategy, LocationStrategy, PathLocationStrategy } from '@angular/common';
+import { HashLocationStrategy, LocationStrategy } from '@angular/common';
+import { HistorialconsumoComponent } from './componentes/abonados/historialconsumo/historialconsumo.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
@@ -280,7 +281,7 @@ import { HashLocationStrategy, LocationStrategy, PathLocationStrategy } from '@a
       InfoEstrfuncComponent, ModiPregastoComponent, AuxGastoComponent, NiifcuentasComponent, AddHomologaComponent, 
       AddNiifcuentaComponent, ModiNiifcuentaComponent, TramipresuComponent, AddTramipresuComponent, ModiTramipresuComponent, 
       CuentasComponent, AddCuentaComponent, SinafipComponent, TransaciComponent, AddTransaciComponent, AddAsientoComponent, 
-      AddBenextranComponent, SimulacionComponent, AddLiquiacfpComponent, ModificarTramitenuevoComponent, AddAguatramiteComponent, CertitmpComponent, GeneCertificacionComponent, AguatramComponent, BuscarClienteComponent, ModiUsuarioComponent, BuscarRutaComponent, HabilitacionesComponent, AddHabilitacionComponent,
+      AddBenextranComponent, SimulacionComponent, AddLiquiacfpComponent, ModificarTramitenuevoComponent, AddAguatramiteComponent, CertitmpComponent, GeneCertificacionComponent, AguatramComponent, BuscarClienteComponent, ModiUsuarioComponent, BuscarRutaComponent, HabilitacionesComponent, AddHabilitacionComponent, HistorialconsumoComponent,
    ],
 
    imports: [
@@ -288,7 +289,7 @@ import { HashLocationStrategy, LocationStrategy, PathLocationStrategy } from '@a
       HttpClientModule, Ng2SearchPipeModule, NgxMaskModule.forRoot() ],
 
    providers: [ MainFooterComponent,
-       { provide: LocationStrategy, useClass: PathLocationStrategy }
+       { provide: LocationStrategy, useClass: HashLocationStrategy }
     ],
    
 

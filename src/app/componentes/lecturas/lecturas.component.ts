@@ -50,13 +50,21 @@ export class LecturasComponent implements OnInit {
    rubros: any = [];
    rubrosFilter: [];
    tarifa: any;
+   idabonado: any;
    factura: any;
    arrprecios: number[] = [];
    arridfactura: number[] = [];
    public progreso = 0;
    private contador = 0;
    otraPagina: boolean = false;
+   modmodi: boolean = true;
    archExportar: string;
+   modalsizes: string = 'sm';
+   
+   porcResidencial: number[] = [0.777, 0.78, 0.78, 0.78, 0.78, 0.778, 0.778, 0.778, 0.78, 0.78, 0.78, 0.68, 0.68, 0.678, 0.68, 0.68, 0.678, 0.678, 0.68,
+      0.68, 0.678, 0.676, 0.678, 0.678, 0.678, 0.68, 0.647, 0.65, 0.65, 0.647, 0.647, 0.65, 0.65, 0.647, 0.647, 0.65, 0.65, 0.65,
+      0.65, 0.65, 0.65, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7,
+      0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7]
 
    constructor(private router: Router, private lecService: LecturasService,
       private rutaxemiService: RutasxemisionService, public fb: FormBuilder, private facService: FacturaService,
@@ -179,7 +187,18 @@ export class LecturasComponent implements OnInit {
       }
    }
 
-   valor(idlectura: number, fila: number) {
+   valor(e: any, idlectura: number, fila: number, cuenta: number) {
+   console.log(idlectura)
+   console.log(cuenta)
+      const tagName = e.target.tagName;
+      this.idabonado = cuenta
+      if (tagName === 'TD') {
+         this.modmodi = true
+         this.modalsizes = 'sm'
+      } else {
+         this.modmodi = false
+         this.modalsizes = 'lg'
+      }
       if (this.rutaxemision.estado == 1) this.formValor.get('lecturaactual')?.disable();
       this.idlectura = idlectura;
       this.fila = fila;
@@ -231,6 +250,8 @@ export class LecturasComponent implements OnInit {
          if (this.kontador < this._lecturas.length) this.planillas();
       }
       else {
+         this.arrprecios = [];
+         let num1: number;
          let planilla = {} as Planilla;
          planilla.idmodulo = this.modulo;
          let cliente: Clientes = new Clientes;
@@ -244,6 +265,9 @@ export class LecturasComponent implements OnInit {
          planilla.formapago = 1;
          planilla.usucrea = 1;
          planilla.feccrea = this.fecha;
+         planilla.estado = 1;
+         let cate9: boolean;
+         if (categoria == 9) { categoria = 1; cate9 = true }
          // Obtiene lo tarifa del nuevo Pliego
          this.pli24Service.getBloque(categoria, consumo).subscribe({
             next: resp => {
@@ -254,8 +278,10 @@ export class LecturasComponent implements OnInit {
                }
                else {
                   this.tarifa = resp;
-                  // console.log('this.tarifa: ', this.tarifa)
-                  let num1 = Math.round((this.tarifa[0].idcategoria.fijoagua - 0.1) * this.tarifa[0].porc * 100) / 100;
+
+                  if (categoria == 1) { num1 = Math.round((this.tarifa[0].idcategoria.fijoagua - 0.1) * this.porcResidencial[consumo] * 100) / 100; }
+                  else { num1 = Math.round((this.tarifa[0].idcategoria.fijoagua - 0.1) * this.tarifa[0].porc * 100) / 100; }
+
                   let num2 = Math.round((this.tarifa[0].idcategoria.fijosanea - 0.5) * this.tarifa[0].porc * 100) / 100;
                   let num3 = Math.round((consumo * this.tarifa[0].agua) * this.tarifa[0].porc * 100) / 100;
                   let num4 = Math.round((consumo * this.tarifa[0].saneamiento / 2) * this.tarifa[0].porc * 100) / 100;
@@ -263,19 +289,34 @@ export class LecturasComponent implements OnInit {
                   let num7 = Math.round(0.5 * this.tarifa[0].porc * 100) / 100;
                   let suma: number = 0;
                   suma = Math.round((num1 + num2 + num3 + num4 + num5 + 0.1 + num7) * 100) / 100;
+                  if (cate9) suma = Math.round(suma / 2 * 100) / 100;  //Categoria 9 no tiene tarifario es el 50% de la Residencial
                   planilla.totaltarifa = suma;
                   planilla.valorbase = suma;
+
                   this.facService.saveFactura(planilla).subscribe({
                      next: fac => {
                         this.factura = fac;
-                        // console.log('this.factura.idfactura: ', this.factura.idfactura)
+                        console.log('this.factura.idfactura: ', this.factura.idfactura)
                         this.lecService.getByIdlectura(this._lecturas[this.kontador].idlectura).subscribe({
                            next: datos => {
                               this._lectura = datos;
                               this._lectura.idfactura = this.factura.idfactura;
                               this.lecService.updateLectura(this._lecturas[this.kontador].idlectura, this._lectura).subscribe({
                                  next: nex => {
-                                    this.arrprecios.push(num1 + num3, num2 + num4 + num7, num5, 0.1);
+                                    if (cate9) {
+                                       let rub1002: number; let rub1003: number
+                                       //Alcantarillado / 2
+                                       if (num2 + num4 + num7 > 0) rub1002 = Math.round((num2 + num4 + num7) / 2 * 100) / 100;
+                                       else rub1002 = 0;
+                                       //Saneamiento / 2
+                                       if (num5 > 0) rub1003 = Math.round(num5 / 2 * 100) / 100;
+                                       else rub1003 = 0
+                                       //Agua portable por diferencia con la suma
+                                       let r1001 = suma - rub1002 - rub1003 - 0.1;
+                                       this.arrprecios.push(r1001, rub1002, rub1003, 0.1);
+                                    }
+                                    else { this.arrprecios.push(num1 + num3, num2 + num4 + num7, num5, 0.1); }
+
                                     let i = 0;
                                     this.addrubros(i);
 

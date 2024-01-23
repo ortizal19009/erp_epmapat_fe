@@ -106,16 +106,10 @@ export class ImporLecturasComponent implements OnInit {
          busca = +this.importedData[i][0];
          let result = this._lecturas.find((lectura: { idabonado_abonados: { idabonado: number; }; }) => lectura.idabonado_abonados.idabonado === busca);
          if (result) {
-            // if (this.importedData[i][4] <= 0 || this.importedData[i][5] < 0 ) {
-            //    this.importedData[i][11] = 0
-            //    hayInvalidos = true;
-            // }
-            // else
-             {
-               this.importedData[i][11] = 1;
-               this.importedData[i][12] = result.idlectura
-            };
-         } else {
+            this.importedData[i][11] = 1;
+            this.importedData[i][12] = result.idlectura
+         }
+         else {
 
             this.importedData[i][11] = 0;
             hayInvalidos = true;

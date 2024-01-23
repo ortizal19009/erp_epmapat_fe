@@ -33,7 +33,6 @@ export class LoginComponent implements OnInit{
    //  sessionStorage.setItem("PDFOld", this.PDFOld.toString());
     this.authService.enabModulos();
 
-
  }
 
 }
