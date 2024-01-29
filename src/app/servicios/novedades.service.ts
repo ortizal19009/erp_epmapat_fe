@@ -23,7 +23,7 @@ export class NovedadesService {
     return this.http.get<Novedad>(`${baseUrl}/${id}`);
   }
 
-  saveNovedad(nov: Novedad):Observable<Object>{
+  saveNovedad(nov: Novedad): Observable<Object> {
     return this.http.post(baseUrl, nov);
   }
 
@@ -37,6 +37,9 @@ export class NovedadesService {
   //Busca por Descripcion
   findByDescripcion(descripcion: string) {
     return this.http.get<Novedad[]>(`${baseUrl}?descripcion=${descripcion}`);
- }
+  }
+  getNovedadesByestado(estado: number) {
+    return this.http.get<Novedad[]>(`${baseUrl}/estado?estado=${estado}`)
+  }
 
 }

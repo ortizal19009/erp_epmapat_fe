@@ -155,7 +155,8 @@
                               <i class="fa fa-info-circle"></i> Info
                            </button>
                            <button *ngIf="swcobrado" class="btn btn-outline-info btn-xs cursor" data-toggle="modal"
-                              data-target="#DetallePlanillaModal" [disabled]="!sincobro.pagado">
+                              data-target="#DetallePlanillaModal" (click)="impComprobante(sincobro)"
+                              [disabled]="!sincobro.pagado">
                               <i class="fa fa-print"></i> Imprimir
                            </button>
                         </td>

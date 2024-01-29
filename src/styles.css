@@ -101,3 +101,14 @@
 .nav-link.disabled {
    opacity: 0.3;
 }
+.description {
+   max-width: 200px; 
+   white-space: nowrap;
+   overflow: hidden;
+   text-overflow: ellipsis;
+ }
+ .description:hover {
+   overflow: visible;
+   white-space: normal;
+   z-index: 1;
+ }

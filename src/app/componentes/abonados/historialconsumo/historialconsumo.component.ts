@@ -16,6 +16,10 @@ export class HistorialconsumoComponent implements OnInit {
   _facturas: any
   _rubrosxfac: any;
   totfac: number;
+  promedio: any = [];
+  totprom: number = 0;
+  suma: number = 0;
+  sobre: number = 0;
   @Input() abonado: any;
   constructor(private lecService: LecturasService, private facService: FacturaService, private rubxfacService: RubroxfacService) { }
 
@@ -53,6 +57,29 @@ export class HistorialconsumoComponent implements OnInit {
     });
     this.totfac = suma12 + suma0;
   }
+  calPromedio(e: any, lectura: any) {
+    this.suma = 0;
+    this.totprom = 0;
+    let consumo = 0;
+    if (e.target.checked === true) {
+      this.promedio.push(lectura)
+    }
+    if (e.target.checked === false) {
+      console.log('falso')
+      let f_lectura = this.promedio.find((_lectura: { idlectura: number }) => _lectura.idlectura === lectura.idlectura)
+      let i = this.promedio.indexOf(f_lectura);
+      this.promedio.splice(i, 1);
+    }
+    this.promedio.forEach((prom: any) => {
+    this.sobre = this.promedio.length
+      console.log(prom)
+      consumo = prom.lecturaactual - prom.lecturaanterior
+      this.suma += consumo;
+      this.totprom = this.suma / this.sobre;
+    })
+
+
+  }
 
   facturasxAbonado(idabonado: number) {
     this.facService.getByIdabonado(idabonado).subscribe({
@@ -62,7 +89,7 @@ export class HistorialconsumoComponent implements OnInit {
   }
   lecturasxAbonado(idabonado: number) {
     this.lecService.getLecturasxIdabonado(idabonado).subscribe({
-      next: datos => this._lecturas = datos,
+      next: datos => { this._lecturas = datos; },
       error: err => console.log(err.error)
     });
   }

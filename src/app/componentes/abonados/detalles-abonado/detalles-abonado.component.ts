@@ -63,7 +63,13 @@ export class DetallesAbonadoComponent implements OnInit {
          error: err => console.log(err.error)
       });
    }
-
+   valorPagado(idmodulo: number, valor: number) {
+      if (idmodulo === 3 && valor > 0) {
+         return valor + 1;
+      } else {
+         return valor;
+      }
+   }
    lecturasxAbonado(idabonado: number) {
       this.lecService.getLecturasxIdabonado(idabonado).subscribe({
          next: datos => this._lecturas = datos,

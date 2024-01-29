@@ -16,6 +16,8 @@ import autoTable from 'jspdf-autotable';
 import { NombreEmisionPipe } from 'src/app/pipes/nombre-emision.pipe'
 import * as ExcelJS from 'exceljs';
 import { Pliego24Service } from 'src/app/servicios/pliego24.service';
+import { NovedadesService } from 'src/app/servicios/novedades.service';
+import { Novedad } from 'src/app/modelos/novedad.model';
 
 @Component({
    selector: 'app-lecturas',
@@ -41,6 +43,7 @@ export class LecturasComponent implements OnInit {
    idlectura: number;
    fila: number;
    datosLectura: any;
+   antIndice = 0;
    //Para cerrar
    disabled: boolean;
    btncerrar: boolean;
@@ -60,7 +63,8 @@ export class LecturasComponent implements OnInit {
    modmodi: boolean = true;
    archExportar: string;
    modalsizes: string = 'sm';
-   
+   novedades: any;
+
    porcResidencial: number[] = [0.777, 0.78, 0.78, 0.78, 0.78, 0.778, 0.778, 0.778, 0.78, 0.78, 0.78, 0.68, 0.68, 0.678, 0.68, 0.68, 0.678, 0.678, 0.68,
       0.68, 0.678, 0.676, 0.678, 0.678, 0.678, 0.68, 0.647, 0.65, 0.65, 0.647, 0.647, 0.65, 0.65, 0.647, 0.647, 0.65, 0.65, 0.65,
       0.65, 0.65, 0.65, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7,
@@ -69,13 +73,13 @@ export class LecturasComponent implements OnInit {
    constructor(private router: Router, private lecService: LecturasService,
       private rutaxemiService: RutasxemisionService, public fb: FormBuilder, private facService: FacturaService,
       private rubService: RubrosService, private pliegoService: PreciosxcatService, private rubxfacService: RubroxfacService,
-      private pli24Service: Pliego24Service) { }
+      private pli24Service: Pliego24Service, private s_novedad: NovedadesService) { }
 
    ngOnInit(): void {
       this.idrutaxemision = +sessionStorage.getItem("idrutaxemisionToLectura")!;
       this.rutaxemisionDatos(this.idrutaxemision);
       this.lecService.getLecturas(this.idrutaxemision).subscribe({
-         next: resp => {
+         next: (resp) => {
             this._lecturas = resp;
             this.abonados = this._lecturas.length;
             this.total();
@@ -87,13 +91,15 @@ export class LecturasComponent implements OnInit {
       this.formValor = this.fb.group({
          lecturaanterior: 0,
          lecturaactual: 0, disabled: false,
-         consumo: 0
+         consumo: 0,
+         idnovedad_novedades: ''
       });
 
       this.formValor.get('lecturaactual')?.valueChanges.subscribe((valor) => {
          this.formValor.controls['consumo'].setValue(valor - this.formValor.get('lecturaanterior')?.value);
       });
       this.fecha = new Date();
+      this.listNovedades();
    }
 
    rutaxemisionDatos(idrutaxemision: number) {
@@ -188,13 +194,12 @@ export class LecturasComponent implements OnInit {
    }
 
    valor(e: any, idlectura: number, fila: number, cuenta: number) {
-   console.log(idlectura)
-   console.log(cuenta)
+      this.antIndice = fila;
       const tagName = e.target.tagName;
       this.idabonado = cuenta
       if (tagName === 'TD') {
          this.modmodi = true
-         this.modalsizes = 'sm'
+         this.modalsizes = 'md'
       } else {
          this.modmodi = false
          this.modalsizes = 'lg'
@@ -209,7 +214,8 @@ export class LecturasComponent implements OnInit {
             this.formValor.patchValue({
                lecturaanterior: resp.lecturaanterior,
                lecturaactual: resp.lecturaactual,
-               consumo: resp.lecturaactual - resp.lecturaanterior
+               consumo: resp.lecturaactual - resp.lecturaanterior,
+               idnovedad_novedades: resp.idnovedad_novedades
             })
          },
          error: err => console.log(err.error)
@@ -217,14 +223,22 @@ export class LecturasComponent implements OnInit {
    }
 
    actuValor() {
+      this.modmodi = true;
       this.datosLectura.lecturaactual = this.formValor.value.lecturaactual;
+      this.datosLectura.idnovedad_novedades = this.formValor.value.idnovedad_novedades;
       this.lecService.updateLectura(this.idlectura, this.datosLectura).subscribe({
          next: nex => {
+            console.log(this._lecturas[this.fila])
             this._lecturas[this.fila].lecturaactual = this.formValor.value.lecturaactual;
+            this._lecturas[this.fila].idnovedad_novedades = this.formValor.value.idnovedad_novedades;
             this.total();
+
          },
          error: err => console.error(err.error)
       });
+   }
+   cancelar() {
+      this.modmodi = true
    }
 
    //Genera Planillas (Tabla Facturas)
@@ -571,6 +585,20 @@ export class LecturasComponent implements OnInit {
 
          window.URL.revokeObjectURL(url); // Libera recursos
       });
+   }
+   listNovedades() {
+      this.s_novedad.getNovedadesByestado(1).subscribe({
+         next: (datos) => {
+            this.novedades = datos
+         },
+         error: (e) => console.error(e)
+      })
+   }
+   compararNovedades(o1: Novedad, o2: Novedad): boolean {
+      if (o1 === undefined && o2 === undefined) { return true; }
+      else {
+         return o1 === null || o2 === null || o1 === undefined || o2 === undefined ? false : o1.idnovedad == o2.idnovedad;
+      }
    }
 
 }

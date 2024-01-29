@@ -114,7 +114,8 @@
                                     <td>{{factura.feccrea | date: 'dd-MM-y'}}</td>
                                     <td class="text-left">{{ factura.idmodulo.descripcion }}</td>
                                     <td>{{factura.nrofactura}}</td>
-                                    <td class="text-right">{{ factura.totaltarifa | number: '1.2-2'}}</td>
+                                    <td class="text-right">{{valorPagado( factura.idmodulo.idmodulo,factura.totaltarifa
+                                       )| number: '1.2-2'}}</td>
                                     <td>{{ factura.fechacobro | date: 'dd-MM-y'}}</td>
                                  </tr>
                               </tbody>

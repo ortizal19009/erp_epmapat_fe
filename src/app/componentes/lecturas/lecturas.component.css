@@ -46,3 +46,7 @@ table tbody tr:hover  {
 }
 
 .red-icon { color: red; }
+
+.check{
+color:rgba(233, 146, 146, 0.548);
+}

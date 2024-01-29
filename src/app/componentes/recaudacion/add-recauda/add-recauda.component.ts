@@ -399,7 +399,10 @@ export class AddRecaudaComponent implements OnInit {
    cobrar() {
       this.swcobrado = true;
    }
+   impComprobante(datos: any) {
+      console.log(datos)
 
+   }
    tonos() {
       setTimeout(() => {
          this.coloService.getTonos().subscribe({
