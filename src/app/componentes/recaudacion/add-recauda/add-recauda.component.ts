@@ -11,6 +11,7 @@ import { LecturasService } from 'src/app/servicios/lecturas.service';
 import { Formacobro } from 'src/app/modelos/formacobro.model';
 import { FormacobroService } from 'src/app/servicios/formacobro.service';
 import { of } from 'rxjs';
+import { RecaudacionReportsService } from '../recaudacion-reports.service';
 
 @Component({
    selector: 'app-add-recauda',
@@ -50,7 +51,7 @@ export class AddRecaudaComponent implements OnInit {
 
    constructor(public fb: FormBuilder, private aboService: AbonadosService, private clieService: ClientesService,
       public fb1: FormBuilder, private facService: FacturaService, private rubxfacService: RubroxfacService,
-      private lecService: LecturasService, private coloService: ColorService, private fcobroService: FormacobroService) { }
+      private lecService: LecturasService, private coloService: ColorService, private fcobroService: FormacobroService, private s_pdfRecaudacion: RecaudacionReportsService) { }
 
    ngOnInit(): void {
       this.formBuscar = this.fb.group({
@@ -398,6 +399,9 @@ export class AddRecaudaComponent implements OnInit {
 
    cobrar() {
       this.swcobrado = true;
+   }
+   comprobante(){
+   this.s_pdfRecaudacion.comprobantePago('hola')
    }
    impComprobante(datos: any) {
       console.log(datos)
