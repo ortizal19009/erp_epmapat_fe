@@ -4,9 +4,9 @@
 
 export const environment = {
   production: false,
-  API_URL: 'http://localhost:8080'
+  //API_URL: 'http://localhost:8080'
   //API_URL: 'http://192.168.100.239:9080'
- // API_URL: 'http://192.168.10.95:8080'
+  API_URL: 'http://192.168.10.95:8080'
 };
 
 /*
