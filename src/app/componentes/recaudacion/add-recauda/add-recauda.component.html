@@ -27,11 +27,6 @@
                         data-target="#clientesModal" (click)="clientesModal()"><i class="bi bi-people"></i> Clientes
                      </button>
                   </div>
-                  <div class="form-group col-md-2 my-0 py-0 mb-0">
-                     <button type="button" class="btn btn-xs btn-success"  (click)="comprobante()">Reporte pago
-                     </button>
-                  </div>
-
                   <div *ngIf="acobrar > 0 && !swcobrado" class="form-group col-md-3 my-0 py-0 mb-0">
                      <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#modalCobrar"
                         (click)="valorAcobrar(acobrar)"><i class="bi bi-check-lg"></i> Cobrar:&nbsp;&nbsp;&nbsp;
