@@ -139,21 +139,18 @@ export class NiifcuentasComponent implements OnInit {
   }
 
   des_homologa(e: any) {
-    console.log(e);
     setTimeout(() => {
       this.hab_homologa = e;
     }, 300);
   }
 
   des_addPlanCuentas(e: any) {
-    console.log(e);
     setTimeout(() => {
       this.hab_addPlanCuentas = e;
     }, 300);
   }
 
   optHomolofaciones(homologa: any) {
-    console.log(homologa);
     this.homologa = homologa;
     this.deleteBox = true;
   }
@@ -161,7 +158,6 @@ export class NiifcuentasComponent implements OnInit {
   deleteHomologa() {
     this.s_niifhomologa.deleteById(this.homologa.idhomologa).subscribe({
       next: (datos) => {
-        console.log(datos);
         this.getByIdNiifCue(this.niifcuenta);
       },
       error: (e) => console.error(e),
@@ -176,7 +172,6 @@ export class NiifcuentasComponent implements OnInit {
 
   modificar(niifCuenta: any) {
     this.act_modPlanCuentas();
-    console.log(niifCuenta);
     this.niifcuenta = niifCuenta;
   }
 

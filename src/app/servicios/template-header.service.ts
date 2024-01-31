@@ -16,8 +16,8 @@ export class TemplateHeaderService {
   constructor() {}
 
   header(titulo: string, doc: any) {
-    // this.logo.src = `${this.url}/img/lep.jpg`;
-    // doc.addImage(this.logo, 'jpg', 100, 10, 375, 100);
+     this.logo.src = `${this.url}/img/lep.jpg`;
+     doc.addImage(this.logo, 'jpg', 100, 10, 375, 100);
     autoTable(doc, {
       styles: {
         fillColor: [255, 255, 255],

@@ -32,7 +32,7 @@ export class InfoConvenioComponent implements OnInit {
     private cuotaService: CuotasService,
     private facService: FacturaService,
     private rxfService: RubroxfacService,
-    private router: Router, 
+    private router: Router,
     private s_conveniosReports: ConveniosReportsService
   ) {}
 
@@ -119,7 +119,15 @@ export class InfoConvenioComponent implements OnInit {
   regresar() {
     this.router.navigate(['/convenios']);
   }
-  imprimir() {}
+  imprimir() {
+    console.log(this.convenio);
+    console.log(this._convenios);
+    console.log(this._cuotas);
+    let datos: any = [];
+    datos = { ...this.convenio, ...this._convenios};
+
+    this.s_conveniosReports.impContratoConvenio(datos, this._cuotas);
+  }
 
   public modiConvenio(idconvenio: number) {
     this.router.navigate(['modiconvenio', idconvenio]);
