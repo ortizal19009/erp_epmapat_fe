@@ -422,9 +422,11 @@ export class AddRecaudaComponent implements OnInit {
     this.rubxfacService.getByIdfactura(+idfactura!).subscribe({
       next: (detalle) => {
         this._rubrosxfac = detalle;
+        console.log(detalle);
         this.lecService.getByIdfactura(idfactura).subscribe({
           next: (resp) => {
             _lecturas = resp;
+            console.log(resp);
             this.consumo =
               _lecturas[0].lecturaactual - _lecturas[0].lecturaanterior;
           },
@@ -468,7 +470,31 @@ export class AddRecaudaComponent implements OnInit {
   comprobante() {}
   impComprobante(datos: any) {
     console.log(datos);
-    this.s_pdfRecaudacion.comprobantePago(datos);
+    this.getRubroxfac(datos.idfactura);
+    this.idfactura = datos.idfactura;
+    this.rubxfacService.getByIdfactura(+datos.idfactura!).subscribe({
+      next: (detalle) => {
+        this._rubrosxfac = detalle;
+        console.log(detalle);
+        this.s_pdfRecaudacion.comprobantePago(datos, detalle);
+        /*  this.lecService.getByIdfactura(idfactura).subscribe({
+          next: (resp) => {
+            _lecturas = resp;
+            console.log(resp);
+            this.consumo =
+              _lecturas[0].lecturaactual - _lecturas[0].lecturaanterior;
+          },
+          error: (err) =>
+            console.error(
+              'Al recuperar la Lectura de la Planilla: ',
+              err.error
+            ),
+        }); */
+       // this.subtotal();
+      },
+      error: (err) =>
+        console.error('Al recuperar el datalle de la Planilla: ', err.error),
+    });
   }
   tonos() {
     setTimeout(() => {
