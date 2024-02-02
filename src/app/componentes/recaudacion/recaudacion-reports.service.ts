@@ -94,13 +94,13 @@ export class RecaudacionReportsService {
         0: { minCellWidth: 10 },
         1: { minCellWidth: 15, halign: 'right' },
       },
-      
+
       columns: ['Descripción', 'Valor unitario'],
       body: rubros,
     });
     autoTable(doc, {
-      startY: 50,
-      margin: 250,
+      //startY: 250,
+      //startY: 250,
       tableWidth,
       theme: 'grid',
       styles: { fontSize: 7 },
@@ -114,9 +114,54 @@ export class RecaudacionReportsService {
         0: { minCellWidth: 10 },
         1: { minCellWidth: 15, halign: 'right' },
       },
+      
+      columns: ['', ''],
+      body: [
+        ['Iva 12%', '0.00'],
+        ['Descuento 0%', '0.00'],
+        ['Intereses', '0.00'],
+        ['Valor total', '0.00'],
+      ],
+    });
+    autoTable(doc, {
+      startY: 30,
+      margin: 250,
+      //columnWidth: 'wrap', 
+      columnStyles: {
+        0: { minCellWidth: 10 },
+        1:{minCellWidth: 100}
+      },
+      tableWidth,
+      theme: 'grid',
+      styles: { fontSize: 7 },
+      headStyles: {
+        halign: 'center',
+        fillColor: 'white',
+        textColor: 'black',
+      },
+      bodyStyles: { cellPadding: 1 },
+/*       columnStyles: {
+        0: { minCellWidth: 20 },
+        1: { minCellWidth: 20 },
+      }, */
 
-      columns: ['Descripción', 'Valor unitario'],
-      body: rubros,
+      columns: ['', ''],
+      body: [
+        [`Cuenta: ${datos.idabonado}`, `Ruta: `],
+        ['Clave catastral: SP'],
+        [
+          `Cliente: ${datos.idcliente.nombre}`,
+          `RUC/Cédula: ${datos.idcliente.cedula}`,
+        ],
+        [`Dirección: ${datos.idcliente.direccion}`,`Medidor: dsfasd555`],
+        [`L. Anterior: 445`, `L. Actual: 460`],
+        [`Cons. ant:`, `Categoria: COME`],
+        [`Nro cartas ant: 0`,`Fecha fact: 25/01/2024`],
+        [`Catastro emitido: 02/01/2024 `,`Forma pago: Contado`],
+        [`Recaudador: WILLIAM `,`Cons. anterior: 14`],
+        [`Referencia: ${datos.idcliente.referencia}`],
+        
+      ],
     });
     /* FIGURAS */
     //doc.rect(margin - 5, 30, 215, 210); /* primer rectangulo */
@@ -126,11 +171,11 @@ export class RecaudacionReportsService {
     /* --------------------------------
     DATOS IZQUIERDA
     -----------------------------------*/
-    doc.rect(margin + 225, 190, 215, 75); /* primer rectangulo */
-    doc.rect(margin + 310, 265, 130, 15); /* primer rectangulo */
-    doc.rect(margin + 310, 265, 130, 120); /* primer rectangulo */
-    doc.line(margin + 250, 190, 280, 265); /* Linia vertical */
-    doc.line(margin + 395, 190, 425, 385); /* Linia vertical */
+/*     doc.rect(margin + 225, 190, 215, 75); 
+    doc.rect(margin + 310, 265, 130, 15); 
+    doc.rect(margin + 310, 265, 130, 120);
+    doc.line(margin + 250, 190, 280, 265);
+    doc.line(margin + 395, 190, 425, 385);
     doc.line(margin + 225, 205, 470, 205);
     doc.text(`Cuenta: 1105`, margin + 230, 50);
     doc.text(`Ruta: AV.UNIVERSITARIA`, margin + 320, 50);
@@ -154,7 +199,7 @@ export class RecaudacionReportsService {
     doc.text(`Recaudador: WILLIAM`, margin + 230, 170);
     doc.text(`Cons. anterior: 14`, margin + 400, 170);
     doc.text(`Referencia: 11715MEJICO Y LAS TEJERIAS`, margin + 230, 185);
-    doc.text(`Agua Potable T.`, margin + 400, 185);
+    doc.text(`Agua Potable T.`, margin + 400, 185); */
     doc.text(`Cant:`, margin + 230, 200);
     doc.text(`1`, margin + 230, 215);
     doc.text(`1`, margin + 230, 230);
