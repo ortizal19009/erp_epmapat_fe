@@ -208,7 +208,7 @@ import { ModiUsuarioComponent } from './componentes/administracion/usuarios/modi
 import { BuscarRutaComponent } from './componentes/suspensiones/buscar-ruta/buscar-ruta.component';
 import { HabilitacionesComponent } from './componentes/habilitaciones/habilitaciones/habilitaciones.component';
 import { AddHabilitacionComponent } from './componentes/habilitaciones/add-habilitacion/add-habilitacion.component';
-import { HashLocationStrategy, LocationStrategy } from '@angular/common';
+import { HashLocationStrategy, LocationStrategy, PathLocationStrategy } from '@angular/common';
 import { HistorialconsumoComponent } from './componentes/abonados/historialconsumo/historialconsumo.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
@@ -289,7 +289,8 @@ import { HistorialconsumoComponent } from './componentes/abonados/historialconsu
       HttpClientModule, Ng2SearchPipeModule, NgxMaskModule.forRoot() ],
 
    providers: [ MainFooterComponent,
-       { provide: LocationStrategy, useClass: HashLocationStrategy }
+       { provide: LocationStrategy, useClass: PathLocationStrategy }
+       /* https://angular.io/api/common/HashLocationStrategy */
     ],
    
 

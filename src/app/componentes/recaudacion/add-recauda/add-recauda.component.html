@@ -27,6 +27,7 @@
                         data-target="#clientesModal" (click)="clientesModal()"><i class="bi bi-people"></i> Clientes
                      </button>
                   </div>
+
                   <div *ngIf="acobrar > 0 && !swcobrado" class="form-group col-md-3 my-0 py-0 mb-0">
                      <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#modalCobrar"
                         (click)="valorAcobrar(acobrar)"><i class="bi bi-check-lg"></i> Cobrar:&nbsp;&nbsp;&nbsp;
@@ -141,11 +142,14 @@
                         <td>{{ sincobro.idfactura }}</td>
                         <td>{{ sincobro.feccrea }}</td>
                         <td class="text-left">{{ sincobro.idmodulo.descripcion }}</td>
-                        <!-- <td class="text-left">{{ sincobro.idmodulo.idmodulo }}</td> -->
-                        <td *ngIf="sincobro.idmodulo.idmodulo != 3" class="text-right">{{ sincobro.totaltarifa | number:
-                           '1.2-2'}}</td>
-                        <td *ngIf="sincobro.idmodulo.idmodulo == 3" class="text-right">{{ sincobro.totaltarifa + 1 |
-                           number: '1.2-2'}}</td>
+
+                        <td class="text-right">{{ sincobro.totaltarifa + sincobro.comerc + sincobro.interes +
+                           sincobro.multa | number:'1.2-2'}}</td>
+                        <!-- <td *ngIf="sincobro.idmodulo.idmodulo == 3" class="text-right">{{ sincobro.totaltarifa + 1 |
+                           number: '1.2-2'}}</td> -->
+                        <!-- <td class="text-right">{{ sincobro.comerc}}</td>
+                        <td class="text-right">{{ sincobro.interes}}</td>
+                        <td class="text-right">{{ sincobro.multa}}</td> -->
                         <td> <input type="checkbox" [(ngModel)]="sincobro.pagado" (change)="marcarAnteriores(i)"
                               [disabled]="swcobrado" class="cursor"></td>
                         <td>
@@ -329,6 +333,17 @@
                         <td>{{ rubroxfac.idrubro_rubros.descripcion}}</td>
                         <td class="text-right">{{ rubroxfac.valorunitario | number:'1.2-2'}}</td>
                      </tr>
+                     <tr>
+                        <td></td>
+                        <td>Interés</td>
+                        <td class="font-weight-bold text-right">{{ totInteres | number:'1.2-2'}}</td>
+                     </tr>
+                     <!-- <tr>
+                        <td></td>
+                        <td>Multa</td>
+                        <td>0.00</td>
+                        <td class="font-weight-bold text-right">{{ _sincobro.multa | number:'1.2-2'}}</td> 
+                     </tr> -->
                      <tr>
                         <td></td>
                         <td class="font-weight-bold">TOTAL</td>

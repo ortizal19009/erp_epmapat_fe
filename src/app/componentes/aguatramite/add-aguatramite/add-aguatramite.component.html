@@ -22,8 +22,8 @@
                                  <div class="form-group col-sm my-0 py-0">
                                     <div class="input-group mb-1 input-group-sm">
                                        <div class="input-group-prepend">
-                                          <button type="button" class="btn btn-primary btn-sm"
-                                             data-toggle="modal" data-target="#clienteModal"> Cliente<sup>*</sup>
+                                          <button type="button" class="btn btn-primary btn-sm" data-toggle="modal"
+                                             data-target="#clienteModal"> Cliente<sup>*</sup>
                                           </button>
                                        </div>
                                        <input type="idcliente_clientes" class="form-control"
@@ -40,7 +40,8 @@
                                  <div class="form-group col-sm my-0 py-0">
                                     <div class="input-group mb-1 input-group-sm">
                                        <div class="input-group-prepend">
-                                          <label class="input-group-text" for="idcliente_clientes">Dirección<sup class="green">*</sup></label>
+                                          <label class="input-group-text" for="idcliente_clientes">Dirección<sup
+                                                class="green">*</sup></label>
                                        </div>
                                        <input type="text" class="form-control form-control-sm"
                                           formControlName="direccion" [ngClass]="{'is-invalid': f['direccion'].invalid && f['direccion'].touched,
@@ -182,10 +183,12 @@
 
                </div>
                <div class="m-2 text-center">
-                  <button type="button" class="btn btn-sm btn-success mx-1" (click)="onSubmit()" [disabled]="!formAguatram1.valid">
+                  <button type="button" class="btn btn-sm btn-success mx-1" (click)="onSubmit()"
+                     [disabled]="!formAguatram1.valid">
                      <i class="fa fa-check-circle"></i>&nbsp; Aceptar
                   </button>
-                  <button type="button" class="btn btn-outline-success btn-sm mx-1" (click)="retornarListaAguaTramites()">
+                  <button type="button" class="btn btn-outline-success btn-sm mx-1"
+                     (click)="retornarListaAguaTramites()">
                      <i class="fa fa-times-circle"></i> Cancelar
                   </button>
                </div>
@@ -194,7 +197,8 @@
       </div>
 
       <!-- Modal Buscar Clientes -->
-      <div class="modal fade" id="clienteModal" tabindex="-1" aria-labelledby="clienteModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false" tabindex="-1">
+      <div class="modal fade" id="clienteModal" tabindex="-1" aria-labelledby="clienteModalLabel" aria-hidden="true"
+         data-backdrop="static" data-keyboard="false" tabindex="-1">
          <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content clientedetalle">
                <div class="modal-body mt-0">

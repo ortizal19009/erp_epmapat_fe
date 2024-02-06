@@ -16,7 +16,10 @@ import { LecturasService } from 'src/app/servicios/lecturas.service';
 import { Formacobro } from 'src/app/modelos/formacobro.model';
 import { FormacobroService } from 'src/app/servicios/formacobro.service';
 import { of } from 'rxjs';
+import { Facturas } from 'src/app/modelos/facturas.model';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { RecaudacionReportsService } from '../recaudacion-reports.service';
+import { InteresesService } from 'src/app/servicios/intereses.service';
 
 @Component({
   selector: 'app-add-recauda',
@@ -54,6 +57,13 @@ export class AddRecaudaComponent implements OnInit {
   swcobrado: boolean;
   formaCobro: Formacobro = new Formacobro();
 
+  /* Intereses */
+  calInteres = {} as calcInteres;
+  totInteres: number = 0;
+  arrCalculoInteres: any = [];
+  factura: Facturas = new Facturas();
+  _intereses: any;
+
   constructor(
     public fb: FormBuilder,
     private aboService: AbonadosService,
@@ -64,7 +74,9 @@ export class AddRecaudaComponent implements OnInit {
     private lecService: LecturasService,
     private coloService: ColorService,
     private fcobroService: FormacobroService,
-    private s_pdfRecaudacion: RecaudacionReportsService
+    private authService: AutorizaService,
+    private s_pdfRecaudacion: RecaudacionReportsService,
+    private interService: InteresesService
   ) {}
 
   ngOnInit(): void {
@@ -76,9 +88,7 @@ export class AddRecaudaComponent implements OnInit {
     this.formBusClientes = this.fb1.group({
       nombre_identifica: [null, [Validators.required, Validators.minLength(5)]],
     });
-    //Formulario Cobrar
 
-    // this.formaCobro.idformacobro = 1
     this.formCobrar = this.fb.group({
       valorAcobrar: 0, //Valor original con decimales para poder validar el dinero recibido
       idformacobro: this.formaCobro,
@@ -116,6 +126,7 @@ export class AddRecaudaComponent implements OnInit {
       colores1: t,
     });
     this.listFormasCobro();
+    this.listarIntereses();
   }
 
   get f() {
@@ -127,8 +138,6 @@ export class AddRecaudaComponent implements OnInit {
     this.fcobroService.getAll().subscribe({
       next: (datos) => {
         this._formascobro = datos;
-        // if (this._formascobro && this._formascobro.length > 0) { this.formCobrar.get('idformacobro')!.patchValue(this._formascobro[0]); } También funciona
-        // if (this._formascobro && this._formascobro.length > 0) No hace falta
         this.formCobrar.patchValue({ idformacobro: this._formascobro[0] });
       },
       error: (err) => console.error(err.error),
@@ -232,10 +241,27 @@ export class AddRecaudaComponent implements OnInit {
   sinCobro(idcliente: number) {
     this.facService.getSinCobro(idcliente).subscribe({
       next: (datos) => {
+        console.log(datos);
         this._sincobro = datos;
         if (this._sincobro.length > 0) {
+          let suma: number = 0;
+          let i = 0;
+          this._sincobro.forEach(() => {
+            if (this._sincobro[i].idmodulo.idmodulo == 3)
+              this._sincobro[i].comerc = 1;
+            this._sincobro[i].interes = 0;
+            this._sincobro[i].multa = 0;
+            suma +=
+              this._sincobro[i].totaltarifa +
+              this._sincobro[i].comerc +
+              this._sincobro[i].multa +
+              this._sincobro[i].interes;
+            i++;
+          });
+          this.sumtotal = suma;
+          // console.log(this._sincobro)
           this.swbusca = 3;
-          this.total();
+          // this.total();
         } else {
           this.swbusca = 2;
           this.sumtotal = 0;
@@ -245,15 +271,17 @@ export class AddRecaudaComponent implements OnInit {
     });
   }
 
-  total() {
-    let suma: number = 0;
-    let i = 0;
-    this._sincobro.forEach(() => {
-      suma += this._sincobro[i].totaltarifa;
-      i++;
-    });
-    this.sumtotal = suma;
-  }
+  //Total de las planillas sin cobrar
+  // total() {
+  //    let suma: number = 0; let i = 0;
+  //    this._sincobro.forEach(() => {
+  //       if (this._sincobro[i].idmodulo.idmodulo == 3) suma += this._sincobro[i].totaltarifa + 1;
+  //       else suma += this._sincobro[i].totaltarifa;
+  //       // suma += this._sincobro[i].totaltarifa;
+  //       i++;
+  //    });
+  //    this.sumtotal = suma;
+  // }
 
   reset() {
     this.cliente.nombre = '';
@@ -351,11 +379,20 @@ export class AddRecaudaComponent implements OnInit {
   totalAcobrar() {
     let suma: number = 0;
     let i = 0;
-    this._sincobro.forEach(() => {
+    console.log(this._sincobro);
+    this._sincobro.forEach((index: any, item: number) => {
+      console.log(index);
+      console.log(item);
+      console.log(this.cInteres(index.idfactura));
       if (this._sincobro[i].pagado == 1) {
-        if (this._sincobro[i].idmodulo.idmodulo == 3)
-          suma += this._sincobro[i].totaltarifa + 1;
-        else suma += this._sincobro[i].totaltarifa;
+        suma +=
+          this._sincobro[i].totaltarifa +
+          this._sincobro[i].comerc +
+          this._sincobro[i].interes +
+          this._sincobro[i].multa +
+          this._sincobro[i].interes;
+        // if (this._sincobro[i].idmodulo.idmodulo == 3) suma += this._sincobro[i].totaltarifa + 1;
+        // else suma += this._sincobro[i].totaltarifa;
       }
       i++;
     });
@@ -363,15 +400,6 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   valorAcobrar(acobrar: number) {
-    // this.disabledcobro = true;
-    // this.formCobrar.controls['valorAcobrar'].setValue(acobrar);
-    // let entero = Math.trunc(acobrar)
-    // this.formCobrar.controls['acobrar'].setValue(entero.toString());
-    // let decimal = (acobrar - entero).toFixed(2)
-    // this.acobrardec = decimal.toString().slice(1);
-    // this.formCobrar.controls['dinero'].setValue('');
-    // this.formCobrar.controls['vuelto'].setValue('');
-
     this.disabledcobro = true;
     let entero = Math.trunc(acobrar);
     let decimal = (acobrar - entero).toFixed(2);
@@ -382,15 +410,6 @@ export class AddRecaudaComponent implements OnInit {
       dinero: '',
       vuelto: '',
     });
-
-    // let dinero = document.getElementById("dinero") as HTMLInputElement; Para esto hay que colocar el ID en dinero
-    // if (dinero != null) {
-    //    dinero.addEventListener('keyup', () => {
-    //       let vuelto = (this.formCobrar.controls['dinero'].value - this.acobrar).toFixed(2);
-    //       this.formCobrar.controls['vuelto'].setValue(vuelto.toString());
-    //       if (this.formCobrar.controls['vuelto'].value > 0) { this.disabledcobro = false } else { this.disabledcobro = true }
-    //    });
-    // }
   }
 
   //Es mejor que HTMLInputElement para formularios
@@ -400,7 +419,7 @@ export class AddRecaudaComponent implements OnInit {
     ).toFixed(2);
     this.formCobrar.controls['vuelto'].setValue(vuelto.toString());
     if (this.formCobrar.controls['vuelto'].value > 0) {
-      this.disabledcobro = false;
+      this.disabledcobro = true;
     } else {
       this.disabledcobro = true;
     }
@@ -411,7 +430,7 @@ export class AddRecaudaComponent implements OnInit {
       this.acobrar.toFixed(2).toString()
     );
     this.formCobrar.controls['vuelto'].setValue('');
-    this.disabledcobro = false;
+    // this.disabledcobro = false;
   }
 
   //Modal del Detalle de la Planilla
@@ -419,14 +438,39 @@ export class AddRecaudaComponent implements OnInit {
     let _lecturas: any;
     this.consumo = 0;
     this.idfactura = idfactura;
-    this.rubxfacService.getByIdfactura(+idfactura!).subscribe({
+    this.lecService.getByIdfactura(idfactura).subscribe({
+      next: (resp) => {
+        _lecturas = resp;
+        this.consumo =
+          _lecturas[0].lecturaactual - _lecturas[0].lecturaanterior;
+        this.rubxfacService.getByIdfactura(idfactura).subscribe({
+          next: (detalle) => {
+            this._rubrosxfac = detalle;
+            this.subtotal();
+            this.calcularInteres();
+          },
+          error: (err) =>
+            console.error(
+              'Al recuperar el datalle de la Planilla: ',
+              err.error
+            ),
+        });
+      },
+      error: (err) =>
+        console.error('Al recuperar la Lectura de la Planilla: ', err.error),
+    });
+  }
+
+  getRubroxfac1(idfactura: number) {
+    let _lecturas: any;
+    this.consumo = 0;
+    this.idfactura = idfactura;
+    this.rubxfacService.getByIdfactura(idfactura).subscribe({
       next: (detalle) => {
         this._rubrosxfac = detalle;
-        console.log(detalle);
         this.lecService.getByIdfactura(idfactura).subscribe({
           next: (resp) => {
             _lecturas = resp;
-            console.log(resp);
             this.consumo =
               _lecturas[0].lecturaactual - _lecturas[0].lecturaanterior;
           },
@@ -461,41 +505,48 @@ export class AddRecaudaComponent implements OnInit {
       }
       i++;
     });
-    this.totfac = suma12 + suma0;
+    this.totfac = suma12 + suma0 + this.totInteres;
   }
 
   cobrar() {
-    this.swcobrado = true;
+    let i = 0;
+    this.updateFacturas(i);
   }
-  comprobante() {}
-  impComprobante(datos: any) {
-    console.log(datos);
-    this.getRubroxfac(datos.idfactura);
-    this.idfactura = datos.idfactura;
-    this.rubxfacService.getByIdfactura(+datos.idfactura!).subscribe({
-      next: (detalle) => {
-        this._rubrosxfac = detalle;
-        console.log(detalle);
-        this.s_pdfRecaudacion.comprobantePago(datos, detalle);
-        /*  this.lecService.getByIdfactura(idfactura).subscribe({
-          next: (resp) => {
-            _lecturas = resp;
-            console.log(resp);
-            this.consumo =
-              _lecturas[0].lecturaactual - _lecturas[0].lecturaanterior;
-          },
-          error: (err) =>
-            console.error(
-              'Al recuperar la Lectura de la Planilla: ',
-              err.error
-            ),
-        }); */
-       // this.subtotal();
-      },
-      error: (err) =>
-        console.error('Al recuperar el datalle de la Planilla: ', err.error),
-    });
+
+  updateFacturas(i: number) {
+    let idfactura: number;
+    let fechacobro: Date = new Date();
+    if (this._sincobro[i].pagado) {
+      idfactura = this._sincobro[i].idfactura;
+      this.facService.getById(idfactura).subscribe({
+        next: (resp) => {
+          // console.log('resp: ', resp);
+          resp.fechacobro = fechacobro;
+          resp.usuariocobro = this.authService.idusuario;
+          resp.pagado = 1;
+          this.facService.updateFacturas(resp).subscribe({
+            next: (nex) => {
+              this.swcobrado = true;
+              // console.log('Actualización Ok!')
+              i++;
+              if (i < this._sincobro.length) this.updateFacturas(i);
+            },
+            error: (err) =>
+              console.error('Al actualizar la Factura: ', err.error),
+          });
+        },
+        error: (err) =>
+          console.error(
+            'Al recuperar los datos de la Factura a actualizar: ',
+            err.error
+          ),
+      });
+    } else {
+      i++;
+      if (i < this._sincobro.length) this.updateFacturas(i);
+    }
   }
+
   tonos() {
     setTimeout(() => {
       this.coloService.getTonos().subscribe({
@@ -585,6 +636,86 @@ export class AddRecaudaComponent implements OnInit {
       return of({ invalido: true });
     else return of(null);
   }
+
+  impComprobante(datos: any) {
+    console.log(datos);
+    this.getRubroxfac(datos.idfactura);
+    this.idfactura = datos.idfactura;
+    this.rubxfacService.getByIdfactura(+datos.idfactura!).subscribe({
+      next: (detalle) => {
+        this._rubrosxfac = detalle;
+        console.log(detalle);
+        this.s_pdfRecaudacion.comprobantePago(datos, detalle);
+        /*  this.lecService.getByIdfactura(idfactura).subscribe({
+          next: (resp) => {
+            _lecturas = resp;
+            console.log(resp);
+            this.consumo =
+              _lecturas[0].lecturaactual - _lecturas[0].lecturaanterior;
+          },
+          error: (err) =>
+            console.error(
+              'Al recuperar la Lectura de la Planilla: ',
+              err.error
+            ),
+        }); */
+        // this.subtotal();
+      },
+      error: (err) =>
+        console.error('Al recuperar el datalle de la Planilla: ', err.error),
+    });
+  }
+
+  listarIntereses() {
+    this.interService.getListaIntereses().subscribe({
+      next: (datos) => {
+        console.log(datos);
+        this._intereses = datos;
+      },
+      error: (err) => console.error(err.error),
+    });
+  }
+
+  calcularInteres() {
+    let idFactura = +this.idfactura!;
+    this.cInteres(idFactura);
+  }
+
+  cInteres(idfactura: number) {
+    this.totInteres = 0;
+    this.arrCalculoInteres = [];
+    //let date: Date = new Date();
+    this.facService.getById(idfactura).subscribe({
+      next: (datos) => {
+        let fec = datos.feccrea.toString().split('-', 2);
+        let fechai: Date = new Date(`${fec[0]}-${fec[1]}-02`);
+        let fechaf: Date = new Date();
+        this.factura = datos;
+        //fechai.setMonth(fechai.getMonth() + 1);
+        fechaf.setMonth(fechaf.getMonth() - 1);
+        while (fechai <= fechaf) {
+          this.calInteres = {} as calcInteres;
+          let query = this._intereses.find(
+            (interes: { anio: number; mes: number }) =>
+              interes.anio === +fechai.getFullYear()! &&
+              interes.mes === +fechai.getMonth()! + 1
+          );
+          this.calInteres.anio = query.anio;
+          this.calInteres.mes = query.mes;
+          this.calInteres.interes = query.porcentaje;
+          this.calInteres.valor = datos.totaltarifa;
+          this.arrCalculoInteres.push(this.calInteres);
+          fechai.setMonth(fechai.getMonth() + 1);
+        }
+        this.arrCalculoInteres.forEach((item: any) => {
+          this.totInteres += (item.interes * item.valor) / 100;
+          this.subtotal();
+          return this.totInteres;
+        });
+      },
+      error: (e) => console.error(e),
+    });
+  }
 }
 
 interface Cliente {
@@ -601,4 +732,16 @@ interface Cliente {
 interface Mensaje {
   campo: String;
   texto: String;
+}
+
+interface Interes {
+  idinteres: number;
+  anio: number;
+  mes: number;
+}
+interface calcInteres {
+  anio: number;
+  mes: number;
+  interes: number;
+  valor: number;
 }

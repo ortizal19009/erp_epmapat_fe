@@ -163,6 +163,52 @@ export class RecaudacionReportsService {
         
       ],
     });
+    autoTable(doc, {
+      //startY: 30,
+      margin: 250,
+      //columnWidth: 'wrap', 
+      tableWidth,
+      theme: 'grid',
+      styles: { fontSize: 7 },
+      headStyles: {
+        halign: 'center',
+        fillColor: 'white',
+        textColor: 'black',
+      },
+      bodyStyles: { cellPadding: 1 },
+      columnStyles: {
+        0: { minCellWidth: 10 },
+        1: { minCellWidth: 15, halign: 'right' },
+      },
+
+      columns: ['Descripción', 'Valor unitario'],
+      body: rubros,
+    });
+    autoTable(doc, {
+      //startY: 30,
+      margin: 250,
+      tableWidth,
+      theme: 'grid',
+      styles: { fontSize: 7 },
+      headStyles: {
+        halign: 'center',
+        fillColor: 'white',
+        textColor: 'black',
+      },
+      bodyStyles: { cellPadding: 1 },
+      columnStyles: {
+        0: { minCellWidth: 10 },
+        1: { minCellWidth: 15, halign: 'right' },
+      },
+      
+      columns: ['', ''],
+      body: [
+        ['Iva 12%', '0.00'],
+        ['Descuento 0%', '0.00'],
+        ['Intereses', '0.00'],
+        ['Valor total', '0.00'],
+      ],
+    });
     /* FIGURAS */
     //doc.rect(margin - 5, 30, 215, 210); /* primer rectangulo */
     //doc.rect(margin - 5, 250, 215, 80); /* segundo rectangulo */
@@ -200,7 +246,7 @@ export class RecaudacionReportsService {
     doc.text(`Cons. anterior: 14`, margin + 400, 170);
     doc.text(`Referencia: 11715MEJICO Y LAS TEJERIAS`, margin + 230, 185);
     doc.text(`Agua Potable T.`, margin + 400, 185); */
-    doc.text(`Cant:`, margin + 230, 200);
+    /* doc.text(`Cant:`, margin + 230, 200);
     doc.text(`1`, margin + 230, 215);
     doc.text(`1`, margin + 230, 230);
     doc.text(`1`, margin + 230, 245);
@@ -214,8 +260,8 @@ export class RecaudacionReportsService {
     doc.text(`2.33`, margin + 400, 215);
     doc.text(`4.60`, margin + 400, 230);
     doc.text(`3.26`, margin + 400, 245);
-    doc.text(`0.1`, margin + 400, 260);
-    doc.text(`Iva 12%`, margin + 320, 275);
+    doc.text(`0.1`, margin + 400, 260); */
+/*     doc.text(`Iva 12%`, margin + 320, 275);
     doc.text(``, margin + 400, 275);
     doc.text(`Descuento`, margin + 320, 290);
     doc.text(`0.00`, margin + 400, 290);
@@ -230,7 +276,7 @@ export class RecaudacionReportsService {
     doc.text(`Interes anterior`, margin + 320, 365);
     doc.text(`0.00`, margin + 400, 365);
     doc.text(`Valor a pagar`, margin + 320, 380);
-    doc.text(`11.35`, margin + 400, 380);
+    doc.text(`11.35`, margin + 400, 380); */
     /*autoTable(doc, {
       headStyles: {
         halign: 'center',

@@ -14,13 +14,13 @@
                   <div class="col-sm-12">
                      <div class="row">
                         <div class="col-sm">
-                           <label for="idcliente_clientes" class="col-sm-6 col-form-label-sm"> Cliente
+                           <label for="idcliente_clientes" class="col-sm-6 col-form-label-sm"> Clientes
                               <div class="row">
                                  <div class="col-sm-9">
                                     <input type="text" class="form-control form-control-sm" id="idcliente_clientes"
-                                       readonly formControlName="idcliente_clientes" />
+                                       readonly value={{f_tramites.value.idcliente_clientes.nombre}} />
                                  </div>
-                                 <div class="col-sm-3">  <!-- Button trigger modal -->
+                                 <div class="col-sm-3"> <!-- Button trigger modal -->
                                     <button type="button" class="btn btn-outline-primary btn-sm" data-toggle="modal"
                                        data-target="#clienteModal">
                                        <i class="fa fa-search" aria-hidden="true"></i> Buscar
@@ -151,7 +151,8 @@
                </button>
             </div>
             <div class="modal-body">
-               <div class="row">
+               <app-buscar-cliente (setCliente)="setCliente($event)"></app-buscar-cliente>
+               <!--                <div class="row">
                   <div class="col-sm-9">
                      <div class="row">
                         <div class="col-sm-9" id="idi-cliente">
@@ -195,12 +196,12 @@
                         </tr>
                      </tbody>
                   </table>
-               </div>
+               </div> -->
             </div>
-            <div class="modal-footer">
+            <!--          <div class="modal-footer">
                <button type="button" class="btn btn-outline-success btn-sm" data-dismiss="modal">
                   <i class="fa fa-times-circle"></i> Cancelar</button>
-            </div>
+            </div> -->
          </div>
       </div>
    </div>

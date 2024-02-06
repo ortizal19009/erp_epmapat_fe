@@ -61,9 +61,9 @@ export class AbonadosService {
       return this.http.get<Abonados>(`${baseUrl}?consulta=${dato}`);
    }
 
-   saveSerxAbo(idabonado: number, idservicio: number): Observable<Object> {
+ /*   saveSerxAbo(idabonado: number, idservicio: number): Observable<Object> {
       return this.http.put(`${baseUrl}/${idabonado}/s/${idservicio}`, null);
-   }
+   } */
    //Abonados de un Cliente (Cuentas por Cliente)
    getByIdcliente(idcliente: number) {
       return this.http.get<Abonados>(`${baseUrl}?idcliente=${idcliente}`)
