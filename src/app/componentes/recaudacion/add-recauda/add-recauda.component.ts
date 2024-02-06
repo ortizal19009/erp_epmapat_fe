@@ -241,25 +241,29 @@ export class AddRecaudaComponent implements OnInit {
   sinCobro(idcliente: number) {
     this.facService.getSinCobro(idcliente).subscribe({
       next: (datos) => {
-        console.log(datos);
         this._sincobro = datos;
         if (this._sincobro.length > 0) {
           let suma: number = 0;
           let i = 0;
-          this._sincobro.forEach(() => {
-            if (this._sincobro[i].idmodulo.idmodulo == 3)
+          this._sincobro.forEach((item: any, index: number) => {
+            let interes = this.cInteres(item);
+            if (this._sincobro[i].idmodulo.idmodulo == 3) {
+              console.log(this._sincobro[i]);
+              this._sincobro[i].interes = interes;
+
               this._sincobro[i].comerc = 1;
-            this._sincobro[i].interes = 0;
-            this._sincobro[i].multa = 0;
-            suma +=
-              this._sincobro[i].totaltarifa +
-              this._sincobro[i].comerc +
-              this._sincobro[i].multa +
-              this._sincobro[i].interes;
+              this._sincobro[i].interes = 0;
+              this._sincobro[i].multa = 0;
+              suma +=
+                this._sincobro[i].totaltarifa +
+                this._sincobro[i].comerc +
+                this._sincobro[i].multa +
+                interes;
+              //this._sincobro[i].interes;
+            }
             i++;
           });
           this.sumtotal = suma;
-          // console.log(this._sincobro)
           this.swbusca = 3;
           // this.total();
         } else {
@@ -380,17 +384,15 @@ export class AddRecaudaComponent implements OnInit {
     let suma: number = 0;
     let i = 0;
     console.log(this._sincobro);
-    this._sincobro.forEach((index: any, item: number) => {
-      console.log(index);
-      console.log(item);
-      console.log(this.cInteres(index.idfactura));
+    this._sincobro.forEach((item: any, index: number) => {
+      let interes = this.cInteres(item);
       if (this._sincobro[i].pagado == 1) {
         suma +=
           this._sincobro[i].totaltarifa +
           this._sincobro[i].comerc +
           this._sincobro[i].interes +
           this._sincobro[i].multa +
-          this._sincobro[i].interes;
+          interes;
         // if (this._sincobro[i].idmodulo.idmodulo == 3) suma += this._sincobro[i].totaltarifa + 1;
         // else suma += this._sincobro[i].totaltarifa;
       }
@@ -512,7 +514,6 @@ export class AddRecaudaComponent implements OnInit {
     let i = 0;
     this.updateFacturas(i);
   }
-
   updateFacturas(i: number) {
     let idfactura: number;
     let fechacobro: Date = new Date();
@@ -669,7 +670,6 @@ export class AddRecaudaComponent implements OnInit {
   listarIntereses() {
     this.interService.getListaIntereses().subscribe({
       next: (datos) => {
-        console.log(datos);
         this._intereses = datos;
       },
       error: (err) => console.error(err.error),
@@ -678,15 +678,13 @@ export class AddRecaudaComponent implements OnInit {
 
   calcularInteres() {
     let idFactura = +this.idfactura!;
-    this.cInteres(idFactura);
-  }
-
-  cInteres(idfactura: number) {
     this.totInteres = 0;
     this.arrCalculoInteres = [];
+    let interes: number = 0;
     //let date: Date = new Date();
-    this.facService.getById(idfactura).subscribe({
+    this.facService.getById(idFactura).subscribe({
       next: (datos) => {
+        console.log(datos);
         let fec = datos.feccrea.toString().split('-', 2);
         let fechai: Date = new Date(`${fec[0]}-${fec[1]}-02`);
         let fechaf: Date = new Date();
@@ -709,12 +707,46 @@ export class AddRecaudaComponent implements OnInit {
         }
         this.arrCalculoInteres.forEach((item: any) => {
           this.totInteres += (item.interes * item.valor) / 100;
+          interes += (item.interes * item.valor) / 100;
           this.subtotal();
-          return this.totInteres;
         });
+        console.log(interes);
+        return interes;
       },
       error: (e) => console.error(e),
     });
+  }
+
+  cInteres(factura: any) {
+    this.totInteres = 0;
+    this.arrCalculoInteres = [];
+    let interes: number = 0;
+    let fec = factura.feccrea.toString().split('-', 2);
+    let fechai: Date = new Date(`${fec[0]}-${fec[1]}-02`);
+    let fechaf: Date = new Date();
+    this.factura = factura;
+    //fechai.setMonth(fechai.getMonth() + 1);
+    fechaf.setMonth(fechaf.getMonth() - 1);
+    while (fechai <= fechaf) {
+      this.calInteres = {} as calcInteres;
+      let query = this._intereses.find(
+        (interes: { anio: number; mes: number }) =>
+          interes.anio === +fechai.getFullYear()! &&
+          interes.mes === +fechai.getMonth()! + 1
+      );
+      this.calInteres.anio = query.anio;
+      this.calInteres.mes = query.mes;
+      this.calInteres.interes = query.porcentaje;
+      this.calInteres.valor = factura.totaltarifa;
+      this.arrCalculoInteres.push(this.calInteres);
+      fechai.setMonth(fechai.getMonth() + 1);
+    }
+    this.arrCalculoInteres.forEach((item: any) => {
+      this.totInteres += (item.interes * item.valor) / 100;
+      interes += (item.interes * item.valor) / 100;
+      // this.subtotal();
+    });
+    return interes;
   }
 }
 

@@ -289,7 +289,7 @@ import { HistorialconsumoComponent } from './componentes/abonados/historialconsu
       HttpClientModule, Ng2SearchPipeModule, NgxMaskModule.forRoot() ],
 
    providers: [ MainFooterComponent,
-       { provide: LocationStrategy, useClass: PathLocationStrategy }
+       { provide: LocationStrategy, useClass: HashLocationStrategy }
        /* https://angular.io/api/common/HashLocationStrategy */
     ],
    
