@@ -37,6 +37,7 @@ export class AddRecaudaComponent implements OnInit {
   _cuentas: any; //Cuentas del Cliente
   _clientes: any; //Clientes del Modal de Búsqueda de Clientes
   filtro: string;
+  filtrar: string;
   privez = true; //Para resetear los datos de Búsqueda de Clientes
   _formascobro: any;
   _sincobro: any;
@@ -77,7 +78,7 @@ export class AddRecaudaComponent implements OnInit {
     private authService: AutorizaService,
     private s_pdfRecaudacion: RecaudacionReportsService,
     private interService: InteresesService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.formBuscar = this.fb.group({
@@ -241,6 +242,7 @@ export class AddRecaudaComponent implements OnInit {
   sinCobro(idcliente: number) {
     this.facService.getSinCobro(idcliente).subscribe({
       next: (datos) => {
+        console.log(datos)
         this._sincobro = datos;
         if (this._sincobro.length > 0) {
           let suma: number = 0;
@@ -248,18 +250,17 @@ export class AddRecaudaComponent implements OnInit {
           this._sincobro.forEach((item: any, index: number) => {
             let interes = this.cInteres(item);
             if (this._sincobro[i].idmodulo.idmodulo == 3) {
-              console.log(this._sincobro[i]);
+              // console.log(this._sincobro[i]);
               this._sincobro[i].interes = interes;
 
               this._sincobro[i].comerc = 1;
-              this._sincobro[i].interes = 0;
+              this._sincobro[i].interes = interes;
               this._sincobro[i].multa = 0;
               suma +=
                 this._sincobro[i].totaltarifa +
                 this._sincobro[i].comerc +
                 this._sincobro[i].multa +
-                interes;
-              //this._sincobro[i].interes;
+                this._sincobro[i].interes;
             }
             i++;
           });
@@ -383,16 +384,16 @@ export class AddRecaudaComponent implements OnInit {
   totalAcobrar() {
     let suma: number = 0;
     let i = 0;
-    console.log(this._sincobro);
+    //console.log(this._sincobro);
     this._sincobro.forEach((item: any, index: number) => {
-      let interes = this.cInteres(item);
       if (this._sincobro[i].pagado == 1) {
+        console.log(this._sincobro)
         suma +=
           this._sincobro[i].totaltarifa +
           this._sincobro[i].comerc +
           this._sincobro[i].interes +
-          this._sincobro[i].multa +
-          interes;
+          this._sincobro[i].multa
+        //interes;
         // if (this._sincobro[i].idmodulo.idmodulo == 3) suma += this._sincobro[i].totaltarifa + 1;
         // else suma += this._sincobro[i].totaltarifa;
       }
@@ -437,26 +438,30 @@ export class AddRecaudaComponent implements OnInit {
 
   //Modal del Detalle de la Planilla
   getRubroxfac(idfactura: number) {
+    this._rubrosxfac = []
     let _lecturas: any;
     this.consumo = 0;
     this.idfactura = idfactura;
     this.lecService.getByIdfactura(idfactura).subscribe({
       next: (resp) => {
-        _lecturas = resp;
-        this.consumo =
-          _lecturas[0].lecturaactual - _lecturas[0].lecturaanterior;
-        this.rubxfacService.getByIdfactura(idfactura).subscribe({
-          next: (detalle) => {
-            this._rubrosxfac = detalle;
-            this.subtotal();
-            this.calcularInteres();
-          },
-          error: (err) =>
-            console.error(
-              'Al recuperar el datalle de la Planilla: ',
-              err.error
-            ),
-        });
+        if (resp.length != 0) {
+          _lecturas = resp;
+          this.consumo =
+            _lecturas[0].lecturaactual - _lecturas[0].lecturaanterior;
+          this.rubxfacService.getByIdfactura(idfactura).subscribe({
+            next: (detalle) => {
+              console.log(detalle)
+              this._rubrosxfac = detalle;
+              this.subtotal();
+              this.calcularInteres();
+            },
+            error: (err) =>
+              console.error(
+                'Al recuperar el datalle de la Planilla: ',
+                err.error
+              ),
+          });
+        } this.subtotal();
       },
       error: (err) =>
         console.error('Al recuperar la Lectura de la Planilla: ', err.error),
@@ -464,6 +469,7 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   getRubroxfac1(idfactura: number) {
+    console.log(idfactura)
     let _lecturas: any;
     this.consumo = 0;
     this.idfactura = idfactura;
@@ -639,13 +645,13 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   impComprobante(datos: any) {
-    console.log(datos);
+    //console.log(datos);
     this.getRubroxfac(datos.idfactura);
     this.idfactura = datos.idfactura;
     this.rubxfacService.getByIdfactura(+datos.idfactura!).subscribe({
       next: (detalle) => {
         this._rubrosxfac = detalle;
-        console.log(detalle);
+        //console.log(detalle);
         this.s_pdfRecaudacion.comprobantePago(datos, detalle);
         /*  this.lecService.getByIdfactura(idfactura).subscribe({
           next: (resp) => {
@@ -684,7 +690,7 @@ export class AddRecaudaComponent implements OnInit {
     //let date: Date = new Date();
     this.facService.getById(idFactura).subscribe({
       next: (datos) => {
-        console.log(datos);
+        // console.log(datos);
         let fec = datos.feccrea.toString().split('-', 2);
         let fechai: Date = new Date(`${fec[0]}-${fec[1]}-02`);
         let fechaf: Date = new Date();
@@ -698,20 +704,34 @@ export class AddRecaudaComponent implements OnInit {
               interes.anio === +fechai.getFullYear()! &&
               interes.mes === +fechai.getMonth()! + 1
           );
-          this.calInteres.anio = query.anio;
-          this.calInteres.mes = query.mes;
-          this.calInteres.interes = query.porcentaje;
-          this.calInteres.valor = datos.totaltarifa;
+          if (!query) {
+            console.log("Este mes no hay interes", this.calInteres.anio, this.calInteres.mes)
+
+            this.calInteres.anio = +fechai.getFullYear()!
+            this.calInteres.mes = +fechai.getMonth()! + 1
+            this.calInteres.interes = 0
+            query = this.calInteres
+          } else {
+            this.calInteres.anio = query.anio;
+            this.calInteres.mes = query.mes;
+            this.calInteres.interes = query.porcentaje;
+            this.calInteres.valor = datos.totaltarifa;
+            /*       this.arrCalculoInteres.push(this.calInteres);
+                  fechai.setMonth(fechai.getMonth() + 1); */
+
+
+          }
           this.arrCalculoInteres.push(this.calInteres);
           fechai.setMonth(fechai.getMonth() + 1);
         }
         this.arrCalculoInteres.forEach((item: any) => {
           this.totInteres += (item.interes * item.valor) / 100;
           interes += (item.interes * item.valor) / 100;
-          this.subtotal();
+
         });
-        console.log(interes);
-        return interes;
+        this.subtotal();
+        // console.log(interes);
+        // return interes;
       },
       error: (e) => console.error(e),
     });
@@ -734,19 +754,40 @@ export class AddRecaudaComponent implements OnInit {
           interes.anio === +fechai.getFullYear()! &&
           interes.mes === +fechai.getMonth()! + 1
       );
-      this.calInteres.anio = query.anio;
-      this.calInteres.mes = query.mes;
-      this.calInteres.interes = query.porcentaje;
-      this.calInteres.valor = factura.totaltarifa;
-      this.arrCalculoInteres.push(this.calInteres);
+      if (!query) {
+
+        this.calInteres.anio = +fechai.getFullYear()!
+        this.calInteres.mes = +fechai.getMonth()! + 1
+        this.calInteres.interes = 0
+        query = this.calInteres
+      } else {
+        this.calInteres.anio = query.anio;
+        this.calInteres.mes = query.mes;
+        this.calInteres.interes = query.porcentaje;
+        this.calInteres.valor = factura.totaltarifa;
+        this.arrCalculoInteres.push(this.calInteres);
+      }
       fechai.setMonth(fechai.getMonth() + 1);
     }
     this.arrCalculoInteres.forEach((item: any) => {
-      this.totInteres += (item.interes * item.valor) / 100;
+      //this.totInteres += (item.interes * item.valor) / 100;
       interes += (item.interes * item.valor) / 100;
       // this.subtotal();
     });
     return interes;
+  }
+  valorTarifas(tarifa: number, cons: number, interes: number, multa: number) {
+    let t = 0, c = 0, i = 0, m = 0
+    t = tarifa === undefined ? 0 : tarifa;
+    c = cons === undefined ? 0 : cons;
+    i = interes === undefined ? 0 : interes;
+    m = multa === undefined ? 0 : multa;
+    //t = tarifa;
+    //c = cons;
+    //i = interes;
+    //m = multa
+    return t + c + i + m;
+
   }
 }
 

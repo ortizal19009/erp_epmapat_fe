@@ -17,7 +17,6 @@
     "@angular/forms": "^14.0.0",
     "@angular/platform-browser": "^14.0.0",
     "@angular/platform-browser-dynamic": "^14.0.0",
-    "@angular/pwa": "^0.5.3",
     "@angular/router": "^14.0.0",
     "chart.js": "^4.3.0",
     "exceljs": "^4.3.0",

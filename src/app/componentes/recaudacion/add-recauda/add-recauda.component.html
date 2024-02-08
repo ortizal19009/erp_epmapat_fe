@@ -4,7 +4,7 @@
          <div class="col-sm-2 pl-0 mt-1">
             <h4 class="m-0 font-weight-bold text-truncate"> <i class="bi bi-cash-coin ml-2"></i> Recaudación</h4>
          </div>
-         <div class="col-sm-9 mx-0 px-0">
+         <div class="col-sm-8 mx-0 px-0">
             <form [formGroup]="formBuscar" class="col-sm-12 mt-0 px-0 pt-0" (ngSubmit)="onSubmit()">
                <div class="row col-sm-12 mt-1 mb-0">
                   <div class="form-group col-md-2 mb-0">
@@ -36,6 +36,10 @@
                   </div>
                </div>
             </form>
+         </div>
+         <div class="col-sm my-0 py-0 mb-0">
+            <input type="text" class="form-control form-control-sm" [(ngModel)]="filtrar"
+               placeholder="Filtrar...">
          </div>
 
          <div class="btn-group ml-auto">
@@ -122,10 +126,13 @@
                   </div>
                </div>
 
+      
                <table *ngIf="swbusca == 3" class="table table-hover table-sm table-bordered">
+
                   <thead class="recaudacabecera">
                      <tr class="text-center">
-                        <th></th>
+                        <th>
+                        </th>
                         <th>Cuenta</th>
                         <th>Planilla</th>
                         <th>Fecha</th>
@@ -136,15 +143,15 @@
                      </tr>
                   </thead>
                   <tbody>
-                     <tr *ngFor="let sincobro of _sincobro; let i = index" class="text-center ">
+                     <tr *ngFor="let sincobro of _sincobro | filter:filtrar ; let i = index" class="text-center ">
                         <td class="small font-weight-bold">{{ i+1 }}</td>
                         <td [ngClass]="{'transparente': sincobro.idabonado == 0}">{{ sincobro.idabonado }}</td>
                         <td>{{ sincobro.idfactura }}</td>
                         <td>{{ sincobro.feccrea }}</td>
                         <td class="text-left">{{ sincobro.idmodulo.descripcion }}</td>
 
-                        <td class="text-right">{{ sincobro.totaltarifa + sincobro.comerc + sincobro.interes +
-                           sincobro.multa | number:'1.2-2'}}</td>
+                        <td class="text-right">{{ valorTarifas(sincobro.totaltarifa , sincobro.comerc , sincobro.interes ,
+                           sincobro.multa )| number:'1.2-2'}}</td>
                         <!-- <td *ngIf="sincobro.idmodulo.idmodulo == 3" class="text-right">{{ sincobro.totaltarifa + 1 |
                            number: '1.2-2'}}</td> -->
                         <!-- <td class="text-right">{{ sincobro.comerc}}</td>
