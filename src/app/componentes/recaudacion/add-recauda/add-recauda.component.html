@@ -135,6 +135,7 @@
                         </th>
                         <th>Cuenta</th>
                         <th>Planilla</th>
+                        <th>Dirección</th>
                         <th>Fecha</th>
                         <th>Módulo</th>
                         <th>Valor</th>
@@ -147,6 +148,11 @@
                         <td class="small font-weight-bold">{{ i+1 }}</td>
                         <td [ngClass]="{'transparente': sincobro.idabonado == 0}">{{ sincobro.idabonado }}</td>
                         <td>{{ sincobro.idfactura }}</td>
+                        <td class="description">
+                           <i class="fa fa-spinner fa-pulse fa-fw"></i>
+                           <span class="sr-only">Loading...</span>                          
+
+                        </td>
                         <td>{{ sincobro.feccrea }}</td>
                         <td class="text-left">{{ sincobro.idmodulo.descripcion }}</td>
 

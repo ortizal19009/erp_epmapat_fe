@@ -48,7 +48,7 @@ export class AddTramiteComponent implements OnInit {
     private s_liquidatramites: LiquidaTramiteService,
     private s_rubroxfac: RubroxfacService,
     private s_rubroadicional: RubroAdicionalService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     let date: Date = new Date();
@@ -134,7 +134,9 @@ export class AddTramiteComponent implements OnInit {
   listarTpTramites() {
     this.s_tptramites.getListaTpTramite().subscribe(
       (datos) => {
+        console.log(datos)
         this.v_tptramites = datos;
+
       },
       (error) => console.log(error)
     );
@@ -288,7 +290,7 @@ export class AddTramiteComponent implements OnInit {
         idrubro_rubros: { idrubro: this.v_rubros[i].idrubro },
       });
       this.s_rubroxfac.saveRubroxfac(this.f_rubxfac.value).subscribe({
-        next: (datos) => {},
+        next: (datos) => { },
         error: (err) => console.log(err.error),
       });
       i++;

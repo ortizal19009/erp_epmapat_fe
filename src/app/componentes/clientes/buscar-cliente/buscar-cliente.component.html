@@ -2,10 +2,14 @@
    <form [formGroup]="formBusClientes" class="mb-0 col-md-9">
       <div class="row py-2">
          <div class="input-group col-sm-12">
+            <div class="input-group-append">
+               <button class="btn btn-sm btn-primary" [routerLink]="'/add-cliente'" data-dismiss="modal">
+                  <i class="fa fa-plus-square" aria-hidden="true"></i></button>
+            </div>
             <input type="text" placeholder="Nombre ó identificación (Mínimo 5)"
                class="form-control form-control-sm" autofocus
                formControlName="nombre_identifica" required minlength="5" [ngClass]="{'is-invalid': formBusClientes.controls['nombre_identifica'].invalid && formBusClientes.controls['nombre_identifica'].touched,
-               'is-valid': formBusClientes.controls['nombre_identifica'].valid, '': formBusClientes.controls['nombre_identifica'].untouched}">
+               'is-valid': formBusClientes.controls['nombre_identifica'].valid, '': formBusClientes.controls['nombre_identifica'].untouched}"/>
             <div class="input-group-append">
                <button class="btn btn-sm btn-primary" (click)="buscarClientes()"
                   [disabled]="formBusClientes.invalid">

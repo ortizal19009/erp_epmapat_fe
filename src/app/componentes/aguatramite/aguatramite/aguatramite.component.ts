@@ -78,6 +78,7 @@ export class AguatramiteComponent implements OnInit {
                if (
                   dato.idtipotramite === 1 ||
                   dato.idtipotramite === 2 ||
+                  dato.idtipotramite === 4 ||
                   dato.idtipotramite === 5 ||
                   dato.idtipotramite === 9
                ) {
