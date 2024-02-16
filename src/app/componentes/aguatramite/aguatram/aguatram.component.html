@@ -79,9 +79,10 @@
             <div class="row justify-content-center text-center">
                <div class="col-sm-4 detalle">
                   <button class="btn btn-sm btn-outline-success mx-1 mb-3" (click)="actualizarCategoria()"><i
-                     class="fa fa-check-circle"></i>&nbsp;Aceptar</button>
-               <button class="btn btn-sm btn-success mx-1 mb-3" (click)="regresar()"><i class="fa fa-times-circle"></i>
-                  Cancelar</button>
+                        class="fa fa-check-circle"></i>&nbsp;Aceptar</button>
+                  <button class="btn btn-sm btn-success mx-1 mb-3" (click)="regresar()"><i
+                        class="fa fa-times-circle"></i>
+                     Cancelar</button>
                </div>
             </div>
 
@@ -110,7 +111,8 @@
                                        value="{{selectClient.nombre}}" readonly>
                                  </label>
                                  <button class="btn btn-sm btn-outline-primary ml-2" data-toggle="modal"
-                                    data-target="#modalClientes"><i class="fa fa-search" aria-hidden="true"></i></button>
+                                    data-target="#modalClientes"><i class="fa fa-search"
+                                       aria-hidden="true"></i></button>
                               </div>
                            </div>
                            <div class="row">
@@ -129,8 +131,10 @@
 
             <div class="row justify-content-center text-center">
                <div class="col-sm-8 detalle">
-                  <button class="btn btn-sm btn-outline-success mx-1 mb-3" (click)="actualizarPropietario()"><i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
-                  <button class="btn btn-sm btn-success mx-1 mb-3" (click)="regresar()"><i class="fa fa-times-circle"></i> Cancelar</button>
+                  <button class="btn btn-sm btn-outline-success mx-1 mb-3" (click)="actualizarPropietario()"><i
+                        class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+                  <button class="btn btn-sm btn-success mx-1 mb-3" (click)="regresar()"><i
+                        class="fa fa-times-circle"></i> Cancelar</button>
                </div>
             </div>
 
@@ -142,7 +146,7 @@
 
             <div class="row justify-content-center">
                <div class="col-sm-8 detalle">
-                  <form [formGroup]="f_camPropietario">
+                  <form [formGroup]="f_nMedidor">
                      <div class="card detalle">
                         <div class="card-header cabecera py-1">
                            <h3 class="card-title font-weight-bold">Datos del nuevo medidor</h3>
@@ -153,22 +157,69 @@
                            </div>
                         </div>
                         <div class="card-body">
-                           <div class="row">
-                              <div class="col-sm">
-                                 <label for="cliente" class="col-sm-6">
-                                    <input type="text" id="cliente" class="form-control form-control-sm"
-                                       value="{{selectClient.nombre}}" readonly>
-                                 </label>
-                                 <button class="btn btn-sm btn-outline-primary ml-2" data-toggle="modal"
-                                    data-target="#modalClientes"><i class="fa fa-search" aria-hidden="true"></i></button>
-                              </div>
-                           </div>
-                           <div class="row">
-                              <div class="col-sm">
-                                 <label for="" class="col-sm-12">Observaciones
-                                    <textarea class="form-control form-control-sm "
-                                       formControlName="observacion"></textarea>
-                                 </label>
+                           <div class="card-body detalle">
+                              <div class="row">
+                                 <div class="col-sm">
+                                    <div class="row">
+                                       <div class="col-sm">
+                                          <div class="input-group mb-1 input-group-sm">
+                                             <div class="input-group-prepend">
+                                                <label class="input-group-text" for="marca">Marca<sup
+                                                      class="green">*</sup></label>
+                                             </div>
+                                             <input type="text" class="form-control form-control-sm"
+                                                formControlName="medidormarca"
+                                             [ngClass]="{'is-invalid': f['medidormarca'].invalid && f['medidormarca'].touched,'is-valid': f['medidormarca'].valid, '': f['medidormarca'].untouched}"> 
+                                          </div>
+                                       </div>
+                                       <div class="col-sm">
+                                          <div class="input-group mb-1 input-group-sm">
+                                             <div class="input-group-prepend">
+                                                <label class="input-group-text" for="medidornumero">Número<sup
+                                                      class="green">*</sup></label>
+                                             </div>
+                                             <input type="text" class="form-control form-control-sm"
+                                                formControlName="medidornumero"
+                                             [ngClass]="{'is-invalid': f['medidornumero'].invalid && f['medidornumero'].touched, 'is-valid': f['medidornumero'].valid, '': f['medidornumero'].untouched}"> 
+                                          </div>
+                                       </div>
+                                    </div>
+                                    <div class="row">
+                                       <div class="col-sm">
+                                          <div class="input-group mb-1 input-group-sm">
+                                             <div class="input-group-prepend">
+                                                <label class="input-group-text" for="codmedidor">Código<sup
+                                                      class="green">*</sup></label>
+                                             </div>
+                                             <input type="number" class="form-control form-control-sm"
+                                                formControlName="codmedidor"
+                                             [ngClass]="{'is-invalid': f['codmedidor'].invalid && f['codmedidor'].touched, 'is-valid': f['codmedidor'].valid, '': f['codmedidor'].untouched}"> 
+                                          </div>
+                                       </div>
+                                       <div class="col-sm">
+                                          <div class="input-group mb-1 input-group-sm">
+                                             <div class="input-group-prepend">
+                                                <label class="input-group-text" for="medidordiametro">Diámetro<sup
+                                                      class="green">*</sup></label>
+                                             </div>
+                                             <input type="number" class="form-control form-control-sm"
+                                                formControlName="medidordiametro"
+                                             [ngClass]="{'is-invalid': f['medidordiametro'].invalid && f['medidordiametro'].touched, 'is-valid': f['medidordiametro'].valid, '': f['medidordiametro'].untouched}"> 
+                                          </div>
+                                       </div>
+                                       <div class="col-sm">
+                                          <div class="input-group mb-1 input-group-sm">
+                                             <div class="input-group-prepend">
+                                                <label class="input-group-text" for="medidornroesferas">Nro esferas<sup
+                                                      class="green">*</sup></label>
+                                             </div>
+                                             <input type="number" min="0" class="form-control form-control-sm"
+                                                formControlName="medidornroesferas"
+                                             [ngClass]="{'is-invalid': f['medidornroesferas'].invalid && f['medidornroesferas'].touched, 'is-valid': f['medidornroesferas'].valid, '': f['medidornroesferas'].untouched}"> 
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
                               </div>
                            </div>
                         </div>
@@ -179,8 +230,10 @@
 
             <div class="row justify-content-center text-center">
                <div class="col-sm-8 detalle">
-                  <button class="btn btn-sm btn-outline-success mx-1 mb-3" (click)="actualizarPropietario()"><i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
-                  <button class="btn btn-sm btn-success mx-1 mb-3" (click)="regresar()"><i class="fa fa-times-circle"></i> Cancelar</button>
+                  <button class="btn btn-sm btn-outline-success mx-1 mb-3" (click)="actualizarPropietario()"><i
+                        class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+                  <button class="btn btn-sm btn-success mx-1 mb-3" (click)="regresar()"><i
+                        class="fa fa-times-circle"></i> Cancelar</button>
                </div>
             </div>
 
@@ -198,7 +251,7 @@
       aria-labelledby="staticBackdropLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg">
          <div class="modal-content">
-       <!--      <div class="modal-header">
+            <!--      <div class="modal-header">
                <div class="row">
                   <div class="col-sm">
                      <h5 class="modal-title" id="modalAbonadosLabel">Seleccionar cliente</h5>

@@ -36,6 +36,7 @@ export class AguatramComponent implements OnInit {
    f_nMedidor: FormGroup;
    f_retiroMedidor: FormGroup;
    f_camPropietario: FormGroup;
+   f_camMedidor: FormGroup;
    filterTerm: string;
    filterClient: string;
    categorias: any;
@@ -222,6 +223,8 @@ export class AguatramComponent implements OnInit {
       this.guardarAguaTramite(this.abonado, this.f_nMedidor.value.codmedidor);
       this.regresar();
    }
+   get f() { return this.f_nMedidor.controls; }
+
 
    guardarAguaTramite(abonado: Abonados, codmedidor: any) {
       let aguatramite: Aguatramite = new Aguatramite();
