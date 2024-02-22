@@ -30,7 +30,7 @@
 
                   <div *ngIf="acobrar > 0 && !swcobrado" class="form-group col-md-3 my-0 py-0 mb-0">
                      <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#modalCobrar"
-                        (click)="valorAcobrar(acobrar)"><i class="bi bi-check-lg"></i> Cobrar:&nbsp;&nbsp;&nbsp;
+                        (click)="valorAcobrar(acobrar)"><i class="bi bi-check-lg"></i> Cobrars:&nbsp;&nbsp;&nbsp;
                         <strong>{{acobrar | number: '1.2-2'}}</strong>
                      </button>
                   </div>
@@ -38,8 +38,7 @@
             </form>
          </div>
          <div class="col-sm my-0 py-0 mb-0">
-            <input type="text" class="form-control form-control-sm" [(ngModel)]="filtrar"
-               placeholder="Filtrar...">
+            <input type="text" class="form-control form-control-sm" [(ngModel)]="filtrar" placeholder="Filtrar...">
          </div>
 
          <div class="btn-group ml-auto">
@@ -47,7 +46,7 @@
                aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#abrirCaja"
+               <button class="dropdown-item" type="button" data-toggle="modal" (click)="listarCajas()" data-target="#abrirCaja"
                   [disabled]="swbusca != 0">
                   <i class="bi-door-open"></i>&nbsp; Abrir caja</button>
                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#cerrarCaja"
@@ -126,7 +125,7 @@
                   </div>
                </div>
 
-      
+
                <table *ngIf="swbusca == 3" class="table table-hover table-sm table-bordered">
 
                   <thead class="recaudacabecera">
@@ -149,14 +148,17 @@
                         <td [ngClass]="{'transparente': sincobro.idabonado == 0}">{{ sincobro.idabonado }}</td>
                         <td>{{ sincobro.idfactura }}</td>
                         <td class="description">
-                           <i class="fa fa-spinner fa-pulse fa-fw"></i>
-                           <span class="sr-only">Loading...</span>                          
+                           <!--    <i class="fa fa-spinner fa-pulse fa-fw"></i>
+                           <span class="sr-only">Loading...</span> -->
 
                         </td>
                         <td>{{ sincobro.feccrea }}</td>
                         <td class="text-left">{{ sincobro.idmodulo.descripcion }}</td>
 
-                        <td class="text-right">{{ valorTarifas(sincobro.totaltarifa , sincobro.comerc , sincobro.interes ,
+                        <!-- <td class="text-right">{{ getRubroxfac(sinCobro.idfactura)| number:'1.2-2'}}</td> -->
+
+                        <td class="text-right">{{ valorTarifas(sincobro.totaltarifa , sincobro.comerc , sincobro.interes
+                           ,
                            sincobro.multa )| number:'1.2-2'}}</td>
                         <!-- <td *ngIf="sincobro.idmodulo.idmodulo == 3" class="text-right">{{ sincobro.totaltarifa + 1 |
                            number: '1.2-2'}}</td> -->
@@ -373,6 +375,48 @@
       </div>
    </div>
 
+   <!-- MODAL Abrir Caja -->
+   <div class="modal fade" id="abrirCaja" tabindex="-1" aria-labelledby="abrirCajaLabel" data-backdrop="static"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+         <div class="modal-content recaudadetalle">
+
+            <div class='modal-header py-2 justify-content-center recaudacabecera'>
+               <h5 class='modal-title font-weight-bold fantacyblack' id='ModalLabel'>Abrir Caja</h5>
+            </div>
+            <div class='modal-body'>
+               <div class="form-group col-md-7 my-0 py-0">
+                  <div class="input-group mb-3 input-group-sm">
+                     <div class="input-group-prepend">
+                        <label class="input-group-text" for="periodo">Período</label>
+                     </div>
+                     <select class="custom-select" id="periodo" formControlName="periodo">
+                        <option value="1" selected>Enero</option>
+                        <option value="2">Febrero</option>
+                        <option value="3">Marzo</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Mayo</option>
+                        <option value="6">Junio</option>
+                        <option value="7">Julio</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Septiembre</option>
+                        <option value="10">Octubre</option>
+                        <option value="11">Noviembre</option>
+                        <option value="12">Diciembre</option>
+                     </select>
+                  </div>
+               </div>
+            </div>
+            <div class='row justify-content-center mt-1 mb-3'>
+               <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal'>
+                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+               <button type='button' class='btn btn-sm btn-outline-success mx-1' data-dismiss='modal'>
+                  <i class="bi bi-x-circle"></i> Cancelar</button>
+            </div>
+         </div>
+
+      </div>
+   </div>
    <!-- MODAL Cerrar Caja -->
    <div class="modal fade" id="cerrarCaja" tabindex="-1" aria-labelledby="cerrarCajaLabel" data-backdrop="static"
       aria-hidden="true">

@@ -20,6 +20,7 @@ import { Facturas } from 'src/app/modelos/facturas.model';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { RecaudacionReportsService } from '../recaudacion-reports.service';
 import { InteresesService } from 'src/app/servicios/intereses.service';
+import { CajaService } from 'src/app/servicios/caja.service';
 
 @Component({
   selector: 'app-add-recauda',
@@ -77,7 +78,8 @@ export class AddRecaudaComponent implements OnInit {
     private fcobroService: FormacobroService,
     private authService: AutorizaService,
     private s_pdfRecaudacion: RecaudacionReportsService,
-    private interService: InteresesService
+    private interService: InteresesService,
+    private s_cajas: CajaService
   ) { }
 
   ngOnInit(): void {
@@ -128,10 +130,22 @@ export class AddRecaudaComponent implements OnInit {
     });
     this.listFormasCobro();
     this.listarIntereses();
+
+    console.log(this.authService.idusuario)
   }
+
 
   get f() {
     return this.formCobrar.controls;
+  }
+  listarCajas() {
+    this.s_cajas.getAll().subscribe({
+      next: (datos) => {
+        console.log(datos)
+
+      }
+    })
+
   }
 
   //Formas de cobro
@@ -242,7 +256,7 @@ export class AddRecaudaComponent implements OnInit {
   sinCobro(idcliente: number) {
     this.facService.getSinCobro(idcliente).subscribe({
       next: (datos) => {
-        console.log(datos)
+        //console.log(datos)
         this._sincobro = datos;
         if (this._sincobro.length > 0) {
           let suma: number = 0;
@@ -337,6 +351,7 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   marcarTodas(event: any) {
+    console.log(event)
     let valor: number = 0;
     if (event.target.checked) {
       valor = 1;
@@ -350,7 +365,6 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   marcarAnteriores(index: number) {
-    // console.log('this._sincobro[index].idmodulo: ', this._sincobro[index].idmodulo)
     if (
       this._sincobro[index].idmodulo.idmodulo == 3 ||
       this._sincobro[index].idmodulo.idmodulo == 4
@@ -377,6 +391,12 @@ export class AddRecaudaComponent implements OnInit {
           i++;
         }
       }
+    } else {
+      if (this._sincobro[index].pagado) {
+        this._sincobro[index].pagado = 1
+      } else {
+        this._sincobro[index].pagado = 0
+      }
     }
     this.totalAcobrar();
   }
@@ -384,15 +404,17 @@ export class AddRecaudaComponent implements OnInit {
   totalAcobrar() {
     let suma: number = 0;
     let i = 0;
-    //console.log(this._sincobro);
     this._sincobro.forEach((item: any, index: number) => {
-      if (this._sincobro[i].pagado == 1) {
-        console.log(this._sincobro)
-        suma +=
-          this._sincobro[i].totaltarifa +
-          this._sincobro[i].comerc +
-          this._sincobro[i].interes +
-          this._sincobro[i].multa
+      if (this._sincobro[i].pagado === true || this._sincobro[i].pagado === 1) {
+        if (this._sincobro[i].idmodulo.idmodulo == 3 || this._sincobro[i].idmodulo.idmodulo == 4) {
+          suma +=
+            this._sincobro[i].totaltarifa +
+            this._sincobro[i].comerc +
+            (+this._sincobro[i].interes.toFixed(2)!) +
+            this._sincobro[i].multa
+        } else {
+          suma += this._sincobro[i].totaltarifa;
+        }
         //interes;
         // if (this._sincobro[i].idmodulo.idmodulo == 3) suma += this._sincobro[i].totaltarifa + 1;
         // else suma += this._sincobro[i].totaltarifa;
@@ -433,7 +455,7 @@ export class AddRecaudaComponent implements OnInit {
       this.acobrar.toFixed(2).toString()
     );
     this.formCobrar.controls['vuelto'].setValue('');
-    // this.disabledcobro = false;
+    this.disabledcobro = false;
   }
 
   //Modal del Detalle de la Planilla
@@ -467,7 +489,16 @@ export class AddRecaudaComponent implements OnInit {
         console.error('Al recuperar la Lectura de la Planilla: ', err.error),
     });
   }
+  getAbonadoById(cuenta: number) {
+    this.aboService.getByIdabonado(cuenta).subscribe({
+      next: (datos) => {
+        console.log(datos);
+        return datos.direccionubicacion;
+      },
+      error: (e) => console.error(e)
+    })
 
+  }
   getRubroxfac1(idfactura: number) {
     console.log(idfactura)
     let _lecturas: any;
@@ -531,10 +562,14 @@ export class AddRecaudaComponent implements OnInit {
           resp.fechacobro = fechacobro;
           resp.usuariocobro = this.authService.idusuario;
           resp.pagado = 1;
+          if (resp.estado === 3) {
+            resp.estado = 1;
+          }
+
           this.facService.updateFacturas(resp).subscribe({
-            next: (nex) => {
+            next: (dato) => {
               this.swcobrado = true;
-              // console.log('Actualización Ok!')
+              console.log('Actualización Ok!', dato)
               i++;
               if (i < this._sincobro.length) this.updateFacturas(i);
             },
@@ -786,6 +821,7 @@ export class AddRecaudaComponent implements OnInit {
     //c = cons;
     //i = interes;
     //m = multa
+    console.log(t, c, i, m)
     return t + c + i + m;
 
   }
