@@ -21,6 +21,12 @@ import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { RecaudacionReportsService } from '../recaudacion-reports.service';
 import { InteresesService } from 'src/app/servicios/intereses.service';
 import { CajaService } from 'src/app/servicios/caja.service';
+import { Cajas } from 'src/app/modelos/cajas.model';
+import { Ptoemision } from 'src/app/modelos/ptoemision';
+import { Usuarios } from 'src/app/modelos/administracion/usuarios.model';
+import { Recaudacion } from 'src/app/modelos/recaudacion.model';
+import { RecaudacionService } from 'src/app/servicios/recaudacion.service';
+import { FacxrecaudaService } from 'src/app/servicios/facxrecauda.service';
 
 @Component({
   selector: 'app-add-recauda',
@@ -58,6 +64,11 @@ export class AddRecaudaComponent implements OnInit {
   _coloresdetalle: any;
   swcobrado: boolean;
   formaCobro: Formacobro = new Formacobro();
+  formacobroNC: boolean;
+  idformacobro: number
+  _caja: Cajas = new Cajas();
+  _establecimiento: Ptoemision = new Ptoemision();
+  _usuario: Usuarios = new Usuarios();
 
   /* Intereses */
   calInteres = {} as calcInteres;
@@ -79,7 +90,9 @@ export class AddRecaudaComponent implements OnInit {
     private authService: AutorizaService,
     private s_pdfRecaudacion: RecaudacionReportsService,
     private interService: InteresesService,
-    private s_cajas: CajaService
+    private s_cajas: CajaService,
+    private recaService: RecaudacionService,
+    private facxrService: FacxrecaudaService
   ) { }
 
   ngOnInit(): void {
@@ -93,12 +106,12 @@ export class AddRecaudaComponent implements OnInit {
     });
 
     this.formCobrar = this.fb.group({
-      valorAcobrar: 0, //Valor original con decimales para poder validar el dinero recibido
+      valorAcobrar: 0,  //Valor original con decimales para poder validar el dinero recibido
       idformacobro: this.formaCobro,
       acobrar: 0,
-      // dinero: '',
+      ncvalor: ['', [Validators.required], this.valNC.bind(this)],
       dinero: ['', [Validators.required], this.valDinero.bind(this)],
-      vuelto: '',
+      vuelto: ''
     });
 
     //Al digitar quita alerta
@@ -130,32 +143,30 @@ export class AddRecaudaComponent implements OnInit {
     });
     this.listFormasCobro();
     this.listarIntereses();
-
-    console.log(this.authService.idusuario)
   }
-
-
   get f() {
     return this.formCobrar.controls;
   }
   listarCajas() {
-    this.s_cajas.getAll().subscribe({
+    this.s_cajas.getByIdUsuario(this.authService.idusuario).subscribe({
       next: (datos) => {
         console.log(datos)
-
+        this._caja = datos;
+        this._establecimiento = datos.idptoemision_ptoemision;
+        this._usuario = datos.idusuario_usuarios;
       }
     })
-
   }
-
   //Formas de cobro
   listFormasCobro() {
     this.fcobroService.getAll().subscribe({
-      next: (datos) => {
+      next: datos => {
         this._formascobro = datos;
-        this.formCobrar.patchValue({ idformacobro: this._formascobro[0] });
+        this.idformacobro = this._formascobro[0].idformacobro;
+        // console.log('Al iniciar this.idformacobro: ', this.idformacobro);
+        // this.formCobrar.patchValue({ idformacobro: this._formascobro[0] })
       },
-      error: (err) => console.error(err.error),
+      error: err => console.error(err.error)
     });
   }
 
@@ -256,7 +267,6 @@ export class AddRecaudaComponent implements OnInit {
   sinCobro(idcliente: number) {
     this.facService.getSinCobro(idcliente).subscribe({
       next: (datos) => {
-        //console.log(datos)
         this._sincobro = datos;
         if (this._sincobro.length > 0) {
           let suma: number = 0;
@@ -264,7 +274,6 @@ export class AddRecaudaComponent implements OnInit {
           this._sincobro.forEach((item: any, index: number) => {
             let interes = this.cInteres(item);
             if (this._sincobro[i].idmodulo.idmodulo == 3) {
-              // console.log(this._sincobro[i]);
               this._sincobro[i].interes = interes;
 
               this._sincobro[i].comerc = 1;
@@ -280,7 +289,6 @@ export class AddRecaudaComponent implements OnInit {
           });
           this.sumtotal = suma;
           this.swbusca = 3;
-          // this.total();
         } else {
           this.swbusca = 2;
           this.sumtotal = 0;
@@ -415,9 +423,6 @@ export class AddRecaudaComponent implements OnInit {
         } else {
           suma += this._sincobro[i].totaltarifa;
         }
-        //interes;
-        // if (this._sincobro[i].idmodulo.idmodulo == 3) suma += this._sincobro[i].totaltarifa + 1;
-        // else suma += this._sincobro[i].totaltarifa;
       }
       i++;
     });
@@ -426,14 +431,21 @@ export class AddRecaudaComponent implements OnInit {
 
   valorAcobrar(acobrar: number) {
     this.disabledcobro = true;
-    let entero = Math.trunc(acobrar);
-    let decimal = (acobrar - entero).toFixed(2);
+    let entero = Math.trunc(acobrar)
+    let decimal = (acobrar - entero).toFixed(2)
     this.acobrardec = decimal.toString().slice(1);
+    const primerPagado = this._sincobro.find((registro: { pagado: number; }) => registro.pagado == 1);
+    let fcobro: number;  //3= Transferencia
+    if (primerPagado.estado == 3) fcobro = this._formascobro[1];
+    else fcobro = this._formascobro[0];
     this.formCobrar.patchValue({
+      // idformacobro: this._formascobro[0],
+      idformacobro: fcobro,
       valorAcobrar: acobrar,
       acobrar: entero,
       dinero: '',
       vuelto: '',
+      ncvalor: ''
     });
   }
 
@@ -451,12 +463,13 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   valorDinero() {
-    this.formCobrar.controls['dinero'].setValue(
-      this.acobrar.toFixed(2).toString()
-    );
+    this.formacobroNC = false;
+    this.formCobrar.controls['ncvalor'].setValue('');
+    this.formCobrar.controls['dinero'].setValue(this.acobrar.toFixed(2).toString());
     this.formCobrar.controls['vuelto'].setValue('');
     this.disabledcobro = false;
   }
+
 
   //Modal del Detalle de la Planilla
   getRubroxfac(idfactura: number) {
@@ -548,9 +561,78 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   cobrar() {
-    let i = 0;
-    this.updateFacturas(i);
+    //Crea el registro en Recaudación
+    let fecha = new Date();
+    let r = {} as iRecaudacion; //Interface para los datos de la Recaudación
+    r.fechacobro = fecha;
+    r.recaudador = this.authService.idusuario;
+    r.totalpagar = +this.formCobrar.value.valorAcobrar;
+    r.recibo = +this.formCobrar.value.dinero;
+    r.cambio = +this.formCobrar.value.vuelto;
+    r.formapago = this.idformacobro;
+    r.valor = +this.formCobrar.value.valorAcobrar;
+    if (r.estado === 2) {
+      r.estado = 2;
+    } else {
+      r.estado = 1
+    }
+    r.ncvalor = +this.formCobrar.value.ncvalor;
+    r.usucrea = this.authService.idusuario;
+    r.feccrea = fecha;
+    this.recaService.saveRecaudacion(r).subscribe({
+      next: resp => {
+        const recaCreada = resp as Recaudacion;
+        // console.log('recaudacion:', recaCreada.idrecaudacion);
+        let i = 0
+        this.facxrecauda(recaCreada, i);
+      },
+      error: err => console.error('Al crear la Recaudación: ', err.error)
+    });
+
   }
+  //Registra las facturas por recaudación y actualiza la fecha de cobro de la(s) factura(s)
+  facxrecauda(recaCreada: Recaudacion, i: number) {
+    let idfactura: number;
+    let fechacobro: Date = new Date();
+    if (this._sincobro[i].pagado) {
+      idfactura = this._sincobro[i].idfactura;
+      this.facService.getById(idfactura).subscribe({
+        next: fac => {
+          // console.log('resp: ', resp);
+          //Añade a facxrecauda
+          let facxr = {} as iFacxrecauda; //Interface para los datos de las facturas de la Recaudación
+          facxr.idrecaudacion = recaCreada;
+          facxr.idfactura = fac;
+          facxr.estado = 1;
+          this.facxrService.save(facxr).subscribe({
+            next: nex => {
+              console.log('facxrecauda Ok');
+              //Actualiza Factura como cobrada
+              fac.fechacobro = fechacobro;
+              fac.usuariocobro = this.authService.idusuario;
+              fac.pagado = 1;
+              this.facService.updateFacturas(fac).subscribe({
+                next: nex => {
+                  this.swcobrado = true;
+                  // console.log('Actualización Ok!')
+                  i++
+                  if (i < this._sincobro.length) this.facxrecauda(recaCreada, i)
+                },
+                error: err => console.error('Al actualizar la Factura: ', err.error)
+              });
+            },
+            error: err => console.error('Al crear las Facturas de la Recaudación: ', err.error)
+          });
+        },
+        error: err => console.error('Al recuperar los datos de la Factura a actualizar: ', err.error)
+      })
+    }
+    else {   //No pagada continua con la siguiente
+      i++
+      if (i < this._sincobro.length) this.facxrecauda(recaCreada, i)
+    }
+  }
+
   updateFacturas(i: number) {
     let idfactura: number;
     let fechacobro: Date = new Date();
@@ -674,8 +756,9 @@ export class AddRecaudaComponent implements OnInit {
 
   //Que el dinero no sea menor que el valor a cobrar
   valDinero(control: AbstractControl) {
-    if (this.formCobrar.value.valorAcobrar > control.value)
-      return of({ invalido: true });
+    let ncvalor: number;
+    if (+this.formCobrar.controls['ncvalor'].value > 0) ncvalor = +this.formCobrar.controls['ncvalor'].value; else ncvalor = 0;
+    if (+this.formCobrar.value.valorAcobrar - ncvalor > control.value) return of({ 'invalido': true });
     else return of(null);
   }
 
@@ -825,6 +908,19 @@ export class AddRecaudaComponent implements OnInit {
     return t + c + i + m;
 
   }
+  //Al digitar el valor de la NC
+  changeNCvalor() {
+    let dinero: number;
+    if (+this.formCobrar.controls['dinero'].value > 0) dinero = +this.formCobrar.controls['dinero'].value; else dinero = 0
+    let vuelto = ((+this.formCobrar.controls['ncvalor'].value + dinero) - this.acobrar).toFixed(2);
+    this.formCobrar.controls['vuelto'].setValue(vuelto.toString());
+    if (this.formCobrar.controls['vuelto'].value == 0) this.disabledcobro = false; else this.disabledcobro = true;
+  }
+  //Valida que el valor de la NC no se mayor que el valor a cobrar
+  valNC(control: AbstractControl) {
+    if (this.formCobrar.value.valorAcobrar < control.value) return of({ 'invalido': true });
+    else return of(null);
+  }
 }
 
 interface Cliente {
@@ -853,4 +949,32 @@ interface calcInteres {
   mes: number;
   interes: number;
   valor: number;
+}
+
+interface iRecaudacion {
+  idrecaudacion: number;
+  fechacobro: Date;
+  recaudador: number;
+  totalpagar: number;
+  recibo: number;
+  cambio: number;
+  formapago: number;
+  valor: number;
+  estado: number;
+  fechaeliminacion: Date;
+  usuarioeliminacion: number;
+  observaciones: String;
+  ncnumero: number;
+  ncvalor: number;
+  usucrea: number;
+  feccrea: Date;
+}
+
+interface iFacxrecauda {
+  idfacxrecauda: number;
+  idrecaudacion: Recaudacion;
+  idfactura: Facturas;
+  estado: number;
+  fechaeliminacion: Date;
+  usuarioeliminacion: number
 }

@@ -1,3 +1,4 @@
+import { Usuarios } from "./administracion/usuarios.model";
 import { Ptoemision } from "./ptoemision";
 
 export class Cajas {
@@ -10,4 +11,6 @@ export class Cajas {
    feccrea: Date;
    usumodi: number;
    fecmodi: Date;
+   idusuario_usuarios: Usuarios;
+   ultimafact: String; 
 }

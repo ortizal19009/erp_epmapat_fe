@@ -201,6 +201,7 @@ import { ModiUsuarioComponent } from './componentes/administracion/usuarios/modi
 
 import { ColoresComponent } from './componentes/administracion/colores/colores.component';
 import { CertitmpComponent } from './componentes/certificaciones/certitmp/certitmp.component';
+import { TransferenciasComponent } from './componentes/recaudacion/transferencias/transferencias.component';
 
 
 const routes: Routes = [
@@ -288,6 +289,7 @@ const routes: Routes = [
    { path: 'modicaja/:idcaja', component: ModificarCajaComponent },
    { path: 'add-caja', component: AddCajaComponent },
    { path: 'info-caja', component: InfoCajaComponent },
+   { path: 'transferencias', component: TransferenciasComponent},
    // Intereses
    { path: 'intereses', component: ListarInteresesComponent },
    { path: 'modificar-intereses', component: ModificarInteresesComponent },

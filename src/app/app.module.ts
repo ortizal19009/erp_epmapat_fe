@@ -44,6 +44,7 @@ import { AddConvenioComponent } from './componentes/convenios/add-convenio/add-c
 import { ListarCajaComponent } from './componentes/caja/cajas/cajas.component';
 import { AddCajaComponent } from './componentes/caja/add-caja/add-caja.component';
 import { ModificarCajaComponent } from './componentes/caja/modificar-caja/modificar-caja.component';
+import { TransferenciasComponent } from './componentes/recaudacion/transferencias/transferencias.component';
 
 //Catálogos
 import { ListarEstadomComponent } from './componentes/estadom/listar-estadom/listar-estadom.component';
@@ -230,7 +231,7 @@ import { HistorialconsumoComponent } from './componentes/abonados/historialconsu
       FacturacionComponent, InfoFacturacionComponent, RubrosComponent, InfoRubroComponent,
       //Recaudación
       ListarCajaComponent, AddCajaComponent, ModificarCajaComponent,
-      ConveniosComponent, ModiConvenioComponent, AddConvenioComponent,
+      ConveniosComponent, ModiConvenioComponent, AddConvenioComponent, TransferenciasComponent,
       //Catálogos
       ListarEstadomComponent, AddEstadomComponent,
       ListarNacionalidadComponent, AddNacionalidadComponent, ModificarNacionalidadComponent,

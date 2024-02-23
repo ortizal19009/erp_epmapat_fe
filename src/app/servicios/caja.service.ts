@@ -54,5 +54,8 @@ export class CajaService {
    getByIdptoemision(idptoemision: number) {
       return this.http.get<Cajas>(`${baseUrl}?idptoemision=${idptoemision}`)
    }
-
+   /* Entontrar cajas por usuario para abrir caja */
+   getByIdUsuario(idusuario: number) {
+      return this.http.get<Cajas>(`${baseUrl}/usuario/${idusuario}`);
+   }
 }
