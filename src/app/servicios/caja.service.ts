@@ -58,4 +58,5 @@ export class CajaService {
    getByIdUsuario(idusuario: number) {
       return this.http.get<Cajas>(`${baseUrl}/usuario/${idusuario}`);
    }
+   
 }

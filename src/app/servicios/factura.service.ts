@@ -69,5 +69,8 @@ export class FacturaService {
    updateFacturas(fac: Facturas) {
       return this.http.put(`${baseUrl}/${fac.idfactura}`, fac);
    }
+   valLastFac(codrecaudador:string){
+      return this.http.get(`${baseUrl}/validador/-${codrecaudador}-`)
+   }
 
 }

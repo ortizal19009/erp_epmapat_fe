@@ -69,6 +69,10 @@ export class AddRecaudaComponent implements OnInit {
   _caja: Cajas = new Cajas();
   _establecimiento: Ptoemision = new Ptoemision();
   _usuario: Usuarios = new Usuarios();
+  _nroFactura: any;
+  _codRecaudador: any;
+  estadoCajaT: boolean = true;
+  caja: Cajas = new Cajas();
 
   /* Intereses */
   calInteres = {} as calcInteres;
@@ -93,7 +97,7 @@ export class AddRecaudaComponent implements OnInit {
     private s_cajas: CajaService,
     private recaService: RecaudacionService,
     private facxrService: FacxrecaudaService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.formBuscar = this.fb.group({
@@ -147,15 +151,52 @@ export class AddRecaudaComponent implements OnInit {
   get f() {
     return this.formCobrar.controls;
   }
-  listarCajas() {
+  abrirCaja() {
     this.s_cajas.getByIdUsuario(this.authService.idusuario).subscribe({
       next: (datos) => {
         console.log(datos);
         this._caja = datos;
         this._establecimiento = datos.idptoemision_ptoemision;
         this._usuario = datos.idusuario_usuarios;
+        this._codRecaudador = `${datos.idptoemision_ptoemision.establecimiento}-${datos.codigo}`
+        if (datos.ultimafact === null) {
+          this.facService.valLastFac(datos.codigo.toString()).subscribe({
+            next: (dato: any) => {
+              let nrofac = dato.nrofactura.split('-', 3)
+              //let nrofac_f = +nrofac[2]! + 1
+              this._nroFactura = (`${this._codRecaudador}-${nrofac[2].toString().padStart(9, "0")}`);
+            },
+            error: (e) => console.error(e)
+          });
+        } else {
+          let nrofac = datos.ultimafact.split('-', 3)
+          //let nrofac_f = +nrofac[2]! + 1
+          this._nroFactura = (`${this._codRecaudador}-${nrofac[2].toString().padStart(9, "0")}`);
+        }
+
       },
     });
+  }
+
+  validarCaja() {
+    let nrofac = this._nroFactura.split('-', 3)
+    sessionStorage.setItem('ultfac', nrofac[2]);
+    this.estadoCajaT = false;
+    this._caja.estado = 1;
+    this.s_cajas.updateCaja(this._caja).subscribe({
+      next: (datos) => {
+        console.log("caja abierta")
+      }, error: (e) => console.error(e)
+    })
+  }
+  cerrarCaja() {
+    this._caja.estado = 0;
+    this.s_cajas.updateCaja(this._caja).subscribe({
+      next: (datos) => {
+        console.log("caja cerrada")
+      }, error: (e) => console.error(e)
+    })
+
   }
   //Formas de cobro
   listFormasCobro() {
@@ -615,13 +656,22 @@ export class AddRecaudaComponent implements OnInit {
           facxr.estado = 1;
           this.facxrService.save(facxr).subscribe({
             next: (nex) => {
-              console.log('facxrecauda Ok');
+              console.log(this._nroFactura)
+              let nrofac = this._nroFactura.split('-', 3)
+              let nrofac_f = +nrofac[2]! + 1
               //Actualiza Factura como cobrada
               fac.fechacobro = fechacobro;
               fac.usuariocobro = this.authService.idusuario;
               fac.pagado = 1;
+              fac.nrofactura = (`${this._codRecaudador}-${nrofac_f.toString().padStart(9, "0")}`);
+              if (fac.estado === 2) {
+                fac.estado = 2;
+              } else {
+                fac.estado = 1;
+              }
               this.facService.updateFacturas(fac).subscribe({
                 next: (nex) => {
+                  console.log(nex)
                   this.swcobrado = true;
                   // console.log('Actualización Ok!')
                   i++;
@@ -652,44 +702,45 @@ export class AddRecaudaComponent implements OnInit {
     }
   }
 
-  updateFacturas(i: number) {
-    let idfactura: number;
-    let fechacobro: Date = new Date();
-    if (this._sincobro[i].pagado) {
-      idfactura = this._sincobro[i].idfactura;
-      this.facService.getById(idfactura).subscribe({
-        next: (resp) => {
-          // console.log('resp: ', resp);
-          resp.fechacobro = fechacobro;
-          resp.usuariocobro = this.authService.idusuario;
-          resp.pagado = 1;
-          if (resp.estado === 3) {
-            resp.estado = 1;
-          }
-
-          this.facService.updateFacturas(resp).subscribe({
-            next: (dato) => {
-              this.swcobrado = true;
-              console.log('Actualización Ok!', dato);
-              i++;
-              if (i < this._sincobro.length) this.updateFacturas(i);
-            },
-            error: (err) =>
-              console.error('Al actualizar la Factura: ', err.error),
-          });
-        },
-        error: (err) =>
-          console.error(
-            'Al recuperar los datos de la Factura a actualizar: ',
-            err.error
-          ),
-      });
-    } else {
-      i++;
-      if (i < this._sincobro.length) this.updateFacturas(i);
+  /*   updateFacturas(i: number) {
+      let idfactura: number;
+      let fechacobro: Date = new Date();
+      if (this._sincobro[i].pagado) {
+        idfactura = this._sincobro[i].idfactura;
+        this.facService.getById(idfactura).subscribe({
+          next: (resp) => {
+            // console.log('resp: ', resp);
+            resp.fechacobro = fechacobro;
+            resp.usuariocobro = this.authService.idusuario;
+            resp.pagado = 1;
+            if (resp.estado === 3) {
+              resp.estado = 1;
+            }
+            console.log(this._nroFactura)
+  
+            this.facService.updateFacturas(resp).subscribe({
+              next: (dato) => {
+                this.swcobrado = true;
+                console.log('Actualización Ok!', dato);
+                i++;
+                if (i < this._sincobro.length) this.updateFacturas(i);
+              },
+              error: (err) =>
+                console.error('Al actualizar la Factura: ', err.error),
+            });
+          },
+          error: (err) =>
+            console.error(
+              'Al recuperar los datos de la Factura a actualizar: ',
+              err.error
+            ),
+        });
+      } else {
+        i++;
+        if (i < this._sincobro.length) this.updateFacturas(i);
+      }
     }
-  }
-
+   */
   tonos() {
     setTimeout(() => {
       this.coloService.getTonos().subscribe({

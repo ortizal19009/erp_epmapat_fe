@@ -34,6 +34,12 @@
                         <strong>{{acobrar | number: '1.2-2'}}</strong>
                      </button>
                   </div>
+                  <div class="col-sm my-0 py-0 mb-0">
+                     <i class="fa fa-lock" aria-hidden="true" *ngIf="estadoCajaT; else estadoCajaF">Caja cerrada</i>
+                     <ng-template #estadoCajaF>
+                        <i class="fa fa-unlock" aria-hidden="true">Caja Abierta</i>
+                     </ng-template>
+                  </div>
                </div>
             </form>
          </div>
@@ -46,7 +52,7 @@
                aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-               <button class="dropdown-item" type="button" data-toggle="modal" (click)="listarCajas()"
+               <button class="dropdown-item" type="button" data-toggle="modal" (click)="abrirCaja()"
                   data-target="#abrirCaja" [disabled]="swbusca != 0">
                   <i class="bi-door-open"></i>&nbsp; Abrir caja</button>
                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#cerrarCaja"
@@ -154,7 +160,7 @@
                            {{ sincobro.idabonado }}</td>
                         <td [ngClass]="{'transferido': sincobro.estado == 3 }">{{ sincobro.idfactura }}</td>
                         <td class="description">
-                        {{sincobro.idabonado}}
+                           {{sincobro.idabonado}}
                            <i class="fa fa-spinner fa-pulse fa-fw"></i>
                            <span class="sr-only">Loading...</span>
                         </td>
@@ -255,7 +261,7 @@
    </div>
 
    <!-- Modal Cobrar -->
-<!--    <div class="modal fade" id="modalCobrar" tabindex="-1" aria-labelledby="modalCobrarLabel" data-backdrop="static"
+   <!--    <div class="modal fade" id="modalCobrar" tabindex="-1" aria-labelledby="modalCobrarLabel" data-backdrop="static"
       aria-hidden="true">
       <div class="modal-dialog modal-sm modal-dialog-centered">
          <div class="modal-content recaudadetalle">
@@ -468,12 +474,19 @@
                         <span class="input-group-text " for="establecimiento">Establecimiento</span>
                      </div>
                      <input type="text" id="establecimiento" value={{_establecimiento.establecimiento}} readonly
-                        class="form-control col-3 form-control-sm">
+                        class="form-control form-control-sm">
+                  </div>
+                  <div class="input-group input-group-sm mb-3">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text " for="establecimiento">Nro. Factura</span>
+                     </div>
+                     <input type="text" id="establecimiento" value={{_nroFactura}} readonly
+                        class="form-control form-control-sm">
                   </div>
                </div>
             </div>
             <div class='row justify-content-center mt-1 mb-3'>
-               <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal'>
+               <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="validarCaja()">
                   <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
                <button type='button' class='btn btn-sm btn-outline-success mx-1' data-dismiss='modal'>
                   <i class="bi bi-x-circle"></i> Cancelar</button>
@@ -498,7 +511,7 @@
                </div>
             </div>
             <div class='row justify-content-center mt-1 mb-3'>
-               <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal'>
+               <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="cerrarCaja()">
                   <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
                <button type='button' class='btn btn-sm btn-outline-success mx-1' data-dismiss='modal'>
                   <i class="bi bi-x-circle"></i> Cancelar</button>
