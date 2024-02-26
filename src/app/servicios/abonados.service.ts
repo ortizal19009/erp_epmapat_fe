@@ -8,96 +8,102 @@ const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/abonados`;
 
 @Injectable({
-   providedIn: 'root'
+  providedIn: 'root',
 })
-
 export class AbonadosService {
-    
-   constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
-   tmpTodos(): Observable<Abonados[]> {
-      return this.http.get<Abonados[]>(`${baseUrl}/tmp`);
-   }
+  tmpTodos(): Observable<Abonados[]> {
+    return this.http.get<Abonados[]>(`${baseUrl}/tmp`);
+  }
 
-   getListaAbonados(): Observable<Abonados[]> {
-      return this.http.get<Abonados[]>(`${baseUrl}`);
-   }
+  getListaAbonados(): Observable<Abonados[]> {
+    return this.http.get<Abonados[]>(`${baseUrl}`);
+  }
 
-   saveAbonado(abonado: Abonados): Observable<Object> {
-      return this.http.post(`${baseUrl}`, abonado);
-   }
+  saveAbonado(abonado: Abonados): Observable<Object> {
+    return this.http.post(`${baseUrl}`, abonado);
+  }
 
-   deleteAbonado(idabonado: number): Observable<Object> {
-      return this.http.delete(`${baseUrl}/${idabonado}`);
-   }
-   
-   //Buscar con parametro idabonado (Ok para validar al importar lecturas)
-   getByIdabonado(idabonado: number): Observable<Abonados> {
-      return this.http.get<Abonados>(`${baseUrl}?idabonado=${idabonado}`);
-   }
+  deleteAbonado(idabonado: number): Observable<Object> {
+    return this.http.delete(`${baseUrl}/${idabonado}`);
+  }
 
-   //Buscar con abonados/idabonado
-   getById(idabonado: number): Observable<Abonados> {
-      return this.http.get<Abonados>(`${baseUrl}/${idabonado}`);
-   }
+  //Buscar con parametro idabonado (Ok para validar al importar lecturas)
+  getByIdabonado(idabonado: number): Observable<Abonados> {
+    return this.http.get<Abonados>(`${baseUrl}?idabonado=${idabonado}`);
+  }
 
-   getListaByNombreCliente(nombre: string) {
-      return this.http.get<Abonados>(`${baseUrl}/ncliente/${nombre}`);
-   }
+  //Buscar con abonados/idabonado
+  getById(idabonado: number): Observable<Abonados> {
+    return this.http.get<Abonados>(`${baseUrl}/${idabonado}`);
+  }
 
-   getListaByidentIficacionCliente(identificacion: string) {
-      return this.http.get<Abonados>(`${baseUrl}/icliente/${identificacion}`);
-   }
+  getListaByNombreCliente(nombre: string) {
+    return this.http.get<Abonados>(`${baseUrl}/ncliente/${nombre}`);
+  }
 
-   getListaByidabonado(idabonado: number) {
-      return this.http.get<Abonados>(`${baseUrl}/cuenta/${idabonado}`);
-   }
+  getListaByidentIficacionCliente(identificacion: string) {
+    return this.http.get<Abonados>(`${baseUrl}/icliente/${identificacion}`);
+  }
 
-   updateAbonado(abonado: Abonados): Observable<Object> {
-      return this.http.put(`${baseUrl}/${abonado.idabonado}`, abonado);
-   }
+  getListaByidabonado(idabonado: number) {
+    return this.http.get<Abonados>(`${baseUrl}/cuenta/${idabonado}`);
+  }
 
-   getAbonadoByQuery(dato: String) {
-      return this.http.get<Abonados>(`${baseUrl}?consulta=${dato}`);
-   }
+  updateAbonado(abonado: Abonados): Observable<Object> {
+    return this.http.put(`${baseUrl}/${abonado.idabonado}`, abonado);
+  }
 
- /*   saveSerxAbo(idabonado: number, idservicio: number): Observable<Object> {
+  getAbonadoByQuery(dato: String) {
+    return this.http.get<Abonados>(`${baseUrl}?consulta=${dato}`);
+  }
+
+  /*   saveSerxAbo(idabonado: number, idservicio: number): Observable<Object> {
       return this.http.put(`${baseUrl}/${idabonado}/s/${idservicio}`, null);
    } */
-   //Abonados de un Cliente (Cuentas por Cliente)
-   getByIdcliente(idcliente: number) {
-      return this.http.get<Abonados>(`${baseUrl}?idcliente=${idcliente}`)
-   }
+  //Abonados de un Cliente (Cuentas por Cliente)
+  getByIdcliente(idcliente: number) {
+    return this.http.get<Abonados>(`${baseUrl}?idcliente=${idcliente}`);
+  }
 
-   //Abonados por Ruta
-   getByIdruta(idruta: number) {
-      return this.http.get<Abonados[]>(`${baseUrl}?idruta=${idruta}`)
-   }
+  //Abonados por Ruta
+  getByIdruta(idruta: number) {
+    return this.http.get<Abonados[]>(`${baseUrl}?idruta=${idruta}`);
+  }
 
-   //Verifica si un Cliente tiene Abonados (Cuentas)
-   tieneAbonados(idcliente: number): Observable<boolean> {
-      return this.http.get<boolean>(`${baseUrl}/clienteTieneAbonados?idcliente=${idcliente}`);
-   }
+  //Verifica si un Cliente tiene Abonados (Cuentas)
+  tieneAbonados(idcliente: number): Observable<boolean> {
+    return this.http.get<boolean>(
+      `${baseUrl}/clienteTieneAbonados?idcliente=${idcliente}`
+    );
+  }
 
-   getListaById(idabonado: number) {
-      return this.http.get<Abonados>(`${baseUrl}/${idabonado}`);
-   }
+  getListaById(idabonado: number) {
+    return this.http.get<Abonados>(`${baseUrl}/${idabonado}`);
+  }
 
-   getByidabonado(idabonado: number) {
-      return this.http.get<Abonados[]>(`${baseUrl}/cuenta/${idabonado}`);
-   }
+  getByidabonado(idabonado: number) {
+    return this.http.get<Abonados[]>(`${baseUrl}/cuenta/${idabonado}`);
+  }
 
-   getByEstado(estado: number) {
-      return this.http.get<Abonados>(`${baseUrl}/estado/${estado}`);
-   }
+  getByEstado(estado: number) {
+    return this.http.get<Abonados>(`${baseUrl}/estado/${estado}`);
+  }
 
-   getByIdCliente(idcliente: number) {
-      return this.http.get<Abonados[]>(`${baseUrl}/cliente?idcliente=${idcliente}`);
-   }
+  getByIdCliente(idcliente: number) {
+    return this.http.get<Abonados[]>(
+      `${baseUrl}/cliente?idcliente=${idcliente}`
+    );
+  }
 
-   //Para reporte de campos especificos
-   getCampos(): Observable<Abonados[]> {
-      return this.http.get<Abonados[]>(`${baseUrl}/campos`);
-   }
-
+  //Para reporte de campos especificos
+  getCampos(): Observable<Abonados[]> {
+    return this.http.get<Abonados[]>(`${baseUrl}/campos`);
+  }
+  getOneAbonado(idabonado: number) {
+    return this.http.get<Abonados>(
+      `${baseUrl}/oneabonado?idabonado=${idabonado}`
+    );
+  }
 }

@@ -65,7 +65,7 @@ export class AddRecaudaComponent implements OnInit {
   swcobrado: boolean;
   formaCobro: Formacobro = new Formacobro();
   formacobroNC: boolean;
-  idformacobro: number
+  idformacobro: number;
   _caja: Cajas = new Cajas();
   _establecimiento: Ptoemision = new Ptoemision();
   _usuario: Usuarios = new Usuarios();
@@ -93,7 +93,7 @@ export class AddRecaudaComponent implements OnInit {
     private s_cajas: CajaService,
     private recaService: RecaudacionService,
     private facxrService: FacxrecaudaService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.formBuscar = this.fb.group({
@@ -106,12 +106,12 @@ export class AddRecaudaComponent implements OnInit {
     });
 
     this.formCobrar = this.fb.group({
-      valorAcobrar: 0,  //Valor original con decimales para poder validar el dinero recibido
+      valorAcobrar: 0, //Valor original con decimales para poder validar el dinero recibido
       idformacobro: this.formaCobro,
       acobrar: 0,
       ncvalor: ['', [Validators.required], this.valNC.bind(this)],
       dinero: ['', [Validators.required], this.valDinero.bind(this)],
-      vuelto: ''
+      vuelto: '',
     });
 
     //Al digitar quita alerta
@@ -150,23 +150,23 @@ export class AddRecaudaComponent implements OnInit {
   listarCajas() {
     this.s_cajas.getByIdUsuario(this.authService.idusuario).subscribe({
       next: (datos) => {
-        console.log(datos)
+        console.log(datos);
         this._caja = datos;
         this._establecimiento = datos.idptoemision_ptoemision;
         this._usuario = datos.idusuario_usuarios;
-      }
-    })
+      },
+    });
   }
   //Formas de cobro
   listFormasCobro() {
     this.fcobroService.getAll().subscribe({
-      next: datos => {
+      next: (datos) => {
         this._formascobro = datos;
         this.idformacobro = this._formascobro[0].idformacobro;
         // console.log('Al iniciar this.idformacobro: ', this.idformacobro);
         // this.formCobrar.patchValue({ idformacobro: this._formascobro[0] })
       },
-      error: err => console.error(err.error)
+      error: (err) => console.error(err.error),
     });
   }
 
@@ -359,7 +359,7 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   marcarTodas(event: any) {
-    console.log(event)
+    console.log(event);
     let valor: number = 0;
     if (event.target.checked) {
       valor = 1;
@@ -401,9 +401,9 @@ export class AddRecaudaComponent implements OnInit {
       }
     } else {
       if (this._sincobro[index].pagado) {
-        this._sincobro[index].pagado = 1
+        this._sincobro[index].pagado = 1;
       } else {
-        this._sincobro[index].pagado = 0
+        this._sincobro[index].pagado = 0;
       }
     }
     this.totalAcobrar();
@@ -414,12 +414,15 @@ export class AddRecaudaComponent implements OnInit {
     let i = 0;
     this._sincobro.forEach((item: any, index: number) => {
       if (this._sincobro[i].pagado === true || this._sincobro[i].pagado === 1) {
-        if (this._sincobro[i].idmodulo.idmodulo == 3 || this._sincobro[i].idmodulo.idmodulo == 4) {
+        if (
+          this._sincobro[i].idmodulo.idmodulo == 3 ||
+          this._sincobro[i].idmodulo.idmodulo == 4
+        ) {
           suma +=
             this._sincobro[i].totaltarifa +
             this._sincobro[i].comerc +
-            (+this._sincobro[i].interes.toFixed(2)!) +
-            this._sincobro[i].multa
+            +this._sincobro[i].interes.toFixed(2)! +
+            this._sincobro[i].multa;
         } else {
           suma += this._sincobro[i].totaltarifa;
         }
@@ -431,11 +434,13 @@ export class AddRecaudaComponent implements OnInit {
 
   valorAcobrar(acobrar: number) {
     this.disabledcobro = true;
-    let entero = Math.trunc(acobrar)
-    let decimal = (acobrar - entero).toFixed(2)
+    let entero = Math.trunc(acobrar);
+    let decimal = (acobrar - entero).toFixed(2);
     this.acobrardec = decimal.toString().slice(1);
-    const primerPagado = this._sincobro.find((registro: { pagado: number; }) => registro.pagado == 1);
-    let fcobro: number;  //3= Transferencia
+    const primerPagado = this._sincobro.find(
+      (registro: { pagado: number }) => registro.pagado == 1
+    );
+    let fcobro: number; //3= Transferencia
     if (primerPagado.estado == 3) fcobro = this._formascobro[1];
     else fcobro = this._formascobro[0];
     this.formCobrar.patchValue({
@@ -445,7 +450,7 @@ export class AddRecaudaComponent implements OnInit {
       acobrar: entero,
       dinero: '',
       vuelto: '',
-      ncvalor: ''
+      ncvalor: '',
     });
   }
 
@@ -465,15 +470,16 @@ export class AddRecaudaComponent implements OnInit {
   valorDinero() {
     this.formacobroNC = false;
     this.formCobrar.controls['ncvalor'].setValue('');
-    this.formCobrar.controls['dinero'].setValue(this.acobrar.toFixed(2).toString());
+    this.formCobrar.controls['dinero'].setValue(
+      this.acobrar.toFixed(2).toString()
+    );
     this.formCobrar.controls['vuelto'].setValue('');
     this.disabledcobro = false;
   }
 
-
   //Modal del Detalle de la Planilla
   getRubroxfac(idfactura: number) {
-    this._rubrosxfac = []
+    this._rubrosxfac = [];
     let _lecturas: any;
     this.consumo = 0;
     this.idfactura = idfactura;
@@ -485,7 +491,7 @@ export class AddRecaudaComponent implements OnInit {
             _lecturas[0].lecturaactual - _lecturas[0].lecturaanterior;
           this.rubxfacService.getByIdfactura(idfactura).subscribe({
             next: (detalle) => {
-              console.log(detalle)
+              console.log(detalle);
               this._rubrosxfac = detalle;
               this.subtotal();
               this.calcularInteres();
@@ -496,24 +502,28 @@ export class AddRecaudaComponent implements OnInit {
                 err.error
               ),
           });
-        } this.subtotal();
+        }
+        this.subtotal();
       },
       error: (err) =>
         console.error('Al recuperar la Lectura de la Planilla: ', err.error),
     });
   }
   getAbonadoById(cuenta: number) {
-    this.aboService.getByIdabonado(cuenta).subscribe({
-      next: (datos) => {
-        console.log(datos);
-        return datos.direccionubicacion;
-      },
-      error: (e) => console.error(e)
-    })
-
+    let abonado: any;
+    if (cuenta != 0) {
+      this.aboService.getOneAbonado(cuenta).subscribe({
+        next: (datos) => {
+          console.log(datos);
+          abonado = datos;
+        },
+        error: (e) => console.error(e),
+      });
+      return abonado;
+    }
   }
   getRubroxfac1(idfactura: number) {
-    console.log(idfactura)
+    console.log(idfactura);
     let _lecturas: any;
     this.consumo = 0;
     this.idfactura = idfactura;
@@ -574,21 +584,20 @@ export class AddRecaudaComponent implements OnInit {
     if (r.estado === 2) {
       r.estado = 2;
     } else {
-      r.estado = 1
+      r.estado = 1;
     }
     r.ncvalor = +this.formCobrar.value.ncvalor;
     r.usucrea = this.authService.idusuario;
     r.feccrea = fecha;
     this.recaService.saveRecaudacion(r).subscribe({
-      next: resp => {
+      next: (resp) => {
         const recaCreada = resp as Recaudacion;
         // console.log('recaudacion:', recaCreada.idrecaudacion);
-        let i = 0
+        let i = 0;
         this.facxrecauda(recaCreada, i);
       },
-      error: err => console.error('Al crear la Recaudación: ', err.error)
+      error: (err) => console.error('Al crear la Recaudación: ', err.error),
     });
-
   }
   //Registra las facturas por recaudación y actualiza la fecha de cobro de la(s) factura(s)
   facxrecauda(recaCreada: Recaudacion, i: number) {
@@ -597,7 +606,7 @@ export class AddRecaudaComponent implements OnInit {
     if (this._sincobro[i].pagado) {
       idfactura = this._sincobro[i].idfactura;
       this.facService.getById(idfactura).subscribe({
-        next: fac => {
+        next: (fac) => {
           // console.log('resp: ', resp);
           //Añade a facxrecauda
           let facxr = {} as iFacxrecauda; //Interface para los datos de las facturas de la Recaudación
@@ -605,31 +614,41 @@ export class AddRecaudaComponent implements OnInit {
           facxr.idfactura = fac;
           facxr.estado = 1;
           this.facxrService.save(facxr).subscribe({
-            next: nex => {
+            next: (nex) => {
               console.log('facxrecauda Ok');
               //Actualiza Factura como cobrada
               fac.fechacobro = fechacobro;
               fac.usuariocobro = this.authService.idusuario;
               fac.pagado = 1;
               this.facService.updateFacturas(fac).subscribe({
-                next: nex => {
+                next: (nex) => {
                   this.swcobrado = true;
                   // console.log('Actualización Ok!')
-                  i++
-                  if (i < this._sincobro.length) this.facxrecauda(recaCreada, i)
+                  i++;
+                  if (i < this._sincobro.length)
+                    this.facxrecauda(recaCreada, i);
                 },
-                error: err => console.error('Al actualizar la Factura: ', err.error)
+                error: (err) =>
+                  console.error('Al actualizar la Factura: ', err.error),
               });
             },
-            error: err => console.error('Al crear las Facturas de la Recaudación: ', err.error)
+            error: (err) =>
+              console.error(
+                'Al crear las Facturas de la Recaudación: ',
+                err.error
+              ),
           });
         },
-        error: err => console.error('Al recuperar los datos de la Factura a actualizar: ', err.error)
-      })
-    }
-    else {   //No pagada continua con la siguiente
-      i++
-      if (i < this._sincobro.length) this.facxrecauda(recaCreada, i)
+        error: (err) =>
+          console.error(
+            'Al recuperar los datos de la Factura a actualizar: ',
+            err.error
+          ),
+      });
+    } else {
+      //No pagada continua con la siguiente
+      i++;
+      if (i < this._sincobro.length) this.facxrecauda(recaCreada, i);
     }
   }
 
@@ -651,7 +670,7 @@ export class AddRecaudaComponent implements OnInit {
           this.facService.updateFacturas(resp).subscribe({
             next: (dato) => {
               this.swcobrado = true;
-              console.log('Actualización Ok!', dato)
+              console.log('Actualización Ok!', dato);
               i++;
               if (i < this._sincobro.length) this.updateFacturas(i);
             },
@@ -757,8 +776,11 @@ export class AddRecaudaComponent implements OnInit {
   //Que el dinero no sea menor que el valor a cobrar
   valDinero(control: AbstractControl) {
     let ncvalor: number;
-    if (+this.formCobrar.controls['ncvalor'].value > 0) ncvalor = +this.formCobrar.controls['ncvalor'].value; else ncvalor = 0;
-    if (+this.formCobrar.value.valorAcobrar - ncvalor > control.value) return of({ 'invalido': true });
+    if (+this.formCobrar.controls['ncvalor'].value > 0)
+      ncvalor = +this.formCobrar.controls['ncvalor'].value;
+    else ncvalor = 0;
+    if (+this.formCobrar.value.valorAcobrar - ncvalor > control.value)
+      return of({ invalido: true });
     else return of(null);
   }
 
@@ -805,15 +827,12 @@ export class AddRecaudaComponent implements OnInit {
     this.totInteres = 0;
     this.arrCalculoInteres = [];
     let interes: number = 0;
-    //let date: Date = new Date();
     this.facService.getById(idFactura).subscribe({
       next: (datos) => {
-        // console.log(datos);
         let fec = datos.feccrea.toString().split('-', 2);
         let fechai: Date = new Date(`${fec[0]}-${fec[1]}-02`);
         let fechaf: Date = new Date();
         this.factura = datos;
-        //fechai.setMonth(fechai.getMonth() + 1);
         fechaf.setMonth(fechaf.getMonth() - 1);
         while (fechai <= fechaf) {
           this.calInteres = {} as calcInteres;
@@ -823,21 +842,21 @@ export class AddRecaudaComponent implements OnInit {
               interes.mes === +fechai.getMonth()! + 1
           );
           if (!query) {
-            console.log("Este mes no hay interes", this.calInteres.anio, this.calInteres.mes)
+            console.log(
+              'Este mes no hay interes',
+              this.calInteres.anio,
+              this.calInteres.mes
+            );
 
-            this.calInteres.anio = +fechai.getFullYear()!
-            this.calInteres.mes = +fechai.getMonth()! + 1
-            this.calInteres.interes = 0
-            query = this.calInteres
+            this.calInteres.anio = +fechai.getFullYear()!;
+            this.calInteres.mes = +fechai.getMonth()! + 1;
+            this.calInteres.interes = 0;
+            query = this.calInteres;
           } else {
             this.calInteres.anio = query.anio;
             this.calInteres.mes = query.mes;
             this.calInteres.interes = query.porcentaje;
             this.calInteres.valor = datos.totaltarifa;
-            /*       this.arrCalculoInteres.push(this.calInteres);
-                  fechai.setMonth(fechai.getMonth() + 1); */
-
-
           }
           this.arrCalculoInteres.push(this.calInteres);
           fechai.setMonth(fechai.getMonth() + 1);
@@ -845,11 +864,8 @@ export class AddRecaudaComponent implements OnInit {
         this.arrCalculoInteres.forEach((item: any) => {
           this.totInteres += (item.interes * item.valor) / 100;
           interes += (item.interes * item.valor) / 100;
-
         });
         this.subtotal();
-        // console.log(interes);
-        // return interes;
       },
       error: (e) => console.error(e),
     });
@@ -873,11 +889,10 @@ export class AddRecaudaComponent implements OnInit {
           interes.mes === +fechai.getMonth()! + 1
       );
       if (!query) {
-
-        this.calInteres.anio = +fechai.getFullYear()!
-        this.calInteres.mes = +fechai.getMonth()! + 1
-        this.calInteres.interes = 0
-        query = this.calInteres
+        this.calInteres.anio = +fechai.getFullYear()!;
+        this.calInteres.mes = +fechai.getMonth()! + 1;
+        this.calInteres.interes = 0;
+        query = this.calInteres;
       } else {
         this.calInteres.anio = query.anio;
         this.calInteres.mes = query.mes;
@@ -895,30 +910,36 @@ export class AddRecaudaComponent implements OnInit {
     return interes;
   }
   valorTarifas(tarifa: number, cons: number, interes: number, multa: number) {
-    let t = 0, c = 0, i = 0, m = 0
+    let t = 0,
+      c = 0,
+      i = 0,
+      m = 0;
     t = tarifa === undefined ? 0 : tarifa;
     c = cons === undefined ? 0 : cons;
     i = interes === undefined ? 0 : interes;
     m = multa === undefined ? 0 : multa;
-    //t = tarifa;
-    //c = cons;
-    //i = interes;
-    //m = multa
-    console.log(t, c, i, m)
     return t + c + i + m;
-
   }
   //Al digitar el valor de la NC
   changeNCvalor() {
     let dinero: number;
-    if (+this.formCobrar.controls['dinero'].value > 0) dinero = +this.formCobrar.controls['dinero'].value; else dinero = 0
-    let vuelto = ((+this.formCobrar.controls['ncvalor'].value + dinero) - this.acobrar).toFixed(2);
+    if (+this.formCobrar.controls['dinero'].value > 0)
+      dinero = +this.formCobrar.controls['dinero'].value;
+    else dinero = 0;
+    let vuelto = (
+      +this.formCobrar.controls['ncvalor'].value +
+      dinero -
+      this.acobrar
+    ).toFixed(2);
     this.formCobrar.controls['vuelto'].setValue(vuelto.toString());
-    if (this.formCobrar.controls['vuelto'].value == 0) this.disabledcobro = false; else this.disabledcobro = true;
+    if (this.formCobrar.controls['vuelto'].value == 0)
+      this.disabledcobro = false;
+    else this.disabledcobro = true;
   }
   //Valida que el valor de la NC no se mayor que el valor a cobrar
   valNC(control: AbstractControl) {
-    if (this.formCobrar.value.valorAcobrar < control.value) return of({ 'invalido': true });
+    if (this.formCobrar.value.valorAcobrar < control.value)
+      return of({ invalido: true });
     else return of(null);
   }
 }
@@ -976,5 +997,5 @@ interface iFacxrecauda {
   idfactura: Facturas;
   estado: number;
   fechaeliminacion: Date;
-  usuarioeliminacion: number
+  usuarioeliminacion: number;
 }
