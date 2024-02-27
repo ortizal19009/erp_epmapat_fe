@@ -484,9 +484,13 @@
                         class="form-control form-control-sm">
                   </div>
                </div>
+               <div class="alert alert-warning text-center mt-3 mb-0" *ngIf="cajaActiva">
+                  <h6> <strong>Esta caja ya esta iniciada en otro computador</strong></h6>
+               </div>
+
             </div>
             <div class='row justify-content-center mt-1 mb-3'>
-               <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="validarCaja()">
+               <button type='button' class='btn btn-success btn-sm mx-1' [disabled]="cajaActiva" data-dismiss='modal' (click)="validarCaja()">
                   <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
                <button type='button' class='btn btn-sm btn-outline-success mx-1' data-dismiss='modal'>
                   <i class="bi bi-x-circle"></i> Cancelar</button>

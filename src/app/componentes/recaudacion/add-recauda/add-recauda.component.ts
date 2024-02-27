@@ -27,6 +27,8 @@ import { Usuarios } from 'src/app/modelos/administracion/usuarios.model';
 import { Recaudacion } from 'src/app/modelos/recaudacion.model';
 import { RecaudacionService } from 'src/app/servicios/recaudacion.service';
 import { FacxrecaudaService } from 'src/app/servicios/facxrecauda.service';
+import { RecaudaxcajaService } from 'src/app/servicios/recaudaxcaja.service';
+import { Recaudaxcaja } from 'src/app/modelos/recaudaxcaja.model';
 
 @Component({
   selector: 'app-add-recauda',
@@ -73,6 +75,7 @@ export class AddRecaudaComponent implements OnInit {
   _codRecaudador: any;
   estadoCajaT: boolean = true;
   caja: Cajas = new Cajas();
+  cajaActiva: boolean = false;
 
   /* Intereses */
   calInteres = {} as calcInteres;
@@ -96,8 +99,9 @@ export class AddRecaudaComponent implements OnInit {
     private interService: InteresesService,
     private s_cajas: CajaService,
     private recaService: RecaudacionService,
-    private facxrService: FacxrecaudaService
-  ) { }
+    private facxrService: FacxrecaudaService,
+    private s_recaudaxcaja: RecaudaxcajaService
+  ) {}
 
   ngOnInit(): void {
     this.formBuscar = this.fb.group({
@@ -158,45 +162,81 @@ export class AddRecaudaComponent implements OnInit {
         this._caja = datos;
         this._establecimiento = datos.idptoemision_ptoemision;
         this._usuario = datos.idusuario_usuarios;
-        this._codRecaudador = `${datos.idptoemision_ptoemision.establecimiento}-${datos.codigo}`
+        this._codRecaudador = `${datos.idptoemision_ptoemision.establecimiento}-${datos.codigo}`;
+
+        /* VALIDAR SI LA CAJA ESTA ABIERTA O CERRADA */
+        this.s_recaudaxcaja.getLastConexion(this._caja.idcaja).subscribe({
+          next: (datos) => {
+            let c_fecha: Date = new Date();
+            let l_fecha: Date = new Date(datos.fechainiciolabor);
+            let estadoCaja = sessionStorage.getItem('estadoCaja');
+            if (
+              (c_fecha.getDate() != l_fecha.getDate() &&
+                c_fecha.getMonth() != l_fecha.getMonth() &&
+                c_fecha.getFullYear() == l_fecha.getFullYear()) ||
+              estadoCaja === '0'
+            ) {
+              console.log('No ha iniciado caja');
+              this.cajaActiva = false;
+              this.estadoCajaT = true;
+            } else {
+              console.log('Caja Iniciada');
+              this.cajaActiva = true;
+              this.estadoCajaT = false;
+            }
+          },
+          error: (e) => console.error(e),
+        });
+
         if (datos.ultimafact === null) {
           this.facService.valLastFac(datos.codigo.toString()).subscribe({
             next: (dato: any) => {
-              let nrofac = dato.nrofactura.split('-', 3)
+              let nrofac = dato.nrofactura.split('-', 3);
               //let nrofac_f = +nrofac[2]! + 1
-              this._nroFactura = (`${this._codRecaudador}-${nrofac[2].toString().padStart(9, "0")}`);
+              this._nroFactura = `${this._codRecaudador}-${nrofac[2]
+                .toString()
+                .padStart(9, '0')}`;
             },
-            error: (e) => console.error(e)
+            error: (e) => console.error(e),
           });
         } else {
-          let nrofac = datos.ultimafact.split('-', 3)
+          let nrofac = datos.ultimafact.split('-', 3);
           //let nrofac_f = +nrofac[2]! + 1
-          this._nroFactura = (`${this._codRecaudador}-${nrofac[2].toString().padStart(9, "0")}`);
+          this._nroFactura = `${this._codRecaudador}-${nrofac[2]
+            .toString()
+            .padStart(9, '0')}`;
         }
-
       },
     });
   }
 
   validarCaja() {
-    let nrofac = this._nroFactura.split('-', 3)
+  let fecha: Date = new Date();
+    let recxcaja: Recaudaxcaja = new Recaudaxcaja();
+    let nrofac = this._nroFactura.split('-', 3);
     sessionStorage.setItem('ultfac', nrofac[2]);
     this.estadoCajaT = false;
     this._caja.estado = 1;
+    recxcaja.estado = 1;
+    recxcaja.facinicio = +nrofac[2]! + 1;
+    recxcaja.fechafinlabor = fecha; 
     this.s_cajas.updateCaja(this._caja).subscribe({
       next: (datos) => {
-        console.log("caja abierta")
-      }, error: (e) => console.error(e)
-    })
+        console.log('caja abierta');
+        sessionStorage.setItem('estadoCaja', '1');
+      },
+      error: (e) => console.error(e),
+    });
   }
   cerrarCaja() {
     this._caja.estado = 0;
     this.s_cajas.updateCaja(this._caja).subscribe({
       next: (datos) => {
-        console.log("caja cerrada")
-      }, error: (e) => console.error(e)
-    })
-
+        console.log('caja cerrada');
+        sessionStorage.setItem('estadoCaja', '0');
+      },
+      error: (e) => console.error(e),
+    });
   }
   //Formas de cobro
   listFormasCobro() {
@@ -656,14 +696,16 @@ export class AddRecaudaComponent implements OnInit {
           facxr.estado = 1;
           this.facxrService.save(facxr).subscribe({
             next: (nex) => {
-              console.log(this._nroFactura)
-              let nrofac = this._nroFactura.split('-', 3)
-              let nrofac_f = +nrofac[2]! + 1
+              console.log(this._nroFactura);
+              let nrofac = this._nroFactura.split('-', 3);
+              let nrofac_f = +nrofac[2]! + 1;
               //Actualiza Factura como cobrada
               fac.fechacobro = fechacobro;
               fac.usuariocobro = this.authService.idusuario;
               fac.pagado = 1;
-              fac.nrofactura = (`${this._codRecaudador}-${nrofac_f.toString().padStart(9, "0")}`);
+              fac.nrofactura = `${this._codRecaudador}-${nrofac_f
+                .toString()
+                .padStart(9, '0')}`;
               if (fac.estado === 2) {
                 fac.estado = 2;
               } else {
@@ -671,7 +713,7 @@ export class AddRecaudaComponent implements OnInit {
               }
               this.facService.updateFacturas(fac).subscribe({
                 next: (nex) => {
-                  console.log(nex)
+                  console.log(nex);
                   this.swcobrado = true;
                   // console.log('Actualización Ok!')
                   i++;
