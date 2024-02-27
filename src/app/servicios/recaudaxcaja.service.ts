@@ -10,7 +10,7 @@ const baseUrl = `${apiUrl}/recaudaxcaja`;
   providedIn: 'root',
 })
 export class RecaudaxcajaService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getLastConexion(idcaja: number) {
     return this.http.get<Recaudaxcaja>(`${baseUrl}/lastconexion/${idcaja}`);
@@ -18,5 +18,8 @@ export class RecaudaxcajaService {
 
   saveRecaudaxcaja(recxcaja: Recaudaxcaja) {
     return this.http.post(`${baseUrl}`, recxcaja);
+  }
+  updateRecaudaxcaja(recxcaja: Recaudaxcaja) {
+    return this.http.put(`${baseUrl}/${recxcaja.idrecaudaxcaja}`, recxcaja);
   }
 }

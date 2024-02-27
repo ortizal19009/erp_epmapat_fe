@@ -76,6 +76,7 @@ export class AddRecaudaComponent implements OnInit {
   estadoCajaT: boolean = true;
   caja: Cajas = new Cajas();
   cajaActiva: boolean = false;
+  recxcaja: Recaudaxcaja = new Recaudaxcaja();
 
   /* Intereses */
   calInteres = {} as calcInteres;
@@ -101,7 +102,7 @@ export class AddRecaudaComponent implements OnInit {
     private recaService: RecaudacionService,
     private facxrService: FacxrecaudaService,
     private s_recaudaxcaja: RecaudaxcajaService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.formBuscar = this.fb.group({
@@ -151,6 +152,7 @@ export class AddRecaudaComponent implements OnInit {
     });
     this.listFormasCobro();
     this.listarIntereses();
+    this.abrirCaja();
   }
   get f() {
     return this.formCobrar.controls;
@@ -167,6 +169,7 @@ export class AddRecaudaComponent implements OnInit {
         /* VALIDAR SI LA CAJA ESTA ABIERTA O CERRADA */
         this.s_recaudaxcaja.getLastConexion(this._caja.idcaja).subscribe({
           next: (datos) => {
+            console.log(datos)
             let c_fecha: Date = new Date();
             let l_fecha: Date = new Date(datos.fechainiciolabor);
             let estadoCaja = sessionStorage.getItem('estadoCaja');
@@ -211,32 +214,43 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   validarCaja() {
-  let fecha: Date = new Date();
-    let recxcaja: Recaudaxcaja = new Recaudaxcaja();
+    let fecha: Date = new Date();
+
     let nrofac = this._nroFactura.split('-', 3);
     sessionStorage.setItem('ultfac', nrofac[2]);
-    this.estadoCajaT = false;
-    this._caja.estado = 1;
-    recxcaja.estado = 1;
-    recxcaja.facinicio = +nrofac[2]! + 1;
-    recxcaja.fechafinlabor = fecha; 
-    this.s_cajas.updateCaja(this._caja).subscribe({
+    //this._caja.estado = 1;
+    this.recxcaja.estado = 1;
+    this.recxcaja.facinicio = +nrofac[2]! + 1;
+    this.recxcaja.fechainiciolabor = fecha;
+    //recxcaja.horainicio = fecha;
+    this.recxcaja.idcaja_cajas = this._caja;
+    this.recxcaja.idusuario_usuarios = this._caja.idusuario_usuarios;
+    console.log(this.recxcaja)
+    this.s_recaudaxcaja.saveRecaudaxcaja(this.recxcaja).subscribe({
       next: (datos) => {
-        console.log('caja abierta');
-        sessionStorage.setItem('estadoCaja', '1');
-      },
-      error: (e) => console.error(e),
-    });
+        this.estadoCajaT = false;
+      }, error: (e) => console.error(e)
+    })
   }
   cerrarCaja() {
-    this._caja.estado = 0;
-    this.s_cajas.updateCaja(this._caja).subscribe({
+    sessionStorage.setItem('estadoCaja', '0');
+    this.s_recaudaxcaja.getLastConexion(this._caja.idcaja).subscribe({
       next: (datos) => {
-        console.log('caja cerrada');
-        sessionStorage.setItem('estadoCaja', '0');
+        let c_fecha: Date = new Date();
+        this.recxcaja = datos
+        this.recxcaja.estado = 0;
+        this.recxcaja.fechafinlabor = c_fecha;
+        this.estadoCajaT = true;
+        this.s_recaudaxcaja.updateRecaudaxcaja(this.recxcaja).subscribe({
+          next: (datos) => {
+            console.log("caja cerrada");
+          },
+          error: (e) => console.error(e)
+        })
       },
       error: (e) => console.error(e),
     });
+
   }
   //Formas de cobro
   listFormasCobro() {

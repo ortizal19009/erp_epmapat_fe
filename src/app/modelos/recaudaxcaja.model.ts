@@ -8,7 +8,7 @@ export class Recaudaxcaja {
   facfin: number;
   fechainiciolabor: Date;
   fechafinlabor: Date;
-  horarioinicio: Date;
+  horainicio: Date ;
   hoorafin: Date;
   idcaja_cajas: Cajas;
   idusuario_usuarios: Usuarios;

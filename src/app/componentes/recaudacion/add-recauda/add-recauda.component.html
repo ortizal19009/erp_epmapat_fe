@@ -53,10 +53,10 @@
             </button>
             <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
                <button class="dropdown-item" type="button" data-toggle="modal" (click)="abrirCaja()"
-                  data-target="#abrirCaja" [disabled]="swbusca != 0">
+                  data-target="#abrirCaja" [disabled]="!estadoCajaT">
                   <i class="bi-door-open"></i>&nbsp; Abrir caja</button>
                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#cerrarCaja"
-                  [disabled]="swbusca != 0">
+               [disabled]="estadoCajaT">
                   <i class="bi-door-closed"></i>&nbsp; Cerrar caja</button>
                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir"
                   [disabled]="swbusca != 0">
