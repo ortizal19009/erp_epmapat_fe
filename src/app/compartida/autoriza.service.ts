@@ -15,11 +15,16 @@ export class AutorizaService {
    sessionlog: boolean;
    idusuario: number;
    alias: string;
+   priusu: string;
+   perfil: string;
 
    constructor() { }
 
    public enabModulos(): void {
-      this.enabled = [true, false, false, false, false, true];
+      //OJO: Controlar con usuarios.perfil
+      if(this.idusuario == 1) this.enabled = [true, true, false, false, false, true];
+      else this.enabled = [true, false, false, false, false, true];
+
       this.colorenabled = true;
 
       if (this.moduActual == null) this.modulo = 1
@@ -34,38 +39,24 @@ export class AutorizaService {
    public selecModulo(opcion: number) {
       this.modulo = opcion;
       this.moduActual = opcion;
-      // sessionStorage.setItem("tmpmodu", opcion.toString())
-      // sessionStorage.setItem("tmpusu", this.idusuario.toString())
-      // sessionStorage.setItem("tmpalias", this.alias)
-      // const abc = sessionStorage.getItem('abc');
       const values = JSON.parse(atob(sessionStorage.getItem('abc')!));
       values.object.modulo = opcion;
       values.object.moduActual = opcion;
       sessionStorage.setItem('abc', btoa(JSON.stringify(values)));
-
-      // const retrievedEncodedValues = sessionStorage.getItem('abc');
-      // if (retrievedEncodedValues !== null) {
-      //    const retrievedValues = JSON.parse(atob(retrievedEncodedValues));
-      //    retrievedValues.object.modulo = opcion;
-      //    retrievedValues.object.moduActual = opcion;
-      //    sessionStorage.setItem('abc', btoa(JSON.stringify(retrievedValues)));
-      // }
-
-      // sessionStorage.setItem('abc', btoa(JSON.stringify(abc)));
    }
 
    valsession() {
       const retrievedEncodedValues = sessionStorage.getItem('abc');
       if (retrievedEncodedValues !== null) {
          const retrievedValues = JSON.parse(atob(retrievedEncodedValues));
-         // const xyz = retrievedValues.object.xyz;
          this.sessionlog = true;
          this.idusuario = retrievedValues.idusuario;
          this.alias = retrievedValues.alias;
          this.modulo = retrievedValues.object.modulo;
          this.moduActual = retrievedValues.object.moduActual;
+         this.priusu = retrievedValues.priusu;
          this.enabModulos();
-      } else console.log('retrievedEncodedValues es nulo')
+      }
    }
 
 }
