@@ -42,4 +42,5 @@ export class UsuarioService {
     return this.http.put(baseUrl + "/" + idusuario, usuario);
   }
 
+
 }

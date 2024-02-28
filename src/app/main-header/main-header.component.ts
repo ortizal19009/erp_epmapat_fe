@@ -23,18 +23,6 @@ export class MainHeaderComponent implements OnInit {
       public authService: AutorizaService, private usuService: UsuarioService, private router: Router) { }
 
    ngOnInit(): void {
-      // const reloadButton = document.querySelector(".reload-button");
-      // // Agregar un evento a la recarga
-      // if (reloadButton != null) {
-      //    reloadButton.addEventListener('click', () => {
-      //       // Hacer algo antes de recargar la página
-      //       console.log('Aqui')
-      //       // Recargar la página
-      //       location.reload();
-      //    });
-      // }
-
-
 
       //Fondo
       let fondoActual = sessionStorage.getItem("fondoActual")?.toString();
@@ -45,25 +33,6 @@ export class MainHeaderComponent implements OnInit {
 
       // console.log('Esta en ngOnInit() de header')
       this.authService.valsession();
-
-      // this.tmpmodu = +sessionStorage.getItem('tmpmodu')!
-      // if(this.tmpmodu) {
-      //    // this.authService.log = true;
-      //    this.authService.idusuario = +sessionStorage.getItem('tmpusu')!
-      //    this.authService.moduActual = this.tmpmodu;
-      //    this.authService.alias = sessionStorage.getItem('tmpalias')!
-      //    sessionStorage.removeItem('tmpusu');
-      //    sessionStorage.removeItem('tmpmodu');
-      //    sessionStorage.removeItem('tmpalias');
-      // }
-      // ========== Quitar para Build ============
-      // else{
-      //    this.authService.log = true;
-      //    this.authService.idusuario = 1;
-
-      //    this.authService.alias = 'Administrador' 
-      // }
-      // ========== Hasta aqui ============
 
       this.authService.nomodulo = this.modulos[this.authService.moduActual - 1];
 
@@ -77,25 +46,6 @@ export class MainHeaderComponent implements OnInit {
          otrapestania: ''
       });
    }
-
-   // @HostListener('window:beforeunload', ['$event'])
-   // unloadHandler(event: Event): void {
-   //    event.preventDefault();
-   // }
-
-   // @HostListener('window:beforeunload', ['$event'])
-   // beforeUnloadHandler(event: Event) {
-   //    event.preventDefault();
-   // }
-
-   // @HostListener('window:unload', ['$event'])
-   // unloadHandler(event: Event): void {
-   //    event.preventDefault();
-   // }
-
-   // onNavigationEnd() {
-   //    this.router.navigate(['/app-rutas']);
-   // }
 
    fondo() {
       if (!this.fondo1) { this.fondo1 = 1; }
@@ -129,5 +79,5 @@ export class MainHeaderComponent implements OnInit {
          error: err => console.log(err.error)
       });
    }
-
+  
 }

@@ -12,7 +12,8 @@ export class Usuarios {
    usumodi: number; 
    fecmodi: Date;
    otrapestania: Boolean;
-   idperfil_perfiles: number; 
    alias: string;
-
+   priusu: string;
+   perfil: string;
+   
 }

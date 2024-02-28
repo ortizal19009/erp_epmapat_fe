@@ -27,7 +27,7 @@ export class ContentWrapperComponent implements OnInit {
          username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20)]],
          codusu: ['', [Validators.required, Validators.minLength(5)]]
       });
-      console.log('Va a this.authService.session()') 
+      // console.log('Va a this.authService.session()') 
       this.authService.valsession();
    }
 
@@ -47,6 +47,7 @@ export class ContentWrapperComponent implements OnInit {
                this.authService.alias = resp.alias;
                this.authService.modulo = 1;
                this.authService.moduActual = 1;          //Poner el modulo por default del Usuario
+               this.authService.priusu = resp.priusu;
 
                const abc = {
                   object: {
@@ -56,15 +57,13 @@ export class ContentWrapperComponent implements OnInit {
                      moduloActual: 1,
                   },
                   idusuario: resp.idusuario,
-                  alias: resp.alias
+                  alias: resp.alias,
+                  priusu: resp.priusu
                };
                sessionStorage.setItem('abc', btoa(JSON.stringify(abc)));
 
                this.authService.enabModulos();
 
-               // if (resp.fdesde != null) sessionStorage.setItem("fdesde", resp.fdesde.toString().substring(0, 10));
-               // if (resp.fhasta != null) sessionStorage.setItem("fhasta", resp.fhasta.toString().substring(0, 10));
-               // sessionStorage.setItem("otrapestania", resp.otrapestania.toString())
             }
             else {
                this.msg = true;

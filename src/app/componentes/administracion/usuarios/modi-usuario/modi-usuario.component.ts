@@ -23,8 +23,6 @@ export class ModiUsuarioComponent implements OnInit {
       private usuService: UsuarioService, private coloresService: ColoresService) { }
 
    ngOnInit(): void {
-      // if (!this.authService.log) this.router.navigate(['/inicio']);
-
       sessionStorage.setItem('ventana', '/usuarios');
       let coloresJSON = sessionStorage.getItem('/usuarios');
       if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));

@@ -2,8 +2,12 @@
    <div class="container-fluid">
       <div class="col-sm-7 pl-0">
          <div class="row m-0 px-0 py-1 justify-content-start cabecera sombra border">
-            <div class="col-sm-5">
+            <div class="col-sm-8">
                <h4 class="m-0 font-weight-bold"><i class="bi-people"></i>&nbsp; Usuarios</h4>
+            </div>
+            <div class="col-sm-3">
+               <input type="text" class="form-control form-control-sm text-center" placeholder="Filtrar..."
+                              [(ngModel)]="filtro"/>
             </div>
 
             <div class="btn-group ml-auto mt-0">
@@ -36,14 +40,14 @@
             <thead class="text-center cabecera">
                <tr>
                   <th></th>
-                  <th>Identificacion</th>
+                  <th>Identificación</th>
                   <th>Alias</th>
                   <th>Nombre</th>
                   <th></th>
                </tr>
             </thead>
             <tbody  class="detalle">
-               <tr *ngFor="let usuario of _usuarios; let i=index" class="text-center fila">
+               <tr *ngFor="let usuario of _usuarios | filter:filtro; let i=index" class="text-center fila">
                   <td class="font-weight-bold small">{{i+1}}</td>
                   <td [ngClass]="{'tachado': !usuario.estado }" class="text-left">{{usuario.identificausu}}</td>
                   <td [ngClass]="{'tachado': !usuario.estado }" class="text-left">{{ usuario.alias}} </td>
@@ -51,9 +55,11 @@
                   <td>
                      <div class="btn-group py-0">
                         <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
-                           aria-expanded="false">
+                           aria-expanded="false"> 
                         </button>
                         <div class="dropdown-menu dropdown-menu-right popLista">
+                           <button class="dropdown-item" type="button" (click)="perfil(usuario.idusuario)">
+                              <i class="bi-battery-half"></i>&nbsp; Perfil</button>
                            <button class="dropdown-item" type="button" (click)="modificar(usuario.idusuario)">
                               <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
                            <button class="dropdown-item" type="button" data-toggle="modal" data-target="#elimInteres"

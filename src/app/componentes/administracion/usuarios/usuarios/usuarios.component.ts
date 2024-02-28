@@ -4,7 +4,6 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
-import { AddInteresesComponent } from 'src/app/componentes/intereses/add-intereses/add-intereses.component';
 import { Usuarios } from 'src/app/modelos/administracion/usuarios.model';
 import { UsuarioService } from 'src/app/servicios/administracion/usuario.service';
 
@@ -22,6 +21,7 @@ export class UsuariosComponent implements OnInit {
    usuario = {} as Usuario; //Interface para los datos del Usuario a eliminar
    otraPagina: boolean = false;
    tsvData: any[] = [];
+   filtro: string;
 
    constructor( public usuService: UsuarioService, private router: Router, public authService: AutorizaService,
       private coloresService: ColoresService ) { }
@@ -66,7 +66,12 @@ export class UsuariosComponent implements OnInit {
 
    nuevo() {
       this.mostrarComponente = true;
-      this.componente = AddInteresesComponent;  //Cambiar a AddUsuarioComponent
+      // this.componente = AddInteresesComponent;  //Cambiar a AddUsuarioComponent
+   }
+
+   perfil(idusuario: number) {
+      sessionStorage.setItem("idusuarioToPerfil", idusuario.toString());
+      this.router.navigate(["/perfil-usuario"]);
    }
 
    modificar(idusuario: number) {

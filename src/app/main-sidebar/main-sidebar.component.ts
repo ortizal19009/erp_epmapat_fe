@@ -22,26 +22,34 @@ export class MainSidebarComponent implements OnInit {
     // this.authService.modulo = +sessionStorage.getItem("moduloOld")!
     // this.authService.modulo = this.authService.moduActual
   }
-
+  
   isOptionEnabled(modulo: number, i: number): boolean {
-    let priusu: string = '';
-    switch (modulo) {
-      case 0:
-        // Bloque de código para value1
-        break;
-      case 1:
-        // Bloque de código para value2
-        break;
-      case 5:
-        priusu = '1660';
-        break;
-      default:
-        // Bloque de código para el caso por defecto
-        break;
-    }
-    let x3 = priusu.slice(i, i + 1);
-    if (+x3 >= 5) return true;
-    else return false;
+    // console.log('Ejecuta main-sidebar.isOptionEnabled con: ', modulo, i, 'this.authService.priusu: ', this.authService.priusu)
+
+    if (this.authService.idusuario == 1) return true;
+    // console.log('modulo: ', modulo)
+    // switch (modulo) {
+    //   case 0:
+    //     priusu = this.authService.priusu;
+    //     break;
+    //   case 1:
+    //     // Bloque de código para value2
+    //     break;
+    //   case 5:
+    //     // priusu = '1660';
+    //     priusu = this.authService.priusu;
+    //     break;
+    //   default:
+    //     // Bloque de código para el caso por defecto
+    //     break;
+    // }
+    // let priusu: string = '';
+
+    // let priusu = this.authService.priusu;
+    if (this.authService.priusu != null) {
+      let pi = this.authService.priusu.slice(i, i + 1);
+      if (+pi >= 5) return true; else return false;
+    } else return false
   }
 
   navUsuario() {
