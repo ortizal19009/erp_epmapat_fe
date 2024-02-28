@@ -22,4 +22,8 @@ export class RecaudaxcajaService {
   updateRecaudaxcaja(recxcaja: Recaudaxcaja) {
     return this.http.put(`${baseUrl}/${recxcaja.idrecaudaxcaja}`, recxcaja);
   }
+  
+  getByIdcaja(idcaja: number, desde: Date, hasta: Date) {
+    return this.http.get<Recaudaxcaja>(`${baseUrl}?idcaja=${idcaja}&desde=${desde}&hasta=${hasta}`);
+ }
 }

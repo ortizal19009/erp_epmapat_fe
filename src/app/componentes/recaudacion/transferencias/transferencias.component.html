@@ -35,6 +35,12 @@
                         <strong>{{atransferir | number: '1.2-2'}}</strong>
                      </button>
                   </div>
+                  <div class="col-sm my-0 py-0 mb-0">
+                     <i class="fa fa-lock" aria-hidden="true" *ngIf="estadoCajaT; else estadoCajaF">Caja cerrada</i>
+                     <ng-template #estadoCajaF>
+                        <i class="fa fa-unlock" aria-hidden="true">Caja Abierta</i>
+                     </ng-template>
+                  </div>
                </div>
             </form>
          </div>
@@ -44,6 +50,12 @@
                aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+               <button class="dropdown-item" type="button" data-toggle="modal" (click)="abrirCaja()"
+                  data-target="#abrirCaja" [disabled]="!estadoCajaT">
+                  <i class="bi-door-open"></i>&nbsp; Abrir caja</button>
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#cerrarCaja"
+                  [disabled]="estadoCajaT">
+                  <i class="bi-door-closed"></i>&nbsp; Cerrar caja</button>
                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir"
                   [disabled]="swbusca != 0">
                   <i class="bi-printer"></i>&nbsp; Imprimir</button>

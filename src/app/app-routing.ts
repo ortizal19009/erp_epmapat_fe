@@ -202,22 +202,23 @@ import { ModiUsuarioComponent } from './componentes/administracion/usuarios/modi
 import { ColoresComponent } from './componentes/administracion/colores/colores.component';
 import { CertitmpComponent } from './componentes/certificaciones/certitmp/certitmp.component';
 import { TransferenciasComponent } from './componentes/recaudacion/transferencias/transferencias.component';
+import { PerfilUsuarioComponent } from './componentes/administracion/usuarios/perfil-usuario/perfil-usuario.component';
 
 
 const routes: Routes = [
 
    //Consumo de Agua
-   { path: 'clientes', component: ClientesComponent },   
+   { path: 'clientes', component: ClientesComponent },
    { path: 'add-cliente', component: AddClienteComponent },
    { path: 'modificar-clientes', component: ModificarClientesComponent },
    { path: 'detalles-cliente', component: DetallesClienteComponent },
    { path: 'buscar-cliente', component: BuscarClienteComponent },
-   
+
    { path: 'abonados', component: ListarAbonadosComponent },
    { path: 'add-abonado', component: AddAbonadosComponent },
    { path: 'modificar-abonado', component: ModificarAbonadosComponent },
    { path: 'detalles-abonado', component: DetallesAbonadoComponent },
-   
+
    { path: 'lecturas', component: LecturasComponent },
    { path: 'impor-lecturas', component: ImporLecturasComponent },
    { path: 'suspensiones', component: SuspensionesComponent },
@@ -289,7 +290,7 @@ const routes: Routes = [
    { path: 'modicaja/:idcaja', component: ModificarCajaComponent },
    { path: 'add-caja', component: AddCajaComponent },
    { path: 'info-caja', component: InfoCajaComponent },
-   { path: 'transferencias', component: TransferenciasComponent},
+   { path: 'transferencias', component: TransferenciasComponent },
    // Intereses
    { path: 'intereses', component: ListarInteresesComponent },
    { path: 'modificar-intereses', component: ModificarInteresesComponent },
@@ -323,13 +324,13 @@ const routes: Routes = [
    //{ path: 'rutasxemision/:idemision/:emision', component: RutasxemisionComponent },
    //{ path: 'rutasxemision/:idemision', component: RutasxemisionComponent },
    { path: 'rutasxemision', component: RutasxemisionComponent },
-   
-   
+
+
    //Reclamos
    { path: 'reclamos', component: ListarReclamosComponent },
    { path: 'add-reclamo', component: AddReclamosComponent },
    { path: 'modificar-reclamo', component: ModificarReclamosComponent },
-      // ================== CATALOGO =================
+   // ================== CATALOGO =================
    /*Estado de los medidores*/
    { path: 'estadom', component: ListarEstadomComponent },
    /* Nacionalidades */
@@ -350,7 +351,7 @@ const routes: Routes = [
    { path: 'ubicacionm', component: UbicacionmComponent },
    { path: 'add-ubicacionm', component: AddUbicacionmComponent },
    { path: 'modiubicacionm/:id', component: ModiUbicacionmComponent },
-   
+
    //================ CONTABILIDAD =============================
    { path: 'cuentas', component: CuentasComponent },
    { path: 'add-cuenta', component: AddCuentaComponent },
@@ -369,7 +370,7 @@ const routes: Routes = [
    { path: 'add-homologa', component: AddHomologaComponent },
    { path: 'add-niifcuenta', component: AddNiifcuentaComponent },
    { path: 'modi-niifcuenta', component: ModiNiifcuentaComponent },
-   
+
    { path: 'preingresos', component: PreingresosComponent },
    { path: 'info-preingreso', component: InfoPreingresoComponent },
    { path: 'add-preingreso', component: AddPreingresoComponent },
@@ -395,7 +396,7 @@ const routes: Routes = [
    { path: 'modi-reforma', component: ModiReformaComponent },
 
    { path: 'clasificador', component: ClasificadorComponent },
-   { path: 'info-clasificador', component: InfoClasificadorComponent},
+   { path: 'info-clasificador', component: InfoClasificadorComponent },
    { path: 'modi-clasificador', component: ModiClasificadorComponent },
    { path: 'add-clasificador', component: AddClasificadorComponent },
 
@@ -424,6 +425,7 @@ const routes: Routes = [
    { path: 'modi-usuario', component: ModiUsuarioComponent },
 
    { path: 'colores', component: ColoresComponent },
+   { path: 'perfil-usuario', component: PerfilUsuarioComponent },
 
    // { path: 'login', component: LoginComponent },
 

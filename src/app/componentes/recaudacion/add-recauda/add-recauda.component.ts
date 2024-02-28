@@ -170,6 +170,7 @@ export class AddRecaudaComponent implements OnInit {
         this.s_recaudaxcaja.getLastConexion(this._caja.idcaja).subscribe({
           next: (datos) => {
             console.log(datos)
+            sessionStorage.setItem('estadoCaja', datos.estado.toString());
             let c_fecha: Date = new Date();
             let l_fecha: Date = new Date(datos.fechainiciolabor);
             let estadoCaja = sessionStorage.getItem('estadoCaja');
@@ -233,7 +234,6 @@ export class AddRecaudaComponent implements OnInit {
     })
   }
   cerrarCaja() {
-    sessionStorage.setItem('estadoCaja', '0');
     this.s_recaudaxcaja.getLastConexion(this._caja.idcaja).subscribe({
       next: (datos) => {
         let c_fecha: Date = new Date();
@@ -243,7 +243,9 @@ export class AddRecaudaComponent implements OnInit {
         this.estadoCajaT = true;
         this.s_recaudaxcaja.updateRecaudaxcaja(this.recxcaja).subscribe({
           next: (datos) => {
-            console.log("caja cerrada");
+            sessionStorage.setItem('estadoCaja', this.recxcaja.estado.toString());
+            console.log("caja cerrada", datos);
+
           },
           error: (e) => console.error(e)
         })
@@ -899,7 +901,7 @@ export class AddRecaudaComponent implements OnInit {
       next: (detalle) => {
         this._rubrosxfac = detalle;
         //console.log(detalle);
-        this.s_pdfRecaudacion.comprobantePago(datos, detalle);
+        this.s_pdfRecaudacion.comprobantePago(datos, detalle, this.totInteres);
         /*  this.lecService.getByIdfactura(idfactura).subscribe({
           next: (resp) => {
             _lecturas = resp;

@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { ColoresService } from 'src/app/compartida/colores.service';
+import { AutorizaService } from 'src/app/servicios/administracion/autoriza.service';
 import { CajaService } from 'src/app/servicios/caja.service';
 
 @Component({
@@ -13,23 +15,31 @@ export class ListarCajaComponent implements OnInit {
    _cajas: any;
    filtro: string;
 
-   constructor(private cajaService: CajaService, private router: Router) { }
+   constructor(private cajaService: CajaService, private router: Router,
+      public authService: AutorizaService, private coloresService: ColoresService) { }
 
    ngOnInit(): void {
       sessionStorage.setItem('ventana', '/cajas');
-      this.setcolor();
+      let coloresJSON = sessionStorage.getItem('/cajas');
+      if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
+      else this.buscaColor();
+      
+      // this.setcolor();
       this.listarCajas();
    }
 
-   setcolor() {
-      let colores: string[];
-      let coloresJSON = sessionStorage.getItem('/cajas');
-      if (!coloresJSON) {
-         colores = ['rgb(57, 95, 95)', 'rgb(207, 221, 210)'];
-         const coloresJSON = JSON.stringify(colores);
+   async buscaColor() {
+      try {
+         const datos = await this.coloresService.setcolor(this.authService.idusuario, 'cajas');
+         const coloresJSON = JSON.stringify(datos);
          sessionStorage.setItem('/cajas', coloresJSON);
-      } else colores = JSON.parse(coloresJSON);
+         this.colocaColor(datos);
+      } catch (error) {
+         console.error(error);
+      }
+   }
 
+   colocaColor(colores: any) {
       document.documentElement.style.setProperty('--bgcolor1', colores[0]);
       const cabecera = document.querySelector('.cabecera');
       if (cabecera) cabecera.classList.add('nuevoBG1')

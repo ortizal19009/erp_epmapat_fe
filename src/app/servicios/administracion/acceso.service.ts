@@ -11,8 +11,6 @@ const baseUrl = `${apiUrl}/acceso`;
   providedIn: 'root'
 })
 export class AccesoService {
-
-
   constructor(private http: HttpClient) { }
 
   getAcceso(): Observable<Acceso[]> {

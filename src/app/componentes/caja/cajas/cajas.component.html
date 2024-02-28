@@ -2,7 +2,7 @@
    <div class="container-fluid">
       <div class="row ml-1 pt-1 col-sm-5 border cabecera sombra">
          <div class="col-md-4">
-            <h4 class="font-weight-bold text-truncate"><i class="fa fa-th"></i> Cajas</h4>
+            <h4 class="font-weight-bold text-truncate"><i class="fa fa-th"></i> &nbsp;Cajas</h4>
          </div>
          <div class="col-sm-4">
             <input class="form-control form-control-sm text-center" type="text" placeholder="Filtrar..."
@@ -44,10 +44,9 @@
                <tr class="fila" *ngFor="let caja of _cajas  | filter: filtro; let i=index"
                   (click)="onCellClick($event, caja.idcaja)">
                   <td class="text-center small font-weight-bold">{{i+1}}</td>
-                  <td class="text-center">{{ caja.idptoemision_ptoemision.establecimiento }}</td>
-                  <td class="text-center">{{ caja.codigo }}</td>
-                  <td>{{ caja.descripcion }}</td>
-
+                  <td [ngClass]="{'tachado': caja.estado == 0 }" class="text-center">{{ caja.idptoemision_ptoemision.establecimiento }}</td>
+                  <td [ngClass]="{'tachado': caja.estado == 0 }" class="text-center">{{ caja.codigo }}</td>
+                  <td [ngClass]="{'tachado': caja.estado == 0 }">{{ caja.descripcion }}</td>
                   <td>
                      <div class="btn-group py-0">
                         <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"

@@ -2,11 +2,17 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
+import { Usuarios } from 'src/app/modelos/administracion/usuarios.model';
+import { Cajas } from 'src/app/modelos/cajas.model';
 import { Clientes } from 'src/app/modelos/clientes';
+import { Ptoemision } from 'src/app/modelos/ptoemision';
+import { Recaudaxcaja } from 'src/app/modelos/recaudaxcaja.model';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
+import { CajaService } from 'src/app/servicios/caja.service';
 import { ClientesService } from 'src/app/servicios/clientes.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
+import { RecaudaxcajaService } from 'src/app/servicios/recaudaxcaja.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 
 @Component({
@@ -34,10 +40,22 @@ export class TransferenciasComponent implements OnInit {
    filtro: string;
    _cliente: any;    //Datos del Cliente
    formTransferir: FormGroup;
+   _establecimiento: Ptoemision = new Ptoemision();
+   _usuario: Usuarios = new Usuarios();
+
+
+   _nroFactura: any;
+   _codRecaudador: any;
+   estadoCajaT: boolean = true;
+   caja: Cajas = new Cajas();
+   cajaActiva: boolean = false;
+   _caja: Cajas = new Cajas();
+   recxcaja: Recaudaxcaja = new Recaudaxcaja();
+
 
    constructor(private coloresService: ColoresService, public fb: FormBuilder, private aboService: AbonadosService,
       private lecService: LecturasService, private rubxfacService: RubroxfacService, private authService: AutorizaService,
-      private clieService: ClientesService, private facService: FacturaService) { }
+      private clieService: ClientesService, private facService: FacturaService, private s_cajas: CajaService, private s_recaudaxcaja: RecaudaxcajaService) { }
 
    ngOnInit(): void {
       sessionStorage.setItem('ventana', '/transferencias');
@@ -72,7 +90,7 @@ export class TransferenciasComponent implements OnInit {
             this.formBuscar.controls['cuenta'].setValue('');
          });
       }
-
+      this.abrirCaja();
    }
 
    async buscaColor() {
@@ -362,6 +380,101 @@ export class TransferenciasComponent implements OnInit {
          i++
          if (i < this._sincobro.length) this.actufacturas(i)
       }
+   }
+   abrirCaja() {
+      this.s_cajas.getByIdUsuario(this.authService.idusuario).subscribe({
+         next: (datos) => {
+            console.log(datos);
+            this._caja = datos;
+            this._establecimiento = datos.idptoemision_ptoemision;
+            this._usuario = datos.idusuario_usuarios;
+            this._codRecaudador = `${datos.idptoemision_ptoemision.establecimiento}-${datos.codigo}`;
+
+            /* VALIDAR SI LA CAJA ESTA ABIERTA O CERRADA */
+            this.s_recaudaxcaja.getLastConexion(this._caja.idcaja).subscribe({
+               next: (datos) => {
+                  console.log(datos)
+                  let c_fecha: Date = new Date();
+                  let l_fecha: Date = new Date(datos.fechainiciolabor);
+                  let estadoCaja = sessionStorage.getItem('estadoCaja');
+                  if (
+                     (c_fecha.getDate() != l_fecha.getDate() &&
+                        c_fecha.getMonth() != l_fecha.getMonth() &&
+                        c_fecha.getFullYear() == l_fecha.getFullYear()) ||
+                     estadoCaja === '0'
+                  ) {
+                     console.log('No ha iniciado caja');
+                     this.cajaActiva = false;
+                     this.estadoCajaT = true;
+                  } else {
+                     console.log('Caja Iniciada');
+                     this.cajaActiva = true;
+                     this.estadoCajaT = false;
+                  }
+               },
+               error: (e) => console.error(e),
+            });
+
+            if (datos.ultimafact === null) {
+               this.facService.valLastFac(datos.codigo.toString()).subscribe({
+                  next: (dato: any) => {
+                     let nrofac = dato.nrofactura.split('-', 3);
+                     //let nrofac_f = +nrofac[2]! + 1
+                     this._nroFactura = `${this._codRecaudador}-${nrofac[2]
+                        .toString()
+                        .padStart(9, '0')}`;
+                  },
+                  error: (e) => console.error(e),
+               });
+            } else {
+               let nrofac = datos.ultimafact.split('-', 3);
+               //let nrofac_f = +nrofac[2]! + 1
+               this._nroFactura = `${this._codRecaudador}-${nrofac[2]
+                  .toString()
+                  .padStart(9, '0')}`;
+            }
+         },
+      });
+   }
+
+   validarCaja() {
+      let fecha: Date = new Date();
+
+      let nrofac = this._nroFactura.split('-', 3);
+      sessionStorage.setItem('ultfac', nrofac[2]);
+      //this._caja.estado = 1;
+      this.recxcaja.estado = 1;
+      this.recxcaja.facinicio = +nrofac[2]! + 1;
+      this.recxcaja.fechainiciolabor = fecha;
+      //recxcaja.horainicio = fecha;
+      this.recxcaja.idcaja_cajas = this._caja;
+      this.recxcaja.idusuario_usuarios = this._caja.idusuario_usuarios;
+      console.log(this.recxcaja)
+      this.s_recaudaxcaja.saveRecaudaxcaja(this.recxcaja).subscribe({
+         next: (datos) => {
+            this.estadoCajaT = false;
+         }, error: (e) => console.error(e)
+      })
+   }
+   cerrarCaja() {
+      sessionStorage.setItem('estadoCaja', '0');
+      this.s_recaudaxcaja.getLastConexion(this._caja.idcaja).subscribe({
+         next: (datos) => {
+            let c_fecha: Date = new Date();
+            this.recxcaja = datos
+            this.recxcaja.estado = 0;
+            this.recxcaja.fechafinlabor = c_fecha;
+            this.estadoCajaT = true;
+            this.s_recaudaxcaja.updateRecaudaxcaja(this.recxcaja).subscribe({
+               next: (datos) => {
+                  console.log("caja cerrada");
+               },
+               error: (e) => console.error(e)
+            })
+         },
+         error: (e) => console.error(e),
+      });
+
    }
 
 }

@@ -211,6 +211,7 @@ import { HabilitacionesComponent } from './componentes/habilitaciones/habilitaci
 import { AddHabilitacionComponent } from './componentes/habilitaciones/add-habilitacion/add-habilitacion.component';
 import { HashLocationStrategy, LocationStrategy, PathLocationStrategy } from '@angular/common';
 import { HistorialconsumoComponent } from './componentes/abonados/historialconsumo/historialconsumo.component';
+import { PerfilUsuarioComponent } from './componentes/administracion/usuarios/perfil-usuario/perfil-usuario.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
@@ -275,7 +276,7 @@ import { HistorialconsumoComponent } from './componentes/abonados/historialconsu
        UsuariosComponent, ModiReformaComponent, 
       ModiEjecucionComponent, AddEjecucionComponent, ModiCertipresuComponent, AddCertipresuComponent, 
       PartixcertiComponent, ImporInteresesComponent, GeneEmisionComponent, ImporLecturasComponent, 
-      BancosComponent, ConciliabanComponent, ColoresComponent, Pliego24Component,
+      BancosComponent, ConciliabanComponent, ColoresComponent, Pliego24Component,PerfilUsuarioComponent,
       // ============ Pipes =============
       EstadoEmisionPipe, NombreEmisionPipe, NoSiPipe, NombreMesPipe, BloqueConsumoPipe, ProyeccionComponent, 
       AuxIngresoComponent, AsientosComponent, PregastosComponent, AddPregastoComponent, EstrfuncComponent, 

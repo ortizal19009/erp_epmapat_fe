@@ -8,17 +8,28 @@ import autoTable from 'jspdf-autotable';
 })
 export class RecaudacionReportsService {
   date: Date = new Date();
-  constructor() {}
+  total: number = 0;
+  interes: number = 0;
+  constructor() { }
 
-  comprobantePago(datos: any, _rubrosxfac: any) {
-    console.log(_rubrosxfac);
+  comprobantePago(datos: any, _rubrosxfac: any, _interes: number) {
+    //console.log(_rubrosxfac);
     console.log(datos);
+    this.interes = 0;
+    console.log(_interes)
+    if (_interes === 0) {
+      this.interes = 0
+    } else {
+      this.interes = _interes
+    }
     let doc = new jsPDF('p', 'pt', 'a4');
     let margin = 30;
     let rubros: any = [];
     _rubrosxfac.forEach((item: any) => {
+      this.total += +item.valorunitario!;
       rubros.push([item.idrubro_rubros.descripcion, item.valorunitario]);
     });
+    this.total += this.interes;
     doc.setFontSize(7);
     doc.text('EPMAPA-T', margin + 70, 50);
     /*doc.text(`${datos.nrofactura}`, margin, 65);
@@ -114,13 +125,13 @@ export class RecaudacionReportsService {
         0: { minCellWidth: 10 },
         1: { minCellWidth: 15, halign: 'right' },
       },
-      
+
       columns: ['', ''],
       body: [
         ['Iva 12%', '0.00'],
         ['Descuento 0%', '0.00'],
-        ['Intereses', '0.00'],
-        ['Valor total', '0.00'],
+        ['Intereses', this.interes.toFixed(2)],
+        ['Valor total', this.total.toFixed(2)],
       ],
     });
     autoTable(doc, {
@@ -129,7 +140,7 @@ export class RecaudacionReportsService {
       //columnWidth: 'wrap', 
       columnStyles: {
         0: { minCellWidth: 10 },
-        1:{minCellWidth: 100}
+        1: { minCellWidth: 100 }
       },
       tableWidth,
       theme: 'grid',
@@ -140,10 +151,10 @@ export class RecaudacionReportsService {
         textColor: 'black',
       },
       bodyStyles: { cellPadding: 1 },
-/*       columnStyles: {
-        0: { minCellWidth: 20 },
-        1: { minCellWidth: 20 },
-      }, */
+      /*       columnStyles: {
+              0: { minCellWidth: 20 },
+              1: { minCellWidth: 20 },
+            }, */
 
       columns: ['', ''],
       body: [
@@ -153,14 +164,14 @@ export class RecaudacionReportsService {
           `Cliente: ${datos.idcliente.nombre}`,
           `RUC/Cédula: ${datos.idcliente.cedula}`,
         ],
-        [`Dirección: ${datos.idcliente.direccion}`,`Medidor: dsfasd555`],
+        [`Dirección: ${datos.idcliente.direccion}`, `Medidor: dsfasd555`],
         [`L. Anterior: 445`, `L. Actual: 460`],
         [`Cons. ant:`, `Categoria: COME`],
-        [`Nro cartas ant: 0`,`Fecha fact: 25/01/2024`],
-        [`Catastro emitido: 02/01/2024 `,`Forma pago: Contado`],
-        [`Recaudador: WILLIAM `,`Cons. anterior: 14`],
+        [`Nro cartas ant: 0`, `Fecha fact: 25/01/2024`],
+        [`Catastro emitido: 02/01/2024 `, `Forma pago: Contado`],
+        [`Recaudador: WILLIAM `, `Cons. anterior: 14`],
         [`Referencia: ${datos.idcliente.referencia}`],
-        
+
       ],
     });
     autoTable(doc, {
@@ -200,13 +211,13 @@ export class RecaudacionReportsService {
         0: { minCellWidth: 10 },
         1: { minCellWidth: 15, halign: 'right' },
       },
-      
+
       columns: ['', ''],
       body: [
         ['Iva 12%', '0.00'],
         ['Descuento 0%', '0.00'],
         ['Intereses', '0.00'],
-        ['Valor total', '0.00'],
+        ['Valor total', this.total],
       ],
     });
     /* FIGURAS */
@@ -217,35 +228,35 @@ export class RecaudacionReportsService {
     /* --------------------------------
     DATOS IZQUIERDA
     -----------------------------------*/
-/*     doc.rect(margin + 225, 190, 215, 75); 
-    doc.rect(margin + 310, 265, 130, 15); 
-    doc.rect(margin + 310, 265, 130, 120);
-    doc.line(margin + 250, 190, 280, 265);
-    doc.line(margin + 395, 190, 425, 385);
-    doc.line(margin + 225, 205, 470, 205);
-    doc.text(`Cuenta: 1105`, margin + 230, 50);
-    doc.text(`Ruta: AV.UNIVERSITARIA`, margin + 320, 50);
-    doc.text(`Clave catastral:  SP`, margin + 230, 65);
-    doc.text(`Clientes: ORTIZ ROSERO ALEXIS LEONARDO`, margin + 230, 80);
-    doc.text(`RUC/Cédula: 0401501176`, margin + 400, 80);
-    doc.text(`Dirección: GENERAL PLAZA Y BOLÍVAR`, margin + 230, 95);
-    doc.text(`Medidor: BM50100291`, margin + 400, 95);
-    doc.text(`L. Anterior: 4415`, margin + 230, 110);
-    doc.text(`L. Actual: 4420`, margin + 400, 110);
-    doc.text(
-      `Cons. Act: DICIEMBRE DEL 2023(2401)Nro Medidor`,
-      margin + 230,
-      125
-    );
-    doc.text(`Categoría: COME`, margin + 400, 125);
-    doc.text(`Nro cartas ant: 0`, margin + 230, 140);
-    doc.text(`Fecha fact: 25/01/2024`, margin + 400, 140);
-    doc.text(`Catastro emitido: 02/01/2024`, margin + 230, 155);
-    doc.text(`Forma pago: Contado`, margin + 400, 155);
-    doc.text(`Recaudador: WILLIAM`, margin + 230, 170);
-    doc.text(`Cons. anterior: 14`, margin + 400, 170);
-    doc.text(`Referencia: 11715MEJICO Y LAS TEJERIAS`, margin + 230, 185);
-    doc.text(`Agua Potable T.`, margin + 400, 185); */
+    /*     doc.rect(margin + 225, 190, 215, 75); 
+        doc.rect(margin + 310, 265, 130, 15); 
+        doc.rect(margin + 310, 265, 130, 120);
+        doc.line(margin + 250, 190, 280, 265);
+        doc.line(margin + 395, 190, 425, 385);
+        doc.line(margin + 225, 205, 470, 205);
+        doc.text(`Cuenta: 1105`, margin + 230, 50);
+        doc.text(`Ruta: AV.UNIVERSITARIA`, margin + 320, 50);
+        doc.text(`Clave catastral:  SP`, margin + 230, 65);
+        doc.text(`Clientes: ORTIZ ROSERO ALEXIS LEONARDO`, margin + 230, 80);
+        doc.text(`RUC/Cédula: 0401501176`, margin + 400, 80);
+        doc.text(`Dirección: GENERAL PLAZA Y BOLÍVAR`, margin + 230, 95);
+        doc.text(`Medidor: BM50100291`, margin + 400, 95);
+        doc.text(`L. Anterior: 4415`, margin + 230, 110);
+        doc.text(`L. Actual: 4420`, margin + 400, 110);
+        doc.text(
+          `Cons. Act: DICIEMBRE DEL 2023(2401)Nro Medidor`,
+          margin + 230,
+          125
+        );
+        doc.text(`Categoría: COME`, margin + 400, 125);
+        doc.text(`Nro cartas ant: 0`, margin + 230, 140);
+        doc.text(`Fecha fact: 25/01/2024`, margin + 400, 140);
+        doc.text(`Catastro emitido: 02/01/2024`, margin + 230, 155);
+        doc.text(`Forma pago: Contado`, margin + 400, 155);
+        doc.text(`Recaudador: WILLIAM`, margin + 230, 170);
+        doc.text(`Cons. anterior: 14`, margin + 400, 170);
+        doc.text(`Referencia: 11715MEJICO Y LAS TEJERIAS`, margin + 230, 185);
+        doc.text(`Agua Potable T.`, margin + 400, 185); */
     /* doc.text(`Cant:`, margin + 230, 200);
     doc.text(`1`, margin + 230, 215);
     doc.text(`1`, margin + 230, 230);
@@ -261,22 +272,22 @@ export class RecaudacionReportsService {
     doc.text(`4.60`, margin + 400, 230);
     doc.text(`3.26`, margin + 400, 245);
     doc.text(`0.1`, margin + 400, 260); */
-/*     doc.text(`Iva 12%`, margin + 320, 275);
-    doc.text(``, margin + 400, 275);
-    doc.text(`Descuento`, margin + 320, 290);
-    doc.text(`0.00`, margin + 400, 290);
-    doc.text(`Exoneración`, margin + 320, 305);
-    doc.text(`.0`, margin + 400, 305);
-    doc.text(`Intereses`, margin + 320, 320);
-    doc.text(`0.00`, margin + 400, 320);
-    doc.text(`Valor total`, margin + 320, 335);
-    doc.text(`11.35`, margin + 400, 335);
-    doc.text(`Deuda anterior`, margin + 320, 350);
-    doc.text(`0.00`, margin + 400, 350);
-    doc.text(`Interes anterior`, margin + 320, 365);
-    doc.text(`0.00`, margin + 400, 365);
-    doc.text(`Valor a pagar`, margin + 320, 380);
-    doc.text(`11.35`, margin + 400, 380); */
+    /*     doc.text(`Iva 12%`, margin + 320, 275);
+        doc.text(``, margin + 400, 275);
+        doc.text(`Descuento`, margin + 320, 290);
+        doc.text(`0.00`, margin + 400, 290);
+        doc.text(`Exoneración`, margin + 320, 305);
+        doc.text(`.0`, margin + 400, 305);
+        doc.text(`Intereses`, margin + 320, 320);
+        doc.text(`0.00`, margin + 400, 320);
+        doc.text(`Valor total`, margin + 320, 335);
+        doc.text(`11.35`, margin + 400, 335);
+        doc.text(`Deuda anterior`, margin + 320, 350);
+        doc.text(`0.00`, margin + 400, 350);
+        doc.text(`Interes anterior`, margin + 320, 365);
+        doc.text(`0.00`, margin + 400, 365);
+        doc.text(`Valor a pagar`, margin + 320, 380);
+        doc.text(`11.35`, margin + 400, 380); */
     /*autoTable(doc, {
       headStyles: {
         halign: 'center',
