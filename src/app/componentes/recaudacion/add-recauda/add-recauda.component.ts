@@ -153,6 +153,7 @@ export class AddRecaudaComponent implements OnInit {
     this.listFormasCobro();
     this.listarIntereses();
     this.abrirCaja();
+    this.disabledcobro = this.estadoCajaT;
   }
   get f() {
     return this.formCobrar.controls;
@@ -895,13 +896,20 @@ export class AddRecaudaComponent implements OnInit {
 
   impComprobante(datos: any) {
     //console.log(datos);
+    let factura: Facturas = new Facturas();
     this.getRubroxfac(datos.idfactura);
     this.idfactura = datos.idfactura;
+    this.facService.getById(datos.idfactura).subscribe({
+      next: (datos) => {
+        console.log(factura);
+        factura = datos;
+      }, error: (e) => console.error(e)
+    })
     this.rubxfacService.getByIdfactura(+datos.idfactura!).subscribe({
       next: (detalle) => {
         this._rubrosxfac = detalle;
         //console.log(detalle);
-        this.s_pdfRecaudacion.comprobantePago(datos, detalle, this.totInteres);
+        this.s_pdfRecaudacion.comprobantePago(factura, detalle, this.totInteres);
         /*  this.lecService.getByIdfactura(idfactura).subscribe({
           next: (resp) => {
             _lecturas = resp;

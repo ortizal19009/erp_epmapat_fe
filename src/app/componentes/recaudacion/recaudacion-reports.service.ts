@@ -17,7 +17,7 @@ export class RecaudacionReportsService {
     console.log(datos);
     this.interes = 0;
     console.log(_interes)
-    if (_interes === 0) {
+    if (_interes < 0) {
       this.interes = 0
     } else {
       this.interes = _interes
@@ -77,15 +77,16 @@ export class RecaudacionReportsService {
       },
       columns: ['EPMAPA-TULCAN', ''],
       body: [
-        [`Ruc/cedula: 0401501176`],
+        [`Nro factura: ${datos.nrofactura}`],
+        [`Ruc/cedula: ${datos.idcliente.cedua}`],
         [`Mes pagado: ${datos.fechacobro}`],
         [`Cliente: ${datos.idcliente.nombre}`],
         [`Dirección: ${datos.idcliente.direccion}`],
         [`Referencia: ${datos.idcliente.referencia}`],
         [`Cartas ant: 0`, `Emision: 02/01/2024`],
-        [`Cuenta: ${datos.idabonado}`, `FechaPag: 02/02/2024`],
-        [`L. Anterior: 4415`, `L. Actual: 4420`],
-        [`Cons. Ant: 14`, `Categoría: COME`],
+        [`Cuenta: ${datos.idabonado}`, `FechaPag: ${datos.fechacobro}`],
+        [`L. Anterior: ---`, `L. Actual: ---`],
+        [`Cons. Ant: ---`, `Categoría: COME`],
         [`Recaudador: WILLIAM`],
       ],
     });
