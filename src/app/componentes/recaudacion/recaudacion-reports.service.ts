@@ -10,17 +10,18 @@ export class RecaudacionReportsService {
   date: Date = new Date();
   total: number = 0;
   interes: number = 0;
-  constructor() { }
+  constructor() {}
 
   comprobantePago(datos: any, _rubrosxfac: any, _interes: number) {
     //console.log(_rubrosxfac);
+    this.total = 0;
     console.log(datos);
     this.interes = 0;
-    console.log(_interes)
+    console.log(_interes);
     if (_interes < 0) {
-      this.interes = 0
+      this.interes = 0;
     } else {
-      this.interes = _interes
+      this.interes = _interes;
     }
     let doc = new jsPDF('p', 'pt', 'a4');
     let margin = 30;
@@ -78,16 +79,16 @@ export class RecaudacionReportsService {
       columns: ['EPMAPA-TULCAN', ''],
       body: [
         [`Nro factura: ${datos.nrofactura}`],
-        [`Ruc/cedula: ${datos.idcliente.cedua}`],
+        [`Ruc/cedula: ${datos.idcliente.cedula}`],
         [`Mes pagado: ${datos.fechacobro}`],
         [`Cliente: ${datos.idcliente.nombre}`],
         [`Dirección: ${datos.idcliente.direccion}`],
         [`Referencia: ${datos.idcliente.referencia}`],
-        [`Cartas ant: 0`, `Emision: 02/01/2024`],
+        [`Cartas ant: --`, `Emision: ----`],
         [`Cuenta: ${datos.idabonado}`, `FechaPag: ${datos.fechacobro}`],
         [`L. Anterior: ---`, `L. Actual: ---`],
         [`Cons. Ant: ---`, `Categoría: COME`],
-        [`Recaudador: WILLIAM`],
+        [`Recaudador: ---`],
       ],
     });
     autoTable(doc, {
@@ -138,10 +139,10 @@ export class RecaudacionReportsService {
     autoTable(doc, {
       startY: 30,
       margin: 250,
-      //columnWidth: 'wrap', 
+      //columnWidth: 'wrap',
       columnStyles: {
         0: { minCellWidth: 10 },
-        1: { minCellWidth: 100 }
+        1: { minCellWidth: 100 },
       },
       tableWidth,
       theme: 'grid',
@@ -172,13 +173,12 @@ export class RecaudacionReportsService {
         [`Catastro emitido: 02/01/2024 `, `Forma pago: Contado`],
         [`Recaudador: WILLIAM `, `Cons. anterior: 14`],
         [`Referencia: ${datos.idcliente.referencia}`],
-
       ],
     });
     autoTable(doc, {
       //startY: 30,
       margin: 250,
-      //columnWidth: 'wrap', 
+      //columnWidth: 'wrap',
       tableWidth,
       theme: 'grid',
       styles: { fontSize: 7 },

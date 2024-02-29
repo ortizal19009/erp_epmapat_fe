@@ -102,7 +102,7 @@ export class AddRecaudaComponent implements OnInit {
     private recaService: RecaudacionService,
     private facxrService: FacxrecaudaService,
     private s_recaudaxcaja: RecaudaxcajaService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.formBuscar = this.fb.group({
@@ -170,7 +170,7 @@ export class AddRecaudaComponent implements OnInit {
         /* VALIDAR SI LA CAJA ESTA ABIERTA O CERRADA */
         this.s_recaudaxcaja.getLastConexion(this._caja.idcaja).subscribe({
           next: (datos) => {
-            console.log(datos)
+            console.log(datos);
             sessionStorage.setItem('estadoCaja', datos.estado.toString());
             let c_fecha: Date = new Date();
             let l_fecha: Date = new Date(datos.fechainiciolabor);
@@ -227,33 +227,35 @@ export class AddRecaudaComponent implements OnInit {
     //recxcaja.horainicio = fecha;
     this.recxcaja.idcaja_cajas = this._caja;
     this.recxcaja.idusuario_usuarios = this._caja.idusuario_usuarios;
-    console.log(this.recxcaja)
+    console.log(this.recxcaja);
     this.s_recaudaxcaja.saveRecaudaxcaja(this.recxcaja).subscribe({
       next: (datos) => {
         this.estadoCajaT = false;
-      }, error: (e) => console.error(e)
-    })
+      },
+      error: (e) => console.error(e),
+    });
   }
   cerrarCaja() {
     this.s_recaudaxcaja.getLastConexion(this._caja.idcaja).subscribe({
       next: (datos) => {
         let c_fecha: Date = new Date();
-        this.recxcaja = datos
+        this.recxcaja = datos;
         this.recxcaja.estado = 0;
         this.recxcaja.fechafinlabor = c_fecha;
         this.estadoCajaT = true;
         this.s_recaudaxcaja.updateRecaudaxcaja(this.recxcaja).subscribe({
           next: (datos) => {
-            sessionStorage.setItem('estadoCaja', this.recxcaja.estado.toString());
-            console.log("caja cerrada", datos);
-
+            sessionStorage.setItem(
+              'estadoCaja',
+              this.recxcaja.estado.toString()
+            );
+            console.log('caja cerrada', datos);
           },
-          error: (e) => console.error(e)
-        })
+          error: (e) => console.error(e),
+        });
       },
       error: (e) => console.error(e),
     });
-
   }
   //Formas de cobro
   listFormasCobro() {
@@ -375,13 +377,12 @@ export class AddRecaudaComponent implements OnInit {
               this._sincobro[i].interes = interes;
 
               this._sincobro[i].comerc = 1;
-              this._sincobro[i].interes = interes;
               this._sincobro[i].multa = 0;
               suma +=
                 this._sincobro[i].totaltarifa +
                 this._sincobro[i].comerc +
-                this._sincobro[i].multa +
-                this._sincobro[i].interes;
+                this._sincobro[i].multa;
+              this._sincobro[i].interes;
             }
             i++;
           });
@@ -589,10 +590,9 @@ export class AddRecaudaComponent implements OnInit {
             _lecturas[0].lecturaactual - _lecturas[0].lecturaanterior;
           this.rubxfacService.getByIdfactura(idfactura).subscribe({
             next: (detalle) => {
-              console.log(detalle);
               this._rubrosxfac = detalle;
               this.subtotal();
-              this.calcularInteres();
+              this.calcularInteres(idfactura);
             },
             error: (err) =>
               console.error(
@@ -670,6 +670,7 @@ export class AddRecaudaComponent implements OnInit {
 
   cobrar() {
     //Crea el registro en Recaudación
+    
     let fecha = new Date();
     let r = {} as iRecaudacion; //Interface para los datos de la Recaudación
     r.fechacobro = fecha;
@@ -897,19 +898,27 @@ export class AddRecaudaComponent implements OnInit {
   impComprobante(datos: any) {
     //console.log(datos);
     let factura: Facturas = new Facturas();
+    console.log(this.idfactura);
+    this.calcularInteres(datos.idfactura);
     this.getRubroxfac(datos.idfactura);
     this.idfactura = datos.idfactura;
     this.facService.getById(datos.idfactura).subscribe({
       next: (datos) => {
         console.log(factura);
         factura = datos;
-      }, error: (e) => console.error(e)
-    })
+      },
+      error: (e) => console.error(e),
+    });
     this.rubxfacService.getByIdfactura(+datos.idfactura!).subscribe({
       next: (detalle) => {
         this._rubrosxfac = detalle;
-        //console.log(detalle);
-        this.s_pdfRecaudacion.comprobantePago(factura, detalle, this.totInteres);
+        console.log(this.totInteres);
+
+        this.s_pdfRecaudacion.comprobantePago(
+          factura,
+          detalle,
+          this.totInteres
+        );
         /*  this.lecService.getByIdfactura(idfactura).subscribe({
           next: (resp) => {
             _lecturas = resp;
@@ -939,8 +948,10 @@ export class AddRecaudaComponent implements OnInit {
     });
   }
 
-  calcularInteres() {
-    let idFactura = +this.idfactura!;
+  calcularInteres(idfactura: number) {
+    console.log('calcular interes');
+    let idFactura = idfactura;
+    console.log(idFactura);
     this.totInteres = 0;
     this.arrCalculoInteres = [];
     let interes: number = 0;
@@ -987,7 +998,7 @@ export class AddRecaudaComponent implements OnInit {
       error: (e) => console.error(e),
     });
   }
-
+  /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
   cInteres(factura: any) {
     this.totInteres = 0;
     this.arrCalculoInteres = [];
@@ -996,7 +1007,6 @@ export class AddRecaudaComponent implements OnInit {
     let fechai: Date = new Date(`${fec[0]}-${fec[1]}-02`);
     let fechaf: Date = new Date();
     this.factura = factura;
-    //fechai.setMonth(fechai.getMonth() + 1);
     fechaf.setMonth(fechaf.getMonth() - 1);
     while (fechai <= fechaf) {
       this.calInteres = {} as calcInteres;

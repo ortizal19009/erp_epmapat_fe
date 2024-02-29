@@ -153,7 +153,7 @@
                      </tr>
                   </thead>
                   <tbody>
-                     <tr *ngFor="let sincobro of _sincobro; let i = index" class="text-center ">
+                     <tr *ngFor="let sincobro of _sincobro | filter:filtrar; let i = index" class="text-center ">
                         <td [ngClass]="{'transferido': sincobro.estado == 3 }" class="small font-weight-bold">{{ i+1 }}
                         </td>
                         <td [ngClass]="{'transparente': sincobro.idabonado == 0, 'transferido': sincobro.estado == 3 }">
