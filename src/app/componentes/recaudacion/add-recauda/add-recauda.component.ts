@@ -670,7 +670,7 @@ export class AddRecaudaComponent implements OnInit {
 
   cobrar() {
     //Crea el registro en Recaudación
-    
+
     let fecha = new Date();
     let r = {} as iRecaudacion; //Interface para los datos de la Recaudación
     r.fechacobro = fecha;
@@ -700,6 +700,7 @@ export class AddRecaudaComponent implements OnInit {
   }
   //Registra las facturas por recaudación y actualiza la fecha de cobro de la(s) factura(s)
   facxrecauda(recaCreada: Recaudacion, i: number) {
+  console.log('primer conteo',i)
     let idfactura: number;
     let fechacobro: Date = new Date();
     if (this._sincobro[i].pagado) {
@@ -716,7 +717,8 @@ export class AddRecaudaComponent implements OnInit {
             next: (nex) => {
               console.log(this._nroFactura);
               let nrofac = this._nroFactura.split('-', 3);
-              let nrofac_f = +nrofac[2]! + 1;
+              let nrofac_f = +nrofac[2]! + i;
+              console.log(nrofac_f);
               //Actualiza Factura como cobrada
               fac.fechacobro = fechacobro;
               fac.usuariocobro = this.authService.idusuario;
@@ -734,6 +736,7 @@ export class AddRecaudaComponent implements OnInit {
                   console.log(nex);
                   this.swcobrado = true;
                   // console.log('Actualización Ok!')
+                  console.log('segundo conteo',i)
                   i++;
                   if (i < this._sincobro.length)
                     this.facxrecauda(recaCreada, i);
