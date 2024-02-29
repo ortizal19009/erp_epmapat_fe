@@ -62,7 +62,6 @@ export class TransferenciasComponent implements OnInit {
       let coloresJSON = sessionStorage.getItem('/transferencias');
       if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
       else this.buscaColor();
-
       this.formBuscar = this.fb.group({
          cuenta: '',
          identificacion: '',
@@ -95,7 +94,8 @@ export class TransferenciasComponent implements OnInit {
 
    async buscaColor() {
       try {
-         const datos = await this.coloresService.setcolor(1, 'transferencias');
+         console.log(this.authService.idusuario)
+         const datos = await this.coloresService.setcolor(this.authService.idusuario, 'transferencias');
          const coloresJSON = JSON.stringify(datos);
          sessionStorage.setItem('/transferencias', coloresJSON);
          this.colocaColor(datos);

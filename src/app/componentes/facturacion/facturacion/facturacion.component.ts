@@ -229,7 +229,7 @@ export class FacturacionComponent implements OnInit {
          var embed = document.createElement('embed');
          embed.setAttribute('src', pdfDataUri);
          embed.setAttribute('type', 'application/pdf');
-         embed.setAttribute('width', '75%');
+         embed.setAttribute('width', '50%');
          embed.setAttribute('height', '100%');
          embed.setAttribute('id', 'idembed');
          //Agrega el <embed> al contenedor del Modal

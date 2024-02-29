@@ -50,27 +50,28 @@ export class FacturaService {
    getById(idfactura: number): Observable<Facturas> {
       return this.http.get<Facturas>(`${baseUrl}/${idfactura}`);
    }
-
    //Planillas sin Cobro de un Cliente 
    getSinCobro(idcliente: number) {
       return this.http.get<Facturas[]>(`${baseUrl}/idcliente/${idcliente}`);
    }
-
    getDeudaConsumo(idabonado: number) {
       return this.http.get<Facturas[]>(`${baseUrl}/deudaconsumo?idabonado=${idabonado}`);
    }
-
    getDeuda(idcliente: number) {
       return this.http.get<Facturas[]>(
          `${baseUrl}/deuda?idcliente=${idcliente}`
       );
    }
-
    updateFacturas(fac: Facturas) {
       return this.http.put(`${baseUrl}/${fac.idfactura}`, fac);
    }
    valLastFac(codrecaudador:string){
       return this.http.get(`${baseUrl}/validador/-${codrecaudador}-`)
+   }
+
+   findByUsucobro(idusuario: number, d: Date, h: Date){
+
+      return this.http.get(`${baseUrl}/reportes/individual?idusuario=${idusuario}&dfecha=${d}&hfecha=${h}`)
    }
 
 }

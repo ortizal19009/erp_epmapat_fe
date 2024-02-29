@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
-import { AutorizaService } from 'src/app/servicios/administracion/autoriza.service';
+
 import { CajaService } from 'src/app/servicios/caja.service';
 
 @Component({
@@ -14,6 +15,7 @@ export class ListarCajaComponent implements OnInit {
 
    _cajas: any;
    filtro: string;
+   otraPagina: boolean = false;
 
    constructor(private cajaService: CajaService, private router: Router,
       public authService: AutorizaService, private coloresService: ColoresService) { }
@@ -23,14 +25,13 @@ export class ListarCajaComponent implements OnInit {
       let coloresJSON = sessionStorage.getItem('/cajas');
       if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
       else this.buscaColor();
-      
-      // this.setcolor();
       this.listarCajas();
    }
 
    async buscaColor() {
       try {
-         const datos = await this.coloresService.setcolor(this.authService.idusuario, 'cajas');
+         console.log(this.authService.idusuario)
+         const datos = await this.coloresService.setcolor(+this.authService.idusuario!, 'cajas');
          const coloresJSON = JSON.stringify(datos);
          sessionStorage.setItem('/cajas', coloresJSON);
          this.colocaColor(datos);
@@ -71,5 +72,9 @@ export class ListarCajaComponent implements OnInit {
    //    sessionStorage.setItem('ventana', '/cajas');
    //    this.router.navigate(['colores']);
    // }
+
+   pdf(){
+      
+   }
 
 }

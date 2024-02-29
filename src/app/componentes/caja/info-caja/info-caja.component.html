@@ -83,3 +83,48 @@
       </div>
    </div>
 </div>
+
+<!-- MODAL Imprimir-->
+<div class="modal fade" id="imprimir" tabindex="-1" aria-labelledby="imprimirLabel" aria-hidden="true">
+   <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content border">
+         <div class='modal-header py-2 justify-content-center cabecera'>
+            <h5 class='modal-title font-weight-bold' id='ModalLabel'>Imprimir</h5>
+         </div>
+         <div class='modal-body cuerpo'>
+
+            <div class="input-group mb-3 input-group-sm">
+               <div class="input-group-prepend">
+                  <label class="input-group-text" for="inputGroupSelect01">Reporte</label>
+               </div>
+               <select class="custom-select" id="inputGroupSelect01">
+                  <option selected>Reporte de caja del dia</option>
+               </select>
+            </div>
+
+            <div class="input-group input-group-sm mb-0">
+               <div class="input-group-prepend">
+                  <small class="input-group-text">Abrir en otra página</small>
+                  <div class="input-group-text">
+                     <input type="checkbox" [(ngModel)]="otraPagina">
+                  </div>
+               </div>
+            </div>
+
+            <div class='row justify-content-center mt-3'>
+               <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="pdf()"
+                  [attr.data-target]="otraPagina ? null : '#pdf'" data-toggle="modal">
+                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+               <button type='button' class='btn btn-sm btn-outline-success btn-sm mx-1' data-dismiss='modal'>
+                  <i class="bi bi-x-circle"></i> Cancelar</button>
+            </div>
+
+         </div>
+      </div>
+   </div>
+</div>
+<!-- MODAL PDF (En la misma página)-->
+<div class='modal fade' id='pdf' tabindex='-1' aria-labelledby='pdf' aria-hidden='true'>
+   <div class='modal-dialog modal-sm'>
+   </div>
+</div>

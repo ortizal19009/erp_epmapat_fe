@@ -102,7 +102,7 @@ export class AddRecaudaComponent implements OnInit {
     private recaService: RecaudacionService,
     private facxrService: FacxrecaudaService,
     private s_recaudaxcaja: RecaudaxcajaService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.formBuscar = this.fb.group({
@@ -700,14 +700,14 @@ export class AddRecaudaComponent implements OnInit {
   }
   //Registra las facturas por recaudación y actualiza la fecha de cobro de la(s) factura(s)
   facxrecauda(recaCreada: Recaudacion, i: number) {
-  console.log('primer conteo',i)
+    console.log('primer conteo', i)
     let idfactura: number;
     let fechacobro: Date = new Date();
     if (this._sincobro[i].pagado) {
       idfactura = this._sincobro[i].idfactura;
       this.facService.getById(idfactura).subscribe({
         next: (fac) => {
-          // console.log('resp: ', resp);
+          console.log('FACTURA: ', fac);
           //Añade a facxrecauda
           let facxr = {} as iFacxrecauda; //Interface para los datos de las facturas de la Recaudación
           facxr.idrecaudacion = recaCreada;
@@ -723,9 +723,12 @@ export class AddRecaudaComponent implements OnInit {
               fac.fechacobro = fechacobro;
               fac.usuariocobro = this.authService.idusuario;
               fac.pagado = 1;
-              fac.nrofactura = `${this._codRecaudador}-${nrofac_f
-                .toString()
-                .padStart(9, '0')}`;
+              if (fac.nrofactura === null) {
+                fac.nrofactura = `${this._codRecaudador}-${nrofac_f
+                  .toString()
+                  .padStart(9, '0')}`;
+              }
+
               if (fac.estado === 2) {
                 fac.estado = 2;
               } else {
@@ -736,7 +739,7 @@ export class AddRecaudaComponent implements OnInit {
                   console.log(nex);
                   this.swcobrado = true;
                   // console.log('Actualización Ok!')
-                  console.log('segundo conteo',i)
+                  console.log('segundo conteo', i)
                   i++;
                   if (i < this._sincobro.length)
                     this.facxrecauda(recaCreada, i);
