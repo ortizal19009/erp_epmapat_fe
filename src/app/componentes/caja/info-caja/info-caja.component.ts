@@ -113,7 +113,7 @@ export class InfoCajaComponent implements OnInit {
       console.log(this.idcaja)
       console.log(this.caja)
       let date: Date = new Date();
-      let date_f = (`${date.getFullYear()}-${date.getMonth()}-${date.getDay()}`)
+      let date_f = date.toISOString().slice(0-10);
       let f_date: Date = new Date(date_f);
       this.s_facturas.findByUsucobro(this.usuario.idusuario, f_date, f_date).subscribe({
          next: (datos) => {
