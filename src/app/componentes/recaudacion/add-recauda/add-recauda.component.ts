@@ -29,6 +29,8 @@ import { RecaudacionService } from 'src/app/servicios/recaudacion.service';
 import { FacxrecaudaService } from 'src/app/servicios/facxrecauda.service';
 import { RecaudaxcajaService } from 'src/app/servicios/recaudaxcaja.service';
 import { Recaudaxcaja } from 'src/app/modelos/recaudaxcaja.model';
+import { Rubroxfac } from 'src/app/modelos/rubroxfac.model';
+import { Rubros } from 'src/app/modelos/rubros.model';
 
 @Component({
   selector: 'app-add-recauda',
@@ -698,6 +700,21 @@ export class AddRecaudaComponent implements OnInit {
       error: (err) => console.error('Al crear la Recaudación: ', err.error),
     });
   }
+  saveRubxFac(idfactura: any, idrubro: any, valorunitario: any) {
+
+    let rubrosxfac: Rubroxfac = new Rubroxfac();
+    rubrosxfac.idfactura_facturas = idfactura;
+    rubrosxfac.idrubro_rubros = idrubro;
+    rubrosxfac.valorunitario = valorunitario;
+    rubrosxfac.cantidad = 1;
+    rubrosxfac.estado = 1;
+    this.rubxfacService.saveRubroxFac(rubrosxfac).subscribe({
+      next: (datos) => {
+        console.log('Interes guardadp')
+      },
+      error: (e) => console.error(e)
+    });
+  }
   //Registra las facturas por recaudación y actualiza la fecha de cobro de la(s) factura(s)
   facxrecauda(recaCreada: Recaudacion, i: number) {
     console.log('primer conteo', i)
@@ -722,12 +739,16 @@ export class AddRecaudaComponent implements OnInit {
               //Actualiza Factura como cobrada
               fac.fechacobro = fechacobro;
               fac.usuariocobro = this.authService.idusuario;
+              fac.interescobrado = this.cInteres(fac)
               fac.pagado = 1;
               if (fac.nrofactura === null) {
                 fac.nrofactura = `${this._codRecaudador}-${nrofac_f
                   .toString()
                   .padStart(9, '0')}`;
               }
+              let rubro: Rubros = new Rubros()
+              rubro.idrubro = 5;
+              this.saveRubxFac(fac, rubro, this.cInteres(fac))
 
               if (fac.estado === 2) {
                 fac.estado = 2;
@@ -738,8 +759,6 @@ export class AddRecaudaComponent implements OnInit {
                 next: (nex) => {
                   console.log(nex);
                   this.swcobrado = true;
-                  // console.log('Actualización Ok!')
-                  console.log('segundo conteo', i)
                   i++;
                   if (i < this._sincobro.length)
                     this.facxrecauda(recaCreada, i);

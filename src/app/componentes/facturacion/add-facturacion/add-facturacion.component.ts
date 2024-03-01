@@ -189,7 +189,8 @@ export class AddFacturacionComponent implements OnInit {
          planilla.formapago = this.formCuotas.value.formapago;
          planilla.valorbase = this.totfac / n;
          planilla.usucrea = 1;
-         planilla.estado = 1
+         planilla.estado = 1;
+         //planilla.interescobrado = 0;
          let fecha: Date = new Date();
          fecha.setMonth(fecha.getMonth() + (i-1));
          planilla.feccrea = fecha;
@@ -366,6 +367,7 @@ interface Planilla {
    usumodi: number;
    fecmodi: Date;
    valorbase: number;
+   interescobrado: number;
 }
 
 interface Rubrosxpla {

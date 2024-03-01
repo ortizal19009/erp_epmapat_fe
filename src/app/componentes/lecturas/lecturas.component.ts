@@ -280,6 +280,7 @@ export class LecturasComponent implements OnInit {
          planilla.usucrea = 1;
          planilla.feccrea = this.fecha;
          planilla.estado = 1;
+         planilla.interescobrado =0;
          let cate9: boolean;
          if (categoria == 9) { categoria = 1; cate9 = true }
          // Obtiene lo tarifa del nuevo Pliego
@@ -643,6 +644,7 @@ interface Planilla {
    usumodi: number;
    fecmodi: Date;
    valorbase: number;
+   interescobrado:number;
 }
 
 interface Rubrosxpla {

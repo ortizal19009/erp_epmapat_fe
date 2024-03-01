@@ -11,6 +11,7 @@ import { formatNumber } from '@angular/common';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { Usuarios } from 'src/app/modelos/administracion/usuarios.model';
 import { format, parse } from '@formkit/tempo';
+import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 
 @Component({
   selector: 'app-info-caja',
@@ -36,8 +37,9 @@ export class InfoCajaComponent implements OnInit {
     private cajaService: CajaService,
     private recxcaja: RecaudaxcajaService,
     private _pdf: PdfService,
-    private s_facturas: FacturaService
-  ) {}
+    private s_facturas: FacturaService,
+    private s_rubroxfac: RubroxfacService
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/cajas');
@@ -149,21 +151,45 @@ export class InfoCajaComponent implements OnInit {
     console.log(this.usuario);
     console.log(this.caja);
 
+    var datosBody: any = [];
+
+    var i = 0;
     this.s_facturas
       .findByUsucobro(this.usuario.idusuario, this.desde, this.hasta)
       .subscribe({
-        next: (datos) => {
+        next: (datos: any) => {
           console.log(datos);
+          datos.forEach(() => {
+            console.log(datos[i]);
+           // datos[i].idrubros.forEach((item: any) => { console.log(item) })
+            datosBody.push([datos[i].nrofactura, datos[i].idcliente.nombre, datos[i].idmodulo.descripcion, datos[i].totaltarifa, datos[i].fechacobro, datos[i].horacobro, this.usuario.nomusu])
+            /*            this.s_rubroxfac.getByIdfactura(datos[i].idfactura).subscribe({
+                         next: (dats: any) => {
+                           let j = 0;
+                           let valuni = 0;
+                           dats.forEach(() => {
+                             console.log(dats[j].valorunitario)
+                             valuni += dats[j].valorunitario
+                             j++;
+                           })
+                           // datos[i].totaltarifa = valuni;
+                         },
+                         error: (e) => console.error(e)
+                       }) */
+            i++;
+          })
+          this.pdf2(datosBody)
         },
         error: (e) => console.error(e),
       });
+
+  }
+  pdf2(datosBody: any) {
     //const nombreEmision = new NombreEmisionPipe(); // Crea una instancia del pipe
     let doc = new jsPDF('p', 'pt', 'a4');
     this._pdf.header('REPORTE INDIVIDUAL DE COBROS POR CAJA', doc);
     let m_izquierda = 10;
 
-    var datos: any = [];
-    var i = 0;
     /*             this._facturacion.forEach(() => {
                      let fecha = this._facturacion[i].feccrea.slice(8, 10).concat('-', this._facturacion[i].feccrea.slice(5, 7), '-', this._facturacion[i].feccrea.slice(0, 4))
                      datos.push([this._facturacion[i].idfacturacion, fecha,
@@ -186,7 +212,6 @@ export class InfoCajaComponent implements OnInit {
         );
       }
     };
-
     autoTable(doc, {
       head: [
         [
@@ -211,24 +236,24 @@ export class InfoCajaComponent implements OnInit {
         cellPadding: 1,
         halign: 'center',
       },
-      columnStyles: {
-        0: { halign: 'center', cellWidth: 10 },
-        1: { halign: 'center', cellWidth: 18 },
-        2: { halign: 'left', cellWidth: 60 },
-        3: { halign: 'left', cellWidth: 80 },
-        4: { halign: 'right', cellWidth: 15 },
-        5: { halign: 'center', cellWidth: 14 },
-      },
-      margin: { left: m_izquierda - 1, top: 19, right: 4, bottom: 13 },
-      body: datos,
+      /*       columnStyles: {
+              0: { halign: 'center', cellWidth: 10 },
+              1: { halign: 'center', cellWidth: 18 },
+              2: { halign: 'left', cellWidth: 60 },
+              3: { halign: 'left', cellWidth: 80 },
+              4: { halign: 'right', cellWidth: 15 },
+              5: { halign: 'center', cellWidth: 14 },
+            },
+            margin: { left: m_izquierda - 1, top: 19, right: 4, bottom: 13 }, */
+      body: datosBody,
 
       didParseCell: function (data) {
         var fila = data.row.index;
         var columna = data.column.index;
         //if (columna === 4 && data.cell.section === 'body') { data.cell.text[0] = formatNumber(+data.cell.raw!); }
-        if (fila === datos.length - 1) {
-          data.cell.styles.fontStyle = 'bold';
-        } // Total Bold
+        /*     if (fila === datosBody.length - 1) {
+              data.cell.styles.fontStyle = 'bold';
+            }  */// Total Bold
       },
     });
     addPageNumbers();
@@ -254,7 +279,7 @@ export class InfoCajaComponent implements OnInit {
       embed.setAttribute('src', pdfDataUri);
       embed.setAttribute('type', 'application/pdf');
       embed.setAttribute('width', '50%');
-      embed.setAttribute('height', '100%');
+      embed.setAttribute('height', '75%');
       embed.setAttribute('id', 'idembed');
       //Agrega el <embed> al contenedor del Modal
       var container: any;
