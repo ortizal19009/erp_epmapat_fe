@@ -292,7 +292,10 @@ export class LecturasComponent implements OnInit {
                         if (swcate9 || swmunicipio) suma = Math.round(suma / 2 * 100) / 100;
                         factura.totaltarifa = suma;
                         factura.valorbase = suma;
-                        factura.estado = 1
+                        factura.estado = 1;
+                        let modulo: Modulos = new Modulos();
+                        modulo.idmodulo = 4;
+                        factura.idmodulo = modulo;
                         this.facService.updateFacturas(factura).subscribe({
                            next: fac => {
                               this.factura = fac;

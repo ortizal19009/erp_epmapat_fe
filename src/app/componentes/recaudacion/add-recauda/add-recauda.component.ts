@@ -375,17 +375,19 @@ export class AddRecaudaComponent implements OnInit {
           let i = 0;
           this._sincobro.forEach((item: any, index: number) => {
             let interes = this.cInteres(item);
-            if (this._sincobro[i].idmodulo.idmodulo == 3) {
-              this._sincobro[i].interes = interes;
+            let com = 0;
+            if (this._sincobro[i].idmodulo.idmodulo == 3) com = 1;
 
-              this._sincobro[i].comerc = 1;
-              this._sincobro[i].multa = 0;
-              suma +=
-                this._sincobro[i].totaltarifa +
-                this._sincobro[i].comerc +
-                this._sincobro[i].multa;
+            this._sincobro[i].interes = interes;
+
+            this._sincobro[i].comerc = com;
+            this._sincobro[i].multa = 0;
+            suma +=
+              this._sincobro[i].totaltarifa +
+              this._sincobro[i].comerc +
+              this._sincobro[i].multa +
               this._sincobro[i].interes;
-            }
+
             i++;
           });
           this.sumtotal = suma;
