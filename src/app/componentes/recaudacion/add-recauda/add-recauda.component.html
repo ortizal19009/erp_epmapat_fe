@@ -2,7 +2,13 @@
    <div class="container-fluid">
       <div class="row m-0 px-0 py-1 col-sm-12 border recaudacabecera sombra">
          <div class="col-sm-2 pl-0 mt-1">
-            <h4 class="m-0 font-weight-bold text-truncate"> <i class="bi bi-cash-coin ml-2"></i> Recaudación</h4>
+            <h4 class="m-0 font-weight-bold text-truncate">
+               <i class="bi bi-cash-coin ml-2"></i> Recaudación
+               <i class="fa fa-lock" aria-hidden="true" *ngIf="estadoCajaT; else estadoCajaF"></i>
+               <ng-template #estadoCajaF>
+                  <i class="fa fa-unlock" aria-hidden="true"></i>
+               </ng-template>
+            </h4>
          </div>
          <div class="col-sm-8 mx-0 px-0">
             <form [formGroup]="formBuscar" class="col-sm-12 mt-0 px-0 pt-0" (ngSubmit)="onSubmit()">
@@ -28,17 +34,11 @@
                      </button>
                   </div>
 
-                  <div *ngIf="acobrar > 0 && !swcobrado" class="form-group col-md-3 my-0 py-0 mb-0">
+                  <div *ngIf="acobrar > 0 && !swcobrado && !estadoCajaT" class="form-group col-md-3 my-0 py-0 mb-0">
                      <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#modalCobrar"
                         (click)="valorAcobrar(acobrar)"><i class="bi bi-check-lg"></i> Cobrar:&nbsp;&nbsp;&nbsp;
                         <strong>{{acobrar | number: '1.2-2'}}</strong>
                      </button>
-                  </div>
-                  <div class="col-sm my-0 py-0 mb-0">
-                     <i class="fa fa-lock" aria-hidden="true" *ngIf="estadoCajaT; else estadoCajaF">Caja cerrada</i>
-                     <ng-template #estadoCajaF>
-                        <i class="fa fa-unlock" aria-hidden="true">Caja Abierta</i>
-                     </ng-template>
                   </div>
                </div>
             </form>
@@ -56,7 +56,7 @@
                   data-target="#abrirCaja" [disabled]="!estadoCajaT">
                   <i class="bi-door-open"></i>&nbsp; Abrir caja</button>
                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#cerrarCaja"
-               [disabled]="estadoCajaT">
+                  [disabled]="estadoCajaT">
                   <i class="bi-door-closed"></i>&nbsp; Cerrar caja</button>
                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir"
                   [disabled]="swbusca != 0">
@@ -160,7 +160,7 @@
                            {{ sincobro.idabonado }}</td>
                         <td [ngClass]="{'transferido': sincobro.estado == 3 }">{{ sincobro.idfactura }}</td>
                         <td class="description">
-                        <!--    {{sincobro.idabonado}}
+                           <!--    {{sincobro.idabonado}}
                            <i class="fa fa-spinner fa-pulse fa-fw"></i>
                            <span class="sr-only">Loading...</span> -->
                         </td>
@@ -490,7 +490,8 @@
 
             </div>
             <div class='row justify-content-center mt-1 mb-3'>
-               <button type='button' class='btn btn-success btn-sm mx-1' [disabled]="cajaActiva" data-dismiss='modal' (click)="validarCaja()">
+               <button type='button' class='btn btn-success btn-sm mx-1' [disabled]="cajaActiva" data-dismiss='modal'
+                  (click)="validarCaja()">
                   <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
                <button type='button' class='btn btn-sm btn-outline-success mx-1' data-dismiss='modal'>
                   <i class="bi bi-x-circle"></i> Cancelar</button>

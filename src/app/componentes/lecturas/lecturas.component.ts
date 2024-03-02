@@ -43,7 +43,6 @@ export class LecturasComponent implements OnInit {
    idlectura: number;
    fila: number;
    datosLectura: any;
-   antIndice = 0;
    //Para cerrar
    disabled: boolean;
    btncerrar: boolean;
@@ -53,17 +52,15 @@ export class LecturasComponent implements OnInit {
    rubros: any = [];
    rubrosFilter: [];
    tarifa: any;
-   idabonado: any;
    factura: any;
    arrprecios: number[] = [];
    arridfactura: number[] = [];
    public progreso = 0;
    private contador = 0;
    otraPagina: boolean = false;
-   modmodi: boolean = true;
    archExportar: string;
-   modalsizes: string = 'sm';
-   novedades: any;
+   swmulta: boolean
+   vecmultas: boolean[] = [];
 
    porcResidencial: number[] = [0.777, 0.78, 0.78, 0.78, 0.78, 0.778, 0.778, 0.778, 0.78, 0.78, 0.78, 0.68, 0.68, 0.678, 0.68, 0.68, 0.678, 0.678, 0.68,
       0.68, 0.678, 0.676, 0.678, 0.678, 0.678, 0.68, 0.647, 0.65, 0.65, 0.647, 0.647, 0.65, 0.65, 0.647, 0.647, 0.65, 0.65, 0.65,
@@ -72,14 +69,13 @@ export class LecturasComponent implements OnInit {
 
    constructor(private router: Router, private lecService: LecturasService,
       private rutaxemiService: RutasxemisionService, public fb: FormBuilder, private facService: FacturaService,
-      private rubService: RubrosService, private pliegoService: PreciosxcatService, private rubxfacService: RubroxfacService,
-      private pli24Service: Pliego24Service, private s_novedad: NovedadesService) { }
+      private rubxfacService: RubroxfacService, private pli24Service: Pliego24Service) { }
 
    ngOnInit(): void {
       this.idrutaxemision = +sessionStorage.getItem("idrutaxemisionToLectura")!;
       this.rutaxemisionDatos(this.idrutaxemision);
       this.lecService.getLecturas(this.idrutaxemision).subscribe({
-         next: (resp) => {
+         next: resp => {
             this._lecturas = resp;
             this.abonados = this._lecturas.length;
             this.total();
@@ -91,15 +87,13 @@ export class LecturasComponent implements OnInit {
       this.formValor = this.fb.group({
          lecturaanterior: 0,
          lecturaactual: 0, disabled: false,
-         consumo: 0,
-         idnovedad_novedades: ''
+         consumo: 0
       });
 
       this.formValor.get('lecturaactual')?.valueChanges.subscribe((valor) => {
          this.formValor.controls['consumo'].setValue(valor - this.formValor.get('lecturaanterior')?.value);
       });
       this.fecha = new Date();
-      this.listNovedades();
    }
 
    rutaxemisionDatos(idrutaxemision: number) {
@@ -193,17 +187,7 @@ export class LecturasComponent implements OnInit {
       }
    }
 
-   valor(e: any, idlectura: number, fila: number, cuenta: number) {
-      this.antIndice = fila;
-      const tagName = e.target.tagName;
-      this.idabonado = cuenta
-      if (tagName === 'TD') {
-         this.modmodi = true
-         this.modalsizes = 'md'
-      } else {
-         this.modmodi = false
-         this.modalsizes = 'lg'
-      }
+   valor(idlectura: number, fila: number) {
       if (this.rutaxemision.estado == 1) this.formValor.get('lecturaactual')?.disable();
       this.idlectura = idlectura;
       this.fila = fila;
@@ -214,8 +198,7 @@ export class LecturasComponent implements OnInit {
             this.formValor.patchValue({
                lecturaanterior: resp.lecturaanterior,
                lecturaactual: resp.lecturaactual,
-               consumo: resp.lecturaactual - resp.lecturaanterior,
-               idnovedad_novedades: resp.idnovedad_novedades
+               consumo: resp.lecturaactual - resp.lecturaanterior
             })
          },
          error: err => console.log(err.error)
@@ -223,22 +206,14 @@ export class LecturasComponent implements OnInit {
    }
 
    actuValor() {
-      this.modmodi = true;
       this.datosLectura.lecturaactual = this.formValor.value.lecturaactual;
-      this.datosLectura.idnovedad_novedades = this.formValor.value.idnovedad_novedades;
       this.lecService.updateLectura(this.idlectura, this.datosLectura).subscribe({
          next: nex => {
-            console.log(this._lecturas[this.fila])
             this._lecturas[this.fila].lecturaactual = this.formValor.value.lecturaactual;
-            this._lecturas[this.fila].idnovedad_novedades = this.formValor.value.idnovedad_novedades;
             this.total();
-
          },
          error: err => console.error(err.error)
       });
-   }
-   cancelar() {
-      this.modmodi = true
    }
 
    //Genera Planillas (Tabla Facturas)
@@ -251,118 +226,130 @@ export class LecturasComponent implements OnInit {
    }
 
    planillas() {
-      let categoria = this._lecturas[this.kontador].idcategoria;
+      //let categoria = this._lecturas[this.kontador].idcategoria;
+      let categoria = this._lecturas[this.kontador].idabonado_abonados.idcategoria_categorias.idcategoria;
       let consumo = this._lecturas[this.kontador].lecturaactual - this._lecturas[this.kontador].lecturaanterior;
-      let terceraedad = this._lecturas[this.kontador].idabonado_abonados.idresponsable.terceraedad; //OJO: 3ra edad NO hay en el cliente
-      // if(terceraedad) if(categoria = 9 && consumo > 10 ) categoria = 1;
-      // else if(categoria == 9 && consumo > 34 ) categoria = 1;
+      let adultomayor = this._lecturas[this.kontador].idabonado_abonados.adultomayor;
+      let factura: Facturas = new Facturas();
+      console.log(this._lecturas)
+      if (adultomayor) if (categoria == 9 && consumo > 34) categoria = 1;
+      else if (categoria == 9 && consumo > 10) categoria = 1;
       if (categoria == 9 && consumo > 34) categoria = 1;
       if (categoria == 1 && consumo > 70) categoria = 2;
+      let municipio = this._lecturas[this.kontador].idabonado_abonados.municipio;
       if (consumo < 0) {
          this.kontador++;
          this.progreso = (this.kontador / this._lecturas.length) * 100
          if (this.kontador < this._lecturas.length) this.planillas();
       }
       else {
-         this.arrprecios = [];
-         let num1: number;
-         let planilla = {} as Planilla;
-         planilla.idmodulo = this.modulo;
-         let cliente: Clientes = new Clientes;
-         cliente.idcliente = this._lecturas[this.kontador].idresponsable;
-         planilla.idcliente = cliente;
-         planilla.idabonado = this._lecturas[this.kontador].idabonado_abonados.idabonado;
-         planilla.porcexoneracion = 0;
-         planilla.pagado = 0;
-         planilla.conveniopago = 0;
-         planilla.estadoconvenio = 0;
-         planilla.formapago = 1;
-         planilla.usucrea = 1;
-         planilla.feccrea = this.fecha;
-         planilla.estado = 1;
-         planilla.interescobrado =0;
-         let cate9: boolean;
-         if (categoria == 9) { categoria = 1; cate9 = true }
-         // Obtiene lo tarifa del nuevo Pliego
-         this.pli24Service.getBloque(categoria, consumo).subscribe({
-            next: resp => {
-               if (!resp) {
-                  this.kontador++;
-                  this.progreso = (this.kontador / this._lecturas.length) * 100
-                  if (this.kontador < this._lecturas.length) this.planillas();
-               }
-               else {
-                  this.tarifa = resp;
+         console.log(this._lecturas[this.kontador].idfactura)
+         this.facService.getById(this._lecturas[this.kontador].idfactura).subscribe({
+            next: (datos) => {
+               factura = datos;
+               this.arrprecios = [];
+               let num1: number;
+               //let planilla = {} as Planilla;
+               //planilla.idmodulo = this.modulo;
+               let cliente: Clientes = new Clientes;
+               cliente.idcliente = this._lecturas[this.kontador].idresponsable;
+               /*             planilla.idcliente = cliente;
+                           planilla.idabonado = this._lecturas[this.kontador].idabonado_abonados.idabonado;
+                           planilla.porcexoneracion = 0;
+                           planilla.pagado = 0;
+                           planilla.conveniopago = 0;
+                           planilla.estadoconvenio = 0;
+                           planilla.formapago = 1;
+                           planilla.usucrea = 1;
+                           planilla.feccrea = this.fecha;
+                           planilla.interescobrado = 0; */
+               let swcate9: boolean;     //No hay Tarifas para Categoria 9 es el 50% de la 1
+               if (categoria == 9) { categoria = 1; swcate9 = true }
+               let swmunicipio: boolean; //Instituciones del Municipio 50% de la Tarifa Oficial
+               if (categoria == 4 && municipio) { swmunicipio = true }
+               // Obtiene lo tarifa del nuevo Pliego
+               this.pli24Service.getBloque(categoria, consumo).subscribe({
+                  next: resp => {
+                     if (!resp) {
+                        this.kontador++;
+                        this.progreso = (this.kontador / this._lecturas.length) * 100
+                        if (this.kontador < this._lecturas.length) this.planillas();
+                     }
+                     else {
+                        this.tarifa = resp;
 
-                  if (categoria == 1) { num1 = Math.round((this.tarifa[0].idcategoria.fijoagua - 0.1) * this.porcResidencial[consumo] * 100) / 100; }
-                  else { num1 = Math.round((this.tarifa[0].idcategoria.fijoagua - 0.1) * this.tarifa[0].porc * 100) / 100; }
+                        if (categoria == 1) { num1 = Math.round((this.tarifa[0].idcategoria.fijoagua - 0.1) * this.porcResidencial[consumo] * 100) / 100; }
+                        else { num1 = Math.round((this.tarifa[0].idcategoria.fijoagua - 0.1) * this.tarifa[0].porc * 100) / 100; }
 
-                  let num2 = Math.round((this.tarifa[0].idcategoria.fijosanea - 0.5) * this.tarifa[0].porc * 100) / 100;
-                  let num3 = Math.round((consumo * this.tarifa[0].agua) * this.tarifa[0].porc * 100) / 100;
-                  let num4 = Math.round((consumo * this.tarifa[0].saneamiento / 2) * this.tarifa[0].porc * 100) / 100;
-                  let num5 = Math.round((consumo * this.tarifa[0].saneamiento / 2) * this.tarifa[0].porc * 100) / 100;
-                  let num7 = Math.round(0.5 * this.tarifa[0].porc * 100) / 100;
-                  let suma: number = 0;
-                  suma = Math.round((num1 + num2 + num3 + num4 + num5 + 0.1 + num7) * 100) / 100;
-                  if (cate9) suma = Math.round(suma / 2 * 100) / 100;  //Categoria 9 no tiene tarifario es el 50% de la Residencial
-                  planilla.totaltarifa = suma;
-                  planilla.valorbase = suma;
+                        let num2 = Math.round((this.tarifa[0].idcategoria.fijosanea - 0.5) * this.tarifa[0].porc * 100) / 100;
+                        let num3 = Math.round((consumo * this.tarifa[0].agua) * this.tarifa[0].porc * 100) / 100;
+                        let num4 = Math.round((consumo * this.tarifa[0].saneamiento / 2) * this.tarifa[0].porc * 100) / 100;
+                        let num5 = Math.round((consumo * this.tarifa[0].saneamiento / 2) * this.tarifa[0].porc * 100) / 100;
+                        let num7 = Math.round(0.5 * this.tarifa[0].porc * 100) / 100;
+                        let suma: number = 0;
+                        suma = Math.round((num1 + num2 + num3 + num4 + num5 + 0.1 + num7) * 100) / 100;
+                        //Categoria 9 no tiene tarifario es el 50% de la Residencial. Abonados del Municipio también 50%
+                        if (swcate9 || swmunicipio) suma = Math.round(suma / 2 * 100) / 100;
+                        factura.totaltarifa = suma;
+                        factura.valorbase = suma;
+                        factura.estado = 1
+                        this.facService.updateFacturas(factura).subscribe({
+                           next: fac => {
+                              this.factura = fac;
+                              // console.log('this.factura.idfactura: ', this.factura.idfactura)
+                              this.lecService.getByIdlectura(this._lecturas[this.kontador].idlectura).subscribe({
+                                 next: datos => {
+                                    this._lectura = datos;
+                                    this._lectura.idfactura = this.factura.idfactura;
+                                    this.lecService.updateLectura(this._lecturas[this.kontador].idlectura, this._lectura).subscribe({
+                                       next: nex => {
+                                          if (swcate9 || swmunicipio) {
+                                             let rub1002: number; let rub1003: number
+                                             //Alcantarillado / 2
+                                             if (num2 + num4 + num7 > 0) rub1002 = Math.round((num2 + num4 + num7) / 2 * 100) / 100;
+                                             else rub1002 = 0;
+                                             //Saneamiento / 2
+                                             if (num5 > 0) rub1003 = Math.round(num5 / 2 * 100) / 100;
+                                             else rub1003 = 0
+                                             //Agua portable por diferencia con la suma
+                                             let r1001 = suma - rub1002 - rub1003 - 0.1;
+                                             this.arrprecios.push(r1001, rub1002, rub1003, 0.1);
+                                          } else this.arrprecios.push(num1 + num3, num2 + num4 + num7, num5, 0.1);
 
-                  this.facService.saveFactura(planilla).subscribe({
-                     next: fac => {
-                        this.factura = fac;
-                        console.log('this.factura.idfactura: ', this.factura.idfactura)
-                        this.lecService.getByIdlectura(this._lecturas[this.kontador].idlectura).subscribe({
-                           next: datos => {
-                              this._lectura = datos;
-                              this._lectura.idfactura = this.factura.idfactura;
-                              this.lecService.updateLectura(this._lecturas[this.kontador].idlectura, this._lectura).subscribe({
-                                 next: nex => {
-                                    if (cate9) {
-                                       let rub1002: number; let rub1003: number
-                                       //Alcantarillado / 2
-                                       if (num2 + num4 + num7 > 0) rub1002 = Math.round((num2 + num4 + num7) / 2 * 100) / 100;
-                                       else rub1002 = 0;
-                                       //Saneamiento / 2
-                                       if (num5 > 0) rub1003 = Math.round(num5 / 2 * 100) / 100;
-                                       else rub1003 = 0
-                                       //Agua portable por diferencia con la suma
-                                       let r1001 = suma - rub1002 - rub1003 - 0.1;
-                                       this.arrprecios.push(r1001, rub1002, rub1003, 0.1);
-                                    }
-                                    else { this.arrprecios.push(num1 + num3, num2 + num4 + num7, num5, 0.1); }
+                                          let i = 0;
+                                          this.addrubros(i);
 
-                                    let i = 0;
-                                    this.addrubros(i);
-
-                                    this.kontador++;
-                                    this.progreso = (this.kontador / this._lecturas.length) * 100
-                                    if (this.kontador < this._lecturas.length) this.planillas();
-                                    // if (this.kontador < 5) this.planillas();
-                                    else {
-                                       //Actualiza el estado, totales y fecha de cierre de la Ruta por Emisión
-                                       this._rutaxemision.estado = 1;
-                                       this._rutaxemision.usuariocierre = 1;
-                                       this._rutaxemision.fechacierre = this.fecha;
-                                       this._rutaxemision.m3 = this.sumtotal;
-                                       this.rutaxemiService.updateRutaxemision(this.idrutaxemision, this._rutaxemision).subscribe({
-                                          next: nex => this.btncerrar = true,
-                                          error: err => console.error(err.error)
-                                       });
-                                    };
+                                          this.kontador++;
+                                          this.progreso = (this.kontador / this._lecturas.length) * 100
+                                          if (this.kontador < this._lecturas.length) this.planillas();
+                                          //if (this.kontador < 5) this.planillas();
+                                          else {
+                                             //Actualiza el estado, totales y fecha de cierre de la Ruta por Emisión
+                                             this._rutaxemision.estado = 1;
+                                             this._rutaxemision.usuariocierre = 1;
+                                             this._rutaxemision.fechacierre = this.fecha;
+                                             this._rutaxemision.m3 = this.sumtotal;
+                                             this.rutaxemiService.updateRutaxemision(this.idrutaxemision, this._rutaxemision).subscribe({
+                                                next: nex => this.btncerrar = true,
+                                                error: err => console.error(err.error)
+                                             });
+                                          };
+                                       },
+                                       error: err => console.error(err.error)
+                                    })
                                  },
                                  error: err => console.error(err.error)
                               })
                            },
                            error: err => console.error(err.error)
-                        })
-                     },
-                     error: err => console.error(err.error)
-                  });
-               }
-            },
-            error: err => console.error(err.error)
-         });
+                        });
+                     }
+                  },
+                  error: err => console.error(err.error)
+               });
+
+            }, error: (e) => { console.error(e) }
+         })
       }
    }
 
@@ -380,25 +367,12 @@ export class LecturasComponent implements OnInit {
       rubro.idrubro = idrubro;
       rubrosxpla.idrubro_rubros = rubro;
       this.rubxfacService.saveRubroxfac(rubrosxpla).subscribe({
-         next: nex => {
-            // console.log(i, 'Ok!')
-         },
+         next: nex => { },
          error: err => console.error(err.error)
       });
       i = i + 1
       if (i < 4) this.addrubros(i)
    }
-
-   // cerrar() {
-   //    this._rutaxemision.estado = 1;
-   //    this._rutaxemision.usuariocierre = 1;
-   //    this._rutaxemision.fechacierre = this.fecha;
-   //    this._rutaxemision.m3 = this.sumtotal;
-   //    this.rutaxemiService.updateRutaxemision(this.idrutaxemision, this._rutaxemision).subscribe({
-   //       next: nex => this.router.navigate(['/emisiones']),
-   //       error: err => console.error(err.error)
-   //    });
-   // }
 
    pdf() {
       const nombreEmision = new NombreEmisionPipe(); // Crea una instancia del pipe
@@ -587,20 +561,7 @@ export class LecturasComponent implements OnInit {
          window.URL.revokeObjectURL(url); // Libera recursos
       });
    }
-   listNovedades() {
-      this.s_novedad.getNovedadesByestado(1).subscribe({
-         next: (datos) => {
-            this.novedades = datos
-         },
-         error: (e) => console.error(e)
-      })
-   }
-   compararNovedades(o1: Novedad, o2: Novedad): boolean {
-      if (o1 === undefined && o2 === undefined) { return true; }
-      else {
-         return o1 === null || o2 === null || o1 === undefined || o2 === undefined ? false : o1.idnovedad == o2.idnovedad;
-      }
-   }
+
 
 }
 
@@ -644,7 +605,7 @@ interface Planilla {
    usumodi: number;
    fecmodi: Date;
    valorbase: number;
-   interescobrado:number;
+   interescobrado: number;
 }
 
 interface Rubrosxpla {

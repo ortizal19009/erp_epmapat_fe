@@ -39,7 +39,7 @@ export class InfoCajaComponent implements OnInit {
     private _pdf: PdfService,
     private s_facturas: FacturaService,
     private s_rubroxfac: RubroxfacService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/cajas');
@@ -153,38 +153,37 @@ export class InfoCajaComponent implements OnInit {
 
     var datosBody: any = [];
 
-    var i = 0;
     this.s_facturas
       .findByUsucobro(this.usuario.idusuario, this.desde, this.hasta)
       .subscribe({
         next: (datos: any) => {
+          var i = 0;
           console.log(datos);
-
-          datos.forEach(() => {
-            console.log(datos[i]);
-            let suma = 0;
-            this.s_rubroxfac
-              .getSumaValoresUnitarios(datos[i].idfactura)
-              .subscribe({
-                next: (val: any) => {
-                  suma = val.toFixed(2);
-                },
-              });
-            console.log(suma);
-            datosBody.push([
-              datos[i].nrofactura,
-              datos[i].idcliente.nombre,
-              datos[i].idmodulo.descripcion,
-              suma,
-              datos[i].fechacobro,
-              datos[i].horacobro,
-              this.usuario.nomusu,
-            ]);
-            i++;
-          });
-          setTimeout(() => {
+          if (datos != null) {
+            datos.forEach(() => {
+              console.log(datos[i]);
+              let suma = 0;
+              this.s_rubroxfac
+                .getSumaValoresUnitarios(datos[i].idfactura)
+                .subscribe({
+                  next: (val: any) => {
+                    suma = val.toFixed(2);
+                  },
+                });
+              console.log(suma);
+              datosBody.push([
+                datos[i].nrofactura,
+                datos[i].idcliente.nombre,
+                datos[i].idmodulo.descripcion,
+                suma,
+                datos[i].fechacobro,
+                datos[i].horacobro,
+                this.usuario.nomusu,
+              ]);
+              i++;
+            });
             this.pdf2(datosBody);
-          }, 3000);
+          }
         },
         error: (e) => console.error(e),
       });

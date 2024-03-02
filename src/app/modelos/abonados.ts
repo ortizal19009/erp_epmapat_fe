@@ -30,4 +30,7 @@ export class Abonados {
     feccrea: Date;
     usumodi: number;
     fecmodi: Date;
+    adultomayor: Boolean; 
+    municipio: Boolean;
+    promedio: number;
 }

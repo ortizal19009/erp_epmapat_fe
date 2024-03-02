@@ -59,15 +59,12 @@
                   <th>Cnsm</th>
                   <th>M.M</th>
                   <th>Novedades</th>
-                  <th></th>
                </tr>
             </thead>
             <tbody>
                <tr *ngFor="let lectura of _lecturas | filter: filtro; let i=index" data-toggle="modal"
-                  data-target="#modalValor"
-                  (click)="valor($event, lectura.idlectura, i, lectura.idabonado_abonados.idabonado)">
-                  <td class="small text-center font-weight-bold"><i class="bi-bookmark-check-fill check"
-                        *ngIf="i == antIndice"></i>{{i+1}}</td>
+                  data-target="#modalValor" (click)="valor(lectura.idlectura, i)">
+                  <td class="small text-center font-weight-bold">{{i+1}}</td>
                   <td class="text-center">{{ lectura.idabonado_abonados.idabonado }}</td>
                   <td>{{ lectura.idabonado_abonados.idcliente_clientes.nombre }}</td>
                   <td>{{ lectura.idabonado_abonados.idcategoria_categorias.descripcion }}</td>
@@ -87,20 +84,6 @@
                         lectura.mesesmulta }}</span>
                   </td>
                   <td>{{ lectura.idnovedad_novedades.descripcion }}</td>
-                  <td class="text-center">
-                     <div class="btn-group py-0">
-                        <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
-                           aria-expanded="false">
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-right popLista">
-                           <!-- <button class="dropdown-item" type="button">
-                              <i class="bi bi-pencil"></i>&nbsp; Modificar</button> -->
-                           <button class="dropdown-item" type="button" data-toggle="modal"
-                              data-target="#staticBackdrop">
-                              <i class="bi bi-file-minus"></i>&nbsp; Historial consumo</button>
-                        </div>
-                     </div>
-                  </td>
                </tr>
                <td *ngIf="!swfiltro" colspan="6" class="font-weight-bold text-right">TOTAL</td>
                <td *ngIf="!swfiltro && swcargado" class="font-weight-bold text-right">{{ sumtotal | number: '1.0' }}
@@ -192,15 +175,15 @@
    <!-- MODAL Valor -->
    <div class="modal fade" id="modalValor" tabindex="-1" aria-labelledby="modalValorLabel" data-backdrop="static"
       aria-hidden="true">
-      <div class="modal-dialog modal-sm modal-dialog-centered modal-dialog-scrollable modal-{{modalsizes}}">
+      <div class="modal-dialog modal-sm modal-dialog-centered">
          <div class="modal-content">
             <div class='modal-header py-2 justify-content-center titEmisiones'>
                <h5 class='modal-title font-weight-bold' id='ModalLabel'>Cuenta {{cuenta}}</h5>
             </div>
             <div class='modal-body'>
                <div class="modal-body col-md-12 ">
-                  <form [formGroup]="formValor" *ngIf="modmodi;else modhistory">
-                     <div class="col-md-10 ">
+                  <form [formGroup]="formValor">
+                     <div class="col-md-8 ml-5">
                         <div class="input-group input-group-sm mb-3">
                            <div class="input-group-prepend"> <span class="input-group-text">Anterior</span> </div>
                            <input type="text" class="form-control text-right" formControlName="lecturaanterior"
@@ -212,29 +195,18 @@
                            </div>
                            <input type="number" class="form-control text-center" formControlName="lecturaactual">
                         </div>
-                        <div class="input-group input-group-sm mb-3">
+                        <div class="input-group input-group-sm mb-0">
                            <div class="input-group-prepend"> <span class="input-group-text">Consumo</span></div>
                            <input type="text" class="form-control text-right" formControlName="consumo" readonly>
                         </div>
-                        <div class="input-group input-group-sm mb-0">
-                           <div class="input-group-prepend"> <span class="input-group-text">Novedades</span></div>
-                           <select type="text" class="form-control text-right" formControlName="idnovedad_novedades">
-                              <option [ngValue]=novedad *ngFor="let novedad of novedades">{{novedad.descripcion}}
-                              </option>
-                           </select>
-                        </div>
                      </div>
                   </form>
-
-                  <ng-template #modhistory>
-                     <app-historialconsumo [abonado]=idabonado></app-historialconsumo>
-                  </ng-template>
                </div>
             </div>
             <div class='modal-footer justify-content-center'>
                <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="actuValor()">
                   <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
-               <button type='button' class='btn btn-sm btn-outline-success' data-dismiss='modal' (click)="cancelar()">
+               <button type='button' class='btn btn-sm btn-outline-success' data-dismiss='modal'>
                   <i class="bi bi-x-circle"></i> Cancelar</button>
             </div>
          </div>
