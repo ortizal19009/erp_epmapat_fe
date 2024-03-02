@@ -921,7 +921,7 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   impComprobante(datos: any) {
-    //console.log(datos);
+    console.log(datos);
     let factura: Facturas = new Facturas();
     console.log(this.idfactura);
     this.calcularInteres(datos.idfactura);

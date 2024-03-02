@@ -8,35 +8,35 @@ const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/rubroxfac`;
 
 @Injectable({
-   providedIn: 'root'
+  providedIn: 'root',
 })
-
 export class RubroxfacService {
+  constructor(private http: HttpClient) {}
 
-   constructor(private http: HttpClient) { }
+  getListaRubroByFactura(idfactura: number) {
+    return this.http.get<Rubroxfac[]>(`${baseUrl}?nrofactura=${idfactura}`);
+  }
 
-   getListaRubroByFactura(idfactura: number) {
-      return this.http.get<Rubroxfac[]>(`${baseUrl}?nrofactura=${idfactura}`);
-   }
+  getListaRubroByIdfactura(idfactura: number) {
+    return this.http.get<Rubroxfac[]>(`${baseUrl}/idfactura/${idfactura}`);
+  }
 
-   getListaRubroByIdfactura(idfactura: number) {
-      return this.http.get<Rubroxfac[]>(`${baseUrl}/idfactura/${idfactura}`);
-   }
+  getByIdfactura(idfactura: number) {
+    return this.http.get<Rubroxfac[]>(`${baseUrl}?idfactura=${idfactura}`);
+  }
 
-   getByIdfactura(idfactura: number) {
-      return this.http.get<Rubroxfac[]>(`${baseUrl}?idfactura=${idfactura}`);
-   }
+  saveRubroxfac(rubroxFac: Rubroxfac): Observable<Object> {
+    return this.http.post(`${baseUrl}`, rubroxFac);
+  }
 
-   saveRubroxfac(rubroxFac: Rubroxfac): Observable<Object> {
-      return this.http.post(`${baseUrl}`, rubroxFac);
-   }
+  getByIdrubro(idrubro: number) {
+    return this.http.get<Rubroxfac[]>(`${baseUrl}/rubro/${idrubro}`);
+  }
 
-   getByIdrubro(idrubro: number) {
-      return this.http.get<Rubroxfac[]>(`${baseUrl}/rubro/${idrubro}`);
-   }
-
-   saveRubroxFac(rubroxFac: Rubroxfac): Observable<Object> {
-      return this.http.post(`${baseUrl}`, rubroxFac);
-   }
-
+  saveRubroxFac(rubroxFac: Rubroxfac): Observable<Object> {
+    return this.http.post(`${baseUrl}`, rubroxFac);
+  }
+  getSumaValoresUnitarios(idfactura: number) {
+    return this.http.get(`${baseUrl}/sumavalores?idfactura=${idfactura}`);
+  }
 }

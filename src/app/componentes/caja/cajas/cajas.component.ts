@@ -1,80 +1,246 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
+import { Usuarios } from 'src/app/modelos/administracion/usuarios.model';
 
 import { CajaService } from 'src/app/servicios/caja.service';
+import { FacturaService } from 'src/app/servicios/factura.service';
+import { PdfService } from 'src/app/servicios/pdf.service';
+import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 
 @Component({
-   selector: 'app-cajas',
-   templateUrl: './cajas.component.html',
-   styleUrls: ['./cajas.component.css']
+  selector: 'app-cajas',
+  templateUrl: './cajas.component.html',
+  styleUrls: ['./cajas.component.css'],
 })
-
 export class ListarCajaComponent implements OnInit {
+  _cajas: any;
+  filtro: string;
+  otraPagina: boolean = false;
+  usuario: Usuarios = new Usuarios();
+  caja = {} as Caja; 
+  desde: any;
+  hasta: any;
+  constructor(
+    private cajaService: CajaService,
+    private router: Router,
+    public authService: AutorizaService,
+    private coloresService: ColoresService,
+    private _pdf: PdfService,
+    private s_facturas: FacturaService,
+    private s_rubroxfac: RubroxfacService
+  ) {}
 
-   _cajas: any;
-   filtro: string;
-   otraPagina: boolean = false;
+  ngOnInit(): void {
+    sessionStorage.setItem('ventana', '/cajas');
+    let coloresJSON = sessionStorage.getItem('/cajas');
+    if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
+    else this.buscaColor();
+    this.listarCajas();
+  }
 
-   constructor(private cajaService: CajaService, private router: Router,
-      public authService: AutorizaService, private coloresService: ColoresService) { }
+  async buscaColor() {
+    try {
+      console.log(this.authService.idusuario);
+      const datos = await this.coloresService.setcolor(
+        +this.authService.idusuario!,
+        'cajas'
+      );
+      const coloresJSON = JSON.stringify(datos);
+      sessionStorage.setItem('/cajas', coloresJSON);
+      this.colocaColor(datos);
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
-   ngOnInit(): void {
-      sessionStorage.setItem('ventana', '/cajas');
-      let coloresJSON = sessionStorage.getItem('/cajas');
-      if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
-      else this.buscaColor();
-      this.listarCajas();
-   }
+  colocaColor(colores: any) {
+    document.documentElement.style.setProperty('--bgcolor1', colores[0]);
+    const cabecera = document.querySelector('.cabecera');
+    if (cabecera) cabecera.classList.add('nuevoBG1');
+    document.documentElement.style.setProperty('--bgcolor2', colores[1]);
+    const detalle = document.querySelector('.detalle');
+    if (detalle) detalle.classList.add('nuevoBG2');
+  }
 
-   async buscaColor() {
-      try {
-         console.log(this.authService.idusuario)
-         const datos = await this.coloresService.setcolor(+this.authService.idusuario!, 'cajas');
-         const coloresJSON = JSON.stringify(datos);
-         sessionStorage.setItem('/cajas', coloresJSON);
-         this.colocaColor(datos);
-      } catch (error) {
-         console.error(error);
-      }
-   }
+  public listarCajas() {
+    this.cajaService.getListaCaja().subscribe((datos) => {
+      this._cajas = datos;
+    });
+  }
 
-   colocaColor(colores: any) {
-      document.documentElement.style.setProperty('--bgcolor1', colores[0]);
-      const cabecera = document.querySelector('.cabecera');
-      if (cabecera) cabecera.classList.add('nuevoBG1')
-      document.documentElement.style.setProperty('--bgcolor2', colores[1]);
-      const detalle = document.querySelector('.detalle');
-      if (detalle) detalle.classList.add('nuevoBG2');
-   }
+  public info(idcaja: number) {
+    sessionStorage.setItem('idcajaToInfo', idcaja.toString());
+    this.router.navigate(['info-caja']);
+  }
 
-   public listarCajas() {
-      this.cajaService.getListaCaja().subscribe(datos => {
-         this._cajas = datos;
-      });
-   }
-
-   public info(idcaja: number) {
+  onCellClick(event: any, idcaja: number) {
+    const tagName = event.target.tagName;
+    if (tagName === 'TD') {
       sessionStorage.setItem('idcajaToInfo', idcaja.toString());
       this.router.navigate(['info-caja']);
-   }
+    }
+  }
 
-   onCellClick(event: any, idcaja: number) {
-      const tagName = event.target.tagName;
-      if (tagName === 'TD') {
-         sessionStorage.setItem('idcajaToInfo', idcaja.toString());
-         this.router.navigate(['info-caja']);
+  // definircolor() {
+  //    sessionStorage.setItem('ventana', '/cajas');
+  //    this.router.navigate(['colores']);
+  // }
+
+  pdf() {
+    console.log(this.usuario);
+    console.log(this.caja);
+
+    var datosBody: any = [];
+
+    var i = 0;
+    this.s_facturas
+      .findByUsucobro(this.usuario.idusuario, this.desde, this.hasta)
+      .subscribe({
+        next: (datos: any) => {
+          console.log(datos);
+
+          datos.forEach(() => {
+            console.log(datos[i]);
+            let suma = 0;
+            this.s_rubroxfac
+              .getSumaValoresUnitarios(datos[i].idfactura)
+              .subscribe({
+                next: (val: any) => {
+                  suma = val.toFixed(2);
+                },
+              });
+            console.log(suma);
+            datosBody.push([
+              datos[i].nrofactura,
+              datos[i].idcliente.nombre,
+              datos[i].idmodulo.descripcion,
+              suma,
+              datos[i].fechacobro,
+              datos[i].horacobro,
+              this.usuario.nomusu,
+            ]);
+            i++;
+          });
+          setTimeout(() => {
+            this.pdf2(datosBody);
+          }, 3000);
+        },
+        error: (e) => console.error(e),
+      });
+  }
+  pdf2(datosBody: any) {
+    console.log(datosBody);
+    //const nombreEmision = new NombreEmisionPipe(); // Crea una instancia del pipe
+    let doc = new jsPDF('p', 'pt', 'a4');
+    this._pdf.header('REPORTE INDIVIDUAL DE COBROS POR CAJA', doc);
+    let m_izquierda = 10;
+
+    /*             this._facturacion.forEach(() => {
+                       let fecha = this._facturacion[i].feccrea.slice(8, 10).concat('-', this._facturacion[i].feccrea.slice(5, 7), '-', this._facturacion[i].feccrea.slice(0, 4))
+                       datos.push([this._facturacion[i].idfacturacion, fecha,
+                       this._facturacion[i].idcliente_clientes.nombre,
+                       this._facturacion[i].descripcion, this._facturacion[i].total, this._facturacion[i].cuotas]);
+                       i++;
+                    }); */
+
+    //datos.push(['', 'TOTAL', '', '', this.sumtotal]);
+
+    const addPageNumbers = function () {
+      const pageCount = doc.internal.pages.length;
+      for (let i = 1; i <= pageCount - 1; i++) {
+        doc.setPage(i);
+        doc.setFontSize(10);
+        doc.text(
+          'Página ' + i + ' de ' + (pageCount - 1),
+          m_izquierda,
+          doc.internal.pageSize.height - 10
+        );
       }
-   }
+    };
+    autoTable(doc, {
+      head: [
+        [
+          'Nro Factura',
+          'Nombre y Apellido',
+          'Módulo',
+          'Valor',
+          'Fecha cobro',
+          'Hora cobro',
+          'Usuario',
+        ],
+      ],
+      theme: 'grid',
+      headStyles: {
+        fillColor: [68, 103, 114],
+        fontStyle: 'bold',
+        halign: 'center',
+      },
+      styles: {
+        font: 'helvetica',
+        fontSize: 8,
+        cellPadding: 1,
+        halign: 'center',
+      },
+      /*       columnStyles: {
+                0: { halign: 'center', cellWidth: 10 },
+                1: { halign: 'center', cellWidth: 18 },
+                2: { halign: 'left', cellWidth: 60 },
+                3: { halign: 'left', cellWidth: 80 },
+                4: { halign: 'right', cellWidth: 15 },
+                5: { halign: 'center', cellWidth: 14 },
+              },
+              margin: { left: m_izquierda - 1, top: 19, right: 4, bottom: 13 }, */
+      body: datosBody,
 
-   // definircolor() {
-   //    sessionStorage.setItem('ventana', '/cajas');
-   //    this.router.navigate(['colores']);
-   // }
+      didParseCell: function (data) {
+        var fila = data.row.index;
+        var columna = data.column.index;
+        //if (columna === 4 && data.cell.section === 'body') { data.cell.text[0] = formatNumber(+data.cell.raw!); }
+        /*     if (fila === datosBody.length - 1) {
+                data.cell.styles.fontStyle = 'bold';
+              }  */ // Total Bold
+      },
+    });
+    addPageNumbers();
 
-   pdf(){
-      
-   }
+    var opciones = {
+      filename: 'lecturas.pdf',
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+      compress: true,
+    };
 
+    if (this.otraPagina) doc.output('dataurlnewwindow', opciones);
+    else {
+      const pdfDataUri = doc.output('datauristring');
+      //Si ya existe el <embed> primero lo remueve
+      const elementoExistente = document.getElementById('idembed');
+      if (elementoExistente) {
+        elementoExistente.remove();
+      }
+      //Crea el <embed>
+      var embed = document.createElement('embed');
+      embed.setAttribute('src', pdfDataUri);
+      embed.setAttribute('type', 'application/pdf');
+      embed.setAttribute('width', '50%');
+      embed.setAttribute('height', '75%');
+      embed.setAttribute('id', 'idembed');
+      //Agrega el <embed> al contenedor del Modal
+      var container: any;
+      container = document.getElementById('pdf');
+      container.appendChild(embed);
+    }
+  }
 }
+interface Caja {
+   idcaja: number;
+   codigo: String;
+   descripcion: String;
+   ptoemi: String;
+   estado: String;
+ }
