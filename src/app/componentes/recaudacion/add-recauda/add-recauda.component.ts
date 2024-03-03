@@ -189,7 +189,9 @@ export class AddRecaudaComponent implements OnInit {
               this.estadoCajaT = true;
             } else {
               this.cajaActiva = true;
-              this.estadoCajaT = false;
+              if (this.cajaActiva === true){
+                this.estadoCajaT = false;
+              }
             }
           },
           error: (e) => console.error(e),
@@ -379,7 +381,6 @@ export class AddRecaudaComponent implements OnInit {
             if (this._sincobro[i].idmodulo.idmodulo == 3) com = 1;
 
             this._sincobro[i].interes = interes;
-
             this._sincobro[i].comerc = com;
             this._sincobro[i].multa = 0;
             suma +=
