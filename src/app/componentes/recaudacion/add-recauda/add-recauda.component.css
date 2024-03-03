@@ -59,6 +59,9 @@ label {
 .transferido{
    background-color: #dcdfb5;
 }
+.transferido_2{
+   background-color: #5119ec;
+}
 
 /* === Buscar Clientes === */
 .clientecabecera {   background-color: var(--clientecabecera);}

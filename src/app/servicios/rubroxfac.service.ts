@@ -36,7 +36,7 @@ export class RubroxfacService {
   saveRubroxFac(rubroxFac: Rubroxfac): Observable<Object> {
     return this.http.post(`${baseUrl}`, rubroxFac);
   }
-  getSumaValoresUnitarios(idfactura: number) {
+  async getSumaValoresUnitarios(idfactura: number) {
     return this.http.get(`${baseUrl}/sumavalores?idfactura=${idfactura}`);
   }
 }

@@ -21,7 +21,7 @@ export class ListarCajaComponent implements OnInit {
   filtro: string;
   otraPagina: boolean = false;
   usuario: Usuarios = new Usuarios();
-  caja = {} as Caja; 
+  caja = {} as Caja;
   desde: any;
   hasta: any;
   constructor(
@@ -91,49 +91,65 @@ export class ListarCajaComponent implements OnInit {
   // }
 
   pdf() {
-    console.log(this.usuario);
-    console.log(this.caja);
+    this.cajaService.getCajasxestado().subscribe({
+      next: (datosCajas: any) => {
+        console.log(datosCajas);
+        var datosBody: any = [];
+        datosCajas.forEach((item: any) => {
+          this.s_facturas
+            .findByUsucobro(
+              item.idusuario_usuarios.idusuario,
+              this.desde,
+              this.hasta
+            )
+            .subscribe({
+              next: (datos: any) => {
+                var i = 0;
+                console.log(datos);
+                if (datos != null || datos != undefined) {
+                  datos.forEach(() => {
+                    console.log(datos[i]);
 
-    var datosBody: any = [];
-
-    var i = 0;
-    this.s_facturas
-      .findByUsucobro(this.usuario.idusuario, this.desde, this.hasta)
-      .subscribe({
-        next: (datos: any) => {
-          console.log(datos);
-
-          datos.forEach(() => {
-            console.log(datos[i]);
-            let suma = 0;
-            this.s_rubroxfac
-              .getSumaValoresUnitarios(datos[i].idfactura)
-              .subscribe({
-                next: (val: any) => {
-                  suma = val.toFixed(2);
-                },
-              });
-            console.log(suma);
-            datosBody.push([
-              datos[i].nrofactura,
-              datos[i].idcliente.nombre,
-              datos[i].idmodulo.descripcion,
-              suma,
-              datos[i].fechacobro,
-              datos[i].horacobro,
-              this.usuario.nomusu,
-            ]);
-            i++;
-          });
-          setTimeout(() => {
-            this.pdf2(datosBody);
-          }, 3000);
-        },
-        error: (e) => console.error(e),
-      });
+                    datosBody.push([
+                      datos[i].nrofactura,
+                      datos[i].idcliente.nombre,
+                      datos[i].idmodulo.descripcion,
+                      datos[i].idfactura,
+                      datos[i].fechacobro,
+                      datos[i].horacobro,
+                      datos[i].usuariocobro,
+                      //this.usuario.nomusu,
+                    ]);
+                    i++;
+                  });
+                  this.pdf2(datosBody);
+                }
+                /* setTimeout(() => {
+                }, 3000); */
+              },
+              error: (e) => console.error(e),
+            });
+        });
+      },
+      error: (e) => console.error(e),
+    });
+    /* console.log(this.usuario);
+    console.log(this.caja); */
   }
+
   pdf2(datosBody: any) {
     console.log(datosBody);
+    let suma = 0;
+    datosBody.forEach(async (item: any) => {
+      console.log(item);
+      (await this.s_rubroxfac.getSumaValoresUnitarios(item[3])).subscribe({
+        next: (val: any) => {
+          console.log(datosBody[3]);
+          suma = val.toFixed(2);
+          console.log(suma);
+        },
+      });
+    });
     //const nombreEmision = new NombreEmisionPipe(); // Crea una instancia del pipe
     let doc = new jsPDF('p', 'pt', 'a4');
     this._pdf.header('REPORTE INDIVIDUAL DE COBROS POR CAJA', doc);
@@ -238,9 +254,9 @@ export class ListarCajaComponent implements OnInit {
   }
 }
 interface Caja {
-   idcaja: number;
-   codigo: String;
-   descripcion: String;
-   ptoemi: String;
-   estado: String;
- }
+  idcaja: number;
+  codigo: String;
+  descripcion: String;
+  ptoemi: String;
+  estado: String;
+}

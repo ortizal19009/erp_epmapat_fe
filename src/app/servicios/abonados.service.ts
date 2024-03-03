@@ -38,6 +38,9 @@ export class AbonadosService {
   getById(idabonado: number): Observable<Abonados> {
     return this.http.get<Abonados>(`${baseUrl}/${idabonado}`);
   }
+  async getById_v2(idabonado: number){
+    return this.http.get<Abonados>(`${baseUrl}/${idabonado}`);
+  }
 
   getListaByNombreCliente(nombre: string) {
     return this.http.get<Abonados>(`${baseUrl}/ncliente/${nombre}`);

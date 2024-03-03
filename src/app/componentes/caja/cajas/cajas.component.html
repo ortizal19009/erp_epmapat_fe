@@ -95,12 +95,26 @@
                   <label class="input-group-text" for="inputGroupSelect01">Reporte</label>
                </div>
                <select class="custom-select" id="inputGroupSelect01">
-                  <option selected>Global</option>
-                  <option disabled>Lista cajas</option>
-
+                  <option selected>Reporte de caja del dia</option>
                </select>
             </div>
 
+            <div class="input-group input-group-sm mb-2">
+               <div class="input-group-prepend">
+                  <small class="input-group-text">Desde</small>
+                  <div class="input-group-text">
+                     <input type="date" class="form-control form-control-sm" [(ngModel)]= "desde">
+                  </div>
+               </div>
+            </div>
+            <div class="input-group input-group-sm mb-2">
+               <div class="input-group-prepend">
+                  <small class="input-group-text">Hasta</small>
+                  <div class="input-group-text">
+                     <input type="date" class="form-control form-control-sm"[(ngModel)]= "hasta">
+                  </div>
+               </div>
+            </div>
             <div class="input-group input-group-sm mb-0">
                <div class="input-group-prepend">
                   <small class="input-group-text">Abrir en otra página</small>
@@ -120,5 +134,10 @@
 
          </div>
       </div>
+   </div>
+</div>
+<!-- MODAL PDF (En la misma página)-->
+<div class='modal fade' id='pdf' tabindex='-1' aria-labelledby='pdf' aria-hidden='true'>
+   <div class='modal-dialog modal-sm'>
    </div>
 </div>

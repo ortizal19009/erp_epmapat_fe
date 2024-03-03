@@ -39,7 +39,7 @@ export class InfoCajaComponent implements OnInit {
     private _pdf: PdfService,
     private s_facturas: FacturaService,
     private s_rubroxfac: RubroxfacService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/cajas');
@@ -156,11 +156,11 @@ export class InfoCajaComponent implements OnInit {
     this.s_facturas
       .findByUsucobro(this.usuario.idusuario, this.desde, this.hasta)
       .subscribe({
-        next: (datos: any) => {
+        next: async (datos: any) => {
           var i = 0;
           console.log(datos);
           if (datos != null) {
-            datos.forEach(() => {
+            /*             datos.forEach(() => {
               console.log(datos[i]);
               let suma = 0;
               this.s_rubroxfac
@@ -168,6 +168,7 @@ export class InfoCajaComponent implements OnInit {
                 .subscribe({
                   next: (val: any) => {
                     suma = val.toFixed(2);
+                    i++;
                   },
                 });
               console.log(suma);
@@ -180,9 +181,34 @@ export class InfoCajaComponent implements OnInit {
                 datos[i].horacobro,
                 this.usuario.nomusu,
               ]);
-              i++;
+            }); */
+       /*      let formato = datos.map((item: any) => {
+              this.s_rubroxfac
+                .getSumaValoresUnitarios(item.idfactura)
+                .subscribe({
+                  next: (suma) => {
+                    console.log(suma);
+                    item.totaltarifa = suma;
+                    return item;
+                  },
+                  error: (e) => console.error(e),
+                });
             });
-            this.pdf2(datosBody);
+            console.log(formato); */
+            
+            const getFormato = async (dato: any[]) => {
+              return await Promise.all(
+                dato.map(async (item: any) => {
+                  item.totaltarifa = await this.s_rubroxfac.getSumaValoresUnitarios(item.idfactura);
+                  return item;
+                })
+              );
+            };
+            
+            const formato = await getFormato(datos);
+            
+            console.log(formato);
+           // this.pdf2(datosBody);
           }
         },
         error: (e) => console.error(e),
