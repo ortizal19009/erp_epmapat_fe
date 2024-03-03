@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { format } from '@formkit/tempo';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
@@ -22,7 +23,7 @@ export class ListarCajaComponent implements OnInit {
   otraPagina: boolean = false;
   usuario: Usuarios = new Usuarios();
   caja = {} as Caja;
-  desde: any;
+  today: Date = new Date();
   hasta: any;
   constructor(
     private cajaService: CajaService,
@@ -35,11 +36,17 @@ export class ListarCajaComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    let fechaActual: Date = new Date();
     sessionStorage.setItem('ventana', '/cajas');
     let coloresJSON = sessionStorage.getItem('/cajas');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
     else this.buscaColor();
     this.listarCajas();
+    let fDate = format(fechaActual, 'YYYY-MM-DD');
+    /*     let date_f = date.toISOString().slice(0, 10);
+    console.log(date); */
+    console.log(fDate);
+    //this.today.setDate(fDate.toString())
   }
 
   async buscaColor() {
@@ -91,7 +98,30 @@ export class ListarCajaComponent implements OnInit {
   // }
 
   pdf() {
-    this.cajaService.getCajasxestado().subscribe({
+    //const facs = await this.getFacturas();
+
+    /*     let fac = this.s_facturas.findByfechacobro(this.today).toPromise();
+    return fac; */
+
+    this.s_facturas.findByfechacobro(this.today).subscribe({
+      next: (d_facturas: any) => {
+        console.log(d_facturas);
+
+        d_facturas.forEach(async (item: any, index: number) => {
+          const rxf = await this.getRubrosxfac(item.idfactura);
+          console.log((item = { ...rxf }));
+        });
+        /*         this.s_rubroxfac.getByFechacobro(this.today).subscribe({
+          next: (d_rubrosxfac) => {
+            console.log(d_rubrosxfac);
+          },
+          error: (e) => console.error(e),
+        }); */
+      },
+      error: (e) => console.error(e),
+    });
+
+    /*this.cajaService.getCajasxestado().subscribe({
       next: (datosCajas: any) => {
         console.log(datosCajas);
         var datosBody: any = [];
@@ -125,7 +155,7 @@ export class ListarCajaComponent implements OnInit {
                   this.pdf2(datosBody);
                 }
                 /* setTimeout(() => {
-                }, 3000); */
+                }, 3000); 
               },
               error: (e) => console.error(e),
             });
@@ -135,6 +165,37 @@ export class ListarCajaComponent implements OnInit {
     });
     /* console.log(this.usuario);
     console.log(this.caja); */
+  }
+  async getFacturas(): Promise<any> {
+    let fac = this.s_facturas.findByfechacobro(this.today).toPromise();
+    return fac;
+
+    /* subscribe({
+      next: (d_facturas: any) => {
+        console.log(d_facturas);
+        let f_facturas = d_facturas.map(async (item: any) => {
+          this.s_rubroxfac.getByIdfactura(item.idfactura).subscribe({
+            next: (datos) => {
+              console.log(datos);
+              //console.log((item = { ...datos }));
+              return (item = { ...datos });
+            },
+          });
+        });
+        console.log(f_facturas);
+        this.s_rubroxfac.getByFechacobro(this.today).subscribe({
+          next: (d_rubrosxfac) => {
+            console.log(d_rubrosxfac);
+          },
+          error: (e) => console.error(e),
+        });
+      },
+      error: (e) => console.error(e),
+    }); */
+  }
+  async getRubrosxfac(idfactura: number): Promise<any> {
+    let rubxfa = this.s_rubroxfac.getByIdfactura(idfactura).toPromise();
+    return rubxfa;
   }
 
   pdf2(datosBody: any) {
@@ -152,7 +213,7 @@ export class ListarCajaComponent implements OnInit {
     });
     //const nombreEmision = new NombreEmisionPipe(); // Crea una instancia del pipe
     let doc = new jsPDF('p', 'pt', 'a4');
-    this._pdf.header('REPORTE INDIVIDUAL DE COBROS POR CAJA', doc);
+    this._pdf.header('REPORTE DEL DIA', doc);
     let m_izquierda = 10;
 
     /*             this._facturacion.forEach(() => {

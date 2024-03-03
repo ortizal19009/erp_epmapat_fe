@@ -39,4 +39,9 @@ export class RubroxfacService {
   async getSumaValoresUnitarios(idfactura: number) {
     return this.http.get(`${baseUrl}/sumavalores?idfactura=${idfactura}`);
   }
+  getByFechacobro(fechacobro: Date) {
+    return this.http.get<Rubroxfac[]>(
+      `${baseUrl}/reportes/fechacobro?fechacobro=${fechacobro}`
+    );
+  }
 }
