@@ -99,9 +99,9 @@
                         <i class="float-right bi-check-circle-fill"></i>
                      </i>
                   </li>
-                  <li class="list-group-item">
+             <!--      <li class="list-group-item">
                      <b>Adulto mayor</b> <a class="float-right"></a><i class="float-right bi-bug-fill"></i>
-                  </li>
+                  </li> -->
                </ul>
             </div>
          </div>
@@ -182,8 +182,7 @@
                               data-target="#DetallePlanillaModal" (click)="getRubroxfac( sincobro.idfactura )">
                               <i class="fa fa-info-circle"></i> Info
                            </button>
-                           <button *ngIf="swcobrado" class="btn btn-outline-info btn-xs cursor" data-toggle="modal"
-                              data-target="#DetallePlanillaModal" (click)="impComprobante(sincobro)"
+                           <button *ngIf="swcobrado" class="btn btn-outline-info btn-xs cursor" (click)="impComprobante(sincobro)"
                               [disabled]="!sincobro.pagado">
                               <i class="fa fa-print"></i> Imprimir
                            </button>

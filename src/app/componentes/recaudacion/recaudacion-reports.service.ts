@@ -10,54 +10,34 @@ export class RecaudacionReportsService {
   date: Date = new Date();
   total: number = 0;
   interes: number = 0;
-  constructor() {}
+  constructor() { }
 
-  comprobantePago(datos: any, _rubrosxfac: any, _interes: number) {
-    //console.log(_rubrosxfac);
+  comprobantePago(datos: any, _rubrosxfac: any) {
+    console.log(_rubrosxfac);
     this.total = 0;
     console.log(datos);
     this.interes = 0;
-    console.log(_interes);
-    if (_interes < 0) {
+  /*   if (_interes < 0) {
       this.interes = 0;
     } else {
       this.interes = _interes;
-    }
+    } */
     let doc = new jsPDF('p', 'pt', 'a4');
     let margin = 30;
     let rubros: any = [];
     _rubrosxfac.forEach((item: any) => {
-      this.total += +item.valorunitario!;
-      rubros.push([item.idrubro_rubros.descripcion, item.valorunitario]);
+      if (item.idrubro_rubros.idrubro != 5) {
+        this.total += +item.valorunitario!;
+        rubros.push([item.idrubro_rubros.descripcion, item.valorunitario.toFixed(2)]);
+      }else {
+
+        this.interes = item.valorunitario
+      }
     });
     this.total += this.interes;
     doc.setFontSize(7);
     doc.text('EPMAPA-T', margin + 70, 50);
-    /*doc.text(`${datos.nrofactura}`, margin, 65);
-    doc.text(`Ruc/cedula: 0401501176`, margin, 80);
-    doc.text(`Mes pagado: ${datos.fechacobro}`, margin, 95);
-    doc.text(`Cliente: ${datos.idcliente.nombre}`, margin, 110);
-    doc.text(`Dirección: ${datos.idcliente.direccion}`, margin, 125);
-    doc.text(`Referencia: ${datos.idcliente.referencia}`, margin, 140);
-    doc.text(`Cartas ant: 0`, margin, 155);
-    doc.text(`Emision: 02/01/2024`, margin + 100, 155);
-    doc.text(`Cuenta: ${datos.idabonado}`, margin, 170);
-    doc.text(`FechaPag: 02/02/2024`, margin + 100, 170);
-    doc.text(`L. Anterior: 4415`, margin, 185);
-    doc.text(`L. Actual: 4420`, margin + 100, 185);
-    doc.text(`Cons. Ant: 14`, margin, 200);
-    doc.text(`Recaudador: WILLIAM`, margin + 100, 200);
-    doc.text(`Categoría: COME`, margin, 215);
-      doc.text(`Descripcion R`, margin + 20, 265);
-    doc.text(`Valor unitario`, margin + 130, 265);
-    doc.text(`alcantarillado`, margin, 280);
-    doc.text(`consumo agua`, margin, 295);
-    doc.text(`saneamiento`, margin, 310);
-    doc.text(`cons. fuentes`, margin, 325);
-    doc.text(`0.00`, margin + 180, 280);
-    doc.text(`0.00`, margin + 180, 295);
-    doc.text(`0.00`, margin + 180, 310);
-    doc.text(`0.00`, margin + 180, 325); */
+
 
     const tableWidth = 200;
     autoTable(doc, {

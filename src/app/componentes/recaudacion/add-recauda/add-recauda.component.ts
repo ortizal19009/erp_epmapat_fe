@@ -108,7 +108,7 @@ export class AddRecaudaComponent implements OnInit {
     private recaService: RecaudacionService,
     private facxrService: FacxrecaudaService,
     private s_recaudaxcaja: RecaudaxcajaService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.formBuscar = this.fb.group({
@@ -167,7 +167,6 @@ export class AddRecaudaComponent implements OnInit {
   abrirCaja() {
     this.s_cajas.getByIdUsuario(this.authService.idusuario).subscribe({
       next: (datos) => {
-        console.log(datos);
         this._caja = datos;
         this._establecimiento = datos.idptoemision_ptoemision;
         this._usuario = datos.idusuario_usuarios;
@@ -176,7 +175,6 @@ export class AddRecaudaComponent implements OnInit {
         /* VALIDAR SI LA CAJA ESTA ABIERTA O CERRADA */
         this.s_recaudaxcaja.getLastConexion(this._caja.idcaja).subscribe({
           next: (datos) => {
-            console.log(datos);
             sessionStorage.setItem('estadoCaja', datos.estado.toString());
             let c_fecha: Date = new Date();
             let l_fecha: Date = new Date(datos.fechainiciolabor);
@@ -187,11 +185,9 @@ export class AddRecaudaComponent implements OnInit {
                 c_fecha.getFullYear() == l_fecha.getFullYear()) ||
               estadoCaja === '0'
             ) {
-              console.log('No ha iniciado caja');
               this.cajaActiva = false;
               this.estadoCajaT = true;
             } else {
-              console.log('Caja Iniciada');
               this.cajaActiva = true;
               this.estadoCajaT = false;
             }
@@ -203,7 +199,6 @@ export class AddRecaudaComponent implements OnInit {
           this.facService.valLastFac(datos.codigo.toString()).subscribe({
             next: (dato: any) => {
               let nrofac = dato.nrofactura.split('-', 3);
-              //let nrofac_f = +nrofac[2]! + 1
               this._nroFactura = `${this._codRecaudador}-${nrofac[2]
                 .toString()
                 .padStart(9, '0')}`;
@@ -212,7 +207,6 @@ export class AddRecaudaComponent implements OnInit {
           });
         } else {
           let nrofac = datos.ultimafact.split('-', 3);
-          //let nrofac_f = +nrofac[2]! + 1
           this._nroFactura = `${this._codRecaudador}-${nrofac[2]
             .toString()
             .padStart(9, '0')}`;
@@ -233,7 +227,6 @@ export class AddRecaudaComponent implements OnInit {
     //recxcaja.horainicio = fecha;
     this.recxcaja.idcaja_cajas = this._caja;
     this.recxcaja.idusuario_usuarios = this._caja.idusuario_usuarios;
-    console.log(this.recxcaja);
     this.s_recaudaxcaja.saveRecaudaxcaja(this.recxcaja).subscribe({
       next: (datos) => {
         this.estadoCajaT = false;
@@ -255,7 +248,6 @@ export class AddRecaudaComponent implements OnInit {
               'estadoCaja',
               this.recxcaja.estado.toString()
             );
-            console.log('caja cerrada', datos);
           },
           error: (e) => console.error(e),
         });
@@ -269,8 +261,6 @@ export class AddRecaudaComponent implements OnInit {
       next: (datos) => {
         this._formascobro = datos;
         this.idformacobro = this._formascobro[0].idformacobro;
-        // console.log('Al iniciar this.idformacobro: ', this.idformacobro);
-        // this.formCobrar.patchValue({ idformacobro: this._formascobro[0] })
       },
       error: (err) => console.error(err.error),
     });
@@ -379,7 +369,6 @@ export class AddRecaudaComponent implements OnInit {
           let i = 0;
           this._sincobro.forEach(async (item: any, index: number) => {
             let interes = this.cInteres(item);
-            // let abonado = this.getAbonado(item.idabonado);
             if (item.idabonado != 0) {
               const abonado: Abonados = await this.getAbonado(item.idabonado);
               item.direccion = abonado.direccionubicacion;
@@ -387,12 +376,18 @@ export class AddRecaudaComponent implements OnInit {
               item.direccion = 'S/D';
             }
             let com = 0;
-            if (item.idmodulo.idmodulo == 3) com = 1;
-            item.interes = interes;
-            item.comerc = com;
-            item.multa = 0;
-            suma += item.totaltarifa + item.comerc + item.multa + item.interes;
-            //i++;
+            if (this._sincobro[i].idmodulo.idmodulo == 3) com = 1;
+
+            this._sincobro[i].interes = interes;
+
+            this._sincobro[i].comerc = com;
+            this._sincobro[i].multa = 0;
+            suma +=
+              this._sincobro[i].totaltarifa +
+              this._sincobro[i].comerc +
+              this._sincobro[i].multa +
+              this._sincobro[i].interes;
+            i++;
           });
           this.sumtotal = suma;
           this.swbusca = 3;
@@ -404,7 +399,7 @@ export class AddRecaudaComponent implements OnInit {
       error: (err) => console.error(err.error),
     });
   }
-  disabled(e: any) {}
+  disabled(e: any) { }
 
   //Total de las planillas sin cobrar
   // total() {
@@ -467,7 +462,6 @@ export class AddRecaudaComponent implements OnInit {
 
   changeFormacobro() {
     const formacobro = this.formCobrar.get('idformacobro')!.value;
-    console.log('formacobro.idformacobro: ', formacobro.idformacobro);
     if (formacobro.idformacobro > 1) this.valorDinero();
   }
 
@@ -486,8 +480,8 @@ export class AddRecaudaComponent implements OnInit {
 
   marcarAnteriores(index: number) {
     if (
-      this._sincobro[index].idmodulo.idmodulo == 3 ||
-      this._sincobro[index].idmodulo.idmodulo == 4
+      this._sincobro[index].idmodulo.idmodulo === 3 /* ||
+      this._sincobro[index].idmodulo.idmodulo === 4 */
     ) {
       //Solo para Emision
       if (this._sincobro[index].pagado) {
@@ -536,7 +530,8 @@ export class AddRecaudaComponent implements OnInit {
             +this._sincobro[i].interes.toFixed(2)! +
             this._sincobro[i].multa;
         } else {
-          suma += this._sincobro[i].totaltarifa;
+          suma += this._sincobro[i].totaltarifa +
+            +this._sincobro[i].interes.toFixed(2)!;
         }
       }
       i++;
@@ -601,19 +596,19 @@ export class AddRecaudaComponent implements OnInit {
           _lecturas = resp;
           this.consumo =
             _lecturas[0].lecturaactual - _lecturas[0].lecturaanterior;
-          this.rubxfacService.getByIdfactura(idfactura).subscribe({
-            next: (detalle) => {
-              this._rubrosxfac = detalle;
-              this.subtotal();
-              this.calcularInteres(idfactura);
-            },
-            error: (err) =>
-              console.error(
-                'Al recuperar el datalle de la Planilla: ',
-                err.error
-              ),
-          });
         }
+        this.rubxfacService.getByIdfactura(idfactura).subscribe({
+          next: (detalle) => {
+            this._rubrosxfac = detalle;
+            this.subtotal();
+            this.calcularInteres(idfactura);
+          },
+          error: (err) =>
+            console.error(
+              'Al recuperar el datalle de la Planilla: ',
+              err.error
+            ),
+        });
         this.subtotal();
       },
       error: (err) =>
@@ -625,7 +620,6 @@ export class AddRecaudaComponent implements OnInit {
     if (cuenta != 0) {
       this.aboService.getOneAbonado(cuenta).subscribe({
         next: (datos) => {
-          console.log(datos);
           abonado = datos;
         },
         error: (e) => console.error(e),
@@ -634,7 +628,6 @@ export class AddRecaudaComponent implements OnInit {
     }
   }
   getRubroxfac1(idfactura: number) {
-    console.log(idfactura);
     let _lecturas: any;
     this.consumo = 0;
     this.idfactura = idfactura;
@@ -704,7 +697,6 @@ export class AddRecaudaComponent implements OnInit {
     this.recaService.saveRecaudacion(r).subscribe({
       next: (resp) => {
         const recaCreada = resp as Recaudacion;
-        // console.log('recaudacion:', recaCreada.idrecaudacion);
         let i = 0;
         this.facxrecauda(recaCreada, i);
       },
@@ -720,21 +712,18 @@ export class AddRecaudaComponent implements OnInit {
     rubrosxfac.estado = 1;
     this.rubxfacService.saveRubroxFac(rubrosxfac).subscribe({
       next: (datos) => {
-        console.log('Interes guardadp');
       },
       error: (e) => console.error(e),
     });
   }
   //Registra las facturas por recaudación y actualiza la fecha de cobro de la(s) factura(s)
   facxrecauda(recaCreada: Recaudacion, i: number) {
-    console.log('primer conteo', i);
     let idfactura: number;
     let fechacobro: Date = new Date();
     if (this._sincobro[i].pagado) {
       idfactura = this._sincobro[i].idfactura;
       this.facService.getById(idfactura).subscribe({
         next: (fac) => {
-          console.log('FACTURA: ', fac);
           //Añade a facxrecauda
           let facxr = {} as iFacxrecauda; //Interface para los datos de las facturas de la Recaudación
           facxr.idrecaudacion = recaCreada;
@@ -742,10 +731,8 @@ export class AddRecaudaComponent implements OnInit {
           facxr.estado = 1;
           this.facxrService.save(facxr).subscribe({
             next: (nex) => {
-              console.log(this._nroFactura);
               let nrofac = this._nroFactura.split('-', 3);
               let nrofac_f = +nrofac[2]! + i;
-              console.log(nrofac_f);
               //Actualiza Factura como cobrada
               fac.fechacobro = fechacobro;
               fac.usuariocobro = this.authService.idusuario;
@@ -767,7 +754,6 @@ export class AddRecaudaComponent implements OnInit {
               }
               this.facService.updateFacturas(fac).subscribe({
                 next: (nex) => {
-                  console.log(nex);
                   this.swcobrado = true;
                   i++;
                   if (i < this._sincobro.length)
@@ -797,45 +783,6 @@ export class AddRecaudaComponent implements OnInit {
     }
   }
 
-  /*   updateFacturas(i: number) {
-      let idfactura: number;
-      let fechacobro: Date = new Date();
-      if (this._sincobro[i].pagado) {
-        idfactura = this._sincobro[i].idfactura;
-        this.facService.getById(idfactura).subscribe({
-          next: (resp) => {
-            // console.log('resp: ', resp);
-            resp.fechacobro = fechacobro;
-            resp.usuariocobro = this.authService.idusuario;
-            resp.pagado = 1;
-            if (resp.estado === 3) {
-              resp.estado = 1;
-            }
-            console.log(this._nroFactura)
-  
-            this.facService.updateFacturas(resp).subscribe({
-              next: (dato) => {
-                this.swcobrado = true;
-                console.log('Actualización Ok!', dato);
-                i++;
-                if (i < this._sincobro.length) this.updateFacturas(i);
-              },
-              error: (err) =>
-                console.error('Al actualizar la Factura: ', err.error),
-            });
-          },
-          error: (err) =>
-            console.error(
-              'Al recuperar los datos de la Factura a actualizar: ',
-              err.error
-            ),
-        });
-      } else {
-        i++;
-        if (i < this._sincobro.length) this.updateFacturas(i);
-      }
-    }
-   */
   tonos() {
     setTimeout(() => {
       this.coloService.getTonos().subscribe({
@@ -931,15 +878,12 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   impComprobante(datos: any) {
-    console.log(datos);
     let factura: Facturas = new Facturas();
-    console.log(this.idfactura);
-    this.calcularInteres(datos.idfactura);
+    //this.calcularInteres(datos.idfactura);
     this.getRubroxfac(datos.idfactura);
     this.idfactura = datos.idfactura;
     this.facService.getById(datos.idfactura).subscribe({
       next: (datos) => {
-        console.log(factura);
         factura = datos;
       },
       error: (e) => console.error(e),
@@ -947,17 +891,14 @@ export class AddRecaudaComponent implements OnInit {
     this.rubxfacService.getByIdfactura(+datos.idfactura!).subscribe({
       next: (detalle) => {
         this._rubrosxfac = detalle;
-        console.log(this.totInteres);
 
         this.s_pdfRecaudacion.comprobantePago(
           factura,
-          detalle,
-          this.totInteres
+          detalle
         );
         /*  this.lecService.getByIdfactura(idfactura).subscribe({
           next: (resp) => {
             _lecturas = resp;
-            console.log(resp);
             this.consumo =
               _lecturas[0].lecturaactual - _lecturas[0].lecturaanterior;
           },
@@ -984,16 +925,14 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   calcularInteres(idfactura: number) {
-    console.log('calcular interes');
     let idFactura = idfactura;
-    console.log(idFactura);
     this.totInteres = 0;
     this.arrCalculoInteres = [];
     let interes: number = 0;
     this.facService.getById(idFactura).subscribe({
       next: (datos) => {
         let fec = datos.feccrea.toString().split('-', 2);
-        let fechai: Date = new Date(`${fec[0]}-${fec[1]}-02`);
+        let fechai: Date = new Date(`${fec[0]}-${fec[1]}-01`);
         let fechaf: Date = new Date();
         this.factura = datos;
         fechaf.setMonth(fechaf.getMonth() - 1);
@@ -1005,12 +944,6 @@ export class AddRecaudaComponent implements OnInit {
               interes.mes === +fechai.getMonth()! + 1
           );
           if (!query) {
-            console.log(
-              'Este mes no hay interes',
-              this.calInteres.anio,
-              this.calInteres.mes
-            );
-
             this.calInteres.anio = +fechai.getFullYear()!;
             this.calInteres.mes = +fechai.getMonth()! + 1;
             this.calInteres.interes = 0;
@@ -1039,7 +972,7 @@ export class AddRecaudaComponent implements OnInit {
     this.arrCalculoInteres = [];
     let interes: number = 0;
     let fec = factura.feccrea.toString().split('-', 2);
-    let fechai: Date = new Date(`${fec[0]}-${fec[1]}-02`);
+    let fechai: Date = new Date(`${fec[0]}-${fec[1]}-01`);
     let fechaf: Date = new Date();
     this.factura = factura;
     fechaf.setMonth(fechaf.getMonth() - 1);
@@ -1104,7 +1037,7 @@ export class AddRecaudaComponent implements OnInit {
       return of({ invalido: true });
     else return of(null);
   }
-  pdf() {}
+  pdf() { }
 }
 
 interface Cliente {

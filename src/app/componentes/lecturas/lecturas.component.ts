@@ -386,11 +386,10 @@ export class LecturasComponent implements OnInit {
                   factura.totaltarifa = suma;
                   factura.valorbase = suma;
                   factura.estado = 1;
-                  factura.feccrea = new Date(
-                    `${this.fecha.getFullYear()}-${
-                      this.fecha.getMonth() + 1
-                    }-01`
-                  );
+                  const fechaEmision = this._lecturas[this.kontador].fechaemision;
+                  const fechaEmisionDate = new Date(Date.parse(fechaEmision));
+                  const primerDiaDelMesSiguiente = new Date(fechaEmisionDate.getFullYear(), fechaEmisionDate.getMonth() + 1, 1);
+                  factura.feccrea = primerDiaDelMesSiguiente;
                   let modulo: Modulos = new Modulos();
                   modulo.idmodulo = 4;
                   factura.idmodulo = modulo;
@@ -495,7 +494,7 @@ export class LecturasComponent implements OnInit {
     let rubrosxpla = {} as Rubrosxpla;
     rubrosxpla.cantidad = 1;
     rubrosxpla.valorunitario = this.arrprecios[i];
-    rubrosxpla.estado = 0;
+    rubrosxpla.estado = 1;
     let factura: Facturas = new Facturas();
     factura.idfactura = this.factura.idfactura;
     rubrosxpla.idfactura_facturas = factura;
