@@ -12,6 +12,7 @@ import { FacturaService } from 'src/app/servicios/factura.service';
 import { Usuarios } from 'src/app/modelos/administracion/usuarios.model';
 import { format, parse } from '@formkit/tempo';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
+import { FacxrecaudaService } from 'src/app/servicios/facxrecauda.service';
 
 @Component({
   selector: 'app-info-caja',
@@ -38,8 +39,9 @@ export class InfoCajaComponent implements OnInit {
     private recxcaja: RecaudaxcajaService,
     private _pdf: PdfService,
     private s_facturas: FacturaService,
-    private s_rubroxfac: RubroxfacService
-  ) {}
+    private s_rubroxfac: RubroxfacService,
+    private s_facxrecauda: FacxrecaudaService
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/cajas');
@@ -148,11 +150,18 @@ export class InfoCajaComponent implements OnInit {
     }
   }
   pdf() {
+    var datosBody: any = [];
     console.log(this.usuario);
     console.log(this.caja);
+    this.s_facxrecauda.getByUsuFecha(this.usuario.idusuario, this.desde, this.hasta).subscribe({
+      next: (datos:any) => { console.log(datos) 
+      
+      
+      },
+      error: (e) => console.error
+    })
 
-    var datosBody: any = [];
-
+/* 
     this.s_facturas
       .findByUsucobro(this.usuario.idusuario, this.desde, this.hasta)
       .subscribe({
@@ -182,20 +191,20 @@ export class InfoCajaComponent implements OnInit {
                 this.usuario.nomusu,
               ]);
             }); */
-       /*      let formato = datos.map((item: any) => {
-              this.s_rubroxfac
-                .getSumaValoresUnitarios(item.idfactura)
-                .subscribe({
-                  next: (suma) => {
-                    console.log(suma);
-                    item.totaltarifa = suma;
-                    return item;
-                  },
-                  error: (e) => console.error(e),
-                });
-            });
-            console.log(formato); */
-            
+            /*      let formato = datos.map((item: any) => {
+                   this.s_rubroxfac
+                     .getSumaValoresUnitarios(item.idfactura)
+                     .subscribe({
+                       next: (suma) => {
+                         console.log(suma);
+                         item.totaltarifa = suma;
+                         return item;
+                       },
+                       error: (e) => console.error(e),
+                     });
+                 });
+                 console.log(formato); 
+
             const getFormato = async (dato: any[]) => {
               return await Promise.all(
                 dato.map(async (item: any) => {
@@ -204,15 +213,15 @@ export class InfoCajaComponent implements OnInit {
                 })
               );
             };
-            
+
             const formato = await getFormato(datos);
-            
+
             console.log(formato);
-           // this.pdf2(datosBody);
+            // this.pdf2(datosBody);
           }
         },
         error: (e) => console.error(e),
-      });
+      }); */
   }
   pdf2(datosBody: any) {
     console.log(datosBody);

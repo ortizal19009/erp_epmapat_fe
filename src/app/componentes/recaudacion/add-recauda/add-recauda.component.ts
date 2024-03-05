@@ -32,6 +32,7 @@ import { Recaudaxcaja } from 'src/app/modelos/recaudaxcaja.model';
 import { Rubroxfac } from 'src/app/modelos/rubroxfac.model';
 import { Rubros } from 'src/app/modelos/rubros.model';
 import { Abonados } from 'src/app/modelos/abonados';
+import { Lecturas } from 'src/app/modelos/lecturas.model';
 
 @Component({
   selector: 'app-add-recauda',
@@ -189,7 +190,7 @@ export class AddRecaudaComponent implements OnInit {
               this.estadoCajaT = true;
             } else {
               this.cajaActiva = true;
-              if (this.cajaActiva === true){
+              if (this.cajaActiva === true) {
                 this.estadoCajaT = false;
               }
             }
@@ -528,11 +529,11 @@ export class AddRecaudaComponent implements OnInit {
           suma +=
             this._sincobro[i].totaltarifa +
             this._sincobro[i].comerc +
-            +this._sincobro[i].interes.toFixed(2)! +
-            this._sincobro[i].multa;
+            +this._sincobro[i].interes
+          this._sincobro[i].multa;
         } else {
           suma += this._sincobro[i].totaltarifa +
-            +this._sincobro[i].interes.toFixed(2)!;
+            +this._sincobro[i].interes;
         }
       }
       i++;
@@ -732,18 +733,11 @@ export class AddRecaudaComponent implements OnInit {
           facxr.estado = 1;
           this.facxrService.save(facxr).subscribe({
             next: (nex) => {
-              let nrofac = this._nroFactura.split('-', 3);
-              let nrofac_f = +nrofac[2]! + i;
               //Actualiza Factura como cobrada
               fac.fechacobro = fechacobro;
               fac.usuariocobro = this.authService.idusuario;
               fac.interescobrado = this.cInteres(fac);
               fac.pagado = 1;
-              if (fac.nrofactura === null) {
-                fac.nrofactura = `${this._codRecaudador}-${nrofac_f
-                  .toString()
-                  .padStart(9, '0')}`;
-              }
               let rubro: Rubros = new Rubros();
               rubro.idrubro = 5;
               this.saveRubxFac(fac, rubro, this.cInteres(fac));
@@ -753,9 +747,23 @@ export class AddRecaudaComponent implements OnInit {
               } else {
                 fac.estado = 1;
               }
+              console.log(fac.nrofactura)
+              let j = 1;
+              if (fac.nrofactura === null) {
+                let nrofac = this._nroFactura.split('-', 3);
+                let nrofac_f = +nrofac[2]! + j;
+                sessionStorage.setItem('ultfac', nrofac_f
+                  .toString()
+                  .padStart(9, '0'))
+                fac.nrofactura = `${this._codRecaudador}-${nrofac_f
+                  .toString()
+                  .padStart(9, '0')}`;
+              }
               this.facService.updateFacturas(fac).subscribe({
-                next: (nex) => {
+                next: (nex: any) => {
                   this.swcobrado = true;
+                  this._nroFactura = nex.nrofactura
+                  j++;
                   i++;
                   if (i < this._sincobro.length)
                     this.facxrecauda(recaCreada, i);
@@ -880,6 +888,7 @@ export class AddRecaudaComponent implements OnInit {
 
   impComprobante(datos: any) {
     let factura: Facturas = new Facturas();
+    let lectura: any;
     //this.calcularInteres(datos.idfactura);
     this.getRubroxfac(datos.idfactura);
     this.idfactura = datos.idfactura;
@@ -889,12 +898,19 @@ export class AddRecaudaComponent implements OnInit {
       },
       error: (e) => console.error(e),
     });
+    this.lecService.getOnefactura(datos.idfactura).subscribe({
+      next: (datos) => {
+        console.log(datos);
+        lectura = datos;
+      },
+      error: (e) => { console.error(e) }
+    })
     this.rubxfacService.getByIdfactura(+datos.idfactura!).subscribe({
       next: (detalle) => {
         this._rubrosxfac = detalle;
 
         this.s_pdfRecaudacion.comprobantePago(
-          factura,
+          lectura,
           detalle
         );
         /*  this.lecService.getByIdfactura(idfactura).subscribe({
@@ -936,32 +952,35 @@ export class AddRecaudaComponent implements OnInit {
         let fechai: Date = new Date(`${fec[0]}-${fec[1]}-01`);
         let fechaf: Date = new Date();
         this.factura = datos;
-        fechaf.setMonth(fechaf.getMonth() - 1);
-        while (fechai <= fechaf) {
-          this.calInteres = {} as calcInteres;
-          let query = this._intereses.find(
-            (interes: { anio: number; mes: number }) =>
-              interes.anio === +fechai.getFullYear()! &&
-              interes.mes === +fechai.getMonth()! + 1
-          );
-          if (!query) {
-            this.calInteres.anio = +fechai.getFullYear()!;
-            this.calInteres.mes = +fechai.getMonth()! + 1;
-            this.calInteres.interes = 0;
-            query = this.calInteres;
-          } else {
-            this.calInteres.anio = query.anio;
-            this.calInteres.mes = query.mes;
-            this.calInteres.interes = query.porcentaje;
-            this.calInteres.valor = datos.totaltarifa;
+        console.log(this.factura)
+        if (this.factura.estado != 3) {
+          fechaf.setMonth(fechaf.getMonth() - 1);
+          while (fechai <= fechaf) {
+            this.calInteres = {} as calcInteres;
+            let query = this._intereses.find(
+              (interes: { anio: number; mes: number }) =>
+                interes.anio === +fechai.getFullYear()! &&
+                interes.mes === +fechai.getMonth()! + 1
+            );
+            if (!query) {
+              this.calInteres.anio = +fechai.getFullYear()!;
+              this.calInteres.mes = +fechai.getMonth()! + 1;
+              this.calInteres.interes = 0;
+              query = this.calInteres;
+            } else {
+              this.calInteres.anio = query.anio;
+              this.calInteres.mes = query.mes;
+              this.calInteres.interes = query.porcentaje;
+              this.calInteres.valor = datos.totaltarifa;
+            }
+            this.arrCalculoInteres.push(this.calInteres);
+            fechai.setMonth(fechai.getMonth() + 1);
           }
-          this.arrCalculoInteres.push(this.calInteres);
-          fechai.setMonth(fechai.getMonth() + 1);
+          this.arrCalculoInteres.forEach((item: any) => {
+            this.totInteres += (item.interes * item.valor) / 100;
+            interes += (item.interes * item.valor) / 100;
+          });
         }
-        this.arrCalculoInteres.forEach((item: any) => {
-          this.totInteres += (item.interes * item.valor) / 100;
-          interes += (item.interes * item.valor) / 100;
-        });
         this.subtotal();
       },
       error: (e) => console.error(e),
@@ -976,33 +995,37 @@ export class AddRecaudaComponent implements OnInit {
     let fechai: Date = new Date(`${fec[0]}-${fec[1]}-01`);
     let fechaf: Date = new Date();
     this.factura = factura;
-    fechaf.setMonth(fechaf.getMonth() - 1);
-    while (fechai <= fechaf) {
-      this.calInteres = {} as calcInteres;
-      let query = this._intereses.find(
-        (interes: { anio: number; mes: number }) =>
-          interes.anio === +fechai.getFullYear()! &&
-          interes.mes === +fechai.getMonth()! + 1
-      );
-      if (!query) {
-        this.calInteres.anio = +fechai.getFullYear()!;
-        this.calInteres.mes = +fechai.getMonth()! + 1;
-        this.calInteres.interes = 0;
-        query = this.calInteres;
-      } else {
-        this.calInteres.anio = query.anio;
-        this.calInteres.mes = query.mes;
-        this.calInteres.interes = query.porcentaje;
-        this.calInteres.valor = factura.totaltarifa;
-        this.arrCalculoInteres.push(this.calInteres);
+    console.log(this.factura)
+    if (factura.estado != 3) {
+      fechaf.setMonth(fechaf.getMonth() - 1);
+      while (fechai <= fechaf) {
+        this.calInteres = {} as calcInteres;
+        let query = this._intereses.find(
+          (interes: { anio: number; mes: number }) =>
+            interes.anio === +fechai.getFullYear()! &&
+            interes.mes === +fechai.getMonth()! + 1
+        );
+        if (!query) {
+          this.calInteres.anio = +fechai.getFullYear()!;
+          this.calInteres.mes = +fechai.getMonth()! + 1;
+          this.calInteres.interes = 0;
+          query = this.calInteres;
+        } else {
+          this.calInteres.anio = query.anio;
+          this.calInteres.mes = query.mes;
+          this.calInteres.interes = query.porcentaje;
+          this.calInteres.valor = factura.totaltarifa;
+          this.arrCalculoInteres.push(this.calInteres);
+        }
+        fechai.setMonth(fechai.getMonth() + 1);
+
       }
-      fechai.setMonth(fechai.getMonth() + 1);
+      this.arrCalculoInteres.forEach((item: any) => {
+        //this.totInteres += (item.interes * item.valor) / 100;
+        interes += (item.interes * item.valor) / 100;
+        // this.subtotal();
+      });
     }
-    this.arrCalculoInteres.forEach((item: any) => {
-      //this.totInteres += (item.interes * item.valor) / 100;
-      interes += (item.interes * item.valor) / 100;
-      // this.subtotal();
-    });
     return interes;
   }
   valorTarifas(tarifa: number, cons: number, interes: number, multa: number) {

@@ -19,4 +19,10 @@ export class FacxrecaudaService {
     return this.http.post(`${baseUrl}`, x);
   }
 
+  getByUsuFecha(idusuario: number, d: Date, h: Date) {
+    return this.http.get<Facxrecauda[]>(
+      `${baseUrl}/reportes/usuario?idusuario=${idusuario}&d=${d}&h=${h}`
+    );
+  }
+
 }

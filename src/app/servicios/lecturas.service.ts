@@ -47,6 +47,10 @@ export class LecturasService {
   getByIdfactura(idfactura: number) {
     return this.http.get<Lecturas[]>(`${baseUrl}/planilla/${idfactura}`);
   }
+  //Lectura por Planilla
+  getOnefactura(idfactura: number) {
+    return this.http.get<Lecturas[]>(`${baseUrl}/onePlanilla/${idfactura}`);
+  }
 
   saveLectura(lectura: Lecturas): Observable<Object> {
     return this.http.post(baseUrl, lectura);

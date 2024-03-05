@@ -11,7 +11,7 @@ const baseUrl = `${apiUrl}/rubroxfac`;
   providedIn: 'root',
 })
 export class RubroxfacService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getListaRubroByFactura(idfactura: number) {
     return this.http.get<Rubroxfac[]>(`${baseUrl}?nrofactura=${idfactura}`);
@@ -44,4 +44,5 @@ export class RubroxfacService {
       `${baseUrl}/reportes/fechacobro?fechacobro=${fechacobro}`
     );
   }
+
 }

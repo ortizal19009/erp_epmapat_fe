@@ -12,39 +12,43 @@ export class RecaudacionReportsService {
   interes: number = 0;
   constructor() { }
 
-  comprobantePago(datos: any, _rubrosxfac: any) {
+  comprobantePago(l_datos: any, _rubrosxfac: any) {
     console.log(_rubrosxfac);
     this.total = 0;
+    console.log(l_datos)
+    let datos = _rubrosxfac[0].idfactura_facturas
     console.log(datos);
     this.interes = 0;
-  /*   if (_interes < 0) {
-      this.interes = 0;
-    } else {
-      this.interes = _interes;
-    } */
+    /*   if (_interes < 0) {
+        this.interes = 0;
+      } else {
+        this.interes = _interes;
+      } */
     let doc = new jsPDF('p', 'pt', 'a4');
-    let margin = 30;
+
+    let m3 = l_datos.lecturaactual - l_datos.lecturaanterior
     let rubros: any = [];
     _rubrosxfac.forEach((item: any) => {
       if (item.idrubro_rubros.idrubro != 5) {
         this.total += +item.valorunitario!;
         rubros.push([item.idrubro_rubros.descripcion, item.valorunitario.toFixed(2)]);
-      }else {
+      } else {
 
         this.interes = item.valorunitario
       }
     });
     this.total += this.interes;
     doc.setFontSize(7);
-    doc.text('EPMAPA-T', margin + 70, 50);
+    // doc.text('EPMAPA-T', margin + 70, 50);
 
 
     const tableWidth = 200;
     autoTable(doc, {
+      //doc.setFontType("bold");
       //startY: 250,
       tableWidth,
       //theme: 'striped',
-      styles: { fontSize: 7 },
+      styles: { fontSize: 8, fontStyle: 'bold' },
       columnStyles: {
         0: { minCellWidth: 10 },
         2: { minCellWidth: 15 },
@@ -60,14 +64,14 @@ export class RecaudacionReportsService {
       body: [
         [`Nro factura: ${datos.nrofactura}`],
         [`Ruc/cedula: ${datos.idcliente.cedula}`],
-        [`Mes pagado: ${datos.fechacobro}`],
+        [`Mes pagado: ${l_datos.fechaemision.slice(0, 10)}`],
         [`Cliente: ${datos.idcliente.nombre}`],
         [`Dirección: ${datos.idcliente.direccion}`],
-        [`Referencia: ${datos.idcliente.referencia}`],
-        [`Cartas ant: --`, `Emision: ----`],
+        /* [`Referencia: ${datos.idcliente.referencia}`], */
+        [`M3: ${m3}`, `Emision: ${l_datos.idemision}`],
         [`Cuenta: ${datos.idabonado}`, `FechaPag: ${datos.fechacobro}`],
-        [`L. Anterior: ---`, `L. Actual: ---`],
-        [`Cons. Ant: ---`, `Categoría: COME`],
+        [`L. Anterior: ${l_datos.lecturaanterior}`, `L. Actual: ${l_datos.lecturaactual}`],
+        [`Cons. Ant: ---`, `Categoría: ${l_datos.idabonado_abonados.idcategoria_categorias.descripcion}`],
         [`Recaudador: ---`],
       ],
     });
@@ -76,7 +80,7 @@ export class RecaudacionReportsService {
       //startY: 250,
       tableWidth,
       theme: 'grid',
-      styles: { fontSize: 7 },
+      styles: { fontSize: 8, fontStyle: 'bold' },
       headStyles: {
         halign: 'center',
         fillColor: 'white',
@@ -96,7 +100,7 @@ export class RecaudacionReportsService {
       //startY: 250,
       tableWidth,
       theme: 'grid',
-      styles: { fontSize: 7 },
+      styles: { fontSize: 8, fontStyle: 'bold' },
       headStyles: {
         halign: 'center',
         fillColor: 'white',
@@ -110,97 +114,13 @@ export class RecaudacionReportsService {
 
       columns: ['', ''],
       body: [
-        ['Iva 12%', '0.00'],
+        /* ['Iva 12%', '0.00'], */
         ['Descuento 0%', '0.00'],
         ['Intereses', this.interes.toFixed(2)],
         ['Valor total', this.total.toFixed(2)],
       ],
     });
-    autoTable(doc, {
-      startY: 30,
-      margin: 250,
-      //columnWidth: 'wrap',
-      columnStyles: {
-        0: { minCellWidth: 10 },
-        1: { minCellWidth: 100 },
-      },
-      tableWidth,
-      theme: 'grid',
-      styles: { fontSize: 7 },
-      headStyles: {
-        halign: 'center',
-        fillColor: 'white',
-        textColor: 'black',
-      },
-      bodyStyles: { cellPadding: 1 },
-      /*       columnStyles: {
-              0: { minCellWidth: 20 },
-              1: { minCellWidth: 20 },
-            }, */
 
-      columns: ['', ''],
-      body: [
-        [`Cuenta: ${datos.idabonado}`, `Ruta: `],
-        ['Clave catastral: SP'],
-        [
-          `Cliente: ${datos.idcliente.nombre}`,
-          `RUC/Cédula: ${datos.idcliente.cedula}`,
-        ],
-        [`Dirección: ${datos.idcliente.direccion}`, `Medidor: dsfasd555`],
-        [`L. Anterior: 445`, `L. Actual: 460`],
-        [`Cons. ant:`, `Categoria: COME`],
-        [`Nro cartas ant: 0`, `Fecha fact: 25/01/2024`],
-        [`Catastro emitido: 02/01/2024 `, `Forma pago: Contado`],
-        [`Recaudador: WILLIAM `, `Cons. anterior: 14`],
-        [`Referencia: ${datos.idcliente.referencia}`],
-      ],
-    });
-    autoTable(doc, {
-      //startY: 30,
-      margin: 250,
-      //columnWidth: 'wrap',
-      tableWidth,
-      theme: 'grid',
-      styles: { fontSize: 7 },
-      headStyles: {
-        halign: 'center',
-        fillColor: 'white',
-        textColor: 'black',
-      },
-      bodyStyles: { cellPadding: 1 },
-      columnStyles: {
-        0: { minCellWidth: 10 },
-        1: { minCellWidth: 15, halign: 'right' },
-      },
-
-      columns: ['Descripción', 'Valor unitario'],
-      body: rubros,
-    });
-    autoTable(doc, {
-      //startY: 30,
-      margin: 250,
-      tableWidth,
-      theme: 'grid',
-      styles: { fontSize: 7 },
-      headStyles: {
-        halign: 'center',
-        fillColor: 'white',
-        textColor: 'black',
-      },
-      bodyStyles: { cellPadding: 1 },
-      columnStyles: {
-        0: { minCellWidth: 10 },
-        1: { minCellWidth: 15, halign: 'right' },
-      },
-
-      columns: ['', ''],
-      body: [
-        ['Iva 12%', '0.00'],
-        ['Descuento 0%', '0.00'],
-        ['Intereses', '0.00'],
-        ['Valor total', this.total],
-      ],
-    });
     /* FIGURAS */
     //doc.rect(margin - 5, 30, 215, 210); /* primer rectangulo */
     //doc.rect(margin - 5, 250, 215, 80); /* segundo rectangulo */
