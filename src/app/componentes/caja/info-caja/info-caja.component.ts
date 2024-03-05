@@ -41,7 +41,7 @@ export class InfoCajaComponent implements OnInit {
     private s_facturas: FacturaService,
     private s_rubroxfac: RubroxfacService,
     private s_facxrecauda: FacxrecaudaService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/cajas');
@@ -153,15 +153,30 @@ export class InfoCajaComponent implements OnInit {
     var datosBody: any = [];
     console.log(this.usuario);
     console.log(this.caja);
-    this.s_facxrecauda.getByUsuFecha(this.usuario.idusuario, this.desde, this.hasta).subscribe({
-      next: (datos:any) => { console.log(datos) 
-      
-      
-      },
-      error: (e) => console.error
-    })
+    this.s_facxrecauda
+      .getByUsuFecha(this.usuario.idusuario, this.desde, this.hasta)
+      .subscribe({
+        next: (datos: any) => {
+          console.log(datos);
+          let total = 0;
+          datos.forEach((item: any) => {
+            datosBody.push([
+              item.idfactura.nrofactura,
+              item.idfactura.idcliente.nombre,
+              item.idfactura.idmodulo.descripcion,
+              item.idrecaudacion.totalpagar,
+              item.idfactura.fechacobro,
+              item.idfactura.horacobro,
+              this.usuario.nomusu,
+            ]);
+            total += item.idrecaudacion.totalpagar;
+          });
+          this.pdf2(datosBody, total);
+        },
+        error: (e) => console.error,
+      });
 
-/* 
+    /* 
     this.s_facturas
       .findByUsucobro(this.usuario.idusuario, this.desde, this.hasta)
       .subscribe({
@@ -191,7 +206,7 @@ export class InfoCajaComponent implements OnInit {
                 this.usuario.nomusu,
               ]);
             }); */
-            /*      let formato = datos.map((item: any) => {
+    /*      let formato = datos.map((item: any) => {
                    this.s_rubroxfac
                      .getSumaValoresUnitarios(item.idfactura)
                      .subscribe({
@@ -223,8 +238,8 @@ export class InfoCajaComponent implements OnInit {
         error: (e) => console.error(e),
       }); */
   }
-  pdf2(datosBody: any) {
-    console.log(datosBody);
+  pdf2(datosBody: any, total: number) {
+    let _total = total.toFixed(2);
     //const nombreEmision = new NombreEmisionPipe(); // Crea una instancia del pipe
     let doc = new jsPDF('p', 'pt', 'a4');
     this._pdf.header('REPORTE INDIVIDUAL DE COBROS POR CAJA', doc);
@@ -244,7 +259,7 @@ export class InfoCajaComponent implements OnInit {
       const pageCount = doc.internal.pages.length;
       for (let i = 1; i <= pageCount - 1; i++) {
         doc.setPage(i);
-        doc.setFontSize(10);
+        doc.setFontSize(12);
         doc.text(
           'Página ' + i + ' de ' + (pageCount - 1),
           m_izquierda,
@@ -286,6 +301,8 @@ export class InfoCajaComponent implements OnInit {
             },
             margin: { left: m_izquierda - 1, top: 19, right: 4, bottom: 13 }, */
       body: datosBody,
+
+      foot: [],
 
       didParseCell: function (data) {
         var fila = data.row.index;

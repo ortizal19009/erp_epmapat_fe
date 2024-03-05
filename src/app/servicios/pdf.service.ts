@@ -35,7 +35,7 @@ export class PdfService {
       head: [[titulo]],
     });
     doc.setFontSize(12);
-    doc.text(this.date.toLocaleDateString().toString(), 450, 40); /*FECHA*/
+   // doc.text(this.date.toLocaleDateString().toString(), 450, 40); /*FECHA*/
   }
   genPdf(row_datos: any, columns_datos: any, titulo: string) {
     let doc = new jsPDF('p', 'pt', 'a4');
