@@ -164,7 +164,7 @@ export class InfoCajaComponent implements OnInit {
               item.idfactura.nrofactura,
               item.idfactura.idcliente.nombre,
               item.idfactura.idmodulo.descripcion,
-              item.idrecaudacion.totalpagar,
+              item.idrecaudacion.totalpagar.toFixed(2),
               item.idfactura.fechacobro,
               item.idfactura.horacobro,
               this.usuario.nomusu,
@@ -302,8 +302,6 @@ export class InfoCajaComponent implements OnInit {
             margin: { left: m_izquierda - 1, top: 19, right: 4, bottom: 13 }, */
       body: datosBody,
 
-      foot: [],
-
       didParseCell: function (data) {
         var fila = data.row.index;
         var columna = data.column.index;
@@ -313,6 +311,8 @@ export class InfoCajaComponent implements OnInit {
             }  */ // Total Bold
       },
     });
+    console.log(_total);
+    doc.text(`TOTAL: ${_total}`, 50, 50);
     addPageNumbers();
 
     var opciones = {

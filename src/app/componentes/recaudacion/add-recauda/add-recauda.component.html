@@ -15,56 +15,64 @@
                <div class="row col-sm-12 mt-1 mb-0">
                   <div class="form-group col-md-2 mb-0">
                      <input class="form-control form-control-sm text-center" type="text" formControlName="cuenta"
-                        placeholder="Cuenta">
+                        placeholder="Cuenta" />
                   </div>
                   <div class="form-group col-md-2 my-0 py-0 mb-0">
                      <input class="form-control form-control-sm text-center" type="text"
-                        formControlName="identificacion" placeholder="Identificación">
+                        formControlName="identificacion" placeholder="Identificación" />
                   </div>
                   <div class="form-group col-md-2 my-0 py-0 mb-0 form-inline">
-                     <button class="btn btn-primary btn-sm mr-1"><i class="fa fa-search"></i>
-                        Buscar</button>
+                     <button class="btn btn-primary btn-sm mr-1">
+                        <i class="fa fa-search"></i> Buscar
+                     </button>
                      <div *ngIf="swvalido == 0" class="alert alert-warning m-0 py-0 px-1 small font-weight-bold"
-                        role="alert"> Ups!
+                        role="alert">
+                        Ups!
                      </div>
                   </div>
                   <div class="form-group col-md-2 my-0 py-0 mb-0">
                      <button type="button" class="btn btn-sm btn-success" data-toggle="modal"
-                        data-target="#clientesModal" (click)="clientesModal()"><i class="bi bi-people"></i> Clientes
+                        data-target="#clientesModal" (click)="clientesModal()">
+                        <i class="bi bi-people"></i> Clientes
                      </button>
                   </div>
-<!--                   <div class="form-group col-md-2 my-0 py-0 mb-0">
-                     <button type="button" class="btn btn-sm btn-success" (click)="impComprobante({idfactura:2459307})"><i class="bi bi-people"></i> Impr
+                  <!--                   <div class="form-group col-md-2 my-0 py-0 mb-0">
+                     <button type="button" class="btn btn-sm btn-success" (click)="impComprobante({idfactura:2315263})"><i class="bi bi-people"></i> Impr
                      </button>
                   </div> -->
 
                   <div *ngIf="acobrar > 0 && !swcobrado && !estadoCajaT" class="form-group col-md-3 my-0 py-0 mb-0">
                      <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#modalCobrar"
-                        (click)="valorAcobrar(acobrar)"><i class="bi bi-check-lg"></i> Cobrar:&nbsp;&nbsp;&nbsp;
-                        <strong>{{acobrar | number: '1.2-2'}}</strong>
+                        (click)="valorAcobrar(acobrar)">
+                        <i class="bi bi-check-lg"></i> Cobrar:&nbsp;&nbsp;&nbsp;
+                        <strong>{{ acobrar | number : "1.2-2" }}</strong>
                      </button>
                   </div>
                </div>
             </form>
          </div>
          <div class="col-sm my-0 py-0 mb-0">
-            <input type="text" class="form-control form-control-sm" [(ngModel)]="filtrar" placeholder="Filtrar...">
+            <input type="text" class="form-control form-control-sm" [(ngModel)]="filtrar" placeholder="Filtrar..." />
          </div>
 
          <div class="btn-group ml-auto">
             <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
-               aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+               aria-expanded="false">
+               <i class="bi-menu-button-wide text-white"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
                <button class="dropdown-item" type="button" data-toggle="modal" (click)="abrirCaja()"
                   data-target="#abrirCaja" [disabled]="!estadoCajaT">
-                  <i class="bi-door-open"></i>&nbsp; Abrir caja</button>
+                  <i class="bi-door-open"></i>&nbsp; Abrir caja
+               </button>
                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#cerrarCaja"
                   [disabled]="estadoCajaT">
-                  <i class="bi-door-closed"></i>&nbsp; Cerrar caja</button>
+                  <i class="bi-door-closed"></i>&nbsp; Cerrar caja
+               </button>
                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
                   <!-- [disabled]="swbusca != 0"> -->
-                  <i class="bi-printer"></i>&nbsp; Imprimir</button>
+                  <i class="bi-printer"></i>&nbsp; Imprimir
+               </button>
             </div>
             <div class="btn-group mx-1" *ngIf="swbusca != 0">
                <button class="bg-transparent border-0" type="button" (click)="reiniciar()">
@@ -72,7 +80,6 @@
                </button>
             </div>
          </div>
-
       </div>
    </div>
 </div>
@@ -86,7 +93,8 @@
                <p class="text-muted text-center">{{ cliente.cedula }}</p>
                <ul class="list-group list-group-unbordered mb-3">
                   <li class="list-group-item">
-                     <b>Dirección</b> <a class="float-right">{{ cliente.direccion }}</a>
+                     <b>Dirección</b>
+                     <a class="float-right">{{ cliente.direccion }}</a>
                   </li>
                   <li class="list-group-item">
                      <b>e-mail</b> <a class="float-right">{{ cliente.email }}</a>
@@ -103,15 +111,18 @@
                         <i class="float-right bi-check-circle-fill"></i>
                      </i>
                   </li>
-             <!--      <li class="list-group-item">
+                  <!--      <li class="list-group-item">
                      <b>Adulto mayor</b> <a class="float-right"></a><i class="float-right bi-bug-fill"></i>
                   </li> -->
                </ul>
             </div>
          </div>
       </div>
-      <div [ngClass]="{'col-9 recaudadetalle': swbusca != 0, 'col-6 mt-5': swbusca == 0}">
-         <div class="card sombra" [ngClass]="{'recaudadetalle': swbusca != 0}">
+      <div [ngClass]="{
+        'col-9 recaudadetalle': swbusca != 0,
+        'col-6 mt-5': swbusca == 0
+      }">
+         <div class="card sombra" [ngClass]="{ recaudadetalle: swbusca != 0 }">
             <div class="card-body box-profile d-flex justify-content-center">
                <div *ngIf="swbusca == 0">
                   <img src="/assets/dist/img/logo.png" width="280" />
@@ -122,7 +133,8 @@
                      <div class="callout callout-info text-center col-md-8">
                         <div class="alert alert-info">
                            <h5><i class="fas fa-info"></i> <strong> Mensaje</strong></h5>
-                           No existe la <strong>{{ mensaje.campo }}</strong> {{ mensaje.texto }}
+                           No existe la <strong>{{ mensaje.campo }}</strong>
+                           {{ mensaje.texto }}
                         </div>
                      </div>
                   </div>
@@ -139,55 +151,65 @@
                   </div>
                </div>
 
-
                <table *ngIf="swbusca == 3" class="table table-hover table-sm table-bordered">
-
                   <thead class="recaudacabecera">
                      <tr class="text-center">
-                        <th>
-                        </th>
+                        <th></th>
                         <th>Cuenta</th>
                         <th>Planilla</th>
                         <th>Dirección</th>
                         <th>Fecha</th>
                         <th>Módulo</th>
                         <th>Valor</th>
-                        <th><input type="checkbox" (change)="marcarTodas($event)" class="cursor" [disabled]="filtrar ">
+                        <th>
+                           <input type="checkbox" (change)="marcarTodas($event)" class="cursor" [disabled]="filtrar" />
                         </th>
                         <th></th>
                      </tr>
                   </thead>
                   <tbody>
-                     <tr *ngFor="let sincobro of _sincobro | filter:filtrar; let i = index" class="text-center "
-                        [ngClass]="{'transferido': sincobro.estado == 3 }">
-                        <td class="small font-weight-bold">{{ i+1 }}
+                     <tr *ngFor="
+                  let sincobro of _sincobro | filter : filtrar;
+                  let i = index
+                " class="text-center" [ngClass]="{ transferido: sincobro.estado == 3 }">
+                        <td class="small font-weight-bold">{{ i + 1 }}</td>
+                        <td [ngClass]="{ transparente: sincobro.idabonado == 0 }">
+                           {{ sincobro.idabonado }}
                         </td>
-                        <td [ngClass]="{'transparente': sincobro.idabonado == 0}">
-                           {{ sincobro.idabonado }}</td>
                         <td>{{ sincobro.idfactura }}</td>
-                        <td class="description">{{sincobro.direccion}}
+                        <td class="description">
+                           {{ sincobro.direccion }}
                            <!--    {{sincobro.idabonado}}
                            <i class="fa fa-spinner fa-pulse fa-fw"></i>
                            <span class="sr-only">Loading...</span> -->
                         </td>
                         <td>{{ sincobro.feccrea }}</td>
-                        <td class="text-left">{{
-                           sincobro.idmodulo.descripcion }}</td>
+                        <td class="text-left">{{ sincobro.idmodulo.descripcion }}</td>
 
                         <!-- <td  class="text-right">{{
                            sincobro.totaltarifa + sincobro.comerc + sincobro.interes +
                            sincobro.multa | number:'1.2-2'}}</td> -->
-                        <td class="text-right">{{ valorTarifas(sincobro.totaltarifa, sincobro.comerc, sincobro.interes,
-                           sincobro.multa )| number:'1.2-2'}}</td>
-                        <td> <input type="checkbox" [(ngModel)]="sincobro.pagado" (change)="marcarAnteriores(i)"
-                              [disabled]="swcobrado" class="cursor"></td>
+                        <td class="text-right">
+                           {{
+                           valorTarifas(
+                           sincobro.totaltarifa,
+                           sincobro.comerc,
+                           sincobro.interes,
+                           sincobro.multa
+                           ) | number : "1.2-2"
+                           }}
+                        </td>
+                        <td>
+                           <input type="checkbox" [(ngModel)]="sincobro.pagado" (change)="marcarAnteriores(i)"
+                              [disabled]="swcobrado" class="cursor" />
+                        </td>
                         <td>
                            <button *ngIf="!swcobrado" class="btn btn-outline-info btn-xs cursor" data-toggle="modal"
-                              data-target="#DetallePlanillaModal" (click)="getRubroxfac( sincobro.idfactura )">
+                              data-target="#DetallePlanillaModal" (click)="getRubroxfac(sincobro.idfactura)">
                               <i class="fa fa-info-circle"></i> Info
                            </button>
-                           <button *ngIf="swcobrado" class="btn btn-outline-info btn-xs cursor" (click)="impComprobante(sincobro)"
-                              [disabled]="!sincobro.pagado">
+                           <button *ngIf="swcobrado" class="btn btn-outline-info btn-xs cursor"
+                              (click)="impComprobante(sincobro)" [disabled]="!sincobro.pagado">
                               <i class="fa fa-print"></i> Imprimir
                            </button>
                         </td>
@@ -198,8 +220,10 @@
                         <td></td>
                         <td></td>
                         <td></td>
-                        <td class="font-weight-bold"> TOTAL </td>
-                        <td class="text-right font-weight-bold">{{ sumtotal | number: '1.2-2'}}</td>
+                        <td class="font-weight-bold">TOTAL</td>
+                        <td class="text-right font-weight-bold">
+                           {{ sumtotal | number : "1.2-2" }}
+                        </td>
                      </tr>
                   </tbody>
                </table>
@@ -225,7 +249,8 @@
                            <div class="input-group-append">
                               <button class="btn btn-sm btn-primary" (click)="buscarClientes()"
                                  [disabled]="formBusClientes.invalid">
-                                 <i class="fa fa-search" aria-hidden="true"></i> Buscar</button>
+                                 <i class="fa fa-search" aria-hidden="true"></i> Buscar
+                              </button>
                            </div>
                         </div>
                      </div>
@@ -235,7 +260,6 @@
                      <input type="text" class="form-control form-control-sm text-center" placeholder="Filtrar..."
                         [(ngModel)]="filtro" />
                   </div>
-
                </div>
                <div class="row mt-0 pt-0" *ngIf="!formBusClientes.invalid">
                   <table class="table table-hover table-bordered table-sm mt-0 pt-0 clientedetalle" id="tablaClientes">
@@ -247,11 +271,15 @@
                         </tr>
                      </thead>
                      <tbody id="id-tbody">
-                        <tr *ngFor="let cliente of _clientes  | filter:filtro; let i= index"
-                           (click)="selecCliente(cliente)" data-dismiss="modal">
-                           <td class="text-center small font-weight-bold py-0">{{i+1}}</td>
-                           <td class="py-0">{{cliente.nombre}}</td>
-                           <td class="py-0">{{cliente.cedula}}</td>
+                        <tr *ngFor="
+                    let cliente of _clientes | filter : filtro;
+                    let i = index
+                  " (click)="selecCliente(cliente)" data-dismiss="modal">
+                           <td class="text-center small font-weight-bold py-0">
+                              {{ i + 1 }}
+                           </td>
+                           <td class="py-0">{{ cliente.nombre }}</td>
+                           <td class="py-0">{{ cliente.cedula }}</td>
                         </tr>
                      </tbody>
                   </table>
@@ -259,7 +287,8 @@
             </div>
             <div class="row justify-content-center mt-0 mb-3">
                <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">
-                  <i class="bi bi-x-circle"></i>&nbsp; Cancelar</button>
+                  <i class="bi bi-x-circle"></i>&nbsp; Cancelar
+               </button>
             </div>
          </div>
       </div>
@@ -338,49 +367,63 @@
             <div class="modal-body col-md-12">
                <form [formGroup]="formCobrar">
                   <div class="col-md-12">
-
                      <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
                            <label class="input-group-text">Forma cobro</label>
                         </div>
                         <select class="custom-select" formControlName="idformacobro" (change)="changeFormacobro()">
                            <option *ngFor="let formacobro of _formascobro" [ngValue]="formacobro"
-                              id="idformacobro{{formacobro.idformacobro}}">
-                              {{formacobro.descripcion}}</option>
+                              id="idformacobro{{ formacobro.idformacobro }}">
+                              {{ formacobro.descripcion }}
+                           </option>
                         </select>
                      </div>
                      <div class="input-group mt-3 mb-3">
-                        <div class="input-group-prepend"> <span class="input-group-text font-weight-bold">A
-                              Cobrar</span> </div>
-                        <input type="text" class="form-control text-right" formControlName="acobrar" readonly>
-                        <div class="input-group-append"> <span class="input-group-text">{{acobrardec}}</span> </div>
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">A Cobrar</span>
+                        </div>
+                        <input type="text" class="form-control text-right" formControlName="acobrar" readonly />
+                        <div class="input-group-append">
+                           <span class="input-group-text">{{ acobrardec }}</span>
+                        </div>
                      </div>
                      <div *ngIf="formacobroNC || f['ncvalor'].value > 0" class="input-group mb-3">
-                        <div class="input-group-prepend"><span class="input-group-text font-weight-bold"
-                              for="dinero">Valor NC</span></div>
-                        <input type="text" class="form-control text-center" formControlName="ncvalor"
-                           [ngClass]="{'is-invalid': f['ncvalor'].invalid && f['ncvalor'].touched,'is-valid': f['ncvalor'].valid, '': f['ncvalor'].untouched}"
-                           (change)="changeNCvalor()">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" for="dinero">Valor NC</span>
+                        </div>
+                        <input type="text" class="form-control text-center" formControlName="ncvalor" [ngClass]="{
+                    'is-invalid': f['ncvalor'].invalid && f['ncvalor'].touched,
+                    'is-valid': f['ncvalor'].valid,
+                    '': f['ncvalor'].untouched
+                  }" (change)="changeNCvalor()" />
                      </div>
                      <div *ngIf="!formacobroNC" class="input-group mb-3">
-                        <div class="input-group-prepend"><span class="input-group-text font-weight-bold"
-                              for="dinero">Dinero</span></div>
-                        <input type="text" class="form-control text-center" formControlName="dinero" [ngClass]="{'is-invalid': f['dinero'].invalid && f['dinero'].touched,
-                        'is-valid': f['dinero'].valid, '': f['dinero'].untouched}" (change)="changeDinero()">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" for="dinero">Dinero</span>
+                        </div>
+                        <input type="text" class="form-control text-center" formControlName="dinero" [ngClass]="{
+                    'is-invalid': f['dinero'].invalid && f['dinero'].touched,
+                    'is-valid': f['dinero'].valid,
+                    '': f['dinero'].untouched
+                  }" (change)="changeDinero()" />
                         <div class="input-group-append">
                            <button type="button" class="btn btn-outline-success btn-xm" (click)="valorDinero()">
-                              <i class="bi bi-chevron-double-down"></i></button>
+                              <i class="bi bi-chevron-double-down"></i>
+                           </button>
                         </div>
                      </div>
                      <div class="input-group mb-3">
-                        <div class="input-group-prepend"> <span class="input-group-text font-weight-bold">Vuelto</span>
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Vuelto</span>
                         </div>
-                        <input type="text" class="form-control text-center" formControlName="vuelto" readonly>
-                        <div *ngIf="disabledcobro; then thenBlock else elseBlock"></div>
+                        <input type="text" class="form-control text-center" formControlName="vuelto" readonly />
+                        <div *ngIf="disabledcobro; then thenBlock; else elseBlock"></div>
                         <ng-template #thenBlock><span class="input-group-text bg-danger"><i class="bi bi-x-circle"></i>
-                           </span> </ng-template>
+                           </span>
+                        </ng-template>
                         <ng-template #elseBlock><span class="input-group-text bg-success"><i
-                                 class="fa fa-check-circle"></i></span> </ng-template>
+                                 class="fa fa-check-circle"></i></span>
+                        </ng-template>
                      </div>
                   </div>
                </form>
@@ -388,9 +431,11 @@
             <div class="row mt-0 mb-3 justify-content-center">
                <button type="button" class="btn btn-success btn-sm mx-1" [disabled]="disabledcobro" (click)="cobrar()"
                   data-dismiss="modal">
-                  <i class="fa fa-check-circle"></i> Aceptar</button>
+                  <i class="fa fa-check-circle"></i> Aceptar
+               </button>
                <button type="button" class="btn btn-sm btn-outline-success mx-1" data-dismiss="modal">
-                  <i class="bi bi-x-circle"></i> Cancelar</button>
+                  <i class="bi bi-x-circle"></i> Cancelar
+               </button>
             </div>
          </div>
       </div>
@@ -399,23 +444,25 @@
    <div class="modal fade" id="DetallePlanillaModal" tabindex="-1" aria-labelledby="DetallePlanillaModal">
       <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
          <div class="modal-content recaudadetalle">
-
             <div class="py-2 recaudacabecera">
                <div class="row text-center">
                   <div class="col">
-                     <h5 class="modal-title" id="DetalleFacturaModalLabel"><strong>Planilla:</strong> {{idfactura}}</h5>
+                     <h5 class="modal-title" id="DetalleFacturaModalLabel">
+                        <strong>Planilla:</strong> {{ idfactura }}
+                     </h5>
                   </div>
                </div>
                <div class="row text-center">
                   <div class="col">
-                     <h6 class="fantacyblack"><strong>Consumo:</strong> {{consumo}} m<sup>3</sup></h6>
+                     <h6 class="fantacyblack">
+                        <strong>Consumo:</strong> {{ consumo }} m<sup>3</sup>
+                     </h6>
                   </div>
                </div>
             </div>
 
-
             <div class="modal-body">
-               <table class="table table-hover table-sm table-bordered mb-0 ">
+               <table class="table table-hover table-sm table-bordered mb-0">
                   <thead class="recaudacabecera">
                      <tr class="text-center">
                         <th></th>
@@ -424,15 +471,19 @@
                      </tr>
                   </thead>
                   <tbody>
-                     <tr *ngFor="let rubroxfac of _rubrosxfac; let i=index" class="fila">
-                        <td class="text-center font-weight-bold small">{{i+1}}</td>
-                        <td>{{ rubroxfac.idrubro_rubros.descripcion}}</td>
-                        <td class="text-right">{{ rubroxfac.valorunitario | number:'1.2-2'}}</td>
+                     <tr *ngFor="let rubroxfac of _rubrosxfac; let i = index" class="fila">
+                        <td class="text-center font-weight-bold small">{{ i + 1 }}</td>
+                        <td>{{ rubroxfac.idrubro_rubros.descripcion }}</td>
+                        <td class="text-right">
+                           {{ rubroxfac.valorunitario | number : "1.2-2" }}
+                        </td>
                      </tr>
                      <tr>
                         <td></td>
                         <td>Interés</td>
-                        <td class="font-weight-bold text-right">{{ totInteres | number:'1.2-2'}}</td>
+                        <td class="font-weight-bold text-right">
+                           {{ totInteres | number : "1.2-2" }}
+                        </td>
                      </tr>
                      <!-- <tr>
                         <td></td>
@@ -443,14 +494,17 @@
                      <tr>
                         <td></td>
                         <td class="font-weight-bold">TOTAL</td>
-                        <td class="font-weight-bold text-right">{{ totfac | number:'1.2-2'}}</td>
+                        <td class="font-weight-bold text-right">
+                           {{ totfac | number : "1.2-2" }}
+                        </td>
                      </tr>
                   </tbody>
                </table>
             </div>
             <div class="row justify-content-center mt-0 mb-3">
                <button type="button" class="btn btn-success btn-sm" data-dismiss="modal">
-                  <i class="fa fa-times-circle"></i> Cerrar</button>
+                  <i class="fa fa-times-circle"></i> Cerrar
+               </button>
             </div>
          </div>
       </div>
@@ -461,48 +515,51 @@
       aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-sm">
          <div class="modal-content recaudadetalle">
-
-            <div class='modal-header py-2 justify-content-center recaudacabecera'>
-               <h5 class='modal-title font-weight-bold fantacyblack' id='ModalLabel'>Datos caja: {{_caja.codigo}}</h5>
+            <div class="modal-header py-2 justify-content-center recaudacabecera">
+               <h5 class="modal-title font-weight-bold fantacyblack" id="ModalLabel">
+                  Datos caja: {{ _caja.codigo }}
+               </h5>
             </div>
-            <div class='modal-body'>
+            <div class="modal-body">
                <div class="form-group">
                   <div class="input-group input-group-sm mb-3">
                      <div class="input-group-prepend">
-                        <span class="input-group-text " for="establecimiento">Usuario</span>
+                        <span class="input-group-text" for="establecimiento">Usuario</span>
                      </div>
-                     <input type="text" id="establecimiento" value={{_usuario.alias}} readonly
-                        class="form-control form-control-sm">
+                     <input type="text" id="establecimiento" value="{{ _usuario.alias }}" readonly
+                        class="form-control form-control-sm" />
                   </div>
                   <div class="input-group input-group-sm mb-3">
                      <div class="input-group-prepend">
-                        <span class="input-group-text " for="establecimiento">Establecimiento</span>
+                        <span class="input-group-text" for="establecimiento">Establecimiento</span>
                      </div>
-                     <input type="text" id="establecimiento" value={{_establecimiento.establecimiento}} readonly
-                        class="form-control form-control-sm">
+                     <input type="text" id="establecimiento" value="{{ _establecimiento.establecimiento }}" readonly
+                        class="form-control form-control-sm" />
                   </div>
                   <div class="input-group input-group-sm mb-3">
                      <div class="input-group-prepend">
-                        <span class="input-group-text " for="establecimiento">Nro. Factura</span>
+                        <span class="input-group-text" for="establecimiento">Nro. Factura</span>
                      </div>
-                     <input type="text" id="establecimiento" value={{_nroFactura}} readonly
-                        class="form-control form-control-sm">
+                     <input type="text" id="establecimiento" value="{{ _nroFactura }}" readonly
+                        class="form-control form-control-sm" />
                   </div>
                </div>
                <div class="alert alert-warning text-center mt-3 mb-0" *ngIf="cajaActiva">
-                  <h6> <strong>Esta caja ya esta iniciada en otro computador</strong></h6>
+                  <h6>
+                     <strong>Esta caja ya esta iniciada en otro computador</strong>
+                  </h6>
                </div>
-
             </div>
-            <div class='row justify-content-center mt-1 mb-3'>
-               <button type='button' class='btn btn-success btn-sm mx-1' [disabled]="cajaActiva" data-dismiss='modal'
+            <div class="row justify-content-center mt-1 mb-3">
+               <button type="button" class="btn btn-success btn-sm mx-1" [disabled]="cajaActiva" data-dismiss="modal"
                   (click)="validarCaja()">
-                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
-               <button type='button' class='btn btn-sm btn-outline-success mx-1' data-dismiss='modal'>
-                  <i class="bi bi-x-circle"></i> Cancelar</button>
+                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar
+               </button>
+               <button type="button" class="btn btn-sm btn-outline-success mx-1" data-dismiss="modal">
+                  <i class="bi bi-x-circle"></i> Cancelar
+               </button>
             </div>
          </div>
-
       </div>
    </div>
    <!-- MODAL Cerrar Caja -->
@@ -510,24 +567,29 @@
       aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-sm">
          <div class="modal-content recaudadetalle">
-
-            <div class='modal-header py-2 justify-content-center recaudacabecera'>
-               <h5 class='modal-title font-weight-bold fantacyblack' id='ModalLabel'>Cerrar</h5>
+            <div class="modal-header py-2 justify-content-center recaudacabecera">
+               <h5 class="modal-title font-weight-bold fantacyblack" id="ModalLabel">
+                  Cerrar
+               </h5>
             </div>
-            <div class='modal-body'>
-               <p>Advertencia: Al cerrar se registra el Total recaudado hasta el momento.</p>
+            <div class="modal-body">
+               <p>
+                  Advertencia: Al cerrar se registra el Total recaudado hasta el
+                  momento.
+               </p>
                <div class="alert alert-warning text-center mt-3 mb-0">
-                  <h6> <strong>¿ Cerrar la caja ?</strong></h6>
+                  <h6><strong>¿ Cerrar la caja ?</strong></h6>
                </div>
             </div>
-            <div class='row justify-content-center mt-1 mb-3'>
-               <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="cerrarCaja()">
-                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
-               <button type='button' class='btn btn-sm btn-outline-success mx-1' data-dismiss='modal'>
-                  <i class="bi bi-x-circle"></i> Cancelar</button>
+            <div class="row justify-content-center mt-1 mb-3">
+               <button type="button" class="btn btn-success btn-sm mx-1" data-dismiss="modal" (click)="cerrarCaja()">
+                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar
+               </button>
+               <button type="button" class="btn btn-sm btn-outline-success mx-1" data-dismiss="modal">
+                  <i class="bi bi-x-circle"></i> Cancelar
+               </button>
             </div>
          </div>
-
       </div>
    </div>
 
@@ -544,7 +606,9 @@
                   <div class="col-md-12">
                      <!-- ========= Color Cabecera ============ -->
                      <div class="col-sm-12 ml-2 mb-0">
-                        <div class=""> <span class="font-weight-bold">Cabecera</span> </div>
+                        <div class="">
+                           <span class="font-weight-bold">Cabecera</span>
+                        </div>
                      </div>
                      <div class="row col-sm-12 mt-1 mb-1">
                         <div class="form-group col-sm-5 mb-0">
@@ -554,8 +618,9 @@
                               </div>
                               <select class="custom-select" id="tonocabecera" formControlName="tonos0">
                                  <option *ngFor="let tono of _tonoscabecera" [ngValue]="tono"
-                                    id="idcolor{{tono.idcolor}}">
-                                    {{tono.nombre}}</option>
+                                    id="idcolor{{ tono.idcolor }}">
+                                    {{ tono.nombre }}
+                                 </option>
                               </select>
                            </div>
                         </div>
@@ -566,7 +631,7 @@
                               </div>
                               <select class="custom-select" id="uso_old" formControlName="colores0">
                                  <option *ngFor="let color of _colorescabecera" [ngValue]="color"
-                                    id="idcolor{{color.idcolor}}">
+                                    id="idcolor{{ color.idcolor }}">
                                     {{ color.nombre }}
                                  </option>
                               </select>
@@ -575,7 +640,9 @@
                      </div>
                      <!-- ================ Color Detalle ================ -->
                      <div class="col-sm-12 ml-2 mb-0">
-                        <div class=""> <span class="font-weight-bold">Detalle</span> </div>
+                        <div class="">
+                           <span class="font-weight-bold">Detalle</span>
+                        </div>
                      </div>
                      <div class="row col-sm-12 mt-1 mb-1">
                         <div class="form-group col-sm-5 mb-0">
@@ -585,8 +652,9 @@
                               </div>
                               <select class="custom-select" id="tonodetalle" formControlName="tonos1">
                                  <option *ngFor="let tono of _tonosdetalle" [ngValue]="tono"
-                                    id="idcolor{{tono.idcolor}}">
-                                    {{tono.nombre}}</option>
+                                    id="idcolor{{ tono.idcolor }}">
+                                    {{ tono.nombre }}
+                                 </option>
                               </select>
                            </div>
                         </div>
@@ -597,7 +665,7 @@
                               </div>
                               <select class="custom-select" id="uso_old" formControlName="colores1">
                                  <option *ngFor="let color of _coloresdetalle" [ngValue]="color"
-                                    id="idcolor{{color.idcolor}}">
+                                    id="idcolor{{ color.idcolor }}">
                                     {{ color.nombre }}
                                  </option>
                               </select>
@@ -609,26 +677,25 @@
             </div>
             <div class="row mt-0 mb-3 justify-content-center">
                <button type="button" class="btn btn-success btn-sm mx-1" [disabled]="disabledcobro">
-                  <i class="fa fa-check-circle"></i> Aceptar</button>
+                  <i class="fa fa-check-circle"></i> Aceptar
+               </button>
                <button type="button" class="btn btn-sm btn-outline-success mx-1" data-dismiss="modal">
-                  <i class="bi bi-x-circle"></i> Cancelar</button>
+                  <i class="bi bi-x-circle"></i> Cancelar
+               </button>
             </div>
          </div>
       </div>
    </div>
-
 </div>
-
 
 <!-- MODAL Imprimir-->
 <div class="modal fade" id="imprimir" tabindex="-1" aria-labelledby="imprimirLabel" aria-hidden="true">
    <div class="modal-dialog modal-dialog-centered modal-sm">
       <div class="modal-content border">
-         <div class='modal-header py-2 justify-content-center cabecera'>
-            <h5 class='modal-title font-weight-bold' id='ModalLabel'>Imprimir</h5>
+         <div class="modal-header py-2 justify-content-center cabecera">
+            <h5 class="modal-title font-weight-bold" id="ModalLabel">Imprimir</h5>
          </div>
-         <div class='modal-body cuerpo'>
-
+         <div class="modal-body cuerpo">
             <div class="input-group mb-3 input-group-sm">
                <div class="input-group-prepend">
                   <label class="input-group-text" for="inputGroupSelect01">Opciones</label>
@@ -642,11 +709,11 @@
                <div class="input-group-prepend">
                   <small class="input-group-text">Cuenta</small>
                   <div class="input-group-text">
-                     <input type="text" class="form-control form-control-sm" [(ngModel)]="cuenta">
+                     <input type="text" class="form-control form-control-sm" [(ngModel)]="cuenta" />
                   </div>
                </div>
             </div>
- <!--            <div class="input-group input-group-sm mb-2">
+            <!--            <div class="input-group input-group-sm mb-2">
                <div class="input-group-prepend">
                   <small class="input-group-text">Hasta</small>
                   <div class="input-group-text">
@@ -658,25 +725,25 @@
                <div class="input-group-prepend">
                   <small class="input-group-text">Abrir en otra página</small>
                   <div class="input-group-text">
-                     <input type="checkbox" [(ngModel)]="otraPagina">
+                     <input type="checkbox" [(ngModel)]="otraPagina" />
                   </div>
                </div>
             </div>
 
-            <div class='row justify-content-center mt-3'>
-               <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="pdf()"
+            <div class="row justify-content-center mt-3">
+               <button type="button" class="btn btn-success btn-sm mx-1" data-dismiss="modal" (click)="pdf()"
                   [attr.data-target]="otraPagina ? null : '#pdf'" data-toggle="modal">
-                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
-               <button type='button' class='btn btn-sm btn-outline-success btn-sm mx-1' data-dismiss='modal'>
-                  <i class="bi bi-x-circle"></i> Cancelar</button>
+                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar
+               </button>
+               <button type="button" class="btn btn-sm btn-outline-success btn-sm mx-1" data-dismiss="modal">
+                  <i class="bi bi-x-circle"></i> Cancelar
+               </button>
             </div>
-
          </div>
       </div>
    </div>
 </div>
 <!-- MODAL PDF (En la misma página)-->
-<div class='modal fade' id='pdf' tabindex='-1' aria-labelledby='pdf' aria-hidden='true'>
-   <div class='modal-dialog modal-sm'>
-   </div>
+<div class="modal fade" id="pdf" tabindex="-1" aria-labelledby="pdf" aria-hidden="true">
+   <div class="modal-dialog modal-sm"></div>
 </div>

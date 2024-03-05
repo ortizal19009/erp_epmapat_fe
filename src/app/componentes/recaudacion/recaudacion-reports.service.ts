@@ -62,7 +62,7 @@ export class RecaudacionReportsService {
       },
       columns: ['EPMAPA-TULCAN', ''],
       body: [
-        [`Nro factura: ${datos.nrofactura}`],
+        [`Nro comp: ${datos.nrofactura}`],
         [`Ruc/cedula: ${datos.idcliente.cedula}`],
         [`Mes pagado: ${l_datos.fechaemision.slice(0, 10)}`],
         [`Cliente: ${datos.idcliente.nombre}`],

@@ -381,15 +381,14 @@ export class AddRecaudaComponent implements OnInit {
             }
             let com = 0;
             if (this._sincobro[i].idmodulo.idmodulo == 3) com = 1;
-
-            this._sincobro[i].interes = interes;
+            //this._sincobro[i].interes = interes;
             this._sincobro[i].comerc = com;
             this._sincobro[i].multa = 0;
             suma +=
               this._sincobro[i].totaltarifa +
               this._sincobro[i].comerc +
               this._sincobro[i].multa +
-              this._sincobro[i].interes;
+              /* this._sincobro[i].interes; */
             i++;
           });
           this.sumtotal = suma;
@@ -469,6 +468,7 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   marcarTodas(event: any) {
+    console.log(event)
     let valor: number = 0;
     if (event.target.checked) {
       valor = 1;
@@ -482,6 +482,7 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   marcarAnteriores(index: number) {
+    console.log(index)
     if (
       this._sincobro[index].idmodulo.idmodulo === 3 /* ||
       this._sincobro[index].idmodulo.idmodulo === 4 */
@@ -531,17 +532,38 @@ export class AddRecaudaComponent implements OnInit {
           suma +=
             this._sincobro[i].totaltarifa +
             this._sincobro[i].comerc +
-            +this._sincobro[i].interes;
           this._sincobro[i].multa;
         } else {
-          suma += this._sincobro[i].totaltarifa + +this._sincobro[i].interes;
+          suma += this._sincobro[i].totaltarifa ;
         }
       }
       i++;
     });
     this.acobrar = suma;
+    console.log(this.acobrar)
   }
 
+/*   valorAcobrar(acobrar: number) {
+    this.disabledcobro = true;
+    let entero = Math.trunc(acobrar);
+    let decimal = (acobrar - entero).toFixed(2);
+    this.acobrardec = decimal.toString().slice(1);
+    const primerPagado = this._sincobro.find(
+      (registro: { pagado: number }) => registro.pagado == 1
+    );
+    let fcobro: number; //3= Transferencia
+    if (primerPagado.estado == 3) fcobro = this._formascobro[1];
+    else fcobro = this._formascobro[0];
+    this.formCobrar.patchValue({
+      // idformacobro: this._formascobro[0],
+      idformacobro: fcobro,
+      valorAcobrar: acobrar,
+      acobrar: entero,
+      dinero: '',
+      vuelto: '',
+      ncvalor: '',
+    });
+  } */
   valorAcobrar(acobrar: number) {
     this.disabledcobro = true;
     let entero = Math.trunc(acobrar);
@@ -679,7 +701,6 @@ export class AddRecaudaComponent implements OnInit {
 
   cobrar() {
     //Crea el registro en Recaudación
-
     let fecha = new Date();
     let r = {} as iRecaudacion; //Interface para los datos de la Recaudación
     r.fechacobro = fecha;
@@ -741,7 +762,6 @@ export class AddRecaudaComponent implements OnInit {
               let rubro: Rubros = new Rubros();
               rubro.idrubro = 5;
               this.saveRubxFac(fac, rubro, this.cInteres(fac));
-
               if (fac.estado === 2) {
                 fac.estado = 2;
               } else {
@@ -792,7 +812,6 @@ export class AddRecaudaComponent implements OnInit {
       if (i < this._sincobro.length) this.facxrecauda(recaCreada, i);
     }
   }
-
   tonos() {
     setTimeout(() => {
       this.coloService.getTonos().subscribe({
@@ -875,7 +894,6 @@ export class AddRecaudaComponent implements OnInit {
         });
     });
   }
-
   //Que el dinero no sea menor que el valor a cobrar
   valDinero(control: AbstractControl) {
     let ncvalor: number;
@@ -988,15 +1006,16 @@ export class AddRecaudaComponent implements OnInit {
   }
   /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
   cInteres(factura: any) {
+    this.factura = factura;
     this.totInteres = 0;
     this.arrCalculoInteres = [];
     let interes: number = 0;
+    if (factura.estado != 3) {
     let fec = factura.feccrea.toString().split('-', 2);
     let fechai: Date = new Date(`${fec[0]}-${fec[1]}-01`);
     let fechaf: Date = new Date();
-    this.factura = factura;
     console.log(this.factura);
-    if (factura.estado != 3) {
+    console.log(fechai, fechaf)
       fechaf.setMonth(fechaf.getMonth() - 1);
       while (fechai <= fechaf) {
         this.calInteres = {} as calcInteres;
@@ -1025,7 +1044,8 @@ export class AddRecaudaComponent implements OnInit {
         // this.subtotal();
       });
     }
-    return interes;
+    console.log(interes)
+      return interes;
   }
   valorTarifas(tarifa: number, cons: number, interes: number, multa: number) {
     let t = 0,

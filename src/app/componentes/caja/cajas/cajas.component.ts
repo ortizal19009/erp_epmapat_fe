@@ -10,6 +10,7 @@ import { Usuarios } from 'src/app/modelos/administracion/usuarios.model';
 import { CajaService } from 'src/app/servicios/caja.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { PdfService } from 'src/app/servicios/pdf.service';
+import { RecaudacionService } from 'src/app/servicios/recaudacion.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 
 @Component({
@@ -24,6 +25,7 @@ export class ListarCajaComponent implements OnInit {
   usuario: Usuarios = new Usuarios();
   caja = {} as Caja;
   today: Date = new Date();
+  desde: any;
   hasta: any;
   constructor(
     private cajaService: CajaService,
@@ -32,7 +34,8 @@ export class ListarCajaComponent implements OnInit {
     private coloresService: ColoresService,
     private _pdf: PdfService,
     private s_facturas: FacturaService,
-    private s_rubroxfac: RubroxfacService
+    private s_rubroxfac: RubroxfacService,
+    private s_recaudacion: RecaudacionService
   ) {}
 
   ngOnInit(): void {
@@ -46,6 +49,8 @@ export class ListarCajaComponent implements OnInit {
     /*     let date_f = date.toISOString().slice(0, 10);
     console.log(date); */
     console.log(fDate);
+    this.desde = fDate;
+    this.hasta = fDate;
     //this.today.setDate(fDate.toString())
   }
 
@@ -99,28 +104,25 @@ export class ListarCajaComponent implements OnInit {
 
   pdf() {
     //const facs = await this.getFacturas();
-
     /*     let fac = this.s_facturas.findByfechacobro(this.today).toPromise();
     return fac; */
-
-    this.s_facturas.findByfechacobro(this.today).subscribe({
+    /*     this.s_facturas.findByfechacobro(this.today).subscribe({
       next: (d_facturas: any) => {
         console.log(d_facturas);
 
         d_facturas.forEach(async (item: any, index: number) => {
           const rxf = await this.getRubrosxfac(item.idfactura);
           console.log((item = { ...rxf }));
-        });
-        /*         this.s_rubroxfac.getByFechacobro(this.today).subscribe({
+        }); */
+    /*         this.s_rubroxfac.getByFechacobro(this.today).subscribe({
           next: (d_rubrosxfac) => {
             console.log(d_rubrosxfac);
           },
           error: (e) => console.error(e),
         }); */
-      },
-      error: (e) => console.error(e),
-    });
-
+    /*     },
+      error: (e) => console.error(e), */
+    /*     }); */
     /*this.cajaService.getCajasxestado().subscribe({
       next: (datosCajas: any) => {
         console.log(datosCajas);
@@ -165,6 +167,11 @@ export class ListarCajaComponent implements OnInit {
     });
     /* console.log(this.usuario);
     console.log(this.caja); */
+    this.s_recaudacion.getRecaudadores(this.desde, this.hasta).subscribe({
+      next: (datos) => {
+        console.log(datos);
+      },
+    });
   }
   async getFacturas(): Promise<any> {
     let fac = this.s_facturas.findByfechacobro(this.today).toPromise();
