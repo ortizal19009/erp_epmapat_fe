@@ -381,14 +381,14 @@ export class AddRecaudaComponent implements OnInit {
             }
             let com = 0;
             if (this._sincobro[i].idmodulo.idmodulo == 3) com = 1;
-            //this._sincobro[i].interes = interes;
+            this._sincobro[i].interes = interes;
             this._sincobro[i].comerc = com;
             this._sincobro[i].multa = 0;
             suma +=
               this._sincobro[i].totaltarifa +
               this._sincobro[i].comerc +
               this._sincobro[i].multa +
-              /* this._sincobro[i].interes; */
+              this._sincobro[i].interes;
             i++;
           });
           this.sumtotal = suma;
@@ -468,7 +468,7 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   marcarTodas(event: any) {
-    console.log(event)
+    console.log(event);
     let valor: number = 0;
     if (event.target.checked) {
       valor = 1;
@@ -482,7 +482,7 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   marcarAnteriores(index: number) {
-    console.log(index)
+    console.log(index);
     if (
       this._sincobro[index].idmodulo.idmodulo === 3 /* ||
       this._sincobro[index].idmodulo.idmodulo === 4 */
@@ -522,6 +522,7 @@ export class AddRecaudaComponent implements OnInit {
   totalAcobrar() {
     let suma: number = 0;
     let i = 0;
+    console.log(this._sincobro);
     this._sincobro.forEach((item: any, index: number) => {
       console.log(item);
       if (this._sincobro[i].pagado === true || this._sincobro[i].pagado === 1) {
@@ -532,18 +533,19 @@ export class AddRecaudaComponent implements OnInit {
           suma +=
             this._sincobro[i].totaltarifa +
             this._sincobro[i].comerc +
+            +this._sincobro[i].interes;
           this._sincobro[i].multa;
         } else {
-          suma += this._sincobro[i].totaltarifa ;
+          suma += this._sincobro[i].totaltarifa + +this._sincobro[i].interes;
         }
       }
       i++;
     });
     this.acobrar = suma;
-    console.log(this.acobrar)
+    console.log(this.acobrar);
   }
 
-/*   valorAcobrar(acobrar: number) {
+  /*   valorAcobrar(acobrar: number) {
     this.disabledcobro = true;
     let entero = Math.trunc(acobrar);
     let decimal = (acobrar - entero).toFixed(2);
@@ -913,6 +915,7 @@ export class AddRecaudaComponent implements OnInit {
     this.idfactura = datos.idfactura;
     this.facService.getById(datos.idfactura).subscribe({
       next: (datos) => {
+        console.log(datos);
         factura = datos;
       },
       error: (e) => console.error(e),
@@ -926,11 +929,13 @@ export class AddRecaudaComponent implements OnInit {
         console.error(e);
       },
     });
+    console.log(datos);
     this.rubxfacService.getByIdfactura(+datos.idfactura!).subscribe({
       next: (detalle) => {
+        console.log(detalle);
         this._rubrosxfac = detalle;
 
-        this.s_pdfRecaudacion.comprobantePago(lectura, detalle);
+        this.s_pdfRecaudacion.comprobantePago(factura, detalle);
         /*  this.lecService.getByIdfactura(idfactura).subscribe({
           next: (resp) => {
             _lecturas = resp;
@@ -1011,11 +1016,11 @@ export class AddRecaudaComponent implements OnInit {
     this.arrCalculoInteres = [];
     let interes: number = 0;
     if (factura.estado != 3) {
-    let fec = factura.feccrea.toString().split('-', 2);
-    let fechai: Date = new Date(`${fec[0]}-${fec[1]}-01`);
-    let fechaf: Date = new Date();
-    console.log(this.factura);
-    console.log(fechai, fechaf)
+      let fec = factura.feccrea.toString().split('-', 2);
+      let fechai: Date = new Date(`${fec[0]}-${fec[1]}-01`);
+      let fechaf: Date = new Date();
+      console.log(this.factura);
+      console.log(fechai, fechaf);
       fechaf.setMonth(fechaf.getMonth() - 1);
       while (fechai <= fechaf) {
         this.calInteres = {} as calcInteres;
@@ -1044,8 +1049,8 @@ export class AddRecaudaComponent implements OnInit {
         // this.subtotal();
       });
     }
-    console.log(interes)
-      return interes;
+    console.log(interes);
+    return interes;
   }
   valorTarifas(tarifa: number, cons: number, interes: number, multa: number) {
     let t = 0,
