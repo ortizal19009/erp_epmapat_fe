@@ -13,6 +13,7 @@ import { Usuarios } from 'src/app/modelos/administracion/usuarios.model';
 import { format, parse } from '@formkit/tempo';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { FacxrecaudaService } from 'src/app/servicios/facxrecauda.service';
+import { RecaudacionService } from 'src/app/servicios/recaudacion.service';
 
 @Component({
   selector: 'app-info-caja',
@@ -40,7 +41,8 @@ export class InfoCajaComponent implements OnInit {
     private _pdf: PdfService,
     private s_facturas: FacturaService,
     private s_rubroxfac: RubroxfacService,
-    private s_facxrecauda: FacxrecaudaService
+    private s_facxrecauda: FacxrecaudaService,
+    private s_recaudacion: RecaudacionService
   ) {}
 
   ngOnInit(): void {
@@ -151,92 +153,38 @@ export class InfoCajaComponent implements OnInit {
   }
   pdf() {
     var datosBody: any = [];
-    console.log(this.usuario);
-    console.log(this.caja);
     this.s_facxrecauda
       .getByUsuFecha(this.usuario.idusuario, this.desde, this.hasta)
       .subscribe({
         next: (datos: any) => {
-          console.log(datos);
-          let total = 0;
-          datos.forEach((item: any) => {
-            datosBody.push([
-              item.idfactura.nrofactura,
-              item.idfactura.idcliente.nombre,
-              item.idfactura.idmodulo.descripcion,
-              item.idrecaudacion.totalpagar.toFixed(2),
-              item.idfactura.fechacobro,
-              item.idfactura.horacobro,
-              this.usuario.nomusu,
-            ]);
-            total += item.idrecaudacion.totalpagar;
-          });
-          this.pdf2(datosBody, total);
+          this.s_recaudacion
+            .getByRecaudador(this.usuario.idusuario, this.desde, this.hasta)
+            .subscribe({
+              next: (_datos: any) => {
+                let total_pagar: any = 0;
+                _datos.forEach((item: any) => {
+                  total_pagar += item.totalpagar;
+                });
+                let total = 0;
+                datos.forEach((item: any) => {
+                  datosBody.push([
+                    item.idfactura.nrofactura,
+                    item.idfactura.idcliente.nombre,
+                    item.idfactura.idmodulo.descripcion,
+                    item.idrecaudacion.totalpagar.toFixed(2),
+                    item.idfactura.fechacobro,
+                    item.idrecaudacion.idrecaudacion,
+                    this.usuario.nomusu,
+                  ]);
+                  total += item.idrecaudacion.totalpagar;
+                });
+                this.pdf2(datosBody, total_pagar);
+              },
+              error: (e) => console.error(e),
+            });
         },
         error: (e) => console.error,
       });
-
-    /* 
-    this.s_facturas
-      .findByUsucobro(this.usuario.idusuario, this.desde, this.hasta)
-      .subscribe({
-        next: async (datos: any) => {
-          var i = 0;
-          console.log(datos);
-          if (datos != null) {
-            /*             datos.forEach(() => {
-              console.log(datos[i]);
-              let suma = 0;
-              this.s_rubroxfac
-                .getSumaValoresUnitarios(datos[i].idfactura)
-                .subscribe({
-                  next: (val: any) => {
-                    suma = val.toFixed(2);
-                    i++;
-                  },
-                });
-              console.log(suma);
-              datosBody.push([
-                datos[i].nrofactura,
-                datos[i].idcliente.nombre,
-                datos[i].idmodulo.descripcion,
-                suma,
-                datos[i].fechacobro,
-                datos[i].horacobro,
-                this.usuario.nomusu,
-              ]);
-            }); */
-    /*      let formato = datos.map((item: any) => {
-                   this.s_rubroxfac
-                     .getSumaValoresUnitarios(item.idfactura)
-                     .subscribe({
-                       next: (suma) => {
-                         console.log(suma);
-                         item.totaltarifa = suma;
-                         return item;
-                       },
-                       error: (e) => console.error(e),
-                     });
-                 });
-                 console.log(formato); 
-
-            const getFormato = async (dato: any[]) => {
-              return await Promise.all(
-                dato.map(async (item: any) => {
-                  item.totaltarifa = await this.s_rubroxfac.getSumaValoresUnitarios(item.idfactura);
-                  return item;
-                })
-              );
-            };
-
-            const formato = await getFormato(datos);
-
-            console.log(formato);
-            // this.pdf2(datosBody);
-          }
-        },
-        error: (e) => console.error(e),
-      }); */
   }
   pdf2(datosBody: any, total: number) {
     let _total = total.toFixed(2);
@@ -244,17 +192,6 @@ export class InfoCajaComponent implements OnInit {
     let doc = new jsPDF('p', 'pt', 'a4');
     this._pdf.header('REPORTE INDIVIDUAL DE COBROS POR CAJA', doc);
     let m_izquierda = 10;
-
-    /*             this._facturacion.forEach(() => {
-                     let fecha = this._facturacion[i].feccrea.slice(8, 10).concat('-', this._facturacion[i].feccrea.slice(5, 7), '-', this._facturacion[i].feccrea.slice(0, 4))
-                     datos.push([this._facturacion[i].idfacturacion, fecha,
-                     this._facturacion[i].idcliente_clientes.nombre,
-                     this._facturacion[i].descripcion, this._facturacion[i].total, this._facturacion[i].cuotas]);
-                     i++;
-                  }); */
-
-    //datos.push(['', 'TOTAL', '', '', this.sumtotal]);
-
     const addPageNumbers = function () {
       const pageCount = doc.internal.pages.length;
       for (let i = 1; i <= pageCount - 1; i++) {
@@ -301,7 +238,6 @@ export class InfoCajaComponent implements OnInit {
             },
             margin: { left: m_izquierda - 1, top: 19, right: 4, bottom: 13 }, */
       body: datosBody,
-
       didParseCell: function (data) {
         var fila = data.row.index;
         var columna = data.column.index;
@@ -311,8 +247,9 @@ export class InfoCajaComponent implements OnInit {
             }  */ // Total Bold
       },
     });
-    console.log(_total);
-    doc.text(`TOTAL: ${_total}`, 50, 50);
+    autoTable(doc, {
+      body: [['TOTAL: ', _total]],
+    });
     addPageNumbers();
 
     var opciones = {

@@ -19,7 +19,7 @@ export class RecaudacionService {
 
   getByRecaudador(idrecaudador: number, d: Date, h: Date) {
     return this.http.get<Recaudacion[]>(
-      `${baseUrl}//reporte/recaudador?idrecaudador=${idrecaudador}&d=${d}&h=${h}`
+      `${baseUrl}/reporte/recaudador?idrecaudador=${idrecaudador}&d=${d}&h=${h}`
     );
   }
   getByfecha(d: Date, h: Date) {

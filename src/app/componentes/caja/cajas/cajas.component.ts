@@ -11,6 +11,7 @@ import { CajaService } from 'src/app/servicios/caja.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { PdfService } from 'src/app/servicios/pdf.service';
 import { RecaudacionService } from 'src/app/servicios/recaudacion.service';
+import { RubrosService } from 'src/app/servicios/rubros.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 
 @Component({
@@ -27,6 +28,7 @@ export class ListarCajaComponent implements OnInit {
   today: Date = new Date();
   desde: any;
   hasta: any;
+  opt: any;
   constructor(
     private cajaService: CajaService,
     private router: Router,
@@ -35,7 +37,8 @@ export class ListarCajaComponent implements OnInit {
     private _pdf: PdfService,
     private s_facturas: FacturaService,
     private s_rubroxfac: RubroxfacService,
-    private s_recaudacion: RecaudacionService
+    private s_recaudacion: RecaudacionService,
+    private s_rubro: RubrosService
   ) {}
 
   ngOnInit(): void {
@@ -102,7 +105,43 @@ export class ListarCajaComponent implements OnInit {
   //    this.router.navigate(['colores']);
   // }
 
-  pdf() {
+  pdf(opt: any) {
+    console.log(opt);
+    switch (opt) {
+      case '0':
+        this.s_rubroxfac.getByFechacobro(this.desde, this.hasta).subscribe({
+          next: (datos: any) => {
+            let rubros: any[] = [];
+            datos.forEach((item: any) => {
+              console.log(item);
+              /* this.s_rubro.getRubroById(item.idrubro_rubros).subscribe({
+                next: (rubro) => {
+                  rubros.push(rubro);
+                },
+              }); */
+            });
+            console.log(rubros);
+            console.log(datos);
+          },
+          error: (e) => console.error(e),
+        });
+        this.s_rubroxfac.getSumaRubros(this.desde, this.hasta).subscribe({
+          next: (datos) => {
+            console.log(datos);
+          },
+          error: (e) => console.error(e),
+        });
+        break;
+      case '1':
+        this.s_recaudacion.getRecaudadores(this.desde, this.hasta).subscribe({
+          next: (datos) => {
+            console.log(datos);
+          },
+        });
+        break;
+      default:
+        break;
+    }
     //const facs = await this.getFacturas();
     /*     let fac = this.s_facturas.findByfechacobro(this.today).toPromise();
     return fac; */
@@ -167,11 +206,6 @@ export class ListarCajaComponent implements OnInit {
     });
     /* console.log(this.usuario);
     console.log(this.caja); */
-    this.s_recaudacion.getRecaudadores(this.desde, this.hasta).subscribe({
-      next: (datos) => {
-        console.log(datos);
-      },
-    });
   }
   async getFacturas(): Promise<any> {
     let fac = this.s_facturas.findByfechacobro(this.today).toPromise();

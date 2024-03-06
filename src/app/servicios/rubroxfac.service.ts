@@ -11,7 +11,7 @@ const baseUrl = `${apiUrl}/rubroxfac`;
   providedIn: 'root',
 })
 export class RubroxfacService {
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   getListaRubroByFactura(idfactura: number) {
     return this.http.get<Rubroxfac[]>(`${baseUrl}?nrofactura=${idfactura}`);
@@ -39,10 +39,19 @@ export class RubroxfacService {
   async getSumaValoresUnitarios(idfactura: number) {
     return this.http.get(`${baseUrl}/sumavalores?idfactura=${idfactura}`);
   }
-  getByFechacobro(fechacobro: Date) {
+  getSumaRubros(d: Date, h: Date) {
     return this.http.get<Rubroxfac[]>(
-      `${baseUrl}/reportes/fechacobro?fechacobro=${fechacobro}`
+      `${baseUrl}/reportes/fechaCobro?d=${d}&h=${h}`
     );
   }
-
+  getByFechacobro(d: Date, h: Date) {
+    return this.http.get<Rubroxfac[]>(
+      `${baseUrl}/reportes/fecha?d=${d}&h=${h}`
+    );
+  }
+  getSinCobroRF(cuenta: number) {
+    return this.http.get<Rubroxfac[]>(
+      `${baseUrl}/sincobro/rubxfa?cuenta=${cuenta}`
+    );
+  }
 }

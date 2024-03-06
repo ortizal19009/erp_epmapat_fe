@@ -94,8 +94,10 @@
                <div class="input-group-prepend">
                   <label class="input-group-text" for="inputGroupSelect01">Reporte</label>
                </div>
-               <select class="custom-select" id="inputGroupSelect01">
-                  <option selected>Reporte Global</option>
+               <select class="custom-select" id="inputGroupSelect01" [(ngModel)]='opt'>
+                  <option value="0" selected>Reporte Global Rubros</option>
+                  <option value="1">Reporte Global Cajas</option>
+
                </select>
             </div>
 
@@ -103,7 +105,7 @@
                <div class="input-group-prepend">
                   <small class="input-group-text">Desde</small>
                   <div class="input-group-text">
-                     <input type="date" class="form-control form-control-sm" [(ngModel)]= "desde">
+                     <input type="date" class="form-control form-control-sm" [(ngModel)]="desde">
                   </div>
                </div>
             </div>
@@ -111,11 +113,11 @@
                <div class="input-group-prepend">
                   <small class="input-group-text">Hasta</small>
                   <div class="input-group-text">
-                     <input type="date" class="form-control form-control-sm" [(ngModel)]= "hasta">
+                     <input type="date" class="form-control form-control-sm" [(ngModel)]="hasta">
                   </div>
                </div>
             </div>
-<!--             <div class="input-group input-group-sm mb-2">
+            <!--             <div class="input-group input-group-sm mb-2">
                <div class="input-group-prepend">
                   <small class="input-group-text">Hasta</small>
                   <div class="input-group-text">
@@ -133,7 +135,7 @@
             </div>
 
             <div class='row justify-content-center mt-3'>
-               <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="pdf()"
+               <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="pdf(opt)"
                   [attr.data-target]="otraPagina ? null : '#pdf'" data-toggle="modal">
                   <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
                <button type='button' class='btn btn-sm btn-outline-success btn-sm mx-1' data-dismiss='modal'>
