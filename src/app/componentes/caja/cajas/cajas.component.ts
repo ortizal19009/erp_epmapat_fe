@@ -28,7 +28,7 @@ export class ListarCajaComponent implements OnInit {
   today: Date = new Date();
   desde: any;
   hasta: any;
-  opt: any;
+  opt: any = '0';
   constructor(
     private cajaService: CajaService,
     private router: Router,
@@ -49,17 +49,12 @@ export class ListarCajaComponent implements OnInit {
     else this.buscaColor();
     this.listarCajas();
     let fDate = format(fechaActual, 'YYYY-MM-DD');
-    /*     let date_f = date.toISOString().slice(0, 10);
-    console.log(date); */
-    console.log(fDate);
     this.desde = fDate;
     this.hasta = fDate;
-    //this.today.setDate(fDate.toString())
   }
 
   async buscaColor() {
     try {
-      console.log(this.authService.idusuario);
       const datos = await this.coloresService.setcolor(
         +this.authService.idusuario!,
         'cajas'
@@ -99,38 +94,57 @@ export class ListarCajaComponent implements OnInit {
       this.router.navigate(['info-caja']);
     }
   }
-
-  // definircolor() {
-  //    sessionStorage.setItem('ventana', '/cajas');
-  //    this.router.navigate(['colores']);
-  // }
-
   pdf(opt: any) {
     console.log(opt);
     switch (opt) {
       case '0':
         this.s_rubroxfac.getByFechacobro(this.desde, this.hasta).subscribe({
           next: (datos: any) => {
+            console.log(datos);
+            let i_factura = {} as Factura;
+            let n_fxr: any[] = [];
+            datos.forEach((item: any) => {
+              console.log(item);
+              let query = n_fxr.find(
+                (factura: { idfactura: number }) =>
+                  factura.idfactura === item.idfactura_facturas.idfactura
+              );
+              let fac = item.idfactura_facturas;
+              if (!query) {
+                //console.log(query);
+                //console.log(item.idfactura_facturas);
+                fac.rubros = [item.idrubro_rubros];
+                n_fxr.push(item.idfactura_facturas);
+              } else {
+                n_fxr.forEach((_item: any) => {
+                  console.log(_item);
+                  let query;
+                  _item.rubros.push(item.idrubro_rubros);
+                });
+              }
+            });
+            console.log(n_fxr);
+          },
+          error: (e) => console.error(e),
+        });
+        /*         this.s_rubroxfac.getSumaRubros(this.desde, this.hasta).subscribe({
+          next: (datos) => {
             let rubros: any[] = [];
             datos.forEach((item: any) => {
               console.log(item);
-              /* this.s_rubro.getRubroById(item.idrubro_rubros).subscribe({
+              this.s_rubro.getRubroById(item.idrubro_rubros).subscribe({
                 next: (rubro) => {
-                  rubros.push(rubro);
+                  rubros.push({
+                    idrubro: rubro.idrubro,
+                    descripcion: rubro.descripcion,
+                    valor: item.sum,
+                  });
                 },
-              }); */
+              });
             });
-            console.log(rubros);
-            console.log(datos);
           },
           error: (e) => console.error(e),
-        });
-        this.s_rubroxfac.getSumaRubros(this.desde, this.hasta).subscribe({
-          next: (datos) => {
-            console.log(datos);
-          },
-          error: (e) => console.error(e),
-        });
+        }); */
         break;
       case '1':
         this.s_recaudacion.getRecaudadores(this.desde, this.hasta).subscribe({
@@ -361,4 +375,15 @@ interface Caja {
   descripcion: String;
   ptoemi: String;
   estado: String;
+}
+
+interface Rubro {
+  nombre: string;
+  precio: number;
+}
+
+interface Factura {
+  numero: string;
+  fecha: Date;
+  rubros: Rubro[]; // Array of Rubro objects
 }

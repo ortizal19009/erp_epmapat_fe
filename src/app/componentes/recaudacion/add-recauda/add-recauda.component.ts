@@ -84,6 +84,7 @@ export class AddRecaudaComponent implements OnInit {
   /* IMPRESION */
   otraPagina: boolean = false;
   cuenta: any;
+  datoBusqueda: any;
   /* Intereses */
   calInteres = {} as calcInteres;
   totInteres: number = 0;
@@ -364,7 +365,6 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   sinCobro(idcliente: number) {
-  
     this.facService.getSinCobro(idcliente).subscribe({
       next: (datos) => {
         this._sincobro = datos;
@@ -993,12 +993,12 @@ export class AddRecaudaComponent implements OnInit {
           fechai.setMonth(fechai.getMonth() + 1);
         }
         this.arrCalculoInteres.forEach((item: any) => {
-        console.log(item)
+          console.log(item);
           this.totInteres += (+item.interes! * item.valor) / 100;
           interes += (+item.interes! * item.valor) / 100;
-          console.log(interes)
+          console.log(interes);
         });
-        console.log(this.totInteres)
+        console.log(this.totInteres);
         this.subtotal();
       },
       error: (e) => console.error(e),
@@ -1093,6 +1093,53 @@ export class AddRecaudaComponent implements OnInit {
     } else {
       this.disabledcobro = true;
     }
+  }
+  buscarPlanillas() {
+    this.datoBusqueda = '';
+    let data = this.datoBusqueda;
+    if (data.length >= 9) {
+      this.aboService.getAbonadoByQuery(data).subscribe({
+        next: (datos) => {
+          console.log(datos);
+        },
+        error: (e) => console.error(e),
+      });
+    }else{
+      this.aboService.getById(data).subscribe({next:(datos)=>{
+
+        console.log("DATOS")
+      }})
+    }
+  }
+
+  getRubroxfacReimpresion(idfactura: number) {
+    this.idfactura = idfactura;
+    this.rubxfacService.getByIdfactura(+idfactura!).subscribe({
+      next: (detalle) => {
+        this._rubrosxfac = detalle;
+        this._subtotal();
+      },
+      error: (err) => console.log(err.error),
+    });
+  }
+  _subtotal() {
+    let suma12: number = 0;
+    let suma0: number = 0;
+    let i = 0;
+    this._rubrosxfac.forEach(() => {
+      if (this._rubrosxfac[i].idrubro_rubros.swiva == 1) {
+        suma12 +=
+          this._rubrosxfac[i].cantidad * this._rubrosxfac[i].valorunitario;
+      } else {
+        if (this._rubrosxfac[i].idrubro_rubros.esiva == 0) {
+          suma0 +=
+            this._rubrosxfac[i].cantidad * this._rubrosxfac[i].valorunitario;
+        } else {
+        }
+      }
+      i++;
+    });
+    //this.totfac = suma12 + suma0;
   }
 }
 

@@ -109,7 +109,6 @@ export class RecaudacionReportsService {
           /* [`Referencia: ${datos.idcliente.referencia}`], */
           [`M3: ${m3}`, `Emision: ${l_datos.idemision}`],
           [`Cuenta: ${datos.idabonado}`, `FechaPag: ${datos.fechacobro}`],
-  
           [`Recaudador: ---`],
         ],
       });

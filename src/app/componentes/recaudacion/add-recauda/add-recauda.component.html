@@ -69,7 +69,7 @@
                   <!-- [disabled]="swbusca != 0"> -->
                   <i class="bi-printer"></i>&nbsp; Imprimir
                </button>
-               <button class="dropdown-item" type="button" (click)="impComprobante({idfactura:2315265})" >
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#reImprimirCom">
                   <!-- [disabled]="swbusca != 0"> -->
                   <i class="bi-printer"></i>&nbsp; Reimprimir
                </button>
@@ -356,74 +356,74 @@
          </div>
       </div>
    </div> -->
-  <!-- Modal Cobrar -->
-  <div class="modal fade" id="modalCobrar" tabindex="-1" aria-labelledby="modalCobrarLabel" data-backdrop="static"
-  aria-hidden="true">
-  <div class="modal-dialog modal-sm modal-dialog-centered">
-     <div class="modal-content recaudadetalle">
-        <div class="modal-header justify-content-center py-2 recaudacabecera">
-           <h5 class="modal-title fantacyblack">Cobro</h5>
-        </div>
-        <div class="modal-body col-md-12">
-           <form [formGroup]="formCobrar">
-              <div class="col-md-12">
+   <!-- Modal Cobrar -->
+   <div class="modal fade" id="modalCobrar" tabindex="-1" aria-labelledby="modalCobrarLabel" data-backdrop="static"
+      aria-hidden="true">
+      <div class="modal-dialog modal-sm modal-dialog-centered">
+         <div class="modal-content recaudadetalle">
+            <div class="modal-header justify-content-center py-2 recaudacabecera">
+               <h5 class="modal-title fantacyblack">Cobro</h5>
+            </div>
+            <div class="modal-body col-md-12">
+               <form [formGroup]="formCobrar">
+                  <div class="col-md-12">
 
-                 <div class="input-group input-group-sm">
-                    <div class="input-group-prepend">
-                       <label class="input-group-text">Forma cobro</label>
-                    </div>
-                    <select class="custom-select" formControlName="idformacobro" (change)="changeFormacobro()">
-                       <option *ngFor="let formacobro of _formascobro" [ngValue]="formacobro"
-                          id="idformacobro{{formacobro.idformacobro}}">
-                          {{formacobro.descripcion}}</option>
-                    </select>
-                 </div>
-                 <div class="input-group mt-3 mb-3">
-                    <div class="input-group-prepend"> <span class="input-group-text font-weight-bold">A
-                          Cobrar</span> </div>
-                    <input type="text" class="form-control text-right" formControlName="acobrar" readonly>
-                    <div class="input-group-append"> <span class="input-group-text">{{acobrardec}}</span> </div>
-                 </div>
-                 <div *ngIf="formacobroNC || f['ncvalor'].value > 0" class="input-group mb-3">
-                    <div class="input-group-prepend"><span class="input-group-text font-weight-bold"
-                          for="dinero">Valor NC</span></div>
-                    <input type="text" class="form-control text-center" formControlName="ncvalor"
-                       [ngClass]="{'is-invalid': f['ncvalor'].invalid && f['ncvalor'].touched,'is-valid': f['ncvalor'].valid, '': f['ncvalor'].untouched}"
-                       (change)="changeNCvalor()">
-                 </div>
-                 <div *ngIf="!formacobroNC" class="input-group mb-3">
-                    <div class="input-group-prepend"><span class="input-group-text font-weight-bold"
-                          for="dinero">Dinero</span></div>
-                    <input type="text" class="form-control text-center" formControlName="dinero" [ngClass]="{'is-invalid': f['dinero'].invalid && f['dinero'].touched,
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Forma cobro</label>
+                        </div>
+                        <select class="custom-select" formControlName="idformacobro" (change)="changeFormacobro()">
+                           <option *ngFor="let formacobro of _formascobro" [ngValue]="formacobro"
+                              id="idformacobro{{formacobro.idformacobro}}">
+                              {{formacobro.descripcion}}</option>
+                        </select>
+                     </div>
+                     <div class="input-group mt-3 mb-3">
+                        <div class="input-group-prepend"> <span class="input-group-text font-weight-bold">A
+                              Cobrar</span> </div>
+                        <input type="text" class="form-control text-right" formControlName="acobrar" readonly>
+                        <div class="input-group-append"> <span class="input-group-text">{{acobrardec}}</span> </div>
+                     </div>
+                     <div *ngIf="formacobroNC || f['ncvalor'].value > 0" class="input-group mb-3">
+                        <div class="input-group-prepend"><span class="input-group-text font-weight-bold"
+                              for="dinero">Valor NC</span></div>
+                        <input type="text" class="form-control text-center" formControlName="ncvalor"
+                           [ngClass]="{'is-invalid': f['ncvalor'].invalid && f['ncvalor'].touched,'is-valid': f['ncvalor'].valid, '': f['ncvalor'].untouched}"
+                           (change)="changeNCvalor()">
+                     </div>
+                     <div *ngIf="!formacobroNC" class="input-group mb-3">
+                        <div class="input-group-prepend"><span class="input-group-text font-weight-bold"
+                              for="dinero">Dinero</span></div>
+                        <input type="text" class="form-control text-center" formControlName="dinero" [ngClass]="{'is-invalid': f['dinero'].invalid && f['dinero'].touched,
                     'is-valid': f['dinero'].valid, '': f['dinero'].untouched}" (change)="changeDinero()">
-                    <div class="input-group-append">
-                       <button type="button" class="btn btn-outline-success btn-xm" (click)="valorDinero()">
-                          <i class="bi bi-chevron-double-down"></i></button>
-                    </div>
-                 </div>
-                 <div class="input-group mb-3">
-                    <div class="input-group-prepend"> <span class="input-group-text font-weight-bold">Vuelto</span>
-                    </div>
-                    <input type="text" class="form-control text-center" formControlName="vuelto" readonly>
-                    <div *ngIf="disabledcobro; then thenBlock else elseBlock"></div>
-                    <ng-template #thenBlock><span class="input-group-text bg-danger"><i class="bi bi-x-circle"></i>
-                       </span> </ng-template>
-                    <ng-template #elseBlock><span class="input-group-text bg-success"><i
-                             class="fa fa-check-circle"></i></span> </ng-template>
-                 </div>
-              </div>
-           </form>
-        </div>
-        <div class="row mt-0 mb-3 justify-content-center">
-           <button type="button" class="btn btn-success btn-sm mx-1" [disabled]="disabledcobro" (click)="cobrar()"
-              data-dismiss="modal">
-              <i class="fa fa-check-circle"></i> Aceptar</button>
-           <button type="button" class="btn btn-sm btn-outline-success mx-1" data-dismiss="modal">
-              <i class="bi bi-x-circle"></i> Cancelar</button>
-        </div>
-     </div>
-  </div>
-</div>
+                        <div class="input-group-append">
+                           <button type="button" class="btn btn-outline-success btn-xm" (click)="valorDinero()">
+                              <i class="bi bi-chevron-double-down"></i></button>
+                        </div>
+                     </div>
+                     <div class="input-group mb-3">
+                        <div class="input-group-prepend"> <span class="input-group-text font-weight-bold">Vuelto</span>
+                        </div>
+                        <input type="text" class="form-control text-center" formControlName="vuelto" readonly>
+                        <div *ngIf="disabledcobro; then thenBlock else elseBlock"></div>
+                        <ng-template #thenBlock><span class="input-group-text bg-danger"><i class="bi bi-x-circle"></i>
+                           </span> </ng-template>
+                        <ng-template #elseBlock><span class="input-group-text bg-success"><i
+                                 class="fa fa-check-circle"></i></span> </ng-template>
+                     </div>
+                  </div>
+               </form>
+            </div>
+            <div class="row mt-0 mb-3 justify-content-center">
+               <button type="button" class="btn btn-success btn-sm mx-1" [disabled]="disabledcobro" (click)="cobrar()"
+                  data-dismiss="modal">
+                  <i class="fa fa-check-circle"></i> Aceptar</button>
+               <button type="button" class="btn btn-sm btn-outline-success mx-1" data-dismiss="modal">
+                  <i class="bi bi-x-circle"></i> Cancelar</button>
+            </div>
+         </div>
+      </div>
+   </div>
 
    <!-- Modal DETALLE Planilla -->
    <div class="modal fade" id="DetallePlanillaModal" tabindex="-1" aria-labelledby="DetallePlanillaModal">
@@ -568,6 +568,46 @@
             </div>
             <div class="row justify-content-center mt-1 mb-3">
                <button type="button" class="btn btn-success btn-sm mx-1" data-dismiss="modal" (click)="cerrarCaja()">
+                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar
+               </button>
+               <button type="button" class="btn btn-sm btn-outline-success mx-1" data-dismiss="modal">
+                  <i class="bi bi-x-circle"></i> Cancelar
+               </button>
+            </div>
+         </div>
+      </div>
+   </div>
+   <!-- MODAL Reimprimir comprobante -->
+   <div class="modal fade" id="reImprimirCom" tabindex="-1" aria-labelledby="reImprimirComLabel" data-backdrop="static"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+         <div class="modal-content recaudadetalle">
+            <div class="modal-header py-2 justify-content-center recaudacabecera">
+               <h5 class="modal-title font-weight-bold fantacyblack" id="ModalLabel">
+                  Reimprimir comprobante pago
+               </h5>
+            </div>
+            <div class="modal-body">
+               <div class="container">
+                  <div class="row">
+                     <div class="input-group col-sm-12">
+                        <div class="input-group-append">
+                           <button class="btn btn-sm btn-primary" data-dismiss="modal">
+                              <i class="fa fa-plus-square" aria-hidden="true"></i></button>
+                        </div>
+                        <input type="text" placeholder="Nombre, identificación ó cuenta "
+                           class="form-control form-control-sm" [(ngModel)]="datoBusqueda" autofocus />
+                        <div class="input-group-append">
+                           <button class="btn btn-sm btn-primary" (click)="buscarPlanillas()">
+                              <i class="fa fa-search" aria-hidden="true"></i> Buscar</button>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <div class="row justify-content-center mt-1 mb-3">
+               <button type="button" class="btn btn-success btn-sm mx-1" data-dismiss="modal"
+                  (click)="impComprobante({idfactura:2315265})">
                   <i class="fa fa-check-circle"></i>&nbsp; Aceptar
                </button>
                <button type="button" class="btn btn-sm btn-outline-success mx-1" data-dismiss="modal">

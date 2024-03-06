@@ -212,7 +212,7 @@ export class InfoCajaComponent implements OnInit {
           'Módulo',
           'Valor',
           'Fecha cobro',
-          'Hora cobro',
+          'Nro recaudacion',
           'Usuario',
         ],
       ],
