@@ -596,9 +596,10 @@
                               <i class="fa fa-plus-square" aria-hidden="true"></i></button>
                         </div>
                         <input type="text" placeholder="Nombre, identificación ó cuenta "
-                           class="form-control form-control-sm" [(ngModel)]="datoBusqueda" autofocus />
+                           class="form-control form-control-sm" [(ngModel)]=datoBusqueda autofocus />
                         <div class="input-group-append">
-                           <button class="btn btn-sm btn-primary" (click)="buscarPlanillas()">
+                           <button class="btn btn-sm btn-primary">
+                              <!-- <button class="btn btn-sm btn-primary"(click)="impComprobante({idfactura:2485485})"> -->
                               <i class="fa fa-search" aria-hidden="true"></i> Buscar</button>
                         </div>
                      </div>
@@ -607,7 +608,7 @@
             </div>
             <div class="row justify-content-center mt-1 mb-3">
                <button type="button" class="btn btn-success btn-sm mx-1" data-dismiss="modal"
-                  (click)="impComprobante({idfactura:2315265})">
+                  (click)="impComprobante({idfactura:datoBusqueda})">
                   <i class="fa fa-check-circle"></i>&nbsp; Aceptar
                </button>
                <button type="button" class="btn btn-sm btn-outline-success mx-1" data-dismiss="modal">

@@ -42,7 +42,45 @@ export class RecaudacionReportsService {
     this.total += this.interes;
     doc.setFontSize(7);
     const tableWidth = 200;
-    if (l_datos.idmodulo === 3 || l_datos.idmodulo === 4) {
+    autoTable(doc, {
+      //doc.setFontType("bold");
+      //startY: 250,
+      tableWidth,
+      //theme: 'striped',
+      styles: { fontSize: 8, fontStyle: 'bold' },
+      columnStyles: {
+        0: { minCellWidth: 10 },
+        2: { minCellWidth: 15 },
+      },
+      bodyStyles: { cellPadding: 1 },
+
+      headStyles: {
+        halign: 'center',
+        fillColor: 'white',
+        textColor: 'black',
+      },
+      columns: ['EPMAPA-TULCAN', ''],
+      body: [
+        [`Nro comp: ${datos.nrofactura}`],
+        [`Ruc/cedula: ${datos.idcliente.cedula}`],
+        [`Mes pagado: ${l_datos.fechaemision.slice(0, 10)}`],
+        [`Cliente: ${datos.idcliente.nombre}`],
+        [`Dirección: ${datos.idcliente.direccion}`],
+        /* [`Referencia: ${datos.idcliente.referencia}`], */
+        [`M3: ${m3}`, `Emision: ${l_datos.idemision}`],
+        [`Cuenta: ${datos.idabonado}`, `FechaPag: ${datos.fechacobro}`],
+        [
+          `L. Anterior: ${l_datos.lecturaanterior}`,
+          `L. Actual: ${l_datos.lecturaactual}`,
+        ],
+        [
+          `Cons. Ant: ---`,
+          `Categoría: ${l_datos.idabonado_abonados.idcategoria_categorias.descripcion}`,
+        ],
+        [`Recaudador: ---`],
+      ],
+    });
+    if (l_datos.idmodulo === 100 || l_datos.idmodulo === 448) {
       autoTable(doc, {
         //doc.setFontType("bold");
         //startY: 250,
@@ -64,54 +102,16 @@ export class RecaudacionReportsService {
         body: [
           [`Nro comp: ${datos.nrofactura}`],
           [`Ruc/cedula: ${datos.idcliente.cedula}`],
-          [`Mes pagado: ${l_datos.fechaemision.slice(0, 10)}`],
+
           [`Cliente: ${datos.idcliente.nombre}`],
           [`Dirección: ${datos.idcliente.direccion}`],
           /* [`Referencia: ${datos.idcliente.referencia}`], */
           [`M3: ${m3}`, `Emision: ${l_datos.idemision}`],
           [`Cuenta: ${datos.idabonado}`, `FechaPag: ${datos.fechacobro}`],
-          [
-            `L. Anterior: ${l_datos.lecturaanterior}`,
-            `L. Actual: ${l_datos.lecturaactual}`,
-          ],
-          [
-            `Cons. Ant: ---`,
-            `Categoría: ${l_datos.idabonado_abonados.idcategoria_categorias.descripcion}`,
-          ],
           [`Recaudador: ---`],
         ],
       });
     } else {
-      autoTable(doc, {
-        //doc.setFontType("bold");
-        //startY: 250,
-        tableWidth,
-        //theme: 'striped',
-        styles: { fontSize: 8, fontStyle: 'bold' },
-        columnStyles: {
-          0: { minCellWidth: 10 },
-          2: { minCellWidth: 15 },
-        },
-        bodyStyles: { cellPadding: 1 },
-
-        headStyles: {
-          halign: 'center',
-          fillColor: 'white',
-          textColor: 'black',
-        },
-        columns: ['EPMAPA-TULCAN', ''],
-        body: [
-          [`Nro comp: ${datos.nrofactura}`],
-          [`Ruc/cedula: ${datos.idcliente.cedula}`],
-        
-          [`Cliente: ${datos.idcliente.nombre}`],
-          [`Dirección: ${datos.idcliente.direccion}`],
-          /* [`Referencia: ${datos.idcliente.referencia}`], */
-          [`M3: ${m3}`, `Emision: ${l_datos.idemision}`],
-          [`Cuenta: ${datos.idabonado}`, `FechaPag: ${datos.fechacobro}`],
-          [`Recaudador: ---`],
-        ],
-      });
     }
     autoTable(doc, {
       //startY: 250,

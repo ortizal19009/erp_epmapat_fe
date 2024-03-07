@@ -84,7 +84,7 @@ export class AddRecaudaComponent implements OnInit {
   /* IMPRESION */
   otraPagina: boolean = false;
   cuenta: any;
-  datoBusqueda: any;
+  datoBusqueda: number = 0;
   /* Intereses */
   calInteres = {} as calcInteres;
   totInteres: number = 0;
@@ -894,19 +894,20 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   impComprobante(datos: any) {
+    console.log(datos);
     let factura: Facturas = new Facturas();
     let lectura: any;
     //this.calcularInteres(datos.idfactura);
     this.getRubroxfac(datos.idfactura);
-    this.idfactura = datos.idfactura;
-    this.facService.getById(datos.idfactura).subscribe({
+    /*     this.idfactura = +datos.idfactura;
+    !this.facService.getById(datos.idfactura).subscribe({
       next: (datos) => {
         console.log(datos);
         factura = datos;
       },
       error: (e) => console.error(e),
-    });
-    this.lecService.getOnefactura(datos.idfactura).subscribe({
+    }); */
+    this.lecService.getOnefactura(+datos.idfactura!).subscribe({
       next: (datos) => {
         console.log(datos);
         lectura = datos;
@@ -915,13 +916,12 @@ export class AddRecaudaComponent implements OnInit {
         console.error(e);
       },
     });
-    console.log(datos);
     this.rubxfacService.getByIdfactura(+datos.idfactura!).subscribe({
       next: (detalle) => {
         console.log(detalle);
         this._rubrosxfac = detalle;
 
-        this.s_pdfRecaudacion.comprobantePago(factura, detalle);
+        this.s_pdfRecaudacion.comprobantePago(lectura, detalle);
         /*  this.lecService.getByIdfactura(idfactura).subscribe({
           next: (resp) => {
             _lecturas = resp;
@@ -1094,8 +1094,10 @@ export class AddRecaudaComponent implements OnInit {
       this.disabledcobro = true;
     }
   }
-  buscarPlanillas() {
-    this.datoBusqueda = '';
+/*   buscarPlanillas() {
+    this.impComprobante({ idfactura: +this.datoBusqueda! });
+
+    /*     this.datoBusqueda = '';
     let data = this.datoBusqueda;
     if (data.length >= 9) {
       this.aboService.getAbonadoByQuery(data).subscribe({
@@ -1104,16 +1106,17 @@ export class AddRecaudaComponent implements OnInit {
         },
         error: (e) => console.error(e),
       });
-    }else{
-      this.aboService.getById(data).subscribe({next:(datos)=>{
-
-        console.log("DATOS")
-      }})
-    }
-  }
+    } else {
+      this.aboService.getById(data).subscribe({
+        next: (datos) => {
+          console.log('DATOS');
+        },
+      });
+    } 
+  } */
 
   getRubroxfacReimpresion(idfactura: number) {
-    this.idfactura = idfactura;
+    idfactura;
     this.rubxfacService.getByIdfactura(+idfactura!).subscribe({
       next: (detalle) => {
         this._rubrosxfac = detalle;
