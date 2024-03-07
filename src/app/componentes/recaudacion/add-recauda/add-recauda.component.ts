@@ -92,6 +92,7 @@ export class AddRecaudaComponent implements OnInit {
   factura: Facturas = new Facturas();
   _intereses: any;
   $event: any;
+  valoriva: number;
 
   constructor(
     public fb: FormBuilder,
@@ -595,14 +596,55 @@ export class AddRecaudaComponent implements OnInit {
     this.disabledcobro = false;
   }
 
+  getRubroxfac(idfactura: number, idmodulo: number) {
+    this._rubrosxfac = null;
+    let _lecturas: any;
+    this.consumo = 0;
+    this.idfactura = idfactura;
+    if (idmodulo == 8) {
+      this.rubxfacService.getByIdfactura1(idfactura).subscribe({
+        next: (detalle) => {
+          this._rubrosxfac = detalle;
+          this.subtotal();
+        },
+        error: (err) =>
+          console.error('Al recuperar el datalle de la Planilla: ', err.error),
+      });
+    } else {
+      this.rubxfacService.getByIdfactura(idfactura).subscribe({
+        next: (detalle) => {
+          this._rubrosxfac = detalle;
+          if (idmodulo == 3 || idmodulo == 4) {
+            this.lecService.getByIdfactura(idfactura).subscribe({
+              next: (resp) => {
+                _lecturas = resp;
+                this.consumo =
+                  _lecturas[0].lecturaactual - _lecturas[0].lecturaanterior;
+              },
+              error: (err) =>
+                console.error(
+                  'Al recuperar la Lectura de la Planilla: ',
+                  err.error
+                ),
+            });
+          }
+          console.log(this.totInteres);
+          this.calcularInteres(idfactura);
+          this.subtotal();
+        },
+        error: (err) =>
+          console.error('Al recuperar el datalle de la Planilla: ', err.error),
+      });
+    }
+  }
+
   //Modal del Detalle de la Planilla
-  getRubroxfac(idfactura: number) {
+  getRubroxfac_2(idfactura: number) {
     console.log(idfactura);
     this._rubrosxfac = [];
     let _lecturas: any;
     this.consumo = 0;
     this.idfactura = idfactura;
-    console.log(this.totInteres);
     this.lecService.getByIdfactura(idfactura).subscribe({
       next: (resp) => {
         if (resp.length != 0) {
@@ -668,23 +710,23 @@ export class AddRecaudaComponent implements OnInit {
 
   //Subtotal de la Planilla
   subtotal() {
+    console.log(this.totInteres);
     let suma12: number = 0;
     let suma0: number = 0;
     let i = 0;
     this._rubrosxfac.forEach(() => {
-      if (this._rubrosxfac[i].idrubro_rubros.swiva == 1) {
-        suma12 +=
+      if (this._rubrosxfac[i].idrubro_rubros.swiva == 1)
+        suma12 =
+          suma12 +
           this._rubrosxfac[i].cantidad * this._rubrosxfac[i].valorunitario;
-      } else {
-        if (this._rubrosxfac[i].idrubro_rubros.esiva == 0) {
-          suma0 +=
-            this._rubrosxfac[i].cantidad * this._rubrosxfac[i].valorunitario;
-        } else {
-        }
-      }
+      else
+        suma0 +=
+          this._rubrosxfac[i].cantidad * this._rubrosxfac[i].valorunitario;
       i++;
     });
-    this.totfac = suma12 + suma0 + this.totInteres;
+    suma12 = Math.round(suma12 * 100) / 100;
+    this.valoriva = suma12 * 0.12;
+    this.totfac = suma12 + suma0 + this.valoriva + this.totInteres;
   }
 
   cobrar() {
@@ -723,7 +765,9 @@ export class AddRecaudaComponent implements OnInit {
     rubrosxfac.cantidad = 1;
     rubrosxfac.estado = 1;
     this.rubxfacService.saveRubroxFac(rubrosxfac).subscribe({
-      next: (datos) => {},
+      next: (datos) => {
+        console.log('DATOS GUARDADOS EN RUBROS X FAC', datos);
+      },
       error: (e) => console.error(e),
     });
   }
@@ -898,7 +942,7 @@ export class AddRecaudaComponent implements OnInit {
     let factura: Facturas = new Facturas();
     let lectura: any;
     //this.calcularInteres(datos.idfactura);
-    this.getRubroxfac(datos.idfactura);
+    this.getRubroxfac1(datos.idfactura);
     /*     this.idfactura = +datos.idfactura;
     !this.facService.getById(datos.idfactura).subscribe({
       next: (datos) => {
@@ -951,6 +995,7 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   calcularInteres(idfactura: number) {
+    console.log('calcularInteres fui llamado', idfactura);
     console.log('calcular interes');
     let idFactura = idfactura;
     console.log(idFactura);
@@ -1094,9 +1139,8 @@ export class AddRecaudaComponent implements OnInit {
       this.disabledcobro = true;
     }
   }
-/*   buscarPlanillas() {
+  /*   buscarPlanillas() {
     this.impComprobante({ idfactura: +this.datoBusqueda! });
-
     /*     this.datoBusqueda = '';
     let data = this.datoBusqueda;
     if (data.length >= 9) {

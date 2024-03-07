@@ -24,6 +24,11 @@ export class RubroxfacService {
   getByIdfactura(idfactura: number) {
     return this.http.get<Rubroxfac[]>(`${baseUrl}?idfactura=${idfactura}`);
   }
+  getByIdfactura1(idfactura: number) {
+    return this.http.get<Rubroxfac[]>(
+      `${baseUrl}/esiva?idfactura=${idfactura}`
+    );
+  }
 
   saveRubroxfac(rubroxFac: Rubroxfac): Observable<Object> {
     return this.http.post(`${baseUrl}`, rubroxFac);
