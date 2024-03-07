@@ -190,10 +190,18 @@
                            sincobro.totaltarifa,
                            sincobro.comerc,
                            sincobro.interes,
-                           sincobro.multa
+                           sincobro.multa,
+                           sincobro.idmodulo.idmodulo,
+                           sincobro.valorbase
                            ) | number : "1.2-2"
                            }}
                         </td>
+                        <!--           <td *ngIf="sincobro.idmodulo.idmodulo != 8" [ngClass]="{'transferido': sincobro.estado == 3 }"
+                           class="text-right">{{
+                           sincobro.totaltarifa + sincobro.comerc + sincobro.interes +
+                           sincobro.multa | number:'1.2-2'}}</td>
+                        <td *ngIf="sincobro.idmodulo.idmodulo == 8" class="text-right">{{
+                           sincobro.valorbase | number:'1.2-2'}}</td>-->
                         <td>
                            <input type="checkbox" [(ngModel)]="sincobro.pagado" (change)="marcarAnteriores(i)"
                               [disabled]="swcobrado" class="cursor" />

@@ -367,9 +367,9 @@ export class AddRecaudaComponent implements OnInit {
 
   sinCobro(idcliente: number) {
     this.facService.getSinCobro(idcliente).subscribe({
-      next: (datos) => {
+      next: (datos: any) => {
         this._sincobro = datos;
-        if (this._sincobro.length > 0) {
+        if (datos.length > 0) {
           let suma: number = 0;
           let i = 0;
           this._sincobro.forEach(async (item: any, index: number) => {
@@ -383,13 +383,14 @@ export class AddRecaudaComponent implements OnInit {
             }
             let com = 0;
             if (item.idmodulo.idmodulo == 3) com = 1;
-            item.interes = interes;
+            item.interes = Math.round(interes * 100) / 100;
             item.comerc = com;
-            item.multa = 0;
-            suma += item.totaltarifa + item.comerc + item.multa + item.interes;
-            //i++;
+            //item.multa = 0;
+            //item.totaltarifa = n_totalTarifa;
+            suma += item.totaltarifa + item.interes;
+            i++;
+            this.sumtotal = Math.round(suma * 100) / 100;
           });
-          this.sumtotal = suma;
           this.swbusca = 3;
         } else {
           this.swbusca = 2;
@@ -462,7 +463,9 @@ export class AddRecaudaComponent implements OnInit {
 
   changeFormacobro() {
     const formacobro = this.formCobrar.get('idformacobro')!.value;
-    if (formacobro.idformacobro > 1) this.valorDinero();
+    this.idformacobro = formacobro.idformacobro;
+    if (formacobro.idformacobro == 3) this.formacobroNC = true;
+    else this.formacobroNC = false;
   }
 
   marcarTodas(event: any) {
@@ -480,7 +483,6 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   marcarAnteriores(index: number) {
-    console.log(index);
     if (
       this._sincobro[index].idmodulo.idmodulo === 3 /* ||
       this._sincobro[index].idmodulo.idmodulo === 4 */
@@ -516,13 +518,10 @@ export class AddRecaudaComponent implements OnInit {
     }
     this.totalAcobrar();
   }
-
   totalAcobrar() {
     let suma: number = 0;
     let i = 0;
-    console.log(this._sincobro);
     this._sincobro.forEach((item: any, index: number) => {
-      console.log(item);
       if (this._sincobro[i].pagado === true || this._sincobro[i].pagado === 1) {
         if (
           this._sincobro[i].idmodulo.idmodulo == 3 ||
@@ -533,6 +532,8 @@ export class AddRecaudaComponent implements OnInit {
             this._sincobro[i].comerc +
             +this._sincobro[i].interes;
           this._sincobro[i].multa;
+        } else if (this._sincobro[i].idmodulo.idmodulo == 8) {
+          suma += this._sincobro[i].valorbase;
         } else {
           suma += this._sincobro[i].totaltarifa + +this._sincobro[i].interes;
         }
@@ -540,30 +541,8 @@ export class AddRecaudaComponent implements OnInit {
       i++;
     });
     this.acobrar = suma;
-    console.log(this.acobrar);
   }
 
-  /*   valorAcobrar(acobrar: number) {
-    this.disabledcobro = true;
-    let entero = Math.trunc(acobrar);
-    let decimal = (acobrar - entero).toFixed(2);
-    this.acobrardec = decimal.toString().slice(1);
-    const primerPagado = this._sincobro.find(
-      (registro: { pagado: number }) => registro.pagado == 1
-    );
-    let fcobro: number; //3= Transferencia
-    if (primerPagado.estado == 3) fcobro = this._formascobro[1];
-    else fcobro = this._formascobro[0];
-    this.formCobrar.patchValue({
-      // idformacobro: this._formascobro[0],
-      idformacobro: fcobro,
-      valorAcobrar: acobrar,
-      acobrar: entero,
-      dinero: '',
-      vuelto: '',
-      ncvalor: '',
-    });
-  } */
   valorAcobrar(acobrar: number) {
     this.disabledcobro = true;
     let entero = Math.trunc(acobrar);
@@ -715,7 +694,7 @@ export class AddRecaudaComponent implements OnInit {
     let suma0: number = 0;
     let i = 0;
     this._rubrosxfac.forEach(() => {
-      console.log(this._rubrosxfac[i])
+      console.log(this._rubrosxfac[i]);
       if (this._rubrosxfac[i].idrubro_rubros.swiva == 1)
         suma12 =
           suma12 +
@@ -743,6 +722,9 @@ export class AddRecaudaComponent implements OnInit {
     r.valor = +this.formCobrar.value.valorAcobrar;
     if (r.estado === 2) {
       r.estado = 2;
+      console.log(
+        'hay un estado de recaudacion diferente a 2 revisar metodo cobrar'
+      );
     } else {
       r.estado = 1;
     }
@@ -776,6 +758,8 @@ export class AddRecaudaComponent implements OnInit {
   facxrecauda(recaCreada: Recaudacion, i: number) {
     let idfactura: number;
     let fechacobro: Date = new Date();
+    let rubro: Rubros = new Rubros();
+    rubro.idrubro = 5;
     if (this._sincobro[i].pagado) {
       idfactura = this._sincobro[i].idfactura;
       this.facService.getById(idfactura).subscribe({
@@ -792,15 +776,14 @@ export class AddRecaudaComponent implements OnInit {
               fac.usuariocobro = this.authService.idusuario;
               fac.interescobrado = this.cInteres(fac);
               fac.pagado = 1;
-              let rubro: Rubros = new Rubros();
-              rubro.idrubro = 5;
-              this.saveRubxFac(fac, rubro, this.cInteres(fac));
+              if (this.cInteres(fac) > 0) {
+                this.saveRubxFac(fac, rubro, this.cInteres(fac));
+              }
               if (fac.estado === 2) {
                 fac.estado = 2;
               } else {
                 fac.estado = 1;
               }
-              console.log(fac.nrofactura);
               let j = 1;
               if (fac.nrofactura === null) {
                 let nrofac = this._nroFactura.split('-', 3);
@@ -942,6 +925,19 @@ export class AddRecaudaComponent implements OnInit {
     console.log(datos);
     let factura: Facturas = new Facturas();
     let lectura: any;
+    this.facService.getById(datos.idfactura).subscribe({
+      next: (_datos: any) => {
+        console.log(_datos);
+        let modulo: number = _datos.idmodulo;
+        if (modulo === 3 || modulo === 4) {
+        
+        }else{
+          
+        }
+
+      },
+      error: (e) => console.error(e),
+    });
     //this.calcularInteres(datos.idfactura);
     this.getRubroxfac1(datos.idfactura);
     /*     this.idfactura = +datos.idfactura;
@@ -1023,7 +1019,6 @@ export class AddRecaudaComponent implements OnInit {
               this.calInteres.anio,
               this.calInteres.mes
             );
-
             this.calInteres.anio = +fechai.getFullYear()!;
             this.calInteres.mes = +fechai.getMonth()! + 1;
             this.calInteres.interes = 0;
@@ -1088,16 +1083,27 @@ export class AddRecaudaComponent implements OnInit {
     });
     return interes;
   }
-  valorTarifas(tarifa: number, cons: number, interes: number, multa: number) {
-    let t = 0,
-      c = 0,
-      i = 0,
-      m = 0;
-    t = tarifa === undefined ? 0 : tarifa;
-    c = cons === undefined ? 0 : cons;
-    i = interes === undefined ? 0 : interes;
-    m = multa === undefined ? 0 : multa;
-    return t + c + i + m;
+  valorTarifas(
+    tarifa: number,
+    cons: number,
+    interes: number,
+    multa: number,
+    modulo: number,
+    valorbase: number
+  ) {
+    if (modulo != 8) {
+      let t = 0,
+        c = 0,
+        i = 0,
+        m = 0;
+      t = tarifa === undefined ? 0 : tarifa;
+      c = cons === undefined ? 0 : cons;
+      i = interes === undefined ? 0 : interes;
+      m = multa === undefined ? 0 : multa;
+      return t + c + i + m;
+    } else {
+      return valorbase;
+    }
   }
   //Al digitar el valor de la NC
   changeNCvalor() {
