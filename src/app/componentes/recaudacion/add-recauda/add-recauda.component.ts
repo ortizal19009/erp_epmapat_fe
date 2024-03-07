@@ -715,6 +715,7 @@ export class AddRecaudaComponent implements OnInit {
     let suma0: number = 0;
     let i = 0;
     this._rubrosxfac.forEach(() => {
+      console.log(this._rubrosxfac[i])
       if (this._rubrosxfac[i].idrubro_rubros.swiva == 1)
         suma12 =
           suma12 +
