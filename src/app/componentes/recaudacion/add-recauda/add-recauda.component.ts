@@ -915,18 +915,14 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   impComprobante(datos: any) {
-    console.log(datos);
     let factura: Facturas = new Facturas();
     let lectura: any;
     this.facService.getById(datos.idfactura).subscribe({
       next: (d_factura: any) => {
-        console.log(d_factura);
         let modulo: number = d_factura.idmodulo.idmodulo;
-        console.log(modulo);
         if (modulo === 3 || modulo === 4) {
           this.lecService.getOnefactura(d_factura.idfactura).subscribe({
             next: (datos: any) => {
-              console.log(datos);
               lectura = datos;
               if (datos != null) {
                 this.s_pdfRecaudacion.comprobantePago(lectura, d_factura);
@@ -978,10 +974,7 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   calcularInteres(idfactura: number) {
-    console.log('calcularInteres fui llamado', idfactura);
-    console.log('calcular interes');
     let idFactura = idfactura;
-    console.log(idFactura);
     this.totInteres = 0;
     this.arrCalculoInteres = [];
     let interes: number = 0;
@@ -1000,11 +993,6 @@ export class AddRecaudaComponent implements OnInit {
               interes.mes === +fechai.getMonth()! + 1
           );
           if (!query) {
-            console.log(
-              'Este mes no hay interes',
-              this.calInteres.anio,
-              this.calInteres.mes
-            );
             this.calInteres.anio = +fechai.getFullYear()!;
             this.calInteres.mes = +fechai.getMonth()! + 1;
             this.calInteres.interes = 0;
@@ -1020,12 +1008,9 @@ export class AddRecaudaComponent implements OnInit {
           fechai.setMonth(fechai.getMonth() + 1);
         }
         this.arrCalculoInteres.forEach((item: any) => {
-          console.log(item);
           this.totInteres += (+item.interes! * item.valor) / 100;
           interes += (+item.interes! * item.valor) / 100;
-          console.log(interes);
         });
-        console.log(this.totInteres);
         this.subtotal();
       },
       error: (e) => console.error(e),

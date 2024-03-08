@@ -35,10 +35,8 @@ export class RecaudacionReportsService {
   cabeceraConsumoAgua(datos: any, doc: jsPDF, usuario: any, factura: any) {
     //doc.setFontSize(7);
     let tableWidth = 200;
-    console.log(factura);
     let m3 = datos.lecturaactual - datos.lecturaanterior;
     let fecha = datos.fechaemision.slice(0, 10).split('-');
-    console.log(fecha);
     let mesConsumo = `${this.meses[+fecha[1]! - 1]}`;
 
     autoTable(doc, {
@@ -88,7 +86,6 @@ export class RecaudacionReportsService {
     });
   }
   cabeceraOtros(datos: any, doc: jsPDF, usuario: any) {
-    console.log('DATOS OTRAS FACTURAS', datos);
     let tableWidth = 200;
     autoTable(doc, {
       //doc.setFontType("bold");
@@ -149,7 +146,6 @@ export class RecaudacionReportsService {
     this.rubxfacService.getByIdfactura(idfactura).subscribe({
       next: (_rubrosxfac: any) => {
         let rubros: any = [];
-        console.log(_rubrosxfac);
         _rubrosxfac.forEach((item: any) => {
           if (
             item.idrubro_rubros.idrubro != 5 &&
