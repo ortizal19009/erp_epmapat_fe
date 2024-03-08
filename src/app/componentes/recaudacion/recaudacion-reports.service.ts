@@ -40,22 +40,18 @@ export class RecaudacionReportsService {
     let mesConsumo = `${this.meses[+fecha[1]! - 1]}`;
 
     autoTable(doc, {
-      //doc.setFontType("bold");
-      //startY: 250,
       tableWidth,
-      //theme: 'striped',
       styles: { fontSize: 9, fontStyle: 'bold' },
       columnStyles: {
         0: { minCellWidth: 10 },
         2: { minCellWidth: 15 },
       },
       bodyStyles: {
-        cellPadding: 3,
+        cellPadding: 2,
         fillColor: [255, 255, 255],
         textColor: 'black',
       },
       alternateRowStyles: { fillColor: [255, 255, 255] },
-
       headStyles: {
         halign: 'center',
         fillColor: 'white',
@@ -97,7 +93,11 @@ export class RecaudacionReportsService {
         0: { minCellWidth: 10 },
         2: { minCellWidth: 15 },
       },
-      bodyStyles: { cellPadding: 1 },
+      bodyStyles: {
+        cellPadding: 1,
+        fillColor: [255, 255, 255],
+        textColor: 'black',
+      },
 
       headStyles: {
         halign: 'center',
@@ -125,7 +125,8 @@ export class RecaudacionReportsService {
     let tableWidth = 200;
     this.iva = 0;
     this.subtotal = 0;
-    this.total = 0
+    this.total = 0;
+    this.interes = 0;
     if (l_datos != null) {
       idfactura = l_datos.idfactura;
     } else {
@@ -152,7 +153,6 @@ export class RecaudacionReportsService {
             item.idrubro_rubros.idrubro != 165
           ) {
             this.total += +item.valorunitario!;
-
             rubros.push([
               item.idrubro_rubros.descripcion,
               item.valorunitario.toFixed(2),
@@ -163,12 +163,9 @@ export class RecaudacionReportsService {
             this.interes = item.valorunitario;
           }
         });
-        //let datos = _rubrosxfac[0].idfactura_facturas;
         this.total += this.interes + this.iva;
         this.subtotal += this.total - this.interes - this.iva;
         autoTable(doc, {
-          //startY: 250,
-          //startY: 250,
           tableWidth,
           theme: 'grid',
           styles: { fontSize: 9, fontStyle: 'bold' },
@@ -177,7 +174,11 @@ export class RecaudacionReportsService {
             fillColor: 'white',
             textColor: 'black',
           },
-          bodyStyles: { cellPadding: 1 },
+          bodyStyles: {
+            cellPadding: 1,
+            fillColor: [255, 255, 255],
+            textColor: 'black',
+          },
           columnStyles: {
             0: { minCellWidth: 10 },
             1: { minCellWidth: 15, halign: 'right' },
@@ -187,8 +188,6 @@ export class RecaudacionReportsService {
           body: rubros,
         });
         autoTable(doc, {
-          //startY: 250,
-          //startY: 250,
           tableWidth,
           theme: 'grid',
           styles: { fontSize: 9, fontStyle: 'bold' },
@@ -197,7 +196,11 @@ export class RecaudacionReportsService {
             fillColor: 'white',
             textColor: 'black',
           },
-          bodyStyles: { cellPadding: 1 },
+          bodyStyles: {
+            cellPadding: 1,
+            fillColor: [255, 255, 255],
+            textColor: 'black',
+          },
           columnStyles: {
             0: { minCellWidth: 10 },
             1: { minCellWidth: 15, halign: 'right' },
@@ -205,9 +208,9 @@ export class RecaudacionReportsService {
 
           columns: ['', ''],
           body: [
+            ['Sub total', this.subtotal.toFixed(2)],
             ['Iva 12%', this.iva.toFixed(2)],
             ['Intereses', factura.interescobrado.toFixed(2)],
-            ['Sub total', this.subtotal.toFixed(2)],
             ['Valor total', this.total.toFixed(2)],
           ],
         });
