@@ -689,12 +689,10 @@ export class AddRecaudaComponent implements OnInit {
 
   //Subtotal de la Planilla
   subtotal() {
-    console.log(this.totInteres);
     let suma12: number = 0;
     let suma0: number = 0;
     let i = 0;
     this._rubrosxfac.forEach(() => {
-      console.log(this._rubrosxfac[i]);
       if (this._rubrosxfac[i].idrubro_rubros.swiva == 1)
         suma12 =
           suma12 +
@@ -720,14 +718,7 @@ export class AddRecaudaComponent implements OnInit {
     r.cambio = +this.formCobrar.value.vuelto;
     r.formapago = this.idformacobro;
     r.valor = +this.formCobrar.value.valorAcobrar;
-    if (r.estado === 2) {
-      r.estado = 2;
-      console.log(
-        'hay un estado de recaudacion diferente a 2 revisar metodo cobrar'
-      );
-    } else {
-      r.estado = 1;
-    }
+    r.estado = 1;
     r.ncvalor = +this.formCobrar.value.ncvalor;
     r.usucrea = this.authService.idusuario;
     r.feccrea = fecha;
@@ -774,9 +765,11 @@ export class AddRecaudaComponent implements OnInit {
               //Actualiza Factura como cobrada
               fac.fechacobro = fechacobro;
               fac.usuariocobro = this.authService.idusuario;
-              fac.interescobrado = this.cInteres(fac);
+              if (fac.idmodulo.idmodulo != 8) {
+                fac.interescobrado = this.cInteres(fac);
+              }
               fac.pagado = 1;
-              if (this.cInteres(fac) > 0) {
+              if (this.cInteres(fac) > 0 && fac.idmodulo.idmodulo != 8) {
                 this.saveRubxFac(fac, rubro, this.cInteres(fac));
               }
               if (fac.estado === 2) {
@@ -926,20 +919,31 @@ export class AddRecaudaComponent implements OnInit {
     let factura: Facturas = new Facturas();
     let lectura: any;
     this.facService.getById(datos.idfactura).subscribe({
-      next: (_datos: any) => {
-        console.log(_datos);
-        let modulo: number = _datos.idmodulo;
+      next: (d_factura: any) => {
+        console.log(d_factura);
+        let modulo: number = d_factura.idmodulo.idmodulo;
+        console.log(modulo);
         if (modulo === 3 || modulo === 4) {
-        
-        }else{
-          
+          this.lecService.getOnefactura(d_factura.idfactura).subscribe({
+            next: (datos: any) => {
+              console.log(datos);
+              lectura = datos;
+              if (datos != null) {
+                this.s_pdfRecaudacion.comprobantePago(lectura, d_factura);
+              } else {
+                this.s_pdfRecaudacion.comprobantePago(null, d_factura);
+              }
+            },
+            error: (e) => console.error(e),
+          });
+        } else {
+          this.s_pdfRecaudacion.comprobantePago(null, d_factura);
         }
-
       },
       error: (e) => console.error(e),
     });
     //this.calcularInteres(datos.idfactura);
-    this.getRubroxfac1(datos.idfactura);
+    //this.getRubroxfac1(datos.idfactura);
     /*     this.idfactura = +datos.idfactura;
     !this.facService.getById(datos.idfactura).subscribe({
       next: (datos) => {
@@ -948,22 +952,8 @@ export class AddRecaudaComponent implements OnInit {
       },
       error: (e) => console.error(e),
     }); */
-    this.lecService.getOnefactura(+datos.idfactura!).subscribe({
-      next: (datos) => {
-        console.log(datos);
-        lectura = datos;
-      },
-      error: (e) => {
-        console.error(e);
-      },
-    });
-    this.rubxfacService.getByIdfactura(+datos.idfactura!).subscribe({
-      next: (detalle) => {
-        console.log(detalle);
-        this._rubrosxfac = detalle;
 
-        this.s_pdfRecaudacion.comprobantePago(lectura, detalle);
-        /*  this.lecService.getByIdfactura(idfactura).subscribe({
+    /*  this.lecService.getByIdfactura(idfactura).subscribe({
           next: (resp) => {
             _lecturas = resp;
             this.consumo =
@@ -975,11 +965,7 @@ export class AddRecaudaComponent implements OnInit {
               err.error
             ),
         }); */
-        // this.subtotal();
-      },
-      error: (err) =>
-        console.error('Al recuperar el datalle de la Planilla: ', err.error),
-    });
+    // this.subtotal();
   }
 
   listarIntereses() {
@@ -1146,25 +1132,6 @@ export class AddRecaudaComponent implements OnInit {
       this.disabledcobro = true;
     }
   }
-  /*   buscarPlanillas() {
-    this.impComprobante({ idfactura: +this.datoBusqueda! });
-    /*     this.datoBusqueda = '';
-    let data = this.datoBusqueda;
-    if (data.length >= 9) {
-      this.aboService.getAbonadoByQuery(data).subscribe({
-        next: (datos) => {
-          console.log(datos);
-        },
-        error: (e) => console.error(e),
-      });
-    } else {
-      this.aboService.getById(data).subscribe({
-        next: (datos) => {
-          console.log('DATOS');
-        },
-      });
-    } 
-  } */
 
   getRubroxfacReimpresion(idfactura: number) {
     idfactura;

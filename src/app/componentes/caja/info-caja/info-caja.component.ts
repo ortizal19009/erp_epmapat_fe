@@ -162,23 +162,42 @@ export class InfoCajaComponent implements OnInit {
             .subscribe({
               next: (_datos: any) => {
                 let total_pagar: any = 0;
+                let i = 0;
                 _datos.forEach((item: any) => {
                   total_pagar += item.totalpagar;
+                  i++;
                 });
                 let total = 0;
                 datos.forEach((item: any) => {
+                  console.log(item);
+                  let com: number = 0;
+                  let totTarifa: number = +item.idfactura.totaltarifa!;
+                  let suma: number = 0;
+                  console.log(item.idfactura.idmodulo.idmodulo);
+                  console.log(totTarifa);
+                  if (+item.idfactura.idmodulo.idmodulo! == 3) {
+                    com = 1;
+                  }
+                  console.log(item.idfactura.interescobrado);
+                  console.log(com);
+                  console.log(totTarifa);
+                  if (+item.idfactura.idmodulo.idmodulo! != 8) {
+                    suma += +item.idfactura.interescobrado! + com + +totTarifa!;
+                  } else {
+                    suma += item.idfactura.valorbase;
+                  }
                   datosBody.push([
                     item.idfactura.nrofactura,
                     item.idfactura.idcliente.nombre,
                     item.idfactura.idmodulo.descripcion,
-                    item.idrecaudacion.totalpagar.toFixed(2),
+                    suma.toFixed(2),
                     item.idfactura.fechacobro,
                     item.idrecaudacion.idrecaudacion,
                     this.usuario.nomusu,
                   ]);
                   total += item.idrecaudacion.totalpagar;
                 });
-                this.pdf2(datosBody, total_pagar);
+                this.pdf2(datosBody, total_pagar, i);
               },
               error: (e) => console.error(e),
             });
@@ -186,7 +205,7 @@ export class InfoCajaComponent implements OnInit {
         error: (e) => console.error,
       });
   }
-  pdf2(datosBody: any, total: number) {
+  pdf2(datosBody: any, total: number, totalfacturas: number) {
     let _total = total.toFixed(2);
     //const nombreEmision = new NombreEmisionPipe(); // Crea una instancia del pipe
     let doc = new jsPDF('p', 'pt', 'a4');
@@ -248,7 +267,7 @@ export class InfoCajaComponent implements OnInit {
       },
     });
     autoTable(doc, {
-      body: [['TOTAL: ', _total]],
+      body: [['TOTAL: ', totalfacturas, _total]],
     });
     addPageNumbers();
 
