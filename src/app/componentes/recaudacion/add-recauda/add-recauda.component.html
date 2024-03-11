@@ -180,7 +180,6 @@
                         </td>
                         <td>{{ sincobro.feccrea }}</td>
                         <td class="text-left">{{ sincobro.idmodulo.descripcion }}</td>
-
                         <!-- <td  class="text-right">{{
                            sincobro.totaltarifa + sincobro.comerc + sincobro.interes +
                            sincobro.multa | number:'1.2-2'}}</td> -->
@@ -212,8 +211,8 @@
                               (click)="getRubroxfac( sincobro.idfactura, sincobro.idmodulo.idmodulo )">
                               <i class="fa fa-info-circle"></i> Info
                            </button>
-                           <button *ngIf="swcobrado" class="btn btn-outline-info btn-xs cursor" (click)="impComprobante(sincobro)"
-                              [disabled]="!sincobro.pagado">
+                           <button *ngIf="swcobrado" class="btn btn-outline-info btn-xs cursor"
+                              (click)="impComprobante(sincobro)" [disabled]="!sincobro.pagado">
                               <i class="fa fa-print"></i> Imprimir
                            </button>
                         </td>
@@ -275,9 +274,7 @@
                         </tr>
                      </thead>
                      <tbody id="id-tbody">
-                        <tr *ngFor="
-                    let cliente of _clientes | filter : filtro;
-                    let i = index
+                        <tr *ngFor="let cliente of _clientes | filter : filtro;let i = index
                   " (click)="selecCliente(cliente)" data-dismiss="modal">
                            <td class="text-center small font-weight-bold py-0">
                               {{ i + 1 }}
@@ -308,7 +305,6 @@
             <div class="modal-body col-md-12">
                <form [formGroup]="formCobrar">
                   <div class="col-md-12">
-
                      <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
                            <label class="input-group-text">Forma cobro</label>
@@ -365,12 +361,10 @@
          </div>
       </div>
    </div>
-
    <!-- Modal DETALLE Planilla -->
    <div class="modal fade" id="DetallePlanillaModal" tabindex="-1" aria-labelledby="DetallePlanillaModal">
       <div class="modal-dialog modal-dialog-centered" role="document">
          <div class="modal-content recaudadetalle">
-
             <div class="py-2 recaudacabecera">
                <div class="row text-center">
                   <div class="col">
@@ -383,7 +377,6 @@
                   </div>
                </div>
             </div>
-
             <div class="modal-body">
                <table *ngIf="_rubrosxfac" class="table table-hover table-sm table-bordered mb-0 ">
                   <thead class="recaudacabecera">

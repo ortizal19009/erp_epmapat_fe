@@ -96,13 +96,11 @@
                      <i *ngIf="cliente.porcdiscapacidad! > 0">
                         <i class="float-right bi-check-circle-fill"></i>
                      </i>
-
                   </li>
                   <li class="list-group-item detalle">
                      <b>Adulto mayor</b> <a class="float-right"></a><i class="float-right bi-bug-fill"></i>
                   </li>
                </ul>
-
             </div>
          </div>
       </div>
@@ -112,7 +110,6 @@
                <div *ngIf="swbusca == 0">
                   <img src="/assets/dist/img/logo.png" width="280" />
                </div>
-
                <div *ngIf="swbusca == 1" class="col-md-12">
                   <div class="row justify-content-center">
                      <div class="callout callout-info text-center col-md-8">
@@ -123,7 +120,6 @@
                      </div>
                   </div>
                </div>
-
                <div *ngIf="swbusca == 2" class="col-md-12">
                   <div class="row justify-content-center">
                      <div class="callout callout-info text-center col-md-8">
@@ -134,7 +130,6 @@
                      </div>
                   </div>
                </div>
-
                <table *ngIf="swbusca == 3" class="table table-hover table-sm table-bordered">
                   <thead class="cabecera">
                      <tr class="text-center">
@@ -159,8 +154,9 @@
                         <td [ngClass]="{'transferido': sincobro.estado == 3 }" class="text-left">{{
                            sincobro.idmodulo.descripcion }}</td>
                         <td [ngClass]="{'transferido': sincobro.estado == 3 }" class="text-right">{{
-                           sincobro.totaltarifa + sincobro.comerc + sincobro.interes +
-                           sincobro.multa | number:'1.2-2'}}</td>
+                           valorTarifas(sincobro.totaltarifa, sincobro.comerc, sincobro.interes, sincobro.multa,
+                           sincobro.idmodulo.idmodulo, sincobro.valorbase)
+                           | number:'1.2-2'}}</td>
                         <td [ngClass]="{'transferido': sincobro.estado == 3 }"> <input type="checkbox"
                               [(ngModel)]="sincobro.pagado" (change)="marcarAnteriores(i)"
                               [disabled]="sincobro.estado == 3 || swtransferido" class="cursor"></td>

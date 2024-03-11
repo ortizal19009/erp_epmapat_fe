@@ -183,7 +183,6 @@ export class RecaudacionReportsService {
             0: { minCellWidth: 10 },
             1: { minCellWidth: 15, halign: 'right' },
           },
-
           columns: ['Descripción', 'Valor unitario'],
           body: rubros,
         });
@@ -205,7 +204,6 @@ export class RecaudacionReportsService {
             0: { minCellWidth: 10 },
             1: { minCellWidth: 15, halign: 'right' },
           },
-
           columns: ['', ''],
           body: [
             ['Sub total', this.subtotal.toFixed(2)],
