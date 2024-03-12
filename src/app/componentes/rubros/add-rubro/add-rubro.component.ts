@@ -23,7 +23,7 @@ export class AddRubroComponent implements OnInit {
 
    ngOnInit(): void { this.crearForm(); }
 
-   ngOnChanges() { this.crearForm();    }
+   ngOnChanges() { this.crearForm(); }
 
    crearForm() {
       let modulo: Modulos = new Modulos;
@@ -56,6 +56,7 @@ export class AddRubroComponent implements OnInit {
 
       let selectmodulo = document.getElementById("selectModulo") as HTMLSelectElement;
       selectmodulo.addEventListener("change", () => {
+         console.log(+selectmodulo.value!)
          this.idmodulo = +selectmodulo.value!;
          this.f['descripcion'].setValue('');
       });
@@ -65,20 +66,23 @@ export class AddRubroComponent implements OnInit {
    get f() { return this.formRubro.controls; }
 
    onSubmit() {
+      console.log(this.formRubro.value)
       this.moduService.getById(this.idmodulo).subscribe({
          next: resp => {
+            console.log(resp);
             this.formRubro.value.idmodulo_modulos = resp;
+            // console.log("Datos del Formulario: "+ JSON.stringify(this.formRubro.value));
+            this.rubService.saveRubro(this.formRubro.value).subscribe({
+               next: resp => {
+                  console.log(resp);
+                  this.reset();
+                  this.parent.listarRubros()
+               },
+               error: err => console.log(err.error)
+            });
          },
          error: err => console.log(err.error),
       })
-      // console.log("Datos del Formulario: "+ JSON.stringify(this.formRubro.value));
-      this.rubService.saveRubro(this.formRubro.value).subscribe({
-         next: resp => {
-            this.reset();
-            this.parent.listarRubros()
-         },
-         error: err => console.log(err.error)
-      });
    }
 
    reset() { this.crearForm() }

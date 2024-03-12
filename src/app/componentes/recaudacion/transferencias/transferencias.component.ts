@@ -114,7 +114,6 @@ export class TransferenciasComponent implements OnInit {
          console.error(error);
       }
    }
-
    colocaColor(colores: any) {
       document.documentElement.style.setProperty('--bgcolor1', colores[0]);
       const cabecera = document.querySelector('.cabecera');
@@ -123,7 +122,6 @@ export class TransferenciasComponent implements OnInit {
       const detalle = document.querySelector('.detalle');
       if (detalle) detalle.classList.add('nuevoBG2');
    }
-
    onSubmit() {
       this.swtransferido = false;
       this.atransferir = 0;
@@ -209,8 +207,9 @@ export class TransferenciasComponent implements OnInit {
    totalAtransferir() {
       let suma: number = 0;
       let i = 0;
+      console.log(this._sincobro)
       this._sincobro.forEach(() => {
-         if (this._sincobro[i].pagado == 1) {
+         if (this._sincobro[i].pagado === 1) {
             suma +=
                this._sincobro[i].totaltarifa +
                this._sincobro[i].comerc +
@@ -223,7 +222,7 @@ export class TransferenciasComponent implements OnInit {
    }
 
    marcarAnteriores(index: number) {
-      console.log('this._sincobro[index].idmodulo: ', this._sincobro[index].idmodulo)
+      console.log('MARCAR ANTERIORES')
       if (
          this._sincobro[index].idmodulo.idmodulo == 3 ||
          this._sincobro[index].idmodulo.idmodulo == 4
@@ -549,7 +548,7 @@ export class TransferenciasComponent implements OnInit {
       modulo: number,
       valorbase: number
    ) {
-      console.log('tarifa', tarifa, 'comercializacion', cons, 'interes', interes, 'multa', multa, 'modulo', modulo, 'valorbase', valorbase)
+      //console.log('tarifa', tarifa, 'comercializacion', cons, 'interes', interes, 'multa', multa, 'modulo', modulo, 'valorbase', valorbase)
       if (modulo != 8) {
          let t = 0,
             c = 0,

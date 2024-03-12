@@ -305,7 +305,7 @@
                   </div>
                   <div class="card-body">
                      <div class="row">
-                        <div class="col-sm-6">
+                        <div class="col-sm-3">
                            <!-- checkbox -->
                            <div class="form-group">
                               <div class="custom-control custom-checkbox">
@@ -319,6 +319,22 @@
                                     formControlName="aprobadoalcantarillado">
                                  <label for="aprobadoalcantarillado" class="custom-control-label">Aprobado
                                     alcantarillado</label>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-sm-3">
+                           <!-- checkbox -->
+                           <div class="form-group">
+                              <div class="custom-control custom-checkbox">
+                                 <input class="custom-control-input" type="checkbox" id="adultomayor"
+                                    formControlName="adultomayor" (change)="adultomayor($event)">
+                                 <label for="adultomayor" class="custom-control-label">Adulto mayor</label>
+                              </div>
+                              <div class="custom-control custom-checkbox">
+                                 <input class="custom-control-input " (change)="municipio($event)"
+                                    type="checkbox" id="municipio"
+                                    formControlName="municipio">
+                                 <label for="municipio" class="custom-control-label">Municipio</label>
                               </div>
                            </div>
                         </div>

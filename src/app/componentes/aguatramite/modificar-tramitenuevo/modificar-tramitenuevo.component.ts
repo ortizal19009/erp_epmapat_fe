@@ -55,45 +55,38 @@ export class ModificarTramitenuevoComponent implements OnInit {
       this.formTramitenuevo = this.fb.group({
          idtramitenuevo: [''],
          direccion: ['', Validators.required],
-
          nrocasa: [{ value: '', disabled: false }, Validators.required],
          nrodepar: [{ value: '', disabled: false }, Validators.required],
          barrio: [{ value: '', disabled: false }, Validators.required],
          referencia: [{ value: '', disabled: false }, Validators.required],
-
          tuberiaprincipal: ['', Validators.required],
          idcategoria_categorias: ['', Validators.required],
          tipovia: 1,
          inspector: ['', Validators.required],
          areaconstruccion: ['', Validators.required],
          observaciones: ['', Validators.required],
-
          medidormarca: [{ value: '', disabled: false }, Validators.required],
          medidornumero: [{ value: '', disabled: false }, Validators.required],
          codmedidor: [{ value: '', disabled: false }, Validators.required],
          medidordiametro: [{ value: '', disabled: false }, Validators.required],
          medidornroesferas: [{ value: '', disabled: false }, Validators.required],
-
          codmedidorvecino: ['', Validators.required],
          secuencia: [{ value: '', disabled: false }, Validators.required],
-
          fechafinalizacion: [{ value: '', disabled: false }, Validators.required],
-
          tipopredio: 0,
          presentacedula: 0,
          presentaescritura: 0,
          solicitaagua: '',
          solicitaalcantarillado: '',
-         aprobadoagua: [{ value: 0, disabled: false } ],
-         aprobadoalcantarillado: [{ value: 0, disabled: false } ],
+         aprobadoagua: [{ value: 0, disabled: false }],
+         aprobadoalcantarillado: [{ value: 0, disabled: false }],
          fechainspeccion: '',
          medidorempresa: '',
-         
-         notificado: [{ value: '', disabled: false } ],
-         fechanotificacion: [{ value: '', disabled: false } ],
-         
+         notificado: [{ value: '', disabled: false }],
+         fechanotificacion: [{ value: '', disabled: false }],
          estado: '',
-         
+         adultomayor: false,
+         municipio: false,
          idaguatramite_aguatramite: ['', Validators.required],
          usucrea: 1,
          feccrea: this.date,
@@ -116,7 +109,7 @@ export class ModificarTramitenuevoComponent implements OnInit {
 
    get f() { return this.formTramitenuevo.controls; }
 
-   retornarListaTramites() { this.router.navigate(['/aguatramite']);   }
+   retornarListaTramites() { this.router.navigate(['/aguatramite']); }
 
    listarCategorias() {
       this.cateService.getListCategoria().subscribe({
@@ -138,7 +131,7 @@ export class ModificarTramitenuevoComponent implements OnInit {
    obtenerDatosTramite() {
       let idtramitenuevo = this.idTramite;
       this.traminuevoService.getListaById(+idtramitenuevo!).subscribe({
-         next: (datos) => {
+         next: (datos: any) => {
             this.formTramitenuevo.setValue({
                idtramitenuevo: datos.idtramitenuevo,
                direccion: datos.direccion,
@@ -173,6 +166,8 @@ export class ModificarTramitenuevoComponent implements OnInit {
                medidordiametro: datos.medidordiametro,
                idcategoria_categorias: datos.idcategoria_categorias,
                idaguatramite_aguatramite: datos.idaguatramite_aguatramite,
+               adultomayor: datos.adultomayor,
+               municipio: datos.municipio,
                usucrea: datos.usucrea,
                feccrea: datos.feccrea,
                usumodi: datos.usumodi,
@@ -184,12 +179,12 @@ export class ModificarTramitenuevoComponent implements OnInit {
          error: (e) => console.error(e),
       });
    }
-   
+
    onSubmit() {
       // console.log('this.formTramitenuevo.value: ',this.formTramitenuevo.value);
       this.guardarTramite();
    }
-   
+
    guardarTramite() {
       this.traminuevoService.saveTramiteNuevo(this.formTramitenuevo.value).subscribe({
          next: (datos) => {
@@ -200,7 +195,7 @@ export class ModificarTramitenuevoComponent implements OnInit {
          error: (e) => console.error('Al guardar en TramiteNuevo: ', e),
       });
    }
-   
+
    guardarAbonado() {
       let abonado: Abonados = new Abonados();
       let estadom: Estadom = new Estadom();
@@ -283,6 +278,32 @@ export class ModificarTramitenuevoComponent implements OnInit {
       } else if (e.target.checked === false) {
          this.formTramitenuevo.patchValue({
             aprobadoalcantarillado: 0,
+         });
+      }
+   }
+   adultomayor(e: any) {
+      // console.log(e.target.value);
+      // console.log(e.target.checked);
+      if (e.target.checked === true) {
+         this.formTramitenuevo.patchValue({
+            aprobadoalcantarillado: true,
+         });
+      } else if (e.target.checked === false) {
+         this.formTramitenuevo.patchValue({
+            aprobadoalcantarillado: false,
+         });
+      }
+   }
+   municipio(e: any) {
+      // console.log(e.target.value);
+      // console.log(e.target.checked);
+      if (e.target.checked === true) {
+         this.formTramitenuevo.patchValue({
+            aprobadoalcantarillado: true,
+         });
+      } else if (e.target.checked === false) {
+         this.formTramitenuevo.patchValue({
+            aprobadoalcantarillado: false,
          });
       }
    }

@@ -8,7 +8,7 @@
                   <label class="input-group-text" for="tipdoc">Sección</label>
                </div>
                <select class="custom-select" formControlName="idmodulo_modulos" id="selectModulo">
-                  <option *ngFor="let modulo of _modulos" value="{{modulo.idmodulo}}" id="idmodulo_{{modulo.idmodulo}}">
+                  <option *ngFor="let modulo of _modulos" value="{{+modulo.idmodulo!}}" id="idmodulo_{{modulo.idmodulo}}">
                   {{ modulo.descripcion }}
                   </option>
                </select>
