@@ -42,6 +42,10 @@ export class ModificarTramitenuevoComponent implements OnInit {
    date: Date = new Date();
    aguatramite: Aguatramite = new Aguatramite();
    abonado: any;
+   v_adultomayor: boolean = false;
+   v_municipio: boolean = false;
+
+
 
    constructor(private traminuevoService: TramiteNuevoService, private router: Router,
       private aguatramService: AguatramiteService, private cateService: CategoriaService, private fb: FormBuilder,
@@ -85,8 +89,8 @@ export class ModificarTramitenuevoComponent implements OnInit {
          notificado: [{ value: '', disabled: false }],
          fechanotificacion: [{ value: '', disabled: false }],
          estado: '',
-         adultomayor: false,
-         municipio: false,
+         /*          adultomayor: false,
+                  municipio: false, */
          idaguatramite_aguatramite: ['', Validators.required],
          usucrea: 1,
          feccrea: this.date,
@@ -132,6 +136,7 @@ export class ModificarTramitenuevoComponent implements OnInit {
       let idtramitenuevo = this.idTramite;
       this.traminuevoService.getListaById(+idtramitenuevo!).subscribe({
          next: (datos: any) => {
+            console.log(datos)
             this.formTramitenuevo.setValue({
                idtramitenuevo: datos.idtramitenuevo,
                direccion: datos.direccion,
@@ -166,8 +171,8 @@ export class ModificarTramitenuevoComponent implements OnInit {
                medidordiametro: datos.medidordiametro,
                idcategoria_categorias: datos.idcategoria_categorias,
                idaguatramite_aguatramite: datos.idaguatramite_aguatramite,
-               adultomayor: datos.adultomayor,
-               municipio: datos.municipio,
+               /*                adultomayor: datos.adultomayor,
+                              municipio: datos.municipio, */
                usucrea: datos.usucrea,
                feccrea: datos.feccrea,
                usumodi: datos.usumodi,
@@ -225,6 +230,8 @@ export class ModificarTramitenuevoComponent implements OnInit {
       abonado.usucrea = this.authService.idusuario;
       abonado.feccrea = this.date;
       abonado.medidorprincipal = 0;
+      abonado.adultomayor = this.v_adultomayor;
+      abonado.municipio = this.v_municipio;
 
       this.aboService.saveAbonado(abonado).subscribe({
          next: (datos) => {
@@ -255,8 +262,6 @@ export class ModificarTramitenuevoComponent implements OnInit {
    }
 
    aprobadoAgua(e: any) {
-      console.log(e.target.value);
-      console.log(e.target.checked);
       if (e.target.checked === true) {
          this.formTramitenuevo.patchValue({
             aprobadoagua: 1,
@@ -284,28 +289,30 @@ export class ModificarTramitenuevoComponent implements OnInit {
    adultomayor(e: any) {
       // console.log(e.target.value);
       // console.log(e.target.checked);
-      if (e.target.checked === true) {
+      /* if (e.target.checked === true) {
          this.formTramitenuevo.patchValue({
-            aprobadoalcantarillado: true,
+            adultomayor: true,
          });
       } else if (e.target.checked === false) {
          this.formTramitenuevo.patchValue({
-            aprobadoalcantarillado: false,
+            adultomayor: false,
          });
-      }
+      } */
+      this.v_adultomayor = e.target.checked
    }
    municipio(e: any) {
       // console.log(e.target.value);
       // console.log(e.target.checked);
-      if (e.target.checked === true) {
+      /* if (e.target.checked === true) {
          this.formTramitenuevo.patchValue({
-            aprobadoalcantarillado: true,
+            municipio: true,
          });
       } else if (e.target.checked === false) {
          this.formTramitenuevo.patchValue({
-            aprobadoalcantarillado: false,
+            municipio: false,
          });
-      }
+      } */
+      this.v_municipio = e.target.checked
    }
 
    actualizarAguaTramite(estado: number) {

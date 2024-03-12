@@ -131,8 +131,8 @@
                                  <label class="input-group-text" for="areaconstruccion">Área construcción<sup
                                        class="green">*</sup></label>
                               </div>
-                              <input type="number" class="form-control form-control-sm" formControlName="areaconstruccion"
-                                 [ngClass]="{'is-invalid': f['areaconstruccion'].invalid && f['areaconstruccion'].touched,
+                              <input type="number" class="form-control form-control-sm"
+                                 formControlName="areaconstruccion" [ngClass]="{'is-invalid': f['areaconstruccion'].invalid && f['areaconstruccion'].touched,
                                  'is-valid': f['areaconstruccion'].valid, '': f['areaconstruccion'].untouched}">
                            </div>
                         </div>
@@ -190,7 +190,8 @@
                                        <label class="input-group-text" for="codmedidor">Código<sup
                                              class="green">*</sup></label>
                                     </div>
-                                    <input type="number" class="form-control form-control-sm" formControlName="codmedidor"
+                                    <input type="number" class="form-control form-control-sm"
+                                       formControlName="codmedidor"
                                        [ngClass]="{'is-invalid': f['codmedidor'].invalid && f['codmedidor'].touched, 'is-valid': f['codmedidor'].valid, '': f['codmedidor'].untouched}">
                                  </div>
                               </div>
@@ -327,13 +328,12 @@
                            <div class="form-group">
                               <div class="custom-control custom-checkbox">
                                  <input class="custom-control-input" type="checkbox" id="adultomayor"
-                                    formControlName="adultomayor" (change)="adultomayor($event)">
+                                    (change)="adultomayor($event)">
                                  <label for="adultomayor" class="custom-control-label">Adulto mayor</label>
                               </div>
                               <div class="custom-control custom-checkbox">
-                                 <input class="custom-control-input " (change)="municipio($event)"
-                                    type="checkbox" id="municipio"
-                                    formControlName="municipio">
+                                 <input class="custom-control-input " (change)="municipio($event)" type="checkbox"
+                                    id="municipio">
                                  <label for="municipio" class="custom-control-label">Municipio</label>
                               </div>
                            </div>
@@ -359,7 +359,8 @@
             </div>
             <div class="mt-3 text-center">
                <button type="button" class="btn btn-success btn-sm " (click)="onSubmit()"
-                  [disabled]="aguatramite.estado === 3 || formTramitenuevo.pristine || !formTramitenuevo.valid"><i class="fa fa-check-circle"></i> &nbsp;Aceptar
+                  [disabled]="aguatramite.estado === 3 || formTramitenuevo.pristine || !formTramitenuevo.valid"><i
+                     class="fa fa-check-circle"></i> &nbsp;Aceptar
                </button>
                <button type="button" class="btn btn-outline-success btn-sm mx-3" (click)="retornarListaTramites()">
                   <i class="fa fa-times-circle"></i> Cancelar
