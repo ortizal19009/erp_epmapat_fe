@@ -101,7 +101,6 @@ export class ListarCajaComponent implements OnInit {
         this.s_rubroxfac.getByFechacobro(this.desde, this.hasta).subscribe({
           next: (datos: any) => {
             console.log(datos);
-            let i_factura = {} as Factura;
             let n_fxr: any[] = [];
             datos.forEach((item: any) => {
               console.log(item);
