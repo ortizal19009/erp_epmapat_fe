@@ -44,6 +44,7 @@ export class ModificarTramitenuevoComponent implements OnInit {
    abonado: any;
    v_adultomayor: boolean = false;
    v_municipio: boolean = false;
+   _abonado: Abonados = new Abonados();
 
 
 
@@ -234,8 +235,9 @@ export class ModificarTramitenuevoComponent implements OnInit {
       abonado.municipio = this.v_municipio;
 
       this.aboService.saveAbonado(abonado).subscribe({
-         next: (datos) => {
+         next: (datos: any) => {
             // console.log('ABONADO CREADO', datos);
+            this._abonado = datos; 
          },
          error: (e) => console.error('Al crear el Abonado: ', e),
       });

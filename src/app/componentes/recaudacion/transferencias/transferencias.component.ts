@@ -102,7 +102,6 @@ export class TransferenciasComponent implements OnInit {
 
    async buscaColor() {
       try {
-         console.log(this.authService.idusuario);
          const datos = await this.coloresService.setcolor(
             this.authService.idusuario,
             'transferencias'
@@ -242,6 +241,7 @@ export class TransferenciasComponent implements OnInit {
          } //Desmarca siguientes
          else {
             let antCuenta = this._sincobro[index].idabonado;
+            console.log('cuenta anterior')
             let i = index;
             while (i <= this._sincobro.length - 1) {
                if (antCuenta != this._sincobro[i].idabonado) break;
@@ -447,16 +447,13 @@ export class TransferenciasComponent implements OnInit {
    abrirCaja() {
       this.s_cajas.getByIdUsuario(this.authService.idusuario).subscribe({
          next: (datos) => {
-            console.log(datos);
             this._caja = datos;
             this._establecimiento = datos.idptoemision_ptoemision;
             this._usuario = datos.idusuario_usuarios;
             this._codRecaudador = `${datos.idptoemision_ptoemision.establecimiento}-${datos.codigo}`;
-
             /* VALIDAR SI LA CAJA ESTA ABIERTA O CERRADA */
             this.s_recaudaxcaja.getLastConexion(this._caja.idcaja).subscribe({
                next: (datos) => {
-                  console.log(datos);
                   let c_fecha: Date = new Date();
                   let l_fecha: Date = new Date(datos.fechainiciolabor);
                   let estadoCaja = sessionStorage.getItem('estadoCaja');
@@ -466,11 +463,9 @@ export class TransferenciasComponent implements OnInit {
                         c_fecha.getFullYear() == l_fecha.getFullYear()) ||
                      estadoCaja === '0'
                   ) {
-                     console.log('No ha iniciado caja');
                      this.cajaActiva = false;
                      this.estadoCajaT = true;
                   } else {
-                     console.log('Caja Iniciada');
                      this.cajaActiva = true;
                      this.estadoCajaT = false;
                   }
@@ -482,7 +477,6 @@ export class TransferenciasComponent implements OnInit {
                this.facService.valLastFac(datos.codigo.toString()).subscribe({
                   next: (dato: any) => {
                      let nrofac = dato.nrofactura.split('-', 3);
-                     //let nrofac_f = +nrofac[2]! + 1
                      this._nroFactura = `${this._codRecaudador}-${nrofac[2]
                         .toString()
                         .padStart(9, '0')}`;

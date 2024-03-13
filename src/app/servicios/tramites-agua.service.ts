@@ -6,21 +6,23 @@ import autoTable from 'jspdf-autotable';
 @Injectable({
   providedIn: 'root',
 })
-
 export class TramitesAguaService {
-
+  administradores = [
+    { nombre: 'Ing. Juan Diego Delgado', cargo: 'Director Comercial' },
+    { nombre: 'Abg. Rigoberto Narváez', cargo: 'Asesor Legal' },
+  ];
   constructor(private s_header: TemplateHeaderService) {}
-  
+
   listaTramitesAgua(datos: any) {
     let titulo: string = 'Lista de tramites de agua';
     let doc = new jsPDF('p', 'pt', 'a4');
     this.s_header.header(titulo, doc);
     autoTable(doc, {
-       html: `#${datos}` 
-    })
+      html: `#${datos}`,
+    });
     doc.output('pdfobjectnewwindow', { filename: `${titulo}.pdf` });
   }
-  
+
   genContratoTramite(aguatramite: any, abonado: any, servicio: string) {
     let titulo: string = 'CONCESIÓN DE SERVICIOS';
     let doc = new jsPDF('p', 'pt', 'a4');
@@ -70,7 +72,7 @@ export class TramitesAguaService {
     });
     doc.output('pdfobjectnewwindow', { filename: `${titulo}.pdf` });
   }
-  
+
   genHojaInspeccion(datos: any, titulo: string) {
     let medidor: string;
     let agua: string = '';
@@ -156,13 +158,14 @@ export class TramitesAguaService {
 
     doc.output('pdfobjectnewwindow', { filename: `${titulo}.pdf` });
   }
-  
+
   genContrato(datos: any) {
+    console.log(datos);
     let titulo: string = 'CONTRATO DE CONCESIÓN DE SERVICIOS';
     let doc = new jsPDF('p', 'pt', 'a4');
     this.s_header.header(titulo, doc);
     let margin = 30;
-    let p1 = `Comparecen por una parte Gerente General de la Empresa Pública Municipal de Agua Potable y Alcantarillado de Tulcán EPMAPA-T, conjuntamente con el señor(a) Asesor Legal, en calidad de concesionario, por otra parte en calidad de cliente el (la) Señor(a). ${datos.idaguatramite_aguatramite.idcliente_clientes.nombre}, domiciliado en ${datos.idaguatramite_aguatramite.idcliente_clientes.direccion}, para la concesión del servicio de agua potable y/o alcantarillado de acuerdo a las siguientes clausulas: `;
+    let p1 = `Comparecen por una parte Gerente General de la Empresa Pública Municipal de Agua Potable y Alcantarillado de Tulcán EPMAPA-T, conjuntamente con el señor(a) Asesor Legal, en calidad de concesionario, por otra parte en calidad de cliente el (la) Señor(a). ${datos.idaguatramite_aguatramite.idcliente_clientes.nombre}, domiciliado en ${datos.direccion}, para la concesión del servicio de agua potable y/o alcantarillado de acuerdo a las siguientes clausulas: `;
     let p2 = `PRIMERA.- Conexión del Servicio de Agua Potable. La EPMAPA-T, por medio del Departamento Técnico, realizará la conexión del servicio de Agua Potable desde la tubería matriz hasta el medidor de consumo, una vez que el cliente cumpla los requisitos legales establecidos. `;
     let p3 = `SEGUNDA.- Valores. Los derechos de instalación, reparación, desconexión y otros servicios conexos se encuentran establecidos en la Ordenanza que Regula la Determinación, Recaudación y Administración de las Tasas por los Servicios de Agua Potable, Alcantarillado, Saneamiento, Conservación de Fuentes y Recolección de Basura, para la ciudad de Tulcán la cual normaliza l a operación y el funcionamiento de los sistemas de agua potable y alcantarillado. Los calores que pagará el usuario han sido establecidos de acuerdo con el valor de mano de obra, gastos administrativos y materiales ha utilizarse, mismos que se hallan detallados en la factura respectiva.
     \nEl medidor de consumo lo ha proporcionado la empresa el solicitante. `;
@@ -177,12 +180,12 @@ export class TramitesAguaService {
     let p13 = `6.6 Los reclamos y observaciones a las plantillas se presentarán en un plazo de hasta sesenta (60) días a partir de la fecha de emisión de la facturación, complidos los cuales, la facturación realizada se la dará por aceptada y sin opción a reclamo. `;
     let p14 = `SÉPTIMA.- Aceptación. El solicitante declara estar de acuerdo en todo el contenido y se compromete a cumplir con todas las clausulas y las disposiciones descritas en el presente contrato. Para constancia y en acuerdo de las partes, se firma el presente contrato en original y copia de igual tenor y contenido. `;
     doc.setFontSize(10);
-    doc.text(`TRAMITE: ${datos.idaguatramite_aguatramite.idaguatramite}`, margin, 160);
     doc.text(
-      `TULCAN, ${datos.fechafinalizacion}`,
+      `TRAMITE: ${datos.idaguatramite_aguatramite.idaguatramite}`,
       margin,
-      250
+      160
     );
+    doc.text(`TULCAN, ${datos.fechafinalizacion}`, margin, 250);
     doc.text(`Nro. cuenta: ${datos}`, margin, 270);
     autoTable(doc, {
       styles: {
@@ -208,6 +211,15 @@ export class TramitesAguaService {
         [p12],
         [p13],
         [p14],
+      ],
+    });
+    autoTable(doc, {
+      bodyStyles: { halign: 'justify' },
+      alternateRowStyles: { fillColor: [255, 255, 255] },
+      body: [
+        ['____________________________', '____________________________'],
+        [this.administradores[0].nombre, this.administradores[1].nombre],
+        [this.administradores[0].cargo, this.administradores[1].cargo],
       ],
     });
 
