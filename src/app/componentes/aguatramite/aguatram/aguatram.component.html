@@ -65,19 +65,40 @@
       <div *ngIf="cambioCategoria">
          <div class="container-fluid">
             <div class="row justify-content-center">
-               <div class="col-sm-4 detalle">
+               <div class="col-sm-6 detalle">
                   <form [formGroup]="f_categoria" class="col-sm-12 d-flex justify-content-center my-2">
-                     <select name="" id="" class="form-control form-control-sm" formControlName="idcategoria_categorias"
-                        [compareWith]="compareCategoria">
+                     <select class="form-control form-control-sm" formControlName="idcategoria_categorias"
+                        [compareWith]="compareCategoria" >
                         <option *ngFor="let categoria of categorias" [ngValue]="categoria">{{categoria.descripcion}}
                         </option>
                      </select>
+                     
+                     <div class="form-group col-md-3 my-0 py-0" [hidden]="f_categoria.value.idcategoria_categorias.idcategoria != 9">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold"
+                                 id="inputGroup-sizing-sm">Adulto mayor</span>
+                           </div>
+                           <input type="checkbox" class="form-control text-center" formControlName="adultomayor"
+                              aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+                        </div>
+                     </div>
+                     <div class="form-group col-md-3 my-0 py-0" [hidden]="f_categoria.value.idcategoria_categorias.idcategoria != 4">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold"
+                                 id="inputGroup-sizing-sm">Municipio</span>
+                           </div>
+                           <input type="checkbox" class="form-control text-center" formControlName="municipio"
+                              aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+                        </div>
+                     </div>
                   </form>
                </div>
             </div>
 
             <div class="row justify-content-center text-center">
-               <div class="col-sm-4 detalle">
+               <div class="col-sm-6 detalle">
                   <button class="btn btn-sm btn-outline-success mx-1 mb-3" (click)="actualizarCategoria()"><i
                         class="fa fa-check-circle"></i>&nbsp;Aceptar</button>
                   <button class="btn btn-sm btn-success mx-1 mb-3" (click)="regresar()"><i

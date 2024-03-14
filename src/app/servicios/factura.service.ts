@@ -11,7 +11,7 @@ const baseUrl = `${apiUrl}/facturas`;
   providedIn: 'root',
 })
 export class FacturaService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getLista(): Observable<Facturas[]> {
     return this.http.get<Facturas[]>(`${baseUrl}`);
@@ -77,4 +77,28 @@ export class FacturaService {
       `${baseUrl}/reportes/fechacobro?fechacobro=${fechacobro}`
     );
   }
+
+  getByNrofactura(nrofactura: String) {
+    return this.http.get<Facturas>(`${baseUrl}/nrofactura?nrofactura=${nrofactura}`);
+  }
+  //Una Planilla (como lista)
+  getPlanilla(idfactura: number) {
+    return this.http.get<Facturas[]>(`${baseUrl}/planilla?idfactura=${idfactura}`);
+  }
+
+  //Planillas por idabonado y fechas
+  getPorabonado(idabonado: number, fechaDesde: Date, fechaHasta: Date): Observable<Facturas[]> {
+    return this.http.get<Facturas[]>(`${baseUrl}/porabonado?idabonado=${idabonado}&fechaDesde=${fechaDesde}&fechaHasta=${fechaHasta}`);
+  }
+
+  //IDs de las Planillas sin cobrar de un Abonado
+  getSinCobroAbo(idabonado: number) {
+    return this.http.get<number[]>(`${baseUrl}/sincobro?idabonado=${idabonado}`);
+  }
+
+  //Planillas sin Cobrar de un Abonado (Para Convenios)
+  getSinCobrarAbo(idabonado: number) {
+    return this.http.get<Facturas[]>(`${baseUrl}/sincobrarAbo?idabonado=${idabonado}`);
+  }
+
 }

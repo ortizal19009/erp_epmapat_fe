@@ -16,8 +16,8 @@ export class ColoresService {
       else {
          let newVentana = {} as Ventana; //Interface para los datos de la nueva Ventana
          newVentana.nombre = ventana;
-         newVentana.color1 = 'rgb(57, 95, 95)';
-         newVentana.color2 = 'rgb(210, 221, 210)';
+         newVentana.color1 = 'rgb(80, 4, 80)';
+         newVentana.color2 = 'rgb(250, 200, 250)';
          newVentana.idusuario = idusuario;
          try {
             const respuesta = await this.venService.saveVentana(newVentana);
@@ -28,8 +28,6 @@ export class ColoresService {
       }
       return Promise.resolve(['0']);
    }
-
-
 }
 
 interface Ventana {

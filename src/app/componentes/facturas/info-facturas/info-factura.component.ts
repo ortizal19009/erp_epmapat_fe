@@ -11,6 +11,7 @@ import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 
 export class InfoFacturasComponent implements OnInit {
 
+  idFactura: number;
   planilla = {} as Planilla; //Interface para los datos del registro de la Facturación
   _rubroxfac: any;
   suma12: number;
@@ -19,11 +20,15 @@ export class InfoFacturasComponent implements OnInit {
 
   constructor(private facService: FacturaService, private router: Router, private rxfService: RubroxfacService) { }
 
-  ngOnInit(): void { this.datosPlanilla();  }
+  ngOnInit(): void {
+    this.idFactura = +sessionStorage.getItem('idfacturaToInfo')!;
+    sessionStorage.removeItem('idfacturaToInfo');
+
+    this.datosPlanilla();
+  }
 
   datosPlanilla() {
-    let idFactura = sessionStorage.getItem('idfacturaToInfo');
-    this.facService.getById(+idFactura!).subscribe({
+    this.facService.getById(this.idFactura!).subscribe({
       next: resp => {
         this.planilla.idfactura = resp.idfactura;
         this.planilla.modulo = resp.idmodulo.descripcion;
@@ -35,21 +40,21 @@ export class InfoFacturasComponent implements OnInit {
         this.planilla.valorbase = resp.valorbase;
         this.getRubroxfac();
       },
-      error: err => console.log(err.error)
+      error: err => console.error(err.error)
     });
   }
 
   getRubroxfac() {
-    let idFactura = sessionStorage.getItem('idfacturaToInfo');
-    this.rxfService.getByIdfactura(+idFactura!).subscribe({
-      next: resp => {
-       this._rubroxfac = resp;
-       this.subtotal();},
-      error: err => console.log(err.error)
+    this.rxfService.getByIdfactura(this.idFactura!).subscribe({
+      next: datos => {
+        this._rubroxfac = datos;
+        this.subtotal();
+      },
+      error: err => console.error(err.error)
     })
- }
+  }
 
-  regresar() {    this.router.navigate(['/facturas']);  }
+  regresar() { this.router.navigate(['/facturas']); }
 
   subtotal() {
     let suma12: number = 0;
@@ -57,24 +62,24 @@ export class InfoFacturasComponent implements OnInit {
     let valoriva = 0;
     let i = 0;
     this._rubroxfac.forEach(() => {
-       if (this._rubroxfac[i].idrubro_rubros.swiva == 1) {
-          suma12 += this._rubroxfac[i].cantidad * this._rubroxfac[i].valorunitario;
-          valoriva += this._rubroxfac[i].cantidad * this._rubroxfac[i].valorunitario * .12;
-       }
-       else {
-          if (this._rubroxfac[i].idrubro_rubros.esiva == 0) {
-             suma0 += this._rubroxfac[i].cantidad * this._rubroxfac[i].valorunitario;
-          }
-          else {
-             // this.valoriva = this.rubroxfac[i].valorunitario;
-          }
-       }
-       i++;
+      if (this._rubroxfac[i].idrubro_rubros.swiva == 1) {
+        suma12 += this._rubroxfac[i].cantidad * this._rubroxfac[i].valorunitario;
+        valoriva += this._rubroxfac[i].cantidad * this._rubroxfac[i].valorunitario * .12;
+      }
+      else {
+        if (this._rubroxfac[i].idrubro_rubros.esiva == 0) {
+          suma0 += this._rubroxfac[i].cantidad * this._rubroxfac[i].valorunitario;
+        }
+        else {
+          // this.valoriva = this.rubroxfac[i].valorunitario;
+        }
+      }
+      i++;
     });
     this.suma12 = suma12;
     this.suma0 = suma0;
     this.valoriva = valoriva;
- }
+  }
 
 }
 

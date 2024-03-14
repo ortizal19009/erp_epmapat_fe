@@ -11,7 +11,7 @@ const baseUrl = `${apiUrl}/rubroxfac`;
   providedIn: 'root',
 })
 export class RubroxfacService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getListaRubroByFactura(idfactura: number) {
     return this.http.get<Rubroxfac[]>(`${baseUrl}?nrofactura=${idfactura}`);
@@ -37,7 +37,7 @@ export class RubroxfacService {
   getByIdrubro(idrubro: number) {
     return this.http.get<Rubroxfac[]>(`${baseUrl}/rubro/${idrubro}`);
   }
-
+  //Está en add-convenio (cambiar a saveRubroxfac -sin f mayúscula-)
   saveRubroxFac(rubroxFac: Rubroxfac): Observable<Object> {
     return this.http.post(`${baseUrl}`, rubroxFac);
   }
@@ -58,5 +58,18 @@ export class RubroxfacService {
     return this.http.get<Rubroxfac[]>(
       `${baseUrl}/sincobro/rubxfa?cuenta=${cuenta}`
     );
+  }
+
+  getMulta(idfactura: number): Observable<boolean> {
+    // console.log(`${baseUrl}/multa?idfactura=${idfactura}`)
+    return this.http.get<boolean>(`${baseUrl}/multa?idfactura=${idfactura}`);
+  }
+
+  getById(idrubroxfac: number) {
+    return this.http.get<Rubroxfac>(baseUrl + "/" + idrubroxfac);
+  }
+
+  updateRubroxfac(idrubroxfac: number, rubroxfac: Rubroxfac): Observable<Object> {
+    return this.http.put(baseUrl + "/" + idrubroxfac, rubroxfac);
   }
 }

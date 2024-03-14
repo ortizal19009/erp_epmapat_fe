@@ -121,7 +121,7 @@ export class AguatramComponent implements OnInit {
          }
       }
       this.f_datos = this.fb.group({ tipoBusqueda: 1, buscarAbonado: '' });
-      this.f_categoria = this.fb.group({ idcategoria_categorias: 1 });
+      this.f_categoria = this.fb.group({ idcategoria_categorias: 1, adultomayor: false, municipio: false });
       this.f_nMedidor = this.fb.group({
          medidormarca: '',
          medidornumero: '',
@@ -196,6 +196,8 @@ export class AguatramComponent implements OnInit {
    actualizarCategoria() {
       this.abonado.idcategoria_categorias =
          this.f_categoria.value.idcategoria_categorias;
+      this.abonado.adultomayor = this.f_categoria.value.adultomayor;
+      this.abonado.municipio = this.f_categoria.value.municipio;
       this.actualizarAbonado(this.abonado);
       this.guardarAguaTramite(this.abonado, null);
    }
@@ -269,6 +271,8 @@ export class AguatramComponent implements OnInit {
       this.ruta = abonado.idruta_rutas;
       this.categoria = abonado.idcategoria_categorias;
       this.estadom = abonado.idestadom_estadom;
+
+      this.f_categoria.patchValue({ idcategoria_categorias: abonado.idcategoria_categorias, adultomayor: abonado.adultomayor, municipio: abonado.municipio })
    }
 
 }

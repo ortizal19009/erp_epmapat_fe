@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { VentanasService } from 'src/app/servicios/administracion/ventanas.service';
 
 @Component({
@@ -20,11 +21,11 @@ export class ColoresComponent implements OnInit {
    blue1: number;
    nomVentana: string;  //Ejm: '/rutas'
 
-   constructor(private router: Router, private fb: FormBuilder, private venServicio: VentanasService) { }
+   constructor(private router: Router, private fb: FormBuilder, private venServicio: VentanasService, public authService: AutorizaService) { }
 
    ngOnInit(): void {
       this.nomVentana = sessionStorage.getItem('ventana')!;
-      console.log('this.nomVentana: ', this.nomVentana);
+      // console.log('this.nomVentana: ', this.nomVentana);
       if (!this.nomVentana || this.nomVentana == '/inicio') {
          //Solo Inicializa para que no de errores y regresa
          this.nomVentana = '/cajas'
@@ -90,11 +91,15 @@ export class ColoresComponent implements OnInit {
       ventana.nombre = v;
       ventana.color1 = rgb0;
       ventana.color2 = rgb1;
-      ventana.idusuario = 1;
+      ventana.idusuario = this.authService.idusuario;
       // Busca la ventana por usuario y nombre para luego actualizarla
-      let ventanas = await this.venServicio.getByIdusuarioyNombre(1, v)
+      // console.log('getByIdusuarioyNombre: ', this.authService.idusuario, v)
+      let ventanas = await this.venServicio.getByIdusuarioyNombre(this.authService.idusuario, v)
       if (ventanas) {
          this.venServicio.updateVentana(ventanas.idventana, ventana).subscribe({
+            next: resp => {
+               // console.log('Actualizacion ventana Ok!')
+            },
             error: err => console.error(err.error)
          });
       }

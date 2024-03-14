@@ -203,6 +203,7 @@ import { ColoresComponent } from './componentes/administracion/colores/colores.c
 import { CertitmpComponent } from './componentes/certificaciones/certitmp/certitmp.component';
 import { TransferenciasComponent } from './componentes/recaudacion/transferencias/transferencias.component';
 import { PerfilUsuarioComponent } from './componentes/administracion/usuarios/perfil-usuario/perfil-usuario.component';
+import { RecalFacturaComponent } from './componentes/facturas/recal-factura/recal-factura.component';
 
 
 const routes: Routes = [
@@ -240,6 +241,7 @@ const routes: Routes = [
    { path: 'facturacion', component: FacturacionComponent },
    { path: 'info-facturacion', component: InfoFacturacionComponent },
    { path: 'add-facturacion', component: AddFacturacionComponent },
+   { path: 'recal-factura', component: RecalFacturaComponent },
    //Planillas (Tabla facturas)
    { path: 'facturas', component: FacturasComponent },
    { path: 'info-planilla', component: InfoFacturasComponent },

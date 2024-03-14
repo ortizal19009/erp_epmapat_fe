@@ -39,7 +39,7 @@ export class ListarCajaComponent implements OnInit {
     private s_rubroxfac: RubroxfacService,
     private s_recaudacion: RecaudacionService,
     private s_rubro: RubrosService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     let fechaActual: Date = new Date();
@@ -95,31 +95,28 @@ export class ListarCajaComponent implements OnInit {
     }
   }
   pdf(opt: any) {
-    console.log(opt);
     switch (opt) {
       case '0':
         this.s_rubroxfac.getByFechacobro(this.desde, this.hasta).subscribe({
           next: (datos: any) => {
-            console.log(datos);
+            console.log(datos)
             let n_fxr: any[] = [];
             datos.forEach((item: any) => {
-              console.log(item);
-              let query = n_fxr.find(
+              let f_query = n_fxr.find(
                 (factura: { idfactura: number }) =>
                   factura.idfactura === item.idfactura_facturas.idfactura
               );
               let fac = item.idfactura_facturas;
-              if (!query) {
-                //console.log(query);
-                //console.log(item.idfactura_facturas);
+              if (!f_query) {
                 fac.rubros = [item.idrubro_rubros];
                 n_fxr.push(item.idfactura_facturas);
-              } else {
-                n_fxr.forEach((_item: any) => {
-                  console.log(_item);
-                  let query;
-                  _item.rubros.push(item.idrubro_rubros);
-                });
+              }
+              else {
+                let r_query = n_fxr.find(
+                  (factura: { idfactura: number }) =>
+                    factura.idfactura === item.idfactura_facturas.idfactura
+                );
+                r_query.rubros.push(item.idrubro_rubros)
               }
             });
             console.log(n_fxr);

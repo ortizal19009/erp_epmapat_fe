@@ -134,7 +134,6 @@ export class AddTramiteComponent implements OnInit {
   listarTpTramites() {
     this.s_tptramites.getListaTpTramite().subscribe(
       (datos) => {
-        console.log(datos)
         this.v_tptramites = datos;
 
       },

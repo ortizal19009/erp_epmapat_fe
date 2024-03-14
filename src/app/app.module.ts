@@ -140,7 +140,7 @@ import { EstadoEmisionPipe } from './pipes/estado-emision.pipe';
 import { InfoRubroComponent } from './componentes/rubros/info-rubro/info-rubro.component';
 import { NoSiPipe } from './pipes/no-si.pipe';
 import { NombreMesPipe } from './pipes/nombre-mes.pipe';
- import { BloqueConsumoPipe } from './pipes/bloque-consumo.pipe';
+import { BloqueConsumoPipe } from './pipes/bloque-consumo.pipe';
 
 import { UsoitemsComponent } from './componentes/usoitems/usoitems/usoitems.component';
 import { InfoUsoitemsComponent } from './componentes/usoitems/info-usoitems/info-usoitems.component';
@@ -212,12 +212,13 @@ import { AddHabilitacionComponent } from './componentes/habilitaciones/add-habil
 import { HashLocationStrategy, LocationStrategy, PathLocationStrategy } from '@angular/common';
 import { HistorialconsumoComponent } from './componentes/abonados/historialconsumo/historialconsumo.component';
 import { PerfilUsuarioComponent } from './componentes/administracion/usuarios/perfil-usuario/perfil-usuario.component';
+import { RecalFacturaComponent } from './componentes/facturas/recal-factura/recal-factura.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
 @NgModule({
    declarations: [
-      
+
       AppComponent, MainHeaderComponent, MainSidebarComponent, ContentWrapperComponent, MainFooterComponent,
 
       //Consumo de Agua
@@ -225,11 +226,11 @@ import { PerfilUsuarioComponent } from './componentes/administracion/usuarios/pe
       ListarAbonadosComponent, BuscarabonadoComponent,
       RutasComponent, AddRutasComponent, InfoRutaComponent,
       EmisionesComponent, AddEmisionComponent, ModiEmisionComponent,
-      RutasxemisionComponent, EmiactualComponent, 
+      RutasxemisionComponent, EmiactualComponent,
       SuspensionesComponent, AddSuspensionesComponent, DetallesSuspensionesComponent,
 
       //Facturacion
-      FacturacionComponent, InfoFacturacionComponent, RubrosComponent, InfoRubroComponent,
+      FacturacionComponent, InfoFacturacionComponent, RubrosComponent, InfoRubroComponent,RecalFacturaComponent,
       //Recaudación
       ListarCajaComponent, AddCajaComponent, ModificarCajaComponent,
       ConveniosComponent, ModiConvenioComponent, AddConvenioComponent, TransferenciasComponent,
@@ -240,7 +241,7 @@ import { PerfilUsuarioComponent } from './componentes/administracion/usuarios/pe
       TpidentificasComponent, AddTpidentificaComponent,
       ListarTipopagoComponent, AddTipopagoComponent,
       TpreclamosComponent, AddTpreclamoComponent,
-      ListarPtoemisionComponent, AddPtoemisionComponent, ModificarPtoemisionComponent,InfoEstablecimientoComponent,
+      ListarPtoemisionComponent, AddPtoemisionComponent, ModificarPtoemisionComponent, InfoEstablecimientoComponent,
       ListarCategoriaComponent, AddCategoriaComponent, ModificarCategoriaComponent,
       ListarInteresesComponent, ModificarInteresesComponent, AddInteresesComponent,
       PreciosxcatComponent, AddPreciosxcatComponent, ModificarPreciosxcatComponent,
@@ -252,49 +253,49 @@ import { PerfilUsuarioComponent } from './componentes/administracion/usuarios/pe
 
       ListarCertificacionesComponent, AddCertificacionesComponent,
       ModificarCertificacionesComponent, ListarReclamosComponent,
-      
+
       AddReclamosComponent, ModificarReclamosComponent, Tramites1Component,
-      AddTramites1Component, ItemxfactComponent, 
-      AguatramiteComponent, InfoAguatramiteComponent, 
-      FacturasComponent, InfoFacturasComponent, RubroxfacComponent, 
-      FacelectroComponent, DetFacelectroComponent, InfoConvenioComponent, 
-      InfoCajaComponent, TramitesComponent, AddTramiteComponent, InfoTramiteComponent, 
+      AddTramites1Component, ItemxfactComponent,
+      AguatramiteComponent, InfoAguatramiteComponent,
+      FacturasComponent, InfoFacturasComponent, RubroxfacComponent,
+      FacelectroComponent, DetFacelectroComponent, InfoConvenioComponent,
+      InfoCajaComponent, TramitesComponent, AddTramiteComponent, InfoTramiteComponent,
       InfoPreciosxcatComponent, RecaudacionComponent, AddRecaudaComponent,
-      UsoitemsComponent, InfoUsoitemsComponent, 
-      CatalogoitemsComponent, AddFacturacionComponent, InfoCatalogoitemsComponent, PreingresosComponent, 
-      InfoPreingresoComponent, ModiPreingresoComponent, AddPreingresoComponent, AddCatalogoitemsComponent, 
-      ModiCatalogoitemsComponent, AddRubroComponent, AddUsoitemsComponent, ModiUsoitemsComponent, 
+      UsoitemsComponent, InfoUsoitemsComponent,
+      CatalogoitemsComponent, AddFacturacionComponent, InfoCatalogoitemsComponent, PreingresosComponent,
+      InfoPreingresoComponent, ModiPreingresoComponent, AddPreingresoComponent, AddCatalogoitemsComponent,
+      ModiCatalogoitemsComponent, AddRubroComponent, AddUsoitemsComponent, ModiUsoitemsComponent,
       ModiRubroComponent, CertipresuComponent,
 
       // ============ CONTABILIDAD ================
-      ClasificadorComponent, InfoClasificadorComponent, ModiClasificadorComponent, AddClasificadorComponent, 
+      ClasificadorComponent, InfoClasificadorComponent, ModiClasificadorComponent, AddClasificadorComponent,
       ReformasComponent, AddReformaComponent, EjecucionComponent,
 
       // ========== ADMINISTRACION CENTRAL ============
-      Tabla4Component, AddTabla4Component, DocumentosComponent, AddDocumentoComponent, InfoDocumentoComponent, ModiDocumentoComponent, 
-      InfoTabla4Component, ModiTabla4Component, LoginComponent, 
-       UsuariosComponent, ModiReformaComponent, 
-      ModiEjecucionComponent, AddEjecucionComponent, ModiCertipresuComponent, AddCertipresuComponent, 
-      PartixcertiComponent, ImporInteresesComponent, GeneEmisionComponent, ImporLecturasComponent, 
-      BancosComponent, ConciliabanComponent, ColoresComponent, Pliego24Component,PerfilUsuarioComponent,
+      Tabla4Component, AddTabla4Component, DocumentosComponent, AddDocumentoComponent, InfoDocumentoComponent, ModiDocumentoComponent,
+      InfoTabla4Component, ModiTabla4Component, LoginComponent,
+      UsuariosComponent, ModiReformaComponent,
+      ModiEjecucionComponent, AddEjecucionComponent, ModiCertipresuComponent, AddCertipresuComponent,
+      PartixcertiComponent, ImporInteresesComponent, GeneEmisionComponent, ImporLecturasComponent,
+      BancosComponent, ConciliabanComponent, ColoresComponent, Pliego24Component, PerfilUsuarioComponent,
       // ============ Pipes =============
-      EstadoEmisionPipe, NombreEmisionPipe, NoSiPipe, NombreMesPipe, BloqueConsumoPipe, ProyeccionComponent, 
-      AuxIngresoComponent, AsientosComponent, PregastosComponent, AddPregastoComponent, EstrfuncComponent, 
-      InfoEstrfuncComponent, ModiPregastoComponent, AuxGastoComponent, NiifcuentasComponent, AddHomologaComponent, 
-      AddNiifcuentaComponent, ModiNiifcuentaComponent, TramipresuComponent, AddTramipresuComponent, ModiTramipresuComponent, 
-      CuentasComponent, AddCuentaComponent, SinafipComponent, TransaciComponent, AddTransaciComponent, AddAsientoComponent, 
+      EstadoEmisionPipe, NombreEmisionPipe, NoSiPipe, NombreMesPipe, BloqueConsumoPipe, ProyeccionComponent,
+      AuxIngresoComponent, AsientosComponent, PregastosComponent, AddPregastoComponent, EstrfuncComponent,
+      InfoEstrfuncComponent, ModiPregastoComponent, AuxGastoComponent, NiifcuentasComponent, AddHomologaComponent,
+      AddNiifcuentaComponent, ModiNiifcuentaComponent, TramipresuComponent, AddTramipresuComponent, ModiTramipresuComponent,
+      CuentasComponent, AddCuentaComponent, SinafipComponent, TransaciComponent, AddTransaciComponent, AddAsientoComponent,
       AddBenextranComponent, SimulacionComponent, AddLiquiacfpComponent, ModificarTramitenuevoComponent, AddAguatramiteComponent, CertitmpComponent, GeneCertificacionComponent, AguatramComponent, BuscarClienteComponent, ModiUsuarioComponent, BuscarRutaComponent, HabilitacionesComponent, AddHabilitacionComponent, HistorialconsumoComponent,
    ],
 
    imports: [
       BrowserModule, AppRoutingModule, HttpClientModule, FormsModule, ReactiveFormsModule,
-      HttpClientModule, Ng2SearchPipeModule, NgxMaskModule.forRoot() ],
+      HttpClientModule, Ng2SearchPipeModule, NgxMaskModule.forRoot()],
 
-   providers: [ MainFooterComponent,
-       { provide: LocationStrategy, useClass: HashLocationStrategy }
-       /* https://angular.io/api/common/HashLocationStrategy */
-    ],
-   
+   providers: [MainFooterComponent,
+      { provide: LocationStrategy, useClass: HashLocationStrategy }
+      /* https://angular.io/api/common/HashLocationStrategy */
+   ],
+
 
    bootstrap: [AppComponent]
 })
