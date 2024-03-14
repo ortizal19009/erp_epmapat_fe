@@ -165,22 +165,22 @@ export class InfoCajaComponent implements OnInit {
                 let i = 0;
                 _datos.forEach((item: any) => {
                   total_pagar += item.totalpagar;
-                  i++;
+                  //i++;
                 });
                 let total = 0;
                 datos.forEach((item: any) => {
-                  console.log(item);
+                 // console.log(item);
                   let com: number = 0;
                   let totTarifa: number = +item.idfactura.totaltarifa!;
                   let suma: number = 0;
-                  console.log(item.idfactura.idmodulo.idmodulo);
-                  console.log(totTarifa);
+                  /*      console.log(item.idfactura.idmodulo.idmodulo);
+                  console.log(totTarifa); */
                   if (+item.idfactura.idmodulo.idmodulo! == 3) {
                     com = 1;
                   }
-                  console.log(item.idfactura.interescobrado);
+                  /*     console.log(item.idfactura.interescobrado);
                   console.log(com);
-                  console.log(totTarifa);
+                  console.log(totTarifa); */
                   if (+item.idfactura.idmodulo.idmodulo! != 8) {
                     suma += +item.idfactura.interescobrado! + com + +totTarifa!;
                   } else {
@@ -195,6 +195,8 @@ export class InfoCajaComponent implements OnInit {
                     item.idrecaudacion.idrecaudacion,
                     this.usuario.nomusu,
                   ]);
+                  //console.log(i);
+                  i++;
                   total += item.idrecaudacion.totalpagar;
                 });
                 this.pdf2(datosBody, total_pagar, i);
@@ -247,23 +249,11 @@ export class InfoCajaComponent implements OnInit {
         cellPadding: 1,
         halign: 'center',
       },
-      /*       columnStyles: {
-              0: { halign: 'center', cellWidth: 10 },
-              1: { halign: 'center', cellWidth: 18 },
-              2: { halign: 'left', cellWidth: 60 },
-              3: { halign: 'left', cellWidth: 80 },
-              4: { halign: 'right', cellWidth: 15 },
-              5: { halign: 'center', cellWidth: 14 },
-            },
-            margin: { left: m_izquierda - 1, top: 19, right: 4, bottom: 13 }, */
+
       body: datosBody,
       didParseCell: function (data) {
         var fila = data.row.index;
         var columna = data.column.index;
-        //if (columna === 4 && data.cell.section === 'body') { data.cell.text[0] = formatNumber(+data.cell.raw!); }
-        /*     if (fila === datosBody.length - 1) {
-              data.cell.styles.fontStyle = 'bold';
-            }  */ // Total Bold
       },
     });
     autoTable(doc, {
@@ -308,7 +298,4 @@ interface Caja {
   descripcion: String;
   ptoemi: String;
   estado: String;
-}
-function getSuma(idfactura: any, number: any) {
-  throw new Error('Function not implemented.');
 }
