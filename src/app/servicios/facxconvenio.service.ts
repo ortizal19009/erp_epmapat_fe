@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Facxconvenio } from '../modelos/facxconvenio.model';
 import { environment } from 'src/environments/environment';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 
 const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/facxconvenio`;
@@ -24,4 +24,9 @@ export class FacxconvenioService {
       return this.http.post(`${baseUrl}`, fxc);
    }
 
+   //Save Facxconvenio async
+   async saveFacxconvenioAsync(facxconv: Facxconvenio): Promise<Object> {
+      const observable = this.http.post(baseUrl, facxconv);
+      return await firstValueFrom(observable);
+   }
 }

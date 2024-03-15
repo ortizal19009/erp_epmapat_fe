@@ -1,8 +1,11 @@
+import { Convenios } from "./convenios.model";
+import { Facturas } from "./facturas.model";
+
 export class Cuotas {
    idcuota: number;
    nrocuota: number;
-   idfactura: number;
-   idconvenio_convenios: number;
-   usucrea: number = 1;
+   idfactura: Facturas;
+   idconvenio_convenios: Convenios;
+   usucrea: number;
    feccrea: Date;
 }

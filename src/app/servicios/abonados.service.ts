@@ -11,7 +11,7 @@ const baseUrl = `${apiUrl}/abonados`;
   providedIn: 'root',
 })
 export class AbonadosService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   tmpTodos(): Observable<Abonados[]> {
     return this.http.get<Abonados[]>(`${baseUrl}/tmp`);
@@ -38,7 +38,7 @@ export class AbonadosService {
   getById(idabonado: number): Observable<Abonados> {
     return this.http.get<Abonados>(`${baseUrl}/${idabonado}`);
   }
-  async getById_v2(idabonado: number){
+  async getById_v2(idabonado: number) {
     return this.http.get<Abonados>(`${baseUrl}/${idabonado}`);
   }
 
@@ -108,5 +108,9 @@ export class AbonadosService {
     return this.http.get<Abonados>(
       `${baseUrl}/oneabonado?idabonado=${idabonado}`
     );
+  }
+  //Un Abonado
+  unAbonado(idabonado: number): Observable<Abonados> {
+    return this.http.get<Abonados>(`${baseUrl}/unabonado?idabonado=${idabonado}`);
   }
 }
