@@ -206,15 +206,18 @@ export class TransferenciasComponent implements OnInit {
    totalAtransferir() {
       let suma: number = 0;
       let i = 0;
-      console.log(this._sincobro)
       this._sincobro.forEach(() => {
-         if (this._sincobro[i].pagado === 1) {
+         if (this._sincobro[i].pagado === 1 && this._sincobro[i].nrofactura === null) {
+            console.log(this._sincobro[i])
+            this._sincobro[i].idmodulo.idmodulo === 3 ? this._sincobro[i].comerc = 1 : this._sincobro[i].comerc = 0
+            console.log(this._sincobro[i].totaltarifa, this._sincobro[i].comerc, this._sincobro[i].interes, this._sincobro[i].multa)
             suma +=
                this._sincobro[i].totaltarifa +
                this._sincobro[i].comerc +
                this._sincobro[i].interes +
                this._sincobro[i].multa;
          }
+         console.log(suma)
          i++;
       });
       this.atransferir = suma;
