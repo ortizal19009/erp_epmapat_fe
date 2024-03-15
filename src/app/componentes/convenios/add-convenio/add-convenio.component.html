@@ -1,171 +1,188 @@
-<div class="collapse" id="collapseNuevo">
-   <h4 class="font-weight-bold">Nuevo Convenio</h4>
-   <div class="row">
-      <div class="col-sm-6">
-         <form [formGroup]="f_bFacxAbo">
-            <input type="text" placeholder="Nro cuenta" class="form-control form-control-sm" autofocus
-               id="cuentaAbonado" formControlName="cuentaAbonado" />
-         </form>
-      </div>
-      <div class="col-sm-6">
-         <!-- Button trigger modal -->
-         <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#buscarClienteModal"
-            id="btn_buscar" (click)="buscarFacxAbo()">
-            Buscar
-         </button>
+<div class="content-header py-1">
+   <div class="container-fluid">
+      <div class="row text-center">
+         <div class="col-sm-8 cabecera sombra border">
+            <h5 class="mt-2 font-weight-bold">Nuevo Convenio de Pago</h5>
+         </div>
       </div>
    </div>
-   <form class="form-group" id="formularioConvenio">
-      <div class="row">
-         <div class="form-group col-sm-3 my-0 py-0">
-            <label class="form-label col-form-label-sm">Número
-               <input class="form-control form-control-sm" type="number" id="nroconvenio" name="nroconvenio"
-                  [(ngModel)]="conv.nroconvenio" /></label>
-            <!-- <label for="" class="form-label col-form-label-sm">Número</label>
-                 <input type="number" class="form-control form-control-sm" id="nroconvenio"
-                     [(ngModel)]="conv.nroconvenio" name="nroconvenio" /> -->
-         </div>
-         <div class="form-group col-sm-3 my-0 py-0">
-            <label class="form-label col-form-label-sm">Autorización
-               <input class="form-control form-control-sm" type="text" id="Autorizacion" name="autorizacion"
-                  [(ngModel)]="conv.nroautorizacion" /></label>
-            <!-- <label for="" class="form-label col-form-label-sm">Referencia</label>
-                 <input type="text" class="form-control form-control-sm" id="referencia"
-                     [(ngModel)]="conv.referencia" name="referencia" /> -->
-         </div>
-         <div class="form-group col-sm-3 my-0 py-0">
-            <label class="form-label col-form-label-sm">Referencia
-               <input class="form-control form-control-sm" type="text" id="Referencia" name="referencia"
-                  [(ngModel)]="conv.referencia" /></label>
-            <!-- " -->
-            <!-- <label for="" class="form-label col-form-label-sm">Referencia</label>
-                 <input type="text" class="form-control form-control-sm" id="referencia"
-                     [(ngModel)]="conv.referencia" name="referencia" /> -->
-         </div>
-      </div>
-      <div class="row">
-         <div class="row mx-0">
-            <div class="form-group col-md-3 my-0 py-0">
-               <label class="form-label col-form-label-sm">Total<input class="form-control form-control-sm"
-                     type="number" id="Total" name="Total" [(ngModel)]="conv.totalconvenio" readOnly /></label>
-               <!-- <label for="total" class="form-label">Total</label>
-                     <input type="number" class="form-control form-control-sm" id="total" data-toggle="tooltip" data-placement="top" title="Total del convenio"> -->
-            </div>
-            <div class="col-sm-3 my-0 py-0">
-               <label class="form-label col-form-label-sm">Cuota inicial
-                  <input class="form-control form-control-sm" type="number" id="cuotainicial" name="cuotainicial"
-                     [(ngModel)]="c_inicial" /></label>
-               <!-- <label for="inputPass" class="form-label">Cuota inicial</label>
-                     <input type="text" class="form-control form-control-sm" id="cuotainicial"> -->
-            </div>
-            <div class="col-sm my-0 py-0">
-               <div class="row">
-                  <div class="col-sm-12">
-                     <label for="nrocuotas" class="form-label col-sm-10 col-form-label-sm">Nro cuotas
-                        <input type="number" min="2" max="12" class="form-control form-control-sm" id="nrocuotas"
-                           placeholder="min: 2 / max: 12"></label>
-                  </div>
-               </div>
-               <div class="row">
-                  <div class="col-sm-6">
-                     <label for="">Cuota inicial:</label>
-                  </div>
-                  <div class="col-sm-6">
-                     <label for="">{{c_inicial | number:'1.2-2'}}</label>
-                  </div>
-               </div>
-               <div class="row">
-                  <div class="col-sm-6">
-                     <label for="">Pagos({{nropagos}}):</label>
-                  </div>
-                  <div class="col-sm-6">
-                     <label for="">{{v_pagos | number:'1.2-2'}}</label>
-                  </div>
-               </div>
-               <div class="row">
-                  <div class="col-sm-6">
-                     <label for="">Cuota final:</label>
-                  </div>
-                  <div class="col-sm-6">
-                     <label for="">{{c_final | number:'1.2-3' }}</label>
-                  </div>
-               </div>
-            </div>
-         </div>
-      </div>
-      <div class="row ml-1">
-         <!-- <label class="form-label col-form-label-sm">Observaciones
-                 <textarea class="form-control form-control-sm" rows="2" 
-                 [(ngModel)]="conv.observaciones"></textarea></label> -->
-         <label class="col-sm-12 col-form-label-sm" for="observaciones">Observaciones
-            <textarea class="form-control" id="observaciones" rows="2" name="observaciones"
-               [(ngModel)]="conv.observaciones"></textarea>
-         </label>
-      </div>
-      <br>
-      <div *ngIf="rtn" class="alert alert-warning ml-1" role="alert">
-         <!-- <div class="alert alert-warning" role="alert"> -->
-         <strong>Mensaje:</strong> Ya existe el Convenio: <strong>{{conv.nroconvenio}}</strong>
-         <!-- </div> -->
-      </div>
-      <div class="mt-0 mb-3 text-center">
-         <button class="btn btn-success btn-sm mx-1" (click)="onSubmit()" data-target="#collapseNuevo"><i
-               class="fa fa-check-circle"></i> Aceptar</button>
-         <button class="btn btn-outline-success btn-sm mx-1" (click)="resetForm()" data-toggle="collapse"
-            data-target="#collapseNuevo"><i class="fa fa-times-circle"></i> Cancelar</button>
-      </div>
-   </form>
-
 </div>
 
+<div class="content">
+   <div class="container-fluid">
+      <div class="row ml-0">
+         <div class="card card-body col-sm-8 detalle sombra">
+            <form [formGroup]="formConvenio">
+               <div class="row">
 
-<!-- Modal -->
-<div class="modal fade" id="buscarClienteModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-   <div class="modal-dialog modal-md ">
-      <div class="modal-content card-success card-outline">
-         <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Facturas pendientes</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-               <span aria-hidden="true">&times;</span>
-            </button>
-         </div>
-         <div class="modal-body">
-            <div class="row">
-               <div class="col-sm-8">{{clienteNombre}}</div>
-               <div class="col-sm-4">{{clienteIdentificacion}}</div>
-            </div>
-            <hr>
-            <div class="row">
-               <div class="col-sm">
-                  <table class="table table-sm hover table-bordered">
-                     <thead class="text-center cabecera">
-                        <tr>
-                           <th>Nro factura</th>
-                           <th>Pagado</th>
-                           <th>Valor</th>
-                        </tr>
-                     </thead>
-                     <tbody>
-                        <tr *ngFor="let facturaDatos of v_facturas">
-                           <td>{{facturaDatos.idfactura}}</td>
-                           <td class="text-right">{{facturaDatos.pagado}}</td>
-                           <td class="text-right">{{facturaDatos.totaltarifa | number:'1.2-2'}}</td>
-                        </tr>
-                     </tbody>
-                  </table>
+                  <div *ngIf="_modulos" class="form-group col-sm-6 mb-0">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Sección<sup class="green">*</sup></label>
+                        </div>
+                        <select class="custom-select" formControlName="seccion" (change)="obtenerSeccion()" >
+                           <option *ngFor="let modulo of _modulos" [ngValue]="modulo.idmodulo">
+                             {{ modulo.descripcion }}
+                           </option>
+                         </select>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-5 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Número de Convenio<sup class="green">*</sup></span>
+                        </div>
+                        <input type="text" class="form-control text-center" formControlName="nroconvenio"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['nroconvenio'].invalid && f['nroconvenio'].touched,
+                           'is-valid': f['nroconvenio'].valid, '': f['nroconvenio'].untouched}">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Referencia<sup class="green">*</sup></span>
+                        </div>
+                        <input type="text" class="form-control text-center" formControlName="referencia"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['referencia'].invalid && f['referencia'].touched,
+                           'is-valid': f['referencia'].valid, '': f['referencia'].untouched}">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Autorización<sup class="green">*</sup></span>
+                        </div>
+                        <input type="text" class="form-control text-center" formControlName="nroautorizacion"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['nroautorizacion'].invalid && f['nroautorizacion'].touched,
+                           'is-valid': f['nroautorizacion'].valid, '': f['nroautorizacion'].untouched}">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-12 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <input type="text" class="form-control text-center col-2" formControlName="idabonado"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['idabonado'].invalid && f['idabonado'].touched,
+                           'is-valid': f['idabonado'].valid, '': f['idabonado'].untouched}">
+                        <div class="input-group-prepend">
+                           <button type="button" class="btn btn-primary btn-sm" (click)="buscarFacxAbo()">
+                              <i *ngIf="swbuscando" class="fa fa-spinner"></i>
+                              <i *ngIf="!swbuscando" class="fa fa-search"></i> {{txtbuscar}}
+                           </button>
+                        </div>
+                        <input type="text" aria-label="cedula" class="form-control col-2 text-center"
+                           formControlName="cedula" readonly>
+                        <input type="text" aria-label="nombre" class="form-control" formControlName="nombre" readonly>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Cuota
+                              inicial<sup class="green">*</sup></span>
+                        </div>
+                        <input type="text" class="form-control text-right" formControlName="cuotainicial"
+                           (change)="changeCuotainicial()" aria-label="Small" aria-describedby="inputGroup-sizing-sm"
+                           [ngClass]="{'is-invalid': f['cuotainicial'].invalid && f['cuotainicial'].touched,
+                           'is-valid': f['cuotainicial'].valid, '': f['cuotainicial'].untouched}">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-3 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Cuotas<sup class="green">*</sup></span>
+                        </div>
+                        <input type="number" class="form-control text-center" formControlName="cuotas" min="2" max="12"
+                           (change)="changeCuotas()" aria-label="Small" aria-describedby="inputGroup-sizing-sm"
+                           [ngClass]="{'is-invalid': f['cuotas'].invalid && f['cuotas'].touched,
+                           'is-valid': f['cuotas'].valid, '': f['cuotas'].untouched}">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-3 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <button type="button" class="btn btn-primary btn-sm" (click)="calcular()" [disabled]="!swcalcular">
+                              <i *ngIf="swcalculando" class="fa fa-spinner"></i>
+                              <i *ngIf="!swcalculando" class="bi-calculator-fill"></i> {{txtcalcular}}
+                           </button>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-5 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold"
+                              id="inputGroup-sizing-sm">Pagos({{nropagos}})<sup class="green">*</sup></span>
+                        </div>
+                        <input type="text" class="form-control text-right" formControlName="pagomensual"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly>
+                        <input type="text" aria-label="totalpago" class="form-control text-right font-weight-bold"
+                           formControlName="totalpago" readonly>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Cuota final<sup class="green">*</sup></span>
+                        </div>
+                        <input type="text" class="form-control text-right" formControlName="cuotafinal"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['cuotafinal'].invalid && f['cuotafinal'].touched,
+                           'is-valid': f['cuotafinal'].valid, '': f['cuotafinal'].untouched}" readonly>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-12 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold"
+                              id="inputGroup-sizing-sm">Observaciones</span>
+                        </div>
+                        <textarea type="text" class="form-control" formControlName="observaciones" rows="2"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm"></textarea>
+                     </div>
+                  </div>
+
                </div>
+            </form>
+            <div class="mt-0 mb-0 text-center">
+               <button class="btn btn-success btn-sm mx-1" (click)="guardar()" [disabled]="!formConvenio.valid || swcalculando">
+                  <i class="fa fa-check-circle"></i> Aceptar</button>
+               <button class="btn btn-outline-success btn-sm mx-1" (click)="regresar()"><i
+                     class="fa fa-times-circle"></i> Cancelar</button>
             </div>
-            <div class="row">
-               <div class="col-sm-6"><strong> Total:</strong></div>
-               <div class="col-sm-6 text-right"><strong>{{suma_facturas | number:'1.2-2'}}</strong></div>
-            </div>
+            
          </div>
-
-         <div class="modal-footer">
-            <button type="button" class="btn btn-success btn-sm" (click)="setValores()" data-dismiss="modal"><i
-                  class="fa fa-check-circle"></i> Aceptar</button>
-            <button type="button" class="btn btn-outline-success btn-sm" data-dismiss="modal" (click)="resetForm()"><i
-                  class="fa fa-times-circle"></i> Cancelar</button>
+         <div *ngIf="_sincobro" class="col-md-4">
+            <table class="table table-hover table-bordered table-sm sombra">
+               <thead class="cabecera">
+                  <tr>
+                     <th colspan="2" class="text-center">Planillas pendientes</th>
+                     <th class="text-right">TOTAL&nbsp; </th>
+                     <th class="text-right">{{total | number: '.2-2'}}</th>
+                  </tr>
+                  <tr class="text-center">
+                     <th></th>
+                     <th>Nro.</th>
+                     <th>Fecha</th>
+                     <th class="text-right">Valor</th>
+                  </tr>
+               </thead>
+               <tbody class="detalle">
+                  <tr *ngFor="let sincobro of _sincobro; let i = index">
+                     <td class="text-center font-weight-bold small">{{ i+1 }}</td>
+                     <td class="text-center">{{ sincobro.idfactura }}</td>
+                     <td class="text-center">{{ sincobro.feccrea }}</td>
+                     <td class="text-right">{{ sincobro.totaltarifa + 1 | number: '.2-2'}}</td>
+                  </tr>
+               </tbody>
+            </table>
          </div>
       </div>
    </div>

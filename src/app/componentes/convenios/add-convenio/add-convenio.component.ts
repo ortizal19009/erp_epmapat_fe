@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Convenios } from 'src/app/modelos/convenios.model';
 import { Cuotas } from 'src/app/modelos/cuotas.model';
 import { Facxconvenio } from 'src/app/modelos/facxconvenio.model';
@@ -12,394 +12,375 @@ import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { FacxconvenioService } from 'src/app/servicios/facxconvenio.service';
 import { CuotasService } from 'src/app/servicios/cuotas.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
+import { Clientes } from 'src/app/modelos/clientes';
+import { Abonados } from 'src/app/modelos/abonados';
+import { Modulos } from 'src/app/modelos/modulos.model';
+import { Router } from '@angular/router';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import { ModulosService } from 'src/app/servicios/modulos.service';
+import { Rubros } from 'src/app/modelos/rubros.model';
 
 @Component({
    selector: 'app-add-convenio',
-   templateUrl: './add-convenio.component.html'
+   templateUrl: './add-convenio.component.html',
+   styleUrls: ['./add-convenio.component.css']
 })
 
 export class AddConvenioComponent implements OnInit {
-   /* modelos declarados */
-   conv: Convenios = new Convenios();
-   factura: Facturas = new Facturas();
-   facxconv: Facxconvenio = new Facxconvenio();
-   cuotas: Cuotas = new Cuotas();
-   rubxfac: Rubroxfac = new Rubroxfac();
-   /* formularios declarados */
-   convForm: FormGroup;
-   f_bFacxAbo: FormGroup;
-   //f_cuotas: FormGroup;
-   /* Variables booleanas */
-   rtn: boolean = false;
-   clientexfac: boolean = true;
-   /* Arrays declarados */
-   v_facturas: any = [];/* lista de facturas antiguas */
+
+   cliente: Clientes = new Clientes();
+
+   formConvenio: FormGroup;
+   _modulos: any;
    rubros: any = [];
-   c_rubros: any = [];
-   g_cuotas: any = [];
-   n_facturas: any = []; /* Lista de facturas nuevas */
-   /* filter term */
-   filterTerm: string;
-   /* Variables tipo objetos */
-   modulo: any = { idmodulo: 27 };
-   buscaConv: any;
-   cliente: any;
-   v_convenios: any;
-   v_cliente: any;
-   l_facturas: any;
-   v_abonado: any;
-   newConvenio: any;
-   newFactura: any;
-   oldFacturas: any;
-   /* variables tipo string */
-   titleModal: string = "Seleccionar Cliente";
-   clienteNombre: string;
-   clienteIdentificacion: string;
-   /* variables tipo numero */
-   suma_facturas: number = 0;
-   base: number = 0;
-   c_inicial: number = 0;
+   modulo27: any = { idmodulo: 27 };
+   abonado: Abonados;
    nropagos: number = 0;
-   // ncuotas: number;
-   v_pagos: number = 0;
-   c_final: number = 0;
-   n_cuotas = 2;
-   dates = new Date();
-   constructor(private parent: ConveniosComponent, private convService: ConvenioService, private facService: FacturaService,
-      private fb: FormBuilder, private s_abonados: AbonadosService, private s_rubxfac: RubroxfacService,
-      private facxconvService: FacxconvenioService, private s_cuota: CuotasService) { }
+   pagomensual: number = 0;
+   fecha = new Date();
+   _sincobro: any;
+   total: number;
+   swbuscando: boolean;
+   txtbuscar: string = 'Abonado';
+   swcalcular: boolean;
+   facturas: any = [];
+   idabonado: number;
+   newconvenio: any;
+   swcalculando: boolean;
+   txtcalcular: string = 'Calcular';
+   idmodulo: number = 3;
+   seccion: Modulos = new Modulos();
+
+   constructor(private fb: FormBuilder, private router: Router, private aboService: AbonadosService,
+      private facService: FacturaService, private convService: ConvenioService, public authService: AutorizaService,
+      private cuotService: CuotasService, private rubxfacService: RubroxfacService, private facxconvService: FacxconvenioService,
+      private rxfService: RubroxfacService, private moduService: ModulosService) { }
 
    ngOnInit(): void {
-      this.f_bFacxAbo = this.fb.group({
-         cuentaAbonado: ['', Validators.required]
-      });
-      /*     this.f_cuotas = this.fb.group({
-            nrocuotas: '',
-            idfactura: '',
-            usucrea: 1,
-            feccrea: this.dates,
-            idconvenio_convenios: ''
-          }) */
+      sessionStorage.setItem('ventana', '/convenios');
+      let coloresJSON = sessionStorage.getItem('/convenios');
+      if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
 
-      this.porcentaje();
-      this.ultimoNroConvenio();
+      this.formConvenio = this.fb.group({
+         seccion: this.seccion,
+         idabonado: ['', Validators.required],
+        // nroconvenio: ['', Validators.required, this.valNroconvenio.bind(this)],
+         referencia: ['', Validators.required],
+         nroautorizacion: ['', Validators.required],
+         cuotainicial: ['', Validators.required],
+         cuotas: ['', [Validators.required, Validators.min(2), Validators.max(12)]],
+         cuotafinal: ['', Validators.required],
+         observaciones: '',
+         cedula: '', nombre: '',
+         pagomensual: '',
+         totalpago: ''
+      }, { updateOn: "blur" });
+
+      this.modulos();
+      //this.siguienteNroconvenio();
    }
 
-   onSubmit() {
-      this.validaNumero();
-      if (this.rtn === true) {
-         // console.log(this.conv.nroconvenio)
+   colocaColor(colores: any) {
+      document.documentElement.style.setProperty('--bgcolor1', colores[0]);
+      const cabecera = document.querySelector('.cabecera');
+      if (cabecera) cabecera.classList.add('nuevoBG1')
+      document.documentElement.style.setProperty('--bgcolor2', colores[1]);
+      const detalle = document.querySelector('.detalle');
+      if (detalle) detalle.classList.add('nuevoBG2');
+   }
+
+   modulos() {
+      this.moduService.getListaModulos().subscribe({
+         next: datos => {
+            this._modulos = datos;
+            this.formConvenio.controls['seccion'].setValue(3);
+         },
+         error: err => console.error(err.error)
+      });
+   }
+
+   obtenerSeccion() {
+      this.idmodulo = this.formConvenio.value.seccion;
+   }
+
+/*    siguienteNroconvenio() {
+      this.convService.siguienteNroconvenio().subscribe({
+         next: x => this.formConvenio.patchValue({ nroconvenio: x }),
+         error: err => console.error('Al obtener el última Nroconvenio', err.error)
+      });
+   } */
+
+   buscarFacxAbo() {
+      let idabonado = this.formConvenio.value.idabonado
+      if (idabonado) {
+         this.swbuscando = true; this.txtbuscar = 'Buscando'
+         this.aboService.unAbonado(this.formConvenio.value.idabonado).subscribe({
+            next: datos => {
+               this.abonado = datos;
+               this.facService.getSinCobrarAbo(this.idmodulo, idabonado).subscribe({
+                  next: datos => {
+                     this._sincobro = datos;
+                     this.formConvenio.controls['cedula'].setValue(this.abonado.idcliente_clientes.cedula);
+                     this.formConvenio.controls['nombre'].setValue(this.abonado.idcliente_clientes.nombre);
+                     this.sumTotaltarifa();
+                     this.pagomensual = 0;
+                     this.formConvenio.controls['cuotas'].setValue('');
+                     this.nropagos = 0;
+                     this.formConvenio.controls['cuotafinal'].setValue('');
+                     this.swbuscando = false; this.txtbuscar = 'Abonado'
+                  },
+                  error: err => console.error('Al recuperar las Planillas sin cobrar por Abonado: ', err.error)
+               });
+            },
+            error: err => console.error('Al recuperar el Abonado: ', err.error)
+         });
+      } else {
+         this._sincobro = null;
+         this.formConvenio.controls['nombre'].setValue('');
+         this.formConvenio.controls['cuotainicial'].setValue('');
+      };
+   }
+
+
+
+   get f() { return this.formConvenio.controls; }
+
+   sumTotaltarifa() {
+      let suma: number = 0;
+      let i = 0;
+      this._sincobro.forEach(() => {
+         suma += this._sincobro[i].totaltarifa + 1;
+         i++;
+      });
+      this.total = suma;
+      let cuotainicial = Math.round((this.total * .20) * 100) / 100;
+      this.formConvenio.controls['cuotainicial'].setValue(cuotainicial);
+   }
+
+   changeCuotainicial() {
+      this.formConvenio.get('cuotainicial')!.valueChanges.subscribe(cuotainicial => {
+         this.pagomensual = 0;
+         this.nropagos = 0;
+         this.formConvenio.controls['cuotafinal'].setValue('');
+         this.formConvenio.controls['pagomensual'].setValue('');
+         this.formConvenio.controls['totalpago'].setValue('');
+         let cuotas = this.formConvenio.value.cuotas;
+         this.swcalcular = false;
+         if (cuotainicial > 0 && cuotas >= 2) this.swcalcular = true;
+      });
+   }
+
+   changeCuotas() {
+      this.formConvenio.get('cuotas')!.valueChanges.subscribe(cuotas => {
+         let cuotainicial = this.formConvenio.value.cuotainicial;
+         this.swcalcular = false;
+         if (cuotainicial > 0 && cuotas >= 2) this.swcalcular = true;
+      });
+   }
+
+   calcular() {
+      this.swcalculando = true;
+      this.txtcalcular = 'Calculando';
+      this.facturas = [];
+      this.rubros = [];
+      let cuotainicial = this.formConvenio.value.cuotainicial;
+      let cuotas = this.formConvenio.value.cuotas;
+      // console.log('cuotainicial: ', cuotainicial, 'cuotas: ', cuotas)
+      this.nropagos = cuotas - 1;
+      this.pagomensual = 0;
+      if (this.nropagos > 0) this.pagomensual = Math.round(((this.total - cuotainicial) / cuotas) * 100) / 100;
+      this.formConvenio.controls['pagomensual'].setValue(this.pagomensual);
+      let totalpago = Math.round((this.pagomensual * this.nropagos) * 100) / 100;
+      this.formConvenio.controls['totalpago'].setValue(totalpago);
+      let cuotafinal = Math.round((this.total - cuotainicial - (this.pagomensual * this.nropagos)) * 100) / 100;
+      this.formConvenio.controls['cuotafinal'].setValue(cuotafinal);
+
+      let i = 0;
+      this.totaltarifaFacturas();
+      this.sumaRubros(i);
+   }
+
+   //Guarda en un arreglo totaltarifa de las facturas a generar
+   totaltarifaFacturas() {
+      //Cuota inicial
+      let cuotainicial = this.formConvenio.value.cuotainicial;
+      let r: any = {};
+      r = { totaltarifa: cuotainicial, porcentaje: Math.round((cuotainicial / this.total) * 100) / 100 }
+      this.facturas.push(r);
+      //Cuotas mensuales
+      let cuotas = this.formConvenio.value.cuotas;
+      let pagomensual = this.formConvenio.value.pagomensual;
+      for (let i = 0; i < cuotas - 1; i++) {
+         r = { totaltarifa: pagomensual, porcentaje: Math.round((pagomensual / this.total) * 100) / 100 }
+         this.facturas.push(r);
       }
-      else {
-         this.guardar();
-      }
+      //Cuota final
+      let cuotafinal = this.formConvenio.value.cuotafinal;
+      r = { totaltarifa: cuotafinal, porcentaje: Math.round((cuotafinal / this.total) * 100) / 100 }
+      this.facturas.push(r);
+   }
+
+   //Calcula y guarda en el arreglo this.rubros los totales de cada rubro de las facturas que se 'convenian'
+   sumaRubros(i: number) {
+      let r: any = {};
+      this.rubxfacService.getByIdfactura(this._sincobro[i].idfactura).subscribe({
+         next: datos => {
+            let j = 0;
+            datos.forEach(() => {
+               r = {
+                  idrubro: datos[j].idrubro_rubros.idrubro,
+                  valorunitario: datos[j].valorunitario
+               }
+               let indice = this.rubros.findIndex((rubro: { idrubro: number }) => rubro.idrubro === r.idrubro);
+               if (indice == -1) this.rubros.push(r)
+               else this.rubros[indice].valorunitario = Math.round((this.rubros[indice].valorunitario + r.valorunitario) * 100) / 100;
+               j++;
+            });
+            i++;
+            if (i < this._sincobro.length) this.sumaRubros(i)
+            else {
+               this.swcalculando = false;
+               this.txtcalcular = 'Calcular';
+            };
+         },
+         error: err => console.error(err.error)
+      });
    }
 
    guardar() {
-      this.conv.feccrea = new Date();
-      this.convService.saveConvenio(this.conv).subscribe({
-         next: datos => {
-            // console.log('this.convService.saveConvenio Ok!');
-            this.newConvenio = datos;
-            this.parent.listar();
-            this.generarFacturas();
-            setTimeout(() => {
-               this.calculoByRubro(this.base, this.n_cuotas, this.n_facturas);
-            }, 1000);
+      let abonado: Abonados = new Abonados();
+      abonado.idabonado = this.formConvenio.value.idabonado;
+      let convenio: Convenios = new Convenios();
+      convenio.nroautorizacion = this.formConvenio.value.nroautorizacion;
+      convenio.referencia = this.formConvenio.value.referencia;
+      convenio.estado = 1;
+      convenio.nroconvenio = this.formConvenio.value.nroconvenio;
+      convenio.totalconvenio = this.total;
+      convenio.cuotas = this.formConvenio.value.cuotas;
+      convenio.cuotainicial = this.formConvenio.value.cuotainicial;
+      convenio.pagomensual = this.formConvenio.value.pagomensual;
+      convenio.cuotafinal = this.formConvenio.value.cuotafinal;
+      convenio.observaciones = this.formConvenio.value.observaciones;
+      convenio.usucrea = this.authService.idusuario;
+      convenio.feccrea = this.fecha;
+      convenio.idabonado = abonado;
+
+      this.convService.saveConvenio(convenio).subscribe({
+         next: async resp => {
+            this.newconvenio = resp;
+            this.creaFacturas();
          },
          error: err => console.error(err.error)
       });
    }
 
-   validaNumero() {
-      this.convService.getNroconvenio(this.conv.nroconvenio).subscribe({
-         next: datos => {
-            let dat = datos;
-            if (dat != null) {
-               this.rtn = false;
-               // } else if (this.conv.nroconvenio != datos[0].nroconvenio) {
-            } else if (this.conv.nroconvenio != datos.nroconvenio) {
-               this.rtn = false;
-            } else {
-               this.rtn = true;
-               setTimeout(() => {
-                  this.rtn = false;
-               }, 3000);
-            }
-         },
-         error: err => console.log(err.error)
-      });
+   async creaFacturas() {
+      await this.facturasAsync();
+      await this.facxconvenioAsync();
+      sessionStorage.removeItem('desdeconvenio');  //Para que vuelva a buscar los últimos y se muestre el creado
+      this.router.navigate(['convenios']);
    }
 
-   ultimoNroConvenio() {
-      this.convService.getAll().subscribe(datos => {
-         this.v_convenios = datos;
-         this.conv.nroconvenio = datos[0].nroconvenio + 1;
-      })
-   }
-
-   buscarFacxAbo() {
-      this.base = 20;
-      this.c_inicial = 0;
-      this.nropagos = 0;
-      this.v_pagos = 0;
-      this.c_final = 0;
-      this.v_facturas = [];
-      this.suma_facturas = 0;
-      let i_b = document.getElementById("cuentaAbonado") as HTMLInputElement;
-      let b_b = document.getElementById("btn_buscar") as HTMLButtonElement;
-      if (this.f_bFacxAbo.value.cuentaAbonado != '') {
-         i_b.style.border = "";
-         this.s_abonados.getListaByidabonado(this.f_bFacxAbo.value.cuentaAbonado).subscribe(datos => {
-            this.v_abonado = datos;
-            this.cliente = datos;
-            this.clienteNombre = this.cliente[0].idcliente_clientes.nombre;
-            this.clienteIdentificacion = this.cliente[0].idcliente_clientes.cedula;
-         });
-         this.facService.getFacturaByAbonado(this.f_bFacxAbo.value.cuentaAbonado).subscribe(datos => {
-            this.l_facturas = datos;
-            let i = 0;
-            datos.forEach(() => {
-               if (datos[i].pagado === 0) {
-                  this.v_facturas.push(datos[i]);
-                  this.suma_facturas += datos[i].totaltarifa;
-               }
-               i++;
-            });
-            this.calculoPrtjs(this.base);
-            this.obtenerRubros();
-         });
-      }
-      else {
-         i_b.style.border = "1px red solid";
-         setTimeout(() => {
-            i_b.style.border = "";
-         }, 2000)
-      }
-   }
-
-   setValores() {
-      this.conv.totalconvenio = this.suma_facturas;
-      this.conv.cuotainicial = this.c_inicial;
-      this.conv.cuotafinal = this.c_final;
-   }
-
-   calculoPrtjs(v_base: number) {
-      this.g_cuotas = [];
-      let i_nrocuota = document.getElementById("nrocuotas") as HTMLInputElement;
-      i_nrocuota.value = "2";
-      let t_facturas = this.suma_facturas;
-      let c_individual = 0;
-      let base = v_base / 100;
-      let c_inicial = this.suma_facturas * base;
-      this.c_inicial = c_inicial;
-      let n_cuotas = this.n_cuotas;
-      this.nropagos = n_cuotas - 1;
-      c_individual = (t_facturas - c_inicial) / n_cuotas;
-      this.v_pagos = c_individual;
-      this.g_cuotas.push({ nrocuota: 1, valor: this.c_inicial });
-      let o = 0;
-      let nc = 2;
-      for (let i = 0; i <= (n_cuotas - 2); i++) {
-         o += c_individual
-         this.g_cuotas.push({ nrocuota: nc, valor: this.v_pagos });
-         nc++;
-      }
-      this.c_final = t_facturas - (o + c_inicial);
-      i_nrocuota.oninput = () => {
-         this.g_cuotas = [];
-         n_cuotas = (+i_nrocuota.value!);
-         this.n_cuotas = n_cuotas;
-         this.nropagos = n_cuotas - 1;
-         c_individual = (t_facturas - c_inicial) / n_cuotas;
-         this.v_pagos = c_individual;
-         this.g_cuotas.push({ nrocuota: 1, valor: this.c_inicial });
-         let o = 0;
-         let nc = 2;
-         for (let i = 0; i <= (n_cuotas - 2); i++) {
-            o += c_individual
-            this.g_cuotas.push({ nrocuota: nc, valor: this.v_pagos });
-            nc++;
+   //Nuevas Facturas
+   async facturasAsync() {
+      let fecha = new Date();
+      for (let i = 0; i < this.facturas.length; i++) {
+         let factura: Facturas = new Facturas();
+         this.cliente = this.abonado.idcliente_clientes;
+         factura.idcliente = this.cliente;
+         factura.idabonado = this.formConvenio.value.idabonado;
+         factura.idmodulo = this.modulo27;
+         factura.totaltarifa = this.facturas[i].totaltarifa;
+         factura.formapago = 1;
+         factura.estado = 2;     //2=Convenio de pago
+         factura.pagado = 0;
+         factura.porcexoneracion = 0;
+         factura.conveniopago = 0;
+         factura.estadoconvenio = 0;
+         factura.usucrea = this.authService.idusuario;
+         factura.feccrea = fecha;
+         factura.valorbase = this.facturas[i].totaltarifa;
+         try {
+            const nuevafac = await this.facService.saveFacturaAsync(factura);
+            await this.generarCuotas(i, nuevafac);
+            await this.rubroxfac(i, nuevafac);
+         } catch (error) {
+            console.error(`Al guardar la Factura ${i}`, error);
          }
-         this.c_final = t_facturas - (o + c_inicial);
-      }
-      this.g_cuotas.push({ nrocuota: nc, valor: this.c_final });
-   }
-
-   porcentaje() {
-      let i_cuotaInicial = document.getElementById("cuotainicial") as HTMLInputElement;
-      let cuotainicial = 0;
-      i_cuotaInicial.oninput = () => {
-         cuotainicial = (+i_cuotaInicial.value!);
-         this.base = (cuotainicial * 100) / this.suma_facturas;
-         this.calculoPrtjs(this.base);
-
+         fecha.setMonth(fecha.getMonth() + 1);
       }
    }
 
-   obtenerRubros() {
-      let i = 0;
-      let r: any = {};
-      this.rubros = [];
-      this.v_facturas.forEach(() => {
-
-         this.s_rubxfac.getByIdfactura(this.v_facturas[i].idfactura).subscribe({
-            next: datos => {
-               let j = 0;
-               datos.forEach(() => {
-                  r = {
-                     idrubro: datos[j].idrubro_rubros.idrubro,
-                     descripcion: datos[j].idrubro_rubros.descripcion,
-                     valorunitario: datos[j].valorunitario
-                  }
-                  let result = this.rubros.some((result: { idrubro: number }) => result.idrubro === r.idrubro)
-                  if (result === false) {
-                     this.rubros.push(r)
-                  } else if (result === true) {
-                     this.rubros[j].valorunitario += r.valorunitario;
-                  }
-                  j++;
-               });
-            },
-            error: err => console.error(err.error)
-         });
-
-         i++;
-      });
+   //Cuotas del convenio (Tabla cuotas)
+   async generarCuotas(i: number, factura: any) {
+      let cuota: Cuotas = new Cuotas();
+      cuota.nrocuota = i + 1
+      cuota.idfactura = factura;
+      cuota.idconvenio_convenios = this.newconvenio;
+      cuota.usucrea = this.authService.idusuario;
+      cuota.feccrea = this.fecha;
+      try {
+         await this.cuotService.saveCuotaAsync(cuota);
+      } catch (error) {
+         console.error(`Al guardar la Cuota: `, error);
+      }
    }
 
-   calculoByRubro(base: number, ncuotas: number, factura: any) {
-      let r = {}
-      let rubros = this.rubros;
-      let i = 0;
-      this.c_rubros = [];
-      rubros.forEach(() => {
-         let idrubro = rubros[i].idrubro;
-         let descripcion = rubros[i].descripcion;
-         let vi = rubros[i].valorunitario;
-         let rci = (rubros[i].valorunitario) * (base / 100);
-         let dvici = vi - rci
-         let cuota = dvici / ncuotas;
-         r = { idrubro: idrubro, descripcion: descripcion, valorunitario: rci, nrocuota: 1, nrofactura: factura[0] }
-         this.c_rubros.push(r)
-         let nc = 2;
-         for (let j = 0; j < ncuotas; j++) {
-            let c = cuota
-            r = { idrubro: idrubro, descripcion: descripcion, valorunitario: c, nrocuota: nc, nrofactura: factura[j] }
-            this.c_rubros.push(r)
-            nc++;
+   async rubroxfac(i: number, factura: any) {
+      for (let j = 0; j < this.rubros.length; j++) {
+         let rxf: Rubroxfac = new Rubroxfac();
+         rxf.cantidad = 1;
+         rxf.estado = 1;
+         rxf.valorunitario = Math.round(this.rubros[j].valorunitario * this.facturas[i].porcentaje * 100) / 100;
+         rxf.idfactura_facturas = factura;
+         const rubro: Rubros = new Rubros();
+         rubro.idrubro = this.rubros[j].idrubro;
+         rxf.idrubro_rubros = rubro;
+         try {
+            await this.rxfService.saveRubroxfacAsync(rxf);
+         } catch (error) {
+            console.error(`Al guardar Rubroxfac ${j}`, error);
          }
-         let rcf = (vi - rci - (cuota * (ncuotas - 1)))
-         i++;
-      });
-      setTimeout(() => {
-         this.generarRubxFac(this.c_rubros);
-      }, 1000);
-
+      }
    }
 
-   generarFacturas() {
-      let cuotas = this.g_cuotas;
-      let i = 0;
-      let j = 1
-      cuotas.forEach(() => {
-         this.setValoresFactura(cuotas[i].valor);
-         // console.log('this.factura: ', this.factura);
-
-         //this.setNroCuota(cuotas[i].nrocuota);
-         /* aqui va el codigo para guardar una nueva factura  */
-
-         this.facService.saveFactura(this.factura).subscribe(datos => {
-            // console.log('this.facService.saveFactura Ok!');
-            this.newFactura = datos;
-            this.n_facturas.push(datos);
-            this.cuotas.nrocuota = j;
-            this.generarCuotas();
-            j++
-         });
-
-         i++;
-      });
-      this.cambiarEstadoFacturasAntiguas();
+   async facxconvenioAsync() {
+      let facxconv: Facxconvenio = new Facxconvenio();
+      for (let k = 0; k < this._sincobro.length; k++) {
+         facxconv.idconvenio_convenios = this.newconvenio
+         facxconv.idfactura_facturas = this._sincobro[k];
+         try {
+            await this.facxconvService.saveFacxconvenioAsync(facxconv);
+            await this.actuAntiguas(k);
+         } catch (error) {
+            console.error(`Al guardar facxconvebnio ${k}`, error);
+         }
+      }
    }
 
-   setNroCuota(ncuota: number) {
-      this.cuotas.nrocuota = ncuota;
+   async actuAntiguas(k: number) {
+      let fac: any;
+      fac = this._sincobro[k]
+      fac.conveniopago = this.newconvenio.nroconvenio;
+      fac.fechaconvenio = this.fecha;
+      fac.estadoconvenio = 1;
+      fac.usumodi = this.authService.idusuario;
+      fac.fecmodi = this.fecha;
+      try {
+         await this.facService.updateFacturaAsync(fac);
+      } catch (error) {
+         console.error(`Al actualizar las Antiguas ${k}`, error);
+      }
    }
 
-   setValoresFactura(tarifa: number) {
-      this.factura.idcliente = this.cliente[0].idcliente_clientes;
-      // console.log('this.v_abonado[0].idabonado: ', this.v_abonado[0].idabonado)
-      this.factura.idabonado = this.v_abonado[0].idabonado;
-      this.factura.totaltarifa = tarifa;
-      this.factura.idmodulo = this.modulo;
-      this.factura.pagado = 0;
-      this.factura.porcexoneracion = 0;
-      this.factura.conveniopago = 0;
-      this.factura.estadoconvenio = 0;
-      this.factura.usucrea = 1;
-      this.factura.feccrea = this.dates;
-      this.factura.formapago = 1;
-      this.factura.valorbase = tarifa;
-   }
+   regresar() { this.router.navigate(['convenios']); }
 
-   cambiarEstadoFacturasAntiguas() {
-      let facturas = this.v_facturas;
-      let i = 0;
-      facturas.forEach(() => {
-         facturas[i].conveniopago = this.conv.nroconvenio;
-         facturas[i].estadoconvenio = this.conv.estado;
-         facturas[i].fechaconvenio = this.dates;
-         this.facService.updateFacturas(facturas[i]).subscribe(datos => {
-            this.oldFacturas = datos;
-            this.generarfxconvenio();
-
-         });  /* AQUI VOY A ACTUALIZAR LAS VIEJAS FACTURAS PARA QUE TENGAN UN ESTADO DE PAGO 1 */
-         i++;
-      });
-   }
-
-   generarfxconvenio() {
-      /* AQUI VAN LAS FACTURAS VIEJAS  */
-      this.facxconv.idfactura_facturas = this.oldFacturas;
-      this.facxconv.idconvenio_convenios = this.newConvenio;
-      this.facxconvService.saveFacByConvenio(this.facxconv).subscribe({
-         // next: datos => { },
-         error: err => console.error(err.error)
-      });
-   }
-
-   generarCuotas() {
-      /* AQUI VAN LAS FACTURAS NUEVAS */
-      this.cuotas.idfactura = this.newFactura;
-      this.cuotas.idconvenio_convenios = this.newConvenio;
-      this.cuotas.feccrea = this.dates;
-      this.cuotas.usucrea = 1;
-      this.s_cuota.saveCuotas(this.cuotas).subscribe({
-         // next: datos => {},
-         error: err => console.error(err.error)
-      });
-   }
-
-   generarRubxFac(rubros: any) {
-      let i = 0;
-      rubros.forEach(() => {
-         let factura: any = {}
-         factura = rubros[i].nrofactura;
-         this.rubxfac.idfactura_facturas = factura;
-         this.rubxfac.cantidad = 1;
-         this.rubxfac.valorunitario = rubros[i].valorunitario;
-         this.rubxfac.estado = 1;
-         this.rubxfac.idrubro_rubros = rubros[i];
-         i++;
-         this.s_rubxfac.saveRubroxFac(this.rubxfac).subscribe({
-            // next: datos => { },
-            error: error => console.log(error)
-         });
-      })
-   }
-
-   resetForm() {
-   }
+/*    valNroconvenio(control: AbstractControl) {
+      return this.convService.valNroconvenio(control.value)
+         .pipe(
+            map(result => result ? { existe: true } : null)
+         );
+   } */
 
 }
+

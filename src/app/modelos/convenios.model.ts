@@ -1,3 +1,5 @@
+import { Abonados } from "./abonados";
+
 export class Convenios {
     idconvenio: number;
     nroautorizacion: String;
@@ -15,4 +17,9 @@ export class Convenios {
     feccrea: Date;
     usumodi: number;
     fecmodi: Date;
+
+    /* ============== */
+    cuotas: number; 
+    pagomensual: number; 
+    idabonado:Abonados
 }
