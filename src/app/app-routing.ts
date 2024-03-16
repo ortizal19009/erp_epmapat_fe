@@ -204,6 +204,7 @@ import { CertitmpComponent } from './componentes/certificaciones/certitmp/certit
 import { TransferenciasComponent } from './componentes/recaudacion/transferencias/transferencias.component';
 import { PerfilUsuarioComponent } from './componentes/administracion/usuarios/perfil-usuario/perfil-usuario.component';
 import { RecalFacturaComponent } from './componentes/facturas/recal-factura/recal-factura.component';
+import { AddConvenioComponent } from './componentes/convenios/add-convenio/add-convenio.component';
 
 
 const routes: Routes = [
@@ -286,13 +287,16 @@ const routes: Routes = [
    { path: 'recaudaciones', component: RecaudacionComponent },
    { path: 'recaudacion', component: AddRecaudaComponent },
    { path: 'convenios', component: ConveniosComponent },
-   { path: 'modiconvenio/:idconvenio', component: ModiConvenioComponent },
-   { path: 'info-convenio', component: InfoConvenioComponent },
    { path: 'cajas', component: ListarCajaComponent },
    { path: 'modicaja/:idcaja', component: ModificarCajaComponent },
    { path: 'add-caja', component: AddCajaComponent },
    { path: 'info-caja', component: InfoCajaComponent },
    { path: 'transferencias', component: TransferenciasComponent },
+   
+   { path: 'add-convenio', component: AddConvenioComponent },
+   { path: 'modi-convenio', component: ModiConvenioComponent },
+   { path: 'info-convenio', component: InfoConvenioComponent },
+   //{ path: 'imp-convenios', component: ImpConveniosComponent },
    // Intereses
    { path: 'intereses', component: ListarInteresesComponent },
    { path: 'modificar-intereses', component: ModificarInteresesComponent },

@@ -1,68 +1,112 @@
 <div class="content-header">
    <div class="container-fluid">
-      <div class="row mb-30">
-         <div class="col-4"></div>
-         <div class="col-6">
-            <h4 class="font-weight-bold">Modificar Convenio de Pago</h4>
-         </div><!-- /.col -->
-      </div><!-- /.row -->
-   </div><!-- /.container-fluid -->
-</div><!-- /.content-header -->
+      <div class="row mt-5 justify-content-center text-center">
+         <div class="col-sm-8 cabecera sombra border">
+            <h5 class="mt-2 font-weight-bold">Modificar Convenio de Pago</h5>
+         </div>
+      </div>
+   </div>
+</div>
 
 <div class="content">
    <div class="container-fluid">
       <div class="row justify-content-center">
-         <div class="col-5">
-            <div class="card card-success card-outline card-body">
-               <form (ngSubmit)="onSubmit()">
-                  <div class="row">
-                     <div class="form-group col-sm-3 my-0 py-0">
-                        <label class="form-label col-form-label-sm text-center">Número
-                           <input disabled class="form-control form-control-sm text-center" type="number"
-                              id="nroconvenio" name="nroconvenio" [(ngModel)]="conv.nroconvenio" /></label>
-                     </div>
-                     <div class="form-group col-sm-3 my-0 py-0">
-                        <label class="form-label col-form-label-sm text-center">Referencia
-                           <input class="form-control form-control-sm text-center" type="text" id="referencia"
-                              name="referencia" [(ngModel)]="conv.referencia" /></label>
-                     </div>
-                     <div class="form-group col-sm-3 my-0 py-0">
-                        <label class="form-label col-form-label-sm text-center">Autorización
-                           <input class="form-control form-control-sm text-center" type="text" id="autorizacion"
-                              name="autorizacion" [(ngModel)]="conv.nroautorizacion" /></label>
+         <div class="card card-body col-sm-8 detalle sombra">
+            <form [formGroup]="formConvenio">
+               <div class="row">
+
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Número</span>
+                        </div>
+                        <input type="text" class="form-control text-center" formControlName="nroconvenio"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['nroconvenio'].invalid && f['nroconvenio'].touched,
+                           'is-valid': f['nroconvenio'].valid, '': f['nroconvenio'].untouched}" readonly>
                      </div>
                   </div>
-                  <div class="row">
-                     <div class="form-group col-md-3 my-0 py-0">
-                        <label class="form-label col-form-label-sm text-center">Total
-                           <input disabled class="form-control form-control-sm text-right" type="number" id="Total"
-                              name="Total" [(ngModel)]="conv.totalconvenio" /></label>
-                     </div>
-                     <div class="col-sm-3 my-0 py-0">
-                        <label class="form-label col-form-label-sm text-center">Cuota inicial
-                           <input disabled class="form-control form-control-sm text-right" type="number"
-                              id="cuotainicial" name="cuotainicial" [(ngModel)]="conv.cuotainicial" /></label>
-                     </div>
-                     <div class="col-sm-3 my-0 py-0">
-                        <label class="form-label col-form-label-sm text-center">Cuota final
-                           <input disabled class="form-control form-control-sm text-right" type="number" id="cuotafinal"
-                              name="cuotafinal" [(ngModel)]="conv.cuotafinal" /></label>
+
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Referencia</span>
+                        </div>
+                        <input type="text" class="form-control text-center" formControlName="referencia"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['referencia'].invalid && f['referencia'].touched,
+                           'is-valid': f['referencia'].valid, '': f['referencia'].untouched}">
                      </div>
                   </div>
-                  <div class="row">
-                     <div class="form-group col-md-12">
-                        <label class="form-label col-form-label-sm col-md-12" for="observaciones">Observaciones
-                        <textarea class="form-control form-control-sm" id="observaciones" rows="2"
-                           [(ngModel)]="conv.observaciones" name="observaciones"></textarea></label>
+
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Autorización</span>
+                        </div>
+                        <input type="text" class="form-control text-center" formControlName="nroautorizacion"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['nroautorizacion'].invalid && f['nroautorizacion'].touched,
+                           'is-valid': f['nroautorizacion'].valid, '': f['nroautorizacion'].untouched}">
                      </div>
                   </div>
-                  <div class="row justify-content-center">
-                     <button class="btn btn-success btn-sm" type="submit">Aceptar</button>
-                     <button class="btn btn-outline-success ml-2 btn-sm" type="button"
-                        (click)="cancelar()">Cancelar</button>
+
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Total</span>
+                        </div>
+                        <input type="text" class="form-control text-right" formControlName="totalconvenio"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['totalconvenio'].invalid && f['totalconvenio'].touched,
+                           'is-valid': f['totalconvenio'].valid, '': f['totalconvenio'].untouched}" readonly>
+                     </div>
                   </div>
-               </form>
-            </div>
+
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Cuota
+                              inicial</span>
+                        </div>
+                        <input type="text" class="form-control text-right" formControlName="cuotainicial"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['cuotainicial'].invalid && f['cuotainicial'].touched,
+                           'is-valid': f['cuotainicial'].valid, '': f['cuotainicial'].untouched}" readonly>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Cuota final</span>
+                        </div>
+                        <input type="text" class="form-control text-right" formControlName="cuotafinal"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['cuotafinal'].invalid && f['cuotafinal'].touched,
+                           'is-valid': f['cuotafinal'].valid, '': f['cuotafinal'].untouched}" readonly>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-12 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold"
+                              id="inputGroup-sizing-sm">Observaciones</span>
+                        </div>
+                        <textarea type="text" class="form-control" formControlName="observaciones" rows="2"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['observaciones'].invalid && f['observaciones'].touched,
+                           'is-valid': f['observaciones'].valid, '': f['observaciones'].untouched}"></textarea>
+                     </div>
+                  </div>
+
+               </div>
+
+               <div class="my-0 text-center">
+                  <button type="button" class="btn btn-success btn-sm mx-1"
+                     [disabled]="formConvenio.pristine || !formConvenio.valid" (click)="actualizar()">
+                     <i class="fa fa-check-circle"></i> Aceptar
+                  </button>
+                  <button type="button" class="btn btn-outline-success btn-sm mx-1" (click)="regresar()">
+                     <i class="fa fa-times-circle"></i> Cancelar
+                  </button>
+               </div>
+
+            </form>
          </div>
       </div>
    </div>

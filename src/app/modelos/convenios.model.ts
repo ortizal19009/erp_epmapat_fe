@@ -4,22 +4,20 @@ export class Convenios {
     idconvenio: number;
     nroautorizacion: String;
     referencia: String;
-    estado: number = 1;
+    estado: number;
     nroconvenio: number;
     totalconvenio: number;
+    cuotas: number;
     cuotainicial: number;
+    pagomensual: number;
     cuotafinal: number;
     observaciones: String;
     usuarioeliminacion: number;
     fechaeliminacion: Date;
     razoneliminacion: String;
-    usucrea: number = 1;
+    usucrea: number;
     feccrea: Date;
     usumodi: number;
     fecmodi: Date;
-
-    /* ============== */
-    cuotas: number; 
-    pagomensual: number; 
-    idabonado:Abonados
+    idabonado: Abonados;
 }
