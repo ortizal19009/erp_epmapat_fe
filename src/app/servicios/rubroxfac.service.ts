@@ -80,4 +80,6 @@ export class RubroxfacService {
   updateRubroxfac(idrubroxfac: number, rubroxfac: Rubroxfac): Observable<Object> {
     return this.http.put(baseUrl + "/" + idrubroxfac, rubroxfac);
   }
+
+  
 }

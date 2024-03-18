@@ -213,6 +213,8 @@ import { HashLocationStrategy, LocationStrategy, PathLocationStrategy } from '@a
 import { HistorialconsumoComponent } from './componentes/abonados/historialconsumo/historialconsumo.component';
 import { PerfilUsuarioComponent } from './componentes/administracion/usuarios/perfil-usuario/perfil-usuario.component';
 import { RecalFacturaComponent } from './componentes/facturas/recal-factura/recal-factura.component';
+import { DefinirComponent } from './componentes/administracion/definir/definir.component';
+import { GeneradorxmlComponent } from './componentes/facelectro/generadorxml/generadorxml.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
@@ -231,6 +233,7 @@ import { RecalFacturaComponent } from './componentes/facturas/recal-factura/reca
 
       //Facturacion
       FacturacionComponent, InfoFacturacionComponent, RubrosComponent, InfoRubroComponent,RecalFacturaComponent,
+      DefinirComponent, GeneradorxmlComponent,
       //Recaudación
       ListarCajaComponent, AddCajaComponent, ModificarCajaComponent,
       ConveniosComponent, ModiConvenioComponent, AddConvenioComponent, TransferenciasComponent,

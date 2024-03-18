@@ -1,0 +1,164 @@
+<div class="content mt-1 pt-1 px-0">
+   <div class="container-fluid">
+      <div class="col-sm-12 px-0">
+         <div class="row  m-0 pl-0 py-1 pr-1 justify-content-start cabecera sombra border">
+            <div class="col-md-6">
+               <h4 class="m-0 font-weight-bold"><i class="bi-file-earmark-binary"></i>&nbsp; Factura Electrónica</h4>
+            </div>
+
+            <div class="btn-group ml-auto mt-0">
+               <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
+                  aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+               </button>
+               <div class="dropdown-menu dropdown-menu-right bg-dark roboto" (click)="definir()">
+                  <button class="dropdown-item" type="button" >
+                     <i class="bi-tools"></i>&nbsp; Definir</button>
+                  <!-- <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
+                     <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+                  <button class="dropdown-item" type="button">
+                     <i class="bi-file-earmark-arrow-up"></i>&nbsp;
+                        Exportar</button> -->
+               </div>
+            </div>
+
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row ml-0">
+         <div class="card card-body col-sm-8 detalle sombra">
+            <form [formGroup]="formBuscar">
+               <div class="row">
+                  <div class="form-group col-md-10 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Número de
+                              Factura</span>
+                        </div>
+                        <input type="text" class="form-control" formControlName="nrofactura" aria-label="Small"
+                           aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['nrofactura'].invalid && f['nrofactura'].touched,
+                           'is-valid': f['nrofactura'].valid, '': f['nrofactura'].untouched}" />
+                        <button type="button" class="btn btn-primary btn-sm ml-2 mr-1" (click)="buscar()"
+                           [disabled]="!formBuscar.valid">
+                           <i *ngIf="swbuscando" class="fa fa-spinner"></i>
+                           <i *ngIf="!swbuscando" class="fa fa-search"></i> {{txtbuscar}}
+                        </button>
+                        <button type="button" class="btn btn-success btn-sm mx-1" (click)="generarXmlFile()"
+                           [disabled]="!swgenerar">
+                           <i class="fa fa-check-circle"></i> Generar
+                        </button>
+                        <button type="button" class="btn btn-outline-success btn-sm mx-1" (click)="regresar()">
+                           <i class="fa fa-times-circle"></i> Cancelar
+                        </button>
+                     </div>
+
+                  </div>
+
+                  <div *ngIf="swnoexiste" class="alert alert-warning alert-dismissible fade show" role="alert">
+                     <strong>Upps!</strong> &nbsp;&nbsp;No existe
+                  </div>
+
+               </div>
+
+
+
+               <div *ngIf="swprogressbar" class="mt-0 ml-1 mb-2 progress">
+                  <div class="progress-bar" [ngStyle]="{ 'width.%': progreso }">{{ progreso / 100 | percent : '1.2-2'
+                     }}</div>
+               </div>
+
+            </form>
+
+
+            <div *ngIf="swencuentra">
+               <form [formGroup]="formFactura">
+                  <div class="row">
+                     <div class="form-group col-md-8 my-0 py-0">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Cliente</span>
+                           </div>
+                           <input type="text" class="form-control" formControlName="cliente" aria-label="Small"
+                              aria-describedby="inputGroup-sizing-sm" readonly>
+                        </div>
+                     </div>
+                     <div class="form-group col-md-4 my-0 py-0">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Fecha de
+                                 cobro</span>
+                           </div>
+                           <input type="text" class="form-control text-center form-control-sm"
+                              formControlName="fechacobro" aria-label="Small" aria-describedby="inputGroup-sizing-sm"
+                              readonly>
+                        </div>
+                     </div>
+                  </div>
+               </form>
+
+               <div>
+                  <table *ngIf="swfincalc" class="table table-bordered table-sm table-hover sombra">
+                     <thead class="cabecera">
+                        <tr>
+                           <th></th>
+                           <th>Rubro</th>
+                           <th class="text-center">Cantidad</th>
+                           <th class="text-right">Valor</th>
+                           <th class="text-right">Subtotal</th>
+                           <th class="text-center">IVA</th>
+                           <th class="text-right">TOTAL</th>
+                        </tr>
+                     </thead>
+                     <tbody class="detalle">
+                        <tr *ngFor="let rubro of vecrubros ; let i=index">
+                           <td class="font-weight-bold small text-center">{{i+1}}</td>
+                           <td>{{rubro.descripcion}}</td>
+                           <td class="text-center">{{rubro.cantidad}}</td>
+                           <td class="text-right">{{rubro.valorunitario | number: '1.2-2'}}</td>
+                           <td class="text-right">{{ rubro.subtotal | number: '1.2-2' }}</td>
+                           <td [ngClass]="{'transparente': rubro.valoriva == 0}" class="text-right">{{ rubro.valoriva |
+                              number: '1.2-2' }}</td>
+                           <td class="text-right font-weight-bold">{{ rubro.total | number: '1.2-2' }}</td>
+                        </tr>
+                     </tbody>
+                     <tfoot class="font-weight-bold text-right cabecera">
+                        <tr>
+                           <td colspan="4" class=" text-right p-0">TOTAL&nbsp;&nbsp; </td>
+                           <td class="text-right p-0">{{sumsubtotal | number: '1.2-2'}}</td>
+                           <td class="text-right p-0">{{sumvaloriva | number: '1.2-2'}}</td>
+                           <td class="text-right p-0">{{sumtotal | number: '1.2-2'}}</td>
+                        </tr>
+                     </tfoot>
+                  </table>
+               </div>
+
+            </div>
+         </div>
+
+         <div *ngIf="swencuentra" class="col-md-4">
+
+            <table class="table table-bordered table-sm table-hover sombra">
+               <thead class="text-center cabecera">
+                  <tr>
+                     <th></th>
+                     <th>Planilla</th>
+                     <th>Fecha</th>
+                     <th class="text-right">Valor</th>
+                  </tr>
+               </thead>
+               <tbody class="detalle">
+                  <tr *ngFor="let factura of _facturas ; let i=index" class="text-center">
+                     <td class="font-weight-bold small">{{i+1}}</td>
+                     <td class="text-center">{{factura.idfactura}}</td>
+                     <td class="text-center">{{ factura.feccrea}} </td>
+                     <td class="text-right">{{ factura.totaltarifa | number: '1.2-2' }}</td>
+                  </tr>
+               </tbody>
+            </table>
+         </div>
+      </div>
+   </div>
+</div>

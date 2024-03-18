@@ -111,7 +111,7 @@ export class AddRecaudaComponent implements OnInit {
     private recaService: RecaudacionService,
     private facxrService: FacxrecaudaService,
     private s_recaudaxcaja: RecaudaxcajaService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.formBuscar = this.fb.group({
@@ -400,7 +400,7 @@ export class AddRecaudaComponent implements OnInit {
       error: (err) => console.error(err.error),
     });
   }
-  disabled(e: any) {}
+  disabled(e: any) { }
 
   //Total de las planillas sin cobrar
   // total() {
@@ -427,6 +427,7 @@ export class AddRecaudaComponent implements OnInit {
     this.cliente.porcexonera = null;
     this.cliente.porcdiscapacidad = null;
     this.filtrar = '';
+    this.totInteres = 0
   }
 
   buscarClientes() {
@@ -740,7 +741,6 @@ export class AddRecaudaComponent implements OnInit {
     rubrosxfac.estado = 1;
     this.rubxfacService.saveRubroxFac(rubrosxfac).subscribe({
       next: (datos) => {
-        console.log('DATOS GUARDADOS EN RUBROS X FAC', datos);
       },
       error: (e) => console.error(e),
     });
@@ -1098,7 +1098,7 @@ export class AddRecaudaComponent implements OnInit {
       return of({ invalido: true });
     else return of(null);
   }
-  pdf() {}
+  pdf() { }
   //Al digitar el dinero
   changeDinero() {
     let ncvalor: number;

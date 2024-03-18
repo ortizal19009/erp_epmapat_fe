@@ -205,6 +205,7 @@ import { TransferenciasComponent } from './componentes/recaudacion/transferencia
 import { PerfilUsuarioComponent } from './componentes/administracion/usuarios/perfil-usuario/perfil-usuario.component';
 import { RecalFacturaComponent } from './componentes/facturas/recal-factura/recal-factura.component';
 import { AddConvenioComponent } from './componentes/convenios/add-convenio/add-convenio.component';
+import { GeneradorxmlComponent } from './componentes/facelectro/generadorxml/generadorxml.component';
 
 
 const routes: Routes = [
@@ -238,6 +239,7 @@ const routes: Routes = [
 
    //========== FACTURACIÓN ===================
    { path: 'facelectro', component: FacelectroComponent },
+   { path: 'generadorxml', component: GeneradorxmlComponent},
    //Facturacion
    { path: 'facturacion', component: FacturacionComponent },
    { path: 'info-facturacion', component: InfoFacturacionComponent },

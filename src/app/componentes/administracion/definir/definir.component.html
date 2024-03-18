@@ -1,0 +1,103 @@
+<div class="content-header">
+   <div class="container-fluid">
+      <div class="row mt-5 justify-content-center text-center">
+         <div class="col-sm-8 cabecera sombra border">
+            <h5 class="mt-2 font-weight-bold">Datos de la Empresa</h5>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="card card-body col-sm-8 detalle sombra">
+            <form [formGroup]="formDefinir">
+               <div class="row">
+
+                  <div class="form-group col-md-12 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold"
+                              id="inputGroup-sizing-sm">Razón social</span>
+                        </div>
+                        <input type="text" class="form-control" formControlName="razonsocial" aria-label="Small"
+                           aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['razonsocial'].invalid && f['razonsocial'].touched,
+                           'is-valid': f['razonsocial'].valid, '': f['razonsocial'].untouched}" />
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-12 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Nombre comercial</span>
+                        </div>
+                        <input type="text" class="form-control" formControlName="nombrecomercial" aria-label="Small"
+                           aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['nombrecomercial'].invalid && f['nombrecomercial'].touched,
+                           'is-valid': f['nombrecomercial'].valid, '': f['nombrecomercial'].untouched}">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-12 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Dirección</span>
+                        </div>
+                        <input type="text" class="form-control" formControlName="direccion" aria-label="Small"
+                           autocomplete="off" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['direccion'].invalid && f['direccion'].touched,
+                           'is-valid': f['direccion'].valid, '': f['direccion'].untouched}">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">R.U.C.</span>
+                        </div>
+                        <input type="text" class="form-control text-center" formControlName="ruc" aria-label="Small"
+                           autocomplete="off" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['ruc'].invalid && f['ruc'].touched,
+                           'is-valid': f['ruc'].valid, '': f['ruc'].untouched}">
+                     </div>
+                  </div>
+                  
+                  <div class="form-group col-md-3 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">I.V.A.</span>
+                        </div>
+                        <input type="text" class="form-control text-center" formControlName="iva" aria-label="Small"
+                           autocomplete="off" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['iva'].invalid && f['iva'].touched,
+                           'is-valid': f['iva'].valid, '': f['iva'].untouched}">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-5 my-0 py-0">
+                     <div class="input-group mb-3 input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" for="iva">Ambiente facturación</label>
+                        </div>
+                        <select class="custom-select" formControlName="tipoambiente" (change)="onTipoambienteChange($event)">
+                           <option value="1">Pruebas</option>
+                           <option value="2">Producción</option>
+                        </select>
+                     </div>
+                  </div>
+
+
+               </div>
+
+               <div class="my-0 text-center">
+                  <button type="button" class="btn btn-success btn-sm mx-1"
+                     [disabled]="formDefinir.pristine || !formDefinir.valid" (click)="guardar()">
+                     <i class="fa fa-check-circle"></i> Aceptar
+                  </button>
+                  <button type="button" class="btn btn-outline-success btn-sm mx-1" (click)="regresar()">
+                     <i class="fa fa-times-circle"></i> Cancelar
+                  </button>
+               </div>
+
+            </form>
+         </div>
+      </div>
+   </div>
+</div>
