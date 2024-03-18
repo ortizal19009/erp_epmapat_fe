@@ -979,38 +979,41 @@ export class AddRecaudaComponent implements OnInit {
     this.arrCalculoInteres = [];
     let interes: number = 0;
     this.facService.getById(idFactura).subscribe({
-      next: (datos) => {
-        let fec = datos.feccrea.toString().split('-', 2);
-        let fechai: Date = new Date(`${fec[0]}-${fec[1]}-02`);
-        let fechaf: Date = new Date();
-        this.factura = datos;
-        fechaf.setMonth(fechaf.getMonth() - 1);
-        while (fechai <= fechaf) {
-          this.calInteres = {} as calcInteres;
-          let query = this._intereses.find(
-            (interes: { anio: number; mes: number }) =>
-              interes.anio === +fechai.getFullYear()! &&
-              interes.mes === +fechai.getMonth()! + 1
-          );
-          if (!query) {
-            this.calInteres.anio = +fechai.getFullYear()!;
-            this.calInteres.mes = +fechai.getMonth()! + 1;
-            this.calInteres.interes = 0;
-            this.calInteres.valor = datos.totaltarifa;
-            query = this.calInteres;
-          } else {
-            this.calInteres.anio = query.anio;
-            this.calInteres.mes = query.mes;
-            this.calInteres.interes = query.porcentaje;
-            this.calInteres.valor = datos.totaltarifa;
+      next: (datos: any) => {
+        console.log(datos)
+        if (datos.estado != 3 && datos.formapago != 4) {
+          let fec = datos.feccrea.toString().split('-', 2);
+          let fechai: Date = new Date(`${fec[0]}-${fec[1]}-02`);
+          let fechaf: Date = new Date();
+          this.factura = datos;
+          fechaf.setMonth(fechaf.getMonth() - 1);
+          while (fechai <= fechaf) {
+            this.calInteres = {} as calcInteres;
+            let query = this._intereses.find(
+              (interes: { anio: number; mes: number }) =>
+                interes.anio === +fechai.getFullYear()! &&
+                interes.mes === +fechai.getMonth()! + 1
+            );
+            if (!query) {
+              this.calInteres.anio = +fechai.getFullYear()!;
+              this.calInteres.mes = +fechai.getMonth()! + 1;
+              this.calInteres.interes = 0;
+              this.calInteres.valor = datos.totaltarifa;
+              query = this.calInteres;
+            } else {
+              this.calInteres.anio = query.anio;
+              this.calInteres.mes = query.mes;
+              this.calInteres.interes = query.porcentaje;
+              this.calInteres.valor = datos.totaltarifa;
+            }
+            this.arrCalculoInteres.push(this.calInteres);
+            fechai.setMonth(fechai.getMonth() + 1);
           }
-          this.arrCalculoInteres.push(this.calInteres);
-          fechai.setMonth(fechai.getMonth() + 1);
+          this.arrCalculoInteres.forEach((item: any) => {
+            this.totInteres += (+item.interes! * item.valor) / 100;
+            interes += (+item.interes! * item.valor) / 100;
+          });
         }
-        this.arrCalculoInteres.forEach((item: any) => {
-          this.totInteres += (+item.interes! * item.valor) / 100;
-          interes += (+item.interes! * item.valor) / 100;
-        });
         this.subtotal();
       },
       error: (e) => console.error(e),
@@ -1018,40 +1021,44 @@ export class AddRecaudaComponent implements OnInit {
   }
   /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
   cInteres(factura: any) {
+    console.log(factura)
     this.totInteres = 0;
     this.arrCalculoInteres = [];
     let interes: number = 0;
-    let fec = factura.feccrea.toString().split('-', 2);
-    let fechai: Date = new Date(`${fec[0]}-${fec[1]}-02`);
-    let fechaf: Date = new Date();
-    this.factura = factura;
-    fechaf.setMonth(fechaf.getMonth() - 1);
-    while (fechai <= fechaf) {
-      this.calInteres = {} as calcInteres;
-      let query = this._intereses.find(
-        (interes: { anio: number; mes: number }) =>
-          interes.anio === +fechai.getFullYear()! &&
-          interes.mes === +fechai.getMonth()! + 1
-      );
-      if (!query) {
-        this.calInteres.anio = +fechai.getFullYear()!;
-        this.calInteres.mes = +fechai.getMonth()! + 1;
-        this.calInteres.interes = 0;
-        query = this.calInteres;
-      } else {
-        this.calInteres.anio = query.anio;
-        this.calInteres.mes = query.mes;
-        this.calInteres.interes = query.porcentaje;
-        this.calInteres.valor = factura.totaltarifa;
-        this.arrCalculoInteres.push(this.calInteres);
+    if (factura.estado != 3 && factura.formapago != 4) {
+
+      let fec = factura.feccrea.toString().split('-', 2);
+      let fechai: Date = new Date(`${fec[0]}-${fec[1]}-02`);
+      let fechaf: Date = new Date();
+      this.factura = factura;
+      fechaf.setMonth(fechaf.getMonth() - 1);
+      while (fechai <= fechaf) {
+        this.calInteres = {} as calcInteres;
+        let query = this._intereses.find(
+          (interes: { anio: number; mes: number }) =>
+            interes.anio === +fechai.getFullYear()! &&
+            interes.mes === +fechai.getMonth()! + 1
+        );
+        if (!query) {
+          this.calInteres.anio = +fechai.getFullYear()!;
+          this.calInteres.mes = +fechai.getMonth()! + 1;
+          this.calInteres.interes = 0;
+          query = this.calInteres;
+        } else {
+          this.calInteres.anio = query.anio;
+          this.calInteres.mes = query.mes;
+          this.calInteres.interes = query.porcentaje;
+          this.calInteres.valor = factura.totaltarifa;
+          this.arrCalculoInteres.push(this.calInteres);
+        }
+        fechai.setMonth(fechai.getMonth() + 1);
       }
-      fechai.setMonth(fechai.getMonth() + 1);
+      this.arrCalculoInteres.forEach((item: any) => {
+        //this.totInteres += (item.interes * item.valor) / 100;
+        interes += (item.interes * item.valor) / 100;
+        // this.subtotal();
+      });
     }
-    this.arrCalculoInteres.forEach((item: any) => {
-      //this.totInteres += (item.interes * item.valor) / 100;
-      interes += (item.interes * item.valor) / 100;
-      // this.subtotal();
-    });
     return interes;
   }
   valorTarifas(
