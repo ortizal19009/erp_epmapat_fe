@@ -37,7 +37,7 @@ export class RecaudacionReportsService {
     let tableWidth = 200;
     let m3 = datos.lecturaactual - datos.lecturaanterior;
     let fecha = datos.fechaemision.slice(0, 10).split('-');
-    let mesConsumo = `${this.meses[+fecha[1]! - 1]}`;
+    let mesConsumo = `${this.meses[+fecha[1]! - 1]} ${fecha[0]}`;
 
     autoTable(doc, {
       tableWidth,
