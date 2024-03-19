@@ -24,8 +24,8 @@ export class ModificarClientesComponent implements OnInit {
    nacionalidad: any;
    personeriajuridica: any;
    _tpidentifica: any;
-   validar: boolean;
-   validarporc: boolean;
+   validar: boolean = false;
+   validarporc: boolean = false;
    codidentifica: string;
    antcedula: String;
    swModifi = false;
@@ -165,14 +165,15 @@ export class ModificarClientesComponent implements OnInit {
    }
 
    onSubmit() {
-      if ((this.validar == true) && (this.validarporc == true)) {
-         this.cliService.saveClientes(this.formCliente.value).subscribe({
-            next: datos => this.retornar(),
-            error: err => console.error(err.error)
-         });
+      console.log(this.validar, this.validarporc)
+      this.cliService.updateCliente(this.formCliente.value).subscribe({
+         next: datos => { console.log(datos); this.retornar() },
+         error: err => console.error(err.error)
+      });
+      /* if ((this.validar == true) && (this.validarporc == true)) {
       } else {
          alert("ERROR DE INGRESO DE INFORMACIÓN");
-      }
+      } */
    }
 
    compararNacionalidad(o1: Nacionalidad, o2: Nacionalidad): boolean {

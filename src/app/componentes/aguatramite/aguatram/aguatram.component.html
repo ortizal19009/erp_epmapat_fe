@@ -68,26 +68,27 @@
                <div class="col-sm-6 detalle">
                   <form [formGroup]="f_categoria" class="col-sm-12 d-flex justify-content-center my-2">
                      <select class="form-control form-control-sm" formControlName="idcategoria_categorias"
-                        [compareWith]="compareCategoria" >
+                        [compareWith]="compareCategoria">
                         <option *ngFor="let categoria of categorias" [ngValue]="categoria">{{categoria.descripcion}}
                         </option>
                      </select>
-                     
-                     <div class="form-group col-md-3 my-0 py-0" [hidden]="f_categoria.value.idcategoria_categorias.idcategoria != 9">
+
+                     <div class="form-group col-md-3 my-0 py-0"
+                        [hidden]="f_categoria.value.idcategoria_categorias.idcategoria != 9">
                         <div class="input-group input-group-sm mb-3">
                            <div class="input-group-prepend">
-                              <span class="input-group-text font-weight-bold"
-                                 id="inputGroup-sizing-sm">Adulto mayor</span>
+                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Adulto
+                                 mayor</span>
                            </div>
                            <input type="checkbox" class="form-control text-center" formControlName="adultomayor"
                               aria-label="Small" aria-describedby="inputGroup-sizing-sm">
                         </div>
                      </div>
-                     <div class="form-group col-md-3 my-0 py-0" [hidden]="f_categoria.value.idcategoria_categorias.idcategoria != 4">
+                     <div class="form-group col-md-3 my-0 py-0"
+                        [hidden]="f_categoria.value.idcategoria_categorias.idcategoria != 4">
                         <div class="input-group input-group-sm mb-3">
                            <div class="input-group-prepend">
-                              <span class="input-group-text font-weight-bold"
-                                 id="inputGroup-sizing-sm">Municipio</span>
+                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Municipio</span>
                            </div>
                            <input type="checkbox" class="form-control text-center" formControlName="municipio"
                               aria-label="Small" aria-describedby="inputGroup-sizing-sm">
@@ -190,7 +191,7 @@
                                              </div>
                                              <input type="text" class="form-control form-control-sm"
                                                 formControlName="medidormarca"
-                                             [ngClass]="{'is-invalid': f['medidormarca'].invalid && f['medidormarca'].touched,'is-valid': f['medidormarca'].valid, '': f['medidormarca'].untouched}"> 
+                                                [ngClass]="{'is-invalid': f['medidormarca'].invalid && f['medidormarca'].touched,'is-valid': f['medidormarca'].valid, '': f['medidormarca'].untouched}">
                                           </div>
                                        </div>
                                        <div class="col-sm">
@@ -201,7 +202,7 @@
                                              </div>
                                              <input type="text" class="form-control form-control-sm"
                                                 formControlName="medidornumero"
-                                             [ngClass]="{'is-invalid': f['medidornumero'].invalid && f['medidornumero'].touched, 'is-valid': f['medidornumero'].valid, '': f['medidornumero'].untouched}"> 
+                                                [ngClass]="{'is-invalid': f['medidornumero'].invalid && f['medidornumero'].touched, 'is-valid': f['medidornumero'].valid, '': f['medidornumero'].untouched}">
                                           </div>
                                        </div>
                                     </div>
@@ -214,7 +215,7 @@
                                              </div>
                                              <input type="number" class="form-control form-control-sm"
                                                 formControlName="codmedidor"
-                                             [ngClass]="{'is-invalid': f['codmedidor'].invalid && f['codmedidor'].touched, 'is-valid': f['codmedidor'].valid, '': f['codmedidor'].untouched}"> 
+                                                [ngClass]="{'is-invalid': f['codmedidor'].invalid && f['codmedidor'].touched, 'is-valid': f['codmedidor'].valid, '': f['codmedidor'].untouched}">
                                           </div>
                                        </div>
                                        <div class="col-sm">
@@ -225,7 +226,7 @@
                                              </div>
                                              <input type="number" class="form-control form-control-sm"
                                                 formControlName="medidordiametro"
-                                             [ngClass]="{'is-invalid': f['medidordiametro'].invalid && f['medidordiametro'].touched, 'is-valid': f['medidordiametro'].valid, '': f['medidordiametro'].untouched}"> 
+                                                [ngClass]="{'is-invalid': f['medidordiametro'].invalid && f['medidordiametro'].touched, 'is-valid': f['medidordiametro'].valid, '': f['medidordiametro'].untouched}">
                                           </div>
                                        </div>
                                        <div class="col-sm">
@@ -236,7 +237,7 @@
                                              </div>
                                              <input type="number" min="0" class="form-control form-control-sm"
                                                 formControlName="medidornroesferas"
-                                             [ngClass]="{'is-invalid': f['medidornroesferas'].invalid && f['medidornroesferas'].touched, 'is-valid': f['medidornroesferas'].valid, '': f['medidornroesferas'].untouched}"> 
+                                                [ngClass]="{'is-invalid': f['medidornroesferas'].invalid && f['medidornroesferas'].touched, 'is-valid': f['medidornroesferas'].valid, '': f['medidornroesferas'].untouched}">
                                           </div>
                                        </div>
                                     </div>
@@ -289,23 +290,15 @@
       </div>
    </div>
    <!-- Modal -->
-   <!-- <div class="modal fade" id="modalClientes" data-backdrop="static" data-keyboard="false" tabindex="-1"
+   <div class="modal fade" id="modalClientes" data-backdrop="static" data-keyboard="false" tabindex="-1"
       aria-labelledby="staticBackdropLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
+      <div class="modal-dialog modal-xs">
          <div class="modal-content">
-            <div class="modal-header">
-               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-               </button>
-            </div>
             <div class="modal-body">
                <app-buscar-cliente (setCliente)="setClient($event)"></app-buscar-cliente>
             </div>
-            <div class="modal-footer">
-               <button type="button" class="btn btn-success btn-sm" data-dismiss="modal">Close</button>
-            </div>
          </div>
       </div>
-   </div> -->
+   </div>
 
 </div>

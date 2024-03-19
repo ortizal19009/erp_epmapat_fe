@@ -12,7 +12,7 @@
    <div class="container-fluid">
       <div class="row justify-content-center">
          <div class="card card-body col-sm-10 detalle sombra">
-            <form [formGroup]="formCliente" (ngSubmit)="onSubmit()">
+            <form [formGroup]="formCliente">
                <div class="row">
 
                   <div class="form-group col-md-4 my-0 py-0">
@@ -90,7 +90,7 @@
                         <div class="input-group-prepend">
                            <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Teléfono</span>
                         </div>
-                        <input type="text" class="form-control text-center" formControlName="telefono" 
+                        <input type="text" class="form-control text-center" formControlName="telefono"
                            aria-label="Small" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['telefono'].invalid && f['telefono'].touched,
                            'is-valid': f['telefono'].valid, '': f['telefono'].untouched}">
                      </div>
@@ -175,7 +175,8 @@
                </div>
 
                <div class="my-0 text-center">
-                  <button type="button" class="btn btn-success btn-sm mx-1" [disabled]="formCliente.pristine || !formCliente.valid">
+                  <button type="button" class="btn btn-success btn-sm mx-1"
+                     [disabled]="formCliente.pristine || !formCliente.valid" ((click))="onSubmit()">
                      <i class="fa fa-check-circle"></i> Aceptar
                   </button>
                   <button type="button" class="btn btn-outline-success btn-sm mx-1" (click)="retornar()">

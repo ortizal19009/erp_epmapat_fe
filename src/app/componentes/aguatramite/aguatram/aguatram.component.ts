@@ -246,7 +246,7 @@ export class AguatramComponent implements OnInit {
             this.s_tramiteagua.genContratoTramite(
                datos,
                this.abonado,
-               'Cambio de medidor'
+               this.titulo
             );
          },
          error: (e) => console.error(e),
