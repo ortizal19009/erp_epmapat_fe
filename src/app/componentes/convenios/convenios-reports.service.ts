@@ -34,7 +34,6 @@ export class ConveniosReportsService {
     let empresa =
       'Empresa Pública Municipal de Agua Potable y Alcantarillado de Tulcán';
     //doc.setFontSize(12);
-    console.log(administradores);
     let _cuotas: any = [];
     let fecha: Date = new Date(datos.feccrea);
     let p1 = `En la ciudad de Tulcán, a los ${

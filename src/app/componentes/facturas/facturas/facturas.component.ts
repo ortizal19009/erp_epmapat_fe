@@ -22,11 +22,13 @@ export class FacturasComponent implements OnInit {
    buscando: boolean;
    today: number = Date.now();
    date: Date = new Date();
+   usuario = this.authService.idusuario; 
 
    constructor(private facServicio: FacturaService, private router: Router, private fb: FormBuilder,
       public authService: AutorizaService, private coloresService: ColoresService) { }
 
    ngOnInit(): void {
+      
       sessionStorage.setItem('ventana', '/facturas');
       let coloresJSON = sessionStorage.getItem('/facturas');
       if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
@@ -118,7 +120,6 @@ export class FacturasComponent implements OnInit {
    }
 
    buscar() {
-      console.log(this.campo)
       if (this.campo == 1) {
          let idfactura = this.formBuscar.value.idfactura;
          sessionStorage.setItem('idfacturaPlanillas', idfactura.toString());

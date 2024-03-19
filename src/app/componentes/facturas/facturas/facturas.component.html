@@ -77,7 +77,8 @@
                            aria-expanded="false">
                         </button>
                         <div class="dropdown-menu dropdown-menu-right popLista">
-                           <button class="dropdown-item" type="button" (click)="recalcular( fac.idfactura )">
+                           <button class="dropdown-item" type="button" [disabled]="(usuario != 1 && usuario != 11)"
+                              (click)="recalcular( fac.idfactura )">
                               <i class="bi-calculator-fill"></i>&nbsp; Recalcular</button>
                            <button class="dropdown-item" type="button" data-toggle="modal" data-target="#elimInteres"
                               disabled>
