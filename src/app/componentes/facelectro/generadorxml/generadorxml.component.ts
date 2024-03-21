@@ -255,7 +255,7 @@ export class GeneradorxmlComponent implements OnInit {
                version: "1.0.0"
             },
             infoTributaria: {
-               ambiente: 2 , tipoEmision: 1, /* en ambiente a loque se vaya a pasar a produccion cambiar  this.empresa.ambiente */
+               ambiente: this.empresa.tipoambiente , tipoEmision: 1, /* en ambiente a loque se vaya a pasar a produccion cambiar  this.empresa.ambiente */
                razonSocial: this.empresa.razonsocial,
                nombreComercial: this.empresa.nombrecomercial,
                ruc: this.empresa.ruc,
