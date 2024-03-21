@@ -64,4 +64,9 @@ export class LecturasService {
     return await firstValueFrom(observable);
   }
 
+    //Lectura por Planilla
+    getOnefactura(idfactura: number) {
+      return this.http.get<Lecturas[]>(`${baseUrl}/onePlanilla/${idfactura}`);
+    }
+
 }

@@ -23,9 +23,9 @@ export class GeneradorxmlComponent implements OnInit {
    vecrubros: any = [];
    porciva: number = 0.12;
    swencuentra: boolean;
-   sumsubtotal: number;
-   sumvaloriva: number;
-   sumtotal: number;
+   sumsubtotal: number = 0;
+   sumvaloriva: number = 0;
+   sumtotal: number = 0;
    swbuscando: boolean;
    txtbuscar: string = 'Buscar';
    swfincalc: boolean;
@@ -57,7 +57,7 @@ export class GeneradorxmlComponent implements OnInit {
       });
 
       await this.datosDefinirAsync()
-      
+
    }
 
    async buscaColor() {
@@ -82,7 +82,7 @@ export class GeneradorxmlComponent implements OnInit {
 
    async datosDefinirAsync() {
       try {
-         const def = await this.defService.getByIddefinirAsync( 1 );
+         const def = await this.defService.getByIddefinirAsync(1);
          this.empresa = def;
       } catch (error) {
          console.log('Al recuperar los datos de la Empresa', error);
@@ -100,6 +100,7 @@ export class GeneradorxmlComponent implements OnInit {
       this.nrofactura = this.formBuscar.value.nrofactura;
       this.facService.getByNrofactura(this.nrofactura).subscribe({
          next: datos => {
+            console.log(datos)
             this._facturas = datos;
             if (this._facturas.length > 0) {
                this.swnoexiste = false;
@@ -110,9 +111,9 @@ export class GeneradorxmlComponent implements OnInit {
                });
                this.txtbuscar = 'Calculando'
                this.progreso = 0;
-               this.sumsubtotal = 0; this.sumvaloriva = 0; this.sumtotal = 0;
                let i = 0;
                this.sumaRubros(i);
+               this.sumsubtotal = 0; this.sumvaloriva = 0; this.sumtotal = 0;
             } else {
                this.swnoexiste = true;
                this.swbuscando = false;
@@ -124,12 +125,13 @@ export class GeneradorxmlComponent implements OnInit {
    }
 
    sumaRubros(i: number) {
+      this.vecrubros = []
       this.swprogressbar = true;
-      let r: any = {};
       this.rxfService.getByIdfactura(this._facturas[i].idfactura).subscribe({
          next: datos => {
             let j = 0;
             datos.forEach(() => {
+               let r: any = {};
                let baseImponible = datos[j].cantidad * datos[j].valorunitario;
                let [valoriva, total] = valoresIVA(datos[j].idrubro_rubros.swiva, baseImponible, this.porciva);
                r = {
@@ -142,12 +144,17 @@ export class GeneradorxmlComponent implements OnInit {
                   valoriva: valoriva,
                   total: total,
                }
-               this.sumsubtotal = this.sumsubtotal + r.subtotal;
-               this.sumvaloriva = this.sumvaloriva + r.valoriva;
-               this.sumtotal = this.sumtotal + r.total;
+               this.sumsubtotal += r.subtotal;
+               this.sumvaloriva += r.valoriva;
+               this.sumtotal += r.total;
+               console.log(this.sumsubtotal)
+               console.log(this.sumvaloriva)
+               console.log(this.sumtotal)
                let indice = this.vecrubros.findIndex((rubro: { idrubro: number }) => rubro.idrubro === r.idrubro);
                if (indice == -1) this.vecrubros.push(r)
                else {
+                  console.log('HOLA POR AQUI ')
+                  console.log(this.vecrubros[indice])
                   this.vecrubros[indice].valorunitario = Math.round((this.vecrubros[indice].valorunitario + r.valorunitario) * 100) / 100;
                   this.vecrubros[indice].subtotal = Math.round((this.vecrubros[indice].subtotal + r.subtotal) * 100) / 100;
                   this.vecrubros[indice].valoriva = Math.round((this.vecrubros[indice].valoriva + r.valoriva) * 100) / 100;
@@ -203,6 +210,7 @@ export class GeneradorxmlComponent implements OnInit {
       let nombre = this._facturas[0].idcliente.nombre;
       let cedula = this._facturas[0].idcliente.cedula;
       // let subtotal = this.sumsubtotal
+      let cuenta = this._facturas[0].idabonado;
       let dircli = this._facturas[0].idcliente.direccion;
       let email = this._facturas[0].idcliente.email;
 
@@ -247,15 +255,15 @@ export class GeneradorxmlComponent implements OnInit {
                version: "1.0.0"
             },
             infoTributaria: {
-               ambiente: 1, tipoEmision: 1,
-               razonSocial: this.empresa.razonsocial, 
+               ambiente: 2 , tipoEmision: 1, /* en ambiente a loque se vaya a pasar a produccion cambiar  this.empresa.ambiente */
+               razonSocial: this.empresa.razonsocial,
                nombreComercial: this.empresa.nombrecomercial,
                ruc: this.empresa.ruc,
-               claveAcceso: claveacceso, 
+               claveAcceso: claveacceso,
                codDoc: '01',
                estab: estab, ptoEmi: ptoemi,
                secuencial: secuencial,
-               direccion: direccion,
+               dirMatriz: direccion,
             },
             infoFactura: {
                fechaEmision: fecha,
@@ -263,6 +271,7 @@ export class GeneradorxmlComponent implements OnInit {
                tipoIdentificacionComprador: tpIdentifica,
                razonSocialComprador: nombre,
                identificacionComprador: cedula,
+               direccionComprador: `${dircli} CUENTA  ${cuenta}  `,
                totalSinImpuestos: this.sumsubtotal.toFixed(2),
                totalDescuento: '0.00',
                totalConImpuestos: {
@@ -286,15 +295,15 @@ export class GeneradorxmlComponent implements OnInit {
                   codigoPrincipal: { _text: detalle.codigoPrincipal },
                   descripcion: { _text: detalle.descripcion },
                   cantidad: { _text: detalle.cantidad },
-                  precioUnitario: { _text: detalle.precioUnitario },
+                  precioUnitario: { _text: (+detalle.precioUnitario!).toFixed(2) },
                   descuento: { _text: detalle.descuento },
-                  precioTotalSinImpuesto: { _text: detalle.precioTotalSinImpuesto },
+                  precioTotalSinImpuesto: { _text: (+detalle.precioTotalSinImpuesto!).toFixed(2) },
                   impuestos: {
                      impuesto: detalle.impuestos.map((impuesto: { codigo: any; codigoPorcentaje: any; tarifa: any; baseImponible: any; valor: any; }) => ({
                         codigo: { _text: impuesto.codigo },
                         codigoPorcentaje: { _text: impuesto.codigoPorcentaje },
                         tarifa: { _text: impuesto.tarifa },
-                        baseImponible: { _text: impuesto.baseImponible },
+                        baseImponible: { _text: (+impuesto.baseImponible!).toFixed(2) },
                         valor: { _text: impuesto.valor }
                      }))
                   }
@@ -304,7 +313,8 @@ export class GeneradorxmlComponent implements OnInit {
             infoAdicional: {
                campoAdicional: [
                   { _attributes: { nombre: 'Dirección' }, _text: dircli },
-                  { _attributes: { nombre: "e-mail" }, _text: email }
+                  { _attributes: { nombre: "e-mail" }, _text: email },
+                  { _attributes: { nombre: "Cuenta" }, _text: cuenta }
                ]
             }
          }
