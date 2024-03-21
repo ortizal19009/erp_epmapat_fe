@@ -368,6 +368,7 @@ export class AddRecaudaComponent implements OnInit {
   sinCobro(idcliente: number) {
     this.facService.getSinCobro(idcliente).subscribe({
       next: (datos: any) => {
+        console.log(datos)
         this._sincobro = datos;
         if (datos.length > 0) {
           let suma: number = 0;
@@ -382,7 +383,7 @@ export class AddRecaudaComponent implements OnInit {
               item.direccion = 'S/D';
             }
             let com = 0;
-            if (item.idmodulo.idmodulo == 3) com = 1;
+            if (item.idmodulo.idmodulo == 3 && item.idabonado != 0) com = 1;
             item.interes = Math.round(interes * 100) / 100;
             item.comerc = com;
             //item.multa = 0;
