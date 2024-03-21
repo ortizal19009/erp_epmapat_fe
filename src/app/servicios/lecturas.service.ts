@@ -15,15 +15,16 @@ export class LecturasService {
 
   constructor(private http: HttpClient) { }
 
-  getLecturas(idrutaxemision: Number){
+  
+  getLecturas(idrutaxemision: Number) {
     return this.http.get<Lecturas>(`${baseUrl}?idrutaxemision=${idrutaxemision}`);
   }
 
-  getLecturasxIdabonado(idabonado: number){
+  getLecturasxIdabonado(idabonado: number) {
     return this.http.get<Lecturas>(`${baseUrl}?idabonado=${idabonado}`);
   }
 
-  getByBmonth(){
+  getByBmonth() {
     return this.http.get<Lecturas[]>(`${baseUrl}/lecbm`);
   }
 
@@ -34,7 +35,7 @@ export class LecturasService {
   getByNCliente(nombre: string) {
     return this.http.get<Lecturas[]>(`${baseUrl}/lbncm/${nombre}`);
   }
-  
+
   getByICliente(cedula: string) {
     return this.http.get<Lecturas[]>(`${baseUrl}/lbicm/${cedula}`);
   }
@@ -47,17 +48,20 @@ export class LecturasService {
   getByIdfactura(idfactura: number) {
     return this.http.get<Lecturas[]>(`${baseUrl}/planilla/${idfactura}`);
   }
-  //Lectura por Planilla
-  getOnefactura(idfactura: number) {
-    return this.http.get<Lecturas[]>(`${baseUrl}/onePlanilla/${idfactura}`);
-  }
 
   saveLectura(lectura: Lecturas): Observable<Object> {
     return this.http.post(baseUrl, lectura);
   }
 
+  //Actualiza una lectura
   updateLectura(idlectura: number, lectura: Lecturas): Observable<Object> {
     return this.http.put(baseUrl + "/" + idlectura, lectura);
+  }
+
+  //Actualiza una lectura async
+  async updateLecturaAsync(idlectura: number, lectura: Lecturas): Promise<Object> {
+    const observable = this.http.put(baseUrl + "/" + idlectura, lectura);
+    return await firstValueFrom(observable);
   }
 
 }
