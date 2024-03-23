@@ -32,4 +32,10 @@ export class RecaudacionService {
       `${baseUrl}/reporte/recaudadores?d=${d}&h=${h}`
     );
   }
+  updateRecaudacion(recaudacion: Recaudacion) {
+    return this.http.put(
+      `${baseUrl}/${recaudacion.idrecaudacion}`,
+      recaudacion
+    );
+  }
 }

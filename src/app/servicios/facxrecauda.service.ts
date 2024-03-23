@@ -24,5 +24,10 @@ export class FacxrecaudaService {
       `${baseUrl}/reportes/usuario?idusuario=${idusuario}&d=${d}&h=${h}`
     );
   }
+  getByIdFactura(idfactura: number) {
+    return this.http.get<Facxrecauda>(
+      `${baseUrl}/factura?idfactura=${idfactura}`
+    );
+  }
 
 }
