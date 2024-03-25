@@ -722,6 +722,7 @@ export class AddRecaudaComponent implements OnInit {
               recauda.recaudador = this.authService.idusuario;
               recauda.usucrea = this.authService;
               recauda.fechacobro = fechacobro;
+              //recauda.fechacobro = 
               this.recaService.updateRecaudacion(recauda).subscribe({
                 next: (uRecau) => {
                   console.log('recaudacion acutalizado', uRecau);
