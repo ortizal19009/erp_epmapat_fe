@@ -14,24 +14,24 @@
          <div class="card card-body col-sm-8 detalle sombra">
             <form [formGroup]="formConvenio">
                <div class="row">
-
                   <div *ngIf="_modulos" class="form-group col-sm-6 mb-0">
                      <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
                            <label class="input-group-text">Sección<sup class="green">*</sup></label>
                         </div>
-                        <select class="custom-select" formControlName="seccion" (change)="obtenerSeccion()" >
-                           <option *ngFor="let modulo of _modulos" [ngValue]="modulo.idmodulo">
-                             {{ modulo.descripcion }}
+                        <select class="custom-select" formControlName="seccion" (change)="obtenerSeccion($event)">
+                           <option *ngFor="let modulo of _modulos" value={{+modulo.idmodulo!}}>
+                              {{ modulo.descripcion }}
                            </option>
-                         </select>
+                        </select>
                      </div>
                   </div>
 
                   <div class="form-group col-md-5 my-0 py-0">
                      <div class="input-group input-group-sm mb-3">
                         <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Número de Convenio<sup class="green">*</sup></span>
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Número de
+                              Convenio<sup class="green">*</sup></span>
                         </div>
                         <input type="text" class="form-control text-center" formControlName="nroconvenio"
                            aria-label="Small" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['nroconvenio'].invalid && f['nroconvenio'].touched,
@@ -42,7 +42,8 @@
                   <div class="form-group col-md-4 my-0 py-0">
                      <div class="input-group input-group-sm mb-3">
                         <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Referencia<sup class="green">*</sup></span>
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Referencia<sup
+                                 class="green">*</sup></span>
                         </div>
                         <input type="text" class="form-control text-center" formControlName="referencia"
                            aria-label="Small" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['referencia'].invalid && f['referencia'].touched,
@@ -53,7 +54,8 @@
                   <div class="form-group col-md-4 my-0 py-0">
                      <div class="input-group input-group-sm mb-3">
                         <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Autorización<sup class="green">*</sup></span>
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Autorización<sup
+                                 class="green">*</sup></span>
                         </div>
                         <input type="text" class="form-control text-center" formControlName="nroautorizacion"
                            aria-label="Small" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['nroautorizacion'].invalid && f['nroautorizacion'].touched,
@@ -94,7 +96,8 @@
                   <div class="form-group col-md-3 my-0 py-0">
                      <div class="input-group input-group-sm mb-3">
                         <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Cuotas<sup class="green">*</sup></span>
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Cuotas<sup
+                                 class="green">*</sup></span>
                         </div>
                         <input type="number" class="form-control text-center" formControlName="cuotas" min="2" max="12"
                            (change)="changeCuotas()" aria-label="Small" aria-describedby="inputGroup-sizing-sm"
@@ -106,7 +109,8 @@
                   <div class="form-group col-md-3 my-0 py-0">
                      <div class="input-group input-group-sm mb-3">
                         <div class="input-group-prepend">
-                           <button type="button" class="btn btn-primary btn-sm" (click)="calcular()" [disabled]="!swcalcular">
+                           <button type="button" class="btn btn-primary btn-sm" (click)="calcular()"
+                              [disabled]="!swcalcular">
                               <i *ngIf="swcalculando" class="fa fa-spinner"></i>
                               <i *ngIf="!swcalculando" class="bi-calculator-fill"></i> {{txtcalcular}}
                            </button>
@@ -130,7 +134,8 @@
                   <div class="form-group col-md-4 my-0 py-0">
                      <div class="input-group input-group-sm mb-3">
                         <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Cuota final<sup class="green">*</sup></span>
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Cuota final<sup
+                                 class="green">*</sup></span>
                         </div>
                         <input type="text" class="form-control text-right" formControlName="cuotafinal"
                            aria-label="Small" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['cuotafinal'].invalid && f['cuotafinal'].touched,
@@ -152,12 +157,13 @@
                </div>
             </form>
             <div class="mt-0 mb-0 text-center">
-               <button class="btn btn-success btn-sm mx-1" (click)="guardar()" [disabled]="!formConvenio.valid || swcalculando">
+               <button class="btn btn-success btn-sm mx-1" (click)="guardar()"
+                  [disabled]="!formConvenio.valid || swcalculando">
                   <i class="fa fa-check-circle"></i> Aceptar</button>
                <button class="btn btn-outline-success btn-sm mx-1" (click)="regresar()"><i
                      class="fa fa-times-circle"></i> Cancelar</button>
             </div>
-            
+
          </div>
          <div *ngIf="_sincobro" class="col-md-4">
             <table class="table table-hover table-bordered table-sm sombra">
@@ -181,8 +187,46 @@
                      <td class="text-center">{{ sincobro.feccrea }}</td>
                      <td class="text-right">{{ sincobro.totaltarifa + 1 | number: '.2-2'}}</td>
                   </tr>
+                  <tr>
+                     <td colspan="4">
+                        <button class="btn btn-xs btn-outline-primary text-right"  data-toggle="modal"
+                           data-target="#addModulo">Agregar</button>
+                     </td>
+                  </tr>
                </tbody>
             </table>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- MODAL AÑADIR  -->
+<div class="modal fade" id="addModulo" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="addModuloLabel">Añadir</h5>
+         </div>
+         <div class="modal-body">
+            <form action="" [formGroup]="f_nuevosValores">
+               <div *ngIf="_modulos" class="form-group col-sm-10 mb-0">
+                  <div class="input-group input-group-sm">
+                     <div class="input-group-prepend">
+                        <label class="input-group-text">Sección<sup class="green">*</sup></label>
+                     </div>
+                     <select class="custom-select" formControlName="seccion" (change)="obtenerSeccion($event)">
+                        <option *ngFor="let modulo of _modulos" value={{+modulo.idmodulo!}}>
+                           {{ modulo.descripcion }}
+                        </option>
+                     </select>
+                  </div>
+               </div>
+
+            </form>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-xs btn-outline-success" data-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-xs btn-success" data-dismiss="modal" (click)="addValores()">Aceptar</button>
          </div>
       </div>
    </div>

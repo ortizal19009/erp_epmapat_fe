@@ -54,6 +54,7 @@ export class AddConvenioComponent implements OnInit {
   txtcalcular: string = 'Calcular';
   idmodulo: number = 3;
   seccion: Modulos = new Modulos();
+  f_nuevosValores: FormGroup;
 
   constructor(
     private fb: FormBuilder,
@@ -67,7 +68,7 @@ export class AddConvenioComponent implements OnInit {
     private facxconvService: FacxconvenioService,
     private rxfService: RubroxfacService,
     private moduService: ModulosService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/convenios');
@@ -95,9 +96,12 @@ export class AddConvenioComponent implements OnInit {
       },
       { updateOn: 'blur' }
     );
+    this.f_nuevosValores = this.fb.group({
+      seccion: this.seccion
+    })
 
     this.modulos();
-    //this.siguienteNroconvenio();
+    this.siguienteNroconvenio();
   }
 
   colocaColor(colores: any) {
@@ -113,13 +117,14 @@ export class AddConvenioComponent implements OnInit {
     this.moduService.getListaModulos().subscribe({
       next: (datos) => {
         this._modulos = datos;
-        this.formConvenio.controls['seccion'].setValue(3);
+        this.formConvenio.controls['seccion'].setValue(this.idmodulo);
       },
       error: (err) => console.error(err.error),
     });
   }
 
-  obtenerSeccion() {
+  obtenerSeccion(e: any) {
+    this.formConvenio.value.seccion = +e.target.value!
     this.idmodulo = this.formConvenio.value.seccion;
   }
 
@@ -141,6 +146,7 @@ export class AddConvenioComponent implements OnInit {
           this.abonado = datos;
           this.facService.getSinCobrarAbo(this.idmodulo, idabonado).subscribe({
             next: (datos) => {
+              console.log(datos)
               this._sincobro = datos;
               this.formConvenio.controls['cedula'].setValue(
                 this.abonado.idcliente_clientes.cedula
@@ -437,5 +443,44 @@ export class AddConvenioComponent implements OnInit {
     return this.convService
       .valNroconvenio(control.value)
       .pipe(map((result) => (result ? { existe: true } : null)));
+  }
+  /* AÑADIR NUEVOS VALORES */
+  addValores() {
+    let seccion = this.f_nuevosValores.value.seccion
+    let idabonado = this.formConvenio.value.idabonado;
+    if (idabonado) {
+      this.swbuscando = true;
+      this.txtbuscar = 'Buscando';
+      this.aboService.unAbonado(this.formConvenio.value.idabonado).subscribe({
+        next: (datos) => {
+          this.abonado = datos;
+          this.facService.getSinCobrarAbo(seccion, idabonado).subscribe({
+            next: (datos: any) => {
+              datos.forEach((item: any) => {
+                let query = this._sincobro.find((factura: { idfactura: number }) => factura.idfactura === item.idfactura)
+                if (query === undefined) {
+                  this._sincobro.push(item)
+                }
+              })
+
+              this.sumTotaltarifa();
+
+            },
+            error: (err) =>
+              console.error(
+                'Al recuperar las Planillas sin cobrar por Abonado: ',
+                err.error
+              ),
+          });
+        },
+        error: (err) => console.error('Al recuperar el Abonado: ', err.error),
+      });
+    } else {
+      this._sincobro = null;
+      this.formConvenio.controls['nombre'].setValue('');
+      this.formConvenio.controls['cuotainicial'].setValue('');
+    }
+
+
   }
 }
