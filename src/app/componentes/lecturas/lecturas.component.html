@@ -1,6 +1,6 @@
 <div class="content mt-1 pt-1 px-2">
    <div class="container-fluid">
-      <div class="row mt-0 px-1 py-1 justify-content-start titEmisiones">
+      <div class="row mt-0 px-1 py-1 justify-content-start border cabecera sombra">
          <div class="col-sm-2">
             <h4 class="m-0 font-weight-bold text-truncate"><i class="fa fa-book"></i>&nbsp; Lecturas </h4>
          </div>
@@ -24,14 +24,14 @@
                <button class="dropdown-item" type="button" [ngClass]="{'disabled' : rutaxemision.estado == 1}"
                   (click)="cargar()">
                   <i class="bi-download"></i>&nbsp; Cargar lecturas</button>
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalCalcular"
+                  [ngClass]="{'disabled' : rutaxemision.estado == 1}"><i class="bi-calculator"></i>
+                  <span>&nbsp; Calcular</span></button>
                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalCerrar"
                   [ngClass]="{'disabled' : rutaxemision.estado == 1}">
                   <i class="bi bi-door-closed"></i>&nbsp; Cerrar emisión ruta</button>
-               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
-                  <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
-               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar"
-                  (click)="exportar()"><i class="bi-file-earmark-arrow-up"></i>
-                  <span>&nbsp; Exportar</span></button>
+               <button class="dropdown-item" type="button" (click)="imprimir()">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
             </div>
          </div>
 
@@ -47,23 +47,24 @@
 <div class="container-fluid">
    <div class="row mb-0">
       <div class="col-sm-12">
-         <table class="table table-hover table-bordered table-sm">
-            <thead>
-               <tr class="text-center">
+         <table *ngIf="_lecturas" class="table table-hover table-bordered table-sm sombra">
+            <thead class="cabecera">
+               <tr>
                   <th></th>
-                  <th>Cuenta</th>
-                  <th>Responsable del Pago</th>
+                  <th class="text-center">Cuenta</th>
+                  <th class="col-sm-3">Responsable del Pago</th>
                   <th>Categoría</th>
-                  <th>Anterior</th>
-                  <th>Actual</th>
-                  <th>Cnsm</th>
-                  <th>M.M</th>
+                  <th class="text-right">Anterior</th>
+                  <th class="text-right">Actual</th>
+                  <th class="text-right">Cnsm</th>
+                  <th class="text-right">Prom.</th>
+                  <th class="text-right">A recaudar</th>
                   <th>Novedades</th>
+                  <th></th>
                </tr>
             </thead>
-            <tbody>
-               <tr *ngFor="let lectura of _lecturas | filter: filtro; let i=index" data-toggle="modal"
-                  data-target="#modalValor" (click)="valor(lectura.idlectura, i)">
+            <tbody class="detalle">
+               <tr *ngFor="let lectura of _lecturas | filter: filtro; let i=index" class="fila">
                   <td class="small text-center font-weight-bold">{{i+1}}</td>
                   <td class="text-center">{{ lectura.idabonado_abonados.idabonado }}</td>
                   <td>{{ lectura.idabonado_abonados.idcliente_clientes.nombre }}</td>
@@ -77,18 +78,37 @@
                   <td class="text-right"
                      [ngClass]="{'fontwarning': ((lectura.lecturaanterior == 0 && lectura.lecturaactual == 0) || lectura.lecturaactual - lectura.lecturaanterior <= 0 || (lectura.lecturaanterior > 0 && lectura.lecturaactual == 0)), 'transparente': !swcargado }">
                      {{ lectura.lecturaactual - lectura.lecturaanterior | number: '1.0' }}</td>
-                  <!-- <td *ngIf="lectura.lecturaactual == 0" class="text-right"
-                     [ngClass]="{'fontwarning': (lectura.lecturaanterior == 0 && lectura.lecturaactual == 0) || lectura.lecturaactual - lectura.lecturaanterior <= 0}">
-                  </td> -->
-                  <td class="text-center"><span [ngClass]="{'fontwarning': lectura.mesesmulta > 4}">{{
-                        lectura.mesesmulta }}</span>
-                  </td>
+                  <td class="text-right">{{ lectura.idabonado_abonados.promedio }}</td>
+                  <td class="text-right">{{ lectura.total1 | number: '1.2-2' }}</td>
                   <td>{{ lectura.idnovedad_novedades.descripcion }}</td>
+                  <td class="text-center">
+                     <div class="btn-group py-0">
+                        <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
+                           aria-expanded="false">
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right popLista">
+                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalValor"
+                              (click)="valor(lectura.idlectura, i)" [disabled]="this.rutaxemision.estado == 1 ">
+                              <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
+                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalArecaudar"
+                              (click)="arecaudar(lectura)">
+                              <i class="bi-calculator"></i>&nbsp; Valor a recaudar</button>
+                        </div>
+                     </div>
+                  </td>
                </tr>
-               <td *ngIf="!swfiltro" colspan="6" class="font-weight-bold text-right">TOTAL</td>
-               <td *ngIf="!swfiltro && swcargado" class="font-weight-bold text-right">{{ sumtotal | number: '1.0' }}
-               </td>
             </tbody>
+            <tfoot class="detalle">
+               <td *ngIf="!swfiltro" colspan="6" class="font-weight-bold text-right">TOTAL</td>
+               <td *ngIf="!swfiltro" class="font-weight-bold text-right">{{ totales[0] | number: '1.0'}}
+               </td>
+               <td *ngIf="!swfiltro" class="font-weight-bold text-right">{{ totales[1] | number: '1.0'}}
+               </td>
+               <td *ngIf="!swfiltro" class="font-weight-bold text-right">{{ totales[2] | number: '1.2-2'}}
+               </td>
+               <td></td><td></td>
+            </tfoot>
+
          </table>
       </div>
    </div>
@@ -100,7 +120,7 @@
             <div class='modal-header py-2 justify-content-center cabecera'>
                <h5 class='modal-title font-weight-bold' id='ModalLabel'>Archivo lecturas</h5>
             </div>
-            <div class='modal-body cuerpo'>
+            <div class='modal-body detalle'>
 
                <div class="form-group  my-0 py-0">
                   <div class="input-group input-group-sm mb-3">
@@ -129,7 +149,7 @@
    <div class="modal fade" id="modalCerrar" tabindex="-1" aria-labelledby="modalCerrarLabel" data-backdrop="static"
       aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
-         <div class="modal-content">
+         <div class="modal-content detalle">
             <div class='modal-header py-2 justify-content-center cabecera'>
                <h5 class='modal-title font-weight-bold fantacy' id='ModalLabel'>Cerrar</h5>
             </div>
@@ -139,16 +159,16 @@
             <p class="px-3 mb-0 pb-0 font-weight-bold text-center">Está seguro de cerrar la Emisión de esta Ruta ?</p>
             <div class='modal-body'>
                <ul class="list-group list-group-unbordered mb-0">
-                  <li class="list-group-item py-1">
+                  <li class="list-group-item py-1 detalle">
                      <b>Emisión</b> <a class="float-right">{{ rutaxemision.emision|nombreEmision }}</a>
                   </li>
-                  <li class="list-group-item py-1">
+                  <li class="list-group-item py-1 detalle">
                      <b>Ruta</b> <a class="float-right">{{ rutaxemision.ruta }}</a>
                   </li>
-                  <li class="list-group-item py-1">
+                  <li class="list-group-item py-1 detalle">
                      <b>Consumo M<sup>3</sup></b> <a class="float-right"> {{ sumtotal | number: '1.0' }}</a>
                   </li>
-                  <li class="list-group-item py-1">
+                  <li class="list-group-item py-1 detalle">
                      <b>Abonados</b> <a class="float-right"> {{ abonados | number: '1.0' }}</a>
                   </li>
                </ul>
@@ -213,74 +233,85 @@
       </div>
    </div>
 
-   <!-- MODAL Imprimir-->
-   <div class="modal fade" id="imprimir" tabindex="-1" aria-labelledby="imprimirLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-sm">
+   <!-- MODAL Valor a recaudar -->
+   <div class="modal fade" id="modalArecaudar" tabindex="-1" aria-labelledby="ArecaudarLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
          <div class="modal-content border">
             <div class='modal-header py-2 justify-content-center cabecera'>
-               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Imprimir</h5>
+               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Cuenta {{cuenta}} &nbsp;&nbsp;&nbsp;{{m3}}
+                  M<sup>3</sup> </h5>
             </div>
-            <div class='modal-body cuerpo'>
+            <div class='modal-body detalle'>
 
-               <div class="input-group mb-3 input-group-sm">
-                  <div class="input-group-prepend">
-                     <label class="input-group-text" for="inputGroupSelect01">Reporte</label>
-                  </div>
-                  <select class="custom-select" id="inputGroupSelect01">
-                     <option selected>Lecturas</option>
-                  </select>
-               </div>
+               <table class="table table-hover table-bordered table-sm sombra">
+                  <thead class="cabecera">
+                     <tr>
+                        <th></th>
+                        <th>Rubro</th>
+                        <th class="text-right">Valor</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <tr *ngFor="let rubro of rubros; let i=index">
+                        <td class="small text-center font-weight-bold">{{i+1}}</td>
+                        <td>{{ rubro.descripcion }}</td>
+                        <td class="text-right">{{ rubro.valorunitario | number: '1.2-2' }}</td>
+                     </tr>
+                  </tbody>
+                  <tfoot class="font-weight-bold text-right cabecera">
+                     <tr>
+                        <td class="p-0"></td>
+                        <td class=" text-right p-0">TOTAL&nbsp;&nbsp; </td>
+                        <td class="text-right p-0">{{totalcalc | number: '1.2-2'}}</td>
+                     </tr>
+                  </tfoot>
 
-               <div class="input-group input-group-sm mb-0">
-                  <div class="input-group-prepend">
-                     <small class="input-group-text">Abrir en otra página</small>
-                     <div class="input-group-text">
-                        <input type="checkbox" [(ngModel)]="otraPagina">
-                     </div>
-                  </div>
-               </div>
+               </table>
 
-               <div class='row justify-content-center mt-3'>
-                  <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="pdf()"
-                     [attr.data-target]="otraPagina ? null : '#pdf'" data-toggle="modal">
-                     <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+               <div class="row justify-content-center">
+                  <!-- <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' data-toggle="modal"
+                     (click)="exporta()">
+                     <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button> -->
                   <button type='button' class='btn btn-sm btn-outline-success btn-sm mx-1' data-dismiss='modal'>
                      <i class="bi bi-x-circle"></i> Cancelar</button>
                </div>
-
             </div>
          </div>
       </div>
    </div>
 
-   <!-- MODAL Exportar -->
-   <div class="modal fade" id="exportar" tabindex="-1" aria-labelledby="exportarLabel" aria-hidden="true">
+   <!-- MODAL Calcular -->
+   <div class="modal fade" id="modalCalcular" tabindex="-1" aria-labelledby="modalCalcularLabel" data-backdrop="static"
+      aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-sm">
-         <div class="modal-content border">
+         <div class="modal-content detalle">
             <div class='modal-header py-2 justify-content-center cabecera'>
-               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Exportar</h5>
+               <h5 class='modal-title font-weight-bold fantacy' id='ModalLabel'>Calcular</h5>
             </div>
-            <div class='modal-body cuerpo'>
+            <div class='modal-body'>
+               <ul class="list-group list-group-unbordered mb-0">
+                  <li class="list-group-item py-1 detalle">
+                     <b>Consumo M<sup>3</sup></b> <a class="float-right"> {{ totales[0] | number: '1.0' }}</a>
+                  </li>
+                  <li class="list-group-item py-1 detalle">
+                     <b>Abonados</b> <a class="float-right"> {{ abonados | number: '1.0' }}</a>
+                  </li>
+               </ul>
+            </div>
 
-               <div class="form-group  my-0 py-0">
-                  <div class="input-group input-group-sm mb-3">
-                     <div class="input-group-prepend">
-                        <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm" data-toggle="tooltip"
-                           title="Obligatorio y mínimo 3 caracteres">Archivo</span>
-                     </div>
-                     <input type="text" class="form-control" [(ngModel)]="archExportar" aria-label="Small"
-                        aria-describedby="inputGroup-sizing-sm" required minlength="3" maxlength="20">
-                  </div>
-               </div>
-
-               <div class="row justify-content-center">
-                  <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' data-toggle="modal"
-                     (click)="exporta()">
-                     <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
-                  <button type='button' class='btn btn-sm btn-outline-success btn-sm mx-1' data-dismiss='modal'>
-                     <i class="bi bi-x-circle"></i> Cancelar</button>
+            <div class='row justify-content-center mb-3'>
+               <button type='button' class='btn btn-success btn-sm mx-1' (click)="calcular()" [disabled]="disabled">
+                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+               <button *ngIf="btncerrar" type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal'>
+                  <i class="fa fa-check-circle"></i>&nbsp; Continuar</button>
+               <button *ngIf="!btncerrar" type='button' class='btn btn-sm btn-outline-success' data-dismiss='modal'>
+                  <i class="bi bi-x-circle"></i> Cancelar</button>
+            </div>
+            <div class="mt-0 mb-3 mx-4 progress">
+               <div class="progress-bar" [ngStyle]="{ 'width.%': progreso }">{{ progreso/100 | percent:'1.2-2'}}
                </div>
             </div>
+
          </div>
       </div>
    </div>
@@ -288,7 +319,7 @@
 </div>
 
 <!-- MODAL PDF (En la misma página)-->
-<div class='modal fade' id='pdf' tabindex='-1' aria-labelledby='pdf' aria-hidden='true'>
+<!-- <div class='modal fade' id='pdf' tabindex='-1' aria-labelledby='pdf' aria-hidden='true'>
    <div class='modal-dialog modal-sm'>
    </div>
-</div>
+</div> -->

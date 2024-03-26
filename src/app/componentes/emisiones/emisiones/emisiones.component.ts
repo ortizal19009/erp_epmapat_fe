@@ -7,6 +7,8 @@ import { NombreEmisionPipe } from 'src/app/pipes/nombre-emision.pipe'
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as ExcelJS from 'exceljs';
+import { ColoresService } from 'src/app/compartida/colores.service';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 
 @Component({
    selector: 'app-emisiones',
@@ -35,11 +37,18 @@ export class EmisionesComponent implements OnInit {
    otraPagina: boolean = false;
    archExportar: string;
    opcExportar: number;
+   swgenerar: boolean = false;    //Controla el si hay rutas por emisión (DIV mensaje 'Gnerar ?')
 
    constructor(public fb: FormBuilder, private emiService: EmisionService, private router: Router,
+      private coloresService: ColoresService, public authService: AutorizaService,
       private ruxemiService: RutasxemisionService) { }
 
    ngOnInit(): void {
+      sessionStorage.setItem('ventana', '/emisiones');
+      let coloresJSON = sessionStorage.getItem('/emisiones');
+      if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
+      else this.buscaColor();
+
       this.formBuscar = this.fb.group({
          desde: '',
          hasta: '',
@@ -66,9 +75,29 @@ export class EmisionesComponent implements OnInit {
          estado: 0,
          observaciones: '',
          m3: 0,
-         usucrea: 1,
+         usucrea: this.authService.idusuario,
          feccrea: date
       });
+   }
+
+   colocaColor(colores: any) {
+      document.documentElement.style.setProperty('--bgcolor1', colores[0]);
+      const cabecera = document.querySelector('.cabecera');
+      if (cabecera) cabecera.classList.add('nuevoBG1')
+      document.documentElement.style.setProperty('--bgcolor2', colores[1]);
+      const detalle = document.querySelector('.detalle');
+      if (detalle) detalle.classList.add('nuevoBG2');
+   }
+
+   async buscaColor() {
+      try {
+         const datos = await this.coloresService.setcolor(this.authService.idusuario, 'emisiones');
+         const coloresJSON = JSON.stringify(datos);
+         sessionStorage.setItem('/emisiones', coloresJSON);
+         this.colocaColor(datos);
+      } catch (error) {
+         console.error(error);
+      }
    }
 
    buscar() {
@@ -105,13 +134,24 @@ export class EmisionesComponent implements OnInit {
             this._rutasxemi = datos;
             this.total();
             if (this._rutasxemi.length == 0) {
-               sessionStorage.setItem("idemisionToGenerar", emision.idemision.toString());
-               this.router.navigate(['gene-emision']);
-            }
+               this.showDiv = false;
+               this.swgenerar = true;
+            } else this.swgenerar = false;
          },
          error: err => console.error(err.error)
       });
    }
+
+   generar() {
+      sessionStorage.setItem("idemisionToGenerar", this.idemision.toString());
+      this.router.navigate(['gene-emision']);
+   }
+
+   nogenerar() {
+      this.swgenerar = false;
+   }
+
+   
 
    ocultar() {
       this.showDiv = false;
@@ -154,12 +194,15 @@ export class EmisionesComponent implements OnInit {
          next: datos => {
             datos.m3 = this.subtotal;
             datos.estado = 1;
-            datos.usuariocierre = 2;
+            datos.usuariocierre = this.authService.idusuario;
             const fechaHora = new Date();
             const data = { fechaHora: fechaHora.toISOString() };
             datos.fechacierre = fechaHora;
             this.emiService.update(this.idemision, datos).subscribe({
-               next: nex => this.buscar(),
+               next: nex => {
+                  this.cerrado = 1;
+                  this.buscar()
+               },
                error: err => console.error(err.error)
             })
          },
@@ -364,7 +407,7 @@ export class EmisionesComponent implements OnInit {
    }
 
    exportar0() { this.archExportar = 'Emisiones'; this.opcExportar = 0 }
-   exportar1() { this.archExportar = 'Emisión_'+this.selEmision; this.opcExportar = 1 }
+   exportar1() { this.archExportar = 'Emisión_' + this.selEmision; this.opcExportar = 1 }
 
    exporta() {
       if (this.opcExportar == 0) this.exporta0(); //Exporta Emisiones
@@ -490,7 +533,7 @@ export class EmisionesComponent implements OnInit {
       // Agrega los datos a la hoja de cálculo
       let i = 1;
       this._rutasxemi.forEach((item: any) => {
-         let fila = worksheet.addRow([i, item.idruta_rutas.codigo, item.idruta_rutas.descripcion, , item.m3 ]);
+         let fila = worksheet.addRow([i, item.idruta_rutas.codigo, item.idruta_rutas.descripcion, , item.m3]);
          if (item.fechacierre != null) {
             let celdaDi = fila.getCell('D'); //Celda de Fechacierre
             let año = item.fechacierre.toString().slice(0, 4);

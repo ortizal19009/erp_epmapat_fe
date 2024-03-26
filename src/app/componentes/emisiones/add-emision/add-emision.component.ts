@@ -8,24 +8,29 @@ import { EmisionesComponent } from '../emisiones/emisiones.component';
   selector: 'app-add-emision',
   templateUrl: './add-emision.component.html',
 })
-
 export class AddEmisionComponent implements OnInit {
-
   emi: Emisiones = new Emisiones();
   emiForm: FormGroup;
   newdisabled = true;
-  
-  constructor(private parent: EmisionesComponent, private emisionservice: EmisionService) {}
+
+  constructor(
+    private parent: EmisionesComponent,
+    private emisionservice: EmisionService
+  ) {}
 
   ngOnInit(): void {}
 
   guardar() {
     this.emi.feccrea = new Date();
-    this.emisionservice.saveEmision(this.emi).subscribe(datos => {
-      // this.parent.listarEmisiones ();
-    }, error => console.log(error))
+    this.emisionservice.saveEmision(this.emi).subscribe(
+      (datos) => {
+        // this.parent.listarEmisiones ();
+      },
+      (error) => console.log(error)
+    );
   }
 
-  onSubmit() { this.guardar();  }
-
+  onSubmit() {
+    this.guardar();
+  }
 }

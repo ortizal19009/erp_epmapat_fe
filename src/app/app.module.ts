@@ -75,7 +75,6 @@ import { ListarInteresesComponent } from './componentes/intereses/intereses/inte
 import { PreciosxcatComponent } from './componentes/preciosxcat/preciosxcat/preciosxcat.component';
 import { AddPreciosxcatComponent } from './componentes/preciosxcat/add-preciosxcat/add-preciosxcat.component';
 import { ModificarPreciosxcatComponent } from './componentes/preciosxcat/modificar-preciosxcat/modificar-preciosxcat.component';
-import { LecturasComponent } from './componentes/lecturas/lecturas.component';
 import { ModulosComponent } from './componentes/modulos/modulos/modulos.component';
 import { ListarAbonadosComponent } from './componentes/abonados/listar-abonados/listar-abonados.component';
 import { AddAbonadosComponent } from './componentes/abonados/add-abonados/add-abonados.component';
@@ -215,6 +214,8 @@ import { PerfilUsuarioComponent } from './componentes/administracion/usuarios/pe
 import { RecalFacturaComponent } from './componentes/facturas/recal-factura/recal-factura.component';
 import { DefinirComponent } from './componentes/administracion/definir/definir.component';
 import { GeneradorxmlComponent } from './componentes/facelectro/generadorxml/generadorxml.component';
+import { ImpLecturasComponent } from './componentes/lecturas/imp-lecturas/imp-lecturas.component';
+import { LecturasComponent } from './componentes/lecturas/lecturas.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
@@ -279,7 +280,7 @@ import { GeneradorxmlComponent } from './componentes/facelectro/generadorxml/gen
       InfoTabla4Component, ModiTabla4Component, LoginComponent,
       UsuariosComponent, ModiReformaComponent,
       ModiEjecucionComponent, AddEjecucionComponent, ModiCertipresuComponent, AddCertipresuComponent,
-      PartixcertiComponent, ImporInteresesComponent, GeneEmisionComponent, ImporLecturasComponent,
+      PartixcertiComponent, ImporInteresesComponent, GeneEmisionComponent, ImporLecturasComponent,ImpLecturasComponent ,
       BancosComponent, ConciliabanComponent, ColoresComponent, Pliego24Component, PerfilUsuarioComponent,
       // ============ Pipes =============
       EstadoEmisionPipe, NombreEmisionPipe, NoSiPipe, NombreMesPipe, BloqueConsumoPipe, ProyeccionComponent,

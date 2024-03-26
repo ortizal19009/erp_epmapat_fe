@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom, map } from 'rxjs';
 import { Facturas } from '../modelos/facturas.model';
 import { environment } from 'src/environments/environment';
 
@@ -11,14 +11,12 @@ const baseUrl = `${apiUrl}/facturas`;
   providedIn: 'root',
 })
 export class FacturaService {
-  constructor(private http: HttpClient) { }
-
+  constructor(private http: HttpClient) {}
 
   getListaByNroFactura(nrofactura: String) {
     return this.http.get<Facturas>(`${baseUrl}?nrofactura=${nrofactura}`);
   }
   //Pre Facturas por Abonado
-
 
   valLastFac(codrecaudador: string) {
     return this.http.get(`${baseUrl}/validador/-${codrecaudador}-`);
@@ -44,12 +42,14 @@ export class FacturaService {
   }
 
   getByNrofactura(nrofactura: String) {
-    return this.http.get<Facturas>(`${baseUrl}/nrofactura?nrofactura=${nrofactura}`);
+    return this.http.get<Facturas>(
+      `${baseUrl}/nrofactura?nrofactura=${nrofactura}`
+    );
   }
 
   //Facturas por Cliente
   getByIdcliente(idcliente: number) {
-    return this.http.get<Facturas>(`${baseUrl}?idcliente=${idcliente}`)
+    return this.http.get<Facturas>(`${baseUrl}?idcliente=${idcliente}`);
   }
   //Lista de Facturas desde/hasta
   getDesdeHasta(desde: number, hasta: number) {
@@ -62,55 +62,89 @@ export class FacturaService {
 
   //Una Planilla (como lista)
   getPlanilla(idfactura: number) {
-    return this.http.get<Facturas[]>(`${baseUrl}/planilla?idfactura=${idfactura}`);
+    return this.http.get<Facturas[]>(
+      `${baseUrl}/planilla?idfactura=${idfactura}`
+    );
   }
 
   //Planillas por idabonado y fechas
-  getPorabonado(idabonado: number, fechaDesde: Date, fechaHasta: Date): Observable<Facturas[]> {
-    return this.http.get<Facturas[]>(`${baseUrl}/porabonado?idabonado=${idabonado}&fechaDesde=${fechaDesde}&fechaHasta=${fechaHasta}`);
+  getPorabonado(
+    idabonado: number,
+    fechaDesde: Date,
+    fechaHasta: Date
+  ): Observable<Facturas[]> {
+    return this.http.get<Facturas[]>(
+      `${baseUrl}/porabonado?idabonado=${idabonado}&fechaDesde=${fechaDesde}&fechaHasta=${fechaHasta}`
+    );
   }
 
   getFacturaByAbonado(idabonado: number) {
     return this.http.get<Facturas[]>(`${baseUrl}/f_abonado/${idabonado}`);
   }
 
+  //Save
   saveFactura(f: Facturas): Observable<Object> {
     return this.http.post(`${baseUrl}`, f);
   }
 
   //Save async
-  async saveFacturaAsync(factura: Facturas): Promise<Object> {
+  async saveFacturaAsync(factura: Facturas): Promise<any> {
     const observable = this.http.post(baseUrl, factura);
     return await firstValueFrom(observable);
   }
+
+  //Save async devuelve el idfactura generado
+  async saveFacturaAsyncId(factura: any): Promise<number> {
+    const observable = this.http.post<Facturas>(baseUrl, factura);
+    return await firstValueFrom(observable.pipe(
+       map(response => response.idfactura)
+    ));
+ }
 
   getById(idfactura: number): Observable<Facturas> {
     return this.http.get<Facturas>(`${baseUrl}/${idfactura}`);
   }
 
-  //Planillas sin Cobro de un Cliente 
+  //Planillas sin Cobro de un Cliente
   getSinCobro(idcliente: number) {
     return this.http.get<Facturas[]>(`${baseUrl}/idcliente/${idcliente}`);
   }
 
   //IDs de las Planillas sin cobrar de un Abonado
   getSinCobroAbo(idabonado: number) {
-    return this.http.get<number[]>(`${baseUrl}/sincobro?idabonado=${idabonado}`);
+    return this.http.get<number[]>(
+      `${baseUrl}/sincobro?idabonado=${idabonado}`
+    );
+  }
+
+  //Cuenta las Planillas pendientes de un Abonado
+  // getPendientesAbonado(idabonado: number) {
+  //    return this.http.get<number>(`${baseUrl}/pendientesabonado?idabonado=${idabonado}`);
+  // }
+
+  //Cuenta las Planillas pendientes de un Abonado Async
+  async getPendientesAbonadoAsync(idabonado: number): Promise<number> {
+    const observable = this.http.get<number>(
+      `${baseUrl}/pendientesabonado?idabonado=${idabonado}`
+    );
+    return await firstValueFrom(observable);
   }
 
   //Planillas sin Cobrar por Modulo y Abonado (Para Convenios)
   getSinCobrarAbo(idmodulo: number, idabonado: number) {
-    return this.http.get<Facturas[]>(`${baseUrl}/sincobrarAbo?idmodulo=${idmodulo}&idabonado=${idabonado}`);
+    return this.http.get<Facturas[]>(
+      `${baseUrl}/sincobrarAbo?idmodulo=${idmodulo}&idabonado=${idabonado}`
+    );
   }
 
   getDeudaConsumo(idabonado: number) {
-    return this.http.get<Facturas[]>(`${baseUrl}/deudaconsumo?idabonado=${idabonado}`);
+    return this.http.get<Facturas[]>(
+      `${baseUrl}/deudaconsumo?idabonado=${idabonado}`
+    );
   }
 
   getDeuda(idcliente: number) {
-    return this.http.get<Facturas[]>(
-      `${baseUrl}/deuda?idcliente=${idcliente}`
-    );
+    return this.http.get<Facturas[]>(`${baseUrl}/deuda?idcliente=${idcliente}`);
   }
 
   updateFacturas(fac: Facturas) {
@@ -122,8 +156,4 @@ export class FacturaService {
     const observable = this.http.put(`${baseUrl}/${fac.idfactura}`, fac);
     return await firstValueFrom(observable);
   }
-
-  
-
-
 }

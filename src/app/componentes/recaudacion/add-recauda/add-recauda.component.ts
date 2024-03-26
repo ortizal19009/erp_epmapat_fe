@@ -470,7 +470,6 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   marcarTodas(event: any) {
-    console.log(event);
     let valor: number = 0;
     if (event.target.checked) {
       valor = 1;
@@ -708,7 +707,7 @@ export class AddRecaudaComponent implements OnInit {
     this.totfac = suma12 + suma0 + this.valoriva + this.totInteres;
   }
 
-  cobrar() {
+/*   cobrar() {
     let fechacobro: Date = new Date();
     this._sincobro.forEach((item: any, index: number) => {
       if (item.pagado && item.estado === 3 && item.formapago === 4) {
@@ -718,7 +717,7 @@ export class AddRecaudaComponent implements OnInit {
             if (datos != null) {
               console.log('FACXRECAUDA', datos);
               /* Actualizar recaudacion  */
-              let recauda: any = datos.idrecaudacion;
+   /*            let recauda: any = datos.idrecaudacion;
               recauda.recaudador = this.authService.idusuario;
               recauda.usucrea = this.authService;
               recauda.fechacobro = fechacobro;
@@ -729,7 +728,7 @@ export class AddRecaudaComponent implements OnInit {
                 },
               });
 
-              /* Actualizar factura  */
+              /* Actualizar factura  
               let fac: any = datos.idfactura;
               fac.estado = 1;
               fac.fechacobro = fechacobro;
@@ -753,8 +752,8 @@ export class AddRecaudaComponent implements OnInit {
         this.f_cobro();
       }
     });
-  }
-  f_cobro() {
+  } */
+  cobrar() {
     console.log('EFECTIVO');
     //Crea el registro en Recaudación
     let fecha = new Date();

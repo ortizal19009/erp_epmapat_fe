@@ -114,14 +114,14 @@ import { AddRecaudaComponent } from './componentes/recaudacion/add-recauda/add-r
 import { InfoRutaComponent } from './componentes/rutas/info-ruta/info-ruta.component';
 //============= Catálogos ======================
 import { ListarEstadomComponent } from './componentes/estadom/listar-estadom/listar-estadom.component';
-import { ListarNovedadesComponent } from './componentes/novedad/listar-novedades/listar-novedades.component'
+import { ListarNovedadesComponent } from './componentes/novedad/listar-novedades/listar-novedades.component';
 import { AddNovedadComponent } from './componentes/novedad/add-novedad/add-novedad.component';
 import { NovedadDetalleComponent } from './componentes/novedad/novedad-detalle/novedad-detalle.component';
-import { ListarNacionalidadComponent } from './componentes/nacionalidad/listar-nacionalidad/listar-nacionalidad.component'
+import { ListarNacionalidadComponent } from './componentes/nacionalidad/listar-nacionalidad/listar-nacionalidad.component';
 import { AddNacionalidadComponent } from './componentes/nacionalidad/add-nacionalidad/add-nacionalidad.component';
 import { ModificarNacionalidadComponent } from './componentes/nacionalidad/modificar-nacionalidad/modificar-nacionalidad.component';
 import { TpidentificasComponent } from './componentes/tpidentifica/tpidentificas/tpidentificas.component';
-import { ListarTipopagoComponent } from './componentes/tipopago/listar-tipopago/listar-tipopago.component'
+import { ListarTipopagoComponent } from './componentes/tipopago/listar-tipopago/listar-tipopago.component';
 import { TpreclamosComponent } from './componentes/tpreclamos/tpreclamos/tpreclamos.component';
 import { ModiUbicacionmComponent } from './componentes/ubicacionm/modi-ubicacionm/modi-ubicacionm.component';
 
@@ -206,245 +206,244 @@ import { PerfilUsuarioComponent } from './componentes/administracion/usuarios/pe
 import { RecalFacturaComponent } from './componentes/facturas/recal-factura/recal-factura.component';
 import { AddConvenioComponent } from './componentes/convenios/add-convenio/add-convenio.component';
 import { GeneradorxmlComponent } from './componentes/facelectro/generadorxml/generadorxml.component';
-
+import { ImpLecturasComponent } from './componentes/lecturas/imp-lecturas/imp-lecturas.component';
 
 const routes: Routes = [
+  //Consumo de Agua
+  { path: 'clientes', component: ClientesComponent },
+  { path: 'add-cliente', component: AddClienteComponent },
+  { path: 'modificar-clientes', component: ModificarClientesComponent },
+  { path: 'detalles-cliente', component: DetallesClienteComponent },
+  { path: 'buscar-cliente', component: BuscarClienteComponent },
 
-   //Consumo de Agua
-   { path: 'clientes', component: ClientesComponent },
-   { path: 'add-cliente', component: AddClienteComponent },
-   { path: 'modificar-clientes', component: ModificarClientesComponent },
-   { path: 'detalles-cliente', component: DetallesClienteComponent },
-   { path: 'buscar-cliente', component: BuscarClienteComponent },
+  { path: 'abonados', component: ListarAbonadosComponent },
+  { path: 'add-abonado', component: AddAbonadosComponent },
+  { path: 'modificar-abonado', component: ModificarAbonadosComponent },
+  { path: 'detalles-abonado', component: DetallesAbonadoComponent },
 
-   { path: 'abonados', component: ListarAbonadosComponent },
-   { path: 'add-abonado', component: AddAbonadosComponent },
-   { path: 'modificar-abonado', component: ModificarAbonadosComponent },
-   { path: 'detalles-abonado', component: DetallesAbonadoComponent },
+  { path: 'lecturas', component: LecturasComponent },
+  { path: 'impor-lecturas', component: ImporLecturasComponent },
+  { path: 'imp-lecturas', component: ImpLecturasComponent },
+  { path: 'suspensiones', component: SuspensionesComponent },
+  { path: 'add-suspension', component: AddSuspensionesComponent },
+  { path: 'info-suspension', component: DetallesSuspensionesComponent },
+  { path: 'habilitaciones', component: HabilitacionesComponent },
 
-   { path: 'lecturas', component: LecturasComponent },
-   { path: 'impor-lecturas', component: ImporLecturasComponent },
-   { path: 'suspensiones', component: SuspensionesComponent },
-   { path: 'add-suspension', component: AddSuspensionesComponent },
-   { path: 'info-suspension', component: DetallesSuspensionesComponent },
-   { path: 'habilitaciones', component: HabilitacionesComponent },
+  { path: 'pliego', component: PreciosxcatComponent },
+  { path: 'modificar-preciosxcat', component: ModificarPreciosxcatComponent },
+  { path: 'add-preciosxcat', component: AddPreciosxcatComponent },
+  { path: 'info-preciosxcat', component: InfoPreciosxcatComponent },
+  { path: 'pliego24', component: Pliego24Component },
+  { path: 'simulacion', component: SimulacionComponent },
+  { path: 'proyeccion', component: ProyeccionComponent },
 
-   { path: 'pliego', component: PreciosxcatComponent },
-   { path: 'modificar-preciosxcat', component: ModificarPreciosxcatComponent },
-   { path: 'add-preciosxcat', component: AddPreciosxcatComponent },
-   { path: 'info-preciosxcat', component: InfoPreciosxcatComponent },
-   { path: 'pliego24', component: Pliego24Component },
-   { path: 'simulacion', component: SimulacionComponent },
-   { path: 'proyeccion', component: ProyeccionComponent },
+  //========== FACTURACIÓN ===================
+  { path: 'facelectro', component: FacelectroComponent },
+  { path: 'generadorxml', component: GeneradorxmlComponent },
+  //Facturacion
+  { path: 'facturacion', component: FacturacionComponent },
+  { path: 'info-facturacion', component: InfoFacturacionComponent },
+  { path: 'add-facturacion', component: AddFacturacionComponent },
+  { path: 'recal-factura', component: RecalFacturaComponent },
+  //Planillas (Tabla facturas)
+  { path: 'facturas', component: FacturasComponent },
+  { path: 'info-planilla', component: InfoFacturasComponent },
+  //Productos (Tabla catalogoitems)
+  { path: 'catalogoitems', component: CatalogoitemsComponent },
+  { path: 'info-catalogoitems', component: InfoCatalogoitemsComponent },
+  { path: 'add-catalogoitems', component: AddCatalogoitemsComponent },
+  { path: 'modi-catalogoitems', component: ModiCatalogoitemsComponent },
+  //Usos de de los Productos (Tabla usoitems)
+  { path: 'usoitems', component: UsoitemsComponent },
+  { path: 'info-usoitems', component: InfoUsoitemsComponent },
+  { path: 'add-usoitems', component: AddUsoitemsComponent },
+  { path: 'modi-usoitems', component: ModiUsoitemsComponent },
+  //Rubros de las Planillas
+  { path: 'rubros', component: RubrosComponent },
+  { path: 'info-rubro', component: InfoRubroComponent },
+  { path: 'add-rubro', component: AddRubroComponent },
+  { path: 'modi-rubro', component: ModiRubroComponent },
 
-   //========== FACTURACIÓN ===================
-   { path: 'facelectro', component: FacelectroComponent },
-   { path: 'generadorxml', component: GeneradorxmlComponent},
-   //Facturacion
-   { path: 'facturacion', component: FacturacionComponent },
-   { path: 'info-facturacion', component: InfoFacturacionComponent },
-   { path: 'add-facturacion', component: AddFacturacionComponent },
-   { path: 'recal-factura', component: RecalFacturaComponent },
-   //Planillas (Tabla facturas)
-   { path: 'facturas', component: FacturasComponent },
-   { path: 'info-planilla', component: InfoFacturasComponent },
-   //Productos (Tabla catalogoitems)
-   { path: 'catalogoitems', component: CatalogoitemsComponent },
-   { path: 'info-catalogoitems', component: InfoCatalogoitemsComponent },
-   { path: 'add-catalogoitems', component: AddCatalogoitemsComponent },
-   { path: 'modi-catalogoitems', component: ModiCatalogoitemsComponent },
-   //Usos de de los Productos (Tabla usoitems)
-   { path: 'usoitems', component: UsoitemsComponent },
-   { path: 'info-usoitems', component: InfoUsoitemsComponent },
-   { path: 'add-usoitems', component: AddUsoitemsComponent },
-   { path: 'modi-usoitems', component: ModiUsoitemsComponent },
-   //Rubros de las Planillas
-   { path: 'rubros', component: RubrosComponent },
-   { path: 'info-rubro', component: InfoRubroComponent },
-   { path: 'add-rubro', component: AddRubroComponent },
-   { path: 'modi-rubro', component: ModiRubroComponent },
+  //============ TRAMITES ======================
+  { path: 'aguatramite', component: AguatramiteComponent },
+  { path: 'info-aguatramite/:id', component: InfoAguatramiteComponent },
+  { path: 'forms-aguatramite/:id', component: AguatramComponent },
 
-   //============ TRAMITES ======================
-   { path: 'aguatramite', component: AguatramiteComponent },
-   { path: 'info-aguatramite/:id', component: InfoAguatramiteComponent },
-   { path: 'forms-aguatramite/:id', component: AguatramComponent },
+  // forms-aguatramite/1
 
-   // forms-aguatramite/1
+  { path: 'tramites', component: TramitesComponent },
+  { path: 'add-tramite', component: AddTramiteComponent },
+  { path: 'info-tramite', component: InfoTramiteComponent },
 
-   { path: 'tramites', component: TramitesComponent },
-   { path: 'add-tramite', component: AddTramiteComponent },
-   { path: 'info-tramite', component: InfoTramiteComponent },
+  { path: 'tramites1', component: Tramites1Component },
+  { path: 'add-tramites1', component: AddTramites1Component },
 
-   { path: 'tramites1', component: Tramites1Component },
-   { path: 'add-tramites1', component: AddTramites1Component },
+  //Certificaciones
+  { path: 'certificaciones', component: ListarCertificacionesComponent },
+  { path: 'modi-certificacion', component: ModificarCertificacionesComponent },
+  { path: 'add-certificacion', component: AddCertificacionesComponent },
+  {
+    path: 'gene-certificacion/:idcertificacion',
+    component: GeneCertificacionComponent,
+  },
+  { path: 'certitmp', component: CertitmpComponent },
 
-   //Certificaciones
-   { path: 'certificaciones', component: ListarCertificacionesComponent },
-   { path: 'modi-certificacion', component: ModificarCertificacionesComponent },
-   { path: 'add-certificacion', component: AddCertificacionesComponent },
-   { path: 'gene-certificacion/:idcertificacion', component: GeneCertificacionComponent },
-   { path: 'certitmp', component: CertitmpComponent },
+  //Recaudación
+  { path: 'recaudaciones', component: RecaudacionComponent },
+  { path: 'recaudacion', component: AddRecaudaComponent },
+  { path: 'convenios', component: ConveniosComponent },
+  { path: 'cajas', component: ListarCajaComponent },
+  { path: 'modicaja/:idcaja', component: ModificarCajaComponent },
+  { path: 'add-caja', component: AddCajaComponent },
+  { path: 'info-caja', component: InfoCajaComponent },
+  { path: 'transferencias', component: TransferenciasComponent },
 
-   //Recaudación
-   { path: 'recaudaciones', component: RecaudacionComponent },
-   { path: 'recaudacion', component: AddRecaudaComponent },
-   { path: 'convenios', component: ConveniosComponent },
-   { path: 'cajas', component: ListarCajaComponent },
-   { path: 'modicaja/:idcaja', component: ModificarCajaComponent },
-   { path: 'add-caja', component: AddCajaComponent },
-   { path: 'info-caja', component: InfoCajaComponent },
-   { path: 'transferencias', component: TransferenciasComponent },
-   
-   { path: 'add-convenio', component: AddConvenioComponent },
-   { path: 'modi-convenio', component: ModiConvenioComponent },
-   { path: 'info-convenio', component: InfoConvenioComponent },
-   //{ path: 'imp-convenios', component: ImpConveniosComponent },
-   // Intereses
-   { path: 'intereses', component: ListarInteresesComponent },
-   { path: 'modificar-intereses', component: ModificarInteresesComponent },
-   { path: 'add-intereses', component: AddInteresesComponent },
-   { path: 'impor-intereses', component: ImporInteresesComponent },
-   // Pto. Emisión
-   { path: 'ptoemision', component: ListarPtoemisionComponent },
-   { path: 'modificar-ptoemision', component: ModificarPtoemisionComponent },
-   { path: 'add-ptoemision', component: AddPtoemisionComponent },
-   { path: 'info-establecimiento', component: InfoEstablecimientoComponent },
-   //Categorías
-   { path: 'categorias', component: ListarCategoriaComponent },
-   // {path:'listar-categoria',component:ListarCategoriaComponent},
-   { path: 'modificar-categoria', component: ModificarCategoriaComponent },
-   { path: 'add-categoria', component: AddCategoriaComponent },
+  { path: 'add-convenio', component: AddConvenioComponent },
+  { path: 'modi-convenio', component: ModiConvenioComponent },
+  { path: 'info-convenio', component: InfoConvenioComponent },
+  //{ path: 'imp-convenios', component: ImpConveniosComponent },
+  // Intereses
+  { path: 'intereses', component: ListarInteresesComponent },
+  { path: 'modificar-intereses', component: ModificarInteresesComponent },
+  { path: 'add-intereses', component: AddInteresesComponent },
+  { path: 'impor-intereses', component: ImporInteresesComponent },
+  // Pto. Emisión
+  { path: 'ptoemision', component: ListarPtoemisionComponent },
+  { path: 'modificar-ptoemision', component: ModificarPtoemisionComponent },
+  { path: 'add-ptoemision', component: AddPtoemisionComponent },
+  { path: 'info-establecimiento', component: InfoEstablecimientoComponent },
+  //Categorías
+  { path: 'categorias', component: ListarCategoriaComponent },
+  // {path:'listar-categoria',component:ListarCategoriaComponent},
+  { path: 'modificar-categoria', component: ModificarCategoriaComponent },
+  { path: 'add-categoria', component: AddCategoriaComponent },
 
-   { path: 'inicio', component: ContentWrapperComponent },
+  { path: 'inicio', component: ContentWrapperComponent },
 
-   //Rutas
-   { path: 'rutas', component: RutasComponent },
-   { path: 'add-rutas', component: AddRutasComponent },
-   { path: 'info-ruta', component: InfoRutaComponent },
-   //Emisiones
-   { path: 'emisiones', component: EmisionesComponent },
-   { path: 'add-emision', component: AddEmisionComponent },
-   { path: 'modiemision/:idemision', component: ModiEmisionComponent },
-   { path: 'gene-emision', component: GeneEmisionComponent },
+  //Rutas
+  { path: 'rutas', component: RutasComponent },
+  { path: 'add-rutas', component: AddRutasComponent },
+  { path: 'info-ruta', component: InfoRutaComponent },
+  //Emisiones
+  { path: 'emisiones', component: EmisionesComponent },
+  { path: 'add-emision', component: AddEmisionComponent },
+  { path: 'modiemision/:idemision', component: ModiEmisionComponent },
+  { path: 'gene-emision', component: GeneEmisionComponent },
 
-   //{ path: 'emiactual/:idemision', component: EmiactualComponent },
-   { path: 'emiactual', component: EmiactualComponent },
-   //{ path: 'rutasxemision/:idemision/:emision', component: RutasxemisionComponent },
-   //{ path: 'rutasxemision/:idemision', component: RutasxemisionComponent },
-   { path: 'rutasxemision', component: RutasxemisionComponent },
+  //{ path: 'emiactual/:idemision', component: EmiactualComponent },
+  { path: 'emiactual', component: EmiactualComponent },
+  //{ path: 'rutasxemision/:idemision/:emision', component: RutasxemisionComponent },
+  //{ path: 'rutasxemision/:idemision', component: RutasxemisionComponent },
+  { path: 'rutasxemision', component: RutasxemisionComponent },
 
+  //Reclamos
+  { path: 'reclamos', component: ListarReclamosComponent },
+  { path: 'add-reclamo', component: AddReclamosComponent },
+  { path: 'modificar-reclamo', component: ModificarReclamosComponent },
+  // ================== CATALOGO =================
+  /*Estado de los medidores*/
+  { path: 'estadom', component: ListarEstadomComponent },
+  /* Nacionalidades */
+  { path: 'nacionalidades', component: ListarNacionalidadComponent },
+  { path: 'add-nacionalidad', component: AddNacionalidadComponent },
+  { path: 'modi-nacionalidad', component: ModificarNacionalidadComponent },
+  /* Novedades */
+  { path: 'novedades', component: ListarNovedadesComponent },
+  { path: 'add-novedad', component: AddNovedadComponent },
+  { path: 'novedades/:id', component: NovedadDetalleComponent },
 
-   //Reclamos
-   { path: 'reclamos', component: ListarReclamosComponent },
-   { path: 'add-reclamo', component: AddReclamosComponent },
-   { path: 'modificar-reclamo', component: ModificarReclamosComponent },
-   // ================== CATALOGO =================
-   /*Estado de los medidores*/
-   { path: 'estadom', component: ListarEstadomComponent },
-   /* Nacionalidades */
-   { path: 'nacionalidades', component: ListarNacionalidadComponent },
-   { path: 'add-nacionalidad', component: AddNacionalidadComponent },
-   { path: 'modi-nacionalidad', component: ModificarNacionalidadComponent },
-   /* Novedades */
-   { path: 'novedades', component: ListarNovedadesComponent },
-   { path: 'add-novedad', component: AddNovedadComponent },
-   { path: 'novedades/:id', component: NovedadDetalleComponent },
+  { path: 'tipopago', component: ListarTipopagoComponent },
 
-   { path: 'tipopago', component: ListarTipopagoComponent },
+  { path: 'tpidentificas', component: TpidentificasComponent },
 
-   { path: 'tpidentificas', component: TpidentificasComponent },
+  { path: 'tpreclamos', component: TpreclamosComponent },
 
-   { path: 'tpreclamos', component: TpreclamosComponent },
+  { path: 'ubicacionm', component: UbicacionmComponent },
+  { path: 'add-ubicacionm', component: AddUbicacionmComponent },
+  { path: 'modiubicacionm/:id', component: ModiUbicacionmComponent },
 
-   { path: 'ubicacionm', component: UbicacionmComponent },
-   { path: 'add-ubicacionm', component: AddUbicacionmComponent },
-   { path: 'modiubicacionm/:id', component: ModiUbicacionmComponent },
+  //================ CONTABILIDAD =============================
+  { path: 'cuentas', component: CuentasComponent },
+  { path: 'add-cuenta', component: AddCuentaComponent },
 
-   //================ CONTABILIDAD =============================
-   { path: 'cuentas', component: CuentasComponent },
-   { path: 'add-cuenta', component: AddCuentaComponent },
+  { path: 'asientos', component: AsientosComponent },
+  { path: 'add-asiento', component: AddAsientoComponent },
 
-   { path: 'asientos', component: AsientosComponent },
-   { path: 'add-asiento', component: AddAsientoComponent },
+  { path: 'transaci', component: TransaciComponent },
+  { path: 'add-transaci', component: AddTransaciComponent },
+  { path: 'add-benextran', component: AddBenextranComponent },
+  { path: 'add-liquiacfp', component: AddLiquiacfpComponent },
 
-   { path: 'transaci', component: TransaciComponent },
-   { path: 'add-transaci', component: AddTransaciComponent },
-   { path: 'add-benextran', component: AddBenextranComponent },
-   { path: 'add-liquiacfp', component: AddLiquiacfpComponent },
+  { path: 'sinafip', component: SinafipComponent },
 
-   { path: 'sinafip', component: SinafipComponent },
+  { path: 'niifcuentas', component: NiifcuentasComponent },
+  { path: 'add-homologa', component: AddHomologaComponent },
+  { path: 'add-niifcuenta', component: AddNiifcuentaComponent },
+  { path: 'modi-niifcuenta', component: ModiNiifcuentaComponent },
 
-   { path: 'niifcuentas', component: NiifcuentasComponent },
-   { path: 'add-homologa', component: AddHomologaComponent },
-   { path: 'add-niifcuenta', component: AddNiifcuentaComponent },
-   { path: 'modi-niifcuenta', component: ModiNiifcuentaComponent },
+  { path: 'preingresos', component: PreingresosComponent },
+  { path: 'info-preingreso', component: InfoPreingresoComponent },
+  { path: 'add-preingreso', component: AddPreingresoComponent },
+  { path: 'modi-preingreso', component: ModiPreingresoComponent },
+  { path: 'aux-ingreso', component: AuxIngresoComponent },
 
-   { path: 'preingresos', component: PreingresosComponent },
-   { path: 'info-preingreso', component: InfoPreingresoComponent },
-   { path: 'add-preingreso', component: AddPreingresoComponent },
-   { path: 'modi-preingreso', component: ModiPreingresoComponent },
-   { path: 'aux-ingreso', component: AuxIngresoComponent },
+  { path: 'pregastos', component: PregastosComponent },
+  { path: 'add-pregasto', component: AddPregastoComponent },
+  { path: 'modi-pregasto', component: ModiPregastoComponent },
+  { path: 'aux-gasto', component: AuxGastoComponent },
 
-   { path: 'pregastos', component: PregastosComponent },
-   { path: 'add-pregasto', component: AddPregastoComponent },
-   { path: 'modi-pregasto', component: ModiPregastoComponent },
-   { path: 'aux-gasto', component: AuxGastoComponent },
+  { path: 'certipresu', component: CertipresuComponent },
+  { path: 'modi-certipresu', component: ModiCertipresuComponent },
+  { path: 'add-certipresu', component: AddCertipresuComponent },
+  { path: 'partixcerti', component: PartixcertiComponent },
 
-   { path: 'certipresu', component: CertipresuComponent },
-   { path: 'modi-certipresu', component: ModiCertipresuComponent },
-   { path: 'add-certipresu', component: AddCertipresuComponent },
-   { path: 'partixcerti', component: PartixcertiComponent },
+  { path: 'tramipresu', component: TramipresuComponent },
+  { path: 'add-tramipresu', component: AddTramipresuComponent },
+  { path: 'modi-tramipresu/:idtrami', component: ModiTramipresuComponent },
 
-   { path: 'tramipresu', component: TramipresuComponent },
-   { path: 'add-tramipresu', component: AddTramipresuComponent },
-   { path: 'modi-tramipresu/:idtrami', component: ModiTramipresuComponent },
+  { path: 'reformas', component: ReformasComponent },
+  { path: 'add-reforma', component: AddReformaComponent },
+  { path: 'modi-reforma', component: ModiReformaComponent },
 
-   { path: 'reformas', component: ReformasComponent },
-   { path: 'add-reforma', component: AddReformaComponent },
-   { path: 'modi-reforma', component: ModiReformaComponent },
+  { path: 'clasificador', component: ClasificadorComponent },
+  { path: 'info-clasificador', component: InfoClasificadorComponent },
+  { path: 'modi-clasificador', component: ModiClasificadorComponent },
+  { path: 'add-clasificador', component: AddClasificadorComponent },
 
-   { path: 'clasificador', component: ClasificadorComponent },
-   { path: 'info-clasificador', component: InfoClasificadorComponent },
-   { path: 'modi-clasificador', component: ModiClasificadorComponent },
-   { path: 'add-clasificador', component: AddClasificadorComponent },
+  { path: 'ejecucion', component: EjecucionComponent },
+  { path: 'modi-ejecucion', component: ModiEjecucionComponent },
+  { path: 'add-ejecucion', component: AddEjecucionComponent },
 
-   { path: 'ejecucion', component: EjecucionComponent },
-   { path: 'modi-ejecucion', component: ModiEjecucionComponent },
-   { path: 'add-ejecucion', component: AddEjecucionComponent },
+  { path: 'bancos', component: BancosComponent },
+  { path: 'conciliaban', component: ConciliabanComponent },
 
-   { path: 'bancos', component: BancosComponent },
-   { path: 'conciliaban', component: ConciliabanComponent },
+  { path: 'estrfunc', component: EstrfuncComponent },
+  { path: 'info-estrfunc', component: InfoEstrfuncComponent },
 
-   { path: 'estrfunc', component: EstrfuncComponent },
-   { path: 'info-estrfunc', component: InfoEstrfuncComponent },
+  // ============== ADMINISTRACION CENTRAL ===================
+  { path: 'tabla4', component: Tabla4Component },
+  { path: 'add-tabla4', component: AddTabla4Component },
+  { path: 'info-tabla4', component: InfoTabla4Component },
+  { path: 'modi-tabla4', component: ModiTabla4Component },
 
-   // ============== ADMINISTRACION CENTRAL ===================
-   { path: 'tabla4', component: Tabla4Component },
-   { path: 'add-tabla4', component: AddTabla4Component },
-   { path: 'info-tabla4', component: InfoTabla4Component },
-   { path: 'modi-tabla4', component: ModiTabla4Component },
+  { path: 'documentos', component: DocumentosComponent },
+  { path: 'add-documento', component: AddDocumentoComponent },
+  { path: 'info-documento', component: InfoDocumentoComponent },
+  { path: 'modi-documento', component: ModiDocumentoComponent },
 
-   { path: 'documentos', component: DocumentosComponent },
-   { path: 'add-documento', component: AddDocumentoComponent },
-   { path: 'info-documento', component: InfoDocumentoComponent },
-   { path: 'modi-documento', component: ModiDocumentoComponent },
+  { path: 'usuarios', component: UsuariosComponent },
+  { path: 'modi-usuario', component: ModiUsuarioComponent },
 
-   { path: 'usuarios', component: UsuariosComponent },
-   { path: 'modi-usuario', component: ModiUsuarioComponent },
+  { path: 'colores', component: ColoresComponent },
+  { path: 'perfil-usuario', component: PerfilUsuarioComponent },
 
-   { path: 'colores', component: ColoresComponent },
-   { path: 'perfil-usuario', component: PerfilUsuarioComponent },
+  // { path: 'login', component: LoginComponent },
 
-   // { path: 'login', component: LoginComponent },
-
-   { path: '', redirectTo: 'inicio', pathMatch: 'full' }
-
+  { path: '', redirectTo: 'inicio', pathMatch: 'full' },
 ];
 
 @NgModule({
-   imports: [RouterModule.forRoot(routes)],
-   exports: [RouterModule]
-
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule],
 })
-
-export class AppRoutingModule { }
+export class AppRoutingModule {}

@@ -8,16 +8,20 @@ const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/lecturas`;
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-
 export class LecturasService {
+  constructor(private http: HttpClient) {}
 
-  constructor(private http: HttpClient) { }
+  //Lectura por Planilla
+  getOnefactura(idfactura: number) {
+    return this.http.get<Lecturas[]>(`${baseUrl}/onePlanilla/${idfactura}`);
+  }
 
-  
   getLecturas(idrutaxemision: Number) {
-    return this.http.get<Lecturas>(`${baseUrl}?idrutaxemision=${idrutaxemision}`);
+    return this.http.get<Lecturas>(
+      `${baseUrl}?idrutaxemision=${idrutaxemision}`
+    );
   }
 
   getLecturasxIdabonado(idabonado: number) {
@@ -41,7 +45,7 @@ export class LecturasService {
   }
 
   getByIdlectura(idlectura: number) {
-    return this.http.get<Lecturas>(baseUrl + "/" + idlectura);
+    return this.http.get<Lecturas>(baseUrl + '/' + idlectura);
   }
 
   //Lectura por Planilla
@@ -49,24 +53,36 @@ export class LecturasService {
     return this.http.get<Lecturas[]>(`${baseUrl}/planilla/${idfactura}`);
   }
 
+  //Ultima lectura de un Abonado async
+  async getUltimaLecturaAsync(idabonado: number): Promise<number> {
+    const observable = this.http.get<number>(
+      `${baseUrl}/ultimalectura?idabonado=${idabonado}`
+    );
+    return await firstValueFrom(observable);
+  }
+
+  //Save
   saveLectura(lectura: Lecturas): Observable<Object> {
     return this.http.post(baseUrl, lectura);
   }
 
-  //Actualiza una lectura
-  updateLectura(idlectura: number, lectura: Lecturas): Observable<Object> {
-    return this.http.put(baseUrl + "/" + idlectura, lectura);
-  }
-
-  //Actualiza una lectura async
-  async updateLecturaAsync(idlectura: number, lectura: Lecturas): Promise<Object> {
-    const observable = this.http.put(baseUrl + "/" + idlectura, lectura);
+  //Save async
+  async saveLecturaAsync(lectura: Lecturas): Promise<any> {
+    const observable = this.http.post(baseUrl, lectura);
     return await firstValueFrom(observable);
   }
 
-    //Lectura por Planilla
-    getOnefactura(idfactura: number) {
-      return this.http.get<Lecturas[]>(`${baseUrl}/onePlanilla/${idfactura}`);
-    }
+  //Actualiza una lectura
+  updateLectura(idlectura: number, lectura: Lecturas): Observable<Object> {
+    return this.http.put(baseUrl + '/' + idlectura, lectura);
+  }
 
+  //Actualiza una lectura async
+  async updateLecturaAsync(
+    idlectura: number,
+    lectura: Lecturas
+  ): Promise<Object> {
+    const observable = this.http.put(baseUrl + '/' + idlectura, lectura);
+    return await firstValueFrom(observable);
+  }
 }

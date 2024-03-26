@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { Abonados } from '../modelos/abonados';
 import { environment } from 'src/environments/environment';
 
@@ -11,8 +11,24 @@ const baseUrl = `${apiUrl}/abonados`;
   providedIn: 'root',
 })
 export class AbonadosService {
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
+  async getById_v2(idabonado: number) {
+    return this.http.get<Abonados>(`${baseUrl}/${idabonado}`);
+  }
+
+  /*   saveSerxAbo(idabonado: number, idservicio: number): Observable<Object> {
+      return this.http.put(`${baseUrl}/${idabonado}/s/${idservicio}`, null);
+   } */
+  //Abonados de un Cliente (Cuentas por Cliente)
+
+  //Abonados por Ruta
+
+  getOneAbonado(idabonado: number) {
+    return this.http.get<Abonados>(
+      `${baseUrl}/oneabonado?idabonado=${idabonado}`
+    );
+  }
   tmpTodos(): Observable<Abonados[]> {
     return this.http.get<Abonados[]>(`${baseUrl}/tmp`);
   }
@@ -38,9 +54,6 @@ export class AbonadosService {
   getById(idabonado: number): Observable<Abonados> {
     return this.http.get<Abonados>(`${baseUrl}/${idabonado}`);
   }
-  async getById_v2(idabonado: number) {
-    return this.http.get<Abonados>(`${baseUrl}/${idabonado}`);
-  }
 
   getListaByNombreCliente(nombre: string) {
     return this.http.get<Abonados>(`${baseUrl}/ncliente/${nombre}`);
@@ -54,6 +67,13 @@ export class AbonadosService {
     return this.http.get<Abonados>(`${baseUrl}/cuenta/${idabonado}`);
   }
 
+  //Un Abonado
+  unAbonado(idabonado: number): Observable<Abonados> {
+    return this.http.get<Abonados>(
+      `${baseUrl}/unabonado?idabonado=${idabonado}`
+    );
+  }
+
   updateAbonado(abonado: Abonados): Observable<Object> {
     return this.http.put(`${baseUrl}/${abonado.idabonado}`, abonado);
   }
@@ -62,9 +82,9 @@ export class AbonadosService {
     return this.http.get<Abonados>(`${baseUrl}?consulta=${dato}`);
   }
 
-  /*   saveSerxAbo(idabonado: number, idservicio: number): Observable<Object> {
-      return this.http.put(`${baseUrl}/${idabonado}/s/${idservicio}`, null);
-   } */
+  saveSerxAbo(idabonado: number, idservicio: number): Observable<Object> {
+    return this.http.put(`${baseUrl}/${idabonado}/s/${idservicio}`, null);
+  }
   //Abonados de un Cliente (Cuentas por Cliente)
   getByIdcliente(idcliente: number) {
     return this.http.get<Abonados>(`${baseUrl}?idcliente=${idcliente}`);
@@ -73,6 +93,12 @@ export class AbonadosService {
   //Abonados por Ruta
   getByIdruta(idruta: number) {
     return this.http.get<Abonados[]>(`${baseUrl}?idruta=${idruta}`);
+  }
+
+  //Abonados por Ruta Async
+  async getByIdrutaAsync(idruta: number): Promise<Abonados[]> {
+    const observable = this.http.get<Abonados[]>(`${baseUrl}?idruta=${idruta}`);
+    return await firstValueFrom(observable);
   }
 
   //Verifica si un Cliente tiene Abonados (Cuentas)
@@ -103,14 +129,5 @@ export class AbonadosService {
   //Para reporte de campos especificos
   getCampos(): Observable<Abonados[]> {
     return this.http.get<Abonados[]>(`${baseUrl}/campos`);
-  }
-  getOneAbonado(idabonado: number) {
-    return this.http.get<Abonados>(
-      `${baseUrl}/oneabonado?idabonado=${idabonado}`
-    );
-  }
-  //Un Abonado
-  unAbonado(idabonado: number): Observable<Abonados> {
-    return this.http.get<Abonados>(`${baseUrl}/unabonado?idabonado=${idabonado}`);
   }
 }

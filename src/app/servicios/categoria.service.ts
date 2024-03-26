@@ -8,44 +8,41 @@ const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/categorias`;
 
 @Injectable({
-   providedIn: 'root'
+  providedIn: 'root',
 })
-
 export class CategoriaService {
+  constructor(private http: HttpClient) {}
 
-constructor(private http: HttpClient) { }
+  getListCategoria(): Observable<Categoria[]> {
+    return this.http.get<Categoria[]>(`${baseUrl}`);
+  }
 
-getListCategoria(): Observable<Categoria[]> {
-   return this.http.get<Categoria[]>(`${baseUrl}`);
-}
+  //Categorias habilitadas ordenadas por código
+  listaCategorias(): Observable<String[]> {
+    return this.http.get<String[]>(`${baseUrl}/categorias`);
+  }
 
-//Categorias habilitadas ordenadas por código
-listaCategorias(): Observable<String[]> {
-   return this.http.get<String[]>(`${baseUrl}/categorias`);
-}
+  valNombre(descripcion: String): Observable<Categoria[]> {
+    return this.http.get<Categoria[]>(`${baseUrl}?descripcion=${descripcion}`);
+  }
 
-valNombre(descripcion: String): Observable<Categoria[]> {
-   return this.http.get<Categoria[]>(`${baseUrl}?descripcion=${descripcion}`);
-}
+  getUsedCategoria(idcategoria: number) {
+    return this.http.get<Categoria[]>(`${baseUrl}?idused=${idcategoria}`);
+  }
 
-getUsedCategoria(idcategoria: number) {
-   return this.http.get<Categoria[]>(`${baseUrl}?idused=${idcategoria}`);
-}
+  saveCategoria(categoria: Categoria): Observable<Object> {
+    return this.http.post(`${baseUrl}`, categoria);
+  }
 
-saveCategoria(categoria: Categoria): Observable<Object> {
-   return this.http.post(`${baseUrl}`, categoria);
-}
+  deleteCategoria(idcategoria: number): Observable<Object> {
+    return this.http.delete(`${baseUrl}/${idcategoria}`);
+  }
 
-deleteCategoria(idcategoria: number): Observable<Object> {
-   return this.http.delete(`${baseUrl}/${idcategoria}`);
-}
+  getById(idcategoria: number) {
+    return this.http.get<Categoria>(`${baseUrl}/${idcategoria}`);
+  }
 
-getById(idcategoria: number) {
-   return this.http.get<Categoria>(`${baseUrl}/${idcategoria}`);
-}
-
-updateCategoria(categoria: Categoria): Observable<Object> {
-   return this.http.put(`${baseUrl}/${categoria.idcategoria}`, categoria);
-}
-
+  updateCategoria(categoria: Categoria): Observable<Object> {
+    return this.http.put(`${baseUrl}/${categoria.idcategoria}`, categoria);
+  }
 }
