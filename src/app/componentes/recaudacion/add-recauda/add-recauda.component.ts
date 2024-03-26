@@ -111,7 +111,7 @@ export class AddRecaudaComponent implements OnInit {
     private recaService: RecaudacionService,
     private facxrService: FacxrecaudaService,
     private s_recaudaxcaja: RecaudaxcajaService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.formBuscar = this.fb.group({
@@ -400,7 +400,7 @@ export class AddRecaudaComponent implements OnInit {
       error: (err) => console.error(err.error),
     });
   }
-  disabled(e: any) {}
+  disabled(e: any) { }
 
   //Total de las planillas sin cobrar
   // total() {
@@ -540,12 +540,15 @@ export class AddRecaudaComponent implements OnInit {
       }
       i++;
     });
-    this.acobrar = suma;
+    console.log(suma.toFixed(2))
+    this.acobrar = +suma.toFixed(2)!;
   }
 
   valorAcobrar(acobrar: number) {
     this.disabledcobro = true;
+    console.log(acobrar)
     let entero = Math.trunc(acobrar);
+    console.log(entero)
     let decimal = (acobrar - entero).toFixed(2);
     this.acobrardec = decimal.toString().slice(1);
     const primerPagado = this._sincobro.find(
@@ -591,11 +594,12 @@ export class AddRecaudaComponent implements OnInit {
       });
     } else {
       this.rubxfacService.getByIdfactura(idfactura).subscribe({
-        next: (detalle) => {
+        next: (detalle: any) => {
           this._rubrosxfac = detalle;
-          if (idmodulo == 3 || idmodulo == 4) {
+          if ((idmodulo == 3 || idmodulo == 4) && detalle.abonado > 0) {
             this.lecService.getByIdfactura(idfactura).subscribe({
               next: (resp) => {
+                console.log(resp)
                 _lecturas = resp;
                 this.consumo =
                   _lecturas[0].lecturaactual - _lecturas[0].lecturaanterior;
@@ -707,52 +711,52 @@ export class AddRecaudaComponent implements OnInit {
     this.totfac = suma12 + suma0 + this.valoriva + this.totInteres;
   }
 
-/*   cobrar() {
-    let fechacobro: Date = new Date();
-    this._sincobro.forEach((item: any, index: number) => {
-      if (item.pagado && item.estado === 3 && item.formapago === 4) {
-        console.log('TRANSFERENCIA');
-        this.facxrService.getByIdFactura(item.idfactura).subscribe({
-          next: (datos: any) => {
-            if (datos != null) {
-              console.log('FACXRECAUDA', datos);
-              /* Actualizar recaudacion  */
-   /*            let recauda: any = datos.idrecaudacion;
-              recauda.recaudador = this.authService.idusuario;
-              recauda.usucrea = this.authService;
-              recauda.fechacobro = fechacobro;
-              //recauda.fechacobro = 
-              this.recaService.updateRecaudacion(recauda).subscribe({
-                next: (uRecau) => {
-                  console.log('recaudacion acutalizado', uRecau);
-                },
-              });
+  /*   cobrar() {
+      let fechacobro: Date = new Date();
+      this._sincobro.forEach((item: any, index: number) => {
+        if (item.pagado && item.estado === 3 && item.formapago === 4) {
+          console.log('TRANSFERENCIA');
+          this.facxrService.getByIdFactura(item.idfactura).subscribe({
+            next: (datos: any) => {
+              if (datos != null) {
+                console.log('FACXRECAUDA', datos);
+                /* Actualizar recaudacion  */
+  /*            let recauda: any = datos.idrecaudacion;
+             recauda.recaudador = this.authService.idusuario;
+             recauda.usucrea = this.authService;
+             recauda.fechacobro = fechacobro;
+             //recauda.fechacobro = 
+             this.recaService.updateRecaudacion(recauda).subscribe({
+               next: (uRecau) => {
+                 console.log('recaudacion acutalizado', uRecau);
+               },
+             });
 
-              /* Actualizar factura  
-              let fac: any = datos.idfactura;
-              fac.estado = 1;
-              fac.fechacobro = fechacobro;
-              fac.usuariocobro = this.authService.idusuario;
-              this.facService.updateFacturas(fac).subscribe({
-                next: (nex: any) => {
-                  this.swcobrado = true;
-                  console.log('FACTURA ACTUALIZADA', nex);
-                },
-                error: (err) =>
-                  console.error('Al actualizar la Factura: ', err.error),
-              });
-            } else {
-              this.f_cobro();
-            }
-          },
-        });
-        //console.log(item);
-        //console.log('estado: ', item.estado, 'formapago: ', item.formapago);
-      } else if (item.pagado) {
-        this.f_cobro();
-      }
-    });
-  } */
+             /* Actualizar factura  
+             let fac: any = datos.idfactura;
+             fac.estado = 1;
+             fac.fechacobro = fechacobro;
+             fac.usuariocobro = this.authService.idusuario;
+             this.facService.updateFacturas(fac).subscribe({
+               next: (nex: any) => {
+                 this.swcobrado = true;
+                 console.log('FACTURA ACTUALIZADA', nex);
+               },
+               error: (err) =>
+                 console.error('Al actualizar la Factura: ', err.error),
+             });
+           } else {
+             this.f_cobro();
+           }
+         },
+       });
+       //console.log(item);
+       //console.log('estado: ', item.estado, 'formapago: ', item.formapago);
+     } else if (item.pagado) {
+       this.f_cobro();
+     }
+   });
+ } */
   cobrar() {
     console.log('EFECTIVO');
     //Crea el registro en Recaudación
@@ -787,7 +791,7 @@ export class AddRecaudaComponent implements OnInit {
     rubrosxfac.cantidad = 1;
     rubrosxfac.estado = 1;
     this.rubxfacService.saveRubroxFac(rubrosxfac).subscribe({
-      next: (datos) => {},
+      next: (datos) => { },
       error: (e) => console.error(e),
     });
   }
@@ -1124,7 +1128,7 @@ export class AddRecaudaComponent implements OnInit {
       return of({ invalido: true });
     else return of(null);
   }
-  pdf() {}
+  pdf() { }
   //Al digitar el dinero
   changeDinero() {
     let ncvalor: number;

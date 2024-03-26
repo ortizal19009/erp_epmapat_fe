@@ -175,7 +175,7 @@ export class InfoCajaComponent implements OnInit {
                   let suma: number = 0;
                   /*      console.log(item.idfactura.idmodulo.idmodulo);
                   console.log(totTarifa); */
-                  if (+item.idfactura.idmodulo.idmodulo! == 3) {
+                  if (+item.idfactura.idmodulo.idmodulo! == 3 && item.idfactura.idabonado > 0) {
                     com = 1;
                   }
                   /*     console.log(item.idfactura.interescobrado);

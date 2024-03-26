@@ -12,7 +12,7 @@ const baseUrl = `${apiUrl}/rubroxfac`;
   providedIn: 'root',
 })
 export class RubroxfacService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   async getSumaValoresUnitarios(idfactura: number) {
     return this.http.get(`${baseUrl}/sumavalores?idfactura=${idfactura}`);
@@ -47,14 +47,25 @@ export class RubroxfacService {
 
   //Rubros por Factura sin el registro mal incluido de IVA ('esiva')
   getByIdfactura1(idfactura: number) {
-    return this.http.get<Rubroxfac[]>(
-      `${baseUrl}/esiva?idfactura=${idfactura}`
-    );
+    return this.http.get<Rubroxfac[]>(`${baseUrl}/esiva?idfactura=${idfactura}`);
   }
 
   getMulta(idfactura: number): Observable<boolean> {
-    // console.log(`${baseUrl}/multa?idfactura=${idfactura}`)
     return this.http.get<boolean>(`${baseUrl}/multa?idfactura=${idfactura}`);
+  }
+
+  //Recaudación diaria - Actual
+  async getTotalRubrosActualAsync(fecha: Date, hasta: string): Promise<any[]> {
+    // console.log(`${baseUrl}/totalrubrosactual?fecha=${fecha}&hasta=${hasta}`)
+    const response = await firstValueFrom(this.http.get<any[]>(`${baseUrl}/totalrubrosactual?fecha=${fecha}&hasta=${hasta}`));
+    return response;
+  }
+
+  //Recaudación diaria - Actual
+  async getTotalRubrosAnteriorAsync(fecha: Date, hasta: string): Promise<any[]> {
+    console.log(`${baseUrl}/totalrubrosanterior?fecha=${fecha}&hasta=${hasta}`)
+    const response = await firstValueFrom(this.http.get<any[]>(`${baseUrl}/totalrubrosanterior?fecha=${fecha}&hasta=${hasta}`));
+    return response;
   }
 
   getByIdrubro(idrubro: number) {
@@ -62,7 +73,7 @@ export class RubroxfacService {
   }
 
   getById(idrubroxfac: number) {
-    return this.http.get<Rubroxfac>(baseUrl + '/' + idrubroxfac);
+    return this.http.get<Rubroxfac>(baseUrl + "/" + idrubroxfac);
   }
 
   saveRubroxfac(rubroxFac: Rubroxfac): Observable<Object> {
@@ -74,17 +85,15 @@ export class RubroxfacService {
     return this.http.post(`${baseUrl}`, rubroxFac);
   }
 
-  //Grabacion async
+  //Grabacion async 
   async saveRubroxfacAsync(x: Rubroxfac): Promise<Object> {
     const observable = this.http.post(baseUrl, x);
     return await firstValueFrom(observable);
   }
 
-  updateRubroxfac(
-    idrubroxfac: number,
-    rubroxfac: Rubroxfac
-  ): Observable<Object> {
-    return this.http.put(baseUrl + '/' + idrubroxfac, rubroxfac);
+  updateRubroxfac(idrubroxfac: number, rubroxfac: Rubroxfac): Observable<Object> {
+    return this.http.put(baseUrl + "/" + idrubroxfac, rubroxfac);
   }
+
 
 }

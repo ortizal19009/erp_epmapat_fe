@@ -207,6 +207,7 @@ import { RecalFacturaComponent } from './componentes/facturas/recal-factura/reca
 import { AddConvenioComponent } from './componentes/convenios/add-convenio/add-convenio.component';
 import { GeneradorxmlComponent } from './componentes/facelectro/generadorxml/generadorxml.component';
 import { ImpLecturasComponent } from './componentes/lecturas/imp-lecturas/imp-lecturas.component';
+import { ImpCajasComponent } from './componentes/caja/imp-cajas/imp-cajas.component';
 
 const routes: Routes = [
   //Consumo de Agua
@@ -296,6 +297,7 @@ const routes: Routes = [
   { path: 'modicaja/:idcaja', component: ModificarCajaComponent },
   { path: 'add-caja', component: AddCajaComponent },
   { path: 'info-caja', component: InfoCajaComponent },
+  { path: 'imp-caja', component: ImpCajasComponent },
   { path: 'transferencias', component: TransferenciasComponent },
 
   { path: 'add-convenio', component: AddConvenioComponent },
@@ -446,4 +448,4 @@ const routes: Routes = [
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],
 })
-export class AppRoutingModule {}
+export class AppRoutingModule { }

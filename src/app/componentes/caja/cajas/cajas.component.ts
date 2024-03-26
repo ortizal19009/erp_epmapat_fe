@@ -38,8 +38,8 @@ export class ListarCajaComponent implements OnInit {
     private s_facturas: FacturaService,
     private s_rubroxfac: RubroxfacService,
     private s_recaudacion: RecaudacionService,
-    private s_rubro: RubrosService
-  ) {}
+    private s_rubro: RubrosService,
+    private s_pdf: PdfService  ) { }
 
   ngOnInit(): void {
     let fechaActual: Date = new Date();
@@ -126,7 +126,6 @@ export class ListarCajaComponent implements OnInit {
       case '1':
         this.s_rubroxfac.getByFechacobro(this.desde, this.hasta).subscribe({
           next: (datos: any) => {
-            console.log(datos);
             let n_fxr: any[] = [];
             datos.forEach((item: any) => {
               let f_query = n_fxr.find(
@@ -145,7 +144,6 @@ export class ListarCajaComponent implements OnInit {
                 r_query.rubros.push(item.idrubro_rubros);
               }
             });
-            console.log(n_fxr);
             this.allFacturas(n_fxr);
           },
           error: (e) => console.error(e),
@@ -165,7 +163,6 @@ export class ListarCajaComponent implements OnInit {
   }
 
   allFacturas(_datosBody: any) {
-    console.log(_datosBody);
     let suma = 0;
     let numFacturas = 0;
     let datosBody: any = [];
@@ -186,7 +183,9 @@ export class ListarCajaComponent implements OnInit {
     let doc = new jsPDF('p', 'pt', 'a4');
     this._pdf.header('REPORTE GENERAL DE CAJAS', doc);
     let m_izquierda = 10;
-
+    console.log(_datosBody);
+    console.log(_datosBody);
+  
     const addPageNumbers = function () {
       const pageCount = doc.internal.pages.length;
       for (let i = 1; i <= pageCount - 1; i++) {
@@ -346,6 +345,9 @@ export class ListarCajaComponent implements OnInit {
       container = document.getElementById('pdf');
       container.appendChild(embed);
     }
+  }
+  imprimir() {
+    this.router.navigate(['/imp-caja'])
   }
 }
 interface Caja {

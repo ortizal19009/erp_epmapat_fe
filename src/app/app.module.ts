@@ -216,6 +216,7 @@ import { DefinirComponent } from './componentes/administracion/definir/definir.c
 import { GeneradorxmlComponent } from './componentes/facelectro/generadorxml/generadorxml.component';
 import { ImpLecturasComponent } from './componentes/lecturas/imp-lecturas/imp-lecturas.component';
 import { LecturasComponent } from './componentes/lecturas/lecturas.component';
+import { ImpCajasComponent } from './componentes/caja/imp-cajas/imp-cajas.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
@@ -262,7 +263,7 @@ import { LecturasComponent } from './componentes/lecturas/lecturas.component';
       AddTramites1Component, ItemxfactComponent,
       AguatramiteComponent, InfoAguatramiteComponent,
       FacturasComponent, InfoFacturasComponent, RubroxfacComponent,
-      FacelectroComponent, DetFacelectroComponent, InfoConvenioComponent,
+      FacelectroComponent, DetFacelectroComponent, InfoConvenioComponent,ImpCajasComponent,
       InfoCajaComponent, TramitesComponent, AddTramiteComponent, InfoTramiteComponent,
       InfoPreciosxcatComponent, RecaudacionComponent, AddRecaudaComponent,
       UsoitemsComponent, InfoUsoitemsComponent,
