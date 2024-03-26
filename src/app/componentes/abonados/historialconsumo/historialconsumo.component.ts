@@ -72,7 +72,6 @@ export class HistorialconsumoComponent implements OnInit {
     }
     this.promedio.forEach((prom: any) => {
     this.sobre = this.promedio.length
-      console.log(prom)
       consumo = prom.lecturaactual - prom.lecturaanterior
       this.suma += consumo;
       this.totprom = this.suma / this.sobre;

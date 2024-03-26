@@ -65,7 +65,8 @@
             </thead>
             <tbody class="detalle">
                <tr *ngFor="let lectura of _lecturas | filter: filtro; let i=index" class="fila">
-                  <td class="small text-center font-weight-bold">{{i+1}}</td>
+                  <td class="small text-center font-weight-bold" ><i class="bi-bookmark-check-fill check"
+                     *ngIf="i == antIndice"></i>{{i+1}}</td>
                   <td class="text-center">{{ lectura.idabonado_abonados.idabonado }}</td>
                   <td>{{ lectura.idabonado_abonados.idcliente_clientes.nombre }}</td>
                   <td>{{ lectura.idabonado_abonados.idcategoria_categorias.descripcion }}</td>
@@ -91,8 +92,11 @@
                               (click)="valor(lectura.idlectura, i)" [disabled]="this.rutaxemision.estado == 1 ">
                               <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
                            <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalArecaudar"
-                              (click)="arecaudar(lectura)">
+                              (click)="arecaudar(lectura, i)">
                               <i class="bi-calculator"></i>&nbsp; Valor a recaudar</button>
+                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalHistorial"
+                              (click)="setIdabonado(lectura, i)">
+                              <i class="bi bi-file-minus"></i>&nbsp; Historial consumo</button>
                         </div>
                      </div>
                   </td>
@@ -106,7 +110,8 @@
                </td>
                <td *ngIf="!swfiltro" class="font-weight-bold text-right">{{ totales[2] | number: '1.2-2'}}
                </td>
-               <td></td><td></td>
+               <td></td>
+               <td></td>
             </tfoot>
 
          </table>
@@ -203,7 +208,7 @@
             <div class='modal-body'>
                <div class="modal-body col-md-12 ">
                   <form [formGroup]="formValor">
-                     <div class="col-md-8 ml-5">
+                     <div class="col-md-12 ml-3">
                         <div class="input-group input-group-sm mb-3">
                            <div class="input-group-prepend"> <span class="input-group-text">Anterior</span> </div>
                            <input type="text" class="form-control text-right" formControlName="lecturaanterior"
@@ -215,12 +220,20 @@
                            </div>
                            <input type="number" class="form-control text-center" formControlName="lecturaactual">
                         </div>
-                        <div class="input-group input-group-sm mb-0">
+                        <div class="input-group input-group-sm mb-3">
                            <div class="input-group-prepend"> <span class="input-group-text">Consumo</span></div>
                            <input type="text" class="form-control text-right" formControlName="consumo" readonly>
                         </div>
+                        <div class="input-group input-group-sm mb-0">
+                           <div class="input-group-prepend"> <span class="input-group-text">Novedades</span></div>
+                           <select type="text" class="form-control text-right" formControlName="idnovedad_novedades" [compareWith]="compararNovedades">
+                              <option [ngValue]=novedad *ngFor="let novedad of novedades">{{novedad.descripcion}}
+                              </option>
+                           </select>
+                        </div>
                      </div>
                   </form>
+                  <!-- <app-historialconsumo [abonado]=idabonado></app-historialconsumo> -->
                </div>
             </div>
             <div class='modal-footer justify-content-center'>
@@ -228,6 +241,28 @@
                   <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
                <button type='button' class='btn btn-sm btn-outline-success' data-dismiss='modal'>
                   <i class="bi bi-x-circle"></i> Cancelar</button>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- HISTORIAL DE CONSUMO -->
+   <div class="modal fade" id="modalHistorial" tabindex="-1" aria-labelledby="modalHistorialLabel"
+      data-backdrop="static" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+         <div class="modal-content">
+            <div class='modal-header py-2 justify-content-center titEmisiones'>
+               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Cuenta {{idabonado}}</h5>
+            </div>
+            <div class='modal-body'>
+               <div class="modal-body col-md-12 ">
+                  <app-historialconsumo *ngIf="s_historial" [abonado]=idabonado></app-historialconsumo>
+               </div>
+            </div>
+            <div class='modal-footer justify-content-center'>
+               <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal'
+                  (click)="resetHistorial()">
+                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
             </div>
          </div>
       </div>
