@@ -31,7 +31,7 @@ export class RecaudacionReportsService {
   constructor(
     private rubxfacService: RubroxfacService,
     private s_usuarios: UsuarioService
-  ) { }
+  ) {}
   cabeceraConsumoAgua(datos: any, doc: jsPDF, usuario: any, factura: any) {
     //doc.setFontSize(7);
     let tableWidth = 200;
@@ -119,8 +119,11 @@ export class RecaudacionReportsService {
     });
   }
   comprobantePago(l_datos: any, factura: any) {
-    console.log(l_datos)
-    console.log(factura)
+    console.log(l_datos);
+    console.log(factura);
+    if (factura.interescobrado === null) {
+      factura.interescobrado = 0;
+    }
     let doc = new jsPDF('p', 'pt', 'a4');
     let usuario: any;
     let idfactura: any;
@@ -148,12 +151,12 @@ export class RecaudacionReportsService {
     });
     this.rubxfacService.getByIdfactura(idfactura).subscribe({
       next: (_rubrosxfac: any) => {
-        console.log(_rubrosxfac)
+        console.log(_rubrosxfac);
         let rubros: any = [];
         _rubrosxfac.forEach((item: any) => {
           if (item.idrubro_rubros.swiva === true) {
-            console.log(item.valorunitario * 0.12)
-            this.iva += item.valorunitario * 0.12
+            console.log(item.valorunitario * 0.12);
+            this.iva += item.valorunitario * 0.12;
           }
           if (
             item.idrubro_rubros.idrubro != 5 &&

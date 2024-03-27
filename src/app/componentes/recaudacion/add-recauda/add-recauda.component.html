@@ -69,10 +69,6 @@
                   <!-- [disabled]="swbusca != 0"> -->
                   <i class="bi-printer"></i>&nbsp; Imprimir
                </button>
-               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#reImprimirCom">
-                  <!-- [disabled]="swbusca != 0"> -->
-                  <i class="bi-printer"></i>&nbsp; Reimprimir
-               </button>
             </div>
             <div class="btn-group mx-1" *ngIf="swbusca != 0">
                <button class="bg-transparent border-0" type="button" (click)="reiniciar()">
@@ -505,48 +501,6 @@
          </div>
       </div>
    </div>
-   <!-- MODAL Reimprimir comprobante -->
-   <div class="modal fade" id="reImprimirCom" tabindex="-1" aria-labelledby="reImprimirComLabel" data-backdrop="static"
-      aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-lg">
-         <div class="modal-content recaudadetalle">
-            <div class="modal-header py-2 justify-content-center recaudacabecera">
-               <h5 class="modal-title font-weight-bold fantacyblack" id="ModalLabel">
-                  Reimprimir comprobante pago
-               </h5>
-            </div>
-            <div class="modal-body">
-               <div class="container">
-                  <div class="row">
-                     <div class="input-group col-sm-12">
-                        <div class="input-group-append">
-                           <button class="btn btn-sm btn-primary" data-dismiss="modal">
-                              <i class="fa fa-plus-square" aria-hidden="true"></i></button>
-                        </div>
-                        <input type="text" placeholder="Nombre, identificación ó cuenta "
-                           class="form-control form-control-sm" [(ngModel)]=datoBusqueda autofocus />
-                        <div class="input-group-append">
-                           <button class="btn btn-sm btn-primary">
-                              <!-- <button class="btn btn-sm btn-primary"(click)="impComprobante({idfactura:2485485})"> -->
-                              <i class="fa fa-search" aria-hidden="true"></i> Buscar</button>
-                        </div>
-                     </div>
-                  </div>
-               </div>
-            </div>
-            <div class="row justify-content-center mt-1 mb-3">
-               <button type="button" class="btn btn-success btn-sm mx-1" data-dismiss="modal"
-                  (click)="impComprobante({idfactura:datoBusqueda})">
-                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar
-               </button>
-               <button type="button" class="btn btn-sm btn-outline-success mx-1" data-dismiss="modal">
-                  <i class="bi bi-x-circle"></i> Cancelar
-               </button>
-            </div>
-         </div>
-      </div>
-   </div>
-
    <!-- Modal Colores -->
    <div class="modal fade" id="modalColores" tabindex="-1" aria-labelledby="modalColoresLabel" data-backdrop="static"
       aria-hidden="true">
@@ -658,10 +612,9 @@
                   <option selected>Reimprimir planilla</option>
                </select>
             </div>
-
             <div class="input-group input-group-sm mb-2">
                <div class="input-group-prepend">
-                  <small class="input-group-text">Cuenta</small>
+                  <small class="input-group-text">N° planilla</small>
                   <div class="input-group-text">
                      <input type="text" class="form-control form-control-sm" [(ngModel)]="cuenta" />
                   </div>
@@ -675,7 +628,7 @@
                   </div>
                </div>
             </div> -->
-            <div class="input-group input-group-sm mb-0">
+            <div class="input-group input-group-sm mb-0" [hidden]=" true">
                <div class="input-group-prepend">
                   <small class="input-group-text">Abrir en otra página</small>
                   <div class="input-group-text">
@@ -685,8 +638,9 @@
             </div>
 
             <div class="row justify-content-center mt-3">
-               <button type="button" class="btn btn-success btn-sm mx-1" data-dismiss="modal" (click)="pdf()"
-                  [attr.data-target]="otraPagina ? null : '#pdf'" data-toggle="modal">
+               <button type="button" class="btn btn-success btn-sm mx-1" data-dismiss="modal"
+                  (click)="impComprobante({idfactura:cuenta})" [attr.data-target]="otraPagina ? null : '#pdf'"
+                  data-toggle="modal">
                   <i class="fa fa-check-circle"></i>&nbsp; Aceptar
                </button>
                <button type="button" class="btn btn-sm btn-outline-success btn-sm mx-1" data-dismiss="modal">

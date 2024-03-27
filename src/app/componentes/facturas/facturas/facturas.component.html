@@ -81,10 +81,10 @@
                            <button class="dropdown-item" type="button" (click)="recalcular( fac.idfactura )"
                               [disabled]="fac.idmodulo.idmodulo != 4">
                               <i class="bi-calculator-fill"></i>&nbsp; Recalcular</button>
-                           <button class="dropdown-item" type="button" (click)="impComprobante( fac )">
+                           <button class="dropdown-item" type="button" [disabled]="fac.pagado ===0" (click)="impComprobante( fac )">
                               <i class="bi bi-file-earmark-check"></i>&nbsp; Imprimir comprobante</button>
-                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#elimInteres"
-                              disabled>
+                           <button class="dropdown-item" type="button" data-toggle="modal"
+                              data-target="#elimInteres" disabled>
                               <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
                         </div>
                      </div>

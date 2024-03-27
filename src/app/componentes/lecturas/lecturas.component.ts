@@ -102,7 +102,6 @@ export class LecturasComponent implements OnInit {
     this.rutaxemisionDatos(this.idrutaxemision);
     this.lecService.getLecturas(this.idrutaxemision).subscribe({
       next: (resp) => {
-      console.log(resp)
         this._lecturas = resp;
         this.abonados = this._lecturas.length;
         this.total();
@@ -308,12 +307,16 @@ export class LecturasComponent implements OnInit {
   }
 
   actuValor() {
+    console.log(this.datosLectura);
     this.datosLectura.lecturaactual = this.formValor.value.lecturaactual;
+    this.datosLectura.idnovedad_novedades =
+      this.formValor.value.idnovedad_novedades;
     this.lecService.updateLectura(this.idlectura, this.datosLectura).subscribe({
       next: (nex) => {
         this._lecturas[this.fila].lecturaactual =
           this.formValor.value.lecturaactual;
-          this._lecturas[this.fila].idnovedad_novedades = this.formValor.value.idnovedad_novedades;
+        this._lecturas[this.fila].idnovedad_novedades =
+          this.formValor.value.idnovedad_novedades;
 
         this.total();
       },
