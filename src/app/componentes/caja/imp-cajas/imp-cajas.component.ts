@@ -82,7 +82,7 @@ export class ImpCajasComponent implements OnInit {
       this.swbotones = true;
       this.swcalculando = true;
       let fecha = this.formImprimir.value.fecha;
-      let hasta = '2023-12-31';
+      let hasta = '2024-03-04';
       switch (this.opcreporte) {
          case 1: // Recaudacion diaria - Resumen
             try {

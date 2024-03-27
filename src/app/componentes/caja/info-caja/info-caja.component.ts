@@ -43,7 +43,7 @@ export class InfoCajaComponent implements OnInit {
     private s_rubroxfac: RubroxfacService,
     private s_facxrecauda: FacxrecaudaService,
     private s_recaudacion: RecaudacionService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/cajas');
@@ -168,8 +168,9 @@ export class InfoCajaComponent implements OnInit {
                   //i++;
                 });
                 let total = 0;
+                console.log(datos)
                 datos.forEach((item: any) => {
-                 // console.log(item);
+                  // console.log(item);
                   let com: number = 0;
                   let totTarifa: number = +item.idfactura.totaltarifa!;
                   let suma: number = 0;
@@ -178,13 +179,14 @@ export class InfoCajaComponent implements OnInit {
                   if (+item.idfactura.idmodulo.idmodulo! == 3 && item.idfactura.idabonado > 0) {
                     com = 1;
                   }
-                  /*     console.log(item.idfactura.interescobrado);
+                  console.log(item.idfactura.interescobrado);
+                  /* 
                   console.log(com);
                   console.log(totTarifa); */
                   if (+item.idfactura.idmodulo.idmodulo! != 8) {
                     suma += +item.idfactura.interescobrado! + com + +totTarifa!;
                   } else {
-                    suma += item.idfactura.valorbase;
+                    suma += item.idfactura.valorbase + item.idfactura.interescobrado;
                   }
                   datosBody.push([
                     item.idfactura.nrofactura,

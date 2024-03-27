@@ -24,7 +24,6 @@ export class HistorialconsumoComponent implements OnInit {
   constructor(private lecService: LecturasService, private facService: FacturaService, private rubxfacService: RubroxfacService) { }
 
   ngOnInit(): void {
-    console.log(this.abonado)
     this.facturasxAbonado(this.abonado);
     this.lecturasxAbonado(this.abonado)
   }
@@ -32,6 +31,7 @@ export class HistorialconsumoComponent implements OnInit {
     this.idfactura = idfactura;
     this.rubxfacService.getByIdfactura(+idfactura!).subscribe({
       next: detalle => {
+        console.log(detalle)
         this._rubrosxfac = detalle;
         this.subtotal()
       },
@@ -71,7 +71,7 @@ export class HistorialconsumoComponent implements OnInit {
       this.promedio.splice(i, 1);
     }
     this.promedio.forEach((prom: any) => {
-    this.sobre = this.promedio.length
+      this.sobre = this.promedio.length
       consumo = prom.lecturaactual - prom.lecturaanterior
       this.suma += consumo;
       this.totprom = this.suma / this.sobre;

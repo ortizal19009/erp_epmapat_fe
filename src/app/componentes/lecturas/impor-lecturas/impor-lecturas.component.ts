@@ -135,11 +135,12 @@ export class ImporLecturasComponent implements OnInit {
       idlectura = this.importedData[this.contador][12];
       // console.log('idlectura: ', idlectura)
       this.lecService.getByIdlectura(idlectura).subscribe({
-         next: resp => {
+         next: (resp: any) => {
             this.contador++;
             this.progreso = (this.contador / this.importedData.length) * 100;
             resp.lecturaanterior = this.importedData[this.contador - 1][3];
             resp.lecturaactual = this.importedData[this.contador - 1][4];
+            resp.idnovedad_novedades = {idnovedad: this.importedData[this.contador - 1][6]};
             this.lecService.updateLectura(idlectura, resp).subscribe({
                next: nex => '',
                error: err => console.error(err.error)

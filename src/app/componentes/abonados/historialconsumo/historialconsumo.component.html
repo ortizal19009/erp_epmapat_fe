@@ -16,6 +16,7 @@
                                         <th>Consumo</th>
                                         <th>Anterior</th>
                                         <th>Actual</th>
+                                        <th>Novedad</th>
                                         <th>Planilla</th>
                                     </tr>
                                 </thead>
@@ -30,6 +31,7 @@
                                         <td>{{ lectura.lecturaactual - lectura.lecturaanterior | number: '1.0'}}</td>
                                         <td>{{lectura.lecturaanterior | number: '1.0'}}</td>
                                         <td>{{ lectura.lecturaactual | number: '1.0' }}</td>
+                                        <td>{{ lectura.idnovedad_novedades.descripcion}}</td>
                                         <td>{{lectura.idfactura}}</td>
                                     </tr>
                                 </tbody>

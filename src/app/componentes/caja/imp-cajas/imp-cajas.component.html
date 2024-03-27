@@ -36,7 +36,18 @@
                      <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
                            <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
-                              data-toggle="tooltip" title="Obligatorio">Fecha</span>
+                              data-toggle="tooltip" title="Obligatorio">Desde: </span>
+                        </div>
+                        <input type="date" class="form-control text-center" formControlName="fecha" id="fecha"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+                     </div>
+                  </div>
+
+                  <div *ngIf="opcreporte != 3" class="form-group col-md-6">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
+                              data-toggle="tooltip" title="Obligatorio">Hasta: </span>
                         </div>
                         <input type="date" class="form-control text-center" formControlName="fecha" id="fecha"
                            aria-label="Small" aria-describedby="inputGroup-sizing-sm">
