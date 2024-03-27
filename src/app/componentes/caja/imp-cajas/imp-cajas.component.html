@@ -35,8 +35,8 @@
                   <div *ngIf="opcreporte != 3" class="form-group col-md-6">
                      <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm" data-toggle="tooltip"
-                              title="Obligatorio">Fecha</span>
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
+                              data-toggle="tooltip" title="Obligatorio">Fecha</span>
                         </div>
                         <input type="date" class="form-control text-center" formControlName="fecha" id="fecha"
                            aria-label="Small" aria-describedby="inputGroup-sizing-sm">
@@ -68,15 +68,30 @@
 
                </div>
             </form>
-            <div class="text-center">
-               <button *ngIf="swimprimir" type='button' class='btn btn-success btn-sm mx-1' (click)="imprimir()"
-                  [attr.data-target]="otrapagina ? null : '#pdf'" data-toggle="modal">
+            <div *ngIf="!swbotones" class="text-center">
+               <button *ngIf="swimprimir" type='button' class='btn btn-success btn-sm mx-1' [disabled]="swbotones"
+                  (click)="imprimir()">
                   <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
-               <button *ngIf="!swimprimir" type='button' class='btn btn-success btn-sm mx-1' (click)="imprimir()"
+               <button *ngIf="!swimprimir" type='button' class='btn btn-warning btn-sm mx-1' (click)="imprimir()"
                   [disabled]="!formImprimir.valid">
                   <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
                <button class="btn btn-outline-success btn-sm mx-1" (click)="retornar()"><i
                      class="fa fa-times-circle"></i> Cancelar</button>
+            </div>
+
+            <div *ngIf="swbotones" class="text-center">
+               <button *ngIf="swimprimir" type="button" class="btn btn-success btn-block"
+                  [attr.data-target]="otrapagina ? null : '#pdf'" data-toggle="modal" [disabled]="swcalculando"
+                  (click)="imprime()">
+                  <i *ngIf="swcalculando" class="fa fa-spinner"></i>
+                  <i *ngIf="!swcalculando" class="bi-eye"></i>&nbsp;&nbsp;&nbsp;{{txtcalculando}}
+               </button>
+               <button *ngIf="!swimprimir" type="button" class="btn btn-warning btn-block" [disabled]="swcalculando"
+                  (click)="imprime()">
+                  <i *ngIf="swcalculando" class="fa fa-spinner"></i>
+                  <i *ngIf="!swcalculando" class="bi-eye"></i>&nbsp;&nbsp;&nbsp;{{txtcalculando}}
+               </button>
+
             </div>
          </div>
       </div>
