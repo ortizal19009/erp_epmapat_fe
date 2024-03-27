@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Abonados } from 'src/app/modelos/abonados';
 import { Categoria } from 'src/app/modelos/categoria.model';
 import { Clientes } from 'src/app/modelos/clientes';
@@ -43,7 +44,7 @@ export class ModificarAbonadosComponent implements OnInit {
       public categoriaS: CategoriaService, public rutasS: RutasService,
       public clienteS: ClientesService, public ubicacionmS: UbicacionmService,
       public tipopagoS: TipopagoService, public estadomS: EstadomService,
-      public router: Router) { }
+      public router: Router, private authService:AutorizaService) { }
 
    ngOnInit(): void {
       let date: Date = new Date();
@@ -68,7 +69,7 @@ export class ModificarAbonadosComponent implements OnInit {
          idtipopago_tipopago: ['', Validators.required],
          idestadom_estadom: ['', Validators.required],
          medidorprincipal: ['', Validators.required],
-         usucrea: 1,
+         usucrea: this.authService.idusuario,
          feccrea: date,
          usumodi: 1,
          fecmodi: date,

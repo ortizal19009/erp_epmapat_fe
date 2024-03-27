@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Abonados } from 'src/app/modelos/abonados';
 import { Categoria } from 'src/app/modelos/categoria.model';
 import { Clientes } from 'src/app/modelos/clientes';
@@ -44,7 +45,7 @@ export class AddAbonadosComponent implements OnInit {
    constructor(public fb: FormBuilder, private aboService: AbonadosService,
       public categoriaS: CategoriaService, public rutasS: RutasService,
       public clienteS: ClientesService, public ubicacionmS: UbicacionmService,
-      public tipopagoS: TipopagoService, public estadomS: EstadomService, public router: Router) { }
+      public tipopagoS: TipopagoService, public estadomS: EstadomService, public router: Router, public authService: AutorizaService) { }
 
    ngOnInit(): void {
       let date: Date = new Date();
@@ -92,7 +93,7 @@ export class AddAbonadosComponent implements OnInit {
          idtipopago_tipopago: tipopago,
          idestadom_estadom: estadom,
          medidorprincipal: ['', Validators.required],
-         usucrea: 12345,
+         usucrea: this.authService.idusuario,
          feccrea: date,
       });
       this.f_responsablePago = this.fb.group({

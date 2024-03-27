@@ -3,6 +3,7 @@ import { AbstractControl, FormBuilder, Validators } from '@angular/forms';
 import { map } from 'rxjs';
 import { Tabla4Service } from 'src/app/servicios/administracion/tabla4.service';
 import { Tabla4Component } from '../tabla4/tabla4.component';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 
 @Component({
    selector: 'app-add-tabla4',
@@ -14,7 +15,7 @@ export class AddTabla4Component implements OnInit {
    tab4Form: any;
 
    constructor(private fb: FormBuilder, private tab4Service: Tabla4Service,
-      private parent: Tabla4Component) { }
+      private parent: Tabla4Component, private authService:AutorizaService) { }
 
    ngOnInit(): void { this.crearForm(); }
 
@@ -23,7 +24,7 @@ export class AddTabla4Component implements OnInit {
       this.tab4Form = this.fb.group({
          tipocomprobante: [null, [Validators.required, Validators.minLength(2), Validators.maxLength(2)], this.valTipocomprobante.bind(this)],
          nomcomprobante: [null, [Validators.required, Validators.minLength(3), Validators.maxLength(100)], this.valNomcomprobante.bind(this)],
-         usucrea: 1,
+         usucrea: this.authService.idusuario,
          feccrea: date
       },
          { updateOn: "blur" }

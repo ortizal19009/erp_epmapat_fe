@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Ptoemision } from 'src/app/modelos/ptoemision';
 import { CajaService } from 'src/app/servicios/caja.service';
 import { PtoemisionService } from 'src/app/servicios/ptoemision.service';
@@ -24,7 +25,7 @@ export class AddCajaComponent implements OnInit {
    ptoEmision: Ptoemision = new Ptoemision();
 
    constructor(public fb: FormBuilder, private cajaService: CajaService,
-      public ptoemiService: PtoemisionService) { }
+      public ptoemiService: PtoemisionService,private authService:AutorizaService) { }
 
    ngOnInit(): void {
       let date: Date = new Date();
@@ -36,7 +37,7 @@ export class AddCajaComponent implements OnInit {
          codigo: ['', Validators.required],
          estado: 1,
          idptoemision_ptoemision: this.ptoEmision,
-         usucrea: 1,
+         usucrea: this.authService.idusuario,
          feccrea: date,
       });
 

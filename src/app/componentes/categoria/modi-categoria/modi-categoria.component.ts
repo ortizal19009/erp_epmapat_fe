@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Categoria } from 'src/app/modelos/categoria.model';
 import { CategoriaService } from 'src/app/servicios/categoria.service';
 
@@ -14,7 +15,7 @@ export class ModificarCategoriaComponent implements OnInit {
   categoria: Categoria = new Categoria();
   categoriaForm: FormGroup;
 
-  constructor(public fb:FormBuilder, private router:Router, private categoriaS:CategoriaService) { }
+  constructor(public fb:FormBuilder, private router:Router, private categoriaS:CategoriaService, private authService:AutorizaService) { }
 
   ngOnInit(): void{
     let date: Date= new Date ();
@@ -22,9 +23,9 @@ export class ModificarCategoriaComponent implements OnInit {
       idcategoria: [''],
       descripcion: ['', Validators.required],
       porcdescuento: ['', Validators.required],
-      usumodi: 12345,
+      usumodi: this.authService.idusuario,
       fecmodi: date,
-      usucrea: 12345,
+      usucrea: this.authService.idusuario,
       feccrea: date
     });
     this.actualizarCategoria();

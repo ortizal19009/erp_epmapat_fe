@@ -93,9 +93,9 @@ export class ModificarTramitenuevoComponent implements OnInit {
          /*          adultomayor: false,
                   municipio: false, */
          idaguatramite_aguatramite: ['', Validators.required],
-         usucrea: 1,
+         usucrea: this.authService.idusuario,
          feccrea: this.date,
-         usumodi: '',
+         usumodi: this.authService.idusuario,
          fecmodi: '',
       });
 

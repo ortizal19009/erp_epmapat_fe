@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { map } from 'rxjs';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Modulos } from 'src/app/modelos/modulos.model';
 import { Rubros } from 'src/app/modelos/rubros.model';
 import { Usoitems } from 'src/app/modelos/usoitems.model';
@@ -29,7 +30,7 @@ export class AddCatalogoitemsComponent implements OnInit {
 
    constructor(public router: Router, private fb: FormBuilder, private moduService: ModulosService,
       private produService: CatalogoitemService, private usoService: UsoitemsService,
-      private rubService: RubrosService) { }
+      private rubService: RubrosService, private authService:AutorizaService) { }
 
    ngOnInit(): void {
       let modulos: Modulos = new Modulos;
@@ -42,7 +43,7 @@ export class AddCatalogoitemsComponent implements OnInit {
          idrubro_rubros: rubro,
          descripcion: [null, [Validators.required, Validators.minLength(3)], this.valNombre.bind(this)],
          cantidad: 0, estado: 1, facturable: 1,
-         usucrea: 1,
+         usucrea: this.authService.idusuario,
          feccrea: (new Date().toISOString().substring(0, 10))
       },
          { updateOn: "blur" });
