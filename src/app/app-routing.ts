@@ -208,6 +208,7 @@ import { AddConvenioComponent } from './componentes/convenios/add-convenio/add-c
 import { GeneradorxmlComponent } from './componentes/facelectro/generadorxml/generadorxml.component';
 import { ImpLecturasComponent } from './componentes/lecturas/imp-lecturas/imp-lecturas.component';
 import { ImpCajasComponent } from './componentes/caja/imp-cajas/imp-cajas.component';
+import { ImpInfoCajasComponent } from './componentes/caja/info-caja/imp-info-cajas/imp-info-cajas.component';
 
 const routes: Routes = [
   //Consumo de Agua
@@ -298,6 +299,7 @@ const routes: Routes = [
   { path: 'add-caja', component: AddCajaComponent },
   { path: 'info-caja', component: InfoCajaComponent },
   { path: 'imp-caja', component: ImpCajasComponent },
+  { path: 'imp-inf-caja', component: ImpInfoCajasComponent },
   { path: 'transferencias', component: TransferenciasComponent },
 
   { path: 'add-convenio', component: AddConvenioComponent },

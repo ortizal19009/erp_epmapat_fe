@@ -29,11 +29,8 @@
                      data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
                   </button>
                   <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-                     <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
-                        <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
-                     <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar">
-                        <i class="bi-file-earmark-arrow-up"></i>
-                        <span>&nbsp; Exportar</span></button>
+                     <button class="dropdown-item" type="button" (click)="imprimirReportes()">
+                        <i class="bi bi-printer"></i>&nbsp; Imprimir/Exportar</button>
                   </div>
                </div>
                <div class="btn-group mx-1">
@@ -106,7 +103,7 @@
                <div class="input-group-prepend">
                   <small class="input-group-text">Desde</small>
                   <div class="input-group-text">
-                     <input type="date" class="form-control form-control-sm" [(ngModel)]= "desde">
+                     <input type="date" class="form-control form-control-sm" [(ngModel)]="desde">
                   </div>
                </div>
             </div>
@@ -114,7 +111,7 @@
                <div class="input-group-prepend">
                   <small class="input-group-text">Hasta</small>
                   <div class="input-group-text">
-                     <input type="date" class="form-control form-control-sm"[(ngModel)]= "hasta">
+                     <input type="date" class="form-control form-control-sm" [(ngModel)]="hasta">
                   </div>
                </div>
             </div>

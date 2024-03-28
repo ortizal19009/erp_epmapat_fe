@@ -1,21 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AutorizaService } from 'src/app/compartida/autoriza.service';
-import { CajaService } from 'src/app/servicios/caja.service';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as ExcelJS from 'exceljs';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import { CajaService } from 'src/app/servicios/caja.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
-import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { PdfService } from 'src/app/servicios/pdf.service';
+import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 
 @Component({
-  selector: 'app-imp-cajas',
-  templateUrl: './imp-cajas.component.html',
-  styleUrls: ['./imp-cajas.component.css'],
+  selector: 'app-imp-info-cajas',
+  templateUrl: './imp-info-cajas.component.html',
+  styleUrls: ['./imp-info-cajas.component.css'],
 })
-export class ImpCajasComponent implements OnInit {
+export class ImpInfoCajasComponent implements OnInit {
   swimprimir: boolean = true;
   formImprimir: FormGroup;
   opcreporte: number = 1;
@@ -80,6 +80,8 @@ export class ImpCajasComponent implements OnInit {
 
   //Recupera los datos de cada reporte
   async imprimir() {
+    let recaudador = +sessionStorage.getItem('idrecaudador')!;
+    console.log(recaudador);
     this.swbotones = true;
     this.swcalculando = true;
     let d_fecha = this.formImprimir.value.d_fecha;
@@ -89,23 +91,27 @@ export class ImpCajasComponent implements OnInit {
     switch (this.opcreporte) {
       case 1: // Recaudacion diaria - Resumen
         try {
-          this._cobradas = await this.rxfService.getTotalRubrosActualAsync(
-            d_fecha,
-            h_fecha,
-            hasta
-          );
+          this._cobradas =
+            await this.rxfService.getTotalRubrosActualByRecaudadorAsync(
+              d_fecha,
+              h_fecha,
+              hasta,
+              recaudador
+            );
           try {
             this._rubrosanterior =
-              await this.rxfService.getTotalRubrosAnteriorAsync(
+              await this.rxfService.getTotalRubrosAnteriorByRecaudadorAsync(
                 d_fecha,
                 h_fecha,
-                hasta
+                hasta,
+                recaudador
               );
             try {
               this._formacobro =
-                await this.facService.totalFechaFormacobroAsync(
+                await this.facService.totalFechaFormacobroByRecaudadorAsync(
                   d_fecha,
-                  h_fecha
+                  h_fecha,
+                  recaudador
                 );
               this.swcalculando = false;
               if (this.swimprimir) this.txtcalculando = 'Mostrar';
@@ -125,10 +131,12 @@ export class ImpCajasComponent implements OnInit {
         break;
       case 2: // Recaudacion diaria - Planillas
         try {
-          this._cobradas = await this.facService.getByFechacobroTotAsync(
-            d_fecha, 
-            h_fecha
-          );
+          this._cobradas =
+            await this.facService.getByFechacobroTotByRecaudadorAsync(
+              d_fecha,
+              h_fecha,
+              recaudador
+            );
           // this.sw1 = true;
           this.swcalculando = false;
           if (this.swimprimir) this.txtcalculando = 'Mostrar';
@@ -906,7 +914,6 @@ export class ImpCajasComponent implements OnInit {
     this.router.navigate(['/cajas']);
   }
 }
-
 function formatNumber(num: number) {
   return num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
 }

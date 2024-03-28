@@ -11,7 +11,7 @@ const baseUrl = `${apiUrl}/facturas`;
   providedIn: 'root',
 })
 export class FacturaService {
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   getListaByNroFactura(nrofactura: String) {
     return this.http.get<Facturas>(`${baseUrl}?nrofactura=${nrofactura}`);
@@ -33,7 +33,6 @@ export class FacturaService {
     );
   }
 
-
   getLista(): Observable<Facturas[]> {
     return this.http.get<Facturas[]>(`${baseUrl}`);
   }
@@ -43,12 +42,14 @@ export class FacturaService {
   }
 
   getByNrofactura(nrofactura: String) {
-    return this.http.get<Facturas>(`${baseUrl}/nrofactura?nrofactura=${nrofactura}`);
+    return this.http.get<Facturas>(
+      `${baseUrl}/nrofactura?nrofactura=${nrofactura}`
+    );
   }
 
   //Facturas por Cliente
   getByIdcliente(idcliente: number) {
-    return this.http.get<Facturas>(`${baseUrl}?idcliente=${idcliente}`)
+    return this.http.get<Facturas>(`${baseUrl}?idcliente=${idcliente}`);
   }
   //Lista de Facturas desde/hasta
   getDesdeHasta(desde: number, hasta: number) {
@@ -61,29 +62,68 @@ export class FacturaService {
 
   //Una Planilla (como lista)
   getPlanilla(idfactura: number) {
-    return this.http.get<Facturas[]>(`${baseUrl}/planilla?idfactura=${idfactura}`);
+    return this.http.get<Facturas[]>(
+      `${baseUrl}/planilla?idfactura=${idfactura}`
+    );
   }
 
   //Planillas por idabonado y fechas
-  getPorabonado(idabonado: number, fechaDesde: Date, fechaHasta: Date): Observable<Facturas[]> {
-    return this.http.get<Facturas[]>(`${baseUrl}/porabonado?idabonado=${idabonado}&fechaDesde=${fechaDesde}&fechaHasta=${fechaHasta}`);
+  getPorabonado(
+    idabonado: number,
+    fechaDesde: Date,
+    fechaHasta: Date
+  ): Observable<Facturas[]> {
+    return this.http.get<Facturas[]>(
+      `${baseUrl}/porabonado?idabonado=${idabonado}&fechaDesde=${fechaDesde}&fechaHasta=${fechaHasta}`
+    );
   }
 
   //Recaudación diaria - Facturas cobradas async
   async getByFechacobroAsync(fecha: Date): Promise<any[]> {
-    const response = await firstValueFrom(this.http.get<any[]>(`${baseUrl}/cobradas?fecha=${fecha}`));
+    const response = await firstValueFrom(
+      this.http.get<any[]>(`${baseUrl}/cobradas?fecha=${fecha}`)
+    );
     return response;
   }
 
   //Recaudación diaria - Facturas cobradas async (sumando los rubros)
-  async getByFechacobroTotAsync(fecha: Date): Promise<any[]> {
-    const response = await firstValueFrom(this.http.get<any[]>(`${baseUrl}/cobradastot?fecha=${fecha}`));
+  async getByFechacobroTotAsync(d_fecha: Date, h_fecha: Date): Promise<any[]> {
+    const response = await firstValueFrom(
+      this.http.get<any[]>(`${baseUrl}/cobradastot?d_fecha=${d_fecha}&h_fecha=${h_fecha}`)
+    );
+    return response;
+  }
+  //Recaudación diaria - Facturas cobradas async (sumando los rubros)
+  async getByFechacobroTotByRecaudadorAsync(d_fecha: Date, h_fecha: Date, idrecaudador: number): Promise<any[]> {
+    const response = await firstValueFrom(
+      this.http.get<any[]>(`${baseUrl}/reportes/cobradastot?d_fecha=${d_fecha}&h_fecha=${h_fecha}&idrecaudador=${idrecaudador}`)
+    );
     return response;
   }
 
   //Recaudación diaria - Resumen: Por Forma de cobro
-  async totalFechaFormacobroAsync(fecha: Date): Promise<any[]> {
-    const response = await firstValueFrom(this.http.get<any[]>(`${baseUrl}/totalformacobro?fecha=${fecha}`));
+  async totalFechaFormacobroAsync(
+    d_fecha: Date,
+    h_fecha: Date
+  ): Promise<any[]> {
+    const response = await firstValueFrom(
+      this.http.get<any[]>(
+        `${baseUrl}/totalformacobro?d_fecha=${d_fecha}&h_fecha=${h_fecha}`
+      )
+    );
+    return response;
+  }
+  //Recaudación diaria - Resumen: Por Forma de cobro
+  async totalFechaFormacobroByRecaudadorAsync(
+    d_fecha: Date,
+    h_fecha: Date, 
+    idrecaudador: number
+  ): Promise<any[]> {
+    const response = await firstValueFrom(
+      this.http.get<any[]>(
+        `${baseUrl}/reportes/totalformacobro?d_fecha=${d_fecha}&h_fecha=${h_fecha}&idrecaudador=${idrecaudador}`
+      )
+    );
     return response;
   }
 
@@ -105,23 +145,25 @@ export class FacturaService {
   //Save async devuelve el idfactura generado
   async saveFacturaAsyncId(factura: any): Promise<number> {
     const observable = this.http.post<Facturas>(baseUrl, factura);
-    return await firstValueFrom(observable.pipe(
-      map(response => response.idfactura)
-    ));
+    return await firstValueFrom(
+      observable.pipe(map((response) => response.idfactura))
+    );
   }
 
   getById(idfactura: number): Observable<Facturas> {
     return this.http.get<Facturas>(`${baseUrl}/${idfactura}`);
   }
 
-  //Planillas sin Cobro de un Cliente 
+  //Planillas sin Cobro de un Cliente
   getSinCobro(idcliente: number) {
     return this.http.get<Facturas[]>(`${baseUrl}/idcliente/${idcliente}`);
   }
 
   //IDs de las Planillas sin cobrar de un Abonado
   getSinCobroAbo(idabonado: number) {
-    return this.http.get<number[]>(`${baseUrl}/sincobro?idabonado=${idabonado}`);
+    return this.http.get<number[]>(
+      `${baseUrl}/sincobro?idabonado=${idabonado}`
+    );
   }
 
   //Cuenta las Planillas pendientes de un Abonado
@@ -131,23 +173,27 @@ export class FacturaService {
 
   //Cuenta las Planillas pendientes de un Abonado Async
   async getPendientesAbonadoAsync(idabonado: number): Promise<number> {
-    const observable = this.http.get<number>(`${baseUrl}/pendientesabonado?idabonado=${idabonado}`);
+    const observable = this.http.get<number>(
+      `${baseUrl}/pendientesabonado?idabonado=${idabonado}`
+    );
     return await firstValueFrom(observable);
   }
 
   //Planillas sin Cobrar por Modulo y Abonado (Para Convenios)
   getSinCobrarAbo(idmodulo: number, idabonado: number) {
-    return this.http.get<Facturas[]>(`${baseUrl}/sincobrarAbo?idmodulo=${idmodulo}&idabonado=${idabonado}`);
+    return this.http.get<Facturas[]>(
+      `${baseUrl}/sincobrarAbo?idmodulo=${idmodulo}&idabonado=${idabonado}`
+    );
   }
 
   getDeudaConsumo(idabonado: number) {
-    return this.http.get<Facturas[]>(`${baseUrl}/deudaconsumo?idabonado=${idabonado}`);
+    return this.http.get<Facturas[]>(
+      `${baseUrl}/deudaconsumo?idabonado=${idabonado}`
+    );
   }
 
   getDeuda(idcliente: number) {
-    return this.http.get<Facturas[]>(
-      `${baseUrl}/deuda?idcliente=${idcliente}`
-    );
+    return this.http.get<Facturas[]>(`${baseUrl}/deuda?idcliente=${idcliente}`);
   }
 
   updateFacturas(fac: Facturas) {

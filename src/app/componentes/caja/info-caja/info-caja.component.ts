@@ -43,7 +43,7 @@ export class InfoCajaComponent implements OnInit {
     private s_rubroxfac: RubroxfacService,
     private s_facxrecauda: FacxrecaudaService,
     private s_recaudacion: RecaudacionService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/cajas');
@@ -168,7 +168,7 @@ export class InfoCajaComponent implements OnInit {
                   //i++;
                 });
                 let total = 0;
-                console.log(datos)
+                console.log(datos);
                 datos.forEach((item: any) => {
                   // console.log(item);
                   let com: number = 0;
@@ -176,7 +176,10 @@ export class InfoCajaComponent implements OnInit {
                   let suma: number = 0;
                   /*      console.log(item.idfactura.idmodulo.idmodulo);
                   console.log(totTarifa); */
-                  if (+item.idfactura.idmodulo.idmodulo! == 3 && item.idfactura.idabonado > 0) {
+                  if (
+                    +item.idfactura.idmodulo.idmodulo! == 3 &&
+                    item.idfactura.idabonado > 0
+                  ) {
                     com = 1;
                   }
                   console.log(item.idfactura.interescobrado);
@@ -186,7 +189,8 @@ export class InfoCajaComponent implements OnInit {
                   if (+item.idfactura.idmodulo.idmodulo! != 8) {
                     suma += +item.idfactura.interescobrado! + com + +totTarifa!;
                   } else {
-                    suma += item.idfactura.valorbase + item.idfactura.interescobrado;
+                    suma +=
+                      item.idfactura.valorbase + item.idfactura.interescobrado;
                   }
                   datosBody.push([
                     item.idfactura.nrofactura,
@@ -291,6 +295,10 @@ export class InfoCajaComponent implements OnInit {
       container = document.getElementById('pdf');
       container.appendChild(embed);
     }
+  }
+  imprimirReportes() {
+    sessionStorage.setItem('idrecaudador', this.usuario.idusuario.toString());
+    this.router.navigate(['/imp-inf-caja']);
   }
 }
 
