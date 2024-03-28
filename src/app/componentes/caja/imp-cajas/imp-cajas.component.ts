@@ -126,7 +126,7 @@ export class ImpCajasComponent implements OnInit {
       case 2: // Recaudacion diaria - Planillas
         try {
           this._cobradas = await this.facService.getByFechacobroTotAsync(
-            d_fecha, 
+            d_fecha,
             h_fecha
           );
           // this.sw1 = true;
@@ -190,7 +190,10 @@ export class ImpCajasComponent implements OnInit {
         16
       ); */
     this._pdf.header(
-      'RESUMEN RECAUDACIÓN DIARIA: ' + this.formImprimir.value.fecha,
+      'RESUMEN RECAUDACIÓN: ' +
+        this.formImprimir.value.d_fecha +
+        ' - ' +
+        this.formImprimir.value.h_fecha,
       doc
     );
 
@@ -350,7 +353,10 @@ export class ImpCajasComponent implements OnInit {
         16
       ); */
     this._pdf.header(
-      'RECAUDACIÓN DIARIA - PLANILLAS: ' + this.formImprimir.value.fecha,
+      'RECAUDACIÓN DIARIA - PLANILLAS: ' +
+        this.formImprimir.value.d_fecha +
+        ' - ' +
+        this.formImprimir.value.h_fecha,
       doc
     );
     const datos: any = [];

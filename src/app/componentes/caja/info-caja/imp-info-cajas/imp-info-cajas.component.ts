@@ -81,12 +81,10 @@ export class ImpInfoCajasComponent implements OnInit {
   //Recupera los datos de cada reporte
   async imprimir() {
     let recaudador = +sessionStorage.getItem('idrecaudador')!;
-    console.log(recaudador);
     this.swbotones = true;
     this.swcalculando = true;
     let d_fecha = this.formImprimir.value.d_fecha;
     let h_fecha = this.formImprimir.value.h_fecha;
-    console.log(this.formImprimir.value);
     let hasta = '2023-12-31';
     switch (this.opcreporte) {
       case 1: // Recaudacion diaria - Resumen
@@ -198,7 +196,7 @@ export class ImpInfoCajasComponent implements OnInit {
         16
       ); */
     this._pdf.header(
-      'RESUMEN RECAUDACIÓN DIARIA: ' + this.formImprimir.value.fecha,
+      'RESUMEN RECAUDACIÓN: ' + this.formImprimir.value.d_fecha +' - '+ this.formImprimir.value.h_fecha,
       doc
     );
 
@@ -358,7 +356,7 @@ export class ImpInfoCajasComponent implements OnInit {
         16
       ); */
     this._pdf.header(
-      'RECAUDACIÓN DIARIA - PLANILLAS: ' + this.formImprimir.value.fecha,
+      'RECAUDACIÓN - PLANILLAS: ' + this.formImprimir.value.d_fecha +' - '+ this.formImprimir.value.h_fecha,
       doc
     );
     const datos: any = [];

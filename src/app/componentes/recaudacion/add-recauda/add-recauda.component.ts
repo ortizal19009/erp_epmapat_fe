@@ -111,7 +111,7 @@ export class AddRecaudaComponent implements OnInit {
     private recaService: RecaudacionService,
     private facxrService: FacxrecaudaService,
     private s_recaudaxcaja: RecaudaxcajaService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.formBuscar = this.fb.group({
@@ -400,7 +400,7 @@ export class AddRecaudaComponent implements OnInit {
       error: (err) => console.error(err.error),
     });
   }
-  disabled(e: any) { }
+  disabled(e: any) {}
 
   //Total de las planillas sin cobrar
   // total() {
@@ -540,15 +540,15 @@ export class AddRecaudaComponent implements OnInit {
       }
       i++;
     });
-    console.log(suma.toFixed(2))
+    console.log(suma.toFixed(2));
     this.acobrar = +suma.toFixed(2)!;
   }
 
   valorAcobrar(acobrar: number) {
     this.disabledcobro = true;
-    console.log(acobrar)
+    console.log(acobrar);
     let entero = Math.trunc(acobrar);
-    console.log(entero)
+    console.log(entero);
     let decimal = (acobrar - entero).toFixed(2);
     this.acobrardec = decimal.toString().slice(1);
     const primerPagado = this._sincobro.find(
@@ -599,7 +599,7 @@ export class AddRecaudaComponent implements OnInit {
           if ((idmodulo == 3 || idmodulo == 4) && detalle.abonado > 0) {
             this.lecService.getByIdfactura(idfactura).subscribe({
               next: (resp) => {
-                console.log(resp)
+                console.log(resp);
                 _lecturas = resp;
                 this.consumo =
                   _lecturas[0].lecturaactual - _lecturas[0].lecturaanterior;
@@ -791,7 +791,7 @@ export class AddRecaudaComponent implements OnInit {
     rubrosxfac.cantidad = 1;
     rubrosxfac.estado = 1;
     this.rubxfacService.saveRubroxFac(rubrosxfac).subscribe({
-      next: (datos) => { },
+      next: (datos) => {},
       error: (e) => console.error(e),
     });
   }
@@ -803,6 +803,7 @@ export class AddRecaudaComponent implements OnInit {
     rubro.idrubro = 5;
     if (this._sincobro[i].pagado) {
       idfactura = this._sincobro[i].idfactura;
+      console.log(this._sincobro[i]);
       this.facService.getById(idfactura).subscribe({
         next: (fac) => {
           //Añade a facxrecauda
@@ -816,11 +817,11 @@ export class AddRecaudaComponent implements OnInit {
               fac.fechacobro = fechacobro;
               fac.usuariocobro = this.authService.idusuario;
               if (fac.idmodulo.idmodulo != 8) {
-                fac.interescobrado = this.cInteres(fac);
+              fac.interescobrado = this._sincobro[i].interes
               }
               fac.pagado = 1;
-              if (this.cInteres(fac) > 0 && fac.idmodulo.idmodulo != 8) {
-                this.saveRubxFac(fac, rubro, this.cInteres(fac));
+              if (this._sincobro[i].interes > 0 && fac.idmodulo.idmodulo != 8) {
+                this.saveRubxFac(fac, rubro, this._sincobro[i].interes);
               }
               if (fac.estado === 2) {
                 fac.estado = 2;
@@ -1128,7 +1129,7 @@ export class AddRecaudaComponent implements OnInit {
       return of({ invalido: true });
     else return of(null);
   }
-  pdf() { }
+  pdf() {}
   //Al digitar el dinero
   changeDinero() {
     let ncvalor: number;
