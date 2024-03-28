@@ -43,7 +43,7 @@ export class InfoCajaComponent implements OnInit {
     private s_rubroxfac: RubroxfacService,
     private s_facxrecauda: FacxrecaudaService,
     private s_recaudacion: RecaudacionService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/cajas');
