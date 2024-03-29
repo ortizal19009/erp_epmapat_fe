@@ -1,6 +1,8 @@
+import { AutorizaService } from "../compartida/autoriza.service";
 import { Clientes } from "./clientes";
 // import { Facturas } from "./facturas.model";
 import { Tipotramite } from "./tipotramite.model";
+let authService: AutorizaService
 
 export class Aguatramite {
    idaguatramite: number;
@@ -13,7 +15,7 @@ export class Aguatramite {
    idcliente_clientes: Clientes;
    idfactura_facturas: number;
    idtipotramite_tipotramite: Tipotramite;
-   usucrea: number = 1;
+   usucrea: number = authService.idusuario;
    feccrea: Date;
    usumodi: number;
    fecmodi: Date;

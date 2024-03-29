@@ -2,6 +2,7 @@ import { Component, OnInit, SimpleChanges } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { map, of } from 'rxjs';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Nacionalidad } from 'src/app/modelos/nacionalidad';
 import { PersoneriaJuridica } from 'src/app/modelos/personeria-juridica';
 import { Tpidentifica } from 'src/app/modelos/tpidentifica.model';
@@ -32,7 +33,7 @@ export class ModificarClientesComponent implements OnInit {
 
    constructor(public fb: FormBuilder, private cliService: ClientesService,
       public nacionalidadS: NacionalidadService, private tpidentiService: TpidentificaService,
-      private router: Router, public personeriajuridicaS: PersoneriaJuridicaService
+      private router: Router, public personeriajuridicaS: PersoneriaJuridicaService, private authService: AutorizaService
    ) { }
 
    ngOnInit(): void {
@@ -56,9 +57,9 @@ export class ModificarClientesComponent implements OnInit {
          estado: '',
          email: ['', [Validators.required, Validators.email]],
          idpjuridica_personeriajuridica: ['', Validators.required],
-         usumodi: 12345,
+         usumodi: this.authService.idusuario,
          fecmodi: date,
-         usucrea: 12345,
+         usucrea: this.authService.idusuario,
          feccrea: date,
       },
          { updateOn: "blur" });

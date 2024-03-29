@@ -5,6 +5,7 @@ import { UsoitemsComponent } from '../usoitems/usoitems.component';
 import { UsoitemsService } from 'src/app/servicios/usoitems.service';
 import { Modulos } from 'src/app/modelos/modulos.model';
 import { map } from 'rxjs';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 
 @Component({
   selector: 'app-add-usoitems',
@@ -20,7 +21,7 @@ export class AddUsoitemsComponent implements OnInit {
 
   constructor(private fb: FormBuilder, private usoService: UsoitemsService,
     private moduService: ModulosService,
-    private parent: UsoitemsComponent) { }
+    private parent: UsoitemsComponent, private authService: AutorizaService) { }
 
   ngOnInit(): void {
     this.crearForm();
@@ -35,7 +36,7 @@ export class AddUsoitemsComponent implements OnInit {
       idmodulo_modulos: modulo,
       descripcion: [null, [Validators.required, Validators.minLength(3), Validators.maxLength(254)], this.valNombre.bind(this)],
       estado: 1,
-      usucrea: 1,
+      usucrea: this.authService.idusuario,
       feccrea: (new Date().toISOString().substring(0, 10))
     },
       { updateOn: "blur" });

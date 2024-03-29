@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Certificaciones } from 'src/app/modelos/certificaciones';
 import { Facturas } from 'src/app/modelos/facturas.model';
 import { TpCertifica } from 'src/app/modelos/tp-certifica';
@@ -21,7 +22,7 @@ export class ModificarCertificacionesComponent implements OnInit {
     v_factura: any;
 
   constructor(private fb: FormBuilder, private router: Router, private tpcertificaS: TpCertificaService,
-    private certificacionesS: CertificacionesService, private facService: FacturaService
+    private certificacionesS: CertificacionesService, private facService: FacturaService, private authService: AutorizaService
   ) { }
 
   ngOnInit(): void {
@@ -33,9 +34,9 @@ export class ModificarCertificacionesComponent implements OnInit {
       referenciadocumento: ['', Validators.required],
       idtpcertifica_tpcertifica: ['', Validators.required],
       idfactura_facturas: this.v_factura,
-      usumodi: 12345,
+      usumodi: this.authService.idusuario,
       fecmodi: date,
-      usucrea: 12345,
+      usucrea:this.authService.idusuario,
       feccrea: date,
     });
     this.f_facturas = this.fb.group({

@@ -6,6 +6,7 @@ import { ReformasService } from 'src/app/servicios/contabilidad/reformas.service
 
 import { Documentos } from 'src/app/modelos/administracion/documentos.model';
 import { DocumentosService } from 'src/app/servicios/administracion/documentos.service';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 
 
 @Component({
@@ -21,7 +22,7 @@ export class AddReformaComponent implements OnInit {
    _reforma: any;
 
    constructor(private fb: FormBuilder, private refoService: ReformasService,
-      private docuService: DocumentosService, private router: Router) { }
+      private docuService: DocumentosService, private router: Router, private authService: AutorizaService) { }
 
    ngOnInit(): void {
       this.refoService.siguienteNumero().subscribe({
@@ -41,7 +42,7 @@ export class AddReformaComponent implements OnInit {
          numdoc: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(12)]],
          concepto: [null, [Validators.required]],
          valor: 0,
-         usucrea: 1,
+         usucrea: this.authService.idusuario,
          feccrea: (new Date().toISOString().substring(0, 10))
       },
          { updateOn: "blur" })

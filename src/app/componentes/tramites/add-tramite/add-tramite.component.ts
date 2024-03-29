@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Clientes } from 'src/app/modelos/clientes';
 import { LiquidaTramite } from 'src/app/modelos/liquida-tramite';
 import { TpTramite } from 'src/app/modelos/tp-tramite';
@@ -47,8 +48,9 @@ export class AddTramiteComponent implements OnInit {
     private s_facturas: FacturaService,
     private s_liquidatramites: LiquidaTramiteService,
     private s_rubroxfac: RubroxfacService,
-    private s_rubroadicional: RubroAdicionalService
-  ) { }
+    private s_rubroadicional: RubroAdicionalService,
+    private authService: AutorizaService
+  ) {}
 
   ngOnInit(): void {
     let date: Date = new Date();
@@ -68,7 +70,7 @@ export class AddTramiteComponent implements OnInit {
       validohasta: ['', Validators.required],
       idtptramite_tptramite: { idtptramite: tptramite.idtptramite },
       idcliente_clientes: ['', Validators.required],
-      usucrea: 1,
+      usucrea: this.authService.idusuario,
       feccrea: date,
     });
     this.f_clientes = this.fb.group({
@@ -101,9 +103,9 @@ export class AddTramiteComponent implements OnInit {
       horacobro: null,
       usuariotransferencia: null,
       fechatransferencia: null,
-      usucrea: ['', Validators.required],
+      usucrea: [this.authService.idusuario, Validators.required],
       feccrea: ['', Validators.required],
-      usumodi: null,
+      usumodi: this.authService.idusuario,
       fecmodi: null,
     });
     this.f_liquidatramite = this.fb.group({
@@ -116,7 +118,7 @@ export class AddTramiteComponent implements OnInit {
       observacion: ['', Validators.required],
       idtramite_tramites: '',
       idfactura_facturas: '',
-      usucrea: 1,
+      usucrea: this.authService.idusuario,
       feccrea: date,
     });
     this.f_rubxfac = this.fb.group({
@@ -135,7 +137,6 @@ export class AddTramiteComponent implements OnInit {
     this.s_tptramites.getListaTpTramite().subscribe(
       (datos) => {
         this.v_tptramites = datos;
-
       },
       (error) => console.log(error)
     );
@@ -254,9 +255,9 @@ export class AddTramiteComponent implements OnInit {
       horacobro: null,
       usuariotransferencia: null,
       fechatransferencia: null,
-      usucrea: 1,
+      usucrea: this.authService.idusuario,
       feccrea: date,
-      usumodi: null,
+      usumodi: this.authService.idusuario,
       fecmodi: null,
     });
   }
@@ -273,7 +274,7 @@ export class AddTramiteComponent implements OnInit {
       observacion: '',
       idtramite_tramites: '',
       idfactura_facturas: '',
-      usucrea: 1,
+      usucrea: this.authService.idusuario,
       feccrea: date,
     });
   }
@@ -289,7 +290,7 @@ export class AddTramiteComponent implements OnInit {
         idrubro_rubros: { idrubro: this.v_rubros[i].idrubro },
       });
       this.s_rubroxfac.saveRubroxfac(this.f_rubxfac.value).subscribe({
-        next: (datos) => { },
+        next: (datos) => {},
         error: (err) => console.log(err.error),
       });
       i++;

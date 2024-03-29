@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { map } from 'rxjs';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Clasificador } from 'src/app/modelos/clasificador.model';
 import { ClasificadorService } from 'src/app/servicios/clasificador.service';
 import { PreingresoService } from 'src/app/servicios/contabilidad/preingreso.service';
@@ -22,7 +23,7 @@ export class AddPreingresoComponent implements OnInit {
    privez = true;    //Para resetear los datos de Búsqueda en el Clasificador
 
    constructor(public fb: FormBuilder, public fb1: FormBuilder, private preingService: PreingresoService,
-      private clasiService: ClasificadorService, public router: Router) { }
+      private clasiService: ClasificadorService, public router: Router, private authService: AutorizaService) { }
 
    ngOnInit(): void {
       this.preingForm = this.fb.group({
@@ -38,7 +39,7 @@ export class AddPreingresoComponent implements OnInit {
          totmisos: 0,
          totdeven: 0,
          intcla: 0,
-         usucrea: 1,
+         usucrea: this.authService.idusuario,
          feccrea: (new Date().toISOString().substring(0, 10))
       });
 

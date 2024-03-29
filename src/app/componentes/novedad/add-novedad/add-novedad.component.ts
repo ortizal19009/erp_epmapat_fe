@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Novedad } from 'src/app/modelos/novedad.model';
 //import { Novedad } from 'src/app/modelos/novedad.model';
 import { NovedadesService } from 'src/app/servicios/novedades.service';
@@ -18,7 +19,7 @@ export class AddNovedadComponent implements OnInit {
    rtn1: number = 0;
    descripcion: String;
 
-   constructor(public fb: FormBuilder, private novService: NovedadesService) { }
+   constructor(public fb: FormBuilder, private novService: NovedadesService, private authService: AutorizaService) { }
 
    ngOnInit(): void { 
       let date: Date = new Date();
@@ -28,7 +29,7 @@ export class AddNovedadComponent implements OnInit {
       this.novedadForm = this.fb.group({
          descripcion: ['', Validators.required, Validators.minLength(3)]
          // estado: 1,
-         // usucrea: 12345,
+         // usucrea: this.authService.idusuario,,
          // feccrea: date,
       });
       this.rtn1 = 0;

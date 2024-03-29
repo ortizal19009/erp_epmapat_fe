@@ -57,9 +57,9 @@ export class ModificarCajaComponent implements OnInit {
         descripcion: datos.descripcion,
         idptoemision_ptoemision: datos.idptoemision_ptoemision,
         estado: datos.estado,
-        usucrea: 3,
+        usucrea: this.authService.idusuario,
         feccrea: datos.feccrea,
-        usumodi: 2,
+        usumodi: this.authService.idusuario,
         fecmodi: fecha,
       });
     });

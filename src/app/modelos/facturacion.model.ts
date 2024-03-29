@@ -1,5 +1,6 @@
+import { AutorizaService } from "../compartida/autoriza.service";
 import { Clientes } from "./clientes";
-
+let authService: AutorizaService
 export class Facturacion {
     idfacturacion: number;
     estado: number;
@@ -8,7 +9,7 @@ export class Facturacion {
     idcliente_clientes: Clientes;
     total: number;
     cuotas: number;
-    usucrea: number = 1;
+    usucrea: number = authService.idusuario
     feccrea: Date;
     usumodi: number;
     fecmodi: Date;

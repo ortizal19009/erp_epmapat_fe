@@ -16,7 +16,7 @@ export class NovedadDetalleComponent implements OnInit {
   //   idnovedad: 
   //   descripcion: '',
   //   estado: 1,
-  //   usucrea: 1
+  //   usucrea:this.authService.idusuario,
   // };
   mensaje = '';
   

@@ -1,12 +1,13 @@
-import { Modulos } from "./modulos.model";
-
-export class Usoitems{
-   idusoitems: number;
-   descripcion: String;
-   estado: Boolean;
-   idmodulo_modulos: Modulos;
-   usucrea: number = 1;
-   feccrea: Date;
-   usumodi: number;
-   fecmodi: Date;
+import { AutorizaService } from '../compartida/autoriza.service';
+import { Modulos } from './modulos.model';
+let authService: AutorizaService;
+export class Usoitems {
+  idusoitems: number;
+  descripcion: String;
+  estado: Boolean;
+  idmodulo_modulos: Modulos;
+  usucrea: number = authService.idusuario;
+  feccrea: Date;
+  usumodi: number;
+  fecmodi: Date;
 }

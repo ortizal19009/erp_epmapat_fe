@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ClasificadorService } from 'src/app/servicios/clasificador.service';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 
 @Component({
   selector: 'app-add-clasificador',
@@ -20,7 +21,8 @@ export class AddClasificadorComponent implements OnInit{
   nompar: String;
 
   constructor(public fb: FormBuilder, private clasificadorService: ClasificadorService,
-   public router: Router) { }
+   public router: Router, private authService: AutorizaService
+   ) { }
 
   ngOnInit(): void {
    let date: Date = new Date();
@@ -36,9 +38,9 @@ export class AddClasificadorComponent implements OnInit{
       devengado: 0,
       reforma: 0,
       asigna_ini: 0,
-      usucrea: "1",
+      usucrea: this.authService.idusuario,
       feccrea: date,
-      usumodi: null,
+      usumodi: this.authService.idusuario,
       fecmodi: null,
       grupo: null,
       balancostos: 0
