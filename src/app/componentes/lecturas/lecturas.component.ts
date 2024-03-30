@@ -14,6 +14,7 @@ import { NovedadesService } from 'src/app/servicios/novedades.service';
 import { Novedad } from 'src/app/modelos/novedad.model';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import { nextTick } from 'process';
 
 @Component({
   selector: 'app-lecturas',
@@ -288,12 +289,14 @@ export class LecturasComponent implements OnInit {
     this.fila = fila;
     this.lecService.getByIdlectura(idlectura).subscribe({
       next: (resp) => {
+      console.log(resp)
         this.datosLectura = resp;
         this.cuenta = resp.idabonado_abonados.idabonado;
         this.formValor.patchValue({
           lecturaanterior: resp.lecturaanterior,
           lecturaactual: resp.lecturaactual,
           consumo: resp.lecturaactual - resp.lecturaanterior,
+          idnovedad_novedades: resp.idnovedad_novedades
         });
       },
       error: (err) => console.error(err.error),
@@ -301,12 +304,15 @@ export class LecturasComponent implements OnInit {
   }
 
   actuValor() {
-    console.log(this.datosLectura);
+    this.datosLectura.lecturaanterior = this.formValor.value.lecturaanterior;
     this.datosLectura.lecturaactual = this.formValor.value.lecturaactual;
     this.datosLectura.idnovedad_novedades =
       this.formValor.value.idnovedad_novedades;
     this.lecService.updateLectura(this.idlectura, this.datosLectura).subscribe({
       next: (nex) => {
+      console.log(nex)
+        this._lecturas[this.fila].lecturaanterior =
+          this.formValor.value.lecturaanterior;
         this._lecturas[this.fila].lecturaactual =
           this.formValor.value.lecturaactual;
         this._lecturas[this.fila].idnovedad_novedades =

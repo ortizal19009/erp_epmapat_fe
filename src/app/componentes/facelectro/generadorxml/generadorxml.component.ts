@@ -21,7 +21,7 @@ export class GeneradorxmlComponent implements OnInit {
    _facturas: any;
    _rubroxfac: any;
    vecrubros: any = [];
-   porciva: number = 0.12;
+   porciva: number = 0.15;
    swencuentra: boolean;
    sumsubtotal: number = 0;
    sumvaloriva: number = 0;

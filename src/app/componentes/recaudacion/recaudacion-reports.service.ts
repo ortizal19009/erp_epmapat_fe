@@ -155,8 +155,7 @@ export class RecaudacionReportsService {
         let rubros: any = [];
         _rubrosxfac.forEach((item: any) => {
           if (item.idrubro_rubros.swiva === true) {
-            console.log(item.valorunitario * 0.12);
-            this.iva += item.valorunitario * 0.12;
+            this.iva += item.valorunitario * 0.15;
           }
           if (
             item.idrubro_rubros.idrubro != 5 &&

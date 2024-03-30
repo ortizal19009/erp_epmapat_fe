@@ -707,7 +707,7 @@ export class AddRecaudaComponent implements OnInit {
       i++;
     });
     suma12 = Math.round(suma12 * 100) / 100;
-    this.valoriva = suma12 * 0.12;
+    this.valoriva = suma12 * 0.15;
     this.totfac = suma12 + suma0 + this.valoriva + this.totInteres;
   }
 

@@ -360,7 +360,7 @@ export class AddFacturacionComponent implements OnInit {
     this.arrRubros.forEach(() => {
       suma12 += this.arrRubros[i][1] * this.arrRubros[i][2];
       if (this.arrRubros[i][3] == 1) {
-        sumiva += this.arrRubros[i][1] * this.arrRubros[i][2] * 0.12;
+        sumiva += this.arrRubros[i][1] * this.arrRubros[i][2] * 0.15;
       }
       i++;
     });

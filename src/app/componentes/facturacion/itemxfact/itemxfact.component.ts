@@ -50,7 +50,7 @@ export class ItemxfactComponent implements OnInit {
       this._itemxfact.forEach(() => {
          suma += this._itemxfact[i].cantidad * this._itemxfact[i].valorunitario;
          if (this._itemxfact[i].idcatalogoitems_catalogoitems.idrubro_rubros.swiva == 1) {
-            sumiva += (this._itemxfact[i].cantidad * this._itemxfact[i].valorunitario) * 0.12;
+            sumiva += (this._itemxfact[i].cantidad * this._itemxfact[i].valorunitario) * 0.15;
          }
          i++;
       });
