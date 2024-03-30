@@ -289,7 +289,6 @@ export class LecturasComponent implements OnInit {
     this.fila = fila;
     this.lecService.getByIdlectura(idlectura).subscribe({
       next: (resp) => {
-      console.log(resp)
         this.datosLectura = resp;
         this.cuenta = resp.idabonado_abonados.idabonado;
         this.formValor.patchValue({
@@ -310,7 +309,6 @@ export class LecturasComponent implements OnInit {
       this.formValor.value.idnovedad_novedades;
     this.lecService.updateLectura(this.idlectura, this.datosLectura).subscribe({
       next: (nex) => {
-      console.log(nex)
         this._lecturas[this.fila].lecturaanterior =
           this.formValor.value.lecturaanterior;
         this._lecturas[this.fila].lecturaactual =
@@ -805,7 +803,6 @@ export class LecturasComponent implements OnInit {
   }
 
   sort(columnName: string) {
-    console.log('Pasa');
     this._lecturas.sort(
       (a: { [x: string]: number }, b: { [x: string]: number }) => {
         if (a[columnName] < b[columnName]) {
