@@ -205,4 +205,11 @@ export class FacturaService {
     const observable = this.http.put(`${baseUrl}/${fac.idfactura}`, fac);
     return await firstValueFrom(observable);
   }
+  
+  getByNroFacturaModulo(nrofactura: String, idmodulo: number) {
+    return this.http.get<Facturas>(
+      `${baseUrl}/nrofmodulo?nrofactura=${nrofactura}&idmodulo=${idmodulo}`
+    );
+  }
+  
 }

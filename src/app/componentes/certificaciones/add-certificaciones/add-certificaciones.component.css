@@ -1,4 +1,3 @@
-
 .cabecera {
    background-color: var(--bgcolor1);
    color: white;
@@ -18,6 +17,10 @@
 #clientesModal {
    --clientecabecera: Olive;
    --clientedetalle: Khaki;
+}
+#facturaModal {
+   --clientecabecera: Olive;
+   --clientedetalle: rgb(140, 240, 227);
 }
 
 .clientecabecera { background-color: var(--clientecabecera);}

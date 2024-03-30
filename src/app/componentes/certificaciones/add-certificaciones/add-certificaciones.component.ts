@@ -5,6 +5,7 @@ import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Certificaciones } from 'src/app/modelos/certificaciones';
 import { Clientes } from 'src/app/modelos/clientes';
 import { Facturas } from 'src/app/modelos/facturas.model';
+import { Modulos } from 'src/app/modelos/modulos.model';
 import { TpCertifica } from 'src/app/modelos/tp-certifica';
 import { CertificacionesService } from 'src/app/servicios/certificaciones.service';
 import { ClientesService } from 'src/app/servicios/clientes.service';
@@ -21,13 +22,16 @@ export class AddCertificacionesComponent implements OnInit {
   privez = true; //Para resetear los datos de Búsqueda de Clientes
   formBusClientes: FormGroup; //Formulario para buscar Clientes del Modal
   certificaciones: Certificaciones = new Certificaciones();
+  tpcertifica: TpCertifica = new TpCertifica();
   formCertificacion: FormGroup;
+  f_factura: FormGroup;
   _clientes: any;
   filtro: string;
   _tpcertifica: any;
-  facturas: any;
-  // f_facturas: FormGroup;
+  _facturas: any;
   v_factura: any;
+  modulo: Modulos = new Modulos();
+  date: Date = new Date();
 
   constructor(
     private fb: FormBuilder,
@@ -35,8 +39,7 @@ export class AddCertificacionesComponent implements OnInit {
     private tpcertificaS: TpCertificaService,
     private certificacionesS: CertificacionesService,
     private facService: FacturaService,
-    private clieService: ClientesService,
-    private authService: AutorizaService
+    private clieService: ClientesService
   ) {}
 
   ngOnInit(): void {
@@ -52,10 +55,11 @@ export class AddCertificacionesComponent implements OnInit {
       // anio: '',
       // referenciadocumento: ['', Validators.required],
       nomcli: ['', Validators.required],
+      nrofactura: ['', Validators.required],
       idtpcertifica_tpcertifica: [tpcertifica, Validators.required],
       // idtpcertifica_tpcertifica: '',
       // idfactura_facturas: this.v_factura,
-      usucrea: this.authService.idusuario,
+      usucrea: 1,
       feccrea: date,
     });
 
@@ -63,8 +67,12 @@ export class AddCertificacionesComponent implements OnInit {
     this.formBusClientes = this.fb.group({
       nombre_identifica: [null, [Validators.required, Validators.minLength(5)]],
     });
+    this.f_factura = this.fb.group({
+      nrofactura: ['', [Validators.required, Validators.minLength(5)]],
+    });
 
     this.listarTpCerifica();
+    this.getUltimaCertificacion();
   }
 
   colocaColor(colores: any) {
@@ -79,19 +87,31 @@ export class AddCertificacionesComponent implements OnInit {
   onSubmit() {
     // this.guardarCertificacion();
     // this.formCertificacion.value.idfactura_facturas = this.v_factura;
-    this.certificacionesS
-      .saveCertificaciones(this.formCertificacion.value)
-      .subscribe({
-        next: (datos) => {
-          console.log('Grada Ok!');
-          this.regresar();
-        },
-        error: (err) =>
-          console.error('Al guardar la nueva Certificación: ', err.error),
-      });
+    this.tpcertifica.idtpcertifica =
+      this.formCertificacion.value.idtpcertifica_tpcertifica;
+    this.certificaciones.idtpcertifica_tpcertifica = this.tpcertifica;
+    this.certificaciones.anio = this.date.getFullYear();
+    this.certificaciones.usucrea = 1;
+    this.certificaciones.feccrea = this.date;
+    this.certificacionesS.saveCertificaciones(this.certificaciones).subscribe({
+      next: (datos) => {
+        console.log('Grada Ok!');
+        this.regresar();
+      },
+      error: (err) =>
+        console.error('Al guardar la nueva Certificación: ', err.error),
+    });
   }
 
   clientesModal() {
+    this.swvalido = 1;
+    if (this.privez) {
+      this.privez = false;
+    } else {
+      this.formBusClientes.reset();
+    }
+  }
+  facturaModal() {
     this.swvalido = 1;
     if (this.privez) {
       this.privez = false;
@@ -108,7 +128,9 @@ export class AddCertificacionesComponent implements OnInit {
       this.clieService
         .getByNombreIdentifi(this.formBusClientes.value.nombre_identifica)
         .subscribe({
-          next: (datos) => (this._clientes = datos),
+          next: (datos) => {
+            this._clientes = datos;
+          },
           error: (err) => console.log(err.error),
         });
     }
@@ -116,7 +138,32 @@ export class AddCertificacionesComponent implements OnInit {
 
   selecCliente(cli: Clientes) {
     this.formCertificacion.controls['nomcli'].setValue(cli.nombre);
-    // this.cliente = cli;
+    this.certificaciones.idcliente_clientes = cli;
+  }
+
+  buscarFactura() {
+  console.log(this.f_factura.value.nrofactura)
+    this.facService
+      .getByNrofactura(this.f_factura.value.nrofactura)
+      .subscribe({
+        next: (datos: any) => {
+          console.log(datos);
+          this._facturas = datos;
+          this.modulo = datos.idmodulo;
+        },
+        error:(e: any) => console.error(e),
+      });
+  }
+  selectFactura(factura: any) {
+    this.formCertificacion.controls['nrofactura'].setValue(factura.nrofactura);
+    this.certificaciones.idfactura_facturas = factura;
+  }
+  pagado(valor: number) {
+    if (valor === 1) {
+      return 'SI';
+    } else {
+      return 'NO';
+    }
   }
 
   listarTpCerifica() {
@@ -148,6 +195,15 @@ export class AddCertificacionesComponent implements OnInit {
         },
         (error) => console.log(error)
       );
+  }
+  getUltimaCertificacion() {
+    this.certificacionesS.ultima().subscribe({
+      next: (datos) => {
+        console.log(datos);
+        this.certificaciones.numero = datos.numero + 1;
+      },
+      error: (e) => console.error(e),
+    });
   }
 
   // buscarFacturas() {

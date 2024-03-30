@@ -27,7 +27,6 @@
                            'is-valid': f['nomcli'].valid, '': f['nomcli'].untouched}">
                      </div>
                   </div>
-
                   <div class="form-group col-md-8 my-0 py-0">
                      <div class="input-group input-group-sm mb-3">
                         <div class="input-group-prepend">
@@ -40,6 +39,18 @@
                            <option *ngFor="let tp of _tpcertifica" [ngValue]="tp.idtpcertifica">
                               {{tp.descripcion}} </option>
                         </select>
+                     </div>
+                  </div>
+                  <div class="form-group col-md-4 ">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <button type="button" class="btn btn-sm btn-primary" data-toggle="modal"
+                              data-target="#facturaModal" (click)="clientesModal()">Factura<sup>*</sup>
+                           </button>
+                        </div>
+                        <input type="text" class="form-control" aria-label="Small" formControlName="nrofactura"
+                           aria-describedby="inputGroup-sizing-sm" readonly [ngClass]="{'is-invalid': f['nrofactura'].invalid && f['nrofactura'].touched,
+                           'is-valid': f['nrofactura'].valid, '': f['nrofactura'].untouched}">
                      </div>
                   </div>
 
@@ -106,6 +117,67 @@
                            <td class="text-center small font-weight-bold py-0">{{i+1}}</td>
                            <td class="py-0">{{cliente.nombre}}</td>
                            <td class="py-0">{{cliente.cedula}}</td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+            <div class="row justify-content-center my-2">
+               <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">
+                  <i class="bi bi-x-circle"></i>&nbsp; Cancelar</button>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="modal fade" id="facturaModal" tabindex="-1" aria-labelledby="facturaModalLabel" aria-hidden="true"
+      data-backdrop="static">
+      <div class="modal-dialog modal-dialog-scrollable modal-lg">
+         <div class="modal-content clientedetalle">
+            <div class="modal-body mt-0">
+               <div class="row clientecabecera">
+                  <form [formGroup]="f_factura" class="mb-0 col-md-9">
+                     <div class="row py-2">
+                        <div class="input-group col-sm-12">
+                           <input type="text" placeholder="Número de factura (Mínimo 5)"
+                              class="form-control form-control-sm" autofocus formControlName="nrofactura" required
+                              minlength="5"
+                              [ngClass]="{'is-invalid': f_factura.controls['nrofactura'].invalid && f_factura.controls['nrofactura'].touched,
+                           'is-valid': f_factura.controls['nrofactura'].valid, '': f_factura.controls['nrofactura'].untouched}">
+
+                           <div class="input-group-append">
+                              <button class="btn btn-sm btn-primary" (click)="buscarFactura()"
+                                 [disabled]="f_factura.invalid">
+                                 <i class="fa fa-search" aria-hidden="true"></i> Buscar</button>
+                           </div>
+                        </div>
+                     </div>
+                  </form>
+
+                  <div class="col-md-3 mt-2 pl-0">
+                     <input type="text" class="form-control form-control-sm text-center" placeholder="Filtrar..."
+                        [(ngModel)]="filtro" />
+                  </div>
+
+               </div>
+               <div class="row mt-0 pt-0" *ngIf="!f_factura.invalid">
+                  <table class="table table-hover table-bordered table-sm mt-0 pt-0 facturadetalle" id="tablaClientes">
+                     <thead class="text-center facturacabecera">
+                        <tr>
+                           <th></th>
+                           <th>Nro. factura</th>
+                           <th>Cliente</th>
+                           <th>Modulo</th>
+                           <th>Pagado</th>
+                        </tr>
+                     </thead>
+                     <tbody id="id-tbody" class="roboto small">
+                        <tr *ngFor="let factura of _facturas  | filter:filtro; let i= index" class="fila"
+                           (click)="selectFactura(factura)" data-dismiss="modal">
+                           <td class="text-center small font-weight-bold py-0">{{i+1}}</td>
+                           <td class="py-0 text-right">{{factura.nrofactura}}</td>
+                           <td class="py-0">{{factura.idcliente.nombre}}</td>
+                           <td class="py-0">{{factura.idmodulo.descripcion}}</td> 
+                           <td class="py-0 text-center">{{pagado(factura.pagado)}}</td> 
                         </tr>
                      </tbody>
                   </table>

@@ -181,7 +181,7 @@ export class GeneCertificacionComponent implements OnInit {
    }
 
    buscarDeudas(idcliente: any) {
-      this.facService.getDeuda(idcliente).subscribe({
+      this.facService.getSinCobro(idcliente).subscribe({
          next: (datos) => {
             console.log(datos);
             if (datos.length != 0) {
