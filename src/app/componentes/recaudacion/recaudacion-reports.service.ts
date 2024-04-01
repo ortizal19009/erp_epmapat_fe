@@ -31,14 +31,14 @@ export class RecaudacionReportsService {
   constructor(
     private rubxfacService: RubroxfacService,
     private s_usuarios: UsuarioService
-  ) {}
+  ) { }
   cabeceraConsumoAgua(datos: any, doc: jsPDF, usuario: any, factura: any) {
     //doc.setFontSize(7);
     let tableWidth = 200;
     let m3 = datos.lecturaactual - datos.lecturaanterior;
     let fecha = datos.fechaemision.slice(0, 10).split('-');
     let mesConsumo = `${this.meses[+fecha[1]! - 1]} ${fecha[0]}`;
-
+    //console.log(datos)
     autoTable(doc, {
       tableWidth,
       styles: { fontSize: 9, fontStyle: 'bold' },

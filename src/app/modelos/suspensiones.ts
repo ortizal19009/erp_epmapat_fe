@@ -10,7 +10,7 @@ export class Suspensiones {
   iddocumento_documentos: Documentos;
   numdoc: string;
   observa: string;
-  usucrea: number = authService.idusuario;
+  usucrea: number = 1;
   feccrea: Date = new Date();
   usumodi: number;
   fecmodi: Date;

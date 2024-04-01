@@ -55,7 +55,7 @@ export class AddConvenioComponent implements OnInit {
   idmodulo: number = 3;
   seccion: Modulos = new Modulos();
   f_nuevosValores: FormGroup;
-
+  porcentaje: number = 0.2;
   constructor(
     private fb: FormBuilder,
     private router: Router,
@@ -185,19 +185,37 @@ export class AddConvenioComponent implements OnInit {
   sumTotaltarifa() {
     let suma: number = 0;
     let i = 0;
+    let com = 0;
     this._sincobro.forEach(() => {
-      suma += this._sincobro[i].totaltarifa + 1;
+      console.log(this._sincobro[i])
+      if (this._sincobro[i].idmodulo.idmodulo === 3 && this._sincobro[i].idabonado != null) {
+        com = 1
+      }
+      suma += this._sincobro[i].totaltarifa + com;
       i++;
     });
     this.total = suma;
-    let cuotainicial = Math.round(this.total * 0.2 * 100) / 100;
+    let cuotainicial = Math.round(this.total * this.porcentaje * 100) / 100;
     this.formConvenio.controls['cuotainicial'].setValue(cuotainicial);
+  }
+  sumComercializacion(sincobro: any) {
+    let com = 0;
+    console.log(sincobro)
+    if (sincobro.idmodulo.idmodulo === 3 && sincobro.idabonado != null) {
+      com = 1;
+      return sincobro.totaltarifa + com;
+    }
+    return sincobro.totaltarifa;
   }
 
   changeCuotainicial() {
     this.formConvenio
       .get('cuotainicial')!
       .valueChanges.subscribe((cuotainicial) => {
+        console.log(cuotainicial)
+        console.log(this.total)
+        this.porcentaje = ((cuotainicial * 100) / this.total) / 100
+        console.log(this.porcentaje)
         this.pagomensual = 0;
         this.nropagos = 0;
         this.formConvenio.controls['cuotafinal'].setValue('');
@@ -224,7 +242,7 @@ export class AddConvenioComponent implements OnInit {
     this.rubros = [];
     let cuotainicial = this.formConvenio.value.cuotainicial;
     let cuotas = this.formConvenio.value.cuotas;
-    // console.log('cuotainicial: ', cuotainicial, 'cuotas: ', cuotas)
+    console.log('cuotainicial: ', cuotainicial, 'cuotas: ', cuotas)
     this.nropagos = cuotas - 1;
     this.pagomensual = 0;
     if (this.nropagos > 0)

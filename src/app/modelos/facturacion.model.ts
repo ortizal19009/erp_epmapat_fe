@@ -9,7 +9,7 @@ export class Facturacion {
     idcliente_clientes: Clientes;
     total: number;
     cuotas: number;
-    usucrea: number = authService.idusuario
+    usucrea: number = 1
     feccrea: Date;
     usumodi: number;
     fecmodi: Date;

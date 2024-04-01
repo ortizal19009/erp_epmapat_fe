@@ -185,11 +185,11 @@
                      <td class="text-center font-weight-bold small">{{ i+1 }}</td>
                      <td class="text-center">{{ sincobro.idfactura }}</td>
                      <td class="text-center">{{ sincobro.feccrea }}</td>
-                     <td class="text-right">{{ sincobro.totaltarifa + 1 | number: '.2-2'}}</td>
+                     <td class="text-right">{{ sumComercializacion(sincobro)| number: '.2-2'}}</td>
                   </tr>
                   <tr>
                      <td colspan="4">
-                        <button class="btn btn-xs btn-outline-primary text-right"  data-toggle="modal"
+                        <button class="btn btn-xs btn-outline-primary text-right" data-toggle="modal"
                            data-target="#addModulo">Agregar</button>
                      </td>
                   </tr>
@@ -201,7 +201,8 @@
 </div>
 
 <!-- MODAL AÑADIR  -->
-<div class="modal fade" id="addModulo" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="modal fade" id="addModulo" data-backdrop="static" data-keyboard="false" tabindex="-1"
+   aria-labelledby="staticBackdropLabel" aria-hidden="true">
    <div class="modal-dialog">
       <div class="modal-content">
          <div class="modal-header">
@@ -226,7 +227,8 @@
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-xs btn-outline-success" data-dismiss="modal">Cancelar</button>
-            <button type="button" class="btn btn-xs btn-success" data-dismiss="modal" (click)="addValores()">Aceptar</button>
+            <button type="button" class="btn btn-xs btn-success" data-dismiss="modal"
+               (click)="addValores()">Aceptar</button>
          </div>
       </div>
    </div>

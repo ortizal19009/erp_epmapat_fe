@@ -6,7 +6,7 @@ export class Tipotramite {
   descripcion: String;
   facturable: number;
   estado: number = 1;
-  usucrea: number = authService.idusuario;
+  usucrea: number ;
   feccrea: Date;
   usumodi: number;
   fecmodi: Date;

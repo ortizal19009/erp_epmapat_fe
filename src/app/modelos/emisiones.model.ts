@@ -9,7 +9,7 @@ export class Emisiones {
   usuariocierre: number;
   fechacierre: Date;
   m3: number;
-  usucrea: number = authService.idusuario;
+  usucrea: number = 1;
   feccrea: Date;
   usumodi: number;
   fecmodi: Date;

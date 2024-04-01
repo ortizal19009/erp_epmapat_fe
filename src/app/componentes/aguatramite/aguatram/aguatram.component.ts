@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Abonados } from 'src/app/modelos/abonados';
 import { Aguatramite } from 'src/app/modelos/aguatramite.model';
 import { Categoria } from 'src/app/modelos/categoria.model';
@@ -61,9 +62,11 @@ export class AguatramComponent implements OnInit {
 
    constructor(private actRouter: ActivatedRoute, private fb: FormBuilder, private s_abonados: AbonadosService,
       private s_aboxdsuspension: AboxsuspensionService, private s_categorias: CategoriaService, private router: Router,
-      private s_tramitenuevo: TramiteNuevoService, private s_tramiteagua: TramitesAguaService, private s_aguatramite: AguatramiteService) { }
+      private s_tramitenuevo: TramiteNuevoService, private s_tramiteagua: TramitesAguaService, private s_aguatramite: AguatramiteService, private authService: AutorizaService) { }
 
    ngOnInit(): void {
+      this.estadom.usucrea = this.authService.idusuario;
+      this.tramitenuevo.usucrea = this.authService.idusuario;
 
       sessionStorage.setItem('ventana', '/aguatramite');
       let coloresJSON = sessionStorage.getItem('/aguatramite');
@@ -266,6 +269,7 @@ export class AguatramComponent implements OnInit {
    }
 
    setAbonado(abonado: any) {
+      console.log(abonado)
       this.abonado = abonado;
       this.cliente = abonado.idcliente_clientes;
       this.ruta = abonado.idruta_rutas;

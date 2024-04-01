@@ -4,5 +4,5 @@ let authService: AutorizaService;
 export class Estadom {
   idestadom!: number;
   descripcion!: string;
-  usucrea: number = authService.idusuario;
+  usucrea: number;
 }

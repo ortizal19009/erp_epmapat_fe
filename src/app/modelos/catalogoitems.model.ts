@@ -10,7 +10,7 @@ export class Catalogoitems {
   estado: Boolean;
   idusoitems_usoitems: Usoitems;
   idrubro_rubros: Rubros;
-  usucrea: number = authService.idusuario;
+  usucrea: number =1;
   feccrea: Date;
   usumodi: number;
   fecmodi: Date;
