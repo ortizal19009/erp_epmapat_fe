@@ -15,7 +15,7 @@ export class Aguatramite {
    idcliente_clientes: Clientes;
    idfactura_facturas: number;
    idtipotramite_tipotramite: Tipotramite;
-   usucrea: number = authService.idusuario;
+   usucrea: number ;
    feccrea: Date;
    usumodi: number;
    fecmodi: Date;

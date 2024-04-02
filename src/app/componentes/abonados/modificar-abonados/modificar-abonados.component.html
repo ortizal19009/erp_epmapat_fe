@@ -214,6 +214,35 @@
                               formControlName="medidorprincipal" aria-label="Small">
                         </div>
                      </div>
+                     <div class="form-group col-md-3 my-0 py-0">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Adulto
+                                 mayor</span>
+                           </div>
+                           <input type="checkbox" class="form-control text-center" formControlName="adultomayor"
+                              aria-label="Small">
+                        </div>
+                     </div>
+                     <div class="form-group col-md-3 my-0 py-0">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Municipio</span>
+                           </div>
+                           <input type="checkbox" class="form-control text-center" formControlName="municipio"
+                              aria-label="Small">
+                        </div>
+                     </div>
+                     <div class="form-group col-md-3 my-0 py-0">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">No
+                                 Alcantarillado</span>
+                           </div>
+                           <input type="checkbox" class="form-control text-center" formControlName="swalcantarillado"
+                              aria-label="Small">
+                        </div>
+                     </div>
 
                      <div class="row col-md-12">
                         <div class="form-group col-md-6 mt-1">
@@ -240,7 +269,7 @@
 
                      </div>
                   </div>
-                  
+
                   <div class="mb-1 text-center">
                      <button type="button" class="btn btn-sm btn-success" data-toggle="modal"
                         data-target="#serviciosModal" (click)="cargarDatos()">
@@ -281,49 +310,9 @@
                <div class="modal-content">
                   <div class="modal-header">
                      <h5 class="modal-title" id="responsablePagoModalLabel">Buscar responsable de pago</h5>
-                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                     </button>
                   </div>
                   <div class="modal-body">
-                     <form [formGroup]="f_responsablePago">
-                        <div class="row">
-                           <div class="col-sm-10" id="idi-responsable-pago">
-                              <input type="text" placeholder="Nombre ó identificación" class="form-control" autofocus
-                                 id="buscarResponsablePago" formControlName="buscarResponsablePago" />
-                           </div>
-                           <div class="col-sm-2">
-                              <button class="btn btn-outline-primary mx-1" (click)="buscarResponsablePago()"><i
-                                    class="fa fa-search" aria-hidden="true"></i></button>
-                           </div>
-                        </div>
-                        <div class="row ">
-                           <table class="table table-hover table-bordered table-sm mt-3">
-                              <thead class="text-center">
-                                 <tr>
-                                    <th class="bg-primary">Nombre</th>
-                                    <th class="bg-primary">Identificacion</th>
-                                    <th class="bg-primary">Seleccionar</th>
-                                 </tr>
-                              </thead>
-                              <tbody id="id-tbody">
-                                 <tr *ngFor="let responsablePagosDatos of v_resppago" class="tr-res-pago">
-                                    <td>{{responsablePagosDatos.nombre}}</td>
-                                    <td>{{responsablePagosDatos.cedula}}</td>
-                                    <td class="text-center">
-                                       <button class="badge badge-primary" data-dismiss="modal"
-                                          (click)="obtenerValoresResponsablePago(responsablePagosDatos)">
-                                          Seleccionar
-                                       </button>
-                                    </td>
-                                 </tr>
-                              </tbody>
-                           </table>
-                        </div>
-                     </form>
-                  </div>
-                  <div class="modal-footer">
-                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                     <app-buscar-cliente (setCliente)="setResponsablePago($event)"></app-buscar-cliente>
                   </div>
                </div>
             </div>
@@ -334,49 +323,9 @@
                <div class="modal-content">
                   <div class="modal-header">
                      <h5 class="modal-title" id="clienteModalLabel">Buscar cliente</h5>
-                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                     </button>
                   </div>
                   <div class="modal-body">
-                     <form [formGroup]="f_clientes">
-                        <div class="row">
-                           <div class="col-sm-10" id="idi-cliente">
-                              <input type="text" placeholder="Nombre ó identificación" class="form-control" autofocus
-                                 id="buscarCliente" formControlName="buscarCliente" />
-                           </div>
-                           <div class="col-sm-2">
-                              <button class="btn btn-outline-primary mx-1" (click)="buscarCliente()"><i
-                                    class="fa fa-search" aria-hidden="true"></i></button>
-                           </div>
-                        </div>
-                        <div class="row ">
-                           <table class="table table-hover table-bordered table-sm mt-3">
-                              <thead class="text-center">
-                                 <tr>
-                                    <th class="bg-primary">Nombre</th>
-                                    <th class="bg-primary">Identificacion</th>
-                                    <th class="bg-primary">Seleccionar</th>
-                                 </tr>
-                              </thead>
-                              <tbody id="id-tbody">
-                                 <tr *ngFor="let clienteDatos of v_cliente" class="tr-res-pago">
-                                    <td>{{clienteDatos.nombre}}</td>
-                                    <td>{{clienteDatos.cedula}}</td>
-                                    <td class="text-center">
-                                       <button class="badge badge-primary" data-dismiss="modal"
-                                          (click)="obtenerValoresClientes(clienteDatos)">
-                                          Seleccionar
-                                       </button>
-                                    </td>
-                                 </tr>
-                              </tbody>
-                           </table>
-                        </div>
-                     </form>
-                  </div>
-                  <div class="modal-footer">
-                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                     <app-buscar-cliente (setCliente)="setCliente($event)"></app-buscar-cliente>
                   </div>
                </div>
             </div>

@@ -104,18 +104,21 @@ export class GeneCertificacionComponent implements OnInit {
          case 1:
             this.buscarDeudas(this.certificacion.idcliente_clientes.idcliente);
             this.respuesta = 'SI adeuda'
+            this.formGenera.patchValue({sino:'1'})
             break;
-         case 2:
-            //this.buscarDeudasConsumo(this.formGenera.value.cliente)
-            this.estarDia = true;
-            this.findAboByCliente(this.certificacion.idcliente_clientes);
-            // console.log(this.formGenera.value);
-            this.respuesta = 'NO está al día'
-            break;
-         case 6:
-            this.serAbonado = true;
-            this.findAboByCliente(this.certificacion.idcliente_clientes);
-            this.respuesta = 'NO es Abonado'
+            case 2:
+               //this.buscarDeudasConsumo(this.formGenera.value.cliente)
+               this.estarDia = true;
+               this.findAboByCliente(this.certificacion.idcliente_clientes);
+               // console.log(this.formGenera.value);
+               this.respuesta = 'NO está al día'
+               this.formGenera.patchValue({sino:'1'})
+               break;
+               case 6:
+                  this.serAbonado = true;
+                  this.findAboByCliente(this.certificacion.idcliente_clientes);
+                  this.respuesta = 'NO es Abonado'
+                  this.formGenera.patchValue({sino:'1'})
             break;
       }
    }

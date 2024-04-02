@@ -212,7 +212,7 @@ export class AddFacturacionComponent implements OnInit {
       planilla.conveniopago = 0;
       planilla.estadoconvenio = 0;
       planilla.formapago = this.formCuotas.value.formapago;
-      planilla.valorbase = this.totfac / n;
+      planilla.valorbase = (this.totfac + this.totiva) / n;
       planilla.usucrea = 1;
       planilla.estado = 1;
       //planilla.interescobrado = 0;
@@ -411,6 +411,7 @@ interface Planilla {
   fecmodi: Date;
   valorbase: number;
   interescobrado: number;
+  swiva: number; 
 }
 
 interface Rubrosxpla {

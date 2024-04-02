@@ -32,5 +32,6 @@ export class Abonados {
     fecmodi: Date;
     adultomayor: Boolean; 
     municipio: Boolean;
+    swalcantarillado: Boolean;
     promedio: number;
 }

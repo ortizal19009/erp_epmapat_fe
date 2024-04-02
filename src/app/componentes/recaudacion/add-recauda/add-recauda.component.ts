@@ -611,7 +611,6 @@ export class AddRecaudaComponent implements OnInit {
                 ),
             });
           }
-          console.log(this.totInteres);
           this.calcularInteres(idfactura);
           this.subtotal();
         },
@@ -817,7 +816,7 @@ export class AddRecaudaComponent implements OnInit {
               fac.fechacobro = fechacobro;
               fac.usuariocobro = this.authService.idusuario;
               if (fac.idmodulo.idmodulo != 8) {
-              fac.interescobrado = this._sincobro[i].interes
+                fac.interescobrado = this._sincobro[i].interes;
               }
               fac.pagado = 1;
               if (this._sincobro[i].interes > 0 && fac.idmodulo.idmodulo != 8) {
