@@ -9,8 +9,6 @@ import { TemplateHeaderService } from 'src/app/servicios/template-header.service
 export class ConveniosReportsService {
   constructor(private header: TemplateHeaderService) {}
   impContratoConvenio(datos: any, cuotas: any) {
-    console.log(datos);
-    console.log(cuotas)
     let margin = 30;
     let doc = new jsPDF('p', 'pt', 'a4');
     let meses = [
