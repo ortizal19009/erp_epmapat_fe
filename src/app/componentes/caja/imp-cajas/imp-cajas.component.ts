@@ -39,7 +39,7 @@ export class ImpCajasComponent implements OnInit {
     private facService: FacturaService,
     private rxfService: RubroxfacService,
     private _pdf: PdfService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/cajas');
@@ -84,7 +84,7 @@ export class ImpCajasComponent implements OnInit {
     this.swcalculando = true;
     let d_fecha = this.formImprimir.value.d_fecha;
     let h_fecha = this.formImprimir.value.h_fecha;
-    console.log(this.formImprimir.value);
+    //console.log(this.formImprimir.value);
     let hasta = '2023-12-31';
     switch (this.opcreporte) {
       case 1: // Recaudacion diaria - Resumen
@@ -191,9 +191,9 @@ export class ImpCajasComponent implements OnInit {
       ); */
     this._pdf.header(
       'RESUMEN RECAUDACIÓN: ' +
-        this.formImprimir.value.d_fecha +
-        ' - ' +
-        this.formImprimir.value.h_fecha,
+      this.formImprimir.value.d_fecha +
+      ' - ' +
+      this.formImprimir.value.h_fecha,
       doc
     );
 
@@ -281,7 +281,9 @@ export class ImpCajasComponent implements OnInit {
     let suma2: number = 0;
     i = 0;
     this._formacobro.forEach(() => {
-      let totalRecaudado = Math.round(this._formacobro[i][1] * 100) / 100;
+      console.log(this._cobradas[i])
+      console.log(this._formacobro[i])
+      let totalRecaudado = Math.round((this._formacobro[i][1] ) * 100) / 100;
       formascobro.push([this._formacobro[i][0], formatNumber(totalRecaudado)]);
       suma2 += totalRecaudado;
       i++;
@@ -354,16 +356,16 @@ export class ImpCajasComponent implements OnInit {
       ); */
     this._pdf.header(
       'RECAUDACIÓN DIARIA - PLANILLAS: ' +
-        this.formImprimir.value.d_fecha +
-        ' - ' +
-        this.formImprimir.value.h_fecha,
+      this.formImprimir.value.d_fecha +
+      ' - ' +
+      this.formImprimir.value.h_fecha,
       doc
     );
     const datos: any = [];
     let suma: number = 0;
     var i = 0;
     this._cobradas.forEach(() => {
-      let totalPorFormaCobro = Math.round(this._cobradas[i][1] * 100) / 100;
+      let totalPorFormaCobro = Math.round((this._cobradas[i][1] + this._cobradas[i][0].swiva) * 100) / 100;
       datos.push([
         this._cobradas[i][0].idfactura,
         this._cobradas[i][0].feccrea,

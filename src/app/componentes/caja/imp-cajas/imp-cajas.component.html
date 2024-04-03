@@ -3,7 +3,7 @@
       <div class="row mt-0 px-1 py-1 justify-content-start cabecera border sombra">
          <div class="col-sm-6">
             <h4 *ngIf="swimprimir" class="m-0 font-weight-bold text-truncate">
-               <i class="bi-printer pointer" (click)="impriexpor()"></i> &nbsp; Imprimir Recaudación / Cajas
+               <i class="bi-printer pointer" (click)="impriexpor()"></i> &nbsp; Imprimir Recaudación General / Cajas
             </h4>
             <h4 *ngIf="!swimprimir" class="m-0 font-weight-bold text-truncate">
                <i class="bi-file-earmark-arrow-up pointer" (click)="impriexpor()"></i> &nbsp; Exportar
@@ -26,8 +26,8 @@
                         <label *ngIf="!swimprimir" class="input-group-text">Exportar</label>
                      </div>
                      <select class="custom-select" formControlName="reporte" (change)="changeReporte()">
-                        <option value="1">Resumen Recaudación diaria</option>
-                        <option value="2">Recaudación diaria - Planillas</option>
+                        <option value="1">Resumen Recaudación</option>
+                        <option value="2">Recaudación - Planillas</option>
                         <option value="3">Lista de cajas</option>
                      </select>
                   </div>
