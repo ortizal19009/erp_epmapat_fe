@@ -68,7 +68,7 @@ export class AddConvenioComponent implements OnInit {
     private facxconvService: FacxconvenioService,
     private rxfService: RubroxfacService,
     private moduService: ModulosService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/convenios');
@@ -97,8 +97,8 @@ export class AddConvenioComponent implements OnInit {
       { updateOn: 'blur' }
     );
     this.f_nuevosValores = this.fb.group({
-      seccion: this.seccion
-    })
+      seccion: this.seccion,
+    });
 
     this.modulos();
     this.siguienteNroconvenio();
@@ -124,7 +124,7 @@ export class AddConvenioComponent implements OnInit {
   }
 
   obtenerSeccion(e: any) {
-    this.formConvenio.value.seccion = +e.target.value!
+    this.formConvenio.value.seccion = +e.target.value!;
     this.idmodulo = this.formConvenio.value.seccion;
   }
 
@@ -146,7 +146,7 @@ export class AddConvenioComponent implements OnInit {
           this.abonado = datos;
           this.facService.getSinCobrarAbo(this.idmodulo, idabonado).subscribe({
             next: (datos) => {
-              console.log(datos)
+              console.log(datos);
               this._sincobro = datos;
               this.formConvenio.controls['cedula'].setValue(
                 this.abonado.idcliente_clientes.cedula
@@ -187,9 +187,11 @@ export class AddConvenioComponent implements OnInit {
     let i = 0;
     let com = 0;
     this._sincobro.forEach(() => {
-      console.log(this._sincobro[i])
-      if (this._sincobro[i].idmodulo.idmodulo === 3 && this._sincobro[i].idabonado != null) {
-        com = 1
+      if (
+        this._sincobro[i].idmodulo.idmodulo === 3 &&
+        this._sincobro[i].idabonado != null
+      ) {
+        com = 1;
       }
       suma += this._sincobro[i].totaltarifa + com;
       i++;
@@ -200,7 +202,6 @@ export class AddConvenioComponent implements OnInit {
   }
   sumComercializacion(sincobro: any) {
     let com = 0;
-    console.log(sincobro)
     if (sincobro.idmodulo.idmodulo === 3 && sincobro.idabonado != null) {
       com = 1;
       return sincobro.totaltarifa + com;
@@ -212,10 +213,10 @@ export class AddConvenioComponent implements OnInit {
     this.formConvenio
       .get('cuotainicial')!
       .valueChanges.subscribe((cuotainicial) => {
-        console.log(cuotainicial)
-        console.log(this.total)
-        this.porcentaje = ((cuotainicial * 100) / this.total) / 100
-        console.log(this.porcentaje)
+        console.log(cuotainicial);
+        console.log(this.total);
+        this.porcentaje = (cuotainicial * 100) / this.total / 100;
+        console.log(this.porcentaje);
         this.pagomensual = 0;
         this.nropagos = 0;
         this.formConvenio.controls['cuotafinal'].setValue('');
@@ -242,7 +243,7 @@ export class AddConvenioComponent implements OnInit {
     this.rubros = [];
     let cuotainicial = this.formConvenio.value.cuotainicial;
     let cuotas = this.formConvenio.value.cuotas;
-    console.log('cuotainicial: ', cuotainicial, 'cuotas: ', cuotas)
+    console.log('cuotainicial: ', cuotainicial, 'cuotas: ', cuotas);
     this.nropagos = cuotas - 1;
     this.pagomensual = 0;
     if (this.nropagos > 0)
@@ -296,11 +297,13 @@ export class AddConvenioComponent implements OnInit {
     let r: any = {};
     this.rubxfacService.getByIdfactura(this._sincobro[i].idfactura).subscribe({
       next: (datos) => {
+        console.log(datos);
+        console.log(this.rubros);
         let j = 0;
         datos.forEach(() => {
           r = {
             idrubro: datos[j].idrubro_rubros.idrubro,
-            valorunitario: datos[j].valorunitario,
+            valorunitario: +datos[j].valorunitario.toFixed(2)!,
           };
           let indice = this.rubros.findIndex(
             (rubro: { idrubro: number }) => rubro.idrubro === r.idrubro
@@ -408,6 +411,7 @@ export class AddConvenioComponent implements OnInit {
       let rxf: Rubroxfac = new Rubroxfac();
       rxf.cantidad = 1;
       rxf.estado = 1;
+      console.log(this.facturas[i].porcentaje)
       rxf.valorunitario =
         Math.round(
           this.rubros[j].valorunitario * this.facturas[i].porcentaje * 100
@@ -417,6 +421,7 @@ export class AddConvenioComponent implements OnInit {
       rubro.idrubro = this.rubros[j].idrubro;
       rxf.idrubro_rubros = rubro;
       try {
+      console.log(rxf)
         await this.rxfService.saveRubroxfacAsync(rxf);
       } catch (error) {
         console.error(`Al guardar Rubroxfac ${j}`, error);
@@ -464,7 +469,7 @@ export class AddConvenioComponent implements OnInit {
   }
   /* AÑADIR NUEVOS VALORES */
   addValores() {
-    let seccion = this.f_nuevosValores.value.seccion
+    let seccion = this.f_nuevosValores.value.seccion;
     let idabonado = this.formConvenio.value.idabonado;
     if (idabonado) {
       this.swbuscando = true;
@@ -475,14 +480,16 @@ export class AddConvenioComponent implements OnInit {
           this.facService.getSinCobrarAbo(seccion, idabonado).subscribe({
             next: (datos: any) => {
               datos.forEach((item: any) => {
-                let query = this._sincobro.find((factura: { idfactura: number }) => factura.idfactura === item.idfactura)
+                let query = this._sincobro.find(
+                  (factura: { idfactura: number }) =>
+                    factura.idfactura === item.idfactura
+                );
                 if (query === undefined) {
-                  this._sincobro.push(item)
+                  this._sincobro.push(item);
                 }
-              })
+              });
 
               this.sumTotaltarifa();
-
             },
             error: (err) =>
               console.error(
@@ -498,7 +505,5 @@ export class AddConvenioComponent implements OnInit {
       this.formConvenio.controls['nombre'].setValue('');
       this.formConvenio.controls['cuotainicial'].setValue('');
     }
-
-
   }
 }

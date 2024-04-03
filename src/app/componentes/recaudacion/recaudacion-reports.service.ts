@@ -216,7 +216,7 @@ export class RecaudacionReportsService {
           columns: ['', ''],
           body: [
             ['Sub total', this.subtotal.toFixed(2)],
-            ['Iva 12%', this.iva.toFixed(2)],
+            ['Iva 15%', this.iva.toFixed(2)],
             ['Intereses', factura.interescobrado.toFixed(2)],
             ['Valor total', this.total.toFixed(2)],
           ],

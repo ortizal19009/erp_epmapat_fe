@@ -215,6 +215,7 @@ export class AddFacturacionComponent implements OnInit {
       planilla.valorbase = (this.totfac + this.totiva) / n;
       planilla.usucrea = 1;
       planilla.estado = 1;
+      planilla.swiva = this.totiva; 
       //planilla.interescobrado = 0;
       let fecha: Date = new Date();
       fecha.setMonth(fecha.getMonth() + (i - 1));

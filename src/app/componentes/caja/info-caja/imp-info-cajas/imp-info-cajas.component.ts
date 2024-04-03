@@ -196,7 +196,10 @@ export class ImpInfoCajasComponent implements OnInit {
         16
       ); */
     this._pdf.header(
-      'RESUMEN RECAUDACIÓN: ' + this.formImprimir.value.d_fecha +' - '+ this.formImprimir.value.h_fecha,
+      'RESUMEN RECAUDACIÓN: ' +
+        this.formImprimir.value.d_fecha +
+        ' - ' +
+        this.formImprimir.value.h_fecha,
       doc
     );
 
@@ -356,12 +359,16 @@ export class ImpInfoCajasComponent implements OnInit {
         16
       ); */
     this._pdf.header(
-      'RECAUDACIÓN - PLANILLAS: ' + this.formImprimir.value.d_fecha +' - '+ this.formImprimir.value.h_fecha,
+      'RECAUDACIÓN - PLANILLAS: ' +
+        this.formImprimir.value.d_fecha +
+        ' - ' +
+        this.formImprimir.value.h_fecha,
       doc
     );
     const datos: any = [];
     let suma: number = 0;
     var i = 0;
+    console.log(this._cobradas);
     this._cobradas.forEach(() => {
       let totalPorFormaCobro = Math.round(this._cobradas[i][1] * 100) / 100;
       datos.push([
@@ -369,8 +376,9 @@ export class ImpInfoCajasComponent implements OnInit {
         this._cobradas[i][0].feccrea,
         this._cobradas[i][0].nrofactura,
         this._cobradas[i][0].formapago,
+        this._cobradas[i][0].idmodulo.idmodulo,
         this._cobradas[i][0].idcliente.nombre,
-        formatNumber(totalPorFormaCobro),
+        formatNumber(totalPorFormaCobro + this._cobradas[i][0].swiva),
       ]);
       suma += totalPorFormaCobro;
       i++;
@@ -399,7 +407,9 @@ export class ImpInfoCajasComponent implements OnInit {
     };
 
     autoTable(doc, {
-      head: [['Nro', 'Fecha', 'Factura', 'F.Cob', 'Cliente', 'Valor']],
+      head: [
+        ['Nro', 'Fecha', 'Factura', 'F.Cob', 'Módulo', 'Cliente', 'Valor'],
+      ],
       theme: 'grid',
       headStyles: {
         fillColor: [68, 103, 114],
@@ -417,8 +427,9 @@ export class ImpInfoCajasComponent implements OnInit {
         1: { halign: 'center', cellWidth: 55 },
         2: { halign: 'center', cellWidth: 110 },
         3: { halign: 'center', cellWidth: 30 },
-        4: { halign: 'left', cellWidth: 250 },
-        5: { halign: 'right', cellWidth: 50 },
+        4: { halign: 'center', cellWidth: 30 },
+        5: { halign: 'left', cellWidth: 250 },
+        6: { halign: 'right', cellWidth: 50 },
       },
       margin: { left: m_izquierda - 1, top: 18, right: 21, bottom: 13 },
       body: datos,
