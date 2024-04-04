@@ -100,6 +100,8 @@ export class RecalFacturaComponent implements OnInit {
       let categoria = this._lecturas[0].idabonado_abonados.idcategoria_categorias.idcategoria;
       let consumo = this._lecturas[0].lecturaactual - this._lecturas[0].lecturaanterior;
       let adultomayor = this._lecturas[0].idabonado_abonados.adultomayor;
+      let noAlcantarillado = this._lecturas[0].idabonado_abonados.swalcantarillado;
+      console.log(noAlcantarillado)
       if (adultomayor) if (categoria == 9 && consumo > 34) categoria = 1;
       else if (categoria == 9 && consumo > 10) categoria = 1;
       if (categoria == 9 && consumo > 34) categoria = 1;
@@ -128,13 +130,18 @@ export class RecalFacturaComponent implements OnInit {
                let num5 = Math.round((consumo * this.tarifa[0].saneamiento / 2) * this.tarifa[0].porc * 100) / 100;
                let num7 = Math.round(0.5 * this.tarifa[0].porc * 100) / 100;
                let suma: number = 0;
+               if (noAlcantarillado === true) {
+                  num2 = 0;
+                  num4 = 0;
+                  num7 = 0;
+                  num5 = 0;
+               }
                suma = Math.round((num1 + num2 + num3 + num4 + num5 + 0.1 + num7) * 100) / 100;
                //Categoria 9 no tiene tarifario es el 50% de la Residencial. Abonados del Municipio también 50%
                if (swcate9 || swmunicipio) suma = Math.round(suma / 2 * 100) / 100;
                this.newtotal = suma;
                let r: any = {};
                this.rubros = [];
-
                if (swcate9 || swmunicipio) {
                   let rub1002: number; let rub1003: number
                   //Alcantarillado / 2

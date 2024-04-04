@@ -111,7 +111,7 @@ export class AddRecaudaComponent implements OnInit {
     private recaService: RecaudacionService,
     private facxrService: FacxrecaudaService,
     private s_recaudaxcaja: RecaudaxcajaService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.formBuscar = this.fb.group({
@@ -400,7 +400,7 @@ export class AddRecaudaComponent implements OnInit {
       error: (err) => console.error(err.error),
     });
   }
-  disabled(e: any) {}
+  disabled(e: any) { }
 
   //Total de las planillas sin cobrar
   // total() {
@@ -790,7 +790,7 @@ export class AddRecaudaComponent implements OnInit {
     rubrosxfac.cantidad = 1;
     rubrosxfac.estado = 1;
     this.rubxfacService.saveRubroxFac(rubrosxfac).subscribe({
-      next: (datos) => {},
+      next: (datos) => { },
       error: (e) => console.error(e),
     });
   }
@@ -1090,8 +1090,11 @@ export class AddRecaudaComponent implements OnInit {
     interes: number,
     multa: number,
     modulo: number,
-    valorbase: number
+    valorbase: number,
+    sincobro: any
   ) {
+    console.log(sincobro)
+    console.log(modulo)
     if (modulo != 8) {
       let t = 0,
         c = 0,
@@ -1102,8 +1105,13 @@ export class AddRecaudaComponent implements OnInit {
       i = interes === undefined ? 0 : interes;
       m = multa === undefined ? 0 : multa;
       return t + c + i + m;
-    } else {
+    } else if (sincobro.idmodulo.idmodulo === 3 && (sincobro.idabonado === 0 || sincobro.idabonado == null)) {
+      console.log(valorbase)
+      console.log(tarifa)
       return valorbase;
+    } else {
+      return tarifa;
+
     }
   }
   //Al digitar el valor de la NC
@@ -1128,7 +1136,7 @@ export class AddRecaudaComponent implements OnInit {
       return of({ invalido: true });
     else return of(null);
   }
-  pdf() {}
+  pdf() { }
   //Al digitar el dinero
   changeDinero() {
     let ncvalor: number;

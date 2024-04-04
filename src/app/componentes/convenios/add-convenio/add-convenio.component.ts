@@ -68,7 +68,7 @@ export class AddConvenioComponent implements OnInit {
     private facxconvService: FacxconvenioService,
     private rxfService: RubroxfacService,
     private moduService: ModulosService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/convenios');
@@ -296,9 +296,8 @@ export class AddConvenioComponent implements OnInit {
   sumaRubros(i: number) {
     let r: any = {};
     this.rubxfacService.getByIdfactura(this._sincobro[i].idfactura).subscribe({
-      next: (datos) => {
+      next: (datos: any) => {
         console.log(datos);
-        console.log(this.rubros);
         let j = 0;
         datos.forEach(() => {
           r = {
@@ -315,6 +314,8 @@ export class AddConvenioComponent implements OnInit {
                 (this.rubros[indice].valorunitario + r.valorunitario) * 100
               ) / 100;
           j++;
+          console.log(r)
+          console.log(this.rubros)
         });
         i++;
         if (i < this._sincobro.length) this.sumaRubros(i);
@@ -421,7 +422,7 @@ export class AddConvenioComponent implements OnInit {
       rubro.idrubro = this.rubros[j].idrubro;
       rxf.idrubro_rubros = rubro;
       try {
-      console.log(rxf)
+        console.log(rxf)
         await this.rxfService.saveRubroxfacAsync(rxf);
       } catch (error) {
         console.error(`Al guardar Rubroxfac ${j}`, error);
@@ -488,7 +489,7 @@ export class AddConvenioComponent implements OnInit {
                   this._sincobro.push(item);
                 }
               });
-
+              console.log(this._sincobro)
               this.sumTotaltarifa();
             },
             error: (err) =>
