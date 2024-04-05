@@ -9,6 +9,7 @@ import { CajaService } from 'src/app/servicios/caja.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { PdfService } from 'src/app/servicios/pdf.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
+import { InfoCajaComponent } from '../info-caja.component';
 
 @Component({
   selector: 'app-imp-info-cajas',
@@ -40,7 +41,7 @@ export class ImpInfoCajasComponent implements OnInit {
     private facService: FacturaService,
     private rxfService: RubroxfacService,
     private _pdf: PdfService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/cajas');
@@ -56,8 +57,12 @@ export class ImpInfoCajasComponent implements OnInit {
       nombrearchivo: ['', [Validators.required, Validators.minLength(3)]],
       otrapagina: '',
     });
+    this.getRecaudador();
   }
-
+  getRecaudador() {
+    let recaudador = +sessionStorage.getItem('idrecaudador')!;
+    console.log(recaudador);
+  }
   colocaColor(colores: any) {
     document.documentElement.style.setProperty('--bgcolor1', colores[0]);
     const cabecera = document.querySelector('.cabecera');
@@ -198,9 +203,9 @@ export class ImpInfoCajasComponent implements OnInit {
       ); */
     this._pdf.header(
       'RESUMEN RECAUDACIÓN: ' +
-      this.formImprimir.value.d_fecha +
-      ' - ' +
-      this.formImprimir.value.h_fecha,
+        this.formImprimir.value.d_fecha +
+        ' - ' +
+        this.formImprimir.value.h_fecha,
       doc
     );
 
@@ -210,8 +215,12 @@ export class ImpInfoCajasComponent implements OnInit {
     let suma: number = 0;
     datos.push(['', 'PERÍODO ACTUAL']);
     let i = 0;
+    let iva1 = 0;
     this._cobradas.forEach(() => {
       let totalRecaudado = Math.round(this._cobradas[i][2] * 100) / 100;
+      if (this._cobradas[i][3] === true) {
+        iva1 += totalRecaudado * 0.15;
+      }
       datos.push([
         this._cobradas[i][0],
         this._cobradas[i][1],
@@ -221,7 +230,8 @@ export class ImpInfoCajasComponent implements OnInit {
       i++;
     });
     kont = kont + i;
-    this.total += suma;
+    this.total += suma + iva1;
+    datos.push(['', 'IVA', formatNumber(iva1)]);
     datos.push([
       '',
       'SUBTOTAL',
@@ -230,9 +240,13 @@ export class ImpInfoCajasComponent implements OnInit {
 
     let suma1 = 0;
     i = 0;
+    let iva2 = 0;
     datos.push(['', 'PERÍODOS ANTERIORES']);
     this._rubrosanterior.forEach(() => {
       let totalRecaudado = Math.round(this._rubrosanterior[i][2] * 100) / 100;
+      if (this._cobradas[i][3] === true) {
+        iva2 += totalRecaudado * 0.15;
+      }
       datos.push([
         this._rubrosanterior[i][0],
         this._rubrosanterior[i][1],
@@ -242,7 +256,8 @@ export class ImpInfoCajasComponent implements OnInit {
       i++;
     });
     kont = kont + i;
-    this.total += suma1;
+    this.total += suma1 + iva2;
+    datos.push(['', 'IVA', formatNumber(iva2)]);
     datos.push(['', 'SUBTOTAL', formatNumber(suma1)]);
 
     datos.push([
@@ -293,11 +308,9 @@ export class ImpInfoCajasComponent implements OnInit {
       suma2 += totalRecaudado;
       i++;
     });
-    formascobro.push([
-      'TOTAL',
-      suma2.toLocaleString('es-ES', { maximumFractionDigits: 2 }),
-    ]);
-
+    formascobro.push(['SUBTOTAL', formatNumber(suma2)]);
+    formascobro.push(['IVA', formatNumber(iva1 + iva2)]);
+    formascobro.push(['TOTAL', formatNumber(suma2 + iva1 + iva2)]);
     autoTable(doc, {
       head: [['Forma Cobro', 'Total Recaudado']],
       theme: 'grid',
@@ -361,17 +374,18 @@ export class ImpInfoCajasComponent implements OnInit {
       ); */
     this._pdf.header(
       'RECAUDACIÓN - PLANILLAS: ' +
-      this.formImprimir.value.d_fecha +
-      ' - ' +
-      this.formImprimir.value.h_fecha,
+        this.formImprimir.value.d_fecha +
+        ' - ' +
+        this.formImprimir.value.h_fecha,
       doc
     );
     const datos: any = [];
     let suma: number = 0;
     var i = 0;
-    console.log(this._cobradas);
     this._cobradas.forEach(() => {
-      let totalPorFormaCobro = Math.round((this._cobradas[i][1] + this._cobradas[i][0].swiva) * 100) / 100;
+      let totalPorFormaCobro =
+        Math.round((this._cobradas[i][1] + this._cobradas[i][0].swiva) * 100) /
+        100;
       datos.push([
         this._cobradas[i][0].idfactura,
         this._cobradas[i][0].feccrea,
@@ -387,7 +401,7 @@ export class ImpInfoCajasComponent implements OnInit {
     datos.push([
       '',
       'TOTAL',
-      '',
+      i,
       '',
       '',
       this.sumtotaltarifa.toLocaleString('es-ES', { maximumFractionDigits: 2 }),
@@ -407,9 +421,7 @@ export class ImpInfoCajasComponent implements OnInit {
     };
 
     autoTable(doc, {
-      head: [
-        ['Nro', 'Fecha', 'Factura', 'F.Cob','Cliente', 'Valor'],
-      ],
+      head: [['Nro', 'Fecha', 'Factura', 'F.Cob', 'Cliente', 'Valor']],
       theme: 'grid',
       headStyles: {
         fillColor: [68, 103, 114],
@@ -590,7 +602,7 @@ export class ImpInfoCajasComponent implements OnInit {
     // console.log('this._cobradas: ', this._cobradas)
     let i = 0;
     this._cobradas.forEach(() => {
-      console.log(this._cobradas[i])
+      console.log(this._cobradas[i]);
       let totalRecaudado = Math.round(this._cobradas[i][2] * 100) / 100;
       const row = [this._cobradas[i][0], this._cobradas[i][1], totalRecaudado];
       worksheet.addRow(row);

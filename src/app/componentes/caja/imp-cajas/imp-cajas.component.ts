@@ -39,19 +39,20 @@ export class ImpCajasComponent implements OnInit {
     private facService: FacturaService,
     private rxfService: RubroxfacService,
     private _pdf: PdfService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/cajas');
     let coloresJSON = sessionStorage.getItem('/cajas');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
 
-    const fecha = new Date();
+    const fecha: Date = new Date();
     const strfecha = fecha.toISOString().slice(0, 10);
     this.formImprimir = this.fb.group({
       reporte: '1',
       d_fecha: strfecha,
       h_fecha: strfecha,
+      fecha: strfecha,
       nombrearchivo: ['', [Validators.required, Validators.minLength(3)]],
       otrapagina: '',
     });
@@ -84,26 +85,67 @@ export class ImpCajasComponent implements OnInit {
     this.swcalculando = true;
     let d_fecha = this.formImprimir.value.d_fecha;
     let h_fecha = this.formImprimir.value.h_fecha;
+    let fecha = this.formImprimir.value.fecha;
     //console.log(this.formImprimir.value);
     let hasta = '2023-12-31';
     switch (this.opcreporte) {
       case 1: // Recaudacion diaria - Resumen
         try {
           this._cobradas = await this.rxfService.getTotalRubrosActualAsync(
-            d_fecha,
-            h_fecha,
+            fecha,
             hasta
           );
           try {
             this._rubrosanterior =
-              await this.rxfService.getTotalRubrosAnteriorAsync(
+              await this.rxfService.getTotalRubrosAnteriorAsync(fecha, hasta);
+            try {
+              this._formacobro =
+                await this.facService.totalFechaFormacobroAsync(fecha);
+              this.swcalculando = false;
+              if (this.swimprimir) this.txtcalculando = 'Mostrar';
+              else this.txtcalculando = 'Descargar';
+            } catch (error) {
+              console.error(
+                'Error al obtener los totales por Forma de cobro:',
+                error
+              );
+            }
+          } catch (error) {
+            console.error('Error al obtener los Rubros anteriores:', error);
+          }
+        } catch (error) {
+          console.error('Error al obtener los Rubros actuales:', error);
+        }
+        break;
+      case 2: // Recaudacion diaria - Planillas
+        try {
+          this._cobradas = await this.facService.getByFechacobroTotAsync(fecha);
+          // this.sw1 = true;
+          this.swcalculando = false;
+          if (this.swimprimir) this.txtcalculando = 'Mostrar';
+          else this.txtcalculando = 'Descargar';
+        } catch (error) {
+          console.error('Error al obtener las Planillas:', error);
+        }
+        break;
+      case 4: // Recaudacion diaria - Resumen
+        try {
+          this._cobradas =
+            await this.rxfService.getTotalRubrosActualRangosAsync(
+              d_fecha,
+              h_fecha,
+              hasta
+            );
+          try {
+            this._rubrosanterior =
+              await this.rxfService.getTotalRubrosAnteriorRangosAsync(
                 d_fecha,
                 h_fecha,
                 hasta
               );
             try {
               this._formacobro =
-                await this.facService.totalFechaFormacobroAsync(
+                await this.facService.totalFechaFormacobroRangosAsync(
                   d_fecha,
                   h_fecha
                 );
@@ -123,9 +165,9 @@ export class ImpCajasComponent implements OnInit {
           console.error('Error al obtener los Rubros actuales:', error);
         }
         break;
-      case 2: // Recaudacion diaria - Planillas
+      case 5: // Recaudacion diaria - Planillas
         try {
-          this._cobradas = await this.facService.getByFechacobroTotAsync(
+          this._cobradas = await this.facService.getByFechacobroTotRangosAsync(
             d_fecha,
             h_fecha
           );
@@ -151,8 +193,6 @@ export class ImpCajasComponent implements OnInit {
       default:
     }
   }
-
-  //Muestra cada reporte
   imprime() {
     // this.sw1 = false;
     this.swbotones = false;
@@ -178,23 +218,16 @@ export class ImpCajasComponent implements OnInit {
   imprimirResumen() {
     this.otrapagina = this.formImprimir.value.otrapagina;
     let m_izquierda = 40;
-    let doc = new jsPDF('p', 'pt', 'a4');
+    let doc = new jsPDF();
     doc.setFont('times', 'bold');
     doc.setFontSize(16);
-    //doc.text('EpmapaT', m_izquierda, 10);
+    doc.text('EpmapaT', m_izquierda, 10);
     doc.setFont('times', 'bold');
     doc.setFontSize(12);
-    /* doc.text(
-        'RESUMEN RECAUDACIÓN DIARIA: ' + this.formImprimir.value.fecha,
-        m_izquierda,
-        16
-      ); */
-    this._pdf.header(
-      'RESUMEN RECAUDACIÓN: ' +
-      this.formImprimir.value.d_fecha +
-      ' - ' +
-      this.formImprimir.value.h_fecha,
-      doc
+    doc.text(
+      'RESUMEN RECAUDACIÓN DIARIA: ' + this.formImprimir.value.fecha,
+      m_izquierda,
+      16
     );
 
     const datos: any = [];
@@ -203,8 +236,12 @@ export class ImpCajasComponent implements OnInit {
     let suma: number = 0;
     datos.push(['', 'PERÍODO ACTUAL']);
     let i = 0;
+    let iva1 = 0;
     this._cobradas.forEach(() => {
       let totalRecaudado = Math.round(this._cobradas[i][2] * 100) / 100;
+      if (this._cobradas[i][3] === true) {
+        iva1 += totalRecaudado * 0.15;
+      }
       datos.push([
         this._cobradas[i][0],
         this._cobradas[i][1],
@@ -214,18 +251,19 @@ export class ImpCajasComponent implements OnInit {
       i++;
     });
     kont = kont + i;
-    this.total += suma;
-    datos.push([
-      '',
-      'SUBTOTAL',
-      suma.toLocaleString('es-ES', { maximumFractionDigits: 2 }),
-    ]);
+    this.total += suma + iva1;
+    datos.push(['', 'IVA', formatNumber(iva1)]);
+    datos.push(['', 'SUBTOTAL', formatNumber(suma)]);
 
     let suma1 = 0;
+    let iva2 = 0;
     i = 0;
     datos.push(['', 'PERÍODOS ANTERIORES']);
     this._rubrosanterior.forEach(() => {
       let totalRecaudado = Math.round(this._rubrosanterior[i][2] * 100) / 100;
+      if (this._cobradas[i][3] === true) {
+        iva2 += totalRecaudado * 0.15;
+      }
       datos.push([
         this._rubrosanterior[i][0],
         this._rubrosanterior[i][1],
@@ -235,14 +273,12 @@ export class ImpCajasComponent implements OnInit {
       i++;
     });
     kont = kont + i;
-    this.total += suma1;
+    this.total += suma1 + iva2;
+    datos.push(['', 'IVA', formatNumber(iva2)]);
     datos.push(['', 'SUBTOTAL', formatNumber(suma1)]);
 
-    datos.push([
-      '',
-      'TOTAL',
-      this.total.toLocaleString('es-ES', { maximumFractionDigits: 2 }),
-    ]);
+    // datos.push(['', 'TOTAL', this.total.toLocaleString("es-ES", { maximumFractionDigits: 2 })]);
+    datos.push(['', 'TOTAL', formatNumber(this.total)]);
 
     autoTable(doc, {
       head: [['Nro.', 'Rubro', 'Total Recaudado']],
@@ -254,15 +290,15 @@ export class ImpCajasComponent implements OnInit {
       },
       styles: {
         font: 'helvetica',
-        fontSize: 11,
+        fontSize: 8,
         cellPadding: 1,
         halign: 'center',
       },
 
       columnStyles: {
-        0: { halign: 'center', cellWidth: 50 },
-        1: { halign: 'left', cellWidth: 200 },
-        2: { halign: 'right', cellWidth: 90 },
+        0: { halign: 'right', cellWidth: 10 },
+        1: { halign: 'left', cellWidth: 80 },
+        2: { halign: 'right', cellWidth: 30 },
       },
       margin: { left: m_izquierda - 1, top: 18, right: 51, bottom: 13 },
       body: datos,
@@ -280,18 +316,16 @@ export class ImpCajasComponent implements OnInit {
     const formascobro: any = [];
     let suma2: number = 0;
     i = 0;
+
     this._formacobro.forEach(() => {
-      console.log(this._cobradas[i])
-      console.log(this._formacobro[i])
-      let totalRecaudado = Math.round((this._formacobro[i][1] ) * 100) / 100;
+      let totalRecaudado = Math.round(this._formacobro[i][1] * 100) / 100;
       formascobro.push([this._formacobro[i][0], formatNumber(totalRecaudado)]);
       suma2 += totalRecaudado;
       i++;
     });
-    formascobro.push([
-      'TOTAL',
-      suma2.toLocaleString('es-ES', { maximumFractionDigits: 2 }),
-    ]);
+    formascobro.push(['SUBTOTAL', formatNumber(suma2)]);
+    formascobro.push(['IVA', formatNumber(iva1 + iva2)]);
+    formascobro.push(['TOTAL', formatNumber(suma2 + iva1 + iva2)]);
 
     autoTable(doc, {
       head: [['Forma Cobro', 'Total Recaudado']],
@@ -303,13 +337,13 @@ export class ImpCajasComponent implements OnInit {
       },
       styles: {
         font: 'helvetica',
-        fontSize: 11,
+        fontSize: 8,
         cellPadding: 1,
         halign: 'center',
       },
       columnStyles: {
-        0: { halign: 'left', cellWidth: 100 },
-        1: { halign: 'right', cellWidth: 100 },
+        0: { halign: 'left', cellWidth: 30 },
+        1: { halign: 'right', cellWidth: 30 },
       },
       margin: { left: m_izquierda - 1, top: kont + 10, right: 111, bottom: 13 },
       body: formascobro,
@@ -342,36 +376,33 @@ export class ImpCajasComponent implements OnInit {
 
   imprimirFacturas() {
     this.otrapagina = this.formImprimir.value.otrapagina;
-    let m_izquierda = 20;
-    let doc = new jsPDF('p', 'pt', 'a4');
+    let m_izquierda = 50;
+    let doc = new jsPDF();
     doc.setFont('times', 'bold');
     doc.setFontSize(16);
-    //doc.text('EpmapaT', m_izquierda, 10);
+    doc.text('EpmapaT', m_izquierda, 10);
     doc.setFont('times', 'bold');
     doc.setFontSize(12);
-    /* doc.text(
-        'RECAUDACIÓN DIARIA - PLANILLAS: ' + this.formImprimir.value.fecha,
-        m_izquierda,
-        16
-      ); */
-    this._pdf.header(
-      'RECAUDACIÓN DIARIA - PLANILLAS: ' +
-      this.formImprimir.value.d_fecha +
-      ' - ' +
-      this.formImprimir.value.h_fecha,
-      doc
+    doc.text(
+      'RECAUDACIÓN DIARIA - PLANILLAS: ' + this.formImprimir.value.fecha,
+      m_izquierda,
+      16
     );
+
     const datos: any = [];
     let suma: number = 0;
     var i = 0;
     this._cobradas.forEach(() => {
-      let totalPorFormaCobro = Math.round((this._cobradas[i][1] + this._cobradas[i][0].swiva) * 100) / 100;
+      let totalPorFormaCobro =
+        Math.round((this._cobradas[i][1] + this._cobradas[i][0].swiva) * 100) /
+        100;
+      // datos.push([this._cobradas[i][0].idfactura, this._cobradas[i][0].feccrea, this._cobradas[i][0].nrofactura, this._cobradas[i][0].formapago,
+      // this._cobradas[i][0].idcliente.nombre, formatNumber(totalPorFormaCobro)]);
       datos.push([
         this._cobradas[i][0].idfactura,
         this._cobradas[i][0].feccrea,
         this._cobradas[i][0].nrofactura,
         this._cobradas[i][0].formapago,
-        this._cobradas[i][0].idcliente.nombre,
         formatNumber(totalPorFormaCobro),
       ]);
       suma += totalPorFormaCobro;
@@ -381,8 +412,7 @@ export class ImpCajasComponent implements OnInit {
     datos.push([
       '',
       'TOTAL',
-      '',
-      '',
+      i,
       '',
       this.sumtotaltarifa.toLocaleString('es-ES', { maximumFractionDigits: 2 }),
     ]);
@@ -401,7 +431,7 @@ export class ImpCajasComponent implements OnInit {
     };
 
     autoTable(doc, {
-      head: [['Nro', 'Fecha', 'Factura', 'F.Cob', 'Cliente', 'Valor']],
+      head: [['Nro', 'Fecha', 'Factura', 'F.Cob', 'Valor']],
       theme: 'grid',
       headStyles: {
         fillColor: [68, 103, 114],
@@ -410,19 +440,19 @@ export class ImpCajasComponent implements OnInit {
       },
       styles: {
         font: 'helvetica',
-        fontSize: 10,
+        fontSize: 8,
         cellPadding: 1,
         halign: 'center',
       },
       columnStyles: {
-        0: { halign: 'center', cellWidth: 50 },
-        1: { halign: 'center', cellWidth: 55 },
-        2: { halign: 'center', cellWidth: 110 },
-        3: { halign: 'center', cellWidth: 30 },
-        4: { halign: 'left', cellWidth: 250 },
-        5: { halign: 'right', cellWidth: 50 },
+        0: { halign: 'center', cellWidth: 16 },
+        1: { halign: 'center', cellWidth: 18 },
+        2: { halign: 'center', cellWidth: 29 },
+        3: { halign: 'center', cellWidth: 12 },
+        // 4: { halign: 'left', cellWidth: 75 },
+        4: { halign: 'right', cellWidth: 20 },
       },
-      margin: { left: m_izquierda - 1, top: 18, right: 21, bottom: 13 },
+      margin: { left: m_izquierda - 1, top: 18, right: 66, bottom: 13 },
       body: datos,
       didParseCell: function (data) {
         var fila = data.row.index;
@@ -441,14 +471,14 @@ export class ImpCajasComponent implements OnInit {
   imprimirCajas() {
     this.otrapagina = this.formImprimir.value.otrapagina;
     let m_izquierda = 24;
-    var doc = new jsPDF('p', 'pt', 'a4');
+    var doc = new jsPDF();
     doc.setFont('times', 'bold');
     doc.setFontSize(16);
-    //doc.text('EpmapaT', m_izquierda, 10);
+    doc.text('EpmapaT', m_izquierda, 10);
     doc.setFont('times', 'bold');
     doc.setFontSize(12);
-    //doc.text('LISTA DE CAJAS', m_izquierda, 16);
-    this._pdf.header('LISTA DE CAJAS', doc);
+    doc.text('LISTA DE CAJAS', m_izquierda, 16);
+
     var datos: any = [];
     let suma: number = 0;
     let arecaudar: number = 0;
@@ -485,14 +515,14 @@ export class ImpCajasComponent implements OnInit {
       },
       styles: {
         font: 'helvetica',
-        fontSize: 11,
+        fontSize: 8,
         cellPadding: 1,
         halign: 'center',
       },
       columnStyles: {
-        0: { halign: 'center', cellWidth: 92 },
-        1: { halign: 'center', cellWidth: 80 },
-        2: { halign: 'left', cellWidth: 230 },
+        0: { halign: 'center', cellWidth: 26 },
+        1: { halign: 'center', cellWidth: 20 },
+        2: { halign: 'left', cellWidth: 70 },
       },
       margin: { left: m_izquierda - 1, top: 18, right: 71, bottom: 13 },
       body: datos,
@@ -704,6 +734,7 @@ export class ImpCajasComponent implements OnInit {
       'Sección',
       'Forma cobro',
       'Valor',
+      'Estado',
     ];
     const headerRowCell = worksheet.addRow(cabecera);
     headerRowCell.eachCell((cell) => {
@@ -730,6 +761,7 @@ export class ImpCajasComponent implements OnInit {
         factura[0].idmodulo.descripcion,
         factura[0].formapago,
         total,
+        factura[0].estado,
       ];
       // const row = [factura[0].idfactura, total ];
       worksheet.addRow(row);

@@ -56,32 +56,51 @@ export class RubroxfacService {
     return this.http.get<boolean>(`${baseUrl}/multa?idfactura=${idfactura}`);
   }
 
+  /* GLOBALES */
+
   //Recaudación diaria - Actual
-  async getTotalRubrosActualAsync(
-    d_fecha: Date,
-    h_fecha: Date,
-    hasta: string
-  ): Promise<any[]> {
-    console.log(
-      `TOTAL RUBRO ACUTAL: ${baseUrl}/totalrubrosactual?d_fecha=${d_fecha}&h_fecha=${h_fecha}&hasta=${hasta}`
-    );
+  async getTotalRubrosActualAsync(fecha: Date, hasta: string): Promise<any[]> {
     const response = await firstValueFrom(
       this.http.get<any[]>(
-        `${baseUrl}/totalrubrosactual?d_fecha=${d_fecha}&h_fecha=${h_fecha}&hasta=${hasta}`
+        `${baseUrl}/totalrubrosactual?fecha=${fecha}&hasta=${hasta}`
+      )
+    );
+    return response;
+  }
+  //Recaudación diaria - Actual
+  async getTotalRubrosAnteriorAsync(
+    fecha: Date,
+    hasta: string
+  ): Promise<any[]> {
+    const response = await firstValueFrom(
+      this.http.get<any[]>(
+        `${baseUrl}/totalrubrosanterior?fecha=${fecha}&hasta=${hasta}`
       )
     );
     return response;
   }
 
+  /* POR RANGOS */
+
   //Recaudación diaria - Actual
-  async getTotalRubrosAnteriorAsync(
+  async getTotalRubrosActualRangosAsync(
     d_fecha: Date,
     h_fecha: Date,
     hasta: string
   ): Promise<any[]> {
-    console.log(
-      `RECAUDACION DIARIA ${baseUrl}/totalrubrosanterior?d_fecha=${d_fecha}&h_fecha=${h_fecha}&hasta=${hasta}`
+    const response = await firstValueFrom(
+      this.http.get<any[]>(
+        `${baseUrl}/totalrubrosactualrangos?d_fecha=${d_fecha}&h_fecha=${h_fecha}&hasta=${hasta}`
+      )
     );
+    return response;
+  }
+  //Recaudación diaria - Actual
+  async getTotalRubrosAnteriorRangosAsync(
+    d_fecha: Date,
+    h_fecha: Date,
+    hasta: string
+  ): Promise<any[]> {
     const response = await firstValueFrom(
       this.http.get<any[]>(
         `${baseUrl}/totalrubrosanterior?d_fecha=${d_fecha}&h_fecha=${h_fecha}&hasta=${hasta}`
@@ -89,6 +108,9 @@ export class RubroxfacService {
     );
     return response;
   }
+
+  /* POR RECAUDADOR */
+
   //Recaudación diaria - Actual
   async getTotalRubrosActualByRecaudadorAsync(
     d_fecha: Date,

@@ -19,7 +19,8 @@
             </button>
             <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#lecturas"
-                  [ngClass]="{'disabled' : rutaxemision.estado == 1}" (click)="lecturas()">
+                  (click)="lecturas()">
+                  <!-- [ngClass]="{'disabled' : rutaxemision.estado == 1}" (click)="lecturas()"> -->
                   <i class="fa fa-book"></i>&nbsp; Archivo lecturas</button>
                <button class="dropdown-item" type="button" [ngClass]="{'disabled' : rutaxemision.estado == 1}"
                   (click)="cargar()">
@@ -65,8 +66,8 @@
             </thead>
             <tbody class="detalle">
                <tr *ngFor="let lectura of _lecturas | filter: filtro; let i=index" class="fila">
-                  <td class="small text-center font-weight-bold" ><i class="bi-bookmark-check-fill check"
-                     *ngIf="i == antIndice"></i>{{i+1}}</td>
+                  <td class="small text-center font-weight-bold"><i class="bi-bookmark-check-fill check"
+                        *ngIf="i == antIndice"></i>{{i+1}}</td>
                   <td class="text-center">{{ lectura.idabonado_abonados.idabonado }}</td>
                   <td>{{ lectura.idabonado_abonados.idcliente_clientes.nombre }}</td>
                   <td>{{ lectura.idabonado_abonados.idcategoria_categorias.descripcion }}</td>
@@ -225,7 +226,8 @@
                         </div>
                         <div class="input-group input-group-sm mb-0">
                            <div class="input-group-prepend"> <span class="input-group-text">Novedades</span></div>
-                           <select type="text" class="form-control text-right" formControlName="idnovedad_novedades" [compareWith]="compararNovedades">
+                           <select type="text" class="form-control text-right" formControlName="idnovedad_novedades"
+                              [compareWith]="compararNovedades">
                               <option [ngValue]=novedad *ngFor="let novedad of novedades">{{novedad.descripcion}}
                               </option>
                            </select>

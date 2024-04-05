@@ -26,13 +26,15 @@
                         <label *ngIf="!swimprimir" class="input-group-text">Exportar</label>
                      </div>
                      <select class="custom-select" formControlName="reporte" (change)="changeReporte()">
-                        <option value="1">Resumen Recaudación</option>
-                        <option value="2">Recaudación - Planillas</option>
+                        <option value="1">Resumen Recaudación diaria</option>
+                        <option value="2">Recaudación diaria - Planillas</option>
+                        <option value="4">Resumen Recaudación</option>
+                        <option value="5">Recaudación - Planillas</option>
                         <option value="3">Lista de cajas</option>
                      </select>
                   </div>
 
-                  <div *ngIf="opcreporte != 3" class="form-group col-md-6">
+                  <div *ngIf="opcreporte != 3 && (opcreporte === 4 || opcreporte ===5)" class="form-group col-md-6">
                      <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
                            <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
@@ -43,13 +45,23 @@
                      </div>
                   </div>
 
-                  <div *ngIf="opcreporte != 3" class="form-group col-md-6">
+                  <div *ngIf="opcreporte != 3 && (opcreporte === 4 || opcreporte ===5)" class="form-group col-md-6">
                      <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
                            <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
                               data-toggle="tooltip" title="Obligatorio">Hasta: </span>
                         </div>
                         <input type="date" class="form-control text-center" formControlName="h_fecha" id="h_fecha"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+                     </div>
+                  </div>
+                  <div *ngIf="opcreporte != 3 && (opcreporte === 1 || opcreporte ===2)" class="form-group col-md-6">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
+                              data-toggle="tooltip" title="Obligatorio">Fecha</span>
+                        </div>
+                        <input type="date" class="form-control text-center" formControlName="fecha" id="fecha"
                            aria-label="Small" aria-describedby="inputGroup-sizing-sm">
                      </div>
                   </div>

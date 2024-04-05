@@ -77,46 +77,77 @@ export class FacturaService {
       `${baseUrl}/porabonado?idabonado=${idabonado}&fechaDesde=${fechaDesde}&fechaHasta=${fechaHasta}`
     );
   }
-
+  /* GLOBALES */
   //Recaudación diaria - Facturas cobradas async
   async getByFechacobroAsync(fecha: Date): Promise<any[]> {
     const response = await firstValueFrom(
-      this.http.get<any[]>(`${baseUrl}/cobradas?fecha=${fecha}`)
-    );
-    return response;
-  }
-
-  //Recaudación diaria - Facturas cobradas async (sumando los rubros)
-  async getByFechacobroTotAsync(d_fecha: Date, h_fecha: Date): Promise<any[]> {
-    const response = await firstValueFrom(
-      this.http.get<any[]>(`${baseUrl}/cobradastot?d_fecha=${d_fecha}&h_fecha=${h_fecha}`)
+      this.http.get<any[]>(`${baseUrl}/cobradastot?fecha=${fecha}`)
     );
     return response;
   }
   //Recaudación diaria - Facturas cobradas async (sumando los rubros)
-  async getByFechacobroTotByRecaudadorAsync(d_fecha: Date, h_fecha: Date, idrecaudador: number): Promise<any[]> {
-    const response = await firstValueFrom(
-      this.http.get<any[]>(`${baseUrl}/reportes/cobradastot?d_fecha=${d_fecha}&h_fecha=${h_fecha}&idrecaudador=${idrecaudador}`)
-    );
-    return response;
-  }
-
-  //Recaudación diaria - Resumen: Por Forma de cobro
-  async totalFechaFormacobroAsync(
-    d_fecha: Date,
-    h_fecha: Date
-  ): Promise<any[]> {
+  async getByFechacobroTotAsync(fecha: Date): Promise<any[]> {
     const response = await firstValueFrom(
       this.http.get<any[]>(
-        `${baseUrl}/totalformacobro?d_fecha=${d_fecha}&h_fecha=${h_fecha}`
+        `${baseUrl}/cobradastot?fecha=${fecha}`
       )
     );
     return response;
   }
   //Recaudación diaria - Resumen: Por Forma de cobro
+  async totalFechaFormacobroAsync(fecha: Date): Promise<any[]> {
+    const response = await firstValueFrom(
+      this.http.get<any[]>(
+        `${baseUrl}/totalformacobro?fecha=${fecha}`
+      )
+    );
+    return response;
+  }
+  /* POR RANGOS */
+  //Recaudación diaria - Facturas cobradas async (sumando los rubros)
+  async getByFechacobroTotRangosAsync(
+    d_fecha: Date,
+    h_fecha: Date
+  ): Promise<any[]> {
+    const response = await firstValueFrom(
+      this.http.get<any[]>(
+        `${baseUrl}/reportes/cobradastotrangos?d_fecha=${d_fecha}&h_fecha=${h_fecha}`
+      )
+    );
+    return response;
+  }
+  //Recaudación diaria - Resumen: Por Forma de cobro
+  async totalFechaFormacobroRangosAsync(
+    d_fecha: Date,
+    h_fecha: Date
+  ): Promise<any[]> {
+    const response = await firstValueFrom(
+      this.http.get<any[]>(
+        `${baseUrl}/reportes/totalformacobrorangos?d_fecha=${d_fecha}&h_fecha=${h_fecha}`
+      )
+    );
+    return response;
+  }
+  /* POR RECAUDADOR */
+
+  //Recaudación diaria - Facturas cobradas async (sumando los rubros)
+  async getByFechacobroTotByRecaudadorAsync(
+    d_fecha: Date,
+    h_fecha: Date,
+    idrecaudador: number
+  ): Promise<any[]> {
+    const response = await firstValueFrom(
+      this.http.get<any[]>(
+        `${baseUrl}/reportes/cobradastot?d_fecha=${d_fecha}&h_fecha=${h_fecha}&idrecaudador=${idrecaudador}`
+      )
+    );
+    return response;
+  }
+
+  //Recaudación diaria - Resumen: Por Forma de cobro
   async totalFechaFormacobroByRecaudadorAsync(
     d_fecha: Date,
-    h_fecha: Date, 
+    h_fecha: Date,
     idrecaudador: number
   ): Promise<any[]> {
     const response = await firstValueFrom(
@@ -205,11 +236,10 @@ export class FacturaService {
     const observable = this.http.put(`${baseUrl}/${fac.idfactura}`, fac);
     return await firstValueFrom(observable);
   }
-  
+
   getByNroFacturaModulo(nrofactura: String, idmodulo: number) {
     return this.http.get<Facturas>(
       `${baseUrl}/nrofmodulo?nrofactura=${nrofactura}&idmodulo=${idmodulo}`
     );
   }
-  
 }
