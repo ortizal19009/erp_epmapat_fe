@@ -111,7 +111,7 @@ export class AddRecaudaComponent implements OnInit {
     private recaService: RecaudacionService,
     private facxrService: FacxrecaudaService,
     private s_recaudaxcaja: RecaudaxcajaService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.formBuscar = this.fb.group({
@@ -214,6 +214,7 @@ export class AddRecaudaComponent implements OnInit {
   getLastFactura() {
     this.facService.valLastFac(this._codigo).subscribe({
       next: (dato: any) => {
+        console.log(dato)
         let nrofac = dato.nrofactura.split('-', 3);
         this._nroFactura = `${this._codRecaudador}-${nrofac[2]
           .toString()
@@ -275,6 +276,7 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   onSubmit() {
+    this.getLastFactura();
     this.swcobrado = false;
     this.acobrar = 0;
     this._cliente = [];
@@ -403,7 +405,7 @@ export class AddRecaudaComponent implements OnInit {
       error: (err) => console.error(err.error),
     });
   }
-  disabled(e: any) {}
+  disabled(e: any) { }
 
   //Total de las planillas sin cobrar
   // total() {
@@ -788,7 +790,7 @@ export class AddRecaudaComponent implements OnInit {
     rubrosxfac.cantidad = 1;
     rubrosxfac.estado = 1;
     this.rubxfacService.saveRubroxFac(rubrosxfac).subscribe({
-      next: (datos) => {},
+      next: (datos) => { },
       error: (e) => console.error(e),
     });
   }
@@ -1130,7 +1132,7 @@ export class AddRecaudaComponent implements OnInit {
       return of({ invalido: true });
     else return of(null);
   }
-  pdf() {}
+  pdf() { }
   //Al digitar el dinero
   changeDinero() {
     let ncvalor: number;

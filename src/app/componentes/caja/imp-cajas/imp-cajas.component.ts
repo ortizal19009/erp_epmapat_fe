@@ -39,7 +39,7 @@ export class ImpCajasComponent implements OnInit {
     private facService: FacturaService,
     private rxfService: RubroxfacService,
     private _pdf: PdfService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/cajas');
@@ -238,10 +238,13 @@ export class ImpCajasComponent implements OnInit {
     let i = 0;
     let iva1 = 0;
     this._cobradas.forEach(() => {
+      console.log(this._cobradas[i])
       let totalRecaudado = Math.round(this._cobradas[i][2] * 100) / 100;
+      console.log(this._cobradas[i][0])
       if (this._cobradas[i][3] === true) {
         iva1 += totalRecaudado * 0.15;
       }
+    
       datos.push([
         this._cobradas[i][0],
         this._cobradas[i][1],
@@ -259,19 +262,25 @@ export class ImpCajasComponent implements OnInit {
     let iva2 = 0;
     i = 0;
     datos.push(['', 'PERÍODOS ANTERIORES']);
+    //console.log(this._rubrosanterior)
     this._rubrosanterior.forEach(() => {
-      let totalRecaudado = Math.round(this._rubrosanterior[i][2] * 100) / 100;
-      if (this._cobradas[i][3] === true) {
-        iva2 += totalRecaudado * 0.15;
+      if (this._rubrosanterior[i][0] != 165) {
+        let totalRecaudado = Math.round(this._rubrosanterior[i][2] * 100) / 100;
+        console.log(this._rubrosanterior[i])
+        console.log(this._cobradas[i])
+        if (this._rubrosanterior[i][3] === true) {
+          iva2 += totalRecaudado * 0.15;
+        }
+        datos.push([
+          this._rubrosanterior[i][0],
+          this._rubrosanterior[i][1],
+          formatNumber(totalRecaudado),
+        ]);
+        suma1 += totalRecaudado;
       }
-      datos.push([
-        this._rubrosanterior[i][0],
-        this._rubrosanterior[i][1],
-        formatNumber(totalRecaudado),
-      ]);
-      suma1 += totalRecaudado;
       i++;
     });
+
     kont = kont + i;
     this.total += suma1 + iva2;
     datos.push(['', 'IVA', formatNumber(iva2)]);

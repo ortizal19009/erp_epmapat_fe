@@ -244,7 +244,7 @@ export class ImpInfoCajasComponent implements OnInit {
     datos.push(['', 'PERÍODOS ANTERIORES']);
     this._rubrosanterior.forEach(() => {
       let totalRecaudado = Math.round(this._rubrosanterior[i][2] * 100) / 100;
-      if (this._cobradas[i][3] === true) {
+      if (this._rubrosanterior[i][3] === true) {
         iva2 += totalRecaudado * 0.15;
       }
       datos.push([
