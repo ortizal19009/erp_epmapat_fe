@@ -6,7 +6,6 @@ import { Pipe, PipeTransform } from '@angular/core';
 export class NombreEmisionPipe implements PipeTransform {
 
    transform(value: String, ...args: unknown[]): string {
-      console.log(value)
       let a = +value!;
       let año = '20' + a.toString().slice(0, 2);
       let mes = a.toString().slice(2);
