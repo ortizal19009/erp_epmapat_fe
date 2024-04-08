@@ -39,7 +39,8 @@ export class ListarCajaComponent implements OnInit {
     private s_rubroxfac: RubroxfacService,
     private s_recaudacion: RecaudacionService,
     private s_rubro: RubrosService,
-    private s_pdf: PdfService  ) { }
+    private s_pdf: PdfService
+  ) {}
 
   ngOnInit(): void {
     let fechaActual: Date = new Date();
@@ -183,9 +184,7 @@ export class ListarCajaComponent implements OnInit {
     let doc = new jsPDF('p', 'pt', 'a4');
     this._pdf.header('REPORTE GENERAL DE CAJAS', doc);
     let m_izquierda = 10;
-    console.log(_datosBody);
-    console.log(_datosBody);
-  
+
     const addPageNumbers = function () {
       const pageCount = doc.internal.pages.length;
       for (let i = 1; i <= pageCount - 1; i++) {
@@ -307,9 +306,7 @@ export class ListarCajaComponent implements OnInit {
             startY: data.cell.y + 1,
             margin: { left: data.cell.x + 2 },
             tableWidth: data.cell.width - 8,
-            body: [
-              ['Hola', 'hola'],
-            ],
+            body: [['Hola', 'hola']],
           });
         }
       },
@@ -347,7 +344,7 @@ export class ListarCajaComponent implements OnInit {
     }
   }
   imprimir() {
-    this.router.navigate(['/imp-caja'])
+    this.router.navigate(['/imp-caja']);
   }
 }
 interface Caja {

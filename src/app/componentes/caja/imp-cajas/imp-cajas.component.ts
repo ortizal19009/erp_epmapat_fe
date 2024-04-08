@@ -39,7 +39,7 @@ export class ImpCajasComponent implements OnInit {
     private facService: FacturaService,
     private rxfService: RubroxfacService,
     private _pdf: PdfService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/cajas');
@@ -229,7 +229,6 @@ export class ImpCajasComponent implements OnInit {
       m_izquierda,
       16
     );
-
     const datos: any = [];
     this.total = 0;
     let kont = 1; //Para la fila de la segunda Tabla
@@ -238,24 +237,27 @@ export class ImpCajasComponent implements OnInit {
     let i = 0;
     let iva1 = 0;
     this._cobradas.forEach(() => {
-      console.log(this._cobradas[i])
       let totalRecaudado = Math.round(this._cobradas[i][2] * 100) / 100;
-      console.log(this._cobradas[i][0])
-      if (this._cobradas[i][3] === true) {
+      if (
+        this._cobradas[i][3] === true &&
+        this.formImprimir.value.fecha >= '2024-04-01' === true
+      ) {
         iva1 += totalRecaudado * 0.15;
       }
-    
       datos.push([
         this._cobradas[i][0],
         this._cobradas[i][1],
         formatNumber(totalRecaudado),
       ]);
+
       suma += totalRecaudado;
       i++;
     });
     kont = kont + i;
     this.total += suma + iva1;
-    datos.push(['', 'IVA', formatNumber(iva1)]);
+    if (iva1 > 0) {
+      datos.push(['', 'IVA', formatNumber(iva1)]);
+    }
     datos.push(['', 'SUBTOTAL', formatNumber(suma)]);
 
     let suma1 = 0;
@@ -266,9 +268,10 @@ export class ImpCajasComponent implements OnInit {
     this._rubrosanterior.forEach(() => {
       if (this._rubrosanterior[i][0] != 165) {
         let totalRecaudado = Math.round(this._rubrosanterior[i][2] * 100) / 100;
-        console.log(this._rubrosanterior[i])
-        console.log(this._cobradas[i])
-        if (this._rubrosanterior[i][3] === true) {
+        if (
+          this._rubrosanterior[i][3] === true &&
+          this.formImprimir.value.fecha >= '2024-04-01' === true
+        ) {
           iva2 += totalRecaudado * 0.15;
         }
         datos.push([
@@ -283,7 +286,9 @@ export class ImpCajasComponent implements OnInit {
 
     kont = kont + i;
     this.total += suma1 + iva2;
-    datos.push(['', 'IVA', formatNumber(iva2)]);
+    if (iva1 > 0) {
+      datos.push(['', 'IVA', formatNumber(iva2)]);
+    }
     datos.push(['', 'SUBTOTAL', formatNumber(suma1)]);
 
     // datos.push(['', 'TOTAL', this.total.toLocaleString("es-ES", { maximumFractionDigits: 2 })]);
@@ -332,8 +337,10 @@ export class ImpCajasComponent implements OnInit {
       suma2 += totalRecaudado;
       i++;
     });
-    formascobro.push(['SUBTOTAL', formatNumber(suma2)]);
-    formascobro.push(['IVA', formatNumber(iva1 + iva2)]);
+    if (iva1 + iva2 > 0) {
+      formascobro.push(['SUBTOTAL', formatNumber(suma2)]);
+      formascobro.push(['IVA', formatNumber(iva1 + iva2)]);
+    }
     formascobro.push(['TOTAL', formatNumber(suma2 + iva1 + iva2)]);
 
     autoTable(doc, {
