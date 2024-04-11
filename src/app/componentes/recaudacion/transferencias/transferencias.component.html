@@ -70,38 +70,49 @@
 </div>
 
 <div class="container-fluid">
-   <div class="row mt-2 mb-0 justify-content-center">
-      <div class="col-sm-3" *ngIf="swbusca != 0">
-         <div class="card detalle sombra">
-            <div class="card-body box-profile">
-               <h3 class="profile-username text-center">{{ cliente.nombre }}</h3>
-               <p class="text-muted text-center">{{ cliente.cedula }}</p>
-               <ul class="list-group list-group-unbordered mb-3">
-                  <li class="list-group-item detalle">
-                     <b>Dirección</b> <a class="float-right">{{ cliente.direccion }}</a>
-                  </li>
-                  <li class="list-group-item detalle">
-                     <b>e-mail</b> <a class="float-right">{{ cliente.email }}</a>
-                  </li>
-                  <li class="list-group-item detalle">
-                     <b>Teléfono</b> <a class="float-right">{{ cliente.telefono }}</a>
-                  </li>
-                  <li class="list-group-item detalle">
-                     <b>Discapacidad</b>
-                     <i *ngIf="cliente.porcdiscapacidad === 0">
-                        <i class="float-right bi-circle"></i>
-                     </i>
-                     <i *ngIf="cliente.porcdiscapacidad! > 0">
-                        <i class="float-right bi-check-circle-fill"></i>
-                     </i>
-                  </li>
-                  <li class="list-group-item detalle">
-                     <b>Adulto mayor</b> <a class="float-right"></a><i class="float-right bi-bug-fill"></i>
-                  </li>
-               </ul>
+   <div class="row mt-3 justify-content-left">
+      <div class="col-sm-3">
+         <div class="row" *ngIf="swbusca != 0">
+            <div class="col-sm">
+               <div class="card detalle sombra">
+                  <div class="card-body box-profile">
+                     <h3 class="profile-username text-center">{{ cliente.nombre }}</h3>
+                     <p class="text-muted text-center">{{ cliente.cedula }}</p>
+                     <ul class="list-group list-group-unbordered mb-3">
+                        <li class="list-group-item detalle">
+                           <b>Dirección</b> <a class="float-right">{{ cliente.direccion }}</a>
+                        </li>
+                        <li class="list-group-item detalle">
+                           <b>e-mail</b> <a class="float-right">{{ cliente.email }}</a>
+                        </li>
+                        <li class="list-group-item detalle">
+                           <b>Teléfono</b> <a class="float-right">{{ cliente.telefono }}</a>
+                        </li>
+                        <li class="list-group-item detalle">
+                           <b>Discapacidad</b>
+                           <i *ngIf="cliente.porcdiscapacidad === 0">
+                              <i class="float-right bi-circle"></i>
+                           </i>
+                           <i *ngIf="cliente.porcdiscapacidad! > 0">
+                              <i class="float-right bi-check-circle-fill"></i>
+                           </i>
+                        </li>
+                        <li class="list-group-item detalle">
+                           <b>Adulto mayor</b> <a class="float-right"></a><i class="float-right bi-bug-fill"></i>
+                        </li>
+                     </ul>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="row" *ngIf="_nroFactura !=''">
+            <div class="col-sm numeracion">
+               <small class="badge badge-danger"><i class="bi bi-newspaper"></i>
+                  {{_nroFactura}}</small>
             </div>
          </div>
       </div>
+
       <div [ngClass]="{'col-9 detalle': swbusca != 0, 'col-6 mt-5': swbusca == 0}">
          <div class="card sombra" [ngClass]="{'detalle': swbusca != 0}">
             <div class="card-body box-profile d-flex justify-content-center">
@@ -371,7 +382,7 @@
             <div class="row justify-content-center mt-1 mb-3">
                <button type="button" class="btn btn-success btn-sm mx-1" [disabled]="cajaActiva" data-dismiss="modal"
                   (click)="validarCaja()">
-                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar
+                  <i class="fa fa-check-circle"></i>&nbsp; v_Aceptar
                </button>
                <button type="button" class="btn btn-sm btn-outline-success mx-1" data-dismiss="modal">
                   <i class="bi bi-x-circle"></i> Cancelar
