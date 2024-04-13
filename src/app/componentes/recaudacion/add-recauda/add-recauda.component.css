@@ -75,3 +75,12 @@ label {
    color: white;
    cursor: pointer;
 }
+
+.numeracion{
+   bottom: 0;
+   height: 100px;
+   padding: 13px 0 4px;
+   position: fixed;
+   width: 100%;
+   z-index: 5000;
+}

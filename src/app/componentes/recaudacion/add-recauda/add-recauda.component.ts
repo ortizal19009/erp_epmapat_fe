@@ -111,7 +111,7 @@ export class AddRecaudaComponent implements OnInit {
     private recaService: RecaudacionService,
     private facxrService: FacxrecaudaService,
     private s_recaudaxcaja: RecaudaxcajaService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.formBuscar = this.fb.group({
@@ -167,7 +167,7 @@ export class AddRecaudaComponent implements OnInit {
   get f() {
     return this.formCobrar.controls;
   }
-  abrirCaja() {
+  _abrirCaja() {
     this.s_cajas.getByIdUsuario(this.authService.idusuario).subscribe({
       next: (datos) => {
         this._caja = datos;
@@ -201,7 +201,7 @@ export class AddRecaudaComponent implements OnInit {
         });
         if (datos.ultimafact === null) {
           this._codigo = datos.codigo.toString();
-          this.getLastFactura();
+          //this.getLastFactura();
         } else {
           let nrofac = datos.ultimafact.split('-', 3);
           this._nroFactura = `${this._codRecaudador}-${nrofac[2]
@@ -211,10 +211,63 @@ export class AddRecaudaComponent implements OnInit {
       },
     });
   }
+  abrirCaja() {
+    this.s_cajas.getByIdUsuario(this.authService.idusuario).subscribe({
+      next: (dcaja) => {
+        console.log('ABRIR CAJA: ', dcaja);
+        this._caja = dcaja;
+        this._establecimiento = dcaja.idptoemision_ptoemision;
+        this._usuario = dcaja.idusuario_usuarios;
+        this._codRecaudador = `${dcaja.idptoemision_ptoemision.establecimiento}-${dcaja.codigo}`;
+        /* VALIDAR SI LA CAJA ESTA ABIERTA O CERRADA */
+        this.s_recaudaxcaja.getLastConexion(this._caja.idcaja).subscribe({
+          next: (drxc: any) => {
+            console.log('OBNETER ULTIMA CONEXIÓN: ', drxc);
+            console.log('Factura inicio: ', drxc.facinicio);
+            console.log('Factura ultima : ', drxc.facfin);
+            let c_fecha: Date = new Date();
+            let l_fecha: Date = new Date(drxc.fechainiciolabor);
+            let estadoCaja = sessionStorage.getItem('estadoCaja');
+            if (
+              (c_fecha.getDate() != l_fecha.getDate() &&
+                c_fecha.getMonth() != l_fecha.getMonth() &&
+                c_fecha.getFullYear() == l_fecha.getFullYear()) ||
+              estadoCaja === '0'
+            ) {
+              this.cajaActiva = false;
+              this.estadoCajaT = true;
+            } else {
+              this.cajaActiva = true;
+              this.estadoCajaT = false;
+            }
+            if (dcaja.ultimafact === null) {
+              console.log(drxc);
+              this.formatNroFactura(drxc.facfin);
+            } else {
+              console.log(dcaja.ultimafact);
+              //this.formatNroFactura(dcaja.ultimafact)};
+            }
+          },
+          error: (e) => console.error(e),
+        });
+      },
+    });
+  }
+  formatNroFactura(nroFactura: number) {
+    console.log(
+      `${this._codRecaudador}-${nroFactura.toString().padStart(9, '0')}`
+    );
+    let nfactura = `${this._codRecaudador}-${nroFactura
+      .toString()
+      .padStart(9, '0')}`;
+    this._nroFactura = nfactura;
+    //sessionStorage.setItem('ultfac', nfactura);
+    return nfactura;
+  }
   getLastFactura() {
     this.facService.valLastFac(this._codigo).subscribe({
       next: (dato: any) => {
-        console.log(dato)
+        console.log(dato);
         let nrofac = dato.nrofactura.split('-', 3);
         this._nroFactura = `${this._codRecaudador}-${nrofac[2]
           .toString()
@@ -226,24 +279,30 @@ export class AddRecaudaComponent implements OnInit {
 
   validarCaja() {
     let fecha: Date = new Date();
+    console.log('validar caja', this._nroFactura);
 
     let nrofac = this._nroFactura.split('-', 3);
     sessionStorage.setItem('ultfac', nrofac[2]);
     //this._caja.estado = 1;
     this.recxcaja.estado = 1;
-    this.recxcaja.facinicio = +nrofac[2]! + 1;
+    this.recxcaja.facinicio = +nrofac[2]!;
+    this.recxcaja.facfin = +nrofac[2]!;
     this.recxcaja.fechainiciolabor = fecha;
     //recxcaja.horainicio = fecha;
     this.recxcaja.idcaja_cajas = this._caja;
     this.recxcaja.idusuario_usuarios = this._caja.idusuario_usuarios;
     this.s_recaudaxcaja.saveRecaudaxcaja(this.recxcaja).subscribe({
       next: (datos) => {
+        console.log(datos);
         this.estadoCajaT = false;
+        sessionStorage.setItem('estadoCaja', '1');
       },
       error: (e) => console.error(e),
     });
   }
   cerrarCaja() {
+    sessionStorage.setItem('estadoCaja', '0');
+    let nrofac = this._nroFactura.split('-', 3);
     this.s_recaudaxcaja.getLastConexion(this._caja.idcaja).subscribe({
       next: (datos) => {
         let c_fecha: Date = new Date();
@@ -251,12 +310,10 @@ export class AddRecaudaComponent implements OnInit {
         this.recxcaja.estado = 0;
         this.recxcaja.fechafinlabor = c_fecha;
         this.estadoCajaT = true;
+        this.recxcaja.facfin = +nrofac[2]!;
         this.s_recaudaxcaja.updateRecaudaxcaja(this.recxcaja).subscribe({
           next: (datos) => {
-            sessionStorage.setItem(
-              'estadoCaja',
-              this.recxcaja.estado.toString()
-            );
+            console.log('caja cerrada');
           },
           error: (e) => console.error(e),
         });
@@ -276,7 +333,7 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   onSubmit() {
-    this.getLastFactura();
+    //this.getLastFactura();
     this.swcobrado = false;
     this.acobrar = 0;
     this._cliente = [];
@@ -405,7 +462,7 @@ export class AddRecaudaComponent implements OnInit {
       error: (err) => console.error(err.error),
     });
   }
-  disabled(e: any) { }
+  disabled(e: any) {}
 
   //Total de las planillas sin cobrar
   // total() {
@@ -757,7 +814,7 @@ export class AddRecaudaComponent implements OnInit {
    });
  } */
   cobrar() {
-    this.getLastFactura();
+    //this.getLastFactura();
     //Crea el registro en Recaudación
     let fecha = new Date();
     let r = {} as iRecaudacion; //Interface para los datos de la Recaudación
@@ -790,7 +847,7 @@ export class AddRecaudaComponent implements OnInit {
     rubrosxfac.cantidad = 1;
     rubrosxfac.estado = 1;
     this.rubxfacService.saveRubroxFac(rubrosxfac).subscribe({
-      next: (datos) => { },
+      next: (datos) => {},
       error: (e) => console.error(e),
     });
   }
@@ -842,6 +899,32 @@ export class AddRecaudaComponent implements OnInit {
                 next: (nex: any) => {
                   this.swcobrado = true;
                   this._nroFactura = nex.nrofactura;
+
+                  /* =============== */
+                  let nrofac = this._nroFactura.split('-', 3);
+                  this.s_recaudaxcaja
+                    .getLastConexion(this._caja.idcaja)
+                    .subscribe({
+                      next: (datos) => {
+                        let c_fecha: Date = new Date();
+                        this.recxcaja = datos;
+                        //this.recxcaja.estado = 0;
+                        //this.recxcaja.fechafinlabor = c_fecha;
+                        //this.estadoCajaT = true;
+                        this.recxcaja.facfin = +nrofac[2]!;
+                        this.s_recaudaxcaja
+                          .updateRecaudaxcaja(this.recxcaja)
+                          .subscribe({
+                            next: (datos) => {
+                              console.log('caja cerrada');
+                            },
+                            error: (e) => console.error(e),
+                          });
+                      },
+                      error: (e) => console.error(e),
+                    });
+                  /* =============== */
+
                   j++;
                   i++;
                   if (i < this._sincobro.length)
@@ -1132,7 +1215,7 @@ export class AddRecaudaComponent implements OnInit {
       return of({ invalido: true });
     else return of(null);
   }
-  pdf() { }
+  pdf() {}
   //Al digitar el dinero
   changeDinero() {
     let ncvalor: number;

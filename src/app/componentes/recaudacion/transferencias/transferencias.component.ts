@@ -146,7 +146,6 @@ export class TransferenciasComponent implements OnInit {
       ) {
         this.aboService.getByIdabonado(this.formBuscar.value.cuenta).subscribe({
           next: (datos) => {
-            console.log(datos);
             this._cliente = datos;
             if (this._cliente.length > 0) {
               this.datosCliente('cuenta');
