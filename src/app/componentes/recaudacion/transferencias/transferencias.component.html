@@ -32,7 +32,7 @@
                         data-target="#clientesModal" (click)="clientesModal()"><i class="bi bi-people"></i> Clientes
                      </button>
                   </div>
-                  <div *ngIf="atransferir > 0 && !swtransferido" class="form-group col-md-4 my-0 py-0 mb-0">
+                  <div *ngIf="atransferir > 0 && !swtransferido  && !estadoCajaT" class="form-group col-md-4 my-0 py-0 mb-0">
                      <button type="button" class="btn btn-sm btn-success" data-toggle="modal"
                         data-target="#modalTransferir" (click)="valorAtransferir(atransferir)"><i
                            class="bi-folder-symlink"></i> Transferir:&nbsp;&nbsp;

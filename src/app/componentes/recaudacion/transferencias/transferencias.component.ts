@@ -208,7 +208,6 @@ export class TransferenciasComponent implements OnInit {
   totalAtransferir() {
     let suma: number = 0;
     let i = 0;
-    console.log(this._sincobro);
     this._sincobro.forEach(() => {
       if (
         (this._sincobro[i].pagado === true || this._sincobro[i].pagado === 1) &&
@@ -223,21 +222,18 @@ export class TransferenciasComponent implements OnInit {
           this._sincobro[i].interes +
           this._sincobro[i].multa;
       }
-      console.log(suma);
       i++;
     });
     this.atransferir = suma;
   }
 
   marcarAnteriores(index: number) {
-    console.log('MARCAR ANTERIORES');
     if (
       this._sincobro[index].idmodulo.idmodulo == 3 ||
       this._sincobro[index].idmodulo.idmodulo == 4
     ) {
       //Solo para Emision
       if (this._sincobro[index].pagado) {
-        console.log(this._sincobro[index]);
         //Marca anteriores
         let antCuenta = this._sincobro[index].idabonado;
         let i = index - 1;
@@ -250,7 +246,6 @@ export class TransferenciasComponent implements OnInit {
       } //Desmarca siguientes
       else {
         let antCuenta = this._sincobro[index].idabonado;
-        console.log('cuenta anterior');
         let i = index;
         while (i <= this._sincobro.length - 1) {
           if (antCuenta != this._sincobro[i].idabonado) break;
@@ -446,7 +441,6 @@ export class TransferenciasComponent implements OnInit {
           this.facService.updateFacturas(fac).subscribe({
             next: (nex) => {
               this.swtransferido = true;
-              // console.log('Actualización Ok!')
               /* =============== */
               let nrofac = this._nroFactura.split('-', 3);
               this.s_recaudaxcaja.getLastConexion(this._caja.idcaja).subscribe({
@@ -459,7 +453,6 @@ export class TransferenciasComponent implements OnInit {
                   this.recxcaja.facfin = +nrofac[2]!;
                   this.s_recaudaxcaja.updateRecaudaxcaja(this.recxcaja).subscribe({
                     next: (datos) => {
-                      console.log('caja cerrada');
                     },
                     error: (e) => console.error(e),
                   });
@@ -491,7 +484,6 @@ export class TransferenciasComponent implements OnInit {
   abrirCaja() {
     this.s_cajas.getByIdUsuario(this.authService.idusuario).subscribe({
       next: (dcaja) => {
-        console.log('ABRIR CAJA: ', dcaja);
         this._caja = dcaja;
         this._establecimiento = dcaja.idptoemision_ptoemision;
         this._usuario = dcaja.idusuario_usuarios;
@@ -499,9 +491,6 @@ export class TransferenciasComponent implements OnInit {
         /* VALIDAR SI LA CAJA ESTA ABIERTA O CERRADA */
         this.s_recaudaxcaja.getLastConexion(this._caja.idcaja).subscribe({
           next: (drxc: any) => {
-            console.log('OBNETER ULTIMA CONEXIÓN: ', drxc);
-            console.log('Factura inicio: ', drxc.facinicio);
-            console.log('Factura ultima : ', drxc.facfin);
             let c_fecha: Date = new Date();
             let l_fecha: Date = new Date(drxc.fechainiciolabor);
             let estadoCaja = sessionStorage.getItem('estadoCaja');
@@ -518,10 +507,8 @@ export class TransferenciasComponent implements OnInit {
               this.estadoCajaT = false;
             }
             if (dcaja.ultimafact === null) {
-              console.log(drxc);
               this.formatNroFactura(drxc.facfin);
             } else {
-              console.log(dcaja.ultimafact);
               //this.formatNroFactura(dcaja.ultimafact)};
             }
           },
@@ -549,9 +536,6 @@ export class TransferenciasComponent implements OnInit {
     });
   }
   formatNroFactura(nroFactura: number) {
-    console.log(
-      `${this._codRecaudador}-${nroFactura.toString().padStart(9, '0')}`
-    );
     let nfactura = `${this._codRecaudador}-${nroFactura
       .toString()
       .padStart(9, '0')}`;
@@ -562,21 +546,16 @@ export class TransferenciasComponent implements OnInit {
 
   validarCaja() {
     let fecha: Date = new Date();
-    console.log('validar caja', this._nroFactura);
-
     let nrofac = this._nroFactura.split('-', 3);
     sessionStorage.setItem('ultfac', nrofac[2]);
-    //this._caja.estado = 1;
     this.recxcaja.estado = 1;
     this.recxcaja.facinicio = +nrofac[2]!;
     this.recxcaja.facfin = +nrofac[2]!;
     this.recxcaja.fechainiciolabor = fecha;
-    //recxcaja.horainicio = fecha;
     this.recxcaja.idcaja_cajas = this._caja;
     this.recxcaja.idusuario_usuarios = this._caja.idusuario_usuarios;
     this.s_recaudaxcaja.saveRecaudaxcaja(this.recxcaja).subscribe({
       next: (datos) => {
-        console.log(datos);
         this.estadoCajaT = false;
         sessionStorage.setItem('estadoCaja', '1');
       },
@@ -596,7 +575,6 @@ export class TransferenciasComponent implements OnInit {
         this.recxcaja.facfin = +nrofac[2]!;
         this.s_recaudaxcaja.updateRecaudaxcaja(this.recxcaja).subscribe({
           next: (datos) => {
-            console.log('caja cerrada');
           },
           error: (e) => console.error(e),
         });
@@ -613,7 +591,6 @@ export class TransferenciasComponent implements OnInit {
     modulo: number,
     valorbase: number
   ) {
-    //console.log('tarifa', tarifa, 'comercializacion', cons, 'interes', interes, 'multa', multa, 'modulo', modulo, 'valorbase', valorbase)
     if (modulo != 8) {
       let t = 0,
         c = 0,
