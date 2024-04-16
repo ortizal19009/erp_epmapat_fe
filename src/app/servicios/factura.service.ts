@@ -11,7 +11,7 @@ const baseUrl = `${apiUrl}/facturas`;
   providedIn: 'root',
 })
 export class FacturaService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getListaByNroFactura(nrofactura: String) {
     return this.http.get<Facturas>(`${baseUrl}?nrofactura=${nrofactura}`);
@@ -241,5 +241,15 @@ export class FacturaService {
     return this.http.get<Facturas>(
       `${baseUrl}/nrofmodulo?nrofactura=${nrofactura}&idmodulo=${idmodulo}`
     );
+  }
+
+
+
+  /*============================
+  ------ REPORTES JASPER -------
+  ============================*/
+
+  reporteFacturas(v_dfecha: Date, v_hfecha: Date){
+    return this.http.get(`${baseUrl}/reportes/facturascobradas?`)
   }
 }
