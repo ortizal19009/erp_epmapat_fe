@@ -11,7 +11,7 @@ const baseUrl = `${apiUrl}/facturas`;
   providedIn: 'root',
 })
 export class FacturaService {
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   getListaByNroFactura(nrofactura: String) {
     return this.http.get<Facturas>(`${baseUrl}?nrofactura=${nrofactura}`);
@@ -88,18 +88,14 @@ export class FacturaService {
   //Recaudación diaria - Facturas cobradas async (sumando los rubros)
   async getByFechacobroTotAsync(fecha: Date): Promise<any[]> {
     const response = await firstValueFrom(
-      this.http.get<any[]>(
-        `${baseUrl}/cobradastot?fecha=${fecha}`
-      )
+      this.http.get<any[]>(`${baseUrl}/cobradastot?fecha=${fecha}`)
     );
     return response;
   }
   //Recaudación diaria - Resumen: Por Forma de cobro
   async totalFechaFormacobroAsync(fecha: Date): Promise<any[]> {
     const response = await firstValueFrom(
-      this.http.get<any[]>(
-        `${baseUrl}/totalformacobro?fecha=${fecha}`
-      )
+      this.http.get<any[]>(`${baseUrl}/totalformacobro?fecha=${fecha}`)
     );
     return response;
   }
@@ -243,13 +239,19 @@ export class FacturaService {
     );
   }
 
-
-
   /*============================
   ------ REPORTES JASPER -------
   ============================*/
 
-  reporteFacturas(v_dfecha: Date, v_hfecha: Date){
-    return this.http.get(`${baseUrl}/reportes/facturascobradas?`)
+  reporteFacturas(v_dfecha: Date, v_hfecha: Date) {
+    console.log(v_dfecha, v_hfecha);
+    return this.http.get(
+      `${baseUrl}/reportes/facturascobradas?v_dfecha=${v_dfecha}&v_hfecha=${v_hfecha}`, { responseType: 'blob' }
+    );
+  }
+  reporteFacturasRubros(v_dfecha: Date, v_hfecha: Date, c_feccrea: Date) {
+    return this.http.get(
+      `${baseUrl}/reportes/facturascobradas?v_dfecha=${v_dfecha}&v_hfecha=${v_hfecha}&c_feccrea=${c_feccrea}`
+    );
   }
 }

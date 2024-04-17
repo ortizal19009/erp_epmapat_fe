@@ -78,7 +78,20 @@ export class ImpCajasComponent implements OnInit {
   impriexpor() {
     this.swimprimir = !this.swimprimir;
   }
-
+  _imprimir() {
+    this.facService
+      .reporteFacturas(
+        this.formImprimir.value.d_fecha,
+        this.formImprimir.value.h_fecha
+      )
+      .subscribe({
+        next: (datos) => {
+          console.log(datos);
+          const blob = new Blob([response], { type: 'application/pdf' });
+        saveAs(blob, 'report.pdf');
+        },
+      });
+  }
   //Recupera los datos de cada reporte
   async imprimir() {
     this.swbotones = true;
