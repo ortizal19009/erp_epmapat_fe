@@ -251,7 +251,7 @@ export class FacturaService {
   }
   reporteFacturasRubros(v_dfecha: Date, v_hfecha: Date, c_feccrea: Date) {
     return this.http.get(
-      `${baseUrl}/reportes/facturascobradas?v_dfecha=${v_dfecha}&v_hfecha=${v_hfecha}&c_feccrea=${c_feccrea}`
+      `${baseUrl}/reportes/facturasrubros?v_dfecha=${v_dfecha}&v_hfecha=${v_hfecha}&c_feccrea=${c_feccrea}`
     );
   }
 }

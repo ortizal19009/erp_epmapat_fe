@@ -9,6 +9,7 @@ import * as ExcelJS from 'exceljs';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { PdfService } from 'src/app/servicios/pdf.service';
+import { saveAs } from 'file-saver';
 
 @Component({
   selector: 'app-imp-cajas',
@@ -39,7 +40,7 @@ export class ImpCajasComponent implements OnInit {
     private facService: FacturaService,
     private rxfService: RubroxfacService,
     private _pdf: PdfService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/cajas');
@@ -53,9 +54,11 @@ export class ImpCajasComponent implements OnInit {
       d_fecha: strfecha,
       h_fecha: strfecha,
       fecha: strfecha,
+      hasta: '2023-12-31',
       nombrearchivo: ['', [Validators.required, Validators.minLength(3)]],
       otrapagina: '',
     });
+    console.log(this.formImprimir.value)
   }
 
   colocaColor(colores: any) {
@@ -87,8 +90,8 @@ export class ImpCajasComponent implements OnInit {
       .subscribe({
         next: (datos) => {
           console.log(datos);
-          const blob = new Blob([response], { type: 'application/pdf' });
-        saveAs(blob, 'report.pdf');
+          const blob = new Blob([datos], { type: 'application/pdf' });
+          saveAs(blob, 'report.pdf');
         },
       });
   }
@@ -142,55 +145,87 @@ export class ImpCajasComponent implements OnInit {
         }
         break;
       case 4: // Recaudacion diaria - Resumen
-        try {
-          this._cobradas =
-            await this.rxfService.getTotalRubrosActualRangosAsync(
-              d_fecha,
-              h_fecha,
-              hasta
-            );
-          try {
-            this._rubrosanterior =
-              await this.rxfService.getTotalRubrosAnteriorRangosAsync(
-                d_fecha,
-                h_fecha,
-                hasta
-              );
-            try {
-              this._formacobro =
-                await this.facService.totalFechaFormacobroRangosAsync(
-                  d_fecha,
-                  h_fecha
-                );
-              this.swcalculando = false;
-              if (this.swimprimir) this.txtcalculando = 'Mostrar';
-              else this.txtcalculando = 'Descargar';
-            } catch (error) {
-              console.error(
-                'Error al obtener los totales por Forma de cobro:',
-                error
-              );
-            }
-          } catch (error) {
-            console.error('Error al obtener los Rubros anteriores:', error);
-          }
-        } catch (error) {
-          console.error('Error al obtener los Rubros actuales:', error);
-        }
+        /*         try {
+                  this._cobradas =
+                    await this.rxfService.getTotalRubrosActualRangosAsync(
+                      d_fecha,
+                      h_fecha,
+                      hasta
+                    );
+                  try {
+                    this._rubrosanterior =
+                      await this.rxfService.getTotalRubrosAnteriorRangosAsync(
+                        d_fecha,
+                        h_fecha,
+                        hasta
+                      );
+                    try {
+                      this._formacobro =
+                        await this.facService.totalFechaFormacobroRangosAsync(
+                          d_fecha,
+                          h_fecha
+                        );
+                      this.swcalculando = false;
+                      if (this.swimprimir) this.txtcalculando = 'Mostrar';
+                      else this.txtcalculando = 'Descargar';
+                    } catch (error) {
+                      console.error(
+                        'Error al obtener los totales por Forma de cobro:',
+                        error
+                      );
+                    }
+                  } catch (error) {
+                    console.error('Error al obtener los Rubros anteriores:', error);
+                  }
+                } catch (error) {
+                  console.error('Error al obtener los Rubros actuales:', error);
+                } */
+/*         const strfecha = new Date(hasta).toISOString().slice(0, 10);
+        this.formImprimir.patchValue({
+          hasta: strfecha
+        }) */
+        this.facService
+          .reporteFacturasRubros
+          (
+            this.formImprimir.value.d_fecha,
+            this.formImprimir.value.h_fecha,
+            this.formImprimir.value.hasta,
+          ).subscribe({
+            next: (datos: any) => {
+              console.log(datos);
+              const blob = new Blob([datos], { type: 'application/pdf' });
+              saveAs(blob, `ReporteFacturasRubros_${new Date().toDateString()}.pdf`);
+            },
+          });
+
         break;
       case 5: // Recaudacion diaria - Planillas
-        try {
-          this._cobradas = await this.facService.getByFechacobroTotRangosAsync(
-            d_fecha,
-            h_fecha
-          );
-          // this.sw1 = true;
-          this.swcalculando = false;
-          if (this.swimprimir) this.txtcalculando = 'Mostrar';
-          else this.txtcalculando = 'Descargar';
-        } catch (error) {
-          console.error('Error al obtener las Planillas:', error);
-        }
+        /*         try {
+                  this._cobradas = await this.facService.getByFechacobroTotRangosAsync(
+                    d_fecha,
+                    h_fecha
+                  );
+                  // this.sw1 = true;
+                  this.swcalculando = false;
+                  if (this.swimprimir) this.txtcalculando = 'Mostrar';
+                  else this.txtcalculando = 'Descargar';
+                } catch (error) {
+                  console.error('Error al obtener las Planillas:', error);
+                } */
+
+        this.facService
+          .reporteFacturas(
+            this.formImprimir.value.d_fecha,
+            this.formImprimir.value.h_fecha
+          )
+          .subscribe({
+            next: (datos) => {
+              console.log(datos);
+              const blob = new Blob([datos], { type: 'application/pdf' });
+              saveAs(blob, `ReporteFacturas_${new Date().toDateString()}.pdf`);
+            },
+          });
+
         break;
       case 3: //Lista de Cajas
         this.cajService.getListaCaja().subscribe({
