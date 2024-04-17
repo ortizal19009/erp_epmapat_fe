@@ -9,7 +9,7 @@ import { CajaService } from 'src/app/servicios/caja.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { PdfService } from 'src/app/servicios/pdf.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
-import { InfoCajaComponent } from '../info-caja.component';
+import { saveAs } from 'file-saver';
 
 @Component({
   selector: 'app-imp-info-cajas',
@@ -54,6 +54,7 @@ export class ImpInfoCajasComponent implements OnInit {
       reporte: '1',
       d_fecha: strfecha,
       h_fecha: strfecha,
+      hasta: '2023-12-31',
       nombrearchivo: ['', [Validators.required, Validators.minLength(3)]],
       otrapagina: '',
     });
@@ -94,7 +95,21 @@ export class ImpInfoCajasComponent implements OnInit {
     let hasta = '2023-12-31';
     switch (this.opcreporte) {
       case 1: // Recaudacion diaria - Resumen
-        try {
+      this.facService
+      .reporteFacturasRubrosCaja(
+        this.formImprimir.value.d_fecha,
+        this.formImprimir.value.h_fecha,
+        this.formImprimir.value.hasta,
+        recaudador
+      )
+      .subscribe({
+        next: (datos) => {
+          console.log(datos);
+          const blob = new Blob([datos], { type: 'application/pdf' });
+          saveAs(blob, `ReporteFacturasCaja_${recaudador}_${new Date().toDateString()}.pdf`);
+        },
+      });
+/*         try {
           this._cobradas =
             await this.rxfService.getTotalRubrosActualByRecaudadorAsync(
               d_fecha,
@@ -131,10 +146,23 @@ export class ImpInfoCajasComponent implements OnInit {
           }
         } catch (error) {
           console.error('Error al obtener los Rubros actuales:', error);
-        }
+        } */
         break;
       case 2: // Recaudacion diaria - Planillas
-        try {
+      this.facService
+      .reporteFacturasCaja(
+        this.formImprimir.value.d_fecha,
+        this.formImprimir.value.h_fecha,
+        recaudador
+      )
+      .subscribe({
+        next: (datos) => {
+          console.log(datos);
+          const blob = new Blob([datos], { type: 'application/pdf' });
+          saveAs(blob, `ReporteFacturasCaja_${recaudador}_${new Date().toDateString()}.pdf`);
+        },
+      });
+/*         try {
           this._cobradas =
             await this.facService.getByFechacobroTotByRecaudadorAsync(
               d_fecha,
@@ -147,7 +175,7 @@ export class ImpInfoCajasComponent implements OnInit {
           else this.txtcalculando = 'Descargar';
         } catch (error) {
           console.error('Error al obtener las Planillas:', error);
-        }
+        } */
         break;
       case 3: //Lista de Cajas
         this.cajService.getListaCaja().subscribe({

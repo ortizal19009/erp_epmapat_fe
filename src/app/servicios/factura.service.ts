@@ -246,12 +246,27 @@ export class FacturaService {
   reporteFacturas(v_dfecha: Date, v_hfecha: Date) {
     console.log(v_dfecha, v_hfecha);
     return this.http.get(
-      `${baseUrl}/reportes/facturascobradas?v_dfecha=${v_dfecha}&v_hfecha=${v_hfecha}`, { responseType: 'blob' }
+      `${baseUrl}/reportes/facturascobradas?v_dfecha=${v_dfecha}&v_hfecha=${v_hfecha}`,
+      { responseType: 'blob' }
     );
   }
   reporteFacturasRubros(v_dfecha: Date, v_hfecha: Date, c_feccrea: Date) {
+    console.log(v_dfecha, v_hfecha, c_feccrea);
     return this.http.get(
-      `${baseUrl}/reportes/facturasrubros?v_dfecha=${v_dfecha}&v_hfecha=${v_hfecha}&c_feccrea=${c_feccrea}`
+      `${baseUrl}/reportes/facturasrubros?v_dfecha=${v_dfecha}&v_hfecha=${v_hfecha}&c_feccrea=${c_feccrea}`,
+      { responseType: 'blob' }
+    );
+  }
+  reporteFacturasCaja(v_dfecha: Date, v_hfecha: Date, usuariocobro: number) {
+    return this.http.get(
+      `${baseUrl}/reportes/facturascobradascaja?v_dfecha=${v_dfecha}&v_hfecha=${v_hfecha}&usuariocobro=${usuariocobro}`,
+      { responseType: 'blob' }
+    );
+  }
+  reporteFacturasRubrosCaja(v_dfecha: Date, v_hfecha: Date, c_feccrea: Date, usuariocobro: number) {
+    return this.http.get(
+      `${baseUrl}/reportes/facturasrubroscaja?v_dfecha=${v_dfecha}&v_hfecha=${v_hfecha}&c_feccrea=${c_feccrea}&usuariocobro=${usuariocobro}`,
+      { responseType: 'blob' }
     );
   }
 }
