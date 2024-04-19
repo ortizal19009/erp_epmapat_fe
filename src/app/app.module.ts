@@ -218,6 +218,7 @@ import { ImpLecturasComponent } from './componentes/lecturas/imp-lecturas/imp-le
 import { LecturasComponent } from './componentes/lecturas/lecturas.component';
 import { ImpCajasComponent } from './componentes/caja/imp-cajas/imp-cajas.component';
 import { ImpInfoCajasComponent } from './componentes/caja/info-caja/imp-info-cajas/imp-info-cajas.component';
+import { AnulacionesBajasComponent } from './componentes/facturas/anulaciones-bajas/anulaciones-bajas.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
@@ -290,7 +291,7 @@ import { ImpInfoCajasComponent } from './componentes/caja/info-caja/imp-info-caj
       InfoEstrfuncComponent, ModiPregastoComponent, AuxGastoComponent, NiifcuentasComponent, AddHomologaComponent,
       AddNiifcuentaComponent, ModiNiifcuentaComponent, TramipresuComponent, AddTramipresuComponent, ModiTramipresuComponent,
       CuentasComponent, AddCuentaComponent, SinafipComponent, TransaciComponent, AddTransaciComponent, AddAsientoComponent,
-      AddBenextranComponent, SimulacionComponent, AddLiquiacfpComponent, ModificarTramitenuevoComponent, AddAguatramiteComponent, CertitmpComponent, GeneCertificacionComponent, AguatramComponent, BuscarClienteComponent, ModiUsuarioComponent, BuscarRutaComponent, HabilitacionesComponent, AddHabilitacionComponent, HistorialconsumoComponent,
+      AddBenextranComponent, SimulacionComponent, AddLiquiacfpComponent, ModificarTramitenuevoComponent, AddAguatramiteComponent, CertitmpComponent, GeneCertificacionComponent, AguatramComponent, BuscarClienteComponent, ModiUsuarioComponent, BuscarRutaComponent, HabilitacionesComponent, AddHabilitacionComponent, HistorialconsumoComponent, AnulacionesBajasComponent,
    ],
 
    imports: [

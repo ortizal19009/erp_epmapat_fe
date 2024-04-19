@@ -43,6 +43,7 @@ import { ProyeccionComponent } from './componentes/pliego24/proyeccion/proyeccio
 import { FacturacionComponent } from './componentes/facturacion/facturacion/facturacion.component';
 import { InfoFacturacionComponent } from './componentes/facturacion/info-facturacion/info-facturacion.component';
 import { AddFacturacionComponent } from './componentes/facturacion/add-facturacion/add-facturacion.component';
+import { AnulacionesBajasComponent } from './componentes/facturas/anulaciones-bajas/anulaciones-bajas.component';
 //Catalogoitems (Productos)
 import { CatalogoitemsComponent } from './componentes/catalogoitems/catalogoitems/catalogoitems.component';
 import { InfoCatalogoitemsComponent } from './componentes/catalogoitems/info-catalogoitems/info-catalogoitems.component';
@@ -242,6 +243,7 @@ const routes: Routes = [
   //========== FACTURACIÓN ===================
   { path: 'facelectro', component: FacelectroComponent },
   { path: 'generadorxml', component: GeneradorxmlComponent },
+  { path: 'anulaciones-bajas', component: AnulacionesBajasComponent },
   //Facturacion
   { path: 'facturacion', component: FacturacionComponent },
   { path: 'info-facturacion', component: InfoFacturacionComponent },
@@ -450,4 +452,4 @@ const routes: Routes = [
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

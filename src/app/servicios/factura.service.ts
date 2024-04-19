@@ -263,10 +263,24 @@ export class FacturaService {
       { responseType: 'blob' }
     );
   }
-  reporteFacturasRubrosCaja(v_dfecha: Date, v_hfecha: Date, c_feccrea: Date, usuariocobro: number) {
+  reporteFacturasRubrosCaja(
+    v_dfecha: Date,
+    v_hfecha: Date,
+    c_feccrea: Date,
+    usuariocobro: number
+  ) {
     return this.http.get(
       `${baseUrl}/reportes/facturasrubroscaja?v_dfecha=${v_dfecha}&v_hfecha=${v_hfecha}&c_feccrea=${c_feccrea}&usuariocobro=${usuariocobro}`,
       { responseType: 'blob' }
     );
+  }
+
+  //ANULACIONES
+  findAnulaciones(limit: number) {
+    return this.http.get<Facturas[]>(`${baseUrl}/anulaciones?limit=${limit}`);
+  }
+  //ELIMICAIONES
+  findEliminadas(limit: number) {
+    return this.http.get<Facturas[]>(`${baseUrl}/eliminaciones?limit=${limit}`);
   }
 }
