@@ -114,7 +114,16 @@ export class AnulacionesBajasComponent implements OnInit {
       this._facturas = null;
     }
   }
+  changeTitulo(e: any) {
+    console.log(e.target.value);
+    if (e.target.value === '0') {
+      this.txttitulo = 'Anulación';
+    }
 
+    if (e.target.value === '1') {
+      this.txttitulo = 'Eliminación';
+    }
+  }
   getAllFacAnuladas(limit: number) {
     this.facServicio.findAnulaciones(limit).subscribe({
       next: (datos: any) => {
