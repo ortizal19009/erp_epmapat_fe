@@ -279,6 +279,8 @@ export class FacturaService {
   findAnulaciones(limit: number) {
     return this.http.get<Facturas[]>(`${baseUrl}/anulaciones?limit=${limit}`);
   }
+  findCobradas(idcliente: number){
+  return this.http.get<Facturas[]>(`${baseUrl}/cobradas/cliente?idcliente=${idcliente}`)}
   //ELIMICAIONES
   findEliminadas(limit: number) {
     return this.http.get<Facturas[]>(`${baseUrl}/eliminaciones?limit=${limit}`);

@@ -6,6 +6,9 @@ import { ColoresService } from 'src/app/compartida/colores.service';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Router } from '@angular/router';
 import { FacturaService } from 'src/app/servicios/factura.service';
+import { Clientes } from 'src/app/modelos/clientes';
+import { AbonadosService } from 'src/app/servicios/abonados.service';
+import { Abonados } from 'src/app/modelos/abonados';
 
 @Component({
   selector: 'app-anulaciones-bajas',
@@ -30,6 +33,10 @@ export class AnulacionesBajasComponent implements OnInit {
   _rubrosxfac: any;
   totfac: number;
   idfactura: number = 0;
+  /* buscar cliente */
+  _cliente: Clientes = new Clientes();
+  nombreCliente: String;
+  option: number = 0;
 
   constructor(
     private facServicio: FacturaService,
@@ -38,7 +45,8 @@ export class AnulacionesBajasComponent implements OnInit {
     public authService: AutorizaService,
     private coloresService: ColoresService,
     private lecService: LecturasService,
-    private s_pdfRecaudacion: RecaudacionReportsService
+    private s_pdfRecaudacion: RecaudacionReportsService,
+    private s_abonados: AbonadosService
   ) {}
 
   ngOnInit(): void {
@@ -96,6 +104,14 @@ export class AnulacionesBajasComponent implements OnInit {
   }
   buscar() {
     console.log(this.formBuscar.value);
+    console.log(this.option);
+    if (this.formBuscar.value.idfactura != '') {
+      console.log('IMPRIMIR FACTURAS');
+    }
+    if (this.formBuscar.value.idabonado != '') {
+      console.log('IMPRIMIR ABONADOS');
+      this.getClienteByAbonado();
+    }
   }
   changeIdfactura() {
     this.formBuscar.controls['idabonado'].setValue('');
@@ -135,10 +151,41 @@ export class AnulacionesBajasComponent implements OnInit {
   getAllFacEliminadas(limit: number) {
     this.facServicio.findEliminadas(limit).subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this._fEliminadas = datos;
       },
       error: (e) => console.error(e),
     });
+  }
+  setCliente(e: any) {
+    console.log(e);
+    this._cliente = e;
+    /*    this.f_tramites.patchValue({
+      idcliente_clientes: e,
+    }); */
+  }
+  getFacCobradas() {
+    this.facServicio.findCobradas(this._cliente.idcliente).subscribe({
+      next: (datos: any) => {
+        console.log(datos);
+      },
+      error: (e) => {
+        console.error(e);
+      },
+    });
+  }
+  getClienteByAbonado() {
+    if (this.option === 0) {
+      console.log('fACTURAS ANULADAS');
+      this.s_abonados
+        .getByIdabonado(this.formBuscar.value.idabonado)
+        .subscribe({
+          next: (datos: any) => {
+            console.log(datos);
+            this._cliente = datos[0].idcliente_clientes;
+            this.getFacCobradas();
+          },
+          error: (e) => console.error(e),
+        });
+    }
   }
 }
