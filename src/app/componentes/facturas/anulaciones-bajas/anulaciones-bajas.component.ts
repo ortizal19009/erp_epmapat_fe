@@ -23,6 +23,7 @@ export class AnulacionesBajasComponent implements OnInit {
   swbuscando: boolean;
   swbusca: boolean;
   filtro: string;
+  mfiltrar: string;
   txtbuscar: string = 'Buscar';
   _facturas: any;
   _fAnuladas: any;
@@ -36,7 +37,7 @@ export class AnulacionesBajasComponent implements OnInit {
   /* buscar cliente */
   _cliente: Clientes = new Clientes();
   nombreCliente: String;
-  option: number = 0;
+  option = '0';
 
   constructor(
     private facServicio: FacturaService,
@@ -107,9 +108,16 @@ export class AnulacionesBajasComponent implements OnInit {
     console.log(this.option);
     if (this.formBuscar.value.idfactura != '') {
       console.log('IMPRIMIR FACTURAS');
+      this.getFacCobrada();
     }
     if (this.formBuscar.value.idabonado != '') {
-      console.log('IMPRIMIR ABONADOS');
+      /*       console.log('IMPRIMIR ABONADOS');
+      if (this.option === '0') {
+        console.log('Anulaciones');
+      }
+      if (this.option === '1') {
+        console.log('Eliminados');
+      } */
       this.getClienteByAbonado();
     }
   }
@@ -119,6 +127,7 @@ export class AnulacionesBajasComponent implements OnInit {
     else {
       this.campo = 1;
       this._facturas = null;
+      this._cliente = new Clientes();
     }
   }
 
@@ -128,16 +137,19 @@ export class AnulacionesBajasComponent implements OnInit {
     else {
       this.campo = 2;
       this._facturas = null;
+      this._cliente = new Clientes();
     }
   }
   changeTitulo(e: any) {
     console.log(e.target.value);
+    this.option = e.target.value;
     if (e.target.value === '0') {
       this.txttitulo = 'Anulación';
     }
 
     if (e.target.value === '1') {
       this.txttitulo = 'Eliminación';
+      //this.option = '1';
     }
   }
   getAllFacAnuladas(limit: number) {
@@ -167,25 +179,55 @@ export class AnulacionesBajasComponent implements OnInit {
     this.facServicio.findCobradas(this._cliente.idcliente).subscribe({
       next: (datos: any) => {
         console.log(datos);
+        this._facturas = datos;
       },
       error: (e) => {
         console.error(e);
       },
     });
   }
+  getFacSinCobro() {
+    this.facServicio.getSinCobro(this._cliente.idcliente).subscribe({
+      next: (datos: any) => {
+        console.log(datos);
+        this._facturas = datos;
+      },
+      error: (e) => console.error(e),
+    });
+  }
+  getFacCobrada() {
+    this.facServicio.getById(this.formBuscar.value.idfactura).subscribe({
+      next: (datos: any) => {
+        console.log('planilla', datos);
+        if (this.option === '0') {
+          if (datos.fechaanulacion === null && datos.fechaeliminacion === null && datos.pagado === 1) {
+            this._facturas = [datos];
+          }
+        }
+        if (this.option === '1') {
+          if (datos.fechaanulacion === null && datos.fechaeliminacion === null && datos.pagado === 0) {
+            this._facturas = [datos];
+          }
+        }
+      },
+      error: (e) => console.error(e),
+    });
+  }
   getClienteByAbonado() {
-    if (this.option === 0) {
-      console.log('fACTURAS ANULADAS');
-      this.s_abonados
-        .getByIdabonado(this.formBuscar.value.idabonado)
-        .subscribe({
-          next: (datos: any) => {
-            console.log(datos);
-            this._cliente = datos[0].idcliente_clientes;
-            this.getFacCobradas();
-          },
-          error: (e) => console.error(e),
-        });
-    }
+    this.s_abonados.getByIdabonado(this.formBuscar.value.idabonado).subscribe({
+      next: (datos: any) => {
+        console.log(datos);
+        this._cliente = datos[0].idcliente_clientes;
+        if (this.option === '0') {
+          console.log('FACTURAS PARA ANULAR');
+          this.getFacCobradas();
+        }
+        if (this.option === '1') {
+          console.log('FACTURAS PARA ELIMINAR');
+          this.getFacSinCobro();
+        }
+      },
+      error: (e) => console.error(e),
+    });
   }
 }
