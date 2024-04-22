@@ -104,10 +104,7 @@ export class AnulacionesBajasComponent implements OnInit {
     }
   }
   buscar() {
-    console.log(this.formBuscar.value);
-    console.log(this.option);
     if (this.formBuscar.value.idfactura != '') {
-      console.log('IMPRIMIR FACTURAS');
       this.getFacCobrada();
     }
     if (this.formBuscar.value.idabonado != '') {
@@ -141,7 +138,6 @@ export class AnulacionesBajasComponent implements OnInit {
     }
   }
   changeTitulo(e: any) {
-    console.log(e.target.value);
     this.option = e.target.value;
     if (e.target.value === '0') {
       this.txttitulo = 'Anulación';
@@ -169,7 +165,6 @@ export class AnulacionesBajasComponent implements OnInit {
     });
   }
   setCliente(e: any) {
-    console.log(e);
     this._cliente = e;
     /*    this.f_tramites.patchValue({
       idcliente_clientes: e,
@@ -178,7 +173,6 @@ export class AnulacionesBajasComponent implements OnInit {
   getFacCobradas() {
     this.facServicio.findCobradas(this._cliente.idcliente).subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this._facturas = datos;
       },
       error: (e) => {
@@ -189,7 +183,6 @@ export class AnulacionesBajasComponent implements OnInit {
   getFacSinCobro() {
     this.facServicio.getSinCobro(this._cliente.idcliente).subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this._facturas = datos;
       },
       error: (e) => console.error(e),
@@ -198,7 +191,6 @@ export class AnulacionesBajasComponent implements OnInit {
   getFacCobrada() {
     this.facServicio.getById(this.formBuscar.value.idfactura).subscribe({
       next: (datos: any) => {
-        console.log('planilla', datos);
         if (this.option === '0') {
           if (datos.fechaanulacion === null && datos.fechaeliminacion === null && datos.pagado === 1) {
             this._facturas = [datos];
@@ -216,14 +208,11 @@ export class AnulacionesBajasComponent implements OnInit {
   getClienteByAbonado() {
     this.s_abonados.getByIdabonado(this.formBuscar.value.idabonado).subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this._cliente = datos[0].idcliente_clientes;
         if (this.option === '0') {
-          console.log('FACTURAS PARA ANULAR');
           this.getFacCobradas();
         }
         if (this.option === '1') {
-          console.log('FACTURAS PARA ELIMINAR');
           this.getFacSinCobro();
         }
       },
