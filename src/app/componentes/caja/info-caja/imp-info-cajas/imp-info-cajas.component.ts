@@ -41,7 +41,7 @@ export class ImpInfoCajasComponent implements OnInit {
     private facService: FacturaService,
     private rxfService: RubroxfacService,
     private _pdf: PdfService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/cajas');
@@ -95,21 +95,21 @@ export class ImpInfoCajasComponent implements OnInit {
     let hasta = '2023-12-31';
     switch (this.opcreporte) {
       case 1: // Recaudacion diaria - Resumen
-      this.facService
-      .reporteFacturasRubrosCaja(
-        this.formImprimir.value.d_fecha,
-        this.formImprimir.value.h_fecha,
-        this.formImprimir.value.hasta,
-        recaudador
-      )
-      .subscribe({
-        next: (datos) => {
-          console.log(datos);
-          const blob = new Blob([datos], { type: 'application/pdf' });
-          saveAs(blob, `ReporteFacturasCaja_${recaudador}_${new Date().toDateString()}.pdf`);
-        },
-      });
-/*         try {
+        /*         this.facService
+                  .reporteFacturasRubrosCaja(
+                    this.formImprimir.value.d_fecha,
+                    this.formImprimir.value.h_fecha,
+                    this.formImprimir.value.hasta,
+                    recaudador
+                  )
+                  .subscribe({
+                    next: (datos) => {
+                      console.log(datos);
+                      const blob = new Blob([datos], { type: 'application/pdf' });
+                      saveAs(blob, `ReporteFacturasCaja_${recaudador}_${new Date().toDateString()}.pdf`);
+                    },
+                  }); */
+        try {
           this._cobradas =
             await this.rxfService.getTotalRubrosActualByRecaudadorAsync(
               d_fecha,
@@ -146,23 +146,23 @@ export class ImpInfoCajasComponent implements OnInit {
           }
         } catch (error) {
           console.error('Error al obtener los Rubros actuales:', error);
-        } */
+        }
         break;
       case 2: // Recaudacion diaria - Planillas
-      this.facService
-      .reporteFacturasCaja(
-        this.formImprimir.value.d_fecha,
-        this.formImprimir.value.h_fecha,
-        recaudador
-      )
-      .subscribe({
-        next: (datos) => {
-          console.log(datos);
-          const blob = new Blob([datos], { type: 'application/pdf' });
-          saveAs(blob, `ReporteFacturasCaja_${recaudador}_${new Date().toDateString()}.pdf`);
-        },
-      });
-/*         try {
+        /*       this.facService
+              .reporteFacturasCaja(
+                this.formImprimir.value.d_fecha,
+                this.formImprimir.value.h_fecha,
+                recaudador
+              )
+              .subscribe({
+                next: (datos) => {
+                  console.log(datos);
+                  const blob = new Blob([datos], { type: 'application/pdf' });
+                  saveAs(blob, `ReporteFacturasCaja_${recaudador}_${new Date().toDateString()}.pdf`);
+                },
+              }); */
+        try {
           this._cobradas =
             await this.facService.getByFechacobroTotByRecaudadorAsync(
               d_fecha,
@@ -175,18 +175,7 @@ export class ImpInfoCajasComponent implements OnInit {
           else this.txtcalculando = 'Descargar';
         } catch (error) {
           console.error('Error al obtener las Planillas:', error);
-        } */
-        break;
-      case 3: //Lista de Cajas
-        this.cajService.getListaCaja().subscribe({
-          next: (datos) => {
-            this._cajas = datos;
-            this.swcalculando = false;
-            if (this.swimprimir) this.txtcalculando = 'Mostrar';
-            else this.txtcalculando = 'Descargar';
-          },
-          error: (err) => console.error(err.error),
-        });
+        }
         break;
       default:
     }
@@ -231,9 +220,9 @@ export class ImpInfoCajasComponent implements OnInit {
       ); */
     this._pdf.header(
       'RESUMEN RECAUDACIÓN: ' +
-        this.formImprimir.value.d_fecha +
-        ' - ' +
-        this.formImprimir.value.h_fecha,
+      this.formImprimir.value.d_fecha +
+      ' - ' +
+      this.formImprimir.value.h_fecha,
       doc
     );
 
@@ -245,7 +234,8 @@ export class ImpInfoCajasComponent implements OnInit {
     let i = 0;
     let iva1 = 0;
     this._cobradas.forEach(() => {
-      let totalRecaudado = Math.round(this._cobradas[i][2] * 100) / 100;
+      let totalRecaudado = this._cobradas[i][2];
+      //Math.round(this._cobradas[i][2] * 100) / 100;
       if (this._cobradas[i][3] === true) {
         iva1 += totalRecaudado * 0.15;
       }
@@ -271,7 +261,8 @@ export class ImpInfoCajasComponent implements OnInit {
     let iva2 = 0;
     datos.push(['', 'PERÍODOS ANTERIORES']);
     this._rubrosanterior.forEach(() => {
-      let totalRecaudado = Math.round(this._rubrosanterior[i][2] * 100) / 100;
+      let totalRecaudado = this._rubrosanterior[i][2];
+      // Math.round(this._rubrosanterior[i][2] * 100) / 100;
       if (this._rubrosanterior[i][3] === true) {
         iva2 += totalRecaudado * 0.15;
       }
@@ -402,18 +393,18 @@ export class ImpInfoCajasComponent implements OnInit {
       ); */
     this._pdf.header(
       'RECAUDACIÓN - PLANILLAS: ' +
-        this.formImprimir.value.d_fecha +
-        ' - ' +
-        this.formImprimir.value.h_fecha,
+      this.formImprimir.value.d_fecha +
+      ' - ' +
+      this.formImprimir.value.h_fecha,
       doc
     );
     const datos: any = [];
     let suma: number = 0;
     var i = 0;
     this._cobradas.forEach(() => {
-      let totalPorFormaCobro =
-        Math.round((this._cobradas[i][1] + this._cobradas[i][0].swiva) * 100) /
-        100;
+      let totalPorFormaCobro = (this._cobradas[i][1] + this._cobradas[i][0].swiva);
+
+      //  Math.round((this._cobradas[i][1] + this._cobradas[i][0].swiva) * 100) / 100;
       datos.push([
         this._cobradas[i][0].idfactura,
         this._cobradas[i][0].feccrea,

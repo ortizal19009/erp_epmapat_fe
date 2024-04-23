@@ -103,7 +103,7 @@ export class RubroxfacService {
   ): Promise<any[]> {
     const response = await firstValueFrom(
       this.http.get<any[]>(
-        `${baseUrl}/totalrubrosanterior?d_fecha=${d_fecha}&h_fecha=${h_fecha}&hasta=${hasta}`
+        `${baseUrl}/totalrubrosanteriorrangos?d_fecha=${d_fecha}&h_fecha=${h_fecha}&hasta=${hasta}`
       )
     );
     return response;

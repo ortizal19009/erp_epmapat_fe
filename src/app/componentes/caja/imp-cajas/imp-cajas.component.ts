@@ -40,7 +40,7 @@ export class ImpCajasComponent implements OnInit {
     private facService: FacturaService,
     private rxfService: RubroxfacService,
     private _pdf: PdfService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/cajas');
@@ -145,38 +145,70 @@ export class ImpCajasComponent implements OnInit {
         }
         break;
       case 4: // Recaudacion diaria - Resumen
-        this.facService
-          .reporteFacturasRubros(
-            this.formImprimir.value.d_fecha,
-            this.formImprimir.value.h_fecha,
-            this.formImprimir.value.hasta
-          )
-          .subscribe({
-            next: (datos) => {
-              console.log(datos);
-              const blob = new Blob([datos], { type: 'application/pdf' });
-              saveAs(
-                blob,
-                `ReporteFacturasRubros_${new Date().toDateString()}.pdf`
+        /*         this.facService
+                  .reporteFacturasRubros(
+                    this.formImprimir.value.d_fecha,
+                    this.formImprimir.value.h_fecha,
+                    this.formImprimir.value.hasta
+                  )
+                  .subscribe({
+                    next: (datos) => {
+                      console.log(datos);
+                      const blob = new Blob([datos], { type: 'application/pdf' });
+                      saveAs(
+                        blob,
+                        `ReporteFacturasRubros_${new Date().toDateString()}.pdf`
+                      );
+                    },
+                  });
+         */
+        try {
+          this._cobradas = await this.rxfService.getTotalRubrosActualRangosAsync(d_fecha, h_fecha, hasta);
+          try {
+            this._rubrosanterior =
+              await this.rxfService.getTotalRubrosAnteriorRangosAsync(d_fecha, h_fecha, hasta);
+            try {
+              this._formacobro =
+                await this.facService.totalFechaFormacobroRangosAsync(d_fecha, h_fecha);
+              this.swcalculando = false;
+              if (this.swimprimir) this.txtcalculando = 'Mostrar';
+              else this.txtcalculando = 'Descargar';
+            } catch (error) {
+              console.error(
+                'Error al obtener los totales por Forma de cobro:',
+                error
               );
-            },
-          });
-
+            }
+          } catch (error) {
+            console.error('Error al obtener los Rubros anteriores:', error);
+          }
+        } catch (error) {
+          console.error('Error al obtener los Rubros actuales:', error);
+        }
         break;
       case 5: // Recaudacion diaria - Planillas
-        this.facService
-          .reporteFacturas(
-            this.formImprimir.value.d_fecha,
-            this.formImprimir.value.h_fecha
-          )
-          .subscribe({
-            next: (datos) => {
-              console.log(datos);
-              const blob = new Blob([datos], { type: 'application/pdf' });
-              saveAs(blob, `ReporteFacturas_${new Date().toDateString()}.pdf`);
-            },
-          });
-
+        /*         this.facService
+                  .reporteFacturas(
+                    this.formImprimir.value.d_fecha,
+                    this.formImprimir.value.h_fecha
+                  )
+                  .subscribe({
+                    next: (datos) => {
+                      console.log(datos);
+                      const blob = new Blob([datos], { type: 'application/pdf' });
+                      saveAs(blob, `ReporteFacturas_${new Date().toDateString()}.pdf`);
+                    },
+                  });
+         */
+        try {
+          this._cobradas = await this.facService.getByFechacobroTotRangosAsync(d_fecha, h_fecha);
+          // this.sw1 = true;
+          this.swcalculando = false;
+          if (this.swimprimir) this.txtcalculando = 'Mostrar';
+          else this.txtcalculando = 'Descargar';
+        } catch (error) {
+          console.error('Error al obtener las Planillas:', error);
+        }
         break;
       case 3: //Lista de Cajas
         this.cajService.getListaCaja().subscribe({
@@ -203,6 +235,14 @@ export class ImpCajasComponent implements OnInit {
         else this.exportarResumen();
         break;
       case 2: // Recaudacion diaria - Planillas
+        if (this.swimprimir) this.imprimirFacturas();
+        else this.exportarFacturas();
+        break;
+      case 4: // Recaudacion diaria - Resumen
+        if (this.swimprimir) this.imprimirResumen();
+        else this.exportarResumen();
+        break;
+      case 5: // Recaudacion diaria - Planillas
         if (this.swimprimir) this.imprimirFacturas();
         else this.exportarFacturas();
         break;
@@ -236,7 +276,8 @@ export class ImpCajasComponent implements OnInit {
     let i = 0;
     let iva1 = 0;
     this._cobradas.forEach(() => {
-      let totalRecaudado = Math.round(this._cobradas[i][2] * 100) / 100;
+      let totalRecaudado = this._cobradas[i][2];
+      // Math.round(this._cobradas[i][2] * 100) / 100;
       if (
         this._cobradas[i][3] === true &&
         this.formImprimir.value.fecha >= '2024-04-01' === true
@@ -266,7 +307,8 @@ export class ImpCajasComponent implements OnInit {
     //console.log(this._rubrosanterior)
     this._rubrosanterior.forEach(() => {
       if (this._rubrosanterior[i][0] != 165) {
-        let totalRecaudado = Math.round(this._rubrosanterior[i][2] * 100) / 100;
+        let totalRecaudado = this._rubrosanterior[i][2];
+        //Math.round(this._rubrosanterior[i][2] * 100) / 100;
         if (
           this._rubrosanterior[i][3] === true &&
           this.formImprimir.value.fecha >= '2024-04-01' === true
@@ -407,10 +449,11 @@ export class ImpCajasComponent implements OnInit {
     const datos: any = [];
     let suma: number = 0;
     var i = 0;
+    console.log(this._cobradas)
     this._cobradas.forEach(() => {
-      let totalPorFormaCobro =
-        Math.round((this._cobradas[i][1] + this._cobradas[i][0].swiva) * 100) /
-        100;
+      let totalPorFormaCobro = (this._cobradas[i][1] + this._cobradas[i][0].swiva)
+      /*       Math.round( * 100) /
+              100; */
       // datos.push([this._cobradas[i][0].idfactura, this._cobradas[i][0].feccrea, this._cobradas[i][0].nrofactura, this._cobradas[i][0].formapago,
       // this._cobradas[i][0].idcliente.nombre, formatNumber(totalPorFormaCobro)]);
       datos.push([
@@ -420,9 +463,286 @@ export class ImpCajasComponent implements OnInit {
         this._cobradas[i][0].formapago,
         formatNumber(totalPorFormaCobro),
       ]);
+      console.log(suma)
       suma += totalPorFormaCobro;
+      console.log("totalforma pago" + totalPorFormaCobro)
       i++;
     });
+    console.log("total" + suma)
+    this.sumtotaltarifa = suma;
+    datos.push([
+      '',
+      'TOTAL',
+      i,
+      '',
+      this.sumtotaltarifa.toLocaleString('es-ES', { maximumFractionDigits: 2 }),
+    ]);
+
+    const addPageNumbers = function () {
+      const pageCount = doc.internal.pages.length;
+      for (let i = 1; i <= pageCount - 1; i++) {
+        doc.setPage(i);
+        doc.setFontSize(10);
+        doc.text(
+          'Página ' + i + ' de ' + (pageCount - 1),
+          m_izquierda,
+          doc.internal.pageSize.height - 10
+        );
+      }
+    };
+
+    autoTable(doc, {
+      head: [['Nro', 'Fecha', 'Factura', 'F.Cob', 'Valor']],
+      theme: 'grid',
+      headStyles: {
+        fillColor: [68, 103, 114],
+        fontStyle: 'bold',
+        halign: 'center',
+      },
+      styles: {
+        font: 'helvetica',
+        fontSize: 8,
+        cellPadding: 1,
+        halign: 'center',
+      },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 16 },
+        1: { halign: 'center', cellWidth: 18 },
+        2: { halign: 'center', cellWidth: 29 },
+        3: { halign: 'center', cellWidth: 12 },
+        // 4: { halign: 'left', cellWidth: 75 },
+        4: { halign: 'right', cellWidth: 20 },
+      },
+      margin: { left: m_izquierda - 1, top: 18, right: 66, bottom: 13 },
+      body: datos,
+      didParseCell: function (data) {
+        var fila = data.row.index;
+        var columna = data.column.index;
+        if (fila === datos.length - 1) {
+          data.cell.styles.fontStyle = 'bold';
+        }
+      },
+    });
+
+    addPageNumbers();
+
+    this.muestraPDF(doc);
+  }
+  imprimirResumenRangos() {
+    this.otrapagina = this.formImprimir.value.otrapagina;
+    let m_izquierda = 40;
+    let doc = new jsPDF();
+    doc.setFont('times', 'bold');
+    doc.setFontSize(16);
+    doc.text('EpmapaT', m_izquierda, 10);
+    doc.setFont('times', 'bold');
+    doc.setFontSize(12);
+    doc.text(
+      'RESUMEN RECAUDACIÓN DIARIA: ' + this.formImprimir.value.fecha,
+      m_izquierda,
+      16
+    );
+    const datos: any = [];
+    this.total = 0;
+    let kont = 1; //Para la fila de la segunda Tabla
+    let suma: number = 0;
+    datos.push(['', 'PERÍODO ACTUAL']);
+    let i = 0;
+    let iva1 = 0;
+    this._cobradas.forEach(() => {
+      let totalRecaudado = this._cobradas[i][2];
+      // Math.round(this._cobradas[i][2] * 100) / 100;
+      if (
+        this._cobradas[i][3] === true &&
+        this.formImprimir.value.fecha >= '2024-04-01' === true
+      ) {
+        iva1 += totalRecaudado * 0.15;
+      }
+      datos.push([
+        this._cobradas[i][0],
+        this._cobradas[i][1],
+        formatNumber(totalRecaudado),
+      ]);
+
+      suma += totalRecaudado;
+      i++;
+    });
+    kont = kont + i;
+    this.total += suma + iva1;
+    if (iva1 > 0) {
+      datos.push(['', 'IVA', formatNumber(iva1)]);
+    }
+    datos.push(['', 'SUBTOTAL', formatNumber(suma)]);
+
+    let suma1 = 0;
+    let iva2 = 0;
+    i = 0;
+    datos.push(['', 'PERÍODOS ANTERIORES']);
+    //console.log(this._rubrosanterior)
+    this._rubrosanterior.forEach(() => {
+      if (this._rubrosanterior[i][0] != 165) {
+        let totalRecaudado = this._rubrosanterior[i][2];
+        //Math.round(this._rubrosanterior[i][2] * 100) / 100;
+        if (
+          this._rubrosanterior[i][3] === true &&
+          this.formImprimir.value.fecha >= '2024-04-01' === true
+        ) {
+          iva2 += totalRecaudado * 0.15;
+        }
+        datos.push([
+          this._rubrosanterior[i][0],
+          this._rubrosanterior[i][1],
+          formatNumber(totalRecaudado),
+        ]);
+        suma1 += totalRecaudado;
+      }
+      i++;
+    });
+
+    kont = kont + i;
+    this.total += suma1 + iva2;
+    if (iva1 > 0) {
+      datos.push(['', 'IVA', formatNumber(iva2)]);
+    }
+    datos.push(['', 'SUBTOTAL', formatNumber(suma1)]);
+
+    // datos.push(['', 'TOTAL', this.total.toLocaleString("es-ES", { maximumFractionDigits: 2 })]);
+    datos.push(['', 'TOTAL', formatNumber(this.total)]);
+
+    autoTable(doc, {
+      head: [['Nro.', 'Rubro', 'Total Recaudado']],
+      theme: 'grid',
+      headStyles: {
+        fillColor: [68, 103, 114],
+        fontStyle: 'bold',
+        halign: 'center',
+      },
+      styles: {
+        font: 'helvetica',
+        fontSize: 8,
+        cellPadding: 1,
+        halign: 'center',
+      },
+
+      columnStyles: {
+        0: { halign: 'right', cellWidth: 10 },
+        1: { halign: 'left', cellWidth: 80 },
+        2: { halign: 'right', cellWidth: 30 },
+      },
+      margin: { left: m_izquierda - 1, top: 18, right: 51, bottom: 13 },
+      body: datos,
+      didParseCell: function (data) {
+        // Cambia el estilo de toda la fila a negrita
+        if (data.cell.raw === '' && data.column.index === 0) {
+          Object.values(data.row.cells).forEach(function (cell) {
+            cell.styles.fontStyle = 'bold';
+          });
+        }
+      },
+    });
+
+    //Segunda Tabla: Totales por Formas de Cobro
+    const formascobro: any = [];
+    let suma2: number = 0;
+    i = 0;
+
+    this._formacobro.forEach(() => {
+      let totalRecaudado = Math.round(this._formacobro[i][1] * 100) / 100;
+      formascobro.push([this._formacobro[i][0], formatNumber(totalRecaudado)]);
+      suma2 += totalRecaudado;
+      i++;
+    });
+    if (iva1 + iva2 > 0) {
+      formascobro.push(['SUBTOTAL', formatNumber(suma2)]);
+      formascobro.push(['IVA', formatNumber(iva1 + iva2)]);
+    }
+    formascobro.push(['TOTAL', formatNumber(suma2 + iva1 + iva2)]);
+
+    autoTable(doc, {
+      head: [['Forma Cobro', 'Total Recaudado']],
+      theme: 'grid',
+      headStyles: {
+        fillColor: [68, 103, 114],
+        fontStyle: 'bold',
+        halign: 'center',
+      },
+      styles: {
+        font: 'helvetica',
+        fontSize: 8,
+        cellPadding: 1,
+        halign: 'center',
+      },
+      columnStyles: {
+        0: { halign: 'left', cellWidth: 30 },
+        1: { halign: 'right', cellWidth: 30 },
+      },
+      margin: { left: m_izquierda - 1, top: kont + 10, right: 111, bottom: 13 },
+      body: formascobro,
+
+      didParseCell: function (data) {
+        var fila = data.row.index;
+        if (fila === formascobro.length - 1) {
+          data.cell.styles.fontStyle = 'bold';
+        }
+      },
+    });
+
+    const addPageNumbers = function () {
+      const pageCount = doc.internal.pages.length;
+      for (let i = 1; i <= pageCount - 1; i++) {
+        doc.setPage(i);
+        doc.setFontSize(10);
+        doc.text(
+          'Página ' + i + ' de ' + (pageCount - 1),
+          m_izquierda,
+          doc.internal.pageSize.height - 10
+        );
+      }
+    };
+
+    addPageNumbers();
+
+    this.muestraPDF(doc);
+  }
+
+  imprimirFacturasRangos() {
+    this.otrapagina = this.formImprimir.value.otrapagina;
+    let m_izquierda = 50;
+    let doc = new jsPDF();
+    doc.setFont('times', 'bold');
+    doc.setFontSize(16);
+    doc.text('EpmapaT', m_izquierda, 10);
+    doc.setFont('times', 'bold');
+    doc.setFontSize(12);
+    doc.text(
+      'RECAUDACIÓN DIARIA - PLANILLAS: ' + this.formImprimir.value.fecha,
+      m_izquierda,
+      16
+    );
+
+    const datos: any = [];
+    let suma: number = 0;
+    var i = 0;
+    console.log(this._cobradas)
+    this._cobradas.forEach(() => {
+      let totalPorFormaCobro = (this._cobradas[i][1] + this._cobradas[i][0].swiva)
+      /*       Math.round( * 100) /
+              100; */
+      // datos.push([this._cobradas[i][0].idfactura, this._cobradas[i][0].feccrea, this._cobradas[i][0].nrofactura, this._cobradas[i][0].formapago,
+      // this._cobradas[i][0].idcliente.nombre, formatNumber(totalPorFormaCobro)]);
+      datos.push([
+        this._cobradas[i][0].idfactura,
+        this._cobradas[i][0].feccrea,
+        this._cobradas[i][0].nrofactura,
+        this._cobradas[i][0].formapago,
+        formatNumber(totalPorFormaCobro),
+      ]);
+      console.log(suma)
+      suma += totalPorFormaCobro;
+      console.log("totalforma pago" + totalPorFormaCobro)
+      i++;
+    });
+    console.log("total" + suma)
     this.sumtotaltarifa = suma;
     datos.push([
       '',
