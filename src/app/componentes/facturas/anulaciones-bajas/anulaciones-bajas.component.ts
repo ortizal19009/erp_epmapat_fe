@@ -48,7 +48,7 @@ export class AnulacionesBajasComponent implements OnInit {
     private lecService: LecturasService,
     private s_pdfRecaudacion: RecaudacionReportsService,
     private s_abonados: AbonadosService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/anulaciones-bajas');
@@ -63,9 +63,9 @@ export class AnulacionesBajasComponent implements OnInit {
       fechaDesde: año + '-01-01',
       fechaHasta: año + '-12-31',
     });
-    if (sessionStorage.getItem('idfacturaPlanillas') != null) {
+    if (sessionStorage.getItem('idplanillas') != null) {
       this.formBuscar.controls['idfactura'].setValue(
-        sessionStorage.getItem('idfacturaPlanillas')
+        sessionStorage.getItem('idplanillas')
       );
       this.campo = 1;
       this.buscar();
@@ -117,6 +117,14 @@ export class AnulacionesBajasComponent implements OnInit {
       } */
       this.getClienteByAbonado();
     }
+    if (this.formBuscar.value.idabonado === '' && this.formBuscar.value.idfactura === '') {
+      if (this.option === '0') {
+        this.getFacCobradas();
+      }
+      if (this.option === '1') {
+        this.getFacSinCobro();
+      }
+    }
   }
   changeIdfactura() {
     this.formBuscar.controls['idabonado'].setValue('');
@@ -136,6 +144,15 @@ export class AnulacionesBajasComponent implements OnInit {
       this._facturas = null;
       this._cliente = new Clientes();
     }
+  }
+  changeCliente() {
+    /*   this.formBuscar.controls['idfactura'].setValue('');
+      if (!this.formBuscar.value.idabonado) this.campo = 0;
+      else {
+        this.campo = 2;
+        this._facturas = null;
+        this._cliente = new Clientes();
+      } */
   }
   changeTitulo(e: any) {
     this.option = e.target.value;
@@ -165,6 +182,11 @@ export class AnulacionesBajasComponent implements OnInit {
     });
   }
   setCliente(e: any) {
+    this.formBuscar.patchValue({
+      idfactura: '',
+      idabonado: ''
+    });
+    this.campo = 1;
     this._cliente = e;
     /*    this.f_tramites.patchValue({
       idcliente_clientes: e,

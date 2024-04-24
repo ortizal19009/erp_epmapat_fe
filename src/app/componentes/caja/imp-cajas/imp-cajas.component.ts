@@ -255,6 +255,7 @@ export class ImpCajasComponent implements OnInit {
   }
 
   imprimirResumen() {
+    console.log(this._cobradas)
     this.otrapagina = this.formImprimir.value.otrapagina;
     let m_izquierda = 40;
     let doc = new jsPDF();
@@ -276,6 +277,9 @@ export class ImpCajasComponent implements OnInit {
     let i = 0;
     let iva1 = 0;
     this._cobradas.forEach(() => {
+   /*    if (this._cobradas[i][0] == 165) {
+        console.log(this._cobradas[i][0])
+      } */
       let totalRecaudado = this._cobradas[i][2];
       // Math.round(this._cobradas[i][2] * 100) / 100;
       if (
@@ -306,6 +310,7 @@ export class ImpCajasComponent implements OnInit {
     datos.push(['', 'PERÍODOS ANTERIORES']);
     //console.log(this._rubrosanterior)
     this._rubrosanterior.forEach(() => {
+      //console.log(this._rubrosanterior[i][0])
       if (this._rubrosanterior[i][0] != 165) {
         let totalRecaudado = this._rubrosanterior[i][2];
         //Math.round(this._rubrosanterior[i][2] * 100) / 100;
@@ -373,6 +378,7 @@ export class ImpCajasComponent implements OnInit {
     i = 0;
 
     this._formacobro.forEach(() => {
+      console.log(this._formacobro[i])
       let totalRecaudado = Math.round(this._formacobro[i][1] * 100) / 100;
       formascobro.push([this._formacobro[i][0], formatNumber(totalRecaudado)]);
       suma2 += totalRecaudado;

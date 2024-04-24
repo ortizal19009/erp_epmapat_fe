@@ -1,26 +1,32 @@
 .cabecera {
-    background-color: var(--bgcolor1);
-    color: white;
- }
- .nuevoBG1 { background-color: var(--bgcolor1); }
- 
- .detalle { background-color: var(--bgcolor2); }
- .nuevoBG2 { background-color: var(--bgcolor2); }
- 
- .fila:hover {
-    background-color: #117a8B;
-    color: white;
-    cursor: pointer;
- }
- 
- ._description {
-   max-width: 200px; 
-   white-space: nowrap;
-   overflow: hidden;
-   text-overflow: ellipsis;
- }
- ._description:hover {
-   overflow: visible;
-   white-space: normal;
-   z-index: 1;
- }
+  background-color: var(--bgcolor1);
+  color: white;
+}
+.nuevoBG1 {
+  background-color: var(--bgcolor1);
+}
+
+.detalle {
+  background-color: var(--bgcolor2);
+}
+.nuevoBG2 {
+  background-color: var(--bgcolor2);
+}
+
+.fila:hover {
+  background-color: #117a8b;
+  color: white;
+  cursor: pointer;
+}
+
+._description {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+._description:hover {
+  overflow: visible;
+  white-space: normal;
+  z-index: 1;
+}

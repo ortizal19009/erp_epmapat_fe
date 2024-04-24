@@ -111,7 +111,7 @@ export class AddRecaudaComponent implements OnInit {
     private recaService: RecaudacionService,
     private facxrService: FacxrecaudaService,
     private s_recaudaxcaja: RecaudaxcajaService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.formBuscar = this.fb.group({
@@ -373,6 +373,7 @@ export class AddRecaudaComponent implements OnInit {
   sinCobro(idcliente: number) {
     this.facService.getSinCobro(idcliente).subscribe({
       next: (datos: any) => {
+        console.log(datos)
         this._sincobro = datos;
         if (datos.length > 0) {
           let suma: number = 0;
@@ -405,7 +406,7 @@ export class AddRecaudaComponent implements OnInit {
       error: (err) => console.error(err.error),
     });
   }
-  disabled(e: any) {}
+  disabled(e: any) { }
 
   async getAbonado(idabonado: number): Promise<any> {
     const abo = await this.aboService.getById(idabonado).toPromise();
@@ -574,9 +575,11 @@ export class AddRecaudaComponent implements OnInit {
     let _lecturas: any;
     this.consumo = 0;
     this.idfactura = idfactura;
+    console.log(idmodulo)
     if (idmodulo == 8) {
       this.rubxfacService.getByIdfactura1(idfactura).subscribe({
         next: (detalle) => {
+          console.log(detalle)
           this._rubrosxfac = detalle;
           this.subtotal();
         },
@@ -733,7 +736,7 @@ export class AddRecaudaComponent implements OnInit {
     rubrosxfac.cantidad = 1;
     rubrosxfac.estado = 1;
     this.rubxfacService.saveRubroxFac(rubrosxfac).subscribe({
-      next: (datos) => {},
+      next: (datos) => { },
       error: (e) => console.error(e),
     });
   }
@@ -1057,7 +1060,7 @@ export class AddRecaudaComponent implements OnInit {
     sincobro: any
   ) {
     if (modulo === 8) {
-      return tarifa;
+      return valorbase;
     } else if (
       sincobro.idmodulo.idmodulo === 3 &&
       (sincobro.idabonado === 0 || sincobro.idabonado == null)
@@ -1097,7 +1100,7 @@ export class AddRecaudaComponent implements OnInit {
       return of({ invalido: true });
     else return of(null);
   }
-  pdf() {}
+  pdf() { }
   //Al digitar el dinero
   changeDinero() {
     let ncvalor: number;
