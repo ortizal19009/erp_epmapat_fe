@@ -2,7 +2,9 @@ import { ParseSpan } from '@angular/compiler';
 import { Injectable } from '@angular/core';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { Clientes } from 'src/app/modelos/clientes';
 import { UsuarioService } from 'src/app/servicios/administracion/usuario.service';
+import { ClientesService } from 'src/app/servicios/clientes.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 
 @Injectable({
@@ -30,10 +32,17 @@ export class RecaudacionReportsService {
   ];
   constructor(
     private rubxfacService: RubroxfacService,
-    private s_usuarios: UsuarioService
+    private s_usuarios: UsuarioService,
+    private s_cliente: ClientesService
   ) { }
   cabeceraConsumoAgua(datos: any, doc: jsPDF, usuario: any, factura: any) {
     //doc.setFontSize(7);
+    console.log(datos)
+/*     this.s_cliente.getListaById(datos.idabonado_abonados.idresponsable).subscribe({
+      next: (datos: any) => {
+        console.log(datos)
+      }, error: (e) => { console.error(e) }
+    }) */
     let tableWidth = 200;
     let m3 = datos.lecturaactual - datos.lecturaanterior;
     let fecha = datos.fechaemision.slice(0, 10).split('-');
@@ -62,7 +71,7 @@ export class RecaudacionReportsService {
         [`Nro comp: ${factura.nrofactura}`],
         [`Ruc/cedula: ${datos.idabonado_abonados.idcliente_clientes.cedula}`],
         [`Mes pagado: ${mesConsumo}`],
-        [`Cliente: ${datos.idabonado_abonados.idcliente_clientes.nombre}`],
+        [`Cliente: ${datos.idabonado_abonados.idresponsable.nombre}`],
         [`Dirección: ${datos.idabonado_abonados.direccionubicacion}`],
         /* [`Referencia: ${datos.idcliente.referencia}`], */
         [`M3: ${m3}`, `Emision: ${datos.idemision}`],
@@ -155,7 +164,7 @@ export class RecaudacionReportsService {
         let rubros: any = [];
         _rubrosxfac.forEach((item: any) => {
           if (item.idrubro_rubros.swiva === true) {
-            this.iva += (item.valorunitario*item.cantidad) * 0.15;
+            this.iva += (item.valorunitario * item.cantidad) * 0.15;
           }
           if (
             item.idrubro_rubros.idrubro != 5 &&
