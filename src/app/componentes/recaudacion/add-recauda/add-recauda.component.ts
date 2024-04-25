@@ -384,6 +384,8 @@ export class AddRecaudaComponent implements OnInit {
             if (item.idabonado != 0) {
               const abonado: Abonados = await this.getAbonado(item.idabonado);
               item.direccion = abonado.direccionubicacion;
+              item.responsablePago = abonado.idresponsable.nombre; 
+              console.log(abonado);
             } else {
               item.direccion = 'S/D';
             }

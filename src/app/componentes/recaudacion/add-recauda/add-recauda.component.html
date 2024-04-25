@@ -158,6 +158,7 @@
                      <tr class="text-center">
                         <th></th>
                         <th>Cuenta</th>
+                        <th>Responsable pago</th>
                         <th>Planilla</th>
                         <th>Dirección</th>
                         <th>Fecha</th>
@@ -176,6 +177,7 @@
                         <td [ngClass]="{ transparente: sincobro.idabonado == 0 }">
                            {{ sincobro.idabonado }}
                         </td>
+                        <td class="description">{{ sincobro.responsablePago }}</td>
                         <td>{{ sincobro.idfactura }}</td>
                         <td class="description">
                            {{ sincobro.direccion }}
@@ -183,8 +185,8 @@
                            <i class="fa fa-spinner fa-pulse fa-fw"></i>
                            <span class="sr-only">Loading...</span> -->
                         </td>
-                        <td>{{ sincobro.feccrea }}</td>
-                        <td class="text-left">{{ sincobro.idmodulo.descripcion }}</td>
+                        <td class="description">{{ sincobro.feccrea |date:"mediumDate" }}</td>
+                        <td class="text-left description">{{ sincobro.idmodulo.descripcion }}</td>
                         <!-- <td  class="text-right">{{
                            sincobro.totaltarifa + sincobro.comerc + sincobro.interes +
                            sincobro.multa | number:'1.2-2'}}</td> -->

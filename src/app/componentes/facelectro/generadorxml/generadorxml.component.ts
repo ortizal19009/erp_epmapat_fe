@@ -3,6 +3,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
+import { Abonados } from 'src/app/modelos/abonados';
+import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { DefinirService } from 'src/app/servicios/administracion/definir.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
@@ -39,7 +41,7 @@ export class GeneradorxmlComponent implements OnInit {
 
    constructor(private router: Router, public authService: AutorizaService, private coloresService: ColoresService,
       public fb: FormBuilder, private facService: FacturaService, private rxfService: RubroxfacService,
-      private defService: DefinirService) { }
+      private defService: DefinirService, private aboService: AbonadosService) { }
 
    async ngOnInit(): Promise<void> {
       sessionStorage.setItem('ventana', '/generadorxml');
@@ -197,21 +199,40 @@ export class GeneradorxmlComponent implements OnInit {
       this.claveacceso = this.claveacceso + verificador	//Dígito Verificador (Módulo 11)
       // console.log('this.claveacceso: ', this.claveacceso)
    }
+   async getAbonado(idabonado: number): Promise<any> {
+      const abo = await this.aboService.getById(idabonado).toPromise();
+      return abo;
+   }
 
-   generarXmlFile() {
+   async generarXmlFile() {
+      console.log(this._facturas)
+      const abonado: Abonados = await this.getAbonado(this._facturas[0].idabonado);
+      let nom: String = '';
+      let ced: String = '';
+      let dir: String = '';
+      if (this._facturas[0].idmodulo.idmodulo === 4 || (this._facturas[0].idmodulo.idmodulo === 3 && this._facturas[0].idabonado != 0)) {
+         nom = abonado.idresponsable.nombre;
+         ced = abonado.idresponsable.cedula;
+         dir = abonado.direccionubicacion;
+      } else {
+         nom = this._facturas[0].idcliente.nombre;
+         ced = this._facturas[0].idcliente.cedula;
+         dir = this._facturas[0].idcliente.direccion;
+      }
       this.claveAcceso();
       let claveacceso = this.claveacceso;
       let estab = this._facturas[0].nrofactura.slice(0, 3);
       let ptoemi = this._facturas[0].nrofactura.slice(4, 7);
       let secuencial = this._facturas[0].nrofactura.slice(8, 17);
       let direccion = this.empresa.direccion;
-      let fecha = formatearFecha(2, this._facturas[0].fechacobro);   //2: Con slash para el XML
+      let fecha = formatearFecha(2, this._facturas[0].feccrea);   //2: Con slash para el XML
+      let fechaC = formatearFecha(2, this._facturas[0].fechacobro);   //2: Con slash para el XML
       let tpIdentifica = this._facturas[0].idcliente.idtpidentifica_tpidentifica.codigo;
-      let nombre = this._facturas[0].idcliente.nombre;
-      let cedula = this._facturas[0].idcliente.cedula;
+      let nombre = nom;
+      let cedula = ced;
       // let subtotal = this.sumsubtotal
       let cuenta = this._facturas[0].idabonado;
-      let dircli = this._facturas[0].idcliente.direccion;
+      let dircli = dir;
       let email = this._facturas[0].idcliente.email;
 
       const detalles: Detalle[] = [];
@@ -255,7 +276,7 @@ export class GeneradorxmlComponent implements OnInit {
                version: "1.0.0"
             },
             infoTributaria: {
-               ambiente: this.empresa.tipoambiente , tipoEmision: 1, /* en ambiente a loque se vaya a pasar a produccion cambiar  this.empresa.ambiente */
+               ambiente: this.empresa.tipoambiente, tipoEmision: 1, /* en ambiente a loque se vaya a pasar a produccion cambiar  this.empresa.ambiente */
                razonSocial: this.empresa.razonsocial,
                nombreComercial: this.empresa.nombrecomercial,
                ruc: this.empresa.ruc,
@@ -314,7 +335,9 @@ export class GeneradorxmlComponent implements OnInit {
                campoAdicional: [
                   { _attributes: { nombre: 'Dirección' }, _text: dircli },
                   { _attributes: { nombre: "e-mail" }, _text: email },
-                  { _attributes: { nombre: "Cuenta" }, _text: cuenta }
+                  { _attributes: { nombre: "Cuenta" }, _text: cuenta },
+                  { _attributes: { nombre: "Fecha emisión" }, _text: fecha },
+                  { _attributes: { nombre: "Fecha cobro" }, _text: fechaC }
                ]
             }
          }
@@ -341,6 +364,7 @@ export class GeneradorxmlComponent implements OnInit {
    }
 
 }
+
 
 //Transforma la fecha: opcion 1: para la clave de acceso sin slash opcion=2 para el XML con slash
 function formatearFecha(opcion: number, fecha: string): string {
