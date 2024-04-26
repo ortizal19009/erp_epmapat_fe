@@ -32,7 +32,7 @@ export class AnulacionesBajasComponent implements OnInit {
   _fEliminadas: any;
   c_limit: number = 10;
   txttitulo: string = 'Anulación';
-  swtitulo: boolean = true; 
+  swtitulo: boolean = true;
   //detalles factura
   _rubrosxfac: any;
   totfac: number;
@@ -171,12 +171,12 @@ export class AnulacionesBajasComponent implements OnInit {
     this.option = e.target.value;
     if (e.target.value === '0') {
       this.txttitulo = 'Anulación';
-      this.swtitulo = true; 
+      this.swtitulo = true;
     }
-    
+
     if (e.target.value === '1') {
       this.txttitulo = 'Eliminación';
-      this.swtitulo = false; 
+      this.swtitulo = false;
       //this.option = '1';
     }
   }
@@ -260,8 +260,14 @@ export class AnulacionesBajasComponent implements OnInit {
     console.log(factura)
     this._factura = factura;
   }
-  actualizar(){
-
+  actualizar() {
+    let factura: Facturas = this._factura;
+    let formFactura = this.f_factura.value; 
+    factura.fechaeliminacion = formFactura.fechaeliminacion;
+   // factura.fechaanulacion = formFactura.fechaanulacion;
+    console.log(this.option)
+    console.log(this.f_factura.value)
+    //this.facServicio.updateFacturas()
 
   }
 }
