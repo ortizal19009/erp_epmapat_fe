@@ -287,7 +287,7 @@ export class GeneradorxmlComponent implements OnInit {
                dirMatriz: direccion,
             },
             infoFactura: {
-               fechaEmision: fecha,
+               fechaEmision: fechaC,
                obligadoContabilidad: 'SI',
                tipoIdentificacionComprador: tpIdentifica,
                razonSocialComprador: nombre,

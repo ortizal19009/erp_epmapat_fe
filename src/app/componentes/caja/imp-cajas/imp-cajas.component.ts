@@ -277,24 +277,24 @@ export class ImpCajasComponent implements OnInit {
     let i = 0;
     let iva1 = 0;
     this._cobradas.forEach(() => {
-   /*    if (this._cobradas[i][0] == 165) {
-        console.log(this._cobradas[i][0])
-      } */
+      /*    if (this._cobradas[i][0] == 165) {
+          console.log(this._cobradas[i][0])
+         } */
       let totalRecaudado = this._cobradas[i][2];
-      // Math.round(this._cobradas[i][2] * 100) / 100;
-      if (
-        this._cobradas[i][3] === true &&
-        this.formImprimir.value.fecha >= '2024-04-01' === true
-      ) {
-        iva1 += totalRecaudado * 0.15;
+      if (this._cobradas[i][0] != 165) {
+        if (
+          this._cobradas[i][3] === true &&
+          this.formImprimir.value.fecha >= '2024-04-01' === true
+        ) {
+          iva1 += totalRecaudado * 0.15;
+        }
+        datos.push([
+          this._cobradas[i][0],
+          this._cobradas[i][1],
+          formatNumber(totalRecaudado),
+        ]);
+        suma += totalRecaudado;
       }
-      datos.push([
-        this._cobradas[i][0],
-        this._cobradas[i][1],
-        formatNumber(totalRecaudado),
-      ]);
-
-      suma += totalRecaudado;
       i++;
     });
     kont = kont + i;

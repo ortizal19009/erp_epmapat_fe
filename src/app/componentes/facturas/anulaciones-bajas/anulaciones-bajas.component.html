@@ -112,101 +112,177 @@
             </div>
         </div>
         <div class="col-sm-3">
-            <div class="card card-outline cardCliente">
-                <div class="card-body box-profile">
-                    <h3 class="profile-username text-center"> Nueva {{txttitulo}}</h3>
-                    <select class="from-control form-control-sm col-sm-12" [(ngModel)]="option"
-                        (change)="changeTitulo($event)">
-                        <option value=0>Anulación</option>
-                        <option value=1>Eliminación</option>
-                    </select>
-                    <hr>
-                    <div class="text-center">
-                        <form [formGroup]="formBuscar">
-                            <div class="row">
-                                <div class="col-sm-12">
+            <div class="row">
+                <div class="col-sm">
+                    <div class="card card-outline cardCliente">
+                        <div class="card-body box-profile">
+                            <h3 class="profile-username text-center"> Nueva {{txttitulo}}</h3>
+                            <select class="from-control form-control-sm col-sm-12" [(ngModel)]="option"
+                                (change)="changeTitulo($event)">
+                                <option value=0>Anulación</option>
+                                <option value=1>Eliminación</option>
+                            </select>
+                            <hr>
+                            <div class="text-center">
+                                <form [formGroup]="formBuscar">
                                     <div class="row">
-                                        <div class="col-sm-5">
-                                            <input class="form-control form-control-sm text-center" type="text"
-                                                placeholder="Planilla" formControlName="idfactura"
-                                                (change)="changeIdfactura()">
-                                        </div>
-                                        <div class="col-sm-5">
-                                            <input class="form-control form-control-sm text-center" type="text"
-                                                placeholder="Abonado" formControlName="idabonado"
-                                                (change)="changeIdabonado()">
-                                        </div>
+                                        <div class="col-sm-12">
+                                            <div class="row">
+                                                <div class="col-sm-5">
+                                                    <input class="form-control form-control-sm text-center" type="text"
+                                                        placeholder="Planilla" formControlName="idfactura"
+                                                        (change)="changeIdfactura()">
+                                                </div>
+                                                <div class="col-sm-5">
+                                                    <input class="form-control form-control-sm text-center" type="text"
+                                                        placeholder="Abonado" formControlName="idabonado"
+                                                        (change)="changeIdabonado()">
+                                                </div>
 
-                                        <!--                                         <div *ngIf="campo == 2" class="col-sm-2">
-                                            <input type="date" class="form-control form-control-sm text-center"
-                                                formControlName="fechaDesde" max="{{ today | date : 'yyyy-MM-dd' }}" />
-                                        </div>
-                                        <div *ngIf="campo == 2" class="col-sm-2">
-                                            <input type="date" class="form-control form-control-sm text-center"
-                                                formControlName="fechaHasta" max="{{ date | date : 'yyyy-MM-dd' }}">
-                                        </div> -->
-                                        <div class="col-sm-2">
-                                            <button class="btn btn-success btn-sm" data-toggle="modal"
-                                                data-target="#bClienteModal" (change)="changeCliente()"><i class="bi bi-people-fill"></i> </button>
+                                                <!--                                         <div *ngIf="campo == 2" class="col-sm-2">
+                                                    <input type="date" class="form-control form-control-sm text-center"
+                                                        formControlName="fechaDesde" max="{{ today | date : 'yyyy-MM-dd' }}" />
+                                                </div>
+                                                <div *ngIf="campo == 2" class="col-sm-2">
+                                                    <input type="date" class="form-control form-control-sm text-center"
+                                                        formControlName="fechaHasta" max="{{ date | date : 'yyyy-MM-dd' }}">
+                                                </div> -->
+                                                <div class="col-sm-2">
+                                                    <button class="btn btn-success btn-sm" data-toggle="modal"
+                                                        data-target="#bClienteModal" (change)="changeCliente()"><i
+                                                            class="bi bi-people-fill"></i> </button>
 
-                                        </div>
-                                        <div *ngIf="swbusca" class="col-sm-2 px-2">
-                                            <input class="form-control form-control-sm text-center" type="text"
-                                                placeholder="Filtrar..." [(ngModel)]="filtro"
-                                                [ngModelOptions]="{standalone: true}" />
+                                                </div>
+                                                <div *ngIf="swbusca" class="col-sm-2 px-2">
+                                                    <input class="form-control form-control-sm text-center" type="text"
+                                                        placeholder="Filtrar..." [(ngModel)]="filtro"
+                                                        [ngModelOptions]="{standalone: true}" />
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="row mt-2">
-                                <div class="col-sm">
-                                    <input type="text" class="form-control form-control-sm" value={{_cliente.nombre}}
-                                        readonly>
-                                </div>
-                            </div>
-                            <div class="row mt-2">
-                                <div class="col-sm">
-                                    <button class="btn btn-primary btn-sm" type="button" data-toggle="modal"
-                                        data-target="#anulelimModal" (click)="buscar()" [disabled]="campo === 0">
-                                        <i *ngIf="swbuscando" class="fa fa-spinner"></i>
-                                        <i *ngIf="!swbuscando" class="fa fa-search"></i>{{txtbuscar}}
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
+                                    <div class="row mt-2">
+                                        <div class="col-sm">
+                                            <input type="text" class="form-control form-control-sm"
+                                                value={{_cliente.nombre}} readonly>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-sm">
+                                            <button class="btn btn-primary btn-sm" type="button" data-toggle="modal"
+                                                data-target="#anulelimModal" (click)="buscar()"
+                                                [disabled]="campo === 0">
+                                                <i *ngIf="swbuscando" class="fa fa-spinner"></i>
+                                                <i *ngIf="!swbuscando" class="fa fa-search"></i>{{txtbuscar}}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
 
+                            </div>
+                            <!--                     <ul class="list-group list-group-unbordered mb-3">
+                                <li class="list-group-item">
+                                    <b>Dirección</b> <a class="float-right"> cliente.direccion</a>
+                                </li>
+                                <li class="list-group-item">
+                                    <b>Fecha nacimiento</b> <a class="float-right">cliente.fechanacimiento </a>
+                                </li>
+                                <li class="list-group-item">
+                                    <b>e-mail</b> <a class="float-right">cliente.email</a>
+                                </li>
+                                <li class="list-group-item">
+                                    <b>Teléfono</b> <a class="float-right">cliente.telefono </a>
+                                </li>
+                                <li class="list-group-item">
+                                    <b>Discapacidad</b> <a class="float-right"> cliente.porcdiscapacidad | number:'1.2-2'%</a>
+                                </li>
+                                <li class="list-group-item">
+                                    <b>Exoneración</b> <a class="float-right">cliente.porcexonera | number:'1.2-2'%</a>
+                                </li>
+                            </ul> -->
+                            <!--       <div class="row justify-content-center">
+                                <button class="btn btn-warning btn-xs mx-1" type="button">
+                                    <i class="fa fa-edit" style="font-size:24pxi"></i>
+                                    Modificar
+                                </button>
+                                <button class="btn btn-danger btn-xs mx-1" data-toggle="modal" data-target="#modalEliminar">
+                                    <i class="fa fa-times-circle" style="font-size:24pxi"></i>
+                                    Eliminar
+                                </button>
+                            </div> -->
+
+                        </div>
                     </div>
-                    <!--                     <ul class="list-group list-group-unbordered mb-3">
-                        <li class="list-group-item">
-                            <b>Dirección</b> <a class="float-right"> cliente.direccion</a>
-                        </li>
-                        <li class="list-group-item">
-                            <b>Fecha nacimiento</b> <a class="float-right">cliente.fechanacimiento </a>
-                        </li>
-                        <li class="list-group-item">
-                            <b>e-mail</b> <a class="float-right">cliente.email</a>
-                        </li>
-                        <li class="list-group-item">
-                            <b>Teléfono</b> <a class="float-right">cliente.telefono </a>
-                        </li>
-                        <li class="list-group-item">
-                            <b>Discapacidad</b> <a class="float-right"> cliente.porcdiscapacidad | number:'1.2-2'%</a>
-                        </li>
-                        <li class="list-group-item">
-                            <b>Exoneración</b> <a class="float-right">cliente.porcexonera | number:'1.2-2'%</a>
-                        </li>
-                    </ul> -->
-                    <!--       <div class="row justify-content-center">
-                        <button class="btn btn-warning btn-xs mx-1" type="button">
-                            <i class="fa fa-edit" style="font-size:24pxi"></i>
-                            Modificar
-                        </button>
-                        <button class="btn btn-danger btn-xs mx-1" data-toggle="modal" data-target="#modalEliminar">
-                            <i class="fa fa-times-circle" style="font-size:24pxi"></i>
-                            Eliminar
-                        </button>
-                    </div> -->
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm">
+                    <div class="card card-outline cardCliente">
+                        <div class="card-body box-profile">
+                            <h6 class="profile-username text-center"> Factura {{_factura.nrofactura}}</h6>
+                            <hr>
+                            <div class="text-center">
+                                <form [formGroup]="f_factura">
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="row">
+                                                <div class="col-sm" *ngIf="swtitulo">
+                                                    <textarea class="form-control form-control-sm text-center"
+                                                        type="text" placeholder="Razon anulación"
+                                                        formControlName="razonanulacion"> </textarea>
+                                                </div>
+                                                <div class="col-sm" *ngIf="!swtitulo">
+                                                    <textarea class="form-control form-control-sm text-center"
+                                                        type="text" placeholder="Razon eliminación"
+                                                        formControlName="razoneliminacion"> </textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-sm">
+                                            <button class="btn btn-outline-success btn-sm" type="button" data-toggle="modal"
+                                                data-target="#anulelimModal" (click)="actualizar()"
+                                                [disabled]="campo === 0">Aceptar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
 
+                            </div>
+                            <!--                     <ul class="list-group list-group-unbordered mb-3">
+                                <li class="list-group-item">
+                                    <b>Dirección</b> <a class="float-right"> cliente.direccion</a>
+                                </li>
+                                <li class="list-group-item">
+                                    <b>Fecha nacimiento</b> <a class="float-right">cliente.fechanacimiento </a>
+                                </li>
+                                <li class="list-group-item">
+                                    <b>e-mail</b> <a class="float-right">cliente.email</a>
+                                </li>
+                                <li class="list-group-item">
+                                    <b>Teléfono</b> <a class="float-right">cliente.telefono </a>
+                                </li>
+                                <li class="list-group-item">
+                                    <b>Discapacidad</b> <a class="float-right"> cliente.porcdiscapacidad | number:'1.2-2'%</a>
+                                </li>
+                                <li class="list-group-item">
+                                    <b>Exoneración</b> <a class="float-right">cliente.porcexonera | number:'1.2-2'%</a>
+                                </li>
+                            </ul> -->
+                            <!--       <div class="row justify-content-center">
+                                <button class="btn btn-warning btn-xs mx-1" type="button">
+                                    <i class="fa fa-edit" style="font-size:24pxi"></i>
+                                    Modificar
+                                </button>
+                                <button class="btn btn-danger btn-xs mx-1" data-toggle="modal" data-target="#modalEliminar">
+                                    <i class="fa fa-times-circle" style="font-size:24pxi"></i>
+                                    Eliminar
+                                </button>
+                            </div> -->
+
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -281,7 +357,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let factura of _facturas | filter:mfiltrar">
+                        <tr *ngFor="let factura of _facturas | filter:mfiltrar" (click)="setFactura(factura)">
                             <td>{{factura.idfactura}}</td>
                             <td class="_description">{{factura.idcliente.nombre}}</td>
                             <td>{{factura.idmodulo.descripcion}}</td>

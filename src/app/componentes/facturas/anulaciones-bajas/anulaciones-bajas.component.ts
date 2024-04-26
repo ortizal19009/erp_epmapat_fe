@@ -9,6 +9,7 @@ import { FacturaService } from 'src/app/servicios/factura.service';
 import { Clientes } from 'src/app/modelos/clientes';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { Abonados } from 'src/app/modelos/abonados';
+import { Facturas } from 'src/app/modelos/facturas.model';
 
 @Component({
   selector: 'app-anulaciones-bajas',
@@ -17,6 +18,7 @@ import { Abonados } from 'src/app/modelos/abonados';
 })
 export class AnulacionesBajasComponent implements OnInit {
   formBuscar: FormGroup;
+  f_factura: FormGroup;
   today: number = Date.now();
   campo: number = 0; //0:Ninguno, 1:Planilla,  2:Abonado
   date: Date = new Date();
@@ -30,6 +32,7 @@ export class AnulacionesBajasComponent implements OnInit {
   _fEliminadas: any;
   c_limit: number = 10;
   txttitulo: string = 'Anulación';
+  swtitulo: boolean = true; 
   //detalles factura
   _rubrosxfac: any;
   totfac: number;
@@ -38,6 +41,8 @@ export class AnulacionesBajasComponent implements OnInit {
   _cliente: Clientes = new Clientes();
   nombreCliente: String;
   option = '0';
+  /* SELECCIONAR FACTURA */
+  _factura: Facturas = new Facturas();
 
   constructor(
     private facServicio: FacturaService,
@@ -63,6 +68,14 @@ export class AnulacionesBajasComponent implements OnInit {
       fechaDesde: año + '-01-01',
       fechaHasta: año + '-12-31',
     });
+    this.f_factura = this.fb.group({
+      fechaanulacion: '',
+      usuarioanulacion: '',
+      razonanulacion: '',
+      fechaeliminacion: '',
+      usuarioeliminacion: '',
+      razoneliminacion: '',
+    })
     if (sessionStorage.getItem('idplanillas') != null) {
       this.formBuscar.controls['idfactura'].setValue(
         sessionStorage.getItem('idplanillas')
@@ -158,10 +171,12 @@ export class AnulacionesBajasComponent implements OnInit {
     this.option = e.target.value;
     if (e.target.value === '0') {
       this.txttitulo = 'Anulación';
+      this.swtitulo = true; 
     }
-
+    
     if (e.target.value === '1') {
       this.txttitulo = 'Eliminación';
+      this.swtitulo = false; 
       //this.option = '1';
     }
   }
@@ -240,5 +255,13 @@ export class AnulacionesBajasComponent implements OnInit {
       },
       error: (e) => console.error(e),
     });
+  }
+  setFactura(factura: any) {
+    console.log(factura)
+    this._factura = factura;
+  }
+  actualizar(){
+
+
   }
 }

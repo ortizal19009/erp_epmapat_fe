@@ -176,7 +176,8 @@ export class RecaudacionReportsService {
               item.valorunitario.toFixed(2),
             ]);
           } else if (item.idrubro_rubros.idrubro === 165) {
-            this.iva = item.valorunitario;
+            console.log("es 165", item)
+            this.iva = 0;
           } else {
             this.interes = item.valorunitario;
           }
@@ -225,7 +226,7 @@ export class RecaudacionReportsService {
           columns: ['', ''],
           body: [
             ['Sub total', this.subtotal.toFixed(2)],
-            ['Iva 15%', this.iva.toFixed(2)],
+            ['Iva 15%', factura.swiva.toFixed(2)],
             ['Intereses', factura.interescobrado.toFixed(2)],
             ['Valor total', this.total.toFixed(2)],
           ],
