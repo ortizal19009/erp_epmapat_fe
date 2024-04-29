@@ -85,4 +85,8 @@ export class LecturasService {
     const observable = this.http.put(baseUrl + '/' + idlectura, lectura);
     return await firstValueFrom(observable);
   }
+  //obtener suma totales x factura
+  totalEmisionXFactura(idemision: number) {
+    return this.http.get(`${baseUrl}/emision/totalsuma?idemision=${idemision}`);
+  }
 }

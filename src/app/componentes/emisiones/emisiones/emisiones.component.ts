@@ -9,6 +9,7 @@ import autoTable from 'jspdf-autotable';
 import * as ExcelJS from 'exceljs';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import { LecturasService } from 'src/app/servicios/lecturas.service';
 
 @Component({
   selector: 'app-emisiones',
@@ -36,6 +37,7 @@ export class EmisionesComponent implements OnInit {
   archExportar: string;
   opcExportar: number;
   swgenerar: boolean = false; //Controla el si hay rutas por emisión (DIV mensaje 'Gnerar ?')
+  totalSuma: number = 0;
 
   constructor(
     public fb: FormBuilder,
@@ -43,7 +45,8 @@ export class EmisionesComponent implements OnInit {
     private router: Router,
     private coloresService: ColoresService,
     public authService: AutorizaService,
-    private ruxemiService: RutasxemisionService
+    private ruxemiService: RutasxemisionService,
+    private s_lecturas: LecturasService
   ) {}
 
   ngOnInit(): void {
@@ -111,7 +114,7 @@ export class EmisionesComponent implements OnInit {
       .getDesdeHasta(this.formBuscar.value.desde, this.formBuscar.value.hasta)
       .subscribe({
         next: (datos) => {
-        console.log("Buscar emisiones componet: ", datos)
+          console.log('Buscar emisiones componet: ', datos);
           this._emisiones = datos;
           const showDivValue = sessionStorage.getItem('showDiv');
           if (showDivValue === 'true') {
@@ -140,9 +143,18 @@ export class EmisionesComponent implements OnInit {
     this.idemision = emision.idemision;
     this.selEmision = emision.emision;
     this.estado = emision.estado;
+
     this.ruxemiService.getByIdEmision(this.idemision).subscribe({
       next: (datos) => {
+        console.log('RUTAS X EMISION: ', datos);
         this._rutasxemi = datos;
+        this.s_lecturas.totalEmisionXFactura(this.idemision).subscribe({
+          next: (datos: any) => {
+            console.log('suma ', datos);
+            this.totalSuma = datos;
+          },
+          error: (e) => console.error(e),
+        });
         this.total();
         if (this._rutasxemi.length == 0) {
           this.showDiv = false;
@@ -249,7 +261,7 @@ export class EmisionesComponent implements OnInit {
     this.emiService.saveEmision(this.formAddEmision.value).subscribe({
       next: (dato) => {
         const idRegistroCreado = dato;
-       console.log('ID del registro creado:', idRegistroCreado);
+        console.log('ID del registro creado:', idRegistroCreado);
         this.cerrado = 0;
         this.formBuscar.controls['hasta'].setValue(this.nuevaemision);
         this.buscar();
@@ -394,7 +406,13 @@ export class EmisionesComponent implements OnInit {
       ]);
       i++;
     });
-    datos.push(['', '', 'TOTAL', '', this.subtotal.toLocaleString('en-US')]);
+    datos.push([
+      '',
+      '',
+      'TOTAL',
+      `$ ${this.totalSuma.toFixed(2)}`,
+      `${this.subtotal.toLocaleString('en-US')} m3`,
+    ]);
 
     const addPageNumbers = function () {
       const pageCount = doc.internal.pages.length;

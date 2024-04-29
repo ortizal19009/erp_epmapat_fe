@@ -153,7 +153,7 @@
                </tr>
                <td *ngIf="!swfiltro" colspan="4" class="text-right font-weight-bold">TOTAL: </td>
                <td *ngIf="!swfiltro" class="text-right font-weight-bold">{{ subtotal | number:'1.0'}}</td>
-               <td></td>
+               <td>$ {{totalSuma.toFixed(2)}}</td>
             </tbody>
          </table>
       </div>
@@ -302,7 +302,8 @@
                      <label class="input-group-text" for="inputGroupSelect01">Reporte</label>
                   </div>
                   <select class="custom-select" id="inputGroupSelect01">
-                     <option selected>Lista de Rutas por Emisión</option>
+                     <option value=0 selected>Lista de Rutas por Emisión</option>
+                     <option value=1 >Rubros por Emisión</option>
                   </select>
                </div>
 
