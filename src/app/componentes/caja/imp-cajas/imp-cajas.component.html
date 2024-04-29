@@ -30,11 +30,12 @@
                         <option value="2">Recaudación diaria - Planillas</option>
                         <option value="4">Resumen Recaudación</option>
                         <option value="5">Recaudación - Planillas</option>
+                        <option value="6">Transferencias cobradas</option>
                         <option value="3">Lista de cajas</option>
                      </select>
                   </div>
 
-                  <div *ngIf="opcreporte != 3 && (opcreporte === 4 || opcreporte ===5)" class="form-group col-md-6">
+                  <div *ngIf="opcreporte != 3 && (opcreporte === 4 || opcreporte ===5 || opcreporte ===6)" class="form-group col-md-6">
                      <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
                            <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
@@ -45,7 +46,8 @@
                      </div>
                   </div>
 
-                  <div *ngIf="opcreporte != 3 && (opcreporte === 4 || opcreporte ===5)" class="form-group col-md-6">
+                  <div *ngIf="opcreporte != 3 && (opcreporte === 4 || opcreporte ===5 || opcreporte ===6)"
+                     class="form-group col-md-6">
                      <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
                            <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"

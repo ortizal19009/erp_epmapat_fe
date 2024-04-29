@@ -221,7 +221,21 @@ export class ImpCajasComponent implements OnInit {
           error: (err) => console.error(err.error),
         });
         break;
+      case 6:
+
+
+        try {
+          this._cobradas = this._cobradas = await this.facService.transferenciasCobradas(d_fecha, h_fecha);
+          // this.sw1 = true;
+          this.swcalculando = false;
+          if (this.swimprimir) this.txtcalculando = 'Mostrar';
+          else this.txtcalculando = 'Descargar';
+        } catch (error) {
+          console.error('Error al obtener las Planillas:', error);
+        }
+        break
       default:
+        break;
     }
   }
   imprime() {
@@ -244,6 +258,10 @@ export class ImpCajasComponent implements OnInit {
         break;
       case 5: // Recaudacion diaria - Planillas
         if (this.swimprimir) this.imprimirFacturas();
+        else this.exportarFacturas();
+        break;
+      case 6: // Recaudacion diaria - Planillas
+        if (this.swimprimir) this.imprimirTransferenciasCobradas();
         else this.exportarFacturas();
         break;
       case 3: //Lista de Cajas
@@ -879,6 +897,104 @@ export class ImpCajasComponent implements OnInit {
     addPageNumbers();
 
     this.muestraPDF(doc);
+  }
+  imprimirTransferenciasCobradas() {
+    this.otrapagina = this.formImprimir.value.otrapagina;
+    let m_izquierda = 50;
+    let doc = new jsPDF();
+    doc.setFont('times', 'bold');
+    doc.setFontSize(16);
+    doc.text('EpmapaT', m_izquierda, 10);
+    doc.setFont('times', 'bold');
+    doc.setFontSize(12);
+    doc.text(
+      'RECAUDACIÓN DIARIA - PLANILLAS: ' + this.formImprimir.value.fecha,
+      m_izquierda,
+      16
+    );
+
+    const datos: any = [];
+    let suma: number = 0;
+    var i = 0;
+    console.log(this._cobradas)
+    this._cobradas.forEach(() => {
+      let totalPorFormaCobro = (this._cobradas[i][1] + this._cobradas[i][0].swiva)
+      /*       Math.round( * 100) /
+              100; */
+      // datos.push([this._cobradas[i][0].idfactura, this._cobradas[i][0].feccrea, this._cobradas[i][0].nrofactura, this._cobradas[i][0].formapago,
+      // this._cobradas[i][0].idcliente.nombre, formatNumber(totalPorFormaCobro)]);
+      datos.push([
+        this._cobradas[i][0].idfactura,
+        this._cobradas[i][0].feccrea,
+        this._cobradas[i][0].nrofactura,
+        this._cobradas[i][0].formapago,
+        formatNumber(totalPorFormaCobro),
+      ]);
+      console.log(suma)
+      suma += totalPorFormaCobro;
+      console.log("totalforma pago" + totalPorFormaCobro)
+      i++;
+    });
+    console.log("total" + suma)
+    this.sumtotaltarifa = suma;
+    datos.push([
+      '',
+      'TOTAL',
+      i,
+      '',
+      this.sumtotaltarifa.toLocaleString('es-ES', { maximumFractionDigits: 2 }),
+    ]);
+
+    const addPageNumbers = function () {
+      const pageCount = doc.internal.pages.length;
+      for (let i = 1; i <= pageCount - 1; i++) {
+        doc.setPage(i);
+        doc.setFontSize(10);
+        doc.text(
+          'Página ' + i + ' de ' + (pageCount - 1),
+          m_izquierda,
+          doc.internal.pageSize.height - 10
+        );
+      }
+    };
+
+    autoTable(doc, {
+      head: [['Nro', 'Fecha', 'Factura', 'F.Cob', 'Valor']],
+      theme: 'grid',
+      headStyles: {
+        fillColor: [68, 103, 114],
+        fontStyle: 'bold',
+        halign: 'center',
+      },
+      styles: {
+        font: 'helvetica',
+        fontSize: 8,
+        cellPadding: 1,
+        halign: 'center',
+      },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 16 },
+        1: { halign: 'center', cellWidth: 18 },
+        2: { halign: 'center', cellWidth: 29 },
+        3: { halign: 'center', cellWidth: 12 },
+        // 4: { halign: 'left', cellWidth: 75 },
+        4: { halign: 'right', cellWidth: 20 },
+      },
+      margin: { left: m_izquierda - 1, top: 18, right: 66, bottom: 13 },
+      body: datos,
+      didParseCell: function (data) {
+        var fila = data.row.index;
+        var columna = data.column.index;
+        if (fila === datos.length - 1) {
+          data.cell.styles.fontStyle = 'bold';
+        }
+      },
+    });
+
+    addPageNumbers();
+
+    this.muestraPDF(doc);
+
   }
 
   muestraPDF(doc: any) {
