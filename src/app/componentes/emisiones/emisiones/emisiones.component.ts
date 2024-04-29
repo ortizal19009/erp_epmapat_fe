@@ -10,6 +10,7 @@ import * as ExcelJS from 'exceljs';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
+import { PdfService } from 'src/app/servicios/pdf.service';
 
 @Component({
   selector: 'app-emisiones',
@@ -38,7 +39,9 @@ export class EmisionesComponent implements OnInit {
   opcExportar: number;
   swgenerar: boolean = false; //Controla el si hay rutas por emisión (DIV mensaje 'Gnerar ?')
   totalSuma: number = 0;
-
+  _rubrosEmision: any;
+  optImprimir = '0';
+  suma: number = 0;
   constructor(
     public fb: FormBuilder,
     private emiService: EmisionService,
@@ -46,8 +49,9 @@ export class EmisionesComponent implements OnInit {
     private coloresService: ColoresService,
     public authService: AutorizaService,
     private ruxemiService: RutasxemisionService,
-    private s_lecturas: LecturasService
-  ) {}
+    private s_lecturas: LecturasService,
+    private _pdf: PdfService
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/emisiones');
@@ -114,7 +118,6 @@ export class EmisionesComponent implements OnInit {
       .getDesdeHasta(this.formBuscar.value.desde, this.formBuscar.value.hasta)
       .subscribe({
         next: (datos) => {
-          console.log('Buscar emisiones componet: ', datos);
           this._emisiones = datos;
           const showDivValue = sessionStorage.getItem('showDiv');
           if (showDivValue === 'true') {
@@ -146,12 +149,15 @@ export class EmisionesComponent implements OnInit {
 
     this.ruxemiService.getByIdEmision(this.idemision).subscribe({
       next: (datos) => {
-        console.log('RUTAS X EMISION: ', datos);
         this._rutasxemi = datos;
-        this.s_lecturas.totalEmisionXFactura(this.idemision).subscribe({
+        this.s_lecturas.rubrosEmitidos(this.idemision).subscribe({
           next: (datos: any) => {
-            console.log('suma ', datos);
-            this.totalSuma = datos;
+            datos.forEach((item: any) => {
+              if (item[0] != 5) {
+                this.totalSuma += item[2]
+              }
+            })
+            this._rubrosEmision = datos;
           },
           error: (e) => console.error(e),
         });
@@ -493,7 +499,134 @@ export class EmisionesComponent implements OnInit {
       container.appendChild(embed);
     }
   }
+  rRubrosxEmision() {
+    const nombreEmision = new NombreEmisionPipe(); // Crea una instancia del pipe
+    let m_izquierda = 150;
+    var doc = new jsPDF('p', 'pt', 'a4')
+    this._pdf.header(`REPORTE DE RUBROS POR EMISION: ${nombreEmision.transform(this.selEmision)}`, doc)
+    doc.setFont('times', 'bold');
+    doc.setFontSize(16);
+    doc.setFont('times', 'bold');
+    doc.setFontSize(12);
+    doc.setFont('times', 'bold');
+    doc.setFontSize(11);
+    doc.setFont('times', 'normal');
+    doc.setFontSize(11);
 
+    var datos: any = [];
+    var i = 0;
+    let suma: number = 0;
+    this._rubrosEmision.forEach(() => {
+      if (this._rubrosEmision[i][0] != 5) {
+        /*       if (this._rutasxemi[i].fechacierre == null) fecha = '';
+        else fecha = this._rutasxemi[i].fechacierre.slice(0, 10); */
+        datos.push([
+          i + 1,
+          this._rubrosEmision[i][0],
+          this._rubrosEmision[i][1],
+          this._rubrosEmision[i][2],
+        ]);
+        suma += this._rubrosEmision[i][2]
+      }
+      i++;
+    });
+    datos.push([
+      '',
+      'TOTAL',
+      `${this.subtotal.toLocaleString('en-US')} m3`,
+      `$ ${suma.toFixed(2)}`,
+    ]);
+
+    const addPageNumbers = function () {
+      const pageCount = doc.internal.pages.length;
+      for (let i = 1; i <= pageCount - 1; i++) {
+        doc.setPage(i);
+        doc.setFontSize(10);
+        doc.text(
+          'Página ' + i + ' de ' + (pageCount - 1),
+          m_izquierda,
+          doc.internal.pageSize.height - 10
+        );
+      }
+    };
+
+    autoTable(doc, {
+      head: [['#', 'N°Rubro', 'Descripción', 'Valor']],
+      theme: 'grid',
+      headStyles: {
+        fillColor: [68, 103, 114],
+        fontStyle: 'bold',
+        halign: 'center',
+      },
+      styles: {
+        font: 'helvetica',
+        fontSize: 11,
+        cellPadding: 1,
+        halign: 'center',
+      },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 30 },
+        1: { halign: 'center', cellWidth: 60 },
+        2: { halign: 'left', cellWidth: 150 },
+        3: { halign: 'right', cellWidth: 70 },
+      },
+      margin: { left: m_izquierda - 1, top: 22, right: 51, bottom: 13 },
+      body: datos,
+
+      didParseCell: function (data) {
+        var fila = data.row.index;
+        var columna = data.column.index;
+        if (columna > 0 && typeof data.cell.raw === 'number') {
+          data.cell.text = [data.cell.raw.toLocaleString('en-US')];
+        }
+        if (fila === datos.length - 1 || columna == 0) {
+          data.cell.styles.fontStyle = 'bold';
+        } // Total Bold
+      },
+    });
+    addPageNumbers();
+
+    var opciones = {
+      filename: 'RubrosEmision.pdf',
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+      compress: true,
+    };
+
+    if (this.otraPagina) doc.output('dataurlnewwindow', opciones);
+    else {
+      const pdfDataUri = doc.output('datauristring');
+      //Si ya existe el <embed> primero lo remueve
+      const elementoExistente = document.getElementById('idembed');
+      if (elementoExistente) {
+        elementoExistente.remove();
+      }
+      //Crea el <embed>
+      var embed = document.createElement('embed');
+      embed.setAttribute('src', pdfDataUri);
+      embed.setAttribute('type', 'application/pdf');
+      embed.setAttribute('width', '70%');
+      embed.setAttribute('height', '100%');
+      embed.setAttribute('id', 'idembed');
+      //Agrega el <embed> al contenedor del Modal
+      var container: any;
+      container = document.getElementById('pdf');
+      container.appendChild(embed);
+    }
+  }
+
+  imprimir() {
+    switch (this.optImprimir) {
+      case '0':
+        this.pdf1();
+        break;
+      case '1':
+        this.rRubrosxEmision();
+        break;
+    }
+
+  }
   exportar0() {
     this.archExportar = 'Emisiones';
     this.opcExportar = 0;

@@ -301,9 +301,9 @@
                   <div class="input-group-prepend">
                      <label class="input-group-text" for="inputGroupSelect01">Reporte</label>
                   </div>
-                  <select class="custom-select" id="inputGroupSelect01">
+                  <select class="custom-select" id="inputGroupSelect01" [(ngModel)]="optImprimir">
                      <option value=0 selected>Lista de Rutas por Emisión</option>
-                     <option value=1 >Rubros por Emisión</option>
+                     <option value=1>Rubros por Emisión</option>
                   </select>
                </div>
 
@@ -317,7 +317,7 @@
                </div>
 
                <div class='row justify-content-center mt-3'>
-                  <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="pdf1()"
+                  <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="imprimir()"
                      [attr.data-target]="otraPagina ? null : '#pdf'" data-toggle="modal">
                      <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
                   <button type='button' class='btn btn-sm btn-outline-success btn-sm mx-1' data-dismiss='modal'>

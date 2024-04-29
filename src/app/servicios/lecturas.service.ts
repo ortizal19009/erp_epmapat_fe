@@ -89,4 +89,8 @@ export class LecturasService {
   totalEmisionXFactura(idemision: number) {
     return this.http.get(`${baseUrl}/emision/totalsuma?idemision=${idemision}`);
   }
+  //obtener suma totales x factura
+  rubrosEmitidos(idemision: number) {
+    return this.http.get(`${baseUrl}/emision/rubros?idemision=${idemision}`);
+  }
 }
