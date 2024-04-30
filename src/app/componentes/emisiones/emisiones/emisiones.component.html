@@ -42,6 +42,9 @@
                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#addEmision"
                   (click)="nuevo()" [disabled]="cerrado == 0">
                   <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#emisionIndividual"
+                  (click)="emisionIndividual()">
+                  <i class="bi-file-earmark-plus"></i>&nbsp; Emisión individual</button>
                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
                   <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar"
@@ -159,6 +162,50 @@
       </div>
    </div>
 
+   <!-- EMISION INDIVIDUAL -->
+   <div class="modal fade" id="emisionIndividual" tabindex="-1" aria-labelledby="emisionIndividualLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+         <div class="modal-content">
+            <div class="modal-header pl-0 py-1 cabecera">
+               <h5 class="modal-title w-100 text-center">Emisión individual</h5>
+            </div>
+            <div class='modal-body detalle Roboto'>
+               <form [formGroup]="f_emisionIndividual" id="formRubro" >
+
+                  <div class="form-group col-md-4 mt-1">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Emisión</span>
+                        </div>
+                        <input type="text" class="form-control text-center" formControlName="emision" minlength="4"
+                           maxlength="4" required readonly>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-12">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Observaciones</span>
+                        </div>
+                        <textarea class="form-control" formControlName="observaciones" rows="3"
+                           maxlength="254"></textarea>
+                     </div>
+                  </div>
+
+                  <div class="mt-2 mb-0 text-center">
+                     <button type="button" class="btn btn-success btn-sm mb-1" data-dismiss='modal'
+                        (click)="saveEmision()">
+                        <i class="fa fa-check-circle"></i> Aceptar</button>
+                     <button class="btn btn-outline-success btn-sm mx-2 btn-sm mb-1" data-dismiss='modal'>
+                        <i class="fa fa-times-circle"></i> Cancelar</button>
+                  </div>
+               </form>
+
+            </div>
+
+         </div>
+      </div>
+   </div>
    <!-- MODAL Nueva Emisión -->
    <div class="modal fade" id="addEmision" tabindex="-1" aria-labelledby="addEmisionLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">

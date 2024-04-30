@@ -20,6 +20,7 @@ import { PdfService } from 'src/app/servicios/pdf.service';
 export class EmisionesComponent implements OnInit {
   formBuscar: FormGroup;
   formAddEmision: FormGroup;
+  f_emisionIndividual: FormGroup; 
   filtro: string;
   swfiltro: boolean;
   _emisiones: any;
@@ -261,6 +262,8 @@ export class EmisionesComponent implements OnInit {
       },
       error: (err) => console.error(err.error),
     });
+  }
+  emisionIndividual(){
   }
 
   saveEmision() {
