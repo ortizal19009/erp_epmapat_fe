@@ -90,7 +90,7 @@ export class GeneEmisionComponent implements OnInit {
       let novedad: Novedad = new Novedad();
       novedad.idnovedad = 1;
       for (let i = 0; i < this.totalrutas; i++) {
-      // for (let i = 9; i < 10; i++) {
+         // for (let i = 9; i < 10; i++) {
          let rutasxemision = {} as Rutasxemision;
          rutasxemision.estado = 0;  //Ruta Abierta
          rutasxemision.m3 = 0;
@@ -117,7 +117,7 @@ export class GeneEmisionComponent implements OnInit {
       try {
          const abonados = await this.aboService.getByIdrutaAsync(this._rutas[i].idruta);
          for (let k = 0; k < abonados.length; k++) {
-         // for (let k = 0; k < 2; k++) {
+            // for (let k = 0; k < 2; k++) {
             //Primero crea la Factura (Planilla) para cada Abonado para luego ponerla en las Lecturas
             let planilla = {} as Planilla;
             planilla.idmodulo = this.modulo;

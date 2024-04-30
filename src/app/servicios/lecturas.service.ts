@@ -93,4 +93,10 @@ export class LecturasService {
   rubrosEmitidos(idemision: number) {
     return this.http.get(`${baseUrl}/emision/rubros?idemision=${idemision}`);
   }
+  getByIdEmision(idemision: number){
+    return this.http.get<Lecturas[]>(`${baseUrl}/emision/${idemision}`);
+  }
+  getByIdEmisionIdabonado(idemision: number, idabonado: number){
+    return this.http.get<Lecturas[]>(`${baseUrl}/emision/${idemision}/${idabonado}`);
+  }
 }

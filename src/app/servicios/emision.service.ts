@@ -43,5 +43,8 @@ export class EmisionService {
   update(id: number, emi: Emisiones): Observable<Object> {
     return this.http.put(`${baseUrl}/${id}`, emi);
   }
+  findAllEmisiones() {
+    return this.http.get<Emisiones[]>(`${baseUrl}/findall`);
+  }
 
 }

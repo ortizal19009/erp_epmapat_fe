@@ -1,174 +1,174 @@
 <div class="content mt-1 pt-1 pl-0">
-   <div class="container-fluid">
-       <div class="row m-0 px-0 py-1 justify-content-start cabecera border sombra">
-           <div class="col-sm-2">
-               <h4 class="m-0 font-weight-bold">{{ titulo }}</h4>
-           </div>
-           <div class="col-sm-4">
-               <form [formGroup]="f_buscarxFechas">
-                   <div class="row">
-                       <div class="col-sm">
-                           <input type="date" class="form-control mx-0 form-control-sm text-center" id="desde"
-                               formControlName="desde" max="{{ today | date : 'yyyy-MM-dd' }}" />
-                       </div>
-                       <div class="col-sm">
-                           <input type="date" class="form-control mx-0 form-control-sm text-center" id="hasta"
-                               formControlName="hasta" max="{{ today | date : 'yyyy-MM-dd' }}" />
-                       </div>
-                       <div class="col-sm-3">
-                           <button class="btn btn-primary btn-sm" (click)="buscarxFecha()">
-                               <i class="fa fa-search" aria-hidden="true"></i> Buscar
-                           </button>
-                       </div>
-                   </div>
-               </form>
-           </div>
-           <div class="col-sm-2">
-               <input type="text" class="form-control form-control-sm text-center" placeholder="Filtrar..."
-                   [(ngModel)]="filterTerm" />
-           </div>
+    <div class="container-fluid">
+        <div class="row m-0 px-0 py-1 justify-content-start cabecera border sombra">
+            <div class="col-sm-2">
+                <h4 class="m-0 font-weight-bold">{{ titulo }}</h4>
+            </div>
+            <div class="col-sm-4">
+                <form [formGroup]="f_buscarxFechas">
+                    <div class="row">
+                        <div class="col-sm">
+                            <input type="date" class="form-control mx-0 form-control-sm text-center" id="desde"
+                                formControlName="desde" max="{{ today | date : 'yyyy-MM-dd' }}" />
+                        </div>
+                        <div class="col-sm">
+                            <input type="date" class="form-control mx-0 form-control-sm text-center" id="hasta"
+                                formControlName="hasta" max="{{ today | date : 'yyyy-MM-dd' }}" />
+                        </div>
+                        <div class="col-sm-3">
+                            <button class="btn btn-primary btn-sm" (click)="buscarxFecha()">
+                                <i class="fa fa-search" aria-hidden="true"></i> Buscar
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-sm-2">
+                <input type="text" class="form-control form-control-sm text-center" placeholder="Filtrar..."
+                    [(ngModel)]="filterTerm" />
+            </div>
 
-           <div class="col-sm text-right">
-               <div class="btn-group ml-auto mt-0">
-                   <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
-                       aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
-                   </button>
-                   <div class="dropdown-menu dropdown-menu-right bg-dark roboto ">
-                       <button class="dropdown-item" type="button" data-toggle="modal" data-target="#buscarAbonado">
-                           <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
-                       <button class="dropdown-item" type="button" data-toggle="modal" data-target="#pdf">
-                           <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
-                       <button class="dropdown-item text-muted" type="button" disabled><i
-                               class="bi-file-earmark-arrow-down text-muted"></i>
-                           <span class="text-muted">&nbsp;
-                               Exportar</span></button>
-                   </div>
-               </div>
-           </div>
+            <div class="col-sm text-right">
+                <div class="btn-group ml-auto mt-0">
+                    <button type="button" class="bg-transparent border-0 dropdown-toggle text-white"
+                        data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right bg-dark roboto ">
+                        <button class="dropdown-item" type="button" data-toggle="modal" data-target="#buscarAbonado">
+                            <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+                        <button class="dropdown-item" type="button" data-toggle="modal" data-target="#pdf">
+                            <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+                        <button class="dropdown-item text-muted" type="button" disabled><i
+                                class="bi-file-earmark-arrow-down text-muted"></i>
+                            <span class="text-muted">&nbsp;
+                                Exportar</span></button>
+                    </div>
+                </div>
+            </div>
 
-       </div>
-   </div>
+        </div>
+    </div>
 </div>
 <div class="container-fluid">
-   <ng-template #habilitacion>
-       <div class="row">
-           <div class="col-sm">
-               <div class="card card-outline">
-                   <div class="card-body">
-                       <div class="row">
-                           <div class="col-sm">
-                               <form [formGroup]="f_habilitacion">
-                                   <div class="row">
-                                       <div class="col-sm">
-                                           <label for="">Numero
-                                               <input type="text" class="form-control form-control-sm"
-                                                   formControlName="numero">
-                                           </label>
-                                       </div>
-                                       <div class="col-sm">
-                                           <label for="">N° Documento
-                                               <input type="text" class="form-control form-control-sm"
-                                                   formControlName="numdoc">
-                                           </label>
-                                       </div>
-                                       <div class="col-sm">
-                                           <label for="">Documento
-                                               <select type="text" class="form-control form-control-sm"
-                                                   formControlName="iddocumento_documentos">
-                                                   <option *ngFor="let documento of l_documentos"
-                                                       [ngValue]="documento">{{documento.nomdoc}}</option>
-                                               </select>
-                                           </label>
-                                       </div>
-                                   </div>
-                                   <div class="row">
-                                       <div class="col-sm">
-                                           <label for="" class="col-sm-12">Observación
-                                               <textarea class="form-control form-control-sm"
-                                                   formControlName="observacion"></textarea>
-                                           </label>
-                                       </div>
-                                   </div>
-                               </form>
-                           </div>
-                       </div>
-                       <div class="row">
-                           <div class="col-sm">
-                               <table class="table table-sm table bordered">
-                                   <tbody>
-                                       <tr>
-                                           <td colspan="3">Cliente: {{cliente.nombre}}</td>
-                                       </tr>
-                                       <tr>
-                                           <td>Cuenta: {{abonado.idabonado}}</td>
-                                           <td>Nro. Medidor: {{abonado.nromedidor}}</td>
-                                           <td>Estado: {{setEstado(abonado.estado)}}</td>
-                                       </tr>
-                                       <tr>
-                                           <td colspan="3" class="text-center">
-                                               <button class="btn btn-sm btn-outline-success mx-3"
-                                                   (click)="habilitarMedidor()"
-                                                   [disabled]="btn_habilitacion">Habilitar</button>
-                                               <button class="btn btn-sm btn-success"
-                                                   (click)="l_habilitaciones = true">Cancelar</button>
-                                           </td>
-                                       </tr>
-                                   </tbody>
-                               </table>
-                           </div>
-                       </div>
-                   </div>
-               </div>
-           </div>
-       </div>
-   </ng-template>
-   <div class="row" *ngIf="l_habilitaciones; else habilitacion">
-       <div class="col-sm">
-           <table class="table table-hover table-bordered table-sm sombra">
-               <thead class="text-center cabecera">
-                   <tr>
-                       <th class="col-sm-1">Número</th>
-                       <th class="col-sm-1">Fecha</th>
-                       <th class="col-sm-1">Total</th>
-                       <th class="col-sm-1">Documento</th>
-                       <th class="col-sm-1">Doc#</th>
-                       <th>Observaciones</th>
-                   </tr>
-               </thead>
-               <tbody>
-                   <tr *ngFor="
+    <ng-template #habilitacion>
+        <div class="row">
+            <div class="col-sm">
+                <div class="card card-outline">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm">
+                                <form [formGroup]="f_habilitacion">
+                                    <div class="row">
+                                        <div class="col-sm">
+                                            <label for="">Numero
+                                                <input type="text" class="form-control form-control-sm"
+                                                    formControlName="numero">
+                                            </label>
+                                        </div>
+                                        <div class="col-sm">
+                                            <label for="">N° Documento
+                                                <input type="text" class="form-control form-control-sm"
+                                                    formControlName="numdoc">
+                                            </label>
+                                        </div>
+                                        <div class="col-sm">
+                                            <label for="">Documento
+                                                <select type="text" class="form-control form-control-sm"
+                                                    formControlName="iddocumento_documentos">
+                                                    <option *ngFor="let documento of l_documentos"
+                                                        [ngValue]="documento">{{documento.nomdoc}}</option>
+                                                </select>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm">
+                                            <label for="" class="col-sm-12">Observación
+                                                <textarea class="form-control form-control-sm"
+                                                    formControlName="observacion"></textarea>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm">
+                                <table class="table table-sm table bordered">
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="3">Cliente: {{cliente.nombre}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Cuenta: {{abonado.idabonado}}</td>
+                                            <td>Nro. Medidor: {{abonado.nromedidor}}</td>
+                                            <td>Estado: {{setEstado(abonado.estado)}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="3" class="text-center">
+                                                <button class="btn btn-sm btn-outline-success mx-3"
+                                                    (click)="habilitarMedidor()"
+                                                    [disabled]="btn_habilitacion">Habilitar</button>
+                                                <button class="btn btn-sm btn-success"
+                                                    (click)="l_habilitaciones = true">Cancelar</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-template>
+    <div class="row" *ngIf="l_habilitaciones; else habilitacion">
+        <div class="col-sm">
+            <table class="table table-hover table-bordered table-sm sombra">
+                <thead class="text-center cabecera">
+                    <tr>
+                        <th class="col-sm-1">Número</th>
+                        <th class="col-sm-1">Fecha</th>
+                        <th class="col-sm-1">Total</th>
+                        <th class="col-sm-1">Documento</th>
+                        <th class="col-sm-1">Doc#</th>
+                        <th>Observaciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="
                let suspension of suspensiones | filter : filterTerm;
                let i = index">
-                       <td class="text-center">{{ suspension.numero }}</td>
-                       <td class="text-center">
-                           {{ suspension.fecha | date : "dd-M-y" }}
-                       </td>
-                       <td class="text-center">{{ suspension.total | number : "1." }}</td>
-                       <td>{{ suspension.iddocumento_documentos.nomdoc }}</td>
-                       <td>{{ suspension.numdoc }}</td>
-                       <td>{{ suspension.observa }}</td>
-                   </tr>
-               </tbody>
-           </table>
-       </div>
-   </div>
+                        <td class="text-center">{{ suspension.numero }}</td>
+                        <td class="text-center">
+                            {{ suspension.fecha | date : "dd-M-y" }}
+                        </td>
+                        <td class="text-center">{{ suspension.total | number : "1." }}</td>
+                        <td>{{ suspension.iddocumento_documentos.nomdoc }}</td>
+                        <td>{{ suspension.numdoc }}</td>
+                        <td>{{ suspension.observa }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 <div class="modal fade" id="buscarAbonado" data-backdrop="static" data-keyboard="false" tabindex="-1"
-   aria-labelledby="buscarAbonadoLabel" aria-hidden="true">
-   <div class="modal-dialog modal-dialog-scrollable modal-lg">
-       <div class="modal-content">
-           <div class="modal-header">
-           </div>
-           <div class="modal-body">
-               <app-buscarabonado (abonadoEvent)="setAbonado($event)"></app-buscarabonado>
-           </div>
-           <div class="modal-footer">
-               <div class="row ">
-                   <div class="col-sm text-right">
-                       <button class="btn btn-sm btn-success">Cancelar</button>
-                   </div>
-               </div>
-           </div>
-       </div>
-   </div>
+    aria-labelledby="buscarAbonadoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+            </div>
+            <div class="modal-body">
+                <app-buscarabonado (abonadoEvent)="setAbonado($event)"></app-buscarabonado>
+            </div>
+            <div class="modal-footer">
+                <div class="row ">
+                    <div class="col-sm text-right">
+                        <button class="btn btn-sm btn-success">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

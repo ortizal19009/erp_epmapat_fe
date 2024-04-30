@@ -11,6 +11,15 @@ import { ColoresService } from 'src/app/compartida/colores.service';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
 import { PdfService } from 'src/app/servicios/pdf.service';
+import { Clientes } from 'src/app/modelos/clientes';
+import { Abonados } from 'src/app/modelos/abonados';
+import { Rutas } from 'src/app/modelos/rutas.model';
+import { Lecturas } from 'src/app/modelos/lecturas.model';
+import { Emisiones } from 'src/app/modelos/emisiones.model';
+import { Novedad } from 'src/app/modelos/novedad.model';
+import { Modulos } from 'src/app/modelos/modulos.model';
+import { AbonadosService } from 'src/app/servicios/abonados.service';
+import { FacturaService } from 'src/app/servicios/factura.service';
 
 @Component({
   selector: 'app-emisiones',
@@ -20,7 +29,7 @@ import { PdfService } from 'src/app/servicios/pdf.service';
 export class EmisionesComponent implements OnInit {
   formBuscar: FormGroup;
   formAddEmision: FormGroup;
-  f_emisionIndividual: FormGroup; 
+  f_emisionIndividual: FormGroup;
   filtro: string;
   swfiltro: boolean;
   _emisiones: any;
@@ -43,6 +52,14 @@ export class EmisionesComponent implements OnInit {
   _rubrosEmision: any;
   optImprimir = '0';
   suma: number = 0;
+  _allemisiones: any;
+  abonado: Abonados = new Abonados();
+  cliente: Clientes = new Clientes();
+  ruta: Rutas = new Rutas();
+  optabonado: boolean = true;
+  _lectura: Lecturas = new Lecturas();
+  modulo: Modulos = new Modulos();
+  fechaemision: Date;
   constructor(
     public fb: FormBuilder,
     private emiService: EmisionService,
@@ -51,10 +68,14 @@ export class EmisionesComponent implements OnInit {
     public authService: AutorizaService,
     private ruxemiService: RutasxemisionService,
     private s_lecturas: LecturasService,
-    private _pdf: PdfService
+    private _pdf: PdfService,
+    private aboService: AbonadosService,
+    private facService: FacturaService
   ) { }
 
   ngOnInit(): void {
+    this.modulo.idmodulo = 4;
+    //this.fechaemision = new Date(anio, mes - 1, 1)
     sessionStorage.setItem('ventana', '/emisiones');
     let coloresJSON = sessionStorage.getItem('/emisiones');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
@@ -68,8 +89,12 @@ export class EmisionesComponent implements OnInit {
     let hasta: String;
     this.emiService.ultimo().subscribe({
       next: (datos) => {
+        console.log(datos)
         this.cerrado = datos.estado;
         hasta = datos.emision;
+        this.f_emisionIndividual.patchValue({
+          emision: datos.idemision
+        })
         let desde = (+hasta.slice(0, 2)! - 1).toString() + hasta.slice(2);
         this.formBuscar.patchValue({
           desde: desde,
@@ -89,6 +114,11 @@ export class EmisionesComponent implements OnInit {
       usucrea: this.authService.idusuario,
       feccrea: date,
     });
+    this.f_emisionIndividual = this.fb.group({
+      emision: [],
+      abonado: []
+    })
+    this.getAllEmisiones();
   }
 
   colocaColor(colores: any) {
@@ -263,8 +293,7 @@ export class EmisionesComponent implements OnInit {
       error: (err) => console.error(err.error),
     });
   }
-  emisionIndividual(){
-  }
+
 
   saveEmision() {
     this.emiService.saveEmision(this.formAddEmision.value).subscribe({
@@ -278,7 +307,144 @@ export class EmisionesComponent implements OnInit {
       error: (err) => console.error(err.error),
     });
   }
+  emisionIndividual() {
+  }
+  getAllEmisiones() {
+    this.emiService.findAllEmisiones().subscribe({
+      next: (datos: any) => {
+        console.log(datos)
+        this._allemisiones = datos;
+      },
+      error: (e) => console.error(e)
+    })
+  }
+  viewAbonadosOpt() {
+    this.optabonado = false;
+  }
+  setAbonado(abonado: any) {
+    console.log(abonado);
+    this.abonado = abonado;
+    this.cliente = abonado.idcliente_clientes;
+    this.ruta = abonado.idruta_rutas;
+    this.optabonado = true;
+    this.f_emisionIndividual.patchValue({
+      abonado: abonado.idabonado
+    });
+    this.s_lecturas.getByIdEmisionIdabonado(this.f_emisionIndividual.value.emision, abonado.idabonado).subscribe({
+      next: (datos: any) => {
+        console.log(datos);
+        this._lectura = datos;
+      },
+      error: (e) => console.error(e)
+    })
+    /*    
+       this.cliente = abonado.idcliente_clientes;
+       this.l_habilitaciones = false;
+       if (abonado.estado != 1) {
+         this.btn_habilitacion = false;
+       } */
+  }
+  saveEmisionIndividual() {
 
+
+  }
+  async generaRutaxemisionIndividual() {
+    let fecha: Date = new Date();
+    let novedad: Novedad = new Novedad();
+    novedad.idnovedad = 1;
+    let rutasxemision = {} as Rutasxemision;
+    rutasxemision.estado = 0;  //Ruta Abierta
+    rutasxemision.m3 = 0;
+    let emision: Emisiones = new Emisiones();
+    emision.idemision = this.idemision;
+    rutasxemision.idemision_emisiones = emision;
+    let ruta: Rutas = new Rutas();
+    ruta.idruta = this.ruta.idruta;
+    rutasxemision.idruta_rutas = ruta;
+    rutasxemision.usucrea = this.authService.idusuario;
+    rutasxemision.feccrea = fecha;
+    try {
+      const nuevaRutaxemision = await this.ruxemiService.saveRutaxemisionAsync(rutasxemision);
+      await this.generaLecturas(nuevaRutaxemision);
+    } catch (error) {
+      console.error(`Al guardar Rutaxemision `, error);
+    }
+  }
+  //Genera las lecturas de los abonados de la nueva Rutaxemision
+  async generaLecturas(nuevarutaxemi: any) {
+    try {
+      const abonados = await this.aboService.getByIdrutaAsync(this.ruta.idruta);
+      for (let k = 0; k < abonados.length; k++) {
+        // for (let k = 0; k < 2; k++) {
+        //Primero crea la Factura (Planilla) para cada Abonado para luego ponerla en las Lecturas
+        let planilla = {} as Planilla;
+        planilla.idmodulo = this.modulo;
+        this.cliente = new Clientes();
+        this.cliente.idcliente = abonados[k].idresponsable.idcliente;
+        planilla.idcliente = this.cliente;
+        planilla.idabonado = abonados[k].idabonado;
+        planilla.porcexoneracion = 0;
+        planilla.totaltarifa = 0;
+        planilla.pagado = 0;
+        planilla.conveniopago = 0;
+        planilla.estadoconvenio = 0;
+        planilla.formapago = 1;
+        planilla.valorbase = 0;
+        planilla.usucrea = this.authService.idusuario;
+        planilla.estado = 1;
+        planilla.feccrea = this.fechaemision;
+        //let nuevoIdfactura = k; Solo para pruebas, para que no genere las facturas
+        let nuevoIdfactura: number = 0;
+        try { //Crea la planilla con el metodo que devuelve el idfactura generado
+          nuevoIdfactura = await this.facService.saveFacturaAsyncId(planilla);
+        } catch (error) {
+          console.error(`Al guardar la Factura (planilla) ${k}`, error);
+        }
+        //Ahora si crea la Lectura para cada Abonado
+        let lectura = {} as Lectura;
+        lectura.estado = 0;
+        lectura.fechaemision = this.fechaemision;
+        try {
+          let lecturaanterior = await this.s_lecturas.getUltimaLecturaAsync(abonados[k].idabonado);
+          if (!lecturaanterior) { lecturaanterior = 0; }
+          lectura.lecturaanterior = lecturaanterior;
+        } catch (error) {
+          console.error(`Al buscar la Última lectura`, error);
+        }
+        lectura.lecturaactual = 0;
+        lectura.lecturadigitada = 0;
+        lectura.mesesmulta = 0;
+        //lectura.idnovedad_novedades = 0;
+        lectura.idemision = this.idemision;
+        lectura.idabonado_abonados = abonados[k];
+        lectura.idresponsable = abonados[k].idresponsable.idcliente;
+        lectura.idcategoria = abonados[k].idcategoria_categorias.idcategoria;
+        lectura.idrutaxemision_rutasxemision = nuevarutaxemi;
+        lectura.total1 = 0;
+        lectura.idfactura = nuevoIdfactura
+        try {
+          await this.s_lecturas.saveLecturaAsync(lectura);
+        } catch (error) {
+          console.error(`Al guardar La lectura ${k}`, error);
+        }
+      };
+    } catch (error) {
+      console.error(`Al recuperar los Abonados por ruta `, error);
+    }
+  }
+  getAllNovedades() {
+
+
+  }
+
+
+
+
+
+
+  /* ===================================== */
+  /* =============REPORTES================ */
+  /* ===================================== */
   //Emisiones
   pdf() {
     const nombreEmision = new NombreEmisionPipe(); // Crea una instancia del pipe
@@ -906,4 +1072,68 @@ export class EmisionesComponent implements OnInit {
       window.URL.revokeObjectURL(url); // Libera recursos
     });
   }
+}
+interface Rutasxemision {
+  idrutaxemision: number;
+  estado: number;
+  m3: number;
+  usuariocierre: number;
+  fechacierre: Date;
+  idemision_emisiones: Emisiones;
+  idruta_rutas: Rutas;
+  usucrea: number;
+  feccrea: Date;
+}
+interface Planilla {
+  idfactura: number;
+  idmodulo: Modulos;
+  idcliente: Clientes;
+  idabonado: number;
+  nrofactura: String;
+  porcexoneracion: number;
+  razonexonera: String;
+  totaltarifa: number;
+  pagado: number;
+  usuariocobro: number;
+  fechacobro: Date;
+  estado: number;
+  usuarioanulacion: number;
+  razonanulacion: String;
+  usuarioeliminacion: number;
+  fechaeliminacion: Date;
+  razoneliminacion: String;
+  conveniopago: number;
+  fechaconvenio: Date;
+  estadoconvenio: number;
+  formapago: number;
+  reformapago: String;
+  horacobro: String;
+  usuariotransferencia: number;
+  fechatransferencia: Date;
+  usucrea: number;
+  feccrea: Date;
+  usumodi: number;
+  fecmodi: Date;
+  valorbase: number;
+}
+
+interface Lectura {
+  idlectura: number;
+  estado: number;
+  fechaemision: Date;
+  lecturaanterior: number;
+  lecturaactual: number;
+  lecturadigitada: number;
+  mesesmulta: number;
+  observaciones: String;
+  idnovedad_novedades: Novedad;
+  idemision: number;
+  idabonado_abonados: Abonados;
+  idresponsable: number;
+  idcategoria: number;
+  idrutaxemision_rutasxemision: Rutasxemision;
+  idfactura: number;
+  total1: number;
+  total31: number;
+  total32: number;
 }
