@@ -20,6 +20,7 @@ import { Novedad } from 'src/app/modelos/novedad.model';
 import { Modulos } from 'src/app/modelos/modulos.model';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
+import { NovedadesService } from 'src/app/servicios/novedades.service';
 
 @Component({
   selector: 'app-emisiones',
@@ -60,6 +61,7 @@ export class EmisionesComponent implements OnInit {
   _lectura: Lecturas = new Lecturas();
   modulo: Modulos = new Modulos();
   fechaemision: Date;
+  novedades: any;
   constructor(
     public fb: FormBuilder,
     private emiService: EmisionService,
@@ -70,8 +72,9 @@ export class EmisionesComponent implements OnInit {
     private s_lecturas: LecturasService,
     private _pdf: PdfService,
     private aboService: AbonadosService,
-    private facService: FacturaService
-  ) { }
+    private facService: FacturaService,
+    private s_novedades: NovedadesService
+  ) {}
 
   ngOnInit(): void {
     this.modulo.idmodulo = 4;
@@ -89,12 +92,12 @@ export class EmisionesComponent implements OnInit {
     let hasta: String;
     this.emiService.ultimo().subscribe({
       next: (datos) => {
-        console.log(datos)
+        console.log(datos);
         this.cerrado = datos.estado;
         hasta = datos.emision;
         this.f_emisionIndividual.patchValue({
-          emision: datos.idemision
-        })
+          emision: datos.idemision,
+        });
         let desde = (+hasta.slice(0, 2)! - 1).toString() + hasta.slice(2);
         this.formBuscar.patchValue({
           desde: desde,
@@ -116,9 +119,10 @@ export class EmisionesComponent implements OnInit {
     });
     this.f_emisionIndividual = this.fb.group({
       emision: [],
-      abonado: []
-    })
+      abonado: [],
+    });
     this.getAllEmisiones();
+    this.getAllNovedades();
   }
 
   colocaColor(colores: any) {
@@ -185,9 +189,9 @@ export class EmisionesComponent implements OnInit {
           next: (datos: any) => {
             datos.forEach((item: any) => {
               if (item[0] != 5) {
-                this.totalSuma += item[2]
+                this.totalSuma += item[2];
               }
-            })
+            });
             this._rubrosEmision = datos;
           },
           error: (e) => console.error(e),
@@ -294,7 +298,6 @@ export class EmisionesComponent implements OnInit {
     });
   }
 
-
   saveEmision() {
     this.emiService.saveEmision(this.formAddEmision.value).subscribe({
       next: (dato) => {
@@ -307,16 +310,15 @@ export class EmisionesComponent implements OnInit {
       error: (err) => console.error(err.error),
     });
   }
-  emisionIndividual() {
-  }
+  emisionIndividual() {}
   getAllEmisiones() {
     this.emiService.findAllEmisiones().subscribe({
       next: (datos: any) => {
-        console.log(datos)
+        console.log(datos);
         this._allemisiones = datos;
       },
-      error: (e) => console.error(e)
-    })
+      error: (e) => console.error(e),
+    });
   }
   viewAbonadosOpt() {
     this.optabonado = false;
@@ -328,15 +330,20 @@ export class EmisionesComponent implements OnInit {
     this.ruta = abonado.idruta_rutas;
     this.optabonado = true;
     this.f_emisionIndividual.patchValue({
-      abonado: abonado.idabonado
+      abonado: abonado.idabonado,
     });
-    this.s_lecturas.getByIdEmisionIdabonado(this.f_emisionIndividual.value.emision, abonado.idabonado).subscribe({
-      next: (datos: any) => {
-        console.log(datos);
-        this._lectura = datos;
-      },
-      error: (e) => console.error(e)
-    })
+    this.s_lecturas
+      .getByIdEmisionIdabonado(
+        this.f_emisionIndividual.value.emision,
+        abonado.idabonado
+      )
+      .subscribe({
+        next: (datos: any) => {
+          console.log(datos);
+          this._lectura = datos;
+        },
+        error: (e) => console.error(e),
+      });
     /*    
        this.cliente = abonado.idcliente_clientes;
        this.l_habilitaciones = false;
@@ -344,16 +351,13 @@ export class EmisionesComponent implements OnInit {
          this.btn_habilitacion = false;
        } */
   }
-  saveEmisionIndividual() {
-
-
-  }
+  saveEmisionIndividual() {}
   async generaRutaxemisionIndividual() {
     let fecha: Date = new Date();
     let novedad: Novedad = new Novedad();
     novedad.idnovedad = 1;
     let rutasxemision = {} as Rutasxemision;
-    rutasxemision.estado = 0;  //Ruta Abierta
+    rutasxemision.estado = 0; //Ruta Abierta
     rutasxemision.m3 = 0;
     let emision: Emisiones = new Emisiones();
     emision.idemision = this.idemision;
@@ -364,7 +368,9 @@ export class EmisionesComponent implements OnInit {
     rutasxemision.usucrea = this.authService.idusuario;
     rutasxemision.feccrea = fecha;
     try {
-      const nuevaRutaxemision = await this.ruxemiService.saveRutaxemisionAsync(rutasxemision);
+      const nuevaRutaxemision = await this.ruxemiService.saveRutaxemisionAsync(
+        rutasxemision
+      );
       await this.generaLecturas(nuevaRutaxemision);
     } catch (error) {
       console.error(`Al guardar Rutaxemision `, error);
@@ -395,7 +401,8 @@ export class EmisionesComponent implements OnInit {
         planilla.feccrea = this.fechaemision;
         //let nuevoIdfactura = k; Solo para pruebas, para que no genere las facturas
         let nuevoIdfactura: number = 0;
-        try { //Crea la planilla con el metodo que devuelve el idfactura generado
+        try {
+          //Crea la planilla con el metodo que devuelve el idfactura generado
           nuevoIdfactura = await this.facService.saveFacturaAsyncId(planilla);
         } catch (error) {
           console.error(`Al guardar la Factura (planilla) ${k}`, error);
@@ -405,8 +412,12 @@ export class EmisionesComponent implements OnInit {
         lectura.estado = 0;
         lectura.fechaemision = this.fechaemision;
         try {
-          let lecturaanterior = await this.s_lecturas.getUltimaLecturaAsync(abonados[k].idabonado);
-          if (!lecturaanterior) { lecturaanterior = 0; }
+          let lecturaanterior = await this.s_lecturas.getUltimaLecturaAsync(
+            abonados[k].idabonado
+          );
+          if (!lecturaanterior) {
+            lecturaanterior = 0;
+          }
           lectura.lecturaanterior = lecturaanterior;
         } catch (error) {
           console.error(`Al buscar la Última lectura`, error);
@@ -421,26 +432,35 @@ export class EmisionesComponent implements OnInit {
         lectura.idcategoria = abonados[k].idcategoria_categorias.idcategoria;
         lectura.idrutaxemision_rutasxemision = nuevarutaxemi;
         lectura.total1 = 0;
-        lectura.idfactura = nuevoIdfactura
+        lectura.idfactura = nuevoIdfactura;
         try {
           await this.s_lecturas.saveLecturaAsync(lectura);
         } catch (error) {
           console.error(`Al guardar La lectura ${k}`, error);
         }
-      };
+      }
     } catch (error) {
       console.error(`Al recuperar los Abonados por ruta `, error);
     }
   }
   getAllNovedades() {
-
-
+    this.s_novedades.getAll().subscribe({
+      next: (datos: any) => {
+        console.log(datos);
+        this.novedades = datos;
+      },
+      error: (e) => console.error(e),
+    });
   }
-
-
-
-
-
+  compararNovedades(o1: Novedad, o2: Novedad): boolean {
+    if (o1 === undefined && o2 === undefined) {
+      return true;
+    } else {
+      return o1 === null || o2 === null || o1 === undefined || o2 === undefined
+        ? false
+        : o1.idnovedad == o2.idnovedad;
+    }
+  }
 
   /* ===================================== */
   /* =============REPORTES================ */
@@ -671,8 +691,13 @@ export class EmisionesComponent implements OnInit {
   rRubrosxEmision() {
     const nombreEmision = new NombreEmisionPipe(); // Crea una instancia del pipe
     let m_izquierda = 150;
-    var doc = new jsPDF('p', 'pt', 'a4')
-    this._pdf.header(`REPORTE DE RUBROS POR EMISION: ${nombreEmision.transform(this.selEmision)}`, doc)
+    var doc = new jsPDF('p', 'pt', 'a4');
+    this._pdf.header(
+      `REPORTE DE RUBROS POR EMISION: ${nombreEmision.transform(
+        this.selEmision
+      )}`,
+      doc
+    );
     doc.setFont('times', 'bold');
     doc.setFontSize(16);
     doc.setFont('times', 'bold');
@@ -695,7 +720,7 @@ export class EmisionesComponent implements OnInit {
           this._rubrosEmision[i][1],
           this._rubrosEmision[i][2],
         ]);
-        suma += this._rubrosEmision[i][2]
+        suma += this._rubrosEmision[i][2];
       }
       i++;
     });
@@ -794,7 +819,6 @@ export class EmisionesComponent implements OnInit {
         this.rRubrosxEmision();
         break;
     }
-
   }
   exportar0() {
     this.archExportar = 'Emisiones';
