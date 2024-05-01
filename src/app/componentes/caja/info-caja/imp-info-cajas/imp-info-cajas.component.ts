@@ -41,7 +41,7 @@ export class ImpInfoCajasComponent implements OnInit {
     private facService: FacturaService,
     private rxfService: RubroxfacService,
     private _pdf: PdfService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/cajas');
@@ -220,9 +220,9 @@ export class ImpInfoCajasComponent implements OnInit {
       ); */
     this._pdf.header(
       'RESUMEN RECAUDACIÓN: ' +
-        this.formImprimir.value.d_fecha +
-        ' - ' +
-        this.formImprimir.value.h_fecha,
+      this.formImprimir.value.d_fecha +
+      ' - ' +
+      this.formImprimir.value.h_fecha,
       doc
     );
 
@@ -239,12 +239,15 @@ export class ImpInfoCajasComponent implements OnInit {
       if (this._cobradas[i][3] === true) {
         iva1 += totalRecaudado * 0.15;
       }
-      datos.push([
-        this._cobradas[i][0],
-        this._cobradas[i][1],
-        formatNumber(totalRecaudado),
-      ]);
-      suma += totalRecaudado;
+      if (this._cobradas[i][0] != 165) {
+
+        datos.push([
+          this._cobradas[i][0],
+          this._cobradas[i][1],
+          formatNumber(totalRecaudado),
+        ]);
+        suma += totalRecaudado;
+      }
       i++;
     });
     kont = kont + i;
@@ -395,9 +398,9 @@ export class ImpInfoCajasComponent implements OnInit {
       ); */
     this._pdf.header(
       'RECAUDACIÓN - PLANILLAS: ' +
-        this.formImprimir.value.d_fecha +
-        ' - ' +
-        this.formImprimir.value.h_fecha,
+      this.formImprimir.value.d_fecha +
+      ' - ' +
+      this.formImprimir.value.h_fecha,
       doc
     );
     const datos: any = [];

@@ -218,30 +218,39 @@
                         </table>
                      </div>
                      <div class="col" *ngIf="_lectura">
-                        <table class="table table-sm table-hover table-bordered">
-                           <thead>
-                              <tr class="text-center">
-                                 <th>Lec. Anterior</th>
-                                 <th>Lec. Actual</th>
-                              </tr>
-                           </thead>
-                           <tbody>
-                              <tr>
-                                 <td class="col-sm-6">{{_lectura.lecturaanterior}}</td>
-                                 <td class="col-sm-6"><input class="form-control form-control-sm col-12"
-                                       value={{_lectura.lecturaactual}} /></td>
-                              </tr>
-                              <tr>
-                                 <td colspan="2">
-                                    <select class="custom-select custom-select-sm col-12">
-                                       <option [ngValue]=novedad *ngFor="let novedad of novedades">
-                                          {{novedad.descripcion}}
-                                       </option>
-                                    </select>
-                                 </td>
-                              </tr>
-                           </tbody>
-                        </table>
+                        <form [formGroup]="f_lecturas">
+                           <table class="table table-sm table-hover table-bordered">
+                              <thead>
+                                 <tr class="text-center">
+                                    <th>Lec. Anterior</th>
+                                    <th>Lec. Actual</th>
+                                 </tr>
+                              </thead>
+                              <tbody>
+
+                                 <tr>
+                                    <td class="col-sm-6">
+                                       <input type="number" min=0 class="form-control form-control-sm col-12"
+                                          formControlName="lecturaanterior">
+                                    </td>
+                                    <td class="col-sm-6">
+                                       <input type="number" min=0 class="form-control form-control-sm col-12"
+                                          formControlName="lecturaactual" />
+                                    </td>
+                                 </tr>
+                                 <tr>
+                                    <td colspan="2">
+                                       <select class="custom-select custom-select-sm col-12"
+                                          formControlName="idnovedad_novedades" [compareWith]="compararNovedades">
+                                          <option [ngValue]="novedad" *ngFor="let novedad of novedades">
+                                             {{novedad.descripcion}}
+                                          </option>
+                                       </select>
+                                    </td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </form>
                      </div>
                   </div>
                   <div class="mt-2 mb-0 text-center">

@@ -31,6 +31,7 @@ export class EmisionesComponent implements OnInit {
   formBuscar: FormGroup;
   formAddEmision: FormGroup;
   f_emisionIndividual: FormGroup;
+  f_lecturas: FormGroup;
   filtro: string;
   swfiltro: boolean;
   _emisiones: any;
@@ -74,7 +75,7 @@ export class EmisionesComponent implements OnInit {
     private aboService: AbonadosService,
     private facService: FacturaService,
     private s_novedades: NovedadesService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.modulo.idmodulo = 4;
@@ -107,7 +108,11 @@ export class EmisionesComponent implements OnInit {
       },
       error: (err) => console.error(err.error),
     });
-
+    this.f_lecturas = this.fb.group({
+      lecturaanterior: '',
+      lecturaactual: '',
+      idnovedad_novedades: ''
+    })
     let date: Date = new Date();
     this.formAddEmision = this.fb.group({
       emision: '',
@@ -310,7 +315,11 @@ export class EmisionesComponent implements OnInit {
       error: (err) => console.error(err.error),
     });
   }
-  emisionIndividual() {}
+
+  /*=====================
+  ======INDIVIDUALES=====
+  =====================*/
+  emisionIndividual() { }
   getAllEmisiones() {
     this.emiService.findAllEmisiones().subscribe({
       next: (datos: any) => {
@@ -341,6 +350,11 @@ export class EmisionesComponent implements OnInit {
         next: (datos: any) => {
           console.log(datos);
           this._lectura = datos;
+          this.f_lecturas.patchValue({
+            lecturaanterior: datos.lecturaanterior,
+            lecturaactual: datos.lecturaactual,
+            idnovedad_novedades: datos.idnovedad_novedades
+          })
         },
         error: (e) => console.error(e),
       });
@@ -351,7 +365,31 @@ export class EmisionesComponent implements OnInit {
          this.btn_habilitacion = false;
        } */
   }
-  saveEmisionIndividual() {}
+ // generarLecturaIndividual(){
+    /* 
+    fechaemision
+    lecturaanterior
+    lecturaactual
+    lecturadigitada
+    mesesmulta
+    idnovedad_novedades
+    idemision
+    idabonado_abonados
+    idresponsable
+    idcategoria
+    idrutaxemision
+    idfactura
+    */
+
+ // }
+  saveEmisionIndividual() {
+    console.log(this.f_emisionIndividual.value)
+    console.log(this._lectura)
+    let lectura: Lecturas = new Lecturas();
+    console.log(this.f_lecturas.value)
+
+
+  }
   async generaRutaxemisionIndividual() {
     let fecha: Date = new Date();
     let novedad: Novedad = new Novedad();
@@ -371,13 +409,13 @@ export class EmisionesComponent implements OnInit {
       const nuevaRutaxemision = await this.ruxemiService.saveRutaxemisionAsync(
         rutasxemision
       );
-      await this.generaLecturas(nuevaRutaxemision);
+      await this.generaLecturaIndividual(nuevaRutaxemision);
     } catch (error) {
       console.error(`Al guardar Rutaxemision `, error);
     }
   }
   //Genera las lecturas de los abonados de la nueva Rutaxemision
-  async generaLecturas(nuevarutaxemi: any) {
+  async generaLecturaIndividual(nuevarutaxemi: any) {
     try {
       const abonados = await this.aboService.getByIdrutaAsync(this.ruta.idruta);
       for (let k = 0; k < abonados.length; k++) {

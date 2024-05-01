@@ -42,7 +42,7 @@ export class ModificarClientesComponent implements OnInit {
     private router: Router,
     public personeriajuridicaS: PersoneriaJuridicaService,
     private authService: AutorizaService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/clientes');
@@ -127,11 +127,11 @@ export class ModificarClientesComponent implements OnInit {
       } else {
         console.log(
           'Property ' +
-            propName +
-            ' changed from ' +
-            change.previousValue +
-            ' to ' +
-            change.currentValue
+          propName +
+          ' changed from ' +
+          change.previousValue +
+          ' to ' +
+          change.currentValue
         );
       }
     }
@@ -245,6 +245,7 @@ export class ModificarClientesComponent implements OnInit {
   }
 
   valIdentifica(control: AbstractControl) {
+    console.log(control)
     switch (this.codidentifica) {
       case '04': // RUC
         if (control.value.length == 13) {
@@ -279,6 +280,7 @@ export class ModificarClientesComponent implements OnInit {
   }
 
   valCedula(cedula: String) {
+    console.log(cedula)
     const digitoRegion = cedula.substring(0, 2);
     let digR = parseInt(digitoRegion);
     if (digR >= 1 && digR <= 24) {
