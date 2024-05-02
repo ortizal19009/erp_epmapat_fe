@@ -1062,7 +1062,7 @@ export class AddRecaudaComponent implements OnInit {
     sincobro: any
   ) {
     if (modulo === 8) {
-      return valorbase;
+      return (valorbase );
     } else if (
       sincobro.idmodulo.idmodulo === 3 &&
       (sincobro.idabonado === 0 || sincobro.idabonado == null)
