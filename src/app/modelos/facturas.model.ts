@@ -15,6 +15,7 @@ export class Facturas {
   usuariocobro: number;
   fechacobro: Date;
   estado: number;
+  fechaanulacion: Date;
   usuarioanulacion: number;
   razonanulacion: String;
   usuarioeliminacion: number;

@@ -69,10 +69,8 @@ export class AnulacionesBajasComponent implements OnInit {
       fechaHasta: año + '-12-31',
     });
     this.f_factura = this.fb.group({
-      fechaanulacion: '',
       usuarioanulacion: '',
       razonanulacion: '',
-      fechaeliminacion: '',
       usuarioeliminacion: '',
       razoneliminacion: '',
     })
@@ -262,10 +260,21 @@ export class AnulacionesBajasComponent implements OnInit {
   }
   actualizar() {
     let factura: Facturas = this._factura;
-    let formFactura = this.f_factura.value; 
-    factura.fechaeliminacion = formFactura.fechaeliminacion;
-   // factura.fechaanulacion = formFactura.fechaanulacion;
+    let formFactura = this.f_factura.value;
+    let date: Date = new Date();
     console.log(this.option)
+    switch (this.option) {
+      case '0':
+        console.log("ANULACIÓN")
+        factura.fechaanulacion = date;
+        factura.razonanulacion = this.f_factura.value.razonanulacion;
+        break;
+      case '1':
+        console.log("ELIMINACIÓN")
+        factura.fechaeliminacion = date;
+        factura.razoneliminacion = this.f_factura.value.razoneliminacion;
+        break;
+    }
     console.log(this.f_factura.value)
     //this.facServicio.updateFacturas()
 

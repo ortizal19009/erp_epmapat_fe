@@ -215,6 +215,7 @@ export class AddFacturacionComponent implements OnInit {
       planilla.valorbase = (this.totfac + this.totiva) / n;
       planilla.usucrea = 1;
       planilla.estado = 1;
+      //planilla.fechaanulacion= ; 
       planilla.swiva = this.totiva; 
       //planilla.interescobrado = 0;
       let fecha: Date = new Date();
@@ -392,6 +393,7 @@ interface Planilla {
   pagado: number;
   usuariocobro: number;
   fechacobro: Date;
+  fechaanulacion: Date;
   estado: number;
   usuarioanulacion: number;
   razonanulacion: String;
