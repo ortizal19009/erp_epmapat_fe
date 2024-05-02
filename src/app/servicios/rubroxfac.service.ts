@@ -170,4 +170,8 @@ export class RubroxfacService {
   ): Observable<Object> {
     return this.http.put(baseUrl + '/' + idrubroxfac, rubroxfac);
   }
+  getIva(iva: number, idfactura: number) {
+    const response = (this.http.get(`${baseUrl}/iva?iva=${iva}&idfactura=${idfactura}`));
+    return response;
+  }
 }
