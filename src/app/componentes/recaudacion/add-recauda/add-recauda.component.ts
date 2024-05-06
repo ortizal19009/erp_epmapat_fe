@@ -111,7 +111,7 @@ export class AddRecaudaComponent implements OnInit {
     private recaService: RecaudacionService,
     private facxrService: FacxrecaudaService,
     private s_recaudaxcaja: RecaudaxcajaService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.formBuscar = this.fb.group({
@@ -408,7 +408,7 @@ export class AddRecaudaComponent implements OnInit {
       error: (err) => console.error(err.error),
     });
   }
-  disabled(e: any) {}
+  disabled(e: any) { }
 
   async getAbonado(idabonado: number): Promise<any> {
     const abo = await this.aboService.getById(idabonado).toPromise();
@@ -738,7 +738,7 @@ export class AddRecaudaComponent implements OnInit {
     rubrosxfac.cantidad = 1;
     rubrosxfac.estado = 1;
     this.rubxfacService.saveRubroxFac(rubrosxfac).subscribe({
-      next: (datos) => {},
+      next: (datos) => { },
       error: (e) => console.error(e),
     });
   }
@@ -765,8 +765,13 @@ export class AddRecaudaComponent implements OnInit {
               this.rubxfacService.getIva(0.15, fac.idfactura).subscribe({
                 next: (iva: any) => {
                   console.log(iva[0]);
+                  if (iva[0] != undefined) {
+                    fac.swiva = iva[0][1];
+                  } else {
+                    fac.swiva = 0;
+                  }
+
                   fac.fechacobro = fechacobro;
-                  fac.swiva = iva[0][1];
                   fac.usuariocobro = this.authService.idusuario;
                   if (fac.idmodulo.idmodulo != 8) {
                     fac.interescobrado = this._sincobro[i].interes;
@@ -807,7 +812,7 @@ export class AddRecaudaComponent implements OnInit {
                           this.s_recaudaxcaja
                             .updateRecaudaxcaja(this.recxcaja)
                             .subscribe({
-                              next: (datos) => {},
+                              next: (datos) => { },
                               error: (e) => console.error(e),
                             });
                         },
@@ -1114,7 +1119,7 @@ export class AddRecaudaComponent implements OnInit {
       return of({ invalido: true });
     else return of(null);
   }
-  pdf() {}
+  pdf() { }
   //Al digitar el dinero
   changeDinero() {
     let ncvalor: number;
