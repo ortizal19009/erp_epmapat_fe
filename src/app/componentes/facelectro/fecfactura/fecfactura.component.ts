@@ -7,6 +7,7 @@ import { DefinirService } from 'src/app/servicios/administracion/definir.service
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { FecFacturaDetallesImpuestosService } from 'src/app/servicios/fec-factura-detalles-impuestos.service';
 import { FecFacturaDetallesService } from 'src/app/servicios/fec-factura-detalles.service';
+import { FecFacturaPagosService } from 'src/app/servicios/fec-factura-pagos.service';
 import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 
@@ -26,9 +27,10 @@ export class FecfacturaComponent implements OnInit {
    swexportar: boolean;
    swfacturas: boolean;
    claveacceso: string;
+   sumaTotal: number = 0;
 
    constructor(private router: Router, private fb: FormBuilder, public authService: AutorizaService, private defService: DefinirService,
-      private coloresService: ColoresService, private facService: FacturaService, private fecfacService: FecfacturaService, private rxfService: RubroxfacService, private fec_facdetalleService: FecFacturaDetallesService, private fec_facdetimpService: FecFacturaDetallesImpuestosService) { }
+      private coloresService: ColoresService, private facService: FacturaService, private fecfacService: FecfacturaService, private rxfService: RubroxfacService, private fec_facdetalleService: FecFacturaDetallesService, private fec_facdetimpService: FecFacturaDetallesImpuestosService, private fec_facPagosService: FecFacturaPagosService) { }
 
    ngOnInit(): void {
       sessionStorage.setItem('ventana', '/fecfactura');
@@ -126,9 +128,16 @@ export class FecfacturaComponent implements OnInit {
             this.formExportar.controls['nrofactura'].setValue('');
             this.swfacturas = false;
             console.log(resp);
+            let codImpuesto = 0;
+            if (resp.fechacobro <= '2024-03-31') {
+               codImpuesto = 2
+            } else {
+               codImpuesto = 4;
+            }
 
             this.rxfService.getRubrosAsync(resp.idfactura).then((item: any) => {
                //console.log(item)
+               let i = 0;
                item.forEach((rxf: any) => {
                   console.log(rxf)
                   let detalle = {} as Fec_factura_detalles;
@@ -141,21 +150,52 @@ export class FecfacturaComponent implements OnInit {
                   detalle.descuento = 0
                   this.fec_facdetalleService.saveFacDetalle(detalle).subscribe({
                      next: (datos: any) => {
+
+                        let iva = 0;
+                        if (rxf.idrubro_rubros.swiva === true) {
+
+                           if (codImpuesto = 2) {
+                              iva = rxf.valorunitario * 0.12
+                           }
+                           if (codImpuesto = 4) {
+                              iva = rxf.valorunitario * 0.15
+                           }
+                        }
+                        this.sumaTotal += rxf.valorunitario + iva;
+                        let secuencialImpuestos: String = rxf.idrubroxfac.toString() + i
+                        console.log(secuencialImpuestos)
+                        let detalleImpuesto = {} as Fec_factura_detalles_impuestos;
+                        detalleImpuesto.idfacturadetalleimpuestos = +secuencialImpuestos!;
+                        detalleImpuesto.idfacturadetalle = rxf.idrubroxfac;
+                        detalleImpuesto.codigoimpuesto = "2";
+                        detalleImpuesto.codigoporcentaje = codImpuesto.toString();
+                        detalleImpuesto.baseimponible = iva;
+
+                        this.fec_facdetimpService.saveFacDetalleImpuesto(detalleImpuesto).subscribe({
+
+                           next: (detimpuesto) => {
+                              console.log(detimpuesto)
+                           }, error: (e) => console.error(e)
+                        })
+                        i++;
                      }, error: (e) => console.error(e)
                   })
-                  let detalleImpuesto = {} as Fec_factura_detalles_impuestos;
-                  detalleImpuesto.idfacturadetalleimpuestos= 0; 
-                  detalleImpuesto.idfacturadetalle= rxf.idfactura_facturas.idfactura; 
-                  detalleImpuesto.codigoimpuesto= rxf.idrubro_rubros.idrubro; 
-                  detalleImpuesto.codigoporcentaje= ''; 
-                  detalleImpuesto.baseimponible= 0; 
-                  /*               this.fec_facdetimpService.saveFacDetalleImpuesto(rxf.idrubro_rubros).subscribe({
-              
-                                   next: (detimpuesto) => {
-                                      console.log(detimpuesto)
-                                   }, error: (e) => console.error(e)
-                                }) */
                })
+            })
+            let pagos = {} as Fec_factura_pagos;
+            let secuencialPagos: String = resp.idfactura.toString() + 0; //cambiar el 0 por un valor autoincrementable cuando sea mas de una factura
+            pagos.idfacturapagos = +secuencialPagos!
+            pagos.idfactura = resp.idfactura;
+            pagos.formapago = '';
+            pagos.total = this.sumaTotal;
+            pagos.plazo = 3;
+            pagos.unidadtiempo = '';
+
+
+            this.fec_facPagosService.saveFacPago(pagos).subscribe({
+               next: (datos) => {
+                  console.log(datos);
+               }, error: (e) => console.error(e)
             })
          },
          error: err => { console.error('Al guardar en Fec_factura: ', err.error) }
@@ -216,9 +256,14 @@ interface Fec_factura_detalles_impuestos {
    codigoporcentaje: String;
    baseimponible: number;
 }
-let calcularIvaRubro = ((rubro: any) => {
-   return null;
-})
+interface Fec_factura_pagos {
+   idfacturapagos: number;
+   idfactura: number;
+   formapago: String;
+   total: number;
+   plazo: number;
+   unidadtiempo: String;
+}
 
 function obtenerFechaActualString(fecha: Date) {
    const milisegundos = fecha.getTime(); // Obtener milisegundos desde la fecha
