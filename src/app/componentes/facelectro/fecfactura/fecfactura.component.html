@@ -1,0 +1,83 @@
+<div class="content mt-1 pt-1 px-2">
+   <div class="container-fluid">
+      <div class="row mt-0 px-1 pt-1 justify-content-center cabecera border sombra">
+         <!-- <div class="col-md-12"> -->
+         <h4 class="font-weight-bold text-truncate ml-2">
+            <i class="bi-arrow-up-left-square-fill"></i> &nbsp; Exportar Facturas &nbsp;&nbsp;
+         </h4>
+         <h6 class="mt-2 fantacyblack"> (Para gestión de Facturas Electrónicas)</h6>
+         <!-- </div> -->
+      </div>
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="card card-body col-sm-6 detalle sombra">
+            <form [formGroup]="formExportar">
+               <div class="row">
+
+                  <div class="input-group input-group-sm col-sm-8 mb-3">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Número de
+                           Factura</span>
+                     </div>
+                     <input type="text" class="form-control text-center" formControlName="nrofactura" aria-label="Small"
+                        aria-describedby="inputGroup-sizing-sm" placeholder="000-000-000000000">
+                  </div>
+
+                  <div class="input-group input-group-sm col-sm-5 mb-3">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Serie</span>
+                     </div>
+                     <input type="text" class="form-control text-center" formControlName="estab" aria-label="Small"
+                        aria-describedby="inputGroup-sizing-sm" placeholder="000">
+                     <input type="text" class="form-control text-center" formControlName="ptoemi" aria-label="Small"
+                        aria-describedby="inputGroup-sizing-sm" placeholder="000">
+                  </div>
+
+                  <div class="input-group input-group-sm col-sm-7 mb-3">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Números</span>
+                     </div>
+                     <input type="text" class="form-control text-center" formControlName="desdeNum" aria-label="Small"
+                        aria-describedby="inputGroup-sizing-sm" placeholder="Desde">
+                     <input type="text" class="form-control text-center" formControlName="hastaNum" aria-label="Small"
+                        aria-describedby="inputGroup-sizing-sm" placeholder="Hasta">
+                  </div>
+
+                  <div class="input-group input-group-sm col-sm-10 mb-3">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Fechas</span>
+                     </div>
+                     <input type="date" class="form-control text-center" formControlName="desdeFecha" aria-label="Small"
+                        aria-describedby="inputGroup-sizing-sm">
+                     <input type="date" class="form-control text-center" formControlName="hastaFecha" aria-label="Small"
+                        aria-describedby="inputGroup-sizing-sm">
+                  </div>
+
+               </div>
+            </form>
+            <div *ngIf="swfacturas" class="alert alert-warning text-center roboto small font-weight-bold py-0" role="alert">
+               Total de Facturas: {{_facturas.length}}
+            </div>
+            <div class="text-center">
+               <button type='submit' class='btn btn-primary btn-sm mx-1' [disabled]="swbotones" (click)="buscar()">
+                  <i class="fa fa-search"></i>&nbsp; Buscar</button>
+               <button class="btn btn-outline-success btn-sm mx-1" (click)="regresar()"><i
+                     class="fa fa-times-circle"></i> Cancelar</button>
+               <button *ngIf="swexportar" class="btn btn-success btn-sm mx-1" (click)="exportar()"><i
+                     class="bi-arrow-up-left-square"></i>&nbsp; Exportar</button>
+            </div>
+
+            <div *ngIf="swbotones" class="text-center">
+               <button type="button" class="btn btn-success btn-block">
+                  <i *ngIf="swcalculando" class="fa fa-spinner"></i>
+                  <i *ngIf="!swcalculando" class="bi-eye"></i>&nbsp;&nbsp;&nbsp;{{txtcalculando}}
+               </button>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

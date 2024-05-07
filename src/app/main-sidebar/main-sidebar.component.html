@@ -143,11 +143,41 @@
                         <p class="text-warning"> Facturación</p>
                      </a>
                   </li>
-                  <li class="nav-item"> 
-                     <a routerLink="/generadorxml" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 160)}">
+                  <li class="nav-item">
+                     <a href="#" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 185)}">
+                        <i class="fa fa-laptop nav-icon"></i>
+                        <!-- <i class="fa fa-shopping-basket nav-icon"></i> -->
+                        <p class="text-warning font-weight-bold"> Fac. Electrónica
+                           <i class="right fas fa-angle-right"></i>
+                        </p>
+                     </a>
+                     <!-- <a routerLink="/generadorxml" class="nav-link">
+                        <i class="fa fa-laptop nav-icon"></i>
+                        <p class="text-warning"> </p>
+                     </a> -->
+                     <!-- <a routerLink="/fecfactura" class="nav-link">
                         <i class="fa fa-laptop nav-icon"></i>
                         <p class="text-warning"> Facturas electrónicas</p>
-                     </a>
+                     </a> -->
+                     <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                           <a routerLink="/fecfactura" class="nav-link py-0"
+                              [ngClass]="{'disabled': !isOptionEnabled(0, 176)}">
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                              <i class="bi-arrow-up-left-square-fill nav-icon"></i>
+                              <p class="small text-warning">&nbsp; Exportar</p>
+                           </a>
+                        </li>
+                        <li class="nav-item">
+                           <a routerLink="/generadorxml" class="nav-link py-0"
+                              [ngClass]="{'disabled': !isOptionEnabled(0, 185)}">
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                              <i class="bi-file-earmark-binary nav-icon"></i>
+                              <p class="small text-warning">&nbsp; Generar</p>
+                           </a>
+                        </li>
+
+                     </ul>
                   </li>
                   <li class="nav-item">
                      <a routerLink="/facturas" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 165)}">

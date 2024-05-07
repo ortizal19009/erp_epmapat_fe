@@ -219,6 +219,7 @@ import { LecturasComponent } from './componentes/lecturas/lecturas.component';
 import { ImpCajasComponent } from './componentes/caja/imp-cajas/imp-cajas.component';
 import { ImpInfoCajasComponent } from './componentes/caja/info-caja/imp-info-cajas/imp-info-cajas.component';
 import { AnulacionesBajasComponent } from './componentes/facturas/anulaciones-bajas/anulaciones-bajas.component';
+import { FecfacturaComponent } from './componentes/facelectro/fecfactura/fecfactura.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
@@ -236,8 +237,8 @@ import { AnulacionesBajasComponent } from './componentes/facturas/anulaciones-ba
       SuspensionesComponent, AddSuspensionesComponent, DetallesSuspensionesComponent,
 
       //Facturacion
-      FacturacionComponent, InfoFacturacionComponent, RubrosComponent, InfoRubroComponent,RecalFacturaComponent,
-      DefinirComponent, GeneradorxmlComponent,
+      FacturacionComponent, InfoFacturacionComponent, RubrosComponent, InfoRubroComponent, RecalFacturaComponent,
+      DefinirComponent, GeneradorxmlComponent, FecfacturaComponent,
       //Recaudación
       ListarCajaComponent, AddCajaComponent, ModificarCajaComponent,
       ConveniosComponent, ModiConvenioComponent, AddConvenioComponent, TransferenciasComponent,
@@ -265,7 +266,7 @@ import { AnulacionesBajasComponent } from './componentes/facturas/anulaciones-ba
       AddTramites1Component, ItemxfactComponent,
       AguatramiteComponent, InfoAguatramiteComponent,
       FacturasComponent, InfoFacturasComponent, RubroxfacComponent,
-      FacelectroComponent, DetFacelectroComponent, InfoConvenioComponent,ImpCajasComponent,ImpInfoCajasComponent,
+      FacelectroComponent, DetFacelectroComponent, InfoConvenioComponent, ImpCajasComponent, ImpInfoCajasComponent,
       InfoCajaComponent, TramitesComponent, AddTramiteComponent, InfoTramiteComponent,
       InfoPreciosxcatComponent, RecaudacionComponent, AddRecaudaComponent,
       UsoitemsComponent, InfoUsoitemsComponent,
@@ -283,7 +284,7 @@ import { AnulacionesBajasComponent } from './componentes/facturas/anulaciones-ba
       InfoTabla4Component, ModiTabla4Component, LoginComponent,
       UsuariosComponent, ModiReformaComponent,
       ModiEjecucionComponent, AddEjecucionComponent, ModiCertipresuComponent, AddCertipresuComponent,
-      PartixcertiComponent, ImporInteresesComponent, GeneEmisionComponent, ImporLecturasComponent,ImpLecturasComponent ,
+      PartixcertiComponent, ImporInteresesComponent, GeneEmisionComponent, ImporLecturasComponent, ImpLecturasComponent,
       BancosComponent, ConciliabanComponent, ColoresComponent, Pliego24Component, PerfilUsuarioComponent,
       // ============ Pipes =============
       EstadoEmisionPipe, NombreEmisionPipe, NoSiPipe, NombreMesPipe, BloqueConsumoPipe, ProyeccionComponent,

@@ -210,6 +210,7 @@ import { GeneradorxmlComponent } from './componentes/facelectro/generadorxml/gen
 import { ImpLecturasComponent } from './componentes/lecturas/imp-lecturas/imp-lecturas.component';
 import { ImpCajasComponent } from './componentes/caja/imp-cajas/imp-cajas.component';
 import { ImpInfoCajasComponent } from './componentes/caja/info-caja/imp-info-cajas/imp-info-cajas.component';
+import { FecfacturaComponent } from './componentes/facelectro/fecfactura/fecfactura.component';
 
 const routes: Routes = [
   //Consumo de Agua
@@ -243,6 +244,7 @@ const routes: Routes = [
   //========== FACTURACIÓN ===================
   { path: 'facelectro', component: FacelectroComponent },
   { path: 'generadorxml', component: GeneradorxmlComponent },
+  {path: 'fecfactura', component: FecfacturaComponent},
   { path: 'anulaciones-bajas', component: AnulacionesBajasComponent },
   //Facturacion
   { path: 'facturacion', component: FacturacionComponent },

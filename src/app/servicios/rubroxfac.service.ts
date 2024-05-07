@@ -174,4 +174,11 @@ export class RubroxfacService {
     const response = (this.http.get(`${baseUrl}/iva?iva=${iva}&idfactura=${idfactura}`));
     return response;
   }
+
+  /* FACTURACIÓN ELECTRÓNICA */
+async getRubrosAsync(idfactura: number): Promise<any[]>{
+  const response = this.http.get<any[]>(`${baseUrl}/feRubros?idfactura=${idfactura}`); 
+  return await firstValueFrom(response);
+}
+
 }
