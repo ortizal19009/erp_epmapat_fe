@@ -1,114 +1,114 @@
 /* Estilos Globales. Tambien se pueden importar otros archivos*/
 
 .icoRegresar {
-   font-size: 20px;
+  font-size: 20px;
 }
 
 .sombra {
-   box-shadow: 0 0 10px #000000bf;
+  box-shadow: 0 0 10px #000000bf;
 }
 
 .sombraClara {
-   box-shadow: 0 0 10px white;
+  box-shadow: 0 0 10px white;
 }
 
 .roboto {
-   font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 
 .fila:hover {
-   background-color: #117a8B;
-   color: white;
+  background-color: #117a8b;
+  color: white;
 }
 
 /* === Popup de una Cabecera === */
 .dropdown-item {
-   font-family: 'Roboto', sans-serif;
-   font-size: small;
-   color: white;
+  font-family: "Roboto", sans-serif;
+  font-size: small;
+  color: white;
 }
 
 .dropdown-item:hover,
 .dropdown-item:focus {
-   font-size: small;
-   background-color: #117a8B;
-   color: white;
+  font-size: small;
+  background-color: #117a8b;
+  color: white;
 }
 
 .fantacy {
-   font-weight: bold;
-   color: yellow;
-   text-shadow: rgb(228, 3, 3) 0.2em 0.2em 0.3em;
+  font-weight: bold;
+  color: yellow;
+  text-shadow: rgb(228, 3, 3) 0.2em 0.2em 0.3em;
 }
 
 .fantacysombra {
-   font-weight: bold;
-   color: rgb(8, 8, 0);
-   text-shadow: rgb(49, 45, 45) 0.1em 0.1em 0.1em;
+  font-weight: bold;
+  color: rgb(8, 8, 0);
+  text-shadow: rgb(49, 45, 45) 0.1em 0.1em 0.1em;
 }
 
 .fantacyblack {
-   font-weight: bold;
-   color: yellow;
-   text-shadow: black 0.1em 0.1em 0.1em;
+  font-weight: bold;
+  color: yellow;
+  text-shadow: black 0.1em 0.1em 0.1em;
 }
 
 .fantacygreen {
-   font-weight: bold;
-   color: black;
-   text-shadow: yellowgreen 0.1em 0.1em 0.1em;
+  font-weight: bold;
+  color: black;
+  text-shadow: yellowgreen 0.1em 0.1em 0.1em;
 }
 
 .transparente {
-   opacity: 0;
+  opacity: 0;
 }
 
 .cursor {
-   cursor: pointer;
+  cursor: pointer;
 }
 
 .green {
-   color: green
+  color: green;
 }
 
 .red {
-   color: red
+  color: red;
 }
 
 .tachado {
-   text-decoration-line: line-through;
-   text-decoration-color: rgb(250, 250, 250);
-   text-decoration-style: wavy;
+  text-decoration-line: line-through;
+  text-decoration-color: rgb(250, 250, 250);
+  text-decoration-style: wavy;
 }
 
 /* === Popup de una lista === */
 .popLista {
-   background-color: #ffc107;
-   font-family: 'Roboto', sans-serif;
-   font-size: small;
+  background-color: #ffc107;
+  font-family: "Roboto", sans-serif;
+  font-size: small;
 }
 
 .popLista button {
-   font-weight: bold;
-   color: black;
+  font-weight: bold;
+  color: black;
 }
 
 .popLista button:hover {
-   font-weight: normal;
-   color: white;
+  font-weight: normal;
+  color: white;
 }
 
 .nav-link.disabled {
-   opacity: 0.3;
+  opacity: 0.3;
 }
 .description {
-   max-width: 200px; 
-   white-space: nowrap;
-   overflow: hidden;
-   text-overflow: ellipsis;
- }
- .description:hover {
-   overflow: visible;
-   white-space: normal;
-   z-index: 1;
- }
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.description:hover {
+  overflow: visible;
+  white-space: normal;
+  z-index: 1;
+}

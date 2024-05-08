@@ -4,7 +4,7 @@ import { Fecfactura } from '../modelos/fecfactura.model';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
-const apiUrl = environment.FE_API_URL;
+const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/fec_factura`;
 
 @Injectable({
