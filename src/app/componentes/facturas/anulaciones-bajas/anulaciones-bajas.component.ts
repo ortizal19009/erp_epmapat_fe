@@ -10,6 +10,8 @@ import { Clientes } from 'src/app/modelos/clientes';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { Abonados } from 'src/app/modelos/abonados';
 import { Facturas } from 'src/app/modelos/facturas.model';
+import { FacturamodificacionesService } from '../../../servicios/facturamodificaciones.service';
+import { Facturamodificaciones } from 'src/app/modelos/facturamodificaciones.model';
 
 @Component({
   selector: 'app-anulaciones-bajas',
@@ -28,6 +30,7 @@ export class AnulacionesBajasComponent implements OnInit {
   mfiltrar: string;
   txtbuscar: string = 'Buscar';
   _facturas: any;
+
   _fAnuladas: any;
   _fEliminadas: any;
   c_limit: number = 10;
@@ -43,6 +46,7 @@ export class AnulacionesBajasComponent implements OnInit {
   option = '0';
   /* SELECCIONAR FACTURA */
   _factura: Facturas = new Facturas();
+  _fac: any;
 
   constructor(
     private facServicio: FacturaService,
@@ -52,7 +56,9 @@ export class AnulacionesBajasComponent implements OnInit {
     private coloresService: ColoresService,
     private lecService: LecturasService,
     private s_pdfRecaudacion: RecaudacionReportsService,
-    private s_abonados: AbonadosService
+    private s_abonados: AbonadosService,
+    private s_facmodificaciones: FacturamodificacionesService,
+    private s_factura: FacturaService
   ) { }
 
   ngOnInit(): void {
@@ -73,7 +79,7 @@ export class AnulacionesBajasComponent implements OnInit {
       razonanulacion: '',
       usuarioeliminacion: '',
       razoneliminacion: '',
-    })
+    });
     if (sessionStorage.getItem('idplanillas') != null) {
       this.formBuscar.controls['idfactura'].setValue(
         sessionStorage.getItem('idplanillas')
@@ -128,7 +134,10 @@ export class AnulacionesBajasComponent implements OnInit {
       } */
       this.getClienteByAbonado();
     }
-    if (this.formBuscar.value.idabonado === '' && this.formBuscar.value.idfactura === '') {
+    if (
+      this.formBuscar.value.idabonado === '' &&
+      this.formBuscar.value.idfactura === ''
+    ) {
       if (this.option === '0') {
         this.getFacCobradas();
       }
@@ -197,7 +206,7 @@ export class AnulacionesBajasComponent implements OnInit {
   setCliente(e: any) {
     this.formBuscar.patchValue({
       idfactura: '',
-      idabonado: ''
+      idabonado: '',
     });
     this.campo = 1;
     this._cliente = e;
@@ -227,12 +236,20 @@ export class AnulacionesBajasComponent implements OnInit {
     this.facServicio.getById(this.formBuscar.value.idfactura).subscribe({
       next: (datos: any) => {
         if (this.option === '0') {
-          if (datos.fechaanulacion === null && datos.fechaeliminacion === null && datos.pagado === 1) {
+          if (
+            datos.fechaanulacion === null &&
+            datos.fechaeliminacion === null &&
+            datos.pagado === 1
+          ) {
             this._facturas = [datos];
           }
         }
         if (this.option === '1') {
-          if (datos.fechaanulacion === null && datos.fechaeliminacion === null && datos.pagado === 0) {
+          if (
+            datos.fechaanulacion === null &&
+            datos.fechaeliminacion === null &&
+            datos.pagado === 0
+          ) {
             this._facturas = [datos];
           }
         }
@@ -255,28 +272,72 @@ export class AnulacionesBajasComponent implements OnInit {
     });
   }
   setFactura(factura: any) {
-    console.log(factura)
+    this._fac = JSON.stringify(factura);
     this._factura = factura;
   }
   actualizar() {
-    let factura: Facturas = this._factura;
+    let factura: any = this._factura;
     let formFactura = this.f_factura.value;
     let date: Date = new Date();
-    console.log(this.option)
+    console.log(this.option);
     switch (this.option) {
       case '0':
-        console.log("ANULACIÓN")
+        console.log('ANULACIÓN');
         factura.fechaanulacion = date;
-        factura.razonanulacion = this.f_factura.value.razonanulacion;
+        factura.nrofactura = null;
+        factura.razonanulacion = formFactura.razonanulacion;
+        factura.fechacobro = '';
+        factura.pagado = 0;
+        factura.usuariocobro = null;
+        factura.usuarioanulacion = this.authService.idusuario;
+        if (factura.formapago === 4) {
+          factura.estado = 1;
+          factura.formapago = 1;
+        }
+        if (factura.estadoconvenio === 1) {
+          factura.estado = 2
+        }
+        this.s_factura.updateFacturas(factura).subscribe({
+          next: (facDato) => {
+            let date: Date = new Date();
+            let fmodi: Facturamodificaciones = new Facturamodificaciones();
+            fmodi.datosfactura = this._fac;
+            fmodi.fechacrea = date;
+            fmodi.detalle = formFactura.razonanulacion;
+            fmodi.idfactura = factura.idfactura;
+            this.s_facmodificaciones
+              .saveFacturacionModificaciones(fmodi)
+              .subscribe({
+                next: (modiDatos) => {
+                  console.log('Datos modificados guardatos', modiDatos);
+                  this.f_factura.reset();
+                  this.formBuscar.reset();
+                  this._cliente = new Clientes();
+                },
+                error: (e) => console.error(e),
+              });
+          },
+          error: (e) => console.error(e),
+        });
+        console.log(factura);
         break;
       case '1':
-        console.log("ELIMINACIÓN")
+        console.log('ELIMINACIÓN');
         factura.fechaeliminacion = date;
-        factura.razoneliminacion = this.f_factura.value.razoneliminacion;
+        factura.razoneliminacion = formFactura.razoneliminacion;
+        factura.estado = 0;
+        factura.usuarioeliminacion = this.authService.idusuario;
+        this.s_factura.updateFacturas(factura).subscribe({
+          next: (facDato) => {
+            this.f_factura.reset();
+            this.formBuscar.reset();
+            this._cliente = new Clientes();
+          },
+          error: (e) => console.error(e),
+        });
+        console.log(factura);
         break;
     }
-    console.log(this.f_factura.value)
     //this.facServicio.updateFacturas()
-
   }
 }
