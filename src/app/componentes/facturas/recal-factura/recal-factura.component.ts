@@ -101,7 +101,6 @@ export class RecalFacturaComponent implements OnInit {
       let consumo = this._lecturas[0].lecturaactual - this._lecturas[0].lecturaanterior;
       let adultomayor = this._lecturas[0].idabonado_abonados.adultomayor;
       let noAlcantarillado = this._lecturas[0].idabonado_abonados.swalcantarillado;
-      console.log(noAlcantarillado)
       if (adultomayor) if (categoria == 9 && consumo > 34) categoria = 1;
       else if (categoria == 9 && consumo > 10) categoria = 1;
       if (categoria == 9 && consumo > 34) categoria = 1;

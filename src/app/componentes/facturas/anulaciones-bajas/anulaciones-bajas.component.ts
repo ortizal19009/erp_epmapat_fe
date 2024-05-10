@@ -12,6 +12,7 @@ import { Abonados } from 'src/app/modelos/abonados';
 import { Facturas } from 'src/app/modelos/facturas.model';
 import { FacturamodificacionesService } from '../../../servicios/facturamodificaciones.service';
 import { Facturamodificaciones } from 'src/app/modelos/facturamodificaciones.model';
+import { Lecturas } from 'src/app/modelos/lecturas.model';
 
 @Component({
   selector: 'app-anulaciones-bajas',
@@ -47,7 +48,8 @@ export class AnulacionesBajasComponent implements OnInit {
   /* SELECCIONAR FACTURA */
   _factura: Facturas = new Facturas();
   _fac: any;
-
+  /* SELECCIONAR LECTURA */
+  _lectura: Lecturas = new Lecturas();
   constructor(
     private facServicio: FacturaService,
     private router: Router,
@@ -58,7 +60,8 @@ export class AnulacionesBajasComponent implements OnInit {
     private s_pdfRecaudacion: RecaudacionReportsService,
     private s_abonados: AbonadosService,
     private s_facmodificaciones: FacturamodificacionesService,
-    private s_factura: FacturaService
+    private s_factura: FacturaService,
+    private s_lectura: LecturasService
   ) { }
 
   ngOnInit(): void {
@@ -272,8 +275,17 @@ export class AnulacionesBajasComponent implements OnInit {
     });
   }
   setFactura(factura: any) {
+    console.log(factura)
     this._fac = JSON.stringify(factura);
     this._factura = factura;
+    if (this.option === '1' && (factura.idmodulo.idmodulo === 3 || factura.idmodulo.idmodulo === 4) && factura.idabonado > 0) {
+      this.s_lectura.getByIdfactura(factura.idfactura).subscribe({
+        next: (d_lectura: any) => {
+          console.log(d_lectura[0])
+          this._lectura = d_lectura[0];
+        }
+      })
+    }
   }
   actualizar() {
     let factura: any = this._factura;
@@ -329,9 +341,18 @@ export class AnulacionesBajasComponent implements OnInit {
         factura.usuarioeliminacion = this.authService.idusuario;
         this.s_factura.updateFacturas(factura).subscribe({
           next: (facDato) => {
-            this.f_factura.reset();
-            this.formBuscar.reset();
-            this._cliente = new Clientes();
+            if ((factura.idmodulo.idmodulo === 3 || factura.idmodulo.idmodulo === 4) && factura.idabonado > 0) {
+              this._lectura.estado = 0;
+              this._lectura.observaciones = formFactura.razoneliminacion;
+              this.s_lectura.updateLectura(this._lectura.idlectura, this._lectura).subscribe({
+                next: (d_lectura: any) => {
+                  console.log(d_lectura)
+                  this.f_factura.reset();
+                  this.formBuscar.reset();
+                  this._cliente = new Clientes();
+                }
+              })
+            }
           },
           error: (e) => console.error(e),
         });

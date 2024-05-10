@@ -145,6 +145,7 @@ export class FecfacturaComponent implements OnInit {
                this.sumaTotal= 0;
                item.forEach((rxf: any) => {
                   let detalle = {} as Fec_factura_detalles;
+                  let basImponible: number = 0 ; 
                   detalle.idfacturadetalle = rxf.idrubroxfac
                   detalle.idfactura = rxf.idfactura_facturas.idfactura
                   detalle.codigoprincipal = rxf.idrubro_rubros.idrubro
@@ -152,8 +153,10 @@ export class FecfacturaComponent implements OnInit {
                   detalle.cantidad = rxf.cantidad
                   detalle.preciounitario = rxf.valorunitario
                   detalle.descuento = 0
+                  basImponible = detalle.cantidad * detalle.preciounitario; 
                   this.fec_facdetalleService.saveFacDetalle(detalle).subscribe({
                      next: (datos: any) => {
+                        console.log(datos)
                         let iva = 0;
                         if (rxf.idrubro_rubros.swiva === true) {
                            if (codImpuesto = 2) {
@@ -172,7 +175,7 @@ export class FecfacturaComponent implements OnInit {
                         detalleImpuesto.idfacturadetalle = rxf.idrubroxfac;
                         detalleImpuesto.codigoimpuesto = "2";
                         detalleImpuesto.codigoporcentaje = codImpuesto.toString();
-                        detalleImpuesto.baseimponible = iva;
+                        detalleImpuesto.baseimponible = basImponible;
                         this.fec_facdetimpService.saveFacDetalleImpuesto(detalleImpuesto).subscribe({
                            next: (detimpuesto) => {
                            }, error: (e) => console.error(e)
