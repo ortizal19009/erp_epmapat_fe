@@ -214,6 +214,14 @@
                                  <th>Dirección</th>
                                  <td>{{abonado.direccionubicacion}}</td>
                               </tr>
+                              <tr>
+                                 <td colspan="2" *ngIf="_lectura.estado == 0" class="text-center">
+                                    <h6>Lectura no cerrada</h6>
+                                 </td>
+                                 <td colspan="2" *ngIf="_lectura.estado == 1" class="text-center">
+                                    <h6>Lectura cerrada</h6>
+                                 </td>
+                              </tr>
                            </tbody>
                         </table>
                      </div>
