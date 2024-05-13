@@ -23,6 +23,7 @@ import { FacturaService } from 'src/app/servicios/factura.service';
 import { NovedadesService } from 'src/app/servicios/novedades.service';
 import { Pliego24Service } from 'src/app/servicios/pliego24.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
+import { Facturas } from 'src/app/modelos/facturas.model';
 
 @Component({
   selector: 'app-emisiones',
@@ -527,7 +528,7 @@ export class EmisionesComponent implements OnInit {
     console.log('categoria y consumo ', categoria, '----', consumo);
     // Obtiene la tarifa del nuevo Pliego
     this.pli24Service.getBloque(categoria, consumo).subscribe({
-      next: (resp) => {
+      next: async (resp) => {
         console.log('obener tarifa', resp);
         if (!resp) {
           //No hay Tarifa para esta Categoría y Consumo
@@ -586,7 +587,7 @@ export class EmisionesComponent implements OnInit {
           //Categoria 9 no tiene tarifario es el 50% de la Residencial. Abonados del Municipio también 50%
           if (swcate9 || swmunicipio) suma = Math.round((suma / 2) * 100) / 100;
           this.newtotal = suma;
-          let r: any = {};
+          let rxf: any = {};
           this.rubros = [];
           if (swcate9 || swmunicipio) {
             let rub1002: number;
@@ -600,57 +601,89 @@ export class EmisionesComponent implements OnInit {
             else rub1003 = 0;
             //Agua portable por diferencia con la suma
             let rub1001 = suma - rub1002 - rub1003 - 0.1;
-            r = {
-              c: this._rubroxfac[0].idrubroxfac,
-              descripcion: this._rubroxfac[0].idrubro_rubros.descripcion,
+            rxf = {
+              idrubro_rubros: { idrubro: 1001 },
+              idfactura_facturas: { idfactura: this.idfactura },
+              estado: 1,
+              cantidad: 1,
               valorunitario: rub1001,
             };
-            this.rubros.push(r);
-            r = {
-              idrubroxfac: this._rubroxfac[1].idrubroxfac,
-              descripcion: this._rubroxfac[1].idrubro_rubros.descripcion,
+            this.rubros.push(rxf);
+            rxf = {
+              idrubro_rubros: { idrubro: 1002 },
+              idfactura_facturas: { idfactura: this.idfactura },
+              estado: 1,
+              cantidad: 1,
               valorunitario: rub1002,
             };
-            this.rubros.push(r);
-            r = {
-              idrubroxfac: this._rubroxfac[2].idrubroxfac,
-              descripcion: this._rubroxfac[2].idrubro_rubros.descripcion,
+            this.rubros.push(rxf);
+            rxf = {
+              idrubro_rubros: { idrubro: 1003 },
+              idfactura_facturas: { idfactura: this.idfactura },
+              estado: 1,
+              cantidad: 1,
               valorunitario: rub1003,
             };
-            this.rubros.push(r);
-            r = {
-              idrubroxfac: this._rubroxfac[3].idrubroxfac,
-              descripcion: this._rubroxfac[3].idrubro_rubros.descripcion,
+            this.rubros.push(rxf);
+            rxf = {
+              idrubro_rubros: { idrubro: 1004 },
+              idfactura_facturas: { idfactura: this.idfactura },
+              estado: 1,
+              cantidad: 1,
               valorunitario: 0.1,
             };
-            this.rubros.push(r);
+            this.rubros.push(rxf);
           } else {
-            r = {
-              idrubroxfac: this._rubroxfac[0].idrubroxfac,
-              descripcion: this._rubroxfac[0].idrubro_rubros.descripcion,
+            rxf = {
+              idrubro_rubros: { idrubro: 1001 },
+              idfactura_facturas: { idfactura: this.idfactura },
+              estado: 1,
+              cantidad: 1,
               valorunitario: num1 + num3,
             };
-            this.rubros.push(r);
-            r = {
-              idrubroxfac: this._rubroxfac[1].idrubroxfac,
-              descripcion: this._rubroxfac[1].idrubro_rubros.descripcion,
+            this.rubros.push(rxf);
+            rxf = {
+              idrubro_rubros: { idrubro: 1002 },
+              idfactura_facturas: { idfactura: this.idfactura },
+              estado: 1,
+              cantidad: 1,
               valorunitario: num2 + num4 + num7,
             };
-            this.rubros.push(r);
-            r = {
-              idrubroxfac: this._rubroxfac[2].idrubroxfac,
-              descripcion: this._rubroxfac[2].idrubro_rubros.descripcion,
+            this.rubros.push(rxf);
+            rxf = {
+              idrubro_rubros: { idrubro: 1003 },
+              idfactura_facturas: { idfactura: this.idfactura },
+              estado: 1,
+              cantidad: 1,
               valorunitario: num5,
             };
-            this.rubros.push(r);
-            r = {
-              idrubroxfac: this._rubroxfac[3].idrubroxfac,
-              descripcion: this._rubroxfac[3].idrubro_rubros.descripcion,
+            this.rubros.push(rxf);
+            rxf = {
+              idrubro_rubros: { idrubro: 1004 },
+              idfactura_facturas: { idfactura: this.idfactura },
+              estado: 1,
+              cantidad: 1,
               valorunitario: 0.1,
             };
-            this.rubros.push(r);
+            this.rubros.push(rxf);
           }
         }
+        console.log(this.rubros);
+        this.rubros.forEach((item: any) => {
+          this.rxfService.saveRubroxfac(item).subscribe({
+            next: (datos) => {
+              console.log(datos);
+              this.ctotal += item.valorunitario;
+            },
+            error: (e) => console.error(e),
+          });
+        });
+        let factu = new Facturas();
+        factu.idfactura = this.idfactura;
+        factu.totaltarifa = this.ctotal;
+        factu.valorbase = this.ctotal;
+        console.log(this.ctotal);
+        await this.facService.updateFacturas(factu);
       },
       error: (err) => console.error(err.error),
     });
@@ -674,7 +707,7 @@ export class EmisionesComponent implements OnInit {
     }
   }
 
-  rubroxfac() {
+  /*   rubroxfac() {
     this.rxfService.getByIdfactura(this.idfactura).subscribe({
       next: (datos) => {
         this._rubroxfac = datos;
@@ -682,7 +715,7 @@ export class EmisionesComponent implements OnInit {
       },
       error: (err) => console.error(err.error),
     });
-  }
+  } */
 
   csubtotal() {
     let suma: number = 0;
