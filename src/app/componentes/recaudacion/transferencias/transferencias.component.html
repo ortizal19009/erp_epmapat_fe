@@ -144,6 +144,7 @@
                      <tr class="text-center">
                         <th></th>
                         <th>Cuenta</th>
+                        <th>Responsable pago</th>
                         <th>Planilla</th>
                         <th>Fecha</th>
                         <th>Módulo</th>
@@ -158,8 +159,9 @@
                         </td>
                         <td [ngClass]="{'transparente': sincobro.idabonado == 0, 'transferido': sincobro.estado == 3 }">
                            {{ sincobro.idabonado }}</td>
+                           <td class="description" [ngClass]="{'transferido': sincobro.estado == 3 }">{{ sincobro.responsablePago }}</td>
                         <td [ngClass]="{'transferido': sincobro.estado == 3 }">{{ sincobro.idfactura }}</td>
-                        <td [ngClass]="{'transferido': sincobro.estado == 3 }">{{ sincobro.feccrea }}</td>
+                        <td [ngClass]="{'transferido': sincobro.estado == 3 }">{{ sincobro.feccrea |date:"mediumDate" }}</td>
                         <td [ngClass]="{'transferido': sincobro.estado == 3 }" class="text-left">{{
                            sincobro.idmodulo.descripcion }}</td>
                         <td [ngClass]="{'transferido': sincobro.estado == 3 }" class="text-right">{{

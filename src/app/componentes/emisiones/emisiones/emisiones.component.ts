@@ -24,6 +24,8 @@ import { NovedadesService } from 'src/app/servicios/novedades.service';
 import { Pliego24Service } from 'src/app/servicios/pliego24.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { Facturas } from 'src/app/modelos/facturas.model';
+import { EmisionIndividualService } from 'src/app/servicios/emision-individual.service';
+import { EmisionIndividual } from 'src/app/modelos/emisionindividual.model';
 
 @Component({
   selector: 'app-emisiones',
@@ -98,7 +100,8 @@ export class EmisionesComponent implements OnInit {
     private facService: FacturaService,
     private s_novedades: NovedadesService,
     private pli24Service: Pliego24Service,
-    private rxfService: RubroxfacService
+    private rxfService: RubroxfacService,
+    private s_emisionindividual: EmisionIndividualService
   ) {}
 
   ngOnInit(): void {
@@ -348,7 +351,6 @@ export class EmisionesComponent implements OnInit {
   getAllEmisiones() {
     this.emiService.findAllEmisiones().subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this._allemisiones = datos;
       },
       error: (e) => console.error(e),
@@ -358,7 +360,6 @@ export class EmisionesComponent implements OnInit {
     this.optabonado = false;
   }
   setAbonado(abonado: any) {
-    console.log(abonado);
     this.abonado = abonado;
     this.cliente = abonado.idcliente_clientes;
     this.ruta = abonado.idruta_rutas;
@@ -503,6 +504,15 @@ export class EmisionesComponent implements OnInit {
 
   async planilla(lectura: Lecturas) {
     console.log('LECTURA CREADA', lectura);
+    let emision_individual: EmisionIndividual = new EmisionIndividual();
+    emision_individual.idlectura = lectura.idlectura;
+    emision_individual.idemision = lectura.idemision;
+    this.s_emisionindividual
+      .saveEmisionIndividual(emision_individual)
+      .subscribe({
+        next: (d_emisionIndividual: any) => {},
+        error: (e) => console.error(e),
+      });
     //this.swcalcular = true;
     let categoria =
       lectura.idabonado_abonados.idcategoria_categorias.idcategoria;
@@ -669,21 +679,32 @@ export class EmisionesComponent implements OnInit {
           }
         }
         console.log(this.rubros);
+        let calcular = 0;
         this.rubros.forEach((item: any) => {
+          console.log('ITEM: ', item.valorunitario);
+          calcular += item.valorunitario;
           this.rxfService.saveRubroxfac(item).subscribe({
             next: (datos) => {
               console.log(datos);
-              this.ctotal += item.valorunitario;
             },
             error: (e) => console.error(e),
           });
         });
-        let factu = new Facturas();
+        /*         let factu: Facturas = new Facturas();
         factu.idfactura = this.idfactura;
-        factu.totaltarifa = this.ctotal;
-        factu.valorbase = this.ctotal;
-        console.log(this.ctotal);
-        await this.facService.updateFacturas(factu);
+        factu.totaltarifa = calcular;
+        factu.valorbase = calcular;
+        console.log(calcular);
+        console.log(factu); */
+        this.facService.getById(this.idfactura).subscribe({
+          next: async (factura: any) => {
+            console.log(factura);
+            factura.totaltarifa = calcular;
+            factura.valorbase = calcular;
+            await this.facService.updateFacturaAsync(factura);
+          },
+          error: (e) => console.error(e),
+        });
       },
       error: (err) => console.error(err.error),
     });
@@ -691,7 +712,6 @@ export class EmisionesComponent implements OnInit {
   getAllNovedades() {
     this.s_novedades.getAll().subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this.novedades = datos;
       },
       error: (e) => console.error(e),

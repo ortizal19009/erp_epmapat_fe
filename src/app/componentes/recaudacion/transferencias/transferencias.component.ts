@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
+import { Abonados } from 'src/app/modelos/abonados';
 import { Usuarios } from 'src/app/modelos/administracion/usuarios.model';
 import { Cajas } from 'src/app/modelos/cajas.model';
 import { Clientes } from 'src/app/modelos/clientes';
@@ -377,7 +378,15 @@ export class TransferenciasComponent implements OnInit {
         if (this._sincobro.length > 0) {
           let suma: number = 0;
           let i = 0;
-          this._sincobro.forEach(() => {
+          this._sincobro.forEach(async(item:any) => {
+            if (item.idabonado != 0) {
+              const abonado: Abonados = await this.getAbonado(item.idabonado);
+              item.direccion = abonado.direccionubicacion;
+              item.responsablePago = abonado.idresponsable.nombre;
+              console.log(abonado);
+            } else {
+              item.direccion = 'S/D';
+            }
             if (this._sincobro[i].idmodulo.idmodulo == 3)
               this._sincobro[i].comerc = 1;
             this._sincobro[i].interes = 0;
@@ -403,7 +412,10 @@ export class TransferenciasComponent implements OnInit {
   get f() {
     return this.formTransferir.controls;
   }
-
+  async getAbonado(idabonado: number): Promise<any> {
+    const abo = await this.aboService.getById(idabonado).toPromise();
+    return abo;
+  }
   transferir() {
     let i = 0;
     this.actufacturas(i);
