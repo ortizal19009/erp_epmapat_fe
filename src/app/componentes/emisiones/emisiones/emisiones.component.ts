@@ -120,7 +120,6 @@ export class EmisionesComponent implements OnInit {
     let hasta: String;
     this.emiService.ultimo().subscribe({
       next: (datos) => {
-        console.log(datos);
         this.fechaemision = datos.feccrea;
         this.cerrado = datos.estado;
         hasta = datos.emision;
@@ -428,6 +427,11 @@ export class EmisionesComponent implements OnInit {
           next: (datos: any) => {
             rutasxemision = datos;
             this.generaLecturaIndividual(rutasxemision, novedad);
+            this._lectura.estado = 1;
+            this.s_lecturas.updateLecturaAsync(
+              this._lectura.idlectura,
+              this._lectura
+            );
           },
           error: (e) => console.error(e),
         });
