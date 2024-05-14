@@ -170,112 +170,158 @@
             <div class="modal-header pl-0 py-1 cabecera">
                <h5 class="modal-title w-100 text-center">Emisión individual</h5>
             </div>
-            <div class='modal-body detalle Roboto'>
-               <div class="container" *ngIf="optabonado else searchAbonado">
-                  <form [formGroup]="f_emisionIndividual" id="formRubro">
+            <div class='modal-body detalle Roboto' *ngIf="listar else nEmisionIndividual">
+               <div class="row">
+                  <div class="col-sm">
+                     <div class="form-group col-md-4 mt-1">
+                        <div class="input-group input-group-sm mb-3">
+                           <div class="input-group-prepend">
+                              <button class="btn font-weight-bold btn-primary "
+                                 (click)="imprimirReporte()">Imprimir</button>
+                           </div>
+                        </div>
+                     </div>
+                     <table class="table table-sm table-hover table-bordered">
+                        <thead>
+                           <tr>
+                              <th>N°</th>
+                              <th>Nro emision</th>
+                              <th>Id Lec anterior</th>
+                              <th>Id Lec actual</th>
+                              <th>Planilla Anterior</th>
+                              <th>Planilla Actual</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <tr>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+               </div>
+               
+               <div class="row">
+                  <div class="col-sm">
+
+                  </div>
+               </div>
+               
+            </div>
+
+            <ng-template #nEmisionIndividual>
+               <div class='modal-body detalle Roboto'>
+                  <div class="container" *ngIf="optabonado else searchAbonado">
+                     <form [formGroup]="f_emisionIndividual" id="formRubro">
+                        <div class="row">
+
+                           <div class="form-group col-md-4 mt-1">
+                              <div class="input-group input-group-sm mb-3">
+                                 <div class="input-group-prepend">
+                                    <span class="input-group-text font-weight-bold">Emisión</span>
+                                 </div>
+                                 <select type="text" class="form-control text-center" formControlName="emision"
+                                    minlength="4" maxlength="4" required>
+                                    <option value={{emision.idemision}} *ngFor="let emision of _allemisiones">
+                                       {{emision.emision}}</option>
+                                 </select>
+                              </div>
+                           </div>
+                           <div class="form-group col-md-4 mt-1">
+                              <div class="input-group input-group-sm mb-3">
+                                 <div class="input-group-prepend">
+                                    <button class="btn font-weight-bold btn-primary "
+                                       (click)="viewAbonadosOpt()">Cuenta</button>
+                                 </div>
+                                 <input type="text" class="form-control text-center" formControlName="abonado" readonly>
+                              </div>
+                           </div>
+
+                        </div>
+                     </form>
                      <div class="row">
-
-                        <div class="form-group col-md-4 mt-1">
-                           <div class="input-group input-group-sm mb-3">
-                              <div class="input-group-prepend">
-                                 <span class="input-group-text font-weight-bold">Emisión</span>
-                              </div>
-                              <select type="text" class="form-control text-center" formControlName="emision"
-                                 minlength="4" maxlength="4" required>
-                                 <option value={{emision.idemision}} *ngFor="let emision of _allemisiones">
-                                    {{emision.emision}}</option>
-                              </select>
-                           </div>
-                        </div>
-                        <div class="form-group col-md-4 mt-1">
-                           <div class="input-group input-group-sm mb-3">
-                              <div class="input-group-prepend">
-                                 <button class="btn font-weight-bold btn-primary "
-                                    (click)="viewAbonadosOpt()">Cuenta</button>
-                              </div>
-                              <input type="text" class="form-control text-center" formControlName="abonado" readonly>
-                           </div>
-                        </div>
-                     </div>
-                  </form>
-                  <div class="row">
-                     <div class="col">
-                        <table class="table table-sm table-bordered table-hover">
-                           <tbody>
-                              <tr>
-                                 <th>Cliente</th>
-                                 <td>{{cliente.nombre}}</td>
-                              </tr>
-                              <tr>
-                                 <th>Ruta</th>
-                                 <td>{{ruta.descripcion}}</td>
-                              </tr>
-                              <tr>
-                                 <th>Dirección</th>
-                                 <td>{{abonado.direccionubicacion}}</td>
-                              </tr>
-                              <tr>
-                                 <td colspan="2" *ngIf="_lectura.estado == 0" class="text-center">
-                                    <h6>Lectura no cerrada</h6>
-                                 </td>
-                                 <td colspan="2" *ngIf="_lectura.estado == 1" class="text-center">
-                                    <h6>Lectura cerrada</h6>
-                                 </td>
-                              </tr>
-                           </tbody>
-                        </table>
-                     </div>
-                     <div class="col" *ngIf="_lectura">
-                        <form [formGroup]="f_lecturas">
-                           <table class="table table-sm table-hover table-bordered">
-                              <thead>
-                                 <tr class="text-center">
-                                    <th>Lec. Anterior</th>
-                                    <th>Lec. Actual</th>
-                                 </tr>
-                              </thead>
+                        <div class="col">
+                           <table class="table table-sm table-bordered table-hover">
                               <tbody>
-
                                  <tr>
-                                    <td class="col-sm-6">
-                                       <input type="number" min=0 class="form-control form-control-sm col-12"
-                                          formControlName="lecturaanterior">
-                                    </td>
-                                    <td class="col-sm-6">
-                                       <input type="number" min=0 class="form-control form-control-sm col-12"
-                                          formControlName="lecturaactual" />
-                                    </td>
+                                    <th>Cliente</th>
+                                    <td>{{cliente.nombre}}</td>
                                  </tr>
                                  <tr>
-                                    <td colspan="2">
-                                       <select class="custom-select custom-select-sm col-12"
-                                          formControlName="idnovedad_novedades" [compareWith]="compararNovedades">
-                                          <option [ngValue]="novedad" *ngFor="let novedad of novedades">
-                                             {{novedad.descripcion}}
-                                          </option>
-                                       </select>
+                                    <th>Ruta</th>
+                                    <td>{{ruta.descripcion}}</td>
+                                 </tr>
+                                 <tr>
+                                    <th>Dirección</th>
+                                    <td>{{abonado.direccionubicacion}}</td>
+                                 </tr>
+                                 <tr>
+                                    <td colspan="2" *ngIf="_lectura.estado == 0" class="text-center">
+                                       <h6>Lectura no cerrada</h6>
+                                    </td>
+                                    <td colspan="2" *ngIf="_lectura.estado == 1" class="text-center">
+                                       <h6>Lectura cerrada</h6>
                                     </td>
                                  </tr>
                               </tbody>
                            </table>
-                        </form>
+                        </div>
+                        <div class="col" *ngIf="_lectura">
+                           <form [formGroup]="f_lecturas">
+                              <table class="table table-sm table-hover table-bordered">
+                                 <thead>
+                                    <tr class="text-center">
+                                       <th>Lec. Anterior</th>
+                                       <th>Lec. Actual</th>
+                                    </tr>
+                                 </thead>
+                                 <tbody>
+
+                                    <tr>
+                                       <td class="col-sm-6">
+                                          <input type="number" min=0 class="form-control form-control-sm col-12"
+                                             formControlName="lecturaanterior">
+                                       </td>
+                                       <td class="col-sm-6">
+                                          <input type="number" min=0 class="form-control form-control-sm col-12"
+                                             formControlName="lecturaactual" />
+                                       </td>
+                                    </tr>
+                                    <tr>
+                                       <td colspan="2">
+                                          <select class="custom-select custom-select-sm col-12"
+                                             formControlName="idnovedad_novedades" [compareWith]="compararNovedades">
+                                             <option [ngValue]="novedad" *ngFor="let novedad of novedades">
+                                                {{novedad.descripcion}}
+                                             </option>
+                                          </select>
+                                       </td>
+                                    </tr>
+                                 </tbody>
+                              </table>
+                           </form>
+                        </div>
+                     </div>
+                     <div class="mt-2 mb-0 text-center">
+                        <button type="button" class="btn btn-success btn-sm mb-1" data-dismiss='modal'
+                           (click)="saveEmisionIndividual()" [disabled]="_lectura.estado == 1">
+                           <i class="fa fa-check-circle"></i> Aceptar</button>
+                        <button class="btn btn-outline-success btn-sm mx-2 btn-sm mb-1" data-dismiss='modal'>
+                           <i class="fa fa-times-circle"></i> Cancelar</button>
+                        <button class="btn btn-primary btn-sm mx-2 btn-sm mb-1" data-dismiss='modal'
+                           (click)="generaRutaxemisionIndividual()" *ngIf="!_lectura && cerrado != 1">
+                           <i class="bi bi-eyeglasses"></i> Crear lectura</button>
                      </div>
                   </div>
-                  <div class="mt-2 mb-0 text-center">
-                     <button type="button" class="btn btn-success btn-sm mb-1"
-                        data-dismiss='modal' (click)="saveEmisionIndividual()">
-                        <i class="fa fa-check-circle"></i> Aceptar</button>
-                     <button class="btn btn-outline-success btn-sm mx-2 btn-sm mb-1" data-dismiss='modal'>
-                        <i class="fa fa-times-circle"></i> Cancelar</button>
-                     <button class="btn btn-primary btn-sm mx-2 btn-sm mb-1" data-dismiss='modal'
-                        (click)="generaRutaxemisionIndividual()" *ngIf="!_lectura && cerrado != 1">
-                        <i class="bi bi-eyeglasses"></i> Crear lectura</button>
-                  </div>
+                  <ng-template #searchAbonado>
+                     <app-buscarabonado (abonadoEvent)="setAbonado($event)"></app-buscarabonado>
+                  </ng-template>
                </div>
-               <ng-template #searchAbonado>
-                  <app-buscarabonado (abonadoEvent)="setAbonado($event)"></app-buscarabonado>
-               </ng-template>
-            </div>
+            </ng-template>
 
          </div>
       </div>

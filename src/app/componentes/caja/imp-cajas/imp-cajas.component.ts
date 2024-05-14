@@ -306,6 +306,12 @@ export class ImpCajasComponent implements OnInit {
         ) {
           iva1 += totalRecaudado * 0.15;
         }
+        if (
+          this._cobradas[i][3] === true &&
+          this.formImprimir.value.fecha < '2024-04-01' === true
+        ) {
+          iva1 += totalRecaudado * 0.12;
+        }
         datos.push([
           this._cobradas[i][0],
           this._cobradas[i][1],
@@ -337,6 +343,12 @@ export class ImpCajasComponent implements OnInit {
           this.formImprimir.value.fecha >= '2024-04-01' === true
         ) {
           iva2 += totalRecaudado * 0.15;
+        }
+        if (
+          this._rubrosanterior[i][3] === true &&
+          this.formImprimir.value.fecha > '2024-04-01' === true
+        ) {
+          iva2 += totalRecaudado * 0.12;
         }
         datos.push([
           this._rubrosanterior[i][0],
@@ -582,6 +594,12 @@ export class ImpCajasComponent implements OnInit {
       ) {
         iva1 += totalRecaudado * 0.15;
       }
+      if (
+        this._cobradas[i][3] === true &&
+        this.formImprimir.value.fecha < '2024-04-01' === true
+      ) {
+        iva1 += totalRecaudado * 0.12;
+      }
       datos.push([
         this._cobradas[i][0],
         this._cobradas[i][1],
@@ -612,6 +630,12 @@ export class ImpCajasComponent implements OnInit {
           this.formImprimir.value.fecha >= '2024-04-01' === true
         ) {
           iva2 += totalRecaudado * 0.15;
+        }
+        if (
+          this._rubrosanterior[i][3] === true &&
+          this.formImprimir.value.fecha < '2024-04-01' === true
+        ) {
+          iva2 += totalRecaudado * 0.12;
         }
         datos.push([
           this._rubrosanterior[i][0],

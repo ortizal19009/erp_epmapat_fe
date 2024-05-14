@@ -62,7 +62,6 @@ export class ImpInfoCajasComponent implements OnInit {
   }
   getRecaudador() {
     let recaudador = +sessionStorage.getItem('idrecaudador')!;
-    console.log(recaudador);
   }
   colocaColor(colores: any) {
     document.documentElement.style.setProperty('--bgcolor1', colores[0]);
@@ -236,8 +235,12 @@ export class ImpInfoCajasComponent implements OnInit {
     this._cobradas.forEach(() => {
       let totalRecaudado = this._cobradas[i][2];
       //Math.round(this._cobradas[i][2] * 100) / 100;
-      if (this._cobradas[i][3] === true) {
+
+      if (this._cobradas[i][3] === true && this.formImprimir.value.d_fecha >= '2024-04-01' === true) {
         iva1 += totalRecaudado * 0.15;
+      }
+      if (this._cobradas[i][3] === true && this.formImprimir.value.d_fecha < '2024-04-01' === true) {
+        iva1 += totalRecaudado * 0.12;
       }
       if (this._cobradas[i][0] != 165) {
 
@@ -627,7 +630,6 @@ export class ImpInfoCajasComponent implements OnInit {
     // console.log('this._cobradas: ', this._cobradas)
     let i = 0;
     this._cobradas.forEach(() => {
-      console.log(this._cobradas[i]);
       let totalRecaudado = Math.round(this._cobradas[i][2] * 100) / 100;
       const row = [this._cobradas[i][0], this._cobradas[i][1], totalRecaudado];
       worksheet.addRow(row);

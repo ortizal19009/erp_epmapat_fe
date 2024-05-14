@@ -77,6 +77,7 @@ export class EmisionesComponent implements OnInit {
   lecturaestado: number = 0;
   idfactura: number;
   ctotal: number;
+  listar: boolean = true; 
 
   porcResidencial: number[] = [
     0.777, 0.78, 0.78, 0.78, 0.78, 0.778, 0.778, 0.778, 0.78, 0.78, 0.78, 0.68,
@@ -101,7 +102,8 @@ export class EmisionesComponent implements OnInit {
     private s_novedades: NovedadesService,
     private pli24Service: Pliego24Service,
     private rxfService: RubroxfacService,
-    private s_emisionindividual: EmisionIndividualService
+    private s_emisionindividual: EmisionIndividualService,
+    private s_pdf: PdfService
   ) {}
 
   ngOnInit(): void {
@@ -509,7 +511,8 @@ export class EmisionesComponent implements OnInit {
   async planilla(lectura: Lecturas) {
     console.log('LECTURA CREADA', lectura);
     let emision_individual: EmisionIndividual = new EmisionIndividual();
-    emision_individual.idlectura = lectura.idlectura;
+    emision_individual.idlecturanueva = lectura.idlectura;
+    emision_individual.idlecturaanterior = this._lectura.idlectura;
     emision_individual.idemision = lectura.idemision;
     this.s_emisionindividual
       .saveEmisionIndividual(emision_individual)
@@ -1098,6 +1101,14 @@ export class EmisionesComponent implements OnInit {
       container = document.getElementById('pdf');
       container.appendChild(embed);
     }
+  }
+  imprimirReporte() {
+    console.log('VAMOS A IMPRIMIR REPORTE');
+    let doc = new jsPDF('p', 'pt', 'a4');
+    this.s_pdf.header('REPORETE DE REFACTURACION INDIVIDUAL', doc);
+   // doc.autoPrint();
+    //doc.save('datauristring');
+    doc.output('dataurlnewwindow', {filename: 'comprobante.pdf'});
   }
 
   imprimir() {

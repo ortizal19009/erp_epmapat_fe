@@ -12,4 +12,9 @@ export class EmisionIndividualService {
   saveEmisionIndividual(datoEmIn: EmisionIndividual) {
     return this.http.post(`${baseUrl}`, datoEmIn);
   }
+  getByIdEmision(idemision: number) {
+    return this.http.get<EmisionIndividual[]>(
+      `${baseUrl}/idemision?idemision=${idemision}`
+    );
+  }
 }
