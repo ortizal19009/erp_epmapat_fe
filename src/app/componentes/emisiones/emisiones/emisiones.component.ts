@@ -1123,7 +1123,6 @@ export class EmisionesComponent implements OnInit {
       date_emision.getMonth() + 1
     }`;
     this.s_pdf.header(`REPORTE DE REFACTURACION INDIVIDUAL ${fecemision}`, doc);
-    console.log(emisionIndividual);
 
     /* LECTURAS ANTERIORES */
     let lectAnteriores = await this.s_rxfService.getByIdfacturaAsync(
