@@ -294,7 +294,6 @@ export class EmisionesComponent implements OnInit {
   cerrarEmision() {
     this.emiService.getByIdemision(this.idemision).subscribe({
       next: (datos) => {
-        console.log('CERRAR EMISION getByIdEmision: ', datos);
         datos.m3 = this.subtotal;
         datos.estado = 1;
         datos.usuariocierre = this.authService.idusuario;
@@ -303,7 +302,6 @@ export class EmisionesComponent implements OnInit {
         datos.fechacierre = fechaHora;
         this.emiService.update(this.idemision, datos).subscribe({
           next: (nex) => {
-            console.log('Emisiones cerradas', nex);
             this.cerrado = 1;
             this.buscar();
           },
@@ -339,7 +337,6 @@ export class EmisionesComponent implements OnInit {
     this.emiService.saveEmision(this.formAddEmision.value).subscribe({
       next: (dato) => {
         const idRegistroCreado = dato;
-        console.log('ID del registro creado:', idRegistroCreado);
         this.cerrado = 0;
         this.formBuscar.controls['hasta'].setValue(this.nuevaemision);
         this.buscar();
@@ -355,7 +352,6 @@ export class EmisionesComponent implements OnInit {
   getAllEmisiones() {
     this.emiService.findAllEmisiones().subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this.emision = datos[0].idemision;
         this._allemisiones = datos;
         this.getEmisionIndividualByIdEmision(datos[0].idemision);
@@ -369,7 +365,6 @@ export class EmisionesComponent implements OnInit {
   getEmisionIndividualByIdEmision(idemision: number) {
     this.s_emisionindividual.getByIdEmision(idemision).subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this._emisionindividual = datos;
       },
       error: (e) => console.error(e),
@@ -390,7 +385,6 @@ export class EmisionesComponent implements OnInit {
       )
       .subscribe({
         next: (datos: any) => {
-          console.log(datos);
           this._lectura = datos[0];
           this.f_lecturas.patchValue({
             lecturaanterior: datos[0].lecturaanterior,
@@ -403,10 +397,6 @@ export class EmisionesComponent implements OnInit {
   }
   //Generar nueva emision individual(){
   saveEmisionIndividual() {
-    console.log(this.f_emisionIndividual.value);
-    console.log(this._lectura);
-    let lectura: Lecturas = new Lecturas();
-    console.log(this.f_lecturas.value);
     this.generaRutaxemisionIndividual();
   }
   async generaRutaxemisionIndividual() {
@@ -523,11 +513,9 @@ export class EmisionesComponent implements OnInit {
     }
   }
   lemisionIndividuao(e: any) {
-    console.log(this.emision);
     this.getEmisionIndividualByIdEmision(this.emision);
   }
   async planilla(lectura: Lecturas) {
-    console.log('LECTURA CREADA', lectura);
     let emision_individual: EmisionIndividual = new EmisionIndividual();
     let ln = new Lecturas();
     let la = new Lecturas();
@@ -567,11 +555,9 @@ export class EmisionesComponent implements OnInit {
     if (categoria == 4 && municipio) {
       swmunicipio = true;
     }
-    console.log('categoria y consumo ', categoria, '----', consumo);
     // Obtiene la tarifa del nuevo Pliego
     this.pli24Service.getBloque(categoria, consumo).subscribe({
       next: async (resp) => {
-        console.log('obener tarifa', resp);
         if (!resp) {
           //No hay Tarifa para esta Categoría y Consumo
         } else {
@@ -710,14 +696,11 @@ export class EmisionesComponent implements OnInit {
             this.rubros.push(rxf);
           }
         }
-        console.log(this.rubros);
         let calcular = 0;
         this.rubros.forEach((item: any) => {
-          console.log('ITEM: ', item.valorunitario);
           calcular += item.valorunitario;
           this.rxfService.saveRubroxfac(item).subscribe({
             next: (datos) => {
-              console.log(datos);
             },
             error: (e) => console.error(e),
           });
@@ -730,7 +713,6 @@ export class EmisionesComponent implements OnInit {
         console.log(factu); */
         this.facService.getById(this.idfactura).subscribe({
           next: async (factura: any) => {
-            console.log(factura);
             factura.totaltarifa = calcular;
             factura.valorbase = calcular;
             await this.facService.updateFacturaAsync(factura);
@@ -1128,7 +1110,6 @@ export class EmisionesComponent implements OnInit {
     }
   }
   imprimirReporte() {
-    console.log('VAMOS A IMPRIMIR REPORTE');
     let doc = new jsPDF('p', 'pt', 'a4');
     this.s_pdf.header('REPORETE DE REFACTURACION', doc);
     // doc.autoPrint();
@@ -1136,14 +1117,12 @@ export class EmisionesComponent implements OnInit {
     doc.output('dataurlnewwindow', { filename: 'comprobante.pdf' });
   }
   async iEmisionIndividual(emisionIndividual: any) {
-    console.log('emision individual', emisionIndividual);
     let doc = new jsPDF('p', 'pt', 'a4');
     /* HEADER */
     this.s_pdf.header(
       `REPORTE DE REFACTURACION INDIVIDUAL ${emisionIndividual.idemision.emision}`,
       doc
     );
-    console.log(emisionIndividual);
 
     /* LECTURAS ANTERIORES */
     let lectAnteriores = await this.s_rxfService.getByIdfacturaAsync(
@@ -1157,9 +1136,7 @@ export class EmisionesComponent implements OnInit {
     let anterior_factura = await this.facService.getByIdAsync(
       emisionIndividual.idlecturaanterior.idfactura
     );
-    console.log(lectAnteriores);
     lectAnteriores.forEach((item: any) => {
-      console.log(item);
       l_anteriores.push([
         item.idrubro_rubros.idrubro,
         item.idrubro_rubros.descripcion,
@@ -1168,7 +1145,6 @@ export class EmisionesComponent implements OnInit {
       ]);
       sum_anterior += item.cantidad * item.valorunitario;
     });
-    console.log(l_anteriores);
     autoTable(doc, {
       headStyles: {
         halign: 'center',
@@ -1183,15 +1159,15 @@ export class EmisionesComponent implements OnInit {
       body: [
         [
           {
-            content: `Lectura: ${emisionIndividual.idlecturaanterior.idlectura} `,
+            content: `N° lectura: ${emisionIndividual.idlecturaanterior.idlectura} `,
           },
           {
             content: `Planilla: ${emisionIndividual.idlecturaanterior.idfactura}`,
           },
         ],
         [
-          `L. anterior: ${emisionIndividual.idlecturaanterior.lecturaanterior} `,
-          `L. actual: ${emisionIndividual.idlecturaanterior.lecturaactual} `,
+          `Lectura ant: ${emisionIndividual.idlecturaanterior.lecturaanterior} `,
+          `Lectura act: ${emisionIndividual.idlecturaanterior.lecturaactual} `,
           `M3: ${m3_anterior}`,
         ],
         [
@@ -1224,7 +1200,6 @@ export class EmisionesComponent implements OnInit {
       emisionIndividual.idlecturanueva.idfactura
     );
     let l_nuevos: any = [];
-    console.log(lectActuales);
     let sum_nuevos: number = 0;
     lectActuales.forEach((item: any) => {
       l_nuevos.push([
@@ -1238,11 +1213,9 @@ export class EmisionesComponent implements OnInit {
     let m3_nuevo: number =
       emisionIndividual.idlecturanueva.lecturaactual -
       emisionIndividual.idlecturanueva.lecturaanterior;
-    console.log(lectActuales);
     let nueva_factura = await this.facService.getByIdAsync(
       emisionIndividual.idlecturanueva.idfactura
     );
-    console.log('FACTURA ', nueva_factura);
     autoTable(doc, {
       headStyles: {
         halign: 'center',
@@ -1256,12 +1229,12 @@ export class EmisionesComponent implements OnInit {
       head: [[{ content: 'Lectura nueva', colSpan: 5 }]],
       body: [
         [
-          `Lectura: ${emisionIndividual.idlecturanueva.idlectura} `,
+          `N° lectura: ${emisionIndividual.idlecturanueva.idlectura} `,
           `Planilla: ${emisionIndividual.idlecturanueva.idfactura}`,
         ],
         [
-          `L. anterior: ${emisionIndividual.idlecturanueva.lecturaanterior} `,
-          `L. actual: ${emisionIndividual.idlecturanueva.lecturaactual} `,
+          `Lectura ant: ${emisionIndividual.idlecturanueva.lecturaanterior} `,
+          `Lectura act: ${emisionIndividual.idlecturanueva.lecturaactual} `,
           `M3: ${m3_nuevo}`,
         ],
         [
@@ -1288,6 +1261,20 @@ export class EmisionesComponent implements OnInit {
       head: [['Cod.Rubro', 'Descripción', 'Cant', 'Valor unitario']],
       body: l_nuevos,
       foot: [['TOTAL: ', sum_nuevos.toFixed(2)]],
+    });
+    let dateEmision: Date = new Date(
+      emisionIndividual.idlecturanueva.fechaemision
+    );
+    autoTable(doc, {
+      bodyStyles: {
+        fillColor: 'white',
+        textColor: 'black',
+      },
+      body: [
+        [
+          `Fecha emision:  ${dateEmision.getFullYear()}/${dateEmision.getMonth()}/${dateEmision.getDate()}`,
+        ],
+      ],
     });
 
     // doc.autoPrint();
