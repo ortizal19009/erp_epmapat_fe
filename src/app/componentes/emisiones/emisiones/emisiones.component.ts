@@ -1136,39 +1136,158 @@ export class EmisionesComponent implements OnInit {
     doc.output('dataurlnewwindow', { filename: 'comprobante.pdf' });
   }
   async iEmisionIndividual(emisionIndividual: any) {
+    console.log('emision individual', emisionIndividual);
     let doc = new jsPDF('p', 'pt', 'a4');
     /* HEADER */
-    this.s_pdf.header('REPORETE DE REFACTURACION INDIVIDUAL', doc);
+    this.s_pdf.header(
+      `REPORTE DE REFACTURACION INDIVIDUAL ${emisionIndividual.idemision.emision}`,
+      doc
+    );
     console.log(emisionIndividual);
 
     /* LECTURAS ANTERIORES */
     let lectAnteriores = await this.s_rxfService.getByIdfacturaAsync(
       emisionIndividual.idlecturaanterior.idfactura
     );
+    let l_anteriores: any = [];
+    let sum_anterior: number = 0;
+    let m3_anterior: number =
+      emisionIndividual.idlecturaanterior.lecturaactual -
+      emisionIndividual.idlecturaanterior.lecturaanterior;
+    let anterior_factura = await this.facService.getByIdAsync(
+      emisionIndividual.idlecturaanterior.idfactura
+    );
     console.log(lectAnteriores);
-
+    lectAnteriores.forEach((item: any) => {
+      console.log(item);
+      l_anteriores.push([
+        item.idrubro_rubros.idrubro,
+        item.idrubro_rubros.descripcion,
+        item.cantidad,
+        item.valorunitario.toFixed(2),
+      ]);
+      sum_anterior += item.cantidad * item.valorunitario;
+    });
+    console.log(l_anteriores);
     autoTable(doc, {
-      head: [['Lectura anterior']],
+      headStyles: {
+        halign: 'center',
+        fillColor: 'white',
+        textColor: 'black',
+      },
+      bodyStyles: {
+        fillColor: 'white',
+        textColor: 'black',
+      },
+      head: [[{ content: 'Lectura anterior', colSpan: 5 }]],
       body: [
         [
-          emisionIndividual.idlecturaanterior.idfactura,
-          emisionIndividual.idlecturaanterior.idlectura,
+          {
+            content: `Lectura: ${emisionIndividual.idlecturaanterior.idlectura} `,
+          },
+          {
+            content: `Planilla: ${emisionIndividual.idlecturaanterior.idfactura}`,
+          },
         ],
+        [
+          `L. anterior: ${emisionIndividual.idlecturaanterior.lecturaanterior} `,
+          `L. actual: ${emisionIndividual.idlecturaanterior.lecturaactual} `,
+          `M3: ${m3_anterior}`,
+        ],
+        [
+          `Propietario: ${anterior_factura.idcliente.nombre}`,
+          `Cuenta: ${anterior_factura.idabonado}`,
+        ],
+        [`Modulo: ${anterior_factura.idmodulo.descripcion}`],
       ],
+    });
+    autoTable(doc, {
+      headStyles: {
+        halign: 'center',
+        fillColor: 'white',
+        textColor: 'black',
+      },
+      bodyStyles: {
+        fillColor: 'white',
+        textColor: 'black',
+      },
+      footStyles: {
+        fillColor: 'white',
+        textColor: 'black',
+      },
+      head: [['Cod.Rubro', 'Descripción', 'Cant', 'Valor unitario']],
+      body: l_anteriores,
+      foot: [['TOTAL: ', sum_anterior.toFixed(2)]],
     });
     /* LECTURAS ACTUALES */
     let lectActuales = await this.s_rxfService.getByIdfacturaAsync(
       emisionIndividual.idlecturanueva.idfactura
     );
+    let l_nuevos: any = [];
     console.log(lectActuales);
+    let sum_nuevos: number = 0;
+    lectActuales.forEach((item: any) => {
+      l_nuevos.push([
+        item.idrubro_rubros.idrubro,
+        item.idrubro_rubros.descripcion,
+        item.cantidad,
+        item.valorunitario.toFixed(2),
+      ]);
+      sum_nuevos += item.cantidad * item.valorunitario;
+    });
+    let m3_nuevo: number =
+      emisionIndividual.idlecturanueva.lecturaactual -
+      emisionIndividual.idlecturanueva.lecturaanterior;
+    console.log(lectActuales);
+    let nueva_factura = await this.facService.getByIdAsync(
+      emisionIndividual.idlecturanueva.idfactura
+    );
+    console.log('FACTURA ', nueva_factura);
     autoTable(doc, {
-      head: [['Lectura nueva']],
+      headStyles: {
+        halign: 'center',
+        fillColor: 'white',
+        textColor: 'black',
+      },
+      bodyStyles: {
+        fillColor: 'white',
+        textColor: 'black',
+      },
+      head: [[{ content: 'Lectura nueva', colSpan: 5 }]],
       body: [
         [
-          emisionIndividual.idlecturanueva.idfactura,
-          emisionIndividual.idlecturanueva.idlectura,
+          `Lectura: ${emisionIndividual.idlecturanueva.idlectura} `,
+          `Planilla: ${emisionIndividual.idlecturanueva.idfactura}`,
         ],
+        [
+          `L. anterior: ${emisionIndividual.idlecturanueva.lecturaanterior} `,
+          `L. actual: ${emisionIndividual.idlecturanueva.lecturaactual} `,
+          `M3: ${m3_nuevo}`,
+        ],
+        [
+          `Propietario: ${nueva_factura.idcliente.nombre}`,
+          `Cuenta: ${nueva_factura.idabonado}`,
+        ],
+        [`Modulo: ${nueva_factura.idmodulo.descripcion}`],
       ],
+    });
+    autoTable(doc, {
+      headStyles: {
+        halign: 'center',
+        fillColor: 'white',
+        textColor: 'black',
+      },
+      bodyStyles: {
+        fillColor: 'white',
+        textColor: 'black',
+      },
+      footStyles: {
+        fillColor: 'white',
+        textColor: 'black',
+      },
+      head: [['Cod.Rubro', 'Descripción', 'Cant', 'Valor unitario']],
+      body: l_nuevos,
+      foot: [['TOTAL: ', sum_nuevos.toFixed(2)]],
     });
 
     // doc.autoPrint();

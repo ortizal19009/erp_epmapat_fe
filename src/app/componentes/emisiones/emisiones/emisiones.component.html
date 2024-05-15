@@ -212,7 +212,7 @@
                               <td>{{emindividual.idlecturaanterior.idfactura}}</td>
                               <td>{{emindividual.idlecturanueva.idfactura}}</td>
                               <td>
-                                 <button class="btn btn-sm btn-danger" (click)="iEmisionIndividual(emindividual)">
+                                 <button class="btn btn-sm btn-danger" (click)="iEmisionIndividual(emindividual)" data-dismiss='modal'>
                                     <i class="bi bi-printer"></i>
                                  </button>
                               </td>
@@ -223,8 +223,8 @@
                </div>
 
                <div class="row">
-                  <div class="col-sm">
-
+                  <div class="col-sm text-center">
+                     <button class="btn btn-sm btn-success" data-dismiss='modal'>Cancelar</button>
                   </div>
                </div>
 

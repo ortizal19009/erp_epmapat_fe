@@ -173,6 +173,7 @@ export class RecaudacionReportsService {
             this.total += +item.valorunitario! * item.cantidad;
             rubros.push([
               item.idrubro_rubros.descripcion,
+              item.cantidad.toFixed(0),
               item.valorunitario.toFixed(2),
             ]);
           } else if (item.idrubro_rubros.idrubro === 165) {
@@ -200,9 +201,10 @@ export class RecaudacionReportsService {
           },
           columnStyles: {
             0: { minCellWidth: 10 },
-            1: { minCellWidth: 15, halign: 'right' },
+            1: { minCellWidth: 15, halign: 'center' },
+            2: { minCellWidth: 15, halign: 'right' },
           },
-          columns: ['Descripción', 'Valor unitario'],
+          columns: ['Descripción','Cant.', 'Valor unitario'],
           body: rubros,
         });
         autoTable(doc, {

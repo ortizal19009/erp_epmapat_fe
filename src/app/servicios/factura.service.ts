@@ -11,7 +11,7 @@ const baseUrl = `${apiUrl}/facturas`;
   providedIn: 'root',
 })
 export class FacturaService {
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   getListaByNroFactura(nrofactura: String) {
     return this.http.get<Facturas>(`${baseUrl}?nrofactura=${nrofactura}`);
@@ -180,6 +180,12 @@ export class FacturaService {
   getById(idfactura: number): Observable<Facturas> {
     return this.http.get<Facturas>(`${baseUrl}/${idfactura}`);
   }
+  async getByIdAsync(idfactura: number): Promise<any> {
+    let response = await firstValueFrom(
+      this.http.get<Facturas>(`${baseUrl}/${idfactura}`)
+    );
+    return response;
+  }
 
   //Planillas sin Cobro de un Cliente
   getSinCobro(idcliente: number) {
@@ -280,7 +286,9 @@ export class FacturaService {
     return this.http.get<Facturas[]>(`${baseUrl}/anulaciones?limit=${limit}`);
   }
   findCobradas(idcliente: number) {
-    return this.http.get<Facturas[]>(`${baseUrl}/cobradas/cliente?idcliente=${idcliente}`)
+    return this.http.get<Facturas[]>(
+      `${baseUrl}/cobradas/cliente?idcliente=${idcliente}`
+    );
   }
   //ELIMICAIONES
   findEliminadas(limit: number) {
@@ -288,7 +296,11 @@ export class FacturaService {
   }
   /* transferencias cobradas */
   async transferenciasCobradas(v_dfecha: Date, v_hfecha: Date): Promise<any[]> {
-    const response = await firstValueFrom(this.http.get<any[]>(`${baseUrl}/transferencias?v_dfecha=${v_dfecha}&v_hfecha=${v_hfecha}`));
+    const response = await firstValueFrom(
+      this.http.get<any[]>(
+        `${baseUrl}/transferencias?v_dfecha=${v_dfecha}&v_hfecha=${v_hfecha}`
+      )
+    );
     return response;
   }
 }
