@@ -1136,34 +1136,43 @@ export class EmisionesComponent implements OnInit {
     doc.output('dataurlnewwindow', { filename: 'comprobante.pdf' });
   }
   async iEmisionIndividual(emisionIndividual: any) {
+    let doc = new jsPDF('p', 'pt', 'a4');
+    /* HEADER */
+    this.s_pdf.header('REPORETE DE REFACTURACION INDIVIDUAL', doc);
     console.log(emisionIndividual);
-    console.log('VAMOS A IMPRIMIR REPORTE');
-    let lectAnteriores = this.s_rxfService.getByIdfacturaAsync(
+
+    /* LECTURAS ANTERIORES */
+    let lectAnteriores = await this.s_rxfService.getByIdfacturaAsync(
       emisionIndividual.idlecturaanterior.idfactura
     );
     console.log(lectAnteriores);
-    lectAnteriores.then(() => {
-      autoTable(doc, {
-        body: [[emisionIndividual.idlecturaanterior.idabonado_abonados]],
-      });
+
+    autoTable(doc, {
+      head: [['Lectura anterior']],
+      body: [
+        [
+          emisionIndividual.idlecturaanterior.idfactura,
+          emisionIndividual.idlecturaanterior.idlectura,
+        ],
+      ],
     });
-    this.s_rxfService
-      .getByIdfactura(emisionIndividual.idlecturanueva.idfactura)
-      .subscribe({
-        next: (datosrubros: any) => {
-          console.log('LECTURA LECTURA NUEVA');
-          console.log(datosrubros);
-          autoTable(doc, {
-            body: [[emisionIndividual.idlecturanueva.idabonado_abonados]],
-          });
-        },
-        error: (e) => console.error(e),
-      });
-    let doc = new jsPDF('p', 'pt', 'a4');
-    this.s_pdf.header('REPORETE DE REFACTURACION INDIVIDUAL', doc);
+    /* LECTURAS ACTUALES */
+    let lectActuales = await this.s_rxfService.getByIdfacturaAsync(
+      emisionIndividual.idlecturanueva.idfactura
+    );
+    console.log(lectActuales);
+    autoTable(doc, {
+      head: [['Lectura nueva']],
+      body: [
+        [
+          emisionIndividual.idlecturanueva.idfactura,
+          emisionIndividual.idlecturanueva.idlectura,
+        ],
+      ],
+    });
+
     // doc.autoPrint();
     //doc.save('datauristring');
-    autoTable(doc, {});
     doc.output('dataurlnewwindow', { filename: 'comprobante.pdf' });
   }
   getrubrosxfactura(idfactura: number) {}
