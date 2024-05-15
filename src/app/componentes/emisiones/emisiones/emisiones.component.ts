@@ -760,7 +760,13 @@ export class EmisionesComponent implements OnInit {
     this.ctotal = Math.round(suma * 100) / 100;
     //this.finbusca = true
   }
+newEmisionIndividual(){
+  this.listar = false
+}
+imp(){
+  this.listar = true
 
+}
   /* ===================================== */
   /* =============REPORTES================ */
   /* ===================================== */

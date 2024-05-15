@@ -172,7 +172,7 @@
                <div class="col-sm-9">
                   <h5 class="modal-title w-100 text-center">Emisión individual</h5>
                </div>
-               <select [(ngModel)]="emision" (change)="lemisionIndividuao($event)"
+               <select [(ngModel)]="emision" (change)="lemisionIndividuao($event)" *ngIf="listar==true"
                   class="form-control form-control-sm col-2">
                   <option [ngValue]=emision.idemision *ngFor="let emision of _allemisiones">{{emision.emision}}
                   </option>
@@ -182,7 +182,9 @@
                      data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
                   </button>
                   <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-                     <button class="dropdown-item" type="button" data-toggle="modal" (click)="imprimirReporte()">
+                     <button class="dropdown-item" type="button" data-toggle="modal" (click)="newEmisionIndividual()">
+                        <i class="bi bi-printer"></i>&nbsp; Nueva E. individual</button>
+                     <button class="dropdown-item" type="button" data-toggle="modal" (click)="imp()">
                         <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
                   </div>
                </div>
@@ -190,7 +192,6 @@
             <div class='modal-body detalle Roboto' *ngIf="listar else nEmisionIndividual">
                <div class="row">
                   <div class="col-sm">
-
                      <table class="table table-sm table-hover table-bordered">
                         <thead>
                            <tr>
@@ -212,7 +213,8 @@
                               <td>{{emindividual.idlecturaanterior.idfactura}}</td>
                               <td>{{emindividual.idlecturanueva.idfactura}}</td>
                               <td>
-                                 <button class="btn btn-sm btn-danger" (click)="iEmisionIndividual(emindividual)" data-dismiss='modal'>
+                                 <button class="btn btn-sm btn-danger" (click)="iEmisionIndividual(emindividual)"
+                                    data-dismiss='modal'>
                                     <i class="bi bi-printer"></i>
                                  </button>
                               </td>
@@ -241,8 +243,8 @@
                                  <div class="input-group-prepend">
                                     <span class="input-group-text font-weight-bold">Emisión</span>
                                  </div>
-                                 <select type="text" class="form-control text-center" formControlName="emision"
-                                    minlength="4" maxlength="4" required>
+                                 <select type="text" class="form-control text-center"
+                                    formControlName="emision" minlength="4" maxlength="4" required>
                                     <option value={{emision.idemision}} *ngFor="let emision of _allemisiones">
                                        {{emision.emision}}</option>
                                  </select>
