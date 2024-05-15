@@ -143,7 +143,7 @@
             <tbody class="detalle">
                <tr *ngFor="let rutasxemi of _rutasxemi | filter:filtro; let i=index"
                   (click)="lecturas(rutasxemi.idrutaxemision)" class="fila">
-                  <td class="small text-center font-weight-bold">{{i+1}}</td>
+                  <td class="text-small text-center font-weight-bold">{{i+1}}</td>
                   <td class="text-center">{{ rutasxemi.idruta_rutas.codigo }}</td>
                   <td>{{ rutasxemi.idruta_rutas.descripcion }}</td>
                   <td class="text-center">{{ rutasxemi.fechacierre | date:'dd-MM-y'}}</td>
@@ -157,7 +157,8 @@
                <td *ngIf="!swfiltro" colspan="4" class="text-right font-weight-bold">TOTAL: </td>
                <td *ngIf="!swfiltro" class="text-right font-weight-bold">{{ subtotal | number:'1.0'}}</td>
                <td>$ {{totalSuma.toFixed(2)}}</td>
-            </tbody>
+            </tbody>AutoTable - Generate PDF tables and lists (jsPDF plugin)
+
          </table>
       </div>
    </div>
@@ -168,19 +169,28 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
          <div class="modal-content">
             <div class="modal-header pl-0 py-1 cabecera">
-               <h5 class="modal-title w-100 text-center">Emisión individual</h5>
+               <div class="col-sm-9">
+                  <h5 class="modal-title w-100 text-center">Emisión individual</h5>
+               </div>
+               <select [(ngModel)]="emision" (change)="lemisionIndividuao($event)"
+                  class="form-control form-control-sm col-2">
+                  <option [ngValue]=emision.idemision *ngFor="let emision of _allemisiones">{{emision.emision}}
+                  </option>
+               </select>
+               <div class="btn-group ml-auto">
+                  <button type="button" class="bg-transparent border-0 dropdown-toggle text-white"
+                     data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+                  </button>
+                  <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+                     <button class="dropdown-item" type="button" data-toggle="modal" (click)="imprimirReporte()">
+                        <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+                  </div>
+               </div>
             </div>
             <div class='modal-body detalle Roboto' *ngIf="listar else nEmisionIndividual">
                <div class="row">
                   <div class="col-sm">
-                     <div class="form-group col-md-4 mt-1">
-                        <div class="input-group input-group-sm mb-3">
-                           <div class="input-group-prepend">
-                              <button class="btn font-weight-bold btn-primary "
-                                 (click)="imprimirReporte()">Imprimir</button>
-                           </div>
-                        </div>
-                     </div>
+
                      <table class="table table-sm table-hover table-bordered">
                         <thead>
                            <tr>
@@ -190,27 +200,34 @@
                               <th>Id Lec actual</th>
                               <th>Planilla Anterior</th>
                               <th>Planilla Actual</th>
+                              <th></th>
                            </tr>
                         </thead>
                         <tbody>
-                           <tr>
-                              <td></td>
-                              <td></td>
-                              <td></td>
-                              <td></td>
-                              <td></td>
+                           <tr *ngFor="let emindividual of _emisionindividual ,let i = index">
+                              <td>{{i+1}}</td>
+                              <td>{{emindividual.idemision.emision}}</td>
+                              <td>{{emindividual.idlecturaanterior.idlectura}}</td>
+                              <td>{{emindividual.idlecturanueva.idlectura}}</td>
+                              <td>{{emindividual.idlecturaanterior.idfactura}}</td>
+                              <td>{{emindividual.idlecturanueva.idfactura}}</td>
+                              <td>
+                                 <button class="btn btn-sm btn-danger" (click)="iEmisionIndividual(emindividual)">
+                                    <i class="bi bi-printer"></i>
+                                 </button>
+                              </td>
                            </tr>
                         </tbody>
                      </table>
                   </div>
                </div>
-               
+
                <div class="row">
                   <div class="col-sm">
 
                   </div>
                </div>
-               
+
             </div>
 
             <ng-template #nEmisionIndividual>

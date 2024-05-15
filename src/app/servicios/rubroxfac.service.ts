@@ -44,6 +44,10 @@ export class RubroxfacService {
   getByIdfactura(idfactura: number) {
     return this.http.get<Rubroxfac[]>(`${baseUrl}?idfactura=${idfactura}`);
   }
+  async getByIdfacturaAsync(idfactura: number) {
+    const response = await firstValueFrom(this.http.get<Rubroxfac[]>(`${baseUrl}?idfactura=${idfactura}`));
+    return response;
+  }
 
   //Rubros por Factura sin el registro mal incluido de IVA ('esiva')
   getByIdfactura1(idfactura: number) {

@@ -77,7 +77,9 @@ export class EmisionesComponent implements OnInit {
   lecturaestado: number = 0;
   idfactura: number;
   ctotal: number;
-  listar: boolean = true; 
+  listar: boolean = true;
+  emision: any;
+  _emisionindividual: any;
 
   porcResidencial: number[] = [
     0.777, 0.78, 0.78, 0.78, 0.78, 0.778, 0.778, 0.778, 0.78, 0.78, 0.78, 0.68,
@@ -103,7 +105,8 @@ export class EmisionesComponent implements OnInit {
     private pli24Service: Pliego24Service,
     private rxfService: RubroxfacService,
     private s_emisionindividual: EmisionIndividualService,
-    private s_pdf: PdfService
+    private s_pdf: PdfService,
+    private s_rxfService: RubroxfacService
   ) {}
 
   ngOnInit(): void {
@@ -352,13 +355,25 @@ export class EmisionesComponent implements OnInit {
   getAllEmisiones() {
     this.emiService.findAllEmisiones().subscribe({
       next: (datos: any) => {
+        console.log(datos);
+        this.emision = datos[0].idemision;
         this._allemisiones = datos;
+        this.getEmisionIndividualByIdEmision(datos[0].idemision);
       },
       error: (e) => console.error(e),
     });
   }
   viewAbonadosOpt() {
     this.optabonado = false;
+  }
+  getEmisionIndividualByIdEmision(idemision: number) {
+    this.s_emisionindividual.getByIdEmision(idemision).subscribe({
+      next: (datos: any) => {
+        console.log(datos);
+        this._emisionindividual = datos;
+      },
+      error: (e) => console.error(e),
+    });
   }
   setAbonado(abonado: any) {
     this.abonado = abonado;
@@ -507,13 +522,23 @@ export class EmisionesComponent implements OnInit {
       console.error(`Al recuperar los Abonados por ruta `, error);
     }
   }
-
+  lemisionIndividuao(e: any) {
+    console.log(this.emision);
+    this.getEmisionIndividualByIdEmision(this.emision);
+  }
   async planilla(lectura: Lecturas) {
     console.log('LECTURA CREADA', lectura);
     let emision_individual: EmisionIndividual = new EmisionIndividual();
-    emision_individual.idlecturanueva = lectura.idlectura;
-    emision_individual.idlecturaanterior = this._lectura.idlectura;
-    emision_individual.idemision = lectura.idemision;
+    let ln = new Lecturas();
+    let la = new Lecturas();
+    let emi = new Emisiones();
+
+    ln.idlectura = lectura.idlectura;
+    la.idlectura = this._lectura.idlectura;
+    emi.idemision = lectura.idemision;
+    emision_individual.idlecturanueva = ln;
+    emision_individual.idlecturaanterior = la;
+    emision_individual.idemision = emi;
     this.s_emisionindividual
       .saveEmisionIndividual(emision_individual)
       .subscribe({
@@ -1105,12 +1130,43 @@ export class EmisionesComponent implements OnInit {
   imprimirReporte() {
     console.log('VAMOS A IMPRIMIR REPORTE');
     let doc = new jsPDF('p', 'pt', 'a4');
-    this.s_pdf.header('REPORETE DE REFACTURACION INDIVIDUAL', doc);
-   // doc.autoPrint();
+    this.s_pdf.header('REPORETE DE REFACTURACION', doc);
+    // doc.autoPrint();
     //doc.save('datauristring');
-    doc.output('dataurlnewwindow', {filename: 'comprobante.pdf'});
+    doc.output('dataurlnewwindow', { filename: 'comprobante.pdf' });
   }
-
+  async iEmisionIndividual(emisionIndividual: any) {
+    console.log(emisionIndividual);
+    console.log('VAMOS A IMPRIMIR REPORTE');
+    let lectAnteriores = this.s_rxfService.getByIdfacturaAsync(
+      emisionIndividual.idlecturaanterior.idfactura
+    );
+    console.log(lectAnteriores);
+    lectAnteriores.then(() => {
+      autoTable(doc, {
+        body: [[emisionIndividual.idlecturaanterior.idabonado_abonados]],
+      });
+    });
+    this.s_rxfService
+      .getByIdfactura(emisionIndividual.idlecturanueva.idfactura)
+      .subscribe({
+        next: (datosrubros: any) => {
+          console.log('LECTURA LECTURA NUEVA');
+          console.log(datosrubros);
+          autoTable(doc, {
+            body: [[emisionIndividual.idlecturanueva.idabonado_abonados]],
+          });
+        },
+        error: (e) => console.error(e),
+      });
+    let doc = new jsPDF('p', 'pt', 'a4');
+    this.s_pdf.header('REPORETE DE REFACTURACION INDIVIDUAL', doc);
+    // doc.autoPrint();
+    //doc.save('datauristring');
+    autoTable(doc, {});
+    doc.output('dataurlnewwindow', { filename: 'comprobante.pdf' });
+  }
+  getrubrosxfactura(idfactura: number) {}
   imprimir() {
     switch (this.optImprimir) {
       case '0':
