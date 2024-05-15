@@ -700,8 +700,7 @@ export class EmisionesComponent implements OnInit {
         this.rubros.forEach((item: any) => {
           calcular += item.valorunitario;
           this.rxfService.saveRubroxfac(item).subscribe({
-            next: (datos) => {
-            },
+            next: (datos) => {},
             error: (e) => console.error(e),
           });
         });
@@ -1119,10 +1118,12 @@ export class EmisionesComponent implements OnInit {
   async iEmisionIndividual(emisionIndividual: any) {
     let doc = new jsPDF('p', 'pt', 'a4');
     /* HEADER */
-    this.s_pdf.header(
-      `REPORTE DE REFACTURACION INDIVIDUAL ${emisionIndividual.idemision.emision}`,
-      doc
-    );
+    let date_emision: Date = new Date(emisionIndividual.idemision.feccrea);
+    let fecemision = `${date_emision.getFullYear()}-${
+      date_emision.getMonth() + 1
+    }`;
+    this.s_pdf.header(`REPORTE DE REFACTURACION INDIVIDUAL ${fecemision}`, doc);
+    console.log(emisionIndividual);
 
     /* LECTURAS ANTERIORES */
     let lectAnteriores = await this.s_rxfService.getByIdfacturaAsync(
@@ -1191,6 +1192,10 @@ export class EmisionesComponent implements OnInit {
         fillColor: 'white',
         textColor: 'black',
       },
+      columnStyles: {
+        2: { halign: 'center' },
+        3: { halign: 'right' },
+      },
       head: [['Cod.Rubro', 'Descripción', 'Cant', 'Valor unitario']],
       body: l_anteriores,
       foot: [['TOTAL: ', sum_anterior.toFixed(2)]],
@@ -1226,6 +1231,7 @@ export class EmisionesComponent implements OnInit {
         fillColor: 'white',
         textColor: 'black',
       },
+
       head: [[{ content: 'Lectura nueva', colSpan: 5 }]],
       body: [
         [
@@ -1258,6 +1264,10 @@ export class EmisionesComponent implements OnInit {
         fillColor: 'white',
         textColor: 'black',
       },
+      columnStyles: {
+        2: { halign: 'center' },
+        3: { halign: 'right' },
+      },
       head: [['Cod.Rubro', 'Descripción', 'Cant', 'Valor unitario']],
       body: l_nuevos,
       foot: [['TOTAL: ', sum_nuevos.toFixed(2)]],
@@ -1265,14 +1275,23 @@ export class EmisionesComponent implements OnInit {
     let dateEmision: Date = new Date(
       emisionIndividual.idlecturanueva.fechaemision
     );
+    let currentDate: Date = new Date();
     autoTable(doc, {
       bodyStyles: {
         fillColor: 'white',
         textColor: 'black',
+        fontSize: 8,
       },
       body: [
         [
-          `Fecha emision:  ${dateEmision.getFullYear()}/${dateEmision.getMonth()}/${dateEmision.getDate()}`,
+          `Fecha emision:  ${dateEmision.getFullYear()}/${
+            dateEmision.getMonth() + 1
+          }/${dateEmision.getDate()}`,
+        ],
+        [
+          `Fecha impresión:  ${currentDate.getFullYear()}/${
+            currentDate.getMonth() + 1
+          }/${currentDate.getDate()}`,
         ],
       ],
     });
