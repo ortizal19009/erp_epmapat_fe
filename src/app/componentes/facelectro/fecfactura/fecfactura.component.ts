@@ -8,6 +8,7 @@ import { ColoresService } from 'src/app/compartida/colores.service';
 import { Abonados } from 'src/app/modelos/abonados';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { DefinirService } from 'src/app/servicios/administracion/definir.service';
+import { UsuarioService } from 'src/app/servicios/administracion/usuario.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { FecFacturaDetallesImpuestosService } from 'src/app/servicios/fec-factura-detalles-impuestos.service';
 import { FecFacturaDetallesService } from 'src/app/servicios/fec-factura-detalles.service';
@@ -45,10 +46,11 @@ export class FecfacturaComponent implements OnInit {
     private fec_facdetalleService: FecFacturaDetallesService,
     private fec_facdetimpService: FecFacturaDetallesImpuestosService,
     private fec_facPagosService: FecFacturaPagosService,
-    private aboService: AbonadosService
+    private aboService: AbonadosService, private s_usuario: UsuarioService
   ) {}
 
   ngOnInit(): void {
+    this.datosDefinir();
     sessionStorage.setItem('ventana', '/fecfactura');
     let coloresJSON = sessionStorage.getItem('/fecfactura');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
@@ -63,6 +65,7 @@ export class FecfacturaComponent implements OnInit {
       hastaNum: '',
       desdeFecha: obtenerFechaActualString(fechaActual),
       hastaFecha: obtenerFechaActualString(fechaActual),
+      ambiente: '',
     });
   }
 
@@ -93,9 +96,20 @@ export class FecfacturaComponent implements OnInit {
     try {
       const def = await this.defService.getByIddefinirAsync(1);
       this.empresa = def;
+      console.log(def);
     } catch (error) {
       console.log('Al recuperar los datos de la Empresa', error);
     }
+  }
+  datosDefinir() {
+    this.defService.getByIddefinir(1).subscribe({
+      next: (datos) => {
+        this.formExportar.patchValue({
+          ambiente: datos.tipoambiente.toString(),
+        });
+      },
+      error: (e) => console.error(e),
+    });
   }
 
   regresar() {
@@ -104,6 +118,7 @@ export class FecfacturaComponent implements OnInit {
 
   buscar() {
     this.datosDefinirAsync();
+    console.log(this.formExportar.value);
     this.swexportar = false;
     let nrofactura = this.formExportar.value.nrofactura;
     this.facService.getByNrofactura(nrofactura).subscribe({
@@ -242,7 +257,8 @@ export class FecfacturaComponent implements OnInit {
     this.claveacceso = '';
     let fecha = formatearFecha(1, this._facturas[0].fechacobro); //1: Sin slash para la Clave de acceso
     let ruc = this.empresa.ruc;
-    let ambiente = this.empresa.tipoambiente.toString(); //1: Pruebas  2: Producción
+    //let ambiente = this.empresa.tipoambiente.toString(); //1: Pruebas  2: Producción
+    let ambiente = this.formExportar.value.ambiente.toString(); //1: Pruebas  2: Producción
     let estab = this._facturas[0].nrofactura.slice(0, 3);
     let ptoemi = this._facturas[0].nrofactura.slice(4, 7);
     let serie = estab + ptoemi;

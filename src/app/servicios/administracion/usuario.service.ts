@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { Usuarios } from 'src/app/modelos/administracion/usuarios.model';
 import { environment } from 'src/environments/environment';
 
@@ -8,12 +8,10 @@ const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/usuarios`;
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-
 export class UsuarioService {
-
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   getUsuarios(): Observable<Usuarios[]> {
     return this.http.get<Usuarios[]>(baseUrl);
@@ -31,16 +29,22 @@ export class UsuarioService {
   }
 
   getByIdentificacion(identificausu: string) {
-    return this.http.get<Usuarios>(`${baseUrl}/identificacion?identificausu=${identificausu}`);
+    return this.http.get<Usuarios>(
+      `${baseUrl}/identificacion?identificausu=${identificausu}`
+    );
   }
 
   getByIdusuario(idusuario: number) {
-    return this.http.get<Usuarios>(baseUrl + "/" + idusuario);
+    return this.http.get<Usuarios>(baseUrl + '/' + idusuario);
+  }
+  async getByIdusuarioAsync(idusuario: number): Promise<any> {
+    const response = firstValueFrom(
+      this.http.get<Usuarios>(baseUrl + '/' + idusuario)
+    );
+    return response;
   }
 
   updateUsuario(idusuario: number, usuario: Usuarios): Observable<Object> {
-    return this.http.put(baseUrl + "/" + idusuario, usuario);
+    return this.http.put(baseUrl + '/' + idusuario, usuario);
   }
-
-
 }
