@@ -212,6 +212,7 @@ export class EmisionesComponent implements OnInit {
 
   //Buscas las Rutas de la emisión seleccionada (Recibe la emisión y el indice seleccionado)
   info(emision: any, indiEmi: number) {
+    console.log(emision);
     this.showDiv = true;
     sessionStorage.setItem('showDiv', 'true');
     sessionStorage.setItem('indiEmi', indiEmi.toString());
@@ -760,13 +761,12 @@ export class EmisionesComponent implements OnInit {
     this.ctotal = Math.round(suma * 100) / 100;
     //this.finbusca = true
   }
-newEmisionIndividual(){
-  this.listar = false
-}
-imp(){
-  this.listar = true
-
-}
+  newEmisionIndividual() {
+    this.listar = false;
+  }
+  imp() {
+    this.listar = true;
+  }
   /* ===================================== */
   /* =============REPORTES================ */
   /* ===================================== */

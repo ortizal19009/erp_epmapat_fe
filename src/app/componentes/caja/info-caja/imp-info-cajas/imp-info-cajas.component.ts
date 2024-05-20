@@ -41,7 +41,7 @@ export class ImpInfoCajasComponent implements OnInit {
     private facService: FacturaService,
     private rxfService: RubroxfacService,
     private _pdf: PdfService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/cajas');
@@ -219,9 +219,9 @@ export class ImpInfoCajasComponent implements OnInit {
       ); */
     this._pdf.header(
       'RESUMEN RECAUDACIÓN: ' +
-      this.formImprimir.value.d_fecha +
-      ' - ' +
-      this.formImprimir.value.h_fecha,
+        this.formImprimir.value.d_fecha +
+        ' - ' +
+        this.formImprimir.value.h_fecha,
       doc
     );
 
@@ -232,18 +232,22 @@ export class ImpInfoCajasComponent implements OnInit {
     datos.push(['', 'PERÍODO ACTUAL']);
     let i = 0;
     let iva1 = 0;
-    this._cobradas.forEach(() => {
+    this._cobradas.forEach((item: any) => {
+      console.log(item);
       let totalRecaudado = this._cobradas[i][2];
-      //Math.round(this._cobradas[i][2] * 100) / 100;
-
-      if (this._cobradas[i][3] === true && this.formImprimir.value.d_fecha >= '2024-04-01' === true) {
+      if (
+        this._cobradas[i][3] === true &&
+        this.formImprimir.value.d_fecha >= '2024-04-01' === true
+      ) {
         iva1 += totalRecaudado * 0.15;
       }
-      if (this._cobradas[i][3] === true && this.formImprimir.value.d_fecha < '2024-04-01' === true) {
+      if (
+        this._cobradas[i][3] === true &&
+        this.formImprimir.value.d_fecha < '2024-04-01' === true
+      ) {
         iva1 += totalRecaudado * 0.12;
       }
       if (this._cobradas[i][0] != 165) {
-
         datos.push([
           this._cobradas[i][0],
           this._cobradas[i][1],
@@ -267,11 +271,18 @@ export class ImpInfoCajasComponent implements OnInit {
     let iva2 = 0;
     datos.push(['', 'PERÍODOS ANTERIORES']);
     this._rubrosanterior.forEach(() => {
+      console.log(this._rubrosanterior);
       if (this._rubrosanterior[i][0] != 165) {
         let totalRecaudado = this._rubrosanterior[i][2];
         // Math.round(this._rubrosanterior[i][2] * 100) / 100;
         if (this._rubrosanterior[i][3] === true) {
           iva2 += totalRecaudado * 0.15;
+        }
+        if (
+          this._rubrosanterior[i][3] === true &&
+          this.formImprimir.value.d_fecha < '2024-04-01' === true
+        ) {
+          iva2 += totalRecaudado * 0.12;
         }
         datos.push([
           this._rubrosanterior[i][0],
@@ -401,9 +412,9 @@ export class ImpInfoCajasComponent implements OnInit {
       ); */
     this._pdf.header(
       'RECAUDACIÓN - PLANILLAS: ' +
-      this.formImprimir.value.d_fecha +
-      ' - ' +
-      this.formImprimir.value.h_fecha,
+        this.formImprimir.value.d_fecha +
+        ' - ' +
+        this.formImprimir.value.h_fecha,
       doc
     );
     const datos: any = [];

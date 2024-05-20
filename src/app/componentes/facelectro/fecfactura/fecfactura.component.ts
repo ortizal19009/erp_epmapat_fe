@@ -14,6 +14,7 @@ import { FecFacturaDetallesImpuestosService } from 'src/app/servicios/fec-factur
 import { FecFacturaDetallesService } from 'src/app/servicios/fec-factura-detalles.service';
 import { FecFacturaPagosService } from 'src/app/servicios/fec-factura-pagos.service';
 import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
+import { LecturasService } from 'src/app/servicios/lecturas.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 
 @Component({
@@ -47,7 +48,8 @@ export class FecfacturaComponent implements OnInit {
     private fec_facdetimpService: FecFacturaDetallesImpuestosService,
     private fec_facPagosService: FecFacturaPagosService,
     private aboService: AbonadosService,
-    private s_usuario: UsuarioService
+    private s_usuario: UsuarioService,
+    private s_lecturas: LecturasService
   ) {}
 
   ngOnInit(): void {
@@ -147,15 +149,12 @@ export class FecfacturaComponent implements OnInit {
   }
   async _exportar() {
     console.log(this._facturas);
-    const abonado: Abonados = await this.getAbonado(
-      this._facturas[0].idabonado
-    );
     let usuario = await this.s_usuario.getByIdusuarioAsync(
       this._facturas[0].usuariocobro
     );
     console.log(usuario);
     let fecfactura = {} as Fec_factura;
-
+    
     fecfactura.idfactura = this._facturas[0].idfactura;
     this.claveAcceso();
     fecfactura.claveacceso = this.claveacceso;
@@ -165,26 +164,37 @@ export class FecfacturaComponent implements OnInit {
     fecfactura.puntoemision = this._facturas[0].nrofactura.slice(4, 7);
     fecfactura.direccionestablecimiento = this.empresa.direccion;
     fecfactura.fechaemision = this._facturas[0].fechacobro;
-    fecfactura.referencia = this._facturas[0].idabonado;
     fecfactura.tipoidentificacioncomprador =
-      this._facturas[0].idcliente.idtpidentifica_tpidentifica.codigo;
+    this._facturas[0].idcliente.idtpidentifica_tpidentifica.codigo;
     if (
       (this._facturas[0].idmodulo.idmodulo === 3 &&
         this._facturas[0].idabonado != 0) ||
-      this._facturas[0].idmodulo.idmodulo === 4
-    ) {
-      fecfactura.razonsocialcomprador = abonado.idresponsable.nombre;
-      fecfactura.identificacioncomprador = abonado.idresponsable.cedula;
-    } else {
-      fecfactura.razonsocialcomprador = this._facturas[0].idcliente.nombre;
-      fecfactura.identificacioncomprador = this._facturas[0].idcliente.cedula;
+        this._facturas[0].idmodulo.idmodulo === 4
+      ) {
+        const abonado: Abonados = await this.getAbonado(
+          this._facturas[0].idabonado
+        );
+        const _lectura = await this.getLectura(this._facturas[0].idfactura);
+        console.log(_lectura);
+        let fecEmision: Date = new Date(_lectura[0].fechaemision);
+        fecfactura.razonsocialcomprador = abonado.idresponsable.nombre;
+        fecfactura.identificacioncomprador = abonado.idresponsable.cedula;
+        fecfactura.referencia = this._facturas[0].idabonado;
+        fecfactura.concepto = `${
+          fecEmision.getMonth() + 1
+        } del ${fecEmision.getFullYear()} Nro medidor: ${
+          _lectura[0].idabonado_abonados.nromedidor
+        }`;
+      } else {
+        fecfactura.razonsocialcomprador = this._facturas[0].idcliente.nombre;
+        fecfactura.identificacioncomprador = this._facturas[0].idcliente.cedula;
+        fecfactura.concepto = 'OTROS SERVICIOS';
+        fecfactura.referencia = 'S/N';
     }
     fecfactura.direccioncomprador = this._facturas[0].idcliente.direccion;
     fecfactura.telefonocomprador = this._facturas[0].idcliente.telefono;
     fecfactura.emailcomprador = this._facturas[0].idcliente.email;
-    fecfactura.domicilio = '';
-    fecfactura.concepto = '';
-    fecfactura.referencia = '';
+    fecfactura.referencia = this._facturas[0].idabonado;
     fecfactura.recaudador = usuario.nomusu;
     this.tipocobro = this._facturas[0].formapago;
     this.fecfacService.save(fecfactura).subscribe({
@@ -262,6 +272,10 @@ export class FecfacturaComponent implements OnInit {
   async getAbonado(idabonado: number): Promise<any> {
     const abo = await this.aboService.getById(idabonado).toPromise();
     return abo;
+  }
+  async getLectura(idfactura: number): Promise<any> {
+    const lectura = await this.s_lecturas.getByIdfactura(idfactura).toPromise();
+    return lectura;
   }
   claveAcceso() {
     this.claveacceso = '';
@@ -354,7 +368,6 @@ interface Fec_factura {
   direccioncomprador: String;
   telefonocomprador: String;
   emailcomprador: String;
-  domicilio: String;
   concepto: String;
   referencia: String;
   recaudador: String;

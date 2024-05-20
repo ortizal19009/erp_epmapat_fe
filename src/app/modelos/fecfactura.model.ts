@@ -16,7 +16,6 @@ export class Fecfactura {
   direccioncomprador: String;
   telefonocomprador: String;
   emailcomprador: String;
-  domicilio: String; 
   concepto: String; 
   referencia: String; 
   recaudador: String; 
