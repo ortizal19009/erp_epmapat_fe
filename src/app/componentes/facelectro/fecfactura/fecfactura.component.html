@@ -31,11 +31,11 @@
                         <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Ambiente</span>
                      </div>
                      <select type="text" class="form-control text-center" formControlName="ambiente" aria-label="Small"
-                        aria-describedby="inputGroup-sizing-sm" >
+                        aria-describedby="inputGroup-sizing-sm">
                         <option value="2">Producción</option>
                         <option value="1">Prueba</option>
-                        </select>
-                        
+                     </select>
+
                   </div>
 
                   <div class="input-group input-group-sm col-sm-5 mb-3">
@@ -70,7 +70,8 @@
 
                </div>
             </form>
-            <div *ngIf="swfacturas" class="alert alert-warning text-center roboto small font-weight-bold py-0" role="alert">
+            <div *ngIf="swfacturas" class="alert alert-warning text-center roboto small font-weight-bold py-0"
+               role="alert">
                Total de Facturas: {{_facturas.length}}
             </div>
             <div class="text-center">
@@ -88,6 +89,64 @@
                   <i *ngIf="!swcalculando" class="bi-eye"></i>&nbsp;&nbsp;&nbsp;{{txtcalculando}}
                </button>
             </div>
+         </div>
+      </div>
+      <div class="row">
+         <div class="col-12">
+            <div class="card">
+               <div class="card-header">
+                  <h3 class="card-title">Facturas exportadas</h3>
+
+                  <div class="card-tools">
+                     <div class="input-group input-group-sm" style="width: 150px;">
+                        <input type="text" [(ngModel)]=filter name="table_search" class="form-control float-right"
+                           placeholder="Search">
+
+                   <!--      <div class="input-group-append">
+                           <button type="submit" class="btn btn-default">
+                              <i class="fas fa-search"></i>
+                           </button>
+                        </div> -->
+                     </div>
+                  </div>
+               </div>
+               <!-- /.card-header -->
+               <div class="card-body table-responsive p-0" style="height: 300px;">
+                  <table
+                     class="table table-head-fixed text-nowrap table-bordered table-hover table-sm table-responsive-sm">
+                     <thead>
+                        <tr class="text-center">
+                           <th>N°</th>
+                           <th>Planilla</th>
+                           <th>Cuenta</th>
+                           <th>Cliente</th>
+                           <th>Nro Factura</th>
+                           <th>Estado</th>
+                           <th>Detalles</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr *ngFor="let fec_factura of fec_facturas | filter: filter; let i = index ">
+                           <td class="text-center">{{i+1}}</td>
+                           <td class="text-center">{{fec_factura.idfactura}}</td>
+                           <td class="text-center">{{fec_factura.referencia}}</td>
+                           <td>{{fec_factura.razonsocialcomprador}}</td>
+                           <td class="text-center">
+                              {{fec_factura.establecimiento}}-{{fec_factura.puntoemision}}-{{fec_factura.secuencial}}
+                           </td>
+                           <td class="text-center">{{fec_factura.estado}}</td>
+                           <td class="text-center">
+                              <button class="btn btn-xs btn-success">
+                                 <i class="bi bi-door-open-fill"></i>
+                              </button>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
          </div>
       </div>
    </div>

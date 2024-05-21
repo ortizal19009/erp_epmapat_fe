@@ -34,7 +34,9 @@ export class FecfacturaComponent implements OnInit {
   claveacceso: string;
   sumaTotal: number = 0;
   tipocobro: string;
-
+  fec_facturas: any;
+  
+  filter: string; 
   constructor(
     private router: Router,
     private fb: FormBuilder,
@@ -70,6 +72,7 @@ export class FecfacturaComponent implements OnInit {
       hastaFecha: obtenerFechaActualString(fechaActual),
       ambiente: '',
     });
+    this.getFecFactura();
   }
 
   colocaColor(colores: any) {
@@ -154,7 +157,7 @@ export class FecfacturaComponent implements OnInit {
     );
     console.log(usuario);
     let fecfactura = {} as Fec_factura;
-    
+
     fecfactura.idfactura = this._facturas[0].idfactura;
     this.claveAcceso();
     fecfactura.claveacceso = this.claveacceso;
@@ -165,31 +168,31 @@ export class FecfacturaComponent implements OnInit {
     fecfactura.direccionestablecimiento = this.empresa.direccion;
     fecfactura.fechaemision = this._facturas[0].fechacobro;
     fecfactura.tipoidentificacioncomprador =
-    this._facturas[0].idcliente.idtpidentifica_tpidentifica.codigo;
+      this._facturas[0].idcliente.idtpidentifica_tpidentifica.codigo;
     if (
       (this._facturas[0].idmodulo.idmodulo === 3 &&
         this._facturas[0].idabonado != 0) ||
-        this._facturas[0].idmodulo.idmodulo === 4
-      ) {
-        const abonado: Abonados = await this.getAbonado(
-          this._facturas[0].idabonado
-        );
-        const _lectura = await this.getLectura(this._facturas[0].idfactura);
-        console.log(_lectura);
-        let fecEmision: Date = new Date(_lectura[0].fechaemision);
-        fecfactura.razonsocialcomprador = abonado.idresponsable.nombre;
-        fecfactura.identificacioncomprador = abonado.idresponsable.cedula;
-        fecfactura.referencia = this._facturas[0].idabonado;
-        fecfactura.concepto = `${
-          fecEmision.getMonth() + 1
-        } del ${fecEmision.getFullYear()} Nro medidor: ${
-          _lectura[0].idabonado_abonados.nromedidor
-        }`;
-      } else {
-        fecfactura.razonsocialcomprador = this._facturas[0].idcliente.nombre;
-        fecfactura.identificacioncomprador = this._facturas[0].idcliente.cedula;
-        fecfactura.concepto = 'OTROS SERVICIOS';
-        fecfactura.referencia = 'S/N';
+      this._facturas[0].idmodulo.idmodulo === 4
+    ) {
+      const abonado: Abonados = await this.getAbonado(
+        this._facturas[0].idabonado
+      );
+      const _lectura = await this.getLectura(this._facturas[0].idfactura);
+      console.log(_lectura);
+      let fecEmision: Date = new Date(_lectura[0].fechaemision);
+      fecfactura.razonsocialcomprador = abonado.idresponsable.nombre;
+      fecfactura.identificacioncomprador = abonado.idresponsable.cedula;
+      fecfactura.referencia = this._facturas[0].idabonado;
+      fecfactura.concepto = `${
+        fecEmision.getMonth() + 1
+      } del ${fecEmision.getFullYear()} Nro medidor: ${
+        _lectura[0].idabonado_abonados.nromedidor
+      }`;
+    } else {
+      fecfactura.razonsocialcomprador = this._facturas[0].idcliente.nombre;
+      fecfactura.identificacioncomprador = this._facturas[0].idcliente.cedula;
+      fecfactura.concepto = 'OTROS SERVICIOS';
+      fecfactura.referencia = 'S/N';
     }
     fecfactura.direccioncomprador = this._facturas[0].idcliente.direccion;
     fecfactura.telefonocomprador = this._facturas[0].idcliente.telefono;
@@ -223,7 +226,7 @@ export class FecfacturaComponent implements OnInit {
               detalle.cantidad = rxf.cantidad;
               detalle.preciounitario = rxf.valorunitario;
               detalle.descuento = 0;
-              basImponible = detalle.cantidad * detalle.preciounitario;
+              basImponible += rxf.cantidad * rxf.valorunitario;
               this.fec_facdetalleService.saveFacDetalle(detalle).subscribe({
                 next: (datos: any) => {
                   console.log(datos);
@@ -348,6 +351,17 @@ export class FecfacturaComponent implements OnInit {
       error: (e) => console.error(e),
     });
   };
+  getFecFactura() {
+    this.fecfacService.getLista().subscribe({
+      next: (datos: any) => {
+        console.log(datos);
+        this.fec_facturas = datos;
+      },
+      error: (e) => {
+        console.error(e);
+      },
+    });
+  }
 }
 
 interface Fec_factura {
