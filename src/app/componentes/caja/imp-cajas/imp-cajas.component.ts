@@ -40,7 +40,7 @@ export class ImpCajasComponent implements OnInit {
     private facService: FacturaService,
     private rxfService: RubroxfacService,
     private _pdf: PdfService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/cajas');
@@ -58,7 +58,6 @@ export class ImpCajasComponent implements OnInit {
       nombrearchivo: ['', [Validators.required, Validators.minLength(3)]],
       otrapagina: '',
     });
-    console.log(this.formImprimir.value);
   }
 
   colocaColor(colores: any) {
@@ -89,7 +88,6 @@ export class ImpCajasComponent implements OnInit {
       )
       .subscribe({
         next: (datos) => {
-          console.log(datos);
           const blob = new Blob([datos], { type: 'application/pdf' });
           saveAs(blob, 'report.pdf');
         },
@@ -102,7 +100,6 @@ export class ImpCajasComponent implements OnInit {
     let d_fecha = this.formImprimir.value.d_fecha;
     let h_fecha = this.formImprimir.value.h_fecha;
     let fecha = this.formImprimir.value.fecha;
-    //console.log(this.formImprimir.value);
     let hasta = '2023-12-31';
     switch (this.opcreporte) {
       case 1: // Recaudacion diaria - Resumen
@@ -153,7 +150,6 @@ export class ImpCajasComponent implements OnInit {
                   )
                   .subscribe({
                     next: (datos) => {
-                      console.log(datos);
                       const blob = new Blob([datos], { type: 'application/pdf' });
                       saveAs(
                         blob,
@@ -163,13 +159,25 @@ export class ImpCajasComponent implements OnInit {
                   });
          */
         try {
-          this._cobradas = await this.rxfService.getTotalRubrosActualRangosAsync(d_fecha, h_fecha, hasta);
+          this._cobradas =
+            await this.rxfService.getTotalRubrosActualRangosAsync(
+              d_fecha,
+              h_fecha,
+              hasta
+            );
           try {
             this._rubrosanterior =
-              await this.rxfService.getTotalRubrosAnteriorRangosAsync(d_fecha, h_fecha, hasta);
+              await this.rxfService.getTotalRubrosAnteriorRangosAsync(
+                d_fecha,
+                h_fecha,
+                hasta
+              );
             try {
               this._formacobro =
-                await this.facService.totalFechaFormacobroRangosAsync(d_fecha, h_fecha);
+                await this.facService.totalFechaFormacobroRangosAsync(
+                  d_fecha,
+                  h_fecha
+                );
               this.swcalculando = false;
               if (this.swimprimir) this.txtcalculando = 'Mostrar';
               else this.txtcalculando = 'Descargar';
@@ -194,14 +202,16 @@ export class ImpCajasComponent implements OnInit {
                   )
                   .subscribe({
                     next: (datos) => {
-                      console.log(datos);
                       const blob = new Blob([datos], { type: 'application/pdf' });
                       saveAs(blob, `ReporteFacturas_${new Date().toDateString()}.pdf`);
                     },
                   });
          */
         try {
-          this._cobradas = await this.facService.getByFechacobroTotRangosAsync(d_fecha, h_fecha);
+          this._cobradas = await this.facService.getByFechacobroTotRangosAsync(
+            d_fecha,
+            h_fecha
+          );
           // this.sw1 = true;
           this.swcalculando = false;
           if (this.swimprimir) this.txtcalculando = 'Mostrar';
@@ -222,10 +232,9 @@ export class ImpCajasComponent implements OnInit {
         });
         break;
       case 6:
-
-
         try {
-          this._cobradas = this._cobradas = await this.facService.transferenciasCobradas(d_fecha, h_fecha);
+          this._cobradas = this._cobradas =
+            await this.facService.transferenciasCobradas(d_fecha, h_fecha);
           // this.sw1 = true;
           this.swcalculando = false;
           if (this.swimprimir) this.txtcalculando = 'Mostrar';
@@ -233,7 +242,7 @@ export class ImpCajasComponent implements OnInit {
         } catch (error) {
           console.error('Error al obtener las Planillas:', error);
         }
-        break
+        break;
       default:
         break;
     }
@@ -272,8 +281,7 @@ export class ImpCajasComponent implements OnInit {
     }
   }
 
-  imprimirResumen() {
-    console.log(this._cobradas)
+  async imprimirResumen() {
     this.otrapagina = this.formImprimir.value.otrapagina;
     let m_izquierda = 40;
     let doc = new jsPDF();
@@ -294,21 +302,18 @@ export class ImpCajasComponent implements OnInit {
     datos.push(['', 'PERÍODO ACTUAL']);
     let i = 0;
     let iva1 = 0;
-    this._cobradas.forEach(() => {
-      /*    if (this._cobradas[i][0] == 165) {
-          console.log(this._cobradas[i][0])
-         } */
+    this._cobradas.forEach((item: any) => {
       let totalRecaudado = this._cobradas[i][2];
       if (this._cobradas[i][0] != 165) {
         if (
           this._cobradas[i][3] === true &&
-          this.formImprimir.value.fecha >= '2024-04-01' === true
+          this.formImprimir.value.fecha >= '2024-04-01'
         ) {
           iva1 += totalRecaudado * 0.15;
         }
         if (
           this._cobradas[i][3] === true &&
-          this.formImprimir.value.fecha < '2024-04-01' === true
+          this.formImprimir.value.fecha <= '2024-03-31'
         ) {
           iva1 += totalRecaudado * 0.12;
         }
@@ -332,9 +337,7 @@ export class ImpCajasComponent implements OnInit {
     let iva2 = 0;
     i = 0;
     datos.push(['', 'PERÍODOS ANTERIORES']);
-    //console.log(this._rubrosanterior)
-    this._rubrosanterior.forEach(() => {
-      console.log(this._rubrosanterior)
+    await this._rubrosanterior.forEach(() => {
       if (this._rubrosanterior[i][0] != 165) {
         let totalRecaudado = this._rubrosanterior[i][2];
         //Math.round(this._rubrosanterior[i][2] * 100) / 100;
@@ -343,10 +346,10 @@ export class ImpCajasComponent implements OnInit {
           this.formImprimir.value.fecha >= '2024-04-01' === true
         ) {
           iva2 += totalRecaudado * 0.15;
-        }
+        } 
         if (
           this._rubrosanterior[i][3] === true &&
-          this.formImprimir.value.fecha > '2024-04-01' === true
+          this.formImprimir.value.fecha <= '2024-03-31' === true
         ) {
           iva2 += totalRecaudado * 0.12;
         }
@@ -408,7 +411,6 @@ export class ImpCajasComponent implements OnInit {
     i = 0;
 
     this._formacobro.forEach(() => {
-      console.log(this._formacobro[i])
       let totalRecaudado = Math.round(this._formacobro[i][1] * 100) / 100;
       formascobro.push([this._formacobro[i][0], formatNumber(totalRecaudado)]);
       suma2 += totalRecaudado;
@@ -485,9 +487,9 @@ export class ImpCajasComponent implements OnInit {
     const datos: any = [];
     let suma: number = 0;
     var i = 0;
-    console.log(this._cobradas)
     this._cobradas.forEach(() => {
-      let totalPorFormaCobro = (this._cobradas[i][1] + this._cobradas[i][0].swiva)
+      let totalPorFormaCobro =
+        this._cobradas[i][1] + this._cobradas[i][0].swiva;
       /*       Math.round( * 100) /
               100; */
       // datos.push([this._cobradas[i][0].idfactura, this._cobradas[i][0].feccrea, this._cobradas[i][0].nrofactura, this._cobradas[i][0].formapago,
@@ -499,12 +501,9 @@ export class ImpCajasComponent implements OnInit {
         this._cobradas[i][0].formapago,
         formatNumber(totalPorFormaCobro),
       ]);
-      console.log(suma)
       suma += totalPorFormaCobro;
-      console.log("totalforma pago" + totalPorFormaCobro)
       i++;
     });
-    console.log("total" + suma)
     this.sumtotaltarifa = suma;
     datos.push([
       '',
@@ -620,7 +619,6 @@ export class ImpCajasComponent implements OnInit {
     let iva2 = 0;
     i = 0;
     datos.push(['', 'PERÍODOS ANTERIORES']);
-    //console.log(this._rubrosanterior)
     this._rubrosanterior.forEach(() => {
       if (this._rubrosanterior[i][0] != 165) {
         let totalRecaudado = this._rubrosanterior[i][2];
@@ -771,9 +769,9 @@ export class ImpCajasComponent implements OnInit {
     const datos: any = [];
     let suma: number = 0;
     var i = 0;
-    console.log(this._cobradas)
     this._cobradas.forEach(() => {
-      let totalPorFormaCobro = (this._cobradas[i][1] + this._cobradas[i][0].swiva)
+      let totalPorFormaCobro =
+        this._cobradas[i][1] + this._cobradas[i][0].swiva;
       /*       Math.round( * 100) /
               100; */
       // datos.push([this._cobradas[i][0].idfactura, this._cobradas[i][0].feccrea, this._cobradas[i][0].nrofactura, this._cobradas[i][0].formapago,
@@ -785,12 +783,9 @@ export class ImpCajasComponent implements OnInit {
         this._cobradas[i][0].formapago,
         formatNumber(totalPorFormaCobro),
       ]);
-      console.log(suma)
       suma += totalPorFormaCobro;
-      console.log("totalforma pago" + totalPorFormaCobro)
       i++;
     });
-    console.log("total" + suma)
     this.sumtotaltarifa = suma;
     datos.push([
       '',
@@ -940,9 +935,9 @@ export class ImpCajasComponent implements OnInit {
     const datos: any = [];
     let suma: number = 0;
     var i = 0;
-    console.log(this._cobradas)
     this._cobradas.forEach(() => {
-      let totalPorFormaCobro = (this._cobradas[i][1] + this._cobradas[i][0].swiva)
+      let totalPorFormaCobro =
+        this._cobradas[i][1] + this._cobradas[i][0].swiva;
       /*       Math.round( * 100) /
               100; */
       // datos.push([this._cobradas[i][0].idfactura, this._cobradas[i][0].feccrea, this._cobradas[i][0].nrofactura, this._cobradas[i][0].formapago,
@@ -954,12 +949,9 @@ export class ImpCajasComponent implements OnInit {
         this._cobradas[i][0].formapago,
         formatNumber(totalPorFormaCobro),
       ]);
-      console.log(suma)
       suma += totalPorFormaCobro;
-      console.log("totalforma pago" + totalPorFormaCobro)
       i++;
     });
-    console.log("total" + suma)
     this.sumtotaltarifa = suma;
     datos.push([
       '',
@@ -1018,7 +1010,6 @@ export class ImpCajasComponent implements OnInit {
     addPageNumbers();
 
     this.muestraPDF(doc);
-
   }
 
   muestraPDF(doc: any) {
@@ -1090,7 +1081,6 @@ export class ImpCajasComponent implements OnInit {
     });
 
     // Agrega los datos a la hoja de cálculo
-    // console.log('this._cobradas: ', this._cobradas)
     let i = 0;
     this._cobradas.forEach(() => {
       let totalRecaudado = Math.round(this._cobradas[i][2] * 100) / 100;

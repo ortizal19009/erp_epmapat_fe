@@ -35,8 +35,8 @@ export class FecfacturaComponent implements OnInit {
   sumaTotal: number = 0;
   tipocobro: string;
   fec_facturas: any;
-  
-  filter: string; 
+
+  filter: string;
   constructor(
     private router: Router,
     private fb: FormBuilder,
@@ -124,28 +124,35 @@ export class FecfacturaComponent implements OnInit {
 
   buscar() {
     this.datosDefinirAsync();
-    console.log(this.formExportar.value);
     this.swexportar = false;
-    let nrofactura = this.formExportar.value.nrofactura;
-    this.facService.getByNrofactura(nrofactura).subscribe({
-      next: (datos: any) => {
-        this._facturas = datos;
-        switch (this._facturas.length) {
-          case 1:
-            this.swexportar = true;
-            this.swfacturas = true;
-            break;
-          case 0:
-            //   this.s_abonados.getListaByNombreCliente(this.f_abonado.value.buscarAbonado).subscribe(datos => {
-            //     this.abonado = datos;
-            //   });
-            break;
-          default:
-            break;
-        }
-      },
-      error: (err) => console.error(err.error),
-    });
+    this.formExportar.value
+    if (this.formExportar.value.nrofactura != null && this.formExportar.value.nrofactura != '') {
+      console.log('buscar individual');
+      let nrofactura = this.formExportar.value.nrofactura;
+      console.log(this.formExportar.value);
+      this.facService.getByNrofactura(nrofactura).subscribe({
+        next: (datos: any) => {
+          this._facturas = datos;
+          switch (this._facturas.length) {
+            case 1:
+              this.swexportar = true;
+              this.swfacturas = true;
+              break;
+            case 0:
+              //   this.s_abonados.getListaByNombreCliente(this.f_abonado.value.buscarAbonado).subscribe(datos => {
+              //     this.abonado = datos;
+              //   });
+              break;
+            default:
+              break;
+          }
+        },
+        error: (err) => console.error(err.error),
+      });
+    }
+    else{
+      console.log('buscar x fechas')
+    }
   }
   async exportar() {
     await this._exportar();
@@ -354,7 +361,6 @@ export class FecfacturaComponent implements OnInit {
   getFecFactura() {
     this.fecfacService.getLista().subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this.fec_facturas = datos;
       },
       error: (e) => {
