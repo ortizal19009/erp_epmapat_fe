@@ -25,7 +25,6 @@ export class ColoresComponent implements OnInit {
 
    ngOnInit(): void {
       this.nomVentana = sessionStorage.getItem('ventana')!;
-      // console.log('this.nomVentana: ', this.nomVentana);
       if (!this.nomVentana || this.nomVentana == '/inicio') {
          //Solo Inicializa para que no de errores y regresa
          this.nomVentana = '/cajas'
@@ -98,7 +97,6 @@ export class ColoresComponent implements OnInit {
       if (ventanas) {
          this.venServicio.updateVentana(ventanas.idventana, ventana).subscribe({
             next: resp => {
-               // console.log('Actualizacion ventana Ok!')
             },
             error: err => console.error(err.error)
          });

@@ -178,7 +178,6 @@ export class AguatramComponent implements OnInit {
       /* Realizar taponamiento */
       let abonado: Abonados = this.abonado;
       if (abonado.estado === 3) {
-         console.log('Este medidor esta suspendido');
       } else {
          abonado.estado = 2;
          this.actualizarAbonado(abonado);

@@ -34,7 +34,6 @@ export class PrintService {
 
    exportPDF(data: any[], headers: IExportHeaders[] = [], filename = "file", headerTitle = "Documento eFact") {
       if (data.length === 0) {
-         console.log('No hay datos disponibles para exportar');
       }
 
       if (!headers || headers.length == 0) {
@@ -107,13 +106,11 @@ export class PrintService {
    }
 
    genPdf(row_datos: any, columns_datos: any, titulo: string) {
-      // console.log(columns_datos)
       let doc = new jsPDF('p', 'pt', 'a4');
       //let i = 0;
       doc.setFont("courier");
       doc.setFontSize(11);
       this.header(titulo, doc);
-      // console.log(row_datos);
       autoTable(doc, {
          startY: 120,
          columns: columns_datos,
