@@ -125,8 +125,11 @@ export class FecfacturaComponent implements OnInit {
   buscar() {
     this.datosDefinirAsync();
     this.swexportar = false;
-    this.formExportar.value
-    if (this.formExportar.value.nrofactura != null && this.formExportar.value.nrofactura != '') {
+    this.formExportar.value;
+    if (
+      this.formExportar.value.nrofactura != null &&
+      this.formExportar.value.nrofactura != ''
+    ) {
       console.log('buscar individual');
       let nrofactura = this.formExportar.value.nrofactura;
       console.log(this.formExportar.value);
@@ -149,9 +152,17 @@ export class FecfacturaComponent implements OnInit {
         },
         error: (err) => console.error(err.error),
       });
-    }
-    else{
-      console.log('buscar x fechas')
+    } else {
+      console.log('buscar x fechas');
+      console.log(this.formExportar.value.desdeFecha);
+      console.log(this.formExportar.value.hastaFecha);
+      let d = this.formExportar.value.desdeFecha;
+      let h = this.formExportar.value.hastaFecha;
+      this.facService.getDesdeHasta(d, h).subscribe({
+        next: (datos) => {
+          console.log(datos);
+        },
+      });
     }
   }
   async exportar() {
