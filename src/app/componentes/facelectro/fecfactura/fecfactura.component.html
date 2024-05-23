@@ -99,8 +99,27 @@
                <div class="card-header">
                   <h3 class="card-title">Facturas exportadas</h3>
 
-                  <div class="card-tools">
-                     <div class="input-group input-group-sm" style="width: 150px;">
+                  <div class="card-tools ml-2">
+                     <div class="input-group input-group-sm" style="width: 200px;">
+                        <select type="text" name="table_search" [(ngModel)]="v_estado" (change)="changeDato()"
+                           style="width: 100px;" class="form-control float-right" placeholder="Search">
+                           <option value={{estado.letra}} *ngFor="let estado of estados">
+                              {{estado.nombre}}-{{estado.letra}}</option>
+                        </select>
+                        <input type="number" [(ngModel)]=limit name="table_search" (change)="changeDato()"
+                           class="form-control float-right" placeholder="Search">
+
+                        <!--      <div class="input-group-append">
+                           <button type="submit" class="btn btn-default">
+                              <i class="fas fa-search"></i>
+                           </button>
+                        </div> -->
+                     </div>
+                  </div>
+
+                  <div class="card-tools mr-2">
+                     <div class="input-group input-group-sm" style="width: 200px;">
+
                         <input type="text" [(ngModel)]=filter name="table_search" class="form-control float-right"
                            placeholder="Search">
 
@@ -109,6 +128,16 @@
                               <i class="fas fa-search"></i>
                            </button>
                         </div> -->
+                     </div>
+                  </div>
+                  <div class="card-tools mr-2">
+                     <div class="input-group input-group-sm" style="width: 50px;">
+
+                        <button class="btn btn-sm btn-primary">
+                           <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+
+
                      </div>
                   </div>
                </div>

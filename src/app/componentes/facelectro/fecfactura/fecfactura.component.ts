@@ -35,7 +35,9 @@ export class FecfacturaComponent implements OnInit {
   sumaTotal: number = 0;
   tipocobro: string;
   fec_facturas: any;
-  estado = [
+  limit: number = 100;
+  v_estado = 'I';
+  estados = [
     { nombre: 'Inicial', letra: 'I' },
     { nombre: 'Proceso', letra: 'P' },
     { nombre: 'Generado', letra: 'G' },
@@ -83,7 +85,8 @@ export class FecfacturaComponent implements OnInit {
       hastaFecha: obtenerFechaActualString(fechaActual),
       ambiente: '',
     });
-    this.getFecFactura();
+    // this.getFecFactura();
+    this.getByEstado(this.v_estado, this.limit);
   }
 
   colocaColor(colores: any) {
@@ -184,6 +187,7 @@ export class FecfacturaComponent implements OnInit {
     console.log(this._facturas.length);
     this._facturas.forEach((item: any, index: number) => {
       this._exportar(index);
+      this.changeDato();
     });
   }
   async _exportar(i: number) {
@@ -393,6 +397,17 @@ export class FecfacturaComponent implements OnInit {
       error: (e) => {
         console.error(e);
       },
+    });
+  }
+  changeDato() {
+    this.getByEstado(this.v_estado, this.limit);
+  }
+  getByEstado(estado: String, limit: number) {
+    this.fecfacService.getByEstado(estado, limit).subscribe({
+      next: (datos: any) => {
+        this.fec_facturas = datos;
+      },
+      error: (e) => console.error(e),
     });
   }
 }

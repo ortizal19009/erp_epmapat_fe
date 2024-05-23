@@ -17,7 +17,7 @@ export class FecfacturaService {
     return this.http.get<Fecfactura[]>(`${baseUrl}`);
   }
 
-  getByEstado(estado: number, limit: number): Observable<Fecfactura[]> {
+  getByEstado(estado: String, limit: number): Observable<Fecfactura[]> {
     return this.http.get<Fecfactura[]>(
       `${baseUrl}/estado?estado=${estado}&limit=${limit}`
     );
