@@ -102,7 +102,6 @@ export class FecfacturaComponent implements OnInit {
     try {
       const def = await this.defService.getByIddefinirAsync(1);
       this.empresa = def;
-      console.log(def);
     } catch (error) {
       console.log('Al recuperar los datos de la Empresa', error);
     }
@@ -154,14 +153,10 @@ export class FecfacturaComponent implements OnInit {
         error: (err) => console.error(err.error),
       });
     } else {
-      console.log('buscar x fechas');
-      console.log(this.formExportar.value.desdeFecha);
-      console.log(this.formExportar.value.hastaFecha);
       let d = this.formExportar.value.desdeFecha;
       let h = this.formExportar.value.hastaFecha;
       this.facService.getFechaByCobro(d, h).subscribe({
         next: (datos: any) => {
-          console.log(datos);
           this._facturas = datos;
           if (this._facturas.length >= 1) {
             this.swexportar = true;
@@ -174,20 +169,17 @@ export class FecfacturaComponent implements OnInit {
       });
     }
   }
-  async exportar() {
+  exportar() {
     console.log(this._facturas.length);
-    this._facturas.forEach(async (item: any, index: number) => {
-      console.log(index);
-      await this._exportar(index);
+    this._facturas.forEach((item: any, index: number) => {
+      this._exportar(index);
     });
   }
   async _exportar(i: number) {
     let j = 0;
-    console.log(this._facturas);
     let usuario = await this.s_usuario.getByIdusuarioAsync(
       this._facturas[i].usuariocobro
     );
-    console.log(usuario);
     let fecfactura = {} as Fec_factura;
 
     fecfactura.idfactura = this._facturas[i].idfactura;
@@ -210,7 +202,6 @@ export class FecfacturaComponent implements OnInit {
         this._facturas[i].idabonado
       );
       const _lectura = await this.getLectura(this._facturas[i].idfactura);
-      console.log(_lectura);
       let fecEmision: Date = new Date(_lectura[0].fechaemision);
       fecfactura.razonsocialcomprador = abonado.idresponsable.nombre;
       fecfactura.identificacioncomprador = abonado.idresponsable.cedula;
@@ -243,12 +234,14 @@ export class FecfacturaComponent implements OnInit {
         } else {
           codImpuesto = 4;
         }
+        /* CONSULTO LOS RUBROS DE LA FACTURA */
         await this.rxfService
           .getRubrosAsync(resp.idfactura)
           .then(async (item: any) => {
             let i = 0;
             this.sumaTotal = 0;
-            item.forEach(async (rxf: any) => {
+            /* POR CADA RUBRO QUE TIENE LA FACTURA ARMO EL OBJETO DETALLE PARA GUARDARLO */
+            await item.forEach(async (rxf: any) => {
               let detalle = {} as Fec_factura_detalles;
               let basImponible: number = 0;
               detalle.idfacturadetalle = rxf.idrubroxfac;
@@ -259,11 +252,11 @@ export class FecfacturaComponent implements OnInit {
               detalle.preciounitario = rxf.valorunitario;
               detalle.descuento = 0;
               basImponible += rxf.cantidad * rxf.valorunitario;
-              await this.fec_facdetalleService
+              /* GUARDO EL OBJETO DETALLE */
+              this.fec_facdetalleService
                 .saveFacDetalle(detalle)
                 .subscribe({
-                  next: async (datos: any) => {
-                    console.log(datos);
+                  next: (datos: any) => {
                     let iva = 0;
                     if (rxf.idrubro_rubros.swiva === true) {
                       if ((codImpuesto = 2)) {
@@ -278,6 +271,7 @@ export class FecfacturaComponent implements OnInit {
                     this.sumaTotal += rxf.valorunitario + iva;
                     let secuencialImpuestos: String =
                       rxf.idrubroxfac.toString() + i;
+                    /* MIENTRAS GUARDO EL DETALLE ARMO EL OBJETO DETALLE IMPUESTO */
                     let detalleImpuesto = {} as Fec_factura_detalles_impuestos;
                     detalleImpuesto.idfacturadetalleimpuestos =
                       +secuencialImpuestos!;
@@ -285,11 +279,13 @@ export class FecfacturaComponent implements OnInit {
                     detalleImpuesto.codigoimpuesto = '2';
                     detalleImpuesto.codigoporcentaje = codImpuesto.toString();
                     detalleImpuesto.baseimponible = basImponible;
-                    await this.fec_facdetimpService
+                    console.log('CONTEO 1: ', j);
+
+                    this.fec_facdetimpService
                       .saveFacDetalleImpuesto(detalleImpuesto)
                       .subscribe({
                         next: (detimpuesto) => {
-                          console.log('CONTEO: ', j);
+                          console.log('CONTEO 2: ', j);
                           j++;
                         },
                         error: (e) => console.error(e),
@@ -301,7 +297,7 @@ export class FecfacturaComponent implements OnInit {
             });
             setTimeout(() => {
               this.pagos(resp, this.sumaTotal);
-            }, 500);
+            }, 350);
           });
       },
       error: (err) => {
@@ -347,27 +343,21 @@ export class FecfacturaComponent implements OnInit {
   }
 
   pagos = (resp: any, sumaTotal: number) => {
-    console.log(this.tipocobro);
     let pagos = {} as Fec_factura_pagos;
     switch (this.tipocobro.toString()) {
       case '1':
-        console.log('efectivo', this.tipocobro);
         pagos.formapago = '01';
         break;
       case '3':
-        console.log('notacredoto', this.tipocobro);
         pagos.formapago = '01';
         break;
       case '4':
-        console.log('transferencias', this.tipocobro);
         pagos.formapago = '20';
         break;
       case '5':
-        console.log('tarjcredito', this.tipocobro);
         pagos.formapago = '19';
         break;
       case '6':
-        console.log('recaudacion externa', this.tipocobro);
         pagos.formapago = '01';
         break;
       case '7':
@@ -382,9 +372,7 @@ export class FecfacturaComponent implements OnInit {
     pagos.plazo = 0;
     pagos.unidadtiempo = 'dias';
     this.fec_facPagosService.saveFacPago(pagos).subscribe({
-      next: (datos) => {
-        console.log(datos);
-      },
+      next: (datos) => {},
       error: (e) => console.error(e),
     });
   };
