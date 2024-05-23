@@ -35,6 +35,17 @@ export class FecfacturaComponent implements OnInit {
   sumaTotal: number = 0;
   tipocobro: string;
   fec_facturas: any;
+  estado = [
+    { nombre: 'Inicial', letra: 'I' },
+    { nombre: 'Proceso', letra: 'P' },
+    { nombre: 'Generado', letra: 'G' },
+    { nombre: 'Error al Validar', letra: 'L' },
+    { nombre: 'Error al Firmar', letra: 'M' },
+    { nombre: 'Devuelta', letra: 'C' },
+    { nombre: 'Error al Autorizar', letra: 'U' },
+    { nombre: 'Autorizado/Enviado', letra: 'A' },
+    { nombre: 'Autorizado/No Enviado', letra: 'O' },
+  ];
 
   filter: string;
   constructor(
@@ -253,47 +264,45 @@ export class FecfacturaComponent implements OnInit {
               detalle.descuento = 0;
               basImponible += rxf.cantidad * rxf.valorunitario;
               /* GUARDO EL OBJETO DETALLE */
-              this.fec_facdetalleService
-                .saveFacDetalle(detalle)
-                .subscribe({
-                  next: (datos: any) => {
-                    let iva = 0;
-                    if (rxf.idrubro_rubros.swiva === true) {
-                      if ((codImpuesto = 2)) {
-                        iva = rxf.valorunitario * 0.12;
-                      }
-                      if ((codImpuesto = 4)) {
-                        iva = rxf.valorunitario * 0.15;
-                      }
-                    } else {
-                      codImpuesto = 0;
+              this.fec_facdetalleService.saveFacDetalle(detalle).subscribe({
+                next: (datos: any) => {
+                  let iva = 0;
+                  if (rxf.idrubro_rubros.swiva === true) {
+                    if ((codImpuesto = 2)) {
+                      iva = rxf.valorunitario * 0.12;
                     }
-                    this.sumaTotal += rxf.valorunitario + iva;
-                    let secuencialImpuestos: String =
-                      rxf.idrubroxfac.toString() + i;
-                    /* MIENTRAS GUARDO EL DETALLE ARMO EL OBJETO DETALLE IMPUESTO */
-                    let detalleImpuesto = {} as Fec_factura_detalles_impuestos;
-                    detalleImpuesto.idfacturadetalleimpuestos =
-                      +secuencialImpuestos!;
-                    detalleImpuesto.idfacturadetalle = rxf.idrubroxfac;
-                    detalleImpuesto.codigoimpuesto = '2';
-                    detalleImpuesto.codigoporcentaje = codImpuesto.toString();
-                    detalleImpuesto.baseimponible = basImponible;
-                    console.log('CONTEO 1: ', j);
+                    if ((codImpuesto = 4)) {
+                      iva = rxf.valorunitario * 0.15;
+                    }
+                  } else {
+                    codImpuesto = 0;
+                  }
+                  this.sumaTotal += rxf.valorunitario + iva;
+                  let secuencialImpuestos: String =
+                    rxf.idrubroxfac.toString() + i;
+                  /* MIENTRAS GUARDO EL DETALLE ARMO EL OBJETO DETALLE IMPUESTO */
+                  let detalleImpuesto = {} as Fec_factura_detalles_impuestos;
+                  detalleImpuesto.idfacturadetalleimpuestos =
+                    +secuencialImpuestos!;
+                  detalleImpuesto.idfacturadetalle = rxf.idrubroxfac;
+                  detalleImpuesto.codigoimpuesto = '2';
+                  detalleImpuesto.codigoporcentaje = codImpuesto.toString();
+                  detalleImpuesto.baseimponible = basImponible;
+                  console.log('CONTEO 1: ', j);
 
-                    this.fec_facdetimpService
-                      .saveFacDetalleImpuesto(detalleImpuesto)
-                      .subscribe({
-                        next: (detimpuesto) => {
-                          console.log('CONTEO 2: ', j);
-                          j++;
-                        },
-                        error: (e) => console.error(e),
-                      });
-                    i++;
-                  },
-                  error: (e) => console.error(e),
-                });
+                  this.fec_facdetimpService
+                    .saveFacDetalleImpuesto(detalleImpuesto)
+                    .subscribe({
+                      next: (detimpuesto) => {
+                        console.log('CONTEO 2: ', j);
+                        j++;
+                      },
+                      error: (e) => console.error(e),
+                    });
+                  i++;
+                },
+                error: (e) => console.error(e),
+              });
             });
             setTimeout(() => {
               this.pagos(resp, this.sumaTotal);

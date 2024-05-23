@@ -8,20 +8,33 @@ const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/fec_factura`;
 
 @Injectable({
-   providedIn: 'root'
+  providedIn: 'root',
 })
-
 export class FecfacturaService {
+  constructor(private http: HttpClient) {}
 
-   constructor(private http: HttpClient) { }
+  getLista(): Observable<Fecfactura[]> {
+    return this.http.get<Fecfactura[]>(`${baseUrl}`);
+  }
 
-   getLista(): Observable<Fecfactura[]> {
-      return this.http.get<Fecfactura[]>(`${baseUrl}`);
-   }
+  getByEstado(estado: number, limit: number): Observable<Fecfactura[]> {
+    return this.http.get<Fecfactura[]>(
+      `${baseUrl}/estado?estado=${estado}&limit=${limit}`
+    );
+  }
 
-   //Save
-   save(f: Fecfactura): Observable<Object> {
-      return this.http.post(`${baseUrl}`, f);
-   }
+  getByCuenta(cuenta: number): Observable<Fecfactura[]> {
+    return this.http.get<Fecfactura[]>(
+      `${baseUrl}/referencia?referencia=${cuenta}`
+    );
+  }
 
+  getByNombreCliente(cliente: string): Observable<Fecfactura[]> {
+    return this.http.get<Fecfactura[]>(`${baseUrl}/cliente?cliente=${cliente}`);
+  }
+
+  //Save
+  save(f: Fecfactura): Observable<Object> {
+    return this.http.post(`${baseUrl}`, f);
+  }
 }
