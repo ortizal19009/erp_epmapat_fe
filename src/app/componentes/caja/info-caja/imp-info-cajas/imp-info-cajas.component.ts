@@ -233,7 +233,6 @@ export class ImpInfoCajasComponent implements OnInit {
     let i = 0;
     let iva1 = 0;
     this._cobradas.forEach((item: any) => {
-      console.log(item);
       let totalRecaudado = this._cobradas[i][2];
       if (
         this._cobradas[i][3] === true &&
@@ -271,11 +270,10 @@ export class ImpInfoCajasComponent implements OnInit {
     let iva2 = 0;
     datos.push(['', 'PERÍODOS ANTERIORES']);
     this._rubrosanterior.forEach(() => {
-      console.log(this._rubrosanterior);
       if (this._rubrosanterior[i][0] != 165) {
         let totalRecaudado = this._rubrosanterior[i][2];
         // Math.round(this._rubrosanterior[i][2] * 100) / 100;
-        if (this._rubrosanterior[i][3] === true) {
+        if (this._rubrosanterior[i][3] === true && this.formImprimir.value.d_fecha >= '2024-04-01' === true) {
           iva2 += totalRecaudado * 0.15;
         }
         if (

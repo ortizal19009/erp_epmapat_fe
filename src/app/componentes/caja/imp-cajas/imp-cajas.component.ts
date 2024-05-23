@@ -262,6 +262,7 @@ export class ImpCajasComponent implements OnInit {
         else this.exportarFacturas();
         break;
       case 4: // Recaudacion diaria - Resumen
+        this.formImprimir.value.fecha = this.formImprimir.value.d_fecha;
         if (this.swimprimir) this.imprimirResumen();
         else this.exportarResumen();
         break;
@@ -346,7 +347,7 @@ export class ImpCajasComponent implements OnInit {
           this.formImprimir.value.fecha >= '2024-04-01' === true
         ) {
           iva2 += totalRecaudado * 0.15;
-        } 
+        }
         if (
           this._rubrosanterior[i][3] === true &&
           this.formImprimir.value.fecha <= '2024-03-31' === true
@@ -365,7 +366,7 @@ export class ImpCajasComponent implements OnInit {
 
     kont = kont + i;
     this.total += suma1 + iva2;
-    if (iva1 > 0) {
+    if (iva2 > 0) {
       datos.push(['', 'IVA', formatNumber(iva2)]);
     }
     datos.push(['', 'SUBTOTAL', formatNumber(suma1)]);
