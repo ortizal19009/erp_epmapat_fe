@@ -303,4 +303,7 @@ export class FacturaService {
     );
     return response;
   }
+  getFechaByCobro(d: Date, h: Date) {
+    return this.http.get<Facturas>(`${baseUrl}/rangofeccobro?d=${d}&h=${h}`);
+  }
 }

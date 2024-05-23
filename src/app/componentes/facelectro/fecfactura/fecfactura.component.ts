@@ -135,6 +135,7 @@ export class FecfacturaComponent implements OnInit {
       console.log(this.formExportar.value);
       this.facService.getByNrofactura(nrofactura).subscribe({
         next: (datos: any) => {
+          console.log(datos);
           this._facturas = datos;
           switch (this._facturas.length) {
             case 1:
@@ -158,66 +159,79 @@ export class FecfacturaComponent implements OnInit {
       console.log(this.formExportar.value.hastaFecha);
       let d = this.formExportar.value.desdeFecha;
       let h = this.formExportar.value.hastaFecha;
-      this.facService.getDesdeHasta(d, h).subscribe({
-        next: (datos) => {
+      this.facService.getFechaByCobro(d, h).subscribe({
+        next: (datos: any) => {
           console.log(datos);
+          this._facturas = datos;
+          if (this._facturas.length >= 1) {
+            this.swexportar = true;
+            this.swfacturas = true;
+          }
+          /*  datos.forEach((item: any) => {
+            console.log(item);
+          }); */
         },
       });
     }
   }
   async exportar() {
-    await this._exportar();
+    console.log(this._facturas.length);
+    this._facturas.forEach(async (item: any, index: number) => {
+      console.log(index);
+      await this._exportar(index);
+    });
   }
-  async _exportar() {
+  async _exportar(i: number) {
+    let j = 0;
     console.log(this._facturas);
     let usuario = await this.s_usuario.getByIdusuarioAsync(
-      this._facturas[0].usuariocobro
+      this._facturas[i].usuariocobro
     );
     console.log(usuario);
     let fecfactura = {} as Fec_factura;
 
-    fecfactura.idfactura = this._facturas[0].idfactura;
-    this.claveAcceso();
+    fecfactura.idfactura = this._facturas[i].idfactura;
+    this.claveAcceso(i);
     fecfactura.claveacceso = this.claveacceso;
-    fecfactura.secuencial = this._facturas[0].nrofactura.slice(8, 18);
+    fecfactura.secuencial = this._facturas[i].nrofactura.slice(8, 18);
     fecfactura.estado = 'I';
-    fecfactura.establecimiento = this._facturas[0].nrofactura.slice(0, 3);
-    fecfactura.puntoemision = this._facturas[0].nrofactura.slice(4, 7);
+    fecfactura.establecimiento = this._facturas[i].nrofactura.slice(0, 3);
+    fecfactura.puntoemision = this._facturas[i].nrofactura.slice(4, 7);
     fecfactura.direccionestablecimiento = this.empresa.direccion;
-    fecfactura.fechaemision = this._facturas[0].fechacobro;
+    fecfactura.fechaemision = this._facturas[i].fechacobro;
     fecfactura.tipoidentificacioncomprador =
-      this._facturas[0].idcliente.idtpidentifica_tpidentifica.codigo;
+      this._facturas[i].idcliente.idtpidentifica_tpidentifica.codigo;
     if (
-      (this._facturas[0].idmodulo.idmodulo === 3 &&
-        this._facturas[0].idabonado != 0) ||
-      this._facturas[0].idmodulo.idmodulo === 4
+      (this._facturas[i].idmodulo.idmodulo === 3 &&
+        this._facturas[i].idabonado != 0) ||
+      this._facturas[i].idmodulo.idmodulo === 4
     ) {
       const abonado: Abonados = await this.getAbonado(
-        this._facturas[0].idabonado
+        this._facturas[i].idabonado
       );
-      const _lectura = await this.getLectura(this._facturas[0].idfactura);
+      const _lectura = await this.getLectura(this._facturas[i].idfactura);
       console.log(_lectura);
       let fecEmision: Date = new Date(_lectura[0].fechaemision);
       fecfactura.razonsocialcomprador = abonado.idresponsable.nombre;
       fecfactura.identificacioncomprador = abonado.idresponsable.cedula;
-      fecfactura.referencia = this._facturas[0].idabonado;
+      fecfactura.referencia = this._facturas[i].idabonado;
       fecfactura.concepto = `${
         fecEmision.getMonth() + 1
       } del ${fecEmision.getFullYear()} Nro medidor: ${
         _lectura[0].idabonado_abonados.nromedidor
       }`;
     } else {
-      fecfactura.razonsocialcomprador = this._facturas[0].idcliente.nombre;
-      fecfactura.identificacioncomprador = this._facturas[0].idcliente.cedula;
+      fecfactura.razonsocialcomprador = this._facturas[i].idcliente.nombre;
+      fecfactura.identificacioncomprador = this._facturas[i].idcliente.cedula;
       fecfactura.concepto = 'OTROS SERVICIOS';
       fecfactura.referencia = 'S/N';
     }
-    fecfactura.direccioncomprador = this._facturas[0].idcliente.direccion;
-    fecfactura.telefonocomprador = this._facturas[0].idcliente.telefono;
-    fecfactura.emailcomprador = this._facturas[0].idcliente.email;
-    fecfactura.referencia = this._facturas[0].idabonado;
+    fecfactura.direccioncomprador = this._facturas[i].idcliente.direccion;
+    fecfactura.telefonocomprador = this._facturas[i].idcliente.telefono;
+    fecfactura.emailcomprador = this._facturas[i].idcliente.email;
+    fecfactura.referencia = this._facturas[i].idabonado;
     fecfactura.recaudador = usuario.nomusu;
-    this.tipocobro = this._facturas[0].formapago;
+    this.tipocobro = this._facturas[i].formapago;
     this.fecfacService.save(fecfactura).subscribe({
       next: async (resp: any) => {
         this.swexportar = false;
@@ -229,12 +243,12 @@ export class FecfacturaComponent implements OnInit {
         } else {
           codImpuesto = 4;
         }
-        this.rxfService
+        await this.rxfService
           .getRubrosAsync(resp.idfactura)
           .then(async (item: any) => {
             let i = 0;
             this.sumaTotal = 0;
-            item.forEach((rxf: any) => {
+            item.forEach(async (rxf: any) => {
               let detalle = {} as Fec_factura_detalles;
               let basImponible: number = 0;
               detalle.idfacturadetalle = rxf.idrubroxfac;
@@ -245,40 +259,45 @@ export class FecfacturaComponent implements OnInit {
               detalle.preciounitario = rxf.valorunitario;
               detalle.descuento = 0;
               basImponible += rxf.cantidad * rxf.valorunitario;
-              this.fec_facdetalleService.saveFacDetalle(detalle).subscribe({
-                next: (datos: any) => {
-                  console.log(datos);
-                  let iva = 0;
-                  if (rxf.idrubro_rubros.swiva === true) {
-                    if ((codImpuesto = 2)) {
-                      iva = rxf.valorunitario * 0.12;
+              await this.fec_facdetalleService
+                .saveFacDetalle(detalle)
+                .subscribe({
+                  next: async (datos: any) => {
+                    console.log(datos);
+                    let iva = 0;
+                    if (rxf.idrubro_rubros.swiva === true) {
+                      if ((codImpuesto = 2)) {
+                        iva = rxf.valorunitario * 0.12;
+                      }
+                      if ((codImpuesto = 4)) {
+                        iva = rxf.valorunitario * 0.15;
+                      }
+                    } else {
+                      codImpuesto = 0;
                     }
-                    if ((codImpuesto = 4)) {
-                      iva = rxf.valorunitario * 0.15;
-                    }
-                  } else {
-                    codImpuesto = 0;
-                  }
-                  this.sumaTotal += rxf.valorunitario + iva;
-                  let secuencialImpuestos: String =
-                    rxf.idrubroxfac.toString() + i;
-                  let detalleImpuesto = {} as Fec_factura_detalles_impuestos;
-                  detalleImpuesto.idfacturadetalleimpuestos =
-                    +secuencialImpuestos!;
-                  detalleImpuesto.idfacturadetalle = rxf.idrubroxfac;
-                  detalleImpuesto.codigoimpuesto = '2';
-                  detalleImpuesto.codigoporcentaje = codImpuesto.toString();
-                  detalleImpuesto.baseimponible = basImponible;
-                  this.fec_facdetimpService
-                    .saveFacDetalleImpuesto(detalleImpuesto)
-                    .subscribe({
-                      next: (detimpuesto) => {},
-                      error: (e) => console.error(e),
-                    });
-                  i++;
-                },
-                error: (e) => console.error(e),
-              });
+                    this.sumaTotal += rxf.valorunitario + iva;
+                    let secuencialImpuestos: String =
+                      rxf.idrubroxfac.toString() + i;
+                    let detalleImpuesto = {} as Fec_factura_detalles_impuestos;
+                    detalleImpuesto.idfacturadetalleimpuestos =
+                      +secuencialImpuestos!;
+                    detalleImpuesto.idfacturadetalle = rxf.idrubroxfac;
+                    detalleImpuesto.codigoimpuesto = '2';
+                    detalleImpuesto.codigoporcentaje = codImpuesto.toString();
+                    detalleImpuesto.baseimponible = basImponible;
+                    await this.fec_facdetimpService
+                      .saveFacDetalleImpuesto(detalleImpuesto)
+                      .subscribe({
+                        next: (detimpuesto) => {
+                          console.log('CONTEO: ', j);
+                          j++;
+                        },
+                        error: (e) => console.error(e),
+                      });
+                    i++;
+                  },
+                  error: (e) => console.error(e),
+                });
             });
             setTimeout(() => {
               this.pagos(resp, this.sumaTotal);
@@ -298,18 +317,18 @@ export class FecfacturaComponent implements OnInit {
     const lectura = await this.s_lecturas.getByIdfactura(idfactura).toPromise();
     return lectura;
   }
-  claveAcceso() {
+  claveAcceso(i: number) {
     this.claveacceso = '';
-    let fecha = formatearFecha(1, this._facturas[0].fechacobro); //1: Sin slash para la Clave de acceso
+    let fecha = formatearFecha(1, this._facturas[i].fechacobro); //1: Sin slash para la Clave de acceso
     let ruc = this.empresa.ruc;
     //let ambiente = this.empresa.tipoambiente.toString(); //1: Pruebas  2: Producción
     let ambiente = this.formExportar.value.ambiente.toString(); //1: Pruebas  2: Producción
-    let estab = this._facturas[0].nrofactura.slice(0, 3);
-    let ptoemi = this._facturas[0].nrofactura.slice(4, 7);
+    let estab = this._facturas[i].nrofactura.slice(0, 3);
+    let ptoemi = this._facturas[i].nrofactura.slice(4, 7);
     let serie = estab + ptoemi;
-    let secuencial = this._facturas[0].nrofactura.slice(8, 17);
+    let secuencial = this._facturas[i].nrofactura.slice(8, 17);
     let codigonumerico = codigoNumerico(
-      this._facturas[0].nrofactura.slice(9, 17)
+      this._facturas[i].nrofactura.slice(9, 17)
     );
     let tipoemision = '1'; //1: Normal
     this.claveacceso =
