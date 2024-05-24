@@ -23,7 +23,7 @@ export class FecfacturaService {
     );
   }
 
-  getByCuenta(cuenta: number): Observable<Fecfactura[]> {
+  getByCuenta(cuenta: String): Observable<Fecfactura[]> {
     return this.http.get<Fecfactura[]>(
       `${baseUrl}/referencia?referencia=${cuenta}`
     );

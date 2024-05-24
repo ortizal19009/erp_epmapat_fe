@@ -5,11 +5,14 @@ const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/facturadetalles
 `;
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class FecFacturaDetallesService {
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
   saveFacDetalle(detalle: any) {
-    return this.http.post(`${baseUrl}`, detalle)
+    return this.http.post(`${baseUrl}`, detalle);
+  }
+  getFecDetalleByIdfactura(idfactura: number) {
+    return this.http.get(`${baseUrl}/factura?idfactura=${idfactura}`);
   }
 }

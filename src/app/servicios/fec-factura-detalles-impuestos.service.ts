@@ -4,12 +4,17 @@ import { environment } from 'src/environments/environment';
 const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/facdetallesimpuestos`;
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class FecFacturaDetallesImpuestosService {
-
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
   saveFacDetalleImpuesto(detalleim: any) {
-    return this.http.post(`${baseUrl}`, detalleim)
+    return this.http.post(`${baseUrl}`, detalleim);
+  }
+  getFecFacDetalleService(iddetalle: number) {
+    return this.http.get(`${baseUrl}/factura_detalle?iddetalle=${iddetalle}`);
+  }
+  deleteImpuesto(idimpuesto: number) {
+    return this.http.delete(`${baseUrl}?idimpuesto=${idimpuesto}`);
   }
 }

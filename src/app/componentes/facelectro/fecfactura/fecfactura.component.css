@@ -6,3 +6,8 @@
 
 .detalle { background-color: var(--bgcolor2); }
 .nuevoBG2 { background-color: var(--bgcolor2); }
+
+.txt_error{
+   width: 200 px;
+   
+}

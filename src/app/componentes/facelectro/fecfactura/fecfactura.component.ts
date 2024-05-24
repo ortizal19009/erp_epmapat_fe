@@ -2,10 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { rejects } from 'assert';
+import { truncate } from 'fs/promises';
 import { resolve } from 'path';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Abonados } from 'src/app/modelos/abonados';
+import { Fecfactura } from 'src/app/modelos/fecfactura.model';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { DefinirService } from 'src/app/servicios/administracion/definir.service';
 import { UsuarioService } from 'src/app/servicios/administracion/usuario.service';
@@ -36,7 +38,20 @@ export class FecfacturaComponent implements OnInit {
   tipocobro: string;
   fec_facturas: any;
   limit: number = 100;
-  v_estado = 'I';
+  v_estado = 'A';
+  datoBusqueda: any;
+  factura: Fecfactura = new Fecfactura();
+  _detalles: any;
+  _pagos: any;
+  impuestos: any = [];
+  totalpreciounitario: number = 0;
+  totalbaseimponible: number = 0;
+  totalpagado: number = 0;
+  estado: Boolean = false;
+  btnRsend: Boolean = false;
+  error: String = '';
+  xml: String = '';
+  txtDetails: boolean = true; 
   estados = [
     { nombre: 'Inicial', letra: 'I' },
     { nombre: 'Proceso', letra: 'P' },
@@ -47,6 +62,7 @@ export class FecfacturaComponent implements OnInit {
     { nombre: 'Error al Autorizar', letra: 'U' },
     { nombre: 'Autorizado/Enviado', letra: 'A' },
     { nombre: 'Autorizado/No Enviado', letra: 'O' },
+    { nombre: 'Datos incompletos', letra: 'E' },
   ];
 
   filter: string;
@@ -409,6 +425,106 @@ export class FecfacturaComponent implements OnInit {
       },
       error: (e) => console.error(e),
     });
+  }
+  getByClienteCuenta() {
+    this.fecfacService
+      .getByNombreCliente(this.datoBusqueda.toLowerCase())
+      .subscribe({
+        next: (dato: any) => {
+          console.log(dato);
+          if (dato.length === 0) {
+            this.fecfacService.getByCuenta(this.datoBusqueda).subscribe({
+              next: (datos: any) => {
+                this.fec_facturas = datos;
+              },
+              error: (e) => console.error(e),
+            });
+          } else {
+            this.fec_facturas = dato;
+          }
+        },
+        error: (e) => console.error(e),
+      });
+  }
+  setFactura(factura: any) {
+    this.totalpreciounitario = 0;
+    this.totalbaseimponible = 0;
+    this.totalpagado = 0;
+    this.impuestos = [];
+    this.factura = factura;
+    this.fec_facdetalleService
+      .getFecDetalleByIdfactura(factura.idfactura)
+      .subscribe({
+        next: (detalles: any) => {
+          this._detalles = detalles;
+          detalles.forEach((item: any, index: number) => {
+            this.totalpreciounitario += item.preciounitario;
+            this.fec_facdetimpService
+              .getFecFacDetalleService(item.idfacturadetalle)
+              .subscribe({
+                next: (impuestos: any) => {
+                  impuestos.forEach((item: any) => {
+                    this.impuestos.push(item);
+                    this.totalbaseimponible += item.baseimponible;
+                  });
+                },
+                error: (e) => console.error(e),
+              });
+          });
+        },
+        error: (e) => console.error(e),
+      });
+    this.fec_facPagosService.getByIdfactura(factura.idfactura).subscribe({
+      next: (pagos: any) => {
+        console.log(pagos);
+        pagos.forEach((item: any, index: number) => {
+          console.log(item);
+          this.totalpagado += item.total;
+        });
+        this._pagos = pagos;
+      },
+      error: (e) => console.error(e),
+    });
+  }
+  deleteImpuesto(detalle: any) {
+    console.log(detalle);
+    this.fec_facdetimpService
+      .deleteImpuesto(detalle.idfacturadetalleimpuestos)
+      .subscribe({
+        next: (datos) => {
+          this.setFactura(this.factura);
+        },
+        error: (e) => console.error(e),
+      });
+  }
+  showError() {
+    console.log(this.factura);
+    this.error = this.factura.errores;
+    this.txtDetails = false; 
+  }
+  showXml() {
+    console.log(this.factura);
+    this.xml = this.factura.xmlautorizado;
+  }
+  validarEstado(estado: any) {
+    switch (estado) {
+      case 'A':
+        this.estado = false;
+        break;
+      case 'O':
+        this.estado = false;
+        break;
+      case 'U':
+        if (this.totalbaseimponible === this.totalpagado) {
+          this.btnRsend = true;
+        } else {
+          this.btnRsend = false;
+        }
+        this.estado = true;
+        break;
+    }
+    return this.estado;
+    /* factura.estado === 'A' || factura.estado === 'O' || factura.estado === 'C' */
   }
 }
 
