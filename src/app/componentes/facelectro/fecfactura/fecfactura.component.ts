@@ -51,7 +51,7 @@ export class FecfacturaComponent implements OnInit {
   btnRsend: Boolean = false;
   error: String = '';
   xml: String = '';
-  txtDetails: boolean = true; 
+  txtDetails: boolean = true;
   estados = [
     { nombre: 'Inicial', letra: 'I' },
     { nombre: 'Proceso', letra: 'P' },
@@ -133,7 +133,6 @@ export class FecfacturaComponent implements OnInit {
       const def = await this.defService.getByIddefinirAsync(1);
       this.empresa = def;
     } catch (error) {
-      console.log('Al recuperar los datos de la Empresa', error);
     }
   }
   datosDefinir() {
@@ -159,12 +158,9 @@ export class FecfacturaComponent implements OnInit {
       this.formExportar.value.nrofactura != null &&
       this.formExportar.value.nrofactura != ''
     ) {
-      console.log('buscar individual');
       let nrofactura = this.formExportar.value.nrofactura;
-      console.log(this.formExportar.value);
       this.facService.getByNrofactura(nrofactura).subscribe({
         next: (datos: any) => {
-          console.log(datos);
           this._facturas = datos;
           switch (this._facturas.length) {
             case 1:
@@ -193,14 +189,12 @@ export class FecfacturaComponent implements OnInit {
             this.swfacturas = true;
           }
           /*  datos.forEach((item: any) => {
-            console.log(item);
           }); */
         },
       });
     }
   }
   exportar() {
-    console.log(this._facturas.length);
     this._facturas.forEach((item: any, index: number) => {
       this._exportar(index);
       this.changeDato();
@@ -308,13 +302,10 @@ export class FecfacturaComponent implements OnInit {
                   detalleImpuesto.codigoimpuesto = '2';
                   detalleImpuesto.codigoporcentaje = codImpuesto.toString();
                   detalleImpuesto.baseimponible = basImponible;
-                  console.log('CONTEO 1: ', j);
-
                   this.fec_facdetimpService
                     .saveFacDetalleImpuesto(detalleImpuesto)
                     .subscribe({
                       next: (detimpuesto) => {
-                        console.log('CONTEO 2: ', j);
                         j++;
                       },
                       error: (e) => console.error(e),
@@ -368,7 +359,6 @@ export class FecfacturaComponent implements OnInit {
       tipoemision;
     let verificador = modulo11(this.claveacceso);
     this.claveacceso = this.claveacceso + verificador; //Dígito Verificador (Módulo 11)
-    // console.log('this.claveacceso: ', this.claveacceso)
   }
 
   pagos = (resp: any, sumaTotal: number) => {
@@ -390,7 +380,6 @@ export class FecfacturaComponent implements OnInit {
         pagos.formapago = '01';
         break;
       case '7':
-        console.log('cheques', this.tipocobro);
         pagos.formapago = '20';
         break;
     }
@@ -431,7 +420,6 @@ export class FecfacturaComponent implements OnInit {
       .getByNombreCliente(this.datoBusqueda.toLowerCase())
       .subscribe({
         next: (dato: any) => {
-          console.log(dato);
           if (dato.length === 0) {
             this.fecfacService.getByCuenta(this.datoBusqueda).subscribe({
               next: (datos: any) => {
@@ -447,6 +435,7 @@ export class FecfacturaComponent implements OnInit {
       });
   }
   setFactura(factura: any) {
+    this.txtDetails = true;
     this.totalpreciounitario = 0;
     this.totalbaseimponible = 0;
     this.totalpagado = 0;
@@ -476,9 +465,7 @@ export class FecfacturaComponent implements OnInit {
       });
     this.fec_facPagosService.getByIdfactura(factura.idfactura).subscribe({
       next: (pagos: any) => {
-        console.log(pagos);
         pagos.forEach((item: any, index: number) => {
-          console.log(item);
           this.totalpagado += item.total;
         });
         this._pagos = pagos;
@@ -487,7 +474,6 @@ export class FecfacturaComponent implements OnInit {
     });
   }
   deleteImpuesto(detalle: any) {
-    console.log(detalle);
     this.fec_facdetimpService
       .deleteImpuesto(detalle.idfacturadetalleimpuestos)
       .subscribe({
@@ -498,13 +484,14 @@ export class FecfacturaComponent implements OnInit {
       });
   }
   showError() {
-    console.log(this.factura);
+    this.error = '';
     this.error = this.factura.errores;
-    this.txtDetails = false; 
+    this.txtDetails = !this.txtDetails;
   }
   showXml() {
-    console.log(this.factura);
-    this.xml = this.factura.xmlautorizado;
+    this.error = '';
+    this.error = this.factura.xmlautorizado;
+    this.txtDetails = !this.txtDetails;
   }
   validarEstado(estado: any) {
     switch (estado) {
