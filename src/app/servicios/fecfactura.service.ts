@@ -38,8 +38,6 @@ export class FecfacturaService {
     return this.http.post(`${baseUrl}`, f);
   }
   updateFecFactura(fecfactura: any){
-    
-    return null/* this.http.put(`${baseUrl}/${fecfactura-idfactura}`) */
-
+    return this.http.put(`${baseUrl}/${fecfactura.idfactura}`, fecfactura);
   }
 }

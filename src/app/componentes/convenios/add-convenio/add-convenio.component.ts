@@ -68,7 +68,7 @@ export class AddConvenioComponent implements OnInit {
     private facxconvService: FacxconvenioService,
     private rxfService: RubroxfacService,
     private moduService: ModulosService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/convenios');
@@ -144,7 +144,14 @@ export class AddConvenioComponent implements OnInit {
       this.aboService.unAbonado(this.formConvenio.value.idabonado).subscribe({
         next: (datos) => {
           this.abonado = datos;
-          this.facService.getSinCobrarAbo(this.idmodulo, idabonado).subscribe({
+          /* this.facService.getSinCobrarAboMod(idabonado).subscribe({
+            next: (datos) => {
+              console.log(datos);
+            },
+            error: (e) => console.error(e),
+          }); */
+          //this.facService.getSinCobrarAboMod(this.idmodulo, idabonado).subscribe({
+          this.facService.getSinCobrarAboMod(idabonado).subscribe({
             next: (datos) => {
               console.log(datos);
               this._sincobro = datos;
@@ -314,8 +321,8 @@ export class AddConvenioComponent implements OnInit {
                 (this.rubros[indice].valorunitario + r.valorunitario) * 100
               ) / 100;
           j++;
-          console.log(r)
-          console.log(this.rubros)
+          console.log(r);
+          console.log(this.rubros);
         });
         i++;
         if (i < this._sincobro.length) this.sumaRubros(i);
@@ -412,7 +419,7 @@ export class AddConvenioComponent implements OnInit {
       let rxf: Rubroxfac = new Rubroxfac();
       rxf.cantidad = 1;
       rxf.estado = 1;
-      console.log(this.facturas[i].porcentaje)
+      console.log(this.facturas[i].porcentaje);
       rxf.valorunitario =
         Math.round(
           this.rubros[j].valorunitario * this.facturas[i].porcentaje * 100
@@ -422,7 +429,7 @@ export class AddConvenioComponent implements OnInit {
       rubro.idrubro = this.rubros[j].idrubro;
       rxf.idrubro_rubros = rubro;
       try {
-        console.log(rxf)
+        console.log(rxf);
         await this.rxfService.saveRubroxfacAsync(rxf);
       } catch (error) {
         console.error(`Al guardar Rubroxfac ${j}`, error);
@@ -489,7 +496,7 @@ export class AddConvenioComponent implements OnInit {
                   this._sincobro.push(item);
                 }
               });
-              console.log(this._sincobro)
+              console.log(this._sincobro);
               this.sumTotaltarifa();
             },
             error: (err) =>

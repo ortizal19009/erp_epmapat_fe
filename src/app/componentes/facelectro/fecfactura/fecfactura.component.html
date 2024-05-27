@@ -290,7 +290,8 @@
 
          <div class="modal-footer">
             <button type="button" class="btn btn-outline-success btn-sm" data-dismiss="modal">Cancelar</button>
-            <button type="button" class="btn btn-success btn-sm" data-dismiss="modal" *ngIf="btnRsend">Re
+            <button type="button" class="btn btn-success btn-sm" data-dismiss="modal" *ngIf="btnRsend"
+               (click)=reSend()>Re
                enviar</button>
          </div>
       </div>

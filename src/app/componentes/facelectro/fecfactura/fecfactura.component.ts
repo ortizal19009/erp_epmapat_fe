@@ -132,8 +132,7 @@ export class FecfacturaComponent implements OnInit {
     try {
       const def = await this.defService.getByIddefinirAsync(1);
       this.empresa = def;
-    } catch (error) {
-    }
+    } catch (error) {}
   }
   datosDefinir() {
     this.defService.getByIddefinir(1).subscribe({
@@ -512,6 +511,17 @@ export class FecfacturaComponent implements OnInit {
     }
     return this.estado;
     /* factura.estado === 'A' || factura.estado === 'O' || factura.estado === 'C' */
+  }
+
+  reSend() {
+    let fac: any = this.factura;
+    fac.errores = '';
+    fac.estado = 'I';
+    this.fecfacService.updateFecFactura(fac).subscribe({
+      next: (datos: any) => {
+      },
+      error: (e) => console.error(e),
+    });
   }
 }
 

@@ -218,6 +218,12 @@ export class FacturaService {
       `${baseUrl}/sincobrarAbo?idmodulo=${idmodulo}&idabonado=${idabonado}`
     );
   }
+  //Planillas sin Cobrar por Modulo y Abonado (Para Convenios)
+  getSinCobrarAboMod(idabonado: number) {
+    return this.http.get<Facturas[]>(
+      `${baseUrl}/sincobrarAboMod?idabonado=${idabonado}`
+    );
+  }
 
   getDeudaConsumo(idabonado: number) {
     return this.http.get<Facturas[]>(
