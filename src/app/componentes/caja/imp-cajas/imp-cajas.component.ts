@@ -645,17 +645,14 @@ export class ImpCajasComponent implements OnInit {
       }
       i++;
     });
-
     kont = kont + i;
     this.total += suma1 + iva2;
     if (iva1 > 0) {
       datos.push(['', 'IVA', formatNumber(iva2)]);
     }
     datos.push(['', 'SUBTOTAL', formatNumber(+suma1.toFixed(2) + iva2)]);
-
     // datos.push(['', 'TOTAL', this.total.toLocaleString("es-ES", { maximumFractionDigits: 2 })]);
     datos.push(['', 'TOTAL', formatNumber(this.total)]);
-
     autoTable(doc, {
       head: [['Nro.', 'Rubro', 'Total Recaudado']],
       theme: 'grid',
