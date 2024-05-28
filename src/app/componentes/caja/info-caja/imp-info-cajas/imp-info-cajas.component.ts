@@ -345,7 +345,7 @@ export class ImpInfoCajasComponent implements OnInit {
     });
     formascobro.push(['SUBTOTAL', formatNumber(suma2)]);
     formascobro.push(['IVA', formatNumber(iva1 + iva2)]);
-    formascobro.push(['TOTAL', formatNumber(suma2 + iva1 + iva2)]);
+    formascobro.push(['TOTAL', formatNumber(+suma2.toFixed(2) + iva1 + iva2)]);
     autoTable(doc, {
       head: [['Forma Cobro', 'Total Recaudado']],
       theme: 'grid',

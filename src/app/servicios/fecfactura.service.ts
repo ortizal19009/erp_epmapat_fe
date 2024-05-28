@@ -37,7 +37,8 @@ export class FecfacturaService {
   save(f: Fecfactura): Observable<Object> {
     return this.http.post(`${baseUrl}`, f);
   }
-  updateFecFactura(fecfactura: any){
+  updateFecFactura(fecfactura: any) {
+    console.log(fecfactura);
     return this.http.put(`${baseUrl}/${fecfactura.idfactura}`, fecfactura);
   }
 }

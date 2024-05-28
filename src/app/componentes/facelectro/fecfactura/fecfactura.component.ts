@@ -517,7 +517,7 @@ export class FecfacturaComponent implements OnInit {
     let fac: any = this.factura;
     fac.errores = '';
     fac.estado = 'I';
-    this.fecfacService.updateFecFactura(fac).subscribe({
+    this.fecfacService.save(fac).subscribe({
       next: (datos: any) => {},
       error: (e) => console.error(e),
     });
