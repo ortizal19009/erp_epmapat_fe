@@ -614,7 +614,7 @@ export class ImpCajasComponent implements OnInit {
     if (iva1 > 0) {
       datos.push(['', 'IVA', formatNumber(iva1)]);
     }
-    datos.push(['', 'SUBTOTAL', formatNumber(suma)]);
+    datos.push(['', 'SUBTOTAL', formatNumber(+suma.toFixed(2) + iva1)]);
 
     let suma1 = 0;
     let iva2 = 0;
@@ -651,7 +651,7 @@ export class ImpCajasComponent implements OnInit {
     if (iva1 > 0) {
       datos.push(['', 'IVA', formatNumber(iva2)]);
     }
-    datos.push(['', 'SUBTOTAL', formatNumber(suma1)]);
+    datos.push(['', 'SUBTOTAL', formatNumber(+suma1.toFixed(2) + iva2)]);
 
     // datos.push(['', 'TOTAL', this.total.toLocaleString("es-ES", { maximumFractionDigits: 2 })]);
     datos.push(['', 'TOTAL', formatNumber(this.total)]);

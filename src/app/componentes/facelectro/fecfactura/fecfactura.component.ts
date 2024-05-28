@@ -290,7 +290,7 @@ export class FecfacturaComponent implements OnInit {
                   } else {
                     codImpuesto = 0;
                   }
-                  this.sumaTotal += rxf.valorunitario + iva;
+                  this.sumaTotal += rxf.cantidad * rxf.valorunitario + iva;
                   let secuencialImpuestos: String =
                     rxf.idrubroxfac.toString() + i;
                   /* MIENTRAS GUARDO EL DETALLE ARMO EL OBJETO DETALLE IMPUESTO */
@@ -518,8 +518,7 @@ export class FecfacturaComponent implements OnInit {
     fac.errores = '';
     fac.estado = 'I';
     this.fecfacService.updateFecFactura(fac).subscribe({
-      next: (datos: any) => {
-      },
+      next: (datos: any) => {},
       error: (e) => console.error(e),
     });
   }
