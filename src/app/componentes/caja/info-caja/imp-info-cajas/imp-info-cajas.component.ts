@@ -259,11 +259,7 @@ export class ImpInfoCajasComponent implements OnInit {
     kont = kont + i;
     this.total += suma + iva1;
     datos.push(['', 'IVA', formatNumber(iva1)]);
-    datos.push([
-      '',
-      'SUBTOTAL',
-      suma.toLocaleString('es-ES', { maximumFractionDigits: 2 }),
-    ]);
+    datos.push(['', 'SUBTOTAL', formatNumber(suma + iva1)]);
 
     let suma1 = 0;
     i = 0;
@@ -273,7 +269,10 @@ export class ImpInfoCajasComponent implements OnInit {
       if (this._rubrosanterior[i][0] != 165) {
         let totalRecaudado = this._rubrosanterior[i][2];
         // Math.round(this._rubrosanterior[i][2] * 100) / 100;
-        if (this._rubrosanterior[i][3] === true && this.formImprimir.value.d_fecha >= '2024-04-01' === true) {
+        if (
+          this._rubrosanterior[i][3] === true &&
+          this.formImprimir.value.d_fecha >= '2024-04-01' === true
+        ) {
           iva2 += totalRecaudado * 0.15;
         }
         if (
@@ -294,7 +293,7 @@ export class ImpInfoCajasComponent implements OnInit {
     kont = kont + i;
     this.total += suma1 + iva2;
     datos.push(['', 'IVA', formatNumber(iva2)]);
-    datos.push(['', 'SUBTOTAL', formatNumber(suma1)]);
+    datos.push(['', 'SUBTOTAL', formatNumber(suma1 + iva2)]);
 
     datos.push([
       '',
