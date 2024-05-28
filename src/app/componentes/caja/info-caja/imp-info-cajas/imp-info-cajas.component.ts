@@ -257,7 +257,7 @@ export class ImpInfoCajasComponent implements OnInit {
       i++;
     });
     kont = kont + i;
-    this.total += suma + iva1;
+    this.total += +suma.toFixed(2) + +iva1.toFixed(2);
     datos.push(['', 'IVA', formatNumber(iva1)]);
     datos.push([
       '',
@@ -295,7 +295,7 @@ export class ImpInfoCajasComponent implements OnInit {
       i++;
     });
     kont = kont + i;
-    this.total += suma1 + iva2;
+    this.total += suma1 + +iva2.toFixed(2);
     datos.push(['', 'IVA', formatNumber(iva2)]);
     datos.push([
       '',
@@ -303,11 +303,7 @@ export class ImpInfoCajasComponent implements OnInit {
       formatNumber(+suma1.toFixed(2) + +iva2.toFixed(2)),
     ]);
 
-    datos.push([
-      '',
-      'TOTAL',
-      this.total.toLocaleString('es-ES', { maximumFractionDigits: 2 }),
-    ]);
+    datos.push(['', 'TOTAL', formatNumber(this.total)]);
 
     autoTable(doc, {
       head: [['Nro.', 'Rubro', 'Total Recaudado']],
