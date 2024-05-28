@@ -196,7 +196,7 @@ export class FecfacturaComponent implements OnInit {
   exportar() {
     this._facturas.forEach(async (item: any, index: number) => {
       await this._exportar(index);
-      this.changeDato();
+     // this.changeDato();
     });
   }
   async _exportar(i: number) {
