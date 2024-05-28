@@ -259,7 +259,11 @@ export class ImpInfoCajasComponent implements OnInit {
     kont = kont + i;
     this.total += suma + iva1;
     datos.push(['', 'IVA', formatNumber(iva1)]);
-    datos.push(['', 'SUBTOTAL', formatNumber(+suma.toFixed(2) + iva1)]);
+    datos.push([
+      '',
+      'SUBTOTAL',
+      formatNumber(+suma.toFixed(2) + +iva1.toFixed(2)),
+    ]);
 
     let suma1 = 0;
     i = 0;
@@ -293,7 +297,11 @@ export class ImpInfoCajasComponent implements OnInit {
     kont = kont + i;
     this.total += suma1 + iva2;
     datos.push(['', 'IVA', formatNumber(iva2)]);
-    datos.push(['', 'SUBTOTAL', formatNumber(+suma1.toFixed(2) + iva2)]);
+    datos.push([
+      '',
+      'SUBTOTAL',
+      formatNumber(+suma1.toFixed(2) + +iva2.toFixed(2)),
+    ]);
 
     datos.push([
       '',
@@ -345,7 +353,10 @@ export class ImpInfoCajasComponent implements OnInit {
     });
     formascobro.push(['SUBTOTAL', formatNumber(suma2)]);
     formascobro.push(['IVA', formatNumber(iva1 + iva2)]);
-    formascobro.push(['TOTAL', formatNumber(+suma2.toFixed(2) + iva1 + iva2)]);
+    formascobro.push([
+      'TOTAL',
+      formatNumber(+suma2.toFixed(2) + +iva1.toFixed(2) + +iva2.toFixed(2)),
+    ]);
     autoTable(doc, {
       head: [['Forma Cobro', 'Total Recaudado']],
       theme: 'grid',
