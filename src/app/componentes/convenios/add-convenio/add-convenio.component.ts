@@ -193,16 +193,21 @@ export class AddConvenioComponent implements OnInit {
     let suma: number = 0;
     let i = 0;
     let com = 0;
-    this._sincobro.forEach(() => {
+    console.log(this._sincobro);
+    this._sincobro.forEach((item: any) => {
       if (
         this._sincobro[i].idmodulo.idmodulo === 3 &&
         this._sincobro[i].idabonado != null
       ) {
         com = 1;
       }
+      if (this._sincobro[i].idmodulo.idmodulo === 4) {
+        com = 0;
+      }
       suma += this._sincobro[i].totaltarifa + com;
       i++;
     });
+    console.log(suma);
     this.total = suma;
     let cuotainicial = Math.round(this.total * this.porcentaje * 100) / 100;
     this.formConvenio.controls['cuotainicial'].setValue(cuotainicial);
