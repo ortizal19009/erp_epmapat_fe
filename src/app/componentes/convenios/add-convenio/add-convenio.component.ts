@@ -352,6 +352,7 @@ export class AddConvenioComponent implements OnInit {
     convenio.usucrea = this.authService.idusuario;
     convenio.feccrea = this.fecha;
     convenio.idabonado = abonado;
+    console.log(convenio);
 
     this.convService.saveConvenio(convenio).subscribe({
       next: async (resp) => {
