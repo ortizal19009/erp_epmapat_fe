@@ -268,6 +268,7 @@ export class AddConvenioComponent implements OnInit {
     let i = 0;
     this.totaltarifaFacturas();
     this.sumaRubros(i);
+    console.log(this._sincobro);
   }
 
   //Guarda en un arreglo totaltarifa de las facturas a generar
@@ -304,7 +305,6 @@ export class AddConvenioComponent implements OnInit {
     let r: any = {};
     this.rubxfacService.getByIdfactura(this._sincobro[i].idfactura).subscribe({
       next: (datos: any) => {
-        console.log(datos);
         let j = 0;
         datos.forEach(() => {
           r = {
@@ -315,21 +315,24 @@ export class AddConvenioComponent implements OnInit {
             (rubro: { idrubro: number }) => rubro.idrubro === r.idrubro
           );
           if (indice == -1) this.rubros.push(r);
-          else
+          else {
             this.rubros[indice].valorunitario =
               Math.round(
-                (this.rubros[indice].valorunitario + r.valorunitario) * 100
+                (this.rubros[indice].valorunitario +
+                  +r.valorunitario.toFixed(2)) *
+                  100
               ) / 100;
+          }
           j++;
-          console.log(r);
-          console.log(this.rubros);
         });
         i++;
+        console.log(this._sincobro.length);
         if (i < this._sincobro.length) this.sumaRubros(i);
         else {
           this.swcalculando = false;
           this.txtcalcular = 'Calcular';
         }
+        console.log(this.rubros);
       },
       error: (err) => console.error(err.error),
     });
@@ -416,6 +419,7 @@ export class AddConvenioComponent implements OnInit {
   }
 
   async rubroxfac(i: number, factura: any) {
+    console.log(this.rubros);
     for (let j = 0; j < this.rubros.length; j++) {
       let rxf: Rubroxfac = new Rubroxfac();
       rxf.cantidad = 1;
