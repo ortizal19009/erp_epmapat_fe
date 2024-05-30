@@ -310,12 +310,14 @@ export class ImpCajasComponent implements OnInit {
           this._cobradas[i][3] === true &&
           this.formImprimir.value.fecha >= '2024-04-01'
         ) {
+          console.log('15');
           iva1 += totalRecaudado * 0.15;
         }
         if (
           this._cobradas[i][3] === true &&
           this.formImprimir.value.fecha <= '2024-03-31'
         ) {
+          console.log('12');
           iva1 += totalRecaudado * 0.12;
         }
         datos.push([
@@ -419,7 +421,7 @@ export class ImpCajasComponent implements OnInit {
     });
     if (iva1 + iva2 > 0) {
       formascobro.push(['SUBTOTAL', formatNumber(suma2)]);
-      formascobro.push(['IVA', formatNumber(iva1 + iva2)]);
+      formascobro.push(['IVA', +iva1.toFixed(2) + +iva2.toFixed(2)]);
     }
     formascobro.push(['TOTAL', formatNumber(suma2 + iva1 + iva2)]);
 
@@ -488,9 +490,10 @@ export class ImpCajasComponent implements OnInit {
     const datos: any = [];
     let suma: number = 0;
     var i = 0;
-    this._cobradas.forEach(() => {
+    this._cobradas.forEach((item: any) => {
+      console.log(item);
       let totalPorFormaCobro =
-        this._cobradas[i][1] + this._cobradas[i][0].swiva;
+        +this._cobradas[i][1].toFixed(2) + this._cobradas[i][0].swiva;
       /*       Math.round( * 100) /
               100; */
       // datos.push([this._cobradas[i][0].idfactura, this._cobradas[i][0].feccrea, this._cobradas[i][0].nrofactura, this._cobradas[i][0].formapago,
@@ -698,7 +701,10 @@ export class ImpCajasComponent implements OnInit {
     });
     if (iva1 + iva2 > 0) {
       formascobro.push(['SUBTOTAL', formatNumber(suma2)]);
-      formascobro.push(['IVA', formatNumber(iva1 + iva2)]);
+      formascobro.push([
+        'IVA',
+        formatNumber(+iva1.toFixed(2) + +iva2.toFixed(2)),
+      ]);
     }
     formascobro.push(['TOTAL', formatNumber(suma2 + iva1 + iva2)]);
 
@@ -769,7 +775,7 @@ export class ImpCajasComponent implements OnInit {
     var i = 0;
     this._cobradas.forEach(() => {
       let totalPorFormaCobro =
-        this._cobradas[i][1] + this._cobradas[i][0].swiva;
+        +this._cobradas[i][1].toFixed(2) + this._cobradas[i][0].swiva;
       /*       Math.round( * 100) /
               100; */
       // datos.push([this._cobradas[i][0].idfactura, this._cobradas[i][0].feccrea, this._cobradas[i][0].nrofactura, this._cobradas[i][0].formapago,
@@ -854,7 +860,6 @@ export class ImpCajasComponent implements OnInit {
     doc.setFont('times', 'bold');
     doc.setFontSize(12);
     doc.text('LISTA DE CAJAS', m_izquierda, 16);
-
     var datos: any = [];
     let suma: number = 0;
     let arecaudar: number = 0;
