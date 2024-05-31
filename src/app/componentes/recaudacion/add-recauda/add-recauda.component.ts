@@ -822,8 +822,6 @@ export class AddRecaudaComponent implements OnInit {
                   this.facService.updateFacturas(fac).subscribe({
                     next: (nex: any) => {
                       this.swcobrado = true;
-                      //this._nroFactura = nex.nrofactura;
-
                       j++;
                       i++;
                       if (i < this._sincobro.length)

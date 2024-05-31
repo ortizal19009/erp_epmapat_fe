@@ -25,6 +25,8 @@ import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ModulosService } from 'src/app/servicios/modulos.service';
 import { Rubros } from 'src/app/modelos/rubros.model';
 import { map } from 'rxjs';
+import { Intereses } from 'src/app/modelos/intereses';
+import { InteresesService } from 'src/app/servicios/intereses.service';
 
 @Component({
   selector: 'app-add-convenio',
@@ -56,6 +58,12 @@ export class AddConvenioComponent implements OnInit {
   seccion: Modulos = new Modulos();
   f_nuevosValores: FormGroup;
   porcentaje: number = 0.2;
+  /* INTERESES */
+  _intereses: any;
+  totInteres: number = 0;
+  arrCalculoInteres: any = [];
+  factura: any;
+  calInteres: any;
   constructor(
     private fb: FormBuilder,
     private router: Router,
@@ -67,7 +75,8 @@ export class AddConvenioComponent implements OnInit {
     private rubxfacService: RubroxfacService,
     private facxconvService: FacxconvenioService,
     private rxfService: RubroxfacService,
-    private moduService: ModulosService
+    private moduService: ModulosService,
+    private interService: InteresesService
   ) {}
 
   ngOnInit(): void {
@@ -102,6 +111,7 @@ export class AddConvenioComponent implements OnInit {
 
     this.modulos();
     this.siguienteNroconvenio();
+    this.listarIntereses();
   }
 
   colocaColor(colores: any) {
@@ -185,7 +195,9 @@ export class AddConvenioComponent implements OnInit {
     let suma: number = 0;
     let i = 0;
     let com = 0;
+    let inte = 0;
     this._sincobro.forEach((item: any) => {
+      let interes = this.cInteres(item);
       if (
         this._sincobro[i].idmodulo.idmodulo === 3 &&
         this._sincobro[i].idabonado != null
@@ -195,11 +207,13 @@ export class AddConvenioComponent implements OnInit {
       if (this._sincobro[i].idmodulo.idmodulo === 4) {
         com = 0;
       }
+      this._sincobro[i].totaltarifa += interes;
+      inte += interes;
       suma += this._sincobro[i].totaltarifa + com;
       i++;
     });
-    console.log(suma);
     this.total = suma;
+    this.totInteres = inte;
     let cuotainicial = Math.round(this.total * this.porcentaje * 100) / 100;
     this.formConvenio.controls['cuotainicial'].setValue(cuotainicial);
   }
@@ -257,6 +271,14 @@ export class AddConvenioComponent implements OnInit {
 
     let i = 0;
     this.totaltarifaFacturas();
+    if (this.totInteres > 0) {
+      let r: any = {};
+      r = {
+        idrubro: 5,
+        valorunitario: this.totInteres,
+      };
+      this.rubros.push(r);
+    }
     this.sumaRubros(i);
   }
 
@@ -288,6 +310,55 @@ export class AddConvenioComponent implements OnInit {
     };
     this.facturas.push(r);
   }
+  listarIntereses() {
+    this.interService.getListaIntereses().subscribe({
+      next: (datos) => {
+        this._intereses = datos;
+      },
+      error: (err) => console.error(err.error),
+    });
+  }
+
+  /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
+  cInteres(factura: any) {
+    this.totInteres = 0;
+    this.arrCalculoInteres = [];
+    let interes: number = 0;
+    if (factura.estado != 3 && factura.formapago != 4) {
+      let fec = factura.feccrea.toString().split('-', 2);
+      let fechai: Date = new Date(`${fec[0]}-${fec[1]}-02`);
+      let fechaf: Date = new Date();
+      this.factura = factura;
+      fechaf.setMonth(fechaf.getMonth() - 1);
+      while (fechai <= fechaf) {
+        this.calInteres = {} as calcInteres;
+        let query = this._intereses.find(
+          (interes: { anio: number; mes: number }) =>
+            interes.anio === +fechai.getFullYear()! &&
+            interes.mes === +fechai.getMonth()! + 1
+        );
+        if (!query) {
+          this.calInteres.anio = +fechai.getFullYear()!;
+          this.calInteres.mes = +fechai.getMonth()! + 1;
+          this.calInteres.interes = 0;
+          query = this.calInteres;
+        } else {
+          this.calInteres.anio = query.anio;
+          this.calInteres.mes = query.mes;
+          this.calInteres.interes = query.porcentaje;
+          this.calInteres.valor = factura.totaltarifa;
+          this.arrCalculoInteres.push(this.calInteres);
+        }
+        fechai.setMonth(fechai.getMonth() + 1);
+      }
+      this.arrCalculoInteres.forEach((item: any) => {
+        //this.totInteres += (item.interes * item.valor) / 100;
+        interes += (item.interes * item.valor) / 100;
+        // this.subtotal();
+      });
+    }
+    return interes;
+  }
 
   //Calcula y guarda en el arreglo this.rubros los totales de cada rubro de las facturas que se 'convenian'
   sumaRubros(i: number) {
@@ -312,6 +383,7 @@ export class AddConvenioComponent implements OnInit {
           }
           j++;
         });
+        console.log(this.rubros);
         i++;
         if (i < this._sincobro.length) this.sumaRubros(i);
         else {
@@ -404,11 +476,9 @@ export class AddConvenioComponent implements OnInit {
 
   async rubroxfac(i: number, factura: any) {
     for (let j = 0; j < this.rubros.length; j++) {
-      console.log('RUBROS', this.rubros[j]);
       let rxf: Rubroxfac = new Rubroxfac();
       rxf.cantidad = 1;
       rxf.estado = 1;
-      console.log(this.facturas[i].porcentaje);
       rxf.valorunitario =
         +this.rubros[j].valorunitario.toFixed(2) * this.facturas[i].porcentaje;
       rxf.idfactura_facturas = factura;
@@ -499,4 +569,10 @@ export class AddConvenioComponent implements OnInit {
       this.formConvenio.controls['cuotainicial'].setValue('');
     }
   }
+}
+interface calcInteres {
+  anio: number;
+  mes: number;
+  interes: number;
+  valor: number;
 }

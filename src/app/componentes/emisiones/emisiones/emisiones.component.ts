@@ -107,7 +107,7 @@ export class EmisionesComponent implements OnInit {
     private s_emisionindividual: EmisionIndividualService,
     private s_pdf: PdfService,
     private s_rxfService: RubroxfacService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.modulo.idmodulo = 4;
@@ -349,7 +349,7 @@ export class EmisionesComponent implements OnInit {
   /*=====================
   ======INDIVIDUALES=====
   =====================*/
-  emisionIndividual() {}
+  emisionIndividual() { }
   getAllEmisiones() {
     this.emiService.findAllEmisiones().subscribe({
       next: (datos: any) => {
@@ -531,7 +531,7 @@ export class EmisionesComponent implements OnInit {
     this.s_emisionindividual
       .saveEmisionIndividual(emision_individual)
       .subscribe({
-        next: (d_emisionIndividual: any) => {},
+        next: (d_emisionIndividual: any) => { },
         error: (e) => console.error(e),
       });
     //this.swcalcular = true;
@@ -540,9 +540,10 @@ export class EmisionesComponent implements OnInit {
     let consumo = lectura.lecturaactual - lectura.lecturaanterior;
     let adultomayor = lectura.idabonado_abonados.adultomayor;
     let noAlcantarillado = lectura.idabonado_abonados.swalcantarillado;
-    if (adultomayor)
+    if (adultomayor) {
       if (categoria == 9 && consumo > 34) categoria = 1;
-      else if (categoria == 9 && consumo > 10) categoria = 1;
+    }
+    else if (categoria == 9 && consumo > 10) categoria = 1;
     if (categoria == 9 && consumo > 34) categoria = 1;
     if (categoria == 1 && consumo > 70) categoria = 2;
     let municipio = lectura.idabonado_abonados.municipio;
@@ -568,23 +569,23 @@ export class EmisionesComponent implements OnInit {
             num1 =
               Math.round(
                 (this.tarifa[0].idcategoria.fijoagua - 0.1) *
-                  this.porcResidencial[consumo] *
-                  100
+                this.porcResidencial[consumo] *
+                100
               ) / 100;
           } else {
             num1 =
               Math.round(
                 (this.tarifa[0].idcategoria.fijoagua - 0.1) *
-                  this.tarifa[0].porc *
-                  100
+                this.tarifa[0].porc *
+                100
               ) / 100;
           }
 
           let num2 =
             Math.round(
               (this.tarifa[0].idcategoria.fijosanea - 0.5) *
-                this.tarifa[0].porc *
-                100
+              this.tarifa[0].porc *
+              100
             ) / 100;
           let num3 =
             Math.round(
@@ -593,14 +594,14 @@ export class EmisionesComponent implements OnInit {
           let num4 =
             Math.round(
               ((consumo * this.tarifa[0].saneamiento) / 2) *
-                this.tarifa[0].porc *
-                100
+              this.tarifa[0].porc *
+              100
             ) / 100;
           let num5 =
             Math.round(
               ((consumo * this.tarifa[0].saneamiento) / 2) *
-                this.tarifa[0].porc *
-                100
+              this.tarifa[0].porc *
+              100
             ) / 100;
           let num7 = Math.round(0.5 * this.tarifa[0].porc * 100) / 100;
           let suma: number = 0;
@@ -701,7 +702,7 @@ export class EmisionesComponent implements OnInit {
         this.rubros.forEach((item: any) => {
           calcular += item.valorunitario;
           this.rxfService.saveRubroxfac(item).subscribe({
-            next: (datos) => {},
+            next: (datos) => { },
             error: (e) => console.error(e),
           });
         });
@@ -1125,9 +1126,8 @@ export class EmisionesComponent implements OnInit {
     let doc = new jsPDF('p', 'pt', 'a4');
     /* HEADER */
     let date_emision: Date = new Date(emisionIndividual.idemision.feccrea);
-    let fecemision = `${date_emision.getFullYear()}-${
-      date_emision.getMonth() + 1
-    }`;
+    let fecemision = `${date_emision.getFullYear()}-${date_emision.getMonth() + 1
+      }`;
     this.s_pdf.header(`REPORTE DE REFACTURACION INDIVIDUAL ${fecemision}`, doc);
 
     /* LECTURAS ANTERIORES */
@@ -1289,13 +1289,11 @@ export class EmisionesComponent implements OnInit {
       },
       body: [
         [
-          `Fecha emision:  ${dateEmision.getFullYear()}/${
-            dateEmision.getMonth() + 1
+          `Fecha emision:  ${dateEmision.getFullYear()}/${dateEmision.getMonth() + 1
           }/${dateEmision.getDate()}`,
         ],
         [
-          `Fecha impresión:  ${currentDate.getFullYear()}/${
-            currentDate.getMonth() + 1
+          `Fecha impresión:  ${currentDate.getFullYear()}/${currentDate.getMonth() + 1
           }/${currentDate.getDate()}`,
         ],
       ],
@@ -1305,7 +1303,7 @@ export class EmisionesComponent implements OnInit {
     //doc.save('datauristring');
     doc.output('dataurlnewwindow', { filename: 'comprobante.pdf' });
   }
-  getrubrosxfactura(idfactura: number) {}
+  getrubrosxfactura(idfactura: number) { }
   imprimir() {
     switch (this.optImprimir) {
       case '0':
