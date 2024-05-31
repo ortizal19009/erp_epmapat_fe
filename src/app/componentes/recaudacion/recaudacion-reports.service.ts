@@ -5,6 +5,7 @@ import autoTable from 'jspdf-autotable';
 import { Clientes } from 'src/app/modelos/clientes';
 import { UsuarioService } from 'src/app/servicios/administracion/usuario.service';
 import { ClientesService } from 'src/app/servicios/clientes.service';
+import { EmisionService } from 'src/app/servicios/emision.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 
 @Injectable({
@@ -30,23 +31,32 @@ export class RecaudacionReportsService {
     'NOVIEMBRE',
     'DICIEMBRE',
   ];
+  emision: any;
   constructor(
     private rubxfacService: RubroxfacService,
     private s_usuarios: UsuarioService,
-    private s_cliente: ClientesService
-  ) { }
-  cabeceraConsumoAgua(datos: any, doc: jsPDF, usuario: any, factura: any) {
+    private s_cliente: ClientesService,
+    private s_emision: EmisionService
+  ) {}
+  async cabeceraConsumoAgua(
+    datos: any,
+    doc: jsPDF,
+    usuario: any,
+    factura: any
+  ) {
     //doc.setFontSize(7);
-    console.log(datos)
-/*     this.s_cliente.getListaById(datos.idabonado_abonados.idresponsable).subscribe({
+    console.log(datos);
+    /*     this.s_cliente.getListaById(datos.idabonado_abonados.idresponsable).subscribe({
       next: (datos: any) => {
         console.log(datos)
       }, error: (e) => { console.error(e) }
     }) */
     let tableWidth = 200;
     let m3 = datos.lecturaactual - datos.lecturaanterior;
-    let fecha = datos.fechaemision.slice(0, 10).split('-');
+    let emi: any = await this.getEmisionByid(datos.idemision);
+    let fecha = emi.feccrea.slice(0, 10).split('-');
     let mesConsumo = `${this.meses[+fecha[1]! - 1]} ${fecha[0]}`;
+    console.log(emi);
     //console.log(datos)
     autoTable(doc, {
       tableWidth,
@@ -74,7 +84,7 @@ export class RecaudacionReportsService {
         [`Cliente: ${datos.idabonado_abonados.idresponsable.nombre}`],
         [`Dirección: ${datos.idabonado_abonados.direccionubicacion}`],
         /* [`Referencia: ${datos.idcliente.referencia}`], */
-        [`M3: ${m3}`, `Emision: ${datos.idemision}`],
+        [`M3: ${m3}`, `Emision: ${emi.emision}`],
         [
           `Cuenta: ${datos.idabonado_abonados.idabonado}`,
           `FechaPag: ${factura.fechacobro}`,
@@ -164,7 +174,7 @@ export class RecaudacionReportsService {
         let rubros: any = [];
         _rubrosxfac.forEach((item: any) => {
           if (item.idrubro_rubros.swiva === true) {
-            this.iva += (item.valorunitario * item.cantidad) * 0.15;
+            this.iva += item.valorunitario * item.cantidad * 0.15;
           }
           if (
             item.idrubro_rubros.idrubro != 5 &&
@@ -177,7 +187,7 @@ export class RecaudacionReportsService {
               item.valorunitario.toFixed(2),
             ]);
           } else if (item.idrubro_rubros.idrubro === 165) {
-            console.log("es 165", item)
+            console.log('es 165', item);
             this.iva = 0;
           } else {
             this.interes = item.valorunitario;
@@ -204,7 +214,7 @@ export class RecaudacionReportsService {
             1: { minCellWidth: 15, halign: 'center' },
             2: { minCellWidth: 15, halign: 'right' },
           },
-          columns: ['Descripción','Cant.', 'Valor unitario'],
+          columns: ['Descripción', 'Cant.', 'Valor unitario'],
           body: rubros,
         });
         autoTable(doc, {
@@ -241,5 +251,9 @@ export class RecaudacionReportsService {
       error: (err) =>
         console.error('Al recuperar el datalle de la Planilla: ', err.error),
     });
+  }
+  async getEmisionByid(idemision: number) {
+    const emision = this.s_emision.getByIdemision(idemision).toPromise();
+    return emision;
   }
 }

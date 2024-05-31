@@ -252,10 +252,8 @@ export class AddConvenioComponent implements OnInit {
     let totalpago = Math.round(this.pagomensual * this.nropagos * 100) / 100;
     this.formConvenio.controls['totalpago'].setValue(totalpago);
     let cuotafinal =
-      Math.round(
-        (this.total - cuotainicial - this.pagomensual * this.nropagos) * 100
-      ) / 100;
-    this.formConvenio.controls['cuotafinal'].setValue(cuotafinal);
+      this.total - cuotainicial - this.pagomensual * this.nropagos;
+    this.formConvenio.controls['cuotafinal'].setValue(cuotafinal.toFixed(2));
 
     let i = 0;
     this.totaltarifaFacturas();
@@ -269,7 +267,7 @@ export class AddConvenioComponent implements OnInit {
     let r: any = {};
     r = {
       totaltarifa: cuotainicial,
-      porcentaje: Math.round((cuotainicial / this.total) * 100) / 100,
+      porcentaje: cuotainicial / this.total,
     };
     this.facturas.push(r);
     //Cuotas mensuales
@@ -278,7 +276,7 @@ export class AddConvenioComponent implements OnInit {
     for (let i = 0; i < cuotas - 1; i++) {
       r = {
         totaltarifa: pagomensual,
-        porcentaje: Math.round((pagomensual / this.total) * 100) / 100,
+        porcentaje: pagomensual / this.total,
       };
       this.facturas.push(r);
     }
@@ -286,7 +284,7 @@ export class AddConvenioComponent implements OnInit {
     let cuotafinal = this.formConvenio.value.cuotafinal;
     r = {
       totaltarifa: cuotafinal,
-      porcentaje: Math.round((cuotafinal / this.total) * 100) / 100,
+      porcentaje: cuotafinal / this.total,
     };
     this.facturas.push(r);
   }
