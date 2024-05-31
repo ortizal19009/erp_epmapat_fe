@@ -84,7 +84,6 @@ export class DefinirComponent implements OnInit {
    guardar() {
       this.defService.updateDefinir(1, this.formDefinir.value).subscribe({
          next: datos => {
-            console.log('Ok')
             this.regresar()
          },
          error: err => console.error(err.error)

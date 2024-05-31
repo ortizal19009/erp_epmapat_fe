@@ -373,7 +373,6 @@ export class AddRecaudaComponent implements OnInit {
   sinCobro(idcliente: number) {
     this.facService.getSinCobro(idcliente).subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this._sincobro = datos;
         if (datos.length > 0) {
           let suma: number = 0;
@@ -385,7 +384,6 @@ export class AddRecaudaComponent implements OnInit {
               const abonado: Abonados = await this.getAbonado(item.idabonado);
               item.direccion = abonado.direccionubicacion;
               item.responsablePago = abonado.idresponsable.nombre;
-              console.log(abonado);
             } else {
               item.direccion = 'S/D';
             }

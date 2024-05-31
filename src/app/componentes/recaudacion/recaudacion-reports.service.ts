@@ -45,10 +45,8 @@ export class RecaudacionReportsService {
     factura: any
   ) {
     //doc.setFontSize(7);
-    console.log(datos);
     /*     this.s_cliente.getListaById(datos.idabonado_abonados.idresponsable).subscribe({
       next: (datos: any) => {
-        console.log(datos)
       }, error: (e) => { console.error(e) }
     }) */
     let tableWidth = 200;
@@ -56,8 +54,6 @@ export class RecaudacionReportsService {
     let emi: any = await this.getEmisionByid(datos.idemision);
     let fecha = emi.feccrea.slice(0, 10).split('-');
     let mesConsumo = `${this.meses[+fecha[1]! - 1]} ${fecha[0]}`;
-    console.log(emi);
-    //console.log(datos)
     autoTable(doc, {
       tableWidth,
       styles: { fontSize: 9, fontStyle: 'bold' },
@@ -138,8 +134,6 @@ export class RecaudacionReportsService {
     });
   }
   comprobantePago(l_datos: any, factura: any) {
-    console.log(l_datos);
-    console.log(factura);
     if (factura.interescobrado === null) {
       factura.interescobrado = 0;
     }
@@ -170,7 +164,6 @@ export class RecaudacionReportsService {
     });
     this.rubxfacService.getByIdfactura(idfactura).subscribe({
       next: (_rubrosxfac: any) => {
-        console.log(_rubrosxfac);
         let rubros: any = [];
         _rubrosxfac.forEach((item: any) => {
           if (item.idrubro_rubros.swiva === true) {
@@ -187,7 +180,6 @@ export class RecaudacionReportsService {
               item.valorunitario.toFixed(2),
             ]);
           } else if (item.idrubro_rubros.idrubro === 165) {
-            console.log('es 165', item);
             this.iva = 0;
           } else {
             this.interes = item.valorunitario;

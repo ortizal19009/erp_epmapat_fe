@@ -177,7 +177,6 @@ export class FacturasComponent implements OnInit {
     this.router.navigate(['recal-factura']);
   }
   impComprobante(datos: any) {
-    console.log(datos);
     let lectura: any;
     this.facServicio.getById(datos.idfactura).subscribe({
       next: (d_factura: any) => {
