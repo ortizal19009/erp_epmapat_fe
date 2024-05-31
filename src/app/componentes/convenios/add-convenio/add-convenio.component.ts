@@ -198,7 +198,7 @@ export class AddConvenioComponent implements OnInit {
       suma += this._sincobro[i].totaltarifa + com;
       i++;
     });
-    console.log(suma)
+    console.log(suma);
     this.total = suma;
     let cuotainicial = Math.round(this.total * this.porcentaje * 100) / 100;
     this.formConvenio.controls['cuotainicial'].setValue(cuotainicial);
@@ -309,9 +309,7 @@ export class AddConvenioComponent implements OnInit {
           else {
             this.rubros[indice].valorunitario =
               Math.round(
-                (this.rubros[indice].valorunitario +
-                  +r.valorunitario.toFixed(2)) *
-                  100
+                (this.rubros[indice].valorunitario + r.valorunitario) * 100
               ) / 100;
           }
           j++;
