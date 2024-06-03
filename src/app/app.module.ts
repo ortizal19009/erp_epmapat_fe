@@ -80,9 +80,9 @@ import { ListarAbonadosComponent } from './componentes/abonados/listar-abonados/
 import { AddAbonadosComponent } from './componentes/abonados/add-abonados/add-abonados.component';
 import { ModificarAbonadosComponent } from './componentes/abonados/modificar-abonados/modificar-abonados.component';
 import { DetallesAbonadoComponent } from './componentes/abonados/detalles-abonado/detalles-abonado.component';
-import { ListarCertificacionesComponent } from './componentes/certificaciones/listar-certificaciones/certificaciones.component';
-import { AddCertificacionesComponent } from './componentes/certificaciones/add-certificaciones/add-certificaciones.component';
-import { ModificarCertificacionesComponent } from './componentes/certificaciones/modificar-certificaciones/modificar-certificaciones.component';
+import { ListarCertificacionesComponent } from './componentes/ccertificaciones/listar-certificaciones/certificaciones.component';
+import { AddCertificacionesComponent } from './componentes/ccertificaciones/add-certificaciones/add-certificaciones.component';
+import { ModificarCertificacionesComponent } from './componentes/ccertificaciones/modificar-certificaciones/modificar-certificaciones.component';
 import { ListarReclamosComponent } from './componentes/reclamos/listar-reclamos/listar-reclamos.component';
 import { AddReclamosComponent } from './componentes/reclamos/add-reclamos/add-reclamos.component';
 import { ModificarReclamosComponent } from './componentes/reclamos/modificar-reclamos/modificar-reclamos.component';
@@ -103,9 +103,9 @@ import { DetFacelectroComponent } from './componentes/facelectro/det-facelectro/
 import { InfoConvenioComponent } from './componentes/convenios/info-convenio/info-convenio.component';
 import { InfoCajaComponent } from './componentes/caja/info-caja/info-caja.component';
 import { InfoEstablecimientoComponent } from './componentes/ptoemision/info-establecimiento/info-establecimiento.component';
-import { TramitesComponent } from './componentes/tramites/tramites/tramites.component';
-import { AddTramiteComponent } from './componentes/tramites/add-tramite/add-tramite.component';
-import { InfoTramiteComponent } from './componentes/tramites/info-tramite/info-tramite.component';
+import { TramitesComponent } from './componentes/ctramites/tramites/tramites.component';
+import { AddTramiteComponent } from './componentes/ctramites/add-tramite/add-tramite.component';
+import { InfoTramiteComponent } from './componentes/ctramites/info-tramite/info-tramite.component';
 import { InfoPreciosxcatComponent } from './componentes/preciosxcat/info-preciosxcat/info-preciosxcat.component';
 import { RecaudacionComponent } from './componentes/recaudacion/recaudacion/recaudacion.component';
 import { AddRecaudaComponent } from './componentes/recaudacion/add-recauda/add-recauda.component';
@@ -200,8 +200,8 @@ import { SimulacionComponent } from './componentes/pliego24/simulacion/simulacio
 import { AddLiquiacfpComponent } from './componentes/contabilidad/transaci/add-liquiacfp/add-liquiacfp.component';
 import { ModificarTramitenuevoComponent } from './componentes/aguatramite/modificar-tramitenuevo/modificar-tramitenuevo.component';
 import { AddAguatramiteComponent } from './componentes/aguatramite/add-aguatramite/add-aguatramite.component';
-import { CertitmpComponent } from './componentes/certificaciones/certitmp/certitmp.component';
-import { GeneCertificacionComponent } from './componentes/certificaciones/gene-certificacion/gene-certificacion.component';
+import { CertitmpComponent } from './componentes/ccertificaciones/certitmp/certitmp.component';
+import { GeneCertificacionComponent } from './componentes/ccertificaciones/gene-certificacion/gene-certificacion.component';
 import { AguatramComponent } from './componentes/aguatramite/aguatram/aguatram.component';
 import { BuscarClienteComponent } from './componentes/clientes/buscar-cliente/buscar-cliente.component';
 import { ModiUsuarioComponent } from './componentes/administracion/usuarios/modi-usuario/modi-usuario.component';

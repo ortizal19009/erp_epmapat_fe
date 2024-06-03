@@ -5,7 +5,7 @@ import { Clientes } from 'src/app/modelos/clientes';
 import { Facturas } from 'src/app/modelos/facturas.model';
 import { TpCertifica } from 'src/app/modelos/tp-certifica';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
-import { CertificacionesService } from 'src/app/servicios/certificaciones.service';
+import { CertificacionesService } from 'src/app/servicios/ccertificaciones.service';
 import { DocCertificacionesService } from 'src/app/servicios/doc-certificaciones.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 
@@ -40,8 +40,8 @@ export class GeneCertificacionComponent implements OnInit {
 
    ngOnInit(): void {
       let idcertificacion = this.acRouter.snapshot.paramMap.get('idcertificacion');
-      sessionStorage.setItem('ventana', '/certificaciones');
-      let coloresJSON = sessionStorage.getItem('/certificaciones');
+      sessionStorage.setItem('ventana', '/ccertificaciones');
+      let coloresJSON = sessionStorage.getItem('/ccertificaciones');
       if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
 
       this.formGenera = this.fb.group({
@@ -138,7 +138,7 @@ export class GeneCertificacionComponent implements OnInit {
       }
    }
 
-   regresar() { this.router.navigate(['certificaciones']); }
+   regresar() { this.router.navigate(['ccertificaciones']); }
 
    findAboByCliente(cliente: Clientes) {
       if (cliente != null) {

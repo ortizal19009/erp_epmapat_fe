@@ -1,11 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Tramites } from '../modelos/tramites';
+import { Tramites } from '../modelos/ctramites';
 import { environment } from 'src/environments/environment';
 
 const apiUrl = environment.API_URL;
-const baseUrl = `${apiUrl}/tramites`;
+const baseUrl = `${apiUrl}/ctramites`;
 
 @Injectable({
    providedIn: 'root'

@@ -1,5 +1,5 @@
 import { Facturas } from "./facturas.model";
-import { Tramites } from "./tramites";
+import { Tramites } from "./ctramites";
 
 export class LiquidaTramite {
     idliquidatrami: number;

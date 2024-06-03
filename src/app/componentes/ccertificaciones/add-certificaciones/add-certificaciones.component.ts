@@ -2,12 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
-import { Certificaciones } from 'src/app/modelos/certificaciones';
+import { Certificaciones } from 'src/app/modelos/ccertificaciones';
 import { Clientes } from 'src/app/modelos/clientes';
 import { Facturas } from 'src/app/modelos/facturas.model';
 import { Modulos } from 'src/app/modelos/modulos.model';
 import { TpCertifica } from 'src/app/modelos/tp-certifica';
-import { CertificacionesService } from 'src/app/servicios/certificaciones.service';
+import { CertificacionesService } from 'src/app/servicios/ccertificaciones.service';
 import { ClientesService } from 'src/app/servicios/clientes.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { TpCertificaService } from 'src/app/servicios/tp-certifica.service';
@@ -43,8 +43,8 @@ export class AddCertificacionesComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    sessionStorage.setItem('ventana', '/certificaciones');
-    let coloresJSON = sessionStorage.getItem('/certificaciones');
+    sessionStorage.setItem('ventana', '/ccertificaciones');
+    let coloresJSON = sessionStorage.getItem('/ccertificaciones');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
 
     let date: Date = new Date();
@@ -182,7 +182,7 @@ export class AddCertificacionesComponent implements OnInit {
   }
 
   regresar() {
-    this.router.navigate(['certificaciones']);
+    this.router.navigate(['ccertificaciones']);
   }
 
   guardarCertificacion() {
@@ -199,7 +199,6 @@ export class AddCertificacionesComponent implements OnInit {
   getUltimaCertificacion() {
     this.certificacionesS.ultima().subscribe({
       next: (datos) => {
-        console.log(datos);
         this.certificaciones.numero = datos.numero + 1;
       },
       error: (e) => console.error(e),

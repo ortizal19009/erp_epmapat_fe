@@ -1,11 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Certificaciones } from '../modelos/certificaciones';
+import { Certificaciones } from '../modelos/ccertificaciones';
 import { environment } from 'src/environments/environment';
 
 const apiUrl = environment.API_URL;
-const baseUrl = `${apiUrl}/certificaciones`;
+const baseUrl = `${apiUrl}/ccertificaciones`;
 
 @Injectable({
   providedIn: 'root'

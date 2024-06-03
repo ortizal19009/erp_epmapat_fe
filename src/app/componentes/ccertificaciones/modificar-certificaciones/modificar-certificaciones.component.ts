@@ -2,10 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
-import { Certificaciones } from 'src/app/modelos/certificaciones';
+import { Certificaciones } from 'src/app/modelos/ccertificaciones';
 import { Facturas } from 'src/app/modelos/facturas.model';
 import { TpCertifica } from 'src/app/modelos/tp-certifica';
-import { CertificacionesService } from 'src/app/servicios/certificaciones.service';
+import { CertificacionesService } from 'src/app/servicios/ccertificaciones.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { TpCertificaService } from 'src/app/servicios/tp-certifica.service';
 
@@ -57,7 +57,7 @@ export class ModificarCertificacionesComponent implements OnInit {
   }
 
   retornarListarCertificaiones() {
-    this.router.navigate(['/certificaciones']);
+    this.router.navigate(['/ccertificaciones']);
   }
 
   guardarCertificacion() {

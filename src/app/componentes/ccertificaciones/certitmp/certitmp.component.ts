@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Certificaciones } from 'src/app/modelos/certificaciones';
-import { CertificacionesService } from 'src/app/servicios/certificaciones.service';
+import { Certificaciones } from 'src/app/modelos/ccertificaciones';
+import { CertificacionesService } from 'src/app/servicios/ccertificaciones.service';
 import { DocCertificacionesService } from 'src/app/servicios/doc-certificaciones.service';
 
 @Component({

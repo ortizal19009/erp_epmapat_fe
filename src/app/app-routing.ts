@@ -61,16 +61,15 @@ import { AddRubroComponent } from './componentes/rubros/add-rubro/add-rubro.comp
 import { ModiRubroComponent } from './componentes/rubros/modi-rubro/modi-rubro.component';
 
 //========= TRÁMITES ==========
-import { InfoTramiteComponent } from './componentes/tramites/info-tramite/info-tramite.component';
+import { InfoTramiteComponent } from './componentes/ctramites/info-tramite/info-tramite.component';
 import { AddAguatramiteComponent } from './componentes/aguatramite/add-aguatramite/add-aguatramite.component';
 
-import { TramitesComponent } from './componentes/tramites/tramites/tramites.component';
-import { AddTramiteComponent } from './componentes/tramites/add-tramite/add-tramite.component';
+import { AddTramiteComponent } from './componentes/ctramites/add-tramite/add-tramite.component';
 
-import { ListarCertificacionesComponent } from './componentes/certificaciones/listar-certificaciones/certificaciones.component';
-import { ModificarCertificacionesComponent } from './componentes/certificaciones/modificar-certificaciones/modificar-certificaciones.component';
-import { AddCertificacionesComponent } from './componentes/certificaciones/add-certificaciones/add-certificaciones.component';
-import { GeneCertificacionComponent } from './componentes/certificaciones/gene-certificacion/gene-certificacion.component';
+import { ListarCertificacionesComponent } from './componentes/ccertificaciones/listar-certificaciones/certificaciones.component';
+import { ModificarCertificacionesComponent } from './componentes/ccertificaciones/modificar-certificaciones/modificar-certificaciones.component';
+import { AddCertificacionesComponent } from './componentes/ccertificaciones/add-certificaciones/add-certificaciones.component';
+import { GeneCertificacionComponent } from './componentes/ccertificaciones/gene-certificacion/gene-certificacion.component';
 import { AguatramComponent } from './componentes/aguatramite/aguatram/aguatram.component';
 
 //Recaudacion
@@ -201,7 +200,7 @@ import { UsuariosComponent } from './componentes/administracion/usuarios/usuario
 import { ModiUsuarioComponent } from './componentes/administracion/usuarios/modi-usuario/modi-usuario.component';
 
 import { ColoresComponent } from './componentes/administracion/colores/colores.component';
-import { CertitmpComponent } from './componentes/certificaciones/certitmp/certitmp.component';
+import { CertitmpComponent } from './componentes/ccertificaciones/certitmp/certitmp.component';
 import { TransferenciasComponent } from './componentes/recaudacion/transferencias/transferencias.component';
 import { PerfilUsuarioComponent } from './componentes/administracion/usuarios/perfil-usuario/perfil-usuario.component';
 import { RecalFacturaComponent } from './componentes/facturas/recal-factura/recal-factura.component';
@@ -211,6 +210,7 @@ import { ImpLecturasComponent } from './componentes/lecturas/imp-lecturas/imp-le
 import { ImpCajasComponent } from './componentes/caja/imp-cajas/imp-cajas.component';
 import { ImpInfoCajasComponent } from './componentes/caja/info-caja/imp-info-cajas/imp-info-cajas.component';
 import { FecfacturaComponent } from './componentes/facelectro/fecfactura/fecfactura.component';
+import { TramitesComponent } from './componentes/ctramites/tramites/tramites.component';
 
 const routes: Routes = [
   //Consumo de Agua
@@ -277,7 +277,7 @@ const routes: Routes = [
 
   // forms-aguatramite/1
 
-  { path: 'tramites', component: TramitesComponent },
+  { path: 'ctramites', component: TramitesComponent },
   { path: 'add-tramite', component: AddTramiteComponent },
   { path: 'info-tramite', component: InfoTramiteComponent },
 
@@ -285,7 +285,7 @@ const routes: Routes = [
   { path: 'add-tramites1', component: AddTramites1Component },
 
   //Certificaciones
-  { path: 'certificaciones', component: ListarCertificacionesComponent },
+  { path: 'ccertificaciones', component: ListarCertificacionesComponent },
   { path: 'modi-certificacion', component: ModificarCertificacionesComponent },
   { path: 'add-certificacion', component: AddCertificacionesComponent },
   {

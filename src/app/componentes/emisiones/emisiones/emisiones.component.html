@@ -129,7 +129,7 @@
          <table class="table table-hover table-bordered table-sm sombra" #miTabla>
             <thead class="cabecera">
                <tr class="text-center">
-                  <th></th>
+                  <th class="col-sm-1"></th>
                   <th>Código</th>
                   <th>Ruta</th>
                   <th>F.Cierre</th>
@@ -154,8 +154,7 @@
                <td *ngIf="!swfiltro" colspan="4" class="text-right font-weight-bold">TOTAL: </td>
                <td *ngIf="!swfiltro" class="text-right font-weight-bold">{{ subtotal | number:'1.0'}}</td>
                <td>$ {{totalSuma.toFixed(2)}}</td>
-            </tbody>AutoTable - Generate PDF tables and lists (jsPDF plugin)
-
+            </tbody>
          </table>
       </div>
    </div>
@@ -240,8 +239,8 @@
                                  <div class="input-group-prepend">
                                     <span class="input-group-text font-weight-bold">Emisión</span>
                                  </div>
-                                 <select type="text" class="form-control text-center"
-                                    formControlName="emision" minlength="4" maxlength="4" required>
+                                 <select type="text" class="form-control text-center" formControlName="emision"
+                                    minlength="4" maxlength="4" required>
                                     <option value={{emision.idemision}} *ngFor="let emision of _allemisiones">
                                        {{emision.emision}}</option>
                                  </select>

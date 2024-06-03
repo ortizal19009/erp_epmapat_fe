@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { TramitesService } from 'src/app/servicios/tramites.service';
+import { TramitesService } from 'src/app/servicios/ctramites.service';
 
 @Component({
    selector: 'app-info-tramite',

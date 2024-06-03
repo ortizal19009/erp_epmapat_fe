@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ColoresService } from 'src/app/compartida/colores.service';
-import { Tramites } from 'src/app/modelos/tramites';
+import { Tramites } from 'src/app/modelos/ctramites';
 import { LiquidaTramiteService } from 'src/app/servicios/liquida-tramite.service';
 import { TpTramiteService } from 'src/app/servicios/tp-tramite.service';
-import { TramitesService } from 'src/app/servicios/tramites.service';
+import { TramitesService } from 'src/app/servicios/ctramites.service';
 
 @Component({
    selector: 'app-tramites',

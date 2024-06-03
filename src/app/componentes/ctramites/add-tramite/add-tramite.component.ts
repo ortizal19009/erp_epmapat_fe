@@ -11,7 +11,7 @@ import { LiquidaTramiteService } from 'src/app/servicios/liquida-tramite.service
 import { RubroAdicionalService } from 'src/app/servicios/rubro-adicional.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { TpTramiteService } from 'src/app/servicios/tp-tramite.service';
-import { TramitesService } from 'src/app/servicios/tramites.service';
+import { TramitesService } from 'src/app/servicios/ctramites.service';
 
 @Component({
   selector: 'app-add-tramite',

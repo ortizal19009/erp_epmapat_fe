@@ -6,7 +6,7 @@ import { ClientesService } from 'src/app/servicios/clientes.service';
 import { FacelectroService } from 'src/app/servicios/facelectro.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
-import { TramitesService } from 'src/app/servicios/tramites.service';
+import { TramitesService } from 'src/app/servicios/ctramites.service';
 
 @Component({
    selector: 'app-detalles-cliente',
