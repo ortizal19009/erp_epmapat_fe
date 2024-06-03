@@ -616,7 +616,6 @@ export class LecturasComponent implements OnInit {
                   if (this.kontador < this._lecturas.length) this.planillas();
                 } else {
                   this.tarifa = resp;
-
                   if (categoria == 1) {
                     num1 =
                       Math.round(

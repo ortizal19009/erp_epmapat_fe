@@ -107,7 +107,7 @@ export class EmisionesComponent implements OnInit {
     private s_emisionindividual: EmisionIndividualService,
     private s_pdf: PdfService,
     private s_rxfService: RubroxfacService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.modulo.idmodulo = 4;
@@ -222,6 +222,7 @@ export class EmisionesComponent implements OnInit {
 
     this.ruxemiService.getByIdEmision(this.idemision).subscribe({
       next: (datos) => {
+        console.log(datos);
         this._rutasxemi = datos;
         this.s_lecturas.rubrosEmitidos(this.idemision).subscribe({
           next: (datos: any) => {
@@ -349,7 +350,7 @@ export class EmisionesComponent implements OnInit {
   /*=====================
   ======INDIVIDUALES=====
   =====================*/
-  emisionIndividual() { }
+  emisionIndividual() {}
   getAllEmisiones() {
     this.emiService.findAllEmisiones().subscribe({
       next: (datos: any) => {
@@ -531,7 +532,7 @@ export class EmisionesComponent implements OnInit {
     this.s_emisionindividual
       .saveEmisionIndividual(emision_individual)
       .subscribe({
-        next: (d_emisionIndividual: any) => { },
+        next: (d_emisionIndividual: any) => {},
         error: (e) => console.error(e),
       });
     //this.swcalcular = true;
@@ -542,8 +543,7 @@ export class EmisionesComponent implements OnInit {
     let noAlcantarillado = lectura.idabonado_abonados.swalcantarillado;
     if (adultomayor) {
       if (categoria == 9 && consumo > 34) categoria = 1;
-    }
-    else if (categoria == 9 && consumo > 10) categoria = 1;
+    } else if (categoria == 9 && consumo > 10) categoria = 1;
     if (categoria == 9 && consumo > 34) categoria = 1;
     if (categoria == 1 && consumo > 70) categoria = 2;
     let municipio = lectura.idabonado_abonados.municipio;
@@ -569,23 +569,23 @@ export class EmisionesComponent implements OnInit {
             num1 =
               Math.round(
                 (this.tarifa[0].idcategoria.fijoagua - 0.1) *
-                this.porcResidencial[consumo] *
-                100
+                  this.porcResidencial[consumo] *
+                  100
               ) / 100;
           } else {
             num1 =
               Math.round(
                 (this.tarifa[0].idcategoria.fijoagua - 0.1) *
-                this.tarifa[0].porc *
-                100
+                  this.tarifa[0].porc *
+                  100
               ) / 100;
           }
 
           let num2 =
             Math.round(
               (this.tarifa[0].idcategoria.fijosanea - 0.5) *
-              this.tarifa[0].porc *
-              100
+                this.tarifa[0].porc *
+                100
             ) / 100;
           let num3 =
             Math.round(
@@ -594,14 +594,14 @@ export class EmisionesComponent implements OnInit {
           let num4 =
             Math.round(
               ((consumo * this.tarifa[0].saneamiento) / 2) *
-              this.tarifa[0].porc *
-              100
+                this.tarifa[0].porc *
+                100
             ) / 100;
           let num5 =
             Math.round(
               ((consumo * this.tarifa[0].saneamiento) / 2) *
-              this.tarifa[0].porc *
-              100
+                this.tarifa[0].porc *
+                100
             ) / 100;
           let num7 = Math.round(0.5 * this.tarifa[0].porc * 100) / 100;
           let suma: number = 0;
@@ -702,7 +702,7 @@ export class EmisionesComponent implements OnInit {
         this.rubros.forEach((item: any) => {
           calcular += item.valorunitario;
           this.rxfService.saveRubroxfac(item).subscribe({
-            next: (datos) => { },
+            next: (datos) => {},
             error: (e) => console.error(e),
           });
         });
@@ -1115,6 +1115,125 @@ export class EmisionesComponent implements OnInit {
       container.appendChild(embed);
     }
   }
+  r_emisionFinal() {
+    console.log(this.selEmision);
+    const nombreEmision = new NombreEmisionPipe(); // Crea una instancia del pipe
+    let m_izquierda = 150;
+    var doc = new jsPDF('p', 'pt', 'a4');
+    this._pdf.header(
+      `REPORTE FINAL EMISION: ${nombreEmision.transform(this.selEmision)}`,
+      doc
+    );
+    doc.setFont('times', 'bold');
+    doc.setFontSize(16);
+    doc.setFont('times', 'bold');
+    doc.setFontSize(12);
+    doc.setFont('times', 'bold');
+    doc.setFontSize(11);
+    doc.setFont('times', 'normal');
+    doc.setFontSize(11);
+    var datos: any = [];
+    var i = 0;
+    let suma: number = 0;
+    this._rubrosEmision.forEach(() => {
+      if (this._rubrosEmision[i][0] != 5) {
+        /*       if (this._rutasxemi[i].fechacierre == null) fecha = '';
+        else fecha = this._rutasxemi[i].fechacierre.slice(0, 10); */
+        datos.push([
+          i + 1,
+          this._rubrosEmision[i][0],
+          this._rubrosEmision[i][1],
+          this._rubrosEmision[i][2],
+        ]);
+        suma += this._rubrosEmision[i][2];
+      }
+      i++;
+    });
+    datos.push([
+      '',
+      'TOTAL',
+      `${this.subtotal.toLocaleString('en-US')} m3`,
+      `$ ${suma.toFixed(2)}`,
+    ]);
+
+    const addPageNumbers = function () {
+      const pageCount = doc.internal.pages.length;
+      for (let i = 1; i <= pageCount - 1; i++) {
+        doc.setPage(i);
+        doc.setFontSize(10);
+        doc.text(
+          'Página ' + i + ' de ' + (pageCount - 1),
+          m_izquierda,
+          doc.internal.pageSize.height - 10
+        );
+      }
+    };
+
+    autoTable(doc, {
+      head: [['#', 'N°Rubro', 'Descripción', 'Valor']],
+      theme: 'grid',
+      headStyles: {
+        fillColor: [68, 103, 114],
+        fontStyle: 'bold',
+        halign: 'center',
+      },
+      styles: {
+        font: 'helvetica',
+        fontSize: 11,
+        cellPadding: 1,
+        halign: 'center',
+      },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 30 },
+        1: { halign: 'center', cellWidth: 60 },
+        2: { halign: 'left', cellWidth: 150 },
+        3: { halign: 'right', cellWidth: 70 },
+      },
+      margin: { left: m_izquierda - 1, top: 22, right: 51, bottom: 13 },
+      body: datos,
+
+      didParseCell: function (data) {
+        var fila = data.row.index;
+        var columna = data.column.index;
+        if (columna > 0 && typeof data.cell.raw === 'number') {
+          data.cell.text = [data.cell.raw.toLocaleString('en-US')];
+        }
+        if (fila === datos.length - 1 || columna == 0) {
+          data.cell.styles.fontStyle = 'bold';
+        } // Total Bold
+      },
+    });
+    addPageNumbers();
+
+    var opciones = {
+      filename: 'RubrosEmision.pdf',
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+      compress: true,
+    };
+
+    if (this.otraPagina) doc.output('dataurlnewwindow', opciones);
+    else {
+      const pdfDataUri = doc.output('datauristring');
+      //Si ya existe el <embed> primero lo remueve
+      const elementoExistente = document.getElementById('idembed');
+      if (elementoExistente) {
+        elementoExistente.remove();
+      }
+      //Crea el <embed>
+      var embed = document.createElement('embed');
+      embed.setAttribute('src', pdfDataUri);
+      embed.setAttribute('type', 'application/pdf');
+      embed.setAttribute('width', '70%');
+      embed.setAttribute('height', '100%');
+      embed.setAttribute('id', 'idembed');
+      //Agrega el <embed> al contenedor del Modal
+      var container: any;
+      container = document.getElementById('pdf');
+      container.appendChild(embed);
+    }
+  }
   imprimirReporte() {
     let doc = new jsPDF('p', 'pt', 'a4');
     this.s_pdf.header('REPORETE DE REFACTURACION', doc);
@@ -1126,8 +1245,9 @@ export class EmisionesComponent implements OnInit {
     let doc = new jsPDF('p', 'pt', 'a4');
     /* HEADER */
     let date_emision: Date = new Date(emisionIndividual.idemision.feccrea);
-    let fecemision = `${date_emision.getFullYear()}-${date_emision.getMonth() + 1
-      }`;
+    let fecemision = `${date_emision.getFullYear()}-${
+      date_emision.getMonth() + 1
+    }`;
     this.s_pdf.header(`REPORTE DE REFACTURACION INDIVIDUAL ${fecemision}`, doc);
 
     /* LECTURAS ANTERIORES */
@@ -1289,11 +1409,13 @@ export class EmisionesComponent implements OnInit {
       },
       body: [
         [
-          `Fecha emision:  ${dateEmision.getFullYear()}/${dateEmision.getMonth() + 1
+          `Fecha emision:  ${dateEmision.getFullYear()}/${
+            dateEmision.getMonth() + 1
           }/${dateEmision.getDate()}`,
         ],
         [
-          `Fecha impresión:  ${currentDate.getFullYear()}/${currentDate.getMonth() + 1
+          `Fecha impresión:  ${currentDate.getFullYear()}/${
+            currentDate.getMonth() + 1
           }/${currentDate.getDate()}`,
         ],
       ],
@@ -1303,7 +1425,7 @@ export class EmisionesComponent implements OnInit {
     //doc.save('datauristring');
     doc.output('dataurlnewwindow', { filename: 'comprobante.pdf' });
   }
-  getrubrosxfactura(idfactura: number) { }
+  getrubrosxfactura(idfactura: number) {}
   imprimir() {
     switch (this.optImprimir) {
       case '0':
@@ -1311,6 +1433,9 @@ export class EmisionesComponent implements OnInit {
         break;
       case '1':
         this.rRubrosxEmision();
+        break;
+      case '2':
+        this.r_emisionFinal();
         break;
     }
   }
