@@ -93,10 +93,17 @@ export class LecturasService {
   rubrosEmitidos(idemision: number) {
     return this.http.get(`${baseUrl}/emision/rubros?idemision=${idemision}`);
   }
-  getByIdEmision(idemision: number){
+  getByIdEmision(idemision: number) {
     return this.http.get<Lecturas[]>(`${baseUrl}/emision/${idemision}`);
   }
-  getByIdEmisionIdabonado(idemision: number, idabonado: number){
-    return this.http.get<Lecturas[]>(`${baseUrl}/emision/${idemision}/${idabonado}`);
+  getByIdEmisionIdabonado(idemision: number, idabonado: number) {
+    return this.http.get<Lecturas[]>(
+      `${baseUrl}/emision/${idemision}/${idabonado}`
+    );
+  } /* REPORTES  */
+  getR_EmisionFinal(idemision: number) {
+    return this.http.get<any>(
+      `${baseUrl}/reportes/emisionfinal?idemision=${idemision}`
+    );
   }
 }

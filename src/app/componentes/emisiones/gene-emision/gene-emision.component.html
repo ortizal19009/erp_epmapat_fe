@@ -9,7 +9,6 @@
                   </h5>
                   <p>Total de Rutas: <span class="font-weight-bold"> {{ totalrutas }} </span></p>
                   <small class="card-text">Se generarán los Abonados de cada Ruta, para cargar las Lecturas</small>
-
                   <div class="mt-3 mb-0 text-center">
                      <button type="button" class="btn btn-success btn-sm mx-1 mb-0" (click)="generar()">
                         <i class="fa fa-check-circle"></i> Aceptar</button>
@@ -17,7 +16,6 @@
                         [disabled]="swgenerando">
                         <i class="fa fa-times-circle"></i> Cancelar</button>
                   </div>
-
                   <div *ngIf="swgenerando" class="mt-2 progress">
                      <div class="progress-bar" [ngStyle]="{ 'width.%': progreso }">{{ progreso / 100 | percent:'1.2-2'}}
                      </div>
