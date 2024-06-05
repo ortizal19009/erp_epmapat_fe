@@ -85,7 +85,7 @@ export class LecturasComponent implements OnInit {
     private rubxfacService: RubroxfacService,
     private pli24Service: Pliego24Service,
     private s_novedad: NovedadesService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/lecturas');
@@ -360,23 +360,23 @@ export class LecturasComponent implements OnInit {
             num1 =
               Math.round(
                 (this.tarifa[0].idcategoria.fijoagua - 0.1) *
-                this.porcResidencial[consumo] *
-                100
+                  this.porcResidencial[consumo] *
+                  100
               ) / 100;
           } else {
             num1 =
               Math.round(
                 (this.tarifa[0].idcategoria.fijoagua - 0.1) *
-                this.tarifa[0].porc *
-                100
+                  this.tarifa[0].porc *
+                  100
               ) / 100;
           }
 
           let num2 =
             Math.round(
               (this.tarifa[0].idcategoria.fijosanea - 0.5) *
-              this.tarifa[0].porc *
-              100
+                this.tarifa[0].porc *
+                100
             ) / 100;
           let num3 =
             Math.round(
@@ -385,14 +385,14 @@ export class LecturasComponent implements OnInit {
           let num4 =
             Math.round(
               ((consumo * this.tarifa[0].saneamiento) / 2) *
-              this.tarifa[0].porc *
-              100
+                this.tarifa[0].porc *
+                100
             ) / 100;
           let num5 =
             Math.round(
               ((consumo * this.tarifa[0].saneamiento) / 2) *
-              this.tarifa[0].porc *
-              100
+                this.tarifa[0].porc *
+                100
             ) / 100;
           let num7 = Math.round(0.5 * this.tarifa[0].porc * 100) / 100;
           let suma: number = 0;
@@ -475,22 +475,22 @@ export class LecturasComponent implements OnInit {
         num1 =
           Math.round(
             (this.tarifa[0].idcategoria.fijoagua - 0.1) *
-            this.porcResidencial[consumo] *
-            100
+              this.porcResidencial[consumo] *
+              100
           ) / 100;
       } else {
         num1 =
           Math.round(
             (this.tarifa[0].idcategoria.fijoagua - 0.1) *
-            this.tarifa[0].porc *
-            100
+              this.tarifa[0].porc *
+              100
           ) / 100;
       }
       let num2 =
         Math.round(
           (this.tarifa[0].idcategoria.fijosanea - 0.5) *
-          this.tarifa[0].porc *
-          100
+            this.tarifa[0].porc *
+            100
         ) / 100;
       let num3 =
         Math.round(consumo * this.tarifa[0].agua * this.tarifa[0].porc * 100) /
@@ -498,14 +498,14 @@ export class LecturasComponent implements OnInit {
       let num4 =
         Math.round(
           ((consumo * this.tarifa[0].saneamiento) / 2) *
-          this.tarifa[0].porc *
-          100
+            this.tarifa[0].porc *
+            100
         ) / 100;
       let num5 =
         Math.round(
           ((consumo * this.tarifa[0].saneamiento) / 2) *
-          this.tarifa[0].porc *
-          100
+            this.tarifa[0].porc *
+            100
         ) / 100;
       let num7 = Math.round(0.5 * this.tarifa[0].porc * 100) / 100;
       let suma: number = 0;
@@ -578,8 +578,7 @@ export class LecturasComponent implements OnInit {
     let factura: Facturas = new Facturas();
     if (adultomayor) {
       if (categoria == 9 && consumo > 34) categoria = 1;
-    }
-    else if (categoria == 9 && consumo > 10) categoria = 1;
+    } else if (categoria == 9 && consumo > 10) categoria = 1;
     if (categoria == 9 && consumo > 34) categoria = 1;
     if (categoria == 1 && consumo > 70) categoria = 2;
     let municipio = this._lecturas[this.kontador].idabonado_abonados.municipio;
@@ -620,23 +619,23 @@ export class LecturasComponent implements OnInit {
                     num1 =
                       Math.round(
                         (this.tarifa[0].idcategoria.fijoagua - 0.1) *
-                        this.porcResidencial[consumo] *
-                        100
+                          this.porcResidencial[consumo] *
+                          100
                       ) / 100;
                   } else {
                     num1 =
                       Math.round(
                         (this.tarifa[0].idcategoria.fijoagua - 0.1) *
-                        this.tarifa[0].porc *
-                        100
+                          this.tarifa[0].porc *
+                          100
                       ) / 100;
                   }
 
                   let num2 =
                     Math.round(
                       (this.tarifa[0].idcategoria.fijosanea - 0.5) *
-                      this.tarifa[0].porc *
-                      100
+                        this.tarifa[0].porc *
+                        100
                     ) / 100;
                   let num3 =
                     Math.round(
@@ -645,14 +644,14 @@ export class LecturasComponent implements OnInit {
                   let num4 =
                     Math.round(
                       ((consumo * this.tarifa[0].saneamiento) / 2) *
-                      this.tarifa[0].porc *
-                      100
+                        this.tarifa[0].porc *
+                        100
                     ) / 100;
                   let num5 =
                     Math.round(
                       ((consumo * this.tarifa[0].saneamiento) / 2) *
-                      this.tarifa[0].porc *
-                      100
+                        this.tarifa[0].porc *
+                        100
                     ) / 100;
                   let num7 = Math.round(0.5 * this.tarifa[0].porc * 100) / 100;
                   let suma: number = 0;

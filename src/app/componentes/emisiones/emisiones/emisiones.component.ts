@@ -80,6 +80,9 @@ export class EmisionesComponent implements OnInit {
   listar: boolean = true;
   emision: any;
   _emisionindividual: any;
+  /* para bajas */
+  _rubrosBajas: any;
+  _rubrosActuales: any;
 
   porcResidencial: number[] = [
     0.777, 0.78, 0.78, 0.78, 0.78, 0.778, 0.778, 0.778, 0.78, 0.78, 0.78, 0.68,
@@ -212,7 +215,6 @@ export class EmisionesComponent implements OnInit {
 
   //Buscas las Rutas de la emisión seleccionada (Recibe la emisión y el indice seleccionado)
   info(emision: any, indiEmi: number) {
-    console.log(emision);
     this.showDiv = true;
     sessionStorage.setItem('showDiv', 'true');
     sessionStorage.setItem('indiEmi', indiEmi.toString());
@@ -222,7 +224,6 @@ export class EmisionesComponent implements OnInit {
 
     this.ruxemiService.getByIdEmision(this.idemision).subscribe({
       next: (datos) => {
-        console.log(datos);
         this._rutasxemi = datos;
         this.s_lecturas.rubrosEmitidos(this.idemision).subscribe({
           next: (datos: any) => {
@@ -235,13 +236,32 @@ export class EmisionesComponent implements OnInit {
           },
           error: (e) => console.error(e),
         });
+
         this.total();
+        this.getBajas();
+        this.getEmisionActual();
         if (this._rutasxemi.length == 0) {
           this.showDiv = false;
           this.swgenerar = true;
         } else this.swgenerar = false;
       },
       error: (err) => console.error(err.error),
+    });
+  }
+  getBajas() {
+    this.s_lecturas.getR_EmisionFinal(this.idemision).subscribe({
+      next: (datos) => {
+        this._rubrosBajas = datos;
+      },
+      error: (e) => console.error(e),
+    });
+  }
+  getEmisionActual() {
+    this.s_lecturas.getR_EmisionActual(this.idemision).subscribe({
+      next: (datos: any) => {
+        this._rubrosActuales = datos;
+      },
+      error: (e) => console.error(e),
     });
   }
 
@@ -1116,7 +1136,7 @@ export class EmisionesComponent implements OnInit {
     }
   }
   r_emisionFinal() {
-    console.log(this.selEmision);
+    this.getBajas();
     const nombreEmision = new NombreEmisionPipe(); // Crea una instancia del pipe
     let m_izquierda = 150;
     var doc = new jsPDF('p', 'pt', 'a4');
@@ -1133,6 +1153,8 @@ export class EmisionesComponent implements OnInit {
     doc.setFont('times', 'normal');
     doc.setFontSize(11);
     var datos: any = [];
+    var datosBajas: any = [];
+    var datosActuales: any = [];
     var i = 0;
     let suma: number = 0;
     this._rubrosEmision.forEach(() => {
@@ -1155,6 +1177,26 @@ export class EmisionesComponent implements OnInit {
       `${this.subtotal.toLocaleString('en-US')} m3`,
       `$ ${suma.toFixed(2)}`,
     ]);
+    let sumabajas: number = 0;
+    this._rubrosBajas.forEach((item: any, index: number) => {
+      if (item[0] != 5) {
+        /*       if (this._rutasxemi[i].fechacierre == null) fecha = '';
+        else fecha = this._rutasxemi[i].fechacierre.slice(0, 10); */
+        datosBajas.push([index + 1, item[0], item[1], item[2]]);
+        sumabajas += item[2];
+      }
+    });
+    datosBajas.push(['', 'TOTAL', ``, `$ ${sumabajas.toFixed(2)}`]);
+    let sumarActuales: number = 0;
+    this._rubrosActuales.forEach((item: any, index: number) => {
+      if (item[0] != 5) {
+        /*       if (this._rutasxemi[i].fechacierre == null) fecha = '';
+        else fecha = this._rutasxemi[i].fechacierre.slice(0, 10); */
+        datosActuales.push([index + 1, item[0], item[1], item[2]]);
+        sumarActuales += item[2];
+      }
+    });
+    datosActuales.push(['', 'TOTAL', ``, `$ ${sumarActuales.toFixed(2)}`]);
 
     const addPageNumbers = function () {
       const pageCount = doc.internal.pages.length;
@@ -1191,6 +1233,74 @@ export class EmisionesComponent implements OnInit {
       },
       margin: { left: m_izquierda - 1, top: 22, right: 51, bottom: 13 },
       body: datos,
+
+      didParseCell: function (data) {
+        var fila = data.row.index;
+        var columna = data.column.index;
+        if (columna > 0 && typeof data.cell.raw === 'number') {
+          data.cell.text = [data.cell.raw.toLocaleString('en-US')];
+        }
+        if (fila === datos.length - 1 || columna == 0) {
+          data.cell.styles.fontStyle = 'bold';
+        } // Total Bold
+      },
+    });
+    autoTable(doc, {
+      head: [['#', 'N°Rubro', 'Descripción', 'Valor']],
+      theme: 'grid',
+      headStyles: {
+        fillColor: [68, 103, 114],
+        fontStyle: 'bold',
+        halign: 'center',
+      },
+      styles: {
+        font: 'helvetica',
+        fontSize: 11,
+        cellPadding: 1,
+        halign: 'center',
+      },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 30 },
+        1: { halign: 'center', cellWidth: 60 },
+        2: { halign: 'left', cellWidth: 150 },
+        3: { halign: 'right', cellWidth: 70 },
+      },
+      margin: { left: m_izquierda - 1, top: 22, right: 51, bottom: 13 },
+      body: datosBajas,
+
+      didParseCell: function (data) {
+        var fila = data.row.index;
+        var columna = data.column.index;
+        if (columna > 0 && typeof data.cell.raw === 'number') {
+          data.cell.text = [data.cell.raw.toLocaleString('en-US')];
+        }
+        if (fila === datos.length - 1 || columna == 0) {
+          data.cell.styles.fontStyle = 'bold';
+        } // Total Bold
+      },
+    });
+    autoTable(doc, {
+      head: [['#', 'N°Rubro', 'Descripción', 'Valor']],
+      theme: 'grid',
+      headStyles: {
+        fillColor: [68, 103, 114],
+        fontStyle: 'bold',
+        halign: 'center',
+      },
+      styles: {
+        font: 'helvetica',
+        fontSize: 11,
+        cellPadding: 1,
+        halign: 'center',
+      },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 30 },
+        1: { halign: 'center', cellWidth: 60 },
+        2: { halign: 'left', cellWidth: 150 },
+        3: { halign: 'right', cellWidth: 70 },
+      },
+      margin: { left: m_izquierda - 1, top: 22, right: 51, bottom: 13 },
+      body: datosActuales,
 
       didParseCell: function (data) {
         var fila = data.row.index;
@@ -1436,6 +1546,7 @@ export class EmisionesComponent implements OnInit {
         break;
       case '2':
         this.r_emisionFinal();
+
         break;
     }
   }

@@ -106,4 +106,9 @@ export class LecturasService {
       `${baseUrl}/reportes/emisionfinal?idemision=${idemision}`
     );
   }
+  getR_EmisionActual(idemision: number) {
+    return this.http.get<any>(
+      `${baseUrl}/reportes/emisionactual?idemision=${idemision}`
+    );
+  }
 }
