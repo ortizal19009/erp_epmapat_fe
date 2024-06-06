@@ -138,6 +138,9 @@ export class RecaudacionReportsService {
       factura.interescobrado = 0;
     }
     let doc = new jsPDF('p', 'pt', 'a4');
+    var logo = new Image();
+    logo.src = './assets/img/logo_planilla.png';
+
     let usuario: any;
     let idfactura: any;
     let tableWidth = 200;
@@ -235,6 +238,8 @@ export class RecaudacionReportsService {
             ['Valor total', this.total.toFixed(2)],
           ],
         });
+        doc.setGState(doc.GState({ opacity: 0.3 }));
+        doc.addImage(logo, 'PNG', 50, 260, 170, 170);
         window.open(doc.output('bloburl'));
         /*     doc.output('pdfobjectnewwindow', {
           filename: 'hoja de reporte de pago',
