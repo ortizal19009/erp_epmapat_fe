@@ -1,47 +1,48 @@
 <div class="container-fluid">
-   <div class="content">
-       <div class="row">
-           <div class="col-sm">
-               <h3>Buscar ruta</h3>
-           </div>
-           <div class="col-sm">
-               <label for="" class="col-sm-6">Rutas
-                   <div class="row">
-                       <div class="col-sm">
-                           <form action="" [formGroup]="f_rutas">
-                               <input class="form-control form-control-sm" list="ruta" formControlName="nom_cod">
-                               <datalist id="ruta">
-                                   <option value={{ruta.codigo}} *ngFor="let ruta of rutas">{{ruta.descripcion}}
-                               </datalist>
-                           </form>
-                       </div>
-                       <div class="col-sm-1">
-                           <button type="submit" class="btn btn-sm btn-outline-primary" (click)="buscarRuta()">
-                               <i class="fa fa-search" aria-hidden="true"></i>
-                           </button>
-                       </div>
-                   </div>
-               </label>
-           </div>
-       </div>
-   </div>
-   <div class="container-fluid">
-       <table class="table table-hover table-sm">
-           <thead class="bg-primary">
-               <tr>
-                   <th>Nro</th>
-                   <th>Nombre</th>
-                   <th>Descripción</th>
-               </tr>
-           </thead>
-           <tbody>
-               <tr *ngFor="let ruta of l_rutas; let i = index" (click)="seleccionarRuta(ruta)" data-dismiss="modal">
-                   <td>{{i+1}}</td>
-                   <td>{{ruta.descripcion}}</td>
-                   <td>{{ruta.codigo}}</td>
-               </tr>
-           </tbody>
-       </table>
+    <div class="content">
+        <div class="row">
+            <div class="col-sm">
+                <h3>Buscar ruta</h3>
+            </div>
+            <div class="col-sm">
+                <label for="" class="col-sm-6">Rutas
+                    <div class="row">
+                        <div class="col-sm">
+                            <form action="" [formGroup]="f_rutas">
+                                <input class="form-control form-control-sm" list="ruta" formControlName="nom_cod">
+                                <datalist id="ruta">
+                                    <option value={{ruta.codigo}} *ngFor="let ruta of rutas">{{ruta.descripcion}}
+                                </datalist>
+                            </form>
+                        </div>
+                        <div class="col-sm-1">
+                            <button type="submit" class="btn btn-sm btn-outline-primary" (click)="buscarRuta()">
+                                <i class="fa fa-search" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <table class="table table-hover table-sm">
+            <thead class="bg-primary text-red">
+                <tr>
+                    <th>Nro</th>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let ruta of rutas | filter: filterTerm; let i = index " (click)="seleccionarRuta(ruta)"
+                    data-dismiss="modal">
+                    <td>{{i+1}}</td>
+                    <td>{{ruta.descripcion}}</td>
+                    <td>{{ruta.codigo}}</td>
+                </tr>
+            </tbody>
+        </table>
 
-   </div>
+    </div>
 </div>

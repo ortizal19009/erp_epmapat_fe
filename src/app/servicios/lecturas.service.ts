@@ -111,4 +111,8 @@ export class LecturasService {
       `${baseUrl}/reportes/emisionactual?idemision=${idemision}`
     );
   }
+  /* Obtener facturas por ruta deudas */
+  findDeudoresByRuta(idruta: number) {
+    return this.http.get(`${baseUrl}/reportes/deudasxruta?idruta=${idruta}`);
+  }
 }

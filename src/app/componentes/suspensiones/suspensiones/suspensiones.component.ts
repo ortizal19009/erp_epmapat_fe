@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Suspensiones } from 'src/app/modelos/suspensiones';
+import { LecturasService } from 'src/app/servicios/lecturas.service';
 import { SuspensionesService } from 'src/app/servicios/suspensiones.service';
 // import { SuspensionesService } from 'src/app/Service/suspensiones.service';
 
@@ -17,12 +18,15 @@ export class SuspensionesComponent implements OnInit {
   filterTerm: string;
   suspensiones: any;
   today: number = Date.now();
+  optImprimir: string = '0';
+  _ruta: any;
 
   constructor(
     private router: Router,
     private suspeService: SuspensionesService,
     private coloresService: ColoresService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private s_lecturas: LecturasService
   ) {}
 
   ngOnInit(): void {
@@ -114,5 +118,25 @@ export class SuspensionesComponent implements OnInit {
   }
   habilitarMedidor() {
     this.router.navigate(['habilitar-medidores']);
+  }
+  optSelect() {
+    switch (this.optImprimir) {
+      case '0':
+        console.log('Imprimir Lista de suspenciones');
+        break;
+      case '1':
+        console.log('Imprimir Lista de Mora consumo de agua x ruta');
+        break;
+    }
+  }
+  setRuta(e: any) {
+    console.log(e);
+    this._ruta = e;
+    this.s_lecturas.findDeudoresByRuta(this._ruta.idruta).subscribe({
+      next: (datos) => {
+        console.log(datos);
+      },
+      error: (e) => console.error(e),
+    });
   }
 }

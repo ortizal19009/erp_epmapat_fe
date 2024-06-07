@@ -9,11 +9,11 @@ import { RutasService } from 'src/app/servicios/rutas.service';
    templateUrl: './buscar-ruta.component.html',
    styleUrls: ['./buscar-ruta.component.css'],
 })
-
 export class BuscarRutaComponent implements OnInit {
    rutas: any;
    f_rutas: FormGroup;
    l_rutas: any;
+   filterTerm: string;
    @Output() setRuta: EventEmitter<any> = new EventEmitter();
    //@Input() getRuta: string='100';
 
@@ -36,17 +36,19 @@ export class BuscarRutaComponent implements OnInit {
    }
 
    buscarRuta() {
-      this.s_rutas.getRutasByQuery(this.f_rutas.value.nom_cod).subscribe({
-         next: (datos) => {
+      console.log(this.f_rutas.value.nom_cod);
+      this.filterTerm = this.f_rutas.value.nom_cod;
+      /*   this.s_rutas.getRutasByQuery(this.f_rutas.value.nom_cod).subscribe({
+          next: (datos) => {
+            console.log(datos);
             this.l_rutas = datos;
-         },
-         error: (e) => console.error(e),
-      });
+          },
+          error: (e) => console.error(e),
+        }); */
    }
 
    seleccionarRuta(ruta: any) {
       this.setRuta.emit(ruta);
       //this.setRuta = ruta;
    }
-
 }

@@ -55,6 +55,7 @@ export class RecaudacionReportsService {
     let fecha = emi.feccrea.slice(0, 10).split('-');
     let mesConsumo = `${this.meses[+fecha[1]! - 1]} ${fecha[0]}`;
     autoTable(doc, {
+      margin: { left: 10 , top: 5},
       tableWidth,
       styles: { fontSize: 9, fontStyle: 'bold' },
       columnStyles: {
@@ -99,6 +100,7 @@ export class RecaudacionReportsService {
   cabeceraOtros(datos: any, doc: jsPDF, usuario: any) {
     let tableWidth = 200;
     autoTable(doc, {
+      margin: { left: 10 },
       //doc.setFontType("bold");
       //startY: 250,
       tableWidth,
@@ -191,6 +193,7 @@ export class RecaudacionReportsService {
         this.total += this.interes + this.iva;
         this.subtotal += this.total - this.interes - this.iva;
         autoTable(doc, {
+          margin: { left: 10 },
           tableWidth,
           theme: 'grid',
           styles: { fontSize: 9, fontStyle: 'bold' },
@@ -213,6 +216,7 @@ export class RecaudacionReportsService {
           body: rubros,
         });
         autoTable(doc, {
+          margin: { left: 10 },
           tableWidth,
           theme: 'grid',
           styles: { fontSize: 9, fontStyle: 'bold' },
@@ -238,8 +242,10 @@ export class RecaudacionReportsService {
             ['Valor total', this.total.toFixed(2)],
           ],
         });
-        doc.setGState(doc.GState({ opacity: 0.3 }));
-        doc.addImage(logo, 'PNG', 50, 260, 170, 170);
+        doc.setGState(doc.GState({ opacity: 0.4 }));
+        doc.addImage(logo, 'PNG', 20, 130, 190, 195);
+        doc.setGState(doc.GState({ opacity: 0.99 }));
+        doc.addImage(logo, 'PNG', 120, 15, 80, 80);
         window.open(doc.output('bloburl'));
         /*     doc.output('pdfobjectnewwindow', {
           filename: 'hoja de reporte de pago',
