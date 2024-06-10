@@ -195,8 +195,10 @@ export class FecfacturaComponent implements OnInit {
   }
   exportar() {
     this._facturas.forEach(async (item: any, index: number) => {
-      await this._exportar(index);
-     // this.changeDato();
+      //await this._exportar(index);
+      console.log(item);
+      // this.changeDato();
+    await this.fecfacService.expDesdeAbonados(item);
     });
   }
   async _exportar(i: number) {
@@ -323,6 +325,12 @@ export class FecfacturaComponent implements OnInit {
         console.error('Al guardar en Fec_factura: ', err.error);
       },
     });
+  }
+  expDesdeAbonados(factura: any) {
+    console.log(factura);
+
+    //this._facturas = factura;
+    //this._exportar(0);
   }
   async getAbonado(idabonado: number): Promise<any> {
     const abo = await this.aboService.getById(idabonado).toPromise();

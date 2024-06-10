@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
+import jsPDF from 'jspdf';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Suspensiones } from 'src/app/modelos/suspensiones';
 import { FacturaService } from 'src/app/servicios/factura.service';
@@ -134,21 +135,38 @@ export class SuspensionesComponent implements OnInit {
     }
   }
   setRuta(e: any) {
-    console.log(e);
+    //console.log(e);
+    let newDatos: any[] = [];
+
     this._ruta = e;
     this.s_lecturas.findDeudoresByRuta(this._ruta.idruta).subscribe({
-      next: (datos: any) => {
+      next: async (datos: any) => {
         console.log(datos);
-        datos.forEach((item: any) => {
-          let _rxf = this.s_rubroxfac
+        await datos.forEach((item: any) => {
+          this.s_rubroxfac
             .getByIdfacturaAsync(item.idfactura)
             .then((i: any) => {
-              console.log(i);
+              let newPreFactura: any = {};
+              if (i.length > 0) {
+                let doc = new jsPDF('p', 'pt', 'a4');
+
+                newPreFactura.idfactura = i.idfactura;
+                newDatos.push(newPreFactura);
+                console.log(i);
+              }
+            })
+            .then(async () => {
+              console.log('HOLA MUNDO SEGUNDO BLOQUE');
             })
             .catch((e) => console.error(e));
         });
+        await console.log(newDatos);
       },
       error: (e) => console.error(e),
     });
+  }
+  /* IMPRIMIR */
+  i_deudasxruta(datos: any) {
+    let doc = new jsPDF('p', 'pt', 'a4');
   }
 }
