@@ -3,7 +3,9 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Suspensiones } from 'src/app/modelos/suspensiones';
+import { FacturaService } from 'src/app/servicios/factura.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
+import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { SuspensionesService } from 'src/app/servicios/suspensiones.service';
 // import { SuspensionesService } from 'src/app/Service/suspensiones.service';
 
@@ -26,7 +28,9 @@ export class SuspensionesComponent implements OnInit {
     private suspeService: SuspensionesService,
     private coloresService: ColoresService,
     private fb: FormBuilder,
-    private s_lecturas: LecturasService
+    private s_lecturas: LecturasService,
+    private s_facturas: FacturaService,
+    private s_rubroxfac: RubroxfacService
   ) {}
 
   ngOnInit(): void {
@@ -133,8 +137,16 @@ export class SuspensionesComponent implements OnInit {
     console.log(e);
     this._ruta = e;
     this.s_lecturas.findDeudoresByRuta(this._ruta.idruta).subscribe({
-      next: (datos) => {
+      next: (datos: any) => {
         console.log(datos);
+        datos.forEach((item: any) => {
+          let _rxf = this.s_rubroxfac
+            .getByIdfacturaAsync(item.idfactura)
+            .then((i: any) => {
+              console.log(i);
+            })
+            .catch((e) => console.error(e));
+        });
       },
       error: (e) => console.error(e),
     });
