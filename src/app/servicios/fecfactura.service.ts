@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Fecfactura } from '../modelos/fecfactura.model';
-import { Observable } from 'rxjs';
+import { Observable, from, interval } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { Router } from '@angular/router';
 import { FormBuilder } from '@angular/forms';
@@ -111,6 +111,26 @@ export class FecfacturaService {
   }
 
   /* Exportar datos */
+  expDesdeAbonados(factura: any) {
+    this.datosDefinirAsync();
+    this._exportar(0, factura);
+
+    console.log(factura);
+    /*    let _factura = new Observable((f) => {
+      f = factura;
+      console.log(f);
+      console.log(factura);
+    }); */
+    //this._facturas = factura;
+    const seconds = interval(1000);
+    //seconds.subscribe((n) => console.log(n));
+  }
+
+  /*   setFacturas(factura: any).subscribe( {next: (datos: any)
+  let f = {} as Fec_factura; 
+  f.idfactura = factura.idfactura; 
+  }) */
+
   async datosDefinirAsync() {
     try {
       const def = await this.defService.getByIddefinirAsync(1);
@@ -218,7 +238,7 @@ export class FecfacturaService {
                   detalleImpuesto.codigoimpuesto = '2';
                   detalleImpuesto.codigoporcentaje = codImpuesto.toString();
                   detalleImpuesto.baseimponible = basImponible;
-                  await this.fec_facdetimpService
+                  this.fec_facdetimpService
                     .saveFacDetalleImpuesto(detalleImpuesto)
                     .subscribe({
                       next: (detimpuesto) => {
@@ -241,13 +261,7 @@ export class FecfacturaService {
     });
     console.log('Guardado');
   }
-  async expDesdeAbonados(factura: any) {
-    await this.datosDefinirAsync();
-    console.log(factura);
 
-    //this._facturas = factura;
-    await this._exportar(0, factura);
-  }
   async getAbonado(idabonado: number): Promise<any> {
     const abo = await this.aboService.getById(idabonado).toPromise();
     return abo;

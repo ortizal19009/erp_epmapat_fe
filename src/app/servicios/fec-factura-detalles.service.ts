@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/facturadetalles
@@ -9,7 +10,7 @@ const baseUrl = `${apiUrl}/facturadetalles
 })
 export class FecFacturaDetallesService {
   constructor(private http: HttpClient) {}
-  saveFacDetalle(detalle: any) {
+  saveFacDetalle(detalle: any) : Observable<Object>{
     return this.http.post(`${baseUrl}`, detalle);
   }
   getFecDetalleByIdfactura(idfactura: number) {
