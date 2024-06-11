@@ -121,7 +121,7 @@ export class FecfacturaService {
       console.log(factura);
     }); */
     //this._facturas = factura;
-    const seconds = interval(1000);
+    
     //seconds.subscribe((n) => console.log(n));
   }
 
@@ -184,7 +184,7 @@ export class FecfacturaService {
     this.tipocobro = factura.formapago;
     console.log('FEC FACTURA: ', fecfactura);
     this.save(fecfactura).subscribe({
-      next: async (resp: any) => {
+      next: (resp: any) => {
         let codImpuesto = 0;
         if (resp.fechacobro <= '2024-03-31') {
           codImpuesto = 2;

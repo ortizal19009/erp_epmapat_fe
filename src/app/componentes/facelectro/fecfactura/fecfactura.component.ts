@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { rejects } from 'assert';
 import { truncate } from 'fs/promises';
 import { resolve } from 'path';
+import { interval, take } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Abonados } from 'src/app/modelos/abonados';
@@ -198,9 +199,14 @@ export class FecfacturaComponent implements OnInit {
       //await this._exportar(index);
       // this.changeDato();
       }); */
-    this._facturas.forEach((item: any) => {
-      this.fecfacService.expDesdeAbonados(item);
+    const numbers = interval(1000);
+    const takeFourNumbers = numbers.pipe(take(this._facturas.length + 1));
+    takeFourNumbers.subscribe((x) => {
+      console.log('Next: ', x);
+      console.log(this._facturas[x]);
+      this.fecfacService.expDesdeAbonados(this._facturas[x]);
     });
+    this._facturas.forEach(async (item: any) => {});
   }
   async _exportar(i: number) {
     let j = 0;
