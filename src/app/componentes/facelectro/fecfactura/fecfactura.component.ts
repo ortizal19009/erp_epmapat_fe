@@ -198,9 +198,8 @@ export class FecfacturaComponent implements OnInit {
       //await this._exportar(index);
       // this.changeDato();
       }); */
-      this._facturas.map((item: any) => {
-        console.log(item);
-        this.fecfacService.expDesdeAbonados(item);
+    this._facturas.forEach((item: any) => {
+      this.fecfacService.expDesdeAbonados(item);
     });
   }
   async _exportar(i: number) {
