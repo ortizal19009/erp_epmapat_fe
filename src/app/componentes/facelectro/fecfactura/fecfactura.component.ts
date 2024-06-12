@@ -201,11 +201,12 @@ export class FecfacturaComponent implements OnInit {
       // this.changeDato();
       }); */
     const numbers = interval(1000);
-    const takeFourNumbers = numbers.pipe(take(this._facturas.length + 1));
+    const takeFourNumbers = numbers.pipe(take(this._facturas.length));
     takeFourNumbers.subscribe((x) => {
       this.fecfacService.expDesdeAbonados(this._facturas[x]);
       this.porcNumber = x;
-      if (this._facturas.length === x) {
+      console.log('IMPRIMIENDO', x, this._facturas.length);
+      if (this._facturas.length - 1 === x) {
         this.swfacturas = false;
         this.swexportar = false;
       }
@@ -314,14 +315,14 @@ export class FecfacturaComponent implements OnInit {
                   detalleImpuesto.codigoimpuesto = '2';
                   detalleImpuesto.codigoporcentaje = codImpuesto.toString();
                   detalleImpuesto.baseimponible = basImponible;
-                  this.fec_facdetimpService
+                  /*          this.fec_facdetimpService
                     .saveFacDetalleImpuesto(detalleImpuesto)
                     .subscribe({
                       next: (detimpuesto) => {
                         j++;
                       },
                       error: (e) => console.error(e),
-                    });
+                    }); */
                   i++;
                 },
                 error: (e) => console.error(e),

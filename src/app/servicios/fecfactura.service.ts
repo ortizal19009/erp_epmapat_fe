@@ -111,8 +111,8 @@ export class FecfacturaService {
   }
 
   /* Exportar datos */
-  expDesdeAbonados(factura: any) {
-    this.datosDefinirAsync();
+  async expDesdeAbonados(factura: any) {
+    await this.datosDefinirAsync();
     //this._exportar(0, factura);
     this.buildFactura(factura);
     /*    let _factura = new Observable((f) => {
@@ -121,7 +121,7 @@ export class FecfacturaService {
       console.log(factura);
     }); */
     //this._facturas = factura;
-    
+
     //seconds.subscribe((n) => console.log(n));
   }
 
@@ -137,6 +137,7 @@ export class FecfacturaService {
     } catch (error) {}
   }
   async buildFactura(factura: any) {
+    console.log(factura);
     this._facturas = factura;
     let i = 0;
     let usuario = await this.s_usuario.getByIdusuarioAsync(
@@ -185,6 +186,7 @@ export class FecfacturaService {
     console.log('FEC FACTURA: ', fecfactura);
     this.save(fecfactura).subscribe({
       next: (resp: any) => {
+        console.log(resp);
         let codImpuesto = 0;
         if (resp.fechacobro <= '2024-03-31') {
           codImpuesto = 2;
@@ -213,21 +215,20 @@ export class FecfacturaService {
           detalle.preciounitario = rxf.valorunitario;
           detalle.descuento = 0;
           basImponible += rxf.cantidad * rxf.valorunitario;
-          console.log(detalle);
           this.sumaTotal += rxf.valorunitario;
           this.fec_facdetalleService.saveFacDetalle(detalle).subscribe({
             next: (datos: any) => {
-              this.buildDetalleImpuesto(rxf, codImpuesto, basImponible, i);
+              console.log('hola');
             },
             error: (e) => console.log(e),
-            complete: () => {},
+            complete: () => {
+              this.buildDetalleImpuesto(rxf, codImpuesto, basImponible, i);
+            },
           });
         });
         return _facturaxrubros[0].idfactura_facturas;
       })
       .then((detalles: any) => {
-        console.log('DETALLE SEGUNDA PROMESA', detalles);
-        console.log(this.sumaTotal);
         this.buildPago(detalles, this.sumaTotal);
       })
       .catch();
@@ -260,11 +261,8 @@ export class FecfacturaService {
     detalleImpuesto.baseimponible = basImponible;
     this.fec_facdetimpService
       .saveFacDetalleImpuesto(detalleImpuesto)
-      .subscribe({
-        next: () => {
-          console.log('guardar detalle impuesto');
-        },
-        error: (e) => console.error(e),
+      .then((dato) => {
+        console.log(dato);
       });
   }
   buildPago(resp: any, total: number) {
@@ -403,7 +401,7 @@ export class FecfacturaService {
                   detalleImpuesto.codigoimpuesto = '2';
                   detalleImpuesto.codigoporcentaje = codImpuesto.toString();
                   detalleImpuesto.baseimponible = basImponible;
-                  this.fec_facdetimpService
+                  /*          this.fec_facdetimpService
                     .saveFacDetalleImpuesto(detalleImpuesto)
                     .subscribe({
                       next: (detimpuesto) => {
@@ -411,13 +409,13 @@ export class FecfacturaService {
                         j++;
                       },
                       error: (e) => console.error(e),
-                    });
+                    }); */
                   i++;
                 },
                 error: (e) => console.error(e),
               });
             });
-            await this.pagos(resp, this.sumaTotal);
+            this.pagos(resp, this.sumaTotal);
           });
       },
       error: (err) => {
