@@ -207,6 +207,7 @@ export class FecfacturaComponent implements OnInit {
       this.porcNumber = x;
       if (this._facturas.length === x) {
         this.swfacturas = false;
+        this.swexportar = false;
       }
     });
     this._facturas.forEach(async (item: any) => {});
