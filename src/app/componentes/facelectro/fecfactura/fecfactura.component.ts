@@ -53,6 +53,7 @@ export class FecfacturaComponent implements OnInit {
   error: String = '';
   xml: String = '';
   txtDetails: boolean = true;
+  porcNumber: number = 0;
   estados = [
     { nombre: 'Inicial', letra: 'I' },
     { nombre: 'Proceso', letra: 'P' },
@@ -202,9 +203,11 @@ export class FecfacturaComponent implements OnInit {
     const numbers = interval(1000);
     const takeFourNumbers = numbers.pipe(take(this._facturas.length + 1));
     takeFourNumbers.subscribe((x) => {
-      console.log('Next: ', x);
-      console.log(this._facturas[x]);
       this.fecfacService.expDesdeAbonados(this._facturas[x]);
+      this.porcNumber = x;
+      if (this._facturas.length === x) {
+        this.swfacturas = false;
+      }
     });
     this._facturas.forEach(async (item: any) => {});
   }

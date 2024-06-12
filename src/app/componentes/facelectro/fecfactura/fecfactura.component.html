@@ -76,6 +76,14 @@
                role="alert">
                Total de Facturas: {{_facturas.length}}
             </div>
+            <div *ngIf="swfacturas" class="alert text-center roboto small font-weight-bold py-0" role="alert">
+               <div class="progress progress-sm">
+                  <div class="progress-bar" [ngStyle]="{ 'width.%': porcNumber }">{{porcNumber}}</div>
+               </div>
+               <small>
+                  {{porcNumber}}Complete de {{_facturas.length}}
+               </small>
+            </div>
             <div class="text-center">
                <button type='submit' class='btn btn-primary btn-sm mx-1' [disabled]="swbotones" (click)="buscar()">
                   <i class="fa fa-search"></i>&nbsp; Buscar</button>

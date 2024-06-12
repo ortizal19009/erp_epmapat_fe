@@ -10,7 +10,7 @@ const baseUrl = `${apiUrl}/facdetallesimpuestos`;
 export class FecFacturaDetallesImpuestosService {
   constructor(private http: HttpClient) {}
   saveFacDetalleImpuesto(detalleim: any):Observable<Object> {
-    return this.http.post(`${baseUrl}`, detalleim);
+    return this.http.put(`${baseUrl}`, detalleim);
   }
   getFecFacDetalleService(iddetalle: number) {
     return this.http.get(`${baseUrl}/factura_detalle?iddetalle=${iddetalle}`);

@@ -261,7 +261,7 @@ export class FecfacturaService {
     this.fec_facdetimpService
       .saveFacDetalleImpuesto(detalleImpuesto)
       .subscribe({
-        next: (detimpuesto) => {
+        next: () => {
           console.log('guardar detalle impuesto');
         },
         error: (e) => console.error(e),
