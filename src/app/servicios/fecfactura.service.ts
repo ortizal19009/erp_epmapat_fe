@@ -106,7 +106,6 @@ export class FecfacturaService {
     return this.http.post(`${baseUrl}`, f);
   }
   updateFecFactura(fecfactura: any) {
-    console.log(fecfactura);
     return this.http.put(`${baseUrl}/${fecfactura.idfactura}`, fecfactura);
   }
 
@@ -137,7 +136,6 @@ export class FecfacturaService {
     } catch (error) {}
   }
   async buildFactura(factura: any) {
-    console.log(factura);
     this._facturas = factura;
     let i = 0;
     let usuario = await this.s_usuario.getByIdusuarioAsync(
@@ -183,10 +181,8 @@ export class FecfacturaService {
     fecfactura.referencia = factura.idabonado;
     fecfactura.recaudador = usuario.nomusu;
     this.tipocobro = factura.formapago;
-    console.log('FEC FACTURA: ', fecfactura);
     this.save(fecfactura).subscribe({
       next: (resp: any) => {
-        console.log(resp);
         let codImpuesto = 0;
         if (resp.fechacobro <= '2024-03-31') {
           codImpuesto = 2;
@@ -218,9 +214,8 @@ export class FecfacturaService {
           this.sumaTotal += rxf.valorunitario;
           this.fec_facdetalleService.saveFacDetalle(detalle).subscribe({
             next: (datos: any) => {
-              console.log('hola');
             },
-            error: (e) => console.log(e),
+            error: (e) => console.error(e),
             complete: () => {
               this.buildDetalleImpuesto(rxf, codImpuesto, basImponible, i);
             },
@@ -262,7 +257,6 @@ export class FecfacturaService {
     this.fec_facdetimpService
       .saveFacDetalleImpuesto(detalleImpuesto)
       .then((dato) => {
-        console.log(dato);
       });
   }
   buildPago(resp: any, total: number) {
@@ -295,7 +289,6 @@ export class FecfacturaService {
     pagos.unidadtiempo = 'dias';
     this.fec_facPagosService.saveFacPago(pagos).subscribe({
       next: (datos) => {
-        console.log('Guardado pago');
       },
       error: (e) => console.error(e),
     });
@@ -490,7 +483,6 @@ export class FecfacturaService {
     pagos.unidadtiempo = 'dias';
     this.fec_facPagosService.saveFacPago(pagos).subscribe({
       next: (datos) => {
-        console.log('Guardado pago');
       },
       error: (e) => console.error(e),
     });
