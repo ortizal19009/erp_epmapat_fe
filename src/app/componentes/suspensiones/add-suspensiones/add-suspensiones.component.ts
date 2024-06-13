@@ -13,6 +13,7 @@ import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { RutasService } from 'src/app/servicios/rutas.service';
 import { Rutas } from 'src/app/modelos/rutas.model';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import { FacturaService } from 'src/app/servicios/factura.service';
 
 @Component({
   selector: 'app-add-suspensiones',
@@ -43,7 +44,8 @@ export class AddSuspensionesComponent implements OnInit {
     private fb: FormBuilder,
     private s_abonado: AbonadosService,
     private s_rutas: RutasService,
-    private authService: AutorizaService
+    private authService: AutorizaService,
+    private s_facturas: FacturaService
   ) {}
 
   ngOnInit(): void {
@@ -135,6 +137,7 @@ export class AddSuspensionesComponent implements OnInit {
   }
 
   selecRuta(ruta: Rutas) {
+    let aboxdeuda: any = { abonado: {}, facturas: [] };
     let date: Date = new Date();
     let year = date.getFullYear();
     let month = date.getMonth();
@@ -142,6 +145,25 @@ export class AddSuspensionesComponent implements OnInit {
     let current_f: any = `${year}-${month + 1}-01`;
     console.log(date.getFullYear());
     console.log(current_s, current_f);
+    this.s_abonado.getByIdrutaAsync(ruta.idruta).then((_abonados: any) => {
+      let dato_abonado : any; 
+      //console.log(_abonados);
+      _abonados.forEach((abonado: any) => {
+        //console.log(abonado);
+        this.s_facturas.getSinCobrarAboMod(abonado.idabonado).subscribe({
+          next: (deuda: any) => {
+            //console.log('DEUDA ABONADO: ', deuda);
+            aboxdeuda.abonado = abonado;
+            aboxdeuda.facturas.deudas;
+            return aboxdeuda;
+          },
+          error: (e) => console.error(e),
+          complete: () => {
+            console.log(aboxdeuda);
+          },
+        });
+      });
+    });
     // this.s_lecturas.getDeudores(current_s, current_f, ruta.idruta).subscribe({
     //    next: (datos: any) => {
     //       this.f_dsuspension.patchValue({
