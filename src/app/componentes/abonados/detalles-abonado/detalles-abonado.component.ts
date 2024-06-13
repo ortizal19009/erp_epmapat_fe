@@ -56,6 +56,10 @@ export class DetallesAbonadoComponent implements OnInit {
           this._abonado[0].idcategoria_categorias.descripcion;
         this.abonado.estado = this._abonado[0].estado;
         this.abonado.textestado = getEstadoText(this._abonado[0].estado);
+        this.abonado.municipio = this._abonado[0].municipio;
+        this.abonado.adultomayor = this._abonado[0].adultomayor;
+        this.abonado.promedio = this._abonado[0].promedio; 
+        this.abonado.responsablepago = this._abonado[0].idresponsable.nombre;
       },
       error: (err) => console.error(err.error),
     });
@@ -221,6 +225,10 @@ interface datAbonado {
   direccionubicacion: String;
   estado: number;
   textestado: String;
+  municipio:boolean;
+  promedio: string; 
+  adultomayor: boolean; 
+  responsablepago: string;
 }
 
 function getEstadoText(estado: number): string {
