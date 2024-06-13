@@ -60,10 +60,15 @@
                      <b>Responsable pago</b> <a class="float-right">{{ abonado.responsablepago }}</a>
                   </li>
                   <li class="list-group-item">
-                     <b>Adulto mayor</b> <a class="float-right">{{ abonado.adultomayor }}</a>
-                  </li>
-                  <li class="list-group-item">
-                     <b>Municipio</b> <a class="float-right">{{ abonado.municipio }}</a>
+                     <b>Adulto mayor</b> <a class="float-right">
+                        <i class="bi bi-check2-square" *ngIf="abonado.adultomayor "></i>
+                        <i class="bi bi-square" *ngIf="!abonado.adultomayor"></i>
+                        </a>
+                        </li>
+                        <li class="list-group-item">
+                           <b>Municipio</b> <a class="float-right">
+                        <i class="bi bi-check2-square" *ngIf="abonado.municipio "></i>
+                        <i class="bi bi-square" *ngIf="!abonado.municipio"></i></a>
                   </li>
                </ul>
                <div class="row justify-content-center">

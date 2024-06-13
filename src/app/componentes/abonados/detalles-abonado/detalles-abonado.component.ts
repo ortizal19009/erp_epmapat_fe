@@ -33,7 +33,7 @@ export class DetallesAbonadoComponent implements OnInit {
     private rubxfacService: RubroxfacService,
     private lecService: LecturasService,
     private router: Router,
-    public _fecFacturaService: FecfacturaService,
+    public _fecFacturaService: FecfacturaService
   ) {}
 
   ngOnInit(): void {
@@ -58,7 +58,7 @@ export class DetallesAbonadoComponent implements OnInit {
         this.abonado.textestado = getEstadoText(this._abonado[0].estado);
         this.abonado.municipio = this._abonado[0].municipio;
         this.abonado.adultomayor = this._abonado[0].adultomayor;
-        this.abonado.promedio = this._abonado[0].promedio; 
+        this.abonado.promedio = this._abonado[0].promedio;
         this.abonado.responsablepago = this._abonado[0].idresponsable.nombre;
       },
       error: (err) => console.error(err.error),
@@ -199,11 +199,9 @@ export class DetallesAbonadoComponent implements OnInit {
     });
   }
   expFacElectronica(idfactura: number) {
-    console.log(idfactura);
     this.facService.getById(idfactura).subscribe({
       next: (d_factura: any) => {
-        console.log(d_factura);
-       this._fecFacturaService.expDesdeAbonados(d_factura); 
+        this._fecFacturaService.expDesdeAbonados(d_factura);
       },
       error: (e: any) => console.error(e),
     });
@@ -225,9 +223,9 @@ interface datAbonado {
   direccionubicacion: String;
   estado: number;
   textestado: String;
-  municipio:boolean;
-  promedio: string; 
-  adultomayor: boolean; 
+  municipio: boolean;
+  promedio: string;
+  adultomayor: boolean;
   responsablepago: string;
 }
 
