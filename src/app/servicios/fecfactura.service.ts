@@ -213,8 +213,7 @@ export class FecfacturaService {
           basImponible += rxf.cantidad * rxf.valorunitario;
           this.sumaTotal += rxf.valorunitario;
           this.fec_facdetalleService.saveFacDetalle(detalle).subscribe({
-            next: (datos: any) => {
-            },
+            next: (datos: any) => {},
             error: (e) => console.error(e),
             complete: () => {
               this.buildDetalleImpuesto(rxf, codImpuesto, basImponible, i);
@@ -256,8 +255,7 @@ export class FecfacturaService {
     detalleImpuesto.baseimponible = basImponible;
     this.fec_facdetimpService
       .saveFacDetalleImpuesto(detalleImpuesto)
-      .then((dato) => {
-      });
+      .then((dato) => {});
   }
   buildPago(resp: any, total: number) {
     let pagos = {} as Fec_factura_pagos;
@@ -288,8 +286,7 @@ export class FecfacturaService {
     pagos.plazo = 0;
     pagos.unidadtiempo = 'dias';
     this.fec_facPagosService.saveFacPago(pagos).subscribe({
-      next: (datos) => {
-      },
+      next: (datos) => {},
       error: (e) => console.error(e),
     });
   }
@@ -482,8 +479,7 @@ export class FecfacturaService {
     pagos.plazo = 0;
     pagos.unidadtiempo = 'dias';
     this.fec_facPagosService.saveFacPago(pagos).subscribe({
-      next: (datos) => {
-      },
+      next: (datos) => {},
       error: (e) => console.error(e),
     });
   };

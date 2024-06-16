@@ -54,6 +54,7 @@ export class FecfacturaComponent implements OnInit {
   xml: String = '';
   txtDetails: boolean = true;
   porcNumber: number = 0;
+  conter: number = 0;
   estados = [
     { nombre: 'Inicial', letra: 'I' },
     { nombre: 'Proceso', letra: 'P' },
@@ -205,11 +206,11 @@ export class FecfacturaComponent implements OnInit {
     takeFourNumbers.subscribe((x) => {
       this.fecfacService.expDesdeAbonados(this._facturas[x]);
       this.porcNumber = x;
-      console.log('IMPRIMIENDO', x, this._facturas.length);
       if (this._facturas.length - 1 === x) {
         this.swfacturas = false;
         this.swexportar = false;
       }
+      this.conter = (x * 100) / this._facturas.length;
     });
     this._facturas.forEach(async (item: any) => {});
   }
