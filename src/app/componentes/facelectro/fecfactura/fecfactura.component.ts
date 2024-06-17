@@ -153,6 +153,7 @@ export class FecfacturaComponent implements OnInit {
   }
 
   buscar() {
+    this.conter = 0;
     this.datosDefinirAsync();
     this.swexportar = false;
     this.formExportar.value;
