@@ -111,23 +111,10 @@ export class FecfacturaService {
 
   /* Exportar datos */
   async expDesdeAbonados(factura: any) {
+    console.log(factura);
     await this.datosDefinirAsync();
-    //this._exportar(0, factura);
     this.buildFactura(factura);
-    /*    let _factura = new Observable((f) => {
-      f = factura;
-      console.log(f);
-      console.log(factura);
-    }); */
-    //this._facturas = factura;
-
-    //seconds.subscribe((n) => console.log(n));
   }
-
-  /*   setFacturas(factura: any).subscribe( {next: (datos: any)
-  let f = {} as Fec_factura; 
-  f.idfactura = factura.idfactura; 
-  }) */
 
   async datosDefinirAsync() {
     try {
