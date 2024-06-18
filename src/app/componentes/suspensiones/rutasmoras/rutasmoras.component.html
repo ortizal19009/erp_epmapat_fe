@@ -1,0 +1,78 @@
+<div class="content mt-1 pt-1 pl-0">
+    <div class="container-fluid">
+        <div class="row m-0 px-0 py-1 justify-content-start cabecera border sombra">
+            <div class="col-sm-2">
+                <h4 class="m-0 font-weight-bold">{{ titulo }}</h4>
+            </div>
+            <div class="col-sm-4">
+                <form action="" [formGroup]="formSuspensiones">
+                    <div class="row">
+                        <div class="col-sm">
+                            <input type="date" class="form-control mx-0 form-control-sm text-center" id="desde"
+                                formControlName="desde" max="{{ today | date : 'yyyy-MM-dd' }}" />
+                        </div>
+                        <div class="col-sm">
+                            <input type="date" class="form-control mx-0 form-control-sm text-center" id="hasta"
+                                formControlName="hasta" max="{{ today | date : 'yyyy-MM-dd' }}" />
+                        </div>
+                        <div class="col-sm-3">
+                            <button class="btn btn-primary btn-sm">
+                                <i class="fa fa-search" aria-hidden="true"></i> Buscar
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-sm-2">
+                <input type="text" class="form-control form-control-sm text-center" placeholder="Filtrar..."
+                    [(ngModel)]="filterTerm" />
+            </div>
+            <div class="col-sm text-right">
+                <div class="btn-group ml-auto mt-0">
+                    <button type="button" class="bg-transparent border-0 dropdown-toggle text-white"
+                        data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+                        <button class="dropdown-item" type="button">
+                            <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+                        <button class="dropdown-item" type="button" data-toggle="modal" data-target="#pdf">
+                            <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+                        <button class="dropdown-item text-muted" type="button" disabled><i
+                                class="bi-file-earmark-arrow-down text-muted"></i>
+                            <span class="text-muted">&nbsp;
+                                Exportar</span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container-fluid mt-3">
+    <div class="row">
+        <div class="col-sm">
+            <table class="table table-sm table-hover table-striped table-bordered">
+                <thead class="text-center">
+                    <tr>
+                        <th>Nro</th>
+                        <th>Cuenta</th>
+                        <th>Cliente</th>
+                        <th>Identificación</th>
+                        <th>Deudas</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let abonado of _abonados | filter: filterTerm; let i = index">
+                        <td class="text-center">{{i+1}}</td>
+                        <td class="text-center">{{abonado.idabonado}}</td>
+                        <td>{{abonado.idresponsable.nombre}}</td>
+                        <td class="text-center">{{abonado.idresponsable.cedula}}</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>

@@ -137,8 +137,9 @@ export class SuspensionesComponent implements OnInit {
   setRuta(e: any) {
     //console.log(e);
     let newDatos: any[] = [];
+    this.router.navigate(['mora-abonados', e.idruta]);
 
-    this._ruta = e;
+    /*  this._ruta = e;
     this.s_lecturas.findDeudoresByRuta(this._ruta.idruta).subscribe({
       next: async (lecturas: any) => {
         await lecturas.forEach((item: any) => {
@@ -174,7 +175,7 @@ export class SuspensionesComponent implements OnInit {
         await console.log(newDatos);
       },
       error: (e) => console.error(e),
-    });
+    }); */
   }
   /* IMPRIMIR */
   i_deudasxruta(datos: any) {

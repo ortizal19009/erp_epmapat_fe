@@ -211,6 +211,7 @@ import { ImpCajasComponent } from './componentes/caja/imp-cajas/imp-cajas.compon
 import { ImpInfoCajasComponent } from './componentes/caja/info-caja/imp-info-cajas/imp-info-cajas.component';
 import { FecfacturaComponent } from './componentes/facelectro/fecfactura/fecfactura.component';
 import { TramitesComponent } from './componentes/ctramites/tramites/tramites.component';
+import { RutasmorasComponent } from './componentes/suspensiones/rutasmoras/rutasmoras.component';
 
 const routes: Routes = [
   //Consumo de Agua
@@ -232,7 +233,7 @@ const routes: Routes = [
   { path: 'add-suspension', component: AddSuspensionesComponent },
   { path: 'info-suspension', component: DetallesSuspensionesComponent },
   { path: 'habilitaciones', component: HabilitacionesComponent },
-
+  { path: 'mora-abonados/:idruta', component: RutasmorasComponent },
   { path: 'pliego', component: PreciosxcatComponent },
   { path: 'modificar-preciosxcat', component: ModificarPreciosxcatComponent },
   { path: 'add-preciosxcat', component: AddPreciosxcatComponent },
@@ -244,7 +245,7 @@ const routes: Routes = [
   //========== FACTURACIÓN ===================
   { path: 'facelectro', component: FacelectroComponent },
   { path: 'generadorxml', component: GeneradorxmlComponent },
-  {path: 'fecfactura', component: FecfacturaComponent},
+  { path: 'fecfactura', component: FecfacturaComponent },
   { path: 'anulaciones-bajas', component: AnulacionesBajasComponent },
   //Facturacion
   { path: 'facturacion', component: FacturacionComponent },
