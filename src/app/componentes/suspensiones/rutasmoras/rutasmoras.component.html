@@ -67,7 +67,11 @@
                         <td class="text-center">{{abonado.idabonado}}</td>
                         <td>{{abonado.idresponsable.nombre}}</td>
                         <td class="text-center">{{abonado.idresponsable.cedula}}</td>
-                        <td></td>
+                        <td>
+                            {{
+                            getSinCobrar(abonado.idabonado)
+                            }}
+                        </td>
                         <td></td>
                     </tr>
                 </tbody>

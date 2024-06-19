@@ -111,7 +111,7 @@ export class AddRecaudaComponent implements OnInit {
     private recaService: RecaudacionService,
     private facxrService: FacxrecaudaService,
     private s_recaudaxcaja: RecaudaxcajaService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.formBuscar = this.fb.group({
@@ -298,6 +298,8 @@ export class AddRecaudaComponent implements OnInit {
       ) {
         this.aboService.getByIdabonado(this.formBuscar.value.cuenta).subscribe({
           next: (datos) => {
+            console.log(datos);
+
             this._cliente = datos;
             if (this._cliente.length > 0) {
               this.datosCliente('cuenta');
@@ -371,6 +373,7 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   sinCobro(idcliente: number) {
+    console.log(idcliente)
     this.facService.getSinCobro(idcliente).subscribe({
       next: (datos: any) => {
         this._sincobro = datos;
@@ -405,8 +408,9 @@ export class AddRecaudaComponent implements OnInit {
       },
       error: (err) => console.error(err.error),
     });
+    
   }
-  disabled(e: any) { }
+  disabled(e: any) {}
 
   async getAbonado(idabonado: number): Promise<any> {
     const abo = await this.aboService.getById(idabonado).toPromise();
@@ -736,7 +740,7 @@ export class AddRecaudaComponent implements OnInit {
     rubrosxfac.cantidad = 1;
     rubrosxfac.estado = 1;
     this.rubxfacService.saveRubroxFac(rubrosxfac).subscribe({
-      next: (datos) => { },
+      next: (datos) => {},
       error: (e) => console.error(e),
     });
   }
@@ -810,7 +814,7 @@ export class AddRecaudaComponent implements OnInit {
                           this.s_recaudaxcaja
                             .updateRecaudaxcaja(this.recxcaja)
                             .subscribe({
-                              next: (datos) => { },
+                              next: (datos) => {},
                               error: (e) => console.error(e),
                             });
                         },
@@ -1115,7 +1119,7 @@ export class AddRecaudaComponent implements OnInit {
       return of({ invalido: true });
     else return of(null);
   }
-  pdf() { }
+  pdf() {}
   //Al digitar el dinero
   changeDinero() {
     let ncvalor: number;

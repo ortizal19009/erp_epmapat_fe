@@ -101,6 +101,15 @@ export class RutasmorasComponent implements OnInit {
     this.s_abonado.getByIdrutaAsync(idruta).then((abonados: any) => {
       console.log(abonados);
       this._abonados = abonados;
+      //this.getSinCobrar(abonados[0].idabonado);
+      /* abonados.forEach((abonado: any) => {
+        this.s_facturas.getSinCobrarAboMod(abonado.idabonado).subscribe({
+          next: (factura: any) => {
+            console.log(factura);
+          },
+          error: (e) => console.error(e),
+        });
+      }); */
     });
   }
   getSinCobrar(idabonado: number) {
@@ -108,6 +117,7 @@ export class RutasmorasComponent implements OnInit {
       next: (facSincobro: any) => {
         console.log(facSincobro);
         this._facSinCobro = facSincobro;
+        console.log(facSincobro.length);
         return facSincobro.length;
       },
       error: (e) => {
