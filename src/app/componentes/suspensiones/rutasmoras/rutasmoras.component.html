@@ -67,15 +67,47 @@
                         <td class="text-center">{{abonado.idabonado}}</td>
                         <td>{{abonado.idresponsable.nombre}}</td>
                         <td class="text-center">{{abonado.idresponsable.cedula}}</td>
-                        <td>
-                            {{
-                            getSinCobrar(abonado.idabonado)
-                            }}
+                        <td class="text-center">
+                            {{abonado.numeroDeuda}}
                         </td>
-                        <td></td>
+                        <td class="text-center">
+                            <div class="btn-group ml-auto mt-0">
+                                <button type="button" class="bg-transparent border-0 dropdown-toggle text-green"
+                                    data-toggle="dropdown" aria-expanded="false"> <i class="bi bi-menu-down"></i>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right roboto">
+                                    <button class="dropdown-item text-muted" type="button">
+                                        <i class="bi bi-sliders"></i>&nbsp; Suspender</button>
+                                    <button class="dropdown-item text-muted" type="button" data-toggle="modal"
+                                        (click)="setDatosImprimir(abonado)" data-target="#impNotificacion">
+                                        <i class="bi bi-printer"></i>&nbsp; Notificación</button>
+
+                                </div>
+                            </div>
+                        </td>
                     </tr>
                 </tbody>
             </table>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="impNotificacion" data-backdrop="static" data-keyboard="false" tabindex="-1"
+            aria-labelledby="impNotificacionLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="impNotificacionLabel">Imprimir notificacion de pago</h5>
+                    </div>
+                    <div class="modal-body">
+                        ...
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-sm btn-outline-success"
+                            (click)="impNotificacion()">Imprimir</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

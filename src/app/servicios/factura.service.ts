@@ -224,6 +224,12 @@ export class FacturaService {
       `${baseUrl}/sincobrarAboMod?idabonado=${idabonado}`
     );
   }
+  async countSinCobrarAbo(idabonado: number) {
+    const resp = this.http.get<Facturas[]>(
+      `${baseUrl}/sincobrarAboMod/count?idabonado=${idabonado}`
+    );
+    return  await firstValueFrom(resp)
+  }
 
   getDeudaConsumo(idabonado: number) {
     return this.http.get<Facturas[]>(
