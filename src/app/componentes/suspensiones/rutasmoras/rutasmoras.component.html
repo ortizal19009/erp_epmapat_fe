@@ -1,27 +1,10 @@
+<div class="overlay" *ngIf="porcCarga != 100"></div>
+
 <div class="content mt-1 pt-1 pl-0">
     <div class="container-fluid">
         <div class="row m-0 px-0 py-1 justify-content-start cabecera border sombra">
-            <div class="col-sm-2">
-                <h4 class="m-0 font-weight-bold">{{ titulo }}</h4>
-            </div>
             <div class="col-sm-4">
-                <form action="" [formGroup]="formSuspensiones">
-                    <div class="row">
-                        <div class="col-sm">
-                            <input type="date" class="form-control mx-0 form-control-sm text-center" id="desde"
-                                formControlName="desde" max="{{ today | date : 'yyyy-MM-dd' }}" />
-                        </div>
-                        <div class="col-sm">
-                            <input type="date" class="form-control mx-0 form-control-sm text-center" id="hasta"
-                                formControlName="hasta" max="{{ today | date : 'yyyy-MM-dd' }}" />
-                        </div>
-                        <div class="col-sm-3">
-                            <button class="btn btn-primary btn-sm">
-                                <i class="fa fa-search" aria-hidden="true"></i> Buscar
-                            </button>
-                        </div>
-                    </div>
-                </form>
+                <h4 class="m-0 font-weight-bold">{{ titulo }}</h4>
             </div>
             <div class="col-sm-2">
                 <input type="text" class="form-control form-control-sm text-center" placeholder="Filtrar..."
@@ -48,6 +31,17 @@
     </div>
 </div>
 <div class="container-fluid mt-3">
+    <div class="row" *ngIf="porcCarga != 100">
+        <div class="col-sm">
+            <div class="progress">
+                <div class="progress-bar bg-primary progress-bar-striped" role="progressbar" aria-valuenow="40"
+                    aria-valuemin="0" aria-valuemax="100" [ngStyle]="{ 'width.%': porcCarga }">
+                    <span class="sr-only">{{porcCarga}}% Complete (success)</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
     <div class="row">
         <div class="col-sm">
             <table class="table table-sm table-hover table-striped table-bordered">
@@ -93,18 +87,18 @@
         <!-- Modal -->
         <div class="modal fade" id="impNotificacion" data-backdrop="static" data-keyboard="false" tabindex="-1"
             aria-labelledby="impNotificacionLabel" aria-hidden="true">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="impNotificacionLabel">Imprimir notificacion de pago</h5>
                     </div>
                     <div class="modal-body">
-                        ...
+                        <iframe id="pdfViewer" src="" width="100%" height="600px"></iframe>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">Cancelar</button>
-                        <button type="button" class="btn btn-sm btn-outline-success"
-                            (click)="impNotificacion()">Imprimir</button>
+                        <!--  <button type="button" class="btn btn-sm btn-outline-success"
+                            (click)="impNotificacion()">Imprimir</button> -->
                     </div>
                 </div>
             </div>

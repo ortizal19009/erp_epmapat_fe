@@ -14,8 +14,9 @@ const baseUrl = `${apiUrl}/rubroxfac`;
 export class RubroxfacService {
   constructor(private http: HttpClient) {}
 
-  async getSumaValoresUnitarios(idfactura: number) {
-    return this.http.get(`${baseUrl}/sumavalores?idfactura=${idfactura}`);
+  getSumaValoresUnitarios(idfactura: number) {
+    let res = this.http.get(`${baseUrl}/sumavalores?idfactura=${idfactura}`);
+    return res;
   }
   getSumaRubros(d: Date, h: Date) {
     return this.http.get<Rubroxfac[]>(
@@ -45,7 +46,9 @@ export class RubroxfacService {
     return this.http.get<Rubroxfac[]>(`${baseUrl}?idfactura=${idfactura}`);
   }
   async getByIdfacturaAsync(idfactura: number) {
-    const response = await firstValueFrom(this.http.get<Rubroxfac[]>(`${baseUrl}?idfactura=${idfactura}`));
+    const response = await firstValueFrom(
+      this.http.get<Rubroxfac[]>(`${baseUrl}?idfactura=${idfactura}`)
+    );
     return response;
   }
 
@@ -175,14 +178,17 @@ export class RubroxfacService {
     return this.http.put(baseUrl + '/' + idrubroxfac, rubroxfac);
   }
   getIva(iva: number, idfactura: number) {
-    const response = (this.http.get(`${baseUrl}/iva?iva=${iva}&idfactura=${idfactura}`));
+    const response = this.http.get(
+      `${baseUrl}/iva?iva=${iva}&idfactura=${idfactura}`
+    );
     return response;
   }
 
   /* FACTURACIÓN ELECTRÓNICA */
-async getRubrosAsync(idfactura: number): Promise<any[]>{
-  const response = this.http.get<any[]>(`${baseUrl}/feRubros?idfactura=${idfactura}`); 
-  return await firstValueFrom(response);
-}
-
+  async getRubrosAsync(idfactura: number): Promise<any[]> {
+    const response = this.http.get<any[]>(
+      `${baseUrl}/feRubros?idfactura=${idfactura}`
+    );
+    return await firstValueFrom(response);
+  }
 }

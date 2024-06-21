@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable, firstValueFrom, map } from 'rxjs';
 import { Facturas } from '../modelos/facturas.model';
 import { environment } from 'src/environments/environment';
+import { InteresesService } from './intereses.service';
 
 const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/facturas`;
@@ -11,7 +12,7 @@ const baseUrl = `${apiUrl}/facturas`;
   providedIn: 'root',
 })
 export class FacturaService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private s_interes: InteresesService) {}
 
   getListaByNroFactura(nrofactura: String) {
     return this.http.get<Facturas>(`${baseUrl}?nrofactura=${nrofactura}`);
@@ -228,7 +229,7 @@ export class FacturaService {
     const resp = this.http.get<Facturas[]>(
       `${baseUrl}/sincobrarAboMod/count?idabonado=${idabonado}`
     );
-    return  await firstValueFrom(resp)
+    return await firstValueFrom(resp);
   }
 
   getDeudaConsumo(idabonado: number) {
@@ -317,5 +318,13 @@ export class FacturaService {
   }
   getFechaByCobro(d: Date, h: Date) {
     return this.http.get<Facturas>(`${baseUrl}/rangofeccobro?d=${d}&h=${h}`);
+  }
+  /* CALCULAR INTERESES */
+  calcularIntereses(idfactura: number) {
+    this.s_interes.getListaIntereses().subscribe({
+      next: (_intereses: any) => {
+        console.log(_intereses);
+      },
+    });
   }
 }
