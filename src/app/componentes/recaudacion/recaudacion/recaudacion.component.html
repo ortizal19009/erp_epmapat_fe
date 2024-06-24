@@ -1,1 +1,673 @@
-<p>recaudacion works!</p>
+<div class="content mt-1 pt-1 pl-0">
+    <div class="container-fluid">
+        <div class="row m-0 px-0 py-1 col-sm-12 border recaudacabecera sombra">
+            <div class="col-sm-2 pl-0 mt-1">
+                <h4 class="m-0 font-weight-bold text-truncate">
+                    <i class="bi bi-cash-coin ml-2"></i> Recaudación v_2.0
+                    <i class="fa fa-lock" aria-hidden="true" *ngIf="estadoCajaT; else estadoCajaF"></i>
+                    <ng-template #estadoCajaF>
+                        <i class="fa fa-unlock" aria-hidden="true"></i>
+                    </ng-template>
+                </h4>
+            </div>
+            <div class="col-sm-8 mx-0 px-0">
+                <form [formGroup]="formBuscar" class="col-sm-12 mt-0 px-0 pt-0" (ngSubmit)="onSubmit()">
+                    <div class="row col-sm-12 mt-1 mb-0">
+                        <div class="form-group col-md-2 mb-0">
+                            <input class="form-control form-control-sm text-center" type="text" formControlName="cuenta"
+                                placeholder="Cuenta" />
+                        </div>
+                        <div class="form-group col-md-2 my-0 py-0 mb-0">
+                            <input class="form-control form-control-sm text-center" type="text"
+                                formControlName="identificacion" placeholder="Identificación" />
+                        </div>
+                        <div class="form-group col-md-2 my-0 py-0 mb-0 form-inline">
+                            <button class="btn btn-primary btn-sm mr-1">
+                                <i class="fa fa-search"></i> Buscar
+                            </button>
+                            <div *ngIf="swvalido == 0" class="alert alert-warning m-0 py-0 px-1 small font-weight-bold"
+                                role="alert">
+                                Ups!
+                            </div>
+                        </div>
+                        <div class="form-group col-md-2 my-0 py-0 mb-0">
+                            <button type="button" class="btn btn-sm btn-success" data-toggle="modal"
+                                data-target="#clientesModal" (click)="clientesModal()">
+                                <i class="bi bi-people"></i> Clientes
+                            </button>
+                        </div>
+
+                        <div *ngIf="acobrar > 0 && !swcobrado && !estadoCajaT"
+                            class="form-group col-md-3 my-0 py-0 mb-0">
+                            <button type="button" class="btn btn-sm btn-success" data-toggle="modal"
+                                data-target="#modalCobrar" (click)="valorAcobrar(acobrar)">
+                                <i class="bi bi-check-lg"></i> Cobrar:&nbsp;&nbsp;&nbsp;
+                                <strong>{{ acobrar | number : "1.2-2" }}</strong>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-sm my-0 py-0 mb-0">
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="filtrar"
+                    placeholder="Filtrar..." />
+            </div>
+
+            <div class="btn-group ml-auto">
+                <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
+                    aria-expanded="false">
+                    <i class="bi-menu-button-wide text-white"></i>
+                </button>
+                <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+                    <button class="dropdown-item" type="button" data-toggle="modal" (click)="abrirCaja()"
+                        data-target="#abrirCaja" [disabled]="!estadoCajaT">
+                        <i class="bi-door-open"></i>&nbsp; Abrir caja
+                    </button>
+                    <button class="dropdown-item" type="button" data-toggle="modal" data-target="#cerrarCaja"
+                        [disabled]="estadoCajaT">
+                        <i class="bi-door-closed"></i>&nbsp; Cerrar caja
+                    </button>
+                    <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
+                        <!-- [disabled]="swbusca != 0"> -->
+                        <i class="bi-printer"></i>&nbsp; Imprimir
+                    </button>
+                </div>
+                <div class="btn-group mx-1" *ngIf="swbusca != 0">
+                    <button class="bg-transparent border-0" type="button" (click)="reiniciar()">
+                        <i class="bi-arrow-left-circle text-white icoRegresar"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row mt-2 mb-0 justify-content-left">
+        <div class="col-sm-3">
+            <div class="row" *ngIf="swbusca != 0">
+                <div class="col-sm">
+                    <div class="card detalle sombra">
+                        <div class="card-body box-profile">
+                            <h3 class="profile-username text-center">{{ cliente.nombre }}</h3>
+                            <p class="text-muted text-center">{{ cliente.cedula }}</p>
+                            <ul class="list-group list-group-unbordered mb-3">
+                                <li class="list-group-item detalle">
+                                    <b>Dirección</b> <a class="float-right">{{ cliente.direccion }}</a>
+                                </li>
+                                <li class="list-group-item detalle">
+                                    <b>e-mail</b> <a class="float-right">{{ cliente.email }}</a>
+                                </li>
+                                <li class="list-group-item detalle">
+                                    <b>Teléfono</b> <a class="float-right">{{ cliente.telefono }}</a>
+                                </li>
+                                <li class="list-group-item detalle">
+                                    <b>Discapacidad</b>
+                                    <i *ngIf="cliente.porcdiscapacidad === 0">
+                                        <i class="float-right bi-circle"></i>
+                                    </i>
+                                    <i *ngIf="cliente.porcdiscapacidad! > 0">
+                                        <i class="float-right bi-check-circle-fill"></i>
+                                    </i>
+                                </li>
+                                <li class="list-group-item detalle">
+                                    <b>Adulto mayor</b> <a class="float-right"></a><i
+                                        class="float-right bi-bug-fill"></i>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" *ngIf="_nroFactura !=''">
+                <div class="col-sm numeracion">
+                    <small class="badge badge-danger"><i class="bi bi-newspaper"></i>
+                        {{_nroFactura}}</small>
+                </div>
+            </div>
+        </div>
+        <div [ngClass]="{'col-9 recaudadetalle': swbusca != 0,'col-6 mt-5': swbusca == 0 }">
+            <div class="card sombra" [ngClass]="{ recaudadetalle: swbusca != 0 }">
+                <div class="card-body box-profile d-flex justify-content-center">
+                    <div *ngIf="swbusca == 0">
+                        <img src="/assets/dist/img/logo.png" width="280" />
+                    </div>
+
+                    <div *ngIf="swbusca == 1" class="col-md-12">
+                        <div class="row justify-content-center">
+                            <div class="callout callout-info text-center col-md-8">
+                                <div class="alert alert-info">
+                                    <h5><i class="fas fa-info"></i> <strong> Mensaje</strong></h5>
+                                    No existe la <strong>{{ mensaje.campo }}</strong>
+                                    {{ mensaje.texto }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div *ngIf="swbusca == 2" class="col-md-12">
+                        <div class="row justify-content-center">
+                            <div class="callout callout-info text-center col-md-8">
+                                <div class="alert alert-info">
+                                    <h5><i class="fas fa-info"></i> <strong> Mensaje</strong></h5>
+                                    No tiene Planillas sin Cobrar !
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <table *ngIf="swbusca == 3" class="table table-hover table-sm table-bordered">
+                        <thead class="recaudacabecera">
+                            <tr class="text-center">
+                                <th></th>
+                                <th>Cuenta</th>
+                                <th>Responsable pago</th>
+                                <th>Planilla</th>
+                                <th>Dirección</th>
+                                <th>Fecha</th>
+                                <th>Módulo</th>
+                                <th>Valor</th>
+                                <th>
+                                    <input type="checkbox" (change)="marcarTodas($event)" class="cursor"
+                                        [disabled]="filtrar" />
+                                </th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let sincobro of _sincobro | filter : filtrar; let i = index" class="text-center"
+                                [ngClass]="{ transferido: sincobro.estado == 3 }">
+                                <td class="small font-weight-bold">{{ i + 1 }}</td>
+                                <td [ngClass]="{ transparente: sincobro.idabonado == 0 }">
+                                    {{ sincobro.idAbonado }}
+                                </td>
+                                <td class="description">{{ sincobro.responsablePago }}</td>
+                                <td>{{ sincobro.idfactura }}</td>
+                                <td class="description">
+                                    {{ sincobro.direccion }}
+                                    <!--    {{sincobro.idabonado}}
+                            <i class="fa fa-spinner fa-pulse fa-fw"></i>
+                            <span class="sr-only">Loading...</span> -->
+                                </td>
+                                <td class="description">{{ sincobro.feccrea |date:"mediumDate" }}</td>
+                                <td class="text-left description">{{ sincobro.modulo }}</td>
+                                <!-- <td  class="text-right">{{
+                            sincobro.totaltarifa + sincobro.comerc + sincobro.interes +
+                            sincobro.multa | number:'1.2-2'}}</td> -->
+                                <td class="text-right">
+                                    {{
+                                    sincobro.total +sincobro.interes + sincobro.iva
+                                    }}
+                                </td>
+                                <!--           <td *ngIf="sincobro.idmodulo.idmodulo != 8" [ngClass]="{'transferido': sincobro.estado == 3 }"
+                            class="text-right">{{
+                            sincobro.totaltarifa + sincobro.comerc + sincobro.interes +
+                            sincobro.multa | number:'1.2-2'}}</td>
+                         <td *ngIf="sincobro.idmodulo.idmodulo == 8" class="text-right">{{
+                            sincobro.valorbase | number:'1.2-2'}}</td>-->
+                                <td>
+                                    <input type="checkbox" [(ngModel)]="sincobro.pagado" (change)="marcarAnteriores(i)"
+                                        [disabled]="swcobrado" class="cursor" />
+                                </td>
+                                <td [ngClass]="{'transferido': sincobro.estado == 3 }">
+                                    <button *ngIf="!swcobrado" class="btn btn-outline-info btn-xs cursor"
+                                        data-toggle="modal" data-target="#DetallePlanillaModal"
+                                        (click)="getRubroxfac( sincobro.idfactura, sincobro.idmodulo.idmodulo )">
+                                        <i class="fa fa-info-circle"></i> Info
+                                    </button>
+                                    <button *ngIf="swcobrado" class="btn btn-outline-info btn-xs cursor"
+                                        (click)="impComprobante(sincobro)" [disabled]="!sincobro.pagado">
+                                        <i class="fa fa-print"></i> Imprimir
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="font-weight-bold">TOTAL</td>
+                                <td class="text-right font-weight-bold">
+                                    {{ 0 | number : "1.2-2" }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Buscar Clientes -->
+    <div class="modal fade" id="clientesModal" tabindex="-1" aria-labelledby="clienteModalLabel" aria-hidden="true"
+        data-backdrop="static">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content clientedetalle">
+                <div class="modal-body mt-0">
+                    <div class="row clientecabecera">
+                        <form [formGroup]="formBusClientes" class="mb-0 col-md-9">
+                            <div class="row py-2">
+                                <div class="input-group col-sm-12">
+                                    <input type="text" placeholder="Nombre ó identificación (Mínimo 5)"
+                                        class="form-control form-control-sm" autofocus id="nombre_identifica"
+                                        formControlName="nombre_identifica" required minlength="5" />
+
+                                    <div class="input-group-append">
+                                        <button class="btn btn-sm btn-primary" (click)="buscarClientes()"
+                                            [disabled]="formBusClientes.invalid">
+                                            <i class="fa fa-search" aria-hidden="true"></i> Buscar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                        <div class="col-md-3 mt-2 pl-0">
+                            <input type="text" class="form-control form-control-sm text-center" placeholder="Filtrar..."
+                                [(ngModel)]="filtro" />
+                        </div>
+                    </div>
+                    <div class="row mt-0 pt-0" *ngIf="!formBusClientes.invalid">
+                        <table class="table table-hover table-bordered table-sm mt-0 pt-0 clientedetalle"
+                            id="tablaClientes">
+                            <thead class="text-center clientecabecera">
+                                <tr>
+                                    <th></th>
+                                    <th>Nombre</th>
+                                    <th>Identificación</th>
+                                </tr>
+                            </thead>
+                            <tbody id="id-tbody">
+                                <tr *ngFor="let cliente of _clientes | filter : filtro;let i = index
+                   " (click)="selecCliente(cliente)" data-dismiss="modal">
+                                    <td class="text-center small font-weight-bold py-0">
+                                        {{ i + 1 }}
+                                    </td>
+                                    <td class="py-0">{{ cliente.nombre }}</td>
+                                    <td class="py-0">{{ cliente.cedula }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="row justify-content-center mt-0 mb-3">
+                    <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">
+                        <i class="bi bi-x-circle"></i>&nbsp; Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Cobrar -->
+    <div class="modal fade" id="modalCobrar" tabindex="-1" aria-labelledby="modalCobrarLabel" data-backdrop="static"
+        aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content recaudadetalle">
+                <div class="modal-header justify-content-center py-2 recaudacabecera">
+                    <h5 class="modal-title fantacyblack">Cobro</h5>
+                </div>
+                <div class="modal-body col-md-12">
+                    <form [formGroup]="formCobrar">
+                        <div class="col-md-12">
+                            <div class="input-group input-group-sm">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text">Forma cobro</label>
+                                </div>
+                                <select class="custom-select" formControlName="idformacobro"
+                                    (change)="changeFormacobro()">
+                                    <option *ngFor="let formacobro of _formascobro" [ngValue]="formacobro"
+                                        id="idformacobro{{formacobro.idformacobro}}">
+                                        {{formacobro.descripcion}}</option>
+                                </select>
+                            </div>
+                            <div class="input-group mt-3 mb-3">
+                                <div class="input-group-prepend"> <span class="input-group-text font-weight-bold">A
+                                        Cobrar</span> </div>
+                                <input type="text" class="form-control text-right" formControlName="acobrar" readonly>
+                                <div class="input-group-append"> <span class="input-group-text">{{acobrardec}}</span>
+                                </div>
+                            </div>
+                            <div *ngIf="formacobroNC || f['ncvalor'].value > 0" class="input-group mb-3">
+                                <div class="input-group-prepend"><span class="input-group-text font-weight-bold"
+                                        for="dinero">Valor NC</span></div>
+                                <input type="text" class="form-control text-center" formControlName="ncvalor"
+                                    [ngClass]="{'is-invalid': f['ncvalor'].invalid && f['ncvalor'].touched,'is-valid': f['ncvalor'].valid, '': f['ncvalor'].untouched}"
+                                    (change)="changeNCvalor()">
+                            </div>
+                            <div *ngIf="!formacobroNC" class="input-group mb-3">
+                                <div class="input-group-prepend"><span class="input-group-text font-weight-bold"
+                                        for="dinero">Dinero</span></div>
+                                <input type="text" class="form-control text-center" formControlName="dinero" [ngClass]="{'is-invalid': f['dinero'].invalid && f['dinero'].touched,
+                         'is-valid': f['dinero'].valid, '': f['dinero'].untouched}" (change)="changeDinero()">
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-outline-success btn-xm"
+                                        (click)="valorDinero()">
+                                        <i class="bi bi-chevron-double-down"></i></button>
+                                </div>
+                            </div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend"> <span
+                                        class="input-group-text font-weight-bold">Vuelto</span>
+                                </div>
+                                <input type="text" class="form-control text-center" formControlName="vuelto" readonly>
+                                <div *ngIf="disabledcobro; then thenBlock else elseBlock"></div>
+                                <ng-template #thenBlock><span class="input-group-text bg-danger"><i
+                                            class="bi bi-x-circle"></i>
+                                    </span> </ng-template>
+                                <ng-template #elseBlock><span class="input-group-text bg-success"><i
+                                            class="fa fa-check-circle"></i></span> </ng-template>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="row mt-0 mb-3 justify-content-center">
+                    <button type="button" class="btn btn-success btn-sm mx-1" [disabled]="disabledcobro"
+                        (click)="cobrar()" data-dismiss="modal">
+                        <i class="fa fa-check-circle"></i> Aceptar</button>
+                    <button type="button" class="btn btn-sm btn-outline-success mx-1" data-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal DETALLE Planilla -->
+    <div class="modal fade" id="DetallePlanillaModal" tabindex="-1" aria-labelledby="DetallePlanillaModal">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content recaudadetalle">
+                <div class="py-2 recaudacabecera">
+                    <div class="row text-center">
+                        <div class="col">
+                            <h5 class="modal-title" id="DetalleFacturaModalLabel"><strong>Planilla:</strong>
+                                {{idfactura}}</h5>
+                        </div>
+                    </div>
+                    <div *ngIf="consumo" class="row text-center">
+                        <div class="col">
+                            <h6 class="fantacyblack"><strong>Consumo:</strong> {{consumo}} m<sup>3</sup></h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <table *ngIf="_rubrosxfac" class="table table-hover table-sm table-bordered mb-0 ">
+                        <thead class="recaudacabecera">
+                            <tr class="text-center">
+                                <th></th>
+                                <th class="col-md-9">Rubro</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let rubroxfac of _rubrosxfac; let i=index" class="fila">
+                                <td class="text-center font-weight-bold small">{{i+1}}</td>
+                                <td>{{ rubroxfac.idrubro_rubros.descripcion}}</td>
+                                <td class="text-right">{{ rubroxfac.valorunitario | number:'1.2-2'}}</td>
+                            </tr>
+                            <tr *ngIf="valoriva > 0">
+                                <td></td>
+                                <td>IVA</td>
+                                <td class="text-right">{{valoriva | number:'1.2-2'}}</td>
+                            </tr>
+                            <tr *ngIf="totInteres > 0">
+                                <td></td>
+                                <td>Interés</td>
+                                <td class="font-weight-bold text-right">
+                                    {{ totInteres | number : "1.2-2" }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td class="font-weight-bold">TOTAL</td>
+                                <td class="font-weight-bold text-right">{{ totfac | number:'1.2-2'}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row justify-content-center mt-0 mb-3">
+                    <button type="button" class="btn btn-success btn-sm" data-dismiss="modal">
+                        <i class="fa fa-times-circle"></i> Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <!-- MODAL Abrir Caja -->
+    <div class="modal fade" id="abrirCaja" tabindex="-1" aria-labelledby="abrirCajaLabel" data-backdrop="static"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content recaudadetalle">
+                <div class="modal-header py-2 justify-content-center recaudacabecera">
+                    <h5 class="modal-title font-weight-bold fantacyblack" id="ModalLabel">
+                        Datos caja: {{ _caja.codigo }}
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <div class="input-group input-group-sm mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" for="establecimiento">Usuario</span>
+                            </div>
+                            <input type="text" id="establecimiento" value="{{ _usuario.alias }}" readonly
+                                class="form-control form-control-sm" />
+                        </div>
+                        <div class="input-group input-group-sm mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" for="establecimiento">Establecimiento</span>
+                            </div>
+                            <input type="text" id="establecimiento" value="{{ _establecimiento.establecimiento }}"
+                                readonly class="form-control form-control-sm" />
+                        </div>
+                        <div class="input-group input-group-sm mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" for="establecimiento">Nro. Factura</span>
+                            </div>
+                            <input type="text" id="establecimiento" value="{{ _nroFactura }}" readonly
+                                class="form-control form-control-sm" />
+                        </div>
+                    </div>
+                    <div class="alert alert-warning text-center mt-3 mb-0" *ngIf="cajaActiva">
+                        <h6>
+                            <strong>Esta caja ya esta iniciada en otro computador</strong>
+                        </h6>
+                    </div>
+                </div>
+                <div class="row justify-content-center mt-1 mb-3">
+                    <button type="button" class="btn btn-success btn-sm mx-1" [disabled]="cajaActiva"
+                        data-dismiss="modal" (click)="validarCaja()">
+                        <i class="fa fa-check-circle"></i>&nbsp; Aceptar
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-success mx-1" data-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- MODAL Cerrar Caja -->
+    <div class="modal fade" id="cerrarCaja" tabindex="-1" aria-labelledby="cerrarCajaLabel" data-backdrop="static"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content recaudadetalle">
+                <div class="modal-header py-2 justify-content-center recaudacabecera">
+                    <h5 class="modal-title font-weight-bold fantacyblack" id="ModalLabel">
+                        Cerrar
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        Advertencia: Al cerrar se registra el Total recaudado hasta el
+                        momento.
+                    </p>
+                    <div class="alert alert-warning text-center mt-3 mb-0">
+                        <h6><strong>¿ Cerrar la caja ?</strong></h6>
+                    </div>
+                </div>
+                <div class="row justify-content-center mt-1 mb-3">
+                    <button type="button" class="btn btn-success btn-sm mx-1" data-dismiss="modal"
+                        (click)="cerrarCaja()">
+                        <i class="fa fa-check-circle"></i>&nbsp; Aceptar
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-success mx-1" data-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Colores -->
+    <div class="modal fade" id="modalColores" tabindex="-1" aria-labelledby="modalColoresLabel" data-backdrop="static"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content recaudadetalle">
+                <div class="modal-header justify-content-center py-2 recaudacabecera">
+                    <h5 class="modal-title">Definir Colores</h5>
+                </div>
+                <div class="modal-body col-md-12">
+                    <form [formGroup]="formColores">
+                        <div class="col-md-12">
+                            <!-- ========= Color Cabecera ============ -->
+                            <div class="col-sm-12 ml-2 mb-0">
+                                <div class="">
+                                    <span class="font-weight-bold">Cabecera</span>
+                                </div>
+                            </div>
+                            <div class="row col-sm-12 mt-1 mb-1">
+                                <div class="form-group col-sm-5 mb-0">
+                                    <div class="input-group input-group-sm">
+                                        <div class="input-group-prepend col-sm-4">
+                                            <label class="input-group-text">Tono</label>
+                                        </div>
+                                        <select class="custom-select" id="tonocabecera" formControlName="tonos0">
+                                            <option *ngFor="let tono of _tonoscabecera" [ngValue]="tono"
+                                                id="idcolor{{ tono.idcolor }}">
+                                                {{ tono.nombre }}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group col-sm-7">
+                                    <div class="input-group input-group-sm">
+                                        <div class="input-group-prepend col-sm-3">
+                                            <label class="input-group-text">Color</label>
+                                        </div>
+                                        <select class="custom-select" id="uso_old" formControlName="colores0">
+                                            <option *ngFor="let color of _colorescabecera" [ngValue]="color"
+                                                id="idcolor{{ color.idcolor }}">
+                                                {{ color.nombre }}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- ================ Color Detalle ================ -->
+                            <div class="col-sm-12 ml-2 mb-0">
+                                <div class="">
+                                    <span class="font-weight-bold">Detalle</span>
+                                </div>
+                            </div>
+                            <div class="row col-sm-12 mt-1 mb-1">
+                                <div class="form-group col-sm-5 mb-0">
+                                    <div class="input-group input-group-sm">
+                                        <div class="input-group-prepend col-sm-4">
+                                            <label class="input-group-text">Tono</label>
+                                        </div>
+                                        <select class="custom-select" id="tonodetalle" formControlName="tonos1">
+                                            <option *ngFor="let tono of _tonosdetalle" [ngValue]="tono"
+                                                id="idcolor{{ tono.idcolor }}">
+                                                {{ tono.nombre }}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group col-sm-7">
+                                    <div class="input-group input-group-sm">
+                                        <div class="input-group-prepend col-sm-3">
+                                            <label class="input-group-text">Color</label>
+                                        </div>
+                                        <select class="custom-select" id="uso_old" formControlName="colores1">
+                                            <option *ngFor="let color of _coloresdetalle" [ngValue]="color"
+                                                id="idcolor{{ color.idcolor }}">
+                                                {{ color.nombre }}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="row mt-0 mb-3 justify-content-center">
+                    <button type="button" class="btn btn-success btn-sm mx-1" [disabled]="disabledcobro">
+                        <i class="fa fa-check-circle"></i> Aceptar
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-success mx-1" data-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL Imprimir-->
+<div class="modal fade" id="imprimir" tabindex="-1" aria-labelledby="imprimirLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border">
+            <div class="modal-header py-2 justify-content-center cabecera">
+                <h5 class="modal-title font-weight-bold" id="ModalLabel">Imprimir</h5>
+            </div>
+            <div class="modal-body cuerpo">
+                <div class="input-group mb-3 input-group-sm">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="inputGroupSelect01">Opciones</label>
+                    </div>
+                    <select class="custom-select" id="inputGroupSelect01">
+                        <option selected>Reimprimir planilla</option>
+                    </select>
+                </div>
+                <div class="input-group input-group-sm mb-2">
+                    <div class="input-group-prepend">
+                        <small class="input-group-text">N° planilla</small>
+                        <div class="input-group-text">
+                            <input type="text" class="form-control form-control-sm" [(ngModel)]="cuenta" />
+                        </div>
+                    </div>
+                </div>
+                <!--            <div class="input-group input-group-sm mb-2">
+                <div class="input-group-prepend">
+                   <small class="input-group-text">Hasta</small>
+                   <div class="input-group-text">
+                      <input type="date" class="form-control form-control-sm" [(ngModel)]="hasta">
+                   </div>
+                </div>
+             </div> -->
+                <div class="input-group input-group-sm mb-0" [hidden]=" true">
+                    <div class="input-group-prepend">
+                        <small class="input-group-text">Abrir en otra página</small>
+                        <div class="input-group-text">
+                            <input type="checkbox" [(ngModel)]="otraPagina" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row justify-content-center mt-3">
+                    <button type="button" class="btn btn-success btn-sm mx-1" data-dismiss="modal"
+                        (click)="impComprobante({idfactura:cuenta})" [attr.data-target]="otraPagina ? null : '#pdf'"
+                        data-toggle="modal">
+                        <i class="fa fa-check-circle"></i>&nbsp; Aceptar
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-success btn-sm mx-1" data-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- MODAL PDF (En la misma página)-->
+<div class="modal fade" id="pdf" tabindex="-1" aria-labelledby="pdf" aria-hidden="true">
+    <div class="modal-dialog modal-sm"></div>
+</div>

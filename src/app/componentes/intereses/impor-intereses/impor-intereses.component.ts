@@ -54,7 +54,7 @@ export class ImporInteresesComponent implements OnInit {
          workbook.xlsx.load(arrayBuffer).then(() => {
             const worksheet = workbook.getWorksheet(1);
 
-            worksheet.eachRow((row, rowNumber) => {
+            worksheet!.eachRow((row, rowNumber) => {
                const rowData: any[] = [];
                row.eachCell((cell, colNumber) => {
                   rowData.push(cell.value);

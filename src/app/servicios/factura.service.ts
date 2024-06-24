@@ -192,6 +192,11 @@ export class FacturaService {
   getSinCobro(idcliente: number) {
     return this.http.get<Facturas[]>(`${baseUrl}/idcliente/${idcliente}`);
   }
+  getFacSincobro(idcliente: number) {
+    return this.http.get<Facturas[]>(
+      `${baseUrl}/facSincobrar?idcliente=${idcliente}`
+    );
+  }
 
   //IDs de las Planillas sin cobrar de un Abonado
   getSinCobroAbo(idabonado: number) {
