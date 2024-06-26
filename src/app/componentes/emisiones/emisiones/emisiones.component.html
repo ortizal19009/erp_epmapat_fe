@@ -158,7 +158,6 @@
          </table>
       </div>
    </div>
-
    <!-- EMISION INDIVIDUAL -->
    <div class="modal fade" data-backdrop="static" id="emisionIndividual" tabindex="-1"
       aria-labelledby="emisionIndividualLabel" aria-hidden="true">
@@ -219,21 +218,17 @@
                      </table>
                   </div>
                </div>
-
                <div class="row">
                   <div class="col-sm text-center">
                      <button class="btn btn-sm btn-success" data-dismiss='modal'>Cancelar</button>
                   </div>
                </div>
-
             </div>
-
             <ng-template #nEmisionIndividual>
                <div class='modal-body detalle Roboto'>
                   <div class="container" *ngIf="optabonado else searchAbonado">
                      <form [formGroup]="f_emisionIndividual" id="formRubro">
                         <div class="row">
-
                            <div class="form-group col-md-4 mt-1">
                               <div class="input-group input-group-sm mb-3">
                                  <div class="input-group-prepend">
@@ -328,7 +323,7 @@
                         <button class="btn btn-outline-success btn-sm mx-2 btn-sm mb-1" data-dismiss='modal'>
                            <i class="fa fa-times-circle"></i> Cancelar</button>
                         <button class="btn btn-primary btn-sm mx-2 btn-sm mb-1" data-dismiss='modal'
-                           (click)="generaRutaxemisionIndividual()" *ngIf="!_lectura && cerrado != 1">
+                           (click)="generaRutaxemisionIndividual()" *ngIf="!_lectura ">
                            <i class="bi bi-eyeglasses"></i> Crear lectura</button>
                      </div>
                   </div>

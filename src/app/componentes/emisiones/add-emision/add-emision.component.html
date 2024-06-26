@@ -2,16 +2,16 @@
     <h4 class="m-0 font-weight-bold">Nueva Emisión</h4>
     <form id="formularioEmision">
         <div class="row">
-             <div class="form-group col-sm-3 ml-1 my-0 py-0">
+            <div class="form-group col-sm-3 ml-1 my-0 py-0">
                 <label for="emision" class="form-label col-form-label-sm text-center">Emisión
                     <input type="text" class="form-control form-control-sm text-center" [(ngModel)]="emi.emision"
-                    id="emision" name="emision" />
+                        id="emision" name="emision" />
                 </label>
             </div>
             <div class="form-group col-sm-12 my-0 py-0">
                 <label for="observaciones" class="form-label col-form-label-sm col-sm-12">Observaciones
-                    <input type="text" class="form-control form-control-sm col-sm-12" 
-                        [(ngModel)]="emi.observaciones" id="observaciones" name="observaciones" />
+                    <input type="text" class="form-control form-control-sm col-sm-12" [(ngModel)]="emi.observaciones"
+                        id="observaciones" name="observaciones" />
                 </label>
             </div>
         </div>
@@ -20,9 +20,8 @@
             <button class="btn btn-sm btn-success mx-1" (click)="onSubmit()" data-toggle="collapse"
                 data-target="#collapseNuevo" [disabled]="newdisabled">
                 <i class="fa fa-check-circle"></i> Aceptar</button>
-                <button class="btn btn-outline-success mx-1 btn-sm" data-toggle="collapse"
-            data-target="#collapseNuevo"> 
-            <i class="fa fa-times-circle"></i> Cancelar</button>
+            <button class="btn btn-outline-success mx-1 btn-sm" data-toggle="collapse" data-target="#collapseNuevo">
+                <i class="fa fa-times-circle"></i> Cancelar</button>
         </div>
     </form>
 </div>

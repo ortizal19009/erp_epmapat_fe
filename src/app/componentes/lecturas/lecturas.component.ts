@@ -97,6 +97,7 @@ export class LecturasComponent implements OnInit {
     this.rutaxemisionDatos(this.idrutaxemision);
     this.lecService.getLecturas(this.idrutaxemision).subscribe({
       next: (resp) => {
+        console.log(resp);
         this._lecturas = resp;
         this.abonados = this._lecturas.length;
         this.total();

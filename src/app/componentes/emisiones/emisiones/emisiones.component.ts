@@ -501,17 +501,7 @@ export class EmisionesComponent implements OnInit {
       let lectura = {} as Lectura;
       lectura.estado = this.lecturaestado;
       lectura.fechaemision = dateEmision;
-      /*       try {
-        let lecturaanterior = await this.s_lecturas.getUltimaLecturaAsync(
-          this.abonado.idabonado
-        );
-        if (!lecturaanterior) {
-          lecturaanterior = 0;
-        }
-        lectura.lecturaanterior = lecturaanterior;
-      } catch (error) {
-        console.error(`Al buscar la Última lectura`, error);
-      } */
+
       lectura.lecturaanterior = this.f_lecturas.value.lecturaanterior;
       lectura.lecturaactual = this.f_lecturas.value.lecturaactual;
       lectura.lecturadigitada = this.f_lecturas.value.lecturaactual;
@@ -524,6 +514,7 @@ export class EmisionesComponent implements OnInit {
       lectura.idrutaxemision_rutasxemision = nuevarutaxemi;
       lectura.total1 = 0;
       lectura.idfactura = nuevoIdfactura;
+      console.log(lectura);
       try {
         let newLectura = await this.s_lecturas.saveLecturaAsync(lectura);
         await this.planilla(newLectura);
@@ -535,6 +526,7 @@ export class EmisionesComponent implements OnInit {
     }
   }
   lemisionIndividuao(e: any) {
+    console.log(e);
     this.getEmisionIndividualByIdEmision(this.emision);
   }
   async planilla(lectura: Lecturas) {
