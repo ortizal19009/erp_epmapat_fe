@@ -95,6 +95,8 @@ export class RecaudacionComponent implements OnInit {
   $event: any;
   valoriva: number;
   _codigo: string;
+  /*  */
+  arrFacturas: any = [];
   constructor(
     public fb: FormBuilder,
     private aboService: AbonadosService,
@@ -133,7 +135,6 @@ export class RecaudacionComponent implements OnInit {
       dinero: ['', [Validators.required], this.valDinero.bind(this)],
       vuelto: '',
     });
-
     //Al digitar quita alerta
     let cuenta = document.getElementById('cuenta') as HTMLInputElement;
     if (cuenta != null) {
@@ -300,8 +301,6 @@ export class RecaudacionComponent implements OnInit {
       ) {
         this.aboService.getByIdabonado(this.formBuscar.value.cuenta).subscribe({
           next: (datos) => {
-            console.log(datos);
-
             this._cliente = datos;
             if (this._cliente.length > 0) {
               this.datosCliente('cuenta');
@@ -377,7 +376,6 @@ export class RecaudacionComponent implements OnInit {
   sinCobro(idcliente: number) {
     this.facService.getFacSincobro(idcliente).subscribe({
       next: (sincobrar: any) => {
-        console.log(sincobrar);
         this.swbusca = 3;
         sincobrar.map(async (item: any) => {
           if (item.idAbonado != 0) {
@@ -386,7 +384,6 @@ export class RecaudacionComponent implements OnInit {
             item.responsablePago = abonado.idresponsable.nombre;
           } else {
             const cliente: Clientes = await this.getCliente(item.idCliente);
-            console.log(cliente);
             item.direccion = cliente.direccion;
             item.responsablePago = cliente.nombre;
           }
@@ -407,40 +404,23 @@ export class RecaudacionComponent implements OnInit {
       },
       error: (e) => console.error(e),
     });
-    /*  this.facService.getSinCobro(idcliente).subscribe({
-      next: (datos: any) => {
-        this._sincobro = datos;
-        if (datos.length > 0) {
-          let suma: number = 0;
-          let i = 0;
-          this._sincobro.forEach(async (item: any, index: number) => {
-            let interes = this.cInteres(item);
-            // let abonado = this.getAbonado(item.idabonado);
-            if (item.idabonado != 0) {
-              const abonado: Abonados = await this.getAbonado(item.idabonado);
-              item.direccion = abonado.direccionubicacion;
-              item.responsablePago = abonado.idresponsable.nombre;
-            } else {
-              item.direccion = 'S/D';
-            }
-            let com = 0;
-            if (item.idmodulo.idmodulo == 3 && item.idabonado != 0) com = 1;
-            item.interes = Math.round(interes * 100) / 100;
-            item.comerc = com;
-            //item.multa = 0;
-            //item.totaltarifa = n_totalTarifa;
-            suma += item.totaltarifa + item.interes;
-            i++;
-            this.sumtotal = Math.round(suma * 100) / 100;
-          });
-          this.swbusca = 3;
-        } else {
-          this.swbusca = 2;
-          this.sumtotal = 0;
-        }
-      },
-      error: (err) => console.error(err.error),
-    }); */
+  }
+  calcular(e: any, factura: any) {
+    if (e.target.checked == true) {
+      console.log('CHECKED');
+    }
+    if (e.target.checked == false) {
+      console.log('un CHECKED');
+    }
+
+    let query = this.arrFacturas.find(
+      (fact: { idfactura: number }) => (fact.idfactura = factura.idfactura)
+    );
+    console.log(query);
+    if (query != undefined) {
+      this.arrFacturas.push(factura);
+    }
+    console.log(this.arrFacturas);
   }
   async getAbonado(idabonado: number): Promise<any> {
     const abo = await this.aboService.getById(idabonado).toPromise();
@@ -476,7 +456,7 @@ export class RecaudacionComponent implements OnInit {
         .getByNombreIdentifi(this.formBusClientes.value.nombre_identifica)
         .subscribe({
           next: (datos) => (this._clientes = datos),
-          error: (err) => console.log(err.error),
+          error: (err) => console.error(err),
         });
     }
   }
@@ -612,17 +592,18 @@ export class RecaudacionComponent implements OnInit {
     this.disabledcobro = false;
   }
 
-  getRubroxfac(idfactura: number, idmodulo: number) {
+  getRubroxfac(idfactura: number, idmodulo: number, factura: any) {
+    this.totInteres = 0;
     this._rubrosxfac = null;
     let _lecturas: any;
     this.consumo = 0;
     this.idfactura = idfactura;
-    console.log(idmodulo);
+    this.totInteres = this.cInteres(factura);
     if (idmodulo == 8) {
       this.rubxfacService.getByIdfactura1(idfactura).subscribe({
         next: (detalle) => {
-          console.log(detalle);
           this._rubrosxfac = detalle;
+          //this.calcularInteres(idfactura);
           this.subtotal();
         },
         error: (err) =>
@@ -646,7 +627,7 @@ export class RecaudacionComponent implements OnInit {
                 ),
             });
           }
-          this.calcularInteres(idfactura);
+          //this.calcularInteres(idfactura);
           this.subtotal();
         },
         error: (err) =>
@@ -655,37 +636,6 @@ export class RecaudacionComponent implements OnInit {
     }
   }
 
-  //Modal del Detalle de la Planilla
-  getRubroxfac_2(idfactura: number) {
-    this._rubrosxfac = [];
-    let _lecturas: any;
-    this.consumo = 0;
-    this.idfactura = idfactura;
-    this.lecService.getByIdfactura(idfactura).subscribe({
-      next: (resp) => {
-        if (resp.length != 0) {
-          _lecturas = resp;
-          this.consumo =
-            _lecturas[0].lecturaactual - _lecturas[0].lecturaanterior;
-        }
-        this.rubxfacService.getByIdfactura(idfactura).subscribe({
-          next: (detalle) => {
-            this._rubrosxfac = detalle;
-            this.calcularInteres(idfactura);
-            this.subtotal();
-          },
-          error: (err) =>
-            console.error(
-              'Al recuperar el datalle de la Planilla: ',
-              err.error
-            ),
-        });
-        this.subtotal();
-      },
-      error: (err) =>
-        console.error('Al recuperar la Lectura de la Planilla: ', err.error),
-    });
-  }
   getAbonadoById(cuenta: number) {
     let abonado: any;
     if (cuenta != 0) {
@@ -698,32 +648,6 @@ export class RecaudacionComponent implements OnInit {
       return abonado;
     }
   }
-  getRubroxfac1(idfactura: number) {
-    let _lecturas: any;
-    this.consumo = 0;
-    this.idfactura = idfactura;
-    this.rubxfacService.getByIdfactura(idfactura).subscribe({
-      next: (detalle) => {
-        this._rubrosxfac = detalle;
-        this.lecService.getByIdfactura(idfactura).subscribe({
-          next: (resp) => {
-            _lecturas = resp;
-            this.consumo =
-              _lecturas[0].lecturaactual - _lecturas[0].lecturaanterior;
-          },
-          error: (err) =>
-            console.error(
-              'Al recuperar la Lectura de la Planilla: ',
-              err.error
-            ),
-        });
-        this.subtotal();
-      },
-      error: (err) =>
-        console.error('Al recuperar el datalle de la Planilla: ', err.error),
-    });
-  }
-
   //Subtotal de la Planilla
   subtotal() {
     let suma12: number = 0;
@@ -801,10 +725,8 @@ export class RecaudacionComponent implements OnInit {
             next: (nex) => {
               //Actualiza Factura como cobrada
               let iva = 0;
-              console.log(iva);
               this.rubxfacService.getIva(0.15, fac.idfactura).subscribe({
                 next: (iva: any) => {
-                  console.log(iva[0]);
                   if (iva[0] != undefined) {
                     fac.swiva = iva[0][1];
                   } else {
@@ -1027,11 +949,16 @@ export class RecaudacionComponent implements OnInit {
     this.totInteres = 0;
     this.arrCalculoInteres = [];
     let interes: number = 0;
+    let facturaI = {} as facturaI;
     this.facService.getById(idFactura).subscribe({
       next: (datos: any) => {
+        //factura.idfactura = datos.idfactura
+        //facturaI.direccion =
+        //console.log(this.cInteres(datos));
+
         if (datos.estado != 3 && datos.formapago != 4) {
           let fec = datos.feccrea.toString().split('-', 2);
-          let fechai: Date = new Date(`${fec[0]}-${fec[1]}-02`);
+          let fechai: Date = new Date(`${fec[0]}-${fec[1]}-01`);
           let fechaf: Date = new Date();
           this.factura = datos;
           fechaf.setMonth(fechaf.getMonth() - 1);
@@ -1069,14 +996,11 @@ export class RecaudacionComponent implements OnInit {
   }
   /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
   cInteres(factura: any) {
-    console.log(factura);
     this.totInteres = 0;
     this.arrCalculoInteres = [];
-    console.log(this.calInteres);
     let interes: number = 0;
     if (factura.estado != 3 && factura.formapago != 4) {
       let fec = factura.feccrea.toString().split('-', 2);
-      console.log(fec);
       let fechai: Date = new Date(`${fec[0]}-${fec[1]}-02`);
       let fechaf: Date = new Date();
       this.factura = factura;
@@ -1108,7 +1032,6 @@ export class RecaudacionComponent implements OnInit {
         // this.subtotal();
       });
     }
-    console.log(interes);
     return interes;
   }
   async calIva(idfactura: any) {
@@ -1270,4 +1193,17 @@ interface iFacxrecauda {
   estado: number;
   fechaeliminacion: Date;
   usuarioeliminacion: number;
+}
+interface facturaI {
+  direccion: String;
+  feccrea: Date;
+  idAbonado: number;
+  idCliente: number;
+  idfactura: number;
+  idmodulo: number;
+  interes: number;
+  iva: number;
+  modulo: string;
+  responsablePago: string;
+  total: number;
 }

@@ -196,7 +196,7 @@
                             sincobro.multa | number:'1.2-2'}}</td> -->
                                 <td class="text-right">
                                     {{
-                                    sincobro.total +sincobro.interes + sincobro.iva
+                                    (sincobro.total +sincobro.interes + sincobro.iva).toFixed(2)
                                     }}
                                 </td>
                                 <!--           <td *ngIf="sincobro.idmodulo.idmodulo != 8" [ngClass]="{'transferido': sincobro.estado == 3 }"
@@ -206,13 +206,13 @@
                          <td *ngIf="sincobro.idmodulo.idmodulo == 8" class="text-right">{{
                             sincobro.valorbase | number:'1.2-2'}}</td>-->
                                 <td>
-                                    <input type="checkbox" [(ngModel)]="sincobro.pagado" (change)="marcarAnteriores(i)"
+                                    <input type="checkbox" [(ngModel)]="sincobro.pagado" (change)="calcular($event, sincobro)"
                                         [disabled]="swcobrado" class="cursor" />
                                 </td>
                                 <td [ngClass]="{'transferido': sincobro.estado == 3 }">
                                     <button *ngIf="!swcobrado" class="btn btn-outline-info btn-xs cursor"
                                         data-toggle="modal" data-target="#DetallePlanillaModal"
-                                        (click)="getRubroxfac( sincobro.idfactura, sincobro.idmodulo.idmodulo )">
+                                        (click)="getRubroxfac( sincobro.idfactura, sincobro.idmodulo, sincobro )">
                                         <i class="fa fa-info-circle"></i> Info
                                     </button>
                                     <button *ngIf="swcobrado" class="btn btn-outline-info btn-xs cursor"

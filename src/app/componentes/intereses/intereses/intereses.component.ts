@@ -244,6 +244,7 @@ export class ListarInteresesComponent implements OnInit {
       window.URL.revokeObjectURL(url); // Liberar recursos
     });
   }
+
   calcularInteres() {
     let idFactura = +this.idfactura!;
     this.totInteres = 0;
@@ -252,7 +253,9 @@ export class ListarInteresesComponent implements OnInit {
       next: (datos) => {
         let fec = datos.feccrea.toString().split('-', 2);
         let fechai: Date = new Date(`${fec[0]}-${fec[1]}-01`);
-        let fechaf: Date = new Date('2023-12-01' + 1);
+        let fechaf: Date = new Date();
+        console.log(fechai);
+        console.log(fechaf);
         this.factura = datos;
         fechai.setMonth(fechai.getMonth() + 2);
         while (fechai <= fechaf) {
@@ -292,3 +295,4 @@ interface calcInteres {
   interes: number;
   valor: number;
 }
+
