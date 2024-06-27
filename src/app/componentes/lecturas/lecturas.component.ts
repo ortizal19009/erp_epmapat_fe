@@ -166,7 +166,10 @@ export class LecturasComponent implements OnInit {
   actualizarLeturaAnterior() {
     this._lecturas.forEach((lectura: any) => {
       this.lecService
-        .getUltimaLecturaAsync(lectura.idabonado_abonados.idabonado)
+        .getUltimaLecturaByEmisionAsync(
+          lectura.idabonado_abonados.idabonado,
+          lectura.idemision - 1
+        )
         .then(async (lecturaanterior: any) => {
           let nlectura = lectura;
           nlectura.lecturaanterior = lecturaanterior;

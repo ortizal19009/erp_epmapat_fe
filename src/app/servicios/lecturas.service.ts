@@ -60,6 +60,12 @@ export class LecturasService {
     );
     return await firstValueFrom(observable);
   }
+  async getUltimaLecturaByEmisionAsync(idabonado: number, idemision : number): Promise<number> {
+    const observable = this.http.get<number>(
+      `${baseUrl}/ultimalecturaByemision?idabonado=${idabonado}&idemision=${idemision}`
+    );
+    return await firstValueFrom(observable);
+  }
 
   //Save
   saveLectura(lectura: Lecturas): Observable<Object> {
