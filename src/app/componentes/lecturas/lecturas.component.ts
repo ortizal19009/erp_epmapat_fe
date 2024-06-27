@@ -97,7 +97,6 @@ export class LecturasComponent implements OnInit {
     this.rutaxemisionDatos(this.idrutaxemision);
     this.lecService.getLecturas(this.idrutaxemision).subscribe({
       next: (resp) => {
-        console.log(resp);
         this._lecturas = resp;
         this.abonados = this._lecturas.length;
         this.total();
@@ -164,7 +163,20 @@ export class LecturasComponent implements OnInit {
     this.archExportar =
       this.rutaxemision.codigo + '_' + this.rutaxemision.emision.toString();
   }
-
+  actualizarLeturaAnterior() {
+    this._lecturas.forEach((lectura: any) => {
+      this.lecService
+        .getUltimaLecturaAsync(lectura.idabonado_abonados.idabonado)
+        .then(async (lecturaanterior: any) => {
+          let nlectura = lectura;
+          nlectura.lecturaanterior = lecturaanterior;
+          await this.lecService.updateLecturaAsync(
+            nlectura.idlectura,
+            nlectura
+          );
+        });
+    });
+  }
   exportToCSV() {
     const columnTitles: string[] = [
       'Cuenta',

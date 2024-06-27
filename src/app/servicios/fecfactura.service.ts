@@ -162,7 +162,7 @@ export class FecfacturaService {
       fecfactura.concepto = 'OTROS SERVICIOS';
       fecfactura.referencia = 'S/N';
     }
-    fecfactura.direccioncomprador = factura.idcliente.direccion;
+    fecfactura.direccioncomprador = factura.idabonado.direccionubicacion;
     fecfactura.telefonocomprador = factura.idcliente.telefono;
     fecfactura.emailcomprador = factura.idcliente.email;
     fecfactura.referencia = factura.idabonado;

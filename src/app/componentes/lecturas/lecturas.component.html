@@ -61,7 +61,12 @@
                   <th class="text-right">Prom.</th>
                   <th class="text-right">A recaudar</th>
                   <th>Novedades</th>
-                  <th></th>
+                  <th class="text-center">
+                     <button class="btn btn-xs btn-outline-success" *ngIf="_rutaxemision.estado === 0"
+                        (click)="actualizarLeturaAnterior()">
+                        <i class="bi bi-arrow-clockwise"></i>
+                     </button>
+                  </th>
                </tr>
             </thead>
             <tbody class="detalle">
