@@ -164,7 +164,8 @@ export class LecturasComponent implements OnInit {
       this.rutaxemision.codigo + '_' + this.rutaxemision.emision.toString();
   }
   actualizarLeturaAnterior() {
-    this._lecturas.forEach((lectura: any) => {
+    this._lecturas.forEach((lectura: any, i: number) => {
+
       this.lecService
         .getUltimaLecturaByEmisionAsync(
           lectura.idabonado_abonados.idabonado,
@@ -173,10 +174,13 @@ export class LecturasComponent implements OnInit {
         .then(async (lecturaanterior: any) => {
           let nlectura = lectura;
           nlectura.lecturaanterior = lecturaanterior;
-          await this.lecService.updateLecturaAsync(
+          console.log(lectura)
+          console.log(nlectura)
+     /*      await this.lecService.updateLecturaAsync(
             nlectura.idlectura,
             nlectura
-          );
+          ); */
+          i++; 
         });
     });
   }
@@ -325,6 +329,7 @@ export class LecturasComponent implements OnInit {
       this.formValor.value.idnovedad_novedades;
     this.lecService.updateLectura(this.idlectura, this.datosLectura).subscribe({
       next: (nex) => {
+        console.log(nex)
         this._lecturas[this.fila].lecturaanterior =
           this.formValor.value.lecturaanterior;
         this._lecturas[this.fila].lecturaactual =

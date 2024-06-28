@@ -155,7 +155,6 @@
                             </div>
                         </div>
                     </div>
-
                     <table *ngIf="swbusca == 3" class="table table-hover table-sm table-bordered">
                         <thead class="recaudacabecera">
                             <tr class="text-center">
@@ -206,8 +205,8 @@
                          <td *ngIf="sincobro.idmodulo.idmodulo == 8" class="text-right">{{
                             sincobro.valorbase | number:'1.2-2'}}</td>-->
                                 <td>
-                                    <input type="checkbox" [(ngModel)]="sincobro.pagado" (change)="calcular($event, sincobro)"
-                                        [disabled]="swcobrado" class="cursor" />
+                                    <input type="checkbox" [(ngModel)]="sincobro.pagado"
+                                        (change)="calcular($event, sincobro)" [disabled]="swcobrado" class="cursor" />
                                 </td>
                                 <td [ngClass]="{'transferido': sincobro.estado == 3 }">
                                     <button *ngIf="!swcobrado" class="btn btn-outline-info btn-xs cursor"

@@ -34,6 +34,7 @@ import { Rubros } from 'src/app/modelos/rubros.model';
 import { of } from 'rxjs';
 import { ModulosService } from 'src/app/servicios/modulos.service';
 import { Modulos } from 'src/app/modelos/modulos.model';
+import { LoadingService } from 'src/app/servicios/loading.service';
 
 @Component({
   selector: 'app-recaudacion',
@@ -114,7 +115,8 @@ export class RecaudacionComponent implements OnInit {
     private recaService: RecaudacionService,
     private facxrService: FacxrecaudaService,
     private s_recaudaxcaja: RecaudaxcajaService,
-    private s_modulo: ModulosService
+    private s_modulo: ModulosService,
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit(): void {
@@ -282,6 +284,7 @@ export class RecaudacionComponent implements OnInit {
     //this.getLastFactura();
     this.swcobrado = false;
     this.acobrar = 0;
+    this.sumtotal = 0;
     this._cliente = [];
     this.reset();
     if (
@@ -374,10 +377,16 @@ export class RecaudacionComponent implements OnInit {
   }
 
   sinCobro(idcliente: number) {
+    this.loadingService.showLoading();
     this.facService.getFacSincobro(idcliente).subscribe({
       next: (sincobrar: any) => {
         this.swbusca = 3;
-        sincobrar.map(async (item: any) => {
+        console.log(sincobrar);
+        if (sincobrar.length === 0) {
+          this.swbusca = 2;
+          this.loadingService.hideLoading();
+        }
+        sincobrar.map(async (item: any, i: number) => {
           if (item.idAbonado != 0) {
             const abonado: Abonados = await this.getAbonado(item.idAbonado);
             item.direccion = abonado.direccionubicacion;
@@ -395,33 +404,54 @@ export class RecaudacionComponent implements OnInit {
           }
           const modulo: Modulos = await this.getModulo(item.idmodulo);
           item.modulo = modulo.descripcion;
-          let interes = this.cInteres(item);
-          item.interes = interes;
+          let interes = 0;
+          if (item.formapago != 4) {
+            interes = this.cInteres(item);
+            item.interes = interes;
+          }
+
+          i++;
+          if (i === sincobrar.length) {
+            this.loadingService.hideLoading();
+          }
           //item.total += interes;
         });
         this._sincobro = sincobrar;
-        console.log(sincobrar);
       },
       error: (e) => console.error(e),
     });
   }
   calcular(e: any, factura: any) {
+    this.sumtotal = 0;
     if (e.target.checked == true) {
       console.log('CHECKED');
+      console.log(factura);
+      let query = this.arrFacturas.find(
+        (fact: { idfactura: number }) => (fact.idfactura = factura.idfactura)
+      );
+      console.log(query);
+      this.arrFacturas.push(factura);
+      if (query != undefined) {
+      }
     }
     if (e.target.checked == false) {
       console.log('un CHECKED');
-    }
-
-    let query = this.arrFacturas.find(
-      (fact: { idfactura: number }) => (fact.idfactura = factura.idfactura)
-    );
-    console.log(query);
-    if (query != undefined) {
-      this.arrFacturas.push(factura);
+      let query = this.arrFacturas.find(
+        (fact: { idfactura: number }) => (fact.idfactura = factura.idfactura)
+      );
+      console.log(query);
+      let i = this.arrFacturas.indexOf(query);
+      console.log(i);
+      this.arrFacturas.splice(i, 1);
     }
     console.log(this.arrFacturas);
+    this.arrFacturas.forEach((factura: any) => {
+      this.sumtotal += factura.total + factura.iva + factura.interes;
+      this.acobrar = this.sumtotal;
+      console.log(this.sumtotal.toFixed(2));
+    });
   }
+
   async getAbonado(idabonado: number): Promise<any> {
     const abo = await this.aboService.getById(idabonado).toPromise();
     return abo;
@@ -1206,4 +1236,5 @@ interface facturaI {
   modulo: string;
   responsablePago: string;
   total: number;
+  formapago: number;
 }
