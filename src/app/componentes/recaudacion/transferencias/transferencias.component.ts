@@ -378,7 +378,7 @@ export class TransferenciasComponent implements OnInit {
         if (this._sincobro.length > 0) {
           let suma: number = 0;
           let i = 0;
-          this._sincobro.forEach(async(item:any) => {
+          this._sincobro.forEach(async (item: any) => {
             if (item.idabonado != 0) {
               const abonado: Abonados = await this.getAbonado(item.idabonado);
               item.direccion = abonado.direccionubicacion;
@@ -425,7 +425,10 @@ export class TransferenciasComponent implements OnInit {
   actufacturas(i: number) {
     let idfactura: number;
     let fechatransferencia: Date = new Date();
-    if (this._sincobro[i].pagado) {
+    if (
+      this._sincobro[i].pagado &&
+      this._sincobro[i].nrofactura === null 
+    ) {
       idfactura = this._sincobro[i].idfactura;
       this.facService.getById(idfactura).subscribe({
         next: (fac) => {
@@ -463,17 +466,17 @@ export class TransferenciasComponent implements OnInit {
                   //this.recxcaja.fechafinlabor = c_fecha;
                   //this.estadoCajaT = true;
                   this.recxcaja.facfin = +nrofac[2]!;
-                  this.s_recaudaxcaja.updateRecaudaxcaja(this.recxcaja).subscribe({
-                    next: (datos) => {
-                    },
-                    error: (e) => console.error(e),
-                  });
+                  this.s_recaudaxcaja
+                    .updateRecaudaxcaja(this.recxcaja)
+                    .subscribe({
+                      next: (datos) => {},
+                      error: (e) => console.error(e),
+                    });
                 },
                 error: (e) => console.error(e),
               });
               /* =============== */
-              
-              
+
               i++;
               if (i < this._sincobro.length) this.actufacturas(i);
             },
@@ -586,8 +589,7 @@ export class TransferenciasComponent implements OnInit {
         this.estadoCajaT = true;
         this.recxcaja.facfin = +nrofac[2]!;
         this.s_recaudaxcaja.updateRecaudaxcaja(this.recxcaja).subscribe({
-          next: (datos) => {
-          },
+          next: (datos) => {},
           error: (e) => console.error(e),
         });
       },
