@@ -111,7 +111,6 @@ export class FecfacturaService {
 
   /* Exportar datos */
   async expDesdeAbonados(factura: any) {
-    console.log(factura);
     await this.datosDefinirAsync();
     this.buildFactura(factura);
   }
@@ -123,7 +122,6 @@ export class FecfacturaService {
     } catch (error) {}
   }
   async buildFactura(factura: any) {
-  console.log(factura)
     this._facturas = factura;
     let i = 0;
     let usuario = await this.s_usuario.getByIdusuarioAsync(
@@ -400,7 +398,6 @@ export class FecfacturaService {
         console.error('Al guardar en Fec_factura: ', err.error);
       },
     });
-    console.log('Guardado');
   }
 
   async getAbonado(idabonado: number): Promise<any> {
