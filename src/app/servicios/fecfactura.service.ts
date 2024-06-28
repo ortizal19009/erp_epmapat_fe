@@ -149,6 +149,7 @@ export class FecfacturaService {
       let fecEmision: Date = new Date(_lectura[0].fechaemision);
       fecfactura.razonsocialcomprador = abonado.idresponsable.nombre;
       fecfactura.identificacioncomprador = abonado.idresponsable.cedula;
+      fecfactura.direccioncomprador = abonado.direccionubicacion;
       fecfactura.referencia = factura.idabonado;
       fecfactura.concepto = `${
         fecEmision.getMonth() + 1
@@ -160,8 +161,8 @@ export class FecfacturaService {
       fecfactura.identificacioncomprador = factura.idcliente.cedula;
       fecfactura.concepto = 'OTROS SERVICIOS';
       fecfactura.referencia = 'S/N';
+      fecfactura.direccioncomprador = factura.idcliente.direccion;
     }
-    fecfactura.direccioncomprador = abonado.direccionubicacion;
     fecfactura.telefonocomprador = factura.idcliente.telefono;
     fecfactura.emailcomprador = factura.idcliente.email;
     fecfactura.referencia = factura.idabonado;
