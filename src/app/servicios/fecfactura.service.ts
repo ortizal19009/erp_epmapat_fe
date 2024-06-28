@@ -123,6 +123,7 @@ export class FecfacturaService {
     } catch (error) {}
   }
   async buildFactura(factura: any) {
+  console.log(factura)
     this._facturas = factura;
     let i = 0;
     let usuario = await this.s_usuario.getByIdusuarioAsync(
@@ -141,11 +142,11 @@ export class FecfacturaService {
     fecfactura.fechaemision = factura.fechacobro;
     fecfactura.tipoidentificacioncomprador =
       factura.idcliente.idtpidentifica_tpidentifica.codigo;
+      const abonado: Abonados = await this.getAbonado(factura.idabonado);
     if (
       (factura.idmodulo.idmodulo === 3 && factura.idabonado != 0) ||
       factura.idmodulo.idmodulo === 4
     ) {
-      const abonado: Abonados = await this.getAbonado(factura.idabonado);
       const _lectura = await this.getLectura(factura.idfactura);
       let fecEmision: Date = new Date(_lectura[0].fechaemision);
       fecfactura.razonsocialcomprador = abonado.idresponsable.nombre;
@@ -162,7 +163,7 @@ export class FecfacturaService {
       fecfactura.concepto = 'OTROS SERVICIOS';
       fecfactura.referencia = 'S/N';
     }
-    fecfactura.direccioncomprador = factura.idabonado.direccionubicacion;
+    fecfactura.direccioncomprador = abonado.direccionubicacion;
     fecfactura.telefonocomprador = factura.idcliente.telefono;
     fecfactura.emailcomprador = factura.idcliente.email;
     fecfactura.referencia = factura.idabonado;
