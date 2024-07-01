@@ -40,7 +40,7 @@
 /* === Planillas === */
 .theadPlanillas{
    background-color: var(--bgPlanillas1);
-   color: white;
+   color: rgb(255, 255, 255);
 }
 .bodyPlanillas{
    background-color: var(--bgPlanillas2);

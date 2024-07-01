@@ -60,6 +60,11 @@ export class FacturaService {
   getByIdabonado(idabonado: number) {
     return this.http.get<Facturas[]>(`${baseUrl}/idabonado/${idabonado}`);
   }
+  getByIdabonadorango(idabonado: number, limit: number) {
+    return this.http.get<Facturas[]>(
+      `${baseUrl}/abonado/${idabonado}/${limit}`
+    );
+  }
 
   //Una Planilla (como lista)
   getPlanilla(idfactura: number) {

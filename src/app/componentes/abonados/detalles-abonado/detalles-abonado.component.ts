@@ -8,6 +8,7 @@ import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { Chart, registerables } from 'chart.js';
 import { FecfacturaComponent } from '../../facelectro/fecfactura/fecfactura.component';
 import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
+import { InteresesService } from 'src/app/servicios/intereses.service';
 
 @Component({
   selector: 'app-detalles-abonado',
@@ -27,19 +28,27 @@ export class DetallesAbonadoComponent implements OnInit {
   idfactura: number;
   grafic: Boolean = false;
 
+  rango: number = 15;
+
   constructor(
     private aboService: AbonadosService,
     private facService: FacturaService,
     private rubxfacService: RubroxfacService,
     private lecService: LecturasService,
     private router: Router,
-    public _fecFacturaService: FecfacturaService
+    public _fecFacturaService: FecfacturaService,
+    public s_interes: InteresesService
   ) {}
 
   ngOnInit(): void {
     this.obtenerDatosAbonado();
   }
 
+  getFactura() {
+    console.log(this.rango);
+    console.log(this.abonado);
+    this.facturasxAbonado(this.abonado.idabonado);
+  }
   obtenerDatosAbonado() {
     let idabonado = sessionStorage.getItem('idabonadoToFactura');
     this.aboService.getByIdabonado(+idabonado!).subscribe({
@@ -68,8 +77,14 @@ export class DetallesAbonadoComponent implements OnInit {
   }
 
   facturasxAbonado(idabonado: number) {
-    this.facService.getByIdabonado(idabonado).subscribe({
-      next: (datos) => (this._facturas = datos),
+    this.facService.getByIdabonadorango(idabonado, this.rango).subscribe({
+      next: (datos: any) => {
+        datos.forEach((item: any) => {
+          console.log(item);
+          console.log(this.s_interes.cInteres(item));
+        });
+        this._facturas = datos;
+      },
       error: (err) => console.log(err.error),
     });
   }

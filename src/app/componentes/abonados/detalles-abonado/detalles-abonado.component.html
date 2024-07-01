@@ -63,10 +63,10 @@
                      <b>Adulto mayor</b> <a class="float-right">
                         <i class="bi bi-check2-square" *ngIf="abonado.adultomayor "></i>
                         <i class="bi bi-square" *ngIf="!abonado.adultomayor"></i>
-                        </a>
-                        </li>
-                        <li class="list-group-item">
-                           <b>Municipio</b> <a class="float-right">
+                     </a>
+                  </li>
+                  <li class="list-group-item">
+                     <b>Municipio</b> <a class="float-right">
                         <i class="bi bi-check2-square" *ngIf="abonado.municipio "></i>
                         <i class="bi bi-square" *ngIf="!abonado.municipio"></i></a>
                   </li>
@@ -98,7 +98,9 @@
                         (click)="lecturasxAbonado( abonado.idabonado )" data-toggle="tab">Historial de Consumo</a>
                   </li>
                </ul>
+
             </div>
+
 
 
             <div class="card-body">
@@ -107,33 +109,49 @@
                   <div class="active tab-pane" id="planillas">
                      <div class="post">
                         <div class="user-block mb-0">
-                           <table class="table table-hover table-sm table-bordered mb-0">
-                              <caption class="small mark">Últimas <strong>15</strong> Planillas&nbsp;&nbsp;&nbsp;&nbsp;
-                                 <button class="btn btn-outline-primary btn-xs">&nbsp;&nbsp;Rango&nbsp;&nbsp;</button>
-                              </caption>
-                              <thead class="theadPlanillas">
-                                 <tr class="text-center">
-                                    <th>Nro.</th>
-                                    <th>Fecha</th>
-                                    <th>Módulo</th>
-                                    <th>Factura</th>
-                                    <th>Valor</th>
-                                    <th>Fecha Cobro</th>
-                                 </tr>
-                              </thead>
-                              <tbody class="bodyPlanillas">
-                                 <tr *ngFor="let factura of _facturas" class="text-center fila" data-toggle="modal"
-                                    data-target="#DetalleFacturaModal" (click)="getRubroxfac( factura.idfactura )">
-                                    <td>{{ factura.idfactura }}</td>
-                                    <td>{{factura.feccrea | date: 'dd-MM-y'}}</td>
-                                    <td class="text-left">{{ factura.idmodulo.descripcion }}</td>
-                                    <td>{{factura.nrofactura}}</td>
-                                    <td class="text-right">{{valorPagado( factura.idmodulo.idmodulo,factura.totaltarifa
-                                       )| number: '1.2-2'}}</td>
-                                    <td>{{ factura.fechacobro | date: 'dd-MM-y'}}</td>
-                                 </tr>
-                              </tbody>
-                           </table>
+                           <div class="row text-rigth">
+                              <div class="col-sm-1">
+                                 <label for="">
+                                    <input type="number" min=1 class="form-control form-control-sm" [(ngModel)]="rango"
+                                       (change)="getFactura()">
+                                 </label>
+
+                              </div>
+                           </div>
+                           <div class="card-body table-responsive p-0 " style="height: 500px;">
+                              <table
+                                 class="table table-hover table-sm table-bordered mb-0 table-head-fixed thead-dark text-nowrap table-responsive-sm">
+                                 <caption class="small mark">Últimas <strong>{{rango}}</strong>
+                                    Planillas&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <button class="btn btn-outline-primary btn-xs"
+                                       (click)="getFactura()">&nbsp;&nbsp;Rango&nbsp;&nbsp;</button>
+                                 </caption>
+                                 <thead class="bodyPlanillas">
+                                    <tr class="text-center">
+                                       <th>Nro.</th>
+                                       <th>Fecha</th>
+                                       <th>Módulo</th>
+                                       <th>Factura</th>
+                                       <th>Valor</th>
+                                       <th>Fecha Cobro</th>
+                                    </tr>
+                                 </thead>
+                                 <tbody class="bodyPlanillas">
+                                    <tr *ngFor="let factura of _facturas" class="text-center fila" data-toggle="modal"
+                                       data-target="#DetalleFacturaModal" (click)="getRubroxfac( factura.idfactura )">
+                                       <td>{{ factura.idfactura }}</td>
+                                       <td>{{factura.feccrea | date: 'dd-MM-y'}}</td>
+                                       <td class="text-left">{{ factura.idmodulo.descripcion }}</td>
+                                       <td>{{factura.nrofactura}}</td>
+                                       <td class="text-right">{{valorPagado(
+                                          factura.idmodulo.idmodulo,factura.totaltarifa
+                                          )| number: '1.2-2'}}</td>
+                                       <td>{{ factura.fechacobro | date: 'dd-MM-y'}}</td>
+                                    </tr>
+                                 </tbody>
+                              </table>
+                           </div>
+
                         </div>
                      </div>
                   </div>
