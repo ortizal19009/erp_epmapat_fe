@@ -286,7 +286,9 @@ export class RecaudacionComponent implements OnInit {
     this.acobrar = 0;
     this.sumtotal = 0;
     this._cliente = [];
+    this.arrFacturas = [];
     this.reset();
+    // this.reiniciar();
     if (
       (this.formBuscar.value.cuenta == null ||
         this.formBuscar.value.cuenta == '') &&
@@ -372,6 +374,7 @@ export class RecaudacionComponent implements OnInit {
     this.swcobrado = false;
     this.swbusca = 0;
     this.acobrar = 0;
+    this.sumtotal = 0;
     this.formBuscar.controls['cuenta'].setValue('');
     this.formBuscar.controls['identificacion'].setValue('');
   }
@@ -422,32 +425,26 @@ export class RecaudacionComponent implements OnInit {
     });
   }
   calcular(e: any, factura: any) {
+    this.acobrar = 0;
     this.sumtotal = 0;
     if (e.target.checked == true) {
-      console.log('CHECKED');
-      console.log(factura);
       let query = this.arrFacturas.find(
         (fact: { idfactura: number }) => (fact.idfactura = factura.idfactura)
       );
-      console.log(query);
       this.arrFacturas.push(factura);
       if (query != undefined) {
       }
     }
     if (e.target.checked == false) {
-      console.log('un CHECKED');
       let query = this.arrFacturas.find(
         (fact: { idfactura: number }) => (fact.idfactura = factura.idfactura)
       );
-      console.log(query);
       let i = this.arrFacturas.indexOf(query);
-      console.log(i);
       this.arrFacturas.splice(i, 1);
     }
-    console.log(this.arrFacturas);
     this.arrFacturas.forEach((factura: any) => {
       this.sumtotal += factura.total + factura.iva + factura.interes;
-      this.acobrar = this.sumtotal;
+      this.acobrar += factura.total + factura.iva + factura.interes;
       console.log(this.sumtotal.toFixed(2));
     });
   }
@@ -598,7 +595,7 @@ export class RecaudacionComponent implements OnInit {
     const primerPagado = this._sincobro.find(
       (registro: { pagado: number }) => registro.pagado == 1
     );
-    let fcobro: number; //3= Transferencia
+    let fcobro: number = 0; //3= Transferencia
     if (primerPagado.estado == 3) fcobro = this._formascobro[1];
     else fcobro = this._formascobro[0];
     this.formCobrar.patchValue({
@@ -723,6 +720,9 @@ export class RecaudacionComponent implements OnInit {
       error: (err) => console.error('Al crear la Recaudación: ', err.error),
     });
   }
+  _cobrar() {
+    console.log(this.arrFacturas);
+  }
 
   saveRubxFac(idfactura: any, idrubro: any, valorunitario: any) {
     let rubrosxfac: Rubroxfac = new Rubroxfac();
@@ -742,8 +742,9 @@ export class RecaudacionComponent implements OnInit {
     let fechacobro: Date = new Date();
     let rubro: Rubros = new Rubros();
     rubro.idrubro = 5;
-    if (this._sincobro[i].pagado) {
-      idfactura = this._sincobro[i].idfactura;
+    this.arrFacturas[i].pagado = 1;
+    if (this.arrFacturas[i].pagado) {
+      idfactura = this.arrFacturas[i].idfactura;
       this.facService.getById(idfactura).subscribe({
         next: (fac) => {
           //Añade a facxrecauda
@@ -754,7 +755,7 @@ export class RecaudacionComponent implements OnInit {
           this.facxrService.save(facxr).subscribe({
             next: (nex) => {
               //Actualiza Factura como cobrada
-              let iva = 0;
+              //let iva = 0;
               this.rubxfacService.getIva(0.15, fac.idfactura).subscribe({
                 next: (iva: any) => {
                   if (iva[0] != undefined) {
@@ -766,15 +767,15 @@ export class RecaudacionComponent implements OnInit {
                   fac.fechacobro = fechacobro;
                   fac.usuariocobro = this.authService.idusuario;
                   if (fac.idmodulo.idmodulo != 8) {
-                    fac.interescobrado = this._sincobro[i].interes;
                   }
+                  fac.interescobrado = this.arrFacturas[i].interes;
                   fac.pagado = 1;
                   if (
-                    this._sincobro[i].interes > 0 &&
+                    this.arrFacturas[i].interes > 0 &&
                     fac.idmodulo.idmodulo != 8
                   ) {
-                    this.saveRubxFac(fac, rubro, this._sincobro[i].interes);
                   }
+                  this.saveRubxFac(fac, rubro, this.arrFacturas[i].interes);
                   if (fac.estado === 2) {
                     fac.estado = 2;
                   } else {
@@ -818,7 +819,7 @@ export class RecaudacionComponent implements OnInit {
                       this.swcobrado = true;
                       j++;
                       i++;
-                      if (i < this._sincobro.length)
+                      if (i < this.arrFacturas.length)
                         this.facxrecauda(recaCreada, i);
                     },
                     error: (err) =>
@@ -844,7 +845,7 @@ export class RecaudacionComponent implements OnInit {
     } else {
       //No pagada continua con la siguiente
       i++;
-      if (i < this._sincobro.length) this.facxrecauda(recaCreada, i);
+      if (i < this.arrFacturas.length) this.facxrecauda(recaCreada, i);
     }
   }
   tonos() {

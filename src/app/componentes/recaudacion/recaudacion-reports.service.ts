@@ -55,7 +55,7 @@ export class RecaudacionReportsService {
     let fecha = emi.feccrea.slice(0, 10).split('-');
     let mesConsumo = `${this.meses[+fecha[1]! - 1]} ${fecha[0]}`;
     autoTable(doc, {
-      margin: { left: 10 , top: 5},
+      margin: { left: 10, top: 5 },
       tableWidth,
       styles: { fontSize: 9, fontStyle: 'bold' },
       columnStyles: {
@@ -76,6 +76,7 @@ export class RecaudacionReportsService {
       columns: ['EPMAPA-TULCAN', ''],
       body: [
         [`Nro comp: ${factura.nrofactura}`],
+        [`Nro planilla: ${factura.idfactura}`],
         [`Ruc/cedula: ${datos.idabonado_abonados.idcliente_clientes.cedula}`],
         [`Mes pagado: ${mesConsumo}`],
         [`Cliente: ${datos.idabonado_abonados.idresponsable.nombre}`],
@@ -83,7 +84,10 @@ export class RecaudacionReportsService {
         /* [`Referencia: ${datos.idcliente.referencia}`], */
         [`M3: ${m3}`, `Emision: ${emi.emision}`],
         [
-          `Cuenta: ${datos.idabonado_abonados.idabonado}`,
+          {
+            content: `Cuenta:  ${datos.idabonado_abonados.idabonado}`,
+            styles: { fontSize: 12, fontStyle: 'bold' },
+          },
           `FechaPag: ${factura.fechacobro}`,
         ],
         [
@@ -111,11 +115,11 @@ export class RecaudacionReportsService {
         2: { minCellWidth: 15 },
       },
       bodyStyles: {
-        cellPadding: 1,
+        cellPadding: 2,
         fillColor: [255, 255, 255],
         textColor: 'black',
       },
-
+      alternateRowStyles: { fillColor: [255, 255, 255] },
       headStyles: {
         halign: 'center',
         fillColor: 'white',
@@ -124,13 +128,19 @@ export class RecaudacionReportsService {
       columns: ['EPMAPA-TULCAN', ''],
       body: [
         [`Nro comp: ${datos.nrofactura}`],
+        [`Nro planilla: ${datos.idfactura}`],
         [`Ruc/cedula: ${datos.idcliente.cedula}`],
-
         [`Cliente: ${datos.idcliente.nombre}`],
         [`Dirección: ${datos.idcliente.direccion}`],
         /* [`Referencia: ${datos.idcliente.referencia}`], */
         /* [`M3: ${m3}`, `Emision: ${datos.idemision}`], */
-        [`Cuenta: ${datos.idabonado}`, `FechaPag: ${datos.fechacobro}`],
+        [
+          {
+            content: `Cuenta: ${datos.idabonado}`,
+            styles: { textColor: 'white' },
+          },
+          `FechaPag: ${datos.fechacobro}`,
+        ],
         [`Recaudador:  ${usuario.nomusu}`],
       ],
     });
@@ -187,6 +197,7 @@ export class RecaudacionReportsService {
           } else if (item.idrubro_rubros.idrubro === 165) {
             this.iva = 0;
           } else {
+            console.log(item.valorunitario);
             this.interes = item.valorunitario;
           }
         });
