@@ -278,8 +278,8 @@
                                 </tr>
                             </thead>
                             <tbody id="id-tbody">
-                                <tr *ngFor="let cliente of _clientes | filter : filtro;let i = index
-                   " (click)="selecCliente(cliente)" data-dismiss="modal">
+                                <tr *ngFor="let cliente of _clientes | filter : filtro;let i = index"
+                                    (click)="selecCliente(cliente)" data-dismiss="modal">
                                     <td class="text-center small font-weight-bold py-0">
                                         {{ i + 1 }}
                                     </td>
@@ -338,7 +338,7 @@
                                 <div class="input-group-prepend"><span class="input-group-text font-weight-bold"
                                         for="dinero">Dinero</span></div>
                                 <input type="text" class="form-control text-center" formControlName="dinero" [ngClass]="{'is-invalid': f['dinero'].invalid && f['dinero'].touched,
-                         'is-valid': f['dinero'].valid, '': f['dinero'].untouched}" (change)="changeDinero()">
+                        'is-valid': f['dinero'].valid, '': f['dinero'].untouched}" (change)="changeDinero()">
                                 <div class="input-group-append">
                                     <button type="button" class="btn btn-outline-success btn-xm"
                                         (click)="valorDinero()">

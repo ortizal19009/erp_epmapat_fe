@@ -60,7 +60,10 @@ export class LecturasService {
     );
     return await firstValueFrom(observable);
   }
-  async getUltimaLecturaByEmisionAsync(idabonado: number, idemision : number): Promise<number> {
+  async getUltimaLecturaByEmisionAsync(
+    idabonado: number,
+    idemision: number
+  ): Promise<number> {
     const observable = this.http.get<number>(
       `${baseUrl}/ultimalecturaByemision?idabonado=${idabonado}&idemision=${idemision}`
     );
@@ -120,5 +123,9 @@ export class LecturasService {
   /* Obtener facturas por ruta deudas */
   findDeudoresByRuta(idruta: number) {
     return this.http.get(`${baseUrl}/reportes/deudasxruta?idruta=${idruta}`);
+  }
+  /* obtener la fecha de una emision por el id de la factura, solo para recaudacion y para facturas de consumo */
+  findDateByIdfactura(idfactura: number) {
+    return this.http.get(`${baseUrl}/fecEmision?idfactura=${idfactura}`);
   }
 }

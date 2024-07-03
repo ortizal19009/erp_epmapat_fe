@@ -381,10 +381,9 @@ export class RecaudacionComponent implements OnInit {
 
   sinCobro(idcliente: number) {
     this.loadingService.showLoading();
+    this.swbusca = 0;
     this.facService.getFacSincobro(idcliente).subscribe({
       next: (sincobrar: any) => {
-        this.swbusca = 3;
-        console.log(sincobrar);
         if (sincobrar.length === 0) {
           this.swbusca = 2;
           this.loadingService.hideLoading();
@@ -394,6 +393,8 @@ export class RecaudacionComponent implements OnInit {
             const abonado: Abonados = await this.getAbonado(item.idAbonado);
             item.direccion = abonado.direccionubicacion;
             item.responsablePago = abonado.idresponsable.nombre;
+            const emision: any = await this.getEmision(item.idfactura);
+            item.feccrea = emision;
           } else {
             const cliente: Clientes = await this.getCliente(item.idCliente);
             item.direccion = cliente.direccion;
@@ -416,6 +417,7 @@ export class RecaudacionComponent implements OnInit {
           i++;
           if (i === sincobrar.length) {
             this.loadingService.hideLoading();
+            this.swbusca = 3;
           }
           //item.total += interes;
         });
@@ -445,7 +447,6 @@ export class RecaudacionComponent implements OnInit {
     this.arrFacturas.forEach((factura: any) => {
       this.sumtotal += factura.total + factura.iva + factura.interes;
       this.acobrar += factura.total + factura.iva + factura.interes;
-      console.log(this.sumtotal.toFixed(2));
     });
   }
 
@@ -460,6 +461,13 @@ export class RecaudacionComponent implements OnInit {
   async getModulo(idmodulo: number): Promise<any> {
     const modulo = await this.s_modulo.getById(idmodulo).toPromise();
     return modulo;
+  }
+
+  async getEmision(idfactura: number) {
+    const emision = await this.lecService
+      .findDateByIdfactura(idfactura)
+      .toPromise();
+    return emision;
   }
 
   reset() {
@@ -1146,7 +1154,7 @@ export class RecaudacionComponent implements OnInit {
         this._rubrosxfac = detalle;
         this._subtotal();
       },
-      error: (err) => console.log(err.error),
+      error: (err) => console.error(err),
     });
   }
   _subtotal() {
