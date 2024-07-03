@@ -9,6 +9,7 @@ import { Chart, registerables } from 'chart.js';
 import { FecfacturaComponent } from '../../facelectro/fecfactura/fecfactura.component';
 import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
 import { InteresesService } from 'src/app/servicios/intereses.service';
+import { Facturas } from 'src/app/modelos/facturas.model';
 
 @Component({
   selector: 'app-detalles-abonado',
@@ -29,6 +30,8 @@ export class DetallesAbonadoComponent implements OnInit {
   grafic: Boolean = false;
 
   rango: number = 15;
+  estadoFE: string;
+  factura: Facturas = new Facturas();
 
   constructor(
     private aboService: AbonadosService,
@@ -80,8 +83,8 @@ export class DetallesAbonadoComponent implements OnInit {
     this.facService.getByIdabonadorango(idabonado, this.rango).subscribe({
       next: (datos: any) => {
         datos.forEach((item: any) => {
-          console.log(item);
-          console.log(this.s_interes.cInteres(item));
+          //console.log(item);
+          //console.log(this.s_interes.cInteres(item));
         });
         this._facturas = datos;
       },
@@ -105,8 +108,21 @@ export class DetallesAbonadoComponent implements OnInit {
   getRubroxfac(idfactura: number) {
     this.idfactura = idfactura;
     this.rubxfacService.getByIdfactura(+idfactura!).subscribe({
-      next: (detalle) => {
+      next: (detalle: any) => {
         this._rubrosxfac = detalle;
+        this.factura = detalle[0].idfactura_facturas;
+        if (detalle[0].idfactura_facturas.pagado === 1) {
+          this._fecFacturaService.getByIdFactura(+idfactura!).subscribe({
+            next: (fecfactura: any) => {
+              if (fecfactura != null) {
+                this.estadoFE = fecfactura.estado;
+              } else {
+                this.estadoFE = 'P';
+              }
+            },
+            error: (e) => console.error(e),
+          });
+        }
         this.subtotal();
       },
       error: (err) => console.log(err.error),

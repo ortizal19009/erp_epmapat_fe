@@ -4,7 +4,6 @@
          <div class="col-sm-5">
             <h5 class="m-0 font-weight-bold"><i class="fa fa-building"></i> Abonado</h5>
          </div>
-
          <div class="btn-group ml-auto mx-0">
             <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
                aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
@@ -15,14 +14,12 @@
                <button class="dropdown-item" type="button">
                   <i class="bi-file-earmark-arrow-down"></i>&nbsp; Exportar</button>
             </div>
-
             <div class="col-sm-1">
                <button class="bg-transparent border-0" type="submit" (click)="regresar()">
                   <i class="bi-arrow-left-circle text-white icoRegresar"></i>
                </button>
             </div>
          </div>
-
       </div>
    </div>
 </div>
@@ -109,36 +106,34 @@
                   <div class="active tab-pane" id="planillas">
                      <div class="post">
                         <div class="user-block mb-0">
-                           <div class="row text-rigth">
-                              <div class="col-sm-1">
-                                 <label for="">
-                                    <input type="number" min=1 class="form-control form-control-sm" [(ngModel)]="rango"
-                                       (change)="getFactura()">
-                                 </label>
 
-                              </div>
-                           </div>
                            <div class="card-body table-responsive p-0 " style="height: 500px;">
                               <table
                                  class="table table-hover table-sm table-bordered mb-0 table-head-fixed thead-dark text-nowrap table-responsive-sm">
                                  <caption class="small mark">Últimas <strong>{{rango}}</strong>
                                     Planillas&nbsp;&nbsp;&nbsp;&nbsp;
-                                    <button class="btn btn-outline-primary btn-xs"
-                                       (click)="getFactura()">&nbsp;&nbsp;Rango&nbsp;&nbsp;</button>
+                                    <button
+                                       class="btn btn-outline-primary btn-xs">&nbsp;&nbsp;Rango&nbsp;&nbsp;</button>
                                  </caption>
-                                 <thead class="bodyPlanillas">
-                                    <tr class="text-center">
-                                       <th>Nro.</th>
-                                       <th>Fecha</th>
-                                       <th>Módulo</th>
-                                       <th>Factura</th>
-                                       <th>Valor</th>
-                                       <th>Fecha Cobro</th>
+                                 <thead class="">
+                                    <tr class="text-center bodyPlanillas">
+                                       <th class="text-center pl-0 pr-0">
+                                          <input type="number" min=1 class="form-control form-control-sm text-center"
+                                             [(ngModel)]="rango" (change)="getFactura()">
+                                       </th>
+                                       <th class="bodyPlanillas">Nro.</th>
+                                       <th class="bodyPlanillas">Fecha</th>
+                                       <th class="bodyPlanillas">Módulo</th>
+                                       <th class="bodyPlanillas">Factura</th>
+                                       <th class="bodyPlanillas">Valor</th>
+                                       <th class="bodyPlanillas">Fecha Cobro</th>
                                     </tr>
                                  </thead>
                                  <tbody class="bodyPlanillas">
-                                    <tr *ngFor="let factura of _facturas" class="text-center fila" data-toggle="modal"
-                                       data-target="#DetalleFacturaModal" (click)="getRubroxfac( factura.idfactura )">
+                                    <tr *ngFor="let factura of _facturas; let i = index" class="text-center fila"
+                                       data-toggle="modal" data-target="#DetalleFacturaModal"
+                                       (click)="getRubroxfac( factura.idfactura )">
+                                       <td class="col-1">{{i+1}}</td>
                                        <td>{{ factura.idfactura }}</td>
                                        <td>{{factura.feccrea | date: 'dd-MM-y'}}</td>
                                        <td class="text-left">{{ factura.idmodulo.descripcion }}</td>
@@ -334,7 +329,7 @@
       <div class="modal-dialog modal-dialog-centered" role="document">
          <div class="modal-content">
             <div class="modal-header py-2 justify-content-center theadPlanillas">
-               <h5 class="modal-title" id="DetalleFacturaModalLabel"><strong>_Planilla:</strong> {{idfactura}}</h5>
+               <h5 class="modal-title" id="DetalleFacturaModalLabel"><strong>Planilla:</strong> {{idfactura}}</h5>
             </div>
             <div class="modal-body">
                <table class="table table-hover table-sm table-bordered mb-0">
@@ -362,8 +357,9 @@
             <div class="modal-footer py-1">
                <button type="button" class="btn btn-outline-success btn-sm" data-dismiss="modal">
                   <i class="fa fa-times-circle"></i> Cerrar</button>
-               <button type="button" class="btn btn-success btn-sm" (click)="expFacElectronica(idfactura)"
-                  data-dismiss="modal">
+               <button type="button" class="btn btn-success btn-sm"
+                  [disabled]="estadoFE ==='A' || estadoFE == 'O'  || factura.pagado === 0"
+                  (click)="expFacElectronica(idfactura)" data-dismiss="modal">
                   <i class="bi bi-send"></i> Fac. Electronica</button>
             </div>
          </div>

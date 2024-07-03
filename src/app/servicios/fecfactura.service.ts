@@ -140,7 +140,7 @@ export class FecfacturaService {
     fecfactura.fechaemision = factura.fechacobro;
     fecfactura.tipoidentificacioncomprador =
       factura.idcliente.idtpidentifica_tpidentifica.codigo;
-      const abonado: Abonados = await this.getAbonado(factura.idabonado);
+    const abonado: Abonados = await this.getAbonado(factura.idabonado);
     if (
       (factura.idmodulo.idmodulo === 3 && factura.idabonado != 0) ||
       factura.idmodulo.idmodulo === 4
@@ -469,6 +469,10 @@ export class FecfacturaService {
       error: (e) => console.error(e),
     });
   };
+
+  getByIdFactura(idfactura: number) {
+    return this.http.get(`${baseUrl}/factura?idfactura=${idfactura}`);
+  }
 }
 
 interface Fec_factura {
