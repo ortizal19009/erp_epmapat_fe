@@ -771,7 +771,6 @@ export class RecaudacionComponent implements OnInit {
                   } else {
                     fac.swiva = 0;
                   }
-
                   fac.fechacobro = fechacobro;
                   fac.usuariocobro = this.authService.idusuario;
                   if (fac.idmodulo.idmodulo != 8) {
@@ -783,12 +782,7 @@ export class RecaudacionComponent implements OnInit {
                     fac.idmodulo.idmodulo != 8
                   ) {
                   }
-                  this.saveRubxFac(fac, rubro, this.arrFacturas[i].interes);
-                  if (fac.estado === 2) {
-                    fac.estado = 2;
-                  } else {
-                    fac.estado = 1;
-                  }
+                  //this.saveRubxFac(fac, rubro, this.arrFacturas[i].interes);
                   let j = 1;
                   if (fac.nrofactura === null) {
                     let nrofac = this._nroFactura.split('-', 3);
@@ -825,6 +819,7 @@ export class RecaudacionComponent implements OnInit {
                   this.facService.updateFacturas(fac).subscribe({
                     next: (nex: any) => {
                       this.swcobrado = true;
+                      this.saveRubxFac(fac, rubro, this.arrFacturas[i].interes);
                       j++;
                       i++;
                       if (i < this.arrFacturas.length)
