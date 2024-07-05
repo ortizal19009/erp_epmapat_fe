@@ -10,6 +10,7 @@ import { FecfacturaComponent } from '../../facelectro/fecfactura/fecfactura.comp
 import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
 import { InteresesService } from 'src/app/servicios/intereses.service';
 import { Facturas } from 'src/app/modelos/facturas.model';
+import { RecaudacionReportsService } from '../../recaudacion/recaudacion-reports.service';
 
 @Component({
   selector: 'app-detalles-abonado',
@@ -40,7 +41,8 @@ export class DetallesAbonadoComponent implements OnInit {
     private lecService: LecturasService,
     private router: Router,
     public _fecFacturaService: FecfacturaService,
-    public s_interes: InteresesService
+    public s_interes: InteresesService,
+    public s_pdfRecaudacion: RecaudacionReportsService
   ) {}
 
   ngOnInit(): void {
@@ -240,6 +242,30 @@ export class DetallesAbonadoComponent implements OnInit {
 
   cerrarGrafico() {
     this.grafic = false;
+  }
+  impComprobante(datos: any) {
+    let lectura: any;
+    this.facService.getById(datos.idfactura).subscribe({
+      next: (d_factura: any) => {
+        let modulo: number = d_factura.idmodulo.idmodulo;
+        if (modulo === 3 || modulo === 4) {
+          this.lecService.getOnefactura(d_factura.idfactura).subscribe({
+            next: (datos: any) => {
+              lectura = datos;
+              if (datos != null) {
+                this.s_pdfRecaudacion.comprobantePago(lectura, d_factura);
+              } else {
+                this.s_pdfRecaudacion.comprobantePago(null, d_factura);
+              }
+            },
+            error: (e) => console.error(e),
+          });
+        } else {
+          this.s_pdfRecaudacion.comprobantePago(null, d_factura);
+        }
+      },
+      error: (e) => console.error(e),
+    });
   }
 }
 
