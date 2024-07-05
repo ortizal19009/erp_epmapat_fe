@@ -188,7 +188,7 @@
                             <i class="fa fa-spinner fa-pulse fa-fw"></i>
                             <span class="sr-only">Loading...</span> -->
                                 </td>
-                                <td class="description">{{ sincobro.feccrea |date:"mediumDate" }}</td>
+                                <td class="description">{{ sincobro.fechaemision |date:"mediumDate" }}</td>
                                 <td class="text-left description">{{ sincobro.modulo }}</td>
                                 <!-- <td  class="text-right">{{
                             sincobro.totaltarifa + sincobro.comerc + sincobro.interes +
@@ -206,7 +206,7 @@
                             sincobro.valorbase | number:'1.2-2'}}</td>-->
                                 <td>
                                     <input type="checkbox" [(ngModel)]="sincobro.pagado"
-                                        (change)="calcular($event, sincobro)" [disabled]="swcobrado" class="cursor" />
+                                    (change)="marcarAnteriores(i)" [disabled]="swcobrado" class="cursor" />
                                 </td>
                                 <td [ngClass]="{'transferido': sincobro.estado == 3 }">
                                     <button *ngIf="!swcobrado" class="btn btn-outline-info btn-xs cursor"

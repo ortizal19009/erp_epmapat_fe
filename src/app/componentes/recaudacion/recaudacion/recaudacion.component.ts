@@ -394,11 +394,13 @@ export class RecaudacionComponent implements OnInit {
             item.direccion = abonado.direccionubicacion;
             item.responsablePago = abonado.idresponsable.nombre;
             const emision: any = await this.getEmision(item.idfactura);
-            item.feccrea = emision;
+            //item.feccrea = emision;
+            item.fechaemision = emision;
           } else {
             const cliente: Clientes = await this.getCliente(item.idCliente);
             item.direccion = cliente.direccion;
             item.responsablePago = cliente.nombre;
+            item.fechaemision = item.feccrea;
           }
           let iva: any = await this.calIva(item.idfactura);
           if (iva.length != 0) {
@@ -413,7 +415,6 @@ export class RecaudacionComponent implements OnInit {
             interes = this.cInteres(item);
             item.interes = interes;
           }
-
           i++;
           if (i === sincobrar.length) {
             this.loadingService.hideLoading();
@@ -429,21 +430,20 @@ export class RecaudacionComponent implements OnInit {
   calcular(e: any, factura: any) {
     this.acobrar = 0;
     this.sumtotal = 0;
-    if (e.target.checked == true) {
-      let query = this.arrFacturas.find(
+    if (e.target.checked === true) {
+      /*    let query = this.arrFacturas.find(
         (fact: { idfactura: number }) => (fact.idfactura = factura.idfactura)
-      );
+      ); */
       this.arrFacturas.push(factura);
-      if (query != undefined) {
-      }
     }
-    if (e.target.checked == false) {
+    if (e.target.checked === false) {
       let query = this.arrFacturas.find(
         (fact: { idfactura: number }) => (fact.idfactura = factura.idfactura)
       );
       let i = this.arrFacturas.indexOf(query);
       this.arrFacturas.splice(i, 1);
     }
+    console.log(this.arrFacturas);
     this.arrFacturas.forEach((factura: any) => {
       this.sumtotal += factura.total + factura.iva + factura.interes;
       this.acobrar += factura.total + factura.iva + factura.interes;
@@ -536,28 +536,28 @@ export class RecaudacionComponent implements OnInit {
 
   marcarAnteriores(index: number) {
     if (
-      this._sincobro[index].idmodulo.idmodulo === 3 /* ||
-      this._sincobro[index].idmodulo.idmodulo === 4 */
+      this._sincobro[index].idmodulo === 3 ||
+      this._sincobro[index].idmodulo === 4
     ) {
       //Solo para Emision
       if (this._sincobro[index].pagado) {
         //Marca anteriores
-        let antCuenta = this._sincobro[index].idabonado;
+        let antCuenta = this._sincobro[index].idAbonado;
         let i = index - 1;
         while (i >= 0) {
-          if (antCuenta != this._sincobro[i].idabonado) break;
+          if (antCuenta != this._sincobro[i].idAbonado) break;
           this._sincobro[i].pagado = 1;
-          antCuenta = this._sincobro[i].idabonado;
+          antCuenta = this._sincobro[i].idAbonado;
           i--;
         }
       } //Desmarca siguientes
       else {
-        let antCuenta = this._sincobro[index].idabonado;
+        let antCuenta = this._sincobro[index].idAbonado;
         let i = index;
         while (i <= this._sincobro.length - 1) {
-          if (antCuenta != this._sincobro[i].idabonado) break;
+          if (antCuenta != this._sincobro[i].idAbonado) break;
           this._sincobro[i].pagado = 0;
-          antCuenta = this._sincobro[i].idabonado;
+          antCuenta = this._sincobro[i].idAbonado;
           i++;
         }
       }
@@ -575,7 +575,7 @@ export class RecaudacionComponent implements OnInit {
     let i = 0;
     this._sincobro.forEach((item: any, index: number) => {
       if (this._sincobro[i].pagado === true || this._sincobro[i].pagado === 1) {
-        if (
+        /*         if (
           this._sincobro[i].idmodulo.idmodulo == 3 ||
           this._sincobro[i].idmodulo.idmodulo == 4
         ) {
@@ -588,7 +588,11 @@ export class RecaudacionComponent implements OnInit {
           suma += this._sincobro[i].valorbase;
         } else {
           suma += this._sincobro[i].totaltarifa + +this._sincobro[i].interes;
-        }
+        } */
+        suma +=
+          this._sincobro[i].total +
+          this._sincobro[i].iva +
+          this._sincobro[i].interes;
       }
       i++;
     });
@@ -728,9 +732,6 @@ export class RecaudacionComponent implements OnInit {
       error: (err) => console.error('Al crear la Recaudación: ', err.error),
     });
   }
-  _cobrar() {
-    console.log(this.arrFacturas);
-  }
 
   saveRubxFac(idfactura: any, idrubro: any, valorunitario: any) {
     let rubrosxfac: Rubroxfac = new Rubroxfac();
@@ -750,9 +751,9 @@ export class RecaudacionComponent implements OnInit {
     let fechacobro: Date = new Date();
     let rubro: Rubros = new Rubros();
     rubro.idrubro = 5;
-    this.arrFacturas[i].pagado = 1;
-    if (this.arrFacturas[i].pagado) {
-      idfactura = this.arrFacturas[i].idfactura;
+    this._sincobro[i].pagado = 1;
+    if (this._sincobro[i].pagado) {
+      idfactura = this._sincobro[i].idfactura;
       this.facService.getById(idfactura).subscribe({
         next: (fac) => {
           //Añade a facxrecauda
@@ -775,14 +776,14 @@ export class RecaudacionComponent implements OnInit {
                   fac.usuariocobro = this.authService.idusuario;
                   if (fac.idmodulo.idmodulo != 8) {
                   }
-                  fac.interescobrado = this.arrFacturas[i].interes;
+                  fac.interescobrado = this._sincobro[i].interes;
                   fac.pagado = 1;
                   if (
-                    this.arrFacturas[i].interes > 0 &&
+                    this._sincobro[i].interes > 0 &&
                     fac.idmodulo.idmodulo != 8
                   ) {
                   }
-                  //this.saveRubxFac(fac, rubro, this.arrFacturas[i].interes);
+                  //this.saveRubxFac(fac, rubro, this._sincobro[i].interes);
                   let j = 1;
                   if (fac.nrofactura === null) {
                     let nrofac = this._nroFactura.split('-', 3);
@@ -819,10 +820,10 @@ export class RecaudacionComponent implements OnInit {
                   this.facService.updateFacturas(fac).subscribe({
                     next: (nex: any) => {
                       this.swcobrado = true;
-                      this.saveRubxFac(fac, rubro, this.arrFacturas[i].interes);
+                      this.saveRubxFac(fac, rubro, this._sincobro[i].interes);
                       j++;
                       i++;
-                      if (i < this.arrFacturas.length)
+                      if (i < this._sincobro.length)
                         this.facxrecauda(recaCreada, i);
                     },
                     error: (err) =>
@@ -848,7 +849,7 @@ export class RecaudacionComponent implements OnInit {
     } else {
       //No pagada continua con la siguiente
       i++;
-      if (i < this.arrFacturas.length) this.facxrecauda(recaCreada, i);
+      if (i < this._sincobro.length) this.facxrecauda(recaCreada, i);
     }
   }
   tonos() {
@@ -979,6 +980,7 @@ export class RecaudacionComponent implements OnInit {
   }
 
   calcularInteres(idfactura: number) {
+    console.log(idfactura);
     let idFactura = idfactura;
     this.totInteres = 0;
     this.arrCalculoInteres = [];
@@ -1033,9 +1035,18 @@ export class RecaudacionComponent implements OnInit {
     this.totInteres = 0;
     this.arrCalculoInteres = [];
     let interes: number = 0;
+    console.log(factura);
+
     if (factura.estado != 3 && factura.formapago != 4) {
-      let fec = factura.feccrea.toString().split('-', 2);
-      let fechai: Date = new Date(`${fec[0]}-${fec[1]}-02`);
+      let fec: any;
+      let fechai: Date;
+      if (factura.idmodulo === 3 || factura.idmodulo === 4) {
+        fec = factura.fechaemision.toString().split('-', 2);
+        fechai = new Date(`${fec[0]}-${+fec[1]! + 1}-01`);
+      } else {
+        fec = factura.feccrea.toString().split('-', 2);
+        fechai = new Date(`${fec[0]}-${fec[1]}-01`);
+      }
       let fechaf: Date = new Date();
       this.factura = factura;
       fechaf.setMonth(fechaf.getMonth() - 1);
