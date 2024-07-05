@@ -443,7 +443,6 @@ export class RecaudacionComponent implements OnInit {
       let i = this.arrFacturas.indexOf(query);
       this.arrFacturas.splice(i, 1);
     }
-    console.log(this.arrFacturas);
     this.arrFacturas.forEach((factura: any) => {
       this.sumtotal += factura.total + factura.iva + factura.interes;
       this.acobrar += factura.total + factura.iva + factura.interes;
@@ -751,8 +750,8 @@ export class RecaudacionComponent implements OnInit {
     let fechacobro: Date = new Date();
     let rubro: Rubros = new Rubros();
     rubro.idrubro = 5;
-    this._sincobro[i].pagado = 1;
-    if (this._sincobro[i].pagado) {
+    //this._sincobro[i].pagado = 1;
+    if (this._sincobro[i].pagado === 1 || this._sincobro[i].pagado === true) {
       idfactura = this._sincobro[i].idfactura;
       this.facService.getById(idfactura).subscribe({
         next: (fac) => {
@@ -980,7 +979,6 @@ export class RecaudacionComponent implements OnInit {
   }
 
   calcularInteres(idfactura: number) {
-    console.log(idfactura);
     let idFactura = idfactura;
     this.totInteres = 0;
     this.arrCalculoInteres = [];
@@ -1035,7 +1033,6 @@ export class RecaudacionComponent implements OnInit {
     this.totInteres = 0;
     this.arrCalculoInteres = [];
     let interes: number = 0;
-    console.log(factura);
 
     if (factura.estado != 3 && factura.formapago != 4) {
       let fec: any;

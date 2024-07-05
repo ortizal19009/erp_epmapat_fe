@@ -7,7 +7,11 @@
 
 .recaudacabecera {
   background-color: var(--recaudacabecera);
-  color: white;
+  color: rgb(255, 255, 255);
+}
+._recaudacabecera {
+  background-color: var(--recaudacabecera);
+  color: rgb(5, 5, 5);
 }
 
 .recaudadetalle {
