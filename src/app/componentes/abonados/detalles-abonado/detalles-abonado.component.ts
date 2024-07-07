@@ -102,7 +102,10 @@ export class DetallesAbonadoComponent implements OnInit {
   }
   lecturasxAbonado(idabonado: number) {
     this.lecService.getLecturasxIdabonado(idabonado).subscribe({
-      next: (datos) => (this._lecturas = datos),
+      next: (datos) => {
+        console.log(datos);
+        this._lecturas = datos;
+      },
       error: (err) => console.log(err.error),
     });
   }
