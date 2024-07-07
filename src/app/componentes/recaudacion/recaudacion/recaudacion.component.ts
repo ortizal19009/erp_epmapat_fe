@@ -411,7 +411,7 @@ export class RecaudacionComponent implements OnInit {
           const modulo: Modulos = await this.getModulo(item.idmodulo);
           item.modulo = modulo.descripcion;
           let interes = 0;
-          if (item.formapago != 4) {
+          if (item.formapago != 4 || item.idmodulo != 27) {
             interes = this.cInteres(item);
             item.interes = interes;
           }
@@ -819,7 +819,9 @@ export class RecaudacionComponent implements OnInit {
                   this.facService.updateFacturas(fac).subscribe({
                     next: (nex: any) => {
                       this.swcobrado = true;
-                      this.saveRubxFac(fac, rubro, this._sincobro[i].interes);
+                      if (nex.idmodulo.idmodulo != 27) {
+                        this.saveRubxFac(fac, rubro, this._sincobro[i].interes);
+                      }
                       j++;
                       i++;
                       if (i < this._sincobro.length)
