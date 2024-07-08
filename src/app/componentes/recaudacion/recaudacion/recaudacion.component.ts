@@ -760,6 +760,7 @@ export class RecaudacionComponent implements OnInit {
           facxr.idrecaudacion = recaCreada;
           facxr.idfactura = fac;
           facxr.estado = 1;
+          console.log(facxr);
           this.facxrService.save(facxr).subscribe({
             next: (nex) => {
               //Actualiza Factura como cobrada
@@ -777,6 +778,11 @@ export class RecaudacionComponent implements OnInit {
                   }
                   fac.interescobrado = this._sincobro[i].interes;
                   fac.pagado = 1;
+                  if (fac.estado === 2) {
+                    fac.estado = 2;
+                  } else {
+                    fac.estado = 1;
+                  }
                   if (
                     this._sincobro[i].interes > 0 &&
                     fac.idmodulo.idmodulo != 8
@@ -816,8 +822,10 @@ export class RecaudacionComponent implements OnInit {
                     /* =============== */
                   }
                   //fac.swiva = +iva[0][1]!;
+                  console.log(fac);
                   this.facService.updateFacturas(fac).subscribe({
                     next: (nex: any) => {
+                      console.log('factura guardada: ', nex);
                       this.swcobrado = true;
                       if (nex.idmodulo.idmodulo != 27) {
                         this.saveRubxFac(fac, rubro, this._sincobro[i].interes);
