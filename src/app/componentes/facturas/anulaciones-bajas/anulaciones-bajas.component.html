@@ -6,15 +6,15 @@
             </div>
             <div class="btn-group ml-auto mt-0">
                 <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
-                   data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+                    data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
                 </button>
                 <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-                   <button class="dropdown-item" type="button" data-toggle="collapse" data-target="#nuevaCaja">
-                      <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
-                      <button class="dropdown-item" type="button" >
-                         <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
+                    <button class="dropdown-item" type="button" data-toggle="collapse" data-target="#nuevaCaja">
+                        <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+                    <button class="dropdown-item" type="button" data-toggle="modal" data-target="#impReporte">
+                        <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
                 </div>
-             </div>
+            </div>
         </div>
     </div>
 </div>
@@ -301,55 +301,84 @@
             </div>
         </div>
     </div>
-</div>
-
-<!-- Modal Facturas para anular -->
-<div class="modal fade" id="anulelimModal" data-backdrop="static" tabindex="-1" aria-labelledby="fanularModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="fanularModalLabel">Lista de facturas para: {{txttitulo}}</h5>
-                <input type="text" class="form-control form-control-sm col-sm-3" [(ngModel)]="mfiltrar"
-                    placeholder="Filtrar...">
-            </div>
-            <div class="modal-body">
-                <table class="table table-sm table-hover table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Planilla</th>
-                            <th>Cliente</th>
-                            <th>Módulo</th>
-                            <th>Cuenta</th>
-                            <th>Nro. Factura</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let factura of _facturas | filter:mfiltrar" (click)="setFactura(factura)"
-                            data-dismiss="modal">
-                            <td>{{factura.idfactura}}</td>
-                            <td class="_description">{{factura.idcliente.nombre}}</td>
-                            <td>{{factura.idmodulo.descripcion}}</td>
-                            <td>{{factura.idabonado}}</td>
-                            <td>{{factura.nrofactura}}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">Cancelar</button>
+    <!-- Modal imprimir reporte -->
+    <div class="modal fade" id="impReporte" tabindex="-1" aria-labelledby="impReporte" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="impReporteLabel"><strong>Imprimir</strong></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm">
+                            <form action="">
+                                <label> Seleccionar opción</label>
+                                <select type="text" class="form-control form-control-sm">
+                                    <option value="0">Anulaciones</option>
+                                    <option value="1">Eliminaciones</option>
+                                </select>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-success btn-sm" data-dismiss="modal">
+                        <i class="fa fa-times-circle"></i> Cerrar</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Modal buscar cliente -->
-<div class="modal fade" id="bClienteModal" tabindex="-1" aria-labelledby="bClienteModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-body">
-                <app-buscar-cliente (setCliente)="setCliente($event)"></app-buscar-cliente>
+    <!-- Modal Facturas para anular -->
+    <div class="modal fade" id="anulelimModal" data-backdrop="static" tabindex="-1" aria-labelledby="fanularModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="fanularModalLabel">Lista de facturas para: {{txttitulo}}</h5>
+                    <input type="text" class="form-control form-control-sm col-sm-3" [(ngModel)]="mfiltrar"
+                        placeholder="Filtrar...">
+                </div>
+                <div class="modal-body">
+                    <table class="table table-sm table-hover table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Planilla</th>
+                                <th>Cliente</th>
+                                <th>Módulo</th>
+                                <th>Cuenta</th>
+                                <th>Nro. Factura</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let factura of _facturas | filter:mfiltrar" (click)="setFactura(factura)"
+                                data-dismiss="modal">
+                                <td>{{factura.idfactura}}</td>
+                                <td class="_description">{{factura.idcliente.nombre}}</td>
+                                <td>{{factura.idmodulo.descripcion}}</td>
+                                <td>{{factura.idabonado}}</td>
+                                <td>{{factura.nrofactura}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">Cancelar</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
+
+    <!-- Modal buscar cliente -->
+    <div class="modal fade" id="bClienteModal" tabindex="-1" aria-labelledby="bClienteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <app-buscar-cliente (setCliente)="setCliente($event)"></app-buscar-cliente>
+                </div>
+            </div>
+        </div>
+    </div>
