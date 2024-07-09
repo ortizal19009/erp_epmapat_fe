@@ -267,6 +267,19 @@ export class FacturaService {
       `${baseUrl}/nrofmodulo?nrofactura=${nrofactura}&idmodulo=${idmodulo}`
     );
   }
+  /* reporte de eliminacionwes */
+
+  getByFecEliminacion(d: Date, h: Date) {
+    return this.http.get<Facturas>(
+      `${baseUrl}/eliminaciones/fechas?d=${d}&h=${h}`
+    );
+  }
+  /* reporte de anulaciones */
+  getByFecAnulaciones(d: Date, h: Date) {
+    return this.http.get<Facturas>(
+      `${baseUrl}/anulaciones/fechas?d=${d}&h=${h}`
+    );
+  }
 
   /*============================
   ------ REPORTES JASPER -------

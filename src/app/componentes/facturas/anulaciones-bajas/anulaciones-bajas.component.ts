@@ -13,6 +13,8 @@ import { Facturas } from 'src/app/modelos/facturas.model';
 import { FacturamodificacionesService } from '../../../servicios/facturamodificaciones.service';
 import { Facturamodificaciones } from 'src/app/modelos/facturamodificaciones.model';
 import { Lecturas } from 'src/app/modelos/lecturas.model';
+import { PdfService } from 'src/app/servicios/pdf.service';
+import jsPDF from 'jspdf';
 
 @Component({
   selector: 'app-anulaciones-bajas',
@@ -22,6 +24,7 @@ import { Lecturas } from 'src/app/modelos/lecturas.model';
 export class AnulacionesBajasComponent implements OnInit {
   formBuscar: FormGroup;
   f_factura: FormGroup;
+  f_reportes: FormGroup;
   today: number = Date.now();
   campo: number = 0; //0:Ninguno, 1:Planilla,  2:Abonado
   date: Date = new Date();
@@ -50,6 +53,7 @@ export class AnulacionesBajasComponent implements OnInit {
   _fac: any;
   /* SELECCIONAR LECTURA */
   _lectura: Lecturas = new Lecturas();
+  sliceDate: string = new Date().toISOString().slice(0, 10);
   constructor(
     private facServicio: FacturaService,
     private router: Router,
@@ -61,8 +65,9 @@ export class AnulacionesBajasComponent implements OnInit {
     private s_abonados: AbonadosService,
     private s_facmodificaciones: FacturamodificacionesService,
     private s_factura: FacturaService,
-    private s_lectura: LecturasService
-  ) { }
+    private s_lectura: LecturasService,
+    private s_pdf: PdfService
+  ) {}
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/anulaciones-bajas');
@@ -82,6 +87,11 @@ export class AnulacionesBajasComponent implements OnInit {
       razonanulacion: '',
       usuarioeliminacion: '',
       razoneliminacion: '',
+    });
+    this.f_reportes = this.fb.group({
+      opt: '0',
+      desde: this.sliceDate,
+      hasta: this.sliceDate,
     });
     if (sessionStorage.getItem('idplanillas') != null) {
       this.formBuscar.controls['idfactura'].setValue(
@@ -275,16 +285,20 @@ export class AnulacionesBajasComponent implements OnInit {
     });
   }
   setFactura(factura: any) {
-    console.log(factura)
+    console.log(factura);
     this._fac = JSON.stringify(factura);
     this._factura = factura;
-    if (this.option === '1' && (factura.idmodulo.idmodulo === 3 || factura.idmodulo.idmodulo === 4) && factura.idabonado > 0) {
+    if (
+      this.option === '1' &&
+      (factura.idmodulo.idmodulo === 3 || factura.idmodulo.idmodulo === 4) &&
+      factura.idabonado > 0
+    ) {
       this.s_lectura.getByIdfactura(factura.idfactura).subscribe({
         next: (d_lectura: any) => {
-          console.log(d_lectura[0])
+          console.log(d_lectura[0]);
           this._lectura = d_lectura[0];
-        }
-      })
+        },
+      });
     }
   }
   actualizar() {
@@ -307,7 +321,7 @@ export class AnulacionesBajasComponent implements OnInit {
           factura.formapago = 1;
         }
         if (factura.estadoconvenio === 1) {
-          factura.estado = 2
+          factura.estado = 2;
         }
         this.s_factura.updateFacturas(factura).subscribe({
           next: (facDato) => {
@@ -341,17 +355,23 @@ export class AnulacionesBajasComponent implements OnInit {
         factura.usuarioeliminacion = this.authService.idusuario;
         this.s_factura.updateFacturas(factura).subscribe({
           next: (facDato) => {
-            if ((factura.idmodulo.idmodulo === 3 || factura.idmodulo.idmodulo === 4) && factura.idabonado > 0) {
+            if (
+              (factura.idmodulo.idmodulo === 3 ||
+                factura.idmodulo.idmodulo === 4) &&
+              factura.idabonado > 0
+            ) {
               this._lectura.estado = 0;
               this._lectura.observaciones = formFactura.razoneliminacion;
-              this.s_lectura.updateLectura(this._lectura.idlectura, this._lectura).subscribe({
-                next: (d_lectura: any) => {
-                  console.log(d_lectura)
-                  this.f_factura.reset();
-                  this.formBuscar.reset();
-                  this._cliente = new Clientes();
-                }
-              })
+              this.s_lectura
+                .updateLectura(this._lectura.idlectura, this._lectura)
+                .subscribe({
+                  next: (d_lectura: any) => {
+                    console.log(d_lectura);
+                    this.f_factura.reset();
+                    this.formBuscar.reset();
+                    this._cliente = new Clientes();
+                  },
+                });
             }
           },
           error: (e) => console.error(e),
@@ -360,5 +380,59 @@ export class AnulacionesBajasComponent implements OnInit {
         break;
     }
     //this.facServicio.updateFacturas()
+  }
+
+  /* REPORTES  */
+  /* REPORTE DE BAJAS */
+  reporte() {
+    console.log(this.f_reportes.value);
+    let opt = this.f_reportes.value.opt;
+    let desde = this.f_reportes.value.desde;
+    let hasta = this.f_reportes.value.hasta;
+    switch (opt) {
+      case '0':
+        console.log('anulaciones');
+        this.facServicio.getByFecAnulaciones(desde, hasta).subscribe({
+          next: (anulaciones: any) => {
+            console.log(anulaciones);
+            if (anulaciones.length > 0) {
+              this.reporteanulaciones(anulaciones);
+            }
+          },
+        });
+        break;
+      case '1':
+        console.log('eliminaciones');
+        this.facServicio.getByFecEliminacion(desde, hasta).subscribe({
+          next: (eliminaciones: any) => {
+            console.log(eliminaciones);
+            if (eliminaciones.length > 0) {
+              this.reporteBajas(eliminaciones);
+            }
+          },
+          error: (e) => console.error(e),
+        });
+        break;
+    }
+  }
+
+  reporteBajas(lbajas: any) {
+    console.log(this.f_reportes.value);
+    let doc = new jsPDF('p', 'pt', 'a4');
+
+    this.s_pdf.header(
+      `Reporte de facturas dadas de baja: ${this.f_reportes.value.desde} - ${this.f_reportes.value.hasta}`,
+      doc
+    );
+    doc.save('holamundo');
+  }
+  reporteanulaciones(lanulaciones: any) {
+    let doc = new jsPDF('p', 'pt', 'a4');
+
+    this.s_pdf.header(
+      `Reporte de facturas dadas de anuladas: ${this.f_reportes.value.desde} - ${this.f_reportes.value.hasta}`,
+      doc
+    );
+    doc.save('holamundo');
   }
 }

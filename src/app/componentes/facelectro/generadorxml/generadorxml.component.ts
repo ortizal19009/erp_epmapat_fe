@@ -102,7 +102,6 @@ export class GeneradorxmlComponent implements OnInit {
       this.nrofactura = this.formBuscar.value.nrofactura;
       this.facService.getByNrofactura(this.nrofactura).subscribe({
          next: datos => {
-            console.log(datos)
             this._facturas = datos;
             if (this._facturas.length > 0) {
                this.swnoexiste = false;
@@ -149,9 +148,6 @@ export class GeneradorxmlComponent implements OnInit {
                this.sumsubtotal += r.subtotal;
                this.sumvaloriva += r.valoriva;
                this.sumtotal += r.total;
-               console.log(this.sumsubtotal)
-               console.log(this.sumvaloriva)
-               console.log(this.sumtotal)
                let indice = this.vecrubros.findIndex((rubro: { idrubro: number }) => rubro.idrubro === r.idrubro);
                if (indice == -1) this.vecrubros.push(r)
                else {

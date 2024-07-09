@@ -251,6 +251,7 @@ export class EmisionesComponent implements OnInit {
   getBajas() {
     this.s_lecturas.getR_EmisionFinal(this.idemision).subscribe({
       next: (datos) => {
+        console.log(datos);
         this._rubrosBajas = datos;
       },
       error: (e) => console.error(e),
@@ -259,6 +260,7 @@ export class EmisionesComponent implements OnInit {
   getEmisionActual() {
     this.s_lecturas.getR_EmisionActual(this.idemision).subscribe({
       next: (datos: any) => {
+        console.log('EMISIONES INDIVIDUALES ', datos);
         this._rubrosActuales = datos;
       },
       error: (e) => console.error(e),
@@ -387,6 +389,7 @@ export class EmisionesComponent implements OnInit {
   getEmisionIndividualByIdEmision(idemision: number) {
     this.s_emisionindividual.getByIdEmision(idemision).subscribe({
       next: (datos: any) => {
+        console.log(datos);
         this._emisionindividual = datos;
       },
       error: (e) => console.error(e),

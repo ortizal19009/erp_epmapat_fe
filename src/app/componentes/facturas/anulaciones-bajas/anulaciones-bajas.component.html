@@ -314,19 +314,25 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-sm">
-                            <form action="">
+                            <form [formGroup]="f_reportes">
                                 <label> Seleccionar opción</label>
-                                <select type="text" class="form-control form-control-sm">
+                                <select type="text" class="form-control form-control-sm" formControlName="opt">
                                     <option value="0">Anulaciones</option>
                                     <option value="1">Eliminaciones</option>
                                 </select>
+                                <div class="row">
+                                    <div class="col-sm-6"><label for="">Desde: </label><input type="date" formControlName="desde" id="" class="form-control form-control-sm"></div>
+                                    <div class="col-sm-6"><label for="">Hasta: </label><input type="date" formControlName="hasta" id="" class="form-control form-control-sm"></div>
+                                </div>
                             </form>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-success btn-sm" data-dismiss="modal">
+                    <button type="button" class="btn btn-success btn-sm" data-dismiss="modal">
                         <i class="fa fa-times-circle"></i> Cerrar</button>
+                        <button type="button" class="btn btn-outline-success btn-sm" data-dismiss="modal" (click)="reporte()">
+                            <i class="fa fa-times-circle"></i> Aceptar</button>
                 </div>
             </div>
         </div>
