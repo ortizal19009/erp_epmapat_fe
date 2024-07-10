@@ -50,11 +50,12 @@ export class ImpInfoCajasComponent implements OnInit {
 
     const fecha = new Date();
     const strfecha = fecha.toISOString().slice(0, 10);
+    let f: Date = new Date();
     this.formImprimir = this.fb.group({
       reporte: '1',
       d_fecha: strfecha,
       h_fecha: strfecha,
-      hasta: '2023-12-31',
+      hasta: `${f.getFullYear() - 1}-12-31`,
       nombrearchivo: ['', [Validators.required, Validators.minLength(3)]],
       otrapagina: '',
     });
@@ -91,7 +92,8 @@ export class ImpInfoCajasComponent implements OnInit {
     this.swcalculando = true;
     let d_fecha = this.formImprimir.value.d_fecha;
     let h_fecha = this.formImprimir.value.h_fecha;
-    let hasta = '2023-12-31';
+    let f: Date = new Date();
+    let hasta = `${f.getFullYear() - 1}-12-31`;
     switch (this.opcreporte) {
       case 1: // Recaudacion diaria - Resumen
         /*         this.facService

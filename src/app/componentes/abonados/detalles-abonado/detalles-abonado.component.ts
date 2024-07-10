@@ -84,9 +84,14 @@ export class DetallesAbonadoComponent implements OnInit {
   facturasxAbonado(idabonado: number) {
     this.facService.getByIdabonadorango(idabonado, this.rango).subscribe({
       next: (datos: any) => {
+        console.log(datos);
         datos.forEach((item: any) => {
           //console.log(item);
           //console.log(this.s_interes.cInteres(item));
+          if (item.interescobrado === null) {
+            item.interescobrado = 0;
+            console.log(this.s_interes.cInteres(item));
+          }
         });
         this._facturas = datos;
       },

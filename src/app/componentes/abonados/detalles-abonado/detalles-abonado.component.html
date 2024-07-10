@@ -88,11 +88,14 @@
 
             <div class="card-header cardTab">
                <ul class="nav nav-tabs card-header-tabs cardTab">
-                  <li class="nav-item"><a class="nav-link active cardTab" href="#planillas" 
+                  <li class="nav-item"><a class="nav-link active cardTab" href="#planillas"
                         data-toggle="tab">Planillas</a>
                   </li>
                   <li class="nav-item"><a class="nav-link cardTab" href="#historialconsumo"
                         (click)="lecturasxAbonado( abonado.idabonado )" data-toggle="tab">Historial de Consumo</a>
+                  </li>
+                  <li class="nav-item"><a class="nav-link cardTab" href="#conveniopago"
+                        (click)="lecturasxAbonado( abonado.idabonado )" data-toggle="tab">Convenios de pago</a>
                   </li>
                </ul>
             </div>
@@ -137,17 +140,16 @@
                                        <td class="text-right">{{valorPagado(
                                           factura.idmodulo.idmodulo,factura.totaltarifa
                                           )| number: '1.2-2'}}</td>
-                                       <td>{{factura.interescobrado.toFixed(2)}}</td>
+                                       <td>{{factura.interescobrado.toFixed(2) }}</td>
                                        <td>{{ factura.fechacobro | date: 'dd-MM-y'}}</td>
                                     </tr>
                                  </tbody>
                               </table>
                            </div>
-
+                           <h3>*Se esta trabajando en el calculo de los intereses</h3>
                         </div>
                      </div>
                   </div>
-
                   <div class="tab-pane" id="historialconsumo">
                      <div class="post">
                         <div class="user-block mb-0">
@@ -199,6 +201,14 @@
                                     <i class="bi-x-octagon"></i></button>
                               </div>
                            </div>
+
+                        </div>
+                     </div>
+                  </div>
+                  <div class="tab-pane" id="conveniopago">
+                     <div class="post">
+                        <div class="user-block mb-0">
+                           <h1>EN DESARROLLO</h1>
 
                         </div>
                      </div>

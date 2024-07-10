@@ -100,7 +100,9 @@ export class ImpCajasComponent implements OnInit {
     let d_fecha = this.formImprimir.value.d_fecha;
     let h_fecha = this.formImprimir.value.h_fecha;
     let fecha = this.formImprimir.value.fecha;
-    let hasta = '2023-12-31';
+    let f: Date = new Date();
+    console.log(f.getFullYear() - 1);
+    let hasta = `${f.getFullYear() - 1}-12-31`;
     switch (this.opcreporte) {
       case 1: // Recaudacion diaria - Resumen
         try {
@@ -310,14 +312,12 @@ export class ImpCajasComponent implements OnInit {
           this._cobradas[i][3] === true &&
           this.formImprimir.value.fecha >= '2024-04-01'
         ) {
-          console.log('15');
           iva1 += totalRecaudado * 0.15;
         }
         if (
           this._cobradas[i][3] === true &&
           this.formImprimir.value.fecha <= '2024-03-31'
         ) {
-          console.log('12');
           iva1 += totalRecaudado * 0.12;
         }
         datos.push([
@@ -491,9 +491,9 @@ export class ImpCajasComponent implements OnInit {
     let suma: number = 0;
     var i = 0;
     this._cobradas.forEach((item: any) => {
-      console.log(item);
       let totalPorFormaCobro =
-        +this._cobradas[i][1].toFixed(2) + this._cobradas[i][0].swiva;
+        +this._cobradas[i][1].toFixed(2) +
+        +this._cobradas[i][0].swiva!.toFixed(2);
       /*       Math.round( * 100) /
               100; */
       // datos.push([this._cobradas[i][0].idfactura, this._cobradas[i][0].feccrea, this._cobradas[i][0].nrofactura, this._cobradas[i][0].formapago,
@@ -505,7 +505,7 @@ export class ImpCajasComponent implements OnInit {
         this._cobradas[i][0].formapago,
         formatNumber(totalPorFormaCobro),
       ]);
-      suma += totalPorFormaCobro;
+      suma += +totalPorFormaCobro.toFixed(2);
       i++;
     });
     this.sumtotaltarifa = suma;

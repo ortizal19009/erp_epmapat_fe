@@ -389,7 +389,7 @@ export class RecaudacionComponent implements OnInit {
           this.loadingService.hideLoading();
         }
         sincobrar.map(async (item: any, i: number) => {
-          if (item.idAbonado != 0) {
+          if (item.idAbonado != 0 && item.idmodulo != 27) {
             const abonado: Abonados = await this.getAbonado(item.idAbonado);
             item.direccion = abonado.direccionubicacion;
             item.responsablePago = abonado.idresponsable.nombre;
