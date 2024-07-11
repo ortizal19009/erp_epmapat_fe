@@ -48,12 +48,14 @@ export class AnulacionesBajasComponent implements OnInit {
   _cliente: Clientes = new Clientes();
   nombreCliente: String;
   option = '0';
+  textodato: String;
   /* SELECCIONAR FACTURA */
   _factura: Facturas = new Facturas();
   _fac: any;
   /* SELECCIONAR LECTURA */
   _lectura: Lecturas = new Lecturas();
   sliceDate: string = new Date().toISOString().slice(0, 10);
+
   constructor(
     private facServicio: FacturaService,
     private router: Router,
@@ -248,6 +250,7 @@ export class AnulacionesBajasComponent implements OnInit {
   getFacCobrada() {
     this.facServicio.getById(this.formBuscar.value.idfactura).subscribe({
       next: (datos: any) => {
+        this._cliente = datos.idcliente;
         if (this.option === '0') {
           if (
             datos.fechaanulacion === null &&
@@ -285,7 +288,11 @@ export class AnulacionesBajasComponent implements OnInit {
     });
   }
   setFactura(factura: any) {
-    console.log(factura);
+    if (factura.nrofactura != null) {
+      this.textodato = factura.nrofactura;
+    } else {
+      this.textodato = factura.idfactura;
+    }
     this._fac = JSON.stringify(factura);
     this._factura = factura;
     if (
@@ -295,7 +302,6 @@ export class AnulacionesBajasComponent implements OnInit {
     ) {
       this.s_lectura.getByIdfactura(factura.idfactura).subscribe({
         next: (d_lectura: any) => {
-          console.log(d_lectura[0]);
           this._lectura = d_lectura[0];
         },
       });
@@ -305,10 +311,8 @@ export class AnulacionesBajasComponent implements OnInit {
     let factura: any = this._factura;
     let formFactura = this.f_factura.value;
     let date: Date = new Date();
-    console.log(this.option);
     switch (this.option) {
       case '0':
-        console.log('ANULACIÓN');
         factura.fechaanulacion = date;
         factura.nrofactura = null;
         factura.razonanulacion = formFactura.razonanulacion;
@@ -335,7 +339,6 @@ export class AnulacionesBajasComponent implements OnInit {
               .saveFacturacionModificaciones(fmodi)
               .subscribe({
                 next: (modiDatos) => {
-                  console.log('Datos modificados guardatos', modiDatos);
                   this.f_factura.reset();
                   this.formBuscar.reset();
                   this._cliente = new Clientes();
@@ -345,10 +348,8 @@ export class AnulacionesBajasComponent implements OnInit {
           },
           error: (e) => console.error(e),
         });
-        console.log(factura);
         break;
       case '1':
-        console.log('ELIMINACIÓN');
         factura.fechaeliminacion = date;
         factura.razoneliminacion = formFactura.razoneliminacion;
         factura.estado = 0;
@@ -366,7 +367,6 @@ export class AnulacionesBajasComponent implements OnInit {
                 .updateLectura(this._lectura.idlectura, this._lectura)
                 .subscribe({
                   next: (d_lectura: any) => {
-                    console.log(d_lectura);
                     this.f_factura.reset();
                     this.formBuscar.reset();
                     this._cliente = new Clientes();
@@ -376,7 +376,6 @@ export class AnulacionesBajasComponent implements OnInit {
           },
           error: (e) => console.error(e),
         });
-        console.log(factura);
         break;
     }
     //this.facServicio.updateFacturas()
@@ -385,16 +384,13 @@ export class AnulacionesBajasComponent implements OnInit {
   /* REPORTES  */
   /* REPORTE DE BAJAS */
   reporte() {
-    console.log(this.f_reportes.value);
     let opt = this.f_reportes.value.opt;
     let desde = this.f_reportes.value.desde;
     let hasta = this.f_reportes.value.hasta;
     switch (opt) {
       case '0':
-        console.log('anulaciones');
         this.facServicio.getByFecAnulaciones(desde, hasta).subscribe({
           next: (anulaciones: any) => {
-            console.log(anulaciones);
             if (anulaciones.length > 0) {
               this.reporteanulaciones(anulaciones);
             }
@@ -402,10 +398,8 @@ export class AnulacionesBajasComponent implements OnInit {
         });
         break;
       case '1':
-        console.log('eliminaciones');
         this.facServicio.getByFecEliminacion(desde, hasta).subscribe({
           next: (eliminaciones: any) => {
-            console.log(eliminaciones);
             if (eliminaciones.length > 0) {
               this.reporteBajas(eliminaciones);
             }
@@ -417,7 +411,6 @@ export class AnulacionesBajasComponent implements OnInit {
   }
 
   reporteBajas(lbajas: any) {
-    console.log(this.f_reportes.value);
     let doc = new jsPDF('p', 'pt', 'a4');
 
     this.s_pdf.header(

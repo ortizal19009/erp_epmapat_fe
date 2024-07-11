@@ -11,6 +11,7 @@ import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
 import { InteresesService } from 'src/app/servicios/intereses.service';
 import { Facturas } from 'src/app/modelos/facturas.model';
 import { RecaudacionReportsService } from '../../recaudacion/recaudacion-reports.service';
+import { ConvenioService } from 'src/app/servicios/convenio.service';
 
 @Component({
   selector: 'app-detalles-abonado',
@@ -34,6 +35,9 @@ export class DetallesAbonadoComponent implements OnInit {
   estadoFE: string;
   factura: Facturas = new Facturas();
 
+  _convenios: any;
+  swconvenio: boolean = false;
+
   constructor(
     private aboService: AbonadosService,
     private facService: FacturaService,
@@ -42,7 +46,8 @@ export class DetallesAbonadoComponent implements OnInit {
     private router: Router,
     public _fecFacturaService: FecfacturaService,
     public s_interes: InteresesService,
-    public s_pdfRecaudacion: RecaudacionReportsService
+    public s_pdfRecaudacion: RecaudacionReportsService,
+    public s_convenios: ConvenioService
   ) {}
 
   ngOnInit(): void {
@@ -50,8 +55,6 @@ export class DetallesAbonadoComponent implements OnInit {
   }
 
   getFactura() {
-    console.log(this.rango);
-    console.log(this.abonado);
     this.facturasxAbonado(this.abonado.idabonado);
   }
   obtenerDatosAbonado() {
@@ -84,18 +87,16 @@ export class DetallesAbonadoComponent implements OnInit {
   facturasxAbonado(idabonado: number) {
     this.facService.getByIdabonadorango(idabonado, this.rango).subscribe({
       next: (datos: any) => {
-        console.log(datos);
         datos.forEach((item: any) => {
           //console.log(item);
           //console.log(this.s_interes.cInteres(item));
           if (item.interescobrado === null) {
             item.interescobrado = 0;
-            console.log(this.s_interes.cInteres(item));
           }
         });
         this._facturas = datos;
       },
-      error: (err) => console.log(err.error),
+      error: (err) => console.error(err.error),
     });
   }
   valorPagado(idmodulo: number, valor: number) {
@@ -108,10 +109,22 @@ export class DetallesAbonadoComponent implements OnInit {
   lecturasxAbonado(idabonado: number) {
     this.lecService.getLecturasxIdabonado(idabonado).subscribe({
       next: (datos) => {
-        console.log(datos);
         this._lecturas = datos;
       },
-      error: (err) => console.log(err.error),
+      error: (err) => console.error(err.error),
+    });
+  }
+  getConveniosPago(idabonado: number) {
+    this.s_convenios.getByReferencia(idabonado.toString()).subscribe({
+      next: (dConvenios: any) => {
+        this._convenios = dConvenios;
+        if (this._convenios.length > 0) {
+          this.swconvenio = true;
+        } else {
+          this.swconvenio = false;
+        }
+      },
+      error: (e) => console.error(e),
     });
   }
 
@@ -135,7 +148,7 @@ export class DetallesAbonadoComponent implements OnInit {
         }
         this.subtotal();
       },
-      error: (err) => console.log(err.error),
+      error: (err) => console.error(err.error),
     });
   }
 
@@ -175,6 +188,13 @@ export class DetallesAbonadoComponent implements OnInit {
     });
     this.totfac = suma12 + suma0;
   }
+  info(event: any, idconvenio: number) {
+    const tagName = event.target.tagName;
+    if (tagName === 'TD') {
+      sessionStorage.setItem('idconvenioToInfo', idconvenio.toString());
+      this.router.navigate(['info-convenio']);
+    }
+  }
 
   grafico(idabonado: number): void {
     this.grafic = true;
@@ -202,30 +222,7 @@ export class DetallesAbonadoComponent implements OnInit {
     // Crea el nuevo gráfico
     var ctx: any;
     ctx = document.getElementById('myChart') as HTMLCanvasElement;
-    // if (ctx == null) {
-    //    const divAlerta = document.getElementById("divHistorial");
-    //    const canvas = document.createElement("canvas") as HTMLElement
-    //    divAlerta?.appendChild(canvas);
-    //    // newElement.id = "newParagraph";
 
-    //    // Get the div element by ID
-    //    let divHistorial: any;
-    //    divHistorial = document.getElementById("historialconsumo");
-
-    //    // Create a new element
-    //    let newElement = document.createElement("canvas");
-
-    //    // Assign an ID to the new element
-    //    newElement.id = "myChart";
-
-    //    // Add some text to the new element
-    //    // newElement.textContent = "Hello, World!";
-
-    //    // Append the new element to the div element
-    //    divHistorial.appendChild(newElement);
-    //    ctx = document.getElementById('myChart') as HTMLCanvasElement;
-    // };
-    // console.log("ctx= " + ctx)
     new Chart(ctx, {
       type: 'bar',
       data: {

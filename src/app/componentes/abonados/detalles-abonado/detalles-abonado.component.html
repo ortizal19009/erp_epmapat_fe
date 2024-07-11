@@ -95,7 +95,7 @@
                         (click)="lecturasxAbonado( abonado.idabonado )" data-toggle="tab">Historial de Consumo</a>
                   </li>
                   <li class="nav-item"><a class="nav-link cardTab" href="#conveniopago"
-                        (click)="lecturasxAbonado( abonado.idabonado )" data-toggle="tab">Convenios de pago</a>
+                        (click)="getConveniosPago( abonado.idabonado )" data-toggle="tab">Convenios de pago</a>
                   </li>
                </ul>
             </div>
@@ -208,8 +208,41 @@
                   <div class="tab-pane" id="conveniopago">
                      <div class="post">
                         <div class="user-block mb-0">
-                           <h1>EN DESARROLLO</h1>
-
+                           <table *ngIf="swconvenio"
+                              class="table table-hover table-sm table-bordered mb-0 table-head-fixed thead-dark text-nowrap table-responsive-sm">
+                              <thead class="text-center">
+                                 <tr class="">
+                                    <th>N°</th>
+                                    <th>Nro. convenio</th>
+                                    <th>Total convenio</th>
+                                    <th>Inicial</th>
+                                    <th>Final</th>
+                                 </tr>
+                              </thead>
+                              <tbody>
+                                 <tr *ngFor="let convenio of _convenios; let i = index"
+                                    (click)="info($event, convenio.idconvenio)">
+                                    <td class="text-center">{{i+1}}</td>
+                                    <td class="text-center">{{convenio.nroconvenio}}</td>
+                                    <td class="text-right">{{convenio.totalconvenio.toFixed(2)}}</td>
+                                    <td class="text-right">{{convenio.cuotainicial.toFixed(2)}}</td>
+                                    <td class="text-right">{{convenio.cuotafinal.toFixed(2)}}</td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                           <div class="row" *ngIf="!swconvenio">
+                              <div class="col-12">
+                                 <div class="info-box bg-gradient-info">
+                                    <span class="info-box-icon"><i class="far fa-bookmark"></i></span>
+                                    <div class="info-box-content">
+                                       <H5 class="info-box-text">Esta cuenta </H5>
+                                       <h3>NO TIENE CONVEIOS</h3>
+                                    </div>
+                                    <!-- /.info-box-content -->
+                                 </div>
+                                 <!-- /.info-box -->
+                              </div>
+                           </div>
                         </div>
                      </div>
                   </div>

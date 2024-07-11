@@ -161,18 +161,29 @@
    <!-- EMISION INDIVIDUAL -->
    <div class="modal fade" data-backdrop="static" id="emisionIndividual" tabindex="-1"
       aria-labelledby="emisionIndividualLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
          <div class="modal-content">
-            <div class="modal-header pl-0 py-1 cabecera">
-               <div class="col-sm-9">
+            <div class="modal-header pl-0 py-1 cabecera row">
+               <div class="col-sm-7">
                   <h5 class="modal-title w-100 text-center">Emisión individual</h5>
                </div>
-               <select [(ngModel)]="emision" (change)="lemisionIndividuao($event)" *ngIf="listar==true"
-                  class="form-control form-control-sm col-2">
-                  <option [ngValue]=emision.idemision *ngFor="let emision of _allemisiones">{{emision.emision}}
-                  </option>
-               </select>
-               <div class="btn-group ml-auto">
+               <div class="col-sm-4" *ngIf="listar==true">
+                  <div class="row">
+                     <div class="col-sm-4">
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="filterimp"
+                           placeholder="Filtrar...">
+
+                     </div>
+                     <div class="col-sm-8">
+                        <select [(ngModel)]="emision" (change)="lemisionIndividuao($event)"
+                           class="form-control form-control-sm">
+                           <option [ngValue]=emision.idemision *ngFor="let emision of _allemisiones">{{emision.emision}}
+                           </option>
+                        </select>
+                     </div>
+                  </div>
+               </div>
+               <div class="btn-group ml-auto col-sm-1">
                   <button type="button" class="bg-transparent border-0 dropdown-toggle text-white"
                      data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
                   </button>
@@ -189,9 +200,10 @@
                   <div class="col-sm">
                      <table class="table table-sm table-hover table-bordered">
                         <thead>
-                           <tr>
+                           <tr class="text-center">
                               <th>N°</th>
                               <th>Nro emision</th>
+                              <th>Cuenta</th>
                               <th>Id Lec anterior</th>
                               <th>Id Lec actual</th>
                               <th>Planilla Anterior</th>
@@ -200,13 +212,14 @@
                            </tr>
                         </thead>
                         <tbody>
-                           <tr *ngFor="let emindividual of _emisionindividual ,let i = index">
+                           <tr *ngFor="let emindividual of _emisionindividual | filter: filterimp ,let i = index">
                               <td>{{i+1}}</td>
-                              <td>{{emindividual.idemision.emision}}</td>
-                              <td>{{emindividual.idlecturaanterior.idlectura}}</td>
-                              <td>{{emindividual.idlecturanueva.idlectura}}</td>
-                              <td>{{emindividual.idlecturaanterior.idfactura}}</td>
-                              <td>{{emindividual.idlecturanueva.idfactura}}</td>
+                              <td class="text-center">{{emindividual.idemision.emision}}</td>
+                              <td class="text-center">{{emindividual.idlecturanueva.idabonado_abonados.idabonado}}</td>
+                              <td class="text-right">{{emindividual.idlecturaanterior.idlectura}}</td>
+                              <td class="text-right">{{emindividual.idlecturanueva.idlectura}}</td>
+                              <td class="text-right">{{emindividual.idlecturaanterior.idfactura}}</td>
+                              <td class="text-right">{{emindividual.idlecturanueva.idfactura}}</td>
                               <td>
                                  <button class="btn btn-sm btn-danger" (click)="iEmisionIndividual(emindividual)"
                                     data-dismiss='modal'>
@@ -234,8 +247,8 @@
                                  <div class="input-group-prepend">
                                     <span class="input-group-text font-weight-bold">Emisión</span>
                                  </div>
-                                 <select type="text" class="form-control text-center" formControlName="emision"
-                                    minlength="4" maxlength="4" required>
+                                 <select type="text" class="form-control text-center" (change)="seEmisionValue()"
+                                    formControlName="emision" minlength="4" maxlength="4" required>
                                     <option value={{emision.idemision}} *ngFor="let emision of _allemisiones">
                                        {{emision.emision}}</option>
                                  </select>

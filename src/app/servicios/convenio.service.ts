@@ -63,4 +63,9 @@ export class ConvenioService {
   deleteConvenio(idconvenio: number): Observable<Object> {
     return this.http.delete(`${baseUrl}/${idconvenio}`);
   }
+  getByReferencia(referencia: string) {
+    return this.http.get<Convenios>(
+      `${baseUrl}/referencia?referencia=${referencia}`
+    );
+  }
 }

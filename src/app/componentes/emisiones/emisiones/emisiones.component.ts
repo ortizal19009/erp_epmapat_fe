@@ -84,6 +84,8 @@ export class EmisionesComponent implements OnInit {
   _rubrosBajas: any;
   _rubrosActuales: any;
 
+  filterimp: string;
+
   porcResidencial: number[] = [
     0.777, 0.78, 0.78, 0.78, 0.78, 0.778, 0.778, 0.778, 0.78, 0.78, 0.78, 0.68,
     0.68, 0.678, 0.68, 0.68, 0.678, 0.678, 0.68, 0.68, 0.678, 0.676, 0.678,
@@ -251,7 +253,6 @@ export class EmisionesComponent implements OnInit {
   getBajas() {
     this.s_lecturas.getR_EmisionFinal(this.idemision).subscribe({
       next: (datos) => {
-        console.log(datos);
         this._rubrosBajas = datos;
       },
       error: (e) => console.error(e),
@@ -260,7 +261,6 @@ export class EmisionesComponent implements OnInit {
   getEmisionActual() {
     this.s_lecturas.getR_EmisionActual(this.idemision).subscribe({
       next: (datos: any) => {
-        console.log('EMISIONES INDIVIDUALES ', datos);
         this._rubrosActuales = datos;
       },
       error: (e) => console.error(e),
@@ -424,6 +424,10 @@ export class EmisionesComponent implements OnInit {
   saveEmisionIndividual() {
     this.generaRutaxemisionIndividual();
   }
+  seEmisionValue() {
+    console.log(this.f_emisionIndividual.value.emision);
+    console.log(this.idemision);
+  }
   async generaRutaxemisionIndividual() {
     if (this.cerrado === 0) {
       this.lecturaestado = 0;
@@ -433,7 +437,7 @@ export class EmisionesComponent implements OnInit {
       let emision: Emisiones = new Emisiones();
       let ruta: Rutas = new Rutas();
       ruta.idruta = this.ruta.idruta;
-      emision.idemision = this.idemision;
+      emision.idemision = this.f_emisionIndividual.value.emision;
       this.ruxemiService
         .getByEmisionRuta(emision.idemision, ruta.idruta)
         .subscribe({
@@ -517,7 +521,6 @@ export class EmisionesComponent implements OnInit {
       lectura.idrutaxemision_rutasxemision = nuevarutaxemi;
       lectura.total1 = 0;
       lectura.idfactura = nuevoIdfactura;
-      console.log(lectura);
       try {
         let newLectura = await this.s_lecturas.saveLecturaAsync(lectura);
         await this.planilla(newLectura);
@@ -529,7 +532,6 @@ export class EmisionesComponent implements OnInit {
     }
   }
   lemisionIndividuao(e: any) {
-    console.log(e);
     this.getEmisionIndividualByIdEmision(this.emision);
   }
   async planilla(lectura: Lecturas) {
