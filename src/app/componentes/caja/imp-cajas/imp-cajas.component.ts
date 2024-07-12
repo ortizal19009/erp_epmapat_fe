@@ -491,9 +491,9 @@ export class ImpCajasComponent implements OnInit {
     let suma: number = 0;
     var i = 0;
     this._cobradas.forEach((item: any) => {
+      console.log(item);
       let totalPorFormaCobro =
-        +this._cobradas[i][1].toFixed(2) +
-        +this._cobradas[i][0].swiva!.toFixed(2);
+        +this._cobradas[i][1] + +this._cobradas[i][0].swiva!;
       /*       Math.round( * 100) /
               100; */
       // datos.push([this._cobradas[i][0].idfactura, this._cobradas[i][0].feccrea, this._cobradas[i][0].nrofactura, this._cobradas[i][0].formapago,
@@ -938,7 +938,7 @@ export class ImpCajasComponent implements OnInit {
     const datos: any = [];
     let suma: number = 0;
     var i = 0;
-    console.log(this._cobradas)
+    console.log(this._cobradas);
     this._cobradas.forEach(() => {
       let totalPorFormaCobro =
         this._cobradas[i][1] + this._cobradas[i][0].swiva;
