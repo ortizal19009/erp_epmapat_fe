@@ -938,6 +938,7 @@ export class ImpCajasComponent implements OnInit {
     const datos: any = [];
     let suma: number = 0;
     var i = 0;
+    console.log(this._cobradas)
     this._cobradas.forEach(() => {
       let totalPorFormaCobro =
         this._cobradas[i][1] + this._cobradas[i][0].swiva;

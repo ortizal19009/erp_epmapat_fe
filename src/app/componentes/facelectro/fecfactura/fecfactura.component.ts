@@ -530,6 +530,9 @@ export class FecfacturaComponent implements OnInit {
         }
         this.estado = true;
         break;
+      case 'C':
+        this.estado = true;
+        break;
     }
     return this.estado;
     /* factura.estado === 'A' || factura.estado === 'O' || factura.estado === 'C' */

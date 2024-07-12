@@ -412,7 +412,7 @@ export class RecaudacionComponent implements OnInit {
           item.modulo = modulo.descripcion;
           let interes = 0;
           if (item.formapago != 4 || item.idmodulo != 27) {
-            interes = this.cInteres(item);
+            interes = +this.cInteres(item).toFixed(2);
             item.interes = interes;
           }
           i++;
@@ -636,7 +636,7 @@ export class RecaudacionComponent implements OnInit {
     let _lecturas: any;
     this.consumo = 0;
     this.idfactura = idfactura;
-    this.totInteres = this.cInteres(factura);
+    this.totInteres = +this.cInteres(factura).toFixed(2);
     if (idmodulo == 8) {
       this.rubxfacService.getByIdfactura1(idfactura).subscribe({
         next: (detalle) => {
