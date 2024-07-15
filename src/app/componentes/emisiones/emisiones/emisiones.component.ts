@@ -296,6 +296,12 @@ export class EmisionesComponent implements OnInit {
       this.swfiltro = false;
     }
   }
+  metrosCu() {
+    let lecanterior = this.f_lecturas.value.lecturaanterior;
+    let lecactual = this.f_lecturas.value.lecturaactual;
+
+    return +lecactual! - +lecanterior!;
+  }
 
   total() {
     let subtotal = 0;
@@ -389,7 +395,6 @@ export class EmisionesComponent implements OnInit {
   getEmisionIndividualByIdEmision(idemision: number) {
     this.s_emisionindividual.getByIdEmision(idemision).subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this._emisionindividual = datos;
       },
       error: (e) => console.error(e),
@@ -420,13 +425,41 @@ export class EmisionesComponent implements OnInit {
         error: (e) => console.error(e),
       });
   }
+  retornar() {
+    this.optabonado = true;
+  }
   //Generar nueva emision individual(){
   saveEmisionIndividual() {
     this.generaRutaxemisionIndividual();
+    this.listar = true;
+    setTimeout(() => {
+      this.abonado = new Abonados();
+      this.cliente = new Clientes();
+      this.ruta = new Rutas();
+      this._lectura = new Lecturas();
+      this.f_emisionIndividual.patchValue({
+        abonado: '',
+      });
+      this.f_lecturas.patchValue({
+        lecturaanterior: 0,
+        lecturaactual: 0,
+        idnovedad_novedades: '',
+      });
+    }, 1000);
   }
   seEmisionValue() {
-    console.log(this.f_emisionIndividual.value.emision);
-    console.log(this.idemision);
+    this.abonado = new Abonados();
+    this.cliente = new Clientes();
+    this.ruta = new Rutas();
+    this._lectura = new Lecturas();
+    this.f_emisionIndividual.patchValue({
+      abonado: '',
+    });
+    this.f_lecturas.patchValue({
+      lecturaanterior: 0,
+      lecturaactual: 0,
+      idnovedad_novedades: '',
+    });
   }
   async generaRutaxemisionIndividual() {
     if (this.cerrado === 0) {
@@ -436,8 +469,9 @@ export class EmisionesComponent implements OnInit {
       let rutasxemision = {} as Rutasxemision;
       let emision: Emisiones = new Emisiones();
       let ruta: Rutas = new Rutas();
+      let emi = this.f_emisionIndividual.value.emision;
       ruta.idruta = this.ruta.idruta;
-      emision.idemision = this.f_emisionIndividual.value.emision;
+      emision.idemision = emi;
       this.ruxemiService
         .getByEmisionRuta(emision.idemision, ruta.idruta)
         .subscribe({
@@ -456,7 +490,7 @@ export class EmisionesComponent implements OnInit {
       let emision: Emisiones = new Emisiones();
       let ruta: Rutas = new Rutas();
       ruta.idruta = this.ruta.idruta;
-      emision.idemision = this.idemision;
+      emision.idemision = this.f_emisionIndividual.value.emision;
       this.ruxemiService
         .getByEmisionRuta(emision.idemision, ruta.idruta)
         .subscribe({
@@ -514,7 +548,7 @@ export class EmisionesComponent implements OnInit {
       lectura.lecturadigitada = this.f_lecturas.value.lecturaactual;
       lectura.mesesmulta = 0;
       lectura.idnovedad_novedades = novedad;
-      lectura.idemision = this.idemision;
+      lectura.idemision = this.f_emisionIndividual.value.emision;
       lectura.idabonado_abonados = this.abonado;
       lectura.idresponsable = this.abonado.idresponsable.idcliente;
       lectura.idcategoria = this.abonado.idcategoria_categorias.idcategoria;
