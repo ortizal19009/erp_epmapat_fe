@@ -84,6 +84,10 @@ export class EmisionesComponent implements OnInit {
   _rubrosBajas: any;
   _rubrosActuales: any;
 
+  /* reportes */
+  lecturasnuevas: any;
+  lecturasanteriores: any;
+
   filterimp: string;
 
   porcResidencial: number[] = [
@@ -111,7 +115,8 @@ export class EmisionesComponent implements OnInit {
     private rxfService: RubroxfacService,
     private s_emisionindividual: EmisionIndividualService,
     private s_pdf: PdfService,
-    private s_rxfService: RubroxfacService
+    private s_rxfService: RubroxfacService,
+    private s_emisionesIndividuales: EmisionIndividualService
   ) {}
 
   ngOnInit(): void {
@@ -241,6 +246,7 @@ export class EmisionesComponent implements OnInit {
 
         this.total();
         this.getBajas();
+        this.getNuevasAnteriores();
         this.getEmisionActual();
         if (this._rutasxemi.length == 0) {
           this.showDiv = false;
@@ -257,6 +263,24 @@ export class EmisionesComponent implements OnInit {
       },
       error: (e) => console.error(e),
     });
+  }
+  getNuevasAnteriores() {
+    this.s_emisionesIndividuales.getLecturasNuevas(this.idemision).subscribe({
+      next: (nuevas: any) => {
+        console.log(nuevas);
+        this.lecturasnuevas = nuevas;
+      },
+      error: (e) => console.error(e),
+    });
+    this.s_emisionesIndividuales
+      .getLecturasAnteriores(this.idemision)
+      .subscribe({
+        next: (anteriores: number) => {
+          console.log(anteriores);
+          this.lecturasanteriores = anteriores;
+        },
+        error: (e) => console.error(e),
+      });
   }
   getEmisionActual() {
     this.s_lecturas.getR_EmisionActual(this.idemision).subscribe({
@@ -1167,7 +1191,8 @@ export class EmisionesComponent implements OnInit {
     }
   }
   r_emisionFinal() {
-    this.getBajas();
+    /*  this.getBajas(); */
+    this.getNuevasAnteriores();
     const nombreEmision = new NombreEmisionPipe(); // Crea una instancia del pipe
     let m_izquierda = 150;
     var doc = new jsPDF('p', 'pt', 'a4');

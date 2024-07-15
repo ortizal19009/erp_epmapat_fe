@@ -17,4 +17,10 @@ export class EmisionIndividualService {
       `${baseUrl}/idemision?idemision=${idemision}`
     );
   }
+  getLecturasNuevas(idemision: number) {
+    return this.http.get<any>(`${baseUrl}/nuevas?idemision=${idemision}`);
+  }
+  getLecturasAnteriores(idemision: number) {
+    return this.http.get<any>(`${baseUrl}/anteriores?idemision=${idemision}`);
+  }
 }
