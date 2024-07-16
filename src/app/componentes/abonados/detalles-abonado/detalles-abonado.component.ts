@@ -358,11 +358,37 @@ export class DetallesAbonadoComponent implements OnInit {
     // Gather all `getSumaFac()` promises
     const sumaFacPromises: any[] = [];
     let facturas: any = this.datosImprimir.facturas;
+    this._rxf = [];
+    let rubrostotal: number = 0;
     facturas.forEach(async (factura: any) => {
       factura.interes = this.cInteres(factura);
       const sumaFacPromise = this.getSumaFac(factura.idfactura);
       sumaFacPromises.push(sumaFacPromise);
-      this.getRubrosxFact(factura.idfactura);
+      // await this.getRubrosxFact(factura.idfactura);
+
+      await this.rubxfacService
+        .getByIdfacturaAsync(factura.idfactura)
+        .then(async (rxf: any) => {
+          await rxf.forEach((item: any, index: number) => {
+            let query = this._rxf.find(
+              (rubro: { idrubro: number }) =>
+                rubro.idrubro === item.idrubro_rubros.idrubro
+            );
+            if (query === undefined) {
+              let rubro = {
+                idrubro: item.idrubro_rubros.idrubro,
+                descripcion: item.idrubro_rubros.descripcion,
+                valortotal: +item.valorunitario! * +item.cantidad!,
+              };
+              this._rxf.push(rubro);
+            }
+            if (query != undefined) {
+              this._rxf[index].valortotal +=
+                +item.valorunitario! * +item.cantidad!;
+            }
+            rubrostotal += item.valorunitario * item.cantidad;
+          });
+        });
     });
     let d_facturas = [];
     // Wait for all `getSumaFac()` promises to resolve
@@ -370,6 +396,10 @@ export class DetallesAbonadoComponent implements OnInit {
     let t_subtotal: number = 0;
     let t_intereses: number = 0;
     let t_total: number = 0;
+    let d_rxf: any = [];
+    await this._rxf.forEach((item: any) => {
+      d_rxf.push([item.idrubro, item.descripcion, +item.valortotal.toFixed(2)]);
+    });
 
     // Iterate through facturas and add sumaFac values
     for (let i = 0; i < facturas.length; i++) {
@@ -405,11 +435,10 @@ export class DetallesAbonadoComponent implements OnInit {
       },
       body: d_facturas,
     });
-    console.log(d_facturas);
-    console.log(this._rxf);
+    d_rxf.push(['', 'Total: ', rubrostotal.toFixed(2)]);
     autoTable(doc, {
       head: [['Cod.Rubro', 'Descripción', 'Valor']],
-      body: [this._rxf[0].idrubro, this._rxf[0].descripcion, this._rxf[0].valortotal],
+      body: d_rxf,
     });
 
     // Generate data URI and set iframe source
@@ -485,26 +514,22 @@ export class DetallesAbonadoComponent implements OnInit {
     return dato;
   }
   async getRubrosxFact(idfactura: number) {
+    this._rxf = [];
     this.rubxfacService.getByIdfacturaAsync(idfactura).then((rxf: any) => {
-      console.log(rxf);
-      rxf.forEach((item: any) => {
+      rxf.forEach((item: any, index: number) => {
         let query = this._rxf.find(
           (rubro: { idrubro: number }) =>
             rubro.idrubro === item.idrubro_rubros.idrubro
         );
         if (query === undefined) {
-          console.log('Datos no encontrados', query);
           let rubro = {
             idrubro: item.idrubro_rubros.idrubro,
             descripcion: item.idrubro_rubros.descripcion,
-            valortotal: item.valorunitario * item.cantidad,
+            valortotal: +item.valorunitario! * +item.cantidad!,
           };
           this._rxf.push(rubro);
-          console.log(this._rxf);
         } else {
-          console.log('datos encontrados', query);
-          console.log('datos encontrados', item);
-          query.valorunitario += item.valorunitario;
+          this._rxf[index].valortotal += +item.valorunitario! * +item.cantidad!;
         }
       });
     });
