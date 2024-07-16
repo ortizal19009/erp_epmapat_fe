@@ -12,6 +12,9 @@ import { InteresesService } from 'src/app/servicios/intereses.service';
 import { Facturas } from 'src/app/modelos/facturas.model';
 import { RecaudacionReportsService } from '../../recaudacion/recaudacion-reports.service';
 import { ConvenioService } from 'src/app/servicios/convenio.service';
+import autoTable from 'jspdf-autotable';
+import jsPDF from 'jspdf';
+import { PdfService } from 'src/app/servicios/pdf.service';
 
 @Component({
   selector: 'app-detalles-abonado',
@@ -37,6 +40,22 @@ export class DetallesAbonadoComponent implements OnInit {
 
   _convenios: any;
   swconvenio: boolean = false;
+  opt = '0';
+
+  datosImprimir: any;
+  /* Intereses */
+  calInteres = {} as calcInteres;
+  totInteres: number = 0;
+  arrCalculoInteres: any = [];
+  //factura: Facturas = new Facturas();
+  _intereses: any;
+  $event: any;
+  valoriva: number;
+  _codigo: string;
+  pdfView: boolean = true;
+  modalSize: string = 'sm';
+  /* para reporte */
+  _rxf: any = [];
 
   constructor(
     private aboService: AbonadosService,
@@ -47,11 +66,13 @@ export class DetallesAbonadoComponent implements OnInit {
     public _fecFacturaService: FecfacturaService,
     public s_interes: InteresesService,
     public s_pdfRecaudacion: RecaudacionReportsService,
-    public s_convenios: ConvenioService
+    public s_convenios: ConvenioService,
+    private s_pdf: PdfService
   ) {}
 
   ngOnInit(): void {
     this.obtenerDatosAbonado();
+    this.listarIntereses();
   }
 
   getFactura() {
@@ -90,8 +111,8 @@ export class DetallesAbonadoComponent implements OnInit {
         datos.forEach((item: any) => {
           //console.log(item);
           //console.log(this.s_interes.cInteres(item));
-          if (item.interescobrado === null) {
-            item.interescobrado = 0;
+          if (item.pagado === 0) {
+            item.interescobrado = this.cInteres(item);
           }
         });
         this._facturas = datos;
@@ -272,6 +293,228 @@ export class DetallesAbonadoComponent implements OnInit {
       error: (e) => console.error(e),
     });
   }
+  setOptImprimir() {
+    switch (this.opt) {
+      case '0':
+        this.getSinCobro();
+        this.pdfView = false;
+        this.modalSize = 'lg';
+        break;
+    }
+  }
+  cancelar() {
+    this.pdfView = true;
+    this.modalSize = 'sm';
+  }
+  getSinCobro() {
+    this.facService.getSinCobrarAboMod(this._abonado[0].idabonado).subscribe({
+      next: (facturas: any) => {
+        this._abonado[0].facturas = facturas;
+        this.datosImprimir = this._abonado[0];
+        this.impNotificacion();
+      },
+      error: (e) => console.error(e.error),
+    });
+  }
+  async impNotificacion() {
+    console.log(this.datosImprimir);
+    let doc = new jsPDF('p', 'pt', 'a4');
+    doc.setFontSize(14);
+    this.s_pdf.header(
+      `Notificación de deudas pendientes: ${this.datosImprimir.idabonado.toString()}`,
+      doc
+    );
+    doc.setFontSize(7);
+    autoTable(doc, {
+      head: [
+        [
+          {
+            colSpan: 2,
+            content: 'DATOS PERSONALES',
+            styles: { halign: 'center' },
+          },
+        ],
+      ],
+      body: [
+        [
+          `CLIENTE: ${this.datosImprimir.idcliente_clientes.nombre}`,
+          `IDENTIFICACIÓN: ${this.datosImprimir.idcliente_clientes.cedula}`,
+        ],
+        [
+          `EMAIL: ${this.datosImprimir.idcliente_clientes.email}`,
+          `TELEFONO: ${this.datosImprimir.idcliente_clientes.telefono}`,
+        ],
+        [
+          `DIRECCIÓN: ${this.datosImprimir.direccionubicacion}`,
+          `RUTA: ${this.datosImprimir.idruta_rutas.descripcion}`,
+        ],
+        [
+          `CATEGORÍA: ${this.datosImprimir.idcategoria_categorias.descripcion}`,
+          `AL.: ${this.datosImprimir.swalcantarillado} / A.M.: ${this.datosImprimir.adultomayor} / M: ${this.datosImprimir.municipio}`,
+        ],
+      ],
+    });
+
+    // Gather all `getSumaFac()` promises
+    const sumaFacPromises: any[] = [];
+    let facturas: any = this.datosImprimir.facturas;
+    facturas.forEach(async (factura: any) => {
+      factura.interes = this.cInteres(factura);
+      const sumaFacPromise = this.getSumaFac(factura.idfactura);
+      sumaFacPromises.push(sumaFacPromise);
+      this.getRubrosxFact(factura.idfactura);
+    });
+    let d_facturas = [];
+    // Wait for all `getSumaFac()` promises to resolve
+    const sumaFacResults = await Promise.all(sumaFacPromises);
+    let t_subtotal: number = 0;
+    let t_intereses: number = 0;
+    let t_total: number = 0;
+
+    // Iterate through facturas and add sumaFac values
+    for (let i = 0; i < facturas.length; i++) {
+      const factura = facturas[i];
+      const sumaFac = sumaFacResults[i];
+      facturas[i].sumaFac = sumaFac;
+      let suma = +factura.sumaFac.toFixed(2)! + +factura.interes.toFixed(2)!;
+      d_facturas.push([
+        factura.idfactura,
+        factura.idmodulo.descripcion,
+        factura.sumaFac.toFixed(2),
+        factura.interes.toFixed(2),
+        suma.toFixed(2),
+      ]);
+      t_subtotal += factura.sumaFac;
+      t_intereses += factura.interes;
+      t_total += suma;
+    }
+    d_facturas.push([
+      '',
+      'TOTALES: ',
+      t_subtotal.toFixed(2),
+      t_intereses.toFixed(2),
+      t_total.toFixed(2),
+    ]);
+    autoTable(doc, {
+      headStyles: { halign: 'center' },
+      head: [['Planilla', 'Módulo', 'Sub total', 'Interés', 'Total']],
+      columnStyles: {
+        2: { halign: 'center' },
+        3: { halign: 'center' },
+        4: { halign: 'center' },
+      },
+      body: d_facturas,
+    });
+    console.log(d_facturas);
+    console.log(this._rxf);
+    autoTable(doc, {
+      head: [['Cod.Rubro', 'Descripción', 'Valor']],
+      body: [this._rxf[0].idrubro, this._rxf[0].descripcion, this._rxf[0].valortotal],
+    });
+
+    // Generate data URI and set iframe source
+    const pdfDataUri = doc.output('datauri');
+    const pdfViewer: any = document.getElementById(
+      'pdfViewer'
+    ) as HTMLIFrameElement;
+    pdfViewer.src = pdfDataUri;
+    // Generate and output the PDF after all data is processed
+    //doc.output('pdfobjectnewwindow');
+  }
+  listarIntereses() {
+    this.s_interes.getListaIntereses().subscribe({
+      next: (datos) => {
+        this._intereses = datos;
+      },
+      error: (err) => console.error(err.error),
+    });
+  }
+
+  /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
+  cInteres(factura: any) {
+    this.totInteres = 0;
+    this.arrCalculoInteres = [];
+    let interes: number = 0;
+    if (factura.estado != 3 && factura.formapago != 4) {
+      let fec = factura.feccrea.toString().split('-', 2);
+      let fechai: Date = new Date(`${fec[0]}-${fec[1]}-02`);
+      let fechaf: Date = new Date();
+      this.factura = factura;
+      fechaf.setMonth(fechaf.getMonth() - 1);
+      while (fechai <= fechaf) {
+        this.calInteres = {} as calcInteres;
+        let query = this._intereses.find(
+          (interes: { anio: number; mes: number }) =>
+            interes.anio === +fechai.getFullYear()! &&
+            interes.mes === +fechai.getMonth()! + 1
+        );
+        if (!query) {
+          this.calInteres.anio = +fechai.getFullYear()!;
+          this.calInteres.mes = +fechai.getMonth()! + 1;
+          this.calInteres.interes = 0;
+          query = this.calInteres;
+        } else {
+          this.calInteres.anio = query.anio;
+          this.calInteres.mes = query.mes;
+          this.calInteres.interes = query.porcentaje;
+          this.calInteres.valor = factura.totaltarifa;
+          this.arrCalculoInteres.push(this.calInteres);
+        }
+        fechai.setMonth(fechai.getMonth() + 1);
+      }
+      this.arrCalculoInteres.forEach((item: any) => {
+        //this.totInteres += (item.interes * item.valor) / 100;
+        interes += (item.interes * item.valor) / 100;
+        // this.subtotal();
+      });
+    }
+    return interes;
+  }
+  async getSumaFac(idfactura: number): Promise<any> {
+    const sumaFac = await this.rubxfacService
+      .getSumaValoresUnitarios(idfactura)
+      .toPromise();
+    return sumaFac;
+  }
+  async contSinCobrar(idabonado: number) {
+    let dato = await this.facService.countSinCobrarAbo(idabonado);
+    /* .then((number: any) => {
+      console.log(number);
+      return number; */
+    //});
+    return dato;
+  }
+  async getRubrosxFact(idfactura: number) {
+    this.rubxfacService.getByIdfacturaAsync(idfactura).then((rxf: any) => {
+      console.log(rxf);
+      rxf.forEach((item: any) => {
+        let query = this._rxf.find(
+          (rubro: { idrubro: number }) =>
+            rubro.idrubro === item.idrubro_rubros.idrubro
+        );
+        if (query === undefined) {
+          console.log('Datos no encontrados', query);
+          let rubro = {
+            idrubro: item.idrubro_rubros.idrubro,
+            descripcion: item.idrubro_rubros.descripcion,
+            valortotal: item.valorunitario * item.cantidad,
+          };
+          this._rxf.push(rubro);
+          console.log(this._rxf);
+        } else {
+          console.log('datos encontrados', query);
+          console.log('datos encontrados', item);
+          query.valorunitario += item.valorunitario;
+        }
+      });
+    });
+  }
+}
+interface calcInteres {
+  anio: number;
+  mes: number;
+  interes: number;
+  valor: number;
 }
 
 interface datAbonado {

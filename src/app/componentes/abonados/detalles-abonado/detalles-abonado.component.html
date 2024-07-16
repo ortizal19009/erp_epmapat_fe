@@ -105,7 +105,7 @@
                      <div class="post">
                         <div class="user-block mb-0">
 
-                           <div class="card-body table-responsive p-0 " style="height: 500px;">
+                           <div class="card-body table-responsive p-0 " style="height: 600px;">
                               <table
                                  class="table table-hover table-sm table-bordered mb-0 table-head-fixed thead-dark text-nowrap table-responsive-sm">
                                  <caption class="small mark">Últimas <strong>{{rango}}</strong>
@@ -146,7 +146,6 @@
                                  </tbody>
                               </table>
                            </div>
-                           <h3>*Se esta trabajando en el calculo de los intereses</h3>
                         </div>
                      </div>
                   </div>
@@ -407,6 +406,37 @@
                   (click)="expFacElectronica(idfactura)" data-dismiss="modal">
                   <i class="bi bi-send"></i> Fac. Electronica</button>
             </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- MODAL Imprimir-->
+<div class="modal fade" id="imprimir" tabindex="-1" aria-labelledby="imprimirLabel" aria-hidden="true">
+   <div class="modal-dialog modal-dialog-centered modal-{{modalSize}}">
+      <div class="modal-content border">
+         <div class='modal-header py-2 justify-content-center cabecera'>
+            <h5 class='modal-title font-weight-bold' id='ModalLabel'>Imprimir</h5>
+         </div>
+         <div class='modal-body cuerpo'>
+
+            <div class="input-group mb-3 input-group-sm" *ngIf="pdfView else pdfHide">
+               <div class="input-group-prepend">
+                  <label class="input-group-text" for="inputGroupSelect01">Reporte</label>
+               </div>
+               <select class="custom-select" id="inputGroupSelect01" [(ngModel)]="opt">
+                  <option value="0">Cartas pendientes</option>
+               </select>
+            </div>
+            <ng-template #pdfHide>
+               <iframe id="pdfViewer" src="" width="100%" height="600px"></iframe>
+            </ng-template>
+
+         </div>
+         <div class="modal-footer">
+            <button class="btn btn-sm btn-outline-success" (click)="setOptImprimir()">Aceptar</button>
+            <button type="button" class="btn btn-sm btn-success" data-dismiss="modal"
+               (click)="cancelar()">Cancelar</button>
          </div>
       </div>
    </div>

@@ -64,10 +64,7 @@
                </tr>
             </thead>
             <tbody>
-               <tr *ngFor="
-              let suspension of suspensiones | filter : filterTerm;
-              let i = index
-            ">
+               <tr *ngFor="let suspension of suspensiones | filter : filterTerm;let i = index">
                   <td class="text-center">{{ suspension.numero }}</td>
                   <td class="text-center">
                      {{ suspension.fecha | date : "dd-M-y" }}
