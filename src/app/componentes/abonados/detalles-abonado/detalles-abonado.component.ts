@@ -15,6 +15,7 @@ import { ConvenioService } from 'src/app/servicios/convenio.service';
 import autoTable from 'jspdf-autotable';
 import jsPDF from 'jspdf';
 import { PdfService } from 'src/app/servicios/pdf.service';
+import { Console } from 'console';
 
 @Component({
   selector: 'app-detalles-abonado',
@@ -56,6 +57,7 @@ export class DetallesAbonadoComponent implements OnInit {
   modalSize: string = 'sm';
   /* para reporte */
   _rxf: any = [];
+  rubrostotal: number = 0;
 
   constructor(
     private aboService: AbonadosService,
@@ -113,6 +115,9 @@ export class DetallesAbonadoComponent implements OnInit {
           //console.log(this.s_interes.cInteres(item));
           if (item.pagado === 0) {
             item.interescobrado = this.cInteres(item);
+          }
+          if (item.pagado === 1 && item.interescobrado === null) {
+            item.interescobrado = 0;
           }
         });
         this._facturas = datos;
@@ -308,7 +313,7 @@ export class DetallesAbonadoComponent implements OnInit {
   }
   getSinCobro() {
     this.facService.getSinCobrarAboMod(this._abonado[0].idabonado).subscribe({
-      next: (facturas: any) => {
+      next: async (facturas: any) => {
         this._abonado[0].facturas = facturas;
         this.datosImprimir = this._abonado[0];
         this.impNotificacion();
@@ -317,8 +322,8 @@ export class DetallesAbonadoComponent implements OnInit {
     });
   }
   async impNotificacion() {
-    console.log(this.datosImprimir);
     let doc = new jsPDF('p', 'pt', 'a4');
+    this.rubrostotal = 0;
     doc.setFontSize(14);
     this.s_pdf.header(
       `Notificación de deudas pendientes: ${this.datosImprimir.idabonado.toString()}`,
@@ -358,37 +363,12 @@ export class DetallesAbonadoComponent implements OnInit {
     // Gather all `getSumaFac()` promises
     const sumaFacPromises: any[] = [];
     let facturas: any = this.datosImprimir.facturas;
-    this._rxf = [];
-    let rubrostotal: number = 0;
+    //this._rxf = [];
+
     facturas.forEach(async (factura: any) => {
       factura.interes = this.cInteres(factura);
       const sumaFacPromise = this.getSumaFac(factura.idfactura);
       sumaFacPromises.push(sumaFacPromise);
-      // await this.getRubrosxFact(factura.idfactura);
-
-      await this.rubxfacService
-        .getByIdfacturaAsync(factura.idfactura)
-        .then(async (rxf: any) => {
-          await rxf.forEach((item: any, index: number) => {
-            let query = this._rxf.find(
-              (rubro: { idrubro: number }) =>
-                rubro.idrubro === item.idrubro_rubros.idrubro
-            );
-            if (query === undefined) {
-              let rubro = {
-                idrubro: item.idrubro_rubros.idrubro,
-                descripcion: item.idrubro_rubros.descripcion,
-                valortotal: +item.valorunitario! * +item.cantidad!,
-              };
-              this._rxf.push(rubro);
-            }
-            if (query != undefined) {
-              this._rxf[index].valortotal +=
-                +item.valorunitario! * +item.cantidad!;
-            }
-            rubrostotal += item.valorunitario * item.cantidad;
-          });
-        });
     });
     let d_facturas = [];
     // Wait for all `getSumaFac()` promises to resolve
@@ -397,8 +377,16 @@ export class DetallesAbonadoComponent implements OnInit {
     let t_intereses: number = 0;
     let t_total: number = 0;
     let d_rxf: any = [];
+    this._rxf = await this.rubxfacService.getRubrosIdcliente(
+      this._abonado[0].idresponsable.idcliente
+    );
     await this._rxf.forEach((item: any) => {
-      d_rxf.push([item.idrubro, item.descripcion, +item.valortotal.toFixed(2)]);
+      d_rxf.push([
+        item.idrubro_rubros,
+        item.descripcion,
+        +item.total.toFixed(2),
+      ]);
+      this.rubrostotal += item.total;
     });
 
     // Iterate through facturas and add sumaFac values
@@ -435,7 +423,7 @@ export class DetallesAbonadoComponent implements OnInit {
       },
       body: d_facturas,
     });
-    d_rxf.push(['', 'Total: ', rubrostotal.toFixed(2)]);
+    d_rxf.push(['', 'Total: ', this.rubrostotal.toFixed(2)]);
     autoTable(doc, {
       head: [['Cod.Rubro', 'Descripción', 'Valor']],
       body: d_rxf,
@@ -512,27 +500,6 @@ export class DetallesAbonadoComponent implements OnInit {
       return number; */
     //});
     return dato;
-  }
-  async getRubrosxFact(idfactura: number) {
-    this._rxf = [];
-    this.rubxfacService.getByIdfacturaAsync(idfactura).then((rxf: any) => {
-      rxf.forEach((item: any, index: number) => {
-        let query = this._rxf.find(
-          (rubro: { idrubro: number }) =>
-            rubro.idrubro === item.idrubro_rubros.idrubro
-        );
-        if (query === undefined) {
-          let rubro = {
-            idrubro: item.idrubro_rubros.idrubro,
-            descripcion: item.idrubro_rubros.descripcion,
-            valortotal: +item.valorunitario! * +item.cantidad!,
-          };
-          this._rxf.push(rubro);
-        } else {
-          this._rxf[index].valortotal += +item.valorunitario! * +item.cantidad!;
-        }
-      });
-    });
   }
 }
 interface calcInteres {

@@ -191,4 +191,11 @@ export class RubroxfacService {
     );
     return await firstValueFrom(response);
   }
+
+  async getRubrosIdcliente(idcliente: number): Promise<any[]> {
+    const response = this.http.get<any[]>(
+      `${baseUrl}/reportes/rsincobro?idcliente=${idcliente}`
+    );
+    return await firstValueFrom(response);
+  }
 }
