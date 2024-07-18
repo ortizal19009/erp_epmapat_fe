@@ -16,6 +16,7 @@ import autoTable from 'jspdf-autotable';
 import jsPDF from 'jspdf';
 import { PdfService } from 'src/app/servicios/pdf.service';
 import { Console } from 'console';
+import { LoadingService } from 'src/app/servicios/loading.service';
 
 @Component({
   selector: 'app-detalles-abonado',
@@ -69,7 +70,8 @@ export class DetallesAbonadoComponent implements OnInit {
     public s_interes: InteresesService,
     public s_pdfRecaudacion: RecaudacionReportsService,
     public s_convenios: ConvenioService,
-    private s_pdf: PdfService
+    private s_pdf: PdfService,
+    private s_loading: LoadingService
   ) {}
 
   ngOnInit(): void {
@@ -322,6 +324,7 @@ export class DetallesAbonadoComponent implements OnInit {
     });
   }
   async impNotificacion() {
+    this.s_loading.showLoading();
     let doc = new jsPDF('p', 'pt', 'a4');
     this.rubrostotal = 0;
     doc.setFontSize(14);
@@ -442,6 +445,7 @@ export class DetallesAbonadoComponent implements OnInit {
       'pdfViewer'
     ) as HTMLIFrameElement;
     pdfViewer.src = pdfDataUri;
+    this.s_loading.hideLoading();
     // Generate and output the PDF after all data is processed
     //doc.output('pdfobjectnewwindow');
   }
