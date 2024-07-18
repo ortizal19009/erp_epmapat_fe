@@ -824,7 +824,10 @@ export class RecaudacionComponent implements OnInit {
                   this.facService.updateFacturas(fac).subscribe({
                     next: (nex: any) => {
                       this.swcobrado = true;
-                      if (nex.idmodulo.idmodulo != 27) {
+                      if (
+                        nex.idmodulo.idmodulo != 27 ||
+                        nex.interescobrado > 0
+                      ) {
                         this.saveRubxFac(fac, rubro, this._sincobro[i].interes);
                       }
                       j++;

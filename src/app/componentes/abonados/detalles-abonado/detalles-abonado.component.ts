@@ -303,7 +303,7 @@ export class DetallesAbonadoComponent implements OnInit {
       case '0':
         this.getSinCobro();
         this.pdfView = false;
-        this.modalSize = 'lg';
+        this.modalSize = 'xl';
         break;
     }
   }
@@ -377,8 +377,8 @@ export class DetallesAbonadoComponent implements OnInit {
     let t_intereses: number = 0;
     let t_total: number = 0;
     let d_rxf: any = [];
-    this._rxf = await this.rubxfacService.getRubrosIdcliente(
-      this._abonado[0].idresponsable.idcliente
+    this._rxf = await this.rubxfacService.getRubrosIdAbonado(
+      this._abonado[0].idabonado
     );
     await this._rxf.forEach((item: any) => {
       d_rxf.push([
@@ -394,9 +394,11 @@ export class DetallesAbonadoComponent implements OnInit {
       const factura = facturas[i];
       const sumaFac = sumaFacResults[i];
       facturas[i].sumaFac = sumaFac;
+      let fecEmision = await this.getFechaEmision(facturas[i].idfactura);
       let suma = +factura.sumaFac.toFixed(2)! + +factura.interes.toFixed(2)!;
       d_facturas.push([
         factura.idfactura,
+        fecEmision.slice(0, 7),
         factura.idmodulo.descripcion,
         factura.sumaFac.toFixed(2),
         factura.interes.toFixed(2),
@@ -408,6 +410,7 @@ export class DetallesAbonadoComponent implements OnInit {
     }
     d_facturas.push([
       '',
+      '',
       'TOTALES: ',
       t_subtotal.toFixed(2),
       t_intereses.toFixed(2),
@@ -415,11 +418,15 @@ export class DetallesAbonadoComponent implements OnInit {
     ]);
     autoTable(doc, {
       headStyles: { halign: 'center' },
-      head: [['Planilla', 'Módulo', 'Sub total', 'Interés', 'Total']],
+      head: [
+        ['Planilla', 'Emision', 'Módulo', 'Sub total', 'Interés', 'Total'],
+      ],
       columnStyles: {
+        1: { halign: 'right' },
         2: { halign: 'center' },
         3: { halign: 'center' },
         4: { halign: 'center' },
+        5: { halign: 'center' },
       },
       body: d_facturas,
     });
@@ -445,6 +452,12 @@ export class DetallesAbonadoComponent implements OnInit {
       },
       error: (err) => console.error(err.error),
     });
+  }
+  async getFechaEmision(idfactura: number): Promise<any> {
+    const fechaEmision = this.lecService
+      .findDateByIdfactura(idfactura)
+      .toPromise();
+    return fechaEmision;
   }
 
   /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */

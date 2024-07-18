@@ -192,9 +192,9 @@ export class RubroxfacService {
     return await firstValueFrom(response);
   }
 
-  async getRubrosIdcliente(idcliente: number): Promise<any[]> {
+  async getRubrosIdAbonado(idabonado: number): Promise<any[]> {
     const response = this.http.get<any[]>(
-      `${baseUrl}/reportes/rsincobro?idcliente=${idcliente}`
+      `${baseUrl}/reportes/rsincobro?idabonado=${idabonado}`
     );
     return await firstValueFrom(response);
   }

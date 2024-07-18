@@ -128,4 +128,5 @@ export class LecturasService {
   findDateByIdfactura(idfactura: number) {
     return this.http.get(`${baseUrl}/fecEmision?idfactura=${idfactura}`);
   }
+ 
 }
