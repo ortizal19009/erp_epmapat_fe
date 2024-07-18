@@ -401,7 +401,8 @@ export class DetallesAbonadoComponent implements OnInit {
       let suma = +factura.sumaFac.toFixed(2)! + +factura.interes.toFixed(2)!;
       d_facturas.push([
         factura.idfactura,
-        fecEmision.slice(0, 7),
+        //fecEmision.slice(0, 7),
+        fecEmision,
         factura.idmodulo.descripcion,
         factura.sumaFac.toFixed(2),
         factura.interes.toFixed(2),

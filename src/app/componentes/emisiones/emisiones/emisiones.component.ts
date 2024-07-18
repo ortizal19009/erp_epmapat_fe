@@ -1193,6 +1193,8 @@ export class EmisionesComponent implements OnInit {
   r_emisionFinal() {
     /*  this.getBajas(); */
     this.getNuevasAnteriores();
+    console.log(this.lecturasnuevas);
+    console.log(this.lecturasanteriores);
     const nombreEmision = new NombreEmisionPipe(); // Crea una instancia del pipe
     let m_izquierda = 150;
     var doc = new jsPDF('p', 'pt', 'a4');
@@ -1209,8 +1211,8 @@ export class EmisionesComponent implements OnInit {
     doc.setFont('times', 'normal');
     doc.setFontSize(11);
     var datos: any = [];
-    var datosBajas: any = [];
-    var datosActuales: any = [];
+    var lecturasNuevas: any = [];
+    var LecturasAnteriores: any = [];
     var i = 0;
     let suma: number = 0;
     this._rubrosEmision.forEach(() => {
@@ -1233,27 +1235,40 @@ export class EmisionesComponent implements OnInit {
       `${this.subtotal.toLocaleString('en-US')} m3`,
       `$ ${suma.toFixed(2)}`,
     ]);
-    let sumabajas: number = 0;
+    /*     let sumabajas: number = 0;
     this._rubrosBajas.forEach((item: any, index: number) => {
       if (item[0] != 5) {
-        /*       if (this._rutasxemi[i].fechacierre == null) fecha = '';
-        else fecha = this._rutasxemi[i].fechacierre.slice(0, 10); */
         datosBajas.push([index + 1, item[0], item[1], item[2]]);
         sumabajas += item[2];
       }
-    });
-    datosBajas.push(['', 'TOTAL', ``, `$ ${sumabajas.toFixed(2)}`]);
+    }); */
+    /*     datosBajas.push(['', 'TOTAL', ``, `$ ${sumabajas.toFixed(2)}`]);
     let sumarActuales: number = 0;
     this._rubrosActuales.forEach((item: any, index: number) => {
       if (item[0] != 5) {
-        /*       if (this._rutasxemi[i].fechacierre == null) fecha = '';
-        else fecha = this._rutasxemi[i].fechacierre.slice(0, 10); */
         datosActuales.push([index + 1, item[0], item[1], item[2]]);
         sumarActuales += item[2];
       }
     });
-    datosActuales.push(['', 'TOTAL', ``, `$ ${sumarActuales.toFixed(2)}`]);
-
+    datosActuales.push(['', 'TOTAL', ``, `$ ${sumarActuales.toFixed(2)}`]); */
+    this.lecturasnuevas.forEach((item: any, index: number) => {
+      lecturasNuevas.push([
+        index,
+        item.rubro,
+        item.nroFacturas,
+        item.descripcion,
+        item.sumaTotal,
+      ]);
+    });
+    this.lecturasanteriores.forEach((item: any, index: number = 1) => {
+      LecturasAnteriores.push([
+        index,
+        item.rubro,
+        item.nroFacturas,
+        item.descripcion,
+        item.sumaTotal,
+      ]);
+    });
     const addPageNumbers = function () {
       const pageCount = doc.internal.pages.length;
       for (let i = 1; i <= pageCount - 1; i++) {
@@ -1302,7 +1317,7 @@ export class EmisionesComponent implements OnInit {
       },
     });
     autoTable(doc, {
-      head: [['#', 'N°Rubro', 'Descripción', 'Valor']],
+      head: [['#', 'N°Rubro', 'Nro.Facturas', 'Descripción', 'Valor']],
       theme: 'grid',
       headStyles: {
         fillColor: [68, 103, 114],
@@ -1318,11 +1333,12 @@ export class EmisionesComponent implements OnInit {
       columnStyles: {
         0: { halign: 'center', cellWidth: 30 },
         1: { halign: 'center', cellWidth: 60 },
-        2: { halign: 'left', cellWidth: 150 },
-        3: { halign: 'right', cellWidth: 70 },
+        2: { halign: 'center', cellWidth: 60 },
+        3: { halign: 'left', cellWidth: 150 },
+        4: { halign: 'right', cellWidth: 70 },
       },
       margin: { left: m_izquierda - 1, top: 22, right: 51, bottom: 13 },
-      body: datosBajas,
+      body: lecturasNuevas,
 
       didParseCell: function (data) {
         var fila = data.row.index;
@@ -1336,7 +1352,7 @@ export class EmisionesComponent implements OnInit {
       },
     });
     autoTable(doc, {
-      head: [['#', 'N°Rubro', 'Descripción', 'Valor']],
+      head: [['#', 'N°Rubro', 'Nro.Facturas', 'Descripción', 'Valor']],
       theme: 'grid',
       headStyles: {
         fillColor: [68, 103, 114],
@@ -1352,11 +1368,12 @@ export class EmisionesComponent implements OnInit {
       columnStyles: {
         0: { halign: 'center', cellWidth: 30 },
         1: { halign: 'center', cellWidth: 60 },
-        2: { halign: 'left', cellWidth: 150 },
-        3: { halign: 'right', cellWidth: 70 },
+        2: { halign: 'center', cellWidth: 60 },
+        3: { halign: 'left', cellWidth: 150 },
+        4: { halign: 'right', cellWidth: 70 },
       },
       margin: { left: m_izquierda - 1, top: 22, right: 51, bottom: 13 },
-      body: datosActuales,
+      body: LecturasAnteriores,
 
       didParseCell: function (data) {
         var fila = data.row.index;
