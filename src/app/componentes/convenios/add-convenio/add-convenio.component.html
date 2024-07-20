@@ -99,7 +99,7 @@
                            <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Cuotas<sup
                                  class="green">*</sup></span>
                         </div>
-                        <input type="number" class="form-control text-center" formControlName="cuotas" min="2" max="12"
+                        <input type="number" class="form-control text-center" formControlName="cuotas" min="2" max="24"
                            (change)="changeCuotas()" aria-label="Small" aria-describedby="inputGroup-sizing-sm"
                            [ngClass]="{'is-invalid': f['cuotas'].invalid && f['cuotas'].touched,
                            'is-valid': f['cuotas'].valid, '': f['cuotas'].untouched}">

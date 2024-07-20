@@ -29,7 +29,11 @@ export class ConveniosReportsService {
       { nombre: 'Ing. Juan Diego Delgado', cargo: 'Director Comercial' },
       { nombre: 'Abg. Rigoberto Narváez', cargo: 'Asesor Legal' },
     ];
-    this.header.header('MODULO: AGUA Y ALCANTARILLADO', doc);
+    console.log(datos);
+    this.header.header(
+      `MODULO: AGUA Y ALCANTARILLADO N° ${datos.nroconvenio}`,
+      doc
+    );
     let empresa =
       'Empresa Pública Municipal de Agua Potable y Alcantarillado de Tulcán';
     //doc.setFontSize(12);

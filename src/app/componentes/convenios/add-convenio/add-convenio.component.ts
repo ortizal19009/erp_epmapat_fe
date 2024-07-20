@@ -94,7 +94,7 @@ export class AddConvenioComponent implements OnInit {
         cuotainicial: ['', Validators.required],
         cuotas: [
           '',
-          [Validators.required, Validators.min(2), Validators.max(12)],
+          [Validators.required, Validators.min(2), Validators.max(24)],
         ],
         cuotafinal: ['', Validators.required],
         observaciones: '',
