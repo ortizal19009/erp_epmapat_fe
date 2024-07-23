@@ -198,4 +198,10 @@ export class RubroxfacService {
     );
     return await firstValueFrom(response);
   }
+  /* obtener multas por factura */
+  async getMultaByIdFactura(idfactura: number): Promise<any> {
+    return await firstValueFrom(
+      this.http.get<any[]>(`${baseUrl}/multas?idfactura= ${idfactura}`)
+    );
+  }
 }

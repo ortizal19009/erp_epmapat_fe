@@ -17,6 +17,9 @@ import jsPDF from 'jspdf';
 import { PdfService } from 'src/app/servicios/pdf.service';
 import { Console } from 'console';
 import { LoadingService } from 'src/app/servicios/loading.service';
+import { Condmultaintereses } from 'src/app/modelos/condmultasintereses';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import { CondmultasinteresesService } from 'src/app/servicios/condmultasintereses.service';
 
 @Component({
   selector: 'app-detalles-abonado',
@@ -59,9 +62,16 @@ export class DetallesAbonadoComponent implements OnInit {
   /* para reporte */
   _rxf: any = [];
   rubrostotal: number = 0;
-
   /* PARA INFO CONDONACION DE DEUDAS */
-  rubros: any[];
+  c_rubros: any = [];
+  multa: any = [];
+  sumInteres: any = 0;
+  totalRubros: number = 0;
+  totalMultas: number = 0;
+  _sincobro: any;
+  date: Date = new Date();
+  condonar: Condmultaintereses = new Condmultaintereses();
+  razonCondonacion: string;
   constructor(
     private aboService: AbonadosService,
     private facService: FacturaService,
@@ -73,7 +83,9 @@ export class DetallesAbonadoComponent implements OnInit {
     public s_pdfRecaudacion: RecaudacionReportsService,
     public s_convenios: ConvenioService,
     private s_pdf: PdfService,
-    private s_loading: LoadingService
+    private s_loading: LoadingService,
+    private authService: AutorizaService,
+    private s_condonar: CondmultasinteresesService
   ) {}
 
   ngOnInit(): void {
@@ -325,20 +337,39 @@ export class DetallesAbonadoComponent implements OnInit {
       error: (e) => console.error(e.error),
     });
   }
-  condonarDeudas() {
+  calcularDeudasAC() {
+    this.c_rubros = [];
+    this.multa = [];
+    this.sumInteres = 0;
+    this.totalMultas = 0;
+    this.totalRubros = 0;
     this.modalSize = 'lg';
-    let d_rxf: any = [];
     this.facService.getSinCobrarAboMod(this._abonado[0].idabonado).subscribe({
       next: async (facturas: any) => {
-        console.log(facturas);
+        this._sincobro = facturas;
+        facturas.forEach((item: any) => {
+          let interes = this.cInteres(item);
+          this.sumInteres += interes;
+        });
         let _rxf = await this.rubxfacService.getRubrosIdAbonado(
           this._abonado[0].idabonado
         );
-        console.log(_rxf);
+        this.multa.push({
+          idrubro_rubros: 5,
+          descripcion: 'Interés',
+          total: this.sumInteres,
+        });
         _rxf.forEach((item: any) => {
           if (item.idrubro_rubros != 6) {
-            this.rubros.push(item);
+            this.c_rubros.push(item);
+            this.totalRubros += item.total;
           }
+          if (item.idrubro_rubros === 6) {
+            this.multa.push(item);
+          }
+        });
+        this.multa.forEach((item: any) => {
+          this.totalMultas += item.total;
         });
         /*         facturas.forEach(async (item: any) => {
       
@@ -353,6 +384,39 @@ export class DetallesAbonadoComponent implements OnInit {
         }); */
       },
       error: (e) => console.error(e.error),
+    });
+  }
+  condonarDeudas() {
+    let n_factura: Facturas = new Facturas();
+    //this.modalSize = 'sm';
+    this._sincobro.forEach(async (item: Facturas) => {
+      n_factura = item;
+      n_factura.swcondonar = true;
+
+      let multa: number = 0;
+      let _multa = await this.rubxfacService.getMultaByIdFactura(
+        item.idfactura
+      );
+      if (_multa.length > 0) {
+        console.log(_multa);
+        multa = _multa[0].cantidad * _multa[0].valorunitario;
+      }
+
+      this.condonar.idfactura_facturas = item;
+      this.condonar.totalinteres = this.cInteres(item);
+      this.condonar.totalmultas = multa;
+      this.condonar.feccrea = this.date;
+      this.condonar.usucrea = this.authService.idusuario;
+      this.condonar.razoncondonacion = this.razonCondonacion;
+      console.log(this.condonar);
+      console.log(n_factura);
+      await this.facService.updateFacturaAsync(n_factura);
+      this.s_condonar.saveCondonacion(this.condonar).subscribe({
+        next: (datos: any) => {
+          console.log(datos);
+        },
+        error: (e) => console.error(e),
+      });
     });
   }
   async impNotificacion() {

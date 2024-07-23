@@ -13,7 +13,8 @@
                   <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
                <button class="dropdown-item" type="button">
                   <i class="bi-file-earmark-arrow-down"></i>&nbsp; Exportar</button>
-               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#condonar">
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#condonar"
+                  (click)="calcularDeudasAC()">
                   <i class="bi bi-exclude"></i>&nbsp; Condonar deudas</button>
             </div>
             <div class="col-sm-1">
@@ -451,9 +452,59 @@
             <h5 class='modal-title font-weight-bold' id='ModalLabel'>Condonar deuda</h5>
          </div>
          <div class='modal-body cuerpo'>
-
-            
-
+            <div class="row">
+               <div class="col-sm-8">
+                  <table class="table table-sm table-hover">
+                     <thead>
+                        <tr>
+                           <th>Cod.Rubro</th>
+                           <th>Descripción</th>
+                           <th>Valor</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr *ngFor="let rubro of c_rubros">
+                           <td class="text-center">{{rubro.idrubro_rubros}}</td>
+                           <td>{{rubro.descripcion}}</td>
+                           <td class="text-right">{{rubro.total.toFixed(2)}}</td>
+                        </tr>
+                        <tr>
+                           <td></td>
+                           <td>TOTAL:</td>
+                           <td>{{totalRubros.toFixed(2)}}</td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <div class="col-sm-4">
+                  <table class="table table-sm table-hover table-bordered">
+                     <thead>
+                        <tr>
+                           <th>Cod.Rubro</th>
+                           <th>Descripción</th>
+                           <th>Valor</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr *ngFor="let m of multa">
+                           <td class="text-center">{{m.idrubro_rubros}}</td>
+                           <td>{{m.descripcion}}</td>
+                           <td class="text-right">{{m.total.toFixed(2)}}</td>
+                        </tr>
+                        <tr>
+                           <td></td>
+                           <td>TOTAL:</td>
+                           <td>{{totalMultas.toFixed(2)}}</td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+            <div class="row">
+               <div class="col-sm">
+                  <textarea name="" id="" class="form-control" [(ngModel)]="razonCondonacion"></textarea>
+               </div>
+            </div>
          </div>
          <div class="modal-footer">
             <button class="btn btn-sm btn-outline-success" (click)="condonarDeudas()">Aceptar</button>
