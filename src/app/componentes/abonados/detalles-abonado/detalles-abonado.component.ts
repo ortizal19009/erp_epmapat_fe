@@ -6,7 +6,6 @@ import { FacturaService } from 'src/app/servicios/factura.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { Chart, registerables } from 'chart.js';
-import { FecfacturaComponent } from '../../facelectro/fecfactura/fecfactura.component';
 import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
 import { InteresesService } from 'src/app/servicios/intereses.service';
 import { Facturas } from 'src/app/modelos/facturas.model';
@@ -15,7 +14,6 @@ import { ConvenioService } from 'src/app/servicios/convenio.service';
 import autoTable from 'jspdf-autotable';
 import jsPDF from 'jspdf';
 import { PdfService } from 'src/app/servicios/pdf.service';
-import { Console } from 'console';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { Condmultaintereses } from 'src/app/modelos/condmultasintereses';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
@@ -338,6 +336,7 @@ export class DetallesAbonadoComponent implements OnInit {
     });
   }
   calcularDeudasAC() {
+    this.s_loading.showLoading();
     this.c_rubros = [];
     this.multa = [];
     this.sumInteres = 0;
@@ -371,6 +370,7 @@ export class DetallesAbonadoComponent implements OnInit {
         this.multa.forEach((item: any) => {
           this.totalMultas += item.total;
         });
+        this.s_loading.hideLoading();
         /*         facturas.forEach(async (item: any) => {
       
           await this._rxf.forEach((item: any) => {
@@ -387,35 +387,39 @@ export class DetallesAbonadoComponent implements OnInit {
     });
   }
   condonarDeudas() {
+    this.s_loading.showLoading();
     let n_factura: Facturas = new Facturas();
     //this.modalSize = 'sm';
-    this._sincobro.forEach(async (item: Facturas) => {
+    this._sincobro.forEach((item: Facturas) => {
       n_factura = item;
       n_factura.swcondonar = true;
 
-      let multa: number = 0;
-      let _multa = await this.rubxfacService.getMultaByIdFactura(
-        item.idfactura
-      );
-      if (_multa.length > 0) {
-        console.log(_multa);
-        multa = _multa[0].cantidad * _multa[0].valorunitario;
-      }
-
-      this.condonar.idfactura_facturas = item;
-      this.condonar.totalinteres = this.cInteres(item);
-      this.condonar.totalmultas = multa;
-      this.condonar.feccrea = this.date;
-      this.condonar.usucrea = this.authService.idusuario;
-      this.condonar.razoncondonacion = this.razonCondonacion;
-      console.log(this.condonar);
-      console.log(n_factura);
-      await this.facService.updateFacturaAsync(n_factura);
-      this.s_condonar.saveCondonacion(this.condonar).subscribe({
-        next: (datos: any) => {
-          console.log(datos);
+      this.facService.updateFacturas(n_factura).subscribe({
+        next: async (factura) => {
+          let multa: number = 0;
+          let _multa = await this.rubxfacService.getMultaByIdFactura(
+            item.idfactura
+          );
+          if (_multa.length > 0) {
+            console.log(_multa);
+            multa = _multa[0].cantidad * _multa[0].valorunitario;
+          }
+          this.condonar.idfactura_facturas = item;
+          this.condonar.totalinteres = this.cInteres(item);
+          this.condonar.totalmultas = multa;
+          this.condonar.feccrea = this.date;
+          this.condonar.usucrea = this.authService.idusuario;
+          this.condonar.razoncondonacion = this.razonCondonacion;
+          console.log(this.condonar);
+          console.log(n_factura);
+          this.s_condonar.saveCondonacion(this.condonar).subscribe({
+            next: (datos: any) => {
+              console.log(datos);
+              this.s_loading.hideLoading();
+            },
+            error: (e) => console.error(e),
+          });
         },
-        error: (e) => console.error(e),
       });
     });
   }
