@@ -13,6 +13,8 @@
                   <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
                <button class="dropdown-item" type="button">
                   <i class="bi-file-earmark-arrow-down"></i>&nbsp; Exportar</button>
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#condonar">
+                  <i class="bi bi-exclude"></i>&nbsp; Condonar deudas</button>
             </div>
             <div class="col-sm-1">
                <button class="bg-transparent border-0" type="submit" (click)="regresar()">
@@ -104,7 +106,6 @@
                   <div class="active tab-pane" id="planillas">
                      <div class="post">
                         <div class="user-block mb-0">
-
                            <div class="card-body table-responsive p-0 " style="height: 600px;">
                               <table
                                  class="table table-hover table-sm table-bordered mb-0 table-head-fixed thead-dark text-nowrap table-responsive-sm">
@@ -435,6 +436,27 @@
          </div>
          <div class="modal-footer">
             <button class="btn btn-sm btn-outline-success" (click)="setOptImprimir()">Aceptar</button>
+            <button type="button" class="btn btn-sm btn-success" data-dismiss="modal"
+               (click)="cancelar()">Cancelar</button>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- MODAL CONDONAR DEUDAS-->
+<div class="modal fade" id="condonar" tabindex="-1" aria-labelledby="condonarLabel" aria-hidden="true">
+   <div class="modal-dialog modal-dialog-centered modal-{{modalSize}}">
+      <div class="modal-content border">
+         <div class='modal-header py-2 justify-content-center cabecera'>
+            <h5 class='modal-title font-weight-bold' id='ModalLabel'>Condonar deuda</h5>
+         </div>
+         <div class='modal-body cuerpo'>
+
+            
+
+         </div>
+         <div class="modal-footer">
+            <button class="btn btn-sm btn-outline-success" (click)="condonarDeudas()">Aceptar</button>
             <button type="button" class="btn btn-sm btn-success" data-dismiss="modal"
                (click)="cancelar()">Cancelar</button>
          </div>

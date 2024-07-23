@@ -415,6 +415,7 @@ interface Planilla {
   valorbase: number;
   interescobrado: number;
   swiva: number; 
+  swcondonar: boolean; 
 }
 
 interface Rubrosxpla {

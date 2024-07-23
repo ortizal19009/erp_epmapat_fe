@@ -60,6 +60,8 @@ export class DetallesAbonadoComponent implements OnInit {
   _rxf: any = [];
   rubrostotal: number = 0;
 
+  /* PARA INFO CONDONACION DE DEUDAS */
+  rubros: any[];
   constructor(
     private aboService: AbonadosService,
     private facService: FacturaService,
@@ -315,10 +317,40 @@ export class DetallesAbonadoComponent implements OnInit {
   }
   getSinCobro() {
     this.facService.getSinCobrarAboMod(this._abonado[0].idabonado).subscribe({
-      next: async (facturas: any) => {
+      next: (facturas: any) => {
         this._abonado[0].facturas = facturas;
         this.datosImprimir = this._abonado[0];
         this.impNotificacion();
+      },
+      error: (e) => console.error(e.error),
+    });
+  }
+  condonarDeudas() {
+    this.modalSize = 'lg';
+    let d_rxf: any = [];
+    this.facService.getSinCobrarAboMod(this._abonado[0].idabonado).subscribe({
+      next: async (facturas: any) => {
+        console.log(facturas);
+        let _rxf = await this.rubxfacService.getRubrosIdAbonado(
+          this._abonado[0].idabonado
+        );
+        console.log(_rxf);
+        _rxf.forEach((item: any) => {
+          if (item.idrubro_rubros != 6) {
+            this.rubros.push(item);
+          }
+        });
+        /*         facturas.forEach(async (item: any) => {
+      
+          await this._rxf.forEach((item: any) => {
+            d_rxf.push([
+              item.idrubro_rubros,
+              item.descripcion,
+              +item.total.toFixed(2),
+            ]);
+            this.rubrostotal += item.total;
+          });
+        }); */
       },
       error: (e) => console.error(e.error),
     });
