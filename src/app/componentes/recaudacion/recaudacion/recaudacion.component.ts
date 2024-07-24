@@ -384,6 +384,8 @@ export class RecaudacionComponent implements OnInit {
     this.swbusca = 0;
     this.facService.getFacSincobro(idcliente).subscribe({
       next: (sincobrar: any) => {
+        console.log(sincobrar);
+
         if (sincobrar.length === 0) {
           this.swbusca = 2;
           this.loadingService.hideLoading();
@@ -411,8 +413,13 @@ export class RecaudacionComponent implements OnInit {
           const modulo: Modulos = await this.getModulo(item.idmodulo);
           item.modulo = modulo.descripcion;
           let interes = 0;
-          if (item.formapago != 4 || item.idmodulo != 27) {
+          if ((item.formapago != 4 || item.idmodulo != 27) && item.swcondonar != true) {
+            console.log("si estoy calculando interes")
             interes = +this.cInteres(item).toFixed(2);
+            item.interes = interes;
+          }
+          else{
+            console.log("no estoy calculando interes")
             item.interes = interes;
           }
           i++;
