@@ -19,6 +19,7 @@ import { Condmultaintereses } from 'src/app/modelos/condmultasintereses';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { CondmultasinteresesService } from 'src/app/servicios/condmultasintereses.service';
 
+
 @Component({
   selector: 'app-detalles-abonado',
   templateUrl: './detalles-abonado.component.html',
@@ -422,6 +423,30 @@ export class DetallesAbonadoComponent implements OnInit {
         },
       });
     });
+  }
+  razonCondonacionChange(e: any) {
+    this.validar();
+  }
+  validar() {
+    let respuesta: boolean = true;
+    if (
+      this.razonCondonacion != null ||
+      this.razonCondonacion != undefined ||
+      this.razonCondonacion != '' ||
+      this.razonCondonacion != ' '
+    ) {
+      respuesta = false;
+    }
+
+    if (
+      this.razonCondonacion === null ||
+      this.razonCondonacion === undefined ||
+      this.razonCondonacion === '' ||
+      this.razonCondonacion === ' '
+    ) {
+      respuesta = true;
+    }
+    return respuesta;
   }
   async impNotificacion() {
     this.s_loading.showLoading();

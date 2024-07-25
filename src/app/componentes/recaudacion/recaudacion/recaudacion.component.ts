@@ -384,8 +384,6 @@ export class RecaudacionComponent implements OnInit {
     this.swbusca = 0;
     this.facService.getFacSincobro(idcliente).subscribe({
       next: (sincobrar: any) => {
-        console.log(sincobrar);
-
         if (sincobrar.length === 0) {
           this.swbusca = 2;
           this.loadingService.hideLoading();
@@ -413,13 +411,13 @@ export class RecaudacionComponent implements OnInit {
           const modulo: Modulos = await this.getModulo(item.idmodulo);
           item.modulo = modulo.descripcion;
           let interes = 0;
-          if ((item.formapago != 4 || item.idmodulo != 27) && item.swcondonar != true) {
-            console.log("si estoy calculando interes")
+          if (
+            (item.formapago != 4 || item.idmodulo != 27) &&
+            item.swcondonar != true
+          ) {
             interes = +this.cInteres(item).toFixed(2);
             item.interes = interes;
-          }
-          else{
-            console.log("no estoy calculando interes")
+          } else {
             item.interes = interes;
           }
           i++;
@@ -714,6 +712,7 @@ export class RecaudacionComponent implements OnInit {
   }
 
   cobrar() {
+    this.loadingService.showLoading();
     //this.getLastFactura();
     //Crea el registro en Recaudación
     let fecha = new Date();
@@ -839,8 +838,12 @@ export class RecaudacionComponent implements OnInit {
                       }
                       j++;
                       i++;
-                      if (i < this._sincobro.length)
+                      if (i < this._sincobro.length) {
                         this.facxrecauda(recaCreada, i);
+                      }
+                      if (i === this._sincobro.length) {
+                        this.loadingService.hideLoading();
+                      }
                     },
                     error: (err) =>
                       console.error('Al actualizar la Factura: ', err.error),

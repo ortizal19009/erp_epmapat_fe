@@ -502,12 +502,14 @@
             </div>
             <div class="row">
                <div class="col-sm">
-                  <textarea name="" id="" class="form-control" [(ngModel)]="razonCondonacion"></textarea>
+                  <textarea name="" id="" class="form-control" [(ngModel)]="razonCondonacion"
+                     (change)="razonCondonacionChange($event)"
+                     placeholder="Ingresar memorando justificando la condonación de multas e intereses de esta cuenta"></textarea>
                </div>
             </div>
          </div>
          <div class="modal-footer">
-            <button class="btn btn-sm btn-outline-success" data-dismiss="modal"
+            <button class="btn btn-sm btn-outline-success" data-dismiss="modal" [disabled]="validar()"
                (click)="condonarDeudas()">Aceptar</button>
             <button type="button" class="btn btn-sm btn-success" data-dismiss="modal"
                (click)="cancelar()">Cancelar</button>

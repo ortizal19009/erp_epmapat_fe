@@ -101,7 +101,6 @@ export class ImpCajasComponent implements OnInit {
     let h_fecha = this.formImprimir.value.h_fecha;
     let fecha = this.formImprimir.value.fecha;
     let f: Date = new Date();
-    console.log(f.getFullYear() - 1);
     let hasta = `${f.getFullYear() - 1}-12-31`;
     switch (this.opcreporte) {
       case 1: // Recaudacion diaria - Resumen
@@ -491,7 +490,6 @@ export class ImpCajasComponent implements OnInit {
     let suma: number = 0;
     var i = 0;
     this._cobradas.forEach((item: any) => {
-      console.log(item);
       let totalPorFormaCobro =
         +this._cobradas[i][1] + +this._cobradas[i][0].swiva!;
       /*       Math.round( * 100) /
@@ -938,7 +936,6 @@ export class ImpCajasComponent implements OnInit {
     const datos: any = [];
     let suma: number = 0;
     var i = 0;
-    console.log(this._cobradas);
     this._cobradas.forEach(() => {
       let totalPorFormaCobro =
         this._cobradas[i][1] + this._cobradas[i][0].swiva;

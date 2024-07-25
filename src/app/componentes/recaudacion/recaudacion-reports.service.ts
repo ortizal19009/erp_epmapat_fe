@@ -188,16 +188,21 @@ export class RecaudacionReportsService {
             item.idrubro_rubros.idrubro != 5 &&
             item.idrubro_rubros.idrubro != 165
           ) {
-            this.total += +item.valorunitario! * item.cantidad;
-            rubros.push([
-              item.idrubro_rubros.descripcion,
-              item.cantidad.toFixed(0),
-              item.valorunitario.toFixed(2),
-            ]);
+            if (
+              item.idfactura_facturas.swcondonar === true &&
+              item.idrubro_rubros.idrubro === 6
+            ) {
+            } else {
+              this.total += +item.valorunitario! * item.cantidad;
+              rubros.push([
+                item.idrubro_rubros.descripcion,
+                item.cantidad.toFixed(0),
+                item.valorunitario.toFixed(2),
+              ]);
+            }
           } else if (item.idrubro_rubros.idrubro === 165) {
             this.iva = 0;
           } else {
-            console.log(item.valorunitario);
             this.interes = item.valorunitario;
           }
         });
