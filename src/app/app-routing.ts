@@ -223,7 +223,7 @@ const routes: Routes = [
   { path: 'detalles-cliente', component: DetallesClienteComponent },
   { path: 'buscar-cliente', component: BuscarClienteComponent },
   { path: 'imp-clientes', component: ImpClienteComponent },
-  { path: 'imp-infoclientes', component: ImpInfoclienteComponent },
+  { path: 'imp-infocliente', component: ImpInfoclienteComponent },
 
   { path: 'abonados', component: ListarAbonadosComponent },
   { path: 'add-abonado', component: AddAbonadosComponent },

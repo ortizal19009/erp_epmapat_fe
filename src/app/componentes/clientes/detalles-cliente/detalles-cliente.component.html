@@ -4,10 +4,20 @@
          <div class="col-sm-5">
             <h4 class="m-0 font-weight-bold"><i class="bi-person-circle"></i> Cliente</h4>
          </div>
-         <div class="col-sm-7 d-flex justify-content-end">
+         <div class="btn-group ml-auto mx-0">
+            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
+               aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+               <button class="dropdown-item" type="button" (click)="imprimir()">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
+            </div>
+
+            <!-- <div class="col-sm-1"> -->
             <button class="bg-transparent border-0" type="submit" (click)="regresar()">
                <i class="bi-arrow-left-circle text-white icoRegresar"></i>
             </button>
+            <!-- </div> -->
          </div>
       </div>
    </div>
