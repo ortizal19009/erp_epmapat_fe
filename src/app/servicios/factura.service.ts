@@ -350,4 +350,27 @@ export class FacturaService {
       },
     });
   }
+  // Cartera de un cliente a una fecha Async (Facturas)
+  async getCarteraClienteAsync(idcliente: number, hasta: Date): Promise<any[]> {
+    // console.log( `${baseUrl}/carteraCliente?idcliente=${idcliente}&hasta=${hasta}` )
+    const response = await firstValueFrom(
+      this.http.get<any[]>(
+        `${baseUrl}/carteraCliente?idcliente=${idcliente}&hasta=${hasta}`
+      )
+    );
+    return response;
+  }
+  // Cartera de un cliente a una fecha Async (Total, el Backend ya devuelve sumado 1 a los del modulo 3)
+  async getTotCarteraClienteAsync(
+    idcliente: number,
+    hasta: Date
+  ): Promise<any[]> {
+    // console.log( `${baseUrl}/totCarteraCliente?idcliente=${idcliente}&hasta=${hasta}` );
+    const response = await firstValueFrom(
+      this.http.get<any[]>(
+        `${baseUrl}/totCarteraCliente?idcliente=${idcliente}&hasta=${hasta}`
+      )
+    );
+    return response;
+  }
 }

@@ -1,0 +1,121 @@
+<div class="content mt-1 pt-1 px-2">
+    <div class="container-fluid">
+        <div class="row mt-0 px-1 pt-1 justify-content-center cabecera border sombra">
+            <h4 *ngIf="swimprimir" class="font-weight-bold text-truncate ml-2">
+                <i class="bi-printer impexp" (click)="impriexpor()"></i> &nbsp; Imprimir Clientes
+            </h4>
+            <h4 *ngIf="!swimprimir" class="font-weight-bold text-truncate">
+                <i class="bi-file-earmark-arrow-up impexp" (click)="impriexpor()"></i> &nbsp; Exportar Clientes
+            </h4>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="card card-body col-sm-4 detalle sombra">
+                <form [formGroup]="formImprimir">
+                    <div class="row">
+
+                        <div class="input-group input-group-sm col-sm-12 mb-3">
+                            <div class="input-group-prepend">
+                                <label *ngIf="swimprimir" class="input-group-text">Imprimir</label>
+                                <label *ngIf="!swimprimir" class="input-group-text">Exportar</label>
+                            </div>
+                            <select class="custom-select" formControlName="reporte" (change)="changeReporte()">
+                                <option value="1">Cartera Vencida</option>
+                                <option value="2">Lista de Abonados</option>
+                            </select>
+                        </div>
+
+                        <div *ngIf="opcreporte != 3" class="form-group col-md-8">
+                            <div class="input-group input-group-sm">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
+                                        data-toggle="tooltip" title="Obligatorio">Fecha</span>
+                                </div>
+                                <input type="date" class="form-control text-center" formControlName="hasta"
+                                    aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+                            </div>
+                        </div>
+
+                        <div *ngIf="opcreporte != 3" class="form-group col-md-10">
+                            <div class="input-group input-group-sm">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
+                                        data-toggle="tooltip" title="Obligatorio">Clientes(id)</span>
+                                </div>
+                                <input type="number" class="form-control text-center" formControlName="desdeNum"
+                                    aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+                                <input type="number" class="form-control text-center" formControlName="hastaNum"
+                                    aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+                            </div>
+                        </div>
+
+                        <div *ngIf="swimprimir" class="form-group col-md-5">
+                            <div class="input-group input-group-sm mb-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text font-weight-bold">Abrir en otra página</span>
+                                    <div class="input-group-text">
+                                        <input type="checkbox" formControlName="otrapagina">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div *ngIf="!swimprimir" class="form-group col-sm-10 my-0 py-0">
+                            <div class="input-group input-group-sm mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Nombre del
+                                        archivo</span>
+                                </div>
+                                <input type="text" class="form-control" formControlName="nombrearchivo"
+                                    aria-label="Small" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['nombrearchivo'].invalid && f['nombrearchivo'].touched,
+                            'is-valid': f['nombrearchivo'].valid, '': f['nombrearchivo'].untouched}">
+                            </div>
+                        </div>
+
+                        <div *ngIf="barraProgreso" class="progress col-sm-12 mb-2">
+                            <div class="progress-bar" [ngStyle]="{ 'width.%': progreso }">{{ progreso / 100 | percent :
+                                '1.2-2'}}
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+                <div *ngIf="!swbotones" class="text-center">
+                    <button *ngIf="swimprimir" type='button' class='btn btn-success btn-sm mx-1' [disabled]="swbotones"
+                        (click)="imprimir()">
+                        <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+                    <button *ngIf="!swimprimir" type='button' class='btn btn-warning btn-sm mx-1' (click)="imprimir()"
+                        [disabled]="!formImprimir.valid">
+                        <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+                    <button class="btn btn-outline-success btn-sm mx-1" (click)="regresar()"><i
+                            class="fa fa-times-circle"></i> Cancelar</button>
+                </div>
+
+                <div *ngIf="swbotones" class="text-center">
+                    <button *ngIf="swimprimir" type="button" class="btn btn-success btn-block"
+                        [attr.data-target]="otrapagina ? null : '#pdf'" data-toggle="modal" [disabled]="swcalculando"
+                        (click)="imprime()">
+                        <i *ngIf="swcalculando" class="fa fa-spinner"></i>
+                        <i *ngIf="!swcalculando" class="bi-eye"></i>&nbsp;&nbsp;&nbsp;{{txtcalculando}}
+                    </button>
+                    <button *ngIf="!swimprimir" type="button" class="btn btn-warning btn-block"
+                        [disabled]="swcalculando" (click)="imprime()">
+                        <i *ngIf="swcalculando" class="fa fa-spinner"></i>
+                        <i *ngIf="!swcalculando" class="bi-eye"></i>&nbsp;&nbsp;&nbsp;{{txtcalculando}}
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL PDF (En la misma página)-->
+<div class='modal fade' id='pdf' tabindex='-1' aria-labelledby='pdf' aria-hidden='true'>
+    <div class='modal-dialog modal-sm'>
+    </div>
+</div>

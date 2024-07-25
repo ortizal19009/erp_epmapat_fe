@@ -212,6 +212,8 @@ import { ImpInfoCajasComponent } from './componentes/caja/info-caja/imp-info-caj
 import { FecfacturaComponent } from './componentes/facelectro/fecfactura/fecfactura.component';
 import { TramitesComponent } from './componentes/ctramites/tramites/tramites.component';
 import { RutasmorasComponent } from './componentes/suspensiones/rutasmoras/rutasmoras.component';
+import { ImpInfoclienteComponent } from './componentes/clientes/imp-infocliente/imp-infocliente.component';
+import { ImpClienteComponent } from './componentes/clientes/imp-cliente/imp-cliente.component';
 
 const routes: Routes = [
   //Consumo de Agua
@@ -220,6 +222,8 @@ const routes: Routes = [
   { path: 'modificar-clientes', component: ModificarClientesComponent },
   { path: 'detalles-cliente', component: DetallesClienteComponent },
   { path: 'buscar-cliente', component: BuscarClienteComponent },
+  { path: 'imp-clientes', component: ImpClienteComponent },
+  { path: 'imp-infoclientes', component: ImpInfoclienteComponent },
 
   { path: 'abonados', component: ListarAbonadosComponent },
   { path: 'add-abonado', component: AddAbonadosComponent },

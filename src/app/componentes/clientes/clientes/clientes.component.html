@@ -34,8 +34,8 @@
             <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
                <button class="dropdown-item" type="button" (click)="irAddClientes()">
                   <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
-               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
-                  <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+               <button class="dropdown-item" type="button" (click)="imprimir()">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
                <button class="dropdown-item" type="button" data-toggle="modal" data-toggle="modal"
                   data-target="#importar" (click)="importar()"> <i class="bi-file-earmark-arrow-up"></i>&nbsp;
                   Importar</button>
