@@ -18,7 +18,7 @@ import { LoadingService } from 'src/app/servicios/loading.service';
 import { Condmultaintereses } from 'src/app/modelos/condmultasintereses';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { CondmultasinteresesService } from 'src/app/servicios/condmultasintereses.service';
-
+import { EmisionService } from 'src/app/servicios/emision.service';
 
 @Component({
   selector: 'app-detalles-abonado',
@@ -84,7 +84,8 @@ export class DetallesAbonadoComponent implements OnInit {
     private s_pdf: PdfService,
     private s_loading: LoadingService,
     private authService: AutorizaService,
-    private s_condonar: CondmultasinteresesService
+    private s_condonar: CondmultasinteresesService,
+    private s_emision: EmisionService
   ) {}
 
   ngOnInit(): void {
@@ -123,9 +124,10 @@ export class DetallesAbonadoComponent implements OnInit {
   }
 
   facturasxAbonado(idabonado: number) {
+    this.s_loading.showLoading();
     this.facService.getByIdabonadorango(idabonado, this.rango).subscribe({
       next: (datos: any) => {
-        datos.forEach((item: any) => {
+        datos.forEach(async (item: any) => {
           //console.log(item);
           //console.log(this.s_interes.cInteres(item));
           if (item.pagado === 0) {
@@ -134,11 +136,30 @@ export class DetallesAbonadoComponent implements OnInit {
           if (item.pagado === 1 && item.interescobrado === null) {
             item.interescobrado = 0;
           }
+          let fecemision = await this.getEmisionoByFactura(item.idfactura);
+          item.feccrea = fecemision;
+          this.s_loading.hideLoading();
         });
         this._facturas = datos;
       },
       error: (err) => console.error(err.error),
     });
+  }
+  validarpago(factura: any) {
+    if (factura.pagado === 0 && factura.totaltarifa > 0) {
+      return false;
+    } else if (
+      factura.formapago === 4 &&
+      factura.estado === 3 &&
+      factura.pagado === 1
+    ) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+  async getEmisionoByFactura(idfactura: any): Promise<any> {
+    return this.lecService.findDateByIdfactura(idfactura).toPromise();
   }
   valorPagado(idmodulo: number, valor: number) {
     if (idmodulo === 3 && valor > 0) {

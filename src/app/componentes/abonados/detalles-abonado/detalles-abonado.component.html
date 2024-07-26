@@ -134,7 +134,8 @@
                                     <tr *ngFor="let factura of _facturas; let i = index" class="text-center fila"
                                        data-toggle="modal" data-target="#DetalleFacturaModal"
                                        (click)="getRubroxfac( factura.idfactura )">
-                                       <td class="col-1">{{i+1}}</td>
+                                       <td class="col-1"><i class="bi bi-cash-coin" [hidden]="validarpago(factura)"></i>
+                                          {{ i+1}}</td>
                                        <td>{{ factura.idfactura }}</td>
                                        <td>{{factura.feccrea | date: 'dd-MM-y'}}</td>
                                        <td class="text-left">{{ factura.idmodulo.descripcion }}</td>
