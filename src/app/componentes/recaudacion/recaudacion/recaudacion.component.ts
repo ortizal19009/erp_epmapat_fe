@@ -712,7 +712,6 @@ export class RecaudacionComponent implements OnInit {
   }
 
   cobrar() {
-    this.loadingService.showLoading();
     //this.getLastFactura();
     //Crea el registro en Recaudación
     let fecha = new Date();
@@ -841,9 +840,6 @@ export class RecaudacionComponent implements OnInit {
                       if (i < this._sincobro.length) {
                         this.facxrecauda(recaCreada, i);
                       }
-                      if (i === this._sincobro.length) {
-                        this.loadingService.hideLoading();
-                      }
                     },
                     error: (err) =>
                       console.error('Al actualizar la Factura: ', err.error),
@@ -868,7 +864,9 @@ export class RecaudacionComponent implements OnInit {
     } else {
       //No pagada continua con la siguiente
       i++;
-      if (i < this._sincobro.length) this.facxrecauda(recaCreada, i);
+      if (i < this._sincobro.length) {
+        this.facxrecauda(recaCreada, i);
+      }
     }
   }
   tonos() {

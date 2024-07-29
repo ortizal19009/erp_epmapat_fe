@@ -329,11 +329,11 @@ export class ImpCajasComponent implements OnInit {
       i++;
     });
     kont = kont + i;
-    this.total += suma + iva1;
+    this.total += +suma.toFixed(2) + +iva1.toFixed(2);
     if (iva1 > 0) {
       datos.push(['', 'IVA', formatNumber(iva1)]);
     }
-    datos.push(['', 'SUBTOTAL', formatNumber(suma + iva1)]);
+    datos.push(['', 'SUBTOTAL', +suma.toFixed(2) + +iva1.toFixed(2)]);
 
     let suma1 = 0;
     let iva2 = 0;
@@ -366,11 +366,11 @@ export class ImpCajasComponent implements OnInit {
     });
 
     kont = kont + i;
-    this.total += suma1 + iva2;
+    this.total += +suma1.toFixed(2) + +iva2.toFixed(2);
     if (iva2 > 0) {
       datos.push(['', 'IVA', formatNumber(iva2)]);
     }
-    datos.push(['', 'SUBTOTAL', formatNumber(suma1 + iva2)]);
+    datos.push(['', 'SUBTOTAL', +suma1.toFixed(2) + +iva2.toFixed(2)]);
 
     // datos.push(['', 'TOTAL', this.total.toLocaleString("es-ES", { maximumFractionDigits: 2 })]);
     datos.push(['', 'TOTAL', formatNumber(this.total)]);
@@ -418,11 +418,13 @@ export class ImpCajasComponent implements OnInit {
       suma2 += totalRecaudado;
       i++;
     });
+    let iva: number = 0;
     if (iva1 + iva2 > 0) {
+      iva = +iva1.toFixed(2) + +iva2.toFixed(2);
       formascobro.push(['SUBTOTAL', formatNumber(suma2)]);
-      formascobro.push(['IVA', +iva1.toFixed(2) + +iva2.toFixed(2)]);
+      formascobro.push(['IVA', formatNumber(iva)]);
     }
-    formascobro.push(['TOTAL', formatNumber(suma2 + iva1 + iva2)]);
+    formascobro.push(['TOTAL', formatNumber(suma2 + iva)]);
 
     autoTable(doc, {
       head: [['Forma Cobro', 'Total Recaudado']],
