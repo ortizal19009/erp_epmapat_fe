@@ -170,6 +170,9 @@ export class ImpInfoCajasComponent implements OnInit {
               h_fecha,
               recaudador
             );
+          this._cobradas.map(async (item: any) => {
+            item[0] = await this.facService.getByIdAsync(item.idfactura);
+          });
           // this.sw1 = true;
           this.swcalculando = false;
           if (this.swimprimir) this.txtcalculando = 'Mostrar';
@@ -428,7 +431,7 @@ export class ImpInfoCajasComponent implements OnInit {
     var i = 0;
     this._cobradas.forEach(() => {
       let totalPorFormaCobro =
-        this._cobradas[i][1] + this._cobradas[i][0].swiva;
+        +this._cobradas[i].total.toFixed(2) + +this._cobradas[i].iva.toFixed(2);
 
       //  Math.round((this._cobradas[i][1] + this._cobradas[i][0].swiva) * 100) / 100;
       datos.push([
