@@ -136,10 +136,8 @@ export class ImpCajasComponent implements OnInit {
           this._cobradas = await this.facService.getByFechacobroTotAsync(fecha);
           // console.log(this._cobradas);
           this._cobradas.map(async (item: any) => {
-            console.log(item.idfactura);
             item[0] = await this.facService.getByIdAsync(item.idfactura);
           });
-          console.log(this._cobradas);
           // this.sw1 = true;
           this.swcalculando = false;
           if (this.swimprimir) this.txtcalculando = 'Mostrar';
@@ -219,9 +217,7 @@ export class ImpCajasComponent implements OnInit {
             d_fecha,
             h_fecha
           );
-          console.log(this._cobradas);
           this._cobradas.map(async (item: any) => {
-            console.log(item.idfactura);
             item[0] = await this.facService.getByIdAsync(item.idfactura);
           });
           // this.sw1 = true;
@@ -504,7 +500,7 @@ export class ImpCajasComponent implements OnInit {
     var i = 0;
     this._cobradas.forEach((item: any) => {
       let totalPorFormaCobro =
-        +this._cobradas[i].total + +this._cobradas[i].iva.toFixed(2);
+        +this._cobradas[i].total.toFixed(2) + +this._cobradas[i].iva.toFixed(2);
       /*       Math.round( * 100) /
               100; */
       // datos.push([this._cobradas[i][0].idfactura, this._cobradas[i][0].feccrea, this._cobradas[i][0].nrofactura, this._cobradas[i][0].formapago,
