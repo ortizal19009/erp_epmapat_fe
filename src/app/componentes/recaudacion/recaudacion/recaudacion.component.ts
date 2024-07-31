@@ -1060,11 +1060,12 @@ export class RecaudacionComponent implements OnInit {
         fechai = new Date(`${fec[0]}-${+fec[1]! + 1}-01`);
       } else {
         fec = factura.feccrea.toString().split('-', 2);
-        fechai = new Date(`${fec[0]}-${fec[1]}-01`);
+        fechai = new Date(`${fec[0]}-${fec[1] + 1}-01`);
       }
       let fechaf: Date = new Date();
       this.factura = factura;
       fechaf.setMonth(fechaf.getMonth() - 1);
+      console.log(+fechai.getMonth()! + 1);
       while (fechai <= fechaf) {
         this.calInteres = {} as calcInteres;
         let query = this._intereses.find(

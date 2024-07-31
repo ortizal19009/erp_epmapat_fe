@@ -198,7 +198,9 @@ export class FecfacturaComponent implements OnInit {
     }
   }
   exportar() {
-    /* this._facturas.forEach((item: any, index: number) => {
+    console.log("exportando")
+    /* this._factu
+    ras.forEach((item: any, index: number) => {
       //await this._exportar(index);
       // this.changeDato();
       }); */
@@ -235,9 +237,10 @@ export class FecfacturaComponent implements OnInit {
       this._facturas[i].idcliente.idtpidentifica_tpidentifica.codigo;
     if (
       (this._facturas[i].idmodulo.idmodulo === 3 &&
-        this._facturas[i].idabonado != 0) ||
+        this._facturas[i].idabonado > 0) ||
       this._facturas[i].idmodulo.idmodulo === 4
     ) {
+      console.log("entro al inicio ")
       const abonado: Abonados = await this.getAbonado(
         this._facturas[i].idabonado
       );
@@ -347,6 +350,7 @@ export class FecfacturaComponent implements OnInit {
     //this._exportar(0);
   }
   async getAbonado(idabonado: number): Promise<any> {
+    console.log("tratando de imprimir ")
     const abo = await this.aboService.getById(idabonado).toPromise();
     return abo;
   }

@@ -178,7 +178,8 @@ export class AddFacturacionComponent implements OnInit {
       prodxfact.cantidad = this.arrRubros[i][1];
       prodxfact.descuento = 0;
       prodxfact.estado = 0;
-      prodxfact.valorunitario = this.arrRubros[i][2];
+      prodxfact.valorunitario =
+        this.arrRubros[i][2] / this.formCuotas.value.cuotas;
       prodxfact.idfacturacion_facturacion = this._facturacion;
       this.catiService.getById(this.arrRubros[i][4]).subscribe({
         //El elemento cuatro es el Id del Producto
@@ -215,8 +216,8 @@ export class AddFacturacionComponent implements OnInit {
       planilla.valorbase = (this.totfac + this.totiva) / n;
       planilla.usucrea = 1;
       planilla.estado = 1;
-      //planilla.fechaanulacion= ; 
-      planilla.swiva = this.totiva; 
+      //planilla.fechaanulacion= ;
+      planilla.swiva = this.totiva;
       //planilla.interescobrado = 0;
       let fecha: Date = new Date();
       fecha.setMonth(fecha.getMonth() + (i - 1));
@@ -258,7 +259,7 @@ export class AddFacturacionComponent implements OnInit {
     this.arrRubros.forEach(() => {
       let rubrosxpla = {} as Rubrosxpla; //Interface para los datos de los Rubros x Planilla
       rubrosxpla.cantidad = this.arrRubros[i][1];
-      rubrosxpla.valorunitario = this.arrRubros[i][2];
+      rubrosxpla.valorunitario = this.arrRubros[i][2] / this.formCuotas.value.cuotas;
       rubrosxpla.estado = 0;
       rubrosxpla.idfactura_facturas = this.factura;
       this.rubService.getRubroById(this.arrRubros[i][5]).subscribe({
@@ -414,8 +415,8 @@ interface Planilla {
   fecmodi: Date;
   valorbase: number;
   interescobrado: number;
-  swiva: number; 
-  swcondonar: boolean; 
+  swiva: number;
+  swcondonar: boolean;
 }
 
 interface Rubrosxpla {
