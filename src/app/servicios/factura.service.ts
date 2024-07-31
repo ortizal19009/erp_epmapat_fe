@@ -274,6 +274,11 @@ export class FacturaService {
       `${baseUrl}/eliminaciones/fechas?d=${d}&h=${h}`
     );
   }
+  findByFecEliminacion(d: Date, h: Date) {
+    return this.http.get<any>(
+      `${baseUrl}/reportes/facturasEliminadas?d=${d}&h=${h}`
+    );
+  }
   /* reporte de anulaciones */
   getByFecAnulaciones(d: Date, h: Date) {
     return this.http.get<Facturas>(

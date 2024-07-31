@@ -15,6 +15,7 @@ import { Facturamodificaciones } from 'src/app/modelos/facturamodificaciones.mod
 import { Lecturas } from 'src/app/modelos/lecturas.model';
 import { PdfService } from 'src/app/servicios/pdf.service';
 import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 @Component({
   selector: 'app-anulaciones-bajas',
@@ -398,8 +399,9 @@ export class AnulacionesBajasComponent implements OnInit {
         });
         break;
       case '1':
-        this.facServicio.getByFecEliminacion(desde, hasta).subscribe({
+        this.facServicio.findByFecEliminacion(desde, hasta).subscribe({
           next: (eliminaciones: any) => {
+            console.log(eliminaciones);
             if (eliminaciones.length > 0) {
               this.reporteBajas(eliminaciones);
             }
@@ -412,11 +414,24 @@ export class AnulacionesBajasComponent implements OnInit {
 
   reporteBajas(lbajas: any) {
     let doc = new jsPDF('p', 'pt', 'a4');
-
+    let bajas: any[] = [];
     this.s_pdf.header(
       `Reporte de facturas dadas de baja: ${this.f_reportes.value.desde} - ${this.f_reportes.value.hasta}`,
       doc
     );
+    lbajas.forEach((item: any) => {
+      bajas.push([
+        item.idfactura,
+        item.modulo,
+        item.nomusu,
+        item.razoneliminacion,
+        +item.total.toFixed(2),
+      ]);
+    });
+    autoTable(doc, {
+      head: [['Nro planilla', 'Modulo', 'Usu elimina', 'Razón', 'Total']],
+      body: bajas,
+    });
     doc.save('holamundo');
   }
   reporteanulaciones(lanulaciones: any) {
