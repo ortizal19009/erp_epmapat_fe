@@ -44,7 +44,8 @@
                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#emisionIndividual"
                   (click)="emisionIndividual()">
                   <i class="bi-file-earmark-plus"></i>&nbsp; Emisión individual</button>
-               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
+               <button class="dropdown-item" type="button" routerLink="/imp-emisiones" data-toggle="modal"
+                  data-target="#imprimir">
                   <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar"
                   (click)="exportar0()">
@@ -216,7 +217,8 @@
                               <tr *ngFor="let emindividual of _emisionindividual | filter: filterimp ,let i = index">
                                  <td>{{i+1}}</td>
                                  <td class="text-center">{{emindividual.idemision.emision}}</td>
-                                 <td class="text-center">{{emindividual.idlecturanueva.idabonado_abonados.idabonado}}</td>
+                                 <td class="text-center">{{emindividual.idlecturanueva.idabonado_abonados.idabonado}}
+                                 </td>
                                  <td class="text-right">{{emindividual.idlecturaanterior.idlectura}}</td>
                                  <td class="text-right">{{emindividual.idlecturanueva.idlectura}}</td>
                                  <td class="text-right">{{emindividual.idlecturaanterior.idfactura}}</td>

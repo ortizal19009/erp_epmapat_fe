@@ -142,6 +142,7 @@ export class EmisionesComponent implements OnInit {
           emision: datos.idemision,
         });
         let desde = (+hasta.slice(0, 2)! - 1).toString() + hasta.slice(2);
+        console.log(desde, hasta)
         this.formBuscar.patchValue({
           desde: desde,
           hasta: hasta,
@@ -1417,6 +1418,9 @@ export class EmisionesComponent implements OnInit {
       container.appendChild(embed);
     }
   }
+  r_facturasEliminadas(){
+
+  }
   imprimirReporte() {
     let doc = new jsPDF('p', 'pt', 'a4');
     this.s_pdf.header('REPORETE DE REFACTURACION', doc);
@@ -1619,7 +1623,6 @@ export class EmisionesComponent implements OnInit {
         break;
       case '2':
         this.r_emisionFinal();
-
         break;
     }
   }

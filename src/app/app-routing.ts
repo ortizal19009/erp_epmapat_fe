@@ -214,6 +214,7 @@ import { TramitesComponent } from './componentes/ctramites/tramites/tramites.com
 import { RutasmorasComponent } from './componentes/suspensiones/rutasmoras/rutasmoras.component';
 import { ImpInfoclienteComponent } from './componentes/clientes/imp-infocliente/imp-infocliente.component';
 import { ImpClienteComponent } from './componentes/clientes/imp-cliente/imp-cliente.component';
+import { ImpEmisionesComponent } from './componentes/emisiones/imp-emisiones/imp-emisiones.component';
 
 const routes: Routes = [
   //Consumo de Agua
@@ -342,6 +343,7 @@ const routes: Routes = [
   { path: 'add-emision', component: AddEmisionComponent },
   { path: 'modiemision/:idemision', component: ModiEmisionComponent },
   { path: 'gene-emision', component: GeneEmisionComponent },
+  { path: 'imp-emisiones', component: ImpEmisionesComponent },
 
   //{ path: 'emiactual/:idemision', component: EmiactualComponent },
   { path: 'emiactual', component: EmiactualComponent },

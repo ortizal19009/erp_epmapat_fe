@@ -66,7 +66,7 @@ export class UsuariosComponent implements OnInit {
 
    nuevo() {
       this.mostrarComponente = true;
-      // this.componente = AddInteresesComponent;  //Cambiar a AddUsuarioComponent
+      //this.componente = AddInteresesComponent;  //Cambiar a AddUsuarioComponent
    }
 
    perfil(idusuario: number) {

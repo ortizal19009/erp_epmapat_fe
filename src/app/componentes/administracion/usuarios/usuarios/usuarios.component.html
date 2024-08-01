@@ -7,16 +7,15 @@
             </div>
             <div class="col-sm-3">
                <input type="text" class="form-control form-control-sm text-center" placeholder="Filtrar..."
-                              [(ngModel)]="filtro"/>
+                  [(ngModel)]="filtro" />
             </div>
-
             <div class="btn-group ml-auto mt-0">
                <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
                   data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
                </button>
                <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
                   <button class="dropdown-item popupCabecera" type="button" data-toggle="collapse"
-                     data-target="#addInteres" (click)="nuevo()">
+                     data-target="#addUsuario" (click)="nuevo()">
                      <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
                   <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
                      <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
@@ -26,7 +25,6 @@
                         Exportar</span></button>
                </div>
             </div>
-
          </div>
       </div>
    </div>
@@ -46,7 +44,7 @@
                   <th></th>
                </tr>
             </thead>
-            <tbody  class="detalle">
+            <tbody class="detalle">
                <tr *ngFor="let usuario of _usuarios | filter:filtro; let i=index" class="text-center fila">
                   <td class="font-weight-bold small">{{i+1}}</td>
                   <td [ngClass]="{'tachado': !usuario.estado }" class="text-left">{{usuario.identificausu}}</td>
@@ -55,7 +53,7 @@
                   <td>
                      <div class="btn-group py-0">
                         <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
-                           aria-expanded="false"> 
+                           aria-expanded="false">
                         </button>
                         <div class="dropdown-menu dropdown-menu-right popLista">
                            <button class="dropdown-item" type="button" (click)="perfil(usuario.idusuario)">
@@ -73,11 +71,50 @@
          </table>
       </div>
 
-      <div class="col-md-5 ml-5 mt-1">
-         <div class="collapse" id="addInteres">
-            <ng-container *ngIf="mostrarComponente">
-               <ng-container *ngComponentOutlet="componente"></ng-container>
-            </ng-container>
+      <div class="col-sm-6 mt-1" class="collapse" id="addUsuario">
+         <div class="card card-success">
+            <div class="card-header">
+               <h3 class="card-title">Añadir nuevo usuario</h3>
+            </div>
+            <form>
+               <div class="card-body">
+                  <div class="form-group">
+                     <label for="exampleInputEmail1">Identificación</label>
+                     <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
+                  </div>
+                  <div class="form-group">
+                     <label for="exampleInputEmail1">Nombre usuario</label>
+                     <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
+                  </div>
+                  <div class="form-group">
+                     <label for="exampleInputEmail1">Alias</label>
+                     <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
+                  </div>
+                  <div class="form-group">
+                     <label for="exampleInputEmail1">E-mail</label>
+                     <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
+                  </div>
+                  <div class="form-group">
+                     <label for="exampleInputPassword1">Password</label>
+                     <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                  </div>
+                  <div class="form-group">
+                     <label for="exampleInputPassword1">Conf. Password</label>
+                     <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                  </div>
+                  <div class="form-check">
+                     <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                     <label class="form-check-label" for="exampleCheck1">Check me out</label>
+                  </div>
+               </div>
+               <!-- /.card-body -->
+
+               <div class="card-footer text-center">
+                  <button type="submit" class="btn btn-sm btn-success mr-3">Cancelar</button>
+                  <button type="submit" class="btn btn-sm btn-outline-success">Aceptar</button>
+
+               </div>
+            </form>
          </div>
       </div>
 
@@ -92,13 +129,14 @@
             </div>
             <div class='modal-body'>
                <div class="alert alert-warning roboto text-center" role="alert">
-                  ¿ Eliminar el Usuario: <span class="fantacysombra"> {{ usuario.identificausu }} / {{usuario.nomusu }}</span> ?
+                  ¿ Eliminar el Usuario: <span class="fantacysombra"> {{ usuario.identificausu }} / {{usuario.nomusu
+                     }}</span> ?
                </div>
             </div>
 
             <div class='modal-footer justify-content-center border py-1' id='idButtons'>
-               <button type='button' class='btn btn-success btn-sm' data-dismiss='modal'
-                  (click)="eliminar()" id='btnSi'>
+               <button type='button' class='btn btn-success btn-sm' data-dismiss='modal' (click)="eliminar()"
+                  id='btnSi'>
                   <i class="fa fa-check-circle" style="font-size:24pxi"></i> Aceptar
                </button>
                <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
@@ -109,44 +147,44 @@
       </div>
    </div>
 
-      <!-- MODAL Imprimir-->
-      <div class="modal fade" id="imprimir" tabindex="-1" aria-labelledby="imprimirLabel" aria-hidden="true">
-         <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content border usuariodetalle">
-               <div class='modal-header py-2 justify-content-center usuariocabecera'>
-                  <h5 class='modal-title font-weight-bold' id='ModalLabel'>Imprimir</h5>
-               </div>
-               <div class='modal-body'>
-   
-                  <div class="input-group mb-3 input-group-sm">
-                     <div class="input-group-prepend">
-                        <label class="input-group-text" for="inputGroupSelect01">Reporte</label>
-                     </div>
-                     <select class="custom-select" id="inputGroupSelect01">
-                        <option selected>Usuarios</option>
-                     </select>
+   <!-- MODAL Imprimir-->
+   <div class="modal fade" id="imprimir" tabindex="-1" aria-labelledby="imprimirLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+         <div class="modal-content border usuariodetalle">
+            <div class='modal-header py-2 justify-content-center usuariocabecera'>
+               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Imprimir</h5>
+            </div>
+            <div class='modal-body'>
+
+               <div class="input-group mb-3 input-group-sm">
+                  <div class="input-group-prepend">
+                     <label class="input-group-text" for="inputGroupSelect01">Reporte</label>
                   </div>
-   
-                  <div class="input-group input-group-sm mb-0">
-                     <div class="input-group-prepend">
-                        <small class="input-group-text">Abrir en otra página</small>
-                        <div class="input-group-text">
-                           <input type="checkbox" [(ngModel)]="otraPagina">
-                        </div>
+                  <select class="custom-select" id="inputGroupSelect01">
+                     <option selected>Usuarios</option>
+                  </select>
+               </div>
+
+               <div class="input-group input-group-sm mb-0">
+                  <div class="input-group-prepend">
+                     <small class="input-group-text">Abrir en otra página</small>
+                     <div class="input-group-text">
+                        <input type="checkbox" [(ngModel)]="otraPagina">
                      </div>
                   </div>
-   
                </div>
-               <div class='modal-footer justify-content-center'>
-                  <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="pdf()"
-                     [attr.data-target]="otraPagina ? null : '#pdf'" data-toggle="modal">
-                     <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
-                  <button type='button' class='btn btn-sm btn-outline-success' data-dismiss='modal'>
-                     <i class="bi bi-x-circle"></i> Cancelar</button>
-               </div>
+
+            </div>
+            <div class='modal-footer justify-content-center'>
+               <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="pdf()"
+                  [attr.data-target]="otraPagina ? null : '#pdf'" data-toggle="modal">
+                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+               <button type='button' class='btn btn-sm btn-outline-success' data-dismiss='modal'>
+                  <i class="bi bi-x-circle"></i> Cancelar</button>
             </div>
          </div>
       </div>
+   </div>
 
 </div>
 

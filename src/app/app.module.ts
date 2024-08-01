@@ -224,6 +224,7 @@ import { RutasmorasComponent } from './componentes/suspensiones/rutasmoras/rutas
 import { LoadingComponent } from './extras/loading/loading.component';
 import { ImpClienteComponent } from './componentes/clientes/imp-cliente/imp-cliente.component';
 import { ImpInfoclienteComponent } from './componentes/clientes/imp-infocliente/imp-infocliente.component';
+import { ImpEmisionesComponent } from './componentes/emisiones/imp-emisiones/imp-emisiones.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
@@ -296,7 +297,7 @@ import { ImpInfoclienteComponent } from './componentes/clientes/imp-infocliente/
       InfoEstrfuncComponent, ModiPregastoComponent, AuxGastoComponent, NiifcuentasComponent, AddHomologaComponent,
       AddNiifcuentaComponent, ModiNiifcuentaComponent, TramipresuComponent, AddTramipresuComponent, ModiTramipresuComponent,
       CuentasComponent, AddCuentaComponent, SinafipComponent, TransaciComponent, AddTransaciComponent, AddAsientoComponent,
-      AddBenextranComponent, SimulacionComponent, AddLiquiacfpComponent, ModificarTramitenuevoComponent, AddAguatramiteComponent, CertitmpComponent, GeneCertificacionComponent, AguatramComponent, BuscarClienteComponent, ModiUsuarioComponent, BuscarRutaComponent, HabilitacionesComponent, AddHabilitacionComponent, HistorialconsumoComponent, AnulacionesBajasComponent, RutasmorasComponent, LoadingComponent, ImpClienteComponent, ImpInfoclienteComponent,
+      AddBenextranComponent, SimulacionComponent, AddLiquiacfpComponent, ModificarTramitenuevoComponent, AddAguatramiteComponent, CertitmpComponent, GeneCertificacionComponent, AguatramComponent, BuscarClienteComponent, ModiUsuarioComponent, BuscarRutaComponent, HabilitacionesComponent, AddHabilitacionComponent, HistorialconsumoComponent, AnulacionesBajasComponent, RutasmorasComponent, LoadingComponent, ImpClienteComponent, ImpInfoclienteComponent, ImpEmisionesComponent,
    ],
 
    imports: [
