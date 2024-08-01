@@ -116,6 +116,12 @@ export class ImpEmisionesComponent implements OnInit {
     this.s_lecturas.findByIdEmisiones(idemision).subscribe({
       next: (lecturas: any) => {
         console.log(lecturas);
+        let body: any[] = [];
+        let head: any = [['Lectura']];
+        lecturas.forEach((lectura: any) => {
+          body.push([lectura.idlectura]);
+        });
+        this.pdfTemplate('Facturas eliminadas ', head, body);
       },
       error: (e) => console.error(e),
     });
