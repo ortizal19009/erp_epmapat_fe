@@ -929,6 +929,7 @@ export class ImpCajasComponent implements OnInit {
   }
   imprimirTransferenciasCobradas() {
     this.otrapagina = this.formImprimir.value.otrapagina;
+    console.log(this.formImprimir.value);
     let m_izquierda = 50;
     let doc = new jsPDF();
     doc.setFont('times', 'bold');
@@ -937,7 +938,10 @@ export class ImpCajasComponent implements OnInit {
     doc.setFont('times', 'bold');
     doc.setFontSize(12);
     doc.text(
-      'RECAUDACIÓN DIARIA - PLANILLAS: ' + this.formImprimir.value.fecha,
+      'RECAUDACIÓN DIARIA - PLANILLAS: ' +
+        this.formImprimir.value.d_fecha +
+        ' / ' +
+        this.formImprimir.value.h_fecha,
       m_izquierda,
       16
     );
