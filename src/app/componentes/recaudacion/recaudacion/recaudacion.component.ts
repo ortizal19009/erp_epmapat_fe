@@ -411,11 +411,13 @@ export class RecaudacionComponent implements OnInit {
           const modulo: Modulos = await this.getModulo(item.idmodulo);
           item.modulo = modulo.descripcion;
           let interes = 0;
+          console.log(item);
           if (
             (item.formapago != 4 || item.idmodulo != 27) &&
-            item.swcondonar != true
+            (item.swcondonar === false || item.swcondonar === null)
           ) {
             interes = +this.cInteres(item).toFixed(2);
+            console.log(interes);
             item.interes = interes;
           } else {
             item.interes = interes;
@@ -1048,6 +1050,7 @@ export class RecaudacionComponent implements OnInit {
   }
   /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
   cInteres(factura: any) {
+    console.log(factura);
     this.totInteres = 0;
     this.arrCalculoInteres = [];
     let interes: number = 0;
@@ -1060,7 +1063,7 @@ export class RecaudacionComponent implements OnInit {
         fechai = new Date(`${fec[0]}-${+fec[1]! + 1}-01`);
       } else {
         fec = factura.feccrea.toString().split('-', 2);
-        fechai = new Date(`${fec[0]}-${fec[1] + 1}-01`);
+        fechai = new Date(`${fec[0]}-${+fec[1]! + 1}-01`);
       }
       let fechaf: Date = new Date();
       this.factura = factura;
