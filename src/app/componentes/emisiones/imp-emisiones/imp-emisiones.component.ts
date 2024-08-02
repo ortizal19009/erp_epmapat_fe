@@ -66,15 +66,7 @@ export class ImpEmisionesComponent implements OnInit {
     let h: String;
     this.emiService.ultimo().subscribe({
       next: (datos) => {
-        console.log(datos);
-        /*         this.fechaemision = datos.feccrea;
-        this.cerrado = datos.estado;
         h = datos.emision;
-        this.f_emisionIndividual.patchValue({
-          emision: datos.idemision,
-        }); */
-        h = datos.emision;
-
         let d = (+h.slice(0, 2)! - 1).toString() + h.slice(2);
         this.formImprimir.patchValue({
           d_emi: d,
@@ -98,8 +90,6 @@ export class ImpEmisionesComponent implements OnInit {
     switch (this.formImprimir.value.reporte) {
       case '0':
         this.buscarEmisiones();
-
-        //this.impListaEmisiones();
         break;
       case '1':
         this.getByIdEmisiones(this.formImprimir.value.emision);

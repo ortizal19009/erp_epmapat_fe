@@ -54,7 +54,8 @@
                                 </div>
                                 <select type="date" class="form-control text-center" formControlName="emision"
                                     aria-label="Small" aria-describedby="inputGroup-sizing-sm">
-                                    <option [ngValue]="emision.idemision" *ngFor="let emision of l_emisiones">{{emision.emision}}
+                                    <option [ngValue]="emision.idemision" *ngFor="let emision of l_emisiones">
+                                        {{emision.emision}}
                                     </option>
                                 </select>
                             </div>
@@ -104,11 +105,11 @@
                     </div>
                 </form>
                 <div *ngIf="!swbotones" class="text-center">
-                    <button *ngIf="swimprimir" type='button' class='btn btn-success btn-sm mx-1' [disabled]="swbotones"
-                        (click)="imprimir()">
+                    <button *ngIf="swimprimir" type='button' class='btn btn-success btn-sm mx-1' data-toggle="modal"
+                        data-target="#staticBackdrop" [disabled]="swbotones" (click)="imprimir()">
                         <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
-                    <button *ngIf="!swimprimir" type='button' class='btn btn-warning btn-sm mx-1' (click)="imprimir()"
-                        [disabled]="!formImprimir.valid">
+                    <button *ngIf="!swimprimir" type='button' class='btn btn-warning btn-sm mx-1' data-toggle="modal"
+                        data-target="#staticBackdrop" (click)="imprimir()" [disabled]="!formImprimir.valid">
                         <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
                     <button class="btn btn-outline-success btn-sm mx-1" (click)="regresar()"><i
                             class="fa fa-times-circle"></i> Cancelar</button>
@@ -139,4 +140,24 @@
     </div>
 </div>
 
-<iframe id="pdfViewer" src="" width="100%" height="600px"></iframe>
+
+<!-- Modal vista imprimir -->
+<div class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Vista de reporte</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <iframe id="pdfViewer" src="" width="100%" height="600px"></iframe>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal">Cerrer</button>
+            </div>
+        </div>
+    </div>
+</div>
