@@ -101,17 +101,30 @@ export class ImpEmisionesComponent implements OnInit {
     }
   }
   imprime() {}
-  regresar() {}
+  regresar() {
+    this.router.navigate(['/emisiones']);
+  }
   getByIdEmisiones(idemision: number) {
     this.s_lecturas.findByIdEmisiones(idemision).subscribe({
       next: (lecturas: any) => {
-        console.log(lecturas);
         let body: any[] = [];
-        let head: any = [['Lectura']];
+        let head: any = [
+          ['Lectura', 'Emisión', 'Cuenta', 'Responsable P.', 'Ruta'],
+        ];
         lecturas.forEach((lectura: any) => {
-          body.push([lectura.idlectura]);
+          body.push([
+            lectura.idlectura,
+            lectura.idrutaxemision_rutasxemision.idemision_emisiones.emision,
+            lectura.idabonado_abonados.idabonado,
+            lectura.idabonado_abonados.idresponsable.nombre,
+            lectura.idrutaxemision_rutasxemision.idruta_rutas.descripcion,
+          ]);
         });
-        this.pdfTemplate('Facturas eliminadas ', head, body);
+        this.pdfTemplate(
+          `Facturas eliminadas - Emisión: ${lecturas[0].idrutaxemision_rutasxemision.idemision_emisiones.emision}`,
+          head,
+          body
+        );
       },
       error: (e) => console.error(e),
     });

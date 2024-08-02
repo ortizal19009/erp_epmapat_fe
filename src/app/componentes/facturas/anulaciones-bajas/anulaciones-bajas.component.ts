@@ -401,7 +401,6 @@ export class AnulacionesBajasComponent implements OnInit {
       case '1':
         this.facServicio.findByFecEliminacion(desde, hasta).subscribe({
           next: (eliminaciones: any) => {
-            console.log(eliminaciones);
             if (eliminaciones.length > 0) {
               this.reporteBajas(eliminaciones);
             }
@@ -441,6 +440,10 @@ export class AnulacionesBajasComponent implements OnInit {
       `Reporte de facturas dadas de anuladas: ${this.f_reportes.value.desde} - ${this.f_reportes.value.hasta}`,
       doc
     );
-    doc.save('holamundo');
+    const pdfDataUri = doc.output('datauri');
+    const pdfViewer: any = document.getElementById(
+      'pdfViewer'
+    ) as HTMLIFrameElement;
+    pdfViewer.src = pdfDataUri;
   }
 }

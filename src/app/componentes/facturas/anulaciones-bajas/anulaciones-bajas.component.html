@@ -321,8 +321,10 @@
                                     <option value="1">Eliminaciones</option>
                                 </select>
                                 <div class="row">
-                                    <div class="col-sm-6"><label for="">Desde: </label><input type="date" formControlName="desde" id="" class="form-control form-control-sm"></div>
-                                    <div class="col-sm-6"><label for="">Hasta: </label><input type="date" formControlName="hasta" id="" class="form-control form-control-sm"></div>
+                                    <div class="col-sm-6"><label for="">Desde: </label><input type="date"
+                                            formControlName="desde" id="" class="form-control form-control-sm"></div>
+                                    <div class="col-sm-6"><label for="">Hasta: </label><input type="date"
+                                            formControlName="hasta" id="" class="form-control form-control-sm"></div>
                                 </div>
                             </form>
                         </div>
@@ -331,8 +333,9 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success btn-sm" data-dismiss="modal">
                         <i class="fa fa-times-circle"></i> Cerrar</button>
-                        <button type="button" class="btn btn-outline-success btn-sm" data-dismiss="modal" (click)="reporte()">
-                            <i class="fa fa-times-circle"></i> Aceptar</button>
+                    <button type="button" class="btn btn-outline-success btn-sm" data-toggle="modal" data-target="#impViewer"
+                        (click)="reporte()">
+                        <i class="fa fa-times-circle"></i> Aceptar</button>
                 </div>
             </div>
         </div>
@@ -384,6 +387,27 @@
             <div class="modal-content">
                 <div class="modal-body">
                     <app-buscar-cliente (setCliente)="setCliente($event)"></app-buscar-cliente>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal vista imprimir -->
+    <div class="modal fade" id="impViewer" data-backdrop="static" data-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Vista de reporte</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <iframe id="pdfViewer" src="" width="100%" height="600px"></iframe>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-dismiss="modal">Cerrer</button>
                 </div>
             </div>
         </div>
