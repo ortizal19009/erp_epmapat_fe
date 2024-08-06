@@ -1236,17 +1236,18 @@ export class ImpCajasComponent implements OnInit {
     });
 
     // Agrega los datos a la hoja de cálculo
-    this._cobradas.forEach((factura: any) => {
-      let total = factura[1];
+    this._cobradas.forEach(async (factura: any) => {
+      let total = factura.total;
+      let fac: any = await this.getFacturaById(factura.idfactura);
       const row = [
-        factura[0].idfactura,
-        factura[0].feccrea,
-        factura[0].nrofactura,
-        factura[0].idcliente.nombre,
-        factura[0].idmodulo.descripcion,
-        factura[0].formapago,
+        fac.idfactura,
+        fac.feccrea,
+        fac.nrofactura,
+        fac.idcliente.nombre,
+        fac.idmodulo.descripcion,
+        fac.formapago,
         total,
-        factura[0].estado,
+        fac.estado,
       ];
       // const row = [factura[0].idfactura, total ];
       worksheet.addRow(row);
@@ -1429,6 +1430,10 @@ export class ImpCajasComponent implements OnInit {
 
   retornar() {
     this.router.navigate(['/cajas']);
+  }
+  getFacturaById(idfactura: number) {
+    let factura = this.facService.getById(idfactura).toPromise();
+    return factura;
   }
 }
 

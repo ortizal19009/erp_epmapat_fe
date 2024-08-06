@@ -789,7 +789,7 @@ export class ImpInfoCajasComponent implements OnInit {
 
     // Agrega los datos a la hoja de cálculo
     this._cobradas.forEach((factura: any) => {
-      let total = factura[1];
+      let total = factura.total;
       const row = [
         factura[0].idfactura,
         factura[0].feccrea,
