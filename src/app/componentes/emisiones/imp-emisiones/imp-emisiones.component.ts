@@ -169,8 +169,13 @@ export class ImpEmisionesComponent implements OnInit {
     });
   }
   changeReporte() {
-    console.log(this.formImprimir.value);
     this.opcreporte = +this.formImprimir.value.reporte!;
+  }
+  hideListaEmision() {
+    if (this.opcreporte === 1 || this.opcreporte === 2) {
+      return false;
+    }
+    return true;
   }
   impriexpor() {}
   buscarEmisiones() {

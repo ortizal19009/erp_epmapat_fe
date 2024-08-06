@@ -142,7 +142,6 @@ export class EmisionesComponent implements OnInit {
           emision: datos.idemision,
         });
         let desde = (+hasta.slice(0, 2)! - 1).toString() + hasta.slice(2);
-        console.log(desde, hasta)
         this.formBuscar.patchValue({
           desde: desde,
           hasta: hasta,
