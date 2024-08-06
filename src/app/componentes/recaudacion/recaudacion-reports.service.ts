@@ -1,9 +1,8 @@
-import { ParseSpan } from '@angular/compiler';
 import { Injectable } from '@angular/core';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { Clientes } from 'src/app/modelos/clientes';
 import { UsuarioService } from 'src/app/servicios/administracion/usuario.service';
+import { CategoriaService } from 'src/app/servicios/categoria.service';
 import { ClientesService } from 'src/app/servicios/clientes.service';
 import { EmisionService } from 'src/app/servicios/emision.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
@@ -35,7 +34,7 @@ export class RecaudacionReportsService {
   constructor(
     private rubxfacService: RubroxfacService,
     private s_usuarios: UsuarioService,
-    private s_cliente: ClientesService,
+    private s_categoria: CategoriaService,
     private s_emision: EmisionService
   ) {}
   async cabeceraConsumoAgua(
@@ -44,11 +43,7 @@ export class RecaudacionReportsService {
     usuario: any,
     factura: any
   ) {
-    //doc.setFontSize(7);
-    /*     this.s_cliente.getListaById(datos.idabonado_abonados.idresponsable).subscribe({
-      next: (datos: any) => {
-      }, error: (e) => { console.error(e) }
-    }) */
+    let categoria = await this.getCategoriaById(datos.idcategoria);
     let tableWidth = 200;
     let m3 = datos.lecturaactual - datos.lecturaanterior;
     let emi: any = await this.getEmisionByid(datos.idemision);
@@ -94,9 +89,7 @@ export class RecaudacionReportsService {
           `L. Anterior: ${datos.lecturaanterior}`,
           `L. Actual: ${datos.lecturaactual}`,
         ],
-        [
-          `Categoría: ${datos.idabonado_abonados.idcategoria_categorias.descripcion}`,
-        ],
+        [`Categoría: ${categoria.descripcion}`],
         [`Recaudador: ${usuario.nomusu}`],
       ],
     });
@@ -270,6 +263,10 @@ export class RecaudacionReportsService {
       error: (err) =>
         console.error('Al recuperar el datalle de la Planilla: ', err.error),
     });
+  }
+  async getCategoriaById(idcategoria: number): Promise<any> {
+    const categoria = this.s_categoria.getById(idcategoria).toPromise();
+    return categoria;
   }
   async getEmisionByid(idemision: number) {
     const emision = this.s_emision.getByIdemision(idemision).toPromise();

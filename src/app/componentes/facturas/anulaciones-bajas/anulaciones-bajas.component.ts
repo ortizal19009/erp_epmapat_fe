@@ -390,7 +390,7 @@ export class AnulacionesBajasComponent implements OnInit {
     let hasta = this.f_reportes.value.hasta;
     switch (opt) {
       case '0':
-        this.facServicio.getByFecAnulaciones(desde, hasta).subscribe({
+        this.facServicio.findByFecAnuladas(desde, hasta).subscribe({
           next: (anulaciones: any) => {
             if (anulaciones.length > 0) {
               this.reporteanulaciones(anulaciones);
@@ -431,15 +431,36 @@ export class AnulacionesBajasComponent implements OnInit {
       head: [['Nro planilla', 'Modulo', 'Usu elimina', 'Razón', 'Total']],
       body: bajas,
     });
-    doc.save('holamundo');
+    const pdfDataUri = doc.output('datauri');
+    const pdfViewer: any = document.getElementById(
+      'pdfViewer'
+    ) as HTMLIFrameElement;
+    pdfViewer.src = pdfDataUri;
   }
   reporteanulaciones(lanulaciones: any) {
     let doc = new jsPDF('p', 'pt', 'a4');
-
+    let anuladas: any[] = [];
     this.s_pdf.header(
-      `Reporte de facturas dadas de anuladas: ${this.f_reportes.value.desde} - ${this.f_reportes.value.hasta}`,
+      `Reporte de facturas anuladas: ${this.f_reportes.value.desde} - ${this.f_reportes.value.hasta}`,
       doc
     );
+    lanulaciones.forEach((item: any) => {
+      anuladas.push([
+        item.idfactura,
+        item.modulo,
+        item.nomusu,
+        item.razoneliminacion,
+        +item.total.toFixed(2),
+      ]);
+    });
+    autoTable(doc, {
+      head: [['Nro planilla', 'Modulo', 'Usu anula', 'Razón', 'Total']],
+      body: anuladas,
+    });
+/*     this.s_pdf.header(
+      `Reporte de facturas dadas de anuladas: ${this.f_reportes.value.desde} - ${this.f_reportes.value.hasta}`,
+      doc
+    ); */
     const pdfDataUri = doc.output('datauri');
     const pdfViewer: any = document.getElementById(
       'pdfViewer'
