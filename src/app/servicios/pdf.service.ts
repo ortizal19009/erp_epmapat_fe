@@ -6,14 +6,12 @@ import autoTable from 'jspdf-autotable';
 @Injectable({
   providedIn: 'root',
 })
-
 export class PdfService {
-
   date = new Date();
   margin_l = 40;
   line = 0;
   url = 'assets/';
-  
+
   constructor(http: HttpClient) {}
 
   header(titulo: string, doc: any) {
@@ -35,7 +33,7 @@ export class PdfService {
       head: [[titulo]],
     });
     doc.setFontSize(12);
-   // doc.text(this.date.toLocaleDateString().toString(), 450, 40); /*FECHA*/
+    // doc.text(this.date.toLocaleDateString().toString(), 450, 40); /*FECHA*/
   }
   genPdf(row_datos: any, columns_datos: any, titulo: string) {
     let doc = new jsPDF('p', 'pt', 'a4');
@@ -48,6 +46,66 @@ export class PdfService {
       body: row_datos,
     });
     doc.output('pdfobjectnewwindow', { filename: `${titulo}.pdf` });
+  }
+  bodyOneTable(title: string, head: any, body: any, doc: any) {
+    let m_izquierda: 10;
+    //let doc = new jsPDF('p', 'pt', 'a4');
+    this.header(title, doc);
+
+    autoTable(doc, {
+      head: head,
+      body: body,
+    });
+
+/*     const addPageNumbers = function () {
+      const pageCount = doc.internal.pages.length;
+      for (let i = 1; i <= pageCount - 1; i++) {
+        doc.setPage(i);
+        doc.setFontSize(10);
+        doc.text(
+          'Página ' + i + ' de ' + (pageCount - 1),
+          m_izquierda,
+          doc.internal.pageSize.height - 10
+        );
+      }
+    };
+
+    const pdfDataUri = doc.output('datauri');
+    const pdfViewer: any = document.getElementById(
+      'pdfViewer'
+    ) as HTMLIFrameElement;
+
+    pdfViewer.src = pdfDataUri; */
+  }
+  bodyTwoTables(
+    titulo: string,
+    ht1: any,
+    bt1: any,
+    ht2: any,
+    bt2: any,
+    doc: any
+  ) {
+    this.header(titulo, doc);
+    // Primera tabla
+    doc.autoTable({
+      head: ht1,
+      body: bt1,
+      styles: { overflow: 'hidden' },
+      //startY: 20, // Ajusta la posición vertical inicial de la tabla
+      margin: { right: 50 }, // Margen izquierdo de la primera tabla
+    });
+
+    // Segunda tabla
+    doc.autoTable({
+      head: ht2,
+      body: bt2,
+      styles: { overflow: 'hidden' },
+     // startY: 20, // La misma posición vertical que la primera tabla
+      // Posición horizontal ajustada para que quede a la derecha de la primera tabla
+      margin: { left: 50 }, // Margen izquierdo de la segunda tabla
+    });
+    
+    
   }
 
   /*   nacionalidades(titulo: string, nacionalidades: any) {
@@ -395,5 +453,4 @@ export class PdfService {
     });
     window.open(doc.output('bloburl'), '_blank');
   }
-
 }

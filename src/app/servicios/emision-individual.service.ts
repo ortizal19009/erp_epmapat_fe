@@ -23,4 +23,9 @@ export class EmisionIndividualService {
   getLecturasAnteriores(idemision: number) {
     return this.http.get<any>(`${baseUrl}/anteriores?idemision=${idemision}`);
   }
+  getRperoteEmisionIndividualByIdEmision(idemision: number) {
+    return this.http.get(
+      `${baseUrl}/reportes/emisiones?idemision=${idemision}`
+    );
+  }
 }

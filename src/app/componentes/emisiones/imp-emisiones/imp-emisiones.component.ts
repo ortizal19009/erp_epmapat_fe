@@ -5,6 +5,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { NombreEmisionPipe } from 'src/app/pipes/nombre-emision.pipe';
 import { ClientesService } from 'src/app/servicios/clientes.service';
+import { EmisionIndividualService } from 'src/app/servicios/emision-individual.service';
 import { EmisionService } from 'src/app/servicios/emision.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
@@ -31,7 +32,7 @@ export class ImpEmisionesComponent implements OnInit {
   _clientes: any = [];
   total: number;
   l_emisiones: any;
-
+  _emisionindividual: any;
   /* Reporte lista emisiones */
   _emisiones: any;
   otraPagina: any;
@@ -43,7 +44,8 @@ export class ImpEmisionesComponent implements OnInit {
     private cliService: ClientesService,
     private emiService: EmisionService,
     private s_pdf: PdfService,
-    private s_lecturas: LecturasService
+    private s_lecturas: LecturasService,
+    private s_emisionindividual: EmisionIndividualService
   ) {}
 
   ngOnInit(): void {
@@ -95,6 +97,7 @@ export class ImpEmisionesComponent implements OnInit {
         this.getByIdEmisiones(this.formImprimir.value.emision);
         break;
       case '2':
+        this.getEmisionIndividualByIdEmision(this.formImprimir.value.emision);
         break;
       case '3':
         break;
@@ -133,12 +136,7 @@ export class ImpEmisionesComponent implements OnInit {
     console.log('REGRESANDO');
     let m_izquierda: 10;
     let doc = new jsPDF('p', 'pt', 'a4');
-    this.s_pdf.header(title, doc);
-
-    autoTable(doc, {
-      head: head,
-      body: body,
-    });
+    this.s_pdf.bodyTwoTables('prueba', head, body,head, body, doc);
 
     const addPageNumbers = function () {
       const pageCount = doc.internal.pages.length;
@@ -167,6 +165,53 @@ export class ImpEmisionesComponent implements OnInit {
       },
       error: (e) => console.error(e),
     });
+  }
+  getEmisionIndividualByIdEmision(idemision: number) {
+    this.s_emisionindividual
+      .getRperoteEmisionIndividualByIdEmision(idemision)
+      .subscribe({
+        next: async (datos: any) => {
+          console.log(datos);
+          this._emisionindividual = datos;
+          let emision: any = await this.getEmision(idemision);
+          console.log(emision);
+          let totala: number = 0;
+          let totaln: number = 0;
+          let head: any;
+          let body: any = [];
+          head = [
+            [
+              'Cuenta',
+              'A Emision',
+
+            ],
+          ];
+          datos.forEach((emindividual: any) => {
+            totala += +emindividual.tanterior.toFixed(2);
+            totaln += +emindividual.tnuevo.toFixed(2);
+            body.push([
+              emindividual.cuenta,
+              emindividual.emisiona,
+
+            ]);
+          });
+          body.push([
+            ``,
+            ``,
+            `Total Anterior`,
+            `${totala.toFixed(2)}`,
+            ``,
+            `Total Nuevo`,
+            `${totaln.toFixed(2)}`,
+          ]);
+          this.pdfTemplate(
+            `Lista de nuevas emisiones de ${emision.emision}`,
+            head,
+            body
+          );
+        },
+        error: (e) => console.error(e),
+      });
   }
   changeReporte() {
     this.opcreporte = +this.formImprimir.value.reporte!;
@@ -209,5 +254,9 @@ export class ImpEmisionesComponent implements OnInit {
     });
     // datos.push(['', 'TOTAL', '', '', '', this.sumtotal.toLocaleString('en-US')]);
     this.pdfTemplate('Listado de emisiones', head, datos);
+  }
+  async getEmision(idemision: number) {
+    const emision = await this.emiService.getByIdemision(idemision).toPromise();
+    return emision;
   }
 }
