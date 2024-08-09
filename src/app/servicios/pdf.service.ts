@@ -15,11 +15,11 @@ export class PdfService {
   constructor(http: HttpClient) {}
 
   header(titulo: string, doc: any) {
-    this.margin_l = 40;
+    this.margin_l = 0;
     this.line = 0;
     let logo = new Image();
     logo.src = './assets/img/lep.jpg';
-    doc.addImage(logo, 'jpg', 100, 10, 350, 100); /*LOGO */
+    doc.addImage(logo, 'jpg', 20, 5, 150, 50); /*LOGO */
     doc.setFontSize(15);
     autoTable(doc, {
       styles: {
@@ -29,7 +29,7 @@ export class PdfService {
         halign: 'center',
       },
       columnStyles: { 0: { halign: 'center' } },
-      startY: 120,
+      startY: 60,
       head: [[titulo]],
     });
     doc.setFontSize(12);
@@ -57,7 +57,7 @@ export class PdfService {
       body: body,
     });
 
-/*     const addPageNumbers = function () {
+    /*     const addPageNumbers = function () {
       const pageCount = doc.internal.pages.length;
       for (let i = 1; i <= pageCount - 1; i++) {
         doc.setPage(i);
@@ -86,26 +86,34 @@ export class PdfService {
     doc: any
   ) {
     this.header(titulo, doc);
+    const pageNumber = doc.internal.getNumberOfPages();
+    let startY = 70;
     // Primera tabla
     doc.autoTable({
       head: ht1,
       body: bt1,
+      showHead: 'firstPage',
+      startY: startY,
       styles: { overflow: 'hidden' },
-      //startY: 20, // Ajusta la posición vertical inicial de la tabla
-      margin: { right: 50 }, // Margen izquierdo de la primera tabla
+      margin: { right: 107 }, // Margen izquierdo de la primera tabla
     });
+    doc.setPage(pageNumber);
 
     // Segunda tabla
     doc.autoTable({
       head: ht2,
       body: bt2,
+      showHead: 'firstPage',
+      startY: startY,
       styles: { overflow: 'hidden' },
-     // startY: 20, // La misma posición vertical que la primera tabla
-      // Posición horizontal ajustada para que quede a la derecha de la primera tabla
-      margin: { left: 50 }, // Margen izquierdo de la segunda tabla
+      margin: { left: 107 }, 
     });
-    
-    
+    const pdfDataUri = doc.output('datauri');
+    const pdfViewer: any = document.getElementById(
+      'pdfViewer'
+    ) as HTMLIFrameElement;
+
+    return (pdfViewer.src = pdfDataUri);
   }
 
   /*   nacionalidades(titulo: string, nacionalidades: any) {

@@ -28,4 +28,14 @@ export class EmisionIndividualService {
       `${baseUrl}/reportes/emisiones?idemision=${idemision}`
     );
   }
+  reportEILecturasAnteriores(idemision: number) {
+    return this.http.get(
+      `${baseUrl}/reportes/anteriores?idemision=${idemision}`
+    );
+  }
+  reportEILecturasNuevas(idemision: number) {
+    return this.http.get(
+      `${baseUrl}/reportes/nuevas?idemision=${idemision}`
+    );
+  }
 }
