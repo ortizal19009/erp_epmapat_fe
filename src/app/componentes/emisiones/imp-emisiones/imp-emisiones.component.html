@@ -116,12 +116,12 @@
                 <div *ngIf="swbotones" class="text-center">
                     <button *ngIf="swimprimir" type="button" class="btn btn-success btn-block"
                         [attr.data-target]="otrapagina ? null : '#pdf'" data-toggle="modal" [disabled]="swcalculando"
-                        (click)="imprime()">
+                        >
                         <i *ngIf="swcalculando" class="fa fa-spinner"></i>
                         <i *ngIf="!swcalculando" class="bi-eye"></i>&nbsp;&nbsp;&nbsp;{{txtcalculando}}
                     </button>
                     <button *ngIf="!swimprimir" type="button" class="btn btn-warning btn-block"
-                        [disabled]="swcalculando" (click)="imprime()">
+                        [disabled]="swcalculando" >
                         <i *ngIf="swcalculando" class="fa fa-spinner"></i>
                         <i *ngIf="!swcalculando" class="bi-eye"></i>&nbsp;&nbsp;&nbsp;{{txtcalculando}}
                     </button>

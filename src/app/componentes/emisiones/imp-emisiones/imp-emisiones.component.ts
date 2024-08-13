@@ -103,13 +103,13 @@ export class ImpEmisionesComponent implements OnInit {
         break;
     }
   }
-  imprime() {}
   regresar() {
     this.router.navigate(['/emisiones']);
   }
   getByIdEmisiones(idemision: number) {
     this.s_lecturas.findByIdEmisiones(idemision).subscribe({
       next: (lecturas: any) => {
+        let doc = new jsPDF();
         let body: any[] = [];
         let head: any = [
           ['Lectura', 'Emisión', 'Cuenta', 'Responsable P.', 'Ruta'],
@@ -123,40 +123,14 @@ export class ImpEmisionesComponent implements OnInit {
             lectura.idrutaxemision_rutasxemision.idruta_rutas.descripcion,
           ]);
         });
-        this.pdfTemplate(
+        this.s_pdf.bodyOneTable(
           `Facturas eliminadas - Emisión: ${lecturas[0].idrutaxemision_rutasxemision.idemision_emisiones.emision}`,
           head,
-          body
+          body, doc
         );
       },
       error: (e) => console.error(e),
     });
-  }
-  pdfTemplate(title: string, head: any, body: any) {
-    console.log('REGRESANDO');
-    let m_izquierda: 10;
-    let doc = new jsPDF('p', 'pt', 'a4');
-    this.s_pdf.bodyTwoTables('prueba', head, body, head, body, doc);
-
-    const addPageNumbers = function () {
-      const pageCount = doc.internal.pages.length;
-      for (let i = 1; i <= pageCount - 1; i++) {
-        doc.setPage(i);
-        doc.setFontSize(10);
-        doc.text(
-          'Página ' + i + ' de ' + (pageCount - 1),
-          m_izquierda,
-          doc.internal.pageSize.height - 10
-        );
-      }
-    };
-
-    const pdfDataUri = doc.output('datauri');
-    const pdfViewer: any = document.getElementById(
-      'pdfViewer'
-    ) as HTMLIFrameElement;
-
-    pdfViewer.src = pdfDataUri;
   }
   listAllEmisiones() {
     this.emiService.findAllEmisiones().subscribe({
@@ -169,42 +143,6 @@ export class ImpEmisionesComponent implements OnInit {
   async getEmisionIndividualByIdEmision(idemision: number) {
     let doc = new jsPDF();
     let emision: any = await this.getEmision(idemision);
-    /*    
-    this.s_emisionindividual.reportEILecturasAnteriores(idemision).subscribe({
-      next: async (datos: any) => {
-        console.log(datos);
-        this._emisionindividual = datos;
-        let emision: any = await this.getEmision(idemision);
-        console.log(emision);
-        let totala: number = 0;
-        let totaln: number = 0;
-        let head: any;
-        let body: any = [];
-        head = [['Cuenta', 'A Emision']];
-        datos.forEach((emindividual: any) => {
-          totala += +emindividual.tanterior;
-          body.push([emindividual.cuenta, emindividual.emisiona]);
-        });
-        body.push([
-          ``,
-          ``,
-          `Total Anterior`,
-          `${totala.toFixed(2)}`,
-          ``,
-          `Total Nuevo`,
-          `${totaln.toFixed(2)}`,
-        ]);
-        this.s_pdf.bodyTwoTables(
-          `Lista de nuevas emisiones de ${emision.emision}`,
-          head,
-          body,
-          head,
-          body,
-          doc
-        );
-      },
-      error: (e) => console.error(e),
-    }); */
 
     let anteriores: any = await this.getEmisionesAnteriores(idemision);
     let nuevas: any = await this.getEmisionesNuevas(idemision);
@@ -281,6 +219,7 @@ export class ImpEmisionesComponent implements OnInit {
       });
   }
   impListaEmisiones() {
+    let doc = new jsPDF();
     const nombreEmision = new NombreEmisionPipe(); // Crea una instancia del pipe
     let head = [['Emision', 'm3', 'Fecha Cierre']];
     var datos: any = [];
@@ -296,7 +235,7 @@ export class ImpEmisionesComponent implements OnInit {
       i++;
     });
     // datos.push(['', 'TOTAL', '', '', '', this.sumtotal.toLocaleString('en-US')]);
-    this.pdfTemplate('Listado de emisiones', head, datos);
+    this.s_pdf.bodyOneTable('Listado de emisiones', head, datos, doc);
   }
   async getEmision(idemision: number) {
     const emision = await this.emiService.getByIdemision(idemision).toPromise();

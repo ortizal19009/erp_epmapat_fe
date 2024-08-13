@@ -36,7 +36,7 @@ export class PdfService {
     // doc.text(this.date.toLocaleDateString().toString(), 450, 40); /*FECHA*/
   }
   genPdf(row_datos: any, columns_datos: any, titulo: string) {
-    let doc = new jsPDF('p', 'pt', 'a4');
+    let doc = new jsPDF();
     doc.setFont('courier');
     doc.setFontSize(11);
     this.header(titulo, doc);
@@ -57,25 +57,12 @@ export class PdfService {
       body: body,
     });
 
-    /*     const addPageNumbers = function () {
-      const pageCount = doc.internal.pages.length;
-      for (let i = 1; i <= pageCount - 1; i++) {
-        doc.setPage(i);
-        doc.setFontSize(10);
-        doc.text(
-          'Página ' + i + ' de ' + (pageCount - 1),
-          m_izquierda,
-          doc.internal.pageSize.height - 10
-        );
-      }
-    };
-
     const pdfDataUri = doc.output('datauri');
     const pdfViewer: any = document.getElementById(
       'pdfViewer'
     ) as HTMLIFrameElement;
 
-    pdfViewer.src = pdfDataUri; */
+    return (pdfViewer.src = pdfDataUri);
   }
   bodyTwoTables(
     titulo: string,
@@ -106,7 +93,7 @@ export class PdfService {
       showHead: 'firstPage',
       startY: startY,
       styles: { overflow: 'hidden' },
-      margin: { left: 107 }, 
+      margin: { left: 107 },
     });
     const pdfDataUri = doc.output('datauri');
     const pdfViewer: any = document.getElementById(
@@ -116,78 +103,7 @@ export class PdfService {
     return (pdfViewer.src = pdfDataUri);
   }
 
-  /*   nacionalidades(titulo: string, nacionalidades: any) {
-    let doc = new jsPDF('p', 'pt', 'a4');
-    let i = 0;
-    doc.setFont("courier");
-    doc.setFontSize(11);
-    let datos: any = [];
-    this.header(titulo, doc);
-    nacionalidades.forEach(() => {
-      datos.push([nacionalidades[i].descripcion]);
-      i++;
-    });
-    autoTable(doc, {
-      startY: 120,
-      head: [['Nombre nacionalidad']],
-      body: datos,
-    });
-    window.open(doc.output('bloburl'), '_blank');
-  } */
-  /*   puntosEmision(titulo: string, puntosemision: any) {
-    let doc = new jsPDF('p', 'pt', 'a4');
-    let i = 0;
-    doc.setFont("courier");
-    doc.setFontSize(11);
-    let datos: any = [];
-    this.header(titulo, doc);
-    puntosemision.forEach(() => {
-      datos.push([puntosemision[i].establecimiento, puntosemision[i].direccion]);
-      i++;
-    });
-    autoTable(doc, {
-      startY: 120,
-      head: [['Establecimiento', 'Dirección']],
-      body: datos,
-    });
-    window.open(doc.output('bloburl'), '_blank');
-  } */
-  /*   cajas(titulo: string, caja: any) {
-    let doc = new jsPDF('p', 'pt', 'a4');
-    let i = 0;
-    doc.setFont("courier");
-    doc.setFontSize(11);
-    let datos: any = [];
-    this.header(titulo, doc);
-    caja.forEach(() => {
-      datos.push([caja[i].descripcion, caja[i].codigo, caja[i].idptoemision_ptoemision.establecimiento]);
-      i++;
-    });
-    autoTable(doc, {
-      startY: 120,
-      head: [['Descripción', 'Código', 'Punto de emisión']],
-      body: datos,
-    });
-    window.open(doc.output('bloburl'), '_blank');
-  } */
-  /*   categorias(titulo: string, categoria: any) {
-    let doc = new jsPDF('p', 'pt', 'a4');
-    let i = 0;
-    doc.setFont("courier");
-    doc.setFontSize(11);
-    let datos: any = [];
-    this.header(titulo, doc);
-    categoria.forEach(() => {
-      datos.push([categoria[i].descripcion, `${categoria[i].porcdescuento}%`]);
-      i++;
-    });
-    autoTable(doc, {
-      startY: 120,
-      head: [['Descripción', 'Porcentaje de descuento']],
-      body: datos,
-    });
-    window.open(doc.output('bloburl'), '_blank');
-  } */
+
   tpcertificacion(titulo: string, tpcertifica: any) {
     let doc = new jsPDF('p', 'pt', 'a4');
     let i = 0;
