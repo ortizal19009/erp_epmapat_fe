@@ -264,6 +264,136 @@ export class RecaudacionReportsService {
         console.error('Al recuperar el datalle de la Planilla: ', err.error),
     });
   }
+  reimprimircomprobantePago(l_datos: any, factura: any) {
+    if (factura.interescobrado === null) {
+      factura.interescobrado = 0;
+    }
+    let doc = new jsPDF('p', 'pt', 'a4');
+    var logo = new Image();
+    logo.src = './assets/img/logo_planilla.png';
+
+    let usuario: any;
+    let idfactura: any;
+    let tableWidth = 200;
+    this.iva = 0;
+    this.subtotal = 0;
+    this.total = 0;
+    this.interes = 0;
+    if (l_datos != null) {
+      idfactura = l_datos.idfactura;
+    } else {
+      idfactura = factura.idfactura;
+    }
+    this.s_usuarios.getByIdusuario(factura.usuariocobro).subscribe({
+      next: (datos) => {
+        usuario = datos;
+        let modulo = factura.idmodulo.idmodulo;
+        if ((modulo === 3 || modulo === 4) && l_datos != null) {
+          this.cabeceraConsumoAgua(l_datos, doc, usuario, factura);
+        } else {
+          this.cabeceraOtros(factura, doc, usuario);
+        }
+      },
+      error: (e) => console.error(e),
+    });
+    this.rubxfacService.getByIdfactura(idfactura).subscribe({
+      next: (_rubrosxfac: any) => {
+        let rubros: any = [];
+        _rubrosxfac.forEach((item: any) => {
+          if (item.idrubro_rubros.swiva === true) {
+            this.iva += item.valorunitario * item.cantidad * 0.15;
+          }
+          if (
+            item.idrubro_rubros.idrubro != 5 &&
+            item.idrubro_rubros.idrubro != 165
+          ) {
+            if (
+              item.idfactura_facturas.swcondonar === true &&
+              item.idrubro_rubros.idrubro === 6
+            ) {
+            } else {
+              this.total += +item.valorunitario! * item.cantidad;
+              rubros.push([
+                item.idrubro_rubros.descripcion,
+                item.cantidad.toFixed(0),
+                item.valorunitario.toFixed(2),
+              ]);
+            }
+          } else if (item.idrubro_rubros.idrubro === 165) {
+            this.iva = 0;
+          } else {
+            this.interes = item.valorunitario;
+          }
+        });
+        this.total += this.interes + this.iva;
+        this.subtotal += this.total - this.interes - this.iva;
+        autoTable(doc, {
+
+          head: [['REIMPRESION']],
+        });
+        autoTable(doc, {
+          margin: { left: 10 },
+          tableWidth,
+          theme: 'grid',
+          styles: { fontSize: 9, fontStyle: 'bold' },
+          headStyles: {
+            halign: 'center',
+            fillColor: 'white',
+            textColor: 'black',
+          },
+          bodyStyles: {
+            cellPadding: 1,
+            fillColor: [255, 255, 255],
+            textColor: 'black',
+          },
+          columnStyles: {
+            0: { minCellWidth: 10 },
+            1: { minCellWidth: 15, halign: 'center' },
+            2: { minCellWidth: 15, halign: 'right' },
+          },
+          columns: ['Descripción', 'Cant.', 'Valor unitario'],
+          body: rubros,
+        });
+        autoTable(doc, {
+          margin: { left: 10 },
+          tableWidth,
+          theme: 'grid',
+          styles: { fontSize: 9, fontStyle: 'bold' },
+          headStyles: {
+            halign: 'center',
+            fillColor: 'white',
+            textColor: 'black',
+          },
+          bodyStyles: {
+            cellPadding: 1,
+            fillColor: [255, 255, 255],
+            textColor: 'black',
+          },
+          columnStyles: {
+            0: { minCellWidth: 10 },
+            1: { minCellWidth: 15, halign: 'right' },
+          },
+          columns: ['', ''],
+          body: [
+            ['Sub total', this.subtotal.toFixed(2)],
+            ['Iva 15%', factura.swiva.toFixed(2)],
+            ['Intereses', factura.interescobrado.toFixed(2)],
+            ['Valor total', this.total.toFixed(2)],
+          ],
+        });
+        doc.setGState(doc.GState({ opacity: 0.4 }));
+        doc.addImage(logo, 'PNG', 20, 130, 190, 195);
+        doc.setGState(doc.GState({ opacity: 0.99 }));
+        doc.addImage(logo, 'PNG', 120, 15, 80, 80);
+        window.open(doc.output('bloburl'));
+        /*     doc.output('pdfobjectnewwindow', {
+          filename: 'hoja de reporte de pago',
+        }); */
+      },
+      error: (err) =>
+        console.error('Al recuperar el datalle de la Planilla: ', err.error),
+    });
+  }
   async getCategoriaById(idcategoria: number): Promise<any> {
     const categoria = this.s_categoria.getById(idcategoria).toPromise();
     return categoria;

@@ -243,6 +243,7 @@ export class AnulacionesBajasComponent implements OnInit {
   getFacSinCobro() {
     this.facServicio.getSinCobro(this._cliente.idcliente).subscribe({
       next: (datos: any) => {
+        console.log(datos)
         this._facturas = datos;
       },
       error: (e) => console.error(e),

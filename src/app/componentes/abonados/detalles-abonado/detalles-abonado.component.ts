@@ -320,15 +320,15 @@ export class DetallesAbonadoComponent implements OnInit {
             next: (datos: any) => {
               lectura = datos;
               if (datos != null) {
-                this.s_pdfRecaudacion.comprobantePago(lectura, d_factura);
+                this.s_pdfRecaudacion.reimprimircomprobantePago(lectura, d_factura);
               } else {
-                this.s_pdfRecaudacion.comprobantePago(null, d_factura);
+                this.s_pdfRecaudacion.reimprimircomprobantePago(null, d_factura);
               }
             },
             error: (e) => console.error(e),
           });
         } else {
-          this.s_pdfRecaudacion.comprobantePago(null, d_factura);
+          this.s_pdfRecaudacion.reimprimircomprobantePago(null, d_factura);
         }
       },
       error: (e) => console.error(e),
