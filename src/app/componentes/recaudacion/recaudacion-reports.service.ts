@@ -6,6 +6,7 @@ import { CategoriaService } from 'src/app/servicios/categoria.service';
 import { ClientesService } from 'src/app/servicios/clientes.service';
 import { EmisionService } from 'src/app/servicios/emision.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
+import { text } from 'stream/consumers';
 
 @Injectable({
   providedIn: 'root',
@@ -327,10 +328,8 @@ export class RecaudacionReportsService {
         });
         this.total += this.interes + this.iva;
         this.subtotal += this.total - this.interes - this.iva;
-        autoTable(doc, {
-
-          head: [['REIMPRESION']],
-        });
+        doc.setFontSize(10)
+        doc.text('REIMPRESIóN', 140, 110);
         autoTable(doc, {
           margin: { left: 10 },
           tableWidth,
