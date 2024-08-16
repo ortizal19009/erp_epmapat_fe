@@ -102,7 +102,106 @@ export class PdfService {
 
     return (pdfViewer.src = pdfDataUri);
   }
+  bodyFourTables(
+    titulo: string,
+    ht1: any,
+    bt1: any,
+    ht2: any,
+    bt2: any,
+    ht3: any,
+    bt3: any,
+    ht4: any,
+    bt4: any,
+    doc: any
+  ) {
+    this.header(titulo, doc);
+    const pageNumber = doc.internal.getNumberOfPages();
 
+    // Primera tabla
+    doc.autoTable({
+      head: [
+        [
+          {
+            content: ht1[0],
+            colSpan: 3,
+            styles: { halign: 'center', fontSize: 11 },
+          },
+        ],
+        [
+          { content: ht1[1][0], styles: { halign: 'center', fillColor: [255,255,255], textColor:[0,0,0] } },
+          { content: ht1[1][1], styles: { halign: 'center', fillColor: [255,255,255], textColor:[0,0,0] } },
+          { content: ht1[1][2], styles: { halign: 'center', fillColor: [255,255,255], textColor:[0,0,0] } },
+        ],
+      ],
+      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } }, 
+      body: bt1,
+    });
+    doc.setPage(pageNumber);
+
+    // Segunda tabla
+    doc.autoTable({
+      head: [
+        [
+          {
+            content: ht2[0],
+            colSpan: 3,
+            styles: { halign: 'center', fontSize: 11 },
+          },
+        ],
+        [
+          { content: ht2[1][0], styles: { halign: 'center', fillColor: [255,255,255], textColor:[0,0,0] } },
+          { content: ht2[1][1], styles: { halign: 'center', fillColor: [255,255,255], textColor:[0,0,0] } },
+          { content: ht2[1][2], styles: { halign: 'center', fillColor: [255,255,255], textColor:[0,0,0] } },
+        ],
+      ],
+      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } }, 
+      body: bt2,
+    });
+    // Tercer tabla
+    doc.autoTable({
+      head: [
+        [
+          {
+            content: ht3[0],
+            colSpan: 3,
+            styles: { halign: 'center', fontSize: 11 },
+          },
+        ],
+        [
+          { content: ht3[1][0], styles: { halign: 'center', fillColor: [255,255,255], textColor:[0,0,0] } },
+          { content: ht3[1][1], styles: { halign: 'center', fillColor: [255,255,255], textColor:[0,0,0] } },
+          { content: ht3[1][2], styles: { halign: 'center', fillColor: [255,255,255], textColor:[0,0,0] } },
+        ],
+      ],
+      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } }, 
+      body: bt3,
+    });
+    // Cuarta tabla
+    doc.autoTable({
+      head: [
+        [
+          {
+            content: ht4[0],
+            colSpan: 3,
+            styles: { halign: 'center', fontSize: 11 },
+          },
+        ],
+        [
+          { content: ht4[1][0], styles: { halign: 'center', fillColor: [255,255,255], textColor:[0,0,0] } },
+          { content: ht4[1][1], styles: { halign: 'center', fillColor: [255,255,255], textColor:[0,0,0] } },
+          { content: ht4[1][2], styles: { halign: 'center', fillColor: [255,255,255], textColor:[0,0,0] } },
+        ],
+      ],
+      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } }, 
+      body: bt4,
+    });
+    const pdfDataUri = doc.output('datauri');
+    const pdfViewer: any = document.getElementById(
+      'pdfViewer'
+    ) as HTMLIFrameElement;
+
+    return (pdfViewer.src = pdfDataUri);
+  }
 
   tpcertificacion(titulo: string, tpcertifica: any) {
     let doc = new jsPDF('p', 'pt', 'a4');

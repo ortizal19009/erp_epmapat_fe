@@ -100,11 +100,100 @@ export class ImpEmisionesComponent implements OnInit {
         this.getEmisionIndividualByIdEmision(this.formImprimir.value.emision);
         break;
       case '3':
+        this.impEmisionInicial(this.formImprimir.value.emision);
+        break;
+      case '4':
+        this.impEmisionFinal(this.formImprimir.value.emision);
         break;
     }
   }
   regresar() {
     this.router.navigate(['/emisiones']);
+  }
+
+  async impEmisionInicial(idemision: number) {
+    let doc = new jsPDF();
+    let inicial: any = await this.getRubLectInicial(idemision);
+    let body: any = [];
+    let head = [['Id', 'Descripción', 'Valor']];
+    let suma: number = 0;
+    let emision: any = await this.getEmision(idemision);
+
+    inicial.forEach((item: any) => {
+      body.push([item.idrubro_rubros, item.descripcion, item.total.toFixed(2)]);
+      suma += item.total;
+    });
+    body.push(['', 'Total', suma.toFixed(2)]);
+    this.s_pdf.bodyOneTable(`Emisión Inicial ${emision.emision}`,head, body, doc);
+  }
+  async impEmisionFinal(idemision: number) {
+    let doc = new jsPDF();
+    let inicial: any = await this.getRubLectInicial(idemision);
+    let nuevos: any = await this.getRubLectNuevos(idemision);
+    let eliminados: any = await this.getRubLectEliminados(idemision);
+    let actuales: any = await this.getRubLectActual(idemision);
+    let i_body: any = [];
+    let n_body: any = [];
+    let e_body: any = [];
+    let a_body: any = [];
+    let i_suma: number = 0;
+    let n_suma: number = 0;
+    let e_suma: number = 0;
+    let a_suma: number = 0;
+    let i_head: any = ['Emisión Inicial', ['Id', 'Descripción', 'Valor']];
+    let n_head: any = ['Emisiones Nuevas', ['Id', 'Descripción', 'Valor']];
+    let e_head: any = ['Emisiones Eliminadas', ['Id', 'Descripción', 'Valor']];
+    let a_head: any = ['Emisión Acutal', ['Id', 'Descripción', 'Valor']];
+    let emision: any = await this.getEmision(idemision);
+    inicial.forEach((item: any) => {
+      i_body.push([
+        item.idrubro_rubros,
+        item.descripcion,
+        item.total.toFixed(2),
+      ]);
+      i_suma += item.total;
+    });
+    i_body.push(['', 'Total', i_suma.toFixed(2)]);
+    nuevos.forEach((item: any) => {
+      n_body.push([
+        item.idrubro_rubros,
+        item.descripcion,
+        item.total.toFixed(2),
+      ]);
+      n_suma += item.total;
+    });
+    n_body.push(['', 'Total', n_suma.toFixed(2)]);
+    eliminados.forEach((item: any) => {
+      e_body.push([
+        item.idrubro_rubros,
+        item.descripcion,
+        item.total.toFixed(2),
+      ]);
+      e_suma += item.total;
+    });
+    e_body.push(['', 'Total', e_suma.toFixed(2)]);
+    actuales.forEach((item: any) => {
+      a_body.push([
+        item.idrubro_rubros,
+        item.descripcion,
+        item.total.toFixed(2),
+      ]);
+      a_suma += item.total;
+    });
+    a_body.push(['', 'Total', a_suma.toFixed(2)]);
+
+    this.s_pdf.bodyFourTables(
+      `Emisión final ${emision.emision}`,
+      i_head,
+      i_body,
+      e_head,
+      e_body,
+      n_head,
+      n_body,
+      a_head,
+      a_body,
+      doc
+    );
   }
   getByIdEmisiones(idemision: number) {
     this.s_lecturas.findByIdEmisiones(idemision).subscribe({
@@ -126,7 +215,8 @@ export class ImpEmisionesComponent implements OnInit {
         this.s_pdf.bodyOneTable(
           `Facturas eliminadas - Emisión: ${lecturas[0].idrutaxemision_rutasxemision.idemision_emisiones.emision}`,
           head,
-          body, doc
+          body,
+          doc
         );
       },
       error: (e) => console.error(e),
@@ -181,7 +271,6 @@ export class ImpEmisionesComponent implements OnInit {
       doc
     );
   }
-
   async getEmisionesAnteriores(idemision: number) {
     let anteriores = this.s_emisionindividual
       .reportEILecturasAnteriores(idemision)
@@ -194,11 +283,32 @@ export class ImpEmisionesComponent implements OnInit {
       .toPromise();
     return nuevas;
   }
+  async getRubLectInicial(idemision: number) {
+    let inicial = this.s_lecturas.findInicial(idemision).toPromise();
+    return inicial;
+  }
+  async getRubLectEliminados(idemision: number) {
+    let eliminados = this.s_lecturas.findEliminados(idemision).toPromise();
+    return eliminados;
+  }
+  async getRubLectNuevos(idemision: number) {
+    let nuevos = this.s_lecturas.findNuevos(idemision).toPromise();
+    return nuevos;
+  }
+  async getRubLectActual(idemision: number) {
+    let actual = this.s_lecturas.findActual(idemision).toPromise();
+    return actual;
+  }
   changeReporte() {
     this.opcreporte = +this.formImprimir.value.reporte!;
   }
   hideListaEmision() {
-    if (this.opcreporte === 1 || this.opcreporte === 2) {
+    if (
+      this.opcreporte === 1 ||
+      this.opcreporte === 2 ||
+      this.opcreporte === 3 ||
+      this.opcreporte === 4
+    ) {
       return false;
     }
     return true;

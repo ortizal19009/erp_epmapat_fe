@@ -114,7 +114,7 @@
                   <button class="dropdown-item" type="button" data-toggle="modal" data-target="#cerrarEmision"
                      (click)="cerrar()" [disabled]="!swcerrar">
                      <i class="bi-door-closed"></i>&nbsp; Cerrar emisión</button>
-                  <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir1">
+                  <button class="dropdown-item" type="button" [disabled]="true" data-toggle="modal" data-target="#imprimir1">
                      <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
                   <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar"
                      (click)="exportar1()">

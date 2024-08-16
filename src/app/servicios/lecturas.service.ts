@@ -131,4 +131,18 @@ export class LecturasService {
   findByIdEmisiones(idemision: number) {
     return this.http.get(`${baseUrl}/emision?idemision=${idemision}`);
   }
+
+  /* Reporte de emisiones */
+  findInicial(idemision : number){
+    return this.http.get(`${baseUrl}/reportes/rubros/inicial?idemision=${idemision}`)
+  }
+  findEliminados(idemision : number){
+    return this.http.get(`${baseUrl}/reportes/rubros/eliminados?idemision=${idemision}`)
+  }
+  findNuevos(idemision : number){
+    return this.http.get(`${baseUrl}/reportes/rubros/nuevos?idemision=${idemision}`)
+  }
+  findActual(idemision : number){
+    return this.http.get(`${baseUrl}/reportes/rubros/actual?idemision=${idemision}`)
+  }
 }
