@@ -411,7 +411,7 @@ export class RecaudacionComponent implements OnInit {
           const modulo: Modulos = await this.getModulo(item.idmodulo);
           item.modulo = modulo.descripcion;
           let interes = 0;
-          console.log(item);
+          // console.log(item);
           if (
             (item.formapago != 4 || item.idmodulo != 27) &&
             (item.swcondonar === false || item.swcondonar === null)
@@ -997,10 +997,17 @@ export class RecaudacionComponent implements OnInit {
           this.lecService.getOnefactura(d_factura.idfactura).subscribe({
             next: (datos: any) => {
               lectura = datos;
+              console.log(datos);
               if (datos != null) {
-                this.s_pdfRecaudacion.reimprimircomprobantePago(lectura, d_factura);
+                this.s_pdfRecaudacion.reimprimircomprobantePago(
+                  lectura,
+                  d_factura
+                );
               } else {
-                this.s_pdfRecaudacion.reimprimircomprobantePago(null, d_factura);
+                this.s_pdfRecaudacion.reimprimircomprobantePago(
+                  null,
+                  d_factura
+                );
               }
             },
             error: (e) => console.error(e),
@@ -1083,7 +1090,12 @@ export class RecaudacionComponent implements OnInit {
       let fec: any;
       let fechai: Date;
       if (factura.idmodulo === 3 || factura.idmodulo === 4) {
-        fec = factura.fechaemision.toString().split('-', 2);
+        if (factura.fechaemision != null) {
+          fec = factura.fechaemision.toString().split('-', 2);
+        } else {
+          fec = factura.feccrea.toString().split('-', 2);
+        }
+
         fechai = new Date(`${fec[0]}-${+fec[1]! + 1}-01`);
       } else {
         fec = factura.feccrea.toString().split('-', 2);

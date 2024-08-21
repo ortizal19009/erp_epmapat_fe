@@ -10,6 +10,7 @@ import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { InteresesService } from 'src/app/servicios/intereses.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
+import { LoadingService } from 'src/app/servicios/loading.service';
 import { PdfService } from 'src/app/servicios/pdf.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { RutasService } from 'src/app/servicios/rutas.service';
@@ -30,6 +31,7 @@ export class RutasmorasComponent implements OnInit {
   porcCarga: number = 0;
   _facSinCobro: any;
   datosImprimir: any = [];
+  _abonado: any;
 
   /* Intereses */
   calInteres = {} as calcInteres;
@@ -41,17 +43,21 @@ export class RutasmorasComponent implements OnInit {
   valoriva: number;
   _codigo: string;
 
+  _rxf: any = [];
+  rubrostotal: number = 0;
+
   constructor(
     private rutaDato: ActivatedRoute,
-    private s_lecturas: LecturasService,
-    private s_rubroxfac: RubroxfacService,
+    private lecService: LecturasService,
+    private rubxfacService: RubroxfacService,
     private fb: FormBuilder,
     private s_ruta: RutasService,
     private s_abonado: AbonadosService,
     private s_facturas: FacturaService,
     private s_pdf: PdfService,
     private s_rubxfacturas: RubroxfacService,
-    private interService: InteresesService
+    private interService: InteresesService,
+    private s_loading: LoadingService
   ) {}
 
   ngOnInit(): void {
@@ -83,12 +89,12 @@ export class RutasmorasComponent implements OnInit {
   }
   getLecturas(idruta: number) {
     let newDatos: any[] = [];
-    this.s_lecturas.findDeudoresByRuta(idruta).subscribe({
+    this.lecService.findDeudoresByRuta(idruta).subscribe({
       next: async (lecturas: any) => {
         this._lecturas = lecturas;
         await lecturas.forEach((item: any) => {
           let newPreFactura: any = [];
-          this.s_rubroxfac
+          this.rubxfacService
             .getByIdfacturaAsync(item.idfactura)
             .then((i: any) => {
               if (i.length > 0) {
@@ -117,6 +123,7 @@ export class RutasmorasComponent implements OnInit {
   }
   getAbonadosByRuta(idruta: any) {
     this.s_abonado.getByIdrutaAsync(idruta).then((abonados: any) => {
+      this.s_loading.showLoading();
       this.porcCarga = 0;
       let i = 0;
       abonados.forEach((abonado: any, index: number) => {
@@ -125,9 +132,13 @@ export class RutasmorasComponent implements OnInit {
           this._abonados.push(abonado);
           i++;
           this.porcCarga = (i * 100) / abonados.length;
+          if (this.porcCarga === 100) {
+            this.s_loading.hideLoading();
+          }
         });
       });
       this.contSinCobrar(abonados[0].idabonado);
+
     });
   }
   getSinCobrar(idabonado: number) {}
@@ -145,8 +156,8 @@ export class RutasmorasComponent implements OnInit {
     });
   }
 
-  async impNotificacion() {
-    let doc = new jsPDF('p', 'pt', 'a4');
+  async _impNotificacion() {
+    let doc = new jsPDF();
     doc.setFontSize(14);
     this.s_pdf.header(
       `Notificación de deudas pendientes: ${this.datosImprimir.idabonado.toString()}`,
@@ -228,6 +239,133 @@ export class RutasmorasComponent implements OnInit {
     // Generate and output the PDF after all data is processed
     //doc.output('pdfobjectnewwindow');
   }
+  async impNotificacion() {
+    this.s_loading.showLoading();
+    let doc = new jsPDF();
+    this.rubrostotal = 0;
+    doc.setFontSize(14);
+    this.s_pdf.header(
+      `Notificación de deudas pendientes: ${this.datosImprimir.idabonado.toString()}`,
+      doc
+    );
+    doc.setFontSize(7);
+    autoTable(doc, {
+      head: [
+        [
+          {
+            colSpan: 2,
+            content: 'DATOS PERSONALES',
+            styles: { halign: 'center' },
+          },
+        ],
+      ],
+      body: [
+        [
+          `CLIENTE: ${this.datosImprimir.idcliente_clientes.nombre}`,
+          `IDENTIFICACIÓN: ${this.datosImprimir.idcliente_clientes.cedula}`,
+        ],
+        [
+          `EMAIL: ${this.datosImprimir.idcliente_clientes.email}`,
+          `TELEFONO: ${this.datosImprimir.idcliente_clientes.telefono}`,
+        ],
+        [
+          `DIRECCIÓN: ${this.datosImprimir.direccionubicacion}`,
+          `RUTA: ${this.datosImprimir.idruta_rutas.descripcion}`,
+        ],
+        [
+          `CATEGORÍA: ${this.datosImprimir.idcategoria_categorias.descripcion}`,
+          `AL.: ${this.datosImprimir.swalcantarillado} / A.M.: ${this.datosImprimir.adultomayor} / M: ${this.datosImprimir.municipio}`,
+        ],
+      ],
+    });
+
+    // Gather all `getSumaFac()` promises
+    const sumaFacPromises: any[] = [];
+    let facturas: any = this.datosImprimir.facturas;
+    //this._rxf = [];
+
+    facturas.forEach(async (factura: any) => {
+      factura.interes = this.cInteres(factura);
+      const sumaFacPromise = this.getSumaFac(factura.idfactura);
+      sumaFacPromises.push(sumaFacPromise);
+    });
+    let d_facturas = [];
+    // Wait for all `getSumaFac()` promises to resolve
+    const sumaFacResults = await Promise.all(sumaFacPromises);
+    let t_subtotal: number = 0;
+    let t_intereses: number = 0;
+    let t_total: number = 0;
+    let d_rxf: any = [];
+    this._rxf = await this.rubxfacService.getRubrosIdAbonado(
+      this.datosImprimir.idabonado
+    );
+    await this._rxf.forEach((item: any) => {
+      d_rxf.push([
+        item.idrubro_rubros,
+        item.descripcion,
+        +item.total.toFixed(2),
+      ]);
+      this.rubrostotal += item.total;
+    });
+
+    // Iterate through facturas and add sumaFac values
+    for (let i = 0; i < facturas.length; i++) {
+      const factura = facturas[i];
+      const sumaFac = sumaFacResults[i];
+      facturas[i].sumaFac = sumaFac;
+      let fecEmision = await this.getFechaEmision(facturas[i].idfactura);
+      let suma = +factura.sumaFac.toFixed(2)! + +factura.interes.toFixed(2)!;
+      d_facturas.push([
+        factura.idfactura,
+        //fecEmision.slice(0, 7),
+        fecEmision,
+        factura.idmodulo.descripcion,
+        factura.sumaFac.toFixed(2),
+        factura.interes.toFixed(2),
+        suma.toFixed(2),
+      ]);
+      t_subtotal += factura.sumaFac;
+      t_intereses += factura.interes;
+      t_total += suma;
+    }
+    d_facturas.push([
+      '',
+      '',
+      'TOTALES: ',
+      t_subtotal.toFixed(2),
+      t_intereses.toFixed(2),
+      t_total.toFixed(2),
+    ]);
+    autoTable(doc, {
+      headStyles: { halign: 'center' },
+      head: [
+        ['Planilla', 'Emision', 'Módulo', 'Sub total', 'Interés', 'Total'],
+      ],
+      columnStyles: {
+        1: { halign: 'right' },
+        2: { halign: 'center' },
+        3: { halign: 'center' },
+        4: { halign: 'center' },
+        5: { halign: 'center' },
+      },
+      body: d_facturas,
+    });
+    d_rxf.push(['', 'Total: ', this.rubrostotal.toFixed(2)]);
+    autoTable(doc, {
+      head: [['Cod.Rubro', 'Descripción', 'Valor']],
+      body: d_rxf,
+    });
+
+    // Generate data URI and set iframe source
+    const pdfDataUri = doc.output('datauri');
+    const pdfViewer: any = document.getElementById(
+      'pdfViewer'
+    ) as HTMLIFrameElement;
+    pdfViewer.src = pdfDataUri;
+    this.s_loading.hideLoading();
+    // Generate and output the PDF after all data is processed
+    //doc.output('pdfobjectnewwindow');
+  }
   listarIntereses() {
     this.interService.getListaIntereses().subscribe({
       next: (datos) => {
@@ -236,6 +374,13 @@ export class RutasmorasComponent implements OnInit {
       },
       error: (err) => console.error(err.error),
     });
+  }
+
+  async getFechaEmision(idfactura: number): Promise<any> {
+    const fechaEmision = this.lecService
+      .findDateByIdfactura(idfactura)
+      .toPromise();
+    return fechaEmision;
   }
 
   /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
@@ -279,7 +424,7 @@ export class RutasmorasComponent implements OnInit {
     return interes;
   }
   async getSumaFac(idfactura: number): Promise<any> {
-    const sumaFac = await this.s_rubroxfac
+    const sumaFac = await this.rubxfacService
       .getSumaValoresUnitarios(idfactura)
       .toPromise();
     return sumaFac;

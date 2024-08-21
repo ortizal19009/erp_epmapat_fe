@@ -3,6 +3,22 @@
   --recaudadetalle: AliceBlue;
   --clientecabecera: Olive;
   --clientedetalle: Khaki;
+  --bgcolor1: rgb(68, 103, 114);
+  --bgcolor2: rgba(231, 251, 253);
+}
+.cabecera {
+  background-color: var(--bgcolor1);
+  color: white;
+}
+.nuevoBG1 {
+  background-color: var(--bgcolor1);
+}
+
+.detalle {
+  background-color: var(--bgcolor2);
+}
+.nuevoBG2 {
+  background-color: var(--bgcolor2);
 }
 
 .recaudacabecera {
@@ -81,30 +97,4 @@ label {
   background-color: #117a8b;
   color: white;
   cursor: pointer;
-}
-
-.numeracion {
-  bottom: 0;
-  height: 100px;
-  padding: 13px 0 4px;
-  position: fixed;
-  width: 100%;
-  z-index: 5000;
-}
-.overlay {
-  pointer-events: none;
-  /* Impedir la interacción con elementos subyacentes */
-  cursor: not-allowed;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.7); /* Ajusta la opacidad según tus necesidades */
-  z-index: 999999; /* Asegurar que el overlay se superponga a todos los demás elementos */
-}
-.overlay:hover {
-  pointer-events: none;
-  /* Impedir la interacción con elementos subyacentes */
-  cursor: not-allowed;
 }

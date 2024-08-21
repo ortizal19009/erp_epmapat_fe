@@ -1,9 +1,7 @@
-<div class="overlay" *ngIf="porcCarga != 100"></div>
-
 <div class="content mt-1 pt-1 pl-0">
     <div class="container-fluid">
         <div class="row m-0 px-0 py-1 justify-content-start cabecera border sombra">
-            <div class="col-sm-4">
+            <div class="col-sm-8">
                 <h4 class="m-0 font-weight-bold">{{ titulo }}</h4>
             </div>
             <div class="col-sm-2">
@@ -39,7 +37,6 @@
                     <span class="sr-only">{{porcCarga}}% Complete (success)</span>
                 </div>
             </div>
-
         </div>
     </div>
     <div class="row">
@@ -75,7 +72,6 @@
                                     <button class="dropdown-item text-muted" type="button" data-toggle="modal"
                                         (click)="setDatosImprimir(abonado)" data-target="#impNotificacion">
                                         <i class="bi bi-printer"></i>&nbsp; Notificación</button>
-
                                 </div>
                             </div>
                         </td>
@@ -97,12 +93,9 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">Cancelar</button>
-                        <!--  <button type="button" class="btn btn-sm btn-outline-success"
-                            (click)="impNotificacion()">Imprimir</button> -->
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
 </div>

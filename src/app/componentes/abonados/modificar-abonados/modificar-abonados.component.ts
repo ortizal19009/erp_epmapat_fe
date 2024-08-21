@@ -333,13 +333,11 @@ export class ModificarAbonadosComponent implements OnInit {
   }
 
   setCliente(cliente: any) {
-
     this.cliente = cliente;
-    this.abonadoForm.patchValue({idcliente_clientes: cliente.nombre})
-   }
-   setResponsablePago(respPago: any){
-     this.v_idresponsable = respPago;
-     this.abonadoForm.patchValue({idresponsable: respPago.nombre})
-  
+    this.abonadoForm.patchValue({ idcliente_clientes: cliente.nombre });
+  }
+  setResponsablePago(respPago: any) {
+    this.v_idresponsable = respPago;
+    this.abonadoForm.patchValue({ idresponsable: respPago.nombre });
   }
 }
