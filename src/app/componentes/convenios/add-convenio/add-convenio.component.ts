@@ -152,31 +152,35 @@ export class AddConvenioComponent implements OnInit {
       this.swbuscando = true;
       this.txtbuscar = 'Buscando';
       this.aboService.unAbonado(this.formConvenio.value.idabonado).subscribe({
-        next: (datos) => {
-          this.abonado = datos;
-          this.facService.getSinCobrarAboMod(idabonado).subscribe({
-            next: (datos) => {
-              this._sincobro = datos;
-              this.formConvenio.controls['cedula'].setValue(
-                this.abonado.idcliente_clientes.cedula
-              );
-              this.formConvenio.controls['nombre'].setValue(
-                this.abonado.idcliente_clientes.nombre
-              );
-              this.sumTotaltarifa();
-              this.pagomensual = 0;
-              this.formConvenio.controls['cuotas'].setValue('');
-              this.nropagos = 0;
-              this.formConvenio.controls['cuotafinal'].setValue('');
-              this.swbuscando = false;
-              this.txtbuscar = 'Abonado';
-            },
-            error: (err) =>
-              console.error(
-                'Al recuperar las Planillas sin cobrar por Abonado: ',
-                err.error
-              ),
-          });
+        next: (_datos) => {
+          console.log(_datos);
+          this.abonado = _datos;
+          this.facService
+            .getFacSincobro(_datos.idresponsable.idcliente)
+            .subscribe({
+              next: (datos) => {
+                console.log(datos);
+                this._sincobro = datos;
+                this.formConvenio.controls['cedula'].setValue(
+                  this.abonado.idcliente_clientes.cedula
+                );
+                this.formConvenio.controls['nombre'].setValue(
+                  this.abonado.idcliente_clientes.nombre
+                );
+                this.sumTotaltarifa();
+                this.pagomensual = 0;
+                this.formConvenio.controls['cuotas'].setValue('');
+                this.nropagos = 0;
+                this.formConvenio.controls['cuotafinal'].setValue('');
+                this.swbuscando = false;
+                this.txtbuscar = 'Abonado';
+              },
+              error: (err) =>
+                console.error(
+                  'Al recuperar las Planillas sin cobrar por Abonado: ',
+                  err.error
+                ),
+            });
         },
         error: (err) => console.error('Al recuperar el Abonado: ', err.error),
       });
@@ -197,9 +201,11 @@ export class AddConvenioComponent implements OnInit {
     let com = 0;
     let inte = 0;
     this._sincobro.forEach((item: any) => {
+      console.log(item);
+      console.log(this.cInteres(item))
       let interes = this.cInteres(item);
       if (
-        this._sincobro[i].idmodulo.idmodulo === 3 &&
+        this._sincobro[i].idmodulo === 3 &&
         this._sincobro[i].idabonado != null
       ) {
         com = 1;
@@ -207,9 +213,10 @@ export class AddConvenioComponent implements OnInit {
       if (this._sincobro[i].idmodulo.idmodulo === 4) {
         com = 0;
       }
-      this._sincobro[i].totaltarifa += interes;
+      this._sincobro[i].total += interes;
       inte += interes;
-      suma += this._sincobro[i].totaltarifa + com;
+      suma += this._sincobro[i].total + com;
+      console.log(suma);
       i++;
     });
     this.total = suma;
@@ -321,44 +328,48 @@ export class AddConvenioComponent implements OnInit {
 
   /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
   cInteres(factura: any) {
-    this.totInteres = 0;
-    this.arrCalculoInteres = [];
-    let interes: number = 0;
-    if (factura.estado != 3 && factura.formapago != 4) {
-      let fec = factura.feccrea.toString().split('-', 2);
-      let fechai: Date = new Date(`${fec[0]}-${fec[1]}-02`);
-      let fechaf: Date = new Date();
-      this.factura = factura;
-      fechaf.setMonth(fechaf.getMonth() - 1);
-      while (fechai <= fechaf) {
-        this.calInteres = {} as calcInteres;
-        let query = this._intereses.find(
-          (interes: { anio: number; mes: number }) =>
-            interes.anio === +fechai.getFullYear()! &&
-            interes.mes === +fechai.getMonth()! + 1
-        );
-        if (!query) {
-          this.calInteres.anio = +fechai.getFullYear()!;
-          this.calInteres.mes = +fechai.getMonth()! + 1;
-          this.calInteres.interes = 0;
-          query = this.calInteres;
-        } else {
-          this.calInteres.anio = query.anio;
-          this.calInteres.mes = query.mes;
-          this.calInteres.interes = query.porcentaje;
-          this.calInteres.valor = factura.totaltarifa;
-          this.arrCalculoInteres.push(this.calInteres);
+    console.log(factura)
+      this.totInteres = 0;
+      this.arrCalculoInteres = [];
+      let interes: number = 0;
+      if (factura.estado != 3 && factura.formapago != 4) {
+        let fec = factura.fechaemision.toString().split('-', 2);
+        //let fec = factura.feccrea.toString().split('-', 2);
+        let fechai: Date = new Date(`${fec[0]}-${fec[1]}-02`);
+        let fechaf: Date = new Date();
+        console.log(fec)
+        //this.factura = factura;
+        fechaf.setMonth(fechaf.getMonth() - 1);
+        while (fechai <= fechaf) {
+          this.calInteres = {} as calcInteres;
+          let query = this._intereses.find(
+            (interes: { anio: number; mes: number }) =>
+              interes.anio === +fechai.getFullYear()! &&
+              interes.mes === +fechai.getMonth()! + 1
+          );
+          if (!query) {
+            this.calInteres.anio = +fechai.getFullYear()!;
+            this.calInteres.mes = +fechai.getMonth()! + 1;
+            this.calInteres.interes = 0;
+            query = this.calInteres;
+          } else {
+            this.calInteres.anio = query.anio;
+            this.calInteres.mes = query.mes;
+            this.calInteres.interes = query.porcentaje;
+            this.calInteres.valor = factura.total;
+            this.arrCalculoInteres.push(this.calInteres);
+          }
+          fechai.setMonth(fechai.getMonth() + 1);
         }
-        fechai.setMonth(fechai.getMonth() + 1);
+        this.arrCalculoInteres.forEach((item: any) => {
+        console.log(item)
+          //this.totInteres += (item.interes * item.valor) / 100;
+          interes += (item.interes * item.valor) / 100;
+          // this.subtotal();
+        });
       }
-      this.arrCalculoInteres.forEach((item: any) => {
-        //this.totInteres += (item.interes * item.valor) / 100;
-        interes += (item.interes * item.valor) / 100;
-        // this.subtotal();
-      });
+      return interes;
     }
-    return interes;
-  }
 
   //Calcula y guarda en el arreglo this.rubros los totales de cada rubro de las facturas que se 'convenian'
   sumaRubros(i: number) {

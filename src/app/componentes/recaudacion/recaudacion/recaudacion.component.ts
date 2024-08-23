@@ -229,7 +229,6 @@ export class RecaudacionComponent implements OnInit {
       error: (e) => console.error(e),
     });
   }
-
   validarCaja() {
     let fecha: Date = new Date();
     let nrofac = this._nroFactura.split('-', 3);
@@ -389,6 +388,7 @@ export class RecaudacionComponent implements OnInit {
           this.loadingService.hideLoading();
         }
         sincobrar.map(async (item: any, i: number) => {
+          console.log(item);
           if (item.idAbonado != 0 && item.idmodulo != 27) {
             const abonado: Abonados = await this.getAbonado(item.idAbonado);
             item.direccion = abonado.direccionubicacion;
@@ -1081,28 +1081,17 @@ export class RecaudacionComponent implements OnInit {
   }
   /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
   cInteres(factura: any) {
-    console.log(factura);
+  console.log(factura)
     this.totInteres = 0;
     this.arrCalculoInteres = [];
     let interes: number = 0;
-
     if (factura.estado != 3 && factura.formapago != 4) {
-      let fec: any;
-      let fechai: Date;
-      if (factura.idmodulo === 3 || factura.idmodulo === 4) {
-        if (factura.fechaemision != null) {
-          fec = factura.fechaemision.toString().split('-', 2);
-        } else {
-          fec = factura.feccrea.toString().split('-', 2);
-        }
-
-        fechai = new Date(`${fec[0]}-${+fec[1]! + 1}-01`);
-      } else {
-        fec = factura.feccrea.toString().split('-', 2);
-        fechai = new Date(`${fec[0]}-${+fec[1]! + 1}-01`);
-      }
+      let fec = factura.fechaemision.toString().split('-', 2);
+      //let fec = factura.feccrea.toString().split('-', 2);
+      let fechai: Date = new Date(`${fec[0]}-${fec[1]}-02`);
       let fechaf: Date = new Date();
-      this.factura = factura;
+      console.log(fec)
+      //this.factura = factura;
       fechaf.setMonth(fechaf.getMonth() - 1);
       while (fechai <= fechaf) {
         this.calInteres = {} as calcInteres;
@@ -1126,6 +1115,7 @@ export class RecaudacionComponent implements OnInit {
         fechai.setMonth(fechai.getMonth() + 1);
       }
       this.arrCalculoInteres.forEach((item: any) => {
+      console.log(item)
         //this.totInteres += (item.interes * item.valor) / 100;
         interes += (item.interes * item.valor) / 100;
         // this.subtotal();
