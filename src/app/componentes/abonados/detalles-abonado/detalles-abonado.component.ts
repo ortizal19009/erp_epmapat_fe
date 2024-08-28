@@ -127,20 +127,24 @@ export class DetallesAbonadoComponent implements OnInit {
     this.s_loading.showLoading();
     this.facService.getByIdabonadorango(idabonado, this.rango).subscribe({
       next: (datos: any) => {
-        datos.forEach(async (item: any) => {
+        datos.map(async (item: any) => {
           //console.log(item);
           //console.log(this.s_interes.cInteres(item));
+          item.feccrea = await this.getEmisionoByFactura(item.idfactura);
+
           if (item.pagado === 0) {
             item.interescobrado = this.cInteres(item);
+            console.log( this.cInteres(item));
           }
           if (item.pagado === 1 && item.interescobrado === null) {
             item.interescobrado = 0;
           }
-          let fecemision = await this.getEmisionoByFactura(item.idfactura);
-          item.feccrea = fecemision;
-          this.s_loading.hideLoading();
+          /*           item.feccrea = await this.getEmisionoByFactura(item.idfactura);
+           */ this.s_loading.hideLoading();
         });
+        console.log(datos)
         this._facturas = datos;
+
       },
       error: (err) => console.error(err.error),
     });
@@ -320,9 +324,15 @@ export class DetallesAbonadoComponent implements OnInit {
             next: (datos: any) => {
               lectura = datos;
               if (datos != null) {
-                this.s_pdfRecaudacion.reimprimircomprobantePago(lectura, d_factura);
+                this.s_pdfRecaudacion.reimprimircomprobantePago(
+                  lectura,
+                  d_factura
+                );
               } else {
-                this.s_pdfRecaudacion.reimprimircomprobantePago(null, d_factura);
+                this.s_pdfRecaudacion.reimprimircomprobantePago(
+                  null,
+                  d_factura
+                );
               }
             },
             error: (e) => console.error(e),
@@ -368,8 +378,8 @@ export class DetallesAbonadoComponent implements OnInit {
     this.facService.getSinCobrarAboMod(this._abonado[0].idabonado).subscribe({
       next: async (facturas: any) => {
         this._sincobro = facturas;
-        facturas.forEach((item: any) => {
-          let interes = this.cInteres(item);
+        facturas.forEach(async (item: any) => {
+          let interes = await this.cInteres(item);
           this.sumInteres += interes;
         });
         let _rxf = await this.rubxfacService.getRubrosIdAbonado(
@@ -412,7 +422,7 @@ export class DetallesAbonadoComponent implements OnInit {
     this.s_loading.showLoading();
     let n_factura: Facturas = new Facturas();
     //this.modalSize = 'sm';
-    this._sincobro.forEach((item: Facturas) => {
+    this._sincobro.forEach((item: any) => {
       n_factura = item;
       n_factura.swcondonar = true;
 
@@ -423,17 +433,14 @@ export class DetallesAbonadoComponent implements OnInit {
             item.idfactura
           );
           if (_multa.length > 0) {
-            console.log(_multa);
             multa = _multa[0].cantidad * _multa[0].valorunitario;
           }
           this.condonar.idfactura_facturas = item;
-          this.condonar.totalinteres = this.cInteres(item);
+          this.condonar.totalinteres = await this.cInteres(item);
           this.condonar.totalmultas = multa;
           this.condonar.feccrea = this.date;
           this.condonar.usucrea = this.authService.idusuario;
           this.condonar.razoncondonacion = this.razonCondonacion;
-          console.log(this.condonar);
-          console.log(n_factura);
           this.s_condonar.saveCondonacion(this.condonar).subscribe({
             next: (datos: any) => {
               console.log(datos);
@@ -515,7 +522,7 @@ export class DetallesAbonadoComponent implements OnInit {
     //this._rxf = [];
 
     facturas.forEach(async (factura: any) => {
-      factura.interes = this.cInteres(factura);
+      factura.interes = await this.cInteres(factura);
       const sumaFacPromise = this.getSumaFac(factura.idfactura);
       sumaFacPromises.push(sumaFacPromise);
     });
@@ -613,12 +620,26 @@ export class DetallesAbonadoComponent implements OnInit {
 
   /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
   cInteres(factura: any) {
+    console.log(factura);
     this.totInteres = 0;
     this.arrCalculoInteres = [];
+    /*     if (
+      (factura.idmodulo.idmodulo == 4 || factura.idmodulo.idmodulo == 3) &&
+      factura.idabonado > 0
+    ) {
+      let fechaemision = await this.getEmisionoByFactura(factura.idfactura);
+      console.log(fechaemision);
+      factura.feccrea = fechaemision;
+    } */
+
     let interes: number = 0;
     if (factura.estado != 3 && factura.formapago != 4) {
       let fec = factura.feccrea.toString().split('-', 2);
-      let fechai: Date = new Date(`${fec[0]}-${fec[1]}-02`);
+      let mes = +fec[1]! +1
+      if(mes > 12){
+        mes = 1
+      }
+      let fechai: Date = new Date(`${fec[0]}-${mes }-01`);
       let fechaf: Date = new Date();
       this.factura = factura;
       fechaf.setMonth(fechaf.getMonth() - 1);
@@ -649,7 +670,7 @@ export class DetallesAbonadoComponent implements OnInit {
         // this.subtotal();
       });
     }
-    return interes;
+    return +interes.toFixed(2);
   }
   async getSumaFac(idfactura: number): Promise<any> {
     const sumaFac = await this.rubxfacService

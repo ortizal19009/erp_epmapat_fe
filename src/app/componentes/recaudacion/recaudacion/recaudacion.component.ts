@@ -648,7 +648,6 @@ export class RecaudacionComponent implements OnInit {
       this.rubxfacService.getByIdfactura1(idfactura).subscribe({
         next: (detalle) => {
           this._rubrosxfac = detalle;
-          //this.calcularInteres(idfactura);
           this.subtotal();
         },
         error: (err) =>
@@ -672,7 +671,6 @@ export class RecaudacionComponent implements OnInit {
                 ),
             });
           }
-          //this.calcularInteres(idfactura);
           this.subtotal();
         },
         error: (err) =>
@@ -1029,69 +1027,24 @@ export class RecaudacionComponent implements OnInit {
     });
   }
 
-  calcularInteres(idfactura: number) {
-    let idFactura = idfactura;
-    this.totInteres = 0;
-    this.arrCalculoInteres = [];
-    let interes: number = 0;
-    let facturaI = {} as facturaI;
-    this.facService.getById(idFactura).subscribe({
-      next: (datos: any) => {
-        //factura.idfactura = datos.idfactura
-        //facturaI.direccion =
-        //console.log(this.cInteres(datos));
-
-        if (datos.estado != 3 && datos.formapago != 4) {
-          let fec = datos.feccrea.toString().split('-', 2);
-          let fechai: Date = new Date(`${fec[0]}-${fec[1]}-01`);
-          let fechaf: Date = new Date();
-          this.factura = datos;
-          fechaf.setMonth(fechaf.getMonth() - 1);
-          while (fechai <= fechaf) {
-            this.calInteres = {} as calcInteres;
-            let query = this._intereses.find(
-              (interes: { anio: number; mes: number }) =>
-                interes.anio === +fechai.getFullYear()! &&
-                interes.mes === +fechai.getMonth()! + 1
-            );
-            if (!query) {
-              this.calInteres.anio = +fechai.getFullYear()!;
-              this.calInteres.mes = +fechai.getMonth()! + 1;
-              this.calInteres.interes = 0;
-              this.calInteres.valor = datos.totaltarifa;
-              query = this.calInteres;
-            } else {
-              this.calInteres.anio = query.anio;
-              this.calInteres.mes = query.mes;
-              this.calInteres.interes = query.porcentaje;
-              this.calInteres.valor = datos.totaltarifa;
-            }
-            this.arrCalculoInteres.push(this.calInteres);
-            fechai.setMonth(fechai.getMonth() + 1);
-          }
-          this.arrCalculoInteres.forEach((item: any) => {
-            this.totInteres += (+item.interes! * item.valor) / 100;
-            interes += (+item.interes! * item.valor) / 100;
-          });
-        }
-        this.subtotal();
-      },
-      error: (e) => console.error(e),
-    });
-  }
   /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
   cInteres(factura: any) {
   console.log(factura)
     this.totInteres = 0;
     this.arrCalculoInteres = [];
+
+    
     let interes: number = 0;
     if (factura.estado != 3 && factura.formapago != 4) {
       let fec = factura.fechaemision.toString().split('-', 2);
       //let fec = factura.feccrea.toString().split('-', 2);
-      let fechai: Date = new Date(`${fec[0]}-${fec[1]}-02`);
+      let mes = +fec[1]! +1
+      if(mes > 12){
+        mes = 1
+      }
+      let fechai: Date = new Date(`${fec[0]}-${mes }-01`);
       let fechaf: Date = new Date();
-      console.log(fec)
-      //this.factura = factura;
+      //this.factura = f(fec)actura;
       fechaf.setMonth(fechaf.getMonth() - 1);
       while (fechai <= fechaf) {
         this.calInteres = {} as calcInteres;
