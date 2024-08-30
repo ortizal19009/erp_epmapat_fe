@@ -245,7 +245,7 @@ export class ListarInteresesComponent implements OnInit {
     });
   }
 
-  calcularInteres() {
+  _calcularInteres() {
     let idFactura = +this.idfactura!;
     this.totInteres = 0;
     this.arrCalculoInteres = [];
@@ -282,6 +282,13 @@ export class ListarInteresesComponent implements OnInit {
       error: (e) => console.error(e),
     });
   }
+
+  async calcularInteres() {
+    console.log(this.idfactura);
+    let factura = await this.s_facturas.getByIdAsync(+this.idfactura!);
+    console.log(factura);
+    console.log(await this.interService.cInteres(factura));
+  }
 }
 
 interface Interes {
@@ -295,4 +302,3 @@ interface calcInteres {
   interes: number;
   valor: number;
 }
-
