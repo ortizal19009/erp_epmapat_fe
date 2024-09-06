@@ -113,7 +113,6 @@ export class RutasmorasComponent implements OnInit {
               }
             })
             .then(async () => {
-              console.log('HOLA MUNDO SEGUNDO BLOQUE');
             })
             .catch((e) => console.error(e));
         });
@@ -370,7 +369,6 @@ export class RutasmorasComponent implements OnInit {
   listarIntereses() {
     this.interService.getListaIntereses().subscribe({
       next: (datos) => {
-        console.log(datos);
         this._intereses = datos;
       },
       error: (err) => console.error(err.error),
