@@ -521,12 +521,9 @@ export class DetallesAbonadoComponent implements OnInit {
 
     facturas.forEach(async (factura: any) => {
       factura.interes = await this.cInteres(factura);
-      const sumaFacPromise = this.getSumaFac(factura.idfactura);
-      sumaFacPromises.push(sumaFacPromise);
     });
     let d_facturas = [];
     // Wait for all `getSumaFac()` promises to resolve
-    const sumaFacResults = await Promise.all(sumaFacPromises);
     let t_subtotal: number = 0;
     let t_intereses: number = 0;
     let t_total: number = 0;
@@ -546,10 +543,10 @@ export class DetallesAbonadoComponent implements OnInit {
     // Iterate through facturas and add sumaFac values
     for (let i = 0; i < facturas.length; i++) {
       const factura = facturas[i];
-      const sumaFac = sumaFacResults[i];
+      const sumaFac = await this.getSumaFac(facturas[i].idfactura);
       facturas[i].sumaFac = sumaFac;
       let fecEmision = await this.getFechaEmision(facturas[i].idfactura);
-      let suma = +factura.sumaFac.toFixed(2)! + +factura.interes.toFixed(2)!;
+      let suma = +factura.sumaFac + +factura.interes;
       d_facturas.push([
         factura.idfactura,
         //fecEmision.slice(0, 7),

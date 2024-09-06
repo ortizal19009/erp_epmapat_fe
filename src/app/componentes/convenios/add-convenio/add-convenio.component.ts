@@ -201,7 +201,7 @@ export class AddConvenioComponent implements OnInit {
     let com = 0;
     let inte = 0;
     this._sincobro.forEach(async (item: any) => {
-      let interes = this.cInteres(item);
+      let interes = await this.cInteres(item);
       if (
         this._sincobro[i].idmodulo === 3 &&
         this._sincobro[i].idabonado != null
@@ -215,9 +215,10 @@ export class AddConvenioComponent implements OnInit {
       inte += interes;
       suma += this._sincobro[i].total + com;
       console.log(suma);
+      this.total = suma;
       i++;
     });
-    this.total = suma;
+   
     this.totInteres = inte;
     let cuotainicial = Math.round(this.total * this.porcentaje * 100) / 100;
     this.formConvenio.controls['cuotainicial'].setValue(cuotainicial);
@@ -226,9 +227,9 @@ export class AddConvenioComponent implements OnInit {
     let com = 0;
     if (sincobro.idmodulo.idmodulo === 3 && sincobro.idabonado != null) {
       com = 1;
-      return sincobro.totaltarifa + com;
+      return sincobro.total + com;
     }
-    return sincobro.totaltarifa;
+    return sincobro.total;
   }
 
   changeCuotainicial() {
@@ -323,9 +324,14 @@ export class AddConvenioComponent implements OnInit {
       error: (err) => console.error(err.error),
     });
   }
-
-  /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
   cInteres(factura: any) {
+    let interes = this.interService
+      .getInteresFactura(factura.idfactura)
+      .toPromise();
+    return interes;
+  }
+  /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
+  _cInteres(factura: any) {
     console.log(factura)
       this.totInteres = 0;
       this.arrCalculoInteres = [];
