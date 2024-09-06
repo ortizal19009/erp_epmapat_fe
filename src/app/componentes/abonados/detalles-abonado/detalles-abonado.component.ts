@@ -133,8 +133,8 @@ export class DetallesAbonadoComponent implements OnInit {
           item.feccrea = await this.getEmisionoByFactura(item.idfactura);
 
           if (item.pagado === 0) {
-            item.interescobrado = this.cInteres(item);
-            console.log( this.cInteres(item));
+            let inte = await this.cInteres(item);
+            item.interescobrado = inte.toFixed(2);
           }
           if (item.pagado === 1 && item.interescobrado === null) {
             item.interescobrado = 0;
@@ -142,9 +142,7 @@ export class DetallesAbonadoComponent implements OnInit {
           /*           item.feccrea = await this.getEmisionoByFactura(item.idfactura);
            */ this.s_loading.hideLoading();
         });
-        console.log(datos)
         this._facturas = datos;
-
       },
       error: (err) => console.error(err.error),
     });
@@ -617,9 +615,14 @@ export class DetallesAbonadoComponent implements OnInit {
       .toPromise();
     return fechaEmision;
   }
-
-  /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
   cInteres(factura: any) {
+    let interes = this.s_interes
+      .getInteresFactura(factura.idfactura)
+      .toPromise();
+    return interes;
+  }
+  /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
+  _cInteres(factura: any) {
     console.log(factura);
     this.totInteres = 0;
     this.arrCalculoInteres = [];
@@ -635,11 +638,11 @@ export class DetallesAbonadoComponent implements OnInit {
     let interes: number = 0;
     if (factura.estado != 3 && factura.formapago != 4) {
       let fec = factura.feccrea.toString().split('-', 2);
-      let mes = +fec[1]! +1
-      if(mes > 12){
-        mes = 1
+      let mes = +fec[1]! + 1;
+      if (mes > 12) {
+        mes = 1;
       }
-      let fechai: Date = new Date(`${fec[0]}-${mes }-01`);
+      let fechai: Date = new Date(`${fec[0]}-${mes}-01`);
       let fechaf: Date = new Date();
       this.factura = factura;
       fechaf.setMonth(fechaf.getMonth() - 1);

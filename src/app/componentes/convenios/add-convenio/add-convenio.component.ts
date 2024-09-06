@@ -200,9 +200,7 @@ export class AddConvenioComponent implements OnInit {
     let i = 0;
     let com = 0;
     let inte = 0;
-    this._sincobro.forEach((item: any) => {
-      console.log(item);
-      console.log(this.cInteres(item))
+    this._sincobro.forEach(async (item: any) => {
       let interes = this.cInteres(item);
       if (
         this._sincobro[i].idmodulo === 3 &&

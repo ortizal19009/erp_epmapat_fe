@@ -89,7 +89,7 @@ export class RecaudacionComponent implements OnInit {
   datoBusqueda: number = 0;
   /* Intereses */
   calInteres = {} as calcInteres;
-  totInteres: number = 0;
+  totInteres: any = 0;
   arrCalculoInteres: any = [];
   factura: Facturas = new Facturas();
   _intereses: any;
@@ -388,7 +388,6 @@ export class RecaudacionComponent implements OnInit {
           this.loadingService.hideLoading();
         }
         sincobrar.map(async (item: any, i: number) => {
-          console.log(item);
           if (item.idAbonado != 0 && item.idmodulo != 27) {
             const abonado: Abonados = await this.getAbonado(item.idAbonado);
             item.direccion = abonado.direccionubicacion;
@@ -410,17 +409,16 @@ export class RecaudacionComponent implements OnInit {
           }
           const modulo: Modulos = await this.getModulo(item.idmodulo);
           item.modulo = modulo.descripcion;
-          let interes = 0;
+          let interes: any = 0;
           // console.log(item);
           if (
             (item.formapago != 4 || item.idmodulo != 27) &&
             (item.swcondonar === false || item.swcondonar === null)
           ) {
-            interes = +this.cInteres(item).toFixed(2);
-            console.log(interes);
-            item.interes = interes;
+            interes = await this.cInteres(item);
+            item.interes = +interes!;
           } else {
-            item.interes = interes;
+            item.interes = +interes!;
           }
           i++;
           if (i === sincobrar.length) {
@@ -637,13 +635,13 @@ export class RecaudacionComponent implements OnInit {
     this.disabledcobro = false;
   }
 
-  getRubroxfac(idfactura: number, idmodulo: number, factura: any) {
+  async getRubroxfac(idfactura: number, idmodulo: number, factura: any) {
     this.totInteres = 0;
     this._rubrosxfac = null;
     let _lecturas: any;
     this.consumo = 0;
     this.idfactura = idfactura;
-    this.totInteres = +this.cInteres(factura).toFixed(2);
+    this.totInteres = await this.cInteres(factura);
     if (idmodulo == 8) {
       this.rubxfacService.getByIdfactura1(idfactura).subscribe({
         next: (detalle) => {
@@ -1029,20 +1027,24 @@ export class RecaudacionComponent implements OnInit {
 
   /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
   cInteres(factura: any) {
-  console.log(factura)
+    let interes = this.interService
+      .getInteresFactura(factura.idfactura)
+      .toPromise();
+    return interes;
+  }
+  _cInteres(factura: any) {
+    console.log(factura);
     this.totInteres = 0;
     this.arrCalculoInteres = [];
-
-    
     let interes: number = 0;
     if (factura.estado != 3 && factura.formapago != 4) {
       let fec = factura.fechaemision.toString().split('-', 2);
       //let fec = factura.feccrea.toString().split('-', 2);
-      let mes = +fec[1]! +1
-      if(mes > 12){
-        mes = 1
+      let mes = +fec[1]! + 1;
+      if (mes > 12) {
+        mes = 1;
       }
-      let fechai: Date = new Date(`${fec[0]}-${mes }-01`);
+      let fechai: Date = new Date(`${fec[0]}-${mes}-01`);
       let fechaf: Date = new Date();
       //this.factura = f(fec)actura;
       fechaf.setMonth(fechaf.getMonth() - 1);
@@ -1068,7 +1070,7 @@ export class RecaudacionComponent implements OnInit {
         fechai.setMonth(fechai.getMonth() + 1);
       }
       this.arrCalculoInteres.forEach((item: any) => {
-      console.log(item)
+        console.log(item);
         //this.totInteres += (item.interes * item.valor) / 100;
         interes += (item.interes * item.valor) / 100;
         // this.subtotal();
