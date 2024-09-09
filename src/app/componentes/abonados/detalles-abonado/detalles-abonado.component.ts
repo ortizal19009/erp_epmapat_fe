@@ -130,8 +130,10 @@ export class DetallesAbonadoComponent implements OnInit {
         datos.map(async (item: any) => {
           //console.log(item);
           //console.log(this.s_interes.cInteres(item));
-          item.feccrea = await this.getEmisionoByFactura(item.idfactura);
-
+          let _feccrea = await this.getEmisionoByFactura(item.idfactura);
+          if (_feccrea != null) {
+            item.feccrea = _feccrea;
+          }
           if (item.pagado === 0) {
             let inte = await this.cInteres(item);
             item.interescobrado = inte.toFixed(2);
@@ -155,6 +157,8 @@ export class DetallesAbonadoComponent implements OnInit {
       factura.estado === 3 &&
       factura.pagado === 1
     ) {
+      return false;
+    } else if (factura.fechaconvenio != null || factura.convenio === 1) {
       return false;
     } else {
       return true;

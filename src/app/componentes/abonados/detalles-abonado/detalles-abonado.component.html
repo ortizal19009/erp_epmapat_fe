@@ -137,7 +137,7 @@
                                        <td class="col-1"><i class="bi bi-cash-coin" [hidden]="validarpago(factura)"></i>
                                           {{ i+1}}</td>
                                        <td>{{ factura.idfactura }}</td>
-                                       <td>{{factura.feccrea | date: 'dd-MM-y'}}</td>
+                                       <td>{{factura.feccrea | formatFecha}}</td>
                                        <td class="text-left">{{ factura.idmodulo.descripcion }}</td>
                                        <td>{{factura.nrofactura}}</td>
                                        <td class="text-right">{{valorPagado(
