@@ -257,7 +257,7 @@ export class FacturaService {
   }
 
   //Update async
-  async updateFacturaAsync(fac: Facturas): Promise<Object> {
+  async updateFacturaAsync(fac: any): Promise<Object> {
     const observable = this.http.put(`${baseUrl}/${fac.idfactura}`, fac);
     return await firstValueFrom(observable);
   }

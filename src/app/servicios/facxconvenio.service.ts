@@ -25,7 +25,7 @@ export class FacxconvenioService {
    }
 
    //Save Facxconvenio async
-   async saveFacxconvenioAsync(facxconv: Facxconvenio): Promise<Object> {
+   async saveFacxconvenioAsync(facxconv: any): Promise<Object> {
       const observable = this.http.post(baseUrl, facxconv);
       return await firstValueFrom(observable);
    }
