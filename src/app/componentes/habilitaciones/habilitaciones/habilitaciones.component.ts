@@ -93,7 +93,6 @@ export class HabilitacionesComponent implements OnInit {
   listarSuspensiones() {
     this.suspeService.getListaHabilitaciones().subscribe({
       next: (datos) => {
-        console.log(datos);
         this.suspensiones = datos;
       },
       error: (e) => console.error(e),
@@ -151,9 +150,16 @@ export class HabilitacionesComponent implements OnInit {
   getLastHabilitacion() {
     this.suspeService.getUltimo().subscribe({
       next: (datos: any) => {
-        this.f_habilitacion.patchValue({
-          numero: datos.numero + 1,
-        });
+        if(datos != null){
+          this.f_habilitacion.patchValue({
+            numero: datos.numero + 1,
+          });
+        }else{
+          this.f_habilitacion.patchValue({
+            numero: 1
+          })
+        }
+  
       },
     });
   }

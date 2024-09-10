@@ -139,12 +139,14 @@
                            <div class="input-group-prepend">
                               <label class="input-group-text" for="idcategoria_categorias">Categoría</label>
                            </div>
-                           <select type="text" class="custom-select" formControlName="idcategoria_categorias"
-                              id="idcategoria_categorias" [compareWith]="compararCategorias">
+                           <input type="text" class="form-control form-control-sm" value = {{setCategoria}}
+                           id="idcategoria_categorias" readonly>
+                      <!--      <select type="text" class="custom-select" formControlName="idcategoria_categorias"
+                              id="idcategoria_categorias" [compareWith]="compararCategorias" >
                               <option [ngValue]="cate" *ngFor="let cate of categoria">
                                  {{ cate.descripcion }}
                               </option>
-                           </select>
+                           </select> -->
                         </div>
                      </div>
 
@@ -230,7 +232,7 @@
                               <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Municipio</span>
                            </div>
                            <input type="checkbox" class="form-control text-center" formControlName="municipio"
-                              aria-label="Small">
+                              aria-label="Small" >
                         </div>
                      </div>
                      <div class="form-group col-md-3 my-0 py-0">
@@ -240,7 +242,7 @@
                                  Alcantarillado</span>
                            </div>
                            <input type="checkbox" class="form-control text-center" formControlName="swalcantarillado"
-                              aria-label="Small">
+                              aria-label="Small" >
                         </div>
                      </div>
 
