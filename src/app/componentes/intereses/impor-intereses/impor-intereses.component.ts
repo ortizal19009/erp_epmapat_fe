@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import * as ExcelJS from 'exceljs';
 import { Observable, forkJoin } from 'rxjs';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { InteresesService } from 'src/app/servicios/intereses.service';
 
 @Component({
@@ -17,7 +18,7 @@ export class ImporInteresesComponent implements OnInit {
    btnImportar: boolean = false;
    importedData: any[][] = []; // Declarar la matriz de dos dimensiones
 
-   constructor(public router: Router, private inteService: InteresesService) { }
+   constructor(public router: Router, private inteService: InteresesService, private authService: AutorizaService) { }
 
    ngOnInit(): void {
    }
@@ -112,7 +113,7 @@ export class ImporInteresesComponent implements OnInit {
          interes.anio = this.importedData[i][0];
          interes.mes = this.importedData[i][1];
          interes.porcentaje = this.importedData[i][2];
-         interes.usucrea = 1
+         interes.usucrea =  this.authService.idusuario
          interes.feccrea = fechaHora;
          this.inteService.saveIntereses(interes).subscribe({
             next: datos => {

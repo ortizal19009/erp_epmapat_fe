@@ -214,7 +214,7 @@ export class AddFacturacionComponent implements OnInit {
       planilla.estadoconvenio = 0;
       planilla.formapago = this.formCuotas.value.formapago;
       planilla.valorbase = (this.totfac + this.totiva) / n;
-      planilla.usucrea = 1;
+      planilla.usucrea =  this.authService.idusuario;
       planilla.estado = 1;
       //planilla.fechaanulacion= ;
       planilla.swiva = this.totiva;
@@ -236,7 +236,7 @@ export class AddFacturacionComponent implements OnInit {
           liquidafac.estado = 0;
           liquidafac.idfacturacion_facturacion = this._facturacion;
           liquidafac.idfactura_facturas = this.factura;
-          liquidafac.usucrea = 1;
+          liquidafac.usucrea =  this.authService.idusuario;
           // let fecha: Date = new Date();
           let fecha = new Date();
           // console.log("Cuota= " + i)
