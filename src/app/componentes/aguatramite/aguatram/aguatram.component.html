@@ -61,7 +61,6 @@
             </div>
          </form>
       </div>
-
       <div *ngIf="cambioCategoria">
          <div class="container-fluid">
             <div class="row justify-content-center">
@@ -72,8 +71,7 @@
                         <option *ngFor="let categoria of categorias" [ngValue]="categoria">{{categoria.descripcion}}
                         </option>
                      </select>
-
-                     <div class="form-group col-md-3 my-0 py-0"
+                     <div class="form-group col-md-4 my-0 py-0"
                         [hidden]="f_categoria.value.idcategoria_categorias.idcategoria != 9">
                         <div class="input-group input-group-sm mb-3">
                            <div class="input-group-prepend">

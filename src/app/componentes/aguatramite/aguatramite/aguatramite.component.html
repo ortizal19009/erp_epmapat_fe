@@ -21,7 +21,7 @@
                   </div>
                   <div class="col-sm-2">
                      <button type="submit" class="btn btn-sm btn-primary" (click)="listarByTipoTramite()">
-                        <i class="fa fa-search" aria-hidden="true"></i> Buscar
+                        <i class="fa fa-search" aria-hidden="true"></i> 
                      </button>
                   </div>
                </div>
@@ -61,22 +61,22 @@
             <thead class="text-center cabecera">
                <tr>
                   <th class="col-sm-1"></th>
-                  <th class="col-sm-3">Cliente</th>
+                  <th class="col-sm-2">Cliente</th>
                   <th class="col-sm-1">Medidor</th>
-                  <th class="col-sm-1">F.Inicia</th>
+                  <th class="col-sm-2">F.Inicia</th>
                   <th class="col-sm-2">Estado</th>
-                  <th class="col-sm-4">Observaciones</th>
+                  <th class="col-sm-3">Observaciones</th>
                   <th class="col-sm-1" *ngIf="optAcciones"></th>
                </tr>
             </thead>
             <tbody>
                <tr *ngFor="let aguatramite of _aguatramite | filter:filterTerm; let i= index">
                   <td class="text-center font-weight-bold small">{{i+1}}</td>
-                  <td>{{ aguatramite.idcliente_clientes.nombre }}</td>
+                  <td class="description">{{ aguatramite.idcliente_clientes.nombre }}</td>
                   <td>{{ aguatramite.codmedidor }}</td>
                   <td class="text-center">{{ aguatramite.feccrea | date: 'dd-MM-y' }}</td>
                   <td>{{ setEstado( aguatramite.estado) }}</td>
-                  <td>{{ aguatramite.observacion }}</td>
+                  <td class="description">{{ aguatramite.observacion }}</td>
                   <td *ngIf="optAcciones">
                      <button class="badge badge-info mx-1" (click)="infoNuevoTramite( aguatramite )">
                         Información
