@@ -199,6 +199,7 @@ export class ModificarAbonadosComponent implements OnInit {
 
   cargarDatos() {
     this.v_idabonado = this.abonadoForm.value.idabonado;
+    this.onSubmit()
   }
 
   compararCategorias(o1: Categoria, o2: Categoria): boolean {

@@ -216,14 +216,14 @@
                               formControlName="medidorprincipal" aria-label="Small">
                         </div>
                      </div>
-                     <div class="form-group col-md-3 my-0 py-0">
+<!--                      <div class="form-group col-md-3 my-0 py-0">
                         <div class="input-group input-group-sm mb-3">
                            <div class="input-group-prepend">
                               <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Adulto
                                  mayor</span>
                            </div>
-                           <input type="checkbox" class="form-control text-center" formControlName="adultomayor"
-                              aria-label="Small">
+                           <input type="text" class="form-control text-center" formControlName="adultomayor"
+                              aria-label="Small" readonly>
                         </div>
                      </div>
                      <div class="form-group col-md-3 my-0 py-0">
@@ -231,10 +231,10 @@
                            <div class="input-group-prepend">
                               <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Municipio</span>
                            </div>
-                           <input type="checkbox" class="form-control text-center" formControlName="municipio"
-                              aria-label="Small" >
+                           <input type="text" class="form-control text-center" formControlName="municipio"
+                              aria-label="Small" readonly >
                         </div>
-                     </div>
+                     </div> -->
                      <div class="form-group col-md-3 my-0 py-0">
                         <div class="input-group input-group-sm mb-3">
                            <div class="input-group-prepend">
@@ -242,7 +242,7 @@
                                  Alcantarillado</span>
                            </div>
                            <input type="checkbox" class="form-control text-center" formControlName="swalcantarillado"
-                              aria-label="Small" >
+                              aria-label="Small" readonly>
                         </div>
                      </div>
 
@@ -273,36 +273,13 @@
                   </div>
 
                   <div class="mb-1 text-center">
-                     <button type="button" class="btn btn-sm btn-success" data-toggle="modal"
-                        data-target="#serviciosModal" (click)="cargarDatos()">
+                     <button type="button" class="btn btn-sm btn-success"  (click)="cargarDatos()">
                         <i class="fa fa-check-circle"></i> Aceptar
                      </button>
                      <button class="btn btn-sm btn-outline-success mx-2" (click)="retornar()">
                         <i class="fa fa-times-circle"></i> Cancelar</button>
                   </div>
                </form>
-            </div>
-         </div>
-         <!-- MODAL DE SERVICIOS -->
-         <div class="modal fade" id="serviciosModal" tabindex="-1" aria-labelledby="serviciosModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog">
-               <div class="modal-content">
-                  <div class="modal-header">
-                     <h5 class="modal-title" id="serviciosModalLabel">Modal title</h5>
-                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                     </button>
-                  </div>
-                  <div class="modal-body">
-                     <!-- <app-modificar-servxabo [v_idabonado]=v_idabonado></app-modificar-servxabo> -->
-                  </div>
-                  <div class="modal-footer">
-                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                     <button type="button" class="btn btn-primary" (click)="onSubmit()" data-dismiss="modal"> Save
-                        changes</button>
-                  </div>
-               </div>
             </div>
          </div>
          <!-- Modal Responsable Pago -->
