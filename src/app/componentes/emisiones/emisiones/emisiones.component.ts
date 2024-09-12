@@ -68,6 +68,7 @@ export class EmisionesComponent implements OnInit {
   modulo: Modulos = new Modulos();
   fechaemision: Date;
   novedades: any;
+  btnCrearLectura: boolean = false;
   /* emision individual */
   _lecturas: any = [];
   tarifa: any;
@@ -267,7 +268,6 @@ export class EmisionesComponent implements OnInit {
   getNuevasAnteriores() {
     this.s_emisionesIndividuales.getLecturasNuevas(this.idemision).subscribe({
       next: (nuevas: any) => {
-        console.log(nuevas);
         this.lecturasnuevas = nuevas;
       },
       error: (e) => console.error(e),
@@ -276,7 +276,6 @@ export class EmisionesComponent implements OnInit {
       .getLecturasAnteriores(this.idemision)
       .subscribe({
         next: (anteriores: number) => {
-          console.log(anteriores);
           this.lecturasanteriores = anteriores;
         },
         error: (e) => console.error(e),
@@ -439,16 +438,23 @@ export class EmisionesComponent implements OnInit {
       )
       .subscribe({
         next: (datos: any) => {
-          this._lectura = datos[0];
-          this.f_lecturas.patchValue({
-            lecturaanterior: datos[0].lecturaanterior,
-            lecturaactual: datos[0].lecturaactual,
-            idnovedad_novedades: datos[0].idnovedad_novedades,
-          });
+          if (datos.length > 0) {
+            this.btnCrearLectura = false;
+            this._lectura = datos[0];
+            this.f_lecturas.patchValue({
+              lecturaanterior: datos[0].lecturaanterior,
+              lecturaactual: datos[0].lecturaactual,
+              idnovedad_novedades: datos[0].idnovedad_novedades,
+            });
+          } else {
+            this.btnCrearLectura = true;
+            this._lectura.observaciones = '';
+          }
         },
         error: (e) => console.error(e),
       });
   }
+
   retornar() {
     this.optabonado = true;
   }
@@ -581,7 +587,9 @@ export class EmisionesComponent implements OnInit {
       lectura.idfactura = nuevoIdfactura;
       try {
         let newLectura = await this.s_lecturas.saveLecturaAsync(lectura);
-        await this.planilla(newLectura);
+        if (this.f_lecturas.value.lecturaactual > 0) {
+          await this.planilla(newLectura);
+        }
       } catch (error) {
         console.error(`Al guardar La lectura`, error);
       }
@@ -597,19 +605,21 @@ export class EmisionesComponent implements OnInit {
     let ln = new Lecturas();
     let la = new Lecturas();
     let emi = new Emisiones();
+    if (this.cerrado == 1) {
+      ln.idlectura = lectura.idlectura;
+      la.idlectura = this._lectura.idlectura;
+      emi.idemision = lectura.idemision;
+      emision_individual.idlecturanueva = ln;
+      emision_individual.idlecturaanterior = la;
+      emision_individual.idemision = emi;
+      this.s_emisionindividual
+        .saveEmisionIndividual(emision_individual)
+        .subscribe({
+          next: (d_emisionIndividual: any) => {},
+          error: (e) => console.error(e),
+        });
+    }
 
-    ln.idlectura = lectura.idlectura;
-    la.idlectura = this._lectura.idlectura;
-    emi.idemision = lectura.idemision;
-    emision_individual.idlecturanueva = ln;
-    emision_individual.idlecturaanterior = la;
-    emision_individual.idemision = emi;
-    this.s_emisionindividual
-      .saveEmisionIndividual(emision_individual)
-      .subscribe({
-        next: (d_emisionIndividual: any) => {},
-        error: (e) => console.error(e),
-      });
     //this.swcalcular = true;
     let categoria =
       lectura.idabonado_abonados.idcategoria_categorias.idcategoria;
@@ -1193,8 +1203,6 @@ export class EmisionesComponent implements OnInit {
   r_emisionFinal() {
     /*  this.getBajas(); */
     this.getNuevasAnteriores();
-    console.log(this.lecturasnuevas);
-    console.log(this.lecturasanteriores);
     const nombreEmision = new NombreEmisionPipe(); // Crea una instancia del pipe
     let m_izquierda = 150;
     var doc = new jsPDF('p', 'pt', 'a4');
@@ -1417,9 +1425,7 @@ export class EmisionesComponent implements OnInit {
       container.appendChild(embed);
     }
   }
-  r_facturasEliminadas(){
-
-  }
+  r_facturasEliminadas() {}
   imprimirReporte() {
     let doc = new jsPDF('p', 'pt', 'a4');
     this.s_pdf.header('REPORETE DE REFACTURACION', doc);

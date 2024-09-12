@@ -360,7 +360,7 @@ export class FecfacturaComponent implements OnInit {
   }
   claveAcceso(i: number) {
     this.claveacceso = '';
-    let fecha = formatearFecha(1, this._facturas[i].fechacobro); //1: Sin slash para la Clave de acceso
+    let fecha = formatearFecha(1, this._facturas[i].feccrea); //1: Sin slash para la Clave de acceso
     let ruc = this.empresa.ruc;
     //let ambiente = this.empresa.tipoambiente.toString(); //1: Pruebas  2: Producción
     let ambiente = this.formExportar.value.ambiente.toString(); //1: Pruebas  2: Producción
