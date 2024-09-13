@@ -91,6 +91,7 @@ export class DetallesAbonadoComponent implements OnInit {
   ngOnInit(): void {
     this.obtenerDatosAbonado();
     this.listarIntereses();
+    
   }
 
   getFactura() {

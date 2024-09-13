@@ -29,6 +29,7 @@
                                 <option value=2>Emisiones individuales</option>
                                 <option value=3>Emisión inicial</option>
                                 <option value=4>Emisión final</option>
+                                <option value=5>Valores Emitidos</option>
                             </select>
                         </div>
                         <div [hidden]="!hideListaEmision()" class="form-group col-sm-12">
@@ -63,7 +64,7 @@
                             </div>
                         </div>
 
-                    <!--     <div [hidden]="opcreporte != 3" class="form-group col-md-10">
+                        <!--     <div [hidden]="opcreporte != 3" class="form-group col-md-10">
                             <div class="input-group input-group-sm">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
@@ -117,13 +118,12 @@
 
                 <div *ngIf="swbotones" class="text-center">
                     <button *ngIf="swimprimir" type="button" class="btn btn-success btn-block"
-                        [attr.data-target]="otrapagina ? null : '#pdf'" data-toggle="modal" [disabled]="swcalculando"
-                        >
+                        [attr.data-target]="otrapagina ? null : '#pdf'" data-toggle="modal" [disabled]="swcalculando">
                         <i *ngIf="swcalculando" class="fa fa-spinner"></i>
                         <i *ngIf="!swcalculando" class="bi-eye"></i>&nbsp;&nbsp;&nbsp;{{txtcalculando}}
                     </button>
                     <button *ngIf="!swimprimir" type="button" class="btn btn-warning btn-block"
-                        [disabled]="swcalculando" >
+                        [disabled]="swcalculando">
                         <i *ngIf="swcalculando" class="fa fa-spinner"></i>
                         <i *ngIf="!swcalculando" class="bi-eye"></i>&nbsp;&nbsp;&nbsp;{{txtcalculando}}
                     </button>

@@ -290,7 +290,7 @@ export class ImpCajasComponent implements OnInit {
     }
   }
 
-  async imprimirResumen() {
+  imprimirResumen() {
     this.otrapagina = this.formImprimir.value.otrapagina;
     let m_izquierda = 40;
     let doc = new jsPDF();
@@ -304,6 +304,7 @@ export class ImpCajasComponent implements OnInit {
       m_izquierda,
       16
     );
+    this._pdf.header('RESUMEN RECAUDACIÓN DIARIA: ' + this.formImprimir.value.fecha, doc)
     const datos: any = [];
     this.total = 0;
     let kont = 1; //Para la fila de la segunda Tabla
@@ -340,13 +341,13 @@ export class ImpCajasComponent implements OnInit {
     if (iva1 > 0) {
       datos.push(['', 'IVA', formatNumber(iva1)]);
     }
-    datos.push(['', 'SUBTOTAL', +suma.toFixed(2) + +iva1.toFixed(2)]);
+    datos.push(['', 'SUBTOTAL s', +suma.toFixed(2) + +iva1.toFixed(2)]);
 
     let suma1 = 0;
     let iva2 = 0;
     i = 0;
     datos.push(['', 'PERÍODOS ANTERIORES']);
-    await this._rubrosanterior.forEach(() => {
+    this._rubrosanterior.forEach(() => {
       if (this._rubrosanterior[i][0] != 165) {
         let totalRecaudado = this._rubrosanterior[i][2];
         //Math.round(this._rubrosanterior[i][2] * 100) / 100;

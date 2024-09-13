@@ -48,6 +48,8 @@ export class PdfService {
     doc.output('pdfobjectnewwindow', { filename: `${titulo}.pdf` });
   }
   bodyOneTable(title: string, head: any, body: any, doc: any) {
+    console.log(head);
+    console.log(body);
     let m_izquierda: 10;
     //let doc = new jsPDF('p', 'pt', 'a4');
     this.header(title, doc);
@@ -61,8 +63,20 @@ export class PdfService {
     const pdfViewer: any = document.getElementById(
       'pdfViewer'
     ) as HTMLIFrameElement;
-
     return (pdfViewer.src = pdfDataUri);
+  }
+  _bodyOneTable(title: string, head: any, body: any, doc: any) {
+    console.log(head);
+    console.log(body);
+    let m_izquierda: 10;
+    //let doc = new jsPDF('p', 'pt', 'a4');
+    this.header(title, doc);
+
+    autoTable(doc, {
+      head: head,
+      body: body,
+    });
+    doc.save('Reporte');
   }
   bodyTwoTables(
     titulo: string,
@@ -128,12 +142,33 @@ export class PdfService {
           },
         ],
         [
-          { content: ht1[1][0], styles: { halign: 'center', fillColor: [255,255,255], textColor:[0,0,0] } },
-          { content: ht1[1][1], styles: { halign: 'center', fillColor: [255,255,255], textColor:[0,0,0] } },
-          { content: ht1[1][2], styles: { halign: 'center', fillColor: [255,255,255], textColor:[0,0,0] } },
+          {
+            content: ht1[1][0],
+            styles: {
+              halign: 'center',
+              fillColor: [255, 255, 255],
+              textColor: [0, 0, 0],
+            },
+          },
+          {
+            content: ht1[1][1],
+            styles: {
+              halign: 'center',
+              fillColor: [255, 255, 255],
+              textColor: [0, 0, 0],
+            },
+          },
+          {
+            content: ht1[1][2],
+            styles: {
+              halign: 'center',
+              fillColor: [255, 255, 255],
+              textColor: [0, 0, 0],
+            },
+          },
         ],
       ],
-      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } }, 
+      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
       body: bt1,
     });
     doc.setPage(pageNumber);
@@ -149,12 +184,33 @@ export class PdfService {
           },
         ],
         [
-          { content: ht2[1][0], styles: { halign: 'center', fillColor: [255,255,255], textColor:[0,0,0] } },
-          { content: ht2[1][1], styles: { halign: 'center', fillColor: [255,255,255], textColor:[0,0,0] } },
-          { content: ht2[1][2], styles: { halign: 'center', fillColor: [255,255,255], textColor:[0,0,0] } },
+          {
+            content: ht2[1][0],
+            styles: {
+              halign: 'center',
+              fillColor: [255, 255, 255],
+              textColor: [0, 0, 0],
+            },
+          },
+          {
+            content: ht2[1][1],
+            styles: {
+              halign: 'center',
+              fillColor: [255, 255, 255],
+              textColor: [0, 0, 0],
+            },
+          },
+          {
+            content: ht2[1][2],
+            styles: {
+              halign: 'center',
+              fillColor: [255, 255, 255],
+              textColor: [0, 0, 0],
+            },
+          },
         ],
       ],
-      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } }, 
+      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
       body: bt2,
     });
     // Tercer tabla
@@ -168,12 +224,33 @@ export class PdfService {
           },
         ],
         [
-          { content: ht3[1][0], styles: { halign: 'center', fillColor: [255,255,255], textColor:[0,0,0] } },
-          { content: ht3[1][1], styles: { halign: 'center', fillColor: [255,255,255], textColor:[0,0,0] } },
-          { content: ht3[1][2], styles: { halign: 'center', fillColor: [255,255,255], textColor:[0,0,0] } },
+          {
+            content: ht3[1][0],
+            styles: {
+              halign: 'center',
+              fillColor: [255, 255, 255],
+              textColor: [0, 0, 0],
+            },
+          },
+          {
+            content: ht3[1][1],
+            styles: {
+              halign: 'center',
+              fillColor: [255, 255, 255],
+              textColor: [0, 0, 0],
+            },
+          },
+          {
+            content: ht3[1][2],
+            styles: {
+              halign: 'center',
+              fillColor: [255, 255, 255],
+              textColor: [0, 0, 0],
+            },
+          },
         ],
       ],
-      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } }, 
+      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
       body: bt3,
     });
     // Cuarta tabla
@@ -187,12 +264,33 @@ export class PdfService {
           },
         ],
         [
-          { content: ht4[1][0], styles: { halign: 'center', fillColor: [255,255,255], textColor:[0,0,0] } },
-          { content: ht4[1][1], styles: { halign: 'center', fillColor: [255,255,255], textColor:[0,0,0] } },
-          { content: ht4[1][2], styles: { halign: 'center', fillColor: [255,255,255], textColor:[0,0,0] } },
+          {
+            content: ht4[1][0],
+            styles: {
+              halign: 'center',
+              fillColor: [255, 255, 255],
+              textColor: [0, 0, 0],
+            },
+          },
+          {
+            content: ht4[1][1],
+            styles: {
+              halign: 'center',
+              fillColor: [255, 255, 255],
+              textColor: [0, 0, 0],
+            },
+          },
+          {
+            content: ht4[1][2],
+            styles: {
+              halign: 'center',
+              fillColor: [255, 255, 255],
+              textColor: [0, 0, 0],
+            },
+          },
         ],
       ],
-      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } }, 
+      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
       body: bt4,
     });
     const pdfDataUri = doc.output('datauri');

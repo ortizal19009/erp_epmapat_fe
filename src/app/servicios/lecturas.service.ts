@@ -133,16 +133,29 @@ export class LecturasService {
   }
 
   /* Reporte de emisiones */
-  findInicial(idemision : number){
-    return this.http.get(`${baseUrl}/reportes/rubros/inicial?idemision=${idemision}`)
+  findInicial(idemision: number) {
+    return this.http.get(
+      `${baseUrl}/reportes/rubros/inicial?idemision=${idemision}`
+    );
   }
-  findEliminados(idemision : number){
-    return this.http.get(`${baseUrl}/reportes/rubros/eliminados?idemision=${idemision}`)
+  findEliminados(idemision: number) {
+    return this.http.get(
+      `${baseUrl}/reportes/rubros/eliminados?idemision=${idemision}`
+    );
   }
-  findNuevos(idemision : number){
-    return this.http.get(`${baseUrl}/reportes/rubros/nuevos?idemision=${idemision}`)
+  findNuevos(idemision: number) {
+    return this.http.get(
+      `${baseUrl}/reportes/rubros/nuevos?idemision=${idemision}`
+    );
   }
-  findActual(idemision : number){
-    return this.http.get(`${baseUrl}/reportes/rubros/actual?idemision=${idemision}`)
+  findActual(idemision: number) {
+    return this.http.get(
+      `${baseUrl}/reportes/rubros/actual?idemision=${idemision}`
+    );
+  }
+  findReporteValEmitidosxEmision(idemision: number) {
+    return this.http.get(
+      `${baseUrl}/reportes/valoresEmitidos?idemision=${idemision}`
+    );
   }
 }
