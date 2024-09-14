@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Ptoemision } from 'src/app/modelos/ptoemision';
 import { PtoemisionService } from 'src/app/servicios/ptoemision.service';
 
@@ -14,11 +15,11 @@ export class AddPtoemisionComponent implements OnInit {
   formularioPtoEmision: any;
   validar: boolean;
 
-  constructor(private ptoemisionS: PtoemisionService, private router: Router) { }
+  constructor(private ptoemisionS: PtoemisionService, private router: Router, private authService: AutorizaService) { }
   
   ngOnInit(): void {
     let date: Date = new Date();
-    this.ptoemision.usucrea = 1;
+    this.ptoemision.usucrea =  this.authService.idusuario;
     this.ptoemision.feccrea = date;
     this.ptoemision.estado = 1;
     this.validarEstablecimiento();

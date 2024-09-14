@@ -20,11 +20,9 @@ import { TramitesAguaService } from 'src/app/servicios/tramites-agua.service';
 @Component({
    selector: 'app-aguatram',
    templateUrl: './aguatram.component.html',
-   styleUrls: ['./aguatram.component.css']
+   styleUrls: ['./aguatram.component.css'],
 })
-
 export class AguatramComponent implements OnInit {
-
    aguatamshow: boolean = true;
    retMedidor: boolean = false;
    suspMedidor: boolean = false;
@@ -60,9 +58,18 @@ export class AguatramComponent implements OnInit {
       { opcion: 'Identificación', valor: 3 },
    ];
 
-   constructor(private actRouter: ActivatedRoute, private fb: FormBuilder, private s_abonados: AbonadosService,
-      private s_aboxdsuspension: AboxsuspensionService, private s_categorias: CategoriaService, private router: Router,
-      private s_tramitenuevo: TramiteNuevoService, private s_tramiteagua: TramitesAguaService, private s_aguatramite: AguatramiteService, private authService: AutorizaService) { }
+   constructor(
+      private actRouter: ActivatedRoute,
+      private fb: FormBuilder,
+      private s_abonados: AbonadosService,
+      private s_aboxdsuspension: AboxsuspensionService,
+      private s_categorias: CategoriaService,
+      private router: Router,
+      private s_tramitenuevo: TramiteNuevoService,
+      private s_tramiteagua: TramitesAguaService,
+      private s_aguatramite: AguatramiteService,
+      private authService: AutorizaService
+   ) { }
 
    ngOnInit(): void {
       this.estadom.usucrea = this.authService.idusuario;
@@ -82,7 +89,7 @@ export class AguatramComponent implements OnInit {
             break;
          }
          case 2: {
-            this.titulo = 'Retiro de medidor';
+            this.titulo = 'Retiro de medidor - taponamiento';
             this.retMedidor = true;
             break;
          }
@@ -124,7 +131,11 @@ export class AguatramComponent implements OnInit {
          }
       }
       this.f_datos = this.fb.group({ tipoBusqueda: 1, buscarAbonado: '' });
-      this.f_categoria = this.fb.group({ idcategoria_categorias: 1, adultomayor: false, municipio: false });
+      this.f_categoria = this.fb.group({
+         idcategoria_categorias: 1,
+         adultomayor: false,
+         municipio: false,
+      });
       this.f_nMedidor = this.fb.group({
          medidormarca: '',
          medidornumero: '',
@@ -148,7 +159,7 @@ export class AguatramComponent implements OnInit {
    colocaColor(colores: any) {
       document.documentElement.style.setProperty('--bgcolor1', colores[0]);
       const cabecera = document.querySelector('.cabecera');
-      if (cabecera) cabecera.classList.add('nuevoBG1')
+      if (cabecera) cabecera.classList.add('nuevoBG1');
       document.documentElement.style.setProperty('--bgcolor2', colores[1]);
       const detalle = document.querySelector('.detalle');
       if (detalle) detalle.classList.add('nuevoBG2');
@@ -165,12 +176,16 @@ export class AguatramComponent implements OnInit {
 
    retiroMedidor() {
       let abonado: Abonados = this.abonado;
-      if (abonado.estado != 1) {
-         console.log('Este medidor ya esta retirado');
-      } else {
+      if (abonado.estado === 1 || abonado.estado === 2) {
+         abonado.estado = 3;
          this.date = this.f_retiroMedidor.value.fecmedidor;
          this.observaciones = this.f_retiroMedidor.value.ubimedidor;
          this.guardarAguaTramite(abonado, abonado.nromedidor);
+         this.actualizarAbonado(abonado);
+      } else if (abonado.estado === 3) {
+         alert('CUENTA TAPONADA');
+      } else if (abonado.estado === 0) {
+         alert('CUENTA ELIMINADA');
       }
    }
 
@@ -178,6 +193,7 @@ export class AguatramComponent implements OnInit {
       /* Realizar taponamiento */
       let abonado: Abonados = this.abonado;
       if (abonado.estado === 3) {
+         alert('ESTE MEDIDOR ESTA TAPONADO');
       } else {
          abonado.estado = 2;
          this.actualizarAbonado(abonado);
@@ -186,6 +202,8 @@ export class AguatramComponent implements OnInit {
    }
 
    actualizarAbonado(abonado: Abonados) {
+      abonado.usumodi = this.authService.idusuario;
+      abonado.fecmodi = new Date();
       this.s_abonados.updateAbonado(abonado).subscribe({
          next: (datos) => {
             console.log('Abonado Actualizado', datos);
@@ -227,8 +245,9 @@ export class AguatramComponent implements OnInit {
       this.guardarAguaTramite(this.abonado, this.f_nMedidor.value.codmedidor);
       this.regresar();
    }
-   get f() { return this.f_nMedidor.controls; }
-
+   get f() {
+      return this.f_nMedidor.controls;
+   }
 
    guardarAguaTramite(abonado: Abonados, codmedidor: any) {
       let aguatramite: Aguatramite = new Aguatramite();
@@ -240,16 +259,11 @@ export class AguatramComponent implements OnInit {
       aguatramite.observacion = this.observaciones;
       aguatramite.idtipotramite_tipotramite = this.tipoTramite;
       aguatramite.idcliente_clientes = abonado.idcliente_clientes;
-      aguatramite.usucrea = 1;
+      aguatramite.usucrea = this.authService.idusuario;
       aguatramite.feccrea = this.date;
       this.s_aguatramite.saveAguaTramite(aguatramite).subscribe({
          next: (datos) => {
-            console.log('TRAMITE GUARDADO', datos);
-            this.s_tramiteagua.genContratoTramite(
-               datos,
-               this.abonado,
-               this.titulo
-            );
+            this.s_tramiteagua.genContratoTramite(datos, this.abonado, this.titulo);
          },
          error: (e) => console.error(e),
       });
@@ -268,14 +282,16 @@ export class AguatramComponent implements OnInit {
    }
 
    setAbonado(abonado: any) {
-      console.log(abonado)
       this.abonado = abonado;
       this.cliente = abonado.idcliente_clientes;
       this.ruta = abonado.idruta_rutas;
       this.categoria = abonado.idcategoria_categorias;
       this.estadom = abonado.idestadom_estadom;
 
-      this.f_categoria.patchValue({ idcategoria_categorias: abonado.idcategoria_categorias, adultomayor: abonado.adultomayor, municipio: abonado.municipio })
+      this.f_categoria.patchValue({
+         idcategoria_categorias: abonado.idcategoria_categorias,
+         adultomayor: abonado.adultomayor,
+         municipio: abonado.municipio,
+      });
    }
-
 }

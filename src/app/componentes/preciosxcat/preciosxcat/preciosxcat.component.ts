@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Categoria } from 'src/app/modelos/categoria.model';
 import { Preciosxcat } from 'src/app/modelos/preciosxcat.model';
 import { CategoriaService } from 'src/app/servicios/categoria.service';
@@ -30,7 +31,7 @@ export class PreciosxcatComponent implements OnInit {
    swvalido: Boolean;
 
    constructor(private prexcatService: PreciosxcatService, private router: Router,
-      private fb: FormBuilder, private cateService: CategoriaService) { }
+      private fb: FormBuilder, private cateService: CategoriaService, private authService: AutorizaService) { }
 
    ngOnInit(): void {
       let categoria: Categoria = new Categoria();
@@ -255,7 +256,7 @@ export class PreciosxcatComponent implements OnInit {
             next: resp => {
                tarifa.idcategoria_categorias = resp;
                tarifa.feccrea = new Date();
-               tarifa.usucrea = 1;
+               tarifa.usucrea =  this.authService.idusuario;
                this.prexcatService.savePreciosxCat(tarifa).subscribe({
                   next: resp1 => {
                      console.log("Ok!");

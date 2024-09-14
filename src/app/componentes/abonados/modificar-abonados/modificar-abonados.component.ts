@@ -37,6 +37,7 @@ export class ModificarAbonadosComponent implements OnInit {
   cliente: any;
   v_resppago: any;
   v_idresponsable: any;
+  setCategoria:any; 
 
   constructor(
     public fb: FormBuilder,
@@ -160,6 +161,7 @@ export class ModificarAbonadosComponent implements OnInit {
   obtenerAbonado() {
     let idabonado = sessionStorage.getItem('idabonadoToModi');
     this.abonadosS.getById(+idabonado!).subscribe((datos) => {
+      this.setCategoria = datos.idcategoria_categorias.descripcion; 
       this.cliente = datos.idcliente_clientes;
       this.v_idresponsable = datos.idresponsable;
       this.v_idabonado = +idabonado!;
@@ -197,6 +199,7 @@ export class ModificarAbonadosComponent implements OnInit {
 
   cargarDatos() {
     this.v_idabonado = this.abonadoForm.value.idabonado;
+    this.onSubmit()
   }
 
   compararCategorias(o1: Categoria, o2: Categoria): boolean {

@@ -39,7 +39,8 @@ export class AddCertificacionesComponent implements OnInit {
     private tpcertificaS: TpCertificaService,
     private certificacionesS: CertificacionesService,
     private facService: FacturaService,
-    private clieService: ClientesService
+    private clieService: ClientesService, 
+    private authService: AutorizaService
   ) {}
 
   ngOnInit(): void {
@@ -91,7 +92,7 @@ export class AddCertificacionesComponent implements OnInit {
       this.formCertificacion.value.idtpcertifica_tpcertifica;
     this.certificaciones.idtpcertifica_tpcertifica = this.tpcertifica;
     this.certificaciones.anio = this.date.getFullYear();
-    this.certificaciones.usucrea = 1;
+    this.certificaciones.usucrea =  this.authService.idusuario;
     this.certificaciones.feccrea = this.date;
     this.certificacionesS.saveCertificaciones(this.certificaciones).subscribe({
       next: (datos) => {

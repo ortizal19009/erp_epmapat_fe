@@ -26,7 +26,6 @@
       </div>
    </div>
 </div>
-
 <div class="container-fluid">
    <div class="row mb-0">
       <div class="col-sm-3">
@@ -85,10 +84,8 @@
             </div>
          </div>
       </div>
-
       <div class="col-sm-9">
          <div class="card mt-2">
-
             <div class="card-header cardTab">
                <ul class="nav nav-tabs card-header-tabs cardTab">
                   <li class="nav-item"><a class="nav-link active cardTab" href="#planillas"
@@ -137,7 +134,7 @@
                                        <td class="col-1"><i class="bi bi-cash-coin" [hidden]="validarpago(factura)"></i>
                                           {{ i+1}}</td>
                                        <td>{{ factura.idfactura }}</td>
-                                       <td>{{factura.feccrea | date: 'dd-MM-y'}}</td>
+                                       <td>{{factura.feccrea | formatFecha}}</td>
                                        <td class="text-left">{{ factura.idmodulo.descripcion }}</td>
                                        <td>{{factura.nrofactura}}</td>
                                        <td class="text-right">{{valorPagado(

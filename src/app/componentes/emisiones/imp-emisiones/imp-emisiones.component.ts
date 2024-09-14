@@ -105,6 +105,8 @@ export class ImpEmisionesComponent implements OnInit {
       case '4':
         this.impEmisionFinal(this.formImprimir.value.emision);
         break;
+      case '5':
+        this.impValoresEmisiones(this.formImprimir.value.emision);
     }
   }
   regresar() {
@@ -124,7 +126,12 @@ export class ImpEmisionesComponent implements OnInit {
       suma += item.total;
     });
     body.push(['', 'Total', suma.toFixed(2)]);
-    this.s_pdf.bodyOneTable(`Emisión Inicial ${emision.emision}`,head, body, doc);
+    this.s_pdf.bodyOneTable(
+      `Emisión Inicial ${emision.emision}`,
+      head,
+      body,
+      doc
+    );
   }
   async impEmisionFinal(idemision: number) {
     let doc = new jsPDF();
@@ -230,6 +237,34 @@ export class ImpEmisionesComponent implements OnInit {
       error: (e) => console.error(e),
     });
   }
+
+  async impValoresEmisiones(idemision: number) {
+    let emision = await this.getEmision(idemision)
+    console.log(emision)
+    let head = [
+      ['CUENTA', 'NOMBRE Y APELLIDO', 'CATEGORIA', 'M3', 'VAL.EMITIDO'],
+    ];
+    let doc = new jsPDF();
+    let valoresEmitidos: any = await this.getValoresEmitidos(idemision);
+    let body: any = [];
+    valoresEmitidos.forEach((item: any) => {
+      body.push([
+        item.cuenta,
+        item.nombre,
+        item.categoria,
+        item.m3,
+        item.valemitido.toFixed(2),
+      ]);
+    });
+    this.s_pdf._bodyOneTable(`VALORES EMITIDOS EMISION: ${emision?.emision}`, head, body, doc);
+  }
+
+  async getValoresEmitidos(idemision: number) {
+    let valores = this.s_lecturas
+      .findReporteValEmitidosxEmision(idemision)
+      .toPromise();
+    return valores;
+  }
   async getEmisionIndividualByIdEmision(idemision: number) {
     let doc = new jsPDF();
     let emision: any = await this.getEmision(idemision);
@@ -307,7 +342,8 @@ export class ImpEmisionesComponent implements OnInit {
       this.opcreporte === 1 ||
       this.opcreporte === 2 ||
       this.opcreporte === 3 ||
-      this.opcreporte === 4
+      this.opcreporte === 4 ||
+      this.opcreporte === 5
     ) {
       return false;
     }

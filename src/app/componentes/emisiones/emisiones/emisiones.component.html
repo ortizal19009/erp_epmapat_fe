@@ -114,7 +114,8 @@
                   <button class="dropdown-item" type="button" data-toggle="modal" data-target="#cerrarEmision"
                      (click)="cerrar()" [disabled]="!swcerrar">
                      <i class="bi-door-closed"></i>&nbsp; Cerrar emisión</button>
-                  <button class="dropdown-item" type="button" [disabled]="true" data-toggle="modal" data-target="#imprimir1">
+                  <button class="dropdown-item" type="button" [disabled]="true" data-toggle="modal"
+                     data-target="#imprimir1">
                      <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
                   <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar"
                      (click)="exportar1()">
@@ -294,7 +295,7 @@
                                        <h6>Lectura cerrada</h6>
                                     </td>
                                  </tr>
-                                 <tr *ngIf="_lectura.observaciones  != null">
+                                 <tr *ngIf="_lectura.observaciones  != null  ">
                                     <th>Factura eliminada</th>
                                     <td>{{_lectura.idfactura}}
                                     </td>
@@ -346,12 +347,13 @@
                      </div>
                      <div class="mt-2 mb-0 text-center">
                         <button type="button" class="btn btn-success btn-sm mb-1" data-dismiss='modal'
-                           (click)="saveEmisionIndividual()" [disabled]="_lectura.observaciones == null">
+                           (click)="saveEmisionIndividual()"
+                           [disabled]="_lectura.observaciones == null  || _lectura.observaciones == ''">
                            <i class="fa fa-check-circle"></i> Aceptar</button>
                         <button class="btn btn-outline-success btn-sm mx-2 btn-sm mb-1" data-dismiss='modal'>
                            <i class="fa fa-times-circle"></i> Cancelar</button>
                         <button class="btn btn-primary btn-sm mx-2 btn-sm mb-1" data-dismiss='modal'
-                           (click)="generaRutaxemisionIndividual()" *ngIf="!_lectura ">
+                           (click)="generaRutaxemisionIndividual()" *ngIf="btnCrearLectura">
                            <i class="bi bi-eyeglasses"></i> Crear lectura</button>
                      </div>
                   </div>

@@ -91,6 +91,7 @@ export class DetallesAbonadoComponent implements OnInit {
   ngOnInit(): void {
     this.obtenerDatosAbonado();
     this.listarIntereses();
+    
   }
 
   getFactura() {
@@ -124,25 +125,33 @@ export class DetallesAbonadoComponent implements OnInit {
   }
 
   facturasxAbonado(idabonado: number) {
+    console.log(idabonado);
     this.s_loading.showLoading();
     this.facService.getByIdabonadorango(idabonado, this.rango).subscribe({
       next: (datos: any) => {
-        datos.map(async (item: any) => {
-          //console.log(item);
-          //console.log(this.s_interes.cInteres(item));
-          item.feccrea = await this.getEmisionoByFactura(item.idfactura);
-
-          if (item.pagado === 0) {
-            let inte = await this.cInteres(item);
-            item.interescobrado = inte.toFixed(2);
-          }
-          if (item.pagado === 1 && item.interescobrado === null) {
-            item.interescobrado = 0;
-          }
-          /*           item.feccrea = await this.getEmisionoByFactura(item.idfactura);
-           */ this.s_loading.hideLoading();
-        });
-        this._facturas = datos;
+        console.log(datos);
+        if (datos.length > 0) {
+          datos.map(async (item: any) => {
+            //console.log(item);
+            //console.log(this.s_interes.cInteres(item));
+            let _feccrea = await this.getEmisionoByFactura(item.idfactura);
+            if (_feccrea != null) {
+              item.feccrea = _feccrea;
+            }
+            if (item.pagado === 0) {
+              let inte = await this.cInteres(item);
+              item.interescobrado = inte.toFixed(2);
+            }
+            if (item.pagado === 1 && item.interescobrado === null) {
+              item.interescobrado = 0;
+            }
+            /*           item.feccrea = await this.getEmisionoByFactura(item.idfactura);
+             */ this.s_loading.hideLoading();
+          });
+          this._facturas = datos;
+        } else {
+          this.s_loading.hideLoading();
+        }
       },
       error: (err) => console.error(err.error),
     });
@@ -155,6 +164,8 @@ export class DetallesAbonadoComponent implements OnInit {
       factura.estado === 3 &&
       factura.pagado === 1
     ) {
+      return false;
+    } else if (factura.fechaconvenio != null || factura.convenio === 1) {
       return false;
     } else {
       return true;
@@ -521,12 +532,9 @@ export class DetallesAbonadoComponent implements OnInit {
 
     facturas.forEach(async (factura: any) => {
       factura.interes = await this.cInteres(factura);
-      const sumaFacPromise = this.getSumaFac(factura.idfactura);
-      sumaFacPromises.push(sumaFacPromise);
     });
     let d_facturas = [];
     // Wait for all `getSumaFac()` promises to resolve
-    const sumaFacResults = await Promise.all(sumaFacPromises);
     let t_subtotal: number = 0;
     let t_intereses: number = 0;
     let t_total: number = 0;
@@ -546,10 +554,10 @@ export class DetallesAbonadoComponent implements OnInit {
     // Iterate through facturas and add sumaFac values
     for (let i = 0; i < facturas.length; i++) {
       const factura = facturas[i];
-      const sumaFac = sumaFacResults[i];
+      const sumaFac = await this.getSumaFac(facturas[i].idfactura);
       facturas[i].sumaFac = sumaFac;
       let fecEmision = await this.getFechaEmision(facturas[i].idfactura);
-      let suma = +factura.sumaFac.toFixed(2)! + +factura.interes.toFixed(2)!;
+      let suma = +factura.sumaFac + +factura.interes;
       d_facturas.push([
         factura.idfactura,
         //fecEmision.slice(0, 7),

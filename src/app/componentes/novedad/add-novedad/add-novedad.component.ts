@@ -24,7 +24,7 @@ export class AddNovedadComponent implements OnInit {
    ngOnInit(): void { 
       let date: Date = new Date();
       this.novedad.estado = 1;
-      this.novedad.usucrea = 12345;
+      this.novedad.usucrea =  this.authService.idusuario;
       this.novedad.feccrea = date;
       this.novedadForm = this.fb.group({
          descripcion: ['', Validators.required, Validators.minLength(3)]

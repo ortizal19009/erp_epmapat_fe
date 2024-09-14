@@ -113,7 +113,6 @@ export class RutasmorasComponent implements OnInit {
               }
             })
             .then(async () => {
-              console.log('HOLA MUNDO SEGUNDO BLOQUE');
             })
             .catch((e) => console.error(e));
         });
@@ -198,7 +197,7 @@ export class RutasmorasComponent implements OnInit {
     const sumaFacPromises: any[] = [];
     let facturas: any = this.datosImprimir.facturas;
     facturas.forEach(async (factura: any) => {
-      factura.interes = this.cInteres(factura);
+      factura.interes = await this.cInteres(factura);
       const sumaFacPromise = this.getSumaFac(factura.idfactura);
       sumaFacPromises.push(sumaFacPromise);
     });
@@ -285,7 +284,7 @@ export class RutasmorasComponent implements OnInit {
     //this._rxf = [];
 
     facturas.forEach(async (factura: any) => {
-      factura.interes = this.cInteres(factura);
+      factura.interes = await this.cInteres(factura);
       const sumaFacPromise = this.getSumaFac(factura.idfactura);
       sumaFacPromises.push(sumaFacPromise);
     });
@@ -311,10 +310,10 @@ export class RutasmorasComponent implements OnInit {
     // Iterate through facturas and add sumaFac values
     for (let i = 0; i < facturas.length; i++) {
       const factura = facturas[i];
-      const sumaFac = sumaFacResults[i];
+      const sumaFac = await this.getSumaFac(facturas[i].idfactura);
       facturas[i].sumaFac = sumaFac;
       let fecEmision = await this.getFechaEmision(facturas[i].idfactura);
-      let suma = +factura.sumaFac.toFixed(2)! + +factura.interes.toFixed(2)!;
+      let suma = +factura.sumaFac! + +factura.interes!;
       d_facturas.push([
         factura.idfactura,
         //fecEmision.slice(0, 7),
@@ -366,10 +365,10 @@ export class RutasmorasComponent implements OnInit {
     // Generate and output the PDF after all data is processed
     //doc.output('pdfobjectnewwindow');
   }
+
   listarIntereses() {
     this.interService.getListaIntereses().subscribe({
       next: (datos) => {
-        console.log(datos);
         this._intereses = datos;
       },
       error: (err) => console.error(err.error),
@@ -383,8 +382,14 @@ export class RutasmorasComponent implements OnInit {
     return fechaEmision;
   }
 
-  /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
   cInteres(factura: any) {
+    let interes = this.interService
+      .getInteresFactura(factura.idfactura)
+      .toPromise();
+    return interes;
+  }
+  /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
+  _cInteres(factura: any) {
     this.totInteres = 0;
     this.arrCalculoInteres = [];
     let interes: number = 0;
