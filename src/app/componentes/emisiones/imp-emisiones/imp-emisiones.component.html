@@ -111,6 +111,9 @@
                     <button *ngIf="swimprimir" type='button' class='btn btn-success btn-sm mx-1' data-toggle="modal"
                         data-target="#staticBackdrop" [disabled]="swbotones" (click)="imprimir()">
                         <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+                    <button *ngIf="!swimprimir" type='button' class='btn btn-warning btn-sm mx-1' (click)="exportar()"
+                        [disabled]="!formImprimir.valid">
+                        <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
 
                     <button class="btn btn-outline-success btn-sm mx-1" routerLink="/emisiones"><i
                             class="fa fa-times-circle"></i> Cancelar</button>

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import * as ExcelJS from 'exceljs';
 import { NombreEmisionPipe } from 'src/app/pipes/nombre-emision.pipe';
 import { ClientesService } from 'src/app/servicios/clientes.service';
 import { EmisionIndividualService } from 'src/app/servicios/emision-individual.service';
@@ -107,6 +107,27 @@ export class ImpEmisionesComponent implements OnInit {
         break;
       case '5':
         this.impValoresEmisiones(this.formImprimir.value.emision);
+    }
+  }
+  exportar() {
+    switch (this.formImprimir.value.reporte) {
+      /*       case '0':
+        this.buscarEmisiones();
+        break;
+      case '1':
+        this.getByIdEmisiones(this.formImprimir.value.emision);
+        break;
+      case '2':
+        this.getEmisionIndividualByIdEmision(this.formImprimir.value.emision);
+        break;
+      case '3':
+        this.impEmisionInicial(this.formImprimir.value.emision);
+        break;
+      case '4':
+        this.impEmisionFinal(this.formImprimir.value.emision);
+        break; */
+      case '5':
+        this.exportarValoresEmitidos(this.formImprimir.value.emision);
     }
   }
   regresar() {
@@ -237,10 +258,115 @@ export class ImpEmisionesComponent implements OnInit {
       error: (e) => console.error(e),
     });
   }
+  async exportarValoresEmitidos(idemision: any) {
+    this.nombrearchivo = this.formImprimir.value.nombrearchivo;
+    let emision = await this.getEmision(idemision);
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet(this.nombrearchivo);
+    let titulo = `VALORES EMITIDOS EMISIÓN: ${emision?.emision}`;
+    worksheet.addRow(['', titulo]);
+    // Celda B1
+    const cellB1 = worksheet.getCell('B1');
+    const customStyle = {
+      font: {
+        name: 'Times New Roman',
+        bold: true,
+        size: 14,
+        color: { argb: '002060' },
+      },
+    };
+    cellB1.font = customStyle.font;
+
+    // Aplicar el estilo personalizado a los Títulos
+    const cellC1 = worksheet.getCell('C1');
+    cellC1.font = customStyle.font;
+
+    worksheet.addRow([]);
+    const cabecera = ['Cuenta', 'Nombre', 'Categoria', 'M3', 'Val.Emitido'];
+    const headerRowCell = worksheet.addRow(cabecera);
+    headerRowCell.eachCell((cell) => {
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: '002060' },
+      };
+      cell.font = {
+        bold: true,
+        name: 'Times New Roman',
+        color: { argb: 'FFFFFF' },
+      };
+    });
+    //AGREGAR DATOS AL EXCEL
+    let getDatos: any = await this.getValoresEmitidos(idemision);
+    getDatos.forEach((item: any) => {
+      const row = [
+        item.cuenta,
+        item.nombre,
+        item.categoria,
+        item.m3,
+        item.valemitido,
+      ];
+      worksheet.addRow(row);
+    });
+
+    // Establece el ancho de las columnas
+    const anchoConfig = [
+      { columnIndex: 1, widthInChars: 10 },
+      { columnIndex: 2, widthInChars: 58 },
+      { columnIndex: 3, widthInChars: 18 },
+    ];
+    anchoConfig.forEach((config) => {
+      worksheet.getColumn(config.columnIndex).width = config.widthInChars;
+    });
+
+    // Columnas centradas
+    const columnsToCenter = [1];
+    columnsToCenter.forEach((columnIndex) => {
+      worksheet
+        .getColumn(columnIndex)
+        .eachCell({ includeEmpty: true }, (cell) => {
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        });
+    });
+    // Columnas a la derecha
+    let columnsToRigth = [3];
+    columnsToRigth.forEach((columnIndex) => {
+      worksheet
+        .getColumn(columnIndex)
+        .eachCell({ includeEmpty: true }, (cell) => {
+          cell.alignment = { horizontal: 'right' };
+        });
+    });
+    // Formato numérico con decimales
+    const numeroStyle1 = { numFmt: '#,##0.00' };
+    const columnsToFormat1 = [3];
+    for (let i = 4; i <= getDatos.length + 3; i++) {
+      columnsToFormat1.forEach((columnIndex) => {
+        const cell = worksheet.getCell(i, columnIndex);
+        cell.style = numeroStyle1;
+      });
+    }
+
+    // Crea el archivo Excel
+    workbook.xlsx.writeBuffer().then((buffer) => {
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const url = window.URL.createObjectURL(blob);
+
+      // Crear un enlace para descargar el archivo
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${this.nombrearchivo}.xlsx`; // Usa el nombre proporcionado por el usuario
+      a.click();
+
+      window.URL.revokeObjectURL(url); // Libera recursos
+    });
+  }
 
   async impValoresEmisiones(idemision: number) {
-    let emision = await this.getEmision(idemision)
-    console.log(emision)
+    let emision = await this.getEmision(idemision);
+    console.log(emision);
     let head = [
       ['CUENTA', 'NOMBRE Y APELLIDO', 'CATEGORIA', 'M3', 'VAL.EMITIDO'],
     ];
@@ -256,7 +382,12 @@ export class ImpEmisionesComponent implements OnInit {
         item.valemitido.toFixed(2),
       ]);
     });
-    this.s_pdf._bodyOneTable(`VALORES EMITIDOS EMISION: ${emision?.emision}`, head, body, doc);
+    this.s_pdf._bodyOneTable(
+      `VALORES EMITIDOS EMISION: ${emision?.emision}`,
+      head,
+      body,
+      doc
+    );
   }
 
   async getValoresEmitidos(idemision: number) {
@@ -349,7 +480,9 @@ export class ImpEmisionesComponent implements OnInit {
     }
     return true;
   }
-  impriexpor() {}
+  impriexpor() {
+    this.swimprimir = !this.swimprimir;
+  }
   buscarEmisiones() {
     this.emiService
       .getDesdeHasta(
