@@ -134,7 +134,6 @@ export class ImpCajasComponent implements OnInit {
       case 2: // Recaudacion diaria - Planillas
         try {
           this._cobradas = await this.facService.getByFechacobroTotAsync(fecha);
-          // console.log(this._cobradas);
           this._cobradas.map(async (item: any) => {
             item[0] = await this.facService.getByIdAsync(item.idfactura);
           });
@@ -304,7 +303,10 @@ export class ImpCajasComponent implements OnInit {
       m_izquierda,
       16
     );
-    this._pdf.header('RESUMEN RECAUDACIÓN DIARIA: ' + this.formImprimir.value.fecha, doc)
+    this._pdf.header(
+      'RESUMEN RECAUDACIÓN DIARIA: ' + this.formImprimir.value.fecha,
+      doc
+    );
     const datos: any = [];
     this.total = 0;
     let kont = 1; //Para la fila de la segunda Tabla
@@ -341,7 +343,8 @@ export class ImpCajasComponent implements OnInit {
     if (iva1 > 0) {
       datos.push(['', 'IVA', formatNumber(iva1)]);
     }
-    datos.push(['', 'SUBTOTAL s', +suma.toFixed(2) + +iva1.toFixed(2)]);
+    let sumsub: number = suma + iva1;
+    datos.push(['', 'SUBTOTAL', sumsub.toFixed(2)]);
 
     let suma1 = 0;
     let iva2 = 0;
@@ -378,7 +381,8 @@ export class ImpCajasComponent implements OnInit {
     if (iva2 > 0) {
       datos.push(['', 'IVA', formatNumber(iva2)]);
     }
-    datos.push(['', 'SUBTOTAL', +suma1.toFixed(2) + +iva2.toFixed(2)]);
+    let sumsub2: number = suma1 + iva2;
+    datos.push(['', 'SUBTOTAL', sumsub2.toFixed(2)]);
 
     // datos.push(['', 'TOTAL', this.total.toLocaleString("es-ES", { maximumFractionDigits: 2 })]);
     datos.push(['', 'TOTAL', formatNumber(this.total)]);
@@ -501,11 +505,7 @@ export class ImpCajasComponent implements OnInit {
     var i = 0;
     this._cobradas.forEach((item: any) => {
       let totalPorFormaCobro =
-        +this._cobradas[i].total.toFixed(2) + +this._cobradas[i].iva.toFixed(2);
-      /*       Math.round( * 100) /
-              100; */
-      // datos.push([this._cobradas[i][0].idfactura, this._cobradas[i][0].feccrea, this._cobradas[i][0].nrofactura, this._cobradas[i][0].formapago,
-      // this._cobradas[i][0].idcliente.nombre, formatNumber(totalPorFormaCobro)]);
+        +this._cobradas[i].total + +this._cobradas[i].iva;
       datos.push([
         this._cobradas[i][0].idfactura,
         this._cobradas[i][0].feccrea,
@@ -513,7 +513,7 @@ export class ImpCajasComponent implements OnInit {
         this._cobradas[i][0].formapago,
         formatNumber(totalPorFormaCobro),
       ]);
-      suma += +totalPorFormaCobro.toFixed(2);
+      suma += totalPorFormaCobro;
       i++;
     });
     this.sumtotaltarifa = suma;
@@ -522,7 +522,7 @@ export class ImpCajasComponent implements OnInit {
       'TOTAL',
       i,
       '',
-      this.sumtotaltarifa.toLocaleString('es-ES', { maximumFractionDigits: 2 }),
+      this.sumtotaltarifa.toFixed(2),
     ]);
 
     const addPageNumbers = function () {

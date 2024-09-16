@@ -431,7 +431,7 @@ export class ImpInfoCajasComponent implements OnInit {
     var i = 0;
     this._cobradas.forEach(() => {
       let totalPorFormaCobro =
-        +this._cobradas[i].total.toFixed(2) + +this._cobradas[i].iva.toFixed(2);
+        +this._cobradas[i].total+ +this._cobradas[i].iva;
 
       //  Math.round((this._cobradas[i][1] + this._cobradas[i][0].swiva) * 100) / 100;
       datos.push([
@@ -446,14 +446,8 @@ export class ImpInfoCajasComponent implements OnInit {
       i++;
     });
     this.sumtotaltarifa = suma;
-    datos.push([
-      '',
-      'TOTAL',
-      i,
-      '',
-      '',
-      this.sumtotaltarifa.toLocaleString('es-ES', { maximumFractionDigits: 2 }),
-    ]);
+    console.log(suma);
+    datos.push(['', 'TOTAL', i, '', '', this.sumtotaltarifa.toFixed(2)]);
 
     const addPageNumbers = function () {
       const pageCount = doc.internal.pages.length;
