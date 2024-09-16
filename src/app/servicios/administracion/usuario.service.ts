@@ -47,4 +47,7 @@ export class UsuarioService {
   updateUsuario(idusuario: number, usuario: Usuarios): Observable<Object> {
     return this.http.put(baseUrl + '/' + idusuario, usuario);
   }
+  getDatosOfOne(idusuario: number) {
+    return this.http.get(`${baseUrl}/one?idusuario=${idusuario}`);
+  }
 }

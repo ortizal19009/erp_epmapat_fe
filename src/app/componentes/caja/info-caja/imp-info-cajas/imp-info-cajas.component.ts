@@ -10,6 +10,7 @@ import { FacturaService } from 'src/app/servicios/factura.service';
 import { PdfService } from 'src/app/servicios/pdf.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { saveAs } from 'file-saver';
+import { UsuarioService } from 'src/app/servicios/administracion/usuario.service';
 
 @Component({
   selector: 'app-imp-info-cajas',
@@ -40,7 +41,8 @@ export class ImpInfoCajasComponent implements OnInit {
     private cajService: CajaService,
     private facService: FacturaService,
     private rxfService: RubroxfacService,
-    private _pdf: PdfService
+    private _pdf: PdfService,
+    private s_usuarios: UsuarioService
   ) {}
 
   ngOnInit(): void {
@@ -61,8 +63,15 @@ export class ImpInfoCajasComponent implements OnInit {
     });
     this.getRecaudador();
   }
-  getRecaudador() {
+  async getRecaudador() {
     let recaudador = +sessionStorage.getItem('idrecaudador')!;
+    console.log(recaudador);
+    this.s_usuarios.getDatosOfOne(recaudador).subscribe({
+      next: (recaudador: any) => {
+        console.log(recaudador);
+        this.nombreUsuario = recaudador.nombre;
+      },
+    });
   }
   colocaColor(colores: any) {
     document.documentElement.style.setProperty('--bgcolor1', colores[0]);
@@ -211,12 +220,12 @@ export class ImpInfoCajasComponent implements OnInit {
   imprimirResumen() {
     this.otrapagina = this.formImprimir.value.otrapagina;
     let m_izquierda = 40;
-    let doc = new jsPDF('p', 'pt', 'a4');
+    let doc = new jsPDF();
     doc.setFont('times', 'bold');
-    doc.setFontSize(16);
+    doc.setFontSize(11);
     //doc.text('EpmapaT', m_izquierda, 10);
     doc.setFont('times', 'bold');
-    doc.setFontSize(12);
+    doc.setFontSize(10);
     /* doc.text(
         'RESUMEN RECAUDACIÓN DIARIA: ' + this.formImprimir.value.fecha,
         m_izquierda,
@@ -326,9 +335,9 @@ export class ImpInfoCajasComponent implements OnInit {
       },
 
       columnStyles: {
-        0: { halign: 'center', cellWidth: 50 },
-        1: { halign: 'left', cellWidth: 200 },
-        2: { halign: 'right', cellWidth: 90 },
+        0: { halign: 'center', cellWidth: 20 },
+        1: { halign: 'left', cellWidth: 100 },
+        2: { halign: 'right', cellWidth: 25 },
       },
       margin: { left: m_izquierda - 1, top: 18, right: 51, bottom: 13 },
       body: datos,
@@ -373,8 +382,8 @@ export class ImpInfoCajasComponent implements OnInit {
         halign: 'center',
       },
       columnStyles: {
-        0: { halign: 'left', cellWidth: 100 },
-        1: { halign: 'right', cellWidth: 100 },
+        0: { halign: 'left', cellWidth: 60 },
+        1: { halign: 'right', cellWidth: 60 },
       },
       margin: { left: m_izquierda - 1, top: kont + 10, right: 111, bottom: 13 },
       body: formascobro,
@@ -385,6 +394,16 @@ export class ImpInfoCajasComponent implements OnInit {
           data.cell.styles.fontStyle = 'bold';
         }
       },
+    });
+
+    autoTable(doc, {
+      styles: {
+        font: 'helvetica',
+        fontSize: 11,
+        cellPadding: 1,
+        halign: 'center',
+      },
+      body: [[this.nombreUsuario]],
     });
 
     const addPageNumbers = function () {
@@ -408,7 +427,7 @@ export class ImpInfoCajasComponent implements OnInit {
   imprimirFacturas() {
     this.otrapagina = this.formImprimir.value.otrapagina;
     let m_izquierda = 20;
-    let doc = new jsPDF('p', 'pt', 'a4');
+    let doc = new jsPDF();
     doc.setFont('times', 'bold');
     doc.setFontSize(16);
     //doc.text('EpmapaT', m_izquierda, 10);
@@ -431,7 +450,7 @@ export class ImpInfoCajasComponent implements OnInit {
     var i = 0;
     this._cobradas.forEach(() => {
       let totalPorFormaCobro =
-        +this._cobradas[i].total+ +this._cobradas[i].iva;
+        +this._cobradas[i].total + +this._cobradas[i].iva;
 
       //  Math.round((this._cobradas[i][1] + this._cobradas[i][0].swiva) * 100) / 100;
       datos.push([
@@ -446,7 +465,6 @@ export class ImpInfoCajasComponent implements OnInit {
       i++;
     });
     this.sumtotaltarifa = suma;
-    console.log(suma);
     datos.push(['', 'TOTAL', i, '', '', this.sumtotaltarifa.toFixed(2)]);
 
     const addPageNumbers = function () {
@@ -472,17 +490,17 @@ export class ImpInfoCajasComponent implements OnInit {
       },
       styles: {
         font: 'helvetica',
-        fontSize: 10,
+        fontSize: 9,
         cellPadding: 1,
         halign: 'center',
       },
       columnStyles: {
-        0: { halign: 'center', cellWidth: 50 },
-        1: { halign: 'center', cellWidth: 55 },
-        2: { halign: 'center', cellWidth: 110 },
-        3: { halign: 'center', cellWidth: 30 },
-        4: { halign: 'left', cellWidth: 250 },
-        5: { halign: 'right', cellWidth: 40 },
+        0: { halign: 'center', cellWidth: 15 },
+        1: { halign: 'center', cellWidth: 20 },
+        2: { halign: 'center', cellWidth: 34 },
+        3: { halign: 'center', cellWidth: 15},
+        4: { halign: 'left', cellWidth: 75 },
+        5: { halign: 'right', cellWidth: 15 },
       },
       margin: { left: m_izquierda - 1, top: 18, right: 21, bottom: 13 },
       body: datos,
@@ -493,6 +511,15 @@ export class ImpInfoCajasComponent implements OnInit {
           data.cell.styles.fontStyle = 'bold';
         }
       },
+    });
+    autoTable(doc, {
+      styles: {
+        font: 'helvetica',
+        fontSize: 11,
+        cellPadding: 1,
+        halign: 'center',
+      },
+      body: [[this.nombreUsuario]],
     });
 
     addPageNumbers();

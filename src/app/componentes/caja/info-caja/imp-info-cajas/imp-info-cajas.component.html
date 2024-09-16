@@ -1,9 +1,9 @@
 <div class="content mt-1 pt-1 px-2">
    <div class="container-fluid">
       <div class="row mt-0 px-1 py-1 justify-content-start cabecera border sombra">
-         <div class="col-sm-6">
+         <div class="col-sm-8">
             <h4 *ngIf="swimprimir" class="m-0 font-weight-bold text-truncate">
-               <i class="bi-printer pointer" (click)="impriexpor()"></i> &nbsp; Imprimir Recaudación {{nombreUsuario}}
+               <i class="bi-printer pointer" (click)="impriexpor()"></i> &nbsp; Imprimir Recaudación / {{nombreUsuario}}
             </h4>
             <h4 *ngIf="!swimprimir" class="m-0 font-weight-bold text-truncate">
                <i class="bi-file-earmark-arrow-up pointer" (click)="impriexpor()"></i> &nbsp; Exportar

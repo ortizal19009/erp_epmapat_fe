@@ -301,6 +301,42 @@ export class PdfService {
     return (pdfViewer.src = pdfDataUri);
   }
 
+  footer(data: any, doc: any) {
+    // Función para obtener la hora actual
+    const getFormattedTime = () => {
+      const now = new Date();
+      const options: any = {
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        hour12: false,
+      };
+      return now.toLocaleString('es-ES', options);
+    };
+
+    // Agregar la tabla con el footer personalizado
+    doc.autoTable(data, {
+      margin: { top: 20 },
+      styles: {
+        fontSize: 10,
+      },
+      columnStyles: {
+        0: { cellWidth: 40 },
+        1: { cellWidth: 40 },
+        2: { cellWidth: 20 },
+      },
+      // Footer personalizado
+      afterPageContent: function (data: { settings: { margin: { left: any; }; }; }) {
+        doc.setFontSize(8);
+        doc.text(
+          `Hora de generación: ${getFormattedTime()}`,
+          data.settings.margin.left,
+          doc.lastAutoTable.finalY + 10
+        );
+      },
+    });
+  }
+
   tpcertificacion(titulo: string, tpcertifica: any) {
     let doc = new jsPDF('p', 'pt', 'a4');
     let i = 0;
