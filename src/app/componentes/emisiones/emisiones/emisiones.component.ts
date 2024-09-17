@@ -492,6 +492,7 @@ export class EmisionesComponent implements OnInit {
     });
   }
   async generaRutaxemisionIndividual() {
+    console.log(this.cerrado);
     if (this.cerrado === 0) {
       this.lecturaestado = 0;
       let novedad: Novedad = new Novedad();
@@ -506,8 +507,13 @@ export class EmisionesComponent implements OnInit {
         .getByEmisionRuta(emision.idemision, ruta.idruta)
         .subscribe({
           next: (datos: any) => {
+            console.log(datos);
             rutasxemision = datos;
             this.generaLecturaIndividual(rutasxemision, novedad);
+            if (datos.idemision_emisiones.estado === 1) {
+              /*  */
+              console.info('AQUI SE VA A emitir los rubros ');
+            }
           },
           error: (e) => console.error(e),
         });
@@ -587,6 +593,7 @@ export class EmisionesComponent implements OnInit {
       lectura.idfactura = nuevoIdfactura;
       try {
         let newLectura = await this.s_lecturas.saveLecturaAsync(lectura);
+        console.log(newLectura);
         if (this.f_lecturas.value.lecturaactual > 0) {
           await this.planilla(newLectura);
         }
@@ -601,11 +608,12 @@ export class EmisionesComponent implements OnInit {
     this.getEmisionIndividualByIdEmision(this.emision);
   }
   async planilla(lectura: Lecturas) {
+    console.log(lectura);
     let emision_individual: EmisionIndividual = new EmisionIndividual();
     let ln = new Lecturas();
     let la = new Lecturas();
     let emi = new Emisiones();
-    if (this.cerrado == 1) {
+    if (this.cerrado === 0) {
       ln.idlectura = lectura.idlectura;
       la.idlectura = this._lectura.idlectura;
       emi.idemision = lectura.idemision;

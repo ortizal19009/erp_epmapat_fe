@@ -71,6 +71,7 @@ export class DetallesAbonadoComponent implements OnInit {
   date: Date = new Date();
   condonar: Condmultaintereses = new Condmultaintereses();
   razonCondonacion: string;
+
   constructor(
     private aboService: AbonadosService,
     private facService: FacturaService,
@@ -91,7 +92,6 @@ export class DetallesAbonadoComponent implements OnInit {
   ngOnInit(): void {
     this.obtenerDatosAbonado();
     this.listarIntereses();
-    
   }
 
   getFactura() {
@@ -125,11 +125,9 @@ export class DetallesAbonadoComponent implements OnInit {
   }
 
   facturasxAbonado(idabonado: number) {
-    console.log(idabonado);
     this.s_loading.showLoading();
     this.facService.getByIdabonadorango(idabonado, this.rango).subscribe({
       next: (datos: any) => {
-        console.log(datos);
         if (datos.length > 0) {
           datos.map(async (item: any) => {
             //console.log(item);
@@ -140,7 +138,7 @@ export class DetallesAbonadoComponent implements OnInit {
             }
             if (item.pagado === 0) {
               let inte = await this.cInteres(item);
-              item.interescobrado = inte.toFixed(2);
+              item.interescobrado = +inte.toFixed(2);
             }
             if (item.pagado === 1 && item.interescobrado === null) {
               item.interescobrado = 0;
@@ -155,6 +153,14 @@ export class DetallesAbonadoComponent implements OnInit {
       },
       error: (err) => console.error(err.error),
     });
+  }
+
+  formatInteres(interes: any) {
+    if (interes != null) {
+      return interes.toFixed(2);
+    } else {
+      return 0;
+    }
   }
   validarpago(factura: any) {
     if (factura.pagado === 0 && factura.totaltarifa > 0) {

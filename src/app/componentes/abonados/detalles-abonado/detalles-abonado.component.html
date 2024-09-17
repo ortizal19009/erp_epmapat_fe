@@ -140,7 +140,7 @@
                                        <td class="text-right">{{valorPagado(
                                           factura.idmodulo.idmodulo,factura.totaltarifa
                                           )| number: '1.2-2'}}</td>
-                                       <td>{{factura.interescobrado }}</td>
+                                       <td>{{formatInteres(factura.interescobrado) }}</td>
                                        <td>{{ factura.fechacobro | date: 'dd-MM-y'}}</td>
                                     </tr>
                                  </tbody>
