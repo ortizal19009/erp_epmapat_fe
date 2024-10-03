@@ -202,6 +202,11 @@ export class FacturaService {
       `${baseUrl}/facSincobrar?idcliente=${idcliente}`
     );
   }
+  getFacSincobroBycuenta(cuenta: number) {
+    return this.http.get<Facturas[]>(
+      `${baseUrl}/facSincobrar/cuenta?cuenta=${cuenta}`
+    );
+  }
 
   //IDs de las Planillas sin cobrar de un Abonado
   getSinCobroAbo(idabonado: number) {

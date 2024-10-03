@@ -155,10 +155,9 @@ export class AddConvenioComponent implements OnInit {
         next: (_datos) => {
           this.abonado = _datos;
           this.facService
-            .getFacSincobro(_datos.idresponsable.idcliente)
+            .getFacSincobroBycuenta(_datos.idabonado)
             .subscribe({
               next: async (datos) => {
-                console.log(datos); 
                 this._sincobro = datos;
                 this.formConvenio.controls['cedula'].setValue(
                   this.abonado.idcliente_clientes.cedula
