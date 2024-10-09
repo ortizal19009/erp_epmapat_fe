@@ -31,11 +31,14 @@
                         <option value="4">Resumen Recaudación</option>
                         <option value="5">Recaudación - Planillas</option>
                         <option value="6">Transferencias cobradas</option>
+                        <option value="7">Transferencias general</option>
                         <option value="3">Lista de cajas</option>
                      </select>
                   </div>
 
-                  <div *ngIf="opcreporte != 3 && (opcreporte === 4 || opcreporte ===5 || opcreporte ===6)" class="form-group col-md-6">
+                  <div
+                     *ngIf="opcreporte != 3 && (opcreporte === 4 || opcreporte ===5 || opcreporte ===6 || opcreporte ===7)"
+                     class="form-group col-md-6">
                      <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
                            <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
@@ -46,7 +49,8 @@
                      </div>
                   </div>
 
-                  <div *ngIf="opcreporte != 3 && (opcreporte === 4 || opcreporte ===5 || opcreporte ===6)"
+                  <div
+                     *ngIf="opcreporte != 3 && (opcreporte === 4 || opcreporte ===5 || opcreporte ===6 || opcreporte ===7)"
                      class="form-group col-md-6">
                      <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
@@ -125,6 +129,28 @@
 
 <!-- MODAL PDF (En la misma página)-->
 <div class='modal fade' id='pdf' tabindex='-1' aria-labelledby='pdf' aria-hidden='true'>
-   <div class='modal-dialog modal-sm'>
+   <div class='modal-dialog modal-lg'>
+      
+      <div class="modal-content" *ngIf="opcreporte == 7">
+         <div class="modal-header">
+            <h5 class="modal-title" id="staticBackdropLabel">Vista de reporte</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+               <span aria-hidden="true">&times;</span>
+            </button>
+         </div>
+         <div class="modal-body">
+            <iframe id="pdfViewer" src="" width="100%" height="600px"></iframe>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-success" data-dismiss="modal">Cerrer</button>
+         </div>
+      </div>
+   </div>
+</div>
+<!-- Modal vista imprimir -->
+<div class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1"
+   aria-labelledby="staticBackdropLabel" aria-hidden="true">
+   <div class="modal-dialog modal-xl">
+
    </div>
 </div>

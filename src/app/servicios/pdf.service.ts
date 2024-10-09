@@ -116,6 +116,45 @@ export class PdfService {
 
     return (pdfViewer.src = pdfDataUri);
   }
+  bodyThreeTables(
+    titulo: string,
+    ht1: any,
+    bt1: any,
+    ht2: any,
+    bt2: any,
+    ht3: any,
+    bt3: any,
+    doc: any
+  ) {
+    this.header(titulo, doc);
+    const pageNumber = doc.internal.getNumberOfPages();
+    // Primera tabla
+    console.log(ht1)
+    doc.autoTable({
+      head: ht1[1],
+      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
+      body: bt1,
+    });
+    // Segunda tabla
+    doc.autoTable({
+      head: ht2[1],
+      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
+      body: bt2,
+    });
+    // Tercer tabla
+    doc.autoTable({
+      head: ht3[1],
+      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
+      body: bt3,
+    });
+    doc.setPage(pageNumber);
+    const pdfDataUri = doc.output('datauri');
+    const pdfViewer: any = document.getElementById(
+      'pdfViewer'
+    ) as HTMLIFrameElement;
+
+    return (pdfViewer.src = pdfDataUri);
+  }
   bodyFourTables(
     titulo: string,
     ht1: any,

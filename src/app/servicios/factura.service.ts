@@ -388,4 +388,13 @@ export class FacturaService {
     );
     return response;
   }
+  async getFacAllTransferidas (d:Date, h:Date){
+    return this.http.get(`${baseUrl}/reportes/alltransferencias?d=${d}&h=${h}`).toPromise();
+  }
+  async getFacPagadasTransferidas (d:Date, h:Date){
+    return this.http.get(`${baseUrl}/reportes/pagadastransferencias?d=${d}&h=${h}`).toPromise();
+  }
+  async getFacNoPagadasTransferidas (d:Date, h:Date){
+    return this.http.get(`${baseUrl}/reportes/nopagadastransferencias?d=${d}&h=${h}`).toPromise();
+  }
 }
