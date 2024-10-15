@@ -114,7 +114,7 @@ export class ImpClienteComponent implements OnInit {
       this.cliService.getListaById(i).subscribe({
         next: (resp) => {
           cliente = resp;
-          this._clientes.push([cliente.cedula, cliente.nombre, suma]);
+          this._clientes.push([cliente.cedula, cliente.nombre, cliente.direccion, suma]);
           this.total = this.total + suma;
         },
         error: (err) => console.log(err.error),
@@ -162,7 +162,7 @@ export class ImpClienteComponent implements OnInit {
     doc.setFont('times', 'normal');
     doc.setFontSize(12);
     doc.text('FECHA: ' + this.formImprimir.value.hasta, m_izquierda, 22);
-    let cabecera = ['CEDULA', 'NOMBRE', 'VALOR'];
+    let cabecera = ['CEDULA', 'NOMBRE','DIRECCIÓN', 'VALOR'];
 
     const datos: any = [];
 
@@ -271,7 +271,7 @@ export class ImpClienteComponent implements OnInit {
       color: { argb: '001060' },
     };
 
-    const cabecera = ['Cédula', 'Nombre', 'Valor'];
+    const cabecera = ['Cédula', 'Nombre','Dirección', 'Valor'];
     const headerRowCell = worksheet.addRow(cabecera);
     headerRowCell.eachCell((cell) => {
       cell.fill = {
@@ -288,14 +288,15 @@ export class ImpClienteComponent implements OnInit {
 
     // Agrega los datos a la hoja de cálculo
     this._clientes.forEach((item: any) => {
-      worksheet.addRow([item[0], item[1], item[2]]);
+      worksheet.addRow([item[0], item[1], item[2], item[3]]);
     });
 
     // Establece el ancho de las columnas
     const anchoConfig = [
       { columnIndex: 1, widthInChars: 15 },
       { columnIndex: 2, widthInChars: 60 },
-      { columnIndex: 3, widthInChars: 16 },
+      { columnIndex: 3, widthInChars: 30 },
+      { columnIndex: 4, widthInChars: 16 },
     ];
     anchoConfig.forEach((config) => {
       worksheet.getColumn(config.columnIndex).width = config.widthInChars;
@@ -342,7 +343,7 @@ export class ImpClienteComponent implements OnInit {
     celdaC.numFmt = '#,##0.00';
     celdaC.font = { bold: true };
     celdaC.value = {
-      formula: 'SUM(C4:' + 'C' + (this._clientes.length + 3).toString() + ')',
+      formula: 'SUM(D4:' + 'D' + (this._clientes.length + 3).toString() + ')',
       result: 0,
       sharedFormula: undefined,
       date1904: false,

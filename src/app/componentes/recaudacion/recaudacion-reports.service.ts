@@ -50,6 +50,7 @@ export class RecaudacionReportsService {
     let emi: any = await this.getEmisionByid(datos.idemision);
     let fecha = emi.feccrea.slice(0, 10).split('-');
     let mesConsumo = `${this.meses[+fecha[1]! - 1]} ${fecha[0]}`;
+    console.log(datos)
     autoTable(doc, {
       margin: { left: 10, top: 5 },
       tableWidth,
@@ -92,6 +93,7 @@ export class RecaudacionReportsService {
         ],
         [`Categoría: ${categoria.descripcion}`],
         [`Recaudador: ${usuario.nomusu}`],
+        [`Módulo: ${factura.idmodulo.descripcion}`]
       ],
     });
   }
@@ -136,6 +138,7 @@ export class RecaudacionReportsService {
           `FechaPag: ${datos.fechacobro}`,
         ],
         [`Recaudador:  ${usuario.nomusu}`],
+        [`Módulo: ${datos.idmodulo.descripcion}`]
       ],
     });
   }
