@@ -158,4 +158,9 @@ export class LecturasService {
       `${baseUrl}/reportes/valoresEmitidos?idemision=${idemision}`
     );
   }
+  findConsumoxCategoria(idemision: number) {
+    return this.http.get(
+      `${baseUrl}/reportes/consumoxcategoria?idemision=${idemision}`
+    );
+  }
 }

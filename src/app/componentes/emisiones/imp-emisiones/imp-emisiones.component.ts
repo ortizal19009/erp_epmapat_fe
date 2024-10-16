@@ -107,6 +107,9 @@ export class ImpEmisionesComponent implements OnInit {
         break;
       case '5':
         this.impValoresEmisiones(this.formImprimir.value.emision);
+        break; 
+        case '6':
+          break;
     }
   }
   exportar() {
@@ -389,6 +392,10 @@ export class ImpEmisionesComponent implements OnInit {
       doc
     );
   }
+  async impConsumoXCategoria(idemision: number){
+    let datos = await this.getConsumoXCategoria(idemision); 
+    
+  }
 
   async getValoresEmitidos(idemision: number) {
     let valores = this.s_lecturas
@@ -465,6 +472,10 @@ export class ImpEmisionesComponent implements OnInit {
     let actual = this.s_lecturas.findActual(idemision).toPromise();
     return actual;
   }
+  async getConsumoXCategoria(idemision:number){
+    let cxc = this.s_lecturas.findConsumoxCategoria(idemision).toPromise();
+    return cxc;
+  }
   changeReporte() {
     this.opcreporte = +this.formImprimir.value.reporte!;
   }
@@ -474,7 +485,8 @@ export class ImpEmisionesComponent implements OnInit {
       this.opcreporte === 2 ||
       this.opcreporte === 3 ||
       this.opcreporte === 4 ||
-      this.opcreporte === 5
+      this.opcreporte === 5 ||
+      this.opcreporte === 6
     ) {
       return false;
     }
