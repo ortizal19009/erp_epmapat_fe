@@ -34,8 +34,12 @@ export class EmisionIndividualService {
     );
   }
   reportEILecturasNuevas(idemision: number) {
-    return this.http.get(
-      `${baseUrl}/reportes/nuevas?idemision=${idemision}`
-    );
+    return this.http.get(`${baseUrl}/reportes/nuevas?idemision=${idemision}`);
+  }
+  getRefacturacionxEmision(idemision: number) {
+    return this.http.get(`${baseUrl}/reportes/xemision?idemision=${idemision}`);
+  }
+  getRefacturacionxFecha(d: Date, h: Date) {
+    return this.http.get(`${baseUrl}/reportes/xfecha?d=${d}&h=${h}`);
   }
 }

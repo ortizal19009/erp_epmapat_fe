@@ -107,9 +107,14 @@ export class ImpEmisionesComponent implements OnInit {
         break;
       case '5':
         this.impValoresEmisiones(this.formImprimir.value.emision);
-        break; 
-        case '6':
-          break;
+        break;
+      case '6':
+        break;
+      case '7':
+        this.impRefacturacionxEmision(this.formImprimir.value.emision);
+        break;
+      case '8':
+        break;
     }
   }
   exportar() {
@@ -369,7 +374,6 @@ export class ImpEmisionesComponent implements OnInit {
 
   async impValoresEmisiones(idemision: number) {
     let emision = await this.getEmision(idemision);
-    console.log(emision);
     let head = [
       ['CUENTA', 'NOMBRE Y APELLIDO', 'CATEGORIA', 'M3', 'VAL.EMITIDO'],
     ];
@@ -392,11 +396,58 @@ export class ImpEmisionesComponent implements OnInit {
       doc
     );
   }
-  async impConsumoXCategoria(idemision: number){
-    let datos = await this.getConsumoXCategoria(idemision); 
-    
+  async impConsumoXCategoria(idemision: number) {
+    let datos = await this.getConsumoXCategoria(idemision);
   }
+  async impRefacturacionxEmision(idemision: number) {
+    let emision = await this.getEmision(idemision);
 
+    let doc = new jsPDF();
+    let obj: any = await this.getRefacturacionxEmision(idemision);
+    let n_suma: number = 0;
+    let a_suma: number = 0;
+    let head = [
+      [
+        'CUENTA',
+        'NOMBRE',
+        'RAZON REFACTURACIÓN',
+        'VALOR ANTERIOR',
+        'VALOR NUEVO',
+      ],
+    ];
+    let body: any = [];
+    obj.forEach((item: any) => {
+      body.push([
+        item.cuenta,
+        item.nombre,
+        item.observaciones,
+        item.valoranterior.toFixed(2),
+        item.valornuevo.toFixed(2),
+      ]);
+      n_suma += item.valornuevo;
+      a_suma += item.valoranterior;
+    });
+    body.push(['', '', 'TOTALES', a_suma.toFixed(2), n_suma.toFixed(2)]);
+
+    this.s_pdf.bodyOneTable(
+      `Refacturación de la emisión ${emision?.emision}`,
+      head,
+      body,
+      doc
+    );
+  }
+  impRefacturacionxFecha(d: Date, h: Date) {
+    let obj = this.getRefacturacionxFecha(d, h);
+    let head = [
+      [
+        'CUENTA',
+        'NOMBRE',
+        'RAZON REFACTURACIÓN',
+        'VALOR ANTERIOR',
+        'VALOR NUEVO',
+      ],
+    ];
+  }
   async getValoresEmitidos(idemision: number) {
     let valores = this.s_lecturas
       .findReporteValEmitidosxEmision(idemision)
@@ -472,9 +523,21 @@ export class ImpEmisionesComponent implements OnInit {
     let actual = this.s_lecturas.findActual(idemision).toPromise();
     return actual;
   }
-  async getConsumoXCategoria(idemision:number){
+  async getConsumoXCategoria(idemision: number) {
     let cxc = this.s_lecturas.findConsumoxCategoria(idemision).toPromise();
     return cxc;
+  }
+  async getRefacturacionxEmision(idemision: number) {
+    let reporte = this.s_emisionindividual
+      .getRefacturacionxEmision(idemision)
+      .toPromise();
+    return reporte;
+  }
+  async getRefacturacionxFecha(d: Date, h: Date) {
+    let reporte = this.s_emisionindividual
+      .getRefacturacionxFecha(d, h)
+      .toPromise();
+    return reporte;
   }
   changeReporte() {
     this.opcreporte = +this.formImprimir.value.reporte!;
@@ -486,7 +549,8 @@ export class ImpEmisionesComponent implements OnInit {
       this.opcreporte === 3 ||
       this.opcreporte === 4 ||
       this.opcreporte === 5 ||
-      this.opcreporte === 6
+      this.opcreporte === 6 ||
+      this.opcreporte === 7
     ) {
       return false;
     }
