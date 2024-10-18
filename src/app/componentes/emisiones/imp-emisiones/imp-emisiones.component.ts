@@ -36,6 +36,8 @@ export class ImpEmisionesComponent implements OnInit {
   /* Reporte lista emisiones */
   _emisiones: any;
   otraPagina: any;
+  tipe: string = 'text';
+  date: Date = new Date();
 
   constructor(
     public fb: FormBuilder,
@@ -78,7 +80,23 @@ export class ImpEmisionesComponent implements OnInit {
       },
       error: (err) => console.error(err.error),
     });
+
     this.listAllEmisiones();
+  }
+  setUltimos() {
+    let h: String;
+    this.emiService.ultimo().subscribe({
+      next: (datos) => {
+        h = datos.emision;
+        let d = (+h.slice(0, 2)! - 1).toString() + h.slice(2);
+        this.formImprimir.patchValue({
+          d_emi: d,
+          h_emi: h,
+          emision: datos.idemision,
+        });
+      },
+      error: (err) => console.error(err.error),
+    });
   }
   colocaColor(colores: any) {
     document.documentElement.style.setProperty('--bgcolor1', colores[0]);
@@ -109,11 +127,16 @@ export class ImpEmisionesComponent implements OnInit {
         this.impValoresEmisiones(this.formImprimir.value.emision);
         break;
       case '6':
+        this.impConsumoXCategoria(this.formImprimir.value.emision);
         break;
       case '7':
         this.impRefacturacionxEmision(this.formImprimir.value.emision);
         break;
       case '8':
+        this.impRefacturacionxFecha(
+          this.formImprimir.value.d_emi,
+          this.formImprimir.value.h_emi
+        );
         break;
     }
   }
@@ -397,7 +420,32 @@ export class ImpEmisionesComponent implements OnInit {
     );
   }
   async impConsumoXCategoria(idemision: number) {
-    let datos = await this.getConsumoXCategoria(idemision);
+    let emision = await this.getEmision(idemision);
+    let datos: any = await this.getConsumoXCategoria(idemision);
+    console.log(datos);
+    let doc = new jsPDF();
+    let head = [['N° CUENTAS', 'DESCRIPCIÓN', 'M3', 'TOTAL']];
+    let body: any = [];
+    let s_m3: number = 0;
+    let s_total: number = 0;
+    datos.forEach((item: any) => {
+      body.push([
+        item.cuentas,
+        item.descripcion,
+        item.m3,
+        item.total.toFixed(2),
+      ]);
+      s_m3 += item.m3;
+      s_total += item.total;
+    });
+    body.push(['', 'TOTAL: ', s_m3.toFixed(2), s_total.toFixed(2)]);
+
+    this.s_pdf.bodyOneTable(
+      `REPORTE DE CONSUMO POR CATEGORIA - EMISION ${emision?.emision}`,
+      head,
+      body,
+      doc
+    );
   }
   async impRefacturacionxEmision(idemision: number) {
     let emision = await this.getEmision(idemision);
@@ -436,8 +484,14 @@ export class ImpEmisionesComponent implements OnInit {
       doc
     );
   }
-  impRefacturacionxFecha(d: Date, h: Date) {
-    let obj = this.getRefacturacionxFecha(d, h);
+  async impRefacturacionxFecha(d: Date, h: Date) {
+    let obj: any = await this.getRefacturacionxFecha(d, h);
+    // let emision = await this.getEmision(idemision);
+
+    let doc = new jsPDF();
+    //let obj: any = await this.getRefacturacionxEmision(idemision);
+    let n_suma: number = 0;
+    let a_suma: number = 0;
     let head = [
       [
         'CUENTA',
@@ -447,6 +501,20 @@ export class ImpEmisionesComponent implements OnInit {
         'VALOR NUEVO',
       ],
     ];
+    let body: any = [];
+    obj.forEach((item: any) => {
+      body.push([
+        item.cuenta,
+        item.nombre,
+        item.observaciones,
+        item.valoranterior.toFixed(2),
+        item.valornuevo.toFixed(2),
+      ]);
+      n_suma += item.valornuevo;
+      a_suma += item.valoranterior;
+    });
+    body.push(['', '', 'TOTALES', a_suma.toFixed(2), n_suma.toFixed(2)]);
+    this.s_pdf.bodyOneTable(`Refacturación ${d} - ${h}`, head, body, doc);
   }
   async getValoresEmitidos(idemision: number) {
     let valores = this.s_lecturas
@@ -541,6 +609,16 @@ export class ImpEmisionesComponent implements OnInit {
   }
   changeReporte() {
     this.opcreporte = +this.formImprimir.value.reporte!;
+    if (this.opcreporte === 8) {
+      this.tipe = 'date';
+      /*       this.formImprimir.patchValue({
+        d_emi: this.date.toISOString(),
+        h_emi: this.date.toISOString(),
+      }); */
+    } else if (this.opcreporte === 0) {
+      this.tipe = 'text';
+      this.setUltimos();
+    }
   }
   hideListaEmision() {
     if (
@@ -554,6 +632,7 @@ export class ImpEmisionesComponent implements OnInit {
     ) {
       return false;
     }
+
     return true;
   }
   impriexpor() {

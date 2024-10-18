@@ -31,7 +31,7 @@
                                 <option value=4>Emisión final</option>
                                 <option value=5>Valores Emitidos</option>
                                 <option value=6>Consumos por categoría</option>
-                                <option value=7>Refacturación por emisiones</option>
+                                <option value=7>Refacturación por emision</option>
                                 <option value=8>Refacturación por fecha</option>
                             </select>
                         </div>
@@ -41,13 +41,13 @@
                                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
                                         data-toggle="tooltip" title="Obligatorio">Desde</span>
                                 </div>
-                                <input type="text" class="form-control text-center" formControlName="d_emi"
+                                <input type={{tipe}} class="form-control text-center" formControlName="d_emi"
                                     aria-label="Small" aria-describedby="inputGroup-sizing-sm">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
                                         data-toggle="tooltip" title="Obligatorio">Hasta</span>
                                 </div>
-                                <input type="text" class="form-control text-center" formControlName="h_emi"
+                                <input type={{tipe}} class="form-control text-center" formControlName="h_emi"
                                     aria-label="Small" aria-describedby="inputGroup-sizing-sm">
                             </div>
                         </div>
@@ -162,7 +162,7 @@
                 <iframe id="pdfViewer" src="" width="100%" height="600px"></iframe>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success" data-dismiss="modal">Cerrer</button>
+                <button type="button" class="btn btn-success" data-dismiss="modal">Cancelar</button>
             </div>
         </div>
     </div>

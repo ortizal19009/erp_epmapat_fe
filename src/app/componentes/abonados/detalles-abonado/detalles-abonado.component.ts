@@ -71,6 +71,7 @@ export class DetallesAbonadoComponent implements OnInit {
   date: Date = new Date();
   condonar: Condmultaintereses = new Condmultaintereses();
   razonCondonacion: string;
+  detalleFactura: any;
 
   constructor(
     private aboService: AbonadosService,
@@ -122,6 +123,27 @@ export class DetallesAbonadoComponent implements OnInit {
     });
 
     this.facturasxAbonado(+idabonado!);
+  }
+  estado_FE(estado: String) {
+    console.log(estado);
+    switch (estado) {
+      case 'A':
+        return 'APROBADO, ENVADO MAIL';
+      case 'O':
+        return 'APROBADO, NO ENVIADO MAIL ';
+      case 'C':
+        return 'DEVUELTA';
+      case 'G':
+        return 'GENERANDO';
+      case 'I':
+        return 'INGRESADO';
+      case 'U':
+        return 'ERROR AL AUTORIZAR';
+      case 'E':
+        return 'DATOS INCOMPLETOS';
+      default:
+        return 'Sin enviar';
+    }
   }
 
   facturasxAbonado(idabonado: number) {
@@ -209,8 +231,10 @@ export class DetallesAbonadoComponent implements OnInit {
     });
   }
 
-  getRubroxfac(idfactura: number) {
+  async getRubroxfac(idfactura: number) {
     this.idfactura = idfactura;
+    this.detalleFactura = await this.facService.getByIdAsync(idfactura);
+    console.log('detalleFactura', this.detalleFactura);
     this.rubxfacService.getByIdfactura(+idfactura!).subscribe({
       next: (detalle: any) => {
         this._rubrosxfac = detalle;
@@ -219,9 +243,9 @@ export class DetallesAbonadoComponent implements OnInit {
           this._fecFacturaService.getByIdFactura(+idfactura!).subscribe({
             next: (fecfactura: any) => {
               if (fecfactura != null) {
-                this.estadoFE = fecfactura.estado;
+                this.estadoFE = this.estado_FE(fecfactura.estado);
               } else {
-                this.estadoFE = 'P';
+                this.estadoFE = 'SIN GENERAR';
               }
             },
             error: (e) => console.error(e),

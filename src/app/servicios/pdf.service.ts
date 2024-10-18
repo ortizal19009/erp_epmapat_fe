@@ -11,9 +11,8 @@ export class PdfService {
   margin_l = 40;
   line = 0;
   url = 'assets/';
-
+  
   constructor(http: HttpClient) {}
-
   header(titulo: string, doc: any) {
     this.margin_l = 0;
     this.line = 0;
@@ -48,8 +47,6 @@ export class PdfService {
     doc.output('pdfobjectnewwindow', { filename: `${titulo}.pdf` });
   }
   bodyOneTable(title: string, head: any, body: any, doc: any) {
-    console.log(head);
-    console.log(body);
     let m_izquierda: 10;
     //let doc = new jsPDF('p', 'pt', 'a4');
     this.header(title, doc);
@@ -129,21 +126,29 @@ export class PdfService {
     this.header(titulo, doc);
     const pageNumber = doc.internal.getNumberOfPages();
     // Primera tabla
-    console.log(ht1)
     doc.autoTable({
-      head: ht1[1],
+      head: [[{ content: ht1[0], styles: { halign: 'center' } }]],
+    });
+    doc.autoTable({
+      head: [ht1[1]],
       columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
       body: bt1,
     });
     // Segunda tabla
     doc.autoTable({
-      head: ht2[1],
+      head: [[{ content: ht2[0], styles: { halign: 'center' } }]],
+    });
+    doc.autoTable({
+      head: [ht2[1]],
       columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
       body: bt2,
     });
     // Tercer tabla
     doc.autoTable({
-      head: ht3[1],
+      head: [[{ content: ht3[0], styles: { halign: 'center' } }]],
+    });
+    doc.autoTable({
+      head: [ht3[1]],
       columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
       body: bt3,
     });
@@ -365,7 +370,9 @@ export class PdfService {
         2: { cellWidth: 20 },
       },
       // Footer personalizado
-      afterPageContent: function (data: { settings: { margin: { left: any; }; }; }) {
+      afterPageContent: function (data: {
+        settings: { margin: { left: any } };
+      }) {
         doc.setFontSize(8);
         doc.text(
           `Hora de generación: ${getFormattedTime()}`,
@@ -376,7 +383,7 @@ export class PdfService {
     });
   }
 
-  tpcertificacion(titulo: string, tpcertifica: any) {
+/*   tpcertificacion(titulo: string, tpcertifica: any) {
     let doc = new jsPDF('p', 'pt', 'a4');
     let i = 0;
     doc.setFont('courier');
@@ -420,16 +427,6 @@ export class PdfService {
       head: [['Nombre', 'Identificación', 'Dirección', 'Teléfono']],
       body: datos,
     });
-    /* ================== */
-    /*     var pageCount = doc.internal.getNumberOfPages(); //Total Page Number
-    for(i = 0; i < pageCount; i++) { 
-      doc.setPage(i); 
-      let pageCurrent = doc.internal.getCurrentPageInfo().pageNumber; //Current Page
-      doc.setFontSize(12);
-      doc.text('page: ' + pageCurrent + '/' + pageCount, 10, doc.internal.pageSize.height - 10);
-    } */
-    /* ================== */
-    //this.header(titulo, doc);
     window.open(doc.output('bloburl'), '_blank');
   }
   abonados(titulo: string, abonados: any) {
@@ -648,5 +645,5 @@ export class PdfService {
       body: datos,
     });
     window.open(doc.output('bloburl'), '_blank');
-  }
+  } */
 }
