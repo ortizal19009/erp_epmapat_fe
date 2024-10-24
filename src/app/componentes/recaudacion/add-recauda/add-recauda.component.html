@@ -1,7 +1,7 @@
 <div class="content mt-1 pt-1 pl-0">
    <div class="container-fluid">
       <div class="row m-0 px-0 py-1 col-sm-12 border recaudacabecera sombra">
-         <div class="col-sm-2 pl-0 mt-1">
+         <div class="col-sm-3 pl-0 mt-1">
             <h4 class="m-0 font-weight-bold text-truncate">
                <i class="bi bi-cash-coin ml-2"></i> Recaudación
                <i class="fa fa-lock" aria-hidden="true"></i>
@@ -10,37 +10,34 @@
                </ng-template>
             </h4>
          </div>
-         <div class="col-sm-8 mx-0 px-0">
+         <div class="col-sm-7 mx-0 px-0">
             <form [formGroup]="f_buscar" class="col-sm-12 mt-0 px-0 pt-0">
                <div class="row col-sm-12 mt-1 mb-0">
-                  <div class="form-group col-md-2 mb-0">
-                     <input class="form-control form-control-sm text-center" type="text" formControlName="cuenta"
-                        placeholder="Cuenta" />
+                  <div class="form-group col-md-3 mb-0">
+                     <input class="form-control form-control-sm text-center" min=1 (click)="txtCuenta($event)"
+                        (keypress)="txtCuenta($event)" type="number" formControlName="cuenta" placeholder="Cuenta" />
                   </div>
-                  <div class="form-group col-md-2 my-0 py-0 mb-0">
-                     <input class="form-control form-control-sm text-center" type="text"
-                        formControlName="identificacion" placeholder="Identificación" />
-                  </div>
-                  <div class="form-group col-md-2 my-0 py-0 mb-0 form-inline">
+                  <div class="form-group col-sm-2 my-0 py-0 mb-0 form-inline">
                      <button class="btn btn-primary btn-sm mr-1" (click)="btn_buscar()">
-                        <i class="fa fa-search"></i> Buscar
+                        <i class="fa fa-search"></i>
                      </button>
-                     <div class="alert alert-warning m-0 py-0 px-1 small font-weight-bold" role="alert">
+                     <div *ngIf="swBuscar" class="alert alert-warning m-0 py-0 px-1 small font-weight-bold"
+                        role="alert">
                         Ups!
                      </div>
                   </div>
-                  <div class="form-group col-md-2 my-0 py-0 mb-0">
+                  <div class="form-group col-sm-3 my-0 py-0 mb-0">
                      <button type="button" class="btn btn-sm btn-success" data-toggle="modal"
                         data-target="#clientesModal">
                         <i class="bi bi-people"></i> Clientes
                      </button>
                   </div>
 
-                  <div class="form-group col-md-3 my-0 py-0 mb-0">
+                  <div class="form-group col-sm-3 my-0 py-0 mb-0" *ngIf="totalapagar > 0.00">
                      <button type="button" class="btn btn-sm btn-success" data-toggle="modal"
                         data-target="#modalCobrar">
                         <i class="bi bi-check-lg"></i> Cobrar:&nbsp;&nbsp;&nbsp;
-                        <strong></strong>
+                        <strong>{{totalapagar.toFixed(2)}}</strong>
                      </button>
                   </div>
                </div>
@@ -84,17 +81,17 @@
             <div class="col-sm">
                <div class="card detalle sombra">
                   <div class="card-body box-profile">
-                     <h3 class="profile-username text-center">{{nombre}}</h3>
-                     <p class="text-muted text-center"></p>
+                     <h3 class="profile-username text-center">{{_cliente?.nombre}}</h3>
+                     <p class="text-muted text-center">{{_cliente?.cedula}}</p>
                      <ul class="list-group list-group-unbordered mb-3">
                         <li class="list-group-item detalle">
-                           <b>Dirección</b> <a class="float-right"></a>
+                           <b>Dirección</b> <a class="float-right">{{_cliente?.direccion}}</a>
                         </li>
                         <li class="list-group-item detalle">
-                           <b>e-mail</b> <a class="float-right"></a>
+                           <b>e-mail</b> <a class="float-right">{{_cliente?.email}}</a>
                         </li>
                         <li class="list-group-item detalle">
-                           <b>Teléfono</b> <a class="float-right"></a>
+                           <b>Teléfono</b> <a class="float-right">{{_cliente?.telefono}}</a>
                         </li>
                      </ul>
                   </div>
@@ -108,13 +105,12 @@
             </div>
          </div>
       </div>
-      <div>
-         <div class="card sombra">
+      <div class="col-sm ">
+         <div class=" card sombra ">
             <div class="card-body box-profile d-flex justify-content-center">
-               <div *ngIf="!swSincobro()">
+               <div *ngIf="!swSincobro()" class="col-sm-12 text-center">
                   <img src="/assets/dist/img/logo.png" width="280" />
                </div>
-
                <!--    <div class="col-md-12">
                   <div class="row justify-content-center">
                      <div class="callout callout-info text-center col-md-8">
@@ -166,13 +162,13 @@
                            <i class="fa fa-spinner fa-pulse fa-fw"></i>
                            <span class="sr-only">Loading...</span> -->
                         </td>
-                        <td class="description"></td>
-                        <td class="text-left description">{{factura.feccrea}}</td>
+                        <td class="description">{{factura.feccrea}}</td>
+                        <td class="text-left description">{{factura.idmodulo}}</td>
                         <!-- <td  class="text-right">{{
                            sincobro.totaltarifa + sincobro.comerc + sincobro.interes +
                            sincobro.multa | number:'1.2-2'}}</td> -->
                         <td class="text-right">
-                           {{factura.total}}
+                           {{sumaIndividual(factura.total,factura.interesacobrar,factura.swiva)}}
                         </td>
                         <!--           <td *ngIf="sincobro.idmodulo.idmodulo != 8" [ngClass]="{'transferido': sincobro.estado == 3 }"
                            class="text-right">{{
@@ -181,14 +177,14 @@
                         <td *ngIf="sincobro.idmodulo.idmodulo == 8" class="text-right">{{
                            sincobro.valorbase | number:'1.2-2'}}</td>-->
                         <td>
-                           <input type="checkbox" class="cursor" />
+                           <input type="checkbox" class="cursor" (change)="calcular($event, factura)" />
                         </td>
                         <td>
                            <button class="btn btn-outline-info btn-xs cursor" data-toggle="modal"
                               data-target="#DetallePlanillaModal">
                               <i class="fa fa-info-circle"></i> Info
                            </button>
-                           <button class="btn btn-outline-info btn-xs cursor">
+                           <button class="btn btn-outline-info btn-xs cursor" *ngIf="swImprimir">
                               <i class="fa fa-print"></i> Imprimir
                            </button>
                         </td>
@@ -205,6 +201,24 @@
                      </tr>
                   </tbody>
                </table>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- Modal Buscar cliente -->
+   <div class="modal fade" id="clientesModal" data-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable">
+         <div class="modal-content">
+            <div class="modal-header">
+               <h5 class="modal-title" id="exampleModalLabel">Buscar cliente</h5>
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+               </button>
+            </div>
+            <div class="modal-body">
+               <app-buscar-cliente (setCliente)="getCliente($event)"></app-buscar-cliente>
             </div>
          </div>
       </div>

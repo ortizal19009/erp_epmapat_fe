@@ -10,7 +10,14 @@ const baseUrl = `${apiUrl}/mrecaudacion`;
 export class RecaudacionService {
   constructor(private http: HttpClient) {}
 
-  async getSincobroByCuenta(cuenta: number):Promise<any>{
-    return await this.http.get<any>(`${baseUrl}/sincobro/cuenta?cuenta=${cuenta}`).toPromise();
+  async getSincobroByCuenta(cuenta: number): Promise<any> {
+    return await this.http
+      .get<any>(`${baseUrl}/sincobro/cuenta?cuenta=${cuenta}`)
+      .toPromise();
+  }
+  async getSincobroByCliente(idcliente: number): Promise<any> {
+    return await this.http
+      .get<any>(`${baseUrl}/sincobro/cliente?idcliente=${idcliente}`)
+      .toPromise();
   }
 }
