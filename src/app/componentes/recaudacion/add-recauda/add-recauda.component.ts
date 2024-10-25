@@ -7,7 +7,9 @@ import {
   Validators,
 } from '@angular/forms';
 import { isEmpty } from 'rxjs';
+import { Recaudacion } from 'src/app/modelos/recaudacion.model';
 import { ClientesService } from 'src/app/servicios/clientes.service';
+import { FormacobroService } from 'src/app/servicios/formacobro.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { RecaudacionService } from 'src/app/servicios/microservicios/recaudacion.service';
 
@@ -20,23 +22,43 @@ export class AddRecaudaComponent implements OnInit {
   filtrar: string;
   _sincobro: any;
   _cliente: any;
+  _formasCobro: any;
   f_buscar: FormGroup;
+  f_cobrar: FormGroup;
   nombre: string;
   swBuscar: Boolean = false;
   swImprimir: Boolean = false;
+  swNotFound: Boolean = false;
   totalapagar: number = 0;
   fencola: any[] = [];
   constructor(
     private fb: FormBuilder,
     private ms_recaudacion: RecaudacionService,
     private s_cliente: ClientesService,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private s_formacobro: FormacobroService
   ) {}
 
   ngOnInit(): void {
     this.f_buscar = this.fb.group({
       cuenta: '',
       cliente: '',
+    });
+    this.f_cobrar = this.fb.group({
+      idformacobro: 1,
+      acobrar: this.totalapagar,
+      ncvalor: '',
+      dinero: '',
+      vuelto: '',
+    });
+    this.getAllFormaCobro();
+  }
+  getAllFormaCobro() {
+    this.s_formacobro.getAll().subscribe({
+      next: (formascobro: any) => {
+        this._formasCobro = formascobro;
+      },
+      error: (e: any) => console.error(e),
     });
   }
 
@@ -60,14 +82,23 @@ export class AddRecaudaComponent implements OnInit {
   async getSinCobro(cuenta: number) {
     this.loadingService.showLoading();
     this._sincobro = null;
+    this.totalapagar = 0;
     this.ms_recaudacion
       .getSincobroByCuenta(cuenta)
       .then((sincobro: any) => {
-        this._sincobro = sincobro;
-        this.getClienteById(sincobro[0].idcliente);
+        if (sincobro.length > 0) {
+          this._sincobro = sincobro;
+          this.getClienteById(sincobro[0].idcliente);
+        } else {
+          alert('Datos no encontrados');
+        }
         this.loadingService.hideLoading();
       })
-      .catch((e: any) => console.error(e));
+      .catch((e: any) => {
+        console.error(e);
+        //this.swNotFound = true;
+        this.loadingService.hideLoading();
+      });
 
     //let sincobro = await this.ms_recaudacion.getSincobroByCuenta(cuenta);
   }
@@ -75,6 +106,7 @@ export class AddRecaudaComponent implements OnInit {
     this.loadingService.showLoading();
     this.f_buscar.reset();
     this._sincobro = null;
+    this.totalapagar = 0;
     this.ms_recaudacion
       .getSincobroByCliente(cliente.idcliente)
       .then((sincobro: any) => {
@@ -82,7 +114,10 @@ export class AddRecaudaComponent implements OnInit {
         this.getClienteById(cliente.idcliente);
         this.loadingService.hideLoading();
       })
-      .catch((e: any) => console.error(e));
+      .catch((e: any) => {
+        console.error(e);
+        this.loadingService.hideLoading();
+      });
   }
   swSincobro() {
     if (this._sincobro != null) {
@@ -124,10 +159,53 @@ export class AddRecaudaComponent implements OnInit {
       this.fencola.splice(i, 1);
     }
     this.fencola.forEach((factura: any) => {
-      console.log(factura);
-      // this.sumtotal += factura.total + factura.iva + factura.interes;
       this.totalapagar +=
         factura.total + factura.interesacobrar + factura.swiva;
+      this.f_cobrar.patchValue({
+        acobrar: +this.totalapagar!.toFixed(2),
+      });
     });
+  }
+  cobrar() {
+    let dinero: number = +this.f_cobrar.value.dinero!;
+    let apagar: number = +this.totalapagar!.toFixed(2);
+    console.log(this.f_cobrar.value);
+    console.log(this.fencola);
+    let facturas: any[] = [];
+    let autentification = 1;
+    let recaudacion: any = {};
+    this.fencola.forEach((item: any) => {
+      facturas.push(item.idfactura);
+    });
+    console.log(facturas);
+    recaudacion.totalpagar = this.totalapagar;
+    recaudacion.recaudador = autentification;
+    recaudacion.valor = this.totalapagar;
+    recaudacion.recibo = dinero;
+    recaudacion.cambio = dinero - apagar;
+    recaudacion.usucrea = autentification;
+    let obj: any = [
+      {
+        facturas: facturas,
+        autentification: autentification,
+        recaudacion: recaudacion,
+      },
+    ];
+    this.ms_recaudacion.cobrarFacturas(obj).subscribe({
+      next: (cobrado: any) => {
+        console.log('FACTURAS COBRADAS');
+      },
+      error: (e: any) => console.log(e),
+    });
+  }
+  vuelto(e: any) {
+    let dinero: number = +this.f_cobrar.value.dinero!;
+    let apagar: number = +this.totalapagar!.toFixed(2);
+    if (dinero > apagar) {
+      let vuelto = dinero - apagar;
+      this.f_cobrar.patchValue({
+        vuelto: +vuelto!.toFixed(2),
+      });
+    }
   }
 }

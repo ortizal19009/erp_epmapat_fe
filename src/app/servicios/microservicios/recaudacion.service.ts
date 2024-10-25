@@ -20,4 +20,7 @@ export class RecaudacionService {
       .get<any>(`${baseUrl}/sincobro/cliente?idcliente=${idcliente}`)
       .toPromise();
   }
+  cobrarFacturas(obj: any){
+    return this.http.put(`${baseUrl}/cobrar`,obj)
+  }
 }

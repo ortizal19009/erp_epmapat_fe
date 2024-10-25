@@ -111,7 +111,7 @@
                <div *ngIf="!swSincobro()" class="col-sm-12 text-center">
                   <img src="/assets/dist/img/logo.png" width="280" />
                </div>
-               <!--    <div class="col-md-12">
+               <div class="col-md-12" *ngIf="swNotFound ">
                   <div class="row justify-content-center">
                      <div class="callout callout-info text-center col-md-8">
                         <div class="alert alert-info">
@@ -120,7 +120,7 @@
                         </div>
                      </div>
                   </div>
-               </div> -->
+               </div>
 
                <!--    <div class="col-md-12">
                   <div class="row justify-content-center">
@@ -151,7 +151,8 @@
                      </tr>
                   </thead>
                   <tbody>
-                     <tr *ngFor="let factura of _sincobro; let i = index">
+                     <tr *ngFor="let factura of _sincobro; let i = index"
+                        [ngClass]="{ transferido: factura.estado === 3 }">
                         <td class="small font-weight-bold">{{i+1}}</td>
                         <td>{{factura.idabonado}}
                         </td>
@@ -233,14 +234,15 @@
                <h5 class="modal-title fantacyblack">Cobro</h5>
             </div>
             <div class="modal-body col-md-12">
-               <form>
+               <form [formGroup]="f_cobrar">
                   <div class="col-md-12">
                      <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
                            <label class="input-group-text">Forma cobro</label>
                         </div>
                         <select class="custom-select" formControlName="idformacobro">
-                           <option></option>
+                           <option *ngFor="let formacobro of _formasCobro" value="{{formacobro.idformacobro}}">
+                              {{formacobro.descripcion}}</option>
                         </select>
                      </div>
                      <div class="input-group mt-3 mb-3">
@@ -257,9 +259,10 @@
                      <div class="input-group mb-3">
                         <div class="input-group-prepend"><span class="input-group-text font-weight-bold"
                               for="dinero">Dinero</span></div>
-                        <input type="text" class="form-control text-center" formControlName="dinero">
+                        <input type="number" class="form-control text-center" (change)="vuelto($event)"
+                           formControlName="dinero">
                         <div class="input-group-append">
-                           <button type="button" class="btn btn-outline-success btn-xm">
+                           <button type="button" class="btn btn-outline-success btn-xm" (click)="vuelto($event)">
                               <i class="bi bi-chevron-double-down"></i></button>
                         </div>
                      </div>
@@ -277,7 +280,7 @@
                </form>
             </div>
             <div class="row mt-0 mb-3 justify-content-center">
-               <button type="button" class="btn btn-success btn-sm mx-1" data-dismiss="modal">
+               <button type="button" class="btn btn-success btn-sm mx-1" (click)="cobrar()" data-dismiss="modal">
                   <i class="fa fa-check-circle"></i> Aceptar</button>
                <button type="button" class="btn btn-sm btn-outline-success mx-1" data-dismiss="modal">
                   <i class="bi bi-x-circle"></i> Cancelar</button>
