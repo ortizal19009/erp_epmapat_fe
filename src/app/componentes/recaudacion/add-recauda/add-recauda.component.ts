@@ -63,6 +63,7 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   btn_buscar() {
+    this.fencola = [];
     if (
       this.validarCampo(this.f_buscar.value.cuenta) ||
       this.f_buscar.value.cuenta != ''
@@ -142,8 +143,6 @@ export class AddRecaudaComponent implements OnInit {
     });
   }
   calcular(e: any, factura: any) {
-    console.log(factura);
-
     this.totalapagar = 0;
     if (e.target.checked === true) {
       /*    let query = this.arrFacturas.find(
@@ -169,33 +168,34 @@ export class AddRecaudaComponent implements OnInit {
   cobrar() {
     let dinero: number = +this.f_cobrar.value.dinero!;
     let apagar: number = +this.totalapagar!.toFixed(2);
-    console.log(this.f_cobrar.value);
-    console.log(this.fencola);
     let facturas: any[] = [];
     let autentification = 1;
     let recaudacion: any = {};
     this.fencola.forEach((item: any) => {
       facturas.push(item.idfactura);
     });
-    console.log(facturas);
     recaudacion.totalpagar = this.totalapagar;
     recaudacion.recaudador = autentification;
     recaudacion.valor = this.totalapagar;
     recaudacion.recibo = dinero;
     recaudacion.cambio = dinero - apagar;
     recaudacion.usucrea = autentification;
-    let obj: any = [
-      {
-        facturas: facturas,
-        autentification: autentification,
-        recaudacion: recaudacion,
-      },
-    ];
+    recaudacion.formapago = 1;
+    let obj: any = {
+      facturas: facturas,
+      autentification: autentification,
+      recaudacion: recaudacion,
+    };
     this.ms_recaudacion.cobrarFacturas(obj).subscribe({
       next: (cobrado: any) => {
-        console.log('FACTURAS COBRADAS');
+        console.log('FACTURAS COBRADAS', cobrado);
+        this.fencola = [];
       },
-      error: (e: any) => console.log(e),
+      error: (e: any) => {
+        console.error(e);
+        this.fencola = [];
+        
+      },
     });
   }
   vuelto(e: any) {
