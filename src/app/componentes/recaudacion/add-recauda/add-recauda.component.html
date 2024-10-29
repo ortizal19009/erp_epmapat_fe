@@ -4,7 +4,7 @@
          <div class="col-sm-3 pl-0 mt-1">
             <h4 class="m-0 font-weight-bold text-truncate">
                <i class="bi bi-cash-coin ml-2"></i> Recaudación
-               <i class="fa fa-lock" aria-hidden="true"></i>
+               <i class="fa fa-lock" aria-hidden="true" *ngIf="!swcaja; else estadoCajaF"></i>
                <ng-template #estadoCajaF>
                   <i class="fa fa-unlock" aria-hidden="true"></i>
                </ng-template>
@@ -53,10 +53,10 @@
                <i class="bi-menu-button-wide text-white"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#abrirCaja">
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#abrirCaja" [disabled]="swcaja">
                   <i class="bi-door-open"></i>&nbsp; Abrir caja
                </button>
-               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#cerrarCaja">
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#cerrarCaja"  [disabled]="!swcaja">
                   <i class="bi-door-closed"></i>&nbsp; Cerrar caja
                </button>
                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">

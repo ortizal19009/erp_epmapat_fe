@@ -30,6 +30,7 @@ export class AddRecaudaComponent implements OnInit {
   swBuscar: Boolean = false;
   swImprimir: Boolean = false;
   swNotFound: Boolean = false;
+  swcaja: boolean = false;
   totalapagar: number = 0;
   fencola: any[] = [];
   constructor(
@@ -55,11 +56,19 @@ export class AddRecaudaComponent implements OnInit {
     });
     this.getAllFormaCobro();
     console.log(this.authService.idusuario);
+    this.getEstadoCaja();
+  }
+  getEstadoCaja() {
     this.ms_recaudacion.testConnection(this.authService.idusuario).subscribe({
       next: (item: any) => {
         console.log(item);
+        if (item.estado === 1) {
+          this.swcaja = true;
+        } else {
+          this.swcaja = false;
+        }
       },
-      error:(e:any)=>console.error(e)
+      error: (e: any) => console.error(e),
     });
   }
   getAllFormaCobro() {

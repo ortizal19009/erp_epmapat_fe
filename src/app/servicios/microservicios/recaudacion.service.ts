@@ -24,6 +24,9 @@ export class RecaudacionService {
     return this.http.put(`${baseUrl}/cobrar`, obj);
   }
   testConnection(user: number) {
-    return this.http.get(`${baseUrl}/testconnection?user=${user}`);
+    return this.http.get(`${baseUrl}/test_connection?user=${user}`);
+  }
+  logincajas(username: string, password: string){
+    return this.http.post(`${baseUrl}/login?username=${username}&password=${password}`, null)
   }
 }
