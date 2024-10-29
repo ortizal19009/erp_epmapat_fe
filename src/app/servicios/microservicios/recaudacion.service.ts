@@ -20,7 +20,10 @@ export class RecaudacionService {
       .get<any>(`${baseUrl}/sincobro/cliente?idcliente=${idcliente}`)
       .toPromise();
   }
-  cobrarFacturas(obj: any){
-    return this.http.put(`${baseUrl}/cobrar`,obj)
+  cobrarFacturas(obj: any) {
+    return this.http.put(`${baseUrl}/cobrar`, obj);
+  }
+  testConnection(user: number) {
+    return this.http.get(`${baseUrl}/testconnection?user=${user}`);
   }
 }

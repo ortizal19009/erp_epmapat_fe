@@ -7,6 +7,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { isEmpty } from 'rxjs';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Recaudacion } from 'src/app/modelos/recaudacion.model';
 import { ClientesService } from 'src/app/servicios/clientes.service';
 import { FormacobroService } from 'src/app/servicios/formacobro.service';
@@ -36,7 +37,8 @@ export class AddRecaudaComponent implements OnInit {
     private ms_recaudacion: RecaudacionService,
     private s_cliente: ClientesService,
     private loadingService: LoadingService,
-    private s_formacobro: FormacobroService
+    private s_formacobro: FormacobroService,
+    private authService: AutorizaService
   ) {}
 
   ngOnInit(): void {
@@ -52,6 +54,13 @@ export class AddRecaudaComponent implements OnInit {
       vuelto: '',
     });
     this.getAllFormaCobro();
+    console.log(this.authService.idusuario);
+    this.ms_recaudacion.testConnection(this.authService.idusuario).subscribe({
+      next: (item: any) => {
+        console.log(item);
+      },
+      error:(e:any)=>console.error(e)
+    });
   }
   getAllFormaCobro() {
     this.s_formacobro.getAll().subscribe({
@@ -194,7 +203,6 @@ export class AddRecaudaComponent implements OnInit {
       error: (e: any) => {
         console.error(e);
         this.fencola = [];
-        
       },
     });
   }
