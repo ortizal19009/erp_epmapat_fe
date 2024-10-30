@@ -53,10 +53,12 @@
                <i class="bi-menu-button-wide text-white"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#abrirCaja" [disabled]="swcaja">
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#abrirCaja"
+                  [disabled]="swcaja">
                   <i class="bi-door-open"></i>&nbsp; Abrir caja
                </button>
-               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#cerrarCaja"  [disabled]="!swcaja">
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#cerrarCaja"
+                  [disabled]="!swcaja">
                   <i class="bi-door-closed"></i>&nbsp; Cerrar caja
                </button>
                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
@@ -346,10 +348,6 @@
          </div>
       </div>
    </div>
-
-
-
-
    <!-- MODAL Abrir Caja -->
    <div class="modal fade" id="abrirCaja" tabindex="-1" aria-labelledby="abrirCajaLabel" data-backdrop="static"
       aria-hidden="true">
@@ -364,27 +362,31 @@
                <div class="form-group">
                   <div class="input-group input-group-sm mb-3">
                      <div class="input-group-prepend">
-                        <span class="input-group-text" for="establecimiento">Usuario</span>
+                        <span class="input-group-text" for="establecimiento"
+                           >Usuario</span>
                      </div>
-                     <input type="text" id="establecimiento" readonly class="form-control form-control-sm" />
+                     <input type="text" id="establecimiento" readonly [(ngModel)]="abrirCaja.usuario" class="form-control form-control-sm" />
                   </div>
                   <div class="input-group input-group-sm mb-3">
                      <div class="input-group-prepend">
                         <span class="input-group-text" for="establecimiento">Contraseña</span>
                      </div>
-                     <input type="password" id="establecimiento" class="form-control form-control-sm" />
+                     <input type="password" id="establecimiento" [(ngModel)]="abrirCaja.password"
+                        class="form-control form-control-sm" />
                   </div>
                   <div class="input-group input-group-sm mb-3">
                      <div class="input-group-prepend">
                         <span class="input-group-text" for="establecimiento">Establecimiento</span>
                      </div>
-                     <input type="text" id="establecimiento" value="" readonly class="form-control form-control-sm" />
+                     <input type="text" id="establecimiento" value="{{abrirCaja.establecimiento}}" [(ngModel)]="abrirCaja.establecimiento" readonly
+                        class="form-control form-control-sm" />
                   </div>
                   <div class="input-group input-group-sm mb-3">
                      <div class="input-group-prepend">
                         <span class="input-group-text" for="establecimiento">Nro. Factura</span>
                      </div>
-                     <input type="text" id="establecimiento" value="" readonly class="form-control form-control-sm" />
+                     <input type="text" id="establecimiento" value="" [(ngModel)]="abrirCaja.nrofactura" readonly
+                        class="form-control form-control-sm" />
                   </div>
                </div>
                <div class="alert alert-warning text-center mt-3 mb-0">
@@ -394,7 +396,7 @@
                </div>
             </div>
             <div class="row justify-content-center mt-1 mb-3">
-               <button type="button" class="btn btn-success btn-sm mx-1" data-dismiss="modal">
+               <button type="button" class="btn btn-success btn-sm mx-1" (click)="fnabrirCaja()" data-dismiss="modal">
                   <i class="fa fa-check-circle"></i>&nbsp; Aceptar
                </button>
                <button type="button" class="btn btn-sm btn-outline-success mx-1" data-dismiss="modal">

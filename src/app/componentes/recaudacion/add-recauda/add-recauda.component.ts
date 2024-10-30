@@ -33,6 +33,12 @@ export class AddRecaudaComponent implements OnInit {
   swcaja: boolean = false;
   totalapagar: number = 0;
   fencola: any[] = [];
+  abrirCaja: any = {
+    usuario: '',
+    password: '',
+    establecimiento: '',
+    nrofactura: '',
+  };
   constructor(
     private fb: FormBuilder,
     private ms_recaudacion: RecaudacionService,
@@ -55,13 +61,15 @@ export class AddRecaudaComponent implements OnInit {
       vuelto: '',
     });
     this.getAllFormaCobro();
-    console.log(this.authService.idusuario);
     this.getEstadoCaja();
   }
   getEstadoCaja() {
     this.ms_recaudacion.testConnection(this.authService.idusuario).subscribe({
       next: (item: any) => {
         console.log(item);
+        this.abrirCaja.usuario = item.username;
+        this.abrirCaja.nrofactura = `${item.establecimiento}-${item.codigo}-${item.secuencial}`;
+        this.abrirCaja.establecimiento = item.establecimiento;
         if (item.estado === 1) {
           this.swcaja = true;
         } else {
@@ -70,6 +78,15 @@ export class AddRecaudaComponent implements OnInit {
       },
       error: (e: any) => console.error(e),
     });
+  }
+  fnabrirCaja() {
+    console.log(this.abrirCaja);
+    this.ms_recaudacion
+      .logincajas(this.abrirCaja.usuario, this.abrirCaja.password)
+      .subscribe({
+        next: (item: any) => console.log(item),
+        error: (e: any) => console.error(e),
+      });
   }
   getAllFormaCobro() {
     this.s_formacobro.getAll().subscribe({
