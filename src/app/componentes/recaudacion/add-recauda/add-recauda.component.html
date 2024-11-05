@@ -33,7 +33,7 @@
                      </button>
                   </div>
 
-                  <div class="form-group col-sm-3 my-0 py-0 mb-0" *ngIf="totalapagar > 0.00">
+                  <div class="form-group col-sm-3 my-0 py-0 mb-0" *ngIf="totalapagar > 0.00 && swcaja">
                      <button type="button" class="btn btn-sm btn-success" data-toggle="modal"
                         data-target="#modalCobrar">
                         <i class="bi bi-check-lg"></i> Cobrar:&nbsp;&nbsp;&nbsp;
@@ -78,8 +78,8 @@
 
 <div class="container-fluid">
    <div class="row mt-2 mb-0 justify-content-left">
-      <div class="col-sm-3" *ngIf="swSincobro()">
-         <div class="row">
+      <div class="col-sm-3">
+         <div class="row"  *ngIf="swSincobro()">
             <div class="col-sm">
                <div class="card detalle sombra">
                   <div class="card-body box-profile">
@@ -102,7 +102,7 @@
          </div>
          <div class="row">
             <div class="col-sm numeracion">
-               <small class="badge badge-danger"><i class="bi bi-newspaper"></i>
+               <small class="badge badge-danger"><i class="bi bi-newspaper"> {{abrirCaja.nrofactura}}</i>
                </small>
             </div>
          </div>
@@ -362,10 +362,10 @@
                <div class="form-group">
                   <div class="input-group input-group-sm mb-3">
                      <div class="input-group-prepend">
-                        <span class="input-group-text" for="establecimiento"
-                           >Usuario</span>
+                        <span class="input-group-text" for="establecimiento">Usuario</span>
                      </div>
-                     <input type="text" id="establecimiento" readonly [(ngModel)]="abrirCaja.usuario" class="form-control form-control-sm" />
+                     <input type="text" id="establecimiento" readonly [(ngModel)]="abrirCaja.usuario"
+                        class="form-control form-control-sm" />
                   </div>
                   <div class="input-group input-group-sm mb-3">
                      <div class="input-group-prepend">
@@ -378,8 +378,8 @@
                      <div class="input-group-prepend">
                         <span class="input-group-text" for="establecimiento">Establecimiento</span>
                      </div>
-                     <input type="text" id="establecimiento" value="{{abrirCaja.establecimiento}}" [(ngModel)]="abrirCaja.establecimiento" readonly
-                        class="form-control form-control-sm" />
+                     <input type="text" id="establecimiento" value="{{abrirCaja.establecimiento}}"
+                        [(ngModel)]="abrirCaja.establecimiento" readonly class="form-control form-control-sm" />
                   </div>
                   <div class="input-group input-group-sm mb-3">
                      <div class="input-group-prepend">
@@ -389,11 +389,11 @@
                         class="form-control form-control-sm" />
                   </div>
                </div>
-               <div class="alert alert-warning text-center mt-3 mb-0">
+               <!--        <div class="alert alert-warning text-center mt-3 mb-0">
                   <h6>
                      <strong>Esta caja ya esta iniciada en otro computador</strong>
                   </h6>
-               </div>
+               </div> -->
             </div>
             <div class="row justify-content-center mt-1 mb-3">
                <button type="button" class="btn btn-success btn-sm mx-1" (click)="fnabrirCaja()" data-dismiss="modal">
@@ -426,7 +426,7 @@
                </div>
             </div>
             <div class="row justify-content-center mt-1 mb-3">
-               <button type="button" class="btn btn-success btn-sm mx-1" data-dismiss="modal">
+               <button type="button" class="btn btn-success btn-sm mx-1 " data-dismiss="modal" (click)="fnCerrarCaja()">
                   <i class="fa fa-check-circle"></i>&nbsp; Aceptar
                </button>
                <button type="button" class="btn btn-sm btn-outline-success mx-1" data-dismiss="modal">

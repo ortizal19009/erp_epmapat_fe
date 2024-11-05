@@ -1,4 +1,6 @@
 import { FormStyle } from '@angular/common';
+import Swal from 'sweetalert2';
+
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import {
   AbstractControl,
@@ -13,7 +15,6 @@ import { ClientesService } from 'src/app/servicios/clientes.service';
 import { FormacobroService } from 'src/app/servicios/formacobro.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { RecaudacionService } from 'src/app/servicios/microservicios/recaudacion.service';
-
 @Component({
   selector: 'app-add-recauda',
   templateUrl: './add-recauda.component.html',
@@ -39,6 +40,8 @@ export class AddRecaudaComponent implements OnInit {
     establecimiento: '',
     nrofactura: '',
   };
+  _estadoCaja: any;
+  //_mensaje: any;
   constructor(
     private fb: FormBuilder,
     private ms_recaudacion: RecaudacionService,
@@ -66,7 +69,7 @@ export class AddRecaudaComponent implements OnInit {
   getEstadoCaja() {
     this.ms_recaudacion.testConnection(this.authService.idusuario).subscribe({
       next: (item: any) => {
-        console.log(item);
+        this._estadoCaja = item;
         this.abrirCaja.usuario = item.username;
         this.abrirCaja.nrofactura = `${item.establecimiento}-${item.codigo}-${item.secuencial}`;
         this.abrirCaja.establecimiento = item.establecimiento;
@@ -80,13 +83,34 @@ export class AddRecaudaComponent implements OnInit {
     });
   }
   fnabrirCaja() {
-    console.log(this.abrirCaja);
     this.ms_recaudacion
       .logincajas(this.abrirCaja.usuario, this.abrirCaja.password)
       .subscribe({
-        next: (item: any) => console.log(item),
+        next: (item: any) => {
+          this.swal('info', item.body.mensaje);
+          this.getEstadoCaja();
+        },
         error: (e: any) => console.error(e),
       });
+  }
+  swal(icon: any, mensaje: any) {
+    Swal.fire({
+      toast: true,
+      icon: icon,
+      title: mensaje,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+    });
+  }
+  fnCerrarCaja() {
+    console.log(this._estadoCaja);
+    this.ms_recaudacion.singOutCaja(this._estadoCaja.username).subscribe({
+      next: (item: any) => {
+        this.swal('info', item.body.mensaje);
+        this.getEstadoCaja();
+      },
+    });
   }
   getAllFormaCobro() {
     this.s_formacobro.getAll().subscribe({
