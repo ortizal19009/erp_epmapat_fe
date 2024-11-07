@@ -139,7 +139,6 @@ export class GeneEmisionComponent implements OnInit {
           .getByIdEmisionIdabonado(this.idemision, abonados[k].idabonado)
           .subscribe({
             next: async (item: any) => {
-              console.log(item);
               if (item.length === 0) {
                 // for (let k = 0; k < 2; k++) {
                 //Primero crea la Factura (Planilla) para cada Abonado para luego ponerla en las Lecturas
