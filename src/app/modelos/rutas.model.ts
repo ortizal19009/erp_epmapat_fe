@@ -7,4 +7,5 @@ export class Rutas {
     feccrea: Date;
     usumodi: number;
     fecmodi: Date;
+    estado: Boolean;
 }

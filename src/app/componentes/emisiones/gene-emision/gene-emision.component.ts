@@ -48,13 +48,24 @@ export class GeneEmisionComponent implements OnInit {
     sessionStorage.setItem('ventana', '/emisiones');
     let coloresJSON = sessionStorage.getItem('/emisiones');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
-
     this.novedad.idnovedad = 1;
     this.modulo.idmodulo = 4;
-
     this.idemision = +sessionStorage.getItem('idemisionToGenerar')!;
     sessionStorage.removeItem('idemisionToGenerar'); //Quitar comentario
-    this.emiServicio.getByIdemision(this.idemision).subscribe({
+    if (this.idemision === 0) {
+      this.emiServicio.ultimo().subscribe({
+        next: (item: any) => {
+          this.idemision = item.idemision;
+          this.setEmisionesData(this.idemision);
+        },
+      });
+    } else {
+      this.setEmisionesData(this.idemision);
+    }
+  }
+
+  setEmisionesData(idemision: any) {
+    this.emiServicio.getByIdemision(idemision).subscribe({
       next: (resp) => {
         this.emision = resp.emision;
         this.rutService.getListaRutas().subscribe({
@@ -124,63 +135,77 @@ export class GeneEmisionComponent implements OnInit {
         this._rutas[i].idruta
       );
       for (let k = 0; k < abonados.length; k++) {
-        // for (let k = 0; k < 2; k++) {
-        //Primero crea la Factura (Planilla) para cada Abonado para luego ponerla en las Lecturas
-        let planilla = {} as Planilla;
-        planilla.idmodulo = this.modulo;
-        this.cliente = new Clientes();
-        this.cliente.idcliente = abonados[k].idresponsable.idcliente;
-        planilla.idcliente = this.cliente;
-        planilla.idabonado = abonados[k].idabonado;
-        planilla.porcexoneracion = 0;
-        planilla.totaltarifa = 0;
-        planilla.pagado = 0;
-        planilla.conveniopago = 0;
-        planilla.estadoconvenio = 0;
-        planilla.formapago = 1;
-        planilla.valorbase = 0;
-        planilla.usucrea = this.authService.idusuario;
-        planilla.estado = 1;
-        planilla.feccrea = this.fechaemision;
-        //let nuevoIdfactura = k; Solo para pruebas, para que no genere las facturas
-        let nuevoIdfactura: number = 0;
-        try {
-          //Crea la planilla con el metodo que devuelve el idfactura generado
-          nuevoIdfactura = await this.facService.saveFacturaAsyncId(planilla);
-        } catch (error) {
-          console.error(`Al guardar la Factura (planilla) ${k}`, error);
-        }
-        //Ahora si crea la Lectura para cada Abonado
-        let lectura = {} as Lectura;
-        lectura.estado = 0;
-        lectura.fechaemision = this.fechaemision;
-        try {
-          let lecturaanterior = await this.lecService.getUltimaLecturaAsync(
-            abonados[k].idabonado
-          );
-          if (!lecturaanterior) {
-            lecturaanterior = 0;
-          }
-          lectura.lecturaanterior = lecturaanterior;
-        } catch (error) {
-          console.error(`Al buscar la Última lectura`, error);
-        }
-        lectura.lecturaactual = 0;
-        lectura.lecturadigitada = 0;
-        lectura.mesesmulta = 0;
-        lectura.idnovedad_novedades = this.novedad;
-        lectura.idemision = this.idemision;
-        lectura.idabonado_abonados = abonados[k];
-        lectura.idresponsable = abonados[k].idresponsable.idcliente;
-        lectura.idcategoria = abonados[k].idcategoria_categorias.idcategoria;
-        lectura.idrutaxemision_rutasxemision = nuevarutaxemi;
-        lectura.total1 = 0;
-        lectura.idfactura = nuevoIdfactura;
-        try {
-          await this.lecService.saveLecturaAsync(lectura);
-        } catch (error) {
-          console.error(`Al guardar La lectura ${k}`, error);
-        }
+        this.lecService
+          .getByIdEmisionIdabonado(this.idemision, abonados[k].idabonado)
+          .subscribe({
+            next: async (item: any) => {
+              console.log(item);
+              if (item.length === 0) {
+                // for (let k = 0; k < 2; k++) {
+                //Primero crea la Factura (Planilla) para cada Abonado para luego ponerla en las Lecturas
+                let planilla = {} as Planilla;
+                planilla.idmodulo = this.modulo;
+                this.cliente = new Clientes();
+                this.cliente.idcliente = abonados[k].idresponsable.idcliente;
+                planilla.idcliente = this.cliente;
+                planilla.idabonado = abonados[k].idabonado;
+                planilla.porcexoneracion = 0;
+                planilla.totaltarifa = 0;
+                planilla.pagado = 0;
+                planilla.conveniopago = 0;
+                planilla.estadoconvenio = 0;
+                planilla.formapago = 1;
+                planilla.valorbase = 0;
+                planilla.usucrea = this.authService.idusuario;
+                planilla.estado = 1;
+                planilla.feccrea = this.fechaemision;
+                //let nuevoIdfactura = k; Solo para pruebas, para que no genere las facturas
+                let nuevoIdfactura: number = 0;
+                try {
+                  //Crea la planilla con el metodo que devuelve el idfactura generado
+                  nuevoIdfactura = await this.facService.saveFacturaAsyncId(
+                    planilla
+                  );
+                } catch (error) {
+                  console.error(`Al guardar la Factura (planilla) ${k}`, error);
+                }
+                //Ahora si crea la Lectura para cada Abonado
+                let lectura = {} as Lectura;
+                lectura.estado = 0;
+                lectura.fechaemision = this.fechaemision;
+                try {
+                  let lecturaanterior =
+                    await this.lecService.getUltimaLecturaAsync(
+                      abonados[k].idabonado
+                    );
+                  if (!lecturaanterior) {
+                    lecturaanterior = 0;
+                  }
+                  lectura.lecturaanterior = lecturaanterior;
+                } catch (error) {
+                  console.error(`Al buscar la Última lectura`, error);
+                }
+                lectura.lecturaactual = 0;
+                lectura.lecturadigitada = 0;
+                lectura.mesesmulta = 0;
+                lectura.idnovedad_novedades = this.novedad;
+                lectura.idemision = this.idemision;
+                lectura.idabonado_abonados = abonados[k];
+                lectura.idresponsable = abonados[k].idresponsable.idcliente;
+                lectura.idcategoria =
+                  abonados[k].idcategoria_categorias.idcategoria;
+                lectura.idrutaxemision_rutasxemision = nuevarutaxemi;
+                lectura.total1 = 0;
+                lectura.idfactura = nuevoIdfactura;
+                try {
+                  await this.lecService.saveLecturaAsync(lectura);
+                } catch (error) {
+                  console.error(`Al guardar La lectura ${k}`, error);
+                }
+              } 
+            },
+            error: (e: any) => console.error(e),
+          });
       }
     } catch (error) {
       console.error(`Al recuperar los Abonados por ruta ${i}`, error);

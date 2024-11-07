@@ -132,6 +132,7 @@ export class EmisionesComponent implements OnInit {
       desde: '',
       hasta: '',
     });
+    console.log(this.cerrado)
 
     let hasta: String;
     this.emiService.ultimo().subscribe({
