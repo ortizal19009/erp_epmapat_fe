@@ -204,4 +204,11 @@ export class RubroxfacService {
       this.http.get<any[]>(`${baseUrl}/multas?idfactura= ${idfactura}`)
     );
   }
+
+  /* REPORTE CARTERA VENCIDA */
+  getCarteraVencidaxRubros(fechacobro: Date) {
+    return this.http.get(
+      `${baseUrl}/reportes/carteravencida?fechacobro=${fechacobro}`
+    );
+  }
 }

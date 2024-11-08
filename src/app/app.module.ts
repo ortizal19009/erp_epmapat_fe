@@ -226,6 +226,7 @@ import { ImpClienteComponent } from './componentes/clientes/imp-cliente/imp-clie
 import { ImpInfoclienteComponent } from './componentes/clientes/imp-infocliente/imp-infocliente.component';
 import { ImpEmisionesComponent } from './componentes/emisiones/imp-emisiones/imp-emisiones.component';
 import { FormatFechaPipe } from './pipes/format-fecha.pipe';
+import { CvRubrosComponent } from './componentes/coactivas/carteras-vencidas/cv-rubros/cv-rubros.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
@@ -298,7 +299,9 @@ import { FormatFechaPipe } from './pipes/format-fecha.pipe';
       InfoEstrfuncComponent, ModiPregastoComponent, AuxGastoComponent, NiifcuentasComponent, AddHomologaComponent,
       AddNiifcuentaComponent, ModiNiifcuentaComponent, TramipresuComponent, AddTramipresuComponent, ModiTramipresuComponent,
       CuentasComponent, AddCuentaComponent, SinafipComponent, TransaciComponent, AddTransaciComponent, AddAsientoComponent,
-      AddBenextranComponent, SimulacionComponent, AddLiquiacfpComponent, ModificarTramitenuevoComponent, AddAguatramiteComponent, CertitmpComponent, GeneCertificacionComponent, AguatramComponent, BuscarClienteComponent, ModiUsuarioComponent, BuscarRutaComponent, HabilitacionesComponent, AddHabilitacionComponent, HistorialconsumoComponent, AnulacionesBajasComponent, RutasmorasComponent, LoadingComponent, ImpClienteComponent, ImpInfoclienteComponent, ImpEmisionesComponent, FormatFechaPipe,
+      AddBenextranComponent, SimulacionComponent, AddLiquiacfpComponent, ModificarTramitenuevoComponent, AddAguatramiteComponent, CertitmpComponent, GeneCertificacionComponent, AguatramComponent, BuscarClienteComponent, ModiUsuarioComponent, BuscarRutaComponent, HabilitacionesComponent, AddHabilitacionComponent, HistorialconsumoComponent, AnulacionesBajasComponent, RutasmorasComponent, LoadingComponent, ImpClienteComponent, ImpInfoclienteComponent, ImpEmisionesComponent, FormatFechaPipe, CvRubrosComponent,
+      /* COACTIVAS */
+      CvRubrosComponent
    ],
 
    imports: [

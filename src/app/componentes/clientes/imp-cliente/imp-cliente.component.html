@@ -24,12 +24,13 @@
                                 <label *ngIf="!swimprimir" class="input-group-text">Exportar</label>
                             </div>
                             <select class="custom-select" formControlName="reporte" (change)="changeReporte()">
-                                <option value="1">Cartera Vencida</option>
+                                <option value="1">Cartera Vencida General</option>
                                 <option value="2">Lista de Abonados</option>
+                                <option value="3">Cartera Vencida Rubros</option>
                             </select>
                         </div>
 
-                        <div *ngIf="opcreporte != 3" class="form-group col-md-8">
+                        <div *ngIf="opcreporte != 2" class="form-group col-md-8">
                             <div class="input-group input-group-sm">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
@@ -40,7 +41,7 @@
                             </div>
                         </div>
 
-                        <div *ngIf="opcreporte != 3" class="form-group col-md-10">
+                        <div *ngIf="opcreporte != 2 " class="form-group col-md-10">
                             <div class="input-group input-group-sm">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"

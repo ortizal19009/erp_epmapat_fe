@@ -6,78 +6,103 @@ import { UsuarioService } from '../servicios/administracion/usuario.service';
 import { Router } from '@angular/router';
 
 @Component({
-   selector: 'app-main-header',
-   templateUrl: './main-header.component.html',
-   styleUrls: ['./main-header.component.css']
+  selector: 'app-main-header',
+  templateUrl: './main-header.component.html',
+  styleUrls: ['./main-header.component.css'],
 })
-
 export class MainHeaderComponent implements OnInit {
+  fondo1: number;
+  modulos: String[];
+  enabled: boolean[];
+  formDefinir: FormGroup;
+  tmpmodu: number;
 
-   fondo1: number;
-   modulos: String[];
-   enabled: boolean[];
-   formDefinir: FormGroup;
-   tmpmodu: number;
+  constructor(
+    private footer: MainFooterComponent,
+    public fb: FormBuilder,
+    public authService: AutorizaService,
+    private usuService: UsuarioService,
+    private router: Router
+  ) {}
 
-   constructor(private footer: MainFooterComponent, public fb: FormBuilder,
-      public authService: AutorizaService, private usuService: UsuarioService, private router: Router) { }
+  ngOnInit(): void {
+    //Fondo
+    let fondoActual = sessionStorage.getItem('fondoActual')?.toString();
+    this.fondo1 = +fondoActual!;
+    //Módulos
+    this.modulos = [
+      'Comercialización',
+      'Contabilidad gubernamental',
+      'Inventario',
+      'Propiedad, planta y equipo',
+      'Recursos humanos',
+      'Coactivas',
+      'Administración central',
+    ];
 
-   ngOnInit(): void {
+    // console.log('Esta en ngOnInit() de header')
+    this.authService.valsession();
 
-      //Fondo
-      let fondoActual = sessionStorage.getItem("fondoActual")?.toString();
-      this.fondo1 = +fondoActual!
-      //Módulos
-      this.modulos = ["Comercialización", "Contabilidad gubernamental", "Inventario",
-         "Propiedad, planta y equipo", "Recursos humanos", "Administración central"];
+    this.authService.nomodulo = this.modulos[this.authService.moduActual - 1];
+    console.log(this.authService.nomodulo);
+    //No hay modulos
+    if (this.authService.sessionlog) this.authService.enabModulos();
+    else this.enabled = [false, false, false, false, false, false, false];
 
-      // console.log('Esta en ngOnInit() de header')
-      this.authService.valsession();
+    this.formDefinir = this.fb.group({
+      fdesde: '',
+      fhasta: '',
+      otrapestania: '',
+    });
+  }
 
-      this.authService.nomodulo = this.modulos[this.authService.moduActual - 1];
+  fondo() {
+    if (!this.fondo1) {
+      this.fondo1 = 1;
+    } else {
+      this.fondo1 = this.fondo1 * -1;
+    }
+    sessionStorage.setItem('fondoActual', this.fondo1.toString());
+    this.footer.fondo(this.fondo1);
+  }
 
-      //No hay modulos
-      if (this.authService.sessionlog) this.authService.enabModulos();
-      else this.enabled = [false, false, false, false, false, false];
+  definir() {
+    this.formDefinir.controls['fdesde'].setValue(
+      sessionStorage.getItem('fdesde')
+    );
+    this.formDefinir.controls['fhasta'].setValue(
+      sessionStorage.getItem('fhasta')
+    );
+    if (sessionStorage.getItem('otrapestania') == 'true')
+      this.formDefinir.controls['otrapestania'].setValue(true);
+    else this.formDefinir.controls['otrapestania'].setValue(false);
+  }
 
-      this.formDefinir = this.fb.group({
-         fdesde: '',
-         fhasta: '',
-         otrapestania: ''
-      });
-   }
-
-   fondo() {
-      if (!this.fondo1) { this.fondo1 = 1; }
-      else { this.fondo1 = this.fondo1 * -1; }
-      sessionStorage.setItem("fondoActual", this.fondo1.toString())
-      this.footer.fondo(this.fondo1);
-   }
-
-   definir() {
-      this.formDefinir.controls['fdesde'].setValue(sessionStorage.getItem("fdesde"));
-      this.formDefinir.controls['fhasta'].setValue(sessionStorage.getItem("fhasta"));
-      if (sessionStorage.getItem("otrapestania") == 'true') this.formDefinir.controls['otrapestania'].setValue(true);
-      else this.formDefinir.controls['otrapestania'].setValue(false);
-   }
-
-   guardarDefinir() {
-      this.usuService.getByIdusuario(1).subscribe({
-         next: resp => {
-            resp.fdesde = this.formDefinir.value.fdesde;
-            resp.fhasta = this.formDefinir.value.fhasta;
-            resp.otrapestania = this.formDefinir.value.otrapestania;
-            this.usuService.updateUsuario(1, resp).subscribe({
-               next: resp => {
-                  sessionStorage.setItem("fdesde", this.formDefinir.value.fdesde.toString());
-                  sessionStorage.setItem("fhasta", this.formDefinir.value.fhasta.toString());
-                  sessionStorage.setItem("otrapestania", this.formDefinir.value.otrapestania.toString())
-               },
-               error: err => console.log(err.error)
-            });
-         },
-         error: err => console.log(err.error)
-      });
-   }
-  
+  guardarDefinir() {
+    this.usuService.getByIdusuario(1).subscribe({
+      next: (resp) => {
+        resp.fdesde = this.formDefinir.value.fdesde;
+        resp.fhasta = this.formDefinir.value.fhasta;
+        resp.otrapestania = this.formDefinir.value.otrapestania;
+        this.usuService.updateUsuario(1, resp).subscribe({
+          next: (resp) => {
+            sessionStorage.setItem(
+              'fdesde',
+              this.formDefinir.value.fdesde.toString()
+            );
+            sessionStorage.setItem(
+              'fhasta',
+              this.formDefinir.value.fhasta.toString()
+            );
+            sessionStorage.setItem(
+              'otrapestania',
+              this.formDefinir.value.otrapestania.toString()
+            );
+          },
+          error: (err) => console.log(err.error),
+        });
+      },
+      error: (err) => console.log(err.error),
+    });
+  }
 }

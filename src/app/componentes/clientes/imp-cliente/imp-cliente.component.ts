@@ -7,6 +7,7 @@ import autoTable from 'jspdf-autotable';
 import * as ExcelJS from 'exceljs';
 import { ClientesService } from 'src/app/servicios/clientes.service';
 import { Clientes } from 'src/app/modelos/clientes';
+import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 @Component({
   selector: 'app-imp-cliente',
   templateUrl: './imp-cliente.component.html',
@@ -31,7 +32,8 @@ export class ImpClienteComponent implements OnInit {
     public fb: FormBuilder,
     private router: Router,
     private facService: FacturaService,
-    private cliService: ClientesService
+    private cliService: ClientesService,
+    private s_rxf: RubroxfacService
   ) {}
 
   ngOnInit(): void {
@@ -103,6 +105,16 @@ export class ImpClienteComponent implements OnInit {
           console.error('Error al obtener las partidas:', error);
         }
         break;
+      case 3: //CARTERA VENCIDA POR RUBRO
+        try {
+          this.calcularCVBRubros(this.formImprimir.value.hasta)
+          this.swcalculando = true;
+          if (this.swimprimir) this.txtcalculando = 'Mostrar';
+          else this.txtcalculando = 'Descargar';
+        } catch (error) {
+          console.error('Error al obtener las partidas:', error);
+        }
+        break;
     }
   }
 
@@ -114,7 +126,12 @@ export class ImpClienteComponent implements OnInit {
       this.cliService.getListaById(i).subscribe({
         next: (resp) => {
           cliente = resp;
-          this._clientes.push([cliente.cedula, cliente.nombre, cliente.direccion, suma]);
+          this._clientes.push([
+            cliente.cedula,
+            cliente.nombre,
+            cliente.direccion,
+            suma,
+          ]);
           this.total = this.total + suma;
         },
         error: (err) => console.log(err.error),
@@ -130,6 +147,14 @@ export class ImpClienteComponent implements OnInit {
       if (this.swimprimir) this.txtcalculando = 'Mostrar';
       else this.txtcalculando = 'Descargar';
     }
+  }
+  calcularCVBRubros(fecha: Date) {
+    this.s_rxf.getCarteraVencidaxRubros(fecha).subscribe({
+      next: (datosCrtera: any) => {
+        console.log(datosCrtera);
+      },
+      error: (e: any) => console.error(e),
+    });
   }
 
   //Muestra cada reporte
@@ -162,7 +187,7 @@ export class ImpClienteComponent implements OnInit {
     doc.setFont('times', 'normal');
     doc.setFontSize(12);
     doc.text('FECHA: ' + this.formImprimir.value.hasta, m_izquierda, 22);
-    let cabecera = ['CEDULA', 'NOMBRE','DIRECCIÓN', 'VALOR'];
+    let cabecera = ['CEDULA', 'NOMBRE', 'DIRECCIÓN', 'VALOR'];
 
     const datos: any = [];
 
@@ -271,7 +296,7 @@ export class ImpClienteComponent implements OnInit {
       color: { argb: '001060' },
     };
 
-    const cabecera = ['Cédula', 'Nombre','Dirección', 'Valor'];
+    const cabecera = ['Cédula', 'Nombre', 'Dirección', 'Valor'];
     const headerRowCell = worksheet.addRow(cabecera);
     headerRowCell.eachCell((cell) => {
       cell.fill = {

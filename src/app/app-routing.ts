@@ -215,6 +215,7 @@ import { RutasmorasComponent } from './componentes/suspensiones/rutasmoras/rutas
 import { ImpInfoclienteComponent } from './componentes/clientes/imp-infocliente/imp-infocliente.component';
 import { ImpClienteComponent } from './componentes/clientes/imp-cliente/imp-cliente.component';
 import { ImpEmisionesComponent } from './componentes/emisiones/imp-emisiones/imp-emisiones.component';
+import { CvRubrosComponent } from './componentes/coactivas/carteras-vencidas/cv-rubros/cv-rubros.component';
 
 const routes: Routes = [
   //Consumo de Agua
@@ -455,6 +456,10 @@ const routes: Routes = [
   // { path: 'login', component: LoginComponent },
 
   { path: '', redirectTo: 'inicio', pathMatch: 'full' },
+
+
+  /* COACTIVAS */
+  {path:'cv-rubros', component:CvRubrosComponent}
 ];
 
 @NgModule({

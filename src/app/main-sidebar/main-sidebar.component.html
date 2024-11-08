@@ -622,8 +622,27 @@
                   </li>
                </ul>
             </li>
-            <!-- =============== ADMINISTRACION CENTRAL ==================== -->
+            <!-- =============== COACTIVAS =================== -->
             <li *ngIf="authService.modulo == 6" class="nav-item">
+               <a href="#" class="nav-link bg-info" >
+                  <i class="bi-gear nav-icon"></i>
+                  <p> Carteras Vencidas
+                     <i class="fas fa-angle-right right"></i>
+                     <span class="badge badge-warning right">1</span>
+                  </p>
+               </a>
+               <ul class="nav nav-treeview">
+   
+                  <li class="nav-item">
+                     <a routerLink="/cv-rubros" class="nav-link">
+                        <i class="bi-hdd-stack nav-icon"></i>
+                        <p class="text-warning"> Rubros </p>
+                     </a>
+                  </li>
+               </ul>
+            </li>
+            <!-- =============== ADMINISTRACION CENTRAL ==================== -->
+            <li *ngIf="authService.modulo == 7" class="nav-item">
                <a href="#" class="nav-link bg-info" [ngClass]="{'disabled': !isOptionEnabled(5, 220)}">
                   <i class="bi-gear nav-icon"></i>
                   <p> Utilería
@@ -646,7 +665,7 @@
                   </li>
                </ul>
             </li>
-            <li *ngIf="authService.modulo == 6" class="nav-item">
+            <li *ngIf="authService.modulo == 7" class="nav-item">
                <a href="#" class="nav-link bg-info" [ngClass]="{'disabled': !isOptionEnabled(5, 223)}">
                   <i class="bi bi-scissors nav-icon"></i>
                   <p> SRI

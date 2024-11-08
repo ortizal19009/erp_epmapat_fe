@@ -26,9 +26,11 @@
                equipo</a>
             <a class="dropdown-item" [ngClass]="{'disabled' : !authService.enabled[4]}" href="#"
                (click)="authService.selecModulo(5)"><i class="bi-file-person"></i>&nbsp;&nbsp;Recursos humanos</a>
+               <a class="dropdown-item" [ngClass]="{'disabled' : !authService.enabled[5]}" href="#"
+               (click)="authService.selecModulo(6)"><i class="bi-file-person"></i>&nbsp;&nbsp;Coactivas</a>
             <div class="dropdown-divider"></div>
-            <a class="dropdown-item" [ngClass]="{'disabled' : !authService.enabled[5]}" href="#"
-               (click)="authService.selecModulo(6)"><i class="bi-gear"></i>&nbsp;&nbsp;Administración central</a>
+            <a class="dropdown-item" [ngClass]="{'disabled' : !authService.enabled[6]}" href="#"
+               (click)="authService.selecModulo(7)"><i class="bi bi-person-video2"></i>&nbsp;&nbsp;Administración central</a>
          </div>
       </li>
    </ul>
