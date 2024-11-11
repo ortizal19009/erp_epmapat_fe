@@ -9,6 +9,7 @@ import { ClientesService } from 'src/app/servicios/clientes.service';
 import { Clientes } from 'src/app/modelos/clientes';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
+import { PdfService } from 'src/app/servicios/pdf.service';
 @Component({
   selector: 'app-imp-cliente',
   templateUrl: './imp-cliente.component.html',
@@ -36,6 +37,7 @@ export class ImpClienteComponent implements OnInit {
     private cliService: ClientesService,
     private s_rxf: RubroxfacService,
     private coloresService: ColoresService,
+    private s_pdf: PdfService
   ) {}
 
   ngOnInit(): void {
@@ -120,7 +122,7 @@ export class ImpClienteComponent implements OnInit {
         break;
       case 3: //CARTERA VENCIDA POR RUBRO
         try {
-          this.calcularCVBRubros(this.formImprimir.value.hasta)
+          this.calcularCVBRubros(this.formImprimir.value.hasta);
           this.swcalculando = true;
           if (this.swimprimir) this.txtcalculando = 'Mostrar';
           else this.txtcalculando = 'Descargar';
@@ -128,9 +130,9 @@ export class ImpClienteComponent implements OnInit {
           console.error('Error al obtener las partidas:', error);
         }
         break;
-        case 4: //CARTERA VENCIDA POR FACTURA
+      case 4: //CARTERA VENCIDA POR FACTURA
         try {
-          this.calcularCVBRubros(this.formImprimir.value.hasta)
+          this.calcularCVByFacturas(this.formImprimir.value.hasta);
           this.swcalculando = true;
           if (this.swimprimir) this.txtcalculando = 'Mostrar';
           else this.txtcalculando = 'Descargar';
@@ -171,10 +173,22 @@ export class ImpClienteComponent implements OnInit {
       else this.txtcalculando = 'Descargar';
     }
   }
-  calcularCVBRubros(fecha: Date) {
+  calcularCVBRubros(fecha: any) {
     this.s_rxf.getCarteraVencidaxRubros(fecha).subscribe({
       next: (datosCrtera: any) => {
         console.log(datosCrtera);
+      },
+      error: (e: any) => console.error(e),
+    });
+  }
+  calcularCVByFacturas(fecha: any) {
+    this.facService.getCarteraVencidaFacturas(fecha).subscribe({
+      next: (datos: any) => {
+        let doc = new jsPDF();
+        console.log(datos);
+        let head: any = [];
+        let body: any = [];
+        this.s_pdf.bodyOneTable('Cartera vencida por factura', head, body, doc);
       },
       error: (e: any) => console.error(e),
     });
