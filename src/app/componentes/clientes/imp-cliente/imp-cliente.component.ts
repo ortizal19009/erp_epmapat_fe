@@ -8,6 +8,7 @@ import * as ExcelJS from 'exceljs';
 import { ClientesService } from 'src/app/servicios/clientes.service';
 import { Clientes } from 'src/app/modelos/clientes';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
+import { ColoresService } from 'src/app/compartida/colores.service';
 @Component({
   selector: 'app-imp-cliente',
   templateUrl: './imp-cliente.component.html',
@@ -33,13 +34,15 @@ export class ImpClienteComponent implements OnInit {
     private router: Router,
     private facService: FacturaService,
     private cliService: ClientesService,
-    private s_rxf: RubroxfacService
+    private s_rxf: RubroxfacService,
+    private coloresService: ColoresService,
   ) {}
 
   ngOnInit(): void {
-    sessionStorage.setItem('ventana', '/clientes');
-    let coloresJSON = sessionStorage.getItem('/clientes');
+    sessionStorage.setItem('ventana', '/cv-facturas');
+    let coloresJSON = sessionStorage.getItem('/cv-facturas');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
+    else this.buscaColor();
 
     //
     const fecha = new Date();
@@ -62,6 +65,16 @@ export class ImpClienteComponent implements OnInit {
     document.documentElement.style.setProperty('--bgcolor2', colores[1]);
     const detalle = document.querySelector('.detalle');
     if (detalle) detalle.classList.add('nuevoBG2');
+  }
+  async buscaColor() {
+    try {
+      const datos = await this.coloresService.setcolor(1, 'cv-facturas');
+      const coloresJSON = JSON.stringify(datos);
+      sessionStorage.setItem('/cv-facturas', coloresJSON);
+      this.colocaColor(datos);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   get f() {
@@ -106,6 +119,16 @@ export class ImpClienteComponent implements OnInit {
         }
         break;
       case 3: //CARTERA VENCIDA POR RUBRO
+        try {
+          this.calcularCVBRubros(this.formImprimir.value.hasta)
+          this.swcalculando = true;
+          if (this.swimprimir) this.txtcalculando = 'Mostrar';
+          else this.txtcalculando = 'Descargar';
+        } catch (error) {
+          console.error('Error al obtener las partidas:', error);
+        }
+        break;
+        case 4: //CARTERA VENCIDA POR FACTURA
         try {
           this.calcularCVBRubros(this.formImprimir.value.hasta)
           this.swcalculando = true;

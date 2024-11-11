@@ -1,8 +1,8 @@
 <div class="content mt-1 pt-1 pl-0">
     <div class="container-fluid">
         <div class="row m-0 px-0 py-1 justify-content-start cabecera border sombra">
-            <div class="col-sm-2">
-                <h4 class="m-0 font-weight-bold"><i class="fa fa-list" aria-hidden="true"></i> C.V. Rubros</h4>
+            <div class="col-sm-3">
+                <h4 class="m-0 font-weight-bold"><i class="fa fa-list" aria-hidden="true"></i> C.V. Facturas</h4>
             </div>
             <div class="col-sm-7">
                 <form [formGroup]="f_buscar">
@@ -18,7 +18,7 @@
                                     <button class="btn btn-primary btn-sm"><i class="fa fa-search"></i>
                                         Buscar</button>
                                 </div>
-                                <div class="col-sm-4 px-0">
+                                <div class="col-sm-2 px-0">
                                     <input type="text" class="form-control form-control-sm text-center"
                                         placeholder="Filtrar..." [(ngModel)]="filtro" formControlName="filtro" />
                                 </div>
@@ -62,12 +62,12 @@
                     </tr>
                 </thead>
                 <tbody class="">
-                    <tr *ngFor="let rubro of _rubros |filter:filtro; let i = index">
+                    <tr *ngFor="let factura of _facturas |filter:filtro; let i = index">
                         <td class="small text-center font-weight-bold">{{i+1}}</td>
-                        <td>{{rubro.descripcion}}</td>
-                        <td class="text-center">{{rubro.codigo}}</td>
-                        <td class="text-center">{{rubro.facturas}}</td>
-                        <td class="text-right">{{rubro.total.toFixed(2)}} $</td>
+                        <td>{{factura.descripcion}}</td>
+                        <td class="text-center">{{factura.codigo}}</td>
+                        <td class="text-center">{{factura.facturas}}</td>
+                        <td class="text-right">{{factura.total.toFixed(2)}} $</td>
                         <td class="text-center">
                             <div class="btn-group py-0">
                                 <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0"

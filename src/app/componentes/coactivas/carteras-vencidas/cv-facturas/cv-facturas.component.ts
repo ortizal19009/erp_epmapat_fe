@@ -1,27 +1,28 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ColoresService } from 'src/app/compartida/colores.service';
-import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
+import { FacturaService } from 'src/app/servicios/factura.service';
 
 @Component({
-  selector: 'app-cv-rubros',
-  templateUrl: './cv-rubros.component.html',
-  styleUrls: ['./cv-rubros.component.css'],
+  selector: 'app-cv-facturas',
+  templateUrl: './cv-facturas.component.html',
+  styleUrls: ['./cv-facturas.component.css'],
 })
-export class CvRubrosComponent implements OnInit {
-  filtro: string;
+export class CvFacturasComponent implements OnInit {
   f_buscar: FormGroup;
+  filtro: string;
+  _facturas: any;
   today: Date = new Date();
-  _rubros: any;
+
   constructor(
     private coloresService: ColoresService,
-    private s_rxf: RubroxfacService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private s_facturas: FacturaService
   ) {}
 
   ngOnInit(): void {
-    sessionStorage.setItem('ventana', '/cv-rubros');
-    let coloresJSON = sessionStorage.getItem('/cv-rubros');
+    sessionStorage.setItem('ventana', '/cv-facturas');
+    let coloresJSON = sessionStorage.getItem('/cv-facturas');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
     else this.buscaColor();
     let d = this.today.toISOString().slice(0, 10);
@@ -29,8 +30,10 @@ export class CvRubrosComponent implements OnInit {
       sDate: d,
       filtro: '',
     });
-    this.getCarteraVencidaxRubros(d);
+    //this.getCarteraOfFacturas(d);
   }
+  onChangeDate(e: any) {}
+
   colocaColor(colores: any) {
     document.documentElement.style.setProperty('--bgcolor1', colores[0]);
     const cabecera = document.querySelector('.cabecera');
@@ -41,24 +44,21 @@ export class CvRubrosComponent implements OnInit {
   }
   async buscaColor() {
     try {
-      const datos = await this.coloresService.setcolor(1, 'cv-rubros');
+      const datos = await this.coloresService.setcolor(1, 'cv-facturas');
       const coloresJSON = JSON.stringify(datos);
-      sessionStorage.setItem('/cv-rubros', coloresJSON);
+      sessionStorage.setItem('/cv-facturas', coloresJSON);
       this.colocaColor(datos);
     } catch (error) {
       console.error(error);
     }
   }
-  getCarteraVencidaxRubros(date: any) {
-    this.s_rxf.getCarteraVencidaxRubros(date).subscribe({
-      next: (datos: any) => {
-        console.log(datos);
-        this._rubros = datos;
+  getCarteraOfFacturas(date: any) {
+    this.s_facturas.getCarteraVencidaFacturas(date).subscribe({
+      next: (facturas: any) => {
+        console.log(facturas);
+        this._facturas = facturas;
       },
       error: (e: any) => console.error(e),
     });
-  }
-  onChangeDate(e: any) {
-    this.getCarteraVencidaxRubros(this.f_buscar.value.sDate);
   }
 }

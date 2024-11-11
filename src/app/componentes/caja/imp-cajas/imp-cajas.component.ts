@@ -261,14 +261,10 @@ export class ImpCajasComponent implements OnInit {
             d_fecha,
             h_fecha
           );
-          this._p_transferidas = await this.facService.getFacPagadasTransferidas(
-            d_fecha,
-            h_fecha
-          );
-          this._np_transferidas = await this.facService.getFacNoPagadasTransferidas(
-            d_fecha,
-            h_fecha
-          );
+          this._p_transferidas =
+            await this.facService.getFacPagadasTransferidas(d_fecha, h_fecha);
+          this._np_transferidas =
+            await this.facService.getFacNoPagadasTransferidas(d_fecha, h_fecha);
           this.swcalculando = false;
           if (this.swimprimir) this.txtcalculando = 'Mostrar';
           else this.txtcalculando = 'Descargar';
@@ -533,6 +529,7 @@ export class ImpCajasComponent implements OnInit {
     let suma: number = 0;
     var i = 0;
     this._cobradas.forEach((item: any) => {
+      console.log(item);
       let totalPorFormaCobro =
         +this._cobradas[i].total + +this._cobradas[i].iva;
       datos.push([
@@ -1051,69 +1048,58 @@ export class ImpCajasComponent implements OnInit {
   }
   async imprimirTransferenciasGlobal() {
     let doc = new jsPDF();
-    let heder1: any = [['TRANSFERENCIAS EMITIDAS'],[
-      'Planilla',
-      'Cliente',
-      'F. transferencia',
-      'Modulo',
-      'total',]
+    let heder1: any = [
+      ['TRANSFERENCIAS EMITIDAS'],
+      ['Planilla', 'Cliente', 'F. transferencia', 'Modulo', 'total'],
     ];
-    let heder2: any = [['TRANSFERENCIAS COBRADAS'],[
-      'Planilla',
-      'Cliente',
-      'F. transferencia',
-      'Modulo',
-      'total',]
+    let heder2: any = [
+      ['TRANSFERENCIAS COBRADAS'],
+      ['Planilla', 'Cliente', 'F. transferencia', 'Modulo', 'total'],
     ];
-    let heder3: any = [['TRANSFERENCIAS POR COBRAR'],[
-      'Planilla',
-      'Cliente',
-      'F. transferencia',
-      'Modulo',
-      'total',]
+    let heder3: any = [
+      ['TRANSFERENCIAS POR COBRAR'],
+      ['Planilla', 'Cliente', 'F. transferencia', 'Modulo', 'total'],
     ];
-    let suma1 = 0; 
-    let suma2 = 0; 
-    let suma3 = 0; 
-    
+    let suma1 = 0;
+    let suma2 = 0;
+    let suma3 = 0;
+
     let body1: any = [];
     let body2: any = [];
     let body3: any = [];
     await this._transferidas.forEach((item: any) => {
-      body1.push ([
+      body1.push([
         item.idfactura,
         item.nombre,
         item.fechatransferencia,
         item.idmodulo,
         +item.total.toFixed(2),
       ]);
-      suma1 += item.total
-    
-      
+      suma1 += item.total;
     });
-    body1.push (['','','TOTAL','',suma1.toFixed(2)])
+    body1.push(['', '', 'TOTAL', '', suma1.toFixed(2)]);
     await this._p_transferidas.forEach((item: any) => {
-      body2.push ([
+      body2.push([
         item.idfactura,
         item.nombre,
         item.fechatransferencia,
         item.idmodulo,
         +item.total.toFixed(2),
       ]);
-      suma2 += item.total
+      suma2 += item.total;
     });
-    body2.push (['','','TOTAL','',suma2.toFixed(2)])
+    body2.push(['', '', 'TOTAL', '', suma2.toFixed(2)]);
     await this._np_transferidas.forEach((item: any) => {
-      body3.push ([
+      body3.push([
         item.idfactura,
         item.nombre,
         item.fechatransferencia,
         item.idmodulo,
         +item.total.toFixed(2),
       ]);
-      suma3 += item.total
+      suma3 += item.total;
     });
-    body3.push (['','','TOTAL','',suma3.toFixed(2)])
+    body3.push(['', '', 'TOTAL', '', suma3.toFixed(2)]);
     this._pdf.bodyThreeTables(
       'Reporte de transferencias',
       heder1,

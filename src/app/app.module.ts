@@ -227,6 +227,7 @@ import { ImpInfoclienteComponent } from './componentes/clientes/imp-infocliente/
 import { ImpEmisionesComponent } from './componentes/emisiones/imp-emisiones/imp-emisiones.component';
 import { FormatFechaPipe } from './pipes/format-fecha.pipe';
 import { CvRubrosComponent } from './componentes/coactivas/carteras-vencidas/cv-rubros/cv-rubros.component';
+import { CvFacturasComponent } from './componentes/coactivas/carteras-vencidas/cv-facturas/cv-facturas.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
@@ -301,7 +302,8 @@ import { CvRubrosComponent } from './componentes/coactivas/carteras-vencidas/cv-
       CuentasComponent, AddCuentaComponent, SinafipComponent, TransaciComponent, AddTransaciComponent, AddAsientoComponent,
       AddBenextranComponent, SimulacionComponent, AddLiquiacfpComponent, ModificarTramitenuevoComponent, AddAguatramiteComponent, CertitmpComponent, GeneCertificacionComponent, AguatramComponent, BuscarClienteComponent, ModiUsuarioComponent, BuscarRutaComponent, HabilitacionesComponent, AddHabilitacionComponent, HistorialconsumoComponent, AnulacionesBajasComponent, RutasmorasComponent, LoadingComponent, ImpClienteComponent, ImpInfoclienteComponent, ImpEmisionesComponent, FormatFechaPipe, CvRubrosComponent,
       /* COACTIVAS */
-      CvRubrosComponent
+      CvRubrosComponent,
+      CvFacturasComponent
    ],
 
    imports: [

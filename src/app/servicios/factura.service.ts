@@ -108,8 +108,8 @@ export class FacturaService {
   /* POR RANGOS */
   //Recaudación diaria - Facturas cobradas async (sumando los rubros)
   async getByFechacobroTotRangosAsync(
-    d_fecha: Date,
-    h_fecha: Date
+    d_fecha: any,
+    h_fecha: any
   ): Promise<any[]> {
     const response = await firstValueFrom(
       this.http.get<any[]>(
@@ -188,7 +188,7 @@ export class FacturaService {
   }
   async getByIdAsync(idfactura: number): Promise<any> {
     let response = await firstValueFrom(
-      this.http.get<Facturas>(`${baseUrl}/${idfactura}`)
+      this.http.get<any>(`${baseUrl}/${idfactura}`)
     );
     return response;
   }
@@ -388,13 +388,22 @@ export class FacturaService {
     );
     return response;
   }
-  async getFacAllTransferidas (d:Date, h:Date){
-    return this.http.get(`${baseUrl}/reportes/alltransferencias?d=${d}&h=${h}`).toPromise();
+  async getFacAllTransferidas(d: Date, h: Date) {
+    return this.http
+      .get(`${baseUrl}/reportes/alltransferencias?d=${d}&h=${h}`)
+      .toPromise();
   }
-  async getFacPagadasTransferidas (d:Date, h:Date){
-    return this.http.get(`${baseUrl}/reportes/pagadastransferencias?d=${d}&h=${h}`).toPromise();
+  async getFacPagadasTransferidas(d: Date, h: Date) {
+    return this.http
+      .get(`${baseUrl}/reportes/pagadastransferencias?d=${d}&h=${h}`)
+      .toPromise();
   }
-  async getFacNoPagadasTransferidas (d:Date, h:Date){
-    return this.http.get(`${baseUrl}/reportes/nopagadastransferencias?d=${d}&h=${h}`).toPromise();
+  async getFacNoPagadasTransferidas(d: Date, h: Date) {
+    return this.http
+      .get(`${baseUrl}/reportes/nopagadastransferencias?d=${d}&h=${h}`)
+      .toPromise();
+  }
+  getCarteraVencidaFacturas(fecha: any) {
+    return this.http.get(`${baseUrl}/reportes/cartera_vencida?fecha=${fecha}`);
   }
 }
