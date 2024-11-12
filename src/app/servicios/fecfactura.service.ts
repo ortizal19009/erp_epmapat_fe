@@ -128,7 +128,6 @@ export class FecfacturaService {
       factura.usuariocobro
     );
     let fecfactura = {} as Fec_factura;
-
     fecfactura.idfactura = factura.idfactura;
     this.claveAcceso(i);
     fecfactura.claveacceso = this.claveacceso;
@@ -140,14 +139,11 @@ export class FecfacturaService {
     fecfactura.fechaemision = factura.fechacobro;
     fecfactura.tipoidentificacioncomprador =
       factura.idcliente.idtpidentifica_tpidentifica.codigo;
-
     if (
       (factura.idmodulo.idmodulo === 3 && factura.idabonado > 0) ||
       factura.idmodulo.idmodulo === 4
     ) {
-      console.log("agua y alcantarillado")
       const abonado: Abonados = await this.getAbonado(factura.idabonado);
-
       const _lectura = await this.getLectura(factura.idfactura);
       let fecEmision: Date = new Date(_lectura[0].fechaemision);
       fecfactura.razonsocialcomprador = abonado.idresponsable.nombre;
@@ -160,7 +156,6 @@ export class FecfacturaService {
         _lectura[0].idabonado_abonados.nromedidor
       }`;
     } else {
-      console.log("OTROS SERVICIOS")
       fecfactura.razonsocialcomprador = factura.idcliente.nombre;
       fecfactura.identificacioncomprador = factura.idcliente.cedula;
       fecfactura.concepto = 'OTROS SERVICIOS';

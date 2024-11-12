@@ -412,7 +412,7 @@ export class ImpEmisionesComponent implements OnInit {
         item.valemitido.toFixed(2),
       ]);
     });
-    this.s_pdf._bodyOneTable(
+    this.s_pdf.bodyOneTable(
       `VALORES EMITIDOS EMISION: ${emision?.emision}`,
       head,
       body,

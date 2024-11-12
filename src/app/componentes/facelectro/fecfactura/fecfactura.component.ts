@@ -240,7 +240,6 @@ export class FecfacturaComponent implements OnInit {
         this._facturas[i].idabonado > 0) ||
       this._facturas[i].idmodulo.idmodulo === 4
     ) {
-      console.log("entro al inicio ")
       const abonado: Abonados = await this.getAbonado(
         this._facturas[i].idabonado
       );

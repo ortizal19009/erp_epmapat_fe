@@ -175,20 +175,61 @@ export class ImpClienteComponent implements OnInit {
   }
   calcularCVBRubros(fecha: any) {
     this.s_rxf.getCarteraVencidaxRubros(fecha).subscribe({
-      next: (datosCrtera: any) => {
+      next: async (datosCrtera: any) => {
         console.log(datosCrtera);
+        let doc = new jsPDF();
+        let head: any = [['Codigo R.', 'Descripción', 'Nro Facturas', 'Total']];
+        let body: any = [];
+        let suma: number = 0;
+        this.barraProgreso = true;
+        await datosCrtera.forEach((item: any, index: number) => {
+          body.push([
+            item.codigo,
+            item.descripcion,
+            item.facturas,
+            item.total.toFixed(2),
+          ]);
+          suma += item.total;
+          this.progreso = index;
+        });
+        body.push(['', '', 'TOTAL', suma.toFixed(2)]);
+        console.log('IMPRIMIR PDF');
+        this.s_pdf._bodyOneTable('Cartera vencida por Rubros', head, body, doc);
       },
       error: (e: any) => console.error(e),
     });
   }
-  calcularCVByFacturas(fecha: any) {
+  async calcularCVByFacturas(fecha: any) {
     this.facService.getCarteraVencidaFacturas(fecha).subscribe({
-      next: (datos: any) => {
+      next: async (datos: any) => {
         let doc = new jsPDF();
-        console.log(datos);
-        let head: any = [];
+        let head: any = [
+          ['Planilla', 'Cliente', 'Modulo', 'Cuenta', 'Emisión', 'M3', 'Total'],
+        ];
         let body: any = [];
-        this.s_pdf.bodyOneTable('Cartera vencida por factura', head, body, doc);
+        let suma: number = 0;
+        this.barraProgreso = true;
+        await datos.forEach((item: any, index: number) => {
+          body.push([
+            item.factura,
+            item.nombre,
+            item.modulo,
+            item.cuenta,
+            item.emision,
+            item.m3,
+            item.total.toFixed(2),
+          ]);
+          this.progreso = index;
+          suma += item.total;
+        });
+        console.log('IMPRIMIR PDF');
+        body.push(['', '', '', '', '', 'TOTAL', suma.toFixed(2)]);
+        this.s_pdf._bodyOneTable(
+          'Cartera vencida por factura',
+          head,
+          body,
+          doc
+        );
       },
       error: (e: any) => console.error(e),
     });

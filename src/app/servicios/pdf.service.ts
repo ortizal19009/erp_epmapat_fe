@@ -11,7 +11,7 @@ export class PdfService {
   margin_l = 40;
   line = 0;
   url = 'assets/';
-  
+
   constructor(http: HttpClient) {}
   header(titulo: string, doc: any) {
     this.margin_l = 0;
@@ -47,33 +47,32 @@ export class PdfService {
     doc.output('pdfobjectnewwindow', { filename: `${titulo}.pdf` });
   }
   bodyOneTable(title: string, head: any, body: any, doc: any) {
-    let m_izquierda: 10;
-    //let doc = new jsPDF('p', 'pt', 'a4');
     this.header(title, doc);
+    const pageNumber = doc.internal.getNumberOfPages();
 
     autoTable(doc, {
       head: head,
       body: body,
     });
 
+    doc.setPage(pageNumber);
     const pdfDataUri = doc.output('datauri');
     const pdfViewer: any = document.getElementById(
       'pdfViewer'
     ) as HTMLIFrameElement;
+
     return (pdfViewer.src = pdfDataUri);
   }
   _bodyOneTable(title: string, head: any, body: any, doc: any) {
-    console.log(head);
-    console.log(body);
-    let m_izquierda: 10;
-    //let doc = new jsPDF('p', 'pt', 'a4');
+    const pageNumber = doc.internal.getNumberOfPages();
     this.header(title, doc);
 
     autoTable(doc, {
       head: head,
       body: body,
     });
-    doc.save('Reporte');
+    doc.setPage(pageNumber);
+    doc.save(title);
   }
   bodyTwoTables(
     titulo: string,
@@ -383,7 +382,7 @@ export class PdfService {
     });
   }
 
-/*   tpcertificacion(titulo: string, tpcertifica: any) {
+  /*   tpcertificacion(titulo: string, tpcertifica: any) {
     let doc = new jsPDF('p', 'pt', 'a4');
     let i = 0;
     doc.setFont('courier');

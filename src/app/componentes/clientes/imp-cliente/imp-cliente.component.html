@@ -42,7 +42,7 @@
                             </div>
                         </div>
 
-                        <div *ngIf="opcreporte != 2 " class="form-group col-md-10">
+                        <div *ngIf="opcreporte ==1" class="form-group col-md-10">
                             <div class="input-group input-group-sm">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
@@ -87,8 +87,8 @@
                     </div>
                 </form>
                 <div *ngIf="!swbotones" class="text-center">
-                    <button *ngIf="swimprimir" type='button' class='btn btn-success btn-sm mx-1' [disabled]="swbotones"
-                        (click)="imprimir()">
+                    <button *ngIf="swimprimir" type='button' class='btn btn-success btn-sm mx-1' data-toggle="modal"
+                        data-target="#staticBackdrop" [disabled]="swbotones" (click)="imprimir()">
                         <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
                     <button *ngIf="!swimprimir" type='button' class='btn btn-warning btn-sm mx-1' (click)="imprimir()"
                         [disabled]="!formImprimir.valid">
@@ -99,7 +99,7 @@
 
                 <div *ngIf="swbotones" class="text-center">
                     <button *ngIf="swimprimir" type="button" class="btn btn-success btn-block"
-                        [attr.data-target]="otrapagina ? null : '#pdf'" data-toggle="modal" [disabled]="swcalculando"
+                        [attr.data-target]="otrapagina ? null : '#pdf '" data-toggle="modal" [disabled]="swcalculando"
                         (click)="imprime()">
                         <i *ngIf="swcalculando" class="fa fa-spinner"></i>
                         <i *ngIf="!swcalculando" class="bi-eye"></i>&nbsp;&nbsp;&nbsp;{{txtcalculando}}
@@ -116,10 +116,10 @@
     </div>
 </div>
 <!-- MODAL PDF (En la misma página)-->
-<div class='modal fade' id='pdf' tabindex='-1' aria-labelledby='pdf' aria-hidden='true'>
+<!-- <div class='modal fade' id='pdf' tabindex='-1' aria-labelledby='pdf' aria-hidden='true'>
     <div class='modal-dialog modal-lg'>
 
-        <div class="modal-content" *ngIf="opcreporte == 4">
+        <div class="modal-content" >
             <div class="modal-header">
                 <h5 class="modal-title" id="staticBackdropLabel">Vista de reporte</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -134,9 +134,30 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->
 <!-- MODAL PDF (En la misma página)-->
 <div class='modal fade' id='pdf' tabindex='-1' aria-labelledby='pdf' aria-hidden='true'>
     <div class='modal-dialog modal-sm'>
+    </div>
+</div> -
+
+<!-- Modal vista imprimir -->
+<div class="modal fade" *ngIf="opcreporte === 4" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Vista de reporte</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <iframe id="pdfViewer" src="" width="100%" height="600px"></iframe>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
     </div>
 </div>
