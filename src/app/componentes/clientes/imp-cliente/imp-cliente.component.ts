@@ -58,6 +58,7 @@ export class ImpClienteComponent implements OnInit {
       nombrearchivo: ['', [Validators.required, Validators.minLength(3)]],
       otrapagina: '',
     });
+    this.Totalclientes();
   }
 
   colocaColor(colores: any) {
@@ -82,7 +83,17 @@ export class ImpClienteComponent implements OnInit {
   get f() {
     return this.formImprimir.controls;
   }
-
+  Totalclientes() {
+    this.cliService.getTotalClientes().subscribe({
+      next: (datos: any) => {
+        console.log(datos);
+        this.formImprimir.patchValue({
+          hastaNum: datos,
+        });
+      },
+      error: (e: any) => console.error(e),
+    });
+  }
   changeReporte() {
     this.opcreporte = +this.formImprimir.value.reporte;
   }
@@ -200,7 +211,7 @@ export class ImpClienteComponent implements OnInit {
     });
   }
   async calcularCVByFacturas(fecha: any) {
-    this.facService.getCarteraVencidaFacturas(fecha).subscribe({
+    this.facService.getCVFacturaconsumo(fecha).subscribe({
       next: async (datos: any) => {
         let doc = new jsPDF();
         let head: any = [
@@ -226,6 +237,34 @@ export class ImpClienteComponent implements OnInit {
         body.push(['', '', '', '', '', 'TOTAL', suma.toFixed(2)]);
         this.s_pdf._bodyOneTable(
           'Cartera vencida por factura',
+          head,
+          body,
+          doc
+        );
+      },
+      error: (e: any) => console.error(e),
+    });
+    this.facService.getCVFacturasNOconsumo(fecha).subscribe({
+      next: async (datos: any) => {
+        let doc = new jsPDF();
+        let head: any = [['Planilla', 'Cliente', 'Modulo', 'Total']];
+        let body: any = [];
+        let suma: number = 0;
+        this.barraProgreso = true;
+        await datos.forEach((item: any, index: number) => {
+          body.push([
+            item.factura,
+            item.nombre,
+            item.modulo,
+            item.total.toFixed(2),
+          ]);
+          this.progreso = index;
+          suma += item.total;
+        });
+        console.log('IMPRIMIR PDF');
+        body.push(['', '', 'TOTAL', suma.toFixed(2)]);
+        this.s_pdf._bodyOneTable(
+          'Cartera vencida por factura servicios',
           head,
           body,
           doc

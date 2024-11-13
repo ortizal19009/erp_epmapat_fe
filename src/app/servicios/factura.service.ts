@@ -403,7 +403,10 @@ export class FacturaService {
       .get(`${baseUrl}/reportes/nopagadastransferencias?d=${d}&h=${h}`)
       .toPromise();
   }
-  getCarteraVencidaFacturas(fecha: any) {
-    return this.http.get(`${baseUrl}/reportes/cartera_vencida?fecha=${fecha}`);
+  getCVFacturaconsumo(fecha: any) {
+    return this.http.get(`${baseUrl}/reportes/CV_consumo?fecha=${fecha}`);
+  }
+  getCVFacturasNOconsumo(fecha: any) {
+    return this.http.get(`${baseUrl}/reportes/CV_noconsumo?fecha=${fecha}`);
   }
 }

@@ -53,7 +53,7 @@ export class CvFacturasComponent implements OnInit {
     }
   }
   getCarteraOfFacturas(date: any) {
-    this.s_facturas.getCarteraVencidaFacturas(date).subscribe({
+    this.s_facturas.getCVFacturaconsumo(date).subscribe({
       next: (facturas: any) => {
         console.log(facturas);
         this._facturas = facturas;
