@@ -38,7 +38,7 @@ export class ImpEmisionesComponent implements OnInit {
   otraPagina: any;
   tipe: string = 'text';
   date: Date = new Date();
-
+  pdfview: any;
   constructor(
     public fb: FormBuilder,
     private router: Router,
@@ -403,8 +403,8 @@ export class ImpEmisionesComponent implements OnInit {
     let doc = new jsPDF();
     let valoresEmitidos: any = await this.getValoresEmitidos(idemision);
     let body: any = [];
-    valoresEmitidos.forEach((item: any) => {
-      body.push([
+    valoresEmitidos.forEach(async (item: any) => {
+      await body.push([
         item.cuenta,
         item.nombre,
         item.categoria,
@@ -412,17 +412,22 @@ export class ImpEmisionesComponent implements OnInit {
         item.valemitido.toFixed(2),
       ]);
     });
-    this.s_pdf.bodyOneTable(
+    console.log(this.s_pdf.bodyOneTable(
       `VALORES EMITIDOS EMISION: ${emision?.emision}`,
       head,
       body,
       doc
-    );
+    ))
+    this.pdfview = await this.s_pdf.bodyOneTable(
+      `VALORES EMITIDOS EMISION: ${emision?.emision}`,
+      head,
+      body,
+      doc
+    )
   }
   async impConsumoXCategoria(idemision: number) {
     let emision = await this.getEmision(idemision);
     let datos: any = await this.getConsumoXCategoria(idemision);
-    console.log(datos);
     let doc = new jsPDF();
     let head = [['N° CUENTAS', 'DESCRIPCIÓN', 'M3', 'TOTAL']];
     let body: any = [];
@@ -449,9 +454,8 @@ export class ImpEmisionesComponent implements OnInit {
   }
   async impRefacturacionxEmision(idemision: number) {
     let emision = await this.getEmision(idemision);
-
-    let doc = new jsPDF();
     let obj: any = await this.getRefacturacionxEmision(idemision);
+    let doc = new jsPDF();
     let n_suma: number = 0;
     let a_suma: number = 0;
     let head = [
@@ -469,8 +473,8 @@ export class ImpEmisionesComponent implements OnInit {
         item.cuenta,
         item.nombre,
         item.observaciones,
-        item.valoranterior.toFixed(2),
-        item.valornuevo.toFixed(2),
+        +item.valoranterior!.toFixed(2),
+        +item.valornuevo!.toFixed(2),
       ]);
       n_suma += item.valornuevo;
       a_suma += item.valoranterior;

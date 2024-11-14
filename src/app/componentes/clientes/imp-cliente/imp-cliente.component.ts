@@ -184,7 +184,7 @@ export class ImpClienteComponent implements OnInit {
       else this.txtcalculando = 'Descargar';
     }
   }
-  calcularCVBRubros(fecha: any) {
+  async calcularCVBRubros(fecha: any) {
     this.s_rxf.getCarteraVencidaxRubros(fecha).subscribe({
       next: async (datosCrtera: any) => {
         console.log(datosCrtera);
@@ -211,9 +211,57 @@ export class ImpClienteComponent implements OnInit {
     });
   }
   async calcularCVByFacturas(fecha: any) {
-    this.facService.getCVFacturaconsumo(fecha).subscribe({
+    let doc = new jsPDF();
+    let facturasConsumo: any = await this.facService
+      .getCVFacturaconsumo(fecha)
+      .toPromise();
+    let facturasNoConsumo: any = await this.facService
+      .getCVFacturasNOconsumo(fecha)
+      .toPromise();
+    let head1: any = [
+      ['Planilla', 'Cliente', 'Modulo', 'Cuenta', 'Emisión', 'M3', 'Total'],
+    ];
+    let head2: any = [['Planilla', 'Cliente', 'Modulo', 'Total']];
+    let body1: any = [];
+    let body2: any = [];
+    let suma1: number = 0;
+    let suma2: number = 0;
+    await facturasConsumo.forEach((item: any, index: number) => {
+      body1.push([
+        item.factura,
+        item.nombre,
+        item.modulo,
+        item.cuenta,
+        item.emision,
+        item.m3,
+        item.total.toFixed(2),
+      ]);
+      this.progreso = index;
+      suma1 += item.total;
+    });
+
+    facturasNoConsumo.forEach((item: any, index: number) => {
+      body2.push([
+        item.factura,
+        item.nombre,
+        item.modulo,
+        item.total.toFixed(2),
+      ]);
+      this.progreso = index;
+      suma2 += item.total;
+    });
+    this.s_pdf.bodyTwoTables(
+      'REPORTE DE CARTERA VENCIDA POR FACTURAS',
+      head1,
+      body1,
+      head2,
+      body2,
+      doc
+    );
+
+    /*     this.facService.getCVFacturaconsumo(fecha).subscribe({
       next: async (datos: any) => {
-        let doc = new jsPDF();
+     
         let head: any = [
           ['Planilla', 'Cliente', 'Modulo', 'Cuenta', 'Emisión', 'M3', 'Total'],
         ];
@@ -271,7 +319,7 @@ export class ImpClienteComponent implements OnInit {
         );
       },
       error: (e: any) => console.error(e),
-    });
+    }); */
   }
 
   //Muestra cada reporte

@@ -48,19 +48,14 @@ export class PdfService {
   }
   bodyOneTable(title: string, head: any, body: any, doc: any) {
     this.header(title, doc);
-    const pageNumber = doc.internal.getNumberOfPages();
-
+  
     autoTable(doc, {
       head: head,
       body: body,
     });
-
-    doc.setPage(pageNumber);
-    const pdfDataUri = doc.output('datauri');
-    const pdfViewer: any = document.getElementById(
-      'pdfViewer'
-    ) as HTMLIFrameElement;
-
+  
+    const pdfDataUri = doc.output('datauristring');
+    const pdfViewer: any = document.getElementById('pdfViewer') as HTMLIFrameElement;
     return (pdfViewer.src = pdfDataUri);
   }
   _bodyOneTable(title: string, head: any, body: any, doc: any) {
