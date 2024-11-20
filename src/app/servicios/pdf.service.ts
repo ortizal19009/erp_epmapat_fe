@@ -48,14 +48,16 @@ export class PdfService {
   }
   bodyOneTable(title: string, head: any, body: any, doc: any) {
     this.header(title, doc);
-  
+
     autoTable(doc, {
       head: head,
       body: body,
     });
-  
+
     const pdfDataUri = doc.output('datauristring');
-    const pdfViewer: any = document.getElementById('pdfViewer') as HTMLIFrameElement;
+    const pdfViewer: any = document.getElementById(
+      'pdfViewer'
+    ) as HTMLIFrameElement;
     return (pdfViewer.src = pdfDataUri);
   }
   _bodyOneTable(title: string, head: any, body: any, doc: any) {
@@ -107,6 +109,41 @@ export class PdfService {
 
     return (pdfViewer.src = pdfDataUri);
   }
+
+  _bodyTwoTables(
+    titulo: string,
+    ht1: any,
+    bt1: any,
+    ht2: any,
+    bt2: any,
+    doc: any
+  ) {
+    console.log(ht1);
+
+    const pageNumber = doc.internal.getNumberOfPages();
+
+    this.header(titulo, doc);
+    doc.autoTable({
+      theme: 'grid',
+      head: [[{ content: ht1[0], styles: { halign: 'center' } }]],
+    });
+    // Primera tabla
+    doc.autoTable({
+      head: [ht1[1]],
+      body: bt1,
+    });
+    doc.autoTable({
+      theme: 'grid',
+      head: [[{ content: ht1[0], styles: { halign: 'center' } }]],
+    });
+    // Segunda tabla
+    doc.autoTable({
+      head: [ht2[1]],
+      body: bt2,
+    });
+    doc.setPage(pageNumber);
+    doc.save(titulo);
+  }
   bodyThreeTables(
     titulo: string,
     ht1: any,
@@ -153,6 +190,49 @@ export class PdfService {
     ) as HTMLIFrameElement;
 
     return (pdfViewer.src = pdfDataUri);
+  }
+  _bodyThreeTables(
+    titulo: string,
+    ht1: any,
+    bt1: any,
+    ht2: any,
+    bt2: any,
+    ht3: any,
+    bt3: any,
+    doc: any
+  ) {
+    this.header(titulo, doc);
+    const pageNumber = doc.internal.getNumberOfPages();
+    // Primera tabla
+    doc.autoTable({
+      head: [[{ content: ht1[0], styles: { halign: 'center' } }]],
+    });
+    doc.autoTable({
+      head: [ht1[1]],
+      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
+      body: bt1,
+    });
+    // Segunda tabla
+    doc.autoTable({
+      head: [[{ content: ht2[0], styles: { halign: 'center' } }]],
+    });
+    doc.autoTable({
+      head: [ht2[1]],
+      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
+      body: bt2,
+    });
+    // Tercer tabla
+    doc.autoTable({
+      head: [[{ content: ht3[0], styles: { halign: 'center' } }]],
+    });
+    doc.autoTable({
+      head: [ht3[1]],
+      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
+      body: bt3,
+    });
+    doc.setPage(pageNumber);
+   // const pdfDataUri = doc.output('datauri');
+    doc.save(titulo);
   }
   bodyFourTables(
     titulo: string,

@@ -43,9 +43,7 @@ export class MainHeaderComponent implements OnInit {
     // console.log('Esta en ngOnInit() de header')
     this.authService.valsession();
 
-    this.authService.nomodulo = this.modulos[this.authService.moduActual - 1];
-    console.log(this.authService.nomodulo);
-    //No hay modulos
+    this.authService.nomodulo = this.modulos[this.authService.moduActual - 1];    //No hay modulos
     if (this.authService.sessionlog) this.authService.enabModulos();
     else this.enabled = [false, false, false, false, false, false, false];
 

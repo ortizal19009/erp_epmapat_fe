@@ -10,6 +10,8 @@ import { Clientes } from 'src/app/modelos/clientes';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { PdfService } from 'src/app/servicios/pdf.service';
+import { LoadingService } from 'src/app/servicios/loading.service';
+
 @Component({
   selector: 'app-imp-cliente',
   templateUrl: './imp-cliente.component.html',
@@ -37,7 +39,8 @@ export class ImpClienteComponent implements OnInit {
     private cliService: ClientesService,
     private s_rxf: RubroxfacService,
     private coloresService: ColoresService,
-    private s_pdf: PdfService
+    private s_pdf: PdfService,
+    private s_loading: LoadingService
   ) {}
 
   ngOnInit(): void {
@@ -86,7 +89,6 @@ export class ImpClienteComponent implements OnInit {
   Totalclientes() {
     this.cliService.getTotalClientes().subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this.formImprimir.patchValue({
           hastaNum: datos,
         });
@@ -170,10 +172,9 @@ export class ImpClienteComponent implements OnInit {
           ]);
           this.total = this.total + suma;
         },
-        error: (err) => console.log(err.error),
+        error: (err) => console.error(err.error),
       });
     }
-    // console.log(i, tot)
     i++;
     this.progreso = (i / this.formImprimir.value.hastaNum) * 100;
     if (i < this.formImprimir.value.hastaNum) this.calClientes(i, hasta);
@@ -187,7 +188,6 @@ export class ImpClienteComponent implements OnInit {
   async calcularCVBRubros(fecha: any) {
     this.s_rxf.getCarteraVencidaxRubros(fecha).subscribe({
       next: async (datosCrtera: any) => {
-        console.log(datosCrtera);
         let doc = new jsPDF();
         let head: any = [['Codigo R.', 'Descripción', 'Nro Facturas', 'Total']];
         let body: any = [];
@@ -204,14 +204,17 @@ export class ImpClienteComponent implements OnInit {
           this.progreso = index;
         });
         body.push(['', '', 'TOTAL', suma.toFixed(2)]);
-        console.log('IMPRIMIR PDF');
         this.s_pdf._bodyOneTable('Cartera vencida por Rubros', head, body, doc);
+        this.swbotones = false;
+        this.swcalculando = false;
+        this.barraProgreso = false;
       },
       error: (e: any) => console.error(e),
     });
   }
   async calcularCVByFacturas(fecha: any) {
     let doc = new jsPDF();
+    this.barraProgreso = true;
     let facturasConsumo: any = await this.facService
       .getCVFacturaconsumo(fecha)
       .toPromise();
@@ -219,14 +222,25 @@ export class ImpClienteComponent implements OnInit {
       .getCVFacturasNOconsumo(fecha)
       .toPromise();
     let head1: any = [
+      ['PLANILLAS DE CONSUMO DE AGUA'],
       ['Planilla', 'Cliente', 'Modulo', 'Cuenta', 'Emisión', 'M3', 'Total'],
     ];
-    let head2: any = [['Planilla', 'Cliente', 'Modulo', 'Total']];
+    let head2: any = [
+      ['PLANILLAS DE SERVICIOS'],
+      ['Planilla', 'Cliente', 'Modulo', 'Total'],
+    ];
     let body1: any = [];
     let body2: any = [];
     let suma1: number = 0;
     let suma2: number = 0;
-    await facturasConsumo.forEach((item: any, index: number) => {
+    let body0: any = [];
+    let suma0: number = 0;
+    let head0: any = [
+      ['TOTALES EMITIDOS'],
+      ['Planillas de consumo de agua', 'Planillas de servicios', 'Suma Total'],
+    ];
+
+    facturasConsumo.forEach((item: any, index: number) => {
       body1.push([
         item.factura,
         item.nombre,
@@ -236,9 +250,10 @@ export class ImpClienteComponent implements OnInit {
         item.m3,
         item.total.toFixed(2),
       ]);
-      this.progreso = index;
+      this.progreso += index;
       suma1 += item.total;
     });
+    body1.push(['', '', '', '', '', 'TOTAL', suma1.toFixed(2)]);
 
     facturasNoConsumo.forEach((item: any, index: number) => {
       body2.push([
@@ -247,79 +262,25 @@ export class ImpClienteComponent implements OnInit {
         item.modulo,
         item.total.toFixed(2),
       ]);
-      this.progreso = index;
+      this.progreso += index;
       suma2 += item.total;
     });
-    this.s_pdf.bodyTwoTables(
+    body2.push(['', '', 'TOTAL', suma2.toFixed(2)]);
+    let total = suma1 + suma2;
+    body0.push([suma1.toFixed(2), suma2.toFixed(2), total.toFixed(2)]);
+    await this.s_pdf._bodyThreeTables(
       'REPORTE DE CARTERA VENCIDA POR FACTURAS',
+      head0,
+      body0,
       head1,
       body1,
       head2,
       body2,
       doc
     );
-
-    /*     this.facService.getCVFacturaconsumo(fecha).subscribe({
-      next: async (datos: any) => {
-     
-        let head: any = [
-          ['Planilla', 'Cliente', 'Modulo', 'Cuenta', 'Emisión', 'M3', 'Total'],
-        ];
-        let body: any = [];
-        let suma: number = 0;
-        this.barraProgreso = true;
-        await datos.forEach((item: any, index: number) => {
-          body.push([
-            item.factura,
-            item.nombre,
-            item.modulo,
-            item.cuenta,
-            item.emision,
-            item.m3,
-            item.total.toFixed(2),
-          ]);
-          this.progreso = index;
-          suma += item.total;
-        });
-        console.log('IMPRIMIR PDF');
-        body.push(['', '', '', '', '', 'TOTAL', suma.toFixed(2)]);
-        this.s_pdf._bodyOneTable(
-          'Cartera vencida por factura',
-          head,
-          body,
-          doc
-        );
-      },
-      error: (e: any) => console.error(e),
-    });
-    this.facService.getCVFacturasNOconsumo(fecha).subscribe({
-      next: async (datos: any) => {
-        let doc = new jsPDF();
-        let head: any = [['Planilla', 'Cliente', 'Modulo', 'Total']];
-        let body: any = [];
-        let suma: number = 0;
-        this.barraProgreso = true;
-        await datos.forEach((item: any, index: number) => {
-          body.push([
-            item.factura,
-            item.nombre,
-            item.modulo,
-            item.total.toFixed(2),
-          ]);
-          this.progreso = index;
-          suma += item.total;
-        });
-        console.log('IMPRIMIR PDF');
-        body.push(['', '', 'TOTAL', suma.toFixed(2)]);
-        this.s_pdf._bodyOneTable(
-          'Cartera vencida por factura servicios',
-          head,
-          body,
-          doc
-        );
-      },
-      error: (e: any) => console.error(e),
-    }); */
+    this.swbotones = false;
+    this.swcalculando = false;
+    this.barraProgreso = false;
   }
 
   //Muestra cada reporte
