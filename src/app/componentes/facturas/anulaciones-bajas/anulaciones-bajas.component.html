@@ -228,7 +228,7 @@
 
 
     <!-- Modal -->
-    <div class="modal fade" id="newAnulBajas" data-backdrop="static" data-keyboard="false" tabindex="-1"
+    <div class="modal" id="newAnulBajas" data-backdrop="static" data-keyboard="false" tabindex="-1"
         aria-labelledby="newAnulBajasLabel" aria-hidden="true">
         <div class="modal-dialog modal-{{size}} modal-dialog-scrollable">
             <div class="modal-content">
@@ -337,7 +337,8 @@
                                                     <div class="col-sm">
                                                         <button class="btn btn-outline-success btn-sm" type="button"
                                                             (click)="actualizar()"
-                                                            [disabled]="campo === 0 || textodato == ''">Aceptar
+                                                            [disabled]="campo === 0 || textodato == ''"
+                                                            data-dismiss="modal">Aceptars
                                                         </button>
                                                     </div>
                                                 </div>

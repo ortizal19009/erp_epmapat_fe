@@ -187,19 +187,22 @@ export class DetallesAbonadoComponent implements OnInit {
     }
   }
   validarpago(factura: any) {
+    let respuesta: Boolean = true;
     if (factura.pagado === 0 && factura.totaltarifa > 0) {
-      return false;
-    } else if (
+      respuesta = false;
+    }
+    if (
       factura.formapago === 4 &&
       factura.estado === 3 &&
       factura.pagado === 1
     ) {
-      return false;
-    } else if (factura.fechaconvenio != null || factura.convenio === 1) {
-      return false;
-    } else {
-      return true;
+      respuesta = false;
     }
+    if (factura.fechaconvenio != null || factura.estadoconvenio === 1) {
+      respuesta = true;
+    }
+    //if(factura.fechaconvenio )
+    return respuesta;
   }
   async getEmisionoByFactura(idfactura: any): Promise<any> {
     return this.lecService.findDateByIdfactura(idfactura).toPromise();

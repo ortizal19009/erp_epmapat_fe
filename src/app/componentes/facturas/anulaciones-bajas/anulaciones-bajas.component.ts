@@ -404,6 +404,7 @@ export class AnulacionesBajasComponent implements OnInit {
         });
         break;
     }
+    this.textodato = '';
     //this.facServicio.updateFacturas()
   }
 

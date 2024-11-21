@@ -27,6 +27,7 @@ import { Rubros } from 'src/app/modelos/rubros.model';
 import { map } from 'rxjs';
 import { Intereses } from 'src/app/modelos/intereses';
 import { InteresesService } from 'src/app/servicios/intereses.service';
+import { LoadingService } from 'src/app/servicios/loading.service';
 
 @Component({
   selector: 'app-add-convenio',
@@ -76,7 +77,8 @@ export class AddConvenioComponent implements OnInit {
     private facxconvService: FacxconvenioService,
     private rxfService: RubroxfacService,
     private moduService: ModulosService,
-    private interService: InteresesService
+    private interService: InteresesService,
+    private s_loading: LoadingService
   ) {}
 
   ngOnInit(): void {
@@ -255,6 +257,7 @@ export class AddConvenioComponent implements OnInit {
 
   calcular() {
     this.swcalculando = true;
+    this.s_loading.showLoading();
     this.txtcalcular = 'Calculando';
     this.facturas = [];
     this.rubros = [];
@@ -397,6 +400,7 @@ export class AddConvenioComponent implements OnInit {
         else {
           this.swcalculando = false;
           this.txtcalcular = 'Calcular';
+          this.s_loading.hideLoading();
         }
       },
       error: (err) => console.error(err.error),
