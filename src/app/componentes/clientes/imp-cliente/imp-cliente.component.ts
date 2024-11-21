@@ -315,7 +315,7 @@ export class ImpClienteComponent implements OnInit {
           this.progreso = index;
         });
         body.push(['', '', '', '', '', 'TOTAL', suma.toFixed(2)]);
-        this.s_pdf._bodyOneTable('Cartera vencida por General', head, body, doc);
+        this.s_pdf._bodyOneTable('Cartera vencida General', head, body, doc);
         this.swbotones = false;
         this.swcalculando = false;
         this.barraProgreso = false;

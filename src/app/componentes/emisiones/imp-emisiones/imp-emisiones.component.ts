@@ -10,7 +10,9 @@ import { EmisionService } from 'src/app/servicios/emision.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
 import { PdfService } from 'src/app/servicios/pdf.service';
-
+import { LoadingService } from 'src/app/servicios/loading.service';
+import $ from 'jquery';
+import * as jQuery from 'jquery';
 @Component({
   selector: 'app-imp-emisiones',
   templateUrl: './imp-emisiones.component.html',
@@ -47,7 +49,8 @@ export class ImpEmisionesComponent implements OnInit {
     private emiService: EmisionService,
     private s_pdf: PdfService,
     private s_lecturas: LecturasService,
-    private s_emisionindividual: EmisionIndividualService
+    private s_emisionindividual: EmisionIndividualService, 
+    private s_loading: LoadingService
   ) {}
 
   ngOnInit(): void {
@@ -396,6 +399,7 @@ export class ImpEmisionesComponent implements OnInit {
   }
 
   async impValoresEmisiones(idemision: number) {
+    this.s_loading.showLoading();
     let emision = await this.getEmision(idemision);
     let head = [
       ['CUENTA', 'NOMBRE Y APELLIDO', 'CATEGORIA', 'M3', 'VAL.EMITIDO'],
@@ -412,18 +416,16 @@ export class ImpEmisionesComponent implements OnInit {
         item.valemitido.toFixed(2),
       ]);
     });
-    console.log(this.s_pdf.bodyOneTable(
-      `VALORES EMITIDOS EMISION: ${emision?.emision}`,
-      head,
-      body,
-      doc
-    ))
-    this.pdfview = await this.s_pdf.bodyOneTable(
+
+    //this.pdfview = this.s_loading.showLoading();
+    this.s_pdf._bodyOneTable(
       `VALORES EMITIDOS EMISION: ${emision?.emision}`,
       head,
       body,
       doc
     )
+    this.s_loading.hideLoading();
+  
   }
   async impConsumoXCategoria(idemision: number) {
     let emision = await this.getEmision(idemision);
@@ -680,3 +682,4 @@ export class ImpEmisionesComponent implements OnInit {
     return emision;
   }
 }
+
