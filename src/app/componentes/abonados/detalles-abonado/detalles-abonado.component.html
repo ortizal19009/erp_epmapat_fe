@@ -434,7 +434,7 @@
                <button type="button" class="btn btn-outline-success btn-sm" data-dismiss="modal">
                   <i class="fa fa-times-circle"></i> Cerrar</button>
                <button type="button" class="btn btn-success btn-sm"
-                  [disabled]="estadoFE ==='A' || estadoFE == 'O'  || factura.pagado === 0"
+                  [disabled]="esFE ==='A' || esFE == 'O'  || factura.pagado === 0 || usuario != 1 "
                   (click)="expFacElectronica(idfactura)" data-dismiss="modal">
                   <i class="bi bi-send"></i> Fac. Electronica</button>
             </div>

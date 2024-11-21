@@ -61,7 +61,6 @@ export class InfoConvenioComponent implements OnInit {
   datosConvenio() {
     this.convService.getById(this.idconvenio).subscribe({
       next: (datos) => {
-        console.log(datos);
         this._convenios = datos;
         this.convenio.idconvenio = datos.idconvenio;
         this.convenio.nroconvenio = datos.nroconvenio;

@@ -40,6 +40,7 @@ export class DetallesAbonadoComponent implements OnInit {
 
   rango: number = 15;
   estadoFE: string;
+  esFE: string;
   factura: Facturas = new Facturas();
 
   _convenios: any;
@@ -72,6 +73,7 @@ export class DetallesAbonadoComponent implements OnInit {
   condonar: Condmultaintereses = new Condmultaintereses();
   razonCondonacion: string;
   detalleFactura: any;
+  usuario: number;
 
   constructor(
     private aboService: AbonadosService,
@@ -93,6 +95,7 @@ export class DetallesAbonadoComponent implements OnInit {
   ngOnInit(): void {
     this.obtenerDatosAbonado();
     this.listarIntereses();
+    this.usuario = this.authService.idusuario;
   }
 
   getFactura() {
@@ -125,7 +128,6 @@ export class DetallesAbonadoComponent implements OnInit {
     this.facturasxAbonado(+idabonado!);
   }
   estado_FE(estado: String) {
-    console.log(estado);
     switch (estado) {
       case 'A':
         return 'APROBADO, ENVADO MAIL';
@@ -234,7 +236,6 @@ export class DetallesAbonadoComponent implements OnInit {
   async getRubroxfac(idfactura: number) {
     this.idfactura = idfactura;
     this.detalleFactura = await this.facService.getByIdAsync(idfactura);
-    console.log('detalleFactura', this.detalleFactura);
     this.rubxfacService.getByIdfactura(+idfactura!).subscribe({
       next: (detalle: any) => {
         this._rubrosxfac = detalle;
@@ -242,6 +243,7 @@ export class DetallesAbonadoComponent implements OnInit {
         if (detalle[0].idfactura_facturas.pagado === 1) {
           this._fecFacturaService.getByIdFactura(+idfactura!).subscribe({
             next: (fecfactura: any) => {
+              this.esFE = fecfactura.estado;
               if (fecfactura != null) {
                 this.estadoFE = this.estado_FE(fecfactura.estado);
               } else {
@@ -250,6 +252,8 @@ export class DetallesAbonadoComponent implements OnInit {
             },
             error: (e) => console.error(e),
           });
+        } else if (detalle[0].idfactura_facturas.pagado === 0) {
+          this.estadoFE = 'PAGO PENDIENTE';
         }
         this.subtotal();
       },

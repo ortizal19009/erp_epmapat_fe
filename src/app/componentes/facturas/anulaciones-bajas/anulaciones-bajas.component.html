@@ -9,7 +9,8 @@
                     data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
                 </button>
                 <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-                    <button class="dropdown-item" type="button" data-toggle="collapse" data-target="#nuevaCaja">
+                    <button class="dropdown-item" type="button" data-toggle="modal"
+                        (click)="getFragmentToShow('formNew')" data-target="#newAnulBajas">
                         <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
                     <button class="dropdown-item" type="button" data-toggle="modal" data-target="#impReporte">
                         <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
@@ -20,7 +21,7 @@
 </div>
 <div class="container-fluid">
     <div class="row mb-0">
-        <div class="col-sm-9">
+        <div class="col-sm">
             <div class="card mt-1">
                 <div class="card-header cardTab">
                     <ul class="nav nav-tabs card-header-tabs cardTab">
@@ -115,145 +116,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-sm-3">
-            <div class="row">
-                <div class="col-sm">
-                    <div class="card card-outline cardCliente">
-                        <div class="card-body box-profile">
-                            <h3 class="profile-username text-center"> Nueva {{txttitulo}}</h3>
-                            <select class="from-control form-control-sm col-sm-12" [(ngModel)]="option"
-                                (change)="changeTitulo($event)">
-                                <option value=0>Anulación</option>
-                                <option value=1>Eliminación</option>
-                            </select>
-                            <hr>
-                            <div class="text-center">
-                                <form [formGroup]="formBuscar">
-                                    <div class="row">
-                                        <div class="col-sm-12">
-                                            <div class="row">
-                                                <div class="col-sm-5">
-                                                    <input class="form-control form-control-sm text-center" type="text"
-                                                        placeholder="Planilla" formControlName="idfactura"
-                                                        (change)="changeIdfactura()">
-                                                </div>
-                                                <div class="col-sm-5">
-                                                    <input class="form-control form-control-sm text-center" type="text"
-                                                        placeholder="Abonado" formControlName="idabonado"
-                                                        (change)="changeIdabonado()">
-                                                </div>
 
-                                                <!--                                         <div *ngIf="campo == 2" class="col-sm-2">
-                                                    <input type="date" class="form-control form-control-sm text-center"
-                                                        formControlName="fechaDesde" max="{{ today | date : 'yyyy-MM-dd' }}" />
-                                                </div>
-                                                <div *ngIf="campo == 2" class="col-sm-2">
-                                                    <input type="date" class="form-control form-control-sm text-center"
-                                                        formControlName="fechaHasta" max="{{ date | date : 'yyyy-MM-dd' }}">
-                                                </div> -->
-                                                <div class="col-sm-2">
-
-                                                    <button class="btn btn-primary btn-sm" type="button"
-                                                        data-toggle="modal" data-target="#anulelimModal"
-                                                        (click)="buscar()" [disabled]="campo === 0">
-                                                        <i *ngIf="swbuscando" class="fa fa-spinner"></i>
-                                                        <i *ngIf="!swbuscando" class="fa fa-search"></i>
-                                                    </button>
-                                                </div>
-                                                <div *ngIf="swbusca" class="col-sm-2 px-2">
-                                                    <input class="form-control form-control-sm text-center" type="text"
-                                                        placeholder="Filtrar..." [(ngModel)]="filtro"
-                                                        [ngModelOptions]="{standalone: true}" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row mt-2">
-                                        <div class="col-sm">
-                                            <input type="text" class="form-control form-control-sm"
-                                                value={{_cliente.nombre}} readonly>
-                                        </div>
-                                        <div class="col-sm-2">
-                                            <button class="btn btn-success btn-sm" data-toggle="modal"
-                                                data-target="#bClienteModal" (change)="changeCliente()"><i
-                                                    class="bi bi-people-fill"></i> </button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                            <!--                     <ul class="list-group list-group-unbordered mb-3">
-                                <li class="list-group-item">
-                                    <b>Dirección</b> <a class="float-right"> cliente.direccion</a>
-                                </li>
-                                <li class="list-group-item">
-                                    <b>Fecha nacimiento</b> <a class="float-right">cliente.fechanacimiento </a>
-                                </li>
-                                <li class="list-group-item">
-                                    <b>e-mail</b> <a class="float-right">cliente.email</a>
-                                </li>
-                                <li class="list-group-item">
-                                    <b>Teléfono</b> <a class="float-right">cliente.telefono </a>
-                                </li>
-                                <li class="list-group-item">
-                                    <b>Discapacidad</b> <a class="float-right"> cliente.porcdiscapacidad | number:'1.2-2'%</a>
-                                </li>
-                                <li class="list-group-item">
-                                    <b>Exoneración</b> <a class="float-right">cliente.porcexonera | number:'1.2-2'%</a>
-                                </li>
-                            </ul> -->
-                            <!--       <div class="row justify-content-center">
-                                <button class="btn btn-warning btn-xs mx-1" type="button">
-                                    <i class="fa fa-edit" style="font-size:24pxi"></i>
-                                    Modificar
-                                </button>
-                                <button class="btn btn-danger btn-xs mx-1" data-toggle="modal" data-target="#modalEliminar">
-                                    <i class="fa fa-times-circle" style="font-size:24pxi"></i>
-                                    Eliminar
-                                </button>
-                            </div> -->
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-sm">
-                    <div class="card card-outline cardCliente">
-                        <div class="card-body box-profile">
-                            <h6 class="profile-username text-center"> Factura {{textodato}}</h6>
-                            <hr>
-                            <div class="text-center">
-                                <form [formGroup]="f_factura">
-                                    <div class="row">
-                                        <div class="col-sm-12">
-                                            <div class="row">
-                                                <div class="col-sm" *ngIf="swtitulo">
-                                                    <textarea class="form-control form-control-sm text-center"
-                                                        type="text" placeholder="Razon anulación"
-                                                        formControlName="razonanulacion"> </textarea>
-                                                </div>
-                                                <div class="col-sm" *ngIf="!swtitulo">
-                                                    <textarea class="form-control form-control-sm text-center"
-                                                        type="text" placeholder="Razon eliminación"
-                                                        formControlName="razoneliminacion"> </textarea>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row mt-2">
-                                        <div class="col-sm">
-                                            <button class="btn btn-outline-success btn-sm" type="button"
-                                                (click)="actualizar()" [disabled]="campo === 0">Aceptar
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Modal DetalleFactura -->
@@ -333,64 +196,14 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success btn-sm" data-dismiss="modal">
                         <i class="fa fa-times-circle"></i> Cerrar</button>
-                    <button type="button" class="btn btn-outline-success btn-sm" data-toggle="modal" data-target="#impViewer"
-                        (click)="reporte()">
+                    <button type="button" class="btn btn-outline-success btn-sm" data-toggle="modal"
+                        data-target="#impViewer" (click)="reporte()">
                         <i class="fa fa-times-circle"></i> Aceptar</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal Facturas para anular -->
-    <div class="modal fade" id="anulelimModal" data-backdrop="static" tabindex="-1" aria-labelledby="fanularModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-scrollable modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="fanularModalLabel">Lista de facturas para: {{txttitulo}}</h5>
-                    <input type="text" class="form-control form-control-sm col-sm-3" [(ngModel)]="mfiltrar"
-                        placeholder="Filtrar...">
-                </div>
-                <div class="modal-body">
-                    <table class="table table-sm table-hover table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Planilla</th>
-                                <th>Cliente</th>
-                                <th>Módulo</th>
-                                <th>Cuenta</th>
-                                <th>Nro. Factura</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let factura of _facturas | filter:mfiltrar" (click)="setFactura(factura)"
-                                data-dismiss="modal">
-                                <td>{{factura.idfactura}}</td>
-                                <td class="_description">{{factura.idcliente.nombre}}</td>
-                                <td>{{factura.idmodulo.descripcion}}</td>
-                                <td>{{factura.idabonado}}</td>
-                                <td>{{factura.nrofactura}}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">Cancelar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal buscar cliente -->
-    <div class="modal fade" id="bClienteModal" tabindex="-1" aria-labelledby="bClienteModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <app-buscar-cliente (setCliente)="setCliente($event)"></app-buscar-cliente>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Modal vista imprimir -->
     <div class="modal fade" id="impViewer" data-backdrop="static" data-keyboard="false" tabindex="-1"
@@ -407,7 +220,166 @@
                     <iframe id="pdfViewer" src="" width="100%" height="600px"></iframe>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-success" data-dismiss="modal">Cerrer</button>
+                    <button type="button" class="btn btn-success" data-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="newAnulBajas" data-backdrop="static" data-keyboard="false" tabindex="-1"
+        aria-labelledby="newAnulBajasLabel" aria-hidden="true">
+        <div class="modal-dialog modal-{{size}} modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newAnulBajasLabel">{{txttitulo}}</h5>
+                    <button type="button" (click)="getFragmentToShow('formNew')" class="btn btn-xs btn-outline-success">
+                        <i class="bi bi-arrow-return-left"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <ng-container
+                        *ngTemplateOutlet="selectedFragment ==='formNew'?formNew:selectedFragment === 'cliente'?cliente:selectedFragment ==='abonado'?abonado:facturas"></ng-container>
+
+                    <ng-template #formNew>
+                        <div class="row">
+                            <div class="col-sm">
+                                <div class="card card-outline cardCliente">
+                                    <div class="card-body box-profile">
+                                        <!--  <h3 class="profile-username text-center"> Nueva {{txttitulo}}</h3> -->
+                                        <select class="from-control form-control-sm col-sm-12" [(ngModel)]="option"
+                                            (change)="changeTitulo($event)">
+                                            <option value=0>Anulación</option>
+                                            <option value=1>Eliminación</option>
+                                        </select>
+                                        <hr>
+                                        <div class="text-center">
+                                            <form [formGroup]="formBuscar">
+                                                <div class="row">
+                                                    <div class="col-sm-12">
+                                                        <div class="row">
+                                                            <div class="col-sm-5">
+                                                                <input class="form-control form-control-sm text-center"
+                                                                    type="text" placeholder="Planilla"
+                                                                    formControlName="idfactura"
+                                                                    (change)="changeIdfactura()">
+                                                            </div>
+                                                            <div class="col-sm-5">
+                                                                <input class="form-control form-control-sm text-center"
+                                                                    type="text" placeholder="Abonado"
+                                                                    formControlName="idabonado"
+                                                                    (change)="changeIdabonado()">
+                                                            </div>
+                                                            <div class="col-sm-2">
+
+                                                                <button class="btn btn-primary btn-sm" type="button"
+                                                                    data-toggle="modal" data-target="#_anulelimModal"
+                                                                    (click)="buscar()" [disabled]="campo === 0">
+                                                                    <i *ngIf="swbuscando" class="fa fa-spinner"></i>
+                                                                    <i *ngIf="!swbuscando" class="fa fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                            <div *ngIf="swbusca" class="col-sm-2 px-2">
+                                                                <input class="form-control form-control-sm text-center"
+                                                                    type="text" placeholder="Filtrar..."
+                                                                    [(ngModel)]="filtro"
+                                                                    [ngModelOptions]="{standalone: true}" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row mt-2">
+                                                    <div class="col-sm">
+                                                        <input type="text" class="form-control form-control-sm"
+                                                            value={{_cliente.nombre}} readonly>
+                                                    </div>
+                                                    <div class="col-sm-2">
+                                                        <button class="btn btn-success btn-sm" data-toggle="modal"
+                                                            data-target="#_bClienteModal"
+                                                            (click)="getFragmentToShow('cliente')"><i
+                                                                class="bi bi-people-fill"></i> </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm">
+                                <div class="card card-outline cardCliente">
+                                    <div class="card-body box-profile">
+                                        <h6 class="profile-username text-center"> Factura {{textodato}}</h6>
+                                        <hr>
+                                        <div class="text-center">
+                                            <form [formGroup]="f_factura">
+                                                <div class="row">
+                                                    <div class="col-sm-12">
+                                                        <div class="row">
+                                                            <div class="col-sm" *ngIf="swtitulo">
+                                                                <textarea
+                                                                    class="form-control form-control-sm text-center"
+                                                                    type="text" placeholder="Razon anulación"
+                                                                    formControlName="razonanulacion"> </textarea>
+                                                            </div>
+                                                            <div class="col-sm" *ngIf="!swtitulo">
+                                                                <textarea
+                                                                    class="form-control form-control-sm text-center"
+                                                                    type="text" placeholder="Razon eliminación"
+                                                                    formControlName="razoneliminacion"> </textarea>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row mt-2">
+                                                    <div class="col-sm">
+                                                        <button class="btn btn-outline-success btn-sm" type="button"
+                                                            (click)="actualizar()"
+                                                            [disabled]="campo === 0 || textodato == ''">Aceptar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </ng-template>
+                    <ng-template #cliente>
+                        <app-buscar-cliente (setCliente)="setCliente($event)"></app-buscar-cliente>
+                    </ng-template>
+                    <ng-template #abonado>
+                        <h3>Hola desde abonados</h3>
+                    </ng-template>
+                    <ng-template #facturas>
+                        <input type="text" class="form-control form-control-sm col-sm-3" [(ngModel)]="mfiltrar"
+                            placeholder="Filtrar...">
+                        <hr>
+                        <table class="table table-sm table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Planilla</th>
+                                    <th>Cliente</th>
+                                    <th>Módulo</th>
+                                    <th>Cuenta</th>
+                                    <th>Nro. Factura</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let factura of _facturas | filter:mfiltrar" (click)="setFactura(factura)"
+                                    data-dismiss="modal">
+                                    <td>{{factura.idfactura}}</td>
+                                    <td class="_description">{{factura.idcliente.nombre}}</td>
+                                    <td>{{factura.idmodulo.descripcion}}</td>
+                                    <td>{{factura.idabonado}}</td>
+                                    <td>{{factura.nrofactura}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </ng-template>
                 </div>
             </div>
         </div>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { RecaudacionReportsService } from '../../recaudacion/recaudacion-reports.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
@@ -49,13 +49,16 @@ export class AnulacionesBajasComponent implements OnInit {
   _cliente: Clientes = new Clientes();
   nombreCliente: String;
   option = '0';
-  textodato: String;
+  textodato: string;
   /* SELECCIONAR FACTURA */
   _factura: Facturas = new Facturas();
   _fac: any;
   /* SELECCIONAR LECTURA */
   _lectura: Lecturas = new Lecturas();
   sliceDate: string = new Date().toISOString().slice(0, 10);
+  userAuth: number;
+  selectedFragment: string = 'formNew';
+  size: string = 'sm';
 
   constructor(
     private facServicio: FacturaService,
@@ -85,6 +88,7 @@ export class AnulacionesBajasComponent implements OnInit {
       fechaDesde: año + '-01-01',
       fechaHasta: año + '-12-31',
     });
+    this.userAuth = this.authService.idusuario;
     this.f_factura = this.fb.group({
       usuarioanulacion: '',
       razonanulacion: '',
@@ -115,6 +119,31 @@ export class AnulacionesBajasComponent implements OnInit {
     this.getAllFacAnuladas(this.c_limit);
     this.getAllFacEliminadas(this.c_limit);
   }
+
+  getFragmentToShow(opt: string) {
+    if (opt === 'cliente') {
+      this.size = 'lg';
+      this.txttitulo = 'BUSCAR CLIENTE';
+    }
+    if (opt === 'facturas') {
+      this.size = 'xl';
+      this.txttitulo = 'SELECCIONAR FACTURA';
+    }
+    if (opt === 'formNew') {
+      this.size = 'sm';
+      if (this.option === '0') {
+        this.txttitulo = 'Nueva Anulación';
+        this.swtitulo = true;
+      }
+
+      if (this.option === '1') {
+        this.txttitulo = 'Nueva Eliminación';
+        this.swtitulo = false;
+        //this.option = '1';
+      }
+    }
+    this.selectedFragment = opt;
+  }
   colocaColor(colores: any) {
     document.documentElement.style.setProperty('--bgcolor1', colores[0]);
     const cabecera = document.querySelector('.cabecera');
@@ -137,17 +166,11 @@ export class AnulacionesBajasComponent implements OnInit {
     }
   }
   buscar() {
+    this.textodato = '';
     if (this.formBuscar.value.idfactura != '') {
       this.getFacCobrada();
     }
     if (this.formBuscar.value.idabonado != '') {
-      /*       console.log('IMPRIMIR ABONADOS');
-      if (this.option === '0') {
-        console.log('Anulaciones');
-      }
-      if (this.option === '1') {
-        console.log('Eliminados');
-      } */
       this.getClienteByAbonado();
     }
     if (
@@ -161,6 +184,7 @@ export class AnulacionesBajasComponent implements OnInit {
         this.getFacSinCobro();
       }
     }
+    this.getFragmentToShow('facturas');
   }
   changeIdfactura() {
     this.formBuscar.controls['idabonado'].setValue('');
@@ -181,26 +205,20 @@ export class AnulacionesBajasComponent implements OnInit {
       this._cliente = new Clientes();
     }
   }
-  changeCliente() {
-    /*   this.formBuscar.controls['idfactura'].setValue('');
-      if (!this.formBuscar.value.idabonado) this.campo = 0;
-      else {
-        this.campo = 2;
-        this._facturas = null;
-        this._cliente = new Clientes();
-      } */
-  }
+
   changeTitulo(e: any) {
     this.option = e.target.value;
     if (e.target.value === '0') {
-      this.txttitulo = 'Anulación';
+      this.txttitulo = 'Nueva Anulación';
       this.swtitulo = true;
+      this.textodato = '';
     }
 
     if (e.target.value === '1') {
-      this.txttitulo = 'Eliminación';
+      this.txttitulo = 'Nueva Eliminación';
       this.swtitulo = false;
       //this.option = '1';
+      this.textodato = '';
     }
   }
   getAllFacAnuladas(limit: number) {
@@ -225,7 +243,10 @@ export class AnulacionesBajasComponent implements OnInit {
       idabonado: '',
     });
     this.campo = 1;
+    this.textodato = '';
     this._cliente = e;
+    this.selectedFragment = 'formNew';
+    this.size = 'sm';
     /*    this.f_tramites.patchValue({
       idcliente_clientes: e,
     }); */
@@ -243,7 +264,7 @@ export class AnulacionesBajasComponent implements OnInit {
   getFacSinCobro() {
     this.facServicio.getSinCobro(this._cliente.idcliente).subscribe({
       next: (datos: any) => {
-        console.log(datos)
+        console.log(datos);
         this._facturas = datos;
       },
       error: (e) => console.error(e),
@@ -308,7 +329,10 @@ export class AnulacionesBajasComponent implements OnInit {
         },
       });
     }
+    this.getFragmentToShow('formNew');
   }
+  buscarCliente() {}
+
   actualizar() {
     let factura: any = this._factura;
     let formFactura = this.f_factura.value;
@@ -458,7 +482,7 @@ export class AnulacionesBajasComponent implements OnInit {
       head: [['Nro planilla', 'Modulo', 'Usu anula', 'Razón', 'Total']],
       body: anuladas,
     });
-/*     this.s_pdf.header(
+    /*     this.s_pdf.header(
       `Reporte de facturas dadas de anuladas: ${this.f_reportes.value.desde} - ${this.f_reportes.value.hasta}`,
       doc
     ); */
