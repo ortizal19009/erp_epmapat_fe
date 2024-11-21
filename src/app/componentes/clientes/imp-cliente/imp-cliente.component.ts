@@ -40,7 +40,8 @@ export class ImpClienteComponent implements OnInit {
     private s_rxf: RubroxfacService,
     private coloresService: ColoresService,
     private s_pdf: PdfService,
-    private s_loading: LoadingService
+    private s_loading: LoadingService, 
+
   ) {}
 
   ngOnInit(): void {
@@ -146,6 +147,16 @@ export class ImpClienteComponent implements OnInit {
       case 4: //CARTERA VENCIDA POR FACTURA
         try {
           this.calcularCVByFacturas(this.formImprimir.value.hasta);
+          this.swcalculando = true;
+          if (this.swimprimir) this.txtcalculando = 'Mostrar';
+          else this.txtcalculando = 'Descargar';
+        } catch (error) {
+          console.error('Error al obtener las partidas:', error);
+        }
+        break;
+        case 5: //CARTERA VENCIDA DE TODOS LOS CLIENTES
+        try {
+          this.calcularCVByClientes(this.formImprimir.value.hasta);
           this.swcalculando = true;
           if (this.swimprimir) this.txtcalculando = 'Mostrar';
           else this.txtcalculando = 'Descargar';
@@ -281,6 +292,36 @@ export class ImpClienteComponent implements OnInit {
     this.swbotones = false;
     this.swcalculando = false;
     this.barraProgreso = false;
+  }
+  async calcularCVByClientes(fecha: any) {
+    this.cliService.getCVOfClientes(fecha).subscribe({
+      next: async (datosCrtera: any) => {
+        let doc = new jsPDF();
+        let head: any = [['Planilla', 'Nombre', 'Identificación', 'Dirección','Correo','Modulo','Valor']];
+        let body: any = [];
+        let suma: number = 0;
+        this.barraProgreso = true;
+        await datosCrtera.forEach((item: any, index: number) => {
+          body.push([
+            item.planilla,
+            item.nombre,
+            item.cedula,
+            item.direccion,
+            item.email,
+            item.modulo,
+            item.valor.toFixed(2),
+          ]);
+          suma += item.valor;
+          this.progreso = index;
+        });
+        body.push(['', '', '', '', '', 'TOTAL', suma.toFixed(2)]);
+        this.s_pdf._bodyOneTable('Cartera vencida por General', head, body, doc);
+        this.swbotones = false;
+        this.swcalculando = false;
+        this.barraProgreso = false;
+      },
+      error: (e: any) => console.error(e),
+    });
   }
 
   //Muestra cada reporte

@@ -60,17 +60,29 @@ export class PdfService {
     ) as HTMLIFrameElement;
     return (pdfViewer.src = pdfDataUri);
   }
-  _bodyOneTable(title: string, head: any, body: any, doc: any) {
-    const pageNumber = doc.internal.getNumberOfPages();
+  async _bodyOneTable(title: string, head: any, body: any, doc: any) {
     this.header(title, doc);
-
+    console.log(this.createColumnStyles(head[0]))
     autoTable(doc, {
+      columnStyles: await this.createColumnStyles(head[0]),
       head: head,
       body: body,
     });
-    doc.setPage(pageNumber);
     doc.save(title);
   }
+  createColumnStyles(columns: any) {
+    var styles: any = {};
+    console.log(columns.length);
+    for (var i = 0; i < columns.length; i++) {
+      styles[i] = {      
+        //cellWidth: 'wrap',
+        minCellWidth: 25,
+        maxCellWidth: 100, // Ancho máximo de la columna
+        halign: 'left' };
+    }
+    return styles;
+  }
+
   bodyTwoTables(
     titulo: string,
     ht1: any,
@@ -231,7 +243,7 @@ export class PdfService {
       body: bt3,
     });
     doc.setPage(pageNumber);
-   // const pdfDataUri = doc.output('datauri');
+    // const pdfDataUri = doc.output('datauri');
     doc.save(titulo);
   }
   bodyFourTables(

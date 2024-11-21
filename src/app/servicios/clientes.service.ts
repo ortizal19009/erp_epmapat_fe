@@ -74,4 +74,7 @@ export class ClientesService {
   getTotalClientes() {
     return this.http.get(`${baseUrl}/total`);
   }
+  getCVOfClientes(fecha : any){
+    return this.http.get(`${baseUrl}/reportes/carteravencida?fecha=${fecha}`)
+  }
 }
