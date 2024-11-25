@@ -49,7 +49,7 @@ export class ImpEmisionesComponent implements OnInit {
     private emiService: EmisionService,
     private s_pdf: PdfService,
     private s_lecturas: LecturasService,
-    private s_emisionindividual: EmisionIndividualService, 
+    private s_emisionindividual: EmisionIndividualService,
     private s_loading: LoadingService
   ) {}
 
@@ -172,15 +172,20 @@ export class ImpEmisionesComponent implements OnInit {
     let doc = new jsPDF();
     let inicial: any = await this.getRubLectInicial(idemision);
     let body: any = [];
-    let head = [['Id', 'Descripción', 'Valor']];
+    let head = [['Id', 'Descripción', 'Abonados', 'Valor']];
     let suma: number = 0;
     let emision: any = await this.getEmision(idemision);
 
     inicial.forEach((item: any) => {
-      body.push([item.idrubro_rubros, item.descripcion, item.total.toFixed(2)]);
+      body.push([
+        item.idrubro_rubros,
+        item.descripcion,
+        item.abonados,
+        item.total.toFixed(2),
+      ]);
       suma += item.total;
     });
-    body.push(['', 'Total', suma.toFixed(2)]);
+    body.push(['', '', 'Total', suma.toFixed(2)]);
     this.s_pdf.bodyOneTable(
       `Emisión Inicial ${emision.emision}`,
       head,
@@ -191,7 +196,9 @@ export class ImpEmisionesComponent implements OnInit {
   async impEmisionFinal(idemision: number) {
     let doc = new jsPDF();
     let inicial: any = await this.getRubLectInicial(idemision);
+    console.log(inicial)
     let nuevos: any = await this.getRubLectNuevos(idemision);
+    console.log(nuevos)
     let eliminados: any = await this.getRubLectEliminados(idemision);
     let actuales: any = await this.getRubLectActual(idemision);
     let i_body: any = [];
@@ -202,15 +209,28 @@ export class ImpEmisionesComponent implements OnInit {
     let n_suma: number = 0;
     let e_suma: number = 0;
     let a_suma: number = 0;
-    let i_head: any = ['Emisión Inicial', ['Id', 'Descripción', 'Valor']];
-    let n_head: any = ['Emisiones Nuevas', ['Id', 'Descripción', 'Valor']];
-    let e_head: any = ['Emisiones Eliminadas', ['Id', 'Descripción', 'Valor']];
-    let a_head: any = ['Emisión Acutal', ['Id', 'Descripción', 'Valor']];
+    let i_head: any = [
+      'Emisión Inicial',
+      ['Id', 'Descripción', 'Abonados', 'Valor'],
+    ];
+    let n_head: any = [
+      'Emisiones Nuevas',
+      ['Id', 'Descripción', 'Abonados', 'Valor'],
+    ];
+    let e_head: any = [
+      'Emisiones Eliminadas',
+      ['Id', 'Descripción', 'Abonados', 'Valor'],
+    ];
+    let a_head: any = [
+      'Emisión Acutal',
+      ['Id', 'Descripción', 'Abonados', 'Valor'],
+    ];
     let emision: any = await this.getEmision(idemision);
     inicial.forEach((item: any) => {
       i_body.push([
         item.idrubro_rubros,
         item.descripcion,
+        item.abonados,
         item.total.toFixed(2),
       ]);
       i_suma += item.total;
@@ -220,6 +240,7 @@ export class ImpEmisionesComponent implements OnInit {
       n_body.push([
         item.idrubro_rubros,
         item.descripcion,
+        item.abonados,
         item.total.toFixed(2),
       ]);
       n_suma += item.total;
@@ -229,6 +250,7 @@ export class ImpEmisionesComponent implements OnInit {
       e_body.push([
         item.idrubro_rubros,
         item.descripcion,
+        item.abonados,
         item.total.toFixed(2),
       ]);
       e_suma += item.total;
@@ -238,6 +260,7 @@ export class ImpEmisionesComponent implements OnInit {
       a_body.push([
         item.idrubro_rubros,
         item.descripcion,
+        item.abonados,
         item.total.toFixed(2),
       ]);
       a_suma += item.total;
@@ -423,9 +446,8 @@ export class ImpEmisionesComponent implements OnInit {
       head,
       body,
       doc
-    )
+    );
     this.s_loading.hideLoading();
-  
   }
   async impConsumoXCategoria(idemision: number) {
     let emision = await this.getEmision(idemision);
@@ -583,6 +605,7 @@ export class ImpEmisionesComponent implements OnInit {
   }
   async getRubLectInicial(idemision: number) {
     let inicial = this.s_lecturas.findInicial(idemision).toPromise();
+    console.log(inicial);
     return inicial;
   }
   async getRubLectEliminados(idemision: number) {
@@ -682,4 +705,3 @@ export class ImpEmisionesComponent implements OnInit {
     return emision;
   }
 }
-

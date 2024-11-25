@@ -62,7 +62,7 @@ export class PdfService {
   }
   async _bodyOneTable(title: string, head: any, body: any, doc: any) {
     this.header(title, doc);
-    console.log(this.createColumnStyles(head[0]))
+    console.log(this.createColumnStyles(head[0]));
     autoTable(doc, {
       columnStyles: await this.createColumnStyles(head[0]),
       head: head,
@@ -74,11 +74,12 @@ export class PdfService {
     var styles: any = {};
     console.log(columns.length);
     for (var i = 0; i < columns.length; i++) {
-      styles[i] = {      
+      styles[i] = {
         //cellWidth: 'wrap',
         minCellWidth: 25,
         maxCellWidth: 100, // Ancho máximo de la columna
-        halign: 'left' };
+        halign: 'left',
+      };
     }
     return styles;
   }
@@ -260,19 +261,21 @@ export class PdfService {
   ) {
     this.header(titulo, doc);
     const pageNumber = doc.internal.getNumberOfPages();
-
+    console.log(bt1);
+    console.log(ht1);
     // Primera tabla
     doc.autoTable({
       head: [
         [
           {
             content: ht1[0],
-            colSpan: 3,
+            colSpan: ht1[1].length,
             styles: { halign: 'center', fontSize: 11 },
           },
         ],
         [
-          {
+          {content: this.headStyles(ht1[1])}
+/*           {
             content: ht1[1][0],
             styles: {
               halign: 'center',
@@ -295,7 +298,7 @@ export class PdfService {
               fillColor: [255, 255, 255],
               textColor: [0, 0, 0],
             },
-          },
+          }, */
         ],
       ],
       columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
@@ -309,7 +312,7 @@ export class PdfService {
         [
           {
             content: ht2[0],
-            colSpan: 3,
+            colSpan: ht2[0].length,
             styles: { halign: 'center', fontSize: 11 },
           },
         ],
@@ -349,7 +352,7 @@ export class PdfService {
         [
           {
             content: ht3[0],
-            colSpan: 3,
+            colSpan: ht3[0].length,
             styles: { halign: 'center', fontSize: 11 },
           },
         ],
@@ -389,7 +392,7 @@ export class PdfService {
         [
           {
             content: ht4[0],
-            colSpan: 3,
+            colSpan: ht4[0].length,
             styles: { halign: 'center', fontSize: 11 },
           },
         ],
@@ -429,6 +432,21 @@ export class PdfService {
     ) as HTMLIFrameElement;
 
     return (pdfViewer.src = pdfDataUri);
+  }
+
+  headStyles(heads: any) {
+    var styles: any = {};
+    for (var i = 0; i < heads.length; i++) {
+      styles[i] = {
+        content: heads[i],
+        styles: {
+          halign: 'center',
+          fillColor: [255, 255, 255],
+          textColor: [0, 0, 0],
+        },
+      };
+    }
+    return styles;
   }
 
   footer(data: any, doc: any) {
