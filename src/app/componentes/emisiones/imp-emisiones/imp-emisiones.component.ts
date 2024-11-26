@@ -171,8 +171,12 @@ export class ImpEmisionesComponent implements OnInit {
   async impEmisionInicial(idemision: number) {
     let doc = new jsPDF();
     let inicial: any = await this.getRubLectInicial(idemision);
+    let cm3inicial: any = await this.getCM3Inicial(idemision);
+    console.log(cm3inicial);
     let body: any = [];
+    let body2: any = [];
     let head = [['Id', 'Descripción', 'Abonados', 'Valor']];
+    let head2 = [['Nro. Cuentas', 'M3']];
     let suma: number = 0;
     let emision: any = await this.getEmision(idemision);
 
@@ -186,19 +190,30 @@ export class ImpEmisionesComponent implements OnInit {
       suma += item.total;
     });
     body.push(['', '', 'Total', suma.toFixed(2)]);
-    this.s_pdf.bodyOneTable(
+    cm3inicial.forEach((item: any) => {
+      body2.push([item.abonados, item.m3]);
+    });
+ /*    this.s_pdf.bodyOneTable(
       `Emisión Inicial ${emision.emision}`,
       head,
       body,
+      doc
+    ); */
+    this.s_pdf._bodyTwoTables(
+      `Emisión Inicial ${emision.emision}`,
+      head,
+      body,
+      head2, 
+      body2,
       doc
     );
   }
   async impEmisionFinal(idemision: number) {
     let doc = new jsPDF();
     let inicial: any = await this.getRubLectInicial(idemision);
-    console.log(inicial)
+    console.log(inicial);
     let nuevos: any = await this.getRubLectNuevos(idemision);
-    console.log(nuevos)
+    console.log(nuevos);
     let eliminados: any = await this.getRubLectEliminados(idemision);
     let actuales: any = await this.getRubLectActual(idemision);
     let i_body: any = [];
@@ -227,6 +242,8 @@ export class ImpEmisionesComponent implements OnInit {
     ];
     let emision: any = await this.getEmision(idemision);
     inicial.forEach((item: any) => {
+      item.abonados === null ? (item.abonados = 0) : item.abonados;
+
       i_body.push([
         item.idrubro_rubros,
         item.descripcion,
@@ -237,6 +254,7 @@ export class ImpEmisionesComponent implements OnInit {
     });
     i_body.push(['', 'Total', i_suma.toFixed(2)]);
     nuevos.forEach((item: any) => {
+      item.abonados === null ? (item.abonados = 0) : item.abonados;
       n_body.push([
         item.idrubro_rubros,
         item.descripcion,
@@ -247,6 +265,7 @@ export class ImpEmisionesComponent implements OnInit {
     });
     n_body.push(['', 'Total', n_suma.toFixed(2)]);
     eliminados.forEach((item: any) => {
+      item.abonados === null ? (item.abonados = 0) : item.abonados;
       e_body.push([
         item.idrubro_rubros,
         item.descripcion,
@@ -257,6 +276,7 @@ export class ImpEmisionesComponent implements OnInit {
     });
     e_body.push(['', 'Total', e_suma.toFixed(2)]);
     actuales.forEach((item: any) => {
+      item.abonados === null ? (item.abonados = 0) : item.abonados;
       a_body.push([
         item.idrubro_rubros,
         item.descripcion,
@@ -605,7 +625,10 @@ export class ImpEmisionesComponent implements OnInit {
   }
   async getRubLectInicial(idemision: number) {
     let inicial = this.s_lecturas.findInicial(idemision).toPromise();
-    console.log(inicial);
+    return inicial;
+  }
+  async getCM3Inicial(idemision: number) {
+    let inicial = this.s_lecturas.findCM3Inicial(idemision).toPromise();
     return inicial;
   }
   async getRubLectEliminados(idemision: number) {

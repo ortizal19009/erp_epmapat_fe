@@ -138,6 +138,11 @@ export class LecturasService {
       `${baseUrl}/reportes/rubros/inicial?idemision=${idemision}`
     );
   }
+  findCM3Inicial(idemision: number) {
+    return this.http.get(
+      `${baseUrl}/reportes/rubros/inicial/cm3?idemision=${idemision}`
+    );
+  }
   findEliminados(idemision: number) {
     return this.http.get(
       `${baseUrl}/reportes/rubros/eliminados?idemision=${idemision}`

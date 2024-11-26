@@ -247,7 +247,7 @@ export class PdfService {
     // const pdfDataUri = doc.output('datauri');
     doc.save(titulo);
   }
-  bodyFourTables(
+  async bodyFourTables(
     titulo: string,
     ht1: any,
     bt1: any,
@@ -261,8 +261,6 @@ export class PdfService {
   ) {
     this.header(titulo, doc);
     const pageNumber = doc.internal.getNumberOfPages();
-    console.log(bt1);
-    console.log(ht1);
     // Primera tabla
     doc.autoTable({
       head: [
@@ -273,33 +271,8 @@ export class PdfService {
             styles: { halign: 'center', fontSize: 11 },
           },
         ],
-        [
-          {content: this.headStyles(ht1[1])}
-/*           {
-            content: ht1[1][0],
-            styles: {
-              halign: 'center',
-              fillColor: [255, 255, 255],
-              textColor: [0, 0, 0],
-            },
-          },
-          {
-            content: ht1[1][1],
-            styles: {
-              halign: 'center',
-              fillColor: [255, 255, 255],
-              textColor: [0, 0, 0],
-            },
-          },
-          {
-            content: ht1[1][2],
-            styles: {
-              halign: 'center',
-              fillColor: [255, 255, 255],
-              textColor: [0, 0, 0],
-            },
-          }, */
-        ],
+        this.headStyles(ht1[1])
+      
       ],
       columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
       body: bt1,
@@ -312,36 +285,12 @@ export class PdfService {
         [
           {
             content: ht2[0],
-            colSpan: ht2[0].length,
+            colSpan: ht2[1].length,
             styles: { halign: 'center', fontSize: 11 },
           },
         ],
-        [
-          {
-            content: ht2[1][0],
-            styles: {
-              halign: 'center',
-              fillColor: [255, 255, 255],
-              textColor: [0, 0, 0],
-            },
-          },
-          {
-            content: ht2[1][1],
-            styles: {
-              halign: 'center',
-              fillColor: [255, 255, 255],
-              textColor: [0, 0, 0],
-            },
-          },
-          {
-            content: ht2[1][2],
-            styles: {
-              halign: 'center',
-              fillColor: [255, 255, 255],
-              textColor: [0, 0, 0],
-            },
-          },
-        ],
+        this.headStyles(ht2[1])
+
       ],
       columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
       body: bt2,
@@ -352,36 +301,12 @@ export class PdfService {
         [
           {
             content: ht3[0],
-            colSpan: ht3[0].length,
+            colSpan: ht3[1].length,
             styles: { halign: 'center', fontSize: 11 },
           },
         ],
-        [
-          {
-            content: ht3[1][0],
-            styles: {
-              halign: 'center',
-              fillColor: [255, 255, 255],
-              textColor: [0, 0, 0],
-            },
-          },
-          {
-            content: ht3[1][1],
-            styles: {
-              halign: 'center',
-              fillColor: [255, 255, 255],
-              textColor: [0, 0, 0],
-            },
-          },
-          {
-            content: ht3[1][2],
-            styles: {
-              halign: 'center',
-              fillColor: [255, 255, 255],
-              textColor: [0, 0, 0],
-            },
-          },
-        ],
+        this.headStyles(ht3[1])
+
       ],
       columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
       body: bt3,
@@ -392,36 +317,12 @@ export class PdfService {
         [
           {
             content: ht4[0],
-            colSpan: ht4[0].length,
+            colSpan: ht4[1].length,
             styles: { halign: 'center', fontSize: 11 },
           },
         ],
-        [
-          {
-            content: ht4[1][0],
-            styles: {
-              halign: 'center',
-              fillColor: [255, 255, 255],
-              textColor: [0, 0, 0],
-            },
-          },
-          {
-            content: ht4[1][1],
-            styles: {
-              halign: 'center',
-              fillColor: [255, 255, 255],
-              textColor: [0, 0, 0],
-            },
-          },
-          {
-            content: ht4[1][2],
-            styles: {
-              halign: 'center',
-              fillColor: [255, 255, 255],
-              textColor: [0, 0, 0],
-            },
-          },
-        ],
+        this.headStyles(ht4[1])
+
       ],
       columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
       body: bt4,
@@ -435,16 +336,16 @@ export class PdfService {
   }
 
   headStyles(heads: any) {
-    var styles: any = {};
+    let styles: any = [];
     for (var i = 0; i < heads.length; i++) {
-      styles[i] = {
+      styles.push({
         content: heads[i],
         styles: {
           halign: 'center',
           fillColor: [255, 255, 255],
           textColor: [0, 0, 0],
         },
-      };
+      });
     }
     return styles;
   }
