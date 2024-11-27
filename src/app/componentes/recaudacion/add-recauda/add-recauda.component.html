@@ -79,7 +79,7 @@
 <div class="container-fluid">
    <div class="row mt-2 mb-0 justify-content-left">
       <div class="col-sm-3">
-         <div class="row"  *ngIf="swSincobro()">
+         <div class="row" *ngIf="swSincobro()">
             <div class="col-sm">
                <div class="card detalle sombra">
                   <div class="card-body box-profile">
@@ -184,7 +184,7 @@
                         </td>
                         <td>
                            <button class="btn btn-outline-info btn-xs cursor" data-toggle="modal"
-                              data-target="#DetallePlanillaModal">
+                              data-target="#DetallePlanillaModal" (click)="facturaDetalle(factura.idfactura)">
                               <i class="fa fa-info-circle"></i> Info
                            </button>
                            <button class="btn btn-outline-info btn-xs cursor" *ngIf="swImprimir">
@@ -291,61 +291,13 @@
       </div>
    </div>
    <!-- Modal DETALLE Planilla -->
-   <div class="modal fade" id="DetallePlanillaModal" tabindex="-1" aria-labelledby="DetallePlanillaModal">
+   <div class="modal fade" *ngIf="detalleFac" id="DetallePlanillaModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="DetallePlanillaModal">
       <div class="modal-dialog modal-dialog-centered" role="document">
          <div class="modal-content recaudadetalle">
-            <div class="py-2 recaudacabecera">
-               <div class="row text-center">
-                  <div class="col">
-                     <h5 class="modal-title" id="DetalleFacturaModalLabel"><strong>Planilla:</strong></h5>
-                  </div>
-               </div>
-               <div class="row text-center">
-                  <div class="col">
-                     <h6 class="fantacyblack"><strong>Consumo:</strong> m<sup>3</sup></h6>
-                  </div>
-               </div>
-            </div>
-            <div class="modal-body">
-               <table class="table table-hover table-sm table-bordered mb-0 ">
-                  <thead class="recaudacabecera">
-                     <tr class="text-center">
-                        <th></th>
-                        <th class="col-md-9">Rubro</th>
-                        <th>Valor</th>
-                     </tr>
-                  </thead>
-                  <tbody>
-                     <tr class="fila">
-                        <td class="text-center font-weight-bold small"></td>
-                        <td></td>
-                        <td class="text-right"></td>
-                     </tr>
-                     <tr>
-                        <td></td>
-                        <td>IVA</td>
-                        <td class="text-right"></td>
-                     </tr>
-                     <tr>
-                        <td></td>
-                        <td>Interés</td>
-                        <td class="font-weight-bold text-right">
+            <app-detalle-planilla  (stateEvent)="cancelarDetalle($event)" [idfactura]="idfactura"></app-detalle-planilla>
 
-                        </td>
-                     </tr>
-                     <tr>
-                        <td></td>
-                        <td class="font-weight-bold">TOTAL</td>
-                        <td class="font-weight-bold text-right"></td>
-                     </tr>
-                  </tbody>
-               </table>
-            </div>
-            <div class="row justify-content-center mt-0 mb-3">
-               <button type="button" class="btn btn-success btn-sm" data-dismiss="modal">
-                  <i class="fa fa-times-circle"></i> Cerrar</button>
-            </div>
          </div>
+         <!--  -->
       </div>
    </div>
    <!-- MODAL Abrir Caja -->

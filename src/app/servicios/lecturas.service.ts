@@ -52,6 +52,11 @@ export class LecturasService {
   getByIdfactura(idfactura: number) {
     return this.http.get<Lecturas[]>(`${baseUrl}/planilla/${idfactura}`);
   }
+  async getByIdfacturaAsync(idfactura: number) {
+    return await firstValueFrom(
+      this.http.get<Lecturas[]>(`${baseUrl}/planilla/${idfactura}`)
+    );
+  }
 
   //Ultima lectura de un Abonado async
   async getUltimaLecturaAsync(idabonado: number): Promise<number> {

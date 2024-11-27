@@ -41,6 +41,8 @@ export class AddRecaudaComponent implements OnInit {
     nrofactura: '',
   };
   _estadoCaja: any;
+  idfactura: any;
+  detalleFac: Boolean = false;
   //_mensaje: any;
   constructor(
     private fb: FormBuilder,
@@ -201,6 +203,15 @@ export class AddRecaudaComponent implements OnInit {
       this._cliente = cliente;
     });
   }
+  facturaDetalle(idfactura: any) {
+    console.log(idfactura);
+    this.idfactura = idfactura;
+    this.detalleFac = true;
+  }
+  cancelarDetalle(e: any) {
+    console.log(e);
+    this.detalleFac = e;
+  }
   calcular(e: any, factura: any) {
     this.totalapagar = 0;
     if (e.target.checked === true) {
@@ -247,7 +258,6 @@ export class AddRecaudaComponent implements OnInit {
     };
     this.ms_recaudacion.cobrarFacturas(obj).subscribe({
       next: (cobrado: any) => {
-        console.log('FACTURAS COBRADAS', cobrado);
         this.fencola = [];
       },
       error: (e: any) => {

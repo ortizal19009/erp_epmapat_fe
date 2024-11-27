@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/mrecaudacion`;
@@ -33,5 +33,15 @@ export class RecaudacionService {
   }
   singOutCaja(username: string) {
     return this.http.put(`${baseUrl}/logout?username=${username}`, null);
+  }
+  async getInteres(idfactura: number) {
+    return await firstValueFrom(
+      this.http.get(`${baseUrl}/interes?idfactura=${idfactura}`)
+    );
+  }
+  async getImpuestos(idfactura: number) {
+    return await firstValueFrom(
+      this.http.get(`${baseUrl}/impuestos?idfactura=${idfactura}`)
+    );
   }
 }
