@@ -16,6 +16,7 @@ export class DetallePlanillaComponent implements OnInit {
   _lecturas: any;
   m3: number = 0;
   loading: Boolean = true;
+  sumaDetail: number = 0;
   constructor(
     private s_rubroxfac: RubroxfacService,
     private s_lectutas: LecturasService,
@@ -26,6 +27,7 @@ export class DetallePlanillaComponent implements OnInit {
     this.getDatos();
   }
   async getDatos() {
+    let _sumaDetail: number = 0;
     await this.s_rubroxfac
       .getByIdfacturaAsync(this.idfactura)
       .then((item: any) => {
@@ -69,6 +71,11 @@ export class DetallePlanillaComponent implements OnInit {
       .catch((e: any) => {
         console.error(e);
       });
+    this._rubros.forEach((item: any) => {
+      console.log(item);
+      _sumaDetail += item.cantidad * item.valorunitario;
+    });
+    this.sumaDetail = _sumaDetail;
     this.loading = false;
   }
   cancelar() {
