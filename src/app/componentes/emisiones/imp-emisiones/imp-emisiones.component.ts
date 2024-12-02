@@ -175,8 +175,8 @@ export class ImpEmisionesComponent implements OnInit {
     console.log(cm3inicial);
     let body: any = [];
     let body2: any = [];
-    let head = [['Id', 'Descripción', 'Abonados', 'Valor']];
-    let head2 = [['Nro. Cuentas', 'M3']];
+    let head = [['Valores emitidos por rubros'],['Id', 'Descripción', 'Abonados', 'Valor']];
+    let head2 = [['Detalles'],['Nro. Cuentas', 'M3']];
     let suma: number = 0;
     let emision: any = await this.getEmision(idemision);
 
@@ -199,7 +199,7 @@ export class ImpEmisionesComponent implements OnInit {
       body,
       doc
     ); */
-    this.s_pdf._bodyTwoTables(
+    this.s_pdf._bodyShowTwoTables(
       `Emisión Inicial ${emision.emision}`,
       head,
       body,
@@ -211,11 +211,15 @@ export class ImpEmisionesComponent implements OnInit {
   async impEmisionFinal(idemision: number) {
     let doc = new jsPDF();
     let inicial: any = await this.getRubLectInicial(idemision);
-    console.log(inicial);
     let nuevos: any = await this.getRubLectNuevos(idemision);
-    console.log(nuevos);
     let eliminados: any = await this.getRubLectEliminados(idemision);
     let actuales: any = await this.getRubLectActual(idemision);
+    let cm3inicial: any = await this.getCM3Inicial(idemision);
+    let head2 = [['Detalles'],['Nro. Cuentas', 'M3']];
+    let body2: any = [];
+    cm3inicial.forEach((item: any) => {
+      body2.push([item.abonados, item.m3]);
+    });
     let i_body: any = [];
     let n_body: any = [];
     let e_body: any = [];
@@ -287,7 +291,7 @@ export class ImpEmisionesComponent implements OnInit {
     });
     a_body.push(['', 'Total', a_suma.toFixed(2)]);
 
-    this.s_pdf.bodyFourTables(
+    this.s_pdf.bodyFiveTables(
       `Emisión final ${emision.emision}`,
       i_head,
       i_body,
@@ -297,6 +301,8 @@ export class ImpEmisionesComponent implements OnInit {
       n_body,
       a_head,
       a_body,
+      head2, 
+      body2,
       doc
     );
   }

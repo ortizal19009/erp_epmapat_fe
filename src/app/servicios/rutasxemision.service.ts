@@ -8,12 +8,10 @@ const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/rutasxemision`;
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-
 export class RutasxemisionService {
-
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   getByIdEmision(idemision: Number) {
     return this.http.get<Rutasxemision>(`${baseUrl}?idemision=${idemision}`);
@@ -32,7 +30,9 @@ export class RutasxemisionService {
   }
 
   countEstado(idemision_emisiones: number) {
-    return this.http.get<Rutasxemision>(`${baseUrl}/conteo?idemision_emisiones=${idemision_emisiones}`);
+    return this.http.get<Rutasxemision>(
+      `${baseUrl}/conteo?idemision_emisiones=${idemision_emisiones}`
+    );
   }
 
   // getById1(idrutaxemision: number) {
@@ -49,14 +49,17 @@ export class RutasxemisionService {
     return await firstValueFrom(observable);
   }
 
-
-  updateRutaxemision(idrutaemision: number, rutaxemision: Rutasxemision): Observable<Object> {
-    return this.http.put(baseUrl + "/" + idrutaemision, rutaxemision);
+  updateRutaxemision(
+    idrutaemision: number,
+    rutaxemision: Rutasxemision
+  ): Observable<Object> {
+    console.log('ACTUALIZANDO RUTA POR EMISION', rutaxemision);
+    return this.http.put(baseUrl + '/' + idrutaemision, rutaxemision);
   }
 
   getByEmisionRuta(idemision: number, idruta: number) {
-    return this.http.get(`${baseUrl}/emiruta?idemision=${idemision}&idruta=${idruta}`)
+    return this.http.get(
+      `${baseUrl}/emiruta?idemision=${idemision}&idruta=${idruta}`
+    );
   }
-
-
 }

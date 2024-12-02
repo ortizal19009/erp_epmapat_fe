@@ -756,8 +756,9 @@ export class LecturasComponent implements OnInit {
                                   this.progreso =
                                     (this.kontador / this._lecturas.length) *
                                     100;
-                                  if (this.kontador < this._lecturas.length)
+                                  if (this.kontador < this._lecturas.length) {
                                     this.planillas();
+                                  }
                                   // if (this.kontador < 3) this.planillas();
                                   else {
                                     //Actualiza el estado, totales y fecha de cierre de la Ruta por Emisión

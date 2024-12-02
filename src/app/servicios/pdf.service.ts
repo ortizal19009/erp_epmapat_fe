@@ -136,6 +136,9 @@ export class PdfService {
     const pageNumber = doc.internal.getNumberOfPages();
 
     this.header(titulo, doc);
+
+    console.log(ht1, bt1);
+    console.log(ht2, bt2);
     doc.autoTable({
       theme: 'grid',
       head: [[{ content: ht1[0], styles: { halign: 'center' } }]],
@@ -156,6 +159,48 @@ export class PdfService {
     });
     doc.setPage(pageNumber);
     doc.save(titulo);
+  }
+  _bodyShowTwoTables(
+    titulo: string,
+    ht1: any,
+    bt1: any,
+    ht2: any,
+    bt2: any,
+    doc: any
+  ) {
+    console.log(ht1);
+
+    const pageNumber = doc.internal.getNumberOfPages();
+
+    this.header(titulo, doc);
+
+    console.log(ht1, bt1);
+    console.log(ht2, bt2);
+    doc.autoTable({
+      theme: 'grid',
+      head: [[{ content: ht1[0], styles: { halign: 'center' } }]],
+    });
+    // Primera tabla
+    doc.autoTable({
+      head: [ht1[1]],
+      body: bt1,
+    });
+    doc.autoTable({
+      theme: 'grid',
+      head: [[{ content: ht1[0], styles: { halign: 'center' } }]],
+    });
+    // Segunda tabla
+    doc.autoTable({
+      head: [ht2[1]],
+      body: bt2,
+    });
+    doc.setPage(pageNumber);
+    const pdfDataUri = doc.output('datauri');
+    const pdfViewer: any = document.getElementById(
+      'pdfViewer'
+    ) as HTMLIFrameElement;
+
+    return (pdfViewer.src = pdfDataUri);
   }
   bodyThreeTables(
     titulo: string,
@@ -271,8 +316,7 @@ export class PdfService {
             styles: { halign: 'center', fontSize: 11 },
           },
         ],
-        this.headStyles(ht1[1])
-      
+        this.headStyles(ht1[1]),
       ],
       columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
       body: bt1,
@@ -289,8 +333,7 @@ export class PdfService {
             styles: { halign: 'center', fontSize: 11 },
           },
         ],
-        this.headStyles(ht2[1])
-
+        this.headStyles(ht2[1]),
       ],
       columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
       body: bt2,
@@ -305,8 +348,7 @@ export class PdfService {
             styles: { halign: 'center', fontSize: 11 },
           },
         ],
-        this.headStyles(ht3[1])
-
+        this.headStyles(ht3[1]),
       ],
       columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
       body: bt3,
@@ -321,11 +363,110 @@ export class PdfService {
             styles: { halign: 'center', fontSize: 11 },
           },
         ],
-        this.headStyles(ht4[1])
-
+        this.headStyles(ht4[1]),
       ],
       columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
       body: bt4,
+    });
+    const pdfDataUri = doc.output('datauri');
+    const pdfViewer: any = document.getElementById(
+      'pdfViewer'
+    ) as HTMLIFrameElement;
+
+    return (pdfViewer.src = pdfDataUri);
+  }
+  async bodyFiveTables(
+    titulo: string,
+    ht1: any,
+    bt1: any,
+    ht2: any,
+    bt2: any,
+    ht3: any,
+    bt3: any,
+    ht4: any,
+    bt4: any,
+    ht5: any,
+    bt5: any,
+    doc: any
+  ) {
+    this.header(titulo, doc);
+    const pageNumber = doc.internal.getNumberOfPages();
+    // Primera tabla
+    doc.autoTable({
+      head: [
+        [
+          {
+            content: ht1[0],
+            colSpan: ht1[1].length,
+            styles: { halign: 'center', fontSize: 11 },
+          },
+        ],
+        this.headStyles(ht1[1]),
+      ],
+      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
+      body: bt1,
+    });
+    doc.setPage(pageNumber);
+
+    // Segunda tabla
+    doc.autoTable({
+      head: [
+        [
+          {
+            content: ht2[0],
+            colSpan: ht2[1].length,
+            styles: { halign: 'center', fontSize: 11 },
+          },
+        ],
+        this.headStyles(ht2[1]),
+      ],
+      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
+      body: bt2,
+    });
+    // Tercer tabla
+    doc.autoTable({
+      head: [
+        [
+          {
+            content: ht3[0],
+            colSpan: ht3[1].length,
+            styles: { halign: 'center', fontSize: 11 },
+          },
+        ],
+        this.headStyles(ht3[1]),
+      ],
+      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
+      body: bt3,
+    });
+    // Cuarta tabla
+    doc.autoTable({
+      head: [
+        [
+          {
+            content: ht4[0],
+            colSpan: ht4[1].length,
+            styles: { halign: 'center', fontSize: 11 },
+          },
+        ],
+        this.headStyles(ht4[1]),
+      ],
+      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
+      body: bt4,
+    });
+    // QUINTA tabla
+    doc.autoTable({
+      head: [
+        [
+          {
+            content: ht5[0],
+            colSpan: ht5[1].length,
+            styles: { halign: 'center', fontSize: 11 },
+          },
+        ],
+        this.headStyles(ht5[1]),
+      ],
+      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
+      body: bt5,
     });
     const pdfDataUri = doc.output('datauri');
     const pdfViewer: any = document.getElementById(
