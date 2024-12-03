@@ -332,7 +332,6 @@ export class LecturasComponent implements OnInit {
       this.formValor.value.idnovedad_novedades;
     this.lecService.updateLectura(this.idlectura, this.datosLectura).subscribe({
       next: (nex) => {
-        console.log(nex);
         this._lecturas[this.fila].lecturaanterior =
           this.formValor.value.lecturaanterior;
         this._lecturas[this.fila].lecturaactual =
@@ -614,7 +613,7 @@ export class LecturasComponent implements OnInit {
       this.facService
         .getById(this._lecturas[this.kontador].idfactura)
         .subscribe({
-          next: (datos) => {
+          next: async (datos) => {
             factura = datos;
             this.arrprecios = [];
             let num1: number;
@@ -703,7 +702,7 @@ export class LecturasComponent implements OnInit {
                   );
                   factura.feccrea = primerDiaDelMesSiguiente;
                   this.facService.updateFacturas(factura).subscribe({
-                    next: (fac) => {
+                    next: (fac: any) => {
                       this.factura = fac;
                       this.lecService
                         .getByIdlectura(this._lecturas[this.kontador].idlectura)
@@ -717,7 +716,7 @@ export class LecturasComponent implements OnInit {
                                 this._lectura
                               )
                               .subscribe({
-                                next: (nex) => {
+                                next: (nex: any) => {
                                   if (swcate9 || swmunicipio) {
                                     let rub1002: number;
                                     let rub1003: number;
@@ -798,7 +797,7 @@ export class LecturasComponent implements OnInit {
     }
   }
 
-  addrubros(i: number, swmulta: boolean) {
+  async addrubros(i: number, swmulta: boolean) {
     let rubrosxpla = {} as Rubrosxpla;
     rubrosxpla.cantidad = 1;
     rubrosxpla.estado = 1;
@@ -809,20 +808,26 @@ export class LecturasComponent implements OnInit {
     //Cuando hay multa n=5 y si i es 4 coloca la multa
     if (i != 4) {
       rubro.idrubro = 1001 + i;
+
       rubrosxpla.valorunitario = this.arrprecios[i];
     } else {
       rubro.idrubro = 6; //6= idrubro de Multa
       rubrosxpla.valorunitario = 2;
     }
     rubrosxpla.idrubro_rubros = rubro;
+    if (rubrosxpla.valorunitario < 0) {
+      rubrosxpla.valorunitario = 0;
+    }
     this.rubxfacService.saveRubroxfac(rubrosxpla).subscribe({
-      next: (nex) => {
+      next: (nex: any) => {
         i = i + 1;
         let n = 4;
         if (swmulta) {
           n = 5;
         }
-        if (i < n) this.addrubros(i, swmulta);
+        if (i < n) {
+          this.addrubros(i, swmulta);
+        }
       },
       error: (err) => console.error(err.error),
     });
