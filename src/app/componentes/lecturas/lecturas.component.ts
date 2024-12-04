@@ -613,7 +613,7 @@ export class LecturasComponent implements OnInit {
       this.facService
         .getById(this._lecturas[this.kontador].idfactura)
         .subscribe({
-          next: async (datos) => {
+          next: (datos) => {
             factura = datos;
             this.arrprecios = [];
             let num1: number;
@@ -721,17 +721,21 @@ export class LecturasComponent implements OnInit {
                                     let rub1002: number;
                                     let rub1003: number;
                                     //Alcantarillado / 2
-                                    if (num2 + num4 + num7 > 0)
+                                    if (num2 + num4 + num7 > 0) {
                                       rub1002 =
                                         Math.round(
                                           ((num2 + num4 + num7) / 2) * 100
                                         ) / 100;
-                                    else rub1002 = 0;
+                                    } else {
+                                      rub1002 = 0;
+                                    }
                                     //Saneamiento / 2
-                                    if (num5 > 0)
+                                    if (num5 > 0) {
                                       rub1003 =
                                         Math.round((num5 / 2) * 100) / 100;
-                                    else rub1003 = 0;
+                                    } else {
+                                      rub1003 = 0;
+                                    }
                                     //Agua portable por diferencia con la suma
                                     let r1001 = suma - rub1002 - rub1003 - 0.1;
                                     this.arrprecios.push(
@@ -740,13 +744,14 @@ export class LecturasComponent implements OnInit {
                                       rub1003,
                                       0.1
                                     );
-                                  } else
+                                  } else {
                                     this.arrprecios.push(
                                       num1 + num3,
                                       num2 + num4 + num7,
                                       num5,
                                       0.1
                                     );
+                                  }
 
                                   let i = 0;
                                   this.addrubros(i, swmulta);
@@ -797,7 +802,7 @@ export class LecturasComponent implements OnInit {
     }
   }
 
-  async addrubros(i: number, swmulta: boolean) {
+  addrubros(i: number, swmulta: boolean) {
     let rubrosxpla = {} as Rubrosxpla;
     rubrosxpla.cantidad = 1;
     rubrosxpla.estado = 1;
@@ -808,16 +813,19 @@ export class LecturasComponent implements OnInit {
     //Cuando hay multa n=5 y si i es 4 coloca la multa
     if (i != 4) {
       rubro.idrubro = 1001 + i;
-
+      if (rubrosxpla.valorunitario < 0) {
+        console.log('RUBRO MENOR A ZERO ', rubrosxpla.idrubro_rubros);
+        console.log('RUBRO MENOR A _ZERO ', rubro.idrubro);
+      }
       rubrosxpla.valorunitario = this.arrprecios[i];
     } else {
       rubro.idrubro = 6; //6= idrubro de Multa
       rubrosxpla.valorunitario = 2;
     }
     rubrosxpla.idrubro_rubros = rubro;
-    if (rubrosxpla.valorunitario < 0) {
+    /*     if (rubrosxpla.valorunitario < 0) {
       rubrosxpla.valorunitario = 0;
-    }
+    } */
     this.rubxfacService.saveRubroxfac(rubrosxpla).subscribe({
       next: (nex: any) => {
         i = i + 1;
