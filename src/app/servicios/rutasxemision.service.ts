@@ -53,7 +53,6 @@ export class RutasxemisionService {
     idrutaemision: number,
     rutaxemision: Rutasxemision
   ): Observable<Object> {
-    console.log('ACTUALIZANDO RUTA POR EMISION', rutaxemision);
     return this.http.put(baseUrl + '/' + idrutaemision, rutaxemision);
   }
 

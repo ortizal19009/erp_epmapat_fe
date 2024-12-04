@@ -597,7 +597,6 @@ export class LecturasComponent implements OnInit {
       this._lecturas[this.kontador].idabonado_abonados.adultomayor;
     let noAlcantarillado =
       this._lecturas[this.kontador].idabonado_abonados.swalcantarillado;
-
     let factura: Facturas = new Facturas();
     if (adultomayor) {
       if (categoria == 9 && consumo > 34) categoria = 1;
@@ -752,10 +751,8 @@ export class LecturasComponent implements OnInit {
                                       0.1
                                     );
                                   }
-
                                   let i = 0;
                                   this.addrubros(i, swmulta);
-
                                   this.kontador++;
                                   this.progreso =
                                     (this.kontador / this._lecturas.length) *
@@ -813,32 +810,29 @@ export class LecturasComponent implements OnInit {
     //Cuando hay multa n=5 y si i es 4 coloca la multa
     if (i != 4) {
       rubro.idrubro = 1001 + i;
-      if (rubrosxpla.valorunitario < 0) {
-        console.log('RUBRO MENOR A ZERO ', rubrosxpla.idrubro_rubros);
-        console.log('RUBRO MENOR A _ZERO ', rubro.idrubro);
-      }
       rubrosxpla.valorunitario = this.arrprecios[i];
     } else {
       rubro.idrubro = 6; //6= idrubro de Multa
       rubrosxpla.valorunitario = 2;
     }
     rubrosxpla.idrubro_rubros = rubro;
-    /*     if (rubrosxpla.valorunitario < 0) {
-      rubrosxpla.valorunitario = 0;
-    } */
     this.rubxfacService.saveRubroxfac(rubrosxpla).subscribe({
       next: (nex: any) => {
-        i = i + 1;
+   /*      i++;
         let n = 4;
         if (swmulta) {
           n = 5;
         }
-        if (i < n) {
-          this.addrubros(i, swmulta);
-        }
+        if (i < n) this.addrubros(i, swmulta); */
       },
       error: (err) => console.error(err.error),
     });
+    i++;
+    let n = 4;
+    if (swmulta) {
+      n = 5;
+    }
+    if (i < n) this.addrubros(i, swmulta);
   }
 
   sort(columnName: string) {
