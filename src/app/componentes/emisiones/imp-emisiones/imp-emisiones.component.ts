@@ -172,7 +172,6 @@ export class ImpEmisionesComponent implements OnInit {
     let doc = new jsPDF();
     let inicial: any = await this.getRubLectInicial(idemision);
     let cm3inicial: any = await this.getCM3Inicial(idemision);
-    console.log(cm3inicial);
     let body: any = [];
     let body2: any = [];
     let head = [['Valores emitidos por rubros'],['Id', 'Descripción', 'Abonados', 'Valor']];

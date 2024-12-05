@@ -1028,11 +1028,10 @@ export class RecaudacionComponent implements OnInit {
   /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
   cInteres(factura: any) {
     let interes: any = 0;
-    if (factura.formaPago != 4) {
       interes = this.interService
         .getInteresFactura(factura.idfactura)
         .toPromise();
-    }
+    
     return interes;
   }
   _cInteres(factura: any) {

@@ -200,7 +200,7 @@ export class RecaudacionReportsService {
           } else if (item.idrubro_rubros.idrubro === 165) {
             this.iva = 0;
           } else {
-            this.interes = item.valorunitario;
+            this.interes = +factura.interescobrado!.toFixed(2);
           }
         });
         this.total += this.interes + this.iva;
