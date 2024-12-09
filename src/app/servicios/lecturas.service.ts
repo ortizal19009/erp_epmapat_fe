@@ -173,4 +173,9 @@ export class LecturasService {
       `${baseUrl}/reportes/consumoxcategoria?idemision=${idemision}`
     );
   }
+  async findZeroByEmisiones(idemision: number) {
+    return this.http.get<any>(
+      `${baseUrl}/reportes/rubrozero?idemision=${idemision}`
+    );
+  }
 }

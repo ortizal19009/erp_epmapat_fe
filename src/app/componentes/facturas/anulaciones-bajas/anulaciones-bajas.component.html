@@ -333,14 +333,19 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="row mt-2">
+                                                <div class="row mt-3">
                                                     <div class="col-sm">
-                                                        <button class="btn btn-outline-success btn-sm" data-dismiss="modal" type="button"
-                                                            (click)="actualizar()"
-                                                            [disabled]="campo === 0 || textodato == ''"
-                                                            data-dismiss="modal">Aceptar
+                                                        <button class="btn btn-success btn-sm" data-dismiss="modal"
+                                                            type="button">Cancelar
                                                         </button>
                                                     </div>
+                                                    <div class="col-sm">
+                                                        <button class="btn btn-outline-success btn-sm"
+                                                            data-dismiss="modal" type="button" (click)="actualizar()"
+                                                            [disabled]="campo === 0 || textodato == ''">Aceptar
+                                                        </button>
+                                                    </div>
+
                                                 </div>
                                             </form>
                                         </div>

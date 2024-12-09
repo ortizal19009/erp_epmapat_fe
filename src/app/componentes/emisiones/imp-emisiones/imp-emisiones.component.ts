@@ -44,8 +44,6 @@ export class ImpEmisionesComponent implements OnInit {
   constructor(
     public fb: FormBuilder,
     private router: Router,
-    private facService: FacturaService,
-    private cliService: ClientesService,
     private emiService: EmisionService,
     private s_pdf: PdfService,
     private s_lecturas: LecturasService,
@@ -172,10 +170,19 @@ export class ImpEmisionesComponent implements OnInit {
     let doc = new jsPDF();
     let inicial: any = await this.getRubLectInicial(idemision);
     let cm3inicial: any = await this.getCM3Inicial(idemision);
+    let count: any = await this.getZeroByEmisiones(idemision);
     let body: any = [];
     let body2: any = [];
-    let head = [['Valores emitidos por rubros'],['Id', 'Descripción', 'Abonados', 'Valor']];
-    let head2 = [['Detalles'],['Nro. Cuentas', 'M3']];
+    let body3: any = [];
+    let head = [
+      ['Valores emitidos por rubros'],
+      ['Id', 'Descripción', 'Abonados', 'Valor'],
+    ];
+    let head2 = [['Detalles'], ['Nro. Cuentas', 'M3']];
+    let head3 = [
+      ['Cuentas sin rubros'],
+      ['Cuenta', 'Planilla', 'Lec.Anterior', 'Lec.Actual', 'm3', 'Nro. Rubros'],
+    ];
     let suma: number = 0;
     let emision: any = await this.getEmision(idemision);
 
@@ -192,18 +199,31 @@ export class ImpEmisionesComponent implements OnInit {
     cm3inicial.forEach((item: any) => {
       body2.push([item.abonados, item.m3]);
     });
- /*    this.s_pdf.bodyOneTable(
+    count.forEach((item: any) => {
+      body3.push([
+        item.idabonado_abonados,
+        item.idfactura,
+        item.lecturaanterior,
+        item.lecturaactual,
+        item.lecturaactual - item.lecturaanterior,
+        item.rubros_count,
+      ]);
+    });
+
+    /*    this.s_pdf.bodyOneTable(
       `Emisión Inicial ${emision.emision}`,
       head,
       body,
       doc
     ); */
-    this.s_pdf._bodyShowTwoTables(
+    this.s_pdf.bodyThreeTables(
       `Emisión Inicial ${emision.emision}`,
       head,
       body,
-      head2, 
+      head2,
       body2,
+      head3,
+      body3,
       doc
     );
   }
@@ -214,7 +234,7 @@ export class ImpEmisionesComponent implements OnInit {
     let eliminados: any = await this.getRubLectEliminados(idemision);
     let actuales: any = await this.getRubLectActual(idemision);
     let cm3inicial: any = await this.getCM3Inicial(idemision);
-    let head2 = [['Detalles'],['Nro. Cuentas', 'M3']];
+    let head2 = [['Detalles'], ['Nro. Cuentas', 'M3']];
     let body2: any = [];
     cm3inicial.forEach((item: any) => {
       body2.push([item.abonados, item.m3]);
@@ -300,7 +320,7 @@ export class ImpEmisionesComponent implements OnInit {
       n_body,
       a_head,
       a_body,
-      head2, 
+      head2,
       body2,
       doc
     );
@@ -512,6 +532,7 @@ export class ImpEmisionesComponent implements OnInit {
         'CUENTA',
         'NOMBRE',
         'RAZON REFACTURACIÓN',
+'FECHA ELIMINACIÓN',
         'VALOR ANTERIOR',
         'VALOR NUEVO',
       ],
@@ -522,6 +543,7 @@ export class ImpEmisionesComponent implements OnInit {
         item.cuenta,
         item.nombre,
         item.observaciones,
+        item.fecelimina,
         +item.valoranterior!.toFixed(2),
         +item.valornuevo!.toFixed(2),
       ]);
@@ -550,6 +572,7 @@ export class ImpEmisionesComponent implements OnInit {
         'CUENTA',
         'NOMBRE',
         'RAZON REFACTURACIÓN',
+        'FECHA ELIMINACIÓN',
         'VALOR ANTERIOR',
         'VALOR NUEVO',
       ],
@@ -560,6 +583,7 @@ export class ImpEmisionesComponent implements OnInit {
         item.cuenta,
         item.nombre,
         item.observaciones,
+        item.fecelimina,
         item.valoranterior.toFixed(2),
         item.valornuevo.toFixed(2),
       ]);
@@ -663,6 +687,9 @@ export class ImpEmisionesComponent implements OnInit {
       .getRefacturacionxFecha(d, h)
       .toPromise();
     return reporte;
+  }
+  async getZeroByEmisiones(idemision: number) {
+    return (await this.s_lecturas.findZeroByEmisiones(idemision)).toPromise();
   }
   changeReporte() {
     this.opcreporte = +this.formImprimir.value.reporte!;
