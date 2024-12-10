@@ -641,7 +641,9 @@ export class RecaudacionComponent implements OnInit {
     let _lecturas: any;
     this.consumo = 0;
     this.idfactura = idfactura;
-    this.totInteres = await this.cInteres(factura);
+    if (factura.swcondonar != true) {
+      this.totInteres = await this.cInteres(factura);
+    }
     if (idmodulo == 8) {
       this.rubxfacService.getByIdfactura1(idfactura).subscribe({
         next: (detalle) => {
@@ -1028,10 +1030,10 @@ export class RecaudacionComponent implements OnInit {
   /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
   cInteres(factura: any) {
     let interes: any = 0;
-      interes = this.interService
-        .getInteresFactura(factura.idfactura)
-        .toPromise();
-    
+    interes = this.interService
+      .getInteresFactura(factura.idfactura)
+      .toPromise();
+
     return interes;
   }
   _cInteres(factura: any) {
