@@ -3,6 +3,7 @@
    <thead>
       <tr class="text-center">
          <th>Producto</th>
+         <th>Cod.Rubro</th>
          <th>Rubro</th>
          <th class="col-sm-1">Canti</th>
          <th class="col-sm-1">Precio</th>
@@ -16,6 +17,7 @@
 
       <tr *ngFor="let item of _itemxfact" class="fila">
          <td class="text-left">{{item.idcatalogoitems_catalogoitems.descripcion}}</td>
+         <td>{{item.idcatalogoitems_catalogoitems.idrubro_rubros.idrubro}}</td>
          <td class="text-left">{{item.idcatalogoitems_catalogoitems.idrubro_rubros.descripcion}}</td>
          <td class="text-center">{{item.cantidad}}</td>
          <td class="text-right">{{item.valorunitario | number:'1.2-2'}}</td>

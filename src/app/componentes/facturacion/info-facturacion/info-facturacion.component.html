@@ -78,11 +78,10 @@
                   <div class="active tab-pane" id="detalle">
                      <div class="post">
                         <div class="user-block">
-                           <app-itemxfact></app-itemxfact>
+                              <app-itemxfact></app-itemxfact>
                         </div>
                      </div>
                   </div>
-
                   <div class="tab-pane" id="planillas">
                      <div class="post">
                         <div class="user-block">
@@ -105,14 +104,15 @@
                                     <td class="text-center">{{ liqfac.idfactura_facturas.nrofactura }}</td>
                                     <td class="text-center">{{ liqfac.idfactura_facturas.fechacobro | date: 'dd-MM-y' }}
                                     </td>
-                                    <td class="text-right">{{ liqfac.idfactura_facturas.totaltarifa | number:'1.2-2' }}</td>
+                                    <td class="text-right">{{ liqfac.idfactura_facturas.totaltarifa | number:'1.2-2' }}
+                                    </td>
                                  </tr>
                                  <tr class="text-right font-weight-bold">
                                     <td colspan="4"></td>
                                     <td class="">Total </td>
                                     <td class="">{{totfac | number:'1.2-2'}}</td>
                                  </tr>
-                           
+
                               </tbody>
                            </table>
 
