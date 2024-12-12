@@ -50,7 +50,6 @@ export class RecaudacionReportsService {
     let emi: any = await this.getEmisionByid(datos.idemision);
     let fecha = emi.feccrea.slice(0, 10).split('-');
     let mesConsumo = `${this.meses[+fecha[1]! - 1]} ${fecha[0]}`;
-    console.log(datos)
     autoTable(doc, {
       margin: { left: 10, top: 5 },
       tableWidth,
@@ -93,7 +92,7 @@ export class RecaudacionReportsService {
         ],
         [`Categoría: ${categoria.descripcion}`],
         [`Recaudador: ${usuario.nomusu}`],
-        [`Módulo: ${factura.idmodulo.descripcion}`]
+        [`Módulo: ${factura.idmodulo.descripcion}`],
       ],
     });
   }
@@ -138,7 +137,7 @@ export class RecaudacionReportsService {
           `FechaPag: ${datos.fechacobro}`,
         ],
         [`Recaudador:  ${usuario.nomusu}`],
-        [`Módulo: ${datos.idmodulo.descripcion}`]
+        [`Módulo: ${datos.idmodulo.descripcion}`],
       ],
     });
   }
@@ -181,10 +180,7 @@ export class RecaudacionReportsService {
           if (item.idrubro_rubros.swiva === true) {
             this.iva += item.valorunitario * item.cantidad * 0.15;
           }
-          if (
-            item.idrubro_rubros.idrubro != 5 &&
-            item.idrubro_rubros.idrubro != 165
-          ) {
+          if (item.idrubro_rubros.idrubro != 165) {
             if (
               item.idfactura_facturas.swcondonar === true &&
               item.idrubro_rubros.idrubro === 6
@@ -199,9 +195,12 @@ export class RecaudacionReportsService {
             }
           } else if (item.idrubro_rubros.idrubro === 165) {
             this.iva = 0;
-          } else {
-            this.interes = +factura.interescobrado!.toFixed(2);
-          }
+          }else if (item.idrubro_rubros.idrubro === 5) {
+            this.interes = item.valorunitario;
+          } /* else { */
+          /* this.interes = +factura.interescobrado!.toFixed(2); */
+          /*  this.interes = item.valorunitario;
+          } */
         });
         this.total += this.interes + this.iva;
         this.subtotal += this.total - this.interes - this.iva;
@@ -331,7 +330,7 @@ export class RecaudacionReportsService {
         });
         this.total += this.interes + this.iva;
         this.subtotal += this.total - this.interes - this.iva;
-        doc.setFontSize(10)
+        doc.setFontSize(10);
         doc.text('REIMPRESIóN', 140, 110);
         autoTable(doc, {
           margin: { left: 10 },

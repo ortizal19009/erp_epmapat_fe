@@ -905,7 +905,7 @@ export class RecaudacionComponent implements OnInit {
                       );
                       this.formColores = this.fb.group({
                         tonos0: defaultValue0,
-                        colores0: defaultValue1,
+                        colores: defaultValue1,
                         tonos1: defaultValue2,
                         colores1: defaultValue3,
                       });
@@ -995,7 +995,6 @@ export class RecaudacionComponent implements OnInit {
           this.lecService.getOnefactura(d_factura.idfactura).subscribe({
             next: (datos: any) => {
               lectura = datos;
-              console.log(datos);
               if (datos != null) {
                 this.s_pdfRecaudacion.reimprimircomprobantePago(
                   lectura,
@@ -1037,7 +1036,6 @@ export class RecaudacionComponent implements OnInit {
     return interes;
   }
   _cInteres(factura: any) {
-    console.log(factura);
     this.totInteres = 0;
     this.arrCalculoInteres = [];
     let interes: number = 0;
@@ -1074,7 +1072,6 @@ export class RecaudacionComponent implements OnInit {
         fechai.setMonth(fechai.getMonth() + 1);
       }
       this.arrCalculoInteres.forEach((item: any) => {
-        console.log(item);
         //this.totInteres += (item.interes * item.valor) / 100;
         interes += (item.interes * item.valor) / 100;
         // this.subtotal();
