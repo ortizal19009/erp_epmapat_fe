@@ -202,7 +202,7 @@ export class RecaudacionReportsService {
           /*  this.interes = item.valorunitario;
           } */
         });
-        this.total += this.interes + this.iva;
+        this.total += this.iva;
         this.subtotal += this.total - this.interes - this.iva;
         autoTable(doc, {
           margin: { left: 10 },
@@ -251,7 +251,7 @@ export class RecaudacionReportsService {
             ['Sub total', this.subtotal.toFixed(2)],
             ['Iva 15%', factura.swiva.toFixed(2)],
             ['Intereses', factura.interescobrado.toFixed(2)],
-            ['Valor total', this.total.toFixed(2)],
+            ['Valor total', +this.total.toFixed(2)! + +factura.interescobrado.toFixed(2)!],
           ],
         });
         doc.setGState(doc.GState({ opacity: 0.4 }));
