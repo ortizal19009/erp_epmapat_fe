@@ -187,15 +187,17 @@ export class RecaudacionReportsService {
             ) {
             } else {
               this.total += +item.valorunitario! * item.cantidad;
-              rubros.push([
-                item.idrubro_rubros.descripcion,
-                item.cantidad.toFixed(0),
-                item.valorunitario.toFixed(2),
-              ]);
+              if (item.idrubro_rubros.idrubro != 5) {
+                rubros.push([
+                  item.idrubro_rubros.descripcion,
+                  item.cantidad.toFixed(0),
+                  item.valorunitario.toFixed(2),
+                ]);
+              }
             }
           } else if (item.idrubro_rubros.idrubro === 165) {
             this.iva = 0;
-          }else if (item.idrubro_rubros.idrubro === 5) {
+          } else if (item.idrubro_rubros.idrubro === 5) {
             this.interes = item.valorunitario;
           } /* else { */
           /* this.interes = +factura.interescobrado!.toFixed(2); */
@@ -251,7 +253,10 @@ export class RecaudacionReportsService {
             ['Sub total', this.subtotal.toFixed(2)],
             ['Iva 15%', factura.swiva.toFixed(2)],
             ['Intereses', factura.interescobrado.toFixed(2)],
-            ['Valor total', +this.total.toFixed(2)! + +factura.interescobrado.toFixed(2)!],
+            [
+              'Valor total',
+              +this.total.toFixed(2)! + +factura.interescobrado.toFixed(2)!,
+            ],
           ],
         });
         doc.setGState(doc.GState({ opacity: 0.4 }));
