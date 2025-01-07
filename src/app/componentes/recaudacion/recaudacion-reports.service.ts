@@ -180,32 +180,34 @@ export class RecaudacionReportsService {
           if (item.idrubro_rubros.swiva === true) {
             this.iva += item.valorunitario * item.cantidad * 0.15;
           }
-          if (item.idrubro_rubros.idrubro != 165) {
+          if (
+            item.idrubro_rubros.idrubro != 5 &&
+            item.idrubro_rubros.idrubro != 165
+          ) {
             if (
               item.idfactura_facturas.swcondonar === true &&
               item.idrubro_rubros.idrubro === 6
             ) {
             } else {
               this.total += +item.valorunitario! * item.cantidad;
-              if (item.idrubro_rubros.idrubro != 5) {
-                rubros.push([
-                  item.idrubro_rubros.descripcion,
-                  item.cantidad.toFixed(0),
-                  item.valorunitario.toFixed(2),
-                ]);
-              }
+              rubros.push([
+                item.idrubro_rubros.descripcion,
+                item.cantidad.toFixed(0),
+                item.valorunitario.toFixed(2),
+              ]);
             }
-          } else if (item.idrubro_rubros.idrubro === 165) {
+          }
+          if (item.idrubro_rubros.idrubro === 165) {
             this.iva = 0;
-          } else if (item.idrubro_rubros.idrubro === 5) {
+          }
+          this.interes = factura.interescobrado;
+          /* if (item.idrubro_rubros.idrubro === 5) {
             this.interes = item.valorunitario;
-          } /* else { */
-          /* this.interes = +factura.interescobrado!.toFixed(2); */
-          /*  this.interes = item.valorunitario;
           } */
         });
-        this.total += this.iva;
+        this.total += this.interes + this.iva;
         this.subtotal += this.total - this.interes - this.iva;
+        doc.setFontSize(10);
         autoTable(doc, {
           margin: { left: 10 },
           tableWidth,
@@ -253,10 +255,7 @@ export class RecaudacionReportsService {
             ['Sub total', this.subtotal.toFixed(2)],
             ['Iva 15%', factura.swiva.toFixed(2)],
             ['Intereses', factura.interescobrado.toFixed(2)],
-            [
-              'Valor total',
-              +this.total.toFixed(2)! + +factura.interescobrado.toFixed(2)!,
-            ],
+            ['Valor total', this.total.toFixed(2)],
           ],
         });
         doc.setGState(doc.GState({ opacity: 0.4 }));
@@ -327,9 +326,11 @@ export class RecaudacionReportsService {
                 item.valorunitario.toFixed(2),
               ]);
             }
-          } else if (item.idrubro_rubros.idrubro === 165) {
+          }
+          if (item.idrubro_rubros.idrubro === 165) {
             this.iva = 0;
-          } else {
+          }
+          if (item.idrubro_rubros.idrubro === 5) {
             this.interes = item.valorunitario;
           }
         });
