@@ -367,13 +367,14 @@ export class EmisionesComponent implements OnInit {
   nuevo() {
     this.emiService.ultimo().subscribe({
       next: (datos) => {
+        console.log(datos);
         let nuevoaño: string;
         let nuevomes: string;
         let año = datos.emision.substring(0, 2);
         let mes = datos.emision.substring(datos.emision.length - 2);
         if (mes == '12') {
           nuevomes = '01';
-          nuevoaño = año + 1;
+          nuevoaño = (+año! + 1).toString();
         } else {
           nuevoaño = año;
           nuevomes = (+mes + 1).toString().padStart(2, '0');
