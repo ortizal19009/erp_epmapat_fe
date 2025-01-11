@@ -2,8 +2,11 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import { ColoresService } from 'src/app/compartida/colores.service';
 import { Asientos } from 'src/app/modelos/contabilidad/asientos.model';
 import { AsientosService } from 'src/app/servicios/contabilidad/asientos.service';
+import { RetencionesService } from 'src/app/servicios/contabilidad/retenciones.service';
 import { TransaciService } from 'src/app/servicios/contabilidad/transaci.service';
 
 @Component({
@@ -14,58 +17,44 @@ import { TransaciService } from 'src/app/servicios/contabilidad/transaci.service
 
 export class AsientosComponent implements OnInit {
 
-   buscarAsientos: { asi_com: number, tipcom: number, desdeNum: number, hastaNum: number, desdeFecha: string, hastaFecha: string }
    _asientos: any;
+   swbuscando: boolean;
+   txtbuscar: string = 'Buscar';
+   buscarAsientos: { tipcom: number, desdeNum: number, hastaNum: number, desdeFecha: string, hastaFecha: string }
    formBuscar: FormGroup;
    today: number = Date.now();
    date: Date = new Date();
-   iAsiento = {} as interfaceAsiento; //Interface para los datos de los Asientos a eliminar
+   swdesdehasta: boolean; //Visibilidad Buscar últimos
+   iAsiento = {} as interfaceAsiento; //Interface para los datos del Asiento a eliminar
    filtro: string;
    disabTipcom: boolean = true;
-   asi_com: number = 1;
    sweliminar: boolean = false;
 
-   constructor(private asientosService: AsientosService, private fb: FormBuilder,
-      private router: Router, private tranService: TransaciService) { }
+   constructor(private asiService: AsientosService, private fb: FormBuilder,
+      public authService: AutorizaService, private coloresService: ColoresService, private router: Router, private tranService: TransaciService,
+      private reteService: RetencionesService) { }
 
    ngOnInit(): void {
       sessionStorage.setItem('ventana', '/asientos');
-      this.setcolor();
+      let coloresJSON = sessionStorage.getItem('/asientos');
+      if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
+      else this.buscaColor();
 
       const fecha = new Date();
       const año = fecha.getFullYear()
       this.formBuscar = this.fb.group({
-         asi_com: '',
          tipcom: '',
          desdeNum: '',
          hastaNum: '',
          desdeFecha: año + '-01-01',
          hastaFecha: año + '-12-31',
-      },
-         { updateOn: "blur" });
+      });
 
+      //Datos de búsqueda último asiento o guardados
       this.buscarAsientos = JSON.parse(sessionStorage.getItem("buscarAsientos")!);
-      // console.log('this.buscarAsientos: ', this.buscarAsientos)
-      if (this.buscarAsientos == null) {
-         console.log('Pasa por null')
-         this.asientosService.ultimo().subscribe({
-            next: resp => {
-               let desde = resp.asiento - 10;
-               if (desde <= 0) desde = 1;
-               this.formBuscar.patchValue({
-                  asi_com: 1,
-                  tipcom: 0,
-                  desdeNum: desde,
-                  hastaNum: resp.asiento,
-               });
-               this.buscar();
-            },
-            error: err => console.error(err.error)
-         }
-         );
-      } else {
+      if (this.buscarAsientos == null) this.ultimoAsiento();
+      else {
          this.formBuscar.patchValue({
-            asi_com: this.buscarAsientos.asi_com,
             tipcom: this.buscarAsientos.tipcom,
             desdeNum: this.buscarAsientos.desdeNum,
             hastaNum: this.buscarAsientos.hastaNum,
@@ -76,15 +65,7 @@ export class AsientosComponent implements OnInit {
       }
    }
 
-   setcolor() {
-      let colores: string[];
-      let coloresJSON = sessionStorage.getItem('/asientos');
-      if (!coloresJSON) {
-         colores = ['rgb(57, 95, 95)', 'rgb(207, 221, 210)'];
-         const coloresJSON = JSON.stringify(colores);
-         sessionStorage.setItem('/asientos', coloresJSON);
-      } else colores = JSON.parse(coloresJSON);
-
+   colocaColor(colores: any) {
       document.documentElement.style.setProperty('--bgcolor1', colores[0]);
       const cabecera = document.querySelector('.cabecera');
       if (cabecera) cabecera.classList.add('nuevoBG1')
@@ -93,9 +74,54 @@ export class AsientosComponent implements OnInit {
       if (detalle) detalle.classList.add('nuevoBG2');
    }
 
+   async buscaColor() {
+      try {
+         const datos = await this.coloresService.setcolor(this.authService.idusuario, 'asientos');
+         const coloresJSON = JSON.stringify(datos);
+         sessionStorage.setItem('/asientos', coloresJSON);
+         this.colocaColor(datos);
+      } catch (error) { console.error(error); }
+   }
+
+   ultimoAsiento() {
+      this.asiService.ultimo().subscribe({
+         next: resp => {
+            let desde = resp.asiento - 16;
+            if (desde <= 0) desde = 1;
+            this.formBuscar.patchValue({
+               tipcom: 0,
+               desdeNum: desde,
+               hastaNum: resp.asiento,
+            });
+            this.buscar();
+         },
+         error: err => console.error(err.error)
+      });
+   }
+
+   changeTipcom() {
+      if (this.formBuscar.value.tipcom == 0) this.ultimoAsiento();
+      else {
+         this.asiService.obtenerUltimoCompro(this.formBuscar.value.tipcom).subscribe({
+            next: resp => {
+               let desde = resp - 16;
+               if (desde <= 0) desde = 1;
+               this.formBuscar.patchValue({
+                  desdeNum: desde,
+                  hastaNum: resp,
+               });
+               this.buscar();
+            },
+            error: err => console.error(err.error)
+         });
+      }
+   }
+
    buscar() {
+      this.swbuscando = true;
+      this.txtbuscar = 'Buscando';
+      //Guarda los datos de búsqueda
       this.buscarAsientos = {
-         asi_com: this.formBuscar.value.asi_com,
          tipcom: this.formBuscar.value.tipcom,
          desdeNum: this.formBuscar.value.desdeNum,
          hastaNum: this.formBuscar.value.hastaNum,
@@ -104,76 +130,101 @@ export class AsientosComponent implements OnInit {
       };
       sessionStorage.setItem("buscarAsientos", JSON.stringify(this.buscarAsientos));
 
-      if (this.formBuscar.value.asi_com == 1)
-         this.asientosService.getAsientos(1, this.formBuscar.value.desdeNum, this.formBuscar.value.hastaNum,
+      //Numeros
+      let desdeNum: number = 1;
+      if (this.formBuscar.value.desdeNum != null) { desdeNum = this.formBuscar.value.desdeNum; }
+      let hastaNum: number = 999999999;
+      if (this.formBuscar.value.hastaNum != null) { hastaNum = this.formBuscar.value.hastaNum; }
+      //Busca Asientos
+      if (this.formBuscar.value.tipcom == 0)
+         this.asiService.getAsientos(1, desdeNum, hastaNum,
             this.formBuscar.value.desdeFecha, this.formBuscar.value.hastaFecha).subscribe({
                next: datos => {
                   this._asientos = datos;
+                  this.swbuscando = false;
+                  this.txtbuscar = 'Buscar';
                },
-               error: err => console.error(err.error),
+               error: err => console.error(err.error)
             });
-      else {
-         let tipcom1: number; let tipcom2: number;
-         if (this.formBuscar.value.tipcom == 0) {
-            tipcom1 = 1; tipcom2 = 5;
-         } else {
-            tipcom1 = this.formBuscar.value.tipcom; tipcom2 = tipcom1;
-         }
-         this.asientosService.getComprobantes(2, tipcom1, tipcom2, this.formBuscar.value.desdeNum, this.formBuscar.value.hastaNum,
+      else {   //Busca Comprobantes
+         this.asiService.getComprobantes(2, this.formBuscar.value.tipcom, this.formBuscar.value.desdeNum, this.formBuscar.value.hastaNum,
             this.formBuscar.value.desdeFecha, this.formBuscar.value.hastaFecha).subscribe({
                next: datos => {
                   this._asientos = datos;
-                  // this.datosBuscar();
+                  this.swbuscando = false;
+                  this.txtbuscar = 'Buscar';
                },
-               error: err => console.error(err.error),
+               error: err => console.error(err.error)
             });
       }
    }
 
-   changeAsi_com() {
-      this.formBuscar.get('asi_com')!.valueChanges.subscribe(asi_comValue => {
-         // this.asi_com = asi_comValue;
-         if (asi_comValue == 1) {
-            this.disabTipcom = true;
-            this.formBuscar.patchValue({ tipcom: 0 });
-         }
-         else
-            this.disabTipcom = false
-      });
+   comprobante(tipcom: number, compro: number) {
+      if (tipcom == 1) return 'I-' + compro.toString();
+      if (tipcom == 2) return 'E-' + compro.toString();
+      if (tipcom == 3) return 'DC-' + compro.toString();
+      if (tipcom == 4) return 'DI-' + compro.toString();
+      if (tipcom == 5) return 'DE-' + compro.toString();
+      return compro.toString();
    }
 
-   // datosBuscar() {
-   //    sessionStorage.setItem('buscaAsi_com', this.formBuscar?.controls['asi_com'].value.toString());
-   //    sessionStorage.setItem('buscaTipo', this.formBuscar?.controls['tipcom'].value.toString());
-   //    sessionStorage.setItem('buscaDesdeNum', this.formBuscar?.controls['desdeNum'].value.toString());
-   //    sessionStorage.setItem('buscaHastaNum', this.formBuscar?.controls['hastaNum'].value.toString());
-   //    sessionStorage.setItem('buscaDesdeFecha', this.formBuscar?.controls['desdeFecha'].value.toString());
-   //    sessionStorage.setItem('buscaHastaFecha', this.formBuscar?.controls['hastaFecha'].value.toString());
-   // }
+   public busquedainicial() {
+      sessionStorage.removeItem('buscarAsientos');
+      this.swdesdehasta = false;
+      this.ultimoAsiento();
+   }
+
+   changeDesdeHasta() { this.swdesdehasta = true; }
 
    onCellClick(event: any, asiento: Asientos) {
       const tagName = event.target.tagName;
       if (tagName === 'TD') {
-         sessionStorage.setItem('idasientoToTransaci', asiento.idasiento.toString());
+         // let asientoToTransaci = { idasiento: asiento.idasiento, padre: '/asientos' };
+         // sessionStorage.setItem("asientoToTransaci", JSON.stringify(asientoToTransaci));
+         sessionStorage.setItem("asientoToTransaci", JSON.stringify({ idasiento: asiento.idasiento, padre: '/asientos' }));
          this.router.navigate(['transaci']);
       }
    }
 
-   addAsiento() {
-      // this.datosBuscar();
-      this.router.navigate(['add-asiento']);
-   }
+   addAsiento() { this.router.navigate(['add-asiento']); }
 
    modiAsiento(idasiento: number) {
-      // this.datosBuscar();
       sessionStorage.setItem("idasientoToModi", idasiento.toString());
       this.router.navigate(['/modi-asiento']);
    }
 
-   modiRetenciones(asiento: number) {
-      //    this.datosBuscar();
-      sessionStorage.setItem("asientoToRete", asiento.toString());
-      this.router.navigate(['/modi-retencion']);
+   retenciones(idasiento: number) {
+      // console.log('idasiento: ', idasiento) 
+      this.reteService.getByAsiento(idasiento).subscribe({
+         next: datos => {
+            const totrete = datos.length;
+            // console.log('totrete: ', totrete)
+            switch (totrete) {
+               case 0:
+                  sessionStorage.setItem("idasientoToRete", idasiento.toString());
+                  this.router.navigate(['/add-retencion']);
+                  break;
+               case 1:
+                  // let retencionToModifi: { idasiento: number, idrete: number}
+                  let idrete = datos[0].idrete;
+                  console.log('Envia: ', idasiento, ' y ', idrete)
+                  let retencionToModifi = { idasiento: idasiento, idrete: idrete}
+                  // sessionStorage.setItem("retencionToModifi", JSON.stringify(retencionToModifi));
+                  sessionStorage.setItem("retencionToModifi", JSON.stringify({ idasiento: idasiento, idrete: idrete}));
+                  this.router.navigate(['/modi-retencion']);
+                  break;
+               default:
+                  if (totrete > 1) {
+                     let idrete = datos[0].idrete;
+                     sessionStorage.setItem("idasientoToRete", idrete.toString());
+                     this.router.navigate(['/modi-retencion']);
+                  } else {
+                     console.error(`Total de retencines no válido (${totrete})`);
+                  }
+            }
+         },
+         error: err => console.error('Al buscar la(s) retenciones: ', err.error)
+      });
    }
 
    eliminar(asiento: Asientos) {
@@ -189,10 +240,15 @@ export class AsientosComponent implements OnInit {
    }
 
    elimina() {
-      this.asientosService.deleteAsiento(this.iAsiento.idasiento).subscribe({
+      this.asiService.deleteAsiento(this.iAsiento.idasiento).subscribe({
          next: datos => this.buscar(),
          error: err => console.error(err.error)
       });
+   }
+
+   imprimir() {
+      sessionStorage.setItem("asientosToImpExp", JSON.stringify(this.buscarAsientos));
+      this.router.navigate(['/imp-asientos']);
    }
 
 }

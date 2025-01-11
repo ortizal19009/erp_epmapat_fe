@@ -1,0 +1,508 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start sombra cabecera border">
+         <div class="col-sm-12 p-0.">
+            <div class="row p-0">
+               <div class="input-group input-group-sm col-sm-4 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Retención del
+                        Asiento</span>
+                  </div>
+                  <input type="text" class="form-control text-center" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.asiento" readonly>
+                  <input type="text" class="form-control text-center" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.comprobante" readonly>
+               </div>
+               <div class="input-group input-group-sm col-sm-2 mb-1 mr-0 ">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Fecha</span>
+                  </div>
+                  <input type="text" class="form-control text-center" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.fecha" readonly>
+               </div>
+               <div class="input-group input-group-sm col-sm-2 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Doc</span>
+                  </div>
+                  <input type="text" class="form-control" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.documento" readonly>
+               </div>
+               <div class="input-group input-group-sm col-sm-3 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Beneficiario</span>
+                  </div>
+                  <input type="text" class="form-control" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.beneficiario" readonly>
+               </div>
+
+               <div class="btn-group ml-auto mt-0 px-0">
+                  <div class="col-sm px-0">
+                     <button class="bg-transparent border-0" type="submit" (click)="regresar()">
+                        <i class="bi-arrow-left-circle text-white icoRegresar"></i>
+                     </button>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="card card-body sombra detalle col-sm-11 pt-1">
+            <form [formGroup]="formRetencion">
+               <div class="row">
+
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group input-group-sm mb-1">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" for="fecharegistro">Fecha Registro<sup
+                                 class="green">*</sup></label>
+                        </div>
+                        <input type="date" class="form-control text-center" formControlName="fecharegistro"
+                           id="fecharegistro" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+                     </div>
+                  </div>
+                  <div class="form-group col-md-5 my-0 py-0">
+                     <div class="input-group input-group-sm mb-1 ">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" for="idbene">Proveedor<sup class="green">*</sup></label>
+                        </div>
+                        <input type="text" class="form-control form-control-sm" value='(Ninguno)'
+                           formControlName="idbene" list="benList"
+                           (input)="onBeneficiarioSelected($event); benefixNombre($event)"
+                           [ngClass]="{'is-invalid': f['idbene'].invalid && f['idbene'].touched,'is-valid': f['idbene'].valid, '': f['idbene'].untouched}">
+                        <datalist role="listbox" id="benList">
+                           <option *ngFor="let beneficiario of _beneficiarios" value={{beneficiario.nomben}}>
+                           </option>
+                        </datalist>
+                     </div>
+                     <div *ngIf="authService.msgval && f['idbene'].errors && f['idbene'].touched" class="mt-0 py-0">
+                        <div *ngIf="f['idbene'].errors['required']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> Proveedor obligatorio
+                        </div>
+                        <div *ngIf="f['idbene'].errors['invalido']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> No ha seleccionado un Proveedor
+                        </div>
+                     </div>
+                  </div>
+                  <div class="form-group col-md-3 my-0 py-0">
+                     <div class="input-group input-group-sm mb-1">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" for="idtabla01">Sus.Tribu:</label>
+                        </div>
+                        <select type="text" class="custom-select" formControlName="idtabla01">
+                           <option *ngFor="let tabla01 of _tabla01" [ngValue]="tabla01.idtabla01">
+                              {{ tabla01.codsustento +' '+ tabla01.nomsustento}}
+                           </option>
+                        </select>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group input-group-sm mb-1 ">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Documento<sup class="green">*</sup></label>
+                        </div>
+                        <select type="text" class="custom-select" formControlName="intdoc">
+                           <option *ngFor="let documento of _documentos" [ngValue]="documento.intdoc">
+                              {{documento.nomdoc}}
+                           </option>
+                        </select>
+                        <input type="text" class="form-control text-center" formControlName="numdoc" aria-label="Small"
+                           aria-describedby="inputGroup-sizing-sm" placeholder="Nro."
+                           [ngClass]="{'is-invalid': f['numdoc'].invalid && f['numdoc'].touched,'is-valid': f['numdoc'].valid, '': f['numdoc'].untouched}">
+                     </div>
+                     <div *ngIf="authService.msgval && f['numdoc'].errors && f['numdoc'].touched" class="mt-0 py-0">
+                        <div *ngIf="f['numdoc'].errors['required']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> Número obligatorio
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm ">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Fecha Emisión</label>
+                        </div>
+                        <input type="date" class="form-control text-center" formControlName="fechaemision"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-2 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Serie<sup
+                                 class="green">*</sup></span>
+                        </div>
+                        <input type="text" class="form-control text-center" formControlName="numserie" maxlength="6"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm"
+                           [ngClass]="{'is-invalid': f['numserie'].invalid && f['numserie'].touched,'is-valid': f['numserie'].valid, '': f['numserie'].untouched}">
+                     </div>
+                     <div *ngIf="authService.msgval && f['numserie'].errors && f['numserie'].touched" class="mt-0 py-0">
+                        <div *ngIf="f['numserie'].errors['required']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> Obligatorio
+                        </div>
+                        <div *ngIf="f['numserie'].errors['minlength'] || f['numserie'].errors['maxlength']"
+                           class="alert alert-warning py-0 mt-0 roboto small" role="alert">
+                           <strong>Ups!</strong> Longitud 6
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-8 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" for="numautoriza_e">Autorización electrónica<sup
+                                 class="green">*</sup></label>
+                        </div>
+                        <input type="text" class="form-control text-center" formControlName="autorizacion"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" maxlength="49"
+                           [ngClass]="{'is-invalid': f['autorizacion'].invalid && f['autorizacion'].touched,'is-valid': f['autorizacion'].valid, '': f['autorizacion'].untouched}">
+                     </div>
+                     <div *ngIf="authService.msgval && f['autorizacion'].errors && f['autorizacion'].touched"
+                        class="mt-0 py-0">
+                        <div *ngIf="f['autorizacion'].errors['required']"
+                           class="alert alert-warning py-0 mt-0 roboto small" role="alert">
+                           <strong>Ups!</strong> El número de autorización electrónica es obligatorio
+                        </div>
+                        <div *ngIf="f['autorizacion'].errors['minlength'] || f['autorizacion'].errors['maxlength']"
+                           class="alert alert-warning py-0 mt-0 roboto small" role="alert">
+                           <strong>Ups!</strong> Debe tener una longitud de 49 caracteres
+                        </div>
+                     </div>
+                  </div>
+                  <div class="form-row col-md-12">
+                     <span class="fantacyblack">Bases Imponibles: &nbsp;&nbsp;&nbsp;</span>
+
+                     <div class="form-group col-md-3 my-0 py-0">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">IVA
+                                 0%</span>
+                           </div>
+                           <input type="text" class="form-control text-right" formControlName="baseimponible"
+                              aria-label="Small" aria-describedby="inputGroup-sizing-sm" mask="separator.2"
+                              [ngClass]="{'is-invalid': f['baseimponible'].invalid && f['baseimponible'].touched,'is-valid': f['baseimponible'].valid, '': f['baseimponible'].untouched}">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-4 my-0 py-0">
+                        <div class="input-group input-group-sm mb-1 ">
+                           <div class="input-group-prepend ">
+                              <label class="input-group-text" for="idtabla17">IVA</label>
+                           </div>
+                           <select type="text" class="custom-select col-md-4" formControlName="idtabla17" (change)="onIdtabla17Change($event)">
+                              <option *ngFor="let tabla17 of _tabla17" [ngValue]="tabla17.idtabla17">
+                                 {{tabla17.porcentaje}} </option>
+                           </select>
+                           <input type="text" class="form-control text-right col-md-6" formControlName="baseimpgrav"
+                              aria-label="Small" aria-describedby="inputGroup-sizing-sm" mask='separator.2'
+                              (blur)="calcMontoIVA()"
+                              [ngClass]="{'is-invalid': f['baseimpgrav'].invalid && f['baseimpgrav'].touched,'is-valid': f['baseimpgrav'].valid, '': f['baseimpgrav'].untouched}">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-3 my-0 py-0">
+                        <div class="input-group mb-1 input-group-sm">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">No Objeto
+                                 de IVA</span>
+                           </div>
+                           <input type="text" class="form-control text-right" formControlName="basenograiva"
+                              aria-label="Small" aria-describedby="inputGroup-sizing-sm" mask="separator.2"
+                              [ngClass]="{'is-invalid': f['basenograiva'].invalid && f['basenograiva'].touched,'is-valid': f['basenograiva'].valid, '': f['basenograiva'].untouched}">
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-3 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Monto IVA</span>
+                        </div>
+                        <input type="text" class="form-control text-right" formControlName="montoiva" aria-label="Small"
+                           aria-describedby="inputGroup-sizing-sm" mask='separator.2' decimalSeparatar=".">
+                     </div>
+                  </div>
+                  <div class="form-group col-md-3 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Monto ICE</span>
+                        </div>
+                        <input type="text" class="form-control text-right" formControlName="montoice" aria-label="Small"
+                           aria-describedby="inputGroup-sizing-sm" mask='separator.2'>
+                     </div>
+                  </div>
+                  <div class="form-group col-md-5 my-0 py-0">
+                     <div class="input-group input-group-sm mb-1 ">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" for="idtabla17">Forma Pago</label>
+                        </div>
+                        <select type="text" class="custom-select" formControlName="idtabla15">
+                           <option *ngFor="let tabla15 of _tabla15" [ngValue]="tabla15.idtabla15">
+                              {{ tabla15.codtabla15+' '+tabla15.nomtabla15}}
+                           </option>
+                        </select>
+                     </div>
+                  </div>
+
+                  <table class="table table-hover table-bordered table-sm mb-1">
+                     <thead>
+                        <tr class="pad0">
+                           <th class="col-md-3 text-right fantacyblack"> Base &nbsp;&nbsp;&nbsp;</th>
+                           <th class="col-md-5 text-center fantacyblack">Valores Retenidos IVA - Concepto</th>
+                           <th class="col-md-1 text-center fantacyblack">F.104</th>
+                           <th class="col-md-1 text-center fantacyblack">Cod.</th>
+                           <th class="col-md-2 text-right fantacyblack">Valor Retenido &nbsp;&nbsp;</th>
+                        </tr>
+                     </thead>
+                  </table>
+
+                  <div class="form-group col-md-3 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <div class="input-group-prepend">
+                           <button class="btn btn-primary btn-sm" (click)="bienes()">&nbsp;&nbsp; Bienes&nbsp;</button>
+                        </div>
+                        <input type="text" class="form-control text-right" formControlName="montoivabienes"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" mask='separator.2'
+                           (input)="onInputBienes($event)">
+                     </div>
+                  </div>
+                  <div class="form-group col-md-5 my-0 py-0">
+                     <div class="input-group input-group-sm mb-1 ">
+                        <select type="text" class="custom-select" formControlName="idtabla5c_bie"
+                           (change)="onBienesChange($event)">
+                           <option *ngFor="let tabla5c of _tabla5c_bie" [ngValue]="tabla5c.idtabla5c">{{
+                              tabla5c.conceptoiva}}
+                           </option>
+                        </select>
+                     </div>
+                  </div>
+                  <div class="form-group col-md-1 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <input type="text" class="form-control text-center" formControlName="codretbienes"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabindex="-1">
+                     </div>
+                  </div>
+                  <div class="form-group col-md-1 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <input type="text" class="form-control text-center" formControlName="porretbienes"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabindex="-1">
+                     </div>
+                  </div>
+                  <div class="form-group col-md-2 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <input type="text" class="form-control text-right" formControlName="valorretbienes"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabindex="-1">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-3 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <div class="input-group-prepend">
+                           <button class="btn btn-primary btn-sm" (click)="servicios()">Servicios</button>
+                        </div>
+                        <input type="text" class="form-control text-right" formControlName="montoivaservicios"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" mask='separator.2'
+                           (input)="onInputServicios($event)">
+                     </div>
+                  </div>
+                  <div class="form-group col-md-5 my-0 py-0">
+                     <div class="input-group input-group-sm mb-1 ">
+                        <select type="text" class="custom-select" formControlName="idtabla5c_ser"
+                           (change)="onServiciosChange($event)">
+                           <option *ngFor="let tabla5c of _tabla5c_ser" [ngValue]="tabla5c.idtabla5c">
+                              {{ tabla5c.conceptoiva}}
+                           </option>
+                        </select>
+                     </div>
+                  </div>
+                  <div class="form-group col-md-1 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <input type="text" class="form-control text-center" formControlName="codretservicios"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabindex="-1">
+                     </div>
+                  </div>
+                  <div class="form-group col-md-1 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <input type="text" class="form-control text-center" formControlName="porretservicios"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabindex="-1">
+                     </div>
+                  </div>
+                  <div class="form-group col-md-2 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <input type="text" class="form-control text-right" formControlName="valorretservicios"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabindex="-1">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-3 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <div class="input-group-prepend">
+                           <button class="btn btn-primary btn-sm"
+                              (click)="cien()">&nbsp;&nbsp;&nbsp;100%&nbsp;&nbsp;&nbsp;&nbsp;</button>
+                        </div>
+                        <input type="text" class="form-control text-right" formControlName="montoivaserv100"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" mask='separator.2'
+                           (input)="onInput100($event)">
+                     </div>
+                  </div>
+                  <div class="form-group col-md-5 my-0 py-0">
+                     <div class="input-group input-group-sm mb-1 ">
+                        <select type="text" class="custom-select" formControlName="idtabla5c_100"
+                           (change)="on100Change($event)">
+                           <option *ngFor="let tabla5c of _tabla5c_100" [ngValue]="tabla5c.idtabla5c">
+                              {{ tabla5c.conceptoiva}}
+                           </option>
+                        </select>
+                     </div>
+                  </div>
+                  <div class="form-group col-md-1 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <input type="text" class="form-control text-center" formControlName="codretserv100"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabindex="-1">
+                     </div>
+                  </div>
+                  <div class="form-group col-md-1 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <input type="text" class="form-control text-center" formControlName="porretserv100"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabindex="-1">
+                     </div>
+                  </div>
+                  <div class="form-group col-md-2 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <input type="text" class="form-control text-right" formControlName="valretserv100"
+                           id="valretserv100" aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly
+                           tabindex="-1">
+                     </div>
+                  </div>
+
+                  <!-- Ultima fila (Totales) del IVA -->
+                  <div class="form-group col-md-3 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">TOTAL</span>
+                        </div>
+                        <input type="text" class="form-control text-right font-weight-bold" formControlName="sumbaseiva"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabindex="-1"
+                           mask="separator.2">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Número de Retención</span>
+                        </div>
+                        <input type="text" class="form-control text-center" formControlName="secretencion1"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm"
+                           [ngClass]="{'is-invalid': f['secretencion1'].invalid && f['secretencion1'].touched, 'is-valid': f['secretencion1'].valid, '': f['secretencion1'].untouched}">
+                     </div>
+                  </div>
+                  <div class="form-group col-md-3 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Fecha
+                              Emisión</span>
+                        </div>
+                        <input type="date" class="form-control" formControlName="fechaemiret1" aria-label="Small"
+                           aria-describedby="inputGroup-sizing-sm">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-2 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <input type="text" class="form-control text-right font-weight-bold" formControlName="sumreteiva"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabindex="-1">
+                     </div>
+                  </div>
+               </div>
+
+               <div class="text-center">
+                  <button class="btn btn-success btn-sm mx-1 mt-1" (click)="onSubmit()" [disabled]="!formRetencion.valid">
+                     <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+                  <button class="btn btn-outline-success btn-sm mx-1 mt-1" (click)="regresar()"><i
+                        class="fa fa-times-circle"></i> Cancelar</button>
+               </div>
+
+               <!-- Cabecera del Impuesto a la Renta -->
+               <table class="table table-hover table-bordered table-sm my-1">
+                  <thead>
+                     <tr class="pad0">
+                        <th class="col-md-2 text-center fantacyblack">Base Imponible</th>
+                        <th class="col-md-5 text-center fantacyblack">Concepto de Retención del Impuesto a la Renta</th>
+                        <th class="col-md-1 text-right fantacyblack"> Cod. &nbsp;&nbsp;&nbsp;</th>
+                        <th class="col-md-1 text-center fantacyblack">%</th>
+                        <th class="col-md-2 text-right fantacyblack">Valor Retenido</th>
+                        <th class="text-center">
+                           <i class="bi-plus-circle-fill fantacyblack" data-toggle="tooltip" title="Nuevo"
+                              (click)="agregarAir()"></i>
+                        </th>
+                     </tr>
+                  </thead>
+               </table>
+
+               <!-- Impuesto a la Renta -->
+               <div formArrayName="air">
+                  <div *ngFor="let ir of air.controls; let i = index" [formGroupName]="i">
+                     <div class="form-row align-items-center mb-1">
+
+                        <div class="form-group col-md-2 my-0 py-0">
+                           <div class="input-group flex-nowrap input-group-sm">
+                              <div class="input-group-prepend">
+                                 <span class="input-group-text bg-primary"><i class="bi-arrow-down-circle"
+                                       data-toggle="tooltip" title="Pasar base" (click)="passBaseimpair(i)"></i> </span>
+                              </div>
+                              <input type="text" class="form-control form-control-sm text-right"
+                                 formControlName="baseimpair" mask="separator.2" aria-describedby="addon-wrapping"
+                                 (input)="onInputBaseimpair($event, i)">
+                           </div>
+                        </div>
+
+                        <div class="form-group col-md-5 my-0 py-0">
+                           <select type="text" class="custom-select custom-select-sm roboto" formControlName="idtabla10"
+                              (change)="onConceptoAirChange($event, i)">
+                              <option *ngFor="let tabla10 of _tabla10" [ngValue]="tabla10.idtabla10">
+                                 {{ tabla10.codretair+' '+tabla10.porcretair+'% '+ tabla10.conceptoretair}}
+                              </option>
+                           </select>
+                        </div>
+
+                        <div class="form-group col-md-1 my-0 py-0">
+                           <input type="text" class="form-control form-control-sm text-center"
+                              formControlName="codretair" aria-label="Small" aria-describedby="inputGroup-sizing-sm"
+                              readonly tabindex="-1">
+                        </div>
+
+                        <div class="col-md-1">
+                           <input type="text" class="form-control form-control-sm text-center"
+                              formControlName="porcretair" readonly tabindex="-1">
+                        </div>
+
+                        <div class="col-md-2">
+                           <input type="text" class="form-control form-control-sm text-right"
+                              formControlName="valretair" readonly tabindex="-1">
+                        </div>
+
+                        <div class="col-md-1 text-center">
+                           <button type="button" class="btn btn-sm" (click)="eliminarAir(i)"><i
+                                 class="bi-x-circle-fill text-danger" data-toggle="tooltip" title="Quitar"></i></button>
+                        </div>
+
+                     </div>
+                  </div>
+
+               </div>
+            </form>
+         </div>
+      </div>
+   </div>
+</div>

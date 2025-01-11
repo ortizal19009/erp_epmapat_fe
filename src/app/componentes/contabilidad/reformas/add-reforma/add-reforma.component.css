@@ -1,21 +1,8 @@
-.container-fluid{
-   --bgcolor1: rgb(80, 83, 54);
-   --bgcolor2: rgb(228, 248, 205);
-}
-
-.titReforma {
+.cabecera {
    background-color: var(--bgcolor1);
    color: white;
-   box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
 }
+.nuevoBG1 { background-color: var(--bgcolor1); }
 
-.cardReforma{
-   background-color: var(--bgcolor2);
-   box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
-}
-/* 
-input:required{
-   border-left-style: solid;
-   border-left-color: #28a745;
-   border-left-width: 4px;
-} */
+.detalle { background-color: var(--bgcolor2); }
+.nuevoBG2 { background-color: var(--bgcolor2); }

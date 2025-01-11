@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { ConciliaBanService } from 'src/app/servicios/contabilidad/concilia-ban.service';
+import { ConciliabanService } from 'src/app/servicios/contabilidad/conciliaban.service';
 
 @Component({
   selector: 'app-conciliaban',
@@ -11,7 +11,7 @@ export class ConciliabanComponent implements OnInit {
 
   conciliaBans: any;
 
-  constructor(   private s_conciliaban: ConciliaBanService, private router: Router ) { }
+  constructor(   private s_conciliaban: ConciliabanService, private router: Router ) { }
 
   ngOnInit(): void {
     this.listarConciliaBan();

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 
 import { Presupue } from 'src/app/modelos/contabilidad/presupue.model';
 import { environment } from 'src/environments/environment';
@@ -16,9 +16,25 @@ export class PreingresoService {
 
    constructor(private http: HttpClient) { }
 
+   //Busca todas las Partidas de Ingresos 
+   getPartidas() {
+      let tippar = 1;
+      return this.http.get<Presupue[]>(`${baseUrl}/partidas?tippar=${tippar}`);
+   }
+
+   //Busca Partidas de Ingresos 
    getParingreso(codpar: String, nompar: String) {
       let buscanompar = nompar.toLowerCase();
       return this.http.get<Presupue[]>(`${baseUrl}/paringreso?codpar=${codpar}&nompar=${buscanompar}`);
+   }
+   //Busca Partidas de Ingresos Async
+   async getParingresoAsync(codpar: String, nompar: String): Promise<any[]> {
+      const resp = await firstValueFrom(this.http.get<any[]>(`${baseUrl}/paringreso?codpar=${codpar}&nompar=${nompar}`));
+      return resp;
+   }
+
+   getTippar(tippar: number) {
+      return this.http.get<Presupue[]>(`${baseUrl}?tippar=${tippar}`);
    }
 
    //Busca por Código o Nombre
@@ -29,25 +45,25 @@ export class PreingresoService {
    getByCodigoI(codpar: String) {
       return this.http.get<Presupue[]>(`${baseUrl}?codpar=${codpar}`);
    }
-   //Creo que no se usa?
+   //No se usa?
    getByNombreI(nompar: String): Observable<any> {
       return this.http.get<Presupue[]>(`${baseUrl}?nompar=${nompar}`);
    }
 
-   getById(idpresupue: number) {
-      return this.http.get<Presupue>(baseUrl + "/" + idpresupue);
+   getById(intpre: number) {
+      return this.http.get<Presupue>(baseUrl + "/" + intpre);
    }
 
    savePreingreso(preingresos: Presupue): Observable<Object> {
       return this.http.post(baseUrl, preingresos);
    }
 
-   updatePreingreso(idpresupue: number, preingresos: Presupue): Observable<Object> {
-      return this.http.put(`${baseUrl}/${preingresos.idpresupue}`, preingresos);
+   updatePreingreso(intpre: number, preingresos: Presupue): Observable<Object> {
+      return this.http.put(`${baseUrl}/${preingresos.intpre}`, preingresos);
    }
 
-   deletePreingreso(idpresupue: number): Observable<Object> {
-      return this.http.delete(`${baseUrl}/${idpresupue}`);
+   deletePreingreso(intpre: number): Observable<Object> {
+      return this.http.delete(`${baseUrl}/${intpre}`);
    }
 
 }

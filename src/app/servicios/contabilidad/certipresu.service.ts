@@ -23,9 +23,15 @@ export class CertipresuService {
       return this.http.get<Certipresu>(`${baseUrl}/ultimo`);
    }
 
-   //Validar por número
-   getNumero(numero: number): Observable<any> {
+   //Validar número
+   valNumero(numero: number): Observable<any> {
       return this.http.get<Certipresu>(`${baseUrl}/numero/${numero}/tipo/1`);
+   }
+
+   //Buscar por número
+   getByNumero(numero: number, tipo: number): Observable<any> {
+      // console.log( `${baseUrl}/numero?numero=${numero}&tipo=${tipo}` )
+      return this.http.get<Certipresu>( `${baseUrl}/numero?numero=${numero}&tipo=${tipo}` );
    }
 
    saveCertiPresu(certipresu: any) {
@@ -33,12 +39,12 @@ export class CertipresuService {
    }
 
    getByIdCerti(idcerti: number) {
-      return this.http.get<Certipresu[]>(`${baseUrl}/${idcerti}`);
+      return this.http.get<Certipresu>(`${baseUrl}/${idcerti}`);
    }
 
    getById(idcerti: number) {
       return this.http.get<Certipresu>(baseUrl + "/" + idcerti);
-    }
+   }
 
    updateCerti(idcerti: number, certipresu: Certipresu): Observable<Object> {
       return this.http.put(`${baseUrl}/${idcerti}`, certipresu);

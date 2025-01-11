@@ -19,6 +19,16 @@ export class NivelesService {
       return this.http.get<Niveles[]>(baseUrl);
    }
 
+   //Obtiene un nivel por nivcue
+   getByNivcue(nivcue: number): Observable<Niveles> {
+      return this.http.get<Niveles>(`${baseUrl}/nivel?nivcue=${nivcue}`);
+   }
+
+   //Siguiente Nivel
+   getSiguienteNivcue(nivcue: number): Observable<Niveles> {
+      return this.http.get<Niveles>(`${baseUrl}/siguiente?nivcue=${nivcue}`);
+   }
+
    saveNiveles(niveles: Niveles): Observable<Object> {
       return this.http.post(baseUrl, niveles);
    }

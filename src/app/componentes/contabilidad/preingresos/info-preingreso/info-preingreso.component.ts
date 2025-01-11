@@ -25,7 +25,7 @@ export class InfoPreingresoComponent implements OnInit {
       let idpresupue = sessionStorage.getItem('idpresupueToInfo');
       console.log("Recibe: "+idpresupue)
       this.preingService.getById(+idpresupue!).subscribe({
-         next: resp => {
+         next: (resp:any) => {
             this.paringreso.idpresupue = resp.idpresupue;
             this.paringreso.codpar = resp.codpar;
             this.paringreso.nompar = resp.nompar;

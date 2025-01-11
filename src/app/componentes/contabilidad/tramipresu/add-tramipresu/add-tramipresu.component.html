@@ -2,7 +2,7 @@
    <div class="container-fluid">
       <div class="row mt-3 justify-content-center text-center">
          <div class="col-sm-8 cabecera sombra border">
-            <h5 class="mt-2 font-weight-bold">{{ titulo }}</h5>
+            <h5 class="mt-2 font-weight-bold">Nuevo Trámite Presupuestario (compromiso)</h5>
          </div>
       </div>
    </div>
@@ -13,70 +13,117 @@
       <div class="row justify-content-center">
          <div class="card card-body col-sm-8 detalle sombra">
             <form [formGroup]="formTramipresu">
-               <div class="container">
-                  <div class="row">
-                     <div class="col-sm">
-                        <label for="" class="col-sm col-form-label-sm">Número
-                           <input type="number" id="id-numero" class="form-control form-control-sm"
-                              formControlName="numero" />
-                        </label>
+               <div class="row">
+
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Número<sup class="green">*</sup></span>
+                        </div>
+                        <input type="number" class="form-control form-control-sm text-center " formControlName="numero"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" autofocus
+                           [ngClass]="{'is-invalid': f['numero'].invalid && f['numero'].touched, 'is-valid': f['numero'].valid, '': f['numero'].untouched}">
                      </div>
-                     <div class="col-sm">
-                        <label for="" class="col-sm col-form-label-sm">Fecha
-                           <input type="date" class="form-control form-control-sm" formControlName="fecha" />
-                        </label>
+                     <div *ngIf="authService.msgval && f['numero'].errors && f['numero'].touched">
+                        <div *ngIf="f['numero'].errors['required']" class="alert alert-warning py-0 my-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> El número es obligatorio.
+                        </div>
+                        <div *ngIf="f['numero'].errors['min']" class="alert alert-warning py-0 my-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> Debe ser mayor que cero.
+                        </div>
+                        <div *ngIf="f['numero'].errors['existe']" class="alert alert-warning py-0 my-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> Ya existe el Trámite <span
+                              class="font-weight-bold">{{f['numero'].value}}</span>
+                        </div>
                      </div>
-                     <div class="col-sm">
-                        <label for="" class="col-sm col-form-label-sm">Documento
-                           <select class="custom-select" [compareWith]="compareDocumentos"
-                              formControlName="iddocumento">
-                              <option [ngValue]="d_documentos" *ngFor="let d_documentos of documentos">
-                                 {{ d_documentos.nomdoc }}
-                              </option>
-                           </select>
-                        </label>
+
+                  </div>
+
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Fecha<sup class="green">*</sup></label>
+                        </div>
+                        <input type="date" class="form-control text-center " formControlName="fecha" aria-label="Small"
+                           aria-describedby="inputGroup-sizing-sm"
+                           [ngClass]="{'is-invalid': f['fecha'].invalid && f['fecha'].touched, 'is-valid': f['fecha'].valid, '': f['fecha'].untouched}">
                      </div>
-                     <div class="col-sm">
-                        <label for="" class="col-sm col-form-label-sm">N° Doc
-                           <input type="text" class="form-control form-control-sm" formControlName="numdoc" />
-                        </label>
-                     </div>
-                     <div class="col-sm">
-                        <label for="" class="col-sm col-form-label-sm">Fecha Doc
-                           <input type="date" class="form-control form-control-sm" formControlName="fecdoc" />
-                        </label>
+                     <div *ngIf="authService.msgval && f['fecha'].errors && f['fecha'].touched" class="my-0 py-0">
+                        <div *ngIf="f['fecha'].errors['required']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> La fecha es obligatorio.
+                        </div>
+                        <div *ngIf="f['fecha'].errors['invalido']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> No corresponde al período.
+                        </div>
                      </div>
                   </div>
-                  
+
+                  <div class="form-group col-md-10 my-2 py-2">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Documento<sup class="green">*</sup></label>
+                        </div>
+                        <select type="text" class="custom-select" formControlName="intdoc">
+                           <option [ngValue]="documento.intdoc" *ngFor="let documento of _documentos"
+                              id="intdoc_{{documento.intdoc}}">
+                              {{ documento.nomdoc }}
+                           </option>
+                        </select>
+                        <input type="text" class="form-control text-center  col-sm-4" formControlName="numdoc"
+                           [ngClass]="{'is-invalid': f['numdoc'].invalid && f['numdoc'].touched,'is-valid': f['numdoc'].valid, '': f['numdoc'].untouched}">
+                        <input type="date" class="form-control form-control-sm text-center" formControlName="fecdoc"
+                           [ngClass]="{'is-invalid': f['fecdoc'].invalid && f['fecdoc'].touched, 'is-valid': f['fecdoc'].valid, '': f['fecdoc'].untouched}">
+                     </div>
+                     <div *ngIf="authService.msgval && f['numdoc'].errors && f['numdoc'].touched" class="my-0 py-0">
+                        <div *ngIf="f['numdoc'].errors['required']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> Número de documento obligatorio.
+                        </div>
+                     </div>
+                     <div *ngIf="authService.msgval && f['fecdoc'].errors && f['fecdoc'].touched" class="my-0 py-0">
+                        <div *ngIf="f['fecdoc'].errors['required']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> Fecha de documento obligatorio.
+                        </div>
+                     </div>
+                  </div>
+
                   <div class="form-group col-md-12 mt-1">
                      <div class="input-group input-group-sm mb-1 ">
                         <div class="input-group-prepend">
                            <label class="input-group-text">Beneficiario<sup class="green">*</sup></label>
                         </div>
-                        <input type="text" class="form-control form-control-sm"
-                           formControlName="idbene" list="benList" (input)="onIresponsableSelected($event); iresponsaxNombre($event)"
+                        <input type="text" class="form-control form-control-sm" formControlName="idbene" list="benList"
+                           (input)="onBenefiSelected($event); benefixNombre($event)"
                            [ngClass]="{'is-invalid': f['idbene'].invalid && f['idbene'].touched,'is-valid': f['idbene'].valid, '': f['idbene'].untouched}">
                         <datalist role="listbox" id="benList">
-                           <option *ngFor="let beneficiario of _beneficiarios" value={{beneficiario.nomben}} > </option>
+                           <option *ngFor="let beneficiario of _beneficiarios" value={{beneficiario.nomben}}> </option>
                         </datalist>
                      </div>
                   </div>
 
-                  <div class="row">
-                     <div class="col-sm">
-                        <label for="" class="col-sm col-form-label-sm">Descripción
-                           <textarea type="text" class="form-control form-control-sm"
-                              formControlName="descripcion"></textarea>
-                        </label>
+                  <div class="form-group col-md-12 my-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Descripción</label>
+                        </div>
+                        <textarea class="form-control" formControlName="descripcion" rows="3"></textarea>
                      </div>
                   </div>
+
                </div>
 
                <div class="mt-1 mb-3 text-center">
-                  <button type="button" class="btn btn-success btn-sm mx-1 mt-1" (click)="onSubmit()">
+                  <button type="button" class="btn btn-success btn-sm mx-1 mt-1" (click)="guardar()"
+                     [disabled]="!formTramipresu.valid">
                      <i class="fa fa-check-circle"></i>&nbsp; Aceptar
                   </button>
-                  <button type="button" (click)="retroceder()" class="btn btn-outline-success mt-1 mx-1 btn-sm">
+                  <button type="button" (click)="regresar()" class="btn btn-outline-success mt-1 mx-1 btn-sm">
                      <i class="fa fa-times-circle"></i> Cancelar
                   </button>
                </div>

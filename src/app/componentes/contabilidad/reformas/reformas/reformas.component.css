@@ -1,44 +1,18 @@
-.container-fluid{
-   --bgcolor1: rgb(80, 83, 54);
-   --bgcolor2: rgb(228, 248, 205);
-}
-
 .cabecera {
    background-color: var(--bgcolor1);
    color: white;
-   box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
 }
+.nuevoBG1 { background-color: var(--bgcolor1); }
 
-thead>tr {
-   background-color: var(--bgcolor1);
-   color: white;
-}
+.detalle { background-color: var(--bgcolor2); }
+.nuevoBG2 { background-color: var(--bgcolor2); }
 
-table {
-   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-}
-
-.fila:hover{
+.fila:hover {
    background-color: #117a8B;
    color: white;
    cursor: pointer;
 }
 
-tbody tr {
-   background-color: var(--bgcolor2)
-}
-
-/* === Popup de la lista === */
-.popLista{
-   background-color: #ffc107;
-   font-family: 'Roboto', sans-serif;
-   font-size: small;
-}
-.popLista button{
-   font-weight: bold;
-   color: black;
-}
-.popLista button:hover{
-   font-weight: normal;
-   color: white;
+.ancho{
+   max-width: 300px;
 }

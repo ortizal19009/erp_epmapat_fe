@@ -6,25 +6,28 @@
          </div>
          <div class="col-sm-7">
             <form [formGroup]="formBuscar" (ngSubmit)="buscar()">
-               <div class="row col-sm-12 my-0">
-                  <div class="col-sm-2">
-                     <input class="form-control form-control-sm" type="text" autofocus formControlName="codcue"
-                        placeholder="Código">
+               <div class="row my-0">
+
+                  <div class="input-group col-sm-7">
+                     <input type="text" class="form-control form-control-sm col-sm-4" formControlName="codcue"
+                        placeholder="Código" autofocus>
+                     <input type="text" class="form-control form-control-sm text-center" formControlName="nomcue"
+                        placeholder="Nombre">
                   </div>
-                  <div class="col-sm-4">
-                     <input type="text" placeholder="Nombre" class="form-control form-control-sm text-center"
-                        formControlName="nomcue" />
-                  </div>
-                  <div class="col-sm-3">
-                     <button class="btn btn-primary btn-sm" [disabled]="disabled"><i class="fa fa-search"></i>
-                        Buscar</button>
-                  </div>
-                  <div class="col-sm-3">
-                     <input class="form-control form-control-sm text-center" type="text" placeholder="Filtrar..."
-                        [(ngModel)]="filtro" [ngModelOptions]="{standalone: true}" />
+
+                  <div>
+                     <button class="btn btn-primary btn-sm">
+                        <i *ngIf="swbuscando" class="fa fa-spinner"></i>
+                        <i *ngIf="!swbuscando" class="fa fa-search"></i> {{txtbuscar}}
+                     </button>
                   </div>
                </div>
             </form>
+         </div>
+
+         <div *ngIf="_cuentas" class="col-sm-2">
+            <input class="form-control form-control-sm text-center" type="text" placeholder="Filtrar..."
+               [(ngModel)]="filtro">
          </div>
 
          <div class="btn-group ml-auto mt-0">
@@ -32,10 +35,8 @@
                data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right bg-dark roboto ">
-               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#pdf">
-                  <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
-               <button class="dropdown-item" type="button"><i class="bi-file-earmark-arrow-up"></i>&nbsp;
-                  Exportar</button>
+               <button class="dropdown-item" type="button" (click)="imprimir()">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
             </div>
          </div>
 
@@ -46,9 +47,9 @@
 <div class="container-fluid">
    <div class="row mb-0">
       <div class="col-sm-12">
-         <table class="table table-hover table-bordered table-sm sombra">
+         <table *ngIf="_cuentas" class="table table-hover table-bordered table-sm sombra">
             <thead class="text-center cabecera">
-               <tr class="text-center">
+               <tr class="text-center pad0">
                   <th></th>
                   <th>Cuenta</th>
                   <th class="col-md-4">Denominación</th>
@@ -61,30 +62,30 @@
                   <th></th>
                </tr>
             </thead>
-            <tbody class="detalle">
-               <tr *ngFor="let cuenta of _cuentas | filter: filtro; let i=index" class="fila">
+            <tbody class="detalle roboto small">
+               <tr *ngFor="let cuenta of _cuentas | filter: filtro; let i=index" class="fila pad0"
+                  (click)="onCellClick($event, cuenta.codcue )">
                   <td class="text-center small font-weight-bold">{{i+1}}</td>
-                  <td [ngClass]="{'font-weight-bold': !cuenta.movcue }">{{ cuenta.codcue}}</td>
-                  <td [ngClass]="{'font-weight-bold': !cuenta.movcue}">{{ cuenta.nomcue}}</td>
-                  <td [ngClass]="{'transparente': cuenta.grucue=='0', 'font-weight-bold': !cuenta.movcue}">{{
+                  <td [ngClass]="{'font-weight-bold': cuenta.movcue==1 }">{{ cuenta.codcue}}</td>
+                  <td [ngClass]="{'font-weight-bold': cuenta.movcue==1}">{{ cuenta.nomcue}}</td>
+                  <td [ngClass]="{'transparente': cuenta.grucue=='0', 'font-weight-bold': cuenta.movcue==1}">{{
                      cuenta.grucue}}</td>
-                  <td class="text-center"> <i class="bi-check" *ngIf="cuenta.movcue"></i> </td>
+                  <td class="text-center"> <i class="bi-check" *ngIf="cuenta.movcue == 2"></i> </td>
                   <td class="text-center"> <i class="bi-check" *ngIf="cuenta.sigef == 1"></i> </td>
                   <td class="text-center" [ngClass]="{'transparente': cuenta.tiptran=='0'}">{{ cuenta.tiptran}}</td>
-                  <td>{{ cuenta.asodebe}}</td>
-                  <td>{{ cuenta.asohaber}}</td>
+                  <td [ngClass]="{'font-weight-bold': cuenta.movcue==1}">{{ cuenta.asodebe}}</td>
+                  <td [ngClass]="{'font-weight-bold': cuenta.movcue==1}">{{ cuenta.asohaber}}</td>
 
                   <td class="text-center">
                      <div class="btn-group py-0">
                         <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
                            aria-expanded="false">
                         </button>
-
                         <div class="dropdown-menu dropdown-menu-right popLista">
                            <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalUnico"
-                              (click)="addCuenta(cuenta.codcue, cuenta.nomcue, cuenta.idnivel.idnivel, cuenta.movcue )">
+                              (click)="addCuenta( cuenta )">
                               <i class="bi-file-earmark-plus"></i>&nbsp; Nueva</button>
-                           <button class="dropdown-item" type="button">
+                           <button class="dropdown-item" type="button" (click)="modiCuenta( cuenta )">
                               <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
                            <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalUnico"
                               (click)="eliminar(cuenta)">
@@ -118,7 +119,7 @@
                      Aceptar</button>
                </div>
             </div>
-            <!-- Eliminar o Mensajet Tiene movimientos -->
+            <!-- Eliminar o Mensaje Tiene movimientos -->
             <div *ngIf="opcionModal === 2">
                <div *ngIf="sweliminar; then thenBlock else elseBlock"></div>
                <ng-template #thenBlock>
@@ -140,8 +141,7 @@
                <ng-template #elseBlock>
                   <div class='modal-body'>
                      <div class="alert alert-warning text-center" role="alert">
-                        No puede Eliminar la Cuenta <span class="fantacygreen">{{cuenta.codcue}} </span><br>Tiene
-                        movimientos.
+                        No puede Eliminar la Cuenta <span class="fantacygreen">{{cuenta.codcue}} <br>{{msgeliminar}}</span>
                      </div>
                   </div>
                   <div class='text-center'>

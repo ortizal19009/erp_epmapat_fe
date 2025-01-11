@@ -1,175 +1,141 @@
 import { Component, OnInit } from '@angular/core';
-import {
-  AbstractControl,
-  FormBuilder,
-  FormGroup,
-  Validators,
-} from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
+import { map, of } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Documentos } from 'src/app/modelos/administracion/documentos.model';
+import { Beneficiarios } from 'src/app/modelos/contabilidad/beneficiarios.model';
 import { DocumentosService } from 'src/app/servicios/administracion/documentos.service';
 import { BeneficiariosService } from 'src/app/servicios/contabilidad/beneficiarios.service';
-import { EjecucionService } from 'src/app/servicios/contabilidad/ejecucion.service';
 import { TramipresuService } from 'src/app/servicios/contabilidad/tramipresu.service';
 
 @Component({
-  selector: 'app-add-tramipresu',
-  templateUrl: './add-tramipresu.component.html',
-  styleUrls: ['./add-tramipresu.component.css'],
+   selector: 'app-add-tramipresu',
+   templateUrl: './add-tramipresu.component.html',
+   styleUrls: ['./add-tramipresu.component.css']
 })
+
 export class AddTramipresuComponent implements OnInit {
-  formTramipresu: FormGroup;
-  documentos: any;
-  _beneficiarios: any[] = [];
-  titulo: string = 'Nuevo Trámite Presupuestario (compromiso)';
-  date: Date = new Date();
-  today: number = Date.now();
-  idbene: number | null;
 
-  constructor(
-    private s_documentos: DocumentosService,
-    private fb: FormBuilder,
-    private s_tramipresu: TramipresuService,
-    private beneService: BeneficiariosService,
-    private s_ejecucion: EjecucionService,
-    private router: Router,
-    private authService: AutorizaService
-  ) {}
+   formTramipresu: FormGroup;
+   _documentos: any;
+   _beneficiarios: any[] = [];
+   date: Date = new Date();
+   idbene: number | null;
 
-  ngOnInit(): void {
-    this.setcolor();
-    const fecha = new Date();
-    const año = fecha.getFullYear();
-    this.formTramipresu = this.fb.group(
-      {
-        numero: '',
-        fecha: '',
-        iddocumento: '',
-        numdoc: '',
-        fecdoc: '',
-        totmiso: 0,
-        idbene: ['', [Validators.required], [this.valBenefi.bind(this)]],
-        descripcion: '',
-        swreinte: true,
-        usucrea: this.authService.idusuario,
-        feccrea: this.date,
+   documento: Documentos = new Documentos;
+   beneficiario: Beneficiarios = new Beneficiarios;
+   
+   constructor(
+      private s_documentos: DocumentosService, private fb: FormBuilder, private router: Router,
+      public authService: AutorizaService, private tramiService: TramipresuService, private beneService: BeneficiariosService) { }
+
+   ngOnInit(): void {
+      sessionStorage.setItem('ventana', '/tramipresu');
+      let coloresJSON = sessionStorage.getItem('/tramipresu');
+      if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
+
+      this.formTramipresu = this.fb.group({
+         numero: ['', [Validators.required, Validators.min(1)], this.valNumero.bind(this)],
+         fecha: ['', [Validators.required], this.valFecha.bind(this)],
+         intdoc: '',
+         numdoc: ['', Validators.required],
+         fecdoc: ['', Validators.required],
+         totmiso: 0,
+         idbene: ['', [Validators.required], [this.valBenefi.bind(this)] ],
+         descripcion: '',
+         swreinte: 0,
+         usucrea: 1,
+         feccrea: this.date
       },
-      { updateOn: 'blur' }
-    );
+         { updateOn: "blur" });
 
-    this.listarDocumentos();
-    this.setValores();
-    // this.listarBene('ninguno');
-  }
+      this.listarDocumentos();
+      this.setValores();
+   }
 
-  setcolor() {
-    let colores: string[];
-    let coloresJSON = sessionStorage.getItem('/tramipresu');
-    if (!coloresJSON) {
-      colores = ['rgb(70, 70, 70)', 'rgb(186, 186, 186)'];
-      const coloresJSON = JSON.stringify(colores);
-      sessionStorage.setItem('/tramipresu', coloresJSON);
-    } else colores = JSON.parse(coloresJSON);
+   colocaColor(colores: any) {
+      document.documentElement.style.setProperty('--bgcolor1', colores[0]);
+      const cabecera = document.querySelector('.cabecera');
+      if (cabecera) cabecera.classList.add('nuevoBG1')
+      document.documentElement.style.setProperty('--bgcolor2', colores[1]);
+      const detalle = document.querySelector('.detalle');
+      if (detalle) detalle.classList.add('nuevoBG2');
+   }
 
-    document.documentElement.style.setProperty('--bgcolor1', colores[0]);
-    const cabecera = document.querySelector('.cabecera');
-    if (cabecera) cabecera.classList.add('nuevoBG1');
-    document.documentElement.style.setProperty('--bgcolor2', colores[1]);
-    const detalle = document.querySelector('.detalle');
-    if (detalle) detalle.classList.add('nuevoBG2');
-  }
+   get f() { return this.formTramipresu.controls; }
 
-  onSubmit() {
-    this.formTramipresu.value.idbene = this.idbene;
-    console.log(this.formTramipresu.value);
-    this.guardatTramipresu();
-  }
-
-  compareDocumentos(o1: Documentos, o2: Documentos): boolean {
-    if (o1 === undefined && o2 === undefined) {
-      return true;
-    } else {
-      return o1 === null || o2 === null || o1 === undefined || o2 === undefined
-        ? false
-        : o1.iddocumento == o2.iddocumento;
-    }
-  }
-
-  get f() {
-    return this.formTramipresu.controls;
-  }
-
-  setValores() {
-    this.s_tramipresu.findMax().subscribe({
-      next: (datos) => {
-        this.formTramipresu.patchValue({
-          numero: +datos.numero! + 1,
-          fecha: datos.fecha,
-          fecdoc: datos.fecha,
-        });
-      },
-      error: (e) => console.error(e),
-    });
-  }
-
-  // listarBeneficiarios(e: any) {
-  //    this.listarBene(e.target.value);
-  // }
-
-  // listarBene(nomben: string) {
-  //    this.beneService.findByNombre(nomben).subscribe({
-  //       next: (datos) => {
-  //          this._beneficiarios = datos;
-  //       },
-  //       error: (e) => console.error(e),
-  //    });
-  // }
-
-  listarDocumentos() {
-    this.s_documentos.getListaDocumentos().subscribe({
-      next: (datos) => {
-        this.documentos = datos;
-        this.formTramipresu.patchValue({ iddocumento: this.documentos[1] });
-      },
-      error: (e) => console.error(e),
-    });
-  }
-
-  iresponsaxNombre(e: any) {
-    if (e.target.value != '') {
-      this.beneService.findByNombre(e.target.value).subscribe({
-        next: (datos) => (this._beneficiarios = datos),
-        error: (err) => console.error(err.error),
+   setValores() {
+      this.tramiService.ultimoTramipresu().subscribe({
+         next: datos => {
+            this.formTramipresu.patchValue({
+               numero: +datos.numero! + 1,
+               fecha: datos.fecha,
+               fecdoc: datos.fecha,
+            });
+         },
+         error: err => console.error(err.error),
       });
-    }
-  }
-  onIresponsableSelected(e: any) {
-    const selectedOption = this._beneficiarios.find(
-      (x: { nomben: any }) => x.nomben === e.target.value
-    );
-    if (selectedOption) this.idbene = selectedOption.idbene;
-    else this.idbene = null;
-    console.log('this.idbene:', this.idbene);
-  }
+   }
 
-  guardatTramipresu() {
-    this.s_tramipresu.saveTramipresu(this.formTramipresu.value).subscribe({
-      next: (datos) => {
-        this.router.navigate(['tramipresu']);
-      },
-      error: (e) => console.error(e),
-    });
-  }
+   listarDocumentos() {
+      this.s_documentos.getListaDocumentos().subscribe({
+         next: datos => {
+            this._documentos = datos;
+            this.formTramipresu.controls['intdoc'].setValue(1);
+         },
+         error: err => console.error(err.error),
+      });
+   }
 
-  retroceder() {
-    this.router.navigate(['tramipresu']);
-  }
+   benefixNombre(e: any) {
+      if (e.target.value != '') {
+         this.beneService.findByNomben(e.target.value).subscribe({
+            next: datos => this._beneficiarios = datos,
+            error: err => console.error(err.error),
+         });
+      }
+   }
+   onBenefiSelected(e: any) {
+      const selectedOption = this._beneficiarios.find((x: { nomben: any; }) => x.nomben === e.target.value);
+      if (selectedOption) this.idbene = selectedOption.idbene;
+      else this.idbene = null;
+   }
 
-  //Valida que se haya seleccionado un Beneficiario
-  valBenefi(control: AbstractControl) {
-    if (this.idbene == null) return of({ invalido: true });
-    else return of(null);
-  }
+   guardar() {
+      this.documento.intdoc = this.formTramipresu.value.intdoc
+      this.formTramipresu.value.intdoc = this.documento;
+
+      this.beneficiario.idbene = this.idbene!;
+      this.formTramipresu.value.idbene = this.beneficiario;
+
+      this.tramiService.saveTramipresu(this.formTramipresu.value).subscribe({
+         next: datos => this.router.navigate(['tramipresu']),
+         error: err => console.error(err.error),
+      });
+   }
+
+   regresar() { this.router.navigate(['tramipresu']); }
+
+   //Valida Numero
+   valNumero(control: AbstractControl) {
+      return this.tramiService.valNumero(control.value).pipe(
+         map(result => result ? { existe: true } : null)
+      );
+   }
+
+   //Valida periodo
+   valFecha(control: AbstractControl) {
+      // let anio  = control.value.slice(0,4)
+      // console.log('fecha en valFecha: ', fecha )
+      if ( control.value.slice(0,4)  != 2024) return of({ 'invalido': true });
+      else return of(null);
+   }
+
+   //Valida que se haya seleccionado un Beneficiario
+   valBenefi(control: AbstractControl) {
+      if (this.idbene == null) return of({ 'invalido': true });
+      else return of(null);
+   }
+
 }

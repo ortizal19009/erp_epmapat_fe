@@ -1,7 +1,8 @@
 import { Clasificador } from "../clasificador.model";
 
 export class Presupue {
-  idpresupue: number;
+  
+  intpre: number;
   tippar: number;
   codpar: String;
   codigo: String;
@@ -12,11 +13,11 @@ export class Presupue {
   totmisos: number;
   totdeven: number;
   funcion: String;
-  idestrfunc: number;
+  intest: number;       //En revision
   codacti: String;
   intcla: Clasificador;
   codpart: String;
-  swpluri: boolean;
+  swpluri: number;
   usucrea: number;
   feccrea: Date;
   usumodi: number;

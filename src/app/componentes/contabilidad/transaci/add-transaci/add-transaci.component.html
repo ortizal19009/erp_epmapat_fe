@@ -43,8 +43,8 @@
    <div class="container-fluid">
       <div class="row justify-content-center">
          <div class="col-sm-9 mt-4">
-            <h4 class="font-weight-bold text-center cabecera sombra border py-1">Nueva Transacción (Cuenta del Asiento)
-            </h4>
+            <h5 class="font-weight-bold text-center cabecera sombra border py-1">Nueva Transacción (Cuenta del Asiento)
+            </h5>
             <div class="card card-body sombra fondo detalle">
                <form [formGroup]="formTransaci">
                   <div class="row">
@@ -65,26 +65,25 @@
                               <label class="input-group-text" for="fecha">Cuenta<sup class="green">*</sup></label>
                            </div>
                            <input type="text" class="form-control form-control-sm col-3" formControlName="idcuenta"
-                              list="cuentasList" (input)="onCuentaSelected($event); cuentasxTiptran($event)"
-                              [ngClass]="{'is-invalid': f['idcuenta'].invalid && f['idcuenta'].touched,
+                              list="cuentasList" (input)="onCuentaSelected($event); cuentasxTiptran($event)" [ngClass]="{'is-invalid': f['idcuenta'].invalid && f['idcuenta'].touched,
                            'is-valid': f['idcuenta'].valid, '': f['idcuenta'].untouched}" [type]="'text'">
                            <datalist role="listbox" id="cuentasList">
                               <option *ngFor="let cuenta of _cuentas" value={{cuenta.codcue}}>
                                  {{ cuenta.nomcue}}</option>
                            </datalist>
                            <input type="text" class="form-control" formControlName="nomcue" aria-label="Small"
-                              aria-describedby="inputGroup-sizing-sm" readonly>
+                              aria-describedby="inputGroup-sizing-sm" readonly tabindex="-1">
                         </div>
                      </div>
 
                      <div class="form-group col-md-6">
                         <div class="input-group input-group-sm">
                            <div class="input-group-prepend">
-                              <label class="input-group-text" for="iddocumento">Documento<sup class="green">*</sup></label>
+                              <label class="input-group-text">Documento<sup class="green">*</sup></label>
                            </div>
-                           <select type="text" class="custom-select" formControlName="iddocumento">
-                              <option [ngValue]="documento" *ngFor="let documento of _documentos"
-                                 [ngValue]="documento.iddocumento"> {{ documento.nomdoc }}
+                           <select type="text" class="custom-select" formControlName="intdoc">
+                              <option *ngFor="let documento of _documentos" [ngValue]="documento.intdoc"> {{
+                                 documento.nomdoc }}
                               </option>
                            </select>
                            <input type="text" class="form-control text-center col-sm-4" formControlName="numdoc"
@@ -137,15 +136,6 @@
                      </button>
                   </div>
                </form>
-<!-- 
-               <select name="paises" multiple>
-                  <option value="es">España</option>
-                  <option value="fr">Francia</option>
-                  <option value="it">Italia</option>
-               </select>
-
-               <input type="text" placeholder="Añadir país" /> -->
-
             </div>
          </div>
       </div>

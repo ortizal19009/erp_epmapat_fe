@@ -26,35 +26,63 @@
                   </div>
 
                   <div class="form-group col-md-4 my-0 py-0">
-                     <div class="input-group mb-3 input-group-sm">
+                     <div class="input-group input-group-sm mb-3">
                         <div class="input-group-prepend">
-                           <label class="input-group-text" for="tipdoc">Nivel</label>
+                           <span class="input-group-text font-weight-bold">Nivel </span>
                         </div>
-                        <select class="custom-select" formControlName="idnivel">
-                           <option *ngFor="let nivel of _niveles" [ngValue]="nivel" id="idnivel_{{nivel.idnivel}}" disabled>
-                              {{ nivel.nomniv }}
-                           </option>
-                        </select>
+                        <input type="text" class="form-control" formControlName="nivcue" readonly>
                      </div>
                   </div>
 
                   <div class="form-group col-md-4 my-0 py-0">
                      <div class="input-group input-group-sm mb-3">
                         <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold">Código </span>
+                           <span class="input-group-text font-weight-bold">Código<sup class="green">*</sup></span>
                         </div>
                         <input type="text" class="form-control form-control-sm" formControlName="codcue" [ngClass]="{'is-invalid': f['codcue'].invalid && f['codcue'].touched,
                         'is-valid': f['codcue'].valid, '': f['codcue'].untouched}">
                      </div>
+                     <div *ngIf="authService.msgval && f['codcue'].errors && f['codcue'].touched" class="mt-0 py-0">
+                        <div *ngIf="f['codcue'].errors['required']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> El código es obligatorio!
+                        </div>
+                        <div *ngIf="f['codcue'].errors['minlength'] || f['codcue'].errors['maxlength']" class="alert alert-warning py-0 mt-0 roboto small"
+                        role="alert">
+                        <strong>Ups!</strong> Longitud incorrecta!
+                     </div>
+                        <div *ngIf="f['codcue'].errors['invalido']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> Grupo incorrecto!
+                        </div>
+                        <div *ngIf="f['codcue'].errors['existe']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> El código ya existe!
+                        </div>
+                     </div>
                   </div>
 
-                  <div class="form-group col-md-12 mt-1 mb-0">
+                  <div class="form-group col-md-12 my-0 py-0">
                      <div class="input-group input-group-sm mb-3">
                         <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold">Nombre</span>
+                           <span class="input-group-text font-weight-bold">Nombre<sup class="green">*</sup></span>
                         </div>
                         <input type="text" class="form-control" formControlName="nomcue" [ngClass]="{'is-invalid': f['nomcue'].invalid && f['nomcue'].touched,
                         'is-valid': f['nomcue'].valid, '': f['nomcue'].untouched}">
+                     </div>
+                     <div *ngIf="authService.msgval && f['nomcue'].errors && f['nomcue'].touched" class="mt-0 py-0">
+                        <div *ngIf="f['nomcue'].errors['required']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> El nombre es obligatorio.
+                        </div>
+                        <div *ngIf="f['nomcue'].errors['minlength']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> El nombre debe tener al menos 3 caracteres.
+                        </div>
+                        <div *ngIf="f['nomcue'].errors['existe']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> El nombre ya existe.
+                        </div>
                      </div>
                   </div>
 
@@ -77,25 +105,25 @@
                   </div>
 
                   <div class="form-group col-md-7 my-0 py-0">
-                     <div class="input-group mb-3 input-group-sm">
+                     <div class="input-group input-group-sm mb-3">
                         <div class="input-group-prepend">
-                           <label class="input-group-text" for="tipdoc">Tipo de Transacción</label>
+                           <label class="input-group-text" for="tipdoc">Tipo de Transacción<sup class="green">*</sup></label>
                         </div>
                         <select class="custom-select" id="tiptran" formControlName="tiptran">
                            <option value="0" selected>(General)</option>
-                        <option value="1">Desde Trámite</option>
-                        <option value="2">Anticipo</option>
-                        <option value="3">Cuenta por Cobrar</option>
-                        <option value="4">Cuenta por Cobrar Año Anterior</option>
-                        <option value="5">Depósitos y Fondos de Terceros</option>
-                        <option value="6">Cuentas por Pagar</option>
-                        <option value="7">Cuentas por Pagar Año Anterior</option>
+                           <option value="1">Desde Trámite</option>
+                           <option value="2">Anticipo</option>
+                           <option value="3">Cuenta por Cobrar</option>
+                           <option value="4">Cuenta por Cobrar Año Anterior</option>
+                           <option value="5">Depósitos y Fondos de Terceros</option>
+                           <option value="6">Cuentas por Pagar</option>
+                           <option value="7">Cuentas por Pagar Año Anterior</option>
                         </select>
                      </div>
                   </div>
 
                   <div class="form-group col-md-3 my-0 py-0">
-                     <div class="input-group input-group-sm mb-1">
+                     <div class="input-group input-group-sm mb-3">
                         <div class="input-group-prepend">
                            <span class="input-group-text font-weight-bold">Movimiento </span>
                            <div class="input-group-text">
@@ -106,7 +134,7 @@
                   </div>
 
                   <div class="form-group col-md-2 my-0 py-0">
-                     <div class="input-group input-group-sm mb-1">
+                     <div class="input-group input-group-sm mb-3">
                         <div class="input-group-prepend">
                            <span class="input-group-text font-weight-bold">Sinafip </span>
                            <div class="input-group-text">
@@ -116,7 +144,7 @@
                      </div>
                   </div>
 
-                  <div class="form-group col-md-5 my-0 py-0">
+                  <div class="form-group col-md-6 my-0 py-0">
                      <div class="input-group input-group-sm mb-3">
                         <div class="input-group-prepend">
                            <span class="input-group-text font-weight-bold">Estado de situación / resultados </span>
@@ -135,10 +163,11 @@
                   </div>
 
                </div>
+
                <div class="col-md-12 text-center">
                   <button class="btn btn-success btn-sm mx-1 mt-1" (click)="onSubmit()" [disabled]="!formCuenta.valid">
                      <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
-                  <button class="btn btn-outline-success btn-sm mx-1 mt-1" (click)="regresar()"><i
+                  <button type="button" class="btn btn-outline-success btn-sm mx-1 mt-1" (click)="regresar()"><i
                         class="fa fa-times-circle"></i> Cancelar</button>
                </div>
             </form>

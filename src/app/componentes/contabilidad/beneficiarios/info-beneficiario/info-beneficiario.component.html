@@ -1,0 +1,101 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 pt-1 pb-0 cabecera border sombra">
+         <div class="col-sm-2 mx-0 ml-1 px-0">
+            <h5 class="ml-1 mt-1 font-weight-bold text-truncate"><i class="bi-blockquote-right"></i>&nbsp; Movimientos</h5>
+         </div>
+         <form [formGroup]="formFechas" class="col-sm-9 px-0">
+            <div class="row px-0">
+
+               <div class="col-sm-5 ml-1 px-0">
+                  <input class="form-control form-control-sm truncate" type="text" formControlName="nomben" readonly>
+               </div>
+               <div class="col-sm-2 ml-1 px-0">
+                  <input class="form-control form-control-sm text-center" type="date" formControlName="desde">
+               </div>
+               <div class="col-sm-2 ml-1 px-0">
+                  <input class="form-control form-control-sm text-center" type="date" formControlName="hasta">
+               </div>
+
+               <div class="col-sm-2 mx-0 px-0 d-flex flex-row">
+                  <div class="ml-1 px-0">
+                     <button class="btn btn-primary btn-sm" type="submit" (click)="buscar()">
+                        <i class="fa fa-search"></i> Buscar
+                     </button>
+                  </div>
+               </div>
+            </div>
+         </form>
+
+         <div class="btn-group">
+            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white"
+               data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+               <button class="dropdown-item" type="button" [disabled]="!_movimi" (click)="imprimir()">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
+            </div>
+         </div>
+         <div class="btn-group mx-1">
+            <button class="bg-transparent border-0" type="button" (click)="regresar()">
+               <i class="bi-arrow-left-circle text-white icoRegresar"></i>
+            </button>
+         </div>
+
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-md-12">
+
+         <table *ngIf="_movimi" class="table table-hover table-sm table-bordered mb-0 sombra">
+            <thead class="cabecera">
+               <tr>
+                  <th class="text-center col-sm-1">Fecha</th>
+                  <th class="text-center">Asie</th>
+                  <th class="text-center">Cmprbnt</th>
+                  <th>Cuenta</th>
+                  <th class="text-right">Anticipo</th>
+                  <th class="text-right">CxC</th>
+                  <th class="text-right">F.T</th>
+                  <th class="text-right">CxP</th>
+                  <th class="text-right">Liquida</th>
+                  <th class="text-right">Saldo</th>
+                  <th class="text-center">Descripción</th>
+               </tr>
+            </thead>
+            <tbody class="detalle small roboto pad0">
+               <tr *ngFor="let movimi of _movimi">
+                  <td class="text-center">{{ movimi.inttra.idasiento.fecha | date: 'yyyy-MM-dd' }}</td>
+                  <td class="text-center">{{ movimi.inttra.idasiento.asiento }}</td>
+                  <td class="text-center">{{ comprobante(movimi.inttra.idasiento.tipcom, movimi.inttra.idasiento.compro) }}</td>
+                  <td >{{movimi.inttra.codcue}}</td>
+                  <td class="text-right">{{ movimi.anticipo | number: '1.2-2'}}</td>
+                  <td class="text-right">{{ movimi.cxc | number: '1.2-2'}}</td>
+                  <td class="text-right">{{ movimi.ft | number: '1.2-2'}}</td>
+                  <td class="text-right">{{ movimi.cxp | number: '1.2-2'}}</td>
+                  <!-- <td class="text-right" [ngClass]="{'transparente': movimi.totpagcob == 0}">{{ movimi.totpagcob | number: '1.2-2' }}  </td> -->
+                  <td class="text-right" [ngClass]="{'transparente': movimi.totpagcob == 0}">
+                     <a (click)="liquidaciones($event, movimi)" class="text-end cursor" data-toggle="tooltip" title=" Detalle ">{{ movimi.totpagcob | number: '1.2-2' }}</a>
+                   </td>
+                  <td class="text-right custom-cell" [ngClass]="{'transparente': movimi.saldo == 0}">{{ movimi.saldo | number: '1.2-2' }}</td>
+                  <td class="text-left text-truncate ancho">{{ movimi.inttra.descri }}</td>
+               </tr>
+            </tbody>
+            <tfoot *ngIf="_movimi" class="font-weight-bold detalle roboto small pad0">
+               <td colspan="4" class="text-right py-0">TOTAL: {{_movimi.length}}&nbsp;&nbsp;</td>
+               <td class="text-right">{{sumanticipo | number: '1.2-2'}} </td>
+               <td class="text-right">{{sumcxc | number: '1.2-2'}} </td>
+               <td class="text-right">{{sumft | number: '1.2-2'}} </td>
+               <td class="text-right">{{sumcxp | number: '1.2-2'}} </td>
+               <td class="text-right">{{sumtotpagcob | number: '1.2-2'}} </td>
+               <td class="text-right">{{sumsaldo | number: '1.2-2'}} </td>
+               <td></td>
+            </tfoot>
+         </table>
+      </div>
+   </div>
+</div>
+

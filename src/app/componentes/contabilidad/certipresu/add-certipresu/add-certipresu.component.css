@@ -1,12 +1,9 @@
-.container-fluid{
-   --bg1: rgb(36, 50, 56);
-   --bg2: rgb(231, 250, 252);
-}
-
 .cabecera {
-   background-color: var(--bg1);
+   background-color: var(--bgcolor1);
    color: white;
 }
+.nuevoBG1 { background-color: var(--bgcolor1); }
 
-.fondo { background-color: var(--bg2); }
-.green {color: green }
+.detalle { background-color: var(--bgcolor2); }
+.nuevoBG2 { background-color: var(--bgcolor2); }
+

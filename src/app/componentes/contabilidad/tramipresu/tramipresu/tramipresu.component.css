@@ -13,4 +13,6 @@
    cursor: pointer;
 }
 
-.ancho200{ max-width: 200px; }
+.ancho{
+   max-width: 300px;
+}

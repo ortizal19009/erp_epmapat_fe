@@ -8,7 +8,7 @@ export class Reformas {
   valor: number;
   concepto: string;
   numdoc: string;
-  iddocumento: Documentos;
+  intdoc: Documentos;
   usucrea: number;
   feccrea: Date;
   usumodi: number;

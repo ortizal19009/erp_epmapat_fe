@@ -1,5 +1,8 @@
-.partidaCla{
-   background-color: rgb(109, 110, 15);
+.cabecera {
+   background-color: var(--bgcolor1);
    color: white;
-   box-shadow: 0 0 10px rgba(0, 0, 0, 1);
 }
+.nuevoBG1 { background-color: var(--bgcolor1); }
+
+.detalle { background-color: var(--bgcolor2); }
+.nuevoBG2 { background-color: var(--bgcolor2); }

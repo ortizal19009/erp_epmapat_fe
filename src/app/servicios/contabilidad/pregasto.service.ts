@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 
 import { Presupue } from 'src/app/modelos/contabilidad/presupue.model';
 import { environment } from 'src/environments/environment';
@@ -17,8 +17,13 @@ export class PregastoService {
    constructor(private http: HttpClient) { }
 
    //Busca por Tipo, Código o Nombre
-   getByTipoCodigoyNombre(tippar: number, codpar: String, nompar: String) {
+   getPregasto(tippar: number, codpar: String, nompar: String) {
       return this.http.get<Presupue[]>(`${baseUrl}?tippar=${tippar}&codpar=${codpar}&nompar=${nompar}`);
+   }
+   //Busca la lista de Partidas de Gastos Async
+   async getPregastoAsync(tippar: number, codpar: String, nompar: String): Promise<any[]> {
+      const resp = await firstValueFrom(this.http.get<any[]>(`${baseUrl}?tippar=${tippar}&codpar=${codpar}&nompar=${nompar}`));
+      return resp;
    }
 
    getPartgasto(codpar: String, nompar: String) {
@@ -39,30 +44,29 @@ export class PregastoService {
    }
 
    //Cuenta por Actividad
-   countByEstrfunc(idestrfunc: number) {
-      return this.http.get<Number>(`${baseUrl}/count?idestrfunc=${idestrfunc}`);
+   countByEstrfunc(intest: number) {
+      return this.http.get<Number>(`${baseUrl}/count?intest=${intest}`);
    }
 
    //Partidas por Actividad
-   getByActividad(idestrfunc: number) {
-      return this.http.get<Presupue[]>(`${baseUrl}/actividad?idestrfunc=${idestrfunc}`);
+   getByActividad(intest: number) {
+      return this.http.get<Presupue[]>(`${baseUrl}/actividad?intest=${intest}`);
    }
 
-   getById(idpresupue: number) {
-      return this.http.get<Presupue>(baseUrl + "/" + idpresupue);
+   getById(intpre: number) {
+      return this.http.get<Presupue>(baseUrl + "/" + intpre);
    }
 
    savePregasto(pregas: Presupue): Observable<Object> {
       return this.http.post(baseUrl, pregas);
    }
 
-   updatePregasto(idpresupue: number, Presupue: Presupue): Observable<Object> {
-      // return this.http.put(`${baseUrl}/${idpresupue}`, Presupue);
-      return this.http.put(baseUrl + "/" + idpresupue, Presupue);
+   updatePregasto(intpre: number, Presupue: Presupue): Observable<Object> {
+      return this.http.put(baseUrl + "/" + intpre, Presupue);
    }
 
-   deletePregasto(idpresupue: number): Observable<Object> {
-      return this.http.delete(`${baseUrl}/${idpresupue}`);
+   deletePregasto(intpre: number): Observable<Object> {
+      return this.http.delete(`${baseUrl}/${intpre}`);
    }
 
 }

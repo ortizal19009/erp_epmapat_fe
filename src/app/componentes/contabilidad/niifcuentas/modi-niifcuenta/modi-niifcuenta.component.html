@@ -1,4 +1,4 @@
-<div class="content pt-1 pl-3">
+<!-- <div class="content pt-1 pl-3">
    <div class="container-fluid">
        <div class="row mt-0 mb-2">
            <div class="col-sm">
@@ -6,18 +6,30 @@
            </div>
        </div>
    </div>
-</div>
+</div> -->
 
 <div class="container-fluid">
-   <form action="" [formGroup]="f_niifhomologa">
-       <div class="row mb-0">
-           <div class="col-sm">
+    <form action="" [formGroup]="formNiifcuenta">
+        <div class="row mb-0">
+
+            <div class="form-group col-md-4 mt-1 mb-0">
+                <div class="input-group input-group-sm mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold">Código</span>
+                    </div>
+                    <input type="text" class="form-control form-control-sm" (keyup)="getCuentas($event)"
+                        formControlName="codcue">
+                </div>
+            </div>
+
+            <!-- <div class="col-sm">
                <label for="">Código
                    <input type="text" class="form-control form-control-sm" (keyup)="getCuentas($event)"
                        formControlName="codcue">
                </label>
-           </div>
-           <div class="col-sm">
+           </div> -->
+
+            <!-- <div class="col-sm">
                <label for="">Grupo
                    <input type="text" class="form-control form-control-sm" formControlName="grucue" readonly>
                </label>
@@ -26,27 +38,58 @@
                <label for="">Nivel
                    <input type="text" class="form-control form-control-sm" formControlName="nivcue" readonly>
                </label>
-           </div>
-           <div class="col-sm">
-               <label for="">Movimiento
-                   <input type="checkbox" class="form-control form-control-sm" formControlName="movcue">
-               </label>
-           </div>
-       </div>
-       <div class="row">
-           <div class="col-sm">
-               <label for="" class="col-sm-12">Nombre
-                   <input type="text" class="form-control form-control-sm" formControlName="nomcue">
-               </label>
-           </div>
-       </div>
-       <div class="row">
-           <div class="col-sm text-right">
-               <button type="button" class="btn btn-success btn-sm" data-dismiss="modal" (click)="cancelar()">Cancelar</button>
-               <button type="submit" class="btn btn-outline-success btn-sm mx-3" data-dismiss="modal" [disabled]="btnSave"
-                   (click)="onSubmit()">Guardar</button>
-           </div>
-       </div>
-   </form>
-</div>
+           </div> -->
 
+            <div class="form-group col-md-3 mt-1 mb-0">
+                <div class="input-group input-group-sm mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold">Grupo</span>
+                    </div>
+                    <input type="text" class="form-control form-control-sm" formControlName="grucue" readonly>
+                </div>
+            </div>
+
+            <div class="form-group col-md-2 mt-1 mb-0">
+                <div class="input-group input-group-sm mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold">Nivel</span>
+                    </div>
+                    <input type="text" class="form-control form-control-sm" formControlName="nivcue" readonly>
+                </div>
+            </div>
+
+            <div class="form-group col-md-2 mt-1 mb-0">
+                <div class="input-group input-group-sm mb-1">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold">Movimiento </span>
+                        <div class="input-group-text">
+                            <input type="checkbox" formControlName="movcue">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="form-group col-md-12 mt-1 mb-0">
+            <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text font-weight-bold">Nombre</span>
+                </div>
+                <input type="text" class="form-control" formControlName="nomcue" [ngClass]="{'is-invalid': f['nomcue'].invalid && f['nomcue'].touched,
+       'is-valid': f['nomcue'].valid, '': f['nomcue'].untouched}">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm text-center">
+                <button type="submit" class="btn btn-success btn-sm mx-3" data-dismiss="modal"
+                    [disabled]="formNiifcuenta.pristine || !formNiifcuenta.valid" (click)="onSubmit()"><i
+                        class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+                <button type="button" class="btn btn-outline-success btn-sm" data-dismiss="modal" (click)="cancelar()">
+                    <i class="fa fa-times-circle"></i> Cancelar</button>
+
+            </div>
+        </div>
+    </form>
+</div>

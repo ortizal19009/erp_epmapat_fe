@@ -42,10 +42,8 @@
                   <div class="dropdown-menu dropdown-menu-right bg-dark roboto px-0">
                      <button class="dropdown-item" type="button" data-toggle="modal" data-target="#addTransa">
                         <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
-                     <button class="dropdown-item" type="button" data-toggle="modal" data-target="#pdf">
-                        <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
-                     <button class="dropdown-item" type="button"><i class="bi-file-earmark-arrow-up"></i>
-                        &nbsp;Exportar</button>
+                     <button class="dropdown-item" type="button" (click)="imprimir()">
+                        <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
                   </div>
 
                   <div class="col-sm px-0">
@@ -67,7 +65,7 @@
       <div class="col-sm-12">
          <table class="table table-hover table-bordered table-sm sombra">
             <thead class="text-center cabecera">
-               <tr>
+               <tr class="pad0">
                   <th>Cuenta</th>
                   <th>Denominación</th>
                   <th>Beneficiario</th>
@@ -75,11 +73,18 @@
                   <th>Haber</th>
                   <th>T</th>
                   <th>Documento</th>
-                  <th></th>
+                  <th>
+                     <div class="col-sm px-0">
+                        <button class="bg-transparent border-0" type="button" data-toggle="tooltip" title=" Concepto "
+                        data-toggle="modal" data-target="#modalConcepto">
+                           <i class="bi-file-text-fill text-white"></i>
+                        </button>
+                     </div>
+                  </th>
                </tr>
             </thead>
-            <tbody class="detalle">
-               <tr *ngFor="let transa of _transaci | filter: filtro; let i=index" class="fila">
+            <tbody class="detalle roboto small">
+               <tr *ngFor="let transa of _transaci | filter: filtro; let i=index" class="fila pad0">
                   <td>{{transa.codcue}}</td>
                   <td>{{transa.idcuenta.nomcue}}</td>
                   <td [ngClass]="{'transparente': transa.idbene.idbene == 1}">{{transa.idbene.nomben}}</td>
@@ -90,40 +95,38 @@
                      [ngClass]="{'transparente': transa.valor  * (transa.debcre === 2 ? 1 : 0) == 0}">{{ transa.valor *
                      (transa.debcre === 2 ? 1 : 0) | number: '1.2-2'}}</td>
                   <td class="text-center" [ngClass]="{'transparente': transa.tiptran == 0}">{{transa.tiptran}}</td>
-                  <td *ngIf="transa.iddocumento.iddocumento > 1">{{transa.iddocumento.nomdoc + ' '+transa.numdoc}}</td>
-                  <td *ngIf="transa.iddocumento.iddocumento == 1">{{transa.numdoc}}</td>
+                  <td *ngIf="transa.intdoc.intdoc > 1">{{transa.intdoc.nomdoc + ' '+transa.numdoc}}</td>
+                  <td *ngIf="transa.intdoc.intdoc == 1">{{transa.numdoc}}</td>
                   <td class="text-center">
                      <div class="btn-group py-0">
                         <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
                            aria-expanded="false">
                         </button>
                         <div class="dropdown-menu dropdown-menu-right popLista">
-                           <button class="dropdown-item" type="button">
+                           <button class="dropdown-item" type="button"  (click)="modificar( transa.inttra )">
                               <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
                            <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalEliminar"
-                           (click)="eliminar( transa )">
+                              (click)="eliminar( transa )">
                               <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
                         </div>
                      </div>
                   </td>
                </tr>
-               <tr class="font-weight-bold" [ngClass]="{'text-danger': totDebe !== totHaber }">
-                  <td></td>
-                  <td></td>
-                  <td class="text-right">TOTAL </td>
-                  <td class="text-right">{{ totDebe | number:'1.2-2'}}</td>
-                  <td class="text-right">{{ totHaber | number:'1.2-2'}}</td>
-                  <td></td>
-                  <td *ngIf="totDebe !== totHaber">Diferencia: {{totDebe - totHaber | number:'1.2-2'}}</td>
-                  <td *ngIf="totDebe == totHaber"></td>
-                  <td></td>
-               </tr>
             </tbody>
+            <tfoot class="font-weight-bold detalle roboto small pad0" [ngClass]="{'text-danger': totDebe != totHaber }">
+               <td></td>
+               <td></td>
+               <td class="text-right">TOTAL </td>
+               <td class="text-right">{{ totDebe | number:'1.2-2'}}</td>
+               <td class="text-right">{{ totHaber | number:'1.2-2'}}</td>
+               <td></td>
+               <td *ngIf="totDebe !== totHaber">Diferencia: {{totDebe - totHaber | number:'1.2-2'}}</td>
+               <td *ngIf="totDebe == totHaber"></td>
+               <td></td>
+            </tfoot>
          </table>
       </div>
    </div>
-
-   
 
    <!-- Modal Eliminar-->
    <div class='modal fade' id='modalEliminar' tabindex='-1' aria-hidden='true'>
@@ -159,6 +162,29 @@
                   </button>
                </div>
             </ng-template>
+         </div>
+      </div>
+   </div>
+
+   <!-- Modal Concepto-->
+   <div class='modal fade' id='modalConcepto' tabindex='-1' aria-hidden='true'>
+      <div class='modal-dialog modal-dialog-centered'>
+         <div class='modal-content'>
+            <div class='modal-header justify-content-center cabecera border py-2'>
+               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Concepto</h5>
+            </div>
+               <div class='modal-body text-center roboto detalle'>
+                  <div class="form-group col-md-12">
+                     <div class="input-group input-group-sm">
+                        <textarea class="form-control mb-0" [(ngModel)]="iAsiento.glosa" rows="5" readonly></textarea>
+                     </div>
+                  </div>
+               </div>
+               <div class='modal-footer justify-content-center detalle border py-1'>
+                  <button type='button' class='btn btn-success btn-sm' data-dismiss='modal'>
+                     <i class="fa fa-check-circle"></i> Aceptar
+                  </button>
+               </div>
          </div>
       </div>
    </div>

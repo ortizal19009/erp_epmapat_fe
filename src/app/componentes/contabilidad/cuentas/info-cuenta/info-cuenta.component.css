@@ -1,0 +1,12 @@
+.cabecera {
+   background-color: var(--bgcolor1);
+   color: white;
+}
+.nuevoBG1 { background-color: var(--bgcolor1); }
+
+.detalle { background-color: var(--bgcolor2); }
+.nuevoBG2 { background-color: var(--bgcolor2); }
+
+.ancho220{
+   max-width: 220px;
+}

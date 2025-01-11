@@ -67,18 +67,18 @@
                </tr>
             </thead>
             <tbody class="detalle">
-               <tr *ngFor="let ejecucion of _ejecucion | filter: filtro; let i=index" class="fila">
-                  <td>{{ ejecucion.codpar}}</td>
-                  <td class="text-left">{{ ejecucion.idpresupue.nompar }}</td>
-                  <td class="text-right">{{ejecucion.modifi | number:'1.2-2'}}</td>
+               <tr *ngFor="let ejecucio of _ejecucio | filter: filtro; let i=index" class="fila">
+                  <td>{{ ejecucio.codpar}}</td>
+                  <td class="text-left">{{ ejecucio.intpre.nompar }}</td>
+                  <td class="text-right">{{ejecucio.modifi | number:'1.2-2'}}</td>
                   <td class="text-center">
                      <div class="btn-group py-0">
                         <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
-                           aria-expanded="false" (click)="onCellClick1(ejecucion)">
+                           aria-expanded="false" (click)="onCellClick1(ejecucio)">
                         </button>
                         <div class="dropdown-menu dropdown-menu-right popLista">
 
-                           <button class="dropdown-item" (click)="modiEjecucion(ejecucion)">
+                           <button class="dropdown-item" (click)="modiEjecucion(ejecucio)">
                               <i class="bi bi-pencil"></i>&nbsp; Modificar
                            </button>
 

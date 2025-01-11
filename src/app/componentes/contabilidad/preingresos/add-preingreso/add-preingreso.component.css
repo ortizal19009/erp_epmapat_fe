@@ -1,28 +1,25 @@
-.container-fluid, .modal{
-   --color1: rgb(109, 110, 15);
-   --color2: rgb(215, 248, 188);
-   --bg1: rgb(36, 50, 56);
-   --bg2: rgb(231, 250, 252);
-}
-
-.titParingreso{
-   background-color: var(--color1);
+.cabecera {
+   background-color: var(--bgcolor1);
    color: white;
-   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
-.cardParingreso{
-   background-color: var(--color2);
-   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-}
+.nuevoBG1 {   background-color: var(--bgcolor1);}
+
+.detalle {   background-color: var(--bgcolor2);}
+
+.nuevoBG2 {   background-color: var(--bgcolor2);}
 
 /* === Modal: Buscar partida del Clasificador === */
-.clasificador {   background-color: var(--bg2);
-}
-.formClasificador, .cabeceraClasificador thead{
-   background-color: var(--bg1);
+/* .clasificador {
+   background-color: rgb(red, green, blue);
+} */
+
+/* .formClasificador,
+.cabeceraClasificador thead {
+   background-color: var(--bgcolor1);
    color: white;
-}
+} */
+
 .filas:hover {
    background-color: #117a8B;
    color: white;

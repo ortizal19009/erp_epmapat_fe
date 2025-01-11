@@ -1,0 +1,107 @@
+<div class="content mt-1 pt-1 px-2">
+   <div class="container-fluid">
+      <div class="row mt-0 px-1 pt-1 justify-content-center cabecera border sombra">
+         <h4 *ngIf="swimprimir" class="font-weight-bold text-truncate ml-2">
+            <i class="bi-printer pointer" (click)="impriexpor()"></i> &nbsp; Imprimir las cuentas NIIF
+         </h4>
+         <h4 *ngIf="!swimprimir" class="font-weight-bold text-truncate">
+            <i class="bi-file-earmark-arrow-up pointer" (click)="impriexpor()"></i> &nbsp; Exportar las cuentas NIIF
+         </h4>
+      </div>
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="card card-body col-sm-6 detalle sombra">
+            <form [formGroup]="formImprimir">
+               <div class="row">
+
+                  <div class="input-group input-group-sm col-sm-10 mb-3">
+                     <div class="input-group-prepend">
+                        <label *ngIf="swimprimir" class="input-group-text">Imprimir</label>
+                        <label *ngIf="!swimprimir" class="input-group-text">Exportar</label>
+                     </div>
+                     <select class="custom-select" formControlName="reporte" (change)="changeReporte()">
+                        <option value="1">Lista de cuentas NIIF</option>
+                        <option value="2">Homologación de cuentas NIIF</option>
+                     </select>
+                  </div>
+
+                  <div class="input-group input-group-sm col-sm-4 mb-3">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
+                           data-toggle="tooltip" title="Obligatorio">Código</span>
+                     </div>
+                     <input type="text" class="form-control form-control-sm" formControlName="codcue" >
+                  </div>
+
+                  <div class="input-group input-group-sm col-sm-8 mb-3">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
+                           data-toggle="tooltip" title="Obligatorio">Nombre</span>
+                     </div>
+                     <input type="text" class="form-control form-control-sm text-center" formControlName="nomcue">
+                  </div>
+
+                  <div *ngIf="swimprimir" class="form-group col-md-4">
+                     <div class="input-group input-group-sm mb-2">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Abrir en otra página</span>
+                           <div class="input-group-text">
+                              <input type="checkbox" formControlName="otrapagina">
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div *ngIf="!swimprimir" class="form-group col-sm-10 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Nombre del
+                              archivo</span>
+                        </div>
+                        <input type="text" class="form-control" formControlName="nombrearchivo" aria-label="Small"
+                           aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['nombrearchivo'].invalid && f['nombrearchivo'].touched,
+                           'is-valid': f['nombrearchivo'].valid, '': f['nombrearchivo'].untouched}">
+                     </div>
+                  </div>
+
+               </div>
+            </form>
+            <div *ngIf="!swbotones" class="text-center">
+               <button *ngIf="swimprimir" type='button' class='btn btn-success btn-sm mx-1' [disabled]="swbotones"
+                  (click)="imprimir()">
+                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+               <button *ngIf="!swimprimir" type='button' class='btn btn-warning btn-sm mx-1' (click)="imprimir()"
+                  [disabled]="!formImprimir.valid">
+                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+               <button class="btn btn-outline-success btn-sm mx-1" (click)="retornar()"><i
+                     class="fa fa-times-circle"></i> Cancelar</button>
+            </div>
+
+            <div *ngIf="swbotones" class="text-center">
+               <button *ngIf="swimprimir" type="button" class="btn btn-success btn-block"
+                  [attr.data-target]="otrapagina ? null : '#pdf'" data-toggle="modal" [disabled]="swcalculando"
+                  (click)="imprime()">
+                  <i *ngIf="swcalculando" class="fa fa-spinner"></i>
+                  <i *ngIf="!swcalculando" class="bi-eye"></i>&nbsp;&nbsp;&nbsp;{{txtcalculando}}
+               </button>
+               <button *ngIf="!swimprimir" type="button" class="btn btn-warning btn-block" [disabled]="swcalculando"
+                  (click)="imprime()">
+                  <i *ngIf="swcalculando" class="fa fa-spinner"></i>
+                  <i *ngIf="!swcalculando" class="bi-eye"></i>&nbsp;&nbsp;&nbsp;{{txtcalculando}}
+               </button>
+
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- MODAL PDF (En la misma página)-->
+<div class='modal fade' id='pdf' tabindex='-1' aria-labelledby='pdf' aria-hidden='true'>
+   <div class='modal-dialog modal-sm'>
+   </div>
+</div>

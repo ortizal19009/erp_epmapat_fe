@@ -1,21 +1,18 @@
-.container-fluid{
-   --bg1: rgb(36, 50, 56);
-   --bg2: rgb(231, 250, 252);
-}
-
-.cabecera, thead>tr {
-   background-color: var(--bg1);
+.cabecera {
+   background-color: var(--bgcolor1);
    color: white;
 }
+.nuevoBG1 { background-color: var(--bgcolor1); }
 
-table { box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);}
+.detalle { background-color: var(--bgcolor2); }
+.nuevoBG2 { background-color: var(--bgcolor2); }
 
-table tbody tr:hover  { 
-   background-color: #117a8b;;
+.fila:hover {
+   background-color: #117a8B;
    color: white;
-   cursor: pointer; 
+   cursor: pointer;
 }
 
-tbody tr, .fondo {
-   background-color: var(--bg2)
+.ancho{
+   max-width: 300px;
 }

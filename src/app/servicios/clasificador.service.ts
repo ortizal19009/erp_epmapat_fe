@@ -2,67 +2,80 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { Clasificador} from '../modelos/clasificador.model';
+import { Clasificador } from '../modelos/clasificador.model';
 import { environment } from 'src/environments/environment';
 
 const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/clasificador`;
 
 @Injectable({
-  providedIn: 'root'
+   providedIn: 'root'
 })
 
 export class ClasificadorService {
 
-  constructor(private http: HttpClient) { }
+   constructor(private http: HttpClient) { }
 
-  getByCodigo(codpar: String) {
-    return this.http.get<Clasificador[]>(`${baseUrl}?codpar=${codpar}`);
-  }
+   getPartidas(codpar: String, nompar: String) {
+      return this.http.get<Clasificador[]>(`${baseUrl}?codpar=${codpar}&nompar=${nompar}`);
+   }
 
-  getParingreso(codpar: String, nompar: String) {
-    return this.http.get<Clasificador[]>(`${baseUrl}/paringreso?codpar=${codpar}&nompar=${nompar}`);
-  }
+   getByCodpar(codpar: String) {
+      return this.http.get<Clasificador>(`${baseUrl}/codpar?codpar=${codpar}`);
+   }
 
-  getPargasto(codpar: String, nompar: String) {
-    return this.http.get<Clasificador[]>(`${baseUrl}?codpar=${codpar}&nompar=${nompar}`);
-  }
+   getByCodigo(codpar: String) {
+      return this.http.get<Clasificador[]>(`${baseUrl}?codpar=${codpar}`);
+   }
 
-  getByNombre(nompar: String) {
-    return this.http.get<Clasificador[]>(`${baseUrl}?nompar=${nompar}`);
-  }
-  
-  //Partidas de Gasto por Codigo o Nombre (un solo campo)
-  getPartidasG(codigoNombre: String): Observable<any> {
-    return this.http.get<Clasificador[]>(`${baseUrl}/partidasG?codigoNombre=${codigoNombre}`);
- }
+   getByNombre(nompar: String) {
+      return this.http.get<Clasificador[]>(`${baseUrl}?nompar=${nompar}`);
+   }
 
-  saveClasificador(clasificador: Clasificador):Observable<Object>{
-    return this.http.post(baseUrl,clasificador);
-  }
+   //Partidas de Gasto por Codigo o Nombre (un solo campo)
+   getPartidasG(codigoNombre: String): Observable<any> {
+      return this.http.get<Clasificador[]>(`${baseUrl}/partidasG?codigoNombre=${codigoNombre}`);
+   }
 
-  deleteClasificador(intcla: number): Observable<Object>{
-    return this.http.delete(`${baseUrl}/${intcla}`);
-  }
+   getParingreso(codpar: String, nompar: String) {
+      return this.http.get<Clasificador[]>(`${baseUrl}/paringreso?codpar=${codpar}&nompar=${nompar}`);
+   }
 
-  getById(intcla: number){
-    return this.http.get<Clasificador>(baseUrl+"/"+intcla);
-  }
+   getPargasto(codpar: String, nompar: String) {
+      return this.http.get<Clasificador[]>(`${baseUrl}?codpar=${codpar}&nompar=${nompar}`);
+   }
 
-  update(intcla:number, clasificador:Clasificador): Observable<Object>{
-    return this.http.put(baseUrl+"/"+intcla, clasificador);
-  }
+   //Validar codpar
+   valCodpar(codpar: String) {
+      return this.http.get<boolean>(`${baseUrl}/valCodpar?codpar=${codpar}`);
+   }
 
-  getByDescripcion(descripcion: String) {
-    return this.http.get<Clasificador[]>(`${baseUrl}?descripcion=${descripcion}`);
- }
-  
-  updateClasificador(clasificador: Clasificador):Observable<Object>{
-    return this.http.put(`${baseUrl}/${clasificador.intcla}`,clasificador);
-  }
+   saveClasificador(clasificador: Clasificador): Observable<Object> {
+      return this.http.post(baseUrl, clasificador);
+   }
 
-  getByDato(dato: String){
-    return this.http.get<Clasificador>(`${baseUrl}?consulta=${dato}`);
-  }
+   deleteClasificador(intcla: number): Observable<Object> {
+      return this.http.delete(`${baseUrl}/${intcla}`);
+   }
+
+   getById(intcla: number) {
+      return this.http.get<Clasificador>(baseUrl + "/" + intcla);
+   }
+
+   update(intcla: number, clasificador: Clasificador): Observable<Object> {
+      return this.http.put(baseUrl + "/" + intcla, clasificador);
+   }
+
+   getByDescripcion(descripcion: String) {
+      return this.http.get<Clasificador[]>(`${baseUrl}?descripcion=${descripcion}`);
+   }
+
+   updateClasificador(clasificador: Clasificador): Observable<Object> {
+      return this.http.put(`${baseUrl}/${clasificador.intcla}`, clasificador);
+   }
+
+   getByDato(dato: String) {
+      return this.http.get<Clasificador>(`${baseUrl}?consulta=${dato}`);
+   }
 
 }

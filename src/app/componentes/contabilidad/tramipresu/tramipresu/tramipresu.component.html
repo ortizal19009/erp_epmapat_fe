@@ -3,35 +3,33 @@
       <div class="row m-0 py-1 justify-content-start cabecera border sombra">
          <div class="col-sm-3">
             <h5 class="m-0 font-weight-bold text-truncate">
-               <i class="bi-badge-tm-fill"></i>&nbsp; {{ titulo }}
+               <i class="bi-badge-tm-fill"></i> Trámites presupuestarios
             </h5>
          </div>
          <div class="col-sm-6">
-            <form [formGroup]="f_buscar" (ngSubmit)="buscar()">
-
+            <form [formGroup]="formBuscar" (ngSubmit)="buscar()">
                <div class="row">
-                  <div class="col-sm">
+
+                  <div class="input-group col-sm-4">
                      <input type="number" class="form-control form-control-sm text-center" formControlName="desdeNum"
-                        placeholder="Desde" min="1" />
-                  </div>
-                  <div class="col-sm">
+                        placeholder="Desde" min="1" (change)="changeDesdeHasta()">
                      <input type="number" class="form-control form-control-sm text-center" formControlName="hastaNum"
-                        placeholder="Hasta" min="1" max="{{f_buscar.value.hastaNum}}" />
+                        placeholder="Hasta" min="1" (change)="changeDesdeHasta()">
                   </div>
-                  <div class="col-sm">
+
+                  <div class="input-group col-sm-5 px-1 ">
                      <input type="date" class="form-control form-control-sm text-center" formControlName="desdeFecha"
                         max="{{ today | date : 'yyyy-MM-dd' }}" />
-                  </div>
-                  <div class="col-sm">
                      <input type="date" class="form-control form-control-sm text-center" formControlName="hastaFecha"
                         max="{{ today | date : 'yyyy-MM-dd' }}" />
                   </div>
+
                   <div class="col-sm">
                      <button class="btn btn-primary btn-sm" data-dismiss="modal">
                         <i class="fa fa-search" aria-hidden="true"></i> Buscar
                      </button>
                   </div>
-                  
+
                </div>
             </form>
 
@@ -39,11 +37,15 @@
 
          <div class="col-sm-2">
             <input class="form-control form-control-sm text-center" type="text" placeholder="Filtrar..."
-            [(ngModel)]="filtro" [ngModelOptions]="{standalone: true}" />
+               [(ngModel)]="filtro" [ngModelOptions]="{standalone: true}" />
          </div>
 
          <div class="col-sm d-flex justify-content-end">
             <div class="btn-group ml-auto mx-0">
+               <button *ngIf="swdesdehasta" class="bg-transparent border-0 mt-0" type="button"
+                  (click)="busquedainicial()" data-toggle="tooltip" title="Ultimos">
+                  <i class="bi-skip-end text-white icoRegresar"></i>
+               </button>
                <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
                   aria-expanded="false">
                   <i class="bi-menu-button-wide text-white"></i>
@@ -53,10 +55,7 @@
                      <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo
                   </button>
                   <button class="dropdown-item" type="button" data-toggle="modal" data-target="#PDFModal">
-                     <i class="bi bi-printer"></i>&nbsp; Imprimir
-                  </button>
-                  <button class="dropdown-item" type="button">
-                     <i class="bi-file-earmark-arrow-up"></i><span class="">&nbsp; Exportar</span>
+                     <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar
                   </button>
                </div>
             </div>
@@ -64,50 +63,90 @@
 
       </div>
    </div>
-   <div class="container-fluid">
-      <div class="row mb-0">
-         <div class="col-sm">
-            <table class="table table-hover table-bordered table-sm sombra">
-               <thead class="text-center cabecera">
-                  <tr>
-                     <th>Nro.</th>
-                     <th class="col-1">Fecha</th>
-                     <th class="col-2">Documento</th>
-                     <th class="col-sm-4">Beneficiario</th>
-                     <th>Total</th>
-                     <th>Descripción</th>
-                     <th></th>
-                  </tr>
-               </thead>
-               <tbody class="detalle">
-                  <tr *ngFor="let d_tramipresu of v_tramipresu | filter: filtro; let i = index"
-                     (click)="detallesTramipresu($event, d_tramipresu)" class="fila">
-                     <td class="text-center">{{ d_tramipresu.numero }}</td>
-                     <td class="text-center"> {{ d_tramipresu.fecha | date : "dd-MM-yyyy"}} </td>
-                     <td class="doc-{{ d_tramipresu.iddocumento.iddocumento }}"> {{ d_tramipresu.iddocumento.nomdoc }}
-                        {{ d_tramipresu.numdoc }} </td>
-                     <td class="bene-{{ d_tramipresu.idbene }}">{{d_tramipresu.idbene.nomben}}</td>
-                     <td class="text-right">{{d_tramipresu.totmiso | number: '1.2-2' }}</td>
-                     <td class="text-left text-truncate ancho200">{{d_tramipresu.descripcion }}</td>
+</div>
 
-                     <td class="text-center">
-                        <div class="btn-group py-0">
-                           <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0"
-                              data-toggle="dropdown" aria-expanded="false">
-                           </button>
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm">
+         <table class="table table-hover table-bordered table-sm sombra">
+            <thead class="text-center cabecera">
+               <tr class="pad0">
+                  <th>Nro.</th>
+                  <th>Fecha</th>
+                  <th>Documento</th>
+                  <th>Beneficiario</th>
+                  <th>Total</th>
+                  <th>Descripción</th>
+                  <th></th>
+               </tr>
+            </thead>
+            <tbody class="detalle roboto small">
+               <tr class="fila pad0" *ngFor="let tramipresu of _tramipresu | filter: filtro"
+                  (click)="compromisos($event, tramipresu)">
+                  <td class="text-center">{{ tramipresu.numero }}</td>
+                  <td class="text-center"> {{ tramipresu.fecha | date : "dd-MM-yyyy"}} </td>
+                  <td class="doc-{{ tramipresu.intdoc.intdoc }}"> {{ tramipresu.intdoc.nomdoc }}
+                     {{ tramipresu.numdoc }} </td>
+                  <td class="bene-{{ tramipresu.idbene }}">{{tramipresu.idbene.nomben}}</td>
+                  <td class="text-right">{{tramipresu.totmiso | number: '1.2-2' }}</td>
+                  <td class="text-truncate ancho" data-toggle="tooltip" title="{{ tramipresu.descri }}">
+                     {{tramipresu.descri}}</td>
+                  <td class="text-center">
+                     <div class="btn-group py-0">
+                        <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
+                           aria-expanded="false">
+                        </button>
 
-                           <div class="dropdown-menu dropdown-menu-right popLista">
-                              <button class="dropdown-item" type="button" (click)="modiTramipresu( d_tramipresu )">
-                                 <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
-                              <button class="dropdown-item" type="button">
-                                 <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
-                           </div>
+                        <div class="dropdown-menu dropdown-menu-right popLista">
+                           <button class="dropdown-item" type="button" (click)="modiTramipresu( tramipresu )">
+                              <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
+                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#eliminar"
+                              (click)="eliminar( tramipresu )">
+                              <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
                         </div>
-                     </td>
+                     </div>
+                  </td>
 
-                  </tr>
-               </tbody>
-            </table>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+   </div>
+
+   <!-- Modal Eliminar-->
+   <div class='modal fade' id='eliminar' tabindex='-1' aria-hidden='true'>
+      <div class='modal-dialog modal-dialog-centered'>
+         <div class='modal-content'>
+            <div class='modal-header justify-content-center cabecera border py-2'>
+               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Mensaje</h5>
+            </div>
+            <div *ngIf="totmovi == 0; then thenBlock else elseBlock"></div>
+            <ng-template #thenBlock>
+               <div class='modal-body text-center roboto fondo'>
+                  ¿ Eliminar el Trámite Nro <span class="fantacysombra"> {{tramipresu.numero}} </span>?
+               </div>
+               <div class='modal-footer justify-content-center detalle border py-1'>
+                  <button type='button' class='btn btn-success btn-sm' data-dismiss='modal' id='btnSi'
+                     (click)="elimina()">
+                     <i class="fa fa-check-circle"></i> Aceptar
+                  </button>
+                  <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
+                     <i class="fa fa-times-circle" style="font-size:24pxi"></i> Cancelar</button>
+               </div>
+            </ng-template>
+            <ng-template #elseBlock>
+               <div class='modal-body detalle'>
+                  <div class="alert alert-warning text-center" role="alert">
+                     No puede eliminar el Trámite <span class="fantacygreen"> {{tramipresu.numero}}</span>
+                     <br>tiene registrado <span class="fantacygreen">{{totmovi}}</span> Partida(s).
+                  </div>
+               </div>
+               <div class='text-center detalle'>
+                  <button type='button' class='btn btn-success btn-sm mb-3' data-dismiss='modal'>
+                     <i class="fa fa-check-circle"></i>&nbsp; Aceptar
+                  </button>
+               </div>
+            </ng-template>
          </div>
       </div>
    </div>

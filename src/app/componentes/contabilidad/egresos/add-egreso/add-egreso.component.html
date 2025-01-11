@@ -1,0 +1,146 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start sombra border cabecera ">
+         <div class="col-sm-12 my-1">
+            <form [formGroup]="formEgreso">
+               <div class="row pad0 my-0">
+                  <div class="col-sm-2 my-0">
+                     <h4 class="font-weight-bold text-truncate"> &nbsp;Nuevo Egreso</h4>
+                  </div>
+
+                  <div class="form-group col-md-2 my-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Número</label>
+                        </div>
+                        <input type="number" class="form-control text-center" formControlName="compro"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-2 my-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" for="fecha">Fecha</label>
+                        </div>
+                        <input type="date" class="form-control text-center" formControlName="fecha" aria-label="Small"
+                           aria-describedby="inputGroup-sizing-sm">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-4 mb-0">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Documento</label>
+                        </div>
+                        <select type="text" class="custom-select" formControlName="intdoc">
+                           <option *ngFor="let documento of _documentos" [ngValue]="documento.intdoc">
+                              {{ documento.nomdoc }}
+                           </option>
+                        </select>
+                        <input type="text" class="form-control text-center" formControlName="numdoc" [ngClass]="{'is-invalid': f['numdoc'].invalid && f['numdoc'].touched,
+                                    'is-valid': f['numdoc'].valid, '': f['numdoc'].untouched}">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-2 my-0">
+                     <div class="input-group mb-1 input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Total</label>
+                        </div>
+                        <input type="text" class="form-control text-right" formControlName="totdeb" aria-label="Small"
+                           aria-describedby="inputGroup-sizing-sm" readonly>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-5 mb-0">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Banco</label>
+                        </div>
+                        <select type="text" class="custom-select" formControlName="idcueban">
+                           <option [ngValue]="banco" *ngFor="let banco of _bancos" [ngValue]="banco.idcuenta">
+                              {{ banco.nomcue }}
+                           </option>
+                        </select>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-5 mb-0 mr-0">
+                     <div class="input-group input-group-sm mb-1 ">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Beneficiario<sup class="green">*</sup></label>
+                        </div>
+                        <input type="text" class="form-control form-control-sm" formControlName="idbene" list="benList"
+                           (input)="onBeneficiarioSelected($event); beneficiarioxNombre($event)" (change)="prueba()"
+                           [ngClass]="{'is-invalid': f['idbene'].invalid && f['idbene'].touched,'is-valid': f['idbene'].valid, '': f['idbene'].untouched}">
+                        <datalist role="listbox" id="benList">
+                           <option *ngFor="let beneficiario of _beneficiarios" value={{beneficiario.nomben}}> </option>
+                        </datalist>
+                     </div>
+                  </div>
+
+                  <div class="col-md-2 my-0 ml-0">
+                     <button type="submit" class="btn btn-success btn-sm mx-0 p-1" [disabled]="!formEgreso.valid">
+                        <i class="fa fa-check-circle"></i> Aceptar</button>
+                     <button type="button" class="btn btn-outline-success btn-sm mx-1 p-1" (click)="regresar()"><i
+                           class="fa fa-times-circle"></i> Cancelar
+                     </button>
+                  </div>
+
+                  <div class="form-group col-md-12 mt-1 mb-0">
+                     <div class="input-group mb-0 input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Concepto</label>
+                        </div>
+                        <textarea class="form-control" formControlName="glosa" rows="1"></textarea>
+                     </div>
+                  </div>
+
+               </div>
+            </form>
+         </div>
+
+      </div>
+   </div>
+</div>
+
+<div *ngIf="idbene" class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-12">
+
+         <div *ngIf="!swcxp; then thenBlock else elseBlock"></div>
+         <ng-template #thenBlock>
+            <div class='container-fluid mt-5 col-md-6'>
+               <div class="alert alert-warning text-center roboto font-weight-bold" role="alert">
+                  No tiene cuentas por pagar hasta esa fecha.
+               </div>
+            </div>
+         </ng-template>
+
+         <ng-template #elseBlock>
+            <table *ngIf="_cxp" class="table table-hover table-bordered table-sm sombra">
+               <thead class="text-center cabecera">
+                  <tr class="pad0">
+                     <th>Asie.</th>
+                     <th>Cmprbnt</th>
+                     <th>Fecha</th>
+                     <th>Cuenta</th>
+                     <th>Valor</th>
+                     <th>Saldo</th>
+                     <th>Pago</th>
+                     <th>Nuevo saldo</th>
+                     <th>Concepto</th>
+                     <th></th>
+                  </tr>
+               </thead>
+               <tbody class="detalle roboto small">
+                  <tr class="fila pad0" *ngFor="let egreso of _cxp">
+
+                  </tr>
+               </tbody>
+            </table>
+         </ng-template>
+      </div>
+   </div>
+</div>

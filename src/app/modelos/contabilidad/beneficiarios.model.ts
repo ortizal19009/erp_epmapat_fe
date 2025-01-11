@@ -1,12 +1,12 @@
-import { Ifinan } from "../ifinan.model";
 import { Gruposbene } from "./gruposbene.model";
+import { Ifinan } from "./ifinan.model";
 
 export class Beneficiarios {
 
   idbene: number;
-  codben: string;
   nomben: string;
   tpidben: string;
+  codben: string;
   rucben: string;
   ciben: string;
   tlfben: string;
@@ -18,6 +18,7 @@ export class Beneficiarios {
   idgrupo: Gruposbene;
   idifinan: Ifinan;
   swconsufin: number;
+  modulo: number;
   usucrea: string;
   feccrea: Date;
   usumodi: string;

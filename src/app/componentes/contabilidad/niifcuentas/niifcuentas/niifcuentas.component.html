@@ -1,35 +1,42 @@
 <div class="content mt-1 pt-1 pl-0">
    <div class="container-fluid">
       <div class="row m-0 px-0 py-1 justify-content-start cabecera sombra border">
-         <div class="col-sm-3">
-            <h4 class="m-0 font-weight-bold text-truncate">Plan de cuentas NIIF</h4>
+         <div class="col-sm-3 mt-1">
+            <h5 class="m-0 font-weight-bold text-truncate"> <i class="bi-book-half"></i> &nbsp; Plan de cuentas NIIF
+            </h5>
          </div>
          <div class="col-sm-5">
             <div class="container-fluid">
-               <form [formGroup]="f_cuentasniif" class="formGroup" (ngSubmit)="onSubmit()">
+               <form [formGroup]="formBuscar">
                   <div class="row">
-                     <div class="col-sm-4">
-                        <select name="" id="selecTipoBusqueda" class="form-control form-control-sm"
-                           formControlName="selecTipoBusqueda">
-                           <option value=1>Código</option>
-                           <option value=2>Nombre</option>
-                        </select>
+
+                     <!-- <div class="col-sm-3">
+                        <input type="text" placeholder="Código" class="form-control form-control-sm"
+                           formControlName="codcue" />
                      </div>
-                     <div class="col-sm-4">
-                        <div class="container">
-                           <input type="text" placeholder="Buscar" class="form-control form-control-sm" autofocus
-                              id="codNomCue" formControlName="codNomCue" />
-                        </div>
+                     <div class="col-sm-6">
+                        <input type="text" placeholder="Nombre" class="form-control form-control-sm text-center"
+                           formControlName="nomcue" />
+                     </div> -->
+
+                     <div class="input-group col-sm-9">
+                        <input type="text" class="form-control form-control-sm col-sm-4" formControlName="codcue"
+                           placeholder="Código" autofocus>
+                        <input type="text" class="form-control form-control-sm text-center" formControlName="nomcue"
+                           placeholder="Nombre">
                      </div>
+
                      <div class="col-sm-3">
-                        <button class="btn btn-primary btn-sm"><i class="fa fa-search" aria-hidden="true"></i>
-                           Buscar</button>
+                        <button class="btn btn-primary btn-sm" type="submit" (click)="buscar()">
+                           <i *ngIf="swbuscando" class="fa fa-spinner"></i>
+                           <i *ngIf="!swbuscando" class="fa fa-search"></i> {{txtbuscar}}
+                        </button>
                      </div>
                   </div>
                </form>
             </div>
          </div>
-         <div class="col-sm-2">
+         <div *ngIf="_cuentasNiif" class="col-sm-2">
             <input type="text" class="form-control mx-0 form-control-sm text-center" placeholder="Filtrar..."
                [(ngModel)]="filterTerm" />
          </div>
@@ -39,13 +46,11 @@
                data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right bg-dark roboto ">
-               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#addplancuentas"
-               (click)="(act_addPlanCuentas())">
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalunico"
+                  (click)="(addNiifcuenta())">
                   <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
-               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#pdf">
-                  <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
-               <button class="dropdown-item" type="button"><i class="bi-file-earmark-arrow-down"></i>&nbsp;
-                  Exportar</button>
+               <button class="dropdown-item" type="button" (click)="imprimir()">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
             </div>
          </div>
 
@@ -56,8 +61,8 @@
 <div class="container-fluid">
    <div class="row mb-0">
       <div class="col-sm">
-         <table class="table table-hover table-bordered table-sm sombra">
-            <thead class="text-center cabecera">
+         <table *ngIf="_cuentasNiif" class="table table-hover table-bordered table-sm sombra">
+            <thead class="text-center cabecera pad0">
                <tr>
                   <th class="">Código</th>
                   <th class="col-sm-5 ">Nombre</th>
@@ -67,8 +72,8 @@
                   <th></th>
                </tr>
             </thead>
-            <tbody class="detalle">
-               <tr *ngFor="let cuentaniif of cuentasNiif | filter:filterTerm; let i= index" class="fila">
+            <tbody class="detalle roboto small">
+               <tr *ngFor="let cuentaniif of _cuentasNiif | filter:filterTerm; let i= index" class="fila pad0">
                   <td [ngClass]="{'font-weight-bold': cuentaniif.movcue==0}">{{ cuentaniif.codcue}}</td>
                   <td [ngClass]="{'font-weight-bold': cuentaniif.movcue==0}">{{ cuentaniif.nomcue }}</td>
 
@@ -88,10 +93,10 @@
                         <div class="dropdown-menu dropdown-menu-right popLista">
                            <button class="dropdown-item" type="button" (click)="getByIdNiifCue(cuentaniif)">
                               <i class="bi-back"></i>&nbsp; Homologación</button>
-                           <button class="dropdown-item" type="button" data-toggle="modal"
-                           data-target="#addplancuentas" (click)="modificar(cuentaniif)">
+                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalunico"
+                              (click)="modificar(cuentaniif)">
                               <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
-                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalEliminar">
+                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalunico">
                               <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
                         </div>
                      </div>
@@ -101,6 +106,7 @@
             </tbody>
          </table>
       </div>
+
       <div class="col-sm-4" *ngIf="listaNef">
 
          <div class="card">
@@ -112,7 +118,7 @@
                      <i class="bi-menu-button-wide text-white"></i>
                   </button>
                   <div class="dropdown-menu dropdown-menu-right bg-light roboto">
-                     <button class="dropdown-item" type="button" data-toggle="modal" data-target="#addplancuentas"
+                     <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalunico"
                         (click)="(act_homologa())">
                         <i class="bi bi-printer"></i>&nbsp; Nuevo
                      </button>
@@ -128,7 +134,7 @@
                <table class="table table-hover table-bordered table-sm table-striped">
                   <thead>
                      <tr class="bg-warning text-center">
-                        <th>Cuenta NEF</th>
+                        <th>Cuenta MEF</th>
                         <th>Denominación</th>
                      </tr>
                   </thead>
@@ -144,37 +150,44 @@
          </div>
       </div>
    </div>
-</div>
-<!-- Modal -->
-<div class="modal fade" id="addplancuentas" data-backdrop="static" data-keyboard="false" tabindex="-1"
-   aria-labelledby="add-plan-cuentasLabel" aria-hidden="true">
-   <div class="modal-dialog modal-dialog-scrollable modal-lg">
-      <div class="modal-content">
-         <div class="modal-body">
-            <app-add-niifcuenta *ngIf="hab_addPlanCuentas" [niifcuenta]="niifcuenta"
-               (cancelarEvent)="des_addPlanCuentas($event)"></app-add-niifcuenta>
-            <app-modi-niifcuenta *ngIf="hab_modPlanCuentas" [niifcuenta]="niifcuenta"
-               (cancelarEvent)="des_addPlanCuentas($event)"></app-modi-niifcuenta>
-            <app-add-homologa *ngIf="hab_homologa" [niifcuenta]="niifcuenta"
-               (cancelarEvent)="des_homologa($event)"></app-add-homologa>
-            <div class="container" *ngIf="deleteBox">
-               <div class="row">
-                  <div class="col-sm">
-                     <div class="alert alert-danger" role="alert">
-                        Desea borrar homologación?
+
+   <!-- Modal modalunico -->
+   <div class="modal fade" id="modalunico" data-backdrop="static" data-keyboard="false" tabindex="-1"
+      aria-labelledby="add-plan-cuentasLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable modal-lg modal-dialog-centered">
+         <div class="modal-content">
+            <div class='modal-header cabecera justify-content-center'>
+               <h5 *ngIf="hab_addPlanCuentas" class='modal-title font-weight-bold' id='ModalLabel'>Nueva cuenta NIIF</h5>
+               <h5 *ngIf="hab_modPlanCuentas" class='modal-title font-weight-bold' id='ModalLabel'>Modificar cuenta NIIF</h5>
+            </div>
+      
+            <div class="modal-body detalle">
+               <app-add-niifcuenta *ngIf="hab_addPlanCuentas" [niifcuenta]="niifcuenta"
+                  (cancelarEvent)="des_addPlanCuentas($event)"></app-add-niifcuenta>
+               <app-modi-niifcuenta *ngIf="hab_modPlanCuentas" [niifcuenta]="niifcuenta"
+                  (cancelarEvent)="des_addPlanCuentas($event)"></app-modi-niifcuenta>
+               <app-add-homologa *ngIf="hab_homologa" [niifcuenta]="niifcuenta"
+                  (cancelarEvent)="des_homologa($event)"></app-add-homologa>
+               <div class="container" *ngIf="deleteBox">
+                  <div class="row">
+                     <div class="col-sm">
+                        <div class="alert alert-danger" role="alert">
+                           Desea borrar homologación?
+                        </div>
                      </div>
                   </div>
-               </div>
-               <div class="row">
-                  <div class="col-sm text-center">
-                     <button class="btn btn-xs btn-success mx-3" data-dismiss="modal"
-                        (click)="cancelar()">Cancelar</button>
-                     <button class="btn btn-xs btn-outline-success" data-dismiss="modal"
-                        (click)="deleteHomologa()">Aceptar</button>
+                  <div class="row">
+                     <div class="col-sm text-center">
+                        <button class="btn btn-xs btn-success mx-3" data-dismiss="modal"
+                           (click)="cancelar()">Cancelar</button>
+                        <button class="btn btn-xs btn-outline-success" data-dismiss="modal"
+                           (click)="deleteHomologa()">Aceptar</button>
+                     </div>
                   </div>
                </div>
             </div>
          </div>
       </div>
    </div>
+
 </div>

@@ -217,6 +217,49 @@ import { ImpClienteComponent } from './componentes/clientes/imp-cliente/imp-clie
 import { ImpEmisionesComponent } from './componentes/emisiones/imp-emisiones/imp-emisiones.component';
 import { CvRubrosComponent } from './componentes/coactivas/carteras-vencidas/cv-rubros/cv-rubros.component';
 import { CvFacturasComponent } from './componentes/coactivas/carteras-vencidas/cv-facturas/cv-facturas.component';
+import { ModiCuentaComponent } from './componentes/contabilidad/cuentas/modi-cuenta/modi-cuenta.component';
+import { InfoCuentaComponent } from './componentes/contabilidad/cuentas/info-cuenta/info-cuenta.component';
+import { ImpCuentasComponent } from './componentes/contabilidad/cuentas/imp-cuentas/imp-cuentas.component';
+import { ImpMayorComponent } from './componentes/contabilidad/cuentas/imp-mayor/imp-mayor.component';
+import { ImpAsientosComponent } from './componentes/contabilidad/asientos/imp-asientos/imp-asientos.component';
+import { ModiAsientoComponent } from './componentes/contabilidad/asientos/modi-asiento/modi-asiento.component';
+import { ModiTransaciComponent } from './componentes/contabilidad/transaci/modi-transaci/modi-transaci.component';
+import { ImpTransaciComponent } from './componentes/contabilidad/transaci/imp-transaci/imp-transaci.component';
+import { ImpBancosComponent } from './componentes/contabilidad/bancos/imp-bancos/imp-bancos.component';
+import { ImpNiifcuentasComponent } from './componentes/contabilidad/niifcuentas/imp-niifcuentas/imp-niifcuentas.component';
+import { BeneficiariosComponent } from './componentes/contabilidad/beneficiarios/beneficiarios/beneficiarios.component';
+import { AddBeneficiarioComponent } from './componentes/contabilidad/beneficiarios/add-beneficiario/add-beneficiario.component';
+import { InfoBeneficiarioComponent } from './componentes/contabilidad/beneficiarios/info-beneficiario/info-beneficiario.component';
+import { ModiBeneficiarioComponent } from './componentes/contabilidad/beneficiarios/modi-beneficiario/modi-beneficiario.component';
+import { ImpBeneficiariosComponent } from './componentes/contabilidad/beneficiarios/imp-beneficiarios/imp-beneficiarios.component';
+import { ImpMovibeneComponent } from './componentes/contabilidad/beneficiarios/imp-movibene/imp-movibene.component';
+import { InfoLiquidaComponent } from './componentes/contabilidad/beneficiarios/info-beneficiario/info-liquida/info-liquida/info-liquida.component';
+import { ImpLiquidaComponent } from './componentes/contabilidad/beneficiarios/info-beneficiario/info-liquida/imp-liquida/imp-liquida.component';
+import { EgresosComponent } from './componentes/contabilidad/egresos/egresos/egresos.component';
+import { ModiEgresoComponent } from './componentes/contabilidad/egresos/modi-egreso/modi-egreso.component';
+import { ImpEgresosComponent } from './componentes/contabilidad/egresos/imp-egresos/imp-egresos.component';
+import { AddEgresoComponent } from './componentes/contabilidad/egresos/add-egreso/add-egreso.component';
+import { RegrecaudaComponent } from './componentes/contabilidad/regrecauda/regrecauda/regrecauda.component';
+import { RetencionesComponent } from './componentes/contabilidad/retenciones/retenciones/retenciones.component';
+import { ImpRetencionesComponent } from './componentes/contabilidad/retenciones/imp-retenciones/imp-retenciones.component';
+import { AddRetencionComponent } from './componentes/contabilidad/retenciones/add-retencion/add-retencion.component';
+import { ModiRetencionComponent } from './componentes/contabilidad/retenciones/modi-retencion/modi-retencion.component';
+import { ImpPreingresoComponent } from './componentes/contabilidad/preingresos/imp-preingreso/imp-preingreso.component';
+import { ImpAuxingresoComponent } from './componentes/contabilidad/preingresos/imp-auxingreso/imp-auxingreso.component';
+import { ImpPregastoComponent } from './componentes/contabilidad/pregastos/imp-pregasto/imp-pregasto.component';
+import { ImpAuxgastoComponent } from './componentes/contabilidad/pregastos/imp-auxgasto/imp-auxgasto.component';
+import { PrmisoxtramiComponent } from './componentes/contabilidad/tramipresu/prmisoxtrami/prmisoxtrami.component';
+import { ComprobacionComponent } from './componentes/contabilidad/comprobacion/comprobacion.component';
+import { EstFinancieraComponent } from './componentes/contabilidad/est-financiera/est-financiera.component';
+import { EstResultadosComponent } from './componentes/contabilidad/est-resultados/est-resultados.component';
+import { EstFlujoEfeComponent } from './componentes/contabilidad/est-flujo-efe/est-flujo-efe.component';
+import { EstEjecucionPreComponent } from './componentes/contabilidad/est-ejecucion-pre/est-ejecucion-pre.component';
+import { UnicostosComponent } from './componentes/contabilidad/costos/unicostos/unicostos.component';
+import { CuecostosComponent } from './componentes/contabilidad/costos/cuecostos/cuecostos.component';
+import { ComparativoComponent } from './componentes/contabilidad/costos/comparativo/comparativo.component';
+import { ResulcostosComponent } from './componentes/contabilidad/costos/resulcostos/resulcostos.component';
+import { ImpUnicostosComponent } from './componentes/contabilidad/costos/imp-unicostos/imp-unicostos.component';
+import { IfinanComponent } from './componentes/contabilidad/ifinan/ifinan/ifinan.component';
 
 const routes: Routes = [
   //Consumo de Agua
@@ -380,62 +423,116 @@ const routes: Routes = [
   { path: 'modiubicacionm/:id', component: ModiUbicacionmComponent },
 
   //================ CONTABILIDAD =============================
-  { path: 'cuentas', component: CuentasComponent },
-  { path: 'add-cuenta', component: AddCuentaComponent },
+   //================ CONTABILIDAD =============================
+   { path: 'cuentas', component: CuentasComponent },
+   { path: 'add-cuenta', component: AddCuentaComponent },
+   { path: 'modi-cuenta', component: ModiCuentaComponent },
+   { path: 'info-cuenta', component: InfoCuentaComponent },
+   { path: 'imp-cuentas', component: ImpCuentasComponent },
+   { path: 'imp-mayor', component: ImpMayorComponent },
 
-  { path: 'asientos', component: AsientosComponent },
-  { path: 'add-asiento', component: AddAsientoComponent },
+   { path: 'asientos', component: AsientosComponent },
+   { path: 'add-asiento', component: AddAsientoComponent },
+   { path: 'imp-asientos', component: ImpAsientosComponent },
+   { path: 'modi-asiento', component: ModiAsientoComponent },
 
-  { path: 'transaci', component: TransaciComponent },
-  { path: 'add-transaci', component: AddTransaciComponent },
-  { path: 'add-benextran', component: AddBenextranComponent },
-  { path: 'add-liquiacfp', component: AddLiquiacfpComponent },
+   { path: 'transaci', component: TransaciComponent },
+   { path: 'add-transaci', component: AddTransaciComponent },
+   { path: 'modi-transaci', component: ModiTransaciComponent },
+   { path: 'imp-transaci', component: ImpTransaciComponent },
+   { path: 'add-benextran', component: AddBenextranComponent },
+   { path: 'add-liquiacfp', component: AddLiquiacfpComponent },
 
-  { path: 'sinafip', component: SinafipComponent },
+   { path: 'bancos', component: BancosComponent },
+   { path: 'conciliaban', component: ConciliabanComponent },   //No se necesita: Ahora esta en el modal
+   { path: 'imp-bancos', component: ImpBancosComponent },
 
-  { path: 'niifcuentas', component: NiifcuentasComponent },
-  { path: 'add-homologa', component: AddHomologaComponent },
-  { path: 'add-niifcuenta', component: AddNiifcuentaComponent },
-  { path: 'modi-niifcuenta', component: ModiNiifcuentaComponent },
+   { path: 'sinafip', component: SinafipComponent },
 
-  { path: 'preingresos', component: PreingresosComponent },
-  { path: 'info-preingreso', component: InfoPreingresoComponent },
-  { path: 'add-preingreso', component: AddPreingresoComponent },
-  { path: 'modi-preingreso', component: ModiPreingresoComponent },
-  { path: 'aux-ingreso', component: AuxIngresoComponent },
+   { path: 'niifcuentas', component: NiifcuentasComponent },
+   { path: 'add-homologa', component: AddHomologaComponent },
+   { path: 'add-niifcuenta', component: AddNiifcuentaComponent },
+   { path: 'modi-niifcuenta', component: ModiNiifcuentaComponent },
+   { path: 'imp-niifcuentas', component: ImpNiifcuentasComponent },
 
-  { path: 'pregastos', component: PregastosComponent },
-  { path: 'add-pregasto', component: AddPregastoComponent },
-  { path: 'modi-pregasto', component: ModiPregastoComponent },
-  { path: 'aux-gasto', component: AuxGastoComponent },
+   { path: 'beneficiarios', component: BeneficiariosComponent },
+   { path: 'add-beneficiario', component: AddBeneficiarioComponent },
+   { path: 'info-beneficiario', component: InfoBeneficiarioComponent },
+   { path: 'modi-beneficiario', component: ModiBeneficiarioComponent },
+   { path: 'imp-beneficiarios', component: ImpBeneficiariosComponent },
+   { path: 'imp-movibene', component: ImpMovibeneComponent },
+   { path: 'info-liquida', component: InfoLiquidaComponent },
+   { path: 'imp-liquida', component: ImpLiquidaComponent },
 
-  { path: 'certipresu', component: CertipresuComponent },
-  { path: 'modi-certipresu', component: ModiCertipresuComponent },
-  { path: 'add-certipresu', component: AddCertipresuComponent },
-  { path: 'partixcerti', component: PartixcertiComponent },
+   { path: 'egresos', component: EgresosComponent },
+   { path: 'modi-egreso', component: ModiEgresoComponent },
+   { path: 'imp-egresos', component: ImpEgresosComponent },
+   { path: 'add-egreso', component: AddEgresoComponent },
 
-  { path: 'tramipresu', component: TramipresuComponent },
-  { path: 'add-tramipresu', component: AddTramipresuComponent },
-  { path: 'modi-tramipresu/:idtrami', component: ModiTramipresuComponent },
+   { path: 'regrecauda', component: RegrecaudaComponent },
 
-  { path: 'reformas', component: ReformasComponent },
-  { path: 'add-reforma', component: AddReformaComponent },
-  { path: 'modi-reforma', component: ModiReformaComponent },
+   { path: 'retenciones', component: RetencionesComponent },
+   { path: 'imp-retenciones', component: ImpRetencionesComponent },
+   { path: 'add-retencion', component: AddRetencionComponent },
+   { path: 'modi-retencion', component: ModiRetencionComponent },
 
-  { path: 'clasificador', component: ClasificadorComponent },
-  { path: 'info-clasificador', component: InfoClasificadorComponent },
-  { path: 'modi-clasificador', component: ModiClasificadorComponent },
-  { path: 'add-clasificador', component: AddClasificadorComponent },
+   { path: 'preingresos', component: PreingresosComponent },
+   // { path: 'info-preingreso', component: InfoPreingresoComponent },
+   { path: 'add-preingreso', component: AddPreingresoComponent },
+   { path: 'modi-preingreso', component: ModiPreingresoComponent },
+   { path: 'aux-ingreso', component: AuxIngresoComponent },
+   { path: 'imp-preingreso', component: ImpPreingresoComponent },
+   { path: 'imp-auxingreso', component: ImpAuxingresoComponent },
 
-  { path: 'ejecucion', component: EjecucionComponent },
-  { path: 'modi-ejecucion', component: ModiEjecucionComponent },
-  { path: 'add-ejecucion', component: AddEjecucionComponent },
+   { path: 'pregastos', component: PregastosComponent },
+   { path: 'add-pregasto', component: AddPregastoComponent },
+   { path: 'modi-pregasto', component: ModiPregastoComponent },
+   { path: 'aux-gasto', component: AuxGastoComponent },
+   { path: 'imp-pregasto', component: ImpPregastoComponent },
+   { path: 'imp-auxgasto', component: ImpAuxgastoComponent },
 
-  { path: 'bancos', component: BancosComponent },
-  { path: 'conciliaban', component: ConciliabanComponent },
+   { path: 'certipresu', component: CertipresuComponent },
+   { path: 'modi-certipresu', component: ModiCertipresuComponent },
+   { path: 'add-certipresu', component: AddCertipresuComponent },
+   { path: 'partixcerti', component: PartixcertiComponent },
 
-  { path: 'estrfunc', component: EstrfuncComponent },
-  { path: 'info-estrfunc', component: InfoEstrfuncComponent },
+   { path: 'tramipresu', component: TramipresuComponent },
+   { path: 'add-tramipresu', component: AddTramipresuComponent },
+   { path: 'modi-tramipresu', component: ModiTramipresuComponent },
+   { path: 'prmisoxtrami', component: PrmisoxtramiComponent },
+
+   { path: 'reformas', component: ReformasComponent },
+   { path: 'add-reforma', component: AddReformaComponent },
+   { path: 'modi-reforma', component: ModiReformaComponent },
+
+   { path: 'clasificador', component: ClasificadorComponent },
+   { path: 'info-clasificador', component: InfoClasificadorComponent},
+   { path: 'modi-clasificador', component: ModiClasificadorComponent },
+   { path: 'add-clasificador', component: AddClasificadorComponent },
+
+   { path: 'ejecucion', component: EjecucionComponent },
+   { path: 'modi-ejecucion', component: ModiEjecucionComponent },
+   { path: 'add-ejecucion', component: AddEjecucionComponent },
+
+   { path: 'bancos', component: BancosComponent },
+   { path: 'conciliaban', component: ConciliabanComponent },
+
+   { path: 'comprobacion', component: ComprobacionComponent },
+   { path: 'estsituacion', component: EstFinancieraComponent },
+   { path: 'estresultados', component: EstResultadosComponent },
+   { path: 'flujoefectivo', component: EstFlujoEfeComponent },
+   { path: 'ejecupresup', component: EstEjecucionPreComponent },
+
+   { path: 'unicostos', component: UnicostosComponent },
+   { path: 'cuecostos', component: CuecostosComponent },
+   { path: 'comparativo', component: ComparativoComponent },
+   { path: 'resulcostos', component: ResulcostosComponent },
+   { path: 'imp-unicostos', component: ImpUnicostosComponent },
+
+   { path: 'estrfunc', component: EstrfuncComponent },
+   { path: 'info-estrfunc', component: InfoEstrfuncComponent },
+
+   { path: 'ifinan', component: IfinanComponent },
 
   // ============== ADMINISTRACION CENTRAL ===================
   { path: 'tabla4', component: Tabla4Component },

@@ -10,5 +10,6 @@ export class Documentos {
     usumodi: number; 
     fecmodi: Date; 
     idtabla4: Tabla4;
+  intdoc: number;
 
 }

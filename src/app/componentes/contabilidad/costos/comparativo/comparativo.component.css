@@ -1,0 +1,15 @@
+.cabecera {
+   background-color: var(--bgcolor1);
+   color: white;
+}
+.nuevoBG1 { background-color: var(--bgcolor1); }
+
+.detalle { background-color: var(--bgcolor2); }
+.nuevoBG2 { background-color: var(--bgcolor2); }
+
+.fila:hover {
+   background-color: #117a8B;
+   color: white;
+}
+
+.alinearvertical, th[rowspan="3"]  {   vertical-align: middle; }

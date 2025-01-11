@@ -1,0 +1,185 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start sombra cabecera border">
+         <div class="col-sm-3 mt-1">
+            <h4 class="font-weight-bold text-truncate"><i class="bi-card-heading"></i>&nbsp; Estado de resultados</h4>
+         </div>
+         <div class="col-sm-7">
+            <form [formGroup]="formBuscar" (ngSubmit)="buscar()">
+               <div class="row">
+
+                  <div class="form-group my-1">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend sm">
+                           <span class="input-group-text font-weight-bold">Nivel </span>
+                        </div>
+                        <select class="form-control form-control-sm " id="numnivel" formControlName="numnivel">
+                           <option value='2' selected>GRUPO</option>
+                           <option value='3'>SUBGRUPO</option>
+                           <option value='6'>Cuenta de nivel 1</option>
+                           <option value='9'>Cuenta de nivel 2</option>
+                           <option value='12'>Cuenta de nivel 3</option>
+                           <option value='15'>Cuenta de nivel 4</option>
+                        </select>
+                     </div>
+                  </div>
+
+                  <div class="input-group col-sm-6 my-1 ">
+                     <input type="date" class="form-control form-control-sm text-center" formControlName="desdeFecha"
+                        max="{{ today | date : 'yyyy-MM-dd' }}" />
+                     <input type="date" class="form-control form-control-sm text-center" formControlName="hastaFecha"
+                        max="{{ date | date : 'yyyy-MM-dd' }}" />
+                  </div>
+
+                  <div class="col-sm my-1">
+                     <button class="btn btn-primary btn-sm" type="submit" (click)="estado_resultados()">
+                        <i class="fa fa-search"></i> Buscar
+                     </button>
+                  </div>
+
+               </div>
+            </form>
+         </div>
+
+         <div class="btn-group ml-auto mt-0">
+            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
+               data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto ">
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar">
+                  <i class="bi-file-earmark-arrow-up"></i> &nbsp; Exportar</button>
+            </div>
+         </div>
+
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row justify-content-center mb-0">
+      <div class="col-sm-7">
+         <table *ngIf="arreglo3.length > 0" class="table table-hover table-bordered table-sm sombra">
+            <thead class="text-center cabecera">
+               <tr class="text-center pad0">
+                  <th class="col-sm-1">Cuenta</th>
+                  <th class="col-sm-5">Denominación</th>
+                  <th class="col-sm-1">Valor</th>
+               </tr>
+            </thead>
+
+            <tbody class="detalle roboto small">
+               <tr *ngFor="let cuentas of this.arreglo3" class="fila pad0">
+                  <td *ngIf="cuentas[0]=='' ; then total else detalle   "></td>
+                  <ng-template class=" font-weight-bold" #total>
+                     <td class="font-weight-bold col-sm-1">{{ cuentas[0]}}</td>
+                     <td class="font-weight-bold col-sm-3">{{ cuentas[1]}}</td>
+                     <td class="text-right font-weight-bold col-sm-1" [ngClass]="{'transparente': cuentas[2] == 0}">{{
+                        cuentas[2]| number:'1.2-2'}}</td>
+                  </ng-template>
+
+                  <ng-template #detalle>
+                     <td class="col-sm-1">{{ cuentas[0]}}</td>
+                     <td class="col-sm-3">{{ cuentas[1]}}</td>
+                     <td class="text-right col-sm-1" [ngClass]="{'transparente': cuentas[2] == 0}">{{ cuentas[2]|
+                        number:'1.2-2'}}</td>
+                  </ng-template>
+
+               </tr>
+
+               <tr *ngIf="!swfiltro" class="text-right font-weight-bold">
+                  <td *ngIf="tb6 >= 0; then utilidad else perdida"> </td>
+                  <ng-template #utilidad>
+                     <td class="col-sm-3" colspan="2">UTILIDAD DEL EJERCICIO </td>
+                  </ng-template>
+                  <ng-template #perdida>
+                     <td class="col-sm-3" colspan="2">PERDIDA DEL EJERCICIO </td>
+                  </ng-template>
+
+                  <td class="col-sm-1">{{tb6 | number: '1.2-2'}}</td>
+                  <!-- <td></td> -->
+               </tr>
+            </tbody>
+         </table>
+      </div>
+   </div>
+
+
+   <!-- MODAL Imprimir-->
+   <div class="modal fade" id="imprimir" tabindex="-1" aria-labelledby="imprimirLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+         <div class="modal-content border">
+            <div class='modal-header py-2 justify-content-center cabecera'>
+               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Imprimir</h5>
+            </div>
+            <div class='modal-body'>
+
+               <div class="input-group mb-3 input-group-sm">
+                  <div class="input-group-prepend">
+                     <label class="input-group-text" for="inputGroupSelect01">Reporte</label>
+                  </div>
+                  <select class="custom-select" id="inputGroupSelect01">
+                     <option selected>Estado de Resultados</option>
+                  </select>
+               </div>
+
+               <div class="input-group input-group-sm mb-0">
+                  <div class="input-group-prepend">
+                     <small class="input-group-text">Abrir en otra página</small>
+                     <div class="input-group-text">
+                        <input type="checkbox" [(ngModel)]="otraPagina">
+                     </div>
+                  </div>
+               </div>
+
+            </div>
+            <div class='modal-footer justify-content-center'>
+               <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="pdf()"
+                  [attr.data-target]="otraPagina ? null : '#pdf'" data-toggle="modal">
+                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+               <button type='button' class='btn btn-sm btn-outline-success' data-dismiss='modal'>
+                  <i class="bi bi-x-circle"></i> Cancelar</button>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- MODAL Exportar -->
+   <div class="modal fade" id="exportar" tabindex="-1" aria-labelledby="exportarLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+         <div class="modal-content border">
+            <div class='modal-header py-2 justify-content-center cabecera'>
+               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Exportar</h5>
+            </div>
+            <div class='modal-body cuerpo'>
+
+               <div class="form-group  my-0 py-0">
+                  <div class="input-group input-group-sm mb-3">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm" data-toggle="tooltip"
+                           title="Obligatorio y mínimo 3 caracteres">Archivo</span>
+                     </div>
+                     <input type="text" class="form-control" [(ngModel)]="archExportar" aria-label="Small"
+                        aria-describedby="inputGroup-sizing-sm" required minlength="3" maxlength="20">
+                  </div>
+               </div>
+
+               <div class="row justify-content-center">
+                  <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' data-toggle="modal"
+                     (click)="exportar()">
+                     <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+                  <button type='button' class='btn btn-sm btn-outline-success btn-sm mx-1' data-dismiss='modal'>
+                     <i class="bi bi-x-circle"></i> Cancelar</button>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- MODAL PDF (En la misma página)-->
+<div class='modal fade' id='pdf' tabindex='-1' aria-labelledby='pdf' aria-hidden='true'>
+   <div class='modal-dialog modal-sm'>
+   </div>
+</div>

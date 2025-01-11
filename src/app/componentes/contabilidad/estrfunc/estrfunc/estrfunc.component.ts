@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { map } from 'rxjs';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import { ColoresService } from 'src/app/compartida/colores.service';
 import { EstrfuncService } from 'src/app/servicios/contabilidad/estrfunc.service';
 import { PregastoService } from 'src/app/servicios/contabilidad/pregasto.service';
 
@@ -10,11 +12,12 @@ import { PregastoService } from 'src/app/servicios/contabilidad/pregasto.service
    templateUrl: './estrfunc.component.html',
    styleUrls: ['./estrfunc.component.css']
 })
+
 export class EstrfuncComponent implements OnInit {
 
    _estrfunc: any;
    formActividad: FormGroup;
-   idestrfunc: number;
+   intest: number;
    opcion: number;      //1: Nuevo, 2: Modificar
    antcodigo: String;
    antnombre: String;
@@ -23,11 +26,13 @@ export class EstrfuncComponent implements OnInit {
    totpartidas: number;
 
    constructor(public fb: FormBuilder, private estrfuncService: EstrfuncService, private router: Router,
-      private pregasService: PregastoService) { }
+      public authService: AutorizaService, private coloresService: ColoresService, private pregasService: PregastoService) { }
 
    ngOnInit(): void {
       sessionStorage.setItem('ventana', '/estrfunc');
-      this.setcolor();
+      let coloresJSON = sessionStorage.getItem('/estrfunc');
+      if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
+      else this.buscaColor();
 
       this.formActividad = this.fb.group({
          codigo: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(2)], this.valCodigo.bind(this)],
@@ -39,21 +44,22 @@ export class EstrfuncComponent implements OnInit {
       this.listarActividades();
    }
 
-   setcolor() {
-      let colores: string[];
-      let coloresJSON = sessionStorage.getItem('/pregastos');
-      if (!coloresJSON) {
-         colores = ['rgb(80, 83, 54)', 'rgb(228, 248, 205)'];
-         const coloresJSON = JSON.stringify(colores);
-         sessionStorage.setItem('/pregastos', coloresJSON);
-      } else colores = JSON.parse(coloresJSON);
-
+   colocaColor(colores: any) {
       document.documentElement.style.setProperty('--bgcolor1', colores[0]);
       const cabecera = document.querySelector('.cabecera');
       if (cabecera) cabecera.classList.add('nuevoBG1')
       document.documentElement.style.setProperty('--bgcolor2', colores[1]);
       const detalle = document.querySelector('.detalle');
       if (detalle) detalle.classList.add('nuevoBG2');
+   }
+
+   async buscaColor() {
+      try {
+         const datos = await this.coloresService.setcolor(this.authService.idusuario, 'estrfunc');
+         const coloresJSON = JSON.stringify(datos);
+         sessionStorage.setItem('/estrfunc', coloresJSON);
+         this.colocaColor(datos);
+      } catch (error) { console.error(error); }
    }
 
    public listarActividades() {
@@ -65,10 +71,10 @@ export class EstrfuncComponent implements OnInit {
 
    get f() { return this.formActividad.controls; }
 
-   onCellClick(event: any, idestrfunc: number) {
+   onCellClick(event: any, intest: number) {
       const tagName = event.target.tagName;
       if (tagName === 'TD') {
-         sessionStorage.setItem('idestrfuncToInfo', idestrfunc.toString() );
+         sessionStorage.setItem('intestToInfo', intest.toString());
          this.router.navigate(['info-estrfunc']);
       }
    }
@@ -85,7 +91,7 @@ export class EstrfuncComponent implements OnInit {
 
    modificar(estrfunc: any) {
       this.opcion = 2;
-      this.idestrfunc = estrfunc.idestrfunc;
+      this.intest = estrfunc.intest;
       this.antcodigo = estrfunc.codigo;
       this.antnombre = estrfunc.nombre;
       this.formActividad.setValue({
@@ -109,7 +115,7 @@ export class EstrfuncComponent implements OnInit {
    }
 
    actuActividad() {
-      this.estrfuncService.updateEstrfun(this.idestrfunc, this.formActividad.value).subscribe({
+      this.estrfuncService.updateEstrfun(this.intest, this.formActividad.value).subscribe({
          next: resp => this.listarActividades(),
          error: err => console.error('Al modificar la Actividad: ', err.error)
       });
@@ -117,27 +123,27 @@ export class EstrfuncComponent implements OnInit {
 
    elimActividad(estrfunc: any) {
       this.actividad = estrfunc.codigo + '  ' + estrfunc.nombre;
-      this.idestrfunc = estrfunc.idestrfunc;
-      this.pregasService.countByEstrfunc(estrfunc.idestrfunc).subscribe({
+      this.intest = estrfunc.intest;
+      this.pregasService.countByEstrfunc(estrfunc.intest).subscribe({
          next: resp => {
             this.totpartidas = +resp;
-            if(+resp > 0)  this.sweliminar = false; else this.sweliminar = true;
+            if (+resp > 0) this.sweliminar = false; else this.sweliminar = true;
          },
          error: err => console.error('Al contar las Partidas por Actividad: ', err.error)
       })
    }
 
    elimina() {
-      if (this.idestrfunc != null) {
-         this.estrfuncService.deleteEstrfunc(this.idestrfunc).subscribe({
+      if (this.intest != null) {
+         this.estrfuncService.deleteEstrfunc(this.intest).subscribe({
             next: resp => this.listarActividades(),
             error: err => console.error('Al eliminar una Actividad: ', err.error),
          });
       }
    }
 
-   public info(idestrfunc: number) {
-      sessionStorage.setItem('idestrfuncToInfo', idestrfunc.toString());
+   public info(intest: number) {
+      sessionStorage.setItem('intestToInfo', intest.toString());
       this.router.navigate(['info-estrfunc']);
    }
 

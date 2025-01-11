@@ -8,7 +8,7 @@ import { CommonModule } from '@angular/common';
   ]
 })
 export class Estrfunc{
-  idestrfunc: number;
+  intest: number;
   codigo: String;
   nombre: String;
   movimiento: number;

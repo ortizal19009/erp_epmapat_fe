@@ -46,12 +46,12 @@ export class EstrfuncService {
       return this.http.post(baseUrl, estrfunc);
    }
 
-   getById(idestrfunc: number) {
-      return this.http.get<Estrfunc>(baseUrl + "/" + idestrfunc);
+   getById(intest: number) {
+      return this.http.get<Estrfunc>(baseUrl + "/" + intest);
    }
 
-   deleteEstrfunc(idestrfunc: number): Observable<Object> {
-      return this.http.delete(`${baseUrl}/${idestrfunc}`);
+   deleteEstrfunc(intest: number): Observable<Object> {
+      return this.http.delete(`${baseUrl}/${intest}`);
    }
 
    updateEstrfun(id: number, estrfunc: Estrfunc): Observable<Object> {

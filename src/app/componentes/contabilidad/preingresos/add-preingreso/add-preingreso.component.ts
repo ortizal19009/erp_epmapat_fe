@@ -22,10 +22,15 @@ export class AddPreingresoComponent implements OnInit {
    swvalido = 1;     //Búsqueda de Partida en el Clasificador Presupuestario
    privez = true;    //Para resetear los datos de Búsqueda en el Clasificador
 
-   constructor(public fb: FormBuilder, public fb1: FormBuilder, private preingService: PreingresoService,
-      private clasiService: ClasificadorService, public router: Router, private authService: AutorizaService) { }
+   constructor(public router: Router, public fb: FormBuilder, public fb1: FormBuilder, private authService: AutorizaService,
+       private preingService: PreingresoService, private clasiService: ClasificadorService, ) { }
 
    ngOnInit(): void {
+      sessionStorage.setItem('ventana', '/preingresos');
+      let coloresJSON = sessionStorage.getItem('/preingresos');
+      if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
+
+      let date: Date = new Date();
       this.preingForm = this.fb.group({
          tippar: 1,
          codpart: ['', Validators.required],
@@ -39,8 +44,9 @@ export class AddPreingresoComponent implements OnInit {
          totmisos: 0,
          totdeven: 0,
          intcla: 0,
+         swpluri: 0,
          usucrea: this.authService.idusuario,
-         feccrea: (new Date().toISOString().substring(0, 10))
+         feccrea: date
       });
 
       //Formulario de Busqueda de Partidas del Clasificador (Modal)
@@ -49,6 +55,15 @@ export class AddPreingresoComponent implements OnInit {
          nompar: '',
          filtrar: ''
       });
+   }
+
+   colocaColor(colores: any) {
+      document.documentElement.style.setProperty('--bgcolor1', colores[0]);
+      const cabecera = document.querySelector('.cabecera');
+      if (cabecera) cabecera.classList.add('nuevoBG1')
+      document.documentElement.style.setProperty('--bgcolor2', colores[1]);
+      const detalle = document.querySelector('.detalle');
+      if (detalle) detalle.classList.add('nuevoBG2');
    }
 
    get codpar() { return this.preingForm.get('codpar'); }

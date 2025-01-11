@@ -1,0 +1,73 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 pt-1 pb-0 cabecera border sombra">
+         <div class="col-sm-2 mx-0 ml-1 px-0">
+            <h5 class="ml-1 mt-1 font-weight-bold text-truncate"><i class="bi-blockquote-right"></i>&nbsp; Liquidación(es)</h5>
+         </div>
+         <form [formGroup]="formMovimiento" class="col-sm-9 px-0">
+            <div class="row px-0">
+
+               <div class="input-group col-sm-12">
+                  <input type="text" class="form-control form-control-sm col-sm-5 truncate" formControlName="nomben" readonly>
+                  <input type="text" class="form-control form-control-sm col-sm-1" formControlName="tiptran" readonly>
+                  <input type="text" class="form-control form-control-sm col-sm-2 text-right font-weight-bold" formControlName="valor" readonly>
+                  <input type="text" class="form-control form-control-sm text-center col-sm-2" formControlName="fecha" readonly>
+               </div>
+            </div>
+         </form>
+
+         <div class="btn-group">
+            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white"
+               data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+               <button class="dropdown-item" type="button" [disabled]="!_liquida" (click)="imprimir()">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
+            </div>
+         </div>
+         <div class="btn-group mx-1">
+            <button class="bg-transparent border-0" type="button" (click)="regresar()">
+               <i class="bi-arrow-left-circle text-white icoRegresar"></i>
+            </button>
+         </div>
+
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-md-12">
+
+         <table *ngIf="_liquida" class="table table-hover table-sm table-bordered mb-0 sombra">
+            <thead class="cabecera">
+               <tr>
+                  <th class="text-center">Fecha</th>
+                  <th class="text-center">Asie</th>
+                  <th class="text-center">Cmprbnt</th>
+                  <th class="text-right">Liquida</th>
+                  <th class="text-right">Saldo</th>
+                  <th class="text-center">Descripción</th>
+               </tr>
+            </thead>
+            <tbody class="detalle small roboto pad0">
+               <tr *ngFor="let liquida of _liquida">
+                  <td class="text-center">{{ liquida.inttra.idasiento.fecha | date: 'yyyy-MM-dd' }}</td>
+                  <td class="text-center">{{ liquida.inttra.idasiento.asiento }}</td>
+                  <!-- <td class="text-center">{{liquida.inttra.idasiento.compro}}</td> -->
+                  <td class="text-center">{{ comprobante( liquida.inttra.idasiento.tipcom, liquida.inttra.idasiento.compro) }}</td>
+                  <td class="text-right">{{ liquida.valor | number: '1.2-2'}}</td>
+                  <td class="text-right custom-cell" [ngClass]="{'transparente': liquida.saldo == 0}">{{ liquida.saldo | number: '1.2-2' }}</td>
+                  <td class="text-left text-truncate ancho">{{ liquida.inttra.descri }}</td>
+               </tr>
+            </tbody>
+            <tfoot *ngIf="_liquida" class="font-weight-bold detalle roboto small pad0">
+               <td colspan="3" class="text-right py-0">TOTAL: {{_liquida.length}}&nbsp;&nbsp;</td>
+               <td class="text-right">{{sumvalor | number: '1.2-2'}} </td> 
+               <td></td><td></td>
+            </tfoot>
+         </table>
+      </div>
+   </div>
+</div>
+

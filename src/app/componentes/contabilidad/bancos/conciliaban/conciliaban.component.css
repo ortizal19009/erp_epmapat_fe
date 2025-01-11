@@ -1,0 +1,9 @@
+.form-control-xs {
+   padding: 0.25rem 0.5rem;
+   font-size: 0.875rem;
+   line-height: 1.25;
+   height: calc(1.5em + 0.5rem + 2px);
+   border: 1px solid #ced4da;
+   border-radius: 0.25rem;
+ }
+ 

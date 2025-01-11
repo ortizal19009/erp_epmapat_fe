@@ -15,5 +15,5 @@ export class Certipresu {
 	fecmodi: Date;
 	idbene: Beneficiarios;
 	idbeneres: Beneficiarios;
-	iddocumento: Documentos;
+	intdoc: Documentos;
 }

@@ -1,193 +1,320 @@
-<div class="content pt-1 pl-3">
+<div class="content mt-1 pt-1 pl-0">
    <div class="container-fluid">
-       <div class="row mt-0 mb-2">
-           <div class="col-sm-8">
-               <h3 class="m-0 font-weight-bold">{{titulo}}</h3>
-           </div>
-           <div class="col-sm-2 d-flex justify-content-end ">
-               <button class="btn btn-sm btn-outline-primary" data-toggle="modal"
-                   data-target="#newCertificacionModal">+ Nuevo</button>
-           </div>
-           <div class="col-sm-2 d-flex justify-content-end ">
-               <button class="btn btn-sm btn-outline-primary" (click)="retroceder()">
-                   <i class="fa fa-reply-all"></i> Retroceder
-               </button>
-           </div>
-       </div>
-   </div><!-- /.container-fluid -->
+      <div class="row m-0 px-0 py-1 justify-content-start sombra cabecera border">
+         <div class="col-sm-12 p-0.">
+            <div class="row p-0">
+               <div class="input-group input-group-sm col-sm-2 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Certificación</span>
+                  </div>
+                  <input type="text" class="form-control text-center" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iCertificacion.numero" readonly>
+               </div>
+               <div class="input-group input-group-sm col-sm-2 mb-1 mr-0 ">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Fecha</span>
+                  </div>
+                  <input type="text" class="form-control text-center" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iCertificacion.fecha" readonly>
+               </div>
+               <div class="input-group input-group-sm col-sm-3 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Doc</span>
+                  </div>
+                  <input type="text" class="form-control" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iCertificacion.docu" readonly>
+               </div>
+               <div class="input-group input-group-sm col-sm-4 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Responsable</span>
+                  </div>
+                  <input type="text" class="form-control" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iCertificacion.respon" readonly>
+               </div>
+
+               <div class="btn-group ml-auto mt-0 px-0">
+                  <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
+                     data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+                  </button>
+
+                  <div class="dropdown-menu dropdown-menu-right bg-dark roboto px-0">
+                     <button class="dropdown-item" type="button" [disabled]="swnuevo || swmodificar" (click)="nuevo()">
+                        <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+                     <button class="dropdown-item" type="button">
+                        <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
+                  </div>
+
+                  <div class="col-sm px-0">
+                     <button class="bg-transparent border-0" type="submit" (click)="regresar()">
+                        <i class="bi-arrow-left-circle text-white icoRegresar"></i>
+                     </button>
+                  </div>
+               </div>
+            </div>
+
+         </div>
+
+      </div>
+   </div>
 </div>
+
 <div class="container-fluid">
    <div class="row mb-0">
-       <div class="col-sm">
-           <div class="card card-success card-outline">
-               <div class="card-body box-porfile">
-                   <div class="card-body box-porfile">
-                       <table class="table table-sm table-bordered">
-                           <tbody>
-                               <tr>
-                                   <td class="font-weight-bold">Número</td>
-                                   <td>{{presuDatos.numero}}</td>
-                                   <td class="font-weight-bold">Beneficiario</td>
-                                   <td>{{presuDatos.idbene.nomben}}</td>
-                                   <td class="font-weight-bold">Responsable</td>
-                                   <td>{{presuDatos.idbeneres.nomben}}</td>
-                               </tr>
-                               <tr>
-                                   <td class="font-weight-bold">Documento</td>
-                                   <td>{{presuDatos.iddocumento.nomdoc}} {{presuDatos.numdoc}}</td>
-                                   <td class="font-weight-bold">Valor</td>
-                                   <td>{{presuDatos.valor}}</td>
-                                   <td class="font-weight-bold">Fecha</td>
-                                   <td>{{presuDatos.fecha}}</td>
-                               </tr>
-                               <tr>
-                                   <td class="font-weight-bold">Descripción</td>
-                                   <td colspan="5">{{presuDatos.descripcion}}</td>
-                               </tr>
-                           </tbody>
-                       </table>
-                       <div class="row mt-2">
-                           <div class="col-sm d-flex justify-content-end">
-                               <button class="btn btn-sm btn-warning mx-2" data-toggle="modal"
-                                   data-target="#modPresupueModal" (click)="modPresupue()">Modificar</button>
-                               <button class="btn btn-sm btn-danger">Eliminar</button>
-                           </div>
-                       </div>
-                   </div>
+      <div class="col-sm-12">
+         <table class="table table-hover table-bordered table-sm sombra">
+            <thead class="cabecera">
+               <tr class="pad0">
+                  <th>Partida</th>
+                  <th>Denominación</th>
+                  <th class="text-right">Saldo</th>
+                  <th class="text-right">Valor</th>
+                  <th class="text-right col-sm-1 small font-weight-bold roboto">Nuevo saldo</th>
+                  <th class="text-center">C</th>
+                  <th class="text-right col-sm-1 text-truncate">Compromiso</th>
+                  <th>Descripción</th>
+                  <th class="text-center">
+                     <div class="col-sm px-0">
+                        <button class="bg-transparent border-0 toolt" type="button" data-toggle="tooltip"
+                           title={{iCertificacion.descripcion}} disabled>
+                           <i class="bi-file-text-fill text-white"></i>
+                        </button>
+                     </div>
+                  </th>
+               </tr>
+            </thead>
+            <tbody class="detalle roboto small pad0">
+               <tr class="fila" *ngFor="let partixcerti of _partixcerti; let i=index">
+                  <td>{{ partixcerti.intpre.codpar}}</td>
+                  <td class="text-truncate ancho toolt" data-toggle="tooltip"
+                     [title]="partixcerti.intpre.nompar.length > 60 ? partixcerti.intpre.nompar : ''">{{
+                     partixcerti.intpre.nompar }}</td>
+
+                  <td class="text-right">{{ partixcerti.saldo | number: '1.2-2'}}</td>
+                  <td class="text-right">{{ partixcerti.valor | number: '1.2-2'}}</td>
+                  <td class="text-right">{{ partixcerti.saldo - partixcerti.valor | number: '1.2-2'}}</td>
+                  <td class="bg-modificar text-center">
+                     <i *ngIf="partixcerti.inteje > 0" class="bi-check-circle " (click)="handleClick( partixcerti )"
+                        data-toggle="tooltip" title="Compromiso(s)"></i>
+                  </td>
+                  <td class="text-right">{{ partixcerti.totprmisos | number: '1.2-2'}}</td>
+                  <td class="text-truncate ancho toolt" data-toggle="tooltip"
+                     [title]="partixcerti.descripcion.length > 60 ? partixcerti.descripcion : ''">{{
+                     partixcerti.descripcion }}</td>
+                  <td class="text-center">
+                     <div class="btn-group py-0">
+                        <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
+                           aria-expanded="false">
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right popLista">
+                           <button class="dropdown-item" type="button" [disabled]="swnuevo || swmodificar"
+                              (click)="modificar(partixcerti)">
+                              <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
+                           <button class="dropdown-item" type="button" [disabled]="swnuevo || swmodificar"
+                              data-toggle="modal" data-target="#eliminar" (click)="eliminar( partixcerti )">
+                              <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
+                        </div>
+                     </div>
+                  </td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+   </div>
+
+   <!-- Nueva partida de la certificación -->
+   <div *ngIf="swnuevo" class="row mb-0 justify-content-center">
+      <div class="card card-body col-sm-8 detalle sombra pt-1">
+         <h6 class="font-weight-bold text-center mt-2 mb-1">Nueva Partida de la Certificación <span
+               class="fantacygreen"> {{iCertificacion.numero}} </span>
+         </h6>
+         <form [formGroup]="formPartixcerti">
+            <div class="row">
+
+               <div class="form-group col-md-12 mt-1">
+                  <div class="input-group input-group-sm mb-1 ">
+                     <div class="input-group-prepend">
+                        <label class="input-group-text">Partida<sup class="green">*</sup></label>
+                     </div>
+                     <input type="text" class="form-control form-control-sm col-sm-4" formControlName="intpre" autoFocus
+                        list="codparList" (input)="onPartidaSelected($event); partidaxCodpar($event)"
+                        [ngClass]="{'is-invalid': f['intpre'].invalid && f['intpre'].touched,'is-valid': f['intpre'].valid, '': f['intpre'].untouched}">
+                     <datalist role="listbox" id="codparList">
+                        <option *ngFor="let partida of _pargas" value={{partida.codpar}}>
+                           {{partida.nompar}}</option>
+                     </datalist>
+                     <input type="text" class="form-control form-control-sm col-sm-8" formControlName="nompar"
+                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabIndex="-1">
+                  </div>
                </div>
-           </div>
-       </div>
-   </div>
-   <div class="row">
-       <div class="col-sm">
-           <div class="card card-success card-outline">
-               <div class="card-body box-porfile">
-                   <table class="table table-sm table-hover table-bordered table-striped">
-                       <thead class="bg-primary text-center">
-                           <tr>
-                               <th>Código</th>
-                               <th>Partida</th>
-                               <th>Saldo</th>
-                               <th>Valor</th>
-                               <th>Nuevo saldo</th>
-                               <th>C</th>
-                               <th>Compromiso</th>
-                               <th class="col-sm-1">Acciones</th>
-                           </tr>
-                       </thead>
-                       <tbody>
-                           <tr *ngFor="let d_presupue of v_presupue">
-                               <td>{{d_presupue.idpresupue.codpar}}</td>
-                               <td>{{d_presupue.idpresupue.nompar}}</td>
-                               <td>{{d_presupue.saldo}}</td>
-                               <td>{{d_presupue.valor}}</td>
-                               <td>{{d_presupue.saldo - d_presupue.valor}}</td>
-                               <td>C</td>
-                               <td>COMPROMISO</td>
-                               <td class="text-center">
-                                   <div class="btn-group">
-                                       <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0"
-                                           data-toggle="dropdown" aria-expanded="false">
-                                       </button>
-                                       <div class="dropdown-menu dropdown-menu-right popLista">
-                                           <button class="dropdown-item" type="button" data-toggle="modal"
-                                               data-target="#modPartixCertiModal" (click)="modcertixpresu(d_presupue)">
-                                               <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
-                                           <button class="dropdown-item" type="button">
-                                               <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
-                                       </div>
-                                   </div>
-                               </td>
-                           </tr>
-                       </tbody>
-                   </table>
 
+               <div class="form-group col-md-4">
+                  <div class="input-group mb-1 input-group-sm">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold">Saldo<sup class="green">*</sup></span>
+                     </div>
+                     <input type="text" class="form-control form-control-sm text-right" formControlName="saldo"
+                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabIndex="-1"
+                        mask='separator.2'>
+                  </div>
                </div>
-           </div>
-       </div>
-   </div>
-</div>
-<!-- Modal -->
-<div class="modal fade" id="newCertificacionModal" tabindex="-1" aria-labelledby="newCertificacionModalLabel"
-   aria-hidden="true">
-   <div class="modal-dialog modal-lg">
-       <div class="modal-content card-success card-outline">
-           <div class="modal-header">
-               <h5 class="modal-title" id="newCertificacionModalLabel">Detalles partida</h5>
-               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                   <span aria-hidden="true">&times;</span>
-               </button>
-           </div>
-           <div class="modal-body">
-               <form [formGroup]="f_presupue" *ngIf="t_presupue;else fs_presupue">
-                   <label for="">Buscar presupuesto
-                       <div class="row">
-                           <div class="col-sm-10">
-                               <input type="text" class="form-control form-control-sm" formControlName="cod_nom"
-                                   placeholder="Código / Nombre">
-                           </div>
-                           <div class="col-sm-2">
-                               <button class="btn btn-outline-primary btn-sm" (click)="obtenerPresupe()">
-                                   <i class="fa fa-search" aria-hidden="true"></i>
-                               </button>
-                           </div>
-                       </div>
-                   </label>
-               </form>
-               <table class="table table-hover table-sm table-bordered" *ngIf="d_presupue">
-                   <thead class="bg-primary">
-                       <tr>
-                           <th>Codigo partida</th>
-                           <th>Nombre partida</th>
-                       </tr>
-                   </thead>
-                   <tbody>
-                       <tr *ngFor="let d_partidas of dpartidas" (click)="setPresupue(d_partidas)">
-                           <td>{{d_partidas.codpar}}</td>
-                           <td>{{d_partidas.nompar}}</td>
-                       </tr>
-                   </tbody>
-               </table>
-               <ng-template #fs_presupue>
-                   <!-- <app-add-partixcerti [certipresu]="v_presupue" [presupue]="presupue"
-                       (d_presupue)="changeTipo($event)" (reloadPartidas)="reload($event)"></app-add-partixcerti> -->
-               </ng-template>
-           </div>
-       </div>
-   </div>
-</div>
-<!-- Modal MODIFICAR DATOS-->
-<div class="modal fade" id="modPartixCertiModal" tabindex="-1" aria-labelledby="modPartixCertiModalLabel"
-   aria-hidden="true">
-   <div class="modal-dialog modal-lg">
-       <div class="modal-content card-success card-outline">
-           <div class="modal-header">
-               <h5 class="modal-title" id="modPartixCertiModalLabel">Detalles partida</h5>
-               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                   <span aria-hidden="true">&times;</span>
-               </button>
-           </div>
-           <div class="modal-body">
-               <!-- <app-modificar-partixcerti *ngIf="modificar" [v_certixpresu]="certixpresu"></app-modificar-partixcerti> -->
 
-           </div>
-       </div>
-   </div>
-</div>
-<!-- Modal MODIFICAR CABECERA-->
-<div class="modal fade" id="modPresupueModal" tabindex="-1" aria-labelledby="modPresupueModalLabel" aria-hidden="true">
-   <div class="modal-dialog modal-lg">
-       <div class="modal-content card-success card-outline">
-           <div class="modal-header">
-               <h5 class="modal-title" id="modPresupueModalLabel">Modificar presupuesto</h5>
-               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                   <span aria-hidden="true">&times;</span>
-               </button>
-           </div>
-           <div class="modal-body">
-               <!-- <app-modificar-certipresu [presupue]="v_presupue" *ngIf="modpresupue"></app-modificar-certipresu> -->
+               <div class="form-group col-md-4">
+                  <div class="input-group mb-1 input-group-sm">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold">Valor<sup class="green">*</sup></span>
+                     </div>
+                     <input type="text" class="form-control form-control-sm text-right" formControlName="valor"
+                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" required mask='separator.2'
+                        [ngClass]="{'is-invalid': f['valor'].invalid && f['valor'].touched, 'is-valid': f['valor'].valid, '': f['valor'].untouched}">
+                  </div>
+               </div>
 
-           </div>
-       </div>
+               <div class="form-group col-md-4">
+                  <div class="input-group mb-1 input-group-sm">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold"
+                           [ngClass]="{'text-danger': partida.newsaldo < 0}">Nuevo Saldo</span>
+                     </div>
+                     <input type="text" class="form-control form-control-sm text-right" formControlName="newsaldo"
+                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabIndex="-1"
+                        [ngClass]="{'text-danger': partida.newsaldo < 0}">
+                  </div>
+               </div>
+
+               <div class="form-group col-md-12 my-0">
+                  <div class="input-group mb-1 input-group-sm">
+                     <div class="input-group-prepend">
+                        <label class="input-group-text">Descripción</label>
+                     </div>
+                     <textarea class="form-control" formControlName="descripcion" rows="3"></textarea>
+                  </div>
+               </div>
+
+            </div>
+
+            <div class="mt-3 text-center">
+               <button type="submit" class="btn btn-success btn-sm mx-1" [disabled]="!formPartixcerti.valid">
+                  <i class="fa fa-check-circle"></i> Aceptar</button>
+               <button type="button" class="btn btn-success mx-1 btn-sm" (click)="cancelar()"><i
+                     class="fa fa-times-circle"></i> Cancelar
+               </button>
+            </div>
+         </form>
+      </div>
    </div>
+
+   <!-- Modificar partida de la certificación -->
+   <div *ngIf="swmodificar" class="row mb-0 justify-content-center">
+      <div class="card card-body col-sm-8 detalle sombra">
+         <h6 class="font-weight-bold text-center mt-0 mb-1">Modificar Partida de la Certificación <span
+               class="fantacygreen"> {{iCertificacion.numero}} </span>
+         </h6>
+         <form [formGroup]="formPartixcerti">
+            <div class="row">
+
+               <div class="form-group col-md-12 mt-1">
+                  <div class="input-group input-group-sm mb-1 ">
+                     <div class="input-group-prepend">
+                        <label class="input-group-text">Partida<sup class="green">*</sup></label>
+                     </div>
+                     <input type="text" class="form-control form-control-sm col-sm-4" formControlName="codpar" readonly
+                        tabIndex="-1">
+                     <input type="text" class="form-control form-control-sm col-sm-8" formControlName="nompar"
+                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabIndex="-1">
+                  </div>
+               </div>
+
+               <div class="form-group col-md-4">
+                  <div class="input-group mb-1 input-group-sm">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold">Saldo<sup class="green">*</sup></span>
+                     </div>
+                     <input type="text" class="form-control form-control-sm text-right" formControlName="saldo"
+                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabIndex="-1">
+                  </div>
+               </div>
+
+               <div class="form-group col-md-4">
+                  <div class="input-group mb-1 input-group-sm">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold">Valor<sup class="green">*</sup></span>
+                     </div>
+                     <input type="text" class="form-control form-control-sm text-right" formControlName="valor"
+                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" required autoFocus mask='separator.2'
+                        [ngClass]="{'is-invalid': f['valor'].invalid && f['valor'].touched, 'is-valid': f['valor'].valid, '': f['valor'].untouched}">
+                  </div>
+               </div>
+
+               <div class="form-group col-md-4">
+                  <div class="input-group mb-1 input-group-sm">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold"
+                           [ngClass]="{'text-danger': partida.newsaldo < 0}">Nuevo Saldo</span>
+                     </div>
+                     <input type="text" class="form-control form-control-sm text-right" formControlName="newsaldo"
+                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabIndex="-1"
+                        [ngClass]="{'text-danger': partida.newsaldo < 0}">
+                  </div>
+               </div>
+
+               <div class="form-group col-md-12 my-0">
+                  <div class="input-group mb-1 input-group-sm">
+                     <div class="input-group-prepend">
+                        <label class="input-group-text">Descripción</label>
+                     </div>
+                     <textarea class="form-control" formControlName="descripcion" rows="3"></textarea>
+                  </div>
+               </div>
+
+            </div>
+
+            <div class="mt-3 text-center">
+               <button type="submit" class="btn btn-success btn-sm mx-1"
+                  [disabled]="formPartixcerti.pristine || !formPartixcerti.valid">
+                  <i class="fa fa-check-circle"></i> Aceptar</button>
+               <button type="button" class="btn btn-success mx-1 btn-sm" (click)="cancelar()"><i
+                     class="fa fa-times-circle"></i> Cancelar
+               </button>
+            </div>
+         </form>
+      </div>
+   </div>
+
+   <!-- Modal Eliminar-->
+   <div class='modal fade' id='eliminar' tabindex='-1' aria-hidden='true'>
+      <div class='modal-dialog modal-dialog-centered'>
+         <div class='modal-content'>
+            <div class='modal-header justify-content-center cabecera border py-2'>
+               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Mensaje</h5>
+            </div>
+            <div *ngIf="sweliminar; then thenBlock else elseBlock"></div>
+            <ng-template #thenBlock>
+               <div class='modal-body text-center roboto detalle'>
+                  ¿ Eliminar la Partida <span class="fantacygreen"> {{partida.saldo}} </span> de esta Certificación ?
+               </div>
+               <div class='modal-footer justify-content-center detalle border py-1'>
+                  <button type='button' class='btn btn-success btn-sm' data-dismiss='modal'>
+                     <i class="fa fa-check-circle"></i> Aceptar
+                  </button>
+                  <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
+                     <i class="fa fa-times-circle"></i> Cancelar</button>
+               </div>
+            </ng-template>
+            <ng-template #elseBlock>
+               <div class='modal-body detalle'>
+                  <div class="alert alert-warning text-center" role="alert">
+                     No puede eliminar la Partida <span class="fantacygreen"> {{partida.codpar}}</span>
+                     <br> de esta Certificación, tiene compromiso(s).
+                  </div>
+               </div>
+               <div class='text-center detalle'>
+                  <button type='button' class='btn btn-success btn-sm mb-3' data-dismiss='modal'>
+                     <i class="fa fa-check-circle"></i>&nbsp; Aceptar
+                  </button>
+               </div>
+            </ng-template>
+         </div>
+      </div>
+   </div>
+
 </div>

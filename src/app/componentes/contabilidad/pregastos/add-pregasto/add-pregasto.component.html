@@ -19,10 +19,10 @@
                      <div class="input-group-prepend">
                         <label class="input-group-text">Actividad</label>
                      </div>
-                     <input type="text" class="form-control form-control-sm" formControlName="idestrfunc"
+                     <input type="text" class="form-control form-control-sm" formControlName="codacti"
                         list="actividadList" (input)="listaActividades($event)" required minlength="2" maxlength="2"
-                        [ngClass]="{'is-invalid': f['idestrfunc'].invalid && f['idestrfunc'].touched,
-                        'is-valid': f['idestrfunc'].valid, '': f['idestrfunc'].untouched}">
+                        [ngClass]="{'is-invalid': f['codacti'].invalid && f['codacti'].touched,
+                        'is-valid': f['codacti'].valid, '': f['codacti'].untouched}">
                      <datalist role="listbox" id="actividadList">
                         <option *ngFor=" let actividad of _actividades" value={{actividad.codigo}}>
                            {{ actividad.nombre}}</option>

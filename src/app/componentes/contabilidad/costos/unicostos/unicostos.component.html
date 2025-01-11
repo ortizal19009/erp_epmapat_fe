@@ -1,0 +1,79 @@
+<div class="content mt-1 pt-1 px-2">
+   <div class="container-fluid">
+      <div class="row mt-0 px-1 pt-1 justify-content-center cabecera border sombra">
+         <div class="col-sm-11 text-center">
+            <h4 class="font-weight-bold text-truncate ml-2"><i class="bi-currency-dollar"></i>&nbsp; Costos - Unidades</h4>
+         </div>
+
+         <div class="btn-group ml-auto mt-0">
+            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
+               data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto ">
+               <button class="dropdown-item" type="button" (click)="cuecostos()">
+                  <i class="bi-book"></i>&nbsp; Cuentas de costos</button>
+               <button class="dropdown-item" type="button" (click)="comparativo()">
+                  <i class="bi-symmetry-vertical"></i>&nbsp; Comparativo devengado/presupuesto</button>
+               <button class="dropdown-item" type="button" (click)="resulcostos()">
+                  <i class="bi-card-heading"></i>&nbsp; Estado de resultados</button>
+               <button class="dropdown-item" type="button" (click)="imprimir()">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
+            </div>
+         </div>
+
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row justify-content-center mb-0">
+      <div class="col-sm-5">
+         <table class="table table-hover table-bordered table-sm sombra">
+            <thead class="cabecera">
+               <tr class="text-center pad0">
+                  <th class="text-center">Mes</th>
+                  <th class="text-right">Agua(Fac)</th>
+                  <th class="text-right">Agua(Prod)</th>
+                  <th class="text-right">Alcantarillado</th>
+                  <th></th>
+               </tr>
+            </thead>
+            <tbody class="detalle roboto small">
+               <tr *ngFor="let unicostos of _unicostos" class="fila pad0">
+                  <td class="text-center">{{ unicostos.mes }}</td>
+                  <td class="text-right" [ngClass]="{'transparente': unicostos.agua == 0}">{{ unicostos.agua | number:
+                     '1.2-2' }}</td>
+                  <td class="text-right" [ngClass]="{'transparente': unicostos.aguaprod == 0}">{{ unicostos.aguaprod |
+                     number: '1.2-2' }}</td>
+                  <td class="text-right" [ngClass]="{'transparente': unicostos.alcanta == 0}">{{ unicostos.alcanta |
+                     number: '1.2-2' }}</td>
+
+                  <td class="text-center">
+                     <div class="btn-group py-0">
+                        <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
+                           aria-expanded="false">
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right popLista">
+                           <button class="dropdown-item" type="button">
+                              <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
+                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalUnico">
+                              <i class="bi-file-diff"></i>&nbsp; Calcular</button>
+                        </div>
+                     </div>
+                  </td>
+
+               </tr>
+            </tbody>
+            <tfoot class="detalle font-weight-bold pad0 roboto small">
+               <tr class="text-center">
+                  <td>TOTAL </td>
+                  <td class="text-right">{{sumagua | number: '1.2-2'}}</td>
+                  <td class="text-right">{{sumaguaprod | number: '1.2-2'}}</td>
+                  <td class="text-right">{{sumalcanta | number: '1.2-2'}}</td>
+                  <td></td>
+               </tr>
+            </tfoot>
+         </table>
+      </div>
+   </div>
+</div>

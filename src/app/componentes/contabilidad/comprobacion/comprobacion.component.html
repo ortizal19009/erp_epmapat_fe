@@ -1,0 +1,229 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start sombra cabecera border">
+         <div class="col-sm-3 my-1">
+            <h5 class="font-weight-bold text-truncate"> <i class="bi-card-checklist"></i> &nbsp;Balance de
+               comprobación</h5>
+         </div>
+         <div class="col-sm-8">
+            <form [formGroup]="formBuscar">
+               <div class="row">
+
+                  <div class="input-group col-sm-2 my-1">
+                     <input type="text" class="form-control form-control-sm text-left" formControlName="codcue"
+                        placeholder="Cuenta" />
+                  </div>
+
+                  <div class="form-group my-1">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Sinafip </span>
+                           <div class="input-group-text">
+                              <input type="checkbox" formControlName="sigef" (change)="changeSigef()">
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div *ngIf="!swsigef" class="form-group my-1">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend sm">
+                           <span class="input-group-text font-weight-bold">Nivel </span>
+                        </div>
+                        <select class="form-control form-control-sm col-sm-8" id="numnivel" formControlName="numnivel">
+                           <option value='2' selected>Grupo</option>
+                           <option value='3'>SubGrupo</option>
+                           <option value='6'>Cuenta Nivel 1</option>
+                           <option value='9'>Cuenta Nivel 2</option>
+                           <option value='12'>Cuenta Nivel 3</option>
+                           <option value='15'>Cuenta Nivel 4</option>
+                        </select>
+                     </div>
+                  </div>
+
+                  <div class="input-group col-sm-4 my-1 ">
+                     <input type="date" class="form-control form-control-sm text-center" formControlName="desdeFecha"
+                        max="{{ today | date : 'yyyy-MM-dd' }}" />
+                     <input type="date" class="form-control form-control-sm text-center" formControlName="hastaFecha"
+                        max="{{ date | date : 'yyyy-MM-dd' }}" />
+                  </div>
+
+                  <div class="col-sm my-1">
+                     <button class="btn btn-primary btn-sm" type="submit" (click)="balance_comprobacion()">
+                        <i class="fa fa-search"></i> Buscar
+                     </button>
+                  </div>
+
+               </div>
+            </form>
+         </div>
+
+         <div class="btn-group ml-auto my-1">
+            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
+               data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto ">
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar">
+                  <i class="bi-file-earmark-arrow-up"></i> &nbsp; Exportar</button>
+            </div>
+         </div>
+
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-12">
+         <table *ngIf="arreglo3.length > 0" class="table table-hover table-bordered table-sm sombra">
+            <thead class="text-center cabecera">
+               <tr class="text-center pad0">
+                  <th>Cuenta</th>
+                  <th>Denominación</th>
+                  <th>Deudor</th>
+                  <th>Acreedor</th>
+                  <th>Débitos</th>
+                  <th>Créditos</th>
+                  <th>Débitos</th>
+                  <th>Créditos</th>
+                  <th>Deudor</th>
+                  <th>Acreedor</th>
+               </tr>
+            </thead>
+            <tbody class="detalle roboto small">
+               <tr *ngFor="let cuenta of arreglo3" class="fila pad0">
+                  <td [ngClass]="{'font-weight-bold': cuenta.movcue != 2}">{{ cuenta.codcue}}</td>
+                  <td [ngClass]="{'font-weight-bold': cuenta.movcue != 2}" class="text-left text-truncate ancho"
+                     data-toggle="tooltip" [title]="cuenta.nomcue.length > 40 ? cuenta.nomcue : ''">
+                     {{ cuenta.nomcue }}</td>
+                  <td class="text-right"
+                     [ngClass]="{'transparente': cuenta.deudor == 0, 'font-weight-bold': cuenta.movcue != 2 }">{{
+                     cuenta.deudor|
+                     number:'1.2-2'}}</td>
+                  <td class="text-right"
+                     [ngClass]="{'transparente': cuenta.acreedor== 0, 'font-weight-bold': cuenta.movcue != 2}">{{
+                     cuenta.acreedor|
+                     number:'1.2-2'}}</td>
+                  <td class="text-right"
+                     [ngClass]="{'transparente': cuenta.debito == 0, 'font-weight-bold': cuenta.movcue != 2}">{{
+                     cuenta.debito|
+                     number:'1.2-2'}}</td>
+                  <td class="text-right"
+                     [ngClass]="{'transparente': cuenta.credito == 0, 'font-weight-bold': cuenta.movcue != 2}">{{
+                     cuenta.credito|
+                     number:'1.2-2'}}</td>
+                  <td class="text-right"
+                     [ngClass]="{'transparente': cuenta.sumdebito == 0, 'font-weight-bold': cuenta.movcue != 2}">{{
+                     cuenta.sumdebito|
+                     number:'1.2-2'}}</td>
+                  <td class="text-right"
+                     [ngClass]="{'transparente': cuenta.sumcredito == 0, 'font-weight-bold': cuenta.movcue != 2}">{{
+                     cuenta.sumcredito|
+                     number:'1.2-2'}}</td>
+                  <td class="text-right"
+                     [ngClass]="{'transparente': cuenta.saldeudor == 0, 'font-weight-bold': cuenta.movcue != 2}">{{
+                     cuenta.saldeudor|
+                     number:'1.2-2'}}</td>
+                  <td class="text-right"
+                     [ngClass]="{'transparente': cuenta.salacreedor == 0, 'font-weight-bold': cuenta.movcue != 2}">{{
+                     cuenta.salacreedor|
+                     number:'1.2-2'}}</td>
+               </tr>
+            </tbody>
+            <tfoot class="font-weight-bold text-right detalle roboto small pad0">
+               <tr>
+                  <td colspan="2">TOTAL </td>
+                  <td>{{tb1 | number: '1.2-2'}}</td>
+                  <td>{{tb2 | number: '1.2-2'}}</td>
+                  <td>{{tb3 | number: '1.2-2'}}</td>
+                  <td>{{tb4 | number: '1.2-2'}}</td>
+                  <td>{{tb5 | number: '1.2-2'}}</td>
+                  <td>{{tb6 | number: '1.2-2'}}</td>
+                  <td>{{tb7 | number: '1.2-2'}}</td>
+                  <td>{{tb8 | number: '1.2-2'}}</td>
+               </tr>
+            </tfoot>
+
+         </table>
+      </div>
+   </div>
+
+   <!-- MODAL Imprimir-->
+   <div class="modal fade" id="imprimir" tabindex="-1" aria-labelledby="imprimirLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+         <div class="modal-content border">
+            <div class='modal-header py-2 justify-content-center cabecera'>
+               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Imprimir</h5>
+            </div>
+            <div class='modal-body'>
+
+               <div class="input-group mb-3 input-group-sm">
+                  <div class="input-group-prepend">
+                     <label class="input-group-text" for="inputGroupSelect01">Reporte</label>
+                  </div>
+                  <select class="custom-select" id="inputGroupSelect01">
+                     <option selected>Balance de Comproboción</option>
+                  </select>
+               </div>
+
+               <div class="input-group input-group-sm mb-0">
+                  <div class="input-group-prepend">
+                     <small class="input-group-text">Abrir en otra página</small>
+                     <div class="input-group-text">
+                        <input type="checkbox" [(ngModel)]="otraPagina">
+                     </div>
+                  </div>
+               </div>
+
+            </div>
+            <div class='modal-footer justify-content-center'>
+               <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="pdf()"
+                  [attr.data-target]="otraPagina ? null : '#pdf'" data-toggle="modal">
+                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+               <button type='button' class='btn btn-sm btn-outline-success' data-dismiss='modal'>
+                  <i class="bi bi-x-circle"></i> Cancelar</button>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- MODAL Exportar -->
+   <div class="modal fade" id="exportar" tabindex="-1" aria-labelledby="exportarLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+         <div class="modal-content border">
+            <div class='modal-header py-2 justify-content-center cabecera'>
+               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Exportar</h5>
+            </div>
+            <div class='modal-body cuerpo'>
+
+               <div class="form-group  my-0 py-0">
+                  <div class="input-group input-group-sm mb-3">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm" data-toggle="tooltip"
+                           title="Obligatorio y mínimo 3 caracteres">Archivo</span>
+                     </div>
+                     <input type="text" class="form-control" [(ngModel)]="archExportar" aria-label="Small"
+                        aria-describedby="inputGroup-sizing-sm" required minlength="3" maxlength="20">
+                  </div>
+               </div>
+
+               <div class="row justify-content-center">
+                  <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' data-toggle="modal"
+                     (click)="exportar()">
+                     <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+                  <button type='button' class='btn btn-sm btn-outline-success btn-sm mx-1' data-dismiss='modal'>
+                     <i class="bi bi-x-circle"></i> Cancelar</button>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- MODAL PDF (En la misma página)-->
+<div class='modal fade' id='pdf' tabindex='-1' aria-labelledby='pdf' aria-hidden='true'>
+   <div class='modal-dialog modal-sm'>
+   </div>
+</div>

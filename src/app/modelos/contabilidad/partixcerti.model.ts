@@ -12,7 +12,7 @@ export class Partixcerti {
   usumodi: number;
   fecmodi: Date;
   idejecucion: number;
-  idpresupue: Presupue;
+  intpre: Presupue;
   idcerti: Certipresu;
   idparxcer_: number;
 }

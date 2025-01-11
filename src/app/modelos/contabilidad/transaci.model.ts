@@ -5,7 +5,7 @@ import { Cuentas } from "./cuentas.model";
 
 export class Transaci {
 	
-   idtransa: number;
+   inttra: number;
 	orden: number;
 	codcue: String;
 	valor: number;
@@ -14,13 +14,13 @@ export class Transaci {
 	numdoc: String;
 	tiptran: number;
 	totbene: number;
-	swconcili: Boolean;
+	swconcili: number;
 	mesconcili: number;
 	idasiento: Asientos;
 	idcuenta: Cuentas;
 	idbene: Beneficiarios;
-	iddocumento: Documentos;
-	idpresupue: number;
+	intdoc: Documentos;
+	intpre: number;
 	codpartr: String;
 	codcueiog: String;
 	debeiog: number;

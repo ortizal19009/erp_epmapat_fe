@@ -15,6 +15,7 @@ export class TransaciComponent implements OnInit {
 
    formAsiento: FormGroup;
    idasiento: number;
+   padre: string;
    iAsiento = {} as interfaceAsiento; //Interface para los datos del Asiento
    _transaci: any;
    filtro: string;
@@ -23,11 +24,12 @@ export class TransaciComponent implements OnInit {
    selectedValue: string = "0";
    codcue: String;
    sweliminar: boolean = false;
-   idtransa: number
+   inttra: number
    swhay: boolean
+   actualizar: boolean = false;
 
-   constructor(private fb: FormBuilder, private router: Router, private coloresService: ColoresService, private asiService: AsientosService,
-      private tranService: TransaciService) { }
+   constructor(private fb: FormBuilder, private router: Router, private coloresService: ColoresService,
+      private asiService: AsientosService, private tranService: TransaciService) { }
 
    ngOnInit(): void {
       sessionStorage.setItem('ventana', '/transaci');
@@ -36,7 +38,21 @@ export class TransaciComponent implements OnInit {
       else this.buscaColor();
 
       this.datosAsiento();
-      this.transacciones();
+      
+      const actuAsiento = sessionStorage.getItem('actuAsiento');  //Regresa de modi-transaci para actualizar los totales
+      sessionStorage.removeItem('actuAsiento');
+      if ( actuAsiento ) { if( actuAsiento == 'true' ){ this.actualizar = true } else { this.actualizar = false} };
+      // console.log('this.actualizar: ', this.actualizar)
+      this.transacciones( this.actualizar );  //Cuando elimina o modifica (debcre o valor) es true para que actualice totales del asiento
+   }
+
+   colocaColor(colores: any) {
+      document.documentElement.style.setProperty('--bgcolor1', colores[0]);
+      const cabecera = document.querySelector('.cabecera');
+      if (cabecera) cabecera.classList.add('nuevoBG1')
+      document.documentElement.style.setProperty('--bgcolor2', colores[1]);
+      const detalle = document.querySelector('.detalle');
+      if (detalle) detalle.classList.add('nuevoBG2');
    }
 
    async buscaColor() {
@@ -50,43 +66,39 @@ export class TransaciComponent implements OnInit {
       }
    }
 
-   colocaColor(colores: any) {
-      document.documentElement.style.setProperty('--bgcolor1', colores[0]);
-      const cabecera = document.querySelector('.cabecera');
-      if (cabecera) cabecera.classList.add('nuevoBG1')
-      document.documentElement.style.setProperty('--bgcolor2', colores[1]);
-      const detalle = document.querySelector('.detalle');
-      if (detalle) detalle.classList.add('nuevoBG2');
-   }
-
    datosAsiento() {
-      this.idasiento = +sessionStorage.getItem('idasientoToTransaci')!;
+      let asientoToTransaci = JSON.parse(sessionStorage.getItem("asientoToTransaci")!);
+      // sessionStorage.removeItem("asientoToTransaci"); OJO: 
+      this.idasiento = asientoToTransaci.idasiento;
+      this.padre = asientoToTransaci.padre;
+
       this.asiService.unAsiento(this.idasiento).subscribe({
          next: datos => {
             this.iAsiento.asiento = datos.asiento;
             this.iAsiento.fecha = datos.fecha;
-            this.iAsiento.comprobante = nomcomprobante(datos.tipcom) + datos.compro.toString();
+            this.iAsiento.comprobante = codcomprobante(datos.tipcom) + datos.compro.toString();
             this.iAsiento.beneficiario = datos.idbene.nomben;
-            if (datos.iddocumento.iddocumento == 1) this.iAsiento.documento = datos.numdoc;
-            else this.iAsiento.documento = datos.iddocumento.nomdoc + ' ' + datos.numdoc;
+            if (datos.intdoc.intdoc == 1) this.iAsiento.documento = datos.numdoc;
+            else this.iAsiento.documento = datos.intdoc.nomdoc + ' ' + datos.numdoc;
+            this.iAsiento.glosa = datos.glosa;
          },
          error: err => console.error(err.error)
       });
    }
 
-   transacciones() {
+   transacciones(actualizar: boolean) {
       this.tranService.getTransaci(this.idasiento).subscribe({
          next: resp => {
             this._transaci = resp;
             this.swhay = false;
-            if(this._transaci.length > 0 ) this.swhay = true;
-            this.total();
+            if (this._transaci.length > 0) this.swhay = true;
+            this.total(actualizar);
          },
          error: err => console.error(err.error)
       });
    }
 
-   total() {
+   total(actualizar: boolean) {
       let sumDebe: number = 0;
       let sumHaber: number = 0;
       let i = 0;
@@ -99,22 +111,27 @@ export class TransaciComponent implements OnInit {
          }
          i++;
       });
-      this.totDebe = sumDebe;
-      this.totHaber = sumHaber;
+      this.totDebe = Math.round(sumDebe * 100) / 100;
+      this.totHaber = Math.round(sumHaber * 100) / 100;
+      if(actualizar) {
+         this.asiService.updateTotdebAndTotcre(this.idasiento, +this.totDebe, +this.totHaber).subscribe({
+            next: resp => { },
+            error: err => console.error(err.error)
+         });
+      }
    }
 
-   regresar() { this.router.navigate(['/asientos']); }
+   regresar() {
+      // this.router.navigate(['/asientos']);
+      this.router.navigate([this.padre]);
+   }
 
    changeTiptran() {
       // console.log('Valor seleccionado:', this.selectedValue);
    }
 
    nuevo() {
-      const datosToAddtransaci = {
-         totDebe: this.totDebe,
-         totHaber: this.totHaber,
-      };
-      sessionStorage.setItem("datosToAddtransaci", JSON.stringify(datosToAddtransaci));
+      sessionStorage.setItem("datosToAddtransaci", JSON.stringify({ idasiento: this.idasiento, totDebe: this.totDebe, totHaber: this.totHaber }));
       switch (+this.selectedValue) {
          case 0:
             this.router.navigate(['/add-transaci']);
@@ -135,27 +152,36 @@ export class TransaciComponent implements OnInit {
             this.router.navigate(['/add-liquiacfp']);
             break;
          default:
-         // Code to execute if expression is not equal to any of the case values
+         // 
       }
 
+   }
+
+   modificar(inttra: number) {
+      // sessionStorage.setItem("inttraToModi", inttra.toString());
+      sessionStorage.setItem("datosToModitransaci", JSON.stringify({ inttra: inttra, idasiento: this.idasiento, totDebe: this.totDebe, totHaber: this.totHaber }));
+      this.router.navigate(['/modi-transaci']);
    }
 
    eliminar(transaci: Transaci) {
       if (transaci.tiptran == 0) {
          this.sweliminar = true
-         this.idtransa = transaci.idtransa;
+         this.inttra = transaci.inttra;
       }
       else this.sweliminar = false;
       this.codcue = transaci.codcue;
    }
 
    elimina() {
-      this.tranService.deleteTransaci(this.idtransa).subscribe({
-         next: datos => {
-            this.transacciones();
-         },
+      this.tranService.deleteTransaci(this.inttra).subscribe({
+         next: datos =>  this.transacciones( true ),
          error: err => console.error('Al eliminar una Transacción: ', err.error)
       });
+   }
+
+   imprimir() {
+      sessionStorage.setItem("idasientoToImpExp", this.idasiento.toString());
+      this.router.navigate(['/imp-transaci']);
    }
 
 }
@@ -166,24 +192,15 @@ interface interfaceAsiento {
    comprobante: string;
    documento: String;
    beneficiario: String;
+   glosa: String;
 }
 
-//Nombre Tipo de Comprobante
-function nomcomprobante(tipcom: number): string {
-   var rtn: string;
-   switch (tipcom) {
-      case 1: rtn = 'I-';
-         break;
-      case 2: rtn = 'E-';
-         break;
-      case 3: rtn = 'DC-';
-         break;
-      case 4: rtn = 'DI-';
-         break;
-      case 5: rtn = 'DE-';
-         break;
-      default:
-         rtn = '';
-   }
-   return rtn;
+//Código Tipo de Comprobante
+function codcomprobante(tipcom: number): string {
+   if (tipcom == 1) return 'I-';
+   if (tipcom == 2) return 'E-';
+   if (tipcom == 3) return 'DC-';
+   if (tipcom == 4) return 'DI-';
+   if (tipcom == 5) return 'DE-';
+   return '';
 }

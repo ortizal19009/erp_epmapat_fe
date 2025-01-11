@@ -1,0 +1,155 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start sombra border cabecera ">
+         <div class="col-sm-9 my-1">
+            <form [formGroup]="formBuscar" (ngSubmit)="buscar()">
+               <div class="row">
+                  <div class="col-sm-2 mt-1 pr-0">
+                     <h5 class="m-0 font-weight-bold text-truncate"> <i class="bi-arrow-up-left-circle-fill"></i>
+                        &nbsp;Egresos</h5>
+                  </div>
+
+                  <div class="input-group col-sm-3 pl-1 ">
+                     <input type="number" class="form-control form-control-sm text-center" formControlName="desdeNum"
+                        placeholder="Desde" min="1" (change)="changeDesdeHasta()">
+                     <input type="number" class="form-control form-control-sm text-center" formControlName="hastaNum"
+                        placeholder="Hasta" min="1" (change)="changeDesdeHasta()">
+                  </div>
+
+                  <div class="input-group col-sm-5 px-1 ">
+                     <input type="date" class="form-control form-control-sm text-center" formControlName="desdeFecha"
+                        max="{{ today | date : 'yyyy-MM-dd' }}" />
+                     <input type="date" class="form-control form-control-sm text-center" formControlName="hastaFecha"
+                        max="{{ date | date : 'yyyy-MM-dd' }}" />
+                  </div>
+
+                  <div class="col-sm-2">
+                     <button class="btn btn-primary btn-sm" type="submit" (click)="buscar()">
+                        <i class="fa fa-search"></i> Buscar
+                     </button>
+                  </div>
+               </div>
+            </form>
+         </div>
+
+         <div class="btn-group col-sm-3 justify-content-end my-1 pb-0">
+            <div class="text-left">
+               <input class="form-control form-control-sm text-center col-sm-11 mb-0" type="text"
+                  placeholder="Filtrar..." [(ngModel)]="filtro" />
+            </div>
+            <button *ngIf="swdesdehasta" class="bg-transparent border-0 mt-0" type="submit" (click)="listainicial()"
+               data-toggle="tooltip" title="Ultimos">
+               <i class="bi-skip-end text-white icoRegresar"></i>
+            </button>
+            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right mt-0"
+               data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto mt-0 ">
+               <button class="dropdown-item" type="button" (click)="addEgreso()">
+                  <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+               <button class="dropdown-item" type="button" (click)="imprimir()">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
+            </div>
+         </div>
+
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-12">
+         <table *ngIf="_egresos" class="table table-hover table-bordered table-sm sombra">
+            <thead class="text-center cabecera">
+               <tr class="pad0">
+                  <th>Egreso</th>
+                  <th>Asie.</th>
+                  <th>Fecha</th>
+                  <th>Documento</th>
+                  <th>Débito</th>
+                  <th>Crédito</th>
+                  <th class="col-sm-2">Beneficiario</th>
+                  <th class="col-sm-2">Concepto</th>
+                  <th></th>
+               </tr>
+            </thead>
+            <tbody class="detalle roboto small">
+               <tr class="fila pad0" *ngFor="let egreso of _egresos | filter: filtro;"
+                  (click)="onCellClick($event, egreso)">
+                  <td class="text-center"> {{ egreso.compro }}</td>
+                  <td class="text-center">{{ egreso.asiento }}</td>
+                  <td class="text-center">{{ egreso.fecha | date: 'dd-MM-yyyy' }}</td>
+                  <td [ngClass]="{'transparente': egreso.intdoc.intdoc == 1}">{{
+                     egreso.intdoc.nomdoc}}&nbsp; {{egreso.numdoc}} </td>
+                  <td class="text-right"
+                     [ngClass]="{'text-danger font-weight-bold': egreso.totdeb !== egreso.totcre, 'transparente': egreso.totdeb == 0}">
+                     {{ egreso.totdeb | number:'1.2-2' }}</td>
+                  <td class="text-right"
+                     [ngClass]="{'text-danger font-weight-bold': egreso.totdeb !== egreso.totcre, 'transparente': egreso.totcre == 0}">
+                     {{ egreso.totcre | number:'1.2-2' }}</td>
+                  
+                  <td [ngClass]="{'transparente': egreso.idbene.idbene == 1}"
+                     class="text-left ancho text-truncate ">
+                     {{ egreso.idbene.nomben}}</td>
+                  <td class="text-left text-truncate ancho">{{ egreso.glosa }}</td>
+
+                  <td class="text-center">
+                     <div class="btn-group py-0">
+                        <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
+                           aria-expanded="false">
+                        </button>
+
+                        <div class="dropdown-menu dropdown-menu-right popLista">
+                           <button class="dropdown-item" type="button" (click)="modiEgreso( egreso.idasiento )">
+                              <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
+                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#elimAsiento"
+                              (click)="eliminar( egreso )">
+                              <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
+                        </div>
+                     </div>
+                  </td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+   </div>
+
+   <!-- Modal Eliminar-->
+   <div class='modal fade' id='elimAsiento' tabindex='-1' aria-hidden='true'>
+      <div class='modal-dialog modal-dialog-centered'>
+         <div class='modal-content'>
+            <div class='modal-header justify-content-center cabecera border py-2'>
+               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Mensaje</h5>
+            </div>
+            <div *ngIf="sweliminar; then thenBlock else elseBlock"></div>
+            <ng-template #thenBlock>
+               <div class='modal-body text-center roboto detalle'>
+                  ¿ Eliminar el Egresp <span class="fantacygreen"> {{iAsiento.compro}} </span>?
+               </div>
+               <div class='modal-footer justify-content-center detalle border py-1'>
+                  <button type='button' class='btn btn-success btn-sm' data-dismiss='modal' id='btnSi'
+                     (click)="elimina()">
+                     <i class="fa fa-check-circle"></i> Aceptar
+                  </button>
+                  <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
+                     <i class="fa fa-times-circle"></i> Cancelar</button>
+               </div>
+            </ng-template>
+            <ng-template #elseBlock>
+               <div class='modal-body detalle'>
+                  <div class="alert alert-warning text-center" role="alert">
+                     No puede eliminar el Egreso <span class="fantacygreen"> {{iAsiento.compro}}</span>
+                     <br>tiene registrado Transacciones (cuentas).
+                  </div>
+               </div>
+               <div class='text-center detalle'>
+                  <button type='button' class='btn btn-success btn-sm mb-3' data-dismiss='modal'>
+                     <i class="fa fa-check-circle"></i>&nbsp; Aceptar
+                  </button>
+               </div>
+            </ng-template>
+         </div>
+      </div>
+   </div>
+
+</div>

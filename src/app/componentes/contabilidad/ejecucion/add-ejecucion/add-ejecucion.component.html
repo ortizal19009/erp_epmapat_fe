@@ -10,7 +10,7 @@
                         <label class="input-group-text" for="fecha">Partida</label>
                      </div>
                      <input type="text" class="form-control form-control-sm"
-                        formControlName="idpresupue" list="partidasList" (input)="listarxCodigoNombre($event)">
+                        formControlName="intpre" list="partidasList" (input)="listarxCodigoNombre($event)">
                      <datalist role="listbox" id="partidasList">
                         <option *ngFor="let partida of _partidas" value={{partida.codpar}}>
                            {{ partida.nompar}}</option>

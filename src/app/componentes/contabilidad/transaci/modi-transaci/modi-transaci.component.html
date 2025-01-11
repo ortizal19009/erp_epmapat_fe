@@ -1,0 +1,144 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start sombra cabecera border">
+         <div class="col-sm-12 p-0.">
+            <div class="row p-0">
+               <div class="input-group input-group-sm col-sm-3 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Asiento</span>
+                  </div>
+                  <input type="text" class="form-control text-center" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.asiento" readonly>
+                  <input type="text" class="form-control text-center" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.comprobante" readonly>
+               </div>
+               <div class="input-group input-group-sm col-sm-2 mb-1 mr-0 ">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Fecha</span>
+                  </div>
+                  <input type="text" class="form-control text-center" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.fecha" readonly>
+               </div>
+               <div class="input-group input-group-sm col-sm-2 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Doc</span>
+                  </div>
+                  <input type="text" class="form-control" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.documento" readonly>
+               </div>
+               <div class="input-group input-group-sm col-sm-5 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Beneficiario</span>
+                  </div>
+                  <input type="text" class="form-control" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.benefi" readonly>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="col-sm-9 mt-4">
+            <h5 class="font-weight-bold text-center cabecera sombra border py-1">Modificar Transacción
+            </h5>
+            <div class="card card-body sombra fondo detalle">
+               <form [formGroup]="formTransaci">
+                  <div class="row">
+
+                     <div class="form-group col-md-2">
+                        <div class="input-group mb-1 input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text" for="orden">Orden</label>
+                           </div>
+                           <input type="number" class="form-control text-center" formControlName="orden"
+                              aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-10">
+                        <div class="input-group input-group-sm mb-1 ">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text" for="fecha">Cuenta<sup class="green">*</sup></label>
+                           </div>
+                           <input type="text" class="form-control form-control-sm col-3" formControlName="idcuenta"
+                              list="cuentasList" (input)="onCuentaSelected($event); cuentasxTiptran($event)" [ngClass]="{'is-invalid': f['idcuenta'].invalid && f['idcuenta'].touched,
+                           'is-valid': f['idcuenta'].valid, '': f['idcuenta'].untouched}" [type]="'text'">
+                           <datalist role="listbox" id="cuentasList">
+                              <option *ngFor="let cuenta of _cuentas" value={{cuenta.codcue}}>
+                                 {{ cuenta.nomcue}}</option>
+                           </datalist>
+                           <input type="text" class="form-control" formControlName="nomcue" aria-label="Small"
+                              aria-describedby="inputGroup-sizing-sm" readonly tabindex="-1">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-6">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Documento<sup class="green">*</sup></label>
+                           </div>
+                           <select type="text" class="custom-select" formControlName="intdoc"
+                              [compareWith]="compararDocumentos">
+                              <option *ngFor="let documento of _documentos" [ngValue]="documento">
+                                 {{ documento.nomdoc }}
+                              </option>
+                           </select>
+                           <input type="text" class="form-control text-center col-sm-4" formControlName="numdoc"
+                              [ngClass]="{'is-invalid': f['numdoc'].invalid && f['numdoc'].touched,
+                                       'is-valid': f['numdoc'].valid, '': f['numdoc'].untouched}">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-3">
+                        <div class="input-group mb-1 input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Movimiento<sup class="green">*</sup></label>
+                           </div>
+                           <select class="custom-select" formControlName="debcre">
+                              <option value=1>Débito</option>
+                              <option value=2>Crédito</option>
+                           </select>
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-3">
+                        <div class="input-group mb-1 input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Valor<sup class="green">*</sup></label>
+                           </div>
+                           <input type="text" class="form-control text-right" formControlName="valor" aria-label="Small"
+                              aria-describedby="inputGroup-sizing-sm"
+                              [ngClass]="{'is-invalid': formTransaci.get('valor')!.invalid && (formTransaci.get('valor')!.dirty || formTransaci.get('valor')!.touched),
+                              'is-valid': formTransaci.get('valor')!.valid && (formTransaci.get('valor')!.dirty || formTransaci.get('valor')!.touched)}"
+                              (blur)="formatInput()">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-12">
+                        <div class="input-group mb-0 input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Concepto</label>
+                           </div>
+                           <textarea class="form-control" formControlName="descri" rows="2"></textarea>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="text-center">
+                     <button type="submit" class="btn btn-success btn-sm mx-1"
+                        [disabled]="formTransaci.pristine || !formTransaci.valid" (click)="onSubmit()">
+                        <i class="fa fa-check-circle"></i> Aceptar</button>
+                     <button type="button" class="btn btn-outline-success btn-sm mb-0" (click)="regresar()"><i
+                           class="fa fa-times-circle"></i> Cancelar
+                     </button>
+                  </div>
+               </form>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

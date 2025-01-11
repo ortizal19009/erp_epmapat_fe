@@ -13,7 +13,7 @@ import { PregastoService } from 'src/app/servicios/contabilidad/pregasto.service
 export class InfoEstrfuncComponent implements OnInit {
 
   estrfunc = {} as Estrfunc; //Interface para los datos de la Actividad
-  idestrfunc: number;
+  intest: number;
   filtro: string;
   totales = false;
   _partidas: any;
@@ -25,7 +25,7 @@ export class InfoEstrfuncComponent implements OnInit {
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/info-estrfunc');
     this.setcolor();
-    this.idestrfunc = +sessionStorage.getItem('idestrfuncToInfo')!;
+    this.intest = +sessionStorage.getItem('intestToInfo')!;
     this.datosActividad();
     this.partidas();
   }
@@ -48,7 +48,7 @@ export class InfoEstrfuncComponent implements OnInit {
   }
 
   datosActividad() {
-    this.estrfuncService.getById(this.idestrfunc).subscribe({
+    this.estrfuncService.getById(this.intest).subscribe({
       next: datos => {
         this.estrfunc.codigo = datos.codigo;
         this.estrfunc.nombre = datos.nombre;
@@ -58,15 +58,12 @@ export class InfoEstrfuncComponent implements OnInit {
   }
 
   onInputChange() {
-    if (this.filtro.trim() !== '') {
-      this.swfiltro = true;
-    } else {
-      this.swfiltro = false;
-    }
+    if (this.filtro.trim() !== '') this.swfiltro = true;
+    else  this.swfiltro = false;
   }
   
   partidas() {
-    this.pregasService.getByActividad(this.idestrfunc).subscribe({
+    this.pregasService.getByActividad(this.intest).subscribe({
       next: resp => {
         this._partidas = resp;
         this.totales = true;
@@ -95,7 +92,7 @@ export class InfoEstrfuncComponent implements OnInit {
 }
 
 interface Estrfunc {
-  idestrfunc: number;
+  intest: number;
   codigo: String;
   nombre: String;
   movimiento: boolean;

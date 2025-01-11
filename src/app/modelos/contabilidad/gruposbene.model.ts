@@ -9,5 +9,6 @@ export class Gruposbene {
    modulo4: number;
    modulo5: number;
    modulo6: number;
+   
  }
  

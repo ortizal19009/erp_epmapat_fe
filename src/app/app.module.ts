@@ -208,7 +208,11 @@ import { ModiUsuarioComponent } from './componentes/administracion/usuarios/modi
 import { BuscarRutaComponent } from './componentes/suspensiones/buscar-ruta/buscar-ruta.component';
 import { HabilitacionesComponent } from './componentes/habilitaciones/habilitaciones/habilitaciones.component';
 import { AddHabilitacionComponent } from './componentes/habilitaciones/add-habilitacion/add-habilitacion.component';
-import { HashLocationStrategy, LocationStrategy, PathLocationStrategy } from '@angular/common';
+import {
+  HashLocationStrategy,
+  LocationStrategy,
+  PathLocationStrategy,
+} from '@angular/common';
 import { HistorialconsumoComponent } from './componentes/abonados/historialconsumo/historialconsumo.component';
 import { PerfilUsuarioComponent } from './componentes/administracion/usuarios/perfil-usuario/perfil-usuario.component';
 import { RecalFacturaComponent } from './componentes/facturas/recal-factura/recal-factura.component';
@@ -229,96 +233,336 @@ import { FormatFechaPipe } from './pipes/format-fecha.pipe';
 import { CvRubrosComponent } from './componentes/coactivas/carteras-vencidas/cv-rubros/cv-rubros.component';
 import { CvFacturasComponent } from './componentes/coactivas/carteras-vencidas/cv-facturas/cv-facturas.component';
 import { DetallePlanillaComponent } from './componentes/facturas/detalle-planilla/detalle-planilla.component';
+import { ImpAsientosComponent } from './componentes/contabilidad/asientos/imp-asientos/imp-asientos.component';
+import { ModiAsientoComponent } from './componentes/contabilidad/asientos/modi-asiento/modi-asiento.component';
+import { ImpBancosComponent } from './componentes/contabilidad/bancos/imp-bancos/imp-bancos.component';
+import { AddBeneficiarioComponent } from './componentes/contabilidad/beneficiarios/add-beneficiario/add-beneficiario.component';
+import { Beneficiarios } from './modelos/contabilidad/beneficiarios.model';
+import { BeneficiariosComponent } from './componentes/contabilidad/beneficiarios/beneficiarios/beneficiarios.component';
+import { ImpBeneficiariosComponent } from './componentes/contabilidad/beneficiarios/imp-beneficiarios/imp-beneficiarios.component';
+import { ImpMovibeneComponent } from './componentes/contabilidad/beneficiarios/imp-movibene/imp-movibene.component';
+import { InfoBeneficiarioComponent } from './componentes/contabilidad/beneficiarios/info-beneficiario/info-beneficiario.component';
+import { ModiBeneficiarioComponent } from './componentes/contabilidad/beneficiarios/modi-beneficiario/modi-beneficiario.component';
+import { ComprobacionComponent } from './componentes/contabilidad/comprobacion/comprobacion.component';
+import { ComparativoComponent } from './componentes/contabilidad/costos/comparativo/comparativo.component';
+import { CuecostosComponent } from './componentes/contabilidad/costos/cuecostos/cuecostos.component';
+import { ImpUnicostosComponent } from './componentes/contabilidad/costos/imp-unicostos/imp-unicostos.component';
+import { ResulcostosComponent } from './componentes/contabilidad/costos/resulcostos/resulcostos.component';
+import { UnicostosComponent } from './componentes/contabilidad/costos/unicostos/unicostos.component';
+import { ImpCuentasComponent } from './componentes/contabilidad/cuentas/imp-cuentas/imp-cuentas.component';
+import { ImpMayorComponent } from './componentes/contabilidad/cuentas/imp-mayor/imp-mayor.component';
+import { InfoCuentaComponent } from './componentes/contabilidad/cuentas/info-cuenta/info-cuenta.component';
+import { ModiCuentaComponent } from './componentes/contabilidad/cuentas/modi-cuenta/modi-cuenta.component';
+import { AddEgresoComponent } from './componentes/contabilidad/egresos/add-egreso/add-egreso.component';
+import { EgresosComponent } from './componentes/contabilidad/egresos/egresos/egresos.component';
+import { ImpEgresosComponent } from './componentes/contabilidad/egresos/imp-egresos/imp-egresos.component';
+import { ModiEgresoComponent } from './componentes/contabilidad/egresos/modi-egreso/modi-egreso.component';
+import { EstEjecucionPreComponent } from './componentes/contabilidad/est-ejecucion-pre/est-ejecucion-pre.component';
+import { EstFinancieraComponent } from './componentes/contabilidad/est-financiera/est-financiera.component';
+import { EstFlujoEfeComponent } from './componentes/contabilidad/est-flujo-efe/est-flujo-efe.component';
+import { EstResultadosComponent } from './componentes/contabilidad/est-resultados/est-resultados.component';
+import { ImpAuxgastoComponent } from './componentes/contabilidad/pregastos/imp-auxgasto/imp-auxgasto.component';
+import { ImpPregastoComponent } from './componentes/contabilidad/pregastos/imp-pregasto/imp-pregasto.component';
+import { ImpPreingresoComponent } from './componentes/contabilidad/preingresos/imp-preingreso/imp-preingreso.component';
+import { AddRetencionComponent } from './componentes/contabilidad/retenciones/add-retencion/add-retencion.component';
+import { ImpAuxingresoComponent } from './componentes/contabilidad/preingresos/imp-auxingreso/imp-auxingreso.component';
+import { ImpLiquidaComponent } from './componentes/contabilidad/beneficiarios/info-beneficiario/info-liquida/imp-liquida/imp-liquida.component';
+import { ModiRetencionComponent } from './componentes/contabilidad/retenciones/modi-retencion/modi-retencion.component';
+import { ImpRetencionesComponent } from './componentes/contabilidad/retenciones/imp-retenciones/imp-retenciones.component';
+import { RetencionesComponent } from './componentes/contabilidad/retenciones/retenciones/retenciones.component';
+import { ModiTransaciComponent } from './componentes/contabilidad/transaci/modi-transaci/modi-transaci.component';
+import { PrmisoxtramiComponent } from './componentes/contabilidad/tramipresu/prmisoxtrami/prmisoxtrami.component';
+import { ImpTransaciComponent } from './componentes/contabilidad/transaci/imp-transaci/imp-transaci.component';
+import { ModificarRutasComponent } from './componentes/rutas/modificar-rutas/modificar-rutas.component';
+import { RegrecaudaComponent } from './componentes/contabilidad/regrecauda/regrecauda/regrecauda.component';
+import { ImpNiifcuentasComponent } from './componentes/contabilidad/niifcuentas/imp-niifcuentas/imp-niifcuentas.component';
+import { IfinanComponent } from './componentes/contabilidad/ifinan/ifinan/ifinan.component';
+import { InfoLiquidaComponent } from './componentes/contabilidad/beneficiarios/info-beneficiario/info-liquida/info-liquida/info-liquida.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
 @NgModule({
-   declarations: [
+  declarations: [
+    AppComponent,
+    MainHeaderComponent,
+    MainSidebarComponent,
+    ContentWrapperComponent,
+    MainFooterComponent,
 
-      AppComponent, MainHeaderComponent, MainSidebarComponent, ContentWrapperComponent, MainFooterComponent,
+    //Consumo de Agua
+    ClientesComponent,
+    AddClienteComponent,
+    ModificarClientesComponent,
+    DetallesClienteComponent,
+    ListarAbonadosComponent,
+    BuscarabonadoComponent,
+    RutasComponent,
+    AddRutasComponent,
+    InfoRutaComponent,
+    EmisionesComponent,
+    AddEmisionComponent,
+    ModiEmisionComponent,
+    RutasxemisionComponent,
+    EmiactualComponent,
+    SuspensionesComponent,
+    AddSuspensionesComponent,
+    DetallesSuspensionesComponent,
 
-      //Consumo de Agua
-      ClientesComponent, AddClienteComponent, ModificarClientesComponent, DetallesClienteComponent,
-      ListarAbonadosComponent, BuscarabonadoComponent,
-      RutasComponent, AddRutasComponent, InfoRutaComponent,
-      EmisionesComponent, AddEmisionComponent, ModiEmisionComponent,
-      RutasxemisionComponent, EmiactualComponent,
-      SuspensionesComponent, AddSuspensionesComponent, DetallesSuspensionesComponent,
+    //Facturacion
+    FacturacionComponent,
+    InfoFacturacionComponent,
+    RubrosComponent,
+    InfoRubroComponent,
+    RecalFacturaComponent,
+    DefinirComponent,
+    GeneradorxmlComponent,
+    FecfacturaComponent,
+    //Recaudación
+    ListarCajaComponent,
+    AddCajaComponent,
+    ModificarCajaComponent,
+    ConveniosComponent,
+    ModiConvenioComponent,
+    AddConvenioComponent,
+    TransferenciasComponent,
+    //Catálogos
+    ListarEstadomComponent,
+    AddEstadomComponent,
+    ListarNacionalidadComponent,
+    AddNacionalidadComponent,
+    ModificarNacionalidadComponent,
+    ListarNovedadesComponent,
+    AddNovedadComponent,
+    NovedadDetalleComponent,
+    TpidentificasComponent,
+    AddTpidentificaComponent,
+    ListarTipopagoComponent,
+    AddTipopagoComponent,
+    TpreclamosComponent,
+    AddTpreclamoComponent,
+    ListarPtoemisionComponent,
+    AddPtoemisionComponent,
+    ModificarPtoemisionComponent,
+    InfoEstablecimientoComponent,
+    ListarCategoriaComponent,
+    AddCategoriaComponent,
+    ModificarCategoriaComponent,
+    ListarInteresesComponent,
+    ModificarInteresesComponent,
+    AddInteresesComponent,
+    PreciosxcatComponent,
+    AddPreciosxcatComponent,
+    ModificarPreciosxcatComponent,
+    LecturasComponent,
+    ModulosComponent,
+    UbicacionmComponent,
+    ModiUbicacionmComponent,
+    AddUbicacionmComponent,
 
-      //Facturacion
-      FacturacionComponent, InfoFacturacionComponent, RubrosComponent, InfoRubroComponent, RecalFacturaComponent,
-      DefinirComponent, GeneradorxmlComponent, FecfacturaComponent,
-      //Recaudación
-      ListarCajaComponent, AddCajaComponent, ModificarCajaComponent,
-      ConveniosComponent, ModiConvenioComponent, AddConvenioComponent, TransferenciasComponent,
-      //Catálogos
-      ListarEstadomComponent, AddEstadomComponent,
-      ListarNacionalidadComponent, AddNacionalidadComponent, ModificarNacionalidadComponent,
-      ListarNovedadesComponent, AddNovedadComponent, NovedadDetalleComponent,
-      TpidentificasComponent, AddTpidentificaComponent,
-      ListarTipopagoComponent, AddTipopagoComponent,
-      TpreclamosComponent, AddTpreclamoComponent,
-      ListarPtoemisionComponent, AddPtoemisionComponent, ModificarPtoemisionComponent, InfoEstablecimientoComponent,
-      ListarCategoriaComponent, AddCategoriaComponent, ModificarCategoriaComponent,
-      ListarInteresesComponent, ModificarInteresesComponent, AddInteresesComponent,
-      PreciosxcatComponent, AddPreciosxcatComponent, ModificarPreciosxcatComponent,
-      LecturasComponent, ModulosComponent,
-      UbicacionmComponent, ModiUbicacionmComponent, AddUbicacionmComponent,
+    C1Component,
+    C2Component,
+    AddAbonadosComponent,
+    ModificarAbonadosComponent,
+    DetallesAbonadoComponent,
 
-      C1Component, C2Component, AddAbonadosComponent,
-      ModificarAbonadosComponent, DetallesAbonadoComponent,
+    ListarCertificacionesComponent,
+    AddCertificacionesComponent,
+    ModificarCertificacionesComponent,
+    ListarReclamosComponent,
 
-      ListarCertificacionesComponent, AddCertificacionesComponent,
-      ModificarCertificacionesComponent, ListarReclamosComponent,
+    AddReclamosComponent,
+    ModificarReclamosComponent,
+    Tramites1Component,
+    AddTramites1Component,
+    ItemxfactComponent,
+    AguatramiteComponent,
+    InfoAguatramiteComponent,
+    FacturasComponent,
+    InfoFacturasComponent,
+    RubroxfacComponent,
+    FacelectroComponent,
+    DetFacelectroComponent,
+    InfoConvenioComponent,
+    ImpCajasComponent,
+    ImpInfoCajasComponent,
+    InfoCajaComponent,
+    TramitesComponent,
+    AddTramiteComponent,
+    InfoTramiteComponent,
+    InfoPreciosxcatComponent,
+    RecaudacionComponent,
+    AddRecaudaComponent,
+    UsoitemsComponent,
+    InfoUsoitemsComponent,
+    CatalogoitemsComponent,
+    AddFacturacionComponent,
+    InfoCatalogoitemsComponent,
+    PreingresosComponent,
+    InfoPreingresoComponent,
+    ModiPreingresoComponent,
+    AddPreingresoComponent,
+    AddCatalogoitemsComponent,
+    ModiCatalogoitemsComponent,
+    AddRubroComponent,
+    AddUsoitemsComponent,
+    ModiUsoitemsComponent,
+    ModiRubroComponent,
+    CertipresuComponent,
 
-      AddReclamosComponent, ModificarReclamosComponent, Tramites1Component,
-      AddTramites1Component, ItemxfactComponent,
-      AguatramiteComponent, InfoAguatramiteComponent,
-      FacturasComponent, InfoFacturasComponent, RubroxfacComponent,
-      FacelectroComponent, DetFacelectroComponent, InfoConvenioComponent, ImpCajasComponent, ImpInfoCajasComponent,
-      InfoCajaComponent, TramitesComponent, AddTramiteComponent, InfoTramiteComponent,
-      InfoPreciosxcatComponent, RecaudacionComponent, AddRecaudaComponent,
-      UsoitemsComponent, InfoUsoitemsComponent,
-      CatalogoitemsComponent, AddFacturacionComponent, InfoCatalogoitemsComponent, PreingresosComponent,
-      InfoPreingresoComponent, ModiPreingresoComponent, AddPreingresoComponent, AddCatalogoitemsComponent,
-      ModiCatalogoitemsComponent, AddRubroComponent, AddUsoitemsComponent, ModiUsoitemsComponent,
-      ModiRubroComponent, CertipresuComponent,
+    // ============ CONTABILIDAD ================
+    ClasificadorComponent,
+    InfoClasificadorComponent,
+    ModiClasificadorComponent,
+    AddClasificadorComponent,
+    ReformasComponent,
+    AddReformaComponent,
+    EjecucionComponent,
+    AddAsientoComponent,
+    AsientosComponent,
+    ImpAsientosComponent,
+    ModiAsientoComponent,
+    ImpBancosComponent,
+    AddBeneficiarioComponent,
+    BeneficiariosComponent,
+    ImpBeneficiariosComponent,
+    ImpMovibeneComponent,
+    InfoBeneficiarioComponent,
+    ModiBeneficiarioComponent,
+    AddCertipresuComponent,
+    ModiCertipresuComponent,
+    ComprobacionComponent,
+    ComparativoComponent,
+    CuecostosComponent,
+    ImpUnicostosComponent,
+    ResulcostosComponent,
+    UnicostosComponent,
+    ImpCuentasComponent,
+    ImpMayorComponent,
+    InfoCuentaComponent,
+    ModiCuentaComponent,
+    AddEgresoComponent,
+    EgresosComponent,
+    ImpEgresosComponent,
+    ModiEgresoComponent,
+    AddEjecucionComponent,
+    EstEjecucionPreComponent,
+    EstFinancieraComponent,
+    EstFlujoEfeComponent,
+    EstResultadosComponent,
+    AddPregastoComponent,
+    ImpAuxgastoComponent,
+    ImpPregastoComponent,
+    ImpPreingresoComponent,
+    AddRetencionComponent,
+    ImpAuxingresoComponent,
+    ImpLiquidaComponent,
+    ModiRetencionComponent,
+    ImpRetencionesComponent,
+    RetencionesComponent,
+    ModiTransaciComponent,
+    PrmisoxtramiComponent,
+    ImpTransaciComponent,
+    ModificarRutasComponent,
+    RegrecaudaComponent,
+    ImpNiifcuentasComponent,
+    IfinanComponent,
+    InfoLiquidaComponent,
 
-      // ============ CONTABILIDAD ================
-      ClasificadorComponent, InfoClasificadorComponent, ModiClasificadorComponent, AddClasificadorComponent,
-      ReformasComponent, AddReformaComponent, EjecucionComponent,
+    // ========== ADMINISTRACION CENTRAL ============
+    Tabla4Component,
+    AddTabla4Component,
+    DocumentosComponent,
+    AddDocumentoComponent,
+    InfoDocumentoComponent,
+    ModiDocumentoComponent,
+    InfoTabla4Component,
+    ModiTabla4Component,
+    LoginComponent,
+    UsuariosComponent,
+    ModiReformaComponent,
+    ModiEjecucionComponent,
+    PartixcertiComponent,
+    ImporInteresesComponent,
+    GeneEmisionComponent,
+    ImporLecturasComponent,
+    ImpLecturasComponent,
+    BancosComponent,
+    ConciliabanComponent,
+    ColoresComponent,
+    Pliego24Component,
+    PerfilUsuarioComponent,
+    // ============ Pipes =============
+    EstadoEmisionPipe,
+    NombreEmisionPipe,
+    NoSiPipe,
+    NombreMesPipe,
+    BloqueConsumoPipe,
+    ProyeccionComponent,
+    AuxIngresoComponent,
+    AsientosComponent,
+    PregastosComponent,
+    EstrfuncComponent,
+    InfoEstrfuncComponent,
+    ModiPregastoComponent,
+    AuxGastoComponent,
+    NiifcuentasComponent,
+    AddHomologaComponent,
+    AddNiifcuentaComponent,
+    ModiNiifcuentaComponent,
+    TramipresuComponent,
+    AddTramipresuComponent,
+    ModiTramipresuComponent,
+    CuentasComponent,
+    AddCuentaComponent,
+    SinafipComponent,
+    TransaciComponent,
+    AddTransaciComponent,
+    AddAsientoComponent,
+    AddBenextranComponent,
+    SimulacionComponent,
+    AddLiquiacfpComponent,
+    ModificarTramitenuevoComponent,
+    AddAguatramiteComponent,
+    CertitmpComponent,
+    GeneCertificacionComponent,
+    AguatramComponent,
+    BuscarClienteComponent,
+    ModiUsuarioComponent,
+    BuscarRutaComponent,
+    HabilitacionesComponent,
+    AddHabilitacionComponent,
+    HistorialconsumoComponent,
+    AnulacionesBajasComponent,
+    RutasmorasComponent,
+    LoadingComponent,
+    ImpClienteComponent,
+    ImpInfoclienteComponent,
+    ImpEmisionesComponent,
+    FormatFechaPipe,
+    CvRubrosComponent,
+    /* COACTIVAS */
+    CvRubrosComponent,
+    CvFacturasComponent,
+    DetallePlanillaComponent,
+  ],
 
-      // ========== ADMINISTRACION CENTRAL ============
-      Tabla4Component, AddTabla4Component, DocumentosComponent, AddDocumentoComponent, InfoDocumentoComponent, ModiDocumentoComponent,
-      InfoTabla4Component, ModiTabla4Component, LoginComponent,
-      UsuariosComponent, ModiReformaComponent,
-      ModiEjecucionComponent, AddEjecucionComponent, ModiCertipresuComponent, AddCertipresuComponent,
-      PartixcertiComponent, ImporInteresesComponent, GeneEmisionComponent, ImporLecturasComponent, ImpLecturasComponent,
-      BancosComponent, ConciliabanComponent, ColoresComponent, Pliego24Component, PerfilUsuarioComponent,
-      // ============ Pipes =============
-      EstadoEmisionPipe, NombreEmisionPipe, NoSiPipe, NombreMesPipe, BloqueConsumoPipe, ProyeccionComponent,
-      AuxIngresoComponent, AsientosComponent, PregastosComponent, AddPregastoComponent, EstrfuncComponent,
-      InfoEstrfuncComponent, ModiPregastoComponent, AuxGastoComponent, NiifcuentasComponent, AddHomologaComponent,
-      AddNiifcuentaComponent, ModiNiifcuentaComponent, TramipresuComponent, AddTramipresuComponent, ModiTramipresuComponent,
-      CuentasComponent, AddCuentaComponent, SinafipComponent, TransaciComponent, AddTransaciComponent, AddAsientoComponent,
-      AddBenextranComponent, SimulacionComponent, AddLiquiacfpComponent, ModificarTramitenuevoComponent, AddAguatramiteComponent, CertitmpComponent, GeneCertificacionComponent, AguatramComponent, BuscarClienteComponent, ModiUsuarioComponent, BuscarRutaComponent, HabilitacionesComponent, AddHabilitacionComponent, HistorialconsumoComponent, AnulacionesBajasComponent, RutasmorasComponent, LoadingComponent, ImpClienteComponent, ImpInfoclienteComponent, ImpEmisionesComponent, FormatFechaPipe, CvRubrosComponent,
-      /* COACTIVAS */
-      CvRubrosComponent,
-      CvFacturasComponent,
-      DetallePlanillaComponent
-   ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    HttpClientModule,
+    FormsModule,
+    ReactiveFormsModule,
+    HttpClientModule,
+    Ng2SearchPipeModule,
+    NgxMaskModule.forRoot(),
+  ],
 
-   imports: [
-      BrowserModule, AppRoutingModule, HttpClientModule, FormsModule, ReactiveFormsModule,
-      HttpClientModule, Ng2SearchPipeModule, NgxMaskModule.forRoot()],
+  providers: [
+    MainFooterComponent,
+    { provide: LocationStrategy, useClass: HashLocationStrategy },
+    /* https://angular.io/api/common/HashLocationStrategy */
+  ],
 
-   providers: [MainFooterComponent,
-      { provide: LocationStrategy, useClass: HashLocationStrategy }
-      /* https://angular.io/api/common/HashLocationStrategy */
-   ],
-
-
-   bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-
-export class AppModule { }
+export class AppModule {}

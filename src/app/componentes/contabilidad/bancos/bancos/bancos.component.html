@@ -1,97 +1,378 @@
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-sm-6">
-            <form [formGroup]="bscrControl">
-                <div class="row mt-2">
-                    <div class="col-sm-5">
-                        <select name="" id="" class="custom-select custom-select-sm" formControlName="banco">
-                            <option *ngFor="let banco of bancos" value={{banco.idcuenta}}>{{banco.nomcue}}</option>
-                        </select>
-                    </div>
-                    <div class="col-sm-2">
-                        <select name="" id="" class="custom-select custom-select-sm" formControlName="mes">
-                            <option *ngFor="let mes of meses" value={{mes.valor}}>{{mes.nombre}}</option>
-                        </select>
-                    </div>
-                    <div class="col-sm-5">
-                        <div class="row">
-                            <div class="col-sm-3 mr-2">
-                                <button class="btn btn-sm btn-outline-primary" (click)="onSubmit()">Buscar</button>
-                            </div>
-                            <div class="col-sm-8">
-                                <button class="btn btn-sm btn-outline-primary" *ngIf="btn_conciliar; else btnConciliar"
-                                    (click)="conciliarBanco()" [disabled]="btncondisable">Conciliar</button>
-                                <ng-template #btnConciliar>
-                                    <button class="btn btn-sm btn-outline-primary" (click)="infconciliarBanco()">Ver
-                                        conciliación</button>
+<div class="content mt-1 pt-1 px-2">
+   <div class="container-fluid">
+      <div class="row mt-0 px-1 py-1 justify-content-start cabecera border sombra">
+         <h4 class="ml-2  font-weight-bold text-truncate"> <i class="bi-bank2"></i> &nbsp; Bancos </h4>
+         <form [formGroup]="formBancos" class="col-sm-8">
+            <div class="row">
+               <div class="col-sm-7">
+                  <select name="" id="" class="custom-select custom-select-sm" formControlName="idcuenta">
+                     <option *ngFor="let banco of _bancos" value={{banco.idcuenta}}>{{banco.nomcue}}</option>
+                  </select>
+               </div>
+               <div class="col-sm-2">
+                  <select class="custom-select custom-select-sm font-weight-bold" formControlName="mes">
+                     <option class="roboto" *ngFor="let mes of meses" value={{mes.valor}}>{{mes.nombre}}</option>
+                  </select>
+               </div>
+               <div class="col-sm-2">
+                  <div class="row">
+                     <div>
+                        <button class="btn btn-sm btn-primary" (click)="buscar()"><i class="fa fa-search"></i>
+                           Buscar</button>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </form>
+         <div *ngIf="_movibank" class="col-sm-2 text-center">
+            <input class="form-control form-control-sm text-center mb-0" type="text" placeholder="Filtrar..."
+               [(ngModel)]="filtro" (ngModelChange)="changeFiltro()" />
+         </div>
+         <div class="btn-group ml-auto mt-0  pb-0">
+            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right mt-0"
+               data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto mt-0 ">
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#conciliacion"
+                  (click)="conciliacion()">
+                  <i class="bi-calculator-fill"></i> &nbsp; Conciliación</button>
+               <button class="dropdown-item" type="button" (click)="imprimir()">
+                  <i class="bi bi-printer"></i> &nbsp; Imprimir / Exportar</button>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
 
-                                </ng-template>
-                            </div>
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-12">
+         <table *ngIf="_movibank" class="table table-sm table-hover table-bordered sombra">
+            <thead>
+               <tr class="cabecera pad0">
+                  <th class="text-center">Fecha</th>
+                  <th class="text-center">Asie</th>
+                  <th class="text-center">Cmprbnt</th>
+                  <th>Documento</th>
+                  <th class="text-center"><i class="bi-bug"></i></th>
+                  <th class="text-center"><i class="bi-check-circle"></i></th>
+                  <th class="text-center">Mes</th>
+                  <th class="text-right">Débito</th>
+                  <th class="text-right">Crédito</th>
+                  <th>Beneficiario</th>
+                  <th>Concepto</th>
+                  <th></th>
+               </tr>
+            </thead>
+            <tbody class="detalle">
+               <tr class="roboto small pad0" *ngFor="let movibank of _movibank | filter: filtro;">
+                  <td class="col-sm-1 text-center">{{movibank.idasiento.fecha}}</td>
+                  <td class="text-center">{{movibank.idasiento.asiento}}</td>
+                  <td class="text-center">{{ comprobante(movibank.idasiento.tipcom, movibank.idasiento.compro )}}</td>
+                  <td>{{movibank.intdoc.nomdoc +' '+movibank.numdoc}}</td>
+                  <td class="text-center">
+                     <div *ngIf="mal(movibank)">
+                        <i class="bi-x bg-red" aria-hidden="true"></i>
+                     </div>
+                  </td>
+                  <td class="text-center">
+                     <input type="checkbox" [(ngModel)]="movibank.swconcili"
+                        (change)="cambioDatosCheck($event, movibank)">
+                  </td>
+                  <td class="text-center">{{movibank.mesconcili}}</td>
+                  <td *ngIf="movibank.debcre==1; else debe" class="text-right">{{movibank.valor | number:
+                     '1.2-2'}}</td>
+                  <ng-template #debe>
+                     <td></td>
+                  </ng-template>
+                  <td *ngIf="movibank.debcre==2; else haber" class="text-right">{{movibank.valor | number:
+                     '1.2-2'}}</td>
+                  <ng-template #haber>
+                     <td></td>
+                  </ng-template>
+                  <td>{{movibank.idasiento.idbene.nomben}}</td>
+                  <td class="text-truncate ancho">{{movibank.descri}}</td>
+
+                  <td class="text-center">
+                     <div class="btn-group py-0">
+                        <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
+                           aria-expanded="false">
+                        </button>
+
+                        <div class="dropdown-menu dropdown-menu-right popLista">
+                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modificar"
+                              (click)="modificar(movibank)">
+                              <i class="bi bi-pencil"></i> &nbsp; Modificar</button>
+                        </div>
+                     </div>
+                  </td>
+               </tr>
+            </tbody>
+            <tfoot *ngIf="!swfiltro" class="detalle font-weight-bold pad0 roboto small">
+               <tr class="text-right">
+                  <td colspan="6">TOTAL: {{_movibank.length}}</td>
+                  <td></td>
+                  <td>{{sumdebe | number: '1.2-2'}}</td>
+                  <td>{{sumhaber | number: '1.2-2'}}</td>
+                  <td colspan="3"></td>
+               </tr>
+            </tfoot>
+         </table>
+      </div>
+   </div>
+
+   <!-- Modal Modificar -->
+   <div class='modal fade' id='modificar' data-backdrop="static" tabindex='-1' aria-hidden='true'>
+      <div class='modal-dialog modal-dialog-centered'>
+         <div class='modal-content'>
+            <div class='modal-header justify-content-center cabecera border py-2'>
+               <h6 class='modal-title font-weight-bold' id='ModalLabel'>Modificar</h6>
+            </div>
+            <div class='modal-body detalle'>
+               <form [formGroup]="formTransaci">
+                  <div class="row">
+
+                     <div class="form-group col-md-10">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Documento</label>
+                           </div>
+                           <select type="text" class="custom-select" formControlName="intdoc">
+                              <option *ngFor="let documento of _documentos" [ngValue]="documento.intdoc">
+                                 {{ documento.nomdoc }}
+                              </option>
+                           </select>
+                           <input type="text" class="form-control text-center col-sm-4" formControlName="numdoc"
+                              [ngClass]="{'is-invalid': f['numdoc'].invalid && f['numdoc'].touched,
+                                       'is-valid': f['numdoc'].valid, '': f['numdoc'].untouched}">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-12">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Concepto</label>
+                           </div>
+                           <textarea class="form-control" formControlName="descri" rows="3"></textarea>
+                        </div>
+                     </div>
+
+                  </div>
+               </form>
+            </div>
+            <div class='modal-footer justify-content-center detalle border py-1'>
+               <button type='button' class='btn btn-success btn-sm' data-dismiss='modal'
+                  [disabled]="formTransaci.pristine || !formTransaci.valid">
+                  <i class="fa fa-check-circle"></i> Aceptar
+               </button>
+               <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
+                  <i class="fa fa-times-circle"></i> Cancelar</button>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- Modal Conciliación -->
+   <div class='modal fade' id='conciliacion' data-backdrop="static" tabindex='-1' aria-hidden='true'>
+      <div class='modal-dialog modal-lg modal-dialog-centered'>
+         <div class='modal-content'>
+            <div class='modal-header justify-content-center cabecera border py-2'>
+               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Conciliación</h5>
+            </div>
+            <div class='modal-body detalle'>
+               <form [formGroup]="formConcilia">
+                  <div class="row">
+                     <div class="col-sm-6 py-0 my-0">
+                        <h6 class="ml-2 roboto small font-weight-bold">LIBRO BANCOS</h6>
+                        <div class="form-group form-control-xs col-md-8 my-0">
+                           <div class="input-group input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text">Inicial</label>
+                              </div>
+                              <input type="text" class="form-control text-right " formControlName="libinicial"
+                                 mask='separator.2' decimalSeparator="." readonly tabindex="-1">
+                           </div>
+                        </div>
+                        <div class="form-group col-md-8 my-0">
+                           <div class="input-group input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text">+ Débitos</label>
+                              </div>
+                              <input type="text" class="form-control text-right" formControlName="libdebitos"
+                                 mask="separator.2" readonly tabindex="-1">
+                           </div>
+                        </div>
+                        <div class="form-group col-md-8 my-0">
+                           <div class="input-group my-0 input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text">- Créditos</label>
+                              </div>
+                              <input type="text" class="form-control text-right" formControlName="libcreditos"
+                                 mask='separator.2' readonly tabindex="-1">
+                           </div>
+                        </div>
+                        <div class="form-group col-md-8">
+                           <div class="input-group input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text">Final</label>
+                              </div>
+                              <input type="text" class="form-control text-right font-weight-bold"
+                                 formControlName="libfinal" aria-label="Small" aria-describedby="inputGroup-sizing-sm"
+                                 mask='separator.2' readonly tabindex="-1">
+                           </div>
                         </div>
 
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-    <div class="row mt-2">
-        <div class="col-sm">
-            <table class="table table-sm table-hover table-bordered">
-                <thead class="bg-primary">
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Asie</th>
-                        <th>Comprobante</th>
-                        <th>Documento</th>
-                        <th>M</th>
-                        <th class="col-sm-1">Nro.</th>
-                        <th>Valor</th>
-                        <th>Concilia</th>
-                        <th>Mes</th>
-                        <th>Débito</th>
-                        <th>Crédito</th>
-                        <th>Beneficiario</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let d_conBanco of controlBancos">
-                        <td>{{d_conBanco.idasiento.fecha}}</td>
-                        <td class="text-center">{{d_conBanco.idasiento.asiento}}</td>
-                        <td></td>
-                        <td>
-                            <select [(ngModel)]="d_conBanco.iddocumento" [compareWith]="comDocumentos"
-                                class="custom-select custom-select-sm" (change)="cambioDatos($event, d_conBanco)" [disabled]="optdisabled(d_conBanco.swconcili)">
-                                <option [ngValue]="documento" *ngFor="let documento of documentos">{{documento.nomdoc}}
-                                </option>
-                            </select>
-                        </td>
-                        <td>
-                            <div *ngIf="mal(d_conBanco)">
-                                <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
-                            </div>
-                        </td>
-                        <td class="text-center">
-                            <input type="text" class="form-control form-control-sm" [(ngModel)]="d_conBanco.numdoc"
-                                (change)="cambioDatos($event, d_conBanco)" [disabled]="optdisabled(d_conBanco.swconcili)">
-                        </td>
-                        <td class="text-right">{{d_conBanco.valor | number: '1.2-2'}}</td>
-                        <td class="text-center">
-                            <input type="checkbox" [(ngModel)]="d_conBanco.swconcili"
-                                (change)="cambioDatosCheck($event, d_conBanco)">
-                        </td>
-                        <td>{{d_conBanco.mesconcili}}</td>
-                        <td *ngIf="d_conBanco.debcre==1; else debe" class="text-right">{{d_conBanco.valor | number: '1.2-2'}}</td>
-                        <ng-template #debe>
-                            <td></td>
-                        </ng-template>
-                        <td *ngIf="d_conBanco.debcre==2; else haber" class="text-right">{{d_conBanco.valor | number: '1.2-2'}}</td>
-                        <ng-template #haber>
-                            <td></td>
-                        </ng-template>
-                        <td>{{d_conBanco.idbene.nomben}}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+                        <h6 class="ml-2 roboto small font-weight-bold">Partidas conciliatorias</h6>
+                        <div class="form-group col-md-10 my-0">
+                           <div class="input-group input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text">- Depósitos en tránsito</label>
+                              </div>
+                              <input type="text" class="form-control text-right" formControlName="libdepositos" readonly
+                                 tabindex="-1">
+                           </div>
+                        </div>
+                        <div class="form-group col-md-10 my-0">
+                           <div class="input-group input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text">+ Cheques y N/D no cobradas</label>
+                              </div>
+                              <input type="text" class="form-control text-right" formControlName="libcheques" readonly
+                                 tabindex="-1">
+                           </div>
+                        </div>
+                        <div class="form-group col-md-10 my-0">
+                           <div class="input-group input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text">± Transacc. mal registradas</label>
+                              </div>
+                              <input type="text" class="form-control text-right" formControlName="liberrores"
+                                 mask='separator.2' [allowNegativeNumbers]="true" (change)="changeLibros()">
+                           </div>
+                        </div>
+                        <h6 class="ml-2 roboto small font-weight-bold"> &nbsp;&nbsp; </h6>
+                        <br>
+                        <div class="form-group col-md-10 my-0">
+                           <div class="input-group input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text">Saldo conciliado</label>
+                              </div>
+                              <input type="text" class="form-control text-right font-weight-bold"
+                                 formControlName="libsaldo" readonly tabindex="-1" mask='separator.2'>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="col-sm-6">
+                        <h6 class="ml-2 roboto small font-weight-bold">ESTADO DE CUENTA DEL BANCO</h6>
+                        <div class="form-group col-md-8 my-0">
+                           <div class="input-group input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text">Inicial</label>
+                              </div>
+                              <input type="text" class="form-control text-right" formControlName="baninicial"
+                                 mask='separator.2' decimalSeparator="." (change)="changeBanco()">
+                           </div>
+                        </div>
+                        <div class="form-group col-md-8 my-0">
+                           <div class="input-group input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text">+ Créditos</label>
+                              </div>
+                              <input type="text" class="form-control text-right" formControlName="bancreditos"
+                                 mask='separator.2' (change)="changeBanco()">
+                           </div>
+                        </div>
+                        <div class="form-group col-md-8 my-0">
+                           <div class="input-group my-0 input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text">- Débitos</label>
+                              </div>
+                              <input type="text" class="form-control text-right" formControlName="bandebitos"
+                                 mask='separator.2' (change)="changeBanco()">
+                           </div>
+                        </div>
+                        <div class="form-group col-md-8">
+                           <div class="input-group my-0 input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text">Final</label>
+                              </div>
+                              <input type="text" class="form-control text-right font-weight-bold"
+                                 formControlName="banfinal" mask='separator.2' readonly tabindex="-1">
+                           </div>
+                        </div>
+
+                        <h6 class="ml-2 roboto small font-weight-bold">&nbsp;&nbsp; </h6>
+                        <div class="form-group col-md-10 my-0">
+                           <div class="input-group input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text">- Cheques año anterior</label>
+                              </div>
+                              <input type="text" class="form-control text-right" formControlName="bancheaa"
+                                 mask="separator.2" (change)="changeBanco()">
+                           </div>
+                        </div>
+                        <div class="form-group col-md-10 my-0">
+                           <div class="input-group input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text">- N/C no contabilizadas</label>
+                              </div>
+                              <input type="text" class="form-control text-right" formControlName="bannc"
+                                 mask='separator.2' (change)="changeBanco()">
+                           </div>
+                        </div>
+                        <div class="form-group col-md-10 my-0">
+                           <div class="input-group input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text">+ N/D no contabilizadas</label>
+                              </div>
+                              <input type="text" class="form-control text-right" formControlName="bannd"
+                                 mask='separator.2' (change)="changeBanco()">
+                           </div>
+                        </div>
+                        <div class="form-group col-md-10 mt-0">
+                           <div class="input-group input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text">± Errores en el banco</label>
+                              </div>
+                              <input type="text" class="form-control text-right" formControlName="banerrores"
+                                 mask='separator.2' (change)="changeBanco()">
+                           </div>
+                        </div>
+                        <div class="form-group col-md-10">
+                           <div class="input-group input-group-sm">
+                              <div class="input-group-prepend">
+                                 <label class="input-group-text">Saldo conciliado</label>
+                              </div>
+                              <input type="text" class="form-control text-right font-weight-bold"
+                                 formControlName="bansaldo" readonly tabindex="-1" mask='separator.2'>
+                           </div>
+                        </div>
+
+                     </div>
+
+                     <div class="form-group col-md-12">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Observaciones</label>
+                           </div>
+                           <textarea class="form-control" formControlName="observa" rows="2"></textarea>
+                        </div>
+                     </div>
+
+                  </div>
+               </form>
+            </div>
+            <div class='modal-footer justify-content-center detalle border py-1'>
+               <button type='button' class='btn btn-success btn-sm' data-dismiss='modal'>
+                  <i class="fa fa-check-circle"></i> Aceptar
+               </button>
+               <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
+                  <i class="fa fa-times-circle"></i> Cancelar</button>
+            </div>
+
+         </div>
+      </div>
+   </div>
+
 </div>

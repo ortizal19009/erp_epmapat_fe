@@ -1,0 +1,100 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 pt-1 pb-0 cabecera border sombra">
+         <div class="col-sm-3 mx-0 ml-1 px-0">
+            <h5 class="mx-0 mt-1 font-weight-bold text-truncate"><i class="bi-blockquote-right"></i>&nbsp; Mayor de la
+               Cuenta</h5>
+         </div>
+         <form [formGroup]="formFechas" class="col-sm-6 px-0">
+            <div class="row px-0">
+
+               <div class="col-sm-3 ml-1 px-0">
+                  <input class="form-control form-control-sm truncate" type="text" formControlName="codcue">
+               </div>
+
+               <div class="input-group col-sm-6">
+                  <input type="date" class="form-control form-control-sm text-center" formControlName="desde">
+                  <input type="date" class="form-control form-control-sm text-center" formControlName="hasta">
+               </div>
+
+               <div class="col-sm-2 mx-0 px-0 d-flex flex-row">
+                  <div class="ml-1 px-0">
+                     <button class="btn btn-primary btn-sm" type="submit" (click)="buscar()">
+                        <i class="fa fa-search"></i> Buscar
+                     </button>
+                  </div>
+               </div>
+            </div>
+         </form>
+
+         <div class="col-sm-2 text-center">
+            <input *ngIf="_mayor" class="form-control form-control-sm text-center col-sm-10" type="text"
+               placeholder="Filtrar..." [(ngModel)]="filtro" (ngModelChange)="onFiltroChange()" />
+         </div>
+
+         <div class="btn-group">
+            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
+               aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+               <button class="dropdown-item" type="button" [disabled]="!_mayor" (click)="imprimir()">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
+            </div>
+            <button class="bg-transparent border-0" type="button" (click)="regresar()">
+               <i class="bi-arrow-left-circle text-white icoRegresar"></i>
+            </button>
+         </div>
+
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-md-12">
+
+         <table *ngIf="_mayor" class="table table-hover table-sm table-bordered mb-0 sombra">
+            <thead class="cabecera">
+               <tr *ngIf="anterior != 0" class="text-right">
+                  <th colspan="6" class="py-0">Anterior &nbsp;</th>
+                  <th class="py-0">{{anterior | number: '1.2-2'}}</th>
+                  <th></th>
+               </tr>
+               <tr>
+                  <th class="text-center col-sm-1">Fecha</th>
+                  <th class="text-center">Asie</th>
+                  <th class="text-center">Cmprbnt</th>
+                  <th>Beneficiario</th>
+                  <th class="text-right">Debe</th>
+                  <th class="text-right">Haber</th>
+                  <th class="text-right">Saldo</th>
+                  <th class="text-center">Descripción</th>
+               </tr>
+            </thead>
+            <tbody class="detalle small roboto">
+               <tr *ngFor="let transa of _mayor | filter: filtro;">
+                  <td class="text-center py-0">{{ transa.idasiento.fecha | date: 'yyyy-MM-dd' }}</td>
+                  <td class="text-center py-0">{{ transa.idasiento.asiento }}</td>
+                  <td class="text-center py-0">{{ comprobante(transa.idasiento.tipcom, transa.idasiento.compro) }}</td>
+                  <td class="text-truncate ancho220 py-0" [ngClass]="{'transparente': transa.idbene.idbene == 1}"
+                     data-toggle="tooltip" [title]="transa.idbene.nomben.length > 34 ? transa.idbene.nomben : ''">{{ transa.idbene.nomben }}</td>
+                  <td class="text-right py-0" [ngClass]="{'transparente': debito(transa.debcre, transa.valor) == 0}">{{
+                     debito(transa.debcre, transa.valor) | number: '1.2-2' }}</td>
+                  <td class="text-right py-0" [ngClass]="{'transparente': credito(transa.debcre, transa.valor) == 0}">{{
+                     credito(transa.debcre, transa.valor) | number: '1.2-2' }}</td>
+                  <td class="text-right py-0" [ngClass]="{'transparente': transa.saldo == 0}">{{ transa.saldo | number:
+                     '1.2-2' }}</td>
+                  <td class="text-left text-truncate ancho220 py-0 ">{{ transa.descri }}</td>
+               </tr>
+            </tbody>
+            <tfoot *ngIf="_mayor && !swfiltro" class="font-weight-bold detalle roboto small pad0">
+               <td colspan="4" class="text-right py-0">TOTAL </td>
+               <td class="text-right py-0">{{sumdebe | number: '1.2-2'}} </td>
+               <td class="text-right py-0">{{sumhaber | number: '1.2-2'}} </td>
+               <td></td>
+               <td></td>
+            </tfoot>
+         </table>
+      </div>
+   </div>
+</div>

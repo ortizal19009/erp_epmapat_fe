@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Ejecucion } from 'src/app/modelos/contabilidad/ejecucion.model';
-import { EjecucionService } from 'src/app/servicios/contabilidad/ejecucion.service';
+import { Ejecucio } from 'src/app/modelos/contabilidad/ejecucio.model';
+import { EjecucionService } from 'src/app/servicios/contabilidad/ejecucio.service';
 import { ReformasService } from 'src/app/servicios/contabilidad/reformas.service';
 
 @Component({
@@ -14,9 +14,9 @@ import { ReformasService } from 'src/app/servicios/contabilidad/reformas.service
 export class EjecucionComponent {
 
    idrefo: number;
-   ejecucion = {} as Ejecucion; //Interface para los datos de la Ejecucion
+   ejecucio = {} as Ejecucio; //Interface para los datos de la Ejecucion
    reforma = {} as Reforma; //Interface para los datos de la Reforma
-   _ejecucion: any;
+   _ejecucio: any;
    filtro: string;
    formBuscar: FormGroup;
    disabled = false;
@@ -39,7 +39,7 @@ export class EjecucionComponent {
             this.reforma.fecha = resp.fecha;
             this.reforma.tipo = 'Gasto'
             if (resp.tipo == 'I') this.reforma.tipo = 'Ingreso'
-            this.reforma.documento = resp.iddocumento.nomdoc + ' ' + resp.numdoc;
+            this.reforma.documento = resp.intdoc.nomdoc + ' ' + resp.numdoc;
          },
          error: err => console.error(err.error)
       });
@@ -49,9 +49,9 @@ export class EjecucionComponent {
    listarPartidas(){
       this.ejecuService.getByIdrefo(this.idrefo).subscribe({
          next: resp => {
-            this._ejecucion = resp;
-            this._ejecucion.forEach((ejecucion: { modifi: number; }) => {
-               this.totalModfi += ejecucion.modifi;
+            this._ejecucio = resp;
+            this._ejecucio.forEach((ejecucio: { modifi: number; }) => {
+               this.totalModfi += ejecucio.modifi;
             });
          },
          error: err => console.log('Al recuperar las partidas de la reforma: ',err.error)
@@ -73,26 +73,26 @@ export class EjecucionComponent {
 
    regresarReformas() { this.router.navigate(['/reformas']); }
 
-   public infoEjecucion(ejecucion: Ejecucion) {
-      sessionStorage.setItem('idejecuToInfo', ejecucion.idejecu.toString());
+   public infoEjecucion(ejecucio: Ejecucio) {
+      sessionStorage.setItem('idejecuToInfo', ejecucio.inteje.toString());
       this.router.navigate(['info-ejecucion']);
    }
 
-   modiEjecucion(ejecucion: Ejecucion) {
-      sessionStorage.setItem("idejecuToModi", ejecucion.idejecu.toString());
+   modiEjecucion(ejecucio: Ejecucio) {
+      sessionStorage.setItem("idejecuToModi", ejecucio.inteje.toString());
       this.router.navigate(['/modi-ejecucion']);
    }
 
-   onCellClick1(ejecucion: Ejecucion) {
-      this.idejecu = ejecucion.idejecu;
-      this.codpar = ejecucion.codpar;
+   onCellClick1(ejecucio: Ejecucio) {
+      this.idejecu = ejecucio.inteje;
+      this.codpar = ejecucio.codpar;
    };
 
    eliminarEjecucion(idejecu: number) {
       if (idejecu != null) {
          this.ejecuService.deleteEjecucion(idejecu).subscribe({
             next: resp => {
-               this.router.navigate(['/ejecucion']);
+               this.router.navigate(['/ejecucio']);
                location.reload(); // Agregar esta línea para refrescar la página
             },
             error: err => console.log(err.error)

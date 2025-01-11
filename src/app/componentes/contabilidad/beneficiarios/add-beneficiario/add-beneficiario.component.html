@@ -1,0 +1,211 @@
+<div class="content-header">
+   <div class="container-fluid">
+      <div class="row mt-3 justify-content-center text-center">
+         <div class="col-sm-8 cabecera sombra border">
+            <h5 class="mt-2 font-weight-bold">Nuevo Beneficiario</h5>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="card card-body col-sm-8 detalle sombra">
+            <form [formGroup]="formBeneficiario" *ngIf="formBeneficiario">
+               <div class="row">
+
+                  <div class="form-group col-md-12 my-0 py-0">
+                     <div class="input-group input-group-sm mb-2">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
+                              data-toggle="tooltip" title="Obligatorio y mínimo 3 caracteres">Nombre<sup
+                                 class="green">*</sup></span>
+                        </div>
+                        <input type="text" class="form-control" formControlName="nomben" aria-label="Small" autofocus
+                           aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['nomben'].invalid && f['nomben'].touched,
+                             'is-valid': f['nomben'].valid, '': f['nomben'].untouched}">
+                     </div>
+                     <div *ngIf="authService.msgval && f['nomben'].errors && f['nomben'].touched" class="mt-0 py-0">
+                        <div *ngIf="f['nomben'].errors['required']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> El nombre es obligatorio.
+                        </div>
+                        <div *ngIf="f['nomben'].errors['minlength']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> El nombre debe tener al menos 3 caracteres.
+                        </div>
+                        <div *ngIf="f['nomben'].errors['existe']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> El nombre ya existe.
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-5 my-0 py-0">
+                     <div class="input-group mb-2 input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" for="idgrupo">Grupo<sup class="green">*</sup></label>
+                        </div>
+                        <select type="text" class="custom-select" formControlName="idgrupo" (change)="changeIdgrupo()">
+                           <option [ngValue]="gruposbene" *ngFor="let gruposbene of _gruposbene">
+                              {{ gruposbene.nomgru }}
+                           </option>
+                        </select>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group mb-2 input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" for="codben">Código<sup class="green">*</sup></label>
+                        </div>
+                        <input type="text" class="form-control text-center" formControlName="codben" aria-label="Small"
+                           aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['codben'].invalid && f['codben'].touched,
+                           'is-valid': f['codben'].valid, '': f['codben'].untouched}">
+                     </div>
+
+                     <div *ngIf="authService.msgval && f['codben'].errors && f['codben'].touched" class="mt-0 py-0">
+                        <div *ngIf="f['codben'].errors['required']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> El código es obligatorio.
+                        </div>
+                        <div *ngIf="f['codben'].errors['minlength'] || f['codben'].errors['maxlength']"
+                           class="alert alert-warning py-0 mt-0 roboto small" role="alert">
+                           <strong>Ups!</strong> El código debe tener 6 caracteres.
+                        </div>
+                        <div *ngIf="f['codben'].errors['invalido']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> Código inconsistente.
+                        </div>
+                        <div *ngIf="f['codben'].errors['existe']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> El código ya existe.
+                        </div>
+                     </div>
+
+                  </div>
+
+                  <div class="form-group col-md-5 my-0 py-0">
+                     <div class="input-group input-group-sm mb-2">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Tipo
+                              identificación<sup class="green">*</sup></span>
+                        </div>
+                        <select class="form-control form-control-sm" formControlName="tpidben" (change)="changeTpidben()">
+                           <option *ngFor="let tpidentifica of _tpidentifica" [ngValue]="tpidentifica.codigo">
+                              {{tpidentifica.nombre}} </option>
+                        </select>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-5 my-0 py-0">
+                     <div class="input-group mb-2 input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" for="rucben">Identificación<sup class="green">*</sup></label>
+                        </div>
+                        <input type="text" class="form-control text-center" formControlName="rucben" aria-label="Small"
+                           aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['rucben'].invalid && f['rucben'].touched,
+                           'is-valid': f['rucben'].valid, '': f['rucben'].untouched}">
+                     </div>
+
+                     <div *ngIf="authService.msgval && f['rucben'].errors && f['rucben'].touched" class="mt-0 py-0">
+                        <div *ngIf="f['rucben'].errors['required']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> La identificación es obligatoria.
+                        </div>
+                        <div *ngIf="f['rucben'].errors['invalido']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> Identificación incorrecta.
+                        </div>
+                        <div *ngIf="f['rucben'].errors['existe']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> La identificación ya existe.
+                        </div>
+                     </div>
+
+                  </div>
+
+                  <div class="form-group col-md-6 my-0 py-0">
+                     <div class="input-group mb-2 input-group-sm">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
+                              data-toggle="tooltip">e-mail</span>
+                        </div>
+                        <input type="text" class="form-control" formControlName="mailben" aria-label="Small"
+                           aria-describedby="inputGroup-sizing-sm">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-5 my-0 py-0">
+                     <div class="input-group mb-2 input-group-sm">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
+                              data-toggle="tooltip">Teléfonos</span>
+                        </div>
+                        <input type="text" class="form-control" formControlName="tlfben" aria-label="Small"
+                           aria-describedby="inputGroup-sizing-sm">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-12 my-0 py-0">
+                     <div class="input-group mb-2 input-group-sm">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
+                              data-toggle="tooltip">Dirección</span>
+                        </div>
+                        <input type="text" class="form-control" formControlName="dirben" aria-label="Small"
+                           aria-describedby="inputGroup-sizing-sm">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-8 my-0 py-0">
+                     <div class="input-group mb-2 input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" for="idifinan">Inst.Financiera</label>
+                        </div>
+                        <select type="text" class="custom-select" formControlName="idifinan">
+                           <option [ngValue]="ifinan" *ngFor="let ifinan of _ifinan">
+                              {{ ifinan.nomifinan }}
+                           </option>
+                        </select>
+                     </div>
+                  </div>
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group mb-2 input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Tipo de Cuenta</label>
+                        </div>
+                        <select class="custom-select" formControlName="tpcueben">
+                           <option value="0" selected>(Ninguno)</option>
+                           <option value="1">Corriente</option>
+                           <option value="2">Ahorros</option>
+                        </select>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group mb-2 input-group-sm">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
+                              data-toggle="tooltip">Nro.Cuenta</span>
+                        </div>
+                        <input type="text" class="form-control" formControlName="cuebanben" id="cuebanben"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+                     </div>
+                  </div>
+
+               </div>
+            
+            </form>
+            <div class="col-md-12 text-center">
+               <button class="btn btn-success btn-sm mx-1 mt-1" (click)="onSubmit()"
+                  [disabled]="!formBeneficiario.valid">
+                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+               <button class="btn btn-outline-success btn-sm mx-1 mt-1" (click)="regresar()"><i
+                     class="fa fa-times-circle"></i> Cancelar</button>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

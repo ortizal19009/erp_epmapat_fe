@@ -1,208 +1,222 @@
 <div class="content mt-1 pt-1 pl-0">
    <div class="container-fluid">
       <div class="row m-0 px-0 py-1 justify-content-start sombra cabecera border">
-         <div class="col-sm-12">
+         <div class="col-sm-11">
             <form [formGroup]="formBuscar">
-
                <div class="row">
-                  <div class="col-sm-2 mt-2">
-                     <h6 class="font-weight-bold text-truncate">Partida: {{ codpar }}</h6>
+
+                  <div class="form-group col-md-6 my-1">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text my-0 py-0">
+                              <div class="btn-group">
+                                 <button type="button" class="bg-transparent border-0 " data-toggle="dropdown"
+                                    aria-expanded="false"><i class="bi-three-dots-vertical"></i>
+                                 </button>
+                                 <div class="dropdown-menu dropdown-menu-left roboto bg-cyan">
+                                    <button class="dropdown-item" type="button" (click)="opciones(1)">
+                                       <i class="bi-receipt"></i>&nbsp; Auxiliar Presupuestario de
+                                       Ingreso</button>
+                                    <button class="dropdown-item" type="button" (click)="opciones(2)">
+                                       <i class="bi-book-half"></i>&nbsp; Cuentas Asociadas</button>
+                                    <button class="dropdown-item" type="button" (click)="opciones(3)">
+                                       <i class="bi-card-list"></i>&nbsp; Datos de la Partida</button>
+                                 </div>
+                              </div>
+                           </span>
+                           <span class="input-group-text font-weight-bold">Partida</span>
+                        </div>
+                        <input type="text" class="form-control col-sm-9" formControlName="partida" readonly
+                           tabIndex="-1">
+                        <!-- <input type="text" class="form-control col-sm-4" formControlName="codpar" readonly
+                           tabIndex="-1">
+                        <input type="text" class="form-control" formControlName="nompar" readonly tabIndex="-1"> -->
+                     </div>
                   </div>
-                  <div class="col-sm-3">
-                     <select class="custom-select-sm pl-0" id="tiprep" formControlName="tiprep">
-                        <!-- <option value="0" selected>Auxiliar Presupuestario de Ingreso</option>
-                        <option value="1">Otros</option> -->
-                        <option value="0" selected>Auxiliar Presupuestario de Ingreso</option>
-                        <option value="1">Cuentas Asociadas</option>
-                        <option value="2">Datos de la Partida</option>
-                        <option value="3">Saldos de la Partida</option>
-                        <option value="4">Cédula Presupuestaria de Ingreso</option>
-                     </select>
-                  </div>
-                  <div class="col-sm-1">
-                     <button class="btn btn-primary btn-sm" (click)="tipo_aux()">
-                        <i class="fa fa-search" aria-hidden="true"></i> Buscar
-                     </button>
-                  </div>
-                  <div class="col-sm-2">
+
+                  <div class="input-group col-sm-4 px-1 my-1">
                      <input type="date" class="form-control form-control-sm text-center" formControlName="desdeFecha"
                         max="{{ today | date : 'yyyy-MM-dd' }}" />
-                  </div>
-                  <div class="col-sm-2">
                      <input type="date" class="form-control form-control-sm text-center" formControlName="hastaFecha"
-                        max="{{ date | date : 'yyyy-MM-dd' }}" />
+                        max="{{ date | date : 'yyyy-MM-dd' }}" /> 
+                     <!-- <input type="date" class="form-control form-control-sm text-center" formControlName="hastaFecha"
+                        [value]="formBuscar.get('fechaNacimiento')?.value | date:'yyyy-MM-dd'"> -->
                   </div>
 
-                  <div class="btn-group ml-auto mx-0">
-                     <button type="button" class="bg-transparent border-0 dropdown-toggle text-white"
-                        data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+                  <div class="my-1">
+                     <button class="btn btn-primary btn-sm" (click)="buscaxopcion()">
+                        <i class="fa fa-search" aria-hidden="true"></i> Buscar
                      </button>
-                     <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-
-                        <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
-                           <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
-                        <button class="dropdown-item" type="button">
-                           <i class="bi-file-earmark-arrow-down"></i><span class="">&nbsp;
-                              Exportar</span></button>
-                     </div>
-
-                     <div class="col-sm">
-                        <button class="bg-transparent border-0" type="submit" (click)="regresar()">
-                           <i class="bi-arrow-left-circle text-white icoRegresar"></i>
-                        </button>
-                     </div>
                   </div>
                </div>
             </form>
          </div>
+         <div class="btn-group ml-auto my-1">
+            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
+               aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+               <button class="dropdown-item" type="button" (click)="imprimir()">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
+            </div>
+            <button class="bg-transparent border-0" type="submit" (click)="regresar()">
+               <i class="bi-arrow-left-circle text-white icoRegresar"></i>
+            </button>
+         </div>
+
       </div>
    </div>
 </div>
 
-<div [ngSwitch]="tiprep">
-   <div class="container-fluid" *ngSwitchCase="0">
-      <div class="row mb-0">
-         <div class="col-sm-12">
-            <table class="table table-hover table-bordered table-sm sombra">
-               <thead class="text-center cabecera">
-                  <tr>
-                     <th class="col-sm-1">Fecha</th>
-                     <th>Asie.</th>
-                     <th>Comp/Ref</th>
-                     <th>Reforma</th>
-                     <th>Codificado</th>
-                     <th>Devengado</th>
-                     <th>Cobrado</th>
-                     <th>Saldo Deven</th>
-                     <th>Saldo Cobro</th>
-                     <th class="col-sm-3">Concepto</th>
-                  </tr>
-               </thead>
-               <tbody class="detalle">
-                  <tr *ngFor="let ejecucion of _ejecucion | filter: filtro; let i=index" class="fila">
-                     <td class="py-0">{{ejecucion.fecha_eje | date : 'dd-MM-yyyy'}}</td>
-                     <td class="py-0">{{ejecucion.asiento}}</td>
-                     <td class="py-0">{{ejecucion.compro}}</td>
-                     <td class="text-right py-0" [ngClass]="{'transparente': ejecucion.modifi == 0}">{{ejecucion.modifi
-                        | number:'1.2-2'}}</td>
-                     <td class="text-right py-0">{{ejecucion.codificado | number:'1.2-2'}}</td>
-                     <td class="text-right py-0" [ngClass]="{'transparente': ejecucion.devengado == 0}">
-                        {{ejecucion.devengado | number:'1.2-2'}}</td>
-                     <td class="text-right py-0" [ngClass]="{'transparente': ejecucion.cobpagado == 0}">
-                        {{ejecucion.cobpagado | number:'1.2-2'}}</td>
-                     <td class="text-right py-0">{{ejecucion.saldo_devengado | number:'1.2-2'}}</td>
-                     <td class="text-right py-0">{{ejecucion.saldo_cobpagado | number:'1.2-2'}}</td>
-                     <td class="text-left text-truncate ancho200">{{ejecucion.concepto}}</td>
-                  </tr>
-                  <tr class="font-weight-bold">
-                     <td class="text-left py-0">TOTAL: {{numreg}}</td>
-                     <td></td>
-                     <td></td>
-                     <td class="text-right py-0">{{ totalRefo | number:'1.2-2'}}</td>
-                     <td></td>
-                     <td class="font-weight-bold text-right py-0">{{ totalDeve | number:'1.2-2'}}</td>
-                     <td class="font-weight-bold text-right py-0">{{ totalCobp | number:'1.2-2'}}</td>
-                     <td></td>
-                     <td></td>
-                     <td></td>
-                  </tr>
-               </tbody>
-            </table>
-         </div>
-      </div>
-   </div>
-
-   <!-- Cuentas Asociadas a la Partida de Ingreso -->
-   <div class="container-fluid" *ngSwitchCase="1">
-      <div class="row mb-0">
-         <div class="col-sm-12">
-            <table class="table table-hover table-bordered table-sm col-sm-8 sombra">
-               <thead class="text-center cabecera">
-                  <tr>
-                     <td></td>
-                     <th class="col-sm-2 text-center">Cuenta</th>
-                     <th class="col-sm-6 text-center">Denominación</th>
-                     <th class="col-sm-2 text-center">Aso.Debe</th>
-                     <th class="col-sm-2 text-center">Aso.Haber</th>
-                  </tr>
-               </thead>
-               <tbody class="detalle">
-                  <tr *ngFor="let cuenta of _cuenta | filter: filtro; let i=index" class="fila">
-                     <td class="font-weight-bold small">{{i+1}}</td>
-                     <td>{{cuenta.codcue}}</td>
-                     <td>{{cuenta.nomcue}}</td>
-                     <td>{{cuenta.asodebe}}</td>
-                     <td>{{cuenta.asohaber}}</td>
-                  </tr>
-               </tbody>
-            </table>
-         </div>
-      </div>
-   </div>
-
-   <!-- Datos de la Partida de Ingresos -->
-   <div class="container-sm" *ngSwitchCase="2">
-      <div class="row m-0 px-0 py-1 justify-content-start">
-         <table class="col-sm-12">
-            <tr>
-               <th class="text-center">
-                  DATOS DE LA PARTIDA PRESUPUESTARIA DE INGRESO
-               </th>
-            </tr>
-            <tr>
-               <th class="text-center">
-                  FECHA: {{this.formBuscar.value.hastaFecha | date : 'dd-MMMM-yyyy'}}
-               </th>
-            </tr><br>
-            <div class="row">
-               <th class="col-sm-4 text-right">Código :</th>
-               <td>{{cuenta}}</td>
-            </div>
-            <div class="row">
-               <th class="col-sm-4 text-right">Denominación :</th>
-               <td>{{nombre}}</td>
-            </div><br>
-
-            <tr>
-               <th class="m-0 col-sm-12 text-center">CLASIFICADOR PRESUPUESTARIO</th>
-            </tr><br>
-            <div class="row">
-               <th class="col-sm-4 text-right">Código :</th>
-               <td>{{cta_cla}}</td>
-            </div>
-            <div class="row">
-               <th class="col-sm-4 text-right">Denominación :</th>
-               <td>{{nom_cla}}</td>
-            </div><br>
-            <div class="row">
-               <th class="col-sm-4 text-right"></th>
-               <th class="col-sm-3 text-right">VALORES</th>
-               <th class="col-sm-3 text-right">SALDOS</th>
-            </div>
-            <div class="row">
-               <th class="col-sm-4 text-right">Asignación Inicial :</th>
-               <td class="col-sm-3 text-right">{{saldo_ini | number:'1.2-2'}}</td>
-            </div>
-            <div class="row">
-               <th class="col-sm-4 text-right">Reformas :</th>
-               <td class="col-sm-3 text-right">{{this.totalRefo | number:'1.2-2'}}</td>
-            </div>
-            <div class="row">
-               <th class="col-sm-4 text-right">Codificado :</th>
-               <td class="col-sm-3 text-right">{{this.codifica| number:'1.2-2'}}</td>
-            </div>
-            <div class="row">
-               <th class="col-sm-4 text-right">Devengado :</th>
-               <td class="col-sm-3 text-right">{{this.totalDeve | number:'1.2-2'}}</td>
-               <td class="col-sm-3 text-right"> {{this.sal_deve | number:'1.2-2'}}</td>
-            </div>
-            <div class="row">
-               <th class="col-sm-4 text-right">Cobrado :</th>
-               <td class="col-sm-3 text-right">{{this.totalCobp | number:'1.2-2'}}</td>
-               <td class="col-sm-3 text-right">{{this.sal_cob | number:'1.2-2'}}</td>
-            </div><br>
+<!-- === Auxiliar Presupuestario de Ingreso === -->
+<div *ngIf="opcion == 1" class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-12">
+         <table class="table table-hover table-bordered table-sm sombra">
+            <thead class="text-center cabecera pad0">
+               <tr>
+                  <th colspan="10">Auxiliar Presupuestario de Ingreso</th>
+               </tr>
+               <tr>
+                  <th class="col-sm-1">Fecha</th>
+                  <th>Asie.</th>
+                  <th>Comp/Ref</th>
+                  <th>Reforma</th>
+                  <th>Codificado</th>
+                  <th>Devengado</th>
+                  <th>Cobrado</th>
+                  <th>Saldo Deven</th>
+                  <th>Saldo Cobro</th>
+                  <th class="col-sm-3">Concepto</th>
+               </tr>
+            </thead>
+            <tbody class="detalle roboto small pad0">
+               <tr *ngFor="let ejecucion of _ejecucion" class="fila">
+                  <td>{{ejecucion.fecha_eje | date : 'dd-MM-yyyy'}}</td>
+                  <td class="text-center">{{ejecucion.asiento}}</td>
+                  <td class="text-center">{{ejecucion.compro}}</td>
+                  <td class="text-right" [ngClass]="{'transparente': ejecucion.modifi == 0}">{{ejecucion.modifi
+                     | number:'1.2-2'}}</td>
+                  <td class="text-right">{{ejecucion.codificado | number:'1.2-2'}}</td>
+                  <td class="text-right" [ngClass]="{'transparente': ejecucion.devengado == 0}">
+                     {{ejecucion.devengado | number:'1.2-2'}}</td>
+                  <td class="text-right" [ngClass]="{'transparente': ejecucion.cobpagado == 0}">
+                     {{ejecucion.cobpagado | number:'1.2-2'}}</td>
+                  <td class="text-right">{{ejecucion.saldo_devengado | number:'1.2-2'}}</td>
+                  <td class="text-right">{{ejecucion.saldo_cobpagado | number:'1.2-2'}}</td>
+                  <td class="text-left text-truncate ancho200" data-toggle="tooltip"
+                     [title]="ejecucion.concep.length > 40 ? ejecucion.concep : ''">{{ejecucion.concep}}</td>
+               </tr>
+            </tbody>
+            <tfoot class="detalle font-weight-bold pad0 roboto small">
+               <tr class="text-right">
+                  <td class="text-left">TOTAL: {{numreg}}</td>
+                  <td></td>
+                  <td></td>
+                  <td class="text-right">{{ totalRefo | number:'1.2-2'}}</td>
+                  <td></td>
+                  <td class="font-weight-bold text-right">{{ totalDeve | number:'1.2-2'}}</td>
+                  <td class="font-weight-bold text-right">{{ totalCobp | number:'1.2-2'}}</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+               </tr>
+            </tfoot>
          </table>
       </div>
    </div>
+</div>
 
+<!-- === Cuentas Asociadas a la Partida de Ingreso === -->
+<div *ngIf="opcion == 2" class="container-fluid">
+   <div class="row mb-0 justify-content-center">
+      <div class="col-sm-8">
+         <table class="table table-hover table-bordered table-sm sombra">
+            <thead class="text-center cabecera pad0">
+               <tr>
+                  <th colspan="4">Cuentas Asociadas</th>
+               </tr>
+               <tr>
+                  <th class="col-sm-2 text-center">Cuenta</th>
+                  <th class="col-sm-6 text-center">Denominación</th>
+                  <th class="col-sm-2 text-center">Aso.Debe</th>
+                  <th class="col-sm-2 text-center">Aso.Haber</th>
+               </tr>
+            </thead>
+            <tbody class="detalle roboto small pad0">
+               <tr *ngFor="let cuenta of _cuentas | filter: filtro; let i=index" class="fila">
+                  <td>{{cuenta.codcue}}</td>
+                  <td>{{cuenta.nomcue}}</td>
+                  <td>{{cuenta.asodebe}}</td>
+                  <td>{{cuenta.asohaber}}</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+   </div>
+</div>
+
+<!-- Datos de la Partida de Ingresos -->
+<div *ngIf="opcion == 3" class="container-sm">
+   <div class="row m-0 px-0 py-1 justify-content-start">
+      <table class="col-sm-12">
+         <tr>
+            <th class="text-center">
+               Datos de la Partida
+            </th>
+         </tr>
+         <tr>
+            <th class="text-center">
+               FECHA: {{this.formBuscar.value.hastaFecha | date : 'dd-MMMM-yyyy'}}
+            </th>
+         </tr><br>
+         <div class="row">
+            <th class="col-sm-4 text-right">Código :</th>
+            <!-- <td>{{cuenta}}</td> -->
+         </div>
+         <div class="row">
+            <th class="col-sm-4 text-right">Denominación :</th>
+            <td>{{nombre}}</td>
+         </div><br>
+
+         <tr>
+            <th class="m-0 col-sm-12 text-center">CLASIFICADOR PRESUPUESTARIO</th>
+         </tr><br>
+         <div class="row">
+            <th class="col-sm-4 text-right">Código :</th>
+            <td>{{cta_cla}}</td>
+         </div>
+         <div class="row">
+            <th class="col-sm-4 text-right">Denominación :</th>
+            <td>{{nom_cla}}</td>
+         </div><br>
+         <div class="row">
+            <th class="col-sm-4 text-right"></th>
+            <th class="col-sm-3 text-right">VALORES</th>
+            <th class="col-sm-3 text-right">SALDOS</th>
+         </div>
+         <div class="row">
+            <th class="col-sm-4 text-right">Asignación Inicial :</th>
+            <td class="col-sm-3 text-right">{{saldo_ini | number:'1.2-2'}}</td>
+         </div>
+         <div class="row">
+            <th class="col-sm-4 text-right">Reformas :</th>
+            <td class="col-sm-3 text-right">{{this.totalRefo | number:'1.2-2'}}</td>
+         </div>
+         <div class="row">
+            <th class="col-sm-4 text-right">Codificado :</th>
+            <td class="col-sm-3 text-right">{{this.codifica| number:'1.2-2'}}</td>
+         </div>
+         <div class="row">
+            <th class="col-sm-4 text-right">Devengado :</th>
+            <td class="col-sm-3 text-right">{{this.totalDeve | number:'1.2-2'}}</td>
+            <td class="col-sm-3 text-right"> {{this.sal_deve | number:'1.2-2'}}</td>
+         </div>
+         <div class="row">
+            <th class="col-sm-4 text-right">Cobrado :</th>
+            <td class="col-sm-3 text-right">{{this.totalCobp | number:'1.2-2'}}</td>
+            <td class="col-sm-3 text-right">{{this.sal_cob | number:'1.2-2'}}</td>
+         </div><br>
+      </table>
+   </div>
 </div>

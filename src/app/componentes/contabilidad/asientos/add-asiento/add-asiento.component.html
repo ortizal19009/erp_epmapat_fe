@@ -35,7 +35,7 @@
                      <div class="form-group col-md-6">
                         <div class="input-group input-group-sm">
                            <div class="input-group-prepend">
-                              <label class="input-group-text" for="tipcom">Comprobante</label>
+                              <label class="input-group-text" for="tipcom">Comprobante<sup class="green">*</sup></label>
                            </div>
                            <select class="custom-select" formControlName="tipcom" (change)="changeTipcom()" [ngClass]="{'is-invalid': f['tipcom'].invalid && f['tipcom'].touched,
                            'is-valid': f['tipcom'].valid, '': f['tipcom'].untouched}">
@@ -54,11 +54,10 @@
                      <div class="form-group col-md-6">
                         <div class="input-group input-group-sm">
                            <div class="input-group-prepend">
-                              <label class="input-group-text" for="iddocumento">Documento</label>
+                              <label class="input-group-text">Documento<sup class="green">*</sup></label>
                            </div>
-                           <select type="text" class="custom-select" formControlName="iddocumento">
-                              <option [ngValue]="documento" *ngFor="let documento of _documentos"
-                                 [ngValue]="documento.iddocumento">
+                           <select type="text" class="custom-select" formControlName="intdoc">
+                              <option *ngFor="let documento of _documentos" [ngValue]="documento.intdoc">
                                  {{ documento.nomdoc }}
                               </option>
                            </select>
@@ -71,14 +70,14 @@
                      <div class="form-group col-md-12 mt-1">
                         <div class="input-group input-group-sm mb-1 ">
                            <div class="input-group-prepend">
-                              <label class="input-group-text" for="fecha">Beneficiario</label>
+                              <label class="input-group-text" for="fecha">Beneficiario<sup class="green">*</sup></label>
                            </div>
-                           <input type="text" class="form-control form-control-sm"
-                              formControlName="idbene" list="benList" (keyup)="benefixNombre($event)" [ngClass]="{'is-invalid': f['idbene'].invalid && f['idbene'].touched,
+                           <input type="text" class="form-control form-control-sm" formControlName="idbene"
+                              list="benList" (input)="onBenefiSelected($event); benefixNombre($event)" [ngClass]="{'is-invalid': f['idbene'].invalid && f['idbene'].touched,
                            'is-valid': f['idbene'].valid, '': f['idbene'].untouched}">
                            <datalist role="listbox" id="benList">
-                              <option *ngFor="let beneficiario of _beneficiarios" value={{beneficiario.nomben}}>
-                                 {{ beneficiario.idgrupo.nomgru}}</option>
+                              <option *ngFor="let beneficiario of _beneficiarios" value={{beneficiario.nomben}}>{{
+                                 beneficiario.idgrupo.nomgru}}</option>
                            </datalist>
                         </div>
                      </div>

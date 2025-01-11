@@ -10,9 +10,6 @@
 .fila:hover {
    background-color: #117a8B;
    color: white;
-   /* cursor: pointer; */
 }
 
-.ancho200{ max-width: 200px; }
-
-tbody { font-size: 14px; }
+.ancho{ max-width: 200px; }

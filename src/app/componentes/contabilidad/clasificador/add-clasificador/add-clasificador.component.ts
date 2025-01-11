@@ -1,147 +1,122 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ClasificadorService } from 'src/app/servicios/clasificador.service';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import { map, of } from 'rxjs';
 
 @Component({
-  selector: 'app-add-clasificador',
-  templateUrl: './add-clasificador.component.html',
-  styleUrls: ['./add-clasificador.component.css']
+   selector: 'app-add-clasificador',
+   templateUrl: './add-clasificador.component.html',
+   styleUrls: ['./add-clasificador.component.css']
 })
 
-export class AddClasificadorComponent implements OnInit{
+export class AddClasificadorComponent implements OnInit {
 
-  clasificadorForm: FormGroup;
-  disabled: boolean = true;
-  vecvalido: Boolean[] = [false, false];
-  rtn1: number = 0; rtn2: number = 0;
-  codigos: String;
-  codpar: String;
-  nompar: String;
+   formClasificador: FormGroup;
+   codgrupo: String;
 
-  constructor(public fb: FormBuilder, private clasificadorService: ClasificadorService,
-   public router: Router, private authService: AutorizaService
-   ) { }
+   constructor(public fb: FormBuilder, public router: Router, public authService: AutorizaService,
+      private clasifService: ClasificadorService ) { }
 
-  ngOnInit(): void {
-   let date: Date = new Date();
-     this.clasificadorForm = this.fb.group({
-      codpar: ['', Validators.required],
-      nivpar: 0,
-      grupar: [''],
-      nompar: ['', Validators.required],
-      despar: [''],
-      cueejepresu: [''],
-      presupuesto: 0,
-      ejecucion: 0,
-      devengado: 0,
-      reforma: 0,
-      asigna_ini: 0,
-      usucrea: this.authService.idusuario,
-      feccrea: date,
-      usumodi: this.authService.idusuario,
-      fecmodi: null,
-      grupo: null,
-      balancostos: 0
+   ngOnInit(): void {
+      sessionStorage.setItem('ventana', '/clasificador');
+      let coloresJSON = sessionStorage.getItem('/clasificador');
+      if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
 
-     });
-     this.valCodigoCuenta();
-     this.valDescriCuenta();
-  }
+      let date: Date = new Date();
+      this.formClasificador = this.fb.group({
+         codpar: ['', [Validators.required], [this.valFormato.bind(this), this.valGrupo.bind(this), this.valCodpar.bind(this)]],
+         nivpar: 0,
+         grupar: [''],
+         nompar: ['', [Validators.required, Validators.minLength(3)]],
+         despar: [''],
+         cueejepresu: [''],
+         presupuesto: 0,
+         ejecucion: 0,
+         devengado: 0,
+         reforma: 0,
+         asigna_ini: 0,
+         usucrea: 1,
+         feccrea: date,
+         balancostos: 0
+      },
+         { updateOn: "blur" });
+   }
 
-  regresar() { this.router.navigate(['/clasificador']); }
+   colocaColor(colores: any) {
+      document.documentElement.style.setProperty('--bgcolor1', colores[0]);
+      const cabecera = document.querySelector('.cabecera');
+      if (cabecera) cabecera.classList.add('nuevoBG1')
+      document.documentElement.style.setProperty('--bgcolor2', colores[1]);
+      const detalle = document.querySelector('.detalle');
+      if (detalle) detalle.classList.add('nuevoBG2');
+   }
 
-  onSubmit() { 
-   let h_codigo = document.getElementById("codpar") as HTMLInputElement;
-   let l_codigo = h_codigo.value;
-   this.findByCodigos(l_codigo);
+   regresar() { this.router.navigate(['/clasificador']); }
 
-   let h_descripcion = document.getElementById("nompar") as HTMLInputElement;
-   let l_descripcion = h_descripcion.value;
+   guardar() {
+      let h_codigo = document.getElementById("codpar") as HTMLInputElement;
+      let l_codigo = h_codigo.value;
+      // this.findByCodigos(l_codigo);
 
-   this.clasificadorService.getByNombre(l_descripcion).subscribe(datos => {
-      this.rtn2= 0;
-      if (datos.length >= 1) {
-         this.rtn2= 1;
-         this.nompar = l_descripcion;
-      }
-   }, error => console.log(error));
-   this.guardarCuenta();
-  }
+      let h_descripcion = document.getElementById("nompar") as HTMLInputElement;
+      let l_descripcion = h_descripcion.value;
 
-  guardaCuenta() {
-
-   let h_codigo = document.getElementById("codpar") as HTMLInputElement;
-   let l_codigo = h_codigo.value;
-   this.rtn2 = 0;
-   this.findByCodigos(l_codigo);
-   if (this.rtn1 == 0 ) {
+      // this.clasifService.getByNombre(l_descripcion).subscribe(datos => {
+      //    this.rtn2 = 0;
+      //    if (datos.length >= 1) {
+      //       this.rtn2 = 1;
+      //       this.nompar = l_descripcion;
+      //    }
+      // }, error => console.log(error));
       this.guardarCuenta();
    }
-}
 
+   get f() { return this.formClasificador.controls; }
 
-guardarCuenta(): void {
-   this.clasificadorService.saveClasificador(this.clasificadorForm.value).subscribe(datos => {
-      this.router.navigate(['/clasificador']);
-    }, error => console.log(error));
+   guardarCuenta(): void {
+      this.clasifService.saveClasificador(this.formClasificador.value).subscribe(datos => {
+         this.router.navigate(['/clasificador']);
+      }, error => console.error(error));
 
-}
+   }
 
-valCodigoCuenta() {
-   let h_codigo = document.getElementById("codpar") as HTMLInputElement;
+   //Valida el formato de codpar
+   valFormato(control: AbstractControl) {
+      let rtn = this.validateFormato(control.value);
+      if (!rtn) return of({ invalido: true });
+      else return of(null);
+   }
 
-   h_codigo.addEventListener('keyup', () => {
-      let l_value = h_codigo.value;
-      if (+l_value > 0) {
-         h_codigo.style.border = '';
-         this.vecvalido[0] = true;
-      } else {
-         h_codigo.style.border = "#F54500 1px solid";
-         this.vecvalido[0] = false;
+   // Expresión regular para validar formato 
+   validateFormato(str: string): boolean {
+      const regex = /^(?:\d{1,2}|\d{2}\.\d{2}|\d{2}\.\d{2}\.\d{2})$/;
+      return regex.test(str);
+   }
+
+   //Valida grupo
+   valGrupo(control: AbstractControl) {
+      let g: number;
+      switch (control.value.length) {
+         case 1: return of(null);
+         case 2: g = 1; break;
+         case 5: g = 2; break;
+         case 8: g = 5; break;
+         default: return of( null );
       }
-      this.disabled = funvalidar(...this.vecvalido);
-   });
-}
+      this.codgrupo = control.value.slice(0, g);
+      return this.clasifService.valCodpar(this.codgrupo).pipe(
+         map(result => !result ? { grupoinvalido: true } : null)
+      );
+   }
 
-valDescriCuenta() {
-   let h_descripcion = document.getElementById("nompar") as HTMLInputElement;
-   h_descripcion.addEventListener('keyup', () => {
-      let l_value = h_descripcion.value;
-      if (l_value.length >= 3) {
-         h_descripcion.style.border = '';
-         this.vecvalido[1] = true;
-         this.disabled = funvalidar(...this.vecvalido);
-      } else {
-         h_descripcion.style.border = "#F54500 1px solid";
-         this.vecvalido[1] = false;
-         this.disabled = funvalidar(...this.vecvalido);
-      }
-   });
-}
-findByCodigos(codpar: String) {
-   let rtn = 0;
-
-   this.clasificadorService.getByDescripcion(codpar).subscribe(datos => {
-      this.rtn1 = 0;
-      if (datos.length >= 1) {
-         this.rtn1 = 1;
-         rtn = 1;
-         this.codigos = datos[0].codpar + "." + codpar;
-      }
-      return rtn;
-   }, error => console.log(error));
-}
+   //Valida codpar
+   valCodpar(control: AbstractControl) {
+      return this.clasifService.valCodpar(control.value).pipe(
+         map(result => result ? { existe: true } : null)
+      );
+   }
 
 }
 
-//Recorre el vector de validación para verificar si todos los campos son válidos
-function funvalidar(...vector: Boolean[]) {
-  for (let i = 0; i < vector.length; i++) {
-     if (vector[i] == false) {
-        return true
-     }
-  }
-  return false
-}

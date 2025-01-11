@@ -8,12 +8,12 @@ export class Tramipresu {
 	numdoc: String; 
 	fecdoc: Date; 
 	totmiso: number; 
-	descripcion: String; 
+	descri: String; 
 	usucrea: number; 
 	feccrea: Date; 
 	usumodi: number; 
 	fecmodi: Date; 
-	swreinte: Boolean; 
+	swreinte: number; 
 	idbene: Beneficiarios; 
-	iddocumento: Documentos;
+	intdoc: Documentos;
 }

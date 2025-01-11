@@ -1,0 +1,89 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start sombra border cabecera ">
+         <div class="col-sm-11 my-1">
+            <form [formGroup]="formBuscar" (ngSubmit)="buscar()">
+               <div class="row">
+                  <div class="col-sm-3">
+                     <h4 class="m-0 font-weight-bold text-truncate"> <i class="bi-arrow-down-right-circle-fill"></i>
+                        &nbsp;Recaudación diaria</h4>
+                  </div>
+
+                  <div class="form-group col-md-3 my-0 py-0">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Registrar</label>
+                        </div>
+                        <select class="custom-select" formControlName="registrar">
+                           <option value="1" selected>Provisión</option>
+                           <option value="2">Cobro</option>
+                        </select>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-3 my-0">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" for="fecha">Fecha</label>
+                        </div>
+                        <input type="date" class="form-control text-center" formControlName="fecha" aria-label="Small"
+                           aria-describedby="inputGroup-sizing-sm">
+                     </div>
+                  </div>
+
+                  <div class="col-sm-2">
+                     <button class="btn btn-primary btn-sm" type="submit" (click)="buscar()">
+                        <i *ngIf="swbuscando" class="fa fa-spinner"></i>
+                        <i *ngIf="!swbuscando" class="fa fa-search"></i> {{txtbuscar}}
+                     </button>
+                  </div>
+               </div>
+            </form>
+         </div>
+
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-6">
+         <table *ngIf="_cobradas.length > 0" class="table table-hover table-bordered table-sm sombra">
+            <thead class="text-center cabecera">
+               <tr class="pad0">
+                  <th>Rubros (Período actual)</th>
+                  <th>Valor</th>
+                  <th>Cuenta</th>
+               </tr>
+            </thead>
+            <tbody class="detalle roboto small">
+               <tr class="fila pad0" *ngFor="let cobrada of _cobradas">
+                  <td> {{ cobrada[1] }}</td>
+                  <td class="text-right">{{ cobrada[2] | number: '1.2-2' }}</td>
+                  <td class="text-center">{{ cobrada.cuenta }}</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <div class="col-sm-6">
+         <table *ngIf="_rubrosanterior.length > 0" class="table table-hover table-bordered table-sm sombra">
+            <thead class="text-center cabecera">
+               <tr class="pad0">
+                  <th>Rubros (Período anterior)</th>
+                  <th>Valor</th>
+                  <th>Cuenta</th>
+               </tr>
+            </thead>
+            <tbody class="detalle roboto small">
+               <tr class="fila pad0" *ngFor="let anterior of _rubrosanterior">
+                  <td> {{ anterior[1] }}</td>
+                  <td class="text-right">{{ anterior[2] | number: '1.2-2' }}</td>
+                  <td class="text-center">{{ anterior.cuenta }}</td>
+               </tr>
+            </tbody>
+         </table>
+
+      </div>
+   </div>
+
+</div>

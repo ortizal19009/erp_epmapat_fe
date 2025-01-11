@@ -1,0 +1,129 @@
+<div class="content mt-1 pt-1 px-2">
+   <div class="container-fluid">
+      <div class="row mt-0 px-1 pt-1 justify-content-center cabecera border sombra">
+         <div class="col-sm-8 text-center">
+            <h4 class="font-weight-bold text-truncate ml-2"><i class="bi-book"></i> &nbsp; Cuentas de Costos</h4>
+         </div>
+         <div class="col-sm-3 text-left">
+            <input type="text" class="form-control form-control-sm text-center col-sm-10" placeholder="Filtrar..."
+               [(ngModel)]="filtro">
+         </div>
+         <div class="btn-group ml-auto mt-0">
+            <button class="bg-transparent border-0" type="button" (click)="regresar()" data-toggle="tooltip"
+               title="Regresar">
+               <i class="bi-arrow-left-circle text-white icoRegresar"></i>
+            </button>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row justify-content-center mb-0">
+      <div class="col-sm-10">
+         <table class="table table-hover table-bordered table-sm sombra">
+            <thead class="cabecera">
+               <tr class="text-center pad0">
+                  <th>Cuenta</th>
+                  <th>Denominación</th>
+                  <th>Aso.Debe</th>
+                  <th>Aso.Haber</th>
+                  <th>Comparativo</th>
+                  <th>Resultados</th>
+                  <th></th>
+               </tr>
+            </thead>
+            <tbody class="detalle roboto small">
+               <tr *ngFor="let cuecostos of _cuecostos | filter: filtro" class="pad0">
+                  <td>{{ cuecostos.codcue }}</td>
+                  <td>{{ cuecostos.nomcue }}</td>
+                  <td>{{ cuecostos.asodebe }}</td>
+                  <td>{{ cuecostos.asohaber }}</td>
+                  <td>{{comparativo(cuecostos.balancostos)}} </td>
+                  <td>{{resultados(cuecostos.resulcostos)}} </td>
+                  <td class="bg-modificar">
+                     <i class="bi-pencil" (click)="handleClick(cuecostos)" data-toggle="tooltip" title="Modificar"
+                        data-toggle="modal" data-target="#modalModificar"></i>
+                  </td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+   </div>
+
+   <!-- Modal Modificar -->
+   <div class='modal fade' id='modalModificar' tabindex='-1' aria-labelledby='modalModificar' aria-hidden='true'>
+      <div class='modal-dialog modal-dialog-centered'>
+         <div class='modal-content detalle'>
+            <div class='modal-header cabecera justify-content-center'>
+               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Modificar</h5>
+            </div>
+
+            <div class='modal-body'>
+               <form [formGroup]="formModificar">
+                  <div class="row">
+
+                     <div class="form-group col-md-6 my-0 py-0">
+                        <div class="input-group input-group-sm mb-1">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold">Código </span>
+                           </div>
+                           <input type="text" class="form-control form-control-sm" formControlName="codcue" readonly>
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-12 mb-0">
+                        <div class="input-group input-group-sm mb-1">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold">Nombre</span>
+                           </div>
+                           <input type="text" class="form-control" formControlName="nomcue" readonly>
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-8 my-0 py-0">
+                        <div class="input-group mb-1 input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Comparativo</label>
+                           </div>
+                           <select class="custom-select" formControlName="balancostos">
+                              <option value="0">(Ninguno)</option>
+                              <option value="1">Remuneraciones</option>
+                              <option value="2">Servicios subcontratados</option>
+                              <option value="3">Materiales e insumos</option>
+                              <option value="4">Otros gastos</option>
+                              <option value="5">Gastos de capital</option>
+                           </select>
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-7 my-0 py-0">
+                        <div class="input-group mb-1 input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Resultados</label>
+                           </div>
+                           <select class="custom-select" formControlName="resulcostos">
+                              <option value="0">(Ninguno)</option>
+                              <option value="1">Agua potable</option>
+                              <option value="2">Alcantarillado</option>
+                              <option value="9">Costos</option>
+                           </select>
+                        </div>
+                     </div>
+
+                  </div>
+               </form>
+            </div>
+
+            <div class="modal-footer justify-content-center">
+               <button type="button" class="btn btn-sm btn-success" data-dismiss="modal" [disabled]="formModificar.pristine || !formModificar.valid" (click)="actualizar()">
+                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+               <button type="button" class="btn btn-sm btn-outline-success" data-dismiss="modal"> <i
+                     class="bi bi-x-circle"></i> Cancelar</button>
+            </div>
+
+         </div>
+      </div>
+   </div>
+
+</div>

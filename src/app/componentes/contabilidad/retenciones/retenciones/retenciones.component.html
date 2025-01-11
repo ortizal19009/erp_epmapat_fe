@@ -1,0 +1,151 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start sombra border cabecera ">
+         <div class="col-sm-9 my-1">
+            <form [formGroup]="formBuscar" (ngSubmit)="buscar()">
+               <div class="row">
+                  <div class="col-md-3 pr-0">
+                     <h4 class="m-0 font-weight-bold text-truncate"> <i class="bi-scissors"></i> Retenciones</h4>
+                  </div>
+
+                  <div class="input-group col-sm-3 pl-1 ">
+                     <input type="number" class="form-control form-control-sm text-center" formControlName="desdeSecu"
+                        placeholder="Desde" min="1" (change)="changeDesdeHasta()">
+                     <input type="number" class="form-control form-control-sm text-center" formControlName="hastaSecu"
+                        placeholder="Hasta" min="1" (change)="changeDesdeHasta()">
+                  </div>
+
+                  <div class="input-group col-sm-4 px-1 ">
+                     <input type="date" class="form-control form-control-sm text-center" formControlName="desdeFecha"
+                        max="{{ today | date : 'yyyy-MM-dd' }}" />
+                     <input type="date" class="form-control form-control-sm text-center" formControlName="hastaFecha"
+                        max="{{ date | date : 'yyyy-MM-dd' }}" />
+                  </div>
+
+                  <div class="col-sm-2">
+                     <button class="btn btn-primary btn-sm" type="submit" (click)="buscar()">
+                        <i class="fa fa-search"></i> Buscar
+                     </button>
+                  </div>
+               </div>
+            </form>
+         </div>
+
+         <div class="btn-group col-sm-3 justify-content-end my-1 pb-0">
+            <div class="text-left">
+               <input class="form-control form-control-sm text-center col-sm-11 mb-0" type="text"
+                  placeholder="Filtrar..." [(ngModel)]="filtro" />
+            </div>
+            <button *ngIf="swdesdehasta" class="bg-transparent border-0 mt-0" type="submit" (click)="listainicial()"
+               data-toggle="tooltip" title="Ultimos">
+               <i class="bi-skip-end text-white icoRegresar"></i>
+            </button>
+            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right mt-0"
+               data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto mt-0 ">
+               <button class="dropdown-item" type="button" [disabled]="seleccionados == 0" data-toggle="modal"
+                  aria-labelledby="enviarLabel" data-target="#enviar" (click)="swbotones = true">
+                  <i class="bi-patch-check"></i>&nbsp; Enviar a autorizar</button>
+               <button class="dropdown-item" type="button" [disabled]="seleccionados == 0">
+                  <i class="bi-check2-all"></i>&nbsp; Obtener autorización</button>
+               <button class="dropdown-item" type="button" (click)="imprimir()">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
+            </div>
+         </div>
+
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-12">
+         <table *ngIf="_retenciones" class="table table-hover table-bordered table-sm sombra">
+            <thead class="text-center cabecera">
+               <tr class="pad0">
+                  <th></th>
+                  <th>Nro.</th>
+                  <th>Fecha</th>
+                  <th>Sujeto retenido</th>
+                  <th>Documento</th>
+                  <th>Número de autorización</th>
+                  <th>Fecha autorización</th>
+                  <th>Valor</th>
+               </tr>
+            </thead>
+            <tbody class="detalle roboto small">
+               <tr class="pad0" *ngFor="let retencion of _retenciones | filter: filtro; let i=index ">
+                  <td><input type="checkbox" [(ngModel)]="retencion.escoge" (change)="changeEscoge(i)" [disabled]="retencion.estado != 0"></td>
+                  <td class="text-center"> {{ retencion.secretencion1 }}</td>
+                  <td class="text-center">{{ retencion.fechaemiret1 | date: 'dd-MM-yyyy' }}</td>
+                  <td class="text-left text-truncate ancho" data-toggle="tooltip"
+                     [title]="retencion.idbene.nomben.length > 30 ? retencion.idbene.nomben : ''">
+                     {{ retencion.idbene.nomben }}</td>
+                  <td [ngClass]="{'transparente': retencion.intdoc.intdoc == 1}">{{
+                     retencion.intdoc.nomdoc}}&nbsp; {{retencion.numdoc}} </td>
+                  <td class="text-center"> {{ retencion.numautoriza_e }}</td>
+                  <td class="text-center"> {{ retencion.fecautoriza }}</td>
+                  <td class="text-right">
+                     {{ retencion.valorretbienes + retencion.valorretservicios + retencion.valretserv100 +
+                     retencion.valretair | number:'1.2-2' }}</td>
+               </tr>
+            </tbody>
+            <tfoot class="font-weight-bold text-right detalle roboto small pad0">
+               <tr>
+                  <td colspan="4" class="text-right">Seleccionadas&nbsp;&nbsp; </td>
+                  <td class="text-center">{{seleccionados}}</td>
+                  <td colspan="2" class="text-right">TOTAL&nbsp;&nbsp; </td>
+                  <td class="text-right">{{sumtotal | number: '1.2-2'}}</td>
+               </tr>
+            </tfoot>
+         </table>
+      </div>
+   </div>
+
+   <!-- Modal Envia a autorizar -->
+   <div class='modal fade' id='enviar' tabindex='-1' aria-labelledby='enviar' aria-hidden='true'>
+      <div class='modal-dialog modal-dialog-centered'>
+         <div class='modal-content'>
+            <div class='modal-header justify-content-center cabecera border py-2'>
+               <h4 class='modal-title font-weight-bold'>Mensaje</h4>
+            </div>
+            <div class='modal-body detalle'>
+               <div class="row justify-content-center">
+                  <div class="callout callout-warning text-center detalle mb-0">
+
+                     <div *ngIf="swbotones" class="alert alert-warning mb-1">
+                        <h6 *ngIf="seleccionados == 1" class="mb-1"><strong> Enviar a Autorizar la Retención
+                              {{secretencion1}}<i class="bi-question-lg"></i> </strong> </h6>
+                        <h6 *ngIf="seleccionados > 1" class="mb-1"><strong> Enviar a Autorizar {{seleccionados}}
+                              Retenciones <i class="bi-question-lg"></i> </strong> </h6>
+                     </div>
+
+                     <div *ngIf="!swbotones" class="alert alert-warning mb-1">
+                        <h6 *ngIf="seleccionados == 1" class="mb-1"> Retención <strong>{{secretencion1}}
+                              correctamente</strong> enviada <strong><i class="bi-exclamation-lg"></i> </strong> </h6>
+                        <h6 *ngIf="seleccionados > 1" class="mb-1"> Retenciones <strong>correctamente</strong> enviadas
+                           <strong><i class="bi-exclamation-lg"></i></strong>
+                        </h6>
+                     </div>
+
+                  </div>
+               </div>
+            </div>
+            <!-- Botones -->
+            <div class='modal-footer justify-content-center detalle border py-1'>
+               <button *ngIf="swbotones" type='button' class='btn btn-success btn-sm' (click)="enviar()">
+                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar
+               </button>
+               <button *ngIf="swbotones" type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
+                  <i class="fa fa-times-circle"></i> Cancelar</button>
+               <button *ngIf="!swbotones" type='button' class='btn btn-success btn-block' data-dismiss='modal'>
+                  <i *ngIf="swenviando" class="fa fa-spinner"></i>
+                  <i *ngIf="!swenviando" class="fa fa-check-circle"></i>&nbsp; {{txtenviar}}
+               </button>
+            </div>
+         </div>
+      </div>
+   </div>
+
+</div>

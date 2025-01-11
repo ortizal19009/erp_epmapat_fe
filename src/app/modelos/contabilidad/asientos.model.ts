@@ -14,10 +14,10 @@ export class Asientos {
   glosa: String;
   numdoc: String;
   numdocban: String;
-  cerrado: Boolean;
-  swretencion: Boolean;
+  cerrado: number;
+  swretencion: number;
   totalspi: number;
-  iddocumento: Documentos;
+  intdoc: Documentos;
   idbene: Beneficiarios;
   idcueban: number;
   usucrea: number;

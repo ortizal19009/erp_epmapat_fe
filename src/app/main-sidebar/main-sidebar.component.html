@@ -66,7 +66,7 @@
                      <!-- 0: Comercializacion   52: Clientes -->
                      <a routerLink="/clientes" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 51)}">
                         &nbsp;<i class="bi-person-circle nav-icon"></i>
-                        <p class="text-warning">&nbsp;&nbsp; Clientes</p> 
+                        <p class="text-warning">&nbsp;&nbsp; Clientes</p>
                      </a>
                   </li>
                   <li class="nav-item">
@@ -90,14 +90,16 @@
                      </a>
                      <ul class="nav nav-treeview">
                         <li class="nav-item">
-                           <a routerLink="/suspensiones" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 81)}">
+                           <a routerLink="/suspensiones" class="nav-link"
+                              [ngClass]="{'disabled': !isOptionEnabled(0, 81)}">
                               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                               <i class="fa fa-gavel nav-icon"></i>
                               <p class="text-warning"> Suspensiones</p>
                            </a>
                         </li>
                         <li class="nav-item">
-                           <a routerLink="/habilitaciones" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 90)}">
+                           <a routerLink="/habilitaciones" class="nav-link"
+                              [ngClass]="{'disabled': !isOptionEnabled(0, 90)}">
                               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                               <i class="fa fa-gift nav-icon"></i>
                               <p class="text-warning"> Habilitaciones</p>
@@ -129,7 +131,7 @@
             </li>
 
             <li *ngIf="authService.modulo == 1" class="nav-item">
-               <a href="#" class="nav-link bg-info"  [ngClass]="{'disabled': !isOptionEnabled(0, 150)}">
+               <a href="#" class="nav-link bg-info" [ngClass]="{'disabled': !isOptionEnabled(0, 150)}">
                   <i class="bi-bookmarks-fill nav-icon" style="font-size: 15px;"></i>
                   <p> Facturación
                      <i class="fas fa-angle-right right"></i>
@@ -187,7 +189,7 @@
                   </li>
 
                   <li class="nav-item">
-                     <a href="#" class="nav-link"  [ngClass]="{'disabled': !isOptionEnabled(0, 175)}">
+                     <a href="#" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 175)}">
                         <i class="fa fa-shopping-basket nav-icon"></i>
                         <p class="text-warning font-weight-bold"> Catálogo
                            <i class="right fas fa-angle-right"></i>
@@ -195,21 +197,24 @@
                      </a>
                      <ul class="nav nav-treeview">
                         <li class="nav-item">
-                           <a routerLink="/catalogoitems" class="nav-link py-0" [ngClass]="{'disabled': !isOptionEnabled(0, 176)}">
+                           <a routerLink="/catalogoitems" class="nav-link py-0"
+                              [ngClass]="{'disabled': !isOptionEnabled(0, 176)}">
                               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                               <i class="bi-file-ruled nav-icon"></i>
                               <p class="small text-warning">&nbsp; Productos</p>
                            </a>
                         </li>
                         <li class="nav-item">
-                           <a routerLink="/usoitems" class="nav-link py-0" [ngClass]="{'disabled': !isOptionEnabled(0, 185)}">
+                           <a routerLink="/usoitems" class="nav-link py-0"
+                              [ngClass]="{'disabled': !isOptionEnabled(0, 185)}">
                               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                               <i class="bi bi-diagram-3 nav-icon"></i>
                               <p class="small text-warning">&nbsp; Usos de los productos</p>
                            </a>
                         </li>
                         <li class="nav-item">
-                           <a routerLink="/rubros" class="nav-link pt-0" [ngClass]="{'disabled': !isOptionEnabled(0, 195)}">
+                           <a routerLink="/rubros" class="nav-link pt-0"
+                              [ngClass]="{'disabled': !isOptionEnabled(0, 195)}">
                               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                               <i class="bi-bullseye nav-icon"></i>
                               <p class="small text-warning">&nbsp; Rubros (planillas)</p>
@@ -248,7 +253,8 @@
                      </a>
                   </li>
                   <li class="nav-item">
-                     <a routerLink="/ccertificaciones" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 30)}">
+                     <a routerLink="/ccertificaciones" class="nav-link"
+                        [ngClass]="{'disabled': !isOptionEnabled(0, 30)}">
                         <i class="fa fa-certificate nav-icon"></i>
                         <p class="text-warning"> Certificaciones</p>
                      </a>
@@ -281,7 +287,8 @@
                </ul>
                <ul class="nav nav-treeview">
                   <li class="nav-item">
-                     <a routerLink="anulaciones-bajas" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 120)}">
+                     <a routerLink="anulaciones-bajas" class="nav-link"
+                        [ngClass]="{'disabled': !isOptionEnabled(0, 120)}">
                         <i class="bi-trash nav-icon"></i>
                         <p class="text-warning"> &nbsp;Anulaciones y bajas</p>
                      </a>
@@ -339,7 +346,8 @@
                      </a>
                   </li>
                   <li class="nav-item">
-                     <a routerLink="/nacionalidades" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 210)}">
+                     <a routerLink="/nacionalidades" class="nav-link"
+                        [ngClass]="{'disabled': !isOptionEnabled(0, 210)}">
                         <i class="fa fa-globe nav-icon"></i>
                         <p class="text-warning">Nacionalidades</p>
                      </a>
@@ -389,7 +397,8 @@
                <ul class="nav nav-treeview">
                   <li class="nav-item">
                      <a routerLink="/cuentas" class="nav-link">
-                        <i class="bi-book-fill nav-icon"></i>
+                        <!-- <i class="bi-book-fill nav-icon"></i> -->
+                        <i class="bi-book-half"></i>
                         <p class="text-warning"> Cuentas</p>
                      </a>
                   </li>
@@ -455,21 +464,27 @@
                </a>
                <ul class="nav nav-treeview">
                   <li class="nav-item">
-                     <a href="pages/mailbox/mailbox.html" class="nav-link">
-                        <i class="far fa-circle nav-icon"></i>
-                        <p>Ingresos</p>
+                     <a routerLink="/beneficiarios" class="nav-link">
+                        <i class="bi-people nav-icon"></i>
+                        <p class="text-warning"> Beneficiarios</p>
                      </a>
                   </li>
                   <li class="nav-item">
-                     <a href="pages/mailbox/compose.html" class="nav-link">
-                        <i class="far fa-circle nav-icon"></i>
-                        <p>Egresos</p>
+                     <a routerLink="/egresos" class="nav-link">
+                        <i class="bi-arrow-up-left-circle-fill nav-icon"></i>
+                        <p class="text-warning"> Egresos</p>
                      </a>
                   </li>
                   <li class="nav-item">
-                     <a href="pages/mailbox/read-mail.html" class="nav-link">
-                        <i class="far fa-circle nav-icon"></i>
-                        <p>Beneficiarios</p>
+                     <a routerLink="/regrecauda" class="nav-link">
+                        <i class="bi-arrow-down-right-circle-fill nav-icon"></i>
+                        <p class="text-warning"> Recaudación</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/retenciones" class="nav-link">
+                        <i class="bi-scissors nav-icon"></i>
+                        <p class="text-warning"> Retenciones</p>
                      </a>
                   </li>
                </ul>
@@ -524,72 +539,47 @@
             <li *ngIf="authService.modulo == 2" class="nav-item">
                <a href="#" class="nav-link bg-info">
                   <i class="bi-card-list nav-icon"></i>
-                  <p> Estados financieros
+                  <p> Info financiera
                      <i class="fas fa-angle-right right"></i>
                      <span class="badge badge-warning right">4</span>
                   </p>
                </a>
                <ul class="nav nav-treeview">
                   <li class="nav-item">
-                     <a routerLink="/bc" class="nav-link">
-                        <i class="far fa-circle nav-icon"></i>
-                        <p> Balance comprobación</p>
+                     <a routerLink="/comprobacion" class="nav-link py-0">
+                        <i class="bi-card-checklist nav-icon"></i>
+                        <p class="text-warning"> Balance comprobación</p>
                      </a>
                   </li>
                   <li class="nav-item">
-                     <a routerLink="/es" class="nav-link">
-                        <i class="far fa-circle nav-icon"></i>
-                        <p> Estado situación</p>
+                     <a routerLink="/estsituacion" class="nav-link py-0">
+                        <i class="bi-card-list nav-icon"></i>
+                        <p class="text-warning"> Estado de situación</p>
                      </a>
                   </li>
                   <li class="nav-item">
-                     <a routerLink="/er" class="nav-link">
-                        <i class="far fa-circle nav-icon"></i>
-                        <p> Estado resultados</p>
+                     <a routerLink="/estresultados" class="nav-link py-0">
+                        <i class="bi-card-heading nav-icon"></i>
+                        <p class="text-warning"> Estado de resultados</p>
                      </a>
                   </li>
                   <li class="nav-item">
-                     <a routerLink="/es" class="nav-link">
-                        <i class="far fa-circle nav-icon"></i>
-                        <p> Flujo del efectivo</p>
+                     <a routerLink="/flujoefectivo" class="nav-link py-0">
+                        <i class="bi-cash-coin nav-icon"></i>
+                        <p class="text-warning"> Flujo del efectivo</p>
                      </a>
                   </li>
                   <li class="nav-item">
-                     <a routerLink="/er" class="nav-link">
-                        <i class="far fa-circle nav-icon"></i>
-                        <p> Ejecución presupuestaria</p>
+                     <a routerLink="/ejecupresup" class="nav-link py-0">
+                        <i class="bi-file-break nav-icon"></i>
+                        <p class="text-warning"> Ejecución presupuestaria</p>
                      </a>
                   </li>
                   <li class="nav-item">
-                     <a href="#" class="nav-link">
-                        <i class="bi-back nav-icon"></i>
-                        <p class="font-weight-bold"> Costos
-                           <i class="right fas fa-angle-right"></i>
-                        </p>
+                     <a routerLink="/unicostos" class="nav-link py-0">
+                        <i class="bi-currency-dollar nav-icon"></i>
+                        <p class="text-warning"> Costos</p>
                      </a>
-                     <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                           <a routerLink="/niifcuentas" class="nav-link py-0">
-                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                              <i class="bi-book-half nav-icon"></i>
-                              <p class="small">&nbsp; Unidades y cuentas</p>
-                           </a>
-                        </li>
-                        <li class="nav-item">
-                           <a routerLink="/usoitems" class="nav-link py-0">
-                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                              <i class="bi-file-ruled-fill nav-icon"></i>
-                              <p class="small">&nbsp; Comparativo</p>
-                           </a>
-                        </li>
-                        <li class="nav-item">
-                           <a routerLink="/rubros" class="nav-link pt-0">
-                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                              <i class="bi-file-diff-fill nav-icon"></i>
-                              <p class="small">&nbsp; Estado de resultados</p>
-                           </a>
-                        </li>
-                     </ul>
                   </li>
                </ul>
             </li>
@@ -615,16 +605,16 @@
                      </a>
                   </li>
                   <li class="nav-item">
-                     <a href="pages/mailbox/mailbox.html" class="nav-link">
-                        <i class="far fa-circle nav-icon"></i>
-                        <p>Instituciones Financieras</p>
+                     <a routerLink="/ifinan" class="nav-link">
+                        <i class="bi-bank2 nav-icon"></i>
+                        <p class="text-warning"> Instituciones Financieras</p>
                      </a>
                   </li>
                </ul>
             </li>
             <!-- =============== COACTIVAS =================== -->
             <li *ngIf="authService.modulo == 6" class="nav-item">
-               <a href="#" class="nav-link bg-info" >
+               <a href="#" class="nav-link bg-info">
                   <i class="bi-gear nav-icon"></i>
                   <p> Carteras Vencidas
                      <i class="fas fa-angle-right right"></i>
@@ -632,7 +622,7 @@
                   </p>
                </a>
                <ul class="nav nav-treeview">
-   
+
                   <li class="nav-item">
                      <a routerLink="/cv-facturas" class="nav-link">
                         <i class="bi-hdd-stack nav-icon"></i>
@@ -664,7 +654,8 @@
                      </a>
                   </li>
                   <li class="nav-item">
-                     <a class="nav-link" (click)="navUsuario()" routerLink="" [ngClass]="{'disabled': !isOptionEnabled(5, 222)}">
+                     <a class="nav-link" (click)="navUsuario()" routerLink=""
+                        [ngClass]="{'disabled': !isOptionEnabled(5, 222)}">
                         <i class="bi-people"></i>
                         <p class="text-warning">&nbsp; Usuarios</p>
                      </a>

@@ -1,30 +1,29 @@
 <div class="content mt-1 pt-1 pl-0">
    <div class="container-fluid">
       <div class="row m-0 px-0 py-1 justify-content-start sombra cabecera border">
-         <div class="col-sm-3 mt-1">
-            <h4 class="m-0 font-weight-bold text-truncate"> <i class="bi-bookmark-check-fill"></i> &nbsp;Certificaciones</h4>
+         <div class="col-sm-2 my-1">
+            <h5 class="m-0 font-weight-bold text-truncate"> <i class="bi-bookmark-check-fill"></i> &nbsp;Certificaciones
+            </h5>
          </div>
-         <div class="col-sm-8">
-            <form [formGroup]="formBuscar" (ngSubmit)="buscar()">
-
+         <div class="col-sm-7">
+            <form [formGroup]="formBuscar">
                <div class="row">
-                  <div class="col-sm">
+
+                  <div class="input-group col-sm-4 pl-1 ">
                      <input type="number" class="form-control form-control-sm text-center" formControlName="desdeNum"
-                        placeholder="Desde" min="1" />
-                  </div>
-                  <div class="col-sm">
+                        placeholder="Desde" min="1" (change)="changeDesdeHasta()">
                      <input type="number" class="form-control form-control-sm text-center" formControlName="hastaNum"
-                        placeholder="Hasta" min="1"/>
+                        placeholder="Hasta" min="1" (change)="changeDesdeHasta()">
                   </div>
-                  <div class="col-sm">
+
+                  <div class="input-group col-sm-5 px-1 ">
                      <input type="date" class="form-control form-control-sm text-center" formControlName="desdeFecha"
                         max="{{ today | date : 'yyyy-MM-dd' }}" />
-                  </div>
-                  <div class="col-sm">
                      <input type="date" class="form-control form-control-sm text-center" formControlName="hastaFecha"
                         max="{{ date | date : 'yyyy-MM-dd' }}" />
                   </div>
-                  <div class="col-sm">
+
+                  <div class="col-sm-2">
                      <button class="btn btn-primary btn-sm" (click)="buscar()">
                         <i class="fa fa-search" aria-hidden="true"></i> Buscar
                      </button>
@@ -33,22 +32,25 @@
             </form>
          </div>
 
-         <div class="btn-group ml-auto mt-0">
+         <div class="btn-group mt-0 col-md-3 justify-content-end">
+            <div class="text-center">
+               <input class="form-control form-control-sm text-center col-sm-11 mb-0" type="text"
+                  placeholder="Filtrar..." [(ngModel)]="filtro" (ngModelChange)="changeFiltro()" />
+            </div>
+            <button *ngIf="swdesdehasta" class="bg-transparent border-0 mt-0" type="button" (click)="busquedainicial()"
+               data-toggle="tooltip" title="Ultimos">
+               <i class="bi-skip-end text-white icoRegresar"></i>
+            </button>
             <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
                data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right bg-dark roboto ">
-               <button class="dropdown-item" type="button" (click)="addCertipresu()">
+               <button class="dropdown-item" type="button" (click)="nuevo()">
                   <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
-               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#pdf">
-                  <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
-               <button class="dropdown-item text-muted" type="button" disabled><i
-                     class="bi-file-earmark-arrow-down text-muted"></i>
-                  <span class="text-muted">&nbsp;
-                     Exportar</span></button>
+               <button class="dropdown-item" type="button">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
             </div>
          </div>
-
       </div>
    </div>
 </div>
@@ -56,67 +58,96 @@
 <div class="container-fluid">
    <div class="row mb-0">
       <div class="col-sm-12">
-         <table class="table table-hover table-bordered table-sm">
-            <thead class="text-center">
-               <tr>
+         <table class="table table-hover table-bordered table-sm sombra">
+            <thead class="text-center cabecera">
+               <tr class="pad0">
                   <th>Nro.</th>
                   <th class="col-sm-1">Fecha</th>
                   <th class="col-sm-2">Documento</th>
-                  <th class="col-sm-2">Beneficiario</th>
+                  <th>Beneficiario</th>
                   <th>Valor</th>
-                  <th class="col-sm-4">Responsable</th>
+                  <th>Responsable</th>
+                  <th>Descripción</th>
                   <th></th>
                </tr>
             </thead>
-            <tbody>
-               <tr *ngFor="let certificacion of _certificaciones | filter: filtro; let i=index" (click)="onCellClick($event, certificacion)">
+            <tbody class="detalle roboto small pad0">
+               <tr class="fila" *ngFor="let certificacion of _certificaciones | filter: filtro; let i=index"
+                  (click)="onCellClick($event, certificacion)">
                   <td class="text-center">{{ certificacion.numero }}</td>
                   <td class="text-center">{{ certificacion.fecha | date: 'dd-MM-yyyy' }}</td>
-                  <td [ngClass]="{'transparente': certificacion.iddocumento.iddocumento == 1}">{{
-                     certificacion.iddocumento.nomdoc}} {{ certificacion.numdoc }}</td>
+                  <td [ngClass]="{'transparente': certificacion.intdoc.intdoc == 1}">{{
+                     certificacion.intdoc.nomdoc}} {{ certificacion.numdoc }}</td>
                   <td [ngClass]="{'transparente': certificacion.idbene.idbene == 1}">{{ certificacion.idbene.nomben}}
                   </td>
                   <td class="text-right">{{ certificacion.valor | number:'1.2-2' }}</td>
                   <td>{{ certificacion.idbeneres.nomben}}</td>
+                  <td class="text-left text-truncate ancho" data-toggle="tooltip"
+                     title="{{ certificacion.descripcion }}"> {{ certificacion.descripcion }}</td>
                   <td class="text-center">
                      <div class="btn-group py-0">
                         <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
                            aria-expanded="false">
                         </button>
-
                         <div class="dropdown-menu dropdown-menu-right popLista">
-                           <button class="dropdown-item" type="button" (click)="modiCertipresu( certificacion.idcerti )">
+                           <button class="dropdown-item" type="button"
+                              (click)="modiCertipresu( certificacion.idcerti )">
                               <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
-                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#elimCertipresu"
-                           (click)="datosEliminar( certificacion )">
+                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#eliminar"
+                              (click)="eliminar( certificacion )">
                               <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
                         </div>
                      </div>
                   </td>
                </tr>
             </tbody>
+            <tfoot *ngIf="!swfiltro" class="detalle font-weight-bold pad0 roboto small">
+               <tr>
+                  <td colspan="2"></td>
+                  <td>TOTAL: {{ tot }}</td>
+                  <td></td>
+                  <td class="text-right">{{sumvalor | number: '1.2-2'}}</td>
+                  <td colspan="3"></td>
+               </tr>
+            </tfoot>
          </table>
       </div>
    </div>
 
    <!-- Modal Eliminar-->
-   <div class='modal fade' id='elimCertipresu' tabindex='-1' aria-hidden='true'>
+   <div class='modal fade' id='eliminar' tabindex='-1' aria-hidden='true'>
       <div class='modal-dialog modal-dialog-centered'>
          <div class='modal-content'>
             <div class='modal-header justify-content-center cabecera border py-2'>
                <h5 class='modal-title font-weight-bold' id='ModalLabel'>Mensaje</h5>
             </div>
-            <div class='modal-body text-center roboto fondo'>
-                  ¿ Eliminar la Certificacion Nro <span class="fantacysombra"> {{certipresu.numero}} </span>?
-            </div>
-            <div class='modal-footer justify-content-center fondo border py-1'>
-               <button type='button' class='btn btn-success btn-sm' data-dismiss='modal'
-                   id='btnSi' (click)="elimCertipresu()">
-                  <i class="fa fa-check-circle"></i> Aceptar
-               </button>
-               <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
-                  <i class="fa fa-times-circle" style="font-size:24pxi"></i> Cancelar</button>
-            </div>
+            <div *ngIf="totmovi == 0; then thenBlock else elseBlock"></div>
+            <ng-template #thenBlock>
+               <div class='modal-body text-center roboto fondo'>
+                  ¿ Eliminar la Certificación Nro <span class="fantacysombra"> {{certipresu.numero}} </span>?
+               </div>
+               <div class='modal-footer justify-content-center detalle border py-1'>
+                  <button type='button' class='btn btn-success btn-sm' data-dismiss='modal' id='btnSi'
+                     (click)="elimina()">
+                     <i class="fa fa-check-circle"></i> Aceptar
+                  </button>
+                  <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
+                     <i class="fa fa-times-circle" style="font-size:24pxi"></i> Cancelar</button>
+               </div>
+            </ng-template>
+            <ng-template #elseBlock>
+               <div class='modal-body detalle'>
+                  <div class="alert alert-warning text-center" role="alert">
+                     No puede eliminar la Certificación <span class="fantacygreen"> {{certipresu.numero}}</span>
+                     <br>tiene registrado <span class="fantacygreen">{{totmovi}}</span> Partida(s).
+                  </div>
+               </div>
+               <div class='text-center detalle'>
+                  <button type='button' class='btn btn-success btn-sm mb-3' data-dismiss='modal'>
+                     <i class="fa fa-check-circle"></i>&nbsp; Aceptar
+                  </button>
+               </div>
+            </ng-template>
          </div>
       </div>
    </div>

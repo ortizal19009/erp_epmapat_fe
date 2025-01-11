@@ -1,0 +1,190 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-0 justify-content-start cabecera sombra border">
+         <div class="col-sm-4">
+            <h4 class="font-weight-bold text-truncate mt-1"> <i class="bi-bank2"></i> &nbsp;Instituciones Financieras
+            </h4>
+         </div>
+         <div class="col-sm-2 my-1 text-center">
+            <input class="form-control form-control-sm text-center" type="text" placeholder="Filtrar..."
+               [(ngModel)]="filtro" />
+         </div>
+         <div class="btn-group ml-auto mt-0">
+            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
+               data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto ">
+               <button class="dropdown-item" type="button" data-toggle="collapse" data-target="#div1" (click)="nuevo()">
+                  <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#pdf">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+               <button class="dropdown-item" type="button"><i class="bi-file-earmark-arrow-up"></i>&nbsp;
+                  Exportar</button>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-5">
+         <table class="table table-hover table-bordered table-sm sombra">
+            <thead class="cabecera">
+               <tr class="pad0">
+                  <th class="text-center"></th>
+                  <th class="text-left">Nombre</th>
+                  <th class="text-center">Código</th>
+                  <th></th>
+               </tr>
+            </thead>
+            <tbody class="detalle roboto small">
+               <tr *ngFor="let ifinan of _ifinan | filter: filtro; let i=index" class="fila pad0"
+                  (click)="onCellClick($event, ifinan.idifinan )">
+                  <td class="text-center small font-weight-bold">{{i+1}}</td>
+                  <td>{{ ifinan.nomifinan }}</td>
+                  <td class="text-center">{{ ifinan.codifinan }}</td>
+                  <td class="text-center">
+                     <div class="btn-group py-0">
+                        <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
+                           aria-expanded="false">
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right popLista">
+                           <button class="dropdown-item" type="button" (click)=" modificar( ifinan )"
+                              data-toggle="collapse" data-target="#div1" [disabled]="ifinan.idifinan == 1">
+                              <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
+                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalEliminar"
+                              (click)="eliminar( ifinan )" [disabled]="ifinan.idifinan == 1">
+                              <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
+                        </div>
+                     </div>
+                  </td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <!-- ========== NUEVO y MODIFICAR ================ -->
+      <div class="col-md-6 mt-2 ml-4">
+         <div class="collapse" id="div1">
+            <div class="card card-body detalle sombra pt-0 px-0">
+               <div *ngIf="opcion == 1">
+                  <h5 class="font-weight-bold py-1 text-center cabecera mt-0">Nueva Institución Financiera</h5>
+               </div>
+               <div *ngIf="opcion == 2">
+                  <h5 class="font-weight-bold py-1 text-center cabecera mt-0">Modificar Institución Financiera</h5>
+               </div>
+               <form [formGroup]="formIfinan">
+                  <div class="row px-3">
+
+                     <div class="form-group col-md-12 mt-3 mb-1 py-0">
+                        <div class="input-group input-group-sm mb-2">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
+                                 data-toggle="tooltip" title="Obligatorio, mínimo 3 caracteres">Nombre<sup
+                                    class="green">*</sup></span>
+                           </div>
+                           <input type="text" class="form-control" formControlName="nomifinan" aria-label="Small"
+                              aria-describedby="inputGroup-sizing-sm" required minlength="3" [ngClass]="{'is-invalid': f['nomifinan'].invalid && f['nomifinan'].touched,
+                              'is-valid': f['nomifinan'].valid, '': f['nomifinan'].untouched}">
+                        </div>
+                        <div *ngIf="authService.msgval && f['nomifinan'].errors && f['nomifinan'].touched" class="mt-0 py-0">
+                           <div *ngIf="f['nomifinan'].errors['required']"
+                              class="alert alert-warning py-0 mt-0 roboto small" role="alert">
+                              <strong>Ups!</strong> El nombre es obligatorio.
+                           </div>
+                           <div *ngIf="f['nomifinan'].errors['minlength']"
+                              class="alert alert-warning py-0 mt-0 roboto small" role="alert">
+                              <strong>Ups!</strong> El nombre debe tener al menos 3 caracteres.
+                           </div>
+                           <div *ngIf="f['nomifinan'].errors['existe']"
+                              class="alert alert-warning py-0 mt-0 roboto small" role="alert">
+                              <strong>Ups!</strong> El nombre ya existe.
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-6 py-0 mb-0">
+                        <div class="input-group input-group-sm mb-2">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
+                                 data-toggle="tooltip" title="Obligatorio 8 caracteres numéricos">Código<sup
+                                    class="green">*</sup></span>
+                           </div>
+                           <input type="text" class="form-control text-center" formControlName="codifinan"
+                              aria-label="Small" aria-describedby="inputGroup-sizing-sm" required minlength="8"
+                              maxlength="8" [ngClass]="{'is-invalid': f['codifinan'].invalid && f['codifinan'].touched,
+                              'is-valid': f['codifinan'].valid, '': f['codifinan'].untouched}">
+                        </div>
+                        <div *ngIf="authService.msgval && f['codifinan'].errors && f['codifinan'].touched" class="mt-0 py-0">
+                           <div *ngIf="f['codifinan'].errors['required']"
+                              class="alert alert-warning py-0 mt-0 roboto small" role="alert">
+                              <strong>Ups!</strong> El código es obligatorio.
+                           </div>
+                           <div *ngIf="f['codifinan'].errors['minlength']"
+                              class="alert alert-warning py-0 mt-0 roboto small" role="alert">
+                              <strong>Ups!</strong> El código debe tener 8 caracteres.
+                           </div>
+                           <div *ngIf="f['codifinan'].errors['existe']"
+                              class="alert alert-warning py-0 mt-0 roboto small" role="alert">
+                              <strong>Ups!</strong> El código ya existe.
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="mt-2 mb-0 text-center">
+                     <button type="button" class="btn btn-success btn-sm mb-1"
+                        [disabled]="formIfinan.pristine || !formIfinan.valid" (click)="guardar()" data-toggle="collapse"
+                        data-target="#div1">
+                        <i class="fa fa-check-circle"></i> Guardar</button>
+                     <button class="btn btn-outline-success btn-sm mx-2 btn-sm mb-1" data-toggle="collapse"
+                        data-target="#div1"> <i class="fa fa-times-circle"></i>
+                        Cancelar</button>
+                  </div>
+               </form>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- Modal Eliminar-->
+   <div class='modal fade' id='modalEliminar' tabindex='-1' aria-labelledby='modalEliminar' aria-hidden='true'>
+      <div class='modal-dialog modal-dialog-centered'>
+         <div class='modal-content detalle'>
+            <div class='modal-header cabecera justify-content-center'>
+               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Mensaje</h5>
+            </div>
+            <!-- <div *ngIf="sweliminar; then thenBlock else elseBlock"></div> -->
+            <div *ngIf="totbenefi == 0; then thenBlock else elseBlock"></div>
+            <ng-template #thenBlock>
+               <div class='modal-body'>
+                  <div class="alert alert-warning text-center" role="alert">
+                     ¿ Eliminar la Institución Financiera <span class="fantacygreen">{{antnomifinan}}</span> ?
+                  </div>
+               </div>
+               <div class='modal-footer justify-content-center' id='idButtons'>
+                  <button type='button' class='btn btn-success btn-sm' data-dismiss='modal' (click)="elimina()">
+                     <i class="fa fa-check-circle" style="font-size:24pxi"></i> Aceptar
+                  </button>
+                  <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
+                     <i class="fa fa-times-circle"></i> Cancelar</button>
+               </div>
+            </ng-template>
+            <ng-template #elseBlock>
+               <div class='modal-body'>
+                  <div class="alert alert-warning text-center" role="alert">
+                     No puede Eliminar <span class="fantacygreen">{{antnomifinan}}</span><br>Tiene registrado
+                     <span class="fantacygreen">{{totbenefi}}</span> Beneficiarios
+                  </div>
+               </div>
+               <div class='modal-footer justify-content-center' id='idButtons'>
+                  <button type='button' class='btn btn-success btn-sm' data-dismiss='modal'>
+                     <i class="fa fa-check-circle"></i> Aceptar
+                  </button>
+               </div>
+            </ng-template>
+         </div>
+      </div>
+   </div>
+
+</div>

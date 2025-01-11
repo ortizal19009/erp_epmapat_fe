@@ -19,6 +19,10 @@ export class PartixcertiService {
     return this.http.get<Partixcerti[]>(`${baseUrl}/idcerti/${idcerti}`);
   }
 
+  getById(idparxcer: number) {
+    return this.http.get<Partixcerti>(baseUrl + "/" + idparxcer);
+  }
+
   savePartixcerti(partixcerti: Partixcerti): Observable<Object> {
     return this.http.post(`${baseUrl}`, partixcerti);
   }

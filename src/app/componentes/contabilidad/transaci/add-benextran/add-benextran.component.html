@@ -88,11 +88,11 @@
                      <div class="form-group col-md-4 mb-1">
                         <div class="input-group input-group-sm">
                            <div class="input-group-prepend">
-                              <label class="input-group-text" for="iddocumento">Documento</label>
+                              <label class="input-group-text">Documento</label>
                            </div>
-                           <select type="text" class="custom-select" formControlName="iddocumento">
-                              <option [ngValue]="documento" *ngFor="let documento of _documentos"
-                                 [ngValue]="documento.iddocumento"> {{ documento.nomdoc }}
+                           <select type="text" class="custom-select" formControlName="intdoc">
+                              <option *ngFor="let documento of _documentos" [ngValue]="documento.intdoc"> {{
+                                 documento.nomdoc }}
                               </option>
                            </select>
                            <input type="text" class="form-control text-center col-sm-4" formControlName="numdoc"
@@ -141,9 +141,9 @@
                            <td>{{ uniqueIdCounter }}</td>
 
                            <td class="col-sm-2">
-                              <select type="text" class="custom-select custom-select-sm" formControlName="iddocumento">
+                              <select type="text" class="custom-select custom-select-sm" formControlName="intdoc">
                                  <option [ngValue]="documento" *ngFor="let documento of _documentos"
-                                    [ngValue]="documento.iddocumento"> {{ documento.nomdoc }}
+                                    [ngValue]="documento.intdoc"> {{ documento.nomdoc }}
                                  </option>
                               </select>
                            </td>
@@ -202,9 +202,9 @@
                   </datalist>
                </td>
                <td>
-                  <select type="text" class="custom-select custom-select-sm" formControlName="iddocumento">
+                  <select type="text" class="custom-select custom-select-sm" formControlName="intdoc">
                      <option [ngValue]="documento" *ngFor="let documento of _documentos"
-                        [ngValue]="documento.iddocumento"> {{ documento.nomdoc }}
+                        [ngValue]="documento.intdoc"> {{ documento.nomdoc }}
                      </option>
                   </select>
                </td>

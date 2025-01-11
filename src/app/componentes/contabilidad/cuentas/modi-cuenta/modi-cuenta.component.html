@@ -1,0 +1,188 @@
+<div class="content-header">
+   <div class="container-fluid">
+      <div class="row mt-3 justify-content-center text-center">
+         <div class="col-sm-8 cabecera border sombra">
+            <h5 class="font-weight-bold mt-2 ">Modificar Cuenta</h5>
+            <span *ngIf="movimientos" class="fantacyblack mt-0 small">Advertencia: Tiene movimientos</span>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="card card-body col-sm-8 detalle sombra">
+            <form [formGroup]="formCuenta">
+               <div class="row">
+                  <div class="form-group col-md-12 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Grupo </span>
+                        </div>
+                        <input type="text" class="form-control col-sm-2" formControlName="grucue" readonly>
+                        <input type="text" class="form-control" formControlName="nomgru" readonly>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-6 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Nivel </span>
+                        </div>
+                        <input type="text" class="form-control" formControlName="nomniv" readonly>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-6 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Código<sup class="green">*</sup></span>
+                        </div>
+                        <input type="text" class="form-control form-control-sm" formControlName="codcue" [ngClass]="{'is-invalid': f['codcue'].invalid && f['codcue'].touched,
+                     'is-valid': f['codcue'].valid, '': f['codcue'].untouched}">
+                     </div>
+                     <div *ngIf="authService.msgval && f['codcue'].errors && f['codcue'].touched" class="mt-0 py-0">
+                        <div *ngIf="f['codcue'].errors['required']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> El código es obligatorio!
+                        </div>
+                        <div *ngIf="f['codcue'].errors['minlength'] || f['codcue'].errors['maxlength']" class="alert alert-warning py-0 mt-0 roboto small"
+                        role="alert">
+                        <strong>Ups!</strong> Longitud incorrecta!
+                     </div>
+                        <div *ngIf="f['codcue'].errors['invalido']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> Grupo incorrecto!
+                        </div>
+                        <div *ngIf="f['codcue'].errors['existe']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> El código ya existe!
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-12 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Nombre<sup class="green">*</sup></span>
+                        </div>
+                        <input type="text" class="form-control" formControlName="nomcue" [ngClass]="{'is-invalid': f['nomcue'].invalid && f['nomcue'].touched,
+                     'is-valid': f['nomcue'].valid, '': f['nomcue'].untouched}">
+                     </div>
+                     <div *ngIf="authService.msgval && f['nomcue'].errors && f['nomcue'].touched" class="mt-0 py-0">
+                        <div *ngIf="f['nomcue'].errors['required']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> El nombre es obligatorio.
+                        </div>
+                        <div *ngIf="f['nomcue'].errors['minlength']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> El nombre debe tener al menos 3 caracteres.
+                        </div>
+                        <div *ngIf="f['nomcue'].errors['existe']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">
+                           <strong>Ups!</strong> El nombre ya existe.
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-6 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Partida asociada al debe </span>
+                        </div>
+                        <input type="text" class="form-control form-control-sm" formControlName="asodebe">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-6 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Partida asociada al haber </span>
+                        </div>
+                        <input type="text" class="form-control" formControlName="asohaber">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-7 my-0 py-0">
+                     <div class="input-group mb-3 input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" for="tipdoc">Tipo de Transacción<sup
+                                 class="green">*</sup></label>
+                        </div>
+                        <select class="custom-select" id="tiptran" formControlName="tiptran">
+                           <option value="0" selected>(General)</option>
+                           <option value="1">Desde Trámite</option>
+                           <option value="2">Anticipo</option>
+                           <option value="3">Cuenta por Cobrar</option>
+                           <option value="4">Cuenta por Cobrar Año Anterior</option>
+                           <option value="5">Depósitos y Fondos de Terceros</option>
+                           <option value="6">Cuentas por Pagar</option>
+                           <option value="7">Cuentas por Pagar Año Anterior</option>
+                        </select>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-3 my-0 py-0">
+                     <div class="input-group input-group-sm mb-1">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Movimiento </span>
+                           <div class="input-group-text">
+                              <input type="checkbox" formControlName="movcue" [ngClass]="{'is-invalid': f['movcue'].invalid && f['movcue'].touched,
+                     'is-valid': f['movcue'].valid, '': f['movcue'].untouched}">
+                           </div>
+                        </div>
+                     </div>
+                     <div *ngIf="f['movcue'].errors && f['movcue'].touched" class="mt-0 py-0">
+                        <div *ngIf="f['movcue'].errors['desagrega']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">Tiene desagregación!
+                        </div>
+                        <div *ngIf="f['movcue'].errors['movimiento']" class="alert alert-warning py-0 mt-0 roboto small"
+                           role="alert">Tiene movimientos!
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-2 my-0 py-0">
+                     <div class="input-group input-group-sm mb-1">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Sinafip </span>
+                           <div class="input-group-text">
+                              <input type="checkbox" formControlName="sigef">
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-5 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Estado de situación / resultados </span>
+                        </div>
+                        <input type="text" class="form-control form-control-sm" formControlName="intgrupo">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-4 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Flujo del efectivo </span>
+                        </div>
+                        <input type="text" class="form-control form-control-sm" formControlName="grufluefec">
+                     </div>
+                  </div>
+
+               </div>
+               <div class="text-center">
+                  <button class="btn btn-success btn-sm mx-1 mt-1"
+                     [disabled]="formCuenta.pristine || !formCuenta.valid">
+                     <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+                  <button type="button" class="btn btn-outline-success btn-sm mx-1 mt-1" (click)="regresar()"><i
+                        class="fa fa-times-circle"></i> Cancelar</button>
+               </div>
+            </form>
+
+         </div>
+      </div>
+   </div>
+</div>

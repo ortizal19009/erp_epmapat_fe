@@ -4,9 +4,9 @@ export class Cuentas {
 	idcuenta: number;
 	codcue: String;
 	nomcue: String;
-	gruecue: String;
-	idnivel: Niveles;
-	movcue: boolean;
+	grucue: String;
+	nivcue: number;
+	movcue: number;
 	asodebe: String;
 	asohaber: String;
 	debito: number;
@@ -14,7 +14,7 @@ export class Cuentas {
 	saldo: number;
 	balance: number;
 	intgrupo: number;
-	sigef: boolean;
+	sigef: number;
 	tiptran: number;
 	usucrea: number;
 	feccrea: Date;
@@ -23,4 +23,5 @@ export class Cuentas {
 	grufluefec: number;
 	resulcostos: number;
 	balancostos: number;
+	idnivel: Niveles
 }
