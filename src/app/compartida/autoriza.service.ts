@@ -5,7 +5,7 @@ import { Injectable } from '@angular/core';
 })
 export class AutorizaService {
 
-  enabled = [false, false, false, false, false, false];
+  enabled = [false, false, false, false, false, false, false];
   colorenabled = false;
   modulos: String[];
   modulo: number;
@@ -22,8 +22,8 @@ export class AutorizaService {
 
   public enabModulos(): void {
      //OJO: Controlar con usuarios.perfil
-     if(this.idusuario == 1) this.enabled = [true, true, false, false, false, true];
-     else this.enabled = [true, false, false, false, false, true];
+     if(this.idusuario == 1) this.enabled = [true, true, false, false, false, true, true];
+     else this.enabled = [true, false, false, false, false, true, true];
 
      this.colorenabled = true;
 

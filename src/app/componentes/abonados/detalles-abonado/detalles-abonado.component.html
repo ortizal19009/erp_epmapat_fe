@@ -402,19 +402,27 @@
                   </div>
                   <div class="col-sm-6">
                      <div class="text-center">
-                        <h3>DETALLES</h3>
+                        <h4>DETALLES</h4>
                      </div>
                      <table class="table table-hover table-sm table-bordered mb-0">
                         <thead>
+                           <tr *ngIf="detalleFactura?.nrofactura">
+                              <th class="theadPlanillas">Nro. Factura</th>
+                              <td class="bodyPlanillas">{{detalleFactura?.nrofactura}}</td>
+                           </tr>
                            <tr>
+                              <th class="theadPlanillas">Cliente</th>
+                              <td class="bodyPlanillas description">{{detalleFactura?.idcliente.nombre}}</td>
+                           </tr>
+                           <tr *ngIf="detalleFactura?.fechaeliminacion">
                               <th class="theadPlanillas">Fecha eliminación</th>
                               <td class="bodyPlanillas">{{detalleFactura?.fechaeliminacion}}</td>
                            </tr>
-                           <tr>
+                           <tr *ngIf="detalleFactura?.fechaanulacion">
                               <th class="theadPlanillas">Fecha anulación</th>
                               <td class="bodyPlanillas">{{detalleFactura?.fechaanulacion}}</td>
                            </tr>
-                           <tr>
+                           <tr *ngIf="detalleFactura?.fechaconvenio">
                               <th class="theadPlanillas">Fecha convenio</th>
                               <td class="bodyPlanillas">{{detalleFactura?.fechaconvenio}}</td>
                            </tr>

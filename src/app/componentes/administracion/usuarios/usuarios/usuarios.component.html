@@ -71,47 +71,54 @@
          </table>
       </div>
 
-      <div class="col-sm-6 mt-1" class="collapse" id="addUsuario">
+      <div class="col-sm mt-1" class="collapse" id="addUsuario">
          <div class="card card-success">
             <div class="card-header">
                <h3 class="card-title">Añadir nuevo usuario</h3>
             </div>
-            <form>
+
+            <form [formGroup]="f_usuario">
                <div class="card-body">
-                  <div class="form-group">
-                     <label for="exampleInputEmail1">Identificación</label>
-                     <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
-                  </div>
-                  <div class="form-group">
-                     <label for="exampleInputEmail1">Nombre usuario</label>
-                     <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
+                  <div class="row">
+                     <div class="col-sm">
+                        <div class="form-group">
+                           <label for="exampleInputEmail1">Identificación</label>
+                           <input type="email" class="form-control" id="exampleInputEmail1"
+                              formControlName="identificausu" placeholder="Identificación">
+                        </div>
+                     </div>
+                     <div class="col-sm">
+                        <div class="form-group">
+                           <label for="exampleInputEmail1">Nombre usuario</label>
+                           <input type="email" class="form-control" formControlName="nomusu" id="exampleInputEmail1"
+                              placeholder="Nombre usuario">
+                        </div>
+                     </div>
                   </div>
                   <div class="form-group">
                      <label for="exampleInputEmail1">Alias</label>
-                     <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
+                     <input type="email" class="form-control" id="exampleInputEmail1" formControlName="alias"
+                        placeholder="Alias">
                   </div>
                   <div class="form-group">
                      <label for="exampleInputEmail1">E-mail</label>
-                     <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
+                     <input type="email" class="form-control" id="exampleInputEmail1" formControlName="email"
+                        placeholder="E-mail">
                   </div>
                   <div class="form-group">
                      <label for="exampleInputPassword1">Password</label>
-                     <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                     <input type="password" class="form-control" formControlName = 'password' id="exampleInputPassword1" placeholder="Password">
                   </div>
                   <div class="form-group">
                      <label for="exampleInputPassword1">Conf. Password</label>
-                     <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
-                  </div>
-                  <div class="form-check">
-                     <input type="checkbox" class="form-check-input" id="exampleCheck1">
-                     <label class="form-check-label" for="exampleCheck1">Check me out</label>
+                     <input type="password" class="form-control" (keyup)="verifyPassword($event)" formControlName = 'conf_password' id="exampleInputPassword1"  placeholder="Password">
                   </div>
                </div>
                <!-- /.card-body -->
 
                <div class="card-footer text-center">
-                  <button type="submit" class="btn btn-sm btn-success mr-3">Cancelar</button>
-                  <button type="submit" class="btn btn-sm btn-outline-success">Aceptar</button>
+                  <button type="submit" class="btn btn-sm btn-success mr-3" data-toggle="collapse">Cancelar</button>
+                  <button type="submit" class="btn btn-sm btn-outline-success" [disabled]="pass == ''" (click)="saveUser()">Aceptar</button>
 
                </div>
             </form>

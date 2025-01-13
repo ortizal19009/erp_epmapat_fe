@@ -7,20 +7,24 @@ import { PregastoService } from 'src/app/servicios/contabilidad/pregasto.service
 @Component({
   selector: 'app-info-estrfunc',
   templateUrl: './info-estrfunc.component.html',
-  styleUrls: ['./info-estrfunc.component.css']
+  styleUrls: ['./info-estrfunc.component.css'],
 })
-
 export class InfoEstrfuncComponent implements OnInit {
-
   estrfunc = {} as Estrfunc; //Interface para los datos de la Actividad
   intest: number;
   filtro: string;
   totales = false;
   _partidas: any;
   swfiltro: boolean;
-  totCodificado = 0; totInicia = 0; totModifi = 0;
+  totCodificado = 0;
+  totInicia = 0;
+  totModifi = 0;
 
-  constructor(private router: Router, private estrfuncService: EstrfuncService, private pregasService: PregastoService) { }
+  constructor(
+    private router: Router,
+    private estrfuncService: EstrfuncService,
+    private pregasService: PregastoService
+  ) {}
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/info-estrfunc');
@@ -41,7 +45,7 @@ export class InfoEstrfuncComponent implements OnInit {
 
     document.documentElement.style.setProperty('--bgcolor1', colores[0]);
     const cabecera = document.querySelector('.cabecera');
-    if (cabecera) cabecera.classList.add('nuevoBG1')
+    if (cabecera) cabecera.classList.add('nuevoBG1');
     document.documentElement.style.setProperty('--bgcolor2', colores[1]);
     const detalle = document.querySelector('.detalle');
     if (detalle) detalle.classList.add('nuevoBG2');
@@ -49,27 +53,29 @@ export class InfoEstrfuncComponent implements OnInit {
 
   datosActividad() {
     this.estrfuncService.getById(this.intest).subscribe({
-      next: datos => {
+      next: (datos: any) => {
         this.estrfunc.codigo = datos.codigo;
         this.estrfunc.nombre = datos.nombre;
       },
-      error: err => console.error(err.error)
+      error: (err) => console.error(err.error),
     });
   }
 
   onInputChange() {
     if (this.filtro.trim() !== '') this.swfiltro = true;
-    else  this.swfiltro = false;
+    else this.swfiltro = false;
   }
-  
+
   partidas() {
     this.pregasService.getByActividad(this.intest).subscribe({
-      next: resp => {
+      next: (resp: any) => {
+        console.log(resp);
         this._partidas = resp;
         this.totales = true;
         this.total();
       },
-      error: err => console.error('Al buscar las Partidas de Gastos: ', err.error)
+      error: (err) =>
+        console.error('Al buscar las Partidas de Gastos: ', err.error),
     });
   }
 
@@ -87,8 +93,9 @@ export class InfoEstrfuncComponent implements OnInit {
     this.totCodificado = sumInicia + sumModifi;
   }
 
-  regresar() { this.router.navigate(['/estrfunc']); }
-
+  regresar() {
+    this.router.navigate(['/estrfunc']);
+  }
 }
 
 interface Estrfunc {
@@ -96,5 +103,5 @@ interface Estrfunc {
   codigo: String;
   nombre: String;
   movimiento: boolean;
-  objcosto: number
+  objcosto: number;
 }

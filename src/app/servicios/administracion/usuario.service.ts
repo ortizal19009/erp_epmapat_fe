@@ -50,4 +50,7 @@ export class UsuarioService {
   getDatosOfOne(idusuario: number) {
     return this.http.get(`${baseUrl}/one?idusuario=${idusuario}`);
   }
+  save(usuario: any) {
+    return this.http.post(`${baseUrl}`, usuario);
+  }
 }
