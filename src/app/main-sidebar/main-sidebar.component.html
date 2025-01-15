@@ -612,6 +612,26 @@
                   </li>
                </ul>
             </li>
+            <!-- =============== RRHH ==================== -->
+            <li *ngIf="authService.modulo == 5" class="nav-item">
+               <a href="#" class="nav-link bg-info">
+                  <i class="bi bi-person-lines-fill"></i>
+                  <p> Admin Personal
+                     <i class="fas fa-angle-right right"></i>
+                     <span class="badge badge-warning right">1</span>
+                  </p>
+               </a>
+               <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                     <a routerLink="/personal" class="nav-link">
+                        <!-- <i class="bi-book-fill nav-icon"></i> -->
+                        <i class="fa fa-users" aria-hidden="true"></i>
+                        <p class="text-warning"> Personal</p>
+                     </a>
+                  </li>
+               </ul>
+            </li>
+
             <!-- =============== COACTIVAS =================== -->
             <li *ngIf="authService.modulo == 6" class="nav-item">
                <a href="#" class="nav-link bg-info">

@@ -1,0 +1,110 @@
+<div class="content mt-1 pt-1 pl-0">
+    <div class="container-fluid">
+        <div class="row m-0 px-0 py-1 justify-content-start cabecera sombra border">
+            <div class="col-sm-2">
+                <h5 class="m-0 font-weight-bold"><i class="fa fa-building"></i> Personal EPMAPAT</h5>
+            </div>
+            <div class="col-sm-6">
+                <div class="container-fluid">
+                    <form [formGroup]="f_personal" class="formGroup">
+                        <div class="row">
+                            <div class="col-sm-5">
+                                <div class="container">
+                                    <input type="text" placeholder="Buscar" class="form-control form-control-sm"
+                                        autofocus id="buscarAbonado" formControlName="bspersonal" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <button class="btn btn-primary btn-sm">
+                                    <i class="fa fa-search" style="font-size:24pxi"></i> Buscar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <input type="text" class="form-control mx-0 form-control-sm text-center" placeholder="Filtrar..."
+                    [(ngModel)]="filterTerm" />
+            </div>
+
+            <div class="btn-group ml-auto mt-0">
+                <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
+                    aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+                </button>
+                <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+                    <button class="dropdown-item" [routerLink]="['/add-personal']" type="button">
+                        <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+                    <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
+                        <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+                    <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar"><i
+                            class="bi-file-earmark-arrow-up"></i>&nbsp; Exportar</button>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row mb-0">
+        <div class="col-sm">
+            <table class="table table-hover table-bordered table-sm sombra">
+                <thead class="text-center cabecera">
+                    <tr>
+                        <th></th>
+                        <th>Nombre</th>
+                        <th>Identificación</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Cargo</th>
+                    </tr>
+                </thead>
+                <tbody class="detalle">
+                    <tr class="fila" *ngFor="let personal of _personal; let i = index">
+                        <td class="text-center small font-weight-bold">{{i+1}}</td>
+                        <td>{{ personal.apellido }}, {{personal.nombre}}</td>
+                        <td class="text-center">{{ personal.identificacion}}</td>
+                        <td class="text-center">
+                            {{personal.email}}</td>
+                        <td>{{ personal.celular }}</td>
+                        <td>{{ personal.idcargo_cargos.descripcion }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MODAL Imprimir-->
+    <div class="modal fade" id="imprimir" tabindex="-1" aria-labelledby="imprimirLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border">
+                <div class='modal-header py-2 justify-content-center cabecera'>
+                    <h5 class='modal-title font-weight-bold' id='ModalLabel'>Imprimir</h5>
+                </div>
+                <div class='modal-body cuerpo'>
+
+                    <div class="input-group mb-3 input-group-sm">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="inputGroupSelect01">Reporte</label>
+                        </div>
+                        <select class="custom-select" id="inputGroupSelect01">
+                            <option selected>Abonados</option>
+                        </select>
+                    </div>
+
+                    <div class='row justify-content-center mt-3'>
+                        <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal'
+                            data-toggle="modal">
+                            <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+                        <button type='button' class='btn btn-sm btn-outline-success btn-sm mx-1' data-dismiss='modal'>
+                            <i class="bi bi-x-circle"></i> Cancelar</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

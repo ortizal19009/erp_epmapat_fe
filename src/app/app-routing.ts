@@ -260,6 +260,8 @@ import { ComparativoComponent } from './componentes/contabilidad/costos/comparat
 import { ResulcostosComponent } from './componentes/contabilidad/costos/resulcostos/resulcostos.component';
 import { ImpUnicostosComponent } from './componentes/contabilidad/costos/imp-unicostos/imp-unicostos.component';
 import { IfinanComponent } from './componentes/contabilidad/ifinan/ifinan/ifinan.component';
+import { PersonalComponent } from './componentes/rrhh/personal/personal.component';
+import { AddPersonalComponent } from './componentes/rrhh/personal/add-personal/add-personal.component';
 
 const routes: Routes = [
   //Consumo de Agua
@@ -423,116 +425,119 @@ const routes: Routes = [
   { path: 'modiubicacionm/:id', component: ModiUbicacionmComponent },
 
   //================ CONTABILIDAD =============================
-   //================ CONTABILIDAD =============================
-   { path: 'cuentas', component: CuentasComponent },
-   { path: 'add-cuenta', component: AddCuentaComponent },
-   { path: 'modi-cuenta', component: ModiCuentaComponent },
-   { path: 'info-cuenta', component: InfoCuentaComponent },
-   { path: 'imp-cuentas', component: ImpCuentasComponent },
-   { path: 'imp-mayor', component: ImpMayorComponent },
+  { path: 'cuentas', component: CuentasComponent },
+  { path: 'add-cuenta', component: AddCuentaComponent },
+  { path: 'modi-cuenta', component: ModiCuentaComponent },
+  { path: 'info-cuenta', component: InfoCuentaComponent },
+  { path: 'imp-cuentas', component: ImpCuentasComponent },
+  { path: 'imp-mayor', component: ImpMayorComponent },
 
-   { path: 'asientos', component: AsientosComponent },
-   { path: 'add-asiento', component: AddAsientoComponent },
-   { path: 'imp-asientos', component: ImpAsientosComponent },
-   { path: 'modi-asiento', component: ModiAsientoComponent },
+  { path: 'asientos', component: AsientosComponent },
+  { path: 'add-asiento', component: AddAsientoComponent },
+  { path: 'imp-asientos', component: ImpAsientosComponent },
+  { path: 'modi-asiento', component: ModiAsientoComponent },
 
-   { path: 'transaci', component: TransaciComponent },
-   { path: 'add-transaci', component: AddTransaciComponent },
-   { path: 'modi-transaci', component: ModiTransaciComponent },
-   { path: 'imp-transaci', component: ImpTransaciComponent },
-   { path: 'add-benextran', component: AddBenextranComponent },
-   { path: 'add-liquiacfp', component: AddLiquiacfpComponent },
+  { path: 'transaci', component: TransaciComponent },
+  { path: 'add-transaci', component: AddTransaciComponent },
+  { path: 'modi-transaci', component: ModiTransaciComponent },
+  { path: 'imp-transaci', component: ImpTransaciComponent },
+  { path: 'add-benextran', component: AddBenextranComponent },
+  { path: 'add-liquiacfp', component: AddLiquiacfpComponent },
 
-   { path: 'bancos', component: BancosComponent },
-   { path: 'conciliaban', component: ConciliabanComponent },   //No se necesita: Ahora esta en el modal
-   { path: 'imp-bancos', component: ImpBancosComponent },
+  { path: 'bancos', component: BancosComponent },
+  { path: 'conciliaban', component: ConciliabanComponent }, //No se necesita: Ahora esta en el modal
+  { path: 'imp-bancos', component: ImpBancosComponent },
 
-   { path: 'sinafip', component: SinafipComponent },
+  { path: 'sinafip', component: SinafipComponent },
 
-   { path: 'niifcuentas', component: NiifcuentasComponent },
-   { path: 'add-homologa', component: AddHomologaComponent },
-   { path: 'add-niifcuenta', component: AddNiifcuentaComponent },
-   { path: 'modi-niifcuenta', component: ModiNiifcuentaComponent },
-   { path: 'imp-niifcuentas', component: ImpNiifcuentasComponent },
+  { path: 'niifcuentas', component: NiifcuentasComponent },
+  { path: 'add-homologa', component: AddHomologaComponent },
+  { path: 'add-niifcuenta', component: AddNiifcuentaComponent },
+  { path: 'modi-niifcuenta', component: ModiNiifcuentaComponent },
+  { path: 'imp-niifcuentas', component: ImpNiifcuentasComponent },
 
-   { path: 'beneficiarios', component: BeneficiariosComponent },
-   { path: 'add-beneficiario', component: AddBeneficiarioComponent },
-   { path: 'info-beneficiario', component: InfoBeneficiarioComponent },
-   { path: 'modi-beneficiario', component: ModiBeneficiarioComponent },
-   { path: 'imp-beneficiarios', component: ImpBeneficiariosComponent },
-   { path: 'imp-movibene', component: ImpMovibeneComponent },
-   { path: 'info-liquida', component: InfoLiquidaComponent },
-   { path: 'imp-liquida', component: ImpLiquidaComponent },
+  { path: 'beneficiarios', component: BeneficiariosComponent },
+  { path: 'add-beneficiario', component: AddBeneficiarioComponent },
+  { path: 'info-beneficiario', component: InfoBeneficiarioComponent },
+  { path: 'modi-beneficiario', component: ModiBeneficiarioComponent },
+  { path: 'imp-beneficiarios', component: ImpBeneficiariosComponent },
+  { path: 'imp-movibene', component: ImpMovibeneComponent },
+  { path: 'info-liquida', component: InfoLiquidaComponent },
+  { path: 'imp-liquida', component: ImpLiquidaComponent },
 
-   { path: 'egresos', component: EgresosComponent },
-   { path: 'modi-egreso', component: ModiEgresoComponent },
-   { path: 'imp-egresos', component: ImpEgresosComponent },
-   { path: 'add-egreso', component: AddEgresoComponent },
+  { path: 'egresos', component: EgresosComponent },
+  { path: 'modi-egreso', component: ModiEgresoComponent },
+  { path: 'imp-egresos', component: ImpEgresosComponent },
+  { path: 'add-egreso', component: AddEgresoComponent },
 
-   { path: 'regrecauda', component: RegrecaudaComponent },
+  { path: 'regrecauda', component: RegrecaudaComponent },
 
-   { path: 'retenciones', component: RetencionesComponent },
-   { path: 'imp-retenciones', component: ImpRetencionesComponent },
-   { path: 'add-retencion', component: AddRetencionComponent },
-   { path: 'modi-retencion', component: ModiRetencionComponent },
+  { path: 'retenciones', component: RetencionesComponent },
+  { path: 'imp-retenciones', component: ImpRetencionesComponent },
+  { path: 'add-retencion', component: AddRetencionComponent },
+  { path: 'modi-retencion', component: ModiRetencionComponent },
 
-   { path: 'preingresos', component: PreingresosComponent },
-   // { path: 'info-preingreso', component: InfoPreingresoComponent },
-   { path: 'add-preingreso', component: AddPreingresoComponent },
-   { path: 'modi-preingreso', component: ModiPreingresoComponent },
-   { path: 'aux-ingreso', component: AuxIngresoComponent },
-   { path: 'imp-preingreso', component: ImpPreingresoComponent },
-   { path: 'imp-auxingreso', component: ImpAuxingresoComponent },
+  { path: 'preingresos', component: PreingresosComponent },
+  // { path: 'info-preingreso', component: InfoPreingresoComponent },
+  { path: 'add-preingreso', component: AddPreingresoComponent },
+  { path: 'modi-preingreso', component: ModiPreingresoComponent },
+  { path: 'aux-ingreso', component: AuxIngresoComponent },
+  { path: 'imp-preingreso', component: ImpPreingresoComponent },
+  { path: 'imp-auxingreso', component: ImpAuxingresoComponent },
 
-   { path: 'pregastos', component: PregastosComponent },
-   { path: 'add-pregasto', component: AddPregastoComponent },
-   { path: 'modi-pregasto', component: ModiPregastoComponent },
-   { path: 'aux-gasto', component: AuxGastoComponent },
-   { path: 'imp-pregasto', component: ImpPregastoComponent },
-   { path: 'imp-auxgasto', component: ImpAuxgastoComponent },
+  { path: 'pregastos', component: PregastosComponent },
+  { path: 'add-pregasto', component: AddPregastoComponent },
+  { path: 'modi-pregasto', component: ModiPregastoComponent },
+  { path: 'aux-gasto', component: AuxGastoComponent },
+  { path: 'imp-pregasto', component: ImpPregastoComponent },
+  { path: 'imp-auxgasto', component: ImpAuxgastoComponent },
 
-   { path: 'certipresu', component: CertipresuComponent },
-   { path: 'modi-certipresu', component: ModiCertipresuComponent },
-   { path: 'add-certipresu', component: AddCertipresuComponent },
-   { path: 'partixcerti', component: PartixcertiComponent },
+  { path: 'certipresu', component: CertipresuComponent },
+  { path: 'modi-certipresu', component: ModiCertipresuComponent },
+  { path: 'add-certipresu', component: AddCertipresuComponent },
+  { path: 'partixcerti', component: PartixcertiComponent },
 
-   { path: 'tramipresu', component: TramipresuComponent },
-   { path: 'add-tramipresu', component: AddTramipresuComponent },
-   { path: 'modi-tramipresu', component: ModiTramipresuComponent },
-   { path: 'prmisoxtrami', component: PrmisoxtramiComponent },
+  { path: 'tramipresu', component: TramipresuComponent },
+  { path: 'add-tramipresu', component: AddTramipresuComponent },
+  { path: 'modi-tramipresu', component: ModiTramipresuComponent },
+  { path: 'prmisoxtrami', component: PrmisoxtramiComponent },
 
-   { path: 'reformas', component: ReformasComponent },
-   { path: 'add-reforma', component: AddReformaComponent },
-   { path: 'modi-reforma', component: ModiReformaComponent },
+  { path: 'reformas', component: ReformasComponent },
+  { path: 'add-reforma', component: AddReformaComponent },
+  { path: 'modi-reforma', component: ModiReformaComponent },
 
-   { path: 'clasificador', component: ClasificadorComponent },
-   { path: 'info-clasificador', component: InfoClasificadorComponent},
-   { path: 'modi-clasificador', component: ModiClasificadorComponent },
-   { path: 'add-clasificador', component: AddClasificadorComponent },
+  { path: 'clasificador', component: ClasificadorComponent },
+  { path: 'info-clasificador', component: InfoClasificadorComponent },
+  { path: 'modi-clasificador', component: ModiClasificadorComponent },
+  { path: 'add-clasificador', component: AddClasificadorComponent },
 
-   { path: 'ejecucion', component: EjecucionComponent },
-   { path: 'modi-ejecucion', component: ModiEjecucionComponent },
-   { path: 'add-ejecucion', component: AddEjecucionComponent },
+  { path: 'ejecucion', component: EjecucionComponent },
+  { path: 'modi-ejecucion', component: ModiEjecucionComponent },
+  { path: 'add-ejecucion', component: AddEjecucionComponent },
 
-   { path: 'bancos', component: BancosComponent },
-   { path: 'conciliaban', component: ConciliabanComponent },
+  { path: 'bancos', component: BancosComponent },
+  { path: 'conciliaban', component: ConciliabanComponent },
 
-   { path: 'comprobacion', component: ComprobacionComponent },
-   { path: 'estsituacion', component: EstFinancieraComponent },
-   { path: 'estresultados', component: EstResultadosComponent },
-   { path: 'flujoefectivo', component: EstFlujoEfeComponent },
-   { path: 'ejecupresup', component: EstEjecucionPreComponent },
+  { path: 'comprobacion', component: ComprobacionComponent },
+  { path: 'estsituacion', component: EstFinancieraComponent },
+  { path: 'estresultados', component: EstResultadosComponent },
+  { path: 'flujoefectivo', component: EstFlujoEfeComponent },
+  { path: 'ejecupresup', component: EstEjecucionPreComponent },
 
-   { path: 'unicostos', component: UnicostosComponent },
-   { path: 'cuecostos', component: CuecostosComponent },
-   { path: 'comparativo', component: ComparativoComponent },
-   { path: 'resulcostos', component: ResulcostosComponent },
-   { path: 'imp-unicostos', component: ImpUnicostosComponent },
+  { path: 'unicostos', component: UnicostosComponent },
+  { path: 'cuecostos', component: CuecostosComponent },
+  { path: 'comparativo', component: ComparativoComponent },
+  { path: 'resulcostos', component: ResulcostosComponent },
+  { path: 'imp-unicostos', component: ImpUnicostosComponent },
 
-   { path: 'estrfunc', component: EstrfuncComponent },
-   { path: 'info-estrfunc', component: InfoEstrfuncComponent },
+  { path: 'estrfunc', component: EstrfuncComponent },
+  { path: 'info-estrfunc', component: InfoEstrfuncComponent },
 
-   { path: 'ifinan', component: IfinanComponent },
+  { path: 'ifinan', component: IfinanComponent },
+
+  //================ RRHH =============================
+  { path: 'personal', component: PersonalComponent },
+  { path: 'add-personal', component: AddPersonalComponent },
 
   // ============== ADMINISTRACION CENTRAL ===================
   { path: 'tabla4', component: Tabla4Component },
@@ -555,10 +560,9 @@ const routes: Routes = [
 
   { path: '', redirectTo: 'inicio', pathMatch: 'full' },
 
-
   /* COACTIVAS */
-  {path:'cv-rubros', component:CvRubrosComponent},
-  {path:'cv-facturas', component: CvFacturasComponent}
+  { path: 'cv-rubros', component: CvRubrosComponent },
+  { path: 'cv-facturas', component: CvFacturasComponent },
 ];
 
 @NgModule({

@@ -278,6 +278,8 @@ import { RegrecaudaComponent } from './componentes/contabilidad/regrecauda/regre
 import { ImpNiifcuentasComponent } from './componentes/contabilidad/niifcuentas/imp-niifcuentas/imp-niifcuentas.component';
 import { IfinanComponent } from './componentes/contabilidad/ifinan/ifinan/ifinan.component';
 import { InfoLiquidaComponent } from './componentes/contabilidad/beneficiarios/info-beneficiario/info-liquida/info-liquida/info-liquida.component';
+import { PersonalComponent } from './componentes/rrhh/personal/personal.component';
+import { AddPersonalComponent } from './componentes/rrhh/personal/add-personal/add-personal.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
@@ -544,6 +546,8 @@ import { InfoLiquidaComponent } from './componentes/contabilidad/beneficiarios/i
     CvRubrosComponent,
     CvFacturasComponent,
     DetallePlanillaComponent,
+    PersonalComponent,
+    AddPersonalComponent,
   ],
 
   imports: [

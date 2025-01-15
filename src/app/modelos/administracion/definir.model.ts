@@ -1,11 +1,29 @@
 export class Definir {
-
-    idusuario: number;
-    razonsocial: string;
-    nombrecomercial: string;
-    ruc: string;
-    direccion: string;
-    tipoambiente: number;
-    iva: number;
-
+  idusuario: number;
+  razonsocial: string;
+  nombrecomercial: string;
+  ruc: string;
+  direccion: string;
+  tipoambiente: number;
+  iva: number;
+  empresa: string;
+  ubirepo: string;
+  posiacti: string;
+  longacti: string;
+  naturaleza: string;
+  fechap: Date;
+  nombre: string;
+  ubicomprobantes: string;
+  asunto: string;
+  textomail: string;
+  dirmatriz: string;
+  fechacierr: Date;
+  f_: string;
+  f_g: string;
+  porciva: number;
+  ciudad: string;
+  idtabla17: number;
+  ubidigi: string;
+  ubimagenes: string;
+  swpreingsi: string;
 }

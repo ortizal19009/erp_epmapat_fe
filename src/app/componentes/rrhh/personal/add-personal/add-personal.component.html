@@ -1,0 +1,152 @@
+<div class="content">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-sm-8 mt-5">
+                <h4 class="font-weight-bold text-center cabecera sombra border py-1">Nuevo Personal EPMAPA-T</h4>
+                <div class="card card-body sombra fondo detalle">
+                    <form [formGroup]="f_personal">
+                        <div class="row">
+                            <div class="form-group col-sm-3">
+                                <div class="input-group mb-1 input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="codigo">Código</label>
+                                    </div>
+                                    <input class="form-control" id="codigo" formControlName="codigo">
+                                </div>
+                            </div>
+                            <div class="form-group col-sm-3">
+                                <div class="input-group mb-1 input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="cargo">Cargo</label>
+                                    </div>
+                                    <select class="custom-select" id="cargo" formControlName="idcargo_cargos">
+                                        <option [ngValue]="cargo" *ngFor="let cargo of _cargos">{{cargo}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group col-sm-3">
+                                <div class="input-group mb-1 input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="tpcontrato">Tipo contrato</label>
+                                    </div>
+                                    <select class="custom-select" id="tpcontrato"
+                                        formControlName="idtpcontrato_tpcontratos">
+                                        <option [ngValue]="cargo" *ngFor="let cargo of _tpcontratos">{{cargo}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group col-sm-3">
+                                <div class="input-group mb-1 input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="identificacion">Identificación</label>
+                                    </div>
+                                    <input class="form-control" id="identificacion"
+                                        formControlName="idtpcontrato_tpcontratos" />
+                                </div>
+                            </div>
+
+                            <div class="form-group col-sm-8">
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="nombreapellido">Apellidos y Nombres</label>
+                                    </div>
+                                    <input class="form-control text-center" formControlName="apellidos" [ngClass]="{'is-invalid': f['apellidos'].invalid && f['apellidos'].touched,
+                            'is-valid': f['apellidos'].valid, '': f['apellidos'].untouched}" placeholder="Apellidos" />
+                                    <input type="text" class="form-control text-center" formControlName="nombres"
+                                        placeholder="Nombres" aria-label="Small" aria-describedby="inputGroup-sizing-sm"
+                                        [ngClass]="{'is-invalid': f['nombres'].invalid && f['nombres'].touched,
+                            'is-valid': f['nombres'].valid, '': f['nombres'].untouched}">
+                                </div>
+                            </div>
+                            <div class="form-group col-sm-4">
+                                <div class="input-group mb-1 input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="fecha">Fecha nacimiento</label>
+                                    </div>
+                                    <input type="date" class="form-control text-center" formControlName="fecnacimiento"
+                                        id="fecha" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+                                </div>
+                            </div>
+
+                            <div class="form-group col-sm-6 mt-1">
+                                <div class="input-group input-group-sm mb-1 ">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="fecha">Email personal<sup
+                                                class="green">*</sup></label>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm" formControlName="idbene"
+                                        list="benList" (input)="onBenefiSelected($event); benefixNombre($event)"
+                                        [ngClass]="{'is-invalid': f['idbene'].invalid && f['idbene'].touched,
+                            'is-valid': f['idbene'].valid, '': f['idbene'].untouched}">
+                                    <datalist role="listbox" id="benList">
+                                        <option *ngFor="let beneficiario of _contemergencia"
+                                            value={{beneficiario.nomben}}>{{
+                                            beneficiario.idgrupo.nomgru}}</option>
+                                    </datalist>
+                                </div>
+                            </div>
+                            <div class="form-group col-sm-6 mt-1">
+                                <div class="input-group input-group-sm mb-1 ">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="fecha">Celular<sup
+                                                class="green">*</sup></label>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm" formControlName="celular"
+                                        list="benList" (input)="onBenefiSelected($event); benefixNombre($event)"
+                                        [ngClass]="{'is-invalid': f['celular'].invalid && f['celular'].touched,
+                            'is-valid': f['celular'].valid, '': f['celular'].untouched}">
+                                    <datalist role="listbox" id="benList">
+                                        <option *ngFor="let beneficiario of _contemergencia"
+                                            value={{beneficiario.nomben}}>{{
+                                            beneficiario.idgrupo.nomgru}}</option>
+                                    </datalist>
+                                </div>
+                            </div>
+                            <div class="form-group col-sm-6 mt-1">
+                                <div class="input-group input-group-sm mb-1 ">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="fecha">Dirección</label>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm" formControlName="dirección"
+                                        list="benList" (input)="onBenefiSelected($event); benefixNombre($event)"
+                                        [ngClass]="{'is-invalid': f['idbene'].invalid && f['idbene'].touched,
+                            'is-valid': f['idbene'].valid, '': f['idbene'].untouched}">
+                                    <datalist role="listbox" id="benList">
+                                        <option *ngFor="let beneficiario of _contemergencia"
+                                            value={{beneficiario.nomben}}>{{
+                                            beneficiario.idgrupo.nomgru}}</option>
+                                    </datalist>
+                                </div>
+                            </div>
+                            <div class="form-group col-sm-6 mt-1">
+                                <div class="input-group input-group-sm mb-1 ">
+                                    <div class="input-group-prepend">
+                                        <button class="btn btn-group btn-primary" for="fecha">Contacto emergencia</button>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm" formControlName="idcontemergencia_contemergencias"
+                                        list="benList" (input)="onBenefiSelected($event); benefixNombre($event)"
+                                        [ngClass]="{'is-invalid': f['idbene'].invalid && f['idbene'].touched,
+                            'is-valid': f['idbene'].valid, '': f['idbene'].untouched}">
+                                    <datalist role="listbox" id="benList">
+                                        <option *ngFor="let beneficiario of _contemergencia"
+                                            value={{beneficiario.nomben}}>{{
+                                            beneficiario.idgrupo.nomgru}}</option>
+                                    </datalist>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-success btn-sm mx-1" (click)="savePersonal()"
+                                [disabled]="!f_personal.valid">
+                                <i class="fa fa-check-circle"></i> Aceptar</button>
+                            <button type="button" class="btn btn-outline-success btn-sm mb-0"
+                                [routerLink]="['/personal']"><i class="fa fa-times-circle"></i> Cancelar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

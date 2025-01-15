@@ -22,8 +22,8 @@ export class AutorizaService {
 
   public enabModulos(): void {
      //OJO: Controlar con usuarios.perfil
-     if(this.idusuario == 1) this.enabled = [true, true, false, false, false, true, true];
-     else this.enabled = [true, false, false, false, false, true, true];
+     if(this.idusuario == 1) this.enabled = [true, true, false, false, true, true, true];
+     else this.enabled = [true, false, false, false, false, false, true];
 
      this.colorenabled = true;
 
