@@ -20,7 +20,8 @@
                                         <label class="input-group-text" for="cargo">Cargo</label>
                                     </div>
                                     <select class="custom-select" id="cargo" formControlName="idcargo_cargos">
-                                        <option [ngValue]="cargo" *ngFor="let cargo of _cargos">{{cargo}}</option>
+                                        <option [ngValue]="cargo" *ngFor="let cargo of _cargos">{{cargo.descripcion}}
+                                        </option>
                                     </select>
                                 </div>
                             </div>
@@ -31,7 +32,8 @@
                                     </div>
                                     <select class="custom-select" id="tpcontrato"
                                         formControlName="idtpcontrato_tpcontratos">
-                                        <option [ngValue]="cargo" *ngFor="let cargo of _tpcontratos">{{cargo}}</option>
+                                        <option [ngValue]="tpcontrato" *ngFor="let tpcontrato of _tpcontratos">
+                                            {{tpcontrato.descripcion}}</option>
                                     </select>
                                 </div>
                             </div>
@@ -40,8 +42,7 @@
                                     <div class="input-group-prepend">
                                         <label class="input-group-text" for="identificacion">Identificación</label>
                                     </div>
-                                    <input class="form-control" id="identificacion"
-                                        formControlName="idtpcontrato_tpcontratos" />
+                                    <input class="form-control" id="identificacion" formControlName="identificacion" />
                                 </div>
                             </div>
 
@@ -74,15 +75,9 @@
                                         <label class="input-group-text" for="fecha">Email personal<sup
                                                 class="green">*</sup></label>
                                     </div>
-                                    <input type="text" class="form-control form-control-sm" formControlName="idbene"
-                                        list="benList" (input)="onBenefiSelected($event); benefixNombre($event)"
-                                        [ngClass]="{'is-invalid': f['idbene'].invalid && f['idbene'].touched,
-                            'is-valid': f['idbene'].valid, '': f['idbene'].untouched}">
-                                    <datalist role="listbox" id="benList">
-                                        <option *ngFor="let beneficiario of _contemergencia"
-                                            value={{beneficiario.nomben}}>{{
-                                            beneficiario.idgrupo.nomgru}}</option>
-                                    </datalist>
+                                    <input type="text" class="form-control form-control-sm" formControlName="email"
+                                        [ngClass]="{'is-invalid': f['email'].invalid && f['email'].touched,
+                            'is-valid': f['email'].valid, '': f['email'].untouched}">
                                 </div>
                             </div>
                             <div class="form-group col-sm-6 mt-1">
@@ -92,14 +87,8 @@
                                                 class="green">*</sup></label>
                                     </div>
                                     <input type="text" class="form-control form-control-sm" formControlName="celular"
-                                        list="benList" (input)="onBenefiSelected($event); benefixNombre($event)"
                                         [ngClass]="{'is-invalid': f['celular'].invalid && f['celular'].touched,
                             'is-valid': f['celular'].valid, '': f['celular'].untouched}">
-                                    <datalist role="listbox" id="benList">
-                                        <option *ngFor="let beneficiario of _contemergencia"
-                                            value={{beneficiario.nomben}}>{{
-                                            beneficiario.idgrupo.nomgru}}</option>
-                                    </datalist>
                                 </div>
                             </div>
                             <div class="form-group col-sm-6 mt-1">
@@ -107,31 +96,21 @@
                                     <div class="input-group-prepend">
                                         <label class="input-group-text" for="fecha">Dirección</label>
                                     </div>
-                                    <input type="text" class="form-control form-control-sm" formControlName="dirección"
-                                        list="benList" (input)="onBenefiSelected($event); benefixNombre($event)"
-                                        [ngClass]="{'is-invalid': f['idbene'].invalid && f['idbene'].touched,
-                            'is-valid': f['idbene'].valid, '': f['idbene'].untouched}">
-                                    <datalist role="listbox" id="benList">
-                                        <option *ngFor="let beneficiario of _contemergencia"
-                                            value={{beneficiario.nomben}}>{{
-                                            beneficiario.idgrupo.nomgru}}</option>
-                                    </datalist>
+                                    <input type="text" class="form-control form-control-sm" formControlName="direccion"
+                                        [ngClass]="{'is-invalid': f['direccion'].invalid && f['direccion'].touched,
+                            'is-valid': f['direccion'].valid, '': f['direccion'].untouched}">
                                 </div>
                             </div>
                             <div class="form-group col-sm-6 mt-1">
                                 <div class="input-group input-group-sm mb-1 ">
                                     <div class="input-group-prepend">
-                                        <button class="btn btn-group btn-primary" for="fecha">Contacto emergencia</button>
+                                        <button class="btn btn-group btn-primary" data-toggle="modal"
+                                            data-target="#btncontemergencia"
+                                            for="idcontemergencia_contemergencias">Contacto
+                                            emergencia</button>
                                     </div>
-                                    <input type="text" class="form-control form-control-sm" formControlName="idcontemergencia_contemergencias"
-                                        list="benList" (input)="onBenefiSelected($event); benefixNombre($event)"
-                                        [ngClass]="{'is-invalid': f['idbene'].invalid && f['idbene'].touched,
-                            'is-valid': f['idbene'].valid, '': f['idbene'].untouched}">
-                                    <datalist role="listbox" id="benList">
-                                        <option *ngFor="let beneficiario of _contemergencia"
-                                            value={{beneficiario.nomben}}>{{
-                                            beneficiario.idgrupo.nomgru}}</option>
-                                    </datalist>
+                                    <input type="text" readonly class="form-control form-control-sm"
+                                        formControlName="idcontemergencia_contemergencias">
                                 </div>
                             </div>
                         </div>
@@ -146,6 +125,100 @@
                         </div>
                     </form>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="btncontemergencia" tabindex="-1" aria-labelledby="btncontemergenciaLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="btncontemergenciaLabel">Registrar contacto de emergencia</h5>
+                <button type="button" class="close" (click)="changeNuevo()">
+                    <span aria-hidden="true"><i class="bi bi-box-arrow-in-left"></i></span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container" *ngIf="formulario; else nuevo">
+                    <form [formGroup]="f_buscarContEmergencia">
+                        <div class="form-group col-sm-12 mt-1">
+                            <div class="input-group input-group-sm mb-1">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" for="contemergencia">Buscar</label>
+                                </div>
+                                <input type="text" id="contemergencia" class="form-control form-control-sm"
+                                    formControlName="contemergencia" (input)="onContEmergenciaSelected($event)" />
+                                <div class="input-group-prepend">
+                                    <button class="btn btn-primary" (click)="changeNuevo()" type="button"
+                                        aria-label="Add">
+                                        <i class="bi bi-journal-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <table class="table table-sm table-hover table-bordered">
+                        <thead>
+                            <tr class="text-center">
+                                <th></th>
+                                <th>NOMBRE</th>
+                                <th>PARENTESCO</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let contemer of contemergencia; let i= index"
+                                (click)="setContactoEmergencia(contemer)" data-dismiss="modal">
+                                <td>{{i+1}}</td>
+                                <td>{{contemer.nombre}}</td>
+                                <td>{{contemer.parentesco}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <ng-template #nuevo>
+                    <form [formGroup]="f_contEmergencia">
+                        <div class="row">
+                            <div class="form-group col-sm mt-1">
+                                <div class="input-group input-group-sm mb-1 ">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="nombre">Nombres</label>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm" formControlName="nombre">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-6 mt-1">
+                                <div class="input-group input-group-sm mb-1 ">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="celular">Celular</label>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm" formControlName="celular">
+                                </div>
+                            </div>
+                            <div class="form-group col-sm-6 mt-1">
+                                <div class="input-group input-group-sm mb-1 ">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="parentesco">Parentesco</label>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm"
+                                        formControlName="parentesco">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </ng-template>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-outline-success" data-dismiss="modal">Cancelar</button>
+                <!--                 <button type="button" class="btn btn-sm btn-success" *ngIf="formulario">Aceptar</button>
+ --> <button type="button" class="btn btn-sm btn-primary" data-dismiss="modal" (click)="saveContEmergencia()"
+                    *ngIf="!formulario">Aceptar</button>
             </div>
         </div>
     </div>

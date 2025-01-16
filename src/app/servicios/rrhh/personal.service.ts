@@ -5,13 +5,14 @@ const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/personal`;
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class PersonalService {
-
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
   getAllPersonal() {
     return this.http.get(`${baseUrl}`);
   }
-  
+  savePaersonal(personal: any) {
+    return this.http.post(`${baseUrl}`, personal);
+  }
 }

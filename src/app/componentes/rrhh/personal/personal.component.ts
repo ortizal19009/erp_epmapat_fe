@@ -51,7 +51,6 @@ export class PersonalComponent implements OnInit {
   getAllPersonal() {
     this.s_personal.getAllPersonal().subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this._personal = datos;
       },
       error: (e: any) => console.error(e),
