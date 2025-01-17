@@ -96,6 +96,7 @@
                                                 <th class="col-sm-5">Cliente</th>
                                                 <th class="col-sm-2">Razón E.</th>
                                                 <th>Módulo</th>
+                                                <th></th>
                                             </tr>
                                         </thead>
                                         <tbody class="bodyFacelectro">
@@ -106,6 +107,11 @@
                                                 <td class="_description">{{faceliminada.idcliente.nombre}}</td>
                                                 <td class="_description">{{faceliminada.razoneliminacion}}</td>
                                                 <td class="_description">{{faceliminada.idmodulo.descripcion}}</td>
+                                                <td class="text-center">
+                                                    <button class="btn btn-sm btn-danger" (click)="generarReport(faceliminada.idfactura)" data-toggle="modal" data-target="#impViewer">
+                                                        <i class="bi bi-file-earmark-pdf"></i>
+                                                    </button>
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>

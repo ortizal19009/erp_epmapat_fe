@@ -16,6 +16,7 @@ import { Lecturas } from 'src/app/modelos/lecturas.model';
 import { PdfService } from 'src/app/servicios/pdf.service';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 
 @Component({
   selector: 'app-anulaciones-bajas',
@@ -72,7 +73,8 @@ export class AnulacionesBajasComponent implements OnInit {
     private s_facmodificaciones: FacturamodificacionesService,
     private s_factura: FacturaService,
     private s_lectura: LecturasService,
-    private s_pdf: PdfService
+    private s_pdf: PdfService,
+    private s_rubroxfac: RubroxfacService
   ) {}
 
   ngOnInit(): void {
@@ -409,6 +411,59 @@ export class AnulacionesBajasComponent implements OnInit {
   }
 
   /* REPORTES  */
+
+  /* REPORTE ELIMINACION */
+  generarReport(idfactura: number) {
+    let factura = this.s_factura.getById(idfactura).subscribe({
+      next: (fact: any) => {
+        console.log(fact);
+        factura = fact;
+        this.s_rubroxfac.getByIdfactura(idfactura).subscribe({
+          next: async (rubros: any) => {
+            let cabeceraAbonado: any = {};
+            let _rubros: any = [];
+            let cabeceraCliente: any = {
+              nombreCliente: fact.idcliente.nombre,
+              identificacion: fact.idcliente.cedula,
+              direccion: fact.idcliente.direccion,
+              fechaeliminacion: fact.fechaeliminacion,
+              razoneliminacion: fact.razoneliminacion,
+              modulo: fact.idmodulo.descripcion,
+              planilla: fact.idfactura,
+            };
+            if (fact.idabonado != 0) {
+              let abonado: any = await this.s_abonados
+                .getByIdabonado(fact.idabonado)
+                .toPromise();
+              cabeceraAbonado = {
+                cuenta: abonado[0].idabonado,
+                responsablepago: abonado[0].idresponsable.nombre,
+                identificacion: abonado[0].idresponsable.cedula,
+                categoria: abonado[0].idcategoria_categorias.descripcion,
+                direccion: abonado[0].direccionubicacion,
+              };
+            }
+            rubros.forEach((item: any) => {
+              _rubros.push([
+                item.idrubro_rubros.idrubro,
+                item.idrubro_rubros.descripcion,
+                item.cantidad,
+                item.valorunitario.toFixed(2),
+                (item.cantidad * item.valorunitario).toFixed(2),
+              ]);
+            });
+            this.reporteeliminacion(cabeceraCliente, cabeceraAbonado, _rubros);
+            console.log(cabeceraCliente);
+            console.log(cabeceraAbonado);
+            console.log(_rubros);
+          },
+          error: (e: any) => console.error(e),
+        });
+        //
+      },
+      error: (e: any) => console.error(e),
+    });
+  }
   /* REPORTE DE BAJAS */
   reporte() {
     let opt = this.f_reportes.value.opt;
@@ -492,5 +547,64 @@ export class AnulacionesBajasComponent implements OnInit {
       'pdfViewer'
     ) as HTMLIFrameElement;
     pdfViewer.src = pdfDataUri;
+  }
+  reporteeliminacion(bodyCliente: any, bodyAbonado: any, bodyRubros: any) {
+    console.log(bodyCliente);
+    console.log(bodyAbonado);
+    let doc = new jsPDF();
+    this.s_pdf.header(`FACTURA ELIMINADA`, doc);
+    let headRubros = [['Cod.', 'Nombre', 'Cantidad', 'V. unitario', 'Total']];
+    autoTable(doc, {
+      body: [
+        [
+          `Nombre Cliente: ${bodyCliente.nombreCliente}`,
+          `Identificación: ${bodyCliente.identificacion}`,
+          ``,
+        ],
+        [
+          {
+            content: `Dirección: ${bodyCliente.direccion}`,
+            colSpan: 3,
+          },
+        ],
+        [
+          `Fec. Eliminacion: ${bodyCliente.fechaeliminacion}`,
+          ``,
+          `Módulo: ${bodyCliente.modulo}`,
+        ],
+        [
+          {
+            content: `Razón eliminación: ${bodyCliente.razoneliminacion}`,
+            colSpan: 3,
+          },
+        ],
+      ],
+    });
+    if (bodyAbonado) {
+      console.log('body cero');
+      autoTable(doc, {
+        body: [
+          [
+            `Cuenta: ${bodyAbonado.cuenta}`,
+            `Responsable pago: ${bodyAbonado.nombreCliente}`,
+            `Identificación: ${bodyAbonado.identificacion}`,
+          ],
+          [`Dirección: ${bodyAbonado.direccion}`],
+          [`Fec. Eliminacion:`, `Razón eliminación: `, `Módulo: `],
+        ],
+      });
+    } else {
+      console.log('body body');
+    }
+    autoTable(doc, {
+      head: headRubros,
+      body: bodyRubros,
+    });
+    const pdfDataUri = doc.output('datauri');
+    const pdfViewer: any = document.getElementById(
+      'pdfViewer'
+    ) as HTMLIFrameElement;
+
+    return (pdfViewer.src = pdfDataUri);
   }
 }
