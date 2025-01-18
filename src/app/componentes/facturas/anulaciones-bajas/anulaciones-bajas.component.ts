@@ -121,6 +121,10 @@ export class AnulacionesBajasComponent implements OnInit {
     this.getAllFacAnuladas(this.c_limit);
     this.getAllFacEliminadas(this.c_limit);
   }
+  setValor() {
+    this.getAllFacAnuladas(this.c_limit);
+    this.getAllFacEliminadas(this.c_limit);
+  }
 
   getFragmentToShow(opt: string) {
     if (opt === 'cliente') {
@@ -422,6 +426,7 @@ export class AnulacionesBajasComponent implements OnInit {
           next: async (rubros: any) => {
             let cabeceraAbonado: any = {};
             let _rubros: any = [];
+            let sumaRubros: number = 0;
             let cabeceraCliente: any = {
               nombreCliente: fact.idcliente.nombre,
               identificacion: fact.idcliente.cedula,
@@ -442,6 +447,8 @@ export class AnulacionesBajasComponent implements OnInit {
                 categoria: abonado[0].idcategoria_categorias.descripcion,
                 direccion: abonado[0].direccionubicacion,
               };
+            } else {
+              cabeceraAbonado = null;
             }
             rubros.forEach((item: any) => {
               _rubros.push([
@@ -451,7 +458,9 @@ export class AnulacionesBajasComponent implements OnInit {
                 item.valorunitario.toFixed(2),
                 (item.cantidad * item.valorunitario).toFixed(2),
               ]);
+              sumaRubros += item.cantidad * item.valorunitario;
             });
+            _rubros.push(['', 'TOTAL: ', '', '', sumaRubros.toFixed(2)]);
             this.reporteeliminacion(cabeceraCliente, cabeceraAbonado, _rubros);
             console.log(cabeceraCliente);
             console.log(cabeceraAbonado);
@@ -552,7 +561,7 @@ export class AnulacionesBajasComponent implements OnInit {
     console.log(bodyCliente);
     console.log(bodyAbonado);
     let doc = new jsPDF();
-    this.s_pdf.header(`FACTURA ELIMINADA`, doc);
+    this.s_pdf.header(`FACTURA ELIMINADA ${bodyCliente.planilla}`, doc);
     let headRubros = [['Cod.', 'Nombre', 'Cantidad', 'V. unitario', 'Total']];
     autoTable(doc, {
       body: [
@@ -580,17 +589,17 @@ export class AnulacionesBajasComponent implements OnInit {
         ],
       ],
     });
-    if (bodyAbonado) {
+    if (bodyAbonado != null) {
       console.log('body cero');
       autoTable(doc, {
         body: [
           [
             `Cuenta: ${bodyAbonado.cuenta}`,
-            `Responsable pago: ${bodyAbonado.nombreCliente}`,
+            `Responsable pago: ${bodyAbonado.responsablepago}`,
             `Identificación: ${bodyAbonado.identificacion}`,
           ],
-          [`Dirección: ${bodyAbonado.direccion}`],
-          [`Fec. Eliminacion:`, `Razón eliminación: `, `Módulo: `],
+          [`Categoria: ${bodyAbonado.categoria}`, ` `, ``],
+          [{ content: `Dirección: ${bodyAbonado.direccion}`, colSpan: 3 }],
         ],
       });
     } else {
@@ -600,6 +609,18 @@ export class AnulacionesBajasComponent implements OnInit {
       head: headRubros,
       body: bodyRubros,
     });
+    //btener la hora actual
+    const horaImpresion = getDateTime();
+    doc.setFontSize(10);
+
+    // Agregar el pie de página
+    doc.text(
+      `Fecha y hora de impresión: ${horaImpresion}`,
+      doc.internal.pageSize.getWidth() / 2,
+      doc.internal.pageSize.getHeight() - 10,
+      { align: 'center' }
+    );
+
     const pdfDataUri = doc.output('datauri');
     const pdfViewer: any = document.getElementById(
       'pdfViewer'
@@ -607,4 +628,17 @@ export class AnulacionesBajasComponent implements OnInit {
 
     return (pdfViewer.src = pdfDataUri);
   }
+}
+function getDateTime() {
+  var now = new Date();
+  var year = now.getFullYear();
+  var month = now.getMonth() + 1; // Meses comienzan en 0
+  var day = now.getDate();
+  var hour = now.getHours();
+  var minute = now.getMinutes();
+  var second = now.getSeconds();
+
+  return (
+    day + '/' + month + '/' + year + ' ' + hour + ':' + minute + ':' + second
+  );
 }

@@ -53,6 +53,17 @@ export class PdfService {
       head: head,
       body: body,
     });
+    //btener la hora actual
+    const horaImpresion = this.getDateTime();
+    doc.setFontSize(10);
+
+    // Agregar el pie de página
+    doc.text(
+      `Fecha y hora de impresión: ${horaImpresion}`,
+      doc.internal.pageSize.getWidth() / 2,
+      doc.internal.pageSize.getHeight() - 10,
+      { align: 'center' }
+    );
 
     const pdfDataUri = doc.output('datauristring');
     const pdfViewer: any = document.getElementById(
@@ -114,7 +125,17 @@ export class PdfService {
       startY: startY,
       styles: { overflow: 'hidden' },
       margin: { left: 107 },
-    });
+    }); //btener la hora actual
+    const horaImpresion = this.getDateTime();
+    doc.setFontSize(10);
+
+    // Agregar el pie de página
+    doc.text(
+      `Fecha y hora de impresión: ${horaImpresion}`,
+      doc.internal.pageSize.getWidth() / 2,
+      doc.internal.pageSize.getHeight() - 10,
+      { align: 'center' }
+    );
     const pdfDataUri = doc.output('datauri');
     const pdfViewer: any = document.getElementById(
       'pdfViewer'
@@ -157,6 +178,17 @@ export class PdfService {
       head: [ht2[1]],
       body: bt2,
     });
+    //btener la hora actual
+    const horaImpresion = this.getDateTime();
+    doc.setFontSize(10);
+
+    // Agregar el pie de página
+    doc.text(
+      `Fecha y hora de impresión: ${horaImpresion}`,
+      doc.internal.pageSize.getWidth() / 2,
+      doc.internal.pageSize.getHeight() - 10,
+      { align: 'center' }
+    );
     doc.setPage(pageNumber);
     doc.save(titulo);
   }
@@ -529,267 +561,17 @@ export class PdfService {
     });
   }
 
-  /*   tpcertificacion(titulo: string, tpcertifica: any) {
-    let doc = new jsPDF('p', 'pt', 'a4');
-    let i = 0;
-    doc.setFont('courier');
-    doc.setFontSize(11);
-    let datos: any = [];
-    this.header(titulo, doc);
-    tpcertifica.forEach(() => {
-      datos.push([
-        tpcertifica[i].descripcion,
-        tpcertifica[i].idrubro_rubros.descripcion,
-        `${tpcertifica[i].valor} $`,
-      ]);
-      i++;
-    });
-    autoTable(doc, {
-      startY: 120,
-      head: [['Descripción', 'Rubro', 'Valor']],
-      body: datos,
-    });
-    window.open(doc.output('bloburl'), '_blank');
-  }
-  clientes(titulo: string, clientes: any) {
-    let doc = new jsPDF('p', 'pt', 'a4');
-    let i = 0;
-    doc.setFont('courier');
-    doc.setFontSize(11);
-    let datos: any = [];
-    this.header(titulo, doc);
-    clientes.forEach(() => {
-      datos.push([
-        clientes[i].nombre,
-        clientes[i].cedula,
-        clientes[i].direccion,
-        clientes[i].telefono,
-      ]);
-      i++;
-    });
+  getDateTime() {
+    var now = new Date();
+    var year = now.getFullYear();
+    var month = now.getMonth() + 1; // Meses comienzan en 0
+    var day = now.getDate();
+    var hour = now.getHours();
+    var minute = now.getMinutes();
+    var second = now.getSeconds();
 
-    autoTable(doc, {
-      startY: 120,
-      head: [['Nombre', 'Identificación', 'Dirección', 'Teléfono']],
-      body: datos,
-    });
-    window.open(doc.output('bloburl'), '_blank');
+    return (
+      day + '/' + month + '/' + year + ' ' + hour + ':' + minute + ':' + second
+    );
   }
-  abonados(titulo: string, abonados: any) {
-    let doc = new jsPDF('p', 'pt', 'a4');
-    let i = 0;
-    doc.setFont('courier');
-    doc.setFontSize(11);
-    let datos: any = [];
-    this.header(titulo, doc);
-    abonados.forEach(() => {
-      datos.push([
-        abonados[i].idcliente_clientes.nombre,
-        abonados[i].idabonado,
-        abonados[i].nromedidor,
-        abonados[i].direccionubicacion,
-      ]);
-      i++;
-    });
-    autoTable(doc, {
-      startY: 120,
-      head: [['Nombre cliente', 'Cuenta', 'Medidor', 'Dirección']],
-      body: datos,
-    });
-    window.open(doc.output('bloburl'), '_blank');
-  }
-  intereses(titulo: string, intereses: any) {
-    let doc = new jsPDF('p', 'pt', 'a4');
-    let i = 0;
-    doc.setFont('courier');
-    doc.setFontSize(11);
-    let datos: any = [];
-    this.header(titulo, doc);
-    intereses.forEach(() => {
-      datos.push([
-        intereses[i].anio,
-        intereses[i].mes,
-        `${intereses[i].porcentaje}%`,
-      ]);
-      i++;
-    });
-    autoTable(doc, {
-      startY: 120,
-      head: [['Año', 'Mes', 'Porcentaje']],
-      body: datos,
-    });
-    window.open(doc.output('bloburl'), '_blank');
-  }
-  reclamos(titulo: string, reclamos: any) {
-    let doc = new jsPDF('p', 'pt', 'a4');
-    let i = 0;
-    let n = 0;
-    doc.setFont('courier');
-    doc.setFontSize(11);
-    let datos: any = [];
-    this.header(titulo, doc);
-    reclamos.forEach(() => {
-      datos.push([
-        n,
-        reclamos[i].observacion,
-        reclamos[i].referencia,
-        reclamos[i].departamento,
-        reclamos[i].contestacion,
-        reclamos[i].responsablereclamo,
-      ]);
-      n++;
-      i++;
-    });
-    autoTable(doc, {
-      startY: 120,
-      head: [
-        [
-          'Nro.',
-          'Observación',
-          'Referencia',
-          'Departamento',
-          'Contestación',
-          'Responsable reclamo',
-        ],
-      ],
-      body: datos,
-    });
-    window.open(doc.output('bloburl'), '_blank');
-  }
-  rutas(titulo: string, rutas: any) {
-    let doc = new jsPDF('p', 'pt', 'a4');
-    let i = 0;
-    let n = 1;
-    doc.setFont('courier');
-    doc.setFontSize(11);
-    let datos: any = [];
-    this.header(titulo, doc);
-    rutas.forEach(() => {
-      datos.push([n, rutas[i].descripcion, rutas[i].orden, rutas[i].codigo]);
-      n++;
-      i++;
-    });
-    autoTable(doc, {
-      startY: 120,
-      head: [['Nro.', 'Descripción', 'Orden', 'Código']],
-      body: datos,
-    });
-    window.open(doc.output('bloburl'), '_blank');
-  }
-  pliegotarifario(titulo: string, pliegotarifario: any) {
-    let doc = new jsPDF('p', 'pt', 'a4');
-    let i = 0;
-    let n = 1;
-    doc.setFont('courier');
-    doc.setFontSize(11);
-    let datos: any = [];
-    this.header(titulo, doc);
-    pliegotarifario.forEach(() => {
-      datos.push([
-        n,
-        pliegotarifario[i].idcategoria_categorias.descripcion,
-        pliegotarifario[i].m3,
-        pliegotarifario[i].preciobase,
-        pliegotarifario[i].precioadicional,
-      ]);
-      n++;
-      i++;
-    });
-    autoTable(doc, {
-      startY: 120,
-      head: [
-        [
-          'Nro.',
-          'Categoria',
-          'Metros cubicos',
-          'Precio base',
-          'Precio adicional',
-        ],
-      ],
-      body: datos,
-    });
-    window.open(doc.output('bloburl'), '_blank');
-  }
-  servicios(titulo: string, servicios: any) {
-    let doc = new jsPDF('p', 'pt', 'a4');
-    let i = 0;
-    let n = 1;
-    doc.setFont('courier');
-    doc.setFontSize(11);
-    let datos: any = [];
-    this.header(titulo, doc);
-    servicios.forEach(() => {
-      datos.push([n, servicios[i].nombre, servicios[i].descripcion]);
-      n++;
-      i++;
-    });
-    autoTable(doc, {
-      startY: 120,
-      head: [['Nro.', 'Nombre', 'Descripción']],
-      body: datos,
-    });
-    window.open(doc.output('bloburl'), '_blank');
-  }
-  suspensiones(titulo: string, suspensiones: any) {
-    let doc = new jsPDF('p', 'pt', 'a4');
-    let i = 0;
-    let n = 1;
-    doc.setFont('courier');
-    doc.setFontSize(11);
-    let datos: any = [];
-    this.header(titulo, doc);
-    suspensiones.forEach(() => {
-      datos.push([
-        n,
-        suspensiones[i].iddocumento_documentos.nomdoc,
-        suspensiones[i].tipo,
-        suspensiones[i].numero,
-        suspensiones[i].observa,
-      ]);
-      n++;
-      i++;
-    });
-    autoTable(doc, {
-      startY: 120,
-      head: [['Nro.', 'Nombre documento', 'Tipo', 'Número', 'Observación']],
-      body: datos,
-    });
-    window.open(doc.output('bloburl'), '_blank');
-  }
-  detallesSuspensiones(titulo: string, dsuspensiones: any) {
-    let doc = new jsPDF('p', 'pt', 'a4');
-    let i = 0;
-    let n = 1;
-    doc.setFont('courier');
-    doc.setFontSize(11);
-    let datos: any = [];
-    this.header(titulo, doc);
-    dsuspensiones.forEach(() => {
-      datos.push([
-        n,
-        dsuspensiones[i].idabonado_abonados.idabonado,
-        dsuspensiones[i].idabonado_abonados.idcliente_clientes.nombre,
-        dsuspensiones[i].idabonado_abonados.nromedidor,
-        dsuspensiones[i].idabonado_abonados.estado,
-        dsuspensiones[i].idsuspension_suspensiones.observa,
-      ]);
-      n++;
-      i++;
-    });
-    autoTable(doc, {
-      startY: 120,
-      head: [
-        [
-          'Nro.',
-          'Cuenta',
-          'Cliente',
-          'Nro medidor',
-          'Estado medidor',
-          'Observación',
-        ],
-      ],
-      body: datos,
-    });
-    window.open(doc.output('bloburl'), '_blank');
-  } */
 }

@@ -31,7 +31,9 @@
                                 <i class="bi bi-file-earmark-x"></i> Fac.Eliminadas</a></li>
                     </ul>
                 </div>
-                <div class="card-body">
+                
+                
+                <div  class="card-body table-responsive p-0" style="height: 600px;">
                     <div class="tab-content">
                         <div class="tab-pane active" id="anuladas">
                             <div class="post">
@@ -46,7 +48,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <table class="table table-hover table-sm table-bordered mb-0">
+                                    <table class="table table-head-fixed text-nowrap table-bordered table-hover table-sm table-responsive-sm">
                                         <thead class="theadCuentas">
                                             <tr class="text-center">
                                                 <th>Planilla</th>
@@ -96,7 +98,9 @@
                                                 <th class="col-sm-5">Cliente</th>
                                                 <th class="col-sm-2">Razón E.</th>
                                                 <th>Módulo</th>
-                                                <th></th>
+                                                <th>
+                                                <input type="number" [(ngModel)]="c_limit" (change)="setValor()" class="form-control-form-control-sm numSize">
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody class="bodyFacelectro">
@@ -226,7 +230,7 @@
                     <iframe id="pdfViewer" src="" width="100%" height="600px"></iframe>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-success" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">Cancelar</button>
                 </div>
             </div>
         </div>
