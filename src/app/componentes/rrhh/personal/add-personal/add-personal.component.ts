@@ -8,6 +8,7 @@ import { Contemergencia } from 'src/app/modelos/rrhh/contemergencia';
 import { Personal } from 'src/app/modelos/rrhh/personal';
 import { CargosService } from 'src/app/servicios/rrhh/cargos.service';
 import { ContemergenciaService } from 'src/app/servicios/rrhh/contemergencia.service';
+import { DetcargoService } from 'src/app/servicios/rrhh/detcargo.service';
 import { PersonalService } from 'src/app/servicios/rrhh/personal.service';
 import { TpcontratosService } from 'src/app/servicios/rrhh/tpcontratos.service';
 
@@ -20,14 +21,21 @@ export class AddPersonalComponent implements OnInit {
   f_personal: FormGroup;
   f_buscarContEmergencia: FormGroup;
   f_contEmergencia: FormGroup;
+  f_cargos: FormGroup;
+  f_tpcontratos: FormGroup;
+  f_detcargo: FormGroup;
   _personal: any;
   _cargos: any;
   _contemergencia: any;
   _tpcontratos: any;
+  _detcargos: any;
   formulario: boolean = true;
   contemergencia: any;
   date: Date = new Date();
+  cargoTitle: string = 'Registrar Cargo';
+  cargoForm: boolean = true;
   personal: Personal = new Personal();
+
   constructor(
     private coloresService: ColoresService,
     private fb: FormBuilder,
@@ -36,7 +44,8 @@ export class AddPersonalComponent implements OnInit {
     private s_cargos: CargosService,
     private s_personal: PersonalService,
     private router: Router,
-    public authService: AutorizaService
+    public authService: AutorizaService,
+    private s_detcargo: DetcargoService
   ) {}
 
   ngOnInit(): void {
@@ -53,6 +62,10 @@ export class AddPersonalComponent implements OnInit {
       celular: '',
       direccion: '',
       idcontemergencia_contemergencias: '',
+      sufijo: '',
+      tituloprofesional: '',
+      fecinicio: '',
+      nomfirma:''
     });
     this.f_buscarContEmergencia = this.fb.group({
       contemergencia: '',
@@ -62,6 +75,24 @@ export class AddPersonalComponent implements OnInit {
       celular: '',
       parentesco: '',
     });
+    this.f_cargos = this.fb.group({
+      descripcion: '',
+      estado: true,
+      iddetcargo_detcargo: '',
+    });
+    this.f_tpcontratos = this.fb.group({
+      descripcion: '',
+    });
+    this.f_detcargo = this.fb.group({
+      rol: '',
+      eje: '',
+      grupoocupacional: '',
+      estado: true,
+      sueldo: 0,
+    });
+    this.f_personal.patchValue({
+      fecinicio: this.date.toISOString,
+    });
     sessionStorage.setItem('ventana', '/personal');
     let coloresJSON = sessionStorage.getItem('/personal');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
@@ -69,6 +100,7 @@ export class AddPersonalComponent implements OnInit {
     this.getAllCargos();
     this.getAllTpcontratos();
     this.getAllContEmergencia();
+    this.getDetCargos();
   }
 
   get f() {
@@ -97,6 +129,9 @@ export class AddPersonalComponent implements OnInit {
   changeNuevo() {
     this.formulario = !this.formulario;
   }
+  changeFormCargo() {
+    this.cargoForm = !this.cargoForm;
+  }
   savePersonal() {
     let valuesForm: any = this.f_personal.value;
     this.personal.nombres = valuesForm.nombres;
@@ -113,6 +148,10 @@ export class AddPersonalComponent implements OnInit {
     this.personal.codigo = valuesForm.codigo;
     this.personal.feccrea = this.date;
     this.personal.usucrea = this.authService.idusuario;
+    this.personal.sufijo = valuesForm.sufijo;
+    this.personal.tituloprofesional = valuesForm.tituloprofesional;
+    this.personal.fecinicio = valuesForm.fecinicio;
+    this.personal.nomfirma =valuesForm.nomfirma;
     this.s_personal.savePaersonal(this.personal).subscribe({
       next: (datos: any) => {
         this.router.navigate(['/personal']);
@@ -189,6 +228,44 @@ export class AddPersonalComponent implements OnInit {
         this.f_personal.patchValue({
           idcargo_cargos: datos[0],
         });
+      },
+      error: (e: any) => console.error(e),
+    });
+  }
+  saveCargos() {
+    this.s_cargos.saveCargo(this.f_cargos.value).subscribe({
+      next: (datos: any) => {
+        console.log('Cargo guardado');
+        this.f_cargos.reset();
+        this.getAllCargos();
+      },
+      error: (e: any) => console.error(e),
+    });
+  }
+  saveDetCargos() {
+    this.s_detcargo.saveDetCargo(this.f_detcargo.value).subscribe({
+      next: (datos: any) => {
+        console.log(datos);
+        this.f_detcargo.reset();
+        this.cargoForm = !this.cargoForm;
+        this.getDetCargos();
+      },
+    });
+  }
+  getDetCargos() {
+    this.s_detcargo.getAllDetCargos().subscribe({
+      next: (datos: any) => {
+        this._detcargos = datos;
+      },
+      error: (e: any) => console.error(e),
+    });
+  }
+  saveTpContratos() {
+    this.s_tpcontratos.saveTpContrato(this.f_tpcontratos.value).subscribe({
+      next: (datos: any) => {
+        console.log('Tipo contraro guardado');
+        this.f_cargos.reset();
+        this.getAllTpcontratos();
       },
       error: (e: any) => console.error(e),
     });

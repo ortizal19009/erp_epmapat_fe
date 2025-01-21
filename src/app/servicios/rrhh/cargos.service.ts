@@ -12,4 +12,7 @@ export class CargosService {
   getAllCargos() {
     return this.http.get(`${baseUrl}`);
   }
+  saveCargo(cargo: any) {
+    return this.http.post(`${baseUrl}`, cargo);
+  }
 }

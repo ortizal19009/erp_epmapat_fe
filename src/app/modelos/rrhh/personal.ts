@@ -20,4 +20,9 @@ export class Personal {
   estado: boolean;
   codigo: string;
   fecnacimiento: Date;
+  sufijo: string;
+  tituloprofesional: string;
+  fecinicio: Date;
+  fecfin: Date;
+  nomfirma: string;
 }

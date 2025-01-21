@@ -1,6 +1,8 @@
+import { Detcargo } from './detcargo';
+
 export class Cargos {
   idcargo: number;
   descripcion: string;
   estado: boolean;
-  sueldo: number;
+  iddetcargo_detcargo: Detcargo;
 }

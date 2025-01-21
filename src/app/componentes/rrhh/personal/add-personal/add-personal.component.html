@@ -6,18 +6,47 @@
                 <div class="card card-body sombra fondo detalle">
                     <form [formGroup]="f_personal">
                         <div class="row">
+                            <div class="form-group col-sm-4">
+                                <div class="input-group mb-1 input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="sufijo">Sufijo</label>
+                                    </div>
+                                    <input class="form-control" [ngClass]="{'is-invalid': f['sufijo'].invalid && f['sufijo'].touched,
+                                    'is-valid': f['sufijo'].valid, '': f['sufijo'].untouched}" id="sufijo"
+                                        formControlName="sufijo">
+                                </div>
+                            </div>
+                            <div class="form-group col-sm-6">
+                                <div class="input-group mb-1 input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="tituloprofesional">Titulo
+                                            profesional</label>
+                                    </div>
+                                    <input class="form-control" [ngClass]="{'is-invalid': f['tituloprofesional'].invalid && f['tituloprofesional'].touched,
+                                    'is-valid': f['tituloprofesional'].valid, '': f['tituloprofesional'].untouched}"
+                                        id="tituloprofesional" formControlName="tituloprofesional">
+                                </div>
+                            </div>
                             <div class="form-group col-sm-3">
                                 <div class="input-group mb-1 input-group-sm">
                                     <div class="input-group-prepend">
                                         <label class="input-group-text" for="codigo">Código</label>
                                     </div>
-                                    <input class="form-control" id="codigo" formControlName="codigo">
+                                    <input class="form-control" id="codigo" [ngClass]="{'is-invalid': f['codigo'].invalid && f['codigo'].touched,
+                                    'is-valid': f['codigo'].valid, '': f['codigo'].untouched}"
+                                        formControlName="codigo">
                                 </div>
                             </div>
                             <div class="form-group col-sm-3">
                                 <div class="input-group mb-1 input-group-sm">
                                     <div class="input-group-prepend">
                                         <label class="input-group-text" for="cargo">Cargo</label>
+                                    </div>
+                                    <div class="input-group-prepend">
+                                        <button class="btn btn-sm btn-success" data-toggle="modal"
+                                            data-target="#modalCargo" for="tpcontrato"><i class="fa fa-plus-square-o"
+                                                aria-hidden="true"></i>
+                                        </button>
                                     </div>
                                     <select class="custom-select" id="cargo" formControlName="idcargo_cargos">
                                         <option [ngValue]="cargo" *ngFor="let cargo of _cargos">{{cargo.descripcion}}
@@ -29,6 +58,12 @@
                                 <div class="input-group mb-1 input-group-sm">
                                     <div class="input-group-prepend">
                                         <label class="input-group-text" for="tpcontrato">Tipo contrato</label>
+                                    </div>
+                                    <div class="input-group-prepend">
+                                        <button class="btn btn-sm btn-success" data-toggle="modal"
+                                            data-target="#modalTpContrato" for="tpcontrato"><i
+                                                class="fa fa-plus-square-o" aria-hidden="true"></i>
+                                        </button>
                                     </div>
                                     <select class="custom-select" id="tpcontrato"
                                         formControlName="idtpcontrato_tpcontratos">
@@ -42,7 +77,9 @@
                                     <div class="input-group-prepend">
                                         <label class="input-group-text" for="identificacion">Identificación</label>
                                     </div>
-                                    <input class="form-control" id="identificacion" formControlName="identificacion" />
+                                    <input class="form-control" [ngClass]="{'is-invalid': f['identificacion'].invalid && f['identificacion'].touched,
+                                    'is-valid': f['identificacion'].valid, '': f['identificacion'].untouched}"
+                                        id="identificacion" formControlName="identificacion" />
                                 </div>
                             </div>
 
@@ -68,8 +105,19 @@
                                         id="fecha" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
                                 </div>
                             </div>
+                            <div class="form-group col-sm-8 mt-1">
+                                <div class="input-group input-group-sm mb-1 ">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="fecha">Nombre preferencia<sup
+                                                class="green">*</sup></label>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm" formControlName="nomfirma"
+                                        [ngClass]="{'is-invalid': f['nomfirma'].invalid && f['nomfirma'].touched,
+                            'is-valid': f['nomfirma'].valid, '': f['nomfirma'].untouched}">
+                                </div>
+                            </div>
 
-                            <div class="form-group col-sm-6 mt-1">
+                            <div class="form-group col-sm-8 mt-1">
                                 <div class="input-group input-group-sm mb-1 ">
                                     <div class="input-group-prepend">
                                         <label class="input-group-text" for="fecha">Email personal<sup
@@ -78,6 +126,15 @@
                                     <input type="text" class="form-control form-control-sm" formControlName="email"
                                         [ngClass]="{'is-invalid': f['email'].invalid && f['email'].touched,
                             'is-valid': f['email'].valid, '': f['email'].untouched}">
+                                </div>
+                            </div>
+                            <div class="form-group col-sm-4">
+                                <div class="input-group mb-1 input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="fecinicio">Fecha Inicio</label>
+                                    </div>
+                                    <input type="date" class="form-control text-center" formControlName="fecinicio"
+                                        id="fecinicio" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
                                 </div>
                             </div>
                             <div class="form-group col-sm-6 mt-1">
@@ -101,7 +158,7 @@
                             'is-valid': f['direccion'].valid, '': f['direccion'].untouched}">
                                 </div>
                             </div>
-                            <div class="form-group col-sm-6 mt-1">
+                            <div class="form-group col-sm-12 mt-1">
                                 <div class="input-group input-group-sm mb-1 ">
                                     <div class="input-group-prepend">
                                         <button class="btn btn-group btn-primary" data-toggle="modal"
@@ -131,7 +188,7 @@
 </div>
 
 
-<!-- Modal -->
+<!-- MODAL CONTACTO DE EMERGENCIA -->
 <div class="modal fade" id="btncontemergencia" tabindex="-1" aria-labelledby="btncontemergenciaLabel"
     aria-hidden="true">
     <div class="modal-dialog">
@@ -219,6 +276,139 @@
                 <!--                 <button type="button" class="btn btn-sm btn-success" *ngIf="formulario">Aceptar</button>
  --> <button type="button" class="btn btn-sm btn-primary" data-dismiss="modal" (click)="saveContEmergencia()"
                     *ngIf="!formulario">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- MODAL CARGO -->
+<div class="modal fade" data-backdrop="static" data-keyboard="false" id="modalCargo" tabindex="-1"
+    aria-labelledby="modalCargoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header text-center">
+                <h5 class="modal-title" id="modalCargoLabel">{{cargoTitle}}</h5>
+                <button type="button" class="close" (click)="changeFormCargo()">
+                    <span aria-hidden="true"><i class="bi bi-box-arrow-in-left"></i></span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <form [formGroup]="f_cargos" *ngIf="cargoForm; else detcargoForm">
+                        <div class="row">
+                            <div class="form-group col-sm-6 mt-1">
+                                <div class="input-group input-group-sm mb-1">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="descripcion">Descripción</label>
+                                    </div>
+                                    <input type="text" id="descripcion" class="form-control form-control-sm"
+                                        formControlName="descripcion" />
+                                </div>
+                            </div>
+                            <div class="form-group col-sm-6">
+                                <div class="input-group mb-1 input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="cargo">Detalle</label>
+                                    </div>
+                                    <div class="input-group-prepend">
+                                        <button class="btn btn-sm btn-success" (click)="changeFormCargo()"
+                                            for="tpcontrato"><i class="fa fa-plus-square-o" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+                                    <select class="custom-select" id="iddetcargo_detcargo"
+                                        formControlName="iddetcargo_detcargo">
+                                        <option [ngValue]="detcargo" *ngFor="let detcargo of _detcargos">
+                                            {{detcargo.rol}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <ng-template #detcargoForm>
+                        <form [formGroup]="f_detcargo">
+                            <div class="row">
+                                <div class="form-group col-sm-12 mt-1">
+                                    <div class="input-group input-group-sm mb-1">
+                                        <div class="input-group-prepend">
+                                            <label class="input-group-text" for="rol">Rol</label>
+                                        </div>
+                                        <input type="text" id="rol" class="form-control form-control-sm"
+                                            formControlName="rol" />
+                                    </div>
+                                </div>
+                                <div class="form-group col-sm-6 mt-1">
+                                    <div class="input-group input-group-sm mb-1">
+                                        <div class="input-group-prepend">
+                                            <label class="input-group-text" for="eje">Eje</label>
+                                        </div>
+                                        <input type="text" id="eje" class="form-control form-control-sm"
+                                            formControlName="eje" />
+                                    </div>
+                                </div>
+                                <div class="form-group col-sm-6 mt-1">
+                                    <div class="input-group input-group-sm mb-1">
+                                        <div class="input-group-prepend">
+                                            <label class="input-group-text" for="grupoocupacional">Grupo
+                                                ocupacional</label>
+                                        </div>
+                                        <input type="text" id="grupoocupacional" class="form-control form-control-sm"
+                                            formControlName="grupoocupacional" />
+                                    </div>
+                                </div>
+                                <div class="form-group col-sm-6 mt-1">
+                                    <div class="input-group input-group-sm mb-1">
+                                        <div class="input-group-prepend">
+                                            <label class="input-group-text" for="sueldo">Sueldo</label>
+                                        </div>
+                                        <input type="text" id="sueldo" class="form-control form-control-sm"
+                                            formControlName="sueldo" />
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </ng-template>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-outline-success" data-dismiss="modal">Cancelar</button>
+                <button type="button" *ngIf="cargoForm; else btncargoForm" class="btn btn-sm btn-success"
+                    (click)="saveCargos()" data-dismiss="modal">Aceptar</button>
+                <ng-template #btncargoForm>
+                    <button type="button" class="btn btn-sm btn-primary" (click)="saveDetCargos()">Aceptar</button>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- MODAL TIPO CONTRATO -->
+<div class="modal fade" data-backdrop="static" data-keyboard="false" id="modalTpContrato" tabindex="-1"
+    aria-labelledby="modalTpContratoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTpContratoLabel">Registrar Tipo Contrato</h5>
+            </div>
+            <div class="modal-body">
+                <div class="container" *ngIf="formulario; else nuevo">
+                    <form [formGroup]="f_tpcontratos">
+                        <div class="form-group col-sm-12 mt-1">
+                            <div class="input-group input-group-sm mb-1">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" for="descripcion">Descripción</label>
+                                </div>
+                                <input type="text" id="descripcion" class="form-control form-control-sm"
+                                    formControlName="descripcion" />
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-outline-success" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-sm btn-success" (click)="saveTpContratos()"
+                    data-dismiss="modal">Aceptar</button>
             </div>
         </div>
     </div>
