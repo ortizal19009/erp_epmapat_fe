@@ -33,6 +33,7 @@ export class ModificarClientesComponent implements OnInit {
   codidentifica: string;
   antcedula: String;
   swModifi = false;
+  date: Date = new Date();
 
   constructor(
     public fb: FormBuilder,
@@ -42,7 +43,7 @@ export class ModificarClientesComponent implements OnInit {
     private router: Router,
     public personeriajuridicaS: PersoneriaJuridicaService,
     private authService: AutorizaService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/clientes');
@@ -127,11 +128,11 @@ export class ModificarClientesComponent implements OnInit {
       } else {
         console.log(
           'Property ' +
-          propName +
-          ' changed from ' +
-          change.previousValue +
-          ' to ' +
-          change.currentValue
+            propName +
+            ' changed from ' +
+            change.previousValue +
+            ' to ' +
+            change.currentValue
         );
       }
     }
@@ -166,7 +167,7 @@ export class ModificarClientesComponent implements OnInit {
           usucrea: datos.usucrea,
           feccrea: datos.feccrea,
           usumodi: this.authService.idusuario,
-          fecmodi: datos.fecmodi,
+          fecmodi: this.date,
         });
       },
       error: (err) => console.error(err.error),
@@ -199,8 +200,10 @@ export class ModificarClientesComponent implements OnInit {
   }
 
   onSubmit() {
+    console.log(this.formCliente.value);
     this.cliService.updateCliente(this.formCliente.value).subscribe({
       next: (datos) => {
+        console.log(datos);
         this.retornar();
       },
       error: (err) => console.error(err.error),
@@ -245,7 +248,7 @@ export class ModificarClientesComponent implements OnInit {
   }
 
   valIdentifica(control: AbstractControl) {
-    console.log(control)
+    console.log(control);
     switch (this.codidentifica) {
       case '04': // RUC
         if (control.value.length == 13) {
@@ -280,7 +283,7 @@ export class ModificarClientesComponent implements OnInit {
   }
 
   valCedula(cedula: String) {
-    console.log(cedula)
+    console.log(cedula);
     const digitoRegion = cedula.substring(0, 2);
     let digR = parseInt(digitoRegion);
     if (digR >= 1 && digR <= 24) {

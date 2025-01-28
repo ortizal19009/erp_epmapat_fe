@@ -1,0 +1,231 @@
+<div class="content mt-1 pt-1 pl-0">
+    <div class="container-fluid">
+        <div class="row m-0 px-0 py-1 justify-content-start cabecera border sombra">
+            <div class="col-sm-3">
+                <h4 class="m-0 font-weight-bold"><i class="fa fa-list" aria-hidden="true"></i> Remisiones intereses y multas</h4>
+            </div>
+            <div class="col-sm-7">
+                <form [formGroup]="f_buscar">
+                    <div class="row col-sm-12 mt-0 mb-0">
+                        <div class="col-sm-12">
+                            <div class="row">
+                                <div class="col-sm-5">
+                                    <input type="date" placeholder="Nombre ó Identificación"
+                                        class="form-control form-control-sm" (change)="onChangeDate($event)" autofocus
+                                        id="nombreIdentifi" formControlName="sDate" required minlength="4" />
+                                </div>
+                                <div class="col-sm-3">
+                                    <button class="btn btn-primary btn-sm"><i class="fa fa-search"></i>
+                                        Buscar</button>
+                                </div>
+                                <div class="col-sm-2 px-0">
+                                    <input type="text" class="form-control form-control-sm text-center"
+                                        placeholder="Filtrar..." [(ngModel)]="filtro" formControlName="filtro" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group ml-auto mt-0">
+                <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
+                    aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+                </button>
+                <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+                    <button class="dropdown-item" type="button">
+                        <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+                    <button class="dropdown-item" type="button">
+                        <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
+                    <button class="dropdown-item" type="button" data-toggle="modal" data-toggle="modal"
+                        data-target="#importar"> <i class="bi-file-earmark-arrow-up"></i>&nbsp;
+                        Importar</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row mb-0">
+        <div class="col-sm">
+            <table class="table table-hover table-bordered table-sm sombra">
+                <thead class="cabecera text-center">
+                    <tr>
+                        <th></th>
+                        <th>Nombre rubro</th>
+                        <th>Código</th>
+                        <th>Nro facturas</th>
+                        <th>Total</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody class="">
+                    <tr *ngFor="let factura of _facturas |filter:filtro; let i = index">
+                        <td class="small text-center font-weight-bold">{{i+1}}</td>
+                        <td>{{factura.descripcion}}</td>
+                        <td class="text-center">{{factura.codigo}}</td>
+                        <td class="text-center">{{factura.facturas}}</td>
+                        <td class="text-right">{{factura.total.toFixed(2)}} $</td>
+                        <td class="text-center">
+                            <div class="btn-group py-0">
+                                <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0"
+                                    data-toggle="dropdown" aria-expanded="false">
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right popLista">
+                                    <button class="dropdown-item" type="button">
+                                        <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
+                                    <button class="dropdown-item" type="button" data-toggle="modal"
+                                        data-target="#modalEliminar">
+                                        <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MODAL Imprimir-->
+    <div class="modal fade" id="imprimir" tabindex="-1" aria-labelledby="imprimirLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class='modal-header py-2 justify-content-center cabecera'>
+                    <h5 class='modal-title font-weight-bold' id='ModalLabel'>Imprimir</h5>
+                </div>
+                <div class='modal-body'>
+
+                    <div class="input-group mb-3 input-group-sm">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="inputGroupSelect01">Reporte</label>
+                        </div>
+                        <select class="custom-select" id="inputGroupSelect01">
+                            <option selected>Lista de Clientes actual</option>
+                            <option class="Roboto">Últimos Clientes ingresados</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group input-group-sm mb-0">
+                        <div class="input-group-prepend">
+                            <small class="input-group-text">Abrir en otra página</small>
+                            <div class="input-group-text">
+                                <input type="checkbox">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class='modal-footer justify-content-center'>
+                    <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' data-toggle="modal">
+                        <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+                    <button type='button' class='btn btn-sm btn-outline-success' data-dismiss='modal'>
+                        <i class="bi bi-x-circle"></i> Cancelar</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL Importar -->
+    <div class="modal fade" id="importar" tabindex="-1" aria-labelledby="importarLabel" aria-hidden="true"
+        data-backdrop="static">
+        <div class="modal-dialog modal-dialog-scrollable modal-xl">
+            <div class="modal-content">
+                <div class='modal-header pt-1 pb-0 justify-content-center cabecera'>
+
+                    <div class="input-group mb-1 col-sm-3">
+                        <div class="custom-file custom-file-sm">
+                            <input type="file" class="custom-file-input" id="inputFile" accept=".tsv"
+                                aria-describedby="inputFileLabel">
+                            <label class="custom-file-label small pl-1" for="inputFile" data-browse="Archivo"
+                                #labelElement><span class="input-group-text-sm">Seleccionar</span></label>
+                        </div>
+                    </div>
+
+                    <button type='button' class='btn btn-warning btn-sm mt-1 mr-1'>
+                        <i class="bi-bug-fill"></i>&nbsp; Validar</button>
+                    <button type='button' class='btn btn-success btn-sm mt-1 mx-1' data-dismiss='modal'>
+                        <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+                    <button type='button' class='btn btn-success btn-sm mt-1 ml-1' data-dismiss='modal'>
+                        <i class="bi bi-x-circle"></i> Cancelar</button>
+                </div>
+                <div class='modal-body'>
+                    <table class="table table-hover table-bordered table-sm mb-0">
+                        <thead>
+                            <tr class="cabecera text-center">
+                                <th>Nombre</th>
+                                <th>Cedula/RUC</th>
+                                <th>Dirección</th>
+                                <th>Telefono</th>
+                                <th>Mail</th>
+                                <th>Discapacitado</th>
+                                <th>& Discap</th>
+                                <th>% Exonera</th>
+                                <th>TpIdenti</th>
+                                <th>Ok</th>
+                            </tr>
+                        </thead>
+                        <tbody class="detalle">
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Eliminar-->
+    <div class='modal fade' id='modalEliminar' tabindex='-1' aria-labelledby='modalEliminar' aria-hidden='true'
+        data-backdrop="static">
+        <div class='modal-dialog modal-dialog-centered'>
+            <div class='modal-content detalle'>
+                <div class='modal-header cabecera justify-content-center'>
+                    <h5 class='modal-title font-weight-bold' id='ModalLabel'>Mensaje</h5>
+                </div>
+                <div></div>
+                <ng-template #thenBlock>
+                    <div class='modal-body'>
+                        <div class="alert alert-warning text-center" role="alert">
+                            ¿ Eliminar el Cliente <span class="fantacygreen"></span> ?
+                        </div>
+                        <div class="text-center">
+                            <button type='button' class='btn btn-success btn-sm mx-2' data-dismiss='modal'>
+                                <i class="fa fa-check-circle" style="font-size:24pxi"></i> Aceptar
+                            </button>
+                            <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
+                                <i class="fa fa-times-circle"></i> Cancelar</button>
+                        </div>
+                    </div>
+                </ng-template>
+
+                <ng-template #elseBlock>
+                    <div class='modal-body'>
+                        <div class="alert alert-warning text-center" role="alert">
+                            No puede eliminar el Cliente <span class="fantacygreen"></span><br>Tiene
+                            registrado Cuentas
+                        </div>
+                    </div>
+                    <div class='text-center'>
+                        <button type='button' class='btn btn-success btn-sm mb-3' data-dismiss='modal'>
+                            <i class="fa fa-check-circle"></i> Aceptar
+                        </button>
+                    </div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+
+</div>

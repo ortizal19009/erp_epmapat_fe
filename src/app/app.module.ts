@@ -280,6 +280,8 @@ import { IfinanComponent } from './componentes/contabilidad/ifinan/ifinan/ifinan
 import { InfoLiquidaComponent } from './componentes/contabilidad/beneficiarios/info-beneficiario/info-liquida/info-liquida/info-liquida.component';
 import { PersonalComponent } from './componentes/rrhh/personal/personal.component';
 import { AddPersonalComponent } from './componentes/rrhh/personal/add-personal/add-personal.component';
+import { RemisionComponent } from './componentes/coactivas/remision/remision.component';
+import { AddRemisionComponent } from './componentes/coactivas/remision/add-remision/add-remision.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
@@ -548,6 +550,8 @@ import { AddPersonalComponent } from './componentes/rrhh/personal/add-personal/a
     DetallePlanillaComponent,
     PersonalComponent,
     AddPersonalComponent,
+    RemisionComponent,
+    AddRemisionComponent,
   ],
 
   imports: [

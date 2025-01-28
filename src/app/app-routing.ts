@@ -262,6 +262,7 @@ import { ImpUnicostosComponent } from './componentes/contabilidad/costos/imp-uni
 import { IfinanComponent } from './componentes/contabilidad/ifinan/ifinan/ifinan.component';
 import { PersonalComponent } from './componentes/rrhh/personal/personal.component';
 import { AddPersonalComponent } from './componentes/rrhh/personal/add-personal/add-personal.component';
+import { RemisionComponent } from './componentes/coactivas/remision/remision.component';
 
 const routes: Routes = [
   //Consumo de Agua
@@ -563,6 +564,7 @@ const routes: Routes = [
   /* COACTIVAS */
   { path: 'cv-rubros', component: CvRubrosComponent },
   { path: 'cv-facturas', component: CvFacturasComponent },
+  { path: 'remision', component: RemisionComponent},
 ];
 
 @NgModule({

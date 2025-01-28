@@ -657,6 +657,24 @@
                   </li>
                </ul>
             </li>
+            <li *ngIf="authService.modulo == 6" class="nav-item">
+               <a href="#" class="nav-link bg-info">
+                  <i class="bi bi-stars"></i>
+                  <p> Remisión I/M/R
+                     <i class="fas fa-angle-right right"></i>
+                     <span class="badge badge-warning right">1</span>
+                  </p>
+               </a>
+               <ul class="nav nav-treeview">
+
+                  <li class="nav-item">
+                     <a routerLink="/remision" class="nav-link">
+                        <i class="bi bi-book-half"></i>
+                        <p class="text-warning"> Remisión </p>
+                     </a>
+                  </li>
+               </ul>
+            </li>
             <!-- =============== ADMINISTRACION CENTRAL ==================== -->
             <li *ngIf="authService.modulo == 7" class="nav-item">
                <a href="#" class="nav-link bg-info" [ngClass]="{'disabled': !isOptionEnabled(5, 220)}">
