@@ -263,6 +263,7 @@ import { IfinanComponent } from './componentes/contabilidad/ifinan/ifinan/ifinan
 import { PersonalComponent } from './componentes/rrhh/personal/personal.component';
 import { AddPersonalComponent } from './componentes/rrhh/personal/add-personal/add-personal.component';
 import { RemisionComponent } from './componentes/coactivas/remision/remision.component';
+import { AddRemisionComponent } from './componentes/coactivas/remision/add-remision/add-remision.component';
 
 const routes: Routes = [
   //Consumo de Agua
@@ -565,6 +566,7 @@ const routes: Routes = [
   { path: 'cv-rubros', component: CvRubrosComponent },
   { path: 'cv-facturas', component: CvFacturasComponent },
   { path: 'remision', component: RemisionComponent},
+  { path: 'add-remision', component: AddRemisionComponent},
 ];
 
 @NgModule({

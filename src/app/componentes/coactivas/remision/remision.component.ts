@@ -12,7 +12,9 @@ export class RemisionComponent implements OnInit {
   filtro: string;
   _facturas: any;
   today: Date = new Date();
-  constructor(private fb: FormBuilder, private coloresService: ColoresService,
+  constructor(
+    private fb: FormBuilder,
+    private coloresService: ColoresService
   ) {}
 
   ngOnInit(): void {
@@ -24,7 +26,8 @@ export class RemisionComponent implements OnInit {
     this.f_buscar = this.fb.group({
       sDate: d,
       filtro: '',
-    });}
+    });
+  }
   onChangeDate(e: any) {}
   colocaColor(colores: any) {
     document.documentElement.style.setProperty('--bgcolor1', colores[0]);
