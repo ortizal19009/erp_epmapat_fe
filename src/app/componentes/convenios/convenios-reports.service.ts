@@ -27,7 +27,7 @@ export class ConveniosReportsService {
     ];
     let administradores = [
       { nombre: 'Ing. Juan Diego Delgado', cargo: 'Director Comercial' },
-      { nombre: 'Ab. Andrés Montenegro', cargo: 'Asesor Legal' },
+      { nombre: 'Ab. Rigoberto Narvaez', cargo: 'Jefe de coactivas' },
     ];
     this.header.header(
       `MODULO: AGUA Y ALCANTARILLADO N° ${datos.nroconvenio}`,
