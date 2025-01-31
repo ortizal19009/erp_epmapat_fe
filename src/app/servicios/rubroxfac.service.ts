@@ -211,4 +211,14 @@ export class RubroxfacService {
       `${baseUrl}/reportes/carteravencida?fechacobro=${fechacobro}`
     );
   }
+
+  /* RUBROS PARA REMISIONES */
+  async getRubrosForRemisiones(idcliente: any, fechatope: any): Promise<any[]> {
+    let rubros: any = await firstValueFrom(
+      this.http.get<any>(
+        `${baseUrl}/remisiones?idcliente=${idcliente}&fechatope=${fechatope}`
+      )
+    );
+    return rubros;
+  }
 }
