@@ -59,6 +59,14 @@
                                 <td>Categoría: {{_categoria.descripcion}}</td>
                                 <td>Ruta: {{_ruta.descripcion}}</td>
                             </tr>
+                            <tr>
+                                <td>
+                                    Documento:
+                                </td>
+                                <td class="" colspan="2">
+                                    Detalle:
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -78,14 +86,14 @@
                                             </button>
                                         </td>
                                     </tr>
+
                                 </tbody>
                             </table>
                         </div>
                         <div class="col-sm text-right">
-                            <button class="btn btn-success mr-3 btn-sm">Cancelar</button>
-                            <button class="btn btn-outline-success mr-3 btn-sm">Aceptar</button>
-                            <button class="btn btn-primary btn-sm mr-3" data-toggle="modal" data-target="#modalSimular"
-                                (click)="modal('simular')">Simular</button>
+                            <button class="btn btn-success mr-3 btn-sm" [routerLink]="['/remision']">Cancelar</button>
+                            <button class="btn btn-outline-success btn-sm mr-3" data-toggle="modal"
+                                data-target="#modalSimular" (click)="modal('simular')">Continuar</button>
                         </div>
                     </div>
                 </div>
@@ -269,7 +277,7 @@
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text" id="addon-wrapping">%</span>
                                                 </div>
-                                                <input type="number" min=20 formControlName="porcentaje"
+                                                <input type="number" readonly min=20 formControlName="porcentaje"
                                                     class="form-control" placeholder="minimo 20%" aria-label="Cuota"
                                                     aria-describedby="addon-wrapping">
                                             </div>
@@ -300,7 +308,8 @@
                                         <td>
                                             <div class="input-group input-group-sm flex-nowrap">
                                                 <div class="input-group-prepend">
-                                                    <span class="input-group-text" id="addon-wrapping">Valor</span>
+                                                    <span class="input-group-text"
+                                                        id="addon-wrapping">Valor({{f_simular.value.cuotas-1}})</span>
                                                 </div>
                                                 <input type="number" min=1 class="form-control" readonly
                                                     formControlName="mensual" placeholder="valor mensual"
@@ -315,6 +324,31 @@
                                                 </div>
                                                 <input type="number" min=1 class="form-control" readonly
                                                     formControlName="final" placeholder="cuota final" aria-label="Cuota"
+                                                    aria-describedby="addon-wrapping">
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="input-group input-group-sm flex-nowrap">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="addon-wrapping">Documento</span>
+                                                </div>
+                                                <select type="number" min=1 class="custom-select" readonly
+                                                    formControlName="documento" placeholder="cuota final"
+                                                    aria-label="Cuota" aria-describedby="addon-wrapping">
+                                                    <option [ngValue]="documento" *ngFor="let documento of _documentos">
+                                                        {{documento.nomdoc}}</option>
+                                                </select>
+                                            </div>
+                                        </td>
+                                        <td colspan="2">
+                                            <div class="input-group input-group-sm flex-nowrap">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="addon-wrapping">Documento</span>
+                                                </div>
+                                                <input type="text" class="form-control" formControlName="referencia"
+                                                    placeholder="Referencia del documento" aria-label="Cuota"
                                                     aria-describedby="addon-wrapping">
                                             </div>
                                         </td>
@@ -349,8 +383,9 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success" data-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-outline-success" (click)="aprobarRemision()">Aceptar</button>
+                <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-sm btn-outline-success"
+                    (click)="aprobarRemision()">Continuar</button>
             </div>
         </div>
     </div>

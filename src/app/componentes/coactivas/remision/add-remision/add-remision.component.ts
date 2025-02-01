@@ -1,13 +1,20 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { min } from 'rxjs';
+import { fx } from 'jquery';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Abonados } from 'src/app/modelos/abonados';
 import { Categoria } from 'src/app/modelos/categoria.model';
 import { Clientes } from 'src/app/modelos/clientes';
+import { Facxremi } from 'src/app/modelos/coactivas/facxremi';
+import { Remision } from 'src/app/modelos/coactivas/remision';
+import { Facturas } from 'src/app/modelos/facturas.model';
 import { Rutas } from 'src/app/modelos/rutas.model';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
+import { DocumentosService } from 'src/app/servicios/administracion/documentos.service';
 import { ClientesService } from 'src/app/servicios/clientes.service';
+import { FacxremiService } from 'src/app/servicios/coactivas/facxremi.service';
+import { RemisionService } from 'src/app/servicios/coactivas/remision.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
@@ -28,6 +35,7 @@ export class AddRemisionComponent implements OnInit {
   _ruta: Rutas = new Rutas();
   _facturas: any;
   _rubros: any;
+  _documentos: any;
   subtotal: number = 0;
   intereses: number = 0;
   total: number = 0;
@@ -36,6 +44,8 @@ export class AddRemisionComponent implements OnInit {
   swdisable: Boolean = false;
   swdmodal: string = 'simular';
   tableSize: string = 'md';
+  fectopedeuda = '2024-12-09';
+  fectopepago = '2025-06-30';
   constructor(
     private fb: FormBuilder,
     private coloresService: ColoresService,
@@ -43,7 +53,11 @@ export class AddRemisionComponent implements OnInit {
     private s_clientes: ClientesService,
     private s_facturas: FacturaService,
     private s_loading: LoadingService,
-    private s_rubroxfac: RubroxfacService
+    private s_rubroxfac: RubroxfacService,
+    private s_documentos: DocumentosService,
+    private authService: AutorizaService,
+    private s_remision: RemisionService,
+    private s_facxremi: FacxremiService
   ) {}
 
   ngOnInit(): void {
@@ -54,7 +68,7 @@ export class AddRemisionComponent implements OnInit {
     let d = this.today.toISOString().slice(0, 10);
     this.f_buscar = this.fb.group({
       cuenta: '',
-      fechatope: '2024-12-09',
+      fechatope: this.fectopedeuda,
     });
     this.f_simular = this.fb.group({
       porcentaje: [20, Validators.required],
@@ -62,7 +76,10 @@ export class AddRemisionComponent implements OnInit {
       inicial: 0,
       mensual: 0,
       final: 0,
+      documento: '',
+      referencia: '',
     });
+    this.getAllDocuments();
   }
   colocaColor(colores: any) {
     document.documentElement.style.setProperty('--bgcolor1', colores[0]);
@@ -94,6 +111,18 @@ export class AddRemisionComponent implements OnInit {
         this._ruta = abonado.idruta_rutas;
         this.getCliente(abonado.idresponsable.idcliente);
       },
+    });
+  }
+  getAllDocuments() {
+    this.s_documentos.getListaDocumentos().subscribe({
+      next: (documentos: any) => {
+        console.log(documentos);
+        this._documentos = documentos;
+        this.f_simular.patchValue({
+          documento: documentos[0],
+        });
+      },
+      error: (e: any) => console.error(e),
     });
   }
   getRubros(idcliente: number) {
@@ -168,12 +197,17 @@ export class AddRemisionComponent implements OnInit {
     if (+e.target.value! > 1) {
       console.log('Mas de una cuota, hay que calcular el valor de los rubros');
       let inicial = (subtotal * +f.porcentaje!) / 100;
-      let t = subtotal - inicial;
+      //let mensual = ((subtotal - inicial) / f.cuotas)-final;
+      let p = subtotal - inicial;
+      let mensual = this.calcularCuotaFija(p, 0, f.cuotas);
+      let final = this.calcularCuotaFinalVariable(p, 0, f.cuotas);
       this.f_simular.patchValue({
-        inicial: inicial,
+        inicial: inicial.toFixed(2),
+        mensual: mensual.toFixed(2),
+        final: final.toFixed(2),
       });
 
-      console.log(inicial, t);
+      console.log(inicial, p);
     } else {
       console.log(
         'El valor de los rubros sigue normal sin cambios, hay que crear una sola factura '
@@ -181,14 +215,110 @@ export class AddRemisionComponent implements OnInit {
       this.f_simular.patchValue({
         inicial: 0,
         final: 0,
-        mensual: this.subtotal,
+        mensual: this.subtotal.toFixed(2),
       });
     }
   }
+
+  calcularCuotaFija(P: number, r: number, n: number): number {
+    // Validaciones
+    if (
+      typeof P !== 'number' ||
+      typeof r !== 'number' ||
+      typeof n !== 'number'
+    ) {
+      throw new Error('Todos los parámetros deben ser números.');
+    }
+    if (P <= 0 || n <= 0) {
+      throw new Error(
+        'El monto principal (P) y el número de cuotas (n) deben ser mayores que cero.'
+      );
+    }
+    if (r < 0) {
+      throw new Error('La tasa de interés (r) no puede ser negativa.');
+    }
+    // Si la tasa de interés es cero
+    if (r === 0) {
+      console.log('La tasa de interés es cero. La cuota es simplemente P / n.');
+      return P / n;
+    }
+
+    // Convertir la tasa de interés a decimal si está en porcentaje
+    if (r > 1) {
+      console.warn(
+        'La tasa de interés (r) parece estar en porcentaje. Se convertirá a decimal.'
+      );
+      r = r / 100;
+    }
+
+    // Calcular el factor
+    const factor = (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+
+    // Verificar si el factor es NaN
+    if (isNaN(factor)) {
+      throw new Error(
+        'No se pudo calcular el factor. Verifica los valores de r y n.'
+      );
+    }
+
+    return P * factor;
+  }
+
+  calcularCuotaFinalVariable(P: number, r: number, n: number): number {
+    const amortizacion = P / n;
+    const intereses = amortizacion * r;
+    return amortizacion + intereses;
+  }
   aprobarRemision() {
+    this.s_loading.showLoading();
+    let f = this.f_simular.value;
+    let remision: Remision = new Remision();
+    remision.idabonado_abonados = this._abonado;
+    remision.idcliente_clientes = this._cliente;
+    remision.cuotas = f.cuotas;
+    remision.fectopedeuda = new Date(this.fectopedeuda);
+    remision.fectopepago = new Date(this.fectopepago);
+    remision.totcapital = this.subtotal;
+    remision.totintereses = this.intereses;
+    if (f.cuotas === 1) {
+      remision.swconvenio = false;
+    } else {
+      remision.swconvenio = true;
+    }
+    remision.usucrea = this.authService.idusuario;
+    remision.feccrea = this.today;
+    remision.iddocumento_documentos = f.documento;
+    remision.detalledocumento = f.referencia;
+    remision.idconvenio = 0;
+    this.s_remision.saveRemision(remision).subscribe((_rem: any) => {
+      console.log('GUARDANDO REMISION ', _rem);
+
+      this._facturas.forEach(async (factura: any, i: number) => {
+        let fxr: Facxremi = new Facxremi();
+        let fact: Facturas = new Facturas();
+        fxr.idfactura_facturas = factura;
+        fxr.idremision_remisiones = _rem;
+        fxr.cuota = 0;
+        fxr.tipfactura = 1;
+        this.s_facxremi.savefacxremi(fxr).subscribe((fr: any) => {
+          console.log('GUARDANDO FXR', fr);
+          this.s_loading.hideLoading();
+        });
+        factura.conveniopago = 1;
+        factura.fechaconvenio = this.today;
+        factura.usumodi = this.authService.idusuario;
+        factura.fecmodi = this.today;
+        await this.s_facturas.updateFacturaAsync(factura);
+      });
+    });
+
+    console.log(this.f_simular.value);
     /* VALIDAR SI LAS CUOTAS SON MAYORES A 1 */
     /* SI SON MAYORES A 1 HAY QUE HACER EL CALCULO DE LOS VALORES */
     /* actualizar facturas antiguas para que esten cobradas y en estado de convenio */
     /*  */
+    console.log(this._facturas);
+    console.log(this._rubros);
+    console.log(remision);
   }
 }
