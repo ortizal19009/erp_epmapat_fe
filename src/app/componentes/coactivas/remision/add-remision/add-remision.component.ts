@@ -9,6 +9,9 @@ import { Clientes } from 'src/app/modelos/clientes';
 import { Facxremi } from 'src/app/modelos/coactivas/facxremi';
 import { Remision } from 'src/app/modelos/coactivas/remision';
 import { Facturas } from 'src/app/modelos/facturas.model';
+import { Modulos } from 'src/app/modelos/modulos.model';
+import { Rubros } from 'src/app/modelos/rubros.model';
+import { Rubroxfac } from 'src/app/modelos/rubroxfac.model';
 import { Rutas } from 'src/app/modelos/rutas.model';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { DocumentosService } from 'src/app/servicios/administracion/documentos.service';
@@ -17,6 +20,7 @@ import { FacxremiService } from 'src/app/servicios/coactivas/facxremi.service';
 import { RemisionService } from 'src/app/servicios/coactivas/remision.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
+import { RubrosService } from 'src/app/servicios/rubros.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 
 @Component({
@@ -57,7 +61,8 @@ export class AddRemisionComponent implements OnInit {
     private s_documentos: DocumentosService,
     private authService: AutorizaService,
     private s_remision: RemisionService,
-    private s_facxremi: FacxremiService
+    private s_facxremi: FacxremiService,
+    private s_rubros: RubrosService
   ) {}
 
   ngOnInit(): void {
@@ -79,6 +84,7 @@ export class AddRemisionComponent implements OnInit {
       documento: '',
       referencia: '',
     });
+
     this.getAllDocuments();
   }
   colocaColor(colores: any) {
@@ -131,11 +137,20 @@ export class AddRemisionComponent implements OnInit {
       .getRubrosForRemisiones(idcliente, this.f_buscar.value.fechatope)
       .then((rubros: any) => {
         console.log(rubros);
-        this._rubros = rubros;
-        rubros.forEach((i: any) => {
-          this.totalrubros += i.sum;
+        //this._rubros = rubros;
+        rubros.forEach(async (i: any) => {
+          console.log(i);
+          if (i.descripcion != 'Multa') {
+            let rubro: any = await this.s_rubros
+              .findByName(i.descripcion)
+              .toPromise();
+            i.idrubro_rubros = rubro[0].idrubro;
+            this._rubros.push(i);
+            this.totalrubros += i.sum;
+          }
         });
-      });
+      })
+      .catch((e: any) => console.error(e));
   }
   getCliente(idcliente: any) {
     this._facturas = [];
@@ -143,10 +158,12 @@ export class AddRemisionComponent implements OnInit {
     this.s_loading.showLoading();
     this.s_clientes.getListaById(idcliente).subscribe({
       next: (cliente: any) => {
-        console.log(cliente);
         this._cliente = cliente;
         this.getFacturasForRemision(cliente.idcliente);
         this.getRubros(cliente.idcliente);
+        this.f_simular.patchValue({
+          mensual: this.subtotal,
+        });
       },
     });
   }
@@ -196,7 +213,7 @@ export class AddRemisionComponent implements OnInit {
     let subtotal = this.subtotal;
     if (+e.target.value! > 1) {
       console.log('Mas de una cuota, hay que calcular el valor de los rubros');
-      let inicial = (subtotal * +f.porcentaje!) / 100;
+      let inicial = this.calcularInicial(subtotal, f.porcentaje);
       //let mensual = ((subtotal - inicial) / f.cuotas)-final;
       let p = subtotal - inicial;
       let mensual = this.calcularCuotaFija(p, 0, f.cuotas);
@@ -206,8 +223,6 @@ export class AddRemisionComponent implements OnInit {
         mensual: mensual.toFixed(2),
         final: final.toFixed(2),
       });
-
-      console.log(inicial, p);
     } else {
       console.log(
         'El valor de los rubros sigue normal sin cambios, hay que crear una sola factura '
@@ -219,7 +234,9 @@ export class AddRemisionComponent implements OnInit {
       });
     }
   }
-
+  calcularInicial(p: number, porcentaje: number): number {
+    return (p * porcentaje) / 100;
+  }
   calcularCuotaFija(P: number, r: number, n: number): number {
     // Validaciones
     if (
@@ -292,33 +309,126 @@ export class AddRemisionComponent implements OnInit {
     remision.idconvenio = 0;
     this.s_remision.saveRemision(remision).subscribe((_rem: any) => {
       console.log('GUARDANDO REMISION ', _rem);
+      if (f.cuotas === 1) {
+        this.newFacturas(this._rubros, _rem);
+      } else {
+        let r_inicial = this._rubros.map((item: any) => ({
+          ...item,
+          sum: this.calcularInicial(item.sum, f.porcentaje),
+        }));
 
-      this._facturas.forEach(async (factura: any, i: number) => {
+        /* CALCULAMOS LAS MENSUALIDADES DE LOS RUBROS */
+        //for (let n: number = 1; n == f.coutas; n++) {
+
+        let r_mensual = this._rubros.map((item: any) => ({
+          ...item,
+          sum: this.calcularCuotaFija(
+            item.sum - this.calcularInicial(item.sum, f.porcentaje),
+            0,
+            f.cuotas
+          ),
+        }));
+        console.log('MENSUAL', r_mensual);
+
+        /* CALCULAMOS LA CUOTA FINAL DE LOS RUBROS */
+        let f_final = this._rubros.map((item: any) => ({
+          ...item,
+          sum: this.calcularCuotaFinalVariable(
+            item.sum - this.calcularInicial(item.sum, f.porcentaje),
+            0,
+            f.cuotas
+          ),
+        }));
+        this.newFacturas(r_inicial, _rem);
+        for (let i: number = 1; i <= f.cuotas -1; i++) {
+          this.newFacturas(r_mensual, _rem);
+        }
+        this.newFacturas(f_final, _rem);
+      }
+
+      this._facturas.forEach(async (factura: Facturas, i: number) => {
+        console.log(factura);
         let fxr: Facxremi = new Facxremi();
         let fact: Facturas = new Facturas();
         fxr.idfactura_facturas = factura;
         fxr.idremision_remisiones = _rem;
         fxr.cuota = 0;
         fxr.tipfactura = 1;
-        this.s_facxremi.savefacxremi(fxr).subscribe((fr: any) => {
-          console.log('GUARDANDO FXR', fr);
-          this.s_loading.hideLoading();
-        });
-        factura.conveniopago = 1;
-        factura.fechaconvenio = this.today;
-        factura.usumodi = this.authService.idusuario;
-        factura.fecmodi = this.today;
-        await this.s_facturas.updateFacturaAsync(factura);
+        this.s_facxremi.savefacxremi(fxr).subscribe((fr: any) => {});
+        fact = factura;
+        fact.idfactura = factura.idfactura;
+        fact.idmodulo = factura.idmodulo;
+        fact.conveniopago = 1;
+        fact.fechaconvenio = this.today;
+        fact.usumodi = this.authService.idusuario;
+        fact.fecmodi = this.today;
+        this.s_facturas
+          .updateFacturatoRemision(fact.idfactura, fact)
+          .subscribe({
+            next: (datos: any) => {
+              console.log(datos);
+            },
+            error: (e: any) => console.error(e),
+          });
       });
+      this.s_loading.hideLoading();
     });
 
-    console.log(this.f_simular.value);
     /* VALIDAR SI LAS CUOTAS SON MAYORES A 1 */
     /* SI SON MAYORES A 1 HAY QUE HACER EL CALCULO DE LOS VALORES */
     /* actualizar facturas antiguas para que esten cobradas y en estado de convenio */
     /*  */
-    console.log(this._facturas);
-    console.log(this._rubros);
-    console.log(remision);
+    
+
+  }
+
+  newFacturas(rubros: any, _rem: any) {
+    let suma: number = 0;
+    rubros.forEach((item: any) => {
+      suma += item.sum;
+    });
+    let newFactura: Facturas = new Facturas();
+    let modulo: Modulos = new Modulos();
+    modulo.idmodulo = 31;
+    newFactura.idabonado = this._abonado.idabonado;
+    newFactura.idcliente = this._cliente;
+    newFactura.feccrea = this.today;
+    newFactura.usucrea = this.authService.idusuario;
+    newFactura.formapago = 1;
+    newFactura.estado = 2;
+    newFactura.idmodulo = modulo;
+    newFactura.porcexoneracion = 0;
+    newFactura.totaltarifa = suma;
+    newFactura.pagado = 0;
+    newFactura.conveniopago = 0;
+    newFactura.estadoconvenio = 0;
+    newFactura.valorbase = suma;
+    newFactura.swcondonar = true;
+    this.s_facturas.saveFactura(newFactura).subscribe({
+      next: (fact: any) => {
+        rubros.forEach((item: any) => {
+          let rxf: Rubroxfac = new Rubroxfac();
+          let r: Rubros = new Rubros();
+          r.idrubro = item.idrubro_rubros;
+          rxf.idfactura_facturas = fact;
+          rxf.idrubro_rubros = r;
+          rxf.cantidad = 1;
+          rxf.valorunitario = item.sum;
+          this.s_rubroxfac.saveRubroxfac(rxf).subscribe({
+            next: (datos: any) => {
+            },
+            error: (e: any) => console.error(e),
+          });
+        });
+        let fxr: Facxremi = new Facxremi();
+        fxr.idfactura_facturas = fact;
+        fxr.idremision_remisiones = _rem;
+        fxr.cuota = 0;
+        fxr.tipfactura = 2;
+        this.s_facxremi.savefacxremi(fxr).subscribe((fr: any) => {
+          console.log('GUARDANDO FXR', fr);
+        });
+      },
+    });
   }
 }

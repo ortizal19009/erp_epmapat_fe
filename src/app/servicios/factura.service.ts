@@ -409,8 +409,18 @@ export class FacturaService {
   getCVFacturasNOconsumo(fecha: any) {
     return this.http.get(`${baseUrl}/reportes/CV_noconsumo?fecha=${fecha}`);
   }
-  async getFacturasForRemision(idcliente: any, fechatope: any):Promise<any[]>{
-      let facturas = await firstValueFrom(this.http.get<any[]>(`${baseUrl}/remisiones?idcliente=${idcliente}&fechatope=${fechatope}`))
-      return facturas;
+  async getFacturasForRemision(idcliente: any, fechatope: any): Promise<any[]> {
+    let facturas = await firstValueFrom(
+      this.http.get<any[]>(
+        `${baseUrl}/remisiones?idcliente=${idcliente}&fechatope=${fechatope}`
+      )
+    );
+    return facturas;
+  }
+  updateFacturatoRemision(idfactura: number, factura: any) {
+    return this.http.put(
+      `${baseUrl}/remisionfactura?idfactura=${idfactura}`,
+      factura
+    );
   }
 }

@@ -8,12 +8,10 @@ const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/rubros`;
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-
 export class RubrosService {
-
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   getAll(): Observable<Rubros[]> {
     return this.http.get<Rubros[]>(baseUrl);
@@ -21,12 +19,14 @@ export class RubrosService {
 
   //Rubros por módulo (Sección)
   getByIdmodulo(idmodulo: number) {
-    return this.http.get<Rubros>(`${baseUrl}/modulo/${idmodulo}`)
+    return this.http.get<Rubros>(`${baseUrl}/modulo/${idmodulo}`);
   }
 
   //Rubros por módulo (Sección) y descripcion
   getByModulo(idmodulo: number, descripcion: String) {
-    return this.http.get<Rubros>(`${baseUrl}/idmodulo?idmodulo=${idmodulo}&descripcion=${descripcion}`)
+    return this.http.get<Rubros>(
+      `${baseUrl}/idmodulo?idmodulo=${idmodulo}&descripcion=${descripcion}`
+    );
   }
 
   getRubroById(idrubro: number) {
@@ -35,7 +35,9 @@ export class RubrosService {
 
   //Validar por Módulo y nombre
   getByNombre(idmodulo: number, descripcion: String): Observable<any> {
-    return this.http.get<Rubros>(`${baseUrl}?idmodulo=${idmodulo}&descripcion=${descripcion}`);
+    return this.http.get<Rubros>(
+      `${baseUrl}?idmodulo=${idmodulo}&descripcion=${descripcion}`
+    );
   }
 
   //Rubros de la Emisión
@@ -48,11 +50,13 @@ export class RubrosService {
   }
 
   updateRubro(idrubro: number, rubro: Rubros): Observable<Object> {
-    return this.http.put(baseUrl + "/" + idrubro, rubro);
+    return this.http.put(baseUrl + '/' + idrubro, rubro);
   }
 
   deleteRubro(idrubro: number): Observable<Object> {
     return this.http.delete(`${baseUrl}/${idrubro}`);
   }
-
+  findByName(descripcion: string) {
+    return this.http.get(`${baseUrl}/findByName?descripcion=${descripcion}`);
+  }
 }
