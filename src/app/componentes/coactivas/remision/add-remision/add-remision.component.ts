@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { fx } from 'jquery';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
@@ -62,7 +63,8 @@ export class AddRemisionComponent implements OnInit {
     private authService: AutorizaService,
     private s_remision: RemisionService,
     private s_facxremi: FacxremiService,
-    private s_rubros: RubrosService
+    private s_rubros: RubrosService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -340,14 +342,13 @@ export class AddRemisionComponent implements OnInit {
           ),
         }));
         this.newFacturas(r_inicial, _rem);
-        for (let i: number = 1; i <= f.cuotas -1; i++) {
+        for (let i: number = 1; i <= f.cuotas - 1; i++) {
           this.newFacturas(r_mensual, _rem);
         }
         this.newFacturas(f_final, _rem);
       }
 
       this._facturas.forEach(async (factura: Facturas, i: number) => {
-        console.log(factura);
         let fxr: Facxremi = new Facxremi();
         let fact: Facturas = new Facturas();
         fxr.idfactura_facturas = factura;
@@ -366,7 +367,6 @@ export class AddRemisionComponent implements OnInit {
           .updateFacturatoRemision(fact.idfactura, fact)
           .subscribe({
             next: (datos: any) => {
-              console.log(datos);
             },
             error: (e: any) => console.error(e),
           });
@@ -378,8 +378,8 @@ export class AddRemisionComponent implements OnInit {
     /* SI SON MAYORES A 1 HAY QUE HACER EL CALCULO DE LOS VALORES */
     /* actualizar facturas antiguas para que esten cobradas y en estado de convenio */
     /*  */
-    
 
+    this.router.navigate(['/remision']);
   }
 
   newFacturas(rubros: any, _rem: any) {
@@ -415,8 +415,7 @@ export class AddRemisionComponent implements OnInit {
           rxf.cantidad = 1;
           rxf.valorunitario = item.sum;
           this.s_rubroxfac.saveRubroxfac(rxf).subscribe({
-            next: (datos: any) => {
-            },
+            next: (datos: any) => {},
             error: (e: any) => console.error(e),
           });
         });
@@ -426,7 +425,6 @@ export class AddRemisionComponent implements OnInit {
         fxr.cuota = 0;
         fxr.tipfactura = 2;
         this.s_facxremi.savefacxremi(fxr).subscribe((fr: any) => {
-          console.log('GUARDANDO FXR', fr);
         });
       },
     });

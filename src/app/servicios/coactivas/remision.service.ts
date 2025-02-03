@@ -12,11 +12,11 @@ const baseUrl = `${apiUrl}/remisiones`;
 })
 export class RemisionService {
   constructor(private http: HttpClient) {}
-  getAllRemisiones() {
-    return this.http.get(`${baseUrl}`);
+  getAllRemisiones(page: number, size: number) {
+    return this.http.get(`${baseUrl}?page=${page}&size=${size}`);
   }
   saveRemision(remision: any) {
-    let newremision = this.http.post(`${baseUrl}`, remision)
+    let newremision = this.http.post(`${baseUrl}`, remision);
     return newremision;
   }
 }
