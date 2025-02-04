@@ -19,4 +19,7 @@ export class RemisionService {
     let newremision = this.http.post(`${baseUrl}`, remision);
     return newremision;
   }
+  getByFechacrea(d: any, h: any) {
+    return this.http.get(`${baseUrl}/reportes?d=${d}&h=${h}`);
+  }
 }

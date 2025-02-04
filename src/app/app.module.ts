@@ -282,6 +282,7 @@ import { PersonalComponent } from './componentes/rrhh/personal/personal.componen
 import { AddPersonalComponent } from './componentes/rrhh/personal/add-personal/add-personal.component';
 import { RemisionComponent } from './componentes/coactivas/remision/remision.component';
 import { AddRemisionComponent } from './componentes/coactivas/remision/add-remision/add-remision.component';
+import { SafePipe } from './pipes/safe.pipe';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
@@ -552,6 +553,7 @@ import { AddRemisionComponent } from './componentes/coactivas/remision/add-remis
     AddPersonalComponent,
     RemisionComponent,
     AddRemisionComponent,
+    SafePipe,
   ],
 
   imports: [
