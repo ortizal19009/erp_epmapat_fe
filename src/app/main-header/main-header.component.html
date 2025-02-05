@@ -7,9 +7,9 @@
       <li class="nav-item d-none d-sm-inline-block">
          <a routerLink="inicio" class="nav-link roboto">Inicio</a>
       </li>
-      <li class="nav-item dropdown">
+ <!--      <li class="nav-item dropdown">
          <a class="nav-link dropdown-toggle roboto" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
-            aria-haspopup="true" aria-expanded="false"> Módulos
+            aria-haspopup="true" aria-expanded="false"> _Módulos
          </a>
          <div class="dropdown-menu navbar-dark" [ngClass]="{'fondo1-background': fondo1 == 1}"
             aria-labelledby="navbarDropdown">
@@ -26,11 +26,23 @@
                equipo</a>
             <a class="dropdown-item" [ngClass]="{'disabled' : !authService.enabled[4]}" href="#"
                (click)="authService.selecModulo(5)"><i class="bi-file-person"></i>&nbsp;&nbsp;Recursos humanos</a>
-               <a class="dropdown-item" [ngClass]="{'disabled' : !authService.enabled[5]}" href="#"
+            <a class="dropdown-item" [ngClass]="{'disabled' : !authService.enabled[5]}" href="#"
                (click)="authService.selecModulo(6)"><i class="bi-file-person"></i>&nbsp;&nbsp;Coactivas</a>
             <div class="dropdown-divider"></div>
             <a class="dropdown-item" [ngClass]="{'disabled' : !authService.enabled[6]}" href="#"
-               (click)="authService.selecModulo(7)"><i class="bi bi-person-video2"></i>&nbsp;&nbsp;Administración central</a>
+               (click)="authService.selecModulo(7)"><i class="bi bi-person-video2"></i>&nbsp;&nbsp;Administración
+               central</a>
+         </div>
+      </li> -->
+      <li class="nav-item dropdown">
+         <a class="nav-link dropdown-toggle roboto" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false"> Módulos
+         </a>
+         <div class="dropdown-menu navbar-dark" [ngClass]="{'fondo1-background': fondo1 == 1}"
+            aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" *ngFor="let m of modules; let i = index" [ngClass]="{'disabled' : !m.enabled}" href="#"
+               (click)="authService.selecModulo(i+1)"> <i
+                  class="bi-file-earmark-binary nav-icon"></i>&nbsp;&nbsp;{{m.descripcion}}</a>
          </div>
       </li>
    </ul>
@@ -88,7 +100,7 @@
       <li class="nav-item dropdown">
          <a [routerLink]="authService.colorenabled ? 'colores' : null" class="nav-link"> <i class="bi-palette"></i> </a>
       </li>
-      
+
       <!-- Messages Dropdown Menu -->
       <li class="nav-item dropdown">
          <a class="nav-link" data-toggle="dropdown" href="#">
