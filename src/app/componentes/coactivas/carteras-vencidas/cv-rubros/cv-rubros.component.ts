@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ColoresService } from 'src/app/compartida/colores.service';
+import { FacturaService } from 'src/app/servicios/factura.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 
 @Component({
@@ -13,9 +14,11 @@ export class CvRubrosComponent implements OnInit {
   f_buscar: FormGroup;
   today: Date = new Date();
   _rubros: any;
+  _facturas: any;
   constructor(
     private coloresService: ColoresService,
     private s_rxf: RubroxfacService,
+    private s_facturas: FacturaService,
     private fb: FormBuilder
   ) {}
 
@@ -60,5 +63,15 @@ export class CvRubrosComponent implements OnInit {
   }
   onChangeDate(e: any) {
     this.getCarteraVencidaxRubros(this.f_buscar.value.sDate);
+  }
+  getfacturas(idrubro: number) {
+    this.s_facturas
+      .getCvFacturasByRubro(idrubro, this.f_buscar.value.sDate)
+      .subscribe({
+        next: (datos: any) => {
+          console.log(datos);
+          this._facturas = datos;
+        },
+      });
   }
 }

@@ -210,11 +210,9 @@ export class AddRemisionComponent implements OnInit {
     }
   }
   changeCuota(e: any) {
-    console.log(e.target.value);
     let f = this.f_simular.value;
     let subtotal = this.subtotal;
     if (+e.target.value! > 1) {
-      console.log('Mas de una cuota, hay que calcular el valor de los rubros');
       let inicial = this.calcularInicial(subtotal, f.porcentaje);
       //let mensual = ((subtotal - inicial) / f.cuotas)-final;
       let p = subtotal - inicial;
@@ -366,20 +364,20 @@ export class AddRemisionComponent implements OnInit {
         this.s_facturas
           .updateFacturatoRemision(fact.idfactura, fact)
           .subscribe({
-            next: (datos: any) => {
-            },
+            next: (datos: any) => {},
             error: (e: any) => console.error(e),
           });
       });
-      this.s_loading.hideLoading();
     });
 
     /* VALIDAR SI LAS CUOTAS SON MAYORES A 1 */
     /* SI SON MAYORES A 1 HAY QUE HACER EL CALCULO DE LOS VALORES */
     /* actualizar facturas antiguas para que esten cobradas y en estado de convenio */
     /*  */
-
-    this.router.navigate(['/remision']);
+    setTimeout(() => {
+      this.router.navigate(['/remision']);
+      this.s_loading.hideLoading();
+    }, 3000);
   }
 
   newFacturas(rubros: any, _rem: any) {
@@ -424,8 +422,7 @@ export class AddRemisionComponent implements OnInit {
         fxr.idremision_remisiones = _rem;
         fxr.cuota = 0;
         fxr.tipfactura = 2;
-        this.s_facxremi.savefacxremi(fxr).subscribe((fr: any) => {
-        });
+        this.s_facxremi.savefacxremi(fxr).subscribe((fr: any) => {});
       },
     });
   }

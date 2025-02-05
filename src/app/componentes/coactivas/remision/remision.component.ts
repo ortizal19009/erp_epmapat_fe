@@ -4,6 +4,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import jsPDF from 'jspdf';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { RemisionService } from 'src/app/servicios/coactivas/remision.service';
+import { LoadingService } from 'src/app/servicios/loading.service';
 import { PdfService } from 'src/app/servicios/pdf.service';
 
 @Component({
@@ -19,7 +20,7 @@ export class RemisionComponent implements OnInit {
   today: Date = new Date();
   _remisiones: any;
   modalSize: string = 'md';
-  swimprimir: Boolean = true;
+  swimprimir: boolean = true;
 
   /* variables para hacer la paginación  */
   page: number = 0;
@@ -34,7 +35,8 @@ export class RemisionComponent implements OnInit {
     private coloresService: ColoresService,
     private s_remision: RemisionService,
     private s_pdf: PdfService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private s_loader: LoadingService
   ) {}
 
   ngOnInit(): void {
@@ -85,7 +87,6 @@ export class RemisionComponent implements OnInit {
   getAllRemisiones(page: number, size: number) {
     this.s_remision.getAllRemisiones(page, size).subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this._remisiones = datos.content;
       },
       error: (e: any) => console.error(e),
@@ -125,14 +126,14 @@ export class RemisionComponent implements OnInit {
     );
   }
   getRemByFeccrea() {
+    this.s_loader.showLoading();
+    this.swimprimir = false;
     console.log(this.f_reporte.value);
     let f = this.f_reporte.value;
     this.s_remision.getByFechacrea(f.d, f.h).subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this._remisiones = datos;
         this.imprimir();
-        this.swimprimir = true;
       },
       error: (e: any) => console.error(e),
     });
@@ -147,12 +148,11 @@ export class RemisionComponent implements OnInit {
     if (!d || !h) {
       return null; // No hay error si alguna fecha está vacía
     }
-    
-    
+
     // Convertir las fechas a objetos Date
     const fechaInicio = new Date(d);
     const fechaFin = new Date(h);
-    
+
     // Verificar que las fechas sean válidas
     if (isNaN(fechaInicio.getTime()) || isNaN(fechaFin.getTime())) {
       return { fechaInvalida: true }; // Fechas inválidas
@@ -179,17 +179,17 @@ export class RemisionComponent implements OnInit {
         item.idcliente_clientes.cedula,
         item.idabonado_abonados.idabonado,
         item.cuotas,
-        item.totcapital,
-        item.totintereses,
+        item.totcapital.toFixed(2),
+        item.totintereses.toFixed(2),
       ]);
     });
+    this.s_loader.hideLoading();
     await this.s_pdf.bodyOneTable(
       'Remision Intereses, Multas y Recargos',
       header,
       body,
       doc
     );
-    
   }
   /* Fin de configuracion de paginacion */
 }

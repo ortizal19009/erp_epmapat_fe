@@ -409,6 +409,11 @@ export class FacturaService {
   getCVFacturasNOconsumo(fecha: any) {
     return this.http.get(`${baseUrl}/reportes/CV_noconsumo?fecha=${fecha}`);
   }
+  getCvFacturasByRubro(idrubro: number, fecha: any) {
+    return this.http.get(
+      `${baseUrl}/reportes/cv_facxrubro?idrubro=${idrubro}&fecha=${fecha}`
+    );
+  }
   async getFacturasForRemision(idcliente: any, fechatope: any): Promise<any[]> {
     let facturas = await firstValueFrom(
       this.http.get<any[]>(
