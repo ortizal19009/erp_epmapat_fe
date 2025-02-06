@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
+import { LoadingService } from 'src/app/servicios/loading.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 
 @Component({
@@ -19,7 +20,8 @@ export class CvRubrosComponent implements OnInit {
     private coloresService: ColoresService,
     private s_rxf: RubroxfacService,
     private s_facturas: FacturaService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private s_loading: LoadingService
   ) {}
 
   ngOnInit(): void {
@@ -55,7 +57,6 @@ export class CvRubrosComponent implements OnInit {
   getCarteraVencidaxRubros(date: any) {
     this.s_rxf.getCarteraVencidaxRubros(date).subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this._rubros = datos;
       },
       error: (e: any) => console.error(e),
@@ -65,12 +66,14 @@ export class CvRubrosComponent implements OnInit {
     this.getCarteraVencidaxRubros(this.f_buscar.value.sDate);
   }
   getfacturas(idrubro: number) {
+    this.s_loading.showLoading();
+    this._facturas = [];
     this.s_facturas
       .getCvFacturasByRubro(idrubro, this.f_buscar.value.sDate)
       .subscribe({
         next: (datos: any) => {
-          console.log(datos);
           this._facturas = datos;
+          this.s_loading.hideLoading();
         },
       });
   }

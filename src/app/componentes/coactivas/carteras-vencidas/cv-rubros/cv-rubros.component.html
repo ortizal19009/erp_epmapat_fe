@@ -114,14 +114,13 @@
                                 <td>{{i+1}}</td>
                                 <td>{{factura.factura}}</td>
                                 <td>{{factura.nombre}}</td>
-                                <td>{{factura.total}}</td>
+                                <td>{{factura.total.toFixed(2)}}</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Understood</button>
+                    <button type="button" class="btn btn-success btn-sm" data-dismiss="modal">Cancelar</button>
                 </div>
             </div>
         </div>
