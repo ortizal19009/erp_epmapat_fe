@@ -11,4 +11,10 @@ export class UsrxmodulosService {
   getAccesoModulos(idusuario: number) {
     return this.http.get(`${baseUrl}/access?idusuario=${idusuario}`);
   }
+  getAllModulos(idusuario: number){
+    return this.http.get(`${baseUrl}?idusuario=${idusuario}`);
+  }
+  saveAccessModulos(usrmodulos: any) {
+    return this.http.post(`${baseUrl}`, usrmodulos);
+  }
 }

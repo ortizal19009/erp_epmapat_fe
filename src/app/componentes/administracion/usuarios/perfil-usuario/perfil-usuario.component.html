@@ -18,7 +18,8 @@
                         Todas</button>
                      <button type='button' class='btn btn-outline-success btn-sm mx-1'><i class="bi-battery"></i>
                         Ninguna</button>
-                     <button type='button' class='btn btn-success btn-sm mx-1' (click)="guardar()"><i class="fa fa-check-circle"></i>
+                     <button type='button' class='btn btn-success btn-sm mx-1' (click)="guardar()"><i
+                           class="fa fa-check-circle"></i>
                         Aceptar</button>
                   </div>
                </div>
@@ -41,15 +42,21 @@
                <thead>
                   <tr class="text-center cabecera">
                      <th>Opción</th>
-                     <th></th>
+                     <th>
+                        <button class="btn btn-xs btn-outline-success" data-toggle="modal" data-target="#modulos">
+                           <i class="fa fa-modx" aria-hidden="true"></i>
+                        </button>
+                     </th>
                   </tr>
                </thead>
                <tbody class="detalle">
                   <tr *ngFor="let opcion of _acceso | filter: filtro; let i = index">
-                     <td [ngClass]="{'font-weight-bold': opcion.largo == 2 }" class="py-0"> 
+                     <td [ngClass]="{'font-weight-bold': opcion.largo == 2 }" class="py-0">
                         <span class="transparente">{{ opcion.espacios }} </span>&nbsp;&nbsp;
-                        {{ opcion.nomacc }}</td>
-                     <td class="text-center py-0"> <input type="checkbox" [(ngModel)]="opcion.selec" class="cursor"></td>
+                        {{ opcion.nomacc }}
+                     </td>
+                     <td class="text-center py-0"> <input type="checkbox" [(ngModel)]="opcion.selec" class="cursor">
+                     </td>
                   </tr>
                </tbody>
             </table>
@@ -58,3 +65,49 @@
    </div>
 </div>
 
+<!-- Modal -->
+<div class="modal fade" id="modulos" data-backdrop="static" data-keyboard="false" tabindex="-1"
+   aria-labelledby="modulosLabel" aria-hidden="true">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="modulosLabel">Modulos</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+               <span aria-hidden="true">&times;</span>
+            </button>
+         </div>
+         <div class="modal-body">
+            <table class="table table-sm table-hover table-bordered sombra">
+               <thead class="cabecera">
+                  <tr>
+                     <th></th>
+                     <th>Descripción</th>
+                     <th></th>
+                  </tr>
+               </thead>
+               <tbody>
+                  <tr *ngFor="let modulo of _usrxmodulo; let i = index">
+                     <td>{{i+1}}</td>
+                     <td>{{modulo.iderpmodulo_erpmodulos.descripcion}}</td>
+                     <td>
+                        <div class="input-group mb-3">
+                           <div class="input-group-prepend">
+                              <div class="input-group-text">
+                                 <input type="checkbox" [checked]="modulo.enabled" (click)="setModuloToUser($event, modulo)"
+                                    aria-label="Checkbox for following text input">
+                              </div>
+                           </div>
+                        </div>
+                     </td>
+                  </tr>
+               </tbody>
+            </table>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-sm btn-outline-success" (click)="guardarModulos()"
+               data-dismiss="modal">Aceptar</button>
+         </div>
+      </div>
+   </div>
+</div>
