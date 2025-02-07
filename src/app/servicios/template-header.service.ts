@@ -5,9 +5,7 @@ import autoTable from 'jspdf-autotable';
 @Injectable({
   providedIn: 'root',
 })
-
 export class TemplateHeaderService {
-
   date: Date = new Date();
   margin_l = 40;
   url = './assets';
@@ -16,8 +14,8 @@ export class TemplateHeaderService {
   constructor() {}
 
   header(titulo: string, doc: any) {
-     this.logo.src = `${this.url}/img/lep.jpg`;
-     doc.addImage(this.logo, 'jpg', 100, 10, 375, 100);
+    this.logo.src = `${this.url}/img/lep.jpg`;
+    doc.addImage(this.logo, 'jpg', 100, 10, 375, 100);
     autoTable(doc, {
       styles: {
         fillColor: [255, 255, 255],
@@ -31,5 +29,4 @@ export class TemplateHeaderService {
     });
     //doc.output('pdfobjectnewwindow', { filename: `${titulo}.pdf` });
   }
-  
 }

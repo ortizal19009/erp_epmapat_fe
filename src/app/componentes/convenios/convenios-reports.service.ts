@@ -9,7 +9,6 @@ import { TemplateHeaderService } from 'src/app/servicios/template-header.service
 export class ConveniosReportsService {
   constructor(private header: TemplateHeaderService) {}
   impContratoConvenio(datos: any, cuotas: any) {
-    let margin = 30;
     let doc = new jsPDF('p', 'pt', 'a4');
     let meses = [
       'enero',
@@ -50,7 +49,7 @@ export class ConveniosReportsService {
       administradores[1].cargo
     } de la ${empresa}, y por otra parte el(la) Sr.(a) ${
       datos.nomcli
-    } en su calidad de solicitante, las partes en forma libre y voluntaria, convienen en suscribir el presente convenio, al tenor de las clusulas siguientes: `;
+    } en su calidad de solicitante, las partes en forma libre y voluntaria, convienen en suscribir el presente convenio, al tenor de las cláusulas siguientes: `;
     let p2 = `PRIMERA.- ANTECEDENTES:`;
     let p3 = `1.- El deudor posee una deuda por Titulo(s) de AGUA Y ALCANTARILLADO a nombre de la ${empresa}, de referencia Nro.: ${datos.referencia}. El deudor por el momento no cuenta con los recursos económicos necesarios para cancelar los valores adeudados.`;
     let p4 = `2.- Mediante autorización, el (la) ${administradores[0].nombre} ${administradores[0].cargo} autoriza se realice el correspondiente convenio de pago en un plazo de ${cuotas.length} meses.`;
@@ -62,12 +61,12 @@ export class ConveniosReportsService {
     let p8 = `El(la) solicitante depositará en la ventanilla de recaudación el pago de acuerdo a la tabla que se adjunta al presente convenio:`;
     let p9 = `Siendo un total de ${datos.totalconvenio.toFixed(
       2
-    )}, a partir de la fecha de suscripción de este convenio hasta su termicación en el lapso de ${
+    )}, a partir de la fecha de suscripción de este convenio hasta su terminación en el lapso de ${
       cuotas.length
     } meses, más la carta marcada en el transcurso del año.`;
     let p10 = `CUARTA.- SANCIÓN: `;
     let p11 = `En caso de que el(la) deudor(a) no cancel los valores pactados en la fecha establecida, se indicará y/o continuará el juicio de coactivas en su contra, sin lugar a prorroga o plazo alguno.`;
-    let p12 = `Para constancia de lo estipulado en las cláusulas anteriores, las partes se afirman y ratifican en cada una de ellas, por lo que libre y voluntariamente firman el presente conveio.`;
+    let p12 = `Para constancia de lo estipulado en las cláusulas anteriores, las partes se afirman y ratifican en cada una de ellas, por lo que libre y voluntariamente firman el presente convenio.`;
     cuotas.forEach((item: any, index: any) => {
       let fecha = item.idfactura.feccrea;
       _cuotas.push([
