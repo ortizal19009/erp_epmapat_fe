@@ -22,4 +22,7 @@ export class RemisionService {
   getByFechacrea(d: any, h: any) {
     return this.http.get(`${baseUrl}/reportes?d=${d}&h=${h}`);
   }
+  getRemisionById(idremision: number) {
+    return this.http.get(`${baseUrl}/one?idremision=${idremision}`);
+  }
 }

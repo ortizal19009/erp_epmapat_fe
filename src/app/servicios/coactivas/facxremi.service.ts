@@ -16,4 +16,12 @@ export class FacxremiService {
     let _facxremi: any = this.http.post(`${baseUrl}`, facxremi);
     return _facxremi;
   }
+  getByRemision(idremision: number, tipfac: number): Promise<any[]> {
+    let respuesta: any = firstValueFrom(
+      this.http.get(
+        `${baseUrl}/byremision?idremision=${idremision}&tipfac=${tipfac}`
+      )
+    );
+    return respuesta;
+  }
 }

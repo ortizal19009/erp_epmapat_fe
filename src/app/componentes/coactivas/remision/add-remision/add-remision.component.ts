@@ -202,10 +202,12 @@ export class AddRemisionComponent implements OnInit {
       case 'simular':
         this.modalTitle = 'Simular remisión';
         this.tableSize = 'lg';
+        this.swdisable = true;
         break;
       case 'rubros':
         this.modalTitle = 'Detalle Rubros';
         this.tableSize = 'md';
+        this.swdisable = false;
         break;
     }
   }

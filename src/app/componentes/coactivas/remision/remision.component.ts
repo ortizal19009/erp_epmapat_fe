@@ -3,9 +3,16 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import jsPDF from 'jspdf';
 import { ColoresService } from 'src/app/compartida/colores.service';
+import { Abonados } from 'src/app/modelos/abonados';
+import { Documentos } from 'src/app/modelos/administracion/documentos.model';
+import { Clientes } from 'src/app/modelos/clientes';
+import { Facxremi } from 'src/app/modelos/coactivas/facxremi';
+import { Remision } from 'src/app/modelos/coactivas/remision';
+import { FacxremiService } from 'src/app/servicios/coactivas/facxremi.service';
 import { RemisionService } from 'src/app/servicios/coactivas/remision.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { PdfService } from 'src/app/servicios/pdf.service';
+import { RemisionReportsService } from './imp-remision/remision-reports.service';
 
 @Component({
   selector: 'app-remision',
@@ -21,6 +28,12 @@ export class RemisionComponent implements OnInit {
   _remisiones: any;
   modalSize: string = 'md';
   swimprimir: boolean = true;
+  remisionDetalles: Remision = new Remision();
+  fac_anteriores: any;
+  fac_nuevas: any;
+  _cliente: Clientes = new Clientes();
+  _abonado: Abonados = new Abonados();
+  _documentos: Documentos = new Documentos();
 
   /* variables para hacer la paginación  */
   page: number = 0;
@@ -36,7 +49,9 @@ export class RemisionComponent implements OnInit {
     private s_remision: RemisionService,
     private s_pdf: PdfService,
     private sanitizer: DomSanitizer,
-    private s_loader: LoadingService
+    private s_loader: LoadingService,
+    private s_facxremi: FacxremiService,
+    private s_remisionPdf: RemisionReportsService
   ) {}
 
   ngOnInit(): void {
@@ -165,6 +180,31 @@ export class RemisionComponent implements OnInit {
 
     return null; // No hay error
   }
+
+  async getRemisionById(remision: any) {
+    this.fac_anteriores = [];
+    this.fac_nuevas = [];
+    this.modalSize = 'xl';
+    this.remisionDetalles = remision;
+    this._cliente = remision.idcliente_clientes;
+    this._abonado = remision.idabonado_abonados;
+    this._documentos = remision.iddocumento_documentos;
+
+    console.log(remision);
+    let id = remision.idremision;
+    this.fac_anteriores = await this.getDetalleRemision(id, 1);
+    this.fac_nuevas = await this.getDetalleRemision(id, 2);
+    console.log(this.fac_anteriores);
+    console.log(this.fac_nuevas);
+  }
+
+  async getDetalleRemision(idremision: number, tipfac: number) {
+    let respuesta: any = await this.s_facxremi.getByRemision(
+      idremision,
+      tipfac
+    );
+    return respuesta;
+  }
   async imprimir() {
     this.modalSize = 'lg';
     let doc = new jsPDF();
@@ -190,6 +230,10 @@ export class RemisionComponent implements OnInit {
       body,
       doc
     );
+  }
+  impContrato() {
+    let doc = new jsPDF();
+    this.s_remisionPdf.genContratoRemision(doc);
   }
   /* Fin de configuracion de paginacion */
 }

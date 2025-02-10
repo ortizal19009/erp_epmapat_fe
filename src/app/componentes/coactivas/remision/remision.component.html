@@ -67,7 +67,8 @@
                     </tr>
                 </thead>
                 <tbody class="">
-                    <tr *ngFor="let remision of _remisiones |filter:filtro; let i = index" data-toggle="modal" data-target="#detallesModal">
+                    <tr *ngFor="let remision of _remisiones |filter:filtro; let i = index"
+                        (click)="getRemisionById(remision)" data-toggle="modal" data-target="#detallesModal">
                         <td class="small text-center font-weight-bold">{{i+1}}</td>
                         <td>{{remision.idcliente_clientes.nombre}}</td>
                         <td class="text-center">{{remision.idcliente_clientes.cedula}}</td>
@@ -142,10 +143,98 @@
                 </button>
             </div>
             <div class="modal-body">
+                <div class="container">
+                    <table class="table table-sm table-hover table-bordered">
+                        <tbody>
+                            <tr>
+                                <td>Cuenta: {{_abonado.idabonado}}</td>
+                                <td>Cliente: {{_cliente.nombre}}</td>
+                                <td>Identificación: {{_cliente.cedula}}</td>
+                            </tr>
+                            <tr>
+                                <td>Cuotas: {{remisionDetalles.cuotas}}</td>
+                                <td>Capital: {{remisionDetalles.totcapital}}</td>
+                                <td>Intereses: {{remisionDetalles.totintereses}}</td>
+                            </tr>
+                            <tr>
+                                <td>Documento: {{_documentos.nomdoc}}</td>
+
+                                <td colspan="2">Detalle: {{remisionDetalles.detalledocumento}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="row">
+                        <div class="col-sm">
+                            <div class="card">
+                                <div class="card-header text-center">
+                                    <h5>Facturas anteriores</h5>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-sm table-hover table-bordered">
+                                        <thead class="text-center">
+                                            <tr>
+                                                <th></th>
+                                                <th>Planilla</th>
+                                                <th>Módulo</th>
+                                                <th>Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let afac of fac_anteriores; let i = index">
+                                                <td class="text-center">{{i+1}}</td>
+                                                <td>{{afac.idfactura_facturas.idfactura}}</td>
+                                                <td>{{afac.idfactura_facturas.idmodulo.descripcion}}</td>
+                                                <td class="text-right">
+                                                    {{afac.idfactura_facturas.totaltarifa.toFixed(2)}} $</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+
+                        </div>
+                        <div class="col-sm">
+                            <div class="card ">
+                                <div class="card-header text-center">
+                                    <h5>Facturas nuevas</h5>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-sm table-hover table-bordered">
+                                        <thead class="text-center">
+                                            <tr>
+                                                <th></th>
+                                                <th>Planilla</th>
+                                                <th>Nro.factura</th>
+                                                <th>Módulo</th>
+                                                <th>Fec.pago</th>
+                                                <th>Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let nfac of fac_nuevas; let i = index">
+                                                <td class="text-center">{{i+1}}</td>
+                                                <td>{{nfac.idfactura_facturas.idfactura}}</td>
+                                                <td>{{nfac.idfactura_facturas.nrofactura}}</td>
+                                                <td>{{nfac.idfactura_facturas.idmodulo.descripcion}}</td>
+                                                <td>{{nfac.idfactura_facturas.fechacobro}}</td>
+                                                <td class="text-right">
+                                                    {{nfac.idfactura_facturas.totaltarifa.toFixed(2)}} $</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+
+                </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-sm btn-success" data-dismiss='modal'>Cancelar</button>
-                <button type="button" class="btn btn-sm btn-outline-success">Aceptar</button>
+                <button type="button" class="btn btn-sm btn-primary" (click)="impContrato()">Contrato</button>
+                <button type="button" class="btn btn-sm btn-outline-success" data-dismiss='modal'>Aceptar</button>
             </div>
         </div>
     </div>
