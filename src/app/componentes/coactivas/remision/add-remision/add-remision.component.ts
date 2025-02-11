@@ -51,7 +51,7 @@ export class AddRemisionComponent implements OnInit {
   tableSize: string = 'md';
   fectopedeuda = '2024-12-09';
   fectopepago = '2025-06-30';
-  fechaModificada:any = new Date(this.today);
+  fechaModificada: any = new Date(this.today);
 
   constructor(
     private fb: FormBuilder,
@@ -161,7 +161,7 @@ export class AddRemisionComponent implements OnInit {
     this.s_clientes.getListaById(idcliente).subscribe({
       next: (cliente: any) => {
         this._cliente = cliente;
-        this.getFacturasForRemision(cliente.idcliente);
+        this.getFacturasForRemision(cliente.idcliente, this._abonado.idabonado);
         this.getRubros(cliente.idcliente);
         this.f_simular.patchValue({
           mensual: this.subtotal,
@@ -169,9 +169,9 @@ export class AddRemisionComponent implements OnInit {
       },
     });
   }
-  getFacturasForRemision(idcliente: any) {
+  getFacturasForRemision(idcliente: any, cuenta: any) {
     this.s_facturas
-      .getFacturasForRemision(idcliente, '2024-12-10')
+      .getFacturasForRemisionabonados(idcliente, cuenta, '2024-12-10')
       .then((item: any) => {
         let subtotal = 0;
         let total = 0;

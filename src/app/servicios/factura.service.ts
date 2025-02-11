@@ -422,6 +422,14 @@ export class FacturaService {
     );
     return facturas;
   }
+  async getFacturasForRemisionabonados(idcliente: any,cuenta: any, fechatope: any): Promise<any[]> {
+    let facturas = await firstValueFrom(
+      this.http.get<any[]>(
+        `${baseUrl}/remisiones/cuenta?idcliente=${idcliente}&cuenta=${cuenta}&fechatope=${fechatope}`
+      )
+    );
+    return facturas;
+  }
   updateFacturatoRemision(idfactura: number, factura: any) {
     return this.http.put(
       `${baseUrl}/remisionfactura?idfactura=${idfactura}`,
