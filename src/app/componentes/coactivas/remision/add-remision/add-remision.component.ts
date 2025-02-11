@@ -51,6 +51,8 @@ export class AddRemisionComponent implements OnInit {
   tableSize: string = 'md';
   fectopedeuda = '2024-12-09';
   fectopepago = '2025-06-30';
+  fechaModificada:any = new Date(this.today);
+
   constructor(
     private fb: FormBuilder,
     private coloresService: ColoresService,
@@ -99,9 +101,9 @@ export class AddRemisionComponent implements OnInit {
   }
   async buscaColor() {
     try {
-      const datos = await this.coloresService.setcolor(1, 'cv-facturas');
+      const datos = await this.coloresService.setcolor(1, 'add-remision');
       const coloresJSON = JSON.stringify(datos);
-      sessionStorage.setItem('/cv-facturas', coloresJSON);
+      sessionStorage.setItem('/add-remision', coloresJSON);
       this.colocaColor(datos);
     } catch (error) {
       console.error(error);
@@ -113,7 +115,6 @@ export class AddRemisionComponent implements OnInit {
     this.total = 0;
     this.s_abonados.getById(+this.f_buscar.value.cuenta!).subscribe({
       next: (abonado: any) => {
-        console.log(abonado);
         this._abonado = abonado;
         this._categoria = abonado.idcategoria_categorias;
         this._ruta = abonado.idruta_rutas;
@@ -124,7 +125,6 @@ export class AddRemisionComponent implements OnInit {
   getAllDocuments() {
     this.s_documentos.getListaDocumentos().subscribe({
       next: (documentos: any) => {
-        console.log(documentos);
         this._documentos = documentos;
         this.f_simular.patchValue({
           documento: documentos[0],
@@ -170,7 +170,6 @@ export class AddRemisionComponent implements OnInit {
     });
   }
   getFacturasForRemision(idcliente: any) {
-    console.log(idcliente);
     this.s_facturas
       .getFacturasForRemision(idcliente, '2024-12-10')
       .then((item: any) => {
@@ -330,7 +329,6 @@ export class AddRemisionComponent implements OnInit {
             f.cuotas
           ),
         }));
-        console.log('MENSUAL', r_mensual);
 
         /* CALCULAMOS LA CUOTA FINAL DE LOS RUBROS */
         let f_final = this._rubros.map((item: any) => ({
@@ -353,7 +351,7 @@ export class AddRemisionComponent implements OnInit {
         let fact: Facturas = new Facturas();
         fxr.idfactura_facturas = factura;
         fxr.idremision_remisiones = _rem;
-        fxr.cuota = 0;
+        fxr.cuota = i + 1;
         fxr.tipfactura = 1;
         this.s_facxremi.savefacxremi(fxr).subscribe((fr: any) => {});
         fact = factura;
@@ -389,10 +387,12 @@ export class AddRemisionComponent implements OnInit {
     });
     let newFactura: Facturas = new Facturas();
     let modulo: Modulos = new Modulos();
+    this.fechaModificada.setMonth(this.fechaModificada.getMonth() + 1);
+
     modulo.idmodulo = 31;
     newFactura.idabonado = this._abonado.idabonado;
     newFactura.idcliente = this._cliente;
-    newFactura.feccrea = this.today;
+    newFactura.feccrea = this.fechaModificada;
     newFactura.usucrea = this.authService.idusuario;
     newFactura.formapago = 1;
     newFactura.estado = 2;

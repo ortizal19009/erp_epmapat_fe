@@ -233,7 +233,11 @@ export class RemisionComponent implements OnInit {
   }
   impContrato() {
     let doc = new jsPDF();
-    this.s_remisionPdf.genContratoRemision(doc);
+    this.s_remisionPdf.genContratoRemision(
+      doc,
+      this.remisionDetalles,
+      this.fac_nuevas
+    );
   }
   /* Fin de configuracion de paginacion */
 }
