@@ -107,6 +107,7 @@
                     <tr>
                         <th></th>
                         <th>Planilla</th>
+                        <th>NroFactura</th>
                         <th>Módulo</th>
                         <th>Fecha</th>
                         <th>Valor</th>
@@ -119,6 +120,7 @@
                     <tr *ngFor="let factura of _facturas |filter:filtro; let i = index">
                         <td class="small text-center font-weight-bold">{{i+1}}</td>
                         <td>{{factura.idfactura}}</td>
+                        <td >{{factura.nrofactura}}</td>
                         <td class="">{{factura.descripcion}}</td>
                         <td class="text-center">{{factura.feccrea}}</td>
                         <td class="text-right">{{factura.total.toFixed(2)}} $</td>

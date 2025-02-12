@@ -52,6 +52,7 @@ export class AddRemisionComponent implements OnInit {
   fectopedeuda = '2024-12-09';
   fectopepago = '2025-06-30';
   fechaModificada: any = new Date(this.today);
+  nroFactura: any;
 
   constructor(
     private fb: FormBuilder,
@@ -173,6 +174,7 @@ export class AddRemisionComponent implements OnInit {
     this.s_facturas
       .getFacturasForRemisionabonados(idcliente, cuenta, '2024-12-10')
       .then((item: any) => {
+        console.log(item);
         let subtotal = 0;
         let total = 0;
         let sumIntereses = 0;
