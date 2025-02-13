@@ -250,7 +250,7 @@
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text" id="addon-wrapping">Cuotas</span>
                                                 </div>
-                                                <input type="number" min=1 max=12 (change)="changeCuota($event)"
+                                                <input type="number" [readOnly]="swinstitucion" min=1 max=12 (change)="changeCuota()"
                                                     class="form-control" placeholder="max 12" aria-label="Cuota"
                                                     formControlName="cuotas" aria-describedby="addon-wrapping">
                                             </div>

@@ -53,6 +53,7 @@ export class AddRemisionComponent implements OnInit {
   fectopepago = '2025-06-30';
   fechaModificada: any = new Date(this.today);
   nroFactura: any;
+  swinstitucion: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -135,6 +136,8 @@ export class AddRemisionComponent implements OnInit {
     });
   }
   getRubros(idcliente: number) {
+    this.swinstitucion = false;
+
     this.totalrubros = 0;
     this.s_rubroxfac
       .getRubrosForRemisiones(idcliente, this.f_buscar.value.fechatope)
@@ -178,13 +181,16 @@ export class AddRemisionComponent implements OnInit {
         let subtotal = 0;
         let total = 0;
         let sumIntereses = 0;
-        console.log(item);
         item.forEach((i: any) => {
-          console.log(i);
           subtotal += i.total;
           sumIntereses += i.intereses;
           total += i.total + i.intereses;
+          console.log(i.nrofactura);
+          if (i.nrofactura != null) {
+            this.swinstitucion = true;
+          } else this.swinstitucion = false;
         });
+        console.log(this.swinstitucion);
 
         this._facturas = item;
         this.s_loading.hideLoading();
@@ -201,9 +207,10 @@ export class AddRemisionComponent implements OnInit {
     this.swdmodal = option;
     switch (option) {
       case 'simular':
-        this.modalTitle = 'Simular remisión';
+        this.modalTitle = 'Calcular remisión';
         this.tableSize = 'lg';
         this.swdisable = true;
+        this.changeCuota();
         break;
       case 'rubros':
         this.modalTitle = 'Detalle Rubros';
@@ -212,10 +219,10 @@ export class AddRemisionComponent implements OnInit {
         break;
     }
   }
-  changeCuota(e: any) {
+  changeCuota() {
     let f = this.f_simular.value;
     let subtotal = this.subtotal;
-    if (+e.target.value! > 1) {
+    if (f.cuotas > 1) {
       let inicial = this.calcularInicial(subtotal, f.porcentaje);
       //let mensual = ((subtotal - inicial) / f.cuotas)-final;
       let p = subtotal - inicial;
@@ -227,9 +234,6 @@ export class AddRemisionComponent implements OnInit {
         final: final.toFixed(2),
       });
     } else {
-      console.log(
-        'El valor de los rubros sigue normal sin cambios, hay que crear una sola factura '
-      );
       this.f_simular.patchValue({
         inicial: 0,
         final: 0,
