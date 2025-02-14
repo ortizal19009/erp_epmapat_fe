@@ -61,7 +61,7 @@
                     </tr>
                 </thead>
                 <tbody class="">
-                    <tr *ngFor="let rubro of _rubros |filter:filtro; let i = index" (click)="getfacturas(rubro.codigo)"
+                    <tr *ngFor="let rubro of _rubros |filter:filtro; let i = index" (click)="getfacturas(rubro)"
                         data-toggle="modal" data-target="#visualizar">
                         <td class="small text-center font-weight-bold">{{i+1}}</td>
                         <td>{{rubro.descripcion}}</td>
@@ -91,16 +91,20 @@
     <!-- Modal -->
     <div class="modal fade" id="visualizar" data-backdrop="static" data-keyboard="false" tabindex="-1"
         aria-labelledby="visualizarLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-dialog modal-dialog-scrollable modal-{{modalSize}}">
             <div class="modal-content ">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="visualizarLabel">Detalles de planillas</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <h5 class="modal-title" id="visualizarLabel">
+                        {{rubrosName}}</h5>
+                    <button type="button" class="close" data-dismiss="modal" *ngIf="swfactura" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
+                    <button class="bg-transparent border-0" type="submit" *ngIf="!swfactura" (click)="regresar()">
+                        <i class="bi-arrow-left-circle icoRegresar"></i>
+                     </button>
                 </div>
                 <div class="modal-body">
-                    <table class="table table-hover table-sm table-bordered">
+                    <table class="table table-hover table-sm table-bordered" *ngIf="swfactura; else detalle">
                         <thead>
                             <tr>
                                 <th></th>
@@ -110,7 +114,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngFor="let factura of _facturas; let i = index">
+                            <tr *ngFor="let factura of _facturas; let i = index" (click)="detallesFactura(factura)">
                                 <td>{{i+1}}</td>
                                 <td>{{factura.factura}}</td>
                                 <td>{{factura.nombre}}</td>
@@ -118,6 +122,10 @@
                             </tr>
                         </tbody>
                     </table>
+                    <ng-template #detalle>
+                        <app-info-factura [idfac]="idfactura"></app-info-factura>
+                    </ng-template>
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success btn-sm" data-dismiss="modal">Cancelar</button>

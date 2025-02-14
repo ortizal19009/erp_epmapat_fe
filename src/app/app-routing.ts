@@ -264,6 +264,7 @@ import { PersonalComponent } from './componentes/rrhh/personal/personal.componen
 import { AddPersonalComponent } from './componentes/rrhh/personal/add-personal/add-personal.component';
 import { RemisionComponent } from './componentes/coactivas/remision/remision.component';
 import { AddRemisionComponent } from './componentes/coactivas/remision/add-remision/add-remision.component';
+import { DetallePlanillaComponent } from './componentes/facturas/detalle-planilla/detalle-planilla.component';
 
 const routes: Routes = [
   //Consumo de Agua
@@ -309,6 +310,7 @@ const routes: Routes = [
   //Planillas (Tabla facturas)
   { path: 'facturas', component: FacturasComponent },
   { path: 'info-planilla', component: InfoFacturasComponent },
+  { path: 'detalle-planilla', component: DetallePlanillaComponent },
   //Productos (Tabla catalogoitems)
   { path: 'catalogoitems', component: CatalogoitemsComponent },
   { path: 'info-catalogoitems', component: InfoCatalogoitemsComponent },
@@ -565,8 +567,8 @@ const routes: Routes = [
   /* COACTIVAS */
   { path: 'cv-rubros', component: CvRubrosComponent },
   { path: 'cv-facturas', component: CvFacturasComponent },
-  { path: 'remision', component: RemisionComponent},
-  { path: 'add-remision', component: AddRemisionComponent},
+  { path: 'remision', component: RemisionComponent },
+  { path: 'add-remision', component: AddRemisionComponent },
 ];
 
 @NgModule({

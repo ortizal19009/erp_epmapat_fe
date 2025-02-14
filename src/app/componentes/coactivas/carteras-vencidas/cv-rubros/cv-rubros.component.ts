@@ -16,13 +16,17 @@ export class CvRubrosComponent implements OnInit {
   today: Date = new Date();
   _rubros: any;
   _facturas: any;
+  rubrosName: string = '';
+  swfactura: boolean = true;
+  modalSize: string = 'md';
+  idfactura: number;
   constructor(
     private coloresService: ColoresService,
     private s_rxf: RubroxfacService,
     private s_facturas: FacturaService,
     private fb: FormBuilder,
     private s_loading: LoadingService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/cv-rubros');
@@ -65,16 +69,30 @@ export class CvRubrosComponent implements OnInit {
   onChangeDate(e: any) {
     this.getCarteraVencidaxRubros(this.f_buscar.value.sDate);
   }
-  getfacturas(idrubro: number) {
+  getfacturas(rubro: any) {
+    this.swfactura = true;
+    this.modalSize = 'lg'
     this.s_loading.showLoading();
+    this.rubrosName = `Listado de clientes en mora del rubro de: ${rubro.descripcion}`;
     this._facturas = [];
     this.s_facturas
-      .getCvFacturasByRubro(idrubro, this.f_buscar.value.sDate)
+      .getCvFacturasByRubro(rubro.codigo, this.f_buscar.value.sDate)
       .subscribe({
         next: (datos: any) => {
           this._facturas = datos;
           this.s_loading.hideLoading();
         },
       });
+  }
+  detallesFactura(factura: any) {
+    console.log(factura)
+    this.rubrosName = `DETALLES PLANILLA ${factura.factura}`
+    this.swfactura = false;
+    this.modalSize = 'xl';
+    this.idfactura = factura.factura;
+    console.log(factura);
+  }
+  regresar() {
+    this.swfactura = true;
   }
 }

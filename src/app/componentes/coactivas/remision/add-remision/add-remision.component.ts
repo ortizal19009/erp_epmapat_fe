@@ -315,65 +315,103 @@ export class AddRemisionComponent implements OnInit {
     remision.detalledocumento = f.referencia;
     remision.idconvenio = 0;
     this.s_remision.saveRemision(remision).subscribe((_rem: any) => {
-      console.log('GUARDANDO REMISION ', _rem);
-      if (f.cuotas === 1) {
-        this.newFacturas(this._rubros, _rem);
+      if (this.swinstitucion == true) {
+        this._facturas.forEach(async (factura: Facturas, i: number) => {
+          let fxr: Facxremi = new Facxremi();
+          let fact: Facturas = new Facturas();
+          fxr.idfactura_facturas = factura;
+          fxr.idremision_remisiones = _rem;
+          fxr.cuota = 0;
+          fxr.tipfactura = 1;
+          this.s_facxremi.savefacxremi(fxr).subscribe((fr: any) => {});
+          fact = factura;
+          fact.idfactura = factura.idfactura;
+          fact.idmodulo = factura.idmodulo;
+          fact.conveniopago = 0;
+          fact.fechaconvenio = factura.fechaconvenio;
+          fact.usumodi = this.authService.idusuario;
+          fact.fecmodi = this.today;
+          fact.swcondonar = true
+          this.s_facturas
+            .updateFacturatoRemision(fact.idfactura, fact)
+            .subscribe({
+              next: (datos: any) => {},
+              error: (e: any) => console.error(e),
+            });
+        });
+        this._facturas.forEach(async (factura: Facturas, i: number) => {
+          let fxr: Facxremi = new Facxremi();
+          let fact: Facturas = new Facturas();
+          fxr.idfactura_facturas = factura;
+          fxr.idremision_remisiones = _rem;
+          fxr.cuota = i + 1;
+          fxr.tipfactura = 2;
+          this.s_facxremi.savefacxremi(fxr).subscribe((fr: any) => {});
+          
+        });
+
+
       } else {
-        let r_inicial = this._rubros.map((item: any) => ({
-          ...item,
-          sum: this.calcularInicial(item.sum, f.porcentaje),
-        }));
-
-        /* CALCULAMOS LAS MENSUALIDADES DE LOS RUBROS */
-        //for (let n: number = 1; n == f.coutas; n++) {
-
-        let r_mensual = this._rubros.map((item: any) => ({
-          ...item,
-          sum: this.calcularCuotaFija(
-            item.sum - this.calcularInicial(item.sum, f.porcentaje),
-            0,
-            f.cuotas
-          ),
-        }));
-
-        /* CALCULAMOS LA CUOTA FINAL DE LOS RUBROS */
-        let f_final = this._rubros.map((item: any) => ({
-          ...item,
-          sum: this.calcularCuotaFinalVariable(
-            item.sum - this.calcularInicial(item.sum, f.porcentaje),
-            0,
-            f.cuotas
-          ),
-        }));
-        this.newFacturas(r_inicial, _rem);
-        for (let i: number = 1; i <= f.cuotas - 1; i++) {
-          this.newFacturas(r_mensual, _rem);
+        if (f.cuotas === 1) {
+          this.newFacturas(this._rubros, _rem);
+        } else {
+          let r_inicial = this._rubros.map((item: any) => ({
+            ...item,
+            sum: this.calcularInicial(item.sum, f.porcentaje),
+          }));
+  
+          /* CALCULAMOS LAS MENSUALIDADES DE LOS RUBROS */
+          //for (let n: number = 1; n == f.coutas; n++) {
+  
+          let r_mensual = this._rubros.map((item: any) => ({
+            ...item,
+            sum: this.calcularCuotaFija(
+              item.sum - this.calcularInicial(item.sum, f.porcentaje),
+              0,
+              f.cuotas
+            ),
+          }));
+  
+          /* CALCULAMOS LA CUOTA FINAL DE LOS RUBROS */
+          let f_final = this._rubros.map((item: any) => ({
+            ...item,
+            sum: this.calcularCuotaFinalVariable(
+              item.sum - this.calcularInicial(item.sum, f.porcentaje),
+              0,
+              f.cuotas
+            ),
+          }));
+          this.newFacturas(r_inicial, _rem);
+          for (let i: number = 1; i <= f.cuotas - 1; i++) {
+            this.newFacturas(r_mensual, _rem);
+          }
+          this.newFacturas(f_final, _rem);
         }
-        this.newFacturas(f_final, _rem);
+  
+        this._facturas.forEach(async (factura: Facturas, i: number) => {
+          let fxr: Facxremi = new Facxremi();
+          let fact: Facturas = new Facturas();
+          fxr.idfactura_facturas = factura;
+          fxr.idremision_remisiones = _rem;
+          fxr.cuota = i + 1;
+          fxr.tipfactura = 1;
+          this.s_facxremi.savefacxremi(fxr).subscribe((fr: any) => {});
+          fact = factura;
+          fact.idfactura = factura.idfactura;
+          fact.idmodulo = factura.idmodulo;
+          fact.conveniopago = 1;
+          fact.fechaconvenio = this.today;
+          fact.usumodi = this.authService.idusuario;
+          fact.fecmodi = this.today;
+          this.s_facturas
+            .updateFacturatoRemision(fact.idfactura, fact)
+            .subscribe({
+              next: (datos: any) => {},
+              error: (e: any) => console.error(e),
+            });
+        });
       }
 
-      this._facturas.forEach(async (factura: Facturas, i: number) => {
-        let fxr: Facxremi = new Facxremi();
-        let fact: Facturas = new Facturas();
-        fxr.idfactura_facturas = factura;
-        fxr.idremision_remisiones = _rem;
-        fxr.cuota = i + 1;
-        fxr.tipfactura = 1;
-        this.s_facxremi.savefacxremi(fxr).subscribe((fr: any) => {});
-        fact = factura;
-        fact.idfactura = factura.idfactura;
-        fact.idmodulo = factura.idmodulo;
-        fact.conveniopago = 1;
-        fact.fechaconvenio = this.today;
-        fact.usumodi = this.authService.idusuario;
-        fact.fecmodi = this.today;
-        this.s_facturas
-          .updateFacturatoRemision(fact.idfactura, fact)
-          .subscribe({
-            next: (datos: any) => {},
-            error: (e: any) => console.error(e),
-          });
-      });
     });
 
     /* VALIDAR SI LAS CUOTAS SON MAYORES A 1 */
