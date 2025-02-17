@@ -12,10 +12,10 @@ const baseUrl = `${apiUrl}/rubroxfac`;
   providedIn: 'root',
 })
 export class RubroxfacService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
-  getSumaValoresUnitarios(idfactura: number) {
-    let res = this.http.get(`${baseUrl}/sumavalores?idfactura=${idfactura}`);
+  async getSumaValoresUnitarios(idfactura: number): Promise<any> {
+    let res = await firstValueFrom(this.http.get<any>(`${baseUrl}/sumavalores?idfactura=${idfactura}`));
     return res;
   }
   getSumaRubros(d: Date, h: Date) {

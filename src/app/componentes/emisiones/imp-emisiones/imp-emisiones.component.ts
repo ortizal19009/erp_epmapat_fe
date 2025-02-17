@@ -13,6 +13,7 @@ import { PdfService } from 'src/app/servicios/pdf.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import $ from 'jquery';
 import * as jQuery from 'jquery';
+import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 @Component({
   selector: 'app-imp-emisiones',
   templateUrl: './imp-emisiones.component.html',
@@ -48,8 +49,9 @@ export class ImpEmisionesComponent implements OnInit {
     private s_pdf: PdfService,
     private s_lecturas: LecturasService,
     private s_emisionindividual: EmisionIndividualService,
-    private s_loading: LoadingService
-  ) {}
+    private s_loading: LoadingService,
+    private s_rubroxfac: RubroxfacService
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/emisiones');
@@ -108,6 +110,7 @@ export class ImpEmisionesComponent implements OnInit {
     if (detalle) detalle.classList.add('nuevoBG2');
   }
   imprimir() {
+    this.s_loading.showLoading();
     switch (this.formImprimir.value.reporte) {
       case '0':
         this.buscarEmisiones();
@@ -328,18 +331,23 @@ export class ImpEmisionesComponent implements OnInit {
   getByIdEmisiones(idemision: number) {
     this.s_lecturas.findByIdEmisiones(idemision).subscribe({
       next: (lecturas: any) => {
+        console.log(lecturas)
         let doc = new jsPDF();
         let body: any[] = [];
+        let suma = 0;
         let head: any = [
-          ['Lectura', 'Emisión', 'Cuenta', 'Responsable P.', 'Ruta'],
+          ['Lectura', 'Emisión', 'Cuenta', 'Responsable P.', 'Ruta', 'Valor'],
         ];
-        lecturas.forEach((lectura: any) => {
+        lecturas.forEach(async (lectura: any) => {
+          suma = await this.s_rubroxfac.getSumaValoresUnitarios(lectura.idfactura)
+          console.log(suma)
           body.push([
             lectura.idlectura,
             lectura.idrutaxemision_rutasxemision.idemision_emisiones.emision,
             lectura.idabonado_abonados.idabonado,
             lectura.idabonado_abonados.idresponsable.nombre,
             lectura.idrutaxemision_rutasxemision.idruta_rutas.descripcion,
+            suma.toFixed(2)
           ]);
         });
         this.s_pdf.bodyOneTable(
@@ -348,6 +356,7 @@ export class ImpEmisionesComponent implements OnInit {
           body,
           doc
         );
+        this.s_loading.hideLoading()
       },
       error: (e) => console.error(e),
     });
@@ -532,7 +541,7 @@ export class ImpEmisionesComponent implements OnInit {
         'CUENTA',
         'NOMBRE',
         'RAZON REFACTURACIÓN',
-'FECHA ELIMINACIÓN',
+        'FECHA ELIMINACIÓN',
         'VALOR ANTERIOR',
         'VALOR NUEVO',
       ],

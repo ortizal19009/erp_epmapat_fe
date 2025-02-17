@@ -90,7 +90,7 @@ export class DetallesAbonadoComponent implements OnInit {
     private authService: AutorizaService,
     private s_condonar: CondmultasinteresesService,
     private s_emision: EmisionService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.obtenerDatosAbonado();
@@ -264,7 +264,7 @@ export class DetallesAbonadoComponent implements OnInit {
     });
   }
 
-  detallesHistorial(lectura: Lecturas) {}
+  detallesHistorial(lectura: Lecturas) { }
 
   regresar() {
     let padre = sessionStorage.getItem('padreDetalleAbonado');
@@ -722,8 +722,7 @@ export class DetallesAbonadoComponent implements OnInit {
   }
   async getSumaFac(idfactura: number): Promise<any> {
     const sumaFac = await this.rubxfacService
-      .getSumaValoresUnitarios(idfactura)
-      .toPromise();
+      .getSumaValoresUnitarios(idfactura);
     return sumaFac;
   }
   async contSinCobrar(idabonado: number) {

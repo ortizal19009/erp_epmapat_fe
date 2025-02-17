@@ -58,7 +58,7 @@ export class RutasmorasComponent implements OnInit {
     private s_rubxfacturas: RubroxfacService,
     private interService: InteresesService,
     private s_loading: LoadingService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/mora-abonados');
@@ -140,7 +140,7 @@ export class RutasmorasComponent implements OnInit {
 
     });
   }
-  getSinCobrar(idabonado: number) {}
+  getSinCobrar(idabonado: number) { }
   setDatosImprimir(abonado: any) {
     //this.getSinCobrar(abonado.idabonado);
     this.s_facturas.getSinCobrarAboMod(abonado.idabonado).subscribe({
@@ -430,8 +430,7 @@ export class RutasmorasComponent implements OnInit {
   }
   async getSumaFac(idfactura: number): Promise<any> {
     const sumaFac = await this.rubxfacService
-      .getSumaValoresUnitarios(idfactura)
-      .toPromise();
+      .getSumaValoresUnitarios(idfactura);
     return sumaFac;
   }
   async contSinCobrar(idabonado: number) {
