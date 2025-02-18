@@ -1,12 +1,13 @@
-FROM node:21-alpine as build-step
-RUN mkdir -p /app
+# Etapa de construcción
+FROM node:21-alpine AS build
 WORKDIR /app
-COPY package.json /app
+COPY package.json package-lock.json ./
 RUN npm install
-COPY . /app
-RUN npm run build --prod
+COPY . .
+RUN npm run build -- --configuration production
 
-#Segunda etapa
-
-FROM nginx:1.17.1-alpine
-COPY --from=build-step /app/dist/erp_epmapat /usr/share/nginx/html
+# Etapa de producción
+FROM nginx:alpine
+COPY --from=build /app/dist/proylte32 /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
