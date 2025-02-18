@@ -107,6 +107,7 @@
                     <tr>
                         <th></th>
                         <th>Planilla</th>
+                        <th>NroFactura</th>
                         <th>Módulo</th>
                         <th>Fecha</th>
                         <th>Valor</th>
@@ -119,6 +120,7 @@
                     <tr *ngFor="let factura of _facturas |filter:filtro; let i = index">
                         <td class="small text-center font-weight-bold">{{i+1}}</td>
                         <td>{{factura.idfactura}}</td>
+                        <td >{{factura.nrofactura}}</td>
                         <td class="">{{factura.descripcion}}</td>
                         <td class="text-center">{{factura.feccrea}}</td>
                         <td class="text-right">{{factura.total.toFixed(2)}} $</td>
@@ -248,7 +250,7 @@
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text" id="addon-wrapping">Cuotas</span>
                                                 </div>
-                                                <input type="number" min=1 max=12 (change)="changeCuota($event)"
+                                                <input type="number" [readOnly]="swinstitucion" min=1 max=12 (change)="changeCuota()"
                                                     class="form-control" placeholder="max 12" aria-label="Cuota"
                                                     formControlName="cuotas" aria-describedby="addon-wrapping">
                                             </div>

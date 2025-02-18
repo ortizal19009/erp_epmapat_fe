@@ -54,6 +54,7 @@ export class AddRecaudaComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    console.log("Add-recauda")
     this.f_buscar = this.fb.group({
       cuenta: '',
       cliente: '',

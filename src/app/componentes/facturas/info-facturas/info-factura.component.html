@@ -5,7 +5,7 @@
             <h4 class="m-0 font-weight-bold"><i class="fa fa-calendar"></i> Planilla</h4>
          </div>
          <div class="col-sm-7 d-flex justify-content-end">
-            <button class="bg-transparent border-0" type="submit" (click)="regresar()">
+            <button class="bg-transparent border-0" type="submit" *ngIf="swreturn" (click)="regresar()">
                <i class="bi-arrow-left-circle text-white icoRegresar"></i>
             </button>
          </div>
@@ -49,7 +49,7 @@
                <!-- <ul class="nav nav-pills"> -->
                <ul class="nav nav-tabs card-header-tabs">
                   <li class="nav-item"><a class="nav-link active" href="#detalle" data-toggle="tab">Detalle</a></li>
-                  <li class="nav-item"><a class="nav-link" href="#facelectro" data-toggle="tab">Factura electrónica</a>
+                  <li class="nav-item"><a class="nav-link" *ngIf="planilla.nrofactura == null" href="#facelectro" data-toggle="tab">Factura electrónica</a>
                   </li>
                   <!-- <li class="nav-item"><a class="nav-link" href="#facturas" data-toggle="tab">Otro</a></li> -->
                </ul>
@@ -81,7 +81,7 @@
                                  </tr>
                                  <tr class="font-weight-bold text-right py-0">
                                     <td colspan="2"></td>
-                                    <td>SubTOTAL 12%</td>
+                                    <td>SubTOTAL {{_impuesto.descripcion}}</td>
                                     <td>{{ suma12 | number: '1.2-2'}}</td>
                                  </tr>
                                  <tr class="font-weight-bold text-right py-0">
@@ -101,8 +101,13 @@
                                  </tr>
                                  <tr class="font-weight-bold text-right py-0">
                                     <td colspan="2"></td>
+                                    <td>INTERES </td>
+                                    <td class="text-right">{{ interes | number: '1.2-2'}}</td>
+                                 </tr>
+                                 <tr class="font-weight-bold text-right py-0">
+                                    <td colspan="2"></td>
                                     <td>TOTAL </td>
-                                    <td class="text-right">{{ suma0 + suma12 + valoriva | number: '1.2-2'}}</td>
+                                    <td class="text-right">{{ suma0 + suma12 + valoriva + interes | number: '1.2-2'}}</td>
                                  </tr>
                               </tbody>
                            </table>

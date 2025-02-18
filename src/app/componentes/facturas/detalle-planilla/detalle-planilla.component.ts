@@ -15,7 +15,7 @@ export class DetallePlanillaComponent implements OnInit {
   _rubros: any;
   _lecturas: any;
   m3: number = 0;
-  loading: Boolean = true;
+  loading: Boolean = false;
   sumaDetail: number = 0;
   constructor(
     private s_rubroxfac: RubroxfacService,
@@ -25,6 +25,7 @@ export class DetallePlanillaComponent implements OnInit {
 
   ngOnInit(): void {
     this.getDatos();
+    console.log(this.idfactura);
   }
   async getDatos() {
     let _sumaDetail: number = 0;
