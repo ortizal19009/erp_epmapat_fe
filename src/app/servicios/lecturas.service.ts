@@ -134,9 +134,12 @@ export class LecturasService {
     return this.http.get(`${baseUrl}/fecEmision?idfactura=${idfactura}`);
   }
   findByIdEmisiones(idemision: number) {
+
     return this.http.get(`${baseUrl}/emision?idemision=${idemision}`);
   }
-
+  getByIdEmisionesR(idemision: number) {
+    return this.http.get(`${baseUrl}/reporte/emision?idemision=${idemision}`);
+  }
   /* Reporte de emisiones */
   findInicial(idemision: number) {
     return this.http.get(

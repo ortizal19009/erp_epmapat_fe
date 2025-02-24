@@ -51,8 +51,6 @@ export class ContentWrapperComponent implements OnInit {
     this.msg = false;
     this.usuService.getUsuario(this.formLogin.value.username, b).subscribe({
       next: (resp) => {
-        console.log(resp);
-
         if (resp) {
           sessionStorage.clear();
           this.authService.sessionlog = true;
@@ -88,7 +86,6 @@ export class ContentWrapperComponent implements OnInit {
   getModulos(idusuario: number) {
     this.s_usrxmodulos.getAccesoModulos(idusuario).subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this.authService.modules = datos;
         sessionStorage.setItem('modulos', JSON.stringify(datos));
       },

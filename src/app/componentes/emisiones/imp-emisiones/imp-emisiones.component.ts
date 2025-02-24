@@ -229,6 +229,7 @@ export class ImpEmisionesComponent implements OnInit {
       body3,
       doc
     );
+  this.s_loading.hideLoading();
   }
   async impEmisionFinal(idemision: number) {
     let doc = new jsPDF();
@@ -327,31 +328,32 @@ export class ImpEmisionesComponent implements OnInit {
       body2,
       doc
     );
+    this.s_loading.hideLoading();
   }
   getByIdEmisiones(idemision: number) {
-    this.s_lecturas.findByIdEmisiones(idemision).subscribe({
+    this.s_lecturas.getByIdEmisionesR(idemision).subscribe({
       next: (lecturas: any) => {
-        console.log(lecturas)
         let doc = new jsPDF();
         let body: any[] = [];
-        let suma = 0;
+        let suma: any = 0;
         let head: any = [
           ['Lectura', 'Emisión', 'Cuenta', 'Responsable P.', 'Ruta', 'Valor'],
         ];
-        lecturas.forEach(async (lectura: any) => {
-          suma = await this.s_rubroxfac.getSumaValoresUnitarios(lectura.idfactura)
-          console.log(suma)
+        lecturas.forEach((lectura: any) => {
           body.push([
             lectura.idlectura,
-            lectura.idrutaxemision_rutasxemision.idemision_emisiones.emision,
-            lectura.idabonado_abonados.idabonado,
-            lectura.idabonado_abonados.idresponsable.nombre,
-            lectura.idrutaxemision_rutasxemision.idruta_rutas.descripcion,
-            suma.toFixed(2)
+            lectura.emision,
+            lectura.cuenta,
+            lectura.nombre,
+            lectura.ruta,
+            lectura.suma.toFixed(2)
           ]);
+          suma += lectura.suma
+
         });
+        body.push(['','','','','TOTAL',suma.toFixed(2)])
         this.s_pdf.bodyOneTable(
-          `Facturas eliminadas - Emisión: ${lecturas[0].idrutaxemision_rutasxemision.idemision_emisiones.emision}`,
+          `Facturas eliminadas - Emisión: ${lecturas[0].emision}`,
           head,
           body,
           doc
@@ -529,6 +531,8 @@ export class ImpEmisionesComponent implements OnInit {
       body,
       doc
     );
+    this.s_loading.hideLoading();
+
   }
   async impRefacturacionxEmision(idemision: number) {
     let emision = await this.getEmision(idemision);
@@ -544,22 +548,29 @@ export class ImpEmisionesComponent implements OnInit {
         'FECHA ELIMINACIÓN',
         'VALOR ANTERIOR',
         'VALOR NUEVO',
+        'DIFERENCIA'
       ],
     ];
     let body: any = [];
+    let diferencia: number = 0;
     obj.forEach((item: any) => {
+      let va = item.valoranterior
+      let vn = item.valornuevo
+      let dif = va - vn
       body.push([
         item.cuenta,
         item.nombre,
         item.observaciones,
         item.fecelimina,
-        +item.valoranterior!.toFixed(2),
-        +item.valornuevo!.toFixed(2),
+        va.toFixed(2),
+        vn.toFixed(2),
+        dif.toFixed(2)
       ]);
       n_suma += item.valornuevo;
       a_suma += item.valoranterior;
+      diferencia = a_suma - n_suma;
     });
-    body.push(['', '', 'TOTALES', a_suma.toFixed(2), n_suma.toFixed(2)]);
+    body.push(['', '', 'TOTALES', a_suma.toFixed(2), n_suma.toFixed(2), 'TOT. DIF.', diferencia.toFixed(2)]);
 
     this.s_pdf.bodyOneTable(
       `Refacturación de la emisión ${emision?.emision}`,
@@ -567,6 +578,8 @@ export class ImpEmisionesComponent implements OnInit {
       body,
       doc
     );
+    this.s_loading.hideLoading();
+
   }
   async impRefacturacionxFecha(d: Date, h: Date) {
     let obj: any = await this.getRefacturacionxFecha(d, h);
@@ -601,6 +614,8 @@ export class ImpEmisionesComponent implements OnInit {
     });
     body.push(['', '', 'TOTALES', a_suma.toFixed(2), n_suma.toFixed(2)]);
     this.s_pdf.bodyOneTable(`Refacturación ${d} - ${h}`, head, body, doc);
+    this.s_loading.hideLoading();
+
   }
   async getValoresEmitidos(idemision: number) {
     let valores = this.s_lecturas
@@ -744,6 +759,7 @@ export class ImpEmisionesComponent implements OnInit {
         },
         error: (err) => console.error(err.error),
       });
+
   }
   impListaEmisiones() {
     let doc = new jsPDF();
@@ -751,6 +767,7 @@ export class ImpEmisionesComponent implements OnInit {
     let head = [['Emision', 'm3', 'Fecha Cierre']];
     var datos: any = [];
     var i = 0;
+    console.log(this._emisiones)
     this._emisiones.forEach((item: any) => {
       if (item.estado === 1) {
         datos.push([
@@ -763,6 +780,8 @@ export class ImpEmisionesComponent implements OnInit {
     });
     // datos.push(['', 'TOTAL', '', '', '', this.sumtotal.toLocaleString('en-US')]);
     this.s_pdf.bodyOneTable('Listado de emisiones', head, datos, doc);
+    this.s_loading.hideLoading();
+
   }
   async getEmision(idemision: number) {
     const emision = await this.emiService.getByIdemision(idemision).toPromise();
