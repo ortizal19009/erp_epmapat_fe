@@ -43,7 +43,7 @@ export class ImpCajasComponent implements OnInit {
     private facService: FacturaService,
     private rxfService: RubroxfacService,
     private _pdf: PdfService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/cajas');
@@ -959,9 +959,9 @@ export class ImpCajasComponent implements OnInit {
     doc.setFontSize(12);
     doc.text(
       'RECAUDACIÓN DIARIA - PLANILLAS: ' +
-        this.formImprimir.value.d_fecha +
-        ' / ' +
-        this.formImprimir.value.h_fecha,
+      this.formImprimir.value.d_fecha +
+      ' / ' +
+      this.formImprimir.value.h_fecha,
       m_izquierda,
       16
     );
@@ -971,16 +971,18 @@ export class ImpCajasComponent implements OnInit {
     var i = 0;
     this._cobradas.forEach(() => {
       let totalPorFormaCobro =
-        this._cobradas[i][1] + this._cobradas[i][0].swiva;
+        this._cobradas[i].valor + this._cobradas[i].swiva;
       /*       Math.round( * 100) /
               100; */
       // datos.push([this._cobradas[i][0].idfactura, this._cobradas[i][0].feccrea, this._cobradas[i][0].nrofactura, this._cobradas[i][0].formapago,
       // this._cobradas[i][0].idcliente.nombre, formatNumber(totalPorFormaCobro)]);
       datos.push([
-        this._cobradas[i][0].idfactura,
-        this._cobradas[i][0].feccrea,
-        this._cobradas[i][0].nrofactura,
-        this._cobradas[i][0].formapago,
+        this._cobradas[i].idfactura,
+        this._cobradas[i].nombre, 
+        this._cobradas[i].cedula,
+        this._cobradas[i].fechatransferencia,
+        this._cobradas[i].nrofactura,
+        this._cobradas[i].formapago,
         formatNumber(totalPorFormaCobro),
       ]);
       suma += totalPorFormaCobro;
@@ -1009,7 +1011,7 @@ export class ImpCajasComponent implements OnInit {
     };
 
     autoTable(doc, {
-      head: [['Nro', 'Fecha', 'Factura', 'F.Cob', 'Valor']],
+      head: [['Nro','Nom. Cliente', 'Identificación', 'Fecha', 'Factura', 'F.Cob', 'Valor']],
       theme: 'grid',
       headStyles: {
         fillColor: [68, 103, 114],
@@ -1022,15 +1024,15 @@ export class ImpCajasComponent implements OnInit {
         cellPadding: 1,
         halign: 'center',
       },
-      columnStyles: {
+/*       columnStyles: {
         0: { halign: 'center', cellWidth: 16 },
         1: { halign: 'center', cellWidth: 18 },
         2: { halign: 'center', cellWidth: 29 },
         3: { halign: 'center', cellWidth: 12 },
         // 4: { halign: 'left', cellWidth: 75 },
         4: { halign: 'right', cellWidth: 20 },
-      },
-      margin: { left: m_izquierda - 1, top: 18, right: 66, bottom: 13 },
+      }, */
+      margin: {  top: 18, bottom: 13 },
       body: datos,
       didParseCell: function (data) {
         var fila = data.row.index;
