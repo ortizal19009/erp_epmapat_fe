@@ -265,6 +265,8 @@ import { AddPersonalComponent } from './componentes/rrhh/personal/add-personal/a
 import { RemisionComponent } from './componentes/coactivas/remision/remision.component';
 import { AddRemisionComponent } from './componentes/coactivas/remision/add-remision/add-remision.component';
 import { DetallePlanillaComponent } from './componentes/facturas/detalle-planilla/detalle-planilla.component';
+import { NtacreditoComponent } from './componentes/ntacredito/ntacredito.component';
+import { AddNtacreditoComponent } from './componentes/ntacredito/add-ntacredito/add-ntacredito.component';
 
 const routes: Routes = [
   //Consumo de Agua
@@ -427,7 +429,8 @@ const routes: Routes = [
   { path: 'ubicacionm', component: UbicacionmComponent },
   { path: 'add-ubicacionm', component: AddUbicacionmComponent },
   { path: 'modiubicacionm/:id', component: ModiUbicacionmComponent },
-
+  { path: 'ntacredito', component:NtacreditoComponent},
+  { path: 'add-ntacredito', component: AddNtacreditoComponent},
   //================ CONTABILIDAD =============================
   { path: 'cuentas', component: CuentasComponent },
   { path: 'add-cuenta', component: AddCuentaComponent },

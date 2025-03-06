@@ -284,6 +284,8 @@ import { RemisionComponent } from './componentes/coactivas/remision/remision.com
 import { AddRemisionComponent } from './componentes/coactivas/remision/add-remision/add-remision.component';
 import { SafePipe } from './pipes/safe.pipe';
 import { NtcreditoComponent } from './componentes/ntcredito/ntcredito.component';
+import { NtacreditoComponent } from './componentes/ntacredito/ntacredito.component';
+import { AddNtacreditoComponent } from './componentes/ntacredito/add-ntacredito/add-ntacredito.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
@@ -556,6 +558,8 @@ import { NtcreditoComponent } from './componentes/ntcredito/ntcredito.component'
     AddRemisionComponent,
     SafePipe,
     NtcreditoComponent,
+    NtacreditoComponent,
+    AddNtacreditoComponent,
   ],
 
   imports: [

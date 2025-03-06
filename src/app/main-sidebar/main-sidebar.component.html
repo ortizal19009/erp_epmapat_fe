@@ -304,6 +304,14 @@
                </ul>
                <ul class="nav nav-treeview">
                   <li class="nav-item">
+                     <a routerLink="ntacredito" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 130)}">
+                        <i class="fa fa-sticky-note" aria-hidden="true"></i>
+                        <p class="text-warning">&nbsp;Notas de crédito</p>
+                     </a>
+                  </li>
+               </ul>
+               <ul class="nav nav-treeview">
+                  <li class="nav-item">
                      <a routerLink="cajas" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 140)}">
                         <i class="fa fa-th nav-icon" aria-hidden="true"></i>
                         <p class="text-warning"> Cajas</p>

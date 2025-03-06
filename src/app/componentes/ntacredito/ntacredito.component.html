@@ -1,0 +1,114 @@
+<div class="content mt-1 pt-1 pl-0">
+    <div class="container-fluid">
+        <div class="row m-0 px-0 py-1 justify-content-start cabecera sombra border">
+            <div class="col-sm-2">
+                <h5 class="m-0 font-weight-bold description"><i class="fa fa-sticky-note" aria-hidden="true"></i>
+                    Notas de créditos</h5>
+            </div>
+            <div class="col-sm-6">
+                <div class="container-fluid">
+                    <form [formGroup]="f_bntacredito" class="formGroup" (ngSubmit)="onSubmit()">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <select name="" id="selecTipoBusqueda" class="form-control form-control-sm"
+                                    formControlName="selecTipoBusqueda">
+                                    <option value="1">Cuenta</option>
+                                    <option value="2">Nombre</option>
+                                    <option value="3">Identificación</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-5">
+                                <div class="container">
+                                    <input type="text" placeholder="Buscar" class="form-control form-control-sm"
+                                        autofocus id="buscarAbonado" formControlName="buscarAbonado" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <button class="btn btn-primary btn-sm">
+                                    <i class="fa fa-search" style="font-size:24pxi"></i> Buscar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <input type="text" class="form-control mx-0 form-control-sm text-center" placeholder="Filtrar..."
+                    [(ngModel)]="filterTerm" />
+            </div>
+
+            <div class="btn-group ml-auto mt-0">
+                <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
+                    aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+                </button>
+                <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+                    <button class="dropdown-item" [routerLink]="['/add-ntacredito']" type="button">
+                        <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+                    <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
+                        <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+                    <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar"><i
+                            class="bi-file-earmark-arrow-up"></i>&nbsp; Exportar</button>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row mb-0">
+        <div class="col-sm">
+            <table class="table table-hover table-bordered table-sm sombra">
+                <thead class="text-center cabecera">
+                    <tr>
+                        <th></th>
+                        <th>Nombre</th>
+                        <th>Identificación</th>
+                        <th>Cuenta</th>
+                        <th>Categoría</th>
+                        <th>Ruta</th>
+                        <th>Dirección</th>
+                    </tr>
+                </thead>
+                <tbody class="detalle">
+                    <tr class="fila" *ngFor="let ntacredito of _ntacreditos | filter:filterTerm; let i= index"
+                        (click)="detallesnotasnc( ntacredito )">
+                        <td class="text-center small font-weight-bold">{{i+1}}</td>
+                        <td>{{ ntacredito.idcliente_clientes.nombre }}</td>
+                        <td class="text-center">{{ ntacredito.idcliente_clientes.cedula }}</td>
+                        <td class="text-center"
+                            [ngClass]="{'fontwarning': ntacredito.estado === 0,'fantacygreen': ntacredito.estado === 2 || ntacredito.estado === 3}">
+                            {{ntacredito.idntacredito }}</td>
+                        <td>{{ ntacredito.idcategoria_categorias.descripcion }}</td>
+                        <td>{{ ntacredito.idruta_rutas.descripcion }}</td>
+                        <td>{{ ntacredito.direccionubicacion }}</td>
+                    </tr>
+                </tbody>
+                <!-- MODAL -->
+                <div class='modal fade' id='modalAbonados' tabindex='-1' aria-labelledby='modalAbonadosLabel'
+                    aria-hidden='true'>
+                    <div class='modal-dialog'>
+                        <div class='modal-content'>
+                            <div class='modal-header'>
+                                <h5 class='modal-title' id='modalAbonadosLabel'>CONFIRMACIÓN</h5>
+                                <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+                                    <span aria-hidden='true'>&times;</span>
+                                </button>
+                            </div>
+                            <div class='modal-body'>
+                                ¿ Esta seguro de eliminar el abonado ?
+                            </div>
+                            <div class='modal-footer' id='idButtons'>
+                                <button type='button' class='btn btn-secondary' data-dismiss='modal'>NO</button>
+                                <button type='button' class='btn btn-primary' data-dismiss='modal'
+                                    id='btnSi'>SI</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </table>
+        </div>
+    </div>
+
+</div>
