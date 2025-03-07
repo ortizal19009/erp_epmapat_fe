@@ -8,7 +8,7 @@
  .nuevoBG2 { background-color: var(--bgcolor2); }
  
  .fila:hover {
-    background-color: #117a8B;
+    background-color: #168697;
     color: white;
     cursor: pointer;
  }

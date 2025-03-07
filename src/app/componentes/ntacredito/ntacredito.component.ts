@@ -22,9 +22,9 @@ export class NtacreditoComponent implements OnInit {
   }
   async buscaColor() {
     try {
-      const datos = await this.coloresService.setcolor(1, 'abonados');
+      const datos = await this.coloresService.setcolor(1, 'ntacredito');
       const coloresJSON = JSON.stringify(datos);
-      sessionStorage.setItem('/abonados', coloresJSON);
+      sessionStorage.setItem('/ntacredito', coloresJSON);
       this.colocaColor(datos);
     } catch (error) {
       console.error(error);

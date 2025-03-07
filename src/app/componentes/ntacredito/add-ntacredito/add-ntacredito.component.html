@@ -1,8 +1,8 @@
 <div class="content mt-1 pt-1 pl-0">
     <div class="container-fluid">
         <div class="row m-0 px-0 py-1 justify-content-start cabecera sombra border">
-            <div class="col-sm-2">
-                <h5 class="m-0 font-weight-bold description"><i class="fa fa-sticky-note" aria-hidden="true"></i>
+            <div class="col-sm">
+                <h5 class="m-0 font-weight-bold"><i class="fa fa-sticky-note" aria-hidden="true"></i>
                     Nueva Nota de Crédito</h5>
             </div>
 
@@ -13,26 +13,87 @@
 </div>
 
 <div class="container-fluid mt-2 sombra">
-    <form action="" >
-
-        <div class="row ">
+    <form [formGroup]="f_ntacredito">
+        <div class="row">
             <div class="col-sm mt-2">
                 <div class="input-group input-group-sm mb-3">
-                    <input type="text" class="form-control" placeholder="Recipient's username"
-                        aria-label="Recipient's username" aria-describedby="button-addon2">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Nro.Factura</span>
+                    </div>
+                    <input type="text" class="form-control" formControlName="nrofactura"
+                        (click)="clearInput('planilla')" placeholder="nro factura" aria-label=""
+                        aria-describedby="button-addon2">
+                    <input type="text" class="form-control" (click)="clearInput('nrofactura')"
+                        formControlName="planilla" placeholder="planilla" aria-label=""
+                        aria-describedby="button-addon2">
                     <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" type="button" id="button-addon2">Button</button>
+                        <button class="btn btn-outline-primary" type="button" (click)="getPlanilla()"
+                            id="button-addon2"><i class="fa fa-search" aria-hidden="true"></i>
+                        </button>
                     </div>
                 </div>
             </div>
-            <div class="col-sm mt-2">
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                <h6>Datos factura</h6>
+                <table class="table table-sm">
+                    <tbody>
+                        <tr>
+                            <td>Resp pago: {{cliente.nombre}}</td>
+                            <td>Nro. factura: {{_factura.nrofactura}}</td>
+                            <td>Planilla: {{_factura.idfactura}}</td>
+                        </tr>
+                        <tr>
+                            <td>Valor factura: </td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row ">
+            <div class="col-sm">
+                <div class="input-group input-group-sm mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Cliente</span>
+                    </div>
+                    <input type="text" class="form-control" formControlName="cliente" placeholder="Cliente"
+                        aria-label="" aria-describedby="button-addon2">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-primary" type="button" id="button-addon2"><i class="fa fa-search"
+                                aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm">
+                <div class="input-group input-group-sm mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Valor</span>
+                    </div>
+                    <input type="text" class="form-control" placeholder="valor nota de credito" aria-label=""
+                        aria-describedby="basic-addon1">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm">
                 <div class="input-group input-group-sm mb-3">
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="basic-addon1">Observación</span>
                     </div>
-                    <input type="text" class="form-control" placeholder="Username" aria-label="Username"
+                    <textarea type="text" class="form-control" placeholder="" aria-label=""
                         aria-describedby="basic-addon1">
+                    </textarea>
                 </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm text-right mb-3">
+                <button class="btn btn-sm btn-success mr-2">Cancelar</button>
+                <button class="btn btn-sm btn-outline-success">Aceptar</button>
             </div>
         </div>
     </form>

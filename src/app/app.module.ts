@@ -283,7 +283,6 @@ import { AddPersonalComponent } from './componentes/rrhh/personal/add-personal/a
 import { RemisionComponent } from './componentes/coactivas/remision/remision.component';
 import { AddRemisionComponent } from './componentes/coactivas/remision/add-remision/add-remision.component';
 import { SafePipe } from './pipes/safe.pipe';
-import { NtcreditoComponent } from './componentes/ntcredito/ntcredito.component';
 import { NtacreditoComponent } from './componentes/ntacredito/ntacredito.component';
 import { AddNtacreditoComponent } from './componentes/ntacredito/add-ntacredito/add-ntacredito.component';
 
@@ -557,7 +556,6 @@ import { AddNtacreditoComponent } from './componentes/ntacredito/add-ntacredito/
     RemisionComponent,
     AddRemisionComponent,
     SafePipe,
-    NtcreditoComponent,
     NtacreditoComponent,
     AddNtacreditoComponent,
   ],
