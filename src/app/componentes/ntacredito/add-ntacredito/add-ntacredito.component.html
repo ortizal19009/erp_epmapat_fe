@@ -34,9 +34,8 @@
                 </div>
             </div>
         </div>
-        <div class="row">
+        <div class="row" *ngIf="valorFactura > 0">
             <div class="col-sm">
-                <h6>Datos factura</h6>
                 <table class="table table-sm">
                     <tbody>
                         <tr>
@@ -45,7 +44,7 @@
                             <td>Planilla: {{_factura.idfactura}}</td>
                         </tr>
                         <tr>
-                            <td>Valor factura: </td>
+                            <td>Valor factura: {{valorFactura}}</td>
                             <td></td>
                             <td></td>
                         </tr>
@@ -62,8 +61,8 @@
                     <input type="text" class="form-control" formControlName="cliente" placeholder="Cliente"
                         aria-label="" aria-describedby="button-addon2">
                     <div class="input-group-append">
-                        <button class="btn btn-outline-primary" type="button" id="button-addon2"><i class="fa fa-search"
-                                aria-hidden="true"></i>
+                        <button class="btn btn-outline-primary" type="button" id="button-addon2" data-toggle="modal"
+                            data-target="#slcCliente"><i class="fa fa-search" aria-hidden="true"></i>
                         </button>
                     </div>
                 </div>
@@ -73,8 +72,8 @@
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="basic-addon1">Valor</span>
                     </div>
-                    <input type="text" class="form-control" placeholder="valor nota de credito" aria-label=""
-                        aria-describedby="basic-addon1">
+                    <input type="number" min="0" max={{valorFactura}} class="form-control" formControlName="valor"
+                        placeholder="valor nota de credito" aria-label="" aria-describedby="basic-addon1">
                 </div>
             </div>
         </div>
@@ -84,8 +83,8 @@
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="basic-addon1">Observación</span>
                     </div>
-                    <textarea type="text" class="form-control" placeholder="" aria-label=""
-                        aria-describedby="basic-addon1">
+                    <textarea type="text" class="form-control" formControlName="observacion" placeholder=""
+                        aria-label="" aria-describedby="basic-addon1">
                     </textarea>
                 </div>
             </div>
@@ -93,9 +92,27 @@
         <div class="row">
             <div class="col-sm text-right mb-3">
                 <button class="btn btn-sm btn-success mr-2">Cancelar</button>
-                <button class="btn btn-sm btn-outline-success">Aceptar</button>
+                <button class="btn btn-sm btn-outline-success" (click)="onSubmit()">Aceptar</button>
             </div>
         </div>
     </form>
+</div>
 
+<!-- Modal -->
+<div class="modal fade" id="slcCliente" data-backdrop="static" data-keyboard="false" tabindex="-1"
+    aria-labelledby="slcClienteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="slcClienteLabel">Buscar cliente</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <app-buscar-cliente (setCliente)="setCliente($event)"></app-buscar-cliente>
+            </div>
+
+        </div>
+    </div>
 </div>
