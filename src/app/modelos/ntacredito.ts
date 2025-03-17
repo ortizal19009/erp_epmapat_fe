@@ -1,3 +1,4 @@
+import { Abonados } from "./abonados";
 import { Clientes } from "./clientes";
 
 export class Ntacredito {
@@ -13,6 +14,7 @@ export class Ntacredito {
     fechaeliminacion: Date;
     razoneliminacion: string;
     idcleinte_clientes: Clientes;
+    idabonado_abonados: Abonados;
     usucrea: number;
     feccrea: Date;
     usumodi: number;

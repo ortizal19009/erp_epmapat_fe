@@ -3,9 +3,11 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
+import { Abonados } from 'src/app/modelos/abonados';
 import { Clientes } from 'src/app/modelos/clientes';
 import { Facturas } from 'src/app/modelos/facturas.model';
 import { Ntacredito } from 'src/app/modelos/ntacredito';
+import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
@@ -22,6 +24,7 @@ export class AddNtacreditoComponent implements OnInit {
   _factura: Facturas = new Facturas();
   cliente: Clientes = new Clientes();
   resppago: Clientes = new Clientes();
+  _cuenta: Abonados = new Abonados()
   date: Date = new Date();
   valorFactura: number = 0
   constructor(
@@ -31,7 +34,8 @@ export class AddNtacreditoComponent implements OnInit {
     private s_factura: FacturaService,
     private authService: AutorizaService,
     private s_rubroxfac: RubroxfacService,
-    private loading: LoadingService
+    private loading: LoadingService,
+    private s_abonado: AbonadosService
   ) { }
 
   ngOnInit(): void {
@@ -46,6 +50,7 @@ export class AddNtacreditoComponent implements OnInit {
       valor: '',
       observacion: '',
       idfactura: '',
+      cuenta: ''
     });
   }
   async buscaColor() {
@@ -69,7 +74,6 @@ export class AddNtacreditoComponent implements OnInit {
   }
   onSubmit() {
     let f = this.f_ntacredito.value
-    console.log(this.f_ntacredito.value)
     let ntacredito: Ntacredito = new Ntacredito();
     ntacredito.valor = f.valor
     ntacredito.observacion = f.observacion
@@ -78,8 +82,7 @@ export class AddNtacreditoComponent implements OnInit {
     ntacredito.usucrea = this.authService.idusuario;
     ntacredito.devengado = 0;
     ntacredito.nrofactura = f.idfactura
-    console.log(ntacredito)
-
+    ntacredito.idabonado_abonados = this._cuenta
   }
   detallesnotasnc(notacredito: any) { }
   clearInput(name: any) {
@@ -92,44 +95,51 @@ export class AddNtacreditoComponent implements OnInit {
     this.f_ntacredito.get(name)?.setValue(''); // Borra el valor del primer input
   }
   getPlanilla() {
-    this.loading.showLoading();
     let formulario = this.f_ntacredito.value;
-    if (formulario.nrofactura != '') {
-      this.s_factura.getByNrofactura(formulario.nrofactura).subscribe({
-        next: (planilla: any) => {
-          console.log(planilla);
-          if (planilla.length == 1) {
-            this._factura = planilla[0];
-            this.cliente = planilla[0].idcliente;
-            this.resppago = planilla[0].idcliente;
+    if (formulario.nrofactura != '' && formulario.planilla != '') {
+      this.loading.showLoading();
+      if (formulario.nrofactura != '') {
+        this.s_factura.getByNrofactura(formulario.nrofactura).subscribe({
+          next: (planilla: any) => {
+            console.log(planilla);
+            if (planilla.length == 1) {
+              this._factura = planilla[0];
+              this.cliente = planilla[0].idcliente;
+              this.resppago = planilla[0].idcliente;
+              this.buscarAbonado(planilla[0].idabonado)
+              this.f_ntacredito.patchValue({
+                cliente: planilla[0].idcliente.nombre,
+                idfactura: planilla[0].idfactura,
+                cuenta: planilla[0].idabonado
+              });
+              this.getValorPlanilla(planilla[0].idfactura)
+            }
+          },
+          error: (e: any) => console.error(e),
+        });
+      }
+      if (formulario.planilla != '') {
+        this.s_factura.getById(formulario.planilla).subscribe({
+          next: (planilla: any) => {
+            console.log(planilla);
+            this._factura = planilla;
+            this.cliente = planilla.idcliente;
+            this.resppago = planilla.idcliente;
+            this.buscarAbonado(planilla.idabonado)
             this.f_ntacredito.patchValue({
-              cliente: planilla[0].idcliente.nombre,
-              idfactura: planilla[0].idfactura
+              cliente: planilla.idcliente.nombre,
+              idfactura: planilla.idfactura,
+              nrofactura: planilla.nrofactura,
+              cuenta: planilla.idabonado
             });
-            this.getValorPlanilla(planilla[0].idfactura)
-          }
-        },
-        error: (e: any) => console.error(e),
-      });
-    }
-    if (formulario.planilla != '') {
-      this.s_factura.getById(formulario.planilla).subscribe({
-        next: (planilla: any) => {
-          console.log(planilla);
-          this._factura = planilla;
-          this.cliente = planilla.idcliente;
-          this.resppago = planilla.idcliente;
-          this.f_ntacredito.patchValue({
-            cliente: planilla.idcliente.nombre,
-            idfactura: planilla.idfactura,
-            nrofactura: planilla.nrofactura
-          });
-          this.getValorPlanilla(planilla.idfactura)
+            this.getValorPlanilla(planilla.idfactura)
 
-        },
-        error: (e: any) => console.error(e),
-      });
+          },
+          error: (e: any) => console.error(e),
+        });
+      }
     }
+
   }
   getValorPlanilla(idfactura: any) {
     this.s_rubroxfac.getSumaValoresUnitarios(idfactura).then((valor: any) => {
@@ -138,11 +148,28 @@ export class AddNtacreditoComponent implements OnInit {
       this.loading.hideLoading();
     })
   }
+  buscarAbonado(cuenta: number) {
+    this.s_abonado.getById(cuenta).subscribe({
+      next: (cuenta: any) => {
+        this._cuenta = cuenta;
+      },
+      error: (e: any) => console.error(e)
+    })
+  }
+
   setCliente(dato: any) {
-    console.log(dato)
     this.resppago = dato;
     this.f_ntacredito.patchValue({
       cliente: dato.nombre
     })
   }
+  setAbonado(dato: any) {
+    this.resppago = dato.idresponsable;
+    this._cuenta = dato;
+    this.f_ntacredito.patchValue({
+      cuenta: dato.idabonado,
+      cliente: dato.idresponsable.nombre
+    })
+  }
+
 }

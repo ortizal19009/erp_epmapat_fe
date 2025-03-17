@@ -61,12 +61,27 @@
                     <input type="text" class="form-control" formControlName="cliente" placeholder="Cliente"
                         aria-label="" aria-describedby="button-addon2">
                     <div class="input-group-append">
-                        <button class="btn btn-outline-primary" type="button" id="button-addon2" data-toggle="modal"
+                        <button class="btn btn-outline-primary" type="button" disabled="true" id="button-addon2" data-toggle="modal"
                             data-target="#slcCliente"><i class="fa fa-search" aria-hidden="true"></i>
                         </button>
                     </div>
                 </div>
             </div>
+            <div class="col-sm">
+                <div class="input-group input-group-sm mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Cuenta </span>
+                    </div>
+                    <input type="text" class="form-control" formControlName="cuenta" placeholder="Cuenta"
+                        aria-label="" aria-describedby="button-addon2">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-primary" type="button" id="button-addon2" data-toggle="modal"
+                            data-target="#slcAbonado"><i class="fa fa-search" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
             <div class="col-sm">
                 <div class="input-group input-group-sm mb-3">
                     <div class="input-group-prepend">
@@ -111,6 +126,24 @@
             </div>
             <div class="modal-body">
                 <app-buscar-cliente (setCliente)="setCliente($event)"></app-buscar-cliente>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="slcAbonado" data-backdrop="static" data-keyboard="false" tabindex="-1"
+    aria-labelledby="slcAbonadoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="slcAbonadoLabel">Buscar abonado</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <app-buscarabonado (abonadoEvent)="setAbonado($event)"></app-buscarabonado>
             </div>
 
         </div>
