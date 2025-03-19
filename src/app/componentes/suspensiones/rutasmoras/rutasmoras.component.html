@@ -29,55 +29,52 @@
     </div>
 </div>
 <div class="container-fluid mt-3">
-    <div class="row" *ngIf="porcCarga != 100">
-        <div class="col-sm">
-            <div class="progress">
-                <div class="progress-bar bg-primary progress-bar-striped" role="progressbar" aria-valuenow="40"
-                    aria-valuemin="0" aria-valuemax="100" [ngStyle]="{ 'width.%': porcCarga }">
-                    <span class="sr-only">{{porcCarga}}% Complete (success)</span>
-                </div>
-            </div>
-        </div>
-    </div>
     <div class="row">
         <div class="col-sm">
-            <table class="table table-sm table-hover table-striped table-bordered">
-                <thead class="text-center">
-                    <tr>
-                        <th>Nro</th>
-                        <th>Cuenta</th>
-                        <th>Cliente</th>
-                        <th>Identificación</th>
-                        <th>Deudas</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let abonado of _abonados | filter: filterTerm; let i = index">
-                        <td class="text-center">{{i+1}}</td>
-                        <td class="text-center">{{abonado.idabonado}}</td>
-                        <td>{{abonado.idresponsable.nombre}}</td>
-                        <td class="text-center">{{abonado.idresponsable.cedula}}</td>
-                        <td class="text-center">
-                            {{abonado.numeroDeuda}}
-                        </td>
-                        <td class="text-center">
-                            <div class="btn-group ml-auto mt-0">
-                                <button type="button" class="bg-transparent border-0 dropdown-toggle text-green"
-                                    data-toggle="dropdown" aria-expanded="false"> <i class="bi bi-menu-down"></i>
-                                </button>
-                                <div class="dropdown-menu dropdown-menu-right roboto">
-                                    <button class="dropdown-item text-muted" type="button">
-                                        <i class="bi bi-sliders"></i>&nbsp; Suspender</button>
-                                    <button class="dropdown-item text-muted" type="button" data-toggle="modal"
-                                        (click)="setDatosImprimir(abonado)" data-target="#impNotificacion">
-                                        <i class="bi bi-printer"></i>&nbsp; Notificación</button>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="card">
+                <div class="card-body table-responsive">
+                    <table class="table table-xs table-hover table-striped table-bordered">
+                        <thead class="text-center">
+                            <tr>
+                                <th>Nro</th>
+                                <th>Cuenta</th>
+                                <th>Cliente</th>
+                                <th>Identificación</th>
+                                <th (click)="sortData('numeroDeuda')">Deudas</th>
+                                <th>Valor</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let abonado of _abonados | filter: filterTerm; let i = index">
+                                <td class="text-center">{{i+1}}</td>
+                                <td class="text-center">{{abonado.idabonado}}</td>
+                                <td>{{abonado.idresponsable.nombre}}</td>
+                                <td class="text-center">{{abonado.idresponsable.cedula}}</td>
+                                <td class="text-center">
+                                    {{abonado.numeroDeuda}}
+                                </td>
+                                <td>...</td>
+                                <td class="text-center">
+                                    <div class="btn-group ml-auto mt-0">
+                                        <button type="button" class="bg-transparent border-0 dropdown-toggle text-green"
+                                            data-toggle="dropdown" aria-expanded="false"> <i class="bi bi-menu-down"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right roboto">
+                                            <button class="dropdown-item text-muted" type="button">
+                                                <i class="bi bi-sliders"></i>&nbsp; Suspender</button>
+                                            <button class="dropdown-item text-muted" type="button" data-toggle="modal"
+                                                (click)="setDatosImprimir(abonado)" data-target="#impNotificacion">
+                                                <i class="bi bi-printer"></i>&nbsp; Notificación</button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
 
         <!-- Modal -->

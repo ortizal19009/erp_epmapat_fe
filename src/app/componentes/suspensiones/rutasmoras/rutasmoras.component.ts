@@ -46,6 +46,9 @@ export class RutasmorasComponent implements OnInit {
   _rxf: any = [];
   rubrostotal: number = 0;
 
+  /* SORRTED METOD */
+  currentSortColumn: any | null = null;
+  isAscending: boolean = true;
   constructor(
     private rutaDato: ActivatedRoute,
     private lecService: LecturasService,
@@ -68,6 +71,7 @@ export class RutasmorasComponent implements OnInit {
     this.getRuta(+idruta!);
     this.getAbonadosByRuta(+idruta!);
     this.listarIntereses();
+
   }
   colocaColor(colores: any) {
     document.documentElement.style.setProperty('--bgcolor1', colores[0]);
@@ -440,6 +444,25 @@ export class RutasmorasComponent implements OnInit {
       return number; */
     //});
     return dato;
+  }
+
+  sortData(column: any) {
+    if (this.currentSortColumn === column) {
+      this.isAscending = !this.isAscending;
+    } else {
+      this.currentSortColumn = column;
+      this.isAscending = true;
+    }
+
+    this._abonados = this._abonados.sort((a: any, b: any) => {
+      if (a[column] < b[column]) {
+        return this.isAscending ? -1 : 1;
+      }
+      if (a[column] > b[column]) {
+        return this.isAscending ? 1 : -1;
+      }
+      return 0;
+    });
   }
 }
 interface calcInteres {
