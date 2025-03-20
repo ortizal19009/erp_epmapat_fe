@@ -438,6 +438,8 @@ export class RutasmorasComponent implements OnInit {
     return sumaFac;
   }
   async contSinCobrar(idabonado: number) {
+    let totales = await this.s_facturas.getValorTotalCuenta(idabonado);
+    console.log(totales)
     let dato = await this.s_facturas.countSinCobrarAbo(idabonado);
     /* .then((number: any) => {
       console.log(number);

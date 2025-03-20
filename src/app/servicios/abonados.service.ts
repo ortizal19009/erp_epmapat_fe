@@ -11,7 +11,7 @@ const baseUrl = `${apiUrl}/abonados`;
   providedIn: 'root',
 })
 export class AbonadosService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   async getById_v2(idabonado: number) {
     return this.http.get<Abonados>(`${baseUrl}/${idabonado}`);
@@ -129,5 +129,9 @@ export class AbonadosService {
   //Para reporte de campos especificos
   getCampos(): Observable<Abonados[]> {
     return this.http.get<Abonados[]>(`${baseUrl}/campos`);
+  }
+  async getDeudasCuentasByRuta(idruta: number) {
+    let resp = this.http.get(`${baseUrl}/deudas?idruta${idruta}`);
+    return await firstValueFrom(resp);
   }
 }

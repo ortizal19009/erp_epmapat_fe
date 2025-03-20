@@ -12,7 +12,7 @@ const baseUrl = `${apiUrl}/facturas`;
   providedIn: 'root',
 })
 export class FacturaService {
-  constructor(private http: HttpClient, private s_interes: InteresesService) {}
+  constructor(private http: HttpClient, private s_interes: InteresesService) { }
 
   getListaByNroFactura(nrofactura: String) {
     return this.http.get<Facturas>(`${baseUrl}?nrofactura=${nrofactura}`);
@@ -422,7 +422,7 @@ export class FacturaService {
     );
     return facturas;
   }
-  async getFacturasForRemisionabonados(idcliente: any,cuenta: any, fechatope: any): Promise<any[]> {
+  async getFacturasForRemisionabonados(idcliente: any, cuenta: any, fechatope: any): Promise<any[]> {
     let facturas = await firstValueFrom(
       this.http.get<any[]>(
         `${baseUrl}/remisiones/cuenta?idcliente=${idcliente}&cuenta=${cuenta}&fechatope=${fechatope}`
@@ -435,5 +435,15 @@ export class FacturaService {
       `${baseUrl}/remisionfactura?idfactura=${idfactura}`,
       factura
     );
+  }
+  /* OBTENER LOS VALORES DE UNA FACTUA POR CUENTA */
+  async getValoresCuenta(cuenta: number) {
+    let resp = this.http.get(`${baseUrl}/sincobrar/cuentas?cuenta=${cuenta}`)
+    return await firstValueFrom(resp);
+  }
+  async getValorTotalCuenta(cuenta: number) {
+    let resp = this.http.get(`${baseUrl}/sincobrar/total?cuenta=${cuenta}`)
+    return await firstValueFrom(resp);
+
   }
 }
