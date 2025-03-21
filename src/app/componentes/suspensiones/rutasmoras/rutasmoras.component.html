@@ -16,7 +16,8 @@
                     <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
                         <button class="dropdown-item" type="button">
                             <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
-                        <button class="dropdown-item" type="button" data-toggle="modal" (click)="impDatosRutaTable()" data-target="#pdf">
+                        <button class="dropdown-item" type="button" data-toggle="modal" (click)="impDatosRutaTable()"
+                            data-target="#pdf">
                             <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
                         <button class="dropdown-item text-muted" type="button" disabled><i
                                 class="bi-file-earmark-arrow-down text-muted"></i>
@@ -69,8 +70,12 @@
                                             <button class="dropdown-item text-muted" type="button">
                                                 <i class="bi bi-sliders"></i>&nbsp; Suspender</button>
                                             <button class="dropdown-item text-muted" type="button" data-toggle="modal"
-                                                (click)="setDatosImprimir(abonado.cuenta)" data-target="#impNotificacion">
+                                                (click)="setDatosImprimir(abonado.cuenta)"
+                                                data-target="#impNotificacion">
                                                 <i class="bi bi-printer"></i>&nbsp; Notificación</button>
+                                            <button class="dropdown-item text-muted" type="button" data-toggle="modal"
+                                                data-target="#detallesAbonado">
+                                                <i class="fa fa-info" aria-hidden="true"></i>&nbsp; Detalles</button>
                                         </div>
                                     </div>
                                 </td>

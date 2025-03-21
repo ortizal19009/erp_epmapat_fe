@@ -21,7 +21,7 @@ export class SuspensionesComponent implements OnInit {
   filterTerm: string;
   suspensiones: any;
   today: number = Date.now();
-  optImprimir: string = '0';
+  optImprimir: string = '1';
   _ruta: any;
 
   constructor(
@@ -135,47 +135,7 @@ export class SuspensionesComponent implements OnInit {
     }
   }
   setRuta(e: any) {
-    //console.log(e);
-    let newDatos: any[] = [];
     this.router.navigate(['mora-abonados', e.idruta]);
-
-    /*  this._ruta = e;
-    this.s_lecturas.findDeudoresByRuta(this._ruta.idruta).subscribe({
-      next: async (lecturas: any) => {
-        await lecturas.forEach((item: any) => {
-          let newPreFactura: any = [];
-          this.s_rubroxfac
-            .getByIdfacturaAsync(item.idfactura)
-            .then((i: any) => {
-              if (i.length > 0) {
-                let doc = new jsPDF('p', 'pt', 'a4');
-                //newPreFactura.idfactura = i.idfactura;
-                //newDatos.push(newPreFactura);
-                let findLectura = newPreFactura.find(
-                  (lectura: { idlectura: number }) =>
-                    lectura.idlectura === item.idlectura
-                );
-                if (findLectura === undefined) {
-                  newPreFactura.push({ item, i });
-                  console.log(newPreFactura);
-                } else {
-                  //newPreFactura.findLectura[]
-                }
-
-                console.log(findLectura);
-                console.log(i);
-              }
-              console.log(newPreFactura);
-            })
-            .then(async () => {
-              console.log('HOLA MUNDO SEGUNDO BLOQUE');
-            })
-            .catch((e) => console.error(e));
-        });
-        await console.log(newDatos);
-      },
-      error: (e) => console.error(e),
-    }); */
   }
   /* IMPRIMIR */
   i_deudasxruta(datos: any) {
