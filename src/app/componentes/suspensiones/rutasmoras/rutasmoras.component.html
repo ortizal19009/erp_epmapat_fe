@@ -37,23 +37,27 @@
                         <thead class="text-center">
                             <tr>
                                 <th>Nro</th>
-                                <th>Cuenta</th>
+                                <th (click)="sortData('cuenta')">Cuenta</th>
                                 <th>Cliente</th>
                                 <th>Identificación</th>
-                                <th (click)="sortData('numeroDeuda')">Deudas</th>
-                                <th>Valor</th>
+                                <th (click)="sortData('numfacturas')">Deudas</th>
+                                <th>Subtotal</th>
+                                <th>Interes</th>
+                                <th>Total</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngFor="let abonado of _abonados | filter: filterTerm; let i = index">
+                            <tr *ngFor="let abonado of datosCuentas | filter: filterTerm; let i = index">
                                 <td class="text-center">{{i+1}}</td>
-                                <td class="text-center">{{abonado.idabonado}}</td>
-                                <td>{{abonado.idresponsable.nombre}}</td>
-                                <td class="text-center">{{abonado.idresponsable.cedula}}</td>
+                                <td class="text-center">{{abonado.cuenta}}</td>
+                                <td>{{abonado.nombre}}</td>
+                                <td class="text-center">{{abonado.cedula}}</td>
                                 <td class="text-center">
-                                    {{abonado.numeroDeuda}}
+                                    {{abonado.numfacturas}}
                                 </td>
+                                <td>...</td>
+                                <td>...</td>
                                 <td>...</td>
                                 <td class="text-center">
                                     <div class="btn-group ml-auto mt-0">

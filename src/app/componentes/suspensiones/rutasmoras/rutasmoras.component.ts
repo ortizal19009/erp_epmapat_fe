@@ -45,6 +45,7 @@ export class RutasmorasComponent implements OnInit {
 
   _rxf: any = [];
   rubrostotal: number = 0;
+  datosCuentas: any;
 
   /* SORRTED METOD */
   currentSortColumn: any | null = null;
@@ -68,9 +69,9 @@ export class RutasmorasComponent implements OnInit {
     let coloresJSON = sessionStorage.getItem('/mora-abonados');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
     let idruta = this.rutaDato.snapshot.paramMap.get('idruta');
-    this.getRuta(+idruta!);
+/*     this.getRuta(+idruta!);
     this.getAbonadosByRuta(+idruta!);
-    this.listarIntereses();
+    this.listarIntereses(); */
     this.getDatosCuenta(+idruta!);
   }
   colocaColor(colores: any) {
@@ -448,6 +449,7 @@ export class RutasmorasComponent implements OnInit {
   this.s_loading.showLoading();
     this.s_abonado.getDeudasCuentasByRuta(idruta).then((item: any) => {
       console.log(item);
+      this.datosCuentas= item;
       this.s_loading.hideLoading();
     });
   }
