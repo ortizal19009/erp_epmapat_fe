@@ -61,7 +61,7 @@ export class RutasmorasComponent implements OnInit {
     private s_rubxfacturas: RubroxfacService,
     private interService: InteresesService,
     private s_loading: LoadingService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/mora-abonados');
@@ -71,7 +71,7 @@ export class RutasmorasComponent implements OnInit {
     this.getRuta(+idruta!);
     this.getAbonadosByRuta(+idruta!);
     this.listarIntereses();
-
+    this.getDatosCuenta(+idruta!);
   }
   colocaColor(colores: any) {
     document.documentElement.style.setProperty('--bgcolor1', colores[0]);
@@ -116,8 +116,7 @@ export class RutasmorasComponent implements OnInit {
                 }
               }
             })
-            .then(async () => {
-            })
+            .then(async () => {})
             .catch((e) => console.error(e));
         });
       },
@@ -141,10 +140,9 @@ export class RutasmorasComponent implements OnInit {
         });
       });
       this.contSinCobrar(abonados[0].idabonado);
-
     });
   }
-  getSinCobrar(idabonado: number) { }
+  getSinCobrar(idabonado: number) {}
   setDatosImprimir(abonado: any) {
     //this.getSinCobrar(abonado.idabonado);
     this.s_facturas.getSinCobrarAboMod(abonado.idabonado).subscribe({
@@ -433,19 +431,25 @@ export class RutasmorasComponent implements OnInit {
     return interes;
   }
   async getSumaFac(idfactura: number): Promise<any> {
-    const sumaFac = await this.rubxfacService
-      .getSumaValoresUnitarios(idfactura);
+    const sumaFac = await this.rubxfacService.getSumaValoresUnitarios(
+      idfactura
+    );
     return sumaFac;
   }
   async contSinCobrar(idabonado: number) {
-    let totales = await this.s_facturas.getValorTotalCuenta(idabonado);
-    console.log(totales)
     let dato = await this.s_facturas.countSinCobrarAbo(idabonado);
     /* .then((number: any) => {
       console.log(number);
       return number; */
     //});
     return dato;
+  }
+  getDatosCuenta(idruta: number) {
+  this.s_loading.showLoading();
+    this.s_abonado.getDeudasCuentasByRuta(idruta).then((item: any) => {
+      console.log(item);
+      this.s_loading.hideLoading();
+    });
   }
 
   sortData(column: any) {
