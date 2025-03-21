@@ -16,7 +16,7 @@
                     <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
                         <button class="dropdown-item" type="button">
                             <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
-                        <button class="dropdown-item" type="button" data-toggle="modal" data-target="#pdf">
+                        <button class="dropdown-item" type="button" data-toggle="modal" (click)="impDatosRutaTable()" data-target="#pdf">
                             <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
                         <button class="dropdown-item text-muted" type="button" disabled><i
                                 class="bi-file-earmark-arrow-down text-muted"></i>
@@ -33,7 +33,7 @@
         <div class="col-sm">
             <div class="card">
                 <div class="card-body table-responsive">
-                    <table class="table table-xs table-hover table-striped table-bordered">
+                    <table id="datos-ruta" class="table table-xs table-hover table-striped table-bordered">
                         <thead class="text-center">
                             <tr>
                                 <th>Nro</th>
@@ -43,7 +43,7 @@
                                 <th (click)="sortData('numfacturas')">Deudas</th>
                                 <th>Subtotal</th>
                                 <th>Interes</th>
-                                <th>Total</th>
+                                <th (click)="sortData('total')">Total</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -56,13 +56,14 @@
                                 <td class="text-center">
                                     {{abonado.numfacturas}}
                                 </td>
-                                <td>...</td>
-                                <td>...</td>
-                                <td>...</td>
+                                <td class="text-right">{{abonado.subtotal.toFixed(2)}}</td>
+                                <td class="text-right">{{abonado.interes.toFixed(2)}}</td>
+                                <td class="text-right">{{abonado.total.toFixed(2)}}</td>
                                 <td class="text-center">
                                     <div class="btn-group ml-auto mt-0">
                                         <button type="button" class="bg-transparent border-0 dropdown-toggle text-green"
-                                            data-toggle="dropdown" aria-expanded="false"> <i class="bi bi-menu-down"></i>
+                                            data-toggle="dropdown" aria-expanded="false"> <i
+                                                class="bi bi-menu-down"></i>
                                         </button>
                                         <div class="dropdown-menu dropdown-menu-right roboto">
                                             <button class="dropdown-item text-muted" type="button">

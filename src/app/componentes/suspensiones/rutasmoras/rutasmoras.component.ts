@@ -24,7 +24,7 @@ export class RutasmorasComponent implements OnInit {
   _ruta: any;
   filterTerm: string;
   today: number = Date.now();
-  titulo: string = 'Abonados en mora ';
+  titulo: string = 'Valores pendientes Abonados';
   abonados: any;
   _lecturas: any;
   _abonados: any = [];
@@ -62,16 +62,16 @@ export class RutasmorasComponent implements OnInit {
     private s_rubxfacturas: RubroxfacService,
     private interService: InteresesService,
     private s_loading: LoadingService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/mora-abonados');
     let coloresJSON = sessionStorage.getItem('/mora-abonados');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
     let idruta = this.rutaDato.snapshot.paramMap.get('idruta');
-/*     this.getRuta(+idruta!);
-    this.getAbonadosByRuta(+idruta!);
-    this.listarIntereses(); */
+    /*     this.getRuta(+idruta!);
+        this.getAbonadosByRuta(+idruta!);
+        this.listarIntereses(); */
     this.getDatosCuenta(+idruta!);
   }
   colocaColor(colores: any) {
@@ -117,7 +117,7 @@ export class RutasmorasComponent implements OnInit {
                 }
               }
             })
-            .then(async () => {})
+            .then(async () => { })
             .catch((e) => console.error(e));
         });
       },
@@ -143,7 +143,7 @@ export class RutasmorasComponent implements OnInit {
       this.contSinCobrar(abonados[0].idabonado);
     });
   }
-  getSinCobrar(idabonado: number) {}
+  getSinCobrar(idabonado: number) { }
   setDatosImprimir(abonado: any) {
     //this.getSinCobrar(abonado.idabonado);
     this.s_facturas.getSinCobrarAboMod(abonado.idabonado).subscribe({
@@ -446,10 +446,10 @@ export class RutasmorasComponent implements OnInit {
     return dato;
   }
   getDatosCuenta(idruta: number) {
-  this.s_loading.showLoading();
+    this.s_loading.showLoading();
     this.s_abonado.getDeudasCuentasByRuta(idruta).then((item: any) => {
       console.log(item);
-      this.datosCuentas= item;
+      this.datosCuentas = item;
       this.s_loading.hideLoading();
     });
   }
@@ -462,7 +462,7 @@ export class RutasmorasComponent implements OnInit {
       this.isAscending = true;
     }
 
-    this._abonados = this._abonados.sort((a: any, b: any) => {
+    this.datosCuentas = this.datosCuentas.sort((a: any, b: any) => {
       if (a[column] < b[column]) {
         return this.isAscending ? -1 : 1;
       }
@@ -471,6 +471,14 @@ export class RutasmorasComponent implements OnInit {
       }
       return 0;
     });
+  }
+  impDatosRutaTable() {
+    let doc = new jsPDF();
+    this.s_pdf.header(this.titulo, doc)
+    autoTable(doc, {
+      html: '#datos-ruta'
+    })
+    doc.save('table.pdf')
   }
 }
 interface calcInteres {
