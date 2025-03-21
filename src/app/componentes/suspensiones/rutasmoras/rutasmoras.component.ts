@@ -24,7 +24,7 @@ export class RutasmorasComponent implements OnInit {
   _ruta: any;
   filterTerm: string;
   today: number = Date.now();
-  titulo: string = 'Valores pendientes Abonados';
+  titulo: string = 'Valores pendientes Abonados de la ruta ';
   abonados: any;
   _lecturas: any;
   _abonados: any = [];
@@ -69,8 +69,8 @@ export class RutasmorasComponent implements OnInit {
     let coloresJSON = sessionStorage.getItem('/mora-abonados');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
     let idruta = this.rutaDato.snapshot.paramMap.get('idruta');
-    /*     this.getRuta(+idruta!);
-        this.getAbonadosByRuta(+idruta!);
+      this.getRuta(+idruta!);
+    /*    this.getAbonadosByRuta(+idruta!);
         this.listarIntereses(); */
     this.getDatosCuenta(+idruta!);
   }
@@ -143,10 +143,9 @@ export class RutasmorasComponent implements OnInit {
       this.contSinCobrar(abonados[0].idabonado);
     });
   }
-  getSinCobrar(idabonado: number) { }
   setDatosImprimir(abonado: any) {
     //this.getSinCobrar(abonado.idabonado);
-    this.s_facturas.getSinCobrarAboMod(abonado.idabonado).subscribe({
+    this.s_facturas.getSinCobrarAboMod(abonado).subscribe({
       next: (facSincobro: any) => {
         abonado.facturas = facSincobro;
         this.datosImprimir = abonado;
@@ -158,89 +157,7 @@ export class RutasmorasComponent implements OnInit {
     });
   }
 
-  async _impNotificacion() {
-    let doc = new jsPDF();
-    doc.setFontSize(14);
-    this.s_pdf.header(
-      `Notificación de deudas pendientes: ${this.datosImprimir.idabonado.toString()}`,
-      doc
-    );
-    doc.setFontSize(7);
-    autoTable(doc, {
-      head: [
-        [
-          {
-            colSpan: 2,
-            content: 'DATOS PERSONALES',
-            styles: { halign: 'center' },
-          },
-        ],
-      ],
-      body: [
-        [
-          `CLIENTE: ${this.datosImprimir.idcliente_clientes.nombre}`,
-          `IDENTIFICACIÓN: ${this.datosImprimir.idcliente_clientes.cedula}`,
-        ],
-        [
-          `EMAIL: ${this.datosImprimir.idcliente_clientes.email}`,
-          `TELEFONO: ${this.datosImprimir.idcliente_clientes.telefono}`,
-        ],
-        [
-          `DIRECCIÓN: ${this.datosImprimir.direccionubicacion}`,
-          `RUTA: ${this.datosImprimir.idruta_rutas.descripcion}`,
-        ],
-        [
-          `CATEGORÍA: ${this.datosImprimir.idcategoria_categorias.descripcion}`,
-          `AL.: ${this.datosImprimir.swalcantarillado} / A.M.: ${this.datosImprimir.adultomayor} / M: ${this.datosImprimir.municipio}`,
-        ],
-      ],
-    });
 
-    // Gather all `getSumaFac()` promises
-    const sumaFacPromises: any[] = [];
-    let facturas: any = this.datosImprimir.facturas;
-    facturas.forEach(async (factura: any) => {
-      factura.interes = await this.cInteres(factura);
-      const sumaFacPromise = this.getSumaFac(factura.idfactura);
-      sumaFacPromises.push(sumaFacPromise);
-    });
-    let d_facturas = [];
-    // Wait for all `getSumaFac()` promises to resolve
-    const sumaFacResults = await Promise.all(sumaFacPromises);
-
-    // Iterate through facturas and add sumaFac values
-    for (let i = 0; i < facturas.length; i++) {
-      const factura = facturas[i];
-      const sumaFac = sumaFacResults[i];
-      facturas[i].sumaFac = sumaFac;
-      let suma = +factura.sumaFac.toFixed(2)! + +factura.interes.toFixed(2)!;
-      d_facturas.push([
-        factura.idfactura,
-        factura.idmodulo.descripcion,
-        factura.sumaFac.toFixed(2),
-        factura.interes.toFixed(2),
-        suma.toFixed(2),
-      ]);
-    }
-    autoTable(doc, {
-      headStyles: { halign: 'center' },
-      head: [['Planilla', 'Módulo', 'Sub total', 'Interés', 'Total']],
-      columnStyles: {
-        2: { halign: 'center' },
-        3: { halign: 'center' },
-        4: { halign: 'center' },
-      },
-      body: d_facturas,
-    });
-    // Generate data URI and set iframe source
-    const pdfDataUri = doc.output('datauri');
-    const pdfViewer: any = document.getElementById(
-      'pdfViewer'
-    ) as HTMLIFrameElement;
-    pdfViewer.src = pdfDataUri;
-    // Generate and output the PDF after all data is processed
-    //doc.output('pdfobjectnewwindow');
-  }
   async impNotificacion() {
     this.s_loading.showLoading();
     let doc = new jsPDF();
@@ -369,14 +286,6 @@ export class RutasmorasComponent implements OnInit {
     //doc.output('pdfobjectnewwindow');
   }
 
-  listarIntereses() {
-    this.interService.getListaIntereses().subscribe({
-      next: (datos) => {
-        this._intereses = datos;
-      },
-      error: (err) => console.error(err.error),
-    });
-  }
 
   async getFechaEmision(idfactura: number): Promise<any> {
     const fechaEmision = this.lecService
@@ -391,46 +300,7 @@ export class RutasmorasComponent implements OnInit {
       .toPromise();
     return interes;
   }
-  /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
-  _cInteres(factura: any) {
-    this.totInteres = 0;
-    this.arrCalculoInteres = [];
-    let interes: number = 0;
-    if (factura.estado != 3 && factura.formapago != 4) {
-      let fec = factura.feccrea.toString().split('-', 2);
-      let fechai: Date = new Date(`${fec[0]}-${fec[1]}-02`);
-      let fechaf: Date = new Date();
-      this.factura = factura;
-      fechaf.setMonth(fechaf.getMonth() - 1);
-      while (fechai <= fechaf) {
-        this.calInteres = {} as calcInteres;
-        let query = this._intereses.find(
-          (interes: { anio: number; mes: number }) =>
-            interes.anio === +fechai.getFullYear()! &&
-            interes.mes === +fechai.getMonth()! + 1
-        );
-        if (!query) {
-          this.calInteres.anio = +fechai.getFullYear()!;
-          this.calInteres.mes = +fechai.getMonth()! + 1;
-          this.calInteres.interes = 0;
-          query = this.calInteres;
-        } else {
-          this.calInteres.anio = query.anio;
-          this.calInteres.mes = query.mes;
-          this.calInteres.interes = query.porcentaje;
-          this.calInteres.valor = factura.totaltarifa;
-          this.arrCalculoInteres.push(this.calInteres);
-        }
-        fechai.setMonth(fechai.getMonth() + 1);
-      }
-      this.arrCalculoInteres.forEach((item: any) => {
-        //this.totInteres += (item.interes * item.valor) / 100;
-        interes += (item.interes * item.valor) / 100;
-        // this.subtotal();
-      });
-    }
-    return interes;
-  }
+
   async getSumaFac(idfactura: number): Promise<any> {
     const sumaFac = await this.rubxfacService.getSumaValoresUnitarios(
       idfactura
@@ -478,6 +348,7 @@ export class RutasmorasComponent implements OnInit {
     autoTable(doc, {
       html: '#datos-ruta'
     })
+    this.s_pdf.setfooter(doc)
     doc.save('table.pdf')
   }
 }

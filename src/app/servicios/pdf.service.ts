@@ -12,7 +12,7 @@ export class PdfService {
   line = 0;
   url = 'assets/';
 
-  constructor(http: HttpClient) {}
+  constructor(http: HttpClient) { }
   header(titulo: string, doc: any) {
     this.margin_l = 0;
     this.line = 0;
@@ -70,6 +70,28 @@ export class PdfService {
       'pdfViewer'
     ) as HTMLIFrameElement;
     return (pdfViewer.src = pdfDataUri);
+  }
+  setfooter(doc: any) {
+    // Obtener la fecha y hora actual
+    const horaImpresion = this.setDateTime();
+  
+    // Configurar el estilo del texto
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100); // Color gris
+    doc.setFont('helvetica', 'normal'); // Fuente helvetica
+  
+    // Agregar el pie de página
+    doc.text(
+      `Fecha y hora de impresión: ${horaImpresion}`,
+      doc.internal.pageSize.getWidth() / 2,
+      doc.internal.pageSize.getHeight() - 20, // Margen inferior aumentado
+      { align: 'center' }
+    );
+  }
+  
+  setDateTime(): string {
+    const now = new Date();
+    return now.toLocaleString(); // Formato local
   }
   async _bodyOneTable(title: string, head: any, body: any, doc: any) {
     this.header(title, doc);
