@@ -406,8 +406,10 @@ export class DetallesAbonadoComponent implements OnInit {
   getSinCobro() {
     this.facService.getSinCobrarAboMod(this._abonado[0].idabonado).subscribe({
       next: (facturas: any) => {
+        console.log(facturas)
         this._abonado[0].facturas = facturas;
         this.datosImprimir = this._abonado[0];
+        console.log(this.datosImprimir)
         this.impNotificacion();
       },
       error: (e) => console.error(e.error),

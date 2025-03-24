@@ -69,7 +69,7 @@ export class RutasmorasComponent implements OnInit {
     let coloresJSON = sessionStorage.getItem('/mora-abonados');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
     let idruta = this.rutaDato.snapshot.paramMap.get('idruta');
-      this.getRuta(+idruta!);
+    this.getRuta(+idruta!);
     /*    this.getAbonadosByRuta(+idruta!);
         this.listarIntereses(); */
     this.getDatosCuenta(+idruta!);
@@ -143,10 +143,11 @@ export class RutasmorasComponent implements OnInit {
       this.contSinCobrar(abonados[0].idabonado);
     });
   }
-  setDatosImprimir(abonado: any) {
+  setDatosImprimir(cuenta: any) {
     //this.getSinCobrar(abonado.idabonado);
-    this.s_facturas.getSinCobrarAboMod(abonado).subscribe({
-      next: (facSincobro: any) => {
+    this.s_facturas.getSinCobrarAboMod(cuenta).subscribe({
+      next: async (facSincobro: any) => {
+        let abonado :any = await this.s_abonado.getById(cuenta).toPromise();
         abonado.facturas = facSincobro;
         this.datosImprimir = abonado;
         this.impNotificacion();
