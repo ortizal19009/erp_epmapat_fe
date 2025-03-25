@@ -275,7 +275,7 @@ export class RutasmorasComponent implements OnInit {
       head: [['Cod.Rubro', 'Descripción', 'Valor']],
       body: d_rxf,
     });
-
+    this.s_pdf.setfooter(doc);
     // Generate data URI and set iframe source
     const pdfDataUri = doc.output('datauri');
     const pdfViewer: any = document.getElementById(

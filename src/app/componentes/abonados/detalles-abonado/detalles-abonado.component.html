@@ -13,8 +13,8 @@
                   <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
                <button class="dropdown-item" type="button">
                   <i class="bi-file-earmark-arrow-down"></i>&nbsp; Exportar</button>
-               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#condonar"
-                  (click)="calcularDeudasAC()">
+               <button class="dropdown-item" type="button" disabled data-toggle="modal" data-target="#condonar">
+                  <!--  (click)="calcularDeudasAC()"> -->
                   <i class="bi bi-exclude"></i>&nbsp; Condonar deudas</button>
             </div>
             <div class="col-sm-1">
@@ -474,9 +474,10 @@
 
          </div>
          <div class="modal-footer">
-            <button class="btn btn-sm btn-outline-success" (click)="setOptImprimir()">Aceptar</button>
             <button type="button" class="btn btn-sm btn-success" data-dismiss="modal"
                (click)="cancelar()">Cancelar</button>
+               <button class="btn btn-sm btn-outline-success" (click)="setOptImprimir()">Aceptar</button>
+
          </div>
       </div>
    </div>
