@@ -51,6 +51,7 @@ export class RutasmorasComponent implements OnInit {
   currentSortColumn: any | null = null;
   isAscending: boolean = true;
   cuenta: any;
+  modalSize: string = 'lg'
   constructor(
     private rutaDato: ActivatedRoute,
     private lecService: LecturasService,
@@ -351,9 +352,15 @@ export class RutasmorasComponent implements OnInit {
       html: '#datos-ruta'
     })
     this.s_pdf.setfooter(doc)
-    doc.save('table.pdf')
+    const pdfDataUri = doc.output('datauri');
+    const pdfViewer: any = document.getElementById(
+      'pdfViewer'
+    ) as HTMLIFrameElement;
+
+    return (pdfViewer.src = pdfDataUri);
   }
   detallesAbonado(cuenta: any) {
+    console.log(cuenta)
     this.cuenta = cuenta
   }
 }

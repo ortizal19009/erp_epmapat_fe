@@ -112,8 +112,6 @@ export class DetallesAbonadoComponent implements OnInit {
       this.swreturn = true;
       idabonado = this.cuenta
     }
-    console.log(idabonado)
-    console.log(this.cuenta)
     this.aboService.getByIdabonado(+idabonado!).subscribe({
       next: (datos) => {
         this._abonado = datos;
