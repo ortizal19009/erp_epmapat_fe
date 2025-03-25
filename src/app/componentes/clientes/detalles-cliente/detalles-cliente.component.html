@@ -178,8 +178,17 @@
                               </div>
                            </div>
                            <table *ngIf="!nofacturas" class="table table-hover table-sm table-bordered mb-0">
+                              <caption class="small mark">Últimas <strong>{{limit}}</strong>
+                                 Planillas&nbsp;&nbsp;&nbsp;&nbsp;
+                                 <button
+                                    class="btn btn-outline-primary btn-xs">&nbsp;&nbsp;Rango&nbsp;&nbsp;</button>
+                              </caption>
                               <thead class="theadPlanillas">
                                  <tr class="text-center">
+                                    <th class="text-center">
+                                       <input type="number" min=1 class="form-control form-control-sm buscarLimit"
+                                          [(ngModel)]="limit" (change)="getFactura()">
+                                    </th>
                                     <th>Nro.</th>
                                     <th>Fecha</th>
                                     <th>Módulo</th>
@@ -189,8 +198,10 @@
                                  </tr>
                               </thead>
                               <tbody class="bodyPlanillas">
-                                 <tr *ngFor="let factura of _facturas" class="text-center fila" data-toggle="modal"
-                                    data-target="#DetalleFacturaModal" (click)="getRubroxfac( factura.idfactura )">
+                                 <tr *ngFor="let factura of _facturas; let i = index" class="text-center fila"
+                                    data-toggle="modal" data-target="#DetalleFacturaModal"
+                                    (click)="getRubroxfac( factura.idfactura )">
+                                    <td>{{i+1}}</td>
                                     <td>{{ factura.idfactura }}</td>
                                     <td>{{ factura.feccrea }}</td>
                                     <td class="text-left">{{ factura.idmodulo.descripcion }}</td>
@@ -250,7 +261,7 @@
    <!-- Modal DetalleFactura -->
    <div class="modal fade" id="DetalleFacturaModal" tabindex="-1" aria-labelledby="DetalleFacturaModal"
       aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
          <div class="modal-content">
             <div class="modal-header">
                <h5 class="modal-title" id="DetalleFacturaModalLabel"><strong>Planilla:</strong> {{idfactura}}</h5>
@@ -259,31 +270,15 @@
                </button>
             </div>
             <div class="modal-body">
-               <table class="table table-hover table-sm table-bordered">
-                  <thead class="bg-primary">
-                     <tr class="text-center">
-                        <th></th>
-                        <th class="col-md-6">Rubro</th>
-                        <!-- <th>Cant</th> -->
-                        <th>Valor</th>
-                        <!-- <th>Subtotal</th> -->
-                     </tr>
-                  </thead>
-                  <tbody>
-                     <tr *ngFor="let rubroxfac of _rubrosxfac; let i=index">
-                        <td class="text-center font-weight-bold small">{{i+1}}</td>
-                        <td>{{ rubroxfac.idrubro_rubros.descripcion}}</td>
-                        <!-- <td class="text-center">{{ rubroxfac.cantidad}}</td> -->
-                        <td class="text-right">{{ rubroxfac.valorunitario | number:'1.2-2'}}</td>
-                        <!-- <td class="text-right">{{ rubroxfac.cantidad * rubroxfac.valorunitario | number:'1.2-2'}}</td> -->
-                     </tr>
-                     <tr>
-                        <td></td>
-                        <td class="font-weight-bold">Total</td>
-                        <td class="font-weight-bold text-right">{{ totfac | number:'1.2-2'}}</td>
-                     </tr>
-                  </tbody>
-               </table>
+               <div class="col-sm text-center" *ngIf="!idfactura;else name">
+                  <i class="fa fa-spinner" aria-hidden="true"></i>
+               </div>
+               <ng-template #name>
+                  <app-info-factura [idfac]="idfactura"></app-info-factura>
+
+               </ng-template>
+
+
             </div>
             <div class="modal-footer">
                <button type="button" class="btn btn-outline-success btn-sm" data-dismiss="modal">

@@ -28,6 +28,8 @@ export class DetallesClienteComponent implements OnInit {
   _rubrosxfac: any; //Detalle de la Factura
   totfac: number;
   idfactura: number;
+  limit: number = 20
+  idcliente: number;
 
   constructor(
     private cliService: ClientesService,
@@ -38,7 +40,7 @@ export class DetallesClienteComponent implements OnInit {
     private traService: TramitesService,
     private router: Router,
     public authService: AutorizaService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // if (!this.authService.log) this.router.navigate(['/inicio']);
@@ -92,7 +94,8 @@ export class DetallesClienteComponent implements OnInit {
 
   //Planillas por Cliente
   planillasxCliente(idcliente: number) {
-    this.facService.getByIdcliente(idcliente).subscribe({
+    this.idcliente = idcliente
+    this.facService.getByIdcliente(idcliente, this.limit).subscribe({
       next: (datos) => {
         this._facturas = datos;
         if (this._facturas.length == 0) {
@@ -101,6 +104,9 @@ export class DetallesClienteComponent implements OnInit {
       },
       error: (err) => console.error(err.error),
     });
+  }
+  getFactura() {
+    this.planillasxCliente(this.idcliente)
   }
 
   //Trámites por Cliente
@@ -118,13 +124,7 @@ export class DetallesClienteComponent implements OnInit {
 
   getRubroxfac(idfactura: number) {
     this.idfactura = idfactura;
-    this.rubxfacService.getByIdfactura(+idfactura!).subscribe({
-      next: (detalle) => {
-        this._rubrosxfac = detalle;
-        this.subtotal();
-      },
-      error: (err) => console.error(err.error),
-    });
+
   }
 
   subtotal() {

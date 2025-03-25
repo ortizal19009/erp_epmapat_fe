@@ -49,8 +49,8 @@ export class FacturaService {
   }
 
   //Facturas por Cliente
-  getByIdcliente(idcliente: number) {
-    return this.http.get<Facturas>(`${baseUrl}?idcliente=${idcliente}`);
+  getByIdcliente(idcliente: number, long: number) {
+    return this.http.get<Facturas>(`${baseUrl}?idcliente=${idcliente}&limit=${long}`);
   }
   //Lista de Facturas desde/hasta
   getDesdeHasta(desde: number, hasta: number) {
