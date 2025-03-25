@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Lecturas } from 'src/app/modelos/lecturas.model';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
@@ -74,6 +74,8 @@ export class DetallesAbonadoComponent implements OnInit {
   razonCondonacion: string;
   detalleFactura: any;
   usuario: number;
+  @Input() cuenta: any;
+  swreturn: boolean = false;
 
   constructor(
     private aboService: AbonadosService,
@@ -102,7 +104,16 @@ export class DetallesAbonadoComponent implements OnInit {
     this.facturasxAbonado(this.abonado.idabonado);
   }
   obtenerDatosAbonado() {
-    let idabonado = sessionStorage.getItem('idabonadoToFactura');
+    let idabonado: any
+    if (!this.cuenta) {
+      this.swreturn = false;
+      idabonado = sessionStorage.getItem('idabonadoToFactura');
+    } else {
+      this.swreturn = true;
+      idabonado = this.cuenta
+    }
+    console.log(idabonado)
+    console.log(this.cuenta)
     this.aboService.getByIdabonado(+idabonado!).subscribe({
       next: (datos) => {
         this._abonado = datos;

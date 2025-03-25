@@ -17,7 +17,7 @@
                   <!--  (click)="calcularDeudasAC()"> -->
                   <i class="bi bi-exclude"></i>&nbsp; Condonar deudas</button>
             </div>
-            <div class="col-sm-1">
+            <div class="col-sm-1" [hidden]="swreturn">
                <button class="bg-transparent border-0" type="submit" (click)="regresar()">
                   <i class="bi-arrow-left-circle text-white icoRegresar"></i>
                </button>
@@ -70,7 +70,7 @@
                         <i class="bi bi-square" *ngIf="!abonado.municipio"></i></a>
                   </li>
                </ul>
-               <div class="row justify-content-center">
+               <div class="row justify-content-center" [hidden]="swreturn">
                   <button class="btn btn-warning btn-xs mx-1" type="button" (click)="modiAbonado( abonado.idabonado )">
                      <i class="fa fa-edit" style="font-size:24pxi"></i>
                      Modificar
@@ -476,7 +476,7 @@
          <div class="modal-footer">
             <button type="button" class="btn btn-sm btn-success" data-dismiss="modal"
                (click)="cancelar()">Cancelar</button>
-               <button class="btn btn-sm btn-outline-success" (click)="setOptImprimir()">Aceptar</button>
+            <button class="btn btn-sm btn-outline-success" (click)="setOptImprimir()">Aceptar</button>
 
          </div>
       </div>

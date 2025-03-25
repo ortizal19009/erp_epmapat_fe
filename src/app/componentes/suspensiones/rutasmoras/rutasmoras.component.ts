@@ -50,6 +50,7 @@ export class RutasmorasComponent implements OnInit {
   /* SORRTED METOD */
   currentSortColumn: any | null = null;
   isAscending: boolean = true;
+  cuenta: any;
   constructor(
     private rutaDato: ActivatedRoute,
     private lecService: LecturasService,
@@ -147,7 +148,7 @@ export class RutasmorasComponent implements OnInit {
     //this.getSinCobrar(abonado.idabonado);
     this.s_facturas.getSinCobrarAboMod(cuenta).subscribe({
       next: async (facSincobro: any) => {
-        let abonado :any = await this.s_abonado.getById(cuenta).toPromise();
+        let abonado: any = await this.s_abonado.getById(cuenta).toPromise();
         abonado.facturas = facSincobro;
         this.datosImprimir = abonado;
         this.impNotificacion();
@@ -351,6 +352,9 @@ export class RutasmorasComponent implements OnInit {
     })
     this.s_pdf.setfooter(doc)
     doc.save('table.pdf')
+  }
+  detallesAbonado(cuenta: any) {
+    this.cuenta = cuenta
   }
 }
 interface calcInteres {

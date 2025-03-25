@@ -55,11 +55,11 @@ export class InfoFacturacionComponent implements OnInit {
     let suma: number = 0;
     let i = 0;
     this._liquidafac.forEach(() => {
-       suma += this._liquidafac[i].idfactura_facturas.totaltarifa
-       i++;
+      suma += this._liquidafac[i].idfactura_facturas.totaltarifa
+      i++;
     });
     this.totfac = suma;
- }
+  }
 
 }
 

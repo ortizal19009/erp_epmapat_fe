@@ -79,7 +79,8 @@
                                                 data-target="#impNotificacion">
                                                 <i class="bi bi-printer"></i>&nbsp; Notificación</button>
                                             <button class="dropdown-item text-muted" type="button" data-toggle="modal"
-                                                data-target="#detallesAbonado">
+                                                data-target="#detallesAbonado"
+                                                (click)="detallesAbonado(abonado.cuenta)">
                                                 <i class="fa fa-info" aria-hidden="true"></i>&nbsp; Detalles</button>
                                         </div>
                                     </div>
@@ -112,13 +113,19 @@
         <!-- Modal -->
         <div class="modal fade" id="detallesAbonado" data-backdrop="static" data-keyboard="false" tabindex="-1"
             aria-labelledby="detallesAbonadoLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
+            <div class="modal-dialog modal-xl">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="detallesAbonadoLabel">Detalles abonados</h5>
                     </div>
                     <div class="modal-body">
 
+                        <div class="col-sm text-center" *ngIf="!cuenta;else name">
+                            <i class="fa fa-spinner" aria-hidden="true"></i>
+                        </div>
+                        <ng-template #name>
+                            <app-detalles-abonado [cuenta]="cuenta"></app-detalles-abonado>
+                        </ng-template>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">Cancelar</button>
