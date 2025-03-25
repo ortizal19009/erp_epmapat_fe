@@ -180,8 +180,7 @@
                            <table *ngIf="!nofacturas" class="table table-hover table-sm table-bordered mb-0">
                               <caption class="small mark">Últimas <strong>{{limit}}</strong>
                                  Planillas&nbsp;&nbsp;&nbsp;&nbsp;
-                                 <button
-                                    class="btn btn-outline-primary btn-xs">&nbsp;&nbsp;Rango&nbsp;&nbsp;</button>
+                                 <button class="btn btn-outline-primary btn-xs">&nbsp;&nbsp;Rango&nbsp;&nbsp;</button>
                               </caption>
                               <thead class="theadPlanillas">
                                  <tr class="text-center">
@@ -192,6 +191,7 @@
                                     <th>Nro.</th>
                                     <th>Fecha</th>
                                     <th>Módulo</th>
+                                    <th>Cuenta</th>
                                     <th>Factura</th>
                                     <th>F.Cobro</th>
                                     <th>Valor</th>
@@ -205,6 +205,7 @@
                                     <td>{{ factura.idfactura }}</td>
                                     <td>{{ factura.feccrea }}</td>
                                     <td class="text-left">{{ factura.idmodulo.descripcion }}</td>
+                                    <td>{{factura.idabonado}}</td>
                                     <td>{{ factura.nrofactura }}</td>
                                     <td>{{ factura.fechacobro }}</td>
                                     <td class="text-right">{{ factura.totaltarifa | number: '1.2-2'}}</td>
