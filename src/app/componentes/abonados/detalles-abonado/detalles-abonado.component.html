@@ -4,11 +4,11 @@
          <div class="col-sm-5">
             <h5 class="m-0 font-weight-bold"><i class="fa fa-building"></i> Abonado</h5>
          </div>
-         <div class="btn-group ml-auto mx-0">
+         <div class="btn-group ml-auto mx-0" [hidden]="swreturn">
             <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
                aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
             </button>
-            <div class="dropdown-menu dropdown-menu-right bg-dark roboto"  [hidden]="swreturn">
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
                   <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
                <button class="dropdown-item" type="button">
@@ -17,7 +17,7 @@
                   <!--  (click)="calcularDeudasAC()"> -->
                   <i class="bi bi-exclude"></i>&nbsp; Condonar deudas</button>
             </div>
-            <div class="col-sm-1" [hidden]="swreturn">
+            <div class="col-sm-1">
                <button class="bg-transparent border-0" type="submit" (click)="regresar()">
                   <i class="bi-arrow-left-circle text-white icoRegresar"></i>
                </button>
