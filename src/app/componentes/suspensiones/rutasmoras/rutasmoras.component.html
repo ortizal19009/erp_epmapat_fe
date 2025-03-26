@@ -13,10 +13,8 @@
                     aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
                 </button>
                 <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-                    <button class="dropdown-item" type="button">
-                        <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
                     <button class="dropdown-item" type="button" data-toggle="modal" (click)="impDatosRutaTable()"
-                        data-target="#pdf">
+                        data-target="#imprimir">
                         <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
                     <button class="dropdown-item text-muted" type="button" disabled><i
                             class="bi-file-earmark-arrow-down text-muted"></i>
@@ -145,7 +143,7 @@
                 <h5 class='modal-title font-weight-bold' id='ModalLabel'>Imprimir</h5>
             </div>
             <div class='modal-body cuerpo'>
-                    <iframe id="pdfViewer" src="" width="100%" height="600px"></iframe>
+                    <iframe id="pdf_Viewer" src="" width="100%" height="600px"></iframe>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">Cancelar</button>

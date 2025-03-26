@@ -51,7 +51,7 @@ export class RutasmorasComponent implements OnInit {
   currentSortColumn: any | null = null;
   isAscending: boolean = true;
   cuenta: any;
-  modalSize: string = 'lg'
+  modalSize: string = 'lg';
   constructor(
     private rutaDato: ActivatedRoute,
     private lecService: LecturasService,
@@ -64,7 +64,7 @@ export class RutasmorasComponent implements OnInit {
     private s_rubxfacturas: RubroxfacService,
     private interService: InteresesService,
     private s_loading: LoadingService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/mora-abonados');
@@ -119,7 +119,7 @@ export class RutasmorasComponent implements OnInit {
                 }
               }
             })
-            .then(async () => { })
+            .then(async () => {})
             .catch((e) => console.error(e));
         });
       },
@@ -159,7 +159,6 @@ export class RutasmorasComponent implements OnInit {
       },
     });
   }
-
 
   async impNotificacion() {
     this.s_loading.showLoading();
@@ -289,7 +288,6 @@ export class RutasmorasComponent implements OnInit {
     //doc.output('pdfobjectnewwindow');
   }
 
-
   async getFechaEmision(idfactura: number): Promise<any> {
     const fechaEmision = this.lecService
       .findDateByIdfactura(idfactura)
@@ -346,22 +344,23 @@ export class RutasmorasComponent implements OnInit {
     });
   }
   impDatosRutaTable() {
+    this.s_loading.showLoading();
     let doc = new jsPDF();
-    this.s_pdf.header(this.titulo, doc)
+    this.s_pdf.header(this.titulo, doc);
     autoTable(doc, {
-      html: '#datos-ruta'
-    })
-    this.s_pdf.setfooter(doc)
+      html: '#datos-ruta',
+    });
+    this.s_pdf.setfooter(doc);
     const pdfDataUri = doc.output('datauri');
     const pdfViewer: any = document.getElementById(
-      'pdfViewer'
+      'pdf_Viewer'
     ) as HTMLIFrameElement;
-
+    this.s_loading.hideLoading();
     return (pdfViewer.src = pdfDataUri);
   }
   detallesAbonado(cuenta: any) {
-    console.log(cuenta)
-    this.cuenta = cuenta
+    console.log(cuenta);
+    this.cuenta = cuenta;
   }
 }
 interface calcInteres {
