@@ -2,6 +2,9 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { AutorizaService } from '../compartida/autoriza.service';
+import { Usuarios } from '../modelos/administracion/usuarios.model';
+import { UsuarioService } from './administracion/usuario.service';
 
 @Injectable({
   providedIn: 'root',
@@ -11,8 +14,9 @@ export class PdfService {
   margin_l = 40;
   line = 0;
   url = 'assets/';
+  _usuario: any;
 
-  constructor(http: HttpClient) { }
+  constructor(private authService: AutorizaService ) { }
   header(titulo: string, doc: any) {
     this.margin_l = 0;
     this.line = 0;
@@ -53,18 +57,7 @@ export class PdfService {
       head: head,
       body: body,
     });
-    //btener la hora actual
-    const horaImpresion = this.getDateTime();
-    doc.setFontSize(10);
-
-    // Agregar el pie de página
-    doc.text(
-      `Fecha y hora de impresión: ${horaImpresion}`,
-      doc.internal.pageSize.getWidth() / 2,
-      doc.internal.pageSize.getHeight() - 10,
-      { align: 'center' }
-    );
-
+    this.setfooter(doc);
     const pdfDataUri = doc.output('datauristring');
     const pdfViewer: any = document.getElementById(
       'pdfViewer'
@@ -74,21 +67,21 @@ export class PdfService {
   setfooter(doc: any) {
     // Obtener la fecha y hora actual
     const horaImpresion = this.setDateTime();
-  
-    // Configurar el estilo del texto
-    doc.setFontSize(10);
+
+    doc.setFontSize(8);
     doc.setTextColor(100, 100, 100); // Color gris
     doc.setFont('helvetica', 'normal'); // Fuente helvetica
-  
     // Agregar el pie de página
     doc.text(
-      `Fecha y hora de impresión: ${horaImpresion}`,
+      `Fecha y hora de impresión: ${horaImpresion} - Usuario: ${this.authService.alias}`,
       doc.internal.pageSize.getWidth() / 2,
       doc.internal.pageSize.getHeight() - 20, // Margen inferior aumentado
       { align: 'center' }
     );
+    // Configurar el estilo del texto
+
   }
-  
+
   setDateTime(): string {
     const now = new Date();
     return now.toLocaleString(); // Formato local
@@ -101,6 +94,8 @@ export class PdfService {
       head: head,
       body: body,
     });
+    this.setfooter(doc);
+
     doc.save(title);
   }
   createColumnStyles(columns: any) {
@@ -116,7 +111,7 @@ export class PdfService {
     }
     return styles;
   }
-
+  /* DOS TABLAS EN COLUMNAS */
   bodyTwoTables(
     titulo: string,
     ht1: any,
@@ -130,34 +125,40 @@ export class PdfService {
     let startY = 70;
     // Primera tabla
     doc.autoTable({
-      head: ht1,
-      body: bt1,
+      head: [[{ content: [ht1[0]], styles: { halign: 'center' } }]],
       showHead: 'firstPage',
       startY: startY,
+      styles: { overflow: 'hidden' },
+      margin: { right: 107 },
+    });
+    doc.autoTable({
+      head: [ht1[1]],
+      body: bt1,
+      showHead: 'firstPage',
+      startY: startY + 10,
       styles: { overflow: 'hidden' },
       margin: { right: 107 }, // Margen izquierdo de la primera tabla
     });
     doc.setPage(pageNumber);
-
     // Segunda tabla
     doc.autoTable({
-      head: ht2,
-      body: bt2,
+      head: [[{ content: [ht2[0]], styles: { halign: 'center' } }]],
       showHead: 'firstPage',
       startY: startY,
       styles: { overflow: 'hidden' },
       margin: { left: 107 },
-    }); //btener la hora actual
-    const horaImpresion = this.getDateTime();
+    });
+    // Segunda tabla
+    doc.autoTable({
+      head: [ht2[1]],
+      body: bt2,
+      showHead: 'firstPage',
+      startY: startY + 10,
+      styles: { overflow: 'hidden' },
+      margin: { left: 107 },
+    });
     doc.setFontSize(10);
-
-    // Agregar el pie de página
-    doc.text(
-      `Fecha y hora de impresión: ${horaImpresion}`,
-      doc.internal.pageSize.getWidth() / 2,
-      doc.internal.pageSize.getHeight() - 10,
-      { align: 'center' }
-    );
+    this.setfooter(doc);
     const pdfDataUri = doc.output('datauri');
     const pdfViewer: any = document.getElementById(
       'pdfViewer'
@@ -180,8 +181,6 @@ export class PdfService {
 
     this.header(titulo, doc);
 
-    console.log(ht1, bt1);
-    console.log(ht2, bt2);
     doc.autoTable({
       theme: 'grid',
       head: [[{ content: ht1[0], styles: { halign: 'center' } }]],
@@ -296,6 +295,7 @@ export class PdfService {
       body: bt3,
     });
     doc.setPage(pageNumber);
+    this.setfooter(doc);
     const pdfDataUri = doc.output('datauri');
     const pdfViewer: any = document.getElementById(
       'pdfViewer'
@@ -522,6 +522,8 @@ export class PdfService {
       columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
       body: bt5,
     });
+    this.setfooter(doc);
+
     const pdfDataUri = doc.output('datauri');
     const pdfViewer: any = document.getElementById(
       'pdfViewer'

@@ -64,7 +64,7 @@ export class RutasmorasComponent implements OnInit {
     private s_rubxfacturas: RubroxfacService,
     private interService: InteresesService,
     private s_loading: LoadingService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/mora-abonados');
@@ -119,7 +119,7 @@ export class RutasmorasComponent implements OnInit {
                 }
               }
             })
-            .then(async () => {})
+            .then(async () => { })
             .catch((e) => console.error(e));
         });
       },
@@ -271,8 +271,8 @@ export class RutasmorasComponent implements OnInit {
       },
       body: d_facturas,
     });
-    d_rxf.push(['', 'Total: ', this.rubrostotal.toFixed(2)]);
-    autoTable(doc, {
+    let t: number = t_intereses + this.rubrostotal
+    d_rxf.push(['5', 'Interes', t_intereses.toFixed(2)], ['', 'Sub total: ', this.rubrostotal.toFixed(2)], ['', 'Total: ', t.toFixed(2)]); autoTable(doc, {
       head: [['Cod.Rubro', 'Descripción', 'Valor']],
       body: d_rxf,
     });

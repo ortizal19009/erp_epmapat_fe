@@ -229,7 +229,7 @@ export class ImpEmisionesComponent implements OnInit {
       body3,
       doc
     );
-  this.s_loading.hideLoading();
+    this.s_loading.hideLoading();
   }
   async impEmisionFinal(idemision: number) {
     let doc = new jsPDF();
@@ -351,7 +351,7 @@ export class ImpEmisionesComponent implements OnInit {
           suma += lectura.suma
 
         });
-        body.push(['','','','','TOTAL',suma.toFixed(2)])
+        body.push(['', '', '', '', 'TOTAL', suma.toFixed(2)])
         this.s_pdf.bodyOneTable(
           `Facturas eliminadas - Emisión: ${lecturas[0].emision}`,
           head,
@@ -597,10 +597,12 @@ export class ImpEmisionesComponent implements OnInit {
         'FECHA ELIMINACIÓN',
         'VALOR ANTERIOR',
         'VALOR NUEVO',
+        'DIFERENCIA'
       ],
     ];
     let body: any = [];
     obj.forEach((item: any) => {
+      let diferencia: number = item.valoranterior - item.valornuevo;
       body.push([
         item.cuenta,
         item.nombre,
@@ -608,6 +610,7 @@ export class ImpEmisionesComponent implements OnInit {
         item.fecelimina,
         item.valoranterior.toFixed(2),
         item.valornuevo.toFixed(2),
+        diferencia.toFixed(2)
       ]);
       n_suma += item.valornuevo;
       a_suma += item.valoranterior;
@@ -629,8 +632,8 @@ export class ImpEmisionesComponent implements OnInit {
 
     let anteriores: any = await this.getEmisionesAnteriores(idemision);
     let nuevas: any = await this.getEmisionesNuevas(idemision);
-    let headAnteriores: any = [['Cuenta', 'Emision', 'Planilla', 'Total']];
-    let headNuevas: any = [['Cuenta', 'Emision', 'Planilla', 'Total']];
+    let headAnteriores: any = [['Facturas eliminadas'], ['Cuenta', 'Emision', 'Planilla', 'Total']];
+    let headNuevas: any = [['Facturas emitidas'], ['Cuenta', 'Emision', 'Planilla', 'Total']];
     let bodyAnteriores: any = [];
     let bodyNuevas: any = [];
     let sumant: number = 0;
@@ -663,6 +666,7 @@ export class ImpEmisionesComponent implements OnInit {
       bodyNuevas,
       doc
     );
+    this.s_loading.hideLoading();
   }
   async getEmisionesAnteriores(idemision: number) {
     let anteriores = this.s_emisionindividual

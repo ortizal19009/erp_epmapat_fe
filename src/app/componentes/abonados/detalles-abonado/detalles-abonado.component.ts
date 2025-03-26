@@ -226,7 +226,6 @@ export class DetallesAbonadoComponent implements OnInit {
   lecturasxAbonado(idabonado: number) {
     this.lecService.getLecturasxIdabonado(idabonado).subscribe({
       next: (datos) => {
-        console.log(datos)
         this._lecturas = datos;
       },
       error: (err) => console.error(err.error),
@@ -640,7 +639,8 @@ export class DetallesAbonadoComponent implements OnInit {
       },
       body: d_facturas,
     });
-    d_rxf.push(['', 'Total: ', this.rubrostotal.toFixed(2)]);
+    let t: number = t_intereses + this.rubrostotal
+    d_rxf.push(['5', 'Interes', t_intereses.toFixed(2)], ['', 'Sub total: ', this.rubrostotal.toFixed(2)], ['', 'Total: ', t.toFixed(2)]);
     autoTable(doc, {
       head: [['Cod.Rubro', 'Descripción', 'Valor']],
       body: d_rxf,

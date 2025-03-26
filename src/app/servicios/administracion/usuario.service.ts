@@ -50,6 +50,10 @@ export class UsuarioService {
   getDatosOfOne(idusuario: number) {
     return this.http.get(`${baseUrl}/one?idusuario=${idusuario}`);
   }
+  getDatosOne(idusuario: number):Promise<any> {
+    let resp = this.http.get(`${baseUrl}/one?idusuario=${idusuario}`);
+    return firstValueFrom(resp);
+  }
   save(usuario: any) {
     return this.http.post(`${baseUrl}`, usuario);
   }
