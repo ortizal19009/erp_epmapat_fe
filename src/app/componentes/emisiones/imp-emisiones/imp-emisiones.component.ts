@@ -615,7 +615,7 @@ export class ImpEmisionesComponent implements OnInit {
       n_suma += item.valornuevo;
       a_suma += item.valoranterior;
     });
-    body.push(['', '', 'TOTALES', a_suma.toFixed(2), n_suma.toFixed(2)]);
+    body.push(['', '', '', 'TOTALES', a_suma.toFixed(2), n_suma.toFixed(2)]);
     this.s_pdf.bodyOneTable(`Refacturación ${d} - ${h}`, head, body, doc);
     this.s_loading.hideLoading();
 
@@ -723,10 +723,12 @@ export class ImpEmisionesComponent implements OnInit {
     this.opcreporte = +this.formImprimir.value.reporte!;
     if (this.opcreporte === 8) {
       this.tipe = 'date';
-      /*       this.formImprimir.patchValue({
-        d_emi: this.date.toISOString(),
-        h_emi: this.date.toISOString(),
-      }); */
+      const fecha: Date = new Date();
+      const strfecha = fecha.toISOString().slice(0, 10);
+      this.formImprimir.patchValue({
+        d_emi: strfecha,
+        h_emi: strfecha
+      });
     } else if (this.opcreporte === 0) {
       this.tipe = 'text';
       this.setUltimos();
