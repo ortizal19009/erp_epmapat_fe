@@ -13,7 +13,7 @@ export class Ntacredito {
     usuarioeliminacion: number;
     fechaeliminacion: Date;
     razoneliminacion: string;
-    idcleinte_clientes: Clientes;
+    idcliente_clientes: Clientes;
     idabonado_abonados: Abonados;
     usucrea: number;
     feccrea: Date;

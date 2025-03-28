@@ -10,6 +10,7 @@ import { Ntacredito } from 'src/app/modelos/ntacredito';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
+import { NtacreditoService } from 'src/app/servicios/ntacredito.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 
 @Component({
@@ -35,7 +36,8 @@ export class AddNtacreditoComponent implements OnInit {
     private authService: AutorizaService,
     private s_rubroxfac: RubroxfacService,
     private loading: LoadingService,
-    private s_abonado: AbonadosService
+    private s_abonado: AbonadosService,
+    private s_ntacredito: NtacreditoService
   ) { }
 
   ngOnInit(): void {
@@ -77,12 +79,19 @@ export class AddNtacreditoComponent implements OnInit {
     let ntacredito: Ntacredito = new Ntacredito();
     ntacredito.valor = f.valor
     ntacredito.observacion = f.observacion
-    ntacredito.idcleinte_clientes = this.resppago;
+    ntacredito.idcliente_clientes = this.resppago;
     ntacredito.feccrea = this.date
     ntacredito.usucrea = this.authService.idusuario;
     ntacredito.devengado = 0;
     ntacredito.nrofactura = f.idfactura
     ntacredito.idabonado_abonados = this._cuenta
+    this.s_ntacredito.saveNtacredito(ntacredito).subscribe({
+      next: (datos: any) => {
+        console.log(datos);
+        this.router.navigate(['/ntacredito']);
+      }
+    })
+
   }
   detallesnotasnc(notacredito: any) { }
   clearInput(name: any) {
@@ -96,12 +105,11 @@ export class AddNtacreditoComponent implements OnInit {
   }
   getPlanilla() {
     let formulario = this.f_ntacredito.value;
-    if (formulario.nrofactura != '' && formulario.planilla != '') {
+    if (formulario.nrofactura != '' || formulario.planilla != '') {
       this.loading.showLoading();
       if (formulario.nrofactura != '') {
         this.s_factura.getByNrofactura(formulario.nrofactura).subscribe({
           next: (planilla: any) => {
-            console.log(planilla);
             if (planilla.length == 1) {
               this._factura = planilla[0];
               this.cliente = planilla[0].idcliente;
