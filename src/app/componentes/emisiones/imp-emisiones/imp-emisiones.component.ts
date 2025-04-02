@@ -14,6 +14,8 @@ import { LoadingService } from 'src/app/servicios/loading.service';
 import $ from 'jquery';
 import * as jQuery from 'jquery';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
+import { ValoresncService } from 'src/app/servicios/valoresnc.service';
+import { bootstrapApplication } from '@angular/platform-browser';
 @Component({
   selector: 'app-imp-emisiones',
   templateUrl: './imp-emisiones.component.html',
@@ -60,7 +62,7 @@ export class ImpEmisionesComponent implements OnInit {
     const fecha = new Date();
     const h_date = fecha.toISOString().slice(0, 10);
     this.formImprimir = this.fb.group({
-      reporte: '0',
+      reporte: 0,
       emision: '',
       desdeNum: 1,
       hastaNum: 18000,
@@ -137,6 +139,17 @@ export class ImpEmisionesComponent implements OnInit {
         this.impRefacturacionxEmision(this.formImprimir.value.emision);
         break;
       case '8':
+        this.impRefacturacionxFecha(
+          this.formImprimir.value.d_emi,
+          this.formImprimir.value.h_emi
+        );
+        break;
+      case '9':
+        this.impRefEmisionRubros(
+          this.formImprimir.value.emision,
+        );
+        break;
+      case '10':
         this.impRefacturacionxFecha(
           this.formImprimir.value.d_emi,
           this.formImprimir.value.h_emi
@@ -620,6 +633,28 @@ export class ImpEmisionesComponent implements OnInit {
     this.s_loading.hideLoading();
 
   }
+  async impRefEmisionRubros(idemision: number) {
+    let doc: jsPDF= new jsPDF()
+    let valoresAnteriores: any = await this.s_emisionindividual.getRefacturacionRubrosAnteriores(idemision);
+    let valoresNuevos: any = await this.s_emisionindividual.getRefacturacionRubrosNuevos(idemision);
+    console.table(valoresAnteriores)
+    console.table(valoresNuevos)
+    let headAnteriores: any = [['Rubros eliminados'], ['Código', 'Descripción', 'Total']];
+    let headNuevos: any = [['Rubros generados'], ['Código', 'Descripción', 'Total']];
+    let bodyAnteriores: any = [];
+    let bodyNuevos: any = [];
+    valoresAnteriores.forEach((item: any) => {
+
+      bodyAnteriores.push([item.idrubro_rubros, item.descripcion, item.sum])
+    })
+    valoresNuevos.forEach((item: any) => {
+
+      bodyNuevos.push([item.idrubro_rubros, item.descripcion, item.sum])
+    })
+    this.s_pdf.bodyTwoTables('Reporte de refacturaciones por rubros',headAnteriores, bodyAnteriores, headNuevos, bodyNuevos, doc);
+    this.s_loading.hideLoading();
+  }
+
   async getValoresEmitidos(idemision: number) {
     let valores = this.s_lecturas
       .findReporteValEmitidosxEmision(idemision)
@@ -629,7 +664,6 @@ export class ImpEmisionesComponent implements OnInit {
   async getEmisionIndividualByIdEmision(idemision: number) {
     let doc = new jsPDF();
     let emision: any = await this.getEmision(idemision);
-
     let anteriores: any = await this.getEmisionesAnteriores(idemision);
     let nuevas: any = await this.getEmisionesNuevas(idemision);
     let headAnteriores: any = [['Facturas eliminadas'], ['Cuenta', 'Emision', 'Planilla', 'Total']];
@@ -721,6 +755,8 @@ export class ImpEmisionesComponent implements OnInit {
   }
   changeReporte() {
     this.opcreporte = +this.formImprimir.value.reporte!;
+    console.log(this.opcreporte)
+
     if (this.opcreporte === 8) {
       this.tipe = 'date';
       const fecha: Date = new Date();
@@ -742,7 +778,8 @@ export class ImpEmisionesComponent implements OnInit {
       this.opcreporte === 4 ||
       this.opcreporte === 5 ||
       this.opcreporte === 6 ||
-      this.opcreporte === 7
+      this.opcreporte === 7 ||
+      this.opcreporte === 9
     ) {
       return false;
     }
@@ -773,7 +810,6 @@ export class ImpEmisionesComponent implements OnInit {
     let head = [['Emision', 'm3', 'Fecha Cierre']];
     var datos: any = [];
     var i = 0;
-    console.log(this._emisiones)
     this._emisiones.forEach((item: any) => {
       if (item.estado === 1) {
         datos.push([
