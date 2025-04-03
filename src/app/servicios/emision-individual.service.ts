@@ -47,8 +47,17 @@ export class EmisionIndividualService {
     let resp = firstValueFrom(this.http.get(`${baseUrl}/reporte/refacturacion/rubros/anterior?idemision=${idemision}`));
     return resp;
   }
-  getRefacturacionRubrosNuevos(idemision: number) {
+  getRefacturacionRubrosNuevos(idemision: number): Promise<any> {
     let resp = firstValueFrom(this.http.get(`${baseUrl}/reporte/refacturacion/rubros/nuevo?idemision=${idemision}`));
+    return resp;
+  }
+
+  getRefacturacionxFechaRubrosAnteriores(d: Date, h: Date): Promise<any> {
+    let resp = firstValueFrom(this.http.get(`${baseUrl}/reporte/refacturacion/fecha/anterior?d=${d}&h=${h}`));
+    return resp;
+  }
+  getRefacturacionxFechaRubrosNuevos(d: Date, h: Date): Promise<any> {
+    let resp = firstValueFrom(this.http.get(`${baseUrl}/reporte/refacturacion/fecha/nuevo?d=${d}&h=${h}`));
     return resp;
   }
 }

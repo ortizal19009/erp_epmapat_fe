@@ -150,7 +150,7 @@ export class ImpEmisionesComponent implements OnInit {
         );
         break;
       case '10':
-        this.impRefacturacionxFecha(
+        this.impRefFechaRubros(
           this.formImprimir.value.d_emi,
           this.formImprimir.value.h_emi
         );
@@ -583,7 +583,7 @@ export class ImpEmisionesComponent implements OnInit {
       a_suma += item.valoranterior;
       diferencia = a_suma - n_suma;
     });
-    body.push(['', '', 'TOTALES', a_suma.toFixed(2), n_suma.toFixed(2), 'TOT. DIF.', diferencia.toFixed(2)]);
+    body.push(['', '', '','TOTALES', a_suma.toFixed(2), n_suma.toFixed(2), diferencia.toFixed(2)]);
 
     this.s_pdf.bodyOneTable(
       `Refacturación de la emisión ${emision?.emision}`,
@@ -628,30 +628,56 @@ export class ImpEmisionesComponent implements OnInit {
       n_suma += item.valornuevo;
       a_suma += item.valoranterior;
     });
-    body.push(['', '', '', 'TOTALES', a_suma.toFixed(2), n_suma.toFixed(2)]);
+    body.push(['', '', '', 'TOTALES', a_suma.toFixed(2), n_suma.toFixed(2), (a_suma - n_suma).toFixed(2)]);
     this.s_pdf.bodyOneTable(`Refacturación ${d} - ${h}`, head, body, doc);
     this.s_loading.hideLoading();
 
   }
   async impRefEmisionRubros(idemision: number) {
-    let doc: jsPDF= new jsPDF()
+    let doc: jsPDF = new jsPDF()
+    let emision = await this.getEmision(idemision);
     let valoresAnteriores: any = await this.s_emisionindividual.getRefacturacionRubrosAnteriores(idemision);
     let valoresNuevos: any = await this.s_emisionindividual.getRefacturacionRubrosNuevos(idemision);
-    console.table(valoresAnteriores)
-    console.table(valoresNuevos)
     let headAnteriores: any = [['Rubros eliminados'], ['Código', 'Descripción', 'Total']];
     let headNuevos: any = [['Rubros generados'], ['Código', 'Descripción', 'Total']];
     let bodyAnteriores: any = [];
     let bodyNuevos: any = [];
+    let sumaAnteriores: number = 0;
+    let sumaNuevos: number = 0;
     valoresAnteriores.forEach((item: any) => {
-
       bodyAnteriores.push([item.idrubro_rubros, item.descripcion, item.sum])
+      sumaAnteriores += item.sum;
     })
+    bodyAnteriores.push(['', 'TOTAL', sumaAnteriores.toFixed(2)])
     valoresNuevos.forEach((item: any) => {
-
       bodyNuevos.push([item.idrubro_rubros, item.descripcion, item.sum])
+      sumaNuevos += item.sum
     })
-    this.s_pdf.bodyTwoTables('Reporte de refacturaciones por rubros',headAnteriores, bodyAnteriores, headNuevos, bodyNuevos, doc);
+    bodyNuevos.push(['', 'TOTAL', sumaNuevos.toFixed(2)], ['', 'DIFERENCIA', (sumaAnteriores-sumaNuevos).toFixed(2)])
+    this.s_pdf.bodyTwoTables(`Refacturaciones por rubros emision: ${emision?.emision}`, headAnteriores, bodyAnteriores, headNuevos, bodyNuevos, doc);
+    this.s_loading.hideLoading();
+  }
+  async impRefFechaRubros(d: Date, h: Date) {
+    let doc: jsPDF = new jsPDF()
+    let valoresAnteriores: any = await this.s_emisionindividual.getRefacturacionxFechaRubrosAnteriores(d,h);
+    let valoresNuevos: any = await this.s_emisionindividual.getRefacturacionxFechaRubrosNuevos(d,h);
+    let headAnteriores: any = [['Rubros eliminados'], ['Código', 'Descripción', 'Total']];
+    let headNuevos: any = [['Rubros generados'], ['Código', 'Descripción', 'Total']];
+    let bodyAnteriores: any = [];
+    let bodyNuevos: any = [];
+    let sumaAnteriores: number = 0;
+    let sumaNuevos: number = 0;
+    valoresAnteriores.forEach((item: any) => {
+      bodyAnteriores.push([item.idrubro_rubros, item.descripcion, item.sum])
+      sumaAnteriores += item.sum;
+    })
+    bodyAnteriores.push(['', 'TOTAL', sumaAnteriores.toFixed(2)])
+    valoresNuevos.forEach((item: any) => {
+      bodyNuevos.push([item.idrubro_rubros, item.descripcion, item.sum])
+      sumaNuevos += item.sum
+    })
+    bodyNuevos.push(['', 'TOTAL', sumaNuevos.toFixed(2)], ['', 'DIFERENCIA', (sumaAnteriores-sumaNuevos).toFixed(2)])
+    this.s_pdf.bodyTwoTables(`Refacturaciones por fecha ${d} - ${h}`, headAnteriores, bodyAnteriores, headNuevos, bodyNuevos, doc);
     this.s_loading.hideLoading();
   }
 
@@ -757,7 +783,7 @@ export class ImpEmisionesComponent implements OnInit {
     this.opcreporte = +this.formImprimir.value.reporte!;
     console.log(this.opcreporte)
 
-    if (this.opcreporte === 8) {
+    if (this.opcreporte === 8 || this.opcreporte === 10) {
       this.tipe = 'date';
       const fecha: Date = new Date();
       const strfecha = fecha.toISOString().slice(0, 10);
