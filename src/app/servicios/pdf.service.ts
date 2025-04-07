@@ -52,11 +52,16 @@ export class PdfService {
   }
   bodyOneTable(title: string, head: any, body: any, doc: any) {
     this.header(title, doc);
-
     autoTable(doc, {
       head: head,
       body: body,
+      styles: {
+        fontSize: 7,              // Fuente más pequeña
+        cellPadding: 1,           // Menos espacio interno
+        overflow: 'linebreak',    // Ajustar texto
+      },
     });
+    
     this.setfooter(doc);
     const pdfDataUri = doc.output('datauristring');
     const pdfViewer: any = document.getElementById(

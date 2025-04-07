@@ -608,7 +608,9 @@ export class ImpEmisionesComponent implements OnInit {
         'NOMBRE',
         'RAZON REFACTURACIÓN',
         'FECHA ELIMINACIÓN',
+        'EMI. ANTERIOR', 
         'VALOR ANTERIOR',
+        'EMI. ACTUAL',
         'VALOR NUEVO',
         'DIFERENCIA'
       ],
@@ -621,14 +623,16 @@ export class ImpEmisionesComponent implements OnInit {
         item.nombre,
         item.observaciones,
         item.fecelimina,
+        item.emisionanterior,
         item.valoranterior.toFixed(2),
+        item.emisionnueva,
         item.valornuevo.toFixed(2),
         diferencia.toFixed(2)
       ]);
       n_suma += item.valornuevo;
       a_suma += item.valoranterior;
     });
-    body.push(['', '', '', 'TOTALES', a_suma.toFixed(2), n_suma.toFixed(2), (a_suma - n_suma).toFixed(2)]);
+    body.push(['', '', '','', 'TOTALES', a_suma.toFixed(2),'', n_suma.toFixed(2), (a_suma - n_suma).toFixed(2)]);
     this.s_pdf.bodyOneTable(`Refacturación ${d} - ${h}`, head, body, doc);
     this.s_loading.hideLoading();
 
