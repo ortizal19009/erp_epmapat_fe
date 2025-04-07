@@ -583,7 +583,7 @@ export class ImpEmisionesComponent implements OnInit {
       a_suma += item.valoranterior;
       diferencia = a_suma - n_suma;
     });
-    body.push(['', '', '','TOTALES', a_suma.toFixed(2), n_suma.toFixed(2), diferencia.toFixed(2)]);
+    body.push(['', '', '', 'TOTALES', a_suma.toFixed(2), n_suma.toFixed(2), diferencia.toFixed(2)]);
 
     this.s_pdf.bodyOneTable(
       `Refacturación de la emisión ${emision?.emision}`,
@@ -597,7 +597,7 @@ export class ImpEmisionesComponent implements OnInit {
   async impRefacturacionxFecha(d: Date, h: Date) {
     let obj: any = await this.getRefacturacionxFecha(d, h);
     // let emision = await this.getEmision(idemision);
-
+    console.log(obj)
     let doc = new jsPDF();
     //let obj: any = await this.getRefacturacionxEmision(idemision);
     let n_suma: number = 0;
@@ -653,14 +653,14 @@ export class ImpEmisionesComponent implements OnInit {
       bodyNuevos.push([item.idrubro_rubros, item.descripcion, item.sum])
       sumaNuevos += item.sum
     })
-    bodyNuevos.push(['', 'TOTAL', sumaNuevos.toFixed(2)], ['', 'DIFERENCIA', (sumaAnteriores-sumaNuevos).toFixed(2)])
+    bodyNuevos.push(['', 'TOTAL', sumaNuevos.toFixed(2)], ['', 'DIFERENCIA', (sumaAnteriores - sumaNuevos).toFixed(2)])
     this.s_pdf.bodyTwoTables(`Refacturaciones por rubros emision: ${emision?.emision}`, headAnteriores, bodyAnteriores, headNuevos, bodyNuevos, doc);
     this.s_loading.hideLoading();
   }
   async impRefFechaRubros(d: Date, h: Date) {
     let doc: jsPDF = new jsPDF()
-    let valoresAnteriores: any = await this.s_emisionindividual.getRefacturacionxFechaRubrosAnteriores(d,h);
-    let valoresNuevos: any = await this.s_emisionindividual.getRefacturacionxFechaRubrosNuevos(d,h);
+    let valoresAnteriores: any = await this.s_emisionindividual.getRefacturacionxFechaRubrosAnteriores(d, h);
+    let valoresNuevos: any = await this.s_emisionindividual.getRefacturacionxFechaRubrosNuevos(d, h);
     let headAnteriores: any = [['Rubros eliminados'], ['Código', 'Descripción', 'Total']];
     let headNuevos: any = [['Rubros generados'], ['Código', 'Descripción', 'Total']];
     let bodyAnteriores: any = [];
@@ -676,7 +676,7 @@ export class ImpEmisionesComponent implements OnInit {
       bodyNuevos.push([item.idrubro_rubros, item.descripcion, item.sum])
       sumaNuevos += item.sum
     })
-    bodyNuevos.push(['', 'TOTAL', sumaNuevos.toFixed(2)], ['', 'DIFERENCIA', (sumaAnteriores-sumaNuevos).toFixed(2)])
+    bodyNuevos.push(['', 'TOTAL', sumaNuevos.toFixed(2)], ['', 'DIFERENCIA', (sumaAnteriores - sumaNuevos).toFixed(2)])
     this.s_pdf.bodyTwoTables(`Refacturaciones por fecha ${d} - ${h}`, headAnteriores, bodyAnteriores, headNuevos, bodyNuevos, doc);
     this.s_loading.hideLoading();
   }
