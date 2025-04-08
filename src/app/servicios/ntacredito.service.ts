@@ -12,4 +12,7 @@ export class NtacreditoService {
   saveNtacredito(ntacredito: any) {
     return this.http.post(`${baseUrl}`, ntacredito)
   }
+  getAllPageable(page: number, size: number){
+    return this.http.get(`${baseUrl}/all?page=${page}&size=${size}`)
+  }
 }

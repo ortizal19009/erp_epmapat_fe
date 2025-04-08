@@ -237,7 +237,7 @@ export class FacturaService {
   //Planillas sin Cobrar por Modulo y Abonado (Para Convenios)
   getSinCobrarAboMod(idabonado: number) {
     return this.http.get<Facturas[]>(
-      `${baseUrl}/sincobrarAboMod?idabonado=${idabonado}`
+      `${baseUrl}/?idabonado=${idabonado}`
     );
   }
   async countSinCobrarAbo(idabonado: number) {
