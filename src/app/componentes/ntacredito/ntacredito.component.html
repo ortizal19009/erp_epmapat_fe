@@ -55,60 +55,72 @@
         </div>
     </div>
 </div>
-
-<div class="container-fluid">
-    <div class="row mb-0">
-        <div class="col-sm">
-            <table class="table table-hover table-bordered table-sm sombra">
-                <thead class="text-center cabecera">
-                    <tr>
-                        <th></th>
-                        <th>Nombre</th>
-                        <th>Identificación</th>
+<div class="container-fluid mt-2">
+    <div class="card mb-0">
+        <div class="card-body table-responsive  center-form card-size">
+            <table class="table table-hover text-nowrap table-striped table-bordered table-sm sombra">
+                <thead class="cabecera">
+                    <tr class="text-center ">
+                        <th class="col-sm-1">N°</th>
                         <th>Cuenta</th>
-                        <th>Categoría</th>
-                        <th>Ruta</th>
-                        <th>Dirección</th>
+                        <th>Cliente</th>
+                        <th>Identificación</th>
+                        <th>Planilla</th>
+                        <th>Valor</th>
+                        <th>Devengado</th>
+                        <th>Saldo</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody class="detalle">
-                    <tr class="fila" *ngFor="let ntacredito of _ntacreditos | filter:filterTerm; let i= index"
-                        (click)="detallesnotasnc( ntacredito )">
-                        <td class="text-center small font-weight-bold">{{i+1}}</td>
-                        <td>{{ ntacredito.idcliente_clientes.nombre }}</td>
-                        <td class="text-center">{{ ntacredito.idcliente_clientes.cedula }}</td>
-                        <td class="text-center"
-                            [ngClass]="{'fontwarning': ntacredito.estado === 0,'fantacygreen': ntacredito.estado === 2 || ntacredito.estado === 3}">
-                            {{ntacredito.idntacredito }}</td>
-                        <td>{{ ntacredito.idcategoria_categorias.descripcion }}</td>
-                        <td>{{ ntacredito.idruta_rutas.descripcion }}</td>
-                        <td>{{ ntacredito.direccionubicacion }}</td>
+                    <tr *ngFor="let ntacredito of _ntacreditos | filter:filterTerm; let i = index ">
+                        <td class="col-sm-1 text-center">{{i+1 + (page * size)}}</td>
+                        <td class="text-center">{{ntacredito.idabonado_abonados.idabonado}}</td>
+                        <td class="description">{{ntacredito.idcliente_clientes.nombre}}</td>
+                        <td class="col-sm-1 text-right">{{ntacredito.idcliente_clientes.cedula}}</td>
+                        <td>{{ntacredito.nrofactura}}</td>
+                        <td class="text-right">{{ntacredito.valor}}</td>
+                        <td class="text-right">{{ntacredito.devengado}}</td>
+                        <td class="text-right">{{ntacredito.valor - ntacredito.devengado}}</td>
+                        <td class="text-center">
+                            <div class="btn-group py-0">
+                                <button type="button" class="btn btn-warning btn-badged dropdown-toggle py-0"
+                                    data-toggle="dropdown" aria-expanded="false">
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right popLista">
+                                    <button class="dropdown-item" type="button"
+                                        [routerLink]="['/modi-pingresos',ntacredito.idntacredito]">
+                                        <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
+                                    <button class="dropdown-item" type="button" data-toggle="modal"
+                                        data-target="#modalEliminar">
+                                        <i class="bi bi-file-minus"></i>&nbsp; ImpComprobante</button>
+                                </div>
+                            </div>
+                        </td>
                     </tr>
                 </tbody>
-                <!-- MODAL -->
-                <div class='modal fade' id='modalAbonados' tabindex='-1' aria-labelledby='modalAbonadosLabel'
-                    aria-hidden='true'>
-                    <div class='modal-dialog'>
-                        <div class='modal-content'>
-                            <div class='modal-header'>
-                                <h5 class='modal-title' id='modalAbonadosLabel'>CONFIRMACIÓN</h5>
-                                <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
-                                    <span aria-hidden='true'>&times;</span>
-                                </button>
-                            </div>
-                            <div class='modal-body'>
-                                ¿ Esta seguro de eliminar el abonado ?
-                            </div>
-                            <div class='modal-footer' id='idButtons'>
-                                <button type='button' class='btn btn-secondary' data-dismiss='modal'>NO</button>
-                                <button type='button' class='btn btn-primary' data-dismiss='modal'
-                                    id='btnSi'>SI</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </table>
         </div>
+        <div class="card-footer">
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-end">
+                    <li class="page-item">
+                        <button class="btn btn-sm btn-primary" (click)="onPreviousPage()"> <span
+                                aria-hidden="true">&laquo;</span>
+                        </button>
+                    </li>
+                    <li class="page-item" *ngFor="let p of pages">
+                        <button class="btn btn-sm btn-outline-primary" (click)="onGoToPage(p)"
+                            [class.active]="p === page">
+                            {{ p + 1 }}
+                        </button>
+                    </li>
+                    <li class="page-item">
+                        <button class="btn btn-sm btn-primary" (click)="onNextPage()"> <span
+                                aria-hidden="true">&raquo;</span>
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+        </div>
     </div>
-
-</div>
