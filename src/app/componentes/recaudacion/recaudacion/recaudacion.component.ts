@@ -35,6 +35,7 @@ import { of } from 'rxjs';
 import { ModulosService } from 'src/app/servicios/modulos.service';
 import { Modulos } from 'src/app/modelos/modulos.model';
 import { LoadingService } from 'src/app/servicios/loading.service';
+import { NtacreditoService } from 'src/app/servicios/ntacredito.service';
 
 @Component({
   selector: 'app-recaudacion',
@@ -116,8 +117,9 @@ export class RecaudacionComponent implements OnInit {
     private facxrService: FacxrecaudaService,
     private s_recaudaxcaja: RecaudaxcajaService,
     private s_modulo: ModulosService,
-    private loadingService: LoadingService
-  ) {}
+    private loadingService: LoadingService,
+    private s_ntacredito: NtacreditoService
+  ) { }
 
   ngOnInit(): void {
     this.formBuscar = this.fb.group({
@@ -136,6 +138,7 @@ export class RecaudacionComponent implements OnInit {
       ncvalor: ['', [Validators.required], this.valNC.bind(this)],
       dinero: ['', [Validators.required], this.valDinero.bind(this)],
       vuelto: '',
+      saldo: '',
     });
     //Al digitar quita alerta
     let cuenta = document.getElementById('cuenta') as HTMLInputElement;
@@ -538,7 +541,9 @@ export class RecaudacionComponent implements OnInit {
     this.totalAcobrar();
   }
 
-  marcarAnteriores(index: number) {
+  marcarAnteriores(index: number, cuenta: number) {
+    console.log(index)
+    console.log(cuenta)
     if (
       this._sincobro[index].idmodulo === 3 ||
       this._sincobro[index].idmodulo === 4
@@ -745,7 +750,7 @@ export class RecaudacionComponent implements OnInit {
     rubrosxfac.cantidad = 1;
     rubrosxfac.estado = 1;
     this.rubxfacService.saveRubroxFac(rubrosxfac).subscribe({
-      next: (datos) => {},
+      next: (datos) => { },
       error: (e) => console.error(e),
     });
   }
@@ -817,7 +822,7 @@ export class RecaudacionComponent implements OnInit {
                           this.s_recaudaxcaja
                             .updateRecaudaxcaja(this.recxcaja)
                             .subscribe({
-                              next: (datos) => {},
+                              next: (datos) => { },
                               error: (e) => console.error(e),
                             });
                         },
@@ -1133,7 +1138,7 @@ export class RecaudacionComponent implements OnInit {
       return of({ invalido: true });
     else return of(null);
   }
-  pdf() {}
+  pdf() { }
   //Al digitar el dinero
   changeDinero() {
     let ncvalor: number;

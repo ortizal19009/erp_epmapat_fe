@@ -208,7 +208,7 @@
                                 sincobro.valorbase | number:'1.2-2'}}</td>-->
                                     <td>
                                         <input type="checkbox" [(ngModel)]="sincobro.pagado"
-                                            (change)="marcarAnteriores(i)" [disabled]="swcobrado" class="cursor" />
+                                            (change)="marcarAnteriores(i, sincobro.idAbonado)" [disabled]="swcobrado" class="cursor" />
                                     </td>
                                     <td [ngClass]="{'transferido': sincobro.estado == 3 }">
                                         <button *ngIf="!swcobrado" class="btn btn-outline-info btn-xs cursor"
@@ -329,6 +329,12 @@
                                 <input type="text" class="form-control text-right" formControlName="acobrar" readonly>
                                 <div class="input-group-append"> <span class="input-group-text">{{acobrardec}}</span>
                                 </div>
+                            </div>
+                            <div *ngIf="formacobroNC || f['ncvalor'].value > 0" class="input-group mb-3">
+                                <div class="input-group-prepend"><span class="input-group-text font-weight-bold"
+                                        for="dinero">Saldo</span></div>
+                                <input type="text" class="form-control text-center" formControlName="saldo" readonly
+                                    [ngClass]="{'is-invalid': f['saldo'].invalid && f['saldo'].touched,'is-valid': f['saldo'].valid, '': f['saldo'].untouched}">
                             </div>
                             <div *ngIf="formacobroNC || f['ncvalor'].value > 0" class="input-group mb-3">
                                 <div class="input-group-prepend"><span class="input-group-text font-weight-bold"
