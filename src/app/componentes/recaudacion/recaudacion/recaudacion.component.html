@@ -119,6 +119,18 @@
                     </div>
                 </div>
             </div>
+            <div class="row" *ngIf=" _ntaCredito.length >0">
+                <div class="col-sm">
+                    <div class="card detalle sombra">
+                        <div class="card-body box-profile">
+                            <h6 class="profile-username text-center">Nota crédito</h6>
+                            <p class="text-muted text-center"><i class="fa fa-check-circle-o" aria-hidden="true"></i>
+                            </p>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="row" *ngIf="_nroFactura !=''">
                 <div class="col-sm numeracion">
                     <small class="badge badge-danger"><i class="bi bi-newspaper"></i>
@@ -208,7 +220,8 @@
                                 sincobro.valorbase | number:'1.2-2'}}</td>-->
                                     <td>
                                         <input type="checkbox" [(ngModel)]="sincobro.pagado"
-                                            (change)="marcarAnteriores(i, sincobro.idAbonado)" [disabled]="swcobrado" class="cursor" />
+                                            (change)="marcarAnteriores($event,i, sincobro.idAbonado)"
+                                            [disabled]="swcobrado" class="cursor" />
                                     </td>
                                     <td [ngClass]="{'transferido': sincobro.estado == 3 }">
                                         <button *ngIf="!swcobrado" class="btn btn-outline-info btn-xs cursor"
@@ -332,7 +345,7 @@
                             </div>
                             <div *ngIf="formacobroNC || f['ncvalor'].value > 0" class="input-group mb-3">
                                 <div class="input-group-prepend"><span class="input-group-text font-weight-bold"
-                                        for="dinero">Saldo</span></div>
+                                        for="dinero">Saldo NC</span></div>
                                 <input type="text" class="form-control text-center" formControlName="saldo" readonly
                                     [ngClass]="{'is-invalid': f['saldo'].invalid && f['saldo'].touched,'is-valid': f['saldo'].valid, '': f['saldo'].untouched}">
                             </div>

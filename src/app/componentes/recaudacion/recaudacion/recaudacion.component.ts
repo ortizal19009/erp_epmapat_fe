@@ -99,6 +99,8 @@ export class RecaudacionComponent implements OnInit {
   _codigo: string;
   /*  */
   arrFacturas: any = [];
+  arrCuenta: any = [];
+  _ntaCredito: ntaCredito[] = [];
   constructor(
     public fb: FormBuilder,
     private aboService: AbonadosService,
@@ -283,6 +285,7 @@ export class RecaudacionComponent implements OnInit {
   }
 
   onSubmit() {
+    this._ntaCredito = [];
     //this.getLastFactura();
     this.swcobrado = false;
     this.acobrar = 0;
@@ -541,9 +544,25 @@ export class RecaudacionComponent implements OnInit {
     this.totalAcobrar();
   }
 
-  marcarAnteriores(index: number, cuenta: number) {
+  marcarAnteriores(e: any, index: number, cuenta: number) {
     console.log(index)
     console.log(cuenta)
+    console.log(e.target.checked)
+    if (cuenta != 0 && e.target.checked === true) {
+      let find = this.arrCuenta.find((item: number) => item == cuenta);
+      if (!find) {
+        this.arrCuenta.push(cuenta);
+        this.buscarNtaCredito(this.arrCuenta[0])
+      }
+    } else if (cuenta != 0 && e.target.checked === false) {
+      let find = this.arrCuenta.find((item: number) => item == cuenta);
+
+      let i = this.arrCuenta.indexOf(find);
+      console.log(i)
+      this.arrCuenta.splice(i, 1);
+    }
+    console.log(this.arrCuenta)
+
     if (
       this._sincobro[index].idmodulo === 3 ||
       this._sincobro[index].idmodulo === 4
@@ -579,6 +598,26 @@ export class RecaudacionComponent implements OnInit {
     }
     this.totalAcobrar();
   }
+
+  buscarNtaCredito(cuenta: number) {
+    this.s_ntacredito.getSaldosNC(cuenta).subscribe({
+      next: (datos: any) => {
+        console.log(datos)
+        if (datos.length > 0) {
+          this.formCobrar.patchValue({
+            saldo: datos[0].saldo - datos[0].devengado
+          })
+        } else {
+          this.formCobrar.patchValue({
+            saldo: ''
+          })
+        }
+
+      },
+      error: (e: any) => console.error(e)
+    })
+  }
+
   totalAcobrar() {
     let suma: number = 0;
     let i = 0;
@@ -1257,4 +1296,11 @@ interface facturaI {
   responsablePago: string;
   total: number;
   formapago: number;
+}
+
+interface ntaCredito {
+  devengado: number;
+  saldo: number;
+  idntacredito: number;
+  cuenta: number
 }
