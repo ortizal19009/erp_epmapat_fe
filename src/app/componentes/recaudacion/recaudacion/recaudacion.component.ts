@@ -490,6 +490,7 @@ export class RecaudacionComponent implements OnInit {
     this.cliente.porcdiscapacidad = null;
     this.filtrar = '';
     this.totInteres = 0;
+
   }
 
   buscarClientes() {
@@ -548,20 +549,7 @@ export class RecaudacionComponent implements OnInit {
     console.log(index)
     console.log(cuenta)
     console.log(e.target.checked)
-    if (cuenta != 0 && e.target.checked === true) {
-      let find = this.arrCuenta.find((item: number) => item == cuenta);
-      if (!find) {
-        this.arrCuenta.push(cuenta);
-        this.buscarNtaCredito(this.arrCuenta[0])
-      }
-    } else if (cuenta != 0 && e.target.checked === false) {
-      let find = this.arrCuenta.find((item: number) => item == cuenta);
-
-      let i = this.arrCuenta.indexOf(find);
-      console.log(i)
-      this.arrCuenta.splice(i, 1);
-    }
-    console.log(this.arrCuenta)
+    this.ntaCredito(cuenta, e.target.checked)
 
     if (
       this._sincobro[index].idmodulo === 3 ||
@@ -575,6 +563,7 @@ export class RecaudacionComponent implements OnInit {
         while (i >= 0) {
           if (antCuenta != this._sincobro[i].idAbonado) break;
           this._sincobro[i].pagado = 1;
+          console.log(antCuenta)
           antCuenta = this._sincobro[i].idAbonado;
           i--;
         }
@@ -597,6 +586,36 @@ export class RecaudacionComponent implements OnInit {
       }
     }
     this.totalAcobrar();
+  }
+  valCheckBox(cuenta: number, swcobrado: any) {
+    if (swcobrado == true) {
+      return swcobrado;
+    } else if (cuenta != this.arrCuenta[0] && this.arrCuenta.length > 0 && cuenta > 0) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+  ntaCredito(cuenta: number, sw: boolean) {
+    if (cuenta != 0 && sw === true) {
+      let find = this.arrCuenta.find((item: number) => item == cuenta);
+      if (!find) {
+        this.arrCuenta.push(cuenta);
+        this.buscarNtaCredito(this.arrCuenta[0])
+      }
+    } else if (cuenta != 0 && sw === false) {
+      let find = this.arrCuenta.find((item: number) => item == cuenta);
+
+      let i = this.arrCuenta.indexOf(find);
+      console.log(i)
+      this.arrCuenta.splice(i, 1);
+      if (this.arrCuenta.length > 0) {
+        this.buscarNtaCredito(this.arrCuenta[0])
+      }
+    }
+    console.log(this.arrCuenta)
+
   }
 
   buscarNtaCredito(cuenta: number) {
