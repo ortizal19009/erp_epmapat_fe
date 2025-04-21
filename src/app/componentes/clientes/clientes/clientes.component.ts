@@ -153,6 +153,7 @@ export class ClientesComponent implements OnInit {
   }
 
   detallesCliente(e: any, cliente: Clientes) {
+    console.log(cliente);
     const tagName = e.target.tagName;
     if (tagName === 'TD') {
       sessionStorage.setItem(

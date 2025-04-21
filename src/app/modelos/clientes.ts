@@ -1,5 +1,6 @@
 import { Nacionalidad } from "./nacionalidad";
 import { PersoneriaJuridica } from "./personeria-juridica";
+import { Tpidentifica } from "./tpidentifica.model";
 
 export class Clientes {
     idcliente: number;
@@ -8,7 +9,7 @@ export class Clientes {
     direccion: String;
     telefono: String;
     fechanacimiento: Date;
-    idtpidentifica_tpidentifica: number;
+    idtpidentifica_tpidentifica: Tpidentifica;
     discapacitado: number;
     porcdiscapacidad: number;
     porcexonera: number;

@@ -11,7 +11,7 @@ const baseUrl = `${apiUrl}/abonados`;
   providedIn: 'root',
 })
 export class AbonadosService {
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   async getById_v2(idabonado: number) {
     return this.http.get<Abonados>(`${baseUrl}/${idabonado}`);
@@ -133,5 +133,20 @@ export class AbonadosService {
   async getDeudasCuentasByRuta(idruta: number) {
     let resp = this.http.get(`${baseUrl}/deudas?idruta=${idruta}`);
     return await firstValueFrom(resp);
+  }
+  getResAbonado(cuenta: number) {
+    return this.http.get(`${baseUrl}/resabonado?idabonado=${cuenta}`);
+  }
+  getResAbonadoNombre(nombre: string) {
+    return this.http.get(`${baseUrl}/resabonado/nombre?nombre=${nombre}`);
+  }
+  getResAbonadoIdentificacion(identificacion: string) {
+    return this.http.get(`${baseUrl}/resabonado/identificacion?identificacion=${identificacion}`);
+  }
+  getResAbonadoCliente(idcliente: number) {
+    return this.http.get(`${baseUrl}/resabonado/cliente?idcliente=${idcliente}`);
+  }
+  getResAbonadoResponsable(idresponsable: number) {
+    return this.http.get(`${baseUrl}/resabonado/respago?idresp=${idresponsable}`);
   }
 }

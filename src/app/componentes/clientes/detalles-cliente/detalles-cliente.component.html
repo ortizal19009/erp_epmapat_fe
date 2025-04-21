@@ -105,7 +105,7 @@
                               <thead class="theadCuentas">
                                  <tr class="text-center">
                                     <th>Cuenta</th>
-                                    <th>Medidor</th>
+                                    <th>Estado</th>
                                     <th>Categoría</th>
                                     <th>Dirección</th>
                                     <th>Ruta</th>
@@ -115,10 +115,10 @@
                                  <tr *ngFor="let cuenta of _cuentas" class="text-center fila"
                                     (click)="detallesAbonado(cuenta.idabonado)">
                                     <td>{{ cuenta.idabonado }}</td>
-                                    <td>{{ cuenta.nromedidor }}</td>
-                                    <td class="text-left">{{ cuenta.idcategoria_categorias.descripcion }}</td>
-                                    <td class="text-left">{{ cuenta.direccionubicacion }}</td>
-                                    <td class="text-left">{{ cuenta.idruta_rutas.descripcion }}</td>
+                                    <td>{{ cuenta.estado }}</td>
+                                    <td class="text-left">{{ cuenta.categoria }}</td>
+                                    <td class="text-left">{{ cuenta.direccion }}</td>
+                                    <td class="text-left">{{ cuenta.ruta }}</td>
                                  </tr>
                               </tbody>
                            </table>

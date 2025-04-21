@@ -74,38 +74,16 @@
                <tr class="fila" *ngFor="let abonado of _abonados | filter:filterTerm; let i= index"
                   (click)="detallesAbonado( abonado )">
                   <td class="text-center small font-weight-bold">{{i+1}}</td>
-                  <td>{{ abonado.idcliente_clientes.nombre }}</td>
-                  <td class="text-center">{{ abonado.idcliente_clientes.cedula }}</td>
+                  <td>{{ abonado.nombre }}</td>
+                  <td class="text-center">{{ abonado.identificacion }}</td>
                   <td class="text-center"
                      [ngClass]="{'fontwarning': abonado.estado === 0,'fantacygreen': abonado.estado === 2 || abonado.estado === 3}">
                      {{abonado.idabonado }}</td>
-                  <td>{{ abonado.idcategoria_categorias.descripcion }}</td>
-                  <td>{{ abonado.idruta_rutas.descripcion }}</td>
-                  <td>{{ abonado.direccionubicacion }}</td>
+                  <td>{{ abonado.categoria }}</td>
+                  <td>{{ abonado.ruta }}</td>
+                  <td>{{ abonado.direccion }}</td>
                </tr>
             </tbody>
-            <!-- MODAL -->
-            <div class='modal fade' id='modalAbonados' tabindex='-1' aria-labelledby='modalAbonadosLabel'
-               aria-hidden='true'>
-               <div class='modal-dialog'>
-                  <div class='modal-content'>
-                     <div class='modal-header'>
-                        <h5 class='modal-title' id='modalAbonadosLabel'>CONFIRMACIÓN</h5>
-                        <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
-                           <span aria-hidden='true'>&times;</span>
-                        </button>
-                     </div>
-                     <div class='modal-body'>
-                        ¿ Esta seguro de eliminar el abonado ?
-                     </div>
-                     <div class='modal-footer' id='idButtons'>
-                        <button type='button' class='btn btn-secondary' data-dismiss='modal'>NO</button>
-                        <button type='button' class='btn btn-primary' data-dismiss='modal'
-                           (click)="aprobarEliminarAbonado()" id='btnSi'>SI</button>
-                     </div>
-                  </div>
-               </div>
-            </div>
          </table>
       </div>
    </div>

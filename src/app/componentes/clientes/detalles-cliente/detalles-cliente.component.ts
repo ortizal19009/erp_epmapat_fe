@@ -28,7 +28,7 @@ export class DetallesClienteComponent implements OnInit {
   _rubrosxfac: any; //Detalle de la Factura
   totfac: number;
   idfactura: number;
-  limit: number = 20
+  limit: number = 20;
   idcliente: number;
 
   constructor(
@@ -40,7 +40,7 @@ export class DetallesClienteComponent implements OnInit {
     private traService: TramitesService,
     private router: Router,
     public authService: AutorizaService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     // if (!this.authService.log) this.router.navigate(['/inicio']);
@@ -49,8 +49,10 @@ export class DetallesClienteComponent implements OnInit {
 
   obtenerDatosCliente() {
     let idCliente = localStorage.getItem('idclienteToDetalles');
+    console.log(idCliente);
     this.cliService.getListaById(+idCliente!).subscribe({
-      next: (datos) => {
+      next: (datos: any) => {
+        console.log(datos);
         this.cliente.idcliente = datos.idcliente;
         this.cliente.nombre = datos.nombre;
         this.cliente.cedula = datos.cedula;
@@ -68,8 +70,9 @@ export class DetallesClienteComponent implements OnInit {
 
   //Cuentas por Cliente
   cuentasxCli(idcliente: number) {
-    this.abonadoService.getByIdcliente(idcliente).subscribe({
+    this.abonadoService.getResAbonadoCliente(idcliente).subscribe({
       next: (datos) => {
+        console.log(datos);
         this._cuentas = datos;
         if (this._cuentas.length == 0) {
           this.nocuentas = true;
@@ -94,7 +97,7 @@ export class DetallesClienteComponent implements OnInit {
 
   //Planillas por Cliente
   planillasxCliente(idcliente: number) {
-    this.idcliente = idcliente
+    this.idcliente = idcliente;
     this.facService.getByIdcliente(idcliente, this.limit).subscribe({
       next: (datos) => {
         this._facturas = datos;
@@ -106,7 +109,7 @@ export class DetallesClienteComponent implements OnInit {
     });
   }
   getFactura() {
-    this.planillasxCliente(this.idcliente)
+    this.planillasxCliente(this.idcliente);
   }
 
   //Trámites por Cliente
@@ -124,7 +127,6 @@ export class DetallesClienteComponent implements OnInit {
 
   getRubroxfac(idfactura: number) {
     this.idfactura = idfactura;
-
   }
 
   subtotal() {
@@ -158,6 +160,7 @@ export class DetallesClienteComponent implements OnInit {
   }
 
   modificarCliente(idcliente: number) {
+    console.log(idcliente);
     sessionStorage.setItem('padreModiCliente', '/detalles-cliente');
     sessionStorage.setItem(
       'idclienteToModi',

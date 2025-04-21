@@ -65,7 +65,7 @@ export class ClientesService {
   }
 
   getListaById(idcliente: number) {
-    return this.http.get<Clientes>(`${baseUrl}/${idcliente}`);
+    return this.http.get<any>(`${baseUrl}/one?idcliente=${idcliente}`);
   }
 
   updateCliente(clientes: Clientes): Observable<Object> {

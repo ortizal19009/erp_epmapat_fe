@@ -8,6 +8,7 @@ import {
 import { Router } from '@angular/router';
 import { map, of } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import { Clientes } from 'src/app/modelos/clientes';
 import { Nacionalidad } from 'src/app/modelos/nacionalidad';
 import { PersoneriaJuridica } from 'src/app/modelos/personeria-juridica';
 import { Tpidentifica } from 'src/app/modelos/tpidentifica.model';
@@ -24,13 +25,13 @@ import { TpidentificaService } from 'src/app/servicios/tpidentifica.service';
 export class ModificarClientesComponent implements OnInit {
   private parent: string | null;
   formCliente: FormGroup;
-  cliente: any;
+  cliente: Clientes;
   nacionalidad: any;
   personeriajuridica: any;
   _tpidentifica: any;
   validar: boolean = false;
   validarporc: boolean = false;
-  codidentifica: string;
+  codidentifica: any;
   antcedula: String;
   swModifi = false;
   date: Date = new Date();
@@ -144,8 +145,11 @@ export class ModificarClientesComponent implements OnInit {
 
   buscaCliente() {
     let idcliente = sessionStorage.getItem('idclienteToModi');
+    //let cli: any = this.cliService.getListaById()
+    console.log(idcliente);
     this.cliService.getListaById(+idcliente!).subscribe({
       next: (datos: any) => {
+        console.log(datos);
         this.cliente = datos;
         this.codidentifica = this.cliente.idtpidentifica_tpidentifica.codigo;
         this.antcedula = datos.cedula;
