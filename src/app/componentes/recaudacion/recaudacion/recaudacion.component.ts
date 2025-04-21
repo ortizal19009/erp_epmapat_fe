@@ -100,7 +100,7 @@ export class RecaudacionComponent implements OnInit {
   /*  */
   arrFacturas: any = [];
   arrCuenta: any = [];
-  _ntaCredito: ntaCredito[] = [];
+  _nc: any=[];
   constructor(
     public fb: FormBuilder,
     private aboService: AbonadosService,
@@ -140,7 +140,7 @@ export class RecaudacionComponent implements OnInit {
       ncvalor: ['', [Validators.required], this.valNC.bind(this)],
       dinero: ['', [Validators.required], this.valDinero.bind(this)],
       vuelto: '',
-      saldo: '',
+      saldo: ['', [Validators.required], this.SaldoNC.bind(this)],
     });
     //Al digitar quita alerta
     let cuenta = document.getElementById('cuenta') as HTMLInputElement;
@@ -285,7 +285,7 @@ export class RecaudacionComponent implements OnInit {
   }
 
   onSubmit() {
-    this._ntaCredito = [];
+    this.arrCuenta = [];
     //this.getLastFactura();
     this.swcobrado = false;
     this.acobrar = 0;
@@ -382,6 +382,7 @@ export class RecaudacionComponent implements OnInit {
     this.sumtotal = 0;
     this.formBuscar.controls['cuenta'].setValue('');
     this.formBuscar.controls['identificacion'].setValue('');
+    this.formCobrar.value.saldo = 0
   }
 
   sinCobro(idcliente: number) {
@@ -490,6 +491,7 @@ export class RecaudacionComponent implements OnInit {
     this.cliente.porcdiscapacidad = null;
     this.filtrar = '';
     this.totInteres = 0;
+    this.formCobrar.reset();
 
   }
 
@@ -608,20 +610,18 @@ export class RecaudacionComponent implements OnInit {
       let find = this.arrCuenta.find((item: number) => item == cuenta);
 
       let i = this.arrCuenta.indexOf(find);
-      console.log(i)
       this.arrCuenta.splice(i, 1);
       if (this.arrCuenta.length > 0) {
         this.buscarNtaCredito(this.arrCuenta[0])
       }
     }
-    console.log(this.arrCuenta)
-
   }
 
   buscarNtaCredito(cuenta: number) {
     this.s_ntacredito.getSaldosNC(cuenta).subscribe({
       next: (datos: any) => {
         console.log(datos)
+        this._nc = datos;
         if (datos.length > 0) {
           this.formCobrar.patchValue({
             saldo: datos[0].saldo - datos[0].devengado
@@ -1193,6 +1193,11 @@ export class RecaudacionComponent implements OnInit {
   //Valida que el valor de la NC no se mayor que el valor a cobrar
   valNC(control: AbstractControl) {
     if (this.formCobrar.value.valorAcobrar < control.value)
+      return of({ invalido: true });
+    else return of(null);
+  }
+  SaldoNC(control: AbstractControl) {
+    if (this.formCobrar.value.saldo <= 0)
       return of({ invalido: true });
     else return of(null);
   }

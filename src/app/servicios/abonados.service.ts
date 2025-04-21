@@ -144,7 +144,7 @@ export class AbonadosService {
     return this.http.get(`${baseUrl}/resabonado/identificacion?identificacion=${identificacion}`);
   }
   getResAbonadoCliente(idcliente: number) {
-    return this.http.get(`${baseUrl}/resabonado/cliente?idcliente=${idcliente}`);
+    return this.http.get(`${baseUrl}/resabonado/idcliente?idcliente=${idcliente}`);
   }
   getResAbonadoResponsable(idresponsable: number) {
     return this.http.get(`${baseUrl}/resabonado/respago?idresp=${idresponsable}`);
