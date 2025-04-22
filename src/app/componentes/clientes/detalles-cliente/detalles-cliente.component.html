@@ -73,9 +73,9 @@
                <ul class="nav nav-tabs card-header-tabs cardTab">
                   <li class="nav-item"><a class="nav-link active cardTab" href="#cuentas" data-toggle="tab">
                         <i class="fa fa-building"></i> Cuentas</a></li>
-                  <li class="nav-item"><a class="nav-link cardTab" href="#facelectro" data-toggle="tab"
+                  <!-- <li class="nav-item"><a class="nav-link cardTab" href="#facelectro" disabled data-toggle="tab"
                         (click)="facelectroxCli( cliente.idcliente )">
-                        <i class="fa fa-laptop"></i> Facturas</a></li>
+                        <i class="fa fa-laptop"></i> Facturas</a></li> -->
                   <li class="nav-item"><a class="nav-link cardTab" href="#planillas"
                         (click)="planillasxCliente( cliente.idcliente )" data-toggle="tab">
                         <i class="fa fa-calendar"></i> Planillas</a></li>
@@ -241,7 +241,7 @@
                               </thead>
                               <tbody>
                                  <tr *ngFor="let tramite of _tramites" class="text-center">
-                                    <td>{{ tramite.idtramite }}</td>
+                                    <td>{{ tramite.idctramite }}</td>
                                     <td>{{ tramite.feccrea | date: 'dd-MM-y'}}</td>
                                     <td class="text-left">{{ tramite.descripcion }}</td>
                                     <td>{{ tramite.validohasta | date: 'dd-MM-y'}}</td>
