@@ -18,4 +18,7 @@ export class NtacreditoService {
   getSaldosNC(cuenta: number) {
     return this.http.get(`${baseUrl}/saldosNC?cuenta=${cuenta}`)
   }
+  updateNotaCredito(ntacredito: any){
+    return this.http.put(`${baseUrl}/up?idntacredito=${ntacredito.idntacredito}`,ntacredito);
+  }
 }

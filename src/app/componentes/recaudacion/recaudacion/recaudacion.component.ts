@@ -36,6 +36,10 @@ import { ModulosService } from 'src/app/servicios/modulos.service';
 import { Modulos } from 'src/app/modelos/modulos.model';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { NtacreditoService } from 'src/app/servicios/ntacredito.service';
+import { ValoresncService } from 'src/app/servicios/valoresnc.service';
+import { FacxncService } from 'src/app/servicios/facxnc.service';
+import { Facxnc } from 'src/app/modelos/facxnc';
+import { Valoresnc } from 'src/app/modelos/valoresnc';
 
 @Component({
   selector: 'app-recaudacion',
@@ -100,7 +104,7 @@ export class RecaudacionComponent implements OnInit {
   /*  */
   arrFacturas: any = [];
   arrCuenta: any = [];
-  _nc: any=[];
+  _nc: any = [];
   constructor(
     public fb: FormBuilder,
     private aboService: AbonadosService,
@@ -120,7 +124,9 @@ export class RecaudacionComponent implements OnInit {
     private s_recaudaxcaja: RecaudaxcajaService,
     private s_modulo: ModulosService,
     private loadingService: LoadingService,
-    private s_ntacredito: NtacreditoService
+    private s_ntacredito: NtacreditoService,
+    private s_valorNc: ValoresncService,
+    private s_facnc: FacxncService
   ) { }
 
   ngOnInit(): void {
@@ -636,6 +642,23 @@ export class RecaudacionComponent implements OnInit {
       error: (e: any) => console.error(e)
     })
   }
+  guardarValoresNc(valorNc: any, factura: any) {
+    this.s_valorNc.saveValoresnc(valorNc).subscribe({
+      next: (datos: any) => {
+        let facxnotacredito: Facxnc = new Facxnc();
+        facxnotacredito.idfactura_facturas = factura;
+        facxnotacredito.idvaloresnc_valoresnc = datos;
+        this.s_facnc.saveFacxnc(facxnotacredito).subscribe({
+          next: (datos: any) => { console.log(datos) 
+           // this.s_ntacredito
+          },
+          error: (e: any) => console.error(e)
+        })
+
+      },
+      error: (e: any) => console.error(e)
+    })
+  }
 
   totalAcobrar() {
     let suma: number = 0;
@@ -880,7 +903,9 @@ export class RecaudacionComponent implements OnInit {
                           this.s_recaudaxcaja
                             .updateRecaudaxcaja(this.recxcaja)
                             .subscribe({
-                              next: (datos) => { },
+                              next: (datos) => {
+
+                              },
                               error: (e) => console.error(e),
                             });
                         },
@@ -891,6 +916,16 @@ export class RecaudacionComponent implements OnInit {
                   //fac.swiva = +iva[0][1]!;
                   this.facService.updateFacturas(fac).subscribe({
                     next: (nex: any) => {
+                      console.log("ACTUALIZANDO FACTURAS", nex)
+                      if (this._nc.length > 0) {
+                        let valoresnc: Valoresnc = new Valoresnc();
+                        valoresnc.estado = 1;
+                        valoresnc.idntacredigo_ntacredito = this._nc[0];
+                        valoresnc.valor = this.formCobrar.value.ncvalor;
+                        valoresnc.fechaaplicado = new Date();
+                        valoresnc.saldo = this._nc[0].saldo - this._nc[0].devengado - this.formCobrar.value.ncvalor;
+                        this.guardarValoresNc(valoresnc, nex)
+                      }
                       this.swcobrado = true;
                       if (
                         nex.idmodulo.idmodulo != 27 ||
