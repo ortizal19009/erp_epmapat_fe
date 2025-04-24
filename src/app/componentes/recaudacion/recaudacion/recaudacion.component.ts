@@ -106,6 +106,7 @@ export class RecaudacionComponent implements OnInit {
   arrFacturas: any = [];
   arrCuenta: any = [];
   _nc: any = [];
+  swNC: boolean = false
   constructor(
     public fb: FormBuilder,
     private aboService: AbonadosService,
@@ -877,6 +878,9 @@ export class RecaudacionComponent implements OnInit {
                     fac.swiva = 0;
                   }
                   fac.fechacobro = fechacobro;
+                  if(this.swNC === true){
+                    fac.formapago = 3
+                  }
                   fac.usuariocobro = this.authService.idusuario;
                   if (fac.idmodulo.idmodulo != 8) {
                   }
@@ -1244,10 +1248,16 @@ export class RecaudacionComponent implements OnInit {
   }
   //Valida que el valor de la NC no se mayor que el valor a cobrar
   valNC(control: AbstractControl) {
-    console.log("VALIDANDO NC")
-    if (this.formCobrar.value.valorAcobrar < control.value || control.value > +this.formCobrar.value.saldo!)
-      return of({ invalido: true });
-    else return of(null);
+    if (this.formCobrar.value.valorAcobrar < control.value || control.value > +this.formCobrar.value.saldo!) {
+      this.swNC = false;
+
+      return of({ invalido: true })
+    }
+    else { 
+      this.swNC = true;
+
+      return of(null); 
+    }
   }
   SaldoNC(control: AbstractControl) {
     if (this.formCobrar.value.saldo <= 0)
