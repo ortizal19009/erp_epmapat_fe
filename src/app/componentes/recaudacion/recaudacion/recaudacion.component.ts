@@ -31,7 +31,7 @@ import { Abonados } from 'src/app/modelos/abonados';
 import { Clientes } from 'src/app/modelos/clientes';
 import { Rubroxfac } from 'src/app/modelos/rubroxfac.model';
 import { Rubros } from 'src/app/modelos/rubros.model';
-import { of } from 'rxjs';
+import { of, switchMap, tap } from 'rxjs';
 import { ModulosService } from 'src/app/servicios/modulos.service';
 import { Modulos } from 'src/app/modelos/modulos.model';
 import { LoadingService } from 'src/app/servicios/loading.service';
@@ -40,6 +40,7 @@ import { ValoresncService } from 'src/app/servicios/valoresnc.service';
 import { FacxncService } from 'src/app/servicios/facxnc.service';
 import { Facxnc } from 'src/app/modelos/facxnc';
 import { Valoresnc } from 'src/app/modelos/valoresnc';
+import { Ntacredito } from 'src/app/modelos/ntacredito';
 
 @Component({
   selector: 'app-recaudacion',
@@ -630,7 +631,7 @@ export class RecaudacionComponent implements OnInit {
         this._nc = datos;
         if (datos.length > 0) {
           this.formCobrar.patchValue({
-            saldo: datos[0].saldo - datos[0].devengado
+            saldo: datos[0].saldo
           })
         } else {
           this.formCobrar.patchValue({
@@ -642,22 +643,35 @@ export class RecaudacionComponent implements OnInit {
       error: (e: any) => console.error(e)
     })
   }
-  guardarValoresNc(valorNc: any, factura: any) {
-    this.s_valorNc.saveValoresnc(valorNc).subscribe({
-      next: (datos: any) => {
-        let facxnotacredito: Facxnc = new Facxnc();
-        facxnotacredito.idfactura_facturas = factura;
-        facxnotacredito.idvaloresnc_valoresnc = datos;
-        this.s_facnc.saveFacxnc(facxnotacredito).subscribe({
-          next: (datos: any) => { console.log(datos) 
-           // this.s_ntacredito
-          },
-          error: (e: any) => console.error(e)
-        })
+  guardarValoresNc(valorNc: any, factura: any): void {
+    const notaCredito = this._nc[0];
+    const ncvalor = this.formCobrar.value.ncvalor;
 
-      },
-      error: (e: any) => console.error(e)
-    })
+    if (!notaCredito || ncvalor == null) {
+      console.warn('Datos incompletos para guardar Nota de Crédito');
+      return;
+    }
+
+    this.s_valorNc.saveValoresnc(valorNc).pipe(
+      switchMap((valoresNcGuardado: any) => {
+        const facxnotacredito = new Facxnc();
+        facxnotacredito.idfactura_facturas = factura;
+        facxnotacredito.idvaloresnc_valoresnc = valoresNcGuardado;
+        return this.s_facnc.saveFacxnc(facxnotacredito);
+      }),
+      switchMap(() => {
+        const nc: NtacreditoUpdate = {
+          idntacredito: notaCredito.idntacredito,
+          devengado: +notaCredito.devengado! + +ncvalor!,
+        };
+        return this.s_ntacredito.updateNotaCredito(nc);
+      }),
+      tap((respuesta: any) => {
+        console.log("Nota Actualizada", respuesta);
+      })
+    ).subscribe({
+      error: (e: any) => console.error("Error en el proceso de guardado de Nota de Crédito:", e)
+    });
   }
 
   totalAcobrar() {
@@ -920,10 +934,10 @@ export class RecaudacionComponent implements OnInit {
                       if (this._nc.length > 0) {
                         let valoresnc: Valoresnc = new Valoresnc();
                         valoresnc.estado = 1;
-                        valoresnc.idntacredigo_ntacredito = this._nc[0];
+                        valoresnc.idntacredito_ntacredito = this._nc[0];
                         valoresnc.valor = this.formCobrar.value.ncvalor;
                         valoresnc.fechaaplicado = new Date();
-                        valoresnc.saldo = this._nc[0].saldo - this._nc[0].devengado - this.formCobrar.value.ncvalor;
+                        valoresnc.saldo = this._nc[0].saldo - this.formCobrar.value.ncvalor;
                         this.guardarValoresNc(valoresnc, nex)
                       }
                       this.swcobrado = true;
@@ -1050,15 +1064,18 @@ export class RecaudacionComponent implements OnInit {
     });
   }
   //Que el dinero no sea menor que el valor a cobrar
-  valDinero(control: AbstractControl) {
-    let ncvalor: number;
-    if (+this.formCobrar.controls['ncvalor'].value > 0)
-      ncvalor = +this.formCobrar.controls['ncvalor'].value;
-    else ncvalor = 0;
-    if (+this.formCobrar.value.valorAcobrar - ncvalor > control.value)
-      return of({ invalido: true });
-    else return of(null);
+  valDinero(control: AbstractControl): { [key: string]: any } | null {
+    const ncvalor = +this.formCobrar.controls['ncvalor'].value || 0;
+    const valorAcobrar = +this.formCobrar.value.valorAcobrar || 0;
+    const valorActual = +control.value || 0;
+
+    if ((valorAcobrar - ncvalor) > valorActual) {
+      return { invalido: true };
+    }
+
+    return null;
   }
+
 
   impComprobante(datos: any) {
     let lectura: any;
@@ -1227,7 +1244,8 @@ export class RecaudacionComponent implements OnInit {
   }
   //Valida que el valor de la NC no se mayor que el valor a cobrar
   valNC(control: AbstractControl) {
-    if (this.formCobrar.value.valorAcobrar < control.value)
+    console.log("VALIDANDO NC")
+    if (this.formCobrar.value.valorAcobrar < control.value || control.value > +this.formCobrar.value.saldo!)
       return of({ invalido: true });
     else return of(null);
   }
@@ -1362,4 +1380,10 @@ interface ntaCredito {
   saldo: number;
   idntacredito: number;
   cuenta: number
+}
+
+interface NtacreditoUpdate {
+  idntacredito: number;
+  devengado: number;
+
 }

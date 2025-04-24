@@ -6,5 +6,5 @@ export class Valoresnc {
     valor: number; 
     fechaaplicado: Date; 
     saldo: number; 
-    idntacredigo_ntacredito: Ntacredito;
+    idntacredito_ntacredito: Ntacredito;
 }
