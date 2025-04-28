@@ -37,7 +37,7 @@ export class RecaudacionReportsService {
     private s_usuarios: UsuarioService,
     private s_categoria: CategoriaService,
     private s_emision: EmisionService
-  ) {}
+  ) { }
   async cabeceraConsumoAgua(
     datos: any,
     doc: jsPDF,
@@ -141,7 +141,7 @@ export class RecaudacionReportsService {
       ],
     });
   }
-  comprobantePago(l_datos: any, factura: any) {
+  _comprobantePago(l_datos: any, factura: any) {
     if (factura.interescobrado === null) {
       factura.interescobrado = 0;
     }
@@ -262,6 +262,7 @@ export class RecaudacionReportsService {
         doc.addImage(logo, 'PNG', 20, 130, 190, 195);
         doc.setGState(doc.GState({ opacity: 0.99 }));
         doc.addImage(logo, 'PNG', 120, 15, 80, 80);
+
         window.open(doc.output('bloburl'));
         /*     doc.output('pdfobjectnewwindow', {
           filename: 'hoja de reporte de pago',
@@ -270,6 +271,30 @@ export class RecaudacionReportsService {
       error: (err) =>
         console.error('Al recuperar el datalle de la Planilla: ', err.error),
     });
+  }
+  _imprimirAll(facturas: any){
+    const doc = new jsPDF();
+
+for (const factura of facturas) {
+  if (factura !== facturas[0]) {
+    doc.addPage();
+  }
+  this._comprobantePago(factura, doc);  // <- Función que dibuja un comprobante
+}
+
+// Después de todos los comprobantes
+const pdfBlob = doc.output('blob');
+const blobUrl = URL.createObjectURL(pdfBlob);
+
+const iframe = document.createElement('iframe');
+iframe.style.display = 'none';
+iframe.src = blobUrl;
+document.body.appendChild(iframe);
+
+iframe.onload = () => {
+  iframe.contentWindow?.focus();
+  iframe.contentWindow?.print();
+};
   }
   reimprimircomprobantePago(l_datos: any, factura: any) {
     if (factura.interescobrado === null) {
@@ -392,15 +417,192 @@ export class RecaudacionReportsService {
         doc.addImage(logo, 'PNG', 20, 130, 190, 195);
         doc.setGState(doc.GState({ opacity: 0.99 }));
         doc.addImage(logo, 'PNG', 120, 15, 80, 80);
-        window.open(doc.output('bloburl'));
+        //window.open(doc.output('bloburl'));
         /*     doc.output('pdfobjectnewwindow', {
           filename: 'hoja de reporte de pago',
         }); */
+
+        /* PARA IMPRIMIR DE FORMA DIRECTA */
+        const pdfBlob = doc.output('blob');
+        const blobUrl = URL.createObjectURL(pdfBlob);
+
+        // Opción 1: usar un iframe oculto para imprimir automáticamente
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = blobUrl;
+        document.body.appendChild(iframe);
+
+        iframe.onload = () => {
+          iframe.contentWindow?.focus();
+          iframe.contentWindow?.print();
+        };
+        /* END PARA IMPRIMIR DE FORMA DIRECTA */
+
       },
       error: (err) =>
         console.error('Al recuperar el datalle de la Planilla: ', err.error),
     });
   }
+
+  async comprobantePago(l_datos: any, factura: any, doc: jsPDF): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (factura.interescobrado === null) {
+        factura.interescobrado = 0;
+      }
+  
+      var logo = new Image();
+      logo.src = './assets/img/logo_planilla.png';
+  
+      let usuario: any;
+      let idfactura: any;
+      let tableWidth = 200;
+      this.iva = 0;
+      this.subtotal = 0;
+      this.total = 0;
+      this.interes = 0;
+  
+      if (l_datos != null) {
+        idfactura = l_datos.idfactura;
+      } else {
+        idfactura = factura.idfactura;
+      }
+  
+      this.s_usuarios.getByIdusuario(factura.usuariocobro).subscribe({
+        next: (datos) => {
+          usuario = datos;
+          let modulo = factura.idmodulo.idmodulo;
+          if ((modulo === 3 || modulo === 4) && l_datos != null) {
+            this.cabeceraConsumoAgua(l_datos, doc, usuario, factura);
+          } else {
+            this.cabeceraOtros(factura, doc, usuario);
+          }
+  
+          this.rubxfacService.getByIdfactura(idfactura).subscribe({
+            next: (_rubrosxfac: any) => {
+              let rubros: any = [];
+              _rubrosxfac.forEach((item: any) => {
+                if (item.idrubro_rubros.swiva === true) {
+                  this.iva += item.valorunitario * item.cantidad * 0.15;
+                }
+                if (item.idrubro_rubros.idrubro != 5 && item.idrubro_rubros.idrubro != 165) {
+                  if (
+                    !(item.idfactura_facturas.swcondonar === true && item.idrubro_rubros.idrubro === 6)
+                  ) {
+                    this.total += +item.valorunitario! * item.cantidad;
+                    rubros.push([
+                      item.idrubro_rubros.descripcion,
+                      item.cantidad.toFixed(0),
+                      item.valorunitario.toFixed(2),
+                    ]);
+                  }
+                }
+                if (item.idrubro_rubros.idrubro === 165) {
+                  this.iva = 0;
+                }
+                this.interes = factura.interescobrado;
+              });
+  
+              this.total += this.interes + this.iva;
+              this.subtotal += this.total - this.interes - this.iva;
+  
+              doc.setFontSize(10);
+              autoTable(doc, {
+                margin: { left: 10 },
+                tableWidth,
+                theme: 'grid',
+                styles: { fontSize: 9, fontStyle: 'bold' },
+                headStyles: {
+                  halign: 'center',
+                  fillColor: 'white',
+                  textColor: 'black',
+                },
+                bodyStyles: {
+                  cellPadding: 1,
+                  fillColor: [255, 255, 255],
+                  textColor: 'black',
+                },
+                columnStyles: {
+                  0: { minCellWidth: 10 },
+                  1: { minCellWidth: 15, halign: 'center' },
+                  2: { minCellWidth: 15, halign: 'right' },
+                },
+                columns: ['Descripción', 'Cant.', 'Valor unitario'],
+                body: rubros,
+              });
+  
+              autoTable(doc, {
+                margin: { left: 10 },
+                tableWidth,
+                theme: 'grid',
+                styles: { fontSize: 9, fontStyle: 'bold' },
+                headStyles: {
+                  halign: 'center',
+                  fillColor: 'white',
+                  textColor: 'black',
+                },
+                bodyStyles: {
+                  cellPadding: 1,
+                  fillColor: [255, 255, 255],
+                  textColor: 'black',
+                },
+                columnStyles: {
+                  0: { minCellWidth: 10 },
+                  1: { minCellWidth: 15, halign: 'right' },
+                },
+                columns: ['', ''],
+                body: [
+                  ['Sub total', this.subtotal.toFixed(2)],
+                  ['Iva 15%', factura.swiva.toFixed(2)],
+                  ['Intereses', factura.interescobrado.toFixed(2)],
+                  ['Valor total', this.total.toFixed(2)],
+                ],
+              });
+  
+              doc.setGState(doc.GState({ opacity: 0.4 }));
+              doc.addImage(logo, 'PNG', 20, 130, 190, 195);
+              doc.setGState(doc.GState({ opacity: 0.99 }));
+              doc.addImage(logo, 'PNG', 120, 15, 80, 80);
+  
+              resolve();  // ✅ Muy importante: resolver la promesa al terminar
+            },
+            error: (err) => {
+              console.error('Error en rubros: ', err);
+              reject(err);
+            }
+          });
+        },
+        error: (e) => {
+          console.error('Error en usuario: ', e);
+          reject(e);
+        }
+      });
+    });
+  }
+  async imprimirAll(facturas: any[]): Promise<void> {
+    const doc = new jsPDF();
+  
+    for (const [index, factura] of facturas.entries()) {
+      if (index !== 0) {
+        doc.addPage();
+      }
+      await this.comprobantePago(null, factura, doc);  // << Esperamos que termine cada comprobante
+    }
+  
+    const pdfBlob = doc.output('blob');
+    const blobUrl = URL.createObjectURL(pdfBlob);
+  
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = blobUrl;
+    document.body.appendChild(iframe);
+  
+    iframe.onload = () => {
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+    };
+  }
+  
+  
   async getCategoriaById(idcategoria: number): Promise<any> {
     const categoria = this.s_categoria.getById(idcategoria).toPromise();
     return categoria;

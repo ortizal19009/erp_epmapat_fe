@@ -107,6 +107,7 @@ export class RecaudacionComponent implements OnInit {
   arrCuenta: any = [];
   _nc: any = [];
   swNC: boolean = false
+  facturasToPrint: any[] = []
   constructor(
     public fb: FormBuilder,
     private aboService: AbonadosService,
@@ -723,17 +724,18 @@ export class RecaudacionComponent implements OnInit {
       dinero: '',
       vuelto: '',
       ncvalor: '',
+      saldo: ''
     });
   }
 
   valorDinero() {
     this.formacobroNC = false;
-    this.formCobrar.controls['ncvalor'].setValue('');
+    this.formCobrar.controls['ncvalor'].setValue('')
     this.formCobrar.controls['dinero'].setValue(
       this.acobrar.toFixed(2).toString()
     );
     this.formCobrar.controls['vuelto'].setValue('');
-    this.disabledcobro = false;
+    this.disabledcobro = false
   }
 
   async getRubroxfac(idfactura: number, idmodulo: number, factura: any) {
@@ -878,8 +880,10 @@ export class RecaudacionComponent implements OnInit {
                     fac.swiva = 0;
                   }
                   fac.fechacobro = fechacobro;
-                  if(this.swNC === true){
+                  if (this.swNC === true) {
                     fac.formapago = 3
+                    console.log(fac)
+                    /* AQUI COLOCAR LA FUNCION DE IMPRIMIR EL COMPROBANTE DE NOTACREDITO */
                   }
                   fac.usuariocobro = this.authService.idusuario;
                   if (fac.idmodulo.idmodulo != 8) {
@@ -1072,12 +1076,13 @@ export class RecaudacionComponent implements OnInit {
     const ncvalor = +this.formCobrar.controls['ncvalor'].value || 0;
     const valorAcobrar = +this.formCobrar.value.valorAcobrar || 0;
     const valorActual = +control.value || 0;
+    console.log(valorAcobrar, ncvalor, valorActual)
 
     if ((valorAcobrar - ncvalor) > valorActual) {
-      return { invalido: true };
+      return of({ invalido: true });
     }
 
-    return null;
+    return of(null);
   }
 
 
@@ -1091,15 +1096,15 @@ export class RecaudacionComponent implements OnInit {
             next: (datos: any) => {
               lectura = datos;
               if (datos != null) {
-                this.s_pdfRecaudacion.comprobantePago(lectura, d_factura);
+                this.s_pdfRecaudacion._comprobantePago(lectura, d_factura);
               } else {
-                this.s_pdfRecaudacion.comprobantePago(null, d_factura);
+                this.s_pdfRecaudacion._comprobantePago(null, d_factura);
               }
             },
             error: (e) => console.error(e),
           });
         } else {
-          this.s_pdfRecaudacion.comprobantePago(null, d_factura);
+          this.s_pdfRecaudacion._comprobantePago(null, d_factura);
         }
       },
       error: (e) => console.error(e),
@@ -1154,50 +1159,7 @@ export class RecaudacionComponent implements OnInit {
 
     return interes;
   }
-  _cInteres(factura: any) {
-    this.totInteres = 0;
-    this.arrCalculoInteres = [];
-    let interes: number = 0;
-    if (factura.estado != 3 && factura.formapago != 4) {
-      let fec = factura.fechaemision.toString().split('-', 2);
-      //let fec = factura.feccrea.toString().split('-', 2);
-      let mes = +fec[1]! + 1;
-      if (mes > 12) {
-        mes = 1;
-      }
-      let fechai: Date = new Date(`${fec[0]}-${mes}-01`);
-      let fechaf: Date = new Date();
-      //this.factura = f(fec)actura;
-      fechaf.setMonth(fechaf.getMonth() - 1);
-      while (fechai <= fechaf) {
-        this.calInteres = {} as calcInteres;
-        let query = this._intereses.find(
-          (interes: { anio: number; mes: number }) =>
-            interes.anio === +fechai.getFullYear()! &&
-            interes.mes === +fechai.getMonth()! + 1
-        );
-        if (!query) {
-          this.calInteres.anio = +fechai.getFullYear()!;
-          this.calInteres.mes = +fechai.getMonth()! + 1;
-          this.calInteres.interes = 0;
-          query = this.calInteres;
-        } else {
-          this.calInteres.anio = query.anio;
-          this.calInteres.mes = query.mes;
-          this.calInteres.interes = query.porcentaje;
-          this.calInteres.valor = factura.total;
-          this.arrCalculoInteres.push(this.calInteres);
-        }
-        fechai.setMonth(fechai.getMonth() + 1);
-      }
-      this.arrCalculoInteres.forEach((item: any) => {
-        //this.totInteres += (item.interes * item.valor) / 100;
-        interes += (item.interes * item.valor) / 100;
-        // this.subtotal();
-      });
-    }
-    return interes;
-  }
+
   async calIva(idfactura: any) {
     let iva = this.rubxfacService.getIva(0.15, idfactura).toPromise();
     return iva;
@@ -1248,15 +1210,16 @@ export class RecaudacionComponent implements OnInit {
   }
   //Valida que el valor de la NC no se mayor que el valor a cobrar
   valNC(control: AbstractControl) {
+    console.log("valNC")
     if (this.formCobrar.value.valorAcobrar < control.value || control.value > +this.formCobrar.value.saldo!) {
       this.swNC = false;
 
       return of({ invalido: true })
     }
-    else { 
+    else {
       this.swNC = true;
 
-      return of(null); 
+      return of(null);
     }
   }
   SaldoNC(control: AbstractControl) {
@@ -1267,6 +1230,7 @@ export class RecaudacionComponent implements OnInit {
   pdf() { }
   //Al digitar el dinero
   changeDinero() {
+    console.log("CHANGE DINERO")
     let ncvalor: number;
     if (+this.formCobrar.controls['ncvalor'].value > 0)
       ncvalor = +this.formCobrar.controls['ncvalor'].value;
