@@ -426,7 +426,6 @@ export class RecaudacionComponent implements OnInit {
           const modulo: Modulos = await this.getModulo(item.idmodulo);
           item.modulo = modulo.descripcion;
           let interes: any = 0;
-          // console.log(item);
           if (
             (item.formapago != 4 || item.idmodulo != 27) &&
             (item.swcondonar === false || item.swcondonar === null)
@@ -557,11 +556,8 @@ export class RecaudacionComponent implements OnInit {
   }
 
   marcarAnteriores(e: any, index: number, cuenta: number) {
-    console.log(index)
-    console.log(cuenta)
-    console.log(e.target.checked)
-    this.ntaCredito(cuenta, e.target.checked)
 
+    this.ntaCredito(cuenta, e.target.checked)
     if (
       this._sincobro[index].idmodulo === 3 ||
       this._sincobro[index].idmodulo === 4
@@ -574,7 +570,6 @@ export class RecaudacionComponent implements OnInit {
         while (i >= 0) {
           if (antCuenta != this._sincobro[i].idAbonado) break;
           this._sincobro[i].pagado = 1;
-          console.log(antCuenta)
           antCuenta = this._sincobro[i].idAbonado;
           i--;
         }
@@ -629,7 +624,6 @@ export class RecaudacionComponent implements OnInit {
   buscarNtaCredito(cuenta: number) {
     this.s_ntacredito.getSaldosNC(cuenta).subscribe({
       next: (datos: any) => {
-        console.log(datos)
         this._nc = datos;
         if (datos.length > 0) {
           this.formCobrar.patchValue({
@@ -938,7 +932,6 @@ export class RecaudacionComponent implements OnInit {
                   //fac.swiva = +iva[0][1]!;
                   this.facService.updateFacturas(fac).subscribe({
                     next: (nex: any) => {
-                      console.log("ACTUALIZANDO FACTURAS", nex)
                       if (this._nc.length > 0) {
                         let valoresnc: Valoresnc = new Valoresnc();
                         valoresnc.estado = 1;
@@ -1076,8 +1069,6 @@ export class RecaudacionComponent implements OnInit {
     const ncvalor = +this.formCobrar.controls['ncvalor'].value || 0;
     const valorAcobrar = +this.formCobrar.value.valorAcobrar || 0;
     const valorActual = +control.value || 0;
-    console.log(valorAcobrar, ncvalor, valorActual)
-
     if ((valorAcobrar - ncvalor) > valorActual) {
       return of({ invalido: true });
     }
@@ -1210,7 +1201,6 @@ export class RecaudacionComponent implements OnInit {
   }
   //Valida que el valor de la NC no se mayor que el valor a cobrar
   valNC(control: AbstractControl) {
-    console.log("valNC")
     if (this.formCobrar.value.valorAcobrar < control.value || control.value > +this.formCobrar.value.saldo!) {
       this.swNC = false;
 
@@ -1227,10 +1217,8 @@ export class RecaudacionComponent implements OnInit {
       return of({ invalido: true });
     else return of(null);
   }
-  pdf() { }
   //Al digitar el dinero
   changeDinero() {
-    console.log("CHANGE DINERO")
     let ncvalor: number;
     if (+this.formCobrar.controls['ncvalor'].value > 0)
       ncvalor = +this.formCobrar.controls['ncvalor'].value;

@@ -36,7 +36,6 @@
                 <input type="text" class="form-control mx-0 form-control-sm text-center" placeholder="Filtrar..."
                     [(ngModel)]="filterTerm" />
             </div>
-
             <div class="btn-group ml-auto mt-0">
                 <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
                     aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
@@ -50,8 +49,6 @@
                             class="bi-file-earmark-arrow-up"></i>&nbsp; Exportar</button>
                 </div>
             </div>
-
-
         </div>
     </div>
 </div>
@@ -91,9 +88,15 @@
                                     <button class="dropdown-item" type="button"
                                         [routerLink]="['/modi-pingresos',ntacredito.idntacredito]">
                                         <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
+                                    <button class="dropdown-item" type="button"
+                                        [routerLink]="['/modi-pingresos',ntacredito.idntacredito]">
+                                        <i class="bi bi-pencil"></i>&nbsp; Transferir</button>
                                     <button class="dropdown-item" type="button" data-toggle="modal"
                                         data-target="#modalEliminar">
                                         <i class="bi bi-file-minus"></i>&nbsp; ImpComprobante</button>
+                                    <button class="dropdown-item" type="button" data-toggle="modal"
+                                        data-target="#modalEliminar">
+                                        <i class="bi bi-file-minus"></i>&nbsp; Imp Doc</button>
                                 </div>
                             </div>
                         </td>
