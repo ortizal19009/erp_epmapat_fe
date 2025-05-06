@@ -60,4 +60,12 @@ export class EmisionIndividualService {
     let resp = firstValueFrom(this.http.get(`${baseUrl}/reporte/refacturacion/fecha/nuevo?d=${d}&h=${h}`));
     return resp;
   }
+  getFacElimByEmision(idemision: number) {
+    let resp = firstValueFrom(this.http.get(`${baseUrl}/reporte/eliminadas/emision?idemision=${idemision}`))
+    return resp;
+  }
+  getFacElimByFechaElimina(d: Date, h: Date) {
+    let resp = firstValueFrom(this.http.get(`${baseUrl}/reporte/eliminadas/fechaeliminacion?d=${d}&h=${h}`))
+    return resp;
+  }
 }

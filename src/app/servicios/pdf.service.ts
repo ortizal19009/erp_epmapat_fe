@@ -16,7 +16,7 @@ export class PdfService {
   url = 'assets/';
   _usuario: any;
 
-  constructor(private authService: AutorizaService ) { }
+  constructor(private authService: AutorizaService) { }
   header(titulo: string, doc: any) {
     this.margin_l = 0;
     this.line = 0;
@@ -61,7 +61,7 @@ export class PdfService {
         overflow: 'linebreak',    // Ajustar texto
       },
     });
-    
+
     this.setfooter(doc);
     const pdfDataUri = doc.output('datauristring');
     const pdfViewer: any = document.getElementById(
@@ -93,7 +93,6 @@ export class PdfService {
   }
   async _bodyOneTable(title: string, head: any, body: any, doc: any) {
     this.header(title, doc);
-    console.log(this.createColumnStyles(head[0]));
     autoTable(doc, {
       columnStyles: await this.createColumnStyles(head[0]),
       head: head,
@@ -105,7 +104,6 @@ export class PdfService {
   }
   createColumnStyles(columns: any) {
     var styles: any = {};
-    console.log(columns.length);
     for (var i = 0; i < columns.length; i++) {
       styles[i] = {
         //cellWidth: 'wrap',
@@ -180,7 +178,6 @@ export class PdfService {
     bt2: any,
     doc: any
   ) {
-    console.log(ht1);
 
     const pageNumber = doc.internal.getNumberOfPages();
 
@@ -226,38 +223,35 @@ export class PdfService {
     bt2: any,
     doc: any
   ) {
-    console.log(ht1);
-
-    const pageNumber = doc.internal.getNumberOfPages();
-
     this.header(titulo, doc);
-
-    console.log(ht1, bt1);
-    console.log(ht2, bt2);
+    doc.text.fontSize = 4;
     doc.autoTable({
-      theme: 'grid',
+      headStyles: { fontSize: 6 },
       head: [[{ content: ht1[0], styles: { halign: 'center' } }]],
     });
     // Primera tabla
     doc.autoTable({
+      headStyles: { fontSize: 6 },
+      bodyStyles: { fontSize: 6 },
       head: [ht1[1]],
       body: bt1,
     });
     doc.autoTable({
-      theme: 'grid',
-      head: [[{ content: ht1[0], styles: { halign: 'center' } }]],
+      headStyles: { fontSize: 6 },
+      head: [[{ content: ht2[0], styles: { halign: 'center' } }]],
     });
     // Segunda tabla
     doc.autoTable({
+      headStyles: { fontSize: 6 },
+      bodyStyles: { fontSize: 6 },
       head: [ht2[1]],
       body: bt2,
     });
-    doc.setPage(pageNumber);
+    this.setfooter(doc);
     const pdfDataUri = doc.output('datauri');
     const pdfViewer: any = document.getElementById(
       'pdfViewer'
     ) as HTMLIFrameElement;
-
     return (pdfViewer.src = pdfDataUri);
   }
   bodyThreeTables(

@@ -4,18 +4,13 @@ import { Router } from '@angular/router';
 import jsPDF from 'jspdf';
 import * as ExcelJS from 'exceljs';
 import { NombreEmisionPipe } from 'src/app/pipes/nombre-emision.pipe';
-import { ClientesService } from 'src/app/servicios/clientes.service';
 import { EmisionIndividualService } from 'src/app/servicios/emision-individual.service';
 import { EmisionService } from 'src/app/servicios/emision.service';
-import { FacturaService } from 'src/app/servicios/factura.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
 import { PdfService } from 'src/app/servicios/pdf.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
-import $ from 'jquery';
-import * as jQuery from 'jquery';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
-import { ValoresncService } from 'src/app/servicios/valoresnc.service';
-import { bootstrapApplication } from '@angular/platform-browser';
+
 @Component({
   selector: 'app-imp-emisiones',
   templateUrl: './imp-emisiones.component.html',
@@ -550,21 +545,27 @@ export class ImpEmisionesComponent implements OnInit {
   async impRefacturacionxEmision(idemision: number) {
     let emision = await this.getEmision(idemision);
     let obj: any = await this.getRefacturacionxEmision(idemision);
+    let eliminadas: any = await this.getFacElimByEmision(idemision);
+    console.log(eliminadas)
     let doc = new jsPDF();
     let n_suma: number = 0;
     let a_suma: number = 0;
-    let head = [
-      [
-        'CUENTA',
-        'NOMBRE',
-        'RAZON REFACTURACIÓN',
-        'FECHA ELIMINACIÓN',
-        'VALOR ANTERIOR',
-        'VALOR NUEVO',
-        'DIFERENCIA'
-      ],
+    let sum_eliminadas: number = 0;
+    let head = [[`REFACTURACIÓN DE LA EMISION ${emision?.emision} `],
+    [
+      'CUENTA',
+      'NOMBRE',
+      'RAZON REFACTURACIÓN',
+      'FECHA BAJA',
+      'VALOR ANTERIOR',
+      'VALOR NUEVO',
+      'DIFERENCIA'
+    ],
     ];
+    let head2 = [[`BAJAS DE LA EMISION ${emision?.emision}`],
+    ['CUENTA', 'NOMBRE', 'PLANILLA', 'USU.BAJA', 'RAZON BAJA', 'FECHA BAJA', 'VALOR']]
     let body: any = [];
+    let body2: any = [];
     let diferencia: number = 0;
     obj.forEach((item: any) => {
       let va = item.valoranterior
@@ -584,11 +585,27 @@ export class ImpEmisionesComponent implements OnInit {
       diferencia = a_suma - n_suma;
     });
     body.push(['', '', '', 'TOTALES', a_suma.toFixed(2), n_suma.toFixed(2), diferencia.toFixed(2)]);
+    eliminadas.forEach((item: any) => {
+      let va = item.total
+      body2.push([
+        item.cuenta,
+        item.nombre,
+        item.idfactura,
+        item.usuario,
+        item.razoneliminacion,
+        item.fechaeliminacion,
+        va.toFixed(2),
 
-    this.s_pdf.bodyOneTable(
-      `Refacturación de la emisión ${emision?.emision}`,
+      ]);
+      sum_eliminadas += va;
+    });
+    body2.push(['', '', '', '', 'TOTAL', sum_eliminadas.toFixed(2), '']);
+    this.s_pdf._bodyShowTwoTables(
+      `Refacturación y bajas de la emisión ${emision?.emision}`,
       head,
       body,
+      head2,
+      body2,
       doc
     );
     this.s_loading.hideLoading();
@@ -596,26 +613,29 @@ export class ImpEmisionesComponent implements OnInit {
   }
   async impRefacturacionxFecha(d: Date, h: Date) {
     let obj: any = await this.getRefacturacionxFecha(d, h);
-    // let emision = await this.getEmision(idemision);
-    console.log(obj)
+    let eliminadas: any = await this.getFacElimByFechaElimina(d, h)
     let doc = new jsPDF();
-    //let obj: any = await this.getRefacturacionxEmision(idemision);
     let n_suma: number = 0;
     let a_suma: number = 0;
-    let head = [
-      [
-        'CUENTA',
-        'NOMBRE',
-        'RAZON REFACTURACIÓN',
-        'FECHA ELIMINACIÓN',
-        'EMI. ANTERIOR', 
-        'VALOR ANTERIOR',
-        'EMI. ACTUAL',
-        'VALOR NUEVO',
-        'DIFERENCIA'
-      ],
+    let sum_eliminadas: number = 0;
+
+    let head = [['LISTADO DE REFACTURACIONES'],
+    [
+      'CUENTA',
+      'NOMBRE',
+      'RAZON REFACTURACIÓN',
+      'FECHA ELIMINACIÓN',
+      'EMI. ANTERIOR',
+      'VALOR ANTERIOR',
+      'EMI. ACTUAL',
+      'VALOR NUEVO',
+      'DIFERENCIA'
+    ],
     ];
+    let head2 = [[`LISTADO DE BAJAS`],
+    ['CUENTA', 'NOMBRE', 'PLANILLA', 'USU.BAJA', 'RAZON BAJA', 'FECHA BAJA', 'VALOR']]
     let body: any = [];
+    let body2: any = [];
     obj.forEach((item: any) => {
       let diferencia: number = item.valoranterior - item.valornuevo;
       body.push([
@@ -632,8 +652,28 @@ export class ImpEmisionesComponent implements OnInit {
       n_suma += item.valornuevo;
       a_suma += item.valoranterior;
     });
-    body.push(['', '', '','', 'TOTALES', a_suma.toFixed(2),'', n_suma.toFixed(2), (a_suma - n_suma).toFixed(2)]);
-    this.s_pdf.bodyOneTable(`Refacturación ${d} - ${h}`, head, body, doc);
+    body.push(['', '', '', '', 'TOTALES', a_suma.toFixed(2), '', n_suma.toFixed(2), (a_suma - n_suma).toFixed(2)]);
+    eliminadas.forEach((item: any) => {
+      let va = item.total
+      body2.push([
+        item.cuenta,
+        item.nombre,
+        item.idfactura,
+        item.usuario,
+        item.razoneliminacion,
+        item.fechaeliminacion,
+        va.toFixed(2),
+
+      ]);
+      sum_eliminadas += va;
+    });
+    body2.push(['', '', '', '', 'TOTAL', sum_eliminadas.toFixed(2), '']);
+    this.s_pdf._bodyShowTwoTables(`Refacturación y bajas ${d} - ${h}`,
+      head,
+      body,
+      head2,
+      body2,
+      doc);
     this.s_loading.hideLoading();
 
   }
@@ -774,10 +814,19 @@ export class ImpEmisionesComponent implements OnInit {
       .toPromise();
     return reporte;
   }
+  async getFacElimByEmision(idemision: number) {
+    let reporte = await this.s_emisionindividual.getFacElimByEmision(idemision);
+    return reporte;
+  }
   async getRefacturacionxFecha(d: Date, h: Date) {
     let reporte = this.s_emisionindividual
       .getRefacturacionxFecha(d, h)
       .toPromise();
+    return reporte;
+  }
+  async getFacElimByFechaElimina(d: Date, h: Date) {
+    let reporte = await this.s_emisionindividual
+      .getFacElimByFechaElimina(d, h);
     return reporte;
   }
   async getZeroByEmisiones(idemision: number) {
