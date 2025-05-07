@@ -13,6 +13,9 @@ import { DefinirService } from 'src/app/servicios/administracion/definir.service
 export class DefinirComponent implements OnInit {
 
    formDefinir: FormGroup;
+   archivo: File | null = null;
+   clave: string = '';
+   idDefinir: number = 1; // Cambia esto según el ID correspondiente
 
    constructor(public fb: FormBuilder, private router: Router, private coloresService: ColoresService,
       public authService: AutorizaService, private defService: DefinirService) { }
@@ -79,7 +82,7 @@ export class DefinirComponent implements OnInit {
 
    onTipoambienteChange(event: any) {
       let tipoambiente = event.target.value;
-    }
+   }
 
    guardar() {
       this.defService.updateDefinir(1, this.formDefinir.value).subscribe({
@@ -91,5 +94,21 @@ export class DefinirComponent implements OnInit {
    }
 
    regresar() { this.router.navigate(['/generadorxml']) }
-
+   onFileChange(event: Event) {
+      const input = event.target as HTMLInputElement;
+      if (input.files && input.files.length > 0) {
+         this.archivo = input.files[0]; // ✅ Carga correcta del archivo
+      }
+   }
+   async subirFirma() {
+      let formData: FormData = new FormData();
+      if (!this.archivo || !this.clave) {
+         alert('Debe seleccionar un archivo y escribir la clave.');
+         return;
+      }
+      formData.append('archivo', this.archivo);
+      formData.append('clave', this.clave);
+      let dat: any = await this.defService.upFirma(this.idDefinir, formData)
+      console.log(dat)
+   }
 }

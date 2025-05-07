@@ -18,8 +18,7 @@
                   <div class="form-group col-md-12 my-0 py-0">
                      <div class="input-group input-group-sm mb-3">
                         <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold"
-                              id="inputGroup-sizing-sm">Razón social</span>
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Razón social</span>
                         </div>
                         <input type="text" class="form-control" formControlName="razonsocial" aria-label="Small"
                            aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['razonsocial'].invalid && f['razonsocial'].touched,
@@ -30,7 +29,8 @@
                   <div class="form-group col-md-12 my-0 py-0">
                      <div class="input-group input-group-sm mb-3">
                         <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Nombre comercial</span>
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Nombre
+                              comercial</span>
                         </div>
                         <input type="text" class="form-control" formControlName="nombrecomercial" aria-label="Small"
                            aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['nombrecomercial'].invalid && f['nombrecomercial'].touched,
@@ -59,7 +59,7 @@
                            'is-valid': f['ruc'].valid, '': f['ruc'].untouched}">
                      </div>
                   </div>
-                  
+
                   <div class="form-group col-md-3 my-0 py-0">
                      <div class="input-group input-group-sm mb-3">
                         <div class="input-group-prepend">
@@ -76,7 +76,8 @@
                         <div class="input-group-prepend">
                            <label class="input-group-text" for="iva">Ambiente facturación</label>
                         </div>
-                        <select class="custom-select" formControlName="tipoambiente" (change)="onTipoambienteChange($event)">
+                        <select class="custom-select" formControlName="tipoambiente"
+                           (change)="onTipoambienteChange($event)">
                            <option value="1">Pruebas</option>
                            <option value="2">Producción</option>
                         </select>
@@ -94,10 +95,51 @@
                   <button type="button" class="btn btn-outline-success btn-sm mx-1" (click)="regresar()">
                      <i class="fa fa-times-circle"></i> Cancelar
                   </button>
+                  <button type="button" class="btn btn-outline-primary btn-sm mx-1" data-toggle="modal"
+                     data-target="#exampleModal">
+                     <i class="fa fa-xing-square" aria-hidden="true"></i> Firma Electrónica
+                  </button>
                </div>
-
             </form>
          </div>
+      </div>
+   </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+               <span aria-hidden="true">&times;</span>
+            </button>
+         </div>
+         <div class="modal-body">
+            <!-- subir-firma.component.html -->
+            <form (ngSubmit)="subirFirma()" #firmaForm="ngForm" enctype="multipart/form-data">
+               <div class="input-group mb-3 input-group-sm">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text" id="inputGroupFileAddon01">Archivo .p12</span>
+                  </div>
+                  <div class="custom-file">
+                     <input type="file" class="custom-file-input" id="inputGroupFile01"
+                        aria-describedby="inputGroupFileAddon01" accept=".pfx,.p12"
+                        (change)="onFileChange($event)" required >
+                     <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+                  </div>
+               </div>
+               <div>
+                  <label for="clave">Contraseña:</label>
+                  <input type="password" class="form-control form-control-sm" [(ngModel)]="clave" name="clave"
+                     required />
+               </div>
+
+               <button type="submit" class="btn btn-success btn-sm">Subir Firma</button>
+            </form>
+         </div>
+
       </div>
    </div>
 </div>

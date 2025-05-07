@@ -706,6 +706,7 @@
                         <p class="text-warning">&nbsp; Usuarios</p>
                      </a>
                   </li>
+
                </ul>
             </li>
             <li *ngIf="authService.modulo == 7" class="nav-item">
@@ -721,6 +722,13 @@
                      <a routerLink="/tabla4" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(5, 224)}">
                         <i class="bi bi-eraser nav-icon"></i>
                         <p class="text-warning"> Comprobantes SRI</p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a class="nav-link" routerLink="/definir"
+                        [ngClass]="{'disabled': !isOptionEnabled(5, 224)}">
+                        <i class="bi-people"></i>
+                        <p class="text-warning">&nbsp; Firma Electrónica</p>
                      </a>
                   </li>
                </ul>

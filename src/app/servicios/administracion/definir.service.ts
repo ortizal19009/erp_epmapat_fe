@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, lastValueFrom } from 'rxjs';
+import { Observable, firstValueFrom, lastValueFrom } from 'rxjs';
 import { Definir } from 'src/app/modelos/administracion/definir.model';
 import { environment } from 'src/environments/environment';
 
@@ -11,7 +11,7 @@ const baseUrl = `${apiUrl}/definir`;
   providedIn: 'root',
 })
 export class DefinirService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getByIddefinir(iddefinir: number) {
     return this.http.get<Definir>(baseUrl + '/' + iddefinir);
@@ -25,5 +25,8 @@ export class DefinirService {
 
   updateDefinir(iddefinir: number, definir: Definir): Observable<Object> {
     return this.http.put(baseUrl + '/' + iddefinir, definir);
+  }
+  upFirma(iddefinir: number, formData: any) {
+    return firstValueFrom(this.http.put(`${baseUrl}/subir-firma/${iddefinir}`, formData));
   }
 }

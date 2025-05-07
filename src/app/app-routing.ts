@@ -267,6 +267,7 @@ import { AddRemisionComponent } from './componentes/coactivas/remision/add-remis
 import { DetallePlanillaComponent } from './componentes/facturas/detalle-planilla/detalle-planilla.component';
 import { NtacreditoComponent } from './componentes/ntacredito/ntacredito.component';
 import { AddNtacreditoComponent } from './componentes/ntacredito/add-ntacredito/add-ntacredito.component';
+import { DefinirComponent } from './componentes/administracion/definir/definir.component';
 
 const routes: Routes = [
   //Consumo de Agua
@@ -429,8 +430,8 @@ const routes: Routes = [
   { path: 'ubicacionm', component: UbicacionmComponent },
   { path: 'add-ubicacionm', component: AddUbicacionmComponent },
   { path: 'modiubicacionm/:id', component: ModiUbicacionmComponent },
-  { path: 'ntacredito', component:NtacreditoComponent},
-  { path: 'add-ntacredito', component: AddNtacreditoComponent},
+  { path: 'ntacredito', component: NtacreditoComponent },
+  { path: 'add-ntacredito', component: AddNtacreditoComponent },
   //================ CONTABILIDAD =============================
   { path: 'cuentas', component: CuentasComponent },
   { path: 'add-cuenta', component: AddCuentaComponent },
@@ -562,6 +563,7 @@ const routes: Routes = [
 
   { path: 'colores', component: ColoresComponent },
   { path: 'perfil-usuario', component: PerfilUsuarioComponent },
+  { path: 'definir', component: DefinirComponent },
 
   // { path: 'login', component: LoginComponent },
 
@@ -578,4 +580,4 @@ const routes: Routes = [
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],
 })
-export class AppRoutingModule {}
+export class AppRoutingModule { }
