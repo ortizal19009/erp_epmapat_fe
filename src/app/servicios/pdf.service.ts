@@ -265,35 +265,45 @@ export class PdfService {
     doc: any
   ) {
     this.header(titulo, doc);
-    const pageNumber = doc.internal.getNumberOfPages();
     // Primera tabla
     doc.autoTable({
+      headStyles: { fontSize: 6 },
+      bodyStyles: { fontSize: 6 },
       head: [[{ content: ht1[0], styles: { halign: 'center' } }]],
     });
     doc.autoTable({
+      headStyles: { fontSize: 6 },
+      bodyStyles: { fontSize: 6 },
       head: [ht1[1]],
-      columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
+      columnStyles: { 0: { halign: 'center' } },
       body: bt1,
     });
     // Segunda tabla
     doc.autoTable({
+      headStyles: { fontSize: 6 },
+      bodyStyles: { fontSize: 6 },
       head: [[{ content: ht2[0], styles: { halign: 'center' } }]],
     });
     doc.autoTable({
+      headStyles: { fontSize: 6 },
+      bodyStyles: { fontSize: 6 },
       head: [ht2[1]],
       columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
       body: bt2,
     });
     // Tercer tabla
     doc.autoTable({
+      headStyles: { fontSize: 6 },
+      bodyStyles: { fontSize: 6 },
       head: [[{ content: ht3[0], styles: { halign: 'center' } }]],
     });
     doc.autoTable({
+      headStyles: { fontSize: 6 },
+      bodyStyles: { fontSize: 6 },
       head: [ht3[1]],
       columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
       body: bt3,
     });
-    doc.setPage(pageNumber);
     this.setfooter(doc);
     const pdfDataUri = doc.output('datauri');
     const pdfViewer: any = document.getElementById(

@@ -1051,7 +1051,7 @@ export class ImpCajasComponent implements OnInit {
     let doc = new jsPDF();
     let heder1: any = [
       ['TRANSFERENCIAS EMITIDAS'],
-      ['Planilla', 'Cliente', 'F. transferencia', 'Modulo', 'total'],
+      ['Planilla','NroFactura', 'Cliente', 'F. transferencia', 'Modulo', 'total'],
     ];
     let heder2: any = [
       ['TRANSFERENCIAS COBRADAS'],
@@ -1071,6 +1071,7 @@ export class ImpCajasComponent implements OnInit {
     await this._transferidas.forEach((item: any) => {
       body1.push([
         item.idfactura,
+        item.nrofactura,
         item.nombre,
         item.fechatransferencia,
         item.idmodulo,
