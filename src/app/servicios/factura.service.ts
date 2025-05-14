@@ -240,6 +240,11 @@ export class FacturaService {
       `${baseUrl}/?idabonado=${idabonado}`
     );
   }
+    getSinCobrar(idabonado: number) {
+    return this.http.get<Facturas[]>(
+      `${baseUrl}/sincobrar/cuenta?cuenta=${idabonado}`
+    );
+  }
   async countSinCobrarAbo(idabonado: number) {
     const resp = this.http.get<Facturas[]>(
       `${baseUrl}/sincobrarAboMod/count?idabonado=${idabonado}`

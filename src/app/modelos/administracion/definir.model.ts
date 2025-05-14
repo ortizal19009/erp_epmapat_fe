@@ -26,4 +26,9 @@ export class Definir {
   ubidigi: string;
   ubimagenes: string;
   swpreingsi: string;
+  firma: any;
+  clave_firma: string;
+  email: string;
+  clave_email: string;
+
 }

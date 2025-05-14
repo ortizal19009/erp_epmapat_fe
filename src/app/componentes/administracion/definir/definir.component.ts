@@ -34,6 +34,8 @@ export class DefinirComponent implements OnInit {
          direccion: ['', Validators.required],
          tipoambiente: ['', Validators.required],
          iva: ['', Validators.required],
+         email: '',
+         clave_email: ''
       },
          // { updateOn: "blur" }
       );
@@ -66,7 +68,8 @@ export class DefinirComponent implements OnInit {
 
    buscaDefinir() {
       this.defService.getByIddefinir(1).subscribe({
-         next: datos => {
+         next: (datos: any) => {
+            console.log(datos)
             this.formDefinir.setValue({
                razonsocial: datos.razonsocial,
                nombrecomercial: datos.nombrecomercial,
@@ -74,6 +77,8 @@ export class DefinirComponent implements OnInit {
                direccion: datos.direccion,
                tipoambiente: datos.tipoambiente,
                iva: datos.iva,
+               email: datos.email, 
+               clave_email: datos.clave_email
             });
          },
          error: err => console.error(err.error)
@@ -87,7 +92,7 @@ export class DefinirComponent implements OnInit {
    guardar() {
       this.defService.updateDefinir(1, this.formDefinir.value).subscribe({
          next: datos => {
-            this.regresar()
+            // this.regresar()
          },
          error: err => console.error(err.error)
       });

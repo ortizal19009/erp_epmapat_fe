@@ -413,8 +413,9 @@ export class DetallesAbonadoComponent implements OnInit {
     this.modalSize = 'sm';
   }
   getSinCobro() {
-    this.facService.getSinCobrarAboMod(this._abonado[0].idabonado).subscribe({
+    this.facService.getSinCobrar(this._abonado[0].idabonado).subscribe({
       next: (facturas: any) => {
+        console.log(facturas)
         this._abonado[0].facturas = facturas;
         this.datosImprimir = this._abonado[0];
         this.impNotificacion();
@@ -608,7 +609,7 @@ export class DetallesAbonadoComponent implements OnInit {
         factura.idfactura,
         //fecEmision.slice(0, 7),
         fecEmision,
-        factura.idmodulo.descripcion,
+        factura.modulo,
         factura.sumaFac.toFixed(2),
         factura.interes.toFixed(2),
         suma.toFixed(2),
