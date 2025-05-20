@@ -20,7 +20,12 @@ export class NtacreditoComponent implements OnInit {
   totalPages: number = 0; // Total de páginas
   pages: number[] = []; // Lista de números de página
   maxPagesToShow: number = 5;
-  constructor(private router: Router, private coloresService: ColoresService, private s_ntacredito: NtacreditoService, private fb: FormBuilder) { }
+  constructor(
+    private router: Router,
+    private coloresService: ColoresService,
+    private s_ntacredito: NtacreditoService,
+    private fb: FormBuilder
+  ) {}
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/ntacredito');
@@ -29,11 +34,9 @@ export class NtacreditoComponent implements OnInit {
     else this.buscaColor();
     this.f_bntacredito = this.fb.group({
       selecTipoBusqueda: 1,
-      buscarAbonado: ''
-
-    })
-    this.getAllNotasCreditos(this.page, this.size)
-
+      buscarAbonado: '',
+    });
+    this.getAllNotasCreditos(this.page, this.size);
   }
   async buscaColor() {
     try {
@@ -54,15 +57,15 @@ export class NtacreditoComponent implements OnInit {
     const detalle = document.querySelector('.detalle');
     if (detalle) detalle.classList.add('nuevoBG2');
   }
-  onSubmit() { }
-  detallesnotasnc(notacredito: any) { }
+  onSubmit() {}
+  detallesnotasnc(notacredito: any) {}
   getAllNotasCreditos(page: number, size: number) {
     this.s_ntacredito.getAllPageable(page, size).subscribe({
       next: (datos: any) => {
         this._ntacreditos = datos.content;
       },
-      error: (e: any) => console.error(e)
-    })
+      error: (e: any) => console.error(e),
+    });
   }
   /* Inicio de configuracion de paginacion */
   onPreviousPage(): void {

@@ -1,4 +1,5 @@
 import { Abonados } from "./abonados";
+import { Documentos } from "./administracion/documentos.model";
 import { Clientes } from "./clientes";
 
 export class Ntacredito {
@@ -19,4 +20,6 @@ export class Ntacredito {
     feccrea: Date;
     usumodi: number;
     fecmodi: Date;
+    iddocumento_documentos: Documentos; 
+    refdocumento: String;
 }
