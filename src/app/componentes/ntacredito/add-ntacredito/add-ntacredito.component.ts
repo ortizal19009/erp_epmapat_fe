@@ -103,6 +103,8 @@ export class AddNtacreditoComponent implements OnInit {
     ntacredito.devengado = 0;
     ntacredito.nrofactura = f.idfactura;
     ntacredito.idabonado_abonados = this._cuenta;
+    ntacredito.iddocumento_documentos = f.iddocumento_documentos;
+    ntacredito.refdocumento = f.refdocumento;
 
     this.s_ntacredito.saveNtacredito(ntacredito).subscribe({
       next: (datos: any) => {

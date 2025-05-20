@@ -268,6 +268,7 @@ import { DetallePlanillaComponent } from './componentes/facturas/detalle-planill
 import { NtacreditoComponent } from './componentes/ntacredito/ntacredito.component';
 import { AddNtacreditoComponent } from './componentes/ntacredito/add-ntacredito/add-ntacredito.component';
 import { DefinirComponent } from './componentes/administracion/definir/definir.component';
+import { HomeComponent } from './componentes/administracion/home/home.component';
 
 const routes: Routes = [
   //Consumo de Agua
@@ -278,6 +279,7 @@ const routes: Routes = [
   { path: 'buscar-cliente', component: BuscarClienteComponent },
   { path: 'imp-clientes', component: ImpClienteComponent },
   { path: 'imp-infocliente', component: ImpInfoclienteComponent },
+  {path: 'home', component: HomeComponent},
 
   { path: 'abonados', component: ListarAbonadosComponent },
   { path: 'add-abonado', component: AddAbonadosComponent },
