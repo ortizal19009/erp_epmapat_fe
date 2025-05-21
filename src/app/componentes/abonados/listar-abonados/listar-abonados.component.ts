@@ -109,10 +109,9 @@ export class ListarAbonadosComponent implements OnInit {
         .getResAbonado(+this.buscarAbonadoForm.value.buscarAbonado!)
         .subscribe({
           next: (datos: any) => {
-            console.log(datos);
             this._abonados = datos;
           },
-          error: (err) => console.log(err.error),
+          error: (err) => console.error(err.error),
         });
     } else if (
       +this.buscarAbonadoForm.value.selecTipoBusqueda == 2 &&
@@ -124,7 +123,7 @@ export class ListarAbonadosComponent implements OnInit {
           (datos) => {
             this._abonados = datos;
           },
-          (error) => console.log(error)
+          (error) => console.error(error)
         );
     } else if (
       +this.buscarAbonadoForm.value.selecTipoBusqueda == 3 &&
@@ -136,7 +135,7 @@ export class ListarAbonadosComponent implements OnInit {
           (datos) => {
             this._abonados = datos;
           },
-          (error) => console.log(error)
+          (error) => console.error(error)
         );
     }
     // else if (this.buscarAbonadoForm.value.buscarAbonado === '') {

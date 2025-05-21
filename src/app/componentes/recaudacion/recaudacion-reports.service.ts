@@ -1,10 +1,12 @@
 import { Injectable } from '@angular/core';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { Ntacredito } from 'src/app/modelos/ntacredito';
 import { UsuarioService } from 'src/app/servicios/administracion/usuario.service';
 import { CategoriaService } from 'src/app/servicios/categoria.service';
 import { ClientesService } from 'src/app/servicios/clientes.service';
 import { EmisionService } from 'src/app/servicios/emision.service';
+import { FacxncService } from 'src/app/servicios/facxnc.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { text } from 'stream/consumers';
 
@@ -36,7 +38,8 @@ export class RecaudacionReportsService {
     private rubxfacService: RubroxfacService,
     private s_usuarios: UsuarioService,
     private s_categoria: CategoriaService,
-    private s_emision: EmisionService
+    private s_emision: EmisionService,
+    private s_facxnc: FacxncService
   ) { }
   async cabeceraConsumoAgua(
     datos: any,
@@ -272,31 +275,31 @@ export class RecaudacionReportsService {
         console.error('Al recuperar el datalle de la Planilla: ', err.error),
     });
   }
-  _imprimirAll(facturas: any){
+  _imprimirAll(facturas: any) {
     const doc = new jsPDF();
 
-for (const factura of facturas) {
-  if (factura !== facturas[0]) {
-    doc.addPage();
+    for (const factura of facturas) {
+      if (factura !== facturas[0]) {
+        doc.addPage();
+      }
+      this._comprobantePago(factura, doc);  // <- Función que dibuja un comprobante
+    }
+
+    // Después de todos los comprobantes
+    const pdfBlob = doc.output('blob');
+    const blobUrl = URL.createObjectURL(pdfBlob);
+
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = blobUrl;
+    document.body.appendChild(iframe);
+
+    iframe.onload = () => {
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+    };
   }
-  this._comprobantePago(factura, doc);  // <- Función que dibuja un comprobante
-}
-
-// Después de todos los comprobantes
-const pdfBlob = doc.output('blob');
-const blobUrl = URL.createObjectURL(pdfBlob);
-
-const iframe = document.createElement('iframe');
-iframe.style.display = 'none';
-iframe.src = blobUrl;
-document.body.appendChild(iframe);
-
-iframe.onload = () => {
-  iframe.contentWindow?.focus();
-  iframe.contentWindow?.print();
-};
-  }
-  reimprimircomprobantePago(l_datos: any, factura: any) {
+  async reimprimircomprobantePago(l_datos: any, factura: any) {
     if (factura.interescobrado === null) {
       factura.interescobrado = 0;
     }
@@ -316,6 +319,8 @@ iframe.onload = () => {
     } else {
       idfactura = factura.idfactura;
     }
+    let ntaCredito: any = await this.s_facxnc.getByIdfactura(idfactura);
+    console.log(ntaCredito)
     this.s_usuarios.getByIdusuario(factura.usuariocobro).subscribe({
       next: (datos) => {
         usuario = datos;
@@ -329,7 +334,7 @@ iframe.onload = () => {
       error: (e) => console.error(e),
     });
     this.rubxfacService.getByIdfactura(idfactura).subscribe({
-      next: (_rubrosxfac: any) => {
+      next: async (_rubrosxfac: any) => {
         let rubros: any = [];
         _rubrosxfac.forEach((item: any) => {
           if (item.idrubro_rubros.swiva === true) {
@@ -359,6 +364,7 @@ iframe.onload = () => {
             this.interes = item.valorunitario;
           }
         });
+
         this.total += this.interes + this.iva;
         this.subtotal += this.total - this.interes - this.iva;
         doc.setFontSize(10);
@@ -413,6 +419,35 @@ iframe.onload = () => {
             ['Valor total', this.total.toFixed(2)],
           ],
         });
+        if (ntaCredito.length > 0) {
+          console.log(ntaCredito)
+          autoTable(doc, {
+            margin: { left: 10 },
+            tableWidth,
+            theme: 'grid',
+            styles: { fontSize: 9, fontStyle: 'bold' },
+            headStyles: {
+              halign: 'center',
+              fillColor: 'white',
+              textColor: 'black',
+            },
+            bodyStyles: {
+              cellPadding: 1,
+              fillColor: [255, 255, 255],
+              textColor: 'black',
+            },
+            columnStyles: {
+              0: { minCellWidth: 10 },
+              1: { minCellWidth: 15, halign: 'right' },
+            },
+            columns: ['', ''],
+            body: [
+              ['Nro Nota de crédito', ntaCredito[0].idntacredito_ntacredito],
+              ['Valor', ntaCredito[0].valor],
+              ['Saldo', ntaCredito[0].saldo],
+            ],
+          });
+        }
         doc.setGState(doc.GState({ opacity: 0.4 }));
         doc.addImage(logo, 'PNG', 20, 130, 190, 195);
         doc.setGState(doc.GState({ opacity: 0.99 }));
@@ -442,17 +477,18 @@ iframe.onload = () => {
       error: (err) =>
         console.error('Al recuperar el datalle de la Planilla: ', err.error),
     });
+
   }
 
   async comprobantePago(l_datos: any, factura: any, doc: jsPDF): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       if (factura.interescobrado === null) {
         factura.interescobrado = 0;
       }
-  
+
       var logo = new Image();
       logo.src = './assets/img/logo_planilla.png';
-  
+
       let usuario: any;
       let idfactura: any;
       let tableWidth = 200;
@@ -460,13 +496,15 @@ iframe.onload = () => {
       this.subtotal = 0;
       this.total = 0;
       this.interes = 0;
-  
+
       if (l_datos != null) {
         idfactura = l_datos.idfactura;
       } else {
         idfactura = factura.idfactura;
       }
-  
+      let ntaCredito: any = await this.s_facxnc.getByIdfactura(idfactura)
+
+
       this.s_usuarios.getByIdusuario(factura.usuariocobro).subscribe({
         next: (datos) => {
           usuario = datos;
@@ -476,7 +514,7 @@ iframe.onload = () => {
           } else {
             this.cabeceraOtros(factura, doc, usuario);
           }
-  
+
           this.rubxfacService.getByIdfactura(idfactura).subscribe({
             next: (_rubrosxfac: any) => {
               let rubros: any = [];
@@ -501,10 +539,10 @@ iframe.onload = () => {
                 }
                 this.interes = factura.interescobrado;
               });
-  
+
               this.total += this.interes + this.iva;
               this.subtotal += this.total - this.interes - this.iva;
-  
+
               doc.setFontSize(10);
               autoTable(doc, {
                 margin: { left: 10 },
@@ -529,7 +567,7 @@ iframe.onload = () => {
                 columns: ['Descripción', 'Cant.', 'Valor unitario'],
                 body: rubros,
               });
-  
+
               autoTable(doc, {
                 margin: { left: 10 },
                 tableWidth,
@@ -557,12 +595,41 @@ iframe.onload = () => {
                   ['Valor total', this.total.toFixed(2)],
                 ],
               });
-  
+              if (ntaCredito.lenght > 0) {
+                console.log(ntaCredito)
+                autoTable(doc, {
+                  margin: { left: 10 },
+                  tableWidth,
+                  theme: 'grid',
+                  styles: { fontSize: 9, fontStyle: 'bold' },
+                  headStyles: {
+                    halign: 'center',
+                    fillColor: 'white',
+                    textColor: 'black',
+                  },
+                  bodyStyles: {
+                    cellPadding: 1,
+                    fillColor: [255, 255, 255],
+                    textColor: 'black',
+                  },
+                  columnStyles: {
+                    0: { minCellWidth: 10 },
+                    1: { minCellWidth: 15, halign: 'right' },
+                  },
+                  columns: ['', ''],
+                  body: [
+                    ['Nro Nota de crédito', ntaCredito[0].idntacredito_ntacredito],
+                    ['Valor', ntaCredito[0].valor],
+                    ['Saldo', ntaCredito[0].saldo],
+                  ],
+                });
+              }
+
               doc.setGState(doc.GState({ opacity: 0.4 }));
               doc.addImage(logo, 'PNG', 20, 130, 190, 195);
               doc.setGState(doc.GState({ opacity: 0.99 }));
               doc.addImage(logo, 'PNG', 120, 15, 80, 80);
-  
+
               resolve();  // ✅ Muy importante: resolver la promesa al terminar
             },
             error: (err) => {
@@ -580,29 +647,29 @@ iframe.onload = () => {
   }
   async imprimirAll(facturas: any[]): Promise<void> {
     const doc = new jsPDF();
-  
+
     for (const [index, factura] of facturas.entries()) {
       if (index !== 0) {
         doc.addPage();
       }
       await this.comprobantePago(null, factura, doc);  // << Esperamos que termine cada comprobante
     }
-  
+
     const pdfBlob = doc.output('blob');
     const blobUrl = URL.createObjectURL(pdfBlob);
-  
+
     const iframe = document.createElement('iframe');
     iframe.style.display = 'none';
     iframe.src = blobUrl;
     document.body.appendChild(iframe);
-  
+
     iframe.onload = () => {
       iframe.contentWindow?.focus();
       iframe.contentWindow?.print();
     };
   }
-  
-  
+
+
   async getCategoriaById(idcategoria: number): Promise<any> {
     const categoria = this.s_categoria.getById(idcategoria).toPromise();
     return categoria;

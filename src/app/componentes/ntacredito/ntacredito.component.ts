@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
+import jsPDF from 'jspdf';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { NtacreditoService } from 'src/app/servicios/ntacredito.service';
+import { PdfService } from 'src/app/servicios/pdf.service';
 
 @Component({
   selector: 'app-ntacredito',
@@ -24,8 +26,9 @@ export class NtacreditoComponent implements OnInit {
     private router: Router,
     private coloresService: ColoresService,
     private s_ntacredito: NtacreditoService,
-    private fb: FormBuilder
-  ) {}
+    private fb: FormBuilder, 
+    private pdf: PdfService
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/ntacredito');
@@ -57,8 +60,8 @@ export class NtacreditoComponent implements OnInit {
     const detalle = document.querySelector('.detalle');
     if (detalle) detalle.classList.add('nuevoBG2');
   }
-  onSubmit() {}
-  detallesnotasnc(notacredito: any) {}
+  onSubmit() { }
+  detallesnotasnc(notacredito: any) { }
   getAllNotasCreditos(page: number, size: number) {
     this.s_ntacredito.getAllPageable(page, size).subscribe({
       next: (datos: any) => {
@@ -101,4 +104,10 @@ export class NtacreditoComponent implements OnInit {
     );
   }
   /* Fin de configuracion de paginacion */
+  async impDocumento(idntacredito: number) {
+    let ntacredito = await this.s_ntacredito.getByIdNtaCredito(idntacredito);
+    console.log(ntacredito)
+    let doc = new jsPDF();
+
+  }
 }

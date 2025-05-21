@@ -8,7 +8,7 @@
             <div class="col-sm-6">
                 <div class="container-fluid">
                     <form [formGroup]="f_bntacredito" class="formGroup" (ngSubmit)="onSubmit()">
-                        <div class="row">
+                        <div class="row" hidden>
                             <div class="col-sm-3">
                                 <select name="" id="selecTipoBusqueda" class="form-control form-control-sm"
                                     formControlName="selecTipoBusqueda">
@@ -75,7 +75,7 @@
                         <td class="text-center">{{ntacredito.idabonado_abonados.idabonado}}</td>
                         <td class="description">{{ntacredito.idcliente_clientes.nombre}}</td>
                         <td class="col-sm-1 text-right">{{ntacredito.idcliente_clientes.cedula}}</td>
-                        <td>{{ntacredito.nrofactura}}</td>
+                        <td class="text-center">{{ntacredito.nrofactura}}</td>
                         <td class="text-right">{{ntacredito.valor}}</td>
                         <td class="text-right">{{ntacredito.devengado}}</td>
                         <td class="text-right">{{ntacredito.valor - ntacredito.devengado}}</td>
@@ -85,18 +85,17 @@
                                     data-toggle="dropdown" aria-expanded="false">
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-right popLista">
+                                    <button class="dropdown-item" type="button" data-toggle="modal"
+                                        data-target="#modalEliminar">
+                                        <i class="bi bi-file-minus"></i>&nbsp; ImpComprobante</button>
+                                    <button class="dropdown-item" type="button" (click)="impDocumento(ntacredito.idntacredito)">
+                                        <i class="bi bi-file-minus"></i>&nbsp; Imp Doc</button>
                                     <button class="dropdown-item" disabled type="button"
                                         [routerLink]="['/modi-pingresos',ntacredito.idntacredito]">
                                         <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
                                     <button class="dropdown-item" disabled type="button"
                                         [routerLink]="['/modi-pingresos',ntacredito.idntacredito]">
                                         <i class="bi bi-pencil"></i>&nbsp; Transferir</button>
-                                    <button class="dropdown-item" type="button" data-toggle="modal"
-                                        data-target="#modalEliminar">
-                                        <i class="bi bi-file-minus"></i>&nbsp; ImpComprobante</button>
-                                    <button class="dropdown-item" type="button" data-toggle="modal"
-                                        data-target="#modalEliminar">
-                                        <i class="bi bi-file-minus"></i>&nbsp; Imp Doc</button>
                                 </div>
                             </div>
                         </td>

@@ -91,7 +91,7 @@ export class DetallesAbonadoComponent implements OnInit {
     private s_loading: LoadingService,
     private authService: AutorizaService,
     private s_condonar: CondmultasinteresesService,
-    private s_emision: EmisionService
+    private s_emision: EmisionService,
   ) { }
 
   ngOnInit(): void {
@@ -399,6 +399,26 @@ export class DetallesAbonadoComponent implements OnInit {
       error: (e) => console.error(e),
     });
   }
+  impFacturaElectronica(datos: any) {
+    console.log(datos)
+    this.facService.generarPDF_FacElectronica(datos.idfactura).subscribe({
+      next: (datos: any) => {
+        // console.log(datos);
+        //const blob = new Blob([datos], { type: 'application/pdf' });
+        //window.open(blob, '_blank');
+        const file = new Blob([datos], { type: 'application/pdf' });
+        const fileURL = URL.createObjectURL(file);
+        window.open(fileURL); // Abrir en nueva pestaña
+        console.log(file)
+        //saveAs(blob, 'report.pdf');
+      },
+      error: (e: any) => console.error(e)
+    })
+  }
+
+
+
+
   setOptImprimir() {
     switch (this.opt) {
       case '0':

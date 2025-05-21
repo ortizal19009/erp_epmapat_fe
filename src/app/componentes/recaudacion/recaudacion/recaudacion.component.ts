@@ -538,8 +538,11 @@ export class RecaudacionComponent implements OnInit {
   changeFormacobro() {
     const formacobro = this.formCobrar.get('idformacobro')!.value;
     this.idformacobro = formacobro.idformacobro;
-    if (formacobro.idformacobro == 3) this.formacobroNC = true;
-    else this.formacobroNC = false;
+    if (formacobro.idformacobro == 3) {
+      this.formacobroNC = true;
+      console.log(this.formCobrar.value)
+    }
+    else { this.formacobroNC = false };
   }
 
   marcarTodas(event: any) {
@@ -626,10 +629,13 @@ export class RecaudacionComponent implements OnInit {
       next: (datos: any) => {
         this._nc = datos;
         if (datos.length > 0) {
+          console.log("BUSCANDO NTA CEDITO CUENT");
           this.formCobrar.patchValue({
             saldo: datos[0].saldo
           })
         } else {
+          console.log("QUITNDO VALOR NTA CEDITO");
+
           this.formCobrar.patchValue({
             saldo: ''
           })
@@ -700,6 +706,7 @@ export class RecaudacionComponent implements OnInit {
   }
 
   valorAcobrar(acobrar: number) {
+    console.log(this.formCobrar.value.ncvalor)
     this.disabledcobro = true;
     let entero = Math.trunc(acobrar);
     let decimal = (acobrar - entero).toFixed(2);
@@ -718,7 +725,7 @@ export class RecaudacionComponent implements OnInit {
       dinero: '',
       vuelto: '',
       ncvalor: '',
-      saldo: ''
+      //saldo: ''
     });
   }
 
@@ -1213,6 +1220,7 @@ export class RecaudacionComponent implements OnInit {
     }
   }
   SaldoNC(control: AbstractControl) {
+    console.log(control)
     if (this.formCobrar.value.saldo <= 0)
       return of({ invalido: true });
     else return of(null);

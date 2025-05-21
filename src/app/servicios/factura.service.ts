@@ -451,4 +451,8 @@ export class FacturaService {
     return await firstValueFrom(resp);
 
   }
+  generarPDF_FacElectronica(idfactura: number){
+    return this.http.get(`${apiUrl}/api/sri/generar-pdf?idfactura=${idfactura}`,
+      { responseType: 'blob' });
+  }
 }

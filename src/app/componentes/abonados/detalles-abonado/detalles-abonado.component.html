@@ -369,11 +369,19 @@
          <div class="modal-content">
             <div class="modal-header py-2 justify-content-center theadPlanillas">
                <h5 class="modal-title" id="DetalleFacturaModalLabel"><strong>Planilla:</strong> {{idfactura}}</h5>
-               <button type="button" class="close" [disabled]="factura.pagado != 1" (click)="impComprobante(factura)">
-                  <span aria-hidden="true">
-                     <i class="bi bi-printer-fill" style="color:white"></i>
-                  </span>
-               </button>
+
+               <div class="btn-group ml-auto mx-0">
+                  <button type="button" class="bg-transparent border-0 dropdown-toggle text-white"
+                     data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+                  </button>
+                  <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+                     <button class="dropdown-item" type="button" data-toggle="modal" (click)="impComprobante(factura)">
+                        <i class="bi bi-printer"></i>&nbsp; Comprobante pago</button>
+                     <button class="dropdown-item" type="button" (click)="impFacturaElectronica(factura)">
+                        <i class="bi-file-earmark-arrow-down"></i>&nbsp; Factura electrónica</button>
+
+                  </div>
+               </div>
             </div>
             <div class="modal-body">
                <div class="row">
