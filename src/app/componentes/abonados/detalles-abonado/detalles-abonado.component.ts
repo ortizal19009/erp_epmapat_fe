@@ -97,7 +97,6 @@ export class DetallesAbonadoComponent implements OnInit {
     private s_loading: LoadingService,
     private authService: AutorizaService,
     private s_condonar: CondmultasinteresesService,
-    private s_emision: EmisionService
   ) { }
 
   ngOnInit(): void {
