@@ -384,7 +384,7 @@
                </div>
             </div>
             <div class="modal-body">
-               <div class="row">
+               <div class="row" *ngIf="facElectro else pdfelectro ">
                   <div class="col-sm-6">
                      <table class="table table-hover table-sm table-bordered mb-0">
                         <thead class="theadPlanillas">
@@ -444,10 +444,13 @@
 
                   </div>
                </div>
+               <ng-template #pdfelectro>
+                  <iframe id="pdfViewer" src="" width="100%" height="600px"></iframe>
+               </ng-template>
 
             </div>
             <div class="modal-footer py-1">
-               <button type="button" class="btn btn-outline-success btn-sm" data-dismiss="modal">
+               <button type="button" class="btn btn-outline-success btn-sm" (click)="cancelarFE()" data-dismiss="modal">
                   <i class="fa fa-times-circle"></i> Cerrar</button>
                <button type="button" class="btn btn-success btn-sm"
                   [disabled]="esFE ==='A' || esFE == 'O'  || factura.pagado === 0 || usuario != 1 "

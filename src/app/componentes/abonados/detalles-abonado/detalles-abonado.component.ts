@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Lecturas } from 'src/app/modelos/lecturas.model';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
@@ -58,6 +58,8 @@ export class DetallesAbonadoComponent implements OnInit {
   valoriva: number;
   _codigo: string;
   pdfView: boolean = true;
+  facElectro: boolean = true;
+
   modalSize: string = 'sm';
   /* para reporte */
   _rxf: any = [];
@@ -77,6 +79,8 @@ export class DetallesAbonadoComponent implements OnInit {
   @Input() cuenta: any;
   swreturn: boolean = false;
 
+  @ViewChild('pdfViewer', { static: false }) pdfViewer!: ElementRef;
+
   constructor(
     private aboService: AbonadosService,
     private facService: FacturaService,
@@ -91,26 +95,28 @@ export class DetallesAbonadoComponent implements OnInit {
     private s_loading: LoadingService,
     private authService: AutorizaService,
     private s_condonar: CondmultasinteresesService,
-    private s_emision: EmisionService,
-  ) { }
+    private s_emision: EmisionService
+  ) {}
 
   ngOnInit(): void {
     this.obtenerDatosAbonado();
     this.listarIntereses();
     this.usuario = this.authService.idusuario;
   }
-
+  cancelarFE() {
+    this.facElectro = !this.facElectro;
+  }
   getFactura() {
     this.facturasxAbonado(this.abonado.idabonado);
   }
   obtenerDatosAbonado() {
-    let idabonado: any
+    let idabonado: any;
     if (!this.cuenta) {
       this.swreturn = false;
       idabonado = sessionStorage.getItem('idabonadoToFactura');
     } else {
       this.swreturn = true;
-      idabonado = this.cuenta
+      idabonado = this.cuenta;
     }
     this.aboService.getByIdabonado(+idabonado!).subscribe({
       next: (datos) => {
@@ -273,7 +279,7 @@ export class DetallesAbonadoComponent implements OnInit {
     });
   }
 
-  detallesHistorial(lectura: Lecturas) { }
+  detallesHistorial(lectura: Lecturas) {}
 
   regresar() {
     let padre = sessionStorage.getItem('padreDetalleAbonado');
@@ -399,25 +405,29 @@ export class DetallesAbonadoComponent implements OnInit {
       error: (e) => console.error(e),
     });
   }
-  impFacturaElectronica(datos: any) {
-    console.log(datos)
-    this.facService.generarPDF_FacElectronica(datos.idfactura).subscribe({
-      next: (datos: any) => {
-        // console.log(datos);
-        //const blob = new Blob([datos], { type: 'application/pdf' });
-        //window.open(blob, '_blank');
-        const file = new Blob([datos], { type: 'application/pdf' });
-        const fileURL = URL.createObjectURL(file);
-        window.open(fileURL); // Abrir en nueva pestaña
-        console.log(file)
-        //saveAs(blob, 'report.pdf');
-      },
-      error: (e: any) => console.error(e)
-    })
+  async impFacturaElectronica(datos: any) {
+    this.facElectro = false;
+
+    this.s_loading.showLoading();
+    let fact = await this.facService.generarPDF_FacElectronica(datos.idfactura);
+    //this.facElectro = true;
+    // Crear blob desde los datos del backend
+    setTimeout(() => {
+      const file = new Blob([fact], { type: 'application/pdf' });
+      const fileURL = URL.createObjectURL(file);
+
+      // Asignar el blob al iframe
+      const pdfViewer = document.getElementById(
+        'pdfViewer'
+      ) as HTMLIFrameElement;
+
+      if (pdfViewer) {
+        pdfViewer.src = fileURL;
+      }
+    }, 1000);
+
+    this.s_loading.hideLoading();
   }
-
-
-
 
   setOptImprimir() {
     switch (this.opt) {
@@ -435,7 +445,7 @@ export class DetallesAbonadoComponent implements OnInit {
   getSinCobro() {
     this.facService.getSinCobrar(this._abonado[0].idabonado).subscribe({
       next: (facturas: any) => {
-        console.log(facturas)
+        console.log(facturas);
         this._abonado[0].facturas = facturas;
         this.datosImprimir = this._abonado[0];
         this.impNotificacion();
@@ -660,8 +670,12 @@ export class DetallesAbonadoComponent implements OnInit {
       },
       body: d_facturas,
     });
-    let t: number = t_intereses + this.rubrostotal
-    d_rxf.push(['5', 'Interes', t_intereses.toFixed(2)], ['', 'Sub total: ', this.rubrostotal.toFixed(2)], ['', 'Total: ', t.toFixed(2)]);
+    let t: number = t_intereses + this.rubrostotal;
+    d_rxf.push(
+      ['5', 'Interes', t_intereses.toFixed(2)],
+      ['', 'Sub total: ', this.rubrostotal.toFixed(2)],
+      ['', 'Total: ', t.toFixed(2)]
+    );
     autoTable(doc, {
       head: [['Cod.Rubro', 'Descripción', 'Valor']],
       body: d_rxf,
@@ -752,8 +766,9 @@ export class DetallesAbonadoComponent implements OnInit {
     return +interes.toFixed(2);
   }
   async getSumaFac(idfactura: number): Promise<any> {
-    const sumaFac = await this.rubxfacService
-      .getSumaValoresUnitarios(idfactura);
+    const sumaFac = await this.rubxfacService.getSumaValoresUnitarios(
+      idfactura
+    );
     return sumaFac;
   }
   async contSinCobrar(idabonado: number) {
