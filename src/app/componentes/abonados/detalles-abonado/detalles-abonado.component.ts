@@ -60,6 +60,8 @@ export class DetallesAbonadoComponent implements OnInit {
   pdfView: boolean = true;
   facElectro: boolean = true;
 
+  swFE: boolean = false;
+
   modalSize: string = 'sm';
   /* para reporte */
   _rxf: any = [];
@@ -96,7 +98,7 @@ export class DetallesAbonadoComponent implements OnInit {
     private authService: AutorizaService,
     private s_condonar: CondmultasinteresesService,
     private s_emision: EmisionService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.obtenerDatosAbonado();
@@ -104,7 +106,9 @@ export class DetallesAbonadoComponent implements OnInit {
     this.usuario = this.authService.idusuario;
   }
   cancelarFE() {
-    this.facElectro = !this.facElectro;
+    if (this.facElectro != true) {
+      this.facElectro = !this.facElectro;
+    }
   }
   getFactura() {
     this.facturasxAbonado(this.abonado.idabonado);
@@ -145,20 +149,28 @@ export class DetallesAbonadoComponent implements OnInit {
   estado_FE(estado: String) {
     switch (estado) {
       case 'A':
+        this.swFE = false;
         return 'APROBADO, ENVADO MAIL';
       case 'O':
+        this.swFE = false;
         return 'APROBADO, NO ENVIADO MAIL ';
       case 'C':
+        this.swFE = true;
         return 'DEVUELTA';
       case 'G':
+        this.swFE = true;
         return 'GENERANDO';
       case 'I':
+        this.swFE = true;
         return 'INGRESADO';
       case 'U':
+        this.swFE = true;
         return 'ERROR AL AUTORIZAR';
       case 'E':
+        this.swFE = true;
         return 'DATOS INCOMPLETOS';
       default:
+        this.swFE = true;
         return 'Sin enviar';
     }
   }
@@ -261,6 +273,7 @@ export class DetallesAbonadoComponent implements OnInit {
         if (detalle[0].idfactura_facturas.pagado === 1) {
           this._fecFacturaService.getByIdFactura(+idfactura!).subscribe({
             next: (fecfactura: any) => {
+              console.log(fecfactura.estado)
               this.esFE = fecfactura.estado;
               if (fecfactura != null) {
                 this.estadoFE = this.estado_FE(fecfactura.estado);
@@ -279,7 +292,7 @@ export class DetallesAbonadoComponent implements OnInit {
     });
   }
 
-  detallesHistorial(lectura: Lecturas) {}
+  detallesHistorial(lectura: Lecturas) { }
 
   regresar() {
     let padre = sessionStorage.getItem('padreDetalleAbonado');

@@ -363,7 +363,7 @@
    </div>
 
    <!-- Modal DETALLE Planilla -->
-   <div class="modal fade" id="DetalleFacturaModal" tabindex="-1" aria-labelledby="DetalleFacturaModal"
+   <div class="modal fade" id="DetalleFacturaModal" data-backdrop="static" tabindex="-1" aria-labelledby="DetalleFacturaModal"
       aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
          <div class="modal-content">
@@ -377,7 +377,7 @@
                   <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
                      <button class="dropdown-item" type="button" data-toggle="modal" (click)="impComprobante(factura)">
                         <i class="bi bi-printer"></i>&nbsp; Comprobante pago</button>
-                     <button class="dropdown-item" type="button" (click)="impFacturaElectronica(factura)">
+                     <button class="dropdown-item" type="button" [disabled]=swFE (click)="impFacturaElectronica(factura)">
                         <i class="bi-file-earmark-arrow-down"></i>&nbsp; Factura electrónica</button>
 
                   </div>
