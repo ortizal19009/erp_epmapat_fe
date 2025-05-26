@@ -272,7 +272,6 @@ export class DetallesAbonadoComponent implements OnInit {
         if (detalle[0].idfactura_facturas.pagado === 1) {
           this._fecFacturaService.getByIdFactura(+idfactura!).subscribe({
             next: (fecfactura: any) => {
-              console.log(fecfactura.estado)
               this.esFE = fecfactura.estado;
               if (fecfactura != null) {
                 this.estadoFE = this.estado_FE(fecfactura.estado);
