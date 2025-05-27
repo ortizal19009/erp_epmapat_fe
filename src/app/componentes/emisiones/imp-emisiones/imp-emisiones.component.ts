@@ -10,6 +10,7 @@ import { LecturasService } from 'src/app/servicios/lecturas.service';
 import { PdfService } from 'src/app/servicios/pdf.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
+import { JasperReportService } from 'src/app/servicios/jasper-report.service';
 
 @Component({
   selector: 'app-imp-emisiones',
@@ -47,7 +48,8 @@ export class ImpEmisionesComponent implements OnInit {
     private s_lecturas: LecturasService,
     private s_emisionindividual: EmisionIndividualService,
     private s_loading: LoadingService,
-    private s_rubroxfac: RubroxfacService
+    private s_rubroxfac: RubroxfacService,
+    private s_jasperReport: JasperReportService
   ) { }
 
   ngOnInit(): void {
@@ -67,6 +69,7 @@ export class ImpEmisionesComponent implements OnInit {
       h_emi: '',
     });
 
+
     let h: String;
     this.emiService.ultimo().subscribe({
       next: (datos) => {
@@ -80,8 +83,38 @@ export class ImpEmisionesComponent implements OnInit {
       },
       error: (err) => console.error(err.error),
     });
-
+    //this.getReporte();
     this.listAllEmisiones();
+  }
+
+
+  async getReporte(idemision: number) {
+    let datos: any;
+    datos = {
+      "reportName": "ResumenEmision",
+      "parameters": {
+        "idemision": idemision
+      },
+      "extencion": ".pdf"
+    }
+    let reporte = await this.s_jasperReport.getReporte(datos)
+    console.log(reporte)
+
+    setTimeout(() => {
+      const file = new Blob([reporte], { type: 'application/pdf' });
+      const fileURL = URL.createObjectURL(file);
+
+      // Asignar el blob al iframe
+      const pdfViewer = document.getElementById(
+        'pdfViewer'
+      ) as HTMLIFrameElement;
+
+      if (pdfViewer) {
+        pdfViewer.src = fileURL;
+      }
+    }, 1000);
+
+    this.s_loading.hideLoading();
   }
   setUltimos() {
     let h: String;
@@ -149,6 +182,9 @@ export class ImpEmisionesComponent implements OnInit {
           this.formImprimir.value.d_emi,
           this.formImprimir.value.h_emi
         );
+        break;
+      case '11':
+        this.getReporte(this.formImprimir.value.emision)
         break;
     }
   }
@@ -638,13 +674,19 @@ export class ImpEmisionesComponent implements OnInit {
     let body2: any = [];
     obj.forEach((item: any) => {
       let diferencia: number = item.valoranterior - item.valornuevo;
+      if (item.valoranterior === null) {
+        item.valoranterior = 0
+      }
+      if (item.valornuevo === null) {
+        item.valornuevo = 0
+      }
       body.push([
         item.cuenta,
         item.nombre,
         item.observaciones,
         item.fecelimina,
         item.emisionanterior,
-        item.valoranterior.toFixed(2),
+        item.valoranterior.toFixed(2) || 0,
         item.emisionnueva,
         item.valornuevo.toFixed(2),
         diferencia.toFixed(2)
@@ -858,7 +900,8 @@ export class ImpEmisionesComponent implements OnInit {
       this.opcreporte === 5 ||
       this.opcreporte === 6 ||
       this.opcreporte === 7 ||
-      this.opcreporte === 9
+      this.opcreporte === 9 ||
+      this.opcreporte === 11
     ) {
       return false;
     }
