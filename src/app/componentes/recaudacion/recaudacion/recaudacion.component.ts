@@ -108,6 +108,7 @@ export class RecaudacionComponent implements OnInit {
   _nc: any = [];
   swNC: boolean = false
   facturasToPrint: any[] = []
+  valorNtaCredito: number;
   constructor(
     public fb: FormBuilder,
     private aboService: AbonadosService,
@@ -706,7 +707,6 @@ export class RecaudacionComponent implements OnInit {
   }
 
   valorAcobrar(acobrar: number) {
-    console.log(this.formCobrar.value.ncvalor)
     this.disabledcobro = true;
     let entero = Math.trunc(acobrar);
     let decimal = (acobrar - entero).toFixed(2);
@@ -927,7 +927,6 @@ export class RecaudacionComponent implements OnInit {
                             .updateRecaudaxcaja(this.recxcaja)
                             .subscribe({
                               next: (datos) => {
-
                               },
                               error: (e) => console.error(e),
                             });
@@ -1191,7 +1190,9 @@ export class RecaudacionComponent implements OnInit {
     }
   }
   //Al digitar el valor de la NC
-  changeNCvalor() {
+  changeNCvalor(e: any) {
+    console.log(e.target.value)
+    this.valorNtaCredito = +e.target.value!
     let dinero: number;
     if (+this.formCobrar.controls['dinero'].value > 0)
       dinero = +this.formCobrar.controls['dinero'].value;
@@ -1205,6 +1206,20 @@ export class RecaudacionComponent implements OnInit {
     if (this.formCobrar.controls['vuelto'].value == 0)
       this.disabledcobro = false;
     else this.disabledcobro = true;
+  }
+
+  calcularNCByFactura(vfactura: number, vnc: number) {
+    if (vfactura <= vnc) {
+      console.log(vnc, vfactura, vfactura - vnc)
+      this.valorNtaCredito = vnc - vfactura;
+      //return vnc; 
+    } else if (vfactura > vnc) {
+      console.log("valor nc")
+      this.valorNtaCredito = vnc;
+    }
+    else{
+      this.valorNtaCredito = 0;
+    }
   }
   //Valida que el valor de la NC no se mayor que el valor a cobrar
   valNC(control: AbstractControl) {

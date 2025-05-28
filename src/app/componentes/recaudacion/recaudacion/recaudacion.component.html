@@ -350,7 +350,7 @@
                                         for="dinero">Valor NC</span></div>
                                 <input type="text" class="form-control text-center" formControlName="ncvalor"
                                     [ngClass]="{'is-invalid': f['ncvalor'].invalid && f['ncvalor'].touched,'is-valid': f['ncvalor'].valid, '': f['ncvalor'].untouched}"
-                                    (change)="changeNCvalor()">
+                                    (change)="changeNCvalor($event)">
                             </div>
                             <div *ngIf="!formacobroNC" class="input-group mb-3">
                                 <div class="input-group-prepend"><span class="input-group-text font-weight-bold"

@@ -218,6 +218,7 @@ export class AddFacturacionComponent implements OnInit {
       planilla.estado = 1;
       //planilla.fechaanulacion= ;
       planilla.swiva = this.totiva;
+      planilla.valornotacredito = 0; 
       //planilla.interescobrado = 0;
       let fecha: Date = new Date();
       fecha.setMonth(fecha.getMonth() + (i - 1));
@@ -417,6 +418,7 @@ interface Planilla {
   interescobrado: number;
   swiva: number;
   swcondonar: boolean;
+  valornotacredito: number;
 }
 
 interface Rubrosxpla {
