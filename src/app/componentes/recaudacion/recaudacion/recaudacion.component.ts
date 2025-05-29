@@ -867,8 +867,8 @@ export class RecaudacionComponent implements OnInit {
       console.log(valfactura)
       this.facService.getById(idfactura).subscribe({
         next: (fac) => {
-          this.calcularNCByFactura(valfactura, this.valorNtaCredito);
-          fac.valornotacredito = this.valorNtaCredito;
+
+          fac.valornotacredito = this.calcularNCByFactura(valfactura, this.valorNtaCredito);
           //Añade a facxrecauda
           let facxr = {} as iFacxrecauda; //Interface para los datos de las facturas de la Recaudación
           facxr.idrecaudacion = recaCreada;
@@ -1212,21 +1212,21 @@ export class RecaudacionComponent implements OnInit {
     else this.disabledcobro = true;
   }
 
-calcularNCByFactura(vfactura: number, vnc: number): number {
-  if (vnc <= 0) {
-    this.valorNtaCredito = 0;
-    return 0;
-  }
+  calcularNCByFactura(vfactura: number, vnc: number): number {
+    if (vnc <= 0) {
+      this.valorNtaCredito = 0;
+      return 0;
+    }
 
-  if (vfactura <= vnc) {
-    this.valorNtaCredito = vnc - vfactura;
-    console.log(vnc, vfactura, vfactura - vnc);
-    return vnc;
-  } else {
-    this.valorNtaCredito = vnc;
-    return vnc;
+    if (vfactura <= vnc) {
+      this.valorNtaCredito = vnc - vfactura;
+      console.log(vnc, vfactura, vfactura - vnc);
+      return vnc;
+    } else {
+      this.valorNtaCredito = vnc;
+      return vnc;
+    }
   }
-}
 
   //Valida que el valor de la NC no se mayor que el valor a cobrar
   valNC(control: AbstractControl) {
@@ -1242,7 +1242,6 @@ calcularNCByFactura(vfactura: number, vnc: number): number {
     }
   }
   SaldoNC(control: AbstractControl) {
-    console.log(control)
     if (this.formCobrar.value.saldo <= 0)
       return of({ invalido: true });
     else return of(null);
