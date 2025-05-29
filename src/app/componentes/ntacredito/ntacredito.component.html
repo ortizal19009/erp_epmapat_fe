@@ -78,7 +78,7 @@
                         <td class="text-center">{{ntacredito.nrofactura}}</td>
                         <td class="text-right">{{ntacredito.valor}}</td>
                         <td class="text-right">{{ntacredito.devengado}}</td>
-                        <td class="text-right">{{ntacredito.valor - ntacredito.devengado}}</td>
+                        <td class="text-right">{{(ntacredito.valor - ntacredito.devengado).toFixed(2)}}</td>
                         <td class="text-center">
                             <div class="btn-group py-0">
                                 <button type="button" class="btn btn-warning btn-badged dropdown-toggle py-0"
@@ -88,7 +88,8 @@
                                     <button class="dropdown-item" type="button" data-toggle="modal"
                                         data-target="#modalEliminar">
                                         <i class="bi bi-file-minus"></i>&nbsp; ImpComprobante</button>
-                                    <button class="dropdown-item" type="button" (click)="impDocumento(ntacredito.idntacredito)">
+                                    <button class="dropdown-item" type="button"
+                                        (click)="impDocumento(ntacredito.idntacredito)">
                                         <i class="bi bi-file-minus"></i>&nbsp; Imp Doc</button>
                                     <button class="dropdown-item" disabled type="button"
                                         [routerLink]="['/modi-pingresos',ntacredito.idntacredito]">

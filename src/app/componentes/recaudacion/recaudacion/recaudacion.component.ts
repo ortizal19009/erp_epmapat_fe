@@ -443,6 +443,7 @@ export class RecaudacionComponent implements OnInit {
           }
           //item.total += interes;
         });
+        console.log(sincobrar);
         this._sincobro = sincobrar;
       },
       error: (e) => console.error(e),
@@ -541,7 +542,6 @@ export class RecaudacionComponent implements OnInit {
     this.idformacobro = formacobro.idformacobro;
     if (formacobro.idformacobro == 3) {
       this.formacobroNC = true;
-      console.log(this.formCobrar.value)
     }
     else { this.formacobroNC = false };
   }
@@ -856,14 +856,19 @@ export class RecaudacionComponent implements OnInit {
   //Registra las facturas por recaudación y actualiza la fecha de cobro de la(s) factura(s)
   facxrecauda(recaCreada: Recaudacion, i: number) {
     let idfactura: number;
+    let valfactura: number;
     let fechacobro: Date = new Date();
     let rubro: Rubros = new Rubros();
     rubro.idrubro = 5;
     //this._sincobro[i].pagado = 1;
     if (this._sincobro[i].pagado === 1 || this._sincobro[i].pagado === true) {
       idfactura = this._sincobro[i].idfactura;
+      valfactura = this._sincobro[i].total + this._sincobro[i].interes
+      console.log(valfactura)
       this.facService.getById(idfactura).subscribe({
         next: (fac) => {
+          this.calcularNCByFactura(valfactura, this.valorNtaCredito);
+          fac.valornotacredito = this.valorNtaCredito;
           //Añade a facxrecauda
           let facxr = {} as iFacxrecauda; //Interface para los datos de las facturas de la Recaudación
           facxr.idrecaudacion = recaCreada;
@@ -883,7 +888,6 @@ export class RecaudacionComponent implements OnInit {
                   fac.fechacobro = fechacobro;
                   if (this.swNC === true) {
                     fac.formapago = 3
-                    console.log(fac)
                     /* AQUI COLOCAR LA FUNCION DE IMPRIMIR EL COMPROBANTE DE NOTACREDITO */
                   }
                   fac.usuariocobro = this.authService.idusuario;
@@ -938,7 +942,7 @@ export class RecaudacionComponent implements OnInit {
                   //fac.swiva = +iva[0][1]!;
                   this.facService.updateFacturas(fac).subscribe({
                     next: (nex: any) => {
-                      if (this._nc.length > 0) {
+                      if (this._nc.length > 0 && fac.valornotacredito > 0) {
                         let valoresnc: Valoresnc = new Valoresnc();
                         valoresnc.estado = 1;
                         valoresnc.idntacredito_ntacredito = this._nc[0];
@@ -1208,19 +1212,22 @@ export class RecaudacionComponent implements OnInit {
     else this.disabledcobro = true;
   }
 
-  calcularNCByFactura(vfactura: number, vnc: number) {
-    if (vfactura <= vnc) {
-      console.log(vnc, vfactura, vfactura - vnc)
-      this.valorNtaCredito = vnc - vfactura;
-      //return vnc; 
-    } else if (vfactura > vnc) {
-      console.log("valor nc")
-      this.valorNtaCredito = vnc;
-    }
-    else{
-      this.valorNtaCredito = 0;
-    }
+calcularNCByFactura(vfactura: number, vnc: number): number {
+  if (vnc <= 0) {
+    this.valorNtaCredito = 0;
+    return 0;
   }
+
+  if (vfactura <= vnc) {
+    this.valorNtaCredito = vnc - vfactura;
+    console.log(vnc, vfactura, vfactura - vnc);
+    return vnc;
+  } else {
+    this.valorNtaCredito = vnc;
+    return vnc;
+  }
+}
+
   //Valida que el valor de la NC no se mayor que el valor a cobrar
   valNC(control: AbstractControl) {
     if (this.formCobrar.value.valorAcobrar < control.value || control.value > +this.formCobrar.value.saldo!) {
