@@ -1213,18 +1213,25 @@ export class RecaudacionComponent implements OnInit {
   }
 
   calcularNCByFactura(vfactura: number, vnc: number): number {
-    if (vnc <= 0) {
-      this.valorNtaCredito = 0;
-      return 0;
+    console.log(`valor factura: ${vfactura}, valor NC: ${vnc}`);
+    if (vnc > 0) {
+      if (vfactura === vnc) {
+        this.valorNtaCredito = vnc - vfactura;
+        console.log("VALORES IGUALES")
+        return vnc;
+      } else if (vfactura < vnc) {
+        this.valorNtaCredito = vnc - vfactura;
+        console.log("VALORES VF < NC")
+        return vfactura;
+      } else if (vfactura > vnc) {
+        this.valorNtaCredito = 0;
+        console.log("VALORES VF > NC")
+        return vnc;
+      }
+      else { return 0 }
     }
-
-    if (vfactura <= vnc) {
-      this.valorNtaCredito = vnc - vfactura;
-      console.log(vnc, vfactura, vfactura - vnc);
-      return vnc;
-    } else {
-      this.valorNtaCredito = vnc;
-      return vnc;
+    else {
+      return 0;
     }
   }
 
