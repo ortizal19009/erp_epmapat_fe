@@ -570,7 +570,7 @@ import { HomeComponent } from './componentes/administracion/home/home.component'
     ReactiveFormsModule,
     HttpClientModule,
     Ng2SearchPipeModule,
-    NgxMaskModule.forRoot(),
+    NgxMaskModule.forRoot()
   ],
 
   providers: [
