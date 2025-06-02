@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { Emisiones } from '../modelos/emisiones.model';
 import { environment } from 'src/environments/environment';
 
@@ -8,15 +8,15 @@ const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/emisiones`;
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-
 export class EmisionService {
-
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   getDesdeHasta(desde: String, hasta: String): Observable<Emisiones[]> {
-    return this.http.get<Emisiones[]>(`${baseUrl}?desde=${desde}&hasta=${hasta}`);
+    return this.http.get<Emisiones[]>(
+      `${baseUrl}?desde=${desde}&hasta=${hasta}`
+    );
   }
 
   getByIdemision_ori(idemision: number): Observable<Emisiones[]> {
@@ -46,5 +46,10 @@ export class EmisionService {
   findAllEmisiones() {
     return this.http.get<Emisiones[]>(`${baseUrl}/findall`);
   }
-
+  getResumenEmision(limit: number) {
+    let resp = firstValueFrom(
+      this.http.get(`${baseUrl}/resumen?limit=${limit}`)
+    );
+    return resp;
+  }
 }
