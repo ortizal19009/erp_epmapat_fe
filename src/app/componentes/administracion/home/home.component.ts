@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { EmisionService } from 'src/app/servicios/emision.service';
+import * as L from 'leaflet';
 
 
 @Component({
@@ -22,8 +23,8 @@ export class HomeComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-   /*  // 1. Crear el mapa en el contenedor con id="map"
-    const map = L.map('map').setView([51.505, -0.09], 13);
+     // 1. Crear el mapa en el contenedor con id="map"
+    const map = L.map('map').setView([0.8038125013453109, -77.72763063596486], 20);
 
     // 2. Añadir la capa de mosaicos (tiles) de OpenStreetMap
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -32,14 +33,13 @@ export class HomeComponent implements OnInit, AfterViewInit {
     }).addTo(map);
 
     // 3. (Opcional) Añadir un marcador de ejemplo
-    L.marker([51.505, -0.09])
+    L.marker([0.8038125013453109, -77.72763063596486])
       .addTo(map)
-      .bindPopup('Aquí está Londres!')
-      .openPopup(); */
+      .bindPopup('Aquí está EPMAPA-T!')
+      .openPopup(); 
   }
   async getResumenEmisiones(limit: number) {
     this._resumenEmisiones = await this.s_emisiones.getResumenEmision(limit);
-    console.log(this._resumenEmisiones);
   }
 
   async getDatosAbonados() {
