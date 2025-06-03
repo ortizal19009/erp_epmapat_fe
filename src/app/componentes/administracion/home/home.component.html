@@ -1,261 +1,239 @@
 <!-- PRUEBA DE ESTADISTICAS -->
+<div class="container-fluid mt-3">
 
-<div class="row">
-  <div class="col-md-12">
-    <div class="card">
-      <div class="card-header">
-        <h5 class="card-title">Mapa de Rutas</h5>
 
-        <div class="card-tools">
-          <button type="button" class="btn btn-tool" data-card-widget="collapse">
-            <i class="fas fa-minus"></i>
-          </button>
-          <div class="btn-group">
-            <button type="button" class="btn btn-tool dropdown-toggle" data-toggle="dropdown">
-              <i class="fas fa-wrench"></i>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title">Mapa de Rutas</h5>
+          <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+              <i class="fas fa-minus"></i>
             </button>
-            <div class="dropdown-menu dropdown-menu-right" role="menu">
-              <a href="#" class="dropdown-item">Action</a>
-              <a href="#" class="dropdown-item">Another action</a>
-              <a href="#" class="dropdown-item">Something else here</a>
-              <a class="dropdown-divider"></a>
-              <a href="#" class="dropdown-item">Separated link</a>
-            </div>
-          </div>
-          <button type="button" class="btn btn-tool" data-card-widget="remove">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-      </div>
-      <!-- /.card-header -->
-      <div class="card-body">
-        <div class="row">
-          <div class="col-md-8">
-            <p class="text-center">
-              <strong>Sales: 1 Jan, 2014 - 30 Jul, 2014</strong>
-            </p>
-
-            <div class="chart">
-              <!-- Sales Chart Canvas -->
-              <!--  <canvas id="salesChart" height="180" style="height: 180px;"></canvas> -->
-<div id="map" style="width: 100%; height: 400px;"></div>
-
-            </div>
-            <!-- /.chart-responsive -->
-          </div>
-          <!-- /.col -->
-          <div class="col-md-4">
-            <p class="text-center">
-              <strong>Rutas</strong>
-            </p>
-
-            <div class="progress-group">
-              Add Products to Cart
-              <span class="float-right"><b>160</b>/200</span>
-              <div class="progress progress-sm">
-                <div class="progress-bar bg-primary" style="width: 80%"></div>
+            <div class="btn-group">
+              <button type="button" class="btn btn-tool dropdown-toggle" data-toggle="dropdown">
+                <i class="fas fa-wrench"></i>
+              </button>
+              <div class="dropdown-menu dropdown-menu-right" role="menu">
+                <a href="#" class="dropdown-item">Action</a>
+                <a href="#" class="dropdown-item">Another action</a>
+                <a href="#" class="dropdown-item">Something else here</a>
+                <a class="dropdown-divider"></a>
+                <a href="#" class="dropdown-item">Separated link</a>
               </div>
             </div>
-            <!-- /.progress-group -->
-
-            <div class="progress-group">
-              Complete Purchase
-              <span class="float-right"><b>310</b>/400</span>
-              <div class="progress progress-sm">
-                <div class="progress-bar bg-danger" style="width: 75%"></div>
-              </div>
-            </div>
-
-            <!-- /.progress-group -->
-            <div class="progress-group">
-              <span class="progress-text">Visit Premium Page</span>
-              <span class="float-right"><b>480</b>/800</span>
-              <div class="progress progress-sm">
-                <div class="progress-bar bg-success" style="width: 60%"></div>
-              </div>
-            </div>
-
-            <!-- /.progress-group -->
-            <div class="progress-group">
-              Send Inquiries
-              <span class="float-right"><b>250</b>/500</span>
-              <div class="progress progress-sm">
-                <div class="progress-bar bg-warning" style="width: 50%"></div>
-              </div>
-            </div>
-            <!-- /.progress-group -->
-          </div>
-          <!-- /.col -->
-        </div>
-        <!-- /.row -->
-      </div>
-      <!-- ./card-body -->
-      <div class="card-footer">
-        <div class="row">
-          <div class="col-sm-3 col-6">
-            <div class="description-block border-right">
-              <span class="description-percentage text-success"><i class="fas fa-caret-up"></i> 17%</span>
-              <h5 class="description-header">$35,210.43</h5>
-              <span class="description-text">TOTAL REVENUE</span>
-            </div>
-            <!-- /.description-block -->
-          </div>
-          <!-- /.col -->
-          <div class="col-sm-3 col-6">
-            <div class="description-block border-right">
-              <span class="description-percentage text-warning"><i class="fas fa-caret-left"></i> 0%</span>
-              <h5 class="description-header">$10,390.90</h5>
-              <span class="description-text">TOTAL COST</span>
-            </div>
-            <!-- /.description-block -->
-          </div>
-          <!-- /.col -->
-          <div class="col-sm-3 col-6">
-            <div class="description-block border-right">
-              <span class="description-percentage text-success"><i class="fas fa-caret-up"></i> 20%</span>
-              <h5 class="description-header">$24,813.53</h5>
-              <span class="description-text">TOTAL PROFIT</span>
-            </div>
-            <!-- /.description-block -->
-          </div>
-          <!-- /.col -->
-          <div class="col-sm-3 col-6">
-            <div class="description-block">
-              <span class="description-percentage text-danger"><i class="fas fa-caret-down"></i> 18%</span>
-              <h5 class="description-header">1200</h5>
-              <span class="description-text">GOAL COMPLETIONS</span>
-            </div>
-            <!-- /.description-block -->
+            <button type="button" class="btn btn-tool" data-card-widget="remove">
+              <i class="fas fa-times"></i>
+            </button>
           </div>
         </div>
-        <!-- /.row -->
-      </div>
-      <!-- /.card-footer -->
-    </div>
-    <!-- /.card -->
-  </div>
-  <!-- /.col -->
-</div>
-<!-- /.row -->
-<div class="row">
-  <div class="col-sm-6">
-    <!-- TABLE: LATEST ORDERS -->
-    <div class="card">
-      <div class="card-header border-transparent">
-        <h3 class="card-title">Resumen emisiones</h3>
-
-        <div class="card-tools">
-          <button type="button" class="btn btn-tool" data-card-widget="collapse">
-            <i class="fas fa-minus"></i>
-          </button>
-
-        </div>
-      </div>
-      <!-- /.card-header -->
-      <div class="card-body p-0">
-        <div class="table-responsive">
-          <table class="table m-0 table-bordered table-hover table-striped">
-            <thead class="text-center">
-              <tr>
-                <th>N°</th>
-                <th>Emision</th>
-                <th>N°Abonados</th>
-                <th>M3</th>
-                <th>Valor Emitido</th>
-                <th>Valor Cobrado</th>
-                <th>Valor Pendiente</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let resEmision of _resumenEmisiones; let i = index">
-                <td class="text-center">{{i+1}}</td>
-                <td class="text-center">{{resEmision.emision}}</td>
-                <td class="text-center">{{resEmision.ncuentas}}</td>
-                <td class="text-center">{{resEmision.m3}}</td>
-                <td class="text-right">{{resEmision.valemision.toFixed(2)+' $'}}</td>
-                <td class="text-right">{{resEmision.total_pagado.toFixed(2)+' $'}}</td>
-                <td class="text-right">{{resEmision.total_pendiente.toFixed(2)+' $'}}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <!-- /.table-responsive -->
-      </div>
-      <!-- /.card-body -->
-
-    </div>
-    <!-- /.card -->
-  </div>
-  <div class="col-sm-6">
-
-    <div class="card">
-      <div class="card-header border-transparent">
-        <h3 class="card-title">Abonados por estado</h3>
-
-        <div class="card-tools">
-          <button type="button" class="btn btn-tool" data-card-widget="collapse">
-            <i class="fas fa-minus"></i>
-          </button>
-
-        </div>
-      </div>
-      <!-- /.card-header -->
-      <div class="card-body p-0">
-        <div class="table-responsive">
+        <!-- /.card-header -->
+        <div class="card-body">
           <div class="row">
-            <div class="col-sm">
-              <table class="table table-hover table-bordered table-sm ">
-                <thead class="text-center">
-                  <tr>
-                    <th>N°</th>
-                    <th>Descripción</th>
-                    <th>N° Cuentas</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let destado of _ByEstados; let i = index">
-                    <td class="text-center">{{i+1}}</td>
-                    <td>{{destado.descripcion}}</td>
-                    <td class="text-center">{{destado.ncuentas}}</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="col-md-8">
+              <p class="text-center">
+                <strong>Mapa de referencia</strong>
+              </p>
+
+              <div class="chart">
+                <!-- Sales Chart Canvas -->
+                <!--  <canvas id="salesChart" height="180" style="height: 180px;"></canvas> -->
+                <div id="map" style="width: 100%; height: 400px;"></div>
+
+              </div>
+              <!-- /.chart-responsive -->
+            </div>
+            <!-- /.col -->
+            <div class="col-md-4">
+              <p class="text-center">
+                <strong>Rutas</strong>
+              </p>
+
+              <input type="text" class="form-control form-control-sm" placeholder="Buscar ...">
+              <div class="list-container-con-scroll">
+                <div class="list-group list-group-sm" *ngFor="let ruta of _rutas">
+                  <div class="list-group-item list-group-item-sm">
+                    <span class="float-right">{{ruta.ncuentas}}</span>
+                    <label><input type="checkbox" (change)=getAbonadosByRutas(ruta.idruta)>
+                      {{ruta.descripcion}}
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+        </div>
+        <!-- ./card-body -->
+        <div class="card-footer">
+          <div class="row">
+            <div class="col-sm-3 col-6">
+              <div class="description-block border-right">
+                <span class="description-percentage text-success"><i class="fas fa-caret-up"></i> 17%</span>
+                <h5 class="description-header">$35,210.43</h5>
+                <span class="description-text">TOTAL REVENUE</span>
+              </div>
+              <!-- /.description-block -->
+            </div>
+            <!-- /.col -->
+            <div class="col-sm-3 col-6">
+              <div class="description-block border-right">
+                <span class="description-percentage text-warning"><i class="fas fa-caret-left"></i> 0%</span>
+                <h5 class="description-header">$10,390.90</h5>
+                <span class="description-text">TOTAL COST</span>
+              </div>
+              <!-- /.description-block -->
+            </div>
+            <!-- /.col -->
+            <div class="col-sm-3 col-6">
+              <div class="description-block border-right">
+                <span class="description-percentage text-success"><i class="fas fa-caret-up"></i> 20%</span>
+                <h5 class="description-header">$24,813.53</h5>
+                <span class="description-text">TOTAL PROFIT</span>
+              </div>
+              <!-- /.description-block -->
+            </div>
+            <!-- /.col -->
+            <div class="col-sm-3 col-6">
+              <div class="description-block">
+                <span class="description-percentage text-danger"><i class="fas fa-caret-down"></i> 18%</span>
+                <h5 class="description-header">1200</h5>
+                <span class="description-text">GOAL COMPLETIONS</span>
+              </div>
+              <!-- /.description-block -->
+            </div>
+          </div>
+          <!-- /.row -->
+        </div>
+        <!-- /.card-footer -->
+      </div>
+      <!-- /.card -->
+    </div>
+    <!-- /.col -->
+  </div>
+  <!-- /.row -->
+  <div class="row">
+    <div class="col-sm-6">
+      <!-- TABLE: LATEST ORDERS -->
+      <div class="card">
+        <div class="card-header border-transparent">
+          <h3 class="card-title">Resumen emisiones</h3>
+
+          <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+              <i class="fas fa-minus"></i>
+            </button>
+
+          </div>
+        </div>
+        <!-- /.card-header -->
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table m-0 table-bordered table-hover table-striped">
+              <thead class="text-center">
+                <tr>
+                  <th>N°</th>
+                  <th>Emision</th>
+                  <th>N°Abonados</th>
+                  <th>M3</th>
+                  <th>Valor Emitido</th>
+                  <th>Valor Cobrado</th>
+                  <th>Valor Pendiente</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let resEmision of _resumenEmisiones; let i = index">
+                  <td class="text-center">{{i+1}}</td>
+                  <td class="text-center">{{resEmision.emision}}</td>
+                  <td class="text-center">{{resEmision.ncuentas}}</td>
+                  <td class="text-center">{{resEmision.m3}}</td>
+                  <td class="text-right">{{resEmision.valemision.toFixed(2)+' $'}}</td>
+                  <td class="text-right">{{resEmision.total_pagado.toFixed(2)+' $'}}</td>
+                  <td class="text-right">{{resEmision.total_pendiente.toFixed(2)+' $'}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- /.table-responsive -->
+        </div>
+        <!-- /.card-body -->
+
+      </div>
+      <!-- /.card -->
+    </div>
+    <div class="col-sm-6">
+
+      <div class="card">
+        <div class="card-header border-transparent">
+          <h3 class="card-title">Abonados por estado</h3>
+
+          <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+              <i class="fas fa-minus"></i>
+            </button>
+
+          </div>
+        </div>
+        <!-- /.card-header -->
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <div class="row">
+              <div class="col-sm">
+                <table class="table table-hover table-bordered table-sm ">
+                  <thead class="text-center">
+                    <tr>
+                      <th>N°</th>
+                      <th>Descripción</th>
+                      <th>N° Cuentas</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let destado of _ByEstados; let i = index">
+                      <td class="text-center">{{i+1}}</td>
+                      <td>{{destado.descripcion}}</td>
+                      <td class="text-center">{{destado.ncuentas}}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <div class="card">
-      <div class="card-header border-transparent">
-        <h3 class="card-title">Abonados por categoría</h3>
-        <div class="card-tools">
-          <button type="button" class="btn btn-tool" data-card-widget="collapse">
-            <i class="fas fa-minus"></i>
-          </button>
+      <div class="card">
+        <div class="card-header border-transparent">
+          <h3 class="card-title">Abonados por categoría</h3>
+          <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+              <i class="fas fa-minus"></i>
+            </button>
 
+          </div>
         </div>
-      </div>
-      <!-- /.card-header -->
-      <div class="card-body p-0">
-        <div class="table-responsive">
-          <div class="row">
-            <div class="col-sm">
-              <table class="table table-hover table-bordered table-sm">
-                <thead class="text-center">
-                  <tr>
-                    <th>N°</th>
-                    <th>Descripción</th>
-                    <th>N° Cuentas</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let dcategoria of _ByCategorias; let i = index">
-                    <td class="text-center">{{i+1}}</td>
-                    <td>{{dcategoria.descripcion}}</td>
-                    <td class="text-center">{{dcategoria.ncuentas}}</td>
-                  </tr>
-                </tbody>
-              </table>
+        <!-- /.card-header -->
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <div class="row">
+              <div class="col-sm">
+                <table class="table table-hover table-bordered table-sm">
+                  <thead class="text-center">
+                    <tr>
+                      <th>N°</th>
+                      <th>Descripción</th>
+                      <th>N° Cuentas</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let dcategoria of _ByCategorias; let i = index">
+                      <td class="text-center">{{i+1}}</td>
+                      <td>{{dcategoria.descripcion}}</td>
+                      <td class="text-center">{{dcategoria.ncuentas}}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>

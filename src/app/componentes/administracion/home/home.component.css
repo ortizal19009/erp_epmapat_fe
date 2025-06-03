@@ -1,1 +1,7 @@
 #map { height: 180px; }
+
+.list-container-con-scroll {
+  max-height: 300px; /* Define la altura máxima que desees */
+  overflow-y: auto;  /* Muestra el scroll vertical solo cuando sea necesario */
+  border: 1px solid #ccc; /* Opcional: para visualizar el contenedor */
+}

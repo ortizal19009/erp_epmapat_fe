@@ -34,4 +34,5 @@ export class Abonados {
     municipio: Boolean;
     swalcantarillado: Boolean;
     promedio: number;
+    geolocalizacion: string;
 }

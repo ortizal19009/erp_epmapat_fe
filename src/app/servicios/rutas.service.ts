@@ -44,4 +44,8 @@ export class RutasService {
       return this.http.get<boolean>(`${baseUrl}/valCodigo?codigo=${codigo}`);
    }
 
+   getNcuentasByRutas(){
+      return this.http.get(`${baseUrl}/cuentasByRuta`);
+   }
+
 }
