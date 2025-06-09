@@ -36,6 +36,7 @@ export class Facturas {
   valorbase: number;
   interescobrado: number;
   swiva: number;
-  swcondonar: Boolean; 
+  swcondonar: Boolean;
   valornotacredito: number;
+  secuencialfacilito: string;
 }
