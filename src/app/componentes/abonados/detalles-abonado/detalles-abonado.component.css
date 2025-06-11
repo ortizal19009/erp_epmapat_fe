@@ -1,62 +1,63 @@
-.container-fluid{
-   --bgcolor1: rgb(148, 150, 63);
-   --bgcolor2: rgb(248, 248, 218);
-   --bgPlanillas1: rgb(50, 88, 51);
-   --bgPlanillas2: rgba(193, 224, 181 );
-   --bgHisconsumo1: #635d19;
-   --bgHisconsumo2: rgb(250, 236, 188);
+.container-fluid {
+  --bgcolor1: rgb(148, 150, 63);
+  --bgcolor2: rgb(248, 248, 218);
+  --bgPlanillas1: rgb(50, 88, 51);
+  --bgPlanillas2: rgba(193, 224, 181);
+  --bgHisconsumo1: #635d19;
+  --bgHisconsumo2: rgb(250, 236, 188);
+}
+#map {
+  height: 580px;
+}
+.abonado {
+  background-color: var(--bgcolor1);
+  border: 1em;
+  color: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
 }
 
-.abonado{
-   background-color: var(--bgcolor1);
-   border: 1em;
-   color: white;
-   box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
-}
-
-.cardAbonado{
-   background-color: var(--bgcolor2);
-   box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
+.cardAbonado {
+  background-color: var(--bgcolor2);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
 }
 .cardAbonado li {
-   background-color: var(--bgcolor2);
+  background-color: var(--bgcolor2);
 }
 
-.cardTab{
-   background-color: var(--bgcolor1);
-   color: white;
+.cardTab {
+  background-color: var(--bgcolor1);
+  color: white;
 }
 
 .fila:hover {
-   background-color: #117a8B;
-   color: white;
-   cursor: pointer;
+  background-color: #117a8b;
+  color: white;
+  cursor: pointer;
 }
 
-.sombra, table{
-   box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
+.sombra,
+table {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
 }
 
 /* === Planillas === */
-.theadPlanillas{
-   background-color: var(--bgPlanillas1);
-   color: rgb(255, 255, 255);
+.theadPlanillas {
+  background-color: var(--bgPlanillas1);
+  color: rgb(255, 255, 255);
 }
 
-.bodyPlanillas{
-   background-color: var(--bgPlanillas2);
+.bodyPlanillas {
+  background-color: var(--bgPlanillas2);
 }
 
 /* === Historial de Consumo === */
-.theadHisconsumo{
-   background-color: var(--bgHisconsumo1);
-   color: white;
+.theadHisconsumo {
+  background-color: var(--bgHisconsumo1);
+  color: white;
 }
-.bodyHisconsumo{
-   background-color: var(--bgHisconsumo2);
+.bodyHisconsumo {
+  background-color: var(--bgHisconsumo2);
 }
-.bi-cash-coin{
-color: rgb(255, 94, 0)
+.bi-cash-coin {
+  color: rgb(255, 94, 0);
 }
-
-

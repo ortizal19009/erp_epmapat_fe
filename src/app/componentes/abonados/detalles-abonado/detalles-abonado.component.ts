@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Lecturas } from 'src/app/modelos/lecturas.model';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
@@ -18,14 +18,15 @@ import { LoadingService } from 'src/app/servicios/loading.service';
 import { Condmultaintereses } from 'src/app/modelos/condmultasintereses';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { CondmultasinteresesService } from 'src/app/servicios/condmultasintereses.service';
-import { EmisionService } from 'src/app/servicios/emision.service';
+import * as L from 'leaflet';
+
 
 @Component({
   selector: 'app-detalles-abonado',
   templateUrl: './detalles-abonado.component.html',
   styleUrls: ['./detalles-abonado.component.css'],
 })
-export class DetallesAbonadoComponent implements OnInit {
+export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
   abonado = {} as datAbonado; //Interface para los datos del Abonado
 
   n_factura: String;
@@ -80,6 +81,9 @@ export class DetallesAbonadoComponent implements OnInit {
   usuario: number;
   @Input() cuenta: any;
   swreturn: boolean = false;
+  private map!: L.Map | undefined;
+  edificioMatriz: any = [0.8038125013453109, -77.72763063596486];
+
 
   @ViewChild('pdfViewer', { static: false }) pdfViewer!: ElementRef;
 
@@ -104,6 +108,31 @@ export class DetallesAbonadoComponent implements OnInit {
     this.listarIntereses();
     this.usuario = this.authService.idusuario;
   }
+  ngAfterViewInit(): void {
+    /*     // 1. Crear el mapa en el contenedor con id="map"
+    const map = L.map('map').setView(
+      [0.8038125013453109, -77.72763063596486],
+      20
+    );
+
+    // 2. Añadir la capa de mosaicos (tiles) de OpenStreetMap
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution:
+        '&copy; <a href="https://epmapatulcan.gob.ec/wp/">ErpEpmapa-Tulcán</a>',
+    }).addTo(map);
+
+    // 3. (Opcional) Añadir un marcador de ejemplo
+    L.marker([0.8038125013453109, -77.72763063596486])
+      .addTo(map)
+      .bindPopup('Aquí está EPMAPA-T!')
+      .openPopup(); */
+
+    /* ============== */
+
+    //this.initMap();
+    this.drawAllCuentas();
+  }
   cancelarFE() {
     if (this.facElectro != true) {
       this.facElectro = !this.facElectro;
@@ -117,12 +146,14 @@ export class DetallesAbonadoComponent implements OnInit {
     if (!this.cuenta) {
       this.swreturn = false;
       idabonado = sessionStorage.getItem('idabonadoToFactura');
+      console.log(idabonado)
     } else {
       this.swreturn = true;
       idabonado = this.cuenta;
     }
     this.aboService.getByIdabonado(+idabonado!).subscribe({
       next: (datos) => {
+        console.log(datos)
         this._abonado = datos;
         this.abonado.idabonado = this._abonado[0].idabonado;
         this.abonado.nombre = this._abonado[0].idcliente_clientes.nombre;
@@ -144,6 +175,7 @@ export class DetallesAbonadoComponent implements OnInit {
     });
 
     this.facturasxAbonado(+idabonado!);
+    //this.drawAllCuentas();
   }
   estado_FE(estado: String) {
     switch (estado) {
@@ -173,6 +205,105 @@ export class DetallesAbonadoComponent implements OnInit {
         return 'Sin enviar';
     }
   }
+
+  drawAllCuentas(): void {
+    const mapElement = document.getElementById('map');
+    if (!mapElement) {
+      console.error('Elemento con ID "map" no encontrado en el DOM');
+      return;
+    }
+
+    const markers: L.Marker[] = [];
+
+    if (this.abonado?.geolocalizacion) {
+      const coords = this.parseGeolocation(this.abonado.geolocalizacion);
+      if (coords) {
+        markers.push(this.createAbonadoMarker(coords, this.abonado.idabonado));
+      } else {
+        console.warn('Coordenadas del abonado no válidas');
+        markers.push(this.createEdificioMarker());
+      }
+    } else {
+      markers.push(this.createEdificioMarker());
+    }
+
+    const citiesLayer = L.layerGroup(markers);
+    const baseLayers = this.createBaseLayers();
+
+    if (this.map) {
+      this.resetMap(this.map, baseLayers, citiesLayer);
+    } else {
+      this.initializeMap(baseLayers, citiesLayer);
+    }
+  }
+  private resetMap(map: L.Map, baseLayers: any, overlayLayer: L.LayerGroup) {
+    map.eachLayer(layer => map.removeLayer(layer));
+
+    baseLayers.OpenStreetMap.addTo(map);
+    overlayLayer.addTo(map);
+
+    L.control.layers(baseLayers, { Cuentas: overlayLayer }).addTo(map);
+    map.setView(this.edificioMatriz, 19);
+  }
+  private parseGeolocation(geolocation: string): L.LatLngExpression | null {
+    try {
+      const coords = JSON.parse(geolocation);
+      if (
+        Array.isArray(coords) &&
+        coords.length === 2 &&
+        typeof coords[0] === 'number' &&
+        typeof coords[1] === 'number'
+      ) {
+        return coords as L.LatLngExpression;
+      }
+      return null;
+    } catch (e) {
+      console.error('Formato de geolocalización inválido:', geolocation);
+      return null;
+    }
+  }
+
+  private initializeMap(baseLayers: any, overlayLayer: L.LayerGroup) {
+    this.map = L.map('map', {
+      center: this.edificioMatriz,
+      zoom: 19,
+      layers: [baseLayers.OpenStreetMap, overlayLayer]
+    });
+
+    L.control.layers(baseLayers, { Cuentas: overlayLayer }).addTo(this.map);
+  }
+  private createAbonadoMarker(coords: L.LatLngExpression, id: number): L.Marker {
+    return L.marker(coords).bindPopup(
+      `<b>Abonado ID:</b> ${id}<br>
+     <b>Coordenadas:</b> ${JSON.stringify(coords)}`
+    );
+  }
+
+  private createEdificioMarker(): L.Marker {
+    return L.marker(this.edificioMatriz).bindPopup(
+      `<b>Edificio Epmapa-T</b><br>
+     <b>Coordenadas:</b> ${JSON.stringify(this.edificioMatriz)}`
+    );
+  }
+
+  private createBaseLayers() {
+    const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 15,
+      attribution: '© Epmapa-Tulcán'
+    });
+
+    const osmHOT = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+      maxZoom: 15,
+      attribution: '© Epmapa-Tulcán contributors, Tiles style by Humanitarian Epmapa-Tulcán Team'
+    });
+
+    return {
+      OpenStreetMap: osm,
+      'OpenStreetMap HOT': osmHOT
+    };
+  }
+
+
 
   facturasxAbonado(idabonado: number) {
     this.s_loading.showLoading();
@@ -261,6 +392,7 @@ export class DetallesAbonadoComponent implements OnInit {
       error: (e) => console.error(e),
     });
   }
+
 
   async getRubroxfac(idfactura: number) {
     this.idfactura = idfactura;
@@ -813,6 +945,7 @@ interface datAbonado {
   promedio: string;
   adultomayor: boolean;
   responsablepago: string;
+  geolocalizacion: string;
 }
 
 function getEstadoText(estado: number): string {
