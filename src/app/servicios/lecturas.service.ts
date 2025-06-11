@@ -24,8 +24,8 @@ export class LecturasService {
     );
   }
 
-  getLecturasxIdabonado(idabonado: number) {
-    return this.http.get<Lecturas>(`${baseUrl}?idabonado=${idabonado}`);
+  getLecturasxIdabonado(idabonado: number, limit: number) {
+    return this.http.get<Lecturas>(`${baseUrl}?idabonado=${idabonado}&limit=${limit}`);
   }
 
   getByBmonth() {
