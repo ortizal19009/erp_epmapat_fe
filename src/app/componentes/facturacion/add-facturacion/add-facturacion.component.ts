@@ -1,3 +1,4 @@
+import { Time } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -409,7 +410,7 @@ interface Planilla {
   estadoconvenio: number;
   formapago: number;
   reformapago: String;
-  horacobro: String;
+  horacobro: Time;
   usuariotransferencia: number;
   fechatransferencia: Date;
   usucrea: number;

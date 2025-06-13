@@ -1,3 +1,4 @@
+import { Time } from '@angular/common';
 import { Abonados } from './abonados';
 import { Clientes } from './clientes';
 import { Modulos } from './modulos.model';
@@ -26,7 +27,7 @@ export class Facturas {
   estadoconvenio: number;
   formapago: number;
   reformapago: String;
-  horacobro: String;
+  horacobro: Time;
   usuariotransferencia: number;
   fechatransferencia: Date;
   usucrea: number;

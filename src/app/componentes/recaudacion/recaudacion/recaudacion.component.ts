@@ -134,6 +134,7 @@ export class RecaudacionComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    console.log("RECAUDACION V.2")
     this.formBuscar = this.fb.group({
       cuenta: '',
       identificacion: '',

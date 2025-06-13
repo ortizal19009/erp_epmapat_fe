@@ -127,7 +127,6 @@ export class GeneEmisionComponent implements OnInit {
       }
     }
   }
-  /* NORTHON BURBANO */
   //Genera las lecturas de los abonados de la nueva Rutaxemision
   async generaLecturas(i: number, nuevarutaxemi: any) {
     try {
