@@ -399,6 +399,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     this.detalleFactura = await this.facService.getByIdAsync(idfactura);
     this.rubxfacService.getByIdfactura(+idfactura!).subscribe({
       next: (detalle: any) => {
+        console.log(detalle)
         this._rubrosxfac = detalle;
         this.factura = detalle[0].idfactura_facturas;
         if (detalle[0].idfactura_facturas.pagado === 1) {

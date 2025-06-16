@@ -4,6 +4,8 @@ import { Impuestos } from 'src/app/modelos/impuestos';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { ImpuestosService } from 'src/app/servicios/impuestos.service';
 import { InteresesService } from 'src/app/servicios/intereses.service';
+import { JasperReportService } from 'src/app/servicios/jasper-report.service';
+import { LoadingService } from 'src/app/servicios/loading.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 
 @Component({
@@ -28,7 +30,9 @@ export class InfoFacturasComponent implements OnInit {
       private router: Router,
       private rxfService: RubroxfacService,
       private s_impuestos: ImpuestosService,
-      private s_interes: InteresesService
+      private s_interes: InteresesService,
+      private s_jasperreport: JasperReportService,
+      private s_loading: LoadingService
    ) { }
 
    ngOnInit(): void {
@@ -54,6 +58,34 @@ export class InfoFacturasComponent implements OnInit {
          error: (e: any) => console.error(e)
       })
    }
+   async impComprobantePago(idfactura: number) {
+      this.s_loading.showLoading();
+      let body: any = {
+         "reportName": "CompPagoConsumoAgua",
+         "parameters": {
+            "idfactura": idfactura
+         },
+         "extencion": ".pdf"
+      }
+      let reporte = await this.s_jasperreport.getReporte(body)
+      console.log(reporte)
+
+      setTimeout(() => {
+         const file = new Blob([reporte], { type: 'application/pdf' });
+         const fileURL = URL.createObjectURL(file);
+
+         // Asignar el blob al iframe
+         const pdfViewer = document.getElementById(
+            'pdfViewer'
+         ) as HTMLIFrameElement;
+
+         if (pdfViewer) {
+            pdfViewer.src = fileURL;
+         }
+      }, 1000);
+
+      this.s_loading.hideLoading();
+   }
 
    datosPlanilla() {
       this.s_interes.getInteresFactura(this.idFactura!).subscribe({
@@ -63,7 +95,8 @@ export class InfoFacturasComponent implements OnInit {
          }
       })
       this.facService.getById(this.idFactura!).subscribe({
-         next: (resp) => {
+         next: (resp: any) => {
+            console.log(resp)
             this.planilla.idfactura = resp.idfactura;
             this.planilla.modulo = resp.idmodulo.descripcion;
             this.planilla.fecha = resp.feccrea;
@@ -72,6 +105,7 @@ export class InfoFacturasComponent implements OnInit {
             this.planilla.fechacobro = resp.fechacobro;
             this.planilla.totaltarifa = resp.totaltarifa;
             this.planilla.valorbase = resp.valorbase;
+            this.planilla.idabonado = resp.idabonado;
             this.getRubroxfac();
          },
          error: (err) => console.error(err.error),
@@ -128,4 +162,5 @@ interface Planilla {
    fechacobro: Date;
    totaltarifa: number;
    valorbase: number;
+   idabonado: number
 }

@@ -1,6 +1,6 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { Rubros } from '../modelos/rubros.model';
 import { environment } from 'src/environments/environment';
 
@@ -11,7 +11,7 @@ const baseUrl = `${apiUrl}/rubros`;
   providedIn: 'root',
 })
 export class RubrosService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getAll(): Observable<Rubros[]> {
     return this.http.get<Rubros[]>(baseUrl);
@@ -49,9 +49,13 @@ export class RubrosService {
     return this.http.post(baseUrl, rubro);
   }
 
-  updateRubro(idrubro: number, rubro: Rubros): Observable<Object> {
-    return this.http.put(baseUrl + '/' + idrubro, rubro);
-  }
+updateRubro(idrubro: number, rubro: any): Promise<any> {
+  const headers = new HttpHeaders({
+  'Content-Type': 'application/json'
+});
+  return firstValueFrom(this.http.put(`${baseUrl}/update?idrubro=${idrubro}`, rubro, { headers }));
+}
+
 
   deleteRubro(idrubro: number): Observable<Object> {
     return this.http.delete(`${baseUrl}/${idrubro}`);

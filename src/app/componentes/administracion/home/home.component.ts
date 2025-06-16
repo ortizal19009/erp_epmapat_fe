@@ -57,7 +57,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
     private s_emisiones: EmisionService,
     private s_abonados: AbonadosService,
     private s_rutas: RutasService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     /* https://www.youtube.com/watch?v=e4urW6Ud3WU  */
@@ -199,6 +199,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   async getDatosAbonados() {
     this._ByCategorias = await this.s_abonados.getCuentasByCategoria();
     this._ByEstados = await this.s_abonados.getCuentasByEstado();
+    console.log(this._ByEstados)
   }
   getRutas() {
     this.s_rutas.getNcuentasByRutas().subscribe({

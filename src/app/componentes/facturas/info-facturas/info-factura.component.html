@@ -8,6 +8,17 @@
             <button class="bg-transparent border-0" type="submit" *ngIf="swreturn" (click)="regresar()">
                <i class="bi-arrow-left-circle text-white icoRegresar"></i>
             </button>
+            <div class="btn-group ml-auto mx-0">
+               <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
+                  aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+               </button>
+               <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+                  <button class="dropdown-item" type="button" (click)="impComprobantePago(planilla.idfactura)">
+                     <i class="bi bi-printer"></i>&nbsp; Comprobante de pago</button>
+                  <button class="dropdown-item" type="button">
+                     <i class="bi bi-printer"></i>&nbsp; Factura electrónica</button>
+               </div>
+            </div>
          </div>
       </div>
    </div>
@@ -33,11 +44,8 @@
                   <li class="list-group-item">
                      <b>Fecha Cobro</b> <a class="float-right">{{ planilla.fechacobro | date: 'dd-MM-y' }}</a>
                   </li>
-                  <li class="list-group-item">
-                     <b>Total Tarifa</b> <a class="float-right">{{ planilla.totaltarifa | number: '1.2-2' }}</a>
-                  </li>
-                  <li class="list-group-item">
-                     <b>Valor Base</b> <a class="float-right">{{ planilla.valorbase | number: '1.2-2' }}</a>
+                  <li class="list-group-item" [hidden]="planilla.idabonado <= 0">
+                     <b>Cuenta</b> <a class="float-right">{{ planilla.idabonado}}</a>
                   </li>
                </ul>
             </div>
@@ -48,8 +56,10 @@
             <div class="card-header">
                <!-- <ul class="nav nav-pills"> -->
                <ul class="nav nav-tabs card-header-tabs">
-                  <li class="nav-item"><a class="nav-link active" href="#detalle" data-toggle="tab">Detalle</a></li>
-                  <li class="nav-item"><a class="nav-link" *ngIf="planilla.nrofactura == null" href="#facelectro" data-toggle="tab">Factura electrónica</a>
+                  <li class="nav-item"><a class="nav-link cardTab active" href="#detalle" data-toggle="tab">Detalle</a>
+                  </li>
+                  <li class="nav-item"><a class="nav-link cardTab" href="#facelectro" data-toggle="tab">Factura
+                        electrónica</a>
                   </li>
                   <!-- <li class="nav-item"><a class="nav-link" href="#facturas" data-toggle="tab">Otro</a></li> -->
                </ul>
@@ -107,7 +117,8 @@
                                  <tr class="font-weight-bold text-right py-0">
                                     <td colspan="2"></td>
                                     <td>TOTAL </td>
-                                    <td class="text-right">{{ suma0 + suma12 + valoriva + interes | number: '1.2-2'}}</td>
+                                    <td class="text-right">{{ suma0 + suma12 + valoriva + interes | number: '1.2-2'}}
+                                    </td>
                                  </tr>
                               </tbody>
                            </table>
@@ -117,20 +128,9 @@
 
                   <div class="tab-pane" id="facelectro">
                      <div class="post">
-                        <div class="user-block text-left">
-                           <div *ngIf="!planilla.nrofactura">
-                              <div class="row justify-content-center">
-                                 <div class="callout callout-info col-sm-6 text-center">
-                                    <div class="alert alert-info">
-                                       <h5><i class="fas fa-info"></i> <strong> Mensaje</strong></h5>
-                                       No tiene Factura Electrónica !
-                                    </div>
-                                 </div>
-                              </div>
-                           </div>
-                           <div *ngIf="planilla.nrofactura">
-                              <!-- <app-det-facelectro></app-det-facelectro> -->
-                           </div>
+                        <div class="user-block mb-0">
+                           <h3>datos</h3>
+                           <iframe id="pdfViewer" width="100%" height="600px"></iframe>
                         </div>
                      </div>
                   </div>

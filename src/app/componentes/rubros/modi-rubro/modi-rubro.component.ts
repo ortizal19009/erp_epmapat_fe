@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 import { map } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Modulos } from 'src/app/modelos/modulos.model';
+import { Rubros } from 'src/app/modelos/rubros.model';
 import { ModulosService } from 'src/app/servicios/modulos.service';
 import { RubrosService } from 'src/app/servicios/rubros.service';
 
@@ -31,7 +32,7 @@ export class ModiRubroComponent implements OnInit {
     private moduService: ModulosService,
     private rubService: RubrosService,
     private authService: AutorizaService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.idrubro = +sessionStorage.getItem('idrubroToModi')!;
@@ -40,6 +41,7 @@ export class ModiRubroComponent implements OnInit {
 
     this.formRubro = this.fb.group(
       {
+        idrubro: '',
         idmodulo_modulos: modulo,
         descripcion: [
           null,
@@ -83,6 +85,7 @@ export class ModiRubroComponent implements OnInit {
       next: (datos) => {
         this.antdescripcion = datos.descripcion;
         this.formRubro.setValue({
+          idrubro: datos.idrubro,
           idmodulo_modulos: datos.idmodulo_modulos,
           descripcion: datos.descripcion,
           estado: datos.estado,
@@ -105,11 +108,38 @@ export class ModiRubroComponent implements OnInit {
     return this.formRubro.controls;
   }
 
-  onSubmit() {
-    this.rubService.updateRubro(this.idrubro, this.formRubro.value).subscribe({
-      next: (resp) => this.retornar(),
-      error: (err) => console.log(err.error),
-    });
+  async onSubmit() {
+    console.log(this.formRubro.value)
+    let rubro: Rubros = new Rubros();
+    let f: any = this.formRubro.value;
+    rubro.idrubro = this.idrubro;
+    rubro.descripcion = f.descripcion;
+    rubro.estado = f.estado
+    rubro.calculable = f.calculable
+    rubro.valor = f.valor
+    rubro.swiva = f.swiva
+    rubro.tipo = f.tipo
+    rubro.esiva = f.esiva
+    rubro.esdebito = f.esdebito
+    rubro.facturable = f.facturable
+    rubro.idmodulo_modulos = f.idmodulo_modulos
+    rubro.usucrea = f.usucrea
+    rubro.feccrea = f.feccrea
+    rubro.usumodi = f.usumodi
+    rubro.fecmodi = f.fecmodi
+    console.log(rubro);
+try {
+  const datos = await this.rubService.updateRubro(this.idrubro, rubro);
+  console.log(datos);
+} catch (error) {
+  console.error('Error al actualizar rubro', error);
+}
+
+
+    /*     this.rubService.updateRubro(this.idrubro, rubro).subscribe({
+          next: (resp: any) => { console.log(resp); this.retornar() },
+          error: (err) => console.error(err),
+        }); */
   }
 
   retornar() {
