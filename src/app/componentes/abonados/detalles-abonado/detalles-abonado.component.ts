@@ -550,7 +550,6 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     });
   }
   async impFacturaElectronica(datos: any) {
-    this.facElectro = false;
 
     this.s_loading.showLoading();
     let fact = await this.facService.generarPDF_FacElectronica(datos.idfactura);
@@ -571,6 +570,8 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     }, 1000);
 
     this.s_loading.hideLoading();
+    this.facElectro = false;
+
   }
 
   setOptImprimir() {

@@ -24,6 +24,7 @@ export class InfoFacturasComponent implements OnInit {
    interes: number = 0;
    @Input() idfac: any;
    swreturn: boolean = true;
+   datos: boolean = true
 
    constructor(
       private facService: FacturaService,
@@ -59,6 +60,7 @@ export class InfoFacturasComponent implements OnInit {
       })
    }
    async impComprobantePago(idfactura: number) {
+      this.datos = true;
       this.s_loading.showLoading();
       let body: any = {
          "reportName": "CompPagoConsumoAgua",
@@ -85,8 +87,28 @@ export class InfoFacturasComponent implements OnInit {
       }, 1000);
 
       this.s_loading.hideLoading();
+      this.datos = false
    }
-
+   async impFacturaElectronica(idfactura: number) {
+      this.datos = true;
+      this.s_loading.showLoading();
+      let fact = await this.facService.generarPDF_FacElectronica(idfactura);
+      //this.facElectro = true;
+      // Crear blob desde los datos del backend
+      setTimeout(() => {
+         const file = new Blob([fact], { type: 'application/pdf' });
+         const fileURL = URL.createObjectURL(file);
+         // Asignar el blob al iframe
+         const pdfViewer = document.getElementById(
+            'pdfViewer'
+         ) as HTMLIFrameElement;
+         if (pdfViewer) {
+            pdfViewer.src = fileURL;
+         }
+      }, 1000);
+      this.s_loading.hideLoading();
+      this.datos = false;
+   }
    datosPlanilla() {
       this.s_interes.getInteresFactura(this.idFactura!).subscribe({
          next: (interes: any) => {
@@ -96,7 +118,6 @@ export class InfoFacturasComponent implements OnInit {
       })
       this.facService.getById(this.idFactura!).subscribe({
          next: (resp: any) => {
-            console.log(resp)
             this.planilla.idfactura = resp.idfactura;
             this.planilla.modulo = resp.idmodulo.descripcion;
             this.planilla.fecha = resp.feccrea;
@@ -106,6 +127,7 @@ export class InfoFacturasComponent implements OnInit {
             this.planilla.totaltarifa = resp.totaltarifa;
             this.planilla.valorbase = resp.valorbase;
             this.planilla.idabonado = resp.idabonado;
+            this.planilla.pagado = resp.pagado;
             this.getRubroxfac();
          },
          error: (err) => console.error(err.error),
@@ -162,5 +184,6 @@ interface Planilla {
    fechacobro: Date;
    totaltarifa: number;
    valorbase: number;
-   idabonado: number
+   idabonado: number; 
+   pagado: number;
 }
