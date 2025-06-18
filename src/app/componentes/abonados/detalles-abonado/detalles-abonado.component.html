@@ -22,6 +22,7 @@
                   <i class="bi-arrow-left-circle text-white icoRegresar"></i>
                </button>
             </div>
+
          </div>
       </div>
    </div>
@@ -389,13 +390,15 @@
                      data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
                   </button>
                   <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-                     <button class="dropdown-item" type="button" data-toggle="modal" (click)="impComprobante(factura)">
+                     <button class="dropdown-item" type="button" [disabled]="factura.pagado != 1" data-toggle="modal" (click)="impComprobante(factura)">
                         <i class="bi bi-printer"></i>&nbsp; Comprobante pago</button>
-                     <button class="dropdown-item" type="button" [disabled]=swFE
+                     <button class="dropdown-item" type="button" [disabled]="factura.pagado != 1"
                         (click)="impFacturaElectronica(factura)">
                         <i class="bi-file-earmark-arrow-down"></i>&nbsp; Factura electrónica</button>
-
                   </div>
+                  <button class="btn btn-sm text-white" [hidden]="facElectro" (click)="facElectro = !facElectro">
+                     <i class="fa fa-retweet" aria-hidden="true"></i>
+                  </button>
                </div>
             </div>
             <div class="modal-body">

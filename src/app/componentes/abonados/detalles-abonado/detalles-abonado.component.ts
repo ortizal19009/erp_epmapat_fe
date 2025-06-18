@@ -19,6 +19,7 @@ import { Condmultaintereses } from 'src/app/modelos/condmultasintereses';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { CondmultasinteresesService } from 'src/app/servicios/condmultasintereses.service';
 import * as L from 'leaflet';
+import { JasperReportService } from 'src/app/servicios/jasper-report.service';
 
 
 @Component({
@@ -101,6 +102,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     private s_loading: LoadingService,
     private authService: AutorizaService,
     private s_condonar: CondmultasinteresesService,
+    private s_jasperreport: JasperReportService,
   ) { }
 
   ngOnInit(): void {
@@ -519,37 +521,80 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
   cerrarGrafico() {
     this.grafic = false;
   }
-  impComprobante(datos: any) {
-    let lectura: any;
-    this.facService.getById(datos.idfactura).subscribe({
-      next: (d_factura: any) => {
-        let modulo: number = d_factura.idmodulo.idmodulo;
-        if (modulo === 3 || modulo === 4) {
-          this.lecService.getOnefactura(d_factura.idfactura).subscribe({
-            next: (datos: any) => {
-              lectura = datos;
-              if (datos != null) {
-                this.s_pdfRecaudacion.reimprimircomprobantePago(
-                  lectura,
-                  d_factura
-                );
-              } else {
-                this.s_pdfRecaudacion.reimprimircomprobantePago(
-                  null,
-                  d_factura
-                );
-              }
-            },
-            error: (e) => console.error(e),
-          });
-        } else {
-          this.s_pdfRecaudacion.reimprimircomprobantePago(null, d_factura);
-        }
-      },
-      error: (e) => console.error(e),
-    });
+  async impComprobante(datos: any) {
+    let idfactura = datos.idfactura;
+    this.facElectro = true;
+
+    //this.datos = true;
+    this.s_loading.showLoading();
+    let body: any;
+    if (datos.idabonado > 0) {
+      body = {
+        "reportName": "CompPagoConsumoAgua",
+        "parameters": {
+          "idfactura": idfactura
+        },
+        "extencion": ".pdf"
+      }
+    } else {
+      body = {
+        "reportName": "CompPagoServicios",
+        "parameters": {
+          "idfactura": idfactura
+        },
+        "extencion": ".pdf"
+      }
+    }
+    let reporte = await this.s_jasperreport.getReporte(body)
+    setTimeout(() => {
+      const file = new Blob([reporte], { type: 'application/pdf' });
+      const fileURL = URL.createObjectURL(file);
+
+      // Asignar el blob al iframe
+      const pdfViewer = document.getElementById(
+        'pdfViewer'
+      ) as HTMLIFrameElement;
+
+      if (pdfViewer) {
+        pdfViewer.src = fileURL;
+      }
+    }, 1000);
+
+    this.s_loading.hideLoading();
+    this.facElectro = false;
+
+    //this.datos = false
+    /*     let lectura: any;
+        this.facService.getById(datos.idfactura).subscribe({
+          next: (d_factura: any) => {
+            let modulo: number = d_factura.idmodulo.idmodulo;
+            if (modulo === 3 || modulo === 4) {
+              this.lecService.getOnefactura(d_factura.idfactura).subscribe({
+                next: (datos: any) => {
+                  lectura = datos;
+                  if (datos != null) {
+                    this.s_pdfRecaudacion.reimprimircomprobantePago(
+                      lectura,
+                      d_factura
+                    );
+                  } else {
+                    this.s_pdfRecaudacion.reimprimircomprobantePago(
+                      null,
+                      d_factura
+                    );
+                  }
+                },
+                error: (e) => console.error(e),
+              });
+            } else {
+              this.s_pdfRecaudacion.reimprimircomprobantePago(null, d_factura);
+            }
+          },
+          error: (e) => console.error(e),
+        }); */
   }
   async impFacturaElectronica(datos: any) {
+    this.facElectro = true;
 
     this.s_loading.showLoading();
     let fact = await this.facService.generarPDF_FacElectronica(datos.idfactura);
@@ -570,7 +615,6 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     }, 1000);
 
     this.s_loading.hideLoading();
-    this.facElectro = false;
 
   }
 

@@ -62,16 +62,25 @@ export class InfoFacturasComponent implements OnInit {
    async impComprobantePago(idfactura: number) {
       this.datos = true;
       this.s_loading.showLoading();
-      let body: any = {
-         "reportName": "CompPagoConsumoAgua",
-         "parameters": {
-            "idfactura": idfactura
-         },
-         "extencion": ".pdf"
+      let body: any;
+      if (this.planilla.idabonado > 0) {
+         body = {
+            "reportName": "CompPagoConsumoAgua",
+            "parameters": {
+               "idfactura": idfactura
+            },
+            "extencion": ".pdf"
+         }
+      } else {
+         body = {
+            "reportName": "CompPagoServicios",
+            "parameters": {
+               "idfactura": idfactura
+            },
+            "extencion": ".pdf"
+         }
       }
       let reporte = await this.s_jasperreport.getReporte(body)
-      console.log(reporte)
-
       setTimeout(() => {
          const file = new Blob([reporte], { type: 'application/pdf' });
          const fileURL = URL.createObjectURL(file);
@@ -120,6 +129,7 @@ export class InfoFacturasComponent implements OnInit {
          next: (resp: any) => {
             this.planilla.idfactura = resp.idfactura;
             this.planilla.modulo = resp.idmodulo.descripcion;
+            this.planilla.idmodulo = resp.idmodulo;
             this.planilla.fecha = resp.feccrea;
             this.planilla.nomcli = resp.idcliente.nombre;
             this.planilla.nrofactura = resp.nrofactura;
@@ -184,6 +194,7 @@ interface Planilla {
    fechacobro: Date;
    totaltarifa: number;
    valorbase: number;
-   idabonado: number; 
+   idabonado: number;
    pagado: number;
+   idmodulo: number
 }

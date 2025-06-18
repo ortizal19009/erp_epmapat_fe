@@ -859,6 +859,12 @@ export class RecaudacionComponent implements OnInit {
     let idfactura: number;
     let valfactura: number;
     let fechacobro: Date = new Date();
+    const ahora = new Date();
+    const horaActual = {
+      horas: ahora.getHours(),
+      minutos: ahora.getMinutes(),
+      segundos: ahora.getSeconds()
+    };
     let rubro: Rubros = new Rubros();
     rubro.idrubro = 5;
     //this._sincobro[i].pagado = 1;
@@ -867,7 +873,7 @@ export class RecaudacionComponent implements OnInit {
       valfactura = this._sincobro[i].total + this._sincobro[i].interes
       console.log(valfactura)
       this.facService.getById(idfactura).subscribe({
-        next: (fac) => {
+        next: (fac: any) => {
 
           fac.valornotacredito = this.calcularNCByFactura(valfactura, this.valorNtaCredito);
           //Añade a facxrecauda
@@ -887,6 +893,7 @@ export class RecaudacionComponent implements OnInit {
                     fac.swiva = 0;
                   }
                   fac.fechacobro = fechacobro;
+                  fac.horacobro = horaActual;
                   if (this.swNC === true) {
                     fac.formapago = 3
                     /* AQUI COLOCAR LA FUNCION DE IMPRIMIR EL COMPROBANTE DE NOTACREDITO */
