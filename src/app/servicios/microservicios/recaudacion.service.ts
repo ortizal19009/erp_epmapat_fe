@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { firstValueFrom, Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 const apiUrl = environment.API_URL;
-const baseUrl = `${apiUrl}/mrecaudacion`;
+const baseUrl = `${apiUrl}/api/rec/cajas`;
 @Injectable({
   providedIn: 'root',
 })
