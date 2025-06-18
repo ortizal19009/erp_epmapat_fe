@@ -74,8 +74,8 @@ export class AbonadosService {
     );
   }
 
-  updateAbonado(abonado: Abonados): Observable<Object> {
-    return this.http.put(`${baseUrl}/${abonado.idabonado}`, abonado);
+  updateAbonado(abonado: any): Observable<any> {
+    return this.http.put<any>(`${baseUrl}/${abonado.idabonado}`, abonado);
   }
 
   getAbonadoByQuery(dato: String) {

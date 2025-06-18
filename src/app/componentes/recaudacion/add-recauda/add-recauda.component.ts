@@ -15,6 +15,8 @@ import { ClientesService } from 'src/app/servicios/clientes.service';
 import { FormacobroService } from 'src/app/servicios/formacobro.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { RecaudacionService } from 'src/app/servicios/microservicios/recaudacion.service';
+import { CajaService } from 'src/app/servicios/caja.service';
+import { RecaudaxcajaService } from 'src/app/servicios/recaudaxcaja.service';
 @Component({
   selector: 'app-add-recauda',
   templateUrl: './add-recauda.component.html',
@@ -50,11 +52,12 @@ export class AddRecaudaComponent implements OnInit {
     private s_cliente: ClientesService,
     private loadingService: LoadingService,
     private s_formacobro: FormacobroService,
-    private authService: AutorizaService
+    private authService: AutorizaService,
+    private s_cajas: CajaService, 
+    private s_recaudaxcaja: RecaudaxcajaService
   ) {}
 
   ngOnInit(): void {
-    console.log("Add-recauda")
     this.f_buscar = this.fb.group({
       cuenta: '',
       cliente: '',
@@ -72,13 +75,24 @@ export class AddRecaudaComponent implements OnInit {
   getEstadoCaja() {
     this.ms_recaudacion.testConnection(this.authService.idusuario).subscribe({
       next: (item: any) => {
+        console.log(item);
         this._estadoCaja = item;
-        this.abrirCaja.usuario = item.username;
-        this.abrirCaja.nrofactura = `${item.establecimiento}-${item.codigo}-${item.secuencial}`;
-        this.abrirCaja.establecimiento = item.establecimiento;
+        this.s_cajas.getByIdUsuario(this.authService.idusuario).subscribe({
+          next: (datos: any) => {
+            console.log(datos);
+          },
+          error: (e: any) => console.error(e),
+        });
+
         if (item.estado === 1) {
           this.swcaja = true;
+          this.abrirCaja.usuario = item.username;
+          this.abrirCaja.nrofactura = `${item.establecimiento}-${item.codigo}-${item.secuencial}`;
+          this.abrirCaja.establecimiento = item.establecimiento;
         } else {
+          /* generar una consulta para traer user name de  */
+          console.log(this.authService);
+          this.abrirCaja.usuario = this.authService.alias;
           this.swcaja = false;
         }
       },
@@ -90,6 +104,7 @@ export class AddRecaudaComponent implements OnInit {
       .logincajas(this.abrirCaja.usuario, this.abrirCaja.password)
       .subscribe({
         next: (item: any) => {
+          console.log(item);
           this.swal('info', item.body.mensaje);
           this.getEstadoCaja();
         },

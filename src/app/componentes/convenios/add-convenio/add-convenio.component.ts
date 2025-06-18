@@ -148,39 +148,40 @@ export class AddConvenioComponent implements OnInit {
     });
   }
 
-  buscarFacxAbo() {
+  async buscarFacxAbo() {
     let idabonado = this.formConvenio.value.idabonado;
     if (idabonado) {
       this.swbuscando = true;
       this.txtbuscar = 'Buscando';
+      let conv = await this.convService.getByReferencia(idabonado).toPromise();
+      console.log(conv);
+      /* hay que hacer una validacion de convenios terminados de pagar o no, los que ya esten cancelados hay que cambiarles de estado a pagados */
       this.aboService.unAbonado(this.formConvenio.value.idabonado).subscribe({
         next: (_datos) => {
           this.abonado = _datos;
-          this.facService
-            .getFacSincobroBycuenta(_datos.idabonado)
-            .subscribe({
-              next: async (datos) => {
-                this._sincobro = datos;
-                this.formConvenio.controls['cedula'].setValue(
-                  this.abonado.idcliente_clientes.cedula
-                );
-                this.formConvenio.controls['nombre'].setValue(
-                  this.abonado.idcliente_clientes.nombre
-                );
-                await this.sumTotaltarifa();
-                this.pagomensual = 0;
-                this.formConvenio.controls['cuotas'].setValue('');
-                this.nropagos = 0;
-                this.formConvenio.controls['cuotafinal'].setValue('');
-                this.swbuscando = false;
-                this.txtbuscar = 'Abonado';
-              },
-              error: (err) =>
-                console.error(
-                  'Al recuperar las Planillas sin cobrar por Abonado: ',
-                  err.error
-                ),
-            });
+          this.facService.getFacSincobroBycuenta(_datos.idabonado).subscribe({
+            next: async (datos) => {
+              this._sincobro = datos;
+              this.formConvenio.controls['cedula'].setValue(
+                this.abonado.idcliente_clientes.cedula
+              );
+              this.formConvenio.controls['nombre'].setValue(
+                this.abonado.idcliente_clientes.nombre
+              );
+              await this.sumTotaltarifa();
+              this.pagomensual = 0;
+              this.formConvenio.controls['cuotas'].setValue('');
+              this.nropagos = 0;
+              this.formConvenio.controls['cuotafinal'].setValue('');
+              this.swbuscando = false;
+              this.txtbuscar = 'Abonado';
+            },
+            error: (err) =>
+              console.error(
+                'Al recuperar las Planillas sin cobrar por Abonado: ',
+                err.error
+              ),
+          });
         },
         error: (err) => console.error('Al recuperar el Abonado: ', err.error),
       });
@@ -220,7 +221,6 @@ export class AddConvenioComponent implements OnInit {
       this.formConvenio.controls['cuotainicial'].setValue(cuotainicial);
       i++;
     });
-   
   }
   sumComercializacion(sincobro: any) {
     let com = 0;
@@ -408,6 +408,7 @@ export class AddConvenioComponent implements OnInit {
   }
 
   guardar() {
+    this.s_loading.showLoading();
     let abonado: Abonados = new Abonados();
     abonado.idabonado = this.formConvenio.value.idabonado;
     let convenio: Convenios = new Convenios();
@@ -439,6 +440,7 @@ export class AddConvenioComponent implements OnInit {
     await this.facxconvenioAsync();
     sessionStorage.removeItem('desdeconvenio'); //Para que vuelva a buscar los últimos y se muestre el creado
     this.router.navigate(['convenios']);
+    this.s_loading.hideLoading();
   }
 
   //Nuevas Facturas
@@ -509,7 +511,7 @@ export class AddConvenioComponent implements OnInit {
     let facxconv: Facxconvenio = new Facxconvenio();
     for (let k = 0; k < this._sincobro.length; k++) {
       let factura: Facturas = new Facturas();
-      factura.idfactura =this._sincobro[k].idfactura
+      factura.idfactura = this._sincobro[k].idfactura;
       facxconv.idconvenio_convenios = this.newconvenio;
       facxconv.idfactura_facturas = factura;
       try {
@@ -522,7 +524,7 @@ export class AddConvenioComponent implements OnInit {
   }
 
   async actuAntiguas(k: number) {
-    let _factura: any = await this.getFacturaById(this._sincobro[k].idfactura)
+    let _factura: any = await this.getFacturaById(this._sincobro[k].idfactura);
     _factura.conveniopago = this.newconvenio.nroconvenio;
     _factura.fechaconvenio = this.fecha;
     _factura.estadoconvenio = 1;
@@ -534,10 +536,9 @@ export class AddConvenioComponent implements OnInit {
       console.error(`Al actualizar las Antiguas ${k}`, error);
     }
   }
-  async getFacturaById(idfactura: number){
-
+  async getFacturaById(idfactura: number) {
     let factura = await this.facService.getByIdAsync(idfactura);
-return factura; 
+    return factura;
   }
 
   regresar() {
