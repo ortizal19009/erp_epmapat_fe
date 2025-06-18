@@ -50,9 +50,9 @@
                 <strong>Rutas</strong>
               </p>
 
-              <input type="text" class="form-control form-control-sm" placeholder="Buscar ...">
+              <input type="text" class="form-control form-control-sm" [(ngModel)]="filtro" placeholder="Buscar ...">
               <div class="list-container-con-scroll">
-                <div class="list-group list-group-sm" *ngFor="let ruta of _rutas">
+                <div class="list-group list-group-sm" *ngFor="let ruta of _rutas|filter:filtro ">
                   <div class="list-group-item list-group-item-sm">
                     <span class="float-right">{{ruta.ncuentas}}</span>
                     <label><input type="checkbox" (change)=getAbonadosByRutas(ruta.idruta)>

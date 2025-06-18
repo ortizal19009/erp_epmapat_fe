@@ -217,74 +217,69 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
 
     const markers: L.Marker[] = [];
 
-    if (this.abonado?.geolocalizacion) {
-      const coords = this.parseGeolocation(this.abonado.geolocalizacion);
-      if (coords) {
-        markers.push(this.createAbonadoMarker(coords, this.abonado.idabonado));
-      } else {
-        console.warn('Coordenadas del abonado no válidas');
-        markers.push(this.createEdificioMarker());
-      }
-    } else {
-      markers.push(this.createEdificioMarker());
-    }
+    const coords = this.abonado?.geolocalizacion
+      ? this.parseGeolocation(this.abonado.geolocalizacion)
+      : null;
 
-    const citiesLayer = L.layerGroup(markers);
+    const marker = coords
+      ? this.createAbonadoMarker(coords, this.abonado!.idabonado)
+      : this.createEdificioMarker();
+
+    markers.push(marker);
+
+    const overlayLayer = L.layerGroup(markers);
     const baseLayers = this.createBaseLayers();
 
-    if (this.map) {
-      this.resetMap(this.map, baseLayers, citiesLayer);
-    } else {
-      this.initializeMap(baseLayers, citiesLayer);
-    }
+    this.map
+      ? this.resetMap(this.map, baseLayers, overlayLayer)
+      : this.initializeMap(baseLayers, overlayLayer);
   }
-  private resetMap(map: L.Map, baseLayers: any, overlayLayer: L.LayerGroup) {
+
+  private resetMap(map: L.Map, baseLayers: any, overlayLayer: L.LayerGroup): void {
     map.eachLayer(layer => map.removeLayer(layer));
 
     baseLayers.OpenStreetMap.addTo(map);
     overlayLayer.addTo(map);
 
     L.control.layers(baseLayers, { Cuentas: overlayLayer }).addTo(map);
-    map.setView(this.edificioMatriz, 19);
-  }
-  private parseGeolocation(geolocation: string): L.LatLngExpression | null {
-    try {
-      const coords = JSON.parse(geolocation);
-      if (
-        Array.isArray(coords) &&
-        coords.length === 2 &&
-        typeof coords[0] === 'number' &&
-        typeof coords[1] === 'number'
-      ) {
-        return coords as L.LatLngExpression;
-      }
-      return null;
-    } catch (e) {
-      console.error('Formato de geolocalización inválido:', geolocation);
-      return null;
-    }
+    //map.setView(this.edificioMatriz, 15);
+    setTimeout(() => {
+      this.map?.invalidateSize();
+      this.map?.setView(this.edificioMatriz, 15);
+    }, 0);
   }
 
-  private initializeMap(baseLayers: any, overlayLayer: L.LayerGroup) {
+  private initializeMap(baseLayers: any, overlayLayer: L.LayerGroup): void {
     this.map = L.map('map', {
       center: this.edificioMatriz,
-      zoom: 19,
+      zoom: 15,
       layers: [baseLayers.OpenStreetMap, overlayLayer]
     });
 
     L.control.layers(baseLayers, { Cuentas: overlayLayer }).addTo(this.map);
   }
+
+  private parseGeolocation(geolocation: string): L.LatLngExpression | null {
+    try {
+      const coords = JSON.parse(geolocation);
+      if (Array.isArray(coords) && coords.length === 2 && typeof coords[0] === 'number' && typeof coords[1] === 'number') {
+        return coords as L.LatLngExpression;
+      }
+    } catch (error) {
+      console.error('Geolocalización inválida:', geolocation, error);
+    }
+    return null;
+  }
+
   private createAbonadoMarker(coords: L.LatLngExpression, id: number): L.Marker {
     return L.marker(coords).bindPopup(
-      `<b>Abonado ID:</b> ${id}<br>
-     <b>Coordenadas:</b> ${JSON.stringify(coords)}`
+      `<b>Abonado ID:</b> ${id}<br><b>Coordenadas:</b> ${JSON.stringify(coords)}`
     );
   }
 
   private createEdificioMarker(): L.Marker {
     return L.marker(this.edificioMatriz).bindPopup(
-      `<b>Edificio Epmapa-T</b><br>
-     <b>Coordenadas:</b> ${JSON.stringify(this.edificioMatriz)}`
+      `<b>Edificio Epmapa-T</b><br><b>Coordenadas:</b> ${JSON.stringify(this.edificioMatriz)}`
     );
   }
 

@@ -15,7 +15,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   _ByCategorias: any;
   _rutas: any;
   _abonados: any[] = []; // o el tipo correcto si ya lo tienes
-
+  filtro: string;
   private states: any = [
     {
       type: 'Feature',
