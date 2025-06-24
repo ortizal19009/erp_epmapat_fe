@@ -187,7 +187,7 @@ export class FacturaService {
     return this.http.get<Facturas>(`${baseUrl}/${idfactura}`);
   }
   async getByIdAsync(idfactura: number): Promise<any> {
-    let response = await firstValueFrom(
+    let response = firstValueFrom(
       this.http.get<any>(`${baseUrl}/${idfactura}`)
     );
     return response;

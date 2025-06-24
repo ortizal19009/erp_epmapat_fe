@@ -155,7 +155,6 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     }
     this.aboService.getByIdabonado(+idabonado!).subscribe({
       next: (datos) => {
-        console.log(datos)
         this._abonado = datos;
         this.abonado.idabonado = this._abonado[0].idabonado;
         this.abonado.nombre = this._abonado[0].idcliente_clientes.nombre;

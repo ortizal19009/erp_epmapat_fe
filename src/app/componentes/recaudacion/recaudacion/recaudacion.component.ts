@@ -41,6 +41,7 @@ import { FacxncService } from 'src/app/servicios/facxnc.service';
 import { Facxnc } from 'src/app/modelos/facxnc';
 import { Valoresnc } from 'src/app/modelos/valoresnc';
 import { Ntacredito } from 'src/app/modelos/ntacredito';
+import { JasperReportService } from 'src/app/servicios/jasper-report.service';
 
 @Component({
   selector: 'app-recaudacion',
@@ -109,6 +110,7 @@ export class RecaudacionComponent implements OnInit {
   swNC: boolean = false
   facturasToPrint: any[] = []
   valorNtaCredito: number;
+
   constructor(
     public fb: FormBuilder,
     private aboService: AbonadosService,
@@ -130,11 +132,11 @@ export class RecaudacionComponent implements OnInit {
     private loadingService: LoadingService,
     private s_ntacredito: NtacreditoService,
     private s_valorNc: ValoresncService,
-    private s_facnc: FacxncService
+    private s_facnc: FacxncService,
+    private s_jasperReport: JasperReportService
   ) { }
 
   ngOnInit(): void {
-    console.log("RECAUDACION V.2")
     this.formBuscar = this.fb.group({
       cuenta: '',
       identificacion: '',
@@ -303,6 +305,7 @@ export class RecaudacionComponent implements OnInit {
     this.sumtotal = 0;
     this._cliente = [];
     this.arrFacturas = [];
+
     this.reset();
     // this.reiniciar();
     if (
@@ -860,21 +863,22 @@ export class RecaudacionComponent implements OnInit {
     let valfactura: number;
     let fechacobro: Date = new Date();
     const ahora = new Date();
-    const horaActual = {
-      horas: ahora.getHours(),
-      minutos: ahora.getMinutes(),
-      segundos: ahora.getSeconds()
-    };
+    /*     const horaActual = {
+          horas: ahora.getHours(),
+          minutos: ahora.getMinutes(),
+          segundos: ahora.getSeconds()
+        }; */
+    //const horaActual = new Date().getTime();
+    let horaActual = `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`;
+
     let rubro: Rubros = new Rubros();
     rubro.idrubro = 5;
     //this._sincobro[i].pagado = 1;
     if (this._sincobro[i].pagado === 1 || this._sincobro[i].pagado === true) {
       idfactura = this._sincobro[i].idfactura;
       valfactura = this._sincobro[i].total + this._sincobro[i].interes
-      console.log(valfactura)
       this.facService.getById(idfactura).subscribe({
         next: (fac: any) => {
-
           fac.valornotacredito = this.calcularNCByFactura(valfactura, this.valorNtaCredito);
           //Añade a facxrecauda
           let facxr = {} as iFacxrecauda; //Interface para los datos de las facturas de la Recaudación
@@ -1095,8 +1099,49 @@ export class RecaudacionComponent implements OnInit {
   }
 
 
-  impComprobante(datos: any) {
-    let lectura: any;
+  async impComprobante(datos: any) {
+    console.log(datos);
+    // Abrir una pestaña vacía de inmediato
+    const newTab = window.open('', '_blank');
+    if (!newTab) {
+      alert('Tu navegador bloqueó la apertura del PDF. Permite ventanas emergentes.');
+      return;
+    }
+    let body: any;
+    if (datos.idAbonado > 0) {
+      body = {
+        "reportName": "CompPagoConsumoAgua",
+        "parameters": {
+          "idfactura": datos.idfactura
+        },
+        "extencion": ".pdf"
+      }
+    } else {
+      body = {
+        "reportName": "CompPagoServicios",
+        "parameters": {
+          "idfactura": datos.idfactura
+        },
+        "extencion": ".pdf"
+      }
+    }
+    // Esperar el reporte
+    let reporte = await this.s_jasperReport.getReporte(body);
+
+    // Crear Blob y URL
+    const file = new Blob([reporte], { type: 'application/pdf' });
+    const fileURL = URL.createObjectURL(file);
+
+    // Redireccionar la pestaña abierta al PDF
+    newTab.location.href = fileURL;
+
+    // Liberar memoria después
+    setTimeout(() => {
+      URL.revokeObjectURL(fileURL);
+    }, 1000);
+
+    /* ================ */
+    /* let lectura: any;
     this.facService.getById(datos.idfactura).subscribe({
       next: (d_factura: any) => {
         let modulo: number = d_factura.idmodulo.idmodulo;
@@ -1117,10 +1162,48 @@ export class RecaudacionComponent implements OnInit {
         }
       },
       error: (e) => console.error(e),
-    });
+    }); */
   }
-  reImpComprobante(datos: any) {
-    let lectura: any;
+  async reImpComprobante(datos: any) {
+    // Abrir una pestaña vacía de inmediato
+    const newTab = window.open('', '_blank');
+    if (!newTab) {
+      alert('Tu navegador bloqueó la apertura del PDF. Permite ventanas emergentes.');
+      return;
+    }
+
+    let fac = await this.facService.getByIdAsync(datos.idfactura);
+    let body: any;
+
+    if (fac.idabonado > 0) {
+      body = {
+        reportName: 'CompPagoConsumoAgua',
+        parameters: { idfactura: +datos.idfactura! },
+        extencion: '.pdf',
+      };
+    } else {
+      body = {
+        reportName: 'CompPagoServicios',
+        parameters: { idfactura: +datos.idfactura! },
+        extencion: '.pdf',
+      };
+    }
+
+    // Esperar el reporte
+    let reporte = await this.s_jasperReport.getReporte(body);
+
+    // Crear Blob y URL
+    const file = new Blob([reporte], { type: 'application/pdf' });
+    const fileURL = URL.createObjectURL(file);
+
+    // Redireccionar la pestaña abierta al PDF
+    newTab.location.href = fileURL;
+
+    // Liberar memoria después
+    setTimeout(() => {
+      URL.revokeObjectURL(fileURL);
+    }, 1000);
+    /* let lectura: any;
     this.facService.getById(datos.idfactura).subscribe({
       next: (d_factura: any) => {
         let modulo: number = d_factura.idmodulo.idmodulo;
@@ -1147,7 +1230,7 @@ export class RecaudacionComponent implements OnInit {
         }
       },
       error: (e) => console.error(e),
-    });
+    }); */
   }
 
   listarIntereses() {
