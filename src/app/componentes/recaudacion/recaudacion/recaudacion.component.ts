@@ -869,7 +869,7 @@ export class RecaudacionComponent implements OnInit {
           segundos: ahora.getSeconds()
         }; */
     //const horaActual = new Date().getTime();
-    let horaActual = `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`;
+    let horaActual: any = `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`;
 
     let rubro: Rubros = new Rubros();
     rubro.idrubro = 5;
@@ -1100,7 +1100,7 @@ export class RecaudacionComponent implements OnInit {
 
 
   async impComprobante(datos: any) {
-    console.log(datos);
+/*     console.log(datos);
     // Abrir una pestaña vacía de inmediato
     const newTab = window.open('', '_blank');
     if (!newTab) {
@@ -1138,10 +1138,10 @@ export class RecaudacionComponent implements OnInit {
     // Liberar memoria después
     setTimeout(() => {
       URL.revokeObjectURL(fileURL);
-    }, 1000);
+    }, 1000); */
 
     /* ================ */
-    /* let lectura: any;
+     let lectura: any;
     this.facService.getById(datos.idfactura).subscribe({
       next: (d_factura: any) => {
         let modulo: number = d_factura.idmodulo.idmodulo;
@@ -1162,7 +1162,7 @@ export class RecaudacionComponent implements OnInit {
         }
       },
       error: (e) => console.error(e),
-    }); */
+    }); 
   }
   async reImpComprobante(datos: any) {
     // Abrir una pestaña vacía de inmediato
