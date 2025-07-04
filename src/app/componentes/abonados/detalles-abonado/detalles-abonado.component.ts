@@ -518,7 +518,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
   }
   async impComprobante(datos: any) {
     let idfactura = datos.idfactura;
-    this.facElectro = true;
+    //this.facElectro = true;
 
     //this.datos = true;
     this.s_loading.showLoading();
@@ -554,9 +554,9 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
         pdfViewer.src = fileURL;
       }
     }, 1000);
-
-    this.s_loading.hideLoading();
     this.facElectro = false;
+    this.s_loading.hideLoading();
+
 
     //this.datos = false
     /*     let lectura: any;
@@ -610,7 +610,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     }, 1000);
 
     this.s_loading.hideLoading();
-
+    this.facElectro = false;
   }
 
   setOptImprimir() {
