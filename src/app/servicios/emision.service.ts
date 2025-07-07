@@ -23,7 +23,7 @@ export class EmisionService {
     return this.http.get<Emisiones[]>(`${baseUrl}/${idemision}`);
   }
 
-  getByIdemision(idemision: number): Observable<Emisiones> {
+  getByIdemision(idemision: number){
     return this.http.get<Emisiones>(`${baseUrl}/${idemision}`);
   }
 

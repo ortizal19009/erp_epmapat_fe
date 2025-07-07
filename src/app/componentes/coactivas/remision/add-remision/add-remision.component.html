@@ -92,7 +92,7 @@
                         </div>
                         <div class="col-sm text-right">
                             <button class="btn btn-success mr-3 btn-sm" [routerLink]="['/remision']">Cancelar</button>
-                            <button class="btn btn-outline-success btn-sm mr-3" data-toggle="modal"
+                            <button class="btn btn-outline-success btn-sm mr-3" [disabled]="true" data-toggle="modal"
                                 data-target="#modalSimular" (click)="modal('simular')">Continuar</button>
                         </div>
                     </div>
@@ -176,12 +176,11 @@
                 </div>
 
                 <div class='modal-footer justify-content-center'>
-                    <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' data-toggle="modal">
+                    <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' [disabled]=true data-toggle="modal">
                         <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
                     <button type='button' class='btn btn-sm btn-outline-success' data-dismiss='modal'>
                         <i class="bi bi-x-circle"></i> Cancelar</button>
                 </div>
-
             </div>
         </div>
     </div>
@@ -348,7 +347,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">Cancelar</button>
                 <button type="button" class="btn btn-sm btn-outline-success"
-                    (click)="aprobarRemision()" data-dismiss="modal" *ngIf="swdisable">Aceptar</button>
+                    (click)="aprobarRemision()" data-dismiss="modal" [disabled]="true" *ngIf="swdisable">Aceptar</button>
             </div>
         </div>
     </div>

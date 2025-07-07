@@ -246,16 +246,23 @@ export class ImpEmisionesComponent implements OnInit {
     cm3inicial.forEach((item: any) => {
       body2.push([item.abonados, item.m3]);
     });
-    count.forEach((item: any) => {
-      body3.push([
-        item.idabonado_abonados,
-        item.idfactura,
-        item.lecturaanterior,
-        item.lecturaactual,
-        item.lecturaactual - item.lecturaanterior,
-        item.rubros_count,
-      ]);
-    });
+    console.log(count.length+"<===========")
+    if (count.length > 0) {
+
+      count.forEach((item: any) => {
+        console.log(item);
+        body3.push([
+          item.idabonado_abonados,
+          item.idfactura,
+          item.lecturaanterior,
+          item.lecturaactual,
+          item.lecturaactual - item.lecturaanterior,
+          item.rubros_count,
+        ]);
+      });
+    } else {
+      body3.push(['', '', '', '', '', ''])
+    }
 
     /*    this.s_pdf.bodyOneTable(
       `Emisión Inicial ${emision.emision}`,
@@ -876,8 +883,6 @@ export class ImpEmisionesComponent implements OnInit {
   }
   changeReporte() {
     this.opcreporte = +this.formImprimir.value.reporte!;
-    console.log(this.opcreporte)
-
     if (this.opcreporte === 8 || this.opcreporte === 10) {
       this.tipe = 'date';
       const fecha: Date = new Date();

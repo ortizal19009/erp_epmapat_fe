@@ -127,14 +127,16 @@ export class PdfService {
     const pageNumber = doc.internal.getNumberOfPages();
     let startY = 70;
     // Primera tabla
-    doc.autoTable({
+    autoTable(doc, {
+
       head: [[{ content: [ht1[0]], styles: { halign: 'center' } }]],
       showHead: 'firstPage',
       startY: startY,
       styles: { overflow: 'hidden' },
       margin: { right: 107 },
     });
-    doc.autoTable({
+    autoTable(doc, {
+
       head: [ht1[1]],
       body: bt1,
       showHead: 'firstPage',
@@ -144,7 +146,8 @@ export class PdfService {
     });
     doc.setPage(pageNumber);
     // Segunda tabla
-    doc.autoTable({
+    autoTable(doc, {
+
       head: [[{ content: [ht2[0]], styles: { halign: 'center' } }]],
       showHead: 'firstPage',
       startY: startY,
@@ -152,7 +155,8 @@ export class PdfService {
       margin: { left: 107 },
     });
     // Segunda tabla
-    doc.autoTable({
+    autoTable(doc, {
+
       head: [ht2[1]],
       body: bt2,
       showHead: 'firstPage',
@@ -183,21 +187,25 @@ export class PdfService {
 
     this.header(titulo, doc);
 
-    doc.autoTable({
+    autoTable(doc, {
+
       theme: 'grid',
       head: [[{ content: ht1[0], styles: { halign: 'center' } }]],
     });
     // Primera tabla
-    doc.autoTable({
+    autoTable(doc, {
+
       head: [ht1[1]],
       body: bt1,
     });
-    doc.autoTable({
+    autoTable(doc, {
+
       theme: 'grid',
       head: [[{ content: ht1[0], styles: { halign: 'center' } }]],
     });
     // Segunda tabla
-    doc.autoTable({
+    autoTable(doc, {
+
       head: [ht2[1]],
       body: bt2,
     });
@@ -225,23 +233,27 @@ export class PdfService {
   ) {
     this.header(titulo, doc);
     doc.text.fontSize = 4;
-    doc.autoTable({
+    autoTable(doc, {
+
       headStyles: { fontSize: 6 },
       head: [[{ content: ht1[0], styles: { halign: 'center' } }]],
     });
     // Primera tabla
-    doc.autoTable({
+    autoTable(doc, {
+
       headStyles: { fontSize: 6 },
       bodyStyles: { fontSize: 6 },
       head: [ht1[1]],
       body: bt1,
     });
-    doc.autoTable({
+    autoTable(doc, {
+
       headStyles: { fontSize: 6 },
       head: [[{ content: ht2[0], styles: { halign: 'center' } }]],
     });
     // Segunda tabla
-    doc.autoTable({
+    autoTable(doc, {
+
       headStyles: { fontSize: 6 },
       bodyStyles: { fontSize: 6 },
       head: [ht2[1]],
@@ -254,7 +266,7 @@ export class PdfService {
     ) as HTMLIFrameElement;
     return (pdfViewer.src = pdfDataUri);
   }
-  bodyThreeTables(
+  _____bodyThreeTables(
     titulo: string,
     ht1: any,
     bt1: any,
@@ -264,14 +276,21 @@ export class PdfService {
     bt3: any,
     doc: any
   ) {
+    console.log(ht1, bt1)
+    console.log(ht2, bt2)
+
+    console.log(ht3, bt3)
+
     this.header(titulo, doc);
     // Primera tabla
-    doc.autoTable({
+    autoTable(doc, {
+
       headStyles: { fontSize: 6 },
       bodyStyles: { fontSize: 6 },
       head: [[{ content: ht1[0], styles: { halign: 'center' } }]],
     });
-    doc.autoTable({
+    autoTable(doc, {
+
       headStyles: { fontSize: 6 },
       bodyStyles: { fontSize: 6 },
       head: [ht1[1]],
@@ -279,12 +298,14 @@ export class PdfService {
       body: bt1,
     });
     // Segunda tabla
-    doc.autoTable({
+    autoTable(doc, {
+
       headStyles: { fontSize: 6 },
       bodyStyles: { fontSize: 6 },
       head: [[{ content: ht2[0], styles: { halign: 'center' } }]],
     });
-    doc.autoTable({
+    autoTable(doc, {
+
       headStyles: { fontSize: 6 },
       bodyStyles: { fontSize: 6 },
       head: [ht2[1]],
@@ -292,12 +313,14 @@ export class PdfService {
       body: bt2,
     });
     // Tercer tabla
-    doc.autoTable({
+    autoTable(doc, {
+
       headStyles: { fontSize: 6 },
       bodyStyles: { fontSize: 6 },
       head: [[{ content: ht3[0], styles: { halign: 'center' } }]],
     });
-    doc.autoTable({
+    autoTable(doc, {
+
       headStyles: { fontSize: 6 },
       bodyStyles: { fontSize: 6 },
       head: [ht3[1]],
@@ -312,6 +335,42 @@ export class PdfService {
 
     return (pdfViewer.src = pdfDataUri);
   }
+
+
+  bodyThreeTables(titulo: string, ht1: any, bt1: any, ht2: any, bt2: any, ht3: any, bt3: any, doc: any) {
+    this.header(titulo, doc);
+
+    this.generarTabla(ht1[0], ht1[1], bt1, doc, { 0: { halign: 'center' } });
+    this.generarTabla(ht2[0], ht2[1], bt2, doc, { 0: { halign: 'center' }, 2: { halign: 'right' } });
+    this.generarTabla(ht3[0], ht3[1], bt3, doc, { 0: { halign: 'center' }, 2: { halign: 'right' } });
+
+    this.setfooter(doc);
+
+    /*   const pdfDataUri = doc.output('datauri');
+      const pdfViewer = document.getElementById('pdfViewer') as HTMLIFrameElement; */
+    const pdfDataUri = doc.output('datauristring');
+    const pdfViewer: any = document.getElementById('pdfViewer') as HTMLIFrameElement;
+    return (pdfViewer.src = pdfDataUri);
+  }
+
+
+
+  private generarTabla(titulo: string, head: any[], body: any[], doc: any, columnStyles?: any) {
+    console.log(titulo)
+    autoTable(doc, {
+      headStyles: { fontSize: 6 },
+      bodyStyles: { fontSize: 6 },
+      head: [[{ content: titulo, styles: { halign: 'center' } }]],
+    });
+    autoTable(doc, {
+      headStyles: { fontSize: 6 },
+      bodyStyles: { fontSize: 6 },
+      head: [head],
+      body,
+      columnStyles,
+    });
+  }
+
   _bodyThreeTables(
     titulo: string,
     ht1: any,
@@ -325,28 +384,34 @@ export class PdfService {
     this.header(titulo, doc);
     const pageNumber = doc.internal.getNumberOfPages();
     // Primera tabla
-    doc.autoTable({
+    autoTable(doc, {
+
       head: [[{ content: ht1[0], styles: { halign: 'center' } }]],
     });
-    doc.autoTable({
+    autoTable(doc, {
+
       head: [ht1[1]],
       columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
       body: bt1,
     });
     // Segunda tabla
-    doc.autoTable({
+    autoTable(doc, {
+
       head: [[{ content: ht2[0], styles: { halign: 'center' } }]],
     });
-    doc.autoTable({
+    autoTable(doc, {
+
       head: [ht2[1]],
       columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
       body: bt2,
     });
     // Tercer tabla
-    doc.autoTable({
+    autoTable(doc, {
+
       head: [[{ content: ht3[0], styles: { halign: 'center' } }]],
     });
-    doc.autoTable({
+    autoTable(doc, {
+
       head: [ht3[1]],
       columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
       body: bt3,
@@ -370,7 +435,8 @@ export class PdfService {
     this.header(titulo, doc);
     const pageNumber = doc.internal.getNumberOfPages();
     // Primera tabla
-    doc.autoTable({
+    autoTable(doc, {
+
       head: [
         [
           {
@@ -387,7 +453,8 @@ export class PdfService {
     doc.setPage(pageNumber);
 
     // Segunda tabla
-    doc.autoTable({
+    autoTable(doc, {
+
       head: [
         [
           {
@@ -402,7 +469,8 @@ export class PdfService {
       body: bt2,
     });
     // Tercer tabla
-    doc.autoTable({
+    autoTable(doc, {
+
       head: [
         [
           {
@@ -417,7 +485,8 @@ export class PdfService {
       body: bt3,
     });
     // Cuarta tabla
-    doc.autoTable({
+    autoTable(doc, {
+
       head: [
         [
           {
@@ -455,7 +524,8 @@ export class PdfService {
     this.header(titulo, doc);
     const pageNumber = doc.internal.getNumberOfPages();
     // Primera tabla
-    doc.autoTable({
+    autoTable(doc, {
+
       head: [
         [
           {
@@ -472,7 +542,8 @@ export class PdfService {
     doc.setPage(pageNumber);
 
     // Segunda tabla
-    doc.autoTable({
+    autoTable(doc, {
+
       head: [
         [
           {
@@ -487,7 +558,8 @@ export class PdfService {
       body: bt2,
     });
     // Tercer tabla
-    doc.autoTable({
+    autoTable(doc, {
+
       head: [
         [
           {
@@ -502,7 +574,8 @@ export class PdfService {
       body: bt3,
     });
     // Cuarta tabla
-    doc.autoTable({
+    autoTable(doc, {
+
       head: [
         [
           {
@@ -517,7 +590,8 @@ export class PdfService {
       body: bt4,
     });
     // QUINTA tabla
-    doc.autoTable({
+    autoTable(doc, {
+
       head: [
         [
           {
