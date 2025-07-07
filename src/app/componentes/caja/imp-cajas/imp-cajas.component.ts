@@ -116,7 +116,6 @@ export class ImpCajasComponent implements OnInit {
     let fecha = this.formImprimir.value.fecha;
     let horad = this.formImprimir.value.horad;
     let horah = this.formImprimir.value.horah;
-    //let f: Date = new Date(d_fecha);
     let year: number = +d_fecha.slice(0, 4)!;
     let hasta = `${year - 1}-12-31`;
     switch (this.opcreporte) {
