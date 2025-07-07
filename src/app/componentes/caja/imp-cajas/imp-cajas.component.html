@@ -33,11 +33,14 @@
                         <option value="6">Transferencias cobradas</option>
                         <option value="7">Transferencias general</option>
                         <option value="3">Lista de cajas</option>
+                        <option value="8">Recaudacion x facturas</option>
+                        <option value="9">Recaudación x rubros</option>
+
                      </select>
                   </div>
 
                   <div
-                     *ngIf="opcreporte != 3 && (opcreporte === 4 || opcreporte ===5 || opcreporte ===6 || opcreporte ===7)"
+                     *ngIf="opcreporte != 3 && (opcreporte === 4 || opcreporte ===5 || opcreporte ===6 || opcreporte ===7 || opcreporte ===8 || opcreporte ===9)"
                      class="form-group col-md-6">
                      <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
@@ -50,7 +53,7 @@
                   </div>
 
                   <div
-                     *ngIf="opcreporte != 3 && (opcreporte === 4 || opcreporte ===5 || opcreporte ===6 || opcreporte ===7)"
+                     *ngIf="opcreporte != 3 && (opcreporte === 4 || opcreporte ===5 || opcreporte ===6 || opcreporte ===7 || opcreporte ===8 || opcreporte ===9)"
                      class="form-group col-md-6">
                      <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
@@ -58,6 +61,28 @@
                               data-toggle="tooltip" title="Obligatorio">Hasta: </span>
                         </div>
                         <input type="date" class="form-control text-center" formControlName="h_fecha" id="h_fecha"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+                     </div>
+                  </div>
+
+                  <div *ngIf="opcreporte != 3 && (opcreporte ===8 || opcreporte ===9)" class="form-group col-md-6">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
+                              data-toggle="tooltip" title="Obligatorio">Hora Desde: </span>
+                        </div>
+                        <input type="time" class="form-control text-center" formControlName="horad" id="horad"
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+                     </div>
+                  </div>
+
+                  <div *ngIf="opcreporte != 3 && (opcreporte ===8 || opcreporte ===9)" class="form-group col-md-6">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
+                              data-toggle="tooltip" title="Obligatorio">Hora Hasta: </span>
+                        </div>
+                        <input type="time" class="form-control text-center" formControlName="horah" id="horah"
                            aria-label="Small" aria-describedby="inputGroup-sizing-sm">
                      </div>
                   </div>
@@ -130,8 +155,8 @@
 <!-- MODAL PDF (En la misma página)-->
 <div class='modal fade' id='pdf' tabindex='-1' aria-labelledby='pdf' aria-hidden='true'>
    <div class='modal-dialog modal-lg'>
-      
-      <div class="modal-content" *ngIf="opcreporte == 7">
+
+      <div class="modal-content" *ngIf="opcreporte == 7 || opcreporte === 8 || opcreporte === 9">
          <div class="modal-header">
             <h5 class="modal-title" id="staticBackdropLabel">Vista de reporte</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">

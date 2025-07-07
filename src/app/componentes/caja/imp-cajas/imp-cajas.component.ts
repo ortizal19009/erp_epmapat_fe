@@ -10,6 +10,9 @@ import { FacturaService } from 'src/app/servicios/factura.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { PdfService } from 'src/app/servicios/pdf.service';
 import { saveAs } from 'file-saver';
+import { JasperReportService } from 'src/app/servicios/jasper-report.service';
+import { LoadingService } from 'src/app/servicios/loading.service';
+import { Time } from '@angular/common';
 
 @Component({
   selector: 'app-imp-cajas',
@@ -42,7 +45,9 @@ export class ImpCajasComponent implements OnInit {
     private cajService: CajaService,
     private facService: FacturaService,
     private rxfService: RubroxfacService,
-    private _pdf: PdfService
+    private _pdf: PdfService,
+    private jrService: JasperReportService,
+    private s_loading: LoadingService,
   ) { }
 
   ngOnInit(): void {
@@ -60,6 +65,8 @@ export class ImpCajasComponent implements OnInit {
       hasta: '2023-12-31',
       nombrearchivo: ['', [Validators.required, Validators.minLength(3)]],
       otrapagina: '',
+      horad: '',
+      horah: ''
     });
   }
 
@@ -78,6 +85,10 @@ export class ImpCajasComponent implements OnInit {
 
   changeReporte() {
     this.opcreporte = +this.formImprimir.value.reporte;
+    this.formImprimir.patchValue({
+      horad: '06:30:00',
+      horah: '18:30:00'
+    })
   }
 
   impriexpor() {
@@ -103,7 +114,9 @@ export class ImpCajasComponent implements OnInit {
     let d_fecha = this.formImprimir.value.d_fecha;
     let h_fecha = this.formImprimir.value.h_fecha;
     let fecha = this.formImprimir.value.fecha;
-    let f: Date = new Date(d_fecha);
+    let horad = this.formImprimir.value.horad;
+    let horah = this.formImprimir.value.horah;
+    //let f: Date = new Date(d_fecha);
     let year: number = +d_fecha.slice(0, 4)!;
     let hasta = `${year - 1}-12-31`;
     switch (this.opcreporte) {
@@ -272,6 +285,75 @@ export class ImpCajasComponent implements OnInit {
         } catch (error) {
           console.error('Error al obtener las Planillas:', error);
         }
+        break;
+      case 8:
+        this.s_loading.showLoading();
+        let data: any = {
+          "reportName": "FacturasCobradas",
+          "parameters": {
+            "desde": d_fecha,
+            "hasta": h_fecha,
+            "hdesde": horad,
+            "hhasta": horah,
+            "idusuario": this.authService.idusuario
+          },
+          "extencion": ".pdf"
+        }
+          ;
+
+        let reporte = await this.jrService.getReporte(data);
+        setTimeout(() => {
+          const file = new Blob([reporte], { type: 'application/pdf' });
+          const fileURL = URL.createObjectURL(file);
+
+          // Asignar el blob al iframe
+          const pdfViewer = document.getElementById(
+            'pdfViewer'
+          ) as HTMLIFrameElement;
+
+          if (pdfViewer) {
+            pdfViewer.src = fileURL;
+          }
+        }, 1000);
+        this.swcalculando = false;
+        if (this.swimprimir) this.txtcalculando = 'Mostrar';
+        else this.txtcalculando = 'Descargar';
+        this.s_loading.hideLoading();
+        break;
+      case 9:
+        this.s_loading.showLoading();
+        let body: any = {
+          "reportName": "RubrosCobrados",
+          "parameters": {
+            "desde": d_fecha,
+            "hasta": h_fecha,
+            "hdesde": horad,
+            "hhasta": horah,
+            "tope": hasta,
+            "idusuario": this.authService.idusuario
+          },
+          "extencion": ".pdf"
+        }
+          ;
+
+        let _reporte: any = await this.jrService.getReporte(body);
+        setTimeout(() => {
+          const file = new Blob([_reporte], { type: 'application/pdf' });
+          const fileURL = URL.createObjectURL(file);
+
+          // Asignar el blob al iframe
+          const pdfViewer = document.getElementById(
+            'pdfViewer'
+          ) as HTMLIFrameElement;
+
+          if (pdfViewer) {
+            pdfViewer.src = fileURL;
+          }
+        }, 1000);
+        this.swcalculando = false;
+        if (this.swimprimir) this.txtcalculando = 'Mostrar';
+        else this.txtcalculando = 'Descargar';
+        this.s_loading.hideLoading();
         break;
       default:
         break;
@@ -978,7 +1060,7 @@ export class ImpCajasComponent implements OnInit {
       // this._cobradas[i][0].idcliente.nombre, formatNumber(totalPorFormaCobro)]);
       datos.push([
         this._cobradas[i].idfactura,
-        this._cobradas[i].nombre, 
+        this._cobradas[i].nombre,
         this._cobradas[i].cedula,
         this._cobradas[i].fechatransferencia,
         this._cobradas[i].nrofactura,
@@ -1011,7 +1093,7 @@ export class ImpCajasComponent implements OnInit {
     };
 
     autoTable(doc, {
-      head: [['Nro','Nom. Cliente', 'Identificación', 'Fecha', 'Factura', 'F.Cob', 'Valor']],
+      head: [['Nro', 'Nom. Cliente', 'Identificación', 'Fecha', 'Factura', 'F.Cob', 'Valor']],
       theme: 'grid',
       headStyles: {
         fillColor: [68, 103, 114],
@@ -1024,15 +1106,15 @@ export class ImpCajasComponent implements OnInit {
         cellPadding: 1,
         halign: 'center',
       },
-/*       columnStyles: {
-        0: { halign: 'center', cellWidth: 16 },
-        1: { halign: 'center', cellWidth: 18 },
-        2: { halign: 'center', cellWidth: 29 },
-        3: { halign: 'center', cellWidth: 12 },
-        // 4: { halign: 'left', cellWidth: 75 },
-        4: { halign: 'right', cellWidth: 20 },
-      }, */
-      margin: {  top: 18, bottom: 13 },
+      /*       columnStyles: {
+              0: { halign: 'center', cellWidth: 16 },
+              1: { halign: 'center', cellWidth: 18 },
+              2: { halign: 'center', cellWidth: 29 },
+              3: { halign: 'center', cellWidth: 12 },
+              // 4: { halign: 'left', cellWidth: 75 },
+              4: { halign: 'right', cellWidth: 20 },
+            }, */
+      margin: { top: 18, bottom: 13 },
       body: datos,
       didParseCell: function (data) {
         var fila = data.row.index;
@@ -1051,7 +1133,7 @@ export class ImpCajasComponent implements OnInit {
     let doc = new jsPDF();
     let heder1: any = [
       ['TRANSFERENCIAS EMITIDAS'],
-      ['Planilla','NroFactura', 'Cliente', 'F. transferencia', 'Modulo', 'total'],
+      ['Planilla', 'NroFactura', 'Cliente', 'F. transferencia', 'Modulo', 'total'],
     ];
     let heder2: any = [
       ['TRANSFERENCIAS COBRADAS'],
