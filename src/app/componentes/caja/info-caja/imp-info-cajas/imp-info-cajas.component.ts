@@ -11,6 +11,8 @@ import { PdfService } from 'src/app/servicios/pdf.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { saveAs } from 'file-saver';
 import { UsuarioService } from 'src/app/servicios/administracion/usuario.service';
+import { LoadingService } from 'src/app/servicios/loading.service';
+import { JasperReportService } from 'src/app/servicios/jasper-report.service';
 
 @Component({
   selector: 'app-imp-info-cajas',
@@ -21,7 +23,7 @@ export class ImpInfoCajasComponent implements OnInit {
   swimprimir: boolean = true;
   formImprimir: FormGroup;
   opcreporte: number = 1;
-  otrapagina: boolean = false;
+  otrapagina: any = false;
   _cajas: any;
   nombrearchivo: string;
   _cobradas: any[] = [];
@@ -38,12 +40,13 @@ export class ImpInfoCajasComponent implements OnInit {
     public authService: AutorizaService,
     public fb: FormBuilder,
     private router: Router,
-    private cajService: CajaService,
     private facService: FacturaService,
     private rxfService: RubroxfacService,
     private _pdf: PdfService,
-    private s_usuarios: UsuarioService
-  ) {}
+    private s_usuarios: UsuarioService,
+    private s_loading: LoadingService,
+    private s_jasperreport: JasperReportService
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/cajas');
@@ -60,6 +63,8 @@ export class ImpInfoCajasComponent implements OnInit {
       hasta: `${f.getFullYear() - 1}-12-31`,
       nombrearchivo: ['', [Validators.required, Validators.minLength(3)]],
       otrapagina: '',
+      hdesde: '',
+      hhasta: ''
     });
     this.getRecaudador();
   }
@@ -88,6 +93,10 @@ export class ImpInfoCajasComponent implements OnInit {
 
   changeReporte() {
     this.opcreporte = +this.formImprimir.value.reporte;
+    this.formImprimir.patchValue({
+      hdesde: '06:30:00',
+      hhasta: '18:30:00'
+    })
   }
 
   impriexpor() {
@@ -97,10 +106,14 @@ export class ImpInfoCajasComponent implements OnInit {
   //Recupera los datos de cada reporte
   async imprimir() {
     let recaudador = +sessionStorage.getItem('idrecaudador')!;
+    const elementoExistente = document.getElementById('idembed');
+
     this.swbotones = true;
     this.swcalculando = true;
     let d_fecha = this.formImprimir.value.d_fecha;
     let h_fecha = this.formImprimir.value.h_fecha;
+    let hhasta = this.formImprimir.value.hhasta;
+    let hdesde = this.formImprimir.value.hdesde;
     let f: Date = new Date();
     let hasta = `${f.getFullYear() - 1}-12-31`;
     switch (this.opcreporte) {
@@ -190,12 +203,92 @@ export class ImpInfoCajasComponent implements OnInit {
           console.error('Error al obtener las Planillas:', error);
         }
         break;
+      case 3:
+        this.s_loading.showLoading();
+        if (elementoExistente) {
+          elementoExistente.remove();
+        }
+        let body: any = {
+          "reportName": "FacturasCobradasRec",
+          "parameters": {
+            "desde": d_fecha,
+            "hasta": h_fecha,
+            "hdesde": hdesde,
+            "hhasta": hhasta,
+            "idusuario": this.authService.idusuario,
+            "usuariocobro": recaudador
+          },
+          "extencion": ".pdf"
+        }
+          ;
+
+        let _reporte = await this.s_jasperreport.getReporte(body);
+        setTimeout(() => {
+          const file = new Blob([_reporte], { type: 'application/pdf' });
+          const fileURL = URL.createObjectURL(file);
+
+          // Asignar el blob al iframe
+          const pdfViewer = document.getElementById(
+            'pdfViewer'
+          ) as HTMLIFrameElement;
+
+          if (pdfViewer) {
+            pdfViewer.src = fileURL;
+          }
+        }, 1000);
+        this.swcalculando = false;
+        if (this.swimprimir) this.txtcalculando = 'Mostrar';
+        else this.txtcalculando = 'Descargar';
+        this.s_loading.hideLoading();
+        break;
+      case 4:
+        this.s_loading.showLoading();
+        if (elementoExistente) {
+          elementoExistente.remove();
+        }
+        let data: any = {
+          "reportName": "RubrosCobradosRec",
+          "parameters": {
+            "desde": d_fecha,
+            "hasta": h_fecha,
+            "hdesde": hdesde,
+            "hhasta": hhasta,
+            "tope": hasta,
+            "idusuario": this.authService.idusuario,
+            "usuariocobro": recaudador
+          },
+          "extencion": ".pdf"
+        }
+          ;
+
+        let reporte = await this.s_jasperreport.getReporte(data);
+        setTimeout(() => {
+          const file = new Blob([reporte], { type: 'application/pdf' });
+          const fileURL = URL.createObjectURL(file);
+
+          // Asignar el blob al iframe
+          const pdfViewer = document.getElementById(
+            'pdfViewer'
+          ) as HTMLIFrameElement;
+
+          if (pdfViewer) {
+            pdfViewer.src = fileURL;
+          }
+        }, 1000);
+        this.swcalculando = false;
+        if (this.swimprimir) this.txtcalculando = 'Mostrar';
+        else this.txtcalculando = 'Descargar';
+        this.s_loading.hideLoading();
+        break;
       default:
+        break;
     }
   }
 
   //Muestra cada reporte
-  imprime() {
+  async imprime() {
+
+
     // this.sw1 = false;
     this.swbotones = false;
     this.swcalculando = false;
@@ -209,9 +302,10 @@ export class ImpInfoCajasComponent implements OnInit {
         if (this.swimprimir) this.imprimirFacturas();
         else this.exportarFacturas();
         break;
-      case 3: //Lista de Cajas
-        if (this.swimprimir) this.imprimirCajas();
-        else this.exportarCajas();
+      case 3:
+        this.otrapagina = null;
+        break;
+      case 4: this.otrapagina = null;
         break;
       default:
     }
@@ -233,9 +327,9 @@ export class ImpInfoCajasComponent implements OnInit {
       ); */
     this._pdf.header(
       'RESUMEN RECAUDACIÓN: ' +
-        this.formImprimir.value.d_fecha +
-        ' - ' +
-        this.formImprimir.value.h_fecha,
+      this.formImprimir.value.d_fecha +
+      ' - ' +
+      this.formImprimir.value.h_fecha,
       doc
     );
 
@@ -440,9 +534,9 @@ export class ImpInfoCajasComponent implements OnInit {
       ); */
     this._pdf.header(
       'RECAUDACIÓN - PLANILLAS: ' +
-        this.formImprimir.value.d_fecha +
-        ' - ' +
-        this.formImprimir.value.h_fecha,
+      this.formImprimir.value.d_fecha +
+      ' - ' +
+      this.formImprimir.value.h_fecha,
       doc
     );
     const datos: any = [];
@@ -498,7 +592,7 @@ export class ImpInfoCajasComponent implements OnInit {
         0: { halign: 'center', cellWidth: 15 },
         1: { halign: 'center', cellWidth: 20 },
         2: { halign: 'center', cellWidth: 34 },
-        3: { halign: 'center', cellWidth: 15},
+        3: { halign: 'center', cellWidth: 15 },
         4: { halign: 'left', cellWidth: 75 },
         5: { halign: 'right', cellWidth: 15 },
       },
@@ -609,6 +703,7 @@ export class ImpInfoCajasComponent implements OnInit {
     };
     if (this.otrapagina) doc.output('dataurlnewwindow', opciones);
     else {
+
       const pdfDataUri = doc.output('datauristring');
       //Si ya existe el <embed> primero lo remueve
       const elementoExistente = document.getElementById('idembed');
