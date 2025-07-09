@@ -2,7 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import jsPDF from 'jspdf';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
+import { JasperReportService } from 'src/app/servicios/jasper-report.service';
+import { LoadingService } from 'src/app/servicios/loading.service';
 import { NtacreditoService } from 'src/app/servicios/ntacredito.service';
 import { PdfService } from 'src/app/servicios/pdf.service';
 
@@ -23,11 +26,12 @@ export class NtacreditoComponent implements OnInit {
   pages: number[] = []; // Lista de números de página
   maxPagesToShow: number = 5;
   constructor(
-    private router: Router,
     private coloresService: ColoresService,
     private s_ntacredito: NtacreditoService,
-    private fb: FormBuilder, 
-    private pdf: PdfService
+    private fb: FormBuilder,
+    private s_jrService: JasperReportService,
+    private authService: AutorizaService,
+    private s_loading: LoadingService
   ) { }
 
   ngOnInit(): void {
@@ -105,9 +109,30 @@ export class NtacreditoComponent implements OnInit {
   }
   /* Fin de configuracion de paginacion */
   async impDocumento(idntacredito: number) {
-    let ntacredito = await this.s_ntacredito.getByIdNtaCredito(idntacredito);
-    console.log(ntacredito)
-    let doc = new jsPDF();
-
+    this.s_loading.showLoading();
+    //let ntacredito = await this.s_ntacredito.getByIdNtaCredito(idntacredito);
+    //console.log(ntacredito)
+    //let doc = new jsPDF();
+    let body: any = {
+      "reportName": "NtaCreditoIndividual",
+      "parameters": {
+        "idntacredito": idntacredito,
+        "idusuario": this.authService.idusuario
+      },
+      "extencion": ".pdf"
+    }
+    let reporte = await this.s_jrService.getReporte(body);
+    setTimeout(() => {
+      const file = new Blob([reporte], { type: 'application/pdf' });
+      const fileURL = URL.createObjectURL(file);
+      // Asignar el blob al iframe
+      const pdfViewer = document.getElementById(
+        'pdfViewer'
+      ) as HTMLIFrameElement;
+      if (pdfViewer) {
+        pdfViewer.src = fileURL;
+      }
+    }, 1000);
+    this.s_loading.hideLoading();
   }
 }

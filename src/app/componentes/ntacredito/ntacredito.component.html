@@ -85,15 +85,9 @@
                                     data-toggle="dropdown" aria-expanded="false">
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-right popLista">
-                                    <button class="dropdown-item" type="button" data-toggle="modal"
-                                        data-target="#modalEliminar">
-                                        <i class="bi bi-file-minus"></i>&nbsp; ImpComprobante</button>
-                                    <button class="dropdown-item" type="button"
+                                    <button class="dropdown-item" type="button" data-toggle="modal" data-target="#pdf"
                                         (click)="impDocumento(ntacredito.idntacredito)">
                                         <i class="bi bi-file-minus"></i>&nbsp; Imp Doc</button>
-                                    <button class="dropdown-item" disabled type="button"
-                                        [routerLink]="['/modi-pingresos',ntacredito.idntacredito]">
-                                        <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
                                     <button class="dropdown-item" disabled type="button"
                                         [routerLink]="['/modi-pingresos',ntacredito.idntacredito]">
                                         <i class="bi bi-pencil"></i>&nbsp; Transferir</button>
@@ -125,5 +119,26 @@
                     </li>
                 </ul>
             </nav>
+        </div>
+    </div>
+
+    <!-- Modal vista imprimir -->
+    <div class="modal fade" id="pdf" data-backdrop="static" data-keyboard="false" tabindex="-1"
+        aria-labelledby="pdfLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pdfLabel">Vista de reporte</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <iframe id="pdfViewer" width="100%" height="600px"></iframe>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
         </div>
     </div>

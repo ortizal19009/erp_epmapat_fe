@@ -98,8 +98,6 @@ export class ImpEmisionesComponent implements OnInit {
       "extencion": ".pdf"
     }
     let reporte = await this.s_jasperReport.getReporte(datos)
-    console.log(reporte)
-
     setTimeout(() => {
       const file = new Blob([reporte], { type: 'application/pdf' });
       const fileURL = URL.createObjectURL(file);

@@ -41,7 +41,7 @@ export class AddNtacreditoComponent implements OnInit {
     private s_abonado: AbonadosService,
     private s_ntacredito: NtacreditoService,
     private s_documento: DocumentosService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/add-ntacredito');
@@ -113,7 +113,7 @@ export class AddNtacreditoComponent implements OnInit {
       },
     });
   }
-  detallesnotasnc(notacredito: any) {}
+  detallesnotasnc(notacredito: any) { }
   clearInput(name: any) {
     this._factura = new Facturas();
     this.cliente = new Clientes();
@@ -124,6 +124,7 @@ export class AddNtacreditoComponent implements OnInit {
     this.f_ntacredito.get(name)?.setValue(''); // Borra el valor del primer input
   }
   getPlanilla() {
+    console.log("por aqui en getPlanilla()")
     let formulario = this.f_ntacredito.value;
     if (formulario.nrofactura != '' || formulario.planilla != '') {
       this.loading.showLoading();
@@ -150,17 +151,23 @@ export class AddNtacreditoComponent implements OnInit {
         this.s_factura.getById(formulario.planilla).subscribe({
           next: (planilla: any) => {
             console.log(planilla);
-            this._factura = planilla;
-            this.cliente = planilla.idcliente;
-            this.resppago = planilla.idcliente;
-            this.buscarAbonado(planilla.idabonado);
-            this.f_ntacredito.patchValue({
-              cliente: planilla.idcliente.nombre,
-              idfactura: planilla.idfactura,
-              nrofactura: planilla.nrofactura,
-              cuenta: planilla.idabonado,
-            });
-            this.getValorPlanilla(planilla.idfactura);
+            if (planilla.pagado == 1 && planilla.estado == 1) {
+
+              this._factura = planilla;
+              this.cliente = planilla.idcliente;
+              this.resppago = planilla.idcliente;
+              this.buscarAbonado(planilla.idabonado);
+              this.f_ntacredito.patchValue({
+                cliente: planilla.idcliente.nombre,
+                idfactura: planilla.idfactura,
+                nrofactura: planilla.nrofactura,
+                cuenta: planilla.idabonado,
+              });
+              this.getValorPlanilla(planilla.idfactura);
+            } else {
+              alert("Nota de credito solo para facturas ya cobradas !!!");
+              this.loading.hideLoading();
+            }
           },
           error: (e: any) => console.error(e),
         });
