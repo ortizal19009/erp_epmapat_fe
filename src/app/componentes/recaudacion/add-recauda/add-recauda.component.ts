@@ -1,6 +1,4 @@
-import { FormStyle } from '@angular/common';
 import Swal from 'sweetalert2';
-
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import {
   AbstractControl,
@@ -53,21 +51,21 @@ export class AddRecaudaComponent implements OnInit {
     private loadingService: LoadingService,
     private s_formacobro: FormacobroService,
     private authService: AutorizaService,
-    private s_cajas: CajaService, 
+    private s_cajas: CajaService,
     private s_recaudaxcaja: RecaudaxcajaService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
+    console.log(this._formasCobro)
     this.f_buscar = this.fb.group({
-      cuenta: '',
-      cliente: '',
+      cuenta: ''
     });
     this.f_cobrar = this.fb.group({
-      idformacobro: 1,
+      idformacobro:1,
       acobrar: this.totalapagar,
       ncvalor: '',
       dinero: '',
-      vuelto: '',
+      vuelto: ''
     });
     this.getAllFormaCobro();
     this.getEstadoCaja();
@@ -105,7 +103,7 @@ export class AddRecaudaComponent implements OnInit {
       .subscribe({
         next: (item: any) => {
           console.log(item);
-          this.swal('info', item.body.mensaje);
+          this.swal('info', item.mensaje);
           this.getEstadoCaja();
         },
         error: (e: any) => console.error(e),
@@ -133,6 +131,7 @@ export class AddRecaudaComponent implements OnInit {
   getAllFormaCobro() {
     this.s_formacobro.getAll().subscribe({
       next: (formascobro: any) => {
+        console.log(formascobro)
         this._formasCobro = formascobro;
       },
       error: (e: any) => console.error(e),
