@@ -85,12 +85,10 @@ export class CvRubrosComponent implements OnInit {
       });
   }
   detallesFactura(factura: any) {
-    console.log(factura)
     this.rubrosName = `DETALLES PLANILLA ${factura.factura}`
     this.swfactura = false;
     this.modalSize = 'xl';
     this.idfactura = factura.factura;
-    console.log(factura);
   }
   regresar() {
     this.swfactura = true;

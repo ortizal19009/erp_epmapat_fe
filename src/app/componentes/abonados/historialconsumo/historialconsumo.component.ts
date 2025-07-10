@@ -64,7 +64,6 @@ export class HistorialconsumoComponent implements OnInit {
       this.promedio.push(lectura)
     }
     if (e.target.checked === false) {
-      console.log('falso')
       let f_lectura = this.promedio.find((_lectura: { idlectura: number }) => _lectura.idlectura === lectura.idlectura)
       let i = this.promedio.indexOf(f_lectura);
       this.promedio.splice(i, 1);

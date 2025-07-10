@@ -73,7 +73,6 @@ export class RemisionComponent implements OnInit {
       },
       { validators: this.validarFechas }
     );
-    console.log(this.today.toISOString());
     this.f_reporte.patchValue({
       d: d,
       h: d,
@@ -143,7 +142,6 @@ export class RemisionComponent implements OnInit {
   getRemByFeccrea() {
     this.s_loader.showLoading();
     this.swimprimir = false;
-    console.log(this.f_reporte.value);
     let f = this.f_reporte.value;
     this.s_remision.getByFechacrea(f.d, f.h).subscribe({
       next: (datos: any) => {
@@ -189,13 +187,9 @@ export class RemisionComponent implements OnInit {
     this._cliente = remision.idcliente_clientes;
     this._abonado = remision.idabonado_abonados;
     this._documentos = remision.iddocumento_documentos;
-
-    console.log(remision);
     let id = remision.idremision;
     this.fac_anteriores = await this.getDetalleRemision(id, 1);
     this.fac_nuevas = await this.getDetalleRemision(id, 2);
-    console.log(this.fac_anteriores);
-    console.log(this.fac_nuevas);
   }
 
   async getDetalleRemision(idremision: number, tipfac: number) {

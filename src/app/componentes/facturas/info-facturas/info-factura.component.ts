@@ -64,9 +64,12 @@ export class InfoFacturasComponent implements OnInit {
     this.s_loading.showLoading();
     let body: any;
     console.log(this.planilla);
-    console.log(this.planilla.idmodulo)
-    let modulo: any = this.planilla.idmodulo; 
-    if (this.planilla.idabonado > 0 && modulo.idmodulo == 4) {
+    console.log(this.planilla.idmodulo);
+    let modulo: any = this.planilla.idmodulo;
+    if (
+      this.planilla.idabonado > 0 &&
+      (modulo.idmodulo == 4 || modulo.idmodulo == 3)
+    ) {
       body = {
         reportName: 'CompPagoConsumoAgua',
         parameters: {

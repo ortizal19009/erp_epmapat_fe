@@ -118,7 +118,6 @@ export class ListarCajaComponent implements OnInit {
                 r_query.rubros.push(item.idrubro_rubros);
               }
             });
-            console.log(n_fxr);
             this.allRubros(n_fxr);
           },
           error: (e) => console.error(e),
@@ -275,7 +274,6 @@ export class ListarCajaComponent implements OnInit {
     let doc = new jsPDF('p', 'pt', 'a4');
     this._pdf.header('REPORTE DEL DIA', doc);
     let m_izquierda = 10;
-    console.log(_datosBody);
     let suma = 0;
     let numFacturas = 0;
     let datosBody: any = [];
@@ -300,7 +298,6 @@ export class ListarCajaComponent implements OnInit {
       body: datosBody,
 
       didDrawCell: function (data) {
-        console.log(data);
         if (data.column.index === 5 && data.cell.section === 'body') {
           autoTable(doc, {
             startY: data.cell.y + 1,

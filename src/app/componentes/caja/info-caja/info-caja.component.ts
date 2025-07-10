@@ -70,9 +70,6 @@ export class InfoCajaComponent implements OnInit {
       hasta: hasta,
     });
     let fDate = format(fechaActual, 'YYYY-MM-DD');
-    /*     let date_f = date.toISOString().slice(0, 10);
-    console.log(date); */
-    console.log(fDate);
     this.desde = fDate;
     this.hasta = fDate;
   }
@@ -89,7 +86,6 @@ export class InfoCajaComponent implements OnInit {
   datosCaja() {
     this.cajaService.getById(this.idcaja).subscribe({
       next: (datos) => {
-        console.log(datos);
         this.caja.idcaja = datos.idcaja;
         this.caja.codigo = datos.codigo;
         this.caja.descripcion = datos.descripcion;

@@ -92,7 +92,6 @@ export class ColoresComponent implements OnInit {
       ventana.color2 = rgb1;
       ventana.idusuario = this.authService.idusuario;
       // Busca la ventana por usuario y nombre para luego actualizarla
-      // console.log('getByIdusuarioyNombre: ', this.authService.idusuario, v)
       let ventanas = await this.venServicio.getByIdusuarioyNombre(this.authService.idusuario, v)
       if (ventanas) {
          this.venServicio.updateVentana(ventanas.idventana, ventana).subscribe({

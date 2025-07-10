@@ -142,10 +142,8 @@ export class AddRemisionComponent implements OnInit {
     this.s_rubroxfac
       .getRubrosForRemisiones(idcliente, this.f_buscar.value.fechatope)
       .then((rubros: any) => {
-        console.log(rubros);
         //this._rubros = rubros;
         rubros.forEach(async (i: any) => {
-          console.log(i);
           if (i.descripcion != 'Multa') {
             let rubro: any = await this.s_rubros
               .findByName(i.descripcion)
@@ -177,7 +175,6 @@ export class AddRemisionComponent implements OnInit {
     this.s_facturas
       .getFacturasForRemisionabonados(idcliente, cuenta, '2024-12-10')
       .then((item: any) => {
-        console.log(item);
         let subtotal = 0;
         let total = 0;
         let sumIntereses = 0;
@@ -185,13 +182,10 @@ export class AddRemisionComponent implements OnInit {
           subtotal += i.total;
           sumIntereses += i.intereses;
           total += i.total + i.intereses;
-          console.log(i.nrofactura);
           if (i.nrofactura != null) {
             this.swinstitucion = true;
           } else this.swinstitucion = false;
         });
-        console.log(this.swinstitucion);
-
         this._facturas = item;
         this.s_loading.hideLoading();
         this.subtotal = subtotal;

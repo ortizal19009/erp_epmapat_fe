@@ -153,14 +153,12 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     if (!this.cuenta) {
       this.swreturn = false;
       idabonado = sessionStorage.getItem('idabonadoToFactura');
-      console.log(idabonado);
     } else {
       this.swreturn = true;
       idabonado = this.cuenta;
     }
     this.aboService.getByIdabonado(+idabonado!).subscribe({
       next: (datos) => {
-        console.log(datos);
         this._abonado = datos;
         this.abonado.idabonado = this._abonado[0].idabonado;
         this.abonado.nombre = this._abonado[0].idcliente_clientes.nombre;
@@ -331,8 +329,6 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
       next: (datos: any) => {
         if (datos.length > 0) {
           datos.map(async (item: any) => {
-            //console.log(item);
-            //console.log(this.s_interes.cInteres(item));
             let _feccrea = await this.getEmisionoByFactura(item.idfactura);
             if (_feccrea != null) {
               item.feccrea = _feccrea;
@@ -418,7 +414,6 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     this.detalleFactura = await this.facService.getByIdAsync(idfactura);
     this.rubxfacService.getByIdfactura(+idfactura!).subscribe({
       next: (detalle: any) => {
-        console.log(detalle);
         this._rubrosxfac = detalle;
         this.factura = detalle[0].idfactura_facturas;
         if (detalle[0].idfactura_facturas.pagado === 1) {
@@ -539,14 +534,16 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     this.grafic = false;
   }
   async impComprobante(datos: any) {
-    console.log(datos);
     let idfactura = datos.idfactura;
     //this.facElectro = true;
 
     //this.datos = true;
     this.s_loading.showLoading();
     let body: any;
-    if (datos.idabonado > 0 && datos.idmodulo.idmodulo == 4) {
+    if (
+      datos.idabonado > 0 &&
+      (datos.idmodulo.idmodulo == 4 || datos.idmodulo.idmodulo === 3)
+    ) {
       body = {
         reportName: 'CompPagoConsumoAgua',
         parameters: {
@@ -554,7 +551,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
         },
         extencion: '.pdf',
       };
-    } else if (datos.idmodulo.idmodulo === 27 || datos.estado ===2) {
+    } else if (datos.idmodulo.idmodulo === 27 || datos.estado === 2) {
       body = {
         reportName: 'CompPagoConvenios',
         parameters: {
@@ -659,7 +656,6 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
   getSinCobro() {
     this.facService.getSinCobrar(this._abonado[0].idabonado).subscribe({
       next: (facturas: any) => {
-        console.log(facturas);
         this._abonado[0].facturas = facturas;
         this.datosImprimir = this._abonado[0];
         this.impNotificacion();
@@ -743,7 +739,6 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
           this.condonar.razoncondonacion = this.razonCondonacion;
           this.s_condonar.saveCondonacion(this.condonar).subscribe({
             next: (datos: any) => {
-              console.log(datos);
               this.s_loading.hideLoading();
             },
             error: (e) => console.error(e),
@@ -927,7 +922,6 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
   }
   /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
   _cInteres(factura: any) {
-    console.log(factura);
     this.totInteres = 0;
     this.arrCalculoInteres = [];
     /*     if (
@@ -935,7 +929,6 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
       factura.idabonado > 0
     ) {
       let fechaemision = await this.getEmisionoByFactura(factura.idfactura);
-      console.log(fechaemision);
       factura.feccrea = fechaemision;
     } */
 
@@ -988,7 +981,6 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
   async contSinCobrar(idabonado: number) {
     let dato = await this.facService.countSinCobrarAbo(idabonado);
     /* .then((number: any) => {
-      console.log(number);
       return number; */
     //});
     return dato;

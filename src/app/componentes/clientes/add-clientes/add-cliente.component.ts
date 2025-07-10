@@ -99,7 +99,6 @@ export class AddClienteComponent implements OnInit {
       cedulaControl.setValue('');
     });
     idtpidentificaControl.valueChanges.subscribe((selectedValue) => {
-      console.log('selectedValue: ', selectedValue);
       this.tpidenti = selectedValue;
       cedulaControl.setValue('');
     });

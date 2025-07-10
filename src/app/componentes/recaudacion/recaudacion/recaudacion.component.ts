@@ -1110,30 +1110,40 @@ export class RecaudacionComponent implements OnInit {
   }
 
   async impComprobante(datos: any) {
-    /*     console.log(datos);
+    console.log(datos);
     // Abrir una pestaña vacía de inmediato
     const newTab = window.open('', '_blank');
     if (!newTab) {
-      alert('Tu navegador bloqueó la apertura del PDF. Permite ventanas emergentes.');
+      alert(
+        'Tu navegador bloqueó la apertura del PDF. Permite ventanas emergentes.'
+      );
       return;
     }
     let body: any;
-    if (datos.idAbonado > 0) {
+    if (datos.idAbonado > 0 && (datos.idmodulo === 4 || datos.idmodulo === 3)) {
       body = {
-        "reportName": "CompPagoConsumoAgua",
-        "parameters": {
-          "idfactura": datos.idfactura
+        reportName: 'CompPagoConsumoAgua',
+        parameters: {
+          idfactura: datos.idfactura,
         },
-        "extencion": ".pdf"
-      }
+        extencion: '.pdf',
+      };
+    } else if (datos.idmodulo === 27) {
+      body = {
+        reportName: 'CompPagoConvenios',
+        parameters: {
+          idfactura: datos.idfactura,
+        },
+        extencion: '.pdf',
+      };
     } else {
       body = {
-        "reportName": "CompPagoServicios",
-        "parameters": {
-          "idfactura": datos.idfactura
+        reportName: 'CompPagoServicios',
+        parameters: {
+          idfactura: datos.idfactura,
         },
-        "extencion": ".pdf"
-      }
+        extencion: '.pdf',
+      };
     }
     // Esperar el reporte
     let reporte = await this.s_jasperReport.getReporte(body);
@@ -1148,10 +1158,10 @@ export class RecaudacionComponent implements OnInit {
     // Liberar memoria después
     setTimeout(() => {
       URL.revokeObjectURL(fileURL);
-    }, 1000); */
+    }, 1000);
 
     /* ================ */
-    let lectura: any;
+    /* et lectura: any;
     this.facService.getById(datos.idfactura).subscribe({
       next: (d_factura: any) => {
         let modulo: number = d_factura.idmodulo.idmodulo;
@@ -1172,7 +1182,7 @@ export class RecaudacionComponent implements OnInit {
         }
       },
       error: (e) => console.error(e),
-    });
+    }); */
   }
   async reImpComprobante(datos: any) {
     // Abrir una pestaña vacía de inmediato
@@ -1195,7 +1205,7 @@ export class RecaudacionComponent implements OnInit {
         },
         extencion: '.pdf',
       };
-    } else if (fac.idmodulo.idmodulo === 27 || fac.estado ==2) {
+    } else if (fac.idmodulo.idmodulo === 27 || fac.estado == 2) {
       console.log('convenio pago');
       body = {
         reportName: 'CompPagoConvenios',

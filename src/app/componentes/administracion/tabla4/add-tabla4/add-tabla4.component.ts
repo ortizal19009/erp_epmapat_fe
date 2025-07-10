@@ -33,7 +33,6 @@ export class AddTabla4Component implements OnInit {
 
    onSubmit() {
       this.tab4Service.saveTabla4(this.tab4Form.value).subscribe(datos => {
-         // console.log("Graba Ok")
          this.parent.listarTabla4();
       }, error => console.log(error));
    }

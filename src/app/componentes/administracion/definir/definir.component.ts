@@ -69,7 +69,6 @@ export class DefinirComponent implements OnInit {
    buscaDefinir() {
       this.defService.getByIddefinir(1).subscribe({
          next: (datos: any) => {
-            console.log(datos)
             this.formDefinir.setValue({
                razonsocial: datos.razonsocial,
                nombrecomercial: datos.nombrecomercial,
@@ -114,6 +113,5 @@ export class DefinirComponent implements OnInit {
       formData.append('archivo', this.archivo);
       formData.append('clave', this.clave);
       let dat: any = await this.defService.upFirma(this.idDefinir, formData)
-      console.log(dat)
    }
 }

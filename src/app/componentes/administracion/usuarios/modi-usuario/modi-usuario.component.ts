@@ -123,7 +123,6 @@ export class ModiUsuarioComponent implements OnInit {
       // this.usuService.updateUsuario(this.idusuarioModi, this.formUsuario.value).subscribe({
       this.usuService.updateUsuario(this.idusuarioModi, valoresFormulario).subscribe({
          next: datos => {
-            // console.log('Ok')
             this.regresar()
          },
          error: err => console.error(err.error)

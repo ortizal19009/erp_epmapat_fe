@@ -125,8 +125,6 @@ export class HomeComponent implements OnInit, AfterViewInit {
           const coordsArray: L.LatLngExpression = JSON.parse(
             item.geolocalizacion
           );
-          console.log('Coordenadas:', coordsArray);
-
           const marker = L.marker(coordsArray).bindPopup(
             `Abonado ID: ${item.idabonado}`
           );
@@ -199,7 +197,6 @@ export class HomeComponent implements OnInit, AfterViewInit {
   async getDatosAbonados() {
     this._ByCategorias = await this.s_abonados.getCuentasByCategoria();
     this._ByEstados = await this.s_abonados.getCuentasByEstado();
-    console.log(this._ByEstados)
   }
   getRutas() {
     this.s_rutas.getNcuentasByRutas().subscribe({
@@ -211,7 +208,6 @@ export class HomeComponent implements OnInit, AfterViewInit {
   }
   async getAbonadosByRutas(idruta: number) {
     this._abonados = await this.s_abonados.getByIdrutaAsync(idruta);
-    console.log(this._abonados);
     this.drawAllCuentas();
   }
 }

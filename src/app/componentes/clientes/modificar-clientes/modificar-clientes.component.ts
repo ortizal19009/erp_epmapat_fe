@@ -146,10 +146,8 @@ export class ModificarClientesComponent implements OnInit {
   buscaCliente() {
     let idcliente = sessionStorage.getItem('idclienteToModi');
     //let cli: any = this.cliService.getListaById()
-    console.log(idcliente);
     this.cliService.getListaById(+idcliente!).subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this.cliente = datos;
         this.codidentifica = this.cliente.idtpidentifica_tpidentifica.codigo;
         this.antcedula = datos.cedula;
@@ -204,10 +202,8 @@ export class ModificarClientesComponent implements OnInit {
   }
 
   onSubmit() {
-    console.log(this.formCliente.value);
     this.cliService.updateCliente(this.formCliente.value).subscribe({
       next: (datos) => {
-        console.log(datos);
         this.retornar();
       },
       error: (err) => console.error(err.error),
@@ -252,7 +248,6 @@ export class ModificarClientesComponent implements OnInit {
   }
 
   valIdentifica(control: AbstractControl) {
-    console.log(control);
     switch (this.codidentifica) {
       case '04': // RUC
         if (control.value.length == 13) {

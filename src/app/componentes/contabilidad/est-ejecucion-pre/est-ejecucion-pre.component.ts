@@ -274,7 +274,6 @@ export class EstEjecucionPreComponent implements OnInit {
    };
 
    pdf() {
-      console.log('pdf', this.arreglo1)
       const nombreEmision = new NombreAuxiliarPipe(); // Crea una instancia del pipe
       let m_izquierda = 20;
       var doc = new jsPDF({});

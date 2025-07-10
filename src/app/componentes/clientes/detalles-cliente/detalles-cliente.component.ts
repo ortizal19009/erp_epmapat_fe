@@ -49,10 +49,8 @@ export class DetallesClienteComponent implements OnInit {
 
   obtenerDatosCliente() {
     let idCliente = localStorage.getItem('idclienteToDetalles');
-    console.log(idCliente);
     this.cliService.getListaById(+idCliente!).subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this.cliente.idcliente = datos.idcliente;
         this.cliente.nombre = datos.nombre;
         this.cliente.cedula = datos.cedula;
