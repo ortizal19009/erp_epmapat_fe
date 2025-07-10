@@ -1,4 +1,11 @@
-import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  Input,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { Lecturas } from 'src/app/modelos/lecturas.model';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
@@ -20,7 +27,6 @@ import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { CondmultasinteresesService } from 'src/app/servicios/condmultasintereses.service';
 import * as L from 'leaflet';
 import { JasperReportService } from 'src/app/servicios/jasper-report.service';
-
 
 @Component({
   selector: 'app-detalles-abonado',
@@ -85,7 +91,6 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
   private map!: L.Map | undefined;
   edificioMatriz: any = [0.8038125013453109, -77.72763063596486];
 
-
   @ViewChild('pdfViewer', { static: false }) pdfViewer!: ElementRef;
 
   constructor(
@@ -102,8 +107,8 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     private s_loading: LoadingService,
     private authService: AutorizaService,
     private s_condonar: CondmultasinteresesService,
-    private s_jasperreport: JasperReportService,
-  ) { }
+    private s_jasperreport: JasperReportService
+  ) {}
 
   ngOnInit(): void {
     this.obtenerDatosAbonado();
@@ -148,14 +153,14 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     if (!this.cuenta) {
       this.swreturn = false;
       idabonado = sessionStorage.getItem('idabonadoToFactura');
-      console.log(idabonado)
+      console.log(idabonado);
     } else {
       this.swreturn = true;
       idabonado = this.cuenta;
     }
     this.aboService.getByIdabonado(+idabonado!).subscribe({
       next: (datos) => {
-        console.log(datos)
+        console.log(datos);
         this._abonado = datos;
         this.abonado.idabonado = this._abonado[0].idabonado;
         this.abonado.nombre = this._abonado[0].idcliente_clientes.nombre;
@@ -235,8 +240,12 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
       : this.initializeMap(baseLayers, overlayLayer);
   }
 
-  private resetMap(map: L.Map, baseLayers: any, overlayLayer: L.LayerGroup): void {
-    map.eachLayer(layer => map.removeLayer(layer));
+  private resetMap(
+    map: L.Map,
+    baseLayers: any,
+    overlayLayer: L.LayerGroup
+  ): void {
+    map.eachLayer((layer) => map.removeLayer(layer));
 
     baseLayers.OpenStreetMap.addTo(map);
     overlayLayer.addTo(map);
@@ -253,7 +262,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     this.map = L.map('map', {
       center: this.edificioMatriz,
       zoom: 15,
-      layers: [baseLayers.OpenStreetMap, overlayLayer]
+      layers: [baseLayers.OpenStreetMap, overlayLayer],
     });
 
     L.control.layers(baseLayers, { Cuentas: overlayLayer }).addTo(this.map);
@@ -262,7 +271,12 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
   private parseGeolocation(geolocation: string): L.LatLngExpression | null {
     try {
       const coords = JSON.parse(geolocation);
-      if (Array.isArray(coords) && coords.length === 2 && typeof coords[0] === 'number' && typeof coords[1] === 'number') {
+      if (
+        Array.isArray(coords) &&
+        coords.length === 2 &&
+        typeof coords[0] === 'number' &&
+        typeof coords[1] === 'number'
+      ) {
         return coords as L.LatLngExpression;
       }
     } catch (error) {
@@ -271,36 +285,45 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     return null;
   }
 
-  private createAbonadoMarker(coords: L.LatLngExpression, id: number): L.Marker {
+  private createAbonadoMarker(
+    coords: L.LatLngExpression,
+    id: number
+  ): L.Marker {
     return L.marker(coords).bindPopup(
-      `<b>Abonado ID:</b> ${id}<br><b>Coordenadas:</b> ${JSON.stringify(coords)}`
+      `<b>Abonado ID:</b> ${id}<br><b>Coordenadas:</b> ${JSON.stringify(
+        coords
+      )}`
     );
   }
 
   private createEdificioMarker(): L.Marker {
     return L.marker(this.edificioMatriz).bindPopup(
-      `<b>Edificio Epmapa-T</b><br><b>Coordenadas:</b> ${JSON.stringify(this.edificioMatriz)}`
+      `<b>Edificio Epmapa-T</b><br><b>Coordenadas:</b> ${JSON.stringify(
+        this.edificioMatriz
+      )}`
     );
   }
 
   private createBaseLayers() {
     const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 15,
-      attribution: '© Epmapa-Tulcán'
+      attribution: '© Epmapa-Tulcán',
     });
 
-    const osmHOT = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-      maxZoom: 15,
-      attribution: '© Epmapa-Tulcán contributors, Tiles style by Humanitarian Epmapa-Tulcán Team'
-    });
+    const osmHOT = L.tileLayer(
+      'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+      {
+        maxZoom: 15,
+        attribution:
+          '© Epmapa-Tulcán contributors, Tiles style by Humanitarian Epmapa-Tulcán Team',
+      }
+    );
 
     return {
       OpenStreetMap: osm,
-      'OpenStreetMap HOT': osmHOT
+      'OpenStreetMap HOT': osmHOT,
     };
   }
-
-
 
   facturasxAbonado(idabonado: number) {
     this.s_loading.showLoading();
@@ -390,13 +413,12 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     });
   }
 
-
   async getRubroxfac(idfactura: number) {
     this.idfactura = idfactura;
     this.detalleFactura = await this.facService.getByIdAsync(idfactura);
     this.rubxfacService.getByIdfactura(+idfactura!).subscribe({
       next: (detalle: any) => {
-        console.log(detalle)
+        console.log(detalle);
         this._rubrosxfac = detalle;
         this.factura = detalle[0].idfactura_facturas;
         if (detalle[0].idfactura_facturas.pagado === 1) {
@@ -420,7 +442,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     });
   }
 
-  detallesHistorial(lectura: Lecturas) { }
+  detallesHistorial(lectura: Lecturas) {}
 
   regresar() {
     let padre = sessionStorage.getItem('padreDetalleAbonado');
@@ -517,30 +539,39 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     this.grafic = false;
   }
   async impComprobante(datos: any) {
+    console.log(datos);
     let idfactura = datos.idfactura;
     //this.facElectro = true;
 
     //this.datos = true;
     this.s_loading.showLoading();
     let body: any;
-    if (datos.idabonado > 0) {
+    if (datos.idabonado > 0 && datos.idmodulo.idmodulo == 4) {
       body = {
-        "reportName": "CompPagoConsumoAgua",
-        "parameters": {
-          "idfactura": idfactura
+        reportName: 'CompPagoConsumoAgua',
+        parameters: {
+          idfactura: idfactura,
         },
-        "extencion": ".pdf"
-      }
+        extencion: '.pdf',
+      };
+    } else if (datos.idmodulo.idmodulo === 27 || datos.estado ===2) {
+      body = {
+        reportName: 'CompPagoConvenios',
+        parameters: {
+          idfactura: idfactura,
+        },
+        extencion: '.pdf',
+      };
     } else {
       body = {
-        "reportName": "CompPagoServicios",
-        "parameters": {
-          "idfactura": idfactura
+        reportName: 'CompPagoServicios',
+        parameters: {
+          idfactura: idfactura,
         },
-        "extencion": ".pdf"
-      }
+        extencion: '.pdf',
+      };
     }
-    let reporte = await this.s_jasperreport.getReporte(body)
+    let reporte = await this.s_jasperreport.getReporte(body);
     setTimeout(() => {
       const file = new Blob([reporte], { type: 'application/pdf' });
       const fileURL = URL.createObjectURL(file);
@@ -556,7 +587,6 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     }, 1000);
     this.facElectro = false;
     this.s_loading.hideLoading();
-
 
     //this.datos = false
     /*     let lectura: any;

@@ -107,8 +107,8 @@ export class RecaudacionComponent implements OnInit {
   arrFacturas: any = [];
   arrCuenta: any = [];
   _nc: any = [];
-  swNC: boolean = false
-  facturasToPrint: any[] = []
+  swNC: boolean = false;
+  facturasToPrint: any[] = [];
   valorNtaCredito: number;
 
   constructor(
@@ -134,7 +134,7 @@ export class RecaudacionComponent implements OnInit {
     private s_valorNc: ValoresncService,
     private s_facnc: FacxncService,
     private s_jasperReport: JasperReportService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.formBuscar = this.fb.group({
@@ -396,7 +396,7 @@ export class RecaudacionComponent implements OnInit {
     this.sumtotal = 0;
     this.formBuscar.controls['cuenta'].setValue('');
     this.formBuscar.controls['identificacion'].setValue('');
-    this.formCobrar.value.saldo = 0
+    this.formCobrar.value.saldo = 0;
   }
 
   sinCobro(idcliente: number) {
@@ -506,7 +506,6 @@ export class RecaudacionComponent implements OnInit {
     this.filtrar = '';
     this.totInteres = 0;
     this.formCobrar.reset();
-
   }
 
   buscarClientes() {
@@ -546,8 +545,9 @@ export class RecaudacionComponent implements OnInit {
     this.idformacobro = formacobro.idformacobro;
     if (formacobro.idformacobro == 3) {
       this.formacobroNC = true;
+    } else {
+      this.formacobroNC = false;
     }
-    else { this.formacobroNC = false };
   }
 
   marcarTodas(event: any) {
@@ -564,8 +564,7 @@ export class RecaudacionComponent implements OnInit {
   }
 
   marcarAnteriores(e: any, index: number, cuenta: number) {
-
-    this.ntaCredito(cuenta, e.target.checked)
+    this.ntaCredito(cuenta, e.target.checked);
     if (
       this._sincobro[index].idmodulo === 3 ||
       this._sincobro[index].idmodulo === 4
@@ -604,10 +603,13 @@ export class RecaudacionComponent implements OnInit {
   valCheckBox(cuenta: number, swcobrado: any) {
     if (swcobrado == true) {
       return swcobrado;
-    } else if (cuenta != this.arrCuenta[0] && this.arrCuenta.length > 0 && cuenta > 0) {
+    } else if (
+      cuenta != this.arrCuenta[0] &&
+      this.arrCuenta.length > 0 &&
+      cuenta > 0
+    ) {
       return true;
-    }
-    else {
+    } else {
       return false;
     }
   }
@@ -616,7 +618,7 @@ export class RecaudacionComponent implements OnInit {
       let find = this.arrCuenta.find((item: number) => item == cuenta);
       if (!find) {
         this.arrCuenta.push(cuenta);
-        this.buscarNtaCredito(this.arrCuenta[0])
+        this.buscarNtaCredito(this.arrCuenta[0]);
       }
     } else if (cuenta != 0 && sw === false) {
       let find = this.arrCuenta.find((item: number) => item == cuenta);
@@ -624,7 +626,7 @@ export class RecaudacionComponent implements OnInit {
       let i = this.arrCuenta.indexOf(find);
       this.arrCuenta.splice(i, 1);
       if (this.arrCuenta.length > 0) {
-        this.buscarNtaCredito(this.arrCuenta[0])
+        this.buscarNtaCredito(this.arrCuenta[0]);
       }
     }
   }
@@ -634,21 +636,20 @@ export class RecaudacionComponent implements OnInit {
       next: (datos: any) => {
         this._nc = datos;
         if (datos.length > 0) {
-          console.log("BUSCANDO NTA CEDITO CUENT");
+          console.log('BUSCANDO NTA CEDITO CUENT');
           this.formCobrar.patchValue({
-            saldo: datos[0].saldo
-          })
+            saldo: datos[0].saldo,
+          });
         } else {
-          console.log("QUITNDO VALOR NTA CEDITO");
+          console.log('QUITNDO VALOR NTA CEDITO');
 
           this.formCobrar.patchValue({
-            saldo: ''
-          })
+            saldo: '',
+          });
         }
-
       },
-      error: (e: any) => console.error(e)
-    })
+      error: (e: any) => console.error(e),
+    });
   }
   guardarValoresNc(valorNc: any, factura: any): void {
     const notaCredito = this._nc[0];
@@ -659,26 +660,33 @@ export class RecaudacionComponent implements OnInit {
       return;
     }
 
-    this.s_valorNc.saveValoresnc(valorNc).pipe(
-      switchMap((valoresNcGuardado: any) => {
-        const facxnotacredito = new Facxnc();
-        facxnotacredito.idfactura_facturas = factura;
-        facxnotacredito.idvaloresnc_valoresnc = valoresNcGuardado;
-        return this.s_facnc.saveFacxnc(facxnotacredito);
-      }),
-      switchMap(() => {
-        const nc: NtacreditoUpdate = {
-          idntacredito: notaCredito.idntacredito,
-          devengado: +notaCredito.devengado! + +ncvalor!,
-        };
-        return this.s_ntacredito.updateNotaCredito(nc);
-      }),
-      tap((respuesta: any) => {
-        console.log("Nota Actualizada", respuesta);
-      })
-    ).subscribe({
-      error: (e: any) => console.error("Error en el proceso de guardado de Nota de Crédito:", e)
-    });
+    this.s_valorNc
+      .saveValoresnc(valorNc)
+      .pipe(
+        switchMap((valoresNcGuardado: any) => {
+          const facxnotacredito = new Facxnc();
+          facxnotacredito.idfactura_facturas = factura;
+          facxnotacredito.idvaloresnc_valoresnc = valoresNcGuardado;
+          return this.s_facnc.saveFacxnc(facxnotacredito);
+        }),
+        switchMap(() => {
+          const nc: NtacreditoUpdate = {
+            idntacredito: notaCredito.idntacredito,
+            devengado: +notaCredito.devengado! + +ncvalor!,
+          };
+          return this.s_ntacredito.updateNotaCredito(nc);
+        }),
+        tap((respuesta: any) => {
+          console.log('Nota Actualizada', respuesta);
+        })
+      )
+      .subscribe({
+        error: (e: any) =>
+          console.error(
+            'Error en el proceso de guardado de Nota de Crédito:',
+            e
+          ),
+      });
   }
 
   totalAcobrar() {
@@ -735,12 +743,12 @@ export class RecaudacionComponent implements OnInit {
 
   valorDinero() {
     this.formacobroNC = false;
-    this.formCobrar.controls['ncvalor'].setValue('')
+    this.formCobrar.controls['ncvalor'].setValue('');
     this.formCobrar.controls['dinero'].setValue(
       this.acobrar.toFixed(2).toString()
     );
     this.formCobrar.controls['vuelto'].setValue('');
-    this.disabledcobro = false
+    this.disabledcobro = false;
   }
 
   async getRubroxfac(idfactura: number, idmodulo: number, factura: any) {
@@ -853,7 +861,7 @@ export class RecaudacionComponent implements OnInit {
     rubrosxfac.cantidad = 1;
     rubrosxfac.estado = 1;
     this.rubxfacService.saveRubroxFac(rubrosxfac).subscribe({
-      next: (datos) => { },
+      next: (datos) => {},
       error: (e) => console.error(e),
     });
   }
@@ -876,10 +884,13 @@ export class RecaudacionComponent implements OnInit {
     //this._sincobro[i].pagado = 1;
     if (this._sincobro[i].pagado === 1 || this._sincobro[i].pagado === true) {
       idfactura = this._sincobro[i].idfactura;
-      valfactura = this._sincobro[i].total + this._sincobro[i].interes
+      valfactura = this._sincobro[i].total + this._sincobro[i].interes;
       this.facService.getById(idfactura).subscribe({
         next: (fac: any) => {
-          fac.valornotacredito = this.calcularNCByFactura(valfactura, this.valorNtaCredito);
+          fac.valornotacredito = this.calcularNCByFactura(
+            valfactura,
+            this.valorNtaCredito
+          );
           //Añade a facxrecauda
           let facxr = {} as iFacxrecauda; //Interface para los datos de las facturas de la Recaudación
           facxr.idrecaudacion = recaCreada;
@@ -899,7 +910,7 @@ export class RecaudacionComponent implements OnInit {
                   fac.fechacobro = fechacobro;
                   fac.horacobro = horaActual;
                   if (this.swNC === true) {
-                    fac.formapago = 3
+                    fac.formapago = 3;
                     /* AQUI COLOCAR LA FUNCION DE IMPRIMIR EL COMPROBANTE DE NOTACREDITO */
                   }
                   fac.usuariocobro = this.authService.idusuario;
@@ -942,8 +953,7 @@ export class RecaudacionComponent implements OnInit {
                           this.s_recaudaxcaja
                             .updateRecaudaxcaja(this.recxcaja)
                             .subscribe({
-                              next: (datos) => {
-                              },
+                              next: (datos) => {},
                               error: (e) => console.error(e),
                             });
                         },
@@ -960,8 +970,9 @@ export class RecaudacionComponent implements OnInit {
                         valoresnc.idntacredito_ntacredito = this._nc[0];
                         valoresnc.valor = this.formCobrar.value.ncvalor;
                         valoresnc.fechaaplicado = new Date();
-                        valoresnc.saldo = this._nc[0].saldo - this.formCobrar.value.ncvalor;
-                        this.guardarValoresNc(valoresnc, nex)
+                        valoresnc.saldo =
+                          this._nc[0].saldo - this.formCobrar.value.ncvalor;
+                        this.guardarValoresNc(valoresnc, nex);
                       }
                       this.swcobrado = true;
                       if (
@@ -1091,16 +1102,15 @@ export class RecaudacionComponent implements OnInit {
     const ncvalor = +this.formCobrar.controls['ncvalor'].value || 0;
     const valorAcobrar = +this.formCobrar.value.valorAcobrar || 0;
     const valorActual = +control.value || 0;
-    if ((valorAcobrar - ncvalor) > valorActual) {
+    if (valorAcobrar - ncvalor > valorActual) {
       return of({ invalido: true });
     }
 
     return of(null);
   }
 
-
   async impComprobante(datos: any) {
-/*     console.log(datos);
+    /*     console.log(datos);
     // Abrir una pestaña vacía de inmediato
     const newTab = window.open('', '_blank');
     if (!newTab) {
@@ -1141,7 +1151,7 @@ export class RecaudacionComponent implements OnInit {
     }, 1000); */
 
     /* ================ */
-     let lectura: any;
+    let lectura: any;
     this.facService.getById(datos.idfactura).subscribe({
       next: (d_factura: any) => {
         let modulo: number = d_factura.idmodulo.idmodulo;
@@ -1162,29 +1172,45 @@ export class RecaudacionComponent implements OnInit {
         }
       },
       error: (e) => console.error(e),
-    }); 
+    });
   }
   async reImpComprobante(datos: any) {
     // Abrir una pestaña vacía de inmediato
     const newTab = window.open('', '_blank');
     if (!newTab) {
-      alert('Tu navegador bloqueó la apertura del PDF. Permite ventanas emergentes.');
+      alert(
+        'Tu navegador bloqueó la apertura del PDF. Permite ventanas emergentes.'
+      );
       return;
     }
 
     let fac = await this.facService.getByIdAsync(datos.idfactura);
     let body: any;
-
-    if (fac.idabonado > 0) {
+    console.log(fac);
+    if (fac.idabonado > 0 && fac.idmodulo.idmodulo == 4) {
       body = {
         reportName: 'CompPagoConsumoAgua',
-        parameters: { idfactura: +datos.idfactura! },
+        parameters: {
+          idfactura: +fac.idfactura!,
+        },
+        extencion: '.pdf',
+      };
+    } else if (fac.idmodulo.idmodulo === 27 || fac.estado ==2) {
+      console.log('convenio pago');
+      body = {
+        reportName: 'CompPagoConvenios',
+        parameters: {
+          idfactura: +fac.idfactura!,
+        },
         extencion: '.pdf',
       };
     } else {
+      console.log('servicio');
       body = {
         reportName: 'CompPagoServicios',
-        parameters: { idfactura: +datos.idfactura! },
+        parameters: {
+          idfactura: +fac.idfactura!,
+        },
         extencion: '.pdf',
       };
     }
@@ -1286,8 +1312,8 @@ export class RecaudacionComponent implements OnInit {
   }
   //Al digitar el valor de la NC
   changeNCvalor(e: any) {
-    console.log(e.target.value)
-    this.valorNtaCredito = +e.target.value!
+    console.log(e.target.value);
+    this.valorNtaCredito = +e.target.value!;
     let dinero: number;
     if (+this.formCobrar.controls['dinero'].value > 0)
       dinero = +this.formCobrar.controls['dinero'].value;
@@ -1308,40 +1334,41 @@ export class RecaudacionComponent implements OnInit {
     if (vnc > 0) {
       if (vfactura === vnc) {
         this.valorNtaCredito = vnc - vfactura;
-        console.log("VALORES IGUALES")
+        console.log('VALORES IGUALES');
         return vnc;
       } else if (vfactura < vnc) {
         this.valorNtaCredito = vnc - vfactura;
-        console.log("VALORES VF < NC")
+        console.log('VALORES VF < NC');
         return vfactura;
       } else if (vfactura > vnc) {
         this.valorNtaCredito = 0;
-        console.log("VALORES VF > NC")
+        console.log('VALORES VF > NC');
         return vnc;
+      } else {
+        return 0;
       }
-      else { return 0 }
-    }
-    else {
+    } else {
       return 0;
     }
   }
 
   //Valida que el valor de la NC no se mayor que el valor a cobrar
   valNC(control: AbstractControl) {
-    if (this.formCobrar.value.valorAcobrar < control.value || control.value > +this.formCobrar.value.saldo!) {
+    if (
+      this.formCobrar.value.valorAcobrar < control.value ||
+      control.value > +this.formCobrar.value.saldo!
+    ) {
       this.swNC = false;
 
-      return of({ invalido: true })
-    }
-    else {
+      return of({ invalido: true });
+    } else {
       this.swNC = true;
 
       return of(null);
     }
   }
   SaldoNC(control: AbstractControl) {
-    if (this.formCobrar.value.saldo <= 0)
-      return of({ invalido: true });
+    if (this.formCobrar.value.saldo <= 0) return of({ invalido: true });
     else return of(null);
   }
   //Al digitar el dinero
@@ -1468,11 +1495,10 @@ interface ntaCredito {
   devengado: number;
   saldo: number;
   idntacredito: number;
-  cuenta: number
+  cuenta: number;
 }
 
 interface NtacreditoUpdate {
   idntacredito: number;
   devengado: number;
-
 }
