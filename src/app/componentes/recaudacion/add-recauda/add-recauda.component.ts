@@ -15,6 +15,7 @@ import { LoadingService } from 'src/app/servicios/loading.service';
 import { RecaudacionService } from 'src/app/servicios/microservicios/recaudacion.service';
 import { CajaService } from 'src/app/servicios/caja.service';
 import { RecaudaxcajaService } from 'src/app/servicios/recaudaxcaja.service';
+import { Colores } from 'src/app/modelos/administracion/colores.model';
 @Component({
   selector: 'app-add-recauda',
   templateUrl: './add-recauda.component.html',
@@ -27,6 +28,7 @@ export class AddRecaudaComponent implements OnInit {
   _formasCobro: any;
   f_buscar: FormGroup;
   f_cobrar: FormGroup;
+  formColores: FormGroup;
   nombre: string;
   swBuscar: Boolean = false;
   swImprimir: Boolean = false;
@@ -56,32 +58,33 @@ export class AddRecaudaComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    console.log(this._formasCobro)
+    console.log(this._sincobro)
     this.f_buscar = this.fb.group({
       cuenta: ''
     });
     this.f_cobrar = this.fb.group({
-      idformacobro:1,
+      idformacobro: 1,
       acobrar: this.totalapagar,
       ncvalor: '',
       dinero: '',
       vuelto: ''
+    });
+    var t: Colores = new Colores();
+    var c: Colores = new Colores();
+    this.formColores = this.fb.group({
+      tonos0: t,
+      colores0: c,
+      tonos1: t,
+      colores1: t,
     });
     this.getAllFormaCobro();
     this.getEstadoCaja();
   }
   getEstadoCaja() {
     this.ms_recaudacion.testConnection(this.authService.idusuario).subscribe({
-      next: (item: any) => {
-        console.log(item);
+      next: async (item: any) => {
         this._estadoCaja = item;
-        this.s_cajas.getByIdUsuario(this.authService.idusuario).subscribe({
-          next: (datos: any) => {
-            console.log(datos);
-          },
-          error: (e: any) => console.error(e),
-        });
-
+        let caja = await this.s_cajas.getByIdUsuario(this.authService.idusuario).toPromise();
         if (item.estado === 1) {
           this.swcaja = true;
           this.abrirCaja.usuario = item.username;
@@ -89,7 +92,6 @@ export class AddRecaudaComponent implements OnInit {
           this.abrirCaja.establecimiento = item.establecimiento;
         } else {
           /* generar una consulta para traer user name de  */
-          console.log(this.authService);
           this.abrirCaja.usuario = this.authService.alias;
           this.swcaja = false;
         }
@@ -131,7 +133,6 @@ export class AddRecaudaComponent implements OnInit {
   getAllFormaCobro() {
     this.s_formacobro.getAll().subscribe({
       next: (formascobro: any) => {
-        console.log(formascobro)
         this._formasCobro = formascobro;
       },
       error: (e: any) => console.error(e),
