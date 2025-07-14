@@ -78,11 +78,11 @@
 
 <div class="container-fluid">
    <div class="row">
-      <div class="col-sm ">
+      <div class="col-sm mt-3 " *ngIf="!swSincobro()">
          <div class=" card sombra ">
             <div class="card-body box-profile d-flex justify-content-center">
-               <div *ngIf="!swSincobro()" class="col-sm-12 text-center">
-                  <img src="/assets/dist/img/logo.png" width="280" />
+               <div  class="col-sm-12 text-center">
+                  <img src="/assets/dist/img/logo.png" width="400" />
                </div>
             </div>
          </div>
@@ -128,7 +128,7 @@
             </div>
          </div>
       </div>
-      <div class="col-sm ">
+      <div class="col-sm " *ngIf="swSincobro()">
          <div class=" card sombra ">
             <div class="card-body box-profile d-flex justify-content-center">
 
@@ -144,7 +144,7 @@
                   </div>
                </div> -->
 
-               <table class="table table-hover table-sm table-bordered" *ngIf="swSincobro()">
+               <table class="table table-hover table-sm table-bordered">
                   <thead class="recaudacabecera">
                      <tr class="text-center">
                         <th></th>
@@ -165,11 +165,12 @@
                      <tr *ngFor="let factura of _sincobro; let i = index"
                         [ngClass]="{ transferido: factura.estado === 3 }">
                         <td class="small font-weight-bold">{{i+1}}</td>
-                        <td>{{factura.idabonado}}
+                        <td class="text-center">{{factura.idabonado}}
                         </td>
                         <td class="description">{{factura.nombre}}</td>
                         <td>{{factura.idfactura}}</td>
                         <td class="description">
+                           {{factura.direccion}}
                            <!--    {{sincobro.idabonado}}
                            <i class="fa fa-spinner fa-pulse fa-fw"></i>
                            <span class="sr-only">Loading...</span> -->

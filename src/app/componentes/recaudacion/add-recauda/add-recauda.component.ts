@@ -58,7 +58,6 @@ export class AddRecaudaComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    console.log(this._sincobro)
     this.f_buscar = this.fb.group({
       cuenta: ''
     });
@@ -166,6 +165,7 @@ export class AddRecaudaComponent implements OnInit {
       .then((sincobro: any) => {
         if (sincobro.length > 0) {
           this._sincobro = sincobro;
+          console.log(sincobro);
           this.getClienteById(sincobro[0].idcliente);
         } else {
           alert('Datos no encontrados');
@@ -234,6 +234,7 @@ export class AddRecaudaComponent implements OnInit {
       /*    let query = this.arrFacturas.find(
         (fact: { idfactura: number }) => (fact.idfactura = factura.idfactura)
       ); */
+
       this.fencola.push(factura);
     }
     if (e.target.checked === false) {
@@ -250,6 +251,7 @@ export class AddRecaudaComponent implements OnInit {
         acobrar: +this.totalapagar!.toFixed(2),
       });
     });
+    console.log(this.fencola)
   }
   cobrar() {
     let dinero: number = +this.f_cobrar.value.dinero!;
