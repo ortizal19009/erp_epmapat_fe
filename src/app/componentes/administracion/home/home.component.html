@@ -1,7 +1,5 @@
 <!-- PRUEBA DE ESTADISTICAS -->
 <div class="container-fluid mt-3">
-
-
   <div class="row">
     <div class="col-md-12">
       <div class="card">
@@ -55,7 +53,10 @@
                 <div class="list-group list-group-sm" *ngFor="let ruta of _rutas|filter:filtro ">
                   <div class="list-group-item list-group-item-sm">
                     <span class="float-right">{{ruta.ncuentas}}</span>
-                    <label><input type="checkbox" (change)=getAbonadosByRutas(ruta.idruta)>
+                    <label>
+                      <button class="btn btn-xs btn-outline-danger" (click)=getAbonadosByRutas(ruta.idruta)>
+                        <i class="fa fa-map-marker" aria-hidden="true"></i>
+                      </button>
                       {{ruta.descripcion}}
                     </label>
                   </div>
@@ -71,9 +72,9 @@
           <div class="row">
             <div class="col-sm-2 col-6">
               <div class="description-block border-right">
-                <span class="description-percentage text-success"><i class="fas fa-caret-up"></i> 17%</span>
-                <h5 class="description-header">$35,210.43</h5>
-                <span class="description-text">TOTAL REVENUE</span>
+                <span class="description-percentage text-success"><i class="fas fa-caret-up"></i> <button class="btn btn-xs btn-outline-primary" (click)="alert()">search</button></span>
+                <h5 class="description-header">EPMAPA-T (Matríz)</h5>
+                <span class="description-text">Juan Ramón Arellano y Bolivar</span>
               </div>
               <!-- /.description-block -->
             </div>

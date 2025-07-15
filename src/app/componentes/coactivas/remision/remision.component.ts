@@ -37,7 +37,7 @@ export class RemisionComponent implements OnInit {
 
   /* variables para hacer la paginación  */
   page: number = 0;
-  size: number = 20;
+  size: number = 10;
   _cuentasPageables?: any;
   totalPages: number = 0; // Total de páginas
   pages: number[] = []; // Lista de números de página
@@ -52,7 +52,7 @@ export class RemisionComponent implements OnInit {
     private s_loader: LoadingService,
     private s_facxremi: FacxremiService,
     private s_remisionPdf: RemisionReportsService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/cv-facturas');
@@ -79,7 +79,7 @@ export class RemisionComponent implements OnInit {
     });
     this.getAllRemisiones(this.page, this.size);
   }
-  onChangeDate(e: any) {}
+  onChangeDate(e: any) { }
   colocaColor(colores: any) {
     document.documentElement.style.setProperty('--bgcolor1', colores[0]);
     const cabecera = document.querySelector('.cabecera');
@@ -102,6 +102,10 @@ export class RemisionComponent implements OnInit {
     this.s_remision.getAllRemisiones(page, size).subscribe({
       next: (datos: any) => {
         this._remisiones = datos.content;
+        this.size = datos.size;
+        this.page = datos.pageable.pageNumber;
+        this.totalPages = datos.totalPages
+        this.updatePages();
       },
       error: (e: any) => console.error(e),
     });
@@ -109,7 +113,7 @@ export class RemisionComponent implements OnInit {
   /* Inicio de configuracion de paginacion */
   onPreviousPage(): void {
     if (this.page > 0) {
-      //this.getByPagesCuentas(this.page - 1, this.size);
+      this.getAllRemisiones(this.page - 1, this.size);
     }
   }
   onNextPage(): void {

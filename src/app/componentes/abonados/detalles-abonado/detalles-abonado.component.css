@@ -7,7 +7,7 @@
   --bgHisconsumo2: rgb(250, 236, 188);
 }
 #map {
-  height: 400px;
+  height: 300px; /* o 500px, según tu diseño */
   width: 100%;
 }
 .abonado {

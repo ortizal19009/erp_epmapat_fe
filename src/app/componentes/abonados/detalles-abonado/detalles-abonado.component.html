@@ -98,7 +98,7 @@
                         (click)="getConveniosPago( abonado.idabonado )" data-toggle="tab">Convenios de pago</a>
                   </li>
                   <li class="nav-item"><a class="nav-link cardTab" href="#georeferencia"
-                        (click)="getConveniosPago( abonado.idabonado )" data-toggle="tab">Ubicación</a>
+                        (click)="drawCuenta(abonado)" data-toggle="tab">Ubicación</a>
                   </li>
                </ul>
             </div>
@@ -251,11 +251,14 @@
                   <div class="tab-pane" id="georeferencia">
                      <div class="post">
                         <div class="user-block mb-0">
-                           <div class="chart">
+                           <div class="card text-center">
                               <!-- Sales Chart Canvas -->
                               <!--  <canvas id="salesChart" height="180" style="height: 180px;"></canvas> -->
-                              <div id="map" ></div>
-
+                              <div class="card-body">
+                                 <ng-container *ngIf="mostrarMapa">
+                                    <div id="map"></div>
+                                 </ng-container>
+                              </div>
                            </div>
                         </div>
                      </div>
@@ -390,7 +393,8 @@
                      data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
                   </button>
                   <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-                     <button class="dropdown-item" type="button" [disabled]="factura.pagado != 1" data-toggle="modal" (click)="impComprobante(factura)">
+                     <button class="dropdown-item" type="button" [disabled]="factura.pagado != 1" data-toggle="modal"
+                        (click)="impComprobante(factura)">
                         <i class="bi bi-printer"></i>&nbsp; Comprobante pago</button>
                      <button class="dropdown-item" type="button" [disabled]="factura.pagado != 1"
                         (click)="impFacturaElectronica(factura)">

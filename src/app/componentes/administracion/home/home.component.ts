@@ -92,71 +92,139 @@ export class HomeComponent implements OnInit, AfterViewInit {
     this.drawAllCuentas();
   }
 
-  private initMap(): void {
-    this.map = L.map('map', {
-      center: [46.0, -100.0],
-      zoom: 5,
-    });
+  /*  private initMap(): void {
+     this.map = L.map('map', {
+       center: [46.0, -100.0],
+       zoom: 5,
+     });
+ 
+     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+       attribution: '&copy; OpenStreetMap contributors',
+     }).addTo(this.map);
+ 
+     L.geoJSON(this.states, {
+       style: (feature: any) => {
+         switch (feature.properties.party) {
+           case 'Republican':
+             return { color: '#ff0000' };
+           case 'Democrat':
+             return { color: '#0000ff' };
+         }
+         return {};
+       },
+     }).addTo(this.map);
+   } */
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-    }).addTo(this.map);
-
-    L.geoJSON(this.states, {
-      style: (feature: any) => {
-        switch (feature.properties.party) {
-          case 'Republican':
-            return { color: '#ff0000' };
-          case 'Democrat':
-            return { color: '#0000ff' };
+  /*   drawAllCuentas(): void {
+      const cuenta: L.Marker[] = [];
+  
+      // Si hay abonados, agregarlos como marcadores
+      if (this._abonados.length > 0) {
+        this._abonados.forEach((item: any) => {
+          try {
+            const coordsArray: L.LatLngExpression = JSON.parse(
+              item.geolocalizacion
+            );
+            const marker = L.marker(coordsArray).bindPopup(
+              `Abonado ID: ${item.idabonado}`
+            );
+            cuenta.push(marker);
+          } catch (e) {
+            console.error('Error al parsear coordenadas:', item.geolocalizacion);
+          }
+        });
+      } else {
+        // Si no hay abonados, mostrar solo el edificio matriz
+        const marker = L.marker(this.edificioMatriz).bindPopup(
+          `Edificio Epmapa-T`
+        );
+        cuenta.push(marker);
+      }
+  
+      const cities = L.layerGroup(cuenta);
+  
+      // Capas base
+      const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap',
+      });
+  
+      const osmHOT = L.tileLayer(
+        'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+        {
+          maxZoom: 19,
+          attribution:
+            '© OpenStreetMap contributors, Tiles style by Humanitarian OpenStreetMap Team',
         }
-        return {};
-      },
-    }).addTo(this.map);
-  }
+      );
+  
+      const baseMaps = {
+        OpenStreetMap: osm,
+        'OpenStreetMap HOT': osmHOT,
+      };
+  
+      const overlayMaps = {
+        Cuentas: cities,
+      };
+  
+      // Si el mapa ya existe, limpiarlo y volver a cargar capas
+      if (this.map) {
+  
+        this.map.eachLayer((layer: any) => {
+          this.map!.removeLayer(layer);
+        });
+        osm.addTo(this.map);
+        cities.addTo(this.map);
+        L.control.layers(baseMaps, overlayMaps).addTo(this.map);
+      this.map.setView(this.edificioMatriz, 10);
+      } else {
+        // Si no existe, crear el mapa desde cero
+        this.map = L.map('map', {
+          center: this.edificioMatriz,
+          zoom: 19,
+          layers: [osm, cities],
+        });
+  
+        L.control.layers(baseMaps, overlayMaps).addTo(this.map);
+      }
+    } */
 
+
+  // Añade esta propiedad a tu componente para mantener referencia a la capa dinámica
+  private citiesLayer: L.LayerGroup | null = null;
   drawAllCuentas(): void {
     const cuenta: L.Marker[] = [];
-
     // Si hay abonados, agregarlos como marcadores
     if (this._abonados.length > 0) {
       this._abonados.forEach((item: any) => {
         try {
-          const coordsArray: L.LatLngExpression = JSON.parse(
-            item.geolocalizacion
-          );
-          const marker = L.marker(coordsArray).bindPopup(
-            `Abonado ID: ${item.idabonado}`
-          );
-          cuenta.push(marker);
+          if (item.geolocalizacion != null) {
+            const coordsArray: L.LatLngExpression = JSON.parse(item.geolocalizacion);
+            const marker = L.marker(coordsArray).bindPopup(`Abonado ID: ${item.idabonado}`);
+            cuenta.push(marker);
+          }
         } catch (e) {
           console.error('Error al parsear coordenadas:', item.geolocalizacion);
         }
       });
     } else {
       // Si no hay abonados, mostrar solo el edificio matriz
-      const marker = L.marker(this.edificioMatriz).bindPopup(
-        `Edificio Epmapa-T`
-      );
+      const marker = L.marker(this.edificioMatriz).bindPopup(`Edificio Epmapa-T`);
       cuenta.push(marker);
     }
 
-    const cities = L.layerGroup(cuenta);
+    const nuevaCitiesLayer = L.layerGroup(cuenta);
 
     // Capas base
     const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      attribution: '© OpenStreetMap',
+      attribution: '&copy; EPMAPA-T',
     });
 
-    const osmHOT = L.tileLayer(
-      'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-      {
-        maxZoom: 19,
-        attribution:
-          '© OpenStreetMap contributors, Tiles style by Humanitarian OpenStreetMap Team',
-      }
-    );
+    const osmHOT = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; EPMAPA-T',
+    });
 
     const baseMaps = {
       OpenStreetMap: osm,
@@ -164,32 +232,39 @@ export class HomeComponent implements OnInit, AfterViewInit {
     };
 
     const overlayMaps = {
-      Cuentas: cities,
+      Cuentas: nuevaCitiesLayer,
     };
 
-    // Si el mapa ya existe, limpiarlo y volver a cargar capas
     if (this.map) {
+      // Eliminar la capa de abonados anterior (si existe)
+      if (this.citiesLayer) {
+        this.map.removeLayer(this.citiesLayer);
+      }
 
-      this.map.eachLayer((layer: any) => {
-        this.map!.removeLayer(layer);
-      });
+      // Agregar la nueva capa
+      this.citiesLayer = nuevaCitiesLayer;
+      this.citiesLayer.addTo(this.map);
+      const mainView: L.LatLngExpression = JSON.parse(this._abonados[0].geolocalizacion);
 
-      osm.addTo(this.map);
-      cities.addTo(this.map);
-      L.control.layers(baseMaps, overlayMaps).addTo(this.map);
-      this.map.setView(this.edificioMatriz, 10);
+      // No volver a agregar los controles si ya están en el mapa
+      this.map.setView(mainView, 17);
     } else {
-      // Si no existe, crear el mapa desde cero
+      // Crear el mapa si no existe
       this.map = L.map('map', {
         center: this.edificioMatriz,
         zoom: 19,
-        layers: [osm, cities],
+        layers: [osm, nuevaCitiesLayer],
       });
 
+      this.citiesLayer = nuevaCitiesLayer;
+
+      // Agregar los controles base y de capa dinámica solo una vez
       L.control.layers(baseMaps, overlayMaps).addTo(this.map);
     }
   }
-
+  alert() {
+    console.log("DATOS")
+  }
   async getResumenEmisiones(limit: number) {
     this._resumenEmisiones = await this.s_emisiones.getResumenEmision(limit);
   }
@@ -207,6 +282,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
     });
   }
   async getAbonadosByRutas(idruta: number) {
+    this._abonados = [];
     this._abonados = await this.s_abonados.getByIdrutaAsync(idruta);
     this.drawAllCuentas();
   }

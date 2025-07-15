@@ -11,6 +11,7 @@ import { PdfService } from 'src/app/servicios/pdf.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { JasperReportService } from 'src/app/servicios/jasper-report.service';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 
 @Component({
   selector: 'app-imp-emisiones',
@@ -40,6 +41,7 @@ export class ImpEmisionesComponent implements OnInit {
   tipe: string = 'text';
   date: Date = new Date();
   pdfview: any;
+  usuario: any;
   constructor(
     public fb: FormBuilder,
     private router: Router,
@@ -49,10 +51,12 @@ export class ImpEmisionesComponent implements OnInit {
     private s_emisionindividual: EmisionIndividualService,
     private s_loading: LoadingService,
     private s_rubroxfac: RubroxfacService,
-    private s_jasperReport: JasperReportService
+    private s_jasperReport: JasperReportService,
+    public authService: AutorizaService
   ) { }
 
   ngOnInit(): void {
+    this.usuario = this.authService.idusuario
     sessionStorage.setItem('ventana', '/emisiones');
     let coloresJSON = sessionStorage.getItem('/emisiones');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
@@ -110,7 +114,7 @@ export class ImpEmisionesComponent implements OnInit {
       if (pdfViewer) {
         pdfViewer.src = fileURL;
       }
-    }, 1000);
+    }, 500);
 
     this.s_loading.hideLoading();
   }
@@ -244,7 +248,7 @@ export class ImpEmisionesComponent implements OnInit {
     cm3inicial.forEach((item: any) => {
       body2.push([item.abonados, item.m3]);
     });
-    console.log(count.length+"<===========")
+    console.log(count.length + "<===========")
     if (count.length > 0) {
 
       count.forEach((item: any) => {
