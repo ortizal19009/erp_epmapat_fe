@@ -69,8 +69,9 @@ export class StatusConveniosComponent implements OnInit {
       sessionStorage.setItem('idconvenioToInfo', idconvenio.toString());
       this.router.navigate(['info-convenio']);
     }
-  } changeDesdeHasta() { this.getConvenios(this.page, this.size) };
-  buscaConvenios() { this.getConvenios(this.page, this.size) };
+  } 
+  changeDesdeHasta() { this.page = 0; this.getConvenios(this.page, this.size) };
+  buscaConvenios() { this.page = 0; this.getConvenios(this.page, this.size) };
   modiConvenio(idconvenio: number) { }
 
   getConvenios(page: number, size: number) {
