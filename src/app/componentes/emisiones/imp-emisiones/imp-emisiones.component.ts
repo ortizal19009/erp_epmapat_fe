@@ -53,10 +53,10 @@ export class ImpEmisionesComponent implements OnInit {
     private s_rubroxfac: RubroxfacService,
     private s_jasperReport: JasperReportService,
     public authService: AutorizaService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
-    this.usuario = this.authService.idusuario
+    this.usuario = this.authService.idusuario;
     sessionStorage.setItem('ventana', '/emisiones');
     let coloresJSON = sessionStorage.getItem('/emisiones');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
@@ -72,7 +72,6 @@ export class ImpEmisionesComponent implements OnInit {
       d_emi: '',
       h_emi: '',
     });
-
 
     let h: String;
     this.emiService.ultimo().subscribe({
@@ -91,17 +90,16 @@ export class ImpEmisionesComponent implements OnInit {
     this.listAllEmisiones();
   }
 
-
   async getReporte(idemision: number) {
     let datos: any;
     datos = {
-      "reportName": "ResumenEmision",
-      "parameters": {
-        "idemision": idemision
+      reportName: 'ResumenEmision',
+      parameters: {
+        idemision: idemision,
       },
-      "extencion": ".pdf"
-    }
-    let reporte = await this.s_jasperReport.getReporte(datos)
+      extencion: '.pdf',
+    };
+    let reporte = await this.s_jasperReport.getReporte(datos);
     setTimeout(() => {
       const file = new Blob([reporte], { type: 'application/pdf' });
       const fileURL = URL.createObjectURL(file);
@@ -175,9 +173,7 @@ export class ImpEmisionesComponent implements OnInit {
         );
         break;
       case '9':
-        this.impRefEmisionRubros(
-          this.formImprimir.value.emision,
-        );
+        this.impRefEmisionRubros(this.formImprimir.value.emision);
         break;
       case '10':
         this.impRefFechaRubros(
@@ -186,7 +182,7 @@ export class ImpEmisionesComponent implements OnInit {
         );
         break;
       case '11':
-        this.getReporte(this.formImprimir.value.emision)
+        this.getReporte(this.formImprimir.value.emision);
         break;
     }
   }
@@ -248,9 +244,8 @@ export class ImpEmisionesComponent implements OnInit {
     cm3inicial.forEach((item: any) => {
       body2.push([item.abonados, item.m3]);
     });
-    console.log(count.length + "<===========")
+    console.log(count.length + '<===========');
     if (count.length > 0) {
-
       count.forEach((item: any) => {
         console.log(item);
         body3.push([
@@ -263,7 +258,7 @@ export class ImpEmisionesComponent implements OnInit {
         ]);
       });
     } else {
-      body3.push(['', '', '', '', '', ''])
+      body3.push(['', '', '', '', '', '']);
     }
 
     /*    this.s_pdf.bodyOneTable(
@@ -399,19 +394,18 @@ export class ImpEmisionesComponent implements OnInit {
             lectura.cuenta,
             lectura.nombre,
             lectura.ruta,
-            lectura.suma.toFixed(2)
+            lectura.suma.toFixed(2),
           ]);
-          suma += lectura.suma
-
+          suma += lectura.suma;
         });
-        body.push(['', '', '', '', 'TOTAL', suma.toFixed(2)])
+        body.push(['', '', '', '', 'TOTAL', suma.toFixed(2)]);
         this.s_pdf.bodyOneTable(
           `Facturas eliminadas - Emisión: ${lecturas[0].emision}`,
           head,
           body,
           doc
         );
-        this.s_loading.hideLoading()
+        this.s_loading.hideLoading();
       },
       error: (e) => console.error(e),
     });
@@ -585,53 +579,72 @@ export class ImpEmisionesComponent implements OnInit {
       doc
     );
     this.s_loading.hideLoading();
-
   }
   async impRefacturacionxEmision(idemision: number) {
     let emision = await this.getEmision(idemision);
     let obj: any = await this.getRefacturacionxEmision(idemision);
     let eliminadas: any = await this.getFacElimByEmision(idemision);
-    console.log(eliminadas)
+    console.log(eliminadas);
     let doc = new jsPDF();
     let n_suma: number = 0;
     let a_suma: number = 0;
     let sum_eliminadas: number = 0;
-    let head = [[`REFACTURACIÓN DE LA EMISION ${emision?.emision} `],
-    [
-      'CUENTA',
-      'NOMBRE',
-      'RAZON REFACTURACIÓN',
-      'FECHA BAJA',
-      'VALOR ANTERIOR',
-      'VALOR NUEVO',
-      'DIFERENCIA'
-    ],
+    let head = [
+      [`REFACTURACIÓN DE LA EMISION ${emision?.emision} `],
+      [
+        'CUENTA',
+        'NOMBRE',
+        'RAZON REFACTURACIÓN',
+        'FECHA BAJA',
+        'VALOR ANTERIOR',
+        'VALOR NUEVO',
+        'DIFERENCIA',
+      ],
     ];
-    let head2 = [[`BAJAS DE LA EMISION ${emision?.emision}`],
-    ['CUENTA', 'NOMBRE', 'PLANILLA', 'USU.BAJA', 'RAZON BAJA', 'FECHA BAJA', 'VALOR']]
+    let head2 = [
+      [`BAJAS DE LA EMISION ${emision?.emision}`],
+      [
+        'CUENTA',
+        'NOMBRE',
+        'PLANILLA',
+        'USU.BAJA',
+        'RAZON BAJA',
+        'FECHA BAJA',
+        'VALOR',
+      ],
+    ];
     let body: any = [];
     let body2: any = [];
     let diferencia: number = 0;
     obj.forEach((item: any) => {
-      let va = item.valoranterior
-      let vn = item.valornuevo
-      let dif = va - vn
+      let va = item.valoranterior > 0 ? item.valoranterior : 0;
+      let vn = item.valornuevo > 0 ? item.valornuevo : 0;
+      let dif = va - vn;
+
       body.push([
         item.cuenta,
         item.nombre,
         item.observaciones,
         item.fecelimina,
-        va.toFixed(2),
-        vn.toFixed(2),
-        dif.toFixed(2)
+        va.toFixed(2) ,
+        vn.toFixed(2) ,
+        dif.toFixed(2),
       ]);
       n_suma += item.valornuevo;
       a_suma += item.valoranterior;
       diferencia = a_suma - n_suma;
     });
-    body.push(['', '', '', 'TOTALES', a_suma.toFixed(2), n_suma.toFixed(2), diferencia.toFixed(2)]);
+    body.push([
+      '',
+      '',
+      '',
+      'TOTALES',
+      a_suma.toFixed(2),
+      n_suma.toFixed(2),
+      diferencia.toFixed(2),
+    ]);
     eliminadas.forEach((item: any) => {
-      let va = item.total
+      let va = item.total;
       body2.push([
         item.cuenta,
         item.nombre,
@@ -640,7 +653,6 @@ export class ImpEmisionesComponent implements OnInit {
         item.razoneliminacion,
         item.fechaeliminacion,
         va.toFixed(2),
-
       ]);
       sum_eliminadas += va;
     });
@@ -654,40 +666,50 @@ export class ImpEmisionesComponent implements OnInit {
       doc
     );
     this.s_loading.hideLoading();
-
   }
   async impRefacturacionxFecha(d: Date, h: Date) {
     let obj: any = await this.getRefacturacionxFecha(d, h);
-    let eliminadas: any = await this.getFacElimByFechaElimina(d, h)
+    let eliminadas: any = await this.getFacElimByFechaElimina(d, h);
     let doc = new jsPDF();
     let n_suma: number = 0;
     let a_suma: number = 0;
     let sum_eliminadas: number = 0;
 
-    let head = [['LISTADO DE REFACTURACIONES'],
-    [
-      'CUENTA',
-      'NOMBRE',
-      'RAZON REFACTURACIÓN',
-      'FECHA ELIMINACIÓN',
-      'EMI. ANTERIOR',
-      'VALOR ANTERIOR',
-      'EMI. ACTUAL',
-      'VALOR NUEVO',
-      'DIFERENCIA'
-    ],
+    let head = [
+      ['LISTADO DE REFACTURACIONES'],
+      [
+        'CUENTA',
+        'NOMBRE',
+        'RAZON REFACTURACIÓN',
+        'FECHA ELIMINACIÓN',
+        'EMI. ANTERIOR',
+        'VALOR ANTERIOR',
+        'EMI. ACTUAL',
+        'VALOR NUEVO',
+        'DIFERENCIA',
+      ],
     ];
-    let head2 = [[`LISTADO DE BAJAS`],
-    ['CUENTA', 'NOMBRE', 'PLANILLA', 'USU.BAJA', 'RAZON BAJA', 'FECHA BAJA', 'VALOR']]
+    let head2 = [
+      [`LISTADO DE BAJAS`],
+      [
+        'CUENTA',
+        'NOMBRE',
+        'PLANILLA',
+        'USU.BAJA',
+        'RAZON BAJA',
+        'FECHA BAJA',
+        'VALOR',
+      ],
+    ];
     let body: any = [];
     let body2: any = [];
     obj.forEach((item: any) => {
       let diferencia: number = item.valoranterior - item.valornuevo;
       if (item.valoranterior === null) {
-        item.valoranterior = 0
+        item.valoranterior = 0;
       }
       if (item.valornuevo === null) {
-        item.valornuevo = 0
+        item.valornuevo = 0;
       }
       body.push([
         item.cuenta,
@@ -698,14 +720,24 @@ export class ImpEmisionesComponent implements OnInit {
         item.valoranterior.toFixed(2) || 0,
         item.emisionnueva,
         item.valornuevo.toFixed(2),
-        diferencia.toFixed(2)
+        diferencia.toFixed(2),
       ]);
       n_suma += item.valornuevo;
       a_suma += item.valoranterior;
     });
-    body.push(['', '', '', '', 'TOTALES', a_suma.toFixed(2), '', n_suma.toFixed(2), (a_suma - n_suma).toFixed(2)]);
+    body.push([
+      '',
+      '',
+      '',
+      '',
+      'TOTALES',
+      a_suma.toFixed(2),
+      '',
+      n_suma.toFixed(2),
+      (a_suma - n_suma).toFixed(2),
+    ]);
     eliminadas.forEach((item: any) => {
-      let va = item.total
+      let va = item.total;
       body2.push([
         item.cuenta,
         item.nombre,
@@ -714,65 +746,106 @@ export class ImpEmisionesComponent implements OnInit {
         item.razoneliminacion,
         item.fechaeliminacion,
         va.toFixed(2),
-
       ]);
       sum_eliminadas += va;
     });
     body2.push(['', '', '', '', 'TOTAL', sum_eliminadas.toFixed(2), '']);
-    this.s_pdf._bodyShowTwoTables(`Refacturación y bajas ${d} - ${h}`,
+    this.s_pdf._bodyShowTwoTables(
+      `Refacturación y bajas ${d} - ${h}`,
       head,
       body,
       head2,
       body2,
-      doc);
+      doc
+    );
     this.s_loading.hideLoading();
-
   }
   async impRefEmisionRubros(idemision: number) {
-    let doc: jsPDF = new jsPDF()
+    let doc: jsPDF = new jsPDF();
     let emision = await this.getEmision(idemision);
-    let valoresAnteriores: any = await this.s_emisionindividual.getRefacturacionRubrosAnteriores(idemision);
-    let valoresNuevos: any = await this.s_emisionindividual.getRefacturacionRubrosNuevos(idemision);
-    let headAnteriores: any = [['Rubros eliminados'], ['Código', 'Descripción', 'Total']];
-    let headNuevos: any = [['Rubros generados'], ['Código', 'Descripción', 'Total']];
+    let valoresAnteriores: any =
+      await this.s_emisionindividual.getRefacturacionRubrosAnteriores(
+        idemision
+      );
+    let valoresNuevos: any =
+      await this.s_emisionindividual.getRefacturacionRubrosNuevos(idemision);
+    let headAnteriores: any = [
+      ['Rubros eliminados'],
+      ['Código', 'Descripción', 'Total'],
+    ];
+    let headNuevos: any = [
+      ['Rubros generados'],
+      ['Código', 'Descripción', 'Total'],
+    ];
     let bodyAnteriores: any = [];
     let bodyNuevos: any = [];
     let sumaAnteriores: number = 0;
     let sumaNuevos: number = 0;
     valoresAnteriores.forEach((item: any) => {
-      bodyAnteriores.push([item.idrubro_rubros, item.descripcion, item.sum])
+      bodyAnteriores.push([item.idrubro_rubros, item.descripcion, item.sum]);
       sumaAnteriores += item.sum;
-    })
-    bodyAnteriores.push(['', 'TOTAL', sumaAnteriores.toFixed(2)])
+    });
+    bodyAnteriores.push(['', 'TOTAL', sumaAnteriores.toFixed(2)]);
     valoresNuevos.forEach((item: any) => {
-      bodyNuevos.push([item.idrubro_rubros, item.descripcion, item.sum])
-      sumaNuevos += item.sum
-    })
-    bodyNuevos.push(['', 'TOTAL', sumaNuevos.toFixed(2)], ['', 'DIFERENCIA', (sumaAnteriores - sumaNuevos).toFixed(2)])
-    this.s_pdf.bodyTwoTables(`Refacturaciones por rubros emision: ${emision?.emision}`, headAnteriores, bodyAnteriores, headNuevos, bodyNuevos, doc);
+      bodyNuevos.push([item.idrubro_rubros, item.descripcion, item.sum]);
+      sumaNuevos += item.sum;
+    });
+    bodyNuevos.push(
+      ['', 'TOTAL', sumaNuevos.toFixed(2)],
+      ['', 'DIFERENCIA', (sumaAnteriores - sumaNuevos).toFixed(2)]
+    );
+    this.s_pdf.bodyTwoTables(
+      `Refacturaciones por rubros emision: ${emision?.emision}`,
+      headAnteriores,
+      bodyAnteriores,
+      headNuevos,
+      bodyNuevos,
+      doc
+    );
     this.s_loading.hideLoading();
   }
   async impRefFechaRubros(d: Date, h: Date) {
-    let doc: jsPDF = new jsPDF()
-    let valoresAnteriores: any = await this.s_emisionindividual.getRefacturacionxFechaRubrosAnteriores(d, h);
-    let valoresNuevos: any = await this.s_emisionindividual.getRefacturacionxFechaRubrosNuevos(d, h);
-    let headAnteriores: any = [['Rubros eliminados'], ['Código', 'Descripción', 'Total']];
-    let headNuevos: any = [['Rubros generados'], ['Código', 'Descripción', 'Total']];
+    let doc: jsPDF = new jsPDF();
+    let valoresAnteriores: any =
+      await this.s_emisionindividual.getRefacturacionxFechaRubrosAnteriores(
+        d,
+        h
+      );
+    let valoresNuevos: any =
+      await this.s_emisionindividual.getRefacturacionxFechaRubrosNuevos(d, h);
+    let headAnteriores: any = [
+      ['Rubros eliminados'],
+      ['Código', 'Descripción', 'Total'],
+    ];
+    let headNuevos: any = [
+      ['Rubros generados'],
+      ['Código', 'Descripción', 'Total'],
+    ];
     let bodyAnteriores: any = [];
     let bodyNuevos: any = [];
     let sumaAnteriores: number = 0;
     let sumaNuevos: number = 0;
     valoresAnteriores.forEach((item: any) => {
-      bodyAnteriores.push([item.idrubro_rubros, item.descripcion, item.sum])
+      bodyAnteriores.push([item.idrubro_rubros, item.descripcion, item.sum]);
       sumaAnteriores += item.sum;
-    })
-    bodyAnteriores.push(['', 'TOTAL', sumaAnteriores.toFixed(2)])
+    });
+    bodyAnteriores.push(['', 'TOTAL', sumaAnteriores.toFixed(2)]);
     valoresNuevos.forEach((item: any) => {
-      bodyNuevos.push([item.idrubro_rubros, item.descripcion, item.sum])
-      sumaNuevos += item.sum
-    })
-    bodyNuevos.push(['', 'TOTAL', sumaNuevos.toFixed(2)], ['', 'DIFERENCIA', (sumaAnteriores - sumaNuevos).toFixed(2)])
-    this.s_pdf.bodyTwoTables(`Refacturaciones por fecha ${d} - ${h}`, headAnteriores, bodyAnteriores, headNuevos, bodyNuevos, doc);
+      bodyNuevos.push([item.idrubro_rubros, item.descripcion, item.sum]);
+      sumaNuevos += item.sum;
+    });
+    bodyNuevos.push(
+      ['', 'TOTAL', sumaNuevos.toFixed(2)],
+      ['', 'DIFERENCIA', (sumaAnteriores - sumaNuevos).toFixed(2)]
+    );
+    this.s_pdf.bodyTwoTables(
+      `Refacturaciones por fecha ${d} - ${h}`,
+      headAnteriores,
+      bodyAnteriores,
+      headNuevos,
+      bodyNuevos,
+      doc
+    );
     this.s_loading.hideLoading();
   }
 
@@ -787,8 +860,14 @@ export class ImpEmisionesComponent implements OnInit {
     let emision: any = await this.getEmision(idemision);
     let anteriores: any = await this.getEmisionesAnteriores(idemision);
     let nuevas: any = await this.getEmisionesNuevas(idemision);
-    let headAnteriores: any = [['Facturas eliminadas'], ['Cuenta', 'Emision', 'Planilla', 'Total']];
-    let headNuevas: any = [['Facturas emitidas'], ['Cuenta', 'Emision', 'Planilla', 'Total']];
+    let headAnteriores: any = [
+      ['Facturas eliminadas'],
+      ['Cuenta', 'Emision', 'Planilla', 'Total'],
+    ];
+    let headNuevas: any = [
+      ['Facturas emitidas'],
+      ['Cuenta', 'Emision', 'Planilla', 'Total'],
+    ];
     let bodyAnteriores: any = [];
     let bodyNuevas: any = [];
     let sumant: number = 0;
@@ -876,8 +955,7 @@ export class ImpEmisionesComponent implements OnInit {
     return reporte;
   }
   async getFacElimByFechaElimina(d: Date, h: Date) {
-    let reporte = await this.s_emisionindividual
-      .getFacElimByFechaElimina(d, h);
+    let reporte = await this.s_emisionindividual.getFacElimByFechaElimina(d, h);
     return reporte;
   }
   async getZeroByEmisiones(idemision: number) {
@@ -891,7 +969,7 @@ export class ImpEmisionesComponent implements OnInit {
       const strfecha = fecha.toISOString().slice(0, 10);
       this.formImprimir.patchValue({
         d_emi: strfecha,
-        h_emi: strfecha
+        h_emi: strfecha,
       });
     } else if (this.opcreporte === 0) {
       this.tipe = 'text';
@@ -931,7 +1009,6 @@ export class ImpEmisionesComponent implements OnInit {
         },
         error: (err) => console.error(err.error),
       });
-
   }
   impListaEmisiones() {
     let doc = new jsPDF();
@@ -952,7 +1029,6 @@ export class ImpEmisionesComponent implements OnInit {
     // datos.push(['', 'TOTAL', '', '', '', this.sumtotal.toLocaleString('en-US')]);
     this.s_pdf.bodyOneTable('Listado de emisiones', head, datos, doc);
     this.s_loading.hideLoading();
-
   }
   async getEmision(idemision: number) {
     const emision = await this.emiService.getByIdemision(idemision).toPromise();

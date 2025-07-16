@@ -4,11 +4,12 @@ import { Router } from '@angular/router';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { ConvenioService } from 'src/app/servicios/convenio.service';
+import { LoadingService } from 'src/app/servicios/loading.service';
 
 @Component({
   selector: 'app-status-convenios',
   templateUrl: './status-convenios.component.html',
-  styleUrls: ['./status-convenios.component.css']
+  styleUrls: ['./status-convenios.component.css'],
 })
 export class StatusConveniosComponent implements OnInit {
   formBuscar: FormGroup;
@@ -25,8 +26,14 @@ export class StatusConveniosComponent implements OnInit {
   pages: number[] = []; // Lista de números de página
   maxPagesToShow: number = 5; // Máximo número de botones a mostrar
 
-  constructor(private convService: ConvenioService, private router: Router, private fb: FormBuilder,
-    public authService: AutorizaService, private coloresService: ColoresService) { }
+  constructor(
+    private convService: ConvenioService,
+    private router: Router,
+    private fb: FormBuilder,
+    public authService: AutorizaService,
+    private coloresService: ColoresService,
+    private s_loading: LoadingService
+  ) {}
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/estados-convenios');
@@ -39,13 +46,11 @@ export class StatusConveniosComponent implements OnInit {
       hasta: ['20'],
     });
     this.getConvenios(this.page, this.size);
-
-
   }
   colocaColor(colores: any) {
     document.documentElement.style.setProperty('--bgcolor1', colores[0]);
     const cabecera = document.querySelector('.cabecera');
-    if (cabecera) cabecera.classList.add('nuevoBG1')
+    if (cabecera) cabecera.classList.add('nuevoBG1');
     document.documentElement.style.setProperty('--bgcolor2', colores[1]);
     const detalle = document.querySelector('.detalle');
     if (detalle) detalle.classList.add('nuevoBG2');
@@ -53,39 +58,58 @@ export class StatusConveniosComponent implements OnInit {
 
   async buscaColor() {
     try {
-      const datos = await this.coloresService.setcolor(this.authService.idusuario, 'estados-convenios');
+      const datos = await this.coloresService.setcolor(
+        this.authService.idusuario,
+        'estados-convenios'
+      );
       const coloresJSON = JSON.stringify(datos);
       sessionStorage.setItem('/estados-convenios', coloresJSON);
       this.colocaColor(datos);
-    } catch (error) { console.error(error); }
+    } catch (error) {
+      console.error(error);
+    }
   }
 
-  nuevo() { };
-  imprimir() { };
-  listainicial() { };
+  nuevo() {}
+  imprimir() {}
+  listainicial() {}
   info(event: any, idconvenio: number) {
     const tagName = event.target.tagName;
     if (tagName === 'TD') {
       sessionStorage.setItem('idconvenioToInfo', idconvenio.toString());
       this.router.navigate(['info-convenio']);
     }
-  } 
-  changeDesdeHasta() { this.page = 0; this.getConvenios(this.page, this.size) };
-  buscaConvenios() { this.page = 0; this.getConvenios(this.page, this.size) };
-  modiConvenio(idconvenio: number) { }
+  }
+  changeDesdeHasta() {
+    this.page = 0;
+    this.getConvenios(this.page, this.size);
+  }
+  buscaConvenios() {
+    this.page = 0;
+    this.getConvenios(this.page, this.size);
+  }
+  modiConvenio(idconvenio: number) {}
 
   getConvenios(page: number, size: number) {
-    this.convService.getByPendientesPagos(this.formBuscar.value.desde, this.formBuscar.value.hasta, page, size).subscribe({
-      next: (datos: any) => {
-        this.size = datos.size;
-        this.page = datos.pageable.pageNumber;
-        this.totalPages = datos.totalPages
-        this._convenios = datos.content
-        this.updatePages();
-
-      },
-      error: (e: any) => console.error(e)
-    })
+    this.s_loading.showLoading();
+    this.convService
+      .getByPendientesPagos(
+        this.formBuscar.value.desde,
+        this.formBuscar.value.hasta,
+        page,
+        size
+      )
+      .subscribe({
+        next: (datos: any) => {
+          this.size = datos.size;
+          this.page = datos.pageable.pageNumber;
+          this.totalPages = datos.totalPages;
+          this._convenios = datos.content;
+          this.updatePages();
+          this.s_loading.hideLoading();
+        },
+        error: (e: any) => console.error(e),
+      });
   }
   /* Inicio de configuracion de paginacion */
   onPreviousPage(): void {
@@ -120,5 +144,4 @@ export class StatusConveniosComponent implements OnInit {
       (_, i) => startPage + i
     );
   }
-
 }
