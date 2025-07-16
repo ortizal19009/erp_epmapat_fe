@@ -46,8 +46,8 @@
                   <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
                <button class="dropdown-item" type="button" (click)="imprimir()">
                   <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
-               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar">
-                  <i class="bi-file-earmark-arrow-up"></i> &nbsp; Exportar</button>
+               <button class="dropdown-item" type="button" [routerLink]="['/estados-convenios']">
+                  <i class="fa fa-pie-chart" aria-hidden="true"></i> &nbsp; Estados</button>
             </div>
          </div>
 

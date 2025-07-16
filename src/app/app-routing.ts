@@ -269,6 +269,7 @@ import { NtacreditoComponent } from './componentes/ntacredito/ntacredito.compone
 import { AddNtacreditoComponent } from './componentes/ntacredito/add-ntacredito/add-ntacredito.component';
 import { DefinirComponent } from './componentes/administracion/definir/definir.component';
 import { HomeComponent } from './componentes/administracion/home/home.component';
+import { StatusConveniosComponent } from './componentes/convenios/status-convenios/status-convenios.component';
 
 const routes: Routes = [
   //Consumo de Agua
@@ -279,7 +280,7 @@ const routes: Routes = [
   { path: 'buscar-cliente', component: BuscarClienteComponent },
   { path: 'imp-clientes', component: ImpClienteComponent },
   { path: 'imp-infocliente', component: ImpInfoclienteComponent },
-  {path: 'home', component: HomeComponent},
+  { path: 'home', component: HomeComponent },
 
   { path: 'abonados', component: ListarAbonadosComponent },
   { path: 'add-abonado', component: AddAbonadosComponent },
@@ -371,6 +372,7 @@ const routes: Routes = [
   { path: 'add-convenio', component: AddConvenioComponent },
   { path: 'modi-convenio', component: ModiConvenioComponent },
   { path: 'info-convenio', component: InfoConvenioComponent },
+  { path: 'estados-convenios', component: StatusConveniosComponent },
   //{ path: 'imp-convenios', component: ImpConveniosComponent },
   // Intereses
   { path: 'intereses', component: ListarInteresesComponent },

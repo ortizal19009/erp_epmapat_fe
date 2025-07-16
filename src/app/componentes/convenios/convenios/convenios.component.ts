@@ -8,7 +8,7 @@ import { ColoresService } from 'src/app/compartida/colores.service';
 
 @Component({
    selector: 'app-convenios',
-   templateUrl: './convenios.component.html', 
+   templateUrl: './convenios.component.html',
    styleUrls: ['./convenios.component.css']
 })
 
@@ -88,6 +88,7 @@ export class ConveniosComponent implements OnInit {
          if (hasta - desde < 200) {
             this.convService.conveniosDesdeHasta(desde, hasta).subscribe({
                next: datos => {
+                  console.log(datos)
                   this._convenios = datos;
                   this.swbuscando = false;
                   this.txtbuscar = 'Buscar'

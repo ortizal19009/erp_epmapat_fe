@@ -286,6 +286,7 @@ import { SafePipe } from './pipes/safe.pipe';
 import { NtacreditoComponent } from './componentes/ntacredito/ntacredito.component';
 import { AddNtacreditoComponent } from './componentes/ntacredito/add-ntacredito/add-ntacredito.component';
 import { HomeComponent } from './componentes/administracion/home/home.component';
+import { StatusConveniosComponent } from './componentes/convenios/status-convenios/status-convenios.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
@@ -560,6 +561,7 @@ import { HomeComponent } from './componentes/administracion/home/home.component'
     NtacreditoComponent,
     AddNtacreditoComponent,
     HomeComponent,
+    StatusConveniosComponent,
   ],
 
   imports: [
