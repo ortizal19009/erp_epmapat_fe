@@ -16,7 +16,11 @@ export class CvFacturasComponent implements OnInit {
   filtro: string;
   _facturas: any;
   today: Date = new Date();
+  nomCliente: string = '';
+  total: number = 0;
   _clientes: any;
+  swfacturas: boolean = true;
+  idplanilla: number = 0;
   /* variables para hacer la paginación  */
   page: number = 0;
   size: number = 20;
@@ -42,11 +46,12 @@ export class CvFacturasComponent implements OnInit {
     this.f_buscar = this.fb.group({
       sDate: d,
       filtro: '',
+      nombre: ''
     });
     //this.getCarteraOfFacturas(d);
     this.getCarteraOfClientes(d, this.page, this.size);
   }
-  onChangeDate() { this.getCarteraOfClientes(this.f_buscar.value.sDate, this.page, this.size) }
+  onChangeDate() { this.page = 0; this.getCarteraOfClientes(this.f_buscar.value.sDate, this.page, this.size) }
 
   colocaColor(colores: any) {
     document.documentElement.style.setProperty('--bgcolor1', colores[0]);
@@ -66,18 +71,10 @@ export class CvFacturasComponent implements OnInit {
       console.error(error);
     }
   }
-  getCarteraOfFacturas(date: any) {
-    this.s_facturas.getCVFacturaconsumo(date).subscribe({
-      next: (facturas: any) => {
-        console.log(facturas);
-        this._facturas = facturas;
-      },
-      error: (e: any) => console.error(e),
-    });
-  }
+
   getCarteraOfClientes(date: any, page: number, size: number) {
     this.s_loading.showLoading();
-    this.s_clientes.CVOfClientes(date, page, size).then((items: any) => {
+    this.s_clientes.CVOfClientes(date, this.f_buscar.value.nombre, page, size).then((items: any) => {
       this._clientes = items.content
       this.size = items.size;
       this.page = items.pageable.pageNumber;
@@ -86,6 +83,29 @@ export class CvFacturasComponent implements OnInit {
       this.updatePages();
       this.s_loading.hideLoading();
     }).catch((error: any) => console.error(error))
+  }
+  getDetallePlanilla(idplanilla: number) {
+    this.s_loading.showLoading()
+    this.idplanilla = idplanilla;
+    this.swfacturas = false;
+    this.s_loading.hideLoading();
+
+  }
+
+  getFacturasByCliente(idcliente: number) {
+    this.s_loading.showLoading()
+
+    this.total = 0;
+    this.s_facturas.getSinCobro(idcliente).subscribe({
+      next: (datos: any) => {
+        datos.length > 0 ? this.nomCliente = datos[0].idcliente.nombre : this.nomCliente = '';
+        this._facturas = datos;
+        datos.forEach((item: any) => {
+          this.total += item.totaltarifa;
+        })
+        this.s_loading.hideLoading();
+      }
+    })
   }
 
 

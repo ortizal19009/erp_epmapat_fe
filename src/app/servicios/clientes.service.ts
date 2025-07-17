@@ -80,7 +80,7 @@ export class ClientesService {
   async asynGetCVOfClientes(fecha: any) {
     return await firstValueFrom(this.http.get(`${baseUrl}/reportes/carteravencida?fecha=${fecha}`))
   }
-  async CVOfClientes(fecha: any, page: number, size: number) {
-    return await firstValueFrom(this.http.get(`${baseUrl}/cartera/clientes?fecha=${fecha}&page=${page}&size=${size}`))
+  async CVOfClientes(fecha: any,name: string, page: number, size: number) {
+    return await firstValueFrom(this.http.get(`${baseUrl}/cartera/clientes?fecha=${fecha}&name=${name}&page=${page}&size=${size}`))
   }
 }

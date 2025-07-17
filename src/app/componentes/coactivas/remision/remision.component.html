@@ -71,47 +71,43 @@
                         </thead>
                         <tbody class="">
                             <tr *ngFor="let remision of _remisiones |filter:filtro; let i = index"
-                                (click)="getRemisionById(remision)" data-toggle="modal" data-target="#detallesModal">
+                                (click)="getRemisionById(remision)" data-toggle="modal" data-target="#detalleCliente">
                                 <td class="small text-center font-weight-bold">{{i+1}}</td>
-                                <td>{{remision.idcliente_clientes.nombre}}</td>
+                                <td class="description">{{remision.idcliente_clientes.nombre}}</td>
                                 <td class="text-center">{{remision.idcliente_clientes.cedula}}</td>
                                 <td class="text-center">{{remision.idabonado_abonados.idabonado}}</td>
                                 <td class="text-right">{{remision.cuotas}} </td>
                                 <td class="text-right">{{remision.feccrea}} </td>
                                 <td class="text-right">{{remision.totcapital.toFixed(2)}} $</td>
                                 <td class="text-right">{{remision.totintereses.toFixed(2)}} $</td>
-
                             </tr>
                         </tbody>
                         <caption class="small mark"> <strong>{{page+1}}/{{totalPages}}</strong> total registros
                             {{totalElements}}
                             <!--   <button class="btn btn-outline-primary btn-xs">&nbsp;&nbsp;Rango&nbsp;&nbsp;</button> -->
+                            <nav aria-label="Page navigation example">
+                                <ul class="pagination justify-content-end">
+                                    <li class="page-item">
+                                        <button class="btn btn-xs btn-primary" (click)="onPreviousPage()"> <span
+                                                aria-hidden="true">&laquo;</span>
+                                        </button>
+                                    </li>
+                                    <li class="page-item" *ngFor="let p of pages">
+                                        <button class="btn btn-xs btn-outline-primary" (click)="onGoToPage(p)"
+                                            [class.active]="p === page">
+                                            {{ p + 1 }}
+                                        </button>
+                                    </li>
+                                    <li class="page-item">
+                                        <button class="btn btn-xs btn-primary" (click)="onNextPage()"> <span
+                                                aria-hidden="true">&raquo;</span>
+                                        </button>
+                                    </li>
+                                </ul>
+                            </nav>
                         </caption>
                     </table>
-
                 </div>
-            </div>
-            <div class="card-footer">
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination justify-content-end">
-                        <li class="page-item">
-                            <button class="btn btn-sm btn-primary" (click)="onPreviousPage()"> <span
-                                    aria-hidden="true">&laquo;</span>
-                            </button>
-                        </li>
-                        <li class="page-item" *ngFor="let p of pages">
-                            <button class="btn btn-sm btn-outline-primary" (click)="onGoToPage(p)"
-                                [class.active]="p === page">
-                                {{ p + 1 }}
-                            </button>
-                        </li>
-                        <li class="page-item">
-                            <button class="btn btn-sm btn-primary" (click)="onNextPage()"> <span
-                                    aria-hidden="true">&raquo;</span>
-                            </button>
-                        </li>
-                    </ul>
-                </nav>
             </div>
         </div>
     </div>
@@ -121,12 +117,12 @@
 
 
 <!-- Modal-Visualizar-Reporte -->
-<div class="modal fade" id="impRemision" data-backdrop="static" data-keyboard="false" tabindex="-1"
-    aria-labelledby="impRemisionLabel" aria-hidden="true">
+<div class="modal fade" id="detalleCliente" data-backdrop="static" data-keyboard="false" tabindex="-1"
+    aria-labelledby="detalleClienteLabel" aria-hidden="true">
     <div class="modal-dialog modal-{{modalSize}}">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="impRemisionLabel">Imprimir resumen remisión</h5>
+                <h5 class="modal-title" id="detalleClienteLabel">Imprimir resumen remisión</h5>
                 <button type="button" class="close" data-dismiss='modal' aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>

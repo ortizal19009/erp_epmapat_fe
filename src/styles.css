@@ -112,3 +112,6 @@
   white-space: normal;
   z-index: 1;
 }
+td:hover {
+  cursor: pointer;
+}
