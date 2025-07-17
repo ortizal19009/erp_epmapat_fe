@@ -11,6 +11,7 @@ import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { PdfService } from 'src/app/servicios/pdf.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 
 @Component({
   selector: 'app-imp-cliente',
@@ -31,6 +32,7 @@ export class ImpClienteComponent implements OnInit {
   public progreso = 0;
   _clientes: any = [];
   total: number;
+  usuario: number;
 
   constructor(
     public fb: FormBuilder,
@@ -40,11 +42,12 @@ export class ImpClienteComponent implements OnInit {
     private s_rxf: RubroxfacService,
     private coloresService: ColoresService,
     private s_pdf: PdfService,
-    private s_loading: LoadingService, 
-
+    private s_loading: LoadingService,
+    public authService: AutorizaService
   ) {}
 
   ngOnInit(): void {
+    this.usuario = this.authService.idusuario;
     sessionStorage.setItem('ventana', '/cv-facturas');
     let coloresJSON = sessionStorage.getItem('/cv-facturas');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
@@ -154,7 +157,7 @@ export class ImpClienteComponent implements OnInit {
           console.error('Error al obtener las partidas:', error);
         }
         break;
-        case 5: //CARTERA VENCIDA DE TODOS LOS CLIENTES
+      case 5: //CARTERA VENCIDA DE TODOS LOS CLIENTES
         try {
           this.calcularCVByClientes(this.formImprimir.value.hasta);
           this.swcalculando = true;
@@ -297,7 +300,17 @@ export class ImpClienteComponent implements OnInit {
     this.cliService.getCVOfClientes(fecha).subscribe({
       next: async (datosCrtera: any) => {
         let doc = new jsPDF();
-        let head: any = [['Planilla', 'Nombre', 'Identificación', 'Dirección','Correo','Modulo','Valor']];
+        let head: any = [
+          [
+            'Planilla',
+            'Nombre',
+            'Identificación',
+            'Dirección',
+            'Correo',
+            'Modulo',
+            'Valor',
+          ],
+        ];
         let body: any = [];
         let suma: number = 0;
         this.barraProgreso = true;

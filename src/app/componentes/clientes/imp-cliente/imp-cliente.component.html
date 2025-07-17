@@ -24,8 +24,8 @@
                                 <label *ngIf="!swimprimir" class="input-group-text">Exportar</label>
                             </div>
                             <select class="custom-select" formControlName="reporte" (change)="changeReporte()">
-                                <option value="1">Cartera Vencida General</option>
-                                <option value="2">Lista de Abonados</option>
+                                <option value="1"[disabled]="usuario != 1">Cartera Vencida General</option>
+                                <option value="2"[disabled]="usuario != 1">Lista de Abonados</option>
                                 <option value="3">Cartera Vencida Rubros</option>
                                 <option value="4">Cartera Vencida Facturas</option>
                                 <option value="5">Cartera Vencida Clientes</option>

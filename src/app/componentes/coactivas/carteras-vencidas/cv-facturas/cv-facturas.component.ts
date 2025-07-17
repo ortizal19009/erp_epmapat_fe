@@ -93,8 +93,8 @@ export class CvFacturasComponent implements OnInit {
   }
 
   getFacturasByCliente(idcliente: number) {
-    this.s_loading.showLoading()
-
+  this.swfacturas = true; 
+    this.s_loading.showLoading();
     this.total = 0;
     this.s_facturas.getSinCobro(idcliente).subscribe({
       next: (datos: any) => {
