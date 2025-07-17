@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ColoresService } from 'src/app/compartida/colores.service';
+import { ImpTransaciComponent } from 'src/app/componentes/contabilidad/transaci/imp-transaci/imp-transaci.component';
+import { ClientesService } from 'src/app/servicios/clientes.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
+import { LoadingService } from 'src/app/servicios/loading.service';
 
 @Component({
   selector: 'app-cv-facturas',
@@ -13,12 +16,22 @@ export class CvFacturasComponent implements OnInit {
   filtro: string;
   _facturas: any;
   today: Date = new Date();
-
+  _clientes: any;
+  /* variables para hacer la paginación  */
+  page: number = 0;
+  size: number = 20;
+  _cuentasPageables?: any;
+  totalPages: number = 0; // Total de páginas
+  pages: number[] = []; // Lista de números de página
+  maxPagesToShow: number = 5; // Máximo número de botones a mostrar
+  totalElements: number = 0;
   constructor(
     private coloresService: ColoresService,
     private fb: FormBuilder,
-    private s_facturas: FacturaService
-  ) {}
+    private s_facturas: FacturaService,
+    private s_clientes: ClientesService,
+    private s_loading: LoadingService
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/cv-facturas');
@@ -31,8 +44,9 @@ export class CvFacturasComponent implements OnInit {
       filtro: '',
     });
     //this.getCarteraOfFacturas(d);
+    this.getCarteraOfClientes(d, this.page, this.size);
   }
-  onChangeDate(e: any) {}
+  onChangeDate() { this.getCarteraOfClientes(this.f_buscar.value.sDate, this.page, this.size) }
 
   colocaColor(colores: any) {
     document.documentElement.style.setProperty('--bgcolor1', colores[0]);
@@ -60,5 +74,58 @@ export class CvFacturasComponent implements OnInit {
       },
       error: (e: any) => console.error(e),
     });
+  }
+  getCarteraOfClientes(date: any, page: number, size: number) {
+    this.s_loading.showLoading();
+    this.s_clientes.CVOfClientes(date, page, size).then((items: any) => {
+      this._clientes = items.content
+      this.size = items.size;
+      this.page = items.pageable.pageNumber;
+      this.totalPages = items.totalPages;
+      this.totalElements = items.totalElements;
+      this.updatePages();
+      this.s_loading.hideLoading();
+    }).catch((error: any) => console.error(error))
+  }
+
+
+  /* Inicio de configuracion de paginacion */
+  onPreviousPage(): void {
+    if (this.page > 0) {
+      const rawDate = new Date(this.f_buscar.value.sDate);
+      const formattedDate = rawDate.toISOString().split('T')[0]; // "2025-07-17"
+      this.getCarteraOfClientes(formattedDate, this.page - 1, this.size);
+    }
+  }
+  onNextPage(): void {
+    if (this.page <= this.totalPages - 1) {
+      const rawDate = new Date(this.f_buscar.value.sDate);
+      const formattedDate = rawDate.toISOString().split('T')[0]; // "2025-07-17"
+      this.getCarteraOfClientes(formattedDate, this.page + 1, this.size);
+    }
+  }
+  onGoToPage(page: number): void {
+    if (page >= 0 && page < this.totalPages) {
+      const rawDate = new Date(this.f_buscar.value.sDate);
+      const formattedDate = rawDate.toISOString().split('T')[0]; // "2025-07-17"
+      this.getCarteraOfClientes(formattedDate, page, this.size);
+    }
+  }
+
+  updatePages(): void {
+    const halfRange = Math.floor(this.maxPagesToShow / 2);
+    let startPage = Math.max(this.page - halfRange, 0);
+    let endPage = Math.min(this.page + halfRange, this.totalPages - 1);
+    // Ajusta el rango si estás al principio o al final
+    if (this.page <= halfRange) {
+      endPage = Math.min(this.maxPagesToShow - 1, this.totalPages - 1);
+    } else if (this.page + halfRange >= this.totalPages) {
+      startPage = Math.max(this.totalPages - this.maxPagesToShow, 0);
+    }
+    // Genera los números de las páginas visibles
+    this.pages = Array.from(
+      { length: endPage - startPage + 1 },
+      (_, i) => startPage + i
+    );
   }
 }

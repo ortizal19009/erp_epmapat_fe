@@ -80,9 +80,13 @@
                                 <td class="text-right">{{remision.feccrea}} </td>
                                 <td class="text-right">{{remision.totcapital.toFixed(2)}} $</td>
                                 <td class="text-right">{{remision.totintereses.toFixed(2)}} $</td>
-        
+
                             </tr>
                         </tbody>
+                        <caption class="small mark"> <strong>{{page+1}}/{{totalPages}}</strong> total registros
+                            {{totalElements}}
+                            <!--   <button class="btn btn-outline-primary btn-xs">&nbsp;&nbsp;Rango&nbsp;&nbsp;</button> -->
+                        </caption>
                     </table>
 
                 </div>

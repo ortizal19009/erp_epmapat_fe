@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { Clientes } from '../modelos/clientes';
 import { environment } from 'src/environments/environment';
 
@@ -11,7 +11,7 @@ const baseUrl = `${apiUrl}/clientes`;
   providedIn: 'root',
 })
 export class ClientesService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   //Busca Clientes por Nombre ó Identificación
   getByNombreIdentifi(nombreIdentifi: String) {
@@ -74,7 +74,13 @@ export class ClientesService {
   getTotalClientes() {
     return this.http.get(`${baseUrl}/total`);
   }
-  getCVOfClientes(fecha : any){
+  getCVOfClientes(fecha: any) {
     return this.http.get(`${baseUrl}/reportes/carteravencida?fecha=${fecha}`)
+  }
+  async asynGetCVOfClientes(fecha: any) {
+    return await firstValueFrom(this.http.get(`${baseUrl}/reportes/carteravencida?fecha=${fecha}`))
+  }
+  async CVOfClientes(fecha: any, page: number, size: number) {
+    return await firstValueFrom(this.http.get(`${baseUrl}/cartera/clientes?fecha=${fecha}&page=${page}&size=${size}`))
   }
 }

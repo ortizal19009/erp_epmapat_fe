@@ -42,6 +42,7 @@ export class RemisionComponent implements OnInit {
   totalPages: number = 0; // Total de páginas
   pages: number[] = []; // Lista de números de página
   maxPagesToShow: number = 5; // Máximo número de botones a mostrar
+  totalElements: number = 20;
 
   constructor(
     private fb: FormBuilder,
@@ -104,7 +105,8 @@ export class RemisionComponent implements OnInit {
         this._remisiones = datos.content;
         this.size = datos.size;
         this.page = datos.pageable.pageNumber;
-        this.totalPages = datos.totalPages
+        this.totalPages = datos.totalPages;
+        this.totalElements = datos.totalElemets;
         this.updatePages();
       },
       error: (e: any) => console.error(e),

@@ -43,7 +43,7 @@ export class StatusConveniosComponent implements OnInit {
 
     this.formBuscar = this.fb.group({
       desde: ['1'],
-      hasta: ['20'],
+      hasta: ['50'],
     });
     this.getConvenios(this.page, this.size);
   }
