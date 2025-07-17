@@ -11,7 +11,7 @@ const baseUrl = `${apiUrl}/convenios`;
   providedIn: 'root',
 })
 export class ConvenioService {
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   getAll(): Observable<Convenios[]> {
     return this.http.get<Convenios[]>(baseUrl);
@@ -69,9 +69,14 @@ export class ConvenioService {
     );
   }
   getByEstadoConvenios() {
-    return this.http.get<any>(`${baseUrl}/estados`)
+    return this.http.get<any>(`${baseUrl}/estados`);
   }
   getByPendientesPagos(d: number, h: number, page: number, size: number) {
-    return this.http.get<any>(`${baseUrl}/pendientesPago?d=${d}&h=${h}&page=${page}&size=${size}`)
+    return this.http.get<any>(
+      `${baseUrl}/pendientesPago?d=${d}&h=${h}&page=${page}&size=${size}`
+    );
+  }
+  getPendienteByConvenio(idconvenio: number) {
+    return this.http.get<any>(`${baseUrl}/pendiente?idconvenio=${idconvenio}`);
   }
 }

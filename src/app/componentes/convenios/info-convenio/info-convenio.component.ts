@@ -39,14 +39,17 @@ export class InfoConvenioComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    sessionStorage.setItem('ventana', '/convenios');
-    let coloresJSON = sessionStorage.getItem('/convenios');
+    sessionStorage.setItem('ventana', '/info-convenios');
+    let coloresJSON = sessionStorage.getItem('/info-convenios');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
 
     this.idconvenio = +sessionStorage.getItem('idconvenioToInfo')!;
     sessionStorage.removeItem('idconvenioToInfo');
-
-    this.datosConvenio();
+    if (this.idconvenio === 0) {
+      this.regresar();
+    }else{
+        this.datosConvenio();
+    }
   }
 
   colocaColor(colores: any) {

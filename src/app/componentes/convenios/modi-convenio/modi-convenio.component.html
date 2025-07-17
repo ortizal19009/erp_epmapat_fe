@@ -104,6 +104,13 @@
                   <button type="button" class="btn btn-outline-success btn-sm mx-1" (click)="regresar()">
                      <i class="fa fa-times-circle"></i> Cancelar
                   </button>
+                  <button type="button" class="btn btn-outline-danger btn-sm mx-1"
+                     *ngIf="!swdeanul" (click)="eliminar()">
+                     <i class="fa fa-check-circle"></i> Eliminar
+                  </button>
+                  <button type="button" class="btn btn-outline-danger btn-sm mx-1" *ngIf="swdeanul"  (click)="anular()">
+                     <i class="fa fa-times-circle"></i> Anular
+                  </button>
                </div>
 
             </form>
