@@ -132,13 +132,13 @@
                         </thead>
                         <tbody>
                             <tr *ngFor="let factura of _facturas; let i = index"
-                                (click)="getDetallePlanilla(factura.idfactura)">
+                                (click)="getDetallePlanilla(factura.factura)">
                                 <td class="small text-center font-weight-bold">{{i+1}}</td>
-                                <td>{{factura.idfactura}}</td>
-                                <td class="description">{{factura.idmodulo.descripcion}}</td>
-                                <td class="text-center">{{factura.idabonado || 0}}</td>
+                                <td>{{factura.factura}}</td>
+                                <td class="description">{{factura.modulo}}</td>
+                                <td class="text-center">{{factura.cuenta || 0}}</td>
                                 <td class="description">{{factura.feccrea}}</td>
-                                <td class="text-right">{{factura.totaltarifa.toFixed(2)}}$</td>
+                                <td class="text-right">{{factura.total.toFixed(2)}}$</td>
                             </tr>
                             <tr>
                                 <td class="text-right font-weight-bold" colspan="4">Total:</td>
