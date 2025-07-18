@@ -35,8 +35,8 @@
                 <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
                     <button class="dropdown-item" type="button">
                         <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
-                    <button class="dropdown-item" type="button">
-                        <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
+                    <button class="dropdown-item" type="button" [routerLink]="['/imp-clientes', 'cv-rubros']">
+                        <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
                     <button class="dropdown-item" type="button" data-toggle="modal" data-toggle="modal"
                         data-target="#importar"> <i class="bi-file-earmark-arrow-up"></i>&nbsp;
                         Importar</button>
@@ -93,32 +93,39 @@
         aria-labelledby="visualizarLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-scrollable modal-{{modalSize}}">
             <div class="modal-content ">
-                <div class="modal-header">
+                <div class="modal-header cabecera">
                     <h5 class="modal-title" id="visualizarLabel">
                         {{rubrosName}}</h5>
-                    <button type="button" class="close" data-dismiss="modal" *ngIf="swfactura" aria-label="Close">
+                    <button type="button" class="close text-white" data-dismiss="modal" *ngIf="swfactura"
+                        aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
-                    <button class="bg-transparent border-0" type="submit" *ngIf="!swfactura" (click)="regresar()">
+                    <button class="bg-transparent border-0 text-white" type="submit" *ngIf="!swfactura"
+                        (click)="regresar()">
                         <i class="bi-arrow-left-circle icoRegresar"></i>
-                     </button>
+                    </button>
                 </div>
                 <div class="modal-body">
-                    <table class="table table-hover table-sm table-bordered" *ngIf="swfactura; else detalle">
-                        <thead>
+                    <div class="row">
+                        <div class="col-sm justify-content-right"><input type="text" class="form-control form-control-sm" [(ngModel)]="filtrar"></div>
+                    </div>
+                    <table class="table table-hover table-sm table-bordered mt-3" *ngIf="swfactura; else detalle">
+                        <thead class="cabecera">
                             <tr>
                                 <th></th>
                                 <th>Planilla</th>
                                 <th>Cliente</th>
                                 <th>V.Rubro</th>
+                                <th>V.Factura</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr *ngFor="let factura of _facturas; let i = index" (click)="detallesFactura(factura)">
-                                <td>{{i+1}}</td>
+                        <tbody class="detalle">
+                            <tr *ngFor="let factura of _facturas | filter:filtrar; let i = index" (click)="detallesFactura(factura)">
+                                <td class="text-center small font-weight-bold">{{i+1}}</td>
                                 <td>{{factura.factura}}</td>
                                 <td>{{factura.nombre}}</td>
-                                <td>{{factura.total.toFixed(2)}}</td>
+                                <td class="text-right">{{factura.total.toFixed(2)}} $</td>
+                                <td class="text-right">{{factura.totalFactura.toFixed(2)}} $</td>
                             </tr>
                         </tbody>
                     </table>

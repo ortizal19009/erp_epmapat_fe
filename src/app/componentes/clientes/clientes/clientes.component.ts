@@ -166,7 +166,7 @@ export class ClientesComponent implements OnInit {
     }
   }
   imprimir() {
-    this.router.navigate(['imp-clientes']);
+    this.router.navigate(['imp-clientes', 'clientes']);
   }
   pdf() {
     let m_izquierda = 20;

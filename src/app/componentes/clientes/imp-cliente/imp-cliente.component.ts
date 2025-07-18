@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -29,6 +29,7 @@ export class ImpClienteComponent implements OnInit {
   pdfgenerado: string;
   nombrearchivo: string;
   barraProgreso: boolean = false;
+  page: any = 'clientes'
   public progreso = 0;
   _clientes: any = [];
   total: number;
@@ -43,10 +44,13 @@ export class ImpClienteComponent implements OnInit {
     private coloresService: ColoresService,
     private s_pdf: PdfService,
     private s_loading: LoadingService,
-    public authService: AutorizaService
-  ) {}
+    public authService: AutorizaService,
+    private activateRuta: ActivatedRoute,
+
+  ) { }
 
   ngOnInit(): void {
+    this.page = this.activateRuta.snapshot.paramMap.get('page');
     this.usuario = this.authService.idusuario;
     sessionStorage.setItem('ventana', '/cv-facturas');
     let coloresJSON = sessionStorage.getItem('/cv-facturas');
@@ -109,7 +113,7 @@ export class ImpClienteComponent implements OnInit {
   }
 
   regresar() {
-    this.router.navigate(['clientes']);
+    this.router.navigate([this.page]);
   }
 
   async imprimir() {

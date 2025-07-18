@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
@@ -20,6 +21,7 @@ export class CvRubrosComponent implements OnInit {
   swfactura: boolean = true;
   modalSize: string = 'md';
   idfactura: number;
+  filtrar: string;
   constructor(
     private coloresService: ColoresService,
     private s_rxf: RubroxfacService,
@@ -70,6 +72,7 @@ export class CvRubrosComponent implements OnInit {
     this.getCarteraVencidaxRubros(this.f_buscar.value.sDate);
   }
   getfacturas(rubro: any) {
+    this.filtrar = '';
     this.swfactura = true;
     this.modalSize = 'lg'
     this.s_loading.showLoading();

@@ -278,7 +278,7 @@ const routes: Routes = [
   { path: 'modificar-clientes', component: ModificarClientesComponent },
   { path: 'detalles-cliente', component: DetallesClienteComponent },
   { path: 'buscar-cliente', component: BuscarClienteComponent },
-  { path: 'imp-clientes', component: ImpClienteComponent },
+  { path: 'imp-clientes/:page', component: ImpClienteComponent },
   { path: 'imp-infocliente', component: ImpInfoclienteComponent },
   { path: 'home', component: HomeComponent },
 
