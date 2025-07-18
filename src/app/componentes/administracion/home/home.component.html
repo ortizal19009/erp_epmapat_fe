@@ -72,7 +72,8 @@
           <div class="row">
             <div class="col-sm-2 col-6">
               <div class="description-block border-right">
-                <span class="description-percentage text-success"><i class="fas fa-caret-up"></i> <button class="btn btn-xs btn-outline-primary" (click)="alert()">search</button></span>
+                <span class="description-percentage text-success"><i class="fas fa-caret-up"></i> <button
+                    class="btn btn-xs btn-outline-primary" (click)="alert()">search</button></span>
                 <h5 class="description-header">EPMAPA-T (Matríz)</h5>
                 <span class="description-text">Juan Ramón Arellano y Bolivar</span>
               </div>
@@ -207,7 +208,8 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr *ngFor="let destado of _ByEstados; let i = index">
+                    <tr *ngFor="let destado of _ByEstados; let i = index" (click)="findCuentasByEstado(destado)"
+                      data-toggle="modal" data-target="#detalles">
                       <td class="text-center">{{i+1}}</td>
                       <td>{{destado.descripcion}}</td>
                       <td class="text-center">{{destado.ncuentas}}</td>
@@ -253,6 +255,45 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="detalles" data-backdrop="static" data-keyboard="false" tabindex="-1"
+    aria-labelledby="detallesLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header cabecera">
+          <h5 class="modal-title" id="detallesLabel">{{txtModal}}</h5>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <table class="table table-hover table-bordered table-sm sombra tabla-pequena text-nowrap">
+            <thead class="cabecera text-center">
+              <tr>
+                <th></th>
+                <th>CUENTA</th>
+                <th>CLIENTE</th>
+                <th>CATEGORÍA</th>
+              </tr>
+            </thead>
+            <tbody class="detalle" >
+              <tr *ngFor="let abonado of abonados; let i = index">
+                <td class="text-center small font-weight-bold">{{i+1}}</td>
+                <td class="text-center">{{abonado.idabonado}}</td>
+                <td>{{abonado.idresponsable.nombre||'S/N'}}</td>
+                <td>{{abonado.idcategoria_categorias.descripcion||'S/C'}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Understood</button>
         </div>
       </div>
     </div>

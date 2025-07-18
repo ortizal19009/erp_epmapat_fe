@@ -3,6 +3,7 @@ import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { EmisionService } from 'src/app/servicios/emision.service';
 import * as L from 'leaflet';
 import { RutasService } from 'src/app/servicios/rutas.service';
+import { ColoresService } from 'src/app/compartida/colores.service';
 
 @Component({
   selector: 'app-home',
@@ -15,7 +16,9 @@ export class HomeComponent implements OnInit, AfterViewInit {
   _ByCategorias: any;
   _rutas: any;
   _abonados: any[] = []; // o el tipo correcto si ya lo tienes
+  abonados: any;
   filtro: string;
+  txtModal: string = 'DETALLES Loading...';
   private states: any = [
     {
       type: 'Feature',
@@ -56,10 +59,16 @@ export class HomeComponent implements OnInit, AfterViewInit {
   constructor(
     private s_emisiones: EmisionService,
     private s_abonados: AbonadosService,
-    private s_rutas: RutasService
-  ) { }
+    private s_rutas: RutasService, 
+        private coloresService: ColoresService,
+
+  ) {}
 
   ngOnInit(): void {
+      sessionStorage.setItem('ventana', '/estados-convenios');
+    let coloresJSON = sessionStorage.getItem('/estados-convenios');
+    if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
+    else this.buscaColor();
     /* https://www.youtube.com/watch?v=e4urW6Ud3WU  */
     this.getResumenEmisiones(12);
     this.getDatosAbonados();
@@ -90,6 +99,25 @@ export class HomeComponent implements OnInit, AfterViewInit {
 
     //this.initMap();
     this.drawAllCuentas();
+  }
+
+  colocaColor(colores: any) {
+    document.documentElement.style.setProperty('--bgcolor1', colores[0]);
+    const cabecera = document.querySelector('.cabecera');
+    if (cabecera) cabecera.classList.add('nuevoBG1');
+    document.documentElement.style.setProperty('--bgcolor2', colores[1]);
+    const detalle = document.querySelector('.detalle');
+    if (detalle) detalle.classList.add('nuevoBG2');
+  }
+  async buscaColor() {
+    try {
+      const datos = await this.coloresService.setcolor(1, 'cv-facturas');
+      const coloresJSON = JSON.stringify(datos);
+      sessionStorage.setItem('/cv-facturas', coloresJSON);
+      this.colocaColor(datos);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   /*  private initMap(): void {
@@ -189,7 +217,6 @@ export class HomeComponent implements OnInit, AfterViewInit {
       }
     } */
 
-
   // Añade esta propiedad a tu componente para mantener referencia a la capa dinámica
   private citiesLayer: L.LayerGroup | null = null;
   drawAllCuentas(): void {
@@ -199,8 +226,12 @@ export class HomeComponent implements OnInit, AfterViewInit {
       this._abonados.forEach((item: any) => {
         try {
           if (item.geolocalizacion != null) {
-            const coordsArray: L.LatLngExpression = JSON.parse(item.geolocalizacion);
-            const marker = L.marker(coordsArray).bindPopup(`Abonado ID: ${item.idabonado}`);
+            const coordsArray: L.LatLngExpression = JSON.parse(
+              item.geolocalizacion
+            );
+            const marker = L.marker(coordsArray).bindPopup(
+              `Abonado ID: ${item.idabonado}`
+            );
             cuenta.push(marker);
           }
         } catch (e) {
@@ -209,7 +240,9 @@ export class HomeComponent implements OnInit, AfterViewInit {
       });
     } else {
       // Si no hay abonados, mostrar solo el edificio matriz
-      const marker = L.marker(this.edificioMatriz).bindPopup(`Edificio Epmapa-T`);
+      const marker = L.marker(this.edificioMatriz).bindPopup(
+        `Edificio Epmapa-T`
+      );
       cuenta.push(marker);
     }
 
@@ -221,10 +254,13 @@ export class HomeComponent implements OnInit, AfterViewInit {
       attribution: '&copy; EPMAPA-T',
     });
 
-    const osmHOT = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; EPMAPA-T',
-    });
+    const osmHOT = L.tileLayer(
+      'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+      {
+        maxZoom: 19,
+        attribution: '&copy; EPMAPA-T',
+      }
+    );
 
     const baseMaps = {
       OpenStreetMap: osm,
@@ -244,7 +280,9 @@ export class HomeComponent implements OnInit, AfterViewInit {
       // Agregar la nueva capa
       this.citiesLayer = nuevaCitiesLayer;
       this.citiesLayer.addTo(this.map);
-      const mainView: L.LatLngExpression = JSON.parse(this._abonados[0].geolocalizacion);
+      const mainView: L.LatLngExpression = JSON.parse(
+        this._abonados[0].geolocalizacion
+      );
 
       // No volver a agregar los controles si ya están en el mapa
       this.map.setView(mainView, 17);
@@ -263,7 +301,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
     }
   }
   alert() {
-    console.log("DATOS")
+    console.log('DATOS');
   }
   async getResumenEmisiones(limit: number) {
     this._resumenEmisiones = await this.s_emisiones.getResumenEmision(limit);
@@ -285,5 +323,15 @@ export class HomeComponent implements OnInit, AfterViewInit {
     this._abonados = [];
     this._abonados = await this.s_abonados.getByIdrutaAsync(idruta);
     this.drawAllCuentas();
+  }
+  findCuentasByEstado(estado: any) {
+    console.log(estado);
+    this.s_abonados.getByEstado(estado.estado).subscribe({
+      next: (datos: any) => {
+        console.log(datos);
+        this.abonados = datos;
+      },
+      error: (e: any) => console.error(e),
+    });
   }
 }
