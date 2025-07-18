@@ -93,10 +93,12 @@ export class CvFacturasComponent implements OnInit {
   }
 
   getFacturasByCliente(idcliente: number) {
-  this.swfacturas = true; 
+    this.swfacturas = true;
     this.s_loading.showLoading();
     this.total = 0;
-    this.s_facturas.getSinCobro(idcliente).subscribe({
+    const rawDate = new Date(this.f_buscar.value.sDate);
+    const formattedDate = rawDate.toISOString().split('T')[0]; // "2025-07-17"
+    this.s_facturas.getFacturasCVClientes(idcliente, formattedDate).subscribe({
       next: (datos: any) => {
         datos.length > 0 ? this.nomCliente = datos[0].idcliente.nombre : this.nomCliente = '';
         this._facturas = datos;

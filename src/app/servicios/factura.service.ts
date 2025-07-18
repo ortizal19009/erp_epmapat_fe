@@ -197,6 +197,9 @@ export class FacturaService {
   getSinCobro(idcliente: number) {
     return this.http.get<Facturas[]>(`${baseUrl}/idcliente/${idcliente}`);
   }
+  getFacturasCVClientes(idcliente: number, date: any) {
+    return this.http.get<Facturas[]>(`${baseUrl}/factCarteraVencida?idcliente=${idcliente}&date=${date}`);
+  }
   getFacSincobro(idcliente: number) {
     return this.http.get<Facturas[]>(
       `${baseUrl}/facSincobrar?idcliente=${idcliente}`
@@ -240,7 +243,7 @@ export class FacturaService {
       `${baseUrl}/?idabonado=${idabonado}`
     );
   }
-    getSinCobrar(idabonado: number) {
+  getSinCobrar(idabonado: number) {
     return this.http.get<Facturas[]>(
       `${baseUrl}/sincobrar/cuenta?cuenta=${idabonado}`
     );
@@ -451,9 +454,9 @@ export class FacturaService {
     return await firstValueFrom(resp);
 
   }
-  generarPDF_FacElectronica(idfactura: number): Promise<any>{
-  let resp =firstValueFrom( this.http.get(`${apiUrl}/api/sri/generar-pdf?idfactura=${idfactura}`,
+  generarPDF_FacElectronica(idfactura: number): Promise<any> {
+    let resp = firstValueFrom(this.http.get(`${apiUrl}/api/sri/generar-pdf?idfactura=${idfactura}`,
       { responseType: 'blob' }));
-      return resp;
+    return resp;
   }
 }
