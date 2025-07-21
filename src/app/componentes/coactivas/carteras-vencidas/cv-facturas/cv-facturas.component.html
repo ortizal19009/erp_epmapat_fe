@@ -2,7 +2,7 @@
     <div class="container-fluid">
         <div class="row m-0 px-0 py-1 justify-content-start cabecera border sombra">
             <div class="col-sm-3">
-                <h4 class="m-0 font-weight-bold"><i class="fa fa-list" aria-hidden="true"></i> C.V. Clientes</h4>
+                <h4 class="m-0 font-weight-bold"><i class="fa fa-list" aria-hidden="true"></i> C.V. Facturas</h4>
             </div>
             <div class="col-sm-7">
                 <form [formGroup]="f_buscar">
@@ -51,60 +51,149 @@
 <div class="container-fluid">
     <div class="card">
         <div class="card-body">
-            <div class="row mb-0">
-                <div class="col-sm">
-                    <table class="table table-hover table-bordered table-sm sombra">
-                        <thead class="cabecera text-center">
-                            <tr>
-                                <th></th>
-                                <th>Cliente</th>
-                                <th>Identificación</th>
-                                <th>Dirección</th>
-                                <th>E-mail</th>
-                                <th>Telefono</th>
-                                <th>Valor</th>
-                            </tr>
-                        </thead>
-                        <tbody class="">
-                            <tr *ngFor="let cliente of _clientes |filter:filtro; let i = index"
-                                (click)="getFacturasByCliente(cliente.idcliente)" data-toggle="modal"
-                                data-target="#detalles">
-                                <td class="small text-center font-weight-bold">{{i+1}}</td>
-                                <td class="description">{{cliente.nombre}}</td>
-                                <td class="text-center">{{cliente.cedula}}</td>
-                                <td class="description">{{cliente.direccion}}</td>
-                                <td class="description">{{cliente.email}}</td>
-                                <td class="text-center">{{cliente.telefono}}</td>
-                                <td class="text-right">{{cliente.valor.toFixed(2)}} $</td>
-                            </tr>
-                        </tbody>
-                        <caption class="small mark"> <strong>{{page+1}}/{{totalPages}}</strong> total registros
-                            {{totalElements}} *NOTA: En los valores impresos no se refleja el interés de mora.
-                            <!--   <button class="btn btn-outline-primary btn-xs">&nbsp;&nbsp;Rango&nbsp;&nbsp;</button> -->
-                            <nav aria-label="Page navigation">
-                                <ul class="pagination justify-content-end">
-                                    <li class="page-item">
-                                        <button class="btn btn-xs btn-primary" (click)="onPreviousPage()"> <span
-                                                aria-hidden="true">&laquo;</span>
-                                        </button>
-                                    </li>
-                                    <li class="page-item" *ngFor="let p of pages">
-                                        <button class="btn btn-xs btn-outline-primary" (click)="onGoToPage(p)"
-                                            [class.active]="p === page">
-                                            {{ p + 1 }}
-                                        </button>
-                                    </li>
-                                    <li class="page-item">
-                                        <button class="btn btn-xs btn-primary" (click)="onNextPage()"> <span
-                                                aria-hidden="true">&raquo;</span>
-                                        </button>
-                                    </li>
-                                </ul>
-                            </nav>
-                        </caption>
-                    </table>
-                </div>
+            <div class="card-header cardTab">
+                <ul class="nav nav-tabs card-header-tabs cardTab">
+                    <li class="nav-item"><a class="nav-link active cardTab"
+                            (click)="getCarteraOfConsumoAgua(f_buscar.value.sDate, page, size)" href="#planillasConsumo"
+                            data-toggle="tab">Consumo
+                            agua potable</a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link cardTab"
+                            (click)="getCarteraOfNoConsumo(f_buscar.value.sDate, page, size)" href="#planillasNoConsumo"
+                            data-toggle="tab">Servicios varios</a>
+                    </li>
+                </ul>
             </div>
+
+            <div class="card-body">
+                <div class="tab-content">
+                    <div class="active tab-pane" id="planillasConsumo">
+                        <div class="post">
+                            <div class="user-block mb-0">
+                                <div class="row mb-0">
+                                    <div class="col-sm">
+                                        <table class="table table-hover table-bordered table-sm sombra">
+                                            <thead class="cabecera text-center">
+                                                <tr>
+                                                    <th></th>
+                                                    <th>Factura</th>
+                                                    <th>Cliente</th>
+                                                    <th>Módulo</th>
+                                                    <th>Emisión</th>
+                                                    <th>Cuenta</th>
+                                                    <th>Valor</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="detalles">
+                                                <tr *ngFor="let factura of _facturas |filter:filtro; let i = index"
+                                                    (click)="getFacturasByCliente(factura.factura)">
+                                                    <td class="small text-center font-weight-bold">{{i+1}}</td>
+                                                    <td class="text-center">{{factura.factura}}</td>
+                                                    <td class="">{{factura.nombre}}</td>
+                                                    <td class="">{{factura.modulo}}</td>
+                                                    <td class="text-center">{{factura.emision}}</td>
+                                                    <td class="text-center">{{factura.cuenta}}</td>
+                                                    <td class="text-right">{{factura.total.toFixed(2)}} $</td>
+                                                </tr>
+                                            </tbody>
+                                            <caption class="small mark"> <strong>{{page+1}}/{{totalPages}}</strong>
+                                                total registros
+                                                {{totalElements}} *NOTA: En los valores impresos no se refleja el
+                                                interés de mora.
+                                                <!--   <button class="btn btn-outline-primary btn-xs">&nbsp;&nbsp;Rango&nbsp;&nbsp;</button> -->
+                                                <nav aria-label="Page navigation">
+                                                    <ul class="pagination justify-content-end">
+                                                        <li class="page-item">
+                                                            <button class="btn btn-xs btn-primary"
+                                                                (click)="onPreviousPage()"> <span
+                                                                    aria-hidden="true">&laquo;</span>
+                                                            </button>
+                                                        </li>
+                                                        <li class="page-item" *ngFor="let p of pages">
+                                                            <button class="btn btn-xs btn-outline-primary"
+                                                                (click)="onGoToPage(p)" [class.active]="p === page">
+                                                                {{ p + 1 }}
+                                                            </button>
+                                                        </li>
+                                                        <li class="page-item">
+                                                            <button class="btn btn-xs btn-primary"
+                                                                (click)="onNextPage()"> <span
+                                                                    aria-hidden="true">&raquo;</span>
+                                                            </button>
+                                                        </li>
+                                                    </ul>
+                                                </nav>
+                                            </caption>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="planillasNoConsumo">
+                        <div class="post">
+                            <div class="user-block mb-0">
+                                <table class="table table-sm table-hover">
+                                    <thead class="cabecera">
+                                        <tr>
+                                            <th></th>
+                                            <th>Factura</th>
+                                            <th>Cliente</th>
+                                            <th>Módulo</th>
+                                            <th>Valor</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="detalles">
+                                        <tr *ngFor="let factura of facturas; let i = index">
+                                            <td class="text-center font-weight-bold">{{i+1}}</td>
+                                            <td class="text-center">{{factura.factura}}</td>
+                                            <td class="">{{factura.nombre}}</td>
+                                            <td class="">{{factura.modulo}}</td>
+                                            <td class="text-right">{{factura.total.toFixed(2)}} $</td>
+                                        </tr>
+                                    </tbody>
+                                    <caption class="small mark"> <strong>{{page+1}}/{{totalPages}}</strong>
+                                        total registros
+                                        {{totalElements}} *NOTA: En los valores impresos no se refleja el
+                                        interés de mora.
+                                        <!--   <button class="btn btn-outline-primary btn-xs">&nbsp;&nbsp;Rango&nbsp;&nbsp;</button> -->
+                                        <nav aria-label="Page navigation">
+                                            <ul class="pagination justify-content-end">
+                                                <li class="page-item">
+                                                    <button class="btn btn-xs btn-primary" (click)="onPreviousPage()">
+                                                        <span aria-hidden="true">&laquo;</span>
+                                                    </button>
+                                                </li>
+                                                <li class="page-item" *ngFor="let p of pages">
+                                                    <button class="btn btn-xs btn-outline-primary"
+                                                        (click)="onGoToPage(p)" [class.active]="p === page">
+                                                        {{ p + 1 }}
+                                                    </button>
+                                                </li>
+                                                <li class="page-item">
+                                                    <button class="btn btn-xs btn-primary" (click)="onNextPage()"> <span
+                                                            aria-hidden="true">&raquo;</span>
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </nav>
+                                    </caption>
+                                </table>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+
         </div>
     </div>
 
@@ -114,7 +203,8 @@
             <div class="modal-content">
                 <div class='modal-header py-2 justify-content-center cabecera'>
                     <h5 class='modal-title font-weight-bold' id='ModalLabel'>{{nomCliente}}</h5>
-                    <button class="bg-transparent border-0 text-white dropdown-menu-right" type="submit" *ngIf="!swfacturas" (click)="swfacturas = !swfacturas">
+                    <button class="bg-transparent border-0 text-white dropdown-menu-right" type="submit"
+                        *ngIf="!swfacturas" (click)="swfacturas = !swfacturas">
                         <i class="bi-arrow-left-circle icoRegresar"></i>
                     </button>
                 </div>

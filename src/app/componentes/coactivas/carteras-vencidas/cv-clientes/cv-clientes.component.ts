@@ -1,21 +1,20 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ColoresService } from 'src/app/compartida/colores.service';
-import { ImpTransaciComponent } from 'src/app/componentes/contabilidad/transaci/imp-transaci/imp-transaci.component';
 import { ClientesService } from 'src/app/servicios/clientes.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
 
 @Component({
-  selector: 'app-cv-facturas',
-  templateUrl: './cv-facturas.component.html',
-  styleUrls: ['./cv-facturas.component.css'],
+  selector: 'app-cv-clientes',
+  templateUrl: './cv-clientes.component.html',
+  styleUrls: ['./cv-clientes.component.css']
 })
-export class CvFacturasComponent implements OnInit {
+export class CvClientesComponent implements OnInit {
+
   f_buscar: FormGroup;
   filtro: string;
   _facturas: any;
-  facturas: any;
   today: Date = new Date();
   nomCliente: string = '';
   total: number = 0;
@@ -34,12 +33,13 @@ export class CvFacturasComponent implements OnInit {
     private coloresService: ColoresService,
     private fb: FormBuilder,
     private s_facturas: FacturaService,
+    private s_clientes: ClientesService,
     private s_loading: LoadingService
   ) { }
 
   ngOnInit(): void {
-    sessionStorage.setItem('ventana', '/cv-facturas');
-    let coloresJSON = sessionStorage.getItem('/cv-facturas');
+    sessionStorage.setItem('ventana', '/cv-clientes');
+    let coloresJSON = sessionStorage.getItem('/cv-clientes');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
     else this.buscaColor();
     let d = this.today.toISOString().slice(0, 10);
@@ -48,13 +48,10 @@ export class CvFacturasComponent implements OnInit {
       filtro: '',
       nombre: ''
     });
-    this.getCarteraOfConsumoAgua(d, this.page, this.size);
-
+    //this.getCarteraOfFacturas(d);
+    this.getCarteraOfClientes(d, this.page, this.size);
   }
-  onChangeDate() {
-    this.page = 0;
-    //this.getCarteraOfClientes(this.f_buscar.value.sDate, this.page, this.size)
-  }
+  onChangeDate() { this.page = 0; this.getCarteraOfClientes(this.f_buscar.value.sDate, this.page, this.size) }
 
   colocaColor(colores: any) {
     document.documentElement.style.setProperty('--bgcolor1', colores[0]);
@@ -66,15 +63,27 @@ export class CvFacturasComponent implements OnInit {
   }
   async buscaColor() {
     try {
-      const datos = await this.coloresService.setcolor(1, 'cv-facturas');
+      const datos = await this.coloresService.setcolor(1, 'cv-clientes');
       const coloresJSON = JSON.stringify(datos);
-      sessionStorage.setItem('/cv-facturas', coloresJSON);
+      sessionStorage.setItem('/cv-clientes', coloresJSON);
       this.colocaColor(datos);
     } catch (error) {
       console.error(error);
     }
   }
 
+  getCarteraOfClientes(date: any, page: number, size: number) {
+    this.s_loading.showLoading();
+    this.s_clientes.CVOfClientes(date, this.f_buscar.value.nombre, page, size).then((items: any) => {
+      this._clientes = items.content
+      this.size = items.size;
+      this.page = items.pageable.pageNumber;
+      this.totalPages = items.totalPages;
+      this.totalElements = items.totalElements;
+      this.updatePages();
+      this.s_loading.hideLoading();
+    }).catch((error: any) => console.error(error))
+  }
   getDetallePlanilla(idplanilla: number) {
     this.s_loading.showLoading()
     this.idplanilla = idplanilla;
@@ -82,47 +91,6 @@ export class CvFacturasComponent implements OnInit {
     this.s_loading.hideLoading();
 
   }
-  getCarteraOfNoConsumo(fecha: any, page: number, size: number) {
-    this.s_loading.showLoading();
-    this._facturas = [];
-    this.facturas = [];
-
-    this.s_facturas.getCVNOconsumo(fecha, page, size).subscribe({
-      next: (datos: any) => {
-        console.log("NoConsumo")
-        console.log(datos);
-        this.facturas = datos.content;
-        this.size = datos.size;
-        this.page = datos.pageable.pageNumber;
-        this.totalPages = datos.totalPages;
-        this.totalElements = datos.totalElements;
-        this.updatePages();
-        this.s_loading.hideLoading();
-      },
-      error: (e: any) => console.error(e)
-    })
-
-  }
-  getCarteraOfConsumoAgua(fecha: any, page: number, size: number) {
-    this.s_loading.showLoading();
-    this._facturas = [];
-    this.facturas = [];
-    this.s_facturas.getCVconsumo(fecha, page, size).subscribe({
-      next: (datos: any) => {
-        console.log("consumo")
-        console.log(datos);
-        this._facturas = datos.content;
-        this.size = datos.size;
-        this.page = datos.pageable.pageNumber;
-        this.totalPages = datos.totalPages;
-        this.totalElements = datos.totalElements;
-        this.updatePages();
-        this.s_loading.hideLoading();
-      },
-      error: (e: any) => console.error(e)
-    })
-  }
-
 
   getFacturasByCliente(idcliente: number) {
     this.swfacturas = true;
@@ -149,21 +117,21 @@ export class CvFacturasComponent implements OnInit {
     if (this.page > 0) {
       const rawDate = new Date(this.f_buscar.value.sDate);
       const formattedDate = rawDate.toISOString().split('T')[0]; // "2025-07-17"
-      //this.getCarteraOfClientes(formattedDate, this.page - 1, this.size);
+      this.getCarteraOfClientes(formattedDate, this.page - 1, this.size);
     }
   }
   onNextPage(): void {
     if (this.page <= this.totalPages - 1) {
       const rawDate = new Date(this.f_buscar.value.sDate);
       const formattedDate = rawDate.toISOString().split('T')[0]; // "2025-07-17"
-      //this.getCarteraOfClientes(formattedDate, this.page + 1, this.size);
+      this.getCarteraOfClientes(formattedDate, this.page + 1, this.size);
     }
   }
   onGoToPage(page: number): void {
     if (page >= 0 && page < this.totalPages) {
       const rawDate = new Date(this.f_buscar.value.sDate);
       const formattedDate = rawDate.toISOString().split('T')[0]; // "2025-07-17"
-      //this.getCarteraOfClientes(formattedDate, page, this.size);
+      this.getCarteraOfClientes(formattedDate, page, this.size);
     }
   }
 

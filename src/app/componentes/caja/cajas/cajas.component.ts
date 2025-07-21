@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { format } from '@formkit/tempo';
 import jsPDF from 'jspdf';
@@ -29,6 +29,11 @@ export class ListarCajaComponent implements OnInit {
   desde: any;
   hasta: any;
   opt: any = '0';
+  swAddCaja: boolean = false;
+  idcaja: number;
+  _iduser: number;
+  @ViewChild('swModi', { read: TemplateRef }) swModi: TemplateRef<unknown> | undefined;
+
   constructor(
     private cajaService: CajaService,
     private router: Router,
@@ -40,7 +45,7 @@ export class ListarCajaComponent implements OnInit {
     private s_recaudacion: RecaudacionService,
     private s_rubro: RubrosService,
     private s_pdf: PdfService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     let fechaActual: Date = new Date();
@@ -94,6 +99,11 @@ export class ListarCajaComponent implements OnInit {
       sessionStorage.setItem('idcajaToInfo', idcaja.toString());
       this.router.navigate(['info-caja']);
     }
+  }
+  setIdcaja(idcaja: number) {
+    this.idcaja = idcaja;
+    this.swAddCaja = true;
+
   }
   pdf(opt: any) {
     switch (opt) {

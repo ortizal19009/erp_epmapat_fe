@@ -287,6 +287,7 @@ import { NtacreditoComponent } from './componentes/ntacredito/ntacredito.compone
 import { AddNtacreditoComponent } from './componentes/ntacredito/add-ntacredito/add-ntacredito.component';
 import { HomeComponent } from './componentes/administracion/home/home.component';
 import { StatusConveniosComponent } from './componentes/convenios/status-convenios/status-convenios.component';
+import { CvClientesComponent } from './componentes/coactivas/carteras-vencidas/cv-clientes/cv-clientes.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
@@ -562,6 +563,7 @@ import { StatusConveniosComponent } from './componentes/convenios/status-conveni
     AddNtacreditoComponent,
     HomeComponent,
     StatusConveniosComponent,
+    CvClientesComponent,
   ],
 
   imports: [

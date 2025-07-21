@@ -652,9 +652,15 @@
                <ul class="nav nav-treeview">
 
                   <li class="nav-item">
-                     <a routerLink="/cv-facturas" class="nav-link">
+                     <a routerLink="/cv-clientes" class="nav-link">
                         <i class="bi-hdd-stack nav-icon"></i>
                         <p class="text-warning"> C.V. Clientes </p>
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a routerLink="/cv-facturas" class="nav-link">
+                        <i class="bi-hdd-stack nav-icon"></i>
+                        <p class="text-warning"> C.V. Facturas </p>
                      </a>
                   </li>
                   <li class="nav-item">
@@ -725,8 +731,7 @@
                      </a>
                   </li>
                   <li class="nav-item">
-                     <a class="nav-link" routerLink="/definir"
-                        [ngClass]="{'disabled': !isOptionEnabled(5, 224)}">
+                     <a class="nav-link" routerLink="/definir" [ngClass]="{'disabled': !isOptionEnabled(5, 224)}">
                         <i class="bi-people"></i>
                         <p class="text-warning">&nbsp; Firma Electrónica</p>
                      </a>

@@ -14,10 +14,11 @@
                data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-               <button class="dropdown-item" type="button" data-toggle="collapse" data-target="#nuevaCaja">
+               <button class="dropdown-item" type="button" data-toggle="collapse" data-target="#nuevaCaja"
+                  (click)="swAddCaja = false">
                   <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
-                  <button class="dropdown-item" type="button" (click)="imprimir()">
-                     <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
+               <button class="dropdown-item" type="button" (click)="imprimir()">
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
             </div>
          </div>
 
@@ -52,10 +53,11 @@
                            aria-expanded="false">
                         </button>
                         <div class="dropdown-menu dropdown-menu-right popLista">
-                           <button class="dropdown-item" type="button" data-toggle="collapse" data-target="#addInteres">
+                           <button class="dropdown-item" (click)="setIdcaja(caja.idcaja)"[disabled]="([8, 10026, 1].includes(_iduser))" type="button"
+                              data-toggle="collapse" data-target="#modiCaja">
                               <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
                            <button class="dropdown-item" type="button" data-toggle="modal" data-target="#elimInteres">
-                              <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
+                              <i class="bi bi-file-minus"></i>&nbsp; Reporte</button>
                         </div>
                      </div>
                   </td>
@@ -70,12 +72,19 @@
       </div>
 
       <div class="col-md-6 ml-5 mt-1">
-         <div class="collapse" id="nuevaCaja">
+         <div class="collapse" id="nuevaCaja" *ngIf="!swAddCaja">
             <div class="card card-success card-outline card-body">
                <app-add-caja></app-add-caja>
             </div>
          </div>
+         <div class="collapse" id="modiCaja" *ngIf="swAddCaja">
+            <div class="card card-success card-outline card-body">
+
+               <app-modificar-caja [idcaja]="idcaja"></app-modificar-caja>
+            </div>
+         </div>
       </div>
+
    </div>
 </div>
 

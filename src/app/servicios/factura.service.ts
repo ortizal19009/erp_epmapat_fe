@@ -417,6 +417,12 @@ export class FacturaService {
   getCVFacturasNOconsumo(fecha: any) {
     return this.http.get(`${baseUrl}/reportes/CV_noconsumo?fecha=${fecha}`);
   }
+  getCVconsumo(fecha: any, page: number, size: number) {
+    return this.http.get(`${baseUrl}/CV_consumo?fecha=${fecha}&page=${page}&size=${size}`);
+  }
+  getCVNOconsumo(fecha: any, page: number, size: number) {
+    return this.http.get(`${baseUrl}/CV_noconsumo?fecha=${fecha}&page=${page}&size=${size}`);
+  }
   getCvFacturasByRubro(idrubro: number, fecha: any) {
     return this.http.get(
       `${baseUrl}/reportes/cv_facxrubro?idrubro=${idrubro}&fecha=${fecha}`

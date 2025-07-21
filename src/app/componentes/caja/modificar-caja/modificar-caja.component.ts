@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
@@ -19,14 +19,14 @@ export class ModificarCajaComponent implements OnInit {
   ptoemision: any;
   rtn: number; //0=Ok, 1=Vacio, 2=Ya existe
   vecvalido: Boolean[] = [true, true];
-
+  @Input() idcaja: any;
   constructor(
     public fb: FormBuilder,
     private cajaService: CajaService,
     private router: Router,
     private ptoemiService: PtoemisionService,
     private authService: AutorizaService
-  ) {}
+  ) { }
 
   ngOnInit() {
     let fecha: Date = new Date();
@@ -42,15 +42,24 @@ export class ModificarCajaComponent implements OnInit {
       fecmodi: fecha,
     });
     this.listarPtoEmision();
-    this.iniciar();
     this.valCodigoCaja();
     this.valDescriCaja();
+  }
+  ngOnChanges(changes: SimpleChanges) {
+    console.log(changes['idcaja'])
+    this.idcaja = +changes['idcaja'].currentValue!
+    this.iniciar();
   }
 
   iniciar() {
     let fecha: Date = new Date();
-    let idcaja = localStorage.getItem('idcajaToModi');
+    //let idcaja: any = localStorage.getItem('idcajaToModi');
+    let idcaja: number = this.idcaja;
+    /*    if (idcaja == null || idcaja === 0) {
+         idcaja = this.idcaja;
+       } */
     this.cajaService.getById(+idcaja!).subscribe((datos) => {
+      console.log(datos)
       this.cajaForm.setValue({
         idcaja: datos.idcaja,
         codigo: datos.codigo,
@@ -67,10 +76,9 @@ export class ModificarCajaComponent implements OnInit {
 
   onSubmit() {
     this.cajaService.updateCaja(this.cajaForm.value).subscribe(
-      (datos) => {},
+      (datos) => { window.location.reload(); },
       (error) => console.log(error)
     );
-    this.retornar();
   }
 
   listarPtoEmision() {
@@ -83,7 +91,7 @@ export class ModificarCajaComponent implements OnInit {
   }
 
   retornar() {
-    this.router.navigate(['info-caja']);
+    this.router.navigate(['cajas']);
   }
 
   valCodigoCaja() {

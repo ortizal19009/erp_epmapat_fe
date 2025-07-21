@@ -270,6 +270,7 @@ import { AddNtacreditoComponent } from './componentes/ntacredito/add-ntacredito/
 import { DefinirComponent } from './componentes/administracion/definir/definir.component';
 import { HomeComponent } from './componentes/administracion/home/home.component';
 import { StatusConveniosComponent } from './componentes/convenios/status-convenios/status-convenios.component';
+import { CvClientesComponent } from './componentes/coactivas/carteras-vencidas/cv-clientes/cv-clientes.component';
 
 const routes: Routes = [
   //Consumo de Agua
@@ -576,6 +577,7 @@ const routes: Routes = [
   /* COACTIVAS */
   { path: 'cv-rubros', component: CvRubrosComponent },
   { path: 'cv-facturas', component: CvFacturasComponent },
+  { path: 'cv-clientes', component: CvClientesComponent },
   { path: 'remision', component: RemisionComponent },
   { path: 'add-remision', component: AddRemisionComponent },
 ];

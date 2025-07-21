@@ -1,7 +1,7 @@
 <div class="content-header">
    <div class="container-fluid">
       <div class="row justify-content-center">
-         <div class="col-md-2 mt-4 mb-0">
+         <div class="col-sm mt-2 mb-0 text-center">
             <h4 class="font-weight-bold">Modificar Caja</h4>
          </div>
       </div><!-- /.row -->
@@ -9,59 +9,58 @@
 </div><!-- /.content-header -->
 
 <div class="content">
-   <div class="container-fluid">
+   <div class="container">
       <div class="row justify-content-center">
-         <!-- <div class="col-5"> -->
-         <div class="card card-body card-success card-outline  col-5 border-success">
-            <form [formGroup]="cajaForm">
-               <div class="row">
-                  <div class="form-group col-2 my-0 py-0">
-                     <label class="form-label col-form-label-sm">Código
-                        <input class="form-control form-control-sm text-center" type="text" minlength="3" maxlength="3"
-                           id="codigo" formControlName="codigo" pattern="[0-9]{3}" title="Codigo de 3 números" />
-                     </label>
-                  </div>
-                  <div class="form-group col-sm-10 my-0 py-0">
-                     <label for="descripcion" class="form-label col-form-label-sm col-12">Descripción
-                        <input type="text" class="form-control form-control-sm " id="descripcion"
-                           formControlName="descripcion" />
-                     </label>
-                  </div>
-                  <div class="form-group col-sm-4 my-0 py-0">
-                     <label for="" class="form-label col-form-label-sm">Punto de emision
-                        <select class="form-control form-control-sm" id="ptoemision"
-                           formControlName="idptoemision_ptoemision" [compareWith]="compararPtoEmision">
-                           <option [ngValue]="ptoemisionDatos" *ngFor="let ptoemisionDatos of ptoemision">
-                              {{ ptoemisionDatos.establecimiento }}
-                           </option>
-                        </select>
-                     </label>
-                  </div>
-                  <div class="form-group col-sm-4 my-0 py-0">
-                     <label for="" class="form-label col-form-label-sm">Estado
-                        <select class="form-control form-control-sm" id="estado" formControlName="estado">
-                           <option value="0">Inactivo</option>
-                           <option value="1">Activo</option>
-                        </select></label>
-                  </div>
-               </div>
 
-               <div class="row justify-content-center mb-3 mt-3">
-                  <button type="button" class="btn btn-success btn-sm" (click)="onSubmit()" [disabled]="disabled">
-                     <i class="fa fa-check-circle" style="font-size:24pxi"></i> Aceptar </button>
-                  <button class="btn btn-sm btn-outline-success mx-2" (click)="retornar()">
-                     <i class="fa fa-times-circle" style="font-size:24pxi"></i> Cancelar</button>
+         <form [formGroup]="cajaForm">
+            <div class="row">
+               <div class="form-group col-sm my-0 py-0">
+                  <label class="form-label col-form-label-sm">Punto de emisión
+                     <input class="form-control form-control-sm text-center" type="text" minlength="3" maxlength="3"
+                        id="codigo" formControlName="codigo" readonly pattern="[0-9]{3}" title="Codigo de 3 números" />
+                  </label>
                </div>
-            </form>
-            <div *ngIf="rtn == 1">
-               <div class="alert alert-danger text-center" role="alert">
-                  <strong>Código</strong> de Caja incorrecto !
+               <div class="form-group col-sm-4 my-0 py-0">
+                  <label for="" class="form-label col-form-label-sm">Establecimiento
+                     <select class="form-control form-control-sm" id="ptoemision"
+                        formControlName="idptoemision_ptoemision" [compareWith]="compararPtoEmision">
+                        <option [ngValue]="ptoemisionDatos" *ngFor="let ptoemisionDatos of ptoemision">
+                           {{ ptoemisionDatos.establecimiento }}
+                        </option>
+                     </select>
+                  </label>
+               </div>
+               <div class="form-group col-sm my-0 py-0">
+                  <label for="" class="form-label col-form-label-sm">Estado
+                     <select class="form-control form-control-sm" id="estado" formControlName="estado">
+                        <option value=0>Inactivo</option>
+                        <option value=1>Activo</option>
+                     </select></label>
+               </div>
+               <div class="form-group col-sm-12 my-0 py-0">
+                  <label for="descripcion" class="form-label col-form-label-sm col-12">Descripción
+                     <input type="text" class="form-control form-control-sm " id="descripcion"
+                        formControlName="descripcion" />
+                  </label>
                </div>
             </div>
-            <div *ngIf="rtn == 2">
-               <div class="alert alert-warning text-center" role="alert">
-                  Ya existe la Caja <strong>{{codigo}}</strong>
-               </div>
+
+            <div class="row justify-content-center mb-3 mt-3">
+               <button type="button" class="btn btn-success btn-sm" (click)="onSubmit()">
+                  <i class="fa fa-check-circle" style="font-size:24pxi"></i> Aceptar </button>
+               <button class="btn btn-sm btn-outline-success mx-2" type="button"
+                              data-toggle="collapse" data-target="#modiCaja" (click)="retornar()">
+                  <i class="fa fa-times-circle" style="font-size:24pxi"></i> Cancelar</button>
+            </div>
+         </form>
+         <div *ngIf="rtn == 1">
+            <div class="alert alert-danger text-center" role="alert">
+               <strong>Código</strong> de Caja incorrecto !
+            </div>
+         </div>
+         <div *ngIf="rtn == 2">
+            <div class="alert alert-warning text-center" role="alert">
+               Ya existe la Caja <strong>{{codigo}}</strong>
             </div>
          </div>
       </div>

@@ -1,0 +1,156 @@
+<div class="content mt-1 pt-1 pl-0">
+    <div class="container-fluid">
+        <div class="row m-0 px-0 py-1 justify-content-start cabecera border sombra">
+            <div class="col-sm-3">
+                <h4 class="m-0 font-weight-bold"><i class="fa fa-list" aria-hidden="true"></i> C.V. Clientes</h4>
+            </div>
+            <div class="col-sm-7">
+                <form [formGroup]="f_buscar">
+                    <div class="row col-sm-12 mt-0 mb-0">
+                        <div class="col-sm-12">
+                            <div class="row">
+                                <div class="col-sm">
+                                    <input type="date" placeholder="Nombre ó Identificación"
+                                        class="form-control form-control-sm" autofocus id="nombreIdentifi"
+                                        formControlName="sDate" required minlength="4" />
+                                </div>
+                                <div class="col-sm">
+                                    <input type="text" placeholder="Nombre ó Identificación"
+                                        class="form-control form-control-sm" formControlName="nombre" required
+                                        minlength="4" />
+                                </div>
+                                <div class="col-sm-3">
+                                    <button class="btn btn-primary btn-sm" (click)="onChangeDate()"><i
+                                            class="fa fa-search"></i></button>
+                                </div>
+                                <div class="col-sm-2 px-0">
+                                    <input type="text" class="form-control form-control-sm text-center"
+                                        placeholder="Filtrar..." [(ngModel)]="filtro" formControlName="filtro" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group ml-auto mt-0">
+                <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
+                    aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+                </button>
+                <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+                    <button class="dropdown-item" type="button">
+                        <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+                    <button class="dropdown-item" type="button" [routerLink]="['/imp-clientes', 'cv-clientes']">
+                        <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <div class="row mb-0">
+                <div class="col-sm">
+                    <table class="table table-hover table-bordered table-sm sombra">
+                        <thead class="cabecera text-center">
+                            <tr>
+                                <th></th>
+                                <th>Cliente</th>
+                                <th>Identificación</th>
+                                <th>Dirección</th>
+                                <th>E-mail</th>
+                                <th>Telefono</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody class="">
+                            <tr *ngFor="let cliente of _clientes |filter:filtro; let i = index"
+                                (click)="getFacturasByCliente(cliente.idcliente)" data-toggle="modal"
+                                data-target="#detalles">
+                                <td class="small text-center font-weight-bold">{{i+1}}</td>
+                                <td class="description">{{cliente.nombre}}</td>
+                                <td class="text-center">{{cliente.cedula}}</td>
+                                <td class="description">{{cliente.direccion}}</td>
+                                <td class="description">{{cliente.email}}</td>
+                                <td class="text-center">{{cliente.telefono}}</td>
+                                <td class="text-right">{{cliente.valor.toFixed(2)}} $</td>
+                            </tr>
+                        </tbody>
+                        <caption class="small mark"> <strong>{{page+1}}/{{totalPages}}</strong> total registros
+                            {{totalElements}} *NOTA: En los valores impresos no se refleja el interés de mora.
+                            <!--   <button class="btn btn-outline-primary btn-xs">&nbsp;&nbsp;Rango&nbsp;&nbsp;</button> -->
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-end">
+                                    <li class="page-item">
+                                        <button class="btn btn-xs btn-primary" (click)="onPreviousPage()"> <span
+                                                aria-hidden="true">&laquo;</span>
+                                        </button>
+                                    </li>
+                                    <li class="page-item" *ngFor="let p of pages">
+                                        <button class="btn btn-xs btn-outline-primary" (click)="onGoToPage(p)"
+                                            [class.active]="p === page">
+                                            {{ p + 1 }}
+                                        </button>
+                                    </li>
+                                    <li class="page-item">
+                                        <button class="btn btn-xs btn-primary" (click)="onNextPage()"> <span
+                                                aria-hidden="true">&raquo;</span>
+                                        </button>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </caption>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL Imprimir-->
+    <div class="modal fade" id="detalles" tabindex="-1" aria-labelledby="detallesLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class='modal-header py-2 justify-content-center cabecera'>
+                    <h5 class='modal-title font-weight-bold' id='ModalLabel'>{{nomCliente}}</h5>
+                    <button class="bg-transparent border-0 text-white dropdown-menu-right" type="submit"
+                        *ngIf="!swfacturas" (click)="swfacturas = !swfacturas">
+                        <i class="bi-arrow-left-circle icoRegresar"></i>
+                    </button>
+                </div>
+                <div class='modal-body'>
+                    <table class="table table-sm table-hover table-bordered sombra" *ngIf="swfacturas; else swfactura">
+                        <thead class="text-center cabecera">
+                            <tr>
+                                <th></th>
+                                <th>Planilla</th>
+                                <th>Módulo</th>
+                                <th>Cuenta</th>
+                                <th>Fecha</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let factura of _facturas; let i = index"
+                                (click)="getDetallePlanilla(factura.factura)">
+                                <td class="small text-center font-weight-bold">{{i+1}}</td>
+                                <td>{{factura.factura}}</td>
+                                <td class="description">{{factura.modulo}}</td>
+                                <td class="text-center">{{factura.cuenta || 0}}</td>
+                                <td class="description">{{factura.feccrea}}</td>
+                                <td class="text-right">{{factura.total.toFixed(2)}}$</td>
+                            </tr>
+                            <tr>
+                                <td class="text-right font-weight-bold" colspan="4">Total:</td>
+                                <td colspan="2" class="text-right font-weight-bold">{{total.toFixed(2)}}$</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <ng-template #swfactura>
+                        <app-info-factura [idfac]="idplanilla"></app-info-factura>
+                    </ng-template>
+                </div>
+            </div>
+        </div>
+    </div>
