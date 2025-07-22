@@ -27,6 +27,7 @@ import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { CondmultasinteresesService } from 'src/app/servicios/condmultasintereses.service';
 import * as L from 'leaflet';
 import { JasperReportService } from 'src/app/servicios/jasper-report.service';
+import { FormBuilder, FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-detalles-abonado',
@@ -45,6 +46,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
   totfac: number;
   idfactura: number;
   grafic: Boolean = false;
+  f_sendEmail: FormGroup;
 
   rango: number = 15;
   estadoFE: string;
@@ -92,6 +94,9 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
   map!: L.Map | undefined;
   mostrarMapa: boolean = false;
 
+  swEmail: boolean = false;
+  dataURI: any;
+
 
   @ViewChild('pdfViewer', { static: false }) pdfViewer!: ElementRef;
 
@@ -109,10 +114,16 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     private s_loading: LoadingService,
     private authService: AutorizaService,
     private s_condonar: CondmultasinteresesService,
-    private s_jasperreport: JasperReportService
+    private s_jasperreport: JasperReportService,
+    private f: FormBuilder
   ) { }
 
   ngOnInit(): void {
+    this.f_sendEmail = this.f.group({
+      email: '',
+      body: '',
+      archivo: ''
+    })
     this.obtenerDatosAbonado();
     this.listarIntereses();
     this.usuario = this.authService.idusuario;
@@ -139,8 +150,11 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
       idabonado = this.cuenta;
     }
     this.aboService.getByIdabonado(+idabonado!).subscribe({
-      next: (datos) => {
+      next: (datos: any) => {
         console.log(datos)
+        this.f_sendEmail.patchValue({
+          email: datos[0].idresponsable.email
+        })
         this._abonado = datos;
         this.abonado.idabonado = this._abonado[0].idabonado;
         this.abonado.nombre = this._abonado[0].idcliente_clientes.nombre;
@@ -782,13 +796,33 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     this.s_pdf.setfooter(doc);
     // Generate data URI and set iframe source
     const pdfDataUri = doc.output('datauri');
-    const pdfViewer: any = document.getElementById(
-      'pdfViewer'
-    ) as HTMLIFrameElement;
-    pdfViewer.src = pdfDataUri;
+    if (this.swEmail == true) {
+      //this.dataURItoBlob(pdfDataUri);
+      this.dataURI = doc.output('datauri').toString();
+
+    } else {
+      const pdfViewer: any = document.getElementById(
+        'pdfViewer'
+      ) as HTMLIFrameElement;
+      pdfViewer.src = pdfDataUri;
+    }
     this.s_loading.hideLoading();
     // Generate and output the PDF after all data is processed
     //doc.output('pdfobjectnewwindow');
+  }
+
+  dataURItoBlob(dataURI: any): Blob {
+    const byteString = atob(dataURI.split(',')[1]);
+    const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+
+    return new Blob([ab], { type: mimeString });
   }
   listarIntereses() {
     this.s_interes.getListaIntereses().subscribe({
@@ -861,6 +895,29 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
       });
     }
     return +interes.toFixed(2);
+  }
+  sendEmail() {
+    console.log(this.f_sendEmail.value);
+    if (this.swEmail === true) {
+      const pdfBlob = this.dataURItoBlob(this.dataURI);
+      const formData = new FormData();
+
+      formData.append('email', this.f_sendEmail.get('email')?.value);
+      formData.append('body', this.f_sendEmail.get('body')?.value);
+      formData.append('file', pdfBlob, 'notificacion.pdf');
+
+/*       this.http.post('/api/enviar-correo', formData).subscribe({
+        next: () => {
+          this.s_loading.hideLoading();
+          console.log('Correo enviado correctamente');
+        },
+        error: (err) => {
+          this.s_loading.hideLoading();
+          console.error('Error al enviar el correo:', err);
+        }
+      }); */
+    }
+
   }
   async getSumaFac(idfactura: number): Promise<any> {
     const sumaFac = await this.rubxfacService.getSumaValoresUnitarios(

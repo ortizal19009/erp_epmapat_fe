@@ -62,3 +62,6 @@ table {
 .bi-cash-coin {
   color: rgb(255, 94, 0);
 }
+textarea{
+  width: 100%;
+}

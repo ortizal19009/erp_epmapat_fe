@@ -105,6 +105,11 @@ export class ListarCajaComponent implements OnInit {
     this.swAddCaja = true;
 
   }
+
+  imprimirReportes(recaudador: any) {
+    sessionStorage.setItem('idrecaudador', recaudador.idusuario_usuarios.idusuario.toString());
+    this.router.navigate(['/imp-inf-caja']);
+  }
   pdf(opt: any) {
     switch (opt) {
       case '0':
