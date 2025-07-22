@@ -16,12 +16,14 @@ export class CvFacturasComponent implements OnInit {
   filtro: string;
   _facturas: any;
   facturas: any;
+  _facturasClientes: any;
   today: Date = new Date();
   nomCliente: string = '';
   total: number = 0;
   _clientes: any;
   swfacturas: boolean = true;
   idplanilla: number = 0;
+  swconsumo: boolean = true;
   /* variables para hacer la paginación  */
   page: number = 0;
   size: number = 20;
@@ -54,6 +56,11 @@ export class CvFacturasComponent implements OnInit {
   onChangeDate() {
     this.page = 0;
     //this.getCarteraOfClientes(this.f_buscar.value.sDate, this.page, this.size)
+    const rawDate = new Date(this.f_buscar.value.sDate);
+    const formattedDate = rawDate.toISOString().split('T')[0]; // "2025-07-17"
+    //this.getCarteraOfClientes(formattedDate, this.page + 1, this.size);
+    this.swconsumo === true ? this.getCarteraOfConsumoAgua(formattedDate, this.page, this.size) : this.getCarteraOfNoConsumo(formattedDate, this.page, this.size)
+
   }
 
   colocaColor(colores: any) {
@@ -83,14 +90,13 @@ export class CvFacturasComponent implements OnInit {
 
   }
   getCarteraOfNoConsumo(fecha: any, page: number, size: number) {
+    this.swconsumo = false;
     this.s_loading.showLoading();
     this._facturas = [];
     this.facturas = [];
 
     this.s_facturas.getCVNOconsumo(fecha, page, size).subscribe({
       next: (datos: any) => {
-        console.log("NoConsumo")
-        console.log(datos);
         this.facturas = datos.content;
         this.size = datos.size;
         this.page = datos.pageable.pageNumber;
@@ -104,13 +110,12 @@ export class CvFacturasComponent implements OnInit {
 
   }
   getCarteraOfConsumoAgua(fecha: any, page: number, size: number) {
+    this.swconsumo = true;
     this.s_loading.showLoading();
     this._facturas = [];
     this.facturas = [];
     this.s_facturas.getCVconsumo(fecha, page, size).subscribe({
       next: (datos: any) => {
-        console.log("consumo")
-        console.log(datos);
         this._facturas = datos.content;
         this.size = datos.size;
         this.page = datos.pageable.pageNumber;
@@ -125,16 +130,15 @@ export class CvFacturasComponent implements OnInit {
 
 
   getFacturasByCliente(idcliente: number) {
-    this.swfacturas = true;
+    // this.swfacturas = true;
     this.s_loading.showLoading();
     this.total = 0;
     const rawDate = new Date(this.f_buscar.value.sDate);
     const formattedDate = rawDate.toISOString().split('T')[0]; // "2025-07-17"
     this.s_facturas.getFacturasCVClientes(idcliente, formattedDate).subscribe({
       next: (datos: any) => {
-        console.log(datos)
         datos.length > 0 ? this.nomCliente = datos[0].nombre : this.nomCliente = '';
-        this._facturas = datos;
+        this._facturasClientes = datos;
         datos.forEach((item: any) => {
           this.total += item.total;
         })
@@ -149,6 +153,8 @@ export class CvFacturasComponent implements OnInit {
     if (this.page > 0) {
       const rawDate = new Date(this.f_buscar.value.sDate);
       const formattedDate = rawDate.toISOString().split('T')[0]; // "2025-07-17"
+      this.swconsumo === true ? this.getCarteraOfConsumoAgua(formattedDate, this.page - 1, this.size) : this.getCarteraOfNoConsumo(formattedDate, this.page, this.size)
+
       //this.getCarteraOfClientes(formattedDate, this.page - 1, this.size);
     }
   }
@@ -157,6 +163,8 @@ export class CvFacturasComponent implements OnInit {
       const rawDate = new Date(this.f_buscar.value.sDate);
       const formattedDate = rawDate.toISOString().split('T')[0]; // "2025-07-17"
       //this.getCarteraOfClientes(formattedDate, this.page + 1, this.size);
+      this.swconsumo === true ? this.getCarteraOfConsumoAgua(formattedDate, this.page + 1, this.size) : this.getCarteraOfNoConsumo(formattedDate, this.page, this.size)
+
     }
   }
   onGoToPage(page: number): void {
@@ -164,6 +172,8 @@ export class CvFacturasComponent implements OnInit {
       const rawDate = new Date(this.f_buscar.value.sDate);
       const formattedDate = rawDate.toISOString().split('T')[0]; // "2025-07-17"
       //this.getCarteraOfClientes(formattedDate, page, this.size);
+      this.swconsumo === true ? this.getCarteraOfConsumoAgua(formattedDate, page, this.size) : this.getCarteraOfNoConsumo(formattedDate, this.page, this.size)
+
     }
   }
 
@@ -182,5 +192,10 @@ export class CvFacturasComponent implements OnInit {
       { length: endPage - startPage + 1 },
       (_, i) => startPage + i
     );
+  }
+  setFactura(factura: any) {
+    this.swfacturas = false;
+    this.idplanilla = factura.factura;
+    this.getFacturasByCliente(factura.idcliente);
   }
 }

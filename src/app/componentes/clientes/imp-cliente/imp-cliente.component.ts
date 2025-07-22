@@ -21,7 +21,7 @@ import { AutorizaService } from 'src/app/compartida/autoriza.service';
 export class ImpClienteComponent implements OnInit {
   swimprimir: boolean = true;
   formImprimir: FormGroup;
-  opcreporte: number = 1;
+  opcreporte: number = 3;
   otrapagina: boolean = false;
   swbotones: boolean = false;
   swcalculando: boolean = false;
@@ -62,7 +62,7 @@ export class ImpClienteComponent implements OnInit {
     const hasta = fecha.toISOString().slice(0, 10);
     const año = fecha.getFullYear() - 1;
     this.formImprimir = this.fb.group({
-      reporte: '1',
+      reporte: '3',
       hasta: hasta,
       desdeNum: 1,
       hastaNum: 18000,

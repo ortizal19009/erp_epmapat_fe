@@ -39,11 +39,9 @@
                 <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
                     <button class="dropdown-item" type="button" [routerLink]="['/add-remision']">
                         <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
-                    <button class="dropdown-item" type="button" data-toggle="modal" data-target="#impRemision">
-                        <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
-                    <button class="dropdown-item" type="button" data-toggle="modal" data-toggle="modal"
-                        data-target="#importar"> <i class="bi-file-earmark-arrow-up"></i>&nbsp;
-                        Importar</button>
+                    <button class="dropdown-item" type="button" data-toggle="modal" data-target="#detalleCliente">
+                        <i class="bi bi-printer"></i>&nbsp; Imprimir </button>
+
                 </div>
             </div>
 
@@ -71,7 +69,7 @@
                         </thead>
                         <tbody class="">
                             <tr *ngFor="let remision of _remisiones |filter:filtro; let i = index"
-                                (click)="getRemisionById(remision)" data-toggle="modal" data-target="#detalleCliente">
+                                (click)="getRemisionById(remision)" data-toggle="modal" data-target="#detallesModal">
                                 <td class="small text-center font-weight-bold">{{i+1}}</td>
                                 <td class="description">{{remision.idcliente_clientes.nombre}}</td>
                                 <td class="text-center">{{remision.idcliente_clientes.cedula}}</td>
@@ -150,6 +148,7 @@
                 </form>
                 <!-- <iframe id="pdfViewer" src="" width="100%" height="600px"></iframe> -->
                 <iframe id="pdfViewer" src="" *ngIf="!swimprimir" width="100%" height="600px"></iframe>
+
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-sm btn-success" data-dismiss='modal'>Cancelar</button>
@@ -263,6 +262,29 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-sm btn-primary" (click)="impContrato()">Contrato</button>
                 <button type="button" class="btn btn-sm btn-outline-success" data-dismiss='modal'>Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="impRemision" tabindex="-1" aria-labelledby="impRemisionLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="impRemisionLabel">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!--                 <iframe id="pdfViewer" src="" *ngIf="!swimprimir" width="100%" height="600px"></iframe>
+ -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
             </div>
         </div>
     </div>

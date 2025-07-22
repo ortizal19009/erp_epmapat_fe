@@ -24,7 +24,7 @@
                                 <label *ngIf="!swimprimir" class="input-group-text">Exportar</label>
                             </div>
                             <select class="custom-select" formControlName="reporte" (change)="changeReporte()">
-                    <!--             <option value="1"[disabled]="usuario != 1">Cartera Vencida General</option>
+                                <!--             <option value="1"[disabled]="usuario != 1">Cartera Vencida General</option>
                                 <option value="2"[disabled]="usuario != 1">Lista de Abonados</option> -->
                                 <option value="3">Cartera Vencida Rubros</option>
                                 <option value="4">Cartera Vencida Facturas</option>
@@ -43,7 +43,7 @@
                             </div>
                         </div>
 
-                        <div *ngIf="opcreporte ==1" class="form-group col-md-10">
+<!--                         <div *ngIf="opcreporte ==1" class="form-group col-md-10">
                             <div class="input-group input-group-sm">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
@@ -54,7 +54,7 @@
                                 <input type="number" class="form-control text-center" formControlName="hastaNum"
                                     aria-label="Small" aria-describedby="inputGroup-sizing-sm">
                             </div>
-                        </div>
+                        </div> -->
 
                         <div *ngIf="swimprimir" class="form-group col-md-5">
                             <div class="input-group input-group-sm mb-2">
@@ -88,7 +88,8 @@
                     </div>
                 </form>
                 <div *ngIf="!swbotones" class="text-center">
-                    <button *ngIf="swimprimir" type='button' class='btn btn-success btn-sm mx-1' [disabled]="swbotones" (click)="imprimir()">
+                    <button *ngIf="swimprimir" type='button' class='btn btn-success btn-sm mx-1' [disabled]="swbotones"
+                        (click)="imprimir()">
                         <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
                     <button *ngIf="!swimprimir" type='button' class='btn btn-warning btn-sm mx-1' (click)="imprimir()"
                         [disabled]="!formImprimir.valid">

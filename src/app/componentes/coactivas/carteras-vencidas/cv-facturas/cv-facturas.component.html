@@ -14,11 +14,6 @@
                                         class="form-control form-control-sm" autofocus id="nombreIdentifi"
                                         formControlName="sDate" required minlength="4" />
                                 </div>
-                                <div class="col-sm">
-                                    <input type="text" placeholder="Nombre ó Identificación"
-                                        class="form-control form-control-sm" formControlName="nombre" required
-                                        minlength="4" />
-                                </div>
                                 <div class="col-sm-3">
                                     <button class="btn btn-primary btn-sm" (click)="onChangeDate()"><i
                                             class="fa fa-search"></i></button>
@@ -38,8 +33,6 @@
                     aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
                 </button>
                 <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-                    <button class="dropdown-item" type="button">
-                        <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
                     <button class="dropdown-item" type="button" [routerLink]="['/imp-clientes', 'cv-facturas']">
                         <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
                 </div>
@@ -53,12 +46,12 @@
         <div class="card-body">
             <div class="card-header cardTab">
                 <ul class="nav nav-tabs card-header-tabs cardTab">
-                    <li class="nav-item"><a class="nav-link active cardTab"
+                    <li class="nav-item"><a class="nav-link active cardTab" (click)="page = 0"
                             (click)="getCarteraOfConsumoAgua(f_buscar.value.sDate, page, size)" href="#planillasConsumo"
                             data-toggle="tab">Consumo
                             agua potable</a>
                     </li>
-                    <li class="nav-item"><a class="nav-link cardTab"
+                    <li class="nav-item"><a class="nav-link cardTab" (click)="page = 0"
                             (click)="getCarteraOfNoConsumo(f_buscar.value.sDate, page, size)" href="#planillasNoConsumo"
                             data-toggle="tab">Servicios varios</a>
                     </li>
@@ -84,13 +77,16 @@
                                                     <th>Valor</th>
                                                 </tr>
                                             </thead>
-                                            <tbody class="detalles">
+                                            <tbody class="detalle">
                                                 <tr *ngFor="let factura of _facturas |filter:filtro; let i = index"
-                                                    (click)="getFacturasByCliente(factura.factura)">
+                                                    (click)="setFactura(factura)" data-toggle="modal"
+                                                    data-target="#detalles">
                                                     <td class="small text-center font-weight-bold">{{i+1}}</td>
                                                     <td class="text-center">{{factura.factura}}</td>
-                                                    <td class="">{{factura.nombre}}</td>
-                                                    <td class="">{{factura.modulo}}</td>
+                                                    <td class="truncate-text" [attr.title]="factura.nombre">
+                                                        {{factura.nombre}}</td>
+                                                    <td class="truncate-text" [attr.title]="factura.modulo">
+                                                        {{factura.modulo}}</td>
                                                     <td class="text-center">{{factura.emision}}</td>
                                                     <td class="text-center">{{factura.cuenta}}</td>
                                                     <td class="text-right">{{factura.total.toFixed(2)}} $</td>
@@ -143,11 +139,13 @@
                                             <th>Valor</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="detalles">
-                                        <tr *ngFor="let factura of facturas; let i = index">
+                                    <tbody class="detalle">
+                                        <tr *ngFor="let factura of facturas; let i = index"
+                                            (click)="setFactura(factura)" data-toggle="modal"
+                                            data-target="#detalles">
                                             <td class="text-center font-weight-bold">{{i+1}}</td>
                                             <td class="text-center">{{factura.factura}}</td>
-                                            <td class="">{{factura.nombre}}</td>
+                                            <td class="truncate-text">{{factura.nombre}}</td>
                                             <td class="">{{factura.modulo}}</td>
                                             <td class="text-right">{{factura.total.toFixed(2)}} $</td>
                                         </tr>
@@ -179,21 +177,11 @@
                                         </nav>
                                     </caption>
                                 </table>
-
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
-
-
-
-
-
-
-
-
         </div>
     </div>
 
@@ -202,10 +190,10 @@
         <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class='modal-header py-2 justify-content-center cabecera'>
-                    <h5 class='modal-title font-weight-bold' id='ModalLabel'>{{nomCliente}}</h5>
+                    <h5 class='modal-title font-weight-bold' id='ModalLabel'>Detalles planilla</h5>
                     <button class="bg-transparent border-0 text-white dropdown-menu-right" type="submit"
                         *ngIf="!swfacturas" (click)="swfacturas = !swfacturas">
-                        <i class="bi-arrow-left-circle icoRegresar"></i>
+                        <i class="bi-arrow-left-circle icoRegresar"> Ver mas f.</i>
                     </button>
                 </div>
                 <div class='modal-body'>
@@ -221,7 +209,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngFor="let factura of _facturas; let i = index"
+                            <tr *ngFor="let factura of _facturasClientes; let i = index"
                                 (click)="getDetallePlanilla(factura.factura)">
                                 <td class="small text-center font-weight-bold">{{i+1}}</td>
                                 <td>{{factura.factura}}</td>

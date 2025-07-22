@@ -39,7 +39,6 @@ export class InfoFacturasComponent implements OnInit {
   ngOnInit(): void {
     this.idFactura = +sessionStorage.getItem('idfacturaToInfo')!;
     sessionStorage.removeItem('idfacturaToInfo');
-    console.log(this.idFactura);
     if (this.idFactura == 0 || this.idFactura == null) {
       this.idFactura = this.idfac;
       this.swreturn = false;
@@ -53,7 +52,6 @@ export class InfoFacturasComponent implements OnInit {
   getImpuestoAcutal() {
     this.s_impuestos.getCurrentlyInteres().subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this._impuesto = datos;
       },
       error: (e: any) => console.error(e),
@@ -63,8 +61,6 @@ export class InfoFacturasComponent implements OnInit {
     this.datos = true;
     this.s_loading.showLoading();
     let body: any;
-    console.log(this.planilla);
-    console.log(this.planilla.idmodulo);
     let modulo: any = this.planilla.idmodulo;
     if (
       this.planilla.idabonado > 0 &&
@@ -135,7 +131,6 @@ export class InfoFacturasComponent implements OnInit {
   datosPlanilla() {
     this.s_interes.getInteresFactura(this.idFactura!).subscribe({
       next: (interes: any) => {
-        console.log(interes);
         this.interes = interes;
       },
     });

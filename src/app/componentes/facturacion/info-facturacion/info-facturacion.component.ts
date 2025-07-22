@@ -32,7 +32,7 @@ export class InfoFacturacionComponent implements OnInit {
         this.facturacion.total = datos.total;
         this.facturacion.cuotas = datos.cuotas;
       },
-      error: err => console.log(err.error)
+      error: err => console.error(err.error)
     })
   }
 
