@@ -465,4 +465,24 @@ export class FacturaService {
       { responseType: 'blob' }));
     return resp;
   }
+ sendEmail(
+    emisor: string,
+    password: string,
+    receptores: string[], // Ejemplo: ['correo1@gmail.com', 'correo2@hotmail.com']
+    asunto: string,
+    mensaje: string,
+    file?: File
+  ): Observable<any> {
+    const formData = new FormData();
+    formData.append('emisor', emisor);
+    formData.append('password', password);
+    receptores.forEach(email => formData.append('receptores', email));
+    formData.append('asunto', asunto);
+    formData.append('mensaje', mensaje);
+    if (file) {
+      formData.append('file', file);
+    }
+
+    return this.http.post(`${apiUrl}/api/sri/send`, formData);
+  }
 }
