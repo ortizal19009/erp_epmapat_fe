@@ -28,6 +28,8 @@ import { CondmultasinteresesService } from 'src/app/servicios/condmultasinterese
 import * as L from 'leaflet';
 import { JasperReportService } from 'src/app/servicios/jasper-report.service';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { SriService } from 'src/app/servicios/sri.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-detalles-abonado',
@@ -95,7 +97,31 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
   mostrarMapa: boolean = false;
 
   swEmail: boolean = false;
+  selectedFile: File | null = null;
   dataURI: any;
+  nameFile: string = "Vacío...";
+
+  mensajeBody = `<h3>Se adjunta su documénto electrónico. No responder este mensaje.</h3>
+
+<hr style="border-top: 1px solid #ccc; margin: 20px 0;" />
+
+<table style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">
+  <tr>
+    <td>
+      <img src="https://epmapatulcan.gob.ec/wp/wp-content/uploads/2021/05/LOGO-HORIZONTAL.png" alt="Logo EPMAPA-T" width="120" style="margin-right: 15px;">
+    </td>
+    <td>
+      <p style="margin: 0; font-weight: bold; color: #0066cc;">EPMAPA-T</p>
+      <p style="margin: 2px 0;">Empresa Pública Municipal de Agua Potable y Alcantarillado de Tulcán</p>
+      <p style="margin: 2px 0;"><strong>Dirección:</strong> Ca. Juan Ramón Arellano y Ca. Bolívar, Tulcán - Ecuador</p>
+      <p style="margin: 2px 0;"><strong><i class="fa-solid fa-phone-volume"></i> Teléfono:</strong> (06) 2980 021 </p>
+      <p style="margin: 2px 0;"><strong><i class="fa-brands fa-whatsapp"></i> WhatsApp:</strong> (06) 2980 021 </p>
+      <p style="margin: 2px 0;"><strong>Horario de atención:</strong> Lunes a Viernes, 07h30 - 16h30</p>
+      <p style="margin: 10px 0 0; font-size: 12px; color: #888;">Este mensaje es confidencial. Si usted no es el destinatario, elimínelo inmediatamente.</p>
+    </td>
+  </tr>
+</table>
+`
 
 
   @ViewChild('pdfViewer', { static: false }) pdfViewer!: ElementRef;
@@ -115,14 +141,17 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     private authService: AutorizaService,
     private s_condonar: CondmultasinteresesService,
     private s_jasperreport: JasperReportService,
-    private f: FormBuilder
+    private f: FormBuilder,
+    private s_sri: SriService
   ) { }
 
   ngOnInit(): void {
     this.f_sendEmail = this.f.group({
-      email: '',
-      body: '',
-      archivo: ''
+      emisor: [''],
+      password: [''],
+      receptores: [''], // separados por coma
+      asunto: ["Notificación de valores pendientes"],
+      mensaje: '',
     })
     this.obtenerDatosAbonado();
     this.listarIntereses();
@@ -153,7 +182,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
       next: (datos: any) => {
         console.log(datos)
         this.f_sendEmail.patchValue({
-          email: datos[0].idresponsable.email
+          receptores: datos[0].idresponsable.email
         })
         this._abonado = datos;
         this.abonado.idabonado = this._abonado[0].idabonado;
@@ -429,6 +458,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     this.facService.getById(idfactura).subscribe({
       next: (d_factura: any) => {
         this._fecFacturaService.expDesdeAbonados(d_factura);
+        //this.swFactura = true
       },
       error: (e: any) => console.error(e),
     });
@@ -521,15 +551,17 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
   }
   async impFacturaElectronica(datos: any) {
     this.facElectro = true;
-
+    this.dataURI = '';
+    this.swEmail = true;
     this.s_loading.showLoading();
+
     let fact = await this.facService.generarPDF_FacElectronica(datos.idfactura);
     //this.facElectro = true;
     // Crear blob desde los datos del backend
     setTimeout(() => {
       const file = new Blob([fact], { type: 'application/pdf' });
       const fileURL = URL.createObjectURL(file);
-
+      this.dataURI = fact;
       // Asignar el blob al iframe
       const pdfViewer = document.getElementById(
         'pdfViewer'
@@ -677,6 +709,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
   }
   async impNotificacion() {
     this.s_loading.showLoading();
+    this.nameFile = "Generando archivo..."
     let doc = new jsPDF('p', 'pt', 'a4');
     this.rubrostotal = 0;
     doc.setFontSize(14);
@@ -806,6 +839,8 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
       ) as HTMLIFrameElement;
       pdfViewer.src = pdfDataUri;
     }
+    this.nameFile = `Notificación_${this._abonado[0].idabonado}.pdf`
+
     this.s_loading.hideLoading();
     // Generate and output the PDF after all data is processed
     //doc.output('pdfobjectnewwindow');
@@ -896,29 +931,74 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     }
     return +interes.toFixed(2);
   }
+  onFileChange(event: any): void {
+    if (event.target.files.length > 0) {
+      this.selectedFile = event.target.files[0];
+    }
+  }
   sendEmail() {
-    console.log(this.f_sendEmail.value);
     if (this.swEmail === true) {
-      const pdfBlob = this.dataURItoBlob(this.dataURI);
+      //const pdfBlob = this.dataURItoBlob(this.dataURI);
+
+      let pdfBlob: Blob;
+
+      if (this.dataURI instanceof Blob) {
+        // Ya es un Blob, úsalo directamente
+        pdfBlob = this.dataURI;
+      } else {
+        // No es Blob, asume que es un Data URI y conviértelo
+        pdfBlob = this.dataURItoBlob(this.dataURI);
+      }
+
       const formData = new FormData();
 
-      formData.append('email', this.f_sendEmail.get('email')?.value);
-      formData.append('body', this.f_sendEmail.get('body')?.value);
-      formData.append('file', pdfBlob, 'notificacion.pdf');
+      const formValue = this.f_sendEmail.value;
 
-/*       this.http.post('/api/enviar-correo', formData).subscribe({
-        next: () => {
+      // Campos normales
+      //formData.append('emisor', formValue.email); // o usa formValue.emisor si así se llama
+      //formData.append('password', formValue.password); // si se requiere
+      formValue.mensaje += `${this.mensajeBody} <p style="margin: 10px 0 0; font-size: 12px; color: #888;">Este mensaje fué enviado por: ${this.authService.alias}.</p>`
+      formData.append('asunto', formValue.asunto || 'Sin asunto');
+      formData.append('mensaje', formValue.mensaje);
+      // Adjuntar PDF generado
+      formData.append('file', pdfBlob, this.nameFile);
+      // Adjuntar receptores (separados por coma)
+      const receptores = formValue.receptores.split(',').map((r: string) => r.trim());
+      receptores.forEach((email: string) => {
+        formData.append('receptores', email);
+      });
+
+      // Adjuntar archivo adicional si se seleccionó uno
+      if (this.selectedFile) {
+        formData.append('file', this.selectedFile); // OJO: esto reemplaza el PDF anterior
+        // Si quieres enviar ambos archivos, usa otro nombre como 'file2'
+        // formData.append('file2', this.selectedFile);
+      }
+
+      this.s_sri.sendEmailNotification(formData).subscribe({
+        next: (datos: any) => {
+          console.log('Respuesta del backend:', datos);
+          this.swal('success', datos.message);
           this.s_loading.hideLoading();
-          console.log('Correo enviado correctamente');
         },
-        error: (err) => {
+        error: (e: any) => {
+          console.error('Error al enviar:', e);
+          this.swal('danger', 'Error al Enivar');
           this.s_loading.hideLoading();
-          console.error('Error al enviar el correo:', err);
         }
-      }); */
+      });
     }
-
   }
+  sendFacturaEmail() {
+
+    this.nameFile = "Factura.pdf"
+    this.f_sendEmail.patchValue({
+      asunto: "Factura EPMAPA-T",
+
+    })
+    this.sendEmail()
+  }
+
   async getSumaFac(idfactura: number): Promise<any> {
     const sumaFac = await this.rubxfacService.getSumaValoresUnitarios(
       idfactura
@@ -931,6 +1011,16 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
       return number; */
     //});
     return dato;
+  }
+  swal(icon: any, mensaje: any) {
+    Swal.fire({
+      toast: true,
+      icon: icon,
+      title: mensaje,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+    });
   }
 }
 interface calcInteres {
