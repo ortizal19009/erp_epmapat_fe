@@ -116,9 +116,15 @@
                         *ngIf="!swfacturas" (click)="swfacturas = !swfacturas">
                         <i class="bi-arrow-left-circle icoRegresar"></i>
                     </button>
+                    <button class="bg-transparent border-0 text-white dropdown-menu-right" type="submit"
+                    (click)="imprimirFacturas()">
+                        <i class="fa fa-print" aria-hidden="true"></i>
+
+                    </button>
                 </div>
                 <div class='modal-body'>
-                    <table class="table table-sm table-hover table-bordered sombra" *ngIf="swfacturas; else swfactura">
+                    <table class="table table-sm table-hover table-bordered sombra" id="facturasTable"
+                        *ngIf="swfacturas; else swfactura">
                         <thead class="text-center cabecera">
                             <tr>
                                 <th></th>

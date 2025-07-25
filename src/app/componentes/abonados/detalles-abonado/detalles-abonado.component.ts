@@ -100,6 +100,8 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
   selectedFile: File | null = null;
   dataURI: any;
   nameFile: string = "Vacío...";
+  email: string ;
+  active: boolean = false;
 
   mensajeBody = `<h3>Se adjunta su documénto electrónico. No responder este mensaje.</h3>
 
@@ -181,9 +183,11 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     this.aboService.getByIdabonado(+idabonado!).subscribe({
       next: (datos: any) => {
         console.log(datos)
+        this.email = datos[0].idresponsable.email.toString();
         this.f_sendEmail.patchValue({
           receptores: datos[0].idresponsable.email
         })
+        
         this._abonado = datos;
         this.abonado.idabonado = this._abonado[0].idabonado;
         this.abonado.nombre = this._abonado[0].idcliente_clientes.nombre;
@@ -989,14 +993,15 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
       });
     }
   }
-  sendFacturaEmail() {
+sendFacturaEmail() {
 
     this.nameFile = "Factura.pdf"
     this.f_sendEmail.patchValue({
       asunto: "Factura EPMAPA-T",
-
+      receptores: this.email
     })
     this.sendEmail()
+    this.active = false;
   }
 
   async getSumaFac(idfactura: number): Promise<any> {

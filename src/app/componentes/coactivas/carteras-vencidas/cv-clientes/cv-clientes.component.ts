@@ -1,9 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { ClientesService } from 'src/app/servicios/clientes.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
+import { PdfService } from 'src/app/servicios/pdf.service';
 
 @Component({
   selector: 'app-cv-clientes',
@@ -34,7 +37,8 @@ export class CvClientesComponent implements OnInit {
     private fb: FormBuilder,
     private s_facturas: FacturaService,
     private s_clientes: ClientesService,
-    private s_loading: LoadingService
+    private s_loading: LoadingService,
+    private s_pdf: PdfService
   ) { }
 
   ngOnInit(): void {
@@ -150,5 +154,23 @@ export class CvClientesComponent implements OnInit {
       { length: endPage - startPage + 1 },
       (_, i) => startPage + i
     );
+  }
+  imprimirFacturas() {
+    this.s_loading.showLoading();
+    let doc = new jsPDF();
+    this.s_pdf.header(`Valores pendientes de ${this.nomCliente}`, doc);
+    autoTable(doc, {
+      html: '#facturasTable',
+    });
+    this.s_pdf.setfooter(doc);
+    /*     const pdfDataUri = doc.output('datauri');
+        const pdfViewer: any = document.getElementById(
+          'pdf_Viewer'
+        ) as HTMLIFrameElement; */
+    this.s_loading.hideLoading();
+    //this.swfacturas = !this.swfacturas
+    //return (pdfViewer.src = pdfDataUri);
+    doc.save(`${this.nomCliente}_valores_pendientes.pdf`) ;
+
   }
 }

@@ -388,7 +388,7 @@
    <!-- Modal DETALLE Planilla -->
    <div class="modal fade" id="DetalleFacturaModal" data-backdrop="static" tabindex="-1"
       aria-labelledby="DetalleFacturaModal" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-dialog modal-dialog-centered dialog-scrollable modal-lg" role="document">
          <div class="modal-content">
             <div class="modal-header py-2 justify-content-center theadPlanillas">
                <h5 class="modal-title" id="DetalleFacturaModalLabel"><strong>Planilla:</strong> {{idfactura}}</h5>
@@ -404,6 +404,8 @@
                      <button class="dropdown-item" type="button" [disabled]="factura.pagado != 1"
                         (click)="impFacturaElectronica(factura)">
                         <i class="bi-file-earmark-arrow-down"></i>&nbsp; Factura electrónica</button>
+                     <button class="dropdown-item" (click)="active = true" *ngIf="!facElectro">Reenviar F. a Email</button>
+
                   </div>
                   <button class="btn btn-sm text-white" [hidden]="facElectro" (click)="facElectro = !facElectro">
                      <i class="fa fa-retweet" aria-hidden="true"></i>
@@ -472,7 +474,22 @@
                   </div>
                </div>
                <ng-template #pdfelectro>
-                  <iframe id="pdfViewer" src="" width="100%" height="600px"></iframe>
+                  <div class="row">
+                     <div class="col-sm">
+                        <iframe id="pdfViewer" src="" width="100%" height="600px"></iframe>
+                     </div>
+                     <div class="col-sm-3" *ngIf="active">
+
+                        <div class="form-group">
+                           <label for="mail">E-mail</label>
+                           <input type="email" [(ngModel)]="email" class="form-control form-control-sm" id="mail"
+                              placeholder="name@example.com">
+                        </div>
+                        <button type="submit" (click)="active = false" class="btn btn-xs btn-success">Cancelar</button>
+                        <button type="submit" data-dismiss="modal" (click)="sendFacturaEmail()"
+                           class="btn btn-xs ml-2 btn-outline-success">Enviar</button>
+                     </div>
+                  </div>
                </ng-template>
 
             </div>
@@ -483,7 +500,6 @@
                   [disabled]="esFE ==='A' || esFE == 'O'  || factura.pagado === 0 || usuario != 1 "
                   (click)="expFacElectronica(idfactura)" data-dismiss="modal">
                   <i class="bi bi-send"></i> Fac. Electronica</button>
-               <button class="btn btn-sm btn-primary" *ngIf="!facElectro" (click)="sendFacturaEmail()" data-dismiss="modal">Send Email</button>
 
             </div>
          </div>
@@ -630,7 +646,8 @@
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">Cancelar</button>
-            <button type="button" class="btn btn-sm btn-outline-success" data-dismiss="modal" (click)="sendEmail()">Enviar</button>
+            <button type="button" class="btn btn-sm btn-outline-success" data-dismiss="modal"
+               (click)="sendEmail()">Enviar</button>
          </div>
       </div>
    </div>
