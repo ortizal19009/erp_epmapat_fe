@@ -100,7 +100,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
   selectedFile: File | null = null;
   dataURI: any;
   nameFile: string = "Vacío...";
-  email: string ;
+  email: string;
   active: boolean = false;
 
   mensajeBody = `<h3>Se adjunta su documénto electrónico. No responder este mensaje.</h3>
@@ -187,7 +187,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
         this.f_sendEmail.patchValue({
           receptores: datos[0].idresponsable.email
         })
-        
+
         this._abonado = datos;
         this.abonado.idabonado = this._abonado[0].idabonado;
         this.abonado.nombre = this._abonado[0].idcliente_clientes.nombre;
@@ -993,7 +993,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
       });
     }
   }
-sendFacturaEmail() {
+  sendFacturaEmail() {
 
     this.nameFile = "Factura.pdf"
     this.f_sendEmail.patchValue({

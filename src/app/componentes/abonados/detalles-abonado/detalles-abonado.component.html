@@ -17,7 +17,7 @@
                <button class="dropdown-item" type="button" disabled data-toggle="modal" data-target="#condonar">
                   <!--  (click)="calcularDeudasAC()"> -->
                   <i class="bi bi-exclude"></i>&nbsp; Condonar deudas</button>
-               <button class="dropdown-item" type="button" (click)="swEmail = true" [disabled]="usuario != 1"
+               <button class="dropdown-item" type="button" (click)="swEmail = true"
                   (click)="getSinCobro()" data-toggle="modal" data-target="#sendNotification">
                   <!--  (click)="calcularDeudasAC()"> -->
                   <i class="bi bi-exclude"></i>&nbsp;Enviar notificacion e-mail</button>
@@ -617,7 +617,7 @@
    <div class="modal-dialog">
       <div class="modal-content">
          <div class="modal-header">
-            <h5 class="modal-title" id="sendNotificationLabel">Enviar notificacion por correo</h5>
+            <h5 class="modal-title" id="sendNotificationLabel">Enviar notificacion a e-mail</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                <span aria-hidden="true">&times;</span>
             </button>
@@ -634,7 +634,7 @@
 
                <div class="input-group mb-3 mt-2">
                   <div class="input-group-prepend">
-                     <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
+                     <span class="input-group-text" id="inputGroupFileAddon01">Archivo</span>
                   </div>
                   <div class="custom-file">
                      <input type="file" (change)="onFileChange($event)" disabled class="custom-file-input"
