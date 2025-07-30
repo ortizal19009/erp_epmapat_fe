@@ -466,13 +466,22 @@
                             <input type="text" id="establecimiento" value="{{ _usuario.alias }}" readonly
                                 class="form-control form-control-sm" />
                         </div>
-                        <div class="input-group input-group-sm mb-3">
+                        <div class="input-group input-group-sm mb-0">
                             <div class="input-group-prepend">
                                 <span class="input-group-text" for="establecimiento">Establecimiento</span>
                             </div>
-                            <input type="text" id="establecimiento" value="{{ _establecimiento.establecimiento }}"
-                                readonly class="form-control form-control-sm" />
+                            <select id="establecimiento" (change)="changeEstablecimiento($event)" class="form-control form-control-sm"
+                                [(ngModel)]="_establecimiento">
+                                <option *ngFor="let ptoemision of _ptoemision" selected="_establecimiento" [ngValue]="ptoemision">
+                                    {{ ptoemision.establecimiento }}
+                                </option>
+                            </select>
                         </div>
+
+                        <!-- Mensaje debajo del select -->
+                        <small class="form-text text-muted ml-2">
+                            {{_establecimiento.direccion}}
+                        </small>
                         <div class="input-group input-group-sm mb-3">
                             <div class="input-group-prepend">
                                 <span class="input-group-text" for="establecimiento">Nro. Factura</span>

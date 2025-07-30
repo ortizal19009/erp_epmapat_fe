@@ -42,6 +42,7 @@ import { Facxnc } from 'src/app/modelos/facxnc';
 import { Valoresnc } from 'src/app/modelos/valoresnc';
 import { Ntacredito } from 'src/app/modelos/ntacredito';
 import { JasperReportService } from 'src/app/servicios/jasper-report.service';
+import { PtoemisionService } from 'src/app/servicios/ptoemision.service';
 
 @Component({
   selector: 'app-recaudacion',
@@ -102,7 +103,7 @@ export class RecaudacionComponent implements OnInit {
   _intereses: any;
   $event: any;
   valoriva: number;
-  _codigo: string;
+  //_codigo: string;
   /*  */
   arrFacturas: any = [];
   arrCuenta: any = [];
@@ -110,6 +111,8 @@ export class RecaudacionComponent implements OnInit {
   swNC: boolean = false;
   facturasToPrint: any[] = [];
   valorNtaCredito: number;
+
+  _ptoemision: any;
 
   constructor(
     public fb: FormBuilder,
@@ -133,8 +136,9 @@ export class RecaudacionComponent implements OnInit {
     private s_ntacredito: NtacreditoService,
     private s_valorNc: ValoresncService,
     private s_facnc: FacxncService,
-    private s_jasperReport: JasperReportService
-  ) {}
+    private s_jasperReport: JasperReportService,
+    private s_ptoemision: PtoemisionService
+  ) { }
 
   ngOnInit(): void {
     this.formBuscar = this.fb.group({
@@ -194,10 +198,15 @@ export class RecaudacionComponent implements OnInit {
     return this.formCobrar.controls;
   }
   abrirCaja() {
+    this.getAllPtoEmision();
+
     this.s_cajas.getByIdUsuario(this.authService.idusuario).subscribe({
-      next: (dcaja) => {
+      next: (dcaja: any) => {
+        console.log(dcaja)
         this._caja = dcaja;
         this._establecimiento = dcaja.idptoemision_ptoemision;
+        this._establecimiento = this._ptoemision.find((e: any) => e.establecimiento === dcaja.idptoemision_ptoemision.establecimiento); // O el criterio que necesites
+
         this._usuario = dcaja.idusuario_usuarios;
         this._codRecaudador = `${dcaja.idptoemision_ptoemision.establecimiento}-${dcaja.codigo}`;
         /* VALIDAR SI LA CAJA ESTA ABIERTA O CERRADA */
@@ -229,23 +238,25 @@ export class RecaudacionComponent implements OnInit {
       },
     });
   }
+  getAllPtoEmision() {
+    this.s_ptoemision.getListaPtoEmision().subscribe({ next: (datos: any) => { this._ptoemision = datos; }, error: (e: any) => console.error(e) })
+  }
+  changeEstablecimiento(e: any) {
+    //console.log(e.target.value);
+    console.log(this._establecimiento)
+    //console.log(this._codRecaudador)
+    //console.log(this._caja)
+    //console.log(this._ptoemision)
+    //this._codRecaudador = `${this._caja.idptoemision_ptoemision.establecimiento}-${this._caja.codigo}`;
+    this._caja.idptoemision_ptoemision = this._establecimiento;
+
+  }
   formatNroFactura(nroFactura: number) {
     let nfactura = `${this._codRecaudador}-${nroFactura
       .toString()
       .padStart(9, '0')}`;
     this._nroFactura = nfactura;
     return nfactura;
-  }
-  getLastFactura() {
-    this.facService.valLastFac(this._codigo).subscribe({
-      next: (dato: any) => {
-        let nrofac = dato.nrofactura.split('-', 3);
-        this._nroFactura = `${this._codRecaudador}-${nrofac[2]
-          .toString()
-          .padStart(9, '0')}`;
-      },
-      error: (e) => console.error(e),
-    });
   }
   validarCaja() {
     let fecha: Date = new Date();
@@ -261,6 +272,8 @@ export class RecaudacionComponent implements OnInit {
       next: (datos) => {
         this.estadoCajaT = false;
         sessionStorage.setItem('estadoCaja', '1');
+        this.s_cajas.updateCaja(this._caja).subscribe({ next: (datos: any) => { window.location.reload(); } })
+
       },
       error: (e) => console.error(e),
     });
@@ -694,20 +707,6 @@ export class RecaudacionComponent implements OnInit {
     let i = 0;
     this._sincobro.forEach((item: any, index: number) => {
       if (this._sincobro[i].pagado === true || this._sincobro[i].pagado === 1) {
-        /*         if (
-          this._sincobro[i].idmodulo.idmodulo == 3 ||
-          this._sincobro[i].idmodulo.idmodulo == 4
-        ) {
-          suma +=
-            this._sincobro[i].totaltarifa +
-            this._sincobro[i].comerc +
-            +this._sincobro[i].interes;
-          this._sincobro[i].multa;
-        } else if (this._sincobro[i].idmodulo.idmodulo == 8) {
-          suma += this._sincobro[i].valorbase;
-        } else {
-          suma += this._sincobro[i].totaltarifa + +this._sincobro[i].interes;
-        } */
         suma +=
           this._sincobro[i].total +
           this._sincobro[i].iva +
@@ -861,7 +860,7 @@ export class RecaudacionComponent implements OnInit {
     rubrosxfac.cantidad = 1;
     rubrosxfac.estado = 1;
     this.rubxfacService.saveRubroxFac(rubrosxfac).subscribe({
-      next: (datos) => {},
+      next: (datos) => { },
       error: (e) => console.error(e),
     });
   }
@@ -953,7 +952,7 @@ export class RecaudacionComponent implements OnInit {
                           this.s_recaudaxcaja
                             .updateRecaudaxcaja(this.recxcaja)
                             .subscribe({
-                              next: (datos) => {},
+                              next: (datos) => { },
                               error: (e) => console.error(e),
                             });
                         },
