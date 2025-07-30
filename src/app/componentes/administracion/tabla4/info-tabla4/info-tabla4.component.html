@@ -1,4 +1,4 @@
-<div class="content mt-1 pt-1 pl-0"> 
+<div class="content mt-1 pt-1 pl-0">
    <div class="container-fluid">
       <div class="row mt-0 mb-1 mx-0 px-0 py-1 justify-content-start tabla4">
          <div class="col-sm-5">
@@ -18,9 +18,9 @@
       <div class="col-sm-3">
          <div class="card card-outline tabla4">
             <div class="card-body box-profile">
-               <h3 class="profile-username text-center"> <span class="font-weight-bold codigo">Código</span> &nbsp;&nbsp;{{ comprobante.tipocomprobante }}</h3>
-               <p class="text-center">{{ comprobante.nomcomprobante
-               }}</p>
+               <h3 class="profile-username text-center"> <span class="font-weight-bold codigo">Código</span>
+                  &nbsp;&nbsp;{{ comprobante.tipocomprobante }}</h3>
+               <p class="text-center">{{ comprobante.nomcomprobante }}</p>
                <ul class="list-group list-group-unbordered mb-3">
                   <li class="list-group-item">
                      <b>F.Creación</b> <a class="float-right">{{ comprobante.feccrea | date: 'dd-MM-y' }}</a>
@@ -54,6 +54,8 @@
                         <i class="fa fa-calendar" style="font-size:12pxi"></i> Mov 3</a></li>
                   <li class="nav-item"><a class="nav-link" href="#tramites" data-toggle="tab">
                         <i class="bi-badge-tm-fill" style="font-size: 15px;"></i> Mov 4</a></li>
+                  <li class="nav-item"><a class="nav-link" href="#envComprobante" data-toggle="tab">
+                        <i class="fa fa-building" style="font-size:12pxi"></i> Envio comprobante</a></li>
                </ul>
             </div><!-- /.card-header -->
 
@@ -133,7 +135,8 @@
                                     <td>{{ facele.idfactura_facturas.fechacobro | date: 'dd-MM-y'}}</td>
                                     <td class="text-right">{{ facele.total | number: '1.2-2'}}</td>
                                     <td>
-                                       <button class="btn btn-outline-info btn-xs" data-toggle="modal" data-target="#DetalleFacturaModal">
+                                       <button class="btn btn-outline-info btn-xs" data-toggle="modal"
+                                          data-target="#DetalleFacturaModal">
                                           <i class="fa fa-info-circle"></i> Info
                                        </button>
                                     </td>
@@ -228,6 +231,54 @@
                                  </tr>
                               </tbody>
                            </table>
+
+                        </div>
+                     </div>
+                  </div>
+                  <div class="tab-pane" id="envComprobante">
+                     <div class="post">
+                        <div class="user-block">
+                           <div *ngIf="nocuentas">
+                              <div class="row justify-content-center">
+                                 <div class="callout callout-info col-sm-6 text-center">
+                                    <div class="alert alert-info">
+                                       <h5><i class="fas fa-info"></i> <strong> Mensaje</strong></h5>
+                                       No tiene Trámites !
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="container row">
+                              <div class="col-sm">
+                                 <form>
+                                    <div class="form-group">
+                                       <label for="formGroupExampleInput">Cargar xml</label>
+                                       <div class="col-sm-6 my-1">
+                                          <label class="sr-only" for="inlineFormInputGroupUsername">Username</label>
+                                          <div class="input-group input-group-sm">
+                                             <div class="input-group-prepend">
+                                                <div class="input-group-text">.xml</div>
+                                             </div>
+                                             <!--                   <input type="file" class="form-control form-control-sm"
+                                                id="inlineFormInputGroupUsername" placeholder="Username"> -->
+
+                                             <input type="file" (change)="onFileSelected($event)"
+                                                class="custom-file-input" id="validatedCustomFile" required>
+                                             <label class="custom-file-label"
+                                                for="validatedCustomFile">{{fileName}}</label>
+                                             <div class="invalid-feedback">Example invalid custom file feedback</div>
+                                          </div>
+                                       </div>
+                                       <div class="col-sm">
+                                          <button type="submit"
+                                             class="btn btn-sm btn-outline-success mt-2 justify-content-end"
+                                             [disabled]="!btnSend" (click)="sendRetencion()">Enviar</button>
+                                       </div>
+                                    </div>
+
+                                 </form>
+                              </div>
+                           </div>
 
                         </div>
                      </div>
