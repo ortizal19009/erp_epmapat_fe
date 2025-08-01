@@ -72,9 +72,10 @@
          </form>
       </div>
       <div *ngIf="cambioCategoria">
-         <div class="container-fluid">
+         <div class="container-fluid ">
             <div class="row justify-content-center">
-               <div class="col-sm-6 detalle">
+               
+               <div class="col-sm-9 detalle sombra border">
                   <form [formGroup]="f_categoria" class="row my-2">
 
                      <!-- Select Categoría -->
@@ -133,11 +134,11 @@
                </div>
             </div>
 
-            <div class="row justify-content-center text-center">
-               <div class="col-sm-6 detalle">
-                  <button class="btn btn-sm btn-outline-success mx-1 mb-3" (click)="actualizarCategoria()"><i
+            <div class="row justify-content-center text-center mt-2">
+               <div class="col-sm-6 detalle sombra border">
+                  <button class="btn btn-sm btn-outline-success mx-1 mb-2 mt-3" (click)="actualizarCategoria()"><i
                         class="fa fa-check-circle"></i>&nbsp;Aceptar</button>
-                  <button class="btn btn-sm btn-success mx-1 mb-3" (click)="regresar()"><i
+                  <button class="btn btn-sm btn-success mx-1 mb-2 mt-3" (click)="regresar()"><i
                         class="fa fa-times-circle"></i>
                      Cancelar</button>
                </div>
@@ -186,7 +187,7 @@
                            <div class="row">
                               <div class="col-sm">
                                  <label for="" class="col-sm-12">Observaciones
-                                    <textarea class="form-control form-control-sm "
+                                    <textarea class="form-control form-control-sm "  [ngClass]="{'is-invalid': fp['observaciones'].invalid && fp['observaciones'].touched,'is-valid': fp['observaciones'].valid, '': fp['observaciones'].untouched}"
                                        formControlName="observaciones"></textarea>
                                  </label>
                               </div>

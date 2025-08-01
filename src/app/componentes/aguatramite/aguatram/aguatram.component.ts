@@ -15,8 +15,10 @@ import { AboxsuspensionService } from 'src/app/servicios/aboxsuspension.service'
 import { DocumentosService } from 'src/app/servicios/administracion/documentos.service';
 import { AguatramiteService } from 'src/app/servicios/aguatramite.service';
 import { CategoriaService } from 'src/app/servicios/categoria.service';
+import { FacturaService } from 'src/app/servicios/factura.service';
 import { TramiteNuevoService } from 'src/app/servicios/tramite-nuevo.service';
 import { TramitesAguaService } from 'src/app/servicios/tramites-agua.service';
+import Swal from 'sweetalert2';
 
 @Component({
    selector: 'app-aguatram',
@@ -59,6 +61,7 @@ export class AguatramComponent implements OnInit {
       { opcion: 'Identificación', valor: 3 },
    ];
    _documentos: any;
+   _facturas: any;
    aguatramite: Aguatramite = new Aguatramite();
 
    constructor(
@@ -72,7 +75,8 @@ export class AguatramComponent implements OnInit {
       private s_tramiteagua: TramitesAguaService,
       private s_aguatramite: AguatramiteService,
       private authService: AutorizaService,
-      private s_documentos: DocumentosService
+      private s_documentos: DocumentosService,
+      private s_facturas: FacturaService
    ) { }
 
    ngOnInit(): void {
@@ -282,6 +286,9 @@ export class AguatramComponent implements OnInit {
    get f() {
       return this.f_nMedidor.controls;
    }
+   get fp() {
+      return this.f_camPropietario.controls;
+   }
 
    guardarAguaTramite(abonado: Abonados, codmedidor: any) {
       this.aguatramite.codmedidor = codmedidor;
@@ -298,8 +305,12 @@ export class AguatramComponent implements OnInit {
       this.s_aguatramite.saveAguaTramite(this.aguatramite).subscribe({
          next: (datos) => {
             this.s_tramiteagua.genContratoTramite(datos, this.abonado, this.titulo);
+            this.swal("success", "Datos guardados con exito")
          },
-         error: (e) => console.error(e),
+         error: (e) => {
+            console.error(e);
+            this.swal("error", "Error al guardar tramite de agua")
+         },
       });
    }
 
@@ -308,16 +319,21 @@ export class AguatramComponent implements OnInit {
    }
 
    actualizarPropietario() {
-      this.abonado.idcliente_clientes = this.selectClient;
-      this.abonado.idresponsable = this.selectClient;
-      this.observaciones = this.f_camPropietario.value.observaciones;
-      this.aguatramite.nrodocumento = this.f_camPropietario.value.nrodocumento
-      this.aguatramite.iddocumento_documentos = +this.f_camPropietario.value.iddocumento_documentos!
-      this.actualizarAbonado(this.abonado);
-      this.guardarAguaTramite(this.abonado, null);
+      if (this._facturas.length === 0) {
+
+         this.abonado.idcliente_clientes = this.selectClient;
+         this.abonado.idresponsable = this.selectClient;
+         this.observaciones = this.f_camPropietario.value.observaciones;
+         this.aguatramite.nrodocumento = this.f_camPropietario.value.nrodocumento
+         this.aguatramite.iddocumento_documentos = +this.f_camPropietario.value.iddocumento_documentos!
+         this.actualizarAbonado(this.abonado);
+         this.guardarAguaTramite(this.abonado, null);
+      } else {
+         this.swal("error", "Cuenta tiene facturas pendientes")
+      }
    }
 
-   setAbonado(abonado: any) {
+   async setAbonado(abonado: any) {
       this.abonado = abonado;
       this.cliente = abonado.idcliente_clientes;
       this.ruta = abonado.idruta_rutas;
@@ -328,6 +344,21 @@ export class AguatramComponent implements OnInit {
          idcategoria_categorias: abonado.idcategoria_categorias,
          adultomayor: abonado.adultomayor,
          municipio: abonado.municipio,
+      });
+      if (this.cambioPropietario) {
+         let facturas: any = await this.s_facturas.getFacSincobroBycuenta(abonado.idabonado).toPromise();
+         console.log(facturas)
+         this._facturas = facturas;
+      }
+   }
+   swal(icon: any, mensaje: any) {
+      Swal.fire({
+         toast: true,
+         icon: icon,
+         title: mensaje,
+         position: 'top-end',
+         showConfirmButton: false,
+         timer: 3000,
       });
    }
 }
