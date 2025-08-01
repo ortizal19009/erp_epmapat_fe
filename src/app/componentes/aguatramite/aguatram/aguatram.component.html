@@ -50,6 +50,16 @@
                   </label>
                </div>
             </div>
+            <!-- Select Documentos -->
+            <div class="form-group form-row col-sm-12">
+               <label class="font-weight-bold">Documento</label>
+               <select class="form-control form-control-sm col-sm-3" formControlName="iddocumento_documentos">
+                  <option *ngFor="let documentos of _documentos" [ngValue]="documentos.intdoc">
+                     {{ documentos.nomdoc }}
+                  </option>
+               </select>
+               <input class="form-control form-control-sm col-sm" formControlName="nrodocumento">
+            </div>
             <div class="row mt-3">
                <div class="col-sm text-center">
                   <button class="btn btn-sm btn-success mx-1 mb-3" [disabled]="f_retiroMedidor.invalid"
@@ -65,34 +75,61 @@
          <div class="container-fluid">
             <div class="row justify-content-center">
                <div class="col-sm-6 detalle">
-                  <form [formGroup]="f_categoria" class="col-sm-12 d-flex justify-content-center my-2">
-                     <select class="form-control form-control-sm" formControlName="idcategoria_categorias"
-                        [compareWith]="compareCategoria">
-                        <option *ngFor="let categoria of categorias" [ngValue]="categoria">{{categoria.descripcion}}
-                        </option>
-                     </select>
-                     <div class="form-group col-md-4 my-0 py-0"
-                        [hidden]="f_categoria.value.idcategoria_categorias.idcategoria != 9">
-                        <div class="input-group input-group-sm mb-3">
-                           <div class="input-group-prepend">
-                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Adulto
-                                 mayor</span>
-                           </div>
-                           <input type="checkbox" class="form-control text-center" formControlName="adultomayor"
-                              aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+                  <form [formGroup]="f_categoria" class="row my-2">
+
+                     <!-- Select Categoría -->
+                     <div class="form-group col-md-7">
+                        <label class="font-weight-bold">Categoría</label>
+                        <select class="form-control form-control-sm" formControlName="idcategoria_categorias"
+                           [compareWith]="compareCategoria">
+                           <option *ngFor="let categoria of categorias" [ngValue]="categoria">
+                              {{ categoria.descripcion }}
+                           </option>
+                        </select>
+                     </div>
+
+                     <!-- Checkbox Adulto Mayor (solo visible si categoría.id == 9) -->
+                     <div class="form-group col-md-4"
+                        *ngIf="f_categoria.value?.idcategoria_categorias?.idcategoria === 9">
+                        <label class="font-weight-bold">Adulto Mayor</label>
+                        <div class="form-check">
+                           <input type="checkbox" class="form-check-input" formControlName="adultomayor"
+                              id="adultoMayorCheck">
+                           <label class="form-check-label" for="adultoMayorCheck">Aplica descuento</label>
                         </div>
                      </div>
-                     <div class="form-group col-md-3 my-0 py-0"
-                        [hidden]="f_categoria.value.idcategoria_categorias.idcategoria != 4">
-                        <div class="input-group input-group-sm mb-3">
-                           <div class="input-group-prepend">
-                              <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Municipio</span>
-                           </div>
-                           <input type="checkbox" class="form-control text-center" formControlName="municipio"
-                              aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+
+                     <!-- Checkbox Municipio (solo visible si categoría.id == 4) -->
+                     <div class="form-group col-md-4"
+                        *ngIf="f_categoria.value?.idcategoria_categorias?.idcategoria === 4">
+                        <label class="font-weight-bold">Municipio</label>
+                        <div class="form-check">
+                           <input type="checkbox" class="form-check-input" formControlName="municipio"
+                              id="municipioCheck">
+                           <label class="form-check-label" for="municipioCheck">Aplica descuento</label>
                         </div>
                      </div>
+
+                     <!-- Select Documentos -->
+                     <div class="form-group form-row col-sm-12">
+                        <label class="font-weight-bold">Documento</label>
+                        <select class="form-control form-control-sm col-sm-3" formControlName="iddocumento_documentos">
+                           <option *ngFor="let documentos of _documentos" [ngValue]="documentos.intdoc">
+                              {{ documentos.nomdoc }}
+                           </option>
+                        </select>
+                        <input class="form-control form-control-sm col-sm" formControlName="nrodocumento">
+                     </div>
+
+                     <!-- Observaciones -->
+                     <div class="form-group col-md-12 mt-2">
+                        <label class="font-weight-bold">Observaciones</label>
+                        <textarea class="form-control" formControlName="observaciones" rows="2"
+                           placeholder="Escribe tus observaciones aquí..."></textarea>
+                     </div>
+
                   </form>
+
                </div>
             </div>
 
@@ -135,11 +172,22 @@
                                        aria-hidden="true"></i></button>
                               </div>
                            </div>
+                           <!-- Select Documentos -->
+                           <div class="form-group form-row col-sm-12">
+                              <label class="font-weight-bold">Documento</label>
+                              <select class="form-control form-control-sm col-sm-3"
+                                 formControlName="iddocumento_documentos">
+                                 <option *ngFor="let documentos of _documentos" [ngValue]="documentos.intdoc">
+                                    {{ documentos.nomdoc }}
+                                 </option>
+                              </select>
+                              <input class="form-control form-control-sm col-sm" formControlName="nrodocumento">
+                           </div>
                            <div class="row">
                               <div class="col-sm">
                                  <label for="" class="col-sm-12">Observaciones
                                     <textarea class="form-control form-control-sm "
-                                       formControlName="observacion"></textarea>
+                                       formControlName="observaciones"></textarea>
                                  </label>
                               </div>
                            </div>
@@ -154,7 +202,8 @@
                   <button class="btn btn-sm btn-outline-success mx-1 mb-3" (click)="actualizarPropietario()"><i
                         class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
                   <button class="btn btn-sm btn-success mx-1 mb-3" (click)="regresar()"><i
-                        class="fa fa-times-circle"></i> Cancelar</button>
+                        class="fa fa-times-circle"></i>
+                     Cancelar</button>
                </div>
             </div>
 
@@ -237,6 +286,19 @@
                                                 [ngClass]="{'is-invalid': f['medidornroesferas'].invalid && f['medidornroesferas'].touched, 'is-valid': f['medidornroesferas'].valid, '': f['medidornroesferas'].untouched}">
                                           </div>
                                        </div>
+                                       <!-- Select Documentos -->
+                                       <div class="form-group form-row col-sm-12">
+                                          <label class="font-weight-bold">Documento</label>
+                                          <select class="form-control form-control-sm col-sm-3"
+                                             formControlName="iddocumento_documentos">
+                                             <option *ngFor="let documentos of _documentos"
+                                                [ngValue]="documentos.intdoc">
+                                                {{ documentos.nomdoc }}
+                                             </option>
+                                          </select>
+                                          <input class="form-control form-control-sm col-sm"
+                                             formControlName="nrodocumento">
+                                       </div>
                                     </div>
                                  </div>
                               </div>
@@ -252,7 +314,8 @@
                   <button class="btn btn-sm btn-outline-success mx-1 mb-3" (click)="actualizarNuevoMedidor()"><i
                         class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
                   <button class="btn btn-sm btn-success mx-1 mb-3" (click)="regresar()"><i
-                        class="fa fa-times-circle"></i> Cancelar</button>
+                        class="fa fa-times-circle"></i>
+                     Cancelar</button>
                </div>
             </div>
 

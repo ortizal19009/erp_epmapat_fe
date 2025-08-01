@@ -19,4 +19,6 @@ export class Aguatramite {
    feccrea: Date;
    usumodi: number;
    fecmodi: Date;
+   iddocumento_documentos: number; 
+   nrodocumento: string;
 }

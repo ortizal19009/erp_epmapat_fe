@@ -12,6 +12,7 @@ import { Tipotramite } from 'src/app/modelos/tipotramite.model';
 import { TramiteNuevo } from 'src/app/modelos/tramite-nuevo';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { AboxsuspensionService } from 'src/app/servicios/aboxsuspension.service';
+import { DocumentosService } from 'src/app/servicios/administracion/documentos.service';
 import { AguatramiteService } from 'src/app/servicios/aguatramite.service';
 import { CategoriaService } from 'src/app/servicios/categoria.service';
 import { TramiteNuevoService } from 'src/app/servicios/tramite-nuevo.service';
@@ -57,6 +58,8 @@ export class AguatramComponent implements OnInit {
       { opcion: 'Nombre o apellido', valor: 2 },
       { opcion: 'Identificación', valor: 3 },
    ];
+   _documentos: any;
+   aguatramite: Aguatramite = new Aguatramite();
 
    constructor(
       private actRouter: ActivatedRoute,
@@ -68,7 +71,8 @@ export class AguatramComponent implements OnInit {
       private s_tramitenuevo: TramiteNuevoService,
       private s_tramiteagua: TramitesAguaService,
       private s_aguatramite: AguatramiteService,
-      private authService: AutorizaService
+      private authService: AutorizaService,
+      private s_documentos: DocumentosService
    ) { }
 
    ngOnInit(): void {
@@ -129,12 +133,16 @@ export class AguatramComponent implements OnInit {
             this.aguatamshow = true;
             break;
          }
+
       }
       this.f_datos = this.fb.group({ tipoBusqueda: 1, buscarAbonado: '' });
       this.f_categoria = this.fb.group({
          idcategoria_categorias: 1,
          adultomayor: false,
          municipio: false,
+         observaciones: '',
+         iddocumento_documentos: 1,
+         nrodocumento: ''
       });
       this.f_nMedidor = this.fb.group({
          medidormarca: '',
@@ -143,17 +151,28 @@ export class AguatramComponent implements OnInit {
          medidordiametro: '',
          medidornroesferas: '',
          observaciones: '',
+         iddocumento_documentos: 1,
+         nrodocumento: ''
       });
       this.f_retiroMedidor = this.fb.group({
          ubimedidor: ['', Validators.required],
          fecmedidor: ['', Validators.required],
+         iddocumento_documentos: 1,
+         nrodocumento: ''
       });
       this.f_camPropietario = this.fb.group({
          cliente: '',
-         observacion: '',
+         observaciones: '',
+         iddocumento_documentos: 1,
+         nrodocumento: ''
       });
+      const fechaFormateada = this.date.toISOString().split('T')[0]; // "2025-07-29"
 
+      this.f_retiroMedidor.patchValue({
+         fecmedidor: fechaFormateada
+      });
       this.listarCategorias();
+      this.listDocumentos();
    }
 
    colocaColor(colores: any) {
@@ -173,6 +192,14 @@ export class AguatramComponent implements OnInit {
          error: (e) => console.error(e),
       });
    }
+   listDocumentos() {
+      this.s_documentos.getListaDocumentos().subscribe({
+         next: (documentos: any) => {
+            this._documentos = documentos
+         },
+         error: (e: any) => console.error(e)
+      })
+   }
 
    retiroMedidor() {
       let abonado: Abonados = this.abonado;
@@ -180,6 +207,8 @@ export class AguatramComponent implements OnInit {
          abonado.estado = 3;
          this.date = this.f_retiroMedidor.value.fecmedidor;
          this.observaciones = this.f_retiroMedidor.value.ubimedidor;
+         this.aguatramite.nrodocumento = this.f_retiroMedidor.value.nrodocumento
+         this.aguatramite.iddocumento_documentos = +this.f_retiroMedidor.value.iddocumento_documentos!
          this.guardarAguaTramite(abonado, abonado.nromedidor);
          this.actualizarAbonado(abonado);
       } else if (abonado.estado === 3) {
@@ -206,7 +235,6 @@ export class AguatramComponent implements OnInit {
       abonado.fecmodi = new Date();
       this.s_abonados.updateAbonado(abonado).subscribe({
          next: (datos) => {
-            console.log('Abonado Actualizado', datos);
             this.regresar();
          },
          error: (e) => console.error(e),
@@ -218,8 +246,12 @@ export class AguatramComponent implements OnInit {
          this.f_categoria.value.idcategoria_categorias;
       this.abonado.adultomayor = this.f_categoria.value.adultomayor;
       this.abonado.municipio = this.f_categoria.value.municipio;
+      this.aguatramite.nrodocumento = this.f_categoria.value.nrodocumento
+      this.aguatramite.iddocumento_documentos = +this.f_categoria.value.iddocumento_documentos!
+      this.observaciones = this.f_categoria.value.observaciones;
       this.actualizarAbonado(this.abonado);
       this.guardarAguaTramite(this.abonado, null);
+
    }
 
    regresar() {
@@ -241,6 +273,8 @@ export class AguatramComponent implements OnInit {
       this.abonado.nromedidor = this.f_nMedidor.value.medidornumero;
       this.abonado.lecturainicial = 0;
       this.observaciones = this.f_nMedidor.value.observaciones;
+      this.aguatramite.nrodocumento = this.f_nMedidor.value.nrodocumento
+      this.aguatramite.iddocumento_documentos = +this.f_nMedidor.value.iddocumento_documentos!
       this.actualizarAbonado(this.abonado);
       this.guardarAguaTramite(this.abonado, this.f_nMedidor.value.codmedidor);
       this.regresar();
@@ -250,18 +284,18 @@ export class AguatramComponent implements OnInit {
    }
 
    guardarAguaTramite(abonado: Abonados, codmedidor: any) {
-      let aguatramite: Aguatramite = new Aguatramite();
-      aguatramite.codmedidor = codmedidor;
-      aguatramite.comentario = '';
-      aguatramite.estado = 3;
-      aguatramite.sistema = 0;
-      aguatramite.fechaterminacion = this.date;
-      aguatramite.observacion = this.observaciones;
-      aguatramite.idtipotramite_tipotramite = this.tipoTramite;
-      aguatramite.idcliente_clientes = abonado.idcliente_clientes;
-      aguatramite.usucrea = this.authService.idusuario;
-      aguatramite.feccrea = this.date;
-      this.s_aguatramite.saveAguaTramite(aguatramite).subscribe({
+      this.aguatramite.codmedidor = codmedidor;
+      this.aguatramite.comentario = '';
+      this.aguatramite.estado = 3;
+      this.aguatramite.sistema = 0;
+      this.aguatramite.fechaterminacion = this.date;
+      this.aguatramite.observacion = this.observaciones;
+      this.aguatramite.idtipotramite_tipotramite = this.tipoTramite;
+      this.aguatramite.idcliente_clientes = abonado.idcliente_clientes;
+      this.aguatramite.usucrea = this.authService.idusuario;
+      this.aguatramite.feccrea = this.date;
+
+      this.s_aguatramite.saveAguaTramite(this.aguatramite).subscribe({
          next: (datos) => {
             this.s_tramiteagua.genContratoTramite(datos, this.abonado, this.titulo);
          },
@@ -276,7 +310,9 @@ export class AguatramComponent implements OnInit {
    actualizarPropietario() {
       this.abonado.idcliente_clientes = this.selectClient;
       this.abonado.idresponsable = this.selectClient;
-      this.observaciones = this.f_camPropietario.value.observacion;
+      this.observaciones = this.f_camPropietario.value.observaciones;
+      this.aguatramite.nrodocumento = this.f_camPropietario.value.nrodocumento
+      this.aguatramite.iddocumento_documentos = +this.f_camPropietario.value.iddocumento_documentos!
       this.actualizarAbonado(this.abonado);
       this.guardarAguaTramite(this.abonado, null);
    }
