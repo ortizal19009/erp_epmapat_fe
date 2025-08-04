@@ -199,42 +199,50 @@ export class RecaudacionComponent implements OnInit {
   }
   abrirCaja() {
     this.getAllPtoEmision();
+    console.log(this.authService.idusuario)
 
     this.s_cajas.getByIdUsuario(this.authService.idusuario).subscribe({
       next: (dcaja: any) => {
         console.log(dcaja)
-        this._caja = dcaja;
-        this._establecimiento = dcaja.idptoemision_ptoemision;
-        this._establecimiento = this._ptoemision.find((e: any) => e.establecimiento === dcaja.idptoemision_ptoemision.establecimiento); // O el criterio que necesites
+        if (dcaja) {
 
-        this._usuario = dcaja.idusuario_usuarios;
-        this._codRecaudador = `${dcaja.idptoemision_ptoemision.establecimiento}-${dcaja.codigo}`;
-        /* VALIDAR SI LA CAJA ESTA ABIERTA O CERRADA */
-        this.s_recaudaxcaja.getLastConexion(this._caja.idcaja).subscribe({
-          next: (drxc: any) => {
-            let c_fecha: Date = new Date();
-            let l_fecha: Date = new Date(drxc.fechainiciolabor);
-            let estadoCaja = sessionStorage.getItem('estadoCaja');
-            if (
-              (c_fecha.getDate() != l_fecha.getDate() &&
-                c_fecha.getMonth() != l_fecha.getMonth() &&
-                c_fecha.getFullYear() == l_fecha.getFullYear()) ||
-              estadoCaja === '0'
-            ) {
-              this.cajaActiva = false;
-              this.estadoCajaT = true;
-            } else {
-              this.cajaActiva = true;
-              this.estadoCajaT = false;
-            }
-            if (dcaja.ultimafact === null) {
-              this.formatNroFactura(drxc.facfin);
-            } else {
-              //this.formatNroFactura(dcaja.ultimafact)};
-            }
-          },
-          error: (e) => console.error(e),
-        });
+          this._caja = dcaja;
+          this._establecimiento = dcaja.idptoemision_ptoemision;
+          this._establecimiento = this._ptoemision.find((e: any) => e.establecimiento === dcaja.idptoemision_ptoemision.establecimiento); // O el criterio que necesites
+
+          this._usuario = dcaja.idusuario_usuarios;
+          this._codRecaudador = `${dcaja.idptoemision_ptoemision.establecimiento}-${dcaja.codigo}`;
+
+          /* VALIDAR SI LA CAJA ESTA ABIERTA O CERRADA */
+          this.s_recaudaxcaja.getLastConexion(this._caja.idcaja).subscribe({
+            next: (drxc: any) => {
+              console.log(drxc)
+              let c_fecha: Date = new Date();
+              let l_fecha: Date = new Date(drxc.fechainiciolabor);
+              let estadoCaja = sessionStorage.getItem('estadoCaja');
+              if (
+                (c_fecha.getDate() != l_fecha.getDate() &&
+                  c_fecha.getMonth() != l_fecha.getMonth() &&
+                  c_fecha.getFullYear() == l_fecha.getFullYear()) ||
+                estadoCaja === '0'
+              ) {
+                this.cajaActiva = false;
+                this.estadoCajaT = true;
+              } else {
+                this.cajaActiva = true;
+                this.estadoCajaT = false;
+              }
+              if (dcaja.ultimafact === null) {
+                this.formatNroFactura(drxc.facfin);
+              } else {
+                //this.formatNroFactura(dcaja.ultimafact)};
+              }
+            },
+            error: (e) => console.error(e),
+          });
+        } else {
+          alert("ESTE USUARIO NO TIENE CAJA REGISTRADA");
+        }
       },
     });
   }

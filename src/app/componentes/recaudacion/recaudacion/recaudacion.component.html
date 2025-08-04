@@ -470,9 +470,10 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text" for="establecimiento">Establecimiento</span>
                             </div>
-                            <select id="establecimiento" (change)="changeEstablecimiento($event)" class="form-control form-control-sm"
-                                [(ngModel)]="_establecimiento">
-                                <option *ngFor="let ptoemision of _ptoemision" selected="_establecimiento" [ngValue]="ptoemision">
+                            <select id="establecimiento" (change)="changeEstablecimiento($event)"
+                                class="form-control form-control-sm" [(ngModel)]="_establecimiento">
+                                <option *ngFor="let ptoemision of _ptoemision" selected="_establecimiento"
+                                    [ngValue]="ptoemision">
                                     {{ ptoemision.establecimiento }}
                                 </option>
                             </select>
