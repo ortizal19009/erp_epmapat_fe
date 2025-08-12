@@ -1,12 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { lastValueFrom } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Abonados } from 'src/app/modelos/abonados';
 import { Aguatramite } from 'src/app/modelos/aguatramite.model';
 import { Categoria } from 'src/app/modelos/categoria.model';
 import { Clientes } from 'src/app/modelos/clientes';
 import { Estadom } from 'src/app/modelos/estadom.model';
+import { Facturamodificaciones } from 'src/app/modelos/facturamodificaciones.model';
 import { Rutas } from 'src/app/modelos/rutas.model';
 import { Tipotramite } from 'src/app/modelos/tipotramite.model';
 import { TramiteNuevo } from 'src/app/modelos/tramite-nuevo';
@@ -16,9 +18,13 @@ import { DocumentosService } from 'src/app/servicios/administracion/documentos.s
 import { AguatramiteService } from 'src/app/servicios/aguatramite.service';
 import { CategoriaService } from 'src/app/servicios/categoria.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
+import { FacturamodificacionesService } from 'src/app/servicios/facturamodificaciones.service';
+import { LoadingService } from 'src/app/servicios/loading.service';
 import { TramiteNuevoService } from 'src/app/servicios/tramite-nuevo.service';
 import { TramitesAguaService } from 'src/app/servicios/tramites-agua.service';
 import Swal from 'sweetalert2';
+
+declare var bootstrap: any; // Para que TypeScript no se queje
 
 @Component({
    selector: 'app-aguatram',
@@ -37,7 +43,7 @@ export class AguatramComponent implements OnInit {
    f_categoria: FormGroup;
    f_nMedidor: FormGroup;
    f_retiroMedidor: FormGroup;
-   f_camPropietario: FormGroup;
+   f_camPropietario!: FormGroup;
    f_camMedidor: FormGroup;
    filterTerm: string;
    filterClient: string;
@@ -61,8 +67,11 @@ export class AguatramComponent implements OnInit {
       { opcion: 'Identificación', valor: 3 },
    ];
    _documentos: any;
-   _facturas: any;
+   _facturas: any = [];
    aguatramite: Aguatramite = new Aguatramite();
+   swActualizar: boolean = true;
+   private modalConfirmacion: any | null = null;
+
 
    constructor(
       private actRouter: ActivatedRoute,
@@ -76,10 +85,18 @@ export class AguatramComponent implements OnInit {
       private s_aguatramite: AguatramiteService,
       private authService: AutorizaService,
       private s_documentos: DocumentosService,
-      private s_facturas: FacturaService
+      private s_facturas: FacturaService,
+      private s_facturasModi: FacturamodificacionesService,
+      private s_loading: LoadingService
+
    ) { }
 
    ngOnInit(): void {
+
+      const modalEl = document.getElementById('modalConfirmacion');
+      if (modalEl) {
+         this.modalConfirmacion = new bootstrap.Modal(modalEl);
+      }
       this.estadom.usucrea = this.authService.idusuario;
       this.tramitenuevo.usucrea = this.authService.idusuario;
 
@@ -87,7 +104,6 @@ export class AguatramComponent implements OnInit {
       let coloresJSON = sessionStorage.getItem('/aguatramite');
       if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
 
-      // console.log(this.abonados);
       let id = this.actRouter.snapshot.paramMap.get('id');
       this.tipoTramite.idtipotramite = +id!;
       // this.especificaTramite.idespecificatramite = +id!;
@@ -166,9 +182,9 @@ export class AguatramComponent implements OnInit {
       });
       this.f_camPropietario = this.fb.group({
          cliente: '',
-         observaciones: '',
-         iddocumento_documentos: 1,
-         nrodocumento: ''
+         observaciones: ['', Validators.required],
+         iddocumento_documentos: [1, Validators.required],
+         nrodocumento: ['', Validators.required],
       });
       const fechaFormateada = this.date.toISOString().split('T')[0]; // "2025-07-29"
 
@@ -318,20 +334,65 @@ export class AguatramComponent implements OnInit {
       this.selectClient = cliente;
    }
 
-   actualizarPropietario() {
-      if (this._facturas.length === 0) {
+   confCambioPropietario() {
+      if (this._facturas.length === 0) { this.actualizarPropietario() } else {
+         this.modalConfirmacion?.show();
 
-         this.abonado.idcliente_clientes = this.selectClient;
-         this.abonado.idresponsable = this.selectClient;
-         this.observaciones = this.f_camPropietario.value.observaciones;
-         this.aguatramite.nrodocumento = this.f_camPropietario.value.nrodocumento
-         this.aguatramite.iddocumento_documentos = +this.f_camPropietario.value.iddocumento_documentos!
-         this.actualizarAbonado(this.abonado);
-         this.guardarAguaTramite(this.abonado, null);
-      } else {
-         this.swal("error", "Cuenta tiene facturas pendientes")
       }
+
    }
+
+   async actualizarPropietario() {
+      this.s_loading.showLoading();
+      this.abonado.idcliente_clientes = this.selectClient;
+      this.abonado.idresponsable = this.selectClient;
+      this.observaciones = this.f_camPropietario.value.observaciones;
+      this.aguatramite.nrodocumento = this.f_camPropietario.value.nrodocumento;
+      this.aguatramite.iddocumento_documentos = +this.f_camPropietario.value.iddocumento_documentos!;
+      if (this.swActualizar) {
+
+         // Espera a que todas las facturas se actualicen antes de seguir
+         await this.actualizarFacturas();
+      }
+
+      this.actualizarAbonado(this.abonado);
+      this.guardarAguaTramite(this.abonado, null);
+      this.modalConfirmacion.hide();
+      this.swal("success", `Datos guardados y actualizados`);
+      this.s_loading.hideLoading();
+   }
+
+   async actualizarFacturas(): Promise<void> {
+      const facturas: any[] = this._facturas;
+
+      // Mapeamos cada factura a una promesa
+      const promesas = facturas.map(async (item: any) => {
+         let facturaModi = new Facturamodificaciones();
+         let factura: any = await this.s_facturas.getByIdAsync(item.idfactura);
+
+         facturaModi.idfactura = item.idfactura;
+         facturaModi.datosfactura = JSON.stringify(item);
+         facturaModi.detalle = JSON.stringify({
+            actividad: `CAMBIO DE PROPIETARIO CUENTA ${this.abonado}`,
+            observacion: this.f_camPropietario.value.observacion,
+            documento: this.f_camPropietario.value.nrodocumento
+         });
+         facturaModi.fechacrea = this.date;
+
+         // Espera a guardar la modificación
+         await lastValueFrom(this.s_facturasModi.saveFacturacionModificaciones(facturaModi));
+
+         // Una vez guardado, actualiza la factura
+         factura.idcliente = this.selectClient;
+         factura.usumodi = this.authService.idusuario;
+         factura.fecmodi = this.date;
+         await this.s_facturas.saveFacturaAsync(factura);
+      });
+
+      // Espera a que todas las promesas terminen
+      await Promise.all(promesas);
+   }
+
 
    async setAbonado(abonado: any) {
       this.abonado = abonado;
@@ -346,8 +407,8 @@ export class AguatramComponent implements OnInit {
          municipio: abonado.municipio,
       });
       if (this.cambioPropietario) {
-         let facturas: any = await this.s_facturas.getFacSincobroBycuenta(abonado.idabonado).toPromise();
-         console.log(facturas)
+         let facturas: any = await this.s_facturas.getAllFacturasByCuenta(abonado.idabonado);
+         this.swal("warning", `Cuenta con ${facturas.length} facturas pendientes`)
          this._facturas = facturas;
       }
    }

@@ -217,6 +217,13 @@ export class FacturaService {
       `${baseUrl}/sincobro?idabonado=${idabonado}`
     );
   }
+  /* opcion para cambio de propietario */
+  async getAllFacturasByCuenta(idabonado: number): Promise<any> {
+    let resp = await firstValueFrom(this.http.get<any>(
+      `${baseUrl}/byCuenta?cuenta=${idabonado}`
+    ))
+    return resp;
+  }
 
   //Cuenta las Planillas pendientes de un Abonado
   // getPendientesAbonado(idabonado: number) {
@@ -465,7 +472,7 @@ export class FacturaService {
       { responseType: 'blob' }));
     return resp;
   }
- sendEmail(
+  sendEmail(
     emisor: string,
     password: string,
     receptores: string[], // Ejemplo: ['correo1@gmail.com', 'correo2@hotmail.com']

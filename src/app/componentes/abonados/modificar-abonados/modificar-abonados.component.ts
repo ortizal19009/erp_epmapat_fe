@@ -37,7 +37,8 @@ export class ModificarAbonadosComponent implements OnInit {
   cliente: any;
   v_resppago: any;
   v_idresponsable: any;
-  setCategoria:any; 
+  setCategoria: any;
+  date: Date = new Date();
 
   constructor(
     public fb: FormBuilder,
@@ -50,7 +51,7 @@ export class ModificarAbonadosComponent implements OnInit {
     public estadomS: EstadomService,
     public router: Router,
     private authService: AutorizaService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     let date: Date = new Date();
@@ -80,7 +81,7 @@ export class ModificarAbonadosComponent implements OnInit {
       municipio: '',
       swalcantarillado: '',
       feccrea: date,
-      usumodi: 1,
+      usumodi: this.authService.idusuario,
       fecmodi: date,
     });
 
@@ -102,7 +103,7 @@ export class ModificarAbonadosComponent implements OnInit {
 
   listarCategorias() {
     this.categoriaS.getListCategoria().subscribe(
-      (datos) => {
+      (datos:any) => {
         this.categoria = datos;
       },
       (error) => console.log(error)
@@ -152,8 +153,10 @@ export class ModificarAbonadosComponent implements OnInit {
   onSubmit() {
     this.abonadoForm.value.idresponsable = this.v_idresponsable;
     this.abonadoForm.value.idcliente_clientes = this.cliente;
+    this.abonadoForm.value.usumodi = this.authService.idusuario;
+    this.abonadoForm.value.fecmodi = this.date;
     this.abonadosS.updateAbonado(this.abonadoForm.value).subscribe({
-      next: (resp) => this.retornar(),
+      next: (resp) => { console.log(resp); this.retornar() },
       error: (err) => console.log(err.error),
     });
   }
@@ -161,7 +164,7 @@ export class ModificarAbonadosComponent implements OnInit {
   obtenerAbonado() {
     let idabonado = sessionStorage.getItem('idabonadoToModi');
     this.abonadosS.getById(+idabonado!).subscribe((datos) => {
-      this.setCategoria = datos.idcategoria_categorias.descripcion; 
+      this.setCategoria = datos.idcategoria_categorias.descripcion;
       this.cliente = datos.idcliente_clientes;
       this.v_idresponsable = datos.idresponsable;
       this.v_idabonado = +idabonado!;
