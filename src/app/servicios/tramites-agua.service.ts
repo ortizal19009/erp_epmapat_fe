@@ -28,7 +28,6 @@ export class TramitesAguaService {
     let doc = new jsPDF('p', 'pt', 'a4');
     this.s_header.header(titulo, doc);
     let margin = 30;
-    console.log(abonado);
     doc.setFontSize(10);
     doc.text(`TRAMITE: ${aguatramite.idaguatramite}`, margin, 160);
     doc.text(`Tipo de servicio, ${servicio}`, margin, 190);
@@ -160,7 +159,6 @@ export class TramitesAguaService {
   }
 
   genContrato(datos: any) {
-    console.log(datos);
     let titulo: string = 'CONTRATO DE CONCESIÓN DE SERVICIOS';
     let doc = new jsPDF('p', 'pt', 'a4');
     this.s_header.header(titulo, doc);
@@ -185,7 +183,6 @@ export class TramitesAguaService {
       margin,
       160
     );
-    console.log(datos);
     doc.text(`TULCAN, ${datos.fechafinalizacion}`, margin, 250);
     doc.text(`Nro. cuenta: ${datos}`, margin, 270);
     autoTable(doc, {
