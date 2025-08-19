@@ -53,7 +53,7 @@ export class ImpEmisionesComponent implements OnInit {
     private s_rubroxfac: RubroxfacService,
     private s_jasperReport: JasperReportService,
     public authService: AutorizaService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.usuario = this.authService.idusuario;
@@ -120,6 +120,7 @@ export class ImpEmisionesComponent implements OnInit {
     let h: String;
     this.emiService.ultimo().subscribe({
       next: (datos) => {
+        console.log(datos)
         h = datos.emision;
         let d = (+h.slice(0, 2)! - 1).toString() + h.slice(2);
         this.formImprimir.patchValue({
@@ -139,7 +140,7 @@ export class ImpEmisionesComponent implements OnInit {
     const detalle = document.querySelector('.detalle');
     if (detalle) detalle.classList.add('nuevoBG2');
   }
-  imprimir() {
+  async imprimir() {
     this.s_loading.showLoading();
     switch (this.formImprimir.value.reporte) {
       case '0':
@@ -183,6 +184,33 @@ export class ImpEmisionesComponent implements OnInit {
         break;
       case '11':
         this.getReporte(this.formImprimir.value.emision);
+        break;
+      case '12':
+        let body: any = {
+          "reportName": "Refacturaciones",
+          "parameters": {
+            "desde": this.formImprimir.value.d_emi,
+            "hasta": this.formImprimir.value.h_emi,
+            "idusuario": 1
+          },
+          "extencion": ".pdf"
+        }
+
+        let reporte = await this.s_jasperReport.getReporte(body);
+        setTimeout(() => {
+          const file = new Blob([reporte], { type: 'application/pdf' });
+          const fileURL = URL.createObjectURL(file);
+
+          // Asignar el blob al iframe
+          const pdfViewer = document.getElementById(
+            'pdfViewer'
+          ) as HTMLIFrameElement;
+
+          if (pdfViewer) {
+            pdfViewer.src = fileURL;
+          }
+        }, 1000);
+        this.s_loading.hideLoading();
         break;
     }
   }
@@ -244,10 +272,8 @@ export class ImpEmisionesComponent implements OnInit {
     cm3inicial.forEach((item: any) => {
       body2.push([item.abonados, item.m3]);
     });
-    console.log(count.length + '<===========');
     if (count.length > 0) {
       count.forEach((item: any) => {
-        console.log(item);
         body3.push([
           item.idabonado_abonados,
           item.idfactura,
@@ -626,8 +652,8 @@ export class ImpEmisionesComponent implements OnInit {
         item.nombre,
         item.observaciones,
         item.fecelimina,
-        va.toFixed(2) ,
-        vn.toFixed(2) ,
+        va.toFixed(2),
+        vn.toFixed(2),
         dif.toFixed(2),
       ]);
       n_suma += item.valornuevo;
@@ -848,7 +874,6 @@ export class ImpEmisionesComponent implements OnInit {
     );
     this.s_loading.hideLoading();
   }
-
   async getValoresEmitidos(idemision: number) {
     let valores = this.s_lecturas
       .findReporteValEmitidosxEmision(idemision)
@@ -963,7 +988,7 @@ export class ImpEmisionesComponent implements OnInit {
   }
   changeReporte() {
     this.opcreporte = +this.formImprimir.value.reporte!;
-    if (this.opcreporte === 8 || this.opcreporte === 10) {
+    if (this.opcreporte === 8 || this.opcreporte === 10 || this.opcreporte === 12) {
       this.tipe = 'date';
       const fecha: Date = new Date();
       const strfecha = fecha.toISOString().slice(0, 10);
