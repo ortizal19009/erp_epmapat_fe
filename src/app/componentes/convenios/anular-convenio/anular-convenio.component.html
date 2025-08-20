@@ -1,1 +1,96 @@
-<p>anular-convenio works!</p>
+<div class="container">
+    <div class="card shadow-sm mb-3 mt-4">
+        <div class="card-header bg-primary text-white">
+            Convenio N° {{ _convenio.nroconvenio }}
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-sm">
+                    <h5 class="card-title">Autorización: {{ _convenio.nroautorizacion }}</h5>
+                    <p class="card-text">
+                        <strong>Referencia:</strong> {{ _convenio.referencia }} <br>
+                        <strong>Estado:</strong>
+                        <span [ngClass]="_convenio.estado === 1 ? 'text-success' : 'text-danger'">
+                            {{ _convenio.estado === 1 ? 'Activo' : 'Inactivo' }}
+                        </span> <br>
+                        <strong>Fecha Creación:</strong> {{ _convenio.feccrea }} <br>
+                        <strong>Observaciones:</strong> {{ _convenio.observaciones }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Acordeones en dos columnas -->
+            <div class="row">
+                <!-- Columna izquierda -->
+                <div class="col-md-6">
+                    <div id="accordionLeft">
+                        <div class="card">
+                            <div class="card-header p-2" id="headingFinancieros">
+                                <h6 class="mb-0">
+                                    <button class="btn btn-link btn-block text-left" type="button"
+                                        data-toggle="collapse" data-target="#collapseFinancieros" aria-expanded="true"
+                                        aria-controls="collapseFinancieros">
+                                        📌 Datos Financieros
+                                    </button>
+                                </h6>
+                            </div>
+                            <div id="collapseFinancieros" class="collapse " aria-labelledby="headingFinancieros"
+                                data-parent="#accordionLeft">
+                                <div class="card-body">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">Total Convenio: <strong>{{_convenio.totalconvenio |
+                                                number:'1.2-2'}} $</strong></li>
+                                        <li class="list-group-item">Pago Mensual: <strong>{{_convenio.pagomensual |
+                                                number:'1.2-2'}} $</strong></li>
+                                        <li class="list-group-item">Cuota Inicial: <strong>{{_convenio.cuotainicial |
+                                                number:'1.2-2'}} $</strong></li>
+                                        <li class="list-group-item">Cuota Final: <strong>{{_convenio.cuotafinal |
+                                                number:'1.2-2'}} $</strong></li>
+                                        <li class="list-group-item">N° de Cuotas: <strong>{{_convenio.cuotas}}</strong>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna derecha -->
+                <div class="col-md-6">
+                    <div id="accordionRight">
+                        <div class="card">
+                            <div class="card-header p-2" id="headingAbonado">
+                                <h6 class="mb-0">
+                                    <button class="btn btn-link btn-block text-left" type="button"
+                                        data-toggle="collapse" data-target="#collapseAbonado" aria-expanded="true"
+                                        aria-controls="collapseAbonado">
+                                        📌 Datos del Abonado
+                                    </button>
+                                </h6>
+                            </div>
+                            <div id="collapseAbonado" class="collapse " aria-labelledby="headingAbonado"
+                                data-parent="#accordionRight">
+                                <div class="card-body">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">ID Abonado:
+                                            <strong>{{_convenio.idabonado.idabonado}}</strong></li>
+                                        <li class="list-group-item">Nro. Medidor:
+                                            <strong>{{_convenio.idabonado.nromedidor}}</strong></li>
+                                        <li class="list-group-item">Lectura Inicial:
+                                            <strong>{{_convenio.idabonado.lecturainicial}}</strong></li>
+                                        <li class="list-group-item">Fecha Instalación:
+                                            <strong>{{_convenio.idabonado.fechainstalacion}}</strong></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- Fin row -->
+        </div>
+
+        <div class="card-footer text-muted text-right">
+            Creado por usuario: {{ _convenio.usucrea }}
+        </div>
+    </div>
+</div>

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Convenios } from 'src/app/modelos/convenios.model';
 import { Cuotas } from 'src/app/modelos/cuotas.model';
 import { ConvenioService } from 'src/app/servicios/convenio.service';
 import { CuotasService } from 'src/app/servicios/cuotas.service';
@@ -11,7 +12,7 @@ import { FacxconvenioService } from 'src/app/servicios/facxconvenio.service';
   styleUrls: ['./anular-convenio.component.css']
 })
 export class AnularConvenioComponent implements OnInit {
-  _convenio: any;
+  _convenio: Convenios = new Convenios();
   _cuotas: any;
   _facxconvenio: any;
   constructor(private actRouter: ActivatedRoute, private s_convenio: ConvenioService, private s_cuota: CuotasService, private s_facxconvenios: FacxconvenioService
