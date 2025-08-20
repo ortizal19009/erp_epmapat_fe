@@ -271,6 +271,7 @@ import { DefinirComponent } from './componentes/administracion/definir/definir.c
 import { HomeComponent } from './componentes/administracion/home/home.component';
 import { StatusConveniosComponent } from './componentes/convenios/status-convenios/status-convenios.component';
 import { CvClientesComponent } from './componentes/coactivas/carteras-vencidas/cv-clientes/cv-clientes.component';
+import { AnularConvenioComponent } from './componentes/convenios/anular-convenio/anular-convenio.component';
 
 const routes: Routes = [
   //Consumo de Agua
@@ -374,6 +375,7 @@ const routes: Routes = [
   { path: 'modi-convenio', component: ModiConvenioComponent },
   { path: 'info-convenio', component: InfoConvenioComponent },
   { path: 'estados-convenios', component: StatusConveniosComponent },
+  { path: 'anular-convenio/:idconvenio', component: AnularConvenioComponent},
   //{ path: 'imp-convenios', component: ImpConveniosComponent },
   // Intereses
   { path: 'intereses', component: ListarInteresesComponent },

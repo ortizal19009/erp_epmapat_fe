@@ -12,11 +12,15 @@
             <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
                   <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
-               <button class="dropdown-item" type="button">
-                  <i class="bi-file-earmark-arrow-down"></i><span class="">&nbsp;
-                     Exportar</span></button>
+               <button class="dropdown-item" [disabled]="!sweliminar" [routerLink]="['/anular-convenio', idconvenio]" type="button">
+                  <i class="fa fa-exchange" aria-hidden="true"></i>
+                  <span class="">&nbsp;
+                     Anular</span></button>
+               <button class="dropdown-item" [disabled]="sweliminar" type="button">
+                  <i class="fa fa-minus-square-o" aria-hidden="true"></i>
+                  <span class="">&nbsp;
+                     Eliminar</span></button>
             </div>
-
             <div class="col-sm-1">
                <button class="bg-transparent border-0" type="submit" (click)="regresar()">
                   <i class="bi-arrow-left-circle text-white icoRegresar"></i>
@@ -220,7 +224,7 @@
                <h5 class='modal-title font-weight-bold' id='ModalLabel'>Seleccione Opción</h5>
             </div>
             <div class='modal-body'>
-<!--                <div class="alert alert-info" role="alert">
+               <!--                <div class="alert alert-info" role="alert">
                   ¿Eliminar el Convenio de Pago {{ convenio.nroconvenio }} ?
                </div> -->
                <div class="container-fluid">
@@ -235,8 +239,8 @@
                </div>
             </div>
             <div class='modal-footer' id='idButtons'>
-               <button type='button' class='btn btn-success btn-sm' data-dismiss='modal'
-                  (click)="imprimirPdf(convenio)" id='btnSi'>
+               <button type='button' class='btn btn-success btn-sm' data-dismiss='modal' (click)="imprimirPdf(convenio)"
+                  id='btnSi'>
                   <i class="fa fa-check-circle" style="font-size:24pxi"></i>&nbsp;&nbsp;&nbsp;Si&nbsp;&nbsp;&nbsp;
                </button>
                <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>

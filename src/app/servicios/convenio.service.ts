@@ -11,7 +11,7 @@ const baseUrl = `${apiUrl}/convenios`;
   providedIn: 'root',
 })
 export class ConvenioService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getAll(): Observable<Convenios[]> {
     return this.http.get<Convenios[]>(baseUrl);
@@ -78,5 +78,8 @@ export class ConvenioService {
   }
   getPendienteByConvenio(idconvenio: number) {
     return this.http.get<any>(`${baseUrl}/pendiente?idconvenio=${idconvenio}`);
+  }
+  findDatosConvenio(idconvenio: number) {
+    return this.http.get(`${baseUrl}/datosOne?idconvenio=${idconvenio}`);
   }
 }

@@ -32,6 +32,7 @@
                                 <option value=5>Valores Emitidos</option>
                                 <option value=6>Consumos por categoría</option>
                                 <option value=12>Refacturaciónes</option>
+                                <option value=13>Refacturaciónes Emision</option>
                                 <option value=7>Refacturación por emision</option>
                                 <option value=8>Refacturación por fecha</option>
                                 <option value=9>Ref emision rubros</option>
@@ -65,7 +66,7 @@
                                 </div>
                                 <select type="date" class="form-control text-center" formControlName="emision"
                                     aria-label="Small" aria-describedby="inputGroup-sizing-sm">
-                                    <option [ngValue]="emision.idemision" *ngFor="let emision of l_emisiones">
+                                    <option [ngValue]="emision.idemision" [disabled]="emision.estado === 0" *ngFor="let emision of l_emisiones">
                                         {{emision.emision}}
                                     </option>
                                 </select>
@@ -164,7 +165,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <iframe id="pdfViewer" width="100%" height="600px"></iframe>
+                <iframe id="pdfViewer" width="100%" height="500px"></iframe>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-success" data-dismiss="modal">Cancelar</button>

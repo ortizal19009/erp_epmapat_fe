@@ -27,7 +27,7 @@ export class InfoConvenioComponent implements OnInit {
   _cuotas: any;
   _rubroxfac: any;
   idconvenio: number;
-
+  sweliminar: boolean = true
   constructor(
     private convService: ConvenioService,
     private fxconvService: FacxconvenioService,
@@ -36,7 +36,7 @@ export class InfoConvenioComponent implements OnInit {
     private rxfService: RubroxfacService,
     private router: Router,
     private s_report: ConveniosReportsService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/info-convenios');
@@ -47,8 +47,8 @@ export class InfoConvenioComponent implements OnInit {
     sessionStorage.removeItem('idconvenioToInfo');
     if (this.idconvenio === 0) {
       this.regresar();
-    }else{
-        this.datosConvenio();
+    } else {
+      this.datosConvenio();
     }
   }
 
@@ -73,11 +73,18 @@ export class InfoConvenioComponent implements OnInit {
         this.convenio.cuotainicial = datos.cuotainicial;
         this.convenio.cuotafinal = datos.cuotafinal;
         this.convenio.cuenta = datos.idabonado.idabonado;
-        this.convenio.feccrea = datos.feccrea; 
+        this.convenio.feccrea = datos.feccrea;
         this.cuotasxConvenio(this.idconvenio);
       },
       error: (err) => console.log(err.error),
     });
+    this.convService.findDatosConvenio(this.idconvenio).subscribe({
+      next: (datos: any) => {
+        console.log(datos)
+        this.sweliminar = true;
+      },
+      error: (e: any) => console.error(e)
+    })
   }
 
   cuotasxConvenio(idconvenio: number) {
@@ -147,7 +154,7 @@ export class InfoConvenioComponent implements OnInit {
     let idc = localStorage.getItem('idconvenioToDelete');
     if (idc != null) {
       this.convService.deleteConvenio(+idc!).subscribe({
-        next: (datos) => {},
+        next: (datos) => { },
         error: (err) => console.error(err.error),
       });
     }
@@ -201,5 +208,5 @@ interface Convenio {
   cuotainicial: number;
   cuotafinal: number;
   cuenta: number;
-  feccrea: Date; 
+  feccrea: Date;
 }

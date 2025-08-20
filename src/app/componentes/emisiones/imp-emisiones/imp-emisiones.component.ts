@@ -142,6 +142,8 @@ export class ImpEmisionesComponent implements OnInit {
   }
   async imprimir() {
     this.s_loading.showLoading();
+    let body: any;
+    let reporte: any;
     switch (this.formImprimir.value.reporte) {
       case '0':
         this.buscarEmisiones();
@@ -186,7 +188,7 @@ export class ImpEmisionesComponent implements OnInit {
         this.getReporte(this.formImprimir.value.emision);
         break;
       case '12':
-        let body: any = {
+        body = {
           "reportName": "Refacturaciones",
           "parameters": {
             "desde": this.formImprimir.value.d_emi,
@@ -196,7 +198,33 @@ export class ImpEmisionesComponent implements OnInit {
           "extencion": ".pdf"
         }
 
-        let reporte = await this.s_jasperReport.getReporte(body);
+        reporte = await this.s_jasperReport.getReporte(body);
+        setTimeout(() => {
+          const file = new Blob([reporte], { type: 'application/pdf' });
+          const fileURL = URL.createObjectURL(file);
+
+          // Asignar el blob al iframe
+          const pdfViewer = document.getElementById(
+            'pdfViewer'
+          ) as HTMLIFrameElement;
+
+          if (pdfViewer) {
+            pdfViewer.src = fileURL;
+          }
+        }, 1000);
+        this.s_loading.hideLoading();
+        break;
+      case '13':
+        body = {
+          "reportName": "RefacturacionesRubros",
+          "parameters": {
+            "idemision": this.formImprimir.value.emision,
+            "idusuario": 1
+          },
+          "extencion": ".pdf"
+        }
+
+        reporte = await this.s_jasperReport.getReporte(body);
         setTimeout(() => {
           const file = new Blob([reporte], { type: 'application/pdf' });
           const fileURL = URL.createObjectURL(file);
@@ -1011,7 +1039,8 @@ export class ImpEmisionesComponent implements OnInit {
       this.opcreporte === 6 ||
       this.opcreporte === 7 ||
       this.opcreporte === 9 ||
-      this.opcreporte === 11
+      this.opcreporte === 11 ||
+      this.opcreporte == 13
     ) {
       return false;
     }
