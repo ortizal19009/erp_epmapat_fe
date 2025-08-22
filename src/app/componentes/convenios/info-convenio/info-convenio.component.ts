@@ -7,6 +7,7 @@ import { FacturaService } from 'src/app/servicios/factura.service';
 import { FacxconvenioService } from 'src/app/servicios/facxconvenio.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { ConveniosReportsService } from '../convenios-reports.service';
+import { InteresesService } from 'src/app/servicios/intereses.service';
 
 @Component({
   selector: 'app-info-convenio',
@@ -28,6 +29,7 @@ export class InfoConvenioComponent implements OnInit {
   _rubroxfac: any;
   idconvenio: number;
   sweliminar: boolean = true
+  totalInteres: number;
   constructor(
     private convService: ConvenioService,
     private fxconvService: FacxconvenioService,
@@ -35,7 +37,8 @@ export class InfoConvenioComponent implements OnInit {
     private facService: FacturaService,
     private rxfService: RubroxfacService,
     private router: Router,
-    private s_report: ConveniosReportsService
+    private s_report: ConveniosReportsService,
+    private s_intereses: InteresesService
   ) { }
 
   ngOnInit(): void {
@@ -63,7 +66,7 @@ export class InfoConvenioComponent implements OnInit {
 
   datosConvenio() {
     this.convService.getById(this.idconvenio).subscribe({
-      next: (datos) => {
+      next: (datos: any) => {
         this._convenios = datos;
         this.convenio.idconvenio = datos.idconvenio;
         this.convenio.nroconvenio = datos.nroconvenio;
@@ -87,12 +90,26 @@ export class InfoConvenioComponent implements OnInit {
     })
   }
 
+  async calcularInteres(idfactura: number) {
+    let interes = await this.s_intereses.getInteresFacturaAsync(idfactura)
+    return interes;
+  }
+
   cuotasxConvenio(idconvenio: number) {
     this.cuotaService.getByIdconvenio(idconvenio).subscribe({
-      next: (datos) => {
+      next: (datos: any) => {
+        this.totalInteres = 0;
+
         this._cuotas = datos;
-        // let idfactura = this._cuotas[0].idfactura.idfactura
-        // this.nombreCliente(idfactura);
+        datos.forEach(async (item: any, index: number) => {
+          if (item.idfactura.pagado === 0) {
+            this._cuotas[index].interesacobrar = await this.s_intereses.getInteresFacturaAsync(item.idfactura.idfactura)
+          } else {
+            this._cuotas[index].interesacobrar = item.idfactura.interescobrado
+          }
+          this.totalInteres += this._cuotas[index].interesacobrar;
+        })
+
         this.totalCuotas();
       },
       error: (err) => console.error(err.error),

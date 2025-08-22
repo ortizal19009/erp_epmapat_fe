@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { first, firstValueFrom, Observable } from 'rxjs';
 import { Intereses } from '../modelos/intereses';
 import { environment } from 'src/environments/environment';
 import { Facturas } from '../modelos/facturas.model';
@@ -13,7 +13,7 @@ const baseUrl = `${apiUrl}/intereses`;
   providedIn: 'root',
 })
 export class InteresesService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getListaIntereses(): Observable<Intereses[]> {
     return this.http.get<Intereses[]>(`${baseUrl}`);
@@ -52,6 +52,13 @@ export class InteresesService {
     let interes = this.http.get<any>(
       `${baseUrl}/calcular?idfactura=${idfactura}`
     );
+
+    return interes;
+  }
+  getInteresFacturaAsync(idfactura: number) {
+    let interes = firstValueFrom(this.http.get<any>(
+      `${baseUrl}/calcular?idfactura=${idfactura}`
+    ));
 
     return interes;
   }

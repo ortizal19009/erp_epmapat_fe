@@ -12,7 +12,8 @@
             <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
                   <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
-               <button class="dropdown-item" [disabled]="!sweliminar" [routerLink]="['/anular-convenio', idconvenio]" type="button">
+               <button class="dropdown-item" [disabled]="!sweliminar" [routerLink]="['/anular-convenio', idconvenio]"
+                  type="button">
                   <i class="fa fa-exchange" aria-hidden="true"></i>
                   <span class="">&nbsp;
                      Anular</span></button>
@@ -78,6 +79,7 @@
                                     <th>Factura</th>
                                     <th>F.Cobro</th>
                                     <th>Valor</th>
+                                    <th>Interés</th>
                                     <th></th>
                                  </tr>
                               </thead>
@@ -89,6 +91,8 @@
                                     <td>{{ cuota.idfactura.nrofactura }}</td>
                                     <td>{{ cuota.idfactura.fechacobro }}</td>
                                     <td class="text-right">{{cuota.idfactura.totaltarifa | number: '1.2-2'}}</td>
+                                    <td class="text-right">{{cuota.interesacobrar | number: '1.2-2'}}
+                                    </td>
                                     <td>
                                        <button class="btn btn-outline-info btn-xs" data-toggle="modal"
                                           data-target="#facturaDetallesModal"
@@ -104,6 +108,7 @@
                                     <td></td>
                                     <td class="text-right font-weight-bold">Total </td>
                                     <td class="text-right font-weight-bold">{{ total1 | number: '1.2-2'}}</td>
+                                    <td class="text-right font-weight-bold">{{ totalInteres | number: '1.2-2'}}</td>
                                     <td *ngIf="dif1" class="text-center"><span class="badge badge-danger"
                                           data-toggle="tooltip" title="Diferencia">{{ convenio.totalconvenio - total1 |
                                           number:
