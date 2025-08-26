@@ -1,0 +1,19 @@
+<div class="container mt-4">
+  <h3>Subir Reporte Jasper</h3>
+
+  <div class="mb-3">
+    <label for="nombre" class="form-label">Nombre del Reporte</label>
+    <input type="text" id="nombre" [(ngModel)]="nombreReporte" class="form-control" placeholder="Ej: factura">
+  </div>
+
+  <div class="mb-3">
+    <label for="file" class="form-label">Archivo (.jasper)</label>
+    <input type="file" id="file" (change)="onFileSelected($event)" class="form-control">
+  </div>
+
+  <button class="btn btn-primary" (click)="onUpload()">Subir</button>
+
+  <div class="mt-3" *ngIf="mensaje">
+    <div class="alert alert-info">{{ mensaje }}</div>
+  </div>
+</div>

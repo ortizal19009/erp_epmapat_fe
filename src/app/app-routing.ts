@@ -272,6 +272,7 @@ import { HomeComponent } from './componentes/administracion/home/home.component'
 import { StatusConveniosComponent } from './componentes/convenios/status-convenios/status-convenios.component';
 import { CvClientesComponent } from './componentes/coactivas/carteras-vencidas/cv-clientes/cv-clientes.component';
 import { AnularConvenioComponent } from './componentes/convenios/anular-convenio/anular-convenio.component';
+import { ReportesjrComponent } from './componentes/reportesjr/reportesjr.component';
 
 const routes: Routes = [
   //Consumo de Agua
@@ -571,6 +572,7 @@ const routes: Routes = [
   { path: 'colores', component: ColoresComponent },
   { path: 'perfil-usuario', component: PerfilUsuarioComponent },
   { path: 'definir', component: DefinirComponent },
+  { path: 'reportesjr', component: ReportesjrComponent},
 
   // { path: 'login', component: LoginComponent },
 
