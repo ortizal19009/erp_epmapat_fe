@@ -11,7 +11,7 @@ const baseUrl = `${apiUrl}/lecturas`;
   providedIn: 'root',
 })
 export class LecturasService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   //Lectura por Planilla
   getOnefactura(idfactura: number) {
@@ -180,5 +180,9 @@ export class LecturasService {
     return this.http.get<any>(
       `${baseUrl}/reportes/rubrozero?idemision=${idemision}`
     );
+  }
+
+  async calcularValores(datos: any): Promise<any> {
+    return firstValueFrom(this.http.post(`${baseUrl}/valoresEmisiones`, datos))
   }
 }
