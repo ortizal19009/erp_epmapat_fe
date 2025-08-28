@@ -28,7 +28,7 @@
                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalCalcular"
                   [ngClass]="{'disabled' : rutaxemision.estado == 1}"><i class="bi-calculator"></i>
                   <span>&nbsp; Calcular</span></button>
-               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalCerrar"
+               <button class="dropdown-item" type="button" (click)="mostrarModal = true" data-toggle="modal" data-target="#modalCerrar"
                   [ngClass]="{'disabled' : rutaxemision.estado == 1}">
                   <i class="bi bi-door-closed"></i>&nbsp; Cerrar emisión ruta</button>
                <button class="dropdown-item" type="button" (click)="imprimir()">
@@ -157,8 +157,8 @@
    </div>
 
    <!-- MODAL Cerrar -->
-   <div class="modal fade" id="modalCerrar" tabindex="-1" aria-labelledby="modalCerrarLabel" data-backdrop="static"
-      aria-hidden="true">
+   <div class="modal fade" *ngIf="mostrarModal" id="modalCerrar" tabindex="-1" aria-labelledby="modalCerrarLabel"
+      data-backdrop="static" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
          <div class="modal-content detalle">
             <div class='modal-header py-2 justify-content-center cabecera'>

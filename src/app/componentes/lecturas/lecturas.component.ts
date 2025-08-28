@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Clientes } from 'src/app/modelos/clientes';
@@ -63,8 +63,12 @@ export class LecturasComponent implements OnInit {
   idabonado: any;
   s_historial: boolean = false;
   antIndice = 0;
+  enProceso: boolean = false;
+  mostrarModal: boolean = false;
+
 
   novedades: any;
+
 
   porcResidencial: number[] = [
     0.777, 0.78, 0.78, 0.78, 0.78, 0.78, 0.778, 0.778, 0.78, 0.78, 0.78, 0.68,
@@ -798,14 +802,13 @@ export class LecturasComponent implements OnInit {
         });
     }
   }
-
-  async planillas() {
-    for (this.kontador = 0; this.kontador < this._lecturas.length; this.kontador++) {
+  async __planillas() {
+    console.log(this._lecturas.length)
+    for (this.kontador = 0; this.kontador < this._lecturas.length - 1; this.kontador++) {
       let lectura = this._lecturas[this.kontador];
       let consumo = lectura.lecturaactual - lectura.lecturaanterior;
 
       if (consumo > 0) {
-        this.progreso = (this.kontador / this._lecturas.length) * 100;
 
         let datos = {
           cuenta: lectura.idabonado_abonados.idabonado,
@@ -824,9 +827,83 @@ export class LecturasComponent implements OnInit {
           // aquí podrías guardar logs o manejar errores
         }
       }
+      console.log(this.kontador);
+      this.progreso = (this.kontador / this._lecturas.length - 1) * 100;
+
+    }
+    console.log("✅ Planillas terminadas");
+  }
+  async planillas() {
+    this.enProceso = true; // 🔒 Bloquear salida
+
+    console.log(this._lecturas.length);
+    for (this.kontador = 0; this.kontador < this._lecturas.length; this.kontador++) {
+      let lectura = this._lecturas[this.kontador];
+      let consumo = lectura.lecturaactual - lectura.lecturaanterior;
+
+      if (consumo >= 0) {
+        let datos = {
+          cuenta: lectura.idabonado_abonados.idabonado,
+          m3: consumo,
+          categoria: lectura.idabonado_abonados.idcategoria_categorias.idcategoria,
+          idfactura: lectura.idfactura,
+          swAdultoMayor: lectura.idabonado_abonados.adultomayor,
+          swMunicipio: lectura.idabonado_abonados.municipio,
+          swAguapotable: lectura.idabonado_abonados.swalcantarillado
+        };
+
+        try {
+          await this.lecService.calcularValores(datos);
+          this._lecturas[this.kontador].estado = 1
+          await this.lecService.updateLecturaAsync(this._lecturas[this.kontador].idlectura, this._lecturas[this.kontador])
+        } catch (e) {
+          console.error("Error en calcularValores:", e);
+        }
+      }
+
+      this.progreso = Math.round(((this.kontador + 1) / this._lecturas.length) * 100);
     }
 
+    this.progreso = 100;
+    this.enProceso = false; // ✅ Proceso terminado, se puede salir
+    //this.mostrarModal = false;
+    this.cerrarModal();
+    //Actualiza el estado, totales y fecha de cierre de la Ruta por Emisión
+    this._rutaxemision.estado = 1;
+    this._rutaxemision.usuariocierre = 1;
+    this._rutaxemision.fechacierre = this.fecha;
+    this._rutaxemision.m3 = this.sumtotal;
+    this.rutaxemiService
+      .updateRutaxemision(
+        this.idrutaxemision,
+        this._rutaxemision
+      )
+      .subscribe({
+        next: (nex) => (this.btncerrar = true),
+        error: (err) =>
+          console.error(err.error),
+      });
     console.log("✅ Planillas terminadas");
+  }
+
+  // 👇 Interceptar cierre o recarga de página
+  @HostListener('window:beforeunload', ['$event'])
+  handleBeforeUnload(event: BeforeUnloadEvent) {
+    if (this.enProceso) {
+      event.preventDefault();
+      event.returnValue = 'Hay un proceso en ejecución. ¿Seguro que quieres salir?';
+    }
+  }
+
+  cerrarModal() {
+    this.mostrarModal = false;
+
+    // Eliminar backdrop y clases de Bootstrap
+    document.body.classList.remove('modal-open');
+    const backdrops = document.getElementsByClassName('modal-backdrop');
+    while (backdrops.length > 0) {
+      backdrops[0].parentNode?.removeChild(backdrops[0]);
+    }
   }
 
 
