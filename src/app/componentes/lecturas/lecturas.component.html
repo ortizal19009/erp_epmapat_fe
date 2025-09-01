@@ -4,7 +4,7 @@
          <div class="col-sm-2">
             <h4 class="m-0 font-weight-bold text-truncate"><i class="fa fa-book"></i>&nbsp; Lecturas </h4>
          </div>
-         <div class="col-sm-6 mt-1">
+         <div class="col-sm-5 mt-1">
             <h6 class="fantacy text-truncate">Emisión {{rutaxemision.emision|nombreEmision}} / Ruta {{ rutaxemision.ruta
                }}</h6>
          </div>
@@ -74,8 +74,8 @@
                   <td class="small text-center font-weight-bold"><i class="bi-bookmark-check-fill check"
                         *ngIf="i == antIndice"></i>{{i+1}}</td>
                   <td class="text-center">{{ lectura.idabonado_abonados.idabonado }}</td>
-                  <td>{{ lectura.idabonado_abonados.idcliente_clientes.nombre }}</td>
-                  <td>{{ lectura.idabonado_abonados.idcategoria_categorias.descripcion }}</td>
+                  <td class="description">{{ lectura.idabonado_abonados.idcliente_clientes.nombre }}</td>
+                  <td class="">{{ lectura.idabonado_abonados.idcategoria_categorias.descripcion }}</td>
                   <td class="text-right"
                      [ngClass]="{'fontwarning': lectura.lecturaanterior == 0 && lectura.lecturaactual == 0 }">{{
                      lectura.lecturaanterior | number: '1.0' }}</td>

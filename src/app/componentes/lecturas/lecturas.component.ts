@@ -853,7 +853,8 @@ export class LecturasComponent implements OnInit {
         };
 
         try {
-          await this.lecService.calcularValores(datos);
+          let total = await this.lecService.calcularValores(datos);
+          this._lecturas[this.kontador].total1 = total
           this._lecturas[this.kontador].estado = 1
           await this.lecService.updateLecturaAsync(this._lecturas[this.kontador].idlectura, this._lecturas[this.kontador])
         } catch (e) {
