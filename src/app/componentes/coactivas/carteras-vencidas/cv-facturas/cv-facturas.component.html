@@ -145,7 +145,7 @@
                                             data-target="#detalles">
                                             <td class="text-center font-weight-bold">{{i+1}}</td>
                                             <td class="text-center">{{factura.factura}}</td>
-                                            <td class="truncate-text">{{factura.nombre}}</td>
+                                            <td class="truncate-text" [attr.title]="factura.nombre">{{factura.nombre}}</td>
                                             <td class="">{{factura.modulo}}</td>
                                             <td class="text-right">{{factura.total.toFixed(2)}} $</td>
                                         </tr>
