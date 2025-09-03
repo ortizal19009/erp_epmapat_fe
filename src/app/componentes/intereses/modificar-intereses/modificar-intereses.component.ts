@@ -9,6 +9,7 @@ import { InteresesService } from 'src/app/servicios/intereses.service';
 import { ListarInteresesComponent } from '../intereses/intereses.component';
 import { map } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import { TmpinteresxfacService } from 'src/app/servicios/tmpinteresxfac.service';
 
 @Component({
   selector: 'app-modificar-intereses',
@@ -27,8 +28,9 @@ export class ModificarInteresesComponent implements OnInit {
     public fb: FormBuilder,
     private inteService: InteresesService,
     private parent: ListarInteresesComponent,
-    private authService: AutorizaService
-  ) {}
+    private authService: AutorizaService,
+    private s_tmpinteresxfac: TmpinteresxfacService
+  ) { }
 
   ngOnInit(): void {
     this.idinteres = +localStorage.getItem('idinteres')!;
@@ -81,9 +83,11 @@ export class ModificarInteresesComponent implements OnInit {
     this.inteService
       .updateInteres(this.idinteres, this.formInteres.value)
       .subscribe({
-        next: (resp) => {
+        next: async (resp: any) => {
           this.parent.reset();
           this.parent.listarIntereses();
+          let tempInteres = await this.s_tmpinteresxfac.calcularInteresesTemporales();
+          console.log(tempInteres)
         },
         error: (err) => console.log(err.error),
       });

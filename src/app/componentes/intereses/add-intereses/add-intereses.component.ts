@@ -4,6 +4,7 @@ import { map } from 'rxjs';
 import { InteresesService } from 'src/app/servicios/intereses.service';
 import { ListarInteresesComponent } from '../intereses/intereses.component';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import { TmpinteresxfacService } from 'src/app/servicios/tmpinteresxfac.service';
 
 @Component({
    selector: 'app-add-intereses',
@@ -15,11 +16,11 @@ export class AddInteresesComponent implements OnInit {
 
    formInteres: FormGroup;
 
-   constructor(private inteService: InteresesService, public fb: FormBuilder, private parent: ListarInteresesComponent, public authService: AutorizaService) { }
+   constructor(private inteService: InteresesService, public fb: FormBuilder, private s_tmpinteresxfac: TmpinteresxfacService, private parent: ListarInteresesComponent, public authService: AutorizaService) { }
 
    ngOnInit(): void {
       this.creaForm();
-      this.buscaUltimo(); 
+      this.buscaUltimo();
    }
 
    creaForm() {
@@ -54,15 +55,17 @@ export class AddInteresesComponent implements OnInit {
 
    onSubmit() {
       this.inteService.saveIntereses(this.formInteres.value).subscribe({
-         next: datos => {
+         next: async (datos: any) => {
             this.reset();
             this.parent.listarIntereses();
+            let tempInteres = await this.s_tmpinteresxfac.calcularInteresesTemporales();
+            console.log(tempInteres);
          },
          error: err => console.log(err.error),
       });
    }
 
-   reset() {  this.parent.reset();    }
+   reset() { this.parent.reset(); }
 
    valAnio(control: AbstractControl) {
       return this.inteService.getByAnioMes(control.value, this.formInteres?.value.mes)
