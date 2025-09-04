@@ -69,6 +69,7 @@
         </div>
         <!-- ./card-body -->
         <div class="card-footer">
+        <p>Rutas con mayor consumo de la emision actual</p> o lista de ubicaciones de los edificios
           <div class="row">
             <div class="col-sm-2 col-6">
               <div class="description-block border-right">
@@ -82,7 +83,7 @@
             <div class="col-sm-2 col-6">
               <div class="description-block border-right">
                 <span class="description-percentage text-success"><i class="fas fa-caret-up"></i> 17%</span>
-                <h5 class="description-header">$35,210.43</h5>
+                <h5 class="description-header">Edf. Comercialización</h5>
                 <span class="description-text">TOTAL REVENUE</span>
               </div>
               <!-- /.description-block -->
@@ -91,7 +92,7 @@
             <div class="col-sm-2 col-6">
               <div class="description-block border-right">
                 <span class="description-percentage text-warning"><i class="fas fa-caret-left"></i> 0%</span>
-                <h5 class="description-header">$10,390.90</h5>
+                <h5 class="description-header">Planta de tratamiento</h5>
                 <span class="description-text">TOTAL COST</span>
               </div>
               <!-- /.description-block -->
@@ -100,7 +101,7 @@
             <div class="col-sm-2 col-6">
               <div class="description-block border-right">
                 <span class="description-percentage text-success"><i class="fas fa-caret-up"></i> 20%</span>
-                <h5 class="description-header">$24,813.53</h5>
+                <h5 class="description-header">Tanques de agua</h5>
                 <span class="description-text">TOTAL PROFIT</span>
               </div>
               <!-- /.description-block -->
@@ -188,6 +189,10 @@
           <h3 class="card-title">Abonados por estado</h3>
 
           <div class="card-tools">
+          
+            <button type="button" class="btn btn-tool" >
+              <i class="fa fa-print" aria-hidden="true"></i>
+            </button>
             <button type="button" class="btn btn-tool" data-card-widget="collapse">
               <i class="fas fa-minus"></i>
             </button>
@@ -267,6 +272,7 @@
       <div class="modal-content">
         <div class="modal-header cabecera">
           <h5 class="modal-title" id="detallesLabel">{{txtModal}}</h5>
+          <input type="text" class="form-control form-control-sm col-sm-2 justify-content-end">
           <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -292,8 +298,8 @@
           </table>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Understood</button>
+          <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">Aceptar</button>
+          <button type="button" class="btn btn-sm btn-outline-primary" data-dismiss="modal">Imprimir</button>
         </div>
       </div>
     </div>

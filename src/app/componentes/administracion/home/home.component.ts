@@ -18,7 +18,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   _abonados: any[] = []; // o el tipo correcto si ya lo tienes
   abonados: any;
   filtro: string;
-  txtModal: string = 'DETALLES Loading...';
+  txtModal: string = 'DETALLES';
   private states: any = [
     {
       type: 'Feature',
