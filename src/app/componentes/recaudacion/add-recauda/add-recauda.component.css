@@ -84,3 +84,26 @@ label {
    width: 100%;
    z-index: 5000;
 }
+
+.btn i {
+  margin-right: 4px; /* separa ícono del texto */
+}
+.btn {
+  white-space: nowrap;
+}
+
+.card-header {
+  padding: 0.25rem 0.5rem; /* reduce padding */
+}
+
+.card-header h4 {
+  margin-bottom: 0;       /* quita espacio extra */
+  line-height: 1.2;       /* más pegado */
+  font-size: 1.1rem;      /* opcional: letra más pequeña */
+}
+
+.card-header p {
+  margin-bottom: 0;       /* quita margen del <p> */
+  line-height: 1.1;       /* más compacto */
+  font-size: 0.9rem;      /* opcional */
+}

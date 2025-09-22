@@ -1,10 +1,11 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy, OnInit } from '@angular/core';
 import { UsrxmodulosService } from '../servicios/administracion/usrxmodulos.service';
+import { CanActivate, Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
 })
-export class AutorizaService {
+export class AutorizaService implements OnInit, OnDestroy, CanActivate {
   enabled = [false, false, false, false, false, false, false];
   colorenabled = false;
   modulos: String[];
@@ -18,17 +19,34 @@ export class AutorizaService {
   perfil: string;
   msgval: boolean = true; //OJO: Obtener en el login del usuario
   modules: any;
+  private intervalId: any;
 
-  constructor() {}
+  ngOnInit(): void {
+    this.intervalId = setInterval(() => {
+      if (!this.sessionlog) {
+        this.router.navigate(['/inicio']);
+      }
+    }, 500); // cada 2 segundos
+  }
+
+  ngOnDestroy(): void {
+    if (this.intervalId) {
+      clearInterval(this.intervalId); // limpia el intervalo cuando el componente se destruya
+    }
+  }
+
+  constructor(private router: Router) {}
 
   public enabModulos(): void {
+    if (!this.sessionlog) {
+      this.router.navigate(['/inicio']);
+    }
     //OJO: Controlar con usuarios.perfil
     if (this.idusuario == 1)
       this.enabled = [true, true, false, false, true, true, true];
     else this.enabled = [true, false, false, false, false, false, true];
 
     this.colorenabled = true;
-    
 
     if (this.moduActual == null) this.modulo = 1;
     else this.modulo = this.moduActual;
@@ -64,8 +82,19 @@ export class AutorizaService {
       this.modulo = retrievedValues.object.modulo;
       this.moduActual = retrievedValues.object.moduActual;
       this.priusu = retrievedValues.priusu;
-
       this.enabModulos();
+    }
+    {
+      this.router.navigate(['/inicio']);
+    }
+  }
+  canActivate(): boolean {
+    const sessionlog = localStorage.getItem('sessionlog'); // ejemplo, cámbialo según tu app
+    if (sessionlog === 'true') {
+      return true; // ✅ acceso permitido
+    } else {
+      this.router.navigate(['/inicio']); // 🚫 redirige si no hay sesión
+      return false;
     }
   }
 }

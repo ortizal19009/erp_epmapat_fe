@@ -10,12 +10,16 @@
                </ng-template>
             </h4>
          </div>
-         <div class="col-sm-7 mx-0 px-0">
+         <div class="col-sm-6 mx-0 px-0">
             <form [formGroup]="f_buscar" class="col-sm-12 mt-0 px-0 pt-0">
                <div class="row col-sm-12 mt-1 mb-0">
-                  <div class="form-group col-md-3 mb-0">
-                     <input class="form-control form-control-sm text-center" min=1 (click)="txtCuenta($event)"
-                        (keypress)="txtCuenta($event)" type="number" formControlName="cuenta" placeholder="Cuenta" />
+                  <div class="form-group col-md-5 mb-0 d-flex">
+                     <input class="form-control form-control-sm text-center mr-1" type="number" formControlName="cuenta"
+                        placeholder="Cuenta" min="1" (click)="txtCuenta($event)" (keypress)="txtCuenta($event)" />
+
+                     <input class="form-control form-control-sm text-center" type="text"
+                        formControlName="identificacion" placeholder="Identificación" min="1"
+                        (click)="txtIdentificacion($event)" (keypress)="txtIdentificacion($event)" />
                   </div>
                   <div class="form-group col-sm-2 my-0 py-0 mb-0 form-inline">
                      <button class="btn btn-primary btn-sm mr-1" (click)="btn_buscar()">
@@ -81,7 +85,7 @@
       <div class="col-sm mt-3 " *ngIf="!swSincobro()">
          <div class=" card sombra ">
             <div class="card-body box-profile d-flex justify-content-center">
-               <div  class="col-sm-12 text-center">
+               <div class="col-sm-12 text-center">
                   <img src="/assets/dist/img/logo.png" width="400" />
                </div>
             </div>
@@ -98,29 +102,8 @@
          </div>
       </div>
    </div>
-   <div class="row mt-2 mb-0 justify-content-left">
-      <div class="col-sm-3">
-         <div class="row" *ngIf="swSincobro()">
-            <div class="col-sm">
-               <div class="card detalle sombra">
-                  <div class="card-body box-profile">
-                     <h3 class="profile-username text-center">{{_cliente?.nombre}}</h3>
-                     <p class="text-muted text-center">{{_cliente?.cedula}}</p>
-                     <ul class="list-group list-group-unbordered mb-3">
-                        <li class="list-group-item detalle">
-                           <b>Dirección</b> <a class="float-right">{{_cliente?.direccion}}</a>
-                        </li>
-                        <li class="list-group-item detalle">
-                           <b>e-mail</b> <a class="float-right">{{_cliente?.email}}</a>
-                        </li>
-                        <li class="list-group-item detalle">
-                           <b>Teléfono</b> <a class="float-right">{{_cliente?.telefono}}</a>
-                        </li>
-                     </ul>
-                  </div>
-               </div>
-            </div>
-         </div>
+   <div class="row mt-2">
+      <div class="col-sm">
          <div class="row">
             <div class="col-sm numeracion">
                <small class="badge badge-danger"><i class="bi bi-newspaper"> {{abrirCaja.nrofactura}}</i>
@@ -128,95 +111,77 @@
             </div>
          </div>
       </div>
-      <div class="col-sm " *ngIf="swSincobro()">
-         <div class=" card sombra ">
+   </div>
+   <div class="row mt-2 mb-0 justify-content-left">
+      <div class="col-sm" *ngIf="swSincobro()">
+         <div class="card sombra">
+            <div class="card-header">
+               <h4 class="profile-username text-center">{{_cliente?.nombre}}</h4>
+               <p class="text-muted text-center">{{_cliente?.cedula}}</p>
+            </div>
             <div class="card-body box-profile d-flex justify-content-center">
 
+               <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                  <table class="table table-hover table-sm table-bordered">
+                     <thead class="recaudacabecera">
+                        <tr class="text-center">
+                           <th></th>
+                           <th>Cuenta</th>
+                           <th>Responsable pago</th>
+                           <th>Planilla</th>
+                           <th>Dirección</th>
+                           <th>Fecha</th>
+                           <th>Módulo</th>
+                           <th>Valor</th>
+                           <th>
+                              <input type="checkbox" class="cursor" [disabled]="filtrar" />
+                           </th>
+                           <th></th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr *ngFor="let factura of _sincobro| filter:filtrar; let i = index "
+                           [ngClass]="{ transferido: factura.estado === 3 }">
+                           <td class="small font-weight-bold">{{i+1}}</td>
+                           <td class="text-center">{{factura.idabonado}}</td>
+                           <td class="truncate-text" [attr.title]="factura.nombre">{{factura.nombre}}</td>
+                           <td>{{factura.idfactura}}</td>
+                           <td class="truncate-text" [attr.title]="factura.direccion">
+                              {{factura.direccion}}
+                           </td>
+                           <td class="description">{{factura.feccrea}}</td>
+                           <td class="text-left description">{{factura.modulo}}</td>
+                           <td class="text-right">
+                              {{sumaIndividual(factura.total,factura.interes,factura.iva)}}
+                           </td>
+                           <td>
+                              <input type="checkbox" class="cursor" (change)="calcular($event, factura)" />
+                           </td>
+                           <td class="col-sm-1 text-nowrap">
+                              <button class="btn btn-outline-info badge-xs btn-xs cursor" data-toggle="modal"
+                                 data-target="#DetallePlanillaModal" (click)="facturaDetalle(factura.idfactura)">
+                                 <i class="fa fa-info-circle"></i> Info
+                              </button>
+                              <button class="btn btn-outline-info btn-xs cursor" *ngIf="swImprimir">
+                                 <i class="fa fa-print"></i> Imprimir
+                              </button>
+                           </td>
 
-               <!--    <div class="col-md-12">
-                  <div class="row justify-content-center">
-                     <div class="callout callout-info text-center col-md-8">
-                        <div class="alert alert-info">
-                           <h5><i class="fas fa-info"></i> <strong> Mensaje</strong></h5>
-                           No tiene Planillas sin Cobrar !
-                        </div>
-                     </div>
-                  </div>
-               </div> -->
+                        </tr>
+                        <tr>
 
-               <table class="table table-hover table-sm table-bordered">
-                  <thead class="recaudacabecera">
-                     <tr class="text-center">
-                        <th></th>
-                        <th>Cuenta</th>
-                        <th>Responsable pago</th>
-                        <th>Planilla</th>
-                        <th>Dirección</th>
-                        <th>Fecha</th>
-                        <th>Módulo</th>
-                        <th>Valor</th>
-                        <th>
-                           <input type="checkbox" class="cursor" [disabled]="filtrar" />
-                        </th>
-                        <th></th>
-                     </tr>
-                  </thead>
-                  <tbody>
-                     <tr *ngFor="let factura of _sincobro; let i = index"
-                        [ngClass]="{ transferido: factura.estado === 3 }">
-                        <td class="small font-weight-bold">{{i+1}}</td>
-                        <td class="text-center">{{factura.idabonado}}
-                        </td>
-                        <td class="description">{{factura.nombre}}</td>
-                        <td>{{factura.idfactura}}</td>
-                        <td class="description">
-                           {{factura.direccion}}
-                           <!--    {{sincobro.idabonado}}
-                           <i class="fa fa-spinner fa-pulse fa-fw"></i>
-                           <span class="sr-only">Loading...</span> -->
-                        </td>
-                        <td class="description">{{factura.feccrea}}</td>
-                        <td class="text-left description">{{factura.idmodulo}}</td>
-                        <!-- <td  class="text-right">{{
-                           sincobro.totaltarifa + sincobro.comerc + sincobro.interes +
-                           sincobro.multa | number:'1.2-2'}}</td> -->
-                        <td class="text-right">
-                           {{sumaIndividual(factura.total,factura.interesacobrar,factura.swiva)}}
-                        </td>
-                        <!--           <td *ngIf="sincobro.idmodulo.idmodulo != 8" [ngClass]="{'transferido': sincobro.estado == 3 }"
-                           class="text-right">{{
-                           sincobro.totaltarifa + sincobro.comerc + sincobro.interes +
-                           sincobro.multa | number:'1.2-2'}}</td>
-                        <td *ngIf="sincobro.idmodulo.idmodulo == 8" class="text-right">{{
-                           sincobro.valorbase | number:'1.2-2'}}</td>-->
-                        <td>
-                           <input type="checkbox" class="cursor" (change)="calcular($event, factura)" />
-                        </td>
-                        <td>
-                           <button class="btn btn-outline-info btn-xs cursor" data-toggle="modal"
-                              data-target="#DetallePlanillaModal" (click)="facturaDetalle(factura.idfactura)">
-                              <i class="fa fa-info-circle"></i> Info
-                           </button>
-                           <button class="btn btn-outline-info btn-xs cursor" *ngIf="swImprimir">
-                              <i class="fa fa-print"></i> Imprimir
-                           </button>
-                        </td>
-                     </tr>
-                     <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td class="font-weight-bold">TOTAL</td>
-                        <td class="text-right font-weight-bold">
-                        </td>
-                     </tr>
-                  </tbody>
-               </table>
+                           <td class="font-weight-bold text-right" colspan="7">TOTAL</td>
+                           <td class="text-center font-weight-bold" colspan="2">{{totalapagar.toFixed(2)}}</td>
+
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+
             </div>
          </div>
       </div>
+
    </div>
 
    <!-- Modal Buscar cliente -->
@@ -482,6 +447,38 @@
                   <i class="bi bi-x-circle"></i> Cancelar
                </button>
             </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- Modal -->
+<div #consultaModal class="modal fade" id="consultaModal" tabindex="-1" aria-hidden="true">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header cabecera">
+            <h5 class="modal-title">Consulta usuario {{f_buscar.value.identificacion}}</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+               <span aria-hidden="true">&times;</span>
+            </button>
+         </div>
+         <div class="modal-body">
+            <table class="table-sm table-hover table-bordered table-responsive">
+               <thead class="text-center">
+                  <tr>
+                     <th>N°</th>
+                     <th>Nombre</th>
+                     <th>Dirección</th>
+                  </tr>
+               </thead>
+               <tbody class="detalle">
+                  <tr *ngFor="let cliente of _clientes; let i = index" (click)="buscarCuentasOfCliente(cliente)">
+                     <td class="text-bold text-center">{{i+1}}</td>
+                     <td>{{cliente.nombre}}</td>
+                     <td>{{cliente.direccion}}</td>
+                  </tr>
+               </tbody>
+            </table>
          </div>
       </div>
    </div>

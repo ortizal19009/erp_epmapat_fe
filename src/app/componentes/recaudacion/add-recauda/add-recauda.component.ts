@@ -1,5 +1,11 @@
-import Swal from 'sweetalert2';
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -16,6 +22,10 @@ import { RecaudacionService } from 'src/app/servicios/microservicios/recaudacion
 import { CajaService } from 'src/app/servicios/caja.service';
 import { RecaudaxcajaService } from 'src/app/servicios/recaudaxcaja.service';
 import { Colores } from 'src/app/modelos/administracion/colores.model';
+import Swal from 'sweetalert2';
+import { Router } from '@angular/router';
+declare var bootstrap: any; // 👈 para usar la librería de Bootstrap JS
+
 @Component({
   selector: 'app-add-recauda',
   templateUrl: './add-recauda.component.html',
@@ -45,6 +55,8 @@ export class AddRecaudaComponent implements OnInit {
   _estadoCaja: any;
   idfactura: any;
   detalleFac: Boolean = false;
+  _clientes: any[] = [];
+  @ViewChild('consultaModal') consultaModal!: ElementRef;
   //_mensaje: any;
   constructor(
     private fb: FormBuilder,
@@ -54,19 +66,24 @@ export class AddRecaudaComponent implements OnInit {
     private s_formacobro: FormacobroService,
     private authService: AutorizaService,
     private s_cajas: CajaService,
-    private s_recaudaxcaja: RecaudaxcajaService
-  ) { }
+    private s_recaudaxcaja: RecaudaxcajaService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
+    if (!this.authService.sessionlog) {
+      this.router.navigate(['/inicio']);
+    }
     this.f_buscar = this.fb.group({
-      cuenta: ''
+      cuenta: '',
+      identificacion: '',
     });
     this.f_cobrar = this.fb.group({
       idformacobro: 1,
       acobrar: this.totalapagar,
       ncvalor: '',
       dinero: '',
-      vuelto: ''
+      vuelto: '',
     });
     var t: Colores = new Colores();
     var c: Colores = new Colores();
@@ -83,7 +100,9 @@ export class AddRecaudaComponent implements OnInit {
     this.ms_recaudacion.testConnection(this.authService.idusuario).subscribe({
       next: async (item: any) => {
         this._estadoCaja = item;
-        let caja = await this.s_cajas.getByIdUsuario(this.authService.idusuario).toPromise();
+        let caja = await this.s_cajas
+          .getByIdUsuario(this.authService.idusuario)
+          .toPromise();
         if (item.estado === 1) {
           this.swcaja = true;
           this.abrirCaja.usuario = item.username;
@@ -139,22 +158,50 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   btn_buscar() {
+    console.log(this.f_buscar.value);
     this.fencola = [];
-    if (
-      this.validarCampo(this.f_buscar.value.cuenta) ||
-      this.f_buscar.value.cuenta != ''
-    ) {
-      this.getSinCobro(this.f_buscar.value.cuenta);
-    }
-    if (
-      !this.validarCampo(this.f_buscar.value.cuenta) ||
-      this.f_buscar.value.cuenta === ''
-    ) {
-      this.swBuscar = true;
+    let f = this.f_buscar.value;
+    if (f.cuenta != '') {
+      if (
+        this.validarCampo(this.f_buscar.value.cuenta) ||
+        this.f_buscar.value.cuenta != ''
+      ) {
+        this.getSinCobro(this.f_buscar.value.cuenta);
+      }
+      if (
+        !this.validarCampo(this.f_buscar.value.cuenta) ||
+        this.f_buscar.value.cuenta === ''
+      ) {
+        this.swBuscar = true;
+      }
+    } else {
+      const modal = new bootstrap.Modal(this.consultaModal.nativeElement);
+      modal.show();
+      this.s_cliente.getByIdentificacion(f.identificacion).subscribe({
+        next: (clientes: any) => {
+          console.log(clientes);
+          this._clientes = clientes;
+        },
+        error: (e: any) => console.error(e.error),
+      });
     }
   }
   txtCuenta(e: any) {
+    console.log('cuenta');
     this.swBuscar = false;
+    this.f_buscar.patchValue({
+      identificacion: '',
+    });
+  }
+  txtIdentificacion(e: any) {
+    console.log('identificacion');
+    this.swBuscar = false;
+    this.f_buscar.patchValue({
+      cuenta: '',
+    });
+  }
+  buscarCuentasOfCliente(cliente: any) {
+    console.log(cliente);
   }
   async getSinCobro(cuenta: number) {
     this.loadingService.showLoading();
@@ -168,7 +215,7 @@ export class AddRecaudaComponent implements OnInit {
           console.log(sincobro);
           this.getClienteById(sincobro[0].idcliente);
         } else {
-          alert('Datos no encontrados');
+          this.swal('warning', 'No tiene valores pendientes');
         }
         this.loadingService.hideLoading();
       })
@@ -189,6 +236,7 @@ export class AddRecaudaComponent implements OnInit {
       .getSincobroByCliente(cliente.idcliente)
       .then((sincobro: any) => {
         this._sincobro = sincobro;
+        console.log(sincobro);
         this.getClienteById(cliente.idcliente);
         this.loadingService.hideLoading();
       })
@@ -251,7 +299,7 @@ export class AddRecaudaComponent implements OnInit {
         acobrar: +this.totalapagar!.toFixed(2),
       });
     });
-    console.log(this.fencola)
+    console.log(this.fencola);
   }
   cobrar() {
     let dinero: number = +this.f_cobrar.value.dinero!;
