@@ -24,6 +24,7 @@ import { RecaudaxcajaService } from 'src/app/servicios/recaudaxcaja.service';
 import { Colores } from 'src/app/modelos/administracion/colores.model';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
+import { ColoresService } from 'src/app/compartida/colores.service';
 declare var bootstrap: any; // 👈 para usar la librería de Bootstrap JS
 
 @Component({
@@ -70,13 +71,20 @@ export class AddRecaudaComponent implements OnInit {
     private authService: AutorizaService,
     private s_cajas: CajaService,
     private s_recaudaxcaja: RecaudaxcajaService,
-    private router: Router
+    private router: Router, 
+    private coloresService: ColoresService
+    
   ) {}
 
   ngOnInit(): void {
+    console.log(this.authService.sessionlog);
     if (!this.authService.sessionlog) {
       this.router.navigate(['/inicio']);
     }
+    sessionStorage.setItem('ventana', '/abonados');
+    let coloresJSON = sessionStorage.getItem('/abonados');
+    if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
+    else this.buscaColor();
     this.f_buscar = this.fb.group({
       cuenta: '',
       identificacion: '',
@@ -99,6 +107,26 @@ export class AddRecaudaComponent implements OnInit {
     this.getAllFormaCobro();
     this.getEstadoCaja();
   }
+  async buscaColor() {
+    try {
+      const datos = await this.coloresService.setcolor(1, 'abonados');
+      const coloresJSON = JSON.stringify(datos);
+      sessionStorage.setItem('/abonados', coloresJSON);
+      this.colocaColor(datos);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  colocaColor(colores: any) {
+    document.documentElement.style.setProperty('--bgcolor1', colores[0]);
+    const cabecera = document.querySelector('.cabecera');
+    if (cabecera) cabecera.classList.add('nuevoBG1');
+    document.documentElement.style.setProperty('--bgcolor2', colores[1]);
+    const detalle = document.querySelector('.detalle');
+    if (detalle) detalle.classList.add('nuevoBG2');
+  }
+
   getEstadoCaja() {
     this.ms_recaudacion.testConnection(this.authService.idusuario).subscribe({
       next: async (item: any) => {
@@ -125,7 +153,6 @@ export class AddRecaudaComponent implements OnInit {
       .logincajas(this.abrirCaja.usuario, this.abrirCaja.password)
       .subscribe({
         next: (item: any) => {
-          console.log(item);
           this.swal('info', item.mensaje);
           this.getEstadoCaja();
         },
@@ -143,7 +170,6 @@ export class AddRecaudaComponent implements OnInit {
     });
   }
   fnCerrarCaja() {
-    console.log(this._estadoCaja);
     this.ms_recaudacion.singOutCaja(this._estadoCaja.username).subscribe({
       next: (item: any) => {
         this.swal('info', item.body.mensaje);
@@ -161,7 +187,6 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   btn_buscar() {
-    console.log(this.f_buscar.value);
     this.fencola = [];
     let f = this.f_buscar.value;
     if (f.cuenta != '') {
@@ -200,9 +225,7 @@ export class AddRecaudaComponent implements OnInit {
       cuenta: '',
     });
   }
-  buscarCuentasOfCliente(cliente: any) {
-    console.log(cliente);
-  }
+  buscarCuentasOfCliente(cliente: any) {}
   async getSinCobro(cuenta: number) {
     this.loadingService.showLoading();
     this._sincobro = [];
@@ -212,7 +235,6 @@ export class AddRecaudaComponent implements OnInit {
       .then((sincobro: any) => {
         if (sincobro.length > 0) {
           this._sincobro = [...sincobro];
-          console.log(sincobro);
           this.getClienteById(sincobro[0].idcliente);
         } else {
           this.swal('warning', 'No tiene valores pendientes');
@@ -221,11 +243,8 @@ export class AddRecaudaComponent implements OnInit {
       })
       .catch((e: any) => {
         console.error(e);
-        //this.swNotFound = true;
         this.loadingService.hideLoading();
       });
-
-    //let sincobro = await this.ms_recaudacion.getSincobroByCuenta(cuenta);
   }
   async getCliente(cliente: any) {
     this.loadingService.showLoading();
@@ -236,7 +255,6 @@ export class AddRecaudaComponent implements OnInit {
       .getSincobroByCliente(cliente.idcliente)
       .then((sincobro: any) => {
         this._sincobro = [...sincobro];
-        console.log(sincobro);
         this.getClienteById(cliente.idcliente);
         this.loadingService.hideLoading();
       })
@@ -252,9 +270,6 @@ export class AddRecaudaComponent implements OnInit {
     return false;
   }
   validarCampo(campo: any) {
-    // ^ indica el inicio de la cadena
-    // \s representa cualquier espacio en blanco (espacio, tabulación, etc.)
-    // + indica uno o más ocurrencias del carácter anterior
     const regex = /^\s+/;
     return !regex.test(campo);
   }
@@ -269,13 +284,11 @@ export class AddRecaudaComponent implements OnInit {
   }
   facturaDetalle(idfactura: any) {
     this.addRubro = [];
-    console.log(idfactura);
     this.idfactura = idfactura;
     this.detalleFac = true;
     let _fac = this._sincobro.find(
       (fact: { idfactura: any }) => fact.idfactura === idfactura
     );
-    console.log(_fac);
     let iva: any = {
       cantidad: 1,
       idrubro_rubros: { descripcion: 'Iva' },
@@ -302,30 +315,45 @@ export class AddRecaudaComponent implements OnInit {
     this.detalleFac = e;
   }
   calcular(e: any, factura: any) {
-    this.totalapagar = 0;
-    if (e.target.checked === true) {
-      /*    let query = this.arrFacturas.find(
-        (fact: { idfactura: number }) => (fact.idfactura = factura.idfactura)
-      ); */
-      console.log(factura);
+    const checked = !!e.target?.checked;
 
-      this.fencola.push(factura);
+    // Asegurar que fencola es un array
+    if (!Array.isArray(this.fencola)) {
+      this.fencola = [];
     }
-    if (e.target.checked === false) {
-      let query = this.fencola.find(
-        (fact: { idfactura: number }) => (fact.idfactura = factura.idfactura)
+
+    if (checked) {
+      // Evitar duplicados
+      const exists = this.fencola.some(
+        (f: any) => f.idfactura === factura.idfactura
       );
-      let i = this.fencola.indexOf(query);
-      this.fencola.splice(i, 1);
+      if (!exists) {
+        this.fencola.push(factura);
+      }
+    } else {
+      // Buscar por igualdad (===), no por asignación
+      const idx = this.fencola.findIndex(
+        (f: any) => f.idfactura === factura.idfactura
+      );
+      if (idx !== -1) {
+        this.fencola.splice(idx, 1);
+      }
     }
-    this.fencola.forEach((factura: any) => {
-      this.totalapagar += factura.total + factura.interes + factura.swiva;
-      this.f_cobrar.patchValue({
-        acobrar: +this.totalapagar!.toFixed(2),
-      });
+
+    // Recalcular total una sola vez (asegurando conversión a Number)
+    this.totalapagar = this.fencola.reduce((acc: number, f: any) => {
+      const t = Number(f.total || 0);
+      const inter = Number(f.interes || 0);
+      const iva = Number(f.iva || 0);
+      return acc + t + inter + iva;
+    }, 0);
+
+    // Patchear el formulario solo una vez
+    this.f_cobrar.patchValue({
+      acobrar: Number(this.totalapagar.toFixed(2)),
     });
-    console.log(this.fencola);
   }
+
   cobrar() {
     let dinero: number = +this.f_cobrar.value.dinero!;
     let apagar: number = +this.totalapagar!.toFixed(2);
@@ -368,7 +396,6 @@ export class AddRecaudaComponent implements OnInit {
     }
   }
   ordenarPor(campo: keyof SinCobrarVisual): void {
-    console.log(campo);
     if (this.ordenColumna === campo) {
       this.ordenAscendente = !this.ordenAscendente;
     } else {
@@ -377,9 +404,6 @@ export class AddRecaudaComponent implements OnInit {
     }
 
     this._sincobro.sort((a: any, b: any) => {
-      console.log(a[campo], b[campo]);
-      console.log(a, b);
-
       const valorA = a[campo];
       const valorB = b[campo];
 
