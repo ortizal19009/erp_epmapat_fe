@@ -22,11 +22,11 @@ export class AutorizaService implements OnInit, OnDestroy, CanActivate {
   private intervalId: any;
 
   ngOnInit(): void {
-    this.intervalId = setInterval(() => {
+/*     this.intervalId = setInterval(() => {
       if (!this.sessionlog) {
         this.router.navigate(['/inicio']);
       }
-    }, 500); // cada 2 segundos
+    }, 500); */ // cada 2 segundos
   }
 
   ngOnDestroy(): void {

@@ -78,9 +78,9 @@ export class AddRecaudaComponent implements OnInit {
 
   ngOnInit(): void {
     console.log(this.authService.sessionlog);
-    if (!this.authService.sessionlog) {
+/*     if (!this.authService.sessionlog) {
       this.router.navigate(['/inicio']);
-    }
+    } */
     sessionStorage.setItem('ventana', '/abonados');
     let coloresJSON = sessionStorage.getItem('/abonados');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
