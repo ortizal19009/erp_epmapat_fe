@@ -33,7 +33,7 @@ declare var bootstrap: any; // 👈 para usar la librería de Bootstrap JS
 })
 export class AddRecaudaComponent implements OnInit {
   filtrar: string;
-  _sincobro: any;
+  _sincobro: any[] = [];
   _cliente: any;
   _formasCobro: any;
   f_buscar: FormGroup;
@@ -55,7 +55,10 @@ export class AddRecaudaComponent implements OnInit {
   _estadoCaja: any;
   idfactura: any;
   detalleFac: Boolean = false;
+  addRubro: any[] = [];
   _clientes: any[] = [];
+  ordenColumna: keyof SinCobrarVisual = 'idabonado';
+  ordenAscendente: boolean = true;
   @ViewChild('consultaModal') consultaModal!: ElementRef;
   //_mensaje: any;
   constructor(
@@ -179,7 +182,6 @@ export class AddRecaudaComponent implements OnInit {
       modal.show();
       this.s_cliente.getByIdentificacion(f.identificacion).subscribe({
         next: (clientes: any) => {
-          console.log(clientes);
           this._clientes = clientes;
         },
         error: (e: any) => console.error(e.error),
@@ -187,14 +189,12 @@ export class AddRecaudaComponent implements OnInit {
     }
   }
   txtCuenta(e: any) {
-    console.log('cuenta');
     this.swBuscar = false;
     this.f_buscar.patchValue({
       identificacion: '',
     });
   }
   txtIdentificacion(e: any) {
-    console.log('identificacion');
     this.swBuscar = false;
     this.f_buscar.patchValue({
       cuenta: '',
@@ -205,13 +205,13 @@ export class AddRecaudaComponent implements OnInit {
   }
   async getSinCobro(cuenta: number) {
     this.loadingService.showLoading();
-    this._sincobro = null;
+    this._sincobro = [];
     this.totalapagar = 0;
     this.ms_recaudacion
       .getSincobroByCuenta(cuenta)
       .then((sincobro: any) => {
         if (sincobro.length > 0) {
-          this._sincobro = sincobro;
+          this._sincobro = [...sincobro];
           console.log(sincobro);
           this.getClienteById(sincobro[0].idcliente);
         } else {
@@ -230,12 +230,12 @@ export class AddRecaudaComponent implements OnInit {
   async getCliente(cliente: any) {
     this.loadingService.showLoading();
     this.f_buscar.reset();
-    this._sincobro = null;
+    this._sincobro = [];
     this.totalapagar = 0;
     this.ms_recaudacion
       .getSincobroByCliente(cliente.idcliente)
       .then((sincobro: any) => {
-        this._sincobro = sincobro;
+        this._sincobro = [...sincobro];
         console.log(sincobro);
         this.getClienteById(cliente.idcliente);
         this.loadingService.hideLoading();
@@ -246,7 +246,7 @@ export class AddRecaudaComponent implements OnInit {
       });
   }
   swSincobro() {
-    if (this._sincobro != null) {
+    if (this._sincobro.length > 0) {
       return true;
     }
     return false;
@@ -268,12 +268,37 @@ export class AddRecaudaComponent implements OnInit {
     });
   }
   facturaDetalle(idfactura: any) {
+    this.addRubro = [];
     console.log(idfactura);
     this.idfactura = idfactura;
     this.detalleFac = true;
+    let _fac = this._sincobro.find(
+      (fact: { idfactura: any }) => fact.idfactura === idfactura
+    );
+    console.log(_fac);
+    let iva: any = {
+      cantidad: 1,
+      idrubro_rubros: { descripcion: 'Iva' },
+      valorunitario: 0.0,
+      estado: 1,
+    };
+    let interes: any = {
+      cantidad: 1,
+      idrubro_rubros: { descripcion: 'Intereses' },
+      valorunitario: 0.0,
+      estado: 1,
+    };
+    if (_fac.interes > 0) {
+      interes.valorunitario = _fac.interes;
+      this.addRubro.push(interes);
+    }
+    if (_fac.iva > 0) {
+      iva.valorunitario = _fac.iva;
+      this.addRubro.push(iva);
+    }
+    // this.addRubro = [...interes, iva];
   }
   cancelarDetalle(e: any) {
-    console.log(e);
     this.detalleFac = e;
   }
   calcular(e: any, factura: any) {
@@ -282,6 +307,7 @@ export class AddRecaudaComponent implements OnInit {
       /*    let query = this.arrFacturas.find(
         (fact: { idfactura: number }) => (fact.idfactura = factura.idfactura)
       ); */
+      console.log(factura);
 
       this.fencola.push(factura);
     }
@@ -293,8 +319,7 @@ export class AddRecaudaComponent implements OnInit {
       this.fencola.splice(i, 1);
     }
     this.fencola.forEach((factura: any) => {
-      this.totalapagar +=
-        factura.total + factura.interesacobrar + factura.swiva;
+      this.totalapagar += factura.total + factura.interes + factura.swiva;
       this.f_cobrar.patchValue({
         acobrar: +this.totalapagar!.toFixed(2),
       });
@@ -342,4 +367,38 @@ export class AddRecaudaComponent implements OnInit {
       });
     }
   }
+  ordenarPor(campo: keyof SinCobrarVisual): void {
+    console.log(campo);
+    if (this.ordenColumna === campo) {
+      this.ordenAscendente = !this.ordenAscendente;
+    } else {
+      this.ordenColumna = campo;
+      this.ordenAscendente = true;
+    }
+
+    this._sincobro.sort((a: any, b: any) => {
+      console.log(a[campo], b[campo]);
+      console.log(a, b);
+
+      const valorA = a[campo];
+      const valorB = b[campo];
+
+      if (valorA == null && valorB == null) return 0;
+      if (valorA == null) return 1;
+      if (valorB == null) return -1;
+
+      const esNumero = typeof valorA === 'number' && typeof valorB === 'number';
+
+      if (esNumero) {
+        return this.ordenAscendente ? valorA - valorB : valorB - valorA;
+      } else {
+        return this.ordenAscendente
+          ? String(valorA).localeCompare(String(valorB))
+          : String(valorB).localeCompare(String(valorA));
+      }
+    });
+  }
+}
+interface SinCobrarVisual {
+  idabonado: number;
 }

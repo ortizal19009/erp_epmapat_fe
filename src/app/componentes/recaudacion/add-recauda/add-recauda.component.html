@@ -126,7 +126,9 @@
                      <thead class="recaudacabecera">
                         <tr class="text-center">
                            <th></th>
-                           <th>Cuenta</th>
+                           <th (click)="ordenarPor('idabonado')">Cuenta <i *ngIf="ordenColumna === 'idabonado'"
+                                 [ngClass]="{'bi bi-caret-up-fill force-warning': ordenAscendente,'bi bi-caret-down-fill text-warning': !ordenAscendente}"></i>
+                           </th>
                            <th>Responsable pago</th>
                            <th>Planilla</th>
                            <th>Dirección</th>
@@ -270,7 +272,8 @@
       tabindex="-1" aria-labelledby="DetallePlanillaModal">
       <div class="modal-dialog modal-dialog-centered" role="document">
          <div class="modal-content recaudadetalle">
-            <app-detalle-planilla (stateEvent)="cancelarDetalle($event)" [idfactura]="idfactura"></app-detalle-planilla>
+            <app-detalle-planilla (stateEvent)="cancelarDetalle($event)" [addRubro]="addRubro"
+               [idfactura]="idfactura"></app-detalle-planilla>
 
          </div>
          <!--  -->

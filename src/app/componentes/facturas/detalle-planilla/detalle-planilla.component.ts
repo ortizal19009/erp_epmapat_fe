@@ -12,6 +12,7 @@ import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 export class DetallePlanillaComponent implements OnInit {
   @Input() idfactura: any;
   @Output() stateEvent = new EventEmitter<Boolean>();
+  @Input() addRubro: any;
   _rubros: any;
   _lecturas: any;
   m3: number = 0;
@@ -25,14 +26,14 @@ export class DetallePlanillaComponent implements OnInit {
 
   ngOnInit(): void {
     this.getDatos();
-    console.log(this.idfactura);
+    console.log(this.addRubro);
   }
   async getDatos() {
     let _sumaDetail: number = 0;
     await this.s_rubroxfac
       .getByIdfacturaAsync(this.idfactura)
       .then((item: any) => {
-        this._rubros = item;
+       this._rubros = [...item, ...this.addRubro];
       })
       .catch((e: any) => {
         console.error(e);
@@ -42,8 +43,9 @@ export class DetallePlanillaComponent implements OnInit {
         this._rubros.push({
           cantidad: 1,
           idrubro_rubros: {
-            descripcion: 'Interés',
+            descripcion: 'Intereses',
           },
+          idfactura_facturas: { idfactura: this.idfactura },
           valorunitario: item.body,
         });
       }
