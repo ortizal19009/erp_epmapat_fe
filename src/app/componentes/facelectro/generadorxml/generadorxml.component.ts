@@ -420,13 +420,30 @@ export class GeneradorxmlComponent implements OnInit {
 
     let options = { compact: true, ignoreComment: true, spaces: 4 };
     let xmlData = require('xml-js').js2xml(json, options);
-    console.log(xmlData);
-    this.s_sri.sendFacturaElectronica(xmlData).subscribe({
-      next: (facelectronica: any) => {
-        console.log(facelectronica);
+    this.s_sri.sendFacturaElectronica(xmlData.toString()).subscribe({
+      next: (resp: any) => {
+        console.log('Respuesta completa:', resp);
+
+        // Extraer el XML del JSON
+        const xmlString =
+          resp.autorizacion.autorizaciones.autorizacion[0].comprobante;
+
+        // Crear un Blob con el contenido del XML
+        const blob = new Blob([xmlString], { type: 'application/xml' });
+        const url = window.URL.createObjectURL(blob);
+
+        // Forzar descarga del archivo
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `factura-${resp.autorizacion.claveAccesoConsultada}.xml`; // nombre dinámico
+        a.click();
+
+        // Liberar memoria
+        window.URL.revokeObjectURL(url);
       },
-      error: (e: any) => console.error(e.error),
+      error: (e: any) => console.error('Error al enviar factura:', e),
     });
+
     // Crear y descargar el archivo XML
     const blob = new Blob([xmlData], { type: 'text/xml' });
     const url = window.URL.createObjectURL(blob);

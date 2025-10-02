@@ -22,10 +22,9 @@ export class SriService {
       responseType: 'text',
     });
   }
-  sendFacturaElectronica(xmlPlano: any) {
-    let data: any = {
-      xmlPlano: xmlPlano,
-    };
-    return this.http.post(`${apiUrl}/api/firmas/factura/send-xml`, data);
+  sendFacturaElectronica(xmlPlano: string) {
+    return this.http.post(`${apiUrl}/api/singsend/factura`, xmlPlano,    {
+      responseType: 'json' // 👈 MUY IMPORTANTE
+    });
   }
 }
