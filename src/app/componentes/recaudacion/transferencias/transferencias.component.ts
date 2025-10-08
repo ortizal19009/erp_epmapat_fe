@@ -182,6 +182,8 @@ export class TransferenciasComponent implements OnInit {
   clientesModal() {}
 
   valorAtransferir(atransferir: number) {
+
+
     this.formTransferir.patchValue({ atransferir: atransferir.toFixed(2) });
   }
 
@@ -316,7 +318,7 @@ export class TransferenciasComponent implements OnInit {
         .getByNombreIdentifi(this.formBusClientes.value.nombre_identifica)
         .subscribe({
           next: (datos) => (this._clientes = datos),
-          error: (err) => console.log(err.error),
+          error: (err) => console.error(err.error),
         });
     }
   }
@@ -383,7 +385,6 @@ export class TransferenciasComponent implements OnInit {
               const abonado: Abonados = await this.getAbonado(item.idabonado);
               item.direccion = abonado.direccionubicacion;
               item.responsablePago = abonado.idresponsable.nombre;
-              console.log(abonado);
             } else {
               item.direccion = 'S/D';
             }
@@ -427,7 +428,7 @@ export class TransferenciasComponent implements OnInit {
     let fechatransferencia: Date = new Date();
     if (
       this._sincobro[i].pagado &&
-      this._sincobro[i].nrofactura === null 
+      this._sincobro[i].nrofactura === null
     ) {
       idfactura = this._sincobro[i].idfactura;
       this.facService.getById(idfactura).subscribe({
