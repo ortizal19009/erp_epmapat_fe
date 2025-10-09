@@ -15,6 +15,7 @@ import { PersoneriaJuridicaService } from 'src/app/servicios/personeria-juridica
 import { TpidentificaService } from 'src/app/servicios/tpidentifica.service';
 import { map, of } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-add-cliente',
@@ -170,8 +171,14 @@ export class AddClienteComponent implements OnInit {
     this.formCliente.value.idpjuridica_personeriajuridica = this.pjuridica;
 
     this.cliService.saveClientes(this.formCliente.value).subscribe({
-      next: (nex) => this.retornarListaClientes(),
-      error: (err) => console.error(err.error),
+      next: (nex) => {
+        this.retornarListaClientes();
+        this.swal('success', 'Cliente creado correctamente');
+      },
+      error: (err) => {
+        console.error(err.error),
+          this.swal('error', 'No se pudo crear el cliente, intente nuevamente');
+      },
     });
   }
 
@@ -248,5 +255,15 @@ export class AddClienteComponent implements OnInit {
       if (digitoValidador === ultimoDigito) return true;
       else return false;
     } else return false;
+  }
+  swal(icon: any, mensaje: any) {
+    Swal.fire({
+      toast: true,
+      icon: icon,
+      title: mensaje,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+    });
   }
 }

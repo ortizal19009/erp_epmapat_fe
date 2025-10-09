@@ -5,7 +5,7 @@ import { CanActivate, Router } from '@angular/router';
 @Injectable({
   providedIn: 'root',
 })
-export class AutorizaService implements OnInit, OnDestroy, CanActivate {
+export class AutorizaService implements OnDestroy, CanActivate {
   enabled = [false, false, false, false, false, false, false];
   colorenabled = false;
   modulos: String[];
@@ -21,13 +21,6 @@ export class AutorizaService implements OnInit, OnDestroy, CanActivate {
   modules: any;
   private intervalId: any;
 
-  ngOnInit(): void {
-/*     this.intervalId = setInterval(() => {
-      if (!this.sessionlog) {
-        this.router.navigate(['/inicio']);
-      }
-    }, 500); */ // cada 2 segundos
-  }
 
   ngOnDestroy(): void {
     if (this.intervalId) {
@@ -69,6 +62,7 @@ export class AutorizaService implements OnInit, OnDestroy, CanActivate {
     const values = JSON.parse(atob(sessionStorage.getItem('abc')!));
     values.object.modulo = opcion;
     values.object.moduActual = opcion;
+    
     sessionStorage.setItem('abc', btoa(JSON.stringify(values)));
   }
 

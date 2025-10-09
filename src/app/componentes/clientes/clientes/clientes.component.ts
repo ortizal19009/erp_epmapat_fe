@@ -8,6 +8,7 @@ import { ColoresService } from 'src/app/compartida/colores.service';
 import { Clientes } from 'src/app/modelos/clientes';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { ClientesService } from 'src/app/servicios/clientes.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-clientes',
@@ -29,6 +30,8 @@ export class ClientesComponent implements OnInit {
   swvalido: Boolean;
   sweliminar: boolean;
   clie = {} as Clientes;
+  rolepermission: number;
+  ventana: string = 'clientes';
 
   constructor(
     public fb: FormBuilder,
@@ -39,14 +42,22 @@ export class ClientesComponent implements OnInit {
     public authService: AutorizaService
   ) {}
 
-  ngOnInit(): void {
-    // if(!this.authService.log) this.router.navigate(['/inicio']);
-
-    sessionStorage.setItem('ventana', '/clientes');
-    let coloresJSON = sessionStorage.getItem('/clientes');
+  async ngOnInit(): Promise<void> {
+    sessionStorage.setItem('ventana', `/${this.ventana}`);
+    let coloresJSON = sessionStorage.getItem(`/${this.ventana}`);
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
     else this.buscaColor();
-
+    if (
+      this.coloresService.rolepermission == undefined ||
+      this.coloresService.rolepermission == null
+    ) {
+      this.rolepermission = await this.coloresService.getRolePermission(
+        this.authService.idusuario,
+        this.ventana
+      );
+      //this.router.navigate(['/inicio ']);
+    }
+    //this.rolepermission = this.coloresService.rolepermission;
     let buscaClientes = sessionStorage.getItem('buscaClientes');
     if (buscaClientes == null) buscaClientes = '';
     localStorage.removeItem('idclienteToDetalles');
@@ -75,9 +86,14 @@ export class ClientesComponent implements OnInit {
 
   async buscaColor() {
     try {
-      const datos = await this.coloresService.setcolor(1, 'clientes');
+      const datos = await this.coloresService.setcolor(
+        this.authService.idusuario,
+        this.ventana
+      );
+      if (datos[0] === '0')
+        throw new Error('No se enccontro colores para la ventana');
       const coloresJSON = JSON.stringify(datos);
-      sessionStorage.setItem('/clientes', coloresJSON);
+      sessionStorage.setItem(`/${this.ventana}`, coloresJSON);
       this.colocaColor(datos);
     } catch (error) {
       console.error(error);
@@ -109,6 +125,10 @@ export class ClientesComponent implements OnInit {
               this.formBuscar.controls['nombreIdentifi'].value.toString()
             );
             this._clientes = datos;
+            this.swal(
+              'success',
+              `${this._clientes.length} Clientes encontrados`
+            );
           },
           error: (err) => console.log(err.error),
         });
@@ -325,5 +345,14 @@ export class ClientesComponent implements OnInit {
     }
   }
 
-  cargar() {}
+  swal(icon: any, mensaje: any) {
+    Swal.fire({
+      toast: true,
+      icon: icon,
+      title: mensaje,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+    });
+  }
 }

@@ -11,7 +11,7 @@
                      <div class="row">
                         <div class="col-sm-5">
                            <input type="text" placeholder="Nombre ó Identificación" class="form-control form-control-sm"
-                              autofocus id="nombreIdentifi" formControlName="nombreIdentifi" required minlength="4" />
+                              id="nombreIdentifi" formControlName="nombreIdentifi" required minlength="4" />
                         </div>
                         <div class="col-sm-3">
                            <button class="btn btn-primary btn-sm" [disabled]="disabled"><i class="fa fa-search"></i>
@@ -32,12 +32,12 @@
                aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-               <button class="dropdown-item" type="button" (click)="irAddClientes()">
+               <button class="dropdown-item" type="button" [disabled]="rolepermission==1" (click)="irAddClientes()">
                   <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
                <button class="dropdown-item" type="button" (click)="imprimir()">
                   <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
                <button class="dropdown-item" type="button" data-toggle="modal" data-toggle="modal"
-                  data-target="#importar" (click)="importar()"> <i class="bi-file-earmark-arrow-up"></i>&nbsp;
+                  data-target="#importar" [disabled]="rolepermission!=3" (click)="importar()"> <i class="bi-file-earmark-arrow-up"></i>&nbsp;
                   Importar</button>
             </div>
          </div>
@@ -61,7 +61,8 @@
                </tr>
             </thead>
             <tbody class="detalle">
-               <tr *ngFor="let cliente of _clientes | filter:filtro; let i= index" (click)="detallesCliente($event, cliente)" class="fila">
+               <tr *ngFor="let cliente of _clientes | filter:filtro; let i= index"
+                  (click)="detallesCliente($event, cliente)" class="fila">
                   <td class="small text-center font-weight-bold">{{i+1}}</td>
                   <td>{{ cliente.nombre }}</td>
                   <td>{{ cliente.cedula }}</td>
@@ -73,10 +74,11 @@
                            aria-expanded="false">
                         </button>
                         <div class="dropdown-menu dropdown-menu-right popLista">
-                           <button class="dropdown-item" type="button" (click)="modificarCliente(cliente.idcliente)">
+                           <button class="dropdown-item" type="button" [disabled]="rolepermission==1"
+                              (click)="modificarCliente(cliente.idcliente)">
                               <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
-                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalEliminar"
-                              (click)="eliminarCliente(cliente)">
+                           <button class="dropdown-item" type="button" [disabled]="rolepermission!=3"
+                              data-toggle="modal" data-target="#modalEliminar" (click)="eliminarCliente(cliente)">
                               <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
                         </div>
                      </div>
@@ -147,7 +149,7 @@
                <button type='button' class='btn btn-warning btn-sm mt-1 mr-1' (click)="validar()" [disabled]="!swfile">
                   <i class="bi-bug-fill"></i>&nbsp; Validar</button>
                <button type='button' class='btn btn-success btn-sm mt-1 mx-1' [disabled]="!swvalido"
-                  data-dismiss='modal' (click)="cargar()">
+                  data-dismiss='modal'>
                   <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
                <button type='button' class='btn btn-success btn-sm mt-1 ml-1' data-dismiss='modal'>
                   <i class="bi bi-x-circle"></i> Cancelar</button>
@@ -191,7 +193,8 @@
    </div>
 
    <!-- Modal Eliminar-->
-   <div class='modal fade' id='modalEliminar' tabindex='-1' aria-labelledby='modalEliminar' aria-hidden='true' data-backdrop="static">
+   <div class='modal fade' id='modalEliminar' tabindex='-1' aria-labelledby='modalEliminar' aria-hidden='true'
+      data-backdrop="static">
       <div class='modal-dialog modal-dialog-centered'>
          <div class='modal-content detalle'>
             <div class='modal-header cabecera justify-content-center'>
