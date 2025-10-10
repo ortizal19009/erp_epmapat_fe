@@ -16,6 +16,7 @@ import { TpidentificaService } from 'src/app/servicios/tpidentifica.service';
 import { map, of } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import Swal from 'sweetalert2';
+import { ColoresService } from 'src/app/compartida/colores.service';
 
 @Component({
   selector: 'app-add-cliente',
@@ -32,6 +33,8 @@ export class AddClienteComponent implements OnInit {
   nacionalidad: Nacionalidad = new Nacionalidad();
   tpidentifica: Tpidentifica = new Tpidentifica();
   pjuridica: PersoneriaJuridica = new PersoneriaJuridica();
+  ventana: string = 'add-cliente';
+  rolepermission: number;
 
   constructor(
     public fb: FormBuilder,
@@ -40,13 +43,23 @@ export class AddClienteComponent implements OnInit {
     private router: Router,
     public pjService: PersoneriaJuridicaService,
     public tpidentiService: TpidentificaService,
-    private authService: AutorizaService
+    private authService: AutorizaService,
+    private coloresService: ColoresService
   ) {}
 
-  ngOnInit(): void {
-    sessionStorage.setItem('ventana', '/clientes');
-    let coloresJSON = sessionStorage.getItem('/clientes');
+  async ngOnInit(): Promise<void> {
+    sessionStorage.setItem('ventana', `/${this.ventana}`);
+    let coloresJSON = sessionStorage.getItem(`/${this.ventana}`);
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
+    if (
+      this.coloresService.rolepermission == undefined ||
+      this.coloresService.rolepermission == null
+    ) {
+      this.rolepermission = await this.coloresService.getRolePermission(
+        this.authService.idusuario,
+        this.ventana
+      );
+    }
 
     let date: Date = new Date();
 
@@ -135,8 +148,9 @@ export class AddClienteComponent implements OnInit {
   listarTpIdentifica() {
     this.tpidentiService.getListaTpIdentifica().subscribe({
       next: (datos) => {
+        console.log(datos);
         this._tpidentifica = datos;
-        this.formCliente.patchValue({ idtpidentifica_tpidentifica: 2 });
+        this.formCliente.patchValue({ idtpidentifica_tpidentifica: datos[1] });
       },
       error: (err) => console.error(err.error),
     });
@@ -169,6 +183,7 @@ export class AddClienteComponent implements OnInit {
       'idpjuridica_personeriajuridica'
     )!.value;
     this.formCliente.value.idpjuridica_personeriajuridica = this.pjuridica;
+    console.log(this.formCliente.value);
 
     this.cliService.saveClientes(this.formCliente.value).subscribe({
       next: (nex) => {
@@ -177,7 +192,7 @@ export class AddClienteComponent implements OnInit {
       },
       error: (err) => {
         console.error(err.error),
-          this.swal('error', 'No se pudo crear el cliente, intente nuevamente');
+          this.swal('warning', 'No se pudo crear el cliente, intente nuevamente');
       },
     });
   }

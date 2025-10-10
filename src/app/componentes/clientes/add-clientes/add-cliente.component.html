@@ -27,7 +27,8 @@
                            </option>
                         </select>
                         <div class="input-group-append">
-                           <button type="button" class="btn btn-outline-success btn-xm" (click)="add_nacionalidad()">
+                           <button type="button" class="btn btn-outline-success btn-xm" *ngIf="rolepermission===3"
+                              (click)="add_nacionalidad()">
                               <i class="bi-plus-lg"></i>
                            </button>
                         </div>
@@ -50,8 +51,8 @@
                   <div class="form-group col-md-4 my-0 py-0">
                      <div class="input-group input-group-sm mb-3">
                         <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold"
-                              id="inputGroup-sizing-sm">Identificación<sup class="green">*</sup></span>
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Identificación<sup
+                                 class="green">*</sup></span>
                         </div>
                         <input type="text" class="form-control text-center" formControlName="cedula" aria-label="Small"
                            aria-describedby="inputGroup-sizing-sm" maxlength="13" [ngClass]="{'is-invalid': f['cedula'].invalid && f['cedula'].touched,
@@ -62,7 +63,8 @@
                   <div class="form-group col-md-6 my-0 py-0">
                      <div class="input-group input-group-sm mb-3">
                         <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Nombre<sup class="green">*</sup></span>
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Nombre<sup
+                                 class="green">*</sup></span>
                         </div>
                         <input type="text" class="form-control" formControlName="nombre" aria-label="Small"
                            aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['nombre'].invalid && f['nombre'].touched,
@@ -73,7 +75,8 @@
                   <div class="form-group col-md-6 my-0 py-0">
                      <div class="input-group input-group-sm mb-3">
                         <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Dirección<sup class="green">*</sup></span>
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Dirección<sup
+                                 class="green">*</sup></span>
                         </div>
                         <input type="text" class="form-control" formControlName="direccion" aria-label="Small"
                            aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['direccion'].invalid && f['direccion'].touched,
@@ -84,7 +87,8 @@
                   <div class="form-group col-md-3 my-0 py-0">
                      <div class="input-group input-group-sm mb-3">
                         <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Teléfono<sup class="green">*</sup></span>
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Teléfono<sup
+                                 class="green">*</sup></span>
                         </div>
                         <input type="text" class="form-control text-center" formControlName="telefono"
                            aria-label="Small" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['telefono'].invalid && f['telefono'].touched,
@@ -95,7 +99,8 @@
                   <div class="form-group col-md-5 my-0 py-0">
                      <div class="input-group input-group-sm mb-3">
                         <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">e-mail<sup class="green">*</sup></span>
+                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">e-mail<sup
+                                 class="green">*</sup></span>
                         </div>
                         <input type="email" class="form-control" formControlName="email" aria-label="Small"
                            aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['email'].invalid && f['email'].touched,
