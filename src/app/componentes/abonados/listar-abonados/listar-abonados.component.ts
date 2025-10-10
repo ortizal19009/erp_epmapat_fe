@@ -7,6 +7,7 @@ import { AbonadosService } from 'src/app/servicios/abonados.service';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as ExcelJS from 'exceljs';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 
 @Component({
   selector: 'app-listar-abonados',
@@ -21,16 +22,20 @@ export class ListarAbonadosComponent implements OnInit {
   otraPagina: boolean = false;
   _campos: any;
 
+  rolepermission = 1; // 1=lector, 2=editor, 3=admin (ajusta a tu convención)
+  ventana = 'abonados';
+
   constructor(
     public fb: FormBuilder,
     private aboService: AbonadosService,
     private router: Router,
+    public authService: AutorizaService,
     private coloresService: ColoresService
   ) {}
 
   ngOnInit(): void {
-    sessionStorage.setItem('ventana', '/abonados');
-    let coloresJSON = sessionStorage.getItem('/abonados');
+    sessionStorage.setItem('ventana', `/${this.ventana}`);
+    let coloresJSON = sessionStorage.getItem(`/${this.ventana}`);
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
     else this.buscaColor();
 
@@ -39,6 +44,13 @@ export class ListarAbonadosComponent implements OnInit {
     if (tipoBusqueda == null) tipoBusqueda = '1';
     if (buscaAbonados == null) buscaAbonados = '';
     localStorage.removeItem('idabonadoToFactura');
+    // Permisos (también sin await directo)
+    if (this.coloresService.rolepermission == null) {
+      this.coloresService
+        .getRolePermission(this.authService.idusuario, this.ventana)
+        .then((rp) => (this.rolepermission = rp))
+        .catch(console.error);
+    }
 
     this.buscarAbonadoForm = this.fb.group({
       selecTipoBusqueda: +tipoBusqueda!,
@@ -55,9 +67,9 @@ export class ListarAbonadosComponent implements OnInit {
 
   async buscaColor() {
     try {
-      const datos = await this.coloresService.setcolor(1, 'abonados');
+      const datos = await this.coloresService.setcolor(1, this.ventana);
       const coloresJSON = JSON.stringify(datos);
-      sessionStorage.setItem('/abonados', coloresJSON);
+      sessionStorage.setItem(`/${this.ventana}`, coloresJSON);
       this.colocaColor(datos);
     } catch (error) {
       console.error(error);

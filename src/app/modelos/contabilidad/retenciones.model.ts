@@ -44,7 +44,7 @@ export class Retenciones {
 	descripcion: String;
 	idasiento: Asientos;
 	idbene: Beneficiarios;
-	intdoc: Documentos;
+	iddocu: Documentos;
 	idautoriza: Autorizaxbene;
 	idtabla01: Tabla01;
 	idtabla15: Tabla15;
