@@ -94,7 +94,7 @@ export class ColoresService {
       if (!datos) {
         this.swal('info', 'Ventana no encontrada');
         // Puedes redirigir o no, según UX deseada:
-        this.router.navigate(['/inicio']);
+        //this.router.navigate(['/inicio']);
         this.rolepermission = 1;
         return this.rolepermission;
       }

@@ -71,14 +71,13 @@ export class AddRecaudaComponent implements OnInit {
     private authService: AutorizaService,
     private s_cajas: CajaService,
     private s_recaudaxcaja: RecaudaxcajaService,
-    private router: Router, 
+    private router: Router,
     private coloresService: ColoresService
-    
   ) {}
 
   ngOnInit(): void {
     console.log(this.authService.sessionlog);
-/*     if (!this.authService.sessionlog) {
+    /*     if (!this.authService.sessionlog) {
       this.router.navigate(['/inicio']);
     } */
     sessionStorage.setItem('ventana', '/abonados');
@@ -421,6 +420,15 @@ export class AddRecaudaComponent implements OnInit {
           : String(valorB).localeCompare(String(valorA));
       }
     });
+  }
+
+  /* CONTROLAR LA FOMRA DE COBRO PARA VALIDAR LAS NOTAS DE CREDITO */
+
+  formaDeCobro(e: any) {
+    console.log(e.target.value);
+    let idformacobro = +this.f_cobrar.value.idformacobro!;
+    if (idformacobro === 3) {
+    }
   }
 }
 interface SinCobrarVisual {

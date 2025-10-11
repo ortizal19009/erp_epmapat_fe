@@ -191,30 +191,30 @@
    </div>
 
    <!-- Modal Buscar cliente -->
-<!-- Modal Buscar cliente -->
-<div class="modal fade" id="clientesModal" data-backdrop="static" tabindex="-1" aria-labelledby="modalClienteLabel"
-   aria-hidden="true">
-   <div class="modal-dialog modal-dialog-scrollable modal-lg">
-      <div class="modal-content shadow-lg rounded">
-         
-         <!-- Encabezado -->
-         <div class="modal-header bg-primary text-white">
-            <h5 class="modal-title d-flex align-items-center" id="modalClienteLabel">
-               <i class="bi bi-people mr-2"></i> Buscar cliente
-            </h5>
-            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-               <span aria-hidden="true">&times;</span>
-            </button>
-         </div>
+   <!-- Modal Buscar cliente -->
+   <div class="modal fade" id="clientesModal" data-backdrop="static" tabindex="-1" aria-labelledby="modalClienteLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable modal-lg">
+         <div class="modal-content shadow-lg rounded">
 
-         <!-- Cuerpo -->
-         <div class="modal-body p-3">
-            <app-buscar-cliente (setCliente)="getCliente($event)"></app-buscar-cliente>
-         </div>
+            <!-- Encabezado -->
+            <div class="modal-header bg-primary text-white">
+               <h5 class="modal-title d-flex align-items-center" id="modalClienteLabel">
+                  <i class="bi bi-people mr-2"></i> Buscar cliente
+               </h5>
+               <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+               </button>
+            </div>
 
+            <!-- Cuerpo -->
+            <div class="modal-body p-3">
+               <app-buscar-cliente (setCliente)="getCliente($event)"></app-buscar-cliente>
+            </div>
+
+         </div>
       </div>
    </div>
-</div>
 
    <!-- Modal Cobrar -->
    <div class="modal fade" id="modalCobrar" tabindex="-1" aria-labelledby="modalCobrarLabel" data-backdrop="static"
@@ -231,7 +231,7 @@
                         <div class="input-group-prepend">
                            <label class="input-group-text">Forma cobro</label>
                         </div>
-                        <select class="custom-select" formControlName="idformacobro">
+                        <select class="custom-select" (change)="formaDeCobro($event)" formControlName="idformacobro">
                            <option *ngFor="let formacobro of _formasCobro" value="{{formacobro.idformacobro}}">
                               {{formacobro.descripcion}}</option>
                         </select>
@@ -242,7 +242,7 @@
                         <input type="text" class="form-control text-right" formControlName="acobrar" readonly>
                         <div class="input-group-append"> <span class="input-group-text"></span> </div>
                      </div>
-                     <div class="input-group mb-3">
+                     <div class="input-group mb-3" *ngIf="+f_cobrar.value.idformacobro==3||f_cobrar.value.ncvalor > 0">
                         <div class="input-group-prepend"><span class="input-group-text font-weight-bold"
                               for="dinero">Valor NC</span></div>
                         <input type="text" class="form-control text-center" formControlName="ncvalor">
