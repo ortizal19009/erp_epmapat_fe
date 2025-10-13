@@ -66,19 +66,16 @@ export class FecfacturaService {
   ];
   constructor(
     private http: HttpClient,
-    private router: Router,
-    private fb: FormBuilder,
     public authService: AutorizaService,
     private defService: DefinirService,
-    private coloresService: ColoresService,
-    private facService: FacturaService,
     private rxfService: RubroxfacService,
     private fec_facdetalleService: FecFacturaDetallesService,
     private fec_facdetimpService: FecFacturaDetallesImpuestosService,
     private fec_facPagosService: FecFacturaPagosService,
     private aboService: AbonadosService,
     private s_usuario: UsuarioService,
-    private s_lecturas: LecturasService
+    private s_lecturas: LecturasService,
+
   ) {}
 
   getLista(): Observable<Fecfactura[]> {
@@ -471,6 +468,10 @@ export class FecfacturaService {
 
   getByIdFactura(idfactura: number) {
     return this.http.get(`${baseUrl}/factura?idfactura=${idfactura}`);
+  }
+
+  getXmlAutorizadoSRI(claveAcceso: string){
+  return this.http.get(`${apiUrl}/api/singsend/autorizacion?claveAcceso=${claveAcceso}`)
   }
 }
 

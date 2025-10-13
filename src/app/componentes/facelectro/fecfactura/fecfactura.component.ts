@@ -198,7 +198,7 @@ export class FecfacturaComponent implements OnInit {
     }
   }
   exportar() {
-    console.log("exportando")
+    console.log('exportando');
     /* this._factu
     ras.forEach((item: any, index: number) => {
       //await this._exportar(index);
@@ -349,7 +349,7 @@ export class FecfacturaComponent implements OnInit {
     //this._exportar(0);
   }
   async getAbonado(idabonado: number): Promise<any> {
-    console.log("tratando de imprimir ")
+    console.log('tratando de imprimir ');
     const abo = await this.aboService.getById(idabonado).toPromise();
     return abo;
   }
@@ -549,6 +549,9 @@ export class FecfacturaComponent implements OnInit {
       next: (datos: any) => {},
       error: (e) => console.error(e),
     });
+  }
+  getXmlAutorizadoSri(fecfactura: any) {
+    console.log(fecfactura);
   }
 }
 
