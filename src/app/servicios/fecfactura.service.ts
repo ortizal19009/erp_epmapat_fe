@@ -74,8 +74,7 @@ export class FecfacturaService {
     private fec_facPagosService: FecFacturaPagosService,
     private aboService: AbonadosService,
     private s_usuario: UsuarioService,
-    private s_lecturas: LecturasService,
-
+    private s_lecturas: LecturasService
   ) {}
 
   getLista(): Observable<Fecfactura[]> {
@@ -470,8 +469,18 @@ export class FecfacturaService {
     return this.http.get(`${baseUrl}/factura?idfactura=${idfactura}`);
   }
 
-  getXmlAutorizadoSRI(claveAcceso: string){
-  return this.http.get(`${apiUrl}/api/singsend/autorizacion?claveAcceso=${claveAcceso}`)
+  getXmlAutorizadoSRI(claveAcceso: string) {
+    return this.http.get(
+      `${apiUrl}/api/singsend/autorizacion?claveAcceso=${claveAcceso}`,
+      { responseType: 'text' }
+    );
+  }
+
+  setxml(fecfactura: any) {
+    return this.http.put(
+      `${baseUrl}/setxml?idfactura=${fecfactura.idfactura}`,
+      fecfactura
+    );
   }
 }
 

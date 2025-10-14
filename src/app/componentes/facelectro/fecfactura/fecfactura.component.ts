@@ -19,6 +19,7 @@ import { FecFacturaPagosService } from 'src/app/servicios/fec-factura-pagos.serv
 import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-fecfactura',
@@ -551,7 +552,41 @@ export class FecfacturaComponent implements OnInit {
     });
   }
   getXmlAutorizadoSri(fecfactura: any) {
-    console.log(fecfactura);
+    this.fecfacService.setxml(fecfactura).subscribe({
+      next: (datos: any) => {
+        console.log(datos);
+      },
+      error: (e: any) => console.error(e),
+    });
+  }
+  async getFacturaPDF(idfactura: number) {
+    let fact = await this.facService.generarPDF_FacElectronica(idfactura);
+    //this.facElectro = true;
+    // Crear blob desde los datos del backend
+    setTimeout(() => {
+      const file = new Blob([fact], { type: 'application/pdf' });
+      const fileURL = URL.createObjectURL(file);
+      //this.dataURI = fact;
+      // Asignar el blob al iframe
+      const pdfViewer = document.getElementById(
+        'pdfViewer'
+      ) as HTMLIFrameElement;
+
+      if (pdfViewer) {
+        pdfViewer.src = fileURL;
+      }
+    }, 1000);
+  }
+
+  swal(icon: any, mensaje: any) {
+    Swal.fire({
+      toast: true,
+      icon: icon,
+      title: mensaje,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+    });
   }
 }
 

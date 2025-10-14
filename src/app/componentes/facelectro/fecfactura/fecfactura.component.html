@@ -188,11 +188,10 @@
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="detallesModalLabel">Nro. factura:
-          {{factura.establecimiento}}-{{factura.puntoemision}}-{{factura.secuencial}} -- {{factura.estado}}</h5>
         <div class="row">
           <div class="col-sm">
-            <h6>{{factura.claveacceso}}</h6>
+            <h5 class="modal-title" id="detallesModalLabel">Nro. factura:
+              {{factura.establecimiento}}-{{factura.puntoemision}}-{{factura.secuencial}} -- {{factura.estado}}</h5>
           </div>
         </div>
         <button [hidden]="validarEstado(factura.estado)" type="button" class="btn btn-xs btn-outline-success ml-5"
@@ -205,6 +204,11 @@
         </button>
       </div>
       <div class="modal-body" *ngIf="txtDetails; else txtError">
+        <div class="row">
+          <div class="col-sm">
+            <h6>{{factura.claveacceso}}</h6>
+          </div>
+        </div>
         <div class="row">
           <div class="col-sm">
             <table class="table table-sm table-hover table-bordered">
@@ -303,8 +307,12 @@
 
       <div class="modal-footer">
         <button type="button" class="btn btn-outline-success btn-sm" data-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-outline-info btn-sm"f(click)="getXmlAutorizadoSri(factura)">Val
+        <button type="button" class="btn btn-outline-info btn-sm"
+          *ngIf="factura.xmlautorizado === null || factura.xmlautorizado===''"
+          (click)="getXmlAutorizadoSri(factura)">Val
           SRI</button>
+        <button type="button" class="btn btn-outline-danger btn-sm" (click)="getFacturaPDF(factura.idfactura)">Descargar
+          PDF</button>
         <button type="button" class="btn btn-success btn-sm" data-dismiss="modal" *ngIf="btnRsend" (click)=reSend()>Re
           enviar</button>
       </div>
