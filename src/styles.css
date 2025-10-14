@@ -1,8 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400&family=IBM+Plex+Mono&display=swap');
+/* === Fuentes === */
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400&family=IBM+Plex+Mono&display=swap");
 
+/* === Utilidades === */
 .uncheck-circle {
-  color: rgb(255, 10, 10);
+  color: #ff0a0a;
 }
 .upperCase {
   text-transform: uppercase;
@@ -26,199 +27,152 @@
 .selected {
   background-color: #cfe8fc;
 }
-
-.truncate-text {
-  max-width: 200px; /* ajusta este valor según el diseño */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  /*   display: inline-block; */
-  vertical-align: middle;
-}
+.truncate-text,
 .description {
   max-width: 200px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  vertical-align: middle;
 }
 .description:hover {
   overflow: visible;
   white-space: normal;
   z-index: 1;
 }
-/* ============================================================================ */
-/* Estilos Globales. Tambien se pueden importar otros archivos*/
-
 .icoRegresar {
   font-size: 20px;
 }
-
 .sombra {
   box-shadow: 0 0 10px #000000bf;
 }
-
 .sombraClara {
-  box-shadow: 0 0 10px white;
+  box-shadow: 0 0 10px #fff;
 }
-
 .fila:hover {
   background-color: #117a8b;
-  color: white;
+  color: #fff;
 }
-
-/* === Popup de una Cabecera === */
 .dropdown-item {
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   font-size: small;
-  color: white;
+  color: #fff;
 }
-
 .dropdown-item:hover,
 .dropdown-item:focus {
-  font-size: small;
   background-color: #117a8b;
-  color: white;
+  color: #fff;
 }
-
 .fantacy {
   font-weight: bold;
   color: yellow;
-  text-shadow: rgb(228, 3, 3) 0.2em 0.2em 0.3em;
+  text-shadow: #e40303 0.2em 0.2em 0.3em;
 }
-
 .fantacysombra {
   font-weight: bold;
-  color: rgb(8, 8, 0);
-  text-shadow: rgb(49, 45, 45) 0.1em 0.1em 0.1em;
+  color: #080800;
+  text-shadow: #312d2d 0.1em 0.1em 0.1em;
 }
-
 .fantacyblack {
   font-weight: bold;
   color: yellow;
-  text-shadow: black 0.1em 0.1em 0.1em;
+  text-shadow: #000 0.1em 0.1em 0.1em;
 }
-
 .fantacygreen {
   font-weight: bold;
-  color: black;
+  color: #000;
   text-shadow: yellowgreen 0.1em 0.1em 0.1em;
 }
-
 .fontwarning {
   font-weight: bold;
-  color: rgb(253, 2, 2);
-  text-shadow: black 0.1em 0.1em 0.2em;
+  color: #fd0202;
+  text-shadow: #000 0.1em 0.1em 0.2em;
 }
-
 .transparente {
   opacity: 0;
 }
-
 .cursor {
   cursor: pointer;
 }
-
 .green {
   color: green;
 }
-
 .red {
   color: red;
 }
-
 .tachado {
-  text-decoration: line-through;
-  text-decoration-style: solid;
-  /* Estilo de línea sólida */
-  text-decoration-color: rgb(77, 76, 76);
-  /* Color del tachado */
-  text-decoration-thickness: 2px;
-  /* Grosor del tachado */
+  text-decoration: line-through solid 2px rgb(77, 76, 76);
   text-decoration-skip-ink: none;
-  /* Evita espacios en blanco en el tachado */
   background-color: lightgray;
-  /* Color de fondo gris claro */
 }
 
-/* === Popup de una lista === */
+/* === Lista popup === */
 .popLista {
   background-color: #ffc107;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   font-size: small;
 }
-
 .popLista button {
   font-weight: bold;
-  color: black;
+  color: #000;
 }
-
 .popLista button:hover {
   font-weight: normal;
-  color: white;
+  color: #fff;
 }
-
 .nav-link.disabled {
   opacity: 0.3;
 }
-
 .pad0 td,
 .pad0 th {
   padding-top: 0;
   padding-bottom: 0;
 }
-
 .impexp:hover {
   cursor: pointer;
-  color: rgb(125, 132, 139);
+  color: #7d848b;
 }
 
+/* === Tipografías === */
 .robotobig {
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   font-size: 18px;
 }
-
 .roboto {
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   font-size: 14px;
 }
-
 .robotobold {
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   font-size: 15px;
   font-weight: bold;
 }
-
 .robotosmall {
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   font-size: 13px;
 }
-
 .robotomini {
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   font-size: 11px;
 }
-
 .robotolist {
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   font-size: 11px;
   background-color: #343a40;
-  color: rgb(255, 255, 255);
+  color: #fff;
 }
-
 .force-warning {
   color: #ffc107 !important;
 }
 
-/* Estilos para Sweetalert2 */
-/* #0000A8 azul de Pantallazo Azul de la Muerte Lucida Console o Fixedsys*/
+/* === SweetAlert retro === */
 .retro {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: "IBM Plex Mono", monospace;
   background-color: #000;
   color: #0f0;
   font-size: 0.8rem;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9);
 }
-
 .swal2-popup .terminal-footer {
   position: absolute;
   right: 10px;
@@ -226,41 +180,115 @@
   font-size: 0.75rem;
   color: #0f0;
 }
-
 .eliminar {
   background-color: #17a2b8;
-  color: white;
+  color: #fff;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9);
 }
-
-/* ff6565 */
 .noeliminar {
   background-color: #ac3b3b;
-  color: white;
+  color: #fff;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9);
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 
-/* .swal2-popup .swal2-error {
-  border-color: white !important;
-  background-color: white
-} */
-
-/* El borde del círculo */
+/* SweetAlert error blanco */
 .swal2-popup .swal2-error {
-  border-color: white !important;
-  /* círculo blanco */
+  border-color: #fff !important;
   background-color: transparent !important;
-  /* interior transparente */
 }
-
-/* La X */
 .swal2-popup .swal2-error .swal2-x-mark-line-left,
 .swal2-popup .swal2-error .swal2-x-mark-line-right {
-  background-color: white !important;
-  /* la X en blanco */
+  background-color: #fff !important;
+}
+
+/* === Tablas: header/columna sticky + responsive === */
+.cabecera {
+  background-color: var(--bgcolor1);
+  color: #fff;
+}
+.nuevoBG1 {
+  background-color: var(--bgcolor1);
+}
+.detalle {
+  background-color: var(--bgcolor2);
+}
+.nuevoBG2 {
+  background-color: var(--bgcolor2);
 }
 
 td:hover {
-  cursor: pointer;
+  cursor: default;
+} /* evita mano sobre toda la celda */
+
+.table-fixed-head {
+  max-height: 80vh;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.table-no-wrap th,
+.table-no-wrap td {
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+/* thead sticky */
+.table-fixed-head thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--bgcolor1, #f8f9fa);
+  color: #fff;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.06);
+}
+thead.cabecera th {
+  background: inherit;
+  color: inherit;
+}
+
+/* primera columna sticky */
+.table-no-wrap th:first-child,
+.table-no-wrap td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  background: #fff; /* color sólido seguro para celdas */
+  box-shadow: 2px 0 0 rgba(0, 0, 0, 0.06);
+}
+.table-no-wrap thead th:first-child {
+  z-index: 4;
+  background: var(--bgcolor1, #f8f9fa);
+  color: #fff;
+}
+.fila:hover td:first-child {
+  background-color: #117a8b;
+  color: #fff;
+}
+
+/* Sticky respecto al viewport (si lo usas en otra vista) */
+:root {
+  --sticky-offset: 0px;
+} /* ej: 56px si hay navbar fixed */
+.table-sticky-head thead th {
+  position: sticky;
+  top: var(--sticky-offset);
+  z-index: 2;
+  background: var(--bgcolor1, #f8f9fa);
+  color: #fff;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* Imprimir: desactivar sticky */
+@media print {
+  .table-fixed-head {
+    max-height: none;
+    overflow: visible;
+  }
+  .table-fixed-head thead th,
+  .table-no-wrap th:first-child,
+  .table-no-wrap td:first-child {
+    position: static;
+    box-shadow: none;
+  }
 }

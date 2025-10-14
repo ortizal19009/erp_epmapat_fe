@@ -7,6 +7,7 @@ import { FacelectroService } from 'src/app/servicios/facelectro.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { TramitesService } from 'src/app/servicios/ctramites.service';
+import { ColoresService } from 'src/app/compartida/colores.service';
 
 @Component({
   selector: 'app-detalles-cliente',
@@ -15,7 +16,7 @@ import { TramitesService } from 'src/app/servicios/ctramites.service';
 })
 export class DetallesClienteComponent implements OnInit {
   cliente = {} as Cliente; //Interface para los datos del Cliente
-  elimdisabled: Boolean = true;
+
   n_factura: String;
   _cuentas: any; //Cuentas por cliente
   nocuentas = false;
@@ -30,20 +31,29 @@ export class DetallesClienteComponent implements OnInit {
   idfactura: number;
   limit: number = 20;
   idcliente: number;
+  rolepermission = 1; // 1=lector, 2=editor, 3=admin (ajusta a tu convención)
+  ventana = 'detalles-clientes';
 
   constructor(
     private cliService: ClientesService,
     private facService: FacturaService,
     private faceleService: FacelectroService,
-    private rubxfacService: RubroxfacService,
     private abonadoService: AbonadosService,
     private traService: TramitesService,
     private router: Router,
-    public authService: AutorizaService
+    public authService: AutorizaService,
+    private coloresService: ColoresService
   ) {}
 
   ngOnInit(): void {
     // if (!this.authService.log) this.router.navigate(['/inicio']);
+    // Permisos (también sin await directo)
+    if (this.coloresService.rolepermission == null) {
+    }
+    this.coloresService
+      .getRolePermission(this.authService.idusuario, this.ventana)
+      .then((rp) => (this.rolepermission = rp))
+      .catch(console.error);
     this.obtenerDatosCliente();
   }
 
@@ -70,7 +80,6 @@ export class DetallesClienteComponent implements OnInit {
   cuentasxCli(idcliente: number) {
     this.abonadoService.getResAbonadoCliente(idcliente).subscribe({
       next: (datos) => {
-        console.log(datos);
         this._cuentas = datos;
         if (this._cuentas.length == 0) {
           this.nocuentas = true;

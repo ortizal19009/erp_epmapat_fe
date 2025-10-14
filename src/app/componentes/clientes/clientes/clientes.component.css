@@ -1,14 +1,9 @@
-.cabecera {
-   background-color: var(--bgcolor1);
-   color: white;
-}
+/* ===== Colores de tema ===== */
+.cabecera { background-color: var(--bgcolor1); color: #fff; }
 .nuevoBG1 { background-color: var(--bgcolor1); }
 
 .detalle { background-color: var(--bgcolor2); }
 .nuevoBG2 { background-color: var(--bgcolor2); }
 
-.fila:hover {
-   background-color: #117a8B;
-   color: white;
-   cursor: pointer;
-}
+.fila:hover { background-color: #117a8b; color: #fff; cursor: pointer; }
+

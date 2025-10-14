@@ -1,4 +1,10 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  OnInit,
+  ViewChild,
+  AfterViewInit,
+} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import jsPDF from 'jspdf';
@@ -8,27 +14,34 @@ import { ColoresService } from 'src/app/compartida/colores.service';
 import { Clientes } from 'src/app/modelos/clientes';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { ClientesService } from 'src/app/servicios/clientes.service';
+import Swal from 'sweetalert2';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-clientes',
   templateUrl: './clientes.component.html',
   styleUrls: ['./clientes.component.css'],
 })
-export class ClientesComponent implements OnInit {
-  @ViewChild('labelElement') labelElement: ElementRef<HTMLInputElement>;
+export class ClientesComponent implements OnInit, AfterViewInit {
+  @ViewChild('labelElement') labelElement!: ElementRef<HTMLInputElement>;
+  @ViewChild('nombreIdentifi', { static: false })
+  nombreIdentifiEl?: ElementRef<HTMLInputElement>;
 
-  filtro: string;
-  formBuscar: FormGroup;
-  _clientes: any;
+  filtro = '';
+  formBuscar!: FormGroup;
+  _clientes: any[] = [];
   disabled = true;
-  otraPagina: boolean = false;
-  tsvData: any[] = [];
-  //Para Importar
+  otraPagina = false;
+
+  // Para Importar
   _tsvData: any[] = [];
-  swfile: Boolean = false;
-  swvalido: Boolean;
-  sweliminar: boolean;
+  swfile = false;
+  swvalido = false;
+  sweliminar = false;
+
   clie = {} as Clientes;
+  rolepermission = 1; // 1=lector, 2=editor, 3=admin (ajusta a tu convención)
+  ventana = 'clientes';
 
   constructor(
     public fb: FormBuilder,
@@ -40,106 +53,127 @@ export class ClientesComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // if(!this.authService.log) this.router.navigate(['/inicio']);
-
-    sessionStorage.setItem('ventana', '/clientes');
-    let coloresJSON = sessionStorage.getItem('/clientes');
-    if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
-    else this.buscaColor();
-
-    let buscaClientes = sessionStorage.getItem('buscaClientes');
-    if (buscaClientes == null) buscaClientes = '';
-    localStorage.removeItem('idclienteToDetalles');
-
+    // 1) CREA EL FORM ANTES DE CUALQUIER AWAIT
     this.formBuscar = this.fb.group({
-      nombreIdentifi: [
-        buscaClientes,
-        [Validators.required, Validators.minLength(4)],
-      ],
-      filtro: '',
+      nombreIdentifi: ['', [Validators.required, Validators.minLength(4)]],
+      filtro: [''],
     });
 
-    let nombreIdentifi = document.getElementById(
-      'nombreIdentifi'
-    ) as HTMLInputElement;
-    nombreIdentifi.addEventListener('keyup', () => {
-      if (this.formBuscar.invalid) {
-        this.disabled = true;
-      } else {
-        this.disabled = false;
-      }
+    // 2) Luego ya puedes hacer lo demás (asíncrono sin bloquear)
+    sessionStorage.setItem('ventana', `/${this.ventana}`);
+
+    const coloresJSON = sessionStorage.getItem(`/${this.ventana}`);
+    if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
+    else {
+      void this.buscaColor();
+    } // NO await en ngOnInit
+
+    // Permisos (también sin await directo)
+    if (this.coloresService.rolepermission == null) {
+      this.coloresService
+        .getRolePermission(this.authService.idusuario, this.ventana)
+        .then((rp) => (this.rolepermission = rp))
+        .catch(console.error);
+    }
+
+    // Estado previo
+    const buscaClientes = sessionStorage.getItem('buscaClientes') ?? '';
+
+    // Reactividad
+    this.formBuscar.statusChanges.subscribe(
+      (st) => (this.disabled = st === 'INVALID')
+    );
+
+    this.formBuscar.get('filtro')!.valueChanges.subscribe((v) => {
+      this.filtro = (v ?? '').toString();
     });
 
-    if (buscaClientes != '') this.onSubmit();
+    // Si había un valor previo, lo aplicas al form (después de CREARLO)
+    if (buscaClientes) {
+      this.formBuscar.patchValue({ nombreIdentifi: buscaClientes });
+      if (buscaClientes.trim().length >= 4) this.onSubmit();
+    }
   }
 
-  async buscaColor() {
+  ngAfterViewInit(): void {
+    // Focus en el input al cargar (si tienes #nombreIdentifi en el template)
+    this.nombreIdentifiEl?.nativeElement?.focus?.();
+  }
+
+  private async buscaColor() {
     try {
-      const datos = await this.coloresService.setcolor(1, 'clientes');
-      const coloresJSON = JSON.stringify(datos);
-      sessionStorage.setItem('/clientes', coloresJSON);
+      const datos = await this.coloresService.setcolor(
+        this.authService.idusuario,
+        this.ventana
+      );
+      if (!datos || datos[0] === '0')
+        throw new Error('No se encontraron colores para la ventana');
+      sessionStorage.setItem(`/${this.ventana}`, JSON.stringify(datos));
       this.colocaColor(datos);
     } catch (error) {
       console.error(error);
     }
   }
 
-  colocaColor(colores: any) {
+  private colocaColor(colores: any) {
     document.documentElement.style.setProperty('--bgcolor1', colores[0]);
-    const cabecera = document.querySelector('.cabecera');
-    if (cabecera) cabecera.classList.add('nuevoBG1');
+    document.querySelector('.cabecera')?.classList.add('nuevoBG1');
     document.documentElement.style.setProperty('--bgcolor2', colores[1]);
-    const detalle = document.querySelector('.detalle');
-    if (detalle) detalle.classList.add('nuevoBG2');
+    document.querySelector('.detalle')?.classList.add('nuevoBG2');
   }
 
   onSubmit() {
-    if (
-      this.formBuscar.value.nombreIdentifi == '' ||
-      this.formBuscar.value.nombreIdentifi == null
-    ) {
+    const criterio: string = (this.formBuscar.value?.nombreIdentifi ?? '')
+      .toString()
+      .trim();
+    if (!criterio) {
       this._clientes = [];
-    } else {
-      this.clieService
-        .getByNombreIdentifi(this.formBuscar.value.nombreIdentifi)
-        .subscribe({
-          next: (datos) => {
-            sessionStorage.setItem(
-              'buscaClientes',
-              this.formBuscar.controls['nombreIdentifi'].value.toString()
-            );
-            this._clientes = datos;
-          },
-          error: (err) => console.log(err.error),
-        });
+      return;
     }
+
+    this.clieService.getByNombreIdentifi(criterio).subscribe({
+      next: (datos: any[]) => {
+        sessionStorage.setItem(
+          'buscaClientes',
+          this.formBuscar.controls['nombreIdentifi'].value.toString()
+        );
+        this._clientes = Array.isArray(datos) ? datos : [];
+        this.swal(
+          'success',
+          `${this._clientes.length} cliente(s) encontrado(s)`
+        );
+      },
+      error: (err) => console.error(err?.error || err),
+    });
   }
 
-  public listarClientes() {
+  listarClientes() {
     this.clieService.getListaClientes().subscribe({
-      next: (datos) => (this._clientes = datos),
-      error: (err) => console.error(err.error),
+      next: (datos: any[]) =>
+        (this._clientes = Array.isArray(datos) ? datos : []),
+      error: (err) => console.error(err?.error || err),
     });
   }
 
   eliminarCliente(cliente: Clientes) {
     this.sweliminar = false;
     this.aboService.tieneAbonados(cliente.idcliente).subscribe({
-      next: (resp) => {
+      next: (resp: boolean) => {
         this.sweliminar = !resp;
         this.clie.idcliente = cliente.idcliente;
         this.clie.nombre = cliente.nombre;
       },
       error: (err) =>
-        console.error('Al buscar los Abonados del Cliente: ', err.error),
+        console.error(
+          'Al buscar los Abonados del Cliente: ',
+          err?.error || err
+        ),
     });
   }
 
   elimina() {
-    // this.pregasService.deletePregasto(this.pargasto.idpresupue).subscribe({
-    //    next: resp => this.buscar(),
-    //    error: err => console.error('Al eliminar la Partida de Gastos: ', err.error),
-    // });
+    // TODO: Implementar delete cliente cuando tengas endpoint
+    // this.clieService.delete(clienteId).subscribe({ next: () => this.onSubmit(), error: ... })
   }
 
   modificarCliente(idcliente: number) {
@@ -152,10 +186,9 @@ export class ClientesComponent implements OnInit {
     this.router.navigate(['add-cliente']);
   }
 
-  detallesCliente(e: any, cliente: Clientes) {
-    console.log(cliente);
-    const tagName = e.target.tagName;
-    if (tagName === 'TD') {
+  detallesCliente(e: MouseEvent, cliente: Clientes) {
+    const target = e.target as HTMLElement;
+    if (target?.tagName === 'TD') {
       sessionStorage.setItem(
         'buscaClientes',
         this.formBuscar.controls['nombreIdentifi'].value.toString()
@@ -165,12 +198,19 @@ export class ClientesComponent implements OnInit {
       this.router.navigate(['detalles-cliente']);
     }
   }
+
   imprimir() {
     this.router.navigate(['imp-clientes', 'clientes']);
   }
+
   pdf() {
-    let m_izquierda = 20;
-    var doc = new jsPDF();
+    if (!Array.isArray(this._clientes) || this._clientes.length === 0) {
+      this.swal('info', 'No hay datos para imprimir');
+      return;
+    }
+
+    const m_izquierda = 20;
+    const doc = new jsPDF();
     doc.setFont('times', 'bold');
     doc.setFontSize(16);
     doc.text('EpmapaT', m_izquierda, 10);
@@ -178,22 +218,15 @@ export class ClientesComponent implements OnInit {
     doc.setFontSize(12);
     doc.text('LISTA DE CLIENTES', m_izquierda, 16);
 
-    var datos: any = [];
-    let calc: string;
-    let swiva: String;
-    var i = 0;
-    this._clientes.forEach(() => {
-      datos.push([
-        i + 1,
-        this._clientes[i].nombre,
-        this._clientes[i].cedula,
-        this._clientes[i].direccion,
-        this._clientes[i].email,
-      ]);
-      i++;
-    });
+    const body = this._clientes.map((c, i) => [
+      i + 1,
+      c?.nombre ?? '',
+      c?.cedula ?? '',
+      c?.direccion ?? '',
+      c?.email ?? '',
+    ]);
 
-    let cabecera = ['', 'NOMBRE', 'CEDULA/RUC', 'DIRECCIÓN', 'E-MAIL'];
+    const cabecera = ['', 'NOMBRE', 'CEDULA/RUC', 'DIRECCIÓN', 'E-MAIL'];
 
     autoTable(doc, {
       theme: 'grid',
@@ -215,115 +248,112 @@ export class ClientesComponent implements OnInit {
         3: { halign: 'left' },
         4: { halign: 'left' },
       },
-
       margin: { left: m_izquierda - 1, top: 17, right: 20, bottom: 10 },
-
-      didParseCell: function (HookData) {
-        let valor = +HookData.cell.text!;
-        if (valor == 0) {
-          HookData.cell.styles.textColor = [255, 255, 255];
-        }
-        if (valor < 0) {
-          HookData.cell.styles.textColor = [255, 0, 0];
-        }
-
-        let x = HookData.cell.text.toString();
-        if (
-          (HookData.column.index === 3 || HookData.column.index === 4) &&
-          x == 'No'
-        ) {
-          HookData.cell.styles.textColor = [255, 255, 255];
-        }
-      },
       head: [cabecera],
-      body: datos,
+      body,
     });
 
-    var opciones = {
-      filename: 'clientes.pdf',
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4',
-      compress: true,
-    };
-
-    if (this.otraPagina) doc.output('dataurlnewwindow', opciones);
-    else {
+    if (this.otraPagina) {
+      // jsPDF no acepta opciones en dataurlnewwindow; se abre directo
+      doc.output('dataurlnewwindow');
+    } else {
       const pdfDataUri = doc.output('datauristring');
-      //Si ya existe el <embed> primero lo remueve
-      const elementoExistente = document.getElementById('idembed');
-      if (elementoExistente) {
-        elementoExistente.remove();
-      }
-      //Crea el <embed>
-      var embed = document.createElement('embed');
+      const existente = document.getElementById('idembed');
+      if (existente) existente.remove();
+
+      const embed = document.createElement('embed');
       embed.setAttribute('src', pdfDataUri);
       embed.setAttribute('type', 'application/pdf');
       embed.setAttribute('width', '65%');
       embed.setAttribute('height', '100%');
       embed.setAttribute('id', 'idembed');
-      //Agrega el <embed> al contenedor del Modal
-      var container: any;
-      container = document.getElementById('pdf');
-      container.appendChild(embed);
+
+      const container = document.getElementById('pdf');
+      container?.appendChild(embed);
     }
   }
 
   importar() {
-    this.labelElement.nativeElement.innerText = 'Seleccionar';
+    if (this.labelElement?.nativeElement)
+      this.labelElement.nativeElement.innerText = 'Seleccionar';
     this._tsvData = [];
+    this.swfile = false;
+    this.swvalido = false;
   }
 
-  onFileChange(event: any) {
-    const file = event.target.files[0];
-    this.labelElement.nativeElement.innerText = file.name;
-    const reader = new FileReader();
+  onFileChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input?.files?.[0];
+    if (!file) return;
 
+    if (this.labelElement?.nativeElement)
+      this.labelElement.nativeElement.innerText = file.name;
+
+    const reader = new FileReader();
     reader.onload = () => {
-      const text = reader.result as string;
+      const text = (reader.result as string) ?? '';
       this._tsvData = this.extractData(text);
+      this.swfile = this._tsvData.length > 0;
+      this.swvalido = false;
     };
+    reader.onerror = () => this.swal('error', 'No se pudo leer el archivo');
     reader.readAsText(file);
   }
 
   private extractData(text: string): any[] {
-    const lines = text.split('\n');
+    const lines = text
+      .replace(/\r/g, '')
+      .split('\n')
+      .filter((l) => l.trim().length > 0);
     const data: any[] = [];
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const values = line.split('\t');
-      if (values.length > 1) {
-        this.swfile = true;
-        const record: any = {};
 
-        record.cuenta = values[0].trim();
-        record.medidor = values[1].trim();
-        record.abonado = values[2].trim();
-        record.anterior = parseInt(values[3].trim());
-        record.direccion = values[4].trim();
-        record.categoria = values[5].trim();
-        record.promedio = parseInt(values[6].trim());
-        record.actual = parseInt(values[7].trim());
-        record.consumo = parseInt(values[8].trim());
-        record.novedades = values[9].trim();
-        record.observaciones = values[10].trim();
-        record.valido = null;
-        data.push(record);
-      }
+    for (const line of lines) {
+      const values = line.split('\t');
+      if (values.length < 2) continue;
+
+      const toInt = (v: string) => {
+        const n = parseInt((v ?? '').trim(), 10);
+        return isNaN(n) ? 0 : n;
+      };
+
+      const record: any = {
+        cuenta: (values[0] ?? '').trim(),
+        medidor: (values[1] ?? '').trim(),
+        abonado: (values[2] ?? '').trim(),
+        anterior: toInt(values[3] ?? '0'),
+        direccion: (values[4] ?? '').trim(),
+        categoria: (values[5] ?? '').trim(),
+        promedio: toInt(values[6] ?? '0'),
+        actual: toInt(values[7] ?? '0'),
+        consumo: toInt(values[8] ?? '0'),
+        novedades: (values[9] ?? '').trim(),
+        observaciones: (values[10] ?? '').trim(),
+        valido: null,
+      };
+      data.push(record);
     }
     return data;
   }
 
   validar() {
     this.swvalido = true;
-    for (let i = 0; i < this._tsvData.length; i++) {
-      if (this._tsvData[i].consumo > 0) this._tsvData[i].valido = true;
+    for (const r of this._tsvData) {
+      if (r.consumo > 0) r.valido = true;
       else {
+        r.valido = false;
         this.swvalido = false;
-        this._tsvData[i].valido = false;
       }
     }
   }
 
-  cargar() {}
+  swal(icon: 'success' | 'error' | 'info' | 'warning', mensaje: string) {
+    Swal.fire({
+      toast: true,
+      icon,
+      title: mensaje,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+    });
+  }
 }
