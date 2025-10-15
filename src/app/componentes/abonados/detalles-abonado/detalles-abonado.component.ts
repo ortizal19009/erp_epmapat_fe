@@ -182,7 +182,6 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     }
     this.aboService.getByIdabonado(+idabonado!).subscribe({
       next: (datos: any) => {
-        console.log(datos)
         this.email = datos[0].idresponsable.email.toString();
         this.f_sendEmail.patchValue({
           receptores: datos[0].idresponsable.email
@@ -522,36 +521,6 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     }, 1000);
     this.facElectro = false;
     this.s_loading.hideLoading();
-
-    //this.datos = false
-    /*     let lectura: any;
-        this.facService.getById(datos.idfactura).subscribe({
-          next: (d_factura: any) => {
-            let modulo: number = d_factura.idmodulo.idmodulo;
-            if (modulo === 3 || modulo === 4) {
-              this.lecService.getOnefactura(d_factura.idfactura).subscribe({
-                next: (datos: any) => {
-                  lectura = datos;
-                  if (datos != null) {
-                    this.s_pdfRecaudacion.reimprimircomprobantePago(
-                      lectura,
-                      d_factura
-                    );
-                  } else {
-                    this.s_pdfRecaudacion.reimprimircomprobantePago(
-                      null,
-                      d_factura
-                    );
-                  }
-                },
-                error: (e) => console.error(e),
-              });
-            } else {
-              this.s_pdfRecaudacion.reimprimircomprobantePago(null, d_factura);
-            }
-          },
-          error: (e) => console.error(e),
-        }); */
   }
   async impFacturaElectronica(datos: any) {
     this.facElectro = true;
@@ -640,7 +609,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
         });
         this.s_loading.hideLoading();
         /*         facturas.forEach(async (item: any) => {
-      
+
           await this._rxf.forEach((item: any) => {
             d_rxf.push([
               item.idrubro_rubros,
@@ -981,7 +950,6 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
 
       this.s_sri.sendEmailNotification(formData).subscribe({
         next: (datos: any) => {
-          console.log('Respuesta del backend:', datos);
           this.swal('success', datos.message);
           this.s_loading.hideLoading();
         },

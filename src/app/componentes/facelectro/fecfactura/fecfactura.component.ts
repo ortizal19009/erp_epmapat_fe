@@ -560,22 +560,28 @@ export class FecfacturaComponent implements OnInit {
     });
   }
   async getFacturaPDF(idfactura: number) {
-    let fact = await this.facService.generarPDF_FacElectronica(idfactura);
-    //this.facElectro = true;
-    // Crear blob desde los datos del backend
-    setTimeout(() => {
-      const file = new Blob([fact], { type: 'application/pdf' });
-      const fileURL = URL.createObjectURL(file);
-      //this.dataURI = fact;
-      // Asignar el blob al iframe
-      const pdfViewer = document.getElementById(
-        'pdfViewer'
-      ) as HTMLIFrameElement;
+    try {
+      // Espera la respuesta del backend (asegúrate de usar { responseType: 'blob' } en el servicio)
+      const pdfBlob = await this.facService.generarPDF_FacElectronica(
+        idfactura
+      );
 
-      if (pdfViewer) {
-        pdfViewer.src = fileURL;
-      }
-    }, 1000);
+      // Crear una URL temporal del blob
+      const fileURL = URL.createObjectURL(pdfBlob);
+
+      // Crear un enlace invisible para forzar descarga
+      const a = document.createElement('a');
+      a.href = fileURL;
+      a.download = `factura_${idfactura}.pdf`; // nombre del archivo
+      document.body.appendChild(a);
+      a.click();
+
+      // Liberar recursos
+      document.body.removeChild(a);
+      URL.revokeObjectURL(fileURL);
+    } catch (err) {
+      console.error('Error al descargar la factura PDF:', err);
+    }
   }
 
   swal(icon: any, mensaje: any) {

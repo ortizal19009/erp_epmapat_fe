@@ -3,7 +3,6 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import jsPDF from 'jspdf';
 import { ColoresService } from 'src/app/compartida/colores.service';
-import { Suspensiones } from 'src/app/modelos/suspensiones';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';

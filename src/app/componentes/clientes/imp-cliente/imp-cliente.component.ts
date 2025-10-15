@@ -12,6 +12,7 @@ import { ColoresService } from 'src/app/compartida/colores.service';
 import { PdfService } from 'src/app/servicios/pdf.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-imp-cliente',
@@ -29,12 +30,14 @@ export class ImpClienteComponent implements OnInit {
   pdfgenerado: string;
   nombrearchivo: string;
   barraProgreso: boolean = false;
-  page: any = 'clientes'
+  page: any = 'clientes';
   public progreso = 0;
   _clientes: any = [];
   total: number;
   usuario: number;
 
+  rolepermission = 1; // 1=lector, 2=editor, 3=admin (ajusta a tu convención)
+  ventana = 'imp-clientes';
   constructor(
     public fb: FormBuilder,
     private router: Router,
@@ -43,17 +46,15 @@ export class ImpClienteComponent implements OnInit {
     private s_rxf: RubroxfacService,
     private coloresService: ColoresService,
     private s_pdf: PdfService,
-    private s_loading: LoadingService,
     public authService: AutorizaService,
-    private activateRuta: ActivatedRoute,
-
-  ) { }
+    private activateRuta: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
     this.page = this.activateRuta.snapshot.paramMap.get('page');
     this.usuario = this.authService.idusuario;
-    sessionStorage.setItem('ventana', '/cv-facturas');
-    let coloresJSON = sessionStorage.getItem('/cv-facturas');
+    sessionStorage.setItem('ventana', `/${this.ventana}`);
+    let coloresJSON = sessionStorage.getItem(`/${this.ventana}`);
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
     else this.buscaColor();
 
@@ -82,9 +83,9 @@ export class ImpClienteComponent implements OnInit {
   }
   async buscaColor() {
     try {
-      const datos = await this.coloresService.setcolor(1, 'cv-facturas');
+      const datos = await this.coloresService.setcolor(1, this.ventana);
       const coloresJSON = JSON.stringify(datos);
-      sessionStorage.setItem('/cv-facturas', coloresJSON);
+      sessionStorage.setItem(this.ventana, coloresJSON);
       this.colocaColor(datos);
     } catch (error) {
       console.error(error);
@@ -570,6 +571,16 @@ export class ImpClienteComponent implements OnInit {
       a.download = `${this.nombrearchivo}.xlsx`; // Usa el nombre proporcionado por el usuario
       a.click();
       window.URL.revokeObjectURL(url); // Libera recursos
+    });
+  }
+  swal(icon: 'success' | 'error' | 'info' | 'warning', mensaje: string) {
+    Swal.fire({
+      toast: true,
+      icon,
+      title: mensaje,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
     });
   }
 }

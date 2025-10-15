@@ -3,9 +3,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import jsPDF from 'jspdf';
 import autoTable, { Column } from 'jspdf-autotable';
-import { Observable } from 'rxjs';
 import { Facturas } from 'src/app/modelos/facturas.model';
-import { Rubros } from 'src/app/modelos/rubros.model';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { InteresesService } from 'src/app/servicios/intereses.service';
@@ -87,7 +85,6 @@ export class RutasmorasComponent implements OnInit {
   getRuta(idruta: number) {
     this.s_ruta.getByIdruta(idruta).subscribe({
       next: (rutaDatos: any) => {
-        console.log(rutaDatos);
         this._ruta = rutaDatos;
         this.titulo += rutaDatos.descripcion;
       },

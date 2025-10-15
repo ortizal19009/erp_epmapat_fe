@@ -311,7 +311,9 @@
           *ngIf="factura.xmlautorizado === null || factura.xmlautorizado===''"
           (click)="getXmlAutorizadoSri(factura)">Val
           SRI</button>
-        <button type="button" class="btn btn-outline-danger btn-sm" (click)="getFacturaPDF(factura.idfactura)">Descargar
+        <button type="button" class="btn btn-outline-danger btn-sm"
+          *ngIf="factura.xmlautorizado !== null || factura.xmlautorizado !== ''"
+          (click)="getFacturaPDF(factura.idfactura)">Descargar
           PDF</button>
         <button type="button" class="btn btn-success btn-sm" data-dismiss="modal" *ngIf="btnRsend" (click)=reSend()>Re
           enviar</button>
