@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Rutas } from 'src/app/modelos/rutas.model';
+import { AbonadosService } from 'src/app/servicios/abonados.service';
+import { LoadingService } from 'src/app/servicios/loading.service';
 import { RutasService } from 'src/app/servicios/rutas.service';
 
 @Component({
@@ -14,12 +16,16 @@ export class RutasComponent implements OnInit {
   filtro: string;
   _rutas: any;
   _deudasRuta: any;
+  _abonados: any;
+  ruta: any;
 
   constructor(
     private rutService: RutasService,
     private router: Router,
     private coloresService: ColoresService,
-    public authService: AutorizaService
+    public authService: AutorizaService,
+    private loading: LoadingService,
+    private s_abonado: AbonadosService
   ) {}
 
   ngOnInit(): void {
@@ -97,18 +103,25 @@ export class RutasComponent implements OnInit {
     let cod = ruta.codigo;
     console.log(cod[0]);
   }
+  setRuta(ruta: any){
+  this.ruta = ruta}
 
   public info(idruta: number) {
     sessionStorage.setItem('idrutaToInfo', idruta.toString());
     this.router.navigate(['info-ruta']);
   }
-  getDeudasOfRuta(idruta: number) {
+  async getDeudasOfRuta(idruta: number) {
+    this.loading.showLoading();
     this._deudasRuta = [];
-    this.rutService.getDeudaOfCuentasByIdrutas(idruta).subscribe({
-      next: (data: any) => {
-      console.log(data)
-        this._deudasRuta = data;
-      },
+    this._deudasRuta = await this.rutService.getDeudaOfCuentasByIdrutas(idruta);
+    this.loading.hideLoading();
+  }
+  getAbonadosByRuta(idruta: number) {
+    this.loading.showLoading();
+    this.s_abonado.getByIdrutaAsync(idruta).then((abonados: any) => {
+      console.log(abonados);
+      this._abonados = abonados;
+      this.loading.hideLoading();
     });
   }
 }

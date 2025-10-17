@@ -45,8 +45,8 @@ export class RutasService {
   getNcuentasByRutas() {
     return this.http.get(`${baseUrl}/cuentasByRuta`);
   }
-  getDeudaOfCuentasByIdrutas(idruta: number) {
-    return this.http.get(`${baseUrl}/deudas_ruta_cuentas?idruta=${idruta}`);
+  async getDeudaOfCuentasByIdrutas(idruta: number):Promise<any> {
+    return firstValueFrom (this.http.get(`${baseUrl}/deudas_ruta_cuentas?idruta=${idruta}`));
   }
   getDeudasOfAllCuentas() {
     return this.http.get(`${baseUrl}/deudas_cuentas`);
