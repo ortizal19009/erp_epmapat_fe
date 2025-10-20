@@ -232,6 +232,7 @@ export class AddRecaudaComponent implements OnInit {
     this.ms_recaudacion
       .getSincobroByCuenta(cuenta)
       .then((sincobro: any) => {
+      console.log("LISTAR SIN COBRO: ",sincobro);
         if (sincobro.length > 0) {
           this._sincobro = [...sincobro];
           this.getClienteById(sincobro[0].idcliente);

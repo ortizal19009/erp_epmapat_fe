@@ -284,10 +284,8 @@ export class ListarInteresesComponent implements OnInit {
   }
 
   async calcularInteres() {
-    console.log(this.idfactura);
     let factura = await this.s_facturas.getByIdAsync(+this.idfactura!);
-    console.log(factura);
-    console.log(await this.interService.cInteres(factura));
+
   }
 }
 
