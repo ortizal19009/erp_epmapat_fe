@@ -5,6 +5,7 @@ import { Intereses } from '../modelos/intereses';
 import { environment } from 'src/environments/environment';
 import { Facturas } from '../modelos/facturas.model';
 import { FacturaService } from './factura.service';
+import { TmpinteresxfacService } from './tmpinteresxfac.service';
 
 const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/intereses`;
@@ -13,7 +14,10 @@ const baseUrl = `${apiUrl}/intereses`;
   providedIn: 'root',
 })
 export class InteresesService {
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private tmpInteresxfacService: TmpinteresxfacService
+  ) {}
 
   getListaIntereses(): Observable<Intereses[]> {
     return this.http.get<Intereses[]>(`${baseUrl}`);
@@ -48,17 +52,15 @@ export class InteresesService {
   updateInteres(idinteres: number, interes: Intereses): Observable<Object> {
     return this.http.put(baseUrl + '/' + idinteres, interes);
   }
-  getInteresFactura(idfactura: number) {
-    let interes = this.http.get<any>(
-      `${baseUrl}/calcular?idfactura=${idfactura}`
-    );
+  async getInteresFactura(idfactura: number) {
+    let interes = await this.tmpInteresxfacService.getByIdFactura(idfactura)
 
     return interes;
   }
   getInteresFacturaAsync(idfactura: number) {
-    let interes = firstValueFrom(this.http.get<any>(
-      `${baseUrl}/calcular?idfactura=${idfactura}`
-    ));
+    let interes = firstValueFrom(
+      this.http.get<any>(`${baseUrl}/calcular?idfactura=${idfactura}`)
+    );
 
     return interes;
   }
@@ -68,10 +70,16 @@ export class InteresesService {
     return intereses;
   }
 
-  cInteres(factura: any) {
-    console.log(factura);
+  /* Calcular los intereses en la tabla tempinteresxfac global o una por una */
+
+  async recalcularBatchInteres(): Promise<any> {
+    return firstValueFrom(this.http.post(`${baseUrl}/batch/recalcular`, null));
   }
-
-
-
+  previewInteresByFactura(idfactura: number) {
+    console.log('consultando');
+    return this.http.get(`${baseUrl}/facturas/${idfactura}/preview`);
+  }
+  async getInteresTemporal(idfactura: number) {
+    return await this.tmpInteresxfacService.getByIdFactura(idfactura);
+  }
 }

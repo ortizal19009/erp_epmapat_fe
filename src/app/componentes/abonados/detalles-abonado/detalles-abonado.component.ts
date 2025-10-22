@@ -99,7 +99,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
   swEmail: boolean = false;
   selectedFile: File | null = null;
   dataURI: any;
-  nameFile: string = "Vacío...";
+  nameFile: string = 'Vacío...';
   email: string;
   active: boolean = false;
 
@@ -123,8 +123,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     </td>
   </tr>
 </table>
-`
-
+`;
 
   @ViewChild('pdfViewer', { static: false }) pdfViewer!: ElementRef;
 
@@ -145,23 +144,21 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     private s_jasperreport: JasperReportService,
     private f: FormBuilder,
     private s_sri: SriService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.f_sendEmail = this.f.group({
       emisor: [''],
       password: [''],
       receptores: [''], // separados por coma
-      asunto: ["Notificación de valores pendientes"],
+      asunto: ['Notificación de valores pendientes'],
       mensaje: '',
-    })
+    });
     this.obtenerDatosAbonado();
     this.listarIntereses();
     this.usuario = this.authService.idusuario;
   }
-  ngAfterViewInit(): void {
-
-  }
+  ngAfterViewInit(): void {}
   cancelarFE() {
     if (this.facElectro != true) {
       this.facElectro = !this.facElectro;
@@ -184,8 +181,8 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
       next: (datos: any) => {
         this.email = datos[0].idresponsable.email.toString();
         this.f_sendEmail.patchValue({
-          receptores: datos[0].idresponsable.email
-        })
+          receptores: datos[0].idresponsable.email,
+        });
 
         this._abonado = datos;
         this.abonado.idabonado = this._abonado[0].idabonado;
@@ -241,21 +238,23 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
   }
   drawCuenta(abonado: any): void {
     if (abonado.geolocalizacion != null) {
-      const coordsArray: L.LatLngExpression = JSON.parse(abonado.geolocalizacion);
-      this.mostrarMapa = true
+      const coordsArray: L.LatLngExpression = JSON.parse(
+        abonado.geolocalizacion
+      );
+      this.mostrarMapa = true;
       setTimeout(() => {
         this.map = L.map('map').setView(coordsArray, 19);
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; EPMAPA-T'
+          attribution: '&copy; EPMAPA-T',
         }).addTo(this.map);
         L.marker(coordsArray)
           .addTo(this.map)
           .bindPopup(`${abonado.idabonado} <br/> ${abonado.direccionubicacion}`)
           .openPopup();
-      }, 300)
+      }, 300);
     } else {
       this.mostrarMapa = false;
-      alert("CUENTA SIN ACUALIZAR GEOLOCALIZACION")
+      alert('CUENTA SIN ACUALIZAR GEOLOCALIZACION');
     }
   }
 
@@ -279,6 +278,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
             /*           item.feccrea = await this.getEmisionoByFactura(item.idfactura);
              */ this.s_loading.hideLoading();
           });
+          console.log(datos);
           this._facturas = datos;
         } else {
           this.s_loading.hideLoading();
@@ -373,7 +373,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     });
   }
 
-  detallesHistorial(lectura: Lecturas) { }
+  detallesHistorial(lectura: Lecturas) {}
 
   regresar() {
     let padre = sessionStorage.getItem('padreDetalleAbonado');
@@ -682,7 +682,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
   }
   async impNotificacion() {
     this.s_loading.showLoading();
-    this.nameFile = "Generando archivo..."
+    this.nameFile = 'Generando archivo...';
     let doc = new jsPDF('p', 'pt', 'a4');
     this.rubrostotal = 0;
     doc.setFontSize(14);
@@ -805,14 +805,13 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     if (this.swEmail == true) {
       //this.dataURItoBlob(pdfDataUri);
       this.dataURI = doc.output('datauri').toString();
-
     } else {
       const pdfViewer: any = document.getElementById(
         'pdfViewer'
       ) as HTMLIFrameElement;
       pdfViewer.src = pdfDataUri;
     }
-    this.nameFile = `Notificación_${this._abonado[0].idabonado}.pdf`
+    this.nameFile = `Notificación_${this._abonado[0].idabonado}.pdf`;
 
     this.s_loading.hideLoading();
     // Generate and output the PDF after all data is processed
@@ -847,9 +846,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     return fechaEmision;
   }
   cInteres(factura: any) {
-    let interes = this.s_interes
-      .getInteresFactura(factura.idfactura)
-      .toPromise();
+    let interes: any = this.s_interes.getInteresTemporal(factura.idfactura);
     return interes;
   }
   /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
@@ -930,13 +927,15 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
       // Campos normales
       //formData.append('emisor', formValue.email); // o usa formValue.emisor si así se llama
       //formData.append('password', formValue.password); // si se requiere
-      formValue.mensaje += `${this.mensajeBody} <p style="margin: 10px 0 0; font-size: 12px; color: #888;">Este mensaje fué enviado por: ${this.authService.alias}.</p>`
+      formValue.mensaje += `${this.mensajeBody} <p style="margin: 10px 0 0; font-size: 12px; color: #888;">Este mensaje fué enviado por: ${this.authService.alias}.</p>`;
       formData.append('asunto', formValue.asunto || 'Sin asunto');
       formData.append('mensaje', formValue.mensaje);
       // Adjuntar PDF generado
       formData.append('file', pdfBlob, this.nameFile);
       // Adjuntar receptores (separados por coma)
-      const receptores = formValue.receptores.split(',').map((r: string) => r.trim());
+      const receptores = formValue.receptores
+        .split(',')
+        .map((r: string) => r.trim());
       receptores.forEach((email: string) => {
         formData.append('receptores', email);
       });
@@ -957,18 +956,17 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
           console.error('Error al enviar:', e);
           this.swal('danger', 'Error al Enivar');
           this.s_loading.hideLoading();
-        }
+        },
       });
     }
   }
   sendFacturaEmail() {
-
-    this.nameFile = "Factura.pdf"
+    this.nameFile = 'Factura.pdf';
     this.f_sendEmail.patchValue({
-      asunto: "Factura EPMAPA-T",
-      receptores: this.email
-    })
-    this.sendEmail()
+      asunto: 'Factura EPMAPA-T',
+      receptores: this.email,
+    });
+    this.sendEmail();
     this.active = false;
   }
 

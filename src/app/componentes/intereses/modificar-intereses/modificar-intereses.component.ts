@@ -30,7 +30,7 @@ export class ModificarInteresesComponent implements OnInit {
     private parent: ListarInteresesComponent,
     private authService: AutorizaService,
     private s_tmpinteresxfac: TmpinteresxfacService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.idinteres = +localStorage.getItem('idinteres')!;
@@ -86,8 +86,8 @@ export class ModificarInteresesComponent implements OnInit {
         next: async (resp: any) => {
           this.parent.reset();
           this.parent.listarIntereses();
-          let tempInteres = await this.s_tmpinteresxfac.calcularInteresesTemporales();
-          console.log(tempInteres)
+          let tempInteres = await this.inteService.recalcularBatchInteres();
+          console.log(tempInteres);
         },
         error: (err) => console.log(err.error),
       });

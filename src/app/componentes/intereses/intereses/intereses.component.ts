@@ -244,45 +244,6 @@ export class ListarInteresesComponent implements OnInit {
       window.URL.revokeObjectURL(url); // Liberar recursos
     });
   }
-
-  _calcularInteres() {
-    let idFactura = +this.idfactura!;
-    this.totInteres = 0;
-    this.arrCalculoInteres = [];
-    this.s_facturas.getById(idFactura).subscribe({
-      next: (datos) => {
-        let fec = datos.feccrea.toString().split('-', 2);
-        let fechai: Date = new Date(`${fec[0]}-${fec[1]}-01`);
-        let fechaf: Date = new Date();
-        console.log(fechai);
-        console.log(fechaf);
-        this.factura = datos;
-        fechai.setMonth(fechai.getMonth() + 2);
-        while (fechai <= fechaf) {
-          this.calInteres = {} as calcInteres;
-          let query = this._intereses.find(
-            (interes: { anio: number; mes: number }) =>
-              interes.anio === fechai.getFullYear() &&
-              interes.mes === fechai.getMonth() + 1
-          );
-          this.calInteres.anio = query.anio;
-          this.calInteres.mes = query.mes;
-          this.calInteres.interes = query.porcentaje;
-          this.calInteres.valor = datos.totaltarifa;
-          this.arrCalculoInteres.push(this.calInteres);
-          fechai.setMonth(fechai.getMonth() + 1);
-        }
-        console.log(this.arrCalculoInteres);
-        this.arrCalculoInteres.forEach((item: any) => {
-          console.log(item.interes * item.valor * 100);
-
-          this.totInteres += (item.interes * item.valor) / 100;
-        });
-      },
-      error: (e) => console.error(e),
-    });
-  }
-
   async calcularInteres() {
     let factura = await this.s_facturas.getByIdAsync(+this.idfactura!);
 

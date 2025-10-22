@@ -21,7 +21,6 @@ export class ListarTipopagoComponent implements OnInit {
 
   public listarTipopago(){
     this.tpService.getListTipopago().subscribe(datos => {this._tipopago = datos})
-    console.log(this._tipopago.length)
   }
 
   // eliminarTipopago(idtipopago:number, descripcion:String){

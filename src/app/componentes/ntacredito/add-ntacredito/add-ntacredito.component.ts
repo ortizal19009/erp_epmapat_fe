@@ -83,7 +83,6 @@ export class AddNtacreditoComponent implements OnInit {
   getAllDocumentos() {
     this.s_documento.getListaDocumentos().subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this._documentos = datos;
         this.f_ntacredito.patchValue({
           iddocumento_documentos: datos[0],
@@ -108,7 +107,6 @@ export class AddNtacreditoComponent implements OnInit {
 
     this.s_ntacredito.saveNtacredito(ntacredito).subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this.router.navigate(['/ntacredito']);
       },
     });
@@ -124,7 +122,6 @@ export class AddNtacreditoComponent implements OnInit {
     this.f_ntacredito.get(name)?.setValue(''); // Borra el valor del primer input
   }
   getPlanilla() {
-    console.log("por aqui en getPlanilla()")
     let formulario = this.f_ntacredito.value;
     if (formulario.nrofactura != '' || formulario.planilla != '') {
       this.loading.showLoading();

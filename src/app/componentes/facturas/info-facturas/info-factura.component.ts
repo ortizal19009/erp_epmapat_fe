@@ -21,7 +21,7 @@ export class InfoFacturasComponent implements OnInit {
   suma0: number;
   valoriva: number;
   _impuesto: Impuestos = new Impuestos();
-  interes: number = 0;
+  interes: any = 0;
   @Input() idfac: any;
   swreturn: boolean = true;
   datos: boolean = true;
@@ -128,12 +128,8 @@ export class InfoFacturasComponent implements OnInit {
     this.s_loading.hideLoading();
     this.datos = false;
   }
-  datosPlanilla() {
-    this.s_interes.getInteresFactura(this.idFactura!).subscribe({
-      next: (interes: any) => {
-        this.interes = interes;
-      },
-    });
+  async datosPlanilla() {
+    this.interes = await this.s_interes.getInteresFactura(this.idFactura!);
     this.facService.getById(this.idFactura!).subscribe({
       next: (resp: any) => {
         this.planilla.idfactura = resp.idfactura;

@@ -199,13 +199,10 @@ export class RecaudacionComponent implements OnInit {
   }
   abrirCaja() {
     this.getAllPtoEmision();
-    console.log(this.authService.idusuario)
 
     this.s_cajas.getByIdUsuario(this.authService.idusuario).subscribe({
       next: (dcaja: any) => {
-        console.log(dcaja)
         if (dcaja) {
-
           this._caja = dcaja;
           this._establecimiento = dcaja.idptoemision_ptoemision;
           this._establecimiento = this._ptoemision.find((e: any) => e.establecimiento === dcaja.idptoemision_ptoemision.establecimiento); // O el criterio que necesites
@@ -216,7 +213,6 @@ export class RecaudacionComponent implements OnInit {
           /* VALIDAR SI LA CAJA ESTA ABIERTA O CERRADA */
           this.s_recaudaxcaja.getLastConexion(this._caja.idcaja).subscribe({
             next: (drxc: any) => {
-              console.log(drxc)
               let c_fecha: Date = new Date();
               let l_fecha: Date = new Date(drxc.fechainiciolabor);
               let estadoCaja = sessionStorage.getItem('estadoCaja');
@@ -468,7 +464,6 @@ export class RecaudacionComponent implements OnInit {
           }
           //item.total += interes;
         });
-        console.log(sincobrar);
         this._sincobro = sincobrar;
       },
       error: (e) => console.error(e),
@@ -1289,8 +1284,7 @@ export class RecaudacionComponent implements OnInit {
   cInteres(factura: any) {
     let interes: any = 0;
     interes = this.interService
-      .getInteresFactura(factura.idfactura)
-      .toPromise();
+      .getInteresFactura(factura.idfactura);
 
     return interes;
   }

@@ -5,30 +5,31 @@ import { EstadomService } from 'src/app/servicios/estadom.service';
 
 @Component({
   selector: 'app-listar-estadom',
-  templateUrl: './listar-estadom.component.html'
+  templateUrl: './listar-estadom.component.html',
 })
-
 export class ListarEstadomComponent implements OnInit {
-  
   v_estadom: Estadom[] = [];
 
-  constructor(private ems: EstadomService, private router: Router) { }
+  constructor(private ems: EstadomService, private router: Router) {}
 
-  ngOnInit(): void { this.listarEstadom(); }
+  ngOnInit(): void {
+    this.listarEstadom();
+  }
 
   public listarEstadom() {
-    this.ems.getListEstadom().subscribe(datos => { this.v_estadom = datos })
-    console.log(this.v_estadom.length)
+    this.ems.getListEstadom().subscribe((datos) => {
+      this.v_estadom = datos;
+    });
   }
 
   eliminarEstadom(idestadom: number) {
-    this.ems.deleteEstadom(idestadom).subscribe(datos => {
+    this.ems.deleteEstadom(idestadom).subscribe((datos) => {
       this.listarEstadom();
-    })
+    });
   }
 
   modificarEstadom(estadom: Estadom) {
-    localStorage.setItem("idestadom", estadom.idestadom.toString());
+    localStorage.setItem('idestadom', estadom.idestadom.toString());
     //this.router.navigate(['/modificar-estadom']);
   }
 }

@@ -88,7 +88,6 @@ export class ConveniosComponent implements OnInit {
          if (hasta - desde < 200) {
             this.convService.conveniosDesdeHasta(desde, hasta).subscribe({
                next: datos => {
-                  console.log(datos)
                   this._convenios = datos;
                   this.swbuscando = false;
                   this.txtbuscar = 'Buscar'

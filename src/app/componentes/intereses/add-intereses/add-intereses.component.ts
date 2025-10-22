@@ -58,7 +58,7 @@ export class AddInteresesComponent implements OnInit {
          next: async (datos: any) => {
             this.reset();
             this.parent.listarIntereses();
-            let tempInteres = await this.s_tmpinteresxfac.calcularInteresesTemporales();
+            let tempInteres = await this.inteService.recalcularBatchInteres();
             console.log(tempInteres);
          },
          error: err => console.log(err.error),

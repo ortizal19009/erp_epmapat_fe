@@ -5,43 +5,48 @@ import { TpreclamoService } from 'src/app/servicios/tpreclamo.service';
 
 @Component({
   selector: 'app-tpreclamos',
-  templateUrl: './tpreclamos.component.html'
+  templateUrl: './tpreclamos.component.html',
 })
 export class TpreclamosComponent implements OnInit {
-
   _tpreclamo: any;
-  rtn:number;
-  descripcion:any;  //Ubicacion enviada como mensaje a eliminar y a info
+  rtn: number;
+  descripcion: any; //Ubicacion enviada como mensaje a eliminar y a info
 
-  constructor(private tprService: TpreclamoService, private router: Router) { }
+  constructor(private tprService: TpreclamoService, private router: Router) {}
 
-  ngOnInit(): void { this.listarAll(); }
+  ngOnInit(): void {
+    this.listarAll();
+  }
 
   public listarAll() {
-    this.tprService.getAll().subscribe(datos => { this._tpreclamo = datos })
-    console.log(this._tpreclamo.length)
+    this.tprService.getAll().subscribe((datos) => {
+      this._tpreclamo = datos;
+    });
   }
-  
+
   eliminarTpreclamo(idtpreclamo: number, descripcion: String) {
-    localStorage.setItem("idtpreclamoToDelete", idtpreclamo.toString());
-    this.descripcion = descripcion
+    localStorage.setItem('idtpreclamoToDelete', idtpreclamo.toString());
+    this.descripcion = descripcion;
     this.rtn = 0;
-    if ( idtpreclamo <= 8 ){
+    if (idtpreclamo <= 8) {
       this.rtn = 1;
     }
   }
 
   confirmaEliminarTpreclamo() {
-    let id = localStorage.getItem("idtpreclamoToDelete");
+    let id = localStorage.getItem('idtpreclamoToDelete');
     if (id != null) {
-        this.tprService.delete(+id!).subscribe(datos => {
+      this.tprService.delete(+id!).subscribe(
+        (datos) => {
           this.listarAll();
-        }, error => console.log(error));
-      }
-   }
+        },
+        (error) => console.log(error)
+      );
+    }
+  }
 
   modificar(tpreclamo: Tpreclamo) {
-    localStorage.setItem("idtpreclamo", tpreclamo.idtpreclamo.toString());
+    localStorage.setItem('idtpreclamo', tpreclamo.idtpreclamo.toString());
     this.router.navigate(['/modificar-tpreclamo']);
   }
 
@@ -49,5 +54,4 @@ export class TpreclamosComponent implements OnInit {
     //localStorage.setItem("idubicacionm", this._ubicacionm.idubicacionm.toString());
     this.descripcion = descripcion;
   }
-
 }

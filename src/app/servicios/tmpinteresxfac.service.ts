@@ -5,12 +5,14 @@ import { environment } from 'src/environments/environment';
 const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/tmpinteresxfac`;
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TmpinteresxfacService {
-
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
   async calcularInteresesTemporales(): Promise<any> {
-    return firstValueFrom(this.http.get(`${baseUrl}/calcularInteres`))
+    return firstValueFrom(this.http.get(`${baseUrl}/calcularInteres`));
+  }
+  async getByIdFactura(idfactura: number): Promise<any> {
+    return firstValueFrom (this.http.get<any>(`${baseUrl}/getByIdfactura?idfactura=${idfactura}`));
   }
 }

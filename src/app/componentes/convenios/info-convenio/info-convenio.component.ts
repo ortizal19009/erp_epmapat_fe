@@ -79,11 +79,10 @@ export class InfoConvenioComponent implements OnInit {
         this.convenio.feccrea = datos.feccrea;
         this.cuotasxConvenio(this.idconvenio);
       },
-      error: (err) => console.log(err.error),
+      error: (err) => console.error(err.error),
     });
     this.convService.findDatosConvenio(this.idconvenio).subscribe({
       next: (datos: any) => {
-        console.log(datos)
         this.sweliminar = true;
       },
       error: (e: any) => console.error(e)
