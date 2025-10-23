@@ -1,14 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Fecfactura } from '../modelos/fecfactura.model';
-import { Observable, from, interval } from 'rxjs';
+import { Observable, firstValueFrom, from, interval } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { Router } from '@angular/router';
-import { FormBuilder } from '@angular/forms';
 import { AutorizaService } from '../compartida/autoriza.service';
 import { DefinirService } from './administracion/definir.service';
-import { ColoresService } from '../compartida/colores.service';
-import { FacturaService } from './factura.service';
 import { RubroxfacService } from './rubroxfac.service';
 import { FecFacturaDetallesService } from './fec-factura-detalles.service';
 import { FecFacturaDetallesImpuestosService } from './fec-factura-detalles-impuestos.service';
@@ -481,6 +477,9 @@ export class FecfacturaService {
       `${baseUrl}/setxml?idfactura=${fecfactura.idfactura}`,
       fecfactura
     );
+  }
+  async generateXmlOfPago(idfactura: number):Promise<any> {
+    return firstValueFrom(this.http.get(`${baseUrl}/createFacElectro?idfactura=${idfactura}`));
   }
 }
 

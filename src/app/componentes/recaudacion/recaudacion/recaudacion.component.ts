@@ -43,6 +43,9 @@ import { Valoresnc } from 'src/app/modelos/valoresnc';
 import { Ntacredito } from 'src/app/modelos/ntacredito';
 import { JasperReportService } from 'src/app/servicios/jasper-report.service';
 import { PtoemisionService } from 'src/app/servicios/ptoemision.service';
+import { DefinirService } from 'src/app/servicios/administracion/definir.service';
+import { FecfacturaComponent } from '../../facelectro/fecfactura/fecfactura.component';
+import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
 
 @Component({
   selector: 'app-recaudacion',
@@ -113,6 +116,7 @@ export class RecaudacionComponent implements OnInit {
   valorNtaCredito: number;
 
   _ptoemision: any;
+  iva: number;
 
   constructor(
     public fb: FormBuilder,
@@ -137,10 +141,16 @@ export class RecaudacionComponent implements OnInit {
     private s_valorNc: ValoresncService,
     private s_facnc: FacxncService,
     private s_jasperReport: JasperReportService,
-    private s_ptoemision: PtoemisionService
-  ) { }
+    private s_ptoemision: PtoemisionService,
+    private s_definir: DefinirService,
+    private s_fecfacturas: FecfacturaService
+  ) {}
 
   ngOnInit(): void {
+    this.s_definir.getByIddefinirAsync(1).then((item: any) => {
+      this.iva = item.iva;
+    });
+
     this.formBuscar = this.fb.group({
       cuenta: '',
       identificacion: '',
@@ -205,7 +215,11 @@ export class RecaudacionComponent implements OnInit {
         if (dcaja) {
           this._caja = dcaja;
           this._establecimiento = dcaja.idptoemision_ptoemision;
-          this._establecimiento = this._ptoemision.find((e: any) => e.establecimiento === dcaja.idptoemision_ptoemision.establecimiento); // O el criterio que necesites
+          this._establecimiento = this._ptoemision.find(
+            (e: any) =>
+              e.establecimiento ===
+              dcaja.idptoemision_ptoemision.establecimiento
+          ); // O el criterio que necesites
 
           this._usuario = dcaja.idusuario_usuarios;
           this._codRecaudador = `${dcaja.idptoemision_ptoemision.establecimiento}-${dcaja.codigo}`;
@@ -237,23 +251,21 @@ export class RecaudacionComponent implements OnInit {
             error: (e) => console.error(e),
           });
         } else {
-          alert("ESTE USUARIO NO TIENE CAJA REGISTRADA");
+          alert('ESTE USUARIO NO TIENE CAJA REGISTRADA');
         }
       },
     });
   }
   getAllPtoEmision() {
-    this.s_ptoemision.getListaPtoEmision().subscribe({ next: (datos: any) => { this._ptoemision = datos; }, error: (e: any) => console.error(e) })
+    this.s_ptoemision.getListaPtoEmision().subscribe({
+      next: (datos: any) => {
+        this._ptoemision = datos;
+      },
+      error: (e: any) => console.error(e),
+    });
   }
   changeEstablecimiento(e: any) {
-    //console.log(e.target.value);
-    console.log(this._establecimiento)
-    //console.log(this._codRecaudador)
-    //console.log(this._caja)
-    //console.log(this._ptoemision)
-    //this._codRecaudador = `${this._caja.idptoemision_ptoemision.establecimiento}-${this._caja.codigo}`;
     this._caja.idptoemision_ptoemision = this._establecimiento;
-
   }
   formatNroFactura(nroFactura: number) {
     let nfactura = `${this._codRecaudador}-${nroFactura
@@ -276,8 +288,11 @@ export class RecaudacionComponent implements OnInit {
       next: (datos) => {
         this.estadoCajaT = false;
         sessionStorage.setItem('estadoCaja', '1');
-        this.s_cajas.updateCaja(this._caja).subscribe({ next: (datos: any) => { window.location.reload(); } })
-
+        this.s_cajas.updateCaja(this._caja).subscribe({
+          next: (datos: any) => {
+            window.location.reload();
+          },
+        });
       },
       error: (e) => console.error(e),
     });
@@ -652,13 +667,10 @@ export class RecaudacionComponent implements OnInit {
       next: (datos: any) => {
         this._nc = datos;
         if (datos.length > 0) {
-          console.log('BUSCANDO NTA CEDITO CUENT');
           this.formCobrar.patchValue({
             saldo: datos[0].saldo,
           });
         } else {
-          console.log('QUITNDO VALOR NTA CEDITO');
-
           this.formCobrar.patchValue({
             saldo: '',
           });
@@ -693,7 +705,6 @@ export class RecaudacionComponent implements OnInit {
           return this.s_ntacredito.updateNotaCredito(nc);
         }),
         tap((respuesta: any) => {
-          console.log('Nota Actualizada', respuesta);
         })
       )
       .subscribe({
@@ -825,7 +836,7 @@ export class RecaudacionComponent implements OnInit {
       i++;
     });
     suma12 = Math.round(suma12 * 100) / 100;
-    this.valoriva = suma12 * 0.15;
+    this.valoriva = suma12 * this.iva;
     this.totfac = suma12 + suma0 + this.valoriva + this.totInteres;
   }
 
@@ -855,17 +866,14 @@ export class RecaudacionComponent implements OnInit {
     });
   }
 
-  saveRubxFac(idfactura: any, idrubro: any, valorunitario: any) {
+  async saveRubxFac(idfactura: any, idrubro: any, valorunitario: any) {
     let rubrosxfac: Rubroxfac = new Rubroxfac();
     rubrosxfac.idfactura_facturas = idfactura;
     rubrosxfac.idrubro_rubros = idrubro;
     rubrosxfac.valorunitario = valorunitario;
     rubrosxfac.cantidad = 1;
     rubrosxfac.estado = 1;
-    this.rubxfacService.saveRubroxFac(rubrosxfac).subscribe({
-      next: (datos) => { },
-      error: (e) => console.error(e),
-    });
+    await this.rubxfacService.saveRubroxfacAsync(rubrosxfac);
   }
   //Registra las facturas por recaudación y actualiza la fecha de cobro de la(s) factura(s)
   facxrecauda(recaCreada: Recaudacion, i: number) {
@@ -902,7 +910,7 @@ export class RecaudacionComponent implements OnInit {
             next: (nex) => {
               //Actualiza Factura como cobrada
               //let iva = 0;
-              this.rubxfacService.getIva(0.15, fac.idfactura).subscribe({
+              this.rubxfacService.getIva(this.iva, fac.idfactura).subscribe({
                 next: (iva: any) => {
                   if (iva[0] != undefined) {
                     fac.swiva = iva[0][1];
@@ -949,13 +957,12 @@ export class RecaudacionComponent implements OnInit {
                       .getLastConexion(this._caja.idcaja)
                       .subscribe({
                         next: (datos) => {
-                          let c_fecha: Date = new Date();
                           this.recxcaja = datos;
                           this.recxcaja.facfin = nrofac_f;
                           this.s_recaudaxcaja
                             .updateRecaudaxcaja(this.recxcaja)
                             .subscribe({
-                              next: (datos) => { },
+                              next: (datos) => {},
                               error: (e) => console.error(e),
                             });
                         },
@@ -965,7 +972,7 @@ export class RecaudacionComponent implements OnInit {
                   }
                   //fac.swiva = +iva[0][1]!;
                   this.facService.updateFacturas(fac).subscribe({
-                    next: (nex: any) => {
+                    next: async (nex: any) => {
                       if (this._nc.length > 0 && fac.valornotacredito > 0) {
                         let valoresnc: Valoresnc = new Valoresnc();
                         valoresnc.estado = 1;
@@ -981,8 +988,9 @@ export class RecaudacionComponent implements OnInit {
                         nex.idmodulo.idmodulo != 27 ||
                         nex.interescobrado > 0
                       ) {
-                        this.saveRubxFac(fac, rubro, this._sincobro[i].interes);
+                        await this.saveRubxFac(fac, rubro, this._sincobro[i].interes);
                       }
+                      this.s_fecfacturas.generateXmlOfPago(fac.idfactura);
                       j++;
                       i++;
                       if (i < this._sincobro.length) {
@@ -1112,7 +1120,6 @@ export class RecaudacionComponent implements OnInit {
   }
 
   async impComprobante(datos: any) {
-    console.log(datos);
     // Abrir una pestaña vacía de inmediato
     const newTab = window.open('', '_blank');
     if (!newTab) {
@@ -1198,7 +1205,6 @@ export class RecaudacionComponent implements OnInit {
 
     let fac = await this.facService.getByIdAsync(datos.idfactura);
     let body: any;
-    console.log(fac);
     if (fac.idabonado > 0 && fac.idmodulo.idmodulo == 4) {
       body = {
         reportName: 'CompPagoConsumoAgua',
@@ -1208,7 +1214,6 @@ export class RecaudacionComponent implements OnInit {
         extencion: '.pdf',
       };
     } else if (fac.idmodulo.idmodulo === 27 || fac.estado == 2) {
-      console.log('convenio pago');
       body = {
         reportName: 'CompPagoConvenios',
         parameters: {
@@ -1217,7 +1222,6 @@ export class RecaudacionComponent implements OnInit {
         extencion: '.pdf',
       };
     } else {
-      console.log('servicio');
       body = {
         reportName: 'CompPagoServicios',
         parameters: {
@@ -1283,8 +1287,7 @@ export class RecaudacionComponent implements OnInit {
   /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
   cInteres(factura: any) {
     let interes: any = 0;
-    interes = this.interService
-      .getInteresFactura(factura.idfactura);
+    interes = this.interService.getInteresFactura(factura.idfactura);
 
     return interes;
   }
@@ -1323,7 +1326,6 @@ export class RecaudacionComponent implements OnInit {
   }
   //Al digitar el valor de la NC
   changeNCvalor(e: any) {
-    console.log(e.target.value);
     this.valorNtaCredito = +e.target.value!;
     let dinero: number;
     if (+this.formCobrar.controls['dinero'].value > 0)
@@ -1341,19 +1343,15 @@ export class RecaudacionComponent implements OnInit {
   }
 
   calcularNCByFactura(vfactura: number, vnc: number): number {
-    console.log(`valor factura: ${vfactura}, valor NC: ${vnc}`);
     if (vnc > 0) {
       if (vfactura === vnc) {
         this.valorNtaCredito = vnc - vfactura;
-        console.log('VALORES IGUALES');
         return vnc;
       } else if (vfactura < vnc) {
         this.valorNtaCredito = vnc - vfactura;
-        console.log('VALORES VF < NC');
         return vfactura;
       } else if (vfactura > vnc) {
         this.valorNtaCredito = 0;
-        console.log('VALORES VF > NC');
         return vnc;
       } else {
         return 0;

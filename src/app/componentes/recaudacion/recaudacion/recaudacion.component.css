@@ -27,7 +27,7 @@
 }
 
 input:required:placeholder-shown {
-  border-color: #d79ee4;
+  border-color: #ffffff;
 }
 
 input:required:not(:placeholder-shown):invalid {
