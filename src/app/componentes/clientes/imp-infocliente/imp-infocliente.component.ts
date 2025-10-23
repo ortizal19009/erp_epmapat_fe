@@ -6,6 +6,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
+import { InteresesService } from 'src/app/servicios/intereses.service';
 @Component({
   selector: 'app-imp-infocliente',
   templateUrl: './imp-infocliente.component.html',
@@ -34,7 +35,8 @@ export class ImpInfoclienteComponent implements OnInit {
     public fb: FormBuilder,
     private router: Router,
     private facService: FacturaService,
-    private rxfService: RubroxfacService
+    private rxfService: RubroxfacService,
+    private s_interes: InteresesService
   ) {}
 
   ngOnInit(): void {
@@ -204,21 +206,33 @@ export class ImpInfoclienteComponent implements OnInit {
     doc.setFont('times', 'normal');
     doc.setFontSize(12);
     doc.text('FECHA: ' + this.formImprimir.value.hasta, m_izquierda, 28);
-    let cabecera = ['CUENTA', 'PLANILLA', 'FECHA', 'MÓDULO', 'VALOR'];
+    let cabecera = [
+      'CUENTA',
+      'PLANILLA',
+      'FECHA',
+      'MÓDULO',
+      'VALOR',
+      'INTERES',
+    ];
 
     const datos: any = [];
     let totales: number[] = [0];
     let i = 0;
-    this._cartera.forEach(() => {
+    this._cartera.forEach(async () => {
       if (this._cartera[i].idmodulo.idmodulo == 3)
         this._cartera[i].totaltarifa = this._cartera[i].totaltarifa + 1;
       totales[0] = totales[0] + this._cartera[i].totaltarifa;
+      let interes: any = await this.s_interes.getInteresTemporal(
+        this._cartera[i].idfactura
+      );
+
       datos.push([
         this._cartera[i].idabonado,
         this._cartera[i].idfactura,
         this._cartera[i].feccrea,
         this._cartera[i].idmodulo.descripcion,
         formatNumber(this._cartera[i].totaltarifa),
+        formatNumber(interes),
       ]);
       i++;
     });
@@ -494,7 +508,7 @@ export class ImpInfoclienteComponent implements OnInit {
     columnsToRigth.forEach((columnIndex) => {
       worksheet
         .getColumn(columnIndex)
-        .eachCell({ includeEmpty: true }, (cell:any) => {
+        .eachCell({ includeEmpty: true }, (cell: any) => {
           cell.alignment = { horizontal: 'right' };
         });
     });

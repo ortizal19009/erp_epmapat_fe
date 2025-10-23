@@ -10,7 +10,6 @@ import { Clientes } from 'src/app/modelos/clientes';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { PdfService } from 'src/app/servicios/pdf.service';
-import { LoadingService } from 'src/app/servicios/loading.service';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import Swal from 'sweetalert2';
 
@@ -61,7 +60,6 @@ export class ImpClienteComponent implements OnInit {
     //
     const fecha = new Date();
     const hasta = fecha.toISOString().slice(0, 10);
-    const año = fecha.getFullYear() - 1;
     this.formImprimir = this.fb.group({
       reporte: '3',
       hasta: hasta,
