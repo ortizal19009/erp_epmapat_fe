@@ -704,8 +704,7 @@ export class RecaudacionComponent implements OnInit {
           };
           return this.s_ntacredito.updateNotaCredito(nc);
         }),
-        tap((respuesta: any) => {
-        })
+        tap((respuesta: any) => {})
       )
       .subscribe({
         error: (e: any) =>
@@ -988,7 +987,11 @@ export class RecaudacionComponent implements OnInit {
                         nex.idmodulo.idmodulo != 27 ||
                         nex.interescobrado > 0
                       ) {
-                        await this.saveRubxFac(fac, rubro, this._sincobro[i].interes);
+                        await this.saveRubxFac(
+                          fac,
+                          rubro,
+                          this._sincobro[i].interes
+                        );
                       }
                       this.s_fecfacturas.generateXmlOfPago(fac.idfactura);
                       j++;
