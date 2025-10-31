@@ -144,7 +144,7 @@ export class RecaudacionComponent implements OnInit {
     private s_ptoemision: PtoemisionService,
     private s_definir: DefinirService,
     private s_fecfacturas: FecfacturaService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.s_definir.getByIddefinirAsync(1).then((item: any) => {
@@ -432,6 +432,7 @@ export class RecaudacionComponent implements OnInit {
   }
 
   sinCobro(idcliente: number) {
+    console.log(idcliente);
     this.loadingService.showLoading();
     this.swbusca = 0;
     this.facService.getFacSincobro(idcliente).subscribe({
@@ -554,6 +555,7 @@ export class RecaudacionComponent implements OnInit {
   }
 
   selecCliente(cliente: Clientes) {
+    console.log(cliente);
     this.formBuscar.controls['cuenta'].setValue('');
     this.formBuscar.controls['identificacion'].setValue(
       cliente.cedula.toString()
@@ -704,7 +706,7 @@ export class RecaudacionComponent implements OnInit {
           };
           return this.s_ntacredito.updateNotaCredito(nc);
         }),
-        tap((respuesta: any) => {})
+        tap((respuesta: any) => { })
       )
       .subscribe({
         error: (e: any) =>
@@ -961,7 +963,7 @@ export class RecaudacionComponent implements OnInit {
                           this.s_recaudaxcaja
                             .updateRecaudaxcaja(this.recxcaja)
                             .subscribe({
-                              next: (datos) => {},
+                              next: (datos) => { },
                               error: (e) => console.error(e),
                             });
                         },
