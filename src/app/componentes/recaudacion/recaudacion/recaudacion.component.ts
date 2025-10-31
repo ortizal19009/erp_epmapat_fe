@@ -144,10 +144,11 @@ export class RecaudacionComponent implements OnInit {
     private s_ptoemision: PtoemisionService,
     private s_definir: DefinirService,
     private s_fecfacturas: FecfacturaService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.s_definir.getByIddefinirAsync(1).then((item: any) => {
+      console.log(item);
       this.iva = item.iva;
     });
 
@@ -215,11 +216,10 @@ export class RecaudacionComponent implements OnInit {
         if (dcaja) {
           this._caja = dcaja;
           this._establecimiento = dcaja.idptoemision_ptoemision;
-          this._establecimiento = this._ptoemision.find(
-            (e: any) =>
-              e.establecimiento ===
-              dcaja.idptoemision_ptoemision.establecimiento
-          ); // O el criterio que necesites
+          this._establecimiento = this._ptoemision.find((e: any) => {
+            console.log(e);
+            e.establecimiento === dcaja.idptoemision_ptoemision.establecimiento;
+          }); // O el criterio que necesites
 
           this._usuario = dcaja.idusuario_usuarios;
           this._codRecaudador = `${dcaja.idptoemision_ptoemision.establecimiento}-${dcaja.codigo}`;
@@ -706,7 +706,7 @@ export class RecaudacionComponent implements OnInit {
           };
           return this.s_ntacredito.updateNotaCredito(nc);
         }),
-        tap((respuesta: any) => { })
+        tap((respuesta: any) => {})
       )
       .subscribe({
         error: (e: any) =>
@@ -963,7 +963,7 @@ export class RecaudacionComponent implements OnInit {
                           this.s_recaudaxcaja
                             .updateRecaudaxcaja(this.recxcaja)
                             .subscribe({
-                              next: (datos) => { },
+                              next: (datos) => {},
                               error: (e) => console.error(e),
                             });
                         },

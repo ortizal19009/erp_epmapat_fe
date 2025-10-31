@@ -17,11 +17,10 @@ export class DefinirService {
     return this.http.get<Definir>(baseUrl + '/' + iddefinir);
   }
 
-  async getByIddefinirAsync(iddefinir: number): Promise<Definir> {
+  getByIddefinirAsync(iddefinir: number): Promise<Definir> {
     const source$ = this.http.get<Definir>(baseUrl + '/' + iddefinir);
     return lastValueFrom(source$);
   }
-
 
   updateDefinir(iddefinir: number, definir: Definir): Observable<Object> {
     return this.http.put(baseUrl + '/' + iddefinir, definir);
