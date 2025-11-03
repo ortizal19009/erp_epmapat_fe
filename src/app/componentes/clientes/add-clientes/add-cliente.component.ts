@@ -45,7 +45,7 @@ export class AddClienteComponent implements OnInit {
     public tpidentiService: TpidentificaService,
     private authService: AutorizaService,
     private coloresService: ColoresService
-  ) {}
+  ) { }
 
   async ngOnInit(): Promise<void> {
     sessionStorage.setItem('ventana', `/${this.ventana}`);
@@ -148,7 +148,6 @@ export class AddClienteComponent implements OnInit {
   listarTpIdentifica() {
     this.tpidentiService.getListaTpIdentifica().subscribe({
       next: (datos) => {
-        console.log(datos);
         this._tpidentifica = datos;
         this.formCliente.patchValue({ idtpidentifica_tpidentifica: datos[1] });
       },
@@ -183,8 +182,6 @@ export class AddClienteComponent implements OnInit {
       'idpjuridica_personeriajuridica'
     )!.value;
     this.formCliente.value.idpjuridica_personeriajuridica = this.pjuridica;
-    console.log(this.formCliente.value);
-
     this.cliService.saveClientes(this.formCliente.value).subscribe({
       next: (nex) => {
         this.retornarListaClientes();

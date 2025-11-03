@@ -128,8 +128,6 @@ export class AguatramiteComponent implements OnInit {
       });
    }
    optFechas() {
-
-      console.log(this.optImprimir.value.opt)
       let opt = false;
       if (+this.optImprimir.value.opt! === 1) {
          opt = true
@@ -139,7 +137,6 @@ export class AguatramiteComponent implements OnInit {
    }
    async genPdf() {
       let opt = +this.optImprimir.value.opt!
-      console.log(opt)
       switch (opt) {
          case 0:
             this.repGeneralByEstado()
@@ -182,7 +179,6 @@ export class AguatramiteComponent implements OnInit {
    }
 
    addAguaTramite() {
-      // console.log('forms-aguatramite',+this.f_Tipotramite.value.idtitpotramite!,)
       this.router.navigate(['forms-aguatramite', +this.f_Tipotramite.value.idtitpotramite!,]);
    }
 

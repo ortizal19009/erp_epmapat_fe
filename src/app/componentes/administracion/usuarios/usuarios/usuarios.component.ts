@@ -132,10 +132,8 @@ export class UsuariosComponent implements OnInit {
     user.estado = true;
     user.usumodi = this.authService.idusuario;
     user.otrapestania = true;
-    console.log(user);
     this.usuService.save(user).subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this.listarUsuarios();
         this.f_usuario.reset();
       },

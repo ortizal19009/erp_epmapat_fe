@@ -70,10 +70,8 @@ export class ImpInfoCajasComponent implements OnInit {
   }
   async getRecaudador() {
     let recaudador = +sessionStorage.getItem('idrecaudador')!;
-    console.log(recaudador);
     this.s_usuarios.getDatosOfOne(recaudador).subscribe({
       next: (recaudador: any) => {
-        console.log(recaudador);
         this.nombreUsuario = recaudador.nombre;
       },
     });

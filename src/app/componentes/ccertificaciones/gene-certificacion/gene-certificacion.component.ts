@@ -153,8 +153,7 @@ export class GeneCertificacionComponent implements OnInit {
 
    setAbonado(e: any) {
       if (e.target.checked === true) {
-         console.log(e.target.value);
-         console.log(this.formGenera.value.tpCertificado);
+
          this.formGenera.patchValue({
             sino: '1',
             cliente: { cuenta: e.target.value },
@@ -177,7 +176,6 @@ export class GeneCertificacionComponent implements OnInit {
                   sino: '0',
                });
             }
-            console.log(datos);
          },
          error: (e) => console.error(e),
       });
@@ -186,7 +184,6 @@ export class GeneCertificacionComponent implements OnInit {
    buscarDeudas(idcliente: any) {
       this.facService.getSinCobro(idcliente).subscribe({
          next: (datos) => {
-            console.log(datos);
             if (datos.length != 0) {
                this.formGenera.patchValue({
                   sino: '1',

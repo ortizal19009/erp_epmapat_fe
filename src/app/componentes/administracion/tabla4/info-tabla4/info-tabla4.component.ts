@@ -61,7 +61,6 @@ export class InfoTabla4Component implements OnInit {
 
         this.s_sri.sendRetencion(xmlString).subscribe({
           next: (response: string) => {
-            console.log('Enviado correctamente', response);
             this.swal('success', "Retencion enviada correctamente  ")
             const blob = new Blob([response], { type: 'application/xml' });
             const url = window.URL.createObjectURL(blob);
@@ -103,8 +102,6 @@ export class InfoTabla4Component implements OnInit {
     this.fileName = 'Cargando ...'
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
-    console.log(input.files)
-    console.log(file)
     this._filexml = file
     this.fileName = this._filexml.name
     this.btnSend = true

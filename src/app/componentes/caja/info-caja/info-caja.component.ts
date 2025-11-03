@@ -164,24 +164,17 @@ export class InfoCajaComponent implements OnInit {
                   //i++;
                 });
                 let total = 0;
-                console.log(datos);
                 datos.forEach((item: any) => {
-                  // console.log(item);
                   let com: number = 0;
                   let totTarifa: number = +item.idfactura.totaltarifa!;
                   let suma: number = 0;
-                  /*      console.log(item.idfactura.idmodulo.idmodulo);
-                  console.log(totTarifa); */
+      
                   if (
                     +item.idfactura.idmodulo.idmodulo! == 3 &&
                     item.idfactura.idabonado > 0
                   ) {
                     com = 1;
                   }
-                  console.log(item.idfactura.interescobrado);
-                  /* 
-                  console.log(com);
-                  console.log(totTarifa); */
                   if (+item.idfactura.idmodulo.idmodulo! != 8) {
                     suma += +item.idfactura.interescobrado! + com + +totTarifa!;
                   } else {

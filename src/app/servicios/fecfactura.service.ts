@@ -479,7 +479,8 @@ export class FecfacturaService {
     );
   }
   async generateXmlOfPago(idfactura: number): Promise<any> {
-    let url_prov = '192.168.0.165:8080';//esta url es provicional para llenar la tabla fec_factura y proceder a crear los xml
+    let url_prov = 'http://192.168.0.165:8080';//esta url es provicional para llenar la tabla fec_factura y proceder a crear los xml
+    //let url_prov = 'http://localhost:8080';
     return firstValueFrom(
       this.http.get(`${url_prov}/createFacElectro?idfactura=${idfactura}`)
     );

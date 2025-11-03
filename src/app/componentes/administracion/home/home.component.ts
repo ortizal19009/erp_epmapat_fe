@@ -300,9 +300,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
       L.control.layers(baseMaps, overlayMaps).addTo(this.map);
     }
   }
-  alert() {
-    console.log('DATOS');
-  }
+
   async getResumenEmisiones(limit: number) {
     this._resumenEmisiones = await this.s_emisiones.getResumenEmision(limit);
   }
@@ -325,10 +323,8 @@ export class HomeComponent implements OnInit, AfterViewInit {
     this.drawAllCuentas();
   }
   findCuentasByEstado(estado: any) {
-    console.log(estado);
     this.s_abonados.getByEstado(estado.estado).subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this.abonados = datos;
       },
       error: (e: any) => console.error(e),

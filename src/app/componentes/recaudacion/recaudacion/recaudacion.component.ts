@@ -31,21 +31,20 @@ import { Abonados } from 'src/app/modelos/abonados';
 import { Clientes } from 'src/app/modelos/clientes';
 import { Rubroxfac } from 'src/app/modelos/rubroxfac.model';
 import { Rubros } from 'src/app/modelos/rubros.model';
-import { of, switchMap, tap } from 'rxjs';
+import { catchError, EMPTY, of, switchMap, tap } from 'rxjs';
 import { ModulosService } from 'src/app/servicios/modulos.service';
-import { Modulos } from 'src/app/modelos/modulos.model';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { NtacreditoService } from 'src/app/servicios/ntacredito.service';
 import { ValoresncService } from 'src/app/servicios/valoresnc.service';
 import { FacxncService } from 'src/app/servicios/facxnc.service';
 import { Facxnc } from 'src/app/modelos/facxnc';
 import { Valoresnc } from 'src/app/modelos/valoresnc';
-import { Ntacredito } from 'src/app/modelos/ntacredito';
 import { JasperReportService } from 'src/app/servicios/jasper-report.service';
 import { PtoemisionService } from 'src/app/servicios/ptoemision.service';
 import { DefinirService } from 'src/app/servicios/administracion/definir.service';
-import { FecfacturaComponent } from '../../facelectro/fecfactura/fecfactura.component';
 import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
+import { Router } from '@angular/router';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-recaudacion',
@@ -118,6 +117,8 @@ export class RecaudacionComponent implements OnInit {
   _ptoemision: any;
   iva: number;
 
+
+
   constructor(
     public fb: FormBuilder,
     private aboService: AbonadosService,
@@ -129,7 +130,6 @@ export class RecaudacionComponent implements OnInit {
     private coloService: ColorService,
     private fcobroService: FormacobroService,
     private authService: AutorizaService,
-    private s_pdfRecaudacion: RecaudacionReportsService,
     private interService: InteresesService,
     private s_cajas: CajaService,
     private recaService: RecaudacionService,
@@ -143,12 +143,12 @@ export class RecaudacionComponent implements OnInit {
     private s_jasperReport: JasperReportService,
     private s_ptoemision: PtoemisionService,
     private s_definir: DefinirService,
-    private s_fecfacturas: FecfacturaService
-  ) {}
+    private s_fecfacturas: FecfacturaService,
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
     this.s_definir.getByIddefinirAsync(1).then((item: any) => {
-      console.log(item);
       this.iva = item.iva;
     });
 
@@ -208,7 +208,89 @@ export class RecaudacionComponent implements OnInit {
   get f() {
     return this.formCobrar.controls;
   }
-  abrirCaja() {
+  // Helpers (puedes moverlos a un utils.service)
+  private isSameYMD(a: Date, b: Date): boolean {
+    return a.getFullYear() === b.getFullYear()
+      && a.getMonth() === b.getMonth()
+      && a.getDate() === b.getDate();
+  }
+
+  private notify(msg: string) {
+    // Reemplaza por tu snackbar/toast si tienes uno
+    alert(msg);
+  }
+
+  abrirCaja(): void {
+    // Si getAllPtoEmision carga lista para otros flujos, mantenlo.
+    this.getAllPtoEmision();
+
+    this.s_cajas
+      .getByIdUsuario(this.authService.idusuario)
+      .pipe(
+        tap((dcaja: any) => {
+          if (!dcaja) {
+            // Lanzamos para que lo capture catchError
+            throw new Error('NO_CAJA');
+          }
+
+          // ===== Asignaciones base de la caja/usuario =====
+          this._caja = dcaja;
+          this._usuario = dcaja.idusuario_usuarios;
+
+          // Tomamos directamente del objeto retornado (sin buscar en _ptoemision)
+          this._establecimiento = dcaja.idptoemision_ptoemision ?? null;
+
+          const establecimiento = dcaja?.idptoemision_ptoemision?.establecimiento ?? '';
+          this._codRecaudador = `${establecimiento}-${dcaja.codigo}`;
+        }),
+        // ===== Consultar el último estado de conexión de la caja =====
+        switchMap((dcaja: any) =>
+          this.s_recaudaxcaja.getLastConexion(dcaja.idcaja).pipe(
+            tap((drxc: any) => {
+              // Si no hay registro previo de conexión, la caja no está activa
+              if (!drxc) {
+                this.cajaActiva = false;
+                this.estadoCajaT = true;
+                // Si no hay ultimafact, tampoco podremos formatear
+                if (dcaja?.ultimafact) {
+                  this.formatNroFactura(dcaja.ultimafact);
+                }
+                return;
+              }
+
+              // ===== Validación de fecha y estado en sesión =====
+              const hoy = new Date();
+              const inicio = new Date(drxc.fechainiciolabor);
+              const estadoCaja = sessionStorage.getItem('estadoCaja'); // '0' = cerrada?
+
+              // Caja activa solo si la última conexión es HOY y no está marcada como cerrada en sesión
+              const mismaFecha = this.isSameYMD(hoy, inicio);
+              this.cajaActiva = (mismaFecha && estadoCaja !== '0');
+              this.estadoCajaT = !this.cajaActiva;
+
+              // ===== Número de factura =====
+              // Prioriza la última factura persistida en caja; si no existe, usa la final de la conexión.
+              const nro = dcaja?.ultimafact ?? drxc?.facfin;
+              if (nro) {
+                this.formatNroFactura(nro);
+              }
+            })
+          )
+        ),
+        catchError((err) => {
+          if (err?.message === 'NO_CAJA') {
+            this.notify('ESTE USUARIO NO TIENE CAJA REGISTRADA');
+            return EMPTY;
+          }
+          console.error('Error al abrir caja:', err);
+          this.notify('Ocurrió un error al abrir la caja. Inténtalo nuevamente.');
+          return EMPTY;
+        })
+      )
+      .subscribe();
+  }
+
+  __abrirCaja() {
     this.getAllPtoEmision();
 
     this.s_cajas.getByIdUsuario(this.authService.idusuario).subscribe({
@@ -217,8 +299,7 @@ export class RecaudacionComponent implements OnInit {
           this._caja = dcaja;
           this._establecimiento = dcaja.idptoemision_ptoemision;
           this._establecimiento = this._ptoemision.find((e: any) => {
-            console.log(e);
-            e.establecimiento === dcaja.idptoemision_ptoemision.establecimiento;
+            e.establecimiento = dcaja.idptoemision_ptoemision.establecimiento;
           }); // O el criterio que necesites
 
           this._usuario = dcaja.idusuario_usuarios;
@@ -311,6 +392,7 @@ export class RecaudacionComponent implements OnInit {
         this.s_recaudaxcaja.updateRecaudaxcaja(this.recxcaja).subscribe({
           next: (datos) => {
             sessionStorage.setItem('ultimafac', '0');
+            this.router.navigate(['/inicio']);
           },
           error: (e) => console.error(e),
         });
@@ -373,17 +455,47 @@ export class RecaudacionComponent implements OnInit {
           this.formBuscar.value.identificacion != null &&
           this.formBuscar.value.identificacion != ''
         ) {
-          this.buscaIdentificacion(this.formBuscar.value.identificacion);
+
+          /*           this.clieService.getByIdentificacion(this.formBuscar.value.identificacion).subscribe({
+                      next: (datos: any) => {
+                        console.log(datos);
+                        // this.buscaIdentificacion(this.formBuscar.value.identificacion);
+                        if (datos.length > 0) {
+                          this._clientes = datos
+                        }
+                      }
+                    }); */
+          this.clieService.getByIdentificacion(this.formBuscar.value.identificacion).subscribe({
+            next: (datos: any[]) => {
+              if (!Array.isArray(datos) || datos.length === 0) {
+                this._clientes = [];
+                alert('⚠️ No se encontraron clientes.');
+                return;
+              }
+
+              if (datos.length === 1) {
+                this._clientes = datos;
+                this.selecCliente(datos[0]);
+                return;
+              }
+
+              // más de uno → cargar lista y abrir modal sin jQuery
+              this._clientes = datos;
+              this.openModal('clientesModal');
+              this.formBusClientes.patchValue({ nombre_identifica: datos[0].nombre })
+            },
+            error: () => alert('❌ Error al buscar clientes.')
+          });
         }
       }
     }
   }
 
-  buscaIdentificacion(identificacion: String) {
+  buscaIdentificacion(identificacion: any) {
     this.acobrar = 0;
-    this.clieService.getByIdentificacion(identificacion).subscribe({
+    this.clieService.getListaById(identificacion).subscribe({
       next: (datos) => {
-        this._cliente = datos;
+        this._cliente = [datos];
         if (this._cliente.length > 0) {
           this.datosCliente('identificacion');
         } else {
@@ -432,7 +544,6 @@ export class RecaudacionComponent implements OnInit {
   }
 
   sinCobro(idcliente: number) {
-    console.log(idcliente);
     this.loadingService.showLoading();
     this.swbusca = 0;
     this.facService.getFacSincobro(idcliente).subscribe({
@@ -441,6 +552,7 @@ export class RecaudacionComponent implements OnInit {
           this.swbusca = 2;
           this.loadingService.hideLoading();
         }
+        console.log(sincobrar)
         sincobrar.map(async (item: any, i: number) => {
           if (item.idAbonado != 0 && item.idmodulo != 27) {
             const abonado: Abonados = await this.getAbonado(item.idAbonado);
@@ -449,30 +561,38 @@ export class RecaudacionComponent implements OnInit {
             const emision: any = await this.getEmision(item.idfactura);
             //item.feccrea = emision;
             item.fechaemision = emision;
+            item.iva = 0;
           } else {
             const cliente: Clientes = await this.getCliente(item.idCliente);
             item.direccion = cliente.direccion;
             item.responsablePago = cliente.nombre;
             item.fechaemision = item.feccrea;
+            let iva: any = await this.calIva(item.idfactura);
+            if (iva.length != 0) {
+              item.iva = iva[0][1];
+            } else {
+              item.iva = 0;
+            }
           }
-          let iva: any = await this.calIva(item.idfactura);
-          if (iva.length != 0) {
-            item.iva = iva[0][1];
-          } else {
-            item.iva = 0;
-          }
-          const modulo: Modulos = await this.getModulo(item.idmodulo);
-          item.modulo = modulo.descripcion;
-          let interes: any = 0;
-          if (
-            (item.formapago != 4 || item.idmodulo != 27) &&
-            (item.swcondonar === false || item.swcondonar === null)
-          ) {
-            interes = await this.cInteres(item);
-            item.interes = +interes!;
-          } else {
-            item.interes = +interes!;
-          }
+
+          /*        let iva: any = await this.calIva(item.idfactura);
+                             if (iva.length != 0) {
+                               item.iva = iva[0][1];
+                             } else {
+                               item.iva = 0;
+                             } */
+          //const modulo: Modulos = await this.getModulo(item.idmodulo);
+          //item.modulo = modulo.descripcion;
+          // let interes: any = 0;
+          /*          if (
+                     (item.formapago != 4 || item.idmodulo != 27) &&
+                     (item.swcondonar === false || item.swcondonar === null)
+                   ) {
+                     interes = await this.cInteres(item);
+                     item.interes = +interes!;
+                   } else {
+                     item.interes = +interes!;
+                   } */
           i++;
           if (i === sincobrar.length) {
             this.loadingService.hideLoading();
@@ -555,12 +675,13 @@ export class RecaudacionComponent implements OnInit {
   }
 
   selecCliente(cliente: Clientes) {
-    console.log(cliente);
     this.formBuscar.controls['cuenta'].setValue('');
     this.formBuscar.controls['identificacion'].setValue(
       cliente.cedula.toString()
     );
-    this.buscaIdentificacion(cliente.cedula.toString());
+    this.buscaIdentificacion(cliente.idcliente);
+    this.closeModal('clientesModal');
+
   }
 
   clientesModal() {
@@ -706,7 +827,7 @@ export class RecaudacionComponent implements OnInit {
           };
           return this.s_ntacredito.updateNotaCredito(nc);
         }),
-        tap((respuesta: any) => {})
+        tap((respuesta: any) => { })
       )
       .subscribe({
         error: (e: any) =>
@@ -862,8 +983,19 @@ export class RecaudacionComponent implements OnInit {
         const recaCreada = resp as Recaudacion;
         let i = 0;
         this.facxrecauda(recaCreada, i);
+        this.swal("success", "Recaudación cobrada con éxito.")
       },
       error: (err) => console.error('Al crear la Recaudación: ', err.error),
+    });
+  }
+  private swal(icon: 'success' | 'error' | 'info' | 'warning', mensaje: string) {
+    Swal.fire({
+      toast: true,
+      icon,
+      title: mensaje,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
     });
   }
 
@@ -963,7 +1095,7 @@ export class RecaudacionComponent implements OnInit {
                           this.s_recaudaxcaja
                             .updateRecaudaxcaja(this.recxcaja)
                             .subscribe({
-                              next: (datos) => {},
+                              next: (datos) => { },
                               error: (e) => console.error(e),
                             });
                         },
@@ -1433,6 +1565,49 @@ export class RecaudacionComponent implements OnInit {
     });
     //this.totfac = suma12 + suma0;
   }
+
+  openModal(id: string) {
+    const modal = document.getElementById(id);
+    if (!modal) return;
+
+    // mostrar modal
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden', 'false');
+    modal.setAttribute('aria-modal', 'true');
+    modal.style.display = 'block';
+
+    // bloquear scroll del body
+    document.body.classList.add('modal-open');
+
+    // crear backdrop
+    const bd = document.createElement('div');
+    bd.className = 'modal-backdrop fade show';
+    bd.setAttribute('data-backdrop-id', id);
+    document.body.appendChild(bd);
+  }
+
+  closeModal(id: string) {
+    const modal = document.getElementById(id);
+    if (!modal) return;
+
+    // ocultar modal
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden', 'true');
+    modal.removeAttribute('aria-modal');
+    modal.style.display = 'none';
+
+    // quitar backdrop
+    const bd = document.querySelector(`.modal-backdrop[data-backdrop-id="${id}"]`);
+    if (bd && bd.parentNode) bd.parentNode.removeChild(bd);
+
+    // desbloquear scroll si no quedan modales abiertos
+    if (!document.querySelector('.modal.show')) {
+      document.body.classList.remove('modal-open');
+    }
+  }
+
+
+
 }
 
 interface Cliente {

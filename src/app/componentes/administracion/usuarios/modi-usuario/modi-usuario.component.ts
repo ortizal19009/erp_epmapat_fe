@@ -117,9 +117,6 @@ export class ModiUsuarioComponent implements OnInit {
          ...this.formUsuario.value,
          identificausu, nomusu, alias, estado
       };
-
-      console.log('valoresFormulario: ', valoresFormulario)
-
       // this.usuService.updateUsuario(this.idusuarioModi, this.formUsuario.value).subscribe({
       this.usuService.updateUsuario(this.idusuarioModi, valoresFormulario).subscribe({
          next: datos => {

@@ -278,7 +278,6 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
             /*           item.feccrea = await this.getEmisionoByFactura(item.idfactura);
              */ this.s_loading.hideLoading();
           });
-          console.log(datos);
           this._facturas = datos;
         } else {
           this.s_loading.hideLoading();

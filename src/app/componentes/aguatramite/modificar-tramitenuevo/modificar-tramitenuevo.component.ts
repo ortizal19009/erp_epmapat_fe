@@ -124,7 +124,6 @@ export class ModificarTramitenuevoComponent implements OnInit {
    }
 
    setAbonado(abonado: any) {
-      // console.log(abonado);
       this.ruta = abonado.idruta_rutas;
       this.formTramitenuevo.patchValue({
          codmedidorvecino: abonado.idabonado,
@@ -137,7 +136,6 @@ export class ModificarTramitenuevoComponent implements OnInit {
       let idtramitenuevo = this.idTramite;
       this.traminuevoService.getListaById(+idtramitenuevo!).subscribe({
          next: (datos: any) => {
-            console.log(datos)
             this.formTramitenuevo.setValue({
                idtramitenuevo: datos.idtramitenuevo,
                direccion: datos.direccion,
@@ -187,7 +185,6 @@ export class ModificarTramitenuevoComponent implements OnInit {
    }
 
    onSubmit() {
-      // console.log('this.formTramitenuevo.value: ',this.formTramitenuevo.value);
       this.guardarTramite();
    }
 
@@ -289,8 +286,6 @@ export class ModificarTramitenuevoComponent implements OnInit {
       }
    }
    adultomayor(e: any) {
-      // console.log(e.target.value);
-      // console.log(e.target.checked);
       /* if (e.target.checked === true) {
          this.formTramitenuevo.patchValue({
             adultomayor: true,
@@ -303,8 +298,6 @@ export class ModificarTramitenuevoComponent implements OnInit {
       this.v_adultomayor = e.target.checked
    }
    municipio(e: any) {
-      // console.log(e.target.value);
-      // console.log(e.target.checked);
       /* if (e.target.checked === true) {
          this.formTramitenuevo.patchValue({
             municipio: true,
@@ -318,11 +311,9 @@ export class ModificarTramitenuevoComponent implements OnInit {
    }
 
    actualizarAguaTramite(estado: number) {
-      // console.log(this.aguatramite);
       this.aguatramite.estado = estado;
       this.aguatramService.updateAguatramite(this.aguatramite).subscribe({
          next: (datos) => {
-            // console.log('AGUA TRAMITE', datos);
          },
          error: (e) => console.error(e),
       });

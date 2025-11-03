@@ -15,12 +15,15 @@
                     <div class="row col-sm-12 mt-1 mb-0">
                         <div class="form-group col-md-2 mb-0">
                             <input class="form-control form-control-sm text-center" type="text" formControlName="cuenta"
-                                placeholder="Cuenta" />
+                                placeholder="Cuenta" (focus)="formBuscar.get('identificacion')?.setValue('')" />
                         </div>
+
                         <div class="form-group col-md-2 my-0 py-0 mb-0">
                             <input class="form-control form-control-sm text-center" type="text"
-                                formControlName="identificacion" placeholder="Identificación" />
+                                formControlName="identificacion" placeholder="Identificación"
+                                (focus)="formBuscar.get('cuenta')?.setValue('')" />
                         </div>
+
                         <div class="form-group col-md-2 my-0 py-0 mb-0 form-inline">
                             <button class="btn btn-primary btn-sm mr-1">
                                 <i class="fa fa-search"></i> Buscar
@@ -634,7 +637,6 @@
         </div>
     </div>
 </div>
-
 <!-- MODAL Imprimir-->
 <div class="modal fade" id="imprimir" tabindex="-1" aria-labelledby="imprimirLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">

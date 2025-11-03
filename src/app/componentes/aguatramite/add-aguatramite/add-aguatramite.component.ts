@@ -130,7 +130,6 @@ export class AddAguatramiteComponent implements OnInit {
       this.tramitenuevo.feccrea = this.formAguatram1.value.feccrea;
       this.traminuevoService.saveTramiteNuevo(this.tramitenuevo).subscribe({
          next: (datos) => {
-            // console.log('saveTramiteNuevo Ok!');
             this.retornarListaAguaTramites();
          },
          error: (e) => console.error(e),
@@ -138,7 +137,6 @@ export class AddAguatramiteComponent implements OnInit {
    }
 
    setCliente(cliente: any) {
-      // console.log(cliente);
       this.formAguatram1.patchValue({
          idcliente_clientes: cliente,
       });

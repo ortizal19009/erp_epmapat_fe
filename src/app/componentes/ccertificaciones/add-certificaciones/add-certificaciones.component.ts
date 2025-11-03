@@ -96,7 +96,6 @@ export class AddCertificacionesComponent implements OnInit {
     this.certificaciones.feccrea = this.date;
     this.certificacionesS.saveCertificaciones(this.certificaciones).subscribe({
       next: (datos) => {
-        console.log('Grada Ok!');
         this.regresar();
       },
       error: (err) =>
@@ -143,12 +142,10 @@ export class AddCertificacionesComponent implements OnInit {
   }
 
   buscarFactura() {
-  console.log(this.f_factura.value.nrofactura)
     this.facService
       .getByNrofactura(this.f_factura.value.nrofactura)
       .subscribe({
         next: (datos: any) => {
-          console.log(datos);
           this._facturas = datos;
           this.modulo = datos.idmodulo;
         },
