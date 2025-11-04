@@ -40,4 +40,5 @@ export class Facturas {
   swcondonar: Boolean;
   valornotacredito: number;
   secuencialfacilito: string;
+  fechacompensacion: Date;
 }

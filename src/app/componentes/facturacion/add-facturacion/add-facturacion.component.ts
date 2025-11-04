@@ -65,7 +65,7 @@ export class AddFacturacionComponent implements OnInit {
     private rubService: RubrosService,
     private liqfacService: LiquidafacService,
     private authService: AutorizaService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     //Formulario de la cabecera
@@ -271,7 +271,7 @@ export class AddFacturacionComponent implements OnInit {
         next: (resp) => {
           rubrosxpla.idrubro_rubros = resp;
           this.rubxfacService.saveRubroxfac(rubrosxpla).subscribe({
-            next: (nex) => {},
+            next: (nex) => { },
             error: (err) => console.error(err.error),
           });
         },
@@ -423,6 +423,7 @@ interface Planilla {
   swcondonar: boolean;
   valornotacredito: number;
   secuencialfacilito: string;
+  fechacompensacion: Date;
 }
 
 interface Rubrosxpla {
