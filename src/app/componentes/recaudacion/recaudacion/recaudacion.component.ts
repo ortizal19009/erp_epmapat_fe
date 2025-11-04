@@ -39,7 +39,7 @@ import { ValoresncService } from 'src/app/servicios/valoresnc.service';
 import { FacxncService } from 'src/app/servicios/facxnc.service';
 import { Facxnc } from 'src/app/modelos/facxnc';
 import { Valoresnc } from 'src/app/modelos/valoresnc';
-import { JasperReportService } from 'src/app/servicios/jasper-report.service';
+import { JasperReportService, MergeItem } from 'src/app/servicios/jasper-report.service';
 import { PtoemisionService } from 'src/app/servicios/ptoemision.service';
 import { DefinirService } from 'src/app/servicios/administracion/definir.service';
 import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
@@ -962,7 +962,7 @@ export class RecaudacionComponent implements OnInit {
     this.totfac = suma12 + suma0 + this.valoriva + this.totInteres;
   }
 
-  cobrar() {
+  __cobrar() {
     //this.getLastFactura();
     //Crea el registro en Recaudación
     let fecha = new Date();
@@ -988,6 +988,37 @@ export class RecaudacionComponent implements OnInit {
       error: (err) => console.error('Al crear la Recaudación: ', err.error),
     });
   }
+  cobrar() {
+    const fecha = new Date();
+    const r = {} as iRecaudacion;
+
+    r.fechacobro = fecha;
+    r.recaudador = this.authService.idusuario;
+    r.totalpagar = +this.formCobrar.value.valorAcobrar;
+    r.recibo = +this.formCobrar.value.dinero;
+    r.cambio = +this.formCobrar.value.vuelto;
+    r.formapago = this.idformacobro;
+    r.valor = +this.formCobrar.value.valorAcobrar;
+    r.estado = 1;
+    r.ncvalor = +this.formCobrar.value.ncvalor;
+    r.usucrea = this.authService.idusuario;
+    r.feccrea = fecha;
+
+    this.recaService.saveRecaudacion(r).subscribe({
+      next: async (resp) => {
+        const recaCreada = resp as Recaudacion;
+        try {
+          await this.facxrecauda(recaCreada, 0);   // ⬅️ Espera a que termine todo
+          this.swal("success", "Recaudación cobrada con éxito.");
+        } catch (err) {
+          console.error('Error en facxrecauda:', err);
+          this.swal("error", "Ocurrió un problema al procesar las facturas.");
+        }
+      },
+      error: (err) => console.error('Al crear la Recaudación: ', err?.error ?? err),
+    });
+  }
+
   private swal(icon: 'success' | 'error' | 'info' | 'warning', mensaje: string) {
     Swal.fire({
       toast: true,
@@ -998,18 +1029,259 @@ export class RecaudacionComponent implements OnInit {
       timer: 3000,
     });
   }
+  // Registra las facturas por recaudación y actualiza la fecha de cobro de la(s) factura(s)
+  facxrecauda(recaCreada: Recaudacion, i: number): Promise<void> {
+    return new Promise((resolve, reject) => {
 
-  async saveRubxFac(idfactura: any, idrubro: any, valorunitario: any) {
-    let rubrosxfac: Rubroxfac = new Rubroxfac();
-    rubrosxfac.idfactura_facturas = idfactura;
-    rubrosxfac.idrubro_rubros = idrubro;
-    rubrosxfac.valorunitario = valorunitario;
-    rubrosxfac.cantidad = 1;
-    rubrosxfac.estado = 1;
-    await this.rubxfacService.saveRubroxfacAsync(rubrosxfac);
+      const avanzar = (idx: number) => {
+        // Fin: cuando ya no hay más por procesar
+        if (idx >= this._sincobro.length) {
+          resolve();
+          return;
+        }
+
+        const item = this._sincobro[idx];
+
+        // Si no está pagada, saltar a la siguiente (y asegurar que no quede marcado)
+        if (item.pagado !== 1 && item.pagado !== true) {
+          item.procesando = false; // por si acaso
+          avanzar(idx + 1);
+          return;
+        }
+
+        // 🔴 comienza a procesar este item
+        item.procesando = true;
+
+        // ======= Tu lógica original (idéntica) desde aquí =======
+        const idfactura: number = item.idfactura;
+        const valfactura: number = item.total + item.interes;
+        const fechacobro: Date = new Date();
+        const horaActual: string = `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`;
+
+        const rubro: Rubros = new Rubros();
+        rubro.idrubro = 5;
+
+        this.facService.getById(idfactura).subscribe({
+          next: (fac: any) => {
+            fac.valornotacredito = this.calcularNCByFactura(valfactura, this.valorNtaCredito);
+
+            const facxr = {} as iFacxrecauda;
+            facxr.idrecaudacion = recaCreada;
+            facxr.idfactura = fac;
+            facxr.estado = 1;
+
+            this.facxrService.save(facxr).subscribe({
+              next: () => {
+                this.rubxfacService.getIva(this.iva, fac.idfactura).subscribe({
+                  next: (iva: any) => {
+                    fac.swiva = (iva && iva[0]) ? iva[0][1] : 0;
+                    fac.fechacobro = fechacobro;
+                    fac.horacobro = horaActual;
+
+                    if (this.swNC === true) {
+                      fac.formapago = 3;
+                    }
+
+                    fac.usuariocobro = this.authService.idusuario;
+                    fac.interescobrado = item.interes;
+                    fac.pagado = 1;
+                    fac.estado = (fac.estado === 2) ? 2 : 1;
+
+                    if (fac.nrofactura === null) {
+                      const nrofac = this._nroFactura.split('-', 3);
+                      const nrofac_f = +nrofac[2]! + 1;
+                      sessionStorage.setItem('ultfac', nrofac_f.toString().padStart(9, '0'));
+                      this.formatNroFactura(nrofac_f);
+                      fac.nrofactura = `${this._codRecaudador}-${nrofac_f.toString().padStart(9, '0')}`;
+
+                      this.s_recaudaxcaja.getLastConexion(this._caja.idcaja).subscribe({
+                        next: (datos) => {
+                          this.recxcaja = datos;
+                          this.recxcaja.facfin = nrofac_f;
+                          this.s_recaudaxcaja.updateRecaudaxcaja(this.recxcaja).subscribe({
+                            next: () => { },
+                            error: (e) => console.error(e),
+                          });
+                        },
+                        error: (e) => console.error(e),
+                      });
+                    }
+
+                    this.facService.updateFacturas(fac).subscribe({
+                      next: async (nex: any) => {
+                        if (this._nc.length > 0 && fac.valornotacredito > 0) {
+                          const valoresnc: Valoresnc = new Valoresnc();
+                          valoresnc.estado = 1;
+                          valoresnc.idntacredito_ntacredito = this._nc[0];
+                          valoresnc.valor = this.formCobrar.value.ncvalor;
+                          valoresnc.fechaaplicado = new Date();
+                          valoresnc.saldo = this._nc[0].saldo - this.formCobrar.value.ncvalor;
+                          this.guardarValoresNc(valoresnc, nex);
+                        }
+
+                        this.swcobrado = true;
+
+                        if (nex.idmodulo.idmodulo != 27 || nex.interescobrado > 0) {
+                          await this.saveRubxFac(fac, rubro, item.interes);
+                        }
+
+                        this.s_fecfacturas.generateXmlOfPago(fac.idfactura);
+
+                        // 🟢 terminó de procesar ESTE item
+                        item.procesando = false;
+                        item.procesada = true;   // <-- NUEVO: quedó lista para imprimir
+
+                        // Continuar con la siguiente
+                        avanzar(idx + 1);
+                      },
+                      error: (err) => {
+                        // ❌ error: libera el estado y rechaza
+                        item.procesando = false;
+                        reject(err?.error ?? err);
+                      },
+                    });
+                  },
+                  error: (e) => {
+                    item.procesando = false;
+                    reject(e);
+                  },
+                });
+              },
+              error: (err) => {
+                item.procesando = false;
+                reject(err?.error ?? err);
+              },
+            });
+          },
+          error: (err) => {
+            item.procesando = false;
+            reject(err?.error ?? err);
+          },
+        });
+        // ======= Fin de tu lógica original =======
+      };
+
+      // inicia
+      avanzar(i);
+    });
   }
+
+  // Registra las facturas por recaudación y actualiza la fecha de cobro de la(s) factura(s)
+  _facxrecauda(recaCreada: Recaudacion, i: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+
+      const avanzar = (idx: number) => {
+        // Fin: cuando ya no hay más por procesar
+        if (idx >= this._sincobro.length) {
+          resolve();
+          return;
+        }
+
+        // Si no está pagada, saltar a la siguiente
+        if (this._sincobro[idx].pagado !== 1 && this._sincobro[idx].pagado !== true) {
+          avanzar(idx + 1);
+          return;
+        }
+
+        // ======= Tu lógica original (idéntica) desde aquí =======
+        let idfactura: number = this._sincobro[idx].idfactura;
+        let valfactura: number = this._sincobro[idx].total + this._sincobro[idx].interes;
+        let fechacobro: Date = new Date();
+        let horaActual: any = `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`;
+
+        let rubro: Rubros = new Rubros();
+        rubro.idrubro = 5;
+
+        this.facService.getById(idfactura).subscribe({
+          next: (fac: any) => {
+            fac.valornotacredito = this.calcularNCByFactura(valfactura, this.valorNtaCredito);
+
+            let facxr = {} as iFacxrecauda;
+            facxr.idrecaudacion = recaCreada;
+            facxr.idfactura = fac;
+            facxr.estado = 1;
+
+            this.facxrService.save(facxr).subscribe({
+              next: () => {
+                this.rubxfacService.getIva(this.iva, fac.idfactura).subscribe({
+                  next: (iva: any) => {
+                    fac.swiva = (iva && iva[0]) ? iva[0][1] : 0;
+                    fac.fechacobro = fechacobro;
+                    fac.horacobro = horaActual;
+
+                    if (this.swNC === true) {
+                      fac.formapago = 3;
+                    }
+
+                    fac.usuariocobro = this.authService.idusuario;
+                    fac.interescobrado = this._sincobro[idx].interes;
+                    fac.pagado = 1;
+                    fac.estado = (fac.estado === 2) ? 2 : 1;
+
+                    if (fac.nrofactura === null) {
+                      let nrofac = this._nroFactura.split('-', 3);
+                      let nrofac_f = +nrofac[2]! + 1;
+                      sessionStorage.setItem('ultfac', nrofac_f.toString().padStart(9, '0'));
+                      this.formatNroFactura(nrofac_f);
+                      fac.nrofactura = `${this._codRecaudador}-${nrofac_f.toString().padStart(9, '0')}`;
+
+                      this.s_recaudaxcaja.getLastConexion(this._caja.idcaja).subscribe({
+                        next: (datos) => {
+                          this.recxcaja = datos;
+                          this.recxcaja.facfin = nrofac_f;
+                          this.s_recaudaxcaja.updateRecaudaxcaja(this.recxcaja).subscribe({
+                            next: () => { },
+                            error: (e) => console.error(e),
+                          });
+                        },
+                        error: (e) => console.error(e),
+                      });
+                    }
+
+                    this.facService.updateFacturas(fac).subscribe({
+                      next: async (nex: any) => {
+                        if (this._nc.length > 0 && fac.valornotacredito > 0) {
+                          let valoresnc: Valoresnc = new Valoresnc();
+                          valoresnc.estado = 1;
+                          valoresnc.idntacredito_ntacredito = this._nc[0];
+                          valoresnc.valor = this.formCobrar.value.ncvalor;
+                          valoresnc.fechaaplicado = new Date();
+                          valoresnc.saldo = this._nc[0].saldo - this.formCobrar.value.ncvalor;
+                          this.guardarValoresNc(valoresnc, nex);
+                        }
+
+                        this.swcobrado = true;
+
+                        if (nex.idmodulo.idmodulo != 27 || nex.interescobrado > 0) {
+                          await this.saveRubxFac(fac, rubro, this._sincobro[idx].interes);
+                        }
+
+                        this.s_fecfacturas.generateXmlOfPago(fac.idfactura);
+
+                        // Continuar con la siguiente
+                        avanzar(idx + 1);
+                      },
+                      error: (err) => reject(err?.error ?? err),
+                    });
+                  },
+                  error: (e) => reject(e),
+                });
+              },
+              error: (err) => reject(err?.error ?? err),
+            });
+          },
+          error: (err) => reject(err?.error ?? err),
+        });
+        // ======= Fin de tu lógica original =======
+      };
+
+      // inicia
+      avanzar(i);
+    });
+  }
+
   //Registra las facturas por recaudación y actualiza la fecha de cobro de la(s) factura(s)
-  facxrecauda(recaCreada: Recaudacion, i: number) {
+  __facxrecauda(recaCreada: Recaudacion, i: number) {
     let idfactura: number;
     let valfactura: number;
     let fechacobro: Date = new Date();
@@ -1162,6 +1434,18 @@ export class RecaudacionComponent implements OnInit {
       }
     }
   }
+
+
+  async saveRubxFac(idfactura: any, idrubro: any, valorunitario: any) {
+    let rubrosxfac: Rubroxfac = new Rubroxfac();
+    rubrosxfac.idfactura_facturas = idfactura;
+    rubrosxfac.idrubro_rubros = idrubro;
+    rubrosxfac.valorunitario = valorunitario;
+    rubrosxfac.cantidad = 1;
+    rubrosxfac.estado = 1;
+    await this.rubxfacService.saveRubroxfacAsync(rubrosxfac);
+  }
+
   tonos() {
     setTimeout(() => {
       this.coloService.getTonos().subscribe({
@@ -1256,7 +1540,7 @@ export class RecaudacionComponent implements OnInit {
     return of(null);
   }
 
-  async impComprobante(datos: any) {
+  async _impComprobante(datos: any) {
     // Abrir una pestaña vacía de inmediato
     const newTab = window.open('', '_blank');
     if (!newTab) {
@@ -1412,6 +1696,142 @@ export class RecaudacionComponent implements OnInit {
     }); */
   }
 
+  private delay(ms: number) {
+    return new Promise(res => setTimeout(res, ms));
+  }
+
+  async imprimirTodasProcesadas() {
+    try {
+      // Toma solo las facturas marcadas como procesadas y pagadas
+      const lista = (this._sincobro || []).filter((s: any) => s.procesada && s.pagado);
+
+      if (!lista.length) {
+        this.swal('info', 'No hay facturas procesadas para imprimir.');
+        return;
+      }
+
+      // Descarga secuencial
+      for (const item of lista) {
+        const blob = await this.generarComprobanteBlob(item);
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Comprobante_${item.idfactura}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        URL.revokeObjectURL(url);
+        await this.delay(250); // ligera pausa para el navegador
+      }
+
+      this.swal('success', 'Se generaron los comprobantes procesados.');
+    } catch (e) {
+      console.error('Error en impresión masiva:', e);
+      this.swal('error', 'Ocurrió un problema al imprimir los comprobantes.');
+    }
+  }
+
+
+  private async generarComprobanteBlob(datos: any): Promise<Blob> {
+    let body: any;
+
+    if (datos.idAbonado > 0 && (datos.idmodulo === 4 || datos.idmodulo === 3)) {
+      body = { reportName: 'CompPagoConsumoAgua', parameters: { idfactura: datos.idfactura }, extencion: '.pdf' };
+    } else if (datos.idmodulo === 27) {
+      body = { reportName: 'CompPagoConvenios', parameters: { idfactura: datos.idfactura }, extencion: '.pdf' };
+    } else {
+      body = { reportName: 'CompPagoServicios', parameters: { idfactura: datos.idfactura }, extencion: '.pdf' };
+    }
+
+    const reporte = await this.s_jasperReport.getReporte(body); // <- tu backend
+    return new Blob([reporte], { type: 'application/pdf' });
+  }
+
+
+  // =========================
+  // 🧾 1) IMPRIMIR UNO (mismo que antes, ya abre nueva pestaña)
+  // =========================
+  async impComprobante(datos: any) {
+    const newTab = window.open('', '_blank');
+    if (!newTab) {
+      alert('Tu navegador bloqueó la apertura del PDF. Permite ventanas emergentes.');
+      return;
+    }
+
+    const body = this.buildJasperBodyPorFactura(datos);
+    try {
+      const reporte = await this.s_jasperReport.getReporte(body);
+      const fileURL = URL.createObjectURL(reporte);
+      newTab.location.href = fileURL;
+
+      // Liberar memoria después de unos segundos
+      setTimeout(() => URL.revokeObjectURL(fileURL), 3000);
+    } catch (e) {
+      console.error(e);
+      this.swal('error', 'No se pudo generar el comprobante.');
+      newTab.close();
+    }
+  }
+
+  private buildJasperBodyPorFactura(datos: any) {
+    let reportName: string;
+    if (datos.idAbonado > 0 && (datos.idmodulo === 4 || datos.idmodulo === 3)) {
+      reportName = 'CompPagoConsumoAgua';
+    } else if (datos.idmodulo === 27) {
+      reportName = 'CompPagoConvenios';
+    } else {
+      reportName = 'CompPagoServicios';
+    }
+    return {
+      reportName,
+      parameters: { idfactura: datos.idfactura },
+      extencion: '.pdf',
+    };
+  }
+
+  // =========================
+  // 🧾 2) IMPRIMIR TODOS EN UN SOLO PDF (ABRIR EN NUEVA PESTAÑA)
+  // =========================
+  async imprimirTodasEnUno() {
+    try {
+      const newTab = window.open('', '_blank');
+      if (!newTab) {
+        alert('Tu navegador bloqueó la apertura del PDF. Permite ventanas emergentes.');
+        return;
+      }
+      const items: MergeItem[] = (this._sincobro || [])
+        .filter((s: any) => s.procesada && s.pagado)
+        .map((s: any) => ({
+          idfactura: s.idfactura,
+          idmodulo: s.idmodulo,
+          idAbonado: s.idAbonado,
+        }));
+
+      if (!items.length) {
+        this.swal('info', 'No hay facturas procesadas para unificar.');
+        return;
+      }
+
+      const reporte = await this.s_jasperReport.mergeComprobantes({ items });
+
+      // 👉 Abrir en otra pestaña
+      const fileURL = URL.createObjectURL(reporte);
+      //window.open(fileURL, '_blank');
+      newTab.location.href = fileURL;
+
+      this.swal('success', 'PDF unificado generado.');
+      // Limpieza de memoria después
+      setTimeout(() => URL.revokeObjectURL(fileURL), 5000);
+    } catch (e) {
+      console.error(e);
+      this.swal('error', 'No se pudo generar el PDF unificado.');
+    }
+  }
+
+
+
   listarIntereses() {
     this.interService.getListaIntereses().subscribe({
       next: (datos) => {
@@ -1420,6 +1840,28 @@ export class RecaudacionComponent implements OnInit {
       error: (err) => console.error(err.error),
     });
   }
+  get hayProcesando(): boolean {
+    return !!this._sincobro?.some((s: any) => !!s.procesando);
+  }
+
+  get hayProcesadas(): boolean {
+    return !!this._sincobro?.some((s: any) => !!s.procesada);
+  }
+
+  /** Botón "Imprimir todo" deshabilitado si:
+   *  - aún no se ha cobrado, o
+   *  - hay algo procesándose, o
+   *  - no hay ninguna factura procesada
+   */
+  get deshabilitarImprimirTodo(): boolean {
+    return !this.swcobrado || this.hayProcesando || !this.hayProcesadas;
+  }
+
+  /** Para el data-target del botón de reimpresión */
+  get dataTargetPdf(): string | null {
+    return this.otraPagina ? null : '#pdf';
+  }
+
 
   /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
   cInteres(factura: any) {
@@ -1626,11 +2068,6 @@ interface Mensaje {
   texto: String;
 }
 
-interface Interes {
-  idinteres: number;
-  anio: number;
-  mes: number;
-}
 interface calcInteres {
   anio: number;
   mes: number;
@@ -1665,29 +2102,18 @@ interface iFacxrecauda {
   fechaeliminacion: Date;
   usuarioeliminacion: number;
 }
-interface facturaI {
-  direccion: String;
-  feccrea: Date;
-  idAbonado: number;
-  idCliente: number;
-  idfactura: number;
-  idmodulo: number;
-  interes: number;
-  iva: number;
-  modulo: string;
-  responsablePago: string;
-  total: number;
-  formapago: number;
-}
-
-interface ntaCredito {
-  devengado: number;
-  saldo: number;
-  idntacredito: number;
-  cuenta: number;
-}
 
 interface NtacreditoUpdate {
   idntacredito: number;
   devengado: number;
 }
+
+interface SincobroItem {
+  idfactura: number;
+  total: number;
+  interes: number;
+  pagado: boolean | number;
+  estado?: number;
+  procesando?: boolean; // 🔹 <- nuevo campo para control visual
+}
+

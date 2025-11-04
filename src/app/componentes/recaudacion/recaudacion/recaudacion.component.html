@@ -3,7 +3,8 @@
         <div class="row m-0 px-0 py-1 col-sm-12 border recaudacabecera sombra">
             <div class="col-sm-2 pl-0 mt-1">
                 <h4 class="m-0 font-weight-bold text-truncate">
-                    <i class="bi bi-cash-coin ml-2" style="color:red"></i> Recaudación v_2.0
+                    <i class="bi bi-cash-coin ml-2" style="color: red"></i> Recaudación
+                    v_2.0
                     <i class="fa fa-lock" aria-hidden="true" *ngIf="estadoCajaT; else estadoCajaF"></i>
                     <ng-template #estadoCajaF>
                         <i class="fa fa-unlock" aria-hidden="true"></i>
@@ -96,16 +97,19 @@
                             <p class="text-muted text-center">{{ cliente.cedula }}</p>
                             <ul class="list-group list-group-unbordered mb-3">
                                 <li class="list-group-item detalle">
-                                    <b>Dirección</b> <a class="float-right">{{ cliente.direccion }}</a>
+                                    <b>Dirección</b>
+                                    <a class="float-right">{{ cliente.direccion }}</a>
                                 </li>
                                 <li class="list-group-item detalle">
                                     <b>e-mail</b> <a class="float-right">{{ cliente.email }}</a>
                                 </li>
                                 <li class="list-group-item detalle">
-                                    <b>Teléfono</b> <a class="float-right">{{ cliente.telefono }}</a>
+                                    <b>Teléfono</b>
+                                    <a class="float-right">{{ cliente.telefono }}</a>
                                 </li>
                                 <li class="list-group-item detalle">
-                                    <b>Nota Crédito</b> <a class="float-right">{{ formCobrar.value.saldo }}</a>
+                                    <b>Nota Crédito</b>
+                                    <a class="float-right">{{ formCobrar.value.saldo }}</a>
                                 </li>
                                 <!--                                 <li class="list-group-item detalle">
                                     <b>Discapacidad</b>
@@ -125,14 +129,16 @@
                     </div>
                 </div>
             </div>
-            <div class="row" *ngIf="_nroFactura !=''">
+            <div class="row" *ngIf="_nroFactura != ''">
                 <div class="col-sm numeracion">
-                    <small class="badge badge-danger"><i class="bi bi-newspaper"></i>
-                        {{_nroFactura}}</small>
+                    <small class="badge badge-danger"><i class="bi bi-newspaper"></i> {{ _nroFactura }}</small>
                 </div>
             </div>
         </div>
-        <div [ngClass]="{'col-9 recaudadetalle': swbusca != 0,'col-6 mt-5': swbusca == 0 }">
+        <div [ngClass]="{
+        'col-9 recaudadetalle': swbusca != 0,
+        'col-6 mt-5': swbusca == 0
+      }">
             <div class="card sombra" [ngClass]="{ recaudadetalle: swbusca != 0 }">
                 <div class="card-body box-profile d-flex justify-content-center">
                     <div *ngIf="swbusca == 0">
@@ -161,7 +167,7 @@
                             </div>
                         </div>
                     </div>
-                    <div *ngIf="swbusca == 3" class="card-body table-responsive p-0 " style="height: 700px;">
+                    <div *ngIf="swbusca == 3" class="card-body table-responsive p-0" style="height: 700px">
                         <table
                             class="table table-hover table-sm table-bordered mb-0 table-head-fixed thead-dark text-nowrap table-responsive-sm">
                             <thead class="_recaudacabecera">
@@ -176,14 +182,22 @@
                                     <th>Valor</th>
                                     <th>
                                         <input type="checkbox" (change)="marcarTodas($event)" class="cursor"
-                                            [disabled]="filtrar" />
+                                            [disabled]="filtrar || !deshabilitarImprimirTodo" />
                                     </th>
-                                    <th></th>
+                                    <th>
+                                        <button class="btn btn-primary btn-sm mb" (click)="imprimirTodasEnUno()"
+                                            [disabled]="deshabilitarImprimirTodo">
+                                            <i class="fa fa-print"></i>
+                                        </button>
+
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr *ngFor="let sincobro of _sincobro | filter : filtrar; let i = index"
-                                    class="text-center" [ngClass]="{ transferido: sincobro.estado == 3 }">
+                                <tr *ngFor="
+                    let sincobro of _sincobro | filter : filtrar;
+                    let i = index
+                  " class="text-center" [ngClass]="{ transferido: sincobro.estado == 3 }">
                                     <td class="small font-weight-bold">{{ i + 1 }}</td>
                                     <td [ngClass]="{ transparente: sincobro.idabonado == 0 }">
                                         {{ sincobro.idAbonado }}
@@ -196,14 +210,20 @@
                                 <i class="fa fa-spinner fa-pulse fa-fw"></i>
                                 <span class="sr-only">Loading...</span> -->
                                     </td>
-                                    <td class="description">{{ sincobro.fechaemision |date:"mediumDate" }}</td>
+                                    <td class="description">
+                                        {{ sincobro.fechaemision | date : "mediumDate" }}
+                                    </td>
                                     <td class="text-left description">{{ sincobro.modulo }}</td>
                                     <!-- <td  class="text-right">{{
                                 sincobro.totaltarifa + sincobro.comerc + sincobro.interes +
                                 sincobro.multa | number:'1.2-2'}}</td> -->
                                     <td class="text-right">
                                         {{
-                                        (sincobro.total + sincobro.interes + sincobro.iva).toFixed(2)
+                                        (
+                                        sincobro.total +
+                                        sincobro.interes +
+                                        sincobro.iva
+                                        ).toFixed(2)
                                         }}
                                     </td>
                                     <!--           <td *ngIf="sincobro.idmodulo.idmodulo != 8" [ngClass]="{'transferido': sincobro.estado == 3 }"
@@ -215,19 +235,28 @@
                                     <td>
                                         <input type="checkbox" [(ngModel)]="sincobro.pagado"
                                             (change)="marcarAnteriores($event, i, sincobro.idAbonado)"
-                                            [disabled]="valCheckBox(sincobro.idAbonado, swcobrado) "
+                                            [disabled]="valCheckBox(sincobro.idAbonado, swcobrado)"
                                             [class]="'cursor sw-' + sincobro.idAbonado" />
-
                                     </td>
-                                    <td [ngClass]="{'transferido': sincobro.estado == 3 }">
+                                    <td [ngClass]="{ transferido: sincobro.estado == 3 }">
                                         <button *ngIf="!swcobrado" class="btn btn-outline-info btn-xs cursor"
-                                            data-toggle="modal" data-target="#DetallePlanillaModal"
-                                            (click)="getRubroxfac( sincobro.idfactura, sincobro.idmodulo, sincobro )">
+                                            data-toggle="modal" data-target="#DetallePlanillaModal" (click)="
+                        getRubroxfac(
+                          sincobro.idfactura,
+                          sincobro.idmodulo,
+                          sincobro
+                        )
+                      ">
                                             <i class="fa fa-info-circle"></i> Info
                                         </button>
-                                        <button *ngIf="swcobrado" class="btn btn-outline-info btn-xs cursor"
-                                            (click)="impComprobante(sincobro)" [disabled]="!sincobro.pagado">
-                                            <i class="fa fa-print"></i> Imprimir
+                                        <button *ngIf="swcobrado" class="btn btn-xs cursor"
+                                            (click)="impComprobante(sincobro)" [disabled]="!sincobro.pagado" [ngClass]="{
+                        'btn-danger': sincobro.procesando,
+                        'btn-success': !sincobro.procesando && sincobro.pagado
+                      }">
+                                            <i class="fa fa-print"></i>
+                                            {{ sincobro.procesando ? "Procesando…" : "Imprimir" }}
+                                            <i *ngIf="sincobro.procesando" class="fa fa-spinner fa-spin ml-1"></i>
                                         </button>
                                     </td>
                                 </tr>
@@ -290,8 +319,10 @@
                                 </tr>
                             </thead>
                             <tbody id="id-tbody">
-                                <tr *ngFor="let cliente of _clientes | filter : filtro;let i = index"
-                                    (click)="selecCliente(cliente)" data-dismiss="modal">
+                                <tr *ngFor="
+                    let cliente of _clientes | filter : filtro;
+                    let i = index
+                  " (click)="selecCliente(cliente)" data-dismiss="modal">
                                     <td class="text-center small font-weight-bold py-0">
                                         {{ i + 1 }}
                                     </td>
@@ -328,55 +359,69 @@
                                 <select class="custom-select" formControlName="idformacobro"
                                     (change)="changeFormacobro()">
                                     <option *ngFor="let formacobro of _formascobro" [ngValue]="formacobro"
-                                        id="idformacobro{{formacobro.idformacobro}}">
-                                        {{formacobro.descripcion}}</option>
+                                        id="idformacobro{{ formacobro.idformacobro }}">
+                                        {{ formacobro.descripcion }}
+                                    </option>
                                 </select>
                             </div>
                             <div class="input-group mt-3 mb-3">
-                                <div class="input-group-prepend"> <span class="input-group-text font-weight-bold">A
-                                        Cobrar</span> </div>
-                                <input type="text" class="form-control text-right" formControlName="acobrar" readonly>
-                                <div class="input-group-append"> <span class="input-group-text">{{acobrardec}}</span>
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text font-weight-bold">A Cobrar</span>
+                                </div>
+                                <input type="text" class="form-control text-right" formControlName="acobrar" readonly />
+                                <div class="input-group-append">
+                                    <span class="input-group-text">{{ acobrardec }}</span>
                                 </div>
                             </div>
                             <div *ngIf="formacobroNC || f['ncvalor'].value > 0" class="input-group mb-3">
-                                <div class="input-group-prepend"><span class="input-group-text font-weight-bold"
-                                        for="dinero">Saldo NC</span></div>
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text font-weight-bold" for="dinero">Saldo NC</span>
+                                </div>
                                 <input type="text" class="form-control text-center" formControlName="saldo" readonly
                                     [ngClass]="{
-                                    'is-invalid': f['saldo'].invalid && f['saldo'].touched,
-                                    'is-valid': f['saldo'].valid && f['saldo'].touched
-                                }">
+                    'is-invalid': f['saldo'].invalid && f['saldo'].touched,
+                    'is-valid': f['saldo'].valid && f['saldo'].touched
+                  }" />
                             </div>
                             <div *ngIf="formacobroNC || f['ncvalor'].value > 0" class="input-group mb-3">
-                                <div class="input-group-prepend"><span class="input-group-text font-weight-bold"
-                                        for="dinero">Valor NC</span></div>
-                                <input type="text" class="form-control text-center" formControlName="ncvalor"
-                                    [ngClass]="{'is-invalid': f['ncvalor'].invalid && f['ncvalor'].touched,'is-valid': f['ncvalor'].valid, '': f['ncvalor'].untouched}"
-                                    (change)="changeNCvalor($event)">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text font-weight-bold" for="dinero">Valor NC</span>
+                                </div>
+                                <input type="text" class="form-control text-center" formControlName="ncvalor" [ngClass]="{
+                    'is-invalid': f['ncvalor'].invalid && f['ncvalor'].touched,
+                    'is-valid': f['ncvalor'].valid,
+                    '': f['ncvalor'].untouched
+                  }" (change)="changeNCvalor($event)" />
                             </div>
                             <div *ngIf="!formacobroNC" class="input-group mb-3">
-                                <div class="input-group-prepend"><span class="input-group-text font-weight-bold"
-                                        for="dinero">Dinero</span></div>
-                                <input type="text" class="form-control text-center" formControlName="dinero" [ngClass]="{'is-invalid': f['dinero'].invalid && f['dinero'].touched,
-                        'is-valid': f['dinero'].valid, '': f['dinero'].untouched}" (change)="changeDinero()">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text font-weight-bold" for="dinero">Dinero</span>
+                                </div>
+                                <input type="text" class="form-control text-center" formControlName="dinero" [ngClass]="{
+                    'is-invalid': f['dinero'].invalid && f['dinero'].touched,
+                    'is-valid': f['dinero'].valid,
+                    '': f['dinero'].untouched
+                  }" (change)="changeDinero()" />
                                 <div class="input-group-append">
                                     <button type="button" class="btn btn-outline-success btn-xm"
                                         (click)="valorDinero()">
-                                        <i class="bi bi-chevron-double-down"></i></button>
+                                        <i class="bi bi-chevron-double-down"></i>
+                                    </button>
                                 </div>
                             </div>
                             <div class="input-group mb-3">
-                                <div class="input-group-prepend"> <span
-                                        class="input-group-text font-weight-bold">Vuelto</span>
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text font-weight-bold">Vuelto</span>
                                 </div>
-                                <input type="text" class="form-control text-center" formControlName="vuelto" readonly>
-                                <div *ngIf="disabledcobro; then thenBlock else elseBlock"></div>
+                                <input type="text" class="form-control text-center" formControlName="vuelto" readonly />
+                                <div *ngIf="disabledcobro; then thenBlock; else elseBlock"></div>
                                 <ng-template #thenBlock><span class="input-group-text bg-danger"><i
                                             class="bi bi-x-circle"></i>
-                                    </span> </ng-template>
+                                    </span>
+                                </ng-template>
                                 <ng-template #elseBlock><span class="input-group-text bg-success"><i
-                                            class="fa fa-check-circle"></i></span> </ng-template>
+                                            class="fa fa-check-circle"></i></span>
+                                </ng-template>
                             </div>
                         </div>
                     </form>
@@ -384,9 +429,11 @@
                 <div class="row mt-0 mb-3 justify-content-center">
                     <button type="button" class="btn btn-success btn-sm mx-1" [disabled]="disabledcobro"
                         (click)="cobrar()" data-dismiss="modal">
-                        <i class="fa fa-check-circle"></i> Aceptar</button>
+                        <i class="fa fa-check-circle"></i> Aceptar
+                    </button>
                     <button type="button" class="btn btn-sm btn-outline-success mx-1" data-dismiss="modal">
-                        <i class="bi bi-x-circle"></i> Cancelar</button>
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
                 </div>
             </div>
         </div>
@@ -398,18 +445,21 @@
                 <div class="py-2 recaudacabecera">
                     <div class="row text-center">
                         <div class="col">
-                            <h5 class="modal-title" id="DetalleFacturaModalLabel"><strong>Planilla:</strong>
-                                {{idfactura}}</h5>
+                            <h5 class="modal-title" id="DetalleFacturaModalLabel">
+                                <strong>Planilla:</strong> {{ idfactura }}
+                            </h5>
                         </div>
                     </div>
                     <div *ngIf="consumo" class="row text-center">
                         <div class="col">
-                            <h6 class="fantacyblack"><strong>Consumo:</strong> {{consumo}} m<sup>3</sup></h6>
+                            <h6 class="fantacyblack">
+                                <strong>Consumo:</strong> {{ consumo }} m<sup>3</sup>
+                            </h6>
                         </div>
                     </div>
                 </div>
                 <div class="modal-body">
-                    <table *ngIf="_rubrosxfac" class="table table-hover table-sm table-bordered mb-0 ">
+                    <table *ngIf="_rubrosxfac" class="table table-hover table-sm table-bordered mb-0">
                         <thead class="recaudacabecera">
                             <tr class="text-center">
                                 <th></th>
@@ -418,15 +468,17 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngFor="let rubroxfac of _rubrosxfac; let i=index" class="fila">
-                                <td class="text-center font-weight-bold small">{{i+1}}</td>
-                                <td>{{ rubroxfac.idrubro_rubros.descripcion}}</td>
-                                <td class="text-right">{{ rubroxfac.valorunitario | number:'1.2-2'}}</td>
+                            <tr *ngFor="let rubroxfac of _rubrosxfac; let i = index" class="fila">
+                                <td class="text-center font-weight-bold small">{{ i + 1 }}</td>
+                                <td>{{ rubroxfac.idrubro_rubros.descripcion }}</td>
+                                <td class="text-right">
+                                    {{ rubroxfac.valorunitario | number : "1.2-2" }}
+                                </td>
                             </tr>
                             <tr *ngIf="valoriva > 0">
                                 <td></td>
                                 <td>IVA</td>
-                                <td class="text-right">{{valoriva | number:'1.2-2'}}</td>
+                                <td class="text-right">{{ valoriva | number : "1.2-2" }}</td>
                             </tr>
                             <tr *ngIf="totInteres > 0">
                                 <td></td>
@@ -438,14 +490,17 @@
                             <tr>
                                 <td></td>
                                 <td class="font-weight-bold">TOTAL</td>
-                                <td class="font-weight-bold text-right">{{ totfac | number:'1.2-2'}}</td>
+                                <td class="font-weight-bold text-right">
+                                    {{ totfac | number : "1.2-2" }}
+                                </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
                 <div class="row justify-content-center mt-0 mb-3">
                     <button type="button" class="btn btn-success btn-sm" data-dismiss="modal">
-                        <i class="fa fa-times-circle"></i> Cerrar</button>
+                        <i class="fa fa-times-circle"></i> Cerrar
+                    </button>
                 </div>
             </div>
         </div>
@@ -484,7 +539,7 @@
 
                         <!-- Mensaje debajo del select -->
                         <small class="form-text text-muted ml-2">
-                            {{_establecimiento.direccion}}
+                            {{ _establecimiento.direccion }}
                         </small>
                         <div class="input-group input-group-sm mb-3">
                             <div class="input-group-prepend">
@@ -662,7 +717,7 @@
                     </div>
                 </div>
 
-                <div class="input-group input-group-sm mb-0" [hidden]=" true">
+                <div class="input-group input-group-sm mb-0" [hidden]="true">
                     <div class="input-group-prepend">
                         <small class="input-group-text">Abrir en otra página</small>
                         <div class="input-group-text">
@@ -673,8 +728,8 @@
 
                 <div class="row justify-content-center mt-3">
                     <button type="button" class="btn btn-success btn-sm mx-1" data-dismiss="modal"
-                        (click)="reImpComprobante({idfactura:cuenta})" [attr.data-target]="otraPagina ? null : '#pdf'"
-                        data-toggle="modal">
+                        (click)="reImpComprobante({ idfactura: cuenta })"
+                        [attr.data-target]="otraPagina ? null : '#pdf'" data-toggle="modal">
                         <i class="fa fa-check-circle"></i>&nbsp; Aceptar
                     </button>
                     <button type="button" class="btn btn-sm btn-outline-success btn-sm mx-1" data-dismiss="modal">
