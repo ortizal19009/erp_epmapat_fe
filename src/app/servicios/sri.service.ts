@@ -15,7 +15,7 @@ export class SriService {
     return this.http.post(`${baseUrl}/sendMail`, datos);
   }
   sendRetencion(xmlString: string): Observable<string> {
-    return this.http.post('http://192.168.0.165:8080/retencion', xmlString, {
+    return this.http.post('http://192.168.0.90:8080/retencion', xmlString, {
       headers: {
         'Content-Type': 'application/xml',
       },
