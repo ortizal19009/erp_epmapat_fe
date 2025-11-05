@@ -24,8 +24,17 @@ import { Pliego24Service } from 'src/app/servicios/pliego24.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { EmisionIndividualService } from 'src/app/servicios/emision-individual.service';
 import { EmisionIndividual } from 'src/app/modelos/emisionindividual.model';
-import { filter, mergeMap, map, tap, toArray, catchError, finalize, reduce } from 'rxjs/operators';
-import { from, of, firstValueFrom } from 'rxjs';
+import {
+  filter,
+  mergeMap,
+  map,
+  tap,
+  toArray,
+  catchError,
+  finalize,
+  reduce,
+} from 'rxjs/operators';
+import { from, of, firstValueFrom, forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-emisiones',
@@ -128,7 +137,7 @@ export class EmisionesComponent implements OnInit {
     private s_pdf: PdfService,
     private s_rxfService: RubroxfacService,
     private s_emisionesIndividuales: EmisionIndividualService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.modulo.idmodulo = 4;
@@ -411,7 +420,7 @@ export class EmisionesComponent implements OnInit {
   /*=====================
   ======INDIVIDUALES=====
   =====================*/
-  emisionIndividual() { }
+  emisionIndividual() {}
   getAllEmisiones() {
     this.emiService.findAllEmisiones().subscribe({
       next: (datos: any) => {
@@ -633,7 +642,7 @@ export class EmisionesComponent implements OnInit {
       this.s_emisionindividual
         .saveEmisionIndividual(emision_individual)
         .subscribe({
-          next: (d_emisionIndividual: any) => { },
+          next: (d_emisionIndividual: any) => {},
           error: (e) => console.error(e),
         });
     }
@@ -672,23 +681,23 @@ export class EmisionesComponent implements OnInit {
             num1 =
               Math.round(
                 (this.tarifa[0].idcategoria.fijoagua - 0.1) *
-                this.porcResidencial[consumo] *
-                100
+                  this.porcResidencial[consumo] *
+                  100
               ) / 100;
           } else {
             num1 =
               Math.round(
                 (this.tarifa[0].idcategoria.fijoagua - 0.1) *
-                this.tarifa[0].porc *
-                100
+                  this.tarifa[0].porc *
+                  100
               ) / 100;
           }
 
           let num2 =
             Math.round(
               (this.tarifa[0].idcategoria.fijosanea - 0.5) *
-              this.tarifa[0].porc *
-              100
+                this.tarifa[0].porc *
+                100
             ) / 100;
           let num3 =
             Math.round(
@@ -697,14 +706,14 @@ export class EmisionesComponent implements OnInit {
           let num4 =
             Math.round(
               ((consumo * this.tarifa[0].saneamiento) / 2) *
-              this.tarifa[0].porc *
-              100
+                this.tarifa[0].porc *
+                100
             ) / 100;
           let num5 =
             Math.round(
               ((consumo * this.tarifa[0].saneamiento) / 2) *
-              this.tarifa[0].porc *
-              100
+                this.tarifa[0].porc *
+                100
             ) / 100;
           let num7 = Math.round(0.5 * this.tarifa[0].porc * 100) / 100;
           let suma: number = 0;
@@ -805,7 +814,7 @@ export class EmisionesComponent implements OnInit {
         this.rubros.forEach((item: any) => {
           calcular += item.valorunitario;
           this.rxfService.saveRubroxfac(item).subscribe({
-            next: (datos) => { },
+            next: (datos) => {},
             error: (e) => console.error(e),
           });
         });
@@ -1445,7 +1454,7 @@ export class EmisionesComponent implements OnInit {
       container.appendChild(embed);
     }
   }
-  r_facturasEliminadas() { }
+  r_facturasEliminadas() {}
   imprimirReporte() {
     let doc = new jsPDF('p', 'pt', 'a4');
     this.s_pdf.header('REPORETE DE REFACTURACION', doc);
@@ -1457,8 +1466,9 @@ export class EmisionesComponent implements OnInit {
     let doc = new jsPDF('p', 'pt', 'a4');
     /* HEADER */
     let date_emision: Date = new Date(emisionIndividual.idemision.feccrea);
-    let fecemision = `${date_emision.getFullYear()}-${date_emision.getMonth() + 1
-      }`;
+    let fecemision = `${date_emision.getFullYear()}-${
+      date_emision.getMonth() + 1
+    }`;
     this.s_pdf.header(`REPORTE DE REFACTURACION INDIVIDUAL ${fecemision}`, doc);
 
     /* LECTURAS ANTERIORES */
@@ -1620,11 +1630,13 @@ export class EmisionesComponent implements OnInit {
       },
       body: [
         [
-          `Fecha emision:  ${dateEmision.getFullYear()}/${dateEmision.getMonth() + 1
+          `Fecha emision:  ${dateEmision.getFullYear()}/${
+            dateEmision.getMonth() + 1
           }/${dateEmision.getDate()}`,
         ],
         [
-          `Fecha impresión:  ${currentDate.getFullYear()}/${currentDate.getMonth() + 1
+          `Fecha impresión:  ${currentDate.getFullYear()}/${
+            currentDate.getMonth() + 1
           }/${currentDate.getDate()}`,
         ],
       ],
@@ -1634,7 +1646,7 @@ export class EmisionesComponent implements OnInit {
     //doc.save('datauristring');
     doc.output('dataurlnewwindow', { filename: 'comprobante.pdf' });
   }
-  getrubrosxfactura(idfactura: number) { }
+  getrubrosxfactura(idfactura: number) {}
   imprimir() {
     switch (this.optImprimir) {
       case '0':
@@ -1930,21 +1942,25 @@ export class EmisionesComponent implements OnInit {
 
     this.enProceso = true;
 
-    from(this._rutasxemi).pipe(
-      filter(r => r.estado === 0),                   // solo abiertas
-      tap(r => {
-        r.processing = true;
-        r.progreso = 0;
-        r.estadoTemp = 'cerrando';
-      }),
-      // procesa hasta 3 rutas a la vez (ajusta el 3 a tus recursos)
-      mergeMap(ruta => this.procesarRuta(ruta), 3),
-      toArray(),
-      finalize(() => { this.enProceso = false; })
-    ).subscribe({
-      next: () => console.log('✅ Todas las rutas procesadas'),
-      error: (e) => console.error('❌ Error en cierre masivo de rutas', e),
-    });
+    from(this._rutasxemi)
+      .pipe(
+        filter((r) => r.estado === 0), // solo abiertas
+        tap((r) => {
+          r.processing = true;
+          r.progreso = 0;
+          r.estadoTemp = 'cerrando';
+        }),
+        // procesa hasta 3 rutas a la vez (ajusta el 3 a tus recursos)
+        mergeMap((ruta) => this.procesarRuta(ruta), 3),
+        toArray(),
+        finalize(() => {
+          this.enProceso = false;
+        })
+      )
+      .subscribe({
+        next: () => console.log('✅ Todas las rutas procesadas'),
+        error: (e) => console.error('❌ Error en cierre masivo de rutas', e),
+      });
   }
 
   /** Procesa UNA ruta: trae lecturas, calcula valores en paralelo y cierra la ruta */
@@ -1969,11 +1985,13 @@ export class EmisionesComponent implements OnInit {
             const datos = {
               cuenta: lectura?.idabonado_abonados?.idabonado,
               m3,
-              categoria: lectura?.idabonado_abonados?.idcategoria_categorias?.idcategoria,
+              categoria:
+                lectura?.idabonado_abonados?.idcategoria_categorias
+                  ?.idcategoria,
               idfactura: lectura?.idfactura,
               swAdultoMayor: lectura?.idabonado_abonados?.adultomayor,
               swMunicipio: lectura?.idabonado_abonados?.municipio,
-              swAguapotable: lectura?.idabonado_abonados?.swalcantarillado
+              swAguapotable: lectura?.idabonado_abonados?.swalcantarillado,
             };
 
             // Calcular y actualizar
@@ -1987,8 +2005,11 @@ export class EmisionesComponent implements OnInit {
                 procesadas++;
                 ruta.progreso = Math.round((procesadas / totalLecturas) * 100);
               }),
-              catchError(err => {
-                console.error('Error en calcular/update lectura', { err, lectura });
+              catchError((err) => {
+                console.error('Error en calcular/update lectura', {
+                  err,
+                  lectura,
+                });
                 procesadas++;
                 ruta.progreso = Math.round((procesadas / totalLecturas) * 100);
                 return of(null);
@@ -1999,7 +2020,7 @@ export class EmisionesComponent implements OnInit {
           mergeMap(() => this.cerrarRutaPersistiendo(ruta, sumaM3))
         );
       }),
-      catchError(err => {
+      catchError((err) => {
         console.error('Error al procesar ruta', { err, ruta });
         ruta.processing = false;
         ruta.estadoTemp = 'abierta';
@@ -2008,7 +2029,6 @@ export class EmisionesComponent implements OnInit {
       })
     );
   }
-
 
   /** Persiste el cierre de la ruta y actualiza la UI */
   private cerrarRutaPersistiendo(ruta: RutaXEmisionUI, m3Total: number) {
@@ -2021,34 +2041,62 @@ export class EmisionesComponent implements OnInit {
       feccrea: new Date(),
     };
 
-    return this.ruxemiService.update_Rutaxemision(ruta.idrutaxemision, payload).pipe(
-      tap(() => {
-        ruta.estado = 1;
-        ruta.m3 = m3Total;
-        ruta.fechacierre = payload.fechacierre;
-        ruta.processing = false;
-        ruta.estadoTemp = 'cerrada';
-        ruta.progreso = 100;
-      }),
-      catchError(err => {
-        console.error('Error al actualizar rutaxemision', { err, ruta, payload });
-        ruta.processing = false;
-        ruta.estadoTemp = 'abierta';
-        ruta.progreso = 0;
-        return of(null);
-      })
-    );
+    return this.ruxemiService
+      .update_Rutaxemision(ruta.idrutaxemision, payload)
+      .pipe(
+        tap(() => {
+          ruta.estado = 1;
+          ruta.m3 = m3Total;
+          ruta.fechacierre = payload.fechacierre;
+          ruta.processing = false;
+          ruta.estadoTemp = 'cerrada';
+          ruta.progreso = 100;
+        }),
+        catchError((err) => {
+          console.error('Error al actualizar rutaxemision', {
+            err,
+            ruta,
+            payload,
+          });
+          ruta.processing = false;
+          ruta.estadoTemp = 'abierta';
+          ruta.progreso = 0;
+          return of(null);
+        })
+      );
   }
-
 
   /** Si aún quieres procesar una ruta al hacer click en la fila */
   lecturasCaluloIndividual(idrutaxemision: number) {
-    const ruta = this._rutasxemi.find(r => r.idrutaxemision === idrutaxemision);
+    const ruta = this._rutasxemi.find(
+      (r) => r.idrutaxemision === idrutaxemision
+    );
     if (!ruta || ruta.estado === 1) return;
     ruta.processing = true;
     ruta.estadoTemp = 'cerrando';
     ruta.progreso = 0;
     this.procesarRuta(ruta).subscribe();
+  }
+
+  async validarCierre() {
+    try {
+      const datos: any = await this.s_lecturas
+        .getDuplicados(240, 6)
+        .toPromise();
+      console.log('Duplicados:', datos);
+
+      for (const item of datos) {
+        console.log('Procesando item:', item);
+        const resultado = await this.s_lecturas
+          .calcular_Valores(item)
+          .toPromise();
+        console.log('Resultado:', resultado);
+      }
+
+      console.log('✅ Todos los cálculos terminados');
+    } catch (err) {
+      console.error('Error:', err);
+    }
   }
 }
 interface Rutasxemision {
@@ -2120,10 +2168,10 @@ interface RutaXEmisionUI {
   idruta_rutas: { codigo: string; descripcion: string };
   fechacierre?: string | Date | null;
   m3: number;
-  estado: 0 | 1;           // 0 abierta, 1 cerrada (persistido)
+  estado: 0 | 1; // 0 abierta, 1 cerrada (persistido)
   // ------- campos UI ------
-  processing?: boolean;     // en proceso
-  progreso?: number;        // 0..100
+  processing?: boolean; // en proceso
+  progreso?: number; // 0..100
   estadoTemp?: 'abierta' | 'cerrando' | 'cerrada';
   usuariocierre?: number | null;
 }

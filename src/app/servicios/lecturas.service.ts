@@ -188,5 +188,12 @@ export class LecturasService {
   calcular_Valores(datos: any): Observable<number> {
     return this.http.post<number>(`${baseUrl}/valoresEmisiones`, datos);
   }
+  pcalcularValores(datos: any){
+    return this.http.put(`${baseUrl}/valores_Emisiones`, datos)
+  }
+  getDuplicados(idemision: number, top: number):Observable<Object>{
+    return this.http.get(`${baseUrl}/duplicatos-emision?idemision=${idemision}&top=${top}`)
+  }
+
 
 }
