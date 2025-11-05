@@ -44,7 +44,7 @@
                                 <th (click)="sortData('cuenta')">Cuenta</th>
                                 <th>Cliente</th>
                                 <th>Identificación</th>
-                                <th (click)="sortData('numfacturas')">Deudas</th>
+                                <th (click)="sortData('num_facturas')">Deudas</th>
                                 <th>Subtotal</th>
                                 <th>Interes</th>
                                 <th (click)="sortData('total')">Total</th>
@@ -58,10 +58,10 @@
                                 <td>{{abonado.nombre}}</td>
                                 <td class="text-center">{{abonado.cedula}}</td>
                                 <td class="text-center">
-                                    {{abonado.numfacturas}}
+                                    {{abonado.num_facturas}}
                                 </td>
                                 <td class="text-right">{{abonado.subtotal.toFixed(2)}}</td>
-                                <td class="text-right">{{abonado.interes.toFixed(2)}}</td>
+                                <td class="text-right">{{abonado.intereses.toFixed(2)}}</td>
                                 <td class="text-right">{{abonado.total.toFixed(2)}}</td>
                                 <td class="text-center">
                                     <div class="btn-group ml-auto mt-0">

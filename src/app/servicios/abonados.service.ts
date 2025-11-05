@@ -134,6 +134,10 @@ export class AbonadosService {
     let resp = this.http.get(`${baseUrl}/deudas?idruta=${idruta}`);
     return await firstValueFrom(resp);
   }
+    async DeudasCuentasByRuta(idruta: number) {
+    let resp = this.http.get(`${baseUrl}/deudasByRuta?idruta=${idruta}`);
+    return await firstValueFrom(resp);
+  }
   getResAbonado(cuenta: number) {
     return this.http.get(`${baseUrl}/resabonado?idabonado=${cuenta}`);
   }

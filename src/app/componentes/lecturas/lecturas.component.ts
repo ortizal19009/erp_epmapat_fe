@@ -379,7 +379,6 @@ export class LecturasComponent implements OnInit {
     this.pli24Service.getBloque(categoria, consumo).subscribe({
       next: (resp) => {
         if (resp.length == 0) {
-          console.log('No hay Tarifa para esta Categoría y Consumo');
         } else {
           this.tarifa = resp;
 
@@ -497,7 +496,6 @@ export class LecturasComponent implements OnInit {
       }
       let num1: number;
       await this.getTarifa(categoria, consumo);
-      // console.log('this.tarifa: ', i, this.tarifa)
       if (categoria == 1) {
         num1 =
           Math.round(
@@ -558,7 +556,6 @@ export class LecturasComponent implements OnInit {
   async updateLectura(idlectura: number, lectura: any): Promise<void> {
     try {
       await this.lecService.updateLecturaAsync(idlectura, lectura);
-      //   console.log('Actualizacion lectura Ok!')
     } catch (error) {
       console.error(`Al actualizar la Lectura: `, error);
     }
@@ -590,7 +587,6 @@ export class LecturasComponent implements OnInit {
       this._lecturas[this.kontador].idabonado_abonados.idabonado
     );
     if (multa === 3) swmulta = true;
-    // console.log(this._lecturas[this.kontador].idabonado_abonados.idabonado, multa, swmulta)
     let categoria =
       this._lecturas[this.kontador].idabonado_abonados.idcategoria_categorias
         .idcategoria;
@@ -803,7 +799,6 @@ export class LecturasComponent implements OnInit {
     }
   }
   async __planillas() {
-    console.log(this._lecturas.length)
     for (this.kontador = 0; this.kontador < this._lecturas.length - 1; this.kontador++) {
       let lectura = this._lecturas[this.kontador];
       let consumo = lectura.lecturaactual - lectura.lecturaanterior;
@@ -827,11 +822,8 @@ export class LecturasComponent implements OnInit {
           // aquí podrías guardar logs o manejar errores
         }
       }
-      console.log(this.kontador);
       this.progreso = (this.kontador / this._lecturas.length - 1) * 100;
-
     }
-    console.log("✅ Planillas terminadas");
   }
   async planillas() {
     this.enProceso = true; // 🔒 Bloquear salida
@@ -884,7 +876,6 @@ export class LecturasComponent implements OnInit {
         error: (err) =>
           console.error(err.error),
       });
-    console.log("✅ Planillas terminadas");
   }
 
   // 👇 Interceptar cierre o recarga de página

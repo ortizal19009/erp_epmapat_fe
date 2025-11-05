@@ -84,6 +84,9 @@
                   <td>{{ abonado.ruta }}</td>
                   <td>{{ abonado.direccion }}</td>
                </tr>
+               <tr *ngIf="(_abonados?.length || 0) === 0">
+                  <td colspan="7" class="text-center text-muted py-3">No hay resultados</td>
+               </tr>
             </tbody>
          </table>
       </div>

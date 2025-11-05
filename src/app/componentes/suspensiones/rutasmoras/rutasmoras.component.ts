@@ -318,7 +318,7 @@ export class RutasmorasComponent implements OnInit {
   }
   getDatosCuenta(idruta: number) {
     this.s_loading.showLoading();
-    this.s_abonado.getDeudasCuentasByRuta(idruta).then((item: any) => {
+    this.s_abonado.DeudasCuentasByRuta(idruta).then((item: any) => {
       console.log(item);
       this.datosCuentas = item;
       this.s_loading.hideLoading();
