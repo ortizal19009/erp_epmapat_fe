@@ -42,6 +42,9 @@ export class ImpEmisionesComponent implements OnInit {
   date: Date = new Date();
   pdfview: any;
   usuario: any;
+
+    rolepermission = 1; // 1=lector, 2=editor, 3=admin (ajusta a tu convención)
+  ventana = 'emisiones';
   constructor(
     public fb: FormBuilder,
     private router: Router,

@@ -1938,7 +1938,7 @@ export class EmisionesComponent implements OnInit {
         r.estadoTemp = 'cerrando';
       }),
       // procesa hasta 3 rutas a la vez (ajusta el 3 a tus recursos)
-      mergeMap(ruta => this.procesarRuta(ruta), 5),
+      mergeMap(ruta => this.procesarRuta(ruta), 3),
       toArray(),
       finalize(() => { this.enProceso = false; })
     ).subscribe({
