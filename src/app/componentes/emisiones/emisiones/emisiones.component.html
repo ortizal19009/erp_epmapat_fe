@@ -117,6 +117,8 @@
                   <button class="dropdown-item" type="button" [disabled]="true" data-toggle="modal"
                      data-target="#imprimir1">
                      <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+                  <button class="dropdown-item" (click)="cerrarRutas()" type="button">
+                     <i class="bi bi-printer"></i>&nbsp; Cerrar Rutas</button>
                   <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar"
                      (click)="exportar1()">
                      <i class="bi-file-earmark-arrow-down"></i>&nbsp; Exportar</button>
@@ -139,25 +141,52 @@
                   <th>Est</th>
                </tr>
             </thead>
+
             <tbody class="detalle">
-               <tr *ngFor="let rutasxemi of _rutasxemi | filter:filtro; let i=index"
-                  (click)="lecturas(rutasxemi.idrutaxemision)" class="fila">
-                  <td class="text-small text-center font-weight-bold">{{i+1}}</td>
+               <tr *ngFor="let rutasxemi of _rutasxemi | filter:filtro; let i = index" class="fila"
+                  (click)="!rutasxemi.processing && lecturas(rutasxemi.idrutaxemision)"
+                  [class.disabled]="rutasxemi.processing" style="cursor: pointer;">
+                  <td class="text-small text-center font-weight-bold">{{ i + 1 }}</td>
+
                   <td class="text-center">{{ rutasxemi.idruta_rutas.codigo }}</td>
-                  <td>{{ rutasxemi.idruta_rutas.descripcion }}</td>
-                  <td class="text-center">{{ rutasxemi.fechacierre | date:'dd-MM-y'}}</td>
-                  <td class="text-right" [ngClass]="{'transparente': rutasxemi.m3 == 0}">{{ rutasxemi.m3 |
-                     number:'1.0'}}</td>
+
+                  <td>
+                     {{ rutasxemi.idruta_rutas.descripcion }}
+                  </td>
+
                   <td class="text-center">
-                     <i class="bi-clock-fill font-weight-bold" *ngIf="rutasxemi.estado == 0"></i>
-                     <i class="bi-door-closed" *ngIf="rutasxemi.estado == 1"></i>
+                     {{ rutasxemi.fechacierre | date: 'dd-MM-y' }}
+                  </td>
+
+                  <td class="text-right" [ngClass]="{ 'transparente': rutasxemi.m3 == 0 }">
+                     {{ rutasxemi.m3 | number: '1.0' }}
+                  </td>
+
+                  <td class="text-center">
+                     <!-- Estado visual -->
+                     <span *ngIf="!rutasxemi.processing && rutasxemi.estado === 0" class="badge badge-warning">
+                        Abierta
+                     </span>
+
+                     <span *ngIf="rutasxemi.processing" class="badge badge-info d-inline-flex align-items-center">
+                        <span class="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span>
+                        Cerrando… {{ rutasxemi.progreso || 0 }}%
+                     </span>
+
+                     <span *ngIf="!rutasxemi.processing && rutasxemi.estado === 1" class="badge badge-success">
+                        Cerrada
+                     </span>
                   </td>
                </tr>
-               <td *ngIf="!swfiltro" colspan="4" class="text-right font-weight-bold">TOTAL: </td>
-               <td *ngIf="!swfiltro" class="text-right font-weight-bold">{{ subtotal | number:'1.0'}}</td>
-               <td>$ {{totalSuma.toFixed(2)}}</td>
+
+               <tr *ngIf="!swfiltro">
+                  <td colspan="4" class="text-right font-weight-bold">TOTAL: </td>
+                  <td class="text-right font-weight-bold">{{ subtotal | number: '1.0' }}</td>
+                  <td>$ {{ totalSuma?.toFixed(2) }}</td>
+               </tr>
             </tbody>
          </table>
+
       </div>
    </div>
    <!-- EMISION INDIVIDUAL -->

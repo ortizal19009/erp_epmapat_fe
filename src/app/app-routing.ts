@@ -62,7 +62,6 @@ import { ModiRubroComponent } from './componentes/rubros/modi-rubro/modi-rubro.c
 
 //========= TRÁMITES ==========
 import { InfoTramiteComponent } from './componentes/ctramites/info-tramite/info-tramite.component';
-import { AddAguatramiteComponent } from './componentes/aguatramite/add-aguatramite/add-aguatramite.component';
 
 import { AddTramiteComponent } from './componentes/ctramites/add-tramite/add-tramite.component';
 
@@ -145,7 +144,6 @@ import { AddNiifcuentaComponent } from './componentes/contabilidad/niifcuentas/a
 import { ModiNiifcuentaComponent } from './componentes/contabilidad/niifcuentas/modi-niifcuenta/modi-niifcuenta.component';
 
 import { PreingresosComponent } from './componentes/contabilidad/preingresos/preingresos/preingresos.component';
-import { InfoPreingresoComponent } from './componentes/contabilidad/preingresos/info-preingreso/info-preingreso.component';
 import { AddPreingresoComponent } from './componentes/contabilidad/preingresos/add-preingreso/add-preingreso.component';
 import { ModiPreingresoComponent } from './componentes/contabilidad/preingresos/modi-preingreso/modi-preingreso.component';
 import { AuxIngresoComponent } from './componentes/contabilidad/preingresos/aux-ingreso/aux-ingreso.component';
@@ -273,7 +271,6 @@ import { StatusConveniosComponent } from './componentes/convenios/status-conveni
 import { CvClientesComponent } from './componentes/coactivas/carteras-vencidas/cv-clientes/cv-clientes.component';
 import { AnularConvenioComponent } from './componentes/convenios/anular-convenio/anular-convenio.component';
 import { ReportesjrComponent } from './componentes/reportesjr/reportesjr.component';
-import { AutorizaService } from './compartida/autoriza.service';
 import { AuthGuard } from './servicios/administracion/auth-guard';
 
 const routes: Routes = [

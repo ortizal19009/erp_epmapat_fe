@@ -185,4 +185,8 @@ export class LecturasService {
   async calcularValores(datos: any): Promise<any> {
     return firstValueFrom(this.http.post(`${baseUrl}/valoresEmisiones`, datos))
   }
+  calcular_Valores(datos: any): Observable<number> {
+    return this.http.post<number>(`${baseUrl}/valoresEmisiones`, datos);
+  }
+
 }

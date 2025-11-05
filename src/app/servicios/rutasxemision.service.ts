@@ -56,6 +56,15 @@ export class RutasxemisionService {
     return this.http.put(baseUrl + '/' + idrutaemision, rutaxemision);
   }
 
+  // rutasxemision.service.ts
+update_Rutaxemision(
+  idrutaemision: number,
+  cambios: Partial<Rutasxemision>
+): Observable<object> {
+  return this.http.patch(`${baseUrl}/${idrutaemision}`, cambios);
+}
+
+
   getByEmisionRuta(idemision: number, idruta: number) {
     return this.http.get(
       `${baseUrl}/emiruta?idemision=${idemision}&idruta=${idruta}`

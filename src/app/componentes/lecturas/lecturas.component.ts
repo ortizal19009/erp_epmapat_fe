@@ -827,8 +827,6 @@ export class LecturasComponent implements OnInit {
   }
   async planillas() {
     this.enProceso = true; // 🔒 Bloquear salida
-
-    console.log(this._lecturas.length);
     for (this.kontador = 0; this.kontador < this._lecturas.length; this.kontador++) {
       let lectura = this._lecturas[this.kontador];
       let consumo = lectura.lecturaactual - lectura.lecturaanterior;
