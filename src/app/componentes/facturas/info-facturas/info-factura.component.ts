@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Impuestos } from 'src/app/modelos/impuestos';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { ImpuestosService } from 'src/app/servicios/impuestos.service';
@@ -25,7 +26,7 @@ export class InfoFacturasComponent implements OnInit {
   @Input() idfac: any;
   swreturn: boolean = true;
   datos: boolean = true;
-
+  idusuario: number;
   constructor(
     private facService: FacturaService,
     private router: Router,
@@ -33,10 +34,12 @@ export class InfoFacturasComponent implements OnInit {
     private s_impuestos: ImpuestosService,
     private s_interes: InteresesService,
     private s_jasperreport: JasperReportService,
-    private s_loading: LoadingService
-  ) {}
+    private s_loading: LoadingService,
+    private authorizaService: AutorizaService
+  ) { }
 
   ngOnInit(): void {
+    this.idusuario = this.authorizaService.idusuario;
     this.idFactura = +sessionStorage.getItem('idfacturaToInfo')!;
     sessionStorage.removeItem('idfacturaToInfo');
     if (this.idFactura == 0 || this.idFactura == null) {
@@ -189,6 +192,20 @@ export class InfoFacturasComponent implements OnInit {
     this.suma12 = suma12;
     this.suma0 = suma0;
     this.valoriva = valoriva;
+  }
+
+  multaCalculate(idfactura: number) {
+    this.s_loading.showLoading();
+    this.facService.calculateMultaAsync(idfactura).then(
+      (resp) => {
+        console.log(resp);
+        this.s_loading.hideLoading();
+      },
+      (error) => {
+        console.error(error);
+        this.s_loading.hideLoading();
+      }
+    );
   }
 }
 

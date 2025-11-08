@@ -493,4 +493,8 @@ export class FacturaService {
 
     return this.http.post(`${apiUrl}/api/sri/send`, formData);
   }
+  calculateMultaAsync(idfactura: number): Promise<any> {
+    let resp = firstValueFrom(this.http.get(`${baseUrl}/multas?idfactura=${idfactura}`));
+    return resp;
+  }
 }

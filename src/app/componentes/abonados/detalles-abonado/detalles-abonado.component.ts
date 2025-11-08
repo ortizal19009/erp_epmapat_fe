@@ -144,7 +144,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     private s_jasperreport: JasperReportService,
     private f: FormBuilder,
     private s_sri: SriService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.f_sendEmail = this.f.group({
@@ -158,7 +158,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     this.listarIntereses();
     this.usuario = this.authService.idusuario;
   }
-  ngAfterViewInit(): void {}
+  ngAfterViewInit(): void { }
   cancelarFE() {
     if (this.facElectro != true) {
       this.facElectro = !this.facElectro;
@@ -372,7 +372,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     });
   }
 
-  detallesHistorial(lectura: Lecturas) {}
+  detallesHistorial(lectura: Lecturas) { }
 
   regresar() {
     let padre = sessionStorage.getItem('padreDetalleAbonado');
@@ -991,6 +991,21 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
       showConfirmButton: false,
       timer: 3000,
     });
+  }
+
+
+  multaCalculate(idfactura: number) {
+    this.s_loading.showLoading();
+    this.facService.calculateMultaAsync(idfactura).then(
+      (resp) => {
+        console.log(resp);
+        this.s_loading.hideLoading();
+      },
+      (error) => {
+        console.error(error);
+        this.s_loading.hideLoading();
+      }
+    );
   }
 }
 interface calcInteres {
