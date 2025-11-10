@@ -35,7 +35,8 @@ export class ImpInfoCajasComponent implements OnInit {
   swcalculando: boolean = false;
   txtcalculando = 'Calculando';
   nombreUsuario: any;
-
+  type: string = 'date';
+  date: Date = new Date();
   constructor(
     public authService: AutorizaService,
     public fb: FormBuilder,
@@ -46,7 +47,7 @@ export class ImpInfoCajasComponent implements OnInit {
     private s_usuarios: UsuarioService,
     private s_loading: LoadingService,
     private s_jasperreport: JasperReportService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/cajas');
@@ -64,7 +65,7 @@ export class ImpInfoCajasComponent implements OnInit {
       nombrearchivo: ['', [Validators.required, Validators.minLength(3)]],
       otrapagina: '',
       hdesde: '',
-      hhasta: ''
+      hhasta: '',
     });
     this.getRecaudador();
   }
@@ -91,10 +92,32 @@ export class ImpInfoCajasComponent implements OnInit {
 
   changeReporte() {
     this.opcreporte = +this.formImprimir.value.reporte;
-    this.formImprimir.patchValue({
-      hdesde: '06:30:00',
-      hhasta: '18:30:00'
-    })
+
+    const ahora = new Date();
+    const ayer = new Date();
+    ayer.setDate(ahora.getDate() - 1); // restar 1 día
+
+    if (this.opcreporte === 3) {
+      this.type = 'datetime-local';
+
+      // 🔹 Ajustar formato ISO sin zona horaria (YYYY-MM-DDTHH:mm)
+      const toLocalISO = (date: Date) => {
+        const offset = date.getTimezoneOffset();
+        const local = new Date(date.getTime() - offset * 60000);
+        return local.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:mm"
+      };
+
+      this.formImprimir.patchValue({
+        desde: toLocalISO(ayer),
+        hasta: toLocalISO(ahora),
+      });
+    } else {
+      this.type = 'date';
+      this.formImprimir.patchValue({
+        desde: ahora.toISOString().substring(0, 10),
+        hasta: ahora.toISOString().substring(0, 10),
+      });
+    }
   }
 
   impriexpor() {
@@ -207,19 +230,15 @@ export class ImpInfoCajasComponent implements OnInit {
           elementoExistente.remove();
         }
         let body: any = {
-          "reportName": "FacturasCobradasRec",
-          "parameters": {
-            "desde": d_fecha,
-            "hasta": h_fecha,
-            "hdesde": hdesde,
-            "hhasta": hhasta,
-            "idusuario": this.authService.idusuario,
-            "usuariocobro": recaudador
+          reportName: 'FacturasCobradasRec',
+          parameters: {
+            desde: d_fecha,
+            hasta: h_fecha,
+            idusuario: this.authService.idusuario,
+            usuariocobro: recaudador,
           },
-          "extencion": ".pdf"
-        }
-          ;
-
+          extencion: '.pdf',
+        };
         let _reporte = await this.s_jasperreport.getReporte(body);
         setTimeout(() => {
           const file = new Blob([_reporte], { type: 'application/pdf' });
@@ -245,20 +264,18 @@ export class ImpInfoCajasComponent implements OnInit {
           elementoExistente.remove();
         }
         let data: any = {
-          "reportName": "RubrosCobradosRec",
-          "parameters": {
-            "desde": d_fecha,
-            "hasta": h_fecha,
-            "hdesde": hdesde,
-            "hhasta": hhasta,
-            "tope": hasta,
-            "idusuario": this.authService.idusuario,
-            "usuariocobro": recaudador
+          reportName: 'RubrosCobradosRec',
+          parameters: {
+            desde: d_fecha,
+            hasta: h_fecha,
+            hdesde: hdesde,
+            hhasta: hhasta,
+            tope: hasta,
+            idusuario: this.authService.idusuario,
+            usuariocobro: recaudador,
           },
-          "extencion": ".pdf"
-        }
-          ;
-
+          extencion: '.pdf',
+        };
         let reporte = await this.s_jasperreport.getReporte(data);
         setTimeout(() => {
           const file = new Blob([reporte], { type: 'application/pdf' });
@@ -285,8 +302,6 @@ export class ImpInfoCajasComponent implements OnInit {
 
   //Muestra cada reporte
   async imprime() {
-
-
     // this.sw1 = false;
     this.swbotones = false;
     this.swcalculando = false;
@@ -303,7 +318,8 @@ export class ImpInfoCajasComponent implements OnInit {
       case 3:
         this.otrapagina = null;
         break;
-      case 4: this.otrapagina = null;
+      case 4:
+        this.otrapagina = null;
         break;
       default:
     }
@@ -325,9 +341,9 @@ export class ImpInfoCajasComponent implements OnInit {
       ); */
     this._pdf.header(
       'RESUMEN RECAUDACIÓN: ' +
-      this.formImprimir.value.d_fecha +
-      ' - ' +
-      this.formImprimir.value.h_fecha,
+        this.formImprimir.value.d_fecha +
+        ' - ' +
+        this.formImprimir.value.h_fecha,
       doc
     );
 
@@ -532,9 +548,9 @@ export class ImpInfoCajasComponent implements OnInit {
       ); */
     this._pdf.header(
       'RECAUDACIÓN - PLANILLAS: ' +
-      this.formImprimir.value.d_fecha +
-      ' - ' +
-      this.formImprimir.value.h_fecha,
+        this.formImprimir.value.d_fecha +
+        ' - ' +
+        this.formImprimir.value.h_fecha,
       doc
     );
     const datos: any = [];
@@ -701,7 +717,6 @@ export class ImpInfoCajasComponent implements OnInit {
     };
     if (this.otrapagina) doc.output('dataurlnewwindow', opciones);
     else {
-
       const pdfDataUri = doc.output('datauristring');
       //Si ya existe el <embed> primero lo remueve
       const elementoExistente = document.getElementById('idembed');
