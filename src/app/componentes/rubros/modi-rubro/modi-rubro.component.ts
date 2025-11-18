@@ -109,7 +109,6 @@ export class ModiRubroComponent implements OnInit {
   }
 
   async onSubmit() {
-    console.log(this.formRubro.value)
     let rubro: Rubros = new Rubros();
     let f: any = this.formRubro.value;
     rubro.idrubro = this.idrubro;
@@ -127,10 +126,9 @@ export class ModiRubroComponent implements OnInit {
     rubro.feccrea = f.feccrea
     rubro.usumodi = f.usumodi
     rubro.fecmodi = f.fecmodi
-    console.log(rubro);
 try {
   const datos = await this.rubService.updateRubro(this.idrubro, rubro);
-  console.log(datos);
+  this.retornar();
 } catch (error) {
   console.error('Error al actualizar rubro', error);
 }

@@ -468,8 +468,8 @@ export class FacturaService {
 
   }
   generarPDF_FacElectronica(idfactura: number): Promise<any> {
-    //let resp = firstValueFrom(this.http.get(`${apiUrl}/api/singsend/generar-pdf?idfactura=${idfactura}`,
-    let resp = firstValueFrom(this.http.get(`${apiUrl}/api/sri/generar-pdf?idfactura=${idfactura}`,
+    let resp = firstValueFrom(this.http.get(`${apiUrl}/api/singsend/generar-pdf?idfactura=${idfactura}`,
+   // let resp = firstValueFrom(this.http.get(`${apiUrl}/api/sri/generar-pdf?idfactura=${idfactura}`,
       { responseType: 'blob' }));
     return resp;
   }

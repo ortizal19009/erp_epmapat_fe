@@ -53,7 +53,7 @@ updateRubro(idrubro: number, rubro: any): Promise<any> {
   const headers = new HttpHeaders({
   'Content-Type': 'application/json'
 });
-  return firstValueFrom(this.http.put(`${baseUrl}/update?idrubro=${idrubro}`, rubro, { headers }));
+  return firstValueFrom(this.http.put(`${baseUrl}/${idrubro}`, rubro, { headers }));
 }
 
 

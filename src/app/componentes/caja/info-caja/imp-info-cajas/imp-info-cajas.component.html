@@ -30,6 +30,7 @@
                 <option value="2">Recaudación - Planillas</option>
                 <option value="3">Recaudación Facturas</option>
                 <!--<option value="4">Recaudación Rubros</option>-->
+                <option value="5" *ngIf="idrec==10041">Recaudación Facilito</option>
               </select>
             </div>
 
@@ -54,7 +55,7 @@
                   aria-label="Small" aria-describedby="inputGroup-sizing-sm">
               </div>
             </div>
-<!--             <div *ngIf="opcreporte == 3 || opcreporte == 4" class="form-group col-md-6">
+            <!--             <div *ngIf="opcreporte == 3 || opcreporte == 4" class="form-group col-md-6">
               <div class="input-group input-group-sm">
                 <div class="input-group-prepend">
                   <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm" data-toggle="tooltip"

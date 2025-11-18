@@ -37,7 +37,7 @@ export class ImpCajasComponent implements OnInit {
   _transferidas: any;
   _p_transferidas: any;
   _np_transferidas: any;
-
+idusuario:number= this.authService.idusuario;
   constructor(
     public authService: AutorizaService,
     public fb: FormBuilder,

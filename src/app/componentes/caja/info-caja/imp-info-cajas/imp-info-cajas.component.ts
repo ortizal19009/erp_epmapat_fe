@@ -37,6 +37,7 @@ export class ImpInfoCajasComponent implements OnInit {
   nombreUsuario: any;
   type: string = 'date';
   date: Date = new Date();
+  idrec: number = +sessionStorage.getItem('idrecaudador')!;
   constructor(
     public authService: AutorizaService,
     public fb: FormBuilder,
@@ -47,7 +48,7 @@ export class ImpInfoCajasComponent implements OnInit {
     private s_usuarios: UsuarioService,
     private s_loading: LoadingService,
     private s_jasperreport: JasperReportService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/cajas');
@@ -73,7 +74,9 @@ export class ImpInfoCajasComponent implements OnInit {
     let recaudador = +sessionStorage.getItem('idrecaudador')!;
     this.s_usuarios.getDatosOfOne(recaudador).subscribe({
       next: (recaudador: any) => {
+        console.log(recaudador);
         this.nombreUsuario = recaudador.nombre;
+
       },
     });
   }
@@ -295,6 +298,43 @@ export class ImpInfoCajasComponent implements OnInit {
         else this.txtcalculando = 'Descargar';
         this.s_loading.hideLoading();
         break;
+
+      case 5:
+console.log("Generando reporte Facilito...");
+        this.s_loading.showLoading();
+        if (elementoExistente) {
+          elementoExistente.remove();
+        }
+        let d: any = {
+          reportName: 'FacturasCobradasFacilito',
+          parameters: {
+            desde: d_fecha,
+            hasta: h_fecha,
+            idusuario: this.authService.idusuario,
+            usuariocobro: recaudador,
+          },
+          extencion: '.pdf',
+        };
+        let rep: any = await this.s_jasperreport.getReporte(d);
+        setTimeout(() => {
+          const file = new Blob([rep], { type: 'application/pdf' });
+          const fileURL = URL.createObjectURL(file);
+
+          // Asignar el blob al iframe
+          const pdfViewer = document.getElementById(
+            'pdfViewer'
+          ) as HTMLIFrameElement;
+
+          if (pdfViewer) {
+            pdfViewer.src = fileURL;
+          }
+        }, 1000);
+        this.swcalculando = false;
+        if (this.swimprimir) this.txtcalculando = 'Mostrar';
+        else this.txtcalculando = 'Descargar';
+        this.s_loading.hideLoading();
+        break;
+
       default:
         break;
     }
@@ -320,6 +360,9 @@ export class ImpInfoCajasComponent implements OnInit {
         break;
       case 4:
         this.otrapagina = null;
+        break
+      case 5:
+        this.otrapagina = null;
         break;
       default:
     }
@@ -341,9 +384,9 @@ export class ImpInfoCajasComponent implements OnInit {
       ); */
     this._pdf.header(
       'RESUMEN RECAUDACIÓN: ' +
-        this.formImprimir.value.d_fecha +
-        ' - ' +
-        this.formImprimir.value.h_fecha,
+      this.formImprimir.value.d_fecha +
+      ' - ' +
+      this.formImprimir.value.h_fecha,
       doc
     );
 
@@ -548,9 +591,9 @@ export class ImpInfoCajasComponent implements OnInit {
       ); */
     this._pdf.header(
       'RECAUDACIÓN - PLANILLAS: ' +
-        this.formImprimir.value.d_fecha +
-        ' - ' +
-        this.formImprimir.value.h_fecha,
+      this.formImprimir.value.d_fecha +
+      ' - ' +
+      this.formImprimir.value.h_fecha,
       doc
     );
     const datos: any = [];

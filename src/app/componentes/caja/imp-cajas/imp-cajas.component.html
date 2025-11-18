@@ -1,181 +1,181 @@
 <div class="content mt-1 pt-1 px-2">
-   <div class="container-fluid">
-      <div class="row mt-0 px-1 py-1 justify-content-start cabecera border sombra">
-         <div class="col-sm-6">
-            <h4 *ngIf="swimprimir" class="m-0 font-weight-bold text-truncate">
-               <i class="bi-printer pointer" (click)="impriexpor()"></i> &nbsp; Imprimir Recaudación General / Cajas
-            </h4>
-            <h4 *ngIf="!swimprimir" class="m-0 font-weight-bold text-truncate">
-               <i class="bi-file-earmark-arrow-up pointer" (click)="impriexpor()"></i> &nbsp; Exportar
-            </h4>
-         </div>
+  <div class="container-fluid">
+    <div class="row mt-0 px-1 py-1 justify-content-start cabecera border sombra">
+      <div class="col-sm-6">
+        <h4 *ngIf="swimprimir" class="m-0 font-weight-bold text-truncate">
+          <i class="bi-printer pointer" (click)="impriexpor()"></i> &nbsp; Imprimir Recaudación General / Cajas
+        </h4>
+        <h4 *ngIf="!swimprimir" class="m-0 font-weight-bold text-truncate">
+          <i class="bi-file-earmark-arrow-up pointer" (click)="impriexpor()"></i> &nbsp; Exportar
+        </h4>
       </div>
-   </div>
+    </div>
+  </div>
 </div>
 
 <div class="content">
-   <div class="container-fluid">
-      <div class="row justify-content-center">
-         <div class="card card-body col-sm-5 detalle sombra">
-            <form [formGroup]="formImprimir">
-               <div class="row">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="card card-body col-sm-5 detalle sombra">
+        <form [formGroup]="formImprimir">
+          <div class="row">
 
-                  <div class="input-group mb-3 input-group-sm col-sm-10">
-                     <div class="input-group-prepend">
-                        <label *ngIf="swimprimir" class="input-group-text">Imprimir</label>
-                        <label *ngIf="!swimprimir" class="input-group-text">Exportar</label>
-                     </div>
-                     <select class="custom-select" formControlName="reporte" (change)="changeReporte()">
-                        <option value="1">Resumen Recaudación diaria</option>
-                        <option value="2">Recaudación diaria - Planillas</option>
-                        <option value="4">Resumen Recaudación</option>
-                        <option value="5">Recaudación - Planillas</option>
-                        <option value="6">Transferencias cobradas</option>
-                        <option value="7">Transferencias general</option>
-                        <option value="3">Lista de cajas</option>
-                        <option value="8">Recaudacion x facturas</option>
-                        <option value="9">Recaudación x rubros</option>
+            <div class="input-group mb-3 input-group-sm col-sm-10">
+              <div class="input-group-prepend">
+                <label *ngIf="swimprimir" class="input-group-text">Imprimir</label>
+                <label *ngIf="!swimprimir" class="input-group-text">Exportar</label>
+              </div>
+              <select class="custom-select" formControlName="reporte" (change)="changeReporte()">
+                <option value="1">Resumen Recaudación diaria</option>
+                <option value="2">Recaudación diaria - Planillas</option>
+                <option value="4">Resumen Recaudación</option>
+                <option value="5">Recaudación - Planillas</option>
+                <option value="6">Transferencias cobradas</option>
+                <option value="7">Transferencias general</option>
+                <option value="3">Lista de cajas</option>
+                <option value="8" *ngIf="idusuario ==1">Recaudacion x facturas</option>
+                <option value="9" *ngIf="idusuario ==1">Recaudación x rubros</option>
 
-                     </select>
+              </select>
+            </div>
+
+            <div
+              *ngIf="opcreporte != 3 && (opcreporte === 4 || opcreporte ===5 || opcreporte ===6 || opcreporte ===7 || opcreporte ===8 || opcreporte ===9)"
+              class="form-group col-md-6">
+              <div class="input-group input-group-sm">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm" data-toggle="tooltip"
+                    title="Obligatorio">Desde: </span>
+                </div>
+                <input type="date" class="form-control text-center" formControlName="d_fecha" id="d_fecha"
+                  aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+              </div>
+            </div>
+
+            <div
+              *ngIf="opcreporte != 3 && (opcreporte === 4 || opcreporte ===5 || opcreporte ===6 || opcreporte ===7 || opcreporte ===8 || opcreporte ===9)"
+              class="form-group col-md-6">
+              <div class="input-group input-group-sm">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm" data-toggle="tooltip"
+                    title="Obligatorio">Hasta: </span>
+                </div>
+                <input type="date" class="form-control text-center" formControlName="h_fecha" id="h_fecha"
+                  aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+              </div>
+            </div>
+
+            <div *ngIf="opcreporte != 3 && (opcreporte ===8 || opcreporte ===9)" class="form-group col-md-6">
+              <div class="input-group input-group-sm">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm" data-toggle="tooltip"
+                    title="Obligatorio">Hora Desde: </span>
+                </div>
+                <input type="time" class="form-control text-center" formControlName="horad" id="horad"
+                  aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+              </div>
+            </div>
+
+            <div *ngIf="opcreporte != 3 && (opcreporte ===8 || opcreporte ===9)" class="form-group col-md-6">
+              <div class="input-group input-group-sm">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm" data-toggle="tooltip"
+                    title="Obligatorio">Hora Hasta: </span>
+                </div>
+                <input type="time" class="form-control text-center" formControlName="horah" id="horah"
+                  aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+              </div>
+            </div>
+            <div *ngIf="opcreporte != 3 && (opcreporte === 1 || opcreporte ===2)" class="form-group col-md-6">
+              <div class="input-group input-group-sm">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm" data-toggle="tooltip"
+                    title="Obligatorio">Fecha</span>
+                </div>
+                <input type="date" class="form-control text-center" formControlName="fecha" id="fecha"
+                  aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+              </div>
+            </div>
+
+            <div *ngIf="swimprimir" class="form-group col-md-3">
+              <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold">Abrir en otra página</span>
+                  <div class="input-group-text">
+                    <input type="checkbox" formControlName="otrapagina">
                   </div>
+                </div>
+              </div>
+            </div>
 
-                  <div
-                     *ngIf="opcreporte != 3 && (opcreporte === 4 || opcreporte ===5 || opcreporte ===6 || opcreporte ===7 || opcreporte ===8 || opcreporte ===9)"
-                     class="form-group col-md-6">
-                     <div class="input-group input-group-sm">
-                        <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
-                              data-toggle="tooltip" title="Obligatorio">Desde: </span>
-                        </div>
-                        <input type="date" class="form-control text-center" formControlName="d_fecha" id="d_fecha"
-                           aria-label="Small" aria-describedby="inputGroup-sizing-sm">
-                     </div>
-                  </div>
-
-                  <div
-                     *ngIf="opcreporte != 3 && (opcreporte === 4 || opcreporte ===5 || opcreporte ===6 || opcreporte ===7 || opcreporte ===8 || opcreporte ===9)"
-                     class="form-group col-md-6">
-                     <div class="input-group input-group-sm">
-                        <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
-                              data-toggle="tooltip" title="Obligatorio">Hasta: </span>
-                        </div>
-                        <input type="date" class="form-control text-center" formControlName="h_fecha" id="h_fecha"
-                           aria-label="Small" aria-describedby="inputGroup-sizing-sm">
-                     </div>
-                  </div>
-
-                  <div *ngIf="opcreporte != 3 && (opcreporte ===8 || opcreporte ===9)" class="form-group col-md-6">
-                     <div class="input-group input-group-sm">
-                        <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
-                              data-toggle="tooltip" title="Obligatorio">Hora Desde: </span>
-                        </div>
-                        <input type="time" class="form-control text-center" formControlName="horad" id="horad"
-                           aria-label="Small" aria-describedby="inputGroup-sizing-sm">
-                     </div>
-                  </div>
-
-                  <div *ngIf="opcreporte != 3 && (opcreporte ===8 || opcreporte ===9)" class="form-group col-md-6">
-                     <div class="input-group input-group-sm">
-                        <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
-                              data-toggle="tooltip" title="Obligatorio">Hora Hasta: </span>
-                        </div>
-                        <input type="time" class="form-control text-center" formControlName="horah" id="horah"
-                           aria-label="Small" aria-describedby="inputGroup-sizing-sm">
-                     </div>
-                  </div>
-                  <div *ngIf="opcreporte != 3 && (opcreporte === 1 || opcreporte ===2)" class="form-group col-md-6">
-                     <div class="input-group input-group-sm">
-                        <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
-                              data-toggle="tooltip" title="Obligatorio">Fecha</span>
-                        </div>
-                        <input type="date" class="form-control text-center" formControlName="fecha" id="fecha"
-                           aria-label="Small" aria-describedby="inputGroup-sizing-sm">
-                     </div>
-                  </div>
-
-                  <div *ngIf="swimprimir" class="form-group col-md-3">
-                     <div class="input-group input-group-sm mb-3">
-                        <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold">Abrir en otra página</span>
-                           <div class="input-group-text">
-                              <input type="checkbox" formControlName="otrapagina">
-                           </div>
-                        </div>
-                     </div>
-                  </div>
-
-                  <div *ngIf="!swimprimir" class="form-group col-sm-10 my-0 py-0">
-                     <div class="input-group input-group-sm mb-3">
-                        <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Nombre del
-                              archivo</span>
-                        </div>
-                        <input type="text" class="form-control" formControlName="nombrearchivo" aria-label="Small"
-                           aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['nombrearchivo'].invalid && f['nombrearchivo'].touched,
+            <div *ngIf="!swimprimir" class="form-group col-sm-10 my-0 py-0">
+              <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Nombre del
+                    archivo</span>
+                </div>
+                <input type="text" class="form-control" formControlName="nombrearchivo" aria-label="Small"
+                  aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['nombrearchivo'].invalid && f['nombrearchivo'].touched,
                            'is-valid': f['nombrearchivo'].valid, '': f['nombrearchivo'].untouched}">
-                     </div>
-                  </div>
-
-               </div>
-            </form>
-            <div *ngIf="!swbotones" class="text-center">
-               <button *ngIf="swimprimir" type='button' class='btn btn-success btn-sm mx-1' [disabled]="swbotones"
-                  (click)="imprimir()">
-                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
-               <button *ngIf="!swimprimir" type='button' class='btn btn-warning btn-sm mx-1' (click)="imprimir()"
-                  [disabled]="!formImprimir.valid">
-                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
-               <button class="btn btn-outline-success btn-sm mx-1" (click)="retornar()"><i
-                     class="fa fa-times-circle"></i> Cancelar</button>
+              </div>
             </div>
 
-            <div *ngIf="swbotones" class="text-center">
-               <button *ngIf="swimprimir" type="button" class="btn btn-success btn-block"
-                  [attr.data-target]="otrapagina ? null : '#pdf'" data-toggle="modal" [disabled]="swcalculando"
-                  (click)="imprime()">
-                  <i *ngIf="swcalculando" class="fa fa-spinner"></i>
-                  <i *ngIf="!swcalculando" class="bi-eye"></i>&nbsp;&nbsp;&nbsp;{{txtcalculando}}
-               </button>
-               <button *ngIf="!swimprimir" type="button" class="btn btn-warning btn-block" [disabled]="swcalculando"
-                  (click)="imprime()">
-                  <i *ngIf="swcalculando" class="fa fa-spinner"></i>
-                  <i *ngIf="!swcalculando" class="bi-eye"></i>&nbsp;&nbsp;&nbsp;{{txtcalculando}}
-               </button>
+          </div>
+        </form>
+        <div *ngIf="!swbotones" class="text-center">
+          <button *ngIf="swimprimir" type='button' class='btn btn-success btn-sm mx-1' [disabled]="swbotones"
+            (click)="imprimir()">
+            <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+          <button *ngIf="!swimprimir" type='button' class='btn btn-warning btn-sm mx-1' (click)="imprimir()"
+            [disabled]="!formImprimir.valid">
+            <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+          <button class="btn btn-outline-success btn-sm mx-1" (click)="retornar()"><i class="fa fa-times-circle"></i>
+            Cancelar</button>
+        </div>
 
-            </div>
-         </div>
+        <div *ngIf="swbotones" class="text-center">
+          <button *ngIf="swimprimir" type="button" class="btn btn-success btn-block"
+            [attr.data-target]="otrapagina ? null : '#pdf'" data-toggle="modal" [disabled]="swcalculando"
+            (click)="imprime()">
+            <i *ngIf="swcalculando" class="fa fa-spinner"></i>
+            <i *ngIf="!swcalculando" class="bi-eye"></i>&nbsp;&nbsp;&nbsp;{{txtcalculando}}
+          </button>
+          <button *ngIf="!swimprimir" type="button" class="btn btn-warning btn-block" [disabled]="swcalculando"
+            (click)="imprime()">
+            <i *ngIf="swcalculando" class="fa fa-spinner"></i>
+            <i *ngIf="!swcalculando" class="bi-eye"></i>&nbsp;&nbsp;&nbsp;{{txtcalculando}}
+          </button>
+
+        </div>
       </div>
-   </div>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL PDF (En la misma página)-->
 <div class='modal fade' id='pdf' tabindex='-1' aria-labelledby='pdf' aria-hidden='true'>
-   <div class='modal-dialog modal-lg'>
+  <div class='modal-dialog modal-lg'>
 
-      <div class="modal-content" *ngIf="opcreporte == 7 || opcreporte === 8 || opcreporte === 9">
-         <div class="modal-header">
-            <h5 class="modal-title" id="staticBackdropLabel">Vista de reporte</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-               <span aria-hidden="true">&times;</span>
-            </button>
-         </div>
-         <div class="modal-body">
-            <iframe id="pdfViewer" src="" width="100%" height="600px"></iframe>
-         </div>
-         <div class="modal-footer">
-            <button type="button" class="btn btn-success" data-dismiss="modal">Cancelar</button>
-         </div>
+    <div class="modal-content" *ngIf="opcreporte == 7 || opcreporte === 8 || opcreporte === 9">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">Vista de reporte</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-   </div>
+      <div class="modal-body">
+        <iframe id="pdfViewer" src="" width="100%" height="600px"></iframe>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" data-dismiss="modal">Cancelar</button>
+      </div>
+    </div>
+  </div>
 </div>
 <!-- Modal vista imprimir -->
 <div class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1"
-   aria-labelledby="staticBackdropLabel" aria-hidden="true">
-   <div class="modal-dialog modal-xl">
+  aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
 
-   </div>
+  </div>
 </div>
