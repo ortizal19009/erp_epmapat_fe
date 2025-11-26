@@ -185,138 +185,219 @@
 <!-- Modal detalles facturacion electronica-->
 <div class="modal fade" id="detallesModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
   aria-labelledby="detallesModalLabel" aria-hidden="true">
+
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header">
-        <div class="row">
-          <div class="col-sm">
-            <h5 class="modal-title" id="detallesModalLabel">Nro. factura:
-              {{factura.establecimiento}}-{{factura.puntoemision}}-{{factura.secuencial}} -- {{factura.estado}}</h5>
+    <div class="modal-content shadow-lg border-0">
+
+      <!-- HEADER -->
+      <div class="modal-header bg-light border-bottom-0 py-3">
+        <div class="w-100 d-flex justify-content-between align-items-start">
+
+          <div>
+            <h5 class="modal-title font-weight-bold mb-1">
+              Factura: {{factura.establecimiento}}-{{factura.puntoemision}}-{{factura.secuencial}}
+              <span class="badge badge-pill ml-2" [ngClass]="{
+                  'badge-success': factura.estado === 'AUTORIZADO',
+                  'badge-danger': factura.estado === 'RECHAZADO',
+                  'badge-warning': factura.estado === 'DEVUELTA'
+                }">
+                {{factura.estado}}
+              </span>
+            </h5>
+
+            <small class="text-muted">{{factura.claveacceso}}</small>
+            <div class="mt-1">
+              <small [ngClass]="getFechaColor()" class="font-weight-bold">
+                Fecha emisión: {{ factura.fechaemision | date:'yyyy-MM-dd' }}
+              </small>
+            </div>
           </div>
-        </div>
-        <button [hidden]="validarEstado(factura.estado)" type="button" class="btn btn-xs btn-outline-success ml-5"
-          (click)="showXml()">
-          <i class="bi bi-eye"></i>
-        </button>
-        <button [hidden]="!validarEstado(factura.estado)" type="button" class="btn btn-xs btn-outline-danger ml-5"
-          (click)="showError()">
-          <i class="bi bi-eye"></i>
-        </button>
-      </div>
-      <div class="modal-body" *ngIf="txtDetails; else txtError">
-        <div class="row">
-          <div class="col-sm">
-            <h6>{{factura.claveacceso}}</h6>
+
+          <div class="text-right">
+
+            <!-- Dropdown acciones -->
+            <div class="dropdown d-inline-block">
+              <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton"
+                data-toggle="dropdown">
+                <i class="fas fa-cog mr-1"></i> Acciones
+              </button>
+
+              <div class="dropdown-menu dropdown-menu-right shadow">
+
+                <!-- XML -->
+                <a class="dropdown-item" href="javascript:void(0)" [hidden]="validarEstado(factura.estado)"
+                  (click)="showXml()">
+                  <i class="fas fa-code text-primary mr-2"></i> Ver XML
+                </a>
+
+                <a class="dropdown-item" href="javascript:void(0)" [hidden]="!validarEstado(factura.estado)"
+                  (click)="showError()">
+                  <i class="fas fa-exclamation-triangle text-warning mr-2"></i> Ver Errores
+                </a>
+
+                <div class="dropdown-divider"></div>
+
+                <!-- Validar -->
+                <a class="dropdown-item" href="javascript:void(0)" *ngIf="idusuario == 1"  (click)="getXmlAutorizadoSri(factura)">
+                  <i class="fas fa-check-circle text-info mr-2"></i> Validar SRI
+                </a>
+
+                <div class="dropdown-divider"></div>
+
+                <!-- Descargar -->
+                <a class="dropdown-item" href="javascript:void(0)" *ngIf="factura.xmlautorizado"
+                  (click)="getFacturaPDF(factura.idfactura)">
+                  <i class="fas fa-file-pdf text-danger mr-2"></i> Descargar PDF
+                </a>
+
+                <a class="dropdown-item" href="javascript:void(0)" *ngIf="factura.xmlautorizado"
+                  (click)="downloadXml(factura)">
+                  <i class="fas fa-file-code text-success mr-2"></i> Descargar XML
+                </a>
+
+                <div class="dropdown-divider"></div>
+
+                <!-- Re enviar -->
+                <a class="dropdown-item" href="javascript:void(0)" *ngIf="btnRsend && idusuario == 1" (click)="reSend()">
+                  <i class="fas fa-paper-plane text-primary mr-2"></i> Re-enviar
+                </a>
+                 <!-- Re crear -->
+                <a class="dropdown-item" href="javascript:void(0)" *ngIf="idusuario == 1" (click)="reCreateFactura(factura.idfactura)">
+                  <i class="fas fa-repeat text-warning mr-2"></i> Re-crear
+                </a>
+              </div>
+            </div>
+
+            <!-- Cerrar -->
+            <button type="button" class="btn btn-outline-secondary btn-sm ml-2" data-dismiss="modal">
+              <i class="fas fa-times"></i>
+            </button>
           </div>
-        </div>
-        <div class="row">
-          <div class="col-sm">
-            <table class="table table-sm table-hover table-bordered">
-              <thead>
-                <tr>
-                  <th>Codigo</th>
-                  <th>Descripción</th>
-                  <th>Cantidad</th>
-                  <th>Valor unitario</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let detalle of _detalles">
-                  <td class="text-center">{{detalle.codigoprincipal}}</td>
-                  <td class="">{{detalle.descripcion}}</td>
-                  <td class="text-center">{{detalle.cantidad}}</td>
-                  <td class="text-right">{{detalle.preciounitario.toFixed(2)}}</td>
-                </tr>
-                <tr>
-                  <td></td>
-                  <td></td>
-                  <td>
-                    <h6>Total</h6>
-                  </td>
-                  <td>
-                    <h6>{{totalpreciounitario.toFixed(2)}}</h6>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="col-sm-4">
-            <table class="table table-sm table-hover table-bordered">
-              <thead>
-                <tr>
-                  <th>N° detalle</th>
-                  <th>Base Imponible</th>
-                  <th [hidden]=validarEstado(factura.estado)>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let impuesto of impuestos">
-                  <td>{{impuesto.idfacturadetalle}}</td>
-                  <td class="text-right">{{impuesto.baseimponible.toFixed(2)}}</td>
-                  <td *ngIf=validarEstado(factura.estado)>
-                    <button class="btn btn-xs btn-danger" (click)="deleteImpuesto(impuesto)">
-                      <i class="bi bi-trash"></i>
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <h6>
-                      Total
-                    </h6>
-                  </td>
-                  <td>
-                    <h6>
-                      {{totalbaseimponible.toFixed(2)}}
-                    </h6>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-sm-6">
-            <table class="table table-hover table-sm table-bordered">
-              <thead>
-                <tr>
-                  <th>N° planilla</th>
-                  <th>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let pago of _pagos">
-                  <td>{{pago.idfactura}}</td>
-                  <td class="text-rigth<">{{pago.total.toFixed(2)}}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+
         </div>
       </div>
-      <ng-template #txtError>
-        <div class="modal-body">
-          <div class="row">
-            <div class="col-sm-12">
-              <textarea class="txt_error" [value]="error" cols="100" rows="10"></textarea>
+
+      <!-- BODY -->
+      <div class="modal-body pt-0" *ngIf="txtDetails; else txtError">
+
+        <div class="row">
+
+          <!-- PRODUCTOS -->
+          <div class="col-md-8">
+            <h6 class="section-title">Productos / Servicios</h6>
+
+            <div class="table-responsive">
+              <table class="table table-sm table-bordered table-striped rounded">
+                <thead class="thead-dark">
+                  <tr>
+                    <th>Código</th>
+                    <th>Descripción</th>
+                    <th class="text-center">Cantidad</th>
+                    <th class="text-right">Valor Unit.</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr *ngFor="let detalle of _detalles">
+                    <td class="text-center">{{detalle.codigoprincipal}}</td>
+                    <td>{{detalle.descripcion}}</td>
+                    <td class="text-center">{{detalle.cantidad}}</td>
+                    <td class="text-right">{{detalle.preciounitario.toFixed(2)}}</td>
+                  </tr>
+
+                  <tr class="table-secondary font-weight-bold">
+                    <td colspan="2"></td>
+                    <td class="text-center">Total</td>
+                    <td class="text-right">{{totalpreciounitario.toFixed(2)}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- IMPUESTOS -->
+          <div class="col-md-4">
+            <h6 class="section-title">Impuestos</h6>
+
+            <div class="table-responsive">
+              <table class="table table-sm table-bordered table-striped">
+                <thead class="thead-dark">
+                  <tr>
+                    <th>N° Detalle</th>
+                    <th>Base Imponible</th>
+                    <th *ngIf="validarEstado(factura.estado)">Acción</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr *ngFor="let imp of impuestos">
+                    <td>{{imp.idfacturadetalle}}</td>
+                    <td class="text-right">{{imp.baseimponible.toFixed(2)}}</td>
+                    <td *ngIf="validarEstado(factura.estado)" class="text-center">
+                      <button class="btn btn-outline-danger btn-sm" (click)="deleteImpuesto(imp)">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+
+                  <tr class="table-secondary font-weight-bold">
+                    <td>Total</td>
+                    <td class="text-right">{{totalbaseimponible.toFixed(2)}}</td>
+                    <td *ngIf="validarEstado(factura.estado)"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- PAGOS -->
+        <div class="row mt-4">
+          <div class="col-md-6">
+            <h6 class="section-title">Pagos</h6>
+
+            <div class="table-responsive">
+              <table class="table table-sm table-bordered table-striped">
+                <thead class="thead-dark">
+                  <tr>
+                    <th>N° Planilla</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr *ngFor="let pago of _pagos">
+                    <td>{{pago.idfactura}}</td>
+                    <td class="text-right">{{pago.total.toFixed(2)}}</td>
+                  </tr>
+                </tbody>
+
+              </table>
             </div>
           </div>
         </div>
+
+      </div>
+
+      <!-- ERROR -->
+      <ng-template #txtError>
+        <div class="modal-body mt-3">
+          <div class="alert alert-warning shadow-sm">
+            <h6 class="mb-0"><i class="fas fa-exclamation-triangle mr-2"></i> Información de errores</h6>
+          </div>
+
+          <textarea class="form-control mt-2" rows="10" readonly>{{error}}</textarea>
+        </div>
       </ng-template>
 
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-success btn-sm" data-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-outline-info btn-sm"
-          (click)="getXmlAutorizadoSri(factura)">Val
-          SRI</button>
-        <button type="button" class="btn btn-outline-danger btn-sm"
-          *ngIf="factura.xmlautorizado !== null || factura.xmlautorizado !== ''"
-          (click)="getFacturaPDF(factura.idfactura)">Descargar
-          PDF</button>
-        <button type="button" class="btn btn-success btn-sm" data-dismiss="modal" *ngIf="btnRsend" (click)=reSend()>Re
-          enviar</button>
+      <!-- FOOTER -->
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-dismiss="modal">
+          <i class="fas fa-times mr-1"></i> Cerrar
+        </button>
       </div>
+
     </div>
   </div>
 </div>

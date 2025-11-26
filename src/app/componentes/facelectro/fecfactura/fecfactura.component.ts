@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { rejects } from 'assert';
 import { truncate } from 'fs/promises';
 import { resolve } from 'path';
-import { interval, take } from 'rxjs';
+import { interval, lastValueFrom, take } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Abonados } from 'src/app/modelos/abonados';
@@ -68,6 +68,7 @@ export class FecfacturaComponent implements OnInit {
     { nombre: 'Autorizado/No Enviado', letra: 'O' },
     { nombre: 'Datos incompletos', letra: 'E' },
   ];
+  idusuario: number;
 
   filter: string;
   constructor(
@@ -93,7 +94,7 @@ export class FecfacturaComponent implements OnInit {
     let coloresJSON = sessionStorage.getItem('/fecfactura');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
     else this.buscaColor();
-
+    this.idusuario = this.authService.idusuario;
     const fechaActual = new Date();
     this.formExportar = this.fb.group({
       nrofactura: '',
@@ -107,6 +108,7 @@ export class FecfacturaComponent implements OnInit {
     });
     // this.getFecFactura();
     this.getByEstado(this.v_estado, this.limit);
+    this.validarReenvio();
   }
 
   colocaColor(colores: any) {
@@ -148,11 +150,9 @@ export class FecfacturaComponent implements OnInit {
       error: (e) => console.error(e),
     });
   }
-
   regresar() {
     this.router.navigate(['/inicio']);
   }
-
   buscar() {
     this.conter = 0;
     this.datosDefinirAsync();
@@ -207,10 +207,11 @@ export class FecfacturaComponent implements OnInit {
     const numbers = interval(1000);
     const takeFourNumbers = numbers.pipe(take(this._facturas.length));
     takeFourNumbers.subscribe((x) => {
-      this.fecfacService.expDesdeAbonados(this._facturas[x]).then((item: any) => {
-        console.log('exportado', this._facturas[x].nrofactura);
-
-      }) ;
+      this.fecfacService
+        .expDesdeAbonados(this._facturas[x])
+        .then((item: any) => {
+          console.log('exportado', this._facturas[x].nrofactura);
+        });
       this.porcNumber = x;
       if (this._facturas.length - 1 === x) {
         this.swfacturas = false;
@@ -387,7 +388,6 @@ export class FecfacturaComponent implements OnInit {
     let verificador = modulo11(this.claveacceso);
     this.claveacceso = this.claveacceso + verificador; //Dígito Verificador (Módulo 11)
   }
-
   pagos = (resp: any, sumaTotal: number) => {
     let pagos = {} as Fec_factura_pagos;
     switch (this.tipocobro.toString()) {
@@ -521,29 +521,54 @@ export class FecfacturaComponent implements OnInit {
     this.txtDetails = !this.txtDetails;
   }
   validarEstado(estado: any) {
+    // Reset por defecto
+    this.estado = true;
+    this.btnRsend = false;
+
     switch (estado) {
+      // -------------------------------------------
+      // Factura AUTORIZADA o PDF-OK → no es error
+      // -------------------------------------------
       case 'A':
-        this.estado = false;
-        break;
       case 'O':
         this.estado = false;
         break;
+
+      // -------------------------------------------
+      // Factura OBSERVADA (U) → solo permitir reenviar si coincide valores
+      // -------------------------------------------
       case 'U':
-        if (this.totalbaseimponible === this.totalpagado) {
-          this.btnRsend = true;
-        } else {
-          this.btnRsend = false;
-        }
+        this.estado = true;
+        this.btnRsend = this.totalbaseimponible === this.totalpagado;
+        break;
+
+      // -------------------------------------------
+      // Factura CANCELADA (C) → mostrar como error
+      // -------------------------------------------
+      case 'C':
         this.estado = true;
         break;
-      case 'C':
+
+      // -------------------------------------------
+      // Facturas DEVUELTAS o CON ERRORES EN RECEPCIÓN (E, M)
+      // Siempre permitir reenviar
+      // -------------------------------------------
+      case 'E':
+      case 'M':
+        this.estado = true;
+        this.btnRsend = true;
+        break;
+
+      // -------------------------------------------
+      // Cualquier otro estado desconocido
+      // -------------------------------------------
+      default:
         this.estado = true;
         break;
     }
     return this.estado;
     /* factura.estado === 'A' || factura.estado === 'O' || factura.estado === 'C' */
   }
-
   reSend() {
     let fac: any = this.factura;
     fac.errores = '';
@@ -553,11 +578,40 @@ export class FecfacturaComponent implements OnInit {
       error: (e) => console.error(e),
     });
   }
+  async reCreateFactura(idfactura: number) {
+    if (!idfactura) {
+      return;
+    }
+
+    const confirmar = confirm(
+      '¿Está seguro que desea eliminar y volver a generar esta factura?'
+    );
+
+    if (!confirmar) {
+      return;
+    }
+
+    try {
+      // 1) Eliminar factura en el backend
+      await lastValueFrom(this.fecfacService.deleteFecFactura(idfactura));
+      console.log('✅ Factura eliminada correctamente');
+
+      // 2) Generar nuevamente (tu método ya es async)
+      await this.fecfacService.generateXmlOfPago(idfactura);
+      console.log('✅ Factura recreada y XML generado');
+
+      // 3) Opcional: recargar tabla/lista de facturas
+      // this.loadFacturas();
+      // o mostrar un mensaje
+      // this.toastr.success('Factura recreada correctamente');
+    } catch (err) {
+      console.error('❌ Error al recrear factura', err);
+      // this.toastr.error('Ocurrió un error al recrear la factura');
+    }
+  }
   getXmlAutorizadoSri(fecfactura: any) {
     this.fecfacService.setxml(fecfactura).subscribe({
-      next: (datos: any) => {
-        console.log(datos);
-      },
+      next: (datos: any) => {},
       error: (e: any) => console.error(e),
     });
   }
@@ -584,6 +638,71 @@ export class FecfacturaComponent implements OnInit {
     } catch (err) {
       console.error('Error al descargar la factura PDF:', err);
     }
+  }
+  downloadXml(factura: any) {
+    const xmlString = factura.xmlautorizado;
+
+    if (!xmlString || xmlString.trim() === '') {
+      console.error('XML vacío');
+      return;
+    }
+
+    // Crear un Blob con el XML
+    const blob = new Blob([xmlString], { type: 'application/xml' });
+
+    // Crear URL temporal
+    const url = window.URL.createObjectURL(blob);
+
+    // Crear link de descarga
+    const a = document.createElement('a');
+    a.href = url;
+
+    // Nombre del archivo (puedes personalizarlo)
+    a.download = `factura_${factura.idfactura}.xml`;
+
+    // Disparar la descarga
+    a.click();
+
+    // Liberar memoria
+    window.URL.revokeObjectURL(url);
+  }
+  validarReenvio() {
+    if (!this.factura?.fechaemision) {
+      this.btnRsend = false;
+      return;
+    }
+
+    const fechaEmision = new Date(this.factura.fechaemision);
+    const hoy = new Date();
+    const diffTime = Math.abs(hoy.getTime() - fechaEmision.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    // Solo permitir reenviar si la fecha es válida y no han pasado más de 90 días
+    this.btnRsend = diffDays <= 90;
+  }
+
+  getFechaColor(): string {
+    if (!this.factura?.fechaemision) return 'text-dark';
+
+    const fechaEmision = new Date(this.factura.fechaemision);
+    const hoy = new Date();
+
+    // días de diferencia
+    const diffTime = Math.abs(hoy.getTime() - fechaEmision.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    // Si está AUTORIZADO → verde
+    if (this.factura.estado === 'AUTORIZADO') {
+      return 'text-success';
+    }
+
+    // Si hay error y la fecha supera 90 días → rojo
+    if (this.validarEstado(this.factura.estado) && diffDays > 90) {
+      return 'text-danger';
+    }
+
+    // Por defecto negra
+    return 'text-dark';
   }
 
   swal(icon: any, mensaje: any) {
