@@ -199,7 +199,6 @@ export class FecfacturaComponent implements OnInit {
     }
   }
   exportar() {
-    console.log('exportando');
     /* this._factu
     ras.forEach((item: any, index: number) => {
       //await this._exportar(index);
@@ -208,7 +207,10 @@ export class FecfacturaComponent implements OnInit {
     const numbers = interval(1000);
     const takeFourNumbers = numbers.pipe(take(this._facturas.length));
     takeFourNumbers.subscribe((x) => {
-      this.fecfacService.expDesdeAbonados(this._facturas[x]);
+      this.fecfacService.expDesdeAbonados(this._facturas[x]).then((item: any) => {
+        console.log('exportado', this._facturas[x].nrofactura);
+
+      }) ;
       this.porcNumber = x;
       if (this._facturas.length - 1 === x) {
         this.swfacturas = false;

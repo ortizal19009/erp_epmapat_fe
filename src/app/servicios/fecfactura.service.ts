@@ -71,7 +71,7 @@ export class FecfacturaService {
     private aboService: AbonadosService,
     private s_usuario: UsuarioService,
     private s_lecturas: LecturasService
-  ) {}
+  ) { }
 
   getLista(): Observable<Fecfactura[]> {
     return this.http.get<Fecfactura[]>(`${baseUrl}`);
@@ -94,24 +94,25 @@ export class FecfacturaService {
   }
 
   //Save
-  save(f: Fecfactura): Observable<Object> {
+  save(f: Fecfactura) {
     return this.http.post(`${baseUrl}`, f);
   }
   updateFecFactura(fecfactura: any) {
     return this.http.put(`${baseUrl}/${fecfactura.idfactura}`, fecfactura);
   }
-
   /* Exportar datos */
-  async expDesdeAbonados(factura: any) {
-    await this.datosDefinirAsync();
-    this.buildFactura(factura);
+  async expDesdeAbonados(factura: any):Promise<any> {
+    console.log('exportando desde abonados', factura.idfactura);
+    //await this.datosDefinirAsync();
+    // this.buildFactura(factura);
+    return firstValueFrom(this.http.get<any>(`${baseUrl}/createFacElectro?idfactura=${factura.idfactura}`));
   }
 
   async datosDefinirAsync() {
     try {
       const def = await this.defService.getByIddefinirAsync(1);
       this.empresa = def;
-    } catch (error) {}
+    } catch (error) { }
   }
   async buildFactura(factura: any) {
     this._facturas = factura;
@@ -142,11 +143,9 @@ export class FecfacturaService {
       fecfactura.identificacioncomprador = abonado.idresponsable.cedula;
       fecfactura.direccioncomprador = abonado.direccionubicacion;
       fecfactura.referencia = factura.idabonado;
-      fecfactura.concepto = `${
-        fecEmision.getMonth() + 1
-      } del ${fecEmision.getFullYear()} Nro medidor: ${
-        _lectura[0].idabonado_abonados.nromedidor
-      }`;
+      fecfactura.concepto = `${fecEmision.getMonth() + 1
+        } del ${fecEmision.getFullYear()} Nro medidor: ${_lectura[0].idabonado_abonados.nromedidor
+        }`;
     } else {
       fecfactura.razonsocialcomprador = factura.idcliente.nombre;
       fecfactura.identificacioncomprador = factura.idcliente.cedula;
@@ -191,7 +190,7 @@ export class FecfacturaService {
           basImponible += rxf.cantidad * rxf.valorunitario;
           this.sumaTotal += rxf.valorunitario;
           this.fec_facdetalleService.saveFacDetalle(detalle).subscribe({
-            next: (datos: any) => {},
+            next: (datos: any) => { },
             error: (e) => console.error(e),
             complete: () => {
               this.buildDetalleImpuesto(rxf, codImpuesto, basImponible, i);
@@ -233,7 +232,7 @@ export class FecfacturaService {
     detalleImpuesto.baseimponible = basImponible;
     this.fec_facdetimpService
       .saveFacDetalleImpuesto(detalleImpuesto)
-      .then((dato) => {});
+      .then((dato) => { });
   }
   buildPago(resp: any, total: number) {
     let pagos = {} as Fec_factura_pagos;
@@ -264,7 +263,7 @@ export class FecfacturaService {
     pagos.plazo = 0;
     pagos.unidadtiempo = 'dias';
     this.fec_facPagosService.saveFacPago(pagos).subscribe({
-      next: (datos) => {},
+      next: (datos) => { },
       error: (e) => console.error(e),
     });
   }
@@ -298,11 +297,9 @@ export class FecfacturaService {
       fecfactura.razonsocialcomprador = abonado.idresponsable.nombre;
       fecfactura.identificacioncomprador = abonado.idresponsable.cedula;
       fecfactura.referencia = this._facturas.idabonado;
-      fecfactura.concepto = `${
-        fecEmision.getMonth() + 1
-      } del ${fecEmision.getFullYear()} Nro medidor: ${
-        _lectura[0].idabonado_abonados.nromedidor
-      }`;
+      fecfactura.concepto = `${fecEmision.getMonth() + 1
+        } del ${fecEmision.getFullYear()} Nro medidor: ${_lectura[0].idabonado_abonados.nromedidor
+        }`;
     } else {
       fecfactura.razonsocialcomprador = this._facturas.idcliente.nombre;
       fecfactura.identificacioncomprador = this._facturas.idcliente.cedula;
@@ -456,7 +453,7 @@ export class FecfacturaService {
     pagos.plazo = 0;
     pagos.unidadtiempo = 'dias';
     this.fec_facPagosService.saveFacPago(pagos).subscribe({
-      next: (datos) => {},
+      next: (datos) => { },
       error: (e) => console.error(e),
     });
   };
