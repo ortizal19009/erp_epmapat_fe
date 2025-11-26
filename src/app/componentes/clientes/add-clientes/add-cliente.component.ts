@@ -45,7 +45,7 @@ export class AddClienteComponent implements OnInit {
     public tpidentiService: TpidentificaService,
     private authService: AutorizaService,
     private coloresService: ColoresService
-  ) { }
+  ) {}
 
   async ngOnInit(): Promise<void> {
     sessionStorage.setItem('ventana', `/${this.ventana}`);
@@ -189,7 +189,10 @@ export class AddClienteComponent implements OnInit {
       },
       error: (err) => {
         console.error(err.error),
-          this.swal('warning', 'No se pudo crear el cliente, intente nuevamente');
+          this.swal(
+            'warning',
+            'No se pudo crear el cliente, intente nuevamente'
+          );
       },
     });
   }
@@ -201,7 +204,7 @@ export class AddClienteComponent implements OnInit {
   }
 
   valIdentifica(control: AbstractControl) {
-    // console.log('this.tpidenti: ', this.tpidenti)
+    console.log('this.tpidenti: ', this.tpidenti);
 
     switch (this.tpidenti) {
       case 1: // RUC
@@ -211,6 +214,7 @@ export class AddClienteComponent implements OnInit {
           else return of({ invalid: true });
         } else return of({ invalid: true }); // Validación fallida
       case 2: // Cedula
+        console.log('0401000252');
         if (control.value.length == 10) {
           let rtn = this.valCedula(control.value);
           if (rtn) return of(null);
@@ -231,43 +235,52 @@ export class AddClienteComponent implements OnInit {
       .valIdentificacion(control.value)
       .pipe(map((result) => (result ? { existe: true } : null)));
   }
+  //0401000252
+  /**
+   * Valida una cédula ecuatoriana de persona natural (10 dígitos).
+   * Retorna true si es válida, false en caso contrario.
+   */
+  valCedula(cedula: string): boolean {
+    if (!cedula) return false;
 
-  valCedula(cedula: String) {
-    const digitoRegion = cedula.substring(0, 2);
-    let digR = parseInt(digitoRegion);
-    if (digR >= 1 && digR <= 24) {
-      const ultimoDigito = Number(cedula.substring(9, 10));
-      const pares =
-        Number(cedula.substring(1, 2)) +
-        Number(cedula.substring(3, 4)) +
-        Number(cedula.substring(5, 6)) +
-        Number(cedula.substring(7, 8));
-      let numeroUno: any = cedula.substring(0, 1);
-      numeroUno = numeroUno * 2;
-      if (numeroUno > 9) numeroUno = numeroUno - 9;
-      let numeroTres: any = cedula.substring(2, 3);
-      numeroTres = numeroTres * 2;
-      if (numeroTres > 9) numeroTres = numeroTres - 9;
-      let numeroCinco: any = cedula.substring(4, 5);
-      numeroCinco = numeroCinco * 2;
-      if (numeroCinco > 9) numeroCinco = numeroCinco - 9;
-      let numeroSiete: any = cedula.substring(6, 7);
-      numeroSiete = numeroSiete * 2;
-      if (numeroSiete > 9) numeroSiete = numeroSiete - 9;
-      let numeroNueve: any = cedula.substring(8, 9);
-      numeroNueve = numeroNueve * 2;
-      if (numeroNueve > 9) numeroNueve = numeroNueve - 9;
-      const impares =
-        numeroUno + numeroTres + numeroCinco + numeroSiete + numeroNueve;
-      const sumaTotal = pares + impares;
-      const primerDigitoSuma = String(sumaTotal).substring(0, 1);
-      const decena = (Number(primerDigitoSuma) + 1) * 10;
-      let digitoValidador = decena - sumaTotal;
-      if (digitoValidador === 10) digitoValidador = 0;
-      if (digitoValidador === ultimoDigito) return true;
-      else return false;
-    } else return false;
+    // Limpiar espacios
+    cedula = cedula.trim();
+
+    // Debe tener exactamente 10 dígitos numéricos
+    if (!/^\d{10}$/.test(cedula)) {
+      return false;
+    }
+
+    // Provincia (dos primeros dígitos): 01–24
+    const provincia = parseInt(cedula.substring(0, 2), 10);
+    if (provincia < 1 || provincia > 24) {
+      return false;
+    }
+
+    // Tercer dígito: 0–5 para persona natural
+    const tercerDigito = parseInt(cedula.charAt(2), 10);
+    if (tercerDigito < 0 || tercerDigito > 5) {
+      return false;
+    }
+
+    // Cálculo del dígito verificador
+    const coeficientes = [2, 1, 2, 1, 2, 1, 2, 1, 2];
+    let suma = 0;
+
+    for (let i = 0; i < 9; i++) {
+      let valor = parseInt(cedula.charAt(i), 10) * coeficientes[i];
+      if (valor >= 10) {
+        valor -= 9;
+      }
+      suma += valor;
+    }
+
+    const digitoVerificadorCalculado = (10 - (suma % 10)) % 10;
+    const digitoVerificadorReal = parseInt(cedula.charAt(9), 10);
+
+    return digitoVerificadorCalculado === digitoVerificadorReal;
   }
+
   swal(icon: any, mensaje: any) {
     Swal.fire({
       toast: true,
