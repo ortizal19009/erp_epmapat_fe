@@ -1,646 +1,746 @@
-<div class="content mt-1 pt-1 pl-0">
+<div class="content mt-3">
   <div class="container-fluid">
-    <div class="row mt-0 mb-1 mx-1 px-0 py-1 justify-content-start abonado border">
-      <div class="col-sm-5">
-        <h5 class="m-0 font-weight-bold"><i class="fa fa-building"></i> Abonado</h5>
-      </div>
-      <div class="btn-group ml-auto mx-0" [hidden]="swreturn">
-        <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
-          aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
-        </button>
-        <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-          <button class="dropdown-item" type="button" data-toggle="modal" (click)="swEmail = false"
-            data-target="#imprimir">
-            <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
-          <button class="dropdown-item" type="button">
-            <i class="bi-file-earmark-arrow-down"></i>&nbsp; Exportar</button>
-          <button class="dropdown-item" type="button" disabled data-toggle="modal" data-target="#condonar">
-            <!--  (click)="calcularDeudasAC()"> -->
-            <i class="bi bi-exclude"></i>&nbsp; Condonar deudas</button>
-          <button class="dropdown-item" type="button" (click)="swEmail = true" (click)="getSinCobro()"
-            data-toggle="modal" data-target="#sendNotification">
-            <!--  (click)="calcularDeudasAC()"> -->
-            <i class="bi bi-exclude"></i>&nbsp;Enviar notificacion e-mail</button>
-        </div>
-        <div class="col-sm-1">
-          <button class="bg-transparent border-0" type="submit" (click)="regresar()">
-            <i class="bi-arrow-left-circle text-white icoRegresar"></i>
-          </button>
-        </div>
+    <!-- Header Mejorado -->
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-header bg-gradient-primary text-white py-3">
+        <div class="row align-items-center">
+          <div class="col-md-8">
+            <div class="d-flex align-items-center">
+              <i class="fa fa-building fa-2x mr-3"></i>
+              <div>
+                <h4 class="mb-0 font-weight-bold">Información del Abonado</h4>
+                <small class="opacity-8">
+                  <span class="badge badge-light">
+                    Cuenta: {{abonado.idabonado}}
+                  </span>
+                </small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 text-right">
+            <div class="btn-group">
+              <button type="button" class="btn btn-light btn-sm dropdown-toggle" data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="false">
+                <i class="bi bi-menu-button-wide"></i> Opciones
+              </button>
+              <div class="dropdown-menu dropdown-menu-right shadow">
+                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir"
+                  (click)="swEmail = false">
+                  <i class="bi bi-printer mr-2"></i>Imprimir
+                </button>
+                <button class="dropdown-item" type="button">
+                  <i class="bi-file-earmark-arrow-down mr-2"></i>Exportar
+                </button>
+                <button class="dropdown-item" type="button" disabled data-toggle="modal" data-target="#condonar">
+                  <i class="bi bi-exclude mr-2"></i>Condonar deudas
+                </button>
+                <button class="dropdown-item" type="button" (click)="swEmail = true; getSinCobro()" data-toggle="modal"
+                  data-target="#sendNotification">
+                  <i class="bi bi-envelope mr-2"></i>Enviar notificación e-mail
+                </button>
+              </div>
+            </div>
 
-      </div>
-    </div>
-  </div>
-</div>
-<div class="container-fluid">
-  <div class="row mb-0">
-    <div class="col-sm-3">
-      <div class="card card-outline cardAbonado">
-        <div class="card-body box-profile">
-          <h3 class="profile-username text-center"><strong>Cuenta:</strong> {{abonado.idabonado}}</h3>
-          <p class="text-muted text-center"> {{abonado.nombre}} </p>
-          <ul class="list-group list-group-unbordered mb-3">
-            <li class="list-group-item">
-              <b>Categoría</b> <a class="float-right">{{abonado.categoria}}</a>
-            </li>
-            <li class="list-group-item">
-              <b>Estado</b> <a class="float-right"
-                [ngClass]="{'fontwarning': abonado.estado === 0,'fantacygreen': abonado.estado === 2 || abonado.estado === 3}">{{
-                abonado.textestado }}</a>
-            </li>
-            <li class="list-group-item">
-              <b>Nro. Medidor</b> <a class="float-right">{{abonado.nromedidor}}</a>
-            </li>
-            <li class="list-group-item">
-              <b>Fecha instalación</b> <a class="float-right">{{ abonado.fechainstalacion | date: 'dd-MM-y'}}</a>
-            </li>
-            <li class="list-group-item">
-              <b>Ruta</b> <a class="float-right">{{ abonado.ruta }}</a>
-            </li>
-            <li class="list-group-item">
-              <b>Dirección</b> <a class="float-right">{{ abonado.direccionubicacion }}</a>
-            </li>
-            <li class="list-group-item">
-              <b>Responsable pago</b> <a class="float-right">{{ abonado.responsablepago }}</a>
-            </li>
-            <li class="list-group-item">
-              <b>Adulto mayor</b> <a class="float-right">
-                <i class="bi bi-check2-square" *ngIf="abonado.adultomayor "></i>
-                <i class="bi bi-square" *ngIf="!abonado.adultomayor"></i>
-              </a>
-            </li>
-            <li class="list-group-item">
-              <b>Municipio</b> <a class="float-right">
-                <i class="bi bi-check2-square" *ngIf="abonado.municipio "></i>
-                <i class="bi bi-square" *ngIf="!abonado.municipio"></i></a>
-            </li>
-          </ul>
-          <div class="row justify-content-center" [hidden]="swreturn">
-            <button class="btn btn-warning btn-xs mx-1" type="button" (click)="modiAbonado( abonado.idabonado )">
-              <i class="fa fa-edit" style="font-size:24pxi"></i>
-              Modificar
-            </button>
-            <button class="btn btn-danger btn-xs mx-1" [disabled]="elimdisabled" data-toggle="modal"
-              data-target="#modalEliminar">
-              <i class="fa fa-times-circle" style="font-size:24pxi"></i>
-              Eliminar
+            <button class="btn btn-outline-light btn-sm ml-2" type="button" (click)="regresar()" [hidden]="swreturn">
+              <i class="bi bi-arrow-left-circle"></i> Volver
             </button>
           </div>
         </div>
       </div>
     </div>
-    <div class="col-sm-9">
-      <div class="card mt-2">
-        <div class="card-header cardTab">
-          <ul class="nav nav-tabs card-header-tabs cardTab">
-            <li class="nav-item"><a class="nav-link active cardTab" href="#planillas" data-toggle="tab">Planillas</a>
-            </li>
-            <li class="nav-item"><a class="nav-link cardTab" href="#historialconsumo"
-                (click)="lecturasxAbonado( abonado.idabonado )" data-toggle="tab">Historial de Consumo</a>
-            </li>
-            <li class="nav-item"><a class="nav-link cardTab" href="#conveniopago"
-                (click)="getConveniosPago( abonado.idabonado )" data-toggle="tab">Convenios de pago</a>
-            </li>
-            <li class="nav-item"><a class="nav-link cardTab" href="#georeferencia" (click)="drawCuenta(abonado)"
-                data-toggle="tab">Ubicación</a>
-            </li>
-          </ul>
+
+    <div class="row mb-0">
+      <!-- Panel Información del Abonado -->
+      <div class="col-sm-3">
+        <div class="card shadow-sm border-0">
+          <div class="card-body">
+            <div class="text-center mb-3">
+              <div class="avatar-circle-lg bg-primary text-white mx-auto mb-2">
+                {{abonado.nombre.charAt(0)}}
+              </div>
+              <h4 class="text-primary mb-1"><strong>Cuenta:</strong> {{abonado.idabonado}}</h4>
+              <p class="text-muted">{{abonado.nombre}}</p>
+            </div>
+
+            <div class="info-list">
+              <div class="info-item">
+                <i class="bi bi-tag mr-2"></i>
+                <div>
+                  <small class="text-muted">Categoría</small>
+                  <div class="font-weight-bold">{{abonado.categoria}}</div>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <i class="bi bi-circle-fill mr-2"
+                  [ngClass]="{'text-success': abonado.estado === 2 || abonado.estado === 3, 'text-warning': abonado.estado === 0}"></i>
+                <div>
+                  <small class="text-muted">Estado</small>
+                  <div class="font-weight-bold">{{abonado.textestado}}</div>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <i class="bi bi-speedometer2 mr-2"></i>
+                <div>
+                  <small class="text-muted">Nro. Medidor</small>
+                  <div class="font-weight-bold">{{abonado.nromedidor}}</div>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <i class="bi bi-calendar-event mr-2"></i>
+                <div>
+                  <small class="text-muted">Fecha instalación</small>
+                  <div class="font-weight-bold">{{ abonado.fechainstalacion | date: 'dd/MM/y'}}</div>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <i class="bi bi-signpost mr-2"></i>
+                <div>
+                  <small class="text-muted">Ruta</small>
+                  <div class="font-weight-bold">{{ abonado.ruta }}</div>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <i class="bi bi-geo-alt mr-2"></i>
+                <div>
+                  <small class="text-muted">Dirección</small>
+                  <div class="font-weight-bold description">{{ abonado.direccionubicacion }}</div>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <i class="bi bi-person-check mr-2"></i>
+                <div>
+                  <small class="text-muted">Responsable pago</small>
+                  <div class="font-weight-bold">{{ abonado.responsablepago }}</div>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <i class="bi bi-person-heart mr-2"></i>
+                <div>
+                  <small class="text-muted">Adulto mayor</small>
+                  <div class="font-weight-bold">
+                    <i class="bi bi-check2-square text-success" *ngIf="abonado.adultomayor"></i>
+                    <i class="bi bi-square text-muted" *ngIf="!abonado.adultomayor"></i>
+                  </div>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <i class="bi bi-building mr-2"></i>
+                <div>
+                  <small class="text-muted">Municipio</small>
+                  <div class="font-weight-bold">
+                    <i class="bi bi-check2-square text-success" *ngIf="abonado.municipio"></i>
+                    <i class="bi bi-square text-muted" *ngIf="!abonado.municipio"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row justify-content-center mt-3" [hidden]="swreturn">
+              <button class="btn btn-warning btn-sm mx-1" type="button" (click)="modiAbonado(abonado.idabonado)">
+                <i class="fa fa-edit mr-1"></i>Modificar
+              </button>
+              <button class="btn btn-danger btn-sm mx-1" [disabled]="elimdisabled" data-toggle="modal"
+                data-target="#modalEliminar">
+                <i class="fa fa-times-circle mr-1"></i>Eliminar
+              </button>
+            </div>
+          </div>
         </div>
-        <div class="card-body">
-          <div class="tab-content">
-            <div class="active tab-pane" id="planillas">
-              <div class="post">
-                <div class="user-block mb-0">
-                  <div class="card-body table-responsive p-0 " style="height: 600px;">
-                    <table
-                      class="table table-hover table-sm table-bordered mb-0 table-head-fixed thead-dark text-nowrap table-responsive-sm">
-                      <caption class="small mark">Últimas <strong>{{rango}}</strong>
-                        Planillas&nbsp;&nbsp;&nbsp;&nbsp;
-                        <button class="btn btn-outline-primary btn-xs">&nbsp;&nbsp;Rango&nbsp;&nbsp;</button>
+      </div>
+
+      <!-- Panel de Pestañas -->
+      <div class="col-sm-9">
+        <div class="card shadow-sm border-0">
+          <div class="card-header bg-light border-0 py-3">
+            <ul class="nav nav-tabs card-header-tabs" role="tablist">
+              <li class="nav-item">
+                <a class="nav-link active" href="#planillas" data-toggle="tab" role="tab">
+                  <i class="bi bi-receipt mr-1"></i>Planillas
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#historialconsumo" data-toggle="tab" role="tab"
+                  (click)="lecturasxAbonado(abonado.idabonado)">
+                  <i class="bi bi-graph-up mr-1"></i>Historial de Consumo
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#conveniopago" data-toggle="tab" role="tab"
+                  (click)="getConveniosPago(abonado.idabonado)">
+                  <i class="bi bi-file-earmark-text mr-1"></i>Convenios de pago
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#georeferencia" data-toggle="tab" role="tab" (click)="drawCuenta(abonado)">
+                  <i class="bi bi-geo-alt mr-1"></i>Ubicación
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="card-body">
+            <div class="tab-content">
+              <!-- Pestaña Planillas -->
+              <div class="tab-pane fade show active" id="planillas" role="tabpanel">
+                <div class="table-container">
+                  <div class="table-scroll-container">
+                    <table class="table table-hover table-modern table-sm mb-0">
+                      <caption class="small p-2 bg-light border-bottom">
+                        Últimas <strong>{{rango}}</strong> Planillas
+                        <div class="float-right">
+                          <input type="number" min="1" class="form-control form-control-sm d-inline-block w-auto"
+                            [(ngModel)]="rango" (change)="getFactura()">
+                        </div>
                       </caption>
-                      <thead class="">
-                        <tr class="text-center bodyPlanillas">
-                          <th class="text-center pl-0 pr-0">
-                            <input type="number" min=1 class="form-control form-control-sm text-center"
-                              [(ngModel)]="rango" (change)="getFactura()">
-                          </th>
-                          <th class="bodyPlanillas">Nro.</th>
-                          <th class="bodyPlanillas">Fecha</th>
-                          <th class="bodyPlanillas">Módulo</th>
-                          <th class="bodyPlanillas">Factura</th>
-                          <th class="bodyPlanillas">Valor</th>
-                          <th class="bodyPlanillas">Interes</th>
-                          <th class="bodyPlanillas">Fecha Cobro</th>
+                      <thead class="thead-modern sticky-header">
+                        <tr>
+                          <th width="50" class="text-center">#</th>
+                          <th width="120" class="text-center">Nro. Planilla</th>
+                          <th width="100" class="text-center">Fecha</th>
+                          <th class="min-width-150">Módulo</th>
+                          <th width="120" class="text-center">Factura</th>
+                          <th width="120" class="text-right">Valor</th>
+                          <th width="100" class="text-center">Interés</th>
+                          <th width="120" class="text-center">Fecha Cobro</th>
                         </tr>
                       </thead>
-                      <tbody class="bodyPlanillas">
-                        <tr *ngFor="let factura of _facturas; let i = index" class="text-center fila"
+                      <tbody>
+                        <tr *ngFor="let factura of _facturas; let i = index" class="fila cursor-pointer"
                           data-toggle="modal" data-target="#DetalleFacturaModal"
-                          (click)="getRubroxfac( factura.idfactura )">
-                          <td class="col-1"><i class="bi bi-cash-coin" [hidden]="validarpago(factura)"></i>
-                            {{ i+1}}</td>
-                          <td>{{ factura.idfactura }}</td>
-                          <td>{{factura.feccrea | formatFecha}}</td>
-                          <td class="text-left">{{ factura.idmodulo.descripcion }}</td>
-                          <td>{{factura.nrofactura}}</td>
-                          <td class="text-right">{{valorPagado(
-                            factura.idmodulo.idmodulo,factura.totaltarifa
-                            )| number: '1.2-2'}}</td>
-                          <td>{{formatInteres(factura.interescobrado) }}</td>
-                          <td>{{ factura.fechacobro | date: 'dd-MM-y'}}</td>
+                          (click)="getRubroxfac(factura.idfactura)">
+                          <td class="text-center small">
+                            <i class="bi bi-cash-coin text-success" [hidden]="validarpago(factura)"></i>
+                            {{ i+1 }}
+                          </td>
+                          <td class="text-center">
+                            <span class="badge badge-primary badge-sm">{{ factura.idfactura }}</span>
+                          </td>
+                          <td class="text-center small">{{factura.feccrea | formatFecha}}</td>
+                          <td class="small">{{ factura.idmodulo.descripcion }}</td>
+                          <td class="text-center small">{{factura.nrofactura}}</td>
+                          <td class="text-right font-weight-bold small">
+                            {{valorPagado(factura.idmodulo.idmodulo,factura.totaltarifa) | number: '1.2-2'}}
+                          </td>
+                          <td class="text-center small">{{formatInteres(factura.interescobrado) }}</td>
+                          <td class="text-center small">{{ factura.fechacobro | date: 'dd/MM/y'}}</td>
                         </tr>
                       </tbody>
                     </table>
                   </div>
                 </div>
               </div>
-            </div>
-            <div class="tab-pane" id="historialconsumo">
-              <div class="post">
-                <div class="user-block mb-0">
-                  <div *ngIf="!grafic" class="row">
-                    <div class="col-sm-11">
-                      <table class="table table-hover table-sm table-bordered mb-0">
-                        <thead class="theadHisconsumo">
-                          <tr class="text-center">
-                            <th>Emisión</th>
-                            <th>Consumo</th>
-                            <th>Anterior</th>
-                            <th>Actual</th>
-                            <th>Planilla</th>
+
+              <!-- Pestaña Historial de Consumo -->
+              <div class="tab-pane fade" id="historialconsumo" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h6 class="mb-0">Historial de Lecturas</h6>
+                  <button class="btn btn-outline-primary btn-sm" (click)="grafico(abonado.idabonado)">
+                    <i class="bi-bar-chart mr-1"></i>Ver Gráfico
+                  </button>
+                </div>
+
+                <div *ngIf="!grafic">
+                  <div class="table-container">
+                    <div class="table-scroll-container">
+                      <table class="table table-hover table-modern table-sm mb-0">
+                        <thead class="thead-modern sticky-header">
+                          <tr>
+                            <th class="text-center">Emisión</th>
+                            <th class="text-center">Consumo</th>
+                            <th class="text-center">Anterior</th>
+                            <th class="text-center">Actual</th>
+                            <th class="text-center">Planilla</th>
                           </tr>
                         </thead>
-                        <tbody class="bodyHisconsumo">
-                          <tr *ngFor="let lectura of _lecturas" class="text-center fila" data-toggle="modal"
-                            data-target="#DetalleFacturaModal" (click)="getRubroxfac( lectura.idfactura )">
-                            <td class="text-left">{{
-                              lectura.idrutaxemision_rutasxemision.idemision_emisiones.emision |
-                              nombreEmision
-                              }}</td>
-                            <td>{{ lectura.lecturaactual - lectura.lecturaanterior | number: '1.0'}}</td>
-                            <td>{{lectura.lecturaanterior | number: '1.0'}}</td>
-                            <td>{{ lectura.lecturaactual | number: '1.0' }}</td>
-                            <td>{{lectura.idfactura}}</td>
+                        <tbody>
+                          <tr *ngFor="let lectura of _lecturas" class="text-center fila cursor-pointer"
+                            data-toggle="modal" data-target="#DetalleFacturaModal"
+                            (click)="getRubroxfac(lectura.idfactura)">
+                            <td class="text-left small">
+                              {{ lectura.idrutaxemision_rutasxemision.idemision_emisiones.emision | nombreEmision }}
+                            </td>
+                            <td class="font-weight-bold small">
+                              {{ lectura.lecturaactual - lectura.lecturaanterior | number: '1.0'}}
+                            </td>
+                            <td class="small">{{lectura.lecturaanterior | number: '1.0'}}</td>
+                            <td class="small">{{ lectura.lecturaactual | number: '1.0' }}</td>
+                            <td class="small">{{lectura.idfactura}}</td>
                           </tr>
                         </tbody>
                       </table>
                     </div>
-                    <div class="col-sm-1 mt-1 mx-0 px-0">
-                      <button class="btn btn-sm theadHisconsumo sombra border" (click)="grafico(abonado.idabonado)">
-                        <i class="bi-bar-chart"></i></button>
-                    </div>
                   </div>
+                </div>
 
-                  <!-- <div  class="row col-sm-12"> -->
-                  <div class="row col-sm-12 ml-1 mb-0">
-                    <div class="row" id="divHistorial">
-                      <canvas id="myChart"></canvas>
-                    </div>
+                <div *ngIf="grafic" class="chart-container">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0">Gráfico de Consumo</h6>
+                    <button class="btn btn-outline-secondary btn-sm" (click)="cerrarGrafico()">
+                      <i class="bi-x-circle mr-1"></i>Cerrar Gráfico
+                    </button>
                   </div>
-                  <!-- </div> -->
-                  <div *ngIf="grafic" class="row col-sm-12">
-                    <div class="col-sm-12 mx-0 px-0 text-right">
-                      <button class="btn btn-sm theadHisconsumo sombra border" (click)="cerrarGrafico()">
-                        <i class="bi-x-octagon"></i></button>
-                    </div>
+                  <div class="chart-wrapper">
+                    <canvas id="myChart"></canvas>
                   </div>
+                </div>
+              </div>
 
+              <!-- Pestaña Convenios de Pago -->
+              <div class="tab-pane fade" id="conveniopago" role="tabpanel">
+                <div *ngIf="swconvenio">
+                  <div class="table-container">
+                    <div class="table-scroll-container">
+                      <table class="table table-hover table-modern table-sm mb-0">
+                        <thead class="thead-modern sticky-header">
+                          <tr>
+                            <th width="50" class="text-center">#</th>
+                            <th width="150" class="text-center">Nro. Convenio</th>
+                            <th width="150" class="text-right">Total Convenio</th>
+                            <th width="120" class="text-right">Cuota Inicial</th>
+                            <th width="120" class="text-right">Cuota Final</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let convenio of _convenios; let i = index"
+                            (click)="info($event, convenio.idconvenio)" class="cursor-pointer">
+                            <td class="text-center small">{{i+1}}</td>
+                            <td class="text-center">
+                              <span class="badge badge-info badge-sm">{{convenio.nroconvenio}}</span>
+                            </td>
+                            <td class="text-right font-weight-bold small">
+                              ${{convenio.totalconvenio.toFixed(2)}}
+                            </td>
+                            <td class="text-right small">${{convenio.cuotainicial.toFixed(2)}}</td>
+                            <td class="text-right small">${{convenio.cuotafinal.toFixed(2)}}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                <div *ngIf="!swconvenio" class="text-center py-5">
+                  <div class="empty-state">
+                    <i class="bi bi-file-earmark-text fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No hay convenios de pago</h5>
+                    <p class="text-muted small">Esta cuenta no tiene convenios registrados</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pestaña Ubicación -->
+              <div class="tab-pane fade" id="georeferencia" role="tabpanel">
+                <div class="card">
+                  <div class="card-body p-0">
+                    <ng-container *ngIf="mostrarMapa">
+                      <div id="map" style="height: 400px; border-radius: 8px;"></div>
+                    </ng-container>
+                    <div *ngIf="!mostrarMapa" class="text-center py-5">
+                      <i class="bi bi-geo-alt fa-3x text-muted mb-3"></i>
+                      <h5 class="text-muted">Ubicación no disponible</h5>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="tab-pane" id="conveniopago">
-              <div class="post">
-                <div class="user-block mb-0">
-                  <table *ngIf="swconvenio"
-                    class="table table-hover table-sm table-bordered mb-0 table-head-fixed thead-dark text-nowrap table-responsive-sm">
-                    <thead class="text-center">
-                      <tr class="">
-                        <th>N°</th>
-                        <th>Nro. convenio</th>
-                        <th>Total convenio</th>
-                        <th>Inicial</th>
-                        <th>Final</th>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal DETALLE Planilla Mejorado -->
+<div class="modal fade" id="DetalleFacturaModal" data-backdrop="static" tabindex="-1"
+  aria-labelledby="DetalleFacturaModal" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white py-3">
+        <div class="d-flex align-items-center w-100">
+          <h5 class="modal-title mb-0">
+            <i class="bi bi-receipt mr-2"></i>Detalle Planilla: <strong>{{idfactura}}</strong>
+          </h5>
+          <div class="ml-auto d-flex align-items-center">
+            <div class="btn-group">
+              <button type="button" class="btn btn-light btn-sm dropdown-toggle" data-toggle="dropdown"
+                aria-expanded="false">
+                <i class="bi bi-menu-button-wide"></i> Opciones
+              </button>
+              <div class="dropdown-menu dropdown-menu-right shadow">
+                <button class="dropdown-item" type="button" [disabled]="factura.pagado != 1"
+                        (click)="impComprobante(factura)">
+                  <i class="bi bi-printer mr-2"></i>Comprobante pago
+                </button>
+                <button class="dropdown-item" type="button" [disabled]="factura.pagado != 1"
+                  (click)="impFacturaElectronica(factura)">
+                  <i class="bi-file-earmark-arrow-down mr-2"></i>Factura electrónica
+                </button>
+                <button class="dropdown-item" (click)="active = true" *ngIf="!facElectro">
+                  <i class="bi bi-envelope mr-2"></i>Reenviar F. a Email
+                </button>
+                <button class="dropdown-item" type="button" *ngIf="usuario===1"
+                        (click)="multaCalculate(factura.idfactura)">
+                  <i class="bi bi-cash-coin mr-2"></i>Multas
+                </button>
+              </div>
+            </div>
+            <button class="btn btn-light btn-sm ml-2" [hidden]="facElectro" (click)="facElectro = !facElectro"
+                    title="Cambiar vista">
+              <i class="fa fa-retweet"></i>
+            </button>
+            <button type="button" class="btn-close btn-close-white ml-2" data-dismiss="modal" aria-label="Close"></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-body">
+        <div class="row" *ngIf="facElectro; else pdfelectro">
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm mb-4">
+              <div class="card-header bg-light py-2">
+                <h6 class="mb-0 font-weight-bold">
+                  <i class="bi bi-list-check mr-2"></i>Detalle de Rubros
+                </h6>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-container">
+                  <table class="table table-hover table-sm mb-0">
+                    <thead class="thead-modern">
+                      <tr>
+                        <th width="50" class="text-center">#</th>
+                        <th>Rubro</th>
+                        <th width="120" class="text-right">Valor</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr *ngFor="let convenio of _convenios; let i = index"
-                        (click)="info($event, convenio.idconvenio)">
-                        <td class="text-center">{{i+1}}</td>
-                        <td class="text-center">{{convenio.nroconvenio}}</td>
-                        <td class="text-right">{{convenio.totalconvenio.toFixed(2)}}</td>
-                        <td class="text-right">{{convenio.cuotainicial.toFixed(2)}}</td>
-                        <td class="text-right">{{convenio.cuotafinal.toFixed(2)}}</td>
+                      <tr *ngFor="let rubroxfac of _rubrosxfac; let i=index">
+                        <td class="text-center small font-weight-bold">{{i+1}}</td>
+                        <td class="small">{{ rubroxfac.idrubro_rubros.descripcion}}</td>
+                        <td class="text-right font-weight-bold small">
+                          ${{ rubroxfac.valorunitario | number:'1.2-2'}}
+                        </td>
+                      </tr>
+                      <tr class="table-active">
+                        <td colspan="2" class="font-weight-bold text-right">TOTAL</td>
+                        <td class="font-weight-bold text-right">${{ totfac | number:'1.2-2'}}</td>
                       </tr>
                     </tbody>
                   </table>
-                  <div class="row" *ngIf="!swconvenio">
-                    <div class="col-12">
-                      <div class="info-box bg-gradient-info">
-                        <span class="info-box-icon"><i class="far fa-bookmark"></i></span>
-                        <div class="info-box-content">
-                          <H5 class="info-box-text">Esta cuenta </H5>
-                          <h3>NO TIENE CONVEIOS</h3>
-                        </div>
-                        <!-- /.info-box-content -->
-                      </div>
-                      <!-- /.info-box -->
-                    </div>
-                  </div>
                 </div>
               </div>
-            </div>
-            <div class="tab-pane" id="georeferencia">
-              <div class="post">
-                <div class="user-block mb-0">
-                  <div class="card text-center">
-                    <!-- Sales Chart Canvas -->
-                    <!--  <canvas id="salesChart" height="180" style="height: 180px;"></canvas> -->
-                    <div class="card-body">
-                      <ng-container *ngIf="mostrarMapa">
-                        <div id="map"></div>
-                      </ng-container>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="tab-pane" id="historialconsumo1">
-              <div *ngIf="!grafic; then thenBlock else elseBlock"></div>
-              <ng-template #thenBlock>
-                <div class="col-sm-10 ml-5 mb-0">
-                  <div class="row">
-                    <div class="col-sm-11">
-                      <table class="table table-hover table-sm table-bordered mb-0">
-                        <thead class="theadHisconsumo">
-                          <tr class="text-center">
-                            <th>Emisión</th>
-                            <th>Consumo</th>
-                            <th>Anterior</th>
-                            <th>Actual</th>
-                            <th>Planilla</th>
-                          </tr>
-                        </thead>
-                        <tbody class="bodyHisconsumo">
-                          <tr *ngFor="let lectura of _lecturas" class="text-center fila" data-toggle="modal"
-                            data-target="#DetalleFacturaModal" (click)="getRubroxfac( lectura.idfactura )">
-                            <td class="text-left">{{
-                              lectura.idrutaxemision_rutasxemision.idemision_emisiones.emision |
-                              nombreEmision
-                              }}</td>
-                            <td>{{ lectura.lecturaactual - lectura.lecturaanterior | number: '1.0'}}</td>
-                            <td>{{lectura.lecturaanterior | number: '1.0'}}</td>
-                            <td>{{ lectura.lecturaactual | number: '1.0' }}</td>
-                            <td>{{lectura.idfactura}}</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                    <div class="col-sm-1 mt-1 mx-0 px-0">
-                      <button class="btn btn-sm theadHisconsumo sombra border" (click)="grafico(abonado.idabonado)">
-                        <i class="bi-bar-chart"></i></button>
-                    </div>
-                  </div>
-                </div>
-              </ng-template>
-              <ng-template #elseBlock>
-                <div class="row">
-                  <canvas *ngIf="grafic" id="myChart"></canvas>
-                </div>
-              </ng-template>
-
-              <div class="col-sm-10 ml-5 mb-0">
-                <div class="row">
-                  <div class="col-sm-11">
-                    <table class="table table-hover table-sm table-bordered mb-0">
-                      <thead class="theadHisconsumo">
-                        <tr class="text-center">
-                          <th>Emisión</th>
-                          <th>Consumo</th>
-                          <th>Anterior</th>
-                          <th>Actual</th>
-                          <th>Planilla</th>
-                        </tr>
-                      </thead>
-                      <tbody class="bodyHisconsumo">
-                        <tr *ngFor="let lectura of _lecturas" class="text-center fila" data-toggle="modal"
-                          data-target="#DetalleFacturaModal" (click)="getRubroxfac( lectura.idfactura )">
-                          <td class="text-left">{{
-                            lectura.idrutaxemision_rutasxemision.idemision_emisiones.emision |
-                            nombreEmision
-                            }}</td>
-                          <td>{{ lectura.lecturaactual - lectura.lecturaanterior | number: '1.0'}}</td>
-                          <td>{{lectura.lecturaanterior | number: '1.0'}}</td>
-                          <td>{{ lectura.lecturaactual | number: '1.0' }}</td>
-                          <td>{{lectura.idfactura}}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                  <div class="col-sm-1 mt-1 mx-0 px-0">
-                    <button class="btn btn-sm theadHisconsumo sombra border" (click)="grafico(abonado.idabonado)">
-                      <i class="bi-bar-chart"></i></button>
-                  </div>
-                </div>
-
-                <!-- <div  class="row col-sm-12"> -->
-                <!-- <div class="row col-sm-12 ml-1 mb-0">
-                           <div class="row" id="divHistorial">
-                              <canvas *ngIf="grafic" id="myChart"></canvas>
-                           </div>
-                        </div> -->
-                <!-- </div> -->
-                <!-- <div *ngIf="grafic" class="row col-sm-12">
-                              <div class="col-sm-12 mx-0 px-0 text-right">
-                                 <button class="btn btn-sm theadHisconsumo sombra border" (click)="cerrarGrafico()">
-                                    <i class="bi-x-octagon"></i></button>
-                              </div>
-                           </div> -->
-
-              </div>
-            </div>
-
-
-            <!-- ===== No Borra: esto funciona en otro TAB ===== -->
-            <!-- <div class="tab-pane" id="grafico">
-                     <div class="post">
-                        <div class="user-block col-sm-12 ml-1 mb-0">
-                           <div>
-                              <canvas id="myChart"></canvas>
-                           </div>
-                        </div>
-                     </div>
-                  </div> -->
-
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal DETALLE Planilla -->
-  <div class="modal fade" id="DetalleFacturaModal" data-backdrop="static" tabindex="-1"
-    aria-labelledby="DetalleFacturaModal" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered dialog-scrollable modal-lg" role="document">
-      <div class="modal-content">
-        <div class="modal-header py-2 justify-content-center theadPlanillas">
-          <h5 class="modal-title" id="DetalleFacturaModalLabel"><strong>Planilla:</strong> {{idfactura}}</h5>
-
-          <div class="btn-group ml-auto mx-0">
-            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
-              aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
-            </button>
-            <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-              <button class="dropdown-item" type="button" [disabled]="factura.pagado != 1" data-toggle="modal"
-                (click)="impComprobante(factura)">
-                <i class="bi bi-printer"></i>&nbsp; Comprobante pago</button>
-              <button class="dropdown-item" type="button" [disabled]="factura.pagado != 1"
-                (click)="impFacturaElectronica(factura)">
-                <i class="bi-file-earmark-arrow-down"></i>&nbsp; Factura electrónica</button>
-              <button class="dropdown-item" (click)="active = true" *ngIf="!facElectro">Reenviar F. a Email</button>
-              <button class="dropdown-item" type="button" *ngIf="usuario===1"
-                (click)="multaCalculate(factura.idfactura)">
-                <i class="bi bi-printer"></i>&nbsp; Multas</button>
-            </div>
-            <button class="btn btn-sm text-white" [hidden]="facElectro" (click)="facElectro = !facElectro">
-              <i class="fa fa-retweet" aria-hidden="true"></i>
-            </button>
-          </div>
-        </div>
-        <div class="modal-body">
-          <div class="row" *ngIf="facElectro else pdfelectro ">
-            <div class="col-sm-6">
-              <table class="table table-hover table-sm table-bordered mb-0">
-                <thead class="theadPlanillas">
-                  <tr class="text-center">
-                    <th></th>
-                    <th class="col-md-6">Rubro</th>
-                    <th>Valor</th>
-                  </tr>
-                </thead>
-                <tbody class="bodyPlanillas">
-                  <tr *ngFor="let rubroxfac of _rubrosxfac; let i=index">
-                    <td class="text-center font-weight-bold small">{{i+1}}</td>
-                    <td>{{ rubroxfac.idrubro_rubros.descripcion}}</td>
-                    <td class="text-right">{{ rubroxfac.valorunitario | number:'1.2-2'}}</td>
-                  </tr>
-                  <tr>
-                    <td></td>
-                    <td class="font-weight-bold">Total</td>
-                    <td class="font-weight-bold text-right">{{ totfac | number:'1.2-2'}}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="col-sm-6">
-              <div class="text-center">
-                <h4>DETALLES</h4>
-              </div>
-              <table class="table table-hover table-sm table-bordered mb-0">
-                <thead>
-                  <tr *ngIf="detalleFactura?.nrofactura">
-                    <th class="theadPlanillas">Nro. Factura</th>
-                    <td class="bodyPlanillas">{{detalleFactura?.nrofactura}}</td>
-                  </tr>
-                  <tr>
-                    <th class="theadPlanillas">Cliente</th>
-                    <td class="bodyPlanillas description">{{detalleFactura?.idcliente.nombre}}</td>
-                  </tr>
-                  <tr *ngIf="detalleFactura?.fechaeliminacion">
-                    <th class="theadPlanillas">Fecha eliminación</th>
-                    <td class="bodyPlanillas">{{detalleFactura?.fechaeliminacion}}</td>
-                  </tr>
-                  <tr *ngIf="detalleFactura?.fechaanulacion">
-                    <th class="theadPlanillas">Fecha anulación</th>
-                    <td class="bodyPlanillas">{{detalleFactura?.fechaanulacion}}</td>
-                  </tr>
-                  <tr *ngIf="detalleFactura?.fechaconvenio">
-                    <th class="theadPlanillas">Fecha convenio</th>
-                    <td class="bodyPlanillas">{{detalleFactura?.fechaconvenio}}</td>
-                  </tr>
-                  <tr>
-                    <th class="theadPlanillas">Estado F.E.</th>
-                    <td class="bodyPlanillas text-center">{{estadoFE}}</td>
-                  </tr>
-
-                </thead>
-              </table>
-
             </div>
           </div>
-          <ng-template #pdfelectro>
-            <div class="row">
-              <div class="col-sm">
-                <iframe id="pdfViewer" src="" width="100%" height="600px"></iframe>
-              </div>
-              <div class="col-sm-3" *ngIf="active">
 
-                <div class="form-group">
-                  <label for="mail">E-mail</label>
-                  <input type="email" [(ngModel)]="email" class="form-control form-control-sm" id="mail"
-                    placeholder="name@example.com">
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+              <div class="card-header bg-light py-2">
+                <h6 class="mb-0 font-weight-bold">
+                  <i class="bi bi-info-circle mr-2"></i>Información General
+                </h6>
+              </div>
+              <div class="card-body">
+                <div class="info-grid">
+                  <div class="info-item" *ngIf="detalleFactura?.nrofactura">
+                    <span class="info-label">Nro. Factura</span>
+                    <span class="info-value badge badge-primary">{{detalleFactura?.nrofactura}}</span>
+                  </div>
+
+                  <div class="info-item">
+                    <span class="info-label">Cliente</span>
+                    <span class="info-value description">{{detalleFactura?.idcliente.nombre}}</span>
+                  </div>
+
+                  <div class="info-item" *ngIf="detalleFactura?.fechaeliminacion">
+                    <span class="info-label">Fecha eliminación</span>
+                    <span class="info-value">{{detalleFactura?.fechaeliminacion | date:'dd/MM/yyyy'}}</span>
+                  </div>
+
+                  <div class="info-item" *ngIf="detalleFactura?.fechaanulacion">
+                    <span class="info-label">Fecha anulación</span>
+                    <span class="info-value">{{detalleFactura?.fechaanulacion | date:'dd/MM/yyyy'}}</span>
+                  </div>
+
+                  <div class="info-item" *ngIf="detalleFactura?.fechaconvenio">
+                    <span class="info-label">Fecha convenio</span>
+                    <span class="info-value">{{detalleFactura?.fechaconvenio | date:'dd/MM/yyyy'}}</span>
+                  </div>
+
+                  <div class="info-item">
+                    <span class="info-label">Estado F.E.</span>
+                    <span class="info-value">
+                      <span class="badge" [ngClass]="{
+                        'badge-success': estadoFE === 'A',
+                        'badge-warning': estadoFE === 'O',
+                        'badge-secondary': estadoFE === 'I'
+                      }">
+                        {{estadoFE}}
+                      </span>
+                    </span>
+                  </div>
                 </div>
-                <button type="submit" (click)="active = false" class="btn btn-xs btn-success">Cancelar</button>
-                <button type="submit" data-dismiss="modal" (click)="sendFacturaEmail()"
-                  class="btn btn-xs ml-2 btn-outline-success">Enviar</button>
               </div>
             </div>
-          </ng-template>
-
-        </div>
-        <div class="modal-footer py-1">
-          <button type="button" class="btn btn-outline-success btn-sm" (click)="cancelarFE()" data-dismiss="modal">
-            <i class="fa fa-times-circle"></i> Cerrar</button>
-          <button type="button" class="btn btn-success btn-sm"
-            [disabled]="esFE ==='A' || esFE == 'O'  || factura.pagado === 0 || usuario != 1 "
-            (click)="expFacElectronica(idfactura)" data-dismiss="modal">
-            <i class="bi bi-send"></i> Fac. Electronica</button>
-
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL Imprimir-->
-<div class="modal fade" id="imprimir" tabindex="-1" aria-labelledby="imprimirLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered dialog-scrollable modal-{{modalSize}}">
-    <div class="modal-content border">
-      <div class='modal-header py-2 justify-content-center cabecera'>
-        <h5 class='modal-title font-weight-bold' id='ModalLabel'>Imprimir</h5>
-      </div>
-      <div class='modal-body cuerpo'>
-
-        <div class="input-group mb-3 input-group-sm" *ngIf="pdfView else pdfHide">
-          <div class="input-group-prepend">
-            <label class="input-group-text" for="inputGroupSelect01">Reporte</label>
           </div>
-          <select class="custom-select" id="inputGroupSelect01" [(ngModel)]="opt">
-            <option value="0">Cartas pendientes</option>
-          </select>
         </div>
-        <ng-template #pdfHide>
-          <iframe id="pdfViewer" src="" width="100%" height="600px"></iframe>
+
+        <ng-template #pdfelectro>
+          <div class="row">
+            <div class="col-md-9">
+              <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                  <iframe id="pdfViewer" src="" width="100%" height="500px" style="border: none; border-radius: 8px;"></iframe>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3" *ngIf="active">
+              <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light py-2">
+                  <h6 class="mb-0 font-weight-bold">
+                    <i class="bi bi-envelope mr-2"></i>Enviar por Email
+                  </h6>
+                </div>
+                <div class="card-body">
+                  <div class="form-group mb-3">
+                    <label class="form-label small font-weight-bold">Correo electrónico</label>
+                    <input type="email" [(ngModel)]="email" class="form-control form-control-sm"
+                           placeholder="nombre@ejemplo.com">
+                  </div>
+                  <div class="d-flex gap-2">
+                    <button type="button" (click)="active = false" class="btn btn-secondary btn-sm flex-fill">
+                      <i class="bi bi-x-circle mr-1"></i>Cancelar
+                    </button>
+                    <button type="button" data-dismiss="modal" (click)="sendFacturaEmail()"
+                            class="btn btn-success btn-sm flex-fill">
+                      <i class="bi bi-send mr-1"></i>Enviar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </ng-template>
+      </div>
 
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-sm btn-success" data-dismiss="modal" (click)="cancelar()">Cancelar</button>
-        <button class="btn btn-sm btn-outline-success" (click)="setOptImprimir()">Aceptar</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL CONDONAR DEUDAS-->
-<div class="modal fade" id="condonar" tabindex="-1" aria-labelledby="condonarLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-{{modalSize}}">
-    <div class="modal-content border">
-      <div class='modal-header py-2 justify-content-center cabecera'>
-        <h5 class='modal-title font-weight-bold' id='ModalLabel'>Condonar deuda</h5>
-      </div>
-      <div class='modal-body cuerpo'>
-        <div class="row">
-          <div class="col-sm-8">
-            <table class="table table-sm table-hover">
-              <thead>
-                <tr>
-                  <th>Cod.Rubro</th>
-                  <th>Descripción</th>
-                  <th>Valor</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let rubro of c_rubros">
-                  <td class="text-center">{{rubro.idrubro_rubros}}</td>
-                  <td>{{rubro.descripcion}}</td>
-                  <td class="text-right">{{rubro.total.toFixed(2)}}</td>
-                </tr>
-                <tr>
-                  <td></td>
-                  <td>TOTAL:</td>
-                  <td>{{totalRubros.toFixed(2)}}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="col-sm-4">
-            <table class="table table-sm table-hover table-bordered">
-              <thead>
-                <tr>
-                  <th>Cod.Rubro</th>
-                  <th>Descripción</th>
-                  <th>Valor</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let m of multa">
-                  <td class="text-center">{{m.idrubro_rubros}}</td>
-                  <td>{{m.descripcion}}</td>
-                  <td class="text-right">{{m.total.toFixed(2)}}</td>
-                </tr>
-                <tr>
-                  <td></td>
-                  <td>TOTAL:</td>
-                  <td>{{totalMultas.toFixed(2)}}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-sm">
-            <textarea name="" id="" class="form-control" [(ngModel)]="razonCondonacion"
-              (change)="razonCondonacionChange($event)"
-              placeholder="Ingresar memorando justificando la condonación de multas e intereses de esta cuenta"></textarea>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-sm btn-outline-success" data-dismiss="modal" [disabled]="validar()"
-          (click)="condonarDeudas()">Aceptar</button>
-        <button type="button" class="btn btn-sm btn-success" data-dismiss="modal" (click)="cancelar()">Cancelar</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal -->
-<div class="modal fade" id="sendNotification" tabindex="-1" aria-labelledby="sendNotificationLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="sendNotificationLabel">Enviar notificacion a e-mail</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary btn-sm" (click)="cancelarFE()" data-dismiss="modal">
+          <i class="bi bi-x-circle mr-1"></i> Cerrar
+        </button>
+        <button type="button" class="btn btn-success btn-sm"
+          [disabled]="esFE ==='A' || esFE == 'O'  || factura.pagado === 0 || usuario != 1 "
+          (click)="expFacElectronica(idfactura)" data-dismiss="modal">
+          <i class="bi bi-send mr-1"></i> Factura Electrónica
         </button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL Imprimir Mejorado -->
+<div class="modal fade" id="imprimir" tabindex="-1" aria-labelledby="imprimirLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white py-3">
+        <h5 class="modal-title">
+          <i class="bi bi-printer mr-2"></i>Imprimir Reportes
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <div *ngIf="pdfView; else pdfHide">
+          <div class="form-group mb-0">
+            <label class="form-label small font-weight-bold">Seleccionar Reporte</label>
+            <select class="form-control form-control-sm" [(ngModel)]="opt">
+              <option value="0">Cartas pendientes</option>
+              <option value="1">Reporte de cobros</option>
+              <option value="2">Estado de cuenta</option>
+            </select>
+          </div>
+        </div>
+
+        <ng-template #pdfHide>
+          <div class="card border-0 shadow-sm">
+            <div class="card-body p-0">
+              <iframe id="pdfViewer" src="" width="100%" height="400px" style="border: none; border-radius: 8px;"></iframe>
+            </div>
+          </div>
+        </ng-template>
+      </div>
+
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" (click)="cancelar()">
+          <i class="bi bi-x-circle mr-1"></i> Cancelar
+        </button>
+        <button class="btn btn-success btn-sm" (click)="setOptImprimir()">
+          <i class="bi bi-check-circle mr-1"></i> Aceptar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONDONAR DEUDAS Mejorado -->
+<div class="modal fade" id="condonar" tabindex="-1" aria-labelledby="condonarLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-dark py-3">
+        <h5 class="modal-title">
+          <i class="bi bi-exclude mr-2"></i>Condonar Deudas
+        </h5>
+        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-8">
+            <div class="card border-0 shadow-sm mb-3">
+              <div class="card-header bg-light py-2">
+                <h6 class="mb-0 font-weight-bold">Rubros a Condonar</h6>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-container">
+                  <table class="table table-sm table-hover mb-0">
+                    <thead class="thead-modern">
+                      <tr>
+                        <th width="80" class="text-center">Código</th>
+                        <th>Descripción</th>
+                        <th width="120" class="text-right">Valor</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let rubro of c_rubros">
+                        <td class="text-center small">{{rubro.idrubro_rubros}}</td>
+                        <td class="small">{{rubro.descripcion}}</td>
+                        <td class="text-right font-weight-bold small">${{rubro.total.toFixed(2)}}</td>
+                      </tr>
+                      <tr class="table-active">
+                        <td colspan="2" class="font-weight-bold text-right">TOTAL RUBROS</td>
+                        <td class="font-weight-bold text-right">${{totalRubros.toFixed(2)}}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-header bg-light py-2">
+                <h6 class="mb-0 font-weight-bold">Multas</h6>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-container">
+                  <table class="table table-sm table-hover mb-0">
+                    <thead class="thead-modern">
+                      <tr>
+                        <th width="80" class="text-center">Código</th>
+                        <th>Descripción</th>
+                        <th width="100" class="text-right">Valor</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let m of multa">
+                        <td class="text-center small">{{m.idrubro_rubros}}</td>
+                        <td class="small">{{m.descripcion}}</td>
+                        <td class="text-right font-weight-bold small">${{m.total.toFixed(2)}}</td>
+                      </tr>
+                      <tr class="table-active">
+                        <td colspan="2" class="font-weight-bold text-right">TOTAL MULTAS</td>
+                        <td class="font-weight-bold text-right">${{totalMultas.toFixed(2)}}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mt-3">
+          <div class="col-12">
+            <div class="form-group mb-0">
+              <label class="form-label small font-weight-bold">Justificación de Condonación</label>
+              <textarea class="form-control form-control-sm" rows="3" [(ngModel)]="razonCondonacion"
+                (change)="razonCondonacionChange($event)"
+                placeholder="Ingresar memorando justificando la condonación de multas e intereses de esta cuenta..."></textarea>
+              <small class="form-text text-muted">Este campo es obligatorio para proceder con la condonación.</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" (click)="cancelar()">
+          <i class="bi bi-x-circle mr-1"></i> Cancelar
+        </button>
+        <button class="btn btn-success btn-sm" data-dismiss="modal" [disabled]="validar()" (click)="condonarDeudas()">
+          <i class="bi bi-check-circle mr-1"></i> Confirmar Condonación
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Enviar Notificación Mejorado -->
+<div class="modal fade" id="sendNotification" tabindex="-1" aria-labelledby="sendNotificationLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-white py-3">
+        <h5 class="modal-title">
+          <i class="bi bi-envelope mr-2"></i>Enviar Notificación por E-mail
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-dismiss="modal" aria-label="Close"></button>
+      </div>
+
       <div class="modal-body">
         <form [formGroup]="f_sendEmail" enctype="multipart/form-data">
-          <!-- Múltiples correos separados por coma -->
-          <input formControlName="receptores" class="form-control form-control-sm"
-            placeholder="Receptores (separados por coma)" />
+          <div class="form-group mb-3">
+            <label class="form-label small font-weight-bold">Destinatarios</label>
+            <input formControlName="receptores" class="form-control form-control-sm"
+              placeholder="correo1@ejemplo.com, correo2@ejemplo.com" />
+            <small class="form-text text-muted">Separar múltiples correos con comas</small>
+          </div>
 
-          <input formControlName="asunto" class="form-control form-control-sm mt-2" placeholder="Asunto" />
-          <textarea formControlName="mensaje" class="form-control form-control-sm mt-2"
-            placeholder="Mensaje "></textarea>
+          <div class="form-group mb-3">
+            <label class="form-label small font-weight-bold">Asunto</label>
+            <input formControlName="asunto" class="form-control form-control-sm"
+                   placeholder="Asunto del mensaje" />
+          </div>
 
-          <div class="input-group mb-3 mt-2">
-            <div class="input-group-prepend">
-              <span class="input-group-text" id="inputGroupFileAddon01">Archivo</span>
-            </div>
+          <div class="form-group mb-3">
+            <label class="form-label small font-weight-bold">Mensaje</label>
+            <textarea formControlName="mensaje" class="form-control form-control-sm" rows="4"
+              placeholder="Escriba el contenido del mensaje..."></textarea>
+          </div>
+
+          <div class="form-group mb-0">
+            <label class="form-label small font-weight-bold">Archivo Adjunto</label>
             <div class="custom-file">
-              <input type="file" (change)="onFileChange($event)" disabled class="custom-file-input"
-                id="inputGroupFile01" aria-describedby="inputGroupFileAddon01">
-              <label class="custom-file-label" for="inputGroupFile01">{{nameFile}}</label>
+              <input type="file" (change)="onFileChange($event)" class="custom-file-input" id="inputGroupFile01"
+                aria-describedby="inputGroupFileAddon01">
+              <label class="custom-file-label" for="inputGroupFile01">
+                {{nameFile || 'Seleccionar archivo...'}}
+              </label>
             </div>
           </div>
         </form>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-sm btn-outline-success" data-dismiss="modal"
-          (click)="sendEmail()">Enviar</button>
+
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">
+          <i class="bi bi-x-circle mr-1"></i> Cancelar
+        </button>
+        <button type="button" class="btn btn-success btn-sm" data-dismiss="modal" (click)="sendEmail()">
+          <i class="bi bi-send mr-1"></i> Enviar Notificación
+        </button>
       </div>
     </div>
   </div>

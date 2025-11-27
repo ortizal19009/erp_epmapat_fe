@@ -20,7 +20,6 @@ import { FacturaService } from 'src/app/servicios/factura.service';
 import { FormacobroService } from 'src/app/servicios/formacobro.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
-import { RecaudacionReportsService } from '../recaudacion-reports.service';
 import { InteresesService } from 'src/app/servicios/intereses.service';
 import { CajaService } from 'src/app/servicios/caja.service';
 import { RecaudacionService } from 'src/app/servicios/recaudacion.service';
@@ -228,6 +227,7 @@ export class RecaudacionComponent implements OnInit {
       .getByIdUsuario(this.authService.idusuario)
       .pipe(
         tap((dcaja: any) => {
+          console.log('Datos de caja obtenidos:', dcaja);
           if (!dcaja) {
             // Lanzamos para que lo capture catchError
             throw new Error('NO_CAJA');
@@ -552,7 +552,6 @@ export class RecaudacionComponent implements OnInit {
           this.swbusca = 2;
           this.loadingService.hideLoading();
         }
-        console.log(sincobrar)
         sincobrar.map(async (item: any, i: number) => {
           if (item.idAbonado != 0 && item.idmodulo != 27) {
             const abonado: Abonados = await this.getAbonado(item.idAbonado);
@@ -601,6 +600,7 @@ export class RecaudacionComponent implements OnInit {
           //item.total += interes;
         });
         this._sincobro = sincobrar;
+
       },
       error: (e) => console.error(e),
     });
@@ -2038,19 +2038,23 @@ export class RecaudacionComponent implements OnInit {
     modal.removeAttribute('aria-modal');
     modal.style.display = 'none';
 
-    // quitar backdrop
+    // quitar backdrop personalizado
     const bd = document.querySelector(`.modal-backdrop[data-backdrop-id="${id}"]`);
     if (bd && bd.parentNode) bd.parentNode.removeChild(bd);
 
-    // desbloquear scroll si no quedan modales abiertos
-    if (!document.querySelector('.modal.show')) {
-      document.body.classList.remove('modal-open');
-    }
+    // 🔥 quitar cualquier backdrop que haya dejado Bootstrap
+    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+
+    // 🔥 quitar clases del body que bloquean scroll y dejan la pantalla transparente
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('padding-right');
   }
 
-
-
 }
+
+
+
 
 interface Cliente {
   idcliente: number;

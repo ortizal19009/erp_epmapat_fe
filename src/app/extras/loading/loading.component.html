@@ -1,3 +1,7 @@
-<div class="loading-overlay" *ngIf="isLoading | async">
+<!-- <div class="loading-overlay" *ngIf="isLoading | async">
     <div class="spinner"></div>
+</div> -->
+
+<div class="loader-wrapper" *ngIf="isLoading$ | async">
+  <img class="loader-frame" [src]="currentFrame" alt="Cargando..." />
 </div>

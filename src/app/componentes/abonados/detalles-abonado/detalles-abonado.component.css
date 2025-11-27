@@ -65,3 +65,262 @@ table {
 textarea{
   width: 100%;
 }
+/* ======================================= */
+/* Estilos específicos para el componente Abonado */
+.avatar-circle-lg {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 2rem;
+}
+
+.info-list {
+  border-top: 1px solid #e9ecef;
+  padding-top: 1rem;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-item i {
+  width: 20px;
+  color: #6c757d;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.cursor-pointer:hover {
+  background-color: rgba(52, 152, 219, 0.1);
+}
+
+.chart-container {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.chart-wrapper {
+  position: relative;
+  height: 300px;
+}
+
+/* Tabs mejorados */
+.nav-tabs .nav-link {
+  border: none;
+  color: #6c757d;
+  font-weight: 500;
+  padding: 0.75rem 1rem;
+}
+
+.nav-tabs .nav-link.active {
+  color: #007bff;
+  background: none;
+  border-bottom: 3px solid #007bff;
+}
+
+.nav-tabs .nav-link:hover {
+  border: none;
+  color: #0056b3;
+}
+
+/* Badges mejorados */
+.badge-sm {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+}
+
+/* Estados mejorados */
+.text-warning {
+  color: #f39c12 !important;
+}
+
+.text-success {
+  color: #27ae60 !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .avatar-circle-lg {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+
+  .info-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .info-item i {
+    margin-bottom: 0.25rem;
+  }
+}
+
+/* Descripción truncada */
+.description {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Estados vacíos */
+.empty-state {
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.empty-state i {
+  opacity: 0.5;
+}
+/* Estilos específicos para modales mejorados */
+.modal-content {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  border-radius: 12px 12px 0 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-footer {
+  border-radius: 0 0 12px 12px;
+  border-top: 1px solid #e9ecef;
+}
+
+/* Info grid para detalles */
+.info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.info-item {
+  display: flex;
+  justify-content: between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #6c757d;
+  font-size: 0.875rem;
+  min-width: 120px;
+}
+
+.info-value {
+  flex: 1;
+  text-align: right;
+  font-weight: 500;
+}
+
+/* Tablas mejoradas en modales */
+.table-container {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.thead-modern {
+  background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+  color: white;
+}
+
+.thead-modern th {
+  border: none;
+  padding: 10px 12px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Botones mejorados */
+.btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  border-radius: 6px;
+}
+
+/* Form controls mejorados */
+.form-control-sm {
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  transition: all 0.3s ease;
+}
+
+.form-control-sm:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+/* Custom file input mejorado */
+.custom-file-input:focus ~ .custom-file-label {
+  border-color: #3498db;
+  box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+.custom-file-label {
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+/* Badges mejorados */
+.badge {
+  font-size: 0.75rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+/* Responsive para modales */
+@media (max-width: 768px) {
+  .modal-dialog {
+    margin: 1rem;
+  }
+
+  .info-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .info-value {
+    text-align: left;
+  }
+}
+
+/* Descripción truncada */
+.description {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Estados de botones deshabilitados */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

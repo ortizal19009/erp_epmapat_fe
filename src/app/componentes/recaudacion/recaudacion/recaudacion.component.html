@@ -1,746 +1,643 @@
-<div class="content mt-1 pt-1 pl-0">
-    <div class="container-fluid">
-        <div class="row m-0 px-0 py-1 col-sm-12 border recaudacabecera sombra">
-            <div class="col-sm-2 pl-0 mt-1">
-                <h4 class="m-0 font-weight-bold text-truncate">
-                    <i class="bi bi-cash-coin ml-2" style="color: red"></i> Recaudación
-                    v_2.0
-                    <i class="fa fa-lock" aria-hidden="true" *ngIf="estadoCajaT; else estadoCajaF"></i>
-                    <ng-template #estadoCajaF>
-                        <i class="fa fa-unlock" aria-hidden="true"></i>
-                    </ng-template>
-                </h4>
+<div class="content mt-3">
+  <div class="container-fluid">
+    <!-- Header Mejorado -->
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-header bg-gradient-primary text-white py-3">
+        <div class="row align-items-center">
+          <div class="col-md-8">
+            <div class="d-flex align-items-center">
+              <i class="bi bi-cash-coin fa-2x mr-3"></i>
+              <div>
+                <h4 class="mb-0 font-weight-bold">Sistema de Recaudación v2.0</h4>
+                <small class="opacity-8">
+                  <span class="badge" [ngClass]="estadoCajaT ? 'badge-danger' : 'badge-success'">
+                    <i class="fa" [ngClass]="estadoCajaT ? 'fa-lock' : 'fa-unlock'" aria-hidden="true"></i>
+                    {{ estadoCajaT ? 'Caja Cerrada' : 'Caja Abierta' }}
+                  </span>
+                </small>
+              </div>
             </div>
-            <div class="col-sm-8 mx-0 px-0">
-                <form [formGroup]="formBuscar" class="col-sm-12 mt-0 px-0 pt-0" (ngSubmit)="onSubmit()">
-                    <div class="row col-sm-12 mt-1 mb-0">
-                        <div class="form-group col-md-2 mb-0">
-                            <input class="form-control form-control-sm text-center" type="text" formControlName="cuenta"
-                                placeholder="Cuenta" (focus)="formBuscar.get('identificacion')?.setValue('')" />
-                        </div>
-
-                        <div class="form-group col-md-2 my-0 py-0 mb-0">
-                            <input class="form-control form-control-sm text-center" type="text"
-                                formControlName="identificacion" placeholder="Identificación"
-                                (focus)="formBuscar.get('cuenta')?.setValue('')" />
-                        </div>
-
-                        <div class="form-group col-md-2 my-0 py-0 mb-0 form-inline">
-                            <button class="btn btn-primary btn-sm mr-1">
-                                <i class="fa fa-search"></i> Buscar
-                            </button>
-                            <div *ngIf="swvalido == 0" class="alert alert-warning m-0 py-0 px-1 small font-weight-bold"
-                                role="alert">
-                                Ups!
-                            </div>
-                        </div>
-                        <div class="form-group col-md-2 my-0 py-0 mb-0">
-                            <button type="button" class="btn btn-sm btn-success" data-toggle="modal"
-                                data-target="#clientesModal" (click)="clientesModal()">
-                                <i class="bi bi-people"></i> Clientes
-                            </button>
-                        </div>
-
-                        <div *ngIf="acobrar > 0 && !swcobrado && !estadoCajaT"
-                            class="form-group col-md-3 my-0 py-0 mb-0">
-                            <button type="button" class="btn btn-sm btn-success" data-toggle="modal"
-                                data-target="#modalCobrar" (click)="valorAcobrar(acobrar)">
-                                <i class="bi bi-check-lg"></i> Cobrar:&nbsp;&nbsp;&nbsp;
-                                <strong>{{ acobrar | number : "1.2-2" }}</strong>
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="col-sm my-0 py-0 mb-0">
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="filtrar"
-                    placeholder="Filtrar..." />
-            </div>
-
-            <div class="btn-group ml-auto">
-                <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
-                    aria-expanded="false">
-                    <i class="bi-menu-button-wide text-white"></i>
+          </div>
+          <div class="col-md-4 text-right">
+            <div class="btn-group">
+              <button type="button" class="btn btn-light btn-sm dropdown-toggle" data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="false">
+                <i class="bi bi-menu-button-wide"></i> Opciones
+              </button>
+              <div class="dropdown-menu dropdown-menu-right shadow">
+                <button class="dropdown-item" type="button" data-toggle="modal" (click)="abrirCaja()" data-target="#abrirCaja"
+                  [disabled]="!estadoCajaT">
+                  <i class="bi bi-door-open mr-2"></i>Abrir caja
                 </button>
-                <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-                    <button class="dropdown-item" type="button" data-toggle="modal" (click)="abrirCaja()"
-                        data-target="#abrirCaja" [disabled]="!estadoCajaT">
-                        <i class="bi-door-open"></i>&nbsp; Abrir caja
-                    </button>
-                    <button class="dropdown-item" type="button" data-toggle="modal" data-target="#cerrarCaja"
-                        [disabled]="estadoCajaT">
-                        <i class="bi-door-closed"></i>&nbsp; Cerrar caja
-                    </button>
-                    <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
-                        <!-- [disabled]="swbusca != 0"> -->
-                        <i class="bi-printer"></i>&nbsp; Imprimir
-                    </button>
-                </div>
-                <div class="btn-group mx-1" *ngIf="swbusca != 0">
-                    <button class="bg-transparent border-0" type="button" (click)="reiniciar()">
-                        <i class="bi-arrow-left-circle text-white icoRegresar"></i>
-                    </button>
-                </div>
+                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#cerrarCaja"
+                  [disabled]="estadoCajaT">
+                  <i class="bi bi-door-closed mr-2"></i>Cerrar caja
+                </button>
+                <div class="dropdown-divider"></div>
+                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
+                  <i class="bi bi-printer mr-2"></i>Imprimir
+                </button>
+              </div>
             </div>
+
+            <button *ngIf="swbusca != 0" class="btn btn-outline-light btn-sm ml-2" (click)="reiniciar()">
+              <i class="bi bi-arrow-left-circle"></i> Volver
+            </button>
+          </div>
         </div>
-    </div>
-</div>
+      </div>
 
-<div class="container-fluid">
-    <div class="row mt-2 mb-0 justify-content-left">
-        <div class="col-sm-3">
-            <div class="row" *ngIf="swbusca != 0">
-                <div class="col-sm">
-                    <div class="card detalle sombra">
-                        <div class="card-body box-profile">
-                            <h3 class="profile-username text-center">{{ cliente.nombre }}</h3>
-                            <p class="text-muted text-center">{{ cliente.cedula }}</p>
-                            <ul class="list-group list-group-unbordered mb-3">
-                                <li class="list-group-item detalle">
-                                    <b>Dirección</b>
-                                    <a class="float-right">{{ cliente.direccion }}</a>
-                                </li>
-                                <li class="list-group-item detalle">
-                                    <b>e-mail</b> <a class="float-right">{{ cliente.email }}</a>
-                                </li>
-                                <li class="list-group-item detalle">
-                                    <b>Teléfono</b>
-                                    <a class="float-right">{{ cliente.telefono }}</a>
-                                </li>
-                                <li class="list-group-item detalle">
-                                    <b>Nota Crédito</b>
-                                    <a class="float-right">{{ formCobrar.value.saldo }}</a>
-                                </li>
-                                <!--                                 <li class="list-group-item detalle">
-                                    <b>Discapacidad</b>
-                                    <i *ngIf="cliente.porcdiscapacidad === 0">
-                                        <i class="float-right bi-circle"></i>
-                                    </i>
-                                    <i *ngIf="cliente.porcdiscapacidad! > 0">
-                                        <i class="float-right bi-check-circle-fill"></i>
-                                    </i>
-                                </li>
-                                <li class="list-group-item detalle">
-                                    <b>Adulto mayor</b> <a class="float-right"></a><i
-                                        class="float-right bi-bug-fill"></i>
-                                </li> -->
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+      <!-- Formulario de Búsqueda -->
+      <div class="card-body bg-light py-3">
+        <form [formGroup]="formBuscar" (ngSubmit)="onSubmit()">
+          <div class="row align-items-end">
+            <div class="col-md-3">
+              <label class="form-label small text-muted mb-1">Número de Cuenta</label>
+              <input class="form-control form-control-sm" type="text" formControlName="cuenta" placeholder="Ej: 123456"
+                (focus)="formBuscar.get('identificacion')?.setValue('')" />
             </div>
-            <div class="row" *ngIf="_nroFactura != ''">
-                <div class="col-sm numeracion">
-                    <small class="badge badge-danger"><i class="bi bi-newspaper"></i> {{ _nroFactura }}</small>
-                </div>
+            <div class="col-md-3">
+              <label class="form-label small text-muted mb-1">Identificación</label>
+              <input class="form-control form-control-sm" type="text" formControlName="identificacion"
+                placeholder="Ej: 1723456789" (focus)="formBuscar.get('cuenta')?.setValue('')" />
             </div>
-        </div>
-        <div [ngClass]="{
-        'col-9 recaudadetalle': swbusca != 0,
-        'col-6 mt-5': swbusca == 0
-      }">
-            <div class="card sombra" [ngClass]="{ recaudadetalle: swbusca != 0 }">
-                <div class="card-body box-profile d-flex justify-content-center">
-                    <div *ngIf="swbusca == 0">
-                        <img src="/assets/dist/img/logo.png" width="280" />
-                    </div>
-
-                    <div *ngIf="swbusca == 1" class="col-md-12">
-                        <div class="row justify-content-center">
-                            <div class="callout callout-info text-center col-md-8">
-                                <div class="alert alert-info">
-                                    <h5><i class="fas fa-info"></i> <strong> Mensaje</strong></h5>
-                                    No existe la <strong>{{ mensaje.campo }}</strong>
-                                    {{ mensaje.texto }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div *ngIf="swbusca == 2" class="col-md-12">
-                        <div class="row justify-content-center">
-                            <div class="callout callout-info text-center col-md-8">
-                                <div class="alert alert-info">
-                                    <h5><i class="fas fa-info"></i> <strong> Mensaje</strong></h5>
-                                    No tiene Planillas sin Cobrar !
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div *ngIf="swbusca == 3" class="card-body table-responsive p-0" style="height: 700px">
-                        <table
-                            class="table table-hover table-sm table-bordered mb-0 table-head-fixed thead-dark text-nowrap table-responsive-sm">
-                            <thead class="_recaudacabecera">
-                                <tr class="text-center">
-                                    <th></th>
-                                    <th>Cuenta</th>
-                                    <th>Responsable pago</th>
-                                    <th>Planilla</th>
-                                    <th>Dirección</th>
-                                    <th>Fecha</th>
-                                    <th>Módulo</th>
-                                    <th>Valor</th>
-                                    <th>
-                                        <input type="checkbox" (change)="marcarTodas($event)" class="cursor"
-                                            [disabled]="filtrar || !deshabilitarImprimirTodo" />
-                                    </th>
-                                    <th>
-                                        <button class="btn btn-primary btn-sm mb" (click)="imprimirTodasEnUno()"
-                                            [disabled]="deshabilitarImprimirTodo">
-                                            <i class="fa fa-print"></i>
-                                        </button>
-
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr *ngFor="
-                    let sincobro of _sincobro | filter : filtrar;
-                    let i = index
-                  " class="text-center" [ngClass]="{ transferido: sincobro.estado == 3 }">
-                                    <td class="small font-weight-bold">{{ i + 1 }}</td>
-                                    <td [ngClass]="{ transparente: sincobro.idabonado == 0 }">
-                                        {{ sincobro.idAbonado }}
-                                    </td>
-                                    <td class="description">{{ sincobro.responsablePago }}</td>
-                                    <td>{{ sincobro.idfactura }}</td>
-                                    <td class="description">
-                                        {{ sincobro.direccion }}
-                                        <!--    {{sincobro.idabonado}}
-                                <i class="fa fa-spinner fa-pulse fa-fw"></i>
-                                <span class="sr-only">Loading...</span> -->
-                                    </td>
-                                    <td class="description">
-                                        {{ sincobro.fechaemision | date : "mediumDate" }}
-                                    </td>
-                                    <td class="text-left description">{{ sincobro.modulo }}</td>
-                                    <!-- <td  class="text-right">{{
-                                sincobro.totaltarifa + sincobro.comerc + sincobro.interes +
-                                sincobro.multa | number:'1.2-2'}}</td> -->
-                                    <td class="text-right">
-                                        {{
-                                        (
-                                        sincobro.total +
-                                        sincobro.interes +
-                                        sincobro.iva
-                                        ).toFixed(2)
-                                        }}
-                                    </td>
-                                    <!--           <td *ngIf="sincobro.idmodulo.idmodulo != 8" [ngClass]="{'transferido': sincobro.estado == 3 }"
-                                class="text-right">{{
-                                sincobro.totaltarifa + sincobro.comerc + sincobro.interes +
-                                sincobro.multa | number:'1.2-2'}}</td>
-                             <td *ngIf="sincobro.idmodulo.idmodulo == 8" class="text-right">{{
-                                sincobro.valorbase | number:'1.2-2'}}</td>-->
-                                    <td>
-                                        <input type="checkbox" [(ngModel)]="sincobro.pagado"
-                                            (change)="marcarAnteriores($event, i, sincobro.idAbonado)"
-                                            [disabled]="valCheckBox(sincobro.idAbonado, swcobrado)"
-                                            [class]="'cursor sw-' + sincobro.idAbonado" />
-                                    </td>
-                                    <td [ngClass]="{ transferido: sincobro.estado == 3 }">
-                                        <button *ngIf="!swcobrado" class="btn btn-outline-info btn-xs cursor"
-                                            data-toggle="modal" data-target="#DetallePlanillaModal" (click)="
-                        getRubroxfac(
-                          sincobro.idfactura,
-                          sincobro.idmodulo,
-                          sincobro
-                        )
-                      ">
-                                            <i class="fa fa-info-circle"></i> Info
-                                        </button>
-                                        <button *ngIf="swcobrado" class="btn btn-xs cursor"
-                                            (click)="impComprobante(sincobro)" [disabled]="!sincobro.pagado" [ngClass]="{
-                        'btn-danger': sincobro.procesando,
-                        'btn-success': !sincobro.procesando && sincobro.pagado
-                      }">
-                                            <i class="fa fa-print"></i>
-                                            {{ sincobro.procesando ? "Procesando…" : "Imprimir" }}
-                                            <i *ngIf="sincobro.procesando" class="fa fa-spinner fa-spin ml-1"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td class="font-weight-bold">TOTAL</td>
-                                    <td class="text-right font-weight-bold">
-                                        {{ acobrar | number : "1.2-2" }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+            <div class="col-md-4">
+              <div class="d-flex align-items-end h-100">
+                <div class="d-flex gap-2 align-items-center">
+                  <button class="btn btn-primary btn-sm px-3" type="submit">
+                    <i class="fa fa-search mr-1"></i>Buscar
+                  </button>
+                  <button type="button" class="btn btn-outline-primary btn-sm" data-toggle="modal"
+                    data-target="#clientesModal" (click)="clientesModal()">
+                    <i class="bi bi-people mr-1"></i>Clientes
+                  </button>
+                  <div *ngIf="swvalido == 0" class="alert alert-warning py-1 px-2 mb-0 small">
+                    <i class="fa fa-exclamation-triangle mr-1"></i>Datos inválidos
+                  </div>
                 </div>
+              </div>
             </div>
-        </div>
+            <div class="col-md-2" *ngIf="acobrar > 0 && !swcobrado && !estadoCajaT">
+              <button type="button" class="btn btn-success btn-sm w-100" data-toggle="modal" data-target="#modalCobrar"
+                (click)="valorAcobrar(acobrar)">
+                <i class="bi bi-check-lg mr-1"></i>
+                <span class="d-block small">Cobrar</span>
+                <strong class="small">{{acobrar | number: '1.2-2'}}</strong>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
 
-    <!-- Modal Buscar Clientes -->
-    <div class="modal fade" id="clientesModal" tabindex="-1" aria-labelledby="clienteModalLabel" aria-hidden="true"
-        data-backdrop="static">
-        <div class="modal-dialog modal-dialog-scrollable">
-            <div class="modal-content clientedetalle">
-                <div class="modal-body mt-0">
-                    <div class="row clientecabecera">
-                        <form [formGroup]="formBusClientes" class="mb-0 col-md-9">
-                            <div class="row py-2">
-                                <div class="input-group col-sm-12">
-                                    <input type="text" placeholder="Nombre ó identificación (Mínimo 5)"
-                                        class="form-control form-control-sm" autofocus id="nombre_identifica"
-                                        formControlName="nombre_identifica" required minlength="5" />
+    <!-- Información del Cliente Compacta -->
+    <div *ngIf="swbusca == 3" class="row mb-3">
+      <div class="col-12">
+        <div class="card shadow-sm border-0">
+          <div class="card-body py-3">
+            <div class="row align-items-center">
+              <div class="col-md-8">
+                <div class="d-flex align-items-center">
+                  <div class="client-avatar mr-3">
+                    <div class="avatar-circle-sm bg-primary text-white">
+                      {{ cliente.nombre.charAt(0) }}
+                    </div>
+                  </div>
+                  <div>
+                    <h5 class="mb-1 text-primary">{{ cliente.nombre }}</h5>
+                    <div class="d-flex flex-wrap gap-3">
+                      <span class="text-muted small">
+                        <i class="bi bi-person-badge mr-1"></i>
+                        <strong>Identificación:</strong> {{ cliente.cedula }}
+                      </span>
+                      <span class="text-muted small" *ngIf="cliente.direccion">
+                        <i class="bi bi-geo-alt mr-1"></i>
+                        <strong>Dirección:</strong> {{ cliente.direccion }}
+                      </span>
+                      <span class="text-muted small" *ngIf="cliente.telefono">
+                        <i class="bi bi-telephone mr-1"></i>
+                        <strong>Teléfono:</strong> {{ cliente.telefono }}
+                      </span>
+                      <span class="text-muted small" *ngIf="formCobrar.value.saldo">
+                        <i class="bi bi-credit-card mr-1"></i>
+                        <strong>Nota Crédito:</strong> {{ formCobrar.value.saldo }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-                                    <div class="input-group-append">
-                                        <button class="btn btn-sm btn-primary" (click)="buscarClientes()"
-                                            [disabled]="formBusClientes.invalid">
-                                            <i class="fa fa-search" aria-hidden="true"></i> Buscar
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
+    <!-- Panel de Resultados -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card shadow-sm border-0">
+          <div class="card-body p-0">
+            <!-- Estados de la aplicación -->
+            <div *ngIf="swbusca == 0" class="text-center py-5">
+              <div class="empty-state">
+                <img src="/assets/dist/img/logo.png" alt="Logo" class="empty-state-img mb-4" style="max-width: 250px;">
+                <h5 class="text-muted">Sistema de Recaudación</h5>
+                <p class="text-muted small">Utilice el formulario de búsqueda para comenzar</p>
+              </div>
+            </div>
 
-                        <div class="col-md-3 mt-2 pl-0">
-                            <input type="text" class="form-control form-control-sm text-center" placeholder="Filtrar..."
-                                [(ngModel)]="filtro" />
-                        </div>
-                    </div>
-                    <div class="row mt-0 pt-0" *ngIf="!formBusClientes.invalid">
-                        <table class="table table-hover table-bordered table-sm mt-0 pt-0 clientedetalle"
-                            id="tablaClientes">
-                            <thead class="text-center clientecabecera">
-                                <tr>
-                                    <th></th>
-                                    <th>Nombre</th>
-                                    <th>Identificación</th>
-                                </tr>
-                            </thead>
-                            <tbody id="id-tbody">
-                                <tr *ngFor="
-                    let cliente of _clientes | filter : filtro;
-                    let i = index
-                  " (click)="selecCliente(cliente)" data-dismiss="modal">
-                                    <td class="text-center small font-weight-bold py-0">
-                                        {{ i + 1 }}
-                                    </td>
-                                    <td class="py-0">{{ cliente.nombre }}</td>
-                                    <td class="py-0">{{ cliente.cedula }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="row justify-content-center mt-0 mb-3">
-                    <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">
-                        <i class="bi bi-x-circle"></i>&nbsp; Cancelar
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Modal Cobrar -->
-    <div class="modal fade" id="modalCobrar" tabindex="-1" aria-labelledby="modalCobrarLabel" data-backdrop="static"
-        aria-hidden="true">
-        <div class="modal-dialog modal-sm modal-dialog-centered">
-            <div class="modal-content recaudadetalle">
-                <div class="modal-header justify-content-center py-2 recaudacabecera">
-                    <h5 class="modal-title fantacyblack">Cobro</h5>
-                </div>
-                <div class="modal-body col-md-12">
-                    <form [formGroup]="formCobrar">
-                        <div class="col-md-12">
-                            <div class="input-group input-group-sm">
-                                <div class="input-group-prepend">
-                                    <label class="input-group-text">Forma cobro</label>
-                                </div>
-                                <select class="custom-select" formControlName="idformacobro"
-                                    (change)="changeFormacobro()">
-                                    <option *ngFor="let formacobro of _formascobro" [ngValue]="formacobro"
-                                        id="idformacobro{{ formacobro.idformacobro }}">
-                                        {{ formacobro.descripcion }}
-                                    </option>
-                                </select>
-                            </div>
-                            <div class="input-group mt-3 mb-3">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text font-weight-bold">A Cobrar</span>
-                                </div>
-                                <input type="text" class="form-control text-right" formControlName="acobrar" readonly />
-                                <div class="input-group-append">
-                                    <span class="input-group-text">{{ acobrardec }}</span>
-                                </div>
-                            </div>
-                            <div *ngIf="formacobroNC || f['ncvalor'].value > 0" class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text font-weight-bold" for="dinero">Saldo NC</span>
-                                </div>
-                                <input type="text" class="form-control text-center" formControlName="saldo" readonly
-                                    [ngClass]="{
-                    'is-invalid': f['saldo'].invalid && f['saldo'].touched,
-                    'is-valid': f['saldo'].valid && f['saldo'].touched
-                  }" />
-                            </div>
-                            <div *ngIf="formacobroNC || f['ncvalor'].value > 0" class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text font-weight-bold" for="dinero">Valor NC</span>
-                                </div>
-                                <input type="text" class="form-control text-center" formControlName="ncvalor" [ngClass]="{
-                    'is-invalid': f['ncvalor'].invalid && f['ncvalor'].touched,
-                    'is-valid': f['ncvalor'].valid,
-                    '': f['ncvalor'].untouched
-                  }" (change)="changeNCvalor($event)" />
-                            </div>
-                            <div *ngIf="!formacobroNC" class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text font-weight-bold" for="dinero">Dinero</span>
-                                </div>
-                                <input type="text" class="form-control text-center" formControlName="dinero" [ngClass]="{
-                    'is-invalid': f['dinero'].invalid && f['dinero'].touched,
-                    'is-valid': f['dinero'].valid,
-                    '': f['dinero'].untouched
-                  }" (change)="changeDinero()" />
-                                <div class="input-group-append">
-                                    <button type="button" class="btn btn-outline-success btn-xm"
-                                        (click)="valorDinero()">
-                                        <i class="bi bi-chevron-double-down"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text font-weight-bold">Vuelto</span>
-                                </div>
-                                <input type="text" class="form-control text-center" formControlName="vuelto" readonly />
-                                <div *ngIf="disabledcobro; then thenBlock; else elseBlock"></div>
-                                <ng-template #thenBlock><span class="input-group-text bg-danger"><i
-                                            class="bi bi-x-circle"></i>
-                                    </span>
-                                </ng-template>
-                                <ng-template #elseBlock><span class="input-group-text bg-success"><i
-                                            class="fa fa-check-circle"></i></span>
-                                </ng-template>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="row mt-0 mb-3 justify-content-center">
-                    <button type="button" class="btn btn-success btn-sm mx-1" [disabled]="disabledcobro"
-                        (click)="cobrar()" data-dismiss="modal">
-                        <i class="fa fa-check-circle"></i> Aceptar
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-success mx-1" data-dismiss="modal">
-                        <i class="bi bi-x-circle"></i> Cancelar
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Modal DETALLE Planilla -->
-    <div class="modal fade" id="DetallePlanillaModal" tabindex="-1" aria-labelledby="DetallePlanillaModal">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content recaudadetalle">
-                <div class="py-2 recaudacabecera">
-                    <div class="row text-center">
-                        <div class="col">
-                            <h5 class="modal-title" id="DetalleFacturaModalLabel">
-                                <strong>Planilla:</strong> {{ idfactura }}
-                            </h5>
-                        </div>
-                    </div>
-                    <div *ngIf="consumo" class="row text-center">
-                        <div class="col">
-                            <h6 class="fantacyblack">
-                                <strong>Consumo:</strong> {{ consumo }} m<sup>3</sup>
-                            </h6>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-body">
-                    <table *ngIf="_rubrosxfac" class="table table-hover table-sm table-bordered mb-0">
-                        <thead class="recaudacabecera">
-                            <tr class="text-center">
-                                <th></th>
-                                <th class="col-md-9">Rubro</th>
-                                <th>Valor</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let rubroxfac of _rubrosxfac; let i = index" class="fila">
-                                <td class="text-center font-weight-bold small">{{ i + 1 }}</td>
-                                <td>{{ rubroxfac.idrubro_rubros.descripcion }}</td>
-                                <td class="text-right">
-                                    {{ rubroxfac.valorunitario | number : "1.2-2" }}
-                                </td>
-                            </tr>
-                            <tr *ngIf="valoriva > 0">
-                                <td></td>
-                                <td>IVA</td>
-                                <td class="text-right">{{ valoriva | number : "1.2-2" }}</td>
-                            </tr>
-                            <tr *ngIf="totInteres > 0">
-                                <td></td>
-                                <td>Interés</td>
-                                <td class="font-weight-bold text-right">
-                                    {{ totInteres | number : "1.2-2" }}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                                <td class="font-weight-bold">TOTAL</td>
-                                <td class="font-weight-bold text-right">
-                                    {{ totfac | number : "1.2-2" }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="row justify-content-center mt-0 mb-3">
-                    <button type="button" class="btn btn-success btn-sm" data-dismiss="modal">
-                        <i class="fa fa-times-circle"></i> Cerrar
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- MODAL Abrir Caja -->
-    <div class="modal fade" id="abrirCaja" tabindex="-1" aria-labelledby="abrirCajaLabel" data-backdrop="static"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content recaudadetalle">
-                <div class="modal-header py-2 justify-content-center recaudacabecera">
-                    <h5 class="modal-title font-weight-bold fantacyblack" id="ModalLabel">
-                        Datos caja: {{ _caja.codigo }}
-                    </h5>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <div class="input-group input-group-sm mb-3">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" for="establecimiento">Usuario</span>
-                            </div>
-                            <input type="text" id="establecimiento" value="{{ _usuario.alias }}" readonly
-                                class="form-control form-control-sm" />
-                        </div>
-                        <div class="input-group input-group-sm mb-0">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" for="establecimiento">Establecimiento</span>
-                            </div>
-                            <select id="establecimiento" (change)="changeEstablecimiento($event)"
-                                class="form-control form-control-sm" [(ngModel)]="_establecimiento">
-                                <option *ngFor="let ptoemision of _ptoemision" selected="_establecimiento"
-                                    [ngValue]="ptoemision">
-                                    {{ ptoemision.establecimiento }}
-                                </option>
-                            </select>
-                        </div>
-
-                        <!-- Mensaje debajo del select -->
-                        <small class="form-text text-muted ml-2">
-                            {{ _establecimiento.direccion }}
-                        </small>
-                        <div class="input-group input-group-sm mb-3">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" for="establecimiento">Nro. Factura</span>
-                            </div>
-                            <input type="text" id="establecimiento" value="{{ _nroFactura }}" readonly
-                                class="form-control form-control-sm" />
-                        </div>
-                    </div>
-                    <div class="alert alert-warning text-center mt-3 mb-0" *ngIf="cajaActiva">
-                        <h6>
-                            <strong>Esta caja ya esta iniciada en otro computador</strong>
-                        </h6>
-                    </div>
-                </div>
-                <div class="row justify-content-center mt-1 mb-3">
-                    <button type="button" class="btn btn-success btn-sm mx-1" [disabled]="cajaActiva"
-                        data-dismiss="modal" (click)="validarCaja()">
-                        <i class="fa fa-check-circle"></i>&nbsp; Aceptar
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-success mx-1" data-dismiss="modal">
-                        <i class="bi bi-x-circle"></i> Cancelar
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- MODAL Cerrar Caja -->
-    <div class="modal fade" id="cerrarCaja" tabindex="-1" aria-labelledby="cerrarCajaLabel" data-backdrop="static"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content recaudadetalle">
-                <div class="modal-header py-2 justify-content-center recaudacabecera">
-                    <h5 class="modal-title font-weight-bold fantacyblack" id="ModalLabel">
-                        Cerrar
-                    </h5>
-                </div>
-                <div class="modal-body">
-                    <p>
-                        Advertencia: Al cerrar se registra el Total recaudado hasta el
-                        momento.
+            <div *ngIf="swbusca == 1" class="text-center py-4">
+              <div class="alert alert-info border-0 m-3 py-3">
+                <div class="d-flex align-items-center justify-content-center">
+                  <i class="fas fa-info-circle fa-lg mr-2"></i>
+                  <div>
+                    <h6 class="alert-heading mb-1">Información</h6>
+                    <p class="mb-0 small">
+                      No existe la <strong>{{ mensaje.campo }}</strong> {{ mensaje.texto }}
                     </p>
-                    <div class="alert alert-warning text-center mt-3 mb-0">
-                        <h6><strong>¿ Cerrar la caja ?</strong></h6>
-                    </div>
+                  </div>
                 </div>
-                <div class="row justify-content-center mt-1 mb-3">
-                    <button type="button" class="btn btn-success btn-sm mx-1" data-dismiss="modal"
-                        (click)="cerrarCaja()">
-                        <i class="fa fa-check-circle"></i>&nbsp; Aceptar
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-success mx-1" data-dismiss="modal">
-                        <i class="bi bi-x-circle"></i> Cancelar
-                    </button>
-                </div>
+              </div>
             </div>
-        </div>
-    </div>
-    <!-- Modal Colores -->
-    <div class="modal fade" id="modalColores" tabindex="-1" aria-labelledby="modalColoresLabel" data-backdrop="static"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content recaudadetalle">
-                <div class="modal-header justify-content-center py-2 recaudacabecera">
-                    <h5 class="modal-title">Definir Colores</h5>
+
+            <div *ngIf="swbusca == 2" class="text-center py-4">
+              <div class="alert alert-info border-0 m-3 py-3">
+                <div class="d-flex align-items-center justify-content-center">
+                  <i class="fas fa-info-circle fa-lg mr-2"></i>
+                  <div>
+                    <h6 class="alert-heading mb-1">Información</h6>
+                    <p class="mb-0 small">
+                      No tiene Planillas sin Cobrar!
+                    </p>
+                  </div>
                 </div>
-                <div class="modal-body col-md-12">
-                    <form [formGroup]="formColores">
-                        <div class="col-md-12">
-                            <!-- ========= Color Cabecera ============ -->
-                            <div class="col-sm-12 ml-2 mb-0">
-                                <div class="">
-                                    <span class="font-weight-bold">Cabecera</span>
-                                </div>
-                            </div>
-                            <div class="row col-sm-12 mt-1 mb-1">
-                                <div class="form-group col-sm-5 mb-0">
-                                    <div class="input-group input-group-sm">
-                                        <div class="input-group-prepend col-sm-4">
-                                            <label class="input-group-text">Tono</label>
-                                        </div>
-                                        <select class="custom-select" id="tonocabecera" formControlName="tonos0">
-                                            <option *ngFor="let tono of _tonoscabecera" [ngValue]="tono"
-                                                id="idcolor{{ tono.idcolor }}">
-                                                {{ tono.nombre }}
-                                            </option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group col-sm-7">
-                                    <div class="input-group input-group-sm">
-                                        <div class="input-group-prepend col-sm-3">
-                                            <label class="input-group-text">Color</label>
-                                        </div>
-                                        <select class="custom-select" id="uso_old" formControlName="colores0">
-                                            <option *ngFor="let color of _colorescabecera" [ngValue]="color"
-                                                id="idcolor{{ color.idcolor }}">
-                                                {{ color.nombre }}
-                                            </option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- ================ Color Detalle ================ -->
-                            <div class="col-sm-12 ml-2 mb-0">
-                                <div class="">
-                                    <span class="font-weight-bold">Detalle</span>
-                                </div>
-                            </div>
-                            <div class="row col-sm-12 mt-1 mb-1">
-                                <div class="form-group col-sm-5 mb-0">
-                                    <div class="input-group input-group-sm">
-                                        <div class="input-group-prepend col-sm-4">
-                                            <label class="input-group-text">Tono</label>
-                                        </div>
-                                        <select class="custom-select" id="tonodetalle" formControlName="tonos1">
-                                            <option *ngFor="let tono of _tonosdetalle" [ngValue]="tono"
-                                                id="idcolor{{ tono.idcolor }}">
-                                                {{ tono.nombre }}
-                                            </option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group col-sm-7">
-                                    <div class="input-group input-group-sm">
-                                        <div class="input-group-prepend col-sm-3">
-                                            <label class="input-group-text">Color</label>
-                                        </div>
-                                        <select class="custom-select" id="uso_old" formControlName="colores1">
-                                            <option *ngFor="let color of _coloresdetalle" [ngValue]="color"
-                                                id="idcolor{{ color.idcolor }}">
-                                                {{ color.nombre }}
-                                            </option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
+              </div>
+            </div>
+
+            <!-- Tabla de Resultados -->
+            <div *ngIf="swbusca == 3" class="table-container">
+              <div class="table-scroll-container">
+                <table class="table table-hover table-modern table-sm mb-0">
+                  <thead class="thead-modern sticky-header">
+                    <tr>
+                      <th width="50" class="text-center">#</th>
+                      <th width="100" class="text-center">Cuenta</th>
+                      <th class="min-width-200">Responsable de Pago</th>
+                      <th width="120" class="text-center">Planilla</th>
+                      <th width="150" class="text-center">Dirección</th>
+                      <th width="110" class="text-center">Fecha</th>
+                      <th class="min-width-150">Módulo</th>
+                      <th width="130" class="text-right">Valor</th>
+                      <th width="80" class="text-center">
+                        <div class="custom-control custom-checkbox custom-control-sm">
+                          <input type="checkbox" class="custom-control-input" id="selectAll"
+                            (change)="marcarTodas($event)" [disabled]="filtrar || !deshabilitarImprimirTodo">
+                          <label class="custom-control-label" for="selectAll"></label>
                         </div>
-                    </form>
-                </div>
-                <div class="row mt-0 mb-3 justify-content-center">
-                    <button type="button" class="btn btn-success btn-sm mx-1" [disabled]="disabledcobro">
-                        <i class="fa fa-check-circle"></i> Aceptar
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-success mx-1" data-dismiss="modal">
-                        <i class="bi bi-x-circle"></i> Cancelar
-                    </button>
-                </div>
+                      </th>
+                      <th width="120" class="text-center">
+                        <button class="btn btn-primary btn-sm mb-1" (click)="imprimirTodasEnUno()"
+                          [disabled]="deshabilitarImprimirTodo" title="Imprimir todas las facturas seleccionadas">
+                          <i class="fa fa-print"></i> Todas
+                        </button>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let sincobro of _sincobro | filter:filtrar; let i = index"
+                      [class.table-warning]="sincobro.estado == 3">
+                      <td class="text-center serial-number small">{{ i+1 }}</td>
+                      <td class="text-center account-number">
+                        <span [ngClass]="{'text-muted': sincobro.idabonado == 0}" class="badge badge-light badge-sm">
+                          {{ sincobro.idAbonado }}
+                        </span>
+                      </td>
+                      <td class="responsible-name small">
+                        <strong>{{ sincobro.responsablePago }}</strong>
+                      </td>
+                      <td class="text-center invoice-number">
+                        <span class="badge badge-primary badge-sm">{{ sincobro.idfactura }}</span>
+                      </td>
+                      <td class="address-cell small">
+                        {{ sincobro.direccion }}
+                      </td>
+                      <td class="text-center date-cell small">
+                        {{ sincobro.fechaemision | date:"dd/MM/yyyy" }}
+                      </td>
+                      <td class="module-name small">
+                        {{ sincobro.modulo }}
+                      </td>
+                      <td class="text-right amount-cell">
+                        <span class="amount-value small">
+                          ${{
+                          (
+                          sincobro.total +
+                          sincobro.interes +
+                          sincobro.iva
+                          ).toFixed(2)
+                          }}
+                        </span>
+                      </td>
+                      <td class="text-center">
+                        <div class="custom-control custom-checkbox custom-control-sm">
+                          <input type="checkbox" class="custom-control-input" [id]="'check_' + i"
+                            [(ngModel)]="sincobro.pagado" (change)="marcarAnteriores($event, i, sincobro.idAbonado)"
+                            [disabled]="valCheckBox(sincobro.idAbonado, swcobrado)">
+                          <label class="custom-control-label" [for]="'check_' + i"></label>
+                        </div>
+                      </td>
+                      <td class="text-center">
+                        <div class="btn-group btn-group-sm" role="group">
+                          <button *ngIf="!swcobrado" class="btn btn-info btn-xs btn-icon" data-toggle="modal"
+                            data-target="#DetallePlanillaModal"
+                            (click)="getRubroxfac(sincobro.idfactura, sincobro.idmodulo, sincobro)"
+                            title="Ver detalles">
+                            <i class="fa fa-eye"></i>
+                          </button>
+                          <button *ngIf="swcobrado" class="btn btn-xs btn-icon" (click)="impComprobante(sincobro)"
+                            [disabled]="!sincobro.pagado" [ngClass]="{
+                                    'btn-danger': sincobro.procesando,
+                                    'btn-success': !sincobro.procesando && sincobro.pagado
+                                  }" title="Imprimir">
+                            <i class="fa fa-print"></i>
+                            <i *ngIf="sincobro.procesando" class="fa fa-spinner fa-spin ml-1"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                  <tfoot class="table-footer bg-light">
+                    <tr>
+                      <td colspan="7" class="text-right total-label small">
+                        <strong>TOTAL A COBRAR</strong>
+                      </td>
+                      <td class="text-right total-amount">
+                        <strong class="small">${{ acobrar | number: '1.2-2' }}</strong>
+                      </td>
+                      <td colspan="2"></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
             </div>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </div>
-<!-- MODAL Imprimir-->
+
+<!-- Notificación Flotante de Factura -->
+<div *ngIf="_nroFactura != ''" class="floating-notification">
+  <div class="notification-card">
+    <div class="notification-content">
+      <div class="notification-icon">
+        <i class="bi bi-receipt"></i>
+      </div>
+      <div class="notification-text">
+        <div class="notification-title">Factura Actual</div>
+        <div class="notification-value">{{_nroFactura}}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODALES Bootstrap 4 -->
+<!-- Modal Buscar Clientes -->
+<div class="modal fade" id="clientesModal" tabindex="-1" role="dialog" aria-labelledby="clientesModalLabel"
+  aria-hidden="true" data-backdrop="static">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white py-2">
+        <h5 class="modal-title" id="clientesModalLabel">Buscar Clientes</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-9">
+            <form [formGroup]="formBusClientes">
+              <div class="input-group input-group-sm">
+                <input type="text" placeholder="Nombre ó identificación (Mínimo 5 caracteres)"
+                  class="form-control form-control-sm" autofocus id="nombre_identifica"
+                  formControlName="nombre_identifica" required minlength="5" />
+                <div class="input-group-append">
+                  <button class="btn btn-primary btn-sm" type="button" (click)="buscarClientes()"
+                    [disabled]="formBusClientes.invalid">
+                    <i class="fa fa-search" aria-hidden="true"></i> Buscar
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="col-md-3">
+            <input type="text" class="form-control form-control-sm" placeholder="Filtrar..." [(ngModel)]="filtro" />
+          </div>
+        </div>
+
+        <div class="row mt-3" *ngIf="!formBusClientes.invalid">
+          <div class="col-12">
+            <div class="table-responsive">
+              <table class="table table-hover table-bordered table-sm">
+                <thead class="thead-dark">
+                  <tr>
+                    <th width="50">#</th>
+                    <th>Nombre</th>
+                    <th>Identificación</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let cliente of _clientes | filter:filtro; let i= index" (click)="selecCliente(cliente)"
+                    style="cursor: pointer;">
+                    <td class="text-center small">{{i+1}}</td>
+                    <td class="small">{{cliente.nombre}}</td>
+                    <td class="small">{{cliente.cedula}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer py-2">
+        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">
+          <i class="bi bi-x-circle"></i> Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Cobrar -->
+<div class="modal fade" id="modalCobrar" tabindex="-1" role="dialog" aria-labelledby="modalCobrarLabel"
+  data-backdrop="static" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white py-2">
+        <h5 class="modal-title" id="modalCobrarLabel">Proceso de Cobro</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body py-2">
+        <form [formGroup]="formCobrar">
+          <div class="form-group mb-2">
+            <label class="font-weight-bold small">Forma de cobro</label>
+            <select class="custom-select form-control-sm" formControlName="idformacobro" (change)="changeFormacobro()">
+              <option *ngFor="let formacobro of _formascobro" [ngValue]="formacobro">
+                {{ formacobro.descripcion }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group mb-2">
+            <label class="font-weight-bold small">A Cobrar</label>
+            <div class="input-group input-group-sm">
+              <input type="text" class="form-control text-right" formControlName="acobrar" readonly />
+              <div class="input-group-append">
+                <span class="input-group-text">{{ acobrardec }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="formacobroNC || f['ncvalor'].value > 0" class="form-group mb-2">
+            <label class="font-weight-bold small">Saldo NC</label>
+            <input type="text" class="form-control form-control-sm text-center" formControlName="saldo" readonly
+              [ngClass]="{
+                     'is-invalid': f['saldo'].invalid && f['saldo'].touched,
+                     'is-valid': f['saldo'].valid && f['saldo'].touched
+                   }" />
+          </div>
+
+          <div *ngIf="formacobroNC || f['ncvalor'].value > 0" class="form-group mb-2">
+            <label class="font-weight-bold small">Valor NC</label>
+            <input type="text" class="form-control form-control-sm text-center" formControlName="ncvalor" [ngClass]="{
+                     'is-invalid': f['ncvalor'].invalid && f['ncvalor'].touched,
+                     'is-valid': f['ncvalor'].valid,
+                     '': f['ncvalor'].untouched
+                   }" (change)="changeNCvalor($event)" />
+          </div>
+
+          <div *ngIf="!formacobroNC" class="form-group mb-2">
+            <label class="font-weight-bold small">Dinero Recibido</label>
+            <div class="input-group input-group-sm">
+              <input type="text" class="form-control text-center" formControlName="dinero" [ngClass]="{
+                       'is-invalid': f['dinero'].invalid && f['dinero'].touched,
+                       'is-valid': f['dinero'].valid,
+                       '': f['dinero'].untouched
+                     }" (change)="changeDinero()" />
+              <div class="input-group-append">
+                <button type="button" class="btn btn-outline-success btn-xm" (click)="valorDinero()">
+                  <i class="bi bi-chevron-double-down"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group mb-2">
+            <label class="font-weight-bold small">Vuelto</label>
+            <div class="input-group input-group-sm">
+              <input type="text" class="form-control text-center" formControlName="vuelto" readonly />
+              <div class="input-group-append">
+                <span *ngIf="disabledcobro" class="input-group-text bg-danger text-white">
+                  <i class="bi bi-x-circle"></i>
+                </span>
+                <span *ngIf="!disabledcobro" class="input-group-text bg-success text-white">
+                  <i class="fa fa-check-circle"></i>
+                </span>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer py-2">
+        <button type="button" class="btn btn-success btn-sm" [disabled]="disabledcobro" (click)="cobrar()"
+          data-dismiss="modal">
+          <i class="fa fa-check-circle"></i> Confirmar Cobro
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">
+          <i class="bi bi-x-circle"></i> Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detalle Planilla -->
+<div class="modal fade" id="DetallePlanillaModal" tabindex="-1" role="dialog"
+  aria-labelledby="DetallePlanillaModalLabel">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-white py-2">
+        <h5 class="modal-title" id="DetallePlanillaModalLabel">
+          Detalle Planilla: {{idfactura}}
+        </h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body py-2">
+        <div class="text-center mb-2" *ngIf="consumo">
+          <h6 class="text-muted">
+            <strong>Consumo:</strong> {{ consumo }} m<sup>3</sup>
+          </h6>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered">
+            <thead class="thead-light">
+              <tr>
+                <th class="small">#</th>
+                <th class="small">Rubro</th>
+                <th class="text-right small">Valor</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let rubroxfac of _rubrosxfac; let i=index">
+                <td class="text-center small">{{i+1}}</td>
+                <td class="small">{{ rubroxfac.idrubro_rubros.descripcion}}</td>
+                <td class="text-right small">{{ rubroxfac.valorunitario | number:'1.2-2'}}</td>
+              </tr>
+              <tr *ngIf="valoriva > 0">
+                <td></td>
+                <td>IVA</td>
+                <td class="text-right small">{{ valoriva | number:'1.2-2'}}</td>
+              </tr>
+              <tr *ngIf="totInteres > 0">
+                <td></td>
+                <td>Interés</td>
+                <td class="text-right small">{{ totInteres | number:'1.2-2'}}</td>
+              </tr>
+              <tr class="table-active">
+                <td colspan="2" class="font-weight-bold small">TOTAL</td>
+                <td class="font-weight-bold text-right small">{{ totfac | number:'1.2-2'}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer py-2">
+        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">
+          <i class="fa fa-times"></i> Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Abrir Caja -->
+<div class="modal fade" id="abrirCaja" tabindex="-1" role="dialog" aria-labelledby="abrirCajaLabel"
+  data-backdrop="static" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-dark py-2">
+        <h5 class="modal-title" id="abrirCajaLabel">Abrir Caja</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body py-2">
+        <div class="form-group mb-2">
+          <label class="small font-weight-bold">Usuario</label>
+          <input type="text" class="form-control form-control-sm" value="{{ _usuario.alias }}" readonly />
+        </div>
+        <div class="form-group mb-2">
+          <label class="small font-weight-bold">Establecimiento</label>
+          <select class="custom-select form-control-sm" (change)="changeEstablecimiento($event)"
+            [(ngModel)]="_establecimiento">
+            <option *ngFor="let ptoemision of _ptoemision" [ngValue]="ptoemision">
+              {{ ptoemision.establecimiento }}
+            </option>
+          </select>
+          <small class="form-text text-muted">
+            {{ _establecimiento.direccion }}
+          </small>
+        </div>
+        <div class="form-group mb-2">
+          <label class="small font-weight-bold">Nro. Factura Inicial</label>
+          <input type="text" class="form-control form-control-sm" value="{{ _nroFactura }}" readonly />
+        </div>
+
+        <div class="alert alert-warning text-center mt-2 py-2" *ngIf="cajaActiva">
+          <i class="fa fa-exclamation-triangle"></i>
+          <strong class="small">Esta caja ya está iniciada en otro computador</strong>
+        </div>
+      </div>
+      <div class="modal-footer py-2">
+        <button type="button" class="btn btn-warning btn-sm" [disabled]="cajaActiva" data-dismiss="modal"
+          (click)="validarCaja()">
+          <i class="fa fa-check-circle"></i> Iniciar Caja
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">
+          <i class="bi bi-x-circle"></i> Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Cerrar Caja -->
+<div class="modal fade" id="cerrarCaja" tabindex="-1" role="dialog" aria-labelledby="cerrarCajaLabel"
+  data-backdrop="static" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white py-2">
+        <h5 class="modal-title" id="cerrarCajaLabel">Cerrar Caja</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body py-2">
+        <div class="alert alert-warning text-center py-2">
+          <i class="fa fa-exclamation-triangle mb-1"></i>
+          <h6 class="small font-weight-bold">¿Está seguro de cerrar la caja?</h6>
+          <p class="mb-0 small">Se registrará el total recaudado hasta el momento.</p>
+        </div>
+      </div>
+      <div class="modal-footer py-2">
+        <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal" (click)="cerrarCaja()">
+          <i class="fa fa-check-circle"></i> Sí, Cerrar Caja
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">
+          <i class="bi bi-x-circle"></i> Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Imprimir -->
 <div class="modal fade" id="imprimir" tabindex="-1" aria-labelledby="imprimirLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content border">
-            <div class="modal-header py-2 justify-content-center cabecera">
-                <h5 class="modal-title font-weight-bold" id="ModalLabel">Imprimir</h5>
-            </div>
-            <div class="modal-body cuerpo">
-                <div class="input-group mb-3 input-group-sm">
-                    <div class="input-group-prepend">
-                        <label class="input-group-text" for="inputGroupSelect01">Opciones</label>
-                    </div>
-                    <select class="custom-select" id="inputGroupSelect01">
-                        <option selected>Reimprimir planilla</option>
-                    </select>
-                </div>
-                <div class="input-group input-group-sm mb-2">
-                    <div class="input-group-prepend">
-                        <small class="input-group-text">N° planilla</small>
-                        <div class="input-group-text">
-                            <input type="text" class="form-control form-control-sm" [(ngModel)]="cuenta" />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="input-group input-group-sm mb-0" [hidden]="true">
-                    <div class="input-group-prepend">
-                        <small class="input-group-text">Abrir en otra página</small>
-                        <div class="input-group-text">
-                            <input type="checkbox" [(ngModel)]="otraPagina" />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row justify-content-center mt-3">
-                    <button type="button" class="btn btn-success btn-sm mx-1" data-dismiss="modal"
-                        (click)="reImpComprobante({ idfactura: cuenta })"
-                        [attr.data-target]="otraPagina ? null : '#pdf'" data-toggle="modal">
-                        <i class="fa fa-check-circle"></i>&nbsp; Aceptar
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-success btn-sm mx-1" data-dismiss="modal">
-                        <i class="bi bi-x-circle"></i> Cancelar
-                    </button>
-                </div>
-            </div>
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content border">
+      <div class="modal-header bg-primary text-white py-2">
+        <h5 class="modal-title font-weight-bold" id="ModalLabel">Imprimir</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group mb-2">
+          <label class="small font-weight-bold">Opciones</label>
+          <select class="custom-select form-control-sm">
+            <option selected>Reimprimir planilla</option>
+          </select>
         </div>
+        <div class="form-group mb-2">
+          <label class="small font-weight-bold">N° planilla</label>
+          <input type="text" class="form-control form-control-sm" [(ngModel)]="cuenta" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal"
+          (click)="reImpComprobante({ idfactura: cuenta })">
+          <i class="fa fa-check-circle"></i>&nbsp; Aceptar
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">
+          <i class="bi bi-x-circle"></i> Cancelar
+        </button>
+      </div>
     </div>
-</div>
-<!-- MODAL PDF (En la misma página)-->
-<div class="modal fade" id="pdf" tabindex="-1" aria-labelledby="pdf" aria-hidden="true">
-    <div class="modal-dialog modal-sm"></div>
+  </div>
 </div>

@@ -12,6 +12,7 @@ import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { CajaService } from 'src/app/servicios/caja.service';
 import { ClientesService } from 'src/app/servicios/clientes.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
+import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
 import { RecaudaxcajaService } from 'src/app/servicios/recaudaxcaja.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
@@ -61,8 +62,10 @@ export class TransferenciasComponent implements OnInit {
     private clieService: ClientesService,
     private facService: FacturaService,
     private s_cajas: CajaService,
-    private s_recaudaxcaja: RecaudaxcajaService
-  ) {}
+    private s_recaudaxcaja: RecaudaxcajaService,
+    private authSvc: AutorizaService,
+    private fecFacturaS: FecfacturaService
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/transferencias');
@@ -179,11 +182,9 @@ export class TransferenciasComponent implements OnInit {
     this.cliente.porcdiscapacidad = null;
   }
 
-  clientesModal() {}
+  clientesModal() { }
 
   valorAtransferir(atransferir: number) {
-
-
     this.formTransferir.patchValue({ atransferir: atransferir.toFixed(2) });
   }
 
@@ -455,7 +456,8 @@ export class TransferenciasComponent implements OnInit {
             this._nroFactura = fac.nrofactura;
           }
           this.facService.updateFacturas(fac).subscribe({
-            next: (nex) => {
+            next: async (nex) => {
+              await this.fecFacturaS.generateXmlOfPago(fac.idfactura)
               this.swtransferido = true;
               /* =============== */
               let nrofac = this._nroFactura.split('-', 3);
@@ -470,7 +472,7 @@ export class TransferenciasComponent implements OnInit {
                   this.s_recaudaxcaja
                     .updateRecaudaxcaja(this.recxcaja)
                     .subscribe({
-                      next: (datos) => {},
+                      next: (datos) => { },
                       error: (e) => console.error(e),
                     });
                 },
@@ -590,7 +592,7 @@ export class TransferenciasComponent implements OnInit {
         this.estadoCajaT = true;
         this.recxcaja.facfin = +nrofac[2]!;
         this.s_recaudaxcaja.updateRecaudaxcaja(this.recxcaja).subscribe({
-          next: (datos) => {},
+          next: (datos) => { },
           error: (e) => console.error(e),
         });
       },
