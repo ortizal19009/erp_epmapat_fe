@@ -4,11 +4,11 @@
     <div class="card shadow-sm border-0 mb-4">
       <div class="card-header bg-gradient-primary text-white py-3">
         <div class="row align-items-center">
-          <div class="col-md-8">
+          <div class="col-md-9">
             <div class="d-flex align-items-center">
-              <i class="bi bi-cash-coin fa-2x mr-3"></i>
+              <i class="bi bi-cash-coin fa-2x mr-1"></i>
               <div>
-                <h4 class="mb-0 font-weight-bold">Sistema de Recaudación v2.0</h4>
+                <h5 class="mb-0 font-weight-bold">Sistema de Recaudación</h5>
                 <small class="opacity-8">
                   <span class="badge" [ngClass]="estadoCajaT ? 'badge-danger' : 'badge-success'">
                     <i class="fa" [ngClass]="estadoCajaT ? 'fa-lock' : 'fa-unlock'" aria-hidden="true"></i>
@@ -16,17 +16,56 @@
                   </span>
                 </small>
               </div>
+              <!-- Formulario de Búsqueda -->
+              <div class="card-body bg-light py-3">
+                <form [formGroup]="formBuscar" (ngSubmit)="onSubmit()">
+                  <div class="row align-items-end">
+                    <div class="col-md-3">
+                      <input class="form-control form-control-sm" type="text" formControlName="cuenta"
+                        placeholder="Número de cuenta" (focus)="formBuscar.get('identificacion')?.setValue('')" />
+                    </div>
+                    <div class="col-md-3">
+                      <input class="form-control form-control-sm" type="text" formControlName="identificacion"
+                        placeholder="Identificación" (focus)="formBuscar.get('cuenta')?.setValue('')" />
+                    </div>
+                    <div class="col-md">
+                      <div class="d-flex align-items-end h-100">
+                        <div class="d-flex gap-2 align-items-center">
+                          <button class="btn btn-primary btn-xs px-3 mr-2" type="submit">
+                            <i class="fa fa-search mr-1"></i>
+                          </button>
+                          <button type="button" class="btn btn-outline-primary btn-xs" data-toggle="modal"
+                            data-target="#clientesModal" (click)="clientesModal()">
+                            <i class="bi bi-people mr-1"></i>Clientes
+                          </button>
+                          <div *ngIf="swvalido == 0" class="alert alert-warning py-1 px-2 mb-0 small">
+                            <i class="fa fa-exclamation-triangle mr-1"></i>Datos inválidos
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md" *ngIf="acobrar > 0 && !swcobrado && !estadoCajaT">
+                      <button type="button" class="btn btn-success btn-xs w-100" data-toggle="modal"
+                        data-target="#modalCobrar" (click)="valorAcobrar(acobrar)">
+
+                        <span class="d-block small"><i class="bi bi-check-lg mr-1"></i> Cobrar</span>
+                        <strong class="small">{{acobrar | number: '1.2-2'}}</strong>
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
-          <div class="col-md-4 text-right">
+          <div class="col-md text-right">
             <div class="btn-group">
               <button type="button" class="btn btn-light btn-sm dropdown-toggle" data-toggle="dropdown"
                 aria-haspopup="true" aria-expanded="false">
-                <i class="bi bi-menu-button-wide"></i> Opciones
+                <i class="bi bi-menu-button-wide"></i>
               </button>
               <div class="dropdown-menu dropdown-menu-right shadow">
-                <button class="dropdown-item" type="button" data-toggle="modal" (click)="abrirCaja()" data-target="#abrirCaja"
-                  [disabled]="!estadoCajaT">
+                <button class="dropdown-item" type="button" data-toggle="modal" (click)="abrirCaja()"
+                  data-target="#abrirCaja" [disabled]="!estadoCajaT">
                   <i class="bi bi-door-open mr-2"></i>Abrir caja
                 </button>
                 <button class="dropdown-item" type="button" data-toggle="modal" data-target="#cerrarCaja"
@@ -40,54 +79,13 @@
               </div>
             </div>
 
-            <button *ngIf="swbusca != 0" class="btn btn-outline-light btn-sm ml-2" (click)="reiniciar()">
+            <button *ngIf="swbusca != 0" class="badge badge-warning ml-1" (click)="reiniciar()">
               <i class="bi bi-arrow-left-circle"></i> Volver
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Formulario de Búsqueda -->
-      <div class="card-body bg-light py-3">
-        <form [formGroup]="formBuscar" (ngSubmit)="onSubmit()">
-          <div class="row align-items-end">
-            <div class="col-md-3">
-              <label class="form-label small text-muted mb-1">Número de Cuenta</label>
-              <input class="form-control form-control-sm" type="text" formControlName="cuenta" placeholder="Ej: 123456"
-                (focus)="formBuscar.get('identificacion')?.setValue('')" />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label small text-muted mb-1">Identificación</label>
-              <input class="form-control form-control-sm" type="text" formControlName="identificacion"
-                placeholder="Ej: 1723456789" (focus)="formBuscar.get('cuenta')?.setValue('')" />
-            </div>
-            <div class="col-md-4">
-              <div class="d-flex align-items-end h-100">
-                <div class="d-flex gap-2 align-items-center">
-                  <button class="btn btn-primary btn-sm px-3" type="submit">
-                    <i class="fa fa-search mr-1"></i>Buscar
-                  </button>
-                  <button type="button" class="btn btn-outline-primary btn-sm" data-toggle="modal"
-                    data-target="#clientesModal" (click)="clientesModal()">
-                    <i class="bi bi-people mr-1"></i>Clientes
-                  </button>
-                  <div *ngIf="swvalido == 0" class="alert alert-warning py-1 px-2 mb-0 small">
-                    <i class="fa fa-exclamation-triangle mr-1"></i>Datos inválidos
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-2" *ngIf="acobrar > 0 && !swcobrado && !estadoCajaT">
-              <button type="button" class="btn btn-success btn-sm w-100" data-toggle="modal" data-target="#modalCobrar"
-                (click)="valorAcobrar(acobrar)">
-                <i class="bi bi-check-lg mr-1"></i>
-                <span class="d-block small">Cobrar</span>
-                <strong class="small">{{acobrar | number: '1.2-2'}}</strong>
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
     </div>
 
     <!-- Información del Cliente Compacta -->
@@ -212,13 +210,13 @@
                           {{ sincobro.idAbonado }}
                         </span>
                       </td>
-                      <td class="responsible-name small">
+                      <td class="responsible-name small truncate-text" [attr.title]="sincobro.responsablePago">
                         <strong>{{ sincobro.responsablePago }}</strong>
                       </td>
                       <td class="text-center invoice-number">
                         <span class="badge badge-primary badge-sm">{{ sincobro.idfactura }}</span>
                       </td>
-                      <td class="address-cell small">
+                      <td class="address-cell small truncate-text" [attr.title]="sincobro.direccion">
                         {{ sincobro.direccion }}
                       </td>
                       <td class="text-center date-cell small">

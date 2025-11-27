@@ -227,7 +227,6 @@ export class RecaudacionComponent implements OnInit {
       .getByIdUsuario(this.authService.idusuario)
       .pipe(
         tap((dcaja: any) => {
-          console.log('Datos de caja obtenidos:', dcaja);
           if (!dcaja) {
             // Lanzamos para que lo capture catchError
             throw new Error('NO_CAJA');
