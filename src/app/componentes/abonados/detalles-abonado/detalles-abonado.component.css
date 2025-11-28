@@ -6,10 +6,13 @@
   --bgHisconsumo1: #635d19;
   --bgHisconsumo2: rgb(250, 236, 188);
 }
+
 #map {
-  height: 500px; /* o 500px, según tu diseño */
+  height: 500px;
+  /* o 500px, según tu diseño */
   width: 100%;
 }
+
 .abonado {
   background-color: var(--bgcolor1);
   border: 1em;
@@ -21,6 +24,7 @@
   background-color: var(--bgcolor2);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
 }
+
 .cardAbonado li {
   background-color: var(--bgcolor2);
 }
@@ -30,11 +34,7 @@
   color: white;
 }
 
-.fila:hover {
-  background-color: #117a8b;
-  color: white;
-  cursor: pointer;
-}
+
 
 .sombra,
 table {
@@ -56,15 +56,19 @@ table {
   background-color: var(--bgHisconsumo1);
   color: white;
 }
+
 .bodyHisconsumo {
   background-color: var(--bgHisconsumo2);
 }
+
 .bi-cash-coin {
   color: rgb(255, 94, 0);
 }
-textarea{
+
+textarea {
   width: 100%;
 }
+
 /* ======================================= */
 /* Estilos específicos para el componente Abonado */
 .avatar-circle-lg {
@@ -187,6 +191,7 @@ textarea{
 .empty-state i {
   opacity: 0.5;
 }
+
 /* Estilos específicos para modales mejorados */
 .modal-content {
   border: none;
@@ -276,7 +281,7 @@ textarea{
 }
 
 /* Custom file input mejorado */
-.custom-file-input:focus ~ .custom-file-label {
+.custom-file-input:focus~.custom-file-label {
   border-color: #3498db;
   box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
 }
