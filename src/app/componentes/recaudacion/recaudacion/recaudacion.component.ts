@@ -572,25 +572,6 @@ export class RecaudacionComponent implements OnInit {
               item.iva = 0;
             }
           }
-
-          /*        let iva: any = await this.calIva(item.idfactura);
-                             if (iva.length != 0) {
-                               item.iva = iva[0][1];
-                             } else {
-                               item.iva = 0;
-                             } */
-          //const modulo: Modulos = await this.getModulo(item.idmodulo);
-          //item.modulo = modulo.descripcion;
-          // let interes: any = 0;
-          /*          if (
-                     (item.formapago != 4 || item.idmodulo != 27) &&
-                     (item.swcondonar === false || item.swcondonar === null)
-                   ) {
-                     interes = await this.cInteres(item);
-                     item.interes = +interes!;
-                   } else {
-                     item.interes = +interes!;
-                   } */
           i++;
           if (i === sincobrar.length) {
             this.loadingService.hideLoading();
@@ -598,6 +579,7 @@ export class RecaudacionComponent implements OnInit {
           }
           //item.total += interes;
         });
+        console.log(sincobrar);
         this._sincobro = sincobrar;
 
       },
