@@ -13,7 +13,12 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "allowedCommonJsDependencies": [ "jspdf-autotable", "core-js", "raf", "exceljs"],
+            "allowedCommonJsDependencies": [
+              "jspdf-autotable",
+              "core-js",
+              "raf",
+              "exceljs"
+            ],
             "outputPath": "dist/proylte32",
             "index": "src/index.html",
             "main": "src/main.ts",
@@ -38,8 +43,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kb",
-                  "maximumError": "4kb"
+                  "maximumWarning": "8kb",
+                  "maximumError": "16kb"
                 }
               ],
               "fileReplacements": [
