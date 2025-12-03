@@ -5,11 +5,9 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as ExcelJS from 'exceljs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
-import { CajaService } from 'src/app/servicios/caja.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { PdfService } from 'src/app/servicios/pdf.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
-import { saveAs } from 'file-saver';
 import { UsuarioService } from 'src/app/servicios/administracion/usuario.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { JasperReportService } from 'src/app/servicios/jasper-report.service';
@@ -232,14 +230,17 @@ export class ImpInfoCajasComponent implements OnInit {
         if (elementoExistente) {
           elementoExistente.remove();
         }
+        console.log('d_fecha', d_fecha);
+          console.log('h_fecha', h_fecha);
         let body: any = {
-          reportName: 'FacturasCobradasRec',
+          reportName: 'FacturasCobradasFacilitoHoras',
           parameters: {
             desde: d_fecha,
             hasta: h_fecha,
             idusuario: this.authService.idusuario,
             usuariocobro: recaudador,
           },
+
           extencion: '.pdf',
         };
         let _reporte = await this.s_jasperreport.getReporte(body);
@@ -300,7 +301,6 @@ export class ImpInfoCajasComponent implements OnInit {
         break;
 
       case 5:
-console.log("Generando reporte Facilito...");
         this.s_loading.showLoading();
         if (elementoExistente) {
           elementoExistente.remove();
