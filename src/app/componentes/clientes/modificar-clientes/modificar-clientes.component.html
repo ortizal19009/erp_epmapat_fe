@@ -1,191 +1,330 @@
 <div class="content-header">
-   <div class="container-fluid">
-      <div class="row mt-4 justify-content-center text-center">
-         <div class="col-sm-10 cabecera sombra border">
-            <h5 class="mt-2 font-weight-bold">Modificar Cliente</h5>
-         </div>
+  <div class="container-fluid">
+    <div class="row mt-4 justify-content-center text-center">
+      <div class="col-sm-10 cabecera sombra border">
+        <h5 class="mt-2 font-weight-bold">Modificar Cliente</h5>
       </div>
-   </div>
+    </div>
+  </div>
 </div>
 
 <div class="content">
-   <div class="container-fluid">
-      <div class="row justify-content-center">
-         <div class="card card-body col-sm-10 detalle sombra">
-            <form [formGroup]="formCliente">
-               <div class="row">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="card card-body col-sm-10 detalle sombra">
+        <form [formGroup]="formCliente">
+          <div class="row">
 
-                  <div class="form-group col-md-4 my-0 py-0">
-                     <div class="input-group input-group-sm mb-3">
-                        <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Nacionalidad</span>
-                        </div>
-                        <select type="text" class="form-control form-control-sm" id="nacionalidad"
-                           formControlName="idnacionalidad_nacionalidad" [compareWith]="compararNacionalidad"
-                           (change)="changeNacion()">
-                           <option [ngValue]="nac" *ngFor="let nac of nacionalidad">
-                              {{ nac.descripcion }}
-                           </option>
-                        </select>
-                        <div class="input-group-append">
-                           <button type="button" class="btn btn-outline-success btn-xm" (click)="add_nacionalidad()">
-                              <i class="bi-plus-lg"></i>
-                           </button>
-                        </div>
-                     </div>
-                  </div>
+            <div class="form-group col-md-4 my-0 py-0">
+              <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Nacionalidad</span>
+                </div>
+                <select type="text" class="form-control form-control-sm" id="nacionalidad"
+                  formControlName="idnacionalidad_nacionalidad" [compareWith]="compararNacionalidad"
+                  (change)="changeNacion()">
+                  <option [ngValue]="nac" *ngFor="let nac of nacionalidad">
+                    {{ nac.descripcion }}
+                  </option>
+                </select>
+                <div class="input-group-append">
+                  <button type="button" class="btn btn-outline-success btn-xm" (click)="add_nacionalidad()">
+                    <i class="bi-plus-lg"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
 
-                  <div class="form-group col-md-4 my-0 py-0">
-                     <div class="input-group input-group-sm mb-3">
-                        <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Tipo
-                              identificación</span>
-                        </div>
-                        <select type="number" class="form-control form-control-sm" id="idtpidentifica_tpidentifica"
-                           formControlName="idtpidentifica_tpidentifica" [compareWith]="compararTpIdentifica"
-                           (change)="changeTpidentifica()">
-                           <option [ngValue]="tp" *ngFor="let tp of _tpidentifica">
-                              {{ tp.codigo + ' ' +tp.nombre }}
-                           </option>
-                        </select>
-                     </div>
-                  </div>
+            <div class="form-group col-md-4 my-0 py-0">
+              <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Tipo
+                    identificación</span>
+                </div>
+                <select type="number" class="form-control form-control-sm" id="idtpidentifica_tpidentifica"
+                  formControlName="idtpidentifica_tpidentifica" [compareWith]="compararTpIdentifica"
+                  (change)="changeTpidentifica()">
+                  <option [ngValue]="tp" *ngFor="let tp of _tpidentifica">
+                    {{ tp.codigo + ' ' +tp.nombre }}
+                  </option>
+                </select>
+              </div>
+            </div>
 
-                  <div class="form-group col-md-4 my-0 py-0">
-                     <div class="input-group input-group-sm mb-3">
-                        <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold"
-                              id="inputGroup-sizing-sm">Identificación</span>
-                        </div>
-                        <input type="text" class="form-control text-center" formControlName="cedula" aria-label="Small"
-                           aria-describedby="inputGroup-sizing-sm" maxlength="13" [ngClass]="{'is-invalid': f['cedula'].invalid && f['cedula'].touched,
+            <div class="form-group col-md-4 my-0 py-0">
+              <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Identificación</span>
+                </div>
+                <input type="text" class="form-control text-center" formControlName="cedula" aria-label="Small"
+                  aria-describedby="inputGroup-sizing-sm" maxlength="13" [ngClass]="{'is-invalid': f['cedula'].invalid && f['cedula'].touched,
                            'is-valid': f['cedula'].valid, '': f['cedula'].untouched}">
-                     </div>
-                  </div>
+              </div>
+            </div>
 
-                  <div class="form-group col-md-6 my-0 py-0">
-                     <div class="input-group input-group-sm mb-3">
-                        <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Nombre</span>
-                        </div>
-                        <input type="text" class="form-control" formControlName="nombre" aria-label="Small"
-                           aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['nombre'].invalid && f['nombre'].touched,
+            <div class="form-group col-md-6 my-0 py-0">
+              <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Nombre</span>
+                </div>
+                <input type="text" class="form-control" formControlName="nombre" aria-label="Small"
+                  aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['nombre'].invalid && f['nombre'].touched,
                            'is-valid': f['nombre'].valid, '': f['nombre'].untouched}">
-                     </div>
-                  </div>
+              </div>
+            </div>
 
-                  <div class="form-group col-md-6 my-0 py-0">
-                     <div class="input-group input-group-sm mb-3">
-                        <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Dirección</span>
-                        </div>
-                        <input type="text" class="form-control" formControlName="direccion" aria-label="Small"
-                           aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['direccion'].invalid && f['direccion'].touched,
+            <div class="form-group col-md-6 my-0 py-0">
+              <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Dirección</span>
+                </div>
+                <input type="text" class="form-control" formControlName="direccion" aria-label="Small"
+                  aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['direccion'].invalid && f['direccion'].touched,
                            'is-valid': f['direccion'].valid, '': f['direccion'].untouched}">
-                     </div>
-                  </div>
+              </div>
+            </div>
 
-                  <div class="form-group col-md-3 my-0 py-0">
-                     <div class="input-group input-group-sm mb-3">
-                        <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Teléfono</span>
-                        </div>
-                        <input type="text" class="form-control text-center" formControlName="telefono"
-                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['telefono'].invalid && f['telefono'].touched,
+            <div class="form-group col-md-3 my-0 py-0">
+              <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Teléfono</span>
+                </div>
+                <input type="text" class="form-control text-center" formControlName="telefono" aria-label="Small"
+                  aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['telefono'].invalid && f['telefono'].touched,
                            'is-valid': f['telefono'].valid, '': f['telefono'].untouched}">
-                     </div>
-                  </div>
+              </div>
+            </div>
 
-                  <div class="form-group col-md-5 my-0 py-0">
-                     <div class="input-group input-group-sm mb-3">
-                        <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">e-mail</span>
-                        </div>
-                        <input type="email" class="form-control" formControlName="email" aria-label="Small"
-                           aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['email'].invalid && f['email'].touched,
+            <div class="form-group col-md-5 my-0 py-0">
+              <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">e-mail</span>
+                </div>
+                <input type="email" class="form-control" formControlName="email" aria-label="Small"
+                  aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['email'].invalid && f['email'].touched,
                            'is-valid': f['email'].valid, '': f['email'].untouched}">
-                     </div>
-                  </div>
+              </div>
+            </div>
 
-                  <div class="form-group col-md-4 my-0 py-0">
-                     <div class="input-group input-group-sm mb-3">
-                        <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Fecha
-                              nacimiento</span>
-                        </div>
-                        <input type="date" class="form-control text-center" formControlName="fechanacimiento"
-                           aria-label="Small" aria-describedby="inputGroup-sizing-sm">
-                     </div>
-                  </div>
+            <div class="form-group col-md-4 my-0 py-0">
+              <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Fecha
+                    nacimiento</span>
+                </div>
+                <input type="date" class="form-control text-center" formControlName="fechanacimiento" aria-label="Small"
+                  aria-describedby="inputGroup-sizing-sm">
+              </div>
+            </div>
 
-                  <div class="form-group col-md-3 my-0 py-0">
-                     <div class="input-group input-group-sm mb-3">
-                        <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Discapacidad</span>
-                        </div>
-                        <select class="form-control form-control-sm" id="discapacitado" formControlName="discapacitado">
-                           <option value=1>Si</option>
-                           <option value=0>No</option>
-                        </select>
-                     </div>
-                  </div>
+            <div class="form-group col-md-3 my-0 py-0">
+              <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Discapacidad</span>
+                </div>
+                <select class="form-control form-control-sm" id="discapacitado" formControlName="discapacitado">
+                  <option value=1>Si</option>
+                  <option value=0>No</option>
+                </select>
+              </div>
+            </div>
 
-                  <div class="form-group col-md-3 my-0 py-0">
-                     <div class="input-group input-group-sm mb-3">
-                        <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">%
-                              Discapacidad</span>
-                        </div>
-                        <input type="number" min="0" max="100" class="form-control form-control-sm text-center"
-                           id="porcdiscapacidad" placeholder="0%-100%" formControlName="porcdiscapacidad" />
-                     </div>
-                  </div>
+            <div class="form-group col-md-3 my-0 py-0">
+              <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">%
+                    Discapacidad</span>
+                </div>
+                <input type="number" min="0" max="100" class="form-control form-control-sm text-center"
+                  id="porcdiscapacidad" placeholder="0%-100%" formControlName="porcdiscapacidad" />
+              </div>
+            </div>
 
-                  <div class="form-group col-md-3 my-0 py-0">
-                     <div class="input-group input-group-sm mb-3">
-                        <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Exoneración</span>
-                        </div>
-                        <select type="number" class="form-control form-control-sm text-center" id="porcexonera"
-                           formControlName="porcexonera">
-                           <option value="0">0%</option>
-                           <option value="25">25%</option>
-                           <option value="50">50%</option>
-                           <option value="75">75%</option>
-                           <option value="100">100%</option>
-                        </select>
-                     </div>
-                  </div>
+            <div class="form-group col-md-3 my-0 py-0">
+              <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Exoneración</span>
+                </div>
+                <select type="number" class="form-control form-control-sm text-center" id="porcexonera"
+                  formControlName="porcexonera">
+                  <option value="0">0%</option>
+                  <option value="25">25%</option>
+                  <option value="50">50%</option>
+                  <option value="75">75%</option>
+                  <option value="100">100%</option>
+                </select>
+              </div>
+            </div>
 
-                  <div class="form-group col-md-4 my-0 py-0">
-                     <div class="input-group input-group-sm mb-3">
-                        <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Personeria
-                              Juridica</span>
-                        </div>
-                        <select type="text" class="form-control form-control-sm" id="personeriajuridica"
-                           formControlName="idpjuridica_personeriajuridica" [compareWith]="compararPersoneriaJuridica">
-                           <option [ngValue]="cliente" *ngFor="let cliente of personeriajuridica">
-                              {{ cliente.descripcion }}
-                           </option>
-                        </select>
-                     </div>
-                  </div>
+            <div class="form-group col-md-4 my-0 py-0">
+              <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Personeria
+                    Juridica</span>
+                </div>
+                <select type="text" class="form-control form-control-sm" id="personeriajuridica"
+                  formControlName="idpjuridica_personeriajuridica" [compareWith]="compararPersoneriaJuridica">
+                  <option [ngValue]="cliente" *ngFor="let cliente of personeriajuridica">
+                    {{ cliente.descripcion }}
+                  </option>
+                </select>
+              </div>
+            </div>
 
-               </div>
+          </div>
 
-               <div class="my-0 text-center">
-                  <button type="button" class="btn btn-success btn-sm mx-1"
-                     [disabled]="formCliente.pristine || !formCliente.valid" (click)="onSubmit()">
-                     <i class="fa fa-check-circle"></i> Aceptar
-                  </button>
-                  <button type="button" class="btn btn-outline-success btn-sm mx-1" (click)="retornar()">
-                     <i class="fa fa-times-circle"></i> Cancelar
-                  </button>
-               </div>
+          <div class="my-0 text-center">
+            <button type="button" class="btn btn-success btn-sm mx-1"
+              [disabled]="formCliente.pristine || !formCliente.valid" (click)="onSubmit()">
+              <i class="fa fa-check-circle"></i> Aceptar
+            </button>
+            <button type="button" class="btn btn-outline-success btn-sm mx-1" (click)="retornar()">
+              <i class="fa fa-times-circle"></i> Cancelar
+            </button>
+          </div>
 
-            </form>
-         </div>
+        </form>
       </div>
-   </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary" data-toggle="modal" (click)="onBuscarCliente()"
+  data-target="#exampleModalCenter">
+  Set User and password
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+  aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">Set user & password</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="container py-4">
+          <div class="row justify-content-center">
+            <div class="col-xl-8 col-lg-9">
+
+              <!-- Card principal -->
+              <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-gradient-primary text-white py-3">
+                  <h5 class="mb-0">
+                    <i class="bi bi-person-gear me-2"></i>
+                    Actualización de usuario y contraseña de cliente
+                  </h5>
+                </div>
+
+                <div class="card-body p-4">
+
+                  <!-- ========== DATOS DEL CLIENTE ========== -->
+                  <div *ngIf="clienteSeleccionado" class="border rounded-3 p-3 mb-4 bg-light">
+                    <h6 class="fw-bold mb-2">
+                      <i class="bi bi-person-lines-fill me-1"></i>
+                      Datos del cliente
+                    </h6>
+
+                    <div class="row small">
+                      <div class="col-md-6 mb-2">
+                        <strong>Nombre:</strong>
+                        <div>{{ clienteSeleccionado.nombre }}</div>
+                      </div>
+                      <div class="col-md-3 mb-2">
+                        <strong>Identificación:</strong>
+                        <div>{{ clienteSeleccionado.cedula }}</div>
+                      </div>
+
+                      <div class="col-12 mb-2">
+                        <strong>Dirección:</strong>
+                        <div>{{ clienteSeleccionado.direccion || 'No registrada' }}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- ========== FORMULARIO DE CREDENCIALES ========== -->
+                  <div *ngIf="clienteSeleccionado">
+                    <h6 class="fw-bold text-secondary mb-3">
+                      <i class="bi bi-key-fill me-1"></i>
+                      Actualizar usuario y contraseña
+                    </h6>
+
+                    <form [formGroup]="formCredenciales" (ngSubmit)="onActualizarCredenciales()">
+
+                      <div class="mb-3">
+                        <label class="form-label">Usuario de acceso</label>
+                        <div class="input-group">
+                          <span class="input-group-text">
+                            <i class="bi bi-person-circle"></i>
+                          </span>
+                          <input type="text" class="form-control" formControlName="username"
+                            placeholder="Nombre de usuario" />
+                        </div>
+                        <div class="form-text text-muted">
+                          Este será el usuario que el cliente usará para iniciar sesión.
+                        </div>
+                      </div>
+
+                      <div class="row g-3">
+                        <div class="col-md-6">
+                          <label class="form-label">Nueva contraseña</label>
+                          <div class="input-group">
+                            <span class="input-group-text">
+                              <i class="bi bi-lock-fill"></i>
+                            </span>
+                            <input type="password" class="form-control" formControlName="password"
+                              placeholder="********" />
+                          </div>
+                        </div>
+
+                        <div class="col-md-6">
+                          <label class="form-label">Confirmar contraseña</label>
+                          <div class="input-group">
+                            <span class="input-group-text">
+                              <i class="bi bi-lock"></i>
+                            </span>
+                            <input type="password" class="form-control" formControlName="confirmPassword"
+                              placeholder="********" />
+                          </div>
+                          <!--          <div *ngIf="formCredenciales.errors.passwordMismatch && formCredenciales.touched"
+                       class="text-danger small mt-1">
+                    Las contraseñas no coinciden.
+                  </div>-->
+                        </div>
+                      </div>
+
+                      <div class="d-flex justify-content-end mt-4">
+                        <button type="submit" class="btn btn-success"
+                          [disabled]="loadingGuardar || formCredenciales.invalid">
+                          <i class="bi bi-save me-1"></i>
+                          {{ loadingGuardar ? 'Guardando...' : 'Guardar cambios' }}
+                        </button>
+                      </div>
+
+                    </form>
+
+                    <div *ngIf="successMsg" class="alert alert-success mt-3 py-2">
+                      <i class="bi bi-check-circle-fill me-2"></i>{{ successMsg }}
+                    </div>
+                  </div>
+
+                  <!-- Si aún no se ha buscado nada -->
+                  <div *ngIf="!clienteSeleccionado && !loadingBuscar && !errorMsg" class="mt-3 text-muted small">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Busque un cliente para poder actualizar su usuario y contraseña.
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

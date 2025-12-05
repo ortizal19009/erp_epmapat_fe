@@ -3,6 +3,7 @@ import {
   AbstractControl,
   FormBuilder,
   FormGroup,
+  ValidationErrors,
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -36,6 +37,18 @@ export class ModificarClientesComponent implements OnInit {
   swModifi = false;
   date: Date = new Date();
 
+  /*====================================================== */
+  formBuscar: FormGroup;
+  formCredenciales: FormGroup;
+
+  loadingBuscar = false;
+  loadingGuardar = false;
+
+  clienteSeleccionado: any | null = null;
+
+  errorMsg = '';
+  successMsg = '';
+
   constructor(
     public fb: FormBuilder,
     private cliService: ClientesService,
@@ -44,7 +57,21 @@ export class ModificarClientesComponent implements OnInit {
     private router: Router,
     public personeriajuridicaS: PersoneriaJuridicaService,
     private authService: AutorizaService
-  ) {}
+  ) {
+    this.formBuscar = this.fb.group({
+      cuenta: [''],
+      identificacion: [''],
+    });
+
+    this.formCredenciales = this.fb.group(
+      {
+        username: ['', [Validators.required, Validators.minLength(4)]],
+        password: ['', [Validators.required, Validators.minLength(6)]],
+        confirmPassword: ['', [Validators.required]],
+      },
+      { validators: this.passwordsCoincidenValidator }
+    );
+  }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/clientes');
@@ -317,5 +344,89 @@ export class ModificarClientesComponent implements OnInit {
       if (digitoValidador === ultimoDigito) return true;
       else return false;
     } else return false;
+  }
+  /*====================================00 */
+  // Validador para que password y confirmPassword coincidan
+  passwordsCoincidenValidator(group: AbstractControl): ValidationErrors | null {
+    const pass = group.get('password')?.value;
+    const conf = group.get('confirmPassword')?.value;
+    if (!pass || !conf) return null;
+    return pass === conf ? null : { passwordMismatch: true };
+  }
+
+  onBuscarCliente(): void {
+    this.errorMsg = '';
+    this.successMsg = '';
+    this.clienteSeleccionado = null;
+
+    const cuenta = this.formBuscar.value.cuenta?.trim();
+    const identificacion = this.formBuscar.value.identificacion?.trim();
+
+/*     if (!cuenta && !identificacion) {
+      this.errorMsg = 'Ingrese número de cuenta o identificación para buscar.';
+      return;
+    }
+ */
+    this.loadingBuscar = true;
+    let cli: any = this.cliente;
+    this.loadingBuscar = false;
+
+    if (!cli) {
+      this.errorMsg =
+        'No se encontró ningún cliente con los datos proporcionados.';
+      return;
+    }
+
+    this.clienteSeleccionado = cli;
+
+    // Inicializar formulario de credenciales con el usuario actual, si existe
+    this.formCredenciales.patchValue({
+      username: cli.username || '',
+      password: '',
+      confirmPassword: '',
+    });
+  }
+
+  onActualizarCredenciales(): void {
+    if (!this.clienteSeleccionado) return;
+
+    this.errorMsg = '';
+    this.successMsg = '';
+
+    if (this.formCredenciales.invalid) {
+      this.formCredenciales.markAllAsTouched();
+      return;
+    }
+
+    const { username, password } = this.formCredenciales.value;
+
+    this.loadingGuardar = true;
+
+    this.cliService
+      .actualizarCredenciales(
+        this.clienteSeleccionado.idcliente,
+        username,
+        password
+      )
+      .subscribe({
+        next: () => {
+          this.loadingGuardar = false;
+          this.successMsg = 'Usuario y contraseña actualizados correctamente.';
+          this.retornar();
+        },
+        error: (err) => {
+          console.error(err);
+          this.loadingGuardar = false;
+          this.errorMsg = 'No se pudo actualizar las credenciales del cliente.';
+        },
+      });
+  }
+
+  limpiarTodo(): void {
+    this.formBuscar.reset();
+    this.formCredenciales.reset();
+    this.clienteSeleccionado = null;
+    this.errorMsg = '';
+    this.successMsg = '';
   }
 }

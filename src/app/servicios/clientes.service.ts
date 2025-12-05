@@ -11,7 +11,7 @@ const baseUrl = `${apiUrl}/clientes`;
   providedIn: 'root',
 })
 export class ClientesService {
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   //Busca Clientes por Nombre ó Identificación
   getByNombreIdentifi(nombreIdentifi: String) {
@@ -75,12 +75,23 @@ export class ClientesService {
     return this.http.get(`${baseUrl}/total`);
   }
   getCVOfClientes(fecha: any) {
-    return this.http.get(`${baseUrl}/reportes/carteravencida?fecha=${fecha}`)
+    return this.http.get(`${baseUrl}/reportes/carteravencida?fecha=${fecha}`);
   }
   async asynGetCVOfClientes(fecha: any) {
-    return await firstValueFrom(this.http.get(`${baseUrl}/reportes/carteravencida?fecha=${fecha}`))
+    return await firstValueFrom(
+      this.http.get(`${baseUrl}/reportes/carteravencida?fecha=${fecha}`)
+    );
   }
-  async CVOfClientes(fecha: any,name: string, page: number, size: number) {
-    return await firstValueFrom(this.http.get(`${baseUrl}/cartera/clientes?fecha=${fecha}&name=${name}&page=${page}&size=${size}`))
+  async CVOfClientes(fecha: any, name: string, page: number, size: number) {
+    return await firstValueFrom(
+      this.http.get(
+        `${baseUrl}/cartera/clientes?fecha=${fecha}&name=${name}&page=${page}&size=${size}`
+      )
+    );
+  }
+  // Actualizar SOLO usuario y contraseña
+  actualizarCredenciales(idcliente: number, username: string, password: string) {
+    const body = { username, password };
+    return this.http.put<void>(`${baseUrl}/${idcliente}/credenciales`, body);
   }
 }
