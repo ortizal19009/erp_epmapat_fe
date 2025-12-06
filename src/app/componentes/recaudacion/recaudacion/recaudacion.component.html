@@ -45,12 +45,23 @@
                       </div>
                     </div>
                     <div class="col-md" *ngIf="acobrar > 0 && !swcobrado && !estadoCajaT">
-                      <button type="button" class="btn btn-success btn-xs w-100" data-toggle="modal"
+                      <button type="button" class="btn btn-success btn-cobrar w-100" data-toggle="modal"
                         data-target="#modalCobrar" (click)="valorAcobrar(acobrar)">
 
-                        <span class="d-block small"><i class="bi bi-check-lg mr-1"></i> Cobrar</span>
-                        <strong class="small">{{acobrar | number: '1.2-2'}}</strong>
+                        <span class="d-block cobrar-text">
+                          <i class="bi bi-check-lg mr-1"></i> Cobrar
+                        </span>
+
+                        <strong class="cobrar-valor">
+                          {{ acobrar | number: '1.2-2' }}
+                        </strong>
+
                       </button>
+                    </div>
+
+                    <div class="col-md-3">
+                      <input class="form-control form-control-sm" type="text" formControlName="filtro"
+                        placeholder="Filtrar resultados..." />
                     </div>
                   </div>
                 </form>
@@ -189,7 +200,7 @@
                       <th width="80" class="text-center">
                         <div class="custom-control custom-checkbox custom-control-sm">
                           <input type="checkbox" class="custom-control-input" id="selectAll"
-                            (change)="marcarTodas($event)" [disabled]="filtrar || !deshabilitarImprimirTodo">
+                            (change)="marcarTodas($event)" [disabled]="filtro || !deshabilitarImprimirTodo">
                           <label class="custom-control-label" for="selectAll"></label>
                         </div>
                       </th>
@@ -202,7 +213,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr *ngFor="let sincobro of _sincobro | filter:filtrar; let i = index"
+                    <tr *ngFor="let sincobro of listaFiltrada; let i = index"
                       [class.table-warning]="sincobro.estado == 3">
                       <td class="text-center serial-number small">{{ i+1 }}</td>
                       <td class="text-center account-number">
@@ -226,7 +237,7 @@
                         {{ sincobro.modulo }}
                       </td>
                       <td class="text-right amount-cell">
-                        <span class="amount-value small">
+                        <strong class="amount-value small">
                           ${{
                           (
                           sincobro.total +
@@ -234,7 +245,7 @@
                           sincobro.iva
                           ).toFixed(2)
                           }}
-                        </span>
+                        </strong>
                       </td>
                       <td class="text-center">
                         <div class="custom-control custom-checkbox custom-control-sm">

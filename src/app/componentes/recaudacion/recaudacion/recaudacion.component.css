@@ -96,6 +96,23 @@ label {
   z-index: 5000;
 }
 /*====================================================*/
+
+.btn-cobrar {
+  padding: 12px 10px !important;
+  font-size: 1.1rem;
+}
+
+.cobrar-text {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.cobrar-valor {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
 /* ===== ESTADO DE CAJA CON COLORES ===== */
 .badge-danger {
   background: linear-gradient(135deg, #dc3545, #c82333);
