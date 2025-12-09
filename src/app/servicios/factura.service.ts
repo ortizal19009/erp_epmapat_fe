@@ -195,7 +195,7 @@ export class FacturaService {
 
   //Planillas sin Cobro de un Cliente
   getSinCobro(idcliente: number) {
-    return this.http.get<Facturas[]>(`${baseUrl}/idcliente/${idcliente}`);
+    return this.http.get<any[]>(`${baseUrl}/idcliente/${idcliente}`);
   }
   getFacturasCVClientes(idcliente: number, date: any) {
     return this.http.get<Facturas[]>(`${baseUrl}/factCarteraVencida?idcliente=${idcliente}&date=${date}`);

@@ -260,6 +260,7 @@ export class AnulacionesBajasComponent implements OnInit {
   getFacCobradas() {
     this.facServicio.findCobradas(this._cliente.idcliente).subscribe({
       next: (datos: any) => {
+        console.log(datos);
         this._facturas = datos;
       },
       error: (e) => {
@@ -268,6 +269,7 @@ export class AnulacionesBajasComponent implements OnInit {
     });
   }
   getFacSinCobro() {
+  console.log(this._cliente.idcliente)
     this.facServicio.getSinCobro(this._cliente.idcliente).subscribe({
       next: (datos: any) => {
         console.log(datos);
@@ -281,20 +283,12 @@ export class AnulacionesBajasComponent implements OnInit {
       next: (datos: any) => {
         this._cliente = datos.idcliente;
         if (this.option === '0') {
-          if (
-            datos.fechaanulacion === null &&
-            datos.fechaeliminacion === null &&
-            datos.pagado === 1
-          ) {
+          if (datos.fechaeliminacion === null && datos.pagado === 1) {
             this._facturas = [datos];
           }
         }
         if (this.option === '1') {
-          if (
-            datos.fechaanulacion === null &&
-            datos.fechaeliminacion === null &&
-            datos.pagado === 0
-          ) {
+          if (datos.fechaeliminacion === null && datos.pagado === 0) {
             this._facturas = [datos];
           }
         }
