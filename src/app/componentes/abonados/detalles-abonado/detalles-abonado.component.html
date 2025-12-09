@@ -56,8 +56,9 @@
           <div class="card-body">
             <div class="text-center mb-3">
               <div class="avatar-circle-lg bg-primary text-white mx-auto mb-2">
-                {{abonado.nombre.charAt(0)}}
+                {{ (abonado!.nombre || '?').trim().charAt(0) | uppercase }}
               </div>
+
               <h4 class="text-primary mb-1"><strong>Cuenta:</strong> {{abonado.idabonado}}</h4>
               <p class="text-muted">{{abonado.nombre}}</p>
             </div>
@@ -375,7 +376,7 @@
               </button>
               <div class="dropdown-menu dropdown-menu-right shadow">
                 <button class="dropdown-item" type="button" [disabled]="factura.pagado != 1"
-                        (click)="impComprobante(factura)">
+                  (click)="impComprobante(factura)">
                   <i class="bi bi-printer mr-2"></i>Comprobante pago
                 </button>
                 <button class="dropdown-item" type="button" [disabled]="factura.pagado != 1"
@@ -386,16 +387,17 @@
                   <i class="bi bi-envelope mr-2"></i>Reenviar F. a Email
                 </button>
                 <button class="dropdown-item" type="button" *ngIf="usuario===1"
-                        (click)="multaCalculate(factura.idfactura)">
+                  (click)="multaCalculate(factura.idfactura)">
                   <i class="bi bi-cash-coin mr-2"></i>Multas
                 </button>
               </div>
             </div>
             <button class="btn btn-light btn-sm ml-2" [hidden]="facElectro" (click)="facElectro = !facElectro"
-                    title="Cambiar vista">
+              title="Cambiar vista">
               <i class="fa fa-retweet"></i>
             </button>
-            <button type="button" class="btn-close btn-close-white ml-2" data-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close btn-close-white ml-2" data-dismiss="modal"
+              aria-label="Close"></button>
           </div>
         </div>
       </div>
@@ -495,7 +497,8 @@
             <div class="col-md-9">
               <div class="card border-0 shadow-sm">
                 <div class="card-body p-0">
-                  <iframe id="pdfViewer" src="" width="100%" height="500px" style="border: none; border-radius: 8px;"></iframe>
+                  <iframe id="pdfViewer" src="" width="100%" height="500px"
+                    style="border: none; border-radius: 8px;"></iframe>
                 </div>
               </div>
             </div>
@@ -510,14 +513,14 @@
                   <div class="form-group mb-3">
                     <label class="form-label small font-weight-bold">Correo electrónico</label>
                     <input type="email" [(ngModel)]="email" class="form-control form-control-sm"
-                           placeholder="nombre@ejemplo.com">
+                      placeholder="nombre@ejemplo.com">
                   </div>
                   <div class="d-flex gap-2">
                     <button type="button" (click)="active = false" class="btn btn-secondary btn-sm flex-fill">
                       <i class="bi bi-x-circle mr-1"></i>Cancelar
                     </button>
                     <button type="button" data-dismiss="modal" (click)="sendFacturaEmail()"
-                            class="btn btn-success btn-sm flex-fill">
+                      class="btn btn-success btn-sm flex-fill">
                       <i class="bi bi-send mr-1"></i>Enviar
                     </button>
                   </div>
@@ -568,7 +571,8 @@
         <ng-template #pdfHide>
           <div class="card border-0 shadow-sm">
             <div class="card-body p-0">
-              <iframe id="pdfViewer" src="" width="100%" height="400px" style="border: none; border-radius: 8px;"></iframe>
+              <iframe id="pdfViewer" src="" width="100%" height="400px"
+                style="border: none; border-radius: 8px;"></iframe>
             </div>
           </div>
         </ng-template>
@@ -711,8 +715,7 @@
 
           <div class="form-group mb-3">
             <label class="form-label small font-weight-bold">Asunto</label>
-            <input formControlName="asunto" class="form-control form-control-sm"
-                   placeholder="Asunto del mensaje" />
+            <input formControlName="asunto" class="form-control form-control-sm" placeholder="Asunto del mensaje" />
           </div>
 
           <div class="form-group mb-3">

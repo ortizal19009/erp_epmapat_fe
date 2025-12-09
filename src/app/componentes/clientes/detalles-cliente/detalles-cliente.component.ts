@@ -167,7 +167,6 @@ export class DetallesClienteComponent implements OnInit {
   }
 
   modificarCliente(idcliente: number) {
-    console.log(idcliente);
     sessionStorage.setItem('padreModiCliente', '/detalles-cliente');
     sessionStorage.setItem(
       'idclienteToModi',
