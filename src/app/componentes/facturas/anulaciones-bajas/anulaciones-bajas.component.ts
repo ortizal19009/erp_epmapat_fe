@@ -260,7 +260,6 @@ export class AnulacionesBajasComponent implements OnInit {
   getFacCobradas() {
     this.facServicio.findCobradas(this._cliente.idcliente).subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this._facturas = datos;
       },
       error: (e) => {
@@ -269,10 +268,8 @@ export class AnulacionesBajasComponent implements OnInit {
     });
   }
   getFacSinCobro() {
-  console.log(this._cliente.idcliente)
     this.facServicio.getSinCobro(this._cliente.idcliente).subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this._facturas = datos;
       },
       error: (e) => console.error(e),
@@ -414,7 +411,6 @@ export class AnulacionesBajasComponent implements OnInit {
   generarReport(idfactura: number) {
     let factura = this.s_factura.getById(idfactura).subscribe({
       next: (fact: any) => {
-        console.log(fact);
         factura = fact;
         this.s_rubroxfac.getByIdfactura(idfactura).subscribe({
           next: async (rubros: any) => {
@@ -456,9 +452,6 @@ export class AnulacionesBajasComponent implements OnInit {
             });
             _rubros.push(['', 'TOTAL: ', '', '', sumaRubros.toFixed(2)]);
             this.reporteeliminacion(cabeceraCliente, cabeceraAbonado, _rubros);
-            console.log(cabeceraCliente);
-            console.log(cabeceraAbonado);
-            console.log(_rubros);
           },
           error: (e: any) => console.error(e),
         });
@@ -552,8 +545,6 @@ export class AnulacionesBajasComponent implements OnInit {
     pdfViewer.src = pdfDataUri;
   }
   reporteeliminacion(bodyCliente: any, bodyAbonado: any, bodyRubros: any) {
-    console.log(bodyCliente);
-    console.log(bodyAbonado);
     let doc = new jsPDF();
     this.s_pdf.header(`FACTURA ELIMINADA ${bodyCliente.planilla}`, doc);
     let headRubros = [['Cod.', 'Nombre', 'Cantidad', 'V. unitario', 'Total']];
@@ -584,7 +575,6 @@ export class AnulacionesBajasComponent implements OnInit {
       ],
     });
     if (bodyAbonado != null) {
-      console.log('body cero');
       autoTable(doc, {
         body: [
           [
@@ -597,7 +587,6 @@ export class AnulacionesBajasComponent implements OnInit {
         ],
       });
     } else {
-      console.log('body body');
     }
     autoTable(doc, {
       head: headRubros,
