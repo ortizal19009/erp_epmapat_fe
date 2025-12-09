@@ -5,14 +5,25 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
+import { Router } from '@angular/router';
+import { catchError, debounceTime, distinctUntilChanged, EMPTY, of, switchMap, tap } from 'rxjs';
+
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Usuarios } from 'src/app/modelos/administracion/usuarios.model';
+import { Colores } from 'src/app/modelos/administracion/colores.model';
 import { Cajas } from 'src/app/modelos/cajas.model';
 import { Facturas } from 'src/app/modelos/facturas.model';
 import { Formacobro } from 'src/app/modelos/formacobro.model';
 import { Ptoemision } from 'src/app/modelos/ptoemision';
 import { Recaudacion } from 'src/app/modelos/recaudacion.model';
 import { Recaudaxcaja } from 'src/app/modelos/recaudaxcaja.model';
+import { Abonados } from 'src/app/modelos/abonados';
+import { Clientes } from 'src/app/modelos/clientes';
+import { Rubroxfac } from 'src/app/modelos/rubroxfac.model';
+import { Rubros } from 'src/app/modelos/rubros.model';
+import { Facxnc } from 'src/app/modelos/facxnc';
+import { Valoresnc } from 'src/app/modelos/valoresnc';
+
 import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { ColorService } from 'src/app/servicios/administracion/color.service';
 import { ClientesService } from 'src/app/servicios/clientes.service';
@@ -25,24 +36,16 @@ import { CajaService } from 'src/app/servicios/caja.service';
 import { RecaudacionService } from 'src/app/servicios/recaudacion.service';
 import { FacxrecaudaService } from 'src/app/servicios/facxrecauda.service';
 import { RecaudaxcajaService } from 'src/app/servicios/recaudaxcaja.service';
-import { Colores } from 'src/app/modelos/administracion/colores.model';
-import { Abonados } from 'src/app/modelos/abonados';
-import { Clientes } from 'src/app/modelos/clientes';
-import { Rubroxfac } from 'src/app/modelos/rubroxfac.model';
-import { Rubros } from 'src/app/modelos/rubros.model';
-import { catchError, EMPTY, of, switchMap, tap } from 'rxjs';
 import { ModulosService } from 'src/app/servicios/modulos.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { NtacreditoService } from 'src/app/servicios/ntacredito.service';
 import { ValoresncService } from 'src/app/servicios/valoresnc.service';
 import { FacxncService } from 'src/app/servicios/facxnc.service';
-import { Facxnc } from 'src/app/modelos/facxnc';
-import { Valoresnc } from 'src/app/modelos/valoresnc';
 import { JasperReportService, MergeItem } from 'src/app/servicios/jasper-report.service';
 import { PtoemisionService } from 'src/app/servicios/ptoemision.service';
 import { DefinirService } from 'src/app/servicios/administracion/definir.service';
 import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
-import { Router } from '@angular/router';
+
 import Swal from 'sweetalert2';
 
 @Component({
@@ -51,78 +54,86 @@ import Swal from 'sweetalert2';
   styleUrls: ['./recaudacion.component.css'],
 })
 export class RecaudacionComponent implements OnInit {
+
+  // ==== Formularios ====
   formBuscar: FormGroup;
   formCobrar: FormGroup;
-  cliente = {} as Cliente; //Interface para los datos del Cliente
-  mensaje = {} as Mensaje; //Interface para los mensajes
-  swvalido = 1; //Ups
-  _cliente: any; //Datos del Cliente
-  formBusClientes: FormGroup; //Buscar Clientes del Modal
-  _cuentas: any; //Cuentas del Cliente
-  _clientes: any; //Clientes del Modal de Búsqueda de Clientes
-  filtro: string;
-  filtrar: string;
-  privez = true; //Para resetear los datos de Búsqueda de Clientes
-  _formascobro: any;
-  _sincobro: any;
-  sumtotal: number;
-  acobrar: number;
-  swbusca = 0; //0: Sin búsqueda, 1:No existe, 2:No tiene Planillas sinCobro, 3:Tiene Planillas sinCobro
-  acobrardec: string;
+  formBusClientes: FormGroup;
+  formColores: FormGroup;
+
+  // ==== Datos de cliente / búsqueda ====
+  cliente = {} as Cliente;
+  mensaje = {} as Mensaje;
+  _cliente: any[] = [];
+  _clientes: any[] = [];
+  _cuentas: any;
+  privez = true;
+
+  // ==== Facturas / recaudación ====
+  _sincobro: any[] = [];
+  listaFiltrada: any[] = [];
+  arrFacturas: any[] = [];
+  arrCuenta: any[] = [];
+  sumtotal = 0;
+  acobrar = 0;
+  acobrardec = '';
+  swbusca = 0; // 0: sin búsqueda, 1: no existe, 2: sin planillas, 3: con planillas
+  swcobrado = false;
   disabledcobro = true;
-  _rubrosxfac: any;
-  totfac: number;
-  idfactura: number; //Id de la Planilla a mostrar en el detalle
-  consumo: number;
-  formColores: FormGroup; //Colores
+  totfac = 0;
+  idfactura: number;
+  consumo = 0;
+  totInteres: number = 0;
+  factura: Facturas = new Facturas();
+  valoriva: number;
+  valorNtaCredito: number = 0;
+
+  // ==== Formas de cobro / NC ====
+  _formascobro: any[] = [];
+  formaCobro: Formacobro = new Formacobro();
+  formacobroNC = false;
+  idformacobro: number;
+  _nc: any[] = [];
+  swNC = false;
+
+  // ==== Caja / usuario / emisión ====
+  _caja: Cajas = new Cajas();
+  _establecimiento: Ptoemision = new Ptoemision();
+  _usuario: Usuarios = new Usuarios();
+  _ptoemision: any;
+  _nroFactura: string;
+  _codRecaudador: string;
+  estadoCajaT = true;
+  cajaActiva = false;
+  recxcaja: Recaudaxcaja = new Recaudaxcaja();
+
+  // ==== Colores ====
   _tonoscabecera: any;
   _colorescabecera: any;
   _tonosdetalle: any;
   _coloresdetalle: any;
-  swcobrado: boolean;
-  formaCobro: Formacobro = new Formacobro();
-  formacobroNC: boolean;
-  idformacobro: number;
-  _caja: Cajas = new Cajas();
-  _establecimiento: Ptoemision = new Ptoemision();
-  _usuario: Usuarios = new Usuarios();
-  _nroFactura: any;
-  _codRecaudador: any;
-  estadoCajaT: boolean = true;
-  caja: Cajas = new Cajas();
-  cajaActiva: boolean = false;
-  recxcaja: Recaudaxcaja = new Recaudaxcaja();
-  /* IMPRESION */
-  otraPagina: boolean = false;
-  cuenta: any;
-  datoBusqueda: number = 0;
-  /* Intereses */
+
+  // ==== Intereses ====
   calInteres = {} as calcInteres;
-  totInteres: any = 0;
-  arrCalculoInteres: any = [];
-  factura: Facturas = new Facturas();
   _intereses: any;
-  $event: any;
-  valoriva: number;
-  //_codigo: string;
-  /*  */
-  arrFacturas: any = [];
-  arrCuenta: any = [];
-  _nc: any = [];
-  swNC: boolean = false;
+
+  // ==== Impresión / PDF ====
+  otraPagina = false;
   facturasToPrint: any[] = [];
-  valorNtaCredito: number;
 
-  _ptoemision: any;
+  // ==== Varios ====
+  swvalido = 1;
   iva: number;
-
-
-
+  cuenta: any;
+  datoBusqueda = 0;
+  $event: any;
+  _rubrosxfac: any[] = [];
+  filtro: string = ''; // para el modal de clientes
   constructor(
     public fb: FormBuilder,
+    public fb1: FormBuilder,
     private aboService: AbonadosService,
     private clieService: ClientesService,
-    public fb1: FormBuilder,
     private facService: FacturaService,
     private rubxfacService: RubroxfacService,
     private lecService: LecturasService,
@@ -146,22 +157,34 @@ export class RecaudacionComponent implements OnInit {
     private router: Router
   ) { }
 
+  // =====================
+  //   CICLO DE VIDA
+  // =====================
+
   ngOnInit(): void {
+    // IVA
     this.s_definir.getByIddefinirAsync(1).then((item: any) => {
       this.iva = item.iva;
     });
 
+    // Formulario principal de búsqueda
     this.formBuscar = this.fb.group({
       cuenta: '',
       identificacion: '',
+      filtro: '',
     });
-    //Formulario de Busqueda de Clientes (Modal)
+
+    // Filtro en vivo
+    this.configurarFiltroEnVivo();
+
+    // Formulario de búsqueda de clientes (modal)
     this.formBusClientes = this.fb1.group({
       nombre_identifica: [null, [Validators.required, Validators.minLength(5)]],
     });
 
+    // Formulario de cobro
     this.formCobrar = this.fb.group({
-      valorAcobrar: 0, //Valor original con decimales para poder validar el dinero recibido
+      valorAcobrar: 0,
       idformacobro: this.formaCobro,
       acobrar: 0,
       ncvalor: ['', [Validators.required], this.valNC.bind(this)],
@@ -169,45 +192,97 @@ export class RecaudacionComponent implements OnInit {
       vuelto: '',
       saldo: ['', [Validators.required], this.SaldoNC.bind(this)],
     });
-    //Al digitar quita alerta
-    let cuenta = document.getElementById('cuenta') as HTMLInputElement;
-    if (cuenta != null) {
+
+    // Listeners simples para limpiar campos
+    const cuenta = document.getElementById('cuenta') as HTMLInputElement;
+    if (cuenta) {
       cuenta.addEventListener('keyup', () => {
         this.swvalido = 1;
         this.formBuscar.controls['identificacion'].setValue('');
       });
     }
 
-    let identificacion = document.getElementById(
-      'identificacion'
-    ) as HTMLInputElement;
-    if (identificacion != null) {
+    const identificacion = document.getElementById('identificacion') as HTMLInputElement;
+    if (identificacion) {
       identificacion.addEventListener('keyup', () => {
         this.swvalido = 1;
         this.formBuscar.controls['cuenta'].setValue('');
       });
     }
 
-    var t: Colores = new Colores();
-    var c: Colores = new Colores();
+    // Colores
+    const t: Colores = new Colores();
+    const c: Colores = new Colores();
     this.formColores = this.fb.group({
       tonos0: t,
       colores0: c,
       tonos1: t,
       colores1: t,
     });
+
     this.listFormasCobro();
     this.listarIntereses();
-    let getEstadoCaja = sessionStorage.getItem('estadoCaja');
-    if (getEstadoCaja != '0') {
+
+    // Estado de caja desde sesión
+    const getEstadoCaja = sessionStorage.getItem('estadoCaja');
+    if (getEstadoCaja !== '0') {
       this.abrirCaja();
     }
     this.disabledcobro = this.estadoCajaT;
   }
+
   get f() {
     return this.formCobrar.controls;
   }
-  // Helpers (puedes moverlos a un utils.service)
+
+  // =====================
+  //   FILTRO EN VIVO
+  // =====================
+  get filtroActivo(): boolean {
+    return !!this.formBuscar?.get('filtro')?.value;
+  }
+  private configurarFiltroEnVivo(): void {
+    this.formBuscar.get('filtro')?.valueChanges
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged()
+      )
+      .subscribe(valor => this.aplicarFiltro(valor));
+  }
+  aplicarFiltro(texto: any): void {
+    const term = (texto || '').toString().toLowerCase().trim();
+    //console.log('Aplicando filtro con término:', term);
+
+    if (!term) {
+      this.listaFiltrada = [...(this._sincobro || [])];
+      return;
+    }
+
+    this.listaFiltrada = (this._sincobro || []).filter((item: any) => {
+
+      // Campos que se muestran en la tabla
+      const valores = [
+        item.idAbonado,                              // Cuenta
+        item.responsablePago,                       // Responsable de pago
+        item.idfactura,                             // Planilla
+        item.direccion,                             // Dirección
+        item.modulo,                                // Módulo
+        item.fechaemision,                          // Fecha (sin formatear)
+        (item.total + item.interes + item.iva)      // Total a cobrar
+      ];
+
+      // Buscar si el término aparece en alguno de esos campos
+      return valores
+        .filter(v => v !== undefined && v !== null)
+        .some(v => v.toString().toLowerCase().includes(term));
+    });
+  }
+
+
+  // =====================
+  //   CAJA / ESTADO
+  // =====================
+
   private isSameYMD(a: Date, b: Date): boolean {
     return a.getFullYear() === b.getFullYear()
       && a.getMonth() === b.getMonth()
@@ -215,12 +290,10 @@ export class RecaudacionComponent implements OnInit {
   }
 
   private notify(msg: string) {
-    // Reemplaza por tu snackbar/toast si tienes uno
     alert(msg);
   }
 
   abrirCaja(): void {
-    // Si getAllPtoEmision carga lista para otros flujos, mantenlo.
     this.getAllPtoEmision();
 
     this.s_cajas
@@ -228,47 +301,36 @@ export class RecaudacionComponent implements OnInit {
       .pipe(
         tap((dcaja: any) => {
           if (!dcaja) {
-            // Lanzamos para que lo capture catchError
             throw new Error('NO_CAJA');
           }
 
-          // ===== Asignaciones base de la caja/usuario =====
           this._caja = dcaja;
           this._usuario = dcaja.idusuario_usuarios;
-
-          // Tomamos directamente del objeto retornado (sin buscar en _ptoemision)
           this._establecimiento = dcaja.idptoemision_ptoemision ?? null;
 
           const establecimiento = dcaja?.idptoemision_ptoemision?.establecimiento ?? '';
           this._codRecaudador = `${establecimiento}-${dcaja.codigo}`;
         }),
-        // ===== Consultar el último estado de conexión de la caja =====
         switchMap((dcaja: any) =>
           this.s_recaudaxcaja.getLastConexion(dcaja.idcaja).pipe(
             tap((drxc: any) => {
-              // Si no hay registro previo de conexión, la caja no está activa
               if (!drxc) {
                 this.cajaActiva = false;
                 this.estadoCajaT = true;
-                // Si no hay ultimafact, tampoco podremos formatear
                 if (dcaja?.ultimafact) {
                   this.formatNroFactura(dcaja.ultimafact);
                 }
                 return;
               }
 
-              // ===== Validación de fecha y estado en sesión =====
               const hoy = new Date();
               const inicio = new Date(drxc.fechainiciolabor);
-              const estadoCaja = sessionStorage.getItem('estadoCaja'); // '0' = cerrada?
+              const estadoCaja = sessionStorage.getItem('estadoCaja');
 
-              // Caja activa solo si la última conexión es HOY y no está marcada como cerrada en sesión
               const mismaFecha = this.isSameYMD(hoy, inicio);
               this.cajaActiva = (mismaFecha && estadoCaja !== '0');
               this.estadoCajaT = !this.cajaActiva;
 
-              // ===== Número de factura =====
-              // Prioriza la última factura persistida en caja; si no existe, usa la final de la conexión.
               const nro = dcaja?.ultimafact ?? drxc?.facfin;
               if (nro) {
                 this.formatNroFactura(nro);
@@ -289,74 +351,33 @@ export class RecaudacionComponent implements OnInit {
       .subscribe();
   }
 
-  __abrirCaja() {
-    this.getAllPtoEmision();
-
-    this.s_cajas.getByIdUsuario(this.authService.idusuario).subscribe({
-      next: (dcaja: any) => {
-        if (dcaja) {
-          this._caja = dcaja;
-          this._establecimiento = dcaja.idptoemision_ptoemision;
-          this._establecimiento = this._ptoemision.find((e: any) => {
-            e.establecimiento = dcaja.idptoemision_ptoemision.establecimiento;
-          }); // O el criterio que necesites
-
-          this._usuario = dcaja.idusuario_usuarios;
-          this._codRecaudador = `${dcaja.idptoemision_ptoemision.establecimiento}-${dcaja.codigo}`;
-
-          /* VALIDAR SI LA CAJA ESTA ABIERTA O CERRADA */
-          this.s_recaudaxcaja.getLastConexion(this._caja.idcaja).subscribe({
-            next: (drxc: any) => {
-              let c_fecha: Date = new Date();
-              let l_fecha: Date = new Date(drxc.fechainiciolabor);
-              let estadoCaja = sessionStorage.getItem('estadoCaja');
-              if (
-                (c_fecha.getDate() != l_fecha.getDate() &&
-                  c_fecha.getMonth() != l_fecha.getMonth() &&
-                  c_fecha.getFullYear() == l_fecha.getFullYear()) ||
-                estadoCaja === '0'
-              ) {
-                this.cajaActiva = false;
-                this.estadoCajaT = true;
-              } else {
-                this.cajaActiva = true;
-                this.estadoCajaT = false;
-              }
-              if (dcaja.ultimafact === null) {
-                this.formatNroFactura(drxc.facfin);
-              } else {
-                //this.formatNroFactura(dcaja.ultimafact)};
-              }
-            },
-            error: (e) => console.error(e),
-          });
-        } else {
-          alert('ESTE USUARIO NO TIENE CAJA REGISTRADA');
-        }
-      },
-    });
+  // Wrapper para compatibilidad con código antiguo
+  __abrirCaja(): void {
+    this.abrirCaja();
   }
+
   getAllPtoEmision() {
     this.s_ptoemision.getListaPtoEmision().subscribe({
-      next: (datos: any) => {
-        this._ptoemision = datos;
-      },
+      next: (datos: any) => (this._ptoemision = datos),
       error: (e: any) => console.error(e),
     });
   }
+
   changeEstablecimiento(e: any) {
     this._caja.idptoemision_ptoemision = this._establecimiento;
   }
+
   formatNroFactura(nroFactura: number) {
-    let nfactura = `${this._codRecaudador}-${nroFactura
+    const nfactura = `${this._codRecaudador}-${nroFactura
       .toString()
       .padStart(9, '0')}`;
     this._nroFactura = nfactura;
     return nfactura;
   }
+
   validarCaja() {
-    let fecha: Date = new Date();
-    let nrofac = this._nroFactura.split('-', 3);
+    const fecha = new Date();
+    const nrofac = this._nroFactura.split('-', 3);
     sessionStorage.setItem('ultfac', nrofac[2]);
     this.recxcaja.estado = 1;
     this.recxcaja.facinicio = +nrofac[2]!;
@@ -364,32 +385,34 @@ export class RecaudacionComponent implements OnInit {
     this.recxcaja.fechainiciolabor = fecha;
     this.recxcaja.idcaja_cajas = this._caja;
     this.recxcaja.idusuario_usuarios = this._caja.idusuario_usuarios;
+
     this.s_recaudaxcaja.saveRecaudaxcaja(this.recxcaja).subscribe({
-      next: (datos) => {
+      next: () => {
         this.estadoCajaT = false;
         sessionStorage.setItem('estadoCaja', '1');
         this.s_cajas.updateCaja(this._caja).subscribe({
-          next: (datos: any) => {
-            window.location.reload();
-          },
+          next: () => window.location.reload(),
         });
       },
       error: (e) => console.error(e),
     });
   }
+
   cerrarCaja() {
     sessionStorage.setItem('estadoCaja', '0');
-    let nrofac = this._nroFactura.split('-', 3);
+    const nrofac = this._nroFactura.split('-', 3);
+
     this.s_recaudaxcaja.getLastConexion(this._caja.idcaja).subscribe({
       next: (datos) => {
-        let c_fecha: Date = new Date();
+        const c_fecha: Date = new Date();
         this.recxcaja = datos;
         this.recxcaja.estado = 0;
         this.recxcaja.fechafinlabor = c_fecha;
         this.estadoCajaT = true;
         this.recxcaja.facfin = +nrofac[2]!;
+
         this.s_recaudaxcaja.updateRecaudaxcaja(this.recxcaja).subscribe({
-          next: (datos) => {
+          next: () => {
             sessionStorage.setItem('ultimafac', '0');
             this.router.navigate(['/inicio']);
           },
@@ -399,7 +422,11 @@ export class RecaudacionComponent implements OnInit {
       error: (e) => console.error(e),
     });
   }
-  //Formas de cobro
+
+  // =====================
+  //   FORMAS DE COBRO
+  // =====================
+
   listFormasCobro() {
     this.fcobroService.getAll().subscribe({
       next: (datos) => {
@@ -410,83 +437,74 @@ export class RecaudacionComponent implements OnInit {
     });
   }
 
+  changeFormacobro() {
+    const formacobro = this.formCobrar.get('idformacobro')!.value;
+    this.idformacobro = formacobro.idformacobro;
+    this.formacobroNC = (formacobro.idformacobro === 3);
+  }
+
+  // =====================
+  //   BÚSQUEDA PRINCIPAL
+  // =====================
+
   onSubmit() {
     this.arrCuenta = [];
-    //this.getLastFactura();
     this.swcobrado = false;
     this.acobrar = 0;
     this.sumtotal = 0;
     this._cliente = [];
     this.arrFacturas = [];
-
     this.reset();
-    // this.reiniciar();
+
+    const { cuenta, identificacion, nombre } = this.formBuscar.value;
+
     if (
-      (this.formBuscar.value.cuenta == null ||
-        this.formBuscar.value.cuenta == '') &&
-      (this.formBuscar.value.identificacion == null ||
-        this.formBuscar.value.identificacion == '') &&
-      (this.formBuscar.value.nombre == null ||
-        this.formBuscar.value.nombre == '')
+      (!cuenta && !identificacion && !nombre)
     ) {
       this.swvalido = 0;
-    } else {
-      this.swvalido = 1;
-      if (
-        this.formBuscar.value.cuenta != null &&
-        this.formBuscar.value.cuenta != ''
-      ) {
-        this.aboService.getByIdabonado(this.formBuscar.value.cuenta).subscribe({
-          next: (datos) => {
-            this._cliente = datos;
-            if (this._cliente.length > 0) {
-              this.datosCliente('cuenta');
-            } else {
-              this.swbusca = 1;
-              this.mensaje.campo = 'Cuenta: ';
-              this.mensaje.texto = this.formBuscar.value.cuenta;
-            }
-          },
-          error: (err) => console.error('Al obtener idabonado: ', err.error),
-        });
-      } else {
-        if (
-          this.formBuscar.value.identificacion != null &&
-          this.formBuscar.value.identificacion != ''
-        ) {
+      return;
+    }
 
-          /*           this.clieService.getByIdentificacion(this.formBuscar.value.identificacion).subscribe({
-                      next: (datos: any) => {
-                        console.log(datos);
-                        // this.buscaIdentificacion(this.formBuscar.value.identificacion);
-                        if (datos.length > 0) {
-                          this._clientes = datos
-                        }
-                      }
-                    }); */
-          this.clieService.getByIdentificacion(this.formBuscar.value.identificacion).subscribe({
-            next: (datos: any[]) => {
-              if (!Array.isArray(datos) || datos.length === 0) {
-                this._clientes = [];
-                alert('⚠️ No se encontraron clientes.');
-                return;
-              }
+    this.swvalido = 1;
 
-              if (datos.length === 1) {
-                this._clientes = datos;
-                this.selecCliente(datos[0]);
-                return;
-              }
+    if (cuenta) {
+      this.aboService.getByIdabonado(cuenta).subscribe({
+        next: (datos: any) => {
+          this._cliente = datos;
+          if (this._cliente.length > 0) {
+            this.datosCliente('cuenta');
+          } else {
+            this.swbusca = 1;
+            this.mensaje.campo = 'Cuenta: ';
+            this.mensaje.texto = cuenta;
+          }
+        },
+        error: (err) => console.error('Al obtener idabonado: ', err.error),
+      });
+      return;
+    }
 
-              // más de uno → cargar lista y abrir modal sin jQuery
-              this._clientes = datos;
-              this.openModal('clientesModal');
-              this.formBusClientes.patchValue({ nombre_identifica: datos[0].nombre })
-            },
-            error: () => alert('❌ Error al buscar clientes.')
-          });
-        }
-      }
+    if (identificacion) {
+      this.clieService.getByIdentificacion(identificacion).subscribe({
+        next: (datos: any[]) => {
+          if (!Array.isArray(datos) || datos.length === 0) {
+            this._clientes = [];
+            alert('⚠️ No se encontraron clientes.');
+            return;
+          }
+
+          if (datos.length === 1) {
+            this._clientes = datos;
+            this.selecCliente(datos[0]);
+            return;
+          }
+
+          this._clientes = datos;
+          this.openModal('clientesModal');
+          this.formBusClientes.patchValue({ nombre_identifica: datos[0].nombre });
+        },
+        error: () => alert('❌ Error al buscar clientes.'),
+      });
     }
   }
 
@@ -507,20 +525,19 @@ export class RecaudacionComponent implements OnInit {
     });
   }
 
-  datosCliente(campo: String) {
-    if (campo == 'cuenta') {
+  datosCliente(campo: string) {
+    if (campo === 'cuenta') {
       this.cliente.nombre = this._cliente[0].idcliente_clientes.nombre;
       this.cliente.cedula = this._cliente[0].idcliente_clientes.cedula;
       this.cliente.direccion = this._cliente[0].idcliente_clientes.direccion;
       this.cliente.telefono = this._cliente[0].idcliente_clientes.telefono;
       this.cliente.email = this._cliente[0].idcliente_clientes.email;
-      this.cliente.porcexonera =
-        this._cliente[0].idcliente_clientes.porcexonera / 100;
-      this.cliente.porcdiscapacidad =
-        this._cliente[0].idcliente_clientes.porcdiscapacidad / 100;
+      this.cliente.porcexonera = this._cliente[0].idcliente_clientes.porcexonera / 100;
+      this.cliente.porcdiscapacidad = this._cliente[0].idcliente_clientes.porcdiscapacidad / 100;
       this.sinCobro(this._cliente[0].idcliente_clientes.idcliente);
     }
-    if (campo == 'identificacion') {
+
+    if (campo === 'identificacion') {
       this.cliente.nombre = this._cliente[0].nombre;
       this.cliente.cedula = this._cliente[0].cedula;
       this.cliente.direccion = this._cliente[0].direccion;
@@ -537,27 +554,36 @@ export class RecaudacionComponent implements OnInit {
     this.swbusca = 0;
     this.acobrar = 0;
     this.sumtotal = 0;
-    this.formBuscar.controls['cuenta'].setValue('');
-    this.formBuscar.controls['identificacion'].setValue('');
-    this.formCobrar.value.saldo = 0;
+    this.formBuscar.patchValue({
+      cuenta: '',
+      identificacion: '',
+      filtrar: '',
+    });
+    this.formCobrar.patchValue({ saldo: 0 });
+    this.listaFiltrada = [...(this._sincobro || [])];
   }
+
+  // =====================
+  //   PLANILLAS SIN COBRO
+  // =====================
 
   sinCobro(idcliente: number) {
     this.loadingService.showLoading();
     this.swbusca = 0;
+
     this.facService.getFacSincobro(idcliente).subscribe({
-      next: (sincobrar: any) => {
-        if (sincobrar.length === 0) {
+      next: (sincobrar: any[]) => {
+        if (!sincobrar.length) {
           this.swbusca = 2;
           this.loadingService.hideLoading();
         }
+
         sincobrar.map(async (item: any, i: number) => {
-          if (item.idAbonado != 0 && item.idmodulo != 27) {
+          if (item.idAbonado !== 0 && item.idmodulo !== 27) {
             const abonado: Abonados = await this.getAbonado(item.idAbonado);
             item.direccion = abonado.direccionubicacion;
             item.responsablePago = abonado.idresponsable.nombre;
             const emision: any = await this.getEmision(item.idfactura);
-            //item.feccrea = emision;
             item.fechaemision = emision;
             item.iva = 0;
           } else {
@@ -565,67 +591,51 @@ export class RecaudacionComponent implements OnInit {
             item.direccion = cliente.direccion;
             item.responsablePago = cliente.nombre;
             item.fechaemision = item.feccrea;
-            let iva: any = await this.calIva(item.idfactura);
-            if (iva.length != 0) {
-              item.iva = iva[0][1];
-            } else {
-              item.iva = 0;
-            }
+            const iva: any = await this.calIva(item.idfactura);
+            item.iva = (iva.length ? iva[0][1] : 0);
           }
-          i++;
-          if (i === sincobrar.length) {
+
+          if (i + 1 === sincobrar.length) {
             this.loadingService.hideLoading();
             this.swbusca = 3;
           }
-          //item.total += interes;
         });
-        console.log(sincobrar);
-        this._sincobro = sincobrar;
 
+        this._sincobro = sincobrar;
+        this.listaFiltrada = [...sincobrar];
       },
       error: (e) => console.error(e),
     });
   }
+
   calcular(e: any, factura: any) {
     this.acobrar = 0;
     this.sumtotal = 0;
-    if (e.target.checked === true) {
-      /*    let query = this.arrFacturas.find(
-        (fact: { idfactura: number }) => (fact.idfactura = factura.idfactura)
-      ); */
+
+    if (e.target.checked) {
       this.arrFacturas.push(factura);
+    } else {
+      const query = this.arrFacturas.find((fact: { idfactura: number }) => fact.idfactura === factura.idfactura);
+      const i = this.arrFacturas.indexOf(query);
+      if (i >= 0) this.arrFacturas.splice(i, 1);
     }
-    if (e.target.checked === false) {
-      let query = this.arrFacturas.find(
-        (fact: { idfactura: number }) => (fact.idfactura = factura.idfactura)
-      );
-      let i = this.arrFacturas.indexOf(query);
-      this.arrFacturas.splice(i, 1);
-    }
-    this.arrFacturas.forEach((factura: any) => {
-      this.sumtotal += factura.total + factura.iva + factura.interes;
-      this.acobrar += factura.total + factura.iva + factura.interes;
+
+    this.arrFacturas.forEach((f: any) => {
+      this.sumtotal += f.total + f.iva + f.interes;
+      this.acobrar += f.total + f.iva + f.interes;
     });
   }
 
   async getAbonado(idabonado: number): Promise<any> {
-    const abo = await this.aboService.getById(idabonado).toPromise();
-    return abo;
+    return this.aboService.getById(idabonado).toPromise();
   }
-  async getCliente(idclietne: number): Promise<any> {
-    const cliente = await this.clieService.getListaById(idclietne).toPromise();
-    return cliente;
-  }
-  async getModulo(idmodulo: number): Promise<any> {
-    const modulo = await this.s_modulo.getById(idmodulo).toPromise();
-    return modulo;
+
+  async getCliente(idcliente: number): Promise<Clientes> {
+    return this.clieService.getListaById(idcliente).toPromise();
   }
 
   async getEmision(idfactura: number) {
-    const emision = await this.lecService
-      .findDateByIdfactura(idfactura)
-      .toPromise();
-    return emision;
+    return this.lecService.findDateByIdfactura(idfactura).toPromise();
   }
 
   reset() {
@@ -636,23 +646,26 @@ export class RecaudacionComponent implements OnInit {
     this.cliente.email = '';
     this.cliente.porcexonera = null;
     this.cliente.porcdiscapacidad = null;
-    this.filtrar = '';
     this.totInteres = 0;
     this.formCobrar.reset();
+    this.formBuscar.patchValue({ filtrar: '' });
+    if (this._sincobro) {
+      this.listaFiltrada = [...this._sincobro];
+    }
   }
 
+  // =====================
+  //   BÚSQUEDA CLIENTES (MODAL)
+  // =====================
+
   buscarClientes() {
-    if (
-      this.formBusClientes.value.nombre_identifica != null &&
-      this.formBusClientes.value.nombre_identifica != ''
-    ) {
-      this.clieService
-        .getByNombreIdentifi(this.formBusClientes.value.nombre_identifica)
-        .subscribe({
-          next: (datos) => (this._clientes = datos),
-          error: (err) => console.error(err),
-        });
-    }
+    const { nombre_identifica } = this.formBusClientes.value;
+    if (!nombre_identifica) return;
+
+    this.clieService.getByNombreIdentifi(nombre_identifica).subscribe({
+      next: (datos) => (this._clientes = datos),
+      error: (err) => console.error(err),
+    });
   }
 
   selecCliente(cliente: Clientes) {
@@ -662,7 +675,6 @@ export class RecaudacionComponent implements OnInit {
     );
     this.buscaIdentificacion(cliente.idcliente);
     this.closeModal('clientesModal');
-
   }
 
   clientesModal() {
@@ -675,71 +687,53 @@ export class RecaudacionComponent implements OnInit {
     }
   }
 
-  changeFormacobro() {
-    const formacobro = this.formCobrar.get('idformacobro')!.value;
-    this.idformacobro = formacobro.idformacobro;
-    if (formacobro.idformacobro == 3) {
-      this.formacobroNC = true;
-    } else {
-      this.formacobroNC = false;
-    }
-  }
+  // =====================
+  //   MARCAR FACTURAS
+  // =====================
 
   marcarTodas(event: any) {
-    let valor: number = 0;
-    if (event.target.checked) {
-      valor = 1;
-    }
-    let i = 0;
-    this._sincobro.forEach(() => {
+    const valor = event.target.checked ? 1 : 0;
+    this._sincobro.forEach((s, i) => {
       this._sincobro[i].pagado = valor;
-      i++;
     });
     this.totalAcobrar();
   }
 
   marcarAnteriores(e: any, index: number, cuenta: number) {
     this.ntaCredito(cuenta, e.target.checked);
-    if (
-      this._sincobro[index].idmodulo === 3 ||
-      this._sincobro[index].idmodulo === 4
-    ) {
-      //Solo para Emision
+
+    if (this._sincobro[index].idmodulo === 3 || this._sincobro[index].idmodulo === 4) {
       if (this._sincobro[index].pagado) {
-        //Marca anteriores
         let antCuenta = this._sincobro[index].idAbonado;
         let i = index - 1;
         while (i >= 0) {
-          if (antCuenta != this._sincobro[i].idAbonado) break;
+          if (antCuenta !== this._sincobro[i].idAbonado) break;
           this._sincobro[i].pagado = 1;
           antCuenta = this._sincobro[i].idAbonado;
           i--;
         }
-      } //Desmarca siguientes
-      else {
+      } else {
         let antCuenta = this._sincobro[index].idAbonado;
         let i = index;
         while (i <= this._sincobro.length - 1) {
-          if (antCuenta != this._sincobro[i].idAbonado) break;
+          if (antCuenta !== this._sincobro[i].idAbonado) break;
           this._sincobro[i].pagado = 0;
           antCuenta = this._sincobro[i].idAbonado;
           i++;
         }
       }
     } else {
-      if (this._sincobro[index].pagado) {
-        this._sincobro[index].pagado = 1;
-      } else {
-        this._sincobro[index].pagado = 0;
-      }
+      this._sincobro[index].pagado = this._sincobro[index].pagado ? 1 : 0;
     }
+
     this.totalAcobrar();
   }
+
   valCheckBox(cuenta: number, swcobrado: any) {
-    if (swcobrado == true) {
+    if (swcobrado === true) {
       return swcobrado;
     } else if (
-      cuenta != this.arrCuenta[0] &&
+      cuenta !== this.arrCuenta[0] &&
       this.arrCuenta.length > 0 &&
       cuenta > 0
     ) {
@@ -748,18 +742,19 @@ export class RecaudacionComponent implements OnInit {
       return false;
     }
   }
+
   ntaCredito(cuenta: number, sw: boolean) {
-    if (cuenta != 0 && sw === true) {
-      let find = this.arrCuenta.find((item: number) => item == cuenta);
+    if (cuenta !== 0 && sw) {
+      const find = this.arrCuenta.find((item: number) => item === cuenta);
       if (!find) {
         this.arrCuenta.push(cuenta);
         this.buscarNtaCredito(this.arrCuenta[0]);
       }
-    } else if (cuenta != 0 && sw === false) {
-      let find = this.arrCuenta.find((item: number) => item == cuenta);
+    } else if (cuenta !== 0 && !sw) {
+      const find = this.arrCuenta.find((item: number) => item === cuenta);
+      const i = this.arrCuenta.indexOf(find);
+      if (i >= 0) this.arrCuenta.splice(i, 1);
 
-      let i = this.arrCuenta.indexOf(find);
-      this.arrCuenta.splice(i, 1);
       if (this.arrCuenta.length > 0) {
         this.buscarNtaCredito(this.arrCuenta[0]);
       }
@@ -771,18 +766,15 @@ export class RecaudacionComponent implements OnInit {
       next: (datos: any) => {
         this._nc = datos;
         if (datos.length > 0) {
-          this.formCobrar.patchValue({
-            saldo: datos[0].saldo,
-          });
+          this.formCobrar.patchValue({ saldo: datos[0].saldo });
         } else {
-          this.formCobrar.patchValue({
-            saldo: '',
-          });
+          this.formCobrar.patchValue({ saldo: '' });
         }
       },
       error: (e: any) => console.error(e),
     });
   }
+
   guardarValoresNc(valorNc: any, factura: any): void {
     const notaCredito = this._nc[0];
     const ncvalor = this.formCobrar.value.ncvalor;
@@ -808,7 +800,7 @@ export class RecaudacionComponent implements OnInit {
           };
           return this.s_ntacredito.updateNotaCredito(nc);
         }),
-        tap((respuesta: any) => { })
+        tap(() => { })
       )
       .subscribe({
         error: (e: any) =>
@@ -820,40 +812,43 @@ export class RecaudacionComponent implements OnInit {
   }
 
   totalAcobrar() {
-    let suma: number = 0;
-    let i = 0;
-    this._sincobro.forEach((item: any, index: number) => {
-      if (this._sincobro[i].pagado === true || this._sincobro[i].pagado === 1) {
-        suma +=
-          this._sincobro[i].total +
-          this._sincobro[i].iva +
-          this._sincobro[i].interes;
+    let suma = 0;
+    this._sincobro.forEach((item) => {
+      if (item.pagado === true || item.pagado === 1) {
+        suma += item.total + item.iva + item.interes;
       }
-      i++;
     });
     this.acobrar = +suma.toFixed(2)!;
   }
 
+  // =====================
+  //   COBRO
+  // =====================
+
   valorAcobrar(acobrar: number) {
     this.disabledcobro = true;
-    let entero = Math.trunc(acobrar);
-    let decimal = (acobrar - entero).toFixed(2);
+    const entero = Math.trunc(acobrar);
+    const decimal = (acobrar - entero).toFixed(2);
     this.acobrardec = decimal.toString().slice(1);
+
     const primerPagado = this._sincobro.find(
       (registro: { pagado: number }) => registro.pagado == 1
     );
-    let fcobro: number = 0; //3= Transferencia
-    if (primerPagado.estado == 3) fcobro = this._formascobro[1];
-    else fcobro = this._formascobro[0];
+
+    let fcobro: any = 0;
+    if (primerPagado?.estado === 3) {
+      fcobro = this._formascobro[1];
+    } else {
+      fcobro = this._formascobro[0];
+    }
+
     this.formCobrar.patchValue({
-      // idformacobro: this._formascobro[0],
       idformacobro: fcobro,
       valorAcobrar: acobrar,
       acobrar: entero,
       dinero: '',
       vuelto: '',
       ncvalor: '',
-      //saldo: ''
     });
   }
 
@@ -867,108 +862,7 @@ export class RecaudacionComponent implements OnInit {
     this.disabledcobro = false;
   }
 
-  async getRubroxfac(idfactura: number, idmodulo: number, factura: any) {
-    this.totInteres = 0;
-    this._rubrosxfac = null;
-    let _lecturas: any;
-    this.consumo = 0;
-    this.idfactura = idfactura;
-    if (factura.swcondonar != true) {
-      this.totInteres = await this.cInteres(factura);
-    }
-    if (idmodulo == 8) {
-      this.rubxfacService.getByIdfactura1(idfactura).subscribe({
-        next: (detalle) => {
-          this._rubrosxfac = detalle;
-          this.subtotal();
-        },
-        error: (err) =>
-          console.error('Al recuperar el datalle de la Planilla: ', err.error),
-      });
-    } else {
-      this.rubxfacService.getByIdfactura(idfactura).subscribe({
-        next: (detalle: any) => {
-          this._rubrosxfac = detalle;
-          if ((idmodulo == 3 || idmodulo == 4) && detalle.abonado > 0) {
-            this.lecService.getByIdfactura(idfactura).subscribe({
-              next: (resp) => {
-                _lecturas = resp;
-                this.consumo =
-                  _lecturas[0].lecturaactual - _lecturas[0].lecturaanterior;
-              },
-              error: (err) =>
-                console.error(
-                  'Al recuperar la Lectura de la Planilla: ',
-                  err.error
-                ),
-            });
-          }
-          this.subtotal();
-        },
-        error: (err) =>
-          console.error('Al recuperar el datalle de la Planilla: ', err.error),
-      });
-    }
-  }
 
-  getAbonadoById(cuenta: number) {
-    let abonado: any;
-    if (cuenta != 0) {
-      this.aboService.getOneAbonado(cuenta).subscribe({
-        next: (datos) => {
-          abonado = datos;
-        },
-        error: (e) => console.error(e),
-      });
-      return abonado;
-    }
-  }
-  //Subtotal de la Planilla
-  subtotal() {
-    let suma12: number = 0;
-    let suma0: number = 0;
-    let i = 0;
-    this._rubrosxfac.forEach(() => {
-      if (this._rubrosxfac[i].idrubro_rubros.swiva == 1)
-        suma12 =
-          suma12 +
-          this._rubrosxfac[i].cantidad * this._rubrosxfac[i].valorunitario;
-      else
-        suma0 +=
-          this._rubrosxfac[i].cantidad * this._rubrosxfac[i].valorunitario;
-      i++;
-    });
-    suma12 = Math.round(suma12 * 100) / 100;
-    this.valoriva = suma12 * this.iva;
-    this.totfac = suma12 + suma0 + this.valoriva + this.totInteres;
-  }
-
-  __cobrar() {
-    //this.getLastFactura();
-    //Crea el registro en Recaudación
-    let fecha = new Date();
-    let r = {} as iRecaudacion; //Interface para los datos de la Recaudación
-    r.fechacobro = fecha;
-    r.recaudador = this.authService.idusuario;
-    r.totalpagar = +this.formCobrar.value.valorAcobrar;
-    r.recibo = +this.formCobrar.value.dinero;
-    r.cambio = +this.formCobrar.value.vuelto;
-    r.formapago = this.idformacobro;
-    r.valor = +this.formCobrar.value.valorAcobrar;
-    r.estado = 1;
-    r.ncvalor = +this.formCobrar.value.ncvalor;
-    r.usucrea = this.authService.idusuario;
-    r.feccrea = fecha;
-    this.recaService.saveRecaudacion(r).subscribe({
-      next: (resp) => {
-        const recaCreada = resp as Recaudacion;
-        let i = 0;
-        this.facxrecauda(recaCreada, i);
-        this.swal("success", "Recaudación cobrada con éxito.")
-      },
-      error: (err) => console.error('Al crear la Recaudación: ', err.error),
-    });
-  }
   cobrar() {
     const fecha = new Date();
     const r = {} as iRecaudacion;
@@ -989,7 +883,7 @@ export class RecaudacionComponent implements OnInit {
       next: async (resp) => {
         const recaCreada = resp as Recaudacion;
         try {
-          await this.facxrecauda(recaCreada, 0);   // ⬅️ Espera a que termine todo
+          await this.facxrecauda(recaCreada, 0);
           this.swal("success", "Recaudación cobrada con éxito.");
         } catch (err) {
           console.error('Error en facxrecauda:', err);
@@ -1010,12 +904,15 @@ export class RecaudacionComponent implements OnInit {
       timer: 3000,
     });
   }
-  // Registra las facturas por recaudación y actualiza la fecha de cobro de la(s) factura(s)
+
+  // =====================
+  //   FACxRECAUDA
+  // =====================
+
   facxrecauda(recaCreada: Recaudacion, i: number): Promise<void> {
     return new Promise((resolve, reject) => {
 
       const avanzar = (idx: number) => {
-        // Fin: cuando ya no hay más por procesar
         if (idx >= this._sincobro.length) {
           resolve();
           return;
@@ -1023,21 +920,19 @@ export class RecaudacionComponent implements OnInit {
 
         const item = this._sincobro[idx];
 
-        // Si no está pagada, saltar a la siguiente (y asegurar que no quede marcado)
         if (item.pagado !== 1 && item.pagado !== true) {
-          item.procesando = false; // por si acaso
+          item.procesando = false;
           avanzar(idx + 1);
           return;
         }
 
-        // 🔴 comienza a procesar este item
         item.procesando = true;
 
-        // ======= Tu lógica original (idéntica) desde aquí =======
         const idfactura: number = item.idfactura;
         const valfactura: number = item.total + item.interes;
         const fechacobro: Date = new Date();
-        const horaActual: string = `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`;
+        const horaActual: string =
+          `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`;
 
         const rubro: Rubros = new Rubros();
         rubro.idrubro = 5;
@@ -1073,7 +968,8 @@ export class RecaudacionComponent implements OnInit {
                       const nrofac_f = +nrofac[2]! + 1;
                       sessionStorage.setItem('ultfac', nrofac_f.toString().padStart(9, '0'));
                       this.formatNroFactura(nrofac_f);
-                      fac.nrofactura = `${this._codRecaudador}-${nrofac_f.toString().padStart(9, '0')}`;
+                      fac.nrofactura =
+                        `${this._codRecaudador}-${nrofac_f.toString().padStart(9, '0')}`;
 
                       this.s_recaudaxcaja.getLastConexion(this._caja.idcaja).subscribe({
                         next: (datos) => {
@@ -1096,27 +992,25 @@ export class RecaudacionComponent implements OnInit {
                           valoresnc.idntacredito_ntacredito = this._nc[0];
                           valoresnc.valor = this.formCobrar.value.ncvalor;
                           valoresnc.fechaaplicado = new Date();
-                          valoresnc.saldo = this._nc[0].saldo - this.formCobrar.value.ncvalor;
+                          valoresnc.saldo =
+                            this._nc[0].saldo - this.formCobrar.value.ncvalor;
                           this.guardarValoresNc(valoresnc, nex);
                         }
 
                         this.swcobrado = true;
 
-                        if (nex.idmodulo.idmodulo != 27 || nex.interescobrado > 0) {
+                        if (nex.idmodulo.idmodulo !== 27 || nex.interescobrado > 0) {
                           await this.saveRubxFac(fac, rubro, item.interes);
                         }
-
-                        this.s_fecfacturas.generateXmlOfPago(fac.idfactura);
-
-                        // 🟢 terminó de procesar ESTE item
+                        if (fac.formapago !== 4) {
+                          this.s_fecfacturas.generateXmlOfPago(fac.idfactura);
+                        }
                         item.procesando = false;
-                        item.procesada = true;   // <-- NUEVO: quedó lista para imprimir
+                        item.procesada = true;
 
-                        // Continuar con la siguiente
                         avanzar(idx + 1);
                       },
                       error: (err) => {
-                        // ❌ error: libera el estado y rechaza
                         item.procesando = false;
                         reject(err?.error ?? err);
                       },
@@ -1139,286 +1033,23 @@ export class RecaudacionComponent implements OnInit {
             reject(err?.error ?? err);
           },
         });
-        // ======= Fin de tu lógica original =======
       };
 
-      // inicia
       avanzar(i);
     });
   }
 
-  // Registra las facturas por recaudación y actualiza la fecha de cobro de la(s) factura(s)
+  // Versiones antiguas delegando
   _facxrecauda(recaCreada: Recaudacion, i: number): Promise<void> {
-    return new Promise((resolve, reject) => {
-
-      const avanzar = (idx: number) => {
-        // Fin: cuando ya no hay más por procesar
-        if (idx >= this._sincobro.length) {
-          resolve();
-          return;
-        }
-
-        // Si no está pagada, saltar a la siguiente
-        if (this._sincobro[idx].pagado !== 1 && this._sincobro[idx].pagado !== true) {
-          avanzar(idx + 1);
-          return;
-        }
-
-        // ======= Tu lógica original (idéntica) desde aquí =======
-        let idfactura: number = this._sincobro[idx].idfactura;
-        let valfactura: number = this._sincobro[idx].total + this._sincobro[idx].interes;
-        let fechacobro: Date = new Date();
-        let horaActual: any = `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`;
-
-        let rubro: Rubros = new Rubros();
-        rubro.idrubro = 5;
-
-        this.facService.getById(idfactura).subscribe({
-          next: (fac: any) => {
-            fac.valornotacredito = this.calcularNCByFactura(valfactura, this.valorNtaCredito);
-
-            let facxr = {} as iFacxrecauda;
-            facxr.idrecaudacion = recaCreada;
-            facxr.idfactura = fac;
-            facxr.estado = 1;
-
-            this.facxrService.save(facxr).subscribe({
-              next: () => {
-                this.rubxfacService.getIva(this.iva, fac.idfactura).subscribe({
-                  next: (iva: any) => {
-                    fac.swiva = (iva && iva[0]) ? iva[0][1] : 0;
-                    fac.fechacobro = fechacobro;
-                    fac.horacobro = horaActual;
-
-                    if (this.swNC === true) {
-                      fac.formapago = 3;
-                    }
-
-                    fac.usuariocobro = this.authService.idusuario;
-                    fac.interescobrado = this._sincobro[idx].interes;
-                    fac.pagado = 1;
-                    fac.estado = (fac.estado === 2) ? 2 : 1;
-
-                    if (fac.nrofactura === null) {
-                      let nrofac = this._nroFactura.split('-', 3);
-                      let nrofac_f = +nrofac[2]! + 1;
-                      sessionStorage.setItem('ultfac', nrofac_f.toString().padStart(9, '0'));
-                      this.formatNroFactura(nrofac_f);
-                      fac.nrofactura = `${this._codRecaudador}-${nrofac_f.toString().padStart(9, '0')}`;
-
-                      this.s_recaudaxcaja.getLastConexion(this._caja.idcaja).subscribe({
-                        next: (datos) => {
-                          this.recxcaja = datos;
-                          this.recxcaja.facfin = nrofac_f;
-                          this.s_recaudaxcaja.updateRecaudaxcaja(this.recxcaja).subscribe({
-                            next: () => { },
-                            error: (e) => console.error(e),
-                          });
-                        },
-                        error: (e) => console.error(e),
-                      });
-                    }
-
-                    this.facService.updateFacturas(fac).subscribe({
-                      next: async (nex: any) => {
-                        if (this._nc.length > 0 && fac.valornotacredito > 0) {
-                          let valoresnc: Valoresnc = new Valoresnc();
-                          valoresnc.estado = 1;
-                          valoresnc.idntacredito_ntacredito = this._nc[0];
-                          valoresnc.valor = this.formCobrar.value.ncvalor;
-                          valoresnc.fechaaplicado = new Date();
-                          valoresnc.saldo = this._nc[0].saldo - this.formCobrar.value.ncvalor;
-                          this.guardarValoresNc(valoresnc, nex);
-                        }
-
-                        this.swcobrado = true;
-
-                        if (nex.idmodulo.idmodulo != 27 || nex.interescobrado > 0) {
-                          await this.saveRubxFac(fac, rubro, this._sincobro[idx].interes);
-                        }
-
-                        this.s_fecfacturas.generateXmlOfPago(fac.idfactura);
-
-                        // Continuar con la siguiente
-                        avanzar(idx + 1);
-                      },
-                      error: (err) => reject(err?.error ?? err),
-                    });
-                  },
-                  error: (e) => reject(e),
-                });
-              },
-              error: (err) => reject(err?.error ?? err),
-            });
-          },
-          error: (err) => reject(err?.error ?? err),
-        });
-        // ======= Fin de tu lógica original =======
-      };
-
-      // inicia
-      avanzar(i);
-    });
+    return this.facxrecauda(recaCreada, i);
   }
 
-  //Registra las facturas por recaudación y actualiza la fecha de cobro de la(s) factura(s)
-  __facxrecauda(recaCreada: Recaudacion, i: number) {
-    let idfactura: number;
-    let valfactura: number;
-    let fechacobro: Date = new Date();
-    const ahora = new Date();
-    /*     const horaActual = {
-          horas: ahora.getHours(),
-          minutos: ahora.getMinutes(),
-          segundos: ahora.getSeconds()
-        }; */
-    //const horaActual = new Date().getTime();
-    let horaActual: any = `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`;
-
-    let rubro: Rubros = new Rubros();
-    rubro.idrubro = 5;
-    //this._sincobro[i].pagado = 1;
-    if (this._sincobro[i].pagado === 1 || this._sincobro[i].pagado === true) {
-      idfactura = this._sincobro[i].idfactura;
-      valfactura = this._sincobro[i].total + this._sincobro[i].interes;
-      this.facService.getById(idfactura).subscribe({
-        next: (fac: any) => {
-          fac.valornotacredito = this.calcularNCByFactura(
-            valfactura,
-            this.valorNtaCredito
-          );
-          //Añade a facxrecauda
-          let facxr = {} as iFacxrecauda; //Interface para los datos de las facturas de la Recaudación
-          facxr.idrecaudacion = recaCreada;
-          facxr.idfactura = fac;
-          facxr.estado = 1;
-          this.facxrService.save(facxr).subscribe({
-            next: (nex) => {
-              //Actualiza Factura como cobrada
-              //let iva = 0;
-              this.rubxfacService.getIva(this.iva, fac.idfactura).subscribe({
-                next: (iva: any) => {
-                  if (iva[0] != undefined) {
-                    fac.swiva = iva[0][1];
-                  } else {
-                    fac.swiva = 0;
-                  }
-                  fac.fechacobro = fechacobro;
-                  fac.horacobro = horaActual;
-                  if (this.swNC === true) {
-                    fac.formapago = 3;
-                    /* AQUI COLOCAR LA FUNCION DE IMPRIMIR EL COMPROBANTE DE NOTACREDITO */
-                  }
-                  fac.usuariocobro = this.authService.idusuario;
-                  if (fac.idmodulo.idmodulo != 8) {
-                  }
-                  fac.interescobrado = this._sincobro[i].interes;
-                  fac.pagado = 1;
-                  if (fac.estado === 2) {
-                    fac.estado = 2;
-                  } else {
-                    fac.estado = 1;
-                  }
-                  if (
-                    this._sincobro[i].interes > 0 &&
-                    fac.idmodulo.idmodulo != 8
-                  ) {
-                  }
-                  //this.saveRubxFac(fac, rubro, this._sincobro[i].interes);
-                  let j = 1;
-                  if (fac.nrofactura === null) {
-                    let nrofac = this._nroFactura.split('-', 3);
-                    let nrofac_f = +nrofac[2]! + j;
-                    sessionStorage.setItem(
-                      'ultfac',
-                      nrofac_f.toString().padStart(9, '0')
-                    );
-                    this.formatNroFactura(nrofac_f);
-                    fac.nrofactura = `${this._codRecaudador}-${nrofac_f
-                      .toString()
-                      .padStart(9, '0')}`;
-                    /* =============== */
-                    //let _nrofac = this._nroFactura.split('-', 3);
-                    this.s_recaudaxcaja
-                      .getLastConexion(this._caja.idcaja)
-                      .subscribe({
-                        next: (datos) => {
-                          this.recxcaja = datos;
-                          this.recxcaja.facfin = nrofac_f;
-                          this.s_recaudaxcaja
-                            .updateRecaudaxcaja(this.recxcaja)
-                            .subscribe({
-                              next: (datos) => { },
-                              error: (e) => console.error(e),
-                            });
-                        },
-                        error: (e) => console.error(e),
-                      });
-                    /* =============== */
-                  }
-                  //fac.swiva = +iva[0][1]!;
-                  this.facService.updateFacturas(fac).subscribe({
-                    next: async (nex: any) => {
-                      if (this._nc.length > 0 && fac.valornotacredito > 0) {
-                        let valoresnc: Valoresnc = new Valoresnc();
-                        valoresnc.estado = 1;
-                        valoresnc.idntacredito_ntacredito = this._nc[0];
-                        valoresnc.valor = this.formCobrar.value.ncvalor;
-                        valoresnc.fechaaplicado = new Date();
-                        valoresnc.saldo =
-                          this._nc[0].saldo - this.formCobrar.value.ncvalor;
-                        this.guardarValoresNc(valoresnc, nex);
-                      }
-                      this.swcobrado = true;
-                      if (
-                        nex.idmodulo.idmodulo != 27 ||
-                        nex.interescobrado > 0
-                      ) {
-                        await this.saveRubxFac(
-                          fac,
-                          rubro,
-                          this._sincobro[i].interes
-                        );
-                      }
-                      this.s_fecfacturas.generateXmlOfPago(fac.idfactura);
-                      j++;
-                      i++;
-                      if (i < this._sincobro.length) {
-                        this.facxrecauda(recaCreada, i);
-                      }
-                    },
-                    error: (err) =>
-                      console.error('Al actualizar la Factura: ', err.error),
-                  });
-                },
-                error: (e) => console.error('Error al obtener el iva', e),
-              });
-            },
-            error: (err) =>
-              console.error(
-                'Al crear las Facturas de la Recaudación: ',
-                err.error
-              ),
-          });
-        },
-        error: (err) =>
-          console.error(
-            'Al recuperar los datos de la Factura a actualizar: ',
-            err.error
-          ),
-      });
-    } else {
-      //No pagada continua con la siguiente
-      i++;
-      if (i < this._sincobro.length) {
-        this.facxrecauda(recaCreada, i);
-      }
-    }
+  __facxrecauda(recaCreada: Recaudacion, i: number): Promise<void> {
+    return this.facxrecauda(recaCreada, i);
   }
-
 
   async saveRubxFac(idfactura: any, idrubro: any, valorunitario: any) {
-    let rubrosxfac: Rubroxfac = new Rubroxfac();
+    const rubrosxfac: Rubroxfac = new Rubroxfac();
     rubrosxfac.idfactura_facturas = idfactura;
     rubrosxfac.idrubro_rubros = idrubro;
     rubrosxfac.valorunitario = valorunitario;
@@ -1426,6 +1057,10 @@ export class RecaudacionComponent implements OnInit {
     rubrosxfac.estado = 1;
     await this.rubxfacService.saveRubroxfacAsync(rubrosxfac);
   }
+
+  // =====================
+  //   COLORES (UI)
+  // =====================
 
   tonos() {
     setTimeout(() => {
@@ -1458,7 +1093,7 @@ export class RecaudacionComponent implements OnInit {
                   .subscribe({
                     next: (resp1) => {
                       this._coloresdetalle = resp1;
-                      let defaultValue3 = this._coloresdetalle.find(
+                      const defaultValue3 = this._coloresdetalle.find(
                         (color1: { idcolor: number }) => color1.idcolor === 131
                       );
                       this.formColores = this.fb.group({
@@ -1482,11 +1117,11 @@ export class RecaudacionComponent implements OnInit {
         error: (err) => console.error('Al recuperar los Tonos', err.error),
       });
     }, 500);
+
     const tonocabecera = document.getElementById(
       'tonocabecera'
     ) as HTMLSelectElement;
     tonocabecera.addEventListener('change', () => {
-      // Recupera los Colores del Tono seleccionado
       this._colorescabecera = [];
       this.coloService
         .getByTono(this.formColores.value.tonos0.codigo)
@@ -1496,7 +1131,7 @@ export class RecaudacionComponent implements OnInit {
             console.error('Al recuperar los Colores por Tono', err.error),
         });
     });
-    // =========== Detalle ===========
+
     const tono1 = document.getElementById('tonodetalle') as HTMLSelectElement;
     tono1.addEventListener('change', () => {
       this._coloresdetalle = [];
@@ -1509,173 +1144,187 @@ export class RecaudacionComponent implements OnInit {
         });
     });
   }
-  //Que el dinero no sea menor que el valor a cobrar
-  valDinero(control: AbstractControl): { [key: string]: any } | null {
+
+  // =====================
+  //   VALIDACIONES
+  // =====================
+
+  valDinero(control: AbstractControl) {
     const ncvalor = +this.formCobrar.controls['ncvalor'].value || 0;
     const valorAcobrar = +this.formCobrar.value.valorAcobrar || 0;
     const valorActual = +control.value || 0;
     if (valorAcobrar - ncvalor > valorActual) {
       return of({ invalido: true });
     }
-
     return of(null);
   }
 
-  async _impComprobante(datos: any) {
-    // Abrir una pestaña vacía de inmediato
-    const newTab = window.open('', '_blank');
-    if (!newTab) {
-      alert(
-        'Tu navegador bloqueó la apertura del PDF. Permite ventanas emergentes.'
-      );
-      return;
-    }
-    let body: any;
-    if (datos.idAbonado > 0 && (datos.idmodulo === 4 || datos.idmodulo === 3)) {
-      body = {
-        reportName: 'CompPagoConsumoAgua',
-        parameters: {
-          idfactura: datos.idfactura,
-        },
-        extencion: '.pdf',
-      };
-    } else if (datos.idmodulo === 27) {
-      body = {
-        reportName: 'CompPagoConvenios',
-        parameters: {
-          idfactura: datos.idfactura,
-        },
-        extencion: '.pdf',
-      };
-    } else {
-      body = {
-        reportName: 'CompPagoServicios',
-        parameters: {
-          idfactura: datos.idfactura,
-        },
-        extencion: '.pdf',
-      };
-    }
-    // Esperar el reporte
-    let reporte = await this.s_jasperReport.getReporte(body);
-
-    // Crear Blob y URL
-    const file = new Blob([reporte], { type: 'application/pdf' });
-    const fileURL = URL.createObjectURL(file);
-
-    // Redireccionar la pestaña abierta al PDF
-    newTab.location.href = fileURL;
-
-    // Liberar memoria después
-    setTimeout(() => {
-      URL.revokeObjectURL(fileURL);
-    }, 1000);
-
-    /* ================ */
-    /* et lectura: any;
-    this.facService.getById(datos.idfactura).subscribe({
-      next: (d_factura: any) => {
-        let modulo: number = d_factura.idmodulo.idmodulo;
-        if (modulo === 3 || modulo === 4) {
-          this.lecService.getOnefactura(d_factura.idfactura).subscribe({
-            next: (datos: any) => {
-              lectura = datos;
-              if (datos != null) {
-                this.s_pdfRecaudacion._comprobantePago(lectura, d_factura);
-              } else {
-                this.s_pdfRecaudacion._comprobantePago(null, d_factura);
-              }
-            },
-            error: (e) => console.error(e),
-          });
-        } else {
-          this.s_pdfRecaudacion._comprobantePago(null, d_factura);
-        }
+  listarIntereses() {
+    this.interService.getListaIntereses().subscribe({
+      next: (datos) => {
+        this._intereses = datos;
       },
-      error: (e) => console.error(e),
-    }); */
+      error: (err) => console.error(err.error),
+    });
   }
-  async reImpComprobante(datos: any) {
-    // Abrir una pestaña vacía de inmediato
-    const newTab = window.open('', '_blank');
-    if (!newTab) {
-      alert(
-        'Tu navegador bloqueó la apertura del PDF. Permite ventanas emergentes.'
-      );
-      return;
-    }
 
-    let fac = await this.facService.getByIdAsync(datos.idfactura);
-    let body: any;
-    if (fac.idabonado > 0 && fac.idmodulo.idmodulo == 4) {
-      body = {
-        reportName: 'CompPagoConsumoAgua',
-        parameters: {
-          idfactura: +fac.idfactura!,
-        },
-        extencion: '.pdf',
-      };
-    } else if (fac.idmodulo.idmodulo === 27 || fac.estado == 2) {
-      body = {
-        reportName: 'CompPagoConvenios',
-        parameters: {
-          idfactura: +fac.idfactura!,
-        },
-        extencion: '.pdf',
-      };
+  get hayProcesando(): boolean {
+    return !!this._sincobro?.some((s: any) => !!s.procesando);
+  }
+
+  get hayProcesadas(): boolean {
+    return !!this._sincobro?.some((s: any) => !!s.procesada);
+  }
+
+  get deshabilitarImprimirTodo(): boolean {
+    return !this.swcobrado || this.hayProcesando || !this.hayProcesadas;
+  }
+
+  get dataTargetPdf(): string | null {
+    return this.otraPagina ? null : '#pdf';
+  }
+
+  cInteres(factura: any) {
+    return this.interService.getInteresFactura(factura.idfactura);
+  }
+
+  async calIva(idfactura: any) {
+    return this.rubxfacService.getIva(0.15, idfactura).toPromise();
+  }
+
+  valorTarifas(
+    tarifa: number,
+    cons: number,
+    interes: number,
+    multa: number,
+    modulo: number,
+    valorbase: number,
+    sincobro: any
+  ) {
+    if (modulo === 8) {
+      return valorbase;
+    } else if (
+      sincobro.idmodulo.idmodulo === 3 &&
+      (sincobro.idabonado === 0 || sincobro.idabonado == null)
+    ) {
+      return valorbase;
     } else {
-      body = {
-        reportName: 'CompPagoServicios',
-        parameters: {
-          idfactura: +fac.idfactura!,
-        },
-        extencion: '.pdf',
-      };
+      const t = tarifa || 0;
+      const c = cons || 0;
+      const i = interes || 0;
+      const m = multa || 0;
+      return t + c + i + m;
     }
-
-    // Esperar el reporte
-    let reporte = await this.s_jasperReport.getReporte(body);
-
-    // Crear Blob y URL
-    const file = new Blob([reporte], { type: 'application/pdf' });
-    const fileURL = URL.createObjectURL(file);
-
-    // Redireccionar la pestaña abierta al PDF
-    newTab.location.href = fileURL;
-
-    // Liberar memoria después
-    setTimeout(() => {
-      URL.revokeObjectURL(fileURL);
-    }, 1000);
-    /* let lectura: any;
-    this.facService.getById(datos.idfactura).subscribe({
-      next: (d_factura: any) => {
-        let modulo: number = d_factura.idmodulo.idmodulo;
-        if (modulo === 3 || modulo === 4) {
-          this.lecService.getOnefactura(d_factura.idfactura).subscribe({
-            next: (datos: any) => {
-              lectura = datos;
-              if (datos != null) {
-                this.s_pdfRecaudacion.reimprimircomprobantePago(
-                  lectura,
-                  d_factura
-                );
-              } else {
-                this.s_pdfRecaudacion.reimprimircomprobantePago(
-                  null,
-                  d_factura
-                );
-              }
-            },
-            error: (e) => console.error(e),
-          });
-        } else {
-          this.s_pdfRecaudacion.reimprimircomprobantePago(null, d_factura);
-        }
-      },
-      error: (e) => console.error(e),
-    }); */
   }
+
+  changeNCvalor(e: any) {
+    this.valorNtaCredito = +e.target.value!;
+    let dinero: number;
+    if (+this.formCobrar.controls['dinero'].value > 0)
+      dinero = +this.formCobrar.controls['dinero'].value;
+    else dinero = 0;
+    const vuelto = (
+      +this.formCobrar.controls['ncvalor'].value +
+      dinero -
+      this.acobrar
+    ).toFixed(2);
+    this.formCobrar.controls['vuelto'].setValue(vuelto.toString());
+    this.disabledcobro = this.formCobrar.controls['vuelto'].value != 0;
+  }
+
+  calcularNCByFactura(vfactura: number, vnc: number): number {
+    if (vnc > 0) {
+      if (vfactura === vnc) {
+        this.valorNtaCredito = vnc - vfactura;
+        return vnc;
+      } else if (vfactura < vnc) {
+        this.valorNtaCredito = vnc - vfactura;
+        return vfactura;
+      } else if (vfactura > vnc) {
+        this.valorNtaCredito = 0;
+        return vnc;
+      } else {
+        return 0;
+      }
+    } else {
+      return 0;
+    }
+  }
+
+  valNC(control: AbstractControl) {
+    if (
+      this.formCobrar.value.valorAcobrar < control.value ||
+      control.value > +this.formCobrar.value.saldo!
+    ) {
+      this.swNC = false;
+      return of({ invalido: true });
+    } else {
+      this.swNC = true;
+      return of(null);
+    }
+  }
+
+  SaldoNC(control: AbstractControl) {
+    if (this.formCobrar.value.saldo <= 0) return of({ invalido: true });
+    else return of(null);
+  }
+
+  changeDinero() {
+    let ncvalor: number;
+    if (+this.formCobrar.controls['ncvalor'].value > 0)
+      ncvalor = +this.formCobrar.controls['ncvalor'].value;
+    else ncvalor = 0;
+    const vuelto = (
+      +this.formCobrar.controls['dinero'].value +
+      ncvalor -
+      this.acobrar
+    ).toFixed(2);
+    this.formCobrar.controls['vuelto'].setValue(vuelto.toString());
+    this.disabledcobro = this.formCobrar.controls['vuelto'].value < 0;
+  }
+
+  getRubroxfacReimpresion(idfactura: number) {
+    this.rubxfacService.getByIdfactura(+idfactura!).subscribe({
+      next: (detalle: any) => {
+        this._rubrosxfac = detalle;
+        this._subtotal();
+      },
+      error: (err) => console.error(err),
+    });
+  }
+  getRubroxfac(idfactura: number, idmodulo?: any, sincobro?: any) {
+    this.idfactura = idfactura;
+    this.valoriva = sincobro?.iva ?? 0;
+    this.totInteres = sincobro?.interes ?? 0;
+    this.consumo = sincobro?.consumo ?? 0;
+
+    this.getRubroxfacReimpresion(idfactura);
+  }
+  reImpComprobante(datos: any) {
+    this.impComprobante(datos);
+  }
+
+  _subtotal() {
+    let suma12 = 0;
+    let suma0 = 0;
+    let i = 0;
+    this._rubrosxfac.forEach(() => {
+      if (this._rubrosxfac[i].idrubro_rubros.swiva === 1) {
+        suma12 +=
+          this._rubrosxfac[i].cantidad * this._rubrosxfac[i].valorunitario;
+      } else {
+        if (this._rubrosxfac[i].idrubro_rubros.esiva === 0) {
+          suma0 +=
+            this._rubrosxfac[i].cantidad * this._rubrosxfac[i].valorunitario;
+        }
+      }
+      i++;
+    });
+  }
+
+  // =====================
+  //   IMPRESIÓN
+  // =====================
 
   private delay(ms: number) {
     return new Promise(res => setTimeout(res, ms));
@@ -1683,7 +1332,6 @@ export class RecaudacionComponent implements OnInit {
 
   async imprimirTodasProcesadas() {
     try {
-      // Toma solo las facturas marcadas como procesadas y pagadas
       const lista = (this._sincobro || []).filter((s: any) => s.procesada && s.pagado);
 
       if (!lista.length) {
@@ -1691,7 +1339,6 @@ export class RecaudacionComponent implements OnInit {
         return;
       }
 
-      // Descarga secuencial
       for (const item of lista) {
         const blob = await this.generarComprobanteBlob(item);
         const url = URL.createObjectURL(blob);
@@ -1704,7 +1351,7 @@ export class RecaudacionComponent implements OnInit {
         a.remove();
 
         URL.revokeObjectURL(url);
-        await this.delay(250); // ligera pausa para el navegador
+        await this.delay(250);
       }
 
       this.swal('success', 'Se generaron los comprobantes procesados.');
@@ -1713,7 +1360,6 @@ export class RecaudacionComponent implements OnInit {
       this.swal('error', 'Ocurrió un problema al imprimir los comprobantes.');
     }
   }
-
 
   private async generarComprobanteBlob(datos: any): Promise<Blob> {
     let body: any;
@@ -1726,14 +1372,10 @@ export class RecaudacionComponent implements OnInit {
       body = { reportName: 'CompPagoServicios', parameters: { idfactura: datos.idfactura }, extencion: '.pdf' };
     }
 
-    const reporte = await this.s_jasperReport.getReporte(body); // <- tu backend
+    const reporte = await this.s_jasperReport.getReporte(body);
     return new Blob([reporte], { type: 'application/pdf' });
   }
 
-
-  // =========================
-  // 🧾 1) IMPRIMIR UNO (mismo que antes, ya abre nueva pestaña)
-  // =========================
   async impComprobante(datos: any) {
     const newTab = window.open('', '_blank');
     if (!newTab) {
@@ -1747,13 +1389,17 @@ export class RecaudacionComponent implements OnInit {
       const fileURL = URL.createObjectURL(reporte);
       newTab.location.href = fileURL;
 
-      // Liberar memoria después de unos segundos
       setTimeout(() => URL.revokeObjectURL(fileURL), 3000);
     } catch (e) {
       console.error(e);
       this.swal('error', 'No se pudo generar el comprobante.');
       newTab.close();
     }
+  }
+
+  // versión vieja -> delega
+  async _impComprobante(datos: any) {
+    await this.impComprobante(datos);
   }
 
   private buildJasperBodyPorFactura(datos: any) {
@@ -1772,9 +1418,6 @@ export class RecaudacionComponent implements OnInit {
     };
   }
 
-  // =========================
-  // 🧾 2) IMPRIMIR TODOS EN UN SOLO PDF (ABRIR EN NUEVA PESTAÑA)
-  // =========================
   async imprimirTodasEnUno() {
     try {
       const newTab = window.open('', '_blank');
@@ -1797,13 +1440,10 @@ export class RecaudacionComponent implements OnInit {
 
       const reporte = await this.s_jasperReport.mergeComprobantes({ items });
 
-      // 👉 Abrir en otra pestaña
       const fileURL = URL.createObjectURL(reporte);
-      //window.open(fileURL, '_blank');
       newTab.location.href = fileURL;
 
       this.swal('success', 'PDF unificado generado.');
-      // Limpieza de memoria después
       setTimeout(() => URL.revokeObjectURL(fileURL), 5000);
     } catch (e) {
       console.error(e);
@@ -1811,198 +1451,21 @@ export class RecaudacionComponent implements OnInit {
     }
   }
 
-
-
-  listarIntereses() {
-    this.interService.getListaIntereses().subscribe({
-      next: (datos) => {
-        this._intereses = datos;
-      },
-      error: (err) => console.error(err.error),
-    });
-  }
-  get hayProcesando(): boolean {
-    return !!this._sincobro?.some((s: any) => !!s.procesando);
-  }
-
-  get hayProcesadas(): boolean {
-    return !!this._sincobro?.some((s: any) => !!s.procesada);
-  }
-
-  /** Botón "Imprimir todo" deshabilitado si:
-   *  - aún no se ha cobrado, o
-   *  - hay algo procesándose, o
-   *  - no hay ninguna factura procesada
-   */
-  get deshabilitarImprimirTodo(): boolean {
-    return !this.swcobrado || this.hayProcesando || !this.hayProcesadas;
-  }
-
-  /** Para el data-target del botón de reimpresión */
-  get dataTargetPdf(): string | null {
-    return this.otraPagina ? null : '#pdf';
-  }
-
-
-  /* Este metodo calcula el interes individual y la uso en el metodo de listar las facturas sin cobro */
-  cInteres(factura: any) {
-    let interes: any = 0;
-    interes = this.interService.getInteresFactura(factura.idfactura);
-
-    return interes;
-  }
-
-  async calIva(idfactura: any) {
-    let iva = this.rubxfacService.getIva(0.15, idfactura).toPromise();
-    return iva;
-  }
-  valorTarifas(
-    tarifa: number,
-    cons: number,
-    interes: number,
-    multa: number,
-    modulo: number,
-    valorbase: number,
-    sincobro: any
-  ) {
-    if (modulo === 8) {
-      return valorbase;
-    } else if (
-      sincobro.idmodulo.idmodulo === 3 &&
-      (sincobro.idabonado === 0 || sincobro.idabonado == null)
-    ) {
-      return valorbase;
-    } else {
-      let t = 0,
-        c = 0,
-        i = 0,
-        m = 0;
-      t = tarifa === undefined ? 0 : tarifa;
-      c = cons === undefined ? 0 : cons;
-      i = interes === undefined ? 0 : interes;
-      m = multa === undefined ? 0 : multa;
-      return t + c + i + m;
-    }
-  }
-  //Al digitar el valor de la NC
-  changeNCvalor(e: any) {
-    this.valorNtaCredito = +e.target.value!;
-    let dinero: number;
-    if (+this.formCobrar.controls['dinero'].value > 0)
-      dinero = +this.formCobrar.controls['dinero'].value;
-    else dinero = 0;
-    let vuelto = (
-      +this.formCobrar.controls['ncvalor'].value +
-      dinero -
-      this.acobrar
-    ).toFixed(2);
-    this.formCobrar.controls['vuelto'].setValue(vuelto.toString());
-    if (this.formCobrar.controls['vuelto'].value == 0)
-      this.disabledcobro = false;
-    else this.disabledcobro = true;
-  }
-
-  calcularNCByFactura(vfactura: number, vnc: number): number {
-    if (vnc > 0) {
-      if (vfactura === vnc) {
-        this.valorNtaCredito = vnc - vfactura;
-        return vnc;
-      } else if (vfactura < vnc) {
-        this.valorNtaCredito = vnc - vfactura;
-        return vfactura;
-      } else if (vfactura > vnc) {
-        this.valorNtaCredito = 0;
-        return vnc;
-      } else {
-        return 0;
-      }
-    } else {
-      return 0;
-    }
-  }
-
-  //Valida que el valor de la NC no se mayor que el valor a cobrar
-  valNC(control: AbstractControl) {
-    if (
-      this.formCobrar.value.valorAcobrar < control.value ||
-      control.value > +this.formCobrar.value.saldo!
-    ) {
-      this.swNC = false;
-
-      return of({ invalido: true });
-    } else {
-      this.swNC = true;
-
-      return of(null);
-    }
-  }
-  SaldoNC(control: AbstractControl) {
-    if (this.formCobrar.value.saldo <= 0) return of({ invalido: true });
-    else return of(null);
-  }
-  //Al digitar el dinero
-  changeDinero() {
-    let ncvalor: number;
-    if (+this.formCobrar.controls['ncvalor'].value > 0)
-      ncvalor = +this.formCobrar.controls['ncvalor'].value;
-    else ncvalor = 0;
-    let vuelto = (
-      +this.formCobrar.controls['dinero'].value +
-      ncvalor -
-      this.acobrar
-    ).toFixed(2);
-    this.formCobrar.controls['vuelto'].setValue(vuelto.toString());
-    if (this.formCobrar.controls['vuelto'].value >= 0) {
-      this.disabledcobro = false;
-    } else {
-      this.disabledcobro = true;
-    }
-  }
-
-  getRubroxfacReimpresion(idfactura: number) {
-    idfactura;
-    this.rubxfacService.getByIdfactura(+idfactura!).subscribe({
-      next: (detalle) => {
-        this._rubrosxfac = detalle;
-        this._subtotal();
-      },
-      error: (err) => console.error(err),
-    });
-  }
-  _subtotal() {
-    let suma12: number = 0;
-    let suma0: number = 0;
-    let i = 0;
-    this._rubrosxfac.forEach(() => {
-      if (this._rubrosxfac[i].idrubro_rubros.swiva == 1) {
-        suma12 +=
-          this._rubrosxfac[i].cantidad * this._rubrosxfac[i].valorunitario;
-      } else {
-        if (this._rubrosxfac[i].idrubro_rubros.esiva == 0) {
-          suma0 +=
-            this._rubrosxfac[i].cantidad * this._rubrosxfac[i].valorunitario;
-        } else {
-        }
-      }
-      i++;
-    });
-    //this.totfac = suma12 + suma0;
-  }
+  // =====================
+  //   MODALES
+  // =====================
 
   openModal(id: string) {
     const modal = document.getElementById(id);
     if (!modal) return;
 
-    // mostrar modal
     modal.classList.add('show');
     modal.setAttribute('aria-hidden', 'false');
     modal.setAttribute('aria-modal', 'true');
     modal.style.display = 'block';
 
-    // bloquear scroll del body
     document.body.classList.add('modal-open');
 
-    // crear backdrop
     const bd = document.createElement('div');
     bd.className = 'modal-backdrop fade show';
     bd.setAttribute('data-backdrop-id', id);
@@ -2013,20 +1476,16 @@ export class RecaudacionComponent implements OnInit {
     const modal = document.getElementById(id);
     if (!modal) return;
 
-    // ocultar modal
     modal.classList.remove('show');
     modal.setAttribute('aria-hidden', 'true');
     modal.removeAttribute('aria-modal');
     modal.style.display = 'none';
 
-    // quitar backdrop personalizado
     const bd = document.querySelector(`.modal-backdrop[data-backdrop-id="${id}"]`);
     if (bd && bd.parentNode) bd.parentNode.removeChild(bd);
 
-    // 🔥 quitar cualquier backdrop que haya dejado Bootstrap
     document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
 
-    // 🔥 quitar clases del body que bloquean scroll y dejan la pantalla transparente
     document.body.classList.remove('modal-open');
     document.body.style.removeProperty('overflow');
     document.body.style.removeProperty('padding-right');
@@ -2035,22 +1494,24 @@ export class RecaudacionComponent implements OnInit {
 }
 
 
-
+// =====================
+//   INTERFACES
+// =====================
 
 interface Cliente {
   idcliente: number;
-  nombre: String;
-  cedula: String;
-  direccion: String;
-  telefono: String;
-  email: String;
+  nombre: string;
+  cedula: string;
+  direccion: string;
+  telefono: string;
+  email: string;
   porcexonera: number | null;
   porcdiscapacidad: number | null;
 }
 
 interface Mensaje {
-  campo: String;
-  texto: String;
+  campo: string;
+  texto: string;
 }
 
 interface calcInteres {
@@ -2072,7 +1533,7 @@ interface iRecaudacion {
   estado: number;
   fechaeliminacion: Date;
   usuarioeliminacion: number;
-  observaciones: String;
+  observaciones: string;
   ncnumero: number;
   ncvalor: number;
   usucrea: number;
@@ -2099,6 +1560,5 @@ interface SincobroItem {
   interes: number;
   pagado: boolean | number;
   estado?: number;
-  procesando?: boolean; // 🔹 <- nuevo campo para control visual
+  procesando?: boolean;
 }
-

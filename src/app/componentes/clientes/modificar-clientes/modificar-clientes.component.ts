@@ -9,6 +9,7 @@ import {
 import { Router } from '@angular/router';
 import { map, of } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import { ColoresService } from 'src/app/compartida/colores.service';
 import { Clientes } from 'src/app/modelos/clientes';
 import { Nacionalidad } from 'src/app/modelos/nacionalidad';
 import { PersoneriaJuridica } from 'src/app/modelos/personeria-juridica';
@@ -49,6 +50,10 @@ export class ModificarClientesComponent implements OnInit {
   errorMsg = '';
   successMsg = '';
 
+  ventana: string = 'modi-cliente';
+  rolepermission: number;
+  passwordMismatch: boolean = false;
+
   constructor(
     public fb: FormBuilder,
     private cliService: ClientesService,
@@ -56,7 +61,9 @@ export class ModificarClientesComponent implements OnInit {
     private tpidentiService: TpidentificaService,
     private router: Router,
     public personeriajuridicaS: PersoneriaJuridicaService,
-    private authService: AutorizaService
+    private authService: AutorizaService,
+    private coloresService: ColoresService
+
   ) {
     this.formBuscar = this.fb.group({
       cuenta: [''],
@@ -73,10 +80,20 @@ export class ModificarClientesComponent implements OnInit {
     );
   }
 
-  ngOnInit(): void {
-    sessionStorage.setItem('ventana', '/clientes');
-    let coloresJSON = sessionStorage.getItem('/clientes');
+  async ngOnInit(): Promise<void> {
+    sessionStorage.setItem('ventana', `/${this.ventana}`);
+    let coloresJSON = sessionStorage.getItem(`/${this.ventana}`);
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
+    if (
+      this.coloresService.rolepermission == undefined ||
+      this.coloresService.rolepermission == null
+    ) {
+      this.rolepermission = await this.coloresService.getRolePermission(
+        this.authService.idusuario,
+        this.ventana
+      );
+      console.log(this.rolepermission);
+    }
     this.parent = sessionStorage.getItem('padreModiCliente');
 
     let date: Date = new Date();
@@ -107,13 +124,30 @@ export class ModificarClientesComponent implements OnInit {
       },
       { updateOn: 'blur' }
     );
+    this.formCredenciales = this.fb.group(
+      {
+        username: ['', [Validators.required]],
+        password: ['', [Validators.required, Validators.minLength(6)]],
+        confirmPassword: ['', [Validators.required]],
+        activo: [true, Validators.required]  // nuevo campo
+      },
+      { validators: this.passwordMatchValidator }
+    );
+
 
     this.listarNacionalidades();
     this.listarPersoneriaJuridica();
     this.listarTpIdentifica();
     this.buscaCliente();
   }
-
+  passwordMatchValidator(group: AbstractControl) {
+    const pass = group.get('password')?.value;
+    const confirm = group.get('confirmPassword')?.value;
+    if (pass && confirm && pass !== confirm) {
+      return { passwordMismatch: true };
+    }
+    return null;
+  }
   colocaColor(colores: any) {
     document.documentElement.style.setProperty('--bgcolor1', colores[0]);
     const cabecera = document.querySelector('.cabecera');
@@ -152,16 +186,7 @@ export class ModificarClientesComponent implements OnInit {
     for (const propName in changes) {
       const change = changes[propName];
       if (change.firstChange) {
-        console.log('Property ' + propName + ' changed for the first time.');
       } else {
-        console.log(
-          'Property ' +
-            propName +
-            ' changed from ' +
-            change.previousValue +
-            ' to ' +
-            change.currentValue
-        );
       }
     }
   }
@@ -309,7 +334,6 @@ export class ModificarClientesComponent implements OnInit {
   }
 
   valCedula(cedula: String) {
-    console.log(cedula);
     const digitoRegion = cedula.substring(0, 2);
     let digR = parseInt(digitoRegion);
     if (digR >= 1 && digR <= 24) {
@@ -362,11 +386,11 @@ export class ModificarClientesComponent implements OnInit {
     const cuenta = this.formBuscar.value.cuenta?.trim();
     const identificacion = this.formBuscar.value.identificacion?.trim();
 
-/*     if (!cuenta && !identificacion) {
-      this.errorMsg = 'Ingrese número de cuenta o identificación para buscar.';
-      return;
-    }
- */
+    /*     if (!cuenta && !identificacion) {
+          this.errorMsg = 'Ingrese número de cuenta o identificación para buscar.';
+          return;
+        }
+     */
     this.loadingBuscar = true;
     let cli: any = this.cliente;
     this.loadingBuscar = false;
@@ -379,12 +403,6 @@ export class ModificarClientesComponent implements OnInit {
 
     this.clienteSeleccionado = cli;
 
-    // Inicializar formulario de credenciales con el usuario actual, si existe
-    this.formCredenciales.patchValue({
-      username: cli.username || '',
-      password: '',
-      confirmPassword: '',
-    });
   }
 
   onActualizarCredenciales(): void {
