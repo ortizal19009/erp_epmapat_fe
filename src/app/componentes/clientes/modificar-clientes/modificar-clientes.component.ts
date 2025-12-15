@@ -63,7 +63,6 @@ export class ModificarClientesComponent implements OnInit {
     public personeriajuridicaS: PersoneriaJuridicaService,
     private authService: AutorizaService,
     private coloresService: ColoresService
-
   ) {
     this.formBuscar = this.fb.group({
       cuenta: [''],
@@ -129,11 +128,10 @@ export class ModificarClientesComponent implements OnInit {
         username: ['', [Validators.required]],
         password: ['', [Validators.required, Validators.minLength(6)]],
         confirmPassword: ['', [Validators.required]],
-        activo: [true, Validators.required]  // nuevo campo
+        activo: [true, Validators.required], // nuevo campo
       },
       { validators: this.passwordMatchValidator }
     );
-
 
     this.listarNacionalidades();
     this.listarPersoneriaJuridica();
@@ -222,6 +220,9 @@ export class ModificarClientesComponent implements OnInit {
           feccrea: datos.feccrea,
           usumodi: this.authService.idusuario,
           fecmodi: this.date,
+        });
+        this.formCredenciales.patchValue({
+          username: datos.username,
         });
       },
       error: (err) => console.error(err.error),
@@ -402,7 +403,6 @@ export class ModificarClientesComponent implements OnInit {
     }
 
     this.clienteSeleccionado = cli;
-
   }
 
   onActualizarCredenciales(): void {
