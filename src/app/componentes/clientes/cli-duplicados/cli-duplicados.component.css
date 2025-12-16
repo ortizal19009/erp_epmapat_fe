@@ -1,0 +1,153 @@
+/* ===========================
+   VARIABLES DE COLOR
+=========================== */
+:root {
+  --bg-soft: #f8f9fa;
+  --border-soft: #e5e7eb;
+  --text-soft: #6c757d;
+  --primary-soft: rgba(0,123,255,.08);
+  --danger-soft: rgba(220,53,69,.08);
+}
+
+/* ===========================
+   CARDS
+=========================== */
+.card {
+  border-radius: 8px;
+  background: #fff;
+}
+
+.sombra {
+  box-shadow: 0 4px 12px rgba(0,0,0,.06);
+}
+
+/* ===========================
+   HEADER
+=========================== */
+.card-header {
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.card-header strong {
+  font-size: .95rem;
+}
+
+.card-header .text-muted {
+  font-size: .75rem;
+}
+
+/* ===========================
+   TABLAS
+=========================== */
+.table {
+  font-size: .82rem;
+}
+
+.table thead th {
+  background: var(--bg-soft);
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.table tbody tr {
+  cursor: pointer;
+  transition: background .15s ease;
+}
+
+.table tbody tr:hover {
+  background: var(--primary-soft);
+}
+
+.table tbody tr.active-row {
+  background: var(--primary-soft);
+  box-shadow: inset 3px 0 0 #007bff;
+}
+
+.table td, .table th {
+  vertical-align: middle !important;
+}
+
+/* Texto largo */
+.truncate-text {
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===========================
+   PANEL LATERAL (DETALLE)
+=========================== */
+.detalle-panel {
+  animation: slideIn .25s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ===========================
+   RADIOS (MASTER)
+=========================== */
+input[type="radio"] {
+  transform: scale(1.15);
+  cursor: pointer;
+}
+
+/* fila seleccionada como master */
+tr.master-row {
+  background: var(--danger-soft);
+  box-shadow: inset 3px 0 0 #dc3545;
+}
+
+/* ===========================
+   FOOTER
+=========================== */
+.card-footer {
+  background: #fff;
+  border-top: 1px solid var(--border-soft);
+}
+
+/* ===========================
+   BOTONES
+=========================== */
+.btn {
+  border-radius: 6px;
+}
+
+.btn-outline-secondary:hover {
+  background: var(--bg-soft);
+}
+
+/* ===========================
+   PAGINACIÓN
+=========================== */
+.pagination .page-link {
+  border-radius: 6px;
+  margin: 0 2px;
+}
+
+.pagination .active .page-link {
+  background: #007bff;
+  border-color: #007bff;
+}
+
+/* ===========================
+   FORM INPUTS
+=========================== */
+.form-control,
+.input-group-text {
+  border-radius: 6px;
+}
+
+.input-group-text {
+  background: var(--bg-soft);
+}

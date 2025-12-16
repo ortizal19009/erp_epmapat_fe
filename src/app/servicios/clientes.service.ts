@@ -90,8 +90,22 @@ export class ClientesService {
     );
   }
   // Actualizar SOLO usuario y contraseña
-  actualizarCredenciales(idcliente: number, username: string, password: string) {
+  actualizarCredenciales(
+    idcliente: number,
+    username: string,
+    password: string
+  ) {
     const body = { username, password };
     return this.http.put<void>(`${baseUrl}/${idcliente}/credenciales`, body);
+  }
+  obtenerDuplicados(page: number, size: number, q?: string) {
+    const params: any = { page, size };
+    if (q) params.q = q; // solo si lo implementas en backend
+    return this.http.get<any>(`${baseUrl}/duplicados`, { params });
+  }
+    obtenerDuplicadosAgrupados(page: number, size: number, q?: string) {
+    const params: any = { page, size };
+    if (q) params.q = q; // solo si lo implementas en backend
+    return this.http.get<any>(`${baseUrl}/duplicados-agrupado`, { params });
   }
 }

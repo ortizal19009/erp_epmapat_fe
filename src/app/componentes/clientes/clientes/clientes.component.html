@@ -1,117 +1,120 @@
 <div class="content mt-1 pt-1 pl-0">
-   <div class="container-fluid">
-      <div class="row m-0 px-0 py-1 justify-content-start cabecera border sombra">
-         <div class="col-sm-2">
-            <h4 class="m-0 font-weight-bold"><i class="bi-person-circle"></i> Clientes</h4>
-         </div>
-
-         <div class="col-sm-7">
-            <!-- Reactive form: submit y sin ngModel mezclado -->
-            <form [formGroup]="formBuscar" (ngSubmit)="onSubmit()" autocomplete="off">
-               <div class="form-row align-items-center">
-                  <div class="col-sm-5 mb-2 mb-sm-0">
-                     <input type="text" placeholder="Nombre ó Identificación" class="form-control form-control-sm"
-                        id="nombreIdentifi" formControlName="nombreIdentifi" required minlength="4"
-                        autocomplete="off" />
-                  </div>
-
-                  <div class="col-sm-2 mb-sm-0">
-                     <button type="submit" class="btn btn-primary btn-sm btn-block" [disabled]="disabled">
-                        <i class="fa fa-search"></i> Buscar
-                     </button>
-                  </div>
-
-                  <div class="col-sm-4">
-                     <input type="text" class="form-control form-control-sm text-center" placeholder="Filtrar..."
-                        formControlName="filtro" autocomplete="off" />
-                  </div>
-               </div>
-            </form>
-         </div>
-
-         <div class="btn-group ml-auto mt-0">
-            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
-               aria-expanded="false" aria-haspopup="true">
-               <i class="bi-menu-button-wide text-white"></i>
-            </button>
-            <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-               <button class="dropdown-item" type="button" [disabled]="rolepermission==1" (click)="irAddClientes()">
-                  <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo
-               </button>
-               <button class="dropdown-item" type="button" (click)="imprimir()">
-                  <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar
-               </button>
-               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#importar"
-                  [disabled]="rolepermission!=3" (click)="importar()">
-                  <i class="bi-file-earmark-arrow-up"></i>&nbsp; Importar
-               </button>
-            </div>
-         </div>
+  <div class="container-fluid">
+    <div class="row m-0 px-0 py-1 justify-content-start cabecera border sombra">
+      <div class="col-sm-2">
+        <h4 class="m-0 font-weight-bold"><i class="bi-person-circle"></i> Clientes</h4>
       </div>
-   </div>
+
+      <div class="col-sm-7">
+        <!-- Reactive form: submit y sin ngModel mezclado -->
+        <form [formGroup]="formBuscar" (ngSubmit)="onSubmit()" autocomplete="off">
+          <div class="form-row align-items-center">
+            <div class="col-sm-5 mb-2 mb-sm-0">
+              <input type="text" placeholder="Nombre ó Identificación" class="form-control form-control-sm"
+                id="nombreIdentifi" formControlName="nombreIdentifi" required minlength="4" autocomplete="off" />
+            </div>
+
+            <div class="col-sm-2 mb-sm-0">
+              <button type="submit" class="btn btn-primary btn-sm btn-block" [disabled]="disabled">
+                <i class="fa fa-search"></i> Buscar
+              </button>
+            </div>
+
+            <div class="col-sm-4">
+              <input type="text" class="form-control form-control-sm text-center" placeholder="Filtrar..."
+                formControlName="filtro" autocomplete="off" />
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="btn-group ml-auto mt-0">
+        <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
+          aria-expanded="false" aria-haspopup="true">
+          <i class="bi-menu-button-wide text-white"></i>
+        </button>
+        <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+          <button class="dropdown-item" type="button" [disabled]="rolepermission==1" (click)="irAddClientes()">
+            <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo
+          </button>
+          <button class="dropdown-item" type="button" (click)="imprimir()">
+            <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar
+          </button>
+          <button class="dropdown-item" type="button" data-toggle="modal" data-target="#importar"
+            [disabled]="rolepermission!=3" (click)="importar()">
+            <i class="bi-file-earmark-arrow-up"></i>&nbsp; Importar
+          </button>
+          <button class="dropdown-item text-warning" type="button" [routerLink]="['/clientesDuplicados']">
+            <i class="bi bi-exclamation-triangle mr-2"></i> Clientes duplicados
+          </button>
+
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="container-fluid">
-   <div class="row mb-0">
-      <div class="col-sm">
+  <div class="row mb-0">
+    <div class="col-sm">
 
-         <!-- Alto fijo + scroll vertical -->
-         <div class="table-fixed-head">
+      <!-- Alto fijo + scroll vertical -->
+      <div class="table-fixed-head">
 
-            <!-- Responsive horizontal -->
-            <div class="table-responsive">
-               <table class="table table-hover table-bordered table-sm sombra table-no-wrap">
-                  <thead class="cabecera text-center">
-                     <tr>
-                        <th style="width:40px;"></th>
-                        <th>Nombre</th>
-                        <th>CI/RUC</th>
-                        <th>Dirección</th>
-                        <th>e-mail</th>
-                        <th style="width:60px;"></th>
-                     </tr>
-                  </thead>
+        <!-- Responsive horizontal -->
+        <div class="table-responsive">
+          <table class="table table-hover table-bordered table-sm sombra table-no-wrap">
+            <thead class="cabecera text-center">
+              <tr>
+                <th style="width:40px;"></th>
+                <th>Nombre</th>
+                <th>CI/RUC</th>
+                <th>Dirección</th>
+                <th>e-mail</th>
+                <th style="width:60px;"></th>
+              </tr>
+            </thead>
 
-                  <tbody class="detalle">
-                     <tr *ngFor="let cliente of _clientes | filter: (formBuscar?.value?.filtro || ''); let i = index"
-                        (click)="detallesCliente($event, cliente)" class="fila">
-                        <td class="small text-center font-weight-bold">{{ i + 1 }}</td>
-                        <td>{{ cliente.nombre }}</td>
-                        <td>{{ cliente.cedula }}</td>
-                        <td>{{ cliente.direccion }}</td>
-                        <td>{{ cliente.email }}</td>
-                        <td class="text-center">
-                           <div class="btn-group py-0">
-                              <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0"
-                                 data-toggle="dropdown" aria-expanded="false" aria-haspopup="true"></button>
-                              <div class="dropdown-menu dropdown-menu-right popLista">
-                                 <button class="dropdown-item" type="button" [disabled]="rolepermission==1"
-                                    (click)="modificarCliente(cliente.idcliente)">
-                                    <i class="bi bi-pencil"></i>&nbsp; Modificar
-                                 </button>
-                                 <button class="dropdown-item" type="button" [disabled]="rolepermission!=3"
-                                    data-toggle="modal" data-target="#modalEliminar" (click)="eliminarCliente(cliente)">
-                                    <i class="bi bi-file-minus"></i>&nbsp; Eliminar
-                                 </button>
-                              </div>
-                           </div>
-                        </td>
-                     </tr>
+            <tbody class="detalle">
+              <tr *ngFor="let cliente of _clientes | filter: (formBuscar.value?.filtro || ''); let i = index"
+                (click)="detallesCliente($event, cliente)" class="fila">
+                <td class="small text-center font-weight-bold">{{ i + 1 }}</td>
+                <td>{{ cliente.nombre }}</td>
+                <td>{{ cliente.cedula }}</td>
+                <td>{{ cliente.direccion }}</td>
+                <td>{{ cliente.email }}</td>
+                <td class="text-center">
+                  <div class="btn-group py-0">
+                    <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
+                      aria-expanded="false" aria-haspopup="true"></button>
+                    <div class="dropdown-menu dropdown-menu-right popLista">
+                      <button class="dropdown-item" type="button" [disabled]="rolepermission==1"
+                        (click)="modificarCliente(cliente.idcliente)">
+                        <i class="bi bi-pencil"></i>&nbsp; Modificar
+                      </button>
+                      <button class="dropdown-item" type="button" [disabled]="rolepermission!=3" data-toggle="modal"
+                        data-target="#modalEliminar" (click)="eliminarCliente(cliente)">
+                        <i class="bi bi-file-minus"></i>&nbsp; Eliminar
+                      </button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
 
-                     <tr *ngIf="(_clientes?.length || 0) === 0">
-                        <td colspan="6" class="text-center text-muted py-3">No hay resultados</td>
-                     </tr>
-                  </tbody>
-               </table>
-            </div><!-- /.table-responsive -->
+              <tr *ngIf="(_clientes.length || 0) === 0">
+                <td colspan="6" class="text-center text-muted py-3">No hay resultados</td>
+              </tr>
+            </tbody>
+          </table>
+        </div><!-- /.table-responsive -->
 
-         </div><!-- /.table-fixed-head -->
+      </div><!-- /.table-fixed-head -->
 
-      </div>
-   </div>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL PDF (En la misma página) -->
 <div class="modal fade" id="pdf" tabindex="-1" aria-labelledby="pdf" aria-hidden="true">
-   <div class="modal-dialog modal-sm"></div>
+  <div class="modal-dialog modal-sm"></div>
 </div>

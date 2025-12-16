@@ -1,0 +1,282 @@
+<div class="content pt-2">
+  <div class="container-fluid px-0">
+
+    <div class="card border-0 sombra mb-2">
+      <div class="card-body py-2">
+
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+
+          <!-- Título -->
+          <div class="d-flex align-items-center">
+            <div class="mr-2 d-flex align-items-center justify-content-center rounded-circle"
+              style="width:38px;height:38px;background: rgba(0,0,0,.06);">
+              <i class="bi bi-person-circle" style="font-size: 1.2rem;"></i>
+            </div>
+
+            <div class="lh-1">
+              <h5 class="m-0 font-weight-bold">Clientes duplicados</h5>
+              <small class="text-muted">Búsqueda, filtro y acciones rápidas</small>
+            </div>
+          </div>
+
+          <!-- Form -->
+          <form class="flex-grow-1 mx-lg-3" [formGroup]="formBuscar" (ngSubmit)="onSubmit()" autocomplete="off">
+
+            <div class="form-row align-items-center">
+
+              <!-- Buscar -->
+              <div class="col-12 col-md-5 mb-2 mb-md-0">
+                <div class="input-group input-group-sm">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">
+                      <i class="bi bi-search"></i>
+                    </span>
+                  </div>
+                  <input type="text" class="form-control" id="nombreIdentifi" placeholder="Nombre o Identificación"
+                    formControlName="nombreIdentifi" required minlength="4" autocomplete="off" />
+                </div>
+              </div>
+
+              <!-- Botón buscar -->
+              <div class="col-12 col-md-2 mb-2 mb-md-0">
+                <button type="submit" class="btn btn-primary btn-sm btn-block" [disabled]="disabled">
+                  <i class="fa fa-search mr-1"></i> Buscar
+                </button>
+              </div>
+
+              <!-- Filtro -->
+              <div class="col-12 col-md-5">
+                <div class="input-group input-group-sm">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">
+                      <i class="bi bi-funnel"></i>
+                    </span>
+                  </div>
+                  <input type="text" class="form-control text-center" placeholder="Filtrar en la tabla..."
+                    formControlName="filtro" autocomplete="off" />
+                </div>
+              </div>
+
+            </div>
+          </form>
+
+          <!-- Menú -->
+          <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-toggle="dropdown"
+              aria-haspopup="true" aria-expanded="false">
+              <i class="bi bi-three-dots-vertical"></i>
+            </button>
+
+            <div class="dropdown-menu dropdown-menu-right">
+
+              <button class="dropdown-item" type="button" (click)="imprimir()">
+                <i class="bi bi-printer mr-2"></i> Imprimir / Exportar
+              </button>
+
+              <div class="dropdown-divider"></div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+<div class="container-fluid px-0">
+  <div class="row no-gutters">
+    <div class="col-sm-7 pr-2">
+      <!-- LISTADO -->
+      <div class="card border-0 sombra">
+        <div class="card-body p-0">
+
+          <!-- Scroll vertical + cabecera sticky -->
+          <div class="table-wrap">
+
+            <div class="table-responsive">
+              <table class="table table-hover table-sm mb-0 table-no-wrap">
+                <thead class="thead-sticky text-center">
+                  <tr>
+                    <th style="width:50px;">#</th>
+                    <th>Nombre</th>
+                    <th>CI/RUC</th>
+                    <th>Repeticiones</th>
+
+                  </tr>
+                </thead>
+
+                <tbody class="detalle">
+                  <tr *ngFor="let cliente of _clientes; let i = index" class="fila align-middle"
+                    [class.active-row]="cliente.cedula === cedulaSeleccionada"
+                    (click)="getByIdentificacion(cliente.cedula)">
+
+                    <td class="text-center font-weight-bold small">{{ i + 1 }}</td>
+
+                    <td class="text-left truncate-text" [attr.title]="cliente.nombres">
+                      <div class="d-flex flex-column">
+                        <span class="font-weight-semibold">{{ cliente.nombres }}</span>
+                      </div>
+                    </td>
+
+                    <td class="text-center">{{ cliente.cedula }}</td>
+
+                    <td class="text-center text-truncate" style="max-width: 3px;">
+                      {{ cliente.total }}
+                    </td>
+                  </tr>
+
+                  <tr *ngIf="(_clientes.length || 0) === 0">
+                    <td colspan="6" class="text-center text-muted py-4">
+                      <i class="bi bi-inbox mr-2"></i> No hay resultados
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+
+          </div>
+          <div class="d-flex flex-wrap align-items-center justify-content-between p-2 border-top">
+
+            <!-- Info -->
+            <div class="small text-muted mb-2 mb-md-0">
+              Mostrando
+              <strong>{{ (page * size) + 1 }}</strong>
+              -
+              <strong>{{ Math.min((page + 1) * size, totalElements) }}</strong>
+              de <strong>{{ totalElements }}</strong>
+            </div>
+
+            <!-- Controles -->
+            <div class="d-flex align-items-center flex-wrap gap-2">
+
+              <!-- Tamaño de página -->
+              <div class="d-flex align-items-center">
+                <small class="text-muted mr-2">Filas:</small>
+                <select class="form-control form-control-sm" style="width:90px;" [ngModel]="size"
+                  (ngModelChange)="onChangeSize($event)">
+                  <option [ngValue]="10">10</option>
+                  <option [ngValue]="20">20</option>
+                  <option [ngValue]="50">50</option>
+                  <option [ngValue]="100">100</option>
+                </select>
+              </div>
+
+              <!-- Paginación -->
+              <nav aria-label="Paginación">
+                <ul class="pagination pagination-sm mb-0 pagination-lgish">
+
+                  <li class="page-item" [class.disabled]="page === 0">
+                    <button class="page-link" type="button" (click)="goTo(0)">
+                      <i class="bi bi-chevron-double-left"></i>
+                    </button>
+                  </li>
+
+                  <li class="page-item" [class.disabled]="page === 0">
+                    <button class="page-link" type="button" (click)="goTo(page - 1)">
+                      <i class="bi bi-chevron-left"></i>
+                    </button>
+                  </li>
+
+                  <!-- Números -->
+                  <li class="page-item" *ngFor="let p of pages" [class.active]="p === page">
+                    <button class="page-link" type="button" (click)="goTo(p)">
+                      {{ p + 1 }}
+                    </button>
+                  </li>
+
+                  <li class="page-item" [class.disabled]="page >= totalPages - 1">
+                    <button class="page-link" type="button" (click)="goTo(page + 1)">
+                      <i class="bi bi-chevron-right"></i>
+                    </button>
+                  </li>
+
+                  <li class="page-item" [class.disabled]="page >= totalPages - 1">
+                    <button class="page-link" type="button" (click)="goTo(totalPages - 1)">
+                      <i class="bi bi-chevron-double-right"></i>
+                    </button>
+                  </li>
+
+                </ul>
+              </nav>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- DETALLE -->
+    <div class="col-5 pl-2 detalle-panel" *ngIf="detalleVisible">
+      <div class="card border-0 sombra h-100">
+
+        <!-- Header -->
+        <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
+          <div>
+            <strong>Duplicados</strong>
+            <div class="small text-muted">CI/RUC: {{ cedulaSeleccionada }}</div>
+          </div>
+
+          <button class="btn btn-sm btn-outline-secondary" (click)="detalleVisible = false">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <!-- Body -->
+        <div class="card-body p-2">
+
+          <table class="table table-sm table-hover">
+            <thead class="text-center">
+              <tr>
+                <th>Master</th>
+                <th>Nombre</th>
+                <th>Teléfono</th>
+                <th>Email</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let c of detalleClientes" [class.master-row]="c.idcliente === masterId">
+
+                <td class="text-center">
+                  <input type="radio" name="master" [value]="c.idcliente" [(ngModel)]="masterId">
+                </td>
+
+                <td>
+                  <div class="font-weight-semibold">{{ c.nombre }}</div>
+                  <small class="text-muted">ID: {{ c.idcliente }}</small>
+                </td>
+
+                <td>{{ c.telefono || '-' }}</td>
+                <td>{{ c.email || '-' }}</td>
+              </tr>
+            </tbody>
+          </table>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="card-footer bg-white border-top text-right">
+
+          <button class="btn btn-outline-secondary btn-sm mr-2" (click)="previewMerge()" [disabled]="!masterId">
+            <i class="bi bi-eye mr-1"></i> Preview
+          </button>
+
+          <button class="btn btn-danger btn-sm" (click)="merge()" [disabled]="!masterId">
+            <i class="bi bi-diagram-3 mr-1"></i> Merge
+          </button>
+
+        </div>
+
+      </div>
+
+      <!-- card lateral -->
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL PDF -->
+<div class="modal fade" id="pdf" tabindex="-1" aria-labelledby="pdf" aria-hidden="true">
+  <div class="modal-dialog modal-sm"></div>
+</div>
