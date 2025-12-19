@@ -11,7 +11,7 @@ const baseUrl = `${apiUrl}/lecturas`;
   providedIn: 'root',
 })
 export class LecturasService {
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   //Lectura por Planilla
   getOnefactura(idfactura: number) {
@@ -25,7 +25,9 @@ export class LecturasService {
   }
 
   getLecturasxIdabonado(idabonado: number, limit: number) {
-    return this.http.get<Lecturas>(`${baseUrl}?idabonado=${idabonado}&limit=${limit}`);
+    return this.http.get<Lecturas>(
+      `${baseUrl}?idabonado=${idabonado}&limit=${limit}`
+    );
   }
 
   getByBmonth() {
@@ -134,7 +136,6 @@ export class LecturasService {
     return this.http.get(`${baseUrl}/fecEmision?idfactura=${idfactura}`);
   }
   findByIdEmisiones(idemision: number) {
-
     return this.http.get(`${baseUrl}/emision?idemision=${idemision}`);
   }
   getByIdEmisionesR(idemision: number) {
@@ -183,17 +184,20 @@ export class LecturasService {
   }
 
   async calcularValores(datos: any): Promise<any> {
-    return firstValueFrom(this.http.post(`${baseUrl}/valoresEmisiones`, datos))
+    return firstValueFrom(this.http.post(`${baseUrl}/valoresEmisiones`, datos));
   }
   calcular_Valores(datos: any): Observable<number> {
     return this.http.post<number>(`${baseUrl}/valoresEmisiones`, datos);
   }
-  pcalcularValores(datos: any){
-    return this.http.put(`${baseUrl}/valores_Emisiones`, datos)
+  pcalcularValores(datos: any) {
+    return this.http.put(`${baseUrl}/valores_Emisiones`, datos);
   }
-  getDuplicados(idemision: number, top: number):Observable<Object>{
-    return this.http.get(`${baseUrl}/duplicatos-emision?idemision=${idemision}&top=${top}`)
+  getDuplicados(idemision: number, top: number): Observable<Object> {
+    return this.http.get(
+      `${baseUrl}/duplicatos-emision?idemision=${idemision}&top=${top}`
+    );
   }
-
-
+  getPendientesByCliente(idcliente: number) {
+    return this.http.get<any[]>(`${baseUrl}/lecturas/pendientes/${idcliente}`);
+  }
 }

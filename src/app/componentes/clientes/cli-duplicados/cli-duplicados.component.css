@@ -151,3 +151,22 @@ tr.master-row {
 .input-group-text {
   background: var(--bg-soft);
 }
+/* Preview modal polish */
+#previewModal .card-header .btn-link {
+  color: inherit;
+}
+
+#previewModal .table thead th {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+}
+
+#previewModal .table td {
+  vertical-align: middle;
+}
+
+#previewModal .badge-light.border {
+  background: #fff;
+}

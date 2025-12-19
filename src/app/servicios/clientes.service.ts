@@ -103,9 +103,15 @@ export class ClientesService {
     if (q) params.q = q; // solo si lo implementas en backend
     return this.http.get<any>(`${baseUrl}/duplicados`, { params });
   }
-    obtenerDuplicadosAgrupados(page: number, size: number, q?: string) {
+  obtenerDuplicadosAgrupados(page: number, size: number, q?: string) {
     const params: any = { page, size };
     if (q) params.q = q; // solo si lo implementas en backend
     return this.http.get<any>(`${baseUrl}/duplicados-agrupado`, { params });
+  }
+  mergeClientes(payload: {
+    masterId: number;
+    duplicateIds: number[];
+  }): Observable<void> {
+    return this.http.post<void>(`${baseUrl}/merge`, payload);
   }
 }

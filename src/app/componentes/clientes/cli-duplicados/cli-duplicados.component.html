@@ -258,13 +258,12 @@
         <!-- Footer -->
         <div class="card-footer bg-white border-top text-right">
 
-          <button class="btn btn-outline-secondary btn-sm mr-2" (click)="previewMerge()" [disabled]="!masterId">
+          <button class="btn btn-outline-secondary btn-sm mr-2" data-toggle="modal" data-target="#previewModal"
+            (click)="previewMerge()" [disabled]="!masterId">
             <i class="bi bi-eye mr-1"></i> Preview
           </button>
 
-          <button class="btn btn-danger btn-sm" (click)="merge()" [disabled]="!masterId">
-            <i class="bi bi-diagram-3 mr-1"></i> Merge
-          </button>
+
 
         </div>
 
@@ -279,4 +278,235 @@
 <!-- MODAL PDF -->
 <div class="modal fade" id="pdf" tabindex="-1" aria-labelledby="pdf" aria-hidden="true">
   <div class="modal-dialog modal-sm"></div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+    <div class="modal-content">
+
+      <!-- Header -->
+      <div class="modal-header bg-white border-bottom">
+        <div>
+          <h6 class="modal-title mb-0 font-weight-bold">
+            Preview de Merge
+          </h6>
+          <small class="text-muted">
+            Verifica abonados, facturas y lecturas antes de confirmar
+          </small>
+        </div>
+
+        <div class="d-flex align-items-center">
+          <button type="button" class="btn btn-outline-secondary btn-sm mr-2"
+                  (click)="collapseAll(true)" [disabled]="previewLoading || !previewData?.length">
+            <i class="bi bi-arrows-collapse mr-1"></i> Colapsar todo
+          </button>
+
+          <button type="button" class="btn btn-outline-secondary btn-sm mr-3"
+                  (click)="collapseAll(false)" [disabled]="previewLoading || !previewData?.length">
+            <i class="bi bi-arrows-expand mr-1"></i> Expandir todo
+          </button>
+
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body">
+
+        <!-- Loading -->
+        <div *ngIf="previewLoading" class="text-center py-4">
+          <div class="spinner-border spinner-border-sm mr-2" role="status"></div>
+          Cargando preview...
+        </div>
+
+        <!-- Error -->
+        <div *ngIf="previewError" class="alert alert-danger">
+          {{ previewError }}
+        </div>
+
+        <!-- Content -->
+        <div *ngIf="!previewLoading && !previewError && previewData?.length">
+
+          <div *ngFor="let p of previewData; let i = index" class="card shadow-sm mb-3 border-0">
+
+            <!-- Card header (click to collapse) -->
+            <div class="card-header bg-light py-2 d-flex align-items-center justify-content-between">
+
+              <button class="btn btn-link p-0 text-left text-decoration-none"
+                      type="button"
+                      data-toggle="collapse"
+                      [attr.data-target]="'#pv_' + i"
+                      aria-expanded="true"
+                      [attr.aria-controls]="'pv_' + i"
+                      (click)="$event.preventDefault()">
+                <div class="d-flex align-items-center">
+                  <div class="mr-2">
+                    <span class="badge" [ngClass]="p.esMaster ? 'badge-primary' : 'badge-secondary'">
+                      {{ p.esMaster ? 'MASTER' : 'DUPLICADO' }}
+                    </span>
+                  </div>
+                  <div>
+                    <strong>Cliente ID: {{ p.idcliente }}</strong>
+                    <div class="small text-muted">
+                      Abonados: <strong>{{ p.abonados?.length || 0 }}</strong> ·
+                      Facturas: <strong>{{ p.facturas?.length || 0 }}</strong> ·
+                      Lecturas: <strong>{{ p.lecturas?.length || 0 }}</strong>
+                    </div>
+                  </div>
+                </div>
+              </button>
+
+              <div class="text-right">
+                <span class="badge badge-light border mr-1">
+                  Abonados: {{ p.abonados?.length || 0 }}
+                </span>
+                <span class="badge badge-light border mr-1">
+                  Facturas: {{ p.facturas?.length || 0 }}
+                </span>
+                <span class="badge badge-light border">
+                  Lecturas: {{ p.lecturas?.length || 0 }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Card body collapsible -->
+            <div class="collapse show" [id]="'pv_' + i">
+              <div class="card-body p-2">
+
+                <!-- ABONADOS -->
+                <div class="mb-3">
+                  <div class="d-flex align-items-center justify-content-between px-1 mb-1">
+                    <small class="text-muted font-weight-bold">Abonados</small>
+                    <small class="text-muted">Total: {{ p.abonados?.length || 0 }}</small>
+                  </div>
+
+                  <div class="table-responsive">
+                    <table class="table table-sm table-hover table-bordered mb-0">
+                      <thead class="text-center bg-white">
+                        <tr>
+                          <th style="width:120px;">Código</th>
+                          <th>Dirección</th>
+                          <th style="width:120px;">Estado</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let a of p.abonados">
+                          <td class="text-center">{{ a.codigo || a.idabonado || '-' }}</td>
+                          <td class="text-truncate" style="max-width: 360px;">
+                            {{ a.direccionubicacion || '-' }}
+                          </td>
+                          <td class="text-center">{{ a.estado || '-' }}</td>
+                        </tr>
+                        <tr *ngIf="(p.abonados?.length || 0) === 0">
+                          <td colspan="3" class="text-center text-muted">Sin abonados</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <!-- FACTURAS -->
+                <div class="mb-3">
+                  <div class="d-flex align-items-center justify-content-between px-1 mb-1">
+                    <small class="text-muted font-weight-bold">Facturas pendientes</small>
+                    <small class="text-muted">Total: {{ p.facturas?.length || 0 }}</small>
+                  </div>
+
+                  <div class="table-responsive">
+                    <table class="table table-sm table-hover table-bordered mb-0">
+                      <thead class="text-center bg-white">
+                        <tr>
+                          <th style="width:140px;">Número</th>
+                          <th style="width:120px;">Emisión</th>
+                          <th style="width:120px;">Módulo</th>
+                          <th style="width:120px;">Total</th>
+                          <th style="width:120px;">Saldo</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let f of p.facturas">
+                          <td class="text-center">{{ f.nrofactura || f.idfactura || '-' }}</td>
+                          <td class="text-center">{{ f.feccrea || '-' }}</td>
+                          <td class="text-center">{{ f.idmodulo || '-' }}</td>
+                          <td class="text-right">{{ (f.total || 0) | number:'1.2-2' }}</td>
+                          <td class="text-right text-danger font-weight-bold">
+                            {{ (f.pagado || 0) | number:'1.2-2' }}
+                          </td>
+                        </tr>
+                        <tr *ngIf="(p.facturas?.length || 0) === 0">
+                          <td colspan="5" class="text-center text-muted">Sin facturas pendientes</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <!-- LECTURAS -->
+                <div>
+                  <div class="d-flex align-items-center justify-content-between px-1 mb-1">
+                    <small class="text-muted font-weight-bold">Lecturas pendientes</small>
+                    <small class="text-muted">Total: {{ p.lecturas?.length || 0 }}</small>
+                  </div>
+
+                  <div class="table-responsive">
+                    <table class="table table-sm table-hover table-bordered mb-0">
+                      <thead class="text-center bg-white">
+                        <tr>
+                          <th style="width:120px;">ID Lectura</th>
+                          <th style="width:120px;">Factura</th>
+                          <th>Periodo / Observación</th>
+                          <th style="width:120px;">Fecha</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let l of p.lecturas">
+                          <td class="text-center">{{ l.idlectura || '-' }}</td>
+                          <td class="text-center">{{ l.idfactura || '-' }}</td>
+                          <td class="text-truncate" style="max-width: 420px;">
+                            {{ l.periodo || l.observacion || '-' }}
+                          </td>
+                          <td class="text-center">{{ l.fecha || l.feccrea || '-' }}</td>
+                        </tr>
+                        <tr *ngIf="(p.lecturas?.length || 0) === 0">
+                          <td colspan="4" class="text-center text-muted">Sin lecturas pendientes</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Empty -->
+        <div *ngIf="!previewLoading && !previewError && (!previewData || previewData.length === 0)"
+             class="text-center text-muted py-4">
+          No hay información para mostrar.
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer bg-white border-top d-flex justify-content-between align-items-center">
+        <small class="text-muted">
+          Verifica que el MASTER sea correcto. El merge moverá abonados, facturas y lecturas pendientes al MASTER.
+        </small>
+
+        <div>
+          <button type="button" class="btn btn-outline-secondary btn-sm mr-2" data-dismiss="modal">
+            Cerrar
+          </button>
+          <button type="button" class="btn btn-danger btn-sm" (click)="merge()" [disabled]="!masterId">
+            <i class="bi bi-diagram-3 mr-1"></i> Confirmar Merge
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>
