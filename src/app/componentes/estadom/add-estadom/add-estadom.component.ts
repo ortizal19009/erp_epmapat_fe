@@ -19,7 +19,7 @@ export class AddEstadomComponent implements OnInit {
   guardarEstadom() {
     this.estadomservice.saveEstadom(this.ems).subscribe(datos => {
       this.parent.listarEstadom();
-    }, error => console.log(error))
+    }, error => console.error(error))
   }
 
   onSubmit() {

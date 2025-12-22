@@ -34,14 +34,14 @@ export class AddTabla4Component implements OnInit {
    onSubmit() {
       this.tab4Service.saveTabla4(this.tab4Form.value).subscribe(datos => {
          this.parent.listarTabla4();
-      }, error => console.log(error));
+      }, error => console.error(error));
    }
 
    reset() { this.crearForm(); }
 
    get tipocomprobante() { return this.tab4Form.get('tipocomprobante'); }
    get nomcomprobante() { return this.tab4Form.get('nomcomprobante'); }
-   
+
    //Valida el código de comprobante
    valTipocomprobante(control: AbstractControl) {
       return this.tab4Service.getByTipocomprobante(control.value)

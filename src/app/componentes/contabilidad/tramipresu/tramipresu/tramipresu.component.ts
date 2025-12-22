@@ -159,7 +159,7 @@ export class TramipresuComponent implements OnInit {
       sessionStorage.setItem("idtramiToModi", tramipresu.idtrami.toString());
       this.router.navigate(['/modi-tramipresu']);
    }
-   
+
    eliminar(tramipresu: iTramipresu) {
       this.tramipresu.idtrami = tramipresu.idtrami;
       this.tramipresu.numero = tramipresu.numero;
@@ -175,7 +175,7 @@ export class TramipresuComponent implements OnInit {
    elimina() {
       // this.tramiService. .deleteCertipresu(this.certipresu.idcerti).subscribe({
       //    next: datos => this.buscar(),
-      //    error: err => console.log(err.error)
+      //    error: err => console.error(err.error)
       // });
    }
 

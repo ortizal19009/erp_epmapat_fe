@@ -44,7 +44,7 @@ export class DetFacelectroComponent implements OnInit {
       //this.fecha = datos.feccrea;
       // alert("this.fecha= " + this.fecha)
       this.getByIdfacelectro();
-    }, error => console.log(error));
+    }, error => console.error(error));
     // this.faceleService.getByNrofac(nrofac).subscribe(datos => {
     //   this.facelectro = datos;
     //   this.claveacceso = datos.claveacceso;
@@ -52,7 +52,7 @@ export class DetFacelectroComponent implements OnInit {
 
     //   this.fecha = this.facelectro.feccrea;
     //   this.idfactura = this.facelectro.idfactura;
-    // }, error => console.log(error));
+    // }, error => console.error(error));
   }
 
   getByIdfacelectro() {
@@ -68,7 +68,7 @@ export class DetFacelectroComponent implements OnInit {
       this.fecha = datos1.feccrea;
       this.numautorizacion = datos1.numautorizacion;
       this.claveacceso = datos1.claveacceso;
-    }, error => console.log(error));
+    }, error => console.error(error));
   }
 
   // getDatosFactura() {
@@ -80,7 +80,7 @@ export class DetFacelectroComponent implements OnInit {
   //     this.telefono = factura.idcliente.telefono;
   //     this.email = factura.idcliente.email;
   //     this.idfactura = factura.idfactura;
-  //   }, error => console.log(error));
+  //   }, error => console.error(error));
   // }
 
 }

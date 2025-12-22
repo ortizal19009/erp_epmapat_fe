@@ -101,7 +101,7 @@ export class EjecucionComponent {
           this.router.navigate(['/ejecucio']);
           location.reload(); // Agregar esta línea para refrescar la página
         },
-        error: (err) => console.log(err.error),
+        error: (err) => console.error(err.error),
       });
     }
   }

@@ -13,13 +13,13 @@ export class NovedadDetalleComponent implements OnInit {
 
   @Input() viewMode = false;
   // @Input() currentNovedad: Novedad = {
-  //   idnovedad: 
+  //   idnovedad:
   //   descripcion: '',
   //   estado: 1,
   //   usucrea:this.authService.idusuario,
   // };
   mensaje = '';
-  
+
   constructor(
     private novedadesService: NovedadesService,
     private route: ActivatedRoute,

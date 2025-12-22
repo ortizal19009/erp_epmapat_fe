@@ -97,7 +97,6 @@ export class ListarCertificacionesComponent implements OnInit {
   }
 
   iniDesdeHasta() {
-    // console.log('this.formBuscar.value.cliente: ', this.formBuscar.value.cliente)
     if (!this.formBuscar.value.cliente) {
       let desde = '';
       if (sessionStorage.getItem('desdeCertificaciones') != null)
@@ -170,7 +169,7 @@ export class ListarCertificacionesComponent implements OnInit {
         localStorage.setItem('mensajeSuccess', 'Certificacion eliminada');
         // this.listarCertificaciones();
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
     localStorage.removeItem('idcertificacionToDelete');
   }
@@ -195,7 +194,6 @@ export class ListarCertificacionesComponent implements OnInit {
 
   // info(){ this.router.navigate(['/gene-certificacion']);   }
   info(idcertificacion: any) {
-    // console.log('idcertificacion: ', idcertificacion)
     this.router.navigate(['/gene-certificacion', idcertificacion]);
   }
 }

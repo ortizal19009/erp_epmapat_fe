@@ -39,7 +39,7 @@ export class AddCertificacionesComponent implements OnInit {
     private tpcertificaS: TpCertificaService,
     private certificacionesS: CertificacionesService,
     private facService: FacturaService,
-    private clieService: ClientesService, 
+    private clieService: ClientesService,
     private authService: AutorizaService
   ) {}
 
@@ -131,7 +131,7 @@ export class AddCertificacionesComponent implements OnInit {
           next: (datos) => {
             this._clientes = datos;
           },
-          error: (err) => console.log(err.error),
+          error: (err) => console.error(err.error),
         });
     }
   }
@@ -191,7 +191,7 @@ export class AddCertificacionesComponent implements OnInit {
         (datos) => {
           this.regresar();
         },
-        (error) => console.log(error)
+        (error) => console.error(error)
       );
   }
   getUltimaCertificacion() {

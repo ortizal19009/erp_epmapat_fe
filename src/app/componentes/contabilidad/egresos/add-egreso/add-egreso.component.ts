@@ -25,7 +25,7 @@ export class AddEgresoComponent implements OnInit {
    idbene: number | null;
    _cxp: any;
    swcxp: boolean;
-   
+
    constructor(private fb: FormBuilder, private router: Router, private authService: AutorizaService,
       private asiService: AsientosService, private docService: DocumentosService, private cueService: CuentasService,
       private beneService: BeneficiariosService) { }

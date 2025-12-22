@@ -24,7 +24,7 @@ export class ListarNacionalidadComponent implements OnInit {
     this.nacService.getListaNacionalidades().subscribe(datos => {
       this.nacionalidades = datos;
       // this.alerta();
-    }, error => console.log(error))
+    }, error => console.error(error))
   }
 
   eliminarNacionalidad(idnacionalidad: number, descripcion: String) {
@@ -41,7 +41,7 @@ export class ListarNacionalidadComponent implements OnInit {
     if (id != null) {
         this.nacService.deleteNacionalidad(+id!).subscribe(datos => {
           this.listarNacionalidades();
-        }, error => console.log(error));
+        }, error => console.error(error));
       }
    }
 
@@ -50,7 +50,7 @@ export class ListarNacionalidadComponent implements OnInit {
     localStorage.setItem("idnacionalidad", idnacionalidad.toString());
     this.router.navigate(['/modi-nacionalidad']);
   }
-  
+
   info(id: number, descripcion: String) {
     //localStorage.setItem("idnacionalidad", this.nacionalidades.idnacionalidad.toString());
     this.descripcion = descripcion;

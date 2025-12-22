@@ -18,7 +18,7 @@ export class AddTipopagoComponent implements OnInit {
   guardarTipopago() {
     this.tipopago.saveTipopago(this.tp).subscribe(datos => {
       this.retornarListaTipopago();
-    }, error => console.log(error))
+    }, error => console.error(error))
   }
   retornarListaTipopago() {
     this.router.navigate(['lis-tipopago']);

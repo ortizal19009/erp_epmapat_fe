@@ -131,7 +131,7 @@ export class AddAbonadosComponent implements OnInit {
       (datos) => {
         this.categoria = datos;
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 
@@ -140,7 +140,7 @@ export class AddAbonadosComponent implements OnInit {
       (datos) => {
         this.ubicacionm = datos;
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 
@@ -149,7 +149,7 @@ export class AddAbonadosComponent implements OnInit {
       (datos) => {
         this.tipopago = datos;
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 
@@ -158,7 +158,7 @@ export class AddAbonadosComponent implements OnInit {
       (datos) => {
         this.estadom = datos;
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 
@@ -167,7 +167,7 @@ export class AddAbonadosComponent implements OnInit {
       (datos) => {
         this.rutas = datos;
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 
@@ -181,7 +181,7 @@ export class AddAbonadosComponent implements OnInit {
         });
         this.idabonado = Math.max.apply(null, maxId);
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 
@@ -196,7 +196,7 @@ export class AddAbonadosComponent implements OnInit {
       (datos) => {
         this.retornarListaAbonados();
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 

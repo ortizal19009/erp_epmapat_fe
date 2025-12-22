@@ -20,7 +20,7 @@ export class AddTpidentificaComponent implements OnInit {
     this.tpidentificaservice.nuevo(this.tpi).subscribe(datos => {
       this.parent.listarAll();
       this.reset()
-    }, error => console.log(error))
+    }, error => console.error(error))
   }
 
   reset(){

@@ -162,7 +162,7 @@ export class AddBenextranComponent implements OnInit {
          });
       }
    }
-   
+
    onCuentaSelected(e: any) {
       const selectedOption = this._cuentas.find((x: { codcue: any; }) => x.codcue === e.target.value);
       if (selectedOption) {
@@ -237,7 +237,7 @@ export class AddBenextranComponent implements OnInit {
       });
 
       // this.tranService.saveTransa1(this.formTransaci.value).subscribe({
-      //    next: transa => { 
+      //    next: transa => {
       //       const id = transa.idtransa;
       //       console.log('id devuelto: ', id)
 
@@ -291,8 +291,6 @@ export class AddBenextranComponent implements OnInit {
       const selectedOption = this._beneficiarios.find((x: { nomben: any; }) => x.nomben === e.target.value);
       if (selectedOption) this.idbenefi = selectedOption.idbene;
       else this.idbenefi = null;
-      console.log('this.idbenefi:', this.idbenefi);
-
       // Agregar la validación después de que onBeneSelected se haya ejecutado
       const grupo = (<FormArray>this.formBene.get('campos')).at(i) as FormGroup;
       grupo.get('idbene')?.setValidators([Validators.required, this.valBenefi.bind(this)]);
@@ -349,10 +347,8 @@ export class AddBenextranComponent implements OnInit {
       for (let i = 0; i < this.benes.length; i++) {
          let itemGroup = this.benes.at(i) as FormGroup;
          let valor = +itemGroup.get('valor')!.value;
-         // console.log('valor: ', valor)
          sum = sum + valor;
       }
-      console.log('sum: ', sum)
       this.formTransaci.controls['valor'].setValue(sum.toString());
    }
 
@@ -374,16 +370,12 @@ export class AddBenextranComponent implements OnInit {
 
    //Valida Beneficiario
    valBenefiOk() {
-      console.log('Pasa')
       if (this.idbenefi == null) return of({ 'invalido': true });
       else return of(null);
    }
    valBenefi() {
-      console.log('Pasa');
       let rtn: any;
       if (this.idbenefi == null) rtn = { 'invalido': true }
-      else rtn = null;
-      console.log('Retorna: ', rtn);
       return of(rtn)
    }
 

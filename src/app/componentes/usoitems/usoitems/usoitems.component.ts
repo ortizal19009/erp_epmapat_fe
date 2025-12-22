@@ -34,7 +34,7 @@ export class UsoitemsComponent implements OnInit {
    listarModulos() {
       this.moduService.getListaModulos().subscribe({
          next: datos => this._modulos = datos,
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       })
    }
 
@@ -47,7 +47,7 @@ export class UsoitemsComponent implements OnInit {
          if (opcion != null) opcion.setAttribute('selected', '');
          this.usoiService.getByIdmodulo(+this.idmodulo!).subscribe({
             next: datos => this._usoitems = datos,
-            error: err => console.log(err.error)
+            error: err => console.error(err.error)
          })
       }, 500);
 
@@ -55,7 +55,7 @@ export class UsoitemsComponent implements OnInit {
          this.idmodulo = +selectmodulo.value!;
          this.usoiService.getByIdmodulo(+selectmodulo.value!).subscribe({
             next: datos => this._usoitems = datos,
-            error: err => console.log(err.error)
+            error: err => console.error(err.error)
          })
       });
    }

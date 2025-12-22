@@ -16,7 +16,7 @@ export class AddPtoemisionComponent implements OnInit {
   validar: boolean;
 
   constructor(private ptoemisionS: PtoemisionService, private router: Router, private authService: AutorizaService) { }
-  
+
   ngOnInit(): void {
     let date: Date = new Date();
     this.ptoemision.usucrea =  this.authService.idusuario;
@@ -58,7 +58,7 @@ export class AddPtoemisionComponent implements OnInit {
       this.ptoemisionS.savePtoEmision(this.ptoemision).subscribe(datos => {
         this.returnListaPtoEmision();
         window.location.reload();
-      }, error => console.log(error));
+      }, error => console.error(error));
     } else {
       alert("ERROR DE INGRESO DE INFORMACIÓN");
     }

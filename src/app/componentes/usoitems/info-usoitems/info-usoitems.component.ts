@@ -32,7 +32,7 @@ export class InfoUsoitemsComponent implements OnInit {
           this.usoitem.estado = resp.estado;
           this.usoitem.feccrea = resp.feccrea;
        },
-       error: err => console.log(err.error),
+       error: err => console.error(err.error),
     });
     this.catalogoitemsxUsoi(+idusoitems!);
  }
@@ -44,7 +44,7 @@ export class InfoUsoitemsComponent implements OnInit {
         this._catalogoitems = datos;
         if (this._catalogoitems.length == 0) { this.noMovimientos = true; }
      },
-     error: err => console.log(err.error)
+     error: err => console.error(err.error)
   })
 }
   regresar() { this.router.navigate(['/usoitems']); }
@@ -58,7 +58,7 @@ export class InfoUsoitemsComponent implements OnInit {
     if (this.usoitem.idusoitems != null) {
        this.usoiService.deleteUsoitem(this.usoitem.idusoitems).subscribe({
           next: resp => this.router.navigate(['/usoitems']),
-          error: err => console.log(err.error),
+          error: err => console.error(err.error),
        })
     }
  }

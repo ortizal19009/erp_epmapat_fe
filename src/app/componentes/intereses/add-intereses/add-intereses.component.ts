@@ -47,7 +47,7 @@ export class AddInteresesComponent implements OnInit {
             this.formInteres.controls['mes'].setValue(ultMes);
             this.formInteres.controls['anio'].setValue(ultAnio);
          },
-         error: err => console.log(err.error),
+         error: err => console.error(err.error),
       });
    }
 
@@ -61,7 +61,7 @@ export class AddInteresesComponent implements OnInit {
             let tempInteres = await this.inteService.recalcularBatchInteres();
             console.log(tempInteres);
          },
-         error: err => console.log(err.error),
+         error: err => console.error(err.error),
       });
    }
 

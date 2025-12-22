@@ -121,7 +121,6 @@ export class PrmisoxtramiComponent implements OnInit {
                this.partixcertiService.getByIdCerti(resp.idcerti).subscribe({
                   next: datos => {
                      this._partixcerti = datos;
-                     // console.log('this._partixcerti: ', this._partixcerti);
                      this._partixcerti.forEach((partixcerti: any) => partixcerti.compromiso = 0);
                      this.totales1();
                   },
@@ -145,12 +144,7 @@ export class PrmisoxtramiComponent implements OnInit {
    }
 
    calcular(partixcerti: any) {
-      // console.log('partixcerti.compromiso: ', partixcerti.compromiso)
-      // if( compromiso > this._partixcerti.valor - this._partixcerti.totprmisos ){
 
-      // }
-      // console.log('Pasa')
-      // console.log('compromiso: ', compromiso)
       this.totales1();
    }
 
@@ -181,7 +175,7 @@ export class PrmisoxtramiComponent implements OnInit {
       });
    }
 
-   //Datalist de codpar 
+   //Datalist de codpar
    // partidaxCodpar(e: any) {
    //    if (e.target.value != '') {
    //       this.presuService.findByCodpar(2, e.target.value).subscribe({

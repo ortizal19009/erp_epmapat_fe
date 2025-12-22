@@ -47,7 +47,7 @@ export class InfoFacturacionComponent implements OnInit {
         this._liquidafac = datos;
         this.subtotal();
       },
-      error: err => console.log(err.error)
+      error: err => console.error(err.error)
     })
   }
 

@@ -104,7 +104,6 @@ export class CvClientesComponent implements OnInit {
     const formattedDate = rawDate.toISOString().split('T')[0]; // "2025-07-17"
     this.s_facturas.getFacturasCVClientes(idcliente, formattedDate).subscribe({
       next: (datos: any) => {
-        console.log(datos)
         datos.length > 0 ? this.nomCliente = datos[0].nombre : this.nomCliente = '';
         this._facturas = datos;
         datos.forEach((item: any) => {

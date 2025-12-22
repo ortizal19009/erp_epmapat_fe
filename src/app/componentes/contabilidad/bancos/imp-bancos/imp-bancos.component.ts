@@ -142,7 +142,6 @@ export class ImpBancosComponent implements OnInit {
          case 2:  //Conciliación
             try {
                this._conciliacion = await this.conciService.getByIdcuentaMesAsync(+this.formBancos.value.idcuenta, +this.formBancos.value.mes!);
-               console.log('this._conciliacion: ', this._conciliacion)
                this.swcalculando = false;
                if (this.swimprimir) this.txtcalculando = 'Mostrar'
                else this.txtcalculando = 'Descargar'
@@ -353,7 +352,7 @@ export class ImpBancosComponent implements OnInit {
       cellD2.font = customStyle2.font;
 
       let filatit = 3
-      //Fila 3 Cabecera 
+      //Fila 3 Cabecera
       const headerRowCell = worksheet.addRow(['Fecha', 'Asie', 'Cmprbnt', 'Documento', 'C', 'M', 'Débito', 'Crédito', 'Beneficiario', 'Concepto']);
       headerRowCell.eachCell(cell => {
          cell.fill = {
@@ -394,14 +393,14 @@ export class ImpBancosComponent implements OnInit {
          worksheet.getColumn(config.columnIndex).width = config.widthInChars;
       });
 
-      // Columnas centradas 
+      // Columnas centradas
       const columnsToCenter = [1, 2, 3, 5, 6];
       columnsToCenter.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {
             cell.alignment = { vertical: 'middle', horizontal: 'center' };
          });
       });
-      // Columnas a la derecha 
+      // Columnas a la derecha
       let columnsToRigth = [7, 8];
       columnsToRigth.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {

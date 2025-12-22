@@ -68,7 +68,7 @@ export class ModiTabla4Component implements OnInit {
           fecmodi: date,
         });
       },
-      error: (err) => console.log(err.msg.error),
+      error: (err) => console.error(err.msg.error),
     });
   }
 
@@ -84,7 +84,7 @@ export class ModiTabla4Component implements OnInit {
       .updateTabla4(this.idtabla4, this.tab4Form.value)
       .subscribe({
         next: (resp) => this.retornar(),
-        error: (err) => console.log(err.error),
+        error: (err) => console.error(err.error),
       });
   }
 

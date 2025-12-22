@@ -48,7 +48,7 @@ export class CertitmpComponent implements OnInit {
          (datos) => {
             this.certificaciones = datos;
          },
-         (error) => console.log(error)
+         (error) => console.error(error)
       );
    }
 
@@ -71,7 +71,7 @@ export class CertitmpComponent implements OnInit {
             localStorage.setItem('mensajeSuccess', 'Certificacion eliminada');
             this.listarCertificaciones();
          },
-         (error) => console.log(error)
+         (error) => console.error(error)
       );
       localStorage.removeItem('idcertificacionToDelete');
    }

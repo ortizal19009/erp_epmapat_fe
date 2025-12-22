@@ -122,7 +122,6 @@ export class InfoCajaComponent implements OnInit {
       .subscribe({
         next: (datos) => {
           this._recaudaxcaja = datos;
-          // console.log('Busqueda ok: ', this._recaudaxcaja)
         },
         error: (err) => console.error(err.error),
       });
@@ -143,7 +142,7 @@ export class InfoCajaComponent implements OnInit {
         (datos) => {
           this.router.navigate(['/cajas']);
         },
-        (error) => console.log(error)
+        (error) => console.error(error)
       );
     }
   }
@@ -168,7 +167,7 @@ export class InfoCajaComponent implements OnInit {
                   let com: number = 0;
                   let totTarifa: number = +item.idfactura.totaltarifa!;
                   let suma: number = 0;
-      
+
                   if (
                     +item.idfactura.idmodulo.idmodulo! == 3 &&
                     item.idfactura.idabonado > 0
@@ -190,7 +189,6 @@ export class InfoCajaComponent implements OnInit {
                     item.idrecaudacion.idrecaudacion,
                     this.usuario.nomusu,
                   ]);
-                  //console.log(i);
                   i++;
                   total += item.idrecaudacion.totalpagar;
                 });

@@ -53,7 +53,7 @@ export class ModificarCertificacionesComponent implements OnInit {
   listarTpCerifica() {
     this.tpcertificaS.getListaTpCertifica().subscribe(datos => {
       this.tpcertifica = datos;
-    }, error => console.log(error))
+    }, error => console.error(error))
   }
 
   retornarListarCertificaiones() {
@@ -65,7 +65,7 @@ export class ModificarCertificacionesComponent implements OnInit {
     this.certificacionesS.saveCertificaciones(this.certificacionesForm.value).subscribe(datos => {
       this.retornarListarCertificaiones();
       this.mensajeSuccess(this.certificacionesForm.value.numero);
-    }, error => console.log(error))
+    }, error => console.error(error))
   }
 
   modificarCertificaciones() {
@@ -119,7 +119,7 @@ export class ModificarCertificacionesComponent implements OnInit {
       }else{
         i_factura.style.border = "";
         p_message.remove();
-        
+
       }
     });
     if (i_factura.value === ''){
@@ -137,7 +137,7 @@ export class ModificarCertificacionesComponent implements OnInit {
 
   obtenerValorFactura(factura: Facturas){
     let idfactura_facturas = document.getElementById("idfactura_facturas") as HTMLInputElement;
-    idfactura_facturas.value = factura.nrofactura.toString(); 
+    idfactura_facturas.value = factura.nrofactura.toString();
     this.v_factura = factura;
   }
 

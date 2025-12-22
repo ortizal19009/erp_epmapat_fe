@@ -38,7 +38,7 @@ export class AddNacionalidadComponent implements OnInit {
           this.rtn = 0;
           this.nacService.saveNacionalidad(this.nacionalidad).subscribe(datos => {
             window.location.reload();
-          }, error => console.log(error));
+          }, error => console.error(error));
         } else {
           i_descripcion.style.border = "#F54500 1px solid";
           this.descripcion = this.nacionalidad.descripcion;

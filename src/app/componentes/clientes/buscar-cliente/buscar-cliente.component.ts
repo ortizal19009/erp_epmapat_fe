@@ -50,7 +50,6 @@ export class BuscarClienteComponent implements OnInit {
   //   } else {
   //     this.clieService.getByNombreIdentifi(this.formBusClientes.value.nomidenti).subscribe({
   //       next: (datos) => {
-  //         console.log(datos);
   //         this._clientes = datos;
   //       },
   //       error: (e) => console.error(e),
@@ -87,7 +86,7 @@ export class BuscarClienteComponent implements OnInit {
         .getByNombreIdentifi(this.formBusClientes.value.nombre_identifica)
         .subscribe({
           next: (datos) => (this._clientes = datos),
-          error: (err) => console.log(err.error),
+          error: (err) => console.error(err.error),
         });
     }
   }

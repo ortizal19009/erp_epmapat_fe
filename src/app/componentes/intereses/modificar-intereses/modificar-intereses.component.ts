@@ -89,7 +89,7 @@ export class ModificarInteresesComponent implements OnInit {
           let tempInteres = await this.inteService.recalcularBatchInteres();
           console.log(tempInteres);
         },
-        error: (err) => console.log(err.error),
+        error: (err) => console.error(err.error),
       });
   }
 

@@ -71,7 +71,7 @@ export class ModificarReclamosComponent implements OnInit {
       (datos) => {
         this.tpreclamo = datos;
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 
@@ -80,7 +80,7 @@ export class ModificarReclamosComponent implements OnInit {
       (datos) => {
         this.modulos = datos;
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 

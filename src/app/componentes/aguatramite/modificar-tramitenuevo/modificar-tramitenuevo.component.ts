@@ -233,8 +233,7 @@ export class ModificarTramitenuevoComponent implements OnInit {
 
       this.aboService.saveAbonado(abonado).subscribe({
          next: (datos: any) => {
-            // console.log('ABONADO CREADO', datos);
-            this._abonado = datos; 
+            this._abonado = datos;
          },
          error: (e) => console.error('Al crear el Abonado: ', e),
       });
@@ -273,8 +272,6 @@ export class ModificarTramitenuevoComponent implements OnInit {
    }
 
    aprobadoAlcantarillado(e: any) {
-      // console.log(e.target.value);
-      // console.log(e.target.checked);
       if (e.target.checked === true) {
          this.formTramitenuevo.patchValue({
             aprobadoalcantarillado: 1,

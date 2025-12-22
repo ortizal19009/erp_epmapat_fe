@@ -22,14 +22,14 @@ export class ModiUbicacionmComponent implements OnInit {
     this.id = this.route.snapshot.params['id'];
     this.ubiService.getById2(this.id).subscribe(data => {
       this.ubi = data;
-    }, error => console.log(error));
+    }, error => console.error(error));
   }
 
   onSubmit(){
     this.ubiService.update(this.id, this.ubi).subscribe( data =>{
       this.goToList();
     }
-    , error => console.log(error));
+    , error => console.error(error));
   }
 
   goToList(){
@@ -37,5 +37,5 @@ export class ModiUbicacionmComponent implements OnInit {
   }
 
   cancelar(){this.goToList();}
-  
+
 }

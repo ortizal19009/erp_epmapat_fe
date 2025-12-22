@@ -62,17 +62,17 @@ export class ModificarPtoemisionComponent implements OnInit {
     });
   }
 
-  onSubmit() { 
+  onSubmit() {
     let i_establecimiento = document.getElementById("establecimiento") as HTMLInputElement;
         if(i_establecimiento.value.length ==3){
       this.validar = true;
     }
     if (this.validar == true) {
       this.ptoemisionS.updatePtoEmision(this.ptoEmisionForm.value).subscribe(datos =>{
-      }, error => console.log(error));
+      }, error => console.error(error));
     }
   };
-  
+
   actualizarPtoEmision() {
     let idptoemision = sessionStorage.getItem("idptoemisionToInfo");
     this.ptoemisionS.getPtoemisionById(+idptoemision!).subscribe(datos => {
@@ -84,7 +84,7 @@ export class ModificarPtoemisionComponent implements OnInit {
         telefono: datos.telefono ,
         nroautorizacion: datos.nroautorizacion ,
         usucrea: datos.usucrea ,
-        feccrea: datos.feccrea 
+        feccrea: datos.feccrea
       })
     })
   }

@@ -33,7 +33,7 @@ export class InfoTabla4Component implements OnInit {
         this.comprobante.feccrea = resp.feccrea;
         if (resp.idtabla4 == 1) { this.elimdisabled = true }
       },
-      error: err => console.log(err.error),
+      error: err => console.error(err.error),
     })
   }
 
@@ -48,7 +48,7 @@ export class InfoTabla4Component implements OnInit {
     if (this.comprobante.idtabla4 != null) {
       this.tab4Service.deleteTabla4(this.comprobante.idtabla4).subscribe({
         next: resp => this.router.navigate(['/tabla4']),
-        error: err => console.log(err.error),
+        error: err => console.error(err.error),
       })
     }
   }

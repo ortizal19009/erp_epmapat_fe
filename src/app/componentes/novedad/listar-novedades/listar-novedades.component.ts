@@ -20,13 +20,13 @@ export class ListarNovedadesComponent implements OnInit {
 
    listarNovedades(){
       this.novService.getAll().subscribe(datos => {
-         this._novedades = datos},error => console.log(error))
+         this._novedades = datos},error => console.error(error))
     }
-  
+
    public info(idnovedad: number) {
       sessionStorage.setItem('idnovedadToInfo', idnovedad.toString());
       this.router.navigate(['novedad-detalle']);
     }
-  
+
 }
 

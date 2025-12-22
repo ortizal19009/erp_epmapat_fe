@@ -91,7 +91,7 @@ export class ModiCertipresuComponent implements OnInit {
                fecmodi: datos.fecmodi,
             })
          },
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       });
    }
 

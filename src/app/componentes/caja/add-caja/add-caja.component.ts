@@ -59,7 +59,7 @@ export class AddCajaComponent implements OnInit {
             this.rtn2 = 1;
             this.descripcion = l_descripcion;
          }
-      }, error => console.log(error));
+      }, error => console.error(error));
    }
 
    findByDescri(descripcion: String) {
@@ -69,7 +69,7 @@ export class AddCajaComponent implements OnInit {
             this.rtn2 = 1;
             this.descripcion = descripcion;
          }
-      }, error => console.log(error));
+      }, error => console.error(error));
    }
 
    guardaCaja() {
@@ -90,7 +90,7 @@ export class AddCajaComponent implements OnInit {
    guardarCaja(): void {
       // this.cajaService.saveCaja(this.cajaForm.value).subscribe(datos => {
       //    window.location.reload();
-      // }, error => console.log(error));
+      // }, error => console.error(error));
       alert("Guarda")
    }
 
@@ -145,7 +145,7 @@ export class AddCajaComponent implements OnInit {
             this.codigos = datos[0].idptoemision_ptoemision.establecimiento + "." + codigo;
          }
          return rtn;
-      }, error => console.log(error));
+      }, error => console.error(error));
    }
 
 }

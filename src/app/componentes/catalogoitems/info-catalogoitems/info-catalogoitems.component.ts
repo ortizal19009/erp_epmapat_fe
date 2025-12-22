@@ -19,9 +19,9 @@ export class InfoCatalogoitemsComponent implements OnInit {
 
    constructor(private router: Router, private prodService: CatalogoitemService, private ixfService: ItemxfactService ) { }
 
-   ngOnInit(): void { 
+   ngOnInit(): void {
       this.idcatalogoitems = +sessionStorage.getItem('idcatalogoitemsToInfo')!;
-      this.datosProducto() 
+      this.datosProducto()
    }
 
    //Datos del Producto
@@ -35,7 +35,7 @@ export class InfoCatalogoitemsComponent implements OnInit {
             this.producto.uso = resp.idusoitems_usoitems.descripcion;
             this.producto.rubro = resp.idrubro_rubros.descripcion;
          },
-         error: err => console.log(err.error),
+         error: err => console.error(err.error),
       });
       this.movxProducto();
    }
@@ -44,7 +44,7 @@ export class InfoCatalogoitemsComponent implements OnInit {
    movxProducto(){
       this.ixfService.getByIdcatalogoitems(this.idcatalogoitems).subscribe({
          next: resp => this._movxproducto = resp,
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       });
    }
 

@@ -8,6 +8,7 @@ import {
 } from '@angular/forms';
 import { forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { ClientesService } from 'src/app/servicios/clientes.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
@@ -53,7 +54,8 @@ export class CliDuplicadosComponent implements OnInit {
     private s_clientes: ClientesService,
     private s_abonados: AbonadosService,
     private s_facturas: FacturaService,
-    private s_lecturas: LecturasService
+    private s_lecturas: LecturasService,
+    private authoriza: AutorizaService
   ) {}
 
   ngOnInit(): void {
@@ -68,7 +70,6 @@ export class CliDuplicadosComponent implements OnInit {
 
   cargarDuplicados(): void {
     this.disabled = true;
-
     // si en backend aún no filtras por nombreIdentifi, igual lo dejamos listo
     const nombreIdentifi: any = (
       this.formBuscar.value?.nombreIdentifi || ''
@@ -91,7 +92,6 @@ export class CliDuplicadosComponent implements OnInit {
   }
 
   private onResponse(res: any): void {
-    console.log(res.content);
     this._clientes = res.content || [];
     this.totalPages = res.totalPages || 0;
     this.totalElements = res.totalElements || 0;
@@ -215,9 +215,8 @@ export class CliDuplicadosComponent implements OnInit {
     const payload = {
       masterId: this.masterId,
       duplicateIds,
+      usuario: this.authoriza.idusuario
     };
-
-    console.log('Payload merge:', payload);
 
     this.s_clientes.mergeClientes(payload).subscribe({
       next: () => {

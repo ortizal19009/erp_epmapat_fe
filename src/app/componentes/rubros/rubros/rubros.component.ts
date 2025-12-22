@@ -42,7 +42,7 @@ export class RubrosComponent implements OnInit {
    listarModulos() {
       this.moduService.getListaModulos().subscribe({
          next: datos => this._modulos = datos,
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       })
    }
 
@@ -60,7 +60,7 @@ export class RubrosComponent implements OnInit {
             opcion.setAttribute('selected', '');
             this.rubService.getByIdmodulo(+this.idmodulo!).subscribe({
                next: datos => this._rubros = datos,
-               error: err => console.log(err.error)
+               error: err => console.error(err.error)
             })
          }
       }, 500);
@@ -74,12 +74,12 @@ export class RubrosComponent implements OnInit {
                this.nomModulo = resp.descripcion;
                // this.nomModulo = ifModulo;
             },
-            error: err => console.log(err.error)
+            error: err => console.error(err.error)
          });
 
          this.rubService.getByIdmodulo(+selectmodulo.value!).subscribe({
             next: datos => this._rubros = datos,
-            error: err => console.log(err.error)
+            error: err => console.error(err.error)
          })
       });
    }
@@ -111,8 +111,8 @@ export class RubrosComponent implements OnInit {
          i++;
       });
 
-      let cabecera = ['', 'NOMBRE', "VALOR", "CALCULABLE", "IVA", 'Otra']; 
-      
+      let cabecera = ['', 'NOMBRE', "VALOR", "CALCULABLE", "IVA", 'Otra'];
+
       autoTable(doc, {
          theme: 'grid',
          headStyles: {fillColor: [95, 57, 95], fontStyle: 'bold', halign: 'center' },
@@ -157,7 +157,7 @@ export class RubrosComponent implements OnInit {
          },
          head: [cabecera],
          body: datos,
-         
+
       });
 
       var opciones = {

@@ -17,7 +17,6 @@ export class PagoscobrosService {
 
   //Liquidaciones de un Movimiento (benextran)
   getByIdbenxtra(idbenxtra: number): Observable<Pagoscobros[]> {
-    // console.log(`${baseUrl}?idbenxtra=${idbenxtra}`)
     return this.http.get<Pagoscobros[]>(`${baseUrl}?idbenxtra=${idbenxtra}`);
   }
   //Liquidaciones de un Movimiento (benextran) async

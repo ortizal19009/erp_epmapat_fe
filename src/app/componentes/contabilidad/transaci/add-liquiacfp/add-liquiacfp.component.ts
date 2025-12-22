@@ -196,9 +196,8 @@ export class AddLiquiacfpComponent implements OnInit {
       });
 
       // this.tranService.saveTransa1(this.formTransaci.value).subscribe({
-      //    next: transa => { 
+      //    next: transa => {
       //       const id = transa.idtransa;
-      //       console.log('id devuelto: ', id)
 
       //       if(this.formTransaci.get('debcre')!.value == 1) this.totDebe = this.totDebe + this.formTransaci.get('valor')!.value
       //       else this.totHaber = this.totHaber + this.formTransaci.get('valor')!.value

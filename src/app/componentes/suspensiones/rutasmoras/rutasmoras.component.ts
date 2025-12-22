@@ -319,7 +319,6 @@ export class RutasmorasComponent implements OnInit {
   getDatosCuenta(idruta: number) {
     this.s_loading.showLoading();
     this.s_abonado.DeudasCuentasByRuta(idruta).then((item: any) => {
-      console.log(item);
       this.datosCuentas = item;
       this.s_loading.hideLoading();
     });
@@ -359,7 +358,6 @@ export class RutasmorasComponent implements OnInit {
     return (pdfViewer.src = pdfDataUri);
   }
   detallesAbonado(cuenta: any) {
-    console.log(cuenta);
     this.cuenta = cuenta;
   }
 }

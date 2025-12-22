@@ -47,7 +47,7 @@ export class AddNiifcuentaComponent implements OnInit {
       //this.busNiifCuentas(codcue);
       this.validarCodCue(e);
    }
-   
+
    validarGruCue(codcue: string) {
       let val = 1;
       let grucue: any;

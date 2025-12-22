@@ -12,7 +12,7 @@ import { UbicacionmComponent } from '../ubicacionm/ubicacionm.component';
 export class AddUbicacionmComponent implements OnInit {
 
   ubi: Ubicacionm = new Ubicacionm();
-  
+
   constructor(private parent: UbicacionmComponent, private ubicaService: UbicacionmService) {}
 
   ngOnInit(): void {
@@ -25,7 +25,7 @@ export class AddUbicacionmComponent implements OnInit {
     this.ubicaService.nuevo(this.ubi).subscribe(datos => {
       this.parent.listarAll();
       this.ubi.descripcion=undefined;
-    }, error => console.log(error))
+    }, error => console.error(error))
   }
 
   onSubmit() { this.guardar();  }

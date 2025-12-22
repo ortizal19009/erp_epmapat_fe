@@ -109,14 +109,14 @@ export class ComprobacionComponent implements OnInit {
             this._cuentas = resp;
             this.arreglo2 = this._cuentas;
          },
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       });
 
       this.nivelesService.getListaNiveles().subscribe({
          next: resp => {
             this._niveles = resp
          },
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       });
    }
 
@@ -137,7 +137,6 @@ export class ComprobacionComponent implements OnInit {
       this.arreglo3 = [];
 
       this._balance = await this.totalTransa();
-      //   console.log('transacciones acumuladas',this._balance)
       for (const transacio1 of this._balance) {
          this.codcue = transacio1.codcue;
          let registroActual = this.arreglo2.find((r: { codcue: any; }) => r.codcue === this.codcue);
@@ -216,11 +215,9 @@ export class ComprobacionComponent implements OnInit {
                      });
                   }
                } else {
-                  console.log('Registrocta no existe', this.codcue_par);
                };
             }
          } else {
-            console.log('ctas no existe', this.codcue);
          };
       }
 
@@ -396,14 +393,14 @@ export class ComprobacionComponent implements OnInit {
          worksheet.getColumn(config.columnIndex).width = config.widthInChars;
       });
 
-      // Columnas centradas 
+      // Columnas centradas
       const columnsToCenter = [2];
       columnsToCenter.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {
             cell.alignment = { vertical: 'middle', horizontal: 'center' };
          });
       });
-      // Columnas a la derecha 
+      // Columnas a la derecha
       let columnsToRigth = [2];
       columnsToRigth.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {

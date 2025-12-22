@@ -194,11 +194,9 @@ export class AsientosComponent implements OnInit {
    }
 
    retenciones(idasiento: number) {
-      // console.log('idasiento: ', idasiento) 
       this.reteService.getByAsiento(idasiento).subscribe({
          next: datos => {
             const totrete = datos.length;
-            // console.log('totrete: ', totrete)
             switch (totrete) {
                case 0:
                   sessionStorage.setItem("idasientoToRete", idasiento.toString());
@@ -207,7 +205,6 @@ export class AsientosComponent implements OnInit {
                case 1:
                   // let retencionToModifi: { idasiento: number, idrete: number}
                   let idrete = datos[0].idrete;
-                  console.log('Envia: ', idasiento, ' y ', idrete)
                   let retencionToModifi = { idasiento: idasiento, idrete: idrete}
                   // sessionStorage.setItem("retencionToModifi", JSON.stringify(retencionToModifi));
                   sessionStorage.setItem("retencionToModifi", JSON.stringify({ idasiento: idasiento, idrete: idrete}));

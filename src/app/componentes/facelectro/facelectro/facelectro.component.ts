@@ -32,15 +32,15 @@ export class FacelectroComponent implements OnInit {
         this._facelectro = datos;
         this.fecha = datos.feccrea ;
         this.idfacelectro = datos.idfacelectro;
-      }, error => console.log(error));
+      }, error => console.error(error));
     } else if ((+s_tipobusqueda.value!) == 2 && i_buscaFacelectro.value != '') {
       this.faceleService.getByNrofac(i_buscaFacelectro.value).subscribe(datos => {
         this._facelectro = datos;
-      }, error => console.log(error));
+      }, error => console.error(error));
     } else if ((+s_tipobusqueda.value!) == 3 && i_buscaFacelectro.value != '') {
       this.faceleService.getByNrofac(i_buscaFacelectro.value).subscribe(datos => {
         this._facelectro = datos;
-      }, error => console.log(error));
+      }, error => console.error(error));
     } else if (i_buscaFacelectro.value === '') {
       i_buscaFacelectro.style.border = "#F54500 1px solid";
     }

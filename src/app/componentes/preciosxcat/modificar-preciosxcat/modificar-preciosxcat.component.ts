@@ -47,7 +47,7 @@ export class ModificarPreciosxcatComponent implements OnInit {
       (datos) => {
         this.categoria = datos;
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 

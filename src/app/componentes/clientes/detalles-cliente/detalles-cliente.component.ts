@@ -71,7 +71,7 @@ export class DetallesClienteComponent implements OnInit {
         this.cliente.porcexonera = datos.porcexonera;
         this.cliente.fechanacimiento = datos.fechanacimiento;
       },
-      error: (err) => console.log(err.error),
+      error: (err) => console.error(err.error),
     });
     this.cuentasxCli(+idCliente!);
   }

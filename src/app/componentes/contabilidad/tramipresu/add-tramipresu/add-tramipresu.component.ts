@@ -25,7 +25,7 @@ export class AddTramipresuComponent implements OnInit {
 
    documento: Documentos = new Documentos;
    beneficiario: Beneficiarios = new Beneficiarios;
-   
+
    constructor(
       private s_documentos: DocumentosService, private fb: FormBuilder, private router: Router,
       public authService: AutorizaService, private tramiService: TramipresuService, private beneService: BeneficiariosService) { }
@@ -127,7 +127,6 @@ export class AddTramipresuComponent implements OnInit {
    //Valida periodo
    valFecha(control: AbstractControl) {
       // let anio  = control.value.slice(0,4)
-      // console.log('fecha en valFecha: ', fecha )
       if ( control.value.slice(0,4)  != 2024) return of({ 'invalido': true });
       else return of(null);
    }

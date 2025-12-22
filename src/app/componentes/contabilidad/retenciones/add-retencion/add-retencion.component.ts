@@ -266,7 +266,7 @@ export class AddRetencionComponent implements OnInit {
       });
    }
 
-   //Forma de pago   
+   //Forma de pago
    listarTabla15() {
       this.tabla15Service.getListaTabla15().subscribe({
          next: datos => this._tabla15 = datos,

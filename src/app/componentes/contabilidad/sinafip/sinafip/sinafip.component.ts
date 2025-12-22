@@ -53,10 +53,8 @@ export class SinafipComponent implements OnInit {
          periodo: 1,
       });
       /*this.getCuentasBySigef(true).then((value: any) => {
-               console.log(value);
         value.forEach((item: any) => {
-          console.log(item);
-        }); 
+        });
       }); */
    }
 
@@ -84,14 +82,11 @@ export class SinafipComponent implements OnInit {
 
    generar() {
       this.sw1 = true;
-      console.log('this.formSinafip.value.archivo: ', this.formSinafip.value.archivo, this.formSinafip.value.tipo)
       switch (this.formSinafip.value.archivo) {
          case 'option1':
             switch (this.formSinafip.value.tipo) {
                case 'opt1':
-                  console.log('Pasa por 1')
                   this.aperturaInicial.then((values) => {
-                     console.log('Pasa por 2')
                      let content = this.formatAperturaInicial(values);
                      this.generarTxt([content], this.formSinafip.value.nombre);
                   });
@@ -106,7 +101,6 @@ export class SinafipComponent implements OnInit {
             }
             break;
          case 'option2':
-            console.log('detalle apertura inicial');
             switch (this.formSinafip.value.tipo) {
                case 'opt1':
                   this.getDetalleApertura.then((values) => {
@@ -125,7 +119,6 @@ export class SinafipComponent implements OnInit {
             }
             break;
          case 'option3':
-            console.log('balance de comprobación');
             switch (this.formSinafip.value.tipo) {
                case 'opt1':
                   this.getIniciales().then((values) => {
@@ -144,7 +137,6 @@ export class SinafipComponent implements OnInit {
             }
             break;
          case 'option4':
-            console.log('transacciones recíprocas ');
             break;
          case 'option5':
             switch (this.formSinafip.value.tipo) {
@@ -183,7 +175,6 @@ export class SinafipComponent implements OnInit {
                      break;
                }
             } else {
-               console.log('ERROR EN EL PERIODO');
             }
 
             break;
@@ -281,7 +272,6 @@ export class SinafipComponent implements OnInit {
                   lista[io].inicia += item.inicia;
                }
             });
-            //console.log(lista);
             resolve(lista);
          },
          error: (e) => console.error(e),
@@ -319,7 +309,6 @@ export class SinafipComponent implements OnInit {
          this.s_transaci.getByTipAsi(1).subscribe({
             next: (datos) => {
                resolve(datos);
-               console.log('datos: ', datos)
             },
             error: (e) => console.error(e),
          });
@@ -327,16 +316,12 @@ export class SinafipComponent implements OnInit {
    });
 
    aperturaInicial: Promise<any> = new Promise((resolve, rejects) => {
-      console.log('En aperturaInicial this.sw1 = ', this.sw1);
       if (this.sw1) {
-         console.log('Esta en aperturaInicial this.sw1');
          let initialValues: any[] = [];
-         console.log('Llama a getTransaciByTipAsi');
 
          this.getTransaciByTipAsi.then((values) => {
 
             let lcodcue: any = [];
-            console.log('values: ', values)
             values.forEach((value: any) => {
                let spltxt = value.codcue.split('.', 2);
                let addtxt = `${spltxt[0]}.${spltxt[1]}`;
@@ -386,9 +371,7 @@ export class SinafipComponent implements OnInit {
 
    /* DETALLE APERTURA INICIAL */
    formatDetalleApertura(data: any[]): string {
-      console.log(data);
       const formattedData = data.map((item) => {
-         console.log(item);
          let deb = 0;
          let cre = 0;
          let codcue = item.codcue.split('.');
@@ -780,9 +763,7 @@ export class SinafipComponent implements OnInit {
       return new Promise((resolve: any, reject: any) => {
          this.getCuentasBySigef(true).then((cuentas: any) => {
             let balance: any = [];
-            //console.log(cuentas);
             cuentas.forEach((item: any) => {
-               //console.log(item);
                this.getBalanceCompro(
                   this.formSinafip.value.periodo,
                   item.codcue
@@ -792,7 +773,6 @@ export class SinafipComponent implements OnInit {
                      let ld_b = 0;
                      let ld_b3 = 0;
                      let ld_b4 = 0;
-                     //console.log(transacciones);
                      transacciones.forEach((transaccion: any) => {
                         transaccion.codcue = item.codcue;
                         /* if (transaccion.debcre === 1) {

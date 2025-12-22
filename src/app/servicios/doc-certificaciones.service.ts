@@ -35,7 +35,6 @@ export class DocCertificacionesService {
   constructor(private s_header: TemplateHeaderService) {}
 
   certificaadoNoAdeudar(datos: any) {
-    console.log(datos);
     let titulo: string = '';
     let doc = new jsPDF('p', 'pt', 'a4');
     let margin = 30;
@@ -84,7 +83,6 @@ export class DocCertificacionesService {
   }
 
   certificadoEstarAlDia(datos: any) {
-    console.log(datos);
     let titulo: string = '';
     let doc = new jsPDF('p', 'pt', 'a4');
     let margin = 30;

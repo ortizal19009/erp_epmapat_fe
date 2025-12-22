@@ -24,7 +24,7 @@ export class DocumentosComponent {
    public listarDocumentos() {
       this.documentosService.getListaDocumentos().subscribe({
          next: datos => this._documentos = datos,
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       });
    }
 

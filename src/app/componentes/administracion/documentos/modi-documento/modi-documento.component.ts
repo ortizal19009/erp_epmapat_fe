@@ -93,7 +93,7 @@ export class ModiDocumentoComponent implements OnInit {
       .updateDocumento(this.iddocumento, this.formDocumento.value)
       .subscribe({
         next: (resp) => this.retornar(),
-        error: (err) => console.log(err.error),
+        error: (err) => console.error(err.error),
       });
   }
 

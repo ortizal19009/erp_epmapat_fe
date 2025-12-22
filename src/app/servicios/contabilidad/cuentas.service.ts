@@ -94,7 +94,6 @@ export class CuentasService {
 
    //Cuentas por tiptran y codcue para datalist
    findByTiptran(tiptran: number, codcue: String) {
-      // console.log(`${baseUrl}/porTiptran?tiptran=${tiptran}&codcue=${codcue}`)
       return this.http.get<Cuentas[]>(`${baseUrl}/porTiptran?tiptran=${tiptran}&codcue=${codcue}`);
    }
 

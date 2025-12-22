@@ -89,7 +89,6 @@ export class InfoAguatramiteComponent implements OnInit {
   }
 
   genContrato() {
-    // console.log('this.aguatramite.estado: ', this.aguatramite.estado)
     this.tramiaguaService.genContrato(this.tramitenuevo);
   }
 

@@ -125,9 +125,7 @@ export class ModiAsientoComponent implements OnInit {
       this.docuService.getListaDocumentos().subscribe({
          next: datos => {
             // const intdoc = this.formAsiento.value.intdoc;
-            // console.log('this.asiento: ', this.asiento)
             // const intdoc = this.asiento.intdoc;
-            // console.log('this.intdoc: ', this.intdoc)
             // const defaDocumento = datos.find(registro => registro.intdoc == this.intdoc);
             // this.f['intdoc'].setValue(defaDocumento!.intdoc)
             this._documentos = datos
@@ -172,7 +170,7 @@ export class ModiAsientoComponent implements OnInit {
    }
 
    actualiza() {
-      //Con getRawValue() porque los deshabilitados no se incluyen en el formulario 
+      //Con getRawValue() porque los deshabilitados no se incluyen en el formulario
       this.asiService.updateAsiento(this.idasiento, this.formAsiento.getRawValue()).subscribe({
          next: datos => this.retornar(),
          error: err => console.error(err.error),

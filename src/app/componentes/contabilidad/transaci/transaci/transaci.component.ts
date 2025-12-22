@@ -38,7 +38,7 @@ export class TransaciComponent implements OnInit {
       else this.buscaColor();
 
       this.datosAsiento();
-      
+
       const actuAsiento = sessionStorage.getItem('actuAsiento');  //Regresa de modi-transaci para actualizar los totales
       sessionStorage.removeItem('actuAsiento');
       if ( actuAsiento ) { if( actuAsiento == 'true' ){ this.actualizar = true } else { this.actualizar = false} };
@@ -68,7 +68,7 @@ export class TransaciComponent implements OnInit {
 
    datosAsiento() {
       let asientoToTransaci = JSON.parse(sessionStorage.getItem("asientoToTransaci")!);
-      // sessionStorage.removeItem("asientoToTransaci"); OJO: 
+      // sessionStorage.removeItem("asientoToTransaci"); OJO:
       this.idasiento = asientoToTransaci.idasiento;
       this.padre = asientoToTransaci.padre;
 
@@ -152,7 +152,7 @@ export class TransaciComponent implements OnInit {
             this.router.navigate(['/add-liquiacfp']);
             break;
          default:
-         // 
+         //
       }
 
    }

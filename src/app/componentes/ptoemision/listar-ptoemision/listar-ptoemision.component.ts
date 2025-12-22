@@ -21,7 +21,7 @@ export class ListarPtoemisionComponent implements OnInit {
 
   listarPtoEmision(){
     this.ptoemiService.getListaPtoEmision().subscribe(datos => {
-       this.ptoemision = datos},error => console.log(error))
+       this.ptoemision = datos},error => console.error(error))
   }
 
   eliminarPtoEmision(idptoemision:number){
@@ -47,10 +47,10 @@ export class ListarPtoemisionComponent implements OnInit {
           this.ptoemiService.deletePtoEmision(+idpte!).subscribe(datos => {
             localStorage.setItem("mensajeSuccess", "Punto de emision eliminado ");
             this.listarPtoEmision();
-          },error=>console.log(error));
-          
+          },error=>console.error(error));
+
         }
-      }, error => console.log(error));
+      }, error => console.error(error));
     }
     localStorage.removeItem("idptoemisionToDelete");
     this.listarPtoEmision();

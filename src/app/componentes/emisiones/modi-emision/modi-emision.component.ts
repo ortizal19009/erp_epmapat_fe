@@ -23,7 +23,7 @@ export class ModiEmisionComponent implements OnInit {
       (data) => {
         this.emi = data;
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 
@@ -32,7 +32,7 @@ export class ModiEmisionComponent implements OnInit {
       (data) => {
         this.goToList();
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 

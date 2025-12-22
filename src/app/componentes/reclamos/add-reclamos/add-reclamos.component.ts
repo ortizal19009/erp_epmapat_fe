@@ -77,7 +77,7 @@ export class AddReclamosComponent implements OnInit {
         this.retornarListaReclamos();
         this.mensajeSuccess(this.reclamoForm.value.observacion);
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 
@@ -90,7 +90,7 @@ export class AddReclamosComponent implements OnInit {
       (datos) => {
         this.tpreclamo = datos;
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 
@@ -99,7 +99,7 @@ export class AddReclamosComponent implements OnInit {
       (datos) => {
         this.modulos = datos;
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 

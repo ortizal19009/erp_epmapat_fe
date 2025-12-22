@@ -242,7 +242,7 @@ export class ImpEgresosComponent implements OnInit {
       //    cellG3.font = customStyleG3.font;
       // } else worksheet.addRow([]);
 
-      //Fila 3 Cabecera 
+      //Fila 3 Cabecera
       const headerRowCell = worksheet.addRow(['Egreso','Asie','Fecha','Documento','Débito','Crédito','Beneficiario','Descripción']);
       headerRowCell.eachCell(cell => {
          cell.fill = {
@@ -280,14 +280,14 @@ export class ImpEgresosComponent implements OnInit {
          worksheet.getColumn(config.columnIndex).width = config.widthInChars;
       });
 
-      // Columnas centradas 
+      // Columnas centradas
       const columnsToCenter = [1, 2, 3];
       columnsToCenter.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {
             cell.alignment = { vertical: 'middle', horizontal: 'center' };
          });
       });
-      // Columnas a la derecha 
+      // Columnas a la derecha
       let columnsToRigth = [5, 6];
       columnsToRigth.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {

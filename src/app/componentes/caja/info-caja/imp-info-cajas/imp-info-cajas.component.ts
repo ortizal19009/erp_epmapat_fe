@@ -72,7 +72,6 @@ export class ImpInfoCajasComponent implements OnInit {
     let recaudador = +sessionStorage.getItem('idrecaudador')!;
     this.s_usuarios.getDatosOfOne(recaudador).subscribe({
       next: (recaudador: any) => {
-        console.log(recaudador);
         this.nombreUsuario = recaudador.nombre;
 
       },
@@ -149,7 +148,6 @@ export class ImpInfoCajasComponent implements OnInit {
                   )
                   .subscribe({
                     next: (datos) => {
-                      console.log(datos);
                       const blob = new Blob([datos], { type: 'application/pdf' });
                       saveAs(blob, `ReporteFacturasCaja_${recaudador}_${new Date().toDateString()}.pdf`);
                     },
@@ -202,7 +200,6 @@ export class ImpInfoCajasComponent implements OnInit {
               )
               .subscribe({
                 next: (datos) => {
-                  console.log(datos);
                   const blob = new Blob([datos], { type: 'application/pdf' });
                   saveAs(blob, `ReporteFacturasCaja_${recaudador}_${new Date().toDateString()}.pdf`);
                 },
@@ -230,8 +227,6 @@ export class ImpInfoCajasComponent implements OnInit {
         if (elementoExistente) {
           elementoExistente.remove();
         }
-        console.log('d_fecha', d_fecha);
-          console.log('h_fecha', h_fecha);
         let body: any = {
           reportName: 'FacturasCobradasFacilitoHoras',
           parameters: {
@@ -819,7 +814,6 @@ export class ImpInfoCajasComponent implements OnInit {
     });
 
     // Agrega los datos a la hoja de cálculo
-    // console.log('this._cobradas: ', this._cobradas)
     let i = 0;
     this._cobradas.forEach(() => {
       let totalRecaudado = Math.round(this._cobradas[i][2] * 100) / 100;

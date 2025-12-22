@@ -24,7 +24,7 @@ export class Tabla4Component {
   public listarTabla4() {
     this.tabla4Service.getListaTabla4().subscribe(datos => {
       this._tabla4 = datos;
-    }, error => console.log(error));
+    }, error => console.error(error));
   }
 
   public info(idtabla4: number) {

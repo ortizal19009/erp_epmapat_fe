@@ -62,7 +62,7 @@ export class ModificarNacionalidadComponent implements OnInit {
                this.rtn = 0;
                this.nacService.updateNacionalidad(this.nacionalidadForm.value).subscribe(datos => {
                   window.location.reload();
-               }, error => console.log(error));
+               }, error => console.error(error));
                this.retornarListaNacionalidad();
             } else {
                i_descripcion.style.border = "#F54500 1px solid";

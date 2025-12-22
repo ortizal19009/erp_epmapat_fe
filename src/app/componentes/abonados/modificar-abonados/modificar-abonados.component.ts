@@ -106,7 +106,7 @@ export class ModificarAbonadosComponent implements OnInit {
       (datos:any) => {
         this.categoria = datos;
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 
@@ -115,7 +115,7 @@ export class ModificarAbonadosComponent implements OnInit {
       (datos) => {
         this.ubicacionm = datos;
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 
@@ -124,7 +124,7 @@ export class ModificarAbonadosComponent implements OnInit {
       (datos) => {
         this.tipopago = datos;
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 
@@ -133,7 +133,7 @@ export class ModificarAbonadosComponent implements OnInit {
       (datos) => {
         this.estadom = datos;
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 
@@ -142,7 +142,7 @@ export class ModificarAbonadosComponent implements OnInit {
       (datos) => {
         this.ruta = datos;
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 
@@ -156,8 +156,8 @@ export class ModificarAbonadosComponent implements OnInit {
     this.abonadoForm.value.usumodi = this.authService.idusuario;
     this.abonadoForm.value.fecmodi = this.date;
     this.abonadosS.updateAbonado(this.abonadoForm.value).subscribe({
-      next: (resp) => { console.log(resp); this.retornar() },
-      error: (err) => console.log(err.error),
+      next: (resp) => { this.retornar() },
+      error: (err) => console.error(err),
     });
   }
 

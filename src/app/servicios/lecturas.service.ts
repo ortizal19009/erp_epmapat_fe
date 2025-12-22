@@ -198,6 +198,6 @@ export class LecturasService {
     );
   }
   getPendientesByCliente(idcliente: number) {
-    return this.http.get<any[]>(`${baseUrl}/lecturas/pendientes/${idcliente}`);
+    return this.http.get<any[]>(`${baseUrl}/preview/lecturas/${idcliente}`);
   }
 }

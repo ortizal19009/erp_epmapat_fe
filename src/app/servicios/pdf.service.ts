@@ -276,10 +276,6 @@ export class PdfService {
     bt3: any,
     doc: any
   ) {
-    console.log(ht1, bt1)
-    console.log(ht2, bt2)
-
-    console.log(ht3, bt3)
 
     this.header(titulo, doc);
     // Primera tabla

@@ -19,7 +19,7 @@ export class TpidentificasComponent implements OnInit {
     this.tpis.getAll().subscribe(datos => { this.v_tpidentifica = datos })
     console.log(this.v_tpidentifica.length)
   }
-  
+
   eliminar(idtpidentifica: number) {
     this.tpis.delete(idtpidentifica).subscribe(datos => {
       this.listarAll();

@@ -45,7 +45,7 @@ export class HabilitacionesComponent implements OnInit {
     private s_abonado: AbonadosService,
     private s_aboxsuspension: AboxsuspensionService,
     private s_documentos: DocumentosService,
-    private coloresService: ColoresService, 
+    private coloresService: ColoresService,
     private authService: AutorizaService
   ) {}
 
@@ -159,7 +159,7 @@ export class HabilitacionesComponent implements OnInit {
             numero: 1
           })
         }
-  
+
       },
     });
   }

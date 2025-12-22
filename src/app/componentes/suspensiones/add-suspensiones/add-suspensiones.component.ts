@@ -143,23 +143,18 @@ export class AddSuspensionesComponent implements OnInit {
     let month = date.getMonth();
     let current_s: any = `${year}-${month}-01`;
     let current_f: any = `${year}-${month + 1}-01`;
-    console.log(date.getFullYear());
-    console.log(current_s, current_f);
+
     this.s_abonado.getByIdrutaAsync(ruta.idruta).then((_abonados: any) => {
-      let dato_abonado : any; 
-      //console.log(_abonados);
+      let dato_abonado : any;
       _abonados.forEach((abonado: any) => {
-        //console.log(abonado);
         this.s_facturas.getSinCobrarAboMod(abonado.idabonado).subscribe({
           next: (deuda: any) => {
-            //console.log('DEUDA ABONADO: ', deuda);
             aboxdeuda.abonado = abonado;
             aboxdeuda.facturas.deudas;
             return aboxdeuda;
           },
           error: (e) => console.error(e),
           complete: () => {
-            console.log(aboxdeuda);
           },
         });
       });
@@ -177,7 +172,6 @@ export class AddSuspensionesComponent implements OnInit {
   }
 
   setRuta(e: any) {
-    console.log(e);
     this.ruta = e;
     this.selecRuta(e);
   }

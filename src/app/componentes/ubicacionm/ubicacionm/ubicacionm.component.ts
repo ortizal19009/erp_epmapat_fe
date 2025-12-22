@@ -37,7 +37,7 @@ export class UbicacionmComponent implements OnInit {
     if (id != null) {
       this.ubiService.delete(+id!).subscribe(datos => {
         this.listarAll();
-      }, error => console.log(error));
+      }, error => console.error(error));
     }
   }
 

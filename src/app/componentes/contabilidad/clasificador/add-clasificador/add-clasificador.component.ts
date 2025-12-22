@@ -69,7 +69,7 @@ export class AddClasificadorComponent implements OnInit {
       //       this.rtn2 = 1;
       //       this.nompar = l_descripcion;
       //    }
-      // }, error => console.log(error));
+      // }, error => console.error(error));
       this.guardarCuenta();
    }
 
@@ -89,7 +89,7 @@ export class AddClasificadorComponent implements OnInit {
       else return of(null);
    }
 
-   // Expresión regular para validar formato 
+   // Expresión regular para validar formato
    validateFormato(str: string): boolean {
       const regex = /^(?:\d{1,2}|\d{2}\.\d{2}|\d{2}\.\d{2}\.\d{2})$/;
       return regex.test(str);

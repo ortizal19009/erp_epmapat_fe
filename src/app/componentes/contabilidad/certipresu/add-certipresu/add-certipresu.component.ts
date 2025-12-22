@@ -125,7 +125,6 @@ export class AddCertipresuComponent implements OnInit {
       this.beneficiario.idbene = this.idbene!;
       this.formCertipresu.value.idbene = this.beneficiario;
       this.responsable.idbene = this.idbeneres!;
-      // console.log('this.responsable: ', this.responsable)
       this.formCertipresu.value.idbeneres = this.responsable;
 
       this.certiService.saveCertiPresu(this.formCertipresu.value).subscribe({

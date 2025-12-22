@@ -34,7 +34,7 @@ export class HistorialconsumoComponent implements OnInit {
         this._rubrosxfac = detalle;
         this.subtotal()
       },
-      error: err => console.log(err.error)
+      error: err => console.error(err.error)
     });
   }
   subtotal() {
@@ -81,13 +81,13 @@ export class HistorialconsumoComponent implements OnInit {
   facturasxAbonado(idabonado: number) {
     this.facService.getByIdabonado(idabonado).subscribe({
       next: datos => this._facturas = datos,
-      error: err => console.log(err.error)
+      error: err => console.error(err.error)
     });
   }
   lecturasxAbonado(idabonado: number) {
     this.lecService.getLecturasxIdabonado(idabonado, 15).subscribe({
       next: datos => { this._lecturas = datos; },
-      error: err => console.log(err.error)
+      error: err => console.error(err.error)
     });
   }
 

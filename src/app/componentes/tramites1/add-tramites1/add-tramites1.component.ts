@@ -171,7 +171,7 @@ export class AddTramites1Component implements OnInit {
           this.obtenerUltimaFactura();
         }, 400);
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 
@@ -184,7 +184,7 @@ export class AddTramites1Component implements OnInit {
       .saveLiquidaTramite1(this.f_liquidatramite.value)
       .subscribe(
         (datos) => {},
-        (error) => console.log(error)
+        (error) => console.error(error)
       );
   }
 
@@ -199,7 +199,7 @@ export class AddTramites1Component implements OnInit {
       });
       this.s_rubxtramite.saveRubrosxTramie(this.f_rubxtramite.value).subscribe(
         (datos) => {},
-        (error) => console.log(error)
+        (error) => console.error(error)
       );
       i++;
     });
@@ -228,7 +228,7 @@ export class AddTramites1Component implements OnInit {
         this.v_idtramite = Math.max.apply(null, maxId);
         this.guargarRubros();
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 
@@ -244,7 +244,7 @@ export class AddTramites1Component implements OnInit {
         this.generarLiquidacionTramite();
         this.guardarLiquidaTramite();
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 
@@ -254,7 +254,7 @@ export class AddTramites1Component implements OnInit {
         this.v_modulos = datos;
         this.listarServicios();
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 
@@ -265,7 +265,7 @@ export class AddTramites1Component implements OnInit {
         this.v_servicios = datos;
         this.v_modulo = { idmodulo: 50 };
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
     s_modulos.addEventListener('change', () => {
       let v_modulo = s_modulos.value;
@@ -278,7 +278,7 @@ export class AddTramites1Component implements OnInit {
           (datos) => {
             this.v_servicios = datos;
           },
-          (error) => console.log(error)
+          (error) => console.error(error)
         );
       } else if (+v_modulo! === 23) {
         this.v_modulo = { idmodulo: 23 };
@@ -289,7 +289,7 @@ export class AddTramites1Component implements OnInit {
           (datos) => {
             this.v_rubros = datos;
           },
-          (error) => console.log(error)
+          (error) => console.error(error)
         );
       }
     });
@@ -307,7 +307,7 @@ export class AddTramites1Component implements OnInit {
     } else {
       // this.s_clientes.getByDato(this.f_clientes.value.buscarCliente).subscribe(datos => {
       //    this.v_cliente = datos;
-      // }, error => console.log(error))
+      // }, error => console.error(error))
     }
   }
 
@@ -324,7 +324,7 @@ export class AddTramites1Component implements OnInit {
         (datos) => {
           this.v_abonado = datos;
         },
-        (error) => console.log(error)
+        (error) => console.error(error)
       );
   }
 
@@ -335,7 +335,7 @@ export class AddTramites1Component implements OnInit {
         (datos) => {
           this.arr_rubro.push(datos);
         },
-        (error) => console.log(error)
+        (error) => console.error(error)
       );
     } else {
       let num: number = event.target.value;
@@ -366,7 +366,7 @@ export class AddTramites1Component implements OnInit {
           this.arr_rubro.push(datos);
           this.sumaTotal();
         },
-        (error) => console.log(error)
+        (error) => console.error(error)
       );
     } else {
       let num: number = event.target.value;

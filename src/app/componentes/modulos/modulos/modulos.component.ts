@@ -15,11 +15,11 @@ export class ModulosComponent implements OnInit {
   ngOnInit(): void {
     this.listar();
   }
-  
+
   public listar(){
     this.moduServicio.getListaModulos().subscribe(datos => {
       this.modulo = datos;
-    }, error => console.log(error));
+    }, error => console.error(error));
   }
 
 }

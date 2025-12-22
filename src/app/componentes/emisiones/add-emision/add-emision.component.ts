@@ -26,7 +26,7 @@ export class AddEmisionComponent implements OnInit {
       (datos) => {
         // this.parent.listarEmisiones ();
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 

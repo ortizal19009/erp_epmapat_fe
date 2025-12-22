@@ -86,7 +86,7 @@ export class ImpLecturasComponent implements OnInit {
             this.rutaxemision.ruta = datos.idruta_rutas.descripcion;
             this.rutaxemision.estado = datos.estado;
          },
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       })
    }
 
@@ -332,14 +332,14 @@ export class ImpLecturasComponent implements OnInit {
          worksheet.getColumn(config.columnIndex).width = config.widthInChars;
       });
 
-      // Columnas centradas 
+      // Columnas centradas
       const columnsToCenter = [1];
       columnsToCenter.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {
             cell.alignment = { vertical: 'middle', horizontal: 'center' };
          });
       });
-      // Columnas a la derecha 
+      // Columnas a la derecha
       let columnsToRigth = [4, 5, 6, 7];
       columnsToRigth.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {

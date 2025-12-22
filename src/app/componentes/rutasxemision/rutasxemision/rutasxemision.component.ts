@@ -24,7 +24,7 @@ export class RutasxemisionComponent implements OnInit {
       this.emisionDatos( +idemision! );
       this.ruxemiService.getByIdEmision(+idemision!).subscribe({
          next: datos => this._rutasxemi = datos,
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       })
    }
 
@@ -32,16 +32,16 @@ export class RutasxemisionComponent implements OnInit {
       this.emiService.getByIdemision(+idemision!).subscribe(datos => {
          this._emision = datos;
          this.emision.emision = this._emision.emision;
-      }, error => console.log(error))
+      }, error => console.error(error))
    }
 
    regresar() { this.router.navigate(['/emisiones']); }
 
-   lecturas(idrutaxemision: number){ 
+   lecturas(idrutaxemision: number){
       sessionStorage.setItem("idrutaxemisionToLectura", idrutaxemision.toString());
       this.router.navigate(['lecturas']);
    }
-  
+
 }
 
 interface Emision {

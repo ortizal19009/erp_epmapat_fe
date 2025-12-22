@@ -210,7 +210,7 @@ export class RetencionesComponent implements OnInit {
             let fec_reteimpu = {} as Fec_reteimpu;
             fec_reteimpu.idretencionesimpuestos = +(retencion.idrete.toString() + index.toString());
             fec_reteimpu.idretencion = retencion.idrete;
-            fec_reteimpu.codigo = '1'; //1=RENTA: TABLA 19 de la Ficha Técnica de comprobantes electrónicos 
+            fec_reteimpu.codigo = '1'; //1=RENTA: TABLA 19 de la Ficha Técnica de comprobantes electrónicos
             fec_reteimpu.codigoporcentaje = impuesto.idtabla10.codretair;   //
             fec_reteimpu.baseimponible = impuesto.baseimpair;
             fec_reteimpu.codigodocumentosustento = '01'; //Factura
@@ -230,7 +230,7 @@ export class RetencionesComponent implements OnInit {
       let fec_reteimpu = {} as Fec_reteimpu;
       fec_reteimpu.idretencionesimpuestos = +(retencion.idrete.toString() + '0' + codigoporcentaje);  //Id de fec_retenciones_impuesto: idrete+0(1,2 o 3)
       fec_reteimpu.idretencion = retencion.idrete;
-      fec_reteimpu.codigo = '2'; // 2=IVA: TABLA 19 de la Ficha Técnica de comprobantes electrónicos 
+      fec_reteimpu.codigo = '2'; // 2=IVA: TABLA 19 de la Ficha Técnica de comprobantes electrónicos
       fec_reteimpu.codigoporcentaje = codigoporcentaje;   //1:Bienes, 2:Servicios, 3:100%
       fec_reteimpu.baseimponible = monto;
       fec_reteimpu.codigodocumentosustento = '01'; //Factura

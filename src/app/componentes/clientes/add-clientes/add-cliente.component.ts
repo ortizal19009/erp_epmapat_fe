@@ -204,7 +204,6 @@ export class AddClienteComponent implements OnInit {
   }
 
   valIdentifica(control: AbstractControl) {
-    console.log('this.tpidenti: ', this.tpidenti);
 
     switch (this.tpidenti) {
       case 1: // RUC
@@ -214,7 +213,6 @@ export class AddClienteComponent implements OnInit {
           else return of({ invalid: true });
         } else return of({ invalid: true }); // Validación fallida
       case 2: // Cedula
-        console.log('0401000252');
         if (control.value.length == 10) {
           let rtn = this.valCedula(control.value);
           if (rtn) return of(null);

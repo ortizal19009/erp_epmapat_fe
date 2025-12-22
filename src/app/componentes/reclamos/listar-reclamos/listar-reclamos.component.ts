@@ -12,7 +12,7 @@ export class ListarReclamosComponent implements OnInit {
 
   reclamos : any;
   filterTerm: string;
-  
+
   constructor(private reclamosS: ReclamosService, private router: Router) { }
 
   ngOnInit(): void {
@@ -23,9 +23,9 @@ export class ListarReclamosComponent implements OnInit {
     this.reclamosS.getListaReclamos().subscribe(datos => {
       this.reclamos = datos;
       this.alerta();
-    }, error => console.log(error))
+    }, error => console.error(error))
   }
-  
+
   modificarReclamos(reclamos:Reclamos){
     localStorage.setItem("idreclamo", reclamos.idreclamo.toString());
     this.router.navigate(['/modificar-reclamo']);
@@ -40,7 +40,7 @@ export class ListarReclamosComponent implements OnInit {
     this.reclamosS.deleteReclamos(+idr!).subscribe(datos => {
       localStorage.setItem("mensajeSuccess", "Este reclamo fue eliminado");
       this.listarReclamos();
-    },error => console.log(error));
+    },error => console.error(error));
     localStorage.removeItem("idreclamoToDelete");
   }
 
@@ -58,7 +58,7 @@ export class ListarReclamosComponent implements OnInit {
     }
     localStorage.removeItem("mensajeSuccess");
   }
-  
+
   irAddReclamo(){
     this.router.navigate(["/add-reclamo"]);
   }

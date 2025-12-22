@@ -31,7 +31,7 @@ export class InfoDocumentoComponent implements OnInit {
             this.documento.nomcomprobante = resp.idtabla4.nomcomprobante;
             if (resp.tipdoc > 0 || resp.iddocumento == 1) { this.elimdisabled = true }
          },
-         error: err => console.log(err.error),
+         error: err => console.error(err.error),
       })
    }
 

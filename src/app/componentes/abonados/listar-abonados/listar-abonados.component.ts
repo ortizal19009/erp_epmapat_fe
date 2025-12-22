@@ -135,7 +135,7 @@ export class ListarAbonadosComponent implements OnInit {
           (datos) => {
             this._abonados = datos;
           },
-          (error) => console.error(error)
+
         );
     } else if (
       +this.buscarAbonadoForm.value.selecTipoBusqueda == 3 &&
@@ -147,7 +147,6 @@ export class ListarAbonadosComponent implements OnInit {
           (datos) => {
             this._abonados = datos;
           },
-          (error) => console.error(error)
         );
     }
     // else if (this.buscarAbonadoForm.value.buscarAbonado === '') {

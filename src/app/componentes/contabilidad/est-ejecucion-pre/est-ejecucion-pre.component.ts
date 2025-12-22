@@ -60,7 +60,7 @@ export class EstEjecucionPreComponent implements OnInit {
       let coloresJSON = sessionStorage.getItem('/ejecupresup');
       if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
       else this.buscaColor();
-      
+
       const fecha = new Date();
       const año = fecha.getFullYear()
       this.formBuscar = this.fb.group({
@@ -265,7 +265,7 @@ export class EstEjecucionPreComponent implements OnInit {
          next: resp => {
             this._cuentas = resp.filter(data => (data.asodebe != null && data.asohaber != null) && (data.asodebe.length === 2 || data.asohaber.length === 2));
          },
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       });
    }
 
@@ -404,14 +404,14 @@ export class EstEjecucionPreComponent implements OnInit {
          worksheet.getColumn(config.columnIndex).width = config.widthInChars;
       });
 
-      // Columnas centradas 
+      // Columnas centradas
       const columnsToCenter = [2];
       columnsToCenter.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {
             cell.alignment = { vertical: 'middle', horizontal: 'center' };
          });
       });
-      // Columnas a la derecha 
+      // Columnas a la derecha
       let columnsToRigth = [2];
       columnsToRigth.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {

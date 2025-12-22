@@ -21,7 +21,7 @@ export class AddNovedadComponent implements OnInit {
 
    constructor(public fb: FormBuilder, private novService: NovedadesService, private authService: AutorizaService) { }
 
-   ngOnInit(): void { 
+   ngOnInit(): void {
       let date: Date = new Date();
       this.novedad.estado = 1;
       this.novedad.usucrea =  this.authService.idusuario;
@@ -36,7 +36,7 @@ export class AddNovedadComponent implements OnInit {
       this.valDescriNovedad();
    }
 
-   onSubmit() { 
+   onSubmit() {
       let h_descripcion = document.getElementById("descripcion") as HTMLInputElement;
       let l_descripcion = h_descripcion.value;
       this.novService.findByDescripcion(l_descripcion).subscribe(datos => {
@@ -45,21 +45,21 @@ export class AddNovedadComponent implements OnInit {
 //            alert("datos.length =" + datos.length)
             this.rtn1 = 1;
             this.descripcion  = l_descripcion;
-         }else{ 
+         }else{
             this.rtn1 = 0;
             this.guardarNovedad()}
-      }, error => console.log(error));
+      }, error => console.error(error));
    }
 
    guardarNovedad(): void {
       this.novService.saveNovedad(this.novedad).subscribe(datos => {
          window.location.reload();
-       }, error => console.log(error));
+       }, error => console.error(error));
       //alert("Guarda")
      // this.novService.create(this.novedadForm.value).subscribe(datos => {
       //    window.location.reload();
-     // }, error => console.log(error));
-      
+     // }, error => console.error(error));
+
    }
 
    valDescriNovedad() {

@@ -257,7 +257,6 @@ export class AddRemisionComponent implements OnInit {
     }
     // Si la tasa de interés es cero
     if (r === 0) {
-      console.log('La tasa de interés es cero. La cuota es simplemente P / n.');
       return P / n;
     }
 
@@ -341,7 +340,7 @@ export class AddRemisionComponent implements OnInit {
           fxr.cuota = i + 1;
           fxr.tipfactura = 2;
           this.s_facxremi.savefacxremi(fxr).subscribe((fr: any) => {});
-          
+
         });
 
 
@@ -353,10 +352,10 @@ export class AddRemisionComponent implements OnInit {
             ...item,
             sum: this.calcularInicial(item.sum, f.porcentaje),
           }));
-  
+
           /* CALCULAMOS LAS MENSUALIDADES DE LOS RUBROS */
           //for (let n: number = 1; n == f.coutas; n++) {
-  
+
           let r_mensual = this._rubros.map((item: any) => ({
             ...item,
             sum: this.calcularCuotaFija(
@@ -365,7 +364,7 @@ export class AddRemisionComponent implements OnInit {
               f.cuotas
             ),
           }));
-  
+
           /* CALCULAMOS LA CUOTA FINAL DE LOS RUBROS */
           let f_final = this._rubros.map((item: any) => ({
             ...item,
@@ -381,7 +380,7 @@ export class AddRemisionComponent implements OnInit {
           }
           this.newFacturas(f_final, _rem);
         }
-  
+
         this._facturas.forEach(async (factura: Facturas, i: number) => {
           let fxr: Facxremi = new Facxremi();
           let fact: Facturas = new Facturas();

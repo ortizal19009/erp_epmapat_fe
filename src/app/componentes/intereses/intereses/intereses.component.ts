@@ -68,7 +68,7 @@ export class ListarInteresesComponent implements OnInit {
   elimInteres() {
     this.interService.deleteInteres(this.interes.idinteres).subscribe({
       next: (datos) => this.listarIntereses(),
-      error: (err) => console.log(err.error),
+      error: (err) => console.error(err.error),
     });
   }
 

@@ -37,7 +37,7 @@ export class RubroxfacComponent implements OnInit {
          // this.telefono = factura.idcliente.telefono;
          // this.email = factura.idcliente.email;
          // this.idfactura = factura.idfactura;
-      }, error => console.log(error));
+      }, error => console.error(error));
    }
 
    getRubroxfac() {
@@ -45,7 +45,7 @@ export class RubroxfacComponent implements OnInit {
       this.rxfService.getByIdfactura(+idFactura!).subscribe(detalle => {
          this.rubroxfac = detalle;
          this.subtotal();
-      }, error => console.log(error));
+      }, error => console.error(error));
    }
 
    subtotal() {

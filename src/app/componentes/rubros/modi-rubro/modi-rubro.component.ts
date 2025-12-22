@@ -75,7 +75,7 @@ export class ModiRubroComponent implements OnInit {
   listarModulos() {
     this.moduService.getListaModulos().subscribe({
       next: (resp) => (this._modulos = resp),
-      error: (err) => console.log(err.error),
+      error: (err) => console.error(err.error),
     });
   }
 
@@ -100,7 +100,7 @@ export class ModiRubroComponent implements OnInit {
           fecmodi: date,
         });
       },
-      error: (err) => console.log(err.msg.error),
+      error: (err) => console.error(err.msg.error),
     });
   }
 

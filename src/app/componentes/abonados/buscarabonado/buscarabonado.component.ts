@@ -50,7 +50,6 @@ export class BuscarabonadoComponent implements OnInit {
         });
         break;
       default:
-        console.log("Error de selección de categoría");
         break;
     }
   }

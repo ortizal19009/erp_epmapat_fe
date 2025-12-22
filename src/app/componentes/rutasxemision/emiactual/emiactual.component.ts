@@ -16,17 +16,17 @@ export class EmiactualComponent implements OnInit {
 
   constructor(private router: Router, private ruxemiService:RutasxemisionService) { }
 
-  ngOnInit(): void { 
+  ngOnInit(): void {
     // let idemision = sessionStorage.getItem("idemisionToEmiactual")
     // this.ruxemiService.getEmisionActual(+idemision!).subscribe(datos => {
     //   this._emiactual = datos;
-    // }, error => console.log(error));
+    // }, error => console.error(error));
 
   }
-  
+
   regresar() { this.router.navigate(['/emisiones']); }
 
-  lecturas(idrutaxemision: number){ 
+  lecturas(idrutaxemision: number){
     sessionStorage.setItem("idrutaxemisionToLectura", idrutaxemision.toString());
     this.router.navigate(['lecturas']);
  }

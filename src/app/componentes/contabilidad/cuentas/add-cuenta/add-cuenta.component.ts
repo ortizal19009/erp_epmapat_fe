@@ -58,7 +58,7 @@ export class AddCuentaComponent implements OnInit {
             this.nivcuenew = resp.nivcue;
             this.crearForm();
          },
-         error: err => console.log(err.msg.error)
+         error: err => console.error(err.msg.error)
       })
    }
 

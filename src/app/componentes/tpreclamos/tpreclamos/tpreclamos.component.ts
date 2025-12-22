@@ -40,7 +40,7 @@ export class TpreclamosComponent implements OnInit {
         (datos) => {
           this.listarAll();
         },
-        (error) => console.log(error)
+        (error) => console.error(error)
       );
     }
   }

@@ -91,7 +91,6 @@ export class ModificarClientesComponent implements OnInit {
         this.authService.idusuario,
         this.ventana
       );
-      console.log(this.rolepermission);
     }
     this.parent = sessionStorage.getItem('padreModiCliente');
 

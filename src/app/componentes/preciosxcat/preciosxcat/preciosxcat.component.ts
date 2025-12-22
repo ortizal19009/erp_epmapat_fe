@@ -61,7 +61,7 @@ export class PreciosxcatComponent implements OnInit {
    listarCategorias() {
       this.cateService.getListCategoria().subscribe({
          next: datos => this.categoria = datos,
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       })
    }
 
@@ -91,7 +91,7 @@ export class PreciosxcatComponent implements OnInit {
             s_categorias.style.border = "";
             this.prexcatService.getPrecioxCatQuery(idcat, dm3, hm3).subscribe(datos => {
                this._preciosxcat = datos;
-            }, error => console.log(error));
+            }, error => console.error(error));
          }
       }
    }
@@ -108,7 +108,7 @@ export class PreciosxcatComponent implements OnInit {
       let idprecioxcat = localStorage.getItem("idprecioxcatToDelete");
       this.prexcatService.deletePrecioxCat(+idprecioxcat!).subscribe(datos => {
          localStorage.setItem("mensajeSuccess", "Precio eliminado")
-      }, error => console.log(error));
+      }, error => console.error(error));
       localStorage.removeItem("idprecioxcatToDelete");
    }
 
@@ -261,10 +261,10 @@ export class PreciosxcatComponent implements OnInit {
                   next: resp1 => {
                      console.log("Ok!");
                   },
-                  error: err => console.log(err.error)
+                  error: err => console.error(err.error)
                });
             },
-            error: err => console.log(err.error)
+            error: err => console.error(err.error)
          });
          i++;
       });

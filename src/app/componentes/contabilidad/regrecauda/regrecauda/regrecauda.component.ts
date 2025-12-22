@@ -61,12 +61,12 @@ export class RegrecaudaComponent implements OnInit {
       try {
          this._cobradas = await this.rxfService.getTotalRubrosActualAsync(fecha, hasta);
          // console.log('this._cobradas: ', this._cobradas)
-         
+
          try {
             this._rubrosanterior = await this.rxfService.getTotalRubrosAnteriorAsync(fecha, hasta);
             this.swbuscando = false;
-            this.txtbuscar = 'Buscar';   
-            
+            this.txtbuscar = 'Buscar';
+
          } catch (error) {
             console.error('Error al obtener los Rubros anteriores:', error);
          }
@@ -83,8 +83,7 @@ function obtenerFechaActualString(fecha: Date) {
    const anio = fechaActual.getFullYear();
    const mes = fechaActual.getMonth() + 1; // Los meses en JavaScript van de 0 a 11
    const dia = fechaActual.getDate();
- 
+
    // Formatear la fecha a string con el formato deseado
    return `${anio}-${mes.toString().padStart(2, '0')}-${dia.toString().padStart(2, '0')}`;
  }
- 

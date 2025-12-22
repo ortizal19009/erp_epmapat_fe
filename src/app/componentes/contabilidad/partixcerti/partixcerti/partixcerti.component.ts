@@ -93,8 +93,8 @@ export class PartixcertiComponent implements OnInit {
       this.creaForm();
    }
 
-   cancelar() { 
-      this.swnuevo = false; 
+   cancelar() {
+      this.swnuevo = false;
       this.swmodificar = false;
    }
 
@@ -117,7 +117,7 @@ export class PartixcertiComponent implements OnInit {
       });
    }
 
-   //Datalist de codpar 
+   //Datalist de codpar
    partidaxCodpar(e: any) {
       if (e.target.value != '') {
          this.presuService.findByCodpar(2, e.target.value).subscribe({

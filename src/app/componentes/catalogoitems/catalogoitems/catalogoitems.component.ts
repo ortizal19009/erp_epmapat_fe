@@ -41,7 +41,7 @@ export class CatalogoitemsComponent implements OnInit {
 
       this.moduService.getListaModulos().subscribe({
          next: datos => this._modulos = datos,
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       })
 
       setTimeout(() => {
@@ -72,7 +72,7 @@ export class CatalogoitemsComponent implements OnInit {
       else descripcion = this.buscarForm.value.descripcion.toLowerCase();
       this.catitemService.getProductos(idmodulo1, idmodulo2, descripcion).subscribe({
          next: datos => this._catalogoitems = datos,
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       })
    }
 

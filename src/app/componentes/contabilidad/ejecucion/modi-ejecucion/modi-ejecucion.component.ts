@@ -43,7 +43,7 @@ export class ModiEjecucionComponent implements OnInit {
         this.reforma.tipo = resp.tipo;
         this.reforma.concepto = resp.concepto;
       },
-      error: err => console.log(err.error)
+      error: err => console.error(err.error)
     });
 
 
@@ -123,7 +123,7 @@ export class ModiEjecucionComponent implements OnInit {
           idevenga: datos.idevenga,
         })
       },
-      error: err => console.log(err.msg.error)
+      error: err => console.error(err.msg.error)
     });
   }
 
@@ -163,7 +163,7 @@ export class ModiEjecucionComponent implements OnInit {
     //     this._presupue = datos;
     //     console.log("this._presupue.length= " + this._presupue.length)
     //   },
-    //   error: err => console.log(err.error)
+    //   error: err => console.error(err.error)
     // })
 
   }

@@ -32,7 +32,7 @@ export class InfoPreingresoComponent implements OnInit {
             this.paringreso.inicia = resp.inicia;
             this.paringreso.totmod = resp.totmod;
          },
-         error: err => console.log(err.error),
+         error: err => console.error(err.error),
       })
    }
 
@@ -48,7 +48,7 @@ export class InfoPreingresoComponent implements OnInit {
       if (this.paringreso.idpresupue != null) {
          this.preingService.deletePreingreso(this.paringreso.idpresupue).subscribe({
             next: resp => this.router.navigate(['/preingresos']),
-            error: err => console.log(err.error)
+            error: err => console.error(err.error)
          })
       }
    }

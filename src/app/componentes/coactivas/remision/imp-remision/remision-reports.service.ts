@@ -29,10 +29,7 @@ export class RemisionReportsService {
   constructor(private s_pdf: PdfService) {}
 
   genContratoRemision(doc: any, remisiones: any, facturas: any) {
-    console.log(remisiones);
-    console.log(facturas);
     let fecha: Date = new Date(remisiones.feccrea);
-    console.log(fecha);
     this.s_pdf.header(
       'CONVENIO DE PAGO - REMISION DE INTERESES, MULTAS Y RECARGOS EPMAPAT',
       doc

@@ -28,7 +28,7 @@ x: any;
          descricategoria: [null, [Validators.required, Validators.minLength(3)],
             this.validateEmail.bind(this)],
             // asyncEmailValidatorOk(this.cateService)],
-         //  this.validarNombre.bind(this)], 
+         //  this.validarNombre.bind(this)],
          porcdescuento: [0]
       },
       { updateOn: "blur" }
@@ -43,13 +43,13 @@ x: any;
          //this.retornarListaReclamos()
          //this.mensajeSuccess(this.reclamoForm.value.observacion);
          window.location.reload();
-      }, error => console.log(error));
+      }, error => console.error(error));
    }
 
    guardarCategoria() {
       // this.cateService.saveCategoria(this.categoria).subscribe(datos => {
       //    window.location.reload();
-      // }, error => console.log(error))
+      // }, error => console.error(error))
    }
 
    // retornarListaCategoria() {
@@ -60,7 +60,6 @@ x: any;
 
    submit() {
       if (this.formCategoria.valid) {
-         console.log(this.formCategoria.value)
       }
       else {
          alert("FILL ALL FIELDS")
@@ -69,7 +68,7 @@ x: any;
 
    onSubmit() {
       console.warn(this.formCategoria.value);
-      
+
       //this.submitted = true;
    }
 
@@ -101,7 +100,7 @@ x: any;
     validateEmail1(control: AbstractControl)  {
       this.x = this.cateService.valNombre(control.value);
 
-      
+
     }
 
 }

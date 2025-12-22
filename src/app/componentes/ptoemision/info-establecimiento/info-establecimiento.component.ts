@@ -14,7 +14,7 @@ export class InfoEstablecimientoComponent implements OnInit {
    _cajas: any;         //Cajas (Ptos de Emision) del Establecimeinto
    elimdisabled: boolean = false;
 
-   constructor(private ptoService: PtoemisionService, private cajaService: CajaService, 
+   constructor(private ptoService: PtoemisionService, private cajaService: CajaService,
       private router: Router) { }
 
    ngOnInit(): void { this.datosEstablecimiento() }
@@ -29,7 +29,7 @@ export class InfoEstablecimientoComponent implements OnInit {
          this.estab.telefono = datos.telefono;
          this.estab.estado = "Inactivo"
          if (datos.estado = 1) { this.estab.estado = "Activo"; }
-      }, error => console.log(error));
+      }, error => console.error(error));
       this.puntosxEstab(+idptoemision!)
    }
 
@@ -37,14 +37,14 @@ export class InfoEstablecimientoComponent implements OnInit {
       this.cajaService.getByIdptoemision(idptoemision).subscribe(datos => {
          this._cajas = datos;
          if (this._cajas.length > 0) { this.elimdisabled = true }
-      }, error => console.log(error));
+      }, error => console.error(error));
    }
 
    eliminarEstablecimiento() {
          if (this.estab.idptoemision != null) {
          this.ptoService.deletePtoEmision(this.estab.idptoemision).subscribe(datos => {
             this.router.navigate(['/ptoemision']);
-         }, error => console.log(error));
+         }, error => console.error(error));
       }
    }
 

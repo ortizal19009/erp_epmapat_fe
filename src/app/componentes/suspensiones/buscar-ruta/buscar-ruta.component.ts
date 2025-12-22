@@ -36,11 +36,9 @@ export class BuscarRutaComponent implements OnInit {
    }
 
    buscarRuta() {
-      console.log(this.f_rutas.value.nom_cod);
       this.filterTerm = this.f_rutas.value.nom_cod;
       /*   this.s_rutas.getRutasByQuery(this.f_rutas.value.nom_cod).subscribe({
           next: (datos) => {
-            console.log(datos);
             this.l_rutas = datos;
           },
           error: (e) => console.error(e),

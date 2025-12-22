@@ -203,7 +203,7 @@ export class ImpNiifcuentasComponent implements OnInit {
       worksheet.addRow([ ]);
       // worksheet.getCell('B2').font = { name: 'Times New Roman', bold: true, size: 16, color: { argb: '001060' } };
 
-      //Fila 3 Cabecera 
+      //Fila 3 Cabecera
       const headerRowCell = worksheet.addRow(['Código', 'Nombre', 'Grupo', 'Nivel', 'Movimiento']);
       headerRowCell.eachCell(cell => {
          cell.fill = {
@@ -236,14 +236,14 @@ export class ImpNiifcuentasComponent implements OnInit {
          worksheet.getColumn(config.columnIndex).width = config.widthInChars;
       });
 
-      // Columnas centradas 
+      // Columnas centradas
       const columnsToCenter = [4, 5];
       columnsToCenter.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {
             cell.alignment = { vertical: 'middle', horizontal: 'center' };
          });
       });
-      // Columnas a la derecha 
+      // Columnas a la derecha
       // let columnsToRigth = [5, 6];
       // columnsToRigth.forEach(columnIndex => {
       //    worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {

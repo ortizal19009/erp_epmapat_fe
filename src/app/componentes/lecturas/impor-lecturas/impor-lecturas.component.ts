@@ -35,7 +35,7 @@ export class ImporLecturasComponent implements OnInit {
          next: resp => {
             this._lecturas = resp;
          },
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       },);
    }
 
@@ -47,7 +47,7 @@ export class ImporLecturasComponent implements OnInit {
             this.rutaxemision.ruta = datos.idruta_rutas.descripcion;
             this.rutaxemision.estado = datos.estado;
          },
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       })
    }
 

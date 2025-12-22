@@ -68,7 +68,7 @@ export class AddRubroComponent implements OnInit {
 
     this.moduService.getListaModulos().subscribe({
       next: (resp) => (this._modulos = resp),
-      error: (err) => console.log(err.error),
+      error: (err) => console.error(err.error),
     });
 
     setTimeout(() => {
@@ -109,10 +109,10 @@ export class AddRubroComponent implements OnInit {
             this.reset();
             this.parent.listarRubros();
           },
-          error: (err) => console.log(err.error),
+          error: (err) => console.error(err.error),
         });
       },
-      error: (err) => console.log(err.error),
+      error: (err) => console.error(err.error),
     });
   }
 

@@ -75,12 +75,12 @@ export class EstFlujoEfeComponent implements OnInit {
          filtro: '',
       },
          { updateOn: "blur" });
-      
+
       //    let buscaDesdeFecha = sessionStorage.getItem("buscaDesdeFecha");
       // let buscaHastaFecha = sessionStorage.getItem("buscaHastaFecha");
 
       this.archExportar = 'Estado de Flujo del Efectivo';
-      
+
       this.filtrar_ctas();
 
       // if (buscaDesdeFecha == null || buscaHastaFecha == null) {
@@ -325,7 +325,7 @@ export class EstFlujoEfeComponent implements OnInit {
             this.arreglo2.sort((a, b) => (a.grufluefec - b.grufluefec) || (a.codcue.localeCompare(b.codcue)));
 
          },
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       });
 
    }
@@ -463,14 +463,14 @@ export class EstFlujoEfeComponent implements OnInit {
          worksheet.getColumn(config.columnIndex).width = config.widthInChars;
       });
 
-      // Columnas centradas 
+      // Columnas centradas
       const columnsToCenter = [2];
       columnsToCenter.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {
             cell.alignment = { vertical: 'middle', horizontal: 'center' };
          });
       });
-      // Columnas a la derecha 
+      // Columnas a la derecha
       let columnsToRigth = [2];
       columnsToRigth.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {

@@ -378,7 +378,6 @@ export class FecfacturaService {
                     .saveFacDetalleImpuesto(detalleImpuesto)
                     .subscribe({
                       next: (detimpuesto) => {
-                        console.log('guardar detalle');
                         j++;
                       },
                       error: (e) => console.error(e),

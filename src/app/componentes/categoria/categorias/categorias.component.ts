@@ -22,7 +22,7 @@ export class ListarCategoriaComponent implements OnInit {
     this.setcolor();
     this.listarCategoria();
   }
-  
+
   setcolor() {
     let colores: string[];
     let coloresJSON = sessionStorage.getItem('/categorias');
@@ -39,11 +39,11 @@ export class ListarCategoriaComponent implements OnInit {
     const detalle = document.querySelector('.detalle');
     if (detalle) detalle.classList.add('nuevoBG2');
  }
- 
+
   public listarCategoria(){
     this.cateService.getListCategoria().subscribe({
       next: datos =>  this._categorias = datos,
-      error: err => console.log(err.error),
+      error: err => console.error(err.error),
     })
   }
 
@@ -53,13 +53,13 @@ export class ListarCategoriaComponent implements OnInit {
       this.tmp = this.lista[0].descripcion;
       alert(this.lista.length)
       alert("this.tmp  = " + this.tmp);
-    }, error => console.log(error));
+    }, error => console.error(error));
   }
 
   eliminarCategoria(idcategoria: number){
     localStorage.setItem("idcategoriaToDelete", idcategoria.toString());
   }
-  
+
   aprobarEliminacionCategoria(){
     let idc = localStorage.getItem("idcategoriaToDelete");
     if(idc != null){
@@ -79,10 +79,10 @@ export class ListarCategoriaComponent implements OnInit {
           this.cateService.deleteCategoria(+idc!).subscribe(datos => {
             localStorage.setItem("mensajeSuccess", "Categoria eliminada ");
             this.listarCategoria();
-          },error=>console.log(error));
-          
+          },error=>console.error(error));
+
         }
-      }, error => console.log(error));
+      }, error => console.error(error));
     }
     localStorage.removeItem("idcategoriaToDelete");
     this.listarCategoria();

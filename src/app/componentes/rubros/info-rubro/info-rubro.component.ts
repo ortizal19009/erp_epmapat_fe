@@ -40,7 +40,7 @@ export class InfoRubroComponent implements OnInit {
             this.rubro.tipo = resp.tipo;
             this.rubro.nommodulo = resp.idmodulo_modulos.descripcion;
          },
-         error: err => console.log(err.error),
+         error: err => console.error(err.error),
       });
       this.catalogoitemsxRub();
    }
@@ -52,7 +52,7 @@ export class InfoRubroComponent implements OnInit {
             this._catalogoitems = datos;
             if (this._catalogoitems.length == 0) { this.noMovimientos = true; }
          },
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       })
    }
 
@@ -67,7 +67,7 @@ export class InfoRubroComponent implements OnInit {
       if (this.rubro.idrubro != null) {
          this.rubService.deleteRubro(this.rubro.idrubro).subscribe({
             next: resp => this.router.navigate(['/rubros']),
-            error: err => console.log(err.error),
+            error: err => console.error(err.error),
          })
       }
    }
@@ -80,7 +80,7 @@ export class InfoRubroComponent implements OnInit {
             if (this._rubroxfac.length == 0) this.noMovimientos = true;
             else this.noMovimientos = false;
          },
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       })
    }
 

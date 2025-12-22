@@ -51,7 +51,7 @@ export class AddCatalogoitemsComponent implements OnInit {
       //Combo de los Módulos (Secciones)
       this.moduService.getListaModulos().subscribe({
          next: resp => this._modulos = resp,
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       });
 
       let selectmodulo = document.getElementById("selectmodulo") as HTMLSelectElement;
@@ -64,7 +64,7 @@ export class AddCatalogoitemsComponent implements OnInit {
                this._usos = resp;
                this.formProdu.value.idusoitems = resp;
             },
-            error: err => console.log(err.error)
+            error: err => console.error(err.error)
          });
       });
 
@@ -88,10 +88,9 @@ export class AddCatalogoitemsComponent implements OnInit {
    regresar() { this.router.navigate(['/catalogoitems']); }
 
    guardar() {
-      // console.log("Datos a guardar= "+JSON.stringify(this.formProdu.value));
       this.produService.save(this.formProdu.value).subscribe({
          next: resp => { this.router.navigate(['/catalogoitems']); },
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       });
    }
 
@@ -111,7 +110,7 @@ export class AddCatalogoitemsComponent implements OnInit {
       else descripcion = this.formBuscaRubros.value.descripcion.toLowerCase();
       this.rubService.getByModulo(this.idmodulo, descripcion).subscribe({
          next: resp => this._rubros = resp,
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       });
    }
 

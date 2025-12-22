@@ -38,7 +38,6 @@ export class EjecucionService {
 
    // Actualizar codpar
    actualizarCodpar(idpresupue: number, nuevoCodpar: string): Observable<Ejecucion[]> {
-      // console.log(`${baseUrl}/${idpresupue}?nuevoCodpar=${nuevoCodpar}`);
       return this.http.patch<Ejecucion[]>(`${baseUrl}/${idpresupue}?nuevoCodpar=${nuevoCodpar}`, null);
    }
 

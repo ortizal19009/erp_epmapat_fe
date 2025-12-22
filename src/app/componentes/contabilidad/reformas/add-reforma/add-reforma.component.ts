@@ -81,7 +81,7 @@ export class AddReformaComponent implements OnInit {
             sessionStorage.setItem('buscaReformasHasta', this.formReforma?.controls['numero'].value.toString());
             this.regresar();
          },
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       });
    }
 

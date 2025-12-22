@@ -29,7 +29,7 @@ export class ItemxfactComponent implements OnInit {
           this._itemxfact[0].idcatalogoitems_catalogoitems.idusoitems_usoitems.descripcion;
         this.subtotal();
       },
-      error: (err) => console.log(err.error),
+      error: (err) => console.error(err.error),
     });
   }
 

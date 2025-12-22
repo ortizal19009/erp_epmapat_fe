@@ -113,10 +113,10 @@ export class MainHeaderComponent implements OnInit {
               this.formDefinir.value.otrapestania.toString()
             );
           },
-          error: (err) => console.log(err.error),
+          error: (err) => console.error(err.error),
         });
       },
-      error: (err) => console.log(err.error),
+      error: (err) => console.error(err.error),
     });
   }
 }

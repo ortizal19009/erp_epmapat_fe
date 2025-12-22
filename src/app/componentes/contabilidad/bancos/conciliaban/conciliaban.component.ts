@@ -20,7 +20,6 @@ export class ConciliabanComponent implements OnInit {
   listarConciliaBan() {
     this.s_conciliaban.getAllConciliaBancos().subscribe({
       next: (datos) => {
-        console.log(datos);
         this.conciliaBans = datos;
       },
       error: (e) => console.error(e),

@@ -48,7 +48,6 @@ export class ModificarCajaComponent implements OnInit {
     this.valDescriCaja();
   }
   ngOnChanges(changes: SimpleChanges) {
-    console.log(changes['idcaja'])
     this.idcaja = +changes['idcaja'].currentValue!
     this.iniciar();
   }
@@ -61,7 +60,6 @@ export class ModificarCajaComponent implements OnInit {
          idcaja = this.idcaja;
        } */
     this.cajaService.getById(+idcaja!).subscribe((datos) => {
-      console.log(datos)
       this.cajaForm.setValue({
         idcaja: datos.idcaja,
         codigo: datos.codigo,
@@ -81,7 +79,7 @@ export class ModificarCajaComponent implements OnInit {
   onSubmit() {
     this.cajaService.updateCaja(this.cajaForm.value).subscribe(
       (datos) => { window.location.reload(); },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 
@@ -90,7 +88,7 @@ export class ModificarCajaComponent implements OnInit {
       (datos) => {
         this.ptoemision = datos;
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 

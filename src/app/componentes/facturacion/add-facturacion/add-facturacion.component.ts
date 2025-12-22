@@ -127,7 +127,7 @@ export class AddFacturacionComponent implements OnInit {
         .getByIdmodulo(this.formDetalle.value.seccion.idmodulo)
         .subscribe({
           next: (datos) => (this._usoitems = datos),
-          error: (err) => console.log(err.error),
+          error: (err) => console.error(err.error),
         });
     });
     //Uso
@@ -142,7 +142,7 @@ export class AddFacturacionComponent implements OnInit {
             this._productos = datos;
             this.totProductos = this._productos.length;
           },
-          error: (err) => console.log(err.error),
+          error: (err) => console.error(err.error),
         });
     });
   }
@@ -168,7 +168,7 @@ export class AddFacturacionComponent implements OnInit {
         this.itemxfacturacion();
         this.facturas();
       },
-      error: (err) => console.log(err.error),
+      error: (err) => console.error(err.error),
     });
   }
 
@@ -190,10 +190,10 @@ export class AddFacturacionComponent implements OnInit {
             next: (resp1) => {
               // console.log("Ok!");
             },
-            error: (err) => console.log(err.error),
+            error: (err) => console.error(err.error),
           });
         },
-        error: (err) => console.log(err.error),
+        error: (err) => console.error(err.error),
       });
       i++;
     });
@@ -251,7 +251,7 @@ export class AddFacturacionComponent implements OnInit {
             error: (err) => console.error(err.error),
           });
         },
-        error: (err) => console.log(err.error),
+        error: (err) => console.error(err.error),
       });
     }
   }
@@ -304,7 +304,7 @@ export class AddFacturacionComponent implements OnInit {
         .getByNombreIdentifi(this.formBusClientes.value.nombre_identifica)
         .subscribe({
           next: (datos) => (this._clientes = datos),
-          error: (err) => console.log(err.error),
+          error: (err) => console.error(err.error),
         });
     }
   }

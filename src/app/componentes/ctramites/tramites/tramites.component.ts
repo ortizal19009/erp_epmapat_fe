@@ -64,14 +64,14 @@ export class TramitesComponent implements OnInit {
          o_tramite.setAttribute('selected', '');
          this.traService.getByTpTramite(1).subscribe({
             next: datos => this._tramites = datos,
-            error: err => console.log(err.error)
+            error: err => console.error(err.error)
          })
       }, 200);
 
       b_tramite.addEventListener("change", () => {
          this.traService.getByTpTramite(+b_tramite.value!).subscribe({
             next: datos => this._tramites = datos,
-            error: err => console.log(err.error)
+            error: err => console.error(err.error)
          })
       });
    }
@@ -79,7 +79,7 @@ export class TramitesComponent implements OnInit {
    listarTpTramites() {
       this.tptramiService.getListaTpTramite().subscribe(datos => {
          this.v_tptramites = datos;
-      }, error => console.log(error))
+      }, error => console.error(error))
    }
 
    addTramite() { this.router.navigate(["/add-tramite"]); }

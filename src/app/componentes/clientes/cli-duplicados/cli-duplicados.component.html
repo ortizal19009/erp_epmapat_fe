@@ -297,12 +297,12 @@
 
         <div class="d-flex align-items-center">
           <button type="button" class="btn btn-outline-secondary btn-sm mr-2"
-                  (click)="collapseAll(true)" [disabled]="previewLoading || !previewData?.length">
+                  (click)="collapseAll(true)" [disabled]="previewLoading || !previewData.length">
             <i class="bi bi-arrows-collapse mr-1"></i> Colapsar todo
           </button>
 
           <button type="button" class="btn btn-outline-secondary btn-sm mr-3"
-                  (click)="collapseAll(false)" [disabled]="previewLoading || !previewData?.length">
+                  (click)="collapseAll(false)" [disabled]="previewLoading || !previewData.length">
             <i class="bi bi-arrows-expand mr-1"></i> Expandir todo
           </button>
 
@@ -327,7 +327,7 @@
         </div>
 
         <!-- Content -->
-        <div *ngIf="!previewLoading && !previewError && previewData?.length">
+        <div *ngIf="!previewLoading && !previewError && previewData.length">
 
           <div *ngFor="let p of previewData; let i = index" class="card shadow-sm mb-3 border-0">
 
@@ -350,9 +350,9 @@
                   <div>
                     <strong>Cliente ID: {{ p.idcliente }}</strong>
                     <div class="small text-muted">
-                      Abonados: <strong>{{ p.abonados?.length || 0 }}</strong> ·
-                      Facturas: <strong>{{ p.facturas?.length || 0 }}</strong> ·
-                      Lecturas: <strong>{{ p.lecturas?.length || 0 }}</strong>
+                      Abonados: <strong>{{ p.abonados.length || 0 }}</strong> ·
+                      Facturas: <strong>{{ p.facturas.length || 0 }}</strong> ·
+                      Lecturas: <strong>{{ p.lecturas.length || 0 }}</strong>
                     </div>
                   </div>
                 </div>
@@ -360,13 +360,13 @@
 
               <div class="text-right">
                 <span class="badge badge-light border mr-1">
-                  Abonados: {{ p.abonados?.length || 0 }}
+                  Abonados: {{ p.abonados.length || 0 }}
                 </span>
                 <span class="badge badge-light border mr-1">
-                  Facturas: {{ p.facturas?.length || 0 }}
+                  Facturas: {{ p.facturas.length || 0 }}
                 </span>
                 <span class="badge badge-light border">
-                  Lecturas: {{ p.lecturas?.length || 0 }}
+                  Lecturas: {{ p.lecturas.length || 0 }}
                 </span>
               </div>
             </div>
@@ -379,7 +379,7 @@
                 <div class="mb-3">
                   <div class="d-flex align-items-center justify-content-between px-1 mb-1">
                     <small class="text-muted font-weight-bold">Abonados</small>
-                    <small class="text-muted">Total: {{ p.abonados?.length || 0 }}</small>
+                    <small class="text-muted">Total: {{ p.abonados.length || 0 }}</small>
                   </div>
 
                   <div class="table-responsive">
@@ -399,7 +399,7 @@
                           </td>
                           <td class="text-center">{{ a.estado || '-' }}</td>
                         </tr>
-                        <tr *ngIf="(p.abonados?.length || 0) === 0">
+                        <tr *ngIf="(p.abonados.length || 0) === 0">
                           <td colspan="3" class="text-center text-muted">Sin abonados</td>
                         </tr>
                       </tbody>
@@ -411,7 +411,7 @@
                 <div class="mb-3">
                   <div class="d-flex align-items-center justify-content-between px-1 mb-1">
                     <small class="text-muted font-weight-bold">Facturas pendientes</small>
-                    <small class="text-muted">Total: {{ p.facturas?.length || 0 }}</small>
+                    <small class="text-muted">Total: {{ p.facturas.length || 0 }}</small>
                   </div>
 
                   <div class="table-responsive">
@@ -435,7 +435,7 @@
                             {{ (f.pagado || 0) | number:'1.2-2' }}
                           </td>
                         </tr>
-                        <tr *ngIf="(p.facturas?.length || 0) === 0">
+                        <tr *ngIf="(p.facturas.length || 0) === 0">
                           <td colspan="5" class="text-center text-muted">Sin facturas pendientes</td>
                         </tr>
                       </tbody>
@@ -447,7 +447,7 @@
                 <div>
                   <div class="d-flex align-items-center justify-content-between px-1 mb-1">
                     <small class="text-muted font-weight-bold">Lecturas pendientes</small>
-                    <small class="text-muted">Total: {{ p.lecturas?.length || 0 }}</small>
+                    <small class="text-muted">Total: {{ p.lecturas.length || 0 }}</small>
                   </div>
 
                   <div class="table-responsive">
@@ -469,7 +469,7 @@
                           </td>
                           <td class="text-center">{{ l.fecha || l.feccrea || '-' }}</td>
                         </tr>
-                        <tr *ngIf="(p.lecturas?.length || 0) === 0">
+                        <tr *ngIf="(p.lecturas.length || 0) === 0">
                           <td colspan="4" class="text-center text-muted">Sin lecturas pendientes</td>
                         </tr>
                       </tbody>

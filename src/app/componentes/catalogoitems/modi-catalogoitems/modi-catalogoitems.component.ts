@@ -103,12 +103,12 @@ export class ModiCatalogoitemsComponent implements OnInit {
                   opcUso.setAttribute('selected', '');
                 }, 500);
               },
-              error: (err) => console.log(err.error),
+              error: (err) => console.error(err.error),
             });
           }
         }, 800);
       },
-      error: (err) => console.log(err.error),
+      error: (err) => console.error(err.error),
     });
   }
 
@@ -134,7 +134,7 @@ export class ModiCatalogoitemsComponent implements OnInit {
           fecmodi: new Date().toISOString().substring(0, 10),
         });
       },
-      error: (err) => console.log(err.msg.error),
+      error: (err) => console.error(err.msg.error),
     });
   }
 
@@ -151,7 +151,7 @@ export class ModiCatalogoitemsComponent implements OnInit {
           this._usos = resp;
           this.formProducto.value.idusoitems = resp;
         },
-        error: (err) => console.log(err.error),
+        error: (err) => console.error(err.error),
       });
     });
 
@@ -177,7 +177,7 @@ export class ModiCatalogoitemsComponent implements OnInit {
       .updateProducto(this.idcatalogoitems, this.formProducto.value)
       .subscribe({
         next: (resp) => this.retornar(),
-        error: (err) => console.log(err.error),
+        error: (err) => console.error(err.error),
       });
   }
 
@@ -201,7 +201,7 @@ export class ModiCatalogoitemsComponent implements OnInit {
     else descripcion = this.formBuscaRubros.value.descripcion.toLowerCase();
     this.rubService.getByModulo(this.idmodulo, descripcion).subscribe({
       next: (resp) => (this._rubros = resp),
-      error: (err) => console.log(err.error),
+      error: (err) => console.error(err.error),
     });
   }
 

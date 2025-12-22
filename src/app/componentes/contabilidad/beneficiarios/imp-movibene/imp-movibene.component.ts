@@ -87,7 +87,6 @@ export class ImpMovibeneComponent implements OnInit {
             try {
                this._movibene = await this.bxtService.getByIdbeneDesdeHastaAsync(this.idbene, this.formImprimir.value.desde, this.formImprimir.value.hasta);
                this.total();
-               // console.log('this._movibene: ', this._movibene)
                this.swcalculando = false;
                if (this.swimprimir) this.txtcalculando = 'Mostrar'
                else this.txtcalculando = 'Descargar'
@@ -203,7 +202,7 @@ export class ImpMovibeneComponent implements OnInit {
       let i = 0;
       this._movibene.forEach(() => {
          datos.push([this._movibene[i].inttra.idasiento.fecha, this._movibene[i].inttra.idasiento.asiento, this.comprobante(this._movibene[i].inttra.idasiento.tipcom, this._movibene[i].inttra.idasiento.compro),
-         this._movibene[i].inttra.codcue, this._movibene[i].anticipo, this._movibene[i].cxc, this._movibene[i].ft, this._movibene[i].cxp, 
+         this._movibene[i].inttra.codcue, this._movibene[i].anticipo, this._movibene[i].cxc, this._movibene[i].ft, this._movibene[i].cxp,
          this._movibene[i].totpagcob, this._movibene[i].saldo, this._movibene[i].inttra.descri ]);
          i++;
       });
@@ -305,7 +304,7 @@ export class ImpMovibeneComponent implements OnInit {
          cellG3.font = customStyleG3.font;
       } else worksheet.addRow([]);
 
-      //Fila 4 Cabecera 
+      //Fila 4 Cabecera
       // const cabecera = ['Fecha', 'Asie', 'Cmprbnt', 'Beneficiario', 'Debe', 'Haber', 'Saldo', 'Descripción'];
       const headerRowCell = worksheet.addRow( [ 'Fecha','Asie','Cmprbnt','Cuenta','Anticipo','CxC','F.T','CxP','Liquida','Saldo','Descripción' ] );
       headerRowCell.eachCell(cell => {
@@ -332,7 +331,7 @@ export class ImpMovibeneComponent implements OnInit {
          //    debe = '';
          //    haber = this._movibene[i].haber;
          // }
-         const row = [this._movibene[i].inttra.idasiento.fecha, this._movibene[i].inttra.idasiento.asiento, 
+         const row = [this._movibene[i].inttra.idasiento.fecha, this._movibene[i].inttra.idasiento.asiento,
          this.comprobante(this._movibene[i].inttra.idasiento.tipcom, this._movibene[i].inttra.idasiento.compro),
          this._movibene[i].inttra.codcue, this._movibene[i].anticipoN, this._movibene[i].cxcN, this._movibene[i].ftN,
          this._movibene[i].cxpN, this._movibene[i].totpagcob, this._movibene[i].saldoN, this._movibene[i].inttra.descri];
@@ -351,16 +350,16 @@ export class ImpMovibeneComponent implements OnInit {
          cell.font = { bold: true }; // Aplicar negrita
          cell.numFmt = '#,##0.00';
        }
-       
+
       let celdaE = worksheet.getCell('E' + (this._movibene.length + 5).toString());
       celdaE.value = { formula: 'SUM(E5:' + 'E' + (this._movibene.length + 4).toString() + ')', result: 0, sharedFormula: undefined, date1904: false };
-      
+
       let celdaF = worksheet.getCell('F' + (this._movibene.length + 5).toString());
       celdaF.value = { formula: 'SUM(F5:' + 'F' + (this._movibene.length + 4).toString() + ')', result: 0, sharedFormula: undefined, date1904: false };
 
       let celdaG = worksheet.getCell('G' + (this._movibene.length + 5).toString());
       celdaG.value = { formula: 'SUM(G5:' + 'G' + (this._movibene.length + 4).toString() + ')', result: 0, sharedFormula: undefined, date1904: false };
-      
+
       let celdaH = worksheet.getCell('H' + (this._movibene.length + 5).toString());
       celdaH.value = { formula: 'SUM(H5:' + 'H' + (this._movibene.length + 4).toString() + ')', result: 0, sharedFormula: undefined, date1904: false };
 
@@ -388,14 +387,14 @@ export class ImpMovibeneComponent implements OnInit {
          worksheet.getColumn(config.columnIndex).width = config.widthInChars;
       });
 
-      // Columnas centradas 
+      // Columnas centradas
       const columnsToCenter = [1, 2, 3];
       columnsToCenter.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {
             cell.alignment = { vertical: 'middle', horizontal: 'center' };
          });
       });
-      // Columnas a la derecha 
+      // Columnas a la derecha
       let columnsToRigth = [5, 6, 7, 8, 9, 10 ];
       columnsToRigth.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {

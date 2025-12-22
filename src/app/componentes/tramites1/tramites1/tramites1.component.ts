@@ -18,10 +18,10 @@ export class Tramites1Component implements OnInit {
   vd_tramite: any;
   l_rubros:any;
 
-  constructor(private fb: FormBuilder, private router: Router, private s_tramite1: Tramites1Service, 
-    private s_rubrosxtramite: RubrosxtramiteService) { 
+  constructor(private fb: FormBuilder, private router: Router, private s_tramite1: Tramites1Service,
+    private s_rubrosxtramite: RubrosxtramiteService) {
   }
-  
+
   ngOnInit(): void {
     this.listarTrmites();
     this.f_detallestramite = this.fb.group({
@@ -33,9 +33,9 @@ export class Tramites1Component implements OnInit {
       pagado:''
     });
   }
-  
+
   onSubmit() {}
-  
+
   addTramite(){
     this.router.navigate(['add-tramites1']);
   }
@@ -52,7 +52,7 @@ export class Tramites1Component implements OnInit {
     }
     this.s_rubrosxtramite.getRubrosByTramite(tramite.idtramite).subscribe(datos=>{
       this.l_rubros = datos;
-    },error => console.log(error));
+    },error => console.error(error));
     this.f_detallestramite.setValue({
       nrotramtie:tramite.idtramite,
       cliente: tramite.idcliente_clientes.nombre,
@@ -66,7 +66,7 @@ export class Tramites1Component implements OnInit {
   listarTrmites(){
     this.s_tramite1.getListaTramites1().subscribe(datos => {
       this.v_tramites = datos;
-    }, error => console.log(error));
+    }, error => console.error(error));
   }
 
 }

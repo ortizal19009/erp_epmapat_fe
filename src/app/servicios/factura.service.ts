@@ -316,14 +316,12 @@ export class FacturaService {
   ============================*/
 
   reporteFacturas(v_dfecha: Date, v_hfecha: Date) {
-    console.log(v_dfecha, v_hfecha);
     return this.http.get(
       `${baseUrl}/reportes/facturascobradas?v_dfecha=${v_dfecha}&v_hfecha=${v_hfecha}`,
       { responseType: 'blob' }
     );
   }
   reporteFacturasRubros(v_dfecha: Date, v_hfecha: Date, c_feccrea: Date) {
-    console.log(v_dfecha, v_hfecha, c_feccrea);
     return this.http.get(
       `${baseUrl}/reportes/facturasrubros?v_dfecha=${v_dfecha}&v_hfecha=${v_hfecha}&c_feccrea=${c_feccrea}`,
       { responseType: 'blob' }
@@ -376,13 +374,11 @@ export class FacturaService {
   calcularIntereses(idfactura: number) {
     this.s_interes.getListaIntereses().subscribe({
       next: (_intereses: any) => {
-        console.log(_intereses);
       },
     });
   }
   // Cartera de un cliente a una fecha Async (Facturas)
   async getCarteraClienteAsync(idcliente: number, hasta: Date): Promise<any[]> {
-    // console.log( `${baseUrl}/carteraCliente?idcliente=${idcliente}&hasta=${hasta}` )
     const response = await firstValueFrom(
       this.http.get<any[]>(
         `${baseUrl}/carteraCliente?idcliente=${idcliente}&hasta=${hasta}`
@@ -395,7 +391,6 @@ export class FacturaService {
     idcliente: number,
     hasta: Date
   ): Promise<any[]> {
-    // console.log( `${baseUrl}/totCarteraCliente?idcliente=${idcliente}&hasta=${hasta}` );
     const response = await firstValueFrom(
       this.http.get<any[]>(
         `${baseUrl}/totCarteraCliente?idcliente=${idcliente}&hasta=${hasta}`

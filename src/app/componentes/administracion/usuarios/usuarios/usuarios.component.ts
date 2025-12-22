@@ -113,7 +113,7 @@ export class UsuariosComponent implements OnInit {
   eliminar() {
     // this.usuService.deleteUsuario(this.usuario.idusuario).subscribe({
     //    next: datos => this.listarUsuarios(),
-    //    error: err => console.log(err.error)
+    //    error: err => console.error(err.error)
     // });
   }
 

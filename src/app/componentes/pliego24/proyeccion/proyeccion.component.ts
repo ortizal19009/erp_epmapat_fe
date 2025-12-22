@@ -143,7 +143,7 @@ export class ProyeccionComponent implements OnInit {
 
                         let num1 = Math.round((tarifa[0].idcategoria.fijoagua - 0.1) * tarifa[0].porc * 100) / 100;
                         let num2 = Math.round((tarifa[0].idcategoria.fijosanea - 0.5) * tarifa[0].porc * 100) / 100;
-                        
+
                         let num3 = Math.round(( m3 * tarifa[0].agua) * tarifa[0].porc * 100) / 100;
                         let num4 = Math.round(( m3 * tarifa[0].saneamiento / 2) * tarifa[0].porc * 100) / 100;
                         let num5 = Math.round(( m3 * tarifa[0].saneamiento / 2) * tarifa[0].porc * 100) / 100;

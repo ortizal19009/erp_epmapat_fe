@@ -74,7 +74,7 @@ export class ModiClasificadorComponent implements OnInit {
 
    actualizar() {
       this.clasifService.updateClasificador(this.formClasificador.value).subscribe(datos => {
-      }, error => console.log(error));
+      }, error => console.error(error));
       this.retornar();
    }
 
@@ -86,7 +86,7 @@ export class ModiClasificadorComponent implements OnInit {
       if (!rtn) return of({ invalido: true });
       else return of(null);
    }
-   // Expresión regular para validar formato 
+   // Expresión regular para validar formato
    validateFormato(str: string): boolean {
       const regex = /^(?:\d{1,2}|\d{2}\.\d{2}|\d{2}\.\d{2}\.\d{2})$/;
       return regex.test(str);

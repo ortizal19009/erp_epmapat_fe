@@ -47,7 +47,7 @@ export class AddPreciosxcatComponent implements OnInit {
   listarCategorias() {
     this.categoriaS.getListCategoria().subscribe({
       next: (datos) => (this.categoria = datos),
-      error: (err) => console.log(err.error),
+      error: (err) => console.error(err.error),
     });
   }
 
@@ -65,7 +65,7 @@ export class AddPreciosxcatComponent implements OnInit {
         this.retornarListaPrecioxCat();
         window.location.reload();
       },
-      error: (err) => console.log(err.error),
+      error: (err) => console.error(err.error),
     });
   }
 }

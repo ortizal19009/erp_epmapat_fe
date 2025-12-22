@@ -43,7 +43,7 @@ export class ListarTipopagoComponent implements OnInit {
     if (id != null) {
       this.tpService.deleteTipopago(+id!).subscribe(datos => {
         this.listarTipopago();
-      }, error => console.log(error));
+      }, error => console.error(error));
     }
   }
 

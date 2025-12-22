@@ -35,7 +35,7 @@ export class ModificarCategoriaComponent implements OnInit {
     this.categoriaS.updateCategoria(this.categoriaForm.value).subscribe(datos => {
       this.retornarListaCategoria();
       this.mensajeSuccess(this.categoriaForm.value.descripcion);
-    }, error => console.log(error));
+    }, error => console.error(error));
   }
 
   actualizarCategoria(){
@@ -58,7 +58,7 @@ export class ModificarCategoriaComponent implements OnInit {
   retornarListaCategoria(){
     this.router.navigate(['/categorias']);
   }
-  
+
   mensajeSuccess(n:String){
     localStorage.setItem("mensajeSuccess","Categoria <strong>"+n+"</strong> actualizada ");
   }

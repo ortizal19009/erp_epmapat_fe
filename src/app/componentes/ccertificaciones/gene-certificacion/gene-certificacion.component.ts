@@ -78,7 +78,6 @@ export class GeneCertificacionComponent implements OnInit {
    getCertificacionById(idcertificacion: any) {
       this.certiService.getListaById(idcertificacion).subscribe({
          next: (datos: any) => {
-            // console.log(datos);
             if (datos.idcliente_clientes != null) {
                this.certificacion = datos;
                this.factura = datos.idfactura_facturas;
@@ -110,7 +109,6 @@ export class GeneCertificacionComponent implements OnInit {
                //this.buscarDeudasConsumo(this.formGenera.value.cliente)
                this.estarDia = true;
                this.findAboByCliente(this.certificacion.idcliente_clientes);
-               // console.log(this.formGenera.value);
                this.respuesta = 'NO está al día'
                this.formGenera.patchValue({sino:'1'})
                break;

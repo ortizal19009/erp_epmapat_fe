@@ -138,7 +138,7 @@ export class AddTramiteComponent implements OnInit {
       (datos) => {
         this.v_tptramites = datos;
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
   }
 
@@ -153,7 +153,7 @@ export class AddTramiteComponent implements OnInit {
         this.generarFactura();
         this.retornarListarTramties();
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
     setTimeout(() => {
       this.s_facturas.saveFactura(this.f_factura.value).subscribe(
@@ -164,7 +164,7 @@ export class AddTramiteComponent implements OnInit {
               (datos) => {
                 ultimoTramite = datos[datos.length - 1];
               },
-              (error) => console.log(error)
+              (error) => console.error(error)
             );
             setTimeout(() => {
               this.f_liquidatramite.value.idfactura_facturas = this.ultimaf;
@@ -174,12 +174,12 @@ export class AddTramiteComponent implements OnInit {
                   (datos) => {
                     this.generarRubroxFac(this.ultimaf);
                   },
-                  (error) => console.log(error)
+                  (error) => console.error(error)
                 );
             }, 500);
           }, 500);
         },
-        (error) => console.log(error)
+        (error) => console.error(error)
       );
     }, 500);
   }
@@ -291,7 +291,7 @@ export class AddTramiteComponent implements OnInit {
       });
       this.s_rubroxfac.saveRubroxfac(this.f_rubxfac.value).subscribe({
         next: (datos) => {},
-        error: (err) => console.log(err.error),
+        error: (err) => console.error(err.error),
       });
       i++;
     });
@@ -327,7 +327,7 @@ export class AddTramiteComponent implements OnInit {
           this.sumaValores();
         }, 300);
       },
-      (error) => console.log(error)
+      (error) => console.error(error)
     );
     s_tptramite.addEventListener('change', () => {
       this.rubxfac = {};
@@ -360,7 +360,7 @@ export class AddTramiteComponent implements OnInit {
             });
           }
         },
-        (error) => console.log(error)
+        (error) => console.error(error)
       );
       setTimeout(() => {
         this.sumaValores();

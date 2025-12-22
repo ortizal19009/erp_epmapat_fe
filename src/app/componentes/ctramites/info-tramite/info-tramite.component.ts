@@ -31,7 +31,7 @@ export class InfoTramiteComponent implements OnInit {
       const detalle = document.querySelector('.detalle');
       if (detalle) detalle.classList.add('nuevoBG2');
    }
-   
+
    datosTramite() {
       let idtramite = sessionStorage.getItem('idtramiteToInfo');
       this.traService.getTramiteById(+idtramite!).subscribe(datos => {
@@ -40,8 +40,8 @@ export class InfoTramiteComponent implements OnInit {
          this.tramite.nomcli = datos.idcliente_clientes.nombre;
          this.tramite.fecha = datos.feccrea;
          this.tramite.validohasta = datos.validohasta;
-         this.tramite.total = datos.total; 
-      }, error => console.log(error));
+         this.tramite.total = datos.total;
+      }, error => console.error(error));
    }
 
    public modiTramite(idtramite: number) {

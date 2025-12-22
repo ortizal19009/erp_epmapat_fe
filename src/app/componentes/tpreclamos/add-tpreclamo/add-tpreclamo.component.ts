@@ -23,7 +23,7 @@ export class AddTpreclamoComponent implements OnInit {
     this.tpreclamoService.nuevo(this.tpr).subscribe(datos => {
       this.parent.listarAll();
       this.reset()
-    }, error => console.log(error))
+    }, error => console.error(error))
   }
 
   reset(){
