@@ -465,7 +465,7 @@
                           <td class="text-center">{{ l.idlectura || '-' }}</td>
                           <td class="text-center">{{ l.idfactura || '-' }}</td>
                           <td class="text-truncate" style="max-width: 420px;">
-                            {{ l.periodo || l.observacion || '-' }}
+                            {{ l.idemision || l.observacion || '-' }}
                           </td>
                           <td class="text-center">{{ l.fecha || l.feccrea || '-' }}</td>
                         </tr>
@@ -501,7 +501,7 @@
           <button type="button" class="btn btn-outline-secondary btn-sm mr-2" data-dismiss="modal">
             Cerrar
           </button>
-          <button type="button" class="btn btn-danger btn-sm" (click)="merge()" [disabled]="!masterId">
+          <button type="button" class="btn btn-danger btn-sm" (click)="merge()" data-dismiss="modal" [disabled]="!masterId">
             <i class="bi bi-diagram-3 mr-1"></i> Confirmar Merge
           </button>
         </div>

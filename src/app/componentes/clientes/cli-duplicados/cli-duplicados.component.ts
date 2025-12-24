@@ -13,6 +13,7 @@ import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { ClientesService } from 'src/app/servicios/clientes.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-cli-duplicados',
@@ -148,63 +149,62 @@ export class CliDuplicadosComponent implements OnInit {
       .filter((c) => c.idcliente !== this.masterId)
       .map((c) => c.idcliente);
   }
- previewMerge() {
-  if (!this.masterId) return;
+  previewMerge() {
+    if (!this.masterId) return;
 
-  this.previewLoading = true;
-  this.previewError = null;
-  this.previewData = [];
+    this.previewLoading = true;
+    this.previewError = null;
+    this.previewData = [];
 
-  const ids: number[] = [this.masterId, ...this.duplicateIds];
+    const ids: number[] = [this.masterId, ...this.duplicateIds];
 
-  const calls = ids.map((idcliente) => {
-    return forkJoin({
-      abonados: this.s_abonados
-        .getByIdcliente(idcliente)
-        .pipe(catchError(() => of([]))),
+    const calls = ids.map((idcliente) => {
+      return forkJoin({
+        abonados: this.s_abonados
+          .getByIdcliente(idcliente)
+          .pipe(catchError(() => of([]))),
 
-      facturas: this.s_facturas
-        .getFacSincobro(idcliente)
-        .pipe(catchError(() => of([]))),
+        facturas: this.s_facturas
+          .getFacSincobro(idcliente)
+          .pipe(catchError(() => of([]))),
 
-      lecturas: this.s_lecturas
-        .getPendientesByCliente(idcliente)
-        .pipe(catchError(() => of([]))),
-    }).pipe(
-      map(
-        (res) =>
-          ({
-            idcliente,
-            esMaster: idcliente === this.masterId,
-            abonados: res.abonados ?? [],
-            facturas: res.facturas ?? [],
-            lecturas: res.lecturas ?? [],
-          } as PreviewCliente)
-      )
-    );
-  });
-
-  forkJoin(calls).subscribe({
-    next: (data: PreviewCliente[]) => {
-      // master primero
-      this.previewData = data.sort(
-        (a, b) => Number(b.esMaster) - Number(a.esMaster)
+        lecturas: this.s_lecturas
+          .getPendientesByCliente(idcliente)
+          .pipe(catchError(() => of([]))),
+      }).pipe(
+        map(
+          (res) =>
+            ({
+              idcliente,
+              esMaster: idcliente === this.masterId,
+              abonados: res.abonados ?? [],
+              facturas: res.facturas ?? [],
+              lecturas: res.lecturas ?? [],
+            } as PreviewCliente)
+        )
       );
+    });
 
-      this.previewLoading = false;
-      ($('#previewModal') as any).modal('show');
-    },
-    error: () => {
-      this.previewLoading = false;
-      this.previewError = 'No se pudo cargar el preview.';
-    },
-  });
-}
+    forkJoin(calls).subscribe({
+      next: (data: PreviewCliente[]) => {
+        // master primero
+        this.previewData = data.sort(
+          (a, b) => Number(b.esMaster) - Number(a.esMaster)
+        );
 
+        this.previewLoading = false;
+        ($('#previewModal') as any).modal('show');
+      },
+      error: () => {
+        this.previewLoading = false;
+        this.previewError = 'No se pudo cargar el preview.';
+      },
+    });
+  }
 
   merge() {
     if (!this.masterId) {
-      alert('Seleccione un cliente master');
+      this.swal('warning', 'Seleccione un cliente master');
       return;
     }
 
@@ -215,39 +215,51 @@ export class CliDuplicadosComponent implements OnInit {
     const payload = {
       masterId: this.masterId,
       duplicateIds,
-      usuario: this.authoriza.idusuario
+      usuario: this.authoriza.idusuario,
     };
 
     this.s_clientes.mergeClientes(payload).subscribe({
       next: () => {
-        alert('Merge realizado correctamente');
-        this.detalleVisible = false;
+        this.swal('success','Merge realizado correctamente');
         this.cargarDuplicados(); // refresca la lista
+        this.detalleVisible = false;
       },
       error: (err) => {
         console.error(err);
-        alert('Error al realizar el merge');
+        this.swal('error','Error al realizar el merge');
       },
     });
   }
   collapseAll(collapse: boolean) {
-  if (!this.previewData?.length) return;
+    if (!this.previewData?.length) return;
 
-  this.previewData.forEach((_, i) => {
-    const el = document.getElementById('pv_' + i);
-    if (!el) return;
+    this.previewData.forEach((_, i) => {
+      const el = document.getElementById('pv_' + i);
+      if (!el) return;
 
-    // Bootstrap 4 collapse: show/hide por clase
-    if (collapse) {
-      // cerrar
-      el.classList.remove('show');
-    } else {
-      // abrir
-      el.classList.add('show');
-    }
-  });
-}
-
+      // Bootstrap 4 collapse: show/hide por clase
+      if (collapse) {
+        // cerrar
+        el.classList.remove('show');
+      } else {
+        // abrir
+        el.classList.add('show');
+      }
+    });
+  }
+  private swal(
+    icon: 'success' | 'error' | 'info' | 'warning',
+    mensaje: string
+  ) {
+    Swal.fire({
+      toast: true,
+      icon,
+      title: mensaje,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+    });
+  }
 }
 
 export interface PreviewCliente {

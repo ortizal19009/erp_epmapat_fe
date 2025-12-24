@@ -1,0 +1,31 @@
+.card.sombra {
+  box-shadow: 0 4px 12px rgba(0,0,0,.06);
+  border-radius: 10px;
+}
+
+.card-header .btn-link {
+  color: #212529;
+  text-decoration: none;
+  padding: .35rem .5rem;
+}
+
+.card-header .btn-link:hover {
+  background: rgba(0,123,255,.06);
+  border-radius: 6px;
+}
+
+.badge.border {
+  font-weight: 600;
+  font-size: .85rem;
+}
+
+hr {
+  border-top: 1px solid #e9ecef;
+}
+.card-footer .btn {
+  min-width: 90px;
+}
+
+.card-footer .btn i {
+  font-size: .9rem;
+}

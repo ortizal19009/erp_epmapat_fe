@@ -251,108 +251,200 @@ export class GeneradorxmlComponent implements OnInit {
   }
 
   async generarXmlFile() {
-    const abonado: Abonados = await this.getAbonado(
-      this._facturas[0].idabonado
-    );
-    let nom: String = '';
-    let ced: String = '';
-    let dir: String = '';
-    if (
-      this._facturas[0].idmodulo.idmodulo === 4 ||
-      (this._facturas[0].idmodulo.idmodulo === 3 &&
-        this._facturas[0].idabonado != 0)
-    ) {
-      nom = abonado.idresponsable.nombre;
-      ced = abonado.idresponsable.cedula;
-      dir = abonado.direccionubicacion;
-    } else {
-      nom = this._facturas[0].idcliente.nombre;
-      ced = this._facturas[0].idcliente.cedula;
-      dir = this._facturas[0].idcliente.direccion;
+    if (!this._facturas?.length) return;
+
+    this.swgenerar = true;
+
+    try {
+      const factura = this._facturas[0];
+
+      // 1) Obtener abonado SOLO si aplica (y dejarlo accesible)
+      let abonado: Abonados | null = null;
+      const requiereAbonado =
+        factura.idabonado &&
+        factura.idabonado !== 0 &&
+        (factura.idmodulo?.idmodulo === 4 ||
+          (factura.idmodulo?.idmodulo === 3 && factura.idabonado !== 0));
+
+      if (requiereAbonado) {
+        abonado = await this.getAbonado(factura.idabonado);
+        if (!abonado) throw new Error('No se pudo obtener el abonado.');
+      }
+
+      // 2) Resolver datos del comprador (cliente efectivo)
+      const comprador = this.getCompradorData(factura, abonado);
+
+      // 3) Construir valores base
+      this.claveAcceso();
+      const claveacceso = this.claveacceso;
+
+      const estab = factura.nrofactura?.slice(0, 3) ?? '';
+      const ptoemi = factura.nrofactura?.slice(4, 7) ?? '';
+      const secuencial = factura.nrofactura?.slice(8, 17) ?? '';
+
+      const fecha = formatearFecha(2, factura.feccrea);
+      const fechaC = formatearFecha(2, factura.fechacobro);
+
+      const tpIdentifica =
+        factura.idcliente?.idtpidentifica_tpidentifica?.codigo ?? '05';
+
+      const cuenta = factura.idabonado ?? 0;
+      const email = factura.idcliente?.email ?? '';
+
+      // 4) Detalles (más seguro: iterar array)
+      const detalles: Detalle[] = [];
+      for (const rubro of this.vecrubros ?? []) {
+        const baseImponible = rubro.subtotal ?? 0;
+
+        const [codigoPorcentaje, tarifa, valorIVA] = calculosIVA(
+          rubro.swiva,
+          baseImponible,
+          this.porciva
+        );
+
+        detalles.push({
+          codigoPrincipal: String(rubro.idrubro ?? '').padStart(4, '0'),
+          descripcion: rubro.descripcion ?? '',
+          cantidad: rubro.cantidad ?? 0,
+          precioUnitario: rubro.valorunitario ?? 0,
+          descuento: '0',
+          precioTotalSinImpuesto: baseImponible,
+          impuestos: [
+            {
+              codigo: '2',
+              codigoPorcentaje,
+              tarifa,
+              baseImponible: String(baseImponible),
+              valor: valorIVA,
+            },
+          ],
+        });
+      }
+
+      // 5) JSON -> XML
+      const json = this.buildFacturaXmlJson({
+        claveacceso,
+        estab,
+        ptoemi,
+        secuencial,
+        fecha,
+        fechaC,
+        tpIdentifica,
+        comprador,
+        cuenta,
+        email,
+        detalles,
+      });
+
+      const options = { compact: true, ignoreComment: true, spaces: 4 };
+      const xmlData = require('xml-js').js2xml(json, options);
+
+      // 6) Enviar y descargar (preferible descargar SOLO el autorizado)
+     this.s_sri.sendFacturaElectronica(xmlData.toString()).subscribe({
+        next: (resp: any) => {
+          // Si viene autorización con comprobante, descargo ese (más correcto)
+          const xmlAutorizado =
+            resp?.autorizacion?.autorizaciones?.autorizacion?.[0]?.comprobante;
+
+          const nombreArchivo = resp?.autorizacion?.claveAccesoConsultada
+            ? `factura-${resp.autorizacion.claveAccesoConsultada}.xml`
+            : `Fac_${this.nrofactura}.xml`;
+
+          const contenido = xmlAutorizado || xmlData;
+
+          this.downloadXml(contenido, nombreArchivo);
+          this.resetFormulario();
+        },
+        error: (e: any) => {
+          console.error('Error al enviar factura:', e);
+
+          // Si falla el envío, opcional: permitir descarga del XML generado
+          this.downloadXml(xmlData, `Fac_${this.nrofactura}.xml`);
+        },
+      });
+    } catch (err) {
+      console.error('Error generarXmlFile:', err);
+    } finally {
+      this.swgenerar = false;
     }
-    this.claveAcceso();
-    let claveacceso = this.claveacceso;
-    let estab = this._facturas[0].nrofactura.slice(0, 3);
-    let ptoemi = this._facturas[0].nrofactura.slice(4, 7);
-    let secuencial = this._facturas[0].nrofactura.slice(8, 17);
-    let direccion = this.empresa.direccion;
-    let fecha = formatearFecha(2, this._facturas[0].feccrea); //2: Con slash para el XML
-    let fechaC = formatearFecha(2, this._facturas[0].fechacobro); //2: Con slash para el XML
-    let tpIdentifica =
-      this._facturas[0].idcliente.idtpidentifica_tpidentifica.codigo;
-    let nombre = nom;
-    let cedula = ced;
-    // let subtotal = this.sumsubtotal
-    let cuenta = this._facturas[0].idabonado;
-    let dircli = dir;
-    let email = this._facturas[0].idcliente.email;
+  }
 
-    const detalles: Detalle[] = [];
+  /** Decide si usa datos del abonado o del cliente */
+  private getCompradorData(factura: any, abonado: Abonados | null) {
+    const usaAbonado =
+      abonado &&
+      (factura.idmodulo?.idmodulo === 4 ||
+        (factura.idmodulo?.idmodulo === 3 && factura.idabonado !== 0));
 
-    for (const key in this.vecrubros) {
-      //Datos para calcular el IVA
-      const baseImponible = this.vecrubros[key].subtotal;
-      const [codigoPorcentaje, tarifa, valorIVA] = calculosIVA(
-        this.vecrubros[key].swiva,
-        this.vecrubros[key].subtotal,
-        this.porciva
-      );
-
-      const detalle: Detalle = {
-        codigoPrincipal: this.vecrubros[key].idrubro
-          .toString()
-          .padStart(4, '0'),
-        descripcion: this.vecrubros[key].descripcion,
-        cantidad: this.vecrubros[key].cantidad,
-        precioUnitario: this.vecrubros[key].valorunitario,
-        descuento: '0',
-        precioTotalSinImpuesto: this.vecrubros[key].subtotal,
-        impuestos: [
-          {
-            codigo: '2',
-            codigoPorcentaje: codigoPorcentaje,
-            tarifa: tarifa,
-            baseImponible: baseImponible.toString(),
-            valor: valorIVA,
-          },
-        ],
+    if (usaAbonado) {
+      return {
+        nombre: abonado!.idresponsable?.nombre ?? '',
+        cedula: abonado!.idresponsable?.cedula ?? '',
+        direccion: abonado!.direccionubicacion ?? '',
       };
-      detalles.push(detalle);
     }
 
-    //Genera el XML
-    let json = {
-      _declaration: {
-        _attributes: {
-          version: '1.0',
-          encoding: 'UTF-8',
-        },
-      },
+    return {
+      nombre: factura.idcliente?.nombre ?? '',
+      cedula: factura.idcliente?.cedula ?? '',
+      direccion: factura.idcliente?.direccion ?? '',
+    };
+  }
+
+  /** Construye el JSON para xml-js */
+  private buildFacturaXmlJson(data: {
+    claveacceso: string;
+    estab: string;
+    ptoemi: string;
+    secuencial: string;
+    fecha: string;
+    fechaC: string;
+    tpIdentifica: string;
+    comprador: { nombre: string; cedula: string; direccion: string };
+    cuenta: any;
+    email: string;
+    detalles: Detalle[];
+  }) {
+    const {
+      claveacceso,
+      estab,
+      ptoemi,
+      secuencial,
+      fecha,
+      fechaC,
+      tpIdentifica,
+      comprador,
+      cuenta,
+      email,
+      detalles,
+    } = data;
+
+    return {
+      _declaration: { _attributes: { version: '1.0', encoding: 'UTF-8' } },
       factura: {
-        _attributes: {
-          id: 'comprobante',
-          version: '1.0.0',
-        },
+        _attributes: { id: 'comprobante', version: '1.0.0' },
+
         infoTributaria: {
           ambiente: this.empresa.tipoambiente,
-          tipoEmision: 1 /* en ambiente a loque se vaya a pasar a produccion cambiar  this.empresa.ambiente */,
+          tipoEmision: 1,
           razonSocial: this.empresa.razonsocial,
           nombreComercial: this.empresa.nombrecomercial,
           ruc: this.empresa.ruc,
           claveAcceso: claveacceso,
           codDoc: '01',
-          estab: estab,
+          estab,
           ptoEmi: ptoemi,
-          secuencial: secuencial,
-          dirMatriz: direccion,
+          secuencial,
+          dirMatriz: this.empresa.direccion,
         },
+
         infoFactura: {
           fechaEmision: fechaC,
           obligadoContabilidad: 'SI',
           tipoIdentificacionComprador: tpIdentifica,
-          razonSocialComprador: nombre,
-          identificacionComprador: cedula,
-          direccionComprador: `${dircli} CUENTA  ${cuenta}  `,
+          razonSocialComprador: comprador.nombre,
+          identificacionComprador: comprador.cedula,
+          direccionComprador: `${comprador.direccion} CUENTA ${cuenta}`,
           totalSinImpuestos: this.sumsubtotal.toFixed(2),
           totalDescuento: '0.00',
           totalConImpuestos: {
@@ -366,49 +458,37 @@ export class GeneradorxmlComponent implements OnInit {
           propina: '0.00',
           importeTotal: this.sumtotal.toFixed(2),
           moneda: 'DOLAR',
-          pagos: {
-            pago: {
-              formaPago: '20',
-              total: this.sumtotal.toFixed(2),
-            },
-          },
+          pagos: { pago: { formaPago: '20', total: this.sumtotal.toFixed(2) } },
         },
 
         detalles: {
-          detalle: detalles.map((detalle) => ({
-            codigoPrincipal: { _text: detalle.codigoPrincipal },
-            descripcion: { _text: detalle.descripcion },
-            cantidad: { _text: detalle.cantidad },
-            precioUnitario: { _text: (+detalle.precioUnitario!).toFixed(2) },
-            descuento: { _text: detalle.descuento },
+          detalle: detalles.map((d) => ({
+            codigoPrincipal: { _text: d.codigoPrincipal },
+            descripcion: { _text: d.descripcion },
+            cantidad: { _text: d.cantidad },
+            precioUnitario: { _text: (+d.precioUnitario!).toFixed(2) },
+            descuento: { _text: d.descuento },
             precioTotalSinImpuesto: {
-              _text: (+detalle.precioTotalSinImpuesto!).toFixed(2),
+              _text: (+d.precioTotalSinImpuesto!).toFixed(2),
             },
             impuestos: {
-              impuesto: detalle.impuestos.map(
-                (impuesto: {
-                  codigo: any;
-                  codigoPorcentaje: any;
-                  tarifa: any;
-                  baseImponible: any;
-                  valor: any;
-                }) => ({
-                  codigo: { _text: impuesto.codigo },
-                  codigoPorcentaje: { _text: impuesto.codigoPorcentaje },
-                  tarifa: { _text: impuesto.tarifa },
-                  baseImponible: {
-                    _text: (+impuesto.baseImponible!).toFixed(2),
-                  },
-                  valor: { _text: impuesto.valor },
-                })
-              ),
+              impuesto: d.impuestos.map((i: any) => ({
+                codigo: { _text: i.codigo },
+                codigoPorcentaje: { _text: i.codigoPorcentaje },
+                tarifa: { _text: i.tarifa },
+                baseImponible: { _text: (+i.baseImponible!).toFixed(2) },
+                valor: { _text: i.valor },
+              })),
             },
           })),
         },
 
         infoAdicional: {
           campoAdicional: [
-            { _attributes: { nombre: 'Dirección' }, _text: dircli },
+            {
+              _attributes: { nombre: 'Dirección' },
+              _text: comprador.direccion,
+            },
             { _attributes: { nombre: 'e-mail' }, _text: email },
             { _attributes: { nombre: 'Cuenta' }, _text: cuenta },
             { _attributes: { nombre: 'Fecha emisión' }, _text: fecha },
@@ -417,46 +497,21 @@ export class GeneradorxmlComponent implements OnInit {
         },
       },
     };
+  }
 
-    let options = { compact: true, ignoreComment: true, spaces: 4 };
-    let xmlData = require('xml-js').js2xml(json, options);
-    this.s_sri.sendFacturaElectronica(xmlData.toString()).subscribe({
-      next: (resp: any) => {
-        console.log('Respuesta completa:', resp);
-
-        // Extraer el XML del JSON
-        const xmlString =
-          resp.autorizacion.autorizaciones.autorizacion[0].comprobante;
-
-        // Crear un Blob con el contenido del XML
-        const blob = new Blob([xmlString], { type: 'application/xml' });
-        const url = window.URL.createObjectURL(blob);
-
-        // Forzar descarga del archivo
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `factura-${resp.autorizacion.claveAccesoConsultada}.xml`; // nombre dinámico
-        a.click();
-
-        // Liberar memoria
-        window.URL.revokeObjectURL(url);
-      },
-      error: (e: any) => console.error('Error al enviar factura:', e),
-    });
-
-    // Crear y descargar el archivo XML
-    const blob = new Blob([xmlData], { type: 'text/xml' });
+  /** Descarga un XML (string) */
+  private downloadXml(xml: string, filename: string) {
+    const blob = new Blob([xml], { type: 'application/xml' });
     const url = window.URL.createObjectURL(blob);
-
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'Fac_' + this.nrofactura + '.xml';
-    document.body.appendChild(a);
+    a.download = filename;
     a.click();
     window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
+  }
 
-    this.swgenerar = false;
+  /** Resetea UI */
+  private resetFormulario() {
     this.swencuentra = false;
     this.formBuscar.controls['nrofactura'].setValue('');
   }
