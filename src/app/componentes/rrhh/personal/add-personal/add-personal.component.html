@@ -295,7 +295,7 @@
                 <div class="container">
                     <form [formGroup]="f_cargos" *ngIf="cargoForm; else detcargoForm">
                         <div class="row">
-                            <div class="form-group col-sm-6 mt-1">
+                            <div class="form-group col-sm-12 mt-1">
                                 <div class="input-group input-group-sm mb-1">
                                     <div class="input-group-prepend">
                                         <label class="input-group-text" for="descripcion">Descripción</label>
@@ -304,7 +304,7 @@
                                         formControlName="descripcion" />
                                 </div>
                             </div>
-                            <div class="form-group col-sm-6">
+                            <div class="form-group col-sm-12">
                                 <div class="input-group mb-1 input-group-sm">
                                     <div class="input-group-prepend">
                                         <label class="input-group-text" for="cargo">Detalle</label>
@@ -316,8 +316,8 @@
                                     </div>
                                     <select class="custom-select" id="iddetcargo_detcargo"
                                         formControlName="iddetcargo_detcargo">
-                                        <option [ngValue]="detcargo" *ngFor="let detcargo of _detcargos">
-                                            {{detcargo.rol}}
+                                        <option [ngValue]="detcargo" [attr.title]="detcargo.eje" *ngFor="let detcargo of _detcargos">
+                                            {{detcargo.rol}} - {{detcargo.grupoocupacional}}
                                         </option>
                                     </select>
                                 </div>

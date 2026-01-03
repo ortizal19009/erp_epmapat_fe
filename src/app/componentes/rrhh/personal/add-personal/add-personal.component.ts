@@ -233,10 +233,14 @@ export class AddPersonalComponent implements OnInit {
     });
   }
   saveCargos() {
+    console.log(this.f_cargos.value);
     this.s_cargos.saveCargo(this.f_cargos.value).subscribe({
       next: (datos: any) => {
-        console.log('Cargo guardado');
-        this.f_cargos.reset();
+        console.log('Cargo guardado', datos);
+        this.f_cargos.patchValue({
+          descripcion: '',
+          idcargo_cargos: '',
+        });
         this.getAllCargos();
       },
       error: (e: any) => console.error(e),

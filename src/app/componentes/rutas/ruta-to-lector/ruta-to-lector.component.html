@@ -1,0 +1,121 @@
+<div class="content mt-1 pt-1 px-0">
+  <div class="container-fluid">
+    <div class="col-sm-12 px-0">
+      <div class="row  m-0 pl-0 py-1 pr-1 justify-content-start cabecera sombra border">
+        <div class="col-md-4">
+          <h4 class="m-0 font-weight-bold"><i class="fa fa-bus"></i>&nbsp; Asignar ruta a lectores</h4>
+        </div>
+
+        <div class="btn-group ml-auto mt-0">
+          <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
+            aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+            <button class="dropdown-item" type="button">
+              <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+            <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
+              <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+            <button class="dropdown-item" type="button" [routerLink]="['/add-ruta-lector']">
+              <i class="bi-file-earmark-arrow-up"></i>&nbsp;
+              Ruta a Lector</button>
+            <button class="dropdown-item" type="button">
+              <i class="bi-file-earmark-arrow-up"></i>&nbsp;
+              Exportar</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+<div class="container-fluid">
+  <div class="row mb-0">
+    <div class="col-sm-6">
+      <table class="table table-hover table-bordered table-sm sombra">
+        <thead>
+          <tr class="text-center font-weight-bold cabecera">
+            <th>Cod.</th>
+            <th>Nombre</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody class="detalle">
+          <tr class="fila" *ngFor="let usuario of _usuarios | filter: filtro;" (click)="onCellClick($event, usuario)">
+            <td class="text-center">{{ usuario.idusuario }}</td>
+            <td> {{ usuario.nomusu }} </td>
+
+            <td class="text-center">
+              <div class="btn-group py-0">
+                <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
+                  aria-expanded="false">
+                </button>
+
+                <div class="dropdown-menu dropdown-menu-right popLista">
+
+                  <button class="dropdown-item" type="button">
+                    <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="col-sm-6 mt-1">
+      <div class="sombra">
+        <div class="card card-header pt-0 pb-1 px-0 cabecera">
+          <div class="row">
+            <div class="col-sm">
+              <h5 class="font-weight-bold py-1 text-center titDocumentos">Lista de rutas asignadas</h5>
+            </div>
+            <div class="col-sm-2">
+              <select class="form-control py-1 form-control-sm w-15 float-right" value="emision.idemision">
+                <option *ngFor="let emision of _emisiones" [ngValue]="emision">{{emision.emision}} -
+                  {{emision.estado}}</option>
+              </select>
+            </div>
+          </div>
+
+        </div>
+        <div class="card-body detalle">
+          <div class="row">
+            <div class="col-sm-12">
+
+            </div>
+          </div>
+          <table class="table table-hover table-bordered table-sm">
+            <thead>
+              <tr class="text-center font-weight-bold cabecera">
+                <th>Cod.</th>
+                <th>Descripción</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody class="detalle">
+              <tr class="fila">
+                <td class="text-center">1</td>
+                <td> Ruta 1 </td>
+
+                <td class="text-center">
+                  <div class="btn-group py-0">
+                    <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
+                      aria-expanded="false">
+                    </button>
+
+                    <div class="dropdown-menu dropdown-menu-right popLista">
+
+                      <button class="dropdown-item" type="button">
+                        <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+
+    </div>
+
+  </div>

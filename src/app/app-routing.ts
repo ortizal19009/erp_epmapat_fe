@@ -273,6 +273,7 @@ import { AnularConvenioComponent } from './componentes/convenios/anular-convenio
 import { ReportesjrComponent } from './componentes/reportesjr/reportesjr.component';
 import { AuthGuard } from './servicios/administracion/auth-guard';
 import { CliDuplicadosComponent } from './componentes/clientes/cli-duplicados/cli-duplicados.component';
+import { RutaToLectorComponent } from './componentes/rutas/ruta-to-lector/ruta-to-lector.component';
 
 const routes: Routes = [
   //Consumo de Agua
@@ -692,6 +693,7 @@ const routes: Routes = [
   { path: 'rutas', component: RutasComponent, canActivate: [AuthGuard] },
   { path: 'add-rutas', component: AddRutasComponent, canActivate: [AuthGuard] },
   { path: 'info-ruta', component: InfoRutaComponent, canActivate: [AuthGuard] },
+  { path: 'add-ruta-lector', component: RutaToLectorComponent, canActivate: [AuthGuard] },
   //Emisiones
   {
     path: 'emisiones',

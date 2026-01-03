@@ -52,4 +52,8 @@ export class EmisionService {
     );
     return resp;
   }
+  getAllEmisiones(): Promise<any> {
+    let resp = this.http.get(`${baseUrl}/findall`);
+    return firstValueFrom(resp);
+  }
 }

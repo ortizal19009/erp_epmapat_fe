@@ -290,6 +290,7 @@ import { StatusConveniosComponent } from './componentes/convenios/status-conveni
 import { CvClientesComponent } from './componentes/coactivas/carteras-vencidas/cv-clientes/cv-clientes.component';
 import { AnularConvenioComponent } from './componentes/convenios/anular-convenio/anular-convenio.component';
 import { ReportesjrComponent } from './componentes/reportesjr/reportesjr.component';
+import { RutaToLectorComponent } from './componentes/rutas/ruta-to-lector/ruta-to-lector.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
@@ -568,6 +569,7 @@ import { ReportesjrComponent } from './componentes/reportesjr/reportesjr.compone
     CvClientesComponent,
     AnularConvenioComponent,
     ReportesjrComponent,
+    RutaToLectorComponent,
   ],
 
   imports: [
