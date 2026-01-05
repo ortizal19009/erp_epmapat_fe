@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { AutorizaService } from '../compartida/autoriza.service';
 import { UsuarioService } from '../servicios/administracion/usuario.service';
 import { Router } from '@angular/router';
+import { ErpmodulosService } from '../servicios/administracion/erpmodulos.service';
 
 @Component({
   selector: 'app-main-header',
@@ -23,17 +24,19 @@ export class MainHeaderComponent implements OnInit {
     public fb: FormBuilder,
     public authService: AutorizaService,
     private usuService: UsuarioService,
-    private router: Router
+    private router: Router,
+    private s_erpmodulos: ErpmodulosService
   ) {}
 
   ngOnInit(): void {
+    this.getAllErpModulos();
     const modulos: any = sessionStorage.getItem('modulos');
     this.modules = JSON.parse(modulos);
     //Fondo
     let fondoActual = sessionStorage.getItem('fondoActual')?.toString();
     this.fondo1 = +fondoActual!;
     //Módulos
-    this.modulos = [
+    /*     this.modulos = [
       'Comercialización',
       'Contabilidad gubernamental',
       'Inventario',
@@ -41,11 +44,11 @@ export class MainHeaderComponent implements OnInit {
       'Recursos humanos',
       'Coactivas',
       'Administración central',
-    ];
+    ]; */
 
-    setInterval(() => {
+    /*     setInterval(() => {
       this.checkModulos();
-    }, 2000); // 2000 ms = 2 segundos
+    }, 2000); // 2000 ms = 2 segundos */
 
     // console.log('Esta en ngOnInit() de header')
     this.authService.valsession();
@@ -59,6 +62,31 @@ export class MainHeaderComponent implements OnInit {
       fhasta: '',
       otrapestania: '',
     });
+  }
+  getAllErpModulos(): void {
+    this.s_erpmodulos
+      .findByPlatform('WEB')
+      .then((data: any[]) => {
+        this.modulos = data.map((i) => i.descripcion);
+        console.log(this.modulos);
+
+        this.startInterval();
+      })
+      .catch((e) => console.error(e));
+  }
+
+  private intervalId: any;
+
+  private startInterval(): void {
+    if (!this.intervalId) {
+      this.intervalId = setInterval(() => {
+        this.checkModulos();
+      }, 2000);
+    }
+  }
+
+  ngOnDestroy(): void {
+    clearInterval(this.intervalId);
   }
 
   checkModulos() {
