@@ -13,7 +13,13 @@ export class ErpmodulosService {
   getAllErpModulos() {
     return this.http.get(`${baseUrl}`);
   }
-  async findByPlatform(plataform: string):Promise<any> {
-    return await firstValueFrom(this.http.get<any>(`${baseUrl}/platform/${plataform}`));
+  async findByPlatform(plataform: string): Promise<any> {
+    return await firstValueFrom(
+      this.http.get<any>(`${baseUrl}/platform/${plataform}`)
+    );
+  }
+
+  _findByPlatform(plataform: string) {
+    return this.http.get<any>(`${baseUrl}/platform/${plataform}`);
   }
 }

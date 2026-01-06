@@ -58,6 +58,7 @@ export class UsuarioService {
     return this.http.post(`${baseUrl}`, usuario);
   }
   getByCargos(idcargo: any): Observable<any> {
+  console.log(idcargo)
     return this.http.get<any>(`${baseUrl}/cargo?idcargo=${idcargo}`);
   }
 }

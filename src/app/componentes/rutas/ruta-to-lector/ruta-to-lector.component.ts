@@ -8,14 +8,18 @@ import { RutasService } from 'src/app/servicios/rutas.service';
 @Component({
   selector: 'app-ruta-to-lector',
   templateUrl: './ruta-to-lector.component.html',
-  styleUrls: ['./ruta-to-lector.component.css']
+  styleUrls: ['./ruta-to-lector.component.css'],
 })
 export class RutaToLectorComponent implements OnInit {
   _usuarios: any[] = [];
   filtro: string = '';
   _rutas: any[] = [];
   _emisiones: any[] = [];
-  constructor(private usuarioService: UsuarioService, private emisionesService: EmisionService, private rutasService: RutasService) { }
+  constructor(
+    private usuarioService: UsuarioService,
+    private emisionesService: EmisionService,
+    private rutasService: RutasService
+  ) {}
 
   ngOnInit(): void {
     this.getUsuarioLectores();
@@ -23,9 +27,12 @@ export class RutaToLectorComponent implements OnInit {
     this.getEmisiones();
   }
   getUsuarioLectores() {
-    this.usuarioService.getByCargos(52).subscribe((data) => {
-      console.log(data);
-      this._usuarios = data;
+    this.usuarioService.getByCargos(45).subscribe({
+      next: (data) => {
+        console.log(data);
+        this._usuarios = data;
+      },
+      error: (e: any) => console.error(e.error),
     });
   }
   onCellClick(event: any, usuario: any) {
@@ -35,7 +42,6 @@ export class RutaToLectorComponent implements OnInit {
     this.rutasService.getListaRutas().subscribe((data) => {
       console.log(data);
     });
-
   }
   getEmisiones() {
     this.emisionesService.getAllEmisiones().then((data) => {

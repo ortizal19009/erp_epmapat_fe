@@ -84,7 +84,7 @@ export class ContentWrapperComponent implements OnInit {
     });
   }
   getModulos(idusuario: number) {
-    this.s_usrxmodulos.getAccesoModulos(idusuario).subscribe({
+    this.s_usrxmodulos.getAccesoModulos(idusuario, 'WEB').subscribe({
       next: (datos: any) => {
         this.authService.modules = datos;
         sessionStorage.setItem('modulos', JSON.stringify(datos));

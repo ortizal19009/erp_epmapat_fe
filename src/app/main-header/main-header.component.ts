@@ -53,9 +53,6 @@ export class MainHeaderComponent implements OnInit {
     // console.log('Esta en ngOnInit() de header')
     this.authService.valsession();
 
-    this.authService.nomodulo = this.modulos[this.authService.moduActual - 1]; //No hay modulos
-    if (this.authService.sessionlog) this.authService.enabModulos();
-    else this.enabled = [false, false, false, false, false, false, false];
 
     this.formDefinir = this.fb.group({
       fdesde: '',
@@ -68,8 +65,10 @@ export class MainHeaderComponent implements OnInit {
       .findByPlatform('WEB')
       .then((data: any[]) => {
         this.modulos = data.map((i) => i.descripcion);
-        console.log(this.modulos);
-
+        this.authService.nomodulo =
+          this.modulos[this.authService.moduActual - 1]; //No hay modulos
+        if (this.authService.sessionlog) this.authService.enabModulos();
+        else this.enabled = [false, false, false, false, false, false, false];
         this.startInterval();
       })
       .catch((e) => console.error(e));

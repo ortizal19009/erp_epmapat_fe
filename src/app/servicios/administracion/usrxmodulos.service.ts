@@ -8,11 +8,11 @@ const baseUrl = `${apiUrl}/usrxmodulos`;
 })
 export class UsrxmodulosService {
   constructor(private http: HttpClient) {}
-  getAccesoModulos(idusuario: number) {
-    return this.http.get(`${baseUrl}/access?idusuario=${idusuario}`);
+  getAccesoModulos(idusuario: number, plataform: string) {
+    return this.http.get(`${baseUrl}/access?idusuario=${idusuario}&plataform=${plataform}`);
   }
-  getAllModulos(idusuario: number){
-    return this.http.get(`${baseUrl}?idusuario=${idusuario}`);
+  getAllModulos(idusuario: number, platform: string){
+    return this.http.get(`${baseUrl}?idusuario=${idusuario}&platform=${platform}`);
   }
   saveAccessModulos(usrmodulos: any) {
     return this.http.post(`${baseUrl}`, usrmodulos);
