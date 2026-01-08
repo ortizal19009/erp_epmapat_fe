@@ -63,7 +63,8 @@
               <h5 class="font-weight-bold py-1 text-center titDocumentos">Lista de rutas asignadas</h5>
             </div>
             <div class="col-sm-2">
-              <select class="form-control py-1 form-control-sm w-15 float-right" value="emision.idemision">
+              <select class="form-control py-1 form-control-sm w-15 float-right" [(ngModel)]="emisionSelected"
+                value="emision.idemision">
                 <option *ngFor="let emision of _emisiones" [ngValue]="emision">{{emision.emision}} -
                   {{emision.estado}}</option>
               </select>
@@ -82,20 +83,21 @@
               <tr class="text-center font-weight-bold cabecera">
                 <th>Cod.</th>
                 <th>Descripción</th>
-                <th></th>
+                <th>
+                  <button type="button" class="btn btn-warning btn-xs py-0" data-toggle="modal"
+                    data-target="#staticBackdrop">
+                    <i class="fa fa-plus-square-o" aria-hidden="true"></i>
+                  </button>
+                </th>
               </tr>
             </thead>
             <tbody class="detalle">
-              <tr class="fila">
+              <tr class="fila" *ngFor="let ra of _rutasAsignadas">
                 <td class="text-center">1</td>
-                <td> Ruta 1 </td>
-
+                <td> {{ra.idruta}} </td>
                 <td class="text-center">
                   <div class="btn-group py-0">
-                    <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
-                      aria-expanded="false">
-                    </button>
-
+                    <i class="fa fa-minus-square-o" aria-hidden="true"></i>
                   </div>
                 </td>
               </tr>
@@ -107,4 +109,42 @@
 
     </div>
 
+  </div>
+  <!-- Modal add ruta to user -->
+  <div class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="staticBackdropLabel">Lista de rutas</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <table class="table table-sm table-hover table-bordered">
+            <thead class="header">
+              <tr>
+                <th>N°</th>
+                <th>Descripción</th>
+                <th>Añadir</th>
+              </tr>
+            </thead>
+            <tbody class="detalle">
+              <tr *ngFor="let r of _rutas; let i = index">
+                <td class="text-center text-strong">{{i+1}}</td>
+                <td>{{r.descripcion}}</td>
+                <td class="text-center">
+                  <input type="checkbox" name="" id="">
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Understood</button>
+        </div>
+      </div>
+    </div>
   </div>
