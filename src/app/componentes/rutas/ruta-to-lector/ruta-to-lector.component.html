@@ -36,21 +36,12 @@
           <tr class="text-center font-weight-bold cabecera">
             <th>Cod.</th>
             <th>Nombre</th>
-            <th></th>
           </tr>
         </thead>
         <tbody class="detalle">
           <tr class="fila" *ngFor="let usuario of _usuarios | filter: filtro;" (click)="onCellClick($event, usuario)">
             <td class="text-center">{{ usuario.idusuario }}</td>
             <td> {{ usuario.nomusu }} </td>
-
-            <td class="text-center">
-              <div class="btn-group py-0">
-                <button type="button" class="btn btn-warning btn-xs py-0">
-                  <i class="fa fa-plus-square-o" aria-hidden="true"></i>
-                </button>
-              </div>
-            </td>
           </tr>
         </tbody>
       </table>
@@ -84,21 +75,21 @@
                 <th>Cod.</th>
                 <th>Descripción</th>
                 <th>
-                  <button type="button" class="btn btn-warning btn-xs py-0" data-toggle="modal"
-                    data-target="#staticBackdrop">
+                  <button type="button" class="btn btn-warning btn-xs py-0" *ngIf="emisionSelected?.estado == 0"
+                    data-toggle="modal" data-target="#staticBackdrop">
                     <i class="fa fa-plus-square-o" aria-hidden="true"></i>
                   </button>
                 </th>
               </tr>
             </thead>
             <tbody class="detalle">
-              <tr class="fila" *ngFor="let ra of _rutasAsignadas">
-                <td class="text-center">1</td>
-                <td> {{ra.idruta}} </td>
+              <tr class="fila" *ngFor="let ra of _rutasAsignadas; let i = index">
+                <td class="text-center">{{i+1}}</td>
+                <td> {{ra.descripcion}} </td>
                 <td class="text-center">
-                  <div class="btn-group py-0">
+                  <button class="btn-group py-0" (click)="dropRuta(ra)">
                     <i class="fa fa-minus-square-o" aria-hidden="true"></i>
-                  </div>
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -113,7 +104,7 @@
   <!-- Modal add ruta to user -->
   <div class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1"
     aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="staticBackdropLabel">Lista de rutas</h5>
@@ -122,6 +113,13 @@
           </button>
         </div>
         <div class="modal-body">
+          <div class="row">
+            <div class="col-sm-12">
+              <label>Filtrar
+                <input type="text" class="form-control form-control-sm col-sm-12" placeholder="Filtrar..." [(ngModel)]="filtrarRutas">
+              </label>
+            </div>
+          </div>
           <table class="table table-sm table-hover table-bordered">
             <thead class="header">
               <tr>
@@ -131,19 +129,19 @@
               </tr>
             </thead>
             <tbody class="detalle">
-              <tr *ngFor="let r of _rutas; let i = index">
+              <tr *ngFor="let r of _rutas | filter:filtrarRutas; let i = index">
                 <td class="text-center text-strong">{{i+1}}</td>
                 <td>{{r.descripcion}}</td>
                 <td class="text-center">
-                  <input type="checkbox" name="" id="">
+                  <input type="checkbox" [checked]="isRutaAsignada(r)" (change)="selectRuta($event, r)" name="" id="">
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Understood</button>
+          <button type="button" class="btn btn-sm btn-outline-success" data-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-sm btn-success" (click)="onSubmit()">Aceptar</button>
         </div>
       </div>
     </div>

@@ -7,12 +7,11 @@ const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/usrxrutas`;
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class UsrxrutaServiceService {
-
-  constructor(private http:HttpClient) { }
-   /** 🔹 Obtener todas las rutas */
+  constructor(private http: HttpClient) {}
+  /** 🔹 Obtener todas las rutas */
   findAll(): Observable<any[]> {
     return this.http.get<any[]>(baseUrl);
   }
@@ -42,5 +41,7 @@ export class UsrxrutaServiceService {
     );
   }
 
-
+  findByEmision(idemision: number) {
+    return this.http.get(`${baseUrl}/emision/${idemision}`);
+  }
 }
