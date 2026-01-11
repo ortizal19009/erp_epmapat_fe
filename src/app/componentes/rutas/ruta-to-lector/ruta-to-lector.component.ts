@@ -18,19 +18,21 @@ export class RutaToLectorComponent implements OnInit {
   _rutas: any[] = [];
   _emisiones: any[] = [];
   emisionSelected: any;
-  usrxrutas: any[] = [];
+  usrxrutas: any;
   _rutasAsignadas: any[] = [];
   usuarioSeletced: any;
   usrxruta: any;
   swaddruta: boolean = false;
   filtrarRutas: string;
+  ocupadas = new Set<number>();
+
 
   constructor(
     private usuarioService: UsuarioService,
     private emisionesService: EmisionService,
     private rutasService: RutasService,
     private UsrxrutaService: UsrxrutaServiceService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.getUsuarioLectores();
@@ -56,12 +58,21 @@ export class RutaToLectorComponent implements OnInit {
       this.emisionSelected.idemision
     ).subscribe({
       next: (datos: any) => {
-        console.log(datos);
+        if (!datos) {
+          this.usrxrutas = null;
+          this._rutasAsignadas = [];
+          return;
+        }
         this.usrxrutas = datos;
-        this._rutasAsignadas = datos.rutas;
+        this._rutasAsignadas = datos?.rutas ?? [];
       },
-      error: (e: any) => console.error(e.error),
+      error: () => {
+        this.usrxrutas = null;
+        this._rutasAsignadas = [];
+      }
     });
+
+
   }
   getAllRutas() {
     this.rutasService.getListaRutas().subscribe((data: any) => {
@@ -80,6 +91,17 @@ export class RutaToLectorComponent implements OnInit {
         this.swaddruta = false;
       }
     });
+  }
+
+  cargarOcupadas() {
+    this.UsrxrutaService.getRutasOcupadas(this.emisionSelected.idemision).subscribe({
+      next: (ids: number[]) => this.ocupadas = new Set(ids),
+      error: (e) => console.error(e)
+    });
+  }
+
+  esOcupada(r: any): boolean {
+    return this.ocupadas.has(r.idruta);
   }
   /* Select rutas */
   selectRuta(e: any, r: any) {
@@ -113,25 +135,28 @@ export class RutaToLectorComponent implements OnInit {
   onSubmit() {
     this.usrxruta = {
       rutas: this._rutasAsignadas,
-      idusuario_usuarios: this.usuarioSeletced,
-      idemision_emisiones: this.emisionSelected,
+      idusuario_usuarios: { idusuario: this.usuarioSeletced.idusuario },
+      idemision_emisiones: { idemision: this.emisionSelected.idemision },
     };
-    console.log(this.usrxruta);
+
     this.UsrxrutaService.save(this.usrxruta).subscribe({
-      next: (datos: any) => {console.log(datos);
-      this.swal('success',"Datos guardados")},
+      next: (datos: any) => {
+        console.log(datos);
+        this.swal('success', 'Datos guardados');
+      },
       error: (e: any) => console.error(e.error),
     });
   }
 
-    private swal(icon: 'success' | 'error' | 'info' | 'warning', mensaje: string) {
-      Swal.fire({
-        toast: true,
-        icon,
-        title: mensaje,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-      });
-    }
+
+  private swal(icon: 'success' | 'error' | 'info' | 'warning', mensaje: string) {
+    Swal.fire({
+      toast: true,
+      icon,
+      title: mensaje,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+    });
+  }
 }

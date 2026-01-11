@@ -87,7 +87,7 @@
                 <td class="text-center">{{i+1}}</td>
                 <td> {{ra.descripcion}} </td>
                 <td class="text-center">
-                  <button class="btn-group py-0" (click)="dropRuta(ra)">
+                  <button class="btn-group btn-danger btn-xs py-0" (click)="dropRuta(ra)">
                     <i class="fa fa-minus-square-o" aria-hidden="true"></i>
                   </button>
                 </td>
@@ -116,7 +116,8 @@
           <div class="row">
             <div class="col-sm-12">
               <label>Filtrar
-                <input type="text" class="form-control form-control-sm col-sm-12" placeholder="Filtrar..." [(ngModel)]="filtrarRutas">
+                <input type="text" class="form-control form-control-sm col-sm-12" placeholder="Filtrar..."
+                  [(ngModel)]="filtrarRutas">
               </label>
             </div>
           </div>
@@ -133,7 +134,12 @@
                 <td class="text-center text-strong">{{i+1}}</td>
                 <td>{{r.descripcion}}</td>
                 <td class="text-center">
-                  <input type="checkbox" [checked]="isRutaAsignada(r)" (change)="selectRuta($event, r)" name="" id="">
+                  <input type="checkbox" [checked]="isRutaAsignada(r)" [disabled]="esOcupada(r) && !isRutaAsignada(r)"
+                    (change)="selectRuta($event, r)" />
+                  <span *ngIf="esOcupada(r) && !isRutaAsignada(r)" class="badge badge-danger ml-2">
+                    Ocupada
+                  </span>
+
                 </td>
               </tr>
             </tbody>

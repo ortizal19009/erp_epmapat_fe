@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -7,6 +7,7 @@ import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Usuarios } from 'src/app/modelos/administracion/usuarios.model';
 import { UsuarioService } from 'src/app/servicios/administracion/usuario.service';
+import { PersonalService } from 'src/app/servicios/rrhh/personal.service';
 
 @Component({
   selector: 'app-usuarios',
@@ -14,74 +15,91 @@ import { UsuarioService } from 'src/app/servicios/administracion/usuario.service
   styleUrls: ['./usuarios.component.css'],
 })
 export class UsuariosComponent implements OnInit {
-  f_usuario: FormGroup;
+  f_usuario!: FormGroup;
+
   _usuarios: any;
-  mostrarComponente: boolean = false;
-  componente: any;
-  usuario = {} as Usuario; //Interface para los datos del Usuario a eliminar
+  filtro: string = '';
+
+  // Modal eliminar
+  usuario = {} as Usuario;
   otraPagina: boolean = false;
-  tsvData: any[] = [];
-  filtro: string;
+
+  // Fecha / password
   date: Date = new Date();
-  pass: any = '';
+  pass: string = '';
+
+  // Personal (para unir)
+  _personal: any[] = [];
+  filtrarPersonalAdd: string = '';
+  personalSeleccionadoId: number | null = null;
+  personalSeleccionadoLabel: string = '';
+
   constructor(
     public usuService: UsuarioService,
     private router: Router,
     public authService: AutorizaService,
     private coloresService: ColoresService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private personalService: PersonalService
   ) {}
 
   ngOnInit(): void {
-    // if(!this.authService.log) this.router.navigate(['/inicio']);
-    this.f_usuario = this.fb.group({
-      identificausu: '',
-      nomusu: '',
-      email: '',
-      alias: '',
-      password: '',
-      conf_password: '',
-    });
-
     sessionStorage.setItem('ventana', '/usuarios');
-    let coloresJSON = sessionStorage.getItem('/usuarios');
+    const coloresJSON = sessionStorage.getItem('/usuarios');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
     else this.buscaColor();
 
+    // FORM
+    this.f_usuario = this.fb.group({
+      identificausu: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20)]],
+      nomusu: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
+      email: ['', [Validators.email]],
+      alias: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20)]],
+      password: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(50)]],
+      conf_password: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(50)]],
+
+      // 🔹 control para personal (se llenará con {idpersonal})
+      personal: new FormControl(null),
+    });
+
     this.listarUsuarios();
+    this.getListarPersonal();
+
+    // Si cambia password, resetea confirmación y pass encriptada
+    this.f_usuario.get('password')?.valueChanges.subscribe((v) => {
+      if (v) {
+        this.f_usuario.get('conf_password')?.reset();
+        this.pass = '';
+      }
+    });
   }
 
+  // =========================
+  // COLORES
+  // =========================
   async buscaColor() {
     try {
-      const datos = await this.coloresService.setcolor(
-        this.authService.idusuario,
-        'usuarios'
-      );
-      const coloresJSON = JSON.stringify(datos);
-      sessionStorage.setItem('/usuarios', coloresJSON);
+      const datos = await this.coloresService.setcolor(this.authService.idusuario, 'usuarios');
+      sessionStorage.setItem('/usuarios', JSON.stringify(datos));
       this.colocaColor(datos);
     } catch (error) {
       console.error(error);
     }
   }
-  verifyPassword(e: any) {
-    let password = this.f_usuario.value.password;
-    let conf_password = e.target.value;
-    if (conf_password === password) {
-      this.pass = myFun(password);
-    } else {
-      this.pass = '';
-    }
-  }
+
   colocaColor(colores: any) {
     document.documentElement.style.setProperty('--bgcolor1', colores[0]);
     const cabecera = document.querySelector('.cabecera');
     if (cabecera) cabecera.classList.add('nuevoBG1');
+
     document.documentElement.style.setProperty('--bgcolor2', colores[1]);
     const detalle = document.querySelector('.detalle');
     if (detalle) detalle.classList.add('nuevoBG2');
   }
 
+  // =========================
+  // LISTADOS
+  // =========================
   listarUsuarios() {
     this.usuService.getUsuarios().subscribe({
       next: (datos) => (this._usuarios = datos),
@@ -89,11 +107,16 @@ export class UsuariosComponent implements OnInit {
     });
   }
 
-  nuevo() {
-    this.mostrarComponente = true;
-    //this.componente = AddInteresesComponent;  //Cambiar a AddUsuarioComponent
+  getListarPersonal() {
+    this.personalService.getAllPersonal().subscribe({
+      next: (datos: any) => (this._personal = datos),
+      error: (err: any) => console.error(err.error),
+    });
   }
 
+  // =========================
+  // ACCIONES USUARIOS
+  // =========================
   perfil(idusuario: number) {
     sessionStorage.setItem('idusuarioToPerfil', idusuario.toString());
     this.router.navigate(['/perfil-usuario']);
@@ -111,92 +134,137 @@ export class UsuariosComponent implements OnInit {
   }
 
   eliminar() {
+    // Implementa si ya tienes endpoint:
     // this.usuService.deleteUsuario(this.usuario.idusuario).subscribe({
-    //    next: datos => this.listarUsuarios(),
-    //    error: err => console.error(err.error)
+    //   next: () => this.listarUsuarios(),
+    //   error: (err) => console.error(err.error),
     // });
   }
 
-  reset() {
-    this.componente = null;
+  // =========================
+  // PASSWORD
+  // =========================
+  verifyPassword(e: any) {
+    const password = this.f_usuario.value.password;
+    const conf_password = e.target.value;
+
+    if (conf_password === password && password && password.trim().length > 0) {
+      this.pass = myFun(password);
+    } else {
+      this.pass = '';
+    }
   }
 
+  // =========================
+  // UNIR PERSONAL (ADD)
+  // =========================
+  seleccionarPersonalAdd(per: any) {
+    this.personalSeleccionadoId = per.idpersonal;
+    this.personalSeleccionadoLabel = `${per.apellidos} ${per.nombres} - ${per.identificacion}`;
+
+    // Enviar SOLO idpersonal al backend:
+    this.f_usuario.get('personal')?.setValue({ idpersonal: per.idpersonal });
+    this.f_usuario.markAsDirty();
+  }
+
+  limpiarPersonalAdd() {
+    this.personalSeleccionadoId = null;
+    this.personalSeleccionadoLabel = '';
+    this.filtrarPersonalAdd = '';
+
+    this.f_usuario.get('personal')?.setValue(null);
+    this.f_usuario.markAsDirty();
+  }
+
+  // =========================
+  // GUARDAR NUEVO USUARIO
+  // =========================
   saveUser() {
-    let user: Usuarios = new Usuarios();
+    if (this.f_usuario.invalid) return;
+
+    // Asegurar que password coincide y pass está lista
+    const p = this.f_usuario.get('password')?.value;
+    const c = this.f_usuario.get('conf_password')?.value;
+    if (p !== c) {
+      this.pass = '';
+      return;
+    }
+    if (!this.pass) this.pass = myFun(p);
+
+    const raw = this.f_usuario.getRawValue();
+
+    const user: any = new Usuarios();
     user.codusu = this.pass;
-    user.email = this.f_usuario.value.email;
-    user.identificausu = this.f_usuario.value.identificausu;
-    user.nomusu = this.f_usuario.value.nomusu;
-    user.alias = this.f_usuario.value.alias;
+    user.email = raw.email;
+    user.identificausu = raw.identificausu;
+    user.nomusu = raw.nomusu;
+    user.alias = raw.alias;
+
+    // relación personal (opcional)
+    // raw.personal ya es {idpersonal} o null
+    user.personal = raw.personal;
+
     user.feccrea = this.date;
     user.estado = true;
+    user.usucrea = this.authService.idusuario; // si tienes usucrea en tu entidad
     user.usumodi = this.authService.idusuario;
     user.otrapestania = true;
+
     this.usuService.save(user).subscribe({
-      next: (datos: any) => {
+      next: () => {
         this.listarUsuarios();
-        this.f_usuario.reset();
+        this.resetFormAdd();
       },
       error: (e: any) => console.error(e),
     });
   }
 
+  resetFormAdd() {
+    this.f_usuario.reset();
+    this.pass = '';
+    this.limpiarPersonalAdd();
+  }
+
+  // =========================
+  // PDF (tu método se mantiene igual)
+  // =========================
   pdf() {
     let m_izquierda = 20;
-    var doc = new jsPDF();
+    const doc = new jsPDF();
+
     doc.setFont('times', 'bold');
     doc.setFontSize(16);
     doc.text('EpmapaT', m_izquierda, 10);
+
     doc.setFont('times', 'normal');
     doc.setFontSize(12);
     doc.text('LISTA DE USUARIOS', m_izquierda, 16);
 
-    var datos: any = [];
+    // ⚠️ OJO: tu pdf actual usa campos anio/mes/porcentaje que no son de usuarios.
+    // Te lo dejo intacto, pero si quieres lo ajusto a: identificausu, alias, nomusu.
+
+    const datos: any[] = [];
     let nombreMes: string;
-    var i = 0;
+    let i = 0;
+
     this._usuarios.forEach(() => {
       let mes = +this._usuarios[i].mes!;
       switch (mes) {
-        case 1:
-          nombreMes = 'Enero';
-          break;
-        case 2:
-          nombreMes = 'Febrero';
-          break;
-        case 3:
-          nombreMes = 'Marzo';
-          break;
-        case 4:
-          nombreMes = 'Abril';
-          break;
-        case 5:
-          nombreMes = 'Mayo';
-          break;
-        case 6:
-          nombreMes = 'Junio';
-          break;
-        case 7:
-          nombreMes = 'Julio';
-          break;
-        case 8:
-          nombreMes = 'Agosto';
-          break;
-        case 9:
-          nombreMes = 'Septiembre';
-          break;
-        case 10:
-          nombreMes = 'Octubre';
-          break;
-        case 11:
-          nombreMes = 'Noviembre';
-          break;
-        case 12:
-          nombreMes = 'Diciembre';
-          break;
-        default:
-          nombreMes = '';
-          break;
+        case 1: nombreMes = 'Enero'; break;
+        case 2: nombreMes = 'Febrero'; break;
+        case 3: nombreMes = 'Marzo'; break;
+        case 4: nombreMes = 'Abril'; break;
+        case 5: nombreMes = 'Mayo'; break;
+        case 6: nombreMes = 'Junio'; break;
+        case 7: nombreMes = 'Julio'; break;
+        case 8: nombreMes = 'Agosto'; break;
+        case 9: nombreMes = 'Septiembre'; break;
+        case 10: nombreMes = 'Octubre'; break;
+        case 11: nombreMes = 'Noviembre'; break;
+        case 12: nombreMes = 'Diciembre'; break;
+        default: nombreMes = ''; break;
       }
+
       datos.push([
         this._usuarios[i].anio,
         nombreMes,
@@ -205,34 +273,20 @@ export class UsuariosComponent implements OnInit {
       i++;
     });
 
-    let cabecera = ['AÑO', 'MES', '%'];
+    const cabecera = ['AÑO', 'MES', '%'];
 
     autoTable(doc, {
       theme: 'grid',
-      headStyles: {
-        fillColor: [83, 67, 54],
-        fontStyle: 'bold',
-        halign: 'center',
-      },
-      styles: {
-        font: 'helvetica',
-        fontSize: 10,
-        cellPadding: 1,
-        halign: 'center',
-      },
-      columnStyles: {
-        0: { halign: 'center' },
-        1: { halign: 'left' },
-        2: { halign: 'right' },
-      },
-
+      headStyles: { fillColor: [83, 67, 54], fontStyle: 'bold', halign: 'center' },
+      styles: { font: 'helvetica', fontSize: 10, cellPadding: 1, halign: 'center' },
+      columnStyles: { 0: { halign: 'center' }, 1: { halign: 'left' }, 2: { halign: 'right' } },
       margin: { left: m_izquierda - 1, top: 18, right: 90, bottom: 10 },
       head: [cabecera],
       body: datos,
     });
 
-    var opciones = {
-      filename: 'intereses.pdf',
+    const opciones: any = {
+      filename: 'usuarios.pdf',
       orientation: 'portrait',
       unit: 'mm',
       format: 'a4',
@@ -242,21 +296,18 @@ export class UsuariosComponent implements OnInit {
     if (this.otraPagina) doc.output('dataurlnewwindow', opciones);
     else {
       const pdfDataUri = doc.output('datauristring');
-      //Si ya existe el <embed> primero lo remueve
+
       const elementoExistente = document.getElementById('idembed');
-      if (elementoExistente) {
-        elementoExistente.remove();
-      }
-      //Crea el <embed>
-      var embed = document.createElement('embed');
+      if (elementoExistente) elementoExistente.remove();
+
+      const embed = document.createElement('embed');
       embed.setAttribute('src', pdfDataUri);
       embed.setAttribute('type', 'application/pdf');
       embed.setAttribute('width', '50%');
       embed.setAttribute('height', '100%');
       embed.setAttribute('id', 'idembed');
-      //Agrega el <embed> al contenedor del Modal
-      var container: any;
-      container = document.getElementById('pdf');
+
+      const container: any = document.getElementById('pdf');
       container.appendChild(embed);
     }
   }
@@ -267,18 +318,17 @@ interface Usuario {
   identificausu: string;
   nomusu: string;
 }
+
 function myFun(x: string): string {
   let y = '';
-  for (let i = 0; i < x.length; i++) {
-    y += String(x.charCodeAt(i));
-  }
+  for (let i = 0; i < x.length; i++) y += String(x.charCodeAt(i));
+
   let rtn = '';
-  for (let i = 0; i < y.length; i += 2) {
-    rtn += y[i];
-  }
+  for (let i = 0; i < y.length; i += 2) rtn += y[i];
+
   rtn += String(x.trim().length);
-  for (let i = y.length - 1; i >= 0; i -= 2) {
-    rtn += y[i];
-  }
+
+  for (let i = y.length - 1; i >= 0; i -= 2) rtn += y[i];
+
   return rtn;
 }

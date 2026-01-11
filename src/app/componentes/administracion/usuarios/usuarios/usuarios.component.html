@@ -1,202 +1,284 @@
-<div class="content mt-1 pt-1 pl-0">
-   <div class="container-fluid">
-      <div class="col-sm-7 pl-0">
-         <div class="row m-0 px-0 py-1 justify-content-start cabecera sombra border">
-            <div class="col-sm-8">
-               <h4 class="m-0 font-weight-bold"><i class="bi-people"></i>&nbsp; Usuarios</h4>
-            </div>
-            <div class="col-sm-3">
-               <input type="text" class="form-control form-control-sm text-center" placeholder="Filtrar..."
-                  [(ngModel)]="filtro" />
-            </div>
-            <div class="btn-group ml-auto mt-0">
-               <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
-                  data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
-               </button>
-               <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-                  <button class="dropdown-item popupCabecera" type="button" data-toggle="collapse"
-                     data-target="#addUsuario" (click)="nuevo()">
-                     <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
-                  <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
-                     <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
-                  <button class="dropdown-item text-muted" type="button" disabled><i
-                        class="bi-file-earmark-arrow-down text-muted"></i>
-                     <span class="text-muted">&nbsp;
-                        Exportar</span></button>
-               </div>
-            </div>
-         </div>
-      </div>
-   </div>
-</div>
+<div class="container-fluid mt-2">
+  <div class="row justify-content-center">
+    <div class="col-sm-10 col-md-9 col-lg-7">
 
+      <!-- CABECERA -->
+      <div class="d-flex align-items-center justify-content-between cabecera sombra border px-3 py-2 rounded">
+        <div class="d-flex align-items-center">
+          <i class="bi bi-people-fill mr-2"></i>
+          <h5 class="m-0 font-weight-bold">Usuarios</h5>
+        </div>
+
+        <div class="d-flex align-items-center">
+          <input
+            type="text"
+            class="form-control form-control-sm text-center mr-2"
+            placeholder="Filtrar..."
+            [(ngModel)]="filtro"
+            style="width: 200px;"
+          />
+
+          <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-outline-light dropdown-toggle" data-toggle="dropdown">
+              <i class="bi bi-menu-button-wide"></i>
+            </button>
+
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+              <button class="dropdown-item text-white" type="button" data-toggle="collapse" data-target="#addUsuario" >
+                <i class="bi bi-file-earmark-plus"></i>&nbsp; Nuevo
+              </button>
+
+              <button class="dropdown-item text-white" type="button" data-toggle="modal" data-target="#imprimir">
+                <i class="bi bi-printer"></i>&nbsp; Imprimir
+              </button>
+
+              <button class="dropdown-item text-muted" type="button" disabled>
+                <i class="bi bi-file-earmark-arrow-down"></i>&nbsp; Exportar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLA -->
+      <div class="mt-2 sombra border rounded detalle">
+        <table class="table table-hover table-sm mb-0">
+          <thead class="text-center">
+            <tr>
+              <th style="width: 50px;">#</th>
+              <th class="text-left">Identificación</th>
+              <th class="text-left">Alias</th>
+              <th class="text-left">Nombre</th>
+              <th style="width: 60px;"></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let usuario of _usuarios | filter:filtro; let i=index" class="text-center fila">
+              <td class="font-weight-bold small">{{ i + 1 }}</td>
+
+              <td class="text-left" [ngClass]="{'tachado': !usuario.estado}">
+                {{ usuario.identificausu }}
+              </td>
+
+              <td class="text-left" [ngClass]="{'tachado': !usuario.estado}">
+                {{ usuario.alias }}
+              </td>
+
+              <td class="text-left" [ngClass]="{'tachado': !usuario.estado}">
+                {{ usuario.nomusu }}
+              </td>
+
+              <td class="text-right">
+                <div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-warning dropdown-toggle" data-toggle="dropdown">
+                    <i class="bi bi-gear-fill"></i>
+                  </button>
+                  <div class="dropdown-menu dropdown-menu-right popLista">
+                    <button class="dropdown-item" type="button" (click)="perfil(usuario.idusuario)">
+                      <i class="bi bi-person-badge"></i>&nbsp; Perfil
+                    </button>
+                    <button class="dropdown-item" type="button" (click)="modificar(usuario.idusuario)">
+                      <i class="bi bi-pencil-square"></i>&nbsp; Modificar
+                    </button>
+                    <button class="dropdown-item text-danger" type="button" data-toggle="modal" data-target="#elimInteres"
+                      (click)="datosEliminar(usuario)">
+                      <i class="bi bi-trash"></i>&nbsp; Eliminar
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+
+            <tr *ngIf="(_usuarios | filter:filtro)?.length === 0">
+              <td colspan="5" class="text-center text-muted py-3">
+                No se encontraron usuarios.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
 <div class="container-fluid">
-   <div class="row mb-0">
-      <div class="col-sm-7">
+  <div class="row justify-content-center">
+    <div class="col-sm-10 col-md-9 col-lg-7">
 
-         <table class="table table-bordered table-sm sombra">
-            <thead class="text-center cabecera">
-               <tr>
-                  <th></th>
-                  <th>Identificación</th>
-                  <th>Alias</th>
-                  <th>Nombre</th>
-                  <th></th>
-               </tr>
-            </thead>
-            <tbody class="detalle">
-               <tr *ngFor="let usuario of _usuarios | filter:filtro; let i=index" class="text-center fila">
-                  <td class="font-weight-bold small">{{i+1}}</td>
-                  <td [ngClass]="{'tachado': !usuario.estado }" class="text-left">{{usuario.identificausu}}</td>
-                  <td [ngClass]="{'tachado': !usuario.estado }" class="text-left">{{ usuario.alias}} </td>
-                  <td [ngClass]="{'tachado': !usuario.estado }" class="text-left">{{ usuario.nomusu }}</td>
-                  <td>
-                     <div class="btn-group py-0">
-                        <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
-                           aria-expanded="false">
+      <div class="collapse mt-2" id="addUsuario">
+        <div class="card sombra border-0">
+          <div class="card-header bg-success text-white d-flex align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold">
+              <i class="bi bi-person-plus-fill"></i>&nbsp; Añadir nuevo usuario
+            </h6>
+            <button class="btn btn-sm btn-outline-light" type="button" data-toggle="collapse" data-target="#addUsuario">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <form [formGroup]="f_usuario">
+            <div class="card-body">
+
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group mb-2">
+                    <label class="font-weight-bold">Identificación</label>
+                    <input type="text" class="form-control form-control-sm" formControlName="identificausu" placeholder="Identificación">
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="form-group mb-2">
+                    <label class="font-weight-bold">Nombre usuario</label>
+                    <input type="text" class="form-control form-control-sm" formControlName="nomusu" placeholder="Nombre usuario">
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group mb-2">
+                    <label class="font-weight-bold">Alias</label>
+                    <input type="text" class="form-control form-control-sm" formControlName="alias" placeholder="Alias">
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="form-group mb-2">
+                    <label class="font-weight-bold">E-mail</label>
+                    <input type="email" class="form-control form-control-sm" formControlName="email" placeholder="E-mail">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Unir Personal -->
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group mb-2">
+                    <label class="font-weight-bold">Personal vinculado</label>
+
+                    <div class="input-group input-group-sm">
+                      <input type="text"
+                        class="form-control"
+                        [value]="personalSeleccionadoLabel || ''"
+                        placeholder="No vinculado"
+                        readonly
+                      >
+                      <div class="input-group-append">
+                        <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#modalPersonalAdd">
+                          <i class="bi bi-search"></i>&nbsp; Buscar
                         </button>
-                        <div class="dropdown-menu dropdown-menu-right popLista">
-                           <button class="dropdown-item" type="button" (click)="perfil(usuario.idusuario)">
-                              <i class="bi-battery-half"></i>&nbsp; Perfil</button>
-                           <button class="dropdown-item" type="button" (click)="modificar(usuario.idusuario)">
-                              <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
-                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#elimInteres"
-                              (click)="datosEliminar( usuario )">
-                              <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
-                        </div>
-                     </div>
-                  </td>
-               </tr>
-            </tbody>
-         </table>
+                        <button type="button" class="btn btn-outline-danger" (click)="limpiarPersonalAdd()" [disabled]="!personalSeleccionadoId">
+                          <i class="bi bi-x-circle"></i>
+                        </button>
+                      </div>
+                    </div>
+
+                    <small class="text-muted">Selecciona un registro de RRHH para vincularlo al usuario.</small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Password -->
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group mb-2">
+                    <label class="font-weight-bold">Password</label>
+                    <input type="password" class="form-control form-control-sm" formControlName="password" placeholder="Password">
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="form-group mb-2">
+                    <label class="font-weight-bold">Conf. Password</label>
+                    <input type="password" class="form-control form-control-sm"
+                      (keyup)="verifyPassword($event)"
+                      formControlName="conf_password"
+                      placeholder="Confirmación">
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="card-footer text-center">
+              <button type="button" class="btn btn-sm btn-outline-secondary mr-2" data-toggle="collapse" data-target="#addUsuario">
+                <i class="bi bi-x-circle"></i>&nbsp; Cancelar
+              </button>
+
+              <button type="button" class="btn btn-sm btn-success" [disabled]="pass == ''" (click)="saveUser()">
+                <i class="bi bi-check-circle"></i>&nbsp; Guardar
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
 
-      <div class="col-sm mt-1" class="collapse" id="addUsuario">
-         <div class="card card-success">
-            <div class="card-header">
-               <h3 class="card-title">Añadir nuevo usuario</h3>
-            </div>
-
-            <form [formGroup]="f_usuario">
-               <div class="card-body">
-                  <div class="row">
-                     <div class="col-sm">
-                        <div class="form-group">
-                           <label for="exampleInputEmail1">Identificación</label>
-                           <input type="email" class="form-control" id="exampleInputEmail1"
-                              formControlName="identificausu" placeholder="Identificación">
-                        </div>
-                     </div>
-                     <div class="col-sm">
-                        <div class="form-group">
-                           <label for="exampleInputEmail1">Nombre usuario</label>
-                           <input type="email" class="form-control" formControlName="nomusu" id="exampleInputEmail1"
-                              placeholder="Nombre usuario">
-                        </div>
-                     </div>
-                  </div>
-                  <div class="form-group">
-                     <label for="exampleInputEmail1">Alias</label>
-                     <input type="email" class="form-control" id="exampleInputEmail1" formControlName="alias"
-                        placeholder="Alias">
-                  </div>
-                  <div class="form-group">
-                     <label for="exampleInputEmail1">E-mail</label>
-                     <input type="email" class="form-control" id="exampleInputEmail1" formControlName="email"
-                        placeholder="E-mail">
-                  </div>
-                  <div class="form-group">
-                     <label for="exampleInputPassword1">Password</label>
-                     <input type="password" class="form-control" formControlName = 'password' id="exampleInputPassword1" placeholder="Password">
-                  </div>
-                  <div class="form-group">
-                     <label for="exampleInputPassword1">Conf. Password</label>
-                     <input type="password" class="form-control" (keyup)="verifyPassword($event)" formControlName = 'conf_password' id="exampleInputPassword1"  placeholder="Password">
-                  </div>
-               </div>
-               <!-- /.card-body -->
-
-               <div class="card-footer text-center">
-                  <button type="submit" class="btn btn-sm btn-success mr-3" data-toggle="collapse">Cancelar</button>
-                  <button type="submit" class="btn btn-sm btn-outline-success" [disabled]="pass == ''" (click)="saveUser()">Aceptar</button>
-
-               </div>
-            </form>
-         </div>
-      </div>
-
-   </div>
-
-   <!-- MODAL Eliminar -->
-   <div class='modal fade' id='elimInteres' tabindex='-1' aria-labelledby='modalInteresLabel' aria-hidden='true'>
-      <div class='modal-dialog modal-dialog-centered'>
-         <div class='modal-content usuariodetalle border'>
-            <div class='modal-header justify-content-center usuariocabecera border'>
-               <h5 class='modal-title' id='modalInteresLabel'>Mensaje</h5>
-            </div>
-            <div class='modal-body'>
-               <div class="alert alert-warning roboto text-center" role="alert">
-                  ¿ Eliminar el Usuario: <span class="fantacysombra"> {{ usuario.identificausu }} / {{usuario.nomusu
-                     }}</span> ?
-               </div>
-            </div>
-
-            <div class='modal-footer justify-content-center border py-1' id='idButtons'>
-               <button type='button' class='btn btn-success btn-sm' data-dismiss='modal' (click)="eliminar()"
-                  id='btnSi'>
-                  <i class="fa fa-check-circle" style="font-size:24pxi"></i> Aceptar
-               </button>
-               <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
-                  <i class="fa fa-times-circle" style="font-size:24pxi"></i> Cancelar</button>
-            </div>
-
-         </div>
-      </div>
-   </div>
-
-   <!-- MODAL Imprimir-->
-   <div class="modal fade" id="imprimir" tabindex="-1" aria-labelledby="imprimirLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-sm">
-         <div class="modal-content border usuariodetalle">
-            <div class='modal-header py-2 justify-content-center usuariocabecera'>
-               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Imprimir</h5>
-            </div>
-            <div class='modal-body'>
-
-               <div class="input-group mb-3 input-group-sm">
-                  <div class="input-group-prepend">
-                     <label class="input-group-text" for="inputGroupSelect01">Reporte</label>
-                  </div>
-                  <select class="custom-select" id="inputGroupSelect01">
-                     <option selected>Usuarios</option>
-                  </select>
-               </div>
-
-               <div class="input-group input-group-sm mb-0">
-                  <div class="input-group-prepend">
-                     <small class="input-group-text">Abrir en otra página</small>
-                     <div class="input-group-text">
-                        <input type="checkbox" [(ngModel)]="otraPagina">
-                     </div>
-                  </div>
-               </div>
-
-            </div>
-            <div class='modal-footer justify-content-center'>
-               <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="pdf()"
-                  [attr.data-target]="otraPagina ? null : '#pdf'" data-toggle="modal">
-                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
-               <button type='button' class='btn btn-sm btn-outline-success' data-dismiss='modal'>
-                  <i class="bi bi-x-circle"></i> Cancelar</button>
-            </div>
-         </div>
-      </div>
-   </div>
-
+    </div>
+  </div>
 </div>
+<div class="modal fade" id="modalPersonalAdd" tabindex="-1" role="dialog" aria-labelledby="modalPersonalAddTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
 
-<!-- MODAL PDF (En la misma página)-->
-<div class='modal fade' id='pdf' tabindex='-1' aria-labelledby='pdf' aria-hidden='true'>
-   <div class='modal-dialog modal-sm'>
-   </div>
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalPersonalAddTitle">Buscar Personal</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-sm-12">
+            <label class="w-100 mb-0">
+              Buscar Personal
+              <input type="text" [(ngModel)]="filtrarPersonalAdd" class="form-control form-control-sm" placeholder="Ingrese nombre o identificación">
+            </label>
+          </div>
+        </div>
+
+        <div class="row mt-3">
+          <div class="col-sm-12 table-responsive">
+            <table class="table table-hover table-sm mb-0">
+              <thead class="thead-light text-center">
+                <tr>
+                  <th style="width:60px">#</th>
+                  <th>Identificación</th>
+                  <th>Nombre</th>
+                  <th>Cargo</th>
+                  <th style="width:120px">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let per of _personal | filter:filtrarPersonalAdd; let i=index" class="text-center">
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ per.identificacion }}</td>
+                  <td class="text-left">{{ per.apellidos }} {{ per.nombres }}</td>
+                  <td class="text-left">{{ per.idcargo_cargos?.descripcion }}</td>
+                  <td>
+                    <button type="button" class="btn btn-sm btn-success" (click)="seleccionarPersonalAdd(per)" data-dismiss="modal">
+                      <i class="bi bi-link-45deg"></i> Unir
+                    </button>
+                  </td>
+                </tr>
+
+                <tr *ngIf="(_personal | filter:filtrarPersonalAdd)?.length === 0">
+                  <td colspan="5" class="text-center text-muted py-3">No se encontraron resultados.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">
+          Cerrar
+        </button>
+      </div>
+
+    </div>
+  </div>
 </div>

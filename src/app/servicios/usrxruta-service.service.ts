@@ -35,8 +35,8 @@ export class UsrxrutaServiceService {
   findByUsuarioAndEmision(
     idusuario: number,
     idemision: number
-  ): Observable<any[]> {
-    return this.http.get<any[]>(
+  ): Observable<any> {
+    return this.http.get<any>(
       `${baseUrl}/usuario/${idusuario}/emision/${idemision}`
     );
   }
@@ -44,4 +44,8 @@ export class UsrxrutaServiceService {
   findByEmision(idemision: number) {
     return this.http.get(`${baseUrl}/emision/${idemision}`);
   }
+  getRutasOcupadas(idemision: number): Observable<any> {
+    return this.http.get(`${baseUrl}/emision/${idemision}/rutas-ocupadas`);
+  }
+
 }
