@@ -115,7 +115,7 @@
               <i class="bi-door-closed"></i>&nbsp; Cerrar emisión</button>
             <button class="dropdown-item" type="button" [disabled]="true" data-toggle="modal" data-target="#imprimir1">
               <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
-            <button class="dropdown-item" (click)="cerrarRutas()" type="button">
+            <button class="dropdown-item" [disabled]="estado==1" (click)="cerrarRutas()" type="button">
               <i class="bi bi-printer"></i>&nbsp; Cerrar Rutas</button>
             <button class="dropdown-item" (click)="validarCierre()" type="button">
               <i class="bi bi-printer"></i>&nbsp; Validar cierre</button>
@@ -182,7 +182,7 @@
           <tr *ngIf="!swfiltro">
             <td colspan="4" class="text-right font-weight-bold">TOTAL: </td>
             <td class="text-right font-weight-bold">{{ subtotal | number: '1.0' }}</td>
-            <td>$ {{ totalSuma?.toFixed(2) }}</td>
+            <td>$ {{ totalSuma.toFixed(2) }}</td>
           </tr>
         </tbody>
       </table>
