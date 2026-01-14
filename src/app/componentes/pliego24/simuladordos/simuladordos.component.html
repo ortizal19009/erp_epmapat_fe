@@ -1,0 +1,170 @@
+<div class="content pt-2">
+  <div class="container-fluid">
+
+    <div class="row mx-1 px-2 py-2 border cabecera sombra align-items-center flex-nowrap">
+
+      <!-- Título -->
+      <div class="col-auto mr-3">
+        <h6 class="font-weight-bold mb-0 text-nowrap">
+          <i class="fa fa-history"></i>&nbsp; Simulación del nuevo Pliego Tarifario
+        </h6>
+        <small class="text-muted d-block text-nowrap">
+          Opciones, categoría y consumo
+        </small>
+      </div>
+
+      <!-- Formulario -->
+      <form [formGroup]="formBuscar" class="d-flex align-items-center flex-nowrap w-100">
+
+        <!-- AP / AM -->
+        <div class="d-flex align-items-center px-2 py-1 border rounded bg-light mr-2">
+          <label class="mb-0 d-flex align-items-center mr-3 text-nowrap">
+            <span class="mr-1 font-weight-bold">AP</span>
+            <input type="checkbox" formControlName="swAguapotable">
+          </label>
+
+          <label class="mb-0 d-flex align-items-center text-nowrap">
+            <span class="mr-1 font-weight-bold">AM</span>
+            <input type="checkbox" formControlName="swAdultoMayor">
+          </label>
+        </div>
+
+        <!-- Categoría -->
+        <div class="mr-2">
+          <select class="custom-select custom-select-sm text-nowrap" formControlName="categoria"
+            (change)="onSelectChange($event)">
+            <option [ngValue]="categoria.idcategoria" *ngFor="let categoria of categorias">
+              {{ categoria.descripcion }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Consumo -->
+        <div class="input-group input-group-sm mr-2" style="width: 160px;">
+          <div class="input-group-prepend">
+            <span class="input-group-text text-nowrap">
+              Consumo m<sup>3</sup>
+            </span>
+          </div>
+          <input type="number" class="form-control text-center" formControlName="m3">
+        </div>
+
+        <!-- Botones -->
+        <div class="d-flex align-items-center ml-auto">
+          <button type="submit" class="btn btn-success btn-sm mr-2" (click)="calcular()">
+            <i class="fa fa-check-circle"></i>&nbsp;Aceptar
+          </button>
+
+          <button type="button" class="btn btn-outline-success btn-sm" (click)="regresar()">
+            <i class="fa fa-times-circle"></i>&nbsp;Cancelar
+          </button>
+        </div>
+
+      </form>
+
+      <!-- Menú -->
+      <div class="col-auto ml-2">
+        <div class="btn-group">
+          <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown">
+            <i class="bi-menu-button-wide text-white"></i>
+          </button>
+
+          <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+            <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
+              <i class="bi bi-printer"></i>&nbsp; Imprimir
+            </button>
+            <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar">
+              <i class="bi-file-earmark-arrow-up"></i>&nbsp; Exportar
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+<div class="col-md-12">
+  <table class="table table-hover table-bordered table-sm sombra mt-2">
+
+    <thead class="cabecera">
+      <tr class="text-center">
+
+        <th colspan="3">Pliego tarifario 2024</th>
+
+        <th colspan="2">Conservación fuentes</th>
+        <th colspan="2">Rubro de basura</th>
+
+
+        <!-- NUEVA: Excedentes (solo si hay) -->
+        <th *ngIf="hayExcedentes" rowspan="2">Excedentes</th>
+
+        <th rowspan="2">Total por m<sup>3</sup></th>
+        <th rowspan="2"></th>
+      </tr>
+
+      <tr class="text-center">
+        <th>Agua Potable</th>
+        <th>Alcantarillado</th>
+        <th>Saneamiento</th>
+        <th>Comuna</th>
+        <th>EPMAPA-T</th>
+        <th>Municipio</th>
+        <th>Recaudación</th>
+      </tr>
+    </thead>
+
+    <tbody class="detalle">
+      <tr class="fila">
+
+        <!-- Corriente (5) -->
+        <td class="text-right">
+          {{ resumenPliego?.['Agua Potable'] | number:'1.2-2' }}
+        </td>
+
+        <td class="text-right">
+          {{ resumenPliego?.['Alcantarillado'] | number:'1.2-2' }}
+        </td>
+
+        <!-- Operativo e Inversión (6 y 7) -->
+        <td class="text-right">
+          {{ resumenPliego?.['Saneamiento'] | number:'1.2-2' }}
+        </td>
+
+        <td class="text-right">
+          {{ resumenPliego?.['Conservacion Fuentes'] | number:'1.2-2' }}
+        </td>
+
+        <td class="text-right">
+          {{ resumenPliego?.['Conservacion Fuentes Epmapat'] | number:'1.2-2' }}
+        </td>
+
+        <!-- Conservación -->
+        <td class="text-right">
+          {{ resumenPliego?.['Recoleccion Basura'] | number:'1.2-2' }}
+        </td>
+
+        <!-- Hidrosuccionador -->
+        <td class="text-right">
+          {{ resumenPliego?.['Recaudacion Basura'] | number:'1.2-2' }}
+        </td>
+
+        <!-- NUEVA: Excedentes (solo si hay) -->
+        <td *ngIf="hayExcedentes" class="text-right">
+          {{ resumenPliego?.['Excedente'] | number:'1.2-2' }}
+        </td>
+
+        <!-- Total por m3 -->
+        <td class="text-right font-weight-bold">
+          {{ resumenPliego?.['Total'] | number:'1.2-2' }}
+        </td>
+
+        <td class="text-center">
+          <i class="fa fa-check-circle text-success"></i>
+        </td>
+
+      </tr>
+    </tbody>
+
+  </table>
+</div>

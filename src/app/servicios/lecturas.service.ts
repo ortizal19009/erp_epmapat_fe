@@ -200,4 +200,8 @@ export class LecturasService {
   getPendientesByCliente(idcliente: number) {
     return this.http.get<any[]>(`${baseUrl}/preview/lecturas/${idcliente}`);
   }
+  getValoresSimulados(datos:any){
+  console.log(datos)
+  return this.http.get(`${baseUrl}/simular?m3=${datos.m3}&categoria=${datos.categoria}&swAdultoMayor=${datos.swAdultoMayor}&swAguapotable=${datos.swAguapotable}`)
+  }
 }

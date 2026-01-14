@@ -1,0 +1,23 @@
+.cabecera {
+   background-color: var(--bgcolor1);
+   color: white;
+}
+.nuevoBG1 { background-color: var(--bgcolor1); }
+
+.detalle { background-color: var(--bgcolor2); }
+.nuevoBG2 { background-color: var(--bgcolor2); }
+
+.fila:hover {
+   background-color: #117a8B;
+   color: white;
+   cursor: pointer;
+}
+.cabecera.sombra{
+  border-radius: 10px;
+}
+.dropdown-menu.bg-dark .dropdown-item{
+  color: #fff;
+}
+.dropdown-menu.bg-dark .dropdown-item:hover{
+  background: rgba(255,255,255,0.12);
+}

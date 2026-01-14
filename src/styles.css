@@ -105,6 +105,9 @@
   text-decoration-skip-ink: none;
   background-color: lightgray;
 }
+.cabecera.sombra{
+  border-radius: 10px;
+}
 
 /* === Lista popup === */
 .popLista {

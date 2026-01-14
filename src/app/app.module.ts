@@ -291,6 +291,7 @@ import { CvClientesComponent } from './componentes/coactivas/carteras-vencidas/c
 import { AnularConvenioComponent } from './componentes/convenios/anular-convenio/anular-convenio.component';
 import { ReportesjrComponent } from './componentes/reportesjr/reportesjr.component';
 import { RutaToLectorComponent } from './componentes/rutas/ruta-to-lector/ruta-to-lector.component';
+import { SimuladordosComponent } from './componentes/pliego24/simuladordos/simuladordos.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
@@ -533,6 +534,7 @@ import { RutaToLectorComponent } from './componentes/rutas/ruta-to-lector/ruta-t
     AddAsientoComponent,
     AddBenextranComponent,
     SimulacionComponent,
+    SimuladordosComponent,
     AddLiquiacfpComponent,
     ModificarTramitenuevoComponent,
     AddAguatramiteComponent,
