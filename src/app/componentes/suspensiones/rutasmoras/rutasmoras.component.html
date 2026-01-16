@@ -1,153 +1,166 @@
+<!-- CABECERA -->
 <div class="content mt-1 pt-1 pl-0">
-    <div class="container-fluid">
-        <div class="row m-0 px-0 py-1 justify-content-start cabecera border sombra">
-            <div class="col-sm-8">
-                <h6 class="m-0 font-weight-bold">{{ titulo }}</h6>
-            </div>
-            <div class="col-sm-2">
-                <input type="text" class="form-control form-control-sm text-center" placeholder="Filtrar..."
-                    [(ngModel)]="filterTerm" />
-            </div>
-            <div class="btn-group ml-auto mx-0">
-                <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
-                    aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
-                </button>
-                <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-                    <button class="dropdown-item" type="button" data-toggle="modal" (click)="impDatosRutaTable()"
-                        data-target="#imprimir">
-                        <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
-                    <button class="dropdown-item text-muted" type="button" disabled><i
-                            class="bi-file-earmark-arrow-down text-muted"></i>
-                        <span class="text-muted">&nbsp;
-                            Exportar</span></button>
-                </div>
-            </div>
+  <div class="container-fluid">
+    <div class="row m-0 px-2 py-2 align-items-center cabecera border sombra">
+      <div class="col-sm-5">
+        <h6 class="m-0 font-weight-bold">{{ titulo }}</h6>
+      </div>
 
-            <div class="col-sm text-right">
-                <button class="bg-transparent border-0" type="submit" [routerLink]="['/suspensiones']">
-                    <i class="bi-arrow-left-circle text-white icoRegresar"></i>
-                </button>
-            </div>
-
+      <!-- FILTRO -->
+      <div class="col-sm-3 ml-auto">
+        <div class="input-group input-group-sm">
+          <div class="input-group-prepend">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+          </div>
+          <input type="text" class="form-control text-center" placeholder="Filtrar..." [(ngModel)]="filterTerm" />
         </div>
+      </div>
+
+      <!-- BOTON GLOBAL -->
+      <div class="col-sm-auto">
+        <button class="btn btn-sm btn-success"
+                [disabled]="selectedCount === 0"
+                (click)="procesarSeleccionados()"
+                data-toggle="modal"
+                data-target="#impSeleccionados">
+          <i class="bi bi-printer"></i>
+          Imprimir seleccionados ({{ selectedCount }})
+        </button>
+      </div>
+
+      <!-- REGRESAR -->
+      <div class="col-sm-auto text-right">
+        <button class="bg-transparent border-0" [routerLink]="['/suspensiones']">
+          <i class="bi-arrow-left-circle text-white icoRegresar"></i>
+        </button>
+      </div>
     </div>
+  </div>
 </div>
+
+<!-- TABLA -->
 <div class="container-fluid mt-3">
-    <div class="row">
-        <div class="col-sm">
-            <div class="card">
-                <div class="card-body table-responsive">
-                    <table id="datos-ruta" class="table table-xs table-hover table-striped table-bordered">
-                        <thead class="text-center">
-                            <tr>
-                                <th>Nro</th>
-                                <th (click)="sortData('cuenta')">Cuenta</th>
-                                <th>Cliente</th>
-                                <th>Identificación</th>
-                                <th (click)="sortData('num_facturas')">Deudas</th>
-                                <th>Subtotal</th>
-                                <th>Interes</th>
-                                <th (click)="sortData('total')">Total</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let abonado of datosCuentas | filter: filterTerm; let i = index">
-                                <td class="text-center">{{i+1}}</td>
-                                <td class="text-center">{{abonado.cuenta}}</td>
-                                <td>{{abonado.nombre}}</td>
-                                <td class="text-center">{{abonado.cedula}}</td>
-                                <td class="text-center">
-                                    {{abonado.num_facturas}}
-                                </td>
-                                <td class="text-right">{{abonado.subtotal.toFixed(2)}}</td>
-                                <td class="text-right">{{abonado.intereses.toFixed(2)}}</td>
-                                <td class="text-right">{{abonado.total.toFixed(2)}}</td>
-                                <td class="text-center">
-                                    <div class="btn-group ml-auto mt-0">
-                                        <button type="button" class="bg-transparent border-0 dropdown-toggle text-green"
-                                            data-toggle="dropdown" aria-expanded="false"> <i
-                                                class="bi bi-menu-down"></i>
-                                        </button>
-                                        <div class="dropdown-menu dropdown-menu-right roboto">
-                                            <button class="dropdown-item text-muted" type="button">
-                                                <i class="bi bi-sliders"></i>&nbsp; Suspender</button>
-                                            <button class="dropdown-item text-muted" type="button" data-toggle="modal"
-                                                (click)="setDatosImprimir(abonado.cuenta)"
-                                                data-target="#impNotificacion">
-                                                <i class="bi bi-printer"></i>&nbsp; Notificación</button>
-                                            <button class="dropdown-item text-muted" type="button" data-toggle="modal"
-                                                data-target="#detallesAbonado"
-                                                (click)="detallesAbonado(abonado.cuenta)">
-                                                <i class="fa fa-info" aria-hidden="true"></i>&nbsp; Detalles</button>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+  <div class="card sombra">
+    <div class="card-body table-responsive">
+      <table id="datos-ruta" class="table table-sm table-hover table-striped table-bordered">
+        <thead class="text-center">
+          <tr>
+            <th style="width:40px">
+              <input type="checkbox" (change)="toggleSelectAll($event)" />
+            </th>
+            <th>#</th>
+            <th (click)="sortData('cuenta')">Cuenta</th>
+            <th>Cliente</th>
+            <th>Identificación</th>
+            <th (click)="sortData('num_facturas')">Deudas</th>
+            <th>Subtotal</th>
+            <th>Interés</th>
+            <th (click)="sortData('total')">Total</th>
+            <th style="min-width:300px">Selección</th>
+          </tr>
+        </thead>
 
+        <tbody>
+          <tr *ngFor="let abonado of datosCuentas | filter: filterTerm; let i = index">
+            <!-- SELECT -->
+            <td class="text-center align-middle">
+              <input type="checkbox"
+                     [(ngModel)]="rowUI[abonado.cuenta].selected"
+                     (ngModelChange)="onRowSelectedChange(abonado)" />
+            </td>
+
+            <td class="text-center">{{ i + 1 }}</td>
+            <td class="text-center">{{ abonado.cuenta }}</td>
+            <td>{{ abonado.nombre }}</td>
+            <td class="text-center">{{ abonado.cedula }}</td>
+            <td class="text-center">{{ abonado.num_facturas }}</td>
+            <td class="text-right">{{ abonado.subtotal?.toFixed(2) }}</td>
+            <td class="text-right">{{ abonado.intereses?.toFixed(2) }}</td>
+            <td class="text-right font-weight-bold">{{ abonado.total?.toFixed(2) }}</td>
+
+            <!-- CONTROLES VISIBLES -->
+            <td class="align-middle">
+              <div class="border rounded p-2 bg-light" *ngIf="rowUI[abonado.cuenta] as ui">
+
+                <!-- NOTIFICAR -->
+                <div class="custom-control custom-checkbox mb-2">
+                  <input type="checkbox"
+                         class="custom-control-input"
+                         [id]="'notif_' + abonado.cuenta"
+                         [(ngModel)]="ui.notificar"
+                         [disabled]="!ui.selected" />
+                  <label class="custom-control-label" [for]="'notif_' + abonado.cuenta">
+                    Notificar
+                  </label>
+                </div>
+
+                <!-- ACCION -->
+                <div class="custom-control custom-radio">
+                  <input type="radio"
+                         class="custom-control-input"
+                         [id]="'susp_' + abonado.cuenta"
+                         name="accion_{{ abonado.cuenta }}"
+                         value="SUSPENDER"
+                         [(ngModel)]="ui.accion"
+                         [disabled]="!ui.selected" />
+                  <label class="custom-control-label" [for]="'susp_' + abonado.cuenta">
+                    Suspender
+                  </label>
+                </div>
+
+                <div class="custom-control custom-radio">
+                  <input type="radio"
+                         class="custom-control-input"
+                         [id]="'ret_' + abonado.cuenta"
+                         name="accion_{{ abonado.cuenta }}"
+                         value="RETIRAR_MEDIDOR"
+                         [(ngModel)]="ui.accion"
+                         [disabled]="!ui.selected" />
+                  <label class="custom-control-label" [for]="'ret_' + abonado.cuenta">
+                    Retirar medidor
+                  </label>
+                </div>
+
+                <small class="text-muted d-block mt-2">
+                  * Activa la selección para habilitar opciones.
+                </small>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- RESUMEN -->
+      <div class="mt-2 d-flex justify-content-between">
+        <div class="text-muted">
+          Seleccionados: <b>{{ selectedCount }}</b>
+          | Notificar: <b>{{ notifyCount }}</b>
         </div>
 
-        <!-- Modal -->
-        <div class="modal fade" id="impNotificacion" data-backdrop="static" data-keyboard="false" tabindex="-1"
-            aria-labelledby="impNotificacionLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="impNotificacionLabel">Imprimir notificacion de pago</h5>
-                    </div>
-                    <div class="modal-body">
-                        <iframe id="pdfViewer" src="" width="100%" height="600px"></iframe>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">Cancelar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Modal -->
-        <div class="modal fade" id="detallesAbonado" data-backdrop="static" data-keyboard="false" tabindex="-1"
-            aria-labelledby="detallesAbonadoLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xl">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="detallesAbonadoLabel">Detalles abonados</h5>
-                    </div>
-                    <div class="modal-body">
+        <button class="btn btn-sm btn-outline-secondary"
+                (click)="clearSelection()"
+                [disabled]="selectedCount === 0">
+          Limpiar selección
+        </button>
+      </div>
 
-                        <div class="col-sm text-center" *ngIf="!cuenta;else name">
-                            <i class="fa fa-spinner" aria-hidden="true"></i>
-                        </div>
-                        <ng-template #name>
-                            <app-detalles-abonado [cuenta]="cuenta"></app-detalles-abonado>
-                        </ng-template>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-sm btn-success" data-dismiss="modal"
-                            (click)="cuenta = 0">Cancelar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
+  </div>
 </div>
 
-<!-- MODAL Imprimir-->
-<div class="modal fade" id="imprimir" tabindex="-1" aria-labelledby="imprimirLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-{{modalSize}}">
-        <div class="modal-content border">
-            <div class='modal-header py-2 justify-content-center cabecera'>
-                <h5 class='modal-title font-weight-bold' id='ModalLabel'>Imprimir</h5>
-            </div>
-            <div class='modal-body cuerpo'>
-                    <iframe id="pdf_Viewer" src="" width="100%" height="600px"></iframe>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">Cancelar</button>
-            </div>
-        </div>
+<!-- MODAL: PDF de seleccionados -->
+<div class="modal fade" id="impSeleccionados" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Impresión - Seleccionados</h5>
+      </div>
+      <div class="modal-body">
+        <iframe id="pdfSeleccionadosViewer" src="" width="100%" height="600px"></iframe>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-sm btn-success" data-dismiss="modal">Cerrar</button>
+      </div>
     </div>
+  </div>
 </div>

@@ -121,3 +121,16 @@ th {
 th:hover {
   background-color: #ddd;
 }
+
+.dropdown-menu {
+  border-radius: 12px;
+}
+
+.table thead th {
+  user-select: none;
+  cursor: pointer;
+}
+
+.btn-outline-success {
+  border-radius: 10px;
+}

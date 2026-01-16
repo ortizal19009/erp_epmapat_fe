@@ -1,363 +1,332 @@
+/* =========================================================
+   MEJORAS (sin cambiar tu idea/estilo)
+   - Orden: variables > base > utilidades > componentes
+   - Evita duplicados (dropdown-item estaba 2 veces)
+   - Evita que td:hover mate el cursor-pointer de filas
+   - Mejora sticky, overflow del tooltip (.description), sombras
+   - Mantiene tus colores/gradientes
+========================================================= */
+
 /* === Fuentes === */
 @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400&family=IBM+Plex+Mono&display=swap");
 
+/* === Variables (fallbacks seguros) === */
+:root{
+  --bgcolor1: #2c3e50;
+  --bgcolor2: #f8f9fa;
+  --sticky-offset: 0px;
+  --shadow-dark: 0 0 10px #000000bf;
+  --shadow-soft: 0 8px 25px rgba(0,0,0,.15);
+  --radius: 10px;
+  --hover-row: #117a8b;
+  --text-dark: #2c3e50;
+}
+
+/* === Base / Reset util === */
+.roboto, .robotobig, .robotobold, .robotosmall, .robotomini, .robotolist, .dropdown-item, .popLista{
+  font-family: "Roboto", sans-serif;
+}
+
+.sombra{ box-shadow: var(--shadow-dark); }
+.sombraClara{ box-shadow: 0 0 10px #fff; }
+.cabecera.sombra{ border-radius: var(--radius); }
+
 /* === Utilidades === */
-.uncheck-circle {
-  color: #ff0a0a;
-}
-.upperCase {
-  text-transform: uppercase;
-}
-.center-form {
-  width: 800px;
-  margin: 0 auto;
-}
-.pdfViewer {
-  width: 100%;
-  height: 700px;
-}
-.card-size {
-  height: 750px;
-  width: 100%;
-}
-.hoverable-row:hover {
+.uncheck-circle{ color: #ff0a0a; }
+.upperCase{ text-transform: uppercase; }
+.center-form{ width: 800px; margin: 0 auto; }
+.pdfViewer{ width: 100%; height: 700px; }
+.card-size{ height: 750px; width: 100%; }
+.selected{ background-color: #cfe8fc; }
+.cursor{ cursor: pointer; }
+.green{ color: green; }
+.red{ color: red; }
+.transparente{ opacity: 0; }
+.icoRegresar{ font-size: 20px; }
+
+.hoverable-row:hover{
   background-color: #f0f0f0;
   cursor: pointer;
 }
-.selected {
-  background-color: #cfe8fc;
-}
+
+/* === Truncado (mejorado: tooltip “seguro”) === */
 .truncate-text,
-.description {
+.description{
   max-width: 200px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   vertical-align: middle;
 }
-.description:hover {
-  overflow: visible;
+.description{
+  position: relative;
+}
+.description:hover{
   white-space: normal;
-  z-index: 1;
+  overflow: visible;
+  z-index: 50;
+  padding: 2px 6px;
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.15);
 }
-.icoRegresar {
-  font-size: 20px;
-}
-.sombra {
-  box-shadow: 0 0 10px #000000bf;
-}
-.sombraClara {
-  box-shadow: 0 0 10px #fff;
-}
-.fila:hover {
-  background-color: #117a8b;
-  color: #fff;
-}
-.dropdown-item {
-  font-family: "Roboto", sans-serif;
-  font-size: small;
-  color: #fff;
-}
-.dropdown-item:hover,
-.dropdown-item:focus {
-  background-color: #117a8b;
-  color: #fff;
-}
-.fantacy {
-  font-weight: bold;
-  color: yellow;
-  text-shadow: #e40303 0.2em 0.2em 0.3em;
-}
-.fantacysombra {
-  font-weight: bold;
-  color: #080800;
-  text-shadow: #312d2d 0.1em 0.1em 0.1em;
-}
-.fantacyblack {
-  font-weight: bold;
-  color: yellow;
-  text-shadow: #000 0.1em 0.1em 0.1em;
-}
-.fantacygreen {
-  font-weight: bold;
-  color: #000;
-  text-shadow: yellowgreen 0.1em 0.1em 0.1em;
-}
-.fontwarning {
-  font-weight: bold;
-  color: #fd0202;
-  text-shadow: #000 0.1em 0.1em 0.2em;
-}
-.transparente {
-  opacity: 0;
-}
-.cursor {
-  cursor: pointer;
-}
-.green {
-  color: green;
-}
-.red {
-  color: red;
-}
-.tachado {
+
+/* === Tachado === */
+.tachado{
   text-decoration: line-through solid 2px rgb(77, 76, 76);
   text-decoration-skip-ink: none;
   background-color: lightgray;
 }
-.cabecera.sombra{
-  border-radius: 10px;
-}
 
-/* === Lista popup === */
-.popLista {
-  background-color: #ffc107;
-  font-family: "Roboto", sans-serif;
-  font-size: small;
+/* === Fancy === */
+.fantacy{
+  font-weight: bold;
+  color: yellow;
+  text-shadow: #e40303 0.2em 0.2em 0.3em;
 }
-.popLista button {
+.fantacysombra{
+  font-weight: bold;
+  color: #080800;
+  text-shadow: #312d2d 0.1em 0.1em 0.1em;
+}
+.fantacyblack{
+  font-weight: bold;
+  color: yellow;
+  text-shadow: #000 0.1em 0.1em 0.1em;
+}
+.fantacygreen{
   font-weight: bold;
   color: #000;
+  text-shadow: yellowgreen 0.1em 0.1em 0.1em;
 }
-.popLista button:hover {
-  font-weight: normal;
-  color: #fff;
-}
-.nav-link.disabled {
-  opacity: 0.3;
-}
-.pad0 td,
-.pad0 th {
-  padding-top: 0;
-  padding-bottom: 0;
-}
-.impexp:hover {
-  cursor: pointer;
-  color: #7d848b;
-}
-
-/* === Tipografías === */
-.robotobig {
-  font-family: "Roboto", sans-serif;
-  font-size: 18px;
-}
-.roboto {
-  font-family: "Roboto", sans-serif;
-  font-size: 14px;
-}
-.robotobold {
-  font-family: "Roboto", sans-serif;
-  font-size: 15px;
+.fontwarning{
   font-weight: bold;
-}
-.robotosmall {
-  font-family: "Roboto", sans-serif;
-  font-size: 13px;
-}
-.robotomini {
-  font-family: "Roboto", sans-serif;
-  font-size: 11px;
-}
-.robotolist {
-  font-family: "Roboto", sans-serif;
-  font-size: 11px;
-  background-color: #343a40;
-  color: #fff;
-}
-.force-warning {
-  color: #ffc107 !important;
+  color: #fd0202;
+  text-shadow: #000 0.1em 0.1em 0.2em;
 }
 
-/* === SweetAlert retro === */
-.retro {
-  font-family: "IBM Plex Mono", monospace;
-  background-color: #000;
-  color: #0f0;
-  font-size: 0.8rem;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9);
-}
-.swal2-popup .terminal-footer {
-  position: absolute;
-  right: 10px;
-  bottom: 5px;
-  font-size: 0.75rem;
-  color: #0f0;
-}
-.eliminar {
-  background-color: #17a2b8;
-  color: #fff;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9);
-}
-.noeliminar {
-  background-color: #ac3b3b;
-  color: #fff;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9);
-  font-family: "Roboto", sans-serif;
-}
-
-/* SweetAlert error blanco */
-.swal2-popup .swal2-error {
-  border-color: #fff !important;
-  background-color: transparent !important;
-}
-.swal2-popup .swal2-error .swal2-x-mark-line-left,
-.swal2-popup .swal2-error .swal2-x-mark-line-right {
-  background-color: #fff !important;
-}
-
-/* === Tablas: header/columna sticky + responsive === */
-.cabecera {
+/* =========================================================
+   TABLAS
+========================================================= */
+.cabecera{
   background-color: var(--bgcolor1);
   color: #fff;
 }
-.nuevoBG1 {
-  background-color: var(--bgcolor1);
-}
-.detalle {
-  background-color: var(--bgcolor2);
-}
-.nuevoBG2 {
+.detalle{
   background-color: var(--bgcolor2);
 }
 
-td:hover {
-  cursor: default;
-} /* evita mano sobre toda la celda */
-
-.table-fixed-head {
+.table-fixed-head{
   max-height: 80vh;
   overflow: auto;
   overscroll-behavior: contain;
 }
 
 .table-no-wrap th,
-.table-no-wrap td {
+.table-no-wrap td{
   white-space: nowrap;
   vertical-align: middle;
 }
 
-/* thead sticky */
-.table-fixed-head thead th {
+/* thead sticky (más robusto) */
+.table-fixed-head thead th,
+.table-sticky-head thead th{
   position: sticky;
-  top: 0;
+  top: var(--sticky-offset);
   z-index: 2;
-  background: var(--bgcolor1, #f8f9fa);
+  background: var(--bgcolor1);
   color: #fff;
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 0 rgba(0,0,0,.06);
 }
-thead.cabecera th {
+thead.cabecera th{
   background: inherit;
   color: inherit;
 }
 
 /* primera columna sticky */
 .table-no-wrap th:first-child,
-.table-no-wrap td:first-child {
+.table-no-wrap td:first-child{
   position: sticky;
   left: 0;
   z-index: 3;
-  background: #fff; /* color sólido seguro para celdas */
-  box-shadow: 2px 0 0 rgba(0, 0, 0, 0.06);
+  background: #fff;
+  box-shadow: 2px 0 0 rgba(0,0,0,.06);
 }
-.table-no-wrap thead th:first-child {
+.table-no-wrap thead th:first-child{
   z-index: 4;
-  background: var(--bgcolor1, #f8f9fa);
-  color: #fff;
-}
-.fila:hover td:first-child {
-  background-color: #117a8b;
+  background: var(--bgcolor1);
   color: #fff;
 }
 
-/* Sticky respecto al viewport (si lo usas en otra vista) */
-:root {
-  --sticky-offset: 0px;
-} /* ej: 56px si hay navbar fixed */
-.table-sticky-head thead th {
-  position: sticky;
-  top: var(--sticky-offset);
-  z-index: 2;
-  background: var(--bgcolor1, #f8f9fa);
+/* Hover fila (sin matar cursor-pointer) */
+.fila:hover{
+  background-color: var(--hover-row);
   color: #fff;
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.06);
 }
+.fila:hover td:first-child{
+  background-color: var(--hover-row);
+  color: #fff;
+}
+
+/* IMPORTANTE:
+   Antes tenías: td:hover { cursor: default; }
+   Eso elimina el cursor “mano” aunque la fila sea clickeable.
+   Mejor: solo default cuando NO sea clickeable.
+*/
+td:hover{ cursor: inherit; }
+tr:not(.cursor-pointer):not(.fila) td:hover{ cursor: default; }
 
 /* Imprimir: desactivar sticky */
-@media print {
-  .table-fixed-head {
+@media print{
+  .table-fixed-head{
     max-height: none;
     overflow: visible;
   }
   .table-fixed-head thead th,
   .table-no-wrap th:first-child,
-  .table-no-wrap td:first-child {
+  .table-no-wrap td:first-child{
     position: static;
     box-shadow: none;
   }
 }
-/*
-ESTILOS DE TRANFERENCIAS
-*/
-/* ===== ESTADO DE CAJA CON COLORES ===== */
-.badge-danger {
+
+/* =========================================================
+   SWEETALERT RETRO
+========================================================= */
+.retro{
+  font-family: "IBM Plex Mono", monospace;
+  background-color: #000;
+  color: #0f0;
+  font-size: 0.8rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,.9);
+}
+.swal2-popup .terminal-footer{
+  position: absolute;
+  right: 10px;
+  bottom: 5px;
+  font-size: 0.75rem;
+  color: #0f0;
+}
+.eliminar{
+  background-color: #17a2b8;
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,.9);
+}
+.noeliminar{
+  background-color: #ac3b3b;
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,.9);
+}
+
+/* SweetAlert error blanco */
+.swal2-popup .swal2-error{
+  border-color: #fff !important;
+  background-color: transparent !important;
+}
+.swal2-popup .swal2-error .swal2-x-mark-line-left,
+.swal2-popup .swal2-error .swal2-x-mark-line-right{
+  background-color: #fff !important;
+}
+
+/* =========================================================
+   POP LISTA
+========================================================= */
+.popLista{
+  background-color: #ffc107;
+  font-size: small;
+}
+.popLista button{
+  font-weight: bold;
+  color: #000;
+}
+.popLista button:hover{
+  font-weight: normal;
+  color: #fff;
+}
+
+.nav-link.disabled{ opacity: .3; }
+
+.pad0 td,
+.pad0 th{
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.impexp:hover{
+  cursor: pointer;
+  color: #7d848b;
+}
+
+/* =========================================================
+   TIPOGRAFÍAS (se mantiene tu escala)
+========================================================= */
+.robotobig{ font-size: 18px; }
+.roboto{ font-size: 14px; }
+.robotobold{ font-size: 15px; font-weight: bold; }
+.robotosmall{ font-size: 13px; }
+.robotomini{ font-size: 11px; }
+.robotolist{
+  font-size: 11px;
+  background-color: #343a40;
+  color: #fff;
+}
+.force-warning{ color: #ffc107 !important; }
+
+/* =========================================================
+   BADGES (estado caja)
+========================================================= */
+.badge-danger{
   background: linear-gradient(135deg, #dc3545, #c82333);
-  color: white;
-  padding: 0.4rem 0.8rem;
-  font-size: 0.75rem;
+  color: #fff;
+  padding: .4rem .8rem;
+  font-size: .75rem;
   font-weight: 600;
 }
-
-.badge-success {
+.badge-success{
   background: linear-gradient(135deg, #28a745, #20c997);
-  color: white;
-  padding: 0.4rem 0.8rem;
-  font-size: 0.75rem;
+  color: #fff;
+  padding: .4rem .8rem;
+  font-size: .75rem;
   font-weight: 600;
 }
 
-/* ===== NOTIFICACIÓN FLOTANTE ===== */
-.floating-notification {
+/* =========================================================
+   NOTIFICACIÓN FLOTANTE
+========================================================= */
+.floating-notification{
   position: fixed;
   bottom: 25px;
   left: 25px;
   z-index: 1060;
   max-width: 280px;
-  animation: slideInLeft 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  animation: slideInLeft .4s cubic-bezier(.25,.46,.45,.94);
 }
-
-.notification-card {
+.notification-card{
   background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
   border-radius: 12px;
   padding: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 32px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.08);
   border-left: 4px solid #dc3545;
   position: relative;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: all .3s ease;
 }
-
-.notification-card::before {
+.notification-card::before{
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 0; left: 0; right: 0;
   height: 2px;
   background: linear-gradient(90deg, #dc3545, #e35d6a);
 }
-
-.notification-card:hover {
+.notification-card:hover{
   transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 12px 40px rgba(0,0,0,.15), 0 4px 12px rgba(0,0,0,.1);
 }
-
-.notification-content {
+.notification-content{
   display: flex;
   align-items: center;
   gap: 12px;
 }
-
-.notification-icon {
+.notification-icon{
   width: 40px;
   height: 40px;
   background: linear-gradient(135deg, #dc3545, #e35d6a);
@@ -365,240 +334,161 @@ ESTILOS DE TRANFERENCIAS
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #fff;
   font-size: 1.2rem;
   flex-shrink: 0;
 }
-
-.notification-text {
-  flex: 1;
-}
-
-.notification-title {
-  font-size: 0.8rem;
+.notification-title{
+  font-size: .8rem;
   font-weight: 600;
   color: #6c757d;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: .5px;
   margin-bottom: 2px;
 }
-
-.notification-value {
+.notification-value{
   font-size: 1rem;
   font-weight: 700;
   color: #dc3545;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
+}
+@keyframes slideInLeft{
+  from{ opacity: 0; transform: translateX(-100px); }
+  to{ opacity: 1; transform: translateX(0); }
 }
 
-@keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-100px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-/* ===== TABLA CON HEADER FIJADO ===== */
-.table-scroll-container {
+/* =========================================================
+   TABLA SCROLL + STICKY HEADER (tu idea, más consistente)
+========================================================= */
+.table-scroll-container{
   position: relative;
   max-height: 65vh;
   overflow: auto;
   border-radius: 8px;
 }
-
-.sticky-header {
+.sticky-header{
   position: sticky;
-  top: 0;
+  top: var(--sticky-offset);
   z-index: 20;
   background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
   backdrop-filter: blur(10px);
 }
-
-.sticky-header th {
+.sticky-header th{
   position: sticky;
-  top: 0;
+  top: var(--sticky-offset);
   background: inherit;
   border-bottom: 2px solid #1a252f;
   padding: 12px 8px;
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: .8rem;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: white;
+  letter-spacing: .5px;
+  color: #fff;
 }
 
 /* Scrollbar personalizado */
-.table-scroll-container::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.table-scroll-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
-}
-
-.table-scroll-container::-webkit-scrollbar-thumb {
+.table-scroll-container::-webkit-scrollbar{ width: 8px; height: 8px; }
+.table-scroll-container::-webkit-scrollbar-track{ background: #f1f1f1; border-radius: 4px; }
+.table-scroll-container::-webkit-scrollbar-thumb{
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 4px;
 }
-
-.table-scroll-container::-webkit-scrollbar-thumb:hover {
+.table-scroll-container::-webkit-scrollbar-thumb:hover{
   background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
 }
 
-/* ===== ALINEACIÓN DE FORMULARIO ===== */
-.card-body .row.align-items-end {
-  align-items: flex-end !important;
+/* =========================================================
+   FORM / BOTONES
+========================================================= */
+.card-body .row.align-items-end{ align-items: flex-end !important; }
+.card-body .d-flex.align-items-end.h-100{ height: 100%; align-items: flex-end; }
+.form-label{ margin-bottom: 4px; }
+.btn-sm{ margin-bottom: 1px; }
+
+/* =========================================================
+   DROPDOWN (unificado, sin duplicados)
+========================================================= */
+.dropdown-menu{
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  box-shadow: var(--shadow-soft);
+  padding: .5rem 0;
+  animation: dropdownFadeIn .3s ease;
+}
+.dropdown-divider{
+  border-color: #e9ecef;
+  margin: .25rem 0;
+}
+.dropdown-item{
+  font-size: small;
+  color: var(--text-dark) !important;
+  font-weight: 500;
+  padding: .5rem 1rem;
+  transition: all .2s ease;
+  border-bottom: 1px solid #f8f9fa;
+}
+.dropdown-item:last-child{ border-bottom: none; }
+.dropdown-item i{
+  color: var(--text-dark);
+  transition: color .2s ease;
+  width: 18px;
+}
+.dropdown-item:hover,
+.dropdown-item:focus{
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  color: #fff !important;
+}
+.dropdown-item:hover i{ color: #fff !important; }
+.dropdown-item:active{
+  background: linear-gradient(135deg, #2980b9 0%, #1f618d 100%);
+  color: #fff !important;
+}
+.dropdown-item:disabled{
+  background-color: #f8f9fa;
+  color: #6c757d !important;
+  cursor: not-allowed;
+  opacity: .6;
+}
+.dropdown-item:disabled:hover{
+  background-color: #f8f9fa;
+  color: #6c757d !important;
+  transform: none;
+}
+.dropdown-item:disabled i{ color: #6c757d; }
+
+@keyframes dropdownFadeIn{
+  from{ opacity: 0; transform: translateY(-10px); }
+  to{ opacity: 1; transform: translateY(0); }
 }
 
-.card-body .d-flex.align-items-end.h-100 {
-  height: 100%;
-  align-items: flex-end;
+/* Estados específicos */
+.dropdown-item.text-success{ color: #28a745 !important; }
+.dropdown-item.text-warning{ color: #ffc107 !important; }
+.dropdown-item.text-danger{ color: #dc3545 !important; }
+.dropdown-item.text-success:hover,
+.dropdown-item.text-warning:hover,
+.dropdown-item.text-danger:hover{
+  color: #fff !important;
 }
 
-.form-label {
-  margin-bottom: 4px;
-}
-
-.btn-sm {
-  margin-bottom: 1px;
-}
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 768px) {
-  .floating-notification {
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+@media (max-width: 768px){
+  .floating-notification{
     bottom: 15px;
     left: 15px;
     right: 15px;
     max-width: none;
   }
-
-  .badge-danger,
-  .badge-success {
-    font-size: 0.7rem;
-    padding: 0.3rem 0.6rem;
+  .badge-danger, .badge-success{
+    font-size: .7rem;
+    padding: .3rem .6rem;
   }
-}
-
-/* Resto de estilos se mantienen igual */
-/* Dropdown con letras negras */
-.dropdown-menu {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  padding: 0.5rem 0;
-}
-
-.dropdown-item {
-  color: #2c3e50 !important;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
-  transition: all 0.3s ease;
-  border-bottom: 1px solid #f8f9fa;
-}
-
-.dropdown-item:last-child {
-  border-bottom: none;
-}
-
-.dropdown-item:hover {
-  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-  color: white !important;
-  transform: translateX(5px);
-}
-
-.dropdown-item:hover i {
-  color: white !important;
-}
-
-.dropdown-item:active {
-  background: linear-gradient(135deg, #2980b9 0%, #1f618d 100%);
-  color: white !important;
-}
-
-.dropdown-item i {
-  color: #2c3e50;
-  transition: color 0.3s ease;
-  width: 18px;
-}
-
-.dropdown-item:disabled {
-  background-color: #f8f9fa;
-  color: #6c757d !important;
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.dropdown-item:disabled:hover {
-  background-color: #f8f9fa;
-  color: #6c757d !important;
-  transform: none;
-}
-
-.dropdown-item:disabled i {
-  color: #6c757d;
-}
-
-/* Separador del dropdown */
-.dropdown-divider {
-  border-color: #e9ecef;
-  margin: 0.25rem 0;
-}
-
-/* Efectos adicionales para mejor UX */
-.dropdown-menu {
-  animation: dropdownFadeIn 0.3s ease;
-}
-
-@keyframes dropdownFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
+  .dropdown-menu{ min-width: 200px; }
+  .dropdown-item{
+    padding: .75rem 1rem;
+    font-size: .9rem;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .dropdown-menu {
-    min-width: 200px;
-  }
-
-  .dropdown-item {
-    padding: 0.75rem 1rem;
-    font-size: 0.9rem;
-  }
-}
-
-/* Estados específicos para diferentes tipos de items */
-.dropdown-item.text-success {
-  color: #28a745 !important;
-}
-
-.dropdown-item.text-success:hover {
-  color: white !important;
-}
-
-.dropdown-item.text-warning {
-  color: #ffc107 !important;
-}
-
-.dropdown-item.text-warning:hover {
-  color: white !important;
-}
-
-.dropdown-item.text-danger {
-  color: #dc3545 !important;
-}
-
-.dropdown-item.text-danger:hover {
-  color: white !important;
 }
