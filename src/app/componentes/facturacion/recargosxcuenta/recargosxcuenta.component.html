@@ -1,0 +1,293 @@
+<!-- =======================
+     CABECERA (solo filtro local)
+======================== -->
+<div class="content mt-1 pt-1">
+  <div class="container-fluid">
+
+    <div class="row m-0 px-2 py-2 align-items-center cabecera border sombra">
+
+      <!-- TÍTULO -->
+      <div class="col-md-3 col-sm-12">
+        <h6 class="m-0 font-weight-bold">{{ titulo }}</h6>
+      </div>
+
+      <!-- SELECT EMISIONES -->
+      <div class="col-md-3 col-sm-12 mt-2 mt-md-0">
+        <select class="form-control form-control-sm" [(ngModel)]="emisionSelected">
+          <option *ngFor="let emision of _emisiones" [ngValue]="emision">
+            {{ emision.emision }}
+          </option>
+        </select>
+      </div>
+
+      <!-- FILTRO LOCAL -->
+      <div class="col-md-3 col-sm-12 mt-2 mt-md-0 ml-md-auto">
+        <div class="input-group input-group-sm">
+          <div class="input-group-prepend">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+          </div>
+          <input type="text" class="form-control text-center" placeholder="Filtrar..." [(ngModel)]="filterTerm" />
+        </div>
+      </div>
+
+      <!-- BOTÓN ACCIÓN -->
+      <div class="col-md-auto col-sm-12 mt-2 mt-md-0 text-center">
+        <button class="btn btn-sm btn-success" [disabled]="selectedCount === 0" (click)="procesarSeleccionados()"
+          data-toggle="modal" data-target="#addRecargo">
+          <i class="bi bi-printer"></i>
+          Cargar valores ({{ selectedCount }})
+        </button>
+      </div>
+
+      <!-- MENÚ DE OPCIONES -->
+      <div class="col-md-auto col-sm-12 mt-2 mt-md-0 text-center">
+        <div class="btn-group">
+          <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
+            aria-expanded="false">
+            <i class="bi-menu-button-wide text-white"></i>
+          </button>
+
+          <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+            <button class="dropdown-item" type="button" data-toggle="modal" data-target="#addRecargo">
+              <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo
+            </button>
+            <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
+              <i class="bi bi-printer"></i>&nbsp; Imprimir
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+
+<!-- =======================
+     TABLA PRINCIPAL
+======================== -->
+<div class="container-fluid">
+  <div class="row mb-0">
+    <div class="col-md-12">
+      <table class="table table-hover table-bordered table-sm sombra">
+        <thead>
+          <tr class="text-center font-weight-bold cabecera">
+            <th style="width:40px;"></th>
+            <th>Cuenta</th>
+            <th>Cliente</th>
+            <th class="text-right">Recargo</th>
+          </tr>
+        </thead>
+
+        <tbody class="detalle">
+          <tr class="fila" *ngFor="let cuenta of _recargosxcuenta | filter: filterTerm">
+            <td class="text-center">
+              <input type="checkbox" [(ngModel)]="cuenta.selected" />
+            </td>
+            <td class="text-center">{{ cuenta.numeroCuenta }}</td>
+            <td>{{ cuenta.nombreCliente }}</td>
+            <td class="text-right">{{ cuenta.recargo | number: '1.2-2' }}</td>
+          </tr>
+
+          <tr *ngIf="(_recargosxcuenta.length || 0) === 0">
+            <td colspan="4" class="text-center text-muted py-3">No hay resultados</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- =======================
+     MODAL: ABONADOS
+     - filtros en 2 filas (no amontonado)
+     - tabla con header sticky
+======================== -->
+<div class="modal fade" id="addRecargo" data-backdrop="static" data-keyboard="false" tabindex="-1"
+  aria-labelledby="addRecargoLabel" aria-hidden="true">
+
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <!-- HEADER -->
+      <div class="modal-header cabecera text-white">
+        <div>
+          <h5 class="modal-title mb-0" id="addRecargoLabel">Añadir recargos a cuentas</h5>
+          <small class="text-white-50">Filtra, selecciona abonados y guarda la selección</small>
+        </div>
+
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <!-- BODY -->
+      <div class="modal-body">
+
+        <!-- CARD FILTROS (ordenado, 2 filas) -->
+        <div class="card sombra mb-3">
+          <div class="card-body py-3">
+
+            <!-- FILA 1: Cuenta / Ruta (datalist) / Responsable -->
+            <div class="form-row">
+              <div class="form-group col-12 col-md-3 mb-2">
+                <label class="mb-1 small text-muted">Cuenta</label>
+                <input class="form-control form-control-sm" type="number" placeholder="Ej: 12345"
+                  [(ngModel)]="filtroCuenta" (focus)="onFocusFiltro('cuenta')" (ngModelChange)="onTypingFiltro()">
+              </div>
+
+              <div class="form-group col-12 col-md-3 mb-2">
+                <label class="mb-1 small text-muted">Ruta</label>
+
+                <!-- input + datalist -->
+                <input class="form-control form-control-sm" list="rutasDatalist" placeholder="Escribe o selecciona..."
+                  [(ngModel)]="filtroRuta" (focus)="onFocusFiltro('ruta')" (ngModelChange)="onTypingFiltro()">
+
+                <datalist id="rutasDatalist">
+                  <option *ngFor="let r of _rutas" [value]="r.descripcion"></option>
+                </datalist>
+
+                <small class="text-muted d-block mt-1">
+                  Ej: AV. UNIVERSITARIA
+                </small>
+              </div>
+
+              <div class="form-group col-12 col-md-6 mb-2">
+                <label class="mb-1 small text-muted">Responsable</label>
+                <input class="form-control form-control-sm" type="text" placeholder="Nombre / razón social..."
+                  [(ngModel)]="filtroResponsable" (focus)="onFocusFiltro('responsable')"
+                  (ngModelChange)="onTypingFiltro()">
+              </div>
+            </div>
+
+            <!-- FILA 2: Identificación / Filtro en pantalla / Botones -->
+            <div class="form-row align-items-end">
+              <div class="form-group col-12 col-md-3 mb-2">
+                <label class="mb-1 small text-muted">Identificación</label>
+                <input class="form-control form-control-sm" type="text" placeholder="Ej: 049999999"
+                  [(ngModel)]="filtroCedula" (focus)="onFocusFiltro('cedula')" (ngModelChange)="onTypingFiltro()">
+              </div>
+
+              <div class="form-group col-12 col-md-5 mb-2">
+                <label class="mb-1 small text-muted">Filtrar en pantalla</label>
+                <div class="input-group input-group-sm">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="bi bi-funnel"></i></span>
+                  </div>
+                  <!-- este NO limpia otros filtros: solo filtra lo ya cargado -->
+                  <input type="text" class="form-control" placeholder="Filtrar resultados cargados..."
+                    [(ngModel)]="filterTerm" />
+                </div>
+              </div>
+
+              <div class="form-group col-12 col-md-4 mb-2 text-md-right">
+                <button class="btn btn-sm btn-primary mr-1" type="button" (click)="aplicarFiltrosServidor()">
+                  <i class="bi bi-search"></i> Buscar
+                </button>
+
+                <button class="btn btn-sm btn-outline-secondary" type="button" (click)="limpiarFiltrosServidor()">
+                  <i class="bi bi-x-circle"></i> Limpiar
+                </button>
+              </div>
+            </div>
+
+            <!-- RESUMEN -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center mt-2">
+              <div class="mb-2 mb-md-0">
+                <span class="badge badge-info p-2 mr-1">
+                  Seleccionados: {{ selectedCount }}
+                </span>
+                <span class="badge badge-light p-2">
+                  Total: {{ totalElements }} | Página: {{ page + 1 }} / {{ totalPages }}
+                </span>
+              </div>
+
+              <div class="text-muted small">
+                Mostrando {{ _abonados?.length || 0 }} registros
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+
+        <!-- PAGINACIÓN -->
+        <div class="d-flex justify-content-end align-items-center mb-2">
+          <div class="btn-group">
+            <button class="btn btn-sm btn-outline-secondary" (click)="prevPage()" [disabled]="page === 0">
+              <i class="bi bi-chevron-left"></i> Anterior
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" (click)="nextPage()" [disabled]="page + 1 >= totalPages">
+              Siguiente <i class="bi bi-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- TABLA -->
+        <div class="table-responsive sombra" style="max-height: 55vh;">
+          <table class="table table-sm table-hover table-bordered mb-0">
+            <thead class="cabecera text-white" style="position: sticky; top: 0; z-index: 5;">
+              <tr>
+                <th class="text-center" style="width:40px;">
+                  <input type="checkbox" (change)="toggleSelectAll($event)">
+                </th>
+                <th class="text-center" style="width:90px;">Cuenta</th>
+                <th>Responsable</th>
+                <th>Identificación</th>
+                <th>Dirección</th>
+                <th class="text-center" style="width:150px;">Ruta</th>
+                <th class="text-center" style="width:80px;">Estado</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let cuenta of _abonados | filter: filterTerm">
+                <td class="text-center">
+                  <input type="checkbox" [(ngModel)]="cuenta.selected">
+                </td>
+
+                <td class="text-center">{{ cuenta.idabonado }}</td>
+
+                <td>
+                  {{ cuenta.idresponsable?.nombre || cuenta.idresponsable?.razonsocial || '—' }}
+                </td>
+                <td class="text-center">{{ cuenta.idresponsable?.cedula || '—' }}</td>
+
+                <td class="truncate-text" title="{{ cuenta.direccionubicacion }}">
+                  {{ cuenta.direccionubicacion || '—' }}
+                </td>
+
+                <td class="text-center">
+                  {{ cuenta.idruta_rutas?.descripcion || cuenta.idruta_rutas?.idruta || '—' }}
+                </td>
+
+                <td class="text-center">{{ cuenta.estado }}</td>
+              </tr>
+
+              <tr *ngIf="(_abonados.length || 0) === 0">
+                <td colspan="6" class="text-center text-muted py-3">No hay resultados</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+      <!-- FOOTER -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Cerrar
+        </button>
+
+        <button type="button" class="btn btn-success" [disabled]="selectedCount === 0"
+          (click)="procesarSeleccionados()">
+          <i class="bi bi-check2-circle"></i>
+          Guardar selección ({{ selectedCount }})
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

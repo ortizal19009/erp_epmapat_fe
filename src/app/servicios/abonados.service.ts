@@ -1,8 +1,10 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, firstValueFrom } from 'rxjs';
 import { Abonados } from '../modelos/abonados';
 import { environment } from 'src/environments/environment';
+import { AbonadosFilters } from '../interfaces/abonados_filters_interface';
+import { PageResponse } from '../interfaces/page-response';
 
 const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/abonados`;
@@ -134,7 +136,7 @@ export class AbonadosService {
     let resp = this.http.get(`${baseUrl}/deudas?idruta=${idruta}`);
     return await firstValueFrom(resp);
   }
-    async DeudasCuentasByRuta(idruta: number) {
+  async DeudasCuentasByRuta(idruta: number) {
     let resp = this.http.get(`${baseUrl}/deudasByRuta?idruta=${idruta}`);
     return await firstValueFrom(resp);
   }
@@ -161,4 +163,58 @@ export class AbonadosService {
     return firstValueFrom(this.http.get(`${baseUrl}/ncuentasByEstado`));
 
   }
+
+  getAbonadosPage(
+    page: number,
+    size: number,
+    sort: string = 'idabonado,desc',
+    filters: AbonadosFilters = {}
+  ): Observable<PageResponse<Abonados>> {
+
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString())
+      .set('sort', sort);
+
+    /* ======================
+       Filtros numéricos
+    ====================== */
+
+    if (filters.idruta !== null && filters.idruta !== undefined) {
+      params = params.set('idruta', filters.idruta.toString());
+    }
+
+    if (filters.estado !== null && filters.estado !== undefined) {
+      params = params.set('estado', filters.estado.toString());
+    }
+
+    if (filters.cuenta !== null && filters.cuenta !== undefined) {
+      params = params.set('cuenta', filters.cuenta.toString());
+    }
+
+    /* ======================
+       Filtros texto (trim)
+    ====================== */
+
+    const responsable = (filters.responsable ?? '').trim();
+    if (responsable.length > 0) {
+      params = params.set('responsable', responsable);
+    }
+
+    const cedula = (filters.cedula ?? '').trim();
+    if (cedula.length > 0) {
+      params = params.set('cedula', cedula);
+    }
+
+    const ruta = (filters.ruta ?? '').trim();
+    if (ruta.length > 0) {
+      params = params.set('ruta', ruta);
+    }
+
+    return this.http.get<PageResponse<Abonados>>(
+      `${baseUrl}/buscar`,
+      { params }
+    );
+  }
+
 }

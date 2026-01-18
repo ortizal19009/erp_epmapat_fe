@@ -292,6 +292,7 @@ import { AnularConvenioComponent } from './componentes/convenios/anular-convenio
 import { ReportesjrComponent } from './componentes/reportesjr/reportesjr.component';
 import { RutaToLectorComponent } from './componentes/rutas/ruta-to-lector/ruta-to-lector.component';
 import { SimuladordosComponent } from './componentes/pliego24/simuladordos/simuladordos.component';
+import { RecargosxcuentaComponent } from './componentes/facturacion/recargosxcuenta/recargosxcuenta.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
@@ -572,6 +573,7 @@ import { SimuladordosComponent } from './componentes/pliego24/simuladordos/simul
     AnularConvenioComponent,
     ReportesjrComponent,
     RutaToLectorComponent,
+    RecargosxcuentaComponent,
   ],
 
   imports: [

@@ -8,6 +8,7 @@ export class AuthGuard implements CanActivate {
   constructor(private authService: AutorizaService, private router: Router) {}
 
   canActivate(): boolean {
+    console.log('AuthGuard#canActivate called', this.authService.sessionlog);
     if (!this.authService.sessionlog) {
       this.router.navigate(['/inicio']);
       return false;

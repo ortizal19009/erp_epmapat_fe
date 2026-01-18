@@ -275,6 +275,7 @@ import { ReportesjrComponent } from './componentes/reportesjr/reportesjr.compone
 import { AuthGuard } from './servicios/administracion/auth-guard';
 import { CliDuplicadosComponent } from './componentes/clientes/cli-duplicados/cli-duplicados.component';
 import { RutaToLectorComponent } from './componentes/rutas/ruta-to-lector/ruta-to-lector.component';
+import { RecargosxcuentaComponent } from './componentes/facturacion/recargosxcuenta/recargosxcuenta.component';
 
 const routes: Routes = [
   //Consumo de Agua
@@ -441,6 +442,11 @@ const routes: Routes = [
   {
     path: 'recal-factura',
     component: RecalFacturaComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'recargosxcuenta',
+    component: RecargosxcuentaComponent,
     canActivate: [AuthGuard],
   },
   //Planillas (Tabla facturas)
