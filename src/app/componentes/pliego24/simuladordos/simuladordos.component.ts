@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { CategoriaService } from 'src/app/servicios/categoria.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
 
@@ -10,74 +11,164 @@ import { LecturasService } from 'src/app/servicios/lecturas.service';
   styleUrls: ['./simuladordos.component.css'],
 })
 export class SimuladordosComponent implements OnInit {
-  formBuscar: FormGroup;
-  categorias: any;
-  resumenPliego: any;
+  formBuscar!: FormGroup;
+
+  categorias: any[] = [];
+  filasPliego: any[] = []; // cada fila corresponde a un m3
+
+  // IDs de negocio
+  readonly CATEGORIA_RESIDENCIAL = 1;
+  readonly CATEGORIA_ESPECIAL = 9;
+
+  cargando = false;
+
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private categoriaService: CategoriaService,
-    private lecturaService: LecturasService
+    private lecturaService: LecturasService,
   ) {}
+
   ngOnInit(): void {
     this.formBuscar = this.fb.group({
       categoria: 1,
-      m3: 0,
+      m3Desde: 0,
+      m3Hasta: 0,
       swAdultoMayor: false,
       swAguapotable: false,
     });
-    this.setcolor(); /*  */
+
+    this.setcolor();
     this.getAllCategorias();
-    //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
-    //Add 'implements OnInit' to the class.
+    this.controlarAdultoMayor(); // 👈 se engancha al valueChanges
   }
 
-  setcolor() {
-    let colores: string[];
-    let coloresJSON = sessionStorage.getItem('/proyeccion');
-    if (!coloresJSON) {
-      colores = ['rgb(57, 95, 95)', 'rgb(207, 221, 210)'];
-      const coloresJSON = JSON.stringify(colores);
-      sessionStorage.setItem('/proyeccion', coloresJSON);
-    } else colores = JSON.parse(coloresJSON);
+  // ===============================
+  // 🔒 CONTROL ADULTO MAYOR
+  // ===============================
+  controlarAdultoMayor(): void {
+    const categoriaCtrl = this.formBuscar.get('categoria');
+    const amCtrl = this.formBuscar.get('swAdultoMayor');
 
-    document.documentElement.style.setProperty('--bgcolor1', colores[0]);
-    const cabecera = document.querySelector('.cabecera');
-    if (cabecera) cabecera.classList.add('nuevoBG1');
-    document.documentElement.style.setProperty('--bgcolor2', colores[1]);
-    const detalle = document.querySelector('.detalle');
-    if (detalle) detalle.classList.add('nuevoBG2');
-  }
-  calcular() {
-    console.log(this.formBuscar.value);
-    let f = this.formBuscar.value;
+    // estado inicial correcto
+    const catInit = Number(categoriaCtrl?.value ?? 0);
+    if (catInit === this.CATEGORIA_ESPECIAL) {
+      amCtrl?.enable({ emitEvent: false });
+    } else {
+      amCtrl?.setValue(false, { emitEvent: false });
+      amCtrl?.disable({ emitEvent: false });
+    }
 
-    this.lecturaService.getValoresSimulados(f).subscribe({
-      next: (datosSimulados: any) => {
-        console.log(datosSimulados);
-        this.resumenPliego = datosSimulados;
-      },
-      error: (e: any) => console.error(e.error),
+    // cambios
+    categoriaCtrl?.valueChanges.subscribe((idCategoria) => {
+      const cat = Number(idCategoria ?? 0);
+
+      if (cat === this.CATEGORIA_ESPECIAL) {
+        amCtrl?.enable({ emitEvent: false });
+      } else {
+        amCtrl?.setValue(false, { emitEvent: false });
+        amCtrl?.disable({ emitEvent: false });
+      }
     });
   }
-  get hayExcedentes(): boolean {
-    const ex = this.resumenPliego?.['Excedente'];
-    return ex !== null && ex !== undefined && Number(ex) > 0;
+
+  // ===============================
+  // 📊 CÁLCULO POR RANGO (m3Desde..m3Hasta)
+  // ===============================
+  async calcular(): Promise<void> {
+    const f = this.formBuscar.getRawValue();
+
+    let desde = Number(f.m3Desde ?? 0);
+    let hasta = Number(f.m3Hasta ?? 0);
+
+    if (Number.isNaN(desde)) desde = 0;
+    if (Number.isNaN(hasta)) hasta = 0;
+
+    // normalizar rango
+    if (hasta < desde) {
+      const tmp = desde;
+      desde = hasta;
+      hasta = tmp;
+    }
+
+    // límite de seguridad (ajusta si quieres)
+    if (hasta - desde > 300) {
+      return;
+    }
+
+    const categoria = Number(f.categoria ?? 1);
+    const swAdultoMayor = !!f.swAdultoMayor;
+    const swAguapotable = !!f.swAguapotable;
+
+    this.cargando = true;
+    this.filasPliego = [];
+
+    try {
+      const requests: Promise<any>[] = [];
+
+      for (let m3 = desde; m3 <= hasta; m3++) {
+        const payload = {
+          m3,
+          categoria,
+          swAdultoMayor,
+          swAguapotable,
+        };
+
+        requests.push(
+          firstValueFrom(this.lecturaService.getValoresSimulados(payload)).then((res: any) => ({
+            ...res,
+            m3, // 👈 guardo el m3 para mostrarlo en la tabla
+            // bandera para cambiar color si es residencial y pasa de 70
+            swCambioCategoria: categoria === this.CATEGORIA_RESIDENCIAL && m3 >= 71,
+          })),
+        );
+      }
+
+      const rows = await Promise.all(requests);
+      this.filasPliego = rows.sort((a, b) => a.m3 - b.m3);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      this.cargando = false;
+    }
   }
 
-  regresar() {
+  // ===============================
+  // 🎨 EXCEDENTES (si alguna fila tiene excedente)
+  // ===============================
+  get hayExcedentes(): boolean {
+    return this.filasPliego.some((r) => Number(r?.['Excedente'] ?? 0) > 0);
+  }
+
+  // ===============================
+  // 🚪 NAV
+  // ===============================
+  regresar(): void {
     this.router.navigate(['/inicio']);
   }
-  onSelectChange(e: any) {
-    console.log(e.target.value);
-  }
-  getAllCategorias() {
+
+  // ===============================
+  // 📥 DATA
+  // ===============================
+  getAllCategorias(): void {
     this.categoriaService.getListCategoria().subscribe({
-      next: (categorias: any) => {
-        console.log(categorias);
-        this.categorias = categorias;
-      },
-      error: (e: any) => console.error(e.error),
+      next: (data: any) => (this.categorias = data ?? []),
+      error: (e: any) => console.error(e),
     });
+  }
+
+  // ===============================
+  // 🎨 THEME
+  // ===============================
+  setcolor(): void {
+    document.documentElement.style.setProperty('--bgcolor1', '#395f5f');
+    document.documentElement.style.setProperty('--bgcolor2', '#cfded2');
+  }
+
+  // helper opcional para clase de fila (para el HTML)
+  rowClass(row: any): any {
+    return {
+      'fila-cambio-cat': !!row?.swCambioCategoria,
+    };
   }
 }

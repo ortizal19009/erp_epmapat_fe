@@ -24,34 +24,36 @@
           </label>
 
           <label class="mb-0 d-flex align-items-center text-nowrap">
-            <span class="mr-1 font-weight-bold">AM</span>
-            <input type="checkbox" formControlName="swAdultoMayor">
-          </label>
+  <span class="mr-1 font-weight-bold">AM</span>
+  <input type="checkbox" formControlName="swAdultoMayor">
+</label>
         </div>
 
         <!-- Categoría -->
         <div class="mr-2">
-          <select class="custom-select custom-select-sm text-nowrap" formControlName="categoria"
-            (change)="onSelectChange($event)">
-            <option [ngValue]="categoria.idcategoria" *ngFor="let categoria of categorias">
+          <select class="custom-select custom-select-sm text-nowrap" formControlName="categoria">
+            <option *ngFor="let categoria of categorias" [ngValue]="categoria.idcategoria">
               {{ categoria.descripcion }}
             </option>
           </select>
         </div>
 
-        <!-- Consumo -->
-        <div class="input-group input-group-sm mr-2" style="width: 160px;">
+        <!-- Consumo rango -->
+        <div class="input-group input-group-sm mr-2" style="width: 280px;">
           <div class="input-group-prepend">
-            <span class="input-group-text text-nowrap">
-              Consumo m<sup>3</sup>
-            </span>
+            <span class="input-group-text">m³ Desde</span>
           </div>
-          <input type="number" class="form-control text-center" formControlName="m3">
+          <input type="number" class="form-control text-center" formControlName="m3Desde">
+
+          <div class="input-group-prepend">
+            <span class="input-group-text">Hasta</span>
+          </div>
+          <input type="number" class="form-control text-center" formControlName="m3Hasta">
         </div>
 
         <!-- Botones -->
         <div class="d-flex align-items-center ml-auto">
-          <button type="submit" class="btn btn-success btn-sm mr-2" (click)="calcular()">
+          <button type="button" class="btn btn-success btn-sm mr-2" (click)="calcular()">
             <i class="fa fa-check-circle"></i>&nbsp;Aceptar
           </button>
 
@@ -62,44 +64,23 @@
 
       </form>
 
-      <!-- Menú -->
-      <div class="col-auto ml-2">
-        <div class="btn-group">
-          <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown">
-            <i class="bi-menu-button-wide text-white"></i>
-          </button>
-
-          <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-            <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
-              <i class="bi bi-printer"></i>&nbsp; Imprimir
-            </button>
-            <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar">
-              <i class="bi-file-earmark-arrow-up"></i>&nbsp; Exportar
-            </button>
-          </div>
-        </div>
-      </div>
-
     </div>
 
   </div>
 </div>
-<div class="col-md-12">
-  <table class="table table-hover table-bordered table-sm sombra mt-2">
 
-    <thead class="cabecera">
+<!-- ================= TABLA ================= -->
+<div class="table-responsive sombra mt-2 tabla-scroll">
+  <table class="table table-hover table-bordered table-striped table-sm sombra mt-2">
+
+    <thead class="cabecera thead-fija">
       <tr class="text-center">
-
+        <th rowspan="2">m³</th>
         <th colspan="3">Pliego tarifario 2024</th>
-
         <th colspan="2">Conservación fuentes</th>
         <th colspan="2">Rubro de basura</th>
-
-
-        <!-- NUEVA: Excedentes (solo si hay) -->
         <th *ngIf="hayExcedentes" rowspan="2">Excedentes</th>
-
-        <th rowspan="2">Total por m<sup>3</sup></th>
+        <th rowspan="2">Total</th>
         <th rowspan="2"></th>
       </tr>
 
@@ -115,55 +96,38 @@
     </thead>
 
     <tbody class="detalle">
-      <tr class="fila">
 
-        <!-- Corriente (5) -->
-        <td class="text-right">
-          {{ resumenPliego?.['Agua Potable'] | number:'1.2-2' }}
-        </td>
+<tr *ngFor="let row of filasPliego"
+    [ngClass]="{ 'fila-exceso': row.swCambioCategoria }">
+        <td class="text-center font-weight-bold">{{ row.m3 }}</td>
 
-        <td class="text-right">
-          {{ resumenPliego?.['Alcantarillado'] | number:'1.2-2' }}
-        </td>
+        <td class="text-right">{{ row['Agua Potable'] | number:'1.2-2' }}</td>
+        <td class="text-right">{{ row['Alcantarillado'] | number:'1.2-2' }}</td>
+        <td class="text-right">{{ row['Saneamiento'] | number:'1.2-2' }}</td>
+        <td class="text-right">{{ row['Conservacion Fuentes'] | number:'1.2-2' }}</td>
+        <td class="text-right">{{ row['Conservacion Fuentes Epmapat'] | number:'1.2-2' }}</td>
+        <td class="text-right">{{ row['Recoleccion Basura'] | number:'1.2-2' }}</td>
+        <td class="text-right">{{ row['Recaudacion Basura'] | number:'1.2-2' }}</td>
 
-        <!-- Operativo e Inversión (6 y 7) -->
-        <td class="text-right">
-          {{ resumenPliego?.['Saneamiento'] | number:'1.2-2' }}
-        </td>
-
-        <td class="text-right">
-          {{ resumenPliego?.['Conservacion Fuentes'] | number:'1.2-2' }}
-        </td>
-
-        <td class="text-right">
-          {{ resumenPliego?.['Conservacion Fuentes Epmapat'] | number:'1.2-2' }}
-        </td>
-
-        <!-- Conservación -->
-        <td class="text-right">
-          {{ resumenPliego?.['Recoleccion Basura'] | number:'1.2-2' }}
-        </td>
-
-        <!-- Hidrosuccionador -->
-        <td class="text-right">
-          {{ resumenPliego?.['Recaudacion Basura'] | number:'1.2-2' }}
-        </td>
-
-        <!-- NUEVA: Excedentes (solo si hay) -->
         <td *ngIf="hayExcedentes" class="text-right">
-          {{ resumenPliego?.['Excedente'] | number:'1.2-2' }}
+          {{ row['Excedente'] | number:'1.2-2' }}
         </td>
 
-        <!-- Total por m3 -->
         <td class="text-right font-weight-bold">
-          {{ resumenPliego?.['Total'] | number:'1.2-2' }}
+          {{ row['Total'] | number:'1.2-2' }}
         </td>
 
         <td class="text-center">
           <i class="fa fa-check-circle text-success"></i>
         </td>
-
       </tr>
+
+      <tr *ngIf="filasPliego.length === 0">
+        <td colspan="11" class="text-center text-muted py-3">
+          No hay resultados
+        </td>
+      </tr>
+
     </tbody>
 
   </table>

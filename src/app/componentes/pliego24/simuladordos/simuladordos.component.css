@@ -1,23 +1,84 @@
+/* =========================
+   COLORES BASE
+========================= */
 .cabecera {
-   background-color: var(--bgcolor1);
-   color: white;
+  background-color: var(--bgcolor1);
+  color: white;
 }
-.nuevoBG1 { background-color: var(--bgcolor1); }
 
-.detalle { background-color: var(--bgcolor2); }
-.nuevoBG2 { background-color: var(--bgcolor2); }
+.nuevoBG1 {
+  background-color: var(--bgcolor1);
+}
 
+.detalle {
+  background-color: var(--bgcolor2);
+}
+
+.nuevoBG2 {
+  background-color: var(--bgcolor2);
+}
+
+/* =========================
+   TABLA SCROLL
+========================= */
+.tabla-scroll {
+  max-height: 55vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+/* =========================
+   CABECERA FIJA
+========================= */
+.thead-fija th {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background-color: var(--bgcolor1);
+  color: white;
+  box-shadow: inset 0 -1px 0 rgba(255,255,255,0.2);
+}
+
+/* Segunda fila del thead */
+.thead-fija tr:nth-child(2) th {
+  top: 38px; /* ⚠️ altura real de la primera fila */
+  z-index: 19;
+}
+
+/* =========================
+   FILAS
+========================= */
 .fila:hover {
-   background-color: #117a8B;
-   color: white;
-   cursor: pointer;
+  background-color: #117a8b;
+  color: white;
+  cursor: pointer;
 }
-.cabecera.sombra{
-  border-radius: 10px;
+
+.fila-exceso {
+  background-color: #ffe0e0 !important;
+  color: #900;
+  font-weight: 600;
 }
-.dropdown-menu.bg-dark .dropdown-item{
+
+.fila-cambio-cat {
+  background: #ffe8a3;
+  font-weight: 600;
+}
+
+/* =========================
+   DROPDOWN
+========================= */
+.dropdown-menu.bg-dark .dropdown-item {
   color: #fff;
 }
-.dropdown-menu.bg-dark .dropdown-item:hover{
-  background: rgba(255,255,255,0.12);
+
+.dropdown-menu.bg-dark .dropdown-item:hover {
+  background: rgba(230, 255, 2, 0.945);
+}
+
+/* =========================
+   CABECERA CONTENEDOR
+========================= */
+.cabecera.sombra {
+  border-radius: 10px;
 }

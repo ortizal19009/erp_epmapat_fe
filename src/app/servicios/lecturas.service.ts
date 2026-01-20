@@ -11,7 +11,7 @@ const baseUrl = `${apiUrl}/lecturas`;
   providedIn: 'root',
 })
 export class LecturasService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   //Lectura por Planilla
   getOnefactura(idfactura: number) {
@@ -200,8 +200,7 @@ export class LecturasService {
   getPendientesByCliente(idcliente: number) {
     return this.http.get<any[]>(`${baseUrl}/preview/lecturas/${idcliente}`);
   }
-  getValoresSimulados(datos:any){
-  console.log(datos)
-  return this.http.get(`${baseUrl}/simular?m3=${datos.m3}&categoria=${datos.categoria}&swAdultoMayor=${datos.swAdultoMayor}&swAguapotable=${datos.swAguapotable}`)
+  getValoresSimulados(datos: any) {
+    return this.http.get(`${baseUrl}/simular?m3=${datos.m3}&categoria=${datos.categoria}&swAdultoMayor=${datos.swAdultoMayor}&swAguapotable=${datos.swAguapotable}`)
   }
 }
