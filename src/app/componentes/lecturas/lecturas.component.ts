@@ -66,9 +66,7 @@ export class LecturasComponent implements OnInit {
   enProceso: boolean = false;
   mostrarModal: boolean = false;
 
-
   novedades: any;
-
 
   porcResidencial: number[] = [
     0.777, 0.78, 0.78, 0.78, 0.78, 0.78, 0.778, 0.778, 0.78, 0.78, 0.78, 0.68,
@@ -90,8 +88,8 @@ export class LecturasComponent implements OnInit {
     private rubxfacService: RubroxfacService,
     private pli24Service: Pliego24Service,
     private s_novedad: NovedadesService,
-    private loadingService: LoadingService
-  ) { }
+    private loadingService: LoadingService,
+  ) {}
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/lecturas');
@@ -121,7 +119,7 @@ export class LecturasComponent implements OnInit {
 
     this.formValor.get('lecturaactual')?.valueChanges.subscribe((valor) => {
       this.formValor.controls['consumo'].setValue(
-        valor - this.formValor.get('lecturaanterior')?.value
+        valor - this.formValor.get('lecturaanterior')?.value,
       );
     });
     this.fecha = new Date();
@@ -142,7 +140,7 @@ export class LecturasComponent implements OnInit {
     try {
       const datos = await this.coloresService.setcolor(
         this.authService.idusuario,
-        'lecturas'
+        'lecturas',
       );
       const coloresJSON = JSON.stringify(datos);
       sessionStorage.setItem('/lecturas', coloresJSON);
@@ -175,14 +173,14 @@ export class LecturasComponent implements OnInit {
       this.lecService
         .getUltimaLecturaByEmisionAsync(
           lectura.idabonado_abonados.idabonado,
-          lectura.idemision - 1
+          lectura.idemision - 1,
         )
         .then(async (lecturaanterior: any) => {
           let nlectura = lectura;
           nlectura.lecturaanterior = lecturaanterior;
           await this.lecService.updateLecturaAsync(
             nlectura.idlectura,
-            nlectura
+            nlectura,
           );
           i++;
           if (i === this._lecturas.length) {
@@ -248,7 +246,7 @@ export class LecturasComponent implements OnInit {
     const rows = [];
     for (const row of array) {
       rows.push(
-        row.map((item: any) => this.escapeCSVValue(item)).join(delimiter)
+        row.map((item: any) => this.escapeCSVValue(item)).join(delimiter),
       );
     }
     return rows.join('\n');
@@ -386,39 +384,39 @@ export class LecturasComponent implements OnInit {
             num1 =
               Math.round(
                 (this.tarifa[0].idcategoria.fijoagua - 0.1) *
-                this.porcResidencial[consumo] *
-                100
+                  this.porcResidencial[consumo] *
+                  100,
               ) / 100;
           } else {
             num1 =
               Math.round(
                 (this.tarifa[0].idcategoria.fijoagua - 0.1) *
-                this.tarifa[0].porc *
-                100
+                  this.tarifa[0].porc *
+                  100,
               ) / 100;
           }
 
           let num2 =
             Math.round(
               (this.tarifa[0].idcategoria.fijosanea - 0.5) *
-              this.tarifa[0].porc *
-              100
+                this.tarifa[0].porc *
+                100,
             ) / 100;
           let num3 =
             Math.round(
-              consumo * this.tarifa[0].agua * this.tarifa[0].porc * 100
+              consumo * this.tarifa[0].agua * this.tarifa[0].porc * 100,
             ) / 100;
           let num4 =
             Math.round(
               ((consumo * this.tarifa[0].saneamiento) / 2) *
-              this.tarifa[0].porc *
-              100
+                this.tarifa[0].porc *
+                100,
             ) / 100;
           let num5 =
             Math.round(
               ((consumo * this.tarifa[0].saneamiento) / 2) *
-              this.tarifa[0].porc *
-              100
+                this.tarifa[0].porc *
+                100,
             ) / 100;
           let num7 = Math.round(0.5 * this.tarifa[0].porc * 100) / 100;
           let suma: number = 0;
@@ -500,22 +498,22 @@ export class LecturasComponent implements OnInit {
         num1 =
           Math.round(
             (this.tarifa[0].idcategoria.fijoagua - 0.1) *
-            this.porcResidencial[consumo] *
-            100
+              this.porcResidencial[consumo] *
+              100,
           ) / 100;
       } else {
         num1 =
           Math.round(
             (this.tarifa[0].idcategoria.fijoagua - 0.1) *
-            this.tarifa[0].porc *
-            100
+              this.tarifa[0].porc *
+              100,
           ) / 100;
       }
       let num2 =
         Math.round(
           (this.tarifa[0].idcategoria.fijosanea - 0.5) *
-          this.tarifa[0].porc *
-          100
+            this.tarifa[0].porc *
+            100,
         ) / 100;
       let num3 =
         Math.round(consumo * this.tarifa[0].agua * this.tarifa[0].porc * 100) /
@@ -523,14 +521,14 @@ export class LecturasComponent implements OnInit {
       let num4 =
         Math.round(
           ((consumo * this.tarifa[0].saneamiento) / 2) *
-          this.tarifa[0].porc *
-          100
+            this.tarifa[0].porc *
+            100,
         ) / 100;
       let num5 =
         Math.round(
           ((consumo * this.tarifa[0].saneamiento) / 2) *
-          this.tarifa[0].porc *
-          100
+            this.tarifa[0].porc *
+            100,
         ) / 100;
       let num7 = Math.round(0.5 * this.tarifa[0].porc * 100) / 100;
       let suma: number = 0;
@@ -584,7 +582,7 @@ export class LecturasComponent implements OnInit {
   async _planillas() {
     let swmulta: boolean = false;
     let multa = await this.getPendientesAbonado(
-      this._lecturas[this.kontador].idabonado_abonados.idabonado
+      this._lecturas[this.kontador].idabonado_abonados.idabonado,
     );
     if (multa === 3) swmulta = true;
     let categoria =
@@ -641,45 +639,45 @@ export class LecturasComponent implements OnInit {
                     num1 =
                       Math.round(
                         (this.tarifa[0].idcategoria.fijoagua - 0.1) *
-                        this.porcResidencial[consumo] *
-                        100
+                          this.porcResidencial[consumo] *
+                          100,
                       ) / 100;
                   } else {
                     num1 =
                       Math.round(
                         (this.tarifa[0].idcategoria.fijoagua - 0.1) *
-                        this.tarifa[0].porc *
-                        100
+                          this.tarifa[0].porc *
+                          100,
                       ) / 100;
                   }
 
                   let num2 =
                     Math.round(
                       (this.tarifa[0].idcategoria.fijosanea - 0.5) *
-                      this.tarifa[0].porc *
-                      100
+                        this.tarifa[0].porc *
+                        100,
                     ) / 100;
                   let num3 =
                     Math.round(
-                      consumo * this.tarifa[0].agua * this.tarifa[0].porc * 100
+                      consumo * this.tarifa[0].agua * this.tarifa[0].porc * 100,
                     ) / 100;
                   let num4 =
                     Math.round(
                       ((consumo * this.tarifa[0].saneamiento) / 2) *
-                      this.tarifa[0].porc *
-                      100
+                        this.tarifa[0].porc *
+                        100,
                     ) / 100;
                   let num5 =
                     Math.round(
                       ((consumo * this.tarifa[0].saneamiento) / 2) *
-                      this.tarifa[0].porc *
-                      100
+                        this.tarifa[0].porc *
+                        100,
                     ) / 100;
                   let num7 = Math.round(0.5 * this.tarifa[0].porc * 100) / 100;
                   let suma: number = 0;
                   suma =
                     Math.round(
-                      (num1 + num2 + num3 + num4 + num5 + 0.1 + num7) * 100
+                      (num1 + num2 + num3 + num4 + num5 + 0.1 + num7) * 100,
                     ) / 100;
                   //Categoria 9 no tiene tarifario es el 50% de la Residencial. Abonados del Municipio también 50%
                   if (swcate9 || swmunicipio)
@@ -697,7 +695,7 @@ export class LecturasComponent implements OnInit {
                   const primerDiaDelMesSiguiente = new Date(
                     fechaEmisionDate.getFullYear(),
                     fechaEmisionDate.getMonth() + 1,
-                    1
+                    1,
                   );
                   factura.feccrea = primerDiaDelMesSiguiente;
                   this.facService.updateFacturas(factura).subscribe({
@@ -712,7 +710,7 @@ export class LecturasComponent implements OnInit {
                             this.lecService
                               .updateLectura(
                                 this._lecturas[this.kontador].idlectura,
-                                this._lectura
+                                this._lectura,
                               )
                               .subscribe({
                                 next: (nex: any) => {
@@ -723,7 +721,7 @@ export class LecturasComponent implements OnInit {
                                     if (num2 + num4 + num7 > 0) {
                                       rub1002 =
                                         Math.round(
-                                          ((num2 + num4 + num7) / 2) * 100
+                                          ((num2 + num4 + num7) / 2) * 100,
                                         ) / 100;
                                     } else {
                                       rub1002 = 0;
@@ -741,14 +739,14 @@ export class LecturasComponent implements OnInit {
                                       r1001,
                                       rub1002,
                                       rub1003,
-                                      0.1
+                                      0.1,
                                     );
                                   } else {
                                     this.arrprecios.push(
                                       num1 + num3,
                                       num2 + num4 + num7,
                                       num5,
-                                      0.1
+                                      0.1,
                                     );
                                   }
                                   let i = 0;
@@ -770,7 +768,7 @@ export class LecturasComponent implements OnInit {
                                     this.rutaxemiService
                                       .updateRutaxemision(
                                         this.idrutaxemision,
-                                        this._rutaxemision
+                                        this._rutaxemision,
                                       )
                                       .subscribe({
                                         next: (nex) => (this.btncerrar = true),
@@ -799,26 +797,31 @@ export class LecturasComponent implements OnInit {
     }
   }
   async __planillas() {
-    for (this.kontador = 0; this.kontador < this._lecturas.length - 1; this.kontador++) {
+    for (
+      this.kontador = 0;
+      this.kontador < this._lecturas.length - 1;
+      this.kontador++
+    ) {
       let lectura = this._lecturas[this.kontador];
       let consumo = lectura.lecturaactual - lectura.lecturaanterior;
 
       if (consumo > 0) {
-
         let datos = {
+          idemision: lectura.idemision,
           cuenta: lectura.idabonado_abonados.idabonado,
           m3: consumo,
-          categoria: lectura.idabonado_abonados.idcategoria_categorias.idcategoria,
+          categoria:
+            lectura.idabonado_abonados.idcategoria_categorias.idcategoria,
           idfactura: lectura.idfactura,
           swAdultoMayor: lectura.idabonado_abonados.adultomayor,
           swMunicipio: lectura.idabonado_abonados.municipio,
-          swAguapotable: lectura.idabonado_abonados.swalcantarillado
+          swAguapotable: lectura.idabonado_abonados.swalcantarillado,
         };
 
         try {
           await this.lecService.calcularValores(datos);
         } catch (e) {
-          console.error("Error en calcularValores:", e);
+          console.error('Error en calcularValores:', e);
           // aquí podrías guardar logs o manejar errores
         }
       }
@@ -827,32 +830,43 @@ export class LecturasComponent implements OnInit {
   }
   async planillas() {
     this.enProceso = true; // 🔒 Bloquear salida
-    for (this.kontador = 0; this.kontador < this._lecturas.length; this.kontador++) {
+    for (
+      this.kontador = 0;
+      this.kontador < this._lecturas.length;
+      this.kontador++
+    ) {
       let lectura = this._lecturas[this.kontador];
       let consumo = lectura.lecturaactual - lectura.lecturaanterior;
 
       if (consumo >= 0) {
         let datos = {
+          idemision: lectura.idemision,
           cuenta: lectura.idabonado_abonados.idabonado,
           m3: consumo,
-          categoria: lectura.idabonado_abonados.idcategoria_categorias.idcategoria,
+          categoria:
+            lectura.idabonado_abonados.idcategoria_categorias.idcategoria,
           idfactura: lectura.idfactura,
           swAdultoMayor: lectura.idabonado_abonados.adultomayor,
           swMunicipio: lectura.idabonado_abonados.municipio,
-          swAguapotable: lectura.idabonado_abonados.swalcantarillado
+          swAguapotable: lectura.idabonado_abonados.swalcantarillado,
         };
 
         try {
           let total = await this.lecService.calcularValores(datos);
-          this._lecturas[this.kontador].total1 = total
-          this._lecturas[this.kontador].estado = 1
-          await this.lecService.updateLecturaAsync(this._lecturas[this.kontador].idlectura, this._lecturas[this.kontador])
+          this._lecturas[this.kontador].total1 = total;
+          this._lecturas[this.kontador].estado = 1;
+          await this.lecService.updateLecturaAsync(
+            this._lecturas[this.kontador].idlectura,
+            this._lecturas[this.kontador],
+          );
         } catch (e) {
-          console.error("Error en calcularValores:", e);
+          console.error('Error en calcularValores:', e);
         }
       }
 
-      this.progreso = Math.round(((this.kontador + 1) / this._lecturas.length) * 100);
+      this.progreso = Math.round(
+        ((this.kontador + 1) / this._lecturas.length) * 100,
+      );
     }
 
     this.progreso = 100;
@@ -865,14 +879,10 @@ export class LecturasComponent implements OnInit {
     this._rutaxemision.fechacierre = this.fecha;
     this._rutaxemision.m3 = this.sumtotal;
     this.rutaxemiService
-      .updateRutaxemision(
-        this.idrutaxemision,
-        this._rutaxemision
-      )
+      .updateRutaxemision(this.idrutaxemision, this._rutaxemision)
       .subscribe({
         next: (nex) => (this.btncerrar = true),
-        error: (err) =>
-          console.error(err.error),
+        error: (err) => console.error(err.error),
       });
   }
 
@@ -881,7 +891,8 @@ export class LecturasComponent implements OnInit {
   handleBeforeUnload(event: BeforeUnloadEvent) {
     if (this.enProceso) {
       event.preventDefault();
-      event.returnValue = 'Hay un proceso en ejecución. ¿Seguro que quieres salir?';
+      event.returnValue =
+        'Hay un proceso en ejecución. ¿Seguro que quieres salir?';
     }
   }
 
@@ -895,7 +906,6 @@ export class LecturasComponent implements OnInit {
       backdrops[0].parentNode?.removeChild(backdrops[0]);
     }
   }
-
 
   addrubros(i: number, swmulta: boolean) {
     let rubrosxpla = {} as Rubrosxpla;
@@ -943,7 +953,7 @@ export class LecturasComponent implements OnInit {
         } else {
           return 0;
         }
-      }
+      },
     );
   }
   /* para historial de consumo */
