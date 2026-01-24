@@ -201,6 +201,6 @@ export class LecturasService {
     return this.http.get<any[]>(`${baseUrl}/preview/lecturas/${idcliente}`);
   }
   getValoresSimulados(datos: any) {
-    return this.http.get(`${baseUrl}/simular?m3=${datos.m3}&categoria=${datos.categoria}&swAdultoMayor=${datos.swAdultoMayor}&swAguapotable=${datos.swAguapotable}`)
+    return this.http.get(`${baseUrl}/simular?m3=${datos.m3}&categoria=${datos.categoria}&swMunicipio=${datos.swMunicipio}&swAdultoMayor=${datos.swAdultoMayor}&swAguapotable=${datos.swAguapotable}`)
   }
 }

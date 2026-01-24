@@ -19,6 +19,7 @@ export class SimuladordosComponent implements OnInit {
   // IDs de negocio
   readonly CATEGORIA_RESIDENCIAL = 1;
   readonly CATEGORIA_ESPECIAL = 9;
+  readonly CATEGORIA_OFICIAL = 4; // ✅ swMunicipio solo aquí
 
   cargando = false;
 
@@ -34,23 +35,30 @@ export class SimuladordosComponent implements OnInit {
       categoria: 1,
       m3Desde: 0,
       m3Hasta: 0,
-      swAdultoMayor: false,
+
+      // ✅ AM inicia bloqueado (lo controlas por categoría 9)
+      swAdultoMayor: [{ value: false, disabled: true }],
+
       swAguapotable: false,
+
+      // ✅ MUN inicia bloqueado (solo categoría 4)
+      swMunicipio: [{ value: false, disabled: true }],
     });
 
     this.setcolor();
     this.getAllCategorias();
-    this.controlarAdultoMayor(); // 👈 se engancha al valueChanges
+
+    this.controlarAdultoMayor();  // cat 9
+    this.controlarMunicipio();    // cat 4
   }
 
   // ===============================
-  // 🔒 CONTROL ADULTO MAYOR
+  // 🔒 CONTROL ADULTO MAYOR (cat 9)
   // ===============================
   controlarAdultoMayor(): void {
     const categoriaCtrl = this.formBuscar.get('categoria');
     const amCtrl = this.formBuscar.get('swAdultoMayor');
 
-    // estado inicial correcto
     const catInit = Number(categoriaCtrl?.value ?? 0);
     if (catInit === this.CATEGORIA_ESPECIAL) {
       amCtrl?.enable({ emitEvent: false });
@@ -59,7 +67,6 @@ export class SimuladordosComponent implements OnInit {
       amCtrl?.disable({ emitEvent: false });
     }
 
-    // cambios
     categoriaCtrl?.valueChanges.subscribe((idCategoria) => {
       const cat = Number(idCategoria ?? 0);
 
@@ -73,10 +80,37 @@ export class SimuladordosComponent implements OnInit {
   }
 
   // ===============================
+  // 🔒 CONTROL MUNICIPIO (cat 4)
+  // ===============================
+  controlarMunicipio(): void {
+    const categoriaCtrl = this.formBuscar.get('categoria');
+    const munCtrl = this.formBuscar.get('swMunicipio');
+
+    const catInit = Number(categoriaCtrl?.value ?? 0);
+    if (catInit === this.CATEGORIA_OFICIAL) {
+      munCtrl?.enable({ emitEvent: false });
+    } else {
+      munCtrl?.setValue(false, { emitEvent: false });
+      munCtrl?.disable({ emitEvent: false });
+    }
+
+    categoriaCtrl?.valueChanges.subscribe((idCategoria) => {
+      const cat = Number(idCategoria ?? 0);
+
+      if (cat === this.CATEGORIA_OFICIAL) {
+        munCtrl?.enable({ emitEvent: false });
+      } else {
+        munCtrl?.setValue(false, { emitEvent: false });
+        munCtrl?.disable({ emitEvent: false });
+      }
+    });
+  }
+
+  // ===============================
   // 📊 CÁLCULO POR RANGO (m3Desde..m3Hasta)
   // ===============================
   async calcular(): Promise<void> {
-    const f = this.formBuscar.getRawValue();
+    const f = this.formBuscar.getRawValue(); // 👈 incluye disabled
 
     let desde = Number(f.m3Desde ?? 0);
     let hasta = Number(f.m3Hasta ?? 0);
@@ -84,14 +118,12 @@ export class SimuladordosComponent implements OnInit {
     if (Number.isNaN(desde)) desde = 0;
     if (Number.isNaN(hasta)) hasta = 0;
 
-    // normalizar rango
     if (hasta < desde) {
       const tmp = desde;
       desde = hasta;
       hasta = tmp;
     }
 
-    // límite de seguridad (ajusta si quieres)
     if (hasta - desde > 300) {
       return;
     }
@@ -99,6 +131,7 @@ export class SimuladordosComponent implements OnInit {
     const categoria = Number(f.categoria ?? 1);
     const swAdultoMayor = !!f.swAdultoMayor;
     const swAguapotable = !!f.swAguapotable;
+    const swMunicipio = !!f.swMunicipio; // ✅ ya controlado por categoría 4
 
     this.cargando = true;
     this.filasPliego = [];
@@ -112,13 +145,13 @@ export class SimuladordosComponent implements OnInit {
           categoria,
           swAdultoMayor,
           swAguapotable,
+          swMunicipio, // ✅ se envía al servicio
         };
 
         requests.push(
           firstValueFrom(this.lecturaService.getValoresSimulados(payload)).then((res: any) => ({
             ...res,
-            m3, // 👈 guardo el m3 para mostrarlo en la tabla
-            // bandera para cambiar color si es residencial y pasa de 70
+            m3,
             swCambioCategoria: categoria === this.CATEGORIA_RESIDENCIAL && m3 >= 71,
           })),
         );
@@ -134,7 +167,7 @@ export class SimuladordosComponent implements OnInit {
   }
 
   // ===============================
-  // 🎨 EXCEDENTES (si alguna fila tiene excedente)
+  // 🎨 EXCEDENTES
   // ===============================
   get hayExcedentes(): boolean {
     return this.filasPliego.some((r) => Number(r?.['Excedente'] ?? 0) > 0);
@@ -165,7 +198,6 @@ export class SimuladordosComponent implements OnInit {
     document.documentElement.style.setProperty('--bgcolor2', '#cfded2');
   }
 
-  // helper opcional para clase de fila (para el HTML)
   rowClass(row: any): any {
     return {
       'fila-cambio-cat': !!row?.swCambioCategoria,

@@ -19,14 +19,18 @@
         <!-- AP / AM -->
         <div class="d-flex align-items-center px-2 py-1 border rounded bg-light mr-2">
           <label class="mb-0 d-flex align-items-center mr-3 text-nowrap">
-            <span class="mr-1 font-weight-bold">AP</span>
+            <span class="mr-1 font-weight-bold">ALC.</span>
             <input type="checkbox" formControlName="swAguapotable">
           </label>
 
           <label class="mb-0 d-flex align-items-center text-nowrap">
-  <span class="mr-1 font-weight-bold">AM</span>
-  <input type="checkbox" formControlName="swAdultoMayor">
-</label>
+            <span class="mr-1 font-weight-bold">AM</span>
+            <input type="checkbox" formControlName="swAdultoMayor">
+          </label>
+          <label class="mb-0 d-flex align-items-center text-nowrap">
+            <span class="mr-1 font-weight-bold">MUN</span>
+            <input type="checkbox" formControlName="swMunicipio">
+          </label>
         </div>
 
         <!-- Categoría -->
@@ -97,8 +101,7 @@
 
     <tbody class="detalle">
 
-<tr *ngFor="let row of filasPliego"
-    [ngClass]="{ 'fila-exceso': row.swCambioCategoria }">
+      <tr *ngFor="let row of filasPliego" [ngClass]="{ 'fila-exceso': row.swCambioCategoria }">
         <td class="text-center font-weight-bold">{{ row.m3 }}</td>
 
         <td class="text-right">{{ row['Agua Potable'] | number:'1.2-2' }}</td>
