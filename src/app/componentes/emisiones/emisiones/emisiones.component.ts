@@ -35,6 +35,7 @@ import {
   reduce,
 } from 'rxjs/operators';
 import { from, of, firstValueFrom, forkJoin } from 'rxjs';
+import { isFunction } from 'chart.js/dist/helpers/helpers.core';
 
 @Component({
   selector: 'app-emisiones',
@@ -512,7 +513,6 @@ export class EmisionesComponent implements OnInit {
     });
   }
   async generaRutaxemisionIndividual() {
-    console.log(this.cerrado);
     if (this.cerrado === 0) {
       this.lecturaestado = 0;
       let novedad: Novedad = new Novedad();
@@ -613,7 +613,6 @@ export class EmisionesComponent implements OnInit {
       lectura.idfactura = nuevoIdfactura;
       try {
         let newLectura = await this.s_lecturas.saveLecturaAsync(lectura);
-        console.log(newLectura);
         if (this.f_lecturas.value.lecturaactual > 0) {
           await this.planilla(newLectura);
         }
@@ -630,6 +629,7 @@ export class EmisionesComponent implements OnInit {
   async planilla(lectura: Lecturas) {
     console.log(lectura);
     let emision_individual: EmisionIndividual = new EmisionIndividual();
+
     let ln = new Lecturas();
     let la = new Lecturas();
     let emi = new Emisiones();
@@ -646,6 +646,13 @@ export class EmisionesComponent implements OnInit {
           next: (d_emisionIndividual: any) => {},
           error: (e) => console.error(e),
         });
+    }
+    if (lectura.idemision >= 243) {
+      //Emisiones actuales
+      //this.s_lecturas.calcular_Valores;
+    } else {
+      //Emisiones anteriores
+      //this.s_lecturas.calcular_Valores_anteriores();
     }
 
     //this.swcalcular = true;
