@@ -16,15 +16,14 @@
 
       <div class="btn-group ml-auto mx-0">
         <!-- menú -->
-        <button type="button" class="bg-transparent border-0 dropdown-toggle text-white"
-                data-toggle="dropdown" aria-expanded="false">
+        <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
+          aria-expanded="false">
           <i class="bi-menu-button-wide text-white"></i>
         </button>
 
         <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-          <button class="dropdown-item" type="button"
-                  data-toggle="modal" data-target="#imprimir"
-                  (click)="swEmail = false">
+          <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir"
+            (click)="swEmail = false">
             <i class="bi bi-printer"></i>&nbsp; Imprimir
           </button>
 
@@ -32,21 +31,18 @@
             <i class="bi-file-earmark-arrow-down"></i>&nbsp; Exportar
           </button>
 
-          <button class="dropdown-item" type="button" disabled
-                  data-toggle="modal" data-target="#condonar">
+          <button class="dropdown-item" type="button" disabled data-toggle="modal" data-target="#condonar">
             <i class="bi bi-exclude"></i>&nbsp; Condonar deudas
           </button>
 
-          <button class="dropdown-item" type="button"
-                  (click)="swEmail = true; getSinCobro()"
-                  data-toggle="modal" data-target="#sendNotification">
+          <button class="dropdown-item" type="button" (click)="swEmail = true; getSinCobro()" data-toggle="modal"
+            data-target="#sendNotification">
             <i class="bi bi-envelope"></i>&nbsp; Enviar notificación e-mail
           </button>
         </div>
 
         <!-- regresar -->
-        <button class="bg-transparent border-0" type="button"
-                (click)="regresar()" [hidden]="swreturn">
+        <button class="bg-transparent border-0" type="button" (click)="regresar()" [hidden]="swreturn">
           <i class="bi-arrow-left-circle text-white icoRegresar"></i>
         </button>
       </div>
@@ -56,13 +52,13 @@
 </div>
 
 <!-- ===========================
-     CONTENIDO
+    CONTENIDO
 =========================== -->
 <div class="container-fluid">
   <div class="row mb-0">
 
     <!-- ===========================
-         PANEL IZQUIERDO (INFO ABONADO)
+        PANEL IZQUIERDO (INFO ABONADO)
     =========================== -->
     <div class="col-sm-3">
       <div class="card card-outline cardCliente mt-1">
@@ -115,14 +111,12 @@
           </ul>
 
           <div class="row justify-content-center" [hidden]="swreturn">
-            <button class="btn btn-warning btn-xs mx-1" type="button"
-                    (click)="modiAbonado(abonado.idabonado)">
+            <button class="btn btn-warning btn-xs mx-1" type="button" (click)="modiAbonado(abonado.idabonado)">
               <i class="fa fa-edit" style="font-size:24pxi"></i>
               Modificar
             </button>
-            <button class="btn btn-danger btn-xs mx-1"
-                    [disabled]="elimdisabled"
-                    data-toggle="modal" data-target="#modalEliminar">
+            <button class="btn btn-danger btn-xs mx-1" [disabled]="elimdisabled" data-toggle="modal"
+              data-target="#modalEliminar">
               <i class="fa fa-times-circle" style="font-size:24pxi"></i>
               Eliminar
             </button>
@@ -147,19 +141,19 @@
             </li>
             <li class="nav-item">
               <a class="nav-link cardTab" href="#historialconsumo" data-toggle="tab" role="tab"
-                 (click)="lecturasxAbonado(abonado.idabonado)">
+                (click)="lecturasxAbonado(abonado.idabonado)">
                 <i class="bi bi-graph-up"></i> Historial de Consumo
               </a>
             </li>
             <li class="nav-item">
               <a class="nav-link cardTab" href="#conveniopago" data-toggle="tab" role="tab"
-                 (click)="getConveniosPago(abonado.idabonado)">
+                (click)="getConveniosPago(abonado.idabonado)">
                 <i class="bi bi-file-earmark-text"></i> Convenios de pago
               </a>
             </li>
             <li class="nav-item">
               <a class="nav-link cardTab" href="#georeferencia" data-toggle="tab" role="tab"
-                 (click)="drawCuenta(abonado)">
+                (click)="drawCuenta(abonado)">
                 <i class="bi bi-geo-alt"></i> Ubicación
               </a>
             </li>
@@ -179,9 +173,8 @@
                   <table class="table table-hover table-sm table-bordered mb-0">
                     <caption class="small mark">
                       Últimas <strong>{{rango}}</strong> Planillas&nbsp;&nbsp;&nbsp;&nbsp;
-                      <input type="number" min="1"
-                             class="form-control form-control-sm d-inline-block w-auto"
-                             [(ngModel)]="rango" (change)="getFactura()">
+                      <input type="number" min="1" class="form-control form-control-sm d-inline-block w-auto"
+                        [(ngModel)]="rango" (change)="getFactura()">
                     </caption>
                     <thead class="theadPlanillas">
                       <tr class="text-center">
@@ -196,10 +189,8 @@
                       </tr>
                     </thead>
                     <tbody class="bodyPlanillas">
-                      <tr *ngFor="let factura of _facturas; let i = index"
-                          class="text-center fila"
-                          data-toggle="modal" data-target="#DetalleFacturaModal"
-                          (click)="getRubroxfac(factura.idfactura)">
+                      <tr *ngFor="let factura of _facturas; let i = index" class="text-center fila" data-toggle="modal"
+                        data-target="#DetalleFacturaModal" (click)="getRubroxfac(factura.idfactura)">
                         <td class="small">
                           <i class="bi bi-cash-coin text-success" [hidden]="validarpago(factura)"></i>
                           {{i+1}}
@@ -247,10 +238,8 @@
                         </tr>
                       </thead>
                       <tbody class="bodyPlanillas">
-                        <tr *ngFor="let lectura of _lecturas"
-                            class="text-center fila"
-                            data-toggle="modal" data-target="#DetalleFacturaModal"
-                            (click)="getRubroxfac(lectura.idfactura)">
+                        <tr *ngFor="let lectura of _lecturas" class="text-center fila" data-toggle="modal"
+                          data-target="#DetalleFacturaModal" (click)="getRubroxfac(lectura.idfactura)">
                           <td class="text-left small">
                             {{ lectura.idrutaxemision_rutasxemision.idemision_emisiones.emision | nombreEmision }}
                           </td>
@@ -298,8 +287,8 @@
                         </tr>
                       </thead>
                       <tbody class="bodyPlanillas">
-                        <tr *ngFor="let convenio of _convenios; let i=index"
-                            (click)="info($event, convenio.idconvenio)" class="text-center fila">
+                        <tr *ngFor="let convenio of _convenios; let i=index" (click)="info($event, convenio.idconvenio)"
+                          class="text-center fila">
                           <td>{{i+1}}</td>
                           <td>{{convenio.nroconvenio}}</td>
                           <td class="text-right">${{convenio.totalconvenio.toFixed(2)}}</td>
@@ -348,7 +337,8 @@
 <!-- ===========================
      MODAL DETALLE FACTURA (se mantiene tu lógica)
 =========================== -->
-<div class="modal fade" id="DetalleFacturaModal" tabindex="-1" aria-labelledby="DetalleFacturaModal" aria-hidden="true">
+<div class="modal fade" id="Detalle_FacturaModal" tabindex="-1" aria-labelledby="DetalleFacturaModal"
+  aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -362,13 +352,204 @@
           <i class="fa fa-spinner" aria-hidden="true"></i>
         </div>
         <ng-template #name>
-          <app-info-factura [idfac]="idfactura"></app-info-factura>
-        </ng-template>
+          <app-info-factura *ngIf="idfactura" [idfac]="idfactura">
+          </app-info-factura> </ng-template>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outline-success btn-sm" data-dismiss="modal">
           <i class="fa fa-times-circle"></i> Cerrar
         </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal DETALLE Planilla -->
+<div class="modal fade" id="DetalleFacturaModal" data-backdrop="static" tabindex="-1"
+  aria-labelledby="DetalleFacturaModal" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered dialog-scrollable modal-lg" role="document">
+    <div class="modal-content cabecera sombra">
+      <div class="modal-header cabecera sombra py-2 justify-content-center theadPlanillas">
+        <h5 class="modal-title" id="DetalleFacturaModalLabel"><strong>Planilla:</strong> {{idfactura}}</h5>
+
+        <div class="btn-group ml-auto mx-0">
+          <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
+            aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+            <button class="dropdown-item" type="button" [disabled]="factura.pagado != 1" data-toggle="modal"
+              (click)="impComprobante(factura)">
+              <i class="bi bi-printer"></i>&nbsp; Comprobante pago</button>
+            <button class="dropdown-item" type="button" [disabled]="factura.pagado != 1"
+              (click)="impFacturaElectronica(factura)">
+              <i class="bi-file-earmark-arrow-down"></i>&nbsp; Factura electrónica</button>
+            <button class="dropdown-item" (click)="active = true" *ngIf="!facElectro">Reenviar F. a Email</button>
+            <button class="dropdown-item" type="button" *ngIf="usuario===1" (click)="multaCalculate(factura.idfactura)">
+              <i class="bi bi-printer"></i>&nbsp; Multas</button>
+          </div>
+          <button class="btn btn-sm text-white" [hidden]="facElectro" (click)="facElectro = !facElectro">
+            <i class="fa fa-retweet" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+      <div class="modal-body detalle">
+
+        <!-- ====== VISTA DETALLE (tabla rubros + ficha) ====== -->
+        <div *ngIf="facElectro; else pdfelectro" class="container-fluid px-0">
+
+          <div class="row no-gutters ">
+
+            <!-- Columna izquierda: Rubros -->
+            <div class="col-12 col-lg-7 pr-lg-2 mb-2 mb-lg-0">
+              <div class="card sombra border-0 h-100">
+                <div class="card-header cabecera theadPlanillas py-2 d-flex align-items-center justify-content-between">
+                  <div class="font-weight-bold">
+                    <i class="bi bi-receipt"></i> Rubros
+                  </div>
+                  <small class="text-white-50">Detalle de cobros</small>
+                </div>
+
+                <div class="card-body p-0">
+                  <div class="table-responsive" style="max-height: 420px; overflow:auto;">
+                    <table class="table table-hover table-sm table-bordered mb-0">
+                      <thead class="theadPlanillas cabecera">
+                        <tr class="text-center">
+                          <th style="width: 40px;">#</th>
+                          <th>Rubro</th>
+                          <th style="width: 110px;">Valor</th>
+                        </tr>
+                      </thead>
+
+                      <tbody class="bodyPlanillas detalle">
+                        <tr *ngFor="let rubroxfac of _rubrosxfac; let i=index">
+                          <td class="text-center font-weight-bold small">{{i+1}}</td>
+                          <td class="description">{{ rubroxfac.idrubro_rubros.descripcion}}</td>
+                          <td class="text-right">{{ rubroxfac.valorunitario | number:'1.2-2'}}</td>
+                        </tr>
+                      </tbody>
+
+                      <tfoot>
+                        <tr>
+                          <td></td>
+                          <td class="font-weight-bold">Total</td>
+                          <td class="font-weight-bold text-right">{{ totfac | number:'1.2-2'}}</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Columna derecha: Detalles -->
+            <div class="col-12 col-lg-5 pl-lg-2">
+              <div class="card sombra border-0 h-100">
+                <div class="card-header cabecera theadPlanillas py-2 d-flex align-items-center justify-content-between">
+                  <div class="font-weight-bold">
+                    <i class="bi bi-info-circle"></i> Detalles
+                  </div>
+                  <span class="badge badge-pill badge-light px-2 py-1">
+                    {{estadoFE}}
+                  </span>
+                </div>
+
+                <div class="card-body p-0">
+                  <table class="table table-sm table-bordered mb-0">
+                    <tbody>
+                      <tr *ngIf="detalleFactura?.nrofactura">
+                        <th class="theadPlanillas" style="width: 45%;">Nro. Factura</th>
+                        <td class="bodyPlanillas">{{detalleFactura?.nrofactura}}</td>
+                      </tr>
+
+                      <tr>
+                        <th class="theadPlanillas">Cliente</th>
+                        <td class="bodyPlanillas description">{{detalleFactura?.idcliente.nombre}}</td>
+                      </tr>
+
+                      <tr *ngIf="detalleFactura?.fechaeliminacion">
+                        <th class="theadPlanillas">Fecha eliminación</th>
+                        <td class="bodyPlanillas">{{detalleFactura?.fechaeliminacion}}</td>
+                      </tr>
+
+                      <tr *ngIf="detalleFactura?.fechaanulacion">
+                        <th class="theadPlanillas">Fecha anulación</th>
+                        <td class="bodyPlanillas">{{detalleFactura?.fechaanulacion}}</td>
+                      </tr>
+
+                      <tr *ngIf="detalleFactura?.fechaconvenio">
+                        <th class="theadPlanillas">Fecha convenio</th>
+                        <td class="bodyPlanillas">{{detalleFactura?.fechaconvenio}}</td>
+                      </tr>
+
+                      <tr>
+                        <th class="theadPlanillas">Estado F.E.</th>
+                        <td class="bodyPlanillas text-center font-weight-bold">{{estadoFE}}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ====== VISTA PDF ====== -->
+        <ng-template #pdfelectro>
+          <div class="row">
+            <div class="col-12 col-lg-9 mb-2 mb-lg-0">
+              <div class="card sombra border-0">
+                <div class="card-header cabecera theadPlanillas py-2 d-flex justify-content-between align-items-center">
+                  <div class="font-weight-bold">
+                    <i class="bi bi-file-earmark-pdf"></i> Vista previa
+                  </div>
+                  <small class="text-white-50">Factura electrónica</small>
+                </div>
+                <div class="card-body p-0">
+                  <iframe id="pdfViewer" src="" width="100%" height="700px" class="pdf-frame"></iframe>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-3" *ngIf="active">
+              <div class="card sombra border-0">
+                <div class="card-header cabecera theadPlanillas py-2">
+                  <strong><i class="bi bi-envelope"></i> Enviar por email</strong>
+                </div>
+
+                <div class="card-body">
+                  <div class="form-group">
+                    <label for="mail">E-mail</label>
+                    <input type="email" [(ngModel)]="email" class="form-control form-control-sm" id="mail"
+                      placeholder="name@example.com">
+                  </div>
+
+                  <button type="button" (click)="active = false" class="btn btn-sm btn-outline-success w-100">
+                    Cancelar
+                  </button>
+
+                  <button type="button" data-dismiss="modal" (click)="sendFacturaEmail()"
+                    class="btn btn-sm btn-success w-100 mt-2">
+                    Enviar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+
+      </div>
+
+      <div class="modal-footer py-1">
+        <button type="button" class="btn btn-outline-success btn-sm" (click)="cancelarFE()" data-dismiss="modal">
+          <i class="fa fa-times-circle"></i> Cerrar</button>
+        <button type="button" class="btn btn-success btn-sm"
+          [disabled]="esFE ==='A' || esFE == 'O'  || factura.pagado === 0 || usuario != 1 "
+          (click)="expFacElectronica(idfactura)" data-dismiss="modal">
+          <i class="bi bi-send"></i> Fac. Electronica</button>
+
       </div>
     </div>
   </div>
@@ -438,7 +619,7 @@
           <div class="form-group mb-3">
             <label class="small font-weight-bold">Destinatarios</label>
             <input formControlName="receptores" class="form-control form-control-sm"
-                   placeholder="correo1@ejemplo.com, correo2@ejemplo.com" />
+              placeholder="correo1@ejemplo.com, correo2@ejemplo.com" />
             <small class="form-text text-muted">Separar múltiples correos con comas</small>
           </div>
 
@@ -450,15 +631,14 @@
           <div class="form-group mb-3">
             <label class="small font-weight-bold">Mensaje</label>
             <textarea formControlName="mensaje" class="form-control form-control-sm" rows="4"
-                      placeholder="Escriba el contenido del mensaje..."></textarea>
+              placeholder="Escriba el contenido del mensaje..."></textarea>
           </div>
 
           <div class="form-group mb-0">
             <label class="small font-weight-bold">Archivo Adjunto</label>
             <div class="custom-file">
-              <input type="file" (change)="onFileChange($event)"
-                     class="custom-file-input" id="inputGroupFile01"
-                     aria-describedby="inputGroupFileAddon01">
+              <input type="file" (change)="onFileChange($event)" class="custom-file-input" id="inputGroupFile01"
+                aria-describedby="inputGroupFileAddon01">
               <label class="custom-file-label" for="inputGroupFile01">
                 {{nameFile || 'Seleccionar archivo...'}}
               </label>

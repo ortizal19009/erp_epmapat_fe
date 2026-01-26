@@ -15,7 +15,7 @@ import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
   styleUrls: ['./info-factura.component.css'],
 })
 export class InfoFacturasComponent implements OnInit {
-  idFactura: number;
+  idFactura: number = 0;
   planilla = {} as Planilla; //Interface para los datos del registro de la Facturación
   _rubroxfac: any;
   suma12: number;
@@ -23,7 +23,7 @@ export class InfoFacturasComponent implements OnInit {
   valoriva: number;
   _impuesto: Impuestos = new Impuestos();
   interes: any = 0;
-  @Input() idfac: any;
+  @Input() idfac: any = null;
   swreturn: boolean = true;
   datos: boolean = true;
   idusuario: number;
@@ -39,6 +39,7 @@ export class InfoFacturasComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    console.log(this.idfac);
     this.idusuario = this.authorizaService.idusuario;
     this.idFactura = +sessionStorage.getItem('idfacturaToInfo')!;
     sessionStorage.removeItem('idfacturaToInfo');

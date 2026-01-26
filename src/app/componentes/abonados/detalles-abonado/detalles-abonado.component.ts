@@ -46,7 +46,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
   elimdisabled = true;
   _rubrosxfac: any;
   totfac: number;
-  idfactura: number;
+  idfactura: number = 0;
   grafic: Boolean = false;
   f_sendEmail: FormGroup;
 
@@ -346,6 +346,8 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
 
   async getRubroxfac(idfactura: number) {
     this.idfactura = idfactura;
+    this._rubrosxfac = [];
+    this.factura = new Facturas();
     this.detalleFactura = await this.facService.getByIdAsync(idfactura);
     this.rubxfacService.getByIdfactura(+idfactura!).subscribe({
       next: (detalle: any) => {
