@@ -647,13 +647,6 @@ export class EmisionesComponent implements OnInit {
           error: (e) => console.error(e),
         });
     }
-    if (lectura.idemision >= 243) {
-      //Emisiones actuales
-      //this.s_lecturas.calcular_Valores;
-    } else {
-      //Emisiones anteriores
-      //this.s_lecturas.calcular_Valores_anteriores();
-    }
 
     //this.swcalcular = true;
     let categoria =
@@ -677,6 +670,31 @@ export class EmisionesComponent implements OnInit {
     if (categoria == 4 && municipio) {
       swmunicipio = true;
     }
+    let body: any = {
+      idemision: lectura.idemision,
+      cuenta: lectura.idabonado_abonados.idabonado,
+      idfactura: lectura.idfactura,
+      m3: lectura.lecturaanterior - lectura.lecturaactual,
+      categoria: lectura.idcategoria,
+      swMunicipio: lectura.idabonado_abonados.municipio,
+      swAdultoMayor: lectura.idabonado_abonados.municipio,
+      swAguapotable: lectura.idabonado_abonados.swalcantarillado,
+    };
+    if (lectura.idemision >= 243) {
+      //Emisiones actuales
+      this.s_lecturas.calcular_Valores(body).subscribe({
+        next: (datos: any) => {},
+        error: (e: any) => console.error(e.error),
+      });
+    } else {
+      //Emisiones anteriores
+      //this.s_lecturas.calcular_Valores_anteriores();
+      this.s_lecturas.calcular_Valores_anteriores(body).subscribe({
+        next: (datos: any) => {},
+        error: (e: any) => console.error(e.error),
+      });
+    }
+
     // Obtiene la tarifa del nuevo Pliego
     this.pli24Service.getBloque(categoria, consumo).subscribe({
       next: async (resp) => {
