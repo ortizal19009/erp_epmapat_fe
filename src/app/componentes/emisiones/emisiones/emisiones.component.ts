@@ -696,7 +696,7 @@ export class EmisionesComponent implements OnInit {
     }
 
     // Obtiene la tarifa del nuevo Pliego
-    this.pli24Service.getBloque(categoria, consumo).subscribe({
+   /*  this.pli24Service.getBloque(categoria, consumo).subscribe({
       next: async (resp) => {
         if (!resp) {
           //No hay Tarifa para esta Categoría y Consumo
@@ -850,7 +850,7 @@ export class EmisionesComponent implements OnInit {
         factu.valorbase = calcular;
         console.log(calcular);
         console.log(factu); */
-        this.facService.getById(this.idfactura).subscribe({
+        /*this.facService.getById(this.idfactura).subscribe({
           next: async (factura: any) => {
             factura.totaltarifa = calcular;
             factura.valorbase = calcular;
@@ -860,7 +860,7 @@ export class EmisionesComponent implements OnInit {
         });
       },
       error: (err) => console.error(err.error),
-    });
+    }); */
   }
   getAllNovedades() {
     this.s_novedades.getAll().subscribe({

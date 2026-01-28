@@ -508,7 +508,7 @@ export class RecargosxcuentaComponent implements OnInit {
           idabonado: s.idabonado,
           tipo: 1,
           idemision: this.lastEmision.idemision,
-          idrubro: 2154,
+          idrubro: 2156,
           observacion: 'NOTIFICACIÓN GENERADA DESDE SISTEMA',
           usucrea: usuarioCrea,
           feccrea: ahora.toISOString(),
