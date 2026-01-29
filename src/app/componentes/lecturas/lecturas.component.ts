@@ -57,7 +57,7 @@ export class LecturasComponent implements OnInit {
   swmulta: boolean;
   vecmultas: boolean[] = [];
   rubros: any = [];
-  totalcalc: number;
+  totalcalc: number = 0;
   m3: number;
   /* mostrar historial de consumo */
   idabonado: any;
@@ -348,6 +348,7 @@ export class LecturasComponent implements OnInit {
   }
 
   arecaudar(lectura: any, fila: number) {
+    this.totalcalc = 0;
     this.antIndice = fila;
     this.cuenta = lectura.idabonado_abonados.idabonado;
     let categoria =
@@ -471,70 +472,25 @@ export class LecturasComponent implements OnInit {
 
   //Calcula los valores a recaudar
   async calcular() {
+    this.totalcalc = 0;
     for (let i = 0; i < this._lecturas.length; i++) {
       let categoria =
         this._lecturas[i].idabonado_abonados.idcategoria_categorias.idcategoria;
       let consumo =
         this._lecturas[i].lecturaactual - this._lecturas[i].lecturaanterior;
       let adultomayor = this._lecturas[i].idabonado_abonados.adultomayor;
-      if (adultomayor && categoria == 9 && consumo > 34) categoria = 1;
-      if (adultomayor && categoria == 9 && consumo <= 34) categoria = 9;
-      if (!adultomayor && categoria == 9 && consumo > 10) categoria = 1;
-      if (categoria == 9 && consumo > 34) categoria = 1;
-      if (categoria == 1 && consumo > 70) categoria = 2;
       let municipio = this._lecturas[i].idabonado_abonados.municipio;
-      let swcate9: boolean = false;
-      if (categoria == 9) {
-        categoria = 1;
-        swcate9 = true;
-      }
-      let swmunicipio: boolean = false;
-      if (categoria == 4 && municipio) {
-        swmunicipio = true;
-      }
-      let num1: number;
-      await this.getTarifa(categoria, consumo);
-      if (categoria == 1) {
-        num1 =
-          Math.round(
-            (this.tarifa[0].idcategoria.fijoagua - 0.1) *
-              this.porcResidencial[consumo] *
-              100,
-          ) / 100;
-      } else {
-        num1 =
-          Math.round(
-            (this.tarifa[0].idcategoria.fijoagua - 0.1) *
-              this.tarifa[0].porc *
-              100,
-          ) / 100;
-      }
-      let num2 =
-        Math.round(
-          (this.tarifa[0].idcategoria.fijosanea - 0.5) *
-            this.tarifa[0].porc *
-            100,
-        ) / 100;
-      let num3 =
-        Math.round(consumo * this.tarifa[0].agua * this.tarifa[0].porc * 100) /
-        100;
-      let num4 =
-        Math.round(
-          ((consumo * this.tarifa[0].saneamiento) / 2) *
-            this.tarifa[0].porc *
-            100,
-        ) / 100;
-      let num5 =
-        Math.round(
-          ((consumo * this.tarifa[0].saneamiento) / 2) *
-            this.tarifa[0].porc *
-            100,
-        ) / 100;
-      let num7 = Math.round(0.5 * this.tarifa[0].porc * 100) / 100;
-      let suma: number = 0;
-      suma =
-        Math.round((num1 + num2 + num3 + num4 + num5 + 0.1 + num7) * 100) / 100;
-      if (swcate9 || swmunicipio) suma = Math.round((suma / 2) * 100) / 100;
+      let body: any = {
+        m3: consumo,
+        categoria: categoria,
+        swMunicipio: municipio,
+        swAdultoMayor: adultomayor,
+        swAguapotable: this._lecturas[i].idabonado_abonados.swalcantarillado,
+      };
+
+      let suma = 0;
+      let calculos: any = await this.lecService.getValoresSimulados_asyc(body);
+      suma = calculos.Total;
       this.totalcalc = suma;
       this._lecturas[i].total1 = suma;
       await this.updateLectura(this._lecturas[i].idlectura, this._lecturas[i]);

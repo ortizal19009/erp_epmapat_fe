@@ -116,7 +116,6 @@ export class RecargosxcuentaComponent implements OnInit {
       .getRecargosxcuentaByEmision(idemision)
       .subscribe({
         next: (datos: any) => {
-          console.log(datos);
           this._recargosxcuenta = datos;
         },
         error: (e: any) => console.error(e.error),
@@ -250,8 +249,10 @@ export class RecargosxcuentaComponent implements OnInit {
   }
 
   cargarUsuario(): void {
-    this.usuarioService.getByCargos(46).subscribe({
-      next: (datos: any) => (this._usuarios = datos ?? []),
+    this.usuarioService.getByCargos([45, 46]).subscribe({
+      next: (datos: any) => {
+        this._usuarios = datos ?? [];
+      },
       error: (e: any) => console.error(e?.error ?? e),
     });
   }
@@ -429,12 +430,6 @@ export class RecargosxcuentaComponent implements OnInit {
     this.refreshSelectedList();
   }
 
-  /**
-   * ✅ payload desde store (todas páginas)
-   * ✅ valida usuarioId requerido
-   * ✅ usuresp = usuarioId seleccionado
-   * ✅ fecha = fechaNotificaStr
-   */
   procesarSeleccionados(): void {
     if (!this.lastEmision) {
       this.swal('warning', 'Debe seleccionar una emisión.');

@@ -11,7 +11,7 @@ const baseUrl = `${apiUrl}/lecturas`;
   providedIn: 'root',
 })
 export class LecturasService {
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   //Lectura por Planilla
   getOnefactura(idfactura: number) {
@@ -20,13 +20,18 @@ export class LecturasService {
 
   getLecturas(idrutaxemision: Number) {
     return this.http.get<Lecturas>(
-      `${baseUrl}?idrutaxemision=${idrutaxemision}`
+      `${baseUrl}?idrutaxemision=${idrutaxemision}`,
+    );
+  }
+    get_Lecturas(idrutaxemision: Number) {
+    return this.http.get<Lecturas[]>(
+      `${baseUrl}?idrutaxemision=${idrutaxemision}`,
     );
   }
 
   getLecturasxIdabonado(idabonado: number, limit: number) {
     return this.http.get<Lecturas>(
-      `${baseUrl}?idabonado=${idabonado}&limit=${limit}`
+      `${baseUrl}?idabonado=${idabonado}&limit=${limit}`,
     );
   }
 
@@ -56,23 +61,23 @@ export class LecturasService {
   }
   async getByIdfacturaAsync(idfactura: number) {
     return await firstValueFrom(
-      this.http.get<Lecturas[]>(`${baseUrl}/planilla/${idfactura}`)
+      this.http.get<Lecturas[]>(`${baseUrl}/planilla/${idfactura}`),
     );
   }
 
   //Ultima lectura de un Abonado async
   async getUltimaLecturaAsync(idabonado: number): Promise<number> {
     const observable = this.http.get<number>(
-      `${baseUrl}/ultimalectura?idabonado=${idabonado}`
+      `${baseUrl}/ultimalectura?idabonado=${idabonado}`,
     );
     return await firstValueFrom(observable);
   }
   async getUltimaLecturaByEmisionAsync(
     idabonado: number,
-    idemision: number
+    idemision: number,
   ): Promise<number> {
     const observable = this.http.get<number>(
-      `${baseUrl}/ultimalecturaByemision?idabonado=${idabonado}&idemision=${idemision}`
+      `${baseUrl}/ultimalecturaByemision?idabonado=${idabonado}&idemision=${idemision}`,
     );
     return await firstValueFrom(observable);
   }
@@ -96,7 +101,7 @@ export class LecturasService {
   //Actualiza una lectura async
   async updateLecturaAsync(
     idlectura: number,
-    lectura: Lecturas
+    lectura: Lecturas,
   ): Promise<Object> {
     const observable = this.http.put(baseUrl + '/' + idlectura, lectura);
     return await firstValueFrom(observable);
@@ -114,17 +119,17 @@ export class LecturasService {
   }
   getByIdEmisionIdabonado(idemision: number, idabonado: number) {
     return this.http.get<Lecturas[]>(
-      `${baseUrl}/emision/${idemision}/${idabonado}`
+      `${baseUrl}/emision/${idemision}/${idabonado}`,
     );
   } /* REPORTES  */
   getR_EmisionFinal(idemision: number) {
     return this.http.get<any>(
-      `${baseUrl}/reportes/emisionfinal?idemision=${idemision}`
+      `${baseUrl}/reportes/emisionfinal?idemision=${idemision}`,
     );
   }
   getR_EmisionActual(idemision: number) {
     return this.http.get<any>(
-      `${baseUrl}/reportes/emisionactual?idemision=${idemision}`
+      `${baseUrl}/reportes/emisionactual?idemision=${idemision}`,
     );
   }
   /* Obtener facturas por ruta deudas */
@@ -144,42 +149,42 @@ export class LecturasService {
   /* Reporte de emisiones */
   findInicial(idemision: number) {
     return this.http.get(
-      `${baseUrl}/reportes/rubros/inicial?idemision=${idemision}`
+      `${baseUrl}/reportes/rubros/inicial?idemision=${idemision}`,
     );
   }
   findCM3Inicial(idemision: number) {
     return this.http.get(
-      `${baseUrl}/reportes/rubros/inicial/cm3?idemision=${idemision}`
+      `${baseUrl}/reportes/rubros/inicial/cm3?idemision=${idemision}`,
     );
   }
   findEliminados(idemision: number) {
     return this.http.get(
-      `${baseUrl}/reportes/rubros/eliminados?idemision=${idemision}`
+      `${baseUrl}/reportes/rubros/eliminados?idemision=${idemision}`,
     );
   }
   findNuevos(idemision: number) {
     return this.http.get(
-      `${baseUrl}/reportes/rubros/nuevos?idemision=${idemision}`
+      `${baseUrl}/reportes/rubros/nuevos?idemision=${idemision}`,
     );
   }
   findActual(idemision: number) {
     return this.http.get(
-      `${baseUrl}/reportes/rubros/actual?idemision=${idemision}`
+      `${baseUrl}/reportes/rubros/actual?idemision=${idemision}`,
     );
   }
   findReporteValEmitidosxEmision(idemision: number) {
     return this.http.get(
-      `${baseUrl}/reportes/valoresEmitidos?idemision=${idemision}`
+      `${baseUrl}/reportes/valoresEmitidos?idemision=${idemision}`,
     );
   }
   findConsumoxCategoria(idemision: number) {
     return this.http.get(
-      `${baseUrl}/reportes/consumoxcategoria?idemision=${idemision}`
+      `${baseUrl}/reportes/consumoxcategoria?idemision=${idemision}`,
     );
   }
   async findZeroByEmisiones(idemision: number) {
     return this.http.get<any>(
-      `${baseUrl}/reportes/rubrozero?idemision=${idemision}`
+      `${baseUrl}/reportes/rubrozero?idemision=${idemision}`,
     );
   }
 
@@ -194,13 +199,22 @@ export class LecturasService {
   }
   getDuplicados(idemision: number, top: number): Observable<Object> {
     return this.http.get(
-      `${baseUrl}/duplicatos-emision?idemision=${idemision}&top=${top}`
+      `${baseUrl}/duplicatos-emision?idemision=${idemision}&top=${top}`,
     );
   }
   getPendientesByCliente(idcliente: number) {
     return this.http.get<any[]>(`${baseUrl}/preview/lecturas/${idcliente}`);
   }
   getValoresSimulados(datos: any) {
-    return this.http.get(`${baseUrl}/simular?m3=${datos.m3}&categoria=${datos.categoria}&swMunicipio=${datos.swMunicipio}&swAdultoMayor=${datos.swAdultoMayor}&swAguapotable=${datos.swAguapotable}`)
+    return this.http.get(
+      `${baseUrl}/simular?m3=${datos.m3}&categoria=${datos.categoria}&swMunicipio=${datos.swMunicipio}&swAdultoMayor=${datos.swAdultoMayor}&swAguapotable=${datos.swAguapotable}`,
+    );
+  }
+  async getValoresSimulados_asyc(datos: any): Promise<any> {
+    return firstValueFrom(
+      this.http.get(
+        `${baseUrl}/simular?m3=${datos.m3}&categoria=${datos.categoria}&swMunicipio=${datos.swMunicipio}&swAdultoMayor=${datos.swAdultoMayor}&swAguapotable=${datos.swAguapotable}`,
+      ),
+    );
   }
 }

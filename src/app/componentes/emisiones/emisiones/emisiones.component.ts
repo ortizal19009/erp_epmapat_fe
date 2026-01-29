@@ -243,6 +243,7 @@ export class EmisionesComponent implements OnInit {
 
   //Buscas las Rutas de la emisión seleccionada (Recibe la emisión y el indice seleccionado)
   info(emision: any, indiEmi: number) {
+    this.totalSuma = 0;
     this.showDiv = true;
     sessionStorage.setItem('showDiv', 'true');
     sessionStorage.setItem('indiEmi', indiEmi.toString());
@@ -256,6 +257,7 @@ export class EmisionesComponent implements OnInit {
         this.s_lecturas.rubrosEmitidos(this.idemision).subscribe({
           next: (datos: any) => {
             datos.forEach((item: any) => {
+            console.log(item)
               if (item[0] != 5) {
                 this.totalSuma += item[2];
               }
@@ -696,7 +698,7 @@ export class EmisionesComponent implements OnInit {
     }
 
     // Obtiene la tarifa del nuevo Pliego
-   /*  this.pli24Service.getBloque(categoria, consumo).subscribe({
+    /*  this.pli24Service.getBloque(categoria, consumo).subscribe({
       next: async (resp) => {
         if (!resp) {
           //No hay Tarifa para esta Categoría y Consumo
@@ -850,7 +852,7 @@ export class EmisionesComponent implements OnInit {
         factu.valorbase = calcular;
         console.log(calcular);
         console.log(factu); */
-        /*this.facService.getById(this.idfactura).subscribe({
+    /*this.facService.getById(this.idfactura).subscribe({
           next: async (factura: any) => {
             factura.totaltarifa = calcular;
             factura.valorbase = calcular;

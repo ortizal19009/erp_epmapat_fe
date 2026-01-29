@@ -57,7 +57,9 @@ export class UsuarioService {
   save(usuario: any) {
     return this.http.post(`${baseUrl}`, usuario);
   }
-  getByCargos(idcargo: any): Observable<any> {
-    return this.http.get<any>(`${baseUrl}/cargo?idcargo=${idcargo}`);
-  }
+getByCargos(ids: number[]): Observable<any> {
+  const params = ids.join(',');
+  return this.http.get<any>(`${baseUrl}/cargo?ids=${params}`);
+}
+
 }

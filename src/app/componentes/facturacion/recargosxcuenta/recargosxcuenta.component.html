@@ -178,7 +178,7 @@
                   (ngModelChange)="onUsuarioChange($event)">
 
                 <datalist id="usuariosDatalist">
-                  <option *ngFor="let u of _usuarios" [value]="u.nomusu"></option>
+                  <option *ngFor="let u of _usuarios" [value]="u.nomusu">{{u.cargo}}</option>
                 </datalist>
 
                 <small class="text-danger" *ngIf="usuarioNombre && !usuarioId">
