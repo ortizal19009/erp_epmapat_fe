@@ -155,7 +155,6 @@ export class EmisionesComponent implements OnInit {
     let hasta: String;
     this.emiService.ultimo().subscribe({
       next: (datos) => {
-        console.log(datos);
         this.fechaemision = datos.feccrea;
         this.cerrado = datos.estado;
         hasta = datos.emision;
@@ -257,7 +256,6 @@ export class EmisionesComponent implements OnInit {
         this.s_lecturas.rubrosEmitidos(this.idemision).subscribe({
           next: (datos: any) => {
             datos.forEach((item: any) => {
-            console.log(item)
               if (item[0] != 5) {
                 this.totalSuma += item[2];
               }
@@ -390,7 +388,6 @@ export class EmisionesComponent implements OnInit {
   nuevo() {
     this.emiService.ultimo().subscribe({
       next: (datos) => {
-        console.log(datos);
         let nuevoaño: string;
         let nuevomes: string;
         let año = datos.emision.substring(0, 2);
@@ -529,7 +526,6 @@ export class EmisionesComponent implements OnInit {
         .getByEmisionRuta(emision.idemision, ruta.idruta)
         .subscribe({
           next: (datos: any) => {
-            console.log(datos);
             rutasxemision = datos;
             this.generaLecturaIndividual(rutasxemision, novedad);
             if (datos.idemision_emisiones.estado === 1) {
@@ -629,7 +625,6 @@ export class EmisionesComponent implements OnInit {
     this.getEmisionIndividualByIdEmision(this.emision);
   }
   async planilla(lectura: Lecturas) {
-    console.log(lectura);
     let emision_individual: EmisionIndividual = new EmisionIndividual();
 
     let ln = new Lecturas();
@@ -2113,17 +2108,12 @@ export class EmisionesComponent implements OnInit {
       const datos: any = await this.s_lecturas
         .getDuplicados(240, 6)
         .toPromise();
-      console.log('Duplicados:', datos);
-
       for (const item of datos) {
-        console.log('Procesando item:', item);
         const resultado = await this.s_lecturas
           .calcular_Valores(item)
           .toPromise();
-        console.log('Resultado:', resultado);
       }
 
-      console.log('✅ Todos los cálculos terminados');
     } catch (err) {
       console.error('Error:', err);
     }
