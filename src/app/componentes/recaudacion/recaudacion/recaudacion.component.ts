@@ -1444,7 +1444,7 @@ export class RecaudacionComponent implements OnInit {
       newTab.location.href = fileURL;
 
       this.swal('success', 'PDF unificado generado.');
-      setTimeout(() => URL.revokeObjectURL(fileURL), 5000);
+      setTimeout(() => URL.revokeObjectURL(fileURL), 10000);
     } catch (e) {
       console.error(e);
       this.swal('error', 'No se pudo generar el PDF unificado.');

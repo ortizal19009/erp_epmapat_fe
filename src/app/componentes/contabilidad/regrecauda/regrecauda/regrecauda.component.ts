@@ -57,7 +57,7 @@ export class RegrecaudaComponent implements OnInit {
       this.swbuscando = true;
       this.txtbuscar = 'Buscando';
       let fecha = this.formBuscar.value.fecha;
-      let hasta = '2023-12-31'
+      let hasta = '2025-12-31'
       try {
          this._cobradas = await this.rxfService.getTotalRubrosActualAsync(fecha, hasta);
          // console.log('this._cobradas: ', this._cobradas)
