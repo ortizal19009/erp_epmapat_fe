@@ -1,0 +1,128 @@
+<div class="card shadow-sm border-0">
+  <div class="card-header bg-white d-flex align-items-center">
+    <div>
+      <div class="fw-bold">Importar Emitidos Autorizados (SRI)</div>
+      <div class="text-muted small" *ngIf="archivoNombre">
+        Archivo: <span class="fw-semibold">{{ archivoNombre }}</span>
+      </div>
+    </div>
+
+    <div class="ms-auto d-flex gap-2 align-items-center">
+      <span class="badge bg-success">Válidos: {{ totalOk }}</span>
+      <span class="badge bg-danger">Errores: {{ totalErr }}</span>
+      <button class="btn btn-outline-secondary btn-sm" (click)="limpiar()" [disabled]="cargando || cargandoProcesamiento">
+        Limpiar
+      </button>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="row g-2 align-items-end">
+      <div class="col-12 col-lg-5">
+        <label class="form-label small text-muted mb-1">Archivo TXT</label>
+        <input class="form-control" type="file" accept=".txt" (change)="onFileSelected($event)" />
+      </div>
+
+      <div class="col-12 col-lg-3">
+        <label class="form-label small text-muted mb-1">Buscar</label>
+        <input class="form-control" type="text" [(ngModel)]="q" placeholder="Serie, clave, fecha..." />
+      </div>
+
+      <div class="col-6 col-lg-2">
+        <div class="form-check mt-4">
+          <input class="form-check-input" type="checkbox" [(ngModel)]="soloErrores" id="soloErr" />
+          <label class="form-check-label" for="soloErr">Solo errores</label>
+        </div>
+      </div>
+
+      <div class="col-6 col-lg-2 text-end">
+        <button class="btn btn-primary w-100"
+                (click)="procesarSeleccionadas()"
+                [disabled]="rows.length===0 || cargando || cargandoProcesamiento || cargandoEnriquecimiento">
+          <span *ngIf="!cargandoProcesamiento">Procesar</span>
+          <span *ngIf="cargandoProcesamiento">Procesando...</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="mt-3">
+      <div *ngIf="cargando" class="alert alert-info py-2 mb-2">Leyendo archivo...</div>
+      <div *ngIf="cargandoEnriquecimiento" class="alert alert-warning py-2 mb-2">Buscando facturas en ERP...</div>
+    </div>
+
+    <div class="table-responsive mt-2" *ngIf="rowsFiltradas.length > 0">
+      <table class="table table-sm table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th style="width:40px">#</th>
+            <th>Serie</th>
+            <th style="min-width:220px">Clave acceso</th>
+            <th>Emisión</th>
+            <th>Autorización</th>
+
+            <th class="text-end">Sin imp.</th>
+            <th class="text-end">IVA</th>
+            <th class="text-end">Total</th>
+
+            <th style="width:110px">ID Fact.</th>
+            <th style="min-width:140px">Fecha cobro</th>
+
+            <th style="min-width:160px">Estado</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let r of rowsFiltradas; let i = index"
+              [class.table-danger]="r.valido===false || r.estadoProceso==='ERROR'"
+              [class.table-warning]="r.estadoProceso==='NO_ENCONTRADA'"
+              [class.table-success]="r.estadoProceso==='ACTUALIZADA'">
+
+            <td class="text-muted">{{ i + 1 }}</td>
+
+            <td class="fw-semibold">{{ r.serie_comprobante }}</td>
+
+            <td style="max-width: 280px; word-break: break-all">
+              <span class="font-monospace small">{{ r.clave_acceso }}</span>
+              <button class="btn btn-link btn-sm p-0 ms-2" (click)="copiar(r.clave_acceso)" title="Copiar">copiar</button>
+            </td>
+
+            <td>{{ r.fecha_emision }}</td>
+            <td>{{ r.fecha_autorizacion }}</td>
+
+            <td class="text-end">{{ r.valor_sin_impuestos | number:'1.2-2' }}</td>
+            <td class="text-end">{{ r.iva | number:'1.2-2' }}</td>
+            <td class="text-end fw-semibold">{{ r.importe_total | number:'1.2-2' }}</td>
+
+            <td class="text-center">
+              <span *ngIf="r.idfactura; else noid" class="badge bg-secondary">{{ r.idfactura }}</span>
+              <ng-template #noid><span class="text-muted">—</span></ng-template>
+            </td>
+
+            <td>
+              <span *ngIf="r.fechacobro; else nocobro">{{ r.fechacobro }}</span>
+              <ng-template #nocobro><span class="text-muted">—</span></ng-template>
+            </td>
+
+            <td>
+              <span class="badge"
+                    [ngClass]="{
+                      'bg-secondary': r.estadoProceso==='PENDIENTE' || r.estadoProceso==='ENCONTRADA',
+                      'bg-warning text-dark': r.estadoProceso==='NO_ENCONTRADA' || r.estadoProceso==='SALTADA',
+                      'bg-success': r.estadoProceso==='ACTUALIZADA',
+                      'bg-danger': r.estadoProceso==='ERROR'
+                    }">
+                {{ r.estadoProceso || 'PENDIENTE' }}
+              </span>
+              <div class="small text-muted mt-1" *ngIf="r.msg">{{ r.msg }}</div>
+              <div class="small text-danger mt-1" *ngIf="r.error">{{ r.error }}</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="rowsFiltradas.length===0 && !cargando" class="text-muted mt-3">
+      Selecciona el archivo .txt descargado del SRI para visualizarlo.
+    </div>
+  </div>
+</div>

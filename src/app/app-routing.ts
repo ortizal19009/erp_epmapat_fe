@@ -276,6 +276,7 @@ import { AuthGuard } from './servicios/administracion/auth-guard';
 import { CliDuplicadosComponent } from './componentes/clientes/cli-duplicados/cli-duplicados.component';
 import { RutaToLectorComponent } from './componentes/rutas/ruta-to-lector/ruta-to-lector.component';
 import { RecargosxcuentaComponent } from './componentes/facturacion/recargosxcuenta/recargosxcuenta.component';
+import { SriEmitidosImportComponent } from './componentes/facelectro/sri-emitidos-import/sri-emitidos-import.component';
 
 const routes: Routes = [
   //Consumo de Agua
@@ -461,6 +462,7 @@ const routes: Routes = [
     component: DetallePlanillaComponent,
     canActivate: [AuthGuard],
   },
+  {path: 'sri-txt', component:SriEmitidosImportComponent, canActivate:[AuthGuard]},
   //Productos (Tabla catalogoitems)
   {
     path: 'catalogoitems',

@@ -21,6 +21,9 @@ const baseUrl = `${apiUrl}/fec_factura`;
   providedIn: 'root',
 })
 export class FecfacturaService {
+  httpGet(API_XML_AUTORIZADO: string, arg1: { claveAcceso: string; }): Observable<unknown> {
+    throw new Error('Method not implemented.');
+  }
   empresa: any;
   //formExportar: FormGroup;
   swbotones: boolean = false;

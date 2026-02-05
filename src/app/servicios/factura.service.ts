@@ -48,6 +48,9 @@ export class FacturaService {
     );
   }
 
+  async_getByNrofactura(nrofactura: String):Promise<any> {
+    return firstValueFrom(this.http.get<any>(`${baseUrl}/nrofactura?nrofactura=${nrofactura}`));
+  }
   //Facturas por Cliente
   getByIdcliente(idcliente: number, long: number) {
     return this.http.get<Facturas>(`${baseUrl}?idcliente=${idcliente}&limit=${long}`);
