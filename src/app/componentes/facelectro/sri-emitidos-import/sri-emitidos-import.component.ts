@@ -308,4 +308,31 @@ export class SriEmitidosImportComponent {
         );
       });
   }
+  limpiar(): void {
+  this.rows = [];
+  this.headers = [];
+  this.q = '';
+  this.soloErrores = false;
+  this.archivoNombre = '';
+}
+
+async copiar(texto: string): Promise<void> {
+  if (!texto) return;
+
+  try {
+    await navigator.clipboard.writeText(texto);
+    // Si quieres, aquí puedes mostrar un toast o alert pequeño
+    // alert('Copiado');
+  } catch {
+    // Fallback por si el navegador bloquea clipboard
+    const ta = document.createElement('textarea');
+    ta.value = texto;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+}
+
+
 }
