@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Fecfactura } from '../modelos/fecfactura.model';
 import { Observable, firstValueFrom, from, interval } from 'rxjs';
@@ -99,6 +99,24 @@ export class FecfacturaService {
   //Save
   save(f: Fecfactura) {
     return this.http.post(`${baseUrl}`, f);
+  }
+  // PATCH parcial (claveacceso, xmlautorizado, estado, errores)
+  patchSri(
+    idfactura: number,
+    payload: { claveacceso?: string; xmlautorizado?: string; estado?: string; errores?: string }
+  ): Observable<any> {
+    return this.http.patch(`${baseUrl}/sri`, payload, {
+      params: new HttpParams().set('idfactura', idfactura),
+    });
+  }
+
+
+  // Traer XML autorizado (tu endpoint externo/controlador SRI)
+  getXmlAutorizado(url: string, claveAcceso: string): Observable<string> {
+    return this.http.get(url, {
+      params: new HttpParams().set('claveAcceso', claveAcceso),
+      responseType: 'text', // CLAVE: para que no intente parsear JSON
+    });
   }
   updateFecFactura(fecfactura: any) {
     return this.http.put(`${baseUrl}/${fecfactura.idfactura}`, fecfactura);

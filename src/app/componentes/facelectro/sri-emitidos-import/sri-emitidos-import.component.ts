@@ -23,17 +23,49 @@ export class SriEmitidosImportComponent {
   q = '';
   soloErrores = false;
   detectarCabecera: any = true;
-
   archivoNombre = '';
 
-  // endpoint para traer XML autorizado (ajusta)
   private API_XML_AUTORIZADO = 'http://192.168.0.165:8080/api/singsend/autorizacion';
 
   constructor(
     private facturaService: FacturaService,
-    private fec_facturaService: FecfacturaService,
+    private fecFacturaService: FecfacturaService
   ) {}
 
+  // =========================
+  // UI helpers
+  // =========================
+limpiar(): void {
+  this.rows = [];
+  this.headers = [];
+  this.q = '';
+  this.soloErrores = false;
+  this.archivoNombre = '';
+
+  this.totalEnriq = 0;
+  this.doneEnriq = 0;
+  this.totalProc = 0;
+  this.doneProc = 0;
+}
+
+
+  async copiar(texto: string): Promise<void> {
+    if (!texto) return;
+    try {
+      await navigator.clipboard.writeText(texto);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = texto;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+  }
+
+  // =========================
+  // 1) Cargar TXT + Parse + Enriquecer
+  // =========================
   async onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -47,13 +79,17 @@ export class SriEmitidosImportComponent {
     try {
       const text = await file.text();
       this.parseTxt(text);
+
+      // DEBUG: confirma que sí cargó filas
+      console.log('Filas parseadas:', this.rows.length, this.rows.slice(0, 3));
     } catch (e) {
+      console.error(e);
       alert('No se pudo leer el archivo');
     } finally {
       this.cargando = false;
     }
 
-    // Enriquecer: buscar en ERP por cada fila
+    // Enriquecer
     await this.enriquecerConFacturaERP();
   }
 
@@ -62,21 +98,25 @@ export class SriEmitidosImportComponent {
       .replace(/\r\n/g, '\n')
       .replace(/\r/g, '\n')
       .split('\n')
-      .map((l) => l.trim())
-      .filter((l) => l.length > 0);
+      .map(l => l.trim())
+      .filter(l => l.length > 0);
 
-    if (lines.length === 0) return;
+    if (lines.length === 0) {
+      this.rows = [];
+      return;
+    }
 
+    // OJO: el TXT del SRI a veces viene separado por TAB o | o ;
     const delimiter = this.detectDelimiter(lines[0]);
-    let startIndex = 0;
 
+    let startIndex = 0;
     if (this.detectarCabecera) {
       const firstCols = this.splitLine(lines[0], delimiter);
-      const hasHeader = firstCols.some((c) =>
-        /comprobante|serie|clave|autoriz|emisi|iva|importe|total/i.test(c),
+      const hasHeader = firstCols.some(c =>
+        /comprobante|serie|clave|autoriz|emisi|iva|importe|total/i.test(c)
       );
       if (hasHeader) {
-        this.headers = firstCols.map((h) => h.trim());
+        this.headers = firstCols.map(h => h.trim());
         startIndex = 1;
       }
     }
@@ -112,7 +152,10 @@ export class SriEmitidosImportComponent {
           importe_total: 0,
           raw,
           valido: false,
-          error: `Fila ${i + 1}: columnas insuficientes (${cols.length}).`,
+          error: `Fila ${i + 1}: columnas insuficientes (${cols.length}). Delimitador='${delimiter === '\t' ? 'TAB' : delimiter}'`,
+          encontrada: false,
+          idfactura: null,
+          fechacobro: null,
           estadoProceso: 'ERROR',
           msg: 'Columnas insuficientes',
         });
@@ -135,6 +178,7 @@ export class SriEmitidosImportComponent {
         idfactura: null,
         fechacobro: null,
         estadoProceso: 'PENDIENTE',
+        msg: '',
       };
 
       const errs: string[] = [];
@@ -154,18 +198,28 @@ export class SriEmitidosImportComponent {
 
     this.rows = parsed;
   }
+totalEnriq = 0;
+doneEnriq = 0;
 
+totalProc = 0;
+doneProc = 0;
+
+get progresoEnriqPct(): number {
+  return this.totalEnriq ? Math.round((this.doneEnriq / this.totalEnriq) * 100) : 0;
+}
+
+get progresoProcPct(): number {
+  return this.totalProc ? Math.round((this.doneProc / this.totalProc) * 100) : 0;
+}
   // =========================
-  // 1) ENRIQUECER CON ERP
+  // 2) Enriquecer con Factura ERP
   // =========================
-  private async enriquecerConFacturaERP() {
+  private async _enriquecerConFacturaERP() {
     const candidatas = this.rows.filter(r => r.valido);
-
     if (candidatas.length === 0) return;
 
     this.cargandoEnriquecimiento = true;
 
-    // Importante: hacerlo en serie evita saturar el backend.
     for (const r of candidatas) {
       try {
         const factura = await this.facturaService.async_getByNrofactura(r.serie_comprobante);
@@ -182,8 +236,7 @@ export class SriEmitidosImportComponent {
         r.fechacobro = factura.fechacobro ?? null;
         r.estadoProceso = 'ENCONTRADA';
         r.msg = r.fechacobro ? 'Encontrada (cobrada)' : 'Encontrada';
-      } catch (e: any) {
-        // Si tu servicio lanza error cuando no encuentra, lo manejas aquí
+      } catch {
         r.encontrada = false;
         r.estadoProceso = 'NO_ENCONTRADA';
         r.msg = 'No existe en ERP';
@@ -194,11 +247,10 @@ export class SriEmitidosImportComponent {
   }
 
   // =========================
-  // 2) PROCESAR (SOLO ENCONTRADAS)
+  // 3) Procesar: solo ENCONTRADAS
   // =========================
-  async procesarSeleccionadas() {
-    const filas = this.rows.filter(r => r.valido && r.encontrada && r.idfactura);
-
+  async _procesarSeleccionadas() {
+    const filas = this.rows.filter(r => r.valido && r.encontrada && !!r.idfactura);
     if (filas.length === 0) return;
 
     this.cargandoProcesamiento = true;
@@ -206,43 +258,44 @@ export class SriEmitidosImportComponent {
     for (const r of filas) {
       try {
         // 1) Consultar FE por idfactura
-        const fe:any = await firstValueFrom(this.fec_facturaService.getByIdFactura(r.idfactura!));
+        let fe: any = null;
+        try {
+          fe = await firstValueFrom(this.fecFacturaService.getByIdFactura(r.idfactura!));
+        } catch {
+          fe = null; // si no existe, seguimos
+        }
 
-        // Si existe y ya está A u O => no hacer nada
         if (fe && (fe.estado === 'A' || fe.estado === 'O')) {
           r.estadoProceso = 'SALTADA';
           r.msg = `Sin cambios (estado=${fe.estado})`;
           continue;
         }
 
-        // 2) Traer XML autorizado (tu endpoint)
-        const xmlResp: any = await firstValueFrom(
-          this.fec_facturaService.httpGet(this.API_XML_AUTORIZADO, { claveAcceso: r.clave_acceso })
+        // 2) Obtener XML autorizado (string)
+        const xmlAutorizado = await firstValueFrom(
+          this.fecFacturaService.getXmlAutorizado(this.API_XML_AUTORIZADO, r.clave_acceso)
         );
-        // Ajusta según tu respuesta real:
-        const xmlAutorizado = typeof xmlResp === 'string' ? xmlResp : (xmlResp?.xml ?? '');
 
-        if (!xmlAutorizado) {
+        if (!xmlAutorizado || xmlAutorizado.trim().length < 20) {
           r.estadoProceso = 'ERROR';
           r.msg = 'No se obtuvo XML autorizado';
           continue;
         }
 
-        // 3) Actualizar FE (crear o actualizar)
-        const payload = {
-          idfactura: r.idfactura,
-          claveacceso: r.clave_acceso,
-          xmlautorizado: xmlAutorizado,
-          estado: 'O',
-        };
-
-        //await firstValueFrom(this.fec_facturaService.actualizarClaveXmlEstado(payload));
+        // 3) PATCH parcial (estado + clave + xml)
+        await firstValueFrom(
+          this.fecFacturaService.patchSri(r.idfactura!, {
+            claveacceso: r.clave_acceso,
+            xmlautorizado: xmlAutorizado,
+            estado: 'O',
+          })
+        );
 
         r.estadoProceso = 'ACTUALIZADA';
         r.msg = 'Actualizada (clave + XML + estado O)';
       } catch (e: any) {
         r.estadoProceso = 'ERROR';
-        r.msg = e?.message ?? 'Error procesando';
+        r.msg = e?.error?.message || e?.message || 'Error procesando';
       }
     }
 
@@ -250,7 +303,35 @@ export class SriEmitidosImportComponent {
   }
 
   // =========================
-  // Helpers
+  // Getters para UI
+  // =========================
+  get totalOk(): number {
+    return this.rows.filter(r => r.valido).length;
+  }
+
+  get totalErr(): number {
+    return this.rows.filter(r => r.valido === false).length;
+  }
+
+  get rowsFiltradas(): SriEmitidoRow[] {
+    const q = (this.q || '').toLowerCase().trim();
+
+    return this.rows
+      .filter(r => !this.soloErrores || r.valido === false || r.estadoProceso === 'ERROR' || r.estadoProceso === 'NO_ENCONTRADA')
+      .filter(r => {
+        if (!q) return true;
+        return (
+          (r.serie_comprobante || '').toLowerCase().includes(q) ||
+          (r.clave_acceso || '').toLowerCase().includes(q) ||
+          (r.fecha_emision || '').toLowerCase().includes(q) ||
+          (r.fecha_autorizacion || '').toLowerCase().includes(q) ||
+          (r.comprobante || '').toLowerCase().includes(q)
+        );
+      });
+  }
+
+  // =========================
+  // Helpers parse
   // =========================
   private detectDelimiter(sampleLine: string): string {
     const candidates = ['|', ';', '\t', ','];
@@ -268,71 +349,120 @@ export class SriEmitidosImportComponent {
   }
 
   private splitLine(line: string, delimiter: string): string[] {
-    return line.split(delimiter).map((c) => c.trim());
+    return line.split(delimiter).map(c => c.trim());
   }
 
   private toNumber(v: string): number {
     if (!v) return 0;
     let s = v.trim();
+
     const lastComma = s.lastIndexOf(',');
     const lastDot = s.lastIndexOf('.');
 
     if (lastComma > lastDot) {
+      // coma decimal
       s = s.replace(/\./g, '').replace(',', '.');
     } else {
+      // punto decimal
       s = s.replace(/,/g, '');
     }
+
     const n = Number(s);
     return isNaN(n) ? 0 : n;
   }
+  private async enriquecerConFacturaERP() {
+  const candidatas = this.rows.filter(r => r.valido);
 
-  get totalOk(): number {
-    return this.rows.filter((r) => r.valido).length;
-  }
-  get totalErr(): number {
-    return this.rows.filter((r) => r.valido === false).length;
+  if (candidatas.length === 0) return;
+
+  this.cargandoEnriquecimiento = true;
+
+  this.totalEnriq = candidatas.length;
+  this.doneEnriq = 0;
+
+  for (const r of candidatas) {
+    try {
+      const factura = await this.facturaService.async_getByNrofactura(r.serie_comprobante);
+
+      if (!factura) {
+        r.encontrada = false;
+        r.estadoProceso = 'NO_ENCONTRADA';
+        r.msg = 'No existe en ERP';
+      } else {
+        r.encontrada = true;
+        r.idfactura = factura.idfactura ?? null;
+        r.fechacobro = factura.fechacobro ?? null;
+        r.estadoProceso = 'ENCONTRADA';
+        r.msg = r.fechacobro ? 'Encontrada (cobrada)' : 'Encontrada';
+      }
+    } catch {
+      r.encontrada = false;
+      r.estadoProceso = 'NO_ENCONTRADA';
+      r.msg = 'No existe en ERP';
+    } finally {
+      this.doneEnriq++;
+    }
   }
 
-  get rowsFiltradas(): SriEmitidoRow[] {
-    const q = (this.q || '').toLowerCase().trim();
-    return this.rows
-      .filter((r) => !this.soloErrores || r.valido === false || r.estadoProceso === 'ERROR')
-      .filter((r) => {
-        if (!q) return true;
-        return (
-          (r.serie_comprobante || '').toLowerCase().includes(q) ||
-          (r.clave_acceso || '').toLowerCase().includes(q) ||
-          (r.fecha_emision || '').toLowerCase().includes(q) ||
-          (r.fecha_autorizacion || '').toLowerCase().includes(q) ||
-          (r.comprobante || '').toLowerCase().includes(q)
-        );
-      });
-  }
-  limpiar(): void {
-  this.rows = [];
-  this.headers = [];
-  this.q = '';
-  this.soloErrores = false;
-  this.archivoNombre = '';
+  this.cargandoEnriquecimiento = false;
 }
 
-async copiar(texto: string): Promise<void> {
-  if (!texto) return;
+  async procesarSeleccionadas() {
+  const filas = this.rows.filter(r => r.valido && r.encontrada && !!r.idfactura);
+  if (filas.length === 0) return;
 
-  try {
-    await navigator.clipboard.writeText(texto);
-    // Si quieres, aquí puedes mostrar un toast o alert pequeño
-    // alert('Copiado');
-  } catch {
-    // Fallback por si el navegador bloquea clipboard
-    const ta = document.createElement('textarea');
-    ta.value = texto;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
+  this.cargandoProcesamiento = true;
+
+  this.totalProc = filas.length;
+  this.doneProc = 0;
+
+  for (const r of filas) {
+    try {
+      // 1) Consultar FE (si no existe, seguimos)
+      let fe: any = null;
+      try {
+        fe = await firstValueFrom(this.fecFacturaService.getByIdFactura(r.idfactura!));
+      } catch {
+        fe = null;
+      }
+
+      if (fe && (fe.estado === 'A' || fe.estado === 'O')) {
+        r.estadoProceso = 'SALTADA';
+        r.msg = `Sin cambios (estado=${fe.estado})`;
+        continue;
+      }
+
+      // 2) XML autorizado
+      const xmlAutorizado = await firstValueFrom(
+        this.fecFacturaService.getXmlAutorizado(this.API_XML_AUTORIZADO, r.clave_acceso)
+      );
+
+      if (!xmlAutorizado || xmlAutorizado.trim().length < 20) {
+        r.estadoProceso = 'ERROR';
+        r.msg = 'No se obtuvo XML autorizado';
+        continue;
+      }
+
+      // 3) PATCH parcial
+      await firstValueFrom(
+        this.fecFacturaService.patchSri(r.idfactura!, {
+          claveacceso: r.clave_acceso,
+          xmlautorizado: xmlAutorizado,
+          estado: 'O',
+        })
+      );
+
+      r.estadoProceso = 'ACTUALIZADA';
+      r.msg = 'Actualizada (clave + XML + estado O)';
+    } catch (e: any) {
+      r.estadoProceso = 'ERROR';
+      r.msg = e?.error?.message || e?.message || 'Error procesando';
+    } finally {
+      this.doneProc++;
+    }
   }
-}
 
+  this.cargandoProcesamiento = false;
+}
 
 }

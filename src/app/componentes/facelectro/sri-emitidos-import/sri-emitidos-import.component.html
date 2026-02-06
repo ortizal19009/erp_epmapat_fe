@@ -7,6 +7,36 @@
       </div>
     </div>
 
+    <!-- Progreso enriquecimiento -->
+<div *ngIf="cargandoEnriquecimiento" class="mt-2">
+  <div class="d-flex justify-content-between small text-muted mb-1">
+    <span>Buscando facturas en ERP...</span>
+    <span>{{ doneEnriq }}/{{ totalEnriq }} ({{ progresoEnriqPct }}%)</span>
+  </div>
+  <div class="progress" style="height: 10px;">
+    <div class="progress-bar" role="progressbar"
+         [style.width.%]="progresoEnriqPct"
+         [attr.aria-valuenow]="progresoEnriqPct"
+         aria-valuemin="0" aria-valuemax="100">
+    </div>
+  </div>
+</div>
+
+<!-- Progreso procesamiento -->
+<div *ngIf="cargandoProcesamiento" class="mt-2">
+  <div class="d-flex justify-content-between small text-muted mb-1">
+    <span>Procesando (consultar FE + XML + actualizar)...</span>
+    <span>{{ doneProc }}/{{ totalProc }} ({{ progresoProcPct }}%)</span>
+  </div>
+  <div class="progress" style="height: 10px;">
+    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+         [style.width.%]="progresoProcPct"
+         [attr.aria-valuenow]="progresoProcPct"
+         aria-valuemin="0" aria-valuemax="100">
+    </div>
+  </div>
+</div>
+
     <div class="ms-auto d-flex gap-2 align-items-center">
       <span class="badge bg-success">Válidos: {{ totalOk }}</span>
       <span class="badge bg-danger">Errores: {{ totalErr }}</span>
