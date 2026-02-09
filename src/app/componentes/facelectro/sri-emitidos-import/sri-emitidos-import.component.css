@@ -1,80 +1,40 @@
-.sri-card .title {
-  font-weight: 700;
-  font-size: 14px;
+.sri-card {
+  border-radius: 14px;
 }
 
-.sri-card .subtitle {
-  font-size: 12px;
+.sri-header {
+  border-bottom: 1px solid rgba(0,0,0,.06);
 }
 
-.filebox {
-  border: 1px dashed #d7d7d7;
+.sri-toolbar .form-control,
+.sri-toolbar .input-group-text,
+.sri-toolbar .btn {
   border-radius: 10px;
-  padding: 10px;
 }
 
-.chip {
-  border: 1px solid #e5e5e5;
-  border-radius: 999px;
-  padding: 6px 10px;
-  font-size: 12px;
+.sri-progress {
   background: #fff;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  border: 1px solid rgba(0,0,0,.06);
+  border-radius: 12px;
+  padding: 10px 12px;
 }
 
-.search {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border: 1px solid #e5e5e5;
-  border-radius: 999px;
-  padding: 2px 10px;
-  background: #fff;
-}
-.search input {
-  border: none;
-  outline: none;
-  box-shadow: none;
-  width: 260px;
+.sri-table {
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
-.sri-table table thead th {
+.sri-thead th {
   position: sticky;
   top: 0;
-  background: #fff;
-  z-index: 1;
-  font-size: 12px;
+  z-index: 2;
 }
 
-.mono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-size: 12px;
-}
-
-.clave {
-  max-width: 260px;
+.sri-clave {
+  max-width: 320px;
   word-break: break-all;
 }
 
-.row-error {
-  background: #fff5f5;
-}
-
-.empty {
-  padding: 30px;
-  text-align: center;
-  color: #777;
-  border: 1px dashed #ddd;
-  border-radius: 10px;
-}
-
-.spin {
-  animation: spin 0.9s linear infinite;
-  display: inline-block;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
+.sri-chips .badge {
+  padding: .45rem .65rem;
 }

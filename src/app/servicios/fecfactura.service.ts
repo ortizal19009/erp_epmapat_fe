@@ -110,6 +110,15 @@ export class FecfacturaService {
     });
   }
 
+    // PUT /sri/{idfactura}
+  updateSriFields(
+    idfactura: number,
+    payload: { claveacceso: string; xmlautorizado: string; estado: string }
+  ): Observable<any> {
+    return this.http.put(`${baseUrl}/sri/${idfactura}`, payload);
+  }
+
+
 
   // Traer XML autorizado (tu endpoint externo/controlador SRI)
   getXmlAutorizado(url: string, claveAcceso: string): Observable<string> {
