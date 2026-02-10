@@ -277,6 +277,7 @@ import { CliDuplicadosComponent } from './componentes/clientes/cli-duplicados/cl
 import { RutaToLectorComponent } from './componentes/rutas/ruta-to-lector/ruta-to-lector.component';
 import { RecargosxcuentaComponent } from './componentes/facturacion/recargosxcuenta/recargosxcuenta.component';
 import { SriEmitidosImportComponent } from './componentes/facelectro/sri-emitidos-import/sri-emitidos-import.component';
+import { ReFacturacionesComponent } from './componentes/facturas/re-facturaciones/re-facturaciones.component';
 
 const routes: Routes = [
   //Consumo de Agua
@@ -396,7 +397,11 @@ const routes: Routes = [
     component: SimulacionComponent,
     canActivate: [AuthGuard],
   },
-  { path:'simulador_v2.0', component:SimuladordosComponent, canActivate:[AuthGuard]},
+  {
+    path: 'simulador_v2.0',
+    component: SimuladordosComponent,
+    canActivate: [AuthGuard],
+  },
   {
     path: 'proyeccion',
     component: ProyeccionComponent,
@@ -458,11 +463,20 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
+    path: 're-facturacion',
+    component: ReFacturacionesComponent,
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'detalle-planilla',
     component: DetallePlanillaComponent,
     canActivate: [AuthGuard],
   },
-  {path: 'sri-txt', component:SriEmitidosImportComponent, canActivate:[AuthGuard]},
+  {
+    path: 'sri-txt',
+    component: SriEmitidosImportComponent,
+    canActivate: [AuthGuard],
+  },
   //Productos (Tabla catalogoitems)
   {
     path: 'catalogoitems',
@@ -703,7 +717,11 @@ const routes: Routes = [
   { path: 'rutas', component: RutasComponent, canActivate: [AuthGuard] },
   { path: 'add-rutas', component: AddRutasComponent, canActivate: [AuthGuard] },
   { path: 'info-ruta', component: InfoRutaComponent, canActivate: [AuthGuard] },
-  { path: 'add-ruta-lector', component: RutaToLectorComponent, canActivate: [AuthGuard] },
+  {
+    path: 'add-ruta-lector',
+    component: RutaToLectorComponent,
+    canActivate: [AuthGuard],
+  },
   //Emisiones
   {
     path: 'emisiones',

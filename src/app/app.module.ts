@@ -20,7 +20,6 @@ import { AddClienteComponent } from './componentes/clientes/add-clientes/add-cli
 import { ModificarClientesComponent } from './componentes/clientes/modificar-clientes/modificar-clientes.component';
 import { DetallesClienteComponent } from './componentes/clientes/detalles-cliente/detalles-cliente.component';
 import { SuspensionesComponent } from './componentes/suspensiones/suspensiones/suspensiones.component';
-import { BuscarabonadoComponent } from './componentes/abonados/buscarabonado/buscarabonado.component';
 import { AddSuspensionesComponent } from './componentes/suspensiones/add-suspensiones/add-suspensiones.component';
 import { DetallesSuspensionesComponent } from './componentes/suspensiones/detalles-suspensiones/detalles-suspensiones.component';
 
@@ -293,6 +292,8 @@ import { ReportesjrComponent } from './componentes/reportesjr/reportesjr.compone
 import { RutaToLectorComponent } from './componentes/rutas/ruta-to-lector/ruta-to-lector.component';
 import { SimuladordosComponent } from './componentes/pliego24/simuladordos/simuladordos.component';
 import { RecargosxcuentaComponent } from './componentes/facturacion/recargosxcuenta/recargosxcuenta.component';
+import { ReFacturacionesComponent } from './componentes/facturas/re-facturaciones/re-facturaciones.component';
+import { BuscarabonadoComponent } from './componentes/abonados/buscarabonado/buscarabonado.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
@@ -310,7 +311,6 @@ import { RecargosxcuentaComponent } from './componentes/facturacion/recargosxcue
     ModificarClientesComponent,
     DetallesClienteComponent,
     ListarAbonadosComponent,
-    BuscarabonadoComponent,
     RutasComponent,
     AddRutasComponent,
     InfoRutaComponent,
@@ -574,6 +574,8 @@ import { RecargosxcuentaComponent } from './componentes/facturacion/recargosxcue
     ReportesjrComponent,
     RutaToLectorComponent,
     RecargosxcuentaComponent,
+    ReFacturacionesComponent,
+    BuscarabonadoComponent
   ],
 
   imports: [

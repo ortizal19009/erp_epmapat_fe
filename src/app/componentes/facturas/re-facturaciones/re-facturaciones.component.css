@@ -1,0 +1,28 @@
+.icono-titulo{
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.18);
+}
+
+.sombra-suave{
+  box-shadow: 0 6px 16px rgba(0,0,0,.08);
+  border-radius: 12px;
+}
+
+.table thead.sticky-top th{
+  top: 0;
+  z-index: 2;
+}
+
+.overlay-cargando{
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,.75);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+}

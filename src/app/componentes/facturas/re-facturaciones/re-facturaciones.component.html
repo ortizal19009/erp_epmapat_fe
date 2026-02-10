@@ -1,0 +1,317 @@
+<div class="container-fluid mt-2">
+
+  <!-- HEADER / TOOLBAR -->
+  <div class="cabecera sombra p-2 px-3 d-flex flex-wrap align-items-center justify-content-between">
+    <div class="d-flex align-items-center">
+      <div class="icono-titulo d-flex align-items-center justify-content-center mr-2">
+        <i class="bi bi-arrow-repeat"></i>
+      </div>
+      <div class="lh-sm">
+        <h5 class="m-0 font-weight-bold">Refacturaciones / Emisión individual</h5>
+        <small class="text-white-50">Gestión completa en pantalla</small>
+      </div>
+    </div>
+
+    <div class="d-flex align-items-center flex-wrap">
+
+      <span class="badge badge-pill badge-light text-dark mr-2" *ngIf="cargando">
+        <i class="bi bi-hourglass-split mr-1"></i> Cargando...
+      </span>
+
+      <span class="badge badge-pill badge-secondary mr-2">
+        <i class="bi bi-list-ol mr-1"></i> Registros: {{ _emisionindividual.length || 0 }}
+      </span>
+
+      <div class="btn-group">
+        <button type="button" class="btn btn-light btn-sm" (click)="irLista()">
+          <i class="bi bi-list"></i> Listado
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-light btn-sm dropdown-toggle dropdown-toggle-split"
+          data-toggle="dropdown"
+          aria-haspopup="true"
+          aria-expanded="false">
+          <span class="sr-only"><i class="fa fa-bars" aria-hidden="true"></i></span>
+        </button>
+
+        <div class="dropdown-menu dropdown-menu-right shadow-sm">
+          <button class="dropdown-item" type="button" (click)="irNueva()">
+            <i class="bi bi-plus-circle mr-2 text-success"></i> Nuevo
+          </button>
+
+          <div class="dropdown-divider"></div>
+
+          <button class="dropdown-item"
+                  type="button"
+                  (click)="imprimirEmisionActual()"
+                  [disabled]="cargando || !_emisionindividual.length">
+            <i class="bi bi-printer mr-2 text-danger"></i> Imprimir emisión actual
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="card mt-2 sombra">
+    <div class="card-body py-2">
+      <div class="row align-items-end">
+
+        <div class="col-12 col-md-4 mb-2 mb-md-0">
+          <label class="small text-muted mb-1">Emisión</label>
+          <div class="input-group input-group-sm">
+            <div class="input-group-prepend">
+              <span class="input-group-text"><i class="bi bi-calendar2-week"></i></span>
+            </div>
+
+            <select class="form-control"
+                    [ngModel]="emisionSeleccionada"
+                    (ngModelChange)="onChangeEmision($event)">
+              <option *ngFor="let e of _allemisiones" [ngValue]="e.idemision">
+                {{ e.emision }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-5 mb-2 mb-md-0" *ngIf="vista==='LISTA'">
+          <label class="small text-muted mb-1">Buscar</label>
+          <div class="input-group input-group-sm">
+            <div class="input-group-prepend">
+              <span class="input-group-text"><i class="bi bi-search"></i></span>
+            </div>
+
+            <input class="form-control"
+                   [(ngModel)]="filterimp"
+                   placeholder="Cuenta, lectura, planilla..."
+                   autocomplete="off">
+
+            <div class="input-group-append">
+              <button class="btn btn-outline-secondary" type="button" (click)="filterimp=''">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-3 text-md-right">
+          <small class="text-muted d-block">Vista</small>
+          <span class="badge badge-primary" *ngIf="vista==='LISTA'">
+            <i class="bi bi-table mr-1"></i>Listado
+          </span>
+          <span class="badge badge-success" *ngIf="vista==='NUEVA'">
+            <i class="bi bi-pencil-square mr-1"></i>Nueva
+          </span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- LISTA -->
+  <div class="card mt-2 sombra" *ngIf="vista==='LISTA'">
+    <div class="card-header bg-white py-2 d-flex align-items-center justify-content-between">
+      <div class="font-weight-semibold">
+        <i class="bi bi-card-list mr-1"></i> Registros de la emisión
+      </div>
+      <small class="text-muted">Use el filtro para encontrar rápido</small>
+    </div>
+
+    <div class="card-body p-0 position-relative">
+
+      <!-- overlay loading -->
+      <div class="overlay-cargando" *ngIf="cargando">
+        <div class="spinner-border" role="status"></div>
+        <div class="mt-2 small text-muted">Cargando información...</div>
+      </div>
+
+      <div class="table-responsive" style="max-height: 65vh;">
+        <table class="table table-sm table-hover table-bordered mb-0 align-middle">
+          <thead class="thead-light sticky-top">
+            <tr class="text-center">
+              <th style="width: 50px;">#</th>
+              <th style="width: 110px;">Nro emisión</th>
+              <th style="width: 110px;">Cuenta</th>
+              <th>Lect. anterior</th>
+              <th>Lect. actual</th>
+              <th>Planilla ant</th>
+              <th>Planilla act</th>
+              <th style="width: 90px;">Acción</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let it of _emisionindividual | filter:filterimp; let i = index">
+              <td class="text-center font-weight-bold">{{ i+1 }}</td>
+
+              <td class="text-center">
+                <span class="badge badge-secondary">{{ it.idemision.emision }}</span>
+              </td>
+
+              <td class="text-center">
+                <span class="badge badge-light border text-dark">
+                  {{ it.idlecturanueva.idabonado_abonados.idabonado }}
+                </span>
+              </td>
+
+              <td class="text-right">{{ it.idlecturaanterior.idlectura }}</td>
+              <td class="text-right">{{ it.idlecturanueva.idlectura }}</td>
+              <td class="text-right">{{ it.idlecturaanterior.idfactura }}</td>
+              <td class="text-right">{{ it.idlecturanueva.idfactura }}</td>
+
+              <td class="text-center">
+                <button class="btn btn-sm btn-outline-danger"
+                        title="Imprimir"
+                        (click)="imprimirItem(it)">
+                  <i class="bi bi-printer"></i>
+                </button>
+              </td>
+            </tr>
+
+            <tr *ngIf="(_emisionindividual.length || 0) === 0 && !cargando">
+              <td colspan="8" class="text-center text-muted py-4">
+                <i class="bi bi-inbox d-block mb-2" style="font-size: 1.5rem;"></i>
+                Sin registros para esta emisión.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- NUEVA -->
+  <div class="card mt-2 sombra" *ngIf="vista==='NUEVA'">
+    <div class="card-header bg-white py-2 d-flex align-items-center justify-content-between">
+      <div class="font-weight-semibold">
+        <i class="bi bi-plus-circle mr-1"></i> Nueva refacturación
+      </div>
+
+      <button class="btn btn-sm btn-outline-success" (click)="limpiarNueva()">
+        <i class="bi bi-eraser mr-1"></i> Limpiar
+      </button>
+    </div>
+
+    <div class="card-body">
+      <div class="row">
+
+        <!-- IZQUIERDA -->
+        <div class="col-12 col-lg-5 mb-3 mb-lg-0">
+          <div class="card border-0 sombra-suave">
+            <div class="card-body">
+
+              <form [formGroup]="f_emisionIndividual">
+                <label class="small text-muted mb-1">Emisión</label>
+                <div class="input-group input-group-sm mb-2">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="bi bi-calendar2-week"></i></span>
+                  </div>
+
+                  <select class="form-control text-center" formControlName="emision">
+                    <option *ngFor="let e of _allemisiones" [ngValue]="e.idemision">{{ e.emision }}</option>
+                  </select>
+                </div>
+
+                <label class="small text-muted mb-1">Cuenta / Abonado</label>
+                <div class="input-group input-group-sm mb-2">
+                  <div class="input-group-prepend">
+                    <button class="btn btn-primary font-weight-bold" type="button" (click)="viewAbonadosOpt()">
+                      <i class="bi bi-person-search mr-1"></i> Buscar
+                    </button>
+                  </div>
+                  <input class="form-control text-center" formControlName="abonado" readonly>
+                </div>
+              </form>
+
+              <div *ngIf="!optabonado" class="mt-2">
+                <div class="alert alert-info py-2 small mb-2">
+                  Seleccione un abonado para cargar datos y lecturas.
+                </div>
+
+                <app-buscarabonado (abonadoEvent)="setAbonado($event)"></app-buscarabonado>
+
+                <div class="text-center mt-2">
+                  <button class="btn btn-success btn-sm" (click)="retornar()">
+                    <i class="bi bi-arrow-left mr-1"></i> Regresar
+                  </button>
+                </div>
+              </div>
+
+              <div *ngIf="optabonado" class="mt-2">
+                <div class="alert alert-light border py-2 small mb-2">
+                  <i class="bi bi-info-circle mr-1"></i> Datos del abonado seleccionado
+                </div>
+
+                <table class="table table-sm table-bordered mb-0">
+                  <tbody>
+                    <tr><th style="width: 120px;">Cliente</th><td>{{ cliente?.nombre }}</td></tr>
+                    <tr><th>Ruta</th><td>{{ ruta?.descripcion }}</td></tr>
+                    <tr><th>Dirección</th><td>{{ abonado.direccionubicacion }}</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- DERECHA -->
+        <div class="col-12 col-lg-7" *ngIf="optabonado">
+          <div class="card border-0 sombra-suave">
+            <div class="card-body">
+
+              <form [formGroup]="f_lecturas">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <div class="font-weight-semibold">
+                    <i class="bi bi-speedometer2 mr-1"></i> Lecturas
+                  </div>
+                  <span class="badge badge-warning text-dark" *ngIf="btnCrearLectura">
+                    <i class="bi bi-exclamation-triangle mr-1"></i> No existe lectura, se creará nueva
+                  </span>
+                </div>
+
+                <div class="form-row">
+                  <div class="col-6 mb-2">
+                    <label class="small text-muted mb-1">Lectura anterior</label>
+                    <input type="number" min="0" class="form-control form-control-sm" formControlName="lecturaanterior">
+                  </div>
+
+                  <div class="col-6 mb-2">
+                    <label class="small text-muted mb-1">Lectura actual</label>
+                    <input type="number" min="0" class="form-control form-control-sm" formControlName="lecturaactual">
+                  </div>
+
+                  <div class="col-12">
+                    <label class="small text-muted mb-1">Novedad</label>
+                    <select class="form-control form-control-sm" formControlName="idnovedad_novedades">
+                      <option *ngFor="let n of novedades" [ngValue]="n">{{ n.descripcion }}</option>
+                    </select>
+                  </div>
+                </div>
+              </form>
+
+              <hr class="my-3">
+
+              <div class="text-center">
+                <button class="btn btn-success btn-sm px-4 mr-2" (click)="guardarRefacturacion()">
+                  <i class="fa fa-check-circle mr-1"></i> Guardar
+                </button>
+
+                <button class="btn btn-outline-secondary btn-sm px-4" (click)="irLista()">
+                  <i class="bi bi-x-circle mr-1"></i> Cancelar
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
