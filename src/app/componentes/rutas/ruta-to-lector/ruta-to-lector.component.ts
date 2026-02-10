@@ -49,15 +49,21 @@ export class RutaToLectorComponent implements OnInit {
     });
   }
   onCellClick(event: any, usuario: any) {
-    console.log('Celda clickeada:', usuario);
-    //Buscar las rutas segun la emision y el usuario
-    console.log(this.emisionSelected);
     this.usuarioSeletced = usuario;
+
+    // Si no hay emisión seleccionada todavía, evita romper (por si acaso)
+    if (!this.emisionSelected?.idemision) {
+      this._rutasAsignadas = [];
+      this.usrxrutas = null;
+      return;
+    }
+
     this.UsrxrutaService.findByUsuarioAndEmision(
       usuario.idusuario,
       this.emisionSelected.idemision
     ).subscribe({
       next: (datos: any) => {
+        // si backend devuelve 200 pero body vacío/null
         if (!datos) {
           this.usrxrutas = null;
           this._rutasAsignadas = [];
@@ -66,14 +72,22 @@ export class RutaToLectorComponent implements OnInit {
         this.usrxrutas = datos;
         this._rutasAsignadas = datos?.rutas ?? [];
       },
-      error: () => {
+      error: (err: any) => {
+        // ✅ 404 = "no hay asignación" (NO es error para el usuario)
+        if (err?.status === 404) {
+          this.usrxrutas = null;
+          this._rutasAsignadas = [];
+          return;
+        }
+
+        // otros errores sí los puedes loguear
+        console.error('Error consultando rutas:', err);
         this.usrxrutas = null;
         this._rutasAsignadas = [];
       }
     });
-
-
   }
+
   getAllRutas() {
     this.rutasService.getListaRutas().subscribe((data: any) => {
       console.log(data);
@@ -105,7 +119,6 @@ export class RutaToLectorComponent implements OnInit {
   }
   /* Select rutas */
   selectRuta(e: any, r: any) {
-    console.log(r);
     if (!e.target.checked) {
       this.dropRuta(r);
       return;

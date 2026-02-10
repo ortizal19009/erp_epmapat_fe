@@ -1,180 +1,260 @@
+<!-- CABECERA -->
 <div class="content mt-1 pt-1 pl-0">
-    <div class="container-fluid">
-        <div class="row m-0 px-0 py-1 justify-content-start cabecera sombra border">
-            <div class="col-sm">
-                <h5 class="m-0 font-weight-bold"><i class="fa fa-sticky-note" aria-hidden="true"></i>
-                    Nueva Nota de Crédito</h5>
-            </div>
-
-
-
-        </div>
+  <div class="container-fluid">
+    <div class="row m-0 px-0 py-1 justify-content-start cabecera sombra border">
+      <div class="col-sm">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fa fa-sticky-note" aria-hidden="true"></i>
+          Nueva Nota de Crédito
+        </h5>
+      </div>
     </div>
+  </div>
 </div>
 
 <div class="container-fluid mt-2 sombra">
-    <form [formGroup]="f_ntacredito">
+  <form [formGroup]="f_ntacredito" novalidate>
+
+    <!-- BUSQUEDA -->
+    <div class="card mt-2">
+      <div class="card-header py-2 font-weight-bold">Buscar factura</div>
+      <div class="card-body py-2">
         <div class="row">
-            <div class="col-sm mt-2">
-                <div class="input-group input-group-sm mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon1">Nro.Factura</span>
-                    </div>
-                    <input type="text" class="form-control" formControlName="nrofactura"
-                        (click)="clearInput('planilla')" placeholder="nro factura" aria-label=""
-                        aria-describedby="button-addon2">
-                    <input type="text" class="form-control" (click)="clearInput('nrofactura')"
-                        formControlName="planilla" placeholder="planilla" aria-label=""
-                        aria-describedby="button-addon2">
-                    <div class="input-group-append">
-                        <button class="btn btn-outline-primary" type="button" (click)="getPlanilla()"
-                            id="button-addon2"><i class="fa fa-search" aria-hidden="true"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row" *ngIf="valorFactura > 0">
-            <div class="col-sm">
-                <table class="table table-sm">
-                    <tbody>
-                        <tr>
-                            <td>Resp pago: {{cliente.nombre}}</td>
-                            <td>Nro. factura: {{_factura.nrofactura}}</td>
-                            <td>Planilla: {{_factura.idfactura}}</td>
-                        </tr>
-                        <tr>
-                            <td>Valor factura: {{valorFactura}}</td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="row ">
-            <div class="col-sm">
-                <div class="input-group input-group-sm mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon1">Cliente</span>
-                    </div>
-                    <input type="text" class="form-control" readonly formControlName="cliente" placeholder="Cliente"
-                        aria-label="" aria-describedby="button-addon2">
-                    <div class="input-group-append" hidden>
-                        <button class="btn btn-outline-primary" type="button" disabled="true" id="button-addon2"
-                            data-toggle="modal" data-target="#slcCliente"><i class="fa fa-search"
-                                aria-hidden="true"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm">
-                <div class="input-group input-group-sm mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon1">Cuenta </span>
-                    </div>
-                    <input type="text" class="form-control" readonly formControlName="cuenta" placeholder="Cuenta"
-                        aria-label="" aria-describedby="button-addon2">
-                    <div class="input-group-append">
-                        <button class="btn btn-outline-primary" type="button" id="button-addon2" data-toggle="modal"
-                            data-target="#slcAbonado"><i class="fa fa-search" aria-hidden="true"></i>
-                        </button>
-                    </div>
-                </div>
+          <div class="col-sm">
+            <div class="input-group input-group-sm mb-2">
+              <div class="input-group-prepend">
+                <span class="input-group-text">Nro.Factura</span>
+              </div>
+
+              <input type="text" class="form-control"
+                formControlName="nrofactura"
+                (click)="clearInput('planilla')"
+                placeholder="nro factura" />
+
+              <input type="text" class="form-control"
+                formControlName="planilla"
+                (click)="clearInput('nrofactura')"
+                placeholder="planilla" />
+
+              <div class="input-group-append">
+                <button class="btn btn-outline-primary" type="button" (click)="getPlanilla()">
+                  <i class="fa fa-search" aria-hidden="true"></i>
+                </button>
+              </div>
             </div>
 
-            <div class="col-sm">
-                <div class="input-group input-group-sm mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon1">Valor</span>
-                    </div>
-                    <input type="number" min="0" max={{valorFactura}} class="form-control" formControlName="valor"
-                        placeholder="valor nota de credito" aria-label="" aria-describedby="basic-addon1">
-                </div>
+            <small class="text-muted">
+              Ingresa <b>Nro. Factura</b> o <b>Planilla</b> y presiona buscar.
+            </small>
+
+            <div *ngIf="formError" class="alert alert-warning mt-2 py-1 mb-0">
+              {{ formError }}
             </div>
+
+          </div>
         </div>
-        <div class="row ">
-            <div class="col-sm">
-                <div class="input-group input-group-sm mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon1">Documentos</span>
-                    </div>
-                    <select type="text" class="form-control" formControlName="iddocumento_documentos" 
-                        aria-describedby="button-addon2">
-                        <option [ngValue]="documento" *ngFor="let documento of _documentos">{{documento.nomdoc}}</option>
-                    </select>
-                    <div class="input-group-append" hidden>
-                        <button class="btn btn-outline-primary" type="button" disabled="true" id="button-addon2"
-                            data-toggle="modal" data-target="#slcCliente"><i class="fa fa-search"
-                                aria-hidden="true"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm">
-                <div class="input-group input-group-sm mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon1">Ref. Documento </span>
-                    </div>
-                    <input type="text" class="form-control" formControlName="refdocumento" placeholder="Nro documento"
-                        aria-label="" aria-describedby="button-addon2">
-                </div>
-            </div>
+      </div>
+    </div>
+
+    <!-- RESUMEN FACTURA -->
+    <div class="card mt-2" *ngIf="valorFactura > 0">
+      <div class="card-header py-2 font-weight-bold">Detalle de factura</div>
+      <div class="card-body py-2">
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <tbody>
+              <tr>
+                <td><b>Resp pago:</b> {{ cliente.nombre }}</td>
+                <td><b>Nro. factura:</b> {{ _factura.nrofactura }}</td>
+                <td><b>Planilla:</b> {{ _factura.idfactura }}</td>
+              </tr>
+              <tr>
+                <td><b>Valor factura:</b> {{ valorFactura | number:'1.2-2' }}</td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+      </div>
+    </div>
+
+    <!-- DATOS NOTA -->
+    <div class="card mt-2">
+      <div class="card-header py-2 font-weight-bold">Datos de la nota de crédito</div>
+      <div class="card-body py-2">
+
         <div class="row">
-            <div class="col-sm">
-                <div class="input-group input-group-sm mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon1">Observación</span>
-                    </div>
-                    <textarea type="text" class="form-control" formControlName="observacion" placeholder=""
-                        aria-label="" aria-describedby="basic-addon1">
-                    </textarea>
-                </div>
+
+          <!-- CLIENTE -->
+          <div class="col-sm">
+            <div class="input-group input-group-sm mb-2">
+              <div class="input-group-prepend">
+                <span class="input-group-text">Cliente</span>
+              </div>
+              <input type="text" class="form-control" readonly formControlName="cliente" placeholder="Cliente" />
             </div>
-        </div>
-        <div class="row">
-            <div class="col-sm text-right mb-3">
-                <button class="btn btn-sm btn-success mr-2">Cancelar</button>
-                <button class="btn btn-sm btn-outline-success" (click)="onSubmit()">Aceptar</button>
+          </div>
+
+          <!-- CUENTA -->
+          <div class="col-sm">
+            <div class="input-group input-group-sm mb-2">
+              <div class="input-group-prepend">
+                <span class="input-group-text">Cuenta</span>
+              </div>
+              <input type="text" class="form-control" readonly formControlName="cuenta" placeholder="Cuenta" />
+              <div class="input-group-append">
+                <button class="btn btn-outline-primary" type="button"
+                  data-toggle="modal" data-target="#slcAbonado">
+                  <i class="fa fa-search" aria-hidden="true"></i>
+                </button>
+              </div>
             </div>
+          </div>
+
+          <!-- VALOR -->
+          <div class="col-sm">
+            <div class="input-group input-group-sm mb-1">
+              <div class="input-group-prepend">
+                <span class="input-group-text">Valor</span>
+              </div>
+
+              <input type="number" class="form-control"
+                formControlName="valor"
+                [min]="0.01"
+                [max]="valorFactura"
+                [readonly]="valorFactura <= 0"
+                [ngClass]="{'is-invalid': isInvalid('valor')}"
+                placeholder="valor nota de crédito" />
+            </div>
+
+            <div class="invalid-feedback d-block" *ngIf="isInvalid('valor')">
+              <div *ngIf="f_ntacredito.get('valor')?.errors?.['required']">El valor es obligatorio.</div>
+              <div *ngIf="f_ntacredito.get('valor')?.errors?.['min']">Debe ser mayor a 0.</div>
+              <div *ngIf="f_ntacredito.get('valor')?.errors?.['max']">No puede superar el valor de la factura ({{ valorFactura | number:'1.2-2' }}).</div>
+            </div>
+
+            <small class="text-muted d-block" *ngIf="valorFactura > 0">
+              Máximo permitido: {{ valorFactura | number:'1.2-2' }}
+            </small>
+          </div>
+
         </div>
-    </form>
+
+        <div class="row mt-1">
+
+          <!-- DOCUMENTO -->
+          <div class="col-sm">
+            <div class="input-group input-group-sm mb-1">
+              <div class="input-group-prepend">
+                <span class="input-group-text">Documento</span>
+              </div>
+
+              <select class="form-control"
+                formControlName="iddocumento_documentos"
+                [ngClass]="{'is-invalid': isInvalid('iddocumento_documentos')}">
+                <option [ngValue]="null">-- Seleccione --</option>
+                <option [ngValue]="documento" *ngFor="let documento of _documentos">
+                  {{ documento.nomdoc }}
+                </option>
+              </select>
+            </div>
+
+            <div class="invalid-feedback d-block" *ngIf="isInvalid('iddocumento_documentos')">
+              Seleccione un documento.
+            </div>
+          </div>
+
+          <!-- REF DOCUMENTO -->
+          <div class="col-sm">
+            <div class="input-group input-group-sm mb-1">
+              <div class="input-group-prepend">
+                <span class="input-group-text">Ref. Documento</span>
+              </div>
+
+              <input type="text" class="form-control"
+                formControlName="refdocumento"
+                [ngClass]="{'is-invalid': isInvalid('refdocumento')}"
+                placeholder="Nro documento" />
+            </div>
+
+            <div class="invalid-feedback d-block" *ngIf="isInvalid('refdocumento')">
+              <div *ngIf="f_ntacredito.get('refdocumento')?.errors?.['required']">La referencia es obligatoria.</div>
+              <div *ngIf="f_ntacredito.get('refdocumento')?.errors?.['maxlength']">Máximo 30 caracteres.</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- OBS -->
+        <div class="row mt-1">
+          <div class="col-sm">
+            <div class="input-group input-group-sm mb-1">
+              <div class="input-group-prepend">
+                <span class="input-group-text">Observación</span>
+              </div>
+              <textarea class="form-control"
+                rows="2"
+                formControlName="observacion"
+                [ngClass]="{'is-invalid': isInvalid('observacion')}"></textarea>
+            </div>
+
+            <div class="invalid-feedback d-block" *ngIf="isInvalid('observacion')">
+              <div *ngIf="f_ntacredito.get('observacion')?.errors?.['required']">La observación es obligatoria.</div>
+              <div *ngIf="f_ntacredito.get('observacion')?.errors?.['minlength']">Mínimo 10 caracteres.</div>
+              <div *ngIf="f_ntacredito.get('observacion')?.errors?.['maxlength']">Máximo 300 caracteres.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="card-footer text-right py-2">
+        <button class="btn btn-sm btn-secondary mr-2" type="button" (click)="onCancel()">
+          Cancelar
+        </button>
+        <button class="btn btn-sm btn-success" type="button"
+          (click)="onSubmit()"
+          [disabled]="f_ntacredito.invalid || valorFactura <= 0">
+          Aceptar
+        </button>
+      </div>
+    </div>
+  </form>
 </div>
 
-<!-- Modal -->
+<!-- Modal CLIENTE (si lo usas) -->
 <div class="modal fade" id="slcCliente" data-backdrop="static" data-keyboard="false" tabindex="-1"
-    aria-labelledby="slcClienteLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="slcClienteLabel">Buscar cliente</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <app-buscar-cliente (setCliente)="setCliente($event)"></app-buscar-cliente>
-            </div>
-
-        </div>
+  aria-labelledby="slcClienteLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="slcClienteLabel">Buscar cliente</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <app-buscar-cliente (setCliente)="setCliente($event)"></app-buscar-cliente>
+      </div>
     </div>
+  </div>
 </div>
-<!-- Modal -->
-<div class="modal fade" id="slcAbonado" data-backdrop="static" data-keyboard="false" tabindex="-1"
-    aria-labelledby="slcAbonadoLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="slcAbonadoLabel">Buscar abonado</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <app-buscarabonado (abonadoEvent)="setAbonado($event)"></app-buscarabonado>
-            </div>
 
-        </div>
+<!-- Modal ABONADO -->
+<div class="modal fade" id="slcAbonado" data-backdrop="static" data-keyboard="false" tabindex="-1"
+  aria-labelledby="slcAbonadoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="slcAbonadoLabel">Buscar abonado</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <app-buscarabonado (abonadoEvent)="setAbonado($event)"></app-buscarabonado>
+      </div>
     </div>
+  </div>
 </div>

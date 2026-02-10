@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { catchError, Observable, of, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 const apiUrl = environment.API_URL;
@@ -10,7 +10,7 @@ const baseUrl = `${apiUrl}/usrxrutas`;
   providedIn: 'root',
 })
 export class UsrxrutaServiceService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
   /** 🔹 Obtener todas las rutas */
   findAll(): Observable<any[]> {
     return this.http.get<any[]>(baseUrl);
@@ -31,15 +31,26 @@ export class UsrxrutaServiceService {
     return this.http.put<any>(`${baseUrl}/${id}`, data);
   }
 
-  /** 🔹 Buscar por usuario y emisión */
+  /** 🔹 Buscar por usuario y emisión (maneja 404 como vacío) */
   findByUsuarioAndEmision(
     idusuario: number,
     idemision: number
   ): Observable<any> {
-    return this.http.get<any>(
-      `${baseUrl}/usuario/${idusuario}/emision/${idemision}`
-    );
+    return this.http
+      .get<any>(`${baseUrl}/usuario/${idusuario}/emision/${idemision}`)
+      .pipe(
+        catchError((err) => {
+          // ✅ 404 = no hay rutas asignadas (caso normal)
+          if (err?.status === 404) {
+            return of(null);
+          }
+
+          // ❌ otros errores sí se propagan
+          return throwError(() => err);
+        })
+      );
   }
+
 
   findByEmision(idemision: number) {
     return this.http.get(`${baseUrl}/emision/${idemision}`);

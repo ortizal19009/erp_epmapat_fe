@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { FacturaService } from './../../../servicios/factura.service';
 import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
 import { SriEmitidoRow } from 'src/app/interfaces/fec_facturas/SriEmitidoRow';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-sri-emitidos-import',
@@ -31,6 +32,7 @@ export class SriEmitidosImportComponent {
   constructor(
     private facturaService: FacturaService,
     private fecFacturaService: FecfacturaService,
+    private router: Router
   ) {}
 
   // =========================
@@ -208,6 +210,9 @@ export class SriEmitidosImportComponent {
     return this.totalEnriq
       ? Math.round((this.doneEnriq / this.totalEnriq) * 100)
       : 0;
+  }
+    regresar() {
+    this.router.navigate(['/fecfactura']);
   }
 
   get progresoProcPct(): number {

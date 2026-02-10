@@ -83,16 +83,28 @@
               </tr>
             </thead>
             <tbody class="detalle">
+
+              <!-- ✅ CUANDO NO HAY RUTAS -->
+              <tr *ngIf="!_rutasAsignadas || _rutasAsignadas.length === 0">
+                <td colspan="3" class="text-center text-muted font-weight-bold py-3">
+                  <i class="bi bi-info-circle mr-1"></i>
+                  No hay rutas asignadas a lector
+                </td>
+              </tr>
+
+              <!-- ✅ CUANDO SI HAY RUTAS -->
               <tr class="fila" *ngFor="let ra of _rutasAsignadas; let i = index">
-                <td class="text-center">{{i+1}}</td>
-                <td> {{ra.descripcion}} </td>
+                <td class="text-center">{{ i + 1 }}</td>
+                <td>{{ ra.descripcion }}</td>
                 <td class="text-center">
                   <button class="btn-group btn-danger btn-xs py-0" (click)="dropRuta(ra)">
                     <i class="fa fa-minus-square-o" aria-hidden="true"></i>
                   </button>
                 </td>
               </tr>
+
             </tbody>
+
           </table>
         </div>
       </div>

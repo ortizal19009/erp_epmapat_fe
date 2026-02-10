@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
@@ -20,16 +20,19 @@ import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
   styleUrls: ['./add-ntacredito.component.css'],
 })
 export class AddNtacreditoComponent implements OnInit {
-  f_ntacredito: FormGroup;
-  filterTerm: string;
-  _ntacreditos: any;
+  f_ntacredito!: FormGroup;
+
   _factura: Facturas = new Facturas();
   cliente: Clientes = new Clientes();
   resppago: Clientes = new Clientes();
   _cuenta: Abonados = new Abonados();
+
   date: Date = new Date();
-  valorFactura: number = 0;
-  _documentos: any;
+  valorFactura: number = 0;   // ✅ number
+  _documentos: any[] = [];
+
+  formError: string = '';
+
   constructor(
     private fb: FormBuilder,
     private router: Router,
@@ -41,31 +44,36 @@ export class AddNtacreditoComponent implements OnInit {
     private s_abonado: AbonadosService,
     private s_ntacredito: NtacreditoService,
     private s_documento: DocumentosService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/add-ntacredito');
-    let coloresJSON = sessionStorage.getItem('/add-ntacredito');
+    const coloresJSON = sessionStorage.getItem('/add-ntacredito');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
     else this.buscaColor();
+
     this.f_ntacredito = this.fb.group({
-      nrofactura: '',
-      planilla: '',
-      cliente: '',
-      valor: '',
-      observacion: '',
-      idfactura: '',
-      cuenta: '',
-      iddocumento_documentos: '',
-      refdocumento: '',
+      nrofactura: [''],
+      planilla: [''],
+      cliente: [{ value: '', disabled: true }],
+      cuenta: [{ value: '', disabled: true }],
+
+      idfactura: [''], // interno
+
+      valor: ['', [Validators.required, Validators.min(0.01)]], // max dinámico luego
+      iddocumento_documentos: [null, [Validators.required]],
+      refdocumento: ['', [Validators.required, Validators.maxLength(30)]],
+      observacion: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(300)]],
     });
+
     this.getAllDocumentos();
+    this.updateValorMaxValidator(0); // al inicio
   }
+
   async buscaColor() {
     try {
       const datos = await this.coloresService.setcolor(1, 'add-ntacredito');
-      const coloresJSON = JSON.stringify(datos);
-      sessionStorage.setItem('/add-ntacredito', coloresJSON);
+      sessionStorage.setItem('/add-ntacredito', JSON.stringify(datos));
       this.colocaColor(datos);
     } catch (error) {
       console.error(error);
@@ -76,108 +84,192 @@ export class AddNtacreditoComponent implements OnInit {
     document.documentElement.style.setProperty('--bgcolor1', colores[0]);
     const cabecera = document.querySelector('.cabecera');
     if (cabecera) cabecera.classList.add('nuevoBG1');
+
     document.documentElement.style.setProperty('--bgcolor2', colores[1]);
     const detalle = document.querySelector('.detalle');
     if (detalle) detalle.classList.add('nuevoBG2');
   }
+
   getAllDocumentos() {
     this.s_documento.getListaDocumentos().subscribe({
-      next: (datos: any) => {
-        this._documentos = datos;
+      next: (datos: any[]) => {
+        this._documentos = datos ?? [];
+        // selecciona el primero si existe
         this.f_ntacredito.patchValue({
-          iddocumento_documentos: datos[0],
+          iddocumento_documentos: this._documentos.length ? this._documentos[0] : null,
         });
       },
       error: (e: any) => console.error(e),
     });
   }
+
+  // ✅ ayuda para template
+  isInvalid(ctrlName: string): boolean {
+    const c = this.f_ntacredito.get(ctrlName);
+    return !!(c && c.invalid && (c.dirty || c.touched));
+  }
+
+  onCancel() {
+    this.router.navigate(['/ntacredito']);
+  }
+
   onSubmit() {
-    let f = this.f_ntacredito.value;
-    let ntacredito: Ntacredito = new Ntacredito();
-    ntacredito.valor = f.valor;
+    this.formError = '';
+
+    if (this.valorFactura <= 0) {
+      this.formError = 'Debe cargar una factura antes de registrar la nota de crédito.';
+      return;
+    }
+
+    if (this.f_ntacredito.invalid) {
+      this.f_ntacredito.markAllAsTouched();
+      this.formError = 'Revise los campos marcados en rojo.';
+      return;
+    }
+
+    const f = this.f_ntacredito.getRawValue();
+
+    const ntacredito: Ntacredito = new Ntacredito();
+    ntacredito.valor = +f.valor;
     ntacredito.observacion = f.observacion;
     ntacredito.idcliente_clientes = this.resppago;
     ntacredito.feccrea = this.date;
     ntacredito.usucrea = this.authService.idusuario;
     ntacredito.devengado = 0;
-    ntacredito.nrofactura = f.idfactura;
+
+    // ojo: tú estabas usando nrofactura = f.idfactura (raro). Te dejo lo correcto:
+    ntacredito.nrofactura = f.idfactura; // si en tu backend “nrofactura” guarda idfactura, déjalo así.
+    // si en realidad debería ser el número:
+    // ntacredito.nrofactura = this._factura?.nrofactura;
+
     ntacredito.idabonado_abonados = this._cuenta;
     ntacredito.iddocumento_documentos = f.iddocumento_documentos;
     ntacredito.refdocumento = f.refdocumento;
 
     this.s_ntacredito.saveNtacredito(ntacredito).subscribe({
-      next: (datos: any) => {
-        this.router.navigate(['/ntacredito']);
-      },
+      next: () => this.router.navigate(['/ntacredito']),
+      error: (e: any) => {
+        console.error(e);
+        this.formError = 'No se pudo guardar la nota de crédito. Revise e intente nuevamente.';
+      }
     });
   }
-  detallesnotasnc(notacredito: any) { }
-  clearInput(name: any) {
+
+  clearInput(name: 'nrofactura' | 'planilla') {
+    this.formError = '';
     this._factura = new Facturas();
     this.cliente = new Clientes();
     this.resppago = new Clientes();
-    this.f_ntacredito.patchValue({
-      clientes: '',
-    });
-    this.f_ntacredito.get(name)?.setValue(''); // Borra el valor del primer input
-  }
-  getPlanilla() {
-    let formulario = this.f_ntacredito.value;
-    if (formulario.nrofactura != '' || formulario.planilla != '') {
-      this.loading.showLoading();
-      if (formulario.nrofactura != '') {
-        this.s_factura.getByNrofactura(formulario.nrofactura).subscribe({
-          next: (planilla: any) => {
-            if (planilla.length == 1) {
-              this._factura = planilla[0];
-              this.cliente = planilla[0].idcliente;
-              this.resppago = planilla[0].idcliente;
-              this.buscarAbonado(planilla[0].idabonado);
-              this.f_ntacredito.patchValue({
-                cliente: planilla[0].idcliente.nombre,
-                idfactura: planilla[0].idfactura,
-                cuenta: planilla[0].idabonado,
-              });
-              this.getValorPlanilla(planilla[0].idfactura);
-            }
-          },
-          error: (e: any) => console.error(e),
-        });
-      }
-      if (formulario.planilla != '') {
-        this.s_factura.getById(formulario.planilla).subscribe({
-          next: (planilla: any) => {
-            console.log(planilla);
-            if (planilla.pagado == 1 && planilla.estado == 1) {
+    this._cuenta = new Abonados();
 
-              this._factura = planilla;
-              this.cliente = planilla.idcliente;
-              this.resppago = planilla.idcliente;
-              this.buscarAbonado(planilla.idabonado);
-              this.f_ntacredito.patchValue({
-                cliente: planilla.idcliente.nombre,
-                idfactura: planilla.idfactura,
-                nrofactura: planilla.nrofactura,
-                cuenta: planilla.idabonado,
-              });
-              this.getValorPlanilla(planilla.idfactura);
-            } else {
-              alert("Nota de credito solo para facturas ya cobradas !!!");
-              this.loading.hideLoading();
-            }
-          },
-          error: (e: any) => console.error(e),
-        });
-      }
+    this.valorFactura = 0;
+    this.updateValorMaxValidator(0);
+
+    this.f_ntacredito.patchValue({
+      cliente: '',
+      cuenta: '',
+      idfactura: '',
+      valor: '',
+    });
+
+    this.f_ntacredito.get(name)?.setValue('');
+  }
+
+  getPlanilla() {
+    this.formError = '';
+    const formulario = this.f_ntacredito.getRawValue();
+
+    if (!formulario.nrofactura && !formulario.planilla) {
+      this.formError = 'Ingrese Nro.Factura o Planilla para buscar.';
+      return;
+    }
+
+    this.loading.showLoading();
+
+    if (formulario.nrofactura) {
+      this.s_factura.getByNrofactura(formulario.nrofactura).subscribe({
+        next: (planilla: any) => {
+          if (planilla?.length === 1) {
+            this.setFactura(planilla[0]);
+          } else {
+            this.formError = 'No se encontró una factura única con ese número.';
+            this.loading.hideLoading();
+          }
+        },
+        error: (e: any) => {
+          console.error(e);
+          this.formError = 'Error consultando la factura por número.';
+          this.loading.hideLoading();
+        }
+      });
+      return;
+    }
+
+    if (formulario.planilla) {
+      this.s_factura.getById(formulario.planilla).subscribe({
+        next: (planilla: any) => {
+          // tu regla: solo cobradas y activas
+          if (planilla?.pagado === 1 && (planilla?.estado === 1 || planilla?.estado === 3)) {
+            this.setFactura(planilla);
+          } else {
+            this.formError = 'Nota de crédito solo para facturas ya cobradas.';
+            this.loading.hideLoading();
+          }
+        },
+        error: (e: any) => {
+          console.error(e);
+          this.formError = 'Error consultando la factura por planilla.';
+          this.loading.hideLoading();
+        }
+      });
     }
   }
+
+  private setFactura(planilla: any) {
+    this._factura = planilla;
+    this.cliente = planilla.idcliente;
+    this.resppago = planilla.idcliente;
+
+    this.buscarAbonado(planilla.idabonado);
+
+    this.f_ntacredito.patchValue({
+      cliente: planilla.idcliente?.nombre ?? '',
+      idfactura: planilla.idfactura,
+      cuenta: planilla.idabonado,
+      nrofactura: planilla.nrofactura ?? this.f_ntacredito.get('nrofactura')?.value,
+    });
+
+    this.getValorPlanilla(planilla.idfactura);
+  }
+
   getValorPlanilla(idfactura: any) {
     this.s_rubroxfac.getSumaValoresUnitarios(idfactura).then((valor: any) => {
-      this.f_ntacredito.patchValue({ valor: valor.toFixed(2) });
-      this.valorFactura = valor.toFixed(2);
+      const v = Number(valor ?? 0);
+      this.valorFactura = v; // ✅ number
+
+      this.updateValorMaxValidator(this.valorFactura);
+
+      // si quieres autollenar el valor por defecto (máximo):
+      this.f_ntacredito.patchValue({ valor: v.toFixed(2) });
+
+      this.loading.hideLoading();
+    }).catch((e: any) => {
+      console.error(e);
+      this.formError = 'No se pudo calcular el valor de la factura.';
       this.loading.hideLoading();
     });
   }
+
+  private updateValorMaxValidator(maxValue: number) {
+    const c = this.f_ntacredito.get('valor');
+    if (!c) return;
+
+    const validators = [Validators.required, Validators.min(0.01)];
+    if (maxValue > 0) validators.push(Validators.max(maxValue));
+    c.setValidators(validators);
+    c.updateValueAndValidity({ emitEvent: false });
+  }
+
   buscarAbonado(cuenta: number) {
     this.s_abonado.getById(cuenta).subscribe({
       next: (cuenta: any) => {
@@ -189,16 +281,16 @@ export class AddNtacreditoComponent implements OnInit {
 
   setCliente(dato: any) {
     this.resppago = dato;
-    this.f_ntacredito.patchValue({
-      cliente: dato.nombre,
-    });
+    this.f_ntacredito.patchValue({ cliente: dato?.nombre ?? '' });
   }
+
   setAbonado(dato: any) {
     this.resppago = dato.idresponsable;
     this._cuenta = dato;
+
     this.f_ntacredito.patchValue({
       cuenta: dato.idabonado,
-      cliente: dato.idresponsable.nombre,
+      cliente: dato.idresponsable?.nombre ?? '',
     });
   }
 }

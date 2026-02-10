@@ -1,381 +1,270 @@
+<!-- ===================== CABECERA ===================== -->
 <div class="content mt-1 pt-1 px-2">
   <div class="container-fluid">
-    <div class="row mt-0 px-1 pt-1 justify-content-center cabecera border sombra">
-      <!-- <div class="col-md-12"> -->
-      <h4 class="font-weight-bold text-truncate ml-2">
-        <i class="bi-arrow-up-left-square-fill"></i> &nbsp; Exportar Facturas &nbsp;&nbsp;
-      </h4>
-      <h6 class="mt-2 fantacyblack"> (Para gestión de Facturas Electrónicas)</h6>
-      <!-- </div> -->
-    </div>
-  </div>
-</div>
+    <div class="row px-2 py-2 justify-content-between align-items-center cabecera border sombra">
 
-<div class="content">
-  <div class="container-fluid">
-    <div class="row justify-content-center">
-      <div class="card card-body col-sm-6 detalle sombra">
-        <form [formGroup]="formExportar">
-          <div class="row">
-
-            <div class="input-group input-group-sm col-sm-8 mb-3">
-              <div class="input-group-prepend">
-                <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Número de
-                  Factura</span>
-              </div>
-              <input type="text" class="form-control text-center" formControlName="nrofactura" aria-label="Small"
-                aria-describedby="inputGroup-sizing-sm" placeholder="000-000-000000000">
-            </div>
-            <div class="input-group input-group-sm col-sm-4 mb-3">
-              <div class="input-group-prepend">
-                <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Ambiente</span>
-              </div>
-              <select type="text" class="form-control text-center" formControlName="ambiente" aria-label="Small"
-                aria-describedby="inputGroup-sizing-sm">
-                <option value="2">Producción</option>
-                <option value="1">Prueba</option>
-              </select>
-
-            </div>
-
-            <div class="input-group input-group-sm col-sm-10 mb-3">
-              <div class="input-group-prepend">
-                <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Fechas</span>
-              </div>
-              <input type="date" class="form-control text-center" formControlName="desdeFecha" aria-label="Small"
-                aria-describedby="inputGroup-sizing-sm">
-              <input type="date" class="form-control text-center" formControlName="hastaFecha" aria-label="Small"
-                aria-describedby="inputGroup-sizing-sm">
-            </div>
-
-          </div>
-        </form>
-        <div *ngIf="swfacturas" class="alert alert-warning text-center roboto small font-weight-bold py-0" role="alert">
-          Total de Facturas: {{_facturas.length}}
-        </div>
-        <div *ngIf="swfacturas" class="alert text-center roboto small font-weight-bold py-0" role="alert">
-          <div class="progress progress-sm">
-            <div class="progress-bar" [ngStyle]="{ 'width.%': conter }">{{porcNumber}}</div>
-          </div>
-          <small>
-            {{conter}} Complete de {{_facturas.length}}
-          </small>
-        </div>
-        <div class="text-center">
-          <button type='submit' class='btn btn-primary btn-sm mx-1' [disabled]="swbotones" (click)="buscar()">
-            <i class="fa fa-search"></i>&nbsp; Buscar</button>
-          <button class="btn btn-outline-success btn-sm mx-1" (click)="regresar()"><i class="fa fa-times-circle"></i>
-            Cancelar</button>
-          <button *ngIf="swexportar" class="btn btn-success btn-sm mx-1" (click)="exportar()"><i
-              class="bi-arrow-up-left-square"></i>&nbsp; Exportar</button>
-        </div>
-
-        <div *ngIf="swbotones" class="text-center">
-          <button type="button" class="btn btn-success btn-block">
-            <i *ngIf="swcalculando" class="fa fa-spinner"></i>
-            <i *ngIf="!swcalculando" class="bi-eye"></i>&nbsp;&nbsp;&nbsp;{{txtcalculando}}
-          </button>
-        </div>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Facturas exportadas</h3>
-            <div class="card-tools ml-2">
-              <div class="input-group input-group-sm" style="width: 50px;">
-                <button class="btn btn-sm btn-primary" (click)="changeDato()">
-                  <i class="bi bi-arrow-clockwise"></i>
-                </button>
-              </div>
-            </div>
-            <div class="card-tools ml-2 mr-2">
-              <div class="input-group input-group-sm" style="width: 200px;">
-                <select type="text" name="table_search" [(ngModel)]="v_estado" (change)="changeDato()"
-                  style="width: 100px;" class="form-control float-right">
-                  <option value={{estado.letra}} *ngFor="let estado of estados">
-                    {{estado.nombre}}-{{estado.letra}}</option>
-                </select>
-                <input type="number" [(ngModel)]=limit name="table_search" (change)="changeDato()"
-                  class="form-control float-right" placeholder="Search">
-              </div>
-            </div>
-            <div class="card-tools mr-2">
-              <div class="input-group input-group-sm" style="width: 200px;">
-                <input type="text" [(ngModel)]=filter name="table_search" class="form-control float-right"
-                  placeholder="Filtrar...">
-              </div>
-            </div>
-            <div class="card-tools mr-2">
-              <div class="input-group input-group-sm" style="width: 200px;">
-                <input type="text" [(ngModel)]=datoBusqueda name="table_search" class="form-control float-right"
-                  placeholder="Cliente / Cuenta">
-                <button class="btn btn-sm btn-primary" (click)="getByClienteCuenta()">
-                  <i class="bi bi-search"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="card-body table-responsive p-0" style="height: 300px;">
-            <table class="table table-head-fixed text-nowrap table-bordered table-hover table-sm table-responsive-sm">
-              <thead>
-                <tr class="text-center">
-                  <th>N°</th>
-                  <th>Planilla</th>
-                  <th>Cuenta</th>
-                  <th>Cliente</th>
-                  <th>FechaEmision</th>
-                  <th>Nro Factura</th>
-                  <th>Estado</th>
-                  <th>Detalles</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let fec_factura of fec_facturas | filter: filter; let i = index ">
-                  <td class="text-center">{{i+1}}</td>
-                  <td class="text-center">{{fec_factura.idfactura}}</td>
-                  <td class="text-center">{{fec_factura.referencia}}</td>
-                  <td>{{fec_factura.razonsocialcomprador}}</td>
-                  <td>{{fec_factura.fechaemision}}</td>
-                  <td class="text-center">
-                    {{fec_factura.establecimiento}}-{{fec_factura.puntoemision}}-{{fec_factura.secuencial}}
-                  </td>
-                  <td class="text-center">{{fec_factura.estado}}</td>
-                  <td class="text-center">
-                    <button class="btn btn-xs btn-success" data-toggle="modal" data-target="#detallesModal"
-                      (click)="setFactura(fec_factura)">
-                      <i class="bi bi-door-open-fill"></i>
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <!-- /.card-body -->
-        </div>
-        <!-- /.card -->
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal detalles facturacion electronica-->
-<div class="modal fade" id="detallesModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-  aria-labelledby="detallesModalLabel" aria-hidden="true">
-
-  <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <div class="modal-content shadow-lg border-0">
-
-      <!-- HEADER -->
-      <div class="modal-header bg-light border-bottom-0 py-3">
-        <div class="w-100 d-flex justify-content-between align-items-start">
-
-          <div>
-            <h5 class="modal-title font-weight-bold mb-1">
-              Factura: {{factura.establecimiento}}-{{factura.puntoemision}}-{{factura.secuencial}}
-              <span class="badge badge-pill ml-2" [ngClass]="{
-                  'badge-success': factura.estado === 'AUTORIZADO',
-                  'badge-danger': factura.estado === 'RECHAZADO',
-                  'badge-warning': factura.estado === 'DEVUELTA'
-                }">
-                {{factura.estado}}
-              </span>
-            </h5>
-
-            <small class="text-muted">{{factura.claveacceso}}</small>
-            <div class="mt-1">
-              <small [ngClass]="getFechaColor()" class="font-weight-bold">
-                Fecha emisión: {{ factura.fechaemision | date:'yyyy-MM-dd' }}
-              </small>
-            </div>
-          </div>
-
-          <div class="text-right">
-
-            <!-- Dropdown acciones -->
-            <div class="dropdown d-inline-block">
-              <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton"
-                data-toggle="dropdown">
-                <i class="fas fa-cog mr-1"></i> Acciones
-              </button>
-
-              <div class="dropdown-menu dropdown-menu-right shadow">
-
-                <!-- XML -->
-                <a class="dropdown-item" href="javascript:void(0)" [hidden]="validarEstado(factura.estado)"
-                  (click)="showXml()">
-                  <i class="fas fa-code text-primary mr-2"></i> Ver XML
-                </a>
-
-                <a class="dropdown-item" href="javascript:void(0)" [hidden]="!validarEstado(factura.estado)"
-                  (click)="showError()">
-                  <i class="fas fa-exclamation-triangle text-warning mr-2"></i> Ver Errores
-                </a>
-
-                <div class="dropdown-divider"></div>
-
-                <!-- Validar -->
-                <a class="dropdown-item" href="javascript:void(0)" *ngIf="idusuario == 1"  (click)="getXmlAutorizadoSri(factura)">
-                  <i class="fas fa-check-circle text-info mr-2"></i> Validar SRI
-                </a>
-
-                <div class="dropdown-divider"></div>
-
-                <!-- Descargar -->
-                <a class="dropdown-item" href="javascript:void(0)" *ngIf="factura.xmlautorizado"
-                  (click)="getFacturaPDF(factura.idfactura)">
-                  <i class="fas fa-file-pdf text-danger mr-2"></i> Descargar PDF
-                </a>
-
-                <a class="dropdown-item" href="javascript:void(0)" *ngIf="factura.xmlautorizado"
-                  (click)="downloadXml(factura)">
-                  <i class="fas fa-file-code text-success mr-2"></i> Descargar XML
-                </a>
-
-                <div class="dropdown-divider"></div>
-
-                <!-- Re enviar -->
-                <a class="dropdown-item" href="javascript:void(0)" *ngIf="btnRsend && idusuario == 1" (click)="reSend()">
-                  <i class="fas fa-paper-plane text-primary mr-2"></i> Re-enviar
-                </a>
-                 <!-- Re crear -->
-                <a class="dropdown-item" href="javascript:void(0)" *ngIf="idusuario == 1" (click)="reCreateFactura(factura.idfactura)">
-                  <i class="fas fa-repeat text-warning mr-2"></i> Re-crear
-                </a>
-              </div>
-            </div>
-
-            <!-- Cerrar -->
-            <button type="button" class="btn btn-outline-secondary btn-sm ml-2" data-dismiss="modal">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-
-        </div>
+      <div class="d-flex align-items-center flex-wrap">
+        <h4 class="font-weight-bold mb-0 mr-2">
+          <i class="bi bi-arrow-up-left-square-fill"></i>&nbsp; Exportar Facturas
+        </h4>
+        <small class="text-muted text-warning font-weight-bold">
+          (Para gestión de Facturas Electrónicas)
+        </small>
       </div>
 
-      <!-- BODY -->
-      <div class="modal-body pt-0" *ngIf="txtDetails; else txtError">
+      <div class="d-flex align-items-center" >
+        <a class="btn btn-outline-primary btn-sm mr-2" *ngIf="idusuario===1" routerLink="/sri-txt">
+          <i class="bi bi-upload"></i>&nbsp; Upload TXT
+        </a>
 
-        <div class="row">
-
-          <!-- PRODUCTOS -->
-          <div class="col-md-8">
-            <h6 class="section-title">Productos / Servicios</h6>
-
-            <div class="table-responsive">
-              <table class="table table-sm table-bordered table-striped rounded">
-                <thead class="thead-dark">
-                  <tr>
-                    <th>Código</th>
-                    <th>Descripción</th>
-                    <th class="text-center">Cantidad</th>
-                    <th class="text-right">Valor Unit.</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  <tr *ngFor="let detalle of _detalles">
-                    <td class="text-center">{{detalle.codigoprincipal}}</td>
-                    <td>{{detalle.descripcion}}</td>
-                    <td class="text-center">{{detalle.cantidad}}</td>
-                    <td class="text-right">{{detalle.preciounitario.toFixed(2)}}</td>
-                  </tr>
-
-                  <tr class="table-secondary font-weight-bold">
-                    <td colspan="2"></td>
-                    <td class="text-center">Total</td>
-                    <td class="text-right">{{totalpreciounitario.toFixed(2)}}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- IMPUESTOS -->
-          <div class="col-md-4">
-            <h6 class="section-title">Impuestos</h6>
-
-            <div class="table-responsive">
-              <table class="table table-sm table-bordered table-striped">
-                <thead class="thead-dark">
-                  <tr>
-                    <th>N° Detalle</th>
-                    <th>Base Imponible</th>
-                    <th *ngIf="validarEstado(factura.estado)">Acción</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  <tr *ngFor="let imp of impuestos">
-                    <td>{{imp.idfacturadetalle}}</td>
-                    <td class="text-right">{{imp.baseimponible.toFixed(2)}}</td>
-                    <td *ngIf="validarEstado(factura.estado)" class="text-center">
-                      <button class="btn btn-outline-danger btn-sm" (click)="deleteImpuesto(imp)">
-                        <i class="fas fa-trash"></i>
-                      </button>
-                    </td>
-                  </tr>
-
-                  <tr class="table-secondary font-weight-bold">
-                    <td>Total</td>
-                    <td class="text-right">{{totalbaseimponible.toFixed(2)}}</td>
-                    <td *ngIf="validarEstado(factura.estado)"></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- PAGOS -->
-        <div class="row mt-4">
-          <div class="col-md-6">
-            <h6 class="section-title">Pagos</h6>
-
-            <div class="table-responsive">
-              <table class="table table-sm table-bordered table-striped">
-                <thead class="thead-dark">
-                  <tr>
-                    <th>N° Planilla</th>
-                    <th>Total</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  <tr *ngFor="let pago of _pagos">
-                    <td>{{pago.idfactura}}</td>
-                    <td class="text-right">{{pago.total.toFixed(2)}}</td>
-                  </tr>
-                </tbody>
-
-              </table>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- ERROR -->
-      <ng-template #txtError>
-        <div class="modal-body mt-3">
-          <div class="alert alert-warning shadow-sm">
-            <h6 class="mb-0"><i class="fas fa-exclamation-triangle mr-2"></i> Información de errores</h6>
-          </div>
-
-          <textarea class="form-control mt-2" rows="10" readonly>{{error}}</textarea>
-        </div>
-      </ng-template>
-
-      <!-- FOOTER -->
-      <div class="modal-footer bg-light">
-        <button type="button" class="btn btn-outline-secondary btn-sm" data-dismiss="modal">
-          <i class="fas fa-times mr-1"></i> Cerrar
+        <button class="btn btn-outline-secondary btn-sm" (click)="regresar()">
+          <i class="bi bi-arrow-left"></i>&nbsp; Volver
         </button>
       </div>
 
     </div>
   </div>
 </div>
+
+<!-- ===================== FORMULARIO ===================== -->
+<div class="content">
+  <div class="container-fluid">
+
+    <div class="row justify-content-center">
+      <div class="col-lg-8 col-md-10">
+
+        <div class="card detalle sombra mt-3">
+          <div class="card-header cabecera">
+            <div class="d-flex justify-content-between  align-items-center">
+              <span class="font-weight-bold">Filtros de exportación</span>
+              <span *ngIf="swfacturas" class="badge badge-light">
+                Total: {{ _facturas.length }}
+              </span>
+            </div>
+          </div>
+
+          <div class="card-body">
+
+            <form [formGroup]="formExportar" novalidate>
+              <div class="form-row">
+
+                <div class="form-group col-md-8">
+                  <label class="small font-weight-bold">Número de Factura</label>
+                  <input type="text"
+                         class="form-control form-control-sm text-center"
+                         formControlName="nrofactura"
+                         placeholder="000-000-000000000">
+                </div>
+
+                <div class="form-group col-md-4">
+                  <label class="small font-weight-bold">Ambiente</label>
+                  <select class="form-control form-control-sm text-center"
+                          formControlName="ambiente">
+                    <option value="2">Producción</option>
+                    <option value="1">Prueba</option>
+                  </select>
+                </div>
+
+                <div class="form-group col-md-6">
+                  <label class="small font-weight-bold">Desde</label>
+                  <input type="date"
+                         class="form-control form-control-sm text-center"
+                         formControlName="desdeFecha">
+                </div>
+
+                <div class="form-group col-md-6">
+                  <label class="small font-weight-bold">Hasta</label>
+                  <input type="date"
+                         class="form-control form-control-sm text-center"
+                         formControlName="hastaFecha">
+                </div>
+
+              </div>
+            </form>
+
+            <!-- ALERTAS -->
+            <div *ngIf="swfacturas"
+                 class="alert alert-warning text-center py-1 mb-2 small font-weight-bold">
+              Facturas encontradas: {{ _facturas.length }}
+            </div>
+
+            <div *ngIf="swfacturas"
+                 class="alert alert-light text-center py-2 mb-2">
+              <div class="progress" style="height: 14px;">
+                <div class="progress-bar"
+                     role="progressbar"
+                     [style.width.%]="conter">
+                  {{ porcNumber }}
+                </div>
+              </div>
+              <small class="text-muted d-block mt-1">
+                {{ conter }}% completado
+              </small>
+            </div>
+
+            <!-- BOTONES -->
+            <div class="d-flex justify-content-center flex-wrap mt-2">
+              <button type="button"
+                      class="btn btn-primary btn-sm mx-1"
+                      [disabled]="swbotones"
+                      (click)="buscar()">
+                <i class="fa fa-search"></i>&nbsp; Buscar
+              </button>
+
+              <button type="button"
+                      class="btn btn-outline-secondary btn-sm mx-1"
+                      (click)="regresar()">
+                <i class="fa fa-times-circle"></i>&nbsp; Cancelar
+              </button>
+
+              <button *ngIf="swexportar"
+                      type="button"
+                      class="btn btn-success btn-sm mx-1"
+                      (click)="exportar()">
+                <i class="bi bi-arrow-up-left-square"></i>&nbsp; Exportar
+              </button>
+            </div>
+
+            <!-- ESTADO -->
+            <div *ngIf="swbotones" class="mt-3">
+              <button type="button" class="btn btn-success btn-block btn-sm">
+                <i *ngIf="swcalculando" class="fa fa-spinner fa-spin"></i>
+                <i *ngIf="!swcalculando" class="bi bi-eye"></i>
+                &nbsp; {{ txtcalculando }}
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ===================== TABLA ===================== -->
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="card sombra">
+
+          <div class="card-header bg-white">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+
+              <h6 class="mb-0 font-weight-bold">Facturas exportadas</h6>
+
+              <div class="d-flex align-items-center flex-wrap">
+
+                <button class="btn btn-sm btn-outline-primary mr-2"
+                        (click)="changeDato()">
+                  <i class="bi bi-arrow-clockwise"></i>
+                </button>
+
+                <select class="form-control form-control-sm mr-2"
+                        style="width: 180px;"
+                        [(ngModel)]="v_estado"
+                        (change)="changeDato()">
+                  <option *ngFor="let estado of estados"
+                          [value]="estado.letra">
+                    {{estado.nombre}} - {{estado.letra}}
+                  </option>
+                </select>
+
+                <input type="number"
+                       class="form-control form-control-sm mr-2"
+                       style="width: 90px;"
+                       [(ngModel)]="limit"
+                       (change)="changeDato()"
+                       placeholder="Limit">
+
+                <input type="text"
+                       class="form-control form-control-sm mr-2"
+                       style="width: 180px;"
+                       [(ngModel)]="filter"
+                       placeholder="Filtrar...">
+
+                <div class="input-group input-group-sm" style="width: 240px;">
+                  <input type="text"
+                         class="form-control"
+                         [(ngModel)]="datoBusqueda"
+                         placeholder="Cliente / Cuenta">
+                  <div class="input-group-append">
+                    <button class="btn btn-primary"
+                            (click)="getByClienteCuenta()">
+                      <i class="bi bi-search"></i>
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+
+          <div class="card-body p-0">
+            <div class="table-responsive"
+                 style="max-height: 360px; overflow:auto;">
+              <table class="table table-sm table-bordered table-hover mb-0">
+                <thead class="thead-dark"
+                       style="position: sticky; top: 0; z-index: 2;">
+                  <tr class="text-center">
+                    <th style="width:60px;">N°</th>
+                    <th>Planilla</th>
+                    <th>Cuenta</th>
+                    <th>Cliente</th>
+                    <th>Fecha Emisión</th>
+                    <th>Nro Factura</th>
+                    <th>Estado</th>
+                    <th style="width:90px;">Detalles</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr *ngFor="let fec_factura of fec_facturas | filter: filter; let i = index">
+                    <td class="text-center">{{ i + 1 }}</td>
+                    <td class="text-center">{{ fec_factura.idfactura }}</td>
+                    <td class="text-center">{{ fec_factura.referencia }}</td>
+                    <td class="text-truncate" style="max-width:240px;">
+                      {{ fec_factura.razonsocialcomprador }}
+                    </td>
+                    <td>{{ fec_factura.fechaemision }}</td>
+
+                    <td class="text-center">
+                      {{fec_factura.establecimiento}}-{{fec_factura.puntoemision}}-{{fec_factura.secuencial}}
+                    </td>
+
+                    <td class="text-center">
+                      <span class="badge badge-pill"
+                            [ngClass]="{
+                              'badge-success': fec_factura.estado === 'AUTORIZADO',
+                              'badge-danger': fec_factura.estado === 'RECHAZADO',
+                              'badge-warning': fec_factura.estado === 'DEVUELTA',
+                              'badge-secondary': fec_factura.estado !== 'AUTORIZADO'
+                                && fec_factura.estado !== 'RECHAZADO'
+                                && fec_factura.estado !== 'DEVUELTA'
+                            }">
+                        {{ fec_factura.estado }}
+                      </span>
+                    </td>
+
+                    <td class="text-center">
+                      <button class="btn btn-xs btn-success"
+                              data-toggle="modal"
+                              data-target="#detallesModal"
+                              (click)="setFactura(fec_factura)">
+                        <i class="bi bi-door-open-fill"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===================== MODAL DETALLES ===================== -->
+<!-- (El modal que ya tenías está bien estructurado, no necesita cambios funcionales) -->

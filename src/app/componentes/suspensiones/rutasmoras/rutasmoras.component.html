@@ -1,39 +1,94 @@
 <!-- CABECERA -->
+<!-- CABECERA (1 SOLO RENGLÓN) -->
 <div class="content mt-1 pt-1 pl-0">
   <div class="container-fluid">
-    <div class="row m-0 px-2 py-2 align-items-center cabecera border sombra">
-      <div class="col-sm-5">
-        <h6 class="m-0 font-weight-bold">{{ titulo }}</h6>
+    <div class="row m-0 px-2 py-2 align-items-center cabecera border sombra flex-nowrap">
+
+      <!-- TÍTULO -->
+      <div class="col-auto pr-2">
+        <h6 class="m-0 font-weight-bold text-truncate" style="max-width: 320px;">
+          {{ titulo }}
+        </h6>
       </div>
 
-      <!-- FILTRO -->
-      <div class="col-sm-3 ml-auto">
-        <div class="input-group input-group-sm">
+      <!-- FILTRO TEXTO -->
+      <div class="col-auto pr-2">
+        <div class="input-group input-group-sm" style="width: 260px;">
           <div class="input-group-prepend">
             <span class="input-group-text"><i class="bi bi-search"></i></span>
           </div>
-          <input type="text" class="form-control text-center" placeholder="Filtrar..." [(ngModel)]="filterTerm" />
+          <input type="text"
+                 class="form-control text-center"
+                 placeholder="Cuenta/cliente/cédula..."
+                 [(ngModel)]="filterTerm"
+                 (ngModelChange)="applyFilters()" />
         </div>
       </div>
 
-      <!-- BOTON GLOBAL -->
-      <div class="col-sm-auto">
+      <!-- DEUDAS MIN -->
+      <div class="col-auto pr-2">
+        <div class="input-group input-group-sm" style="width: 160px;">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Deudas</span>
+          </div>
+          <input type="number"
+                 class="form-control text-center"
+                 placeholder="Min"
+                 [(ngModel)]="deudasMin"
+                 (ngModelChange)="applyFilters()"
+                 min="0" />
+        </div>
+      </div>
+
+      <!-- DEUDAS MAX + LIMPIAR -->
+      <div class="col-auto pr-2">
+        <div class="input-group input-group-sm" style="width: 180px;">
+          <input type="number"
+                 class="form-control text-center"
+                 placeholder="Max"
+                 [(ngModel)]="deudasMax"
+                 (ngModelChange)="applyFilters()"
+                 min="0" />
+          <div class="input-group-append">
+            <button class="btn btn-outline-light"
+                    type="button"
+                    (click)="clearFilters()"
+                    [disabled]="!filterTerm && deudasMin==null && deudasMax==null"
+                    title="Limpiar filtros">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTADOR (se empuja al centro/derecha sin romper línea) -->
+      <div class="col text-right pr-2">
+        <small class="text-white-50 d-block text-truncate">
+          Mostrando: <b class="text-white">{{ datosCuentasFiltradas.length }}</b>
+          de <b class="text-white">{{ datosCuentas.length }}</b>
+        </small>
+      </div>
+
+      <!-- IMPRIMIR -->
+      <div class="col-auto pr-2">
         <button class="btn btn-sm btn-success"
                 [disabled]="selectedCount === 0"
                 (click)="procesarSeleccionados()"
                 data-toggle="modal"
                 data-target="#impSeleccionados">
           <i class="bi bi-printer"></i>
-          Imprimir seleccionados ({{ selectedCount }})
+          <span class="d-none d-lg-inline">Imprimir</span>
+          ({{ selectedCount }})
         </button>
       </div>
 
       <!-- REGRESAR -->
-      <div class="col-sm-auto text-right">
-        <button class="bg-transparent border-0" [routerLink]="['/suspensiones']">
+      <div class="col-auto text-right">
+        <button class="bg-transparent border-0 p-0" [routerLink]="['/suspensiones']" title="Regresar">
           <i class="bi-arrow-left-circle text-white icoRegresar"></i>
         </button>
       </div>
+
     </div>
   </div>
 </div>
@@ -42,31 +97,45 @@
 <div class="container-fluid mt-3">
   <div class="card sombra">
     <div class="card-body table-responsive">
+
       <table id="datos-ruta" class="table table-sm table-hover table-striped table-bordered">
         <thead class="text-center">
           <tr>
             <th style="width:40px">
-              <input type="checkbox" (change)="toggleSelectAll($event)" />
+              <input type="checkbox" [checked]="isAllFilteredSelected" (change)="toggleSelectAllFiltered($event)" />
             </th>
-            <th>#</th>
-            <th (click)="sortData('cuenta')">Cuenta</th>
+            <th style="width:60px">#</th>
+
+            <th style="cursor:pointer" (click)="sortData('cuenta')">
+              Cuenta
+              <i class="bi" [ngClass]="getSortIcon('cuenta')" *ngIf="currentSortColumn==='cuenta'"></i>
+            </th>
+
             <th>Cliente</th>
             <th>Identificación</th>
-            <th (click)="sortData('num_facturas')">Deudas</th>
+
+            <th style="cursor:pointer" (click)="sortData('num_facturas')">
+              Deudas
+              <i class="bi" [ngClass]="getSortIcon('num_facturas')" *ngIf="currentSortColumn==='num_facturas'"></i>
+            </th>
+
             <th>Subtotal</th>
             <th>Interés</th>
-            <th (click)="sortData('total')">Total</th>
-            <th style="min-width:300px">Selección</th>
+
+            <th style="cursor:pointer" (click)="sortData('total')">
+              Total
+              <i class="bi" [ngClass]="getSortIcon('total')" *ngIf="currentSortColumn==='total'"></i>
+            </th>
+
           </tr>
         </thead>
 
         <tbody>
-          <tr *ngFor="let abonado of datosCuentas | filter: filterTerm; let i = index">
+          <tr *ngFor="let abonado of datosCuentasFiltradas; let i = index">
             <!-- SELECT -->
             <td class="text-center align-middle">
-              <input type="checkbox"
-                     [(ngModel)]="rowUI[abonado.cuenta].selected"
-                     (ngModelChange)="onRowSelectedChange(abonado)" />
+              <input type="checkbox" [(ngModel)]="rowUI[abonado.cuenta].selected"
+                (ngModelChange)="onRowSelectedChange(abonado)" />
             </td>
 
             <td class="text-center">{{ i + 1 }}</td>
@@ -77,69 +146,17 @@
             <td class="text-right">{{ abonado.subtotal?.toFixed(2) }}</td>
             <td class="text-right">{{ abonado.intereses?.toFixed(2) }}</td>
             <td class="text-right font-weight-bold">{{ abonado.total?.toFixed(2) }}</td>
-
-            <!-- CONTROLES VISIBLES -->
-            <td class="align-middle">
-              <div class="border rounded p-2 bg-light" *ngIf="rowUI[abonado.cuenta] as ui">
-
-                <!-- NOTIFICAR -->
-                <div class="custom-control custom-checkbox mb-2">
-                  <input type="checkbox"
-                         class="custom-control-input"
-                         [id]="'notif_' + abonado.cuenta"
-                         [(ngModel)]="ui.notificar"
-                         [disabled]="!ui.selected" />
-                  <label class="custom-control-label" [for]="'notif_' + abonado.cuenta">
-                    Notificar
-                  </label>
-                </div>
-
-                <!-- ACCION -->
-                <div class="custom-control custom-radio">
-                  <input type="radio"
-                         class="custom-control-input"
-                         [id]="'susp_' + abonado.cuenta"
-                         name="accion_{{ abonado.cuenta }}"
-                         value="SUSPENDER"
-                         [(ngModel)]="ui.accion"
-                         [disabled]="!ui.selected" />
-                  <label class="custom-control-label" [for]="'susp_' + abonado.cuenta">
-                    Suspender
-                  </label>
-                </div>
-
-                <div class="custom-control custom-radio">
-                  <input type="radio"
-                         class="custom-control-input"
-                         [id]="'ret_' + abonado.cuenta"
-                         name="accion_{{ abonado.cuenta }}"
-                         value="RETIRAR_MEDIDOR"
-                         [(ngModel)]="ui.accion"
-                         [disabled]="!ui.selected" />
-                  <label class="custom-control-label" [for]="'ret_' + abonado.cuenta">
-                    Retirar medidor
-                  </label>
-                </div>
-
-                <small class="text-muted d-block mt-2">
-                  * Activa la selección para habilitar opciones.
-                </small>
-              </div>
-            </td>
           </tr>
         </tbody>
       </table>
 
       <!-- RESUMEN -->
-      <div class="mt-2 d-flex justify-content-between">
+      <div class="mt-2 d-flex justify-content-between align-items-center flex-wrap">
         <div class="text-muted">
           Seleccionados: <b>{{ selectedCount }}</b>
-          | Notificar: <b>{{ notifyCount }}</b>
         </div>
 
-        <button class="btn btn-sm btn-outline-secondary"
-                (click)="clearSelection()"
-                [disabled]="selectedCount === 0">
+        <button class="btn btn-sm btn-outline-secondary" (click)="clearSelection()" [disabled]="selectedCount === 0">
           Limpiar selección
         </button>
       </div>
@@ -152,17 +169,22 @@
 <div class="modal fade" id="impSeleccionados" data-backdrop="static" data-keyboard="false">
   <div class="modal-dialog modal-xl">
     <div class="modal-content">
+
       <div class="modal-header">
         <h5 class="modal-title">Impresión - Seleccionados</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
+
       <div class="modal-body">
         <iframe id="pdfSeleccionadosViewer" src="" width="100%" height="600px"></iframe>
       </div>
+
       <div class="modal-footer">
         <button class="btn btn-sm btn-success" data-dismiss="modal">Cerrar</button>
       </div>
+
     </div>
   </div>
 </div>
-
-

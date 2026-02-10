@@ -13,12 +13,8 @@ import { PdfService } from 'src/app/servicios/pdf.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { RutasService } from 'src/app/servicios/rutas.service';
 
-type AccionFila = 'SUSPENDER' | 'RETIRAR_MEDIDOR' | null;
-
 interface RowUIState {
   selected: boolean;
-  notificar: boolean;
-  accion: AccionFila;
 }
 
 @Component({
@@ -28,42 +24,24 @@ interface RowUIState {
 })
 export class RutasmorasComponent implements OnInit {
   _ruta: any;
-  filterTerm: string = '';
   today: number = Date.now();
   titulo: string = 'Valores pendientes Abonados de la ruta ';
-  abonados: any;
-  _lecturas: any;
-  _abonados: any = [];
-  porcCarga: number = 0;
-  _facSinCobro: any;
-  datosImprimir: any = [];
-  _abonado: any;
-
-  /* Intereses */
-  calInteres = {} as calcInteres;
-  totInteres: number = 0;
-  arrCalculoInteres: any = [];
-  factura: Facturas = new Facturas();
-  _intereses: any;
-  valoriva: number = 0;
-  _codigo: string = '';
-
-  _rxf: any = [];
-  rubrostotal: number = 0;
   datosCuentas: any[] = [];
+  datosCuentasFiltradas: any[] = [];
+
+  /* filtros */
+  filterTerm: string = '';
+  deudasMin: number | null = null;
+  deudasMax: number | null = null;
 
   /* SORT */
-  currentSortColumn: any | null = null;
+  currentSortColumn: string | null = null;
   isAscending: boolean = true;
 
-  cuenta: any;
-  modalSize: string = 'lg';
-
-  // ===== NUEVO =====
+  /* selección */
   rowUI: Record<number, RowUIState> = {};
   seleccionados: any[] = [];
   selectedCount: number = 0;
-  notifyCount: number = 0;
 
   constructor(
     private rutaDato: ActivatedRoute,
@@ -110,43 +88,149 @@ export class RutasmorasComponent implements OnInit {
   }
 
   // =========================
-  // NUEVO: Inicializar UI por fila
+  // DATA
   // =========================
+  getDatosCuenta(idruta: number) {
+    this.s_loading.showLoading();
+
+    this.s_abonado.DeudasCuentasByRuta(idruta).then((item: any) => {
+      this.datosCuentas = Array.isArray(item) ? item : [];
+
+      // init UI
+      this.initRowUI(this.datosCuentas);
+
+      // aplicar filtros (y sort si ya hay)
+      this.applyFilters();
+
+      this.s_loading.hideLoading();
+    }).catch((e: any) => {
+      console.error(e);
+      this.s_loading.hideLoading();
+    });
+  }
+
   private initRowUI(list: any[]) {
-    if (!Array.isArray(list)) return;
     for (const a of list) {
       const key = Number(a.cuenta);
       if (!this.rowUI[key]) {
-        this.rowUI[key] = {
-          selected: false,
-          notificar: false,
-          accion: 'SUSPENDER',
-        };
+        this.rowUI[key] = { selected: false };
       }
     }
     this.rebuildSeleccionados();
   }
 
-  onRowSelectedChange(abonado: any) {
-    const key = Number(abonado.cuenta);
-    const ui = this.rowUI[key];
-    if (!ui) return;
+  // =========================
+  // FILTROS (texto + rango)
+  // =========================
+  applyFilters() {
+    const term = (this.filterTerm || '').trim().toLowerCase();
 
-    // Si deselecciona, apagamos notificar (opcional) pero conservamos acción
-    if (!ui.selected) {
-      ui.notificar = false;
+    const min = (this.deudasMin === null || this.deudasMin === undefined || this.deudasMin === ('' as any))
+      ? null
+      : Number(this.deudasMin);
+
+    const max = (this.deudasMax === null || this.deudasMax === undefined || this.deudasMax === ('' as any))
+      ? null
+      : Number(this.deudasMax);
+
+    this.datosCuentasFiltradas = this.datosCuentas.filter((a: any) => {
+      // filtro texto
+      const texto =
+        `${a.cuenta ?? ''} ${a.nombre ?? ''} ${a.cedula ?? ''}`.toLowerCase();
+      const okTexto = term ? texto.includes(term) : true;
+
+      // filtro rango de deudas
+      const deudas = Number(a.num_facturas ?? 0);
+      const okMin = (min !== null && !Number.isNaN(min)) ? deudas >= min : true;
+      const okMax = (max !== null && !Number.isNaN(max)) ? deudas <= max : true;
+
+      return okTexto && okMin && okMax;
+    });
+
+    // mantener sort vigente
+    if (this.currentSortColumn) {
+      this.sortArrayInPlace(this.datosCuentasFiltradas, this.currentSortColumn, this.isAscending);
     }
+
+    // refrescar "select all" visual y conteo
     this.rebuildSeleccionados();
   }
 
-  toggleSelectAll(ev: any) {
-    const checked = !!ev?.target?.checked;
-    for (const a of this.datosCuentas) {
-      const key = Number(a.cuenta);
-      if (!this.rowUI[key]) continue;
-      this.rowUI[key].selected = checked;
-      if (!checked) this.rowUI[key].notificar = false;
+  clearFilters() {
+    this.filterTerm = '';
+    this.deudasMin = null;
+    this.deudasMax = null;
+    this.applyFilters();
+  }
+
+  // =========================
+  // SORT (NO rompe filtros)
+  // =========================
+  sortData(column: string) {
+    if (this.currentSortColumn === column) {
+      this.isAscending = !this.isAscending;
+    } else {
+      this.currentSortColumn = column;
+      this.isAscending = true;
     }
+
+    // ordena la lista filtrada (lo que ve el usuario)
+    this.sortArrayInPlace(this.datosCuentasFiltradas, column, this.isAscending);
+
+    // también ordena la lista base para que al limpiar filtros conserve el orden
+    this.sortArrayInPlace(this.datosCuentas, column, this.isAscending);
+  }
+
+  private sortArrayInPlace(arr: any[], column: string, asc: boolean) {
+    arr.sort((a: any, b: any) => {
+      const va = a?.[column];
+      const vb = b?.[column];
+
+      // números primero si aplica
+      const na = Number(va);
+      const nb = Number(vb);
+      const bothNumbers = !Number.isNaN(na) && !Number.isNaN(nb);
+
+      if (bothNumbers) {
+        return asc ? na - nb : nb - na;
+      }
+
+      // strings fallback
+      const sa = String(va ?? '').toLowerCase();
+      const sb = String(vb ?? '').toLowerCase();
+      if (sa < sb) return asc ? -1 : 1;
+      if (sa > sb) return asc ? 1 : -1;
+      return 0;
+    });
+  }
+
+  getSortIcon(column: string): string {
+    if (this.currentSortColumn !== column) return '';
+    return this.isAscending ? 'bi-caret-up-fill' : 'bi-caret-down-fill';
+  }
+
+  // =========================
+  // SELECCIÓN (solo checkbox)
+  // =========================
+  onRowSelectedChange(abonado: any) {
+    this.rebuildSeleccionados();
+  }
+
+  get isAllFilteredSelected(): boolean {
+    if (!this.datosCuentasFiltradas.length) return false;
+    return this.datosCuentasFiltradas.every(a => this.rowUI[Number(a.cuenta)]?.selected);
+  }
+
+  toggleSelectAllFiltered(ev: any) {
+    const checked = !!ev?.target?.checked;
+
+    // solo sobre lo filtrado (lo que ve)
+    for (const a of this.datosCuentasFiltradas) {
+      const key = Number(a.cuenta);
+      if (!this.rowUI[key]) this.rowUI[key] = { selected: false };
+      this.rowUI[key].selected = checked;
+    }
+
     this.rebuildSeleccionados();
   }
 
@@ -155,42 +239,27 @@ export class RutasmorasComponent implements OnInit {
       const key = Number(a.cuenta);
       if (!this.rowUI[key]) continue;
       this.rowUI[key].selected = false;
-      this.rowUI[key].notificar = false;
-      // accion se mantiene por defecto, si quieres reset:
-      // this.rowUI[key].accion = 'SUSPENDER';
     }
     this.rebuildSeleccionados();
   }
 
-private rebuildSeleccionados() {
-  const selected: any[] = [];
-  let notify = 0;
+  private rebuildSeleccionados() {
+    const selected: any[] = [];
 
-  for (const a of this.datosCuentas) {
-    const key = Number(a.cuenta);
-    const ui = this.rowUI[key];
-    if (!ui) continue;
-
-    if (ui.selected) {
-      selected.push({
-        ...a,
-        _accion: ui.accion,
-        _notificar: ui.notificar === true, // ✅ fuerza boolean
-      });
-      if (ui.notificar) notify++;
+    for (const a of this.datosCuentas) {
+      const key = Number(a.cuenta);
+      const ui = this.rowUI[key];
+      if (ui?.selected) {
+        selected.push({ ...a });
+      }
     }
+
+    this.seleccionados = selected;
+    this.selectedCount = selected.length;
   }
 
-  this.seleccionados = selected;
-  this.selectedCount = selected.length;
-  this.notifyCount = notify;
-}
-
-
   // =========================
-  // BOTON GLOBAL: Procesar seleccionados
-  // - genera PDF con seleccionados
-  // - guarda notificaciones en tabla (backend)
+  // IMPRIMIR SELECCIONADOS (PDF)
   // =========================
   async procesarSeleccionados() {
     if (this.seleccionados.length === 0) {
@@ -198,30 +267,13 @@ private rebuildSeleccionados() {
       return;
     }
 
-    // Validación: acción obligatoria
-    const sinAccion = this.seleccionados.filter(x => !x._accion);
-    if (sinAccion.length > 0) {
-      alert('Hay seleccionados sin acción. Elige Suspender o Retirar medidor.');
-      return;
-    }
-
     this.s_loading.showLoading();
 
-    // 1) Guardar notificaciones en tabla (solo los que tienen _notificar)
-    const paraNotificar = this.seleccionados.filter(x => x._notificar);
-    if (paraNotificar.length > 0) {
-      try {
-        await this.guardarNotificaciones(paraNotificar);
-      } catch (e) {
-        console.error(e);
-        // no bloqueamos el PDF si falla BD (tu decides)
-      }
+    try {
+      this.generarPdfSeleccionados(this.seleccionados);
+    } finally {
+      this.s_loading.hideLoading();
     }
-
-    // 2) Generar PDF global con seleccionados
-    this.generarPdfSeleccionados(this.seleccionados);
-
-    this.s_loading.hideLoading();
   }
 
   private generarPdfSeleccionados(rows: any[]) {
@@ -234,17 +286,15 @@ private rebuildSeleccionados() {
       r.nombre,
       r.cedula,
       r.num_facturas,
-      Number(r.subtotal).toFixed(2),
-      Number(r.intereses).toFixed(2),
-      Number(r.total).toFixed(2),
-      r._notificar ? 'SI' : 'NO',
-      r._accion === 'SUSPENDER' ? 'SUSPENDER' : 'RETIRAR MEDIDOR',
+      Number(r.subtotal ?? 0).toFixed(2),
+      Number(r.intereses ?? 0).toFixed(2),
+      Number(r.total ?? 0).toFixed(2),
     ]));
 
     autoTable(doc, {
       head: [[
         '#', 'Cuenta', 'Cliente', 'Identificación', 'Deudas',
-        'Subtotal', 'Interés', 'Total', 'Notificar', 'Acción'
+        'Subtotal', 'Interés', 'Total'
       ]],
       body,
       styles: { fontSize: 7 },
@@ -256,90 +306,13 @@ private rebuildSeleccionados() {
         5: { halign: 'right' },
         6: { halign: 'right' },
         7: { halign: 'right' },
-        8: { halign: 'center' },
-        9: { halign: 'center' },
       },
     });
 
     this.s_pdf.setfooter(doc);
 
     const pdfDataUri = doc.output('datauri');
-    const viewer:any = document.getElementById('pdfSeleccionadosViewer') as HTMLIFrameElement;
+    const viewer: any = document.getElementById('pdfSeleccionadosViewer') as HTMLIFrameElement;
     viewer.src = pdfDataUri;
   }
-
-  // =========================
-  // Guardar notificaciones en tabla (backend)
-  // Aquí debes conectar tu endpoint real
-  // =========================
-  private async guardarNotificaciones(rows: any[]): Promise<void> {
-    // Payload sugerido para tu backend:
-    // - cuenta
-    // - idruta
-    // - total, intereses, subtotal
-    // - accion
-    // - fecha
-    const payload = rows.map((r: any) => ({
-      cuenta: Number(r.cuenta),
-      idruta: this._ruta?.idruta ?? null,
-      total: Number(r.total),
-      subtotal: Number(r.subtotal),
-      intereses: Number(r.intereses),
-      accion: r._accion, // 'SUSPENDER' | 'RETIRAR_MEDIDOR'
-      fecha: new Date().toISOString(),
-      usuario: sessionStorage.getItem('usuario') ?? null,
-    }));
-
-    // EJEMPLO: si tuvieras un servicio NotificationsService:
-    // return firstValueFrom(this.notifService.guardarBatch(payload));
-
-    // Por ahora, dejo stub:
-    console.log('GUARDAR NOTIFICACIONES (BATCH) payload:', payload);
-    return;
-  }
-
-  // =========================
-  // TUS METODOS EXISTENTES
-  // =========================
-  getDatosCuenta(idruta: number) {
-    this.s_loading.showLoading();
-    this.s_abonado.DeudasCuentasByRuta(idruta).then((item: any) => {
-      this.datosCuentas = item;
-
-      // ✅ importantísimo para no tener undefined
-      this.initRowUI(this.datosCuentas);
-
-      this.s_loading.hideLoading();
-    });
-  }
-
-  sortData(column: any) {
-    if (this.currentSortColumn === column) {
-      this.isAscending = !this.isAscending;
-    } else {
-      this.currentSortColumn = column;
-      this.isAscending = true;
-    }
-
-    this.datosCuentas = this.datosCuentas.sort((a: any, b: any) => {
-      if (a[column] < b[column]) return this.isAscending ? -1 : 1;
-      if (a[column] > b[column]) return this.isAscending ? 1 : -1;
-      return 0;
-    });
-  }
-
-  detallesAbonado(cuenta: any) {
-    this.cuenta = cuenta;
-  }
-
-  // ========= lo demás tuyo lo puedes dejar tal cual =========
-  // Si quieres que también exista "impDatosRutaTable()" (imprimir tabla completa), déjalo igual.
-
-}
-
-interface calcInteres {
-  anio: number;
-  mes: number;
-  interes: number;
-  valor: number;
 }
