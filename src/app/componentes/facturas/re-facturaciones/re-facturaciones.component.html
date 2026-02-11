@@ -13,7 +13,6 @@
     </div>
 
     <div class="d-flex align-items-center flex-wrap">
-
       <span class="badge badge-pill badge-light text-dark mr-2" *ngIf="cargando">
         <i class="bi bi-hourglass-split mr-1"></i> Cargando...
       </span>
@@ -22,18 +21,18 @@
         <i class="bi bi-list-ol mr-1"></i> Registros: {{ _emisionindividual.length || 0 }}
       </span>
 
+      <!-- MENU -->
       <div class="btn-group">
         <button type="button" class="btn btn-light btn-sm" (click)="irLista()">
           <i class="bi bi-list"></i> Listado
         </button>
 
-        <button
-          type="button"
-          class="btn btn-light btn-sm dropdown-toggle dropdown-toggle-split"
-          data-toggle="dropdown"
-          aria-haspopup="true"
-          aria-expanded="false">
-          <span class="sr-only"><i class="fa fa-bars" aria-hidden="true"></i></span>
+        <button type="button"
+                class="btn btn-light btn-sm dropdown-toggle dropdown-toggle-split"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false">
+          <span class="sr-only">Toggle Dropdown</span>
         </button>
 
         <div class="dropdown-menu dropdown-menu-right shadow-sm">
@@ -51,16 +50,16 @@
           </button>
         </div>
       </div>
-
     </div>
   </div>
 
-  <!-- FILTROS -->
+  <!-- FILTROS (✅ se oculta el selector de emisión cuando vista === 'NUEVA') -->
   <div class="card mt-2 sombra">
     <div class="card-body py-2">
       <div class="row align-items-end">
 
-        <div class="col-12 col-md-4 mb-2 mb-md-0">
+        <!-- ✅ OCULTAR EN NUEVA -->
+        <div class="col-12 col-md-4 mb-2 mb-md-0" *ngIf="vista === 'LISTA'">
           <label class="small text-muted mb-1">Emisión</label>
           <div class="input-group input-group-sm">
             <div class="input-group-prepend">
@@ -114,15 +113,13 @@
   <!-- LISTA -->
   <div class="card mt-2 sombra" *ngIf="vista==='LISTA'">
     <div class="card-header bg-white py-2 d-flex align-items-center justify-content-between">
-      <div class="font-weight-semibold">
+      <div class="font-weight-bold">
         <i class="bi bi-card-list mr-1"></i> Registros de la emisión
       </div>
       <small class="text-muted">Use el filtro para encontrar rápido</small>
     </div>
 
     <div class="card-body p-0 position-relative">
-
-      <!-- overlay loading -->
       <div class="overlay-cargando" *ngIf="cargando">
         <div class="spinner-border" role="status"></div>
         <div class="mt-2 small text-muted">Cargando información...</div>
@@ -130,7 +127,7 @@
 
       <div class="table-responsive" style="max-height: 65vh;">
         <table class="table table-sm table-hover table-bordered mb-0 align-middle">
-          <thead class="thead-light sticky-top">
+          <thead class="thead-light" style="position: sticky; top:0; z-index:2;">
             <tr class="text-center">
               <th style="width: 50px;">#</th>
               <th style="width: 110px;">Nro emisión</th>
@@ -146,11 +143,9 @@
           <tbody>
             <tr *ngFor="let it of _emisionindividual | filter:filterimp; let i = index">
               <td class="text-center font-weight-bold">{{ i+1 }}</td>
-
               <td class="text-center">
                 <span class="badge badge-secondary">{{ it.idemision.emision }}</span>
               </td>
-
               <td class="text-center">
                 <span class="badge badge-light border text-dark">
                   {{ it.idlecturanueva.idabonado_abonados.idabonado }}
@@ -180,14 +175,13 @@
           </tbody>
         </table>
       </div>
-
     </div>
   </div>
 
   <!-- NUEVA -->
   <div class="card mt-2 sombra" *ngIf="vista==='NUEVA'">
     <div class="card-header bg-white py-2 d-flex align-items-center justify-content-between">
-      <div class="font-weight-semibold">
+      <div class="font-weight-bold">
         <i class="bi bi-plus-circle mr-1"></i> Nueva refacturación
       </div>
 
@@ -248,9 +242,18 @@
 
                 <table class="table table-sm table-bordered mb-0">
                   <tbody>
-                    <tr><th style="width: 120px;">Cliente</th><td>{{ cliente?.nombre }}</td></tr>
-                    <tr><th>Ruta</th><td>{{ ruta?.descripcion }}</td></tr>
-                    <tr><th>Dirección</th><td>{{ abonado.direccionubicacion }}</td></tr>
+                    <tr>
+                      <th style="width: 120px;">Cliente</th>
+                      <td>{{ cliente?.nombre }}</td>
+                    </tr>
+                    <tr>
+                      <th>Ruta</th>
+                      <td>{{ ruta?.descripcion }}</td>
+                    </tr>
+                    <tr>
+                      <th>Dirección</th>
+                      <td>{{ abonado?.direccionubicacion }}</td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -266,9 +269,10 @@
 
               <form [formGroup]="f_lecturas">
                 <div class="d-flex align-items-center justify-content-between mb-2">
-                  <div class="font-weight-semibold">
+                  <div class="font-weight-bold">
                     <i class="bi bi-speedometer2 mr-1"></i> Lecturas
                   </div>
+
                   <span class="badge badge-warning text-dark" *ngIf="btnCrearLectura">
                     <i class="bi bi-exclamation-triangle mr-1"></i> No existe lectura, se creará nueva
                   </span>
@@ -296,8 +300,33 @@
 
               <hr class="my-3">
 
+              <!-- FACTURAS ELIMINADAS -->
+              <div class="alert alert-warning py-2 mb-2" *ngIf="(_facturasEliminadas.length || 0) === 0">
+                <i class="bi bi-exclamation-triangle mr-1"></i>
+                No existen facturas antiguas eliminadas. No se puede guardar.
+              </div>
+
+              <div *ngIf="(_facturasEliminadas.length || 0) > 0">
+                <div class="font-weight-bold mb-2">
+                  <i class="bi bi-file-earmark-x mr-1"></i> Facturas eliminadas detectadas:
+                </div>
+
+                <ul class="mb-0">
+                  <li *ngFor="let facElim of _facturasEliminadas">
+                    #{{ facElim.idfactura }}
+                    <span class="text-muted">
+                      ({{ facElim.fechaelimina || facElim.fechaeliminacion }})
+                    </span>
+                  </li>
+                </ul>
+              </div>
+
+              <hr class="my-3">
+
               <div class="text-center">
-                <button class="btn btn-success btn-sm px-4 mr-2" (click)="guardarRefacturacion()">
+                <button class="btn btn-success btn-sm px-4 mr-2"
+                        (click)="guardarRefacturacion()"
+                        [disabled]="!puedeGuardar">
                   <i class="fa fa-check-circle mr-1"></i> Guardar
                 </button>
 
