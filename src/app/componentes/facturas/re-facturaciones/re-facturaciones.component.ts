@@ -380,11 +380,6 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
   // =======================
   // imprimir
   // =======================
-  _imprimirItem(item: any): void {
-    console.log('Imprimir item:', item);
-    // TODO: tu iEmisionIndividual() (jsPDF)
-  }
-
     async imprimirItem(emisionIndividual: any) {
       let doc = new jsPDF('p', 'pt', 'a4');
       /* HEADER */
