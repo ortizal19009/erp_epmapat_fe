@@ -132,8 +132,6 @@ export class EmisionesComponent implements OnInit {
     private _pdf: PdfService,
     private facService: FacturaService,
     private s_novedades: NovedadesService,
-    private pli24Service: Pliego24Service,
-    private rxfService: RubroxfacService,
     private s_emisionindividual: EmisionIndividualService,
     private s_pdf: PdfService,
     private s_rxfService: RubroxfacService,

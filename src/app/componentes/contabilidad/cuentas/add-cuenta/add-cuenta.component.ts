@@ -110,7 +110,6 @@ export class AddCuentaComponent implements OnInit {
    valGrupo(control: FormControl) {
       const grucue = this.formCuenta.get('grucue').value.toString() + '.';
       const codcue = control.value.toString().slice(0, grucue.length);
-      console.log('valGrupo: ', grucue, codcue)
       if (grucue !== codcue) return of({ invalido: true });
       else return of(null);
    }

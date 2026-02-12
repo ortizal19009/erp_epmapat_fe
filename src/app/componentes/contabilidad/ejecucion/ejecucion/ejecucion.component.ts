@@ -51,7 +51,6 @@ export class EjecucionComponent {
   listarPartidas() {
     this.ejecuService.getByIdrefo(this.idrefo).subscribe({
       next: (resp: any) => {
-        console.log(resp);
         this._ejecucio = resp;
         this._ejecucio.forEach((ejecucio: { modifi: number }) => {
           this.totalModfi += ejecucio.modifi;

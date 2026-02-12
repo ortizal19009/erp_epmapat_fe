@@ -127,7 +127,6 @@ export class ModiUsuarioComponent implements OnInit {
   getListarPersonal() {
     this.personalService.getAllPersonal().subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this._personal = datos;
       },
       error: (err: any) => console.error(err.error)

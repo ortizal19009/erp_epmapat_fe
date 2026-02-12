@@ -140,7 +140,6 @@ export class PerfilUsuarioComponent implements OnInit {
         if (datos.length == 0) {
           this.s_erpmodulos._findByPlatform('WEB').subscribe({
             next: (datos: any) => {
-            console.log("Desde perfil usuario ",datos)
               this._erpmodulos = datos;
               datos.forEach((item: any) => {
                 let usrxmodulo: Usrxmodulos = new Usrxmodulos();

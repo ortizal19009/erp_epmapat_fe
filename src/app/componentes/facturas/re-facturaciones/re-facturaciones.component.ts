@@ -18,6 +18,10 @@ import { EmisionIndividual } from 'src/app/modelos/emisionindividual.model';
 import { Emisiones } from 'src/app/modelos/emisiones.model';
 import { Rutas } from 'src/app/modelos/rutas.model';
 import { Novedad } from 'src/app/modelos/novedad.model';
+import autoTable from 'jspdf-autotable';
+import jsPDF from 'jspdf';
+import { PdfService } from 'src/app/servicios/pdf.service';
+import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 
 type Vista = 'LISTA' | 'NUEVA';
 
@@ -69,6 +73,9 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
     private s_novedades: NovedadesService,
     private ruxemiService: RutasxemisionService,
     public authService: AutorizaService,
+    private s_pdf: PdfService,
+        private s_rxfService: RubroxfacService,
+
   ) {}
 
   ngOnInit(): void {
@@ -193,7 +200,10 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
         if (!this._allemisiones.length) {
           this.emisionSeleccionada = 0 as any;
           this._emisionindividual = [];
-          this.f_emisionIndividual.patchValue({ emision: null }, { emitEvent: false });
+          this.f_emisionIndividual.patchValue(
+            { emision: null },
+            { emitEvent: false },
+          );
           return;
         }
 
@@ -272,11 +282,14 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
     }
 
     this.s_lecturas
-      .getByIdEmisionIdabonado(this.f_emisionIndividual.value.emision, abonado.idabonado)
+      .getByIdEmisionIdabonado(
+        this.f_emisionIndividual.value.emision,
+        abonado.idabonado,
+      )
       .subscribe({
         next: async (datos: any[]) => {
           // 1) facturas eliminadas: fechaelimina/fechaeliminacion != null
-          for (const i of (datos || [])) {
+          for (const i of datos || []) {
             try {
               const fac: any = await this.facService.getByIdAsync(i.idfactura);
               const fechaElimina = fac?.fechaelimina ?? fac?.fechaeliminacion;
@@ -321,7 +334,9 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
   // =======================
   async guardarRefacturacion(): Promise<void> {
     if (!this.puedeGuardar) {
-      console.warn('No se puede guardar: no existen facturas antiguas eliminadas.');
+      console.warn(
+        'No se puede guardar: no existen facturas antiguas eliminadas.',
+      );
       return;
     }
 
@@ -336,7 +351,7 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
       let nuevarutaxemi: any = null;
 
       // TODO: si tienes un endpoint para obtener/crear la ruta-emisión del abonado:
-      // nuevarutaxemi = await firstValueFrom(this.ruxemiService.getOrCreateByEmisionCuenta(this.f_emisionIndividual.value.emision, this.abonado.idabonado))
+      nuevarutaxemi = await firstValueFrom(this.ruxemiService.getByEmisionRuta(this.f_emisionIndividual.value.emision, this.abonado.idruta_rutas.idruta))
 
       // Si no lo tienes y tu lectura ya funciona con null, puedes dejarlo null.
       // (pero OJO: en tu interface Lectura, idrutaxemision_rutasxemision no debería ser null)
@@ -365,10 +380,195 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
   // =======================
   // imprimir
   // =======================
-  imprimirItem(item: any): void {
+  _imprimirItem(item: any): void {
     console.log('Imprimir item:', item);
     // TODO: tu iEmisionIndividual() (jsPDF)
   }
+
+    async imprimirItem(emisionIndividual: any) {
+      let doc = new jsPDF('p', 'pt', 'a4');
+      /* HEADER */
+      let date_emision: Date = new Date(emisionIndividual.idemision.feccrea);
+      let fecemision = `${date_emision.getFullYear()}-${
+        date_emision.getMonth() + 1
+      }`;
+      this.s_pdf.header(`REPORTE DE REFACTURACION INDIVIDUAL ${fecemision}`, doc);
+
+      /* LECTURAS ANTERIORES */
+      let lectAnteriores = await this.s_rxfService.getByIdfacturaAsync(
+        emisionIndividual.idlecturaanterior.idfactura,
+      );
+      let l_anteriores: any = [];
+      let sum_anterior: number = 0;
+      let m3_anterior: number =
+        emisionIndividual.idlecturaanterior.lecturaactual -
+        emisionIndividual.idlecturaanterior.lecturaanterior;
+      let anterior_factura = await this.facService.getByIdAsync(
+        emisionIndividual.idlecturaanterior.idfactura,
+      );
+      lectAnteriores.forEach((item: any) => {
+        l_anteriores.push([
+          item.idrubro_rubros.idrubro,
+          item.idrubro_rubros.descripcion,
+          item.cantidad,
+          item.valorunitario.toFixed(2),
+        ]);
+        sum_anterior += item.cantidad * item.valorunitario;
+      });
+      autoTable(doc, {
+        headStyles: {
+          halign: 'center',
+          fillColor: 'white',
+          textColor: 'black',
+        },
+        bodyStyles: {
+          fillColor: 'white',
+          textColor: 'black',
+        },
+        head: [[{ content: 'Lectura anterior', colSpan: 5 }]],
+        body: [
+          [
+            {
+              content: `N° lectura: ${emisionIndividual.idlecturaanterior.idlectura} `,
+            },
+            {
+              content: `Planilla: ${emisionIndividual.idlecturaanterior.idfactura}`,
+            },
+          ],
+          [
+            `Lectura ant: ${emisionIndividual.idlecturaanterior.lecturaanterior} `,
+            `Lectura act: ${emisionIndividual.idlecturaanterior.lecturaactual} `,
+            `M3: ${m3_anterior}`,
+          ],
+          [
+            `Propietario: ${anterior_factura.idcliente.nombre}`,
+            `Cuenta: ${anterior_factura.idabonado}`,
+          ],
+          [`Modulo: ${anterior_factura.idmodulo.descripcion}`],
+        ],
+      });
+      autoTable(doc, {
+        headStyles: {
+          halign: 'center',
+          fillColor: 'white',
+          textColor: 'black',
+        },
+        bodyStyles: {
+          fillColor: 'white',
+          textColor: 'black',
+        },
+        footStyles: {
+          fillColor: 'white',
+          textColor: 'black',
+        },
+        columnStyles: {
+          2: { halign: 'center' },
+          3: { halign: 'right' },
+        },
+        head: [['Cod.Rubro', 'Descripción', 'Cant', 'Valor unitario']],
+        body: l_anteriores,
+        foot: [['TOTAL: ', sum_anterior.toFixed(2)]],
+      });
+      /* LECTURAS ACTUALES */
+      let lectActuales = await this.s_rxfService.getByIdfacturaAsync(
+        emisionIndividual.idlecturanueva.idfactura,
+      );
+      let l_nuevos: any = [];
+      let sum_nuevos: number = 0;
+      lectActuales.forEach((item: any) => {
+        l_nuevos.push([
+          item.idrubro_rubros.idrubro,
+          item.idrubro_rubros.descripcion,
+          item.cantidad,
+          item.valorunitario.toFixed(2),
+        ]);
+        sum_nuevos += item.cantidad * item.valorunitario;
+      });
+      let m3_nuevo: number =
+        emisionIndividual.idlecturanueva.lecturaactual -
+        emisionIndividual.idlecturanueva.lecturaanterior;
+      let nueva_factura = await this.facService.getByIdAsync(
+        emisionIndividual.idlecturanueva.idfactura,
+      );
+      autoTable(doc, {
+        headStyles: {
+          halign: 'center',
+          fillColor: 'white',
+          textColor: 'black',
+        },
+        bodyStyles: {
+          fillColor: 'white',
+          textColor: 'black',
+        },
+
+        head: [[{ content: 'Lectura nueva', colSpan: 5 }]],
+        body: [
+          [
+            `N° lectura: ${emisionIndividual.idlecturanueva.idlectura} `,
+            `Planilla: ${emisionIndividual.idlecturanueva.idfactura}`,
+          ],
+          [
+            `Lectura ant: ${emisionIndividual.idlecturanueva.lecturaanterior} `,
+            `Lectura act: ${emisionIndividual.idlecturanueva.lecturaactual} `,
+            `M3: ${m3_nuevo}`,
+          ],
+          [
+            `Propietario: ${nueva_factura.idcliente.nombre}`,
+            `Cuenta: ${nueva_factura.idabonado}`,
+          ],
+          [`Modulo: ${nueva_factura.idmodulo.descripcion}`],
+        ],
+      });
+      autoTable(doc, {
+        headStyles: {
+          halign: 'center',
+          fillColor: 'white',
+          textColor: 'black',
+        },
+        bodyStyles: {
+          fillColor: 'white',
+          textColor: 'black',
+        },
+        footStyles: {
+          fillColor: 'white',
+          textColor: 'black',
+        },
+        columnStyles: {
+          2: { halign: 'center' },
+          3: { halign: 'right' },
+        },
+        head: [['Cod.Rubro', 'Descripción', 'Cant', 'Valor unitario']],
+        body: l_nuevos,
+        foot: [['TOTAL: ', sum_nuevos.toFixed(2)]],
+      });
+      let dateEmision: Date = new Date(
+        emisionIndividual.idlecturanueva.fechaemision,
+      );
+      let currentDate: Date = new Date();
+      autoTable(doc, {
+        bodyStyles: {
+          fillColor: 'white',
+          textColor: 'black',
+          fontSize: 8,
+        },
+        body: [
+          [
+            `Fecha emision:  ${dateEmision.getFullYear()}/${
+              dateEmision.getMonth() + 1
+            }/${dateEmision.getDate()}`,
+          ],
+          [
+            `Fecha impresión:  ${currentDate.getFullYear()}/${
+              currentDate.getMonth() + 1
+            }/${currentDate.getDate()}`,
+          ],
+        ],
+      });
+
+      // doc.autoPrint();
+      //doc.save('datauristring');
+      doc.output('dataurlnewwindow', { filename: 'comprobante.pdf' });
+    }
 
   // =======================
   // TUS MÉTODOS (se dejan, pero ya operativos)
@@ -378,6 +578,7 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
   async generaLecturaIndividual(nuevarutaxemi: any, novedad: any) {
     try {
       const dateEmision: Date = new Date();
+      this.modulo.idmodulo = 4;
 
       // 1) Crear Factura (Planilla)
       let planilla = {} as Planilla;
@@ -453,14 +654,17 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
       emision_individual.idlecturaanterior = la;
       emision_individual.idemision = emi;
 
-      this.s_emisionindividual.saveEmisionIndividual(emision_individual).subscribe({
-        next: () => {},
-        error: (e) => console.error(e),
-      });
+      this.s_emisionindividual
+        .saveEmisionIndividual(emision_individual)
+        .subscribe({
+          next: () => {},
+          error: (e) => console.error(e),
+        });
     }
 
     // ====== CALCULO VALORES ======
-    let categoria = lectura.idabonado_abonados.idcategoria_categorias.idcategoria;
+    let categoria =
+      lectura.idabonado_abonados.idcategoria_categorias.idcategoria;
     let consumo = lectura.lecturaactual - lectura.lecturaanterior;
     let adultomayor = lectura.idabonado_abonados.adultomayor;
 

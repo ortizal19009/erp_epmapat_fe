@@ -202,7 +202,6 @@ export class EstResultadosComponent implements OnInit {
       }; // fin for transacciones
 
       this.arreglo1.sort((a, b) => (a.intgrupo - b.intgrupo) || (a.codcue.localeCompare(b.codcue)));
-      console.log('arreg1', this.arreglo1);
       this.arreglo3 = this.arreglo1.filter((data) => (data.nivel <= this.formBuscar.value.numnivel && data.valor != 0));
 
       this.totalizar();

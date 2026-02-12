@@ -19,6 +19,7 @@
   background-color: var(--bgcolor2);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
 }
+
 .cardCliente li {
   background-color: var(--bgcolor2);
 }
@@ -44,6 +45,7 @@ table {
   background-color: var(--bgCuentas1);
   color: white;
 }
+
 .bodyCuentas {
   background-color: var(--bgCuentas2);
 }
@@ -53,6 +55,7 @@ table {
   background-color: var(--bgFacelectro1);
   color: white;
 }
+
 .bodyFacelectro {
   background-color: var(--bgFacelectro2);
 }
@@ -62,10 +65,12 @@ table {
   background-color: var(--bgPlanillas1);
   color: rgb(255, 255, 255);
 }
+
 .bodyPlanillas {
   background-color: var(--bgPlanillas2);
-  color:black
+  color: black
 }
+
 .buscarLimit {
   width: 35px;
   margin: 0px;
