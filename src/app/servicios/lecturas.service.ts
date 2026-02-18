@@ -195,7 +195,7 @@ export class LecturasService {
     return this.http.post<number>(`${baseUrl}/valoresEmisiones`, datos);
   }
   calcular_Valores_anteriores(datos: any) {
-    return this.http.put(`${baseUrl}/valoresemisionesanteriores`, datos);
+    return this.http.post(`${baseUrl}/valoresemisionesanteriores`, datos);
   }
   getDuplicados(idemision: number, top: number): Observable<Object> {
     return this.http.get(

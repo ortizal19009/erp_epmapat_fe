@@ -674,12 +674,13 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
       idemision: lectura.idemision,
       cuenta: lectura.idabonado_abonados.idabonado,
       idfactura: lectura.idfactura,
-      m3: lectura.lecturaanterior - lectura.lecturaactual,
+      m3: lectura.lecturaactual - lectura.lecturaanterior,
       categoria: lectura.idcategoria,
       swMunicipio: lectura.idabonado_abonados.municipio,
       swAdultoMayor: lectura.idabonado_abonados.municipio,
       swAguapotable: lectura.idabonado_abonados.swalcantarillado,
     };
+    console.log(body);
 
     if (lectura.idemision >= 243) {
       this.s_lecturas.calcular_Valores(body).subscribe({
