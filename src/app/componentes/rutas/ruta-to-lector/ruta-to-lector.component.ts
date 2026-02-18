@@ -40,7 +40,7 @@ export class RutaToLectorComponent implements OnInit {
     this.getEmisiones();
   }
   getUsuarioLectores() {
-    this.usuarioService.getByCargos([45]).subscribe({
+    this.usuarioService.getByCargos([45,25]).subscribe({
       next: (data: any) => {
         this.usuarioSeletced = data[0];
         this._usuarios = data;
