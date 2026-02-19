@@ -419,7 +419,9 @@ export class EmisionesComponent implements OnInit {
   /*=====================
   ======INDIVIDUALES=====
   =====================*/
-  emisionIndividual() {}
+  emisionIndividual() {
+    this.router.navigate(['/re-facturacion']);
+  }
   getAllEmisiones() {
     this.emiService.findAllEmisiones().subscribe({
       next: (datos: any) => {
@@ -2111,7 +2113,6 @@ export class EmisionesComponent implements OnInit {
           .calcular_Valores(item)
           .toPromise();
       }
-
     } catch (err) {
       console.error('Error:', err);
     }

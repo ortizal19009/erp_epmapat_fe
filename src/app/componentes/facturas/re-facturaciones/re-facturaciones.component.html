@@ -1,7 +1,7 @@
 <div class="container-fluid mt-2">
 
   <!-- HEADER / TOOLBAR -->
-  <div class="cabecera sombra p-2 px-3 d-flex flex-wrap align-items-center justify-content-between">
+  <div class="cabecera sombra p-2 px-3 mt-3 d-flex flex-wrap align-items-center justify-content-between">
     <div class="d-flex align-items-center">
       <div class="icono-titulo d-flex align-items-center justify-content-center mr-2">
         <i class="bi bi-arrow-repeat"></i>
@@ -27,11 +27,8 @@
           <i class="bi bi-list"></i> Listado
         </button>
 
-        <button type="button"
-                class="btn btn-light btn-sm dropdown-toggle dropdown-toggle-split"
-                data-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false">
+        <button type="button" class="btn btn-light btn-sm dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"
+          aria-haspopup="true" aria-expanded="false">
           <span class="sr-only">Toggle Dropdown</span>
         </button>
 
@@ -42,10 +39,8 @@
 
           <div class="dropdown-divider"></div>
 
-          <button class="dropdown-item"
-                  type="button"
-                  (click)="imprimirEmisionActual()"
-                  [disabled]="cargando || !_emisionindividual.length">
+          <button class="dropdown-item" type="button" (click)="imprimirEmisionActual()"
+            [disabled]="cargando || !_emisionindividual.length">
             <i class="bi bi-printer mr-2 text-danger"></i> Imprimir emisión actual
           </button>
         </div>
@@ -66,9 +61,7 @@
               <span class="input-group-text"><i class="bi bi-calendar2-week"></i></span>
             </div>
 
-            <select class="form-control"
-                    [ngModel]="emisionSeleccionada"
-                    (ngModelChange)="onChangeEmision($event)">
+            <select class="form-control" [ngModel]="emisionSeleccionada" (ngModelChange)="onChangeEmision($event)">
               <option *ngFor="let e of _allemisiones" [ngValue]="e.idemision">
                 {{ e.emision }}
               </option>
@@ -83,10 +76,8 @@
               <span class="input-group-text"><i class="bi bi-search"></i></span>
             </div>
 
-            <input class="form-control"
-                   [(ngModel)]="filterimp"
-                   placeholder="Cuenta, lectura, planilla..."
-                   autocomplete="off">
+            <input class="form-control" [(ngModel)]="filterimp" placeholder="Cuenta, lectura, planilla..."
+              autocomplete="off">
 
             <div class="input-group-append">
               <button class="btn btn-outline-secondary" type="button" (click)="filterimp=''">
@@ -132,6 +123,8 @@
               <th style="width: 50px;">#</th>
               <th style="width: 110px;">Nro emisión</th>
               <th style="width: 110px;">Cuenta</th>
+              <th>Cliente</th>
+              <th>Identificación</th>
               <th>Lect. anterior</th>
               <th>Lect. actual</th>
               <th>Planilla ant</th>
@@ -151,16 +144,15 @@
                   {{ it.idlecturanueva.idabonado_abonados.idabonado }}
                 </span>
               </td>
-
+              <td>{{it.idlecturanueva.idabonado_abonados.idcliente_clientes.nombre}}</td>
+              <td>{{it.idlecturanueva.idabonado_abonados.idcliente_clientes.cedula}}</td>
               <td class="text-right">{{ it.idlecturaanterior.idlectura }}</td>
               <td class="text-right">{{ it.idlecturanueva.idlectura }}</td>
               <td class="text-right">{{ it.idlecturaanterior.idfactura }}</td>
               <td class="text-right">{{ it.idlecturanueva.idfactura }}</td>
 
               <td class="text-center">
-                <button class="btn btn-sm btn-outline-danger"
-                        title="Imprimir"
-                        (click)="imprimirItem(it)">
+                <button class="btn btn-sm btn-outline-danger" title="Imprimir" (click)="imprimirItem(it)">
                   <i class="bi bi-printer"></i>
                 </button>
               </td>
@@ -324,9 +316,8 @@
               <hr class="my-3">
 
               <div class="text-center">
-                <button class="btn btn-success btn-sm px-4 mr-2"
-                        (click)="guardarRefacturacion()"
-                        [disabled]="!puedeGuardar">
+                <button class="btn btn-success btn-sm px-4 mr-2" (click)="guardarRefacturacion()"
+                  [disabled]="!puedeGuardar">
                   <i class="fa fa-check-circle mr-1"></i> Guardar
                 </button>
 

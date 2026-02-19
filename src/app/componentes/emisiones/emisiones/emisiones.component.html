@@ -41,8 +41,7 @@
           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#addEmision" (click)="nuevo()"
             [disabled]="cerrado == 0">
             <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
-          <button class="dropdown-item" type="button" data-toggle="modal" data-target="#emisionIndividual"
-            (click)="emisionIndividual()">
+          <button class="dropdown-item" type="button" (click)="emisionIndividual()">
             <i class="bi-file-earmark-plus"></i>&nbsp; Emisión individual</button>
           <button class="dropdown-item" type="button" routerLink="/imp-emisiones" data-toggle="modal"
             data-target="#imprimir">
