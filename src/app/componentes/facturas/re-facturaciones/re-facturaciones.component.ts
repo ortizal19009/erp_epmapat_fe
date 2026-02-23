@@ -473,6 +473,7 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
           `Cuenta: ${anterior_factura.idabonado}`,
         ],
         [`Modulo: ${anterior_factura.idmodulo.descripcion}`],
+        [`Observaciones: ${anterior_factura.razoneliminacion}`]
       ],
     });
     autoTable(doc, {

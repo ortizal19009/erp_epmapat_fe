@@ -65,6 +65,7 @@ export class AnularConvenioComponent implements OnInit {
       facxconvenio: this.s_facxconvenios.getFacByConvenio(idconvenio),
     }).subscribe({
       next: (res: any) => {
+      console.log(res)
         this._convenio = res.convenio;
         this._cuotas = Array.isArray(res.cuotas) ? res.cuotas : [];
         this._facxconvenio = Array.isArray(res.facxconvenio)
@@ -179,7 +180,6 @@ export class AnularConvenioComponent implements OnInit {
 
     if (!confirm('¿Desea anular este convenio?')) return;
 
-    // TODO: llamada real al servicio
     // this.s_convenio.anular(this._convenio.idconvenio).subscribe(...)
     console.log('Anulando convenio', this._convenio.nroconvenio);
   }
@@ -192,7 +192,6 @@ export class AnularConvenioComponent implements OnInit {
     )
       return;
 
-    // TODO: llamada real al servicio
     // this.s_convenio.eliminar(this._convenio.idconvenio).subscribe(...)
     console.log('Eliminando convenio', this._convenio.nroconvenio);
   }

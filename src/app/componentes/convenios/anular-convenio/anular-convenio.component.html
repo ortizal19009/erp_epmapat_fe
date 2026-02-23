@@ -1,55 +1,64 @@
-<div class="container my-4">
-  <div class="card sombra border-0">
+<div class="container-fluid my-3">
+  <div class="card sombra border-0 erp-card">
 
-    <!-- Header -->
-    <div class="card-header d-flex align-items-center justify-content-between bg-white border-bottom">
-      <div>
-        <div class="text-muted small">Convenio</div>
-        <div class="h6 mb-0">
-          N° {{ _convenio.nroconvenio }}
-          <span class="badge ml-2" [ngClass]="_convenio.estado === 1 ? 'badge-success' : 'badge-danger'">
-            {{ _convenio.estado === 1 ? 'ACTIVO' : 'INACTIVO' }}
-          </span>
+    <!-- ===== HEADER ===== -->
+    <div class="card-header cabecera erp-header border-bottom py-3">
+      <div class="d-flex flex-wrap align-items-center justify-content-between">
 
-          <span *ngIf="tieneFacturaVencidaNueva" class="badge badge-warning ml-2">
-            <i class="bi bi-exclamation-triangle mr-1"></i>
-            {{ cantVencidasNuevas }} factura(s) nueva(s) vencida(s)
-          </span>
+        <div class="mb-2 mb-md-0">
+          <div class="erp-meta">Convenio</div>
+
+          <div class="d-flex align-items-center flex-wrap">
+            <div class="h6 mb-0 mr-2 erp-section-title">
+              N° {{ _convenio.nroconvenio }}
+            </div>
+
+            <span class="badge erp-chip"
+              [ngClass]="_convenio.estado === 1 ? 'badge-success' : 'badge-danger'">
+              {{ _convenio.estado === 1 ? 'ACTIVO' : 'INACTIVO' }}
+            </span>
+
+            <span *ngIf="tieneFacturaVencidaNueva" class="badge erp-chip badge-warning ml-2">
+              <i class="bi bi-exclamation-triangle mr-1"></i>
+              {{ cantVencidasNuevas }} factura(s) nueva(s) vencida(s)
+            </span>
+          </div>
         </div>
-      </div>
 
-      <div class="text-right">
-        <div class="text-muted small">Autorización</div>
-        <div class="font-weight-bold">{{ _convenio.nroautorizacion || '-' }}</div>
+        <div class="text-md-right">
+          <div class="erp-meta">Autorización</div>
+          <div class="font-weight-bold">{{ _convenio.nroautorizacion || '-' }}</div>
+        </div>
+
       </div>
     </div>
 
-    <div class="card-body">
+    <div class="card-body detalle">
 
-      <!-- Resumen -->
+      <!-- ===== RESUMEN ===== -->
       <div class="row">
-        <div class="col-md-8">
-          <div class="mb-2">
-            <span class="text-muted small">Referencia</span>
+        <div class="col-lg-8">
+          <div class="mb-3">
+            <div class="erp-meta">Referencia</div>
             <div class="font-weight-bold">{{ _convenio.referencia || '-' }}</div>
           </div>
 
           <div class="mb-2">
-            <span class="text-muted small">Observaciones</span>
+            <div class="erp-meta">Observaciones</div>
             <div class="text-muted">
               {{ _convenio.observaciones || 'Sin observaciones.' }}
             </div>
           </div>
         </div>
 
-        <div class="col-md-4">
-          <div class="p-3 rounded border bg-light">
+        <div class="col-lg-4">
+          <div class="erp-kpi">
             <div class="d-flex justify-content-between">
-              <span class="text-muted small">Fecha creación</span>
+              <span class="erp-meta">Fecha creación</span>
               <span class="font-weight-bold">{{ _convenio.feccrea || '-' }}</span>
             </div>
             <div class="d-flex justify-content-between mt-2">
-              <span class="text-muted small">Creado por</span>
+              <span class="erp-meta">Creado por</span>
               <span class="font-weight-bold">{{ _convenio.usucrea || '-' }}</span>
             </div>
           </div>
@@ -58,16 +67,23 @@
 
       <hr class="my-3" />
 
-      <!-- Acordeones superiores -->
+      <!-- ===== ACORDEONES SUPERIORES ===== -->
       <div class="row">
 
         <!-- FINANCIEROS -->
-        <div class="col-md-6 mb-3">
-          <div class="card border">
-            <div class="card-header bg-white p-2">
-              <button class="btn btn-link btn-block text-left font-weight-bold" type="button" data-toggle="collapse"
-                data-target="#collapseFinancieros" aria-expanded="true" aria-controls="collapseFinancieros">
+        <div class="col-lg-6 mb-3">
+          <div class="card border erp-card">
+            <div class="card-header bg-white py-2 d-flex align-items-center justify-content-between">
+              <button class="btn btn-link p-0 font-weight-bold erp-accordion-btn" type="button"
+                data-toggle="collapse" data-target="#collapseFinancieros" aria-expanded="true"
+                aria-controls="collapseFinancieros">
                 <i class="bi bi-cash-coin mr-2"></i> Datos financieros
+              </button>
+
+              <button class="btn btn-sm btn-light border" type="button" data-toggle="collapse"
+                data-target="#collapseFinancieros" aria-expanded="true" aria-controls="collapseFinancieros"
+                title="Expandir/Colapsar">
+                <i class="bi bi-chevron-down"></i>
               </button>
             </div>
 
@@ -76,44 +92,44 @@
                 <div class="row">
 
                   <div class="col-6 mb-2">
-                    <div class="text-muted small">Total convenio</div>
-                    <div class="badge badge-light border w-100 text-right py-2">
+                    <div class="erp-meta">Total convenio</div>
+                    <div class="erp-field">
                       {{ _convenio.totalconvenio | number:'1.2-2' }} $
                     </div>
                   </div>
 
                   <div class="col-6 mb-2">
-                    <div class="text-muted small">Pago mensual</div>
-                    <div class="badge badge-light border w-100 text-right py-2">
+                    <div class="erp-meta">Pago mensual</div>
+                    <div class="erp-field">
                       {{ _convenio.pagomensual | number:'1.2-2' }} $
                     </div>
                   </div>
 
                   <div class="col-6 mb-2">
-                    <div class="text-muted small">Cuota inicial</div>
-                    <div class="badge badge-light border w-100 text-right py-2">
+                    <div class="erp-meta">Cuota inicial</div>
+                    <div class="erp-field">
                       {{ _convenio.cuotainicial | number:'1.2-2' }} $
                     </div>
                   </div>
 
                   <div class="col-6 mb-2">
-                    <div class="text-muted small">Cuota final</div>
-                    <div class="badge badge-light border w-100 text-right py-2">
+                    <div class="erp-meta">Cuota final</div>
+                    <div class="erp-field">
                       {{ _convenio.cuotafinal | number:'1.2-2' }} $
                     </div>
                   </div>
 
                   <div class="col-6 mb-2">
-                    <div class="text-muted small">N° de cuotas</div>
-                    <div class="badge badge-light border w-100 text-right py-2">
+                    <div class="erp-meta">N° de cuotas</div>
+                    <div class="erp-field">
                       {{ _convenio.cuotas || 0 }}
                     </div>
                   </div>
 
                   <div class="col-6 mb-2">
-                    <div class="text-muted small">Estado</div>
-                    <div class="badge w-100 text-right py-2"
-                      [ngClass]="_convenio.estado === 1 ? 'badge-success' : 'badge-danger'">
+                    <div class="erp-meta">Estado</div>
+                    <div class="erp-field"
+                      [ngClass]="_convenio.estado === 1 ? 'text-success' : 'text-danger'">
                       {{ _convenio.estado === 1 ? 'Activo' : 'Inactivo' }}
                     </div>
                   </div>
@@ -125,12 +141,19 @@
         </div>
 
         <!-- ABONADO -->
-        <div class="col-md-6 mb-3">
-          <div class="card border">
-            <div class="card-header bg-white p-2">
-              <button class="btn btn-link btn-block text-left font-weight-bold" type="button" data-toggle="collapse"
-                data-target="#collapseAbonado" aria-expanded="true" aria-controls="collapseAbonado">
+        <div class="col-lg-6 mb-3">
+          <div class="card border erp-card">
+            <div class="card-header bg-white py-2 d-flex align-items-center justify-content-between">
+              <button class="btn btn-link p-0 font-weight-bold erp-accordion-btn" type="button"
+                data-toggle="collapse" data-target="#collapseAbonado" aria-expanded="true"
+                aria-controls="collapseAbonado">
                 <i class="bi bi-person-badge mr-2"></i> Datos del abonado
+              </button>
+
+              <button class="btn btn-sm btn-light border" type="button" data-toggle="collapse"
+                data-target="#collapseAbonado" aria-expanded="true" aria-controls="collapseAbonado"
+                title="Expandir/Colapsar">
+                <i class="bi bi-chevron-down"></i>
               </button>
             </div>
 
@@ -139,29 +162,29 @@
                 <div class="row">
 
                   <div class="col-6 mb-2">
-                    <div class="text-muted small">ID abonado</div>
-                    <div class="badge badge-light border w-100 text-right py-2">
+                    <div class="erp-meta">ID abonado</div>
+                    <div class="erp-field">
                       {{ _convenio.idabonado?.idabonado || '-' }}
                     </div>
                   </div>
 
                   <div class="col-6 mb-2">
-                    <div class="text-muted small">Nro. medidor</div>
-                    <div class="badge badge-light border w-100 text-right py-2">
+                    <div class="erp-meta">Nro. medidor</div>
+                    <div class="erp-field">
                       {{ _convenio.idabonado?.nromedidor || '-' }}
                     </div>
                   </div>
 
                   <div class="col-6 mb-2">
-                    <div class="text-muted small">Lectura inicial</div>
-                    <div class="badge badge-light border w-100 text-right py-2">
+                    <div class="erp-meta">Lectura inicial</div>
+                    <div class="erp-field">
                       {{ _convenio.idabonado?.lecturainicial || '-' }}
                     </div>
                   </div>
 
                   <div class="col-6 mb-2">
-                    <div class="text-muted small">Fecha instalación</div>
-                    <div class="badge badge-light border w-100 text-right py-2">
+                    <div class="erp-meta">Fecha instalación</div>
+                    <div class="erp-field left">
                       {{ _convenio.idabonado?.fechainstalacion || '-' }}
                     </div>
                   </div>
@@ -174,17 +197,16 @@
 
       </div>
 
-      <!-- FACTURAS DEL CONVENIO (card propio) -->
-      <div class="card border mb-2">
-        <div class="card-header bg-white d-flex align-items-center justify-content-between">
-          <div class="font-weight-bold">
+      <!-- ===== FACTURAS DEL CONVENIO ===== -->
+      <div class="card border mb-2 erp-card">
+        <div class="card-header bg-white d-flex flex-wrap align-items-center justify-content-between">
+          <div class="font-weight-bold erp-section-title">
             <i class="bi bi-receipt-cutoff mr-2"></i> Facturas del convenio
             <span class="badge badge-light border ml-2">
               Nuevas: <strong>{{ facNuevas.length }}</strong> · Viejas: <strong>{{ facViejas.length }}</strong>
             </span>
           </div>
 
-          <!-- Botón colapsar/expandir TODO -->
           <button type="button" class="btn btn-outline-secondary btn-sm" (click)="toggleFacturas()">
             <i class="bi bi-arrows-collapse mr-1"></i> Colapsar / Expandir
           </button>
@@ -193,48 +215,52 @@
         <div class="card-body p-2">
           <div id="accordionFacturas">
 
-            <!-- FACTURAS NUEVAS -->
-            <div class="card sombra mb-2">
-              <div class="card-header p-2 d-flex justify-content-between align-items-center" id="headingFacNuevas">
-                <button class="btn btn-link btn-block text-left p-0 font-weight-bold" type="button"
+            <!-- ===== FACTURAS NUEVAS ===== -->
+            <div class="card sombra mb-2 erp-card">
+              <div class="card-header p-2 d-flex justify-content-between align-items-center">
+                <button class="btn btn-link btn-block text-left p-0 font-weight-bold erp-accordion-btn" type="button"
                   data-toggle="collapse" data-target="#collapseFacNuevas" aria-expanded="true"
                   aria-controls="collapseFacNuevas">
                   📄 Facturas nuevas del convenio
                 </button>
 
-                <span class="badge badge-primary">{{ facNuevas.length }}</span>
+                <span class="badge badge-primary erp-chip">{{ facNuevas.length }}</span>
               </div>
 
-              <div id="collapseFacNuevas" class="collapse show" aria-labelledby="headingFacNuevas"
-                data-parent="#accordionFacturas">
+              <div id="collapseFacNuevas" class="collapse show" data-parent="#accordionFacturas">
                 <div class="card-body p-2">
 
                   <div class="table-responsive">
-                    <table class="table table-sm table-bordered mb-0">
-                      <thead class="text-center bg-light">
+                    <table class="table table-sm table-bordered mb-0 erp-table">
+                      <thead class="text-center">
                         <tr>
-                          <th style="width:140px;">Nro</th>
-                          <th style="width:120px;">Emisión</th>
-                          <th style="width:140px;">Módulo</th>
-                          <th style="width:120px;">Total</th>
-                          <th style="width:120px;">Estado</th>
+                          <th class="sticky" style="width:140px;">Nro</th>
+                          <th class="sticky" style="width:120px;">Emisión</th>
+                          <th class="sticky" style="width:140px;">Módulo</th>
+                          <th class="sticky" style="width:120px;">Total</th>
+                          <th class="sticky" style="width:120px;">Estado</th>
                         </tr>
                       </thead>
+
                       <tbody>
                         <tr *ngFor="let f of facNuevas">
                           <td class="text-center">{{ f.nrofactura || f.idfactura }}</td>
                           <td class="text-center">{{ f.feccrea || '-' }}</td>
                           <td class="text-center">{{ f.idmodulo?.descripcion || f.idmodulo || '-' }}</td>
-                          <td class="text-right text-danger">{{ (f.totaltarifa || 0) | number:'1.2-2' }}</td>
+                          <td class="text-right text-danger font-weight-bold">
+                            {{ (f.totaltarifa || 0) | number:'1.2-2' }}
+                          </td>
                           <td class="text-center">
-                            <span class="badge" [ngClass]="(f.pagado === 1) ? 'badge-success' : 'badge-warning'">
+                            <span class="badge erp-chip"
+                              [ngClass]="(f.pagado === 1) ? 'badge-success' : 'badge-warning'">
                               {{ (f.pagado === 1) ? 'Pagada' : 'Pendiente' }}
                             </span>
                           </td>
                         </tr>
 
+                        <!-- FIX: colspan correcto (5 columnas) -->
                         <tr *ngIf="facNuevas.length === 0">
-                          <td colspan="6" class="text-center text-muted py-3">Sin facturas nuevas</td>
+                          <td colspan="5" class="text-center text-muted py-3">Sin facturas nuevas</td>
                         </tr>
                       </tbody>
                     </table>
@@ -244,42 +270,45 @@
               </div>
             </div>
 
-            <!-- FACTURAS VIEJAS -->
-            <div class="card sombra">
-              <div class="card-header p-2 d-flex justify-content-between align-items-center" id="headingFacViejas">
-                <button class="btn btn-link btn-block text-left p-0 font-weight-bold" type="button"
+            <!-- ===== FACTURAS VIEJAS ===== -->
+            <div class="card sombra erp-card">
+              <div class="card-header p-2 d-flex justify-content-between align-items-center">
+                <button class="btn btn-link btn-block text-left p-0 font-weight-bold erp-accordion-btn" type="button"
                   data-toggle="collapse" data-target="#collapseFacViejas" aria-expanded="false"
                   aria-controls="collapseFacViejas">
                   🧾 Facturas viejas incluidas en el convenio
                 </button>
 
-                <span class="badge badge-secondary">{{ facViejas.length }}</span>
+                <span class="badge badge-secondary erp-chip">{{ facViejas.length }}</span>
               </div>
 
-              <div id="collapseFacViejas" class="collapse" aria-labelledby="headingFacViejas"
-                data-parent="#accordionFacturas">
+              <div id="collapseFacViejas" class="collapse" data-parent="#accordionFacturas">
                 <div class="card-body p-2">
 
                   <div class="table-responsive">
-                    <table class="table table-sm table-bordered mb-0">
-                      <thead class="text-center bg-light">
+                    <table class="table table-sm table-bordered mb-0 erp-table">
+                      <thead class="text-center">
                         <tr>
-                          <th style="width:140px;">Nro</th>
-                          <th style="width:120px;">Periodo</th>
-                          <th>Detalle</th>
-                          <th style="width:120px;">Total</th>
+                          <th class="sticky" style="width:140px;">Nro</th>
+                          <th class="sticky" style="width:120px;">Periodo</th>
+                          <th class="sticky">Detalle</th>
+                          <th class="sticky" style="width:120px;">Total</th>
                         </tr>
                       </thead>
+
                       <tbody>
                         <tr *ngFor="let f of facViejas">
                           <td class="text-center">{{ f.nrofactura || f.idfactura }}</td>
                           <td class="text-center">{{ f.feccrea || '-' }}</td>
                           <td class="text-center">{{ f.idmodulo?.descripcion || f.idmodulo || '-' }}</td>
-                          <td class="text-right text-danger">{{ (f.totaltarifa || 0) | number:'1.2-2' }}</td>
+                          <td class="text-right text-danger font-weight-bold">
+                            {{ (f.totaltarifa || 0) | number:'1.2-2' }}
+                          </td>
                         </tr>
 
+                        <!-- FIX: colspan correcto (4 columnas) -->
                         <tr *ngIf="facViejas.length === 0">
-                          <td colspan="5" class="text-center text-muted py-3">Sin facturas viejas incluidas</td>
+                          <td colspan="4" class="text-center text-muted py-3">Sin facturas viejas incluidas</td>
                         </tr>
                       </tbody>
                     </table>
@@ -295,16 +324,16 @@
 
     </div>
 
-    <!-- Footer -->
-    <div class="card-footer bg-white border-top d-flex justify-content-between align-items-center">
-      <small class="text-muted">
+    <!-- ===== FOOTER ===== -->
+    <div class="card-footer bg-white border-top d-flex flex-wrap justify-content-between align-items-center">
+      <small class="text-muted mb-2 mb-md-0">
         Última actualización: {{ _convenio.fecmodi || '-' }} ·
         Usuario: <strong>{{ _convenio.usucrea || '-' }}</strong>
       </small>
 
       <div class="btn-group btn-group-sm">
 
-        <!-- ANULAR: solo si NO hay ninguna factura pagada en nuevas (todas pendientes) -->
+        <!-- ANULAR: solo si NO hay ninguna factura pagada en nuevas -->
         <button *ngIf="!tieneFacturaPagadaNueva" type="button" class="btn btn-outline-success"
           (click)="anularConvenio()" [disabled]="_convenio.estado !== 1" title="Anular convenio">
           <i class="bi bi-slash-circle mr-1"></i> Anular
@@ -315,7 +344,6 @@
           (click)="eliminarConvenio()" title="Eliminar convenio">
           <i class="bi bi-trash mr-1"></i> Eliminar
         </button>
-
 
         <button type="button" class="btn btn-outline-secondary" (click)="cancelar()" title="Cancelar">
           <i class="bi bi-x-circle mr-1"></i> Cancelar

@@ -1,31 +1,170 @@
-.card.sombra {
-  box-shadow: 0 4px 12px rgba(0,0,0,.06);
-  border-radius: 10px;
+.container-fluid {
+  --bgcolor1: rgb(109, 110, 15);
+  --bgcolor2: rgba(228, 224, 153);
+  --bgCuentas1: rgb(148, 150, 63);
+  --bgCuentas2: rgb(248, 241, 201);
+  --bgFacelectro1: rgb(54, 59, 68);
+  --bgFacelectro2: rgb(229, 236, 250);
+  --bgPlanillas1: rgb(50, 88, 51);
+  --bgPlanillas2: rgba(193, 224, 181);
 }
 
-.card-header .btn-link {
+.cliente {
+  background-color: rgb(109, 110, 15);
+  color: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
+}
+
+.cardCliente {
+  background-color: var(--bgcolor2);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
+}
+
+.cardCliente li {
+  background-color: var(--bgcolor2);
+}
+
+.cardTab {
+  background-color: var(--bgcolor1);
+  color: white;
+}
+
+.sombra,
+table {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
+}
+
+.fila:hover {
+  background-color: #117a8b;
+  color: white;
+  cursor: pointer;
+}
+
+/* === Cuentas ===  */
+.theadCuentas {
+  background-color: var(--bgCuentas1);
+  color: white;
+}
+
+.bodyCuentas {
+  background-color: var(--bgCuentas2);
+}
+
+/* === Facturas Electrónicas === */
+.theadFacelectro {
+  background-color: var(--bgFacelectro1);
+  color: white;
+}
+
+.bodyFacelectro {
+  background-color: var(--bgFacelectro2);
+}
+
+/* === Planillas === */
+.theadPlanillas {
+  background-color: var(--bgPlanillas1);
+  color: rgb(255, 255, 255);
+}
+
+.bodyPlanillas {
+  background-color: var(--bgPlanillas2);
+  color: black
+}
+
+.buscarLimit {
+  width: 35px;
+  margin: 0px;
+  padding: 0px;
+}
+
+/* ===== ERP helpers ===== */
+.erp-card {
+  border-radius: .6rem;
+  overflow: hidden;
+}
+
+.erp-header {
+  background: #fff;
+}
+
+.erp-section-title {
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+
+.erp-chip {
+  border-radius: 999px;
+  padding: .32rem .65rem;
+  font-weight: 700;
+  font-size: .75rem;
+  vertical-align: middle;
+}
+
+.erp-meta {
+  color: #6c757d;
+  font-size: .78rem;
+}
+
+.erp-kpi {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: .35rem;
+  padding: .85rem;
+}
+
+.erp-field {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: .25rem;
+  padding: .45rem .6rem;
+  font-weight: 700;
+  text-align: right;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.erp-field.left {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.erp-table thead th {
+  background: #f8f9fa;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.erp-table td,
+.erp-table th {
+  vertical-align: middle !important;
+}
+
+/* Sticky header opcional en tablas (si tu contenedor permite scroll) */
+.erp-table thead th.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+/* Botón link de acordeón más “ERP” */
+.erp-accordion-btn {
   color: #212529;
   text-decoration: none;
-  padding: .35rem .5rem;
 }
 
-.card-header .btn-link:hover {
-  background: rgba(0,123,255,.06);
-  border-radius: 6px;
+.erp-accordion-btn:hover {
+  text-decoration: none;
+  opacity: .9;
 }
 
-.badge.border {
-  font-weight: 600;
-  font-size: .85rem;
+/* Sombras (si ya tienes .sombra en tu ERP, puedes omitir esto) */
+.sombra {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .08);
 }
 
-hr {
-  border-top: 1px solid #e9ecef;
-}
-.card-footer .btn {
-  min-width: 90px;
-}
-
-.card-footer .btn i {
-  font-size: .9rem;
+/* Ajuste badges Bootstrap 4 */
+.badge-warning {
+  color: #212529;
 }
