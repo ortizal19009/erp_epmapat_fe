@@ -17,7 +17,8 @@
               "jspdf-autotable",
               "core-js",
               "raf",
-              "exceljs"
+              "exceljs",
+              "xml-js"
             ],
             "outputPath": "dist/proylte32",
             "index": "src/index.html",
@@ -26,12 +27,31 @@
             "tsConfig": "tsconfig.app.json",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "node_modules/admin-lte/dist",
+                "output": "/assets/dist"
+              },
+              {
+                "glob": "**/*",
+                "ignore": [
+                  "**/moment/**"
+                ],
+                "input": "node_modules/admin-lte/plugins",
+                "output": "/assets/plugins"
+              }
             ],
             "styles": [
+              "node_modules/admin-lte/dist/css/adminlte.min.css",
+              "node_modules/bootstrap-icons/font/bootstrap-icons.css",
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/jquery/dist/jquery.min.js",
+              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js",
+              "node_modules/admin-lte/dist/js/adminlte.min.js"
+            ]
           },
           "configurations": {
             "production": {
@@ -93,12 +113,31 @@
             "karmaConfig": "karma.conf.js",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "node_modules/admin-lte/dist",
+                "output": "/assets/dist"
+              },
+              {
+                "glob": "**/*",
+                "ignore": [
+                  "**/moment/**"
+                ],
+                "input": "node_modules/admin-lte/plugins",
+                "output": "/assets/plugins"
+              }
             ],
             "styles": [
+              "node_modules/admin-lte/dist/css/adminlte.min.css",
+              "node_modules/bootstrap-icons/font/bootstrap-icons.css",
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/jquery/dist/jquery.min.js",
+              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js",
+              "node_modules/admin-lte/dist/js/adminlte.min.js"
+            ]
           }
         }
       }
