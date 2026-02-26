@@ -10,12 +10,12 @@
 
           <div class="d-flex align-items-center flex-wrap">
             <div class="h6 mb-0 mr-2 erp-section-title">
-              N° {{ _convenio.nroconvenio }}
+              N° {{ _convenio?.nroconvenio }}
             </div>
 
             <span class="badge erp-chip"
-              [ngClass]="_convenio.estado === 1 ? 'badge-success' : 'badge-danger'">
-              {{ _convenio.estado === 1 ? 'ACTIVO' : 'INACTIVO' }}
+              [ngClass]="_convenio?.estado === 1 ? 'badge-success' : 'badge-danger'">
+              {{ _convenio?.estado === 1 ? 'ACTIVO' : 'INACTIVO' }}
             </span>
 
             <span *ngIf="tieneFacturaVencidaNueva" class="badge erp-chip badge-warning ml-2">
@@ -27,7 +27,7 @@
 
         <div class="text-md-right">
           <div class="erp-meta">Autorización</div>
-          <div class="font-weight-bold">{{ _convenio.nroautorizacion || '-' }}</div>
+          <div class="font-weight-bold">{{ _convenio?.nroautorizacion || '-' }}</div>
         </div>
 
       </div>
@@ -40,13 +40,13 @@
         <div class="col-lg-8">
           <div class="mb-3">
             <div class="erp-meta">Referencia</div>
-            <div class="font-weight-bold">{{ _convenio.referencia || '-' }}</div>
+            <div class="font-weight-bold">{{ _convenio?.referencia || '-' }}</div>
           </div>
 
           <div class="mb-2">
             <div class="erp-meta">Observaciones</div>
             <div class="text-muted">
-              {{ _convenio.observaciones || 'Sin observaciones.' }}
+              {{ _convenio?.observaciones || 'Sin observaciones.' }}
             </div>
           </div>
         </div>
@@ -55,11 +55,11 @@
           <div class="erp-kpi">
             <div class="d-flex justify-content-between">
               <span class="erp-meta">Fecha creación</span>
-              <span class="font-weight-bold">{{ _convenio.feccrea || '-' }}</span>
+              <span class="font-weight-bold">{{ _convenio?.feccrea || '-' }}</span>
             </div>
             <div class="d-flex justify-content-between mt-2">
               <span class="erp-meta">Creado por</span>
-              <span class="font-weight-bold">{{ _convenio.usucrea || '-' }}</span>
+              <span class="font-weight-bold">{{ _convenio?.usucrea || '-' }}</span>
             </div>
           </div>
         </div>
@@ -94,43 +94,43 @@
                   <div class="col-6 mb-2">
                     <div class="erp-meta">Total convenio</div>
                     <div class="erp-field">
-                      {{ _convenio.totalconvenio | number:'1.2-2' }} $
+                      {{ _convenio?.totalconvenio | number:'1.2-2' }} $
                     </div>
                   </div>
 
                   <div class="col-6 mb-2">
                     <div class="erp-meta">Pago mensual</div>
                     <div class="erp-field">
-                      {{ _convenio.pagomensual | number:'1.2-2' }} $
+                      {{ _convenio?.pagomensual | number:'1.2-2' }} $
                     </div>
                   </div>
 
                   <div class="col-6 mb-2">
                     <div class="erp-meta">Cuota inicial</div>
                     <div class="erp-field">
-                      {{ _convenio.cuotainicial | number:'1.2-2' }} $
+                      {{ _convenio?.cuotainicial | number:'1.2-2' }} $
                     </div>
                   </div>
 
                   <div class="col-6 mb-2">
                     <div class="erp-meta">Cuota final</div>
                     <div class="erp-field">
-                      {{ _convenio.cuotafinal | number:'1.2-2' }} $
+                      {{ _convenio?.cuotafinal | number:'1.2-2' }} $
                     </div>
                   </div>
 
                   <div class="col-6 mb-2">
                     <div class="erp-meta">N° de cuotas</div>
                     <div class="erp-field">
-                      {{ _convenio.cuotas || 0 }}
+                      {{ _convenio?.cuotas || 0 }}
                     </div>
                   </div>
 
                   <div class="col-6 mb-2">
                     <div class="erp-meta">Estado</div>
                     <div class="erp-field"
-                      [ngClass]="_convenio.estado === 1 ? 'text-success' : 'text-danger'">
-                      {{ _convenio.estado === 1 ? 'Activo' : 'Inactivo' }}
+                      [ngClass]="_convenio?.estado === 1 ? 'text-success' : 'text-danger'">
+                      {{ _convenio?.estado === 1 ? 'Activo' : 'Inactivo' }}
                     </div>
                   </div>
 
@@ -164,28 +164,28 @@
                   <div class="col-6 mb-2">
                     <div class="erp-meta">ID abonado</div>
                     <div class="erp-field">
-                      {{ _convenio.idabonado?.idabonado || '-' }}
+                      {{ _convenio?.idabonado?.idabonado || '-' }}
                     </div>
                   </div>
 
                   <div class="col-6 mb-2">
                     <div class="erp-meta">Nro. medidor</div>
                     <div class="erp-field">
-                      {{ _convenio.idabonado?.nromedidor || '-' }}
+                      {{ _convenio?.idabonado?.nromedidor || '-' }}
                     </div>
                   </div>
 
                   <div class="col-6 mb-2">
                     <div class="erp-meta">Lectura inicial</div>
                     <div class="erp-field">
-                      {{ _convenio.idabonado?.lecturainicial || '-' }}
+                      {{ _convenio?.idabonado?.lecturainicial || '-' }}
                     </div>
                   </div>
 
                   <div class="col-6 mb-2">
                     <div class="erp-meta">Fecha instalación</div>
                     <div class="erp-field left">
-                      {{ _convenio.idabonado?.fechainstalacion || '-' }}
+                      {{ _convenio?.idabonado?.fechainstalacion || '-' }}
                     </div>
                   </div>
 
@@ -327,15 +327,15 @@
     <!-- ===== FOOTER ===== -->
     <div class="card-footer bg-white border-top d-flex flex-wrap justify-content-between align-items-center">
       <small class="text-muted mb-2 mb-md-0">
-        Última actualización: {{ _convenio.fecmodi || '-' }} ·
-        Usuario: <strong>{{ _convenio.usucrea || '-' }}</strong>
+        Última actualización: {{ _convenio?.fecmodi || '-' }} ·
+        Usuario: <strong>{{ _convenio?.usucrea || '-' }}</strong>
       </small>
 
       <div class="btn-group btn-group-sm">
 
         <!-- ANULAR: solo si NO hay ninguna factura pagada en nuevas -->
         <button *ngIf="!tieneFacturaPagadaNueva" type="button" class="btn btn-outline-success"
-          (click)="anularConvenio()" [disabled]="_convenio.estado !== 1" title="Anular convenio">
+          (click)="anularConvenio()" [disabled]="_convenio?.estado !== 1" title="Anular convenio">
           <i class="bi bi-slash-circle mr-1"></i> Anular
         </button>
 

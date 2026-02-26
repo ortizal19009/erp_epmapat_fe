@@ -12,7 +12,7 @@ import { FacxconvenioService } from 'src/app/servicios/facxconvenio.service';
   styleUrls: ['./anular-convenio.component.css'],
 })
 export class AnularConvenioComponent implements OnInit {
-  _convenio: Convenios = new Convenios();
+  _convenio: any;
 
   _cuotas: any[] = [];
   _facxconvenio: any[] = [];
@@ -176,7 +176,7 @@ export class AnularConvenioComponent implements OnInit {
   }
 
   anularConvenio() {
-    if (!this._convenio?.idconvenio) return;
+    if (!this._convenio.idconvenio) return;
 
     if (!confirm('¿Desea anular este convenio?')) return;
 
