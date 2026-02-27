@@ -289,12 +289,13 @@ export class SinafipComponent implements OnInit {
     if (!this.sw1) return [];
 
     const values = await this.getTransaciByTipAsi();
+    console.log(values)
     const initialValues: any[] = [];
 
     const lcodcue: string[] = [];
     values.forEach((value: any) => {
-      const spltxt = value.codcue.split('.', 2);
-      const addtxt = `${spltxt[0]}.${spltxt[1]}`;
+      const spltxt = value.codcue.split('.', 3);
+      const addtxt = `${spltxt[0]}.${spltxt[1]}.${spltxt[2]}`;
       if (!lcodcue.includes(addtxt)) lcodcue.push(addtxt);
     });
 
