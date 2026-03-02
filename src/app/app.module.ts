@@ -568,7 +568,10 @@ import { BuscarabonadoComponent } from './componentes/abonados/buscarabonado/bus
     PersonalComponent,
     AddPersonalComponent,
     ThActionsComponent,
-    ThLeaveComponent,`r`n    ThFilesComponent,`r`n    ThAuditComponent,`r`n    ThDashboardComponent,
+    ThLeaveComponent,
+    ThFilesComponent,
+    ThAuditComponent,
+    ThDashboardComponent,
     RemisionComponent,
     AddRemisionComponent,
     SafePipe,
@@ -605,6 +608,7 @@ import { BuscarabonadoComponent } from './componentes/abonados/buscarabonado/bus
   bootstrap: [AppComponent],
 })
 export class AppModule {}
+
 
 
 
