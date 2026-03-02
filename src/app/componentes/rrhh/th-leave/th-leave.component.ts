@@ -92,4 +92,25 @@ export class ThLeaveComponent implements OnInit {
       error: (e) => { this.error = e?.error?.message || 'Error al rechazar'; }
     });
   }
+
+  estadoClass(estado: string): string {
+    switch ((estado || '').toUpperCase()) {
+      case 'APROBADA': return 'badge badge-success';
+      case 'RECHAZADA': return 'badge badge-danger';
+      case 'SOLICITADA': return 'badge badge-warning';
+      default: return 'badge badge-secondary';
+    }
+  }
+
+  formatFecha(fecha: string): string {
+    if (!fecha) return '';
+    const d = new Date(fecha);
+    return isNaN(d.getTime()) ? fecha : d.toLocaleDateString('es-EC');
+  }
+
+  refreshAll() {
+    this.msg = '';
+    this.error = '';
+    this.cargar();
+  }
 }
