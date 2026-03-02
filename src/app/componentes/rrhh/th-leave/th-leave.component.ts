@@ -13,6 +13,7 @@ export class ThLeaveComponent implements OnInit {
   balances: any[] = [];
   requests: any[] = [];
   estadoFiltro: string = 'TODAS';
+  selectedRequest: any = null;
 
   msg = '';
   error = '';
@@ -55,7 +56,8 @@ export class ThLeaveComponent implements OnInit {
   }
 
   get requestsFiltradas(): any[] {
-    const base = this.estadoFiltro === 'TODAS' ? this.requests : this.requests.filter(r => r.estado === this.estadoFiltro);
+    let base = this.estadoFiltro === 'TODAS' ? this.requests : this.requests.filter(r => r.estado === this.estadoFiltro);
+    base = base.sort((a, b) => (b.idrequest || 0) - (a.idrequest || 0));
     const start = (this.page - 1) * this.pageSize;
     return base.slice(start, start + this.pageSize);
   }
@@ -96,6 +98,7 @@ export class ThLeaveComponent implements OnInit {
   refreshAll() {
     this.msg = '';
     this.error = '';
+    this.selectedRequest = null;
     this.cargar();
   }
 
@@ -103,6 +106,10 @@ export class ThLeaveComponent implements OnInit {
     if (!this.idpersonal) return;
     this.service.getBalancesByPersonal(this.idpersonal).subscribe((d: any) => this.balances = d || []);
     this.service.getRequestsByPersonal(this.idpersonal).subscribe((d: any) => this.requests = d || []);
+  }
+
+  verDetalle(r: any) {
+    this.selectedRequest = r;
   }
 
   crearBalance() {
@@ -137,7 +144,8 @@ export class ThLeaveComponent implements OnInit {
 
   aprobar(idrequest: number) {
     if (!confirm('¿Confirmas aprobar esta solicitud?')) return;
-    this.service.aprobar(idrequest, { aprobadorId: this.aprobadorId, observacion: 'Aprobado FE' }).subscribe({
+    const observacion = prompt('Observación de aprobación:', 'Aprobado FE') || 'Aprobado FE';
+    this.service.aprobar(idrequest, { aprobadorId: this.aprobadorId, observacion }).subscribe({
       next: () => { this.msg = 'Solicitud aprobada'; this.cargar(); },
       error: (e) => { this.error = e?.error?.message || 'Error al aprobar'; }
     });
@@ -145,7 +153,8 @@ export class ThLeaveComponent implements OnInit {
 
   rechazar(idrequest: number) {
     if (!confirm('¿Confirmas rechazar esta solicitud?')) return;
-    this.service.rechazar(idrequest, { aprobadorId: this.aprobadorId, observacion: 'Rechazado FE' }).subscribe({
+    const observacion = prompt('Motivo/observación de rechazo:', 'Rechazado FE') || 'Rechazado FE';
+    this.service.rechazar(idrequest, { aprobadorId: this.aprobadorId, observacion }).subscribe({
       next: () => { this.msg = 'Solicitud rechazada'; this.cargar(); },
       error: (e) => { this.error = e?.error?.message || 'Error al rechazar'; }
     });

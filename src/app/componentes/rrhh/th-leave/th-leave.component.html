@@ -56,7 +56,7 @@
           <td>{{r.idrequest}}</td><td><span [ngClass]="tipoClass(r.tipolicencia)">{{r.tipolicencia}}</span></td><td><span [ngClass]="estadoClass(r.estado)">{{r.estado}}</span></td><td>{{formatFecha(r.fechainicio)}}</td><td>{{formatFecha(r.fechafin)}}</td><td>{{r.aprobador_id || "-"}}</td><td>{{formatFecha(r.fecha_aprobacion)}}</td>
           <td>
             <button class="btn btn-sm btn-success mr-1" (click)="aprobar(r.idrequest)" [disabled]="r.estado !== 'SOLICITADA'">Aprobar</button>
-            <button class="btn btn-sm btn-danger" (click)="rechazar(r.idrequest)" [disabled]="r.estado !== 'SOLICITADA'">Rechazar</button>
+            <button class="btn btn-sm btn-danger" (click)="rechazar(r.idrequest)" [disabled]="r.estado !== 'SOLICITADA'">Rechazar</button>`r`n            <button class="btn btn-sm btn-outline-info ml-1" (click)="verDetalle(r)">Detalle</button>
           </td>
         </tr>
       </tbody></table>
@@ -70,3 +70,15 @@
 </div>
 
 
+
+<div class="card mt-3" *ngIf="selectedRequest">
+  <div class="card-header py-1"><strong>Detalle solicitud #{{selectedRequest.idrequest}}</strong></div>
+  <div class="card-body py-2 small">
+    <div><strong>Tipo:</strong> {{selectedRequest.tipolicencia}}</div>
+    <div><strong>Estado:</strong> {{selectedRequest.estado}}</div>
+    <div><strong>Inicio:</strong> {{formatFecha(selectedRequest.fechainicio)}} | <strong>Fin:</strong> {{formatFecha(selectedRequest.fechafin)}}</div>
+    <div><strong>Días:</strong> {{selectedRequest.dias_solicitados}}</div>
+    <div><strong>Motivo:</strong> {{selectedRequest.motivo || '-'}}</div>
+    <div><strong>Obs. aprobación:</strong> {{selectedRequest.observacion_aprobacion || '-'}}</div>
+  </div>
+</div>
