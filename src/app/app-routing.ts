@@ -261,6 +261,8 @@ import { ImpUnicostosComponent } from './componentes/contabilidad/costos/imp-uni
 import { IfinanComponent } from './componentes/contabilidad/ifinan/ifinan/ifinan.component';
 import { PersonalComponent } from './componentes/rrhh/personal/personal.component';
 import { AddPersonalComponent } from './componentes/rrhh/personal/add-personal/add-personal.component';
+import { ThActionsComponent } from './componentes/rrhh/th-actions/th-actions.component';
+import { ThLeaveComponent } from './componentes/rrhh/th-leave/th-leave.component';
 import { RemisionComponent } from './componentes/coactivas/remision/remision.component';
 import { AddRemisionComponent } from './componentes/coactivas/remision/add-remision/add-remision.component';
 import { DetallePlanillaComponent } from './componentes/facturas/detalle-planilla/detalle-planilla.component';
@@ -1275,6 +1277,9 @@ const routes: Routes = [
 
   //================ RRHH =============================
   { path: 'personal', component: PersonalComponent, canActivate: [AuthGuard] },
+  { path: 'th-actions', component: ThActionsComponent, canActivate: [AuthGuard] },
+  { path: 'th-leave', component: ThLeaveComponent, canActivate: [AuthGuard] },
+
   {
     path: 'add-personal',
     component: AddPersonalComponent,
@@ -1370,3 +1375,4 @@ const routes: Routes = [
   exports: [RouterModule],
 })
 export class AppRoutingModule {}
+

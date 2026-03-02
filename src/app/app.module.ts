@@ -279,6 +279,8 @@ import { IfinanComponent } from './componentes/contabilidad/ifinan/ifinan/ifinan
 import { InfoLiquidaComponent } from './componentes/contabilidad/beneficiarios/info-beneficiario/info-liquida/info-liquida/info-liquida.component';
 import { PersonalComponent } from './componentes/rrhh/personal/personal.component';
 import { AddPersonalComponent } from './componentes/rrhh/personal/add-personal/add-personal.component';
+import { ThActionsComponent } from './componentes/rrhh/th-actions/th-actions.component';
+import { ThLeaveComponent } from './componentes/rrhh/th-leave/th-leave.component';
 import { RemisionComponent } from './componentes/coactivas/remision/remision.component';
 import { AddRemisionComponent } from './componentes/coactivas/remision/add-remision/add-remision.component';
 import { SafePipe } from './pipes/safe.pipe';
@@ -562,6 +564,8 @@ import { BuscarabonadoComponent } from './componentes/abonados/buscarabonado/bus
     DetallePlanillaComponent,
     PersonalComponent,
     AddPersonalComponent,
+    ThActionsComponent,
+    ThLeaveComponent,
     RemisionComponent,
     AddRemisionComponent,
     SafePipe,
@@ -598,3 +602,7 @@ import { BuscarabonadoComponent } from './componentes/abonados/buscarabonado/bus
   bootstrap: [AppComponent],
 })
 export class AppModule {}
+
+
+
+
