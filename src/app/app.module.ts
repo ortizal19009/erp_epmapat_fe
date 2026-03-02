@@ -283,6 +283,7 @@ import { ThActionsComponent } from './componentes/rrhh/th-actions/th-actions.com
 import { ThLeaveComponent } from './componentes/rrhh/th-leave/th-leave.component';
 import { ThFilesComponent } from './componentes/rrhh/th-files/th-files.component';
 import { ThAuditComponent } from './componentes/rrhh/th-audit/th-audit.component';
+import { ThDashboardComponent } from './componentes/rrhh/th-dashboard/th-dashboard.component';
 import { RemisionComponent } from './componentes/coactivas/remision/remision.component';
 import { AddRemisionComponent } from './componentes/coactivas/remision/add-remision/add-remision.component';
 import { SafePipe } from './pipes/safe.pipe';
@@ -567,7 +568,7 @@ import { BuscarabonadoComponent } from './componentes/abonados/buscarabonado/bus
     PersonalComponent,
     AddPersonalComponent,
     ThActionsComponent,
-    ThLeaveComponent,`r`n    ThFilesComponent,`r`n    ThAuditComponent,
+    ThLeaveComponent,`r`n    ThFilesComponent,`r`n    ThAuditComponent,`r`n    ThDashboardComponent,
     RemisionComponent,
     AddRemisionComponent,
     SafePipe,
@@ -604,6 +605,7 @@ import { BuscarabonadoComponent } from './componentes/abonados/buscarabonado/bus
   bootstrap: [AppComponent],
 })
 export class AppModule {}
+
 
 
 
