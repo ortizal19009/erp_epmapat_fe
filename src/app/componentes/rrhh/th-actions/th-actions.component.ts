@@ -15,6 +15,11 @@ export class ThActionsComponent implements OnInit {
   msg = '';
   error = '';
 
+  tipoFiltro: string = 'TODOS';
+  estadoFiltro: string = 'TODOS';
+  page = 1;
+  pageSize = 8;
+
   model: any = {
     idpersonal_personal: { idpersonal: 0 },
     tipoaccion: 'INGRESO',
@@ -31,6 +36,52 @@ export class ThActionsComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarPersonal();
+  }
+
+  get accionesFiltradas(): any[] {
+    let base = [...this.acciones];
+    if (this.tipoFiltro !== 'TODOS') {
+      base = base.filter(a => a.tipoaccion === this.tipoFiltro);
+    }
+    if (this.estadoFiltro !== 'TODOS') {
+      const est = this.estadoFiltro === 'ACTIVO';
+      base = base.filter(a => !!a.estado === est);
+    }
+    const start = (this.page - 1) * this.pageSize;
+    return base.slice(start, start + this.pageSize);
+  }
+
+  get totalPages(): number {
+    let total = this.acciones.length;
+    if (this.tipoFiltro !== 'TODOS') total = this.acciones.filter(a => a.tipoaccion === this.tipoFiltro).length;
+    if (this.estadoFiltro !== 'TODOS') {
+      const est = this.estadoFiltro === 'ACTIVO';
+      total = this.acciones.filter(a => (this.tipoFiltro === 'TODOS' || a.tipoaccion === this.tipoFiltro) && (!!a.estado === est)).length;
+    }
+    return Math.max(1, Math.ceil(total / this.pageSize));
+  }
+
+  estadoClass(estado: boolean): string {
+    return estado ? 'badge badge-success' : 'badge badge-secondary';
+  }
+
+  formatFecha(fecha: string): string {
+    if (!fecha) return '';
+    const d = new Date(fecha);
+    return isNaN(d.getTime()) ? fecha : d.toLocaleDateString('es-EC');
+  }
+
+  cambiarFiltros() {
+    this.page = 1;
+  }
+
+  prevPage() { if (this.page > 1) this.page--; }
+  nextPage() { if (this.page < this.totalPages) this.page++; }
+
+  refreshAll() {
+    this.msg = '';
+    this.error = '';
+    this.buscar();
   }
 
   cargarPersonal() {
