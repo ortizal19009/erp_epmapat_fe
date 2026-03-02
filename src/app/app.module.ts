@@ -291,6 +291,7 @@ import { AnularConvenioComponent } from './componentes/convenios/anular-convenio
 import { ReportesjrComponent } from './componentes/reportesjr/reportesjr.component';
 import { RutaToLectorComponent } from './componentes/rutas/ruta-to-lector/ruta-to-lector.component';
 import { SimuladordosComponent } from './componentes/pliego24/simuladordos/simuladordos.component';
+import { SimuladortresComponent } from './componentes/pliego24/simuladortres/simuladortres.component';
 import { RecargosxcuentaComponent } from './componentes/facturacion/recargosxcuenta/recargosxcuenta.component';
 import { ReFacturacionesComponent } from './componentes/facturas/re-facturaciones/re-facturaciones.component';
 import { BuscarabonadoComponent } from './componentes/abonados/buscarabonado/buscarabonado.component';
@@ -536,6 +537,7 @@ import { BuscarabonadoComponent } from './componentes/abonados/buscarabonado/bus
     AddBenextranComponent,
     SimulacionComponent,
     SimuladordosComponent,
+    SimuladortresComponent,
     AddLiquiacfpComponent,
     ModificarTramitenuevoComponent,
     AddAguatramiteComponent,

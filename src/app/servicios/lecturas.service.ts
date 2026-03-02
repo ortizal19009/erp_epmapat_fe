@@ -217,4 +217,15 @@ export class LecturasService {
       ),
     );
   }
+
+  calcular_Valores_v2(datos: any): Observable<number> {
+    return this.http.post<number>(`${baseUrl}/valoresEmisiones/v2`, datos);
+  }
+
+  getValoresSimuladosV2(datos: any) {
+    return this.http.get(
+      `${baseUrl}/simular/v2?m3=${datos.m3}&categoria=${datos.categoria}&swMunicipio=${datos.swMunicipio}&swAdultoMayor=${datos.swAdultoMayor}&swAguapotable=${datos.swAguapotable}`,
+    );
+  }
 }
+

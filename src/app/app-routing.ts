@@ -1,4 +1,5 @@
 import { SimuladordosComponent } from './componentes/pliego24/simuladordos/simuladordos.component';
+import { SimuladortresComponent } from './componentes/pliego24/simuladortres/simuladortres.component';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 // import { AppComponent } from './app.component';
@@ -400,6 +401,11 @@ const routes: Routes = [
   {
     path: 'simulador_v2.0',
     component: SimuladordosComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'simulador_v3.0',
+    component: SimuladortresComponent,
     canActivate: [AuthGuard],
   },
   {
