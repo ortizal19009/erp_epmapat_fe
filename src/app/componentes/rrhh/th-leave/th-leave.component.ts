@@ -12,11 +12,16 @@ export class ThLeaveComponent implements OnInit {
   personalList: any[] = [];
   balances: any[] = [];
   requests: any[] = [];
+  estadoFiltro: string = 'TODAS';
+
   msg = '';
   error = '';
 
   balanceModel: any = { idpersonal_personal: { idpersonal: 0 }, anio: new Date().getFullYear(), dias_asignados: 15, dias_usados: 0, dias_disponibles: 15, usucrea: 1 };
   requestModel: any = { idpersonal_personal: { idpersonal: 0 }, tipolicencia: 'VACACION', fechainicio: '', fechafin: '', motivo: '', usucrea: 1 };
+
+  page = 1;
+  pageSize = 8;
 
   constructor(private service: ThLeaveService, private personalService: PersonalService) {}
 
@@ -32,6 +37,21 @@ export class ThLeaveComponent implements OnInit {
       error: (e) => console.error(e)
     });
   }
+
+  get requestsFiltradas(): any[] {
+    const base = this.estadoFiltro === 'TODAS' ? this.requests : this.requests.filter(r => r.estado === this.estadoFiltro);
+    const start = (this.page - 1) * this.pageSize;
+    return base.slice(start, start + this.pageSize);
+  }
+
+  get totalPages(): number {
+    const total = this.estadoFiltro === 'TODAS' ? this.requests.length : this.requests.filter(r => r.estado === this.estadoFiltro).length;
+    return Math.max(1, Math.ceil(total / this.pageSize));
+  }
+
+  cambiarFiltro() { this.page = 1; }
+  prevPage() { if (this.page > 1) this.page--; }
+  nextPage() { if (this.page < this.totalPages) this.page++; }
 
   cargar() {
     if (!this.idpersonal) return;
@@ -58,6 +78,7 @@ export class ThLeaveComponent implements OnInit {
   }
 
   aprobar(idrequest: number) {
+    if (!confirm('¿Confirmas aprobar esta solicitud?')) return;
     this.service.aprobar(idrequest, { aprobadorId: 1, observacion: 'Aprobado FE' }).subscribe({
       next: () => { this.msg = 'Solicitud aprobada'; this.cargar(); },
       error: (e) => { this.error = e?.error?.message || 'Error al aprobar'; }
@@ -65,6 +86,7 @@ export class ThLeaveComponent implements OnInit {
   }
 
   rechazar(idrequest: number) {
+    if (!confirm('¿Confirmas rechazar esta solicitud?')) return;
     this.service.rechazar(idrequest, { aprobadorId: 1, observacion: 'Rechazado FE' }).subscribe({
       next: () => { this.msg = 'Solicitud rechazada'; this.cargar(); },
       error: (e) => { this.error = e?.error?.message || 'Error al rechazar'; }
