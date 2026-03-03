@@ -1,10 +1,12 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { catchError, map, of, switchMap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class LookupsApi {
   private base = `${((environment as any).GD_API_URL || environment.API_URL) + '/api'}/lookups`;
+  private rrhhPersonal = `${environment.API_URL}/personal`;
   constructor(private http: HttpClient) {}
 
   users(entityCode: string, q?: string, page: number = 1, pageSize: number = 100) {
@@ -13,7 +15,33 @@ export class LookupsApi {
       .set('page', page)
       .set('page_size', pageSize);
     if (q?.trim()) params = params.set('q', q.trim());
-    return this.http.get<any>(`${this.base}/users`, { params });
+
+    const fromGd$ = this.http.get<any>(`${this.base}/users`, { params });
+    const fromRrhh$ = this.http.get<any[]>(this.rrhhPersonal).pipe(
+      map((rows) => {
+        const normalized = (rows || []).map((p: any) => ({
+          id: String(p?.idpersonal ?? p?.id ?? ''),
+          full_name: [p?.nombres, p?.apellidos].filter(Boolean).join(' ').trim() || p?.nomper || p?.nombre || 'Sin nombre',
+          email: p?.email || p?.correo || null,
+          active: p?.estado ?? true,
+          source: 'RRHH'
+        }));
+        const term = (q || '').trim().toLowerCase();
+        const filtered = term ? normalized.filter((u: any) => (u.full_name || '').toLowerCase().includes(term)) : normalized;
+        const start = (page - 1) * pageSize;
+        const items = filtered.slice(start, start + pageSize);
+        return { items, page, page_size: pageSize, total: filtered.length, pages: Math.ceil(filtered.length / pageSize) || 1 };
+      }),
+      catchError(() => of({ items: [], page, page_size: pageSize, total: 0, pages: 1 }))
+    );
+
+    return fromGd$.pipe(
+      switchMap((res: any) => {
+        const hasItems = Array.isArray(res?.items) && res.items.length > 0;
+        return hasItems ? of(res) : fromRrhh$;
+      }),
+      catchError(() => fromRrhh$)
+    );
   }
 
   persons(entityCode: string, q?: string, page: number = 1, pageSize: number = 100) {
