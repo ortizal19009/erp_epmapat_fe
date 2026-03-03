@@ -159,8 +159,9 @@ export class DocumentosListComponent implements OnInit {
 
   refreshOverdueNow(): void {
     this.api.refreshOverdue(ENTITY_CODE).subscribe({
-      next: (res) => {
-        alert(`Actualización de vencidos: ${res.documents_updated || 0} documento(s)`);
+      next: (rows) => {
+        const total = Array.isArray(rows) ? rows.length : 0;
+        alert(`Vencidos recalculados: ${total} documento(s)`);
         this.load();
         this.loadOverdue();
         this.loadDueSoon();

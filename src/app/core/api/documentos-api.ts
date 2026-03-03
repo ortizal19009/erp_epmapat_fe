@@ -120,8 +120,10 @@ export class DocumentosApi {
     return this.http.get<any[]>(`${this.base}/due-soon`, { params: { entity_code: entityCode, hours } });
   }
 
+  // Compat: el backend actual no expone /overdue/refresh.
+  // Usamos /overdue para recalcular y devolver la lista vigente.
   refreshOverdue(entityCode: string) {
-    return this.http.post<any>(`${this.base}/overdue/refresh`, null, { params: { entity_code: entityCode } });
+    return this.http.get<any[]>(`${this.base}/overdue`, { params: { entity_code: entityCode } });
   }
 
   generateAlerts(entityCode: string) {
