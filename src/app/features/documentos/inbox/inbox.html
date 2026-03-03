@@ -1,6 +1,6 @@
 <div class="page gd-page">
   <div class="page gd-page-header">
-    <div class="d-flex gap-2">
+    <div class="d-flex ">
       <button *ngIf="hasRole('SUPERVISOR','ADMIN')" class="btn btn-outline-secondary" (click)="exportCsv()">Exportar CSV</button>
     </div>
     <div>
@@ -10,22 +10,22 @@
   </div>
 
   <div class="page gd-page-card mb-3">
-    <div class="row g-3 align-items-end">
+    <div class="row align-items-end">
       <div class="col-md-4">
-        <label class="form-label">Usuario destino</label>
-        <select class="form-select" [(ngModel)]="toUserId">
+        <label class="control-label">Usuario destino</label>
+        <select class="custom-select" [(ngModel)]="toUserId">
           <option value="">Todos</option>
           <option *ngFor="let u of users" [value]="u.id">{{ u.nombre || u.username }}</option>
         </select>
       </div>
       <div class="col-md-4">
-        <label class="form-label">Dependencia destino</label>
-        <select class="form-select" [(ngModel)]="toDependencyId">
+        <label class="control-label">Dependencia destino</label>
+        <select class="custom-select" [(ngModel)]="toDependencyId">
           <option value="">Todas</option>
           <option *ngFor="let d of dependencies" [value]="d.id">{{ d.codigo }} - {{ d.nombre }}</option>
         </select>
       </div>
-      <div class="col-md-4 d-grid">
+      <div class="col-md-4 ">
         <button class="btn btn-primary" (click)="load()">Consultar bandeja</button>
       </div>
     </div>
@@ -52,7 +52,7 @@
             <th style="cursor:pointer" (click)="setSort('asunto')">Asunto {{ sortIcon('asunto') }}</th>
             <th style="cursor:pointer" (click)="setSort('fecha_plazo')">Plazo {{ sortIcon('fecha_plazo') }}</th>
             <th style="cursor:pointer" (click)="setSort('estado')">Estado {{ sortIcon('estado') }}</th>
-            <th class="text-end">Acciones</th>
+            <th class="text-right">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -63,7 +63,7 @@
             <td>{{ r.asunto }}</td>
             <td>{{ r.fecha_plazo ? (r.fecha_plazo | date:'yyyy-MM-dd HH:mm') : '—' }}</td>
             <td><span class="badge" [ngClass]="statusBadge(r.estado)">{{ r.estado }}</span></td>
-            <td class="text-end">
+            <td class="text-right">
               <div class="btn-group btn-group-sm">
                 <button class="btn btn-outline-secondary" (click)="goRespond(r)">Responder</button>
                 <button *ngIf="hasRole('RECEPCION','RESPONSABLE','SUPERVISOR','ADMIN')" class="btn btn-outline-primary" (click)="markRead(r)">Marcar leído</button>
@@ -78,4 +78,5 @@
     </div>
   </div>
 </div>
+
 

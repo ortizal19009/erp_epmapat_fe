@@ -1,4 +1,4 @@
-﻿import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, signal } from '@angular/core';
 import {
   FormBuilder,
@@ -137,3 +137,4 @@ export class DependencyFormComponent implements OnInit {
     this.error.set(e?.error?.detail || e?.message || 'Error inesperado');
   }
 }
+

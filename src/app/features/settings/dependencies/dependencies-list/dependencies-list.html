@@ -1,14 +1,14 @@
 <div class="page gd-page">
   <div class="page gd-page-header">
-    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap w-100">
+    <div class="d-flex align-items-start justify-content-between  flex-wrap w-100">
       <div>
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center ">
           <h2 class="page gd-page-title mb-0">Dependencias</h2>
         </div>
         <div class="page gd-page-subtitle mt-1">Entidad: EPMAPA-T</div>
       </div>
 
-      <div class="d-flex gap-2">
+      <div class="d-flex ">
         <button class="btn btn-primary" (click)="new()">
           <i class="bi bi-plus-lg me-1"></i>
           Nueva dependencia
@@ -18,9 +18,9 @@
   </div>
 
   <div class="page gd-page-card mb-3">
-    <div class="row g-3 align-items-end">
+    <div class="row align-items-end">
       <div class="col-12 col-lg-6">
-        <label class="form-label mb-1">Buscar</label>
+        <label class="control-label mb-1">Buscar</label>
         <div class="input-group">
           <span class="input-group-text"><i class="bi bi-search"></i></span>
           <input class="form-control" [(ngModel)]="q" placeholder="Buscar por código o nombre..." (keyup.enter)="load()" />
@@ -29,8 +29,8 @@
       </div>
 
       <div class="col-12 col-lg-3">
-        <label class="form-label mb-1">Estado</label>
-        <select class="form-select" [(ngModel)]="status">
+        <label class="control-label mb-1">Estado</label>
+        <select class="custom-select" [(ngModel)]="status">
           <option value="">Todos</option>
           <option value="active">Activo</option>
           <option value="inactive">Inactivo</option>
@@ -38,7 +38,7 @@
       </div>
 
       <div class="col-12 col-lg-3">
-        <div class="d-grid gap-2 d-lg-flex justify-content-lg-end">
+        <div class="  d-lg-flex justify-content-lg-end">
           <button class="btn btn-outline-secondary" type="button" (click)="clearFilters()">
             <i class="bi bi-x-circle me-1"></i>Limpiar
           </button>
@@ -62,19 +62,19 @@
             <th>Nombre</th>
             <th style="width: 280px;">Padre</th>
             <th style="width: 140px;">Estado</th>
-            <th style="width: 220px;" class="text-end">Acciones</th>
+            <th style="width: 220px;" class="text-right">Acciones</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let d of filteredItems()">
-            <td class="fw-semibold">{{ d.codigo }}</td>
+            <td class="font-weight-bold">{{ d.codigo }}</td>
             <td>
-              <div class="fw-semibold">{{ d.nombre }}</div>
+              <div class="font-weight-bold">{{ d.nombre }}</div>
               <div class="text-muted small">{{ d.padre_id ? 'Dependencia hija' : 'Dependencia principal' }}</div>
             </td>
             <td class="text-muted">{{ d.dependencia_padre || '—' }}</td>
             <td><span class="badge" [ngClass]="d.activo ? 'bg-success' : 'bg-secondary'">{{ d.activo ? 'ACTIVO' : 'INACTIVO' }}</span></td>
-            <td class="text-end">
+            <td class="text-right">
               <div class="btn-group">
                 <button class="btn btn-outline-primary btn-sm" (click)="edit(d)">Editar</button>
                 <button class="btn btn-outline-secondary btn-sm" (click)="toggle(d)">{{ d.activo ? 'Desactivar' : 'Activar' }}</button>
@@ -89,4 +89,5 @@
     </div>
   </div>
 </div>
+
 

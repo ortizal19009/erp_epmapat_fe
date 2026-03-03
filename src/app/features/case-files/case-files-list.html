@@ -2,11 +2,11 @@
   <div class="page gd-page-header"><div class="d-flex align-items-center"><h2 class="page gd-page-title mb-0">Expedientes electrónicos</h2><app-info-help key="case_files"></app-info-help></div></div>
 
   <div class="page gd-page-card mb-3">
-    <div class="row g-2 align-items-end">
-      <div class="col-md-3"><label class="form-label">Código</label><input class="form-control" [(ngModel)]="code" /></div>
-      <div class="col-md-5"><label class="form-label">Título</label><input class="form-control" [(ngModel)]="title" /></div>
-      <div class="col-md-3"><label class="form-label">Dependencia responsable</label><select class="form-select" [(ngModel)]="ownerDependencyId"><option [ngValue]="null">(sin dependencia)</option><option *ngFor="let d of deps" [ngValue]="d.id">{{ d.codigo }} - {{ d.nombre }}</option></select></div>
-      <div class="col-md-1 d-grid"><button class="btn btn-primary" (click)="create()">Crear</button></div>
+    <div class="row align-items-end">
+      <div class="col-md-3"><label class="control-label">Código</label><input class="form-control" [(ngModel)]="code" /></div>
+      <div class="col-md-5"><label class="control-label">Título</label><input class="form-control" [(ngModel)]="title" /></div>
+      <div class="col-md-3"><label class="control-label">Dependencia responsable</label><select class="custom-select" [(ngModel)]="ownerDependencyId"><option [ngValue]="null">(sin dependencia)</option><option *ngFor="let d of deps" [ngValue]="d.id">{{ d.codigo }} - {{ d.nombre }}</option></select></div>
+      <div class="col-md-1 "><button class="btn btn-primary" (click)="create()">Crear</button></div>
     </div>
   </div>
 
@@ -19,7 +19,7 @@
             <td>{{ r.code }}</td><td>{{ r.title }}</td><td><span class="badge" [ngClass]="r.status==='CERRADO' ? 'bg-secondary' : 'bg-success'">{{ r.status }}</span></td>
             <td>{{ r.opened_at | date:'yyyy-MM-dd HH:mm' }}</td>
             <td>{{ r.closed_at ? (r.closed_at | date:'yyyy-MM-dd HH:mm') : '-' }}</td>
-            <td class="d-flex gap-1"><button class="btn btn-sm btn-outline-secondary" (click)="viewItems(r)">Ver índice</button><button class="btn btn-sm btn-outline-danger" (click)="close(r)" [disabled]="r.status==='CERRADO'">Cerrar</button></td>
+            <td class="d-flex "><button class="btn btn-sm btn-outline-secondary" (click)="viewItems(r)">Ver índice</button><button class="btn btn-sm btn-outline-danger" (click)="close(r)" [disabled]="r.status==='CERRADO'">Cerrar</button></td>
           </tr>
           <tr *ngIf="rows.length===0"><td colspan="6" class="text-center text-muted py-3">Sin expedientes</td></tr>
         </tbody>
@@ -49,4 +49,5 @@
     </table>
   </div>
 </div>
+
 

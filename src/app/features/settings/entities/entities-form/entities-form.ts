@@ -83,3 +83,4 @@ export class EntitiesFormComponent implements OnInit {
     this.error.set(e?.error?.detail || e?.message || 'Error inesperado');
   }
 }
+

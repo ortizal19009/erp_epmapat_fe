@@ -227,3 +227,4 @@ export class DocumentoDetalleComponent implements OnInit {
     return this.api.downloadFile(this.id, file.id);
   }
 }
+

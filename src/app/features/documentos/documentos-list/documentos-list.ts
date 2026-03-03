@@ -279,9 +279,9 @@ export class DocumentosListComponent implements OnInit {
     const due = new Date(d.fecha_plazo).getTime();
     const now = Date.now();
     const diffH = (due - now) / 3600000;
-    if (diffH < 0) return 'text-danger fw-semibold';
-    if (diffH <= 24) return 'text-warning fw-semibold';
-    return 'text-success fw-semibold';
+    if (diffH < 0) return 'text-danger font-weight-bold';
+    if (diffH <= 24) return 'text-warning font-weight-bold';
+    return 'text-success font-weight-bold';
   }
 
   deadlineLabel(d: any): string {
@@ -341,5 +341,6 @@ export class DocumentosListComponent implements OnInit {
     }
   }
 }
+
 
 

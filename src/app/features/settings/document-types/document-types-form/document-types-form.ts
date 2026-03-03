@@ -1,4 +1,4 @@
-﻿import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators, FormControl, FormGroup } from '@angular/forms';
@@ -123,3 +123,4 @@ export class DocumentTypeFormComponent implements OnInit {
     this.error.set(e?.error?.detail || e?.message || 'Error inesperado');
   }
 }
+

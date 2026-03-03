@@ -84,3 +84,4 @@ export class DocumentTypesListComponent implements OnInit {
     return flow === 'INGRESO' ? 'bg-info text-dark' : 'bg-primary';
   }
 }
+

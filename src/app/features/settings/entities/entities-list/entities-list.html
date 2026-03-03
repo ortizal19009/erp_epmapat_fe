@@ -9,15 +9,15 @@
 
   <div class="card mb-3">
     <div class="card-body">
-      <div class="row g-2 align-items-end">
+      <div class="row align-items-end">
         <div class="col-md-6">
-          <label class="form-label mb-1">Buscar</label>
+          <label class="control-label mb-1">Buscar</label>
           <input class="form-control" [(ngModel)]="q" placeholder="Código o nombre..." />
         </div>
-        <div class="col-md-2 d-grid">
+        <div class="col-md-2 ">
           <button class="btn btn-outline-primary" (click)="load()">Buscar</button>
         </div>
-        <div class="col-md-2 d-grid">
+        <div class="col-md-2 ">
           <button class="btn btn-outline-secondary" (click)="clear()">Limpiar</button>
         </div>
       </div>
@@ -35,15 +35,15 @@
             <th style="width: 160px;">Código</th>
             <th>Nombre</th>
             <th style="width: 120px;">Estado</th>
-            <th style="width: 160px;" class="text-end">Acciones</th>
+            <th style="width: 160px;" class="text-right">Acciones</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let e of items">
-            <td class="fw-semibold">{{ e.codigo }}</td>
+            <td class="font-weight-bold">{{ e.codigo }}</td>
             <td>{{ e.nombre }}</td>
             <td><span class="badge" [ngClass]="e.activo ? 'bg-success' : 'bg-secondary'">{{ e.activo ? 'ACTIVO' : 'INACTIVO' }}</span></td>
-            <td class="text-end">
+            <td class="text-right">
               <div class="btn-group">
                 <button class="btn btn-outline-primary btn-sm" (click)="edit(e)">Editar</button>
                 <button class="btn btn-outline-dark btn-sm" (click)="toggle(e)">{{ e.activo ? 'Desactivar' : 'Activar' }}</button>
@@ -59,4 +59,5 @@
     </div>
   </div>
 </div>
+
 

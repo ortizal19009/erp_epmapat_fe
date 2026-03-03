@@ -27,3 +27,4 @@ export class UiFeedbackService {
     return !!res.isConfirmed;
   }
 }
+

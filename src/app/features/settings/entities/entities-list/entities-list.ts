@@ -63,3 +63,4 @@ export class EntitiesListComponent implements OnInit {
     });
   }
 }
+

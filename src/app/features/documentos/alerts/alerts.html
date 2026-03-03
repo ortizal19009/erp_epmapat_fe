@@ -4,9 +4,9 @@
       <div class="d-flex align-items-center"><h2 class="page gd-page-title mb-0">Alertas de plazo</h2><app-info-help key="alerts"></app-info-help></div>
       <div class="page gd-page-subtitle">Seguimiento de documentos por vencer y vencidos</div>
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex ">
     <button class="btn btn-outline-secondary" (click)="exportCsv()">Exportar CSV</button>
-    <select class="form-select form-select-sm" style="max-width:160px" [(ngModel)]="dispatchChannel">
+    <select class="custom-select custom-select-sm" style="max-width:160px" [(ngModel)]="dispatchChannel">
       <option value="TELEGRAM">Telegram</option>
       <option value="EMAIL">Email</option>
       <option value="WHATSAPP">WhatsApp</option>
@@ -17,17 +17,17 @@
   </div>
 
   <div class="page gd-page-card mb-3">
-    <div class="row g-2 align-items-end">
+    <div class="row align-items-end">
       <div class="col-md-3">
-        <label class="form-label">Estado alerta</label>
-        <select class="form-select" [(ngModel)]="state">
+        <label class="control-label">Estado alerta</label>
+        <select class="custom-select" [(ngModel)]="state">
           <option value="PENDIENTE">PENDIENTE</option>
           <option value="ENVIADA">ENVIADA</option>
           <option value="ERROR">ERROR</option>
           <option value="CANCELADA">CANCELADA</option>
         </select>
       </div>
-      <div class="col-md-2 d-grid">
+      <div class="col-md-2 ">
         <button class="btn btn-outline-primary" (click)="load()">Consultar</button>
       </div>
     </div>
@@ -75,4 +75,5 @@
     </div>
   </div>
 </div>
+
 

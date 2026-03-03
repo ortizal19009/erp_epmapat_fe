@@ -5,33 +5,33 @@
       <div class="page gd-page-subtitle">Entidad: {{ entityCode }}</div>
     </div>
 
-    <div class="d-flex gap-2">
+    <div class="d-flex ">
       <button class="btn btn-outline-secondary" (click)="load()">Actualizar</button>
       <button class="btn btn-primary" (click)="goNew()">+ Nuevo</button>
     </div>
   </div>
 
   <div class="page gd-page-card mb-3">
-    <div class="row g-2 align-items-end">
+    <div class="row align-items-end">
       <div class="col-md-7">
-        <label class="form-label mb-1">Buscar</label>
+        <label class="control-label mb-1">Buscar</label>
         <input class="form-control" [(ngModel)]="q" placeholder="Código o nombre..." />
       </div>
 
       <div class="col-md-3">
-        <label class="form-label mb-1">Flujo</label>
-        <select class="form-select" [(ngModel)]="flow">
+        <label class="control-label mb-1">Flujo</label>
+        <select class="custom-select" [(ngModel)]="flow">
           <option value="">(Todos)</option>
           <option value="INGRESO">INGRESO</option>
           <option value="SALIDA">SALIDA</option>
         </select>
       </div>
 
-      <div class="col-md-2 d-grid">
+      <div class="col-md-2 ">
         <button class="btn btn-outline-primary" (click)="load()">Aplicar</button>
       </div>
 
-      <div class="col-12 d-flex gap-2 mt-2">
+      <div class="col-12 d-flex  mt-2">
         <button class="btn btn-outline-secondary btn-sm" (click)="clear()">Limpiar</button>
       </div>
     </div>
@@ -50,17 +50,17 @@
               <th>Nombre</th>
               <th style="width: 140px;">Flujo</th>
               <th style="width: 120px;">Activo</th>
-              <th style="width: 180px;" class="text-end">Acciones</th>
+              <th style="width: 180px;" class="text-right">Acciones</th>
             </tr>
           </thead>
 
           <tbody>
             <tr *ngFor="let t of items">
-              <td class="fw-semibold">{{ t.codigo }}</td>
+              <td class="font-weight-bold">{{ t.codigo }}</td>
               <td>{{ t.nombre }}</td>
               <td><span class="badge" [ngClass]="badgeFlow(t.flujo)">{{ t.flujo }}</span></td>
               <td><span class="badge" [ngClass]="t.activo ? 'bg-success' : 'bg-secondary'">{{ t.activo ? 'SÍ' : 'NO' }}</span></td>
-              <td class="text-end">
+              <td class="text-right">
                 <div class="btn-group">
                   <button class="btn btn-outline-primary btn-sm" (click)="edit(t)">Editar</button>
                   <button class="btn btn-outline-dark btn-sm" (click)="toggleActive(t)">{{ t.activo ? 'Desactivar' : 'Activar' }}</button>
@@ -77,4 +77,5 @@
     </div>
   </div>
 </div>
+
 

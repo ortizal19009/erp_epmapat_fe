@@ -4,7 +4,7 @@
       <div class="d-flex align-items-center"><h2 class="page gd-page-title mb-0">Documentos</h2><app-info-help key="documents"></app-info-help></div>
       <p class="page gd-page-subtitle">Gestión documental de entrada y salida • Entidad: EPMAPA-T</p>
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex ">
     <button *ngIf="hasRole('SUPERVISOR','ADMIN')" class="btn btn-outline-secondary" (click)="refreshOverdueNow()">Refrescar vencidos</button>
     <button *ngIf="hasRole('SUPERVISOR','ADMIN')" class="btn btn-outline-warning" (click)="generateAlertsNow()">Generar alertas</button>
     <button *ngIf="hasRole('RECEPCION','RESPONSABLE','SUPERVISOR','ADMIN')" class="btn btn-primary shadow-sm" (click)="goNew()">+ Nuevo documento</button>
@@ -12,7 +12,7 @@
   </div>
 
 
-  <div class="row g-2 mb-3">
+  <div class="row mb-3">
     <div class="col-md-3"><div class="page gd-page-card py-2"><div class="small text-muted">Pendientes</div><div class="h5 mb-0">{{ kpiPendientes }}</div></div></div>
     <div class="col-md-3"><div class="page gd-page-card py-2"><div class="small text-muted">Por vencer</div><div class="h5 mb-0 text-warning">{{ kpiPorVencer }}</div></div></div>
     <div class="col-md-3"><div class="page gd-page-card py-2"><div class="small text-muted">Vencidos</div><div class="h5 mb-0 text-danger">{{ kpiVencidos }}</div></div></div>
@@ -48,15 +48,15 @@
   </div>
 
   <div class="page gd-page-card filters-card mb-3">
-    <div class="row g-3 align-items-end">
+    <div class="row align-items-end">
       <div class="col-lg-5">
-        <label class="form-label">Buscar</label>
+        <label class="control-label">Buscar</label>
         <input class="form-control" [(ngModel)]="q" placeholder="Buscar por asunto o remitente" />
       </div>
 
       <div class="col-lg-3 col-md-6">
-        <label class="form-label">Flujo</label>
-        <select class="form-select" [(ngModel)]="flow">
+        <label class="control-label">Flujo</label>
+        <select class="custom-select" [(ngModel)]="flow">
           <option value="">Todos</option>
           <option value="INGRESO">INGRESO</option>
           <option value="SALIDA">SALIDA</option>
@@ -64,8 +64,8 @@
       </div>
 
       <div class="col-lg-3 col-md-6">
-        <label class="form-label">Estado</label>
-        <select class="form-select" [(ngModel)]="status">
+        <label class="control-label">Estado</label>
+        <select class="custom-select" [(ngModel)]="status">
           <option value="">Todos</option>
           <option value="BORRADOR">BORRADOR</option>
           <option value="EN_REVISION">EN_REVISION</option>
@@ -77,7 +77,7 @@
         </select>
       </div>
 
-      <div class="col-lg-1 col-md-12 d-grid">
+      <div class="col-lg-1 col-md-12 ">
         <button class="btn btn-outline-primary" (click)="load()">Aplicar</button>
       </div>
 
@@ -116,7 +116,7 @@
             <th style="width: 95px; cursor:pointer" (click)="setSort('flujo')">Flujo {{ sortIcon('flujo') }}</th>
             <th style="width: 120px; cursor:pointer" (click)="setSort('estado')">Estado {{ sortIcon('estado') }}</th>
             <th style="width: 170px; cursor:pointer" (click)="setSort('fecha_plazo')">Plazo {{ sortIcon('fecha_plazo') }}</th>
-            <th style="width: 210px;" class="text-end">Acciones</th>
+            <th style="width: 210px;" class="text-right">Acciones</th>
           </tr>
         </thead>
 
@@ -187,5 +187,6 @@
     </div>
   </div>
 </div>
+
 
 

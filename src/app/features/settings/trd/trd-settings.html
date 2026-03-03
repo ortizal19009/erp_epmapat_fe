@@ -1,14 +1,14 @@
 <div class="page gd-page">
   <div class="page gd-page-header"><div class="d-flex align-items-center"><h2 class="page gd-page-title mb-0">TRD (Retención)</h2><app-info-help key="trd"></app-info-help></div></div>
   <div class="page gd-page-card mb-3">
-    <div class="row g-2 align-items-end">
-      <div class="col-md-3"><label class="form-label">Serie</label><select class="form-select" [(ngModel)]="model.series_id" (ngModelChange)="onSeriesChange()"><option value="">Seleccione</option><option *ngFor="let s of series" [value]="s.id">{{ s.code }} - {{ s.name }}</option></select></div>
-      <div class="col-md-3"><label class="form-label">Subserie</label><select class="form-select" [(ngModel)]="model.subseries_id"><option value="">(ninguna)</option><option *ngFor="let ss of subseries" [value]="ss.id">{{ ss.code }} - {{ ss.name }}</option></select></div>
-      <div class="col-md-2"><label class="form-label">Años activos</label><input type="number" class="form-control" [(ngModel)]="model.active_years" /></div>
-      <div class="col-md-2"><label class="form-label">Años semiactivos</label><input type="number" class="form-control" [(ngModel)]="model.semi_active_years" /></div>
-      <div class="col-md-2"><label class="form-label">Disposición</label><select class="form-select" [(ngModel)]="model.final_disposition"><option>CONSERVAR</option><option>TRANSFERIR</option><option>ELIMINAR</option></select></div>
-      <div class="col-md-10"><label class="form-label">Base legal</label><input class="form-control" [(ngModel)]="model.legal_basis" /></div>
-      <div class="col-md-2 d-grid"><button class="btn btn-primary" (click)="save()">Guardar</button></div>
+    <div class="row align-items-end">
+      <div class="col-md-3"><label class="control-label">Serie</label><select class="custom-select" [(ngModel)]="model.series_id" (ngModelChange)="onSeriesChange()"><option value="">Seleccione</option><option *ngFor="let s of series" [value]="s.id">{{ s.code }} - {{ s.name }}</option></select></div>
+      <div class="col-md-3"><label class="control-label">Subserie</label><select class="custom-select" [(ngModel)]="model.subseries_id"><option value="">(ninguna)</option><option *ngFor="let ss of subseries" [value]="ss.id">{{ ss.code }} - {{ ss.name }}</option></select></div>
+      <div class="col-md-2"><label class="control-label">Años activos</label><input type="number" class="form-control" [(ngModel)]="model.active_years" /></div>
+      <div class="col-md-2"><label class="control-label">Años semiactivos</label><input type="number" class="form-control" [(ngModel)]="model.semi_active_years" /></div>
+      <div class="col-md-2"><label class="control-label">Disposición</label><select class="custom-select" [(ngModel)]="model.final_disposition"><option>CONSERVAR</option><option>TRANSFERIR</option><option>ELIMINAR</option></select></div>
+      <div class="col-md-10"><label class="control-label">Base legal</label><input class="form-control" [(ngModel)]="model.legal_basis" /></div>
+      <div class="col-md-2 "><button class="btn btn-primary" (click)="save()">Guardar</button></div>
     </div>
   </div>
 
@@ -24,4 +24,5 @@
     </div>
   </div>
 </div>
+
 

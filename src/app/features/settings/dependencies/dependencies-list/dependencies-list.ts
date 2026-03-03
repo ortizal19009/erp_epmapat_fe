@@ -85,3 +85,4 @@ export class DependenciesListComponent implements OnInit {
     this.load();
   }
 }
+

@@ -1,4 +1,4 @@
-﻿.documents-page .documents-header {
+.documents-page .documents-header {
   margin-bottom: 14px;
 }
 
@@ -6,7 +6,7 @@
   border-radius: 16px;
 }
 
-.filters-card .form-label {
+.filters-card .control-label {
   font-size: 0.82rem;
   color: var(--muted);
   margin-bottom: 0.35rem;
@@ -23,3 +23,4 @@
 .table thead th {
   white-space: nowrap;
 }
+
