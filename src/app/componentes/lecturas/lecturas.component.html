@@ -1,361 +1,360 @@
 <div class="content mt-1 pt-1 px-2">
-   <div class="container-fluid">
-      <div class="row mt-0 px-1 py-1 justify-content-start border cabecera sombra">
-         <div class="col-sm-2">
-            <h4 class="m-0 font-weight-bold text-truncate"><i class="fa fa-book"></i>&nbsp; Lecturas </h4>
-         </div>
-         <div class="col-sm-5 mt-1">
-            <h6 class="fantacy text-truncate">Emisión {{rutaxemision.emision|nombreEmision}} / Ruta {{ rutaxemision.ruta
-               }}</h6>
-         </div>
-         <div class="col-md-3 text-left">
-            <input type="text" class="form-control form-control-sm text-center col-sm-10" placeholder="Filtrar..."
-               [(ngModel)]="filtro" (ngModelChange)="onInputChange()" />
-         </div>
-
-         <div class="btn-group mx-1">
-            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
-               aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
-            </button>
-            <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#lecturas"
-                  (click)="lecturas()">
-                  <!-- [ngClass]="{'disabled' : rutaxemision.estado == 1}" (click)="lecturas()"> -->
-                  <i class="fa fa-book"></i>&nbsp; Archivo lecturas</button>
-               <button class="dropdown-item" type="button" [ngClass]="{'disabled' : rutaxemision.estado == 1}"
-                  (click)="cargar()">
-                  <i class="bi-download"></i>&nbsp; Cargar lecturas</button>
-               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalCalcular"
-                  [ngClass]="{'disabled' : rutaxemision.estado == 1}"><i class="bi-calculator"></i>
-                  <span>&nbsp; Calcular</span></button>
-               <button class="dropdown-item" type="button" (click)="mostrarModal = true" data-toggle="modal" data-target="#modalCerrar"
-                  [ngClass]="{'disabled' : rutaxemision.estado == 1}">
-                  <i class="bi bi-door-closed"></i>&nbsp; Cerrar emisión ruta</button>
-               <button class="dropdown-item" type="button" (click)="imprimir()">
-                  <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
-            </div>
-         </div>
-
-         <div class="btn-group mx-1">
-            <button class="bg-transparent border-0" type="button" (click)="regresar()">
-               <i class="bi-arrow-left-circle text-white icoRegresar"></i>
-            </button>
-         </div>
+  <div class="container-fluid">
+    <div class="row mt-0 px-1 py-1 justify-content-start border cabecera sombra">
+      <div class="col-sm-2">
+        <h4 class="m-0 font-weight-bold text-truncate"><i class="fa fa-book"></i>&nbsp; Lecturas </h4>
       </div>
-   </div>
+      <div class="col-sm-5 mt-1">
+        <h6 class="fantacy text-truncate">Emisión {{rutaxemision.emision|nombreEmision}} / Ruta {{ rutaxemision.ruta
+          }}</h6>
+      </div>
+      <div class="col-md-3 text-left">
+        <input type="text" class="form-control form-control-sm text-center col-sm-10" placeholder="Filtrar..."
+          [(ngModel)]="filtro" (ngModelChange)="onInputChange()" />
+      </div>
+
+      <div class="btn-group mx-1">
+        <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
+          aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+        </button>
+        <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+          <button class="dropdown-item" type="button" data-toggle="modal" data-target="#lecturas" (click)="lecturas()">
+            <!-- [ngClass]="{'disabled' : rutaxemision.estado == 1}" (click)="lecturas()"> -->
+            <i class="fa fa-book"></i>&nbsp; Archivo lecturas</button>
+          <button class="dropdown-item" type="button" [ngClass]="{'disabled' : rutaxemision.estado == 1}"
+            (click)="cargar()">
+            <i class="bi-download"></i>&nbsp; Cargar lecturas</button>
+          <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalCalcular"
+            [ngClass]="{'disabled' : rutaxemision.estado == 1}"><i class="bi-calculator"></i>
+            <span>&nbsp; Calcular</span></button>
+          <button class="dropdown-item" *ngIf="idusuario===1" type="button" (click) = "calcularMultaBasura()"><i class="bi-calculator"></i>
+            <span>&nbsp; Calcular Multa basura</span></button>
+          <button class="dropdown-item" type="button" (click)="mostrarModal = true" data-toggle="modal"
+            data-target="#modalCerrar" [ngClass]="{'disabled' : rutaxemision.estado == 1}">
+            <i class="bi bi-door-closed"></i>&nbsp; Cerrar emisión ruta</button>
+          <button class="dropdown-item" type="button" (click)="imprimir()">
+            <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
+        </div>
+      </div>
+
+      <div class="btn-group mx-1">
+        <button class="bg-transparent border-0" type="button" (click)="regresar()">
+          <i class="bi-arrow-left-circle text-white icoRegresar"></i>
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="container-fluid">
-   <div class="row mb-0">
-      <div class="col-sm-12">
-         <table *ngIf="_lecturas" class="table table-hover table-bordered table-sm sombra">
+  <div class="row mb-0">
+    <div class="col-sm-12">
+      <table *ngIf="_lecturas" class="table table-hover table-bordered table-sm sombra">
+        <thead class="cabecera">
+          <tr>
+            <th></th>
+            <th class="text-center">Cuenta</th>
+            <th class="col-sm-3">Responsable del Pago</th>
+            <th>Categoría</th>
+            <th class="text-right">Anterior</th>
+            <th class="text-right">Actual</th>
+            <th class="text-right">Cnsm</th>
+            <th class="text-right">Prom.</th>
+            <th class="text-right">A recaudar</th>
+            <th>Novedades</th>
+            <th class="text-center">
+              <button class="btn btn-xs btn-outline-success" *ngIf="_rutaxemision.estado === 0"
+                (click)="actualizarLeturaAnterior()">
+                <i class="bi bi-arrow-clockwise"></i>
+              </button>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="detalle">
+          <tr *ngFor="let lectura of _lecturas | filter: filtro; let i=index" class="fila">
+            <td class="small text-center font-weight-bold"><i class="bi-bookmark-check-fill check"
+                *ngIf="i == antIndice"></i>{{i+1}}</td>
+            <td class="text-center">{{ lectura.idabonado_abonados.idabonado }}</td>
+            <td class="description">{{ lectura.idabonado_abonados.idcliente_clientes.nombre }}</td>
+            <td class="">{{ lectura.idabonado_abonados.idcategoria_categorias.descripcion }}</td>
+            <td class="text-right"
+              [ngClass]="{'fontwarning': lectura.lecturaanterior == 0 && lectura.lecturaactual == 0 }">{{
+              lectura.lecturaanterior | number: '1.0' }}</td>
+            <td class="text-right"
+              [ngClass]="{'fontwarning': lectura.lecturaanterior == 0 && lectura.lecturaactual == 0 }">{{
+              lectura.lecturaactual | number: '1.0' }}</td>
+            <td class="text-right"
+              [ngClass]="{'fontwarning': ((lectura.lecturaanterior == 0 && lectura.lecturaactual == 0) || lectura.lecturaactual - lectura.lecturaanterior <= 0 || (lectura.lecturaanterior > 0 && lectura.lecturaactual == 0)), 'transparente': !swcargado }">
+              {{ lectura.lecturaactual - lectura.lecturaanterior | number: '1.0' }}</td>
+            <td class="text-right">{{ lectura.idabonado_abonados.promedio }}</td>
+            <td class="text-right">{{ lectura.total1 | number: '1.2-2' }}</td>
+            <td>{{ lectura.idnovedad_novedades.descripcion }}</td>
+            <td class="text-center">
+              <div class="btn-group py-0">
+                <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
+                  aria-expanded="false">
+                </button>
+                <div class="dropdown-menu dropdown-menu-right popLista">
+                  <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalValor"
+                    (click)="valor(lectura.idlectura, i)" [disabled]="this.rutaxemision.estado == 1 ">
+                    <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
+                  <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalArecaudar"
+                    (click)="arecaudar(lectura, i)">
+                    <i class="bi-calculator"></i>&nbsp; Valor a recaudar</button>
+                  <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalHistorial"
+                    (click)="setIdabonado(lectura, i)">
+                    <i class="bi bi-file-minus"></i>&nbsp; Historial consumo</button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot class="detalle">
+          <td *ngIf="!swfiltro" colspan="6" class="font-weight-bold text-right">TOTAL</td>
+          <td *ngIf="!swfiltro" class="font-weight-bold text-right">{{ totales[0] | number: '1.0'}}
+          </td>
+          <td *ngIf="!swfiltro" class="font-weight-bold text-right">{{ totales[1] | number: '1.0'}}
+          </td>
+          <td *ngIf="!swfiltro" class="font-weight-bold text-right">{{ totales[2] | number: '1.2-2'}}
+          </td>
+          <td></td>
+          <td></td>
+        </tfoot>
+
+      </table>
+    </div>
+  </div>
+
+  <!-- MODAL Archivo lecturas -->
+  <div class="modal fade" id="lecturas" tabindex="-1" aria-labelledby="lecturasLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content border">
+        <div class='modal-header py-2 justify-content-center cabecera'>
+          <h5 class='modal-title font-weight-bold' id='ModalLabel'>Archivo lecturas</h5>
+        </div>
+        <div class='modal-body detalle'>
+
+          <div class="form-group  my-0 py-0">
+            <div class="input-group input-group-sm mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm" data-toggle="tooltip"
+                  title="Obligatorio y mínimo 3 caracteres">Archivo</span>
+              </div>
+              <input type="text" class="form-control" [(ngModel)]="archExportar" aria-label="Small"
+                aria-describedby="inputGroup-sizing-sm" required minlength="3" maxlength="20">
+            </div>
+          </div>
+
+          <div class="row justify-content-center">
+            <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' data-toggle="modal"
+              (click)="exportToCSV()">
+              <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+            <button type='button' class='btn btn-sm btn-outline-success btn-sm mx-1' data-dismiss='modal'>
+              <i class="bi bi-x-circle"></i> Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL Cerrar -->
+  <div class="modal fade" *ngIf="mostrarModal" id="modalCerrar" tabindex="-1" aria-labelledby="modalCerrarLabel"
+    data-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content detalle">
+        <div class='modal-header py-2 justify-content-center cabecera'>
+          <h5 class='modal-title font-weight-bold fantacy' id='ModalLabel'>Cerrar</h5>
+        </div>
+        <p class="px-3 mb-0 pb-0 text-center">Al cerrar se generan las Planillas de cobro para Recaudación.<br>Este
+          proceso es
+          irreversible.</p>
+        <p class="px-3 mb-0 pb-0 font-weight-bold text-center">Está seguro de cerrar la Emisión de esta Ruta ?</p>
+        <div class='modal-body'>
+          <ul class="list-group list-group-unbordered mb-0">
+            <li class="list-group-item py-1 detalle">
+              <b>Emisión</b> <a class="float-right">{{ rutaxemision.emision|nombreEmision }}</a>
+            </li>
+            <li class="list-group-item py-1 detalle">
+              <b>Ruta</b> <a class="float-right">{{ rutaxemision.ruta }}</a>
+            </li>
+            <li class="list-group-item py-1 detalle">
+              <b>Consumo M<sup>3</sup></b> <a class="float-right"> {{ sumtotal | number: '1.0' }}</a>
+            </li>
+            <li class="list-group-item py-1 detalle">
+              <b>Abonados</b> <a class="float-right"> {{ abonados | number: '1.0' }}</a>
+            </li>
+          </ul>
+        </div>
+
+        <div class='row justify-content-center mb-3'>
+          <button type='button' class='btn btn-success btn-sm mx-1' (click)="generar()" [disabled]="disabled">
+            <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+          <button *ngIf="btncerrar" type='button' class='btn btn-success btn-sm mx-1' (click)="regresar()"
+            data-dismiss='modal'>
+            <i class="fa fa-check-circle"></i>&nbsp; Continuar</button>
+          <button *ngIf="!btncerrar" type='button' class='btn btn-sm btn-outline-success' data-dismiss='modal'>
+            <i class="bi bi-x-circle"></i> Cancelar</button>
+        </div>
+        <div class="mt-0 mb-3 mx-4 progress">
+          <div class="progress-bar" [ngStyle]="{ 'width.%': progreso }">{{ progreso / 100 | percent : '1.2-2'
+            }}</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL Valor -->
+  <div class="modal fade" id="modalValor" tabindex="-1" aria-labelledby="modalValorLabel" data-backdrop="static"
+    aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+      <div class="modal-content">
+        <div class='modal-header py-2 justify-content-center titEmisiones'>
+          <h5 class='modal-title font-weight-bold' id='ModalLabel'>Cuenta {{cuenta}}</h5>
+        </div>
+        <div class='modal-body'>
+          <div class="modal-body col-md-12 ">
+            <form [formGroup]="formValor">
+              <div class="col-md-12 ml-3">
+                <div class="input-group input-group-sm mb-3">
+                  <div class="input-group-prepend"> <span class="input-group-text">Anterior</span> </div>
+                  <input type="number" class="form-control text-right" formControlName="lecturaanterior">
+                </div>
+                <div class="input-group input-group-sm mb-3">
+                  <div class="input-group-prepend"><span class="input-group-text" for="lecturaactual">Actual</span>
+                  </div>
+                  <input type="number" class="form-control text-right" formControlName="lecturaactual">
+                </div>
+                <div class="input-group input-group-sm mb-3">
+                  <div class="input-group-prepend"> <span class="input-group-text">Consumo</span></div>
+                  <input type="text" class="form-control text-right" formControlName="consumo" readonly>
+                </div>
+                <div class="input-group input-group-sm mb-0">
+                  <div class="input-group-prepend"> <span class="input-group-text">Novedades</span></div>
+                  <select type="text" class="form-control text-right" formControlName="idnovedad_novedades"
+                    [compareWith]="compararNovedades">
+                    <option [ngValue]=novedad *ngFor="let novedad of novedades">{{novedad.descripcion}}
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </form>
+            <!-- <app-historialconsumo [abonado]=idabonado></app-historialconsumo> -->
+          </div>
+        </div>
+        <div class='modal-footer justify-content-center'>
+          <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="actuValor()">
+            <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+          <button type='button' class='btn btn-sm btn-outline-success' data-dismiss='modal'>
+            <i class="bi bi-x-circle"></i> Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORIAL DE CONSUMO -->
+  <div class="modal fade" id="modalHistorial" tabindex="-1" aria-labelledby="modalHistorialLabel" data-backdrop="static"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class='modal-header py-2 justify-content-center titEmisiones'>
+          <h5 class='modal-title font-weight-bold' id='ModalLabel'>Cuenta {{idabonado}}</h5>
+        </div>
+        <div class='modal-body'>
+          <div class="modal-body col-md-12 ">
+            <app-historialconsumo *ngIf="s_historial" [abonado]=idabonado></app-historialconsumo>
+          </div>
+        </div>
+        <div class='modal-footer justify-content-center'>
+          <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="resetHistorial()">
+            <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL Valor a recaudar -->
+  <div class="modal fade" id="modalArecaudar" tabindex="-1" aria-labelledby="ArecaudarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border">
+        <div class='modal-header py-2 justify-content-center cabecera'>
+          <h5 class='modal-title font-weight-bold' id='ModalLabel'>Cuenta {{cuenta}} &nbsp;&nbsp;&nbsp;{{m3}}
+            M<sup>3</sup> </h5>
+        </div>
+        <div class='modal-body detalle'>
+
+          <table class="table table-hover table-bordered table-sm sombra">
             <thead class="cabecera">
-               <tr>
-                  <th></th>
-                  <th class="text-center">Cuenta</th>
-                  <th class="col-sm-3">Responsable del Pago</th>
-                  <th>Categoría</th>
-                  <th class="text-right">Anterior</th>
-                  <th class="text-right">Actual</th>
-                  <th class="text-right">Cnsm</th>
-                  <th class="text-right">Prom.</th>
-                  <th class="text-right">A recaudar</th>
-                  <th>Novedades</th>
-                  <th class="text-center">
-                     <button class="btn btn-xs btn-outline-success" *ngIf="_rutaxemision.estado === 0"
-                        (click)="actualizarLeturaAnterior()">
-                        <i class="bi bi-arrow-clockwise"></i>
-                     </button>
-                  </th>
-               </tr>
+              <tr>
+                <th></th>
+                <th>Rubro</th>
+                <th class="text-right">Valor</th>
+              </tr>
             </thead>
-            <tbody class="detalle">
-               <tr *ngFor="let lectura of _lecturas | filter: filtro; let i=index" class="fila">
-                  <td class="small text-center font-weight-bold"><i class="bi-bookmark-check-fill check"
-                        *ngIf="i == antIndice"></i>{{i+1}}</td>
-                  <td class="text-center">{{ lectura.idabonado_abonados.idabonado }}</td>
-                  <td class="description">{{ lectura.idabonado_abonados.idcliente_clientes.nombre }}</td>
-                  <td class="">{{ lectura.idabonado_abonados.idcategoria_categorias.descripcion }}</td>
-                  <td class="text-right"
-                     [ngClass]="{'fontwarning': lectura.lecturaanterior == 0 && lectura.lecturaactual == 0 }">{{
-                     lectura.lecturaanterior | number: '1.0' }}</td>
-                  <td class="text-right"
-                     [ngClass]="{'fontwarning': lectura.lecturaanterior == 0 && lectura.lecturaactual == 0 }">{{
-                     lectura.lecturaactual | number: '1.0' }}</td>
-                  <td class="text-right"
-                     [ngClass]="{'fontwarning': ((lectura.lecturaanterior == 0 && lectura.lecturaactual == 0) || lectura.lecturaactual - lectura.lecturaanterior <= 0 || (lectura.lecturaanterior > 0 && lectura.lecturaactual == 0)), 'transparente': !swcargado }">
-                     {{ lectura.lecturaactual - lectura.lecturaanterior | number: '1.0' }}</td>
-                  <td class="text-right">{{ lectura.idabonado_abonados.promedio }}</td>
-                  <td class="text-right">{{ lectura.total1 | number: '1.2-2' }}</td>
-                  <td>{{ lectura.idnovedad_novedades.descripcion }}</td>
-                  <td class="text-center">
-                     <div class="btn-group py-0">
-                        <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
-                           aria-expanded="false">
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-right popLista">
-                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalValor"
-                              (click)="valor(lectura.idlectura, i)" [disabled]="this.rutaxemision.estado == 1 ">
-                              <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
-                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalArecaudar"
-                              (click)="arecaudar(lectura, i)">
-                              <i class="bi-calculator"></i>&nbsp; Valor a recaudar</button>
-                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalHistorial"
-                              (click)="setIdabonado(lectura, i)">
-                              <i class="bi bi-file-minus"></i>&nbsp; Historial consumo</button>
-                        </div>
-                     </div>
-                  </td>
-               </tr>
+            <tbody>
+              <tr *ngFor="let rubro of rubros; let i=index">
+                <td class="small text-center font-weight-bold">{{i+1}}</td>
+                <td>{{ rubro.descripcion }}</td>
+                <td class="text-right">{{ rubro.valorunitario | number: '1.2-2' }}</td>
+              </tr>
             </tbody>
-            <tfoot class="detalle">
-               <td *ngIf="!swfiltro" colspan="6" class="font-weight-bold text-right">TOTAL</td>
-               <td *ngIf="!swfiltro" class="font-weight-bold text-right">{{ totales[0] | number: '1.0'}}
-               </td>
-               <td *ngIf="!swfiltro" class="font-weight-bold text-right">{{ totales[1] | number: '1.0'}}
-               </td>
-               <td *ngIf="!swfiltro" class="font-weight-bold text-right">{{ totales[2] | number: '1.2-2'}}
-               </td>
-               <td></td>
-               <td></td>
+            <tfoot class="font-weight-bold text-right cabecera">
+              <tr>
+                <td class="p-0"></td>
+                <td class=" text-right p-0">TOTAL&nbsp;&nbsp; </td>
+                <td class="text-right p-0">{{totalcalc | number: '1.2-2'}}</td>
+              </tr>
             </tfoot>
 
-         </table>
-      </div>
-   </div>
+          </table>
 
-   <!-- MODAL Archivo lecturas -->
-   <div class="modal fade" id="lecturas" tabindex="-1" aria-labelledby="lecturasLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-sm">
-         <div class="modal-content border">
-            <div class='modal-header py-2 justify-content-center cabecera'>
-               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Archivo lecturas</h5>
-            </div>
-            <div class='modal-body detalle'>
-
-               <div class="form-group  my-0 py-0">
-                  <div class="input-group input-group-sm mb-3">
-                     <div class="input-group-prepend">
-                        <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm" data-toggle="tooltip"
-                           title="Obligatorio y mínimo 3 caracteres">Archivo</span>
-                     </div>
-                     <input type="text" class="form-control" [(ngModel)]="archExportar" aria-label="Small"
-                        aria-describedby="inputGroup-sizing-sm" required minlength="3" maxlength="20">
-                  </div>
-               </div>
-
-               <div class="row justify-content-center">
-                  <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' data-toggle="modal"
-                     (click)="exportToCSV()">
-                     <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
-                  <button type='button' class='btn btn-sm btn-outline-success btn-sm mx-1' data-dismiss='modal'>
-                     <i class="bi bi-x-circle"></i> Cancelar</button>
-               </div>
-            </div>
-         </div>
-      </div>
-   </div>
-
-   <!-- MODAL Cerrar -->
-   <div class="modal fade" *ngIf="mostrarModal" id="modalCerrar" tabindex="-1" aria-labelledby="modalCerrarLabel"
-      data-backdrop="static" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-         <div class="modal-content detalle">
-            <div class='modal-header py-2 justify-content-center cabecera'>
-               <h5 class='modal-title font-weight-bold fantacy' id='ModalLabel'>Cerrar</h5>
-            </div>
-            <p class="px-3 mb-0 pb-0 text-center">Al cerrar se generan las Planillas de cobro para Recaudación.<br>Este
-               proceso es
-               irreversible.</p>
-            <p class="px-3 mb-0 pb-0 font-weight-bold text-center">Está seguro de cerrar la Emisión de esta Ruta ?</p>
-            <div class='modal-body'>
-               <ul class="list-group list-group-unbordered mb-0">
-                  <li class="list-group-item py-1 detalle">
-                     <b>Emisión</b> <a class="float-right">{{ rutaxemision.emision|nombreEmision }}</a>
-                  </li>
-                  <li class="list-group-item py-1 detalle">
-                     <b>Ruta</b> <a class="float-right">{{ rutaxemision.ruta }}</a>
-                  </li>
-                  <li class="list-group-item py-1 detalle">
-                     <b>Consumo M<sup>3</sup></b> <a class="float-right"> {{ sumtotal | number: '1.0' }}</a>
-                  </li>
-                  <li class="list-group-item py-1 detalle">
-                     <b>Abonados</b> <a class="float-right"> {{ abonados | number: '1.0' }}</a>
-                  </li>
-               </ul>
-            </div>
-
-            <div class='row justify-content-center mb-3'>
-               <button type='button' class='btn btn-success btn-sm mx-1' (click)="generar()" [disabled]="disabled">
-                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
-               <button *ngIf="btncerrar" type='button' class='btn btn-success btn-sm mx-1' (click)="regresar()"
-                  data-dismiss='modal'>
-                  <i class="fa fa-check-circle"></i>&nbsp; Continuar</button>
-               <button *ngIf="!btncerrar" type='button' class='btn btn-sm btn-outline-success' data-dismiss='modal'>
-                  <i class="bi bi-x-circle"></i> Cancelar</button>
-            </div>
-            <div class="mt-0 mb-3 mx-4 progress">
-               <div class="progress-bar" [ngStyle]="{ 'width.%': progreso }">{{ progreso / 100 | percent : '1.2-2'
-                  }}</div>
-            </div>
-
-         </div>
-      </div>
-   </div>
-
-   <!-- MODAL Valor -->
-   <div class="modal fade" id="modalValor" tabindex="-1" aria-labelledby="modalValorLabel" data-backdrop="static"
-      aria-hidden="true">
-      <div class="modal-dialog modal-sm modal-dialog-centered">
-         <div class="modal-content">
-            <div class='modal-header py-2 justify-content-center titEmisiones'>
-               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Cuenta {{cuenta}}</h5>
-            </div>
-            <div class='modal-body'>
-               <div class="modal-body col-md-12 ">
-                  <form [formGroup]="formValor">
-                     <div class="col-md-12 ml-3">
-                        <div class="input-group input-group-sm mb-3">
-                           <div class="input-group-prepend"> <span class="input-group-text">Anterior</span> </div>
-                           <input type="number" class="form-control text-right" formControlName="lecturaanterior">
-                        </div>
-                        <div class="input-group input-group-sm mb-3">
-                           <div class="input-group-prepend"><span class="input-group-text"
-                                 for="lecturaactual">Actual</span>
-                           </div>
-                           <input type="number" class="form-control text-right" formControlName="lecturaactual">
-                        </div>
-                        <div class="input-group input-group-sm mb-3">
-                           <div class="input-group-prepend"> <span class="input-group-text">Consumo</span></div>
-                           <input type="text" class="form-control text-right" formControlName="consumo" readonly>
-                        </div>
-                        <div class="input-group input-group-sm mb-0">
-                           <div class="input-group-prepend"> <span class="input-group-text">Novedades</span></div>
-                           <select type="text" class="form-control text-right" formControlName="idnovedad_novedades"
-                              [compareWith]="compararNovedades">
-                              <option [ngValue]=novedad *ngFor="let novedad of novedades">{{novedad.descripcion}}
-                              </option>
-                           </select>
-                        </div>
-                     </div>
-                  </form>
-                  <!-- <app-historialconsumo [abonado]=idabonado></app-historialconsumo> -->
-               </div>
-            </div>
-            <div class='modal-footer justify-content-center'>
-               <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="actuValor()">
-                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
-               <button type='button' class='btn btn-sm btn-outline-success' data-dismiss='modal'>
-                  <i class="bi bi-x-circle"></i> Cancelar</button>
-            </div>
-         </div>
-      </div>
-   </div>
-
-   <!-- HISTORIAL DE CONSUMO -->
-   <div class="modal fade" id="modalHistorial" tabindex="-1" aria-labelledby="modalHistorialLabel"
-      data-backdrop="static" aria-hidden="true">
-      <div class="modal-dialog modal-lg modal-dialog-centered">
-         <div class="modal-content">
-            <div class='modal-header py-2 justify-content-center titEmisiones'>
-               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Cuenta {{idabonado}}</h5>
-            </div>
-            <div class='modal-body'>
-               <div class="modal-body col-md-12 ">
-                  <app-historialconsumo *ngIf="s_historial" [abonado]=idabonado></app-historialconsumo>
-               </div>
-            </div>
-            <div class='modal-footer justify-content-center'>
-               <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal'
-                  (click)="resetHistorial()">
-                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
-            </div>
-         </div>
-      </div>
-   </div>
-
-   <!-- MODAL Valor a recaudar -->
-   <div class="modal fade" id="modalArecaudar" tabindex="-1" aria-labelledby="ArecaudarLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-         <div class="modal-content border">
-            <div class='modal-header py-2 justify-content-center cabecera'>
-               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Cuenta {{cuenta}} &nbsp;&nbsp;&nbsp;{{m3}}
-                  M<sup>3</sup> </h5>
-            </div>
-            <div class='modal-body detalle'>
-
-               <table class="table table-hover table-bordered table-sm sombra">
-                  <thead class="cabecera">
-                     <tr>
-                        <th></th>
-                        <th>Rubro</th>
-                        <th class="text-right">Valor</th>
-                     </tr>
-                  </thead>
-                  <tbody>
-                     <tr *ngFor="let rubro of rubros; let i=index">
-                        <td class="small text-center font-weight-bold">{{i+1}}</td>
-                        <td>{{ rubro.descripcion }}</td>
-                        <td class="text-right">{{ rubro.valorunitario | number: '1.2-2' }}</td>
-                     </tr>
-                  </tbody>
-                  <tfoot class="font-weight-bold text-right cabecera">
-                     <tr>
-                        <td class="p-0"></td>
-                        <td class=" text-right p-0">TOTAL&nbsp;&nbsp; </td>
-                        <td class="text-right p-0">{{totalcalc | number: '1.2-2'}}</td>
-                     </tr>
-                  </tfoot>
-
-               </table>
-
-               <div class="row justify-content-center">
-                  <!-- <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' data-toggle="modal"
+          <div class="row justify-content-center">
+            <!-- <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' data-toggle="modal"
                      (click)="exporta()">
                      <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button> -->
-                  <button type='button' class='btn btn-sm btn-outline-success btn-sm mx-1' data-dismiss='modal'>
-                     <i class="bi bi-x-circle"></i> Cancelar</button>
-               </div>
-            </div>
-         </div>
+            <button type='button' class='btn btn-sm btn-outline-success btn-sm mx-1' data-dismiss='modal'>
+              <i class="bi bi-x-circle"></i> Cancelar</button>
+          </div>
+        </div>
       </div>
-   </div>
+    </div>
+  </div>
 
-   <!-- MODAL Calcular -->
-   <div class="modal fade" id="modalCalcular" tabindex="-1" aria-labelledby="modalCalcularLabel" data-backdrop="static"
-      aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-sm">
-         <div class="modal-content detalle">
-            <div class='modal-header py-2 justify-content-center cabecera'>
-               <h5 class='modal-title font-weight-bold fantacy' id='ModalLabel'>Calcular</h5>
-            </div>
-            <div class='modal-body'>
-               <ul class="list-group list-group-unbordered mb-0">
-                  <li class="list-group-item py-1 detalle">
-                     <b>Consumo M<sup>3</sup></b> <a class="float-right"> {{ totales[0] | number: '1.0' }}</a>
-                  </li>
-                  <li class="list-group-item py-1 detalle">
-                     <b>Abonados</b> <a class="float-right"> {{ abonados | number: '1.0' }}</a>
-                  </li>
-               </ul>
-            </div>
+  <!-- MODAL Calcular -->
+  <div class="modal fade" id="modalCalcular" tabindex="-1" aria-labelledby="modalCalcularLabel" data-backdrop="static"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content detalle">
+        <div class='modal-header py-2 justify-content-center cabecera'>
+          <h5 class='modal-title font-weight-bold fantacy' id='ModalLabel'>Calcular</h5>
+        </div>
+        <div class='modal-body'>
+          <ul class="list-group list-group-unbordered mb-0">
+            <li class="list-group-item py-1 detalle">
+              <b>Consumo M<sup>3</sup></b> <a class="float-right"> {{ totales[0] | number: '1.0' }}</a>
+            </li>
+            <li class="list-group-item py-1 detalle">
+              <b>Abonados</b> <a class="float-right"> {{ abonados | number: '1.0' }}</a>
+            </li>
+          </ul>
+        </div>
 
-            <div class='row justify-content-center mb-3'>
-               <button type='button' class='btn btn-success btn-sm mx-1' (click)="calcular()" [disabled]="disabled">
-                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
-               <button *ngIf="btncerrar" type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal'>
-                  <i class="fa fa-check-circle"></i>&nbsp; Continuar</button>
-               <button *ngIf="!btncerrar" type='button' class='btn btn-sm btn-outline-success' data-dismiss='modal'>
-                  <i class="bi bi-x-circle"></i> Cancelar</button>
-            </div>
-            <div class="mt-0 mb-3 mx-4 progress">
-               <div class="progress-bar" [ngStyle]="{ 'width.%': progreso }">{{ progreso/100 | percent:'1.2-2'}}
-               </div>
-            </div>
+        <div class='row justify-content-center mb-3'>
+          <button type='button' class='btn btn-success btn-sm mx-1' (click)="calcular()" [disabled]="disabled">
+            <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+          <button *ngIf="btncerrar" type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal'>
+            <i class="fa fa-check-circle"></i>&nbsp; Continuar</button>
+          <button *ngIf="!btncerrar" type='button' class='btn btn-sm btn-outline-success' data-dismiss='modal'>
+            <i class="bi bi-x-circle"></i> Cancelar</button>
+        </div>
+        <div class="mt-0 mb-3 mx-4 progress">
+          <div class="progress-bar" [ngStyle]="{ 'width.%': progreso }">{{ progreso/100 | percent:'1.2-2'}}
+          </div>
+        </div>
 
-         </div>
       </div>
-   </div>
+    </div>
+  </div>
 
 </div>
 

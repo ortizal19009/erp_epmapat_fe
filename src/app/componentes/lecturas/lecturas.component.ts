@@ -16,6 +16,7 @@ import { ColoresService } from 'src/app/compartida/colores.service';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { nextTick } from 'process';
 import { LoadingService } from 'src/app/servicios/loading.service';
+import { EmisionService } from 'src/app/servicios/emision.service';
 
 @Component({
   selector: 'app-lecturas',
@@ -65,7 +66,7 @@ export class LecturasComponent implements OnInit {
   antIndice = 0;
   enProceso: boolean = false;
   mostrarModal: boolean = false;
-
+  idusuario: number;
   novedades: any;
 
   porcResidencial: number[] = [
@@ -89,7 +90,8 @@ export class LecturasComponent implements OnInit {
     private pli24Service: Pliego24Service,
     private s_novedad: NovedadesService,
     private loadingService: LoadingService,
-  ) {}
+    private emisionService: EmisionService,
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/lecturas');
@@ -107,6 +109,7 @@ export class LecturasComponent implements OnInit {
       },
       error: (err) => console.error(err.error),
     });
+    this.idusuario = this.authService.idusuario;
 
     //Formulario para modificar Lectura Actual
     this.formValor = this.fb.group({
@@ -385,23 +388,23 @@ export class LecturasComponent implements OnInit {
             num1 =
               Math.round(
                 (this.tarifa[0].idcategoria.fijoagua - 0.1) *
-                  this.porcResidencial[consumo] *
-                  100,
+                this.porcResidencial[consumo] *
+                100,
               ) / 100;
           } else {
             num1 =
               Math.round(
                 (this.tarifa[0].idcategoria.fijoagua - 0.1) *
-                  this.tarifa[0].porc *
-                  100,
+                this.tarifa[0].porc *
+                100,
               ) / 100;
           }
 
           let num2 =
             Math.round(
               (this.tarifa[0].idcategoria.fijosanea - 0.5) *
-                this.tarifa[0].porc *
-                100,
+              this.tarifa[0].porc *
+              100,
             ) / 100;
           let num3 =
             Math.round(
@@ -410,14 +413,14 @@ export class LecturasComponent implements OnInit {
           let num4 =
             Math.round(
               ((consumo * this.tarifa[0].saneamiento) / 2) *
-                this.tarifa[0].porc *
-                100,
+              this.tarifa[0].porc *
+              100,
             ) / 100;
           let num5 =
             Math.round(
               ((consumo * this.tarifa[0].saneamiento) / 2) *
-                this.tarifa[0].porc *
-                100,
+              this.tarifa[0].porc *
+              100,
             ) / 100;
           let num7 = Math.round(0.5 * this.tarifa[0].porc * 100) / 100;
           let suma: number = 0;
@@ -595,23 +598,23 @@ export class LecturasComponent implements OnInit {
                     num1 =
                       Math.round(
                         (this.tarifa[0].idcategoria.fijoagua - 0.1) *
-                          this.porcResidencial[consumo] *
-                          100,
+                        this.porcResidencial[consumo] *
+                        100,
                       ) / 100;
                   } else {
                     num1 =
                       Math.round(
                         (this.tarifa[0].idcategoria.fijoagua - 0.1) *
-                          this.tarifa[0].porc *
-                          100,
+                        this.tarifa[0].porc *
+                        100,
                       ) / 100;
                   }
 
                   let num2 =
                     Math.round(
                       (this.tarifa[0].idcategoria.fijosanea - 0.5) *
-                        this.tarifa[0].porc *
-                        100,
+                      this.tarifa[0].porc *
+                      100,
                     ) / 100;
                   let num3 =
                     Math.round(
@@ -620,14 +623,14 @@ export class LecturasComponent implements OnInit {
                   let num4 =
                     Math.round(
                       ((consumo * this.tarifa[0].saneamiento) / 2) *
-                        this.tarifa[0].porc *
-                        100,
+                      this.tarifa[0].porc *
+                      100,
                     ) / 100;
                   let num5 =
                     Math.round(
                       ((consumo * this.tarifa[0].saneamiento) / 2) *
-                        this.tarifa[0].porc *
-                        100,
+                      this.tarifa[0].porc *
+                      100,
                     ) / 100;
                   let num7 = Math.round(0.5 * this.tarifa[0].porc * 100) / 100;
                   let suma: number = 0;
@@ -936,6 +939,48 @@ export class LecturasComponent implements OnInit {
       return o1 === null || o2 === null || o1 === undefined || o2 === undefined
         ? false
         : o1.idnovedad == o2.idnovedad;
+    }
+  }
+  async calcularMultaBasura() {
+    try {
+      if (!this._rutaxemision?.idemision_emisiones?.idemision || !this._rutaxemision?.idruta_rutas?.idruta) {
+        console.error('No se pudo obtener idemision o idruta desde _rutaxemision:', this._rutaxemision);
+        return;
+      }
+
+      const idemision = this._rutaxemision.idemision_emisiones.idemision;
+      const idruta = this._rutaxemision.idruta_rutas.idruta;
+const idrutaxemision = this.idrutaxemision; // ✅ sessionStorage
+
+      this.loadingService.showLoading();
+
+      const resp = await this.emisionService.recalcularMultaBasura1011Async(idemision, idrutaxemision );
+
+      // ✅ Resumen
+      const total = resp.length;
+      const generadas = resp.filter(x => x.estado === 'GENERADO_1011_Y_ACTUALIZADO_TOTAL').length;
+      const yaTenian = resp.filter(x => x.estado === 'YA_EXISTIA_RUBRO_1011').length;
+      const noAplica = resp.filter(x => x.estado === 'NO_APLICA_MULTA').length;
+      const pagadas = resp.filter(x => x.estado === 'FACTURA_YA_PAGADA_NO_MODIFICADA').length;
+
+      console.log('✅ Recalculo multa basura 1011:', {
+        idemision,
+        idruta,
+        totalRevisadas: total,
+        generadas,
+        yaTenian,
+        noAplica,
+        pagadas,
+        detalle: resp,
+      });
+
+      // Opcional: mostrar un modal/toast (si tienes)
+      // alert(`Revisión: ${total}. Generadas: ${generadas}. Ya existían: ${yaTenian}. No aplica: ${noAplica}. Pagadas: ${pagadas}.`);
+
+    } catch (err: any) {
+      console.error('❌ Error recalculando multa basura 1011:', err);
+    } finally {
+      this.loadingService.hideLoading();
     }
   }
 }

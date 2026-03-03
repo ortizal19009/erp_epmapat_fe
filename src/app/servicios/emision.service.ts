@@ -56,4 +56,14 @@ export class EmisionService {
     let resp = this.http.get(`${baseUrl}/findall`);
     return firstValueFrom(resp);
   }
+
+    recalcularMultaBasura1011(idemision: number, idruta: number) {
+    const url = `${baseUrl}/${idemision}/rutaxemision/${idruta}/multa-basura/recalcular`;
+    return this.http.post<any[]>(url, {});
+  }
+
+  // Si prefieres async/await
+  async recalcularMultaBasura1011Async(idemision: number, idruta: number) {
+    return await firstValueFrom(this.recalcularMultaBasura1011(idemision, idruta));
+  }
 }
