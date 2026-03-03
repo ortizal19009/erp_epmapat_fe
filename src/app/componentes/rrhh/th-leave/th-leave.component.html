@@ -1,5 +1,6 @@
 <div class="container-fluid mt-2">
-  <h5>TH Leave</h5>`r`n  <div class="small text-muted mb-2">Aprobador actual: {{aprobadorId}}</div>
+  <h5>TH Leave</h5>
+  <div class="small text-muted mb-2">Aprobador actual: {{aprobadorId}}</div>
 
   <div class="alert alert-success py-1" *ngIf="msg">{{ msg }}</div>
   <div class="alert alert-danger py-1" *ngIf="error">{{ error }}</div>
@@ -11,7 +12,8 @@
         <option *ngFor="let p of personalList" [ngValue]="p.idpersonal">{{ p.apellidos }}, {{ p.nombres }} - {{ p.identificacion }}</option>
       </select>
     </div>
-    <div class="col-sm-2"><button class="btn btn-sm btn-primary" (click)="cargar()">Cargar</button></div>`r`n    <div class="col-sm-2"><button class="btn btn-sm btn-outline-secondary" (click)="refreshAll()">Refrescar</button></div>
+    <div class="col-sm-2"><button class="btn btn-sm btn-primary" (click)="cargar()">Cargar</button></div>
+    <div class="col-sm-2"><button class="btn btn-sm btn-outline-secondary" (click)="refreshAll()">Refrescar</button></div>
   </div>
 
   <div class="card p-2 mb-2">
@@ -28,7 +30,8 @@
     <div class="row">
       <div class="col-sm-2"><select class="form-control form-control-sm" [(ngModel)]="requestModel.tipolicencia"><option>VACACION</option><option>PERMISO</option><option>LICENCIA</option></select></div>
       <div class="col-sm-2"><input class="form-control form-control-sm" type="date" [(ngModel)]="requestModel.fechainicio"></div>
-      <div class="col-sm-2"><input class="form-control form-control-sm" type="date" [(ngModel)]="requestModel.fechafin"></div>`r`n      <div class="col-sm-1 small text-muted d-flex align-items-center">{{diasSolicitadosPreview}} día(s)</div>
+      <div class="col-sm-2"><input class="form-control form-control-sm" type="date" [(ngModel)]="requestModel.fechafin"></div>
+      <div class="col-sm-1 small text-muted d-flex align-items-center">{{diasSolicitadosPreview}} día(s)</div>
       <div class="col-sm-3"><input class="form-control form-control-sm" [(ngModel)]="requestModel.motivo" placeholder="Motivo"></div>
       <div class="col-sm-2"><button class="btn btn-sm btn-success" (click)="crearRequest()">Solicitar</button></div>
     </div>
@@ -56,7 +59,8 @@
           <td>{{r.idrequest}}</td><td><span [ngClass]="tipoClass(r.tipolicencia)">{{r.tipolicencia}}</span></td><td><span [ngClass]="estadoClass(r.estado)">{{r.estado}}</span></td><td>{{formatFecha(r.fechainicio)}}</td><td>{{formatFecha(r.fechafin)}}</td><td>{{r.aprobador_id || "-"}}</td><td>{{formatFecha(r.fecha_aprobacion)}}</td>
           <td>
             <button class="btn btn-sm btn-success mr-1" (click)="aprobar(r.idrequest)" [disabled]="r.estado !== 'SOLICITADA'">Aprobar</button>
-            <button class="btn btn-sm btn-danger" (click)="rechazar(r.idrequest)" [disabled]="r.estado !== 'SOLICITADA'">Rechazar</button>`r`n            <button class="btn btn-sm btn-outline-info ml-1" (click)="verDetalle(r)">Detalle</button>
+            <button class="btn btn-sm btn-danger" (click)="rechazar(r.idrequest)" [disabled]="r.estado !== 'SOLICITADA'">Rechazar</button>
+            <button class="btn btn-sm btn-outline-info ml-1" (click)="verDetalle(r)">Detalle</button>
           </td>
         </tr>
       </tbody></table>
@@ -82,3 +86,4 @@
     <div><strong>Obs. aprobación:</strong> {{selectedRequest.observacion_aprobacion || '-'}}</div>
   </div>
 </div>
+
