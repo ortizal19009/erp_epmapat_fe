@@ -493,17 +493,21 @@ tr:not(.cursor-pointer):not(.fila) td:hover{ cursor: default; }
   }
 }
 
-/* ===== Gestión Documental (ERP visual, Bootstrap 4 friendly) ===== */
-.gd-page .page-header{background:#fff;border:1px solid #dee2e6;border-radius:.25rem;padding:.75rem 1rem;margin-bottom:1rem;}
-.gd-page .page-header h2,.gd-page .page-header h4{font-size:1.1rem;font-weight:600;margin-bottom:0;}
-.gd-page .page-card,.gd-page .card{border:1px solid #dee2e6 !important;border-radius:.25rem !important;box-shadow:none !important;}
-.gd-page .card .card-header{background:#f8f9fa;border-bottom:1px solid #dee2e6;font-weight:600;}
-.gd-page .card .card-body,.gd-page .page-card{padding:1rem;}
+/* ===== Gestión Documental (alineado visual ERP) ===== */
+.gd-page{font-family:"Roboto",sans-serif;}
+.gd-page .page-header{background:var(--bgcolor1);color:#fff;border:1px solid #1f2d3d;border-radius:.25rem;padding:.5rem .75rem;margin-bottom:.75rem;box-shadow:var(--shadow-dark);}
+.gd-page .page-header h2,.gd-page .page-header h4{font-size:1rem;font-weight:700;margin-bottom:0;color:#fff;}
+.gd-page .page-header .text-muted, .gd-page .page-header small{color:#d6dee6 !important;}
+.gd-page .page-card,.gd-page .card{background:var(--bgcolor2);border:1px solid #ced4da !important;border-radius:.25rem !important;box-shadow:none !important;}
+.gd-page .card .card-header{background:#e9ecef;border-bottom:1px solid #ced4da;font-weight:700;padding:.35rem .6rem;font-size:.9rem;}
+.gd-page .card .card-body,.gd-page .page-card{padding:.6rem .7rem;}
 .gd-page .btn{border-radius:.2rem;}
-.gd-page .table thead th{background:#f8f9fa;border-bottom:1px solid #dee2e6;font-weight:600;}
+.gd-page .table{font-size:.82rem;}
+.gd-page .table thead th{background:var(--bgcolor1);color:#fff;border-bottom:1px solid #1f2d3d;font-weight:700;padding:.35rem .45rem;}
+.gd-page .table tbody td{padding:.3rem .45rem;}
 .gd-page .text-muted{color:#6c757d !important;}
-.gd-page .detail-label{font-size:.8rem;color:#6c757d;display:block;margin-bottom:.2rem;}
-.gd-page .detail-value{font-weight:500;color:#212529;}
+.gd-page .detail-label{font-size:.76rem;color:#6c757d;display:block;margin-bottom:.1rem;}
+.gd-page .detail-value{font-weight:600;color:#212529;}
 
 /* Compatibilidad utilidades BS5 -> BS4 dentro de GD */
 .gd-page .form-select{display:block;width:100%;height:calc(1.8125rem + 2px);padding:.25rem 1.5rem .25rem .5rem;line-height:1.5;color:#495057;vertical-align:middle;background:#fff;border:1px solid #ced4da;border-radius:.2rem;appearance:none;font-size:.875rem;}
