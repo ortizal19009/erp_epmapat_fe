@@ -10,35 +10,39 @@
   <div *ngIf="loading" class="alert alert-info">Cargando...</div>
   <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
 
-  <form *ngIf="!loading" [formGroup]="form" class="page-card p-3" (ngSubmit)="save()">
-    <div class="row g-3">
+  <form *ngIf="!loading" [formGroup]="form" class="card shadow-sm border-0" (ngSubmit)="save()">
+    <div class="card-header bg-light py-2">
+      <strong>Cabecera del documento</strong>
+    </div>
+    <div class="card-body">
+    <div class="row">
       <div class="col-md-4">
-        <label class="form-label">Tipo de documento</label>
-        <select class="form-select" formControlName="tipo_doc_id">
+        <label class="d-block mb-1 text-muted">Tipo de documento</label>
+        <select class="custom-select" formControlName="tipo_doc_id">
           <option value="">Seleccione...</option>
           <option *ngFor="let t of docTypes" [value]="t.id">{{ t.codigo }} - {{ t.nombre }}</option>
         </select>
       </div>
 
       <div class="col-md-4">
-        <label class="form-label">Dependencia emisora</label>
-        <select class="form-select" formControlName="dependencia_emisora_id">
+        <label class="d-block mb-1 text-muted">Dependencia emisora</label>
+        <select class="custom-select" formControlName="dependencia_emisora_id">
           <option value="">Seleccione...</option>
           <option *ngFor="let d of dependencies" [value]="d.id">{{ d.codigo }} - {{ d.nombre }}</option>
         </select>
       </div>
 
       <div class="col-md-2">
-        <label class="form-label">Flujo</label>
-        <select class="form-select" formControlName="flujo">
+        <label class="d-block mb-1 text-muted">Flujo</label>
+        <select class="custom-select" formControlName="flujo">
           <option value="INGRESO">INGRESO</option>
           <option value="SALIDA">SALIDA</option>
         </select>
       </div>
 
       <div class="col-md-2">
-        <label class="form-label">Prioridad</label>
-        <select class="form-select" formControlName="prioridad">
+        <label class="d-block mb-1 text-muted">Prioridad</label>
+        <select class="custom-select" formControlName="prioridad">
           <option value="BAJA">BAJA</option>
           <option value="MEDIA">MEDIA</option>
           <option value="ALTA">ALTA</option>
@@ -46,44 +50,44 @@
       </div>
 
       <div class="col-md-4">
-        <label class="form-label">Serie</label>
-        <select class="form-select" formControlName="series_id" (change)="onSeriesChange()">
+        <label class="d-block mb-1 text-muted">Serie</label>
+        <select class="custom-select" formControlName="series_id" (change)="onSeriesChange()">
           <option value="">Sin serie</option>
           <option *ngFor="let s of series" [value]="s.id">{{ s.codigo }} - {{ s.nombre }}</option>
         </select>
       </div>
 
       <div class="col-md-4">
-        <label class="form-label">Subserie</label>
-        <select class="form-select" formControlName="subseries_id">
+        <label class="d-block mb-1 text-muted">Subserie</label>
+        <select class="custom-select" formControlName="subseries_id">
           <option value="">Sin subserie</option>
           <option *ngFor="let s of subseries" [value]="s.id">{{ s.codigo }} - {{ s.nombre }}</option>
         </select>
       </div>
 
       <div class="col-md-2">
-        <label class="form-label">F. elaboración</label>
+        <label class="d-block mb-1 text-muted">F. elaboración</label>
         <input type="date" class="form-control" formControlName="fecha_elaboracion" />
       </div>
 
       <div class="col-md-2">
-        <label class="form-label">F. plazo</label>
+        <label class="d-block mb-1 text-muted">F. plazo</label>
         <input type="date" class="form-control" formControlName="fecha_plazo" />
       </div>
 
       <div class="col-12">
-        <label class="form-label">Asunto</label>
+        <label class="d-block mb-1 text-muted">Asunto</label>
         <input class="form-control" formControlName="asunto" maxlength="250" />
       </div>
 
       <div class="col-12">
-        <label class="form-label">Referencia</label>
+        <label class="d-block mb-1 text-muted">Referencia</label>
         <input class="form-control" formControlName="referencia" maxlength="120" />
       </div>
 
       <div class="col-md-4">
-        <label class="form-label">Origen</label>
-        <select class="form-select" formControlName="origen">
+        <label class="d-block mb-1 text-muted">Origen</label>
+        <select class="custom-select" formControlName="origen">
           <option value="INTERNO">INTERNO</option>
           <option value="EXTERNO">EXTERNO</option>
         </select>
@@ -97,9 +101,10 @@
       </div>
     </div>
 
-    <div class="d-flex gap-2 justify-content-end mt-4">
-      <button type="button" class="btn btn-outline-secondary" (click)="cancel()">Cancelar</button>
+    <div class="text-right mt-4">
+      <button type="button" class="btn btn-outline-secondary mr-2" (click)="cancel()">Cancelar</button>
       <button type="submit" class="btn btn-primary" [disabled]="saving || (!id && !canCreate()) || (id && !canEditByState())">{{ saving ? 'Guardando...' : 'Guardar' }}</button>
+    </div>
     </div>
   </form>
 </div>

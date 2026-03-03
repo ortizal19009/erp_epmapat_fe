@@ -4,9 +4,9 @@
       <h2 class="mb-0">Detalle de documento</h2>
       <small class="text-muted" *ngIf="doc">{{ doc.numero_oficial || 'Sin número' }} · {{ doc.estado }}</small>
     </div>
-    <div class="d-flex gap-2">
-      <button class="btn btn-outline-secondary" (click)="back()">Volver</button>
-      <button class="btn btn-outline-primary" [disabled]="!canEdit()" (click)="edit()">Editar</button>
+    <div class="d-flex">
+      <button class="btn btn-outline-secondary mr-2" (click)="back()">Volver</button>
+      <button class="btn btn-outline-primary mr-2" [disabled]="!canEdit()" (click)="edit()">Editar</button>
       <button class="btn btn-outline-success" [disabled]="!canEmit()" (click)="emit()">Emitir</button>
     </div>
   </div>
@@ -15,11 +15,11 @@
   <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
   <div *ngIf="actionError" class="alert alert-warning">{{ actionError }}</div>
 
-  <div *ngIf="!loading && doc" class="row g-3">
+  <div *ngIf="!loading && doc" class="row">
     <div class="col-lg-7">
-      <div class="page-card p-3">
+      <div class="card shadow-sm border-0 p-3 mb-3">
         <h6 class="mb-3">Información general</h6>
-        <div class="row g-2 small">
+        <div class="row small">
           <div class="col-md-6"><strong>Asunto:</strong> {{ doc.asunto }}</div>
           <div class="col-md-6"><strong>Referencia:</strong> {{ doc.referencia || '—' }}</div>
           <div class="col-md-6"><strong>Tipo:</strong> {{ doc.tipo_codigo || doc.type_id }}</div>
@@ -31,14 +31,14 @@
         </div>
       </div>
 
-      <div class="page-card p-3 mt-3">
+      <div class="card shadow-sm border-0 p-3 mt-3">
         <div class="d-flex justify-content-between align-items-center mb-2">
           <h6 class="mb-0">Línea de tiempo</h6>
-          <span class="badge bg-light text-dark">{{ timeline.length }}</span>
+          <span class="badge badge-light">{{ timeline.length }}</span>
         </div>
         <ul class="list-group list-group-flush">
           <li *ngFor="let t of timeline" class="list-group-item px-0">
-            <div class="fw-semibold">{{ t.event_type || t.tipo || 'Evento' }}</div>
+            <div class="font-weight-bold">{{ t.event_type || t.tipo || 'Evento' }}</div>
             <small class="text-muted">{{ t.occurred_at || t.created_at | date:'yyyy-MM-dd HH:mm' }}</small>
             <div class="small" *ngIf="t.description || t.descripcion">{{ t.description || t.descripcion }}</div>
           </li>
@@ -48,19 +48,19 @@
     </div>
 
     <div class="col-lg-5">
-      <div class="page-card p-3 mb-3" *ngIf="canReceive()">
+      <div class="card shadow-sm border-0 p-3 mb-3" *ngIf="canReceive()">
         <h6 class="mb-2">Registrar recepción</h6>
-        <div class="row g-2">
+        <div class="row">
           <div class="col-12">
-            <label class="form-label form-label-sm">Dependencia receptora</label>
-            <select class="form-select form-select-sm" [(ngModel)]="receivePayload.dependencia_id" name="depRecep">
+            <label class="small text-muted d-block mb-1">Dependencia receptora</label>
+            <select class="custom-select custom-select-sm" [(ngModel)]="receivePayload.dependencia_id" name="depRecep">
               <option value="">(Opcional)</option>
               <option *ngFor="let d of dependencies" [value]="d.id">{{ d.codigo }} - {{ d.nombre }}</option>
             </select>
           </div>
           <div class="col-12">
-            <label class="form-label form-label-sm">Usuario receptor</label>
-            <select class="form-select form-select-sm" [(ngModel)]="receivePayload.receptor_id" name="userRecep">
+            <label class="small text-muted d-block mb-1">Usuario receptor</label>
+            <select class="custom-select custom-select-sm" [(ngModel)]="receivePayload.receptor_id" name="userRecep">
               <option value="">(Opcional)</option>
               <option *ngFor="let u of users" [value]="u.id">{{ u.full_name || u.name || u.email }}</option>
             </select>
@@ -68,43 +68,43 @@
           <div class="col-12">
             <textarea class="form-control form-control-sm" rows="2" [(ngModel)]="receivePayload.comentario" name="recComment" placeholder="Comentario"></textarea>
           </div>
-          <div class="col-12 d-grid">
+          <div class="col-12 ">
             <button class="btn btn-sm btn-outline-dark" (click)="receive()">Registrar recepción</button>
           </div>
         </div>
       </div>
 
-      <div class="page-card p-3 mb-3" *ngIf="canDerive()">
+      <div class="card shadow-sm border-0 p-3 mb-3" *ngIf="canDerive()">
         <h6 class="mb-2">Derivar documento</h6>
-        <div class="row g-2">
+        <div class="row">
           <div class="col-12">
-            <label class="form-label form-label-sm">Dependencia destino</label>
-            <select class="form-select form-select-sm" [(ngModel)]="derivePayload.to_dependency_id" name="depDerive">
+            <label class="small text-muted d-block mb-1">Dependencia destino</label>
+            <select class="custom-select custom-select-sm" [(ngModel)]="derivePayload.to_dependency_id" name="depDerive">
               <option value="">(Opcional)</option>
               <option *ngFor="let d of dependencies" [value]="d.id">{{ d.codigo }} - {{ d.nombre }}</option>
             </select>
           </div>
           <div class="col-12">
-            <label class="form-label form-label-sm">Usuario destino</label>
-            <select class="form-select form-select-sm" [(ngModel)]="derivePayload.to_user_id" name="userDerive">
+            <label class="small text-muted d-block mb-1">Usuario destino</label>
+            <select class="custom-select custom-select-sm" [(ngModel)]="derivePayload.to_user_id" name="userDerive">
               <option value="">(Opcional)</option>
               <option *ngFor="let u of users" [value]="u.id">{{ u.full_name || u.name || u.email }}</option>
             </select>
           </div>
           <div class="col-12">
-            <label class="form-label form-label-sm">Vence en</label>
+            <label class="small text-muted d-block mb-1">Vence en</label>
             <input type="datetime-local" class="form-control form-control-sm" [(ngModel)]="derivePayload.due_at" name="dueDerive" />
           </div>
           <div class="col-12">
             <textarea class="form-control form-control-sm" rows="2" [(ngModel)]="derivePayload.comment" name="deriveComment" placeholder="Comentario"></textarea>
           </div>
-          <div class="col-12 d-grid">
+          <div class="col-12 ">
             <button class="btn btn-sm btn-outline-primary" (click)="derive()">Derivar</button>
           </div>
         </div>
       </div>
 
-      <div class="page-card p-3">
+      <div class="card shadow-sm border-0 p-3 mb-3">
         <div class="d-flex justify-content-between align-items-center mb-2">
           <h6 class="mb-0">Archivos</h6>
           <label class="btn btn-sm btn-outline-primary mb-0">
@@ -115,7 +115,7 @@
         <ul class="list-group list-group-flush">
           <li *ngFor="let f of files" class="list-group-item px-0 d-flex justify-content-between align-items-center">
             <div>
-              <div class="fw-semibold small">{{ f.original_filename || f.nombre || 'Archivo' }}</div>
+              <div class="font-weight-bold small">{{ f.original_filename || f.nombre || 'Archivo' }}</div>
               <small class="text-muted">{{ f.file_kind || f.tipo || '' }}</small>
             </div>
             <a class="btn btn-sm btn-outline-secondary" [href]="fileDownloadUrl(f)" target="_blank">Descargar</a>
@@ -124,10 +124,10 @@
         </ul>
       </div>
 
-      <div class="page-card p-3 mt-3">
+      <div class="card shadow-sm border-0 p-3 mt-3">
         <div class="d-flex justify-content-between align-items-center mb-2">
           <h6 class="mb-0">Derivaciones</h6>
-          <span class="badge bg-light text-dark">{{ derivations.length }}</span>
+          <span class="badge badge-light">{{ derivations.length }}</span>
         </div>
         <ul class="list-group list-group-flush">
           <li *ngFor="let d of derivations" class="list-group-item px-0">
