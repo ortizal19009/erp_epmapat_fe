@@ -1,1 +1,30 @@
+.rrhh-page .card {
+  border-radius: .35rem;
+}
 
+.rrhh-page .card-header {
+  background: #f8f9fa;
+}
+
+.rrhh-page .table thead th {
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.rrhh-page .table td {
+  vertical-align: middle;
+}
+
+.filtro-estado {
+  width: 190px;
+}
+
+.gap-sm > * + * {
+  margin-left: .5rem;
+}
+
+@media (max-width: 768px) {
+  .filtro-estado {
+    width: 140px;
+  }
+}

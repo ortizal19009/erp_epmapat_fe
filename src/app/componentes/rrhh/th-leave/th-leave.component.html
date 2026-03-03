@@ -1,89 +1,199 @@
-<div class="container-fluid mt-2">
-  <h5>TH Leave</h5>
-  <div class="small text-muted mb-2">Aprobador actual: {{aprobadorId}}</div>
-
-  <div class="alert alert-success py-1" *ngIf="msg">{{ msg }}</div>
-  <div class="alert alert-danger py-1" *ngIf="error">{{ error }}</div>
-
-  <div class="row mb-2">
-    <div class="col-sm-5">
-      <select class="form-control form-control-sm" [(ngModel)]="idpersonal" (change)="cargar()">
-        <option [ngValue]="0">Seleccione personal...</option>
-        <option *ngFor="let p of personalList" [ngValue]="p.idpersonal">{{ p.apellidos }}, {{ p.nombres }} - {{ p.identificacion }}</option>
-      </select>
-    </div>
-    <div class="col-sm-2"><button class="btn btn-sm btn-primary" (click)="cargar()">Cargar</button></div>
-    <div class="col-sm-2"><button class="btn btn-sm btn-outline-secondary" (click)="refreshAll()">Refrescar</button></div>
+<div class="container-fluid mt-2 rrhh-page">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h5 class="mb-0">TH Leave</h5>
+    <span class="text-muted small">Aprobador actual: <strong>{{ aprobadorId }}</strong></span>
   </div>
 
-  <div class="card p-2 mb-2">
-    <h6>Crear Balance</h6>
-    <div class="row">
-      <div class="col-sm-2"><input class="form-control form-control-sm" type="number" [(ngModel)]="balanceModel.anio"></div>
-      <div class="col-sm-2"><input class="form-control form-control-sm" type="number" [(ngModel)]="balanceModel.dias_asignados"></div>
-      <div class="col-sm-2"><button class="btn btn-sm btn-success" (click)="crearBalance()">Guardar</button></div>
-    </div>
-  </div>
+  <div class="alert alert-success py-1 mb-2" *ngIf="msg">{{ msg }}</div>
+  <div class="alert alert-danger py-1 mb-2" *ngIf="error">{{ error }}</div>
 
-  <div class="card p-2 mb-2">
-    <h6>Crear Solicitud</h6>
-    <div class="row">
-      <div class="col-sm-2"><select class="form-control form-control-sm" [(ngModel)]="requestModel.tipolicencia"><option>VACACION</option><option>PERMISO</option><option>LICENCIA</option></select></div>
-      <div class="col-sm-2"><input class="form-control form-control-sm" type="date" [(ngModel)]="requestModel.fechainicio"></div>
-      <div class="col-sm-2"><input class="form-control form-control-sm" type="date" [(ngModel)]="requestModel.fechafin"></div>
-      <div class="col-sm-1 small text-muted d-flex align-items-center">{{diasSolicitadosPreview}} día(s)</div>
-      <div class="col-sm-3"><input class="form-control form-control-sm" [(ngModel)]="requestModel.motivo" placeholder="Motivo"></div>
-      <div class="col-sm-2"><button class="btn btn-sm btn-success" (click)="crearRequest()">Solicitar</button></div>
+  <div class="card card-outline card-primary mb-3">
+    <div class="card-header py-2">
+      <strong>Selección de personal</strong>
+    </div>
+    <div class="card-body py-2">
+      <div class="row align-items-end">
+        <div class="col-md-7 mb-2 mb-md-0">
+          <label class="small text-muted mb-1">Empleado</label>
+          <select class="form-control form-control-sm" [(ngModel)]="idpersonal" (change)="cargar()">
+            <option [ngValue]="0">Seleccione personal...</option>
+            <option *ngFor="let p of personalList" [ngValue]="p.idpersonal">
+              {{ p.apellidos }}, {{ p.nombres }} - {{ p.identificacion }}
+            </option>
+          </select>
+        </div>
+        <div class="col-md-5 d-flex gap-sm">
+          <button class="btn btn-sm btn-primary" (click)="cargar()">Cargar</button>
+          <button class="btn btn-sm btn-outline-secondary" (click)="refreshAll()">Refrescar</button>
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="row">
-    <div class="col-sm-6">
-      <h6>Balances</h6>
-      <table class="table table-sm table-bordered"><thead><tr><th>Año</th><th>Asignados</th><th>Usados</th><th>Disponibles</th></tr></thead>
-      <tbody><tr *ngFor="let b of balances"><td>{{b.anio}}</td><td>{{b.dias_asignados}}</td><td>{{b.dias_usados}}</td><td>{{b.dias_disponibles}}</td></tr></tbody></table>
-    </div>
-    <div class="col-sm-6">
-      <div class="d-flex justify-content-between align-items-center mb-1">
-        <h6 class="mb-0">Solicitudes</h6>
-        <select class="form-control form-control-sm" style="width: 180px" [(ngModel)]="estadoFiltro" (change)="cambiarFiltro()">
-          <option value="TODAS">Todas</option>
-          <option value="SOLICITADA">Solicitadas</option>
-          <option value="APROBADA">Aprobadas</option>
-          <option value="RECHAZADA">Rechazadas</option>
-        </select>
+    <div class="col-lg-6">
+      <div class="card card-outline card-info mb-3">
+        <div class="card-header py-2"><strong>Crear balance</strong></div>
+        <div class="card-body py-2">
+          <div class="row align-items-end">
+            <div class="col-md-4 mb-2 mb-md-0">
+              <label class="small text-muted mb-1">Año</label>
+              <input class="form-control form-control-sm" type="number" [(ngModel)]="balanceModel.anio">
+            </div>
+            <div class="col-md-4 mb-2 mb-md-0">
+              <label class="small text-muted mb-1">Días asignados</label>
+              <input class="form-control form-control-sm" type="number" [(ngModel)]="balanceModel.dias_asignados">
+            </div>
+            <div class="col-md-4">
+              <button class="btn btn-sm btn-success btn-block" (click)="crearBalance()">Guardar balance</button>
+            </div>
+          </div>
+        </div>
       </div>
-      <table class="table table-sm table-bordered"><thead><tr><th>ID</th><th>Tipo</th><th>Estado</th><th>Inicio</th><th>Fin</th><th>Aprobador</th><th>F. Aprob.</th><th></th></tr></thead>
-      <tbody>
-        <tr *ngFor="let r of requestsFiltradas">
-          <td>{{r.idrequest}}</td><td><span [ngClass]="tipoClass(r.tipolicencia)">{{r.tipolicencia}}</span></td><td><span [ngClass]="estadoClass(r.estado)">{{r.estado}}</span></td><td>{{formatFecha(r.fechainicio)}}</td><td>{{formatFecha(r.fechafin)}}</td><td>{{r.aprobador_id || "-"}}</td><td>{{formatFecha(r.fecha_aprobacion)}}</td>
-          <td>
-            <button class="btn btn-sm btn-success mr-1" (click)="aprobar(r.idrequest)" [disabled]="r.estado !== 'SOLICITADA'">Aprobar</button>
-            <button class="btn btn-sm btn-danger" (click)="rechazar(r.idrequest)" [disabled]="r.estado !== 'SOLICITADA'">Rechazar</button>
-            <button class="btn btn-sm btn-outline-info ml-1" (click)="verDetalle(r)">Detalle</button>
-          </td>
-        </tr>
-      </tbody></table>
-      <div class="d-flex justify-content-end align-items-center">
-        <button class="btn btn-sm btn-light mr-2" (click)="prevPage()" [disabled]="page<=1">Anterior</button>
-        <span class="small mr-2">Página {{page}} / {{totalPages}}</span>
-        <button class="btn btn-sm btn-light" (click)="nextPage()" [disabled]="page>=totalPages">Siguiente</button>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card card-outline card-success mb-3">
+        <div class="card-header py-2"><strong>Crear solicitud</strong></div>
+        <div class="card-body py-2">
+          <div class="row">
+            <div class="col-md-4 mb-2">
+              <label class="small text-muted mb-1">Tipo</label>
+              <select class="form-control form-control-sm" [(ngModel)]="requestModel.tipolicencia">
+                <option>VACACION</option>
+                <option>PERMISO</option>
+                <option>LICENCIA</option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-2">
+              <label class="small text-muted mb-1">Fecha inicio</label>
+              <input class="form-control form-control-sm" type="date" [(ngModel)]="requestModel.fechainicio">
+            </div>
+            <div class="col-md-4 mb-2">
+              <label class="small text-muted mb-1">Fecha fin</label>
+              <input class="form-control form-control-sm" type="date" [(ngModel)]="requestModel.fechafin">
+            </div>
+            <div class="col-md-8 mb-2">
+              <label class="small text-muted mb-1">Motivo</label>
+              <input class="form-control form-control-sm" [(ngModel)]="requestModel.motivo" placeholder="Motivo">
+            </div>
+            <div class="col-md-4 mb-2 d-flex align-items-end">
+              <button class="btn btn-sm btn-success btn-block" (click)="crearRequest()">Solicitar</button>
+            </div>
+            <div class="col-12">
+              <span class="badge badge-light border">{{ diasSolicitadosPreview }} día(s) solicitados</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
+  <div class="row">
+    <div class="col-lg-5">
+      <div class="card card-outline card-secondary mb-3">
+        <div class="card-header py-2"><strong>Balances</strong></div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered table-hover mb-0">
+              <thead class="thead-light">
+                <tr>
+                  <th>Año</th>
+                  <th>Asignados</th>
+                  <th>Usados</th>
+                  <th>Disponibles</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let b of balances">
+                  <td>{{ b.anio }}</td>
+                  <td>{{ b.dias_asignados }}</td>
+                  <td>{{ b.dias_usados }}</td>
+                  <td><strong>{{ b.dias_disponibles }}</strong></td>
+                </tr>
+                <tr *ngIf="!balances?.length">
+                  <td colspan="4" class="text-center text-muted">Sin balances registrados</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
 
+    <div class="col-lg-7">
+      <div class="card card-outline card-warning mb-3">
+        <div class="card-header py-2 d-flex justify-content-between align-items-center">
+          <strong>Solicitudes</strong>
+          <select class="form-control form-control-sm filtro-estado" [(ngModel)]="estadoFiltro" (change)="cambiarFiltro()">
+            <option value="TODAS">Todas</option>
+            <option value="SOLICITADA">Solicitadas</option>
+            <option value="APROBADA">Aprobadas</option>
+            <option value="RECHAZADA">Rechazadas</option>
+          </select>
+        </div>
 
-<div class="card mt-3" *ngIf="selectedRequest">
-  <div class="card-header py-1"><strong>Detalle solicitud #{{selectedRequest.idrequest}}</strong></div>
-  <div class="card-body py-2 small">
-    <div><strong>Tipo:</strong> {{selectedRequest.tipolicencia}}</div>
-    <div><strong>Estado:</strong> {{selectedRequest.estado}}</div>
-    <div><strong>Inicio:</strong> {{formatFecha(selectedRequest.fechainicio)}} | <strong>Fin:</strong> {{formatFecha(selectedRequest.fechafin)}}</div>
-    <div><strong>Días:</strong> {{selectedRequest.dias_solicitados}}</div>
-    <div><strong>Motivo:</strong> {{selectedRequest.motivo || '-'}}</div>
-    <div><strong>Obs. aprobación:</strong> {{selectedRequest.observacion_aprobacion || '-'}}</div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered table-hover mb-0">
+              <thead class="thead-light">
+                <tr>
+                  <th>ID</th>
+                  <th>Tipo</th>
+                  <th>Estado</th>
+                  <th>Inicio</th>
+                  <th>Fin</th>
+                  <th>Aprobador</th>
+                  <th>F. Aprob.</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let r of requestsFiltradas">
+                  <td>{{ r.idrequest }}</td>
+                  <td><span [ngClass]="tipoClass(r.tipolicencia)">{{ r.tipolicencia }}</span></td>
+                  <td><span [ngClass]="estadoClass(r.estado)">{{ r.estado }}</span></td>
+                  <td>{{ formatFecha(r.fechainicio) }}</td>
+                  <td>{{ formatFecha(r.fechafin) }}</td>
+                  <td>{{ r.aprobador_id || '-' }}</td>
+                  <td>{{ formatFecha(r.fecha_aprobacion) }}</td>
+                  <td>
+                    <div class="btn-group btn-group-sm" role="group">
+                      <button class="btn btn-success" (click)="aprobar(r.idrequest)" [disabled]="r.estado !== 'SOLICITADA'">Aprobar</button>
+                      <button class="btn btn-danger" (click)="rechazar(r.idrequest)" [disabled]="r.estado !== 'SOLICITADA'">Rechazar</button>
+                      <button class="btn btn-outline-info" (click)="verDetalle(r)">Detalle</button>
+                    </div>
+                  </td>
+                </tr>
+                <tr *ngIf="!requestsFiltradas?.length">
+                  <td colspan="8" class="text-center text-muted">Sin solicitudes para el filtro seleccionado</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card-footer py-2 d-flex justify-content-end align-items-center" *ngIf="totalPages > 0">
+          <button class="btn btn-sm btn-light mr-2" (click)="prevPage()" [disabled]="page <= 1">Anterior</button>
+          <span class="small mr-2">Página {{ page }} / {{ totalPages }}</span>
+          <button class="btn btn-sm btn-light" (click)="nextPage()" [disabled]="page >= totalPages">Siguiente</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-outline card-info" *ngIf="selectedRequest">
+    <div class="card-header py-2"><strong>Detalle solicitud #{{ selectedRequest.idrequest }}</strong></div>
+    <div class="card-body py-2 small">
+      <div><strong>Tipo:</strong> {{ selectedRequest.tipolicencia }}</div>
+      <div><strong>Estado:</strong> {{ selectedRequest.estado }}</div>
+      <div>
+        <strong>Inicio:</strong> {{ formatFecha(selectedRequest.fechainicio) }} |
+        <strong>Fin:</strong> {{ formatFecha(selectedRequest.fechafin) }}
+      </div>
+      <div><strong>Días:</strong> {{ selectedRequest.dias_solicitados }}</div>
+      <div><strong>Motivo:</strong> {{ selectedRequest.motivo || '-' }}</div>
+      <div><strong>Obs. aprobación:</strong> {{ selectedRequest.observacion_aprobacion || '-' }}</div>
+    </div>
   </div>
 </div>
-
