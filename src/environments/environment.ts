@@ -5,6 +5,7 @@
 export const environment = {
   production: false,
   API_URL: 'http://localhost:8080',
+  GD_API_URL: 'http://localhost:9095',
   //API_URL: 'http://192.168.1.69:8080'
   //API_URL: 'http://192.168.10.95:8080'
 };

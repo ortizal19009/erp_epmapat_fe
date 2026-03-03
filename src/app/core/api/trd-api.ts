@@ -4,7 +4,7 @@ import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class TrdApi {
-  private base = `${environment.API_URL + '/api'}/trd`;
+  private base = `${((environment as any).GD_API_URL || environment.API_URL) + '/api'}/trd`;
   constructor(private http: HttpClient) {}
 
   list(entityCode: string) {

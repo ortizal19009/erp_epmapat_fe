@@ -11,7 +11,7 @@ export interface Entity {
 
 @Injectable({ providedIn: 'root' })
 export class EntitiesApi {
-  private base = `${environment.API_URL + '/api'}/entities`;
+  private base = `${((environment as any).GD_API_URL || environment.API_URL) + '/api'}/entities`;
 
   constructor(private http: HttpClient) {}
 

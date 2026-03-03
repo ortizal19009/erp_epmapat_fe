@@ -4,7 +4,7 @@ import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class CaseFilesApi {
-  private base = `${environment.API_URL + '/api'}/case-files`;
+  private base = `${((environment as any).GD_API_URL || environment.API_URL) + '/api'}/case-files`;
   constructor(private http: HttpClient) {}
 
   list(entityCode: string) {

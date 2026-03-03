@@ -4,7 +4,7 @@ import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class DocumentosApi {
-  private base = `${environment.API_URL + '/api'}/documents`;
+  private base = `${((environment as any).GD_API_URL || environment.API_URL) + '/api'}/documents`;
 
   constructor(private http: HttpClient) {}
 

@@ -4,7 +4,7 @@ import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class SystemSettingsApi {
-  private base = `${environment.API_URL + '/api'}/settings/system`;
+  private base = `${((environment as any).GD_API_URL || environment.API_URL) + '/api'}/settings/system`;
   constructor(private http: HttpClient) {}
 
   list(entityCode: string) {

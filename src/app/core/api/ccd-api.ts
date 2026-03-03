@@ -4,7 +4,7 @@ import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class CcdApi {
-  private base = `${environment.API_URL + '/api'}/ccd`;
+  private base = `${((environment as any).GD_API_URL || environment.API_URL) + '/api'}/ccd`;
   constructor(private http: HttpClient) {}
 
   listSeries(entityCode: string) {
