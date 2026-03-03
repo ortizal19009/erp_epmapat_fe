@@ -1,5 +1,5 @@
 <div class="page gd-page documents-page">
-  <div class="page gd-page-header documents-header">
+  <div class="page gd-page-header cabecera documents-header">
     <div>
       <div class="d-flex align-items-center"><h2 class="page gd-page-title mb-0">Documentos</h2><app-info-help key="documents"></app-info-help></div>
       <p class="page gd-page-subtitle">Gestión documental de entrada y salida • Entidad: EPMAPA-T</p>
@@ -13,18 +13,18 @@
 
 
   <div class="row mb-3">
-    <div class="col-md-3"><div class="page gd-page-card py-2"><div class="small text-muted">Pendientes</div><div class="h5 mb-0">{{ kpiPendientes }}</div></div></div>
-    <div class="col-md-3"><div class="page gd-page-card py-2"><div class="small text-muted">Por vencer</div><div class="h5 mb-0 text-warning">{{ kpiPorVencer }}</div></div></div>
-    <div class="col-md-3"><div class="page gd-page-card py-2"><div class="small text-muted">Vencidos</div><div class="h5 mb-0 text-danger">{{ kpiVencidos }}</div></div></div>
-    <div class="col-md-3"><div class="page gd-page-card py-2"><div class="small text-muted">Respondidos</div><div class="h5 mb-0 text-success">{{ kpiRespondidos }}</div></div></div>
+    <div class="col-md-3"><div class="page gd-page-card detalle py-2"><div class="small text-muted">Pendientes</div><div class="h5 mb-0">{{ kpiPendientes }}</div></div></div>
+    <div class="col-md-3"><div class="page gd-page-card detalle py-2"><div class="small text-muted">Por vencer</div><div class="h5 mb-0 text-warning">{{ kpiPorVencer }}</div></div></div>
+    <div class="col-md-3"><div class="page gd-page-card detalle py-2"><div class="small text-muted">Vencidos</div><div class="h5 mb-0 text-danger">{{ kpiVencidos }}</div></div></div>
+    <div class="col-md-3"><div class="page gd-page-card detalle py-2"><div class="small text-muted">Respondidos</div><div class="h5 mb-0 text-success">{{ kpiRespondidos }}</div></div></div>
   </div>
-  <div class="page gd-page-card mb-3" *ngIf="overdueItems.length > 0">
+  <div class="page gd-page-card detalle mb-3" *ngIf="overdueItems.length > 0">
     <div class="d-flex justify-content-between align-items-center mb-2">
       <h6 class="mb-0 text-danger">Documentos vencidos</h6>
       <span class="badge bg-danger">{{ overdueItems.length }}</span>
     </div>
     <div class="small text-muted mb-2">Documentos con plazo de respuesta vencido.</div>
-    <ul class="mb-0 ps-3">
+    <ul class="mb-0 pl-3">
       <li *ngFor="let o of overdueItems">
         <strong>{{ o.tipo_codigo }}</strong> - {{ o.asunto }}
         <span class="text-danger">(Plazo: {{ o.fecha_plazo | date:'yyyy-MM-dd HH:mm' }})</span>
@@ -33,13 +33,13 @@
   </div>
 
 
-  <div class="page gd-page-card mb-3" *ngIf="dueSoonItems.length > 0">
+  <div class="page gd-page-card detalle mb-3" *ngIf="dueSoonItems.length > 0">
     <div class="d-flex justify-content-between align-items-center mb-2">
       <h6 class="mb-0 text-warning">Documentos por vencer (48h)</h6>
       <span class="badge bg-warning text-dark">{{ dueSoonItems.length }}</span>
     </div>
     <div class="small text-muted mb-2">Documentos que requieren respuesta y vencen pronto.</div>
-    <ul class="mb-0 ps-3">
+    <ul class="mb-0 pl-3">
       <li *ngFor="let o of dueSoonItems">
         <strong>{{ o.tipo_codigo }}</strong> - {{ o.asunto }}
         <span class="text-warning">(Plazo: {{ o.fecha_plazo | date:'yyyy-MM-dd HH:mm' }})</span>
@@ -47,7 +47,7 @@
     </ul>
   </div>
 
-  <div class="page gd-page-card filters-card mb-3">
+  <div class="page gd-page-card detalle filters-card mb-3">
     <div class="row align-items-end">
       <div class="col-lg-5">
         <label class="control-label">Buscar</label>
@@ -101,7 +101,7 @@
   <div *ngIf="loading" class="alert alert-info border-0">Cargando documentos...</div>
   <div *ngIf="error" class="alert alert-danger border-0">{{ error }}</div>
 
-  <div class="page gd-page-card p-0 overflow-hidden">
+  <div class="page gd-page-card detalle p-0 overflow-hidden">
     <div class="table-wrap">
       <table class="table table-hover align-middle mb-0">
         <thead>
@@ -187,6 +187,8 @@
     </div>
   </div>
 </div>
+
+
 
 
 

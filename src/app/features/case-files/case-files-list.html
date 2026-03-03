@@ -1,7 +1,7 @@
 <div class="page gd-page">
-  <div class="page gd-page-header"><div class="d-flex align-items-center"><h2 class="page gd-page-title mb-0">Expedientes electrónicos</h2><app-info-help key="case_files"></app-info-help></div></div>
+  <div class="page gd-page-header cabecera"><div class="d-flex align-items-center"><h2 class="page gd-page-title mb-0">Expedientes electrónicos</h2><app-info-help key="case_files"></app-info-help></div></div>
 
-  <div class="page gd-page-card mb-3">
+  <div class="page gd-page-card detalle mb-3">
     <div class="row align-items-end">
       <div class="col-md-3"><label class="control-label">Código</label><input class="form-control" [(ngModel)]="code" /></div>
       <div class="col-md-5"><label class="control-label">Título</label><input class="form-control" [(ngModel)]="title" /></div>
@@ -10,7 +10,7 @@
     </div>
   </div>
 
-  <div class="page gd-page-card p-0 overflow-hidden">
+  <div class="page gd-page-card detalle p-0 overflow-hidden">
     <div class="table-wrap">
       <table class="table table-hover align-middle mb-0">
         <thead><tr><th>Código</th><th>Título</th><th>Estado</th><th>Apertura</th><th>Cierre</th><th>Acción</th></tr></thead>
@@ -29,7 +29,7 @@
 </div>
 
 
-<div class="page gd-page-card mt-3" *ngIf="selectedCaseId">
+<div class="page gd-page-card detalle mt-3" *ngIf="selectedCaseId">
   <h5>Índice del expediente seleccionado</h5>
   <div class="alert alert-warning py-2" *ngIf="selectedCaseStatus==='CERRADO'">Expediente CERRADO: no admite nuevos documentos.</div>
   <div class="table-wrap">
@@ -49,5 +49,6 @@
     </table>
   </div>
 </div>
+
 
 

@@ -1,5 +1,5 @@
 <div class="page gd-page">
-  <div class="page gd-page-header">
+  <div class="page gd-page-header cabecera">
     <div class="d-flex ">
       <button *ngIf="hasRole('SUPERVISOR','ADMIN')" class="btn btn-outline-secondary" (click)="exportCsv()">Exportar CSV</button>
     </div>
@@ -9,7 +9,7 @@
     </div>
   </div>
 
-  <div class="page gd-page-card mb-3">
+  <div class="page gd-page-card detalle mb-3">
     <div class="row align-items-end">
       <div class="col-md-4">
         <label class="control-label">Usuario destino</label>
@@ -43,7 +43,7 @@
   <div *ngIf="loading" class="alert alert-info">Cargando...</div>
   <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
 
-  <div class="page gd-page-card p-0 overflow-hidden">
+  <div class="page gd-page-card detalle p-0 overflow-hidden">
     <div class="table-wrap">
       <table class="table table-hover align-middle mb-0">
         <thead>
@@ -78,5 +78,6 @@
     </div>
   </div>
 </div>
+
 
 

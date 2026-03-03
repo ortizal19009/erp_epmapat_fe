@@ -495,12 +495,16 @@ tr:not(.cursor-pointer):not(.fila) td:hover{ cursor: default; }
 
 /* ===== Gestión Documental (alineado visual ERP) ===== */
 .gd-page{font-family:"Roboto",sans-serif;}
-.gd-page .page-header{background:var(--bgcolor1);color:#fff;border:1px solid #1f2d3d;border-radius:.25rem;padding:.5rem .75rem;margin-bottom:.75rem;box-shadow:var(--shadow-dark);}
-.gd-page .page-header h2,.gd-page .page-header h4{font-size:1rem;font-weight:700;margin-bottom:0;color:#fff;}
-.gd-page .page-header .text-muted, .gd-page .page-header small{color:#d6dee6 !important;}
-.gd-page .page-card,.gd-page .card{background:var(--bgcolor2);border:1px solid #ced4da !important;border-radius:.25rem !important;box-shadow:none !important;}
+.gd-page .page-header,
+.gd-page .gd-page-header{background:var(--bgcolor1);color:#fff;border:1px solid #1f2d3d;border-radius:.25rem;padding:.5rem .75rem;margin-bottom:.75rem;box-shadow:var(--shadow-dark);}
+.gd-page .page-header h2,.gd-page .page-header h4,
+.gd-page .gd-page-header h2,.gd-page .gd-page-header h4{font-size:1rem;font-weight:700;margin-bottom:0;color:#fff;}
+.gd-page .page-header .text-muted, .gd-page .page-header small,
+.gd-page .gd-page-header .text-muted, .gd-page .gd-page-header small,
+.gd-page .gd-page-subtitle{color:#d6dee6 !important;}
+.gd-page .page-card,.gd-page .gd-page-card,.gd-page .card{background:var(--bgcolor2);border:1px solid #ced4da !important;border-radius:.25rem !important;box-shadow:none !important;}
 .gd-page .card .card-header{background:#e9ecef;border-bottom:1px solid #ced4da;font-weight:700;padding:.35rem .6rem;font-size:.9rem;}
-.gd-page .card .card-body,.gd-page .page-card{padding:.6rem .7rem;}
+.gd-page .card .card-body,.gd-page .page-card,.gd-page .gd-page-card{padding:.6rem .7rem;}
 .gd-page .btn{border-radius:.2rem;}
 .gd-page .table{font-size:.82rem;}
 .gd-page .table thead th{background:var(--bgcolor1);color:#fff;border-bottom:1px solid #1f2d3d;font-weight:700;padding:.35rem .45rem;}

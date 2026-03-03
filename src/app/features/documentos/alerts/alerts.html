@@ -1,5 +1,5 @@
 <div class="page gd-page">
-  <div class="page gd-page-header">
+  <div class="page gd-page-header cabecera">
     <div>
       <div class="d-flex align-items-center"><h2 class="page gd-page-title mb-0">Alertas de plazo</h2><app-info-help key="alerts"></app-info-help></div>
       <div class="page gd-page-subtitle">Seguimiento de documentos por vencer y vencidos</div>
@@ -16,7 +16,7 @@
     </div>
   </div>
 
-  <div class="page gd-page-card mb-3">
+  <div class="page gd-page-card detalle mb-3">
     <div class="row align-items-end">
       <div class="col-md-3">
         <label class="control-label">Estado alerta</label>
@@ -45,7 +45,7 @@
   <div *ngIf="loading" class="alert alert-info">Cargando...</div>
   <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
 
-  <div class="page gd-page-card p-0 overflow-hidden">
+  <div class="page gd-page-card detalle p-0 overflow-hidden">
     <div class="table-wrap">
       <table class="table table-sm align-middle mb-0">
         <thead>
@@ -75,5 +75,6 @@
     </div>
   </div>
 </div>
+
 
 

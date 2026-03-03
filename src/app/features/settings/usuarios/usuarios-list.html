@@ -1,12 +1,12 @@
 <div class="page gd-page">
-  <div class="page gd-page-header">
+  <div class="page gd-page-header cabecera">
     <div>
       <div class="d-flex align-items-center"><h2 class="page gd-page-title mb-0">Administración de usuarios</h2><app-info-help key="usuarios"></app-info-help></div>
       <div class="page gd-page-subtitle">Roles, estado y filtros operativos</div>
     </div>
   </div>
 
-  <div class="page gd-page-card mb-3">
+  <div class="page gd-page-card detalle mb-3">
     <div class="row align-items-end">
       <div class="col-md-4"><label class="control-label">Buscar</label><input class="form-control" [(ngModel)]="q" placeholder="Usuario o nombre" /></div>
       <div class="col-md-3"><label class="control-label">Rol</label><select class="custom-select" [(ngModel)]="roleFilter"><option value="">Todos</option><option *ngFor="let r of roles" [value]="r">{{ r }}</option></select></div>
@@ -18,7 +18,7 @@
   <div *ngIf="loading" class="alert alert-info">Cargando...</div>
   <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
 
-  <div class="page gd-page-card p-0 overflow-hidden">
+  <div class="page gd-page-card detalle p-0 overflow-hidden">
     <div class="table-wrap">
       <table class="table table-hover align-middle mb-0">
         <thead><tr><th>Usuario</th><th>Nombre</th><th>Dependencia</th><th>Rol</th><th>Activo</th><th>Acciones</th></tr></thead>
@@ -44,7 +44,7 @@
 </div>
 
 
-<div class="page gd-page-card mt-3">
+<div class="page gd-page-card detalle mt-3">
   <h5>Auditoría administrativa</h5>
   <div class="table-wrap">
     <table class="table table-sm align-middle mb-0">
@@ -62,5 +62,6 @@
     </table>
   </div>
 </div>
+
 
 
