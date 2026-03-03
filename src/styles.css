@@ -505,3 +505,18 @@ tr:not(.cursor-pointer):not(.fila) td:hover{ cursor: default; }
 .gd-page .detail-label{font-size:.8rem;color:#6c757d;display:block;margin-bottom:.2rem;}
 .gd-page .detail-value{font-weight:500;color:#212529;}
 
+/* Compatibilidad utilidades BS5 -> BS4 dentro de GD */
+.gd-page .form-select{display:block;width:100%;height:calc(2.25rem + 2px);padding:.375rem 1.75rem .375rem .75rem;line-height:1.5;color:#495057;vertical-align:middle;background:#fff;border:1px solid #ced4da;border-radius:.25rem;appearance:none;}
+.gd-page .form-select-sm{height:calc(1.8125rem + 2px);padding-top:.25rem;padding-bottom:.25rem;font-size:.875rem;}
+.gd-page .form-label{display:block;margin-bottom:.3rem;color:#6c757d;font-size:.85rem;}
+.gd-page .g-1,.gd-page .g-2,.gd-page .g-3,.gd-page .g-4{margin-right:-.5rem;margin-left:-.5rem;}
+.gd-page .g-1 > [class*='col-'],.gd-page .g-2 > [class*='col-'],.gd-page .g-3 > [class*='col-'],.gd-page .g-4 > [class*='col-']{padding-right:.5rem;padding-left:.5rem;margin-bottom:.75rem;}
+.gd-page .gap-1 > * + *{margin-left:.25rem;}
+.gd-page .gap-2 > * + *{margin-left:.5rem;}
+.gd-page .gap-3 > * + *{margin-left:1rem;}
+.gd-page .d-grid{display:block !important;}
+.gd-page .d-grid .btn{width:100%;}
+.gd-page .fw-semibold{font-weight:600 !important;}
+.gd-page .bg-light{background-color:#f8f9fa !important;}
+.gd-page .badge.bg-light{color:#343a40 !important;border:1px solid #dee2e6;}
+
