@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import Swal from 'sweetalert2';
 
 import { DocumentosApi } from '../../../core/api/documentos-api';
 import { DependencyApi } from '../../../core/api/dependency-api';
@@ -55,6 +56,30 @@ export class DocumentoDetalleComponent implements OnInit {
     this.lookupsApi.users(ENTITY_CODE, '', 1, 200).subscribe({ next: (r) => this.users = r?.items || [] });
 
     this.loadAll();
+  }
+
+  private toast(icon: 'success' | 'error' | 'warning' | 'info', title: string): void {
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon,
+      title,
+      showConfirmButton: false,
+      timer: 2600,
+      timerProgressBar: true,
+    });
+  }
+
+  private async confirmAction(title: string, text: string, confirmText: string): Promise<boolean> {
+    const res = await Swal.fire({
+      icon: 'question',
+      title,
+      text,
+      showCancelButton: true,
+      confirmButtonText: confirmText,
+      cancelButtonText: 'Cancelar'
+    });
+    return !!res.isConfirmed;
   }
 
   get currentRole(): string {
@@ -118,25 +143,37 @@ export class DocumentoDetalleComponent implements OnInit {
     this.router.navigate(['/gd/documentos', this.id, 'editar']);
   }
 
-  emit(): void {
+  async emit(): Promise<void> {
     this.actionError = null;
     if (!this.canEmit()) return;
-    if (!confirm('¿Emitir este documento?')) return;
+
+    const ok = await this.confirmAction('Emitir documento', 'Se generará/confirmará su número oficial.', 'Emitir');
+    if (!ok) return;
 
     this.api.emit(this.id, null).subscribe({
-      next: () => this.loadAll(),
-      error: (e) => this.actionError = e?.error?.detail || 'No se pudo emitir'
+      next: () => {
+        this.toast('success', 'Documento emitido correctamente');
+        this.loadAll();
+      },
+      error: (e) => {
+        this.actionError = e?.error?.detail || 'No se pudo emitir';
+        this.toast('error', this.actionError || 'Error');
+      }
     });
   }
 
-  receive(): void {
+  async receive(): Promise<void> {
     this.actionError = null;
     if (!this.canReceive()) return;
 
     if (!this.receivePayload.dependencia_id && !this.receivePayload.receptor_id) {
       this.actionError = 'Selecciona una dependencia o un usuario receptor.';
+      this.toast('warning', this.actionError);
       return;
     }
+
+    const ok = await this.confirmAction('Registrar recepción', 'Se marcará el documento como recibido.', 'Registrar');
+    if (!ok) return;
 
     this.api.receive(this.id, {
       dependencia_id: this.receivePayload.dependencia_id || undefined,
@@ -146,20 +183,28 @@ export class DocumentoDetalleComponent implements OnInit {
     }).subscribe({
       next: () => {
         this.receivePayload = { dependencia_id: '', receptor_id: '', comentario: '' };
+        this.toast('success', 'Recepción registrada');
         this.loadAll();
       },
-      error: (e) => this.actionError = e?.error?.detail || 'No se pudo registrar recepción'
+      error: (e) => {
+        this.actionError = e?.error?.detail || 'No se pudo registrar recepción';
+        this.toast('error', this.actionError || 'Error');
+      }
     });
   }
 
-  derive(): void {
+  async derive(): Promise<void> {
     this.actionError = null;
     if (!this.canDerive()) return;
 
     if (!this.derivePayload.to_dependency_id && !this.derivePayload.to_user_id) {
       this.actionError = 'Selecciona un destino de derivación (dependencia o usuario).';
+      this.toast('warning', this.actionError);
       return;
     }
+
+    const ok = await this.confirmAction('Derivar documento', 'Se enviará al destino seleccionado.', 'Derivar');
+    if (!ok) return;
 
     this.api.derive(this.id, {
       to_dependency_id: this.derivePayload.to_dependency_id || undefined,
@@ -169,9 +214,13 @@ export class DocumentoDetalleComponent implements OnInit {
     }).subscribe({
       next: () => {
         this.derivePayload = { to_dependency_id: '', to_user_id: '', comment: '', due_at: '' };
+        this.toast('success', 'Documento derivado');
         this.loadAll();
       },
-      error: (e) => this.actionError = e?.error?.detail || 'No se pudo derivar'
+      error: (e) => {
+        this.actionError = e?.error?.detail || 'No se pudo derivar';
+        this.toast('error', this.actionError || 'Error');
+      }
     });
   }
 
@@ -185,11 +234,13 @@ export class DocumentoDetalleComponent implements OnInit {
       next: () => {
         this.uploading = false;
         input.value = '';
+        this.toast('success', 'Archivo subido correctamente');
         this.api.listFiles(this.id).subscribe({ next: (r) => this.files = r || [] });
       },
       error: (e) => {
         this.uploading = false;
         this.actionError = e?.error?.detail || 'No se pudo subir el archivo';
+        this.toast('error', this.actionError || 'Error');
       }
     });
   }

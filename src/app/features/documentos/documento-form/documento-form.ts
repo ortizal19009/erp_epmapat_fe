@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import Swal from 'sweetalert2';
 
 import { DocumentosApi } from '../../../core/api/documentos-api';
 import { DependencyApi } from '../../../core/api/dependency-api';
@@ -55,6 +56,30 @@ export class DocumentoFormComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router
   ) {}
+
+  private toast(icon: 'success' | 'error' | 'warning' | 'info', title: string): void {
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon,
+      title,
+      showConfirmButton: false,
+      timer: 2400,
+      timerProgressBar: true,
+    });
+  }
+
+  private async confirmSave(): Promise<boolean> {
+    const res = await Swal.fire({
+      icon: 'question',
+      title: this.id ? 'Guardar cambios' : 'Crear documento',
+      text: this.id ? 'Se actualizará la información del documento.' : 'Se creará un nuevo documento en borrador.',
+      showCancelButton: true,
+      confirmButtonText: this.id ? 'Guardar' : 'Crear',
+      cancelButtonText: 'Cancelar'
+    });
+    return !!res.isConfirmed;
+  }
 
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id') || this.route.snapshot.queryParamMap.get('id');
@@ -139,20 +164,26 @@ export class DocumentoFormComponent implements OnInit {
     this.ccdApi.listSubseries(seriesId).subscribe({ next: (r) => this.subseries = r || [] });
   }
 
-  save(): void {
+  async save(): Promise<void> {
     this.error = null;
     if (!this.id && !this.canCreate()) {
       this.error = 'Tu rol no tiene permisos para crear documentos.';
+      this.toast('warning', this.error);
       return;
     }
     if (this.id && !this.canEditByState()) {
       this.error = `No se puede editar un documento en estado ${this.currentState}.`;
+      this.toast('warning', this.error);
       return;
     }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.toast('warning', 'Completa los campos obligatorios.');
       return;
     }
+
+    const ok = await this.confirmSave();
+    if (!ok) return;
 
     const raw = this.form.getRawValue();
     const payload: any = {
@@ -178,12 +209,14 @@ export class DocumentoFormComponent implements OnInit {
       next: (res) => {
         const id = this.id || res?.id;
         this.saving = false;
+        this.toast('success', this.id ? 'Documento actualizado' : 'Documento creado');
         if (id) this.router.navigate(['/gd/documentos', id]);
         else this.router.navigate(['/gd/documentos']);
       },
       error: (e) => {
         this.error = e?.error?.detail || e?.message || 'No se pudo guardar el documento';
         this.saving = false;
+        this.toast('error', this.error || 'Error');
       }
     });
   }
