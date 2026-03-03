@@ -1,23 +1,25 @@
-<div class="container-fluid mt-2">
-  <h5>TH Actions</h5>
+<div class="container-fluid mt-2 rrhh-page">
+  <div class="row m-0 px-2 py-2 mb-2 align-items-center cabecera sombra border rounded">
+    <h5 class="mb-0">TH Actions</h5>
+  </div>
 
   <div class="alert alert-success py-1" *ngIf="msg">{{ msg }}</div>
   <div class="alert alert-danger py-1" *ngIf="error">{{ error }}</div>
 
-  <div class="row mb-2">
-    <div class="col-sm-5">
-      <select class="form-control form-control-sm" [(ngModel)]="idpersonal" (change)="buscar()">
-        <option [ngValue]="0">Seleccione personal...</option>
-        <option *ngFor="let p of personalList" [ngValue]="p.idpersonal">
-          {{ p.apellidos }}, {{ p.nombres }} - {{ p.identificacion }}
-        </option>
-      </select>
+  <div class="card p-2 mb-3 detalle">
+    <div class="row mb-2">
+      <div class="col-sm-5">
+        <select class="form-control form-control-sm" [(ngModel)]="idpersonal" (change)="buscar()">
+          <option [ngValue]="0">Seleccione personal...</option>
+          <option *ngFor="let p of personalList" [ngValue]="p.idpersonal">
+            {{ p.apellidos }}, {{ p.nombres }} - {{ p.identificacion }}
+          </option>
+        </select>
+      </div>
+      <div class="col-sm-2"><button class="btn btn-sm btn-primary" (click)="buscar()">Buscar</button></div>
+      <div class="col-sm-2"><button class="btn btn-sm btn-outline-secondary" (click)="refreshAll()">Refrescar</button></div>
     </div>
-    <div class="col-sm-2"><button class="btn btn-sm btn-primary" (click)="buscar()">Buscar</button></div>
-    <div class="col-sm-2"><button class="btn btn-sm btn-outline-secondary" (click)="refreshAll()">Refrescar</button></div>
-  </div>
 
-  <div class="card p-2 mb-3">
     <div class="row">
       <div class="col-sm-2">
         <select class="form-control form-control-sm" [(ngModel)]="model.tipoaccion">
@@ -32,7 +34,7 @@
     </div>
   </div>
 
-  <div class="row mb-2">
+  <div class="row mb-2 detalle p-2 rounded">
     <div class="col-sm-2">
       <select class="form-control form-control-sm" [(ngModel)]="tipoFiltro" (change)="cambiarFiltros()">
         <option value="TODOS">Todos los tipos</option>
@@ -52,8 +54,8 @@
   <div *ngIf="loading" class="small text-muted">Cargando...</div>
 
   <table class="table table-sm table-bordered" *ngIf="!loading">
-    <thead><tr><th>ID</th><th>Tipo</th><th>Vigencia</th><th>Motivo</th><th>Estado</th></tr></thead>
-    <tbody>
+    <thead class="cabecera"><tr><th>ID</th><th>Tipo</th><th>Vigencia</th><th>Motivo</th><th>Estado</th></tr></thead>
+    <tbody class="detalle">
       <tr *ngFor="let a of accionesFiltradas">
         <td>{{a.idaction}}</td>
         <td>{{a.tipoaccion}}</td>
