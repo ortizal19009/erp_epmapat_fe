@@ -32,11 +32,12 @@
 :host {
   --bgcolor1: rgb(80, 4, 80);
   --bgcolor2: rgb(250, 200, 250);
+  --header-text-color: #ffffff;
 }
 
 .cabecera {
   background-color: var(--bgcolor1);
-  color: #fff;
+  color: var(--header-text-color);
 }
 
 .detalle {
@@ -45,7 +46,7 @@
 
 .nuevoBG1 {
   background-color: var(--bgcolor1) !important;
-  color: #fff !important;
+  color: var(--header-text-color) !important;
 }
 
 .nuevoBG2 {
@@ -55,6 +56,9 @@
 .cabecera .form-control,
 .cabecera select,
 .cabecera input {
-  background-color: #fff;
+  background-color: var(--header-text-color);
   color: #212529;
 }
+
+
+
