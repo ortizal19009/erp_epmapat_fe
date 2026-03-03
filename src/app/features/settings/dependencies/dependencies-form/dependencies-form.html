@@ -1,0 +1,59 @@
+﻿<div class="page">
+  <div class="page-header d-flex align-items-end justify-content-between gap-3">
+    <div>
+      <h2 class="page-title mb-1">{{ title() }}</h2>
+      <div class="page-subtitle">Una dependencia representa un área organizacional de la institución.</div>
+    </div>
+  </div>
+
+  <div *ngIf="error()" class="alert alert-danger mt-3">{{ error() }}</div>
+
+  <div class="page-card mt-3" *ngIf="!loading()">
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="alert alert-primary d-flex gap-3 align-items-start mb-4">
+        <i class="bi bi-info-circle fs-4"></i>
+        <div>
+          <div class="fw-semibold mb-1">Sobre las dependencias</div>
+          <div class="small">
+            <div><strong>Dependencia:</strong> un área organizacional o administrativa.</div>
+            <div><strong>Dependencia padre:</strong> área principal o de nivel superior.</div>
+            <div><strong>Dependencia hija:</strong> área que pertenece a otra dependencia.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Código</label>
+          <input class="form-control" formControlName="codigo" placeholder="Ej: ADM, FIN, TH" [class.is-invalid]="form.controls.codigo.touched && form.controls.codigo.invalid" />
+          <div class="invalid-feedback">El código es obligatorio (se recomiendan 2–5 caracteres).</div>
+          <div class="form-text">Código corto único (recomendado 2–5 caracteres).</div>
+        </div>
+
+        <div class="col-md-8">
+          <label class="form-label">Nombre</label>
+          <input class="form-control" formControlName="nombre" placeholder="Ej: Administración, Finanzas, Talento Humano" [class.is-invalid]="form.controls.nombre.touched && form.controls.nombre.invalid" />
+          <div class="invalid-feedback">El nombre es obligatorio.</div>
+          <div class="form-text">Nombre oficial del área organizacional.</div>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Dependencia padre</label>
+          <select class="form-select" formControlName="padre_id" [class.is-invalid]="form.controls.padre_id.touched && form.controls.padre_id.invalid">
+            <option [ngValue]="null">Sin dependencia padre (esta es principal)</option>
+            <option *ngFor="let d of dependencies()" [ngValue]="d.id">{{ d.codigo }} - {{ d.nombre }}</option>
+          </select>
+          <div class="form-text">Selecciona una dependencia padre solo si esta área pertenece a otra.</div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <button type="button" class="btn btn-outline-secondary" (click)="cancel()">Cancelar</button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          <span *ngIf="!saving()">Guardar</span>
+          <span *ngIf="saving()" class="d-inline-flex align-items-center gap-2"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Guardando...</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

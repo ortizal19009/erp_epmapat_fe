@@ -1,0 +1,93 @@
+<div class="page">
+  <div class="page-header">
+    <button class="btn btn-outline-secondary" (click)="exportCsv()">Exportar CSV</button>
+    <div>
+      <div class="d-flex align-items-center"><h2 class="page-title mb-0">Dashboard Ejecutivo</h2><app-info-help key="dashboard"></app-info-help></div>
+      <div class="page-subtitle">KPIs, SLA y estado documental</div>
+    </div>
+  </div>
+
+  <div class="page-card mb-3">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label">Fecha desde</label>
+        <input type="date" class="form-control" [(ngModel)]="dateFrom" />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Fecha hasta</label>
+        <input type="date" class="form-control" [(ngModel)]="dateTo" />
+      </div>
+      <div class="col-md-2 d-grid">
+        <button class="btn btn-primary" (click)="load()">Aplicar</button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="alert alert-info">Cargando...</div>
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <div *ngIf="data" class="row g-3">
+    <div class="col-md-3"><div class="page-card"><div class="small text-muted">Total documentos</div><div class="h4">{{ data.total_documents }}</div></div></div>
+    <div class="col-md-3"><div class="page-card"><div class="small text-muted">Vencidos</div><div class="h4 text-danger">{{ data.overdue }}</div></div></div>
+    <div class="col-md-3"><div class="page-card"><div class="small text-muted">Por vencer (48h)</div><div class="h4 text-warning">{{ data.due_soon_48h }}</div></div></div>
+    <div class="col-md-3"><div class="page-card"><div class="small text-muted">Tiempo respuesta promedio (h)</div><div class="h4 text-success">{{ data.avg_response_hours ? (data.avg_response_hours | number:'1.1-1') : '—' }}</div></div></div>
+
+    <div class="col-md-6">
+      <div class="page-card">
+        <h6>Distribución por estado</h6>
+        <div *ngFor="let s of data.by_status" class="mb-2">
+          <div class="d-flex justify-content-between"><span>{{ s.estado }}</span><span>{{ s.total }}</span></div>
+          <div class="bar"><span class="bar-fill" [style.width.%]="barWidth(s.total)"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="page-card">
+        <h6>Distribución por flujo</h6>
+        <ul class="mb-0">
+          <li *ngFor="let f of data.by_flow">{{ f.flujo }}: <strong>{{ f.total }}</strong></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div *ngIf="data" class="row g-3 mt-1">
+  <div class="col-md-6">
+    <div class="page-card">
+      <h6>Distribución por dependencia</h6>
+      <ul class="mb-0">
+        <li *ngFor="let d of data.by_dependency">{{ d.dependencia }}: <strong>{{ d.total }}</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="page-card">
+      <h6>Distribución por tipo documental</h6>
+      <ul class="mb-0">
+        <li *ngFor="let t of data.by_type">{{ t.tipo }}: <strong>{{ t.total }}</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="page-card">
+      <h6>Tendencia diaria (últimos 30 días)</h6>
+      <ul class="mb-0">
+        <li *ngFor="let t of data.trend_daily">{{ t.fecha }}: <strong>{{ t.total }}</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="page-card">
+      <h6>Top vencidos</h6>
+      <ul class="mb-0">
+        <li *ngFor="let o of data.top_overdue">{{ o.tipo || '-' }} · {{ o.dependencia || '-' }} · {{ o.asunto }}</li>
+      </ul>
+    </div>
+  </div>
+</div>

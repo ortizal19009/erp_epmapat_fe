@@ -1372,6 +1372,21 @@ const routes: Routes = [
 
   // { path: 'login', component: LoginComponent, canActivate: [AuthGuard]},
 
+  // ================== GESTIÓN DOCUMENTAL ==================
+  { path: 'gd/documentos', loadComponent: () => import('./features/documentos/documentos-list/documentos-list').then(m => m.DocumentosListComponent), canActivate: [AuthGuard] },
+
+  { path: 'gd/inbox', loadComponent: () => import('./features/documentos/inbox/inbox').then(m => m.InboxComponent), canActivate: [AuthGuard] },
+  { path: 'gd/alerts', loadComponent: () => import('./features/documentos/alerts/alerts').then(m => m.AlertsComponent), canActivate: [AuthGuard] },
+  { path: 'gd/dashboard', loadComponent: () => import('./features/documentos/dashboard/dashboard').then(m => m.DashboardEjecutivoComponent), canActivate: [AuthGuard] },
+  { path: 'gd/case-files', loadComponent: () => import('./features/case-files/case-files-list').then(m => m.CaseFilesListComponent), canActivate: [AuthGuard] },
+  { path: 'gd/settings/system', loadComponent: () => import('./features/settings/system/system-settings').then(m => m.SystemSettingsComponent), canActivate: [AuthGuard] },
+  { path: 'gd/settings/ccd', loadComponent: () => import('./features/settings/ccd/ccd-settings').then(m => m.CcdSettingsComponent), canActivate: [AuthGuard] },
+  { path: 'gd/settings/trd', loadComponent: () => import('./features/settings/trd/trd-settings').then(m => m.TrdSettingsComponent), canActivate: [AuthGuard] },
+  { path: 'gd/settings/entities', loadComponent: () => import('./features/settings/entities/entities-list/entities-list').then(m => m.EntitiesListComponent), canActivate: [AuthGuard] },
+  { path: 'gd/settings/document-types', loadComponent: () => import('./features/settings/document-types/document-types-list/document-types-list').then(m => m.DocumentTypesListComponent), canActivate: [AuthGuard] },
+  { path: 'gd/settings/dependencies', loadComponent: () => import('./features/settings/dependencies/dependencies-list/dependencies-list').then(m => m.DependenciesListComponent), canActivate: [AuthGuard] },
+  { path: 'gd/settings/usuarios', loadComponent: () => import('./features/settings/usuarios/usuarios-list').then(m => m.UsuariosListComponent), canActivate: [AuthGuard] },
+
   { path: '', redirectTo: 'inicio', pathMatch: 'full' },
   { path: '**', redirectTo: 'inicio' },
 ];

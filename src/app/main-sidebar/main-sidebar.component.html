@@ -733,6 +733,12 @@
                 <p class="text-warning">Cargar Reportes</p>
               </a>
             </li>
+            <li class="nav-item">
+              <a routerLink="/gd/dashboard" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(5, 221)}">
+                <i class="bi bi-folder2-open nav-icon"></i>
+                <p class="text-warning">Gestión Documental</p>
+              </a>
+            </li>
           </ul>
         </li>
         <li *ngIf="authService.modulo == 7" class="nav-item">

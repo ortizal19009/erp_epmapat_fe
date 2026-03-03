@@ -1,0 +1,47 @@
+﻿<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ title() }}</h1>
+      <div class="page-subtitle">Entidad: {{ 'EPMAPA-T' }}</div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-secondary" (click)="cancel()">Volver</button>
+      <button class="btn btn-primary" [disabled]="saving()" (click)="save()">{{ saving() ? 'Guardando...' : 'Guardar' }}</button>
+    </div>
+  </div>
+
+  <div *ngIf="loading()" class="alert alert-info">Cargando...</div>
+  <div *ngIf="error()" class="alert alert-danger">{{ error() }}</div>
+
+  <div class="page-card" *ngIf="!loading()">
+    <form [formGroup]="form" class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">Código</label>
+        <input class="form-control" formControlName="codigo" placeholder="MEMO / INF / OFI" />
+        <div class="text-danger small mt-1" *ngIf="form.controls.codigo.touched && form.controls.codigo.invalid">El código es obligatorio.</div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Nombre</label>
+        <input class="form-control" formControlName="nombre" placeholder="Memorando / Informe / Oficio..." />
+        <div class="text-danger small mt-1" *ngIf="form.controls.nombre.touched && form.controls.nombre.invalid">El nombre es obligatorio.</div>
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Flujo</label>
+        <select class="form-select" formControlName="flujo">
+          <option value="INGRESO">INGRESO</option>
+          <option value="SALIDA">SALIDA</option>
+        </select>
+      </div>
+
+      <div class="col-12">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" formControlName="activo" id="activeChk" />
+          <label class="form-check-label" for="activeChk">Activo</label>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

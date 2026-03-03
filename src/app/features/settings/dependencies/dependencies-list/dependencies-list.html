@@ -1,0 +1,91 @@
+﻿<div class="page">
+  <div class="page-header">
+    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap w-100">
+      <div>
+        <div class="d-flex align-items-center gap-2">
+          <h2 class="page-title mb-0">Dependencias</h2>
+        </div>
+        <div class="page-subtitle mt-1">Entidad: EPMAPA-T</div>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button class="btn btn-primary" (click)="new()">
+          <i class="bi bi-plus-lg me-1"></i>
+          Nueva dependencia
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-card mb-3">
+    <div class="row g-3 align-items-end">
+      <div class="col-12 col-lg-6">
+        <label class="form-label mb-1">Buscar</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input class="form-control" [(ngModel)]="q" placeholder="Buscar por código o nombre..." (keyup.enter)="load()" />
+        </div>
+        <small class="text-muted">Tip: presiona Enter para aplicar rápido</small>
+      </div>
+
+      <div class="col-12 col-lg-3">
+        <label class="form-label mb-1">Estado</label>
+        <select class="form-select" [(ngModel)]="status">
+          <option value="">Todos</option>
+          <option value="active">Activo</option>
+          <option value="inactive">Inactivo</option>
+        </select>
+      </div>
+
+      <div class="col-12 col-lg-3">
+        <div class="d-grid gap-2 d-lg-flex justify-content-lg-end">
+          <button class="btn btn-outline-secondary" type="button" (click)="clearFilters()">
+            <i class="bi bi-x-circle me-1"></i>Limpiar
+          </button>
+          <button class="btn btn-primary" type="button" (click)="load()">
+            <i class="bi bi-funnel me-1"></i>Aplicar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="alert alert-info">Cargando...</div>
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <div class="page-card" *ngIf="!loading">
+    <div class="table-wrap">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th style="width: 140px;">Código</th>
+            <th>Nombre</th>
+            <th style="width: 280px;">Padre</th>
+            <th style="width: 140px;">Estado</th>
+            <th style="width: 220px;" class="text-end">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let d of filteredItems()">
+            <td class="fw-semibold">{{ d.codigo }}</td>
+            <td>
+              <div class="fw-semibold">{{ d.nombre }}</div>
+              <div class="text-muted small">{{ d.padre_id ? 'Dependencia hija' : 'Dependencia principal' }}</div>
+            </td>
+            <td class="text-muted">{{ d.dependencia_padre || '—' }}</td>
+            <td><span class="badge" [ngClass]="d.activo ? 'bg-success' : 'bg-secondary'">{{ d.activo ? 'ACTIVO' : 'INACTIVO' }}</span></td>
+            <td class="text-end">
+              <div class="btn-group">
+                <button class="btn btn-outline-primary btn-sm" (click)="edit(d)">Editar</button>
+                <button class="btn btn-outline-secondary btn-sm" (click)="toggle(d)">{{ d.activo ? 'Desactivar' : 'Activar' }}</button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="filteredItems().length === 0">
+            <td colspan="5" class="text-center text-muted py-4">No se encontraron dependencias</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

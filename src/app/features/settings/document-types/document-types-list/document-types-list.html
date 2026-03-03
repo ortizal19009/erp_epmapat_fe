@@ -1,0 +1,79 @@
+﻿<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Tipos de documento</h1>
+      <div class="page-subtitle">Entidad: {{ entityCode }}</div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-secondary" (click)="load()">Actualizar</button>
+      <button class="btn btn-primary" (click)="goNew()">+ Nuevo</button>
+    </div>
+  </div>
+
+  <div class="page-card mb-3">
+    <div class="row g-2 align-items-end">
+      <div class="col-md-7">
+        <label class="form-label mb-1">Buscar</label>
+        <input class="form-control" [(ngModel)]="q" placeholder="Código o nombre..." />
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label mb-1">Flujo</label>
+        <select class="form-select" [(ngModel)]="flow">
+          <option value="">(Todos)</option>
+          <option value="INGRESO">INGRESO</option>
+          <option value="SALIDA">SALIDA</option>
+        </select>
+      </div>
+
+      <div class="col-md-2 d-grid">
+        <button class="btn btn-outline-primary" (click)="load()">Aplicar</button>
+      </div>
+
+      <div class="col-12 d-flex gap-2 mt-2">
+        <button class="btn btn-outline-secondary btn-sm" (click)="clear()">Limpiar</button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="alert alert-info">Cargando...</div>
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <div class="page-card">
+    <div class="table-wrap">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th style="width: 160px;">Código</th>
+              <th>Nombre</th>
+              <th style="width: 140px;">Flujo</th>
+              <th style="width: 120px;">Activo</th>
+              <th style="width: 180px;" class="text-end">Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let t of items">
+              <td class="fw-semibold">{{ t.codigo }}</td>
+              <td>{{ t.nombre }}</td>
+              <td><span class="badge" [ngClass]="badgeFlow(t.flujo)">{{ t.flujo }}</span></td>
+              <td><span class="badge" [ngClass]="t.activo ? 'bg-success' : 'bg-secondary'">{{ t.activo ? 'SÍ' : 'NO' }}</span></td>
+              <td class="text-end">
+                <div class="btn-group">
+                  <button class="btn btn-outline-primary btn-sm" (click)="edit(t)">Editar</button>
+                  <button class="btn btn-outline-dark btn-sm" (click)="toggleActive(t)">{{ t.activo ? 'Desactivar' : 'Activar' }}</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr *ngIf="!loading && items.length === 0">
+              <td colspan="5" class="text-center text-muted py-4">No se encontraron tipos de documento.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

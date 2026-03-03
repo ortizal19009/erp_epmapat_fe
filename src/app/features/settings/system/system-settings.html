@@ -1,0 +1,14 @@
+<div class="page">
+  <div class="page-header"><div class="d-flex align-items-center"><h2 class="page-title mb-0">Configuración del sistema</h2><app-info-help key="settings_system"></app-info-help></div></div>
+  <div *ngIf="loading" class="alert alert-info">Cargando...</div>
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+  <div class="page-card" *ngIf="!loading">
+    <div class="row g-3">
+      <div class="col-md-3"><label class="form-label">SLA horas (default)</label><input class="form-control" [(ngModel)]="model.sla_hours_default" /></div>
+      <div class="col-md-3"><label class="form-label">Canal alertas default</label><select class="form-select" [(ngModel)]="model.alerts_channel_default"><option>TELEGRAM</option><option>EMAIL</option><option>WHATSAPP</option></select></div>
+      <div class="col-md-3"><label class="form-label">Nombre entidad</label><input class="form-control" [(ngModel)]="model.entity_display_name" /></div>
+      <div class="col-md-3"><label class="form-label">Política días hábiles</label><input class="form-control" [(ngModel)]="model.workdays_policy" /></div>
+    </div>
+    <div class="mt-3"><button class="btn btn-primary" (click)="save()">Guardar configuración</button></div>
+  </div>
+</div>
