@@ -24,6 +24,7 @@ export class DocumentoFormComponent implements OnInit {
 
   id: string | null = null;
   title = 'Nuevo documento';
+  currentState = 'BORRADOR';
 
   dependencies: any[] = [];
   docTypes: any[] = [];
@@ -64,11 +65,13 @@ export class DocumentoFormComponent implements OnInit {
     if (!this.id) {
       this.form.patchValue({ fecha_elaboracion: this.today() });
       this.loading = false;
+      if (!this.canCreate()) this.error = 'Tu rol no tiene permisos para crear documentos.';
       return;
     }
 
     this.api.get(this.id).subscribe({
       next: (doc) => {
+        this.currentState = doc?.estado || 'BORRADOR';
         this.form.patchValue({
           tipo_doc_id: doc?.tipo_doc_id || doc?.type_id || '',
           dependencia_emisora_id: doc?.dependencia_emisora_id || doc?.dependency_id || '',
@@ -84,6 +87,11 @@ export class DocumentoFormComponent implements OnInit {
           prioridad: doc?.prioridad || 'MEDIA'
         });
         if (doc?.series_id) this.loadSubseries(doc.series_id);
+
+        if (!this.canEditByState()) {
+          this.form.disable();
+          this.error = `No se puede editar un documento en estado ${this.currentState}.`;
+        }
         this.loading = false;
       },
       error: (e) => {
@@ -91,6 +99,24 @@ export class DocumentoFormComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  get currentRole(): string {
+    try { return (globalThis.localStorage?.getItem('gd.role') || 'ADMIN').toUpperCase(); }
+    catch { return 'ADMIN'; }
+  }
+
+  hasRole(...roles: string[]): boolean {
+    return roles.includes(this.currentRole);
+  }
+
+  canCreate(): boolean {
+    return this.hasRole('RECEPCION', 'RESPONSABLE', 'SUPERVISOR', 'ADMIN');
+  }
+
+  canEditByState(): boolean {
+    return this.hasRole('RECEPCION', 'RESPONSABLE', 'SUPERVISOR', 'ADMIN')
+      && (this.currentState === 'BORRADOR' || this.currentState === 'EN_REVISION');
   }
 
   loadCatalogs(): void {
@@ -115,6 +141,14 @@ export class DocumentoFormComponent implements OnInit {
 
   save(): void {
     this.error = null;
+    if (!this.id && !this.canCreate()) {
+      this.error = 'Tu rol no tiene permisos para crear documentos.';
+      return;
+    }
+    if (this.id && !this.canEditByState()) {
+      this.error = `No se puede editar un documento en estado ${this.currentState}.`;
+      return;
+    }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;

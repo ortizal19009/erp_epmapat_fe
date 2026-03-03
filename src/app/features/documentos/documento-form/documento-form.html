@@ -2,7 +2,7 @@
   <div class="page-header d-flex justify-content-between align-items-center mb-3">
     <div>
       <h2 class="mb-0">{{ title }}</h2>
-      <small class="text-muted">Gestión documental · {{ id ? 'edición' : 'creación' }}</small>
+      <small class="text-muted">Gestión documental · {{ id ? 'edición' : 'creación' }} <span *ngIf="id">· Estado: {{ currentState }}</span></small>
     </div>
     <button class="btn btn-outline-secondary" (click)="cancel()">Volver</button>
   </div>
@@ -99,7 +99,7 @@
 
     <div class="d-flex gap-2 justify-content-end mt-4">
       <button type="button" class="btn btn-outline-secondary" (click)="cancel()">Cancelar</button>
-      <button type="submit" class="btn btn-primary" [disabled]="saving">{{ saving ? 'Guardando...' : 'Guardar' }}</button>
+      <button type="submit" class="btn btn-primary" [disabled]="saving || (!id && !canCreate()) || (id && !canEditByState())">{{ saving ? 'Guardando...' : 'Guardar' }}</button>
     </div>
   </form>
 </div>
