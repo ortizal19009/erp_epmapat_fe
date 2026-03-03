@@ -8,10 +8,10 @@
   <div class="alert alert-danger py-1 mb-2" *ngIf="error">{{ error }}</div>
 
   <div class="card card-outline card-primary mb-3">
-    <div class="card-header py-2">
+    <div class="card-header py-2 cabecera">
       <strong>Selección de personal</strong>
     </div>
-    <div class="card-body py-2">
+    <div class="card-body py-2 detalle">
       <div class="row align-items-end">
         <div class="col-md-7 mb-2 mb-md-0">
           <label class="small text-muted mb-1">Empleado</label>
@@ -33,8 +33,8 @@
   <div class="row">
     <div class="col-lg-6">
       <div class="card card-outline card-info mb-3">
-        <div class="card-header py-2"><strong>Crear balance</strong></div>
-        <div class="card-body py-2">
+        <div class="card-header py-2 cabecera"><strong>Crear balance</strong></div>
+        <div class="card-body py-2 detalle">
           <div class="row align-items-end">
             <div class="col-md-4 mb-2 mb-md-0">
               <label class="small text-muted mb-1">Año</label>
@@ -54,8 +54,8 @@
 
     <div class="col-lg-6">
       <div class="card card-outline card-success mb-3">
-        <div class="card-header py-2"><strong>Crear solicitud</strong></div>
-        <div class="card-body py-2">
+        <div class="card-header py-2 cabecera"><strong>Crear solicitud</strong></div>
+        <div class="card-body py-2 detalle">
           <div class="row">
             <div class="col-md-4 mb-2">
               <label class="small text-muted mb-1">Tipo</label>
@@ -92,11 +92,11 @@
   <div class="row">
     <div class="col-lg-5">
       <div class="card card-outline card-secondary mb-3">
-        <div class="card-header py-2"><strong>Balances</strong></div>
+        <div class="card-header py-2 cabecera"><strong>Balances</strong></div>
         <div class="card-body p-0">
           <div class="table-responsive">
             <table class="table table-sm table-bordered table-hover mb-0">
-              <thead class="thead-light">
+              <thead class="thead-light cabecera">
                 <tr>
                   <th>Año</th>
                   <th>Asignados</th>
@@ -104,7 +104,7 @@
                   <th>Disponibles</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody class="detalle">
                 <tr *ngFor="let b of balances">
                   <td>{{ b.anio }}</td>
                   <td>{{ b.dias_asignados }}</td>
@@ -123,7 +123,7 @@
 
     <div class="col-lg-7">
       <div class="card card-outline card-warning mb-3">
-        <div class="card-header py-2 d-flex justify-content-between align-items-center">
+        <div class="card-header py-2 cabecera d-flex justify-content-between align-items-center">
           <strong>Solicitudes</strong>
           <select class="form-control form-control-sm filtro-estado" [(ngModel)]="estadoFiltro" (change)="cambiarFiltro()">
             <option value="TODAS">Todas</option>
@@ -136,7 +136,7 @@
         <div class="card-body p-0">
           <div class="table-responsive">
             <table class="table table-sm table-bordered table-hover mb-0">
-              <thead class="thead-light">
+              <thead class="thead-light cabecera">
                 <tr>
                   <th>ID</th>
                   <th>Tipo</th>
@@ -148,7 +148,7 @@
                   <th>Acciones</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody class="detalle">
                 <tr *ngFor="let r of requestsFiltradas">
                   <td>{{ r.idrequest }}</td>
                   <td><span [ngClass]="tipoClass(r.tipolicencia)">{{ r.tipolicencia }}</span></td>
@@ -183,8 +183,8 @@
   </div>
 
   <div class="card card-outline card-info" *ngIf="selectedRequest">
-    <div class="card-header py-2"><strong>Detalle solicitud #{{ selectedRequest.idrequest }}</strong></div>
-    <div class="card-body py-2 small">
+    <div class="card-header py-2 cabecera"><strong>Detalle solicitud #{{ selectedRequest.idrequest }}</strong></div>
+    <div class="card-body py-2 detalle small">
       <div><strong>Tipo:</strong> {{ selectedRequest.tipolicencia }}</div>
       <div><strong>Estado:</strong> {{ selectedRequest.estado }}</div>
       <div>
@@ -197,3 +197,4 @@
     </div>
   </div>
 </div>
+

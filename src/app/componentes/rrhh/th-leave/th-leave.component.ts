@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { ColoresService } from 'src/app/compartida/colores.service';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { PersonalService } from 'src/app/servicios/rrhh/personal.service';
 import { ThLeaveService } from 'src/app/servicios/rrhh/th-leave.service';
 
@@ -19,6 +21,7 @@ export class ThLeaveComponent implements OnInit {
   error = '';
 
   aprobadorId: number = 1;
+  ventana = 'th-leave';
 
   balanceModel: any = { idpersonal_personal: { idpersonal: 0 }, anio: new Date().getFullYear(), dias_asignados: 15, dias_usados: 0, dias_disponibles: 15, usucrea: 1 };
   requestModel: any = { idpersonal_personal: { idpersonal: 0 }, tipolicencia: 'VACACION', fechainicio: '', fechafin: '', motivo: '', usucrea: 1 };
@@ -26,9 +29,19 @@ export class ThLeaveComponent implements OnInit {
   page = 1;
   pageSize = 8;
 
-  constructor(private service: ThLeaveService, private personalService: PersonalService) {}
+  constructor(
+    private service: ThLeaveService,
+    private personalService: PersonalService,
+    private coloresService: ColoresService,
+    public authService: AutorizaService
+  ) {}
 
   ngOnInit(): void {
+    sessionStorage.setItem('ventana', `/${this.ventana}`);
+    const coloresJSON = sessionStorage.getItem(`/${this.ventana}`);
+    if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
+    else this.buscaColor();
+
     const uid = Number(sessionStorage.getItem('idusuario') || sessionStorage.getItem('idUsuario') || '1');
     this.aprobadorId = isNaN(uid) ? 1 : uid;
     this.requestModel.usucrea = this.aprobadorId;
@@ -44,6 +57,25 @@ export class ThLeaveComponent implements OnInit {
       },
       error: (e) => console.error(e)
     });
+  }
+
+  async buscaColor() {
+    try {
+      const idusuario = Number(this.authService?.idusuario || 1);
+      const datos = await this.coloresService.setcolor(idusuario, this.ventana);
+      sessionStorage.setItem(`/${this.ventana}`, JSON.stringify(datos));
+      this.colocaColor(datos);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  colocaColor(colores: any) {
+    document.documentElement.style.setProperty('--bgcolor1', colores[0]);
+    document.documentElement.style.setProperty('--bgcolor2', colores[1]);
+
+    document.querySelectorAll('.cabecera').forEach((el) => el.classList.add('nuevoBG1'));
+    document.querySelectorAll('.detalle').forEach((el) => el.classList.add('nuevoBG2'));
   }
 
   get diasSolicitadosPreview(): number {

@@ -28,3 +28,33 @@
     width: 140px;
   }
 }
+
+:host {
+  --bgcolor1: rgb(80, 4, 80);
+  --bgcolor2: rgb(250, 200, 250);
+}
+
+.cabecera {
+  background-color: var(--bgcolor1);
+  color: #fff;
+}
+
+.detalle {
+  background-color: var(--bgcolor2);
+}
+
+.nuevoBG1 {
+  background-color: var(--bgcolor1) !important;
+  color: #fff !important;
+}
+
+.nuevoBG2 {
+  background-color: var(--bgcolor2) !important;
+}
+
+.cabecera .form-control,
+.cabecera select,
+.cabecera input {
+  background-color: #fff;
+  color: #212529;
+}
