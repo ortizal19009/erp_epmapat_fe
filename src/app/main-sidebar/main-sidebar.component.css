@@ -14,3 +14,21 @@
 .fondo1-texto{
    color: rgb(231, 214, 236);
 }
+
+/* Gestión Documental - orden visual estilo ERP */
+.gd-menu > .nav-treeview > .nav-item > .nav-link {
+   padding-top: .35rem;
+   padding-bottom: .35rem;
+}
+
+.gd-menu .nav-treeview .nav-link {
+   padding-left: 1rem;
+}
+
+.gd-menu .nav-treeview .nav-treeview .nav-link {
+   padding-left: 2rem;
+}
+
+.gd-menu .small.text-warning {
+   font-size: .8rem;
+}
