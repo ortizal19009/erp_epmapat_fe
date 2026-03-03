@@ -58,7 +58,7 @@
         <tbody>
           <tr *ngFor="let r of rows">
             <td>
-              <a [routerLink]="['/documents', r.documento_id, 'edit']">{{ r.documento_id }}</a>
+              <a [routerLink]="['/gd/documentos', r.documento_id]">{{ r.documento_id }}</a>
             </td>
             <td>{{ r.asunto }}</td>
             <td>{{ r.fecha_plazo ? (r.fecha_plazo | date:'yyyy-MM-dd HH:mm') : '—' }}</td>

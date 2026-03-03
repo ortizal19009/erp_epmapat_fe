@@ -1,0 +1,105 @@
+<div class="page">
+  <div class="page-header d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h2 class="mb-0">{{ title }}</h2>
+      <small class="text-muted">Gestión documental · {{ id ? 'edición' : 'creación' }}</small>
+    </div>
+    <button class="btn btn-outline-secondary" (click)="cancel()">Volver</button>
+  </div>
+
+  <div *ngIf="loading" class="alert alert-info">Cargando...</div>
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <form *ngIf="!loading" [formGroup]="form" class="page-card p-3" (ngSubmit)="save()">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Tipo de documento</label>
+        <select class="form-select" formControlName="tipo_doc_id">
+          <option value="">Seleccione...</option>
+          <option *ngFor="let t of docTypes" [value]="t.id">{{ t.codigo }} - {{ t.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Dependencia emisora</label>
+        <select class="form-select" formControlName="dependencia_emisora_id">
+          <option value="">Seleccione...</option>
+          <option *ngFor="let d of dependencies" [value]="d.id">{{ d.codigo }} - {{ d.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label">Flujo</label>
+        <select class="form-select" formControlName="flujo">
+          <option value="INGRESO">INGRESO</option>
+          <option value="SALIDA">SALIDA</option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label">Prioridad</label>
+        <select class="form-select" formControlName="prioridad">
+          <option value="BAJA">BAJA</option>
+          <option value="MEDIA">MEDIA</option>
+          <option value="ALTA">ALTA</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Serie</label>
+        <select class="form-select" formControlName="series_id" (change)="onSeriesChange()">
+          <option value="">Sin serie</option>
+          <option *ngFor="let s of series" [value]="s.id">{{ s.codigo }} - {{ s.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Subserie</label>
+        <select class="form-select" formControlName="subseries_id">
+          <option value="">Sin subserie</option>
+          <option *ngFor="let s of subseries" [value]="s.id">{{ s.codigo }} - {{ s.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label">F. elaboración</label>
+        <input type="date" class="form-control" formControlName="fecha_elaboracion" />
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label">F. plazo</label>
+        <input type="date" class="form-control" formControlName="fecha_plazo" />
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Asunto</label>
+        <input class="form-control" formControlName="asunto" maxlength="250" />
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Referencia</label>
+        <input class="form-control" formControlName="referencia" maxlength="120" />
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Origen</label>
+        <select class="form-select" formControlName="origen">
+          <option value="INTERNO">INTERNO</option>
+          <option value="EXTERNO">EXTERNO</option>
+        </select>
+      </div>
+
+      <div class="col-md-4 d-flex align-items-end">
+        <div class="form-check mb-2">
+          <input id="reqResp" type="checkbox" class="form-check-input" formControlName="requiere_respuesta" />
+          <label for="reqResp" class="form-check-label">Requiere respuesta</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2 justify-content-end mt-4">
+      <button type="button" class="btn btn-outline-secondary" (click)="cancel()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="saving">{{ saving ? 'Guardando...' : 'Guardar' }}</button>
+    </div>
+  </form>
+</div>

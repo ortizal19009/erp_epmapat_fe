@@ -1,0 +1,87 @@
+<div class="page">
+  <div class="page-header d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h2 class="mb-0">Detalle de documento</h2>
+      <small class="text-muted" *ngIf="doc">{{ doc.numero_oficial || 'Sin número' }} · {{ doc.estado }}</small>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-secondary" (click)="back()">Volver</button>
+      <button class="btn btn-outline-primary" (click)="edit()">Editar</button>
+      <button class="btn btn-outline-success" (click)="emit()">Emitir</button>
+      <button class="btn btn-outline-dark" (click)="receive()">Recibir</button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="alert alert-info">Cargando...</div>
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <div *ngIf="!loading && doc" class="row g-3">
+    <div class="col-lg-7">
+      <div class="page-card p-3">
+        <h6 class="mb-3">Información general</h6>
+        <div class="row g-2 small">
+          <div class="col-md-6"><strong>Asunto:</strong> {{ doc.asunto }}</div>
+          <div class="col-md-6"><strong>Referencia:</strong> {{ doc.referencia || '—' }}</div>
+          <div class="col-md-6"><strong>Tipo:</strong> {{ doc.tipo_codigo || doc.type_id }}</div>
+          <div class="col-md-6"><strong>Flujo:</strong> {{ doc.flujo }}</div>
+          <div class="col-md-6"><strong>Dependencia:</strong> {{ doc.dep_nombre || doc.dependency_id }}</div>
+          <div class="col-md-6"><strong>Origen:</strong> {{ doc.origen }}</div>
+          <div class="col-md-6"><strong>Fecha elaboración:</strong> {{ doc.fecha_elaboracion | date:'yyyy-MM-dd' }}</div>
+          <div class="col-md-6"><strong>Fecha plazo:</strong> {{ doc.fecha_plazo ? (doc.fecha_plazo | date:'yyyy-MM-dd') : 'No aplica' }}</div>
+        </div>
+      </div>
+
+      <div class="page-card p-3 mt-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="mb-0">Línea de tiempo</h6>
+          <span class="badge bg-light text-dark">{{ timeline.length }}</span>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li *ngFor="let t of timeline" class="list-group-item px-0">
+            <div class="fw-semibold">{{ t.event_type || t.tipo || 'Evento' }}</div>
+            <small class="text-muted">{{ t.occurred_at || t.created_at | date:'yyyy-MM-dd HH:mm' }}</small>
+            <div class="small" *ngIf="t.description || t.descripcion">{{ t.description || t.descripcion }}</div>
+          </li>
+          <li *ngIf="timeline.length === 0" class="list-group-item px-0 text-muted">Sin eventos.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="page-card p-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="mb-0">Archivos</h6>
+          <label class="btn btn-sm btn-outline-primary mb-0">
+            {{ uploading ? 'Subiendo...' : 'Subir' }}
+            <input type="file" hidden (change)="onFileSelected($event)" [disabled]="uploading" />
+          </label>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li *ngFor="let f of files" class="list-group-item px-0 d-flex justify-content-between align-items-center">
+            <div>
+              <div class="fw-semibold small">{{ f.original_filename || f.nombre || 'Archivo' }}</div>
+              <small class="text-muted">{{ f.file_kind || f.tipo || '' }}</small>
+            </div>
+            <a class="btn btn-sm btn-outline-secondary" [href]="fileDownloadUrl(f)" target="_blank">Descargar</a>
+          </li>
+          <li *ngIf="files.length === 0" class="list-group-item px-0 text-muted">Sin adjuntos.</li>
+        </ul>
+      </div>
+
+      <div class="page-card p-3 mt-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="mb-0">Derivaciones</h6>
+          <span class="badge bg-light text-dark">{{ derivations.length }}</span>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li *ngFor="let d of derivations" class="list-group-item px-0">
+            <div class="small"><strong>Destino:</strong> {{ d.to_dependency_name || d.to_user_name || '—' }}</div>
+            <div class="small"><strong>Estado:</strong> {{ d.status || d.estado || '—' }}</div>
+            <small class="text-muted">{{ d.created_at | date:'yyyy-MM-dd HH:mm' }}</small>
+          </li>
+          <li *ngIf="derivations.length === 0" class="list-group-item px-0 text-muted">Sin derivaciones.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

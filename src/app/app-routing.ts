@@ -1374,6 +1374,9 @@ const routes: Routes = [
 
   // ================== GESTIÓN DOCUMENTAL ==================
   { path: 'gd/documentos', loadComponent: () => import('./features/documentos/documentos-list/documentos-list').then(m => m.DocumentosListComponent), canActivate: [AuthGuard] },
+  { path: 'gd/documentos/nuevo', loadComponent: () => import('./features/documentos/documento-form/documento-form').then(m => m.DocumentoFormComponent), canActivate: [AuthGuard] },
+  { path: 'gd/documentos/:id', loadComponent: () => import('./features/documentos/documento-detalle/documento-detalle').then(m => m.DocumentoDetalleComponent), canActivate: [AuthGuard] },
+  { path: 'gd/documentos/:id/editar', loadComponent: () => import('./features/documentos/documento-form/documento-form').then(m => m.DocumentoFormComponent), canActivate: [AuthGuard] },
 
   { path: 'gd/inbox', loadComponent: () => import('./features/documentos/inbox/inbox').then(m => m.InboxComponent), canActivate: [AuthGuard] },
   { path: 'gd/alerts', loadComponent: () => import('./features/documentos/alerts/alerts').then(m => m.AlertsComponent), canActivate: [AuthGuard] },

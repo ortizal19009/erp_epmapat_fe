@@ -78,7 +78,7 @@ export class InboxComponent {
   nextPage(): void { if (this.page < this.pages) { this.page++; this.load(); } }
 
   goRespond(row: any): void {
-    this.router.navigate(['/documents', row.documento_id, 'edit'], { queryParams: { derivationId: row.id } });
+    this.router.navigate(['/gd/documentos', row.documento_id, 'editar'], { queryParams: { derivationId: row.id } });
   }
 
   markRead(row: any): void {

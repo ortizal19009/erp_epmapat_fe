@@ -179,15 +179,15 @@ export class DocumentosListComponent implements OnInit {
   }
 
   goNew(): void {
-    this.router.navigate(['/documents/new']);
+    this.router.navigate(['/gd/documentos/nuevo']);
   }
 
   view(doc: DocumentoListItem): void {
-    this.router.navigate(['/documents', doc.id, 'edit']);
+    this.router.navigate(['/gd/documentos', doc.id]);
   }
 
   edit(doc: DocumentoListItem): void {
-    this.router.navigate(['/documents/new'], { queryParams: { id: doc.id } });
+    this.router.navigate(['/gd/documentos', doc.id, 'editar']);
   }
 
   canEdit(doc: DocumentoListItem): boolean {
