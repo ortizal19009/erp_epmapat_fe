@@ -492,3 +492,16 @@ tr:not(.cursor-pointer):not(.fila) td:hover{ cursor: default; }
     font-size: .9rem;
   }
 }
+
+/* ===== Gestión Documental (ERP visual, Bootstrap 4 friendly) ===== */
+.gd-page .page-header{background:#fff;border:1px solid #dee2e6;border-radius:.25rem;padding:.75rem 1rem;margin-bottom:1rem;}
+.gd-page .page-header h2,.gd-page .page-header h4{font-size:1.1rem;font-weight:600;margin-bottom:0;}
+.gd-page .page-card,.gd-page .card{border:1px solid #dee2e6 !important;border-radius:.25rem !important;box-shadow:none !important;}
+.gd-page .card .card-header{background:#f8f9fa;border-bottom:1px solid #dee2e6;font-weight:600;}
+.gd-page .card .card-body,.gd-page .page-card{padding:1rem;}
+.gd-page .btn{border-radius:.2rem;}
+.gd-page .table thead th{background:#f8f9fa;border-bottom:1px solid #dee2e6;font-weight:600;}
+.gd-page .text-muted{color:#6c757d !important;}
+.gd-page .detail-label{font-size:.8rem;color:#6c757d;display:block;margin-bottom:.2rem;}
+.gd-page .detail-value{font-weight:500;color:#212529;}
+

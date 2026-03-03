@@ -1,6 +1,6 @@
-<div class="page">
-  <div class="page-header"><div class="d-flex align-items-center"><h2 class="page-title mb-0">TRD (Retención)</h2><app-info-help key="trd"></app-info-help></div></div>
-  <div class="page-card mb-3">
+<div class="page gd-page">
+  <div class="page gd-page-header"><div class="d-flex align-items-center"><h2 class="page gd-page-title mb-0">TRD (Retención)</h2><app-info-help key="trd"></app-info-help></div></div>
+  <div class="page gd-page-card mb-3">
     <div class="row g-2 align-items-end">
       <div class="col-md-3"><label class="form-label">Serie</label><select class="form-select" [(ngModel)]="model.series_id" (ngModelChange)="onSeriesChange()"><option value="">Seleccione</option><option *ngFor="let s of series" [value]="s.id">{{ s.code }} - {{ s.name }}</option></select></div>
       <div class="col-md-3"><label class="form-label">Subserie</label><select class="form-select" [(ngModel)]="model.subseries_id"><option value="">(ninguna)</option><option *ngFor="let ss of subseries" [value]="ss.id">{{ ss.code }} - {{ ss.name }}</option></select></div>
@@ -12,7 +12,7 @@
     </div>
   </div>
 
-  <div class="page-card p-0 overflow-hidden">
+  <div class="page gd-page-card p-0 overflow-hidden">
     <div class="table-wrap">
       <table class="table table-sm align-middle mb-0">
         <thead><tr><th>Serie</th><th>Subserie</th><th>Activos</th><th>Semiactivos</th><th>Disposición</th><th>Base legal</th></tr></thead>
@@ -24,3 +24,4 @@
     </div>
   </div>
 </div>
+

@@ -1,14 +1,14 @@
-﻿<div class="page">
-  <div class="page-header d-flex align-items-end justify-content-between gap-3">
+<div class="page gd-page">
+  <div class="page gd-page-header d-flex align-items-end justify-content-between gap-3">
     <div>
-      <h2 class="page-title mb-1">{{ title() }}</h2>
-      <div class="page-subtitle">Una dependencia representa un área organizacional de la institución.</div>
+      <h2 class="page gd-page-title mb-1">{{ title() }}</h2>
+      <div class="page gd-page-subtitle">Una dependencia representa un área organizacional de la institución.</div>
     </div>
   </div>
 
   <div *ngIf="error()" class="alert alert-danger mt-3">{{ error() }}</div>
 
-  <div class="page-card mt-3" *ngIf="!loading()">
+  <div class="page gd-page-card mt-3" *ngIf="!loading()">
     <form [formGroup]="form" (ngSubmit)="save()">
       <div class="alert alert-primary d-flex gap-3 align-items-start mb-4">
         <i class="bi bi-info-circle fs-4"></i>
@@ -57,3 +57,4 @@
     </form>
   </div>
 </div>
+

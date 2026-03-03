@@ -1,11 +1,11 @@
-﻿<div class="page">
-  <div class="page-header">
+<div class="page gd-page">
+  <div class="page gd-page-header">
     <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap w-100">
       <div>
         <div class="d-flex align-items-center gap-2">
-          <h2 class="page-title mb-0">Dependencias</h2>
+          <h2 class="page gd-page-title mb-0">Dependencias</h2>
         </div>
-        <div class="page-subtitle mt-1">Entidad: EPMAPA-T</div>
+        <div class="page gd-page-subtitle mt-1">Entidad: EPMAPA-T</div>
       </div>
 
       <div class="d-flex gap-2">
@@ -17,7 +17,7 @@
     </div>
   </div>
 
-  <div class="page-card mb-3">
+  <div class="page gd-page-card mb-3">
     <div class="row g-3 align-items-end">
       <div class="col-12 col-lg-6">
         <label class="form-label mb-1">Buscar</label>
@@ -53,7 +53,7 @@
   <div *ngIf="loading" class="alert alert-info">Cargando...</div>
   <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
 
-  <div class="page-card" *ngIf="!loading">
+  <div class="page gd-page-card" *ngIf="!loading">
     <div class="table-wrap">
       <table class="table table-hover align-middle mb-0">
         <thead>
@@ -89,3 +89,4 @@
     </div>
   </div>
 </div>
+

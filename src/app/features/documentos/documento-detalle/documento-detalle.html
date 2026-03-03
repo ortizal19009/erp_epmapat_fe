@@ -1,5 +1,5 @@
-<div class="page gd-doc-detalle">
-  <div class="page-header d-flex justify-content-between align-items-center mb-3">
+<div class="page gd-page gd-doc-detalle">
+  <div class="page gd-page-header d-flex justify-content-between align-items-center mb-3">
     <div>
       <h2 class="mb-0">Detalle de documento</h2>
       <small class="text-muted" *ngIf="doc">{{ doc.numero_oficial || 'Sin número' }} · {{ doc.estado }}</small>
@@ -20,14 +20,14 @@
       <div class="card shadow-sm border-0 p-3 mb-3">
         <h6 class="mb-3">Información general</h6>
         <div class="row small">
-          <div class="col-md-6"><strong>Asunto:</strong> {{ doc.asunto }}</div>
-          <div class="col-md-6"><strong>Referencia:</strong> {{ doc.referencia || '—' }}</div>
-          <div class="col-md-6"><strong>Tipo:</strong> {{ doc.tipo_codigo || doc.type_id }}</div>
-          <div class="col-md-6"><strong>Flujo:</strong> {{ doc.flujo }}</div>
-          <div class="col-md-6"><strong>Dependencia:</strong> {{ doc.dep_nombre || doc.dependency_id }}</div>
-          <div class="col-md-6"><strong>Origen:</strong> {{ doc.origen }}</div>
-          <div class="col-md-6"><strong>Fecha elaboración:</strong> {{ doc.fecha_elaboracion | date:'yyyy-MM-dd' }}</div>
-          <div class="col-md-6"><strong>Fecha plazo:</strong> {{ doc.fecha_plazo ? (doc.fecha_plazo | date:'yyyy-MM-dd') : 'No aplica' }}</div>
+          <div class="col-md-6"><span class="detail-label">Asunto</span><span class="detail-value">{{ doc.asunto }}</span></div>
+          <div class="col-md-6"><span class="detail-label">Referencia</span><span class="detail-value">{{ doc.referencia || '—' }}</span></div>
+          <div class="col-md-6"><span class="detail-label">Tipo</span><span class="detail-value">{{ doc.tipo_codigo || doc.type_id }}</span></div>
+          <div class="col-md-6"><span class="detail-label">Flujo</span><span class="detail-value">{{ doc.flujo }}</span></div>
+          <div class="col-md-6"><span class="detail-label">Dependencia</span><span class="detail-value">{{ doc.dep_nombre || doc.dependency_id }}</span></div>
+          <div class="col-md-6"><span class="detail-label">Origen</span><span class="detail-value">{{ doc.origen }}</span></div>
+          <div class="col-md-6"><span class="detail-label">Fecha elaboración</span><span class="detail-value">{{ doc.fecha_elaboracion | date:'yyyy-MM-dd' }}</span></div>
+          <div class="col-md-6"><span class="detail-label">Fecha plazo</span><span class="detail-value">{{ doc.fecha_plazo ? (doc.fecha_plazo | date:'yyyy-MM-dd') : 'No aplica' }}</span></div>
         </div>
       </div>
 
@@ -141,3 +141,5 @@
     </div>
   </div>
 </div>
+
+

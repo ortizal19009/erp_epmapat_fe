@@ -1,12 +1,12 @@
-<div class="page">
-  <div class="page-header"><div class="d-flex align-items-center"><h2 class="page-title mb-0">CCD (Series/Subseries)</h2><app-info-help key="ccd"></app-info-help></div></div>
+<div class="page gd-page">
+  <div class="page gd-page-header"><div class="d-flex align-items-center"><h2 class="page gd-page-title mb-0">CCD (Series/Subseries)</h2><app-info-help key="ccd"></app-info-help></div></div>
   <div class="row g-3">
     <div class="col-md-6">
-      <div class="page-card">
+      <div class="page gd-page-card">
         <h6>Nueva serie</h6>
         <div class="row g-2"><div class="col"><input class="form-control" placeholder="Código" [(ngModel)]="code" /></div><div class="col"><input class="form-control" placeholder="Nombre" [(ngModel)]="name" /></div><div class="col-auto"><button class="btn btn-primary" (click)="createSeries()">Guardar</button></div></div>
       </div>
-      <div class="page-card mt-3">
+      <div class="page gd-page-card mt-3">
         <h6>Series</h6>
         <ul class="list-group">
           <li class="list-group-item" *ngFor="let s of series" (click)="selectSeries(s.id)" style="cursor:pointer">{{ s.code }} - {{ s.name }}</li>
@@ -15,11 +15,11 @@
     </div>
 
     <div class="col-md-6">
-      <div class="page-card">
+      <div class="page gd-page-card">
         <h6>Nueva subserie</h6>
         <div class="row g-2"><div class="col"><input class="form-control" placeholder="Código" [(ngModel)]="subCode" /></div><div class="col"><input class="form-control" placeholder="Nombre" [(ngModel)]="subName" /></div><div class="col-auto"><button class="btn btn-primary" (click)="createSubseries()" [disabled]="!selectedSeriesId">Guardar</button></div></div>
       </div>
-      <div class="page-card mt-3">
+      <div class="page gd-page-card mt-3">
         <h6>Subseries</h6>
         <ul class="list-group">
           <li class="list-group-item" *ngFor="let ss of subseries">{{ ss.code }} - {{ ss.name }}</li>
@@ -28,3 +28,4 @@
     </div>
   </div>
 </div>
+

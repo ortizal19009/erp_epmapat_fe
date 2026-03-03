@@ -1,8 +1,8 @@
-﻿<div class="page">
-  <div class="page-header">
+<div class="page gd-page">
+  <div class="page gd-page-header">
     <div>
-      <h1 class="page-title">Tipos de documento</h1>
-      <div class="page-subtitle">Entidad: {{ entityCode }}</div>
+      <h1 class="page gd-page-title">Tipos de documento</h1>
+      <div class="page gd-page-subtitle">Entidad: {{ entityCode }}</div>
     </div>
 
     <div class="d-flex gap-2">
@@ -11,7 +11,7 @@
     </div>
   </div>
 
-  <div class="page-card mb-3">
+  <div class="page gd-page-card mb-3">
     <div class="row g-2 align-items-end">
       <div class="col-md-7">
         <label class="form-label mb-1">Buscar</label>
@@ -40,7 +40,7 @@
   <div *ngIf="loading" class="alert alert-info">Cargando...</div>
   <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
 
-  <div class="page-card">
+  <div class="page gd-page-card">
     <div class="table-wrap">
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
@@ -77,3 +77,4 @@
     </div>
   </div>
 </div>
+
