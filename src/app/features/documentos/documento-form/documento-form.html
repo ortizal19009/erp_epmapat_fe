@@ -85,6 +85,21 @@
         <input class="form-control" formControlName="referencia" maxlength="120" />
       </div>
 
+      <div class="col-md-6">
+        <label class="d-block mb-1 text-muted">Remitente externo</label>
+        <input class="form-control" formControlName="remitente_externo" maxlength="200" />
+      </div>
+
+      <div class="col-12">
+        <label class="d-block mb-1 text-muted">Contenido / Resumen</label>
+        <textarea class="form-control" rows="2" formControlName="cuerpo"></textarea>
+      </div>
+
+      <div class="col-12">
+        <label class="d-block mb-1 text-muted">Observaciones de recepción</label>
+        <textarea class="form-control" rows="2" formControlName="observaciones"></textarea>
+      </div>
+
       <div class="col-md-4">
         <label class="d-block mb-1 text-muted">Origen</label>
         <select class="custom-select" formControlName="origen">

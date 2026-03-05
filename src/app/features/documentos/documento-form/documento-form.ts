@@ -43,6 +43,9 @@ export class DocumentoFormComponent implements OnInit {
     fecha_plazo: [''],
     asunto: ['', [Validators.required, Validators.minLength(5)]],
     referencia: [''],
+    remitente_externo: [''],
+    cuerpo: [''],
+    observaciones: [''],
     requiere_respuesta: [false],
     prioridad: ['MEDIA']
   });
@@ -86,6 +89,9 @@ export class DocumentoFormComponent implements OnInit {
           fecha_plazo: this.toDateInput(doc?.fecha_plazo),
           asunto: doc?.asunto || '',
           referencia: doc?.referencia || '',
+          remitente_externo: doc?.remitente_externo || '',
+          cuerpo: doc?.cuerpo || '',
+          observaciones: doc?.observaciones || '',
           requiere_respuesta: !!doc?.requiere_respuesta,
           prioridad: doc?.prioridad || 'MEDIA'
         });
@@ -160,10 +166,14 @@ export class DocumentoFormComponent implements OnInit {
       return;
     }
 
+    const raw = this.form.getRawValue();
+    if (raw?.requiere_respuesta && !raw?.fecha_plazo) {
+      this.ui.toast('warning', 'Si requiere respuesta, debes ingresar fecha de plazo.');
+      return;
+    }
+
     const ok = await this.ui.confirm(this.id ? 'Guardar cambios' : 'Crear documento', this.id ? 'Se actualizará la información del documento.' : 'Se creará un nuevo documento en borrador.', this.id ? 'Guardar' : 'Crear');
     if (!ok) return;
-
-    const raw = this.form.getRawValue();
     const payload: any = {
       entity_code: ENTITY_CODE,
       type_id: raw.tipo_doc_id,
@@ -176,6 +186,9 @@ export class DocumentoFormComponent implements OnInit {
       due_date: raw.fecha_plazo || null,
       subject: raw.asunto,
       reference: raw.referencia || null,
+      remitente_externo: raw.remitente_externo || null,
+      body: raw.cuerpo || null,
+      observaciones: raw.observaciones || null,
       requires_response: !!raw.requiere_respuesta,
       priority: raw.prioridad
     };
