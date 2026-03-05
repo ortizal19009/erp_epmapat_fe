@@ -108,10 +108,20 @@
         </select>
       </div>
 
+      <div class="col-md-4">
+        <label class="d-block mb-1 text-muted">Documento escaneado</label>
+        <input type="file" class="form-control" (change)="onFileSelected($event)" />
+        <small class="text-muted" *ngIf="selectedFile">Seleccionado: {{ selectedFile.name }}</small>
+      </div>
+
       <div class="col-md-4 d-flex align-items-end">
-        <div class="form-check mb-2">
+        <div class="form-check mb-2 mr-3">
           <input id="reqResp" type="checkbox" class="form-check-input" formControlName="requiere_respuesta" />
           <label for="reqResp" class="form-check-label">Requiere respuesta</label>
+        </div>
+        <div class="form-check mb-2" *ngIf="!id">
+          <input id="uploadNow" type="checkbox" class="form-check-input" [(ngModel)]="uploadOnCreate" [ngModelOptions]="{standalone: true}" />
+          <label for="uploadNow" class="form-check-label">Adjuntar al guardar</label>
         </div>
       </div>
     </div>

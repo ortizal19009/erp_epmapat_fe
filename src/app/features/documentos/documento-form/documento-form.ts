@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
 import { DocumentosApi } from '../../../core/api/documentos-api';
@@ -14,7 +14,7 @@ const ENTITY_CODE = 'EPMAPA-T';
 @Component({
   selector: 'app-documento-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule],
   templateUrl: './documento-form.html',
   styleUrls: ['./documento-form.css']
 })
@@ -31,6 +31,9 @@ export class DocumentoFormComponent implements OnInit {
   docTypes: any[] = [];
   series: any[] = [];
   subseries: any[] = [];
+
+  selectedFile: File | null = null;
+  uploadOnCreate = true;
 
   form = this.fb.group({
     tipo_doc_id: ['', Validators.required],
@@ -148,6 +151,11 @@ export class DocumentoFormComponent implements OnInit {
     this.ccdApi.listSubseries(seriesId).subscribe({ next: (r) => this.subseries = r || [] });
   }
 
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.selectedFile = input.files?.[0] || null;
+  }
+
   async save(): Promise<void> {
     this.error = null;
     if (!this.id && !this.canCreate()) {
@@ -199,10 +207,29 @@ export class DocumentoFormComponent implements OnInit {
     req.subscribe({
       next: (res) => {
         const id = this.id || res?.id;
-        this.saving = false;
-        this.ui.toast('success', this.id ? 'Documento actualizado' : 'Documento creado');
-        if (id) this.router.navigate(['/gd/documentos', id]);
-        else this.router.navigate(['/gd/documentos']);
+
+        const finish = () => {
+          this.saving = false;
+          this.ui.toast('success', this.id ? 'Documento actualizado' : 'Documento creado');
+          if (id) this.router.navigate(['/gd/documentos', id]);
+          else this.router.navigate(['/gd/documentos']);
+        };
+
+        if (!this.id && id && this.uploadOnCreate && this.selectedFile) {
+          this.api.uploadFile(id, this.selectedFile).subscribe({
+            next: () => {
+              this.ui.toast('success', 'Archivo escaneado adjuntado');
+              finish();
+            },
+            error: (e) => {
+              this.ui.toast('warning', e?.error?.detail || 'Documento creado, pero no se pudo adjuntar el archivo');
+              finish();
+            }
+          });
+          return;
+        }
+
+        finish();
       },
       error: (e) => {
         this.error = e?.error?.detail || e?.message || 'No se pudo guardar el documento';
