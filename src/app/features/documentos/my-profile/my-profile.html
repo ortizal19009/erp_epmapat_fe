@@ -1,0 +1,29 @@
+<div class="container py-3 gd-page">
+  <div class="page-header mb-3">
+    <h4 class="mb-0">Mi Perfil GD (pruebas)</h4>
+    <small class="text-muted">Define usuario/rol/dependencia para simular permisos en Gestión Documental</small>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="form-row">
+        <div class="col-md-6 mb-2">
+          <label class="control-label">User ID (UUID)</label>
+          <input class="form-control form-control-sm" [(ngModel)]="userId" />
+        </div>
+        <div class="col-md-3 mb-2">
+          <label class="control-label">Rol GD</label>
+          <select class="custom-select custom-select-sm" [(ngModel)]="role">
+            <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
+          </select>
+        </div>
+        <div class="col-md-3 mb-2">
+          <label class="control-label">Dependencia ID</label>
+          <input class="form-control form-control-sm" [(ngModel)]="dependencyId" />
+        </div>
+      </div>
+
+      <button class="btn btn-sm btn-primary" (click)="save()">Guardar perfil GD</button>
+    </div>
+  </div>
+</div>
