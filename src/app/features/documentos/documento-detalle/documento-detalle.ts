@@ -301,6 +301,17 @@ export class DocumentoDetalleComponent implements OnInit {
   fileDownloadUrl(file: any): string {
     return this.api.downloadFile(this.id, file.id);
   }
+
+  derivationBadgeClass(status?: string): string {
+    switch ((status || '').toUpperCase()) {
+      case 'PENDIENTE': return 'badge-warning';
+      case 'LEIDO': return 'badge-info';
+      case 'EN_GESTION': return 'badge-primary';
+      case 'RESPONDIDO': return 'badge-success';
+      case 'CERRADO': return 'badge-dark';
+      default: return 'badge-secondary';
+    }
+  }
 }
 
 

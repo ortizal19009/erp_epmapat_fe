@@ -38,9 +38,9 @@
         </div>
         <ul class="list-group list-group-flush">
           <li *ngFor="let t of timeline" class="list-group-item px-0">
-            <div class="font-weight-bold">{{ t.event_type || t.tipo || 'Evento' }}</div>
-            <small class="text-muted">{{ t.occurred_at || t.created_at | date:'yyyy-MM-dd HH:mm' }}</small>
-            <div class="small" *ngIf="t.description || t.descripcion">{{ t.description || t.descripcion }}</div>
+            <div class="font-weight-bold">{{ t.event_type || t.evento || t.tipo || 'Evento' }}</div>
+            <small class="text-muted">{{ t.occurred_at || t.created_at || t.created_en | date:'yyyy-MM-dd HH:mm' }}</small>
+            <div class="small" *ngIf="t.description || t.descripcion || t.detalle">{{ t.description || t.descripcion || t.detalle }}</div>
           </li>
           <li *ngIf="timeline.length === 0" class="list-group-item px-0 text-muted">Sin eventos.</li>
         </ul>
@@ -162,7 +162,10 @@
         <ul class="list-group list-group-flush">
           <li *ngFor="let d of derivations" class="list-group-item px-0">
             <div class="small"><strong>Destino:</strong> {{ d.para_dependencia_id || d.para_user_id || d.to_dependency_name || d.to_user_name || '—' }}</div>
-            <div class="small"><strong>Estado:</strong> {{ d.status || d.estado || '—' }}</div>
+            <div class="small d-flex align-items-center">
+              <strong class="mr-2">Estado:</strong>
+              <span class="badge" [ngClass]="derivationBadgeClass(d.status || d.estado)">{{ d.status || d.estado || '—' }}</span>
+            </div>
             <small class="text-muted">{{ d.created_at || d.creado_en | date:'yyyy-MM-dd HH:mm' }}</small>
             <div class="mt-2" *ngIf="canRespond() && (d.estado==='PENDIENTE' || d.estado==='LEIDO')">
               <button class="btn btn-sm btn-outline-warning" (click)="attendDerivation(d.id)">Atender</button>
