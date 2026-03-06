@@ -98,6 +98,13 @@ export class DocumentosApi {
     return this.http.patch<any>(`${this.base}/derivations/${derivationId}/read`, { reader_user_id: readerUserId || null });
   }
 
+  attendDerivation(derivationId: string, payload?: { user_id?: string | null; note?: string | null }) {
+    return this.http.patch<any>(`${this.base}/derivations/${derivationId}/attend`, {
+      user_id: payload?.user_id || null,
+      note: payload?.note || null,
+    });
+  }
+
   listFiles(id: string) {
     return this.http.get<any[]>(`${this.base}/${id}/files`);
   }

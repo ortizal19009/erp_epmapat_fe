@@ -104,6 +104,36 @@
         </div>
       </div>
 
+      <div class="card shadow-sm border-0 p-3 mb-3" *ngIf="canRespond()">
+        <h6 class="mb-2">Responder derivación</h6>
+        <div class="row">
+          <div class="col-12">
+            <label class="small text-muted d-block mb-1">Derivación</label>
+            <select class="custom-select custom-select-sm" [(ngModel)]="respondPayload.derivation_id" name="respDerivation">
+              <option value="">(Selecciona)</option>
+              <option *ngFor="let d of derivations" [value]="d.id">
+                {{ d.estado || 'SIN_ESTADO' }} · {{ (d.para_user_id || d.para_dependencia_id || 'destino') }}
+              </option>
+            </select>
+          </div>
+          <div class="col-12 mt-2">
+            <input type="text" class="form-control form-control-sm" [(ngModel)]="respondPayload.subject" name="respSubject" placeholder="Asunto de respuesta" />
+          </div>
+          <div class="col-12 mt-2">
+            <textarea class="form-control form-control-sm" rows="3" [(ngModel)]="respondPayload.body" name="respBody" placeholder="Contenido de respuesta"></textarea>
+          </div>
+          <div class="col-12 mt-2">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="nestedResp" [(ngModel)]="respondPayload.nested" name="nestedResp" />
+              <label class="form-check-label small" for="nestedResp">Crear documento de respuesta relacionado</label>
+            </div>
+          </div>
+          <div class="col-12 mt-2">
+            <button class="btn btn-sm btn-outline-success" (click)="respondDerivation()">Responder derivación</button>
+          </div>
+        </div>
+      </div>
+
       <div class="card shadow-sm border-0 p-3 mb-3">
         <div class="d-flex justify-content-between align-items-center mb-2">
           <h6 class="mb-0">Archivos</h6>
@@ -131,9 +161,12 @@
         </div>
         <ul class="list-group list-group-flush">
           <li *ngFor="let d of derivations" class="list-group-item px-0">
-            <div class="small"><strong>Destino:</strong> {{ d.to_dependency_name || d.to_user_name || '—' }}</div>
+            <div class="small"><strong>Destino:</strong> {{ d.para_dependencia_id || d.para_user_id || d.to_dependency_name || d.to_user_name || '—' }}</div>
             <div class="small"><strong>Estado:</strong> {{ d.status || d.estado || '—' }}</div>
-            <small class="text-muted">{{ d.created_at | date:'yyyy-MM-dd HH:mm' }}</small>
+            <small class="text-muted">{{ d.created_at || d.creado_en | date:'yyyy-MM-dd HH:mm' }}</small>
+            <div class="mt-2" *ngIf="canRespond() && (d.estado==='PENDIENTE' || d.estado==='LEIDO')">
+              <button class="btn btn-sm btn-outline-warning" (click)="attendDerivation(d.id)">Atender</button>
+            </div>
           </li>
           <li *ngIf="derivations.length === 0" class="list-group-item px-0 text-muted">Sin derivaciones.</li>
         </ul>

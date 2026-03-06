@@ -35,6 +35,7 @@ export class DocumentoDetalleComponent implements OnInit {
 
   receivePayload = { dependencia_id: '', receptor_id: '', comentario: '' };
   derivePayload = { to_dependency_id: '', to_user_id: '', comment: '', due_at: '' };
+  respondPayload = { derivation_id: '', subject: '', body: '', nested: true };
 
   constructor(
     private route: ActivatedRoute,
@@ -96,6 +97,12 @@ export class DocumentoDetalleComponent implements OnInit {
     if (!this.doc) return false;
     if (!this.hasRole('RESPONSABLE', 'SUPERVISOR', 'ADMIN')) return false;
     return this.doc.estado === 'RECIBIDO' || this.doc.estado === 'EN_REVISION';
+  }
+
+  canRespond(): boolean {
+    if (!this.doc) return false;
+    if (!this.hasRole('RESPONSABLE', 'SUPERVISOR', 'ADMIN')) return false;
+    return this.doc.estado === 'RECIBIDO' || this.doc.estado === 'DERIVADO' || this.doc.estado === 'EN_REVISION';
   }
 
   loadAll(): void {
@@ -205,6 +212,66 @@ export class DocumentoDetalleComponent implements OnInit {
       },
       error: (e) => {
         this.actionError = e?.error?.detail || 'No se pudo derivar';
+        this.ui.toast('error', this.actionError || 'Error');
+      }
+    });
+  }
+
+  attendDerivation(derivationId: string): void {
+    this.actionError = null;
+    if (!derivationId) return;
+    this.api.attendDerivation(derivationId, { user_id: this.currentUserId, note: 'Atendido desde detalle' }).subscribe({
+      next: () => {
+        this.ui.toast('success', 'Derivación marcada en gestión');
+        this.api.listDerivations(this.id).subscribe({ next: (r) => this.derivations = r || [] });
+      },
+      error: (e) => {
+        this.actionError = e?.error?.detail || 'No se pudo marcar como atendida';
+        this.ui.toast('error', this.actionError || 'Error');
+      }
+    });
+  }
+
+  async respondDerivation(): Promise<void> {
+    this.actionError = null;
+    if (!this.canRespond()) return;
+    if (!this.respondPayload.derivation_id) {
+      this.actionError = 'Selecciona una derivación para responder.';
+      this.ui.toast('warning', this.actionError);
+      return;
+    }
+    if (!this.respondPayload.subject || !this.respondPayload.body) {
+      this.actionError = 'Completa asunto y cuerpo de la respuesta.';
+      this.ui.toast('warning', this.actionError);
+      return;
+    }
+
+    const ok = await this.ui.confirm('Responder derivación', 'Se registrará la respuesta y se cerrará la derivación.', 'Responder');
+    if (!ok) return;
+
+    const payload = {
+      derivation_id: this.respondPayload.derivation_id,
+      subject: this.respondPayload.subject,
+      body: this.respondPayload.body,
+      responded_by_user_id: this.currentUserId || undefined,
+      user_id: this.currentUserId || undefined,
+      user_role: this.currentRole,
+      nested_subject: this.respondPayload.subject,
+      nested_body: this.respondPayload.body
+    };
+
+    const req = this.respondPayload.nested
+      ? this.api.respondNested(this.id, payload)
+      : this.api.respond(this.id, payload);
+
+    req.subscribe({
+      next: () => {
+        this.respondPayload = { derivation_id: '', subject: '', body: '', nested: true };
+        this.ui.toast('success', 'Respuesta registrada');
+        this.loadAll();
+      },
+      error: (e) => {
+        this.actionError = e?.error?.detail || 'No se pudo registrar respuesta';
         this.ui.toast('error', this.actionError || 'Error');
       }
     });
