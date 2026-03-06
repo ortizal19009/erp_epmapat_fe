@@ -546,6 +546,21 @@ tr:not(.cursor-pointer):not(.fila) td:hover{ cursor: default; }
 .gd-page .badge.bg-light{color:#343a40 !important;border:1px solid #dee2e6;}
 
 /* =========================================================
+   LAYOUT GD - ESPACIADO TIPO CONTAINER-FLUID
+========================================================= */
+.gd-page{
+  width:100%;
+  padding: .75rem 1rem 1rem;
+  box-sizing:border-box;
+}
+@media (min-width: 1200px){
+  .gd-page{ padding-left:1.25rem; padding-right:1.25rem; }
+}
+@media (max-width: 768px){
+  .gd-page{ padding-left:.75rem; padding-right:.75rem; }
+}
+
+/* =========================================================
    MODALES LEGIBLES (Bootstrap + SweetAlert)
 ========================================================= */
 .modal-content{
