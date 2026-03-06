@@ -218,6 +218,17 @@ label {
   }
 }
 
+.ntaCredito{
+  /* background: linear-gradient(135deg, #28a745, #20c997); */
+  color: rgb(255, 0, 0);
+/*   padding: 0.4rem 0.8rem;
+te
+ */  font-size: 1.2rem;
+  font-weight: 600;
+  
+  border: none;
+}
+
 /* ===== TABLA CON HEADER FIJADO ===== */
 .table-scroll-container {
   position: relative;

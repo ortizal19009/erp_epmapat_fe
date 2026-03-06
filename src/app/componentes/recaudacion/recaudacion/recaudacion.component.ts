@@ -45,7 +45,6 @@ import { JasperReportService, MergeItem } from 'src/app/servicios/jasper-report.
 import { PtoemisionService } from 'src/app/servicios/ptoemision.service';
 import { DefinirService } from 'src/app/servicios/administracion/definir.service';
 import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
-
 import Swal from 'sweetalert2';
 
 @Component({
@@ -567,7 +566,7 @@ export class RecaudacionComponent implements OnInit {
   //   PLANILLAS SIN COBRO
   // =====================
 
-  sinCobro(idcliente: number) {
+  __sinCobro(idcliente: number) {
     this.loadingService.showLoading();
     this.swbusca = 0;
 
@@ -603,6 +602,70 @@ export class RecaudacionComponent implements OnInit {
 
         this._sincobro = sincobrar;
         this.listaFiltrada = [...sincobrar];
+      },
+      error: (e) => console.error(e),
+    });
+  }
+  sinCobro(idcliente: number) {
+    this.loadingService.showLoading();
+    this.swbusca = 0;
+
+    this.facService.getFacSincobro(idcliente).subscribe({
+      next: async (sincobrar: any[]) => {
+        if (!sincobrar.length) {
+          this.swbusca = 2;
+          this.loadingService.hideLoading();
+          return;
+        }
+
+        // Procesar todos los items en paralelo
+        await Promise.all(
+          sincobrar.map(async (item: any, i: number) => {
+            if (item.idAbonado !== 0 && item.idmodulo !== 27) {
+              const abonado: Abonados = await this.getAbonado(item.idAbonado);
+              item.direccion = abonado.direccionubicacion;
+              item.responsablePago = abonado.idresponsable.nombre;
+              const emision: any = await this.getEmision(item.idfactura);
+              item.fechaemision = emision;
+              item.iva = 0;
+            } else {
+              const cliente: Clientes = await this.getCliente(item.idCliente);
+              item.direccion = cliente.direccion;
+              item.responsablePago = cliente.nombre;
+              item.fechaemision = item.feccrea;
+              const iva: any = await this.calIva(item.idfactura);
+              item.iva = (iva.length ? iva[0][1] : 0);
+            }
+          })
+        );
+
+        // Ordenar: primero por idAbonado (agrupando), luego por feccrea dentro de cada grupo
+        const listaOrdenada = [...sincobrar].sort((a, b) => {
+          // Items sin abonado (idAbonado === 0 o idmodulo === 27) van al final
+          const aEsAbonado = a.idAbonado !== 0 && a.idmodulo !== 27;
+          const bEsAbonado = b.idAbonado !== 0 && b.idmodulo !== 27;
+
+          if (aEsAbonado && !bEsAbonado) return -1; // a va primero
+          if (!aEsAbonado && bEsAbonado) return 1;  // b va primero
+
+          // Ambos son abonados: agrupar por idAbonado
+          if (aEsAbonado && bEsAbonado) {
+            if (a.idAbonado !== b.idAbonado) {
+              return a.idAbonado - b.idAbonado; // Ordenar por idAbonado
+            }
+            // Mismo abonado: ordenar por feccrea
+            return new Date(a.feccrea).getTime() - new Date(b.feccrea).getTime();
+          }
+
+          // Ambos sin abonado: ordenar por feccrea
+          return new Date(a.feccrea).getTime() - new Date(b.feccrea).getTime();
+        });
+
+        this._sincobro = listaOrdenada;
+        this.listaFiltrada = [...listaOrdenada];
+
+        this.swbusca = 3;
+        this.loadingService.hideLoading();
       },
       error: (e) => console.error(e),
     });
@@ -698,8 +761,45 @@ export class RecaudacionComponent implements OnInit {
     });
     this.totalAcobrar();
   }
-
   marcarAnteriores(e: any, index: number, cuenta: number) {
+    this.ntaCredito(cuenta, e.target.checked);
+
+    if (this._sincobro[index].idmodulo === 3 || this._sincobro[index].idmodulo === 4) {
+      if (this._sincobro[index].pagado) {
+        // Al MARCAR: marcar todas las facturas anteriores del mismo abonado
+        const fechaSeleccionada = new Date(this._sincobro[index].feccrea).getTime();
+        const idAbonado = this._sincobro[index].idAbonado;
+
+        this._sincobro.forEach((item: any) => {
+          if (
+            item.idAbonado === idAbonado &&
+            new Date(item.feccrea).getTime() <= fechaSeleccionada
+          ) {
+            item.pagado = 1;
+          }
+        });
+
+      } else {
+        // Al DESMARCAR: desmarcar todas las facturas posteriores del mismo abonado
+        const fechaSeleccionada = new Date(this._sincobro[index].feccrea).getTime();
+        const idAbonado = this._sincobro[index].idAbonado;
+
+        this._sincobro.forEach((item: any) => {
+          if (
+            item.idAbonado === idAbonado &&
+            new Date(item.feccrea).getTime() >= fechaSeleccionada
+          ) {
+            item.pagado = 0;
+          }
+        });
+      }
+    } else {
+      this._sincobro[index].pagado = this._sincobro[index].pagado ? 1 : 0;
+    }
+
+    this.totalAcobrar();
+  }
+  __marcarAnteriores(e: any, index: number, cuenta: number) {
     this.ntaCredito(cuenta, e.target.checked);
 
     if (this._sincobro[index].idmodulo === 3 || this._sincobro[index].idmodulo === 4) {
@@ -909,7 +1009,7 @@ export class RecaudacionComponent implements OnInit {
   //   FACxRECAUDA
   // =====================
 
-  facxrecauda(recaCreada: Recaudacion, i: number): Promise<void> {
+  ___facxrecauda(recaCreada: Recaudacion, i: number): Promise<void> {
     return new Promise((resolve, reject) => {
 
       const avanzar = (idx: number) => {
@@ -982,6 +1082,153 @@ export class RecaudacionComponent implements OnInit {
                         },
                         error: (e) => console.error(e),
                       });
+                    }
+
+                    this.facService.updateFacturas(fac).subscribe({
+                      next: async (nex: any) => {
+                        if (this._nc.length > 0 && fac.valornotacredito > 0) {
+                          const valoresnc: Valoresnc = new Valoresnc();
+                          valoresnc.estado = 1;
+                          valoresnc.idntacredito_ntacredito = this._nc[0];
+                          valoresnc.valor = this.formCobrar.value.ncvalor;
+                          valoresnc.fechaaplicado = new Date();
+                          valoresnc.saldo =
+                            this._nc[0].saldo - this.formCobrar.value.ncvalor;
+                          this.guardarValoresNc(valoresnc, nex);
+                        }
+
+                        this.swcobrado = true;
+
+                        if (nex.idmodulo.idmodulo !== 27 || nex.interescobrado > 0) {
+                          await this.saveRubxFac(fac, rubro, item.interes);
+                        }
+                        if (fac.formapago !== 4) {
+                          this.s_fecfacturas.generateXmlOfPago(fac.idfactura);
+                        }
+                        item.procesando = false;
+                        item.procesada = true;
+
+                        avanzar(idx + 1);
+                      },
+                      error: (err) => {
+                        item.procesando = false;
+                        reject(err?.error ?? err);
+                      },
+                    });
+                  },
+                  error: (e) => {
+                    item.procesando = false;
+                    reject(e);
+                  },
+                });
+              },
+              error: (err) => {
+                item.procesando = false;
+                reject(err?.error ?? err);
+              },
+            });
+          },
+          error: (err) => {
+            item.procesando = false;
+            reject(err?.error ?? err);
+          },
+        });
+      };
+
+      avanzar(i);
+    });
+  }
+
+  facxrecauda(recaCreada: Recaudacion, i: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+
+      const avanzar = async (idx: number) => {
+        if (idx >= this._sincobro.length) {
+          resolve();
+          return;
+        }
+
+        const item = this._sincobro[idx];
+
+        if (item.pagado !== 1 && item.pagado !== true) {
+          item.procesando = false;
+          avanzar(idx + 1);
+          return;
+        }
+
+        item.procesando = true;
+
+        const idfactura: number = item.idfactura;
+        const valfactura: number = item.total + item.interes;
+        const fechacobro: Date = new Date();
+        const horaActual: string =
+          `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`;
+
+        const rubro: Rubros = new Rubros();
+        rubro.idrubro = 5;
+
+        this.facService.getById(idfactura).subscribe({
+          next: async (fac: any) => {
+            fac.valornotacredito = this.calcularNCByFactura(valfactura, this.valorNtaCredito);
+
+            const facxr = {} as iFacxrecauda;
+            facxr.idrecaudacion = recaCreada;
+            facxr.idfactura = fac;
+            facxr.estado = 1;
+
+            this.facxrService.save(facxr).subscribe({
+              next: () => {
+                this.rubxfacService.getIva(this.iva, fac.idfactura).subscribe({
+                  next: async (iva: any) => {
+                    fac.swiva = (iva && iva[0]) ? iva[0][1] : 0;
+                    fac.fechacobro = fechacobro;
+                    fac.horacobro = horaActual;
+
+                    if (this.swNC === true) {
+                      fac.formapago = 3;
+                    }
+
+                    fac.usuariocobro = this.authService.idusuario;
+                    fac.interescobrado = item.interes;
+                    fac.pagado = 1;
+                    fac.estado = (fac.estado === 2) ? 2 : 1;
+
+                    // =====================
+                    // ASIGNACIÓN SEGURA DEL NÚMERO DE FACTURA
+                    // =====================
+                    if (fac.nrofactura === null) {
+                      try {
+                        // 1. Leer el último número desde recaudaxcaja (fuente de verdad)
+                        const rxcActual: any = await this.s_recaudaxcaja
+                          .getLastConexion(this._caja.idcaja)
+                          .toPromise();
+
+                        // 2. Incrementar secuencialmente desde la fuente de verdad
+                        const nrofac_f = rxcActual.facfin + 1;
+
+                        // 3. Actualizar recaudaxcaja ANTES de continuar (await garantiza secuencia)
+                        rxcActual.facfin = nrofac_f;
+                        await this.s_recaudaxcaja
+                          .updateRecaudaxcaja(rxcActual)
+                          .toPromise();
+
+                        // 4. Actualizar el estado local y formatear el número
+                        this.recxcaja = rxcActual;
+                        this.formatNroFactura(nrofac_f);
+
+                        // 5. Asignar el número a la factura
+                        fac.nrofactura =
+                          `${this._codRecaudador}-${nrofac_f.toString().padStart(9, '0')}`;
+
+                        sessionStorage.setItem(
+                          'ultfac',
+                          nrofac_f.toString().padStart(9, '0')
+                        );
+                      } catch (err) {
+                        item.procesando = false;
+                        reject(err);
+                        return;
+                      }
                     }
 
                     this.facService.updateFacturas(fac).subscribe({

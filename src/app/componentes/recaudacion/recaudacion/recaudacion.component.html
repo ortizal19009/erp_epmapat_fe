@@ -127,7 +127,7 @@
                         <i class="bi bi-telephone mr-1"></i>
                         <strong>Teléfono:</strong> {{ cliente.telefono }}
                       </span>
-                      <span class="text-muted small" *ngIf="formCobrar.value.saldo">
+                      <span class="text-muted small ntaCre" *ngIf="formCobrar.value.saldo">
                         <i class="bi bi-credit-card mr-1"></i>
                         <strong>Nota Crédito:</strong> {{ formCobrar.value.saldo }}
                       </span>
@@ -233,6 +233,7 @@
                       <td class="text-center date-cell small">
                         {{ sincobro.fechaemision | date:"dd/MM/yyyy" }}
                       </td>
+
                       <td class="module-name small">
                         {{ sincobro.modulo }}
                       </td>
