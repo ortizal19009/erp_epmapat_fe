@@ -65,6 +65,11 @@ export class DocumentoDetalleComponent implements OnInit {
     catch { return 'ADMIN'; }
   }
 
+  get currentUserId(): string | null {
+    try { return globalThis.localStorage?.getItem('gd.user_id'); }
+    catch { return null; }
+  }
+
   hasRole(...roles: string[]): boolean {
     return roles.includes(this.currentRole);
   }
@@ -98,7 +103,7 @@ export class DocumentoDetalleComponent implements OnInit {
     this.error = null;
     this.actionError = null;
 
-    this.api.get(this.id).subscribe({
+    this.api.get(this.id, this.currentUserId).subscribe({
       next: (doc) => {
         this.doc = doc;
         this.loading = false;
@@ -227,4 +232,5 @@ export class DocumentoDetalleComponent implements OnInit {
     return this.api.downloadFile(this.id, file.id);
   }
 }
+
 

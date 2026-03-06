@@ -7,6 +7,7 @@ import { DocumentosApi } from '../../../core/api/documentos-api';
 import { DependencyApi } from '../../../core/api/dependency-api';
 import { DocumentTypeApi } from '../../../core/api/document-type-api';
 import { CcdApi } from '../../../core/api/ccd-api';
+import { LookupsApi } from '../../../core/api/lookups-api';
 import { UiFeedbackService } from '../shared/ui-feedback.service';
 
 const ENTITY_CODE = 'EPMAPA-T';
@@ -31,6 +32,10 @@ export class DocumentoFormComponent implements OnInit {
   docTypes: any[] = [];
   series: any[] = [];
   subseries: any[] = [];
+  users: any[] = [];
+
+  selectedTargetUserIds: string[] = [];
+  selectedTargetDependencyIds: string[] = [];
 
   selectedFile: File | null = null;
   uploadOnCreate = true;
@@ -59,6 +64,7 @@ export class DocumentoFormComponent implements OnInit {
     private depsApi: DependencyApi,
     private typesApi: DocumentTypeApi,
     private ccdApi: CcdApi,
+    private lookupsApi: LookupsApi,
     private route: ActivatedRoute,
     private router: Router,
     private ui: UiFeedbackService
@@ -78,7 +84,7 @@ export class DocumentoFormComponent implements OnInit {
       return;
     }
 
-    this.api.get(this.id).subscribe({
+    this.api.get(this.id, this.currentUserId).subscribe({
       next: (doc) => {
         this.currentState = doc?.estado || 'BORRADOR';
         this.form.patchValue({
@@ -118,6 +124,11 @@ export class DocumentoFormComponent implements OnInit {
     catch { return 'ADMIN'; }
   }
 
+  get currentUserId(): string | null {
+    try { return globalThis.localStorage?.getItem('gd.user_id'); }
+    catch { return null; }
+  }
+
   hasRole(...roles: string[]): boolean {
     return roles.includes(this.currentRole);
   }
@@ -135,6 +146,7 @@ export class DocumentoFormComponent implements OnInit {
     this.depsApi.list(ENTITY_CODE).subscribe({ next: (r) => this.dependencies = r || [] });
     this.typesApi.list(ENTITY_CODE).subscribe({ next: (r) => this.docTypes = r || [] });
     this.ccdApi.listSeries(ENTITY_CODE).subscribe({ next: (r) => this.series = r || [] });
+    this.lookupsApi.users(ENTITY_CODE, '', 1, 300).subscribe({ next: (r) => this.users = r?.items || [] });
   }
 
   onSeriesChange(): void {
@@ -149,6 +161,16 @@ export class DocumentoFormComponent implements OnInit {
 
   loadSubseries(seriesId: string): void {
     this.ccdApi.listSubseries(seriesId).subscribe({ next: (r) => this.subseries = r || [] });
+  }
+
+  onTargetUsersChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    this.selectedTargetUserIds = Array.from(select.selectedOptions).map(o => o.value).filter(Boolean);
+  }
+
+  onTargetDepsChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    this.selectedTargetDependencyIds = Array.from(select.selectedOptions).map(o => o.value).filter(Boolean);
   }
 
   onFileSelected(event: Event): void {
@@ -197,6 +219,8 @@ export class DocumentoFormComponent implements OnInit {
       remitente_externo: raw.remitente_externo || null,
       body: raw.cuerpo || null,
       observaciones: raw.observaciones || null,
+      to_user_ids: this.selectedTargetUserIds,
+      to_dependency_ids: this.selectedTargetDependencyIds,
       requires_response: !!raw.requiere_respuesta,
       priority: raw.prioridad
     };
@@ -255,4 +279,5 @@ export class DocumentoFormComponent implements OnInit {
     return d.toISOString().slice(0, 10);
   }
 }
+
 

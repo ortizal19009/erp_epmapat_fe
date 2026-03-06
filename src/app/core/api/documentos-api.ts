@@ -18,8 +18,10 @@ export class DocumentosApi {
     return this.http.get<any>(this.base, { params });
   }
 
-  get(id: string) {
-    return this.http.get<any>(`${this.base}/${id}`);
+  get(id: string, userId?: string | null) {
+    let params = new HttpParams();
+    if (userId) params = params.set('user_id', userId);
+    return this.http.get<any>(`${this.base}/${id}`, { params });
   }
 
   create(payload: any) {

@@ -3,6 +3,13 @@ import { Injectable } from '@angular/core';
 import { catchError, map, of, switchMap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
+const MOCK_PERSONAL_GD = [
+  { id: '11111111-1111-1111-1111-111111111111', full_name: 'María José Pérez', email: 'maria.perez@epmapat.gob.ec', active: true, source: 'MOCK' },
+  { id: '22222222-2222-2222-2222-222222222222', full_name: 'Carlos Andrade', email: 'carlos.andrade@epmapat.gob.ec', active: true, source: 'MOCK' },
+  { id: '33333333-3333-3333-3333-333333333333', full_name: 'Lucía Montalvo', email: 'lucia.montalvo@epmapat.gob.ec', active: true, source: 'MOCK' },
+  { id: '44444444-4444-4444-4444-444444444444', full_name: 'Diego Villacís', email: 'diego.villacis@epmapat.gob.ec', active: true, source: 'MOCK' }
+];
+
 @Injectable({ providedIn: 'root' })
 export class LookupsApi {
   private base = `${((environment as any).GD_API_URL || environment.API_URL) + '/api'}/lookups`;
@@ -35,12 +42,24 @@ export class LookupsApi {
       catchError(() => of({ items: [], page, page_size: pageSize, total: 0, pages: 1 }))
     );
 
+    const fromMock$ = of((() => {
+      const term = (q || '').trim().toLowerCase();
+      const filtered = term ? MOCK_PERSONAL_GD.filter((u: any) => (u.full_name || '').toLowerCase().includes(term)) : MOCK_PERSONAL_GD;
+      const start = (page - 1) * pageSize;
+      const items = filtered.slice(start, start + pageSize);
+      return { items, page, page_size: pageSize, total: filtered.length, pages: Math.ceil(filtered.length / pageSize) || 1 };
+    })());
+
     return fromGd$.pipe(
       switchMap((res: any) => {
         const hasItems = Array.isArray(res?.items) && res.items.length > 0;
         return hasItems ? of(res) : fromRrhh$;
       }),
-      catchError(() => fromRrhh$)
+      switchMap((res: any) => {
+        const hasItems = Array.isArray(res?.items) && res.items.length > 0;
+        return hasItems ? of(res) : fromMock$;
+      }),
+      catchError(() => fromRrhh$.pipe(switchMap((res: any) => (Array.isArray(res?.items) && res.items.length > 0) ? of(res) : fromMock$)))
     );
   }
 

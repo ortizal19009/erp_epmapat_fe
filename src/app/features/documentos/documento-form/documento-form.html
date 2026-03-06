@@ -114,6 +114,20 @@
         <small class="text-muted" *ngIf="selectedFile">Seleccionado: {{ selectedFile.name }}</small>
       </div>
 
+      <div class="col-md-6">
+        <label class="d-block mb-1 text-muted">Etiquetar usuarios (destinatarios)</label>
+        <select class="custom-select" multiple size="4" (change)="onTargetUsersChange($event)">
+          <option *ngFor="let u of users" [value]="u.id">{{ u.full_name || u.name || u.email }}</option>
+        </select>
+      </div>
+
+      <div class="col-md-6">
+        <label class="d-block mb-1 text-muted">Dirigir a dependencias</label>
+        <select class="custom-select" multiple size="4" (change)="onTargetDepsChange($event)">
+          <option *ngFor="let d of dependencies" [value]="d.id">{{ d.codigo }} - {{ d.nombre }}</option>
+        </select>
+      </div>
+
       <div class="col-md-4 d-flex align-items-end">
         <div class="form-check mb-2 mr-3">
           <input id="reqResp" type="checkbox" class="form-check-input" formControlName="requiere_respuesta" />
