@@ -36,6 +36,8 @@ import {
 } from 'rxjs/operators';
 import { from, of, firstValueFrom, forkJoin } from 'rxjs';
 import { isFunction } from 'chart.js/dist/helpers/helpers.core';
+import { LoadingService } from 'src/app/servicios/loading.service';
+import { JasperReportService } from 'src/app/servicios/jasper-report.service';
 
 @Component({
   selector: 'app-emisiones',
@@ -111,6 +113,7 @@ export class EmisionesComponent implements OnInit {
   btncerrar: boolean = false;
   _rutasxemi: RutaXEmisionUI[] = [];
   _lecturas: any[] = [];
+  idusuario: number;
 
   porcResidencial: number[] = [
     0.777, 0.78, 0.78, 0.78, 0.78, 0.778, 0.778, 0.778, 0.78, 0.78, 0.78, 0.68,
@@ -136,7 +139,9 @@ export class EmisionesComponent implements OnInit {
     private s_pdf: PdfService,
     private s_rxfService: RubroxfacService,
     private s_emisionesIndividuales: EmisionIndividualService,
-  ) {}
+    private s_loading: LoadingService,
+    private s_jasperreport: JasperReportService
+  ) { }
 
   ngOnInit(): void {
     this.modulo.idmodulo = 4;
@@ -145,6 +150,7 @@ export class EmisionesComponent implements OnInit {
     let coloresJSON = sessionStorage.getItem('/emisiones');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
     else this.buscaColor();
+    this.idusuario = this.authService.idusuario;
 
     this.formBuscar = this.fb.group({
       desde: '',
@@ -640,7 +646,7 @@ export class EmisionesComponent implements OnInit {
       this.s_emisionindividual
         .saveEmisionIndividual(emision_individual)
         .subscribe({
-          next: (d_emisionIndividual: any) => {},
+          next: (d_emisionIndividual: any) => { },
           error: (e) => console.error(e),
         });
     }
@@ -680,14 +686,14 @@ export class EmisionesComponent implements OnInit {
     if (lectura.idemision >= 243) {
       //Emisiones actuales
       this.s_lecturas.calcular_Valores(body).subscribe({
-        next: (datos: any) => {},
+        next: (datos: any) => { },
         error: (e: any) => console.error(e.error),
       });
     } else {
       //Emisiones anteriores
       //this.s_lecturas.calcular_Valores_anteriores();
       this.s_lecturas.calcular_Valores_anteriores(body).subscribe({
-        next: (datos: any) => {},
+        next: (datos: any) => { },
         error: (e: any) => console.error(e.error),
       });
     }
@@ -1477,7 +1483,7 @@ export class EmisionesComponent implements OnInit {
       container.appendChild(embed);
     }
   }
-  r_facturasEliminadas() {}
+  r_facturasEliminadas() { }
   imprimirReporte() {
     let doc = new jsPDF('p', 'pt', 'a4');
     this.s_pdf.header('REPORETE DE REFACTURACION', doc);
@@ -1489,9 +1495,8 @@ export class EmisionesComponent implements OnInit {
     let doc = new jsPDF('p', 'pt', 'a4');
     /* HEADER */
     let date_emision: Date = new Date(emisionIndividual.idemision.feccrea);
-    let fecemision = `${date_emision.getFullYear()}-${
-      date_emision.getMonth() + 1
-    }`;
+    let fecemision = `${date_emision.getFullYear()}-${date_emision.getMonth() + 1
+      }`;
     this.s_pdf.header(`REPORTE DE REFACTURACION INDIVIDUAL ${fecemision}`, doc);
 
     /* LECTURAS ANTERIORES */
@@ -1653,13 +1658,11 @@ export class EmisionesComponent implements OnInit {
       },
       body: [
         [
-          `Fecha emision:  ${dateEmision.getFullYear()}/${
-            dateEmision.getMonth() + 1
+          `Fecha emision:  ${dateEmision.getFullYear()}/${dateEmision.getMonth() + 1
           }/${dateEmision.getDate()}`,
         ],
         [
-          `Fecha impresión:  ${currentDate.getFullYear()}/${
-            currentDate.getMonth() + 1
+          `Fecha impresión:  ${currentDate.getFullYear()}/${currentDate.getMonth() + 1
           }/${currentDate.getDate()}`,
         ],
       ],
@@ -1669,7 +1672,7 @@ export class EmisionesComponent implements OnInit {
     //doc.save('datauristring');
     doc.output('dataurlnewwindow', { filename: 'comprobante.pdf' });
   }
-  getrubrosxfactura(idfactura: number) {}
+  getrubrosxfactura(idfactura: number) { }
   imprimir() {
     switch (this.optImprimir) {
       case '0':
@@ -2017,10 +2020,11 @@ export class EmisionesComponent implements OnInit {
               swAdultoMayor: lectura?.idabonado_abonados?.adultomayor,
               swMunicipio: lectura?.idabonado_abonados?.municipio,
               swAguapotable: lectura?.idabonado_abonados?.swalcantarillado,
+              swbasura: lectura?.idabonado_abonados?.swbasura,
             };
 
             // Calcular y actualizar
-            return this.s_lecturas.calcular_Valores(datos).pipe(
+            return this.s_lecturas.calcular_Valores_v2(datos).pipe(
               mergeMap((totalCalculado: number) => {
                 sumaM3 += m3;
                 const patch = { ...lectura, total1: totalCalculado, estado: 1 };
@@ -2117,7 +2121,98 @@ export class EmisionesComponent implements OnInit {
       console.error('Error:', err);
     }
   }
+  abrirRutasAndEmision() {
+    this.s_loading.showLoading();
+    this.facService.findCobradasByIdemision(this.idemision).subscribe((datos: any) => {
+      if (datos.length > 0) {
+        this.impComprobante(this.idemision);
+        return;
+      }
+    });
+
+
+  }
+  continuarApertura() {
+    this.s_loading.showLoading();
+    let swcerrando: boolean = false;
+    this._rutasxemi.forEach((ruta: any) => {
+      console.log(ruta);
+      if (ruta.estado === 1) {
+        swcerrando = true;
+        const payload = {
+          estado: 0,
+          usuariocierre: '',
+          fechacierre: '',
+          m3: 0,
+          usucrea: this.authService.idusuario,
+          feccrea: ruta.feccrea,
+          idrutaxemision: ruta.idrutaxemision,
+          idemision_emisiones: ruta.idemision_emisiones,
+          idruta_rutas: ruta.idruta_rutas,
+        };
+
+        this.ruxemiService.updateRutaxemision(ruta.idrutaxemision, payload).subscribe({
+          next: () => {
+            console.log('✅ Ruta reabierta: ' + ruta.idrutaxemision);
+          },
+          error: (e) => {
+            console.error('❌ Error al reabrir ruta', { error: e, ruta });
+            swcerrando = false;
+            this.s_loading.hideLoading();
+          }
+        });
+      }
+
+    });
+    if (swcerrando) {
+      this.s_lecturas.deleteRubrosEmision(this.idemision).subscribe({
+        next: () => {
+          console.log('✅ Rubros de ruta eliminados');
+          swcerrando = false;
+          this.s_loading.hideLoading();
+        },
+      });
+    }
+
+
+  }
+
+  async impComprobante(idemision: any) {
+    //this.facElectro = true;
+
+    //this.datos = true;
+    this.s_loading.showLoading();
+    let body: any;
+
+    body = {
+      reportName: 'FacturasCobradasXEmision',
+      parameters: {
+        emision: idemision,
+        idusuario: this.authService.idusuario,
+      },
+      extencion: '.pdf',
+    };
+
+    let reporte = await this.s_jasperreport.getReporte(body);
+    setTimeout(() => {
+      const file = new Blob([reporte], { type: 'application/pdf' });
+      const fileURL = URL.createObjectURL(file);
+
+      // Asignar el blob al iframe
+      const pdfViewer = document.getElementById(
+        'pdfViewer'
+      ) as HTMLIFrameElement;
+
+      if (pdfViewer) {
+        pdfViewer.src = fileURL;
+      }
+    }, 1000);
+    this.s_loading.hideLoading();
+  }
+
+
 }
+
 interface Rutasxemision {
   idrutaxemision: number;
   estado: number;

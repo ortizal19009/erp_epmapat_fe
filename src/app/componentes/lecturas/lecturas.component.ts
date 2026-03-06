@@ -808,10 +808,10 @@ export class LecturasComponent implements OnInit {
           swAdultoMayor: lectura.idabonado_abonados.adultomayor,
           swMunicipio: lectura.idabonado_abonados.municipio,
           swAguapotable: lectura.idabonado_abonados.swalcantarillado,
+          swbasura: lectura.idabonado_abonados.swbasura,
         };
-
         try {
-          let total = await this.lecService.calcularValores(datos);
+          let total = await this.lecService.asycalcular_Valores_v2(datos);
           this._lecturas[this.kontador].total1 = total;
           this._lecturas[this.kontador].estado = 1;
           await this.lecService.updateLecturaAsync(

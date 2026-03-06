@@ -51,7 +51,7 @@ export class RutasxemisionService {
 
   updateRutaxemision(
     idrutaemision: number,
-    rutaxemision: Rutasxemision
+    rutaxemision: any
   ): Observable<Object> {
     return this.http.put(baseUrl + '/' + idrutaemision, rutaxemision);
   }

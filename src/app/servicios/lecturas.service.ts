@@ -11,7 +11,7 @@ const baseUrl = `${apiUrl}/lecturas`;
   providedIn: 'root',
 })
 export class LecturasService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   //Lectura por Planilla
   getOnefactura(idfactura: number) {
@@ -23,7 +23,7 @@ export class LecturasService {
       `${baseUrl}?idrutaxemision=${idrutaxemision}`,
     );
   }
-    get_Lecturas(idrutaxemision: Number) {
+  get_Lecturas(idrutaxemision: Number) {
     return this.http.get<Lecturas[]>(
       `${baseUrl}?idrutaxemision=${idrutaxemision}`,
     );
@@ -207,25 +207,33 @@ export class LecturasService {
   }
   getValoresSimulados(datos: any) {
     return this.http.get(
-      `${baseUrl}/simular?m3=${datos.m3}&categoria=${datos.categoria}&swMunicipio=${datos.swMunicipio}&swAdultoMayor=${datos.swAdultoMayor}&swAguapotable=${datos.swAguapotable}`,
+      `${baseUrl}/simular?m3=${datos.m3}&categoria=${datos.categoria}&swMunicipio=${datos.swMunicipio}&swAdultoMayor=${datos.swAdultoMayor}&swAguapotable=${datos.swAguapotable}&swbasura=${datos.swbasura} `,
     );
   }
   async getValoresSimulados_asyc(datos: any): Promise<any> {
     return firstValueFrom(
       this.http.get(
-        `${baseUrl}/simular?m3=${datos.m3}&categoria=${datos.categoria}&swMunicipio=${datos.swMunicipio}&swAdultoMayor=${datos.swAdultoMayor}&swAguapotable=${datos.swAguapotable}`,
+        `${baseUrl}/simular?m3=${datos.m3}&categoria=${datos.categoria}&swMunicipio=${datos.swMunicipio}&swAdultoMayor=${datos.swAdultoMayor}&swAguapotable=${datos.swAguapotable}&swbasura=${datos.swbasura} `,
       ),
     );
   }
 
-  calcular_Valores_v2(datos: any): Observable<number> {
+  calcular_Valores_v2(datos: any) {
     return this.http.post<number>(`${baseUrl}/valoresEmisiones/v2`, datos);
   }
 
+  async asycalcular_Valores_v2(datos: any): Promise<any> {
+    return await firstValueFrom(this.http.post<any>(`${baseUrl}/valoresEmisiones/v2`, datos));
+  }
+
+
   getValoresSimuladosV2(datos: any) {
     return this.http.get(
-      `${baseUrl}/simular/v2?m3=${datos.m3}&categoria=${datos.categoria}&swMunicipio=${datos.swMunicipio}&swAdultoMayor=${datos.swAdultoMayor}&swAguapotable=${datos.swAguapotable}`,
+      `${baseUrl}/simular/v2?m3=${datos.m3}&categoria=${datos.categoria}&swMunicipio=${datos.swMunicipio}&swAdultoMayor=${datos.swAdultoMayor}&swAguapotable=${datos.swAguapotable}&swbasura=${datos.swbasura} `,
     );
+  }
+  deleteRubrosEmision(idemision: any) {
+    return this.http.delete(`${baseUrl}/emision?idemision=${idemision}`);
   }
 }
 

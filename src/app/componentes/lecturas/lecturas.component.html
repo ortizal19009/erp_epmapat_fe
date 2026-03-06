@@ -27,8 +27,8 @@
           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalCalcular"
             [ngClass]="{'disabled' : rutaxemision.estado == 1}"><i class="bi-calculator"></i>
             <span>&nbsp; Calcular</span></button>
-          <button class="dropdown-item" *ngIf="idusuario===1" type="button" (click) = "calcularMultaBasura()"><i class="bi-calculator"></i>
-            <span>&nbsp; Calcular Multa basura</span></button>
+   <!--        <button class="dropdown-item" *ngIf="idusuario===1" type="button" (click) = "calcularMultaBasura()"><i class="bi-calculator"></i>
+            <span>&nbsp; Calcular Multa basura</span></button> -->
           <button class="dropdown-item" type="button" (click)="mostrarModal = true" data-toggle="modal"
             data-target="#modalCerrar" [ngClass]="{'disabled' : rutaxemision.estado == 1}">
             <i class="bi bi-door-closed"></i>&nbsp; Cerrar emisión ruta</button>

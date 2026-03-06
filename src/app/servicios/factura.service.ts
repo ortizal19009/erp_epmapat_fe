@@ -48,7 +48,7 @@ export class FacturaService {
     );
   }
 
-  async_getByNrofactura(nrofactura: String):Promise<any> {
+  async_getByNrofactura(nrofactura: String): Promise<any> {
     return firstValueFrom(this.http.get<any>(`${baseUrl}/nrofactura?nrofactura=${nrofactura}`));
   }
   //Facturas por Cliente
@@ -467,7 +467,7 @@ export class FacturaService {
   }
   generarPDF_FacElectronica(idfactura: number): Promise<any> {
     //let resp = firstValueFrom(this.http.get(`${apiUrl}/api/singsend/generar-pdf?idfactura=${idfactura}`,
-   let resp = firstValueFrom(this.http.get(`${apiUrl}/api/sri/generar-pdf?idfactura=${idfactura}`,
+    let resp = firstValueFrom(this.http.get(`${apiUrl}/api/sri/generar-pdf?idfactura=${idfactura}`,
       { responseType: 'blob' }));
     return resp;
   }
@@ -494,5 +494,8 @@ export class FacturaService {
   calculateMultaAsync(idfactura: number): Promise<any> {
     let resp = firstValueFrom(this.http.get(`${baseUrl}/multas?idfactura=${idfactura}`));
     return resp;
+  }
+  findCobradasByIdemision(idemision: number) {
+    return this.http.get<any[]>(`${baseUrl}/findByIdEmision?idemision=${idemision}`);
   }
 }

@@ -7,7 +7,7 @@ export class Rutasxemision {
   estado: number;
   usuariocierre: number;
   fechacierre: Date;
-  usucrea: number = 1;
+  usucrea: number;
   feccrea: Date;
   idemision_emisiones: Emisiones;
   idruta_rutas: Rutas;

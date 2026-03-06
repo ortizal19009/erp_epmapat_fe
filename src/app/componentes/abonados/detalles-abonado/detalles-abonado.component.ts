@@ -201,6 +201,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
         this.abonado.promedio = this._abonado[0].promedio;
         this.abonado.responsablepago = this._abonado[0].idresponsable.nombre;
         this.abonado.geolocalizacion = this._abonado[0].geolocalizacion;
+        this.abonado.swbasura = this._abonado[0].swbasura;
       },
       error: (err) => console.error(err.error),
     });
@@ -1032,6 +1033,7 @@ interface datAbonado {
   adultomayor: boolean;
   responsablepago: string;
   geolocalizacion: string;
+  swbasura: boolean;
 }
 
 function getEstadoText(estado: number): string {

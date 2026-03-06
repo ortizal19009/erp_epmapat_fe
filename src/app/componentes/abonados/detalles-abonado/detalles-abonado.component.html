@@ -102,6 +102,13 @@
               </a>
             </li>
             <li class="list-group-item">
+              <b>Sub Recolección Basura</b>
+              <a class="float-right">
+                <i class="bi bi-check2-square text-success" *ngIf="abonado.swbasura"></i>
+                <i class="bi bi-square text-muted" *ngIf="!abonado.swbasura"></i>
+              </a>
+            </li>
+            <li class="list-group-item">
               <b>Municipio</b>
               <a class="float-right">
                 <i class="bi bi-check2-square text-success" *ngIf="abonado.municipio"></i>

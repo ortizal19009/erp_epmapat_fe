@@ -116,8 +116,10 @@
               <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
             <button class="dropdown-item" [disabled]="estado==1" (click)="cerrarRutas()" type="button">
               <i class="bi bi-printer"></i>&nbsp; Cerrar Rutas</button>
-            <button class="dropdown-item" (click)="validarCierre()" type="button">
-              <i class="bi bi-printer"></i>&nbsp; Validar cierre</button>
+<!--             <button class="dropdown-item" (click)="validarCierre()" type="button">
+              <i class="bi bi-printer"></i>&nbsp; Validar cierre</button> -->
+            <button class="dropdown-item" (click)="abrirRutasAndEmision()" *ngIf="idusuario ==1" data-toggle="modal" data-target="#modalReporteFacuras" type="button">
+              <i class="bi bi-printer"></i>&nbsp; Abrir rutas</button>
             <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar"
               (click)="exportar1()">
               <i class="bi-file-earmark-arrow-down"></i>&nbsp; Exportar</button>
@@ -186,6 +188,33 @@
         </tbody>
       </table>
 
+    </div>
+
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="modalReporteFacuras" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Facturas Cobradas por emision</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="card">
+            <div class="card-body p-0">
+              <iframe id="pdfViewer" src="" width="100%" height="700px" class="pdf-frame"></iframe>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" (click)="continuarApertura()" >Continuar</button>
+        </div>
+      </div>
     </div>
   </div>
   <!-- EMISION INDIVIDUAL -->
