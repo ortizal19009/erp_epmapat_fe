@@ -187,6 +187,28 @@ export class InboxComponent {
     const d = this.dependencies.find((x: any) => String(x?.id) === String(depId));
     return d ? `${d.codigo} - ${d.nombre}` : depId;
   }
+
+  pendingAgeLabel(row: any): string {
+    const base = row?.created_at || row?.creado_en || row?.fecha_emision || row?.fecha_elaboracion;
+    if (!base) return '—';
+    const t = new Date(base).getTime();
+    if (Number.isNaN(t)) return '—';
+    const diffH = Math.floor((Date.now() - t) / 3600000);
+    if (diffH < 24) return `${Math.max(0, diffH)}h`;
+    const days = Math.floor(diffH / 24);
+    return `${days}d ${diffH % 24}h`;
+  }
+
+  pendingAgeClass(row: any): string {
+    const base = row?.created_at || row?.creado_en || row?.fecha_emision || row?.fecha_elaboracion;
+    if (!base) return 'text-muted';
+    const t = new Date(base).getTime();
+    if (Number.isNaN(t)) return 'text-muted';
+    const diffH = Math.floor((Date.now() - t) / 3600000);
+    if (diffH >= 72) return 'text-danger font-weight-bold';
+    if (diffH >= 24) return 'text-warning font-weight-bold';
+    return 'text-success font-weight-bold';
+  }
 }
 
 

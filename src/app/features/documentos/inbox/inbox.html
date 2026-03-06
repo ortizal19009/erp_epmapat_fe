@@ -91,6 +91,7 @@
             <th>Documento</th>
             <th>Asunto</th>
             <th>Dependencia</th>
+            <th>Edad pendiente</th>
             <th>Estado doc</th>
             <th class="text-right">Acciones</th>
           </tr>
@@ -100,6 +101,7 @@
             <td><a [routerLink]="['/gd/documentos', r.documento_id]">{{ r.numero_oficial || r.documento_id }}</a></td>
             <td>{{ r.asunto }}</td>
             <td>{{ dependencyLabel(r.dependencia_id) }}</td>
+            <td><span [class]="pendingAgeClass(r)">{{ pendingAgeLabel(r) }}</span></td>
             <td><span class="badge badge-secondary">{{ r.estado_documento }}</span></td>
             <td class="text-right">
               <div class="btn-group btn-group-sm">
@@ -109,7 +111,7 @@
             </td>
           </tr>
           <tr *ngIf="receptionRows.length===0">
-            <td colspan="5" class="text-center text-muted py-3">Sin recepciones pendientes</td>
+            <td colspan="6" class="text-center text-muted py-3">Sin recepciones pendientes</td>
           </tr>
         </tbody>
       </table>
