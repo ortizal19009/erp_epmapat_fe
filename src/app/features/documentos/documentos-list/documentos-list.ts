@@ -79,6 +79,9 @@ export class DocumentosListComponent implements OnInit {
     return roles.includes(this.currentRole);
   }
 
+  private getCurrentUserRole(): string {
+    return this.currentRole || this.getRole();
+  }
 
   ngOnInit(): void {
     this.page = 1;
@@ -219,7 +222,7 @@ export class DocumentosListComponent implements OnInit {
     const ok = confirm(`¿Emitir el documento "${doc.asunto}"?`);
     if (!ok) return;
 
-    this.api.emit(doc.id, null).subscribe({
+    this.api.emit(doc.id, this.getUserId() || null, this.getCurrentUserRole()).subscribe({
       next: (res) => {
         alert(`Emitido con número: ${res.numero_oficial}`);
         this.load();
@@ -246,7 +249,8 @@ export class DocumentosListComponent implements OnInit {
       this.api.receive(doc.id, {
         receptor_id: receptorId,
         comentario: 'Recibido (persona)',
-        usuario_id: null
+        usuario_id: this.getUserId() || null,
+        user_role: this.getCurrentUserRole()
       }).subscribe({
         next: () => {
           alert('Recepción registrada');
@@ -266,7 +270,8 @@ export class DocumentosListComponent implements OnInit {
       this.api.receive(doc.id, {
         dependencia_id: depId,
         comentario: 'Recibido (dependencia)',
-        usuario_id: null
+        usuario_id: this.getUserId() || null,
+        user_role: this.getCurrentUserRole()
       }).subscribe({
         next: () => {
           alert('Recepción registrada');
