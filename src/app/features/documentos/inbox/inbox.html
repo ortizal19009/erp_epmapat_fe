@@ -98,7 +98,10 @@
             <td>{{ r.dependencia_id || '—' }}</td>
             <td><span class="badge badge-secondary">{{ r.estado_documento }}</span></td>
             <td class="text-right">
-              <button class="btn btn-sm btn-outline-success" (click)="receivePending(r)">Recibir</button>
+              <div class="btn-group btn-group-sm">
+                <button class="btn btn-outline-success" (click)="receivePending(r)">Recibir</button>
+                <button class="btn btn-success" (click)="receivePending(r, true)">Recibir y abrir</button>
+              </div>
             </td>
           </tr>
           <tr *ngIf="receptionRows.length===0">
