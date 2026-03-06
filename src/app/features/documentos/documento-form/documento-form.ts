@@ -25,6 +25,7 @@ export class DocumentoFormComponent implements OnInit {
   error: string | null = null;
 
   id: string | null = null;
+  mesaEntradaMode = false;
   title = 'Nuevo documento';
   currentState = 'BORRADOR';
 
@@ -73,12 +74,18 @@ export class DocumentoFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id') || this.route.snapshot.queryParamMap.get('id');
-    this.title = this.id ? 'Editar documento' : 'Nuevo documento';
+    this.mesaEntradaMode = !this.id && (this.route.snapshot.queryParamMap.get('mode') || '').toLowerCase() === 'ingreso';
+    this.title = this.id ? 'Editar documento' : (this.mesaEntradaMode ? 'Nuevo ingreso (Mesa de entrada)' : 'Nuevo documento');
 
     this.loadCatalogs();
 
     if (!this.id) {
       this.form.patchValue({ fecha_elaboracion: this.today() });
+      if (this.mesaEntradaMode) {
+        this.form.patchValue({ flujo: 'INGRESO', origen: 'EXTERNO' });
+        const depId = this.getSessionDependencyId();
+        if (depId) this.form.patchValue({ dependencia_emisora_id: depId });
+      }
       this.loading = false;
       if (!this.canCreate()) this.error = 'Tu rol no tiene permisos para crear documentos.';
       return;
@@ -129,6 +136,16 @@ export class DocumentoFormComponent implements OnInit {
     catch { return null; }
   }
 
+  private getSessionDependencyId(): string | null {
+    try {
+      return globalThis.localStorage?.getItem('gd.dependency_id')
+        || globalThis.localStorage?.getItem('gd.dep_id')
+        || globalThis.localStorage?.getItem('gd.dependencia_id');
+    } catch {
+      return null;
+    }
+  }
+
   hasRole(...roles: string[]): boolean {
     return roles.includes(this.currentRole);
   }
@@ -146,7 +163,16 @@ export class DocumentoFormComponent implements OnInit {
     this.depsApi.list(ENTITY_CODE).subscribe({ next: (r) => this.dependencies = r || [] });
     this.typesApi.list(ENTITY_CODE).subscribe({ next: (r) => this.docTypes = r || [] });
     this.ccdApi.listSeries(ENTITY_CODE).subscribe({ next: (r) => this.series = r || [] });
-    this.lookupsApi.users(ENTITY_CODE, '', 1, 300).subscribe({ next: (r) => this.users = r?.items || [] });
+    this.lookupsApi.users(ENTITY_CODE, '', 1, 300).subscribe({
+      next: (r) => {
+        this.users = r?.items || [];
+        if (!this.id && this.mesaEntradaMode && !this.form.value.dependencia_emisora_id) {
+          const me = this.users.find((u: any) => String(u?.id || '') === String(this.currentUserId || ''));
+          const dep = me?.dependencia_id || me?.dependency_id;
+          if (dep) this.form.patchValue({ dependencia_emisora_id: dep });
+        }
+      }
+    });
   }
 
   onSeriesChange(): void {

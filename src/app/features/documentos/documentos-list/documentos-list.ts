@@ -193,6 +193,10 @@ export class DocumentosListComponent implements OnInit {
     this.router.navigate(['/gd/documentos/nuevo']);
   }
 
+  goNewIngreso(): void {
+    this.router.navigate(['/gd/documentos/nuevo'], { queryParams: { mode: 'ingreso' } });
+  }
+
   view(doc: DocumentoListItem): void {
     this.router.navigate(['/gd/documentos', doc.id]);
   }

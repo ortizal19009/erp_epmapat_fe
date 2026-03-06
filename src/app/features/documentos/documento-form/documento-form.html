@@ -34,7 +34,7 @@
 
       <div class="col-md-2">
         <label class="d-block mb-1 text-muted">Flujo</label>
-        <select class="custom-select" formControlName="flujo">
+        <select class="custom-select" formControlName="flujo" [disabled]="mesaEntradaMode">
           <option value="INGRESO">INGRESO</option>
           <option value="SALIDA">SALIDA</option>
         </select>
@@ -102,7 +102,7 @@
 
       <div class="col-md-4">
         <label class="d-block mb-1 text-muted">Origen</label>
-        <select class="custom-select" formControlName="origen">
+        <select class="custom-select" formControlName="origen" [disabled]="mesaEntradaMode">
           <option value="INTERNO">INTERNO</option>
           <option value="EXTERNO">EXTERNO</option>
         </select>

@@ -7,6 +7,7 @@
     <div class="d-flex ">
     <button *ngIf="hasRole('SUPERVISOR','ADMIN')" class="btn btn-outline-secondary" (click)="refreshOverdueNow()">Refrescar vencidos</button>
     <button *ngIf="hasRole('SUPERVISOR','ADMIN')" class="btn btn-outline-warning" (click)="generateAlertsNow()">Generar alertas</button>
+    <button *ngIf="hasRole('RECEPCION','RESPONSABLE','SUPERVISOR','ADMIN')" class="btn btn-outline-primary shadow-sm" (click)="goNewIngreso()">+ Nuevo ingreso</button>
     <button *ngIf="hasRole('RECEPCION','RESPONSABLE','SUPERVISOR','ADMIN')" class="btn btn-primary shadow-sm" (click)="goNew()">+ Nuevo documento</button>
   </div>
   </div>
