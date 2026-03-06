@@ -133,7 +133,7 @@ export class DocumentoDetalleComponent implements OnInit {
     const ok = await this.ui.confirm('Emitir documento', 'Se generará/confirmará su número oficial.', 'Emitir');
     if (!ok) return;
 
-    this.api.emit(this.id, this.currentUserId).subscribe({
+    this.api.emit(this.id, this.currentUserId, this.currentRole).subscribe({
       next: () => {
         this.ui.toast('success', 'Documento emitido correctamente');
         this.loadAll();
@@ -162,7 +162,8 @@ export class DocumentoDetalleComponent implements OnInit {
       dependencia_id: this.receivePayload.dependencia_id || undefined,
       receptor_id: this.receivePayload.receptor_id || undefined,
       comentario: this.receivePayload.comentario || 'Recibido desde detalle',
-      usuario_id: this.currentUserId || null
+      usuario_id: this.currentUserId || null,
+      user_role: this.currentRole
     }).subscribe({
       next: () => {
         this.receivePayload = { dependencia_id: '', receptor_id: '', comentario: '' };
@@ -193,7 +194,9 @@ export class DocumentoDetalleComponent implements OnInit {
       to_dependency_id: this.derivePayload.to_dependency_id || undefined,
       to_user_id: this.derivePayload.to_user_id || undefined,
       comment: this.derivePayload.comment || undefined,
-      due_at: this.derivePayload.due_at || undefined
+      due_at: this.derivePayload.due_at || undefined,
+      user_id: this.currentUserId || undefined,
+      user_role: this.currentRole
     }).subscribe({
       next: () => {
         this.derivePayload = { to_dependency_id: '', to_user_id: '', comment: '', due_at: '' };
@@ -232,6 +235,7 @@ export class DocumentoDetalleComponent implements OnInit {
     return this.api.downloadFile(this.id, file.id);
   }
 }
+
 
 
 

@@ -41,16 +41,17 @@ export class DocumentosApi {
     return this.http.put<any>(`${this.base}/${id}`, payload);
   }
 
-  emit(id: string, userId: string | null) {
-    return this.http.post<any>(`${this.base}/${id}/issue`, { user_id: userId });
+  emit(id: string, userId: string | null, userRole?: string | null) {
+    return this.http.post<any>(`${this.base}/${id}/issue`, { user_id: userId, user_role: userRole || undefined });
   }
 
-  receive(id: string, payload: { receptor_id?: string; dependencia_id?: string; comentario?: string; usuario_id?: string | null; }) {
+  receive(id: string, payload: { receptor_id?: string; dependencia_id?: string; comentario?: string; usuario_id?: string | null; user_role?: string | null; }) {
     return this.http.post<any>(`${this.base}/${id}/receive`, {
       receiver_id: payload.receptor_id,
       dependency_id: payload.dependencia_id,
       comment: payload.comentario,
       user_id: payload.usuario_id,
+      user_role: payload.user_role || undefined,
     });
   }
 
