@@ -545,3 +545,33 @@ tr:not(.cursor-pointer):not(.fila) td:hover{ cursor: default; }
 .gd-page .bg-light{background-color:#f8f9fa !important;}
 .gd-page .badge.bg-light{color:#343a40 !important;border:1px solid #dee2e6;}
 
+/* =========================================================
+   MODALES LEGIBLES (Bootstrap + SweetAlert)
+========================================================= */
+.modal-content{
+  background-color:#fff !important;
+  color:#212529 !important;
+}
+.modal-header,
+.modal-body,
+.modal-footer,
+.modal-title,
+.modal-body label,
+.modal-body p,
+.modal-body span,
+.modal-body .form-label,
+.modal-body .text-muted{
+  color:#212529 !important;
+}
+
+.swal2-popup{
+  background:#fff !important;
+  color:#212529 !important;
+}
+.swal2-title,
+.swal2-html-container,
+.swal2-content,
+.swal2-validation-message{
+  color:#212529 !important;
+}
+
