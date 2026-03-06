@@ -62,6 +62,7 @@ export class InboxComponent {
   load(): void {
     this.loading = true;
     this.error = null;
+    if (!this.toUserId) this.toUserId = this.getUserId();
     this.api.pendingDerivations({
       to_user_id: this.toUserId || undefined,
       to_dependency_id: this.toDependencyId || undefined,

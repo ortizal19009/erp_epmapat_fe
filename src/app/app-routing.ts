@@ -1388,7 +1388,7 @@ const routes: Routes = [
   { path: 'gd/settings/entities', loadComponent: () => import('./features/settings/entities/entities-list/entities-list').then(m => m.EntitiesListComponent), canActivate: [AuthGuard] },
   { path: 'gd/settings/document-types', loadComponent: () => import('./features/settings/document-types/document-types-list/document-types-list').then(m => m.DocumentTypesListComponent), canActivate: [AuthGuard] },
   { path: 'gd/settings/dependencies', loadComponent: () => import('./features/settings/dependencies/dependencies-list/dependencies-list').then(m => m.DependenciesListComponent), canActivate: [AuthGuard] },
-  { path: 'gd/settings/usuarios', loadComponent: () => import('./features/settings/usuarios/usuarios-list').then(m => m.UsuariosListComponent), canActivate: [AuthGuard] },
+  { path: 'gd/settings/usuarios', redirectTo: 'gd/settings/dependencies', pathMatch: 'full' },
 
   { path: '', redirectTo: 'inicio', pathMatch: 'full' },
   { path: '**', redirectTo: 'inicio' },

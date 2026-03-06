@@ -12,9 +12,8 @@
   <div class="page gd-page-card detalle mb-3">
     <div class="row align-items-end">
       <div class="col-md-4">
-        <label class="control-label">Usuario destino</label>
-        <select class="custom-select" [(ngModel)]="toUserId">
-          <option value="">Todos</option>
+        <label class="control-label">Usuario destino (sesión)</label>
+        <select class="custom-select" [(ngModel)]="toUserId" disabled>
           <option *ngFor="let u of users" [value]="u.id">{{ u.nombre || u.username }}</option>
         </select>
       </div>

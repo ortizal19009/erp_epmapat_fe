@@ -95,6 +95,7 @@ export class DocumentosListComponent implements OnInit {
   load(): void {
     this.loading = true;
     this.error = null;
+    if (!this.userId) this.userId = this.getUserId();
 
     this.api.list(ENTITY_CODE, {
       q: this.q?.trim() || undefined,
@@ -154,7 +155,7 @@ export class DocumentosListComponent implements OnInit {
     this.status = '';
     this.dependencyId = '';
     this.typeId = '';
-    this.userId = '';
+    this.userId = this.getUserId();
     this.dateFrom = '';
     this.dateTo = '';
     this.seriesId = '';
