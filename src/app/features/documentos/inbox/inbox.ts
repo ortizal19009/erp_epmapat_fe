@@ -100,7 +100,7 @@ export class InboxComponent {
       receiver_id: this.toUserId || undefined,
       dependency_id: depFilter || undefined,
     }).subscribe({
-      next: (rows) => this.receptionRows = rows || [],
+      next: (rows) => this.receptionRows = this.sortReceptionRows(rows || []),
       error: () => this.receptionRows = []
     });
   }
@@ -208,6 +208,16 @@ export class InboxComponent {
     if (diffH >= 72) return 'text-danger font-weight-bold';
     if (diffH >= 24) return 'text-warning font-weight-bold';
     return 'text-success font-weight-bold';
+  }
+
+  private receptionBaseTime(row: any): number {
+    const base = row?.created_at || row?.creado_en || row?.fecha_emision || row?.fecha_elaboracion;
+    const t = base ? new Date(base).getTime() : Number.NaN;
+    return Number.isNaN(t) ? Number.MAX_SAFE_INTEGER : t;
+  }
+
+  private sortReceptionRows(rows: any[]): any[] {
+    return [...rows].sort((a, b) => this.receptionBaseTime(a) - this.receptionBaseTime(b));
   }
 }
 

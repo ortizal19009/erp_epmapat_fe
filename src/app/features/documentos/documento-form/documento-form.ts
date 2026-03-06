@@ -80,12 +80,15 @@ export class DocumentoFormComponent implements OnInit {
     this.loadCatalogs();
 
     if (!this.id) {
-      this.form.patchValue({ fecha_elaboracion: this.today() });
+      this.form.patchValue({ fecha_elaboracion: this.today(), fecha_plazo: this.addDays(2) });
       if (this.mesaEntradaMode) {
         this.form.patchValue({ flujo: 'INGRESO', origen: 'EXTERNO' });
         const depId = this.getSessionDependencyId();
         if (depId) this.form.patchValue({ dependencia_emisora_id: depId });
       }
+      this.form.get('requiere_respuesta')?.valueChanges.subscribe((v) => {
+        if (v && !this.form.value.fecha_plazo) this.form.patchValue({ fecha_plazo: this.addDays(2) });
+      });
       this.loading = false;
       if (!this.canCreate()) this.error = 'Tu rol no tiene permisos para crear documentos.';
       return;
@@ -160,8 +163,24 @@ export class DocumentoFormComponent implements OnInit {
   }
 
   loadCatalogs(): void {
-    this.depsApi.list(ENTITY_CODE).subscribe({ next: (r) => this.dependencies = r || [] });
-    this.typesApi.list(ENTITY_CODE).subscribe({ next: (r) => this.docTypes = r || [] });
+    this.depsApi.list(ENTITY_CODE).subscribe({
+      next: (r) => {
+        this.dependencies = r || [];
+        if (!this.id && !this.form.value.dependencia_emisora_id) {
+          const depFromSession = this.getSessionDependencyId();
+          const depDefault = depFromSession || this.dependencies?.[0]?.id;
+          if (depDefault) this.form.patchValue({ dependencia_emisora_id: depDefault });
+        }
+      }
+    });
+    this.typesApi.list(ENTITY_CODE).subscribe({
+      next: (r) => {
+        this.docTypes = r || [];
+        if (!this.id && !this.form.value.tipo_doc_id && this.docTypes.length > 0) {
+          this.form.patchValue({ tipo_doc_id: this.docTypes[0].id });
+        }
+      }
+    });
     this.ccdApi.listSeries(ENTITY_CODE).subscribe({ next: (r) => this.series = r || [] });
     this.lookupsApi.users(ENTITY_CODE, '', 1, 300).subscribe({
       next: (r) => {
@@ -314,6 +333,12 @@ export class DocumentoFormComponent implements OnInit {
 
   private today(): string {
     return new Date().toISOString().slice(0, 10);
+  }
+
+  private addDays(days: number): string {
+    const d = new Date();
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0, 10);
   }
 
   private toDateInput(value?: string): string {
