@@ -94,6 +94,13 @@ export class DocumentosApi {
     return this.http.get<any>(`${this.base}/derivations/pending`, { params });
   }
 
+  pendingReceptions(filters: { entity_code: string; receiver_id?: string; dependency_id?: string }) {
+    let params = new HttpParams().set('entity_code', filters.entity_code);
+    if (filters.receiver_id) params = params.set('receiver_id', filters.receiver_id);
+    if (filters.dependency_id) params = params.set('dependency_id', filters.dependency_id);
+    return this.http.get<any[]>(`${this.base}/receptions/pending`, { params });
+  }
+
   markDerivationRead(derivationId: string, readerUserId?: string) {
     return this.http.patch<any>(`${this.base}/derivations/${derivationId}/read`, { reader_user_id: readerUserId || null });
   }

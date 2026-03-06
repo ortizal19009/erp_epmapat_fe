@@ -22,6 +22,7 @@ export class InboxComponent {
   toUserId = this.getUserId();
   toDependencyId = '';
   rows: any[] = [];
+  receptionRows: any[] = [];
   users: any[] = [];
   dependencies: any[] = [];
   loading = false;
@@ -52,6 +53,7 @@ export class InboxComponent {
 
   constructor(private api: DocumentosApi, private router: Router, private lookupsApi: LookupsApi, private depsApi: DependencyApi) {
     this.loadLookups();
+    this.loadReceptions();
   }
 
   loadLookups(): void {
@@ -79,6 +81,18 @@ export class InboxComponent {
     });
   }
 
+  loadReceptions(): void {
+    if (!this.toUserId) this.toUserId = this.getUserId();
+    this.api.pendingReceptions({
+      entity_code: ENTITY_CODE,
+      receiver_id: this.toUserId || undefined,
+      dependency_id: this.toDependencyId || undefined,
+    }).subscribe({
+      next: (rows) => this.receptionRows = rows || [],
+      error: () => this.receptionRows = []
+    });
+  }
+
   prevPage(): void { if (this.page > 1) { this.page--; this.load(); } }
 
   nextPage(): void { if (this.page < this.pages) { this.page++; this.load(); } }
@@ -91,6 +105,24 @@ export class InboxComponent {
     this.api.markDerivationRead(row.id, this.toUserId || undefined).subscribe({
       next: () => this.load(),
       error: (e) => alert(e?.error?.detail || 'Error marcando leído')
+    });
+  }
+
+  receivePending(row: any): void {
+    const role = this.currentRole;
+    const userId = this.toUserId || this.getUserId();
+    this.api.receive(row.documento_id, {
+      receptor_id: row.receptor_id || undefined,
+      dependencia_id: row.dependencia_id || this.toDependencyId || undefined,
+      comentario: 'Recepción desde bandeja',
+      usuario_id: userId || null,
+      user_role: role,
+    }).subscribe({
+      next: () => {
+        this.loadReceptions();
+        this.load();
+      },
+      error: (e) => alert(e?.error?.detail || 'Error registrando recepción')
     });
   }
 

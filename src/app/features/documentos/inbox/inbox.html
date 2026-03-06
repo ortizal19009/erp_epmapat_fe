@@ -25,7 +25,8 @@
         </select>
       </div>
       <div class="col-md-4 ">
-        <button class="btn btn-primary" (click)="load()">Consultar bandeja</button>
+        <button class="btn btn-primary mr-2" (click)="load()">Consultar derivaciones</button>
+        <button class="btn btn-outline-primary" (click)="loadReceptions()">Consultar recepciones</button>
       </div>
     </div>
   </div>
@@ -42,7 +43,7 @@
   <div *ngIf="loading" class="alert alert-info">Cargando...</div>
   <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
 
-  <div class="page gd-page-card detalle p-0 overflow-hidden">
+  <div class="page gd-page-card detalle p-0 overflow-hidden mb-3">
     <div class="table-wrap">
       <table class="table table-hover align-middle mb-0">
         <thead>
@@ -71,6 +72,37 @@
           </tr>
           <tr *ngIf="rows.length===0 && !loading">
             <td colspan="5" class="text-center text-muted py-4">Sin derivaciones pendientes</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="page gd-page-card detalle p-0 overflow-hidden">
+    <div class="p-3 border-bottom"><strong>Bandeja de recepciones pendientes</strong></div>
+    <div class="table-wrap">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Documento</th>
+            <th>Asunto</th>
+            <th>Dependencia</th>
+            <th>Estado doc</th>
+            <th class="text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of receptionRows">
+            <td><a [routerLink]="['/gd/documentos', r.documento_id]">{{ r.numero_oficial || r.documento_id }}</a></td>
+            <td>{{ r.asunto }}</td>
+            <td>{{ r.dependencia_id || '—' }}</td>
+            <td><span class="badge badge-secondary">{{ r.estado_documento }}</span></td>
+            <td class="text-right">
+              <button class="btn btn-sm btn-outline-success" (click)="receivePending(r)">Recibir</button>
+            </td>
+          </tr>
+          <tr *ngIf="receptionRows.length===0">
+            <td colspan="5" class="text-center text-muted py-3">Sin recepciones pendientes</td>
           </tr>
         </tbody>
       </table>
