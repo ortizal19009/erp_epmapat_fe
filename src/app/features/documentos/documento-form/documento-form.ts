@@ -178,6 +178,11 @@ export class DocumentoFormComponent implements OnInit {
     this.selectedFile = input.files?.[0] || null;
   }
 
+  isMesaEntrada(): boolean {
+    const raw = this.form.getRawValue();
+    return String(raw?.flujo || '').toUpperCase() === 'INGRESO' && String(raw?.origen || '').toUpperCase() === 'EXTERNO';
+  }
+
   async save(): Promise<void> {
     this.error = null;
     if (!this.id && !this.canCreate()) {
@@ -200,6 +205,17 @@ export class DocumentoFormComponent implements OnInit {
     if (raw?.requiere_respuesta && !raw?.fecha_plazo) {
       this.ui.toast('warning', 'Si requiere respuesta, debes ingresar fecha de plazo.');
       return;
+    }
+
+    if (!this.id && this.isMesaEntrada()) {
+      if (!raw?.remitente_externo || !String(raw.remitente_externo).trim()) {
+        this.ui.toast('warning', 'En ingreso externo, el remitente externo es obligatorio.');
+        return;
+      }
+      if (!this.selectedFile) {
+        this.ui.toast('warning', 'En mesa de entrada debes adjuntar el documento escaneado.');
+        return;
+      }
     }
 
     const ok = await this.ui.confirm(this.id ? 'Guardar cambios' : 'Crear documento', this.id ? 'Se actualizará la información del documento.' : 'Se creará un nuevo documento en borrador.', this.id ? 'Guardar' : 'Crear');
@@ -240,7 +256,8 @@ export class DocumentoFormComponent implements OnInit {
           else this.router.navigate(['/gd/documentos']);
         };
 
-        if (!this.id && id && this.uploadOnCreate && this.selectedFile) {
+        const mustUpload = this.isMesaEntrada() || this.uploadOnCreate;
+        if (!this.id && id && mustUpload && this.selectedFile) {
           this.api.uploadFile(id, this.selectedFile).subscribe({
             next: () => {
               this.ui.toast('success', 'Archivo escaneado adjuntado');

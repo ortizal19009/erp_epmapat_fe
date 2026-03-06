@@ -108,6 +108,12 @@
         </select>
       </div>
 
+      <div class="col-12" *ngIf="isMesaEntrada()">
+        <div class="alert alert-info py-2 mb-2">
+          <strong>Mesa de entrada activa:</strong> para ingreso externo se requiere remitente externo y documento escaneado.
+        </div>
+      </div>
+
       <div class="col-md-4">
         <label class="d-block mb-1 text-muted">Documento escaneado</label>
         <input type="file" class="form-control" (change)="onFileSelected($event)" />
@@ -133,7 +139,7 @@
           <input id="reqResp" type="checkbox" class="form-check-input" formControlName="requiere_respuesta" />
           <label for="reqResp" class="form-check-label">Requiere respuesta</label>
         </div>
-        <div class="form-check mb-2" *ngIf="!id">
+        <div class="form-check mb-2" *ngIf="!id && !isMesaEntrada()">
           <input id="uploadNow" type="checkbox" class="form-check-input" [(ngModel)]="uploadOnCreate" [ngModelOptions]="{standalone: true}" />
           <label for="uploadNow" class="form-check-label">Adjuntar al guardar</label>
         </div>
