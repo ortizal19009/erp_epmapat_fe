@@ -222,7 +222,8 @@ export class DocumentoFormComponent implements OnInit {
       to_user_ids: this.selectedTargetUserIds,
       to_dependency_ids: this.selectedTargetDependencyIds,
       requires_response: !!raw.requiere_respuesta,
-      priority: raw.prioridad
+      priority: raw.prioridad,
+      user_id: this.currentUserId || undefined
     };
 
     this.saving = true;
@@ -279,5 +280,6 @@ export class DocumentoFormComponent implements OnInit {
     return d.toISOString().slice(0, 10);
   }
 }
+
 
 

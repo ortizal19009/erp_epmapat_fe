@@ -19,7 +19,7 @@ const ENTITY_CODE = 'EPMAPA-T';
 })
 export class InboxComponent {
   currentRole = this.getRole();
-  toUserId = '';
+  toUserId = this.getUserId();
   toDependencyId = '';
   rows: any[] = [];
   users: any[] = [];
@@ -38,6 +38,11 @@ export class InboxComponent {
     try {
       return (globalThis.localStorage?.getItem('gd.role') || 'ADMIN').toUpperCase();
     } catch { return 'ADMIN'; }
+  }
+
+  private getUserId(): string {
+    try { return globalThis.localStorage?.getItem('gd.user_id') || ''; }
+    catch { return ''; }
   }
 
   hasRole(...roles: string[]): boolean {

@@ -133,7 +133,7 @@ export class DocumentoDetalleComponent implements OnInit {
     const ok = await this.ui.confirm('Emitir documento', 'Se generará/confirmará su número oficial.', 'Emitir');
     if (!ok) return;
 
-    this.api.emit(this.id, null).subscribe({
+    this.api.emit(this.id, this.currentUserId).subscribe({
       next: () => {
         this.ui.toast('success', 'Documento emitido correctamente');
         this.loadAll();
@@ -162,7 +162,7 @@ export class DocumentoDetalleComponent implements OnInit {
       dependencia_id: this.receivePayload.dependencia_id || undefined,
       receptor_id: this.receivePayload.receptor_id || undefined,
       comentario: this.receivePayload.comentario || 'Recibido desde detalle',
-      usuario_id: null
+      usuario_id: this.currentUserId || null
     }).subscribe({
       next: () => {
         this.receivePayload = { dependencia_id: '', receptor_id: '', comentario: '' };
@@ -232,5 +232,6 @@ export class DocumentoDetalleComponent implements OnInit {
     return this.api.downloadFile(this.id, file.id);
   }
 }
+
 
 

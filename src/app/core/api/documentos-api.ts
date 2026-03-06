@@ -13,6 +13,13 @@ export class DocumentosApi {
     if (filters?.q) params = params.set('q', filters.q);
     if (filters?.flujo) params = params.set('flujo', filters.flujo);
     if (filters?.estado) params = params.set('estado', filters.estado);
+    if (filters?.dependency_id) params = params.set('dependency_id', filters.dependency_id);
+    if (filters?.type_id) params = params.set('type_id', filters.type_id);
+    if (filters?.user_id) params = params.set('user_id', filters.user_id);
+    if (filters?.series_id) params = params.set('series_id', filters.series_id);
+    if (filters?.subseries_id) params = params.set('subseries_id', filters.subseries_id);
+    if (filters?.date_from) params = params.set('date_from', filters.date_from);
+    if (filters?.date_to) params = params.set('date_to', filters.date_to);
     if (filters?.page) params = params.set('page', filters.page);
     if (filters?.page_size) params = params.set('page_size', filters.page_size);
     return this.http.get<any>(this.base, { params });

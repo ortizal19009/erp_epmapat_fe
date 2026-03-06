@@ -70,6 +70,11 @@ export class DocumentosListComponent implements OnInit {
     } catch { return 'ADMIN'; }
   }
 
+  private getUserId(): string {
+    try { return globalThis.localStorage?.getItem('gd.user_id') || ''; }
+    catch { return ''; }
+  }
+
   hasRole(...roles: string[]): boolean {
     return roles.includes(this.currentRole);
   }
@@ -77,6 +82,7 @@ export class DocumentosListComponent implements OnInit {
 
   ngOnInit(): void {
     this.page = 1;
+    this.userId = this.getUserId();
     this.depsApi.list(ENTITY_CODE).subscribe({ next: (r) => this.dependencies = r || [] });
     this.typesApi.list(ENTITY_CODE).subscribe({ next: (r) => this.docTypes = r || [] });
     this.lookupsApi.users(ENTITY_CODE, '', 1, 200).subscribe({ next: (r) => this.users = r?.items || [] });
