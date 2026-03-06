@@ -120,7 +120,7 @@ export class InboxComponent {
     });
   }
 
-  receivePending(row: any, openAfter: boolean = false): void {
+  receivePending(row: any, openAfter: boolean = false, focusDerive: boolean = false): void {
     const role = this.currentRole;
     const userId = this.toUserId || this.getUserId();
     this.api.receive(row.documento_id, {
@@ -133,7 +133,10 @@ export class InboxComponent {
       next: () => {
         this.loadReceptions();
         this.load();
-        if (openAfter) this.router.navigate(['/gd/documentos', row.documento_id]);
+        if (openAfter) {
+          const queryParams = focusDerive ? { focus: 'derive' } : undefined;
+          this.router.navigate(['/gd/documentos', row.documento_id], { queryParams });
+        }
       },
       error: (e) => alert(e?.error?.detail || 'Error registrando recepción')
     });

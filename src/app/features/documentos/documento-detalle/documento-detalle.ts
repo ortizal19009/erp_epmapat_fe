@@ -58,6 +58,14 @@ export class DocumentoDetalleComponent implements OnInit {
     this.lookupsApi.users(ENTITY_CODE, '', 1, 200).subscribe({ next: (r) => this.users = r?.items || [] });
 
     this.loadAll();
+
+    const focus = (this.route.snapshot.queryParamMap.get('focus') || '').toLowerCase();
+    if (focus === 'derive') {
+      setTimeout(() => {
+        const el = document.getElementById('derive-card');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 450);
+    }
   }
 
 
