@@ -749,7 +749,7 @@
           </ul>
         </li>
 
-        <li *ngIf="authService.modulo == 12" class="nav-item gd-menu">
+        <li *ngIf="authService.modulo == 12 || (authService.modulo == 7 && isOptionEnabled(5, 221))" class="nav-item gd-menu">
           <a href="#" class="nav-link bg-info">
             <i class="bi bi-folder2-open nav-icon" style="font-size: 15px;"></i>
             <p> Gestión Documental
