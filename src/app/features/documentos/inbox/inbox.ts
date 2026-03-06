@@ -21,6 +21,7 @@ export class InboxComponent {
   currentRole = this.getRole();
   toUserId = this.getUserId();
   toDependencyId = '';
+  onlyMyDependency = true;
   rows: any[] = [];
   receptionRows: any[] = [];
   users: any[] = [];
@@ -46,12 +47,22 @@ export class InboxComponent {
     catch { return ''; }
   }
 
+  private getSessionDependencyId(): string {
+    try {
+      return globalThis.localStorage?.getItem('gd.dependency_id')
+        || globalThis.localStorage?.getItem('gd.dep_id')
+        || globalThis.localStorage?.getItem('gd.dependencia_id')
+        || '';
+    } catch { return ''; }
+  }
+
   hasRole(...roles: string[]): boolean {
     return roles.includes(this.currentRole);
   }
 
 
   constructor(private api: DocumentosApi, private router: Router, private lookupsApi: LookupsApi, private depsApi: DependencyApi) {
+    this.toDependencyId = this.getSessionDependencyId();
     this.loadLookups();
     this.loadReceptions();
   }
@@ -83,10 +94,11 @@ export class InboxComponent {
 
   loadReceptions(): void {
     if (!this.toUserId) this.toUserId = this.getUserId();
+    const depFilter = this.onlyMyDependency ? (this.toDependencyId || this.getSessionDependencyId()) : this.toDependencyId;
     this.api.pendingReceptions({
       entity_code: ENTITY_CODE,
       receiver_id: this.toUserId || undefined,
-      dependency_id: this.toDependencyId || undefined,
+      dependency_id: depFilter || undefined,
     }).subscribe({
       next: (rows) => this.receptionRows = rows || [],
       error: () => this.receptionRows = []
@@ -168,6 +180,12 @@ export class InboxComponent {
       case 'RESPONDIDO': return 'bg-success';
       default: return 'bg-light text-dark';
     }
+  }
+
+  dependencyLabel(depId?: string): string {
+    if (!depId) return '—';
+    const d = this.dependencies.find((x: any) => String(x?.id) === String(depId));
+    return d ? `${d.codigo} - ${d.nombre}` : depId;
   }
 }
 

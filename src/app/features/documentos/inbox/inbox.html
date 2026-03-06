@@ -23,6 +23,10 @@
           <option value="">Todas</option>
           <option *ngFor="let d of dependencies" [value]="d.id">{{ d.codigo }} - {{ d.nombre }}</option>
         </select>
+        <div class="form-check mt-1">
+          <input id="onlyMyDep" class="form-check-input" type="checkbox" [(ngModel)]="onlyMyDependency" />
+          <label class="form-check-label small" for="onlyMyDep">Solo mi dependencia</label>
+        </div>
       </div>
       <div class="col-md-4 ">
         <button class="btn btn-primary mr-2" (click)="load()">Consultar derivaciones</button>
@@ -95,7 +99,7 @@
           <tr *ngFor="let r of receptionRows">
             <td><a [routerLink]="['/gd/documentos', r.documento_id]">{{ r.numero_oficial || r.documento_id }}</a></td>
             <td>{{ r.asunto }}</td>
-            <td>{{ r.dependencia_id || '—' }}</td>
+            <td>{{ dependencyLabel(r.dependencia_id) }}</td>
             <td><span class="badge badge-secondary">{{ r.estado_documento }}</span></td>
             <td class="text-right">
               <div class="btn-group btn-group-sm">
