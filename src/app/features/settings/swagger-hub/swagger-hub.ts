@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 interface SwaggerServiceLink {
   nombre: string;
@@ -7,15 +8,27 @@ interface SwaggerServiceLink {
   descripcion?: string;
 }
 
+interface EntornoGateway {
+  key: string;
+  label: string;
+  baseUrl: string;
+}
+
 @Component({
   selector: 'app-swagger-hub',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './swagger-hub.html',
   styleUrls: ['./swagger-hub.css']
 })
 export class SwaggerHubComponent {
-  readonly gatewayBaseUrl = 'http://localhost:8080';
+  readonly entornos: EntornoGateway[] = [
+    { key: 'dev', label: 'Desarrollo', baseUrl: 'http://localhost:8080' },
+    { key: 'qa', label: 'QA', baseUrl: 'http://localhost:8081' },
+    { key: 'prod', label: 'Producción', baseUrl: 'https://api.tu-dominio.com' }
+  ];
+
+  entornoSeleccionado = this.entornos[0].key;
 
   readonly servicios: SwaggerServiceLink[] = [
     { nombre: 'Login', gatewayPath: '/login', descripcion: 'Autenticación y sesiones' },
@@ -30,6 +43,13 @@ export class SwaggerHubComponent {
     { nombre: 'EPMAPA API', gatewayPath: '/epmapaapi', descripcion: 'API general de integración' },
     { nombre: 'Emails', gatewayPath: '/emails', descripcion: 'Plantillas y envío de correos' }
   ];
+
+  get gatewayBaseUrl(): string {
+    return (
+      this.entornos.find((e) => e.key === this.entornoSeleccionado)?.baseUrl ||
+      this.entornos[0].baseUrl
+    );
+  }
 
   getSwaggerUi(path: string): string {
     return `${this.gatewayBaseUrl}${path}/swagger-ui.html`;
