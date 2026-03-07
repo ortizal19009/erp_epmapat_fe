@@ -4,10 +4,10 @@
 
 export const environment = {
   production: false,
-  API_URL: 'http://localhost:8080',
-  GD_API_URL: 'http://localhost:8080',
+  API_URL: 'http://127.0.0.1:8080',
+  GD_API_URL: 'http://127.0.0.1:8080',
   SWAGGER_GATEWAYS: [
-    { key: 'dev', label: 'Desarrollo', baseUrl: 'http://localhost:8080' },
+    { key: 'dev', label: 'Desarrollo', baseUrl: 'http://127.0.0.1:8080' },
     { key: 'qa', label: 'QA', baseUrl: 'http://localhost:8081' },
     { key: 'prod', label: 'Producción', baseUrl: 'https://api.tu-dominio.com' }
   ]
