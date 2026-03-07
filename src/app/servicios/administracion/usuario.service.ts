@@ -18,6 +18,10 @@ export class UsuarioService {
     return this.http.get<Usuarios[]>(baseUrl);
   }
 
+  getUsuariosWithPersonal(): Observable<any[]> {
+    return this.http.get<any[]>(`${baseUrl}/with-personal`);
+  }
+
   //
   // getUsuario(a: String, b: String): Observable<boolean> {
   //   console.log(`${baseUrl}/usuario?a=${a}&b=${b}`)

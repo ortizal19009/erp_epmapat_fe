@@ -106,9 +106,14 @@ export class UsuariosComponent implements OnInit {
   // LISTADOS
   // =========================
   listarUsuarios() {
-    this.usuService.getUsuarios().subscribe({
+    this.usuService.getUsuariosWithPersonal().subscribe({
       next: (datos) => (this._usuarios = (datos || []) as any[]),
-      error: (err) => console.error(err.error),
+      error: () => {
+        this.usuService.getUsuarios().subscribe({
+          next: (datos) => (this._usuarios = (datos || []) as any[]),
+          error: (err) => console.error(err.error),
+        });
+      },
     });
   }
 
@@ -221,6 +226,7 @@ export class UsuariosComponent implements OnInit {
   }
 
   personalLinkLabel(usuario: any): string {
+    if (usuario?.personalNombre) return String(usuario.personalNombre).trim();
     const p = usuario?.personal;
     if (p?.apellidos || p?.nombres) return `${p?.apellidos || ''} ${p?.nombres || ''}`.trim();
     const idp = usuario?.personalIdpersonal || usuario?.personal_idpersonal || p?.idpersonal || usuario?.idpersonal_personal || usuario?.idpersonal;
@@ -236,6 +242,7 @@ export class UsuariosComponent implements OnInit {
     this.usuService.unlinkPersonal(usuario.idusuario, this.authService.idusuario).subscribe({
       next: () => {
         usuario.personalIdpersonal = null;
+        usuario.personalNombre = null;
         if (usuario.personal) usuario.personal = null;
       },
       error: (e) => console.error(e),
@@ -248,6 +255,7 @@ export class UsuariosComponent implements OnInit {
     this.usuService.linkPersonal(this.usuarioLinkTarget.idusuario, per.idpersonal, this.authService.idusuario).subscribe({
       next: () => {
         this.usuarioLinkTarget.personalIdpersonal = per.idpersonal;
+        this.usuarioLinkTarget.personalNombre = `${per.apellidos || ''} ${per.nombres || ''}`.trim();
         this.usuarioLinkTarget.personal = { idpersonal: per.idpersonal, apellidos: per.apellidos, nombres: per.nombres };
         this.usuarioLinkTarget = null;
       },
