@@ -32,6 +32,23 @@
         </div>
       </div>
 
+      <div class="row mb-3">
+        <div class="col-12 d-flex align-items-center justify-content-end">
+          <div class="custom-control custom-switch">
+            <input
+              type="checkbox"
+              class="custom-control-input"
+              id="autoRefreshSwagger"
+              [(ngModel)]="autoRefresh"
+              (ngModelChange)="onAutoRefreshToggle()"
+            />
+            <label class="custom-control-label" for="autoRefreshSwagger">
+              Auto-refresh cada {{ autoRefreshSeconds }}s
+            </label>
+          </div>
+        </div>
+      </div>
+
       <div class="table-responsive">
         <table class="table table-sm table-hover table-bordered mb-0">
           <thead class="thead-light">

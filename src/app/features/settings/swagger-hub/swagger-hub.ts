@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../../environments/environment';
 
@@ -24,8 +24,11 @@ interface EntornoGateway {
   templateUrl: './swagger-hub.html',
   styleUrls: ['./swagger-hub.css']
 })
-export class SwaggerHubComponent {
+export class SwaggerHubComponent implements OnDestroy {
   statusMap: Record<string, { estado: EstadoSwagger; ms?: number }> = {};
+  autoRefresh = false;
+  autoRefreshSeconds = 30;
+  private autoRefreshTimer: ReturnType<typeof setInterval> | null = null;
   readonly entornos: EntornoGateway[] =
     (environment as any).SWAGGER_GATEWAYS ?? [
       { key: 'dev', label: 'Desarrollo', baseUrl: 'http://localhost:8080' }
@@ -51,6 +54,10 @@ export class SwaggerHubComponent {
     this.refreshStatus();
   }
 
+  ngOnDestroy(): void {
+    this.stopAutoRefresh();
+  }
+
   get gatewayBaseUrl(): string {
     return (
       this.entornos.find((e) => e.key === this.entornoSeleccionado)?.baseUrl ||
@@ -69,6 +76,28 @@ export class SwaggerHubComponent {
   onEntornoChange(): void {
     this.statusMap = {};
     this.refreshStatus();
+  }
+
+  onAutoRefreshToggle(): void {
+    if (this.autoRefresh) {
+      this.startAutoRefresh();
+    } else {
+      this.stopAutoRefresh();
+    }
+  }
+
+  private startAutoRefresh(): void {
+    this.stopAutoRefresh();
+    this.autoRefreshTimer = setInterval(() => {
+      this.refreshStatus();
+    }, this.autoRefreshSeconds * 1000);
+  }
+
+  private stopAutoRefresh(): void {
+    if (this.autoRefreshTimer) {
+      clearInterval(this.autoRefreshTimer);
+      this.autoRefreshTimer = null;
+    }
   }
 
   async refreshStatus(): Promise<void> {
