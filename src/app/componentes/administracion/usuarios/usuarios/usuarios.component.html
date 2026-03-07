@@ -87,6 +87,10 @@
                     data-toggle="modal" data-target="#modalPersonalLink" (click)="openLinkPersonal(usuario)">
                     Unir
                   </button>
+                  <div *ngIf="hasPersonalLink(usuario)" class="btn-group btn-group-sm ml-2">
+                    <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#modalPersonalLink" (click)="openLinkPersonal(usuario)">Cambiar</button>
+                    <button type="button" class="btn btn-outline-danger" (click)="unlinkPersonalUsuario(usuario)">Desvincular</button>
+                  </div>
                 </div>
               </td>
 

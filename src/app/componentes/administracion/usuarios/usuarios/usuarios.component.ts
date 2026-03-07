@@ -217,13 +217,13 @@ export class UsuariosComponent implements OnInit {
   }
 
   hasPersonalLink(usuario: any): boolean {
-    return !!(usuario?.personal?.idpersonal || usuario?.idpersonal_personal || usuario?.idpersonal);
+    return !!(usuario?.personalIdpersonal || usuario?.personal_idpersonal || usuario?.personal?.idpersonal || usuario?.idpersonal_personal || usuario?.idpersonal);
   }
 
   personalLinkLabel(usuario: any): string {
     const p = usuario?.personal;
     if (p?.apellidos || p?.nombres) return `${p?.apellidos || ''} ${p?.nombres || ''}`.trim();
-    const idp = p?.idpersonal || usuario?.idpersonal_personal || usuario?.idpersonal;
+    const idp = usuario?.personalIdpersonal || usuario?.personal_idpersonal || p?.idpersonal || usuario?.idpersonal_personal || usuario?.idpersonal;
     return idp ? `ID Personal: ${idp}` : 'No vinculado';
   }
 
@@ -232,18 +232,22 @@ export class UsuariosComponent implements OnInit {
     this.filtrarPersonalVinculo = '';
   }
 
+  unlinkPersonalUsuario(usuario: any) {
+    this.usuService.unlinkPersonal(usuario.idusuario, this.authService.idusuario).subscribe({
+      next: () => {
+        usuario.personalIdpersonal = null;
+        if (usuario.personal) usuario.personal = null;
+      },
+      error: (e) => console.error(e),
+    });
+  }
+
   seleccionarPersonalParaUsuario(per: any) {
     if (!this.usuarioLinkTarget) return;
 
-    const payload: any = {
-      ...this.usuarioLinkTarget,
-      personal: { idpersonal: per.idpersonal },
-      usumodi: this.authService.idusuario,
-      fecmodi: new Date(),
-    };
-
-    this.usuService.updateUsuario(this.usuarioLinkTarget.idusuario, payload).subscribe({
+    this.usuService.linkPersonal(this.usuarioLinkTarget.idusuario, per.idpersonal, this.authService.idusuario).subscribe({
       next: () => {
+        this.usuarioLinkTarget.personalIdpersonal = per.idpersonal;
         this.usuarioLinkTarget.personal = { idpersonal: per.idpersonal, apellidos: per.apellidos, nombres: per.nombres };
         this.usuarioLinkTarget = null;
       },

@@ -48,6 +48,15 @@ export class UsuarioService {
   updateUsuario(idusuario: number, usuario: Usuarios): Observable<Object> {
     return this.http.put(baseUrl + '/' + idusuario, usuario);
   }
+
+  linkPersonal(idusuario: number, idpersonal: number, usumodi?: number) {
+    return this.http.patch(`${baseUrl}/${idusuario}/personal`, { idpersonal, usumodi: usumodi || null });
+  }
+
+  unlinkPersonal(idusuario: number, usumodi?: number) {
+    const q = usumodi ? `?usumodi=${usumodi}` : '';
+    return this.http.delete(`${baseUrl}/${idusuario}/personal${q}`);
+  }
   getDatosOfOne(idusuario: number) {
     return this.http.get(`${baseUrl}/one?idusuario=${idusuario}`);
   }
