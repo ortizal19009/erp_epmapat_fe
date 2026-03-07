@@ -11,7 +11,11 @@ const baseUrl = `${apiUrl}/erpmodulos`;
 export class ErpmodulosService {
   constructor(private http: HttpClient) {}
   getAllErpModulos() {
-    return this.http.get(`${baseUrl}`);
+    return this.http.get<any[]>(`${baseUrl}`);
+  }
+
+  save(modulo: { descripcion: string; platform: string }) {
+    return this.http.post<any>(`${baseUrl}`, modulo);
   }
   async findByPlatform(plataform: string): Promise<any> {
     return await firstValueFrom(

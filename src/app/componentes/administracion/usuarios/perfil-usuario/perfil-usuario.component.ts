@@ -23,6 +23,8 @@ export class PerfilUsuarioComponent implements OnInit {
   _usrxmodulo: any = [];
   _user: Usuarios = new Usuarios();
   sectionChanges: Array<{ iderpseccion: number; enabled: boolean }> = [];
+  adminNewModulo = { descripcion: '', platform: 'WEB' };
+  allModules: any[] = [];
 
   constructor(
     private router: Router,
@@ -47,6 +49,7 @@ export class PerfilUsuarioComponent implements OnInit {
     });
     this.buscaUsuario();
     this.getAllErpModulos();
+    this.loadAllModulesCatalog();
   }
 
   colocaColor(colores: any) {
@@ -140,10 +143,10 @@ export class PerfilUsuarioComponent implements OnInit {
     this.s_usrxmodulos.getAccessProfile(this.idusuario, 'WEB').subscribe({
       next: (datos: any[]) => {
         if ((datos || []).length === 0) {
-          this.s_erpmodulos._findByPlatform('WEB').subscribe({
+          this.s_erpmodulos.getAllErpModulos().subscribe({
             next: (mods: any[]) => {
-              this._erpmodulos = mods;
-              this._usrxmodulo = (mods || []).map((item: any) => ({
+              this._erpmodulos = (mods || []).filter((m: any) => ['WEB','BOTH'].includes(String(m?.platform || '').toUpperCase()));
+              this._usrxmodulo = (this._erpmodulos || []).map((item: any) => ({
                 iderpmodulo_erpmodulos: item,
                 enabled: false,
                 idusuario_usuarios: this._user,
@@ -209,6 +212,32 @@ export class PerfilUsuarioComponent implements OnInit {
       });
     });
     this.sectionChanges = [];
+  }
+
+  loadAllModulesCatalog() {
+    this.s_erpmodulos.getAllErpModulos().subscribe({
+      next: (mods: any[]) => this.allModules = mods || [],
+      error: (e: any) => console.error(e),
+    });
+  }
+
+  saveNewModulo() {
+    if (this.idusuario !== 1) return;
+    if (!this.adminNewModulo.descripcion?.trim()) return;
+
+    const payload = {
+      descripcion: this.adminNewModulo.descripcion.trim(),
+      platform: (this.adminNewModulo.platform || 'WEB').toUpperCase(),
+    };
+
+    this.s_erpmodulos.save(payload).subscribe({
+      next: () => {
+        this.adminNewModulo = { descripcion: '', platform: 'WEB' };
+        this.loadAllModulesCatalog();
+        this.getAllErpModulos();
+      },
+      error: (e: any) => console.error(e),
+    });
   }
 
   regresar() {
