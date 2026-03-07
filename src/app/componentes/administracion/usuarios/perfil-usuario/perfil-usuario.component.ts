@@ -22,7 +22,6 @@ export class PerfilUsuarioComponent implements OnInit {
   _erpmodulos: any;
   _usrxmodulo: any = [];
   _user: Usuarios = new Usuarios();
-  sectionChanges: Array<{ iderpseccion: number; enabled: boolean }> = [];
   adminNewModulo = { descripcion: '', platform: 'WEB' };
   allModules: any[] = [];
   selectedModuleId: number | null = null;
@@ -196,11 +195,21 @@ export class PerfilUsuarioComponent implements OnInit {
   }
 
   setSectionToUser(e: any, sec: any): void {
-    sec.enabled = !!e.target.checked;
-    const id = +sec.iderpseccion;
-    const idx = this.sectionChanges.findIndex((x) => x.iderpseccion === id);
-    if (idx >= 0) this.sectionChanges[idx].enabled = sec.enabled;
-    else this.sectionChanges.push({ iderpseccion: id, enabled: sec.enabled });
+    const enabled = !!e.target.checked;
+    const prev = !!sec.enabled;
+    sec.enabled = enabled;
+
+    this.s_usrxmodulos.saveAccessSeccion({
+      idusuario: this.idusuario,
+      iderpseccion: +sec.iderpseccion,
+      enabled,
+    }).subscribe({
+      next: () => {},
+      error: (err: any) => {
+        console.error(err);
+        sec.enabled = prev;
+      }
+    });
   }
 
   guardarModulos() {
@@ -210,18 +219,6 @@ export class PerfilUsuarioComponent implements OnInit {
         error: (e: any) => console.error(e),
       });
     });
-
-    this.sectionChanges.forEach((item) => {
-      this.s_usrxmodulos.saveAccessSeccion({
-        idusuario: this.idusuario,
-        iderpseccion: item.iderpseccion,
-        enabled: item.enabled,
-      }).subscribe({
-        next: () => {},
-        error: (e: any) => console.error(e),
-      });
-    });
-    this.sectionChanges = [];
   }
 
   loadAllModulesCatalog() {
