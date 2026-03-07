@@ -1350,6 +1350,11 @@ const routes: Routes = [
     component: ReportesjrComponent,
     canActivate: [AuthGuard],
   },
+  {
+    path: 'admin/access-control',
+    loadComponent: () => import('./features/settings/access-admin/access-admin').then(m => m.AccessAdminComponent),
+    canActivate: [AuthGuard],
+  },
 
   /* COACTIVAS */
   { path: 'cv-rubros', component: CvRubrosComponent, canActivate: [AuthGuard] },

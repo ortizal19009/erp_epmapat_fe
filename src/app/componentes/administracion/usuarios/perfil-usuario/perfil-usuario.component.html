@@ -143,96 +143,9 @@
                </tbody>
             </table>
 
-            <div *ngIf="idusuario == 1" class="mt-2 border rounded p-2 bg-light">
-               <div class="small font-weight-bold mb-2">Panel rápido de administración (módulos, secciones y subsecciones)</div>
-
-               <div class="small text-muted mb-1">Editar módulos</div>
-               <table class="table table-sm table-bordered mb-2">
-                  <thead>
-                     <tr>
-                        <th style="width:60px">#</th>
-                        <th>Módulo</th>
-                        <th style="width:140px">Platform</th>
-                        <th style="width:90px"></th>
-                     </tr>
-                  </thead>
-                  <tbody>
-                     <tr *ngFor="let m of allModules; let i=index">
-                        <td>{{i+1}}</td>
-                        <td><input class="form-control form-control-sm" [(ngModel)]="m.descripcion"></td>
-                        <td>
-                           <select class="custom-select custom-select-sm" [(ngModel)]="m.platform">
-                              <option value="WEB">WEB</option>
-                              <option value="MOBILE">MOBILE</option>
-                              <option value="BOTH">BOTH</option>
-                           </select>
-                        </td>
-                        <td><button class="btn btn-sm btn-outline-success" (click)="saveModuloEdit(m)">Guardar</button></td>
-                     </tr>
-                  </tbody>
-               </table>
-
-               <div class="small text-muted mb-1">Editar secciones/subsecciones</div>
-               <div class="form-row mb-2">
-                  <div class="col-sm-6">
-                     <select class="custom-select custom-select-sm" [(ngModel)]="selectedModuleId" (change)="loadSectionCatalog()">
-                        <option [ngValue]="null">(Selecciona módulo)</option>
-                        <option *ngFor="let m of allModules" [ngValue]="m.iderpmodulo">{{m.descripcion}}</option>
-                     </select>
-                  </div>
-                  <div class="col-sm-6 small text-muted pt-1">
-                     Tip: para subsección usa código jerárquico, por ejemplo: <b>GD_CFG.SYSTEM</b>
-                  </div>
-               </div>
-
-               <table class="table table-sm table-bordered mb-2" *ngIf="selectedModuleId">
-                  <thead>
-                     <tr>
-                        <th>Código</th>
-                        <th>Descripción</th>
-                        <th>Ruta</th>
-                        <th style="width:70px">Orden</th>
-                        <th style="width:110px">Platform</th>
-                        <th style="width:70px">Activo</th>
-                        <th style="width:90px"></th>
-                     </tr>
-                  </thead>
-                  <tbody>
-                     <tr *ngFor="let s of sectionCatalog">
-                        <td><input class="form-control form-control-sm" [(ngModel)]="s.codigo"></td>
-                        <td><input class="form-control form-control-sm" [(ngModel)]="s.descripcion"></td>
-                        <td><input class="form-control form-control-sm" [(ngModel)]="s.ruta"></td>
-                        <td><input class="form-control form-control-sm" type="number" [(ngModel)]="s.orden"></td>
-                        <td>
-                           <select class="custom-select custom-select-sm" [(ngModel)]="s.platform">
-                              <option value="WEB">WEB</option>
-                              <option value="MOBILE">MOBILE</option>
-                              <option value="BOTH">BOTH</option>
-                           </select>
-                        </td>
-                        <td class="text-center"><input type="checkbox" [(ngModel)]="s.activo"></td>
-                        <td><button class="btn btn-sm btn-outline-success" (click)="saveSectionEdit(s)">Guardar</button></td>
-                     </tr>
-                  </tbody>
-               </table>
-
-               <div class="border rounded p-2" *ngIf="selectedModuleId">
-                  <div class="small font-weight-bold mb-2">Nueva sección/subsección</div>
-                  <div class="form-row">
-                     <div class="col-sm-2 mb-1"><input class="form-control form-control-sm" placeholder="Código" [(ngModel)]="adminNewSection.codigo"></div>
-                     <div class="col-sm-3 mb-1"><input class="form-control form-control-sm" placeholder="Descripción" [(ngModel)]="adminNewSection.descripcion"></div>
-                     <div class="col-sm-3 mb-1"><input class="form-control form-control-sm" placeholder="Ruta" [(ngModel)]="adminNewSection.ruta"></div>
-                     <div class="col-sm-1 mb-1"><input class="form-control form-control-sm" type="number" [(ngModel)]="adminNewSection.orden"></div>
-                     <div class="col-sm-2 mb-1">
-                        <select class="custom-select custom-select-sm" [(ngModel)]="adminNewSection.platform">
-                           <option value="WEB">WEB</option>
-                           <option value="MOBILE">MOBILE</option>
-                           <option value="BOTH">BOTH</option>
-                        </select>
-                     </div>
-                     <div class="col-sm-1 mb-1"><button class="btn btn-sm btn-success btn-block" (click)="saveNewSectionCatalog()">+</button></div>
-                  </div>
-               </div>
+            <div *ngIf="idusuario == 1" class="mt-2 alert alert-info py-2">
+              La administración del catálogo de módulos/secciones/subsecciones fue movida a:
+              <b>Utilería → Accesos y permisos</b>.
             </div>
          </div>
          <div class="modal-footer">
