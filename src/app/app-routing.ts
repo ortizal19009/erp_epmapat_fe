@@ -1351,6 +1351,11 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
+    path: 'admin/swagger-microservicios',
+    loadComponent: () => import('./features/settings/swagger-hub/swagger-hub').then(m => m.SwaggerHubComponent),
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'admin/access-control',
     loadComponent: () => import('./features/settings/access-admin/access-admin').then(m => m.AccessAdminComponent),
     canActivate: [AuthGuard],

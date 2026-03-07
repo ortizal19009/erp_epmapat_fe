@@ -1,0 +1,46 @@
+<section class="swagger-hub container-fluid py-3">
+  <div class="card card-outline card-info">
+    <div class="card-header">
+      <h3 class="card-title mb-0">
+        <i class="bi bi-journal-code mr-2"></i>
+        Swagger de Microservicios
+      </h3>
+    </div>
+    <div class="card-body">
+      <p class="text-muted mb-3">
+        Acceso rápido a la documentación OpenAPI publicada por cada microservicio a través del Gateway.
+      </p>
+
+      <div class="table-responsive">
+        <table class="table table-sm table-hover table-bordered mb-0">
+          <thead class="thead-light">
+            <tr>
+              <th>Microservicio</th>
+              <th>Descripción</th>
+              <th>Swagger UI</th>
+              <th>OpenAPI JSON</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let servicio of servicios">
+              <td class="font-weight-bold">{{ servicio.nombre }}</td>
+              <td>{{ servicio.descripcion }}</td>
+              <td>
+                <a [href]="getSwaggerUi(servicio.gatewayPath)" target="_blank" rel="noopener noreferrer" class="btn btn-xs btn-primary">
+                  <i class="bi bi-box-arrow-up-right mr-1"></i>
+                  Abrir UI
+                </a>
+              </td>
+              <td>
+                <a [href]="getOpenApiJson(servicio.gatewayPath)" target="_blank" rel="noopener noreferrer" class="btn btn-xs btn-outline-secondary">
+                  <i class="bi bi-filetype-json mr-1"></i>
+                  Ver JSON
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,14 @@
+.swagger-hub .card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.swagger-hub .table td,
+.swagger-hub .table th {
+  vertical-align: middle;
+}
+
+.swagger-hub .btn {
+  white-space: nowrap;
+}
