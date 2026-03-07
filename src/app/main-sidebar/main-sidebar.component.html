@@ -717,7 +717,7 @@
           </ul>
         </li>
         <!-- =============== ADMINISTRACION CENTRAL ==================== -->
-        <li *ngIf="authService.modulo == 7" class="nav-item">
+        <li *ngIf="authService.modulo == 7 && canAnySection(['AC_UTIL_DOCS','AC_UTIL_USUARIOS','AC_UTIL_REPORTES'])" class="nav-item">
           <a href="#" class="nav-link bg-info" [ngClass]="{'disabled': !isOptionEnabled(5, 220)}">
             <i class="bi-gear nav-icon"></i>
             <p> Utilería
@@ -726,20 +726,20 @@
             </p>
           </a>
           <ul class="nav nav-treeview">
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canSection('AC_UTIL_DOCS')">
               <a routerLink="/documentos" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(5, 221)}">
                 <i class="bi bi-file-text-fill nav-icon"></i>
                 <p class="text-warning"> Documentos de respaldo</p>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canSection('AC_UTIL_USUARIOS')">
               <a class="nav-link" (click)="navUsuario()" routerLink=""
                 [ngClass]="{'disabled': !isOptionEnabled(5, 222)}">
                 <i class="bi-people"></i>
                 <p class="text-warning">&nbsp; Usuarios</p>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canSection('AC_UTIL_REPORTES')">
               <a routerLink="/reportesjr" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(5, 221)}">
                 <i class="bi bi-file-text-fill nav-icon"></i>
                 <p class="text-warning">Cargar Reportes</p>
@@ -749,7 +749,7 @@
           </ul>
         </li>
 
-        <li *ngIf="authService.modulo == 12" class="nav-item gd-menu">
+        <li *ngIf="authService.modulo == 12 && canAnySection(['GD_DASHBOARD','GD_DOCUMENTOS','GD_INBOX','GD_ALERTS','GD_EXPEDIENTES','GD_CFG_SYSTEM','GD_CFG_CCD','GD_CFG_TRD','GD_CFG_TIPOS','GD_PERFIL'])" class="nav-item gd-menu">
           <a href="#" class="nav-link bg-info">
             <i class="bi bi-folder2-open nav-icon" style="font-size: 15px;"></i>
             <p> Gestión Documental
@@ -758,31 +758,31 @@
             </p>
           </a>
           <ul class="nav nav-treeview">
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canSection('GD_DASHBOARD')">
               <a routerLink="/gd/dashboard" class="nav-link">
                 <i class="bi bi-speedometer2 nav-icon"></i>
                 <p class="text-warning"> Dashboard</p>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canSection('GD_DOCUMENTOS')">
               <a routerLink="/gd/documentos" class="nav-link">
                 <i class="bi bi-file-earmark-text nav-icon"></i>
                 <p class="text-warning"> Documentos</p>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canSection('GD_INBOX')">
               <a routerLink="/gd/inbox" class="nav-link">
                 <i class="bi bi-inbox nav-icon"></i>
                 <p class="text-warning"> Bandeja</p>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canSection('GD_ALERTS')">
               <a routerLink="/gd/alerts" class="nav-link">
                 <i class="bi bi-bell nav-icon"></i>
                 <p class="text-warning"> Alertas</p>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canSection('GD_EXPEDIENTES')">
               <a routerLink="/gd/case-files" class="nav-link">
                 <i class="bi bi-archive nav-icon"></i>
                 <p class="text-warning"> Expedientes</p>
@@ -796,21 +796,21 @@
                 </p>
               </a>
               <ul class="nav nav-treeview">
-                <li class="nav-item">
+                <li class="nav-item" *ngIf="canSection('GD_CFG_SYSTEM')">
                   <a routerLink="/gd/settings/system" class="nav-link py-0">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <i class="bi bi-sliders nav-icon"></i>
                     <p class="small text-warning"> Sistema</p>
                   </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" *ngIf="canSection('GD_CFG_CCD')">
                   <a routerLink="/gd/settings/ccd" class="nav-link py-0">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <i class="bi bi-diagram-3 nav-icon"></i>
                     <p class="small text-warning"> CCD</p>
                   </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" *ngIf="canSection('GD_CFG_TRD')">
                   <a routerLink="/gd/settings/trd" class="nav-link py-0">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <i class="bi bi-calendar-range nav-icon"></i>
@@ -824,7 +824,7 @@
                     <p class="small text-warning"> Entidades (TTHH)</p>
                   </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" *ngIf="canSection('GD_CFG_TIPOS')">
                   <a routerLink="/gd/settings/document-types" class="nav-link py-0">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <i class="bi bi-file-earmark-medical nav-icon"></i>
@@ -838,7 +838,7 @@
                     <p class="small text-warning"> Dependencias (TTHH)</p>
                   </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" *ngIf="canSection('GD_PERFIL')">
                   <a routerLink="/gd/my-profile" class="nav-link py-0">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <i class="bi bi-person-circle nav-icon"></i>
@@ -851,7 +851,7 @@
           </ul>
         </li>
 
-        <li *ngIf="authService.modulo == 7" class="nav-item">
+        <li *ngIf="authService.modulo == 7 && canAnySection(['AC_SRI_COMPROB','AC_SRI_FIRMA'])" class="nav-item">
           <a href="#" class="nav-link bg-info" [ngClass]="{'disabled': !isOptionEnabled(5, 223)}">
             <i class="bi bi-scissors nav-icon"></i>
             <p> SRI
@@ -860,13 +860,13 @@
             </p>
           </a>
           <ul class="nav nav-treeview">
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canSection('AC_SRI_COMPROB')">
               <a routerLink="/tabla4" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(5, 224)}">
                 <i class="bi bi-eraser nav-icon"></i>
                 <p class="text-warning"> Comprobantes SRI</p>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canSection('AC_SRI_FIRMA')">
               <a class="nav-link" routerLink="/definir" [ngClass]="{'disabled': !isOptionEnabled(5, 224)}">
                 <i class="bi-people"></i>
                 <p class="text-warning">&nbsp; Firma Electrónica</p>

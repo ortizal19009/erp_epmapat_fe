@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AutorizaService } from '../compartida/autoriza.service';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
+import { UsrxmodulosService } from '../servicios/administracion/usrxmodulos.service';
 
 @Component({
   selector: 'app-main-sidebar',
@@ -11,8 +12,14 @@ import { BehaviorSubject } from 'rxjs';
 export class MainSidebarComponent implements OnInit {
   fondo1: number;
   private _sessionLog = new BehaviorSubject<boolean>(false);
+  accessLoaded = false;
+  enabledSections = new Set<string>();
 
-  constructor(public authService: AutorizaService, private router: Router) {}
+  constructor(
+    public authService: AutorizaService,
+    private router: Router,
+    private usrxmodulosService: UsrxmodulosService
+  ) {}
 
   ngOnInit(): void {
     //Fondo
@@ -25,6 +32,8 @@ export class MainSidebarComponent implements OnInit {
     if (!this.authService.sessionlog) {
       this.router.navigate(['/inicio']); // redirige inmediatamente
     }
+
+    this.loadSectionAccess();
   }
 
   isOptionEnabled(modulo: number, i: number): boolean {
@@ -80,5 +89,52 @@ export class MainSidebarComponent implements OnInit {
 
   logout() {
     this._sessionLog.next(false);
+  }
+
+  private resolveUserId(): number {
+    if (this.authService.idusuario) return this.authService.idusuario;
+    try {
+      const raw = sessionStorage.getItem('abc');
+      if (!raw) return 0;
+      const decoded = JSON.parse(atob(raw));
+      return +decoded?.idusuario || 0;
+    } catch {
+      return 0;
+    }
+  }
+
+  private loadSectionAccess(): void {
+    const userId = this.resolveUserId();
+    if (!userId || userId === 1) {
+      this.accessLoaded = true;
+      return;
+    }
+
+    this.usrxmodulosService.getAccessProfile(userId, 'WEB').subscribe({
+      next: (rows: any[]) => {
+        this.enabledSections.clear();
+        (rows || []).forEach((m: any) => {
+          if (!m?.enabled) return;
+          (m?.secciones || []).forEach((s: any) => {
+            if (s?.enabled && s?.codigo) this.enabledSections.add(String(s.codigo));
+          });
+        });
+        this.accessLoaded = true;
+      },
+      error: () => {
+        this.accessLoaded = true;
+      }
+    });
+  }
+
+  canSection(code: string): boolean {
+    if (this.authService.idusuario == 1) return true;
+    if (!this.accessLoaded) return false;
+    return this.enabledSections.has(code);
+  }
+
+  canAnySection(codes: string[]): boolean {
+    if (this.authService.idusuario == 1) return true;
+    return codes.some((c) => this.canSection(c));
   }
 }
