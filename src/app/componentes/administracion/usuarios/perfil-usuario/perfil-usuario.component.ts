@@ -146,40 +146,26 @@ export class PerfilUsuarioComponent implements OnInit {
 
     this.s_erpmodulos.getAllErpModulos().subscribe({
       next: (mods: any[]) => {
-        const catalog = mods || [];
+        const catalog = (mods || []).filter((m: any) => {
+          const pf = String(m?.platform || 'BOTH').toUpperCase();
+          return pf === 'WEB' || pf === 'BOTH';
+        });
 
         this.s_usrxmodulos.getAccessProfile(this.idusuario, 'WEB').subscribe({
-          next: (webRows: any[]) => {
-            this.s_usrxmodulos.getAccessProfile(this.idusuario, 'MOBILE').subscribe({
-              next: (mobileRows: any[]) => {
-                const byId = new Map<number, any>();
+          next: (rows: any[]) => {
+            const byId = new Map<number, any>();
+            (rows || []).forEach((r: any) => byId.set(+r.iderpmodulo, r));
 
-                [...(webRows || []), ...(mobileRows || [])].forEach((r: any) => {
-                  const id = +r.iderpmodulo;
-                  const cur = byId.get(id) || {
-                    iderpmodulo: id,
-                    descripcion: r.descripcion,
-                    platform: r.platform,
-                    enabled: false,
-                    secciones: [] as any[],
-                  };
-                  cur.enabled = !!cur.enabled || !!r.enabled;
-                  cur.secciones = [...(cur.secciones || []), ...(r.secciones || [])];
-                  byId.set(id, cur);
-                });
-
-                this._usrxmodulo = catalog.map((m: any) => {
-                  const id = +m.iderpmodulo;
-                  const assigned = byId.get(id);
-                  return {
-                    iderpmodulo_erpmodulos: m,
-                    enabled: !!assigned?.enabled,
-                    idusuario_usuarios: this._user,
-                    secciones: assigned?.secciones || [],
-                  };
-                });
-              },
-              error: (e: any) => console.error(e),
+            this._usrxmodulo = catalog.map((m: any) => {
+              const id = +m.iderpmodulo;
+              const assigned = byId.get(id);
+              return {
+                iderpmodulo_erpmodulos: m,
+                enabled: !!assigned?.enabled,
+                idusuario_usuarios: this._user,
+                secciones: assigned?.secciones || [],
+                platform: 'WEB',
+              };
             });
           },
           error: (e: any) => console.error(e),
@@ -189,16 +175,24 @@ export class PerfilUsuarioComponent implements OnInit {
     });
   }
   setModuloToUser(e: any, data: any): void {
-    let findDato = this._usrxmodulo.find(
-      (um: { iderpmodulo_erpmodulos: any }) =>
-        um.iderpmodulo_erpmodulos === data.iderpmodulo_erpmodulos
-    );
+    const enabled = !!e.target.checked;
+    data.enabled = enabled;
 
-    if (e.target.checked) {
-      findDato.enabled = true;
-    } else {
-      findDato.enabled = false;
-    }
+    const payload = {
+      ...data,
+      enabled,
+      platform: 'WEB',
+      idusuario_usuarios: this._user,
+      iderpmodulo_erpmodulos: data.iderpmodulo_erpmodulos,
+    };
+
+    this.s_usrxmodulos.saveAccessModulos(payload).subscribe({
+      next: () => {},
+      error: (err: any) => {
+        console.error(err);
+        data.enabled = !enabled;
+      }
+    });
   }
 
   setSectionToUser(e: any, sec: any): void {
