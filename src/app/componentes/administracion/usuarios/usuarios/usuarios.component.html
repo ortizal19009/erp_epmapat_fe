@@ -18,13 +18,19 @@
             style="width: 200px;"
           />
 
+          <select class="custom-select custom-select-sm mr-2" style="width: 160px;" [(ngModel)]="filtroEstado">
+            <option value="ACTIVOS">Solo activos</option>
+            <option value="INACTIVOS">Solo inactivos</option>
+            <option value="TODOS">Todos</option>
+          </select>
+
           <div class="btn-group">
             <button type="button" class="btn btn-sm btn-outline-light dropdown-toggle" data-toggle="dropdown">
               <i class="bi bi-menu-button-wide"></i>
             </button>
 
             <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-              <button class="dropdown-item text-white" type="button" data-toggle="collapse" data-target="#addUsuario" >
+              <button class="dropdown-item text-white" type="button" (click)="openAddForm()">
                 <i class="bi bi-file-earmark-plus"></i>&nbsp; Nuevo
               </button>
 
@@ -41,7 +47,7 @@
       </div>
 
       <!-- TABLA -->
-      <div class="mt-2 sombra border rounded detalle">
+      <div class="mt-2 sombra border rounded detalle" *ngIf="!showAddForm">
         <table class="table table-hover table-sm mb-0">
           <thead class="text-center">
             <tr>
@@ -54,7 +60,7 @@
           </thead>
 
           <tbody>
-            <tr *ngFor="let usuario of _usuarios | filter:filtro; let i=index" class="text-center fila">
+            <tr *ngFor="let usuario of usuariosFiltrados; let i=index" class="text-center fila">
               <td class="font-weight-bold small">{{ i + 1 }}</td>
 
               <td class="text-left" [ngClass]="{'tachado': !usuario.estado}">
@@ -90,7 +96,7 @@
               </td>
             </tr>
 
-            <tr *ngIf="(_usuarios | filter:filtro)?.length === 0">
+            <tr *ngIf="usuariosFiltrados.length === 0">
               <td colspan="5" class="text-center text-muted py-3">
                 No se encontraron usuarios.
               </td>
@@ -106,13 +112,13 @@
   <div class="row justify-content-center">
     <div class="col-sm-10 col-md-9 col-lg-7">
 
-      <div class="collapse mt-2" id="addUsuario">
-        <div class="card sombra border-0">
+      <div class="mt-2" *ngIf="showAddForm">
+        <div class="card sombra border-0 form-elegante">
           <div class="card-header bg-success text-white d-flex align-items-center justify-content-between">
             <h6 class="m-0 font-weight-bold">
               <i class="bi bi-person-plus-fill"></i>&nbsp; Añadir nuevo usuario
             </h6>
-            <button class="btn btn-sm btn-outline-light" type="button" data-toggle="collapse" data-target="#addUsuario">
+            <button class="btn btn-sm btn-outline-light" type="button" (click)="closeAddForm()">
               <i class="bi bi-x-lg"></i>
             </button>
           </div>
@@ -203,7 +209,7 @@
             </div>
 
             <div class="card-footer text-center">
-              <button type="button" class="btn btn-sm btn-outline-secondary mr-2" data-toggle="collapse" data-target="#addUsuario">
+              <button type="button" class="btn btn-sm btn-outline-secondary mr-2" (click)="closeAddForm()">
                 <i class="bi bi-x-circle"></i>&nbsp; Cancelar
               </button>
 

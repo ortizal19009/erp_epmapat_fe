@@ -17,8 +17,10 @@ import { PersonalService } from 'src/app/servicios/rrhh/personal.service';
 export class UsuariosComponent implements OnInit {
   f_usuario!: FormGroup;
 
-  _usuarios: any;
+  _usuarios: any[] = [];
   filtro: string = '';
+  filtroEstado: 'ACTIVOS' | 'INACTIVOS' | 'TODOS' = 'ACTIVOS';
+  showAddForm: boolean = false;
 
   // Modal eliminar
   usuario = {} as Usuario;
@@ -102,7 +104,7 @@ export class UsuariosComponent implements OnInit {
   // =========================
   listarUsuarios() {
     this.usuService.getUsuarios().subscribe({
-      next: (datos) => (this._usuarios = datos),
+      next: (datos) => (this._usuarios = (datos || []) as any[]),
       error: (err) => console.error(err.error),
     });
   }
@@ -214,6 +216,7 @@ export class UsuariosComponent implements OnInit {
       next: () => {
         this.listarUsuarios();
         this.resetFormAdd();
+        this.closeAddForm();
       },
       error: (e: any) => console.error(e),
     });
@@ -223,6 +226,32 @@ export class UsuariosComponent implements OnInit {
     this.f_usuario.reset();
     this.pass = '';
     this.limpiarPersonalAdd();
+  }
+
+  openAddForm() {
+    this.showAddForm = true;
+    this.resetFormAdd();
+  }
+
+  closeAddForm() {
+    this.showAddForm = false;
+  }
+
+  get usuariosFiltrados(): any[] {
+    const term = (this.filtro || '').trim().toLowerCase();
+
+    let base = this._usuarios || [];
+    if (this.filtroEstado === 'ACTIVOS') base = base.filter((u: any) => !!u?.estado);
+    if (this.filtroEstado === 'INACTIVOS') base = base.filter((u: any) => !u?.estado);
+
+    if (!term) return base;
+
+    return base.filter((u: any) => {
+      const id = String(u?.identificausu || '').toLowerCase();
+      const alias = String(u?.alias || '').toLowerCase();
+      const nom = String(u?.nomusu || '').toLowerCase();
+      return id.includes(term) || alias.includes(term) || nom.includes(term);
+    });
   }
 
   // =========================
