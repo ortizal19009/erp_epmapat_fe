@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../../environments/environment';
 
 interface SwaggerServiceLink {
   nombre: string;
@@ -22,13 +23,12 @@ interface EntornoGateway {
   styleUrls: ['./swagger-hub.css']
 })
 export class SwaggerHubComponent {
-  readonly entornos: EntornoGateway[] = [
-    { key: 'dev', label: 'Desarrollo', baseUrl: 'http://localhost:8080' },
-    { key: 'qa', label: 'QA', baseUrl: 'http://localhost:8081' },
-    { key: 'prod', label: 'Producción', baseUrl: 'https://api.tu-dominio.com' }
-  ];
+  readonly entornos: EntornoGateway[] =
+    (environment as any).SWAGGER_GATEWAYS ?? [
+      { key: 'dev', label: 'Desarrollo', baseUrl: 'http://localhost:8080' }
+    ];
 
-  entornoSeleccionado = this.entornos[0].key;
+  entornoSeleccionado = this.entornos[0]?.key ?? 'dev';
 
   readonly servicios: SwaggerServiceLink[] = [
     { nombre: 'Login', gatewayPath: '/login', descripcion: 'Autenticación y sesiones' },
