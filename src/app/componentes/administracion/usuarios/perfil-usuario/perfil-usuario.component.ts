@@ -25,6 +25,9 @@ export class PerfilUsuarioComponent implements OnInit {
   sectionChanges: Array<{ iderpseccion: number; enabled: boolean }> = [];
   adminNewModulo = { descripcion: '', platform: 'WEB' };
   allModules: any[] = [];
+  selectedModuleId: number | null = null;
+  sectionCatalog: any[] = [];
+  adminNewSection: any = { codigo: '', descripcion: '', ruta: '', orden: 0, platform: 'WEB', activo: true };
 
   constructor(
     private router: Router,
@@ -216,7 +219,13 @@ export class PerfilUsuarioComponent implements OnInit {
 
   loadAllModulesCatalog() {
     this.s_erpmodulos.getAllErpModulos().subscribe({
-      next: (mods: any[]) => this.allModules = mods || [],
+      next: (mods: any[]) => {
+        this.allModules = mods || [];
+        if (this.selectedModuleId == null && this.allModules.length > 0) {
+          this.selectedModuleId = this.allModules[0].iderpmodulo;
+          this.loadSectionCatalog();
+        }
+      },
       error: (e: any) => console.error(e),
     });
   }
@@ -234,6 +243,73 @@ export class PerfilUsuarioComponent implements OnInit {
       next: () => {
         this.adminNewModulo = { descripcion: '', platform: 'WEB' };
         this.loadAllModulesCatalog();
+        this.getAllErpModulos();
+      },
+      error: (e: any) => console.error(e),
+    });
+  }
+
+  saveModuloEdit(m: any) {
+    if (this.idusuario !== 1) return;
+    this.s_erpmodulos.update(m.iderpmodulo, {
+      descripcion: m.descripcion,
+      platform: (m.platform || 'WEB').toUpperCase(),
+    }).subscribe({
+      next: () => {
+        this.loadAllModulesCatalog();
+        this.getAllErpModulos();
+      },
+      error: (e: any) => console.error(e),
+    });
+  }
+
+  loadSectionCatalog() {
+    if (!this.selectedModuleId) {
+      this.sectionCatalog = [];
+      return;
+    }
+    this.s_usrxmodulos.getSectionCatalog(this.selectedModuleId, 'WEB').subscribe({
+      next: (rows: any[]) => this.sectionCatalog = rows || [],
+      error: (e: any) => console.error(e),
+    });
+  }
+
+  saveNewSectionCatalog() {
+    if (this.idusuario !== 1 || !this.selectedModuleId) return;
+    if (!this.adminNewSection.codigo?.trim() || !this.adminNewSection.descripcion?.trim()) return;
+
+    const payload = {
+      iderpmodulo: this.selectedModuleId,
+      codigo: this.adminNewSection.codigo.trim(),
+      descripcion: this.adminNewSection.descripcion.trim(),
+      ruta: this.adminNewSection.ruta?.trim() || null,
+      orden: +this.adminNewSection.orden || 0,
+      platform: (this.adminNewSection.platform || 'WEB').toUpperCase(),
+      activo: !!this.adminNewSection.activo,
+    };
+
+    this.s_usrxmodulos.saveSectionCatalog(payload).subscribe({
+      next: () => {
+        this.adminNewSection = { codigo: '', descripcion: '', ruta: '', orden: 0, platform: 'WEB', activo: true };
+        this.loadSectionCatalog();
+        this.getAllErpModulos();
+      },
+      error: (e: any) => console.error(e),
+    });
+  }
+
+  saveSectionEdit(sec: any) {
+    if (this.idusuario !== 1) return;
+    this.s_usrxmodulos.updateSectionCatalog(sec.iderpseccion, {
+      codigo: sec.codigo,
+      descripcion: sec.descripcion,
+      ruta: sec.ruta,
+      orden: +sec.orden || 0,
+      platform: (sec.platform || 'WEB').toUpperCase(),
+      activo: !!sec.activo,
+    }).subscribe({
+      next: () => {
+        this.loadSectionCatalog();
         this.getAllErpModulos();
       },
       error: (e: any) => console.error(e),

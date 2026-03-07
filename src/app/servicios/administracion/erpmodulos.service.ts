@@ -17,6 +17,10 @@ export class ErpmodulosService {
   save(modulo: { descripcion: string; platform: string }) {
     return this.http.post<any>(`${baseUrl}`, modulo);
   }
+
+  update(id: number, modulo: { descripcion: string; platform: string }) {
+    return this.http.put<any>(`${baseUrl}/${id}`, modulo);
+  }
   async findByPlatform(plataform: string): Promise<any> {
     return await firstValueFrom(
       this.http.get<any>(`${baseUrl}/platform/${plataform}`)
