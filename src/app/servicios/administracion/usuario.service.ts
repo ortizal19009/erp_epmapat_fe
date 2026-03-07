@@ -6,6 +6,7 @@ import { environment } from 'src/environments/environment';
 
 const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/usuarios`;
+const authUrl = `${apiUrl}/api/auth`;
 
 @Injectable({
   providedIn: 'root',
@@ -60,6 +61,10 @@ export class UsuarioService {
 getByCargos(ids: number[]): Observable<any> {
   const params = ids.join(',');
   return this.http.get<any>(`${baseUrl}/cargo?ids=${params}`);
+}
+
+loginAuth(payload: { username: string; password: string; platform?: string }) {
+  return this.http.post<any>(`${authUrl}/login`, payload);
 }
 
 }
