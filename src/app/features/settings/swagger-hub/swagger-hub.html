@@ -14,15 +14,21 @@
       <div class="row mb-3 align-items-end">
         <div class="col-md-4 col-lg-3">
           <label class="mb-1 font-weight-bold">Ambiente</label>
-          <select class="form-control form-control-sm" [(ngModel)]="entornoSeleccionado">
+          <select class="form-control form-control-sm" [(ngModel)]="entornoSeleccionado" (ngModelChange)="onEntornoChange()">
             <option *ngFor="let env of entornos" [value]="env.key">{{ env.label }}</option>
           </select>
         </div>
-        <div class="col-md-8 col-lg-9 mt-2 mt-md-0">
+        <div class="col-md-5 col-lg-6 mt-2 mt-md-0">
           <small class="text-muted">
             Gateway base seleccionado:
             <strong>{{ gatewayBaseUrl }}</strong>
           </small>
+        </div>
+        <div class="col-md-3 col-lg-3 text-md-right mt-2 mt-md-0">
+          <button class="btn btn-sm btn-outline-info" (click)="refreshStatus()">
+            <i class="bi bi-arrow-repeat mr-1"></i>
+            Verificar estado
+          </button>
         </div>
       </div>
 
@@ -34,6 +40,7 @@
               <th>Descripción</th>
               <th>Swagger UI</th>
               <th>OpenAPI JSON</th>
+              <th>Estado</th>
             </tr>
           </thead>
           <tbody>
@@ -51,6 +58,9 @@
                   <i class="bi bi-filetype-json mr-1"></i>
                   Ver JSON
                 </a>
+              </td>
+              <td>
+                <span [class]="getBadgeClass(servicio.gatewayPath)">{{ getBadgeText(servicio.gatewayPath) }}</span>
               </td>
             </tr>
           </tbody>

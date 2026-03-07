@@ -3,6 +3,8 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../../environments/environment';
 
+type EstadoSwagger = 'checking' | 'online' | 'offline' | 'unknown';
+
 interface SwaggerServiceLink {
   nombre: string;
   gatewayPath: string;
@@ -23,6 +25,7 @@ interface EntornoGateway {
   styleUrls: ['./swagger-hub.css']
 })
 export class SwaggerHubComponent {
+  statusMap: Record<string, { estado: EstadoSwagger; ms?: number }> = {};
   readonly entornos: EntornoGateway[] =
     (environment as any).SWAGGER_GATEWAYS ?? [
       { key: 'dev', label: 'Desarrollo', baseUrl: 'http://localhost:8080' }
@@ -44,6 +47,10 @@ export class SwaggerHubComponent {
     { nombre: 'Emails', gatewayPath: '/emails', descripcion: 'Plantillas y envío de correos' }
   ];
 
+  constructor() {
+    this.refreshStatus();
+  }
+
   get gatewayBaseUrl(): string {
     return (
       this.entornos.find((e) => e.key === this.entornoSeleccionado)?.baseUrl ||
@@ -57,5 +64,59 @@ export class SwaggerHubComponent {
 
   getOpenApiJson(path: string): string {
     return `${this.gatewayBaseUrl}${path}/v3/api-docs`;
+  }
+
+  onEntornoChange(): void {
+    this.statusMap = {};
+    this.refreshStatus();
+  }
+
+  async refreshStatus(): Promise<void> {
+    for (const servicio of this.servicios) {
+      const key = servicio.gatewayPath;
+      this.statusMap[key] = { estado: 'checking' };
+
+      const start = performance.now();
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+        const resp = await fetch(this.getOpenApiJson(servicio.gatewayPath), {
+          method: 'GET',
+          cache: 'no-store',
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!resp.ok) {
+          throw new Error(`HTTP ${resp.status}`);
+        }
+
+        this.statusMap[key] = {
+          estado: 'online',
+          ms: Math.round(performance.now() - start)
+        };
+      } catch {
+        this.statusMap[key] = { estado: 'offline' };
+      }
+    }
+  }
+
+  getBadgeClass(path: string): string {
+    const estado = this.statusMap[path]?.estado ?? 'unknown';
+    if (estado === 'online') return 'badge badge-success';
+    if (estado === 'offline') return 'badge badge-danger';
+    if (estado === 'checking') return 'badge badge-warning';
+    return 'badge badge-secondary';
+  }
+
+  getBadgeText(path: string): string {
+    const status = this.statusMap[path];
+    if (!status) return 'Sin validar';
+    if (status.estado === 'checking') return 'Verificando...';
+    if (status.estado === 'online') return `Online (${status.ms} ms)`;
+    if (status.estado === 'offline') return 'Offline';
+    return 'Sin validar';
   }
 }
