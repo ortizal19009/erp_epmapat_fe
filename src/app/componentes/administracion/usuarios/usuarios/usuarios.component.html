@@ -24,6 +24,12 @@
             <option value="TODOS">Todos</option>
           </select>
 
+          <select class="custom-select custom-select-sm mr-2" style="width: 180px;" [(ngModel)]="filtroVinculo">
+            <option value="TODOS">Vínculo: Todos</option>
+            <option value="VINCULADOS">Vínculo: Vinculados</option>
+            <option value="NO_VINCULADOS">Vínculo: No vinculados</option>
+          </select>
+
           <div class="btn-group">
             <button type="button" class="btn btn-sm btn-outline-light dropdown-toggle" data-toggle="dropdown">
               <i class="bi bi-menu-button-wide"></i>

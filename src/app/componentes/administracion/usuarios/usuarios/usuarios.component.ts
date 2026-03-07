@@ -21,6 +21,7 @@ export class UsuariosComponent implements OnInit {
   _usuarios: any[] = [];
   filtro: string = '';
   filtroEstado: 'ACTIVOS' | 'INACTIVOS' | 'TODOS' = 'ACTIVOS';
+  filtroVinculo: 'TODOS' | 'VINCULADOS' | 'NO_VINCULADOS' = 'TODOS';
   showAddForm: boolean = false;
 
   // Modal eliminar
@@ -238,7 +239,17 @@ export class UsuariosComponent implements OnInit {
     this.filtrarPersonalVinculo = '';
   }
 
-  unlinkPersonalUsuario(usuario: any) {
+  async unlinkPersonalUsuario(usuario: any) {
+    const r = await Swal.fire({
+      title: '¿Desvincular personal?',
+      text: `${usuario?.alias || usuario?.nomusu || 'Usuario'}`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, desvincular',
+      cancelButtonText: 'Cancelar'
+    });
+    if (!r.isConfirmed) return;
+
     this.usuService.unlinkPersonal(usuario.idusuario, this.authService.idusuario).subscribe({
       next: () => {
         usuario.personalIdpersonal = null;
@@ -251,6 +262,21 @@ export class UsuariosComponent implements OnInit {
 
   seleccionarPersonalParaUsuario(per: any) {
     if (!this.usuarioLinkTarget) return;
+
+    const usedBy = (this._usuarios || []).find((u: any) =>
+      +u?.idusuario !== +this.usuarioLinkTarget.idusuario &&
+      !!u?.estado &&
+      +(u?.personalIdpersonal || u?.personal_idpersonal || 0) === +per.idpersonal
+    );
+
+    if (usedBy) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Personal ya vinculado',
+        text: `Este personal ya está vinculado a ${usedBy.alias || usedBy.nomusu}.`
+      });
+      return;
+    }
 
     this.usuService.linkPersonal(this.usuarioLinkTarget.idusuario, per.idpersonal, this.authService.idusuario).subscribe({
       next: () => {
@@ -328,6 +354,9 @@ export class UsuariosComponent implements OnInit {
     let base = this._usuarios || [];
     if (this.filtroEstado === 'ACTIVOS') base = base.filter((u: any) => !!u?.estado);
     if (this.filtroEstado === 'INACTIVOS') base = base.filter((u: any) => !u?.estado);
+
+    if (this.filtroVinculo === 'VINCULADOS') base = base.filter((u: any) => this.hasPersonalLink(u));
+    if (this.filtroVinculo === 'NO_VINCULADOS') base = base.filter((u: any) => !this.hasPersonalLink(u));
 
     if (!term) return base;
 
