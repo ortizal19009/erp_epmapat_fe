@@ -1,0 +1,14 @@
+<div class="container-fluid mt-4">
+  <div class="card shadow-sm border-0 p-4">
+    <h4 class="mb-2 text-danger"><i class="bi bi-exclamation-triangle"></i> Servicio no disponible</h4>
+    <p class="mb-2">No se pudo conectar con un microservicio del sistema.</p>
+    <div class="small text-muted mb-3">
+      <div><b>Status:</b> {{status}}</div>
+      <div *ngIf="endpoint"><b>Endpoint:</b> {{endpoint}}</div>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-primary btn-sm" (click)="backHome()">Ir al inicio</button>
+      <button class="btn btn-outline-secondary btn-sm" onclick="window.location.reload()">Reintentar</button>
+    </div>
+  </div>
+</div>

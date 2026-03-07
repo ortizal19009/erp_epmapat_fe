@@ -2,7 +2,7 @@ import { RouterModule } from '@angular/router';
 
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -131,6 +131,7 @@ import { ModiDocumentoComponent } from './componentes/administracion/documentos/
 import { InfoTabla4Component } from './componentes/administracion/tabla4/info-tabla4/info-tabla4.component';
 import { ModiTabla4Component } from './componentes/administracion/tabla4/modi-tabla4/modi-tabla4.component';
 import { LoginComponent } from './compartida/login/login.component';
+import { ServiceErrorInterceptor } from './compartida/service-error.interceptor';
 
 // ================ Pipes ==========================
 import { NombreEmisionPipe } from './pipes/nombre-emision.pipe';
@@ -602,6 +603,7 @@ import { BuscarabonadoComponent } from './componentes/abonados/buscarabonado/bus
   providers: [
     MainFooterComponent,
     { provide: LocationStrategy, useClass: HashLocationStrategy },
+    { provide: HTTP_INTERCEPTORS, useClass: ServiceErrorInterceptor, multi: true },
     /* https://angular.io/api/common/HashLocationStrategy */
   ],
 

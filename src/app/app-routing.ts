@@ -1398,6 +1398,7 @@ const routes: Routes = [
 
   { path: 'tthh/entidades', loadComponent: () => import('./features/settings/entities/entities-list/entities-list').then(m => m.EntitiesListComponent), canActivate: [AuthGuard] },
   { path: 'tthh/dependencias', loadComponent: () => import('./features/settings/dependencies/dependencies-list/dependencies-list').then(m => m.DependenciesListComponent), canActivate: [AuthGuard] },
+  { path: 'service-unavailable', loadComponent: () => import('./extras/service-unavailable/service-unavailable').then(m => m.ServiceUnavailableComponent) },
 
   { path: '', redirectTo: 'inicio', pathMatch: 'full' },
   { path: '**', redirectTo: 'inicio' },
