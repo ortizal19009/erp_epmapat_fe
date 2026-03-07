@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import Swal from 'sweetalert2';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
@@ -127,6 +128,41 @@ export class UsuariosComponent implements OnInit {
   modificar(idusuario: number) {
     sessionStorage.setItem('idusuarioToModi', idusuario.toString());
     this.router.navigate(['/modi-usuario']);
+  }
+
+  async toggleEstadoUsuario(usuario: any) {
+    const toActivo = !usuario?.estado;
+    const accion = toActivo ? 'activar' : 'inactivar';
+
+    const r = await Swal.fire({
+      title: `¿Deseas ${accion} este usuario?`,
+      text: `${usuario?.alias || usuario?.nomusu || 'Usuario'}`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: `Sí, ${accion}`,
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (!r.isConfirmed) return;
+
+    const payload: any = {
+      ...usuario,
+      estado: toActivo,
+      usumodi: this.authService.idusuario,
+      fecmodi: new Date(),
+    };
+
+    this.usuService.updateUsuario(usuario.idusuario, payload).subscribe({
+      next: () => {
+        usuario.estado = toActivo;
+        const lbl = toActivo ? 'activado' : 'inactivado';
+        Swal.fire({ icon: 'success', title: `Usuario ${lbl}`, timer: 1200, showConfirmButton: false });
+      },
+      error: (e) => {
+        console.error(e);
+        Swal.fire({ icon: 'error', title: 'No se pudo actualizar estado' });
+      }
+    });
   }
 
   datosEliminar(usuario: Usuarios) {

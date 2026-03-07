@@ -55,6 +55,7 @@
               <th class="text-left">Identificación</th>
               <th class="text-left">Alias</th>
               <th class="text-left">Nombre</th>
+              <th style="width: 130px;">Estado</th>
               <th style="width: 60px;"></th>
             </tr>
           </thead>
@@ -75,6 +76,16 @@
                 {{ usuario.nomusu }}
               </td>
 
+              <td class="text-center">
+                <div class="custom-control custom-switch d-inline-block">
+                  <input type="checkbox" class="custom-control-input" [id]="'swU'+usuario.idusuario" [checked]="!!usuario.estado"
+                    (change)="toggleEstadoUsuario(usuario)">
+                  <label class="custom-control-label" [for]="'swU'+usuario.idusuario">
+                    <span [class]="usuario.estado ? 'text-success' : 'text-muted'">{{ usuario.estado ? 'Activo' : 'Inactivo' }}</span>
+                  </label>
+                </div>
+              </td>
+
               <td class="text-right">
                 <div class="btn-group">
                   <button type="button" class="btn btn-sm btn-warning dropdown-toggle" data-toggle="dropdown">
@@ -87,9 +98,9 @@
                     <button class="dropdown-item" type="button" (click)="modificar(usuario.idusuario)">
                       <i class="bi bi-pencil-square"></i>&nbsp; Modificar
                     </button>
-                    <button class="dropdown-item text-danger" type="button" data-toggle="modal" data-target="#elimInteres"
-                      (click)="datosEliminar(usuario)">
-                      <i class="bi bi-trash"></i>&nbsp; Eliminar
+                    <button class="dropdown-item" type="button" (click)="toggleEstadoUsuario(usuario)">
+                      <i class="bi" [ngClass]="usuario.estado ? 'bi-toggle-off text-danger' : 'bi-toggle-on text-success'"></i>
+                      &nbsp; {{ usuario.estado ? 'Inactivar' : 'Activar' }}
                     </button>
                   </div>
                 </div>
@@ -97,7 +108,7 @@
             </tr>
 
             <tr *ngIf="usuariosFiltrados.length === 0">
-              <td colspan="5" class="text-center text-muted py-3">
+              <td colspan="6" class="text-center text-muted py-3">
                 No se encontraron usuarios.
               </td>
             </tr>
