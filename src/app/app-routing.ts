@@ -183,25 +183,25 @@ import { EstrfuncComponent } from './componentes/contabilidad/estrfunc/estrfunc/
 import { InfoEstrfuncComponent } from './componentes/contabilidad/estrfunc/info-estrfunc/info-estrfunc.component';
 
 // ============ ADMINISTRACION CENTRAL ==========================
-import { Tabla4Component } from './componentes/administracion/tabla4/tabla4/tabla4.component';
-import { AddTabla4Component } from './componentes/administracion/tabla4/add-tabla4/add-tabla4.component';
-import { InfoTabla4Component } from './componentes/administracion/tabla4/info-tabla4/info-tabla4.component';
-import { ModiTabla4Component } from './componentes/administracion/tabla4/modi-tabla4/modi-tabla4.component';
+import { Tabla4Component } from './features/admin-central/pages/administracion/tabla4/tabla4/tabla4.component';
+import { AddTabla4Component } from './features/admin-central/pages/administracion/tabla4/add-tabla4/add-tabla4.component';
+import { InfoTabla4Component } from './features/admin-central/pages/administracion/tabla4/info-tabla4/info-tabla4.component';
+import { ModiTabla4Component } from './features/admin-central/pages/administracion/tabla4/modi-tabla4/modi-tabla4.component';
 
 // import { LoginComponent } from './compartida/login/login.component';
 
-import { DocumentosComponent } from './componentes/administracion/documentos/documentos/documentos.component';
-import { AddDocumentoComponent } from './componentes/administracion/documentos/add-documento/add-documento.component';
-import { InfoDocumentoComponent } from './componentes/administracion/documentos/info-documento/info-documento.component';
-import { ModiDocumentoComponent } from './componentes/administracion/documentos/modi-documento/modi-documento.component';
+import { DocumentosComponent } from './features/admin-central/pages/administracion/documentos/documentos/documentos.component';
+import { AddDocumentoComponent } from './features/admin-central/pages/administracion/documentos/add-documento/add-documento.component';
+import { InfoDocumentoComponent } from './features/admin-central/pages/administracion/documentos/info-documento/info-documento.component';
+import { ModiDocumentoComponent } from './features/admin-central/pages/administracion/documentos/modi-documento/modi-documento.component';
 
-import { UsuariosComponent } from './componentes/administracion/usuarios/usuarios/usuarios.component';
-import { ModiUsuarioComponent } from './componentes/administracion/usuarios/modi-usuario/modi-usuario.component';
+import { UsuariosComponent } from './features/admin-central/pages/administracion/usuarios/usuarios/usuarios.component';
+import { ModiUsuarioComponent } from './features/admin-central/pages/administracion/usuarios/modi-usuario/modi-usuario.component';
 
-import { ColoresComponent } from './componentes/administracion/colores/colores.component';
+import { ColoresComponent } from './features/admin-central/pages/administracion/colores/colores.component';
 import { CertitmpComponent } from './componentes/ccertificaciones/certitmp/certitmp.component';
 import { TransferenciasComponent } from './componentes/recaudacion/transferencias/transferencias.component';
-import { PerfilUsuarioComponent } from './componentes/administracion/usuarios/perfil-usuario/perfil-usuario.component';
+import { PerfilUsuarioComponent } from './features/admin-central/pages/administracion/usuarios/perfil-usuario/perfil-usuario.component';
 import { RecalFacturaComponent } from './componentes/facturas/recal-factura/recal-factura.component';
 import { AddConvenioComponent } from './componentes/convenios/add-convenio/add-convenio.component';
 import { GeneradorxmlComponent } from './componentes/facelectro/generadorxml/generadorxml.component';
@@ -271,8 +271,8 @@ import { AddRemisionComponent } from './componentes/coactivas/remision/add-remis
 import { DetallePlanillaComponent } from './componentes/facturas/detalle-planilla/detalle-planilla.component';
 import { NtacreditoComponent } from './componentes/ntacredito/ntacredito.component';
 import { AddNtacreditoComponent } from './componentes/ntacredito/add-ntacredito/add-ntacredito.component';
-import { DefinirComponent } from './componentes/administracion/definir/definir.component';
-import { HomeComponent } from './componentes/administracion/home/home.component';
+import { DefinirComponent } from './features/admin-central/pages/administracion/definir/definir.component';
+import { HomeComponent } from './features/admin-central/pages/administracion/home/home.component';
 import { StatusConveniosComponent } from './componentes/convenios/status-convenios/status-convenios.component';
 import { CvClientesComponent } from './componentes/coactivas/carteras-vencidas/cv-clientes/cv-clientes.component';
 import { AnularConvenioComponent } from './componentes/convenios/anular-convenio/anular-convenio.component';
@@ -1414,6 +1414,7 @@ const routes: Routes = [
   exports: [RouterModule],
 })
 export class AppRoutingModule {}
+
 
 
 

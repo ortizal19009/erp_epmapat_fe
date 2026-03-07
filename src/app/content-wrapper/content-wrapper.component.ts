@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AutorizaService } from '../compartida/autoriza.service';
+import { AutorizaService } from '@core/auth/autoriza.service';
 import { UsuarioService } from '../servicios/administracion/usuario.service';
 import { UsrxmodulosService } from '../servicios/administracion/usrxmodulos.service';
 

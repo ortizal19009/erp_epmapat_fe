@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AutorizaService } from '../compartida/autoriza.service';
+import { AutorizaService } from '@core/auth/autoriza.service';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { UsrxmodulosService } from '../servicios/administracion/usrxmodulos.service';
