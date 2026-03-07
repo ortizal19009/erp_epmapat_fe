@@ -22,6 +22,7 @@ export class PerfilUsuarioComponent implements OnInit {
   _erpmodulos: any;
   _usrxmodulo: any = [];
   _user: Usuarios = new Usuarios();
+  sectionChanges: Array<{ iderpseccion: number; enabled: boolean }> = [];
 
   constructor(
     private router: Router,
@@ -135,31 +136,35 @@ export class PerfilUsuarioComponent implements OnInit {
     });
   }
   getAllErpModulos() {
-    this.s_usrxmodulos.getAllModulos(this.idusuario,'WEB').subscribe({
-      next: (datos: any) => {
-        if (datos.length == 0) {
+    this._usrxmodulo = [];
+    this.s_usrxmodulos.getAccessProfile(this.idusuario, 'WEB').subscribe({
+      next: (datos: any[]) => {
+        if ((datos || []).length === 0) {
           this.s_erpmodulos._findByPlatform('WEB').subscribe({
-            next: (datos: any) => {
-              this._erpmodulos = datos;
-              datos.forEach((item: any) => {
-                let usrxmodulo: Usrxmodulos = new Usrxmodulos();
-                usrxmodulo.iderpmodulo_erpmodulos = item;
-                usrxmodulo.enabled = false;
-                usrxmodulo.idusuario_usuarios = this._user;
-                this._usrxmodulo.push(usrxmodulo);
-              });
+            next: (mods: any[]) => {
+              this._erpmodulos = mods;
+              this._usrxmodulo = (mods || []).map((item: any) => ({
+                iderpmodulo_erpmodulos: item,
+                enabled: false,
+                idusuario_usuarios: this._user,
+                secciones: []
+              }));
             },
             error: (e: any) => console.error(e),
           });
-        } else {
-          datos.forEach((item: any) => {
-            let usrxmodulo: Usrxmodulos = new Usrxmodulos();
-            usrxmodulo.iderpmodulo_erpmodulos = item.iderpmodulo_erpmodulos;
-            usrxmodulo.enabled = item.enabled;
-            usrxmodulo.idusuario_usuarios = this._user;
-            this._usrxmodulo.push(usrxmodulo);
-          });
+          return;
         }
+
+        this._usrxmodulo = (datos || []).map((item: any) => ({
+          iderpmodulo_erpmodulos: {
+            iderpmodulo: item.iderpmodulo,
+            descripcion: item.descripcion,
+            platform: item.platform
+          },
+          enabled: !!item.enabled,
+          idusuario_usuarios: this._user,
+          secciones: item.secciones || []
+        }));
       },
       error: (e: any) => console.error(e),
     });
@@ -176,13 +181,34 @@ export class PerfilUsuarioComponent implements OnInit {
       findDato.enabled = false;
     }
   }
+
+  setSectionToUser(e: any, sec: any): void {
+    sec.enabled = !!e.target.checked;
+    const id = +sec.iderpseccion;
+    const idx = this.sectionChanges.findIndex((x) => x.iderpseccion === id);
+    if (idx >= 0) this.sectionChanges[idx].enabled = sec.enabled;
+    else this.sectionChanges.push({ iderpseccion: id, enabled: sec.enabled });
+  }
+
   guardarModulos() {
     this._usrxmodulo.forEach((item: any) => {
       this.s_usrxmodulos.saveAccessModulos(item).subscribe({
-        next: (datos: any) => {},
+        next: () => {},
         error: (e: any) => console.error(e),
       });
     });
+
+    this.sectionChanges.forEach((item) => {
+      this.s_usrxmodulos.saveAccessSeccion({
+        idusuario: this.idusuario,
+        iderpseccion: item.iderpseccion,
+        enabled: item.enabled,
+      }).subscribe({
+        next: () => {},
+        error: (e: any) => console.error(e),
+      });
+    });
+    this.sectionChanges = [];
   }
 
   regresar() {

@@ -17,4 +17,12 @@ export class UsrxmodulosService {
   saveAccessModulos(usrmodulos: any) {
     return this.http.post(`${baseUrl}`, usrmodulos);
   }
+
+  getAccessProfile(idusuario: number, platform: string) {
+    return this.http.get<any[]>(`${apiUrl}/access/profile?idusuario=${idusuario}&platform=${platform}`);
+  }
+
+  saveAccessSeccion(payload: { idusuario: number; iderpseccion: number; enabled: boolean }) {
+    return this.http.post(`${apiUrl}/access/sections`, payload);
+  }
 }
