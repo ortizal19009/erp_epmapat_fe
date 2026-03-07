@@ -34,8 +34,10 @@ export class UsuariosComponent implements OnInit {
   // Personal (para unir)
   _personal: any[] = [];
   filtrarPersonalAdd: string = '';
+  filtrarPersonalVinculo: string = '';
   personalSeleccionadoId: number | null = null;
   personalSeleccionadoLabel: string = '';
+  usuarioLinkTarget: any | null = null;
 
   constructor(
     public usuService: UsuarioService,
@@ -212,6 +214,41 @@ export class UsuariosComponent implements OnInit {
 
     this.f_usuario.get('personal')?.setValue(null);
     this.f_usuario.markAsDirty();
+  }
+
+  hasPersonalLink(usuario: any): boolean {
+    return !!(usuario?.personal?.idpersonal || usuario?.idpersonal_personal || usuario?.idpersonal);
+  }
+
+  personalLinkLabel(usuario: any): string {
+    const p = usuario?.personal;
+    if (p?.apellidos || p?.nombres) return `${p?.apellidos || ''} ${p?.nombres || ''}`.trim();
+    const idp = p?.idpersonal || usuario?.idpersonal_personal || usuario?.idpersonal;
+    return idp ? `ID Personal: ${idp}` : 'No vinculado';
+  }
+
+  openLinkPersonal(usuario: any) {
+    this.usuarioLinkTarget = usuario;
+    this.filtrarPersonalVinculo = '';
+  }
+
+  seleccionarPersonalParaUsuario(per: any) {
+    if (!this.usuarioLinkTarget) return;
+
+    const payload: any = {
+      ...this.usuarioLinkTarget,
+      personal: { idpersonal: per.idpersonal },
+      usumodi: this.authService.idusuario,
+      fecmodi: new Date(),
+    };
+
+    this.usuService.updateUsuario(this.usuarioLinkTarget.idusuario, payload).subscribe({
+      next: () => {
+        this.usuarioLinkTarget.personal = { idpersonal: per.idpersonal, apellidos: per.apellidos, nombres: per.nombres };
+        this.usuarioLinkTarget = null;
+      },
+      error: (e) => console.error(e),
+    });
   }
 
   // =========================

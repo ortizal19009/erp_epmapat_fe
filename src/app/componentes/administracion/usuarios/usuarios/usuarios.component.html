@@ -55,6 +55,7 @@
               <th class="text-left">Identificación</th>
               <th class="text-left">Alias</th>
               <th class="text-left">Nombre</th>
+              <th style="width: 220px;">Vínculo RRHH</th>
               <th style="width: 130px;">Estado</th>
               <th style="width: 60px;"></th>
             </tr>
@@ -74,6 +75,19 @@
 
               <td class="text-left" [ngClass]="{'tachado': !usuario.estado}">
                 {{ usuario.nomusu }}
+              </td>
+
+              <td class="text-left small">
+                <div class="d-flex align-items-center justify-content-between">
+                  <span [class]="hasPersonalLink(usuario) ? 'text-success font-weight-bold' : 'text-muted'">
+                    <i class="bi" [ngClass]="hasPersonalLink(usuario) ? 'bi-check-circle-fill' : 'bi-x-circle'"></i>
+                    {{ personalLinkLabel(usuario) }}
+                  </span>
+                  <button *ngIf="!hasPersonalLink(usuario)" type="button" class="btn btn-sm btn-outline-primary ml-2"
+                    data-toggle="modal" data-target="#modalPersonalLink" (click)="openLinkPersonal(usuario)">
+                    Unir
+                  </button>
+                </div>
               </td>
 
               <td class="text-center">
@@ -108,7 +122,7 @@
             </tr>
 
             <tr *ngIf="usuariosFiltrados.length === 0">
-              <td colspan="6" class="text-center text-muted py-3">
+              <td colspan="7" class="text-center text-muted py-3">
                 No se encontraron usuarios.
               </td>
             </tr>
@@ -296,6 +310,64 @@
         </button>
       </div>
 
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalPersonalLink" tabindex="-1" role="dialog" aria-labelledby="modalPersonalLinkTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalPersonalLinkTitle">Vincular usuario con personal</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="alert alert-info py-2" *ngIf="usuarioLinkTarget">
+          Usuario: <b>{{ usuarioLinkTarget.alias || usuarioLinkTarget.nomusu }}</b>
+        </div>
+
+        <label class="w-100 mb-2">
+          Buscar personal
+          <input type="text" [(ngModel)]="filtrarPersonalVinculo" class="form-control form-control-sm" placeholder="Nombre o identificación">
+        </label>
+
+        <div class="table-responsive">
+          <table class="table table-hover table-sm mb-0">
+            <thead class="thead-light text-center">
+              <tr>
+                <th style="width:60px">#</th>
+                <th>Identificación</th>
+                <th>Nombre</th>
+                <th>Cargo</th>
+                <th style="width:120px">Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let per of _personal | filter:filtrarPersonalVinculo; let i=index" class="text-center">
+                <td>{{ i + 1 }}</td>
+                <td>{{ per.identificacion }}</td>
+                <td class="text-left">{{ per.apellidos }} {{ per.nombres }}</td>
+                <td class="text-left">{{ per.idcargo_cargos?.descripcion }}</td>
+                <td>
+                  <button type="button" class="btn btn-sm btn-success" (click)="seleccionarPersonalParaUsuario(per)" data-dismiss="modal">
+                    <i class="bi bi-link-45deg"></i> Unir
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="(_personal | filter:filtrarPersonalVinculo)?.length === 0">
+                <td colspan="5" class="text-center text-muted py-3">No se encontraron resultados.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Cerrar</button>
+      </div>
     </div>
   </div>
 </div>
