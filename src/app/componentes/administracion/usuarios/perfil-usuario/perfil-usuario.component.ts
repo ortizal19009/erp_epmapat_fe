@@ -143,34 +143,47 @@ export class PerfilUsuarioComponent implements OnInit {
   }
   getAllErpModulos() {
     this._usrxmodulo = [];
-    this.s_usrxmodulos.getAccessProfile(this.idusuario, 'WEB').subscribe({
-      next: (datos: any[]) => {
-        if ((datos || []).length === 0) {
-          this.s_erpmodulos.getAllErpModulos().subscribe({
-            next: (mods: any[]) => {
-              this._erpmodulos = (mods || []).filter((m: any) => ['WEB','BOTH'].includes(String(m?.platform || '').toUpperCase()));
-              this._usrxmodulo = (this._erpmodulos || []).map((item: any) => ({
-                iderpmodulo_erpmodulos: item,
-                enabled: false,
-                idusuario_usuarios: this._user,
-                secciones: []
-              }));
-            },
-            error: (e: any) => console.error(e),
-          });
-          return;
-        }
 
-        this._usrxmodulo = (datos || []).map((item: any) => ({
-          iderpmodulo_erpmodulos: {
-            iderpmodulo: item.iderpmodulo,
-            descripcion: item.descripcion,
-            platform: item.platform
+    this.s_erpmodulos.getAllErpModulos().subscribe({
+      next: (mods: any[]) => {
+        const catalog = mods || [];
+
+        this.s_usrxmodulos.getAccessProfile(this.idusuario, 'WEB').subscribe({
+          next: (webRows: any[]) => {
+            this.s_usrxmodulos.getAccessProfile(this.idusuario, 'MOBILE').subscribe({
+              next: (mobileRows: any[]) => {
+                const byId = new Map<number, any>();
+
+                [...(webRows || []), ...(mobileRows || [])].forEach((r: any) => {
+                  const id = +r.iderpmodulo;
+                  const cur = byId.get(id) || {
+                    iderpmodulo: id,
+                    descripcion: r.descripcion,
+                    platform: r.platform,
+                    enabled: false,
+                    secciones: [] as any[],
+                  };
+                  cur.enabled = !!cur.enabled || !!r.enabled;
+                  cur.secciones = [...(cur.secciones || []), ...(r.secciones || [])];
+                  byId.set(id, cur);
+                });
+
+                this._usrxmodulo = catalog.map((m: any) => {
+                  const id = +m.iderpmodulo;
+                  const assigned = byId.get(id);
+                  return {
+                    iderpmodulo_erpmodulos: m,
+                    enabled: !!assigned?.enabled,
+                    idusuario_usuarios: this._user,
+                    secciones: assigned?.secciones || [],
+                  };
+                });
+              },
+              error: (e: any) => console.error(e),
+            });
           },
-          enabled: !!item.enabled,
-          idusuario_usuarios: this._user,
-          secciones: item.secciones || []
-        }));
+          error: (e: any) => console.error(e),
+        });
       },
       error: (e: any) => console.error(e),
     });
