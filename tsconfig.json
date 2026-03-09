@@ -31,7 +31,12 @@
       "@features/*": ["src/app/features/*"],
       "@servicios/*": ["src/app/servicios/*"],
       "@modelos/*": ["src/app/modelos/*"],
-      "@compartida/*": ["src/app/compartida/*"]
+      "@compartida/*": ["src/app/compartida/*"],
+      "@admin-central/*": ["src/app/features/admin-central/pages/administracion/*"],
+      "@comercializacion/*": ["src/app/componentes/*"],
+      "@contabilidad/*": ["src/app/componentes/contabilidad/*"],
+      "@rrhh/*": ["src/app/componentes/rrhh/*"],
+      "@gestion-documental/*": ["src/app/features/*"]
     }
   },
   "angularCompilerOptions": {
