@@ -77,7 +77,7 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
     public authService: AutorizaService,
     private s_pdf: PdfService,
     private s_rxfService: RubroxfacService,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.f_emisionIndividual = this.fb.group({
@@ -417,9 +417,8 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
     let doc = new jsPDF('p', 'pt', 'a4');
     /* HEADER */
     let date_emision: Date = new Date(emisionIndividual.idemision.feccrea);
-    let fecemision = `${date_emision.getFullYear()}-${
-      date_emision.getMonth() + 1
-    }`;
+    let fecemision = `${date_emision.getFullYear()}-${date_emision.getMonth() + 1
+      }`;
     this.s_pdf.header(`REPORTE DE REFACTURACION INDIVIDUAL ${fecemision}`, doc);
 
     /* LECTURAS ANTERIORES */
@@ -582,13 +581,11 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
       },
       body: [
         [
-          `Fecha emision:  ${dateEmision.getFullYear()}/${
-            dateEmision.getMonth() + 1
+          `Fecha emision:  ${dateEmision.getFullYear()}/${dateEmision.getMonth() + 1
           }/${dateEmision.getDate()}`,
         ],
         [
-          `Fecha impresión:  ${currentDate.getFullYear()}/${
-            currentDate.getMonth() + 1
+          `Fecha impresión:  ${currentDate.getFullYear()}/${currentDate.getMonth() + 1
           }/${currentDate.getDate()}`,
         ],
       ],
@@ -686,7 +683,7 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
       this.s_emisionindividual
         .saveEmisionIndividual(emision_individual)
         .subscribe({
-          next: () => {},
+          next: () => { },
           error: (e) => console.error(e),
         });
     }
@@ -713,15 +710,19 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
       swMunicipio: lectura.idabonado_abonados.municipio,
       swAdultoMayor: lectura.idabonado_abonados.municipio,
       swAguapotable: lectura.idabonado_abonados.swalcantarillado,
-    };
-    console.log(body);
-
-    if (lectura.idemision >= 243) {
+    };8625
+    if (lectura.idemision == 243) {
       this.s_lecturas.calcular_Valores(body).subscribe({
         next: (datos: any) => console.log(datos),
         error: (e: any) => console.error(e.error),
       });
-    } else {
+    } else if (lectura.idemision > 243) {
+      this.s_lecturas.calcular_Valores_v2(body).subscribe({
+        next: (datos: any) => console.log(datos),
+        error: (e: any) => console.error(e.error),
+      });
+    }
+    else {
       this.s_lecturas.calcular_Valores_anteriores(body).subscribe({
         next: (datos: any) => console.log(datos),
         error: (e: any) => console.error(e.error),
