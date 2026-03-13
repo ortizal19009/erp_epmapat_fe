@@ -1036,14 +1036,12 @@ const routes: Routes = [
 
   {
     path: 'regrecauda',
-    component: RegrecaudaComponent,
-    canActivate: [AuthGuard],
+    component: RegrecaudaComponent
   },
 
   {
     path: 'retenciones',
-    component: RetencionesComponent,
-    canActivate: [AuthGuard],
+    component: RetencionesComponent
   },
   {
     path: 'imp-retenciones',

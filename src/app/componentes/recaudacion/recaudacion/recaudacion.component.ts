@@ -224,9 +224,11 @@ export class RecaudacionComponent implements OnInit {
 
     // Estado de caja desde sesión
     const getEstadoCaja = sessionStorage.getItem('estadoCaja');
-    if (getEstadoCaja !== '0') {
+    console.log(getEstadoCaja)
+    if (getEstadoCaja !== '1') {
       this.abrirCaja();
     }
+    console.log(this.estadoCajaT)
     this.disabledcobro = this.estadoCajaT;
   }
 
@@ -313,6 +315,7 @@ export class RecaudacionComponent implements OnInit {
         switchMap((dcaja: any) =>
           this.s_recaudaxcaja.getLastConexion(dcaja.idcaja).pipe(
             tap((drxc: any) => {
+              console.log(drxc)
               if (!drxc) {
                 this.cajaActiva = false;
                 this.estadoCajaT = true;
@@ -386,11 +389,15 @@ export class RecaudacionComponent implements OnInit {
     this.recxcaja.idusuario_usuarios = this._caja.idusuario_usuarios;
 
     this.s_recaudaxcaja.saveRecaudaxcaja(this.recxcaja).subscribe({
-      next: () => {
+      next: (data: any) => {
+        console.log(data)
         this.estadoCajaT = false;
-        sessionStorage.setItem('estadoCaja', '1');
         this.s_cajas.updateCaja(this._caja).subscribe({
-          next: () => window.location.reload(),
+          next: (datos: any) => {/* window.location.reload() */
+            console.log(datos)
+            sessionStorage.setItem('estadoCaja', datos.estado);
+
+          },
         });
       },
       error: (e) => console.error(e),
