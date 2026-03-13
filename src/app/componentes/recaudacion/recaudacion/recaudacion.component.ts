@@ -225,7 +225,7 @@ export class RecaudacionComponent implements OnInit {
     // Estado de caja desde sesión
     const getEstadoCaja = sessionStorage.getItem('estadoCaja');
     console.log(getEstadoCaja)
-    if (getEstadoCaja !== '1') {
+    if (getEstadoCaja !== '0') {
       this.abrirCaja();
     }
     console.log(this.estadoCajaT)
@@ -328,10 +328,11 @@ export class RecaudacionComponent implements OnInit {
               const hoy = new Date();
               const inicio = new Date(drxc.fechainiciolabor);
               const estadoCaja = sessionStorage.getItem('estadoCaja');
-
+              console.log(estadoCaja)
               const mismaFecha = this.isSameYMD(hoy, inicio);
               this.cajaActiva = (mismaFecha && estadoCaja !== '0');
-              this.estadoCajaT = !this.cajaActiva;
+              this.estadoCajaT = this.cajaActiva;
+              console.log(this.cajaActiva)
 
               const nro = dcaja?.ultimafact ?? drxc?.facfin;
               if (nro) {
@@ -392,11 +393,10 @@ export class RecaudacionComponent implements OnInit {
       next: (data: any) => {
         console.log(data)
         this.estadoCajaT = false;
+        sessionStorage.setItem('estadoCaja', '1');
+
         this.s_cajas.updateCaja(this._caja).subscribe({
           next: (datos: any) => {/* window.location.reload() */
-            console.log(datos)
-            sessionStorage.setItem('estadoCaja', datos.estado);
-
           },
         });
       },
