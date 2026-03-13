@@ -315,7 +315,6 @@ export class RecaudacionComponent implements OnInit {
         switchMap((dcaja: any) =>
           this.s_recaudaxcaja.getLastConexion(dcaja.idcaja).pipe(
             tap((drxc: any) => {
-              console.log(drxc)
               if (!drxc) {
                 this.cajaActiva = false;
                 this.estadoCajaT = true;
@@ -328,11 +327,9 @@ export class RecaudacionComponent implements OnInit {
               const hoy = new Date();
               const inicio = new Date(drxc.fechainiciolabor);
               const estadoCaja = sessionStorage.getItem('estadoCaja');
-              console.log(estadoCaja)
               const mismaFecha = this.isSameYMD(hoy, inicio);
               this.cajaActiva = (mismaFecha && estadoCaja !== '0');
               this.estadoCajaT = this.cajaActiva;
-              console.log(this.cajaActiva)
 
               const nro = dcaja?.ultimafact ?? drxc?.facfin;
               if (nro) {
