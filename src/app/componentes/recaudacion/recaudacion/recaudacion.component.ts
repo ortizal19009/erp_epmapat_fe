@@ -224,11 +224,9 @@ export class RecaudacionComponent implements OnInit {
 
     // Estado de caja desde sesión
     const getEstadoCaja = sessionStorage.getItem('estadoCaja');
-    console.log(getEstadoCaja)
     if (getEstadoCaja !== '0') {
       this.abrirCaja();
     }
-    console.log(this.estadoCajaT)
     this.disabledcobro = this.estadoCajaT;
   }
 
@@ -252,8 +250,6 @@ export class RecaudacionComponent implements OnInit {
   }
   aplicarFiltro(texto: any): void {
     const term = (texto || '').toString().toLowerCase().trim();
-    //console.log('Aplicando filtro con término:', term);
-
     if (!term) {
       this.listaFiltrada = [...(this._sincobro || [])];
       return;
@@ -388,7 +384,6 @@ export class RecaudacionComponent implements OnInit {
 
     this.s_recaudaxcaja.saveRecaudaxcaja(this.recxcaja).subscribe({
       next: (data: any) => {
-        console.log(data)
         this.estadoCajaT = false;
         sessionStorage.setItem('estadoCaja', '1');
 
@@ -1534,11 +1529,12 @@ export class RecaudacionComponent implements OnInit {
     this.disabledcobro = this.formCobrar.controls['vuelto'].value < 0;
   }
 
-  getRubroxfacReimpresion(idfactura: number) {
+  getRubroxfacReimpresion(idfactura: number, interes: number) {
+    this.totfac = 0;
     this.rubxfacService.getByIdfactura(+idfactura!).subscribe({
       next: (detalle: any) => {
         this._rubrosxfac = detalle;
-        this._subtotal();
+        this._subtotal(interes);
       },
       error: (err) => console.error(err),
     });
@@ -1547,19 +1543,20 @@ export class RecaudacionComponent implements OnInit {
     this.idfactura = idfactura;
     this.valoriva = sincobro?.iva ?? 0;
     this.totInteres = sincobro?.interes ?? 0;
+    let interes = sincobro?.interes ?? 0;
     this.consumo = sincobro?.consumo ?? 0;
-
-    this.getRubroxfacReimpresion(idfactura);
+    this.getRubroxfacReimpresion(idfactura, interes);
   }
   reImpComprobante(datos: any) {
     this.impComprobante(datos);
   }
 
-  _subtotal() {
+  _subtotal(interes: any) {
+    this.totfac = 0;
     let suma12 = 0;
     let suma0 = 0;
     let i = 0;
-    this._rubrosxfac.forEach(() => {
+    this._rubrosxfac.forEach((index: any) => {
       if (this._rubrosxfac[i].idrubro_rubros.swiva === 1) {
         suma12 +=
           this._rubrosxfac[i].cantidad * this._rubrosxfac[i].valorunitario;
@@ -1569,6 +1566,7 @@ export class RecaudacionComponent implements OnInit {
             this._rubrosxfac[i].cantidad * this._rubrosxfac[i].valorunitario;
         }
       }
+      this.totfac = suma12 + suma0 + interes
       i++;
     });
   }

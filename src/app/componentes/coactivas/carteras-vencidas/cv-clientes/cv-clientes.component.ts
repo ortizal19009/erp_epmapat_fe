@@ -162,13 +162,13 @@ export class CvClientesComponent implements OnInit {
       html: '#facturasTable',
     });
     this.s_pdf.setfooter(doc);
-    /*     const pdfDataUri = doc.output('datauri');
+    /*     const blobUrl  = doc.output('datauri');
         const pdfViewer: any = document.getElementById(
           'pdf_Viewer'
         ) as HTMLIFrameElement; */
     this.s_loading.hideLoading();
     //this.swfacturas = !this.swfacturas
-    //return (pdfViewer.src = pdfDataUri);
+    //return (pdfViewer.src = blobUrl );
     doc.save(`${this.nomCliente}_valores_pendientes.pdf`) ;
 
   }

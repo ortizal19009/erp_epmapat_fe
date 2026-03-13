@@ -508,11 +508,11 @@ export class AnulacionesBajasComponent implements OnInit {
       head: [['Nro planilla', 'Modulo', 'Usu elimina', 'Razón', 'Total']],
       body: bajas,
     });
-    const pdfDataUri = doc.output('datauri');
+    const blobUrl  = doc.output('datauri');
     const pdfViewer: any = document.getElementById(
       'pdfViewer'
     ) as HTMLIFrameElement;
-    pdfViewer.src = pdfDataUri;
+    pdfViewer.src = blobUrl ;
   }
   reporteanulaciones(lanulaciones: any) {
     let doc = new jsPDF('p', 'pt', 'a4');
@@ -538,11 +538,11 @@ export class AnulacionesBajasComponent implements OnInit {
       `Reporte de facturas dadas de anuladas: ${this.f_reportes.value.desde} - ${this.f_reportes.value.hasta}`,
       doc
     ); */
-    const pdfDataUri = doc.output('datauri');
+    const blobUrl  = doc.output('datauri');
     const pdfViewer: any = document.getElementById(
       'pdfViewer'
     ) as HTMLIFrameElement;
-    pdfViewer.src = pdfDataUri;
+    pdfViewer.src = blobUrl ;
   }
   reporteeliminacion(bodyCliente: any, bodyAbonado: any, bodyRubros: any) {
     let doc = new jsPDF();
@@ -604,12 +604,12 @@ export class AnulacionesBajasComponent implements OnInit {
       { align: 'center' }
     );
 
-    const pdfDataUri = doc.output('datauri');
+    const blobUrl  = doc.output('datauri');
     const pdfViewer: any = document.getElementById(
       'pdfViewer'
     ) as HTMLIFrameElement;
 
-    return (pdfViewer.src = pdfDataUri);
+    return (pdfViewer.src = blobUrl );
   }
 }
 function getDateTime() {

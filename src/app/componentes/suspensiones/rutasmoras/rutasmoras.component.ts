@@ -311,8 +311,8 @@ export class RutasmorasComponent implements OnInit {
 
     this.s_pdf.setfooter(doc);
 
-    const pdfDataUri = doc.output('datauri');
+    const blobUrl  = doc.output('datauri');
     const viewer: any = document.getElementById('pdfSeleccionadosViewer') as HTMLIFrameElement;
-    viewer.src = pdfDataUri;
+    viewer.src = blobUrl ;
   }
 }

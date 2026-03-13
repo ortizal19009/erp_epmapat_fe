@@ -180,7 +180,8 @@ export class CatalogoitemsComponent implements OnInit {
       // embed.setAttribute('height', '100%');
       // container.appendChild(embed);
 
-      //    const pdfDataUri = doc.output('datauristring');
+      //      const pdfBlob = doc.output('blob');
+  //const blobUrl = URL.createObjectURL(pdfBlob);
       //    const newWindow = window.open('');
       //    newWindow?.document.write(`
       //    <html>

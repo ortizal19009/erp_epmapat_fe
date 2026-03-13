@@ -395,13 +395,14 @@ export class EstFlujoEfeComponent implements OnInit {
 
       if (this.otraPagina) doc.output('dataurlnewwindow', opciones);
       else {
-         const pdfDataUri = doc.output('datauristring');
+           const pdfBlob = doc.output('blob');
+  const blobUrl = URL.createObjectURL(pdfBlob);
          //Si ya existe el <embed> primero lo remueve
          const elementoExistente = document.getElementById('idembed');
          if (elementoExistente) { elementoExistente.remove(); }
          //Crea el <embed>
          var embed = document.createElement('embed');
-         embed.setAttribute('src', pdfDataUri);
+     embed.setAttribute('src', blobUrl);
          embed.setAttribute('type', 'application/pdf');
          embed.setAttribute('width', '75%');
          embed.setAttribute('height', '100%');

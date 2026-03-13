@@ -63,11 +63,12 @@ export class PdfService {
     });
 
     this.setfooter(doc);
-    const pdfDataUri = doc.output('datauristring');
+    const pdfBlob = doc.output('blob');
+    const blobUrl = URL.createObjectURL(pdfBlob);
     const pdfViewer: any = document.getElementById(
       'pdfViewer'
     ) as HTMLIFrameElement;
-    return (pdfViewer.src = pdfDataUri);
+    return (pdfViewer.src = blobUrl);
   }
   setfooter(doc: any) {
     // Obtener la fecha y hora actual
@@ -344,9 +345,10 @@ export class PdfService {
 
     /*   const pdfDataUri = doc.output('datauri');
       const pdfViewer = document.getElementById('pdfViewer') as HTMLIFrameElement; */
-    const pdfDataUri = doc.output('datauristring');
+    const pdfBlob = doc.output('blob');
+    const blobUrl = URL.createObjectURL(pdfBlob);
     const pdfViewer: any = document.getElementById('pdfViewer') as HTMLIFrameElement;
-    return (pdfViewer.src = pdfDataUri);
+    return (pdfViewer.src = blobUrl);
   }
 
 

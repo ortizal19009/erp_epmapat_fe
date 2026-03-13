@@ -57,7 +57,7 @@
       </div>
       <div class="dash-kpi__body">
         <span class="dash-kpi__label">Valor Cobrado</span>
-        <span class="dash-kpi__value">${{ totalCobrado?.toFixed(2) || '0.00' }}</span>
+        <span class="dash-kpi__value">${{ totalCobrado.toFixed(2) || '0.00' }}</span>
         <span class="dash-kpi__sub">Emisión actual</span>
       </div>
       <div class="dash-kpi__trend dash-kpi__trend--up">
@@ -74,7 +74,7 @@
       </div>
       <div class="dash-kpi__body">
         <span class="dash-kpi__label">Valor Pendiente</span>
-        <span class="dash-kpi__value">${{ totalPendiente?.toFixed(2) || '0.00' }}</span>
+        <span class="dash-kpi__value">${{ totalPendiente.toFixed(2) || '0.00' }}</span>
         <span class="dash-kpi__sub">Por cobrar</span>
       </div>
       <div class="dash-kpi__trend dash-kpi__trend--down">
@@ -129,7 +129,7 @@
           <span class="dash-card__title">Mapa de Rutas</span>
         </div>
         <div class="dash-card__actions">
-          <span class="dash-badge dash-badge--teal">{{ _abonados?.length || 0 }} puntos</span>
+          <span class="dash-badge dash-badge--teal">{{ _abonados.length || 0 }} puntos</span>
         </div>
       </div>
       <div class="dash-card__body dash-card__body--nopad">

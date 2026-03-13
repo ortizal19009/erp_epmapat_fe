@@ -41,7 +41,7 @@ export class UsuariosComponent implements OnInit {
     private coloresService: ColoresService,
     private fb: FormBuilder,
     private personalService: PersonalService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/usuarios');
@@ -295,13 +295,13 @@ export class UsuariosComponent implements OnInit {
 
     if (this.otraPagina) doc.output('dataurlnewwindow', opciones);
     else {
-      const pdfDataUri = doc.output('datauristring');
-
+      const pdfBlob = doc.output('blob');
+      const blobUrl = URL.createObjectURL(pdfBlob);
       const elementoExistente = document.getElementById('idembed');
       if (elementoExistente) elementoExistente.remove();
 
       const embed = document.createElement('embed');
-      embed.setAttribute('src', pdfDataUri);
+      embed.setAttribute('src', blobUrl);
       embed.setAttribute('type', 'application/pdf');
       embed.setAttribute('width', '50%');
       embed.setAttribute('height', '100%');

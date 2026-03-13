@@ -167,22 +167,26 @@ export class ImpNiifcuentasComponent implements OnInit {
 
    muestraPDF(doc: any) {
       var opciones = { filename: this.pdfgenerado };
-      if (this.otrapagina) doc.output('dataurlnewwindow', opciones);
-      else {
-         const pdfDataUri = doc.output('datauristring');
-         //Si ya existe el <embed> primero lo remueve
-         const elementoExistente = document.getElementById('idembed');
-         if (elementoExistente) { elementoExistente.remove(); }
-         //Crea el <embed>
+      if (this.otrapagina) {
+         doc.output('dataurlnewwindow', opciones);
+      } else {
+         const pdfBlob = doc.output('blob');
+         const blobUrl = URL.createObjectURL(pdfBlob);
+
+         const elementoExistente = document.getElementById('idembed') as HTMLEmbedElement;
+         if (elementoExistente) {
+            URL.revokeObjectURL(elementoExistente.src);
+            elementoExistente.remove();
+         }
+
          var embed = document.createElement('embed');
-         embed.setAttribute('src', pdfDataUri);
+         embed.setAttribute('src', blobUrl);
          embed.setAttribute('type', 'application/pdf');
          embed.setAttribute('width', '70%');
          embed.setAttribute('height', '100%');
          embed.setAttribute('id', 'idembed');
-         //Agrega el <embed> al contenedor del Modal
-         var container: any;
-         container = document.getElementById('pdf');
+
+         var container: any = document.getElementById('pdf');
          container.appendChild(embed);
       }
    }
@@ -200,7 +204,7 @@ export class ImpNiifcuentasComponent implements OnInit {
       worksheet.getCell('B1').font = { name: 'Times New Roman', bold: true, size: 14, color: { argb: '002060' } }
 
       // Fila 2
-      worksheet.addRow([ ]);
+      worksheet.addRow([]);
       // worksheet.getCell('B2').font = { name: 'Times New Roman', bold: true, size: 16, color: { argb: '001060' } };
 
       //Fila 3 Cabecera

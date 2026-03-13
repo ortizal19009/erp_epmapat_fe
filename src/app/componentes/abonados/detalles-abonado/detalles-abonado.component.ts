@@ -803,15 +803,15 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     });
     this.s_pdf.setfooter(doc);
     // Generate data URI and set iframe source
-    const pdfDataUri = doc.output('datauri');
+    const blobUrl  = doc.output('datauri');
     if (this.swEmail == true) {
-      //this.dataURItoBlob(pdfDataUri);
+      //this.dataURItoBlob(blobUrl );
       this.dataURI = doc.output('datauri').toString();
     } else {
       const pdfViewer: any = document.getElementById(
         'pdfViewer'
       ) as HTMLIFrameElement;
-      pdfViewer.src = pdfDataUri;
+      pdfViewer.src = blobUrl ;
     }
     this.nameFile = `Notificación_${this._abonado[0].idabonado}.pdf`;
 

@@ -257,12 +257,13 @@ export class ClientesComponent implements OnInit, AfterViewInit {
       // jsPDF no acepta opciones en dataurlnewwindow; se abre directo
       doc.output('dataurlnewwindow');
     } else {
-      const pdfDataUri = doc.output('datauristring');
+        const pdfBlob = doc.output('blob');
+  const blobUrl = URL.createObjectURL(pdfBlob);
       const existente = document.getElementById('idembed');
       if (existente) existente.remove();
 
       const embed = document.createElement('embed');
-      embed.setAttribute('src', pdfDataUri);
+  embed.setAttribute('src', blobUrl);
       embed.setAttribute('type', 'application/pdf');
       embed.setAttribute('width', '65%');
       embed.setAttribute('height', '100%');

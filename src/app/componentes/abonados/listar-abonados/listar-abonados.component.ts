@@ -31,7 +31,7 @@ export class ListarAbonadosComponent implements OnInit {
     private router: Router,
     public authService: AutorizaService,
     private coloresService: ColoresService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', `/${this.ventana}`);
@@ -283,24 +283,26 @@ export class ListarAbonadosComponent implements OnInit {
       compress: true,
     };
 
-    if (this.otraPagina) doc.output('dataurlnewwindow', opciones);
-    else {
-      const pdfDataUri = doc.output('datauristring');
-      //Si ya existe el <embed> primero lo remueve
-      const elementoExistente = document.getElementById('idembed');
+    if (this.otraPagina) {
+      doc.output('dataurlnewwindow', opciones);
+    } else {
+      const pdfBlob = doc.output('blob');
+      const blobUrl = URL.createObjectURL(pdfBlob);
+
+      const elementoExistente = document.getElementById('idembed') as HTMLEmbedElement;
       if (elementoExistente) {
+        URL.revokeObjectURL(elementoExistente.src);
         elementoExistente.remove();
       }
-      //Crea el <embed>
+
       var embed = document.createElement('embed');
-      embed.setAttribute('src', pdfDataUri);
+      embed.setAttribute('src', blobUrl);
       embed.setAttribute('type', 'application/pdf');
-      embed.setAttribute('width', '80%');
+      embed.setAttribute('width', '80%');  // mantuve tu 80%
       embed.setAttribute('height', '100%');
       embed.setAttribute('id', 'idembed');
-      //Agrega el <embed> al contenedor del Modal
-      var container: any;
-      container = document.getElementById('pdf');
+
+      var container: any = document.getElementById('pdf');
       container.appendChild(embed);
     }
   }

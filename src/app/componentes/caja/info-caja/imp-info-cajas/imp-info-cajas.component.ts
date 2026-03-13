@@ -753,24 +753,27 @@ export class ImpInfoCajasComponent implements OnInit {
       format: 'a4',
       compress: true,
     };
-    if (this.otrapagina) doc.output('dataurlnewwindow', opciones);
-    else {
-      const pdfDataUri = doc.output('datauristring');
-      //Si ya existe el <embed> primero lo remueve
-      const elementoExistente = document.getElementById('idembed');
+
+    if (this.otrapagina) {
+      doc.output('dataurlnewwindow', opciones);
+    } else {
+      const pdfBlob = doc.output('blob');
+      const blobUrl = URL.createObjectURL(pdfBlob);
+
+      const elementoExistente = document.getElementById('idembed') as HTMLEmbedElement;
       if (elementoExistente) {
+        URL.revokeObjectURL(elementoExistente.src);
         elementoExistente.remove();
       }
-      //Crea el <embed>
+
       var embed = document.createElement('embed');
-      embed.setAttribute('src', pdfDataUri);
+      embed.setAttribute('src', blobUrl);
       embed.setAttribute('type', 'application/pdf');
       embed.setAttribute('width', '70%');
       embed.setAttribute('height', '100%');
       embed.setAttribute('id', 'idembed');
-      //Agrega el <embed> al contenedor del Modal
-      var container: any;
-      container = document.getElementById('pdf');
+
+      var container: any = document.getElementById('pdf');
       container.appendChild(embed);
     }
   }
