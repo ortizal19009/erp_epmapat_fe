@@ -37,7 +37,7 @@ export class ImpCajasComponent implements OnInit {
   _transferidas: any;
   _p_transferidas: any;
   _np_transferidas: any;
-idusuario:number= this.authService.idusuario;
+  idusuario: number = this.authService.idusuario;
   constructor(
     public authService: AutorizaService,
     public fb: FormBuilder,
@@ -1205,8 +1205,8 @@ idusuario:number= this.authService.idusuario;
     };
     if (this.otrapagina) doc.output('dataurlnewwindow', opciones);
     else {
-        const pdfBlob = doc.output('blob');
-  const blobUrl = URL.createObjectURL(pdfBlob);
+      const pdfBlob = doc.output('blob');
+      const blobUrl = URL.createObjectURL(pdfBlob);
       //Si ya existe el <embed> primero lo remueve
       const elementoExistente = document.getElementById('idembed');
       if (elementoExistente) {
@@ -1214,7 +1214,7 @@ idusuario:number= this.authService.idusuario;
       }
       //Crea el <embed>
       var embed = document.createElement('embed');
-  embed.setAttribute('src', blobUrl);
+      embed.setAttribute('src', blobUrl);
       embed.setAttribute('type', 'application/pdf');
       embed.setAttribute('width', '70%');
       embed.setAttribute('height', '100%');
