@@ -39,8 +39,7 @@
 
           <div class="dropdown-divider"></div>
 
-          <button class="dropdown-item" type="button"
-            [disabled]="cargando || !_emisionindividual.length">
+          <button class="dropdown-item" type="button" [disabled]="cargando || !_emisionindividual.length">
             <i class="bi bi-printer mr-2 text-danger"></i> Imprimir
           </button>
         </div>
@@ -248,6 +247,9 @@
                     </tr>
                   </tbody>
                 </table>
+              </div>
+              <div class="alert alert-danger border py-2 small mb-2">
+                <i class="bi bi-info-circle mr-1"></i> MULTAS 
               </div>
 
             </div>
