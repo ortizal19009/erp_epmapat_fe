@@ -274,7 +274,10 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
   getEmisionIndividualByIdEmision(idemision: number): void {
     this.cargando = true;
     this.s_emisionindividual.getByIdEmision(idemision).subscribe({
-      next: (datos: any[]) => (this._emisionindividual = datos || []),
+      next: (datos: any[]) => {
+        console.log(datos);
+        this._emisionindividual = datos || [];
+      },
       error: (e) => console.error(e),
       complete: () => (this.cargando = false),
     });
@@ -293,8 +296,9 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
 
   // ✅ Seleccionar abonado + buscar lecturas + traer facturas eliminadas
   async setAbonado(abonado: any): Promise<void> {
+    console.log(abonado)
     this.abonado = abonado;
-    this.cliente = abonado?.idcliente_clientes;
+    this.cliente = abonado?.idresponsable;
     this.ruta = abonado?.idruta_rutas;
     this.optabonado = true;
 
@@ -318,6 +322,7 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
       .subscribe({
         next: async (datos: any[]) => {
           // 1) facturas eliminadas: fechaelimina/fechaeliminacion != null
+          console.log(datos)
           for (const i of datos || []) {
             try {
               const fac: any = await this.facService.getByIdAsync(i.idfactura);
@@ -593,7 +598,15 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
 
     // doc.autoPrint();
     //doc.save('datauristring');
-    doc.output('dataurlnewwindow', { filename: 'comprobante.pdf' });
+    //doc.output('dataurlnewwindow', { filename: 'comprobante.pdf' });
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    const ventana = window.open(url, '_blank');
+
+    // Libera memoria cuando la ventana se cierre
+    if (ventana) {
+      ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
+    }
   }
 
   // =======================
@@ -710,7 +723,7 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
       swMunicipio: lectura.idabonado_abonados.municipio,
       swAdultoMayor: lectura.idabonado_abonados.municipio,
       swAguapotable: lectura.idabonado_abonados.swalcantarillado,
-    };8625
+    }; 8625
     if (lectura.idemision == 243) {
       this.s_lecturas.calcular_Valores(body).subscribe({
         next: (datos: any) => console.log(datos),

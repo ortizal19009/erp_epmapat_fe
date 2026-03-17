@@ -22,7 +22,16 @@ export class CajaReportsService {
       compress: true
     };
 
-    if (this.otraPagina) doc.output('dataurlnewwindow', opciones);
+    if (this.otraPagina) {
+      const blob = doc.output('blob');
+      const url = URL.createObjectURL(blob);
+      const ventana = window.open(url, '_blank');
+
+      // Libera memoria cuando la ventana se cierre
+      if (ventana) {
+        ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
+      }
+    }
     else {
       const pdfBlob = doc.output('blob');
       const blobUrl = URL.createObjectURL(pdfBlob);      //Si ya existe el <embed> primero lo remueve

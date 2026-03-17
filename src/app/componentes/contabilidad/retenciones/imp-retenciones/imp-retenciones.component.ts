@@ -167,16 +167,25 @@ export class ImpRetencionesComponent implements OnInit {
 
    muestraPDF(doc: any) {
       var opciones = { filename: this.pdfgenerado };
-      if (this.otrapagina) doc.output('dataurlnewwindow', opciones);
+      if (this.otrapagina) {
+         const blob = doc.output('blob');
+         const url = URL.createObjectURL(blob);
+         const ventana = window.open(url, '_blank');
+
+         // Libera memoria cuando la ventana se cierre
+         if (ventana) {
+            ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
+         }
+      }
       else {
-           const pdfBlob = doc.output('blob');
-  const blobUrl = URL.createObjectURL(pdfBlob);
+         const pdfBlob = doc.output('blob');
+         const blobUrl = URL.createObjectURL(pdfBlob);
          //Si ya existe el <embed> primero lo remueve
          const elementoExistente = document.getElementById('idembed');
          if (elementoExistente) { elementoExistente.remove(); }
          //Crea el <embed>
          var embed = document.createElement('embed');
-     embed.setAttribute('src', blobUrl);
+         embed.setAttribute('src', blobUrl);
          embed.setAttribute('type', 'application/pdf');
          embed.setAttribute('width', '70%');
          embed.setAttribute('height', '100%');
@@ -216,8 +225,8 @@ export class ImpRetencionesComponent implements OnInit {
       // Agrega los datos a la hoja de cálculo
       this._retenciones.forEach((retencion: any) => {
          const valor = retencion.valorretbienes + retencion.valorretservicios + retencion.valretserv100 + retencion.valretair;
-         worksheet.addRow([ retencion.secretencion1, retencion.fechaemiret1, retencion.idbene.nomben, retencion.intdoc.nomdoc + " " + retencion.numdoc,
-            retencion.numautoriza_e, retencion.fecautoriza, valor ]);
+         worksheet.addRow([retencion.secretencion1, retencion.fechaemiret1, retencion.idbene.nomben, retencion.intdoc.nomdoc + " " + retencion.numdoc,
+         retencion.numautoriza_e, retencion.fecautoriza, valor]);
       });
 
       // Establece el ancho de las columnas
@@ -243,7 +252,7 @@ export class ImpRetencionesComponent implements OnInit {
       });
 
       // Columnas a la derecha 
-      let columnsToRigth = [ 7 ];
+      let columnsToRigth = [7];
       columnsToRigth.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {
             cell.alignment = { horizontal: 'right' };
@@ -251,7 +260,7 @@ export class ImpRetencionesComponent implements OnInit {
       });
       // Formato numérico
       const numeroStyle = { numFmt: '#,##0.00' };
-      const columnsToFormat = [ 7 ];
+      const columnsToFormat = [7];
       for (let i = 4; i <= this._retenciones.length + 3; i++) {
          columnsToFormat.forEach(columnIndex => {
             const cell = worksheet.getCell(i, columnIndex);
@@ -260,11 +269,11 @@ export class ImpRetencionesComponent implements OnInit {
       }
 
       //Coloca la fila del Total
-      worksheet.addRow([ "", "", 'TOTAL: '+this._retenciones.length]);
+      worksheet.addRow(["", "", 'TOTAL: ' + this._retenciones.length]);
       worksheet.getCell('C' + (this._retenciones.length + 4).toString()).font = { bold: true }
 
       let celdaG = worksheet.getCell('G' + (this._retenciones.length + 4).toString());
-      celdaG.numFmt = '#,##0.00';  celdaG.font = { bold: true }
+      celdaG.numFmt = '#,##0.00'; celdaG.font = { bold: true }
       celdaG.value = { formula: 'SUM(G4:' + 'G' + (this._retenciones.length + 3).toString() + ')', result: 0, sharedFormula: undefined, date1904: false };
 
       // Crea el archivo Excel

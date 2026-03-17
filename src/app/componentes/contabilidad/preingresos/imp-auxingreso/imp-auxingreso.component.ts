@@ -211,13 +211,13 @@ export class ImpAuxingresoComponent implements OnInit {
 
       const datos: any = [];
       this._ejecucion.forEach((ejecu: any) => {
-         datos.push([ ejecu.fecha_eje, ejecu.asiento, ejecu.compro, formatNumber( ejecu.modifi ),
-         formatNumber( ejecu.codificado ), formatNumber( ejecu.devengado ), formatNumber( ejecu.cobpagado ),
-         formatNumber( ejecu.saldo_devengado ), formatNumber( ejecu.saldo_cobpagado ), ejecu.concep]);
+         datos.push([ejecu.fecha_eje, ejecu.asiento, ejecu.compro, formatNumber(ejecu.modifi),
+         formatNumber(ejecu.codificado), formatNumber(ejecu.devengado), formatNumber(ejecu.cobpagado),
+         formatNumber(ejecu.saldo_devengado), formatNumber(ejecu.saldo_cobpagado), ejecu.concep]);
       });
 
-      if (this._ejecucion.length > 0) datos.push(['TOTAL: '+this._ejecucion.length, , , formatNumber(this.sumModifi), , formatNumber(this.sumDevenga), formatNumber(this.sumCobp)]);
-      
+      if (this._ejecucion.length > 0) datos.push(['TOTAL: ' + this._ejecucion.length, , , formatNumber(this.sumModifi), , formatNumber(this.sumDevenga), formatNumber(this.sumCobp)]);
+
       const filaEnNegrita = this._ejecucion.length;
       autoTable(doc, {
          theme: 'grid',
@@ -243,7 +243,7 @@ export class ImpAuxingresoComponent implements OnInit {
          didParseCell: function (hookData) {
             if (hookData.column.index == 3 && hookData.cell.text.toString() == '(Ninguno)') { hookData.cell.text = ['']; }
             if (hookData.cell.raw == 0) { hookData.cell.text = ['']; }
-            if( hookData.row.index == filaEnNegrita ) Object.values(hookData.row.cells).forEach(function (cell) { cell.styles.fontStyle = 'bold'; });
+            if (hookData.row.index == filaEnNegrita) Object.values(hookData.row.cells).forEach(function (cell) { cell.styles.fontStyle = 'bold'; });
          }
       });
 
@@ -272,16 +272,25 @@ export class ImpAuxingresoComponent implements OnInit {
 
    muestraPDF(doc: any) {
       var opciones = { filename: this.pdfgenerado };
-      if (this.otrapagina) doc.output('dataurlnewwindow', opciones);
+      if (this.otrapagina) {
+         const blob = doc.output('blob');
+         const url = URL.createObjectURL(blob);
+         const ventana = window.open(url, '_blank');
+
+         // Libera memoria cuando la ventana se cierre
+         if (ventana) {
+            ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
+         }
+      }
       else {
-           const pdfBlob = doc.output('blob');
-  const blobUrl = URL.createObjectURL(pdfBlob);
+         const pdfBlob = doc.output('blob');
+         const blobUrl = URL.createObjectURL(pdfBlob);
          //Si ya existe el <embed> primero lo remueve
          const elementoExistente = document.getElementById('idembed');
          if (elementoExistente) { elementoExistente.remove(); }
          //Crea el <embed>
          var embed = document.createElement('embed');
-     embed.setAttribute('src', blobUrl);
+         embed.setAttribute('src', blobUrl);
          embed.setAttribute('type', 'application/pdf');
          embed.setAttribute('width', '70%');
          embed.setAttribute('height', '100%');
@@ -329,13 +338,13 @@ export class ImpAuxingresoComponent implements OnInit {
       this._ejecucion.forEach(() => {
          const row = [this._ejecucion[i].fecha_eje, this._ejecucion[i].asiento, this._ejecucion[i].compro, this._ejecucion[i].modifi,
          this._ejecucion[i].codificado, this._ejecucion[i].devengado, this._ejecucion[i].cobpagado,
-         this._ejecucion[i].saldo_devengado, this._ejecucion[i].saldo_cobpagado, this._ejecucion[i].concep ];
+         this._ejecucion[i].saldo_devengado, this._ejecucion[i].saldo_cobpagado, this._ejecucion[i].concep];
          worksheet.addRow(row);
          i++;
       });
 
       //Coloca la fila del Total
-      worksheet.addRow([ 'TOTAL']);
+      worksheet.addRow(['TOTAL']);
       worksheet.getCell('A' + (this._ejecucion.length + 5).toString()).font = { bold: true }
 
       let celdaD = worksheet.getCell('D' + (this._ejecucion.length + 5).toString());

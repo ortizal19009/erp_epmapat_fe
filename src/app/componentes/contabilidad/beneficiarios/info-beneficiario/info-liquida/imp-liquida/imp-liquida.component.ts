@@ -196,16 +196,25 @@ export class ImpLiquidaComponent implements OnInit {
 
    muestraPDF(doc: any) {
       var opciones = { filename: this.pdfgenerado };
-      if (this.otrapagina) doc.output('dataurlnewwindow', opciones);
+      if (this.otrapagina) {
+         const blob = doc.output('blob');
+         const url = URL.createObjectURL(blob);
+         const ventana = window.open(url, '_blank');
+
+         // Libera memoria cuando la ventana se cierre
+         if (ventana) {
+            ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
+         }
+      }
       else {
-           const pdfBlob = doc.output('blob');
-  const blobUrl = URL.createObjectURL(pdfBlob);
+         const pdfBlob = doc.output('blob');
+         const blobUrl = URL.createObjectURL(pdfBlob);
          //Si ya existe el <embed> primero lo remueve
          const elementoExistente = document.getElementById('idembed');
          if (elementoExistente) { elementoExistente.remove(); }
          //Crea el <embed>
          var embed = document.createElement('embed');
-     embed.setAttribute('src', blobUrl);
+         embed.setAttribute('src', blobUrl);
          embed.setAttribute('type', 'application/pdf');
          embed.setAttribute('width', '70%');
          embed.setAttribute('height', '100%');
@@ -232,7 +241,7 @@ export class ImpLiquidaComponent implements OnInit {
       worksheet.getCell('B2').font = customStyle12.font;
 
       // Fila 3
-      worksheet.addRow(['', this.formMovimiento.value.tiptran, , , this.formMovimiento.value.valor,'Fecha: '+ this.formMovimiento.value.fecha ]);
+      worksheet.addRow(['', this.formMovimiento.value.tiptran, , , this.formMovimiento.value.valor, 'Fecha: ' + this.formMovimiento.value.fecha]);
       worksheet.getCell('B3').font = customStyle12.font;
       worksheet.getCell('E3').font = customStyle12.font;
       worksheet.getCell('F3').font = customStyle12.font;
@@ -289,11 +298,11 @@ export class ImpLiquidaComponent implements OnInit {
 
       // Columnas centradas 
       const columnsToCenter = [1, 3];
-         columnsToCenter.forEach(columnIndex => {
-            worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {
-               cell.alignment = { vertical: 'middle', horizontal: 'center' };
-            });
+      columnsToCenter.forEach(columnIndex => {
+         worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
          });
+      });
       // Columnas a la derecha 
       let columnsToRigth = [4, 5];
       columnsToRigth.forEach(columnIndex => {

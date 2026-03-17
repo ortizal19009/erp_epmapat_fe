@@ -168,7 +168,14 @@ export class ImpNiifcuentasComponent implements OnInit {
    muestraPDF(doc: any) {
       var opciones = { filename: this.pdfgenerado };
       if (this.otrapagina) {
-         doc.output('dataurlnewwindow', opciones);
+           const blob = doc.output('blob');
+  const url = URL.createObjectURL(blob);
+  const ventana = window.open(url, '_blank');
+
+  // Libera memoria cuando la ventana se cierre
+  if (ventana) {
+    ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
+  }
       } else {
          const pdfBlob = doc.output('blob');
          const blobUrl = URL.createObjectURL(pdfBlob);

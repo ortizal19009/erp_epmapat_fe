@@ -62,7 +62,7 @@ export class ImpPreingresoComponent implements OnInit {
     private preingService: PreingresoService,
     private ejeService: EjecucionService,
     private clasiService: ClasificadorService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/preingresos');
@@ -492,9 +492,9 @@ export class ImpPreingresoComponent implements OnInit {
     doc.setFontSize(12);
     doc.text(
       'DEL ' +
-        this.formImprimir.value.desde +
-        ' AL ' +
-        this.formImprimir.value.hasta,
+      this.formImprimir.value.desde +
+      ' AL ' +
+      this.formImprimir.value.hasta,
       m_izquierda,
       22
     );
@@ -702,10 +702,19 @@ export class ImpPreingresoComponent implements OnInit {
 
   muestraPDF(doc: any) {
     var opciones = { filename: this.pdfgenerado };
-    if (this.otrapagina) doc.output('dataurlnewwindow', opciones);
+    if (this.otrapagina) {
+      const blob = doc.output('blob');
+      const url = URL.createObjectURL(blob);
+      const ventana = window.open(url, '_blank');
+
+      // Libera memoria cuando la ventana se cierre
+      if (ventana) {
+        ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
+      }
+    }
     else {
-        const pdfBlob = doc.output('blob');
-  const blobUrl = URL.createObjectURL(pdfBlob);
+      const pdfBlob = doc.output('blob');
+      const blobUrl = URL.createObjectURL(pdfBlob);
       //Si ya existe el <embed> primero lo remueve
       const elementoExistente = document.getElementById('idembed');
       if (elementoExistente) {
@@ -713,7 +722,7 @@ export class ImpPreingresoComponent implements OnInit {
       }
       //Crea el <embed>
       var embed = document.createElement('embed');
-  embed.setAttribute('src', blobUrl);
+      embed.setAttribute('src', blobUrl);
       embed.setAttribute('type', 'application/pdf');
       embed.setAttribute('width', '70%');
       embed.setAttribute('height', '100%');
@@ -905,9 +914,9 @@ export class ImpPreingresoComponent implements OnInit {
     // Fila 2
     worksheet.addRow([
       'DEL ' +
-        this.formImprimir.value.desde +
-        ' AL ' +
-        this.formImprimir.value.hasta,
+      this.formImprimir.value.desde +
+      ' AL ' +
+      this.formImprimir.value.hasta,
     ]);
     worksheet.getCell('A2').font = customStyle12.font;
 

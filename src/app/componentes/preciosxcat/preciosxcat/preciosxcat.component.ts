@@ -173,16 +173,25 @@ export class PreciosxcatComponent implements OnInit {
          compress: true
       };
 
-      if (this.otraPagina) doc.output('dataurlnewwindow', opciones);
+      if (this.otraPagina) {
+         const blob = doc.output('blob');
+         const url = URL.createObjectURL(blob);
+         const ventana = window.open(url, '_blank');
+
+         // Libera memoria cuando la ventana se cierre
+         if (ventana) {
+            ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
+         }
+      }
       else {
-           const pdfBlob = doc.output('blob');
-  const blobUrl = URL.createObjectURL(pdfBlob);
+         const pdfBlob = doc.output('blob');
+         const blobUrl = URL.createObjectURL(pdfBlob);
          //Si ya existe el <embed> primero lo remueve
          const elementoExistente = document.getElementById('idembed');
          if (elementoExistente) { elementoExistente.remove(); }
          //Crea el <embed>
          var embed = document.createElement('embed');
-     embed.setAttribute('src', blobUrl);
+         embed.setAttribute('src', blobUrl);
          embed.setAttribute('type', 'application/pdf');
          embed.setAttribute('width', '65%');
          embed.setAttribute('height', '100%');
@@ -257,7 +266,7 @@ export class PreciosxcatComponent implements OnInit {
             next: resp => {
                tarifa.idcategoria_categorias = resp;
                tarifa.feccrea = new Date();
-               tarifa.usucrea =  this.authService.idusuario;
+               tarifa.usucrea = this.authService.idusuario;
                this.prexcatService.savePreciosxCat(tarifa).subscribe({
                   next: resp1 => {
                      console.log("Ok!");

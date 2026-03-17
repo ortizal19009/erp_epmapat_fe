@@ -271,16 +271,25 @@ export class ImpAuxgastoComponent implements OnInit {
 
    muestraPDF(doc: any) {
       var opciones = { filename: this.pdfgenerado };
-      if (this.otrapagina) doc.output('dataurlnewwindow', opciones);
+      if (this.otrapagina) {
+         const blob = doc.output('blob');
+         const url = URL.createObjectURL(blob);
+         const ventana = window.open(url, '_blank');
+
+         // Libera memoria cuando la ventana se cierre
+         if (ventana) {
+            ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
+         }
+      }
       else {
-           const pdfBlob = doc.output('blob');
-  const blobUrl = URL.createObjectURL(pdfBlob);
+         const pdfBlob = doc.output('blob');
+         const blobUrl = URL.createObjectURL(pdfBlob);
          //Si ya existe el <embed> primero lo remueve
          const elementoExistente = document.getElementById('idembed');
          if (elementoExistente) { elementoExistente.remove(); }
          //Crea el <embed>
          var embed = document.createElement('embed');
-     embed.setAttribute('src', blobUrl);
+         embed.setAttribute('src', blobUrl);
          embed.setAttribute('type', 'application/pdf');
          embed.setAttribute('width', '70%');
          embed.setAttribute('height', '100%');
@@ -303,11 +312,11 @@ export class ImpAuxgastoComponent implements OnInit {
       worksheet.addRow(['Partida:  ' + this.formPargas.value.codpar + '  ' + this.formPargas.value.nompar]);
       worksheet.getCell('A2').font = { name: 'Times New Roman', bold: true, size: 12, color: { argb: '002060' } };
       // Fila 3
-      worksheet.addRow(['Del ' + this.formImprimir.value.desde + ' al ' + this.formImprimir.value.hasta ]);
+      worksheet.addRow(['Del ' + this.formImprimir.value.desde + ' al ' + this.formImprimir.value.hasta]);
       worksheet.getCell('A3').font = { name: 'Times New Roman', bold: true, size: 10, color: { argb: '002060' } };
 
       //Fila 4 Cabecera 
-      worksheet.addRow([,,,, 'Inicial', this.inicia,,,,, 'Saldo',]);
+      worksheet.addRow([, , , , 'Inicial', this.inicia, , , , , 'Saldo',]);
       worksheet.getCell('D4').font = { name: 'Times New Roman', bold: true, size: 10, color: { argb: '002060' } };
       worksheet.getCell('E4').font = { name: 'Times New Roman', bold: true, size: 10, color: { argb: '002060' } };
       worksheet.getCell('E4').numFmt = '#,##0.00';

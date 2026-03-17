@@ -803,15 +803,22 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     });
     this.s_pdf.setfooter(doc);
     // Generate data URI and set iframe source
-    const blobUrl  = doc.output('datauri');
+    // ✅ Reemplaza con esto:
     if (this.swEmail == true) {
-      //this.dataURItoBlob(blobUrl );
+      // El email necesita base64, datauri está bien aquí
       this.dataURI = doc.output('datauri').toString();
     } else {
-      const pdfViewer: any = document.getElementById(
-        'pdfViewer'
-      ) as HTMLIFrameElement;
-      pdfViewer.src = blobUrl ;
+      // Iframe necesita blob URL, no datauri
+      const blob = doc.output('blob');
+      const url = URL.createObjectURL(blob);
+      const pdfViewer = document.getElementById('pdfViewer') as HTMLIFrameElement;
+
+      if (pdfViewer) {
+        if (pdfViewer.src?.startsWith('blob:')) {
+          URL.revokeObjectURL(pdfViewer.src);
+        }
+        pdfViewer.src = url;
+      }
     }
     this.nameFile = `Notificación_${this._abonado[0].idabonado}.pdf`;
 

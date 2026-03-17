@@ -993,10 +993,19 @@ export class EmisionesComponent implements OnInit {
       compress: true,
     };
 
-    if (this.otraPagina) doc.output('dataurlnewwindow', opciones);
+    if (this.otraPagina) {
+      const blob = doc.output('blob');
+      const url = URL.createObjectURL(blob);
+      const ventana = window.open(url, '_blank');
+
+      // Libera memoria cuando la ventana se cierre
+      if (ventana) {
+        ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
+      }
+    }
     else {
-        const pdfBlob = doc.output('blob');
-  const blobUrl = URL.createObjectURL(pdfBlob);
+      const pdfBlob = doc.output('blob');
+      const blobUrl = URL.createObjectURL(pdfBlob);
       //Si ya existe el <embed> primero lo remueve
       const elementoExistente = document.getElementById('idembed');
       if (elementoExistente) {
@@ -1004,7 +1013,7 @@ export class EmisionesComponent implements OnInit {
       }
       //Crea el <embed>
       var embed = document.createElement('embed');
-  embed.setAttribute('src', blobUrl);
+      embed.setAttribute('src', blobUrl);
       embed.setAttribute('type', 'application/pdf');
       embed.setAttribute('width', '50%');
       embed.setAttribute('height', '100%');
@@ -1117,10 +1126,19 @@ export class EmisionesComponent implements OnInit {
       compress: true,
     };
 
-    if (this.otraPagina) doc.output('dataurlnewwindow', opciones);
+    if (this.otraPagina) {
+      const blob = doc.output('blob');
+      const url = URL.createObjectURL(blob);
+      const ventana = window.open(url, '_blank');
+
+      // Libera memoria cuando la ventana se cierre
+      if (ventana) {
+        ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
+      }
+    }
     else {
-        const pdfBlob = doc.output('blob');
-  const blobUrl = URL.createObjectURL(pdfBlob);
+      const pdfBlob = doc.output('blob');
+      const blobUrl = URL.createObjectURL(pdfBlob);
       //Si ya existe el <embed> primero lo remueve
       const elementoExistente = document.getElementById('idembed');
       if (elementoExistente) {
@@ -1128,7 +1146,7 @@ export class EmisionesComponent implements OnInit {
       }
       //Crea el <embed>
       var embed = document.createElement('embed');
-  embed.setAttribute('src', blobUrl);
+      embed.setAttribute('src', blobUrl);
       embed.setAttribute('type', 'application/pdf');
       embed.setAttribute('width', '70%');
       embed.setAttribute('height', '100%');
@@ -1239,10 +1257,19 @@ export class EmisionesComponent implements OnInit {
       compress: true,
     };
 
-    if (this.otraPagina) doc.output('dataurlnewwindow', opciones);
+    if (this.otraPagina) {
+      const blob = doc.output('blob');
+      const url = URL.createObjectURL(blob);
+      const ventana = window.open(url, '_blank');
+
+      // Libera memoria cuando la ventana se cierre
+      if (ventana) {
+        ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
+      }
+    }
     else {
-        const pdfBlob = doc.output('blob');
-  const blobUrl = URL.createObjectURL(pdfBlob);
+      const pdfBlob = doc.output('blob');
+      const blobUrl = URL.createObjectURL(pdfBlob);
       //Si ya existe el <embed> primero lo remueve
       const elementoExistente = document.getElementById('idembed');
       if (elementoExistente) {
@@ -1250,7 +1277,7 @@ export class EmisionesComponent implements OnInit {
       }
       //Crea el <embed>
       var embed = document.createElement('embed');
-  embed.setAttribute('src', blobUrl);
+      embed.setAttribute('src', blobUrl);
       embed.setAttribute('type', 'application/pdf');
       embed.setAttribute('width', '70%');
       embed.setAttribute('height', '100%');
@@ -1465,10 +1492,19 @@ export class EmisionesComponent implements OnInit {
       compress: true,
     };
 
-    if (this.otraPagina) doc.output('dataurlnewwindow', opciones);
+    if (this.otraPagina) {
+      const blob = doc.output('blob');
+      const url = URL.createObjectURL(blob);
+      const ventana = window.open(url, '_blank');
+
+      // Libera memoria cuando la ventana se cierre
+      if (ventana) {
+        ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
+      }
+    }
     else {
-        const pdfBlob = doc.output('blob');
-  const blobUrl = URL.createObjectURL(pdfBlob);
+      const pdfBlob = doc.output('blob');
+      const blobUrl = URL.createObjectURL(pdfBlob);
       //Si ya existe el <embed> primero lo remueve
       const elementoExistente = document.getElementById('idembed');
       if (elementoExistente) {
@@ -1476,7 +1512,7 @@ export class EmisionesComponent implements OnInit {
       }
       //Crea el <embed>
       var embed = document.createElement('embed');
-  embed.setAttribute('src', blobUrl);
+      embed.setAttribute('src', blobUrl);
       embed.setAttribute('type', 'application/pdf');
       embed.setAttribute('width', '70%');
       embed.setAttribute('height', '100%');
@@ -1493,7 +1529,14 @@ export class EmisionesComponent implements OnInit {
     this.s_pdf.header('REPORETE DE REFACTURACION', doc);
     // doc.autoPrint();
     //doc.save('datauristring');
-    doc.output('dataurlnewwindow', { filename: 'comprobante.pdf' });
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    const ventana = window.open(url, '_blank');
+
+    // Libera memoria cuando la ventana se cierre
+    if (ventana) {
+      ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
+    }
   }
   async iEmisionIndividual(emisionIndividual: any) {
     let doc = new jsPDF('p', 'pt', 'a4');
@@ -1674,7 +1717,14 @@ export class EmisionesComponent implements OnInit {
 
     // doc.autoPrint();
     //doc.save('datauristring');
-    doc.output('dataurlnewwindow', { filename: 'comprobante.pdf' });
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    const ventana = window.open(url, '_blank');
+
+    // Libera memoria cuando la ventana se cierre
+    if (ventana) {
+      ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
+    }
   }
   getrubrosxfactura(idfactura: number) { }
   imprimir() {

@@ -167,12 +167,20 @@ export class PdfService {
     });
     doc.setFontSize(10);
     this.setfooter(doc);
-    const pdfDataUri = doc.output('datauri');
-    const pdfViewer: any = document.getElementById(
-      'pdfViewer'
-    ) as HTMLIFrameElement;
+    // ✅ Reemplaza con esto:
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    const pdfViewer = document.getElementById('pdfViewer') as HTMLIFrameElement;
 
-    return (pdfViewer.src = pdfDataUri);
+    if (pdfViewer) {
+      // Revoca la URL anterior si ya existía para liberar memoria
+      if (pdfViewer.src?.startsWith('blob:')) {
+        URL.revokeObjectURL(pdfViewer.src);
+      }
+      pdfViewer.src = url;
+    }
+
+    return url;
   }
 
   _bodyTwoTables(
@@ -261,11 +269,20 @@ export class PdfService {
       body: bt2,
     });
     this.setfooter(doc);
-    const pdfDataUri = doc.output('datauri');
-    const pdfViewer: any = document.getElementById(
-      'pdfViewer'
-    ) as HTMLIFrameElement;
-    return (pdfViewer.src = pdfDataUri);
+    // ✅ Reemplaza con esto:
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    const pdfViewer = document.getElementById('pdfViewer') as HTMLIFrameElement;
+
+    if (pdfViewer) {
+      // Revoca la URL anterior si ya existía para liberar memoria
+      if (pdfViewer.src?.startsWith('blob:')) {
+        URL.revokeObjectURL(pdfViewer.src);
+      }
+      pdfViewer.src = url;
+    }
+
+    return url;
   }
   _____bodyThreeTables(
     titulo: string,
@@ -325,12 +342,20 @@ export class PdfService {
       body: bt3,
     });
     this.setfooter(doc);
-    const pdfDataUri = doc.output('datauri');
-    const pdfViewer: any = document.getElementById(
-      'pdfViewer'
-    ) as HTMLIFrameElement;
+    // ✅ Reemplaza con esto:
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    const pdfViewer = document.getElementById('pdfViewer') as HTMLIFrameElement;
 
-    return (pdfViewer.src = pdfDataUri);
+    if (pdfViewer) {
+      // Revoca la URL anterior si ya existía para liberar memoria
+      if (pdfViewer.src?.startsWith('blob:')) {
+        URL.revokeObjectURL(pdfViewer.src);
+      }
+      pdfViewer.src = url;
+    }
+
+    return url;
   }
 
 
@@ -498,12 +523,20 @@ export class PdfService {
       columnStyles: { 0: { halign: 'center' }, 2: { halign: 'right' } },
       body: bt4,
     });
-    const pdfDataUri = doc.output('datauri');
-    const pdfViewer: any = document.getElementById(
-      'pdfViewer'
-    ) as HTMLIFrameElement;
+    // ✅ Reemplaza con esto:
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    const pdfViewer = document.getElementById('pdfViewer') as HTMLIFrameElement;
 
-    return (pdfViewer.src = pdfDataUri);
+    if (pdfViewer) {
+      // Revoca la URL anterior si ya existía para liberar memoria
+      if (pdfViewer.src?.startsWith('blob:')) {
+        URL.revokeObjectURL(pdfViewer.src);
+      }
+      pdfViewer.src = url;
+    }
+
+    return url;
   }
   async bodyFiveTables(
     titulo: string,
@@ -605,12 +638,20 @@ export class PdfService {
     });
     this.setfooter(doc);
 
-    const pdfDataUri = doc.output('datauri');
-    const pdfViewer: any = document.getElementById(
-      'pdfViewer'
-    ) as HTMLIFrameElement;
+    // ✅ Reemplaza con esto:
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    const pdfViewer = document.getElementById('pdfViewer') as HTMLIFrameElement;
 
-    return (pdfViewer.src = pdfDataUri);
+    if (pdfViewer) {
+      // Revoca la URL anterior si ya existía para liberar memoria
+      if (pdfViewer.src?.startsWith('blob:')) {
+        URL.revokeObjectURL(pdfViewer.src);
+      }
+      pdfViewer.src = url;
+    }
+
+    return url;
   }
 
   headStyles(heads: any) {

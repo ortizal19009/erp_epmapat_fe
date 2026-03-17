@@ -115,7 +115,7 @@ export class RubrosComponent implements OnInit {
 
       autoTable(doc, {
          theme: 'grid',
-         headStyles: {fillColor: [95, 57, 95], fontStyle: 'bold', halign: 'center' },
+         headStyles: { fillColor: [95, 57, 95], fontStyle: 'bold', halign: 'center' },
          styles: { font: 'helvetica', fontSize: 9, cellPadding: 1, halign: 'center' },
          columnStyles: {
             0: { halign: 'center' },
@@ -149,8 +149,8 @@ export class RubrosComponent implements OnInit {
             // };
 
             let valor = +HookData.cell.text!
-            if (valor == 0) { HookData.cell.styles.textColor = [255, 255, 255];            };
-            if (valor < 0) { HookData.cell.styles.textColor = [255, 0, 0];            };
+            if (valor == 0) { HookData.cell.styles.textColor = [255, 255, 255]; };
+            if (valor < 0) { HookData.cell.styles.textColor = [255, 0, 0]; };
 
             let x = HookData.cell.text.toString()
             if ((HookData.column.index === 3 || HookData.column.index === 4) && x == 'No') { HookData.cell.styles.textColor = [255, 255, 255]; };
@@ -168,16 +168,25 @@ export class RubrosComponent implements OnInit {
          compress: true
       };
 
-      if (this.otraPagina) doc.output('dataurlnewwindow', opciones);
+      if (this.otraPagina) {
+         const blob = doc.output('blob');
+         const url = URL.createObjectURL(blob);
+         const ventana = window.open(url, '_blank');
+
+         // Libera memoria cuando la ventana se cierre
+         if (ventana) {
+            ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
+         }
+      }
       else {
-           const pdfBlob = doc.output('blob');
-  const blobUrl = URL.createObjectURL(pdfBlob);
+         const pdfBlob = doc.output('blob');
+         const blobUrl = URL.createObjectURL(pdfBlob);
          //Si ya existe el <embed> primero lo remueve
          const elementoExistente = document.getElementById('idembed');
          if (elementoExistente) { elementoExistente.remove(); }
          //Crea el <embed>
          var embed = document.createElement('embed');
-     embed.setAttribute('src', blobUrl);
+         embed.setAttribute('src', blobUrl);
          embed.setAttribute('type', 'application/pdf');
          embed.setAttribute('width', '65%');
          embed.setAttribute('height', '100%');

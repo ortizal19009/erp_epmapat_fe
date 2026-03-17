@@ -1203,7 +1203,16 @@ export class ImpCajasComponent implements OnInit {
       format: 'a4',
       compress: true,
     };
-    if (this.otrapagina) doc.output('dataurlnewwindow', opciones);
+    if (this.otrapagina) {
+      const blob = doc.output('blob');
+      const url = URL.createObjectURL(blob);
+      const ventana = window.open(url, '_blank');
+
+      // Libera memoria cuando la ventana se cierre
+      if (ventana) {
+        ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
+      }
+    }
     else {
       const pdfBlob = doc.output('blob');
       const blobUrl = URL.createObjectURL(pdfBlob);
