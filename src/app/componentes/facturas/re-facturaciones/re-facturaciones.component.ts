@@ -64,6 +64,7 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
   _facturasEliminadas: any[] = [];
 
   private subs: Subscription[] = [];
+  swMulta: boolean = false;
 
   constructor(
     private fb: FormBuilder,
