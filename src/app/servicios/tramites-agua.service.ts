@@ -11,7 +11,7 @@ export class TramitesAguaService {
     { nombre: 'Ing. Juan Diego Delgado', cargo: 'Director Comercial' },
     { nombre: 'Ab. Andrés Montenegro', cargo: 'Asesor Legal' },
   ];
-  constructor(private s_header: TemplateHeaderService) {}
+  constructor(private s_header: TemplateHeaderService) { }
 
   listaTramitesAgua(datos: any) {
     let titulo: string = 'Lista de tramites de agua';
@@ -20,7 +20,9 @@ export class TramitesAguaService {
     autoTable(doc, {
       html: `#${datos}`,
     });
-    doc.output('pdfobjectnewwindow', { filename: `${titulo}.pdf` });
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
   }
 
   genContratoTramite(aguatramite: any, abonado: any, servicio: string) {
@@ -69,7 +71,10 @@ export class TramitesAguaService {
         ],
       ],
     });
-    doc.output('pdfobjectnewwindow', { filename: `${titulo}.pdf` });
+    // ✅ DESPUÉS
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
   }
 
   genHojaInspeccion(datos: any, titulo: string) {
@@ -155,7 +160,10 @@ export class TramitesAguaService {
     doc.text(`Firma: `, margx + 300, 740);
     doc.line(margx + 370, 740, margy, 740);
 
-    doc.output('pdfobjectnewwindow', { filename: `${titulo}.pdf` });
+    // ✅ DESPUÉS
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
   }
 
   genContrato(datos: any) {
@@ -251,6 +259,8 @@ export class TramitesAguaService {
       ],
     });
 
-    doc.output('pdfobjectnewwindow', { filename: `${titulo}.pdf` });
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
   }
 }

@@ -276,7 +276,6 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
     this.cargando = true;
     this.s_emisionindividual.getByIdEmision(idemision).subscribe({
       next: (datos: any[]) => {
-        console.log(datos);
         this._emisionindividual = datos || [];
       },
       error: (e) => console.error(e),
@@ -297,7 +296,6 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
 
   // ✅ Seleccionar abonado + buscar lecturas + traer facturas eliminadas
   async setAbonado(abonado: any): Promise<void> {
-    console.log(abonado)
     this.abonado = abonado;
     this.cliente = abonado?.idresponsable;
     this.ruta = abonado?.idruta_rutas;
@@ -323,7 +321,6 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
       .subscribe({
         next: async (datos: any[]) => {
           // 1) facturas eliminadas: fechaelimina/fechaeliminacion != null
-          console.log(datos)
           for (const i of datos || []) {
             try {
               const fac: any = await this.facService.getByIdAsync(i.idfactura);
@@ -714,7 +711,6 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
 
     if (categoria == 9 && consumo > 34) categoria = 1;
     if (categoria == 1 && consumo > 70) categoria = 2;
-
     let body: any = {
       idemision: lectura.idemision,
       cuenta: lectura.idabonado_abonados.idabonado,
@@ -724,21 +720,43 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
       swMunicipio: lectura.idabonado_abonados.municipio,
       swAdultoMayor: lectura.idabonado_abonados.municipio,
       swAguapotable: lectura.idabonado_abonados.swalcantarillado,
+      swRefacturacion: true
     }; 8625
     if (lectura.idemision == 243) {
       this.s_lecturas.calcular_Valores(body).subscribe({
-        next: (datos: any) => console.log(datos),
+        next: (datos: any) => {
+          if (this.swMulta) {
+            this.facService.setMulta(lectura.idfactura).subscribe({
+              next: (dato: any) => {
+              }
+            });
+          }
+        },
         error: (e: any) => console.error(e.error),
       });
     } else if (lectura.idemision > 243) {
       this.s_lecturas.calcular_Valores_v2(body).subscribe({
-        next: (datos: any) => console.log(datos),
+        next: (datos: any) => {
+          if (this.swMulta) {
+            this.facService.setMulta(lectura.idfactura).subscribe({
+              next: (dato: any) => {
+              }
+            });
+          }
+        },
         error: (e: any) => console.error(e.error),
       });
     }
     else {
       this.s_lecturas.calcular_Valores_anteriores(body).subscribe({
-        next: (datos: any) => console.log(datos),
+        next: (datos: any) => {
+          if (this.swMulta) {
+            this.facService.setMulta(lectura.idfactura).subscribe({
+              next: (dato: any) => {
+              }
+            });
+          }
+        },
         error: (e: any) => console.error(e.error),
       });
     }

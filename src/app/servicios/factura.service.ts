@@ -498,4 +498,9 @@ export class FacturaService {
   findCobradasByIdemision(idemision: number) {
     return this.http.get<any[]>(`${baseUrl}/findByIdEmision?idemision=${idemision}`);
   }
+  setMulta(idfactura: number) {
+    console.log("Calculando calculando ")
+    return this.http.get<any[]>(`${baseUrl}/set_multas?idfactura=${idfactura}`)
+
+  }
 }
