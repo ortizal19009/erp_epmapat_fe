@@ -3,6 +3,7 @@ import { firstValueFrom, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { Retenciones } from 'src/app/modelos/contabilidad/retenciones.model';
 import { environment } from 'src/environments/environment';
+import { RetencionCreateDTO } from 'src/app/componentes/contabilidad/retenciones/add-retencion/add-retencion.component';
 
 const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/retenciones`;
@@ -12,6 +13,8 @@ const baseUrl = `${apiUrl}/retenciones`;
 })
 
 export class RetencionesService {
+
+   private apiUrl = 'http://localhost:8026/api/comprobantes';  //URL de sri-files
 
    constructor(private http: HttpClient) { }
 
@@ -43,32 +46,48 @@ export class RetencionesService {
    }
 
    //Validar secretencion1 
-   valSecretencion1(secretencion1: String): Observable<boolean> {
-      return this.http.get<boolean>(`${baseUrl}/valSecretencion1?secretencion1=${secretencion1}`);
-   }
-
-   // Save
-   // saveRetencion(retenciones: any) {
-   //    return this.http.post(`${baseUrl}`, retenciones);
+   // valSecretencion1Old(secretencion1: number): Observable<boolean> {
+   //    return this.http.get<boolean>(`${baseUrl}/valSecretencion1?secretencion1=${secretencion1}`);
    // }
-   saveRetencion(retencion: Retenciones): Observable<Object> {
-      return this.http.post(`${baseUrl}`, retencion);
+   valSecretencion1(secretencion1: number): Observable<boolean> {
+      return this.http.get<boolean>(`${baseUrl}/valSecretencion1/${secretencion1}`);
    }
 
-   getByIdRete(idrete: number) {
+   // Save usando DTO
+   saveRetencion(nueva: RetencionCreateDTO): Observable<Retenciones> {
+      return this.http.post<Retenciones>(`${baseUrl}`, nueva);
+   }
+
+   getByIdReteBad(idrete: number) {
       return this.http.get<Retenciones[]>(`${baseUrl}/${idrete}`);
    }
+   getByIdRete(idrete: number): Observable<Retenciones> {
+      return this.http.get<Retenciones>(`${baseUrl}/${idrete}`);
+   }
 
-   getById(idrete: number) {
+   getById(idrete: number): Observable<Retenciones> {
       return this.http.get<Retenciones>(baseUrl + "/" + idrete);
    }
 
-   updateRetencion(idrete: number, retenciones: Retenciones): Observable<Object> {
-      return this.http.put(`${baseUrl}/${idrete}`, retenciones);
+   // Actualiza con Parcial
+   updateRetencion(idrete: number, retenciones: Partial<Retenciones>): Observable<Retenciones> {
+      return this.http.put<Retenciones>(`${baseUrl}/${idrete}`, retenciones);
    }
 
-   deleteRetencion(idrete: number) {
-      return this.http.delete(`${baseUrl}/${idrete}`);
+   // deleteRetencion(idrete: number) {
+   //    return this.http.delete(`${baseUrl}/${idrete}`);
+   // }
+   deleteRetencion(idrete: number): Observable<any> {
+      return this.http.delete(`${baseUrl}/${idrete}`, { responseType: 'text' });
+   }
+
+   autorizar(idrete: number): Observable<any> {
+      return this.http.delete(`${baseUrl}/${idrete}`, { responseType: 'text' });
+   }
+
+   verificar() {
+      console.log(`${this.apiUrl}/verificacion`)
+      return this.http.get(`${this.apiUrl}/verificacion`);
    }
 
 }

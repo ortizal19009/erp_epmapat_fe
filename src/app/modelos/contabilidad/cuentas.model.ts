@@ -23,5 +23,7 @@ export class Cuentas {
 	grufluefec: number;
 	resulcostos: number;
 	balancostos: number;
+
 	idnivel: Niveles
+	
 }

@@ -171,10 +171,12 @@ export class BancosComponent implements OnInit {
 
    cambioDatosCheck(e: any, transaci: any) {
       let date: Date = new Date();
+      // console.log(e.target.checked);
 
       if (e.target.checked === false) {
          transaci.mesconcili = 0;
          this.updateTransaci(transaci);
+         console.log(transaci);
       } else if (e.target.checked === true) {
          transaci.mesconcili = date.getMonth();
          //transaci.mesconcili = 1;
@@ -265,7 +267,6 @@ export class BancosComponent implements OnInit {
    }
 
 }
-
 //Miles: coma y decimales: punto
 // function formatNumber(num: number) {
 //    return num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');

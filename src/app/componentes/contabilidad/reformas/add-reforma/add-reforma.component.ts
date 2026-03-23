@@ -40,7 +40,8 @@ export class AddReformaComponent implements OnInit {
          usucrea: 1,
          feccrea: (new Date().toISOString().substring(0, 10))
       },
-         { updateOn: "blur" });
+         { updateOn: "blur" }
+      );
 
       this.listarDocumentos();
       this.ultimo();
@@ -65,23 +66,37 @@ export class AddReformaComponent implements OnInit {
       });
    }
 
-   //OJO: Deberia tambien recuperar la 'ultima fecha (está colocando la actual)
    ultimo() {
-      this.refoService.siguienteNumero().subscribe({
-         next: num => this.formReforma.patchValue({ numero: num }),
+      this.refoService.ultima().subscribe({
+         next: resp => {
+            this.formReforma.patchValue({ 
+               numero: resp.numero + 1, 
+               fecha: resp.fecha
+            })
+      },
          error: err => console.error(err.error)
       });
    }
 
    get f() { return this.formReforma.controls; }
 
-   onSubmit() {
+   guardar() {
       this.refoService.saveReformas(this.formReforma.value).subscribe({
-         next: resp => {
-            sessionStorage.setItem('buscaReformasHasta', this.formReforma?.controls['numero'].value.toString());
+         next: () => {
+            //Actualiza los datos de búsqueda para que se muestre en la lista de Reformas
+            let buscaDesdeNum = this.f['numero'].value - 16;
+            if (buscaDesdeNum <= 0) buscaDesdeNum = 1;
+            let year = new Date(this.f['fecha'].value).getFullYear(); // Extraer el año de la fecha 
+            const buscarReformas = {
+               desdeNum: buscaDesdeNum,
+               hastaNum: this.f['numero'].value,
+               desdeFecha: year.toString() + "-01-01",
+               hastaFecha: year.toString() + "-12-31",
+            };
+            sessionStorage.setItem("buscarReformas", JSON.stringify(buscarReformas));
             this.regresar();
          },
-         error: err => console.error(err.error)
+         error: err => console.log(err.error)
       });
    }
 

@@ -2,7 +2,8 @@
    <div class="container-fluid">
       <div class="row m-0 px-0 pt-1 pb-0 cabecera border sombra">
          <div class="col-sm-2 mx-0 ml-1 px-0">
-            <h5 class="ml-1 mt-1 font-weight-bold text-truncate"><i class="bi-blockquote-right"></i>&nbsp; Movimientos</h5>
+            <h5 class="ml-1 mt-1 font-weight-bold text-truncate"><i class="bi-blockquote-right"></i>&nbsp; Movimientos
+            </h5>
          </div>
          <form [formGroup]="formFechas" class="col-sm-9 px-0">
             <div class="row px-0">
@@ -28,8 +29,8 @@
          </form>
 
          <div class="btn-group">
-            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white"
-               data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
+               aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
                <button class="dropdown-item" type="button" [disabled]="!_movimi" (click)="imprimir()">
@@ -69,19 +70,26 @@
             <tbody class="detalle small roboto pad0">
                <tr *ngFor="let movimi of _movimi">
                   <td class="text-center">{{ movimi.inttra.idasiento.fecha | date: 'yyyy-MM-dd' }}</td>
-                  <td class="text-center">{{ movimi.inttra.idasiento.asiento }}</td>
-                  <td class="text-center">{{ comprobante(movimi.inttra.idasiento.tipcom, movimi.inttra.idasiento.compro) }}</td>
-                  <td >{{movimi.inttra.codcue}}</td>
+                  <!-- <td class="text-center">{{ movimi.inttra.idasiento.asiento }}</td> -->
+                  <td class="text-center">
+                     <a class="text-end cursor text-purple font-weight-bolder" data-toggle="tooltip"
+                        title=" Abrir asiento ">{{ movimi.inttra.idasiento.asiento }}</a>
+                  </td>
+                  <td class="text-center">{{ comprobante(movimi.inttra.idasiento.tipcom, movimi.inttra.idasiento.compro)
+                     }}</td>
+                  <td>{{movimi.inttra.codcue}}</td>
                   <td class="text-right">{{ movimi.anticipo | number: '1.2-2'}}</td>
                   <td class="text-right">{{ movimi.cxc | number: '1.2-2'}}</td>
                   <td class="text-right">{{ movimi.ft | number: '1.2-2'}}</td>
                   <td class="text-right">{{ movimi.cxp | number: '1.2-2'}}</td>
-                  <!-- <td class="text-right" [ngClass]="{'transparente': movimi.totpagcob == 0}">{{ movimi.totpagcob | number: '1.2-2' }}  </td> -->
                   <td class="text-right" [ngClass]="{'transparente': movimi.totpagcob == 0}">
-                     <a (click)="liquidaciones($event, movimi)" class="text-end cursor" data-toggle="tooltip" title=" Detalle ">{{ movimi.totpagcob | number: '1.2-2' }}</a>
-                   </td>
-                  <td class="text-right custom-cell" [ngClass]="{'transparente': movimi.saldo == 0}">{{ movimi.saldo | number: '1.2-2' }}</td>
-                  <td class="text-left text-truncate ancho">{{ movimi.inttra.descri }}</td>
+                     <a (click)="liquidaciones($event, movimi)" class="text-end cursor text-purple font-weight-bolder" data-toggle="tooltip"
+                        title=" Detalle de liquidaciones ">{{ movimi.totpagcob | number: '1.2-2' }}</a>
+                  </td>
+                  <td class="text-right custom-cell" [ngClass]="{'transparente': movimi.saldo == 0}">{{ movimi.saldo |
+                     number: '1.2-2' }}</td>
+                  <td class="text-left text-truncate ancho260" data-toggle="tooltip"
+                     [title]="movimi.inttra.descri.length > 35 ? movimi.inttra.descri : ''">{{ movimi.inttra.descri }}</td>
                </tr>
             </tbody>
             <tfoot *ngIf="_movimi" class="font-weight-bold detalle roboto small pad0">
@@ -98,4 +106,3 @@
       </div>
    </div>
 </div>
-

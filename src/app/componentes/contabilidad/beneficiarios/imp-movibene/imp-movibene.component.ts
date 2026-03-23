@@ -28,12 +28,12 @@ export class ImpMovibeneComponent implements OnInit {
    sumhaber: number;
    pdfgenerado: string;
    nombrearchivo: string;
-   sumanticipo: number;
-   sumcxc: number;
-   sumft: number;
-   sumcxp: number;
-   sumtotpagcob: number;
-   sumsaldo: number;
+	sumanticipo: number;
+	sumcxc: number;
+	sumft: number;
+	sumcxp: number;
+	sumtotpagcob: number;
+	sumsaldo: number;
 
    constructor(public fb: FormBuilder, private router: Router, private bxtService: BenextranService) { }
 
@@ -43,8 +43,8 @@ export class ImpMovibeneComponent implements OnInit {
       if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
 
       const movibeneJSON = sessionStorage.getItem('movibeneToImpExp');
-      if (movibeneJSON) {
-         const movibene = JSON.parse(movibeneJSON);
+      if ( movibeneJSON ) {
+         const movibene = JSON.parse( movibeneJSON );
          this.idbene = movibene.idbene;
          this.formBeneficiario = this.fb.group({
             nomben: movibene.nomben
@@ -87,6 +87,7 @@ export class ImpMovibeneComponent implements OnInit {
             try {
                this._movibene = await this.bxtService.getByIdbeneDesdeHastaAsync(this.idbene, this.formImprimir.value.desde, this.formImprimir.value.hasta);
                this.total();
+               // console.log('this._movibene: ', this._movibene)
                this.swcalculando = false;
                if (this.swimprimir) this.txtcalculando = 'Mostrar'
                else this.txtcalculando = 'Descargar'
@@ -110,64 +111,64 @@ export class ImpMovibeneComponent implements OnInit {
    }
 
    comprobante(tipcom: number, compro: number): string {
-      if (tipcom == 1) return 'I-' + compro.toString();
-      if (tipcom == 2) return 'E-' + compro.toString();
-      if (tipcom == 3) return 'DC-' + compro.toString();
-      if (tipcom == 4) return 'DI-' + compro.toString();
-      if (tipcom == 5) return 'DE-' + compro.toString();
+      if(tipcom == 1) return 'I-' + compro.toString();
+      if(tipcom == 2) return 'E-' + compro.toString();
+      if(tipcom == 3) return 'DC-' + compro.toString();
+      if(tipcom == 4) return 'DI-' + compro.toString();
+      if(tipcom == 5) return 'DE-' + compro.toString();
       return '';
    }
 
    total() {
-      this.sumanticipo = 0;
-      this.sumcxc = 0;
-      this.sumft = 0;
-      this.sumcxp = 0;
-      this.sumtotpagcob = 0;
-      this.sumsaldo = 0;
-      let i = 0;
-      this._movibene.forEach(() => {
-         switch (this._movibene[i].inttra.tiptran) {
-            case 2:
-               this._movibene[i].anticipo = formatNumber(this._movibene[i].valor);
+		this.sumanticipo = 0;
+		this.sumcxc = 0;
+		this.sumft = 0;
+		this.sumcxp = 0;
+		this.sumtotpagcob = 0;
+		this.sumsaldo = 0;
+		let i = 0;
+		this._movibene.forEach(() => {
+			switch (this._movibene[i].inttra.tiptran) {
+				case 2:
+					this._movibene[i].anticipo = formatNumber(this._movibene[i].valor);
                this._movibene[i].anticipoN = this._movibene[i].valor;
-               this.sumanticipo = this.sumanticipo + this._movibene[i].valor;
-               break;
-            case 3:
-               this._movibene[i].cxc = formatNumber(this._movibene[i].valor); //Con formato para imprimir
+					this.sumanticipo = this.sumanticipo + this._movibene[i].valor;
+					break;
+				case 3:
+					this._movibene[i].cxc = formatNumber(this._movibene[i].valor); //Con formato para imprimir
                this._movibene[i].cxcN = this._movibene[i].valor;              //Como número para exportar
-               this.sumcxc = this.sumcxc + this._movibene[i].valor;
-               break;
-            case 4:
-               this._movibene[i].cxc = formatNumber(this._movibene[i].valor);
+					this.sumcxc = this.sumcxc + this._movibene[i].valor;
+					break;
+				case 4:
+					this._movibene[i].cxc = formatNumber(this._movibene[i].valor);
                this._movibene[i].cxcN = this._movibene[i].valor;
-               this.sumcxc = this.sumcxc + this._movibene[i].valor;
-               break;
-            case 5:
-               this._movibene[i].ft = formatNumber(this._movibene[i].valor);
+					this.sumcxc = this.sumcxc + this._movibene[i].valor;
+					break;
+				case 5:
+					this._movibene[i].ft = formatNumber(this._movibene[i].valor);
                this._movibene[i].ftN = this._movibene[i].valor;
-               this.sumft = this.sumft + this._movibene[i].valor;
-               break;
-            case 6:
-               this._movibene[i].cxp = formatNumber(this._movibene[i].valor);
+					this.sumft = this.sumft + this._movibene[i].valor;
+					break;
+				case 6:
+					this._movibene[i].cxp = formatNumber(this._movibene[i].valor);
                this._movibene[i].cxpN = this._movibene[i].valor;
-               this.sumcxp = this.sumcxp + this._movibene[i].valor;
-               break;
-            case 7:
-               this._movibene[i].cxp = formatNumber(this._movibene[i].valor);
+					this.sumcxp = this.sumcxp + this._movibene[i].valor;
+					break;
+				case 7:
+					this._movibene[i].cxp = formatNumber(this._movibene[i].valor);
                this._movibene[i].cxpN = this._movibene[i].valor;
-               this.sumcxp = this.sumcxp + this._movibene[i].valor;
-               break;
-            default:
+					this.sumcxp = this.sumcxp + this._movibene[i].valor;
+					break;
+				default:
 
-         }
-         this._movibene[i].saldo = formatNumber(this._movibene[i].valor - this._movibene[i].totpagcob);
+			}
+			this._movibene[i].saldo = formatNumber(this._movibene[i].valor - this._movibene[i].totpagcob);
          this._movibene[i].saldoN = this._movibene[i].valor - this._movibene[i].totpagcob;
-         this.sumtotpagcob = this.sumtotpagcob + this._movibene[i].totpagcob;
-         this.sumsaldo = this.sumsaldo + (this._movibene[i].valor - this._movibene[i].totpagcob);
-         i++;
-      });
-   }
+			this.sumtotpagcob = this.sumtotpagcob + this._movibene[i].totpagcob;
+			this.sumsaldo = this.sumsaldo + (this._movibene[i].valor - this._movibene[i].totpagcob);
+			i++;
+		});
+	}
 
    //Muestra cada reporte
    imprime() {
@@ -202,15 +203,15 @@ export class ImpMovibeneComponent implements OnInit {
       let i = 0;
       this._movibene.forEach(() => {
          datos.push([this._movibene[i].inttra.idasiento.fecha, this._movibene[i].inttra.idasiento.asiento, this.comprobante(this._movibene[i].inttra.idasiento.tipcom, this._movibene[i].inttra.idasiento.compro),
-         this._movibene[i].inttra.codcue, this._movibene[i].anticipo, this._movibene[i].cxc, this._movibene[i].ft, this._movibene[i].cxp,
-         this._movibene[i].totpagcob, this._movibene[i].saldo, this._movibene[i].inttra.descri]);
+         this._movibene[i].inttra.codcue, this._movibene[i].anticipo, this._movibene[i].cxc, this._movibene[i].ft, this._movibene[i].cxp, 
+         this._movibene[i].totpagcob, this._movibene[i].saldo, this._movibene[i].inttra.descri ]);
          i++;
       });
-      datos.push(['', '', '', 'TOTAL: ' + this._movibene.length, formatNumber(this.sumanticipo), formatNumber(this.sumcxc), formatNumber(this.sumft), formatNumber(this.sumcxp),
-         formatNumber(this.sumtotpagcob), this.sumsaldo]);
+      datos.push(['', '', '', 'TOTAL: '+this._movibene.length, formatNumber(this.sumanticipo), formatNumber(this.sumcxc), formatNumber(this.sumft), formatNumber(this.sumcxp),
+      formatNumber(this.sumtotpagcob), this.sumsaldo ]);
 
       autoTable(doc, {
-         head: [['Fecha', 'Asie', 'Cmprbnt', 'Cuenta', 'Anticipo', 'CxC', 'F.T', 'CxP', 'Liquida', 'Saldo', 'Descripción']],
+         head: [['Fecha','Asie','Cmprbnt','Cuenta','Anticipo','CxC','F.T','CxP','Liquida','Saldo','Descripción']],
          theme: 'grid',
          headStyles: { fillColor: [68, 103, 114], fontStyle: 'bold', halign: 'center' },
          styles: { font: 'helvetica', fontSize: 8, cellPadding: 1, halign: 'center' },
@@ -257,25 +258,15 @@ export class ImpMovibeneComponent implements OnInit {
 
    muestraPDF(doc: any) {
       var opciones = { filename: this.pdfgenerado };
-      if (this.otrapagina) {
-         const blob = doc.output('blob');
-         const url = URL.createObjectURL(blob);
-         const ventana = window.open(url, '_blank');
-
-         // Libera memoria cuando la ventana se cierre
-         if (ventana) {
-            ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
-         }
-      }
+      if (this.otrapagina) doc.output('dataurlnewwindow', opciones);
       else {
-         const pdfBlob = doc.output('blob');
-         const blobUrl = URL.createObjectURL(pdfBlob);
+         const pdfDataUri = doc.output('datauristring');
          //Si ya existe el <embed> primero lo remueve
          const elementoExistente = document.getElementById('idembed');
          if (elementoExistente) { elementoExistente.remove(); }
          //Crea el <embed>
          var embed = document.createElement('embed');
-         embed.setAttribute('src', blobUrl);
+         embed.setAttribute('src', pdfDataUri);
          embed.setAttribute('type', 'application/pdf');
          embed.setAttribute('width', '70%');
          embed.setAttribute('height', '100%');
@@ -292,7 +283,7 @@ export class ImpMovibeneComponent implements OnInit {
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet(this.nombrearchivo);
       // Fila 1
-      worksheet.addRow(['', '', '', 'Movimientos ' + this.formBeneficiario.value.nomben]);
+      worksheet.addRow(['', '', '', 'Movimientos ' + this.formBeneficiario.value.nomben ]);
       const cellD1 = worksheet.getCell('D1');
       const customStyle = { font: { name: 'Times New Roman', bold: true, size: 14, color: { argb: '002060' } } };
       cellD1.font = customStyle.font;
@@ -304,7 +295,7 @@ export class ImpMovibeneComponent implements OnInit {
       cellD2.font = customStyle2.font;
       // Fila 3: Anterior
       if (this.anterior != 0) {
-         worksheet.addRow([]);
+         worksheet.addRow([ ]);
          const cellF3 = worksheet.getCell('F3');
          cellF3.font = customStyle2.font;
          const cellG3 = worksheet.getCell('G3');
@@ -314,9 +305,9 @@ export class ImpMovibeneComponent implements OnInit {
          cellG3.font = customStyleG3.font;
       } else worksheet.addRow([]);
 
-      //Fila 4 Cabecera
+      //Fila 4 Cabecera 
       // const cabecera = ['Fecha', 'Asie', 'Cmprbnt', 'Beneficiario', 'Debe', 'Haber', 'Saldo', 'Descripción'];
-      const headerRowCell = worksheet.addRow(['Fecha', 'Asie', 'Cmprbnt', 'Cuenta', 'Anticipo', 'CxC', 'F.T', 'CxP', 'Liquida', 'Saldo', 'Descripción']);
+      const headerRowCell = worksheet.addRow( [ 'Fecha','Asie','Cmprbnt','Cuenta','Anticipo','CxC','F.T','CxP','Liquida','Saldo','Descripción' ] );
       headerRowCell.eachCell(cell => {
          cell.fill = {
             type: 'pattern',
@@ -341,7 +332,7 @@ export class ImpMovibeneComponent implements OnInit {
          //    debe = '';
          //    haber = this._movibene[i].haber;
          // }
-         const row = [this._movibene[i].inttra.idasiento.fecha, this._movibene[i].inttra.idasiento.asiento,
+         const row = [this._movibene[i].inttra.idasiento.fecha, this._movibene[i].inttra.idasiento.asiento, 
          this.comprobante(this._movibene[i].inttra.idasiento.tipcom, this._movibene[i].inttra.idasiento.compro),
          this._movibene[i].inttra.codcue, this._movibene[i].anticipoN, this._movibene[i].cxcN, this._movibene[i].ftN,
          this._movibene[i].cxpN, this._movibene[i].totpagcob, this._movibene[i].saldoN, this._movibene[i].inttra.descri];
@@ -359,17 +350,17 @@ export class ImpMovibeneComponent implements OnInit {
          const cell = worksheet.getCell(String.fromCharCode(65 + colIndex) + lastRowIndex.toString()); // Obtener celda
          cell.font = { bold: true }; // Aplicar negrita
          cell.numFmt = '#,##0.00';
-      }
-
+       }
+       
       let celdaE = worksheet.getCell('E' + (this._movibene.length + 5).toString());
       celdaE.value = { formula: 'SUM(E5:' + 'E' + (this._movibene.length + 4).toString() + ')', result: 0, sharedFormula: undefined, date1904: false };
-
+      
       let celdaF = worksheet.getCell('F' + (this._movibene.length + 5).toString());
       celdaF.value = { formula: 'SUM(F5:' + 'F' + (this._movibene.length + 4).toString() + ')', result: 0, sharedFormula: undefined, date1904: false };
 
       let celdaG = worksheet.getCell('G' + (this._movibene.length + 5).toString());
       celdaG.value = { formula: 'SUM(G5:' + 'G' + (this._movibene.length + 4).toString() + ')', result: 0, sharedFormula: undefined, date1904: false };
-
+      
       let celdaH = worksheet.getCell('H' + (this._movibene.length + 5).toString());
       celdaH.value = { formula: 'SUM(H5:' + 'H' + (this._movibene.length + 4).toString() + ')', result: 0, sharedFormula: undefined, date1904: false };
 
@@ -397,15 +388,15 @@ export class ImpMovibeneComponent implements OnInit {
          worksheet.getColumn(config.columnIndex).width = config.widthInChars;
       });
 
-      // Columnas centradas
+      // Columnas centradas 
       const columnsToCenter = [1, 2, 3];
       columnsToCenter.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {
             cell.alignment = { vertical: 'middle', horizontal: 'center' };
          });
       });
-      // Columnas a la derecha
-      let columnsToRigth = [5, 6, 7, 8, 9, 10];
+      // Columnas a la derecha 
+      let columnsToRigth = [5, 6, 7, 8, 9, 10 ];
       columnsToRigth.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {
             cell.alignment = { horizontal: 'right' };

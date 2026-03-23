@@ -202,6 +202,7 @@ export class EstResultadosComponent implements OnInit {
       }; // fin for transacciones
 
       this.arreglo1.sort((a, b) => (a.intgrupo - b.intgrupo) || (a.codcue.localeCompare(b.codcue)));
+      console.log('arreg1', this.arreglo1);
       this.arreglo3 = this.arreglo1.filter((data) => (data.nivel <= this.formBuscar.value.numnivel && data.valor != 0));
 
       this.totalizar();
@@ -392,25 +393,15 @@ export class EstResultadosComponent implements OnInit {
 
       };
 
-      if (this.otraPagina) {
-         const blob = doc.output('blob');
-         const url = URL.createObjectURL(blob);
-         const ventana = window.open(url, '_blank');
-
-         // Libera memoria cuando la ventana se cierre
-         if (ventana) {
-            ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
-         }
-      }
+      if (this.otraPagina) doc.output('dataurlnewwindow', opciones);
       else {
-         const pdfBlob = doc.output('blob');
-         const blobUrl = URL.createObjectURL(pdfBlob);
+         const pdfDataUri = doc.output('datauristring');
          //Si ya existe el <embed> primero lo remueve
          const elementoExistente = document.getElementById('idembed');
          if (elementoExistente) { elementoExistente.remove(); }
          //Crea el <embed>
          var embed = document.createElement('embed');
-         embed.setAttribute('src', blobUrl);
+         embed.setAttribute('src', pdfDataUri);
          embed.setAttribute('type', 'application/pdf');
          embed.setAttribute('width', '75%');
          embed.setAttribute('height', '100%');
@@ -475,14 +466,14 @@ export class EstResultadosComponent implements OnInit {
          worksheet.getColumn(config.columnIndex).width = config.widthInChars;
       });
 
-      // Columnas centradas
+      // Columnas centradas 
       const columnsToCenter = [2];
       columnsToCenter.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {
             cell.alignment = { vertical: 'middle', horizontal: 'center' };
          });
       });
-      // Columnas a la derecha
+      // Columnas a la derecha 
       let columnsToRigth = [2];
       columnsToRigth.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {

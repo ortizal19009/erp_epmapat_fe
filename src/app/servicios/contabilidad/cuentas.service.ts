@@ -11,6 +11,7 @@ const baseUrl = `${apiUrl}/cuentas`;
    providedIn: 'root',
 })
 
+
 export class CuentasService {
 
    constructor(private http: HttpClient) { }
@@ -50,7 +51,7 @@ export class CuentasService {
    }
 
    //Verifica Desagregación Async
-   async valDesagrega(codcue: String, nivcue: number): Promise<any> {
+   async valDesagregaAsync(codcue: String, nivcue: number): Promise<any> {
       const response = await firstValueFrom(this.http.get<any>(`${baseUrl}/desagrega?codcue=${codcue}&nivcue=${nivcue}`));
       return response;
    }
@@ -61,7 +62,13 @@ export class CuentasService {
    }
 
    getByAsoHaber(asohaber: String) {
-      return this.http.get<Cuentas>(`${baseUrl}?asohaber=${asohaber}`);
+      return this.http.get<Cuentas[]>(`${baseUrl}?asohaber=${asohaber}`);
+   }
+
+   //Cuentas asociadas a una Parttida (Al debe)
+   getByAsodebe(asodebe: String) {
+      // console.log(`${baseUrl}?asodebe=${asodebe}`)
+      return this.http.get<Cuentas[]>(`${baseUrl}?asodebe=${asodebe}`);
    }
 
    //Cuentas por Tiptran
@@ -97,8 +104,8 @@ export class CuentasService {
       return this.http.get<Cuentas[]>(`${baseUrl}/porTiptran?tiptran=${tiptran}&codcue=${codcue}`);
    }
 
-   saveCuenta(cuentas: Cuentas): Observable<Object> {
-      return this.http.post(baseUrl, cuentas);
+   saveCuenta(cuentas: Cuentas): Observable<Cuentas> {
+      return this.http.post<Cuentas>(baseUrl, cuentas);
    }
 
    deleteCuenta(idcuenta: number): Observable<Object> {
@@ -109,4 +116,14 @@ export class CuentasService {
       return this.http.put(baseUrl + "/" + idcuenta, cuenta);
    }
 
+   // Reporte cuentas (dataset)
+   reporteCuentas(dto: DatasetReportRequest) {
+      // console.log(`${baseUrl}/dataset`, dto)
+      return this.http.post(`${baseUrl}/dataset`, dto, { responseType: 'blob' });
+   }
+
+   // Llama al endpoint que genera el reporte en el Backend (SaldoCuentas)
+   generaReporteBeans(dto: ReportRequest) {
+      return this.http.post(`${baseUrl}/reporte`, dto, { responseType: 'blob' });
+   }
 }

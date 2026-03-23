@@ -5,7 +5,7 @@
             <form [formGroup]="formBuscar" (ngSubmit)="buscar()">
                <div class="row">
                   <div class="col-sm-2 mt-1 pr-0">
-                     <h5 class="m-0 font-weight-bold text-truncate"> <i class="bi-calendar3-range-fill"></i>
+                     <h5 class="m-0 font-weight-bold text-truncate"> <i class="bi-calendar3-range-fill text-warning"></i>
                         &nbsp;Asientos</h5>
                   </div>
                   <div class="form-group col-sm-2 ml-0 px-0 my-0">
@@ -57,9 +57,11 @@
             </button>
             <div class="dropdown-menu dropdown-menu-right bg-dark roboto mt-0 ">
                <button class="dropdown-item" type="button" (click)="addAsiento()">
-                  <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+                  <i class="bi-file-earmark-plus text-info"></i>&nbsp; Nuevo</button>
                <button class="dropdown-item" type="button" (click)="imprimir()">
-                  <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
+                  <i class="bi bi-printer text-info"></i>&nbsp; Imprimir / Exportar</button>
+               <button class="dropdown-item" type="button" (click)="cerrar()">
+                  <i class="bi-x-circle text-info"></i>&nbsp; Cerrar</button>
             </div>
          </div>
 
@@ -76,23 +78,25 @@
                   <th>Asie.</th>
                   <th>Cmprbnt</th>
                   <th>Fecha</th>
-                  <th>Documento</th>
+                  <th class="col-sm-2">Beneficiario</th>
                   <th>Débito</th>
                   <th>Crédito</th>
                   <th>Rf</th>
-                  <th class="col-sm-2">Beneficiario</th>
+                  <th>Documento</th>
                   <th class="col-sm-2">Concepto</th>
                   <th></th>
                </tr>
             </thead>
             <tbody class="detalle roboto small">
-               <tr class="fila pad0" *ngFor="let asiento of _asientos | filter: filtro;"
+               <tr class="fila pad0" *ngFor="let asiento of asientos | filter: filtro;"
                   (click)="onCellClick($event, asiento)">
-                  <td class="text-center">{{ asiento.asiento }}</td>
-                  <td class="text-center"> {{ comprobante(asiento.tipcom, asiento.compro)}}</td>
+                  <td class="text-center"> <i *ngIf="asiento.idasiento == ultIdSelec"
+                        class="bi bi-caret-right-fill text-primary"></i> {{ asiento.asiento }}</td>
+                  <td> {{ this.authService.comprobante(asiento.tipcom, asiento.compro)}}</td>
                   <td class="text-center">{{ asiento.fecha | date: 'dd-MM-yyyy' }}</td>
-                  <td [ngClass]="{'transparente': asiento.intdoc.intdoc == 1}">{{
-                     asiento.intdoc.nomdoc}}&nbsp; {{asiento.numdoc}} </td>
+                  <td [ngClass]="{'transparente': asiento.idbene.idbene == 1}"
+                     class="text-left ancho220 text-truncate ">
+                     {{ asiento.idbene.nomben}}</td>
                   <td class="text-right"
                      [ngClass]="{'text-danger font-weight-bold': asiento.totdeb !== asiento.totcre, 'transparente': asiento.totdeb == 0}">
                      {{ asiento.totdeb | number:'1.2-2' }}</td>
@@ -102,11 +106,10 @@
                   <td class="text-center">
                      <i class="bi-check" *ngIf="asiento.swretencion"></i>
                   </td>
-                  <td [ngClass]="{'transparente': asiento.idbene.idbene == 1}"
-                     class="text-left ancho220 text-truncate ">
-                     {{ asiento.idbene.nomben}}</td>
-                  <td class="text-left text-truncate ancho220">{{ asiento.glosa }}</td>
-
+                  <td [ngClass]="{'transparente': asiento.intdoc.intdoc == 1}">{{
+                     asiento.intdoc.nomdoc}}&nbsp; {{asiento.numdoc}} </td>
+                  <td class="text-left text-truncate ancho220" data-toggle="tooltip"
+                     [title]="(asiento && asiento.glosa!.length > 35) ? asiento!.glosa : ''">{{ asiento!.glosa }}</td>
                   <td class="text-center">
                      <div class="btn-group py-0">
                         <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
@@ -116,57 +119,26 @@
                         <div class="dropdown-menu dropdown-menu-right popLista">
                            <button class="dropdown-item" type="button" (click)="modiAsiento( asiento.idasiento )">
                               <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
-                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#elimAsiento"
-                              (click)="eliminar( asiento )">
-                              <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
+                           <button class="dropdown-item" type="button" (click)="eliminar( asiento )">
+                              <i class="bi bi-trash-fill"></i>&nbsp; Eliminar</button>
                            <button class="dropdown-item" type="button" (click)="retenciones( asiento.idasiento )">
-                              <i class="bi bi-scissors"></i>&nbsp; Retenciones</button>
+                              <i class="bi bi-scissors"></i>&nbsp; Retención</button>
 
                         </div>
                      </div>
                   </td>
                </tr>
             </tbody>
+            <tfoot *ngIf="!filtro" class="detalle font-weight-bold pad0 roboto small">
+               <tr>
+                  <td></td>
+                  <td colspan="3">TOTAL: {{ asientos.length }}</td>
+                  <td class="text-right" [ngClass]="{'text-danger': sumTotdeb != sumTotcre}">{{sumTotdeb | number: '1.2-2'}}</td>
+                  <td class="text-right" [ngClass]="{'text-danger': sumTotdeb != sumTotcre}">{{sumTotcre | number: '1.2-2'}}</td>
+                  <td colspan="4"></td>
+               </tr>
+            </tfoot>
          </table>
       </div>
    </div>
-
-   <!-- Modal Eliminar-->
-   <div class='modal fade' id='elimAsiento' tabindex='-1' aria-hidden='true'>
-      <div class='modal-dialog modal-dialog-centered'>
-         <div class='modal-content'>
-            <div class='modal-header justify-content-center cabecera border py-2'>
-               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Mensaje</h5>
-            </div>
-            <div *ngIf="sweliminar; then thenBlock else elseBlock"></div>
-            <ng-template #thenBlock>
-               <div class='modal-body text-center roboto detalle'>
-                  ¿ Eliminar el Asiento <span class="fantacygreen"> {{iAsiento.asiento}} </span>?
-               </div>
-               <div class='modal-footer justify-content-center detalle border py-1'>
-                  <button type='button' class='btn btn-success btn-sm' data-dismiss='modal' id='btnSi'
-                     (click)="elimina()">
-                     <i class="fa fa-check-circle"></i> Aceptar
-                  </button>
-                  <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
-                     <i class="fa fa-times-circle"></i> Cancelar</button>
-               </div>
-            </ng-template>
-            <ng-template #elseBlock>
-               <div class='modal-body detalle'>
-                  <div class="alert alert-warning text-center" role="alert">
-                     No puede eliminar el Asiento <span class="fantacygreen"> {{iAsiento.asiento}}</span>
-                     <br>tiene Transacciones.
-                  </div>
-               </div>
-               <div class='text-center detalle'>
-                  <button type='button' class='btn btn-success btn-sm mb-3' data-dismiss='modal'>
-                     <i class="fa fa-check-circle"></i>&nbsp; Aceptar
-                  </button>
-               </div>
-            </ng-template>
-         </div>
-      </div>
-   </div>
-
 </div>

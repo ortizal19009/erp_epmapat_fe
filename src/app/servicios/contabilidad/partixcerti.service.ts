@@ -13,22 +13,40 @@ const baseUrl = `${apiUrl}/partixcerti`;
 
 export class PartixcertiService {
 
-  constructor(private http: HttpClient) {}
+   constructor(private http: HttpClient) { }
 
-  getByIdCerti(idcerti: number) {
-    return this.http.get<Partixcerti[]>(`${baseUrl}/idcerti/${idcerti}`);
-  }
+   getByIdCerti(idcerti: number) {
+      return this.http.get<Partixcerti[]>(`${baseUrl}/idcerti/${idcerti}`);
+   }
 
-  getById(idparxcer: number) {
-    return this.http.get<Partixcerti>(baseUrl + "/" + idparxcer);
-  }
+   getById(idparxcer: number) {
+      return this.http.get<Partixcerti>(baseUrl + "/" + idparxcer);
+   }
 
-  savePartixcerti(partixcerti: Partixcerti): Observable<Object> {
-    return this.http.post(`${baseUrl}`, partixcerti);
-  }
+   // Cuentas las partidas de una certipresu
+   countByIdcerti(idcerti: number) {
+      return this.http.get<number>(`${baseUrl}/count/${idcerti}`);
+   }
 
-  updateParxCer(partixcerti: Partixcerti){
-  return this.http.put(`${baseUrl}/${partixcerti.idparxcer}`, partixcerti);
-  }
+   // Save usando DTO
+   savePartixcerti(nueva: PartixcertiCreateDTO): Observable<Partixcerti> {
+      return this.http.post<Partixcerti>(`${baseUrl}`, nueva);
+   }
+
+   // Guarda Reintegro
+   savePartixreinte(nueva: PartixreinteCreateDTO): Observable<Partixcerti> {
+      return this.http.post<Partixcerti>(`${baseUrl}`, nueva);
+   }
+
+   // Actualiza solo campos modificados
+   updatePartixcerti(idparxcer: number, dto: PartixcertiUpdateDTO): Observable<Partixcerti> {
+      return this.http.put<Partixcerti>(`${baseUrl}/${idparxcer}`, dto);
+   }
+
+   // Elimina (controlando 404)
+   deletePartixcerti(idparxcer: number): Observable<any> {
+      return this.http.delete(`${baseUrl}/${idparxcer}`, { responseType: 'text' });
+   }
 
 }
+

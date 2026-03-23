@@ -129,7 +129,7 @@
                            <span class="input-group-text font-weight-bold">Movimiento </span>
                            <div class="input-group-text">
                               <input type="checkbox" formControlName="movcue" [ngClass]="{'is-invalid': f['movcue'].invalid && f['movcue'].touched,
-                     'is-valid': f['movcue'].valid, '': f['movcue'].untouched}">
+                     'is-valid': f['movcue'].valid, '': f['movcue'].untouched}" (blur)="blurMovcue()">
                            </div>
                         </div>
                      </div>

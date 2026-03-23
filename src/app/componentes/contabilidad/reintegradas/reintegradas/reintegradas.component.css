@@ -1,0 +1,16 @@
+.cabecera {
+   background-color: var(--bgcolor1);
+   color: white;
+}
+
+.detalle { background-color: var(--bgcolor2); }
+
+.fila:hover {
+   background-color: #117a8B;
+   color: white;
+   cursor: pointer;
+}
+
+.ancho{
+   max-width: 300px;
+}

@@ -43,10 +43,10 @@
    <div class="container-fluid">
       <div class="row">
          <div class="col-sm-12 mt-0">
-            <div class="card card-body sombra detalle pt-0">
-               <form [formGroup]="formTransaci" class="pt-1">
-                  <h5 class="font-weight-bold text-center cabecera border mt-0 py-1">Liquidación de Anticipos</h5>
-                  <div class="row">
+            <div class="card card-body sombra detalle pt-0 px-2">
+               <form [formGroup]="formTransaci" class="pt-1 mb-0">
+                  <h5 class="font-weight-bold text-center cabecera border mt-0 py-1">{{tiptran.nombre}}</h5>
+                  <div class="row pb-0">
 
                      <div class="form-group col-md-2 mb-1">
                         <div class="input-group input-group-sm">
@@ -71,17 +71,17 @@
                                  {{ cuenta.nomcue}}</option>
                            </datalist>
                            <input type="text" class="form-control" formControlName="nomcue" aria-label="Small"
-                              aria-describedby="inputGroup-sizing-sm" readonly>
+                              aria-describedby="inputGroup-sizing-sm" readonly tabindex="-1">
                         </div>
                      </div>
 
                      <div class="form-group col-md-2 mb-1">
                         <div class="input-group mb-1 input-group-sm">
                            <div class="input-group-prepend">
-                              <label class="input-group-text">Total</label>
+                              <label class="input-group-text">{{nomDebcre}}</label>
                            </div>
                            <input type="text" class="form-control text-right font-weight-bold" formControlName="valor"
-                              aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly mask="separator.2">
+                              aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabindex="-1">
                         </div>
                      </div>
 
@@ -111,63 +111,60 @@
                      </div>
                   </div>
 
-                  <div class="text-center">
-                     <button type="submit" class="btn btn-success btn-sm mx-1"
-                        [disabled]="!formTransaci.valid || swinvalido" (click)="onSubmit()">
-                        <i class="fa fa-check-circle"></i> Aceptar</button>
-                     <button type="button" class="btn btn-outline-success btn-sm mx-1" (click)="regresar()"><i
-                           class="fa fa-times-circle"></i> Cancelar
-                     </button>
-                     <button type="button" class="btn btn-success btn-sm mx-1 small" (click)="acfp()"
-                        [disabled]="idcuenta == null"><i class="bi-plus-circle"></i> Beneficiarios
-                     </button>
+                  <div class="row justify-content-center mt-1">
+                     <div class="form-group mb-0 pb-0">
+                        <div class="input-group mb-1 input-group-sm">
+                           <button type="button" class="btn btn-success btn-sm mx-1"
+                              [disabled]="!formTransaci.valid || swinvalido" (click)="onSubmit()">
+                              <i class="fa fa-check-circle"></i> Aceptar</button>
+                           <button type="button" class="btn btn-success btn-sm mx-1 small input-group-prepend"
+                              (click)="acfp()" [disabled]="idcuenta == null"><i class="bi-search"></i> Beneficiarios
+                           </button>
+                           <input *ngIf="idcuenta != null" type="text"
+                              class="form-control form-control-sm input-group-append" formControlName="nomben" (blur)="blurNomben()">
+                           <button type="button" class="btn btn-outline-success btn-sm mx-1" (click)="regresar()"><i
+                                 class="fa fa-times-circle"></i> Cancelar
+                           </button>
+                        </div>
+                     </div>
                   </div>
                </form>
-               <div class="row mt-2">
-                  <table class="table table-hover table-bordered table-sm">
+
+               <div class="row mt-1 px-2" *ngIf="_benextran.length > 0">
+                  <table class="table table-hover table-bordered table-sm mb-0">
                      <thead class="text-center cabecera">
                         <tr>
-                           <th class="py-0"></th>
                            <th class="py-0">Beneficiario</th>
                            <th class="py-0">Asiento</th>
                            <th class="py-0">Cmprbnt</th>
                            <th class="py-0">Fecha</th>
-                           <th class="py-0">Anticipo</th>
+                           <th class="py-0">{{tiptran.cabecera1}}</th>
                            <th class="py-0">Saldo</th>
-                           <th class="py-0">Liquida</th>
-                           <th></th>
+                           <th class="py-0">{{tiptran.cabecera2}}</th>
                            <th class="py-0">Nuevo Saldo</th>
+                           <th></th>
                         </tr>
                      </thead>
                      <tbody class="detalle">
-                        <tr class="robato" *ngFor="let benextran of _benextran; let i=index">
-                           <td class="text-center small">{{ i+1 }}</td>
+                        <tr class="roboto13" *ngFor="let benextran of _benextran; let i=index">
                            <td>{{ benextran.idbene.nomben }}</td>
-                           <td class="text-center">{{ benextran.idtransa.idasiento.asiento }}</td>
-                           <!-- <td>{{ benextran.idtransa.idasiento.compro }}</td> -->
-                           <td *ngIf="benextran.idtransa.idasiento.tipcom === 1">
-                              I-{{benextran.idtransa.idasiento.compro}}</td>
-                           <td *ngIf="benextran.idtransa.idasiento.tipcom === 2">
-                              E-{{benextran.idtransa.idasiento.compro}}</td>
-                           <td *ngIf="benextran.idtransa.idasiento.tipcom === 3">
-                              DC-{{benextran.idtransa.idasiento.compro}}</td>
-                           <td *ngIf="benextran.idtransa.idasiento.tipcom === 4">
-                              DI-{{benextran.idtransa.idasiento.compro}}</td>
-                           <td *ngIf="benextran.idtransa.idasiento.tipcom === 5">
-                              DE-{{benextran.idtransa.idasiento.compro}}</td>
-                           <td class="text-center">{{ benextran.idtransa.idasiento.fecha | date: 'dd-MM-yyyy' }}</td>
+                           <td class="text-center">{{ benextran.inttra.idasiento.asiento }}</td>
+                           <td class="text-center">{{ codcomprobante(benextran.inttra.idasiento.tipcom) }}{{
+                              benextran.inttra.idasiento.compro }}</td>
+                           <td class="text-center">{{ benextran.inttra.idasiento.fecha | date: 'dd-MM-yyyy' }}</td>
                            <td class="text-right">{{ benextran.valor | number: '1.2-2' }}</td>
                            <td class="text-right">{{ benextran.valor - benextran.totpagcob | number: '1.2-2' }}</td>
-                           <td><input type="text" class="form-control form-control-sm text-right" [(ngModel)]="valor[i]"
-                                 (dblclick)="dobleclick(i)" (change)="changeValor(i)" mask="separator.2"></td>
-                           <!-- <td><span *ngIf="swinvalido">Upps!</span></td> -->
-                           <td *ngIf="benextran.pagocobro === 0"><i class="bi bi-hourglass-half"></i></td>
-                           <td *ngIf="benextran.pagocobro === 1"><i class="bi bi-check-circle green"></i></td>
-                           <td *ngIf="benextran.pagocobro === 2"><i class="bi bi-x-circle red"></i></td>
+                           <td class="py-0"><input type="text" class="form-control form-control-sm text-right"
+                                 [(ngModel)]="liquida[i]" (dblclick)="dobleclick(i)" (change)="changeValor(i)"
+                                 mask="separator.2"></td>
                            <td class="text-right"
-                              [ngClass]="{'transparente': benextran.valor - benextran.totpagcob - valor[i] == 0, 'red': benextran.pagocobro == 2}">
+                              [ngClass]="{'transparente': benextran.valor - benextran.totpagcob - liquida[i] == 0, 'red': benextran.pagocobro == 2}">
                               {{
-                              benextran.valor - benextran.totpagcob - valor[i] | number: '1.2-2' }}</td>
+                              benextran.valor - benextran.totpagcob - liquida[i] | number: '1.2-2' }}</td>
+                           <td class="text-center" *ngIf="benextran.pagocobro === 1"><i
+                                 class="bi bi-check-circle green"></i></td>
+                           <td class="text-center" *ngIf="benextran.pagocobro === 2"><i class="bi bi-x-circle red"></i>
+                           </td>
                         </tr>
                      </tbody>
                   </table>

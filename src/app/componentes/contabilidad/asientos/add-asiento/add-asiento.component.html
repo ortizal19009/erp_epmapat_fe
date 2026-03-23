@@ -8,17 +8,28 @@
                   <div class="row">
 
                      <div class="form-group col-md-4">
-                        <div class="input-group mb-1 input-group-sm">
+                        <div class="input-group input-group-sm">
                            <div class="input-group-prepend">
                               <label class="input-group-text" for="fecha">Fecha</label>
                            </div>
-                           <input type="date" class="form-control text-center" formControlName="fecha" id="fecha"
-                              aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+                           <input type="date" class="form-control text-center" formControlName="fecha"
+                              aria-label="Small" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['fecha'].invalid && f['fecha'].touched,
+                           'is-valid': f['fecha'].valid, '': f['fecha'].untouched}">
+                        </div>
+                        <div *ngIf="authService.msgval && f['fecha'].errors && f['fecha'].touched">
+                           <div *ngIf="f['fecha'].errors['required']"
+                              class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> La Fecha es obligatoria
+                           </div>
+                           <div *ngIf="f['fecha'].errors['añoinvalido']"
+                              class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> El Período (año) es incorrecto
+                           </div>
                         </div>
                      </div>
 
                      <div class="form-group col-md-3">
-                        <div class="input-group mb-1 input-group-sm">
+                        <div class="input-group input-group-sm">
                            <div class="input-group-prepend">
                               <label class="input-group-text" for="tipasi">Tipo</label>
                            </div>
@@ -37,7 +48,7 @@
                            <div class="input-group-prepend">
                               <label class="input-group-text" for="tipcom">Comprobante<sup class="green">*</sup></label>
                            </div>
-                           <select class="custom-select" formControlName="tipcom" (change)="changeTipcom()" [ngClass]="{'is-invalid': f['tipcom'].invalid && f['tipcom'].touched,
+                           <select class="custom-select" formControlName="tipcom" [ngClass]="{'is-invalid': f['tipcom'].invalid && f['tipcom'].touched,
                            'is-valid': f['tipcom'].valid, '': f['tipcom'].untouched}">
                               <option value="1">Ingreso</option>
                               <option value="2">Egreso</option>
@@ -49,6 +60,16 @@
                               aria-label="Small" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['compro'].invalid && f['compro'].touched,
                            'is-valid': f['compro'].valid, '': f['compro'].untouched}">
                         </div>
+                        <div *ngIf="authService.msgval && f['compro'].errors && f['compro'].touched">
+                           <div *ngIf="f['compro'].errors['required']"
+                              class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> El número de Comprobante es obligatorio
+                           </div>
+                           <div *ngIf="f['compro'].errors['existe']"
+                              class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> El Comprobante <strong>{{f['compro'].value}}</strong> ya existe
+                           </div>
+                        </div>
                      </div>
 
                      <div class="form-group col-md-6">
@@ -57,7 +78,7 @@
                               <label class="input-group-text">Documento<sup class="green">*</sup></label>
                            </div>
                            <select type="text" class="custom-select" formControlName="intdoc">
-                              <option *ngFor="let documento of _documentos" [ngValue]="documento.intdoc">
+                              <option *ngFor="let documento of documentos" [ngValue]="documento.intdoc">
                                  {{ documento.nomdoc }}
                               </option>
                            </select>
@@ -65,10 +86,16 @@
                               [ngClass]="{'is-invalid': f['numdoc'].invalid && f['numdoc'].touched,
                                        'is-valid': f['numdoc'].valid, '': f['numdoc'].untouched}">
                         </div>
+                        <div *ngIf="authService.msgval && f['numdoc'].errors && f['numdoc'].touched">
+                           <div *ngIf="f['numdoc'].errors['required']"
+                              class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> El número de Documento es obligatorio
+                           </div>
+                        </div>
                      </div>
 
-                     <div class="form-group col-md-12 mt-1">
-                        <div class="input-group input-group-sm mb-1 ">
+                     <div class="form-group col-md-12">
+                        <div class="input-group input-group-sm">
                            <div class="input-group-prepend">
                               <label class="input-group-text" for="fecha">Beneficiario<sup class="green">*</sup></label>
                            </div>
@@ -76,14 +103,24 @@
                               list="benList" (input)="onBenefiSelected($event); benefixNombre($event)" [ngClass]="{'is-invalid': f['idbene'].invalid && f['idbene'].touched,
                            'is-valid': f['idbene'].valid, '': f['idbene'].untouched}">
                            <datalist role="listbox" id="benList">
-                              <option *ngFor="let beneficiario of _beneficiarios" value={{beneficiario.nomben}}>{{
+                              <option *ngFor="let beneficiario of beneficiarios" value={{beneficiario.nomben}}>{{
                                  beneficiario.idgrupo.nomgru}}</option>
                            </datalist>
+                        </div>
+                        <div *ngIf="authService.msgval && f['idbene'].errors && f['idbene'].touched">
+                           <div *ngIf="f['idbene'].errors['required']"
+                              class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> El Beneficiario es obligatorio
+                           </div>
+                           <div *ngIf="f['idbene'].errors['invalido']"
+                              class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> No ha seleccionado un Beneficiario
+                           </div>
                         </div>
                      </div>
 
                      <div class="form-group col-md-12">
-                        <div class="input-group mb-0 input-group-sm">
+                        <div class="input-group input-group-sm">
                            <div class="input-group-prepend">
                               <label class="input-group-text">Concepto</label>
                            </div>
@@ -96,7 +133,7 @@
                      <button type="submit" class="btn btn-success btn-sm mx-1" (click)="saveAsiento()"
                         [disabled]="!formAsiento.valid">
                         <i class="fa fa-check-circle"></i> Aceptar</button>
-                     <button type="button" class="btn btn-outline-success btn-sm mb-0" (click)="regresar()"><i
+                     <button type="button" class="btn btn-outline-success btn-sm" (click)="regresar()"><i
                            class="fa fa-times-circle"></i> Cancelar
                      </button>
                   </div>

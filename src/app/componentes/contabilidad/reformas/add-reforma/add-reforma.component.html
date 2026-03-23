@@ -76,10 +76,10 @@
                </div>
 
                <div class="mt-2 mb-0 text-center">
-                  <button type="submit" class="btn btn-success btn-sm mx-1" (click)="onSubmit()"
+                  <button type="button" class="btn btn-success btn-sm mx-1" (click)="guardar()"
                      [disabled]="!formReforma.valid">
                      <i class="fa fa-check-circle"></i> Aceptar</button>
-                  <button class="btn btn-outline-success btn-sm mx-1" (click)="regresar()"><i
+                  <button type="button" class="btn btn-outline-success btn-sm mx-1" (click)="regresar()"><i
                         class="fa fa-times-circle"></i> Cancelar</button>
                </div>
             </form>

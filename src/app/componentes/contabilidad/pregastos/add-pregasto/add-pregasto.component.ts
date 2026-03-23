@@ -89,8 +89,9 @@ export class AddPregastoComponent implements OnInit {
       this.formPregasto.value.codigo = codpar.substring(3, 20);
       this.formPregasto.value.codpart = codpar.substring(3, 11);
       this.formPregasto.value.feccrea = new Date();
+      // console.log(this.formPregasto.value);
       this.pregasService.savePregasto(this.formPregasto.value).subscribe({
-         next: resp => this.regresar(),
+         next: () => this.regresar(),
          error: err => console.error('Al guardar la nueva Partida de Gastos: ', err.error )
       });
    }

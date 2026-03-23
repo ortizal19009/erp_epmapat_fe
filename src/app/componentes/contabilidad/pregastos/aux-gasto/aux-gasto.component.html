@@ -8,22 +8,24 @@
                   <div class="form-group col-md-6 my-1">
                      <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
-                           <span class="input-group-text my-0 py-0">
-                              <div class="btn-group">
-                                 <button type="button" class="bg-transparent border-0 " data-toggle="dropdown"
-                                    aria-expanded="false"><i class="bi-three-dots-vertical"></i>
-                                 </button>
-                                 <div class="dropdown-menu dropdown-menu-left roboto bg-cyan">
-                                    <button class="dropdown-item" type="button" (click)="opciones(1)">
-                                       <i class="bi-receipt"></i>&nbsp; Auxiliar Presupuestario de
-                                       Gasto</button>
-                                    <button class="dropdown-item" type="button" (click)="opciones(2)">
-                                       <i class="bi-book-half"></i>&nbsp; Cuentas Asociadas</button>
-                                       <button class="dropdown-item" type="button" (click)="opciones(3)">
-                                          <i class="bi-card-list"></i>&nbsp; Datos de la Partida</button>
-                                 </div>
+                           <!-- <span class="input-group-text my-0 py-0"> -->
+                           <div class="btn-group">
+                              <button type="button" class="bg-transparent border-0 bg-info" data-toggle="dropdown"
+                                 aria-expanded="false"><i class="bi-caret-down-square"></i>
+                              </button>
+                              <div class="dropdown-menu dropdown-menu-left roboto bg-info">
+                                 <button class="dropdown-item" type="button" (click)="opciones(1)">
+                                    <i class="bi-receipt"></i>&nbsp; Auxiliar Presupuestario de
+                                    Gasto</button>
+                                 <button class="dropdown-item" type="button" (click)="opciones(2)">
+                                    <i class="bi-book-half"></i>&nbsp; Cuentas Asociadas</button>
+                                 <button class="dropdown-item" type="button" (click)="opciones(3)">
+                                    <i class="bi-bookmark-check-fill"></i>&nbsp; Certificaciones de la Partida</button>
+                                 <button class="dropdown-item" type="button" (click)="opciones(4)">
+                                    <i class="bi-card-list"></i>&nbsp; Datos de la Partida</button>
                               </div>
-                           </span>
+                           </div>
+                           <!-- </span> -->
                            <span class="input-group-text font-weight-bold">Partida</span>
                         </div>
                         <input type="text" class="form-control col-sm-4" formControlName="codpar" readonly

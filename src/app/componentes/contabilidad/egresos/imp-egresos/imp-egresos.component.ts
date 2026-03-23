@@ -139,7 +139,7 @@ export class ImpEgresosComponent implements OnInit {
       this._asientos.forEach(() => {
          sumtotdeb = sumtotdeb + this._asientos[i].totdeb;
          sumtotcre = sumtotcre + this._asientos[i].totcre;
-         datos.push([this._asientos[i].compro, this._asientos[i].asiento,
+         datos.push([ this._asientos[i].compro, this._asientos[i].asiento,
          this._asientos[i].fecha, this._asientos[i].intdoc.nomdoc + ' ' + this._asientos[i].numdoc, formatNumber(this._asientos[i].totdeb),
          formatNumber(this._asientos[i].totcre), this._asientos[i].idbene.nomben, this._asientos[i].glosa]);
          i++;
@@ -147,7 +147,7 @@ export class ImpEgresosComponent implements OnInit {
       datos.push(['', '', '', 'TOTAL', formatNumber(sumtotdeb), formatNumber(sumtotcre)]);
 
       autoTable(doc, {
-         head: [['Egreso', 'Asie', 'Fecha', 'Documento', 'Debito', 'Crédito', 'Beneficiario', 'Descripción']],
+         head: [[ 'Egreso','Asie','Fecha','Documento','Debito','Crédito','Beneficiario','Descripción']],
          theme: 'grid',
          headStyles: { fillColor: [68, 103, 114], fontStyle: 'bold', halign: 'center' },
          styles: { font: 'helvetica', fontSize: 8, cellPadding: 1, halign: 'center' },
@@ -191,25 +191,15 @@ export class ImpEgresosComponent implements OnInit {
 
    muestraPDF(doc: any) {
       var opciones = { filename: this.pdfgenerado };
-      if (this.otrapagina) {
-         const blob = doc.output('blob');
-         const url = URL.createObjectURL(blob);
-         const ventana = window.open(url, '_blank');
-
-         // Libera memoria cuando la ventana se cierre
-         if (ventana) {
-            ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
-         }
-      }
+      if (this.otrapagina) doc.output('dataurlnewwindow', opciones);
       else {
-         const pdfBlob = doc.output('blob');
-         const blobUrl = URL.createObjectURL(pdfBlob);
+         const pdfDataUri = doc.output('datauristring');
          //Si ya existe el <embed> primero lo remueve
          const elementoExistente = document.getElementById('idembed');
          if (elementoExistente) { elementoExistente.remove(); }
          //Crea el <embed>
          var embed = document.createElement('embed');
-         embed.setAttribute('src', blobUrl);
+         embed.setAttribute('src', pdfDataUri);
          embed.setAttribute('type', 'application/pdf');
          embed.setAttribute('width', '70%');
          embed.setAttribute('height', '100%');
@@ -232,10 +222,10 @@ export class ImpEgresosComponent implements OnInit {
       cellD1.font = customStyle.font;
 
       // Fila 2
-      if (this.formImprimir.value.desdeNum != null && this.formImprimir.value.hastaNum != null) {
-         worksheet.addRow(['', '', '', 'Desde el ' + this.formImprimir.value.desdeNum + ' hasta el ' + this.formImprimir.value.hastaNum + ' del ' + this.formImprimir.value.desdeFecha + ' al ' + this.formImprimir.value.hastaFecha]);
-      } else {
-         worksheet.addRow(['', '', '', 'Del ' + this.formImprimir.value.desdeFecha + ' al ' + this.formImprimir.value.hastaFecha]);
+      if( this.formImprimir.value.desdeNum != null && this.formImprimir.value.hastaNum != null ){
+         worksheet.addRow(['', '', '', 'Desde el ' +this.formImprimir.value.desdeNum+' hasta el ' +this.formImprimir.value.hastaNum + ' del ' + this.formImprimir.value.desdeFecha + ' al ' + this.formImprimir.value.hastaFecha]);
+      }else{
+         worksheet.addRow(['', '', '',  'Del ' + this.formImprimir.value.desdeFecha + ' al ' + this.formImprimir.value.hastaFecha]);
       }
       const cellD2 = worksheet.getCell('D2');
       const customStyle2 = { font: { name: 'Times New Roman', bold: true, size: 10, color: { argb: '002060' } } };
@@ -252,8 +242,8 @@ export class ImpEgresosComponent implements OnInit {
       //    cellG3.font = customStyleG3.font;
       // } else worksheet.addRow([]);
 
-      //Fila 3 Cabecera
-      const headerRowCell = worksheet.addRow(['Egreso', 'Asie', 'Fecha', 'Documento', 'Débito', 'Crédito', 'Beneficiario', 'Descripción']);
+      //Fila 3 Cabecera 
+      const headerRowCell = worksheet.addRow(['Egreso','Asie','Fecha','Documento','Débito','Crédito','Beneficiario','Descripción']);
       headerRowCell.eachCell(cell => {
          cell.fill = {
             type: 'pattern',
@@ -269,7 +259,7 @@ export class ImpEgresosComponent implements OnInit {
          let nomben: string;
          if (this._asientos[i].idbene.idbene == 1) nomben = ''
          else nomben = this._asientos[i].idbene.nomben
-         const row = [this._asientos[i].compro, this._asientos[i].asiento, this._asientos[i].fecha,
+         const row = [ this._asientos[i].compro, this._asientos[i].asiento,  this._asientos[i].fecha,
          this._asientos[i].intdoc.nomdoc + ' ' + this._asientos[i].numdoc, this._asientos[i].totdeb, this._asientos[i].totcre, nomben, this._asientos[i].glosa];
          worksheet.addRow(row);
          i++;
@@ -290,14 +280,14 @@ export class ImpEgresosComponent implements OnInit {
          worksheet.getColumn(config.columnIndex).width = config.widthInChars;
       });
 
-      // Columnas centradas
+      // Columnas centradas 
       const columnsToCenter = [1, 2, 3];
       columnsToCenter.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {
             cell.alignment = { vertical: 'middle', horizontal: 'center' };
          });
       });
-      // Columnas a la derecha
+      // Columnas a la derecha 
       let columnsToRigth = [5, 6];
       columnsToRigth.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {

@@ -53,6 +53,7 @@ export class InfoLiquidaComponent implements OnInit {
 	buscar() {
 		this.bxtService.getById(this.idbenxtra).subscribe({
 			next: resp => {
+				// console.log('resp.inttra.idasiento.fecha: ', resp.inttra.idasiento.fecha)
 				let tiptran = funTiptran(resp.inttra.tiptran)
 				this.formMovimiento.patchValue({
 					tiptran: tiptran,
@@ -70,6 +71,7 @@ export class InfoLiquidaComponent implements OnInit {
 	liquida() {
 		this.pagoscobroService.getByIdbenxtra(this.idbenxtra).subscribe({
 			next: datos => {
+				// console.log('datos: ', datos);
 				this._liquida = datos;
 				this.total();
 			},

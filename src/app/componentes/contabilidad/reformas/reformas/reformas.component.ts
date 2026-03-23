@@ -20,7 +20,6 @@ export class ReformasComponent {
    buscarReformas: { desdeNum: number, hastaNum: number, desdeFecha: string, hastaFecha: string }
    today: number = Date.now();
    filtro: string;
-   // elimdisabled = false;
    disabled = false;
    idrefo: number;
    ireforma = {} as iReforma; //Interface para los datos de la Reforma a eliminar
@@ -46,7 +45,7 @@ export class ReformasComponent {
 
       //Datos de búsqueda: últimas Reformas o guardadas
       this.buscarReformas = JSON.parse(sessionStorage.getItem("buscarReformas")!);
-      if (this.buscarReformas == null) this.ultimaReforma();
+      if (this.buscarReformas == null) this.ultima();
       else {
          this.formBuscar.patchValue({
             desdeNum: this.buscarReformas.desdeNum,
@@ -56,32 +55,6 @@ export class ReformasComponent {
          });
          this.buscar();
       }
-
-      // let buscaReformasHasta = '';
-      // let buscaReformasDesde = '';
-      // if (!sessionStorage.getItem("buscaReformasHasta")) {
-      //    this.refoService.ultimaReforma().subscribe({
-      //       next: datos => {
-      //          buscaReformasHasta = datos.numero.toString();
-      //          if (+buscaReformasHasta - 15 < 0) buscaReformasDesde = '1';
-      //          else buscaReformasDesde = (+buscaReformasHasta - 15).toString();
-      //          this.formBuscar.patchValue({
-      //             desde: buscaReformasDesde,
-      //             hasta: buscaReformasHasta,
-      //          });
-      //          this.buscar();
-      //       },
-      //       error: err => console.error('Al buscar la última Reforma: ', err.error)
-      //    });
-      // } else {
-      //    buscaReformasHasta = sessionStorage.getItem("buscaReformasHasta")!;
-      //    buscaReformasDesde = sessionStorage.getItem("buscaReformasDesde")!;
-      //    this.formBuscar.patchValue({
-      //       desde: buscaReformasDesde,
-      //       hasta: buscaReformasHasta,
-      //    });
-      //    this.buscar();
-      // }
    }
 
    colocaColor(colores: any) {
@@ -102,8 +75,8 @@ export class ReformasComponent {
       } catch (error) { console.error(error); }
    }
 
-   ultimaReforma() {
-      this.refoService.ultimaReforma().subscribe({
+   ultima() {
+      this.refoService.ultima().subscribe({
          next: resp => {
             let desde = resp.numero - 16;
             if (desde <= 0) desde = 1;
@@ -122,7 +95,7 @@ export class ReformasComponent {
    busquedainicial() {
       sessionStorage.removeItem('buscarReformas');
       this.swdesdehasta = false;
-      this.ultimaReforma();
+      this.ultima();
    }
 
    buscar() {

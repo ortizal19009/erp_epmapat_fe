@@ -60,7 +60,7 @@ export class EstEjecucionPreComponent implements OnInit {
       let coloresJSON = sessionStorage.getItem('/ejecupresup');
       if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
       else this.buscaColor();
-
+      
       const fecha = new Date();
       const año = fecha.getFullYear()
       this.formBuscar = this.fb.group({
@@ -156,15 +156,15 @@ export class EstEjecucionPreComponent implements OnInit {
    totalCodpar(): Promise<number> {
       return new Promise((resolve, reject) => {
          this.presupueService.getTotalCodpar(this.tippar, this.asodebe).subscribe({
-            next: datos => {
-               // Resolvemos la promesa con el valor de datos
-               resolve(datos);
-               //   console.log('total:', datos);
-            },
-            error: err => {
-               // Rechazamos la promesa con el error
-               reject(err);
-            }
+           next: datos => {
+             // Resolvemos la promesa con el valor de datos
+             resolve(datos);
+             //   console.log('total:', datos);
+           },
+           error: err => {
+             // Rechazamos la promesa con el error
+             reject(err);
+           }
          });
       });
    }
@@ -265,7 +265,7 @@ export class EstEjecucionPreComponent implements OnInit {
          next: resp => {
             this._cuentas = resp.filter(data => (data.asodebe != null && data.asohaber != null) && (data.asodebe.length === 2 || data.asohaber.length === 2));
          },
-         error: err => console.error(err.error)
+         error: err => console.log(err.error)
       });
    }
 
@@ -274,6 +274,7 @@ export class EstEjecucionPreComponent implements OnInit {
    };
 
    pdf() {
+      console.log('pdf', this.arreglo1)
       const nombreEmision = new NombreAuxiliarPipe(); // Crea una instancia del pipe
       let m_izquierda = 20;
       var doc = new jsPDF({});
@@ -334,25 +335,15 @@ export class EstEjecucionPreComponent implements OnInit {
 
       };
 
-      if (this.otraPagina) {
-         const blob = doc.output('blob');
-         const url = URL.createObjectURL(blob);
-         const ventana = window.open(url, '_blank');
-
-         // Libera memoria cuando la ventana se cierre
-         if (ventana) {
-            ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
-         }
-      }
+      if (this.otraPagina) doc.output('dataurlnewwindow', opciones);
       else {
-         const pdfBlob = doc.output('blob');
-         const blobUrl = URL.createObjectURL(pdfBlob);
+         const pdfDataUri = doc.output('datauristring');
          //Si ya existe el <embed> primero lo remueve
          const elementoExistente = document.getElementById('idembed');
          if (elementoExistente) { elementoExistente.remove(); }
          //Crea el <embed>
          var embed = document.createElement('embed');
-         embed.setAttribute('src', blobUrl);
+         embed.setAttribute('src', pdfDataUri);
          embed.setAttribute('type', 'application/pdf');
          embed.setAttribute('width', '75%');
          embed.setAttribute('height', '100%');
@@ -414,14 +405,14 @@ export class EstEjecucionPreComponent implements OnInit {
          worksheet.getColumn(config.columnIndex).width = config.widthInChars;
       });
 
-      // Columnas centradas
+      // Columnas centradas 
       const columnsToCenter = [2];
       columnsToCenter.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {
             cell.alignment = { vertical: 'middle', horizontal: 'center' };
          });
       });
-      // Columnas a la derecha
+      // Columnas a la derecha 
       let columnsToRigth = [2];
       columnsToRigth.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {

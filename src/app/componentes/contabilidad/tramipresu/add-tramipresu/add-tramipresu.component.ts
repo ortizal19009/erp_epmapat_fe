@@ -25,7 +25,7 @@ export class AddTramipresuComponent implements OnInit {
 
    documento: Documentos = new Documentos;
    beneficiario: Beneficiarios = new Beneficiarios;
-
+   
    constructor(
       private s_documentos: DocumentosService, private fb: FormBuilder, private router: Router,
       public authService: AutorizaService, private tramiService: TramipresuService, private beneService: BeneficiariosService) { }
@@ -43,9 +43,9 @@ export class AddTramipresuComponent implements OnInit {
          fecdoc: ['', Validators.required],
          totmiso: 0,
          idbene: ['', [Validators.required], [this.valBenefi.bind(this)] ],
-         descripcion: '',
+         descri: '',
          swreinte: 0,
-         usucrea: 1,
+         usucrea: this.authService.idusuario,
          feccrea: this.date
       },
          { updateOn: "blur" });
@@ -67,11 +67,11 @@ export class AddTramipresuComponent implements OnInit {
 
    setValores() {
       this.tramiService.ultimoTramipresu().subscribe({
-         next: datos => {
+         next: resp => {
             this.formTramipresu.patchValue({
-               numero: +datos.numero! + 1,
-               fecha: datos.fecha,
-               fecdoc: datos.fecha,
+               numero: +resp.numero! + 1,
+               fecha: resp.fecha,
+               fecdoc: resp.fecha,
             });
          },
          error: err => console.error(err.error),
@@ -110,7 +110,20 @@ export class AddTramipresuComponent implements OnInit {
       this.formTramipresu.value.idbene = this.beneficiario;
 
       this.tramiService.saveTramipresu(this.formTramipresu.value).subscribe({
-         next: datos => this.router.navigate(['tramipresu']),
+         next: () => {
+            //Actualiza los datos de búsqueda para que se muestre en la lista de Trámites
+            let buscaDesdeNum = this.f['numero'].value - 16;
+            if (buscaDesdeNum <= 0) buscaDesdeNum = 1;
+            let year = new Date(this.f['fecha'].value).getFullYear(); // Extraer el año de la fecha 
+            const buscarTramipresu = {
+               desdeNum: buscaDesdeNum,
+               hastaNum: this.f['numero'].value,
+               desdeFecha: year.toString() + "-01-01",
+               hastaFecha: year.toString() + "-12-31",
+            };
+            sessionStorage.setItem("buscarTramipresu", JSON.stringify(buscarTramipresu));
+            this.regresar();
+         },
          error: err => console.error(err.error),
       });
    }
@@ -127,6 +140,7 @@ export class AddTramipresuComponent implements OnInit {
    //Valida periodo
    valFecha(control: AbstractControl) {
       // let anio  = control.value.slice(0,4)
+      // console.log('fecha en valFecha: ', fecha )
       if ( control.value.slice(0,4)  != 2024) return of({ 'invalido': true });
       else return of(null);
    }

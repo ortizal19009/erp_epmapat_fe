@@ -77,7 +77,7 @@ export class ImpCuentasComponent implements OnInit {
    async imprimir() {
       this.swbotones = true;
       this.swcalculando = true;
-      let fecha = this.formImprimir.value.fecha;
+      // let fecha = this.formImprimir.value.fecha;
       switch (this.opcreporte) {
          case 1:  //Lista de cuentas
             try {
@@ -98,6 +98,7 @@ export class ImpCuentasComponent implements OnInit {
                this._cuentas = await this.cueService.getByCodigoyNombreAsync(codcue, nomcue);
                // let i = 0
                this.saldos(0);
+               // console.log('Después de this.saldos(i)')
                // this.swcalculando = false;
                // if (this.swimprimir) this.txtcalculando = 'Mostrar'
                // else this.txtcalculando = 'Descargar'
@@ -283,25 +284,15 @@ export class ImpCuentasComponent implements OnInit {
 
    muestraPDF(doc: any) {
       var opciones = { filename: this.pdfgenerado };
-      if (this.otrapagina) {
-         const blob = doc.output('blob');
-         const url = URL.createObjectURL(blob);
-         const ventana = window.open(url, '_blank');
-
-         // Libera memoria cuando la ventana se cierre
-         if (ventana) {
-            ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
-         }
-      }
+      if (this.otrapagina) doc.output('dataurlnewwindow', opciones);
       else {
-         const pdfBlob = doc.output('blob');
-         const blobUrl = URL.createObjectURL(pdfBlob);
+         const pdfDataUri = doc.output('datauristring');
          //Si ya existe el <embed> primero lo remueve
          const elementoExistente = document.getElementById('idembed');
          if (elementoExistente) { elementoExistente.remove(); }
          //Crea el <embed>
          var embed = document.createElement('embed');
-         embed.setAttribute('src', blobUrl);
+         embed.setAttribute('src', pdfDataUri);
          embed.setAttribute('type', 'application/pdf');
          embed.setAttribute('width', '70%');
          embed.setAttribute('height', '100%');
@@ -325,7 +316,7 @@ export class ImpCuentasComponent implements OnInit {
       worksheet.addRow([]);
       // worksheet.getCell('B2').font = { name: 'Times New Roman', bold: true, size: 16, color: { argb: '001060' } };
 
-      //Fila 3 Cabecera
+      //Fila 3 Cabecera 
       const headerRowCell = worksheet.addRow(['Código', 'Nombre', 'Grupo', 'Movi', 'Sigef', 'Tipo', 'Aso.Debe', 'Aso.Haber']);
       headerRowCell.eachCell(cell => {
          cell.fill = {
@@ -363,7 +354,7 @@ export class ImpCuentasComponent implements OnInit {
          worksheet.getColumn(config.columnIndex).width = config.widthInChars;
       });
 
-      // Columnas centradas
+      // Columnas centradas 
       const columnsToCenter = [4, 5, 6];
       columnsToCenter.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {
@@ -400,7 +391,7 @@ export class ImpCuentasComponent implements OnInit {
       worksheet.addRow(['', 'Del ' + this.formImprimir.value.desde + ' al ' + this.formImprimir.value.hasta]);
       worksheet.getCell('B2').style = { font: { name: 'Times New Roman', bold: true, size: 10, color: { argb: '002060' } } };
 
-      //Fila 3 Cabecera
+      //Fila 3 Cabecera 
       const cabecera = worksheet.addRow(['Código', 'Nombre', 'Débitos', 'Créditos', 'Saldo']);
       cabecera.eachCell(celda => {
          celda.style = { fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: '002060' } }, font: { bold: true, name: 'Times New Roman', color: { argb: 'FFFFFF' } } }

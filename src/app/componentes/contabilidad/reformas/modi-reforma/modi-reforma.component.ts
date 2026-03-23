@@ -12,6 +12,7 @@ import { DocumentosService } from 'src/app/servicios/administracion/documentos.s
    styleUrls: ['./modi-reforma.component.css']
 })
 
+
 export class ModiReformaComponent implements OnInit {
    formReforma: any;
    disabled = false;
@@ -63,7 +64,7 @@ export class ModiReformaComponent implements OnInit {
    listarDocumentos() {
       this.documentosService.getListaDocumentos().subscribe({
          next: resp => this._documentos = resp,
-         error: err => console.error(err.error)
+         error: err => console.log(err.error)
       });
    }
 
@@ -85,7 +86,7 @@ export class ModiReformaComponent implements OnInit {
                fecmodi: datos.fecmodi,
             })
          },
-         error: err => console.error(err.msg.error)
+         error: err => console.log(err.msg.error)
       });
    }
 

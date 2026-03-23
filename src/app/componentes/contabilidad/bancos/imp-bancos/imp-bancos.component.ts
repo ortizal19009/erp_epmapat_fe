@@ -142,6 +142,7 @@ export class ImpBancosComponent implements OnInit {
          case 2:  //Conciliación
             try {
                this._conciliacion = await this.conciService.getByIdcuentaMesAsync(+this.formBancos.value.idcuenta, +this.formBancos.value.mes!);
+               console.log('this._conciliacion: ', this._conciliacion)
                this.swcalculando = false;
                if (this.swimprimir) this.txtcalculando = 'Mostrar'
                else this.txtcalculando = 'Descargar'
@@ -285,7 +286,7 @@ export class ImpBancosComponent implements OnInit {
       doc.setFont("times", "normal"); doc.setFontSize(11); doc.text(formatNumber(this._conciliacion.libdepositos), m_izquierda + 84, 76, { align: 'right' });
       doc.setFont("times", "normal"); doc.setFontSize(11); doc.text(formatNumber(this._conciliacion.libcheques), m_izquierda + 84, 82, { align: 'right' });
       doc.setFont("times", "normal"); doc.setFontSize(11); doc.text(formatNumber(this._conciliacion.liberrores), m_izquierda + 84, 88, { align: 'right' });
-      doc.setFont("times", "bold"); doc.setFontSize(11); doc.text(formatNumber(this._conciliacion.libinicial + this._conciliacion.libdebitos - this._conciliacion.libcreditos - this._conciliacion.libdepositos + this._conciliacion.libcheques + this._conciliacion.liberrores), m_izquierda + 84, 104, { align: 'right' });
+      doc.setFont("times", "bold"); doc.setFontSize(11); doc.text(formatNumber(this._conciliacion.libinicial + this._conciliacion.libdebitos - this._conciliacion.libcreditos - this._conciliacion.libdepositos + this._conciliacion.libcheques + this._conciliacion.liberrores ), m_izquierda + 84, 104, { align: 'right' });
 
       doc.setFont("times", "bold"); doc.setFontSize(11); doc.text("ESTADO DE CUENTA DEL BANCO", m_izquierda + 110, 36);
       doc.setFont("times", "bold"); doc.setFontSize(11); doc.text("Inicial ", m_izquierda + 110, 44);
@@ -302,10 +303,10 @@ export class ImpBancosComponent implements OnInit {
       doc.setFont("times", "normal"); doc.setFontSize(11); doc.text(formatNumber(this._conciliacion.bandebitos), m_izquierda + 164, 56, { align: 'right' });
       doc.setFont("times", "bold"); doc.setFontSize(11); doc.text(formatNumber(this._conciliacion.baninicial + this._conciliacion.bancreditos - this._conciliacion.bandebitos), m_izquierda + 164, 62, { align: 'right' });
       doc.setFont("times", "normal"); doc.setFontSize(11); doc.text(formatNumber(this._conciliacion.bancheaa), m_izquierda + 184, 76, { align: 'right' });
-      doc.setFont("times", "normal"); doc.setFontSize(11); doc.text(formatNumber(this._conciliacion.bannd), m_izquierda + 184, 82, { align: 'right' });
-      doc.setFont("times", "normal"); doc.setFontSize(11); doc.text(formatNumber(this._conciliacion.bannc), m_izquierda + 184, 88, { align: 'right' });
-      doc.setFont("times", "normal"); doc.setFontSize(11); doc.text(formatNumber(this._conciliacion.banerrores), m_izquierda + 184, 94, { align: 'right' });
-      doc.setFont("times", "bold"); doc.setFontSize(11); doc.text(formatNumber(this._conciliacion.baninicial + this._conciliacion.bancreditos - this._conciliacion.bandebitos - this._conciliacion.bancheaa - this._conciliacion.bannd + this._conciliacion.bannc + this._conciliacion.banerrores), m_izquierda + 184, 104, { align: 'right' });
+      doc.setFont("times", "normal"); doc.setFontSize(11); doc.text(formatNumber(this._conciliacion.bannd ), m_izquierda + 184, 82, { align: 'right' });
+      doc.setFont("times", "normal"); doc.setFontSize(11); doc.text(formatNumber(this._conciliacion.bannc ), m_izquierda + 184, 88, { align: 'right' });
+      doc.setFont("times", "normal"); doc.setFontSize(11); doc.text(formatNumber(this._conciliacion.banerrores ), m_izquierda + 184, 94, { align: 'right' });
+      doc.setFont("times", "bold"); doc.setFontSize(11); doc.text(formatNumber(this._conciliacion.baninicial + this._conciliacion.bancreditos - this._conciliacion.bandebitos - this._conciliacion.bancheaa - this._conciliacion.bannd + this._conciliacion.bannc + this._conciliacion.banerrores ), m_izquierda + 184, 104, { align: 'right' });
       let diferencia = (this._conciliacion.libinicial + this._conciliacion.libdebitos - this._conciliacion.libcreditos - this._conciliacion.libdepositos + this._conciliacion.libcheques + this._conciliacion.liberrores) - (this._conciliacion.libinicial + this._conciliacion.libdebitos - this._conciliacion.libcreditos - this._conciliacion.libdepositos + this._conciliacion.libcheques + this._conciliacion.liberrores)
       doc.setFont("times", "normal"); doc.setFontSize(11); doc.text(formatNumber(diferencia), m_izquierda + 84, 110, { align: 'right' });
 
@@ -314,25 +315,15 @@ export class ImpBancosComponent implements OnInit {
 
    muestraPDF(doc: any) {
       var opciones = { filename: this.pdfgenerado };
-      if (this.otrapagina) {
-         const blob = doc.output('blob');
-         const url = URL.createObjectURL(blob);
-         const ventana = window.open(url, '_blank');
-
-         // Libera memoria cuando la ventana se cierre
-         if (ventana) {
-            ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
-         }
-      }
+      if (this.otrapagina) doc.output('dataurlnewwindow', opciones);
       else {
-         const pdfBlob = doc.output('blob');
-         const blobUrl = URL.createObjectURL(pdfBlob);
+         const pdfDataUri = doc.output('datauristring');
          //Si ya existe el <embed> primero lo remueve
          const elementoExistente = document.getElementById('idembed');
          if (elementoExistente) { elementoExistente.remove(); }
          //Crea el <embed>
          var embed = document.createElement('embed');
-         embed.setAttribute('src', blobUrl);
+         embed.setAttribute('src', pdfDataUri);
          embed.setAttribute('type', 'application/pdf');
          embed.setAttribute('width', '70%');
          embed.setAttribute('height', '100%');
@@ -362,7 +353,7 @@ export class ImpBancosComponent implements OnInit {
       cellD2.font = customStyle2.font;
 
       let filatit = 3
-      //Fila 3 Cabecera
+      //Fila 3 Cabecera 
       const headerRowCell = worksheet.addRow(['Fecha', 'Asie', 'Cmprbnt', 'Documento', 'C', 'M', 'Débito', 'Crédito', 'Beneficiario', 'Concepto']);
       headerRowCell.eachCell(cell => {
          cell.fill = {
@@ -403,14 +394,14 @@ export class ImpBancosComponent implements OnInit {
          worksheet.getColumn(config.columnIndex).width = config.widthInChars;
       });
 
-      // Columnas centradas
+      // Columnas centradas 
       const columnsToCenter = [1, 2, 3, 5, 6];
       columnsToCenter.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {
             cell.alignment = { vertical: 'middle', horizontal: 'center' };
          });
       });
-      // Columnas a la derecha
+      // Columnas a la derecha 
       let columnsToRigth = [7, 8];
       columnsToRigth.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {

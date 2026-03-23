@@ -5,33 +5,33 @@
             <div class="row p-0">
                <div class="input-group input-group-sm col-sm-3 mb-1 ml-0">
                   <div class="input-group-prepend">
-                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Asiento</span>
+                     <label class="input-group-text" id="inputGroup-sizing-sm">Asiento</label>
                   </div>
                   <input type="text" class="form-control text-center" aria-label="Sizing example input"
-                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.asiento" readonly>
+                     aria-describedby="inputGroup-sizing-sm" [value]="iAsiento.asiento" readonly tabindex="-1">
                   <input type="text" class="form-control text-center" aria-label="Sizing example input"
-                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.comprobante" readonly>
+                     aria-describedby="inputGroup-sizing-sm" [value]="iAsiento.comprobante" readonly tabindex="-1">
                </div>
                <div class="input-group input-group-sm col-sm-2 mb-1 mr-0 ">
                   <div class="input-group-prepend">
-                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Fecha</span>
+                     <label class="input-group-text" id="inputGroup-sizing-sm">Fecha</label>
                   </div>
                   <input type="text" class="form-control text-center" aria-label="Sizing example input"
-                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.fecha" readonly>
+                     aria-describedby="inputGroup-sizing-sm" [value]="iAsiento.fecha" readonly tabindex="-1">
                </div>
                <div class="input-group input-group-sm col-sm-2 mb-1 ml-0">
                   <div class="input-group-prepend">
-                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Doc</span>
+                     <label class="input-group-text" id="inputGroup-sizing-sm">Doc</label>
                   </div>
                   <input type="text" class="form-control" aria-label="Sizing example input"
-                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.documento" readonly>
+                     aria-describedby="inputGroup-sizing-sm" [value]="iAsiento.documento" readonly tabindex="-1">
                </div>
                <div class="input-group input-group-sm col-sm-5 mb-1 ml-0">
                   <div class="input-group-prepend">
-                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Beneficiario</span>
+                     <label class="input-group-text" id="inputGroup-sizing-sm">Beneficiario</label>
                   </div>
                   <input type="text" class="form-control" aria-label="Sizing example input"
-                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.benefi" readonly>
+                     aria-describedby="inputGroup-sizing-sm" [value]="iAsiento.benefi" readonly tabindex="-1">
                </div>
             </div>
          </div>
@@ -43,55 +43,73 @@
    <div class="container-fluid">
       <div class="row">
          <div class="col-sm-12 mt-0">
-            <div class="card card-body sombra detalle pt-0">
+            <div class="card card-body sombra detalle pt-0 px-2">
                <form [formGroup]="formTransaci" class="pt-1">
-                  <h5 class="font-weight-bold text-center cabecera border mt-0 py-1">Registro de Anticipo(s)</h5>
+                  <h5 class="font-weight-bold text-center cabecera border mt-0 py-1">{{tiptran.nombre}}</h5>
                   <div class="row">
 
                      <div class="form-group col-md-2 mb-1">
                         <div class="input-group input-group-sm">
                            <div class="input-group-prepend">
-                              <label class="input-group-text" for="orden">Orden</label>
+                              <label class="input-group-text" for="orden">Orden<sup class="green">*</sup></label>
                            </div>
                            <input type="number" class="form-control text-center" formControlName="orden"
-                              aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+                              aria-label="Small" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['orden'].invalid && f['orden'].touched,
+                           'is-valid': f['orden'].valid, '': f['orden'].untouched}">
+                        </div>
+                        <div *ngIf="authService.msgval && f['orden'].errors && f['orden'].touched">
+                           <div *ngIf="f['orden'].errors['required']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> Orden obligatorio
+                           </div>
                         </div>
                      </div>
 
                      <div class="form-group col-md-8 mb-1">
                         <div class="input-group input-group-sm">
                            <div class="input-group-prepend">
-                              <label class="input-group-text" for="fecha">Cuenta</label>
+                              <label class="input-group-text" for="fecha">Cuenta<sup class="green">*</sup></label>
                            </div>
                            <input type="text" class="form-control form-control-sm col-3" formControlName="idcuenta"
                               list="cuentasList" (input)="onCuentaSelected($event); cuentasxTiptran($event)" [ngClass]="{'is-invalid': f['idcuenta'].invalid && f['idcuenta'].touched,
                            'is-valid': f['idcuenta'].valid, '': f['idcuenta'].untouched}" [type]="'text'">
                            <datalist role="listbox" id="cuentasList">
-                              <option *ngFor="let cuenta of _cuentas" value={{cuenta.codcue}}>
+                              <option *ngFor="let cuenta of cuentas" value={{cuenta.codcue}}>
                                  {{ cuenta.nomcue}}</option>
                            </datalist>
                            <input type="text" class="form-control" formControlName="nomcue" aria-label="Small"
-                              aria-describedby="inputGroup-sizing-sm" readonly>
+                              aria-describedby="inputGroup-sizing-sm" readonly tabindex="-1">
+                        </div>
+                        <div *ngIf="authService.msgval && f['idcuenta'].errors && f['idcuenta'].touched">
+                           <div *ngIf="f['idcuenta'].errors['required']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> La Cuenta es obligatoria
+                           </div>
+                           <div *ngIf="f['idcuenta'].errors['invalido']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> No ha seleccionado una Cuenta
+                           </div>
                         </div>
                      </div>
 
                      <div class="form-group col-md-2 mb-1">
                         <div class="input-group mb-1 input-group-sm">
                            <div class="input-group-prepend">
-                              <label class="input-group-text">Debe</label>
+                              <label class="input-group-text">{{nomDebcre}}<sup class="green">*</sup></label>
                            </div>
                            <input type="text" class="form-control text-right" formControlName="valor" aria-label="Small"
-                              aria-describedby="inputGroup-sizing-sm" readonly>
+                              aria-describedby="inputGroup-sizing-sm" appVisualFormat [minDecimals]="2"
+                              [maxDecimals]="2" readonly tabindex="-1">
                         </div>
                      </div>
 
                      <div class="form-group col-md-4 mb-1">
                         <div class="input-group input-group-sm">
                            <div class="input-group-prepend">
-                              <label class="input-group-text">Documento</label>
+                              <label class="input-group-text">Documento<sup class="green">*</sup></label>
                            </div>
                            <select type="text" class="custom-select" formControlName="intdoc">
-                              <option *ngFor="let documento of _documentos" [ngValue]="documento.intdoc"> {{
+                              <option *ngFor="let documento of documentos" [ngValue]="documento.intdoc"> {{
                                  documento.nomdoc }}
                               </option>
                            </select>
@@ -99,7 +117,38 @@
                               [ngClass]="{'is-invalid': f['numdoc'].invalid && f['numdoc'].touched,
                                        'is-valid': f['numdoc'].valid, '': f['numdoc'].untouched}">
                         </div>
+                        <div *ngIf="authService.msgval && f['numdoc'].errors && f['numdoc'].touched">
+                           <div *ngIf="f['numdoc'].errors['required']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> El Número de Documento es obligatorio
+                           </div>
+                        </div>
                      </div>
+
+                     <!-- <div *ngIf="tiptran.numero == 3 || tiptran.numero == 6" class="form-group col-md-8 mb-2">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Partida para Cobro<sup class="green">*</sup></label>
+                           </div>
+                           <input type="text" class="form-control col-md-5" formControlName="codpar" readonly
+                              tabindex="-1">
+
+                           <div class="btn-group py-0" *ngIf="ejecuciones">
+                              <button type="button" class="btn btn-info btn-xs dropdown-toggle py-0"
+                                 data-toggle="dropdown" aria-expanded="false">
+                              </button>
+                              <div class="dropdown-menu dropdown-menu-right bg-info">
+                                 <button class="dropdown-item" type="button" *ngFor="let ejecu of ejecuciones"
+                                    (click)="changePartida(ejecu)">
+                                    {{ ejecu.intpre.codpar }} {{ ejecu.intpre.nompar }}
+                                 </button>
+                              </div>
+                           </div>
+
+                           <input type="text" class="form-control robotosmall" formControlName="nompar" readonly
+                              tabindex="-1">
+                        </div>
+                     </div> -->
 
                      <div class="form-group col-md-8 mb-2">
                         <div class="input-group input-group-sm">
@@ -118,112 +167,134 @@
                      <button type="button" class="btn btn-outline-success btn-sm mx-1" (click)="regresar()"><i
                            class="fa fa-times-circle"></i> Cancelar
                      </button>
-                     <button type="button" class="btn btn-success btn-sm mx-1 small" (click)="aniadir()"><i
-                           class="bi-plus-circle"></i> Beneficiarios
-                     </button>
                   </div>
-               </form>
-               <!-- <div class="row mt-2">
-                  <table class="table table-hover table-bordered table-sm" [formGroup]="formBenextran">
-                     <thead class="text-center cabecera">
-                        <tr>
-                           <th class="py-0"></th>
-                           <th class="py-0">Beneficiario</th>
-                           <th class="py-0">Documento</th>
-                           <th class="py-0"># Doc</th>
-                           <th class="py-0">Anticipo</th>
-                           <th class="py-0">Liquidado</th>
-                           <th class="py-0">Saldo</th>
+
+                  <div *ngIf="idcuenta" class="row justify-content-center mt-2">
+                     <div class="col-md-7">
+                        <form [formGroup]="formBenextran">
+                           <table class="table table-hover table-bordered table-sm sombra mb-0">
+                              <thead>
+                                 <tr class="pad0 cabecera">
+                                    <th class="col-md-8 fantacyblack">Beneficiario<sup>*</sup></th>
+                                    <th class="col-md-4 text-right fantacyblack">
+                                       {{tiptran.cabecera1}}<sup>*</sup>&nbsp;&nbsp;</th>
+                                    <th class="text-center fantacyblack"><i class="bi-plus-circle-fill"
+                                          data-toggle="tooltip" title="Nuevo" (click)="agregarFila()"></i></th>
+                                 </tr>
+                              </thead>
+                              <tbody formArrayName="registros">
+                                 <tr class="pad0" *ngFor="let fila of registros.controls; let i = index"
+                                    [formGroupName]="i">
+                                    <td>
+                                       <input type="text" class="form-control form-control-sm"
+                                          formControlName="beneficiario" [attr.list]="'beneficiariosList' + i"
+                                          (input)="onBenefiSelected(i, $event); benefixNombre(i, $event)"
+                                          [ngClass]="{'is-invalid': fila.get('beneficiario')?.invalid && fila.get('beneficiario')?.touched,'is-valid': fila.get('beneficiario')?.valid}" />
+                                       <datalist role="listbox" [id]="'beneficiariosList' + i">
+                                          <option *ngFor="let bene of arrBeneficiarios[i]" [value]="bene.nomben">
+                                             {{ bene.idgrupo.nomgru }}
+                                          </option>
+                                       </datalist>
+                                       <div
+                                          *ngIf="authService.msgval && registros.at(i).get('beneficiario')?.invalid && registros.at(i).get('beneficiario')?.touched">
+                                          <div *ngIf="registros.at(i).get('beneficiario')?.errors?.['required']"
+                                             class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border"
+                                             role="alert">
+                                             <strong>Ups!</strong> El Beneficiario es obligatorio
+                                          </div>
+                                          <div *ngIf="registros.at(i).get('beneficiario')?.errors?.['invalido']"
+                                             class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border"
+                                             role="alert">
+                                             <strong>Ups!</strong> No ha seleccionado un Beneficiario
+                                          </div>
+                                       </div>
+                                    </td>
+
+                                    <td>
+                                       <input type="text" class="form-control form-control-sm text-right"
+                                          formControlName="valor" appVisualFormat [minDecimals]="2" [maxDecimals]="2"
+                                          (blur)="changeValor()" (focus)="seleccionarTexto($event)"
+                                          [readonly]="arrIdbeneficiario[i]! == null"
+                                          [ngClass]="{'is-invalid': fila.get('valor')?.invalid && fila.get('valor')?.touched,'is-valid': fila.get('valor')?.valid}">
+                                       <div
+                                          *ngIf="authService.msgval && registros.at(i).get('valor')?.invalid && registros.at(i).get('valor')?.touched">
+                                          <div *ngIf="registros.at(i).get('valor')?.errors?.['required']"
+                                             class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border"
+                                             role="alert">
+                                             <strong>Ups!</strong> El Valor es obligatorio
+                                          </div>
+                                          <div *ngIf="registros.at(i).get('valor')?.errors?.['min']"
+                                             class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border"
+                                             role="alert">
+                                             <strong>Ups!</strong> No puede ser negativo
+                                          </div>
+                                       </div>
+                                    </td>
+
+                                    <td><button type="button" class="btn btn-sm text-center" (click)="eliminarFila(i)">
+                                          <i class="bi-x-circle-fill text-danger" data-toggle="tooltip"
+                                             title="Quitar"></i></button>
+                                    </td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </form>
+                     </div>
+                  </div>
+
+                  <!-- Cabecera de benextran -->
+                  <!-- <table *ngIf="idcuenta" class="table table-hover table-bordered table-sm my-1">
+                     <thead>
+                        <tr class="pad0">
+                           <th class="col-md-3 text-center fantacyblack">Beneficiario<sup>*</sup></th>
+                           <th class="col-md-2 text-right fantacyblack">
+                              {{tiptran.cabecera1}}<sup>*</sup>&nbsp;&nbsp;&nbsp;</th>
+                           <th class="text-center">
+                              <i class="bi-plus-circle-fill fantacyblack" data-toggle="tooltip" title="Nuevo"
+                                 (click)="addBenextran()"></i>
+                           </th>
                         </tr>
                      </thead>
-                     <tbody class="detalle">
-                        <tr *ngFor="let item of formArrayControls; let i = index" [formGroup]="item">
-                           <td>{{ uniqueIdCounter }}</td>
+                  </table> -->
 
-                           <td class="col-sm-2">
-                              <select type="text" class="custom-select custom-select-sm" formControlName="intdoc">
-                                 <option [ngValue]="documento" *ngFor="let documento of _documentos"
-                                    [ngValue]="documento.intdoc"> {{ documento.nomdoc }}
-                                 </option>
-                              </select>
-                           </td>
-                           <td>
-                              <input type="text" class="form-control form-control-sm text-center"
-                                 formControlName="numdoc"
-                                 [ngClass]="{'is-valid': f1(uniqueIdCounter) && f1(uniqueIdCounter)?.get('numdoc')!.valid && (f1(uniqueIdCounter)?.get('numdoc')!.dirty || f1(uniqueIdCounter)?.get('numdoc')!.touched),
-                                 'is-invalid': f1(uniqueIdCounter) && f1(uniqueIdCounter)?.get('numdoc')!.invalid && (f1(uniqueIdCounter)?.get('numdoc')!.dirty || f1(uniqueIdCounter)?.get('numdoc')!.touched)}">
+                  <!-- <div formArrayName="benextran">
+                     <div *ngFor="let bxt of benextran.controls; let i = index" [formGroupName]="i">
+                        <div class="form-row mb-1">
 
-                           </td>
-                           <td>
+                           <div class="form-group col-md-3 my-0 py-0">
+                              <div class="input-group flex-nowrap input-group-sm">
+                                 <input type="text" class="form-control form-control-sm" formControlName="idbene"
+                                    [attr.list]="'beneficiariosList' + i"
+                                    (input)="onBenefiSelected(i, $event); benefixNombre(i, $event)" [ngClass]="{'is-invalid': benextran.controls[i].get('idbene')?.invalid && benextran.controls[i].get('idbene')?.touched, 'is-valid': benextran.controls[i].get('idbene')?.valid,
+                      '': benextran.controls[i].get('idbene')?.untouched}">
+                                 <datalist role="listbox" id="beneficiariosList{{ i }}">
+                                    <option *ngFor="let beneficiario of arrBeneficiarios[i]"
+                                       value={{beneficiario.nomben}}>
+                                       {{ beneficiario.idgrupo.nomgru}}</option>
+                                 </datalist>
+                              </div>
+                           </div>
+
+                           <div class="col-md-2">
                               <input type="text" class="form-control form-control-sm text-right" formControlName="valor"
-                                 (change)="changeValor()">
-                           </td>
-                           <td>
-                              <input type="text" class="form-control form-control-sm text-right"
-                                 formControlName="totpagcob" readonly>
-                           </td>
-                           <td>
-                              <input type="text" class="form-control form-control-sm text-right" formControlName="saldo"
-                                 readonly>
-                           </td>
-                        </tr>
-                     </tbody>
-                  </table>
-               </div> -->
+                                 appVisualFormat [minDecimals]="2" [maxDecimals]="2" (blur)="changeValor()"
+                                 [ngClass]="{'is-invalid': benextran.controls[i].get('valor')?.invalid && benextran.controls[i].get('valor')?.touched, 'is-valid': benextran.controls[i].get('valor')?.valid,'': benextran.controls[i].get('valor')?.untouched}">
+                           </div>
+
+                           <div class="col-md-1 text-center">
+                              <button type="button" class="btn btn-sm text-center" (click)="eliminaBenextran(i)"><i
+                                    class="bi-x-circle-fill text-danger" data-toggle="tooltip"
+                                    title="Quitar"></i></button>
+                           </div>
+
+                        </div>
+                     </div>
+
+                  </div> -->
+               </form>
+
             </div>
          </div>
       </div>
    </div>
 </div>
-
-<!-- <div class="container" style="margin-top: 50px;">
-   <form [formGroup]="formBene" (ngSubmit)="onSubmit()">
-      <table class="table">
-         <thead class="cabecera">
-            <tr>
-               <th scope="col">#</th>
-               <th class="py-0">Beneficiario</th>
-               <th scope="col">Documento</th>
-               <th scope="col"># Doc</th>
-               <th scope="col">Anticipo</th>
-               <th scope="col">Liquidado</th>
-               <th scope="col">Saldo</th>
-            </tr>
-         </thead>
-         <tbody formArrayName="campos">
-            <tr *ngFor="let grupo of getCampos().controls; let i = index" [formGroupName]="i">
-               <th scope="row">{{i + 1}}</th>
-               <td class="col-sm-4">
-                  <input type="text" class="form-control form-control-sm" formControlName="idbene"
-                     list="benList" (input)="onBeneSelected($event, i); benefixNombre($event)" [ngClass]="{'is-valid': grupo.get('idbene')?.valid && grupo.get('idbene')?.touched, 'is-invalid': !grupo.get('idbene')?.valid && grupo.get('idbene')?.touched}">
-                  <datalist role="listbox" id="benList">
-                     <option *ngFor="let beneficiario of _beneficiarios" value={{beneficiario.nomben}}>
-                     </option>
-                  </datalist>
-               </td>
-               <td>
-                  <select type="text" class="custom-select custom-select-sm" formControlName="intdoc">
-                     <option [ngValue]="documento" *ngFor="let documento of _documentos"
-                        [ngValue]="documento.intdoc"> {{ documento.nomdoc }}
-                     </option>
-                  </select>
-               </td>
-               <td>
-                  <input type="text" class="form-control" formControlName="numdoc"
-                     [ngClass]="{'is-valid': grupo.get('numdoc')?.valid && grupo.get('numdoc')?.touched, 'is-invalid': !grupo.get('numdoc')?.valid && grupo.get('numdoc')?.touched}">
-               </td>
-               <td>
-                  <input type="text" class="form-control" formControlName="valor"
-                     [ngClass]="{'is-valid': grupo.get('valor')?.valid && grupo.get('valor')?.touched, 'is-invalid': !grupo.get('valor')?.valid && grupo.get('valor')?.touched}">
-               </td>
-               <td>
-                  <input type="text" class="form-control" formControlName="totpagcob" readonly>
-               </td>
-               <td>
-                  <input type="text" class="form-control" formControlName="saldo" readonly>
-               </td>
-            </tr>
-         </tbody>
-      </table>
-   </form>
-</div> -->

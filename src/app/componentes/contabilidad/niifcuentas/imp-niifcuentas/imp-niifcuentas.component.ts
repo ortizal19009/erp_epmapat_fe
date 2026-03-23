@@ -167,33 +167,22 @@ export class ImpNiifcuentasComponent implements OnInit {
 
    muestraPDF(doc: any) {
       var opciones = { filename: this.pdfgenerado };
-      if (this.otrapagina) {
-           const blob = doc.output('blob');
-  const url = URL.createObjectURL(blob);
-  const ventana = window.open(url, '_blank');
-
-  // Libera memoria cuando la ventana se cierre
-  if (ventana) {
-    ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
-  }
-      } else {
-         const pdfBlob = doc.output('blob');
-         const blobUrl = URL.createObjectURL(pdfBlob);
-
-         const elementoExistente = document.getElementById('idembed') as HTMLEmbedElement;
-         if (elementoExistente) {
-            URL.revokeObjectURL(elementoExistente.src);
-            elementoExistente.remove();
-         }
-
+      if (this.otrapagina) doc.output('dataurlnewwindow', opciones);
+      else {
+         const pdfDataUri = doc.output('datauristring');
+         //Si ya existe el <embed> primero lo remueve
+         const elementoExistente = document.getElementById('idembed');
+         if (elementoExistente) { elementoExistente.remove(); }
+         //Crea el <embed>
          var embed = document.createElement('embed');
-         embed.setAttribute('src', blobUrl);
+         embed.setAttribute('src', pdfDataUri);
          embed.setAttribute('type', 'application/pdf');
          embed.setAttribute('width', '70%');
          embed.setAttribute('height', '100%');
          embed.setAttribute('id', 'idembed');
-
-         var container: any = document.getElementById('pdf');
+         //Agrega el <embed> al contenedor del Modal
+         var container: any;
+         container = document.getElementById('pdf');
          container.appendChild(embed);
       }
    }
@@ -211,10 +200,10 @@ export class ImpNiifcuentasComponent implements OnInit {
       worksheet.getCell('B1').font = { name: 'Times New Roman', bold: true, size: 14, color: { argb: '002060' } }
 
       // Fila 2
-      worksheet.addRow([]);
+      worksheet.addRow([ ]);
       // worksheet.getCell('B2').font = { name: 'Times New Roman', bold: true, size: 16, color: { argb: '001060' } };
 
-      //Fila 3 Cabecera
+      //Fila 3 Cabecera 
       const headerRowCell = worksheet.addRow(['Código', 'Nombre', 'Grupo', 'Nivel', 'Movimiento']);
       headerRowCell.eachCell(cell => {
          cell.fill = {
@@ -247,14 +236,14 @@ export class ImpNiifcuentasComponent implements OnInit {
          worksheet.getColumn(config.columnIndex).width = config.widthInChars;
       });
 
-      // Columnas centradas
+      // Columnas centradas 
       const columnsToCenter = [4, 5];
       columnsToCenter.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {
             cell.alignment = { vertical: 'middle', horizontal: 'center' };
          });
       });
-      // Columnas a la derecha
+      // Columnas a la derecha 
       // let columnsToRigth = [5, 6];
       // columnsToRigth.forEach(columnIndex => {
       //    worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {

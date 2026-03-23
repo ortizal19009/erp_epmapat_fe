@@ -48,7 +48,7 @@ export class ResulcostosComponent implements OnInit {
          next: datos => {
             // this._cuecostos = datos;
             this._cuecostos = datos.filter(item =>
-               item.codcue.startsWith('13') );
+               item.codcue.startsWith('13'));
             // this.totales();
          },
          error: err => console.error(err.error)
@@ -59,12 +59,14 @@ export class ResulcostosComponent implements OnInit {
 
       this.cueService.getCuecostos().subscribe({
          next: datos => {
+            console.log('datos: ', datos);
             this._tmp = datos;
+            console.log('this._tmp: ', this._tmp);
             this.arr = datos;
             // this.arr = datos;
 
             this._cuecostos = datos.filter(data =>
-               data.codcue.startsWith('6') );
+               data.codcue.startsWith('6'));
             // this.arreglo2 = this._cuentas;
 
             // this.arreglo = this._resulcostos;
@@ -79,7 +81,7 @@ export class ResulcostosComponent implements OnInit {
 
    regresar() { this.router.navigate(['/unicostos']); }
 
-   calcular(){
+   calcular() {
       for (let i = 0; i <= this._resulcostos.length - 1; i++) {
          this._resulcostos[i].ingresoM = i;
          this._resulcostos[i].costoM = 0;

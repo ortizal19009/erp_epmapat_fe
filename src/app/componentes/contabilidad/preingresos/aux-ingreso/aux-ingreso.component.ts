@@ -55,7 +55,7 @@ export class AuxIngresoComponent implements OnInit {
       let coloresJSON = sessionStorage.getItem('/preingresos');
       if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
 
-      let paringToAuxiliar:any = JSON.parse(sessionStorage.getItem("paringToAuxiliar")!);
+      let paringToAuxiliar = JSON.parse(sessionStorage.getItem("paringToAuxiliar")!);
       // sessionStorage.removeItem("paringToAuxiliar");
       this.codpar = paringToAuxiliar.codpar;
 

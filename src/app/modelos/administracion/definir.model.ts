@@ -18,7 +18,7 @@ export class Definir {
   textomail: string;
   dirmatriz: string;
   fechacierr: Date;
-  f_: string;
+  f_i: string;
   f_g: string;
   porciva: number;
   ciudad: string;
@@ -31,4 +31,6 @@ export class Definir {
   email: string;
   clave_email: string;
   rbu: number;
+  longparing: number;
+  longpargas: number;
 }

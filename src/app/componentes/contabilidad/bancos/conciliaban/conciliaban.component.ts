@@ -11,7 +11,7 @@ export class ConciliabanComponent implements OnInit {
 
   conciliaBans: any;
 
-  constructor(   private s_conciliaban: ConciliabanService, private router: Router ) { }
+  constructor(private s_conciliaban: ConciliabanService, private router: Router) { }
 
   ngOnInit(): void {
     this.listarConciliaBan();
@@ -20,6 +20,7 @@ export class ConciliabanComponent implements OnInit {
   listarConciliaBan() {
     this.s_conciliaban.getAllConciliaBancos().subscribe({
       next: (datos) => {
+        console.log(datos);
         this.conciliaBans = datos;
       },
       error: (e) => console.error(e),

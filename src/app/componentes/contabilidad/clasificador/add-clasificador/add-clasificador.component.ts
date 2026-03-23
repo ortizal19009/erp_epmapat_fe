@@ -17,7 +17,7 @@ export class AddClasificadorComponent implements OnInit {
    codgrupo: String;
 
    constructor(public fb: FormBuilder, public router: Router, public authService: AutorizaService,
-      private clasifService: ClasificadorService ) { }
+      private clasifService: ClasificadorService) { }
 
    ngOnInit(): void {
       sessionStorage.setItem('ventana', '/clasificador');
@@ -55,31 +55,22 @@ export class AddClasificadorComponent implements OnInit {
 
    regresar() { this.router.navigate(['/clasificador']); }
 
-   guardar() {
-      let h_codigo = document.getElementById("codpar") as HTMLInputElement;
-      let l_codigo = h_codigo.value;
-      // this.findByCodigos(l_codigo);
-
-      let h_descripcion = document.getElementById("nompar") as HTMLInputElement;
-      let l_descripcion = h_descripcion.value;
-
-      // this.clasifService.getByNombre(l_descripcion).subscribe(datos => {
-      //    this.rtn2 = 0;
-      //    if (datos.length >= 1) {
-      //       this.rtn2 = 1;
-      //       this.nompar = l_descripcion;
-      //    }
-      // }, error => console.error(error));
-      this.guardarCuenta();
-   }
-
    get f() { return this.formClasificador.controls; }
 
-   guardarCuenta(): void {
-      this.clasifService.saveClasificador(this.formClasificador.value).subscribe(datos => {
-         this.router.navigate(['/clasificador']);
-      }, error => console.error(error));
-
+   guardar(): void {
+      //Coloca nivpar y grupar
+      const codpar = this.formClasificador.value.codpar;
+      const l = codpar.length;
+      switch (this.formClasificador.value.codpar.length) {
+         case 1: this.formClasificador.value.nivpar = 1; this.formClasificador.value.grupar = 1; break;
+         case 2: this.formClasificador.value.nivpar = 2; this.formClasificador.value.grupar = codpar.slice(0, 1); break;
+         case 5: this.formClasificador.value.nivpar = 3; this.formClasificador.value.grupar = codpar.slice(0, 3); break;
+         case 8: this.formClasificador.value.nivpar = 4; this.formClasificador.value.grupar = codpar.slice(0, 5); break;
+      }
+      this.clasifService.saveClasificador(this.formClasificador.value).subscribe({
+         next: () => this.router.navigate(['/clasificador']),
+         error: err => console.error('Al guardar en Clasificador: ', err.error)
+      });
    }
 
    //Valida el formato de codpar
@@ -89,7 +80,7 @@ export class AddClasificadorComponent implements OnInit {
       else return of(null);
    }
 
-   // Expresión regular para validar formato
+   // Expresión regular para validar formato 
    validateFormato(str: string): boolean {
       const regex = /^(?:\d{1,2}|\d{2}\.\d{2}|\d{2}\.\d{2}\.\d{2})$/;
       return regex.test(str);
@@ -103,7 +94,7 @@ export class AddClasificadorComponent implements OnInit {
          case 2: g = 1; break;
          case 5: g = 2; break;
          case 8: g = 5; break;
-         default: return of( null );
+         default: return of(null);
       }
       this.codgrupo = control.value.slice(0, g);
       return this.clasifService.valCodpar(this.codgrupo).pipe(

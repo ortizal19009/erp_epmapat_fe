@@ -19,17 +19,17 @@ export class ReformasService {
       return this.http.get<Reformas[]>(baseUrl);
    }
 
-   ultimaReforma(): Observable<Reformas> {
+   ultima(): Observable<Reformas> {
       return this.http.get<Reformas>(`${baseUrl}/ultima`);
    }
 
-   // ultimo(): Observable<Emisiones> {
-   //    return this.http.get<Emisiones>(`${baseUrl}/ultimo`);
+   // ultimo(): Observable<Reformas> {
+   //    return this.http.get<Reformas>(`${baseUrl}/ultima`);
    //  }
 
-   siguienteNumero(): Observable<number> {
-      return this.http.get<number>(`${baseUrl}/siguiente`);
-   }
+   // siguienteNumero(): Observable<number> {
+   //    return this.http.get<number>(`${baseUrl}/siguiente`);
+   // }
 
    buscaByNumfec(desde: number, hasta: number) {
       return this.http.get<Reformas>(`${baseUrl}?desde=${desde}&hasta=${hasta}`);

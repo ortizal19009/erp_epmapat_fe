@@ -2,7 +2,7 @@
    <div class="container-fluid">
       <div class="row m-0 px-0 py-1 justify-content-start cabecera border sombra">
          <div class="col-sm-2">
-            <h5 class="font-weight-bold mt-1 my-0"> <i class="bi-book-fill"></i>&nbsp; Cuentas</h5>
+            <h5 class="font-weight-bold mt-1 my-0"> <i class="bi-book-fill text-warning"></i>&nbsp; Cuentas</h5>
          </div>
          <div class="col-sm-7">
             <form [formGroup]="formBuscar" (ngSubmit)="buscar()">
@@ -25,7 +25,7 @@
             </form>
          </div>
 
-         <div *ngIf="_cuentas" class="col-sm-2">
+         <div *ngIf="cuentas" class="col-sm-2">
             <input class="form-control form-control-sm text-center" type="text" placeholder="Filtrar..."
                [(ngModel)]="filtro">
          </div>
@@ -35,8 +35,15 @@
                data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right bg-dark roboto ">
+               <button class="dropdown-item" type="button" (click)="generaJasperDataset()"
+                  [disabled]="cuentas.length == 0">
+                  <i class="bi bi-view-list text-info"></i>&nbsp; Reporte</button>
                <button class="dropdown-item" type="button" (click)="imprimir()">
-                  <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
+                  <i class="bi bi-printer text-info"></i>&nbsp; Imprimir / Exportar</button>
+               <button class="dropdown-item" type="button" (click)="imprimirj()">
+                  <i class="bi bi-vector-pen text-info"></i>&nbsp; Reportes Jasper</button>
+               <button class="dropdown-item" type="button" (click)="cerrar()">
+                  <i class="bi-x-circle text-info"></i>&nbsp; Cerrar</button>
             </div>
          </div>
 
@@ -47,26 +54,26 @@
 <div class="container-fluid">
    <div class="row mb-0">
       <div class="col-sm-12">
-         <table *ngIf="_cuentas" class="table table-hover table-bordered table-sm sombra">
-            <thead class="text-center cabecera">
-               <tr class="text-center pad0">
-                  <th></th>
+         <table *ngIf="cuentas" class="table table-hover table-bordered table-sm sombra">
+            <thead class="cabecera">
+               <tr class="pad0">
+                  <!-- <th></th> -->
                   <th>Cuenta</th>
                   <th class="col-md-4">Denominación</th>
                   <th>Grupo</th>
-                  <th>Mov.</th>
-                  <th>Sinafip</th>
-                  <th>Tipo</th>
+                  <th class="text-center">Mov.</th>
+                  <th class="text-center">Sinafip</th>
+                  <th class="text-center">Tipo</th>
                   <th>Aso.Debe</th>
                   <th>Aso.Haber</th>
                   <th></th>
                </tr>
             </thead>
             <tbody class="detalle roboto small">
-               <tr *ngFor="let cuenta of _cuentas | filter: filtro; let i=index" class="fila pad0"
-                  (click)="onCellClick($event, cuenta.codcue )">
-                  <td class="text-center small font-weight-bold">{{i+1}}</td>
-                  <td [ngClass]="{'font-weight-bold': cuenta.movcue==1 }">{{ cuenta.codcue}}</td>
+               <tr *ngFor="let cuenta of cuentas | filter: filtro; let i=index" class="fila pad0"
+                  (click)="onCellClick($event, cuenta )">
+                  <td [ngClass]="{'font-weight-bold': cuenta.movcue==1 }"> <i *ngIf="cuenta.idcuenta == ultIdSelec"
+                        class="bi bi-caret-right-fill text-primary"></i> {{cuenta.codcue}}</td>
                   <td [ngClass]="{'font-weight-bold': cuenta.movcue==1}">{{ cuenta.nomcue}}</td>
                   <td [ngClass]="{'transparente': cuenta.grucue=='0', 'font-weight-bold': cuenta.movcue==1}">{{
                      cuenta.grucue}}</td>
@@ -141,7 +148,8 @@
                <ng-template #elseBlock>
                   <div class='modal-body'>
                      <div class="alert alert-warning text-center" role="alert">
-                        No puede Eliminar la Cuenta <span class="fantacygreen">{{cuenta.codcue}} <br>{{msgeliminar}}</span>
+                        No puede Eliminar la Cuenta <span class="fantacygreen">{{cuenta.codcue}}
+                           <br>{{msgeliminar}}</span>
                      </div>
                   </div>
                   <div class='text-center'>

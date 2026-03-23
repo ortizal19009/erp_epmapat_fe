@@ -1,13 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, AsyncValidatorFn, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BeneficiariosService } from 'src/app/servicios/contabilidad/beneficiarios.service';
 import { CertipresuService } from 'src/app/servicios/contabilidad/certipresu.service';
 import { DocumentosService } from 'src/app/servicios/administracion/documentos.service';
-import { map, of } from 'rxjs';
+import { catchError, map, Observable, of } from 'rxjs';
 import { Documentos } from 'src/app/modelos/administracion/documentos.model';
 import { Beneficiarios } from 'src/app/modelos/contabilidad/beneficiarios.model';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import { Certipresu } from 'src/app/modelos/contabilidad/certipresu.model';
 
 @Component({
    selector: 'app-add-certipresu',
@@ -18,46 +19,36 @@ import { AutorizaService } from 'src/app/compartida/autoriza.service';
 export class AddCertipresuComponent implements OnInit {
 
    formCertipresu: FormGroup;
-   _documentos: any[] = [];
-   _beneficiarios: any[] = [];
+   documentos: Documentos[] = [];
+   beneficiarios: Beneficiarios[] = [];
    idbene: number | null = 1;
-   _responsables: any[] = [];
+   responsables: Beneficiarios[] = [];
    idbeneres: number | null;
-   date: Date = new Date();
-
-   beneficiario: Beneficiarios = new Beneficiarios;
-   responsable: Beneficiarios = new Beneficiarios;
-   documento: Documentos = new Documentos;
+   inicioFormulario: number = 0;
+   tiempoTranscurrido: number = 0;
 
    constructor(private beneService: BeneficiariosService, private router: Router, public authService: AutorizaService,
       private fb: FormBuilder, private docuService: DocumentosService, private certiService: CertipresuService) { }
 
    ngOnInit(): void {
+      if (!this.authService.sessionlog) { this.router.navigate(['/inicio']); }
       sessionStorage.setItem('ventana', '/certipresu');
       let coloresJSON = sessionStorage.getItem('/certipresu');
       if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
 
-      this.documento.intdoc = 1;
       this.formCertipresu = this.fb.group({
-         tipo: 1,
-         numero: ['', [Validators.required, Validators.min(1)], this.valNumero.bind(this)],
-         valor: 0,
-         fecha: [],
-         intdoc: this.documento,
-         numdoc: ['', [Validators.required]],
-         idbene: ['(Ninguno)', [Validators.required], [this.valBenefi.bind(this)]],
-         idbeneres: ['', [Validators.required], [this.valResponsa.bind(this)]],
+         numero: ['', [Validators.required, Validators.min(1)], this.valNumero()],
+         fecha: ['', Validators.required, this.valAño()],
+         intdoc: this.documentos,
+         numdoc: ['', Validators.required],
+         idbene: ['(Ninguno)', Validators.required, this.valBenefi()],
+         idbeneres: ['', Validators.required, this.valResponsa()],
          descripcion: [],
-         usucrea: this.authService.idusuario,
-         feccrea: this.date,
-         usumodi: [],
-         fecmodi: [],
-      },
-         { updateOn: "blur" });
+      }, { updateOn: "blur" });
 
+      this.inicioFormulario = Date.now();
       this.listarDocumentos();
       this.ultimo();
-
    }
 
    colocaColor(colores: any) {
@@ -71,34 +62,34 @@ export class AddCertipresuComponent implements OnInit {
 
    listarDocumentos() {
       this.docuService.getListaDocumentos().subscribe({
-         next: (datos) => {
-            this._documentos = datos;
-            this.formCertipresu.controls['intdoc'].setValue(1);
+         next: (documentos: Documentos[]) => {
+            this.documentos = documentos;
+            this.f['intdoc'].setValue(1)
          },
          error: (err) => console.error(err.error)
       });
    }
 
    ultimo() {
-      this.certiService.ultimo().subscribe({
-         next: datos => {
-            let x = datos.numero + 1;
-            this.formCertipresu.patchValue({ numero: x, fecha: datos.fecha });
+      this.certiService.ultima(1).subscribe({
+         next: resp => {
+            let x = resp.numero + 1;
+            this.formCertipresu.patchValue({ numero: x, fecha: resp.fecha });
          },
-         error: err => console.error(err.error),
+         error: err => { console.error(err.error); this.authService.mostrarError('Error al buscar el Ultimo', err.error) }
       });
    }
 
    benefixNombre(e: any) {
       if (e.target.value != '') {
          this.beneService.findByNomben(e.target.value).subscribe({
-            next: datos => this._beneficiarios = datos,
+            next: datos => this.beneficiarios = datos,
             error: err => console.error(err.error),
          });
       }
    }
    onBeneficiarioSelected(e: any) {
-      const selectedOption = this._beneficiarios.find((x: { nomben: any; }) => x.nomben === e.target.value);
+      const selectedOption = this.beneficiarios.find((x: { nomben: any; }) => x.nomben === e.target.value);
       if (selectedOption) this.idbene = selectedOption.idbene;
       else this.idbene = null;
    }
@@ -106,13 +97,13 @@ export class AddCertipresuComponent implements OnInit {
    responsaxNombre(e: any) {
       if (e.target.value != '') {
          this.beneService.findByNomben(e.target.value).subscribe({
-            next: datos => this._responsables = datos,
+            next: (responsables: Beneficiarios[]) => this.responsables = responsables,
             error: err => console.error(err.error),
          });
       }
    }
    onResponsableSelected(e: any) {
-      const selectedOption = this._responsables.find((x: { nomben: any; }) => x.nomben === e.target.value);
+      const selectedOption = this.responsables.find((x: { nomben: any; }) => x.nomben === e.target.value);
       if (selectedOption) this.idbeneres = selectedOption.idbene;
       else this.idbeneres = null;
    }
@@ -120,44 +111,121 @@ export class AddCertipresuComponent implements OnInit {
    get f() { return this.formCertipresu.controls; }
 
    onSubmit() {
-      this.documento.intdoc = this.formCertipresu.value.intdoc
-      this.formCertipresu.value.intdoc = this.documento;
-      this.beneficiario.idbene = this.idbene!;
-      this.formCertipresu.value.idbene = this.beneficiario;
-      this.responsable.idbene = this.idbeneres!;
-      this.formCertipresu.value.idbeneres = this.responsable;
-
-      this.certiService.saveCertiPresu(this.formCertipresu.value).subscribe({
-         next: datos => {
-            let buscaDesdeNum = this.f['numero'].value - 10;
-            if (buscaDesdeNum <= 0) buscaDesdeNum = 1;
-            sessionStorage.setItem('buscaDesdeNum', buscaDesdeNum.toString());
-            sessionStorage.setItem('buscaHastaNum', this.f['numero'].value);
-            this.regresar();
-         },
-         error: err => console.error(err.error),
+      // Vuelve a validar el número (Mientras toman café ...)
+      this.validaNumeroAntesDeGuardar().subscribe(esValido => {
+         if (!esValido) {
+            const fin = Date.now();
+            this.tiempoTranscurrido = fin - this.inicioFormulario;
+            this.authService.mensaje404(`La Certificación ${this.formCertipresu.value.numero} ya fue creada por otro Usuario. 
+               Tiempo transcurrido: ${this.authService.formatearTiempo(this.tiempoTranscurrido)}`);
+            return;
+         }
+         const dto: CertipresuCreateDTO = {
+            tipo: 1,
+            valor: 0,
+            numero: this.formCertipresu.value.numero,
+            fecha: this.formCertipresu.value.fecha,
+            intdoc: { intdoc: this.formCertipresu.value.intdoc },
+            numdoc: this.formCertipresu.value.numdoc,
+            idbene: { idbene: this.idbene },
+            idbeneres: { idbene: this.idbeneres },
+            descripcion: this.formCertipresu.value.descripcion,
+            usucrea: this.authService.idusuario,
+            feccrea: new Date(),
+         };
+         // Guarda
+         this.certiService.saveCertipresu(dto).subscribe({
+            next: (certi: Certipresu) => {
+               this.authService.swal('success', `Certificación ${certi.numero} guardada con éxito`);
+               sessionStorage.setItem('ultidcerti', certi.idcerti.toString());
+               //Actualiza los datos de búsqueda para que se muestre en la lista de certificaciones
+               let buscaDesdeNum = this.f['numero'].value - 16;
+               if (buscaDesdeNum <= 0) buscaDesdeNum = 1;
+               let year = new Date(this.f['fecha'].value).getFullYear(); // Extraer el año de la fecha 
+               const buscarCertipresu = {
+                  desdeNum: buscaDesdeNum,
+                  hastaNum: this.f['numero'].value,
+                  desdeFecha: year.toString() + "-01-01",
+                  hastaFecha: year.toString() + "-12-31",
+               };
+               sessionStorage.setItem("buscarCertipresu", JSON.stringify(buscarCertipresu));
+               //Datos a enviar a partixcerti
+               const datosToPartixcerti = {
+                  idcerti: certi.idcerti,
+                  desdeNum: buscaDesdeNum,
+                  hastaNum: this.f['numero'].value
+               };
+               sessionStorage.setItem('datosToPartixcerti', JSON.stringify(datosToPartixcerti));
+               this.router.navigate(['partixcerti']);
+            },
+            error: err => { console.error('Al guardar la Certificación: ', err.error); this.authService.mostrarError('Error al guardar', err.error) }
+         });
       });
    }
 
    regresar() { this.router.navigate(['/certipresu']); }
 
-   valNumero(control: AbstractControl) {
-      return this.certiService.valNumero(control.value)
-         .pipe(
-            map(result => result != null ? { existe: true } : null)
+   // Valida el número
+   valNumero(): AsyncValidatorFn {
+      return (control: AbstractControl) => {
+         const valor = control.value;
+         if (valor === null || valor === undefined || valor === '') { return of(null); }
+         return this.certiService.valNumero(valor, 1).pipe(
+            map(existe => (existe ? { existe: true } : null)),
+            catchError(() => of(null))
          );
+      };
+   }
+
+   // Al guardar Valida el número nuevamente
+   validaNumeroAntesDeGuardar(): Observable<boolean> {
+      const valor = this.formCertipresu.get('numero')?.value;
+      if (valor === null || valor === undefined || valor === '') { return of(true); }
+      return this.certiService.valNumero(valor, 1).pipe(
+         map(existe => !existe),
+         catchError(() => of(true))
+      );
+   }
+
+   //Valida el año de la fecha
+   valAño(): AsyncValidatorFn {
+      return (control: AbstractControl): Observable<ValidationErrors | null> => {
+         const datos = this.authService.getDatosEmpresa();
+         const añoEmpresa = datos?.fechap?.toString().slice(0, 4);
+         const añoDigitado = control.value?.toString().slice(0, 4);
+         const esValido = añoEmpresa === añoDigitado;
+         return of(esValido ? null : { añoinvalido: true });
+      };
    }
 
    //Valida que se haya seleccionado un Beneficiario
-   valBenefi(control: AbstractControl) {
-      if (this.idbene == null) return of({ 'invalido': true });
-      else return of(null);
+   valBenefi(): AsyncValidatorFn {
+      return (_control: AbstractControl) => {
+         if (this.idbene == null) { return of({ invalido: true }); }
+         return of(null);
+      };
    }
 
    //Valida que se haya seleccionado un Responsable
-   valResponsa(control: AbstractControl) {
-      if (this.idbeneres == null) return of({ 'invalido': true });
-      else return of(null);
+   valResponsa(): AsyncValidatorFn {
+      return (_control: AbstractControl) => {
+         if (this.idbeneres == null) { return of({ invalido: true }); }
+         return of(null);
+      };
    }
 
+}
+
+export interface CertipresuCreateDTO {
+   tipo: number;
+   numero: number;
+   fecha: Date;
+   valor: number;
+   descripcion: String;
+   numdoc: String;
+   usucrea: number;
+   feccrea: Date;
+   idbene: { idbene: number | null };
+   idbeneres: { idbene: number | null };
+   intdoc: { intdoc: number };
 }

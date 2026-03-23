@@ -5,9 +5,11 @@ import { Router } from '@angular/router';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Asientos } from 'src/app/modelos/contabilidad/asientos.model';
+import { Retenciones } from 'src/app/modelos/contabilidad/retenciones.model';
 import { AsientosService } from 'src/app/servicios/contabilidad/asientos.service';
 import { RetencionesService } from 'src/app/servicios/contabilidad/retenciones.service';
 import { TransaciService } from 'src/app/servicios/contabilidad/transaci.service';
+import Swal from 'sweetalert2';
 
 @Component({
    selector: 'app-asientos',
@@ -17,22 +19,24 @@ import { TransaciService } from 'src/app/servicios/contabilidad/transaci.service
 
 export class AsientosComponent implements OnInit {
 
-   _asientos: any;
+   asientos: Asientos[] = [];
    swbuscando: boolean;
    txtbuscar: string = 'Buscar';
    buscarAsientos: { tipcom: number, desdeNum: number, hastaNum: number, desdeFecha: string, hastaFecha: string }
    formBuscar: FormGroup;
    today: number = Date.now();
    date: Date = new Date();
+   sumTotdeb: number;
+   sumTotcre: number;
    swdesdehasta: boolean; //Visibilidad Buscar últimos
-   iAsiento = {} as interfaceAsiento; //Interface para los datos del Asiento a eliminar
    filtro: string;
    disabTipcom: boolean = true;
    sweliminar: boolean = false;
+   ultIdSelec: number = -1;
 
-   constructor(private asiService: AsientosService, private fb: FormBuilder,
-      public authService: AutorizaService, private coloresService: ColoresService, private router: Router, private tranService: TransaciService,
-      private reteService: RetencionesService) { }
+   constructor(private asiService: AsientosService, private fb: FormBuilder, public authService: AutorizaService,
+      private coloresService: ColoresService, private router: Router, private tranService: TransaciService,
+      private reteService: RetencionesService, private elimService: EliminadosappService) { }
 
    ngOnInit(): void {
       sessionStorage.setItem('ventana', '/asientos');
@@ -51,6 +55,7 @@ export class AsientosComponent implements OnInit {
       });
 
       //Datos de búsqueda último asiento o guardados
+      this.ultIdSelec = sessionStorage.getItem('ultidasiento') ? Number(sessionStorage.getItem('ultidasiento')) : 0;
       this.buscarAsientos = JSON.parse(sessionStorage.getItem("buscarAsientos")!);
       if (this.buscarAsientos == null) this.ultimoAsiento();
       else {
@@ -63,6 +68,13 @@ export class AsientosComponent implements OnInit {
          });
          this.buscar();
       }
+      this.formBuscar.get('desdeNum')?.valueChanges.subscribe(valor => {
+         if (valor != null && !isNaN(valor)) {
+            this.formBuscar.patchValue({
+               hastaNum: Number(valor) + 16
+            }, { emitEvent: false });
+         }
+      });
    }
 
    colocaColor(colores: any) {
@@ -95,7 +107,7 @@ export class AsientosComponent implements OnInit {
             });
             this.buscar();
          },
-         error: err => console.error(err.error)
+         error: err => { console.error(err.error); this.authService.mostrarError('Error al buscar el último', err.error) }
       });
    }
 
@@ -136,39 +148,39 @@ export class AsientosComponent implements OnInit {
       let hastaNum: number = 999999999;
       if (this.formBuscar.value.hastaNum != null) { hastaNum = this.formBuscar.value.hastaNum; }
       //Busca Asientos
+      console.log('this.formBuscar.value.hastaFecha: ', this.formBuscar.value.hastaFecha)
       if (this.formBuscar.value.tipcom == 0)
          this.asiService.getAsientos(1, desdeNum, hastaNum,
             this.formBuscar.value.desdeFecha, this.formBuscar.value.hastaFecha).subscribe({
-               next: datos => {
-                  this._asientos = datos;
+               next: (asientos: Asientos[]) => {
+                  this.asientos = asientos;
                   this.swbuscando = false;
                   this.txtbuscar = 'Buscar';
+                  this.totales();
                },
-               error: err => console.error(err.error)
+               error: err => { console.error(err.error); this.authService.mostrarError('Error al buscar por Asiento', err.error) }
             });
       else {   //Busca Comprobantes
          this.asiService.getComprobantes(2, this.formBuscar.value.tipcom, this.formBuscar.value.desdeNum, this.formBuscar.value.hastaNum,
             this.formBuscar.value.desdeFecha, this.formBuscar.value.hastaFecha).subscribe({
                next: datos => {
-                  this._asientos = datos;
+                  this.asientos = datos;
                   this.swbuscando = false;
                   this.txtbuscar = 'Buscar';
+                  this.totales();
                },
-               error: err => console.error(err.error)
+               error: err => { console.error(err.error); this.authService.mostrarError('Error al buscar por Comprobante', err.error) }
             });
       }
    }
 
-   comprobante(tipcom: number, compro: number) {
-      if (tipcom == 1) return 'I-' + compro.toString();
-      if (tipcom == 2) return 'E-' + compro.toString();
-      if (tipcom == 3) return 'DC-' + compro.toString();
-      if (tipcom == 4) return 'DI-' + compro.toString();
-      if (tipcom == 5) return 'DE-' + compro.toString();
-      return compro.toString();
+   totales() {
+      this.sumTotdeb = this.asientos.reduce((acc, a) => acc + (a.totdeb ?? 0), 0);
+      this.sumTotcre = this.asientos.reduce((acc, a) => acc + (a.totcre ?? 0), 0);
+
    }
 
-   public busquedainicial() {
+   busquedainicial() {
       sessionStorage.removeItem('buscarAsientos');
       this.swdesdehasta = false;
       this.ultimoAsiento();
@@ -178,10 +190,26 @@ export class AsientosComponent implements OnInit {
 
    onCellClick(event: any, asiento: Asientos) {
       const tagName = event.target.tagName;
+      this.ultIdSelec = asiento.idasiento;
+      sessionStorage.setItem('ultidasiento', this.ultIdSelec.toString());
+      let desdeNum = 0;
+      let hastaNum = 0;
       if (tagName === 'TD') {
-         // let asientoToTransaci = { idasiento: asiento.idasiento, padre: '/asientos' };
-         // sessionStorage.setItem("asientoToTransaci", JSON.stringify(asientoToTransaci));
-         sessionStorage.setItem("asientoToTransaci", JSON.stringify({ idasiento: asiento.idasiento, padre: '/asientos' }));
+         if (this.formBuscar.get('tipcom')?.value == 0) {
+            desdeNum = this.formBuscar.value.desdeNum;
+            hastaNum = this.formBuscar.value.hastaNum;
+         } else {    //Si se muestran comprobantes ultimo = actual
+            hastaNum = asiento.asiento;
+            desdeNum = hastaNum - 16
+            if (desdeNum < 1 ) desdeNum = 1
+         }
+         let datosToTransaci = {
+            idasiento: asiento.idasiento,
+            desdeNum: desdeNum,
+            hastaNum: hastaNum,
+            padre: '/asientos'
+         };
+         sessionStorage.setItem('datosToTransaci', JSON.stringify(datosToTransaci));
          this.router.navigate(['transaci']);
       }
    }
@@ -195,24 +223,21 @@ export class AsientosComponent implements OnInit {
 
    retenciones(idasiento: number) {
       this.reteService.getByAsiento(idasiento).subscribe({
-         next: datos => {
-            const totrete = datos.length;
+         next: (retenciones: Retenciones[]) => {
+            const totrete = retenciones.length;
             switch (totrete) {
                case 0:
                   sessionStorage.setItem("idasientoToRete", idasiento.toString());
                   this.router.navigate(['/add-retencion']);
                   break;
                case 1:
-                  // let retencionToModifi: { idasiento: number, idrete: number}
-                  let idrete = datos[0].idrete;
-                  let retencionToModifi = { idasiento: idasiento, idrete: idrete}
-                  // sessionStorage.setItem("retencionToModifi", JSON.stringify(retencionToModifi));
-                  sessionStorage.setItem("retencionToModifi", JSON.stringify({ idasiento: idasiento, idrete: idrete}));
+                  let idrete = retenciones[0].idrete;
+                  sessionStorage.setItem("retencionToModifi", JSON.stringify({ idasiento: idasiento, idrete: idrete }));
                   this.router.navigate(['/modi-retencion']);
                   break;
                default:
                   if (totrete > 1) {
-                     let idrete = datos[0].idrete;
+                     let idrete = retenciones[0].idrete;
                      sessionStorage.setItem("idasientoToRete", idrete.toString());
                      this.router.navigate(['/modi-retencion']);
                   } else {
@@ -225,21 +250,70 @@ export class AsientosComponent implements OnInit {
    }
 
    eliminar(asiento: Asientos) {
-      this.sweliminar = false;
-      this.tranService.porIdasiento(asiento.idasiento).subscribe({
-         next: resp => {
-            this.sweliminar = !resp
-            this.iAsiento.idasiento = asiento.idasiento;
-            this.iAsiento.asiento = asiento.asiento;
+      this.tranService.countByIdasiento(asiento.idasiento).subscribe({
+         next: registros => {
+            if (registros > 0) {
+               Swal.fire({
+                  icon: 'error',
+                  title: `No puede eliminar el Asiento Nro: ${asiento.asiento}`,
+                  text: `Tiene registrado ${registros} Transaccion(es)`,
+                  confirmButtonText: '<i class="bi-check"></i> Continuar ',
+                  customClass: {
+                     popup: 'noeliminar',
+                     title: 'robotobig',
+                     confirmButton: 'btn btn-warning',
+                  },
+               });
+            } else {
+               Swal.fire({
+                  width: '500px',
+                  title: 'Mensaje',
+                  text: `Eliminar la Certificación: ${asiento.asiento} ?`,
+                  icon: 'warning',
+                  showCancelButton: true,
+                  confirmButtonText: '<i class="fa fa-check"></i> Aceptar',
+                  cancelButtonText: '<i class="fa fa-times"></i> Cancelar',
+                  customClass: {
+                     popup: 'eliminar',
+                     title: 'robotobig',
+                     confirmButton: 'btn btn-success',
+                     cancelButton: 'btn btn-success'
+                  },
+               }).then((resultado) => {
+                  if (resultado.isConfirmed) this.elimina(asiento);
+               });
+            }
          },
-         error: err => console.error('Al buscar si el Asiento tiene Transacciones: ', err.error),
+         error: err => { console.error('Al buscar las Transacciones del Asiento: ', err.error); },
       });
    }
 
-   elimina() {
-      this.asiService.deleteAsiento(this.iAsiento.idasiento).subscribe({
-         next: datos => this.buscar(),
-         error: err => console.error(err.error)
+   elimina(asiento: Asientos) {
+      this.asiService.deleteAsiento(asiento.idasiento).subscribe({
+         next: () => {
+            let eliminado: Eliminadosapp = new Eliminadosapp();
+            eliminado.idusuario = this.authService.idusuario!;
+            eliminado.modulo = this.authService.moduActual;
+            eliminado.fecha = new Date();
+            eliminado.routerlink = 'asientos';
+            eliminado.tabla = 'ASIENTOS';
+            eliminado.datos = `Nro. ${asiento.asiento} del ${asiento.fecha}`;
+            this.elimService.save(eliminado).subscribe({
+               next: () => {
+                  this.authService.swal('success', `Asiento ${asiento.asiento} eliminada con éxito`);
+                  this.buscar();
+               },
+               error: err => { console.error(err.error); this.authService.mostrarError('Error al guardar eliminado', err.error); }
+            });
+         },
+         error: (err) => {
+            if (err.status === 404) {
+               this.authService.mensaje404(`El Asiento ${asiento.asiento} no existe o fue eliminado por otro Usuario`);
+               this.buscar();
+            } else {
+               this.authService.mostrarError('Error al eliminar el Asiento', err.error);
+            }
+         }
       });
    }
 
@@ -248,9 +322,6 @@ export class AsientosComponent implements OnInit {
       this.router.navigate(['/imp-asientos']);
    }
 
-}
+   cerrar() { this.router.navigate(['/inicio']); }
 
-interface interfaceAsiento {
-   idasiento: number;
-   asiento: number
 }

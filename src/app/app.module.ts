@@ -295,6 +295,13 @@ import { SimuladortresComponent } from './componentes/pliego24/simuladortres/sim
 import { RecargosxcuentaComponent } from './componentes/facturacion/recargosxcuenta/recargosxcuenta.component';
 import { ReFacturacionesComponent } from './componentes/facturas/re-facturaciones/re-facturaciones.component';
 import { BuscarabonadoComponent } from './componentes/abonados/buscarabonado/buscarabonado.component';
+import { ImpPartixcertiComponent } from './componentes/contabilidad/partixcerti/imp-partixcerti/imp-partixcerti.component';
+import { ImpjCuentasComponent } from './componentes/contabilidad/cuentas/impj-cuentas/impj-cuentas.component';
+import { AddPartixreinteComponent } from './componentes/contabilidad/reintegradas/add-partixreinte/add-partixreinte.component';
+import { AddReintegradaComponent } from './componentes/contabilidad/reintegradas/add-reintegrada/add-reintegrada.component';
+import { ModiReintegradaComponent } from './componentes/contabilidad/reintegradas/modi-reintegrada/modi-reintegrada.component';
+import { PartixreinteComponent } from './componentes/contabilidad/reintegradas/partixreinte/partixreinte.component';
+import { ReintegradasComponent } from './componentes/contabilidad/reintegradas/reintegradas/reintegradas.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
@@ -577,7 +584,14 @@ import { BuscarabonadoComponent } from './componentes/abonados/buscarabonado/bus
     RutaToLectorComponent,
     RecargosxcuentaComponent,
     ReFacturacionesComponent,
-    BuscarabonadoComponent
+    BuscarabonadoComponent,
+    ImpPartixcertiComponent,
+    ImpjCuentasComponent,
+    AddPartixreinteComponent,
+    AddReintegradaComponent,
+    ModiReintegradaComponent,
+    PartixreinteComponent,
+    ReintegradasComponent
   ],
 
   imports: [

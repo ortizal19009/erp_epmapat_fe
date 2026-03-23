@@ -123,12 +123,12 @@ export class ModiTramipresuComponent implements OnInit {
       if (this.swmodiresp) this.responsable.idbene = this._responsables[0].idbene;
       else this.responsable.idbene = this.antidbeneres;
       this.formTramipresu.value.idbeneres = this.responsable;
-      this.saveCetiPresu();
+      this.saveTramiPresu();
    }
 
-   saveCetiPresu() {
+   saveTramiPresu() {
       this.tramiService.saveTramipresu(this.formTramipresu.value).subscribe({
-         next: datos => this.regresar(),
+         next: () => this.regresar(),
          error: err => console.error(err.error),
       });
    }

@@ -6,3 +6,7 @@
 
 .detalle { background-color: var(--bgcolor2); }
 .nuevoBG2 { background-color: var(--bgcolor2); }
+
+.ancho560{
+   max-width: 560px;
+}

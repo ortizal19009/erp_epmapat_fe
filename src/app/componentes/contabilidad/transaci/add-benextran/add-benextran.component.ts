@@ -1,12 +1,16 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { AbstractControl, AsyncValidatorFn, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
+import { BenextranCreateDTO } from 'src/app/dtos/contabilidad/benextran.dto';
+import { TransaciCreateDTO } from 'src/app/dtos/contabilidad/transaci.dto';
 import { Documentos } from 'src/app/modelos/administracion/documentos.model';
 import { Asientos } from 'src/app/modelos/contabilidad/asientos.model';
 import { Beneficiarios } from 'src/app/modelos/contabilidad/beneficiarios.model';
 import { Cuentas } from 'src/app/modelos/contabilidad/cuentas.model';
+import { Ejecucio } from 'src/app/modelos/contabilidad/ejecucio.model';
 import { Transaci } from 'src/app/modelos/contabilidad/transaci.model';
 import { DocumentosService } from 'src/app/servicios/administracion/documentos.service';
 import { AsientosService } from 'src/app/servicios/contabilidad/asientos.service';
@@ -26,29 +30,28 @@ export class AddBenextranComponent implements OnInit {
    iAsiento = {} as interfaceAsiento; //Interface para los datos del Asiento
    formTransaci: FormGroup;
    idasiento: number;
-   _cuentas: any[] = [];
+   cuentas: Cuentas[] = [];
    idcuenta: number | null;
-   _documentos: any;
+   documentos: Documentos[] = [];
    totDebe: number;
-   totHaber: number
-   _transaci: any
+   totHaber: number;
+   tiptran: { numero: number; nombre: string; cabecera1: string; cabecera2: string };
+   transaci: Transaci[] = [];
+   arrBeneficiarios: any[] = [];
+   arrIdbeneficiario: number[] | null[] = [];
+   nomDebcre: string = 'Debe';
    formBenextran: FormGroup;
-   _beneficiarios: any[] = [];
-   idbenefi: number | null
-   iTransaci = {} as interfaceTransaci;
-   benes: FormArray;
-   control: any
-   uniqueIdCounter = 0; // Inicializa tu contador
-   formBene: FormGroup;
+   ejecuciones: Ejecucio[] = []; //Ejecuciones del asiento
+   intpreSeleccionado: number | null;
 
-   cuenta: Cuentas = new Cuentas;
-   documento: Documentos = new Documentos;
-   beneficiario: Beneficiarios = new Beneficiarios;
-   asiento: Asientos = new Asientos;
-
-   constructor(private router: Router, private fb: FormBuilder, private coloresService: ColoresService, private cueService: CuentasService,
-      private asiService: AsientosService, private docuService: DocumentosService, private beneService: BeneficiariosService,
-      private tranService: TransaciService, private benextranService: BenextranService) { }
+   constructor(private router: Router, private fb: FormBuilder, private coloresService: ColoresService, public authService: AutorizaService,
+      private cueService: CuentasService, private asiService: AsientosService, private docuService: DocumentosService,
+      private beneService: BeneficiariosService, private tranService: TransaciService, private benextranService: BenextranService,
+      private ejecuService: EjecucionService) {
+      this.formBenextran = this.fb.group({
+         registros: this.fb.array([])
+      }, { updateOn: "blur" });
+   }
 
    ngOnInit(): void {
       sessionStorage.setItem('ventana', '/benextran');
@@ -57,45 +60,30 @@ export class AddBenextranComponent implements OnInit {
       else this.buscaColor();
 
       const datosToAddtransaci = JSON.parse(sessionStorage.getItem("datosToAddtransaci")!);
-      this.totDebe = datosToAddtransaci.totDebe;
-      this.totHaber = datosToAddtransaci.totHaber;
+      this.idasiento = datosToAddtransaci.idasiento;
+      this.totDebe = +datosToAddtransaci.totDebe;
+      this.totHaber = +datosToAddtransaci.totHaber;
+      const tiptranInfo = nombreTiptran(datosToAddtransaci.tiptran);
+      this.tiptran = { numero: datosToAddtransaci.tiptran, nombre: tiptranInfo.nombre, cabecera1: tiptranInfo.cabecera1, cabecera2: tiptranInfo.cabecera2 };
+      if (this.tiptran.numero > 4) { this.nomDebcre = 'Haber'; };
 
-      this.idasiento = +sessionStorage.getItem('idasientoToTransaci')!;
-      this.asiento.idasiento = this.idasiento;
-      this.beneficiario.idbene = 1;
       let date: Date = new Date();
       this.formTransaci = this.fb.group({
-         orden: 10,
-         idcuenta: ['', Validators.required, this.valCuenta.bind(this)],
+         orden: [+datosToAddtransaci.orden, Validators.required],
+         idcuenta: ['', Validators.required, this.valCuenta()],
          codcue: '',
          nomcue: ['', Validators.required],
-         debcre: 1,
          valor: ['', Validators.required],
-         intdoc: this.documento,
+         intdoc: this.documentos,
          numdoc: ['', Validators.required],
-         idbene: this.beneficiario,
-         idasiento: this.asiento,
-         tiptran: 2,
-         totbene: 0,
+         codpar: '',
+         nompar: '',
          descri: '',
-         swconcili: false,
-         usucrea: 1,
-         feccrea: date
+         benextran: this.fb.array([])
       }, { updateOn: "blur" });
 
       this.datosAsiento();
       this.listarDocumentos();
-
-      // this.formBenextran = this.fb.group({
-      //    items: this.fb.array([]),
-      //    numdoc: ['', [Validators.required]]
-      // });
-
-      // this.benes = this.formBenextran.get('items') as FormArray;
-
-      this.formBene = new FormGroup({
-         'campos': new FormArray([])
-      });
    }
 
    async buscaColor() {
@@ -119,54 +107,65 @@ export class AddBenextranComponent implements OnInit {
    }
 
    get f() { return this.formTransaci.controls; }
-   f1(fila: number) {
-      const control = this.formBenextran.get('items') as any;
-      return control.controls.find((c: { get: (arg0: string) => any; }) => c.get('id')!.value === fila);
-   }
 
    datosAsiento() {
-      this.idasiento = +sessionStorage.getItem('idasientoToTransaci')!;
       this.asiService.unAsiento(this.idasiento).subscribe({
          next: datos => {
             this.iAsiento.asiento = datos.asiento;
             this.iAsiento.fecha = datos.fecha;
-            this.iAsiento.comprobante = nomcomprobante(datos.tipcom) + datos.compro.toString();
+            this.iAsiento.comprobante = this.authService.comprobante(datos.tipcom, datos.compro);
             this.iAsiento.benefi = datos.idbene.nomben;
             this.iAsiento.documento = datos.intdoc.nomdoc + ' ' + datos.numdoc;
             this.iAsiento.numdoc = datos.numdoc;
             this.iAsiento.intdoc = datos.intdoc.intdoc;
-            this.documento.intdoc = this.iAsiento.intdoc;
             this.formTransaci.patchValue({
                intdoc: this.iAsiento.intdoc,
                numdoc: datos.numdoc,
                descri: datos.glosa,
             });
-            this.aniadir();
          },
          error: err => console.error(err.error)
       });
+      if (this.tiptran.numero == 3 || this.tiptran.numero == 6) this.partidasCobroPago();
    }
 
    listarDocumentos() {
       this.docuService.getListaDocumentos().subscribe({
-         next: datos => this._documentos = datos,
+         next: (documentos: Documentos[]) => this.documentos = documentos,
          error: (err) => console.error(err.error)
+      });
+   }
+
+   partidasCobroPago() {
+      //OJO: Debe buscar solo partidas de ingreso o gasto (no las dos)
+      this.ejecuService.findByIdAsiento(this.idasiento).subscribe({
+         next: (ejecuciones: Ejecucio[]) => {
+            this.ejecuciones = ejecuciones;
+            // console.log('this.ejecuciones: ', this.ejecuciones)
+            if (ejecuciones && ejecuciones.length > 0) {
+               this.formTransaci.patchValue({
+                  codpar: this.ejecuciones[0].intpre.codpar,
+                  nompar: this.ejecuciones[0].intpre.nompar
+               });
+            }
+         },
+         error: err => { console.error(err.error); this.authService.mostrarError('Error al buscar la Ejecución', err.error) },
       });
    }
 
    cuentasxTiptran(e: any) {
       if (e.target.value != '') {
-         this.cueService.getByTiptran(2, e.target.value).subscribe({
-            next: datos => this._cuentas = datos,
+         this.cueService.getByTiptran(this.tiptran.numero, e.target.value).subscribe({
+            next: (cuentas: Cuentas[]) => this.cuentas = cuentas,
             error: err => console.error(err.error),
          });
       }
    }
-
    onCuentaSelected(e: any) {
-      const selectedOption = this._cuentas.find((x: { codcue: any; }) => x.codcue === e.target.value);
+      const selectedOption = this.cuentas.find((x: { codcue: any; }) => x.codcue === e.target.value);
       if (selectedOption) {
          this.idcuenta = selectedOption.idcuenta;
+         this.f['codcue'].setValue(selectedOption.codcue);
          this.formTransaci.controls['nomcue'].setValue(selectedOption.nomcue);
       }
       else {
@@ -175,208 +174,133 @@ export class AddBenextranComponent implements OnInit {
       };
    }
 
-   regresar() { this.router.navigate(['/transaci']); }
-
-   getCampos() {
-      return <FormArray>this.formBene.get('campos');
+   changePartida(ejecucio: Ejecucio) {
+      this.intpreSeleccionado = ejecucio.intpre.intpre;
+      this.formTransaci.controls['codpar'].setValue(ejecucio.intpre.codigo + '.' + ejecucio.intpre.codpar);
+      this.formTransaci.controls['nompar'].setValue(ejecucio.intpre.nompar);
    }
 
-   aniadir() {
-      const grupo = new FormGroup({
-         // 'idbene': new FormControl(null, Validators.required, this.valBenefi.bind(this)),
-         'idbene': new FormControl(null),
-         'intdoc': new FormControl(this.iAsiento.intdoc, Validators.required),
-         'numdoc': new FormControl(this.iAsiento.numdoc, Validators.required),
-         'valor': new FormControl(null, Validators.required),
-         'totpagcob': new FormControl(null, Validators.required),
-         'saldo': new FormControl(null),
+   //Beneficiarios por Transacción
+   get registros(): FormArray { return this.formBenextran.get('registros') as FormArray }
+
+   agregarFila(): void {
+      const index = this.registros.length;
+      this.registros.push(this.crearRegistro(index));
+   }
+
+   crearRegistro(i: number): FormGroup {
+      return this.fb.group({
+         beneficiario: ['', Validators.required, this.valBeneficiario(i)],
+         valor: [0, [Validators.required, Validators.min(0)]]
       });
-      (<FormArray>this.formBene.get('campos')).push(grupo);
    }
 
-   onSubmit() {
-      this.cuenta.idcuenta = this._cuentas[0].idcuenta;
-      this.formTransaci.value.idcuenta = this.cuenta;
-      this.documento.intdoc = this.formTransaci.get('intdoc')!.value;
-      this.formTransaci.value.intdoc = this.documento;
-
-      this.tranService.saveTransa(this.formTransaci.value).subscribe({
-         next: (resp) => {
-            //Añade Beneficiario(s) (benextran)
-            const _resp = resp as Transaci;  //Preferible a any
-            // let items = this.formBenextran.get('items') as FormArray;
-            for (let i = 0; i < this.benes.length; i++) {
-               let itemGroup = this.benes.at(i) as FormGroup;
-               let iBenextran = {} as interfaceBenextran;
-               iBenextran.inttra = _resp;
-               this.beneficiario.idbene = this._beneficiarios[0].idbene;
-               iBenextran.idbene = this.beneficiario;
-               this.documento.intdoc = itemGroup.get('intdoc')!.value;
-               iBenextran.intdoc = this.documento;
-               let numdoc = itemGroup.get('numdoc')!.value;
-               iBenextran.numdoc = numdoc;
-               iBenextran.valor = itemGroup.get('valor')!.value;
-               iBenextran.totpagcob = 0;
-               iBenextran.pagocobro = 0;
-               this.benextranService.saveBenextran(iBenextran).subscribe({
-                  // next: (nex) => {},
-                  error: err => console.error(err.error)
-               });
-            }
-            //Actualiza Totales del Asiento
-            if (this.formTransaci.get('debcre')!.value == 1) this.totDebe = this.totDebe + this.formTransaci.get('valor')!.value
-            else this.totHaber = this.totHaber + this.formTransaci.get('valor')!.value
-            this.asiService.updateTotdebAndTotcre(this.idasiento, this.totDebe, this.totHaber).subscribe({
-               next: resp => this.regresar(),
-               error: err => console.error(err.error)
-            });
-         },
-         error: (error) => {
-            console.error('Error al guardar:', error);
-         }
-      });
-
-      // this.tranService.saveTransa1(this.formTransaci.value).subscribe({
-      //    next: transa => {
-      //       const id = transa.idtransa;
-      //       console.log('id devuelto: ', id)
-
-      //       if(this.formTransaci.get('debcre')!.value == 1) this.totDebe = this.totDebe + this.formTransaci.get('valor')!.value
-      //       else this.totHaber = this.totHaber + this.formTransaci.get('valor')!.value
-      //       this.asiService.updateTotdebAndTotcre(this.idasiento, this.totDebe, this.totHaber).subscribe({
-      //          next: resp => this.regresar(),
-      //          error: err => console.error(err.error)
-      //       });
-      //       this.regresar()
-      //    },
-      //    error: err => console.error(err.error)
-      // });
+   eliminarFila(index: number): void {
+      this.registros.removeAt(index);
+      const suma = this.getTotalValorBenextran();
+      if (suma != 0) this.formTransaci.controls['valor'].setValue(suma)
+      else this.formTransaci.controls['valor'].setValue(null)
    }
 
-   formatInput() {
-      let valorFormateado: string;
-      let valor = this.formTransaci.get('valor')!.value;
-      if (valor === '' || isNaN(valor)) valorFormateado = '';         // Comprueba si el valor está vacío o NaN
-      else {
-         valorFormateado = parseFloat(valor).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      }
-      this.f['valor'].setValue(valorFormateado);
-   }
-
-   decimalValidator(control: AbstractControl): ValidationErrors | null {
-      const value = control.value;
-      if (value === null || value === undefined || value === '') { return null; }
-      const regex = /^-?\d{1,3}(,\d{3})*(\.\d{0,2})?$/;
-      return regex.test(value) ? null : { invalidDecimal: true };
-   }
-
-   // benefixNombre1(e: any) {
-   //    if (e.target.value != '') {
-   //       this.beneService.findByNombre(e.target.value).subscribe({
-   //          next: datos => this._beneficiarios = datos,
-   //          error: err => console.error(err.error),
-   //       });
-   //    }
-   // }
-   benefixNombre(e: any) {
+   benefixNombre(index: number, e: any) {
+      if (!this.arrBeneficiarios[index]) { this.arrBeneficiarios[index] = []; }
       if (e.target.value != '') {
          this.beneService.findByNomben(e.target.value).subscribe({
-            next: datos => this._beneficiarios = datos,
+            next: (beneficiarios: Beneficiarios[]) => this.arrBeneficiarios[index] = beneficiarios,
             error: err => console.error(err.error),
          });
-      }
+      } else this.arrBeneficiarios[index] = [];
+   }
+   onBenefiSelected(index: number, e: any) {
+      const selectedOption = this.arrBeneficiarios[index]?.find((x: { nomben: any; }) => x.nomben === e.target.value);
+      if (selectedOption) this.arrIdbeneficiario[index] = selectedOption.idbene;
+      else this.arrIdbeneficiario[index] = null;
    }
 
-   onBeneSelected(e: any, i: number) {
-      const selectedOption = this._beneficiarios.find((x: { nomben: any; }) => x.nomben === e.target.value);
-      if (selectedOption) this.idbenefi = selectedOption.idbene;
-      else this.idbenefi = null;
-      // Agregar la validación después de que onBeneSelected se haya ejecutado
-      const grupo = (<FormArray>this.formBene.get('campos')).at(i) as FormGroup;
-      grupo.get('idbene')?.setValidators([Validators.required, this.valBenefi.bind(this)]);
-      grupo.get('idbene')?.updateValueAndValidity();
-   }
-
-   // generateUniqueId(): number {
-   //    return this.uniqueIdCounter++;
-   // }
-
-   // aniadir1() {
-   //    this.control = this.formBenextran.get('items') as any;
-   //    const uniqueId = this.generateUniqueId();
-   //    this.control.push(
-   //       this.fb.group({
-   //          id: [uniqueId],
-   //          idbene: ['', Validators.required],
-   //          intdoc: [this.iAsiento.intdoc, Validators.required],
-   //          numdoc: [this.iAsiento.numdoc, [Validators.required]],
-   //          valor: [0, [Validators.required]],
-   //          totpagcob: 0,
-   //          saldo: 0
-   //       })
-   //    );
-   //    this.formBenextran.get('numdoc')!.addValidators([Validators.required]);
-   // }
-
-   // aniadir2() {
-   //    const control = this.formBenextran.get('items') as FormArray;
-   //    const uniqueId = this.generateUniqueId();
-
-   //    // Crea una nueva instancia del grupo de formulario para asegurar que tenga su propio contador
-   //    const newFormGroup = this.fb.group({
-   //       id: [uniqueId],
-   //       idbene: ['', Validators.required],
-   //       intdoc: [this.iAsiento.intdoc, Validators.required],
-   //       numdoc: [this.iAsiento.numdoc, [Validators.required]],
-   //       valor: [0, [Validators.required]],
-   //       totpagcob: 0,
-   //       saldo: 0
-   //    });
-
-   //    control.push(newFormGroup);
-   //    this.formBenextran.get('numdoc')!.addValidators([Validators.required]);
-   // }
-
-   // Getter para acceder a los controles del formArray
-   get formArrayControls() {
-      return (this.formBenextran.get('items') as any).controls;
+   seleccionarTexto(event: FocusEvent): void {
+      const input = event.target as HTMLInputElement;
+      input.select();
    }
 
    changeValor() {
-      let sum = 0;
-      for (let i = 0; i < this.benes.length; i++) {
-         let itemGroup = this.benes.at(i) as FormGroup;
-         let valor = +itemGroup.get('valor')!.value;
-         sum = sum + valor;
-      }
-      this.formTransaci.controls['valor'].setValue(sum.toString());
+      const suma = this.getTotalValorBenextran();
+      if (suma != 0) this.formTransaci.controls['valor'].setValue(suma)
+      else this.formTransaci.controls['valor'].setValue(null)
    }
 
-   total() {
-      // let items = this.formBenextran.get('items') as FormArray;
-      let sum = 0;
-      for (let i = 0; i < this.benes.length; i++) {
-         let itemGroup = this.benes.at(i) as FormGroup;
-         let valor = itemGroup.get('valor')!.value;
-         sum = sum + itemGroup.get('valor')!.value;
-      }
+   getTotalValorBenextran(): number {
+      return this.registros.controls.reduce((total, fila) => {
+         const valor = fila.get('valor')?.value;
+         return total + (typeof valor === 'number' ? valor : 0);
+      }, 0);
    }
+
+   onSubmit() {
+      let intpre: number | null = null;
+      if (this.tiptran.numero == 3 || this.tiptran.numero == 6) { intpre = this.intpreSeleccionado }
+      const dto: TransaciCreateDTO = {
+         idasiento: { idasiento: this.idasiento },
+         tiptran: this.tiptran.numero,
+         orden: this.formTransaci.value.orden,
+         idcuenta: { idcuenta: this.idcuenta! },
+         codcue: this.formTransaci.value.codcue,
+         debcre: this.nomDebcre === 'Debe' ? 1 : 2,
+         valor: this.formTransaci.value.valor,
+         intdoc: { intdoc: this.formTransaci.value.intdoc },
+         numdoc: this.formTransaci.value.numdoc,
+         descri: this.formTransaci.value.descri,
+         idbene: { idbene: this.arrIdbeneficiario[0]! },
+         totbene: this.registros.length,
+         intpre: intpre,
+         usucrea: this.authService.idusuario,
+         feccrea: new Date(),
+      };
+      this.tranService.saveTransaci(dto).subscribe({
+         next: (newtransaci: Transaci) => {
+            //Añade Beneficiario(s) (benextran) en lote
+            const registrosFA = this.formBenextran.get('registros') as FormArray;
+            const dtoLote: BenextranCreateDTO[] = registrosFA.controls.map((ctrl, index) => {
+               const fila = ctrl.value;
+               return {
+                  inttra: { inttra: newtransaci.inttra },
+                  idbene: { idbene: this.arrIdbeneficiario[index]! },
+                  intdoc: { intdoc: newtransaci.intdoc.intdoc },
+                  numdoc: newtransaci.numdoc,
+                  valor: fila.valor,
+                  totpagcob: 0,
+                  pagocobro: 0
+               };
+            });
+            // console.log('dtoLote: ', dtoLote)
+            this.benextranService.guardarLote(dtoLote).subscribe({
+               next: () => {
+                  this.authService.swal('success', `Transacción de la Cuenta ${newtransaci.codcue} guardada con éxito`);
+                  this.regresar();
+               },
+               error: err => { console.error(err.error); this.authService.mostrarError('Error al guardar Benextran por lote', err.error) }
+            });
+
+         },
+         error: err => { console.error(err.error); this.authService.mostrarError('Error al guardar Transaci', err.error) }
+      });
+   }
+
+   regresar() { this.router.navigate(['/transaci']); }
 
    //Valida Cuenta
-   valCuenta() {
-      if (this.idcuenta == null) return of({ 'invalido': true });
-      else return of(null);
+   valCuenta(): AsyncValidatorFn {
+      return (_control: AbstractControl): Observable<ValidationErrors | null> => {
+         const esValido = this.idcuenta != null;
+         return of(esValido ? null : { invalido: true });
+      };
    }
 
    //Valida Beneficiario
-   valBenefiOk() {
-      if (this.idbenefi == null) return of({ 'invalido': true });
-      else return of(null);
-   }
-   valBenefi() {
-      let rtn: any;
-      if (this.idbenefi == null) rtn = { 'invalido': true }
-      return of(rtn)
+   valBeneficiario(i: number): AsyncValidatorFn {
+      return (_control: AbstractControl): Observable<ValidationErrors | null> => {
+         if (this.arrIdbeneficiario[i] == null) return of({ 'invalido': true });
+         else return of(null);
+      };
    }
 
 }
@@ -391,41 +315,12 @@ interface interfaceAsiento {
    intdoc: number;
 }
 
-interface interfaceTransaci {
-   idtransa: number;
-}
-
-//Nombre Tipo de Comprobante
-function nomcomprobante(tipcom: number): string {
-   var rtn: string;
-   switch (tipcom) {
-      case 1: rtn = 'I-';
-         break;
-      case 2: rtn = 'E-';
-         break;
-      case 3: rtn = 'DC-';
-         break;
-      case 4: rtn = 'DI-';
-         break;
-      case 5: rtn = 'DE-';
-         break;
-      default:
-         rtn = '';
-   }
-   return rtn;
-}
-
-interface interfaceBenextran {
-   idbenxtra: number;
-   inttra: Transaci;
-   idbene: Beneficiarios;
-   intdoc: Documentos;
-   numdoc: string;
-   valor: number;
-   totpagcob: number;
-   pagocobro: number;
-   intpre: number;
-   codparreci: string;
-   codcuereci: string;
-   asierefe: number;
+function nombreTiptran(tiptran: number): { nombre: string, cabecera1: string, cabecera2: string } {
+   if (tiptran == 2) return { nombre: 'Registro de Anticipo(s)', cabecera1: 'Anticipo', cabecera2: 'Liquidado' };
+   if (tiptran == 3) return { nombre: 'Registro de Cuenta(s) por cobrar', cabecera1: 'Cuenta por cobrar', cabecera2: 'Cobrado' };
+   if (tiptran == 4) return { nombre: 'Registro de Cuenta(s) por cobrar año anterior', cabecera1: 'Valor', cabecera2: 'Cobrado' };
+   if (tiptran == 5) return { nombre: 'Registro de Depósitos y fondos de terceros', cabecera1: 'Valor', cabecera2: 'Liquidado' };
+   if (tiptran == 6) return { nombre: 'Registro de Cuenta(s) por pagar', cabecera1: 'Cuenta por Pagar', cabecera2: 'Pagado' };
+   if (tiptran == 7) return { nombre: 'Registro de Cuenta(s) por pagar año anterior', cabecera1: 'Valor', cabecera2: 'Pagado' };
+   return { nombre: '(Ninguno)', cabecera1: ' ', cabecera2: ' ' };
 }

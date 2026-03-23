@@ -7,6 +7,9 @@ import { DocumentosService } from 'src/app/servicios/administracion/documentos.s
 import { Documentos } from 'src/app/modelos/administracion/documentos.model';
 import { Beneficiarios } from 'src/app/modelos/contabilidad/beneficiarios.model';
 import { map } from 'rxjs';
+import { PartixcertiService } from 'src/app/servicios/contabilidad/partixcerti.service';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import { Certipresu } from 'src/app/modelos/contabilidad/certipresu.model';
 
 @Component({
    selector: 'app-modi-certipresu',
@@ -17,45 +20,37 @@ import { map } from 'rxjs';
 export class ModiCertipresuComponent implements OnInit {
 
    formCertipresu: FormGroup;
-   gruben: number = 4;
-   _responsables: any;
-   _beneficiarios: any;
-   _documentos: any;
+   documentos: Documentos[] = [];
+   intdoc: number;
+   beneficiarios: Beneficiarios[] = [];
+   idbene: number | null;
+   responsables: Beneficiarios[] = [];;
+   idbeneres: number | null;
    idcerti: number;
    antnumero: number;
-   swmodibene: boolean = false;
-   antidbene: number;
-   swmodiresp: boolean = false;
-   antidbeneres: number;
-
-   beneficiario: Beneficiarios = new Beneficiarios;
-   responsable: Beneficiarios = new Beneficiarios;
+   partidas: number = 0;
 
    constructor(private beneService: BeneficiariosService, private router: Router, private fb: FormBuilder,
-      private docuService: DocumentosService, private certiService: CertipresuService) { }
+      private docuService: DocumentosService, private certiService: CertipresuService, public authService: AutorizaService,
+      private parxcerService: PartixcertiService) { }
 
    ngOnInit(): void {
+      if (!this.authService.sessionlog) { this.router.navigate(['/inicio']); }
       sessionStorage.setItem('ventana', '/certipresu');
       let coloresJSON = sessionStorage.getItem('/certipresu');
       if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
 
       this.idcerti = +sessionStorage.getItem("idcertiToModi")!;
-      let documento: Documentos = new Documentos;
       this.formCertipresu = this.fb.group({
-         tipo: 1,
-         numero: [null, [Validators.required, Validators.min(1)], this.valNumero.bind(this) ],
-         valor: 0,
-         fecha: [],
-         intdoc: documento,
-         numdoc: [null, [Validators.required, Validators.minLength(1) ]],
-         idbene: [null, Validators.required],
-         idbeneres: [null, Validators.required],
+         numero: [null, [Validators.required, Validators.min(1)], this.valNumero()],
+         fecha: ['', Validators.required, this.valAño()],
+         intdoc: this.documentos,
+         numdoc: [null, Validators.required],
+         idbene: [null, Validators.required, this.valBenefi()],
+         idbeneres: [null, Validators.required, this.valResponsa()],
          descripcion: [],
-         usucrea: 1,
-         feccrea: [],
-         usumodi: [],
-         fecmodi: [],
-      });
+      }, { updateOn: "blur" });
+
       this.datosCertipresu();
       this.listarDocumentos();
    }
@@ -69,107 +64,148 @@ export class ModiCertipresuComponent implements OnInit {
       if (detalle) detalle.classList.add('nuevoBG2');
    }
 
+   listarDocumentos() {
+      this.docuService.getListaDocumentos().subscribe({
+         next: (documentos: Documentos[]) => {
+            this.documentos = documentos;
+            const encontrado = documentos.find(d => d.intdoc === this.intdoc);
+            if (encontrado) { this.f['intdoc'].setValue(encontrado.intdoc); }
+         },
+         error: err => console.error(err.error),
+      });
+   }
+
    datosCertipresu() {
       this.certiService.getById(this.idcerti).subscribe({
-         next: datos => {
-            this.antnumero = datos.numero;
-            this.antidbene = datos.idbene.idbene;
-            this.antidbeneres = datos.idbeneres.idbene;
-            this.formCertipresu.setValue({
-               tipo: datos.tipo,
-               numero: datos.numero,
-               fecha: datos.fecha,
-               valor: datos.valor,
-               descripcion: datos.descripcion,
-               numdoc: datos.numdoc,
-               idbene: datos.idbene.nomben,
-               idbeneres: datos.idbeneres.nomben,
-               intdoc: datos.intdoc,
-               usucrea: datos.usucrea,
-               feccrea: datos.feccrea,
-               usumodi: datos.usumodi,
-               fecmodi: datos.fecmodi,
-            })
+         next: (certi: Certipresu) => {
+            this.antnumero = certi.numero;
+            this.intdoc = certi.intdoc.intdoc;
+            this.idbene = certi.idbene.idbene;
+            this.idbeneres = certi.idbeneres.idbene;
+            this.formCertipresu.patchValue({
+               numero: certi.numero,
+               fecha: certi.fecha,
+               intdoc: certi.intdoc.intdoc,
+               numdoc: certi.numdoc,
+               idbene: certi.idbene.nomben,
+               idbeneres: certi.idbeneres.nomben,
+               descripcion: certi.descripcion,
+            });
+            this.parxcerService.countByIdcerti(this.idcerti).subscribe({
+               next: partidas => {
+                  this.partidas = partidas;
+               },
+               error: err => { console.error(err.error); this.authService.mostrarError('Error al contar las Partidas', err.error) }
+            });
          },
          error: err => console.error(err.error)
       });
    }
 
-   listarxNombre(e: any) {
+   get f() { return this.formCertipresu.controls; }
+
+   benefixNombre(e: any) {
       if (e.target.value != '') {
          this.beneService.findByNomben(e.target.value).subscribe({
-            next: datos => {
-               this.swmodibene = true;
-               this._beneficiarios = datos;
-            },
+            next: datos => this.beneficiarios = datos,
             error: err => console.error(err.error),
          });
       }
    }
-
-   listarResponsables(e: any) {
-      if (e.target.value != '') {
-         this.beneService
-            // .findByGrupo(e.target.value, this.gruben)
-            .findByNomben( e.target.value )
-            .subscribe({
-               next: datos => {
-                  this.swmodiresp = true;
-                  this._responsables = datos;
-               },
-               error: err => console.error(err.error),
-            });
-      }
+   onBeneficiarioSelected(e: any) {
+      const selectedOption = this.beneficiarios.find((x: { nomben: any; }) => x.nomben === e.target.value);
+      if (selectedOption) this.idbene = selectedOption.idbene;
+      else this.idbene = null;
    }
 
-   get f() { return this.formCertipresu.controls; }
+   responsaxNombre(e: any) {
+      if (e.target.value != '') {
+         this.beneService.findByNomben(e.target.value).subscribe({
+            next: (responsables: Beneficiarios[]) => this.responsables = responsables,
+            error: err => console.error(err.error),
+         });
+      }
+   }
+   onResponsableSelected(e: any) {
+      const selectedOption = this.responsables.find((x: { nomben: any; }) => x.nomben === e.target.value);
+      if (selectedOption) this.idbeneres = selectedOption.idbene;
+      else this.idbeneres = null;
+   }
 
    onSubmit() {
-      if(this.swmodibene) this.beneficiario.idbene = this._beneficiarios[0].idbene;
-      else this.beneficiario.idbene = this.antidbene;
-      this.formCertipresu.value.idbene = this.beneficiario;
-
-      if(this.swmodiresp) this.responsable.idbene = this._responsables[0].idbene;
-      else this.responsable.idbene = this.antidbeneres;
-      this.formCertipresu.value.idbeneres = this.responsable;
-      this.saveCetiPresu();
-   }
-
-   saveCetiPresu() {
-      this.certiService.updateCerti(this.idcerti, this.formCertipresu.value).subscribe({
-         next: datos => {
+      const dto: CertipresuUpdateDTO = {};   // Todos los campos opcionales
+      if (this.f['numero'].dirty) { dto.numero = this.f['numero'].value; }
+      if (this.f['fecha'].dirty) { dto.fecha = this.f['fecha'].value; }
+      if (this.f['intdoc'].dirty) { dto.intdoc = { intdoc: this.f['intdoc'].value }; }
+      if (this.f['numdoc'].dirty) { dto.numdoc = this.f['numdoc'].value; }
+      if (this.f['idbene']?.dirty) { dto.idbene = { idbene: this.idbene }; }
+      if (this.f['idbeneres']?.dirty) { dto.idbeneres = { idbene: this.idbeneres }; }
+      if (this.f['descripcion'].dirty) { dto.descripcion = this.f['descripcion'].value; }
+      dto.usumodi = this.authService.idusuario;
+      dto.fecmodi = new Date();
+      this.certiService.updateCertipresu(this.idcerti, dto).subscribe({
+         next: (actualizada: Certipresu) => {
+            this.authService.swal('success', `Certificación ${actualizada.numero} actualizada con éxito`);
             this.retornar();
          },
-         error: err => console.error(err.error),
+         error: err => { console.error('Al actualizar la Certificación: ', err.error); this.authService.mostrarError('Error al actualizar', err.error) }
       });
-   }
-
-   listarDocumentos() {
-      this.docuService.getListaDocumentos().subscribe({
-         next: datos => {
-            this._documentos = datos;
-         },
-         error: err => console.error(err.error),
-      });
-   }
-
-   compararDocumentos(o1: Documentos, o2: Documentos): boolean {
-      if (o1 === undefined && o2 === undefined) {
-         return true;
-      } else {
-         return o1 === null || o2 === null || o1 === undefined || o2 === undefined
-            ? false
-            : o1.intdoc === o2.intdoc;
-      }
    }
 
    retornar() { this.router.navigate(['/certipresu']); }
 
-   valNumero(control: AbstractControl) {
-      return this.certiService.valNumero(control.value)
-         .pipe(
-            map(result => result != null && control.value != this.antnumero ? { existe: true } : null)
+   // Valida el número
+   valNumero(): AsyncValidatorFn {
+      return (control: AbstractControl) => {
+         const valor = control.value;
+         if (valor === null || valor === undefined || valor === '') { return of(null); }
+         return this.certiService.valNumero(valor, 1).pipe(
+            map(existe => {
+               if (existe && valor !== this.antnumero) { return { existe: true }; }
+               return null;
+            }),
+            catchError(() => of(null))
          );
+      };
    }
 
+   //Valida el año de la fecha
+   valAño(): AsyncValidatorFn {
+      return (control: AbstractControl): Observable<ValidationErrors | null> => {
+         const datos = this.authService.getDatosEmpresa();
+         const añoEmpresa = datos?.fechap?.toString().slice(0, 4);
+         const añoDigitado = control.value?.toString().slice(0, 4);
+         const esValido = añoEmpresa === añoDigitado;
+         return of(esValido ? null : { añoinvalido: true });
+      };
+   }
+
+   //Valida que se haya seleccionado un Beneficiario
+   valBenefi(): AsyncValidatorFn {
+      return (_control: AbstractControl) => {
+         if (this.idbene == null) { return of({ invalido: true }); }
+         return of(null);
+      };
+   }
+
+   //Valida que se haya seleccionado un Responsable
+   valResponsa(): AsyncValidatorFn {
+      return (_control: AbstractControl) => {
+         if (this.idbeneres == null) { return of({ invalido: true }); }
+         return of(null);
+      };
+   }
+
+}
+
+export interface CertipresuUpdateDTO {
+   numero?: number;
+   fecha?: Date;
+   descripcion?: String;
+   intdoc?: { intdoc: number };
+   numdoc?: String;
+   idbene?: { idbene: number | null };
+   idbeneres?: { idbene: number | null };
+   usumodi?: number;
+   fecmodi?: Date;
 }

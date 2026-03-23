@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormControl, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { map, of } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import { Cuentas } from 'src/app/modelos/contabilidad/cuentas.model';
+import { Niveles } from 'src/app/modelos/contabilidad/niveles.model';
 import { CuentasService } from 'src/app/servicios/contabilidad/cuentas.service';
 import { NivelesService } from 'src/app/servicios/contabilidad/niveles.service';
 
@@ -14,13 +16,15 @@ import { NivelesService } from 'src/app/servicios/contabilidad/niveles.service';
 
 export class AddCuentaComponent implements OnInit {
 
-   formCuenta: any;
-   _niveles: any;
+   formCuenta: FormGroup;
+   _niveles: Niveles[] = [];
    grucue: string | null;
    nomgru: string | null;
-   nivel: any;
+   nivel: Niveles;
    nivcue: number;
    nivcuenew: number;
+
+   niveles: Niveles = new Niveles();
 
    constructor(private router: Router, private fb: FormBuilder, public authService: AutorizaService,
       private cuentasService: CuentasService, private nivService: NivelesService) {
@@ -53,12 +57,12 @@ export class AddCuentaComponent implements OnInit {
 
    nivelSiguiente() {
       this.nivService.getSiguienteNivcue(this.nivcue).subscribe({
-         next: resp => {
-            this.nivel = resp;
-            this.nivcuenew = resp.nivcue;
+         next: (nivel: Niveles) => {
+            this.nivel = nivel;
+            this.nivcuenew = nivel.nivcue;
             this.crearForm();
          },
-         error: err => console.error(err.msg.error)
+         error: err => console.error(err.error)
       })
    }
 
@@ -67,9 +71,10 @@ export class AddCuentaComponent implements OnInit {
       this.formCuenta = this.fb.group({
          codcue: [this.grucue + '.', [Validators.required, Validators.minLength(this.nivcuenew), Validators.maxLength(this.nivcuenew)], [this.valCodcue.bind(this), this.valGrupo.bind(this)]],
          nomcue: [null, [Validators.required, Validators.minLength(3)], this.valNomcue.bind(this)],
-         grucue: [this.grucue],
-         nomgru: [this.nomgru],
-         nivcue: [this.nivel.nomniv],
+         grucue: this.grucue,
+         nomgru: this.nomgru,
+         nivcue: this.nivel.nomniv,
+         idnivel: Niveles,
          movcue: 1,
          asodebe: [''],
          asohaber: [''],
@@ -85,17 +90,19 @@ export class AddCuentaComponent implements OnInit {
 
    get f() { return this.formCuenta.controls; }
 
-   onSubmit() {
+   guardar() {
+      this.formCuenta.value.nivcue = this.nivel.nivcue;
+      this.niveles.idnivel = this.nivel.idnivel;
+      this.formCuenta.value.idnivel = this.niveles;
+      if (this.formCuenta.value.movcue == 1) this.formCuenta.value.movcue = 2
+      else this.formCuenta.value.movcue = 1
       this.cuentasService.saveCuenta(this.formCuenta.value).subscribe({
-         next: resp => {
-            // this.crearForm()
-            //    this.parent.listarCuentas()
+         next: (nueva: Cuentas) => {
+            sessionStorage.setItem('ultidcuenta', nueva.idcuenta.toString());
+            this.regresar();
          },
-         error: err => console.error(err.error)
+         error: err => console.error('Al guardar la nueva cuenta: ', err.error)
       });
-   }
-
-   reset1() {
    }
 
    regresar() { this.router.navigate(['/cuentas']); }
@@ -108,8 +115,9 @@ export class AddCuentaComponent implements OnInit {
 
    //Valida que no se modifique el Grupo
    valGrupo(control: FormControl) {
-      const grucue = this.formCuenta.get('grucue').value.toString() + '.';
+      const grucue = this.formCuenta.get('grucue')!.value.toString() + '.';
       const codcue = control.value.toString().slice(0, grucue.length);
+      // console.log('valGrupo: ', grucue, codcue)
       if (grucue !== codcue) return of({ invalido: true });
       else return of(null);
    }

@@ -162,6 +162,7 @@ export class InfoBeneficiarioComponent implements OnInit {
 	}
 
 	liquidaciones(event: any, movimi: Benextran){
+		// console.log('Liquidacion')
 		let movimientoToInfo: { idbenxtra: number, nomben: string }
 		movimientoToInfo = {
 			idbenxtra: movimi.idbenxtra,

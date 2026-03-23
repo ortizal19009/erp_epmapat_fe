@@ -1,6 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, firstValueFrom } from 'rxjs';
+import { Observable, catchError, firstValueFrom, map, of, throwError } from 'rxjs';
+import { AsientoCreateDTO } from 'src/app/componentes/contabilidad/asientos/add-asiento/add-asiento.component';
+import { AsientoUpdateDTO } from 'src/app/componentes/contabilidad/asientos/modi-asiento/modi-asiento.component';
 import { Asientos } from 'src/app/modelos/contabilidad/asientos.model';
 import { environment } from 'src/environments/environment';
 
@@ -49,8 +51,23 @@ export class AsientosService {
       return this.http.get<Asientos>(`${baseUrl}/ultimo`);
    }
 
+   // Un asiento por id (con /asiento)
    unAsiento(idasiento: number): Observable<Asientos> {
       return this.http.get<Asientos>(`${baseUrl}/asiento?idasiento=${idasiento}`);
+   }
+
+   // Un asiento por ID
+   findByIdAsiento(idasiento: number): Observable<Asientos | null> {
+      return this.http.get<Asientos>(`${baseUrl}/${idasiento}`, { observe: 'response' })
+         .pipe(
+            map(resp => resp.status === 200 ? resp.body! : null),
+            catchError(err => {
+               if (err.status === 404) {
+                  return of(null);
+               }
+               return throwError(() => err);
+            })
+         );
    }
 
    //Ultima Fecha
@@ -58,9 +75,30 @@ export class AsientosService {
       return this.http.get<Date>(`${baseUrl}/ultimafecha`);
    }
 
+   // Primer Comprobante
+   obtenerPrimerCompro(tipcom: number): Observable<number> {
+      return this.http.get<number>(`${baseUrl}/primercompro/${tipcom}`);
+   }
+
    //Ultimo Comprobante
    obtenerUltimoCompro(tipcom: number): Observable<number> {
       return this.http.get<number>(`${baseUrl}/ultimocompro?tipcom=${tipcom}`);
+   }
+
+   // Un asiento por número
+   buscaPorNumero(asiento: number): Observable<Asientos | null> {
+      return this.http.get<Asientos>(`${baseUrl}/numero/${asiento}`, { observe: 'response' })
+         .pipe(
+            map(resp => resp.status === 200 ? resp.body! : null)
+         );
+   }
+
+   // Un asiento por Comprobante
+   buscaPorComprobante(tipcom: number, compro: number): Observable<Asientos | null> {
+      return this.http.get<Asientos>(`${baseUrl}/comprobante/${tipcom}/${compro}`, { observe: 'response' })
+         .pipe(
+            map(resp => resp.status === 200 ? resp.body! : null)
+         );
    }
 
    //Valida número de Comprobante
@@ -69,28 +107,31 @@ export class AsientosService {
    }
 
    //Actualizar los Totales del Asiento
-   updateTotdebAndTotcre(idasiento: number, totdeb: number, totcre: number): Observable<any> {
-      return this.http.patch(`${baseUrl}/totales?idasiento=${idasiento}&totdeb=${totdeb}&totcre=${totcre}`, null);
-   }
+   // updateTotdebAndTotcre(idasiento: number, totdeb: number, totcre: number): Observable<any> {
+   //    return this.http.patch(`${baseUrl}/totales?idasiento=${idasiento}&totdeb=${totdeb}&totcre=${totcre}`, null);
+   // }
 
-   saveAsiento(asientos: Asientos): Observable<Object> {
-      return this.http.post(`${baseUrl}`, asientos);
+   // Save usando DTO
+   saveAsiento(asiento: AsientoCreateDTO): Observable<Asientos> {
+      return this.http.post<Asientos>(`${baseUrl}`, asiento);
    }
 
    getByIdAsiento(idasiento: number) {
       return this.http.get<Asientos[]>(`${baseUrl}/${idasiento}`);
    }
 
-   getById(idasiento: number) {
+   getById(idasiento: number): Observable<Asientos> {
       return this.http.get<Asientos>(baseUrl + "/" + idasiento);
    }
 
-   updateAsiento(idasiento: number, asientos: Asientos): Observable<Object> {
-      return this.http.put(baseUrl + "/" + idasiento, asientos);
+   // Actualiza solo modificados
+   updateAsiento(idasiento: number, dto: AsientoUpdateDTO): Observable<Asientos> {
+      return this.http.put<Asientos>(`${baseUrl}/${idasiento}`, dto);
    }
 
-   deleteAsiento(idasiento: number) {
-      return this.http.delete(`${baseUrl}/${idasiento}`);
+   // Elimina (controlando 404)
+   deleteAsiento(idasiento: number): Observable<any> {
+      return this.http.delete(`${baseUrl}/${idasiento}`, { responseType: 'text' });
    }
 
 }

@@ -109,18 +109,18 @@ export class ComprobacionComponent implements OnInit {
             this._cuentas = resp;
             this.arreglo2 = this._cuentas;
          },
-         error: err => console.error(err.error)
+         error: err => console.log(err.error)
       });
 
       this.nivelesService.getListaNiveles().subscribe({
          next: resp => {
             this._niveles = resp
          },
-         error: err => console.error(err.error)
+         error: err => console.log(err.error)
       });
    }
 
-   changeSigef() {
+   changeSigef(){
       this.swsigef = this.formBuscar.value.sigef;
    }
 
@@ -137,6 +137,7 @@ export class ComprobacionComponent implements OnInit {
       this.arreglo3 = [];
 
       this._balance = await this.totalTransa();
+      //   console.log('transacciones acumuladas',this._balance)
       for (const transacio1 of this._balance) {
          this.codcue = transacio1.codcue;
          let registroActual = this.arreglo2.find((r: { codcue: any; }) => r.codcue === this.codcue);
@@ -215,9 +216,11 @@ export class ComprobacionComponent implements OnInit {
                      });
                   }
                } else {
+                  console.log('Registrocta no existe', this.codcue_par);
                };
             }
          } else {
+            console.log('ctas no existe', this.codcue);
          };
       }
 
@@ -317,25 +320,15 @@ export class ComprobacionComponent implements OnInit {
 
       };
 
-      if (this.otraPagina) {
-         const blob = doc.output('blob');
-         const url = URL.createObjectURL(blob);
-         const ventana = window.open(url, '_blank');
-
-         // Libera memoria cuando la ventana se cierre
-         if (ventana) {
-            ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
-         }
-      }
+      if (this.otraPagina) doc.output('dataurlnewwindow', opciones);
       else {
-         const pdfBlob = doc.output('blob');
-         const blobUrl = URL.createObjectURL(pdfBlob);
+         const pdfDataUri = doc.output('datauristring');
          //Si ya existe el <embed> primero lo remueve
          const elementoExistente = document.getElementById('idembed');
          if (elementoExistente) { elementoExistente.remove(); }
          //Crea el <embed>
          var embed = document.createElement('embed');
-         embed.setAttribute('src', blobUrl);
+         embed.setAttribute('src', pdfDataUri);
          embed.setAttribute('type', 'application/pdf');
          embed.setAttribute('width', '75%');
          embed.setAttribute('height', '100%');
@@ -403,14 +396,14 @@ export class ComprobacionComponent implements OnInit {
          worksheet.getColumn(config.columnIndex).width = config.widthInChars;
       });
 
-      // Columnas centradas
+      // Columnas centradas 
       const columnsToCenter = [2];
       columnsToCenter.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {
             cell.alignment = { vertical: 'middle', horizontal: 'center' };
          });
       });
-      // Columnas a la derecha
+      // Columnas a la derecha 
       let columnsToRigth = [2];
       columnsToRigth.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {

@@ -103,6 +103,7 @@ export class ClasificadorComponent implements OnInit {
    nuevo() { this.router.navigate(['/add-clasificador']); }
 
    modificar(intcla: number) {
+      console.log('intcla: ', intcla);
       sessionStorage.setItem("intclaToModi", intcla.toString());
       this.router.navigate(['/modi-clasificador']);
    }
@@ -122,7 +123,7 @@ export class ClasificadorComponent implements OnInit {
    elimina() {
       // this.tramiService. .deleteCertipresu(this.certipresu.idcerti).subscribe({
       //    next: datos => this.buscar(),
-      //    error: err => console.error(err.error)
+      //    error: err => console.log(err.error)
       // });
    }
 

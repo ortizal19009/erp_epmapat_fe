@@ -1,0 +1,141 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start sombra cabecera border">
+         <div class="col-sm-12 p-0.">
+            <div class="row p-0">
+
+               <div class="input-group input-group-sm col-md-3 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <label class="input-group-text" id="inputGroup-sizing-sm">Reintegro Nro:</label>
+                  </div>
+                  <input type="number" class="form-control text-center" [value]="iReintegrada.numero" readonly
+                     tabindex="-1">
+                  <div class="dropdown input-group-apppend">
+                     <button type="button" class="btn btn-xs dropdown-toggle btn-info pb-2" data-toggle="dropdown"
+                        (click)="actual()" aria-expanded="false">
+                     </button>
+                     <div class="dropdown-menu dropdown-menu-left border roboto sombra bg-info py-0"
+                        (click)="$event.stopPropagation()">
+                        <div class="p-1 text-center text-white">
+                           <!-- Barra de navegación -->
+                           <div class="btn-group btn-group-sm" role="group">
+                              <button class="btn btn-info" (click)="irPrimero()">⏮</button>
+                              <button class="btn btn-info" (click)="retroceder()">◀</button>
+                              <input #nav type="number"
+                                 class="form-control form-control-sm text-center nav-input nav-input-wide"
+                                 [(ngModel)]="navegador" [ngModelOptions]="{standalone: true}"
+                                 (keyup.enter)="irA(navegador)" (change)="irA(navegador)" min="1">
+                              <button class="btn btn-info" (click)="avanzar()">▶</button>
+                              <button class="btn btn-info" (click)="irUltimo()">⏭</button>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+               </div>
+
+               <div class="input-group input-group-sm col-sm-2 mb-1 mr-0 ">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Fecha</span>
+                  </div>
+                  <input type="text" class="form-control text-center" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [value]="iReintegrada.fecha" readonly tabindex="-1">
+               </div>
+               <div class="input-group input-group-sm col-sm-3 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Doc</span>
+                  </div>
+                  <input type="text" class="form-control" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [value]="iReintegrada.docu" readonly tabindex="-1">
+               </div>
+
+               <div class="input-group input-group-sm col-sm-4 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Responsable</span>
+                  </div>
+                  <input type="text" class="form-control" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [value]="iReintegrada.respon" readonly tabindex="-1">
+
+                  <div class="btn-group ml-auto mt-0 px-0">
+                     <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
+                        data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+                     </button>
+                     <div class="dropdown-menu dropdown-menu-right bg-dark roboto px-0">
+                        <button class="dropdown-item" type="button" (click)="nuevo()">
+                           <i class="bi-file-earmark-plus text-info"></i>&nbsp; Nuevo</button>
+                        <button class="dropdown-item" type="button" (click)="imprimir()">
+                           <i class="bi bi-printer text-info"></i>&nbsp; Imprimir / Exportar</button>
+                        <button class="dropdown-item" type="button" (click)="regresar()">
+                           <i class="bi-arrow-left-circle text-info"></i>&nbsp; Regresar</button>
+                        <button class="dropdown-item" type="button" (click)="cerrar()">
+                           <i class="bi-x-circle text-info"></i>&nbsp; Cerrar</button>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-12">
+         <table *ngIf="partireinte.length > 0" class="table table-hover table-bordered table-sm sombra">
+            <thead class="cabecera">
+               <tr class="pad0">
+                  <th class="text-center">Certifi</th>
+                  <th>Partida</th>
+                  <th>Denominación</th>
+                  <th class="text-right">Valor</th>
+                  <th>Descripción</th>
+                  <th class="text-center">
+                     <div class="col-sm px-0">
+                        <button class="bg-transparent border-0 toolt" type="button" data-toggle="tooltip"
+                           title={{iReintegrada.descripcion}} disabled>
+                           <i class="bi-file-text-fill text-white"></i>
+                        </button>
+                     </div>
+                  </th>
+               </tr>
+            </thead>
+            <tbody class="detalle roboto small pad0">
+               <tr class="fila" *ngFor="let parxrei of partireinte; let i=index">
+                  <td class="text-center">{{ mapCertipreuReintegrada.get(parxrei.idparxcer) }}</td>
+                  <td>{{ parxrei.intpre.codpar}}</td>
+                  <td class="text-truncate ancho" data-toggle="tooltip"
+                     [title]="parxrei.intpre.nompar.length > 60 ? parxrei.intpre.nompar : ''">{{
+                     parxrei.intpre.nompar }}</td>
+                  <td class="text-right">{{ parxrei.valor | number: '1.2-2'}}</td>
+                  <td class="text-truncate ancho300" data-toggle="tooltip"
+                     [ngClass]="{'toolt': parxrei.descripcion.length > 60}"
+                     [title]="parxrei.descripcion.length > 60 ? parxrei.descripcion : ''">{{
+                     parxrei.descripcion }}</td>
+                  <td class="text-center">
+                     <i class="bi-trash-fill text-danger cursor" (click)="eliminar(parxrei)" title="Eliminar"></i>
+                  </td>
+               </tr>
+            </tbody>
+            <tfoot *ngIf="partireinte.length > 1" class="font-weight-bold detalle roboto small pad0">
+               <td colspan="3">TOTAL</td>
+               <td class="text-right">{{sumValor | number: '1.2-2'}}</td>
+               <td colspan="2">
+            </tfoot>
+         </table>
+      </div>
+   </div>
+
+</div>
+
+<div *ngIf="partireinte.length == 0 && swbusca" class="content mt-5">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="card col-sm-6 card-inclinada">
+            <div class="card-body text-center">
+               <p class="texto-inclinado  opaco" (mouseenter)="hover = true" (mouseleave)="hover = false"
+                  [ngClass]="{ 'no-opaco': hover }">¡ No existen registros !</p>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

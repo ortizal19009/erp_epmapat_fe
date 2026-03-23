@@ -58,7 +58,9 @@
                   <td class="text-center">{{ comprobante( liquida.inttra.idasiento.tipcom, liquida.inttra.idasiento.compro) }}</td>
                   <td class="text-right">{{ liquida.valor | number: '1.2-2'}}</td>
                   <td class="text-right custom-cell" [ngClass]="{'transparente': liquida.saldo == 0}">{{ liquida.saldo | number: '1.2-2' }}</td>
-                  <td class="text-left text-truncate ancho">{{ liquida.inttra.descri }}</td>
+                  <!-- <td class="text-left text-truncate ancho">{{ liquida.inttra.descri }}</td> -->
+                  <td class="text-left text-truncate ancho560" data-toggle="tooltip"
+                     [title]="liquida.inttra.descri.length > 100 ? liquida.inttra.descri : ''">{{ liquida.inttra.descri }}</td>
                </tr>
             </tbody>
             <tfoot *ngIf="_liquida" class="font-weight-bold detalle roboto small pad0">

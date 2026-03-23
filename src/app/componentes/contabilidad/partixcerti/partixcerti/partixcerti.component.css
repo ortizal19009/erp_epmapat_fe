@@ -3,12 +3,12 @@
    color: white;
 }
 
-.nuevoBG1 {   background-color: var(--bgcolor1);}
-
 .detalle {   background-color: var(--bgcolor2);}
-
-.nuevoBG2 {   background-color: var(--bgcolor2);}
 
 .ancho {   max-width: 300px;}
 .toolt:hover {   cursor: help;}
 .bg-modificar:hover {   background-color: #2788b4; }
+
+.nav-input-wide {
+  width: 100px;
+}

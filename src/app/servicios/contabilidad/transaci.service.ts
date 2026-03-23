@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, firstValueFrom, map } from 'rxjs';
+import { TransaciCreateDTO, TransaciUpdateDTO } from 'src/app/dtos/contabilidad/transaci.dto';
 import { Transaci } from 'src/app/modelos/contabilidad/transaci.model';
 import { environment } from 'src/environments/environment';
 
@@ -10,6 +11,7 @@ const baseUrl = `${apiUrl}/transaci`;
 @Injectable({
    providedIn: 'root',
 })
+
 
 export class TransaciService {
 
@@ -51,6 +53,11 @@ export class TransaciService {
       return this.http.get<boolean>(`${baseUrl}/porIdasiento?idasiento=${idasiento}`);
    }
 
+   // Cuenta las transacciones de un asiento
+   countByIdasiento(idasiento: number): Observable<number> {
+      return this.http.get<number>(`${baseUrl}/count/${idasiento}`);
+   }
+
    //Cuentas (Transacciones) de una Cuenta
    getByCodcue(codcue: String, desde: Date, hasta: Date) {
       return this.http.get<Transaci[]>(`${baseUrl}/mayor?codcue=${codcue}&desde=${desde}&hasta=${hasta}`);
@@ -71,26 +78,28 @@ export class TransaciService {
       return this.http.get<number>(`${baseUrl}/sumValor?codcue=${codcue}&debcre=${debcre}&desde=${desde}&hasta=${hasta}`);
    }
 
-   updateTransaci(transaci: Transaci) {
-      return this.http.put(`${baseUrl}/updtransaci/${transaci.inttra}`, transaci);
-   }
-
-   //Actualiza indicando el Id
-   updateTransaci1(idtransa: number, transaci: Transaci): Observable<Object> {
-      return this.http.put(`${baseUrl}/${idtransa}`, transaci);
-   }
 
    getFecha(desdeFecha: Date, hastaFecha: Date): Observable<Transaci[]> {
       return this.http.get<Transaci[]>(`${baseUrl}?desdeFecha=${desdeFecha}&hastaFecha=${hastaFecha}`);
    }
 
+   getById(inttra: number) {
+      return this.http.get<Transaci>(baseUrl + "/" + inttra);
+   }
+
    //OJO: Se usa?
-   saveTransaci(transaci: any) {
+   // saveTransaci(transaci: any) {
+   //    return this.http.post(`${baseUrl}`, transaci);
+   // }
+
+   //OJO: Temporal (usar con dto)
+   saveTransa(transaci: Transaci): Observable<Object> {
       return this.http.post(`${baseUrl}`, transaci);
    }
 
-   saveTransa(transaci: Transaci): Observable<Object> {
-      return this.http.post(`${baseUrl}`, transaci);
+   // Save usando DTO
+   saveTransaci(nueva: TransaciCreateDTO): Observable<Transaci> {
+      return this.http.post<Transaci>(`${baseUrl}`, nueva);
    }
 
    //Save con retorno del idtransa generado (no se usa porque debe devolver el registro completo para colocar en benxtran)
@@ -107,14 +116,26 @@ export class TransaciService {
    //    return this.http.get<Transaci[]>(`${baseUrl}/${inttra}`);
    // }
 
-   getById(inttra: number) {
-      return this.http.get<Transaci>(baseUrl + "/" + inttra);
+
+   updateTransaci(transaci: Transaci) {
+      return this.http.put(`${baseUrl}/updtransaci/${transaci.inttra}`, transaci);
    }
 
-   deleteTransaci(idtransa: number) {
-      return this.http.delete(`${baseUrl}/${idtransa}`);
+   //Actualiza indicando el Id
+   updateTransaci1(idtransa: number, transaci: Transaci): Observable<Object> {
+      return this.http.put(`${baseUrl}/${idtransa}`, transaci);
    }
 
+   // Actualiza solo modificados
+   updateTransa(inttra: number, dto: TransaciUpdateDTO): Observable<Transaci> {
+      return this.http.put<Transaci>(`${baseUrl}/${inttra}`, dto);
+   }
+
+   deleteTransaci(inttra: number) {
+      return this.http.delete(`${baseUrl}/${inttra}`);
+   }
+   
+   
    //Balance de comprobación
    getBalance(desdeFecha: Date, hastaFecha: Date) {
       return this.http.get<number>(`${baseUrl}/balance?desdeFecha=${desdeFecha}&hastaFecha=${hastaFecha}`);

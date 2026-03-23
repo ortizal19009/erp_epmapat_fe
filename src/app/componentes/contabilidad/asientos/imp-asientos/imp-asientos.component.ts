@@ -340,25 +340,15 @@ export class ImpAsientosComponent implements OnInit {
 
    muestraPDF(doc: any) {
       var opciones = { filename: this.pdfgenerado };
-      if (this.otrapagina) {
-         const blob = doc.output('blob');
-         const url = URL.createObjectURL(blob);
-         const ventana = window.open(url, '_blank');
-
-         // Libera memoria cuando la ventana se cierre
-         if (ventana) {
-            ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
-         }
-      }
+      if (this.otrapagina) doc.output('dataurlnewwindow', opciones);
       else {
-         const pdfBlob = doc.output('blob');
-         const blobUrl = URL.createObjectURL(pdfBlob);
+         const pdfDataUri = doc.output('datauristring');
          //Si ya existe el <embed> primero lo remueve
          const elementoExistente = document.getElementById('idembed');
          if (elementoExistente) { elementoExistente.remove(); }
          //Crea el <embed>
          var embed = document.createElement('embed');
-         embed.setAttribute('src', blobUrl);
+         embed.setAttribute('src', pdfDataUri);
          embed.setAttribute('type', 'application/pdf');
          embed.setAttribute('width', '70%');
          embed.setAttribute('height', '100%');
@@ -401,7 +391,7 @@ export class ImpAsientosComponent implements OnInit {
       //    cellG3.font = customStyleG3.font;
       // } else worksheet.addRow([]);
 
-      //Fila 3 Cabecera
+      //Fila 3 Cabecera 
       const headerRowCell = worksheet.addRow(['Asie', 'Cmprbnt', 'Fecha', 'Documento', 'Débito', 'Crédito', 'Beneficiario', 'Descripción']);
       headerRowCell.eachCell(cell => {
          cell.fill = {
@@ -439,14 +429,14 @@ export class ImpAsientosComponent implements OnInit {
          worksheet.getColumn(config.columnIndex).width = config.widthInChars;
       });
 
-      // Columnas centradas
+      // Columnas centradas 
       const columnsToCenter = [1, 2, 3];
       columnsToCenter.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {
             cell.alignment = { vertical: 'middle', horizontal: 'center' };
          });
       });
-      // Columnas a la derecha
+      // Columnas a la derecha 
       let columnsToRigth = [5, 6];
       columnsToRigth.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {
@@ -472,6 +462,7 @@ export class ImpAsientosComponent implements OnInit {
       celdaE.numFmt = '#,##0.00';
       celdaE.font = { bold: true };
       celdaE.value = { formula: 'SUM(E4:' + 'E' + (this._asientos.length + 3).toString() + ')', result: 0, sharedFormula: undefined, date1904: false };
+      console.log('celdaE: ', celdaE)
 
       let celdaF = worksheet.getCell('F' + (this._asientos.length + 4).toString());
       celdaF.numFmt = '#,##0.00';
@@ -512,7 +503,7 @@ export class ImpAsientosComponent implements OnInit {
       }
       worksheet.getCell('A2').font = customStyle12.font;
 
-      //Fila 3 Cabecera
+      //Fila 3 Cabecera 
       const headerRowCell = worksheet.addRow(['Cuenta', 'Asiento / Denominación', 'Beneficiario', 'Debe', 'Haber', 'Concepto / Documento']);
       headerRowCell.eachCell(cell => {
          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '002060' } };
@@ -560,7 +551,7 @@ export class ImpAsientosComponent implements OnInit {
          worksheet.getColumn(config.columnIndex).width = config.widthInChars;
       });
 
-      // Columnas a la derecha
+      // Columnas a la derecha 
       let columnsToRigth = [4, 5];
       columnsToRigth.forEach(columnIndex => {
          worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, cell => {

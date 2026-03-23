@@ -1,0 +1,147 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start sombra cabecera border">
+         <div class="col-sm-12">
+            <div class="row p-0">
+
+               <div class="input-group input-group-sm col-md-3 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <label class="input-group-text" id="inputGroup-sizing-sm">Reintegro Nro:</label>
+                  </div>
+                  <input type="number" class="form-control text-center" [value]="iReintegrada.numero" readonly
+                     tabindex="-1">
+               </div>
+
+               <div class="input-group input-group-sm col-sm-2 mb-1 mr-0 ">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Fecha</span>
+                  </div>
+                  <input type="text" class="form-control text-center" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [value]="iReintegrada.fecha" readonly tabindex="-1">
+               </div>
+               <div class="input-group input-group-sm col-sm-3 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Doc</span>
+                  </div>
+                  <input type="text" class="form-control" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [value]="iReintegrada.docu" readonly tabindex="-1">
+               </div>
+
+               <div class="input-group input-group-sm col-sm-4 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Responsable</span>
+                  </div>
+                  <input type="text" class="form-control" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [value]="iReintegrada.respon" readonly tabindex="-1">
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row">
+         <div class="col-sm-12">
+            <div class="card card-body sombra detalle pt-0 px-2">
+               <div class="row px-0 border">
+
+                  <div class="form-group col-md-6 cabecera mt-0 ml-0 py-2">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" id="inputGroup-sizing-sm">Certificación a Reintegrar</label>
+                        </div>
+                        <div class="input-group-append">
+                           <div class="btn-group btn-group-sm cabecera" role="group">
+                              <button class="btn btn-info" (click)="irPrimero()" ><i class="bi-skip-backward-fill"></i></button>
+                              <button class="btn btn-info" (click)="retroceder()"><i class="bi-caret-left-fill"></i></button>
+                              <input #nav type="number"
+                                 class="form-control form-control-sm text-center nav-input nav-input-wide"
+                                 [(ngModel)]="navegador" [ngModelOptions]="{standalone: true}"
+                                 (keyup.enter)="irA(navegador)" (change)="irA(navegador)" min="1" placeholder="Nro">
+                              <button class="btn btn-info" (click)="avanzar()"><i class="bi-caret-right-fill"></i></button>
+                              <button class="btn btn-info" (click)="irUltimo()"><i class="bi-skip-forward-fill"></i></button>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-2 cabecera mt-0 py-2">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" id="inputGroup-sizing-sm">Fecha</label>
+                        </div>
+                        <input type="text" class="form-control text-center" aria-label="Sizing example input"
+                           aria-describedby="inputGroup-sizing-sm" [value]="iCertipresu.fecha" readonly tabindex="-1">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-4 cabecera py-2 mt-0">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" id="inputGroup-sizing-sm">Responsable</label>
+                        </div>
+                        <input type="text" class="form-control" aria-label="Sizing example input"
+                           aria-describedby="inputGroup-sizing-sm" [value]="iCertipresu.respon" readonly tabindex="-1">
+                     </div>
+                  </div>
+
+               </div>
+
+               <table *ngIf="partixcerti.length > 0" class="table table-hover table-bordered table-sm sombra">
+                  <thead class="cabecera">
+                     <tr class="pad0">
+                        <th>Partida</th>
+                        <th>Denominación</th>
+                        <th class="text-right">Valor</th>
+                        <th class="text-right">Saldo</th>
+                        <th class="text-center">Sel.</th>
+                        <th>Descripción</th>
+                     </tr>
+                  </thead>
+                  <tbody class="detalle roboto small pad0">
+                     <tr class="fila" *ngFor="let partixcerti of partixcerti; let i=index">
+                        <td>{{ partixcerti.intpre.codpar}}</td>
+                        <td class="text-truncate ancho toolt" data-toggle="tooltip"
+                           [title]="partixcerti.intpre.nompar.length > 60 ? partixcerti.intpre.nompar : ''">{{
+                           partixcerti.intpre.nompar }}</td>
+                        <td class="text-right">{{ partixcerti.valor | number: '1.2-2'}}</td>
+                        <td class="text-right">{{ partixcerti.valor - partixcerti.totprmisos | number: '1.2-2'}}</td>
+                        <td *ngIf="(partixcerti.valor - partixcerti.totprmisos) <= 0">
+                        </td>
+                        <td class="text-center" *ngIf="(partixcerti.valor - partixcerti.totprmisos) > 0">
+                           <input type="checkbox" [(ngModel)]="partixcerti.k1" [ngModelOptions]="{standalone: true}"
+                           (ngModelChange)="onK1Change()">
+                        </td>
+                        <td class="text-truncate ancho300" data-toggle="tooltip"
+                           [title]="partixcerti.descripcion.length > 60 ? partixcerti.descripcion : ''">{{
+                           partixcerti.descripcion }}</td>
+                     </tr>
+                  </tbody>
+                  <tfoot *ngIf="partixcerti.length > 0" class="font-weight-bold detalle roboto small pad0">
+                     <td colspan="2">TOTAL: {{partixcerti.length}}</td>
+                     <td class="text-right">{{sumValor | number: '1.2-2'}}</td>
+                     <td class="text-right">{{sumSaldo | number: '1.2-2'}}</td>
+                     <td colspan="2">
+                  </tfoot>
+               </table>
+
+               <div class="row justify-content-center mt-2">
+                  <div class="form-group mb-0 pb-0">
+                     <div class="input-group mb-0 input-group-sm">
+                        <button type="button" class="btn btn-success btn-sm mx-1"  [disabled]="sumMarcados == 0" (click)="aceptar()">
+                           <i class="fa fa-check-circle"></i> Aceptar</button>
+                        <button type="button" class="btn btn-outline-success btn-sm mx-1" (click)="regresar()"><i
+                              class="fa fa-times-circle"></i> Cancelar
+                        </button>
+                     </div>
+                  </div>
+               </div>
+
+
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

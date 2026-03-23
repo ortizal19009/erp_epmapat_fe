@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
@@ -14,7 +15,7 @@ import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 export class RegrecaudaComponent implements OnInit {
 
    formBuscar: FormGroup;
-   _cobradas: any[] = [];
+   cobradas: any[] = [];
    _rubrosanterior: any[] = [];
    swbuscando: boolean;
    txtbuscar: string = 'Buscar';
@@ -31,7 +32,7 @@ export class RegrecaudaComponent implements OnInit {
       const fechaActual = new Date();
       this.formBuscar = this.fb.group({
          registrar: 1,
-         fecha: obtenerFechaActualString( fechaActual ),
+         fecha: obtenerFechaActualString(fechaActual),
       });
    }
 
@@ -57,16 +58,16 @@ export class RegrecaudaComponent implements OnInit {
       this.swbuscando = true;
       this.txtbuscar = 'Buscando';
       let fecha = this.formBuscar.value.fecha;
-      let hasta = '2025-12-31'
+      const anio = Number(fecha.substring(0, 4));
+      const hasta = `${anio - 1}-12-31`;
       try {
-         this._cobradas = await this.rxfService.getTotalRubrosActualAsync(fecha, hasta);
+         // this.cobradas = await this.rxfService.getTotalRubrosActualAsync(fecha, hasta);
+         this.cobradas = await firstValueFrom(this.rxfService.getTotalRubrosActual(fecha, hasta));
          // console.log('this._cobradas: ', this._cobradas)
-
          try {
             this._rubrosanterior = await this.rxfService.getTotalRubrosAnteriorAsync(fecha, hasta);
             this.swbuscando = false;
             this.txtbuscar = 'Buscar';
-
          } catch (error) {
             console.error('Error al obtener los Rubros anteriores:', error);
          }
@@ -86,4 +87,4 @@ function obtenerFechaActualString(fecha: Date) {
 
    // Formatear la fecha a string con el formato deseado
    return `${anio}-${mes.toString().padStart(2, '0')}-${dia.toString().padStart(2, '0')}`;
- }
+}

@@ -3,57 +3,78 @@
       <div class="row m-0 px-0 py-1 justify-content-start sombra cabecera border">
          <div class="col-sm-12 p-0.">
             <div class="row p-0">
-               <div class="input-group input-group-sm col-sm-2 mb-1 ml-0">
+
+               <div class="input-group input-group-sm col-md-3 mb-1 ml-0">
                   <div class="input-group-prepend">
-                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Certificación</span>
+                     <label class="input-group-text" id="inputGroup-sizing-sm">Certificación</label>
                   </div>
-                  <input type="text" class="form-control text-center" aria-label="Sizing example input"
-                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iCertificacion.numero" readonly>
+                  <input type="number" class="form-control text-center" [value]="iCertificacion.numero" readonly
+                     tabindex="-1">
+                  <div class="dropdown input-group-apppend">
+                     <button type="button" class="btn btn-xs dropdown-toggle btn-info pb-2" data-toggle="dropdown"
+                        (click)="actual()" aria-expanded="false">
+                     </button>
+                     <div class="dropdown-menu dropdown-menu-left border roboto sombra bg-info py-0"
+                        (click)="$event.stopPropagation()">
+                        <div class="p-1 text-center text-white">
+                           <!-- Barra de navegación -->
+                           <div class="btn-group btn-group-sm" role="group">
+                              <button class="btn btn-info" (click)="irPrimero()">⏮</button>
+                              <button class="btn btn-info" (click)="retroceder()">◀</button>
+                              <input #nav type="number"
+                                 class="form-control form-control-sm text-center nav-input nav-input-wide"
+                                 [(ngModel)]="navegador" [ngModelOptions]="{standalone: true}"
+                                 (keyup.enter)="irA(navegador)" (change)="irA(navegador)" min="1">
+                              <button class="btn btn-info" (click)="avanzar()">▶</button>
+                              <button class="btn btn-info" (click)="irUltimo()">⏭</button>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
                </div>
+
                <div class="input-group input-group-sm col-sm-2 mb-1 mr-0 ">
                   <div class="input-group-prepend">
                      <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Fecha</span>
                   </div>
                   <input type="text" class="form-control text-center" aria-label="Sizing example input"
-                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iCertificacion.fecha" readonly>
+                     aria-describedby="inputGroup-sizing-sm" [value]="iCertificacion.fecha" readonly tabindex="-1">
                </div>
                <div class="input-group input-group-sm col-sm-3 mb-1 ml-0">
                   <div class="input-group-prepend">
                      <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Doc</span>
                   </div>
                   <input type="text" class="form-control" aria-label="Sizing example input"
-                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iCertificacion.docu" readonly>
+                     aria-describedby="inputGroup-sizing-sm" [value]="iCertificacion.docu" readonly tabindex="-1">
                </div>
+
                <div class="input-group input-group-sm col-sm-4 mb-1 ml-0">
                   <div class="input-group-prepend">
                      <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Responsable</span>
                   </div>
                   <input type="text" class="form-control" aria-label="Sizing example input"
-                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iCertificacion.respon" readonly>
-               </div>
+                     aria-describedby="inputGroup-sizing-sm" [value]="iCertificacion.respon" readonly tabindex="-1">
 
-               <div class="btn-group ml-auto mt-0 px-0">
-                  <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
-                     data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
-                  </button>
-
-                  <div class="dropdown-menu dropdown-menu-right bg-dark roboto px-0">
-                     <button class="dropdown-item" type="button" [disabled]="swnuevo || swmodificar" (click)="nuevo()">
-                        <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
-                     <button class="dropdown-item" type="button">
-                        <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
-                  </div>
-
-                  <div class="col-sm px-0">
-                     <button class="bg-transparent border-0" type="submit" (click)="regresar()">
-                        <i class="bi-arrow-left-circle text-white icoRegresar"></i>
+                  <div class="btn-group ml-auto mt-0 px-0">
+                     <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
+                        data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
                      </button>
+                     <div class="dropdown-menu dropdown-menu-right bg-dark roboto px-0">
+                        <button class="dropdown-item" type="button" [disabled]="swnuevo || swmodificar"
+                           (click)="nuevo()">
+                           <i class="bi-file-earmark-plus text-info"></i>&nbsp; Nuevo</button>
+                        <button class="dropdown-item" type="button" (click)="imprimir()">
+                           <i class="bi bi-printer text-info"></i>&nbsp; Imprimir / Exportar</button>
+                        <button class="dropdown-item" type="button" (click)="regresar()">
+                           <i class="bi-arrow-left-circle text-info"></i>&nbsp; Regresar</button>
+                        <button class="dropdown-item" type="button" (click)="cerrar()">
+                           <i class="bi-x-circle text-info"></i>&nbsp; Cerrar</button>
+                     </div>
                   </div>
                </div>
             </div>
-
          </div>
-
       </div>
    </div>
 </div>
@@ -61,7 +82,7 @@
 <div class="container-fluid">
    <div class="row mb-0">
       <div class="col-sm-12">
-         <table class="table table-hover table-bordered table-sm sombra">
+         <table *ngIf="partixcerti.length > 0" class="table table-hover table-bordered table-sm sombra">
             <thead class="cabecera">
                <tr class="pad0">
                   <th>Partida</th>
@@ -69,7 +90,6 @@
                   <th class="text-right">Saldo</th>
                   <th class="text-right">Valor</th>
                   <th class="text-right col-sm-1 small font-weight-bold roboto">Nuevo saldo</th>
-                  <th class="text-center">C</th>
                   <th class="text-right col-sm-1 text-truncate">Compromiso</th>
                   <th>Descripción</th>
                   <th class="text-center">
@@ -83,21 +103,17 @@
                </tr>
             </thead>
             <tbody class="detalle roboto small pad0">
-               <tr class="fila" *ngFor="let partixcerti of _partixcerti; let i=index">
+               <tr class="fila" *ngFor="let partixcerti of partixcerti; let i=index">
                   <td>{{ partixcerti.intpre.codpar}}</td>
                   <td class="text-truncate ancho toolt" data-toggle="tooltip"
                      [title]="partixcerti.intpre.nompar.length > 60 ? partixcerti.intpre.nompar : ''">{{
                      partixcerti.intpre.nompar }}</td>
 
                   <td class="text-right">{{ partixcerti.saldo | number: '1.2-2'}}</td>
-                  <td class="text-right">{{ partixcerti.valor | number: '1.2-2'}}</td>
-                  <td class="text-right">{{ partixcerti.saldo - partixcerti.valor | number: '1.2-2'}}</td>
-                  <td class="bg-modificar text-center">
-                     <i *ngIf="partixcerti.inteje > 0" class="bi-check-circle " (click)="handleClick( partixcerti )"
-                        data-toggle="tooltip" title="Compromiso(s)"></i>
-                  </td>
+                  <td class="text-right" [class.tachado]="partixcerti.swreinte == 1">{{ partixcerti.valor | number: '1.2-2'}}</td>
+                  <td class="text-right" [class.tachado]="partixcerti.swreinte == 1">{{ partixcerti.saldo - partixcerti.valor | number: '1.2-2'}}</td>
                   <td class="text-right">{{ partixcerti.totprmisos | number: '1.2-2'}}</td>
-                  <td class="text-truncate ancho toolt" data-toggle="tooltip"
+                  <td class="text-truncate ancho" data-toggle="tooltip"
                      [title]="partixcerti.descripcion.length > 60 ? partixcerti.descripcion : ''">{{
                      partixcerti.descripcion }}</td>
                   <td class="text-center">
@@ -106,32 +122,43 @@
                            aria-expanded="false">
                         </button>
                         <div class="dropdown-menu dropdown-menu-right popLista">
-                           <button class="dropdown-item" type="button" [disabled]="swnuevo || swmodificar"
+                           <button class="dropdown-item" type="button"
+                              [disabled]="swnuevo || swmodificar || partixcerti.totprmisos > 0 || partixcerti.swreinte == 1"
                               (click)="modificar(partixcerti)">
                               <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
-                           <button class="dropdown-item" type="button" [disabled]="swnuevo || swmodificar"
-                              data-toggle="modal" data-target="#eliminar" (click)="eliminar( partixcerti )">
+                           <button class="dropdown-item" type="button"
+                              [disabled]="swnuevo || swmodificar || partixcerti.totprmisos > 0 || partixcerti.swreinte == 1"
+                              (click)="eliminar( partixcerti )">
                               <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
                         </div>
                      </div>
                   </td>
                </tr>
             </tbody>
+            <tfoot *ngIf="partixcerti.length > 1" class="font-weight-bold detalle roboto small pad0">
+               <td colspan="3">TOTAL</td>
+               <td class="text-right">{{sumValor | number: '1.2-2'}}</td>
+               <td></td>
+               <td class="text-right">{{sumTotprmisos | number: '1.2-2'}}</td>
+               <td colspan="2">
+            </tfoot>
          </table>
       </div>
    </div>
 
    <!-- Nueva partida de la certificación -->
    <div *ngIf="swnuevo" class="row mb-0 justify-content-center">
-      <div class="card card-body col-sm-8 detalle sombra pt-1">
-         <h6 class="font-weight-bold text-center mt-2 mb-1">Nueva Partida de la Certificación <span
-               class="fantacygreen"> {{iCertificacion.numero}} </span>
-         </h6>
-         <form [formGroup]="formPartixcerti">
+      <div class="card card-body col-sm-8 detalle sombra pt-0 px-2">
+         <div class="row mt-0 justify-content-center text-center">
+            <div class="col-sm-12 cabecera border">
+               <h5 class="font-weight-bold mt-2">Nueva Partida de la Certificación Nro: {{iCertificacion.numero}}</h5>
+            </div>
+         </div>
+         <form [formGroup]="formPartixcerti" class="px-3">
             <div class="row">
 
-               <div class="form-group col-md-12 mt-1">
-                  <div class="input-group input-group-sm mb-1 ">
+               <div class="form-group col-md-12">
+                  <div class="input-group input-group-sm mt-3">
                      <div class="input-group-prepend">
                         <label class="input-group-text">Partida<sup class="green">*</sup></label>
                      </div>
@@ -139,50 +166,75 @@
                         list="codparList" (input)="onPartidaSelected($event); partidaxCodpar($event)"
                         [ngClass]="{'is-invalid': f['intpre'].invalid && f['intpre'].touched,'is-valid': f['intpre'].valid, '': f['intpre'].untouched}">
                      <datalist role="listbox" id="codparList">
-                        <option *ngFor="let partida of _pargas" value={{partida.codpar}}>
+                        <option *ngFor="let partida of presupue" value={{partida.codpar}}>
                            {{partida.nompar}}</option>
                      </datalist>
                      <input type="text" class="form-control form-control-sm col-sm-8" formControlName="nompar"
                         aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabIndex="-1">
                   </div>
+                  <div *ngIf="authService.msgval && f['intpre'].errors && f['intpre'].touched">
+                     <div *ngIf="f['intpre'].errors['required']"
+                        class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                        <strong>Ups!</strong> La Partida es obligatorio
+                     </div>
+                     <div *ngIf="f['intpre'].errors['invalido']"
+                        class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                        <strong>Ups!</strong> No ha seleccionado una Partida
+                     </div>
+                  </div>
                </div>
 
                <div class="form-group col-md-4">
-                  <div class="input-group mb-1 input-group-sm">
+                  <div class="input-group input-group-sm">
                      <div class="input-group-prepend">
                         <span class="input-group-text font-weight-bold">Saldo<sup class="green">*</sup></span>
                      </div>
                      <input type="text" class="form-control form-control-sm text-right" formControlName="saldo"
                         aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabIndex="-1"
-                        mask='separator.2'>
+                        appVisualFormat [minDecimals]="2" [maxDecimals]="2">
                   </div>
                </div>
 
                <div class="form-group col-md-4">
-                  <div class="input-group mb-1 input-group-sm">
+                  <div class="input-group input-group-sm">
                      <div class="input-group-prepend">
                         <span class="input-group-text font-weight-bold">Valor<sup class="green">*</sup></span>
                      </div>
                      <input type="text" class="form-control form-control-sm text-right" formControlName="valor"
-                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" required mask='separator.2'
+                        appVisualFormat [minDecimals]="2" [maxDecimals]="2" (focus)="seleccionarTexto($event)"
                         [ngClass]="{'is-invalid': f['valor'].invalid && f['valor'].touched, 'is-valid': f['valor'].valid, '': f['valor'].untouched}">
+                  </div>
+                  <div *ngIf="authService.msgval && f['valor'].errors && f['valor'].touched">
+                     <div *ngIf="f['valor'].errors['required']"
+                        class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                        <strong>Ups!</strong> El valor es obligatorio
+                     </div>
+                     <div *ngIf="f['valor'].errors['min']" class="alert alert-warning m-0 px-1 py-0 robotosmall border"
+                        role="alert">
+                        <strong>Ups!</strong> No puede ser menor a 0.01
+                     </div>
+                     <div *ngIf="f['valor'].errors['invalido']"
+                        class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                        <strong>Ups!</strong> No puede ser mayor que <strong>{{f['saldo'].value |
+                           number:'1.2-2'}}</strong>
+                     </div>
                   </div>
                </div>
 
                <div class="form-group col-md-4">
-                  <div class="input-group mb-1 input-group-sm">
+                  <div class="input-group input-group-sm">
                      <div class="input-group-prepend">
                         <span class="input-group-text font-weight-bold"
                            [ngClass]="{'text-danger': partida.newsaldo < 0}">Nuevo Saldo</span>
                      </div>
                      <input type="text" class="form-control form-control-sm text-right" formControlName="newsaldo"
-                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabIndex="-1"
+                        appVisualFormat [minDecimals]="2" [maxDecimals]="2" readonly tabIndex="-1"
                         [ngClass]="{'text-danger': partida.newsaldo < 0}">
                   </div>
                </div>
 
                <div class="form-group col-md-12 my-0">
-                  <div class="input-group mb-1 input-group-sm">
+                  <div class="input-group input-group-sm">
                      <div class="input-group-prepend">
                         <label class="input-group-text">Descripción</label>
                      </div>
@@ -193,7 +245,8 @@
             </div>
 
             <div class="mt-3 text-center">
-               <button type="submit" class="btn btn-success btn-sm mx-1" [disabled]="!formPartixcerti.valid">
+               <button type="submit" class="btn btn-success btn-sm mx-1" [disabled]="!formPartixcerti.valid"
+                  (click)="guardar()">
                   <i class="fa fa-check-circle"></i> Aceptar</button>
                <button type="button" class="btn btn-success mx-1 btn-sm" (click)="cancelar()"><i
                      class="fa fa-times-circle"></i> Cancelar
@@ -205,15 +258,18 @@
 
    <!-- Modificar partida de la certificación -->
    <div *ngIf="swmodificar" class="row mb-0 justify-content-center">
-      <div class="card card-body col-sm-8 detalle sombra">
-         <h6 class="font-weight-bold text-center mt-0 mb-1">Modificar Partida de la Certificación <span
-               class="fantacygreen"> {{iCertificacion.numero}} </span>
-         </h6>
-         <form [formGroup]="formPartixcerti">
+      <div class="card card-body col-sm-8 detalle sombra pt-0 px-2">
+         <div class="row mt-0 justify-content-center text-center">
+            <div class="col-sm-12 cabecera border">
+               <h5 class="font-weight-bold mt-2">Modificar Partida de la Certificación Nro: {{iCertificacion.numero}}
+               </h5>
+            </div>
+         </div>
+         <form [formGroup]="formPartixcerti" class="px-3">
             <div class="row">
 
-               <div class="form-group col-md-12 mt-1">
-                  <div class="input-group input-group-sm mb-1 ">
+               <div class="form-group col-md-12 mt-3">
+                  <div class="input-group input-group-sm">
                      <div class="input-group-prepend">
                         <label class="input-group-text">Partida<sup class="green">*</sup></label>
                      </div>
@@ -225,40 +281,55 @@
                </div>
 
                <div class="form-group col-md-4">
-                  <div class="input-group mb-1 input-group-sm">
+                  <div class="input-group input-group-sm">
                      <div class="input-group-prepend">
-                        <span class="input-group-text font-weight-bold">Saldo<sup class="green">*</sup></span>
+                        <label class="input-group-text">Saldo<sup class="green">*</sup></label>
                      </div>
                      <input type="text" class="form-control form-control-sm text-right" formControlName="saldo"
-                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabIndex="-1">
+                        appVisualFormat [minDecimals]="2" [maxDecimals]="2" readonly tabIndex="-1">
                   </div>
                </div>
 
                <div class="form-group col-md-4">
-                  <div class="input-group mb-1 input-group-sm">
+                  <div class="input-group input-group-sm">
                      <div class="input-group-prepend">
-                        <span class="input-group-text font-weight-bold">Valor<sup class="green">*</sup></span>
+                        <label class="input-group-text">Valor<sup class="green">*</sup></label>
                      </div>
                      <input type="text" class="form-control form-control-sm text-right" formControlName="valor"
-                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" required autoFocus mask='separator.2'
+                        appVisualFormat [minDecimals]="2" [maxDecimals]="2" (focus)="seleccionarTexto($event)"
                         [ngClass]="{'is-invalid': f['valor'].invalid && f['valor'].touched, 'is-valid': f['valor'].valid, '': f['valor'].untouched}">
+                  </div>
+                  <div *ngIf="authService.msgval && f['valor'].errors && f['valor'].touched">
+                     <div *ngIf="f['valor'].errors['required']"
+                        class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                        <strong>Ups!</strong> El valor es obligatorio
+                     </div>
+                     <div *ngIf="f['valor'].errors['min']" class="alert alert-warning m-0 px-1 py-0 robotosmall border"
+                        role="alert">
+                        <strong>Ups!</strong> No puede ser menor a 0.01
+                     </div>
+                     <div *ngIf="f['valor'].errors['invalido']"
+                        class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                        <strong>Ups!</strong> No puede ser mayor que <strong>{{f['saldo'].value |
+                           number:'1.2-2'}}</strong>
+                     </div>
                   </div>
                </div>
 
                <div class="form-group col-md-4">
-                  <div class="input-group mb-1 input-group-sm">
+                  <div class="input-group input-group-sm">
                      <div class="input-group-prepend">
-                        <span class="input-group-text font-weight-bold"
-                           [ngClass]="{'text-danger': partida.newsaldo < 0}">Nuevo Saldo</span>
+                        <label class="input-group-text" [ngClass]="{'text-danger': partida.newsaldo < 0}">Nuevo
+                           Saldo</label>
                      </div>
                      <input type="text" class="form-control form-control-sm text-right" formControlName="newsaldo"
-                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabIndex="-1"
+                        appVisualFormat [minDecimals]="2" [maxDecimals]="2" readonly tabIndex="-1"
                         [ngClass]="{'text-danger': partida.newsaldo < 0}">
                   </div>
                </div>
 
                <div class="form-group col-md-12 my-0">
-                  <div class="input-group mb-1 input-group-sm">
+                  <div class="input-group input-group-sm">
                      <div class="input-group-prepend">
                         <label class="input-group-text">Descripción</label>
                      </div>
@@ -270,7 +341,7 @@
 
             <div class="mt-3 text-center">
                <button type="submit" class="btn btn-success btn-sm mx-1"
-                  [disabled]="formPartixcerti.pristine || !formPartixcerti.valid">
+                  [disabled]="formPartixcerti.pristine || !formPartixcerti.valid" (click)="actualizar()">
                   <i class="fa fa-check-circle"></i> Aceptar</button>
                <button type="button" class="btn btn-success mx-1 btn-sm" (click)="cancelar()"><i
                      class="fa fa-times-circle"></i> Cancelar
@@ -280,41 +351,18 @@
       </div>
    </div>
 
-   <!-- Modal Eliminar-->
-   <div class='modal fade' id='eliminar' tabindex='-1' aria-hidden='true'>
-      <div class='modal-dialog modal-dialog-centered'>
-         <div class='modal-content'>
-            <div class='modal-header justify-content-center cabecera border py-2'>
-               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Mensaje</h5>
+
+</div>
+
+<div *ngIf="partixcerti.length == 0 && !swnuevo && swbusca" class="content mt-5">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="card col-sm-6 card-inclinada">
+            <div class="card-body text-center">
+               <p class="texto-inclinado  opaco" (mouseenter)="hover = true" (mouseleave)="hover = false"
+                  [ngClass]="{ 'no-opaco': hover }">¡ No existen registros !</p>
             </div>
-            <div *ngIf="sweliminar; then thenBlock else elseBlock"></div>
-            <ng-template #thenBlock>
-               <div class='modal-body text-center roboto detalle'>
-                  ¿ Eliminar la Partida <span class="fantacygreen"> {{partida.saldo}} </span> de esta Certificación ?
-               </div>
-               <div class='modal-footer justify-content-center detalle border py-1'>
-                  <button type='button' class='btn btn-success btn-sm' data-dismiss='modal'>
-                     <i class="fa fa-check-circle"></i> Aceptar
-                  </button>
-                  <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
-                     <i class="fa fa-times-circle"></i> Cancelar</button>
-               </div>
-            </ng-template>
-            <ng-template #elseBlock>
-               <div class='modal-body detalle'>
-                  <div class="alert alert-warning text-center" role="alert">
-                     No puede eliminar la Partida <span class="fantacygreen"> {{partida.codpar}}</span>
-                     <br> de esta Certificación, tiene compromiso(s).
-                  </div>
-               </div>
-               <div class='text-center detalle'>
-                  <button type='button' class='btn btn-success btn-sm mb-3' data-dismiss='modal'>
-                     <i class="fa fa-check-circle"></i>&nbsp; Aceptar
-                  </button>
-               </div>
-            </ng-template>
          </div>
       </div>
    </div>
-
 </div>

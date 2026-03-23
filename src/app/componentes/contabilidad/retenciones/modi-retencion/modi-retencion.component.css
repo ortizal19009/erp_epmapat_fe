@@ -2,7 +2,11 @@
    background-color: var(--bgcolor1);
    color: white;
 }
-.nuevoBG1 { background-color: var(--bgcolor1); }
 
 .detalle { background-color: var(--bgcolor2); }
-.nuevoBG2 { background-color: var(--bgcolor2); }
+
+select.custom-select:disabled {
+  opacity: 1 !important;        /* evita el efecto transparente */
+  background-color: #e9ecef;    /* color típico de campo deshabilitado */
+  color: #495057;               /* texto normal */
+}

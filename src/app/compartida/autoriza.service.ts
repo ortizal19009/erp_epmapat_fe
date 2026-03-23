@@ -1,11 +1,20 @@
 import { Injectable, OnDestroy, OnInit } from '@angular/core';
 import { UsrxmodulosService } from '../servicios/administracion/usrxmodulos.service';
 import { CanActivate, Router } from '@angular/router';
+import { AbstractControl, AsyncValidatorFn, ValidationErrors } from '@angular/forms';
+import { Observable, of } from 'rxjs';
+import Swal from 'sweetalert2';
+import { Definir } from '../modelos/administracion/definir.model';
+import { environment } from 'src/environments/environment';
+import { DefinirService } from '../servicios/administracion/definir.service';
+const backend = environment.BACK;
 
 @Injectable({
   providedIn: 'root',
 })
 export class AutorizaService implements OnDestroy, CanActivate {
+  private readonly STORAGE_EMPRESA = 'datosEmpresa';
+
   enabled = [false, false, false, false, false, false, false];
   colorenabled = false;
   modulos: String[];
@@ -28,7 +37,7 @@ export class AutorizaService implements OnDestroy, CanActivate {
     }
   }
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private defService: DefinirService) { }
 
   public enabModulos(): void {
     if (!this.sessionlog) {
@@ -62,7 +71,7 @@ export class AutorizaService implements OnDestroy, CanActivate {
     const values = JSON.parse(atob(sessionStorage.getItem('abc')!));
     values.object.modulo = opcion;
     values.object.moduActual = opcion;
-    
+
     sessionStorage.setItem('abc', btoa(JSON.stringify(values)));
   }
 
@@ -91,4 +100,126 @@ export class AutorizaService implements OnDestroy, CanActivate {
       return false;
     }
   }
+
+  formatearFecha(fecha: Date): string {
+    const anio = fecha.getFullYear();
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    return `${anio}-${mes}-${dia}`;
+  }
+
+  mostrarError(titulo: string, excepcion: any): void {
+    const excep = `<div class="text-left" style="text-align: left;">
+                        <strong>Path:</strong> ${excepcion.path}<br>
+                        <strong>Mensaje:</strong> ${excepcion.message}
+                        </div>`;
+    Swal.fire({
+      width: '800px',
+      title: titulo,
+      html: excep,
+      showConfirmButton: false,
+      footer: '<div class="terminal-footer">Terminal IBM</div>',
+      customClass: { popup: 'retro' },
+    });
+  }
+
+  swal(icon: any, mensaje: string) {
+    let anchocalculado = calcularAnchoTexto(mensaje.toString()) + 120
+    const anchoString = anchocalculado.toString() + 'px';
+    Swal.fire({
+      width: anchoString,
+      toast: true,
+      icon: icon,
+      title: mensaje,
+      position: 'top',
+      showConfirmButton: false,
+      timer: 2000
+    });
+  }
+
+  mensaje404(text: string) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Mensaje',
+      text,
+      allowOutsideClick: true, allowEscapeKey: true, showConfirmButton: false
+    });
+  }
+
+  //Obtiene el nombre de la Empresa
+  getEmpresa() {
+    this.defService.getByIddefinir(1).subscribe({
+      next: (definir: Definir) => {
+        // OJO: Falta validar la Empresa con la licencia
+        this.setDatosEmpresa({
+          empresa: definir.empresa,
+          ruc: definir.ruc ?? '',
+          fechap: definir.fechap as Date,
+          f_i: definir.f_i ?? '',
+          f_g: definir.f_g ?? '',
+          longparing: definir.longparing ?? 0,
+          longpargas: definir.longpargas ?? 0,
+        });
+      },
+      error: err => {
+        console.error(err.error); this.mostrarError('Error al buscar Empresa', err);
+      }
+    });
+  }
+
+  setDatosEmpresa(datos: DatosEmpresa): void {
+    sessionStorage.setItem(this.STORAGE_EMPRESA, JSON.stringify(datos));
+  }
+
+  getDatosEmpresa(): DatosEmpresa | null {
+    const raw = sessionStorage.getItem(this.STORAGE_EMPRESA);
+    return raw ? JSON.parse(raw) : null;
+  }
+
+  // Comprobante
+  comprobante(tipcom: number, compro: number): string {
+    if (tipcom == 1) return 'I-' + compro.toString();
+    if (tipcom == 2) return 'E-' + compro.toString();
+    if (tipcom == 3) return 'DC-' + compro.toString();
+    if (tipcom == 4) return 'DI-' + compro.toString();
+    if (tipcom == 5) return 'DE-' + compro.toString();
+    return '';
+  }
+
+  valAñoValidator(): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      // Si el control está vacío → no validar (o puedes decidir validarlo)
+      if (!control.value) { return of(null); }
+      const empresa = this.getDatosEmpresa();
+      // Manejo seguro si empresa o fechap no existen
+      if (!empresa?.fechap) { return of({ añoinvalido: true }); }
+      const añoEmpresa = empresa.fechap.toString().slice(0, 4);
+      const añoControl = control.value.toString().slice(0, 4);
+      return of(añoEmpresa !== añoControl ? { añoinvalido: true } : null);
+    };
+  }
+
+  formatearTiempo(ms: number): string {
+    const totalSeg = Math.floor(ms / 1000);
+    const min = Math.floor(totalSeg / 60);
+    const seg = totalSeg % 60;
+    return `${min}m ${seg}s`;
+  }
+}
+export interface DatosEmpresa {
+  empresa?: String;
+  ruc: string;
+  fechap: Date;
+  f_i: String;
+  f_g: String;
+  longparing: number;
+  longpargas: number;
+}
+
+function calcularAnchoTexto(texto: string, font = "18px Arial"): number {
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  ctx!.font = font;
+  const ancho = ctx!.measureText(texto).width;
+  return Math.round(ancho); // retorna entero sin decimales
 }

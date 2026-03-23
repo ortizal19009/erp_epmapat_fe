@@ -5,8 +5,8 @@
             <form [formGroup]="formBuscar" (ngSubmit)="buscar()">
                <div class="row">
                   <div class="col-sm-3">
-                     <h4 class="m-0 font-weight-bold text-truncate"> <i class="bi-arrow-down-right-circle-fill"></i>
-                        &nbsp;Recaudación diaria</h4>
+                     <h5 class="m-0 font-weight-bold text-truncate"> <i class="bi-arrow-down-right-circle-fill"></i>
+                        &nbsp;Recaudación diaria</h5>
                   </div>
 
                   <div class="form-group col-md-3 my-0 py-0">
@@ -48,7 +48,7 @@
 <div class="container-fluid">
    <div class="row mb-0">
       <div class="col-sm-6">
-         <table *ngIf="_cobradas.length > 0" class="table table-hover table-bordered table-sm sombra">
+         <table *ngIf="cobradas.length > 0" class="table table-hover table-bordered table-sm sombra">
             <thead class="text-center cabecera">
                <tr class="pad0">
                   <th>Rubros (Período actual)</th>
@@ -57,7 +57,7 @@
                </tr>
             </thead>
             <tbody class="detalle roboto small">
-               <tr class="fila pad0" *ngFor="let cobrada of _cobradas">
+               <tr class="fila pad0" *ngFor="let cobrada of cobradas">
                   <td> {{ cobrada[1] }}</td>
                   <td class="text-right">{{ cobrada[2] | number: '1.2-2' }}</td>
                   <td class="text-center">{{ cobrada.cuenta }}</td>

@@ -118,23 +118,15 @@ export class TramipresuComponent implements OnInit {
 
    addTramite() { this.router.navigate(['add-tramipresu']); }
 
-   // detallesTramipresu(event: any, d_tramipresu: any) {
-   //    if (event.target.classList.contains('dropdown-toggle')) {
-   //    } else {
-   //       this.router.navigate(['compromiso', d_tramipresu.idtrami]);
-   //    }
-   // }
-
    compromisos(event: any, tramipresu: iTramipresu) {
       const tagName = event.target.tagName;
       if (tagName === 'TD') {
-         // this.datosBuscar();
          sessionStorage.setItem('idtramiToPrmisoxtrami', tramipresu.idtrami.toString());
          this.router.navigate(['prmisoxtrami']);
       }
    }
 
-   listarTramiPresu() {
+   listarTramiPresuOld() {
       // this.tramiService.getDesdeHasta().subscribe({
       //    next: (datos) => {
       //       console.log(datos);
@@ -147,19 +139,14 @@ export class TramipresuComponent implements OnInit {
    // retroceder() { this.targ_partida = true; }
 
    selectPartidas(partidas: any) {
-      // console.log(partidas);
       this.router.navigate(['add-tramipresu', partidas.idparxcer]);
-      /*     this.targ_partida = false;
-      console.log(partidas)
-      this.partida = partidas; */
    }
 
    modiTramipresu(tramipresu: any) {
-      // console.log(tramipresu);
       sessionStorage.setItem("idtramiToModi", tramipresu.idtrami.toString());
       this.router.navigate(['/modi-tramipresu']);
    }
-
+   
    eliminar(tramipresu: iTramipresu) {
       this.tramipresu.idtrami = tramipresu.idtrami;
       this.tramipresu.numero = tramipresu.numero;
@@ -175,7 +162,7 @@ export class TramipresuComponent implements OnInit {
    elimina() {
       // this.tramiService. .deleteCertipresu(this.certipresu.idcerti).subscribe({
       //    next: datos => this.buscar(),
-      //    error: err => console.error(err.error)
+      //    error: err => console.log(err.error)
       // });
    }
 

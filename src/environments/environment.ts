@@ -8,6 +8,9 @@ export const environment = {
   //API_URL: 'http://192.168.1.69:8080'
   //API_URL: 'http://192.168.10.95:8080'
   //API_URL: 'http://192.168.0.165:8080'
+  BACK: 1,
+  API: 'Java/Spring',
+
 };
 
 /*d
