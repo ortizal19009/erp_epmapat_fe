@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom, Observable } from 'rxjs';
 import { Ejecucio } from 'src/app/modelos/contabilidad/ejecucio.model';
 import { environment } from 'src/environments/environment';
+import { EjecucioCreateDTO } from 'src/app/dtos/contabilidad/ejecucio.dto';
 
 const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/ejecucio`;
@@ -42,6 +43,11 @@ export class EjecucionService {
       return this.http.get<boolean>(`${baseUrl}/tieneEjecucio?codpar=${codpar}`);
    }
 
+   // Cuenta compromisos por idparxcer (para no eliminar)
+   countByIdparxcer(idparxcer: number): Observable<number> {
+      return this.http.get<number>(`${baseUrl}/countByIdparxcer/${idparxcer}`);
+   }
+
    //Cuenta por intpre
    countByIntpre(intpre: number) {
       return this.http.get<number>(`${baseUrl}/countByIntpre?intpre=${intpre}`);
@@ -67,21 +73,14 @@ export class EjecucionService {
       return this.http.get<number>(`${baseUrl}/cobpagado?codpar=${codpar}&desdeFecha=${desdeFecha}&hastaFecha=${hastaFecha}`);
    }
 
-   // Actualizar codpar
-   actualizarCodpar(intpre: number, nuevoCodpar: string): Observable<Ejecucio[]> {
-      return this.http.patch<Ejecucio[]>(`${baseUrl}/${intpre}?nuevoCodpar=${nuevoCodpar}`, null);
+   //Ejecución de un Asiento
+   findByIdAsiento(idasiento: number): Observable<Ejecucio[]> {
+      return this.http.get<Ejecucio[]>(`${baseUrl}/idasiento/${idasiento}`);
    }
 
-   saveEjecucion(ejecucion: Ejecucio): Observable<Object> {
-      return this.http.post(baseUrl, ejecucion);
-   }
-
-   deleteEjecucion(idejecu: number): Observable<Object> {
-      return this.http.delete(`${baseUrl}/${idejecu}`);
-   }
-
-   updateEjecucion(idejecu: number, reforma: Ejecucio): Observable<Object> {
-      return this.http.put(baseUrl + "/" + idejecu, reforma);
+   // Ejecución de una transaci.inttra
+   getByInttra(inttra: number): Observable<Ejecucio | null> {
+      return this.http.get<Ejecucio | null>(`${baseUrl}/inttra/${inttra}`);
    }
 
    getByCodPar(codpar: string, periodo: number) {
@@ -96,6 +95,39 @@ export class EjecucionService {
       return this.http.get<Ejecucio[]>(
          `${baseUrl}/partida/${codpar}/${d_fec}/${h_fec}`
       );
+   }
+
+   //Compromiso pendientes
+   misosPendientes(nomben: String, hasta: Date) {
+      // console.log(`${baseUrl}/misosPendientes?nomben=${nomben}&hasta=${hasta}`)
+      return this.http.get<Ejecucio>(`${baseUrl}/misosPendientes?nomben=${nomben}&hasta=${hasta}`);
+   }
+
+   saveEjecucion(ejecucion: Ejecucio): Observable<Object> {
+      return this.http.post(baseUrl, ejecucion);
+   }
+   // Save usando DTO
+   saveEjecu(nueva: EjecucioCreateDTO): Observable<Ejecucio> {
+      return this.http.post<Ejecucio>(`${baseUrl}`, nueva);
+   }
+
+   // Actualizar codpar
+   actualizarCodpar(intpre: number, nuevoCodpar: string): Observable<Ejecucio[]> {
+      return this.http.patch<Ejecucio[]>(`${baseUrl}/${intpre}?nuevoCodpar=${nuevoCodpar}`, null);
+   }
+
+   //Actualizar totdeven de una ejecucio
+   updateTotdeven(inteje: number, totdeven: number): Observable<any> {
+      // console.log(`${baseUrl}/totdeven?inteje=${inteje}&totdeven=${totdeven}`)
+      return this.http.patch(`${baseUrl}/totdeven?inteje=${inteje}&totdeven=${totdeven}`, null);
+   }
+
+   deleteEjecucion(idejecu: number): Observable<Object> {
+      return this.http.delete(`${baseUrl}/${idejecu}`);
+   }
+
+   updateEjecucion(idejecu: number, reforma: Ejecucio): Observable<Object> {
+      return this.http.put(baseUrl + "/" + idejecu, reforma);
    }
 
 }

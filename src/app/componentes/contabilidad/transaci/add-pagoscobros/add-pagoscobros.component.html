@@ -1,0 +1,267 @@
+<div class="content mt-1 pt-1 pl-0">
+    <div class="container-fluid">
+        <div class="row m-0 px-0 py-1 justify-content-start sombra cabecera border">
+            <div class="col-sm-12 p-0.">
+                <div class="row p-0">
+                    <div class="input-group input-group-sm col-sm-3 mb-1 ml-0">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" id="inputGroup-sizing-sm">Asiento</label>
+                        </div>
+                        <input type="text" class="form-control text-center" [value]="iAsiento.numero" readonly
+                            tabindex="-1">
+                        <input type="text" class="form-control text-center" [value]="iAsiento.comprobante" readonly
+                            tabindex="-1">
+                    </div>
+                    <div class="input-group input-group-sm col-sm-2 mb-1 mr-0 ">
+                        <div class="input-group-prepend"><label class="input-group-text">Fecha</label></div>
+                        <input type="date" class="form-control text-center" [value]="iAsiento.fecha" readonly
+                            tabindex="-1">
+                    </div>
+                    <div class="input-group input-group-sm col-sm-2 mb-1 ml-0">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Doc</span>
+                        </div>
+                        <input type="text" class="form-control" aria-label="Sizing example input"
+                            aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.documento" readonly
+                            tabindex="-1">
+                    </div>
+                    <div class="input-group input-group-sm col-sm-5 mb-1 ml-0">
+                        <div class="input-group-prepend"> <label class="input-group-text">Beneficiario</label> </div>
+                        <input type="text" class="form-control" [value]="iAsiento.beneficiario" readonly tabindex="-1">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-12 mt-0">
+                <div class="card card-body sombra detalle pt-0 px-2">
+                    <form [formGroup]="formTransaci" class="pt-1 mb-0">
+                        <h5 class="font-weight-bold text-center cabecera border mt-0 py-1">{{tiptran.nombre}}</h5>
+                        <div class="row pb-0">
+
+                            <div class="form-group col-md-2 mb-1">
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="orden">Orden</label>
+                                    </div>
+                                    <input type="number" class="form-control text-center" formControlName="orden"
+                                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['orden'].invalid && f['orden'].touched,
+                           'is-valid': f['orden'].valid, '': f['orden'].untouched}">
+                                </div>
+                                <div *ngIf="authService.msgval && f['orden'].errors && f['orden'].touched">
+                                    <div *ngIf="f['orden'].errors['required']"
+                                        class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                                        <strong>Ups!</strong> Orden obligatorio
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group col-md-8 mb-1">
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="fecha">Cuenta</label>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm col-3"
+                                        formControlName="idcuenta" list="cuentasList"
+                                        (input)="onCuentaSelected($event); cuentasxTiptran($event)" [ngClass]="{'is-invalid': f['idcuenta'].invalid && f['idcuenta'].touched,
+                           'is-valid': f['idcuenta'].valid, '': f['idcuenta'].untouched}" [type]="'text'">
+                                    <datalist role="listbox" id="cuentasList">
+                                        <option *ngFor="let cue of cuentas" value={{cue.codcue}}>
+                                            {{ cue.nomcue}}</option>
+                                    </datalist>
+                                    <input type="text" class="form-control" formControlName="nomcue" aria-label="Small"
+                                        aria-describedby="inputGroup-sizing-sm" readonly tabindex="-1">
+                                </div>
+                                <div *ngIf="authService.msgval && f['idcuenta'].errors && f['idcuenta'].touched">
+                                    <div *ngIf="f['idcuenta'].errors['required']"
+                                        class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                                        <strong>Ups!</strong> La Cuenta es obligatoria
+                                    </div>
+                                    <div *ngIf="f['idcuenta'].errors['invalido']"
+                                        class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                                        <strong>Ups!</strong> No ha seleccionado una Cuenta
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group col-md-2 mb-1">
+                                <div class="input-group mb-1 input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text">{{nomDebcre}}</label>
+                                    </div>
+                                    <input type="text" class="form-control text-right font-weight-bold"
+                                        formControlName="valor" aria-label="Small"
+                                        aria-describedby="inputGroup-sizing-sm" appVisualFormat [minDecimals]="2"
+                                        readonly tabindex="-1">
+                                </div>
+                            </div>
+
+                            <div class="form-group col-md-4 mb-1">
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text">Documento</label>
+                                    </div>
+                                    <select type="text" class="custom-select" formControlName="intdoc">
+                                        <option class="robotosmall" *ngFor="let doc of documentos"
+                                            [ngValue]="doc.intdoc"> {{
+                                            doc.nomdoc }}
+                                        </option>
+                                    </select>
+                                    <input type="text" class="form-control text-center col-sm-4"
+                                        formControlName="numdoc" [ngClass]="{'is-invalid': f['numdoc'].invalid && f['numdoc'].touched,
+                                       'is-valid': f['numdoc'].valid, '': f['numdoc'].untouched}">
+                                </div>
+                            </div>
+
+                            <div class="form-group col-md-8 mb-2">
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text">Concepto</label>
+                                    </div>
+                                    <textarea class="form-control" formControlName="descri" rows="1"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row justify-content-center mt-1">
+                            <div class="form-group mb-0 pb-0 col-md-6">
+                                <div class="input-group mb-1 input-group-sm">
+                                    <button type="button" class="btn btn-success btn-sm mx-1"
+                                        [disabled]="!formTransaci.valid" (click)="guardar()">
+                                        <i class="fa fa-check-circle"></i> Aceptar</button>
+                                    <button type="button" class="btn btn-success btn-sm mx-1 small input-group-prepend"
+                                        (click)="sinliquidar()" [disabled]="idcuenta == null"><i class="bi-search"></i>
+                                        Beneficiarios
+                                    </button>
+                                    <input *ngIf="idcuenta != null" type="text"
+                                        class="form-control form-control-sm input-group-append" formControlName="nomben"
+                                        (blur)="blurNomben()">
+                                    <button type="button" class="btn btn-success btn-sm mx-1" (click)="regresar()"><i
+                                            class="fa fa-times-circle"></i> Cancelar
+                                    </button>
+                                </div>
+                                <div *ngIf="hayregistros == false">
+                                    <div class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border" role="alert">
+                                        <strong>Ups!</strong> No existen registros
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="row mt-1" *ngIf="benextran.length > 0">
+                        <div class="col-12">
+                            <form [formGroup]="formBeneficiarios">
+                                <div formArrayName="liquida">
+                                    <table class="table table-hover table-bordered table-sm mb-0">
+                                        <thead class="cabecera">
+                                            <tr class="pad0">
+
+                                                <th colspan="2" class="text-center">Asiento</th>
+                                                <th class="text-center">Fecha</th>
+                                                <th class="text-center">{{tiptran.cabecera1}}</th>
+                                                <th class="text-right">Saldo</th>
+                                                <!-- <th *ngIf="tiptran.numero == 9">Partida</th> -->
+                                                <th>Beneficiario</th>
+                                                <th class="text-right">{{tiptran.cabecera2}}</th>
+                                                <th class="text-right">Nuevo Saldo</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="detalle ">
+                                            <tr class="pad0 robotosmall" *ngFor="let benxtra of benextran; let i=index">
+
+                                                <td class="text-center align-middle">{{ benxtra.inttra.idasiento.asiento
+                                                    }}</td>
+                                                <td class="text-center align-middle">{{
+                                                    authService.comprobante(benxtra.inttra.idasiento.tipcom,
+                                                    benxtra.inttra.idasiento.compro) }}</td>
+                                                <td class="text-center align-middle">{{ benxtra.inttra.idasiento.fecha |
+                                                    date:
+                                                    'dd-MM-yyyy'
+                                                    }}
+                                                </td>
+                                                <td class="text-right align-middle">{{ benxtra.valor | number: '1.2-2'
+                                                    }}</td>
+                                                <td class="text-right align-middle">{{ benxtra.valor - benxtra.totpagcob
+                                                    |
+                                                    number: '1.2-2' }}
+                                                </td>
+
+                                                <!-- <td *ngIf="tiptran.numero == 9" class="align-middle">
+                                       {{partidaSeleccionada[i]?.codpar}}&nbsp;
+                                       <div class="btn-group py-0">
+                                          <button type="button" class="btn btn-info btn-xs dropdown-toggle py-0 mr-0"
+                                             data-toggle="dropdown" aria-expanded="false"
+                                             (click)="getPartidas(benxtra)">
+                                          </button>
+                                          <div class="dropdown-menu dropdown-menu-left bg-info">
+                                             <button class="dropdown-item" type="button"
+                                                *ngFor="let eje of ejecucionBenxtra" (click)="changePartida(i, eje)">
+                                                {{ eje.intpre.codpar }} &nbsp;{{ eje.intpre.nompar }}
+                                             </button>
+                                          </div>
+                                       </div>
+                                    </td> -->
+
+                                                <td class="align-middle">{{ benxtra.idbene.nomben }}</td>
+                                                <td class="py-0">
+                                                    <input type="text" class="form-control form-control-sm text-right"
+                                                        appVisualFormat [minDecimals]="2" [formControlName]="i"
+                                                        (focus)="seleccionarTexto($event)" (dblclick)="dobleclick(i)"
+                                                        (change)="changeValor(i)"
+                                                        [ngClass]="{'is-valid': formArrayLiquida.at(i).valid && formArrayLiquida.at(i).touched,'is-invalid': formArrayLiquida.at(i).invalid && formArrayLiquida.at(i).touched}">
+                                                    <div
+                                                        *ngIf="authService.msgval && formArrayLiquida.at(i).errors && formArrayLiquida.at(i).touched">
+                                                        <div *ngIf="formArrayLiquida.at(i).hasError('required')"
+                                                            class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border"
+                                                            role="alert">
+                                                            <strong>Ups!</strong> El valor es obligatorio
+                                                        </div>
+                                                        <div *ngIf="formArrayLiquida.at(i).hasError('min')"
+                                                            class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border"
+                                                            role="alert">
+                                                            <strong>Ups!</strong> No puede ser negativo
+                                                        </div>
+                                                        <div *ngIf="formArrayLiquida.at(i).hasError('liquidaExcede')"
+                                                            class="alert alert-danger m-0 py-0 px-1 pr-0 robotosmall border"
+                                                            role="alert">
+                                                            <strong>Ups!</strong> No puede ser mayor a {{
+                                                            formArrayLiquida.at(i).getError('liquidaExcede')?.maxPermitido
+                                                            | number:
+                                                            '1.2-2'
+                                                            }}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="text-right align-middle"> {{ benxtra.valor -
+                                                    benxtra.totpagcob -
+                                                    formArrayLiquida.at(i).value | number: '1.2-2' }}</td>
+
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr class="pad0 robotosmall font-weight-bold">
+                                                <td colspan="3">TOTALES</td>
+                                                <td class="text-right">{{ totales.totalValor | number: '1.2-2' }}</td>
+                                                <td class="text-right">{{ totales.totalSaldo | number: '1.2-2' }}</td>
+                                                <td></td>
+                                                <td class="text-right">{{ totales.totalLiquida | number: '1.2-2' }}</td>
+                                                <td class="text-right">{{ totales.totalNuevosaldo | number: '1.2-2' }}
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

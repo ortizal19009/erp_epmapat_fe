@@ -4,8 +4,10 @@ import { Router } from '@angular/router';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Cuentas } from 'src/app/modelos/contabilidad/cuentas.model';
+import { ReportesjrService } from 'src/app/servicios/administracion/reportesjr.service';
 import { CuentasService } from 'src/app/servicios/contabilidad/cuentas.service';
 import { TransaciService } from 'src/app/servicios/contabilidad/transaci.service';
+import { DatasetReportRequest } from 'src/app/utileria/dataset-report-request';
 
 @Component({
    selector: 'app-cuentas',

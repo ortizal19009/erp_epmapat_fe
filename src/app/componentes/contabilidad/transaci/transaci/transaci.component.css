@@ -3,20 +3,37 @@
    color: white;
 }
 
-.nuevoBG1 {
-   background-color: var(--bgcolor1);
-}
+/* .nuevoBG1 {   background-color: var(--bgcolor1);} */
 
-.detalle {
-   background-color: var(--bgcolor2);
-}
+.detalle { background-color: var(--bgcolor2); }
 
-.nuevoBG2 {
-   background-color: var(--bgcolor2);
-}
+/* .nuevoBG2 {   background-color: var(--bgcolor2);} */
 
 .fila:hover {
    background-color: #117a8B;
    color: white;
    cursor: pointer;
+}
+
+.ancho300{
+   max-width: 300px;
+}
+
+.ancho450{
+   max-width: 450px;
+}
+
+.fila:hover {
+   background-color: #117a8B;
+   color: white;
+}
+
+.filacursor:hover {
+   background-color: #117a8B;
+   color: white;
+   cursor: pointer;
+}
+
+.nav-input {
+  width: 120px;
 }

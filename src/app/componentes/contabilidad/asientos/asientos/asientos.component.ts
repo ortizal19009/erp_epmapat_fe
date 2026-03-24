@@ -4,8 +4,10 @@ import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/fo
 import { Router } from '@angular/router';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
+import { Eliminadosapp } from 'src/app/modelos/administracion/eliminadosapp.model';
 import { Asientos } from 'src/app/modelos/contabilidad/asientos.model';
 import { Retenciones } from 'src/app/modelos/contabilidad/retenciones.model';
+import { EliminadosappService } from 'src/app/servicios/administracion/eliminadosapp.service';
 import { AsientosService } from 'src/app/servicios/contabilidad/asientos.service';
 import { RetencionesService } from 'src/app/servicios/contabilidad/retenciones.service';
 import { TransaciService } from 'src/app/servicios/contabilidad/transaci.service';

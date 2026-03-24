@@ -302,6 +302,11 @@ import { AddReintegradaComponent } from './componentes/contabilidad/reintegradas
 import { ModiReintegradaComponent } from './componentes/contabilidad/reintegradas/modi-reintegrada/modi-reintegrada.component';
 import { PartixreinteComponent } from './componentes/contabilidad/reintegradas/partixreinte/partixreinte.component';
 import { ReintegradasComponent } from './componentes/contabilidad/reintegradas/reintegradas/reintegradas.component';
+import { AddPagoscobrosComponent } from './componentes/contabilidad/transaci/add-pagoscobros/add-pagoscobros.component';
+import { AddTrandetramiComponent } from './componentes/contabilidad/transaci/add-trandetrami/add-trandetrami.component';
+import { ModiBenextranComponent } from './componentes/contabilidad/transaci/modi-benextran/modi-benextran.component';
+import { ModiPagoscobrosComponent } from './componentes/contabilidad/transaci/modi-pagoscobros/modi-pagoscobros.component';
+import { VisualFormatDirective } from './directives/visual-format.directive';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
@@ -312,7 +317,6 @@ import { ReintegradasComponent } from './componentes/contabilidad/reintegradas/r
     MainSidebarComponent,
     ContentWrapperComponent,
     MainFooterComponent,
-
     //Consumo de Agua
     ClientesComponent,
     AddClienteComponent,
@@ -591,8 +595,12 @@ import { ReintegradasComponent } from './componentes/contabilidad/reintegradas/r
     AddReintegradaComponent,
     ModiReintegradaComponent,
     PartixreinteComponent,
-    ReintegradasComponent
-  ],
+    ReintegradasComponent,
+    AddPagoscobrosComponent,
+    AddTrandetramiComponent,
+    ModiBenextranComponent,
+    ModiPagoscobrosComponent, 
+    ],
 
   imports: [
     BrowserModule,
@@ -613,4 +621,4 @@ import { ReintegradasComponent } from './componentes/contabilidad/reintegradas/r
 
   bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule { }

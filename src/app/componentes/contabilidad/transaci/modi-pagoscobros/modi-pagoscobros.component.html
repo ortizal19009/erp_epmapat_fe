@@ -1,0 +1,253 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start sombra border cabecera ">
+         <div class="col-sm-12">
+            <form [formGroup]="formAsiento">
+               <div class="row my-0">
+
+                  <div class="input-group input-group-sm col-sm-3 mb-1">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold">Asiento</span>
+                     </div>
+                     <input type="text" class="form-control text-center" formControlName="numero" readonly
+                        tabindex="-1">
+                     <input type="text" class="form-control text-center" formControlName="comprobante" readonly
+                        tabindex="-1">
+                  </div>
+                  <div class="input-group input-group-sm col-sm-2 mb-1 mr-0 ">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold">Fecha</span>
+                     </div>
+                     <input type="date" class="form-control text-center" formControlName="fecha" readonly tabindex="-1">
+                  </div>
+                  <div class="input-group input-group-sm col-sm-3 mb-1 ml-0">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold">Documento</span>
+                     </div>
+                     <input type="text" class="form-control" formControlName="documentonum" readonly tabindex="-1">
+                  </div>
+                  <div class="input-group input-group-sm col-sm-4 mb-1 ml-0">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold">Beneficiario</span>
+                     </div>
+                     <input type="text" class="form-control form-control-sm" formControlName="beneficiario" readonly
+                        tabindex="-1">
+                  </div>
+               </div>
+            </form>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row">
+         <div class="col-sm-12 mt-0">
+            <div class="card card-body sombra detalle pt-0 px-2">
+               <form [formGroup]="formTransaci" class="pt-1">
+                  <h5 class="font-weight-bold text-center cabecera border mt-0 py-1">{{nombretiptran.nombre}}</h5>
+                  <div class="row pb-0">
+
+                     <div class="form-group col-md-2 mb-1">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text" for="orden">Orden<sup class="green">*</sup></label>
+                           </div>
+                           <input type="number" class="form-control text-center" formControlName="orden" [ngClass]="{'is-invalid': f['orden'].invalid && f['orden'].touched,
+                                       'is-valid': f['orden'].valid, '': f['orden'].untouched}">
+                        </div>
+                        <div *ngIf="authService.msgval && f['orden'].errors && f['orden'].touched">
+                           <div *ngIf="f['orden'].errors['required']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> Orden obligatorio
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-7 mb-1">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text" for="fecha">Cuenta<sup class="green">*</sup></label>
+                           </div>
+                           <input type="text" class="form-control form-control-sm col-3" formControlName="codcue"
+                              readonly tabindex="-1">
+                           <input type="text" class="form-control" formControlName="nomcue" aria-label="Small"
+                              aria-describedby="inputGroup-sizing-sm" readonly tabindex="-1">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-3 mb-1">
+                        <div class="input-group mb-1 input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">{{nomDebcre}}<sup class="green">*</sup></label>
+                           </div>
+                           <input type="text" class="form-control text-right" formControlName="valor" appVisualFormat
+                              [minDecimals]="2" readonly tabindex="-1" [ngClass]="{'is-invalid': f['valor'].invalid && f['valor'].touched,
+                                       'is-valid': f['valor'].valid, '': f['valor'].untouched}">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-4 mb-1">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Documento<sup class="green">*</sup></label>
+                           </div>
+                           <select type="text" class="custom-select" formControlName="intdoc">
+                              <option class="documentos" *ngFor="let doc of documentos" [ngValue]="doc.intdoc"> {{
+                                 doc.nomdoc }}
+                              </option>
+                           </select>
+                           <input type="text" class="form-control text-center col-sm-4" formControlName="numdoc"
+                              [ngClass]="{'is-invalid': f['numdoc'].invalid && f['numdoc'].touched,
+                                       'is-valid': f['numdoc'].valid, '': f['numdoc'].untouched}">
+                        </div>
+                        <div *ngIf="authService.msgval && f['numdoc'].errors && f['numdoc'].touched">
+                           <div *ngIf="f['numdoc'].errors['required']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> El Número de Documento es obligatorio
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-8 mb-2">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Concepto</label>
+                           </div>
+                           <textarea class="form-control" formControlName="descri" rows="1"></textarea>
+                        </div>
+                     </div>
+
+                     <div *ngIf="tiptran == 9 || tiptran == 12" class="form-group col-md-11 mb-2">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text" [ngClass]="{'bg-info': !ejecucio}">Cobrado
+                                 presupuestario</label>
+                           </div>
+                           <input type="text" class="form-control col-sm-2" formControlName="codpar" readonly
+                              tabindex="-1">
+                           <div class="btn-group py-0">
+                              <button type="button" class="btn btn-info btn-xs dropdown-toggle py-0"
+                                 data-toggle="dropdown" aria-expanded="false" (click)="partidasPorNaturaleza()">
+                              </button>
+                              <div class="dropdown-menu dropdown-menu-left dropdownApp">
+                                 <button class="dropdown-item" type="button" *ngFor="let partida of presupue"
+                                    (click)="changePartida(partida)">
+                                    {{ partida.codpar }} {{ partida.nompar }}
+                                 </button>
+                              </div>
+                           </div>
+                           <input type="text" class="form-control col-sm-7" formControlName="nompar" readonly
+                              tabindex="-1">
+                           <input type="text" class="form-control col-sm-2 text-right" formControlName="cobpagado"
+                              appVisualFormat [minDecimals]="2" readonly tabindex="-1">
+                           <div class="input-group-append">
+                              <button class="btn btn-sm btn-primary" [disabled]="!swCobpagado" (click)="cobpagado()">
+                                 <i class="fa fa-save"></i>  {{txtCobpagado}}</button>
+                           </div>
+                        </div>
+
+                     </div>
+
+                  </div>
+
+                  <div class="text-center">
+                     <button type="submit" class="btn btn-success btn-sm mx-1"
+                        [disabled]="formTransaci.pristine || !formTransaci.valid" (click)="guardarFilas()">
+                        <i class="fa fa-check-circle"></i> Aceptar</button>
+                     <button type="button" class="btn btn-outline-success btn-sm mx-1" (click)="regresar()"><i
+                           class="fa fa-times-circle"></i> Cancelar
+                     </button>
+                  </div>
+
+                  <div class="row mt-3 justify-content-center">
+                     <div class="col-11">
+                        <form [formGroup]="formTransaci">
+                           <table class="table table-hover table-bordered table-striped table-sm mb-0 sombra">
+                              <thead>
+                                 <tr class="pad0 cabecera">
+                                    <th colspan="2" class="text-center fantacyblack">Asiento</th>
+                                    <th class="fantacyblack text-center">Fecha</th>
+                                    <th class="fantacyblack text-right">{{nombretiptran.cabecera1}}</th>
+                                    <th class="fantacyblack text-right">{{nombretiptran.cabecera2}} </th>
+                                    <th class="fantacyblack text-right"> &nbsp;Saldo</th>
+                                    <th class="fantacyblack"> &nbsp;Beneficiario</th>
+                                    <th class="text-right fantacyblack">{{nombretiptran.cabecera3}}<sup>*</sup></th>
+                                    <th></th>
+                                 </tr>
+                              </thead>
+                              <tbody class="detalle" formArrayName="registros">
+                                 <tr class="pad0 robotosmall" *ngFor="let fila of registros.controls; let i = index"
+                                    [formGroupName]="i">
+                                    <td class="align-middle text-center"> {{fila.get('asiento')?.value}}</td>
+                                    <td class="align-middle text-center ">{{fila.get('comprobante')?.value }} </td>
+                                    <td class="align-middle text-center"> {{fila.get('fecha')?.value | date:
+                                       'dd-MM-yyyy'}}</td>
+                                    <td class="align-middle text-right">
+                                       {{fila.get('benextran_valor')?.value|number:'1.2-2'}}</td>
+                                    <td class="align-middle text-right"> {{fila.get('totpagcob')?.value|number:'1.2-2'}}
+                                    </td>
+                                    <td class="align-middle text-right"
+                                       [ngClass]="{'text-danger font-weight-bold': fila.get('saldo')?.value < 0}">
+                                       {{ fila.get('saldo')?.value | number:'1.2-2' }}
+                                    </td>
+                                    <td class="align-middle">{{fila.get('nomben')?.value}}</td>
+                                    <td class="py-0">
+                                       <input type="text" class="form-control form-control-sm text-right"
+                                          formControlName="valor" (focus)="seleccionarTexto($event)" appVisualFormat
+                                          [minDecimals]="2" [maxDecimals]="2"
+                                          [ngClass]="{'is-invalid': fila.get('valor')?.invalid && fila.get('valor')?.touched,'is-valid': fila.get('valor')?.valid}">
+                                       <div
+                                          *ngIf="authService.msgval && registros.at(i).get('valor')?.invalid && registros.at(i).get('valor')?.touched">
+                                          <div *ngIf="registros.at(i).get('valor')?.errors?.['required']"
+                                             class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border"
+                                             role="alert">
+                                             <strong>Ups!</strong> El Valor es obligatorio
+                                          </div>
+                                          <div *ngIf="registros.at(i).get('valor')?.errors?.['min']"
+                                             class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border"
+                                             role="alert">
+                                             <strong>Ups!</strong> No puede ser negativo
+                                          </div>
+                                          <div *ngIf="registros.at(i).get('valor')?.errors?.['saldoNegativo']"
+                                             class="alert alert-danger m-0 py-0 px-1 pr-0 robotosmall border"
+                                             role="alert">
+                                             <strong>Ups!</strong>
+                                             No puede ser mayor que {{
+                                             registros.at(i).get('valor')?.errors?.['saldoNegativo']?.maxPermitido |
+                                             number:
+                                             '1.2-2' }}
+                                          </div>
+
+                                       </div>
+                                    </td>
+                                    <td class="align-middle text-center">
+                                       <button type="button" class="btn btn-sm text-danger" (click)="eliminarFila(i)">
+                                          <i class="bi-trash-fill text-danger" tooltip="text" title="Eliminar"></i>
+                                       </button>
+                                    </td>
+                                 </tr>
+                              </tbody>
+                              <tfoot>
+                                 <tr class="pad0 robotosmall font-weight-bold">
+                                    <td colspan="3">TOTAL: {{registros.length}}</td>
+                                    <td class="text-right">{{ totales.totBenextranValor | number: '1.2-2' }}</td>
+                                    <td class="text-right">{{ totales.totTotpagcob | number: '1.2-2' }}</td>
+                                    <td class="text-right">{{ totales.totSaldo | number: '1.2-2' }}</td>
+                                    <td></td>
+                                    <td class="text-right">{{ totales.totValor | number: '1.2-2' }}</td>
+                                 </tr>
+                              </tfoot>
+                           </table>
+                        </form>
+                     </div>
+                  </div>
+
+               </form>
+
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

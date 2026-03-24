@@ -5,33 +5,33 @@
             <div class="row p-0">
                <div class="input-group input-group-sm col-sm-3 mb-1 ml-0">
                   <div class="input-group-prepend">
-                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Asiento</span>
+                     <label class="input-group-text" id="inputGroup-sizing-sm">Asiento</label>
                   </div>
                   <input type="text" class="form-control text-center" aria-label="Sizing example input"
-                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.asiento" readonly>
+                     aria-describedby="inputGroup-sizing-sm" [value]="iAsiento.asiento" readonly>
                   <input type="text" class="form-control text-center" aria-label="Sizing example input"
-                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.comprobante" readonly>
+                     aria-describedby="inputGroup-sizing-sm" [value]="iAsiento.comprobante" readonly tabindex="-1">
                </div>
                <div class="input-group input-group-sm col-sm-2 mb-1 mr-0 ">
                   <div class="input-group-prepend">
-                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Fecha</span>
+                     <label class="input-group-text">Fecha</label>
                   </div>
                   <input type="text" class="form-control text-center" aria-label="Sizing example input"
-                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.fecha" readonly>
+                     aria-describedby="inputGroup-sizing-sm" [value]="iAsiento.fecha" readonly tabindex="-1">
                </div>
                <div class="input-group input-group-sm col-sm-2 mb-1 ml-0">
                   <div class="input-group-prepend">
                      <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Doc</span>
                   </div>
                   <input type="text" class="form-control" aria-label="Sizing example input"
-                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.documento" readonly>
+                     aria-describedby="inputGroup-sizing-sm" [value]="iAsiento.documento" readonly tabindex="-1">
                </div>
                <div class="input-group input-group-sm col-sm-5 mb-1 ml-0">
                   <div class="input-group-prepend">
                      <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Beneficiario</span>
                   </div>
                   <input type="text" class="form-control" aria-label="Sizing example input"
-                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iAsiento.benefi" readonly>
+                     aria-describedby="inputGroup-sizing-sm" [value]="iAsiento.benefi" readonly tabindex="-1">
                </div>
             </div>
          </div>
@@ -42,25 +42,32 @@
 <div class="content">
    <div class="container-fluid">
       <div class="row justify-content-center">
-         <div class="col-sm-9 mt-4">
+         <div class="col-sm-10 mt-5">
             <h5 class="font-weight-bold text-center cabecera sombra border py-1">Modificar Transacción
             </h5>
             <div class="card card-body sombra fondo detalle">
                <form [formGroup]="formTransaci">
                   <div class="row">
 
-                     <div class="form-group col-md-2">
-                        <div class="input-group mb-1 input-group-sm">
+                     <div class="form-group col-md-3">
+                        <div class="input-group input-group-sm">
                            <div class="input-group-prepend">
                               <label class="input-group-text" for="orden">Orden</label>
                            </div>
                            <input type="number" class="form-control text-center" formControlName="orden"
-                              aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+                              aria-label="Small" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['orden'].invalid && f['orden'].touched,
+                           'is-valid': f['orden'].valid, '': f['orden'].untouched}" min="1">
+                        </div>
+                        <div *ngIf="authService.msgval && f['orden'].errors && f['orden'].touched">
+                           <div *ngIf="f['orden'].errors['required']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> El Orden es obligatorio
+                           </div>
                         </div>
                      </div>
 
-                     <div class="form-group col-md-10">
-                        <div class="input-group input-group-sm mb-1 ">
+                     <div class="form-group col-md-9">
+                        <div class="input-group input-group-sm">
                            <div class="input-group-prepend">
                               <label class="input-group-text" for="fecha">Cuenta<sup class="green">*</sup></label>
                            </div>
@@ -68,10 +75,36 @@
                               list="cuentasList" (input)="onCuentaSelected($event); cuentasxTiptran($event)" [ngClass]="{'is-invalid': f['idcuenta'].invalid && f['idcuenta'].touched,
                            'is-valid': f['idcuenta'].valid, '': f['idcuenta'].untouched}" [type]="'text'">
                            <datalist role="listbox" id="cuentasList">
-                              <option *ngFor="let cuenta of _cuentas" value={{cuenta.codcue}}>
+                              <option *ngFor="let cuenta of cuentas" value={{cuenta.codcue}}>
                                  {{ cuenta.nomcue}}</option>
                            </datalist>
                            <input type="text" class="form-control" formControlName="nomcue" aria-label="Small"
+                              aria-describedby="inputGroup-sizing-sm" readonly tabindex="-1">
+                        </div>
+                        <div *ngIf="authService.msgval && f['idcuenta'].errors && f['idcuenta'].touched">
+                           <div *ngIf="f['idcuenta'].errors['required']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> La Cuenta es obligatoria
+                           </div>
+                           <div *ngIf="f['idcuenta'].errors['invalido']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> No ha seleccionado una Cuenta
+                           </div>
+                           <div *ngIf="f['idcuenta'].errors['intpreInvalido']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> No puede modificar de una Cuenta con/sin Asociación a otra sin/con Asociación
+                           </div>
+                        </div>
+                     </div>
+
+                     <div *ngIf="this.iAsiento.tipasi == 2 && partida && partida.intpre !== null" class="form-group col-md-12">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text" for="fecha">Partida</label>
+                           </div>
+                           <input type="text" class="form-control form-control-sm col-3" formControlName="codpar"
+                              readonly tabindex="-1">
+                           <input type="text" class="form-control" formControlName="nompar" aria-label="Small"
                               aria-describedby="inputGroup-sizing-sm" readonly tabindex="-1">
                         </div>
                      </div>
@@ -81,9 +114,8 @@
                            <div class="input-group-prepend">
                               <label class="input-group-text">Documento<sup class="green">*</sup></label>
                            </div>
-                           <select type="text" class="custom-select" formControlName="intdoc"
-                              [compareWith]="compararDocumentos">
-                              <option *ngFor="let documento of _documentos" [ngValue]="documento">
+                           <select type="text" class="custom-select" formControlName="intdoc">
+                              <option *ngFor="let documento of documentos" [ngValue]="documento.intdoc">
                                  {{ documento.nomdoc }}
                               </option>
                            </select>
@@ -91,10 +123,16 @@
                               [ngClass]="{'is-invalid': f['numdoc'].invalid && f['numdoc'].touched,
                                        'is-valid': f['numdoc'].valid, '': f['numdoc'].untouched}">
                         </div>
+                        <div *ngIf="authService.msgval && f['numdoc'].errors && f['numdoc'].touched">
+                           <div *ngIf="f['numdoc'].errors['required']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> El Número de Documento es obligatorio
+                           </div>
+                        </div>
                      </div>
 
                      <div class="form-group col-md-3">
-                        <div class="input-group mb-1 input-group-sm">
+                        <div class="input-group input-group-sm">
                            <div class="input-group-prepend">
                               <label class="input-group-text">Movimiento<sup class="green">*</sup></label>
                            </div>
@@ -106,15 +144,19 @@
                      </div>
 
                      <div class="form-group col-md-3">
-                        <div class="input-group mb-1 input-group-sm">
+                        <div class="input-group input-group-sm">
                            <div class="input-group-prepend">
                               <label class="input-group-text">Valor<sup class="green">*</sup></label>
                            </div>
-                           <input type="text" class="form-control text-right" formControlName="valor" aria-label="Small"
-                              aria-describedby="inputGroup-sizing-sm"
-                              [ngClass]="{'is-invalid': formTransaci.get('valor')!.invalid && (formTransaci.get('valor')!.dirty || formTransaci.get('valor')!.touched),
-                              'is-valid': formTransaci.get('valor')!.valid && (formTransaci.get('valor')!.dirty || formTransaci.get('valor')!.touched)}"
-                              (blur)="formatInput()">
+                           <input type="text" class="form-control form-control-sm text-right" formControlName="valor"
+                              appVisualFormat [minDecimals]="2" [maxDecimals]="2" (focus)="seleccionarTexto($event)"
+                              [ngClass]="{'is-invalid': f['valor'].invalid && f['valor'].touched, 'is-valid': f['valor'].valid, '': f['valor'].untouched}">
+                        </div>
+                        <div *ngIf="authService.msgval && f['valor'].errors && f['valor'].touched">
+                           <div *ngIf="f['valor'].errors['required']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> El valor es obligatorio
+                           </div>
                         </div>
                      </div>
 
@@ -123,7 +165,7 @@
                            <div class="input-group-prepend">
                               <label class="input-group-text">Concepto</label>
                            </div>
-                           <textarea class="form-control" formControlName="descri" rows="2"></textarea>
+                           <textarea class="form-control" formControlName="descri" rows="3"></textarea>
                         </div>
                      </div>
                   </div>

@@ -15,4 +15,6 @@ export class Partixcerti {
   intpre: Presupue;
   idcerti: Certipresu;
   idparxcer_: number;
+  k1: number;
+
 }

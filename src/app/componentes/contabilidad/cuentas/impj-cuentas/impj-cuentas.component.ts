@@ -1,8 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import { Reportesjr } from 'src/app/modelos/administracion/reportesjr.model';
+import { Repoxopcion } from 'src/app/modelos/administracion/repoxopcion.model';
+import { ReportesjrService } from 'src/app/servicios/administracion/reportesjr.service';
+import { RepoxopcionService } from 'src/app/servicios/administracion/repoxopcion.service';
 import { CuentasService } from 'src/app/servicios/contabilidad/cuentas.service';
+import { ReportParameterDTO, ReportRequest } from 'src/app/utileria/report-request';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -28,6 +33,7 @@ export class ImpjCuentasComponent implements OnInit {
    reporteSeleccionado: Reportesjr;
    cuentasToImpExp: any;
    codigo = '211';
+   
 
    extensiones = [
       { icono: 'bi-file-earmark-pdf', nombre: '.pdf' },

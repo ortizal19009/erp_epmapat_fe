@@ -1,13 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, AsyncValidatorFn, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import { Eliminadosapp } from 'src/app/modelos/administracion/eliminadosapp.model';
 import { Certipresu } from 'src/app/modelos/contabilidad/certipresu.model';
 import { Partixcerti } from 'src/app/modelos/contabilidad/partixcerti.model';
 import { Presupue } from 'src/app/modelos/contabilidad/presupue.model';
+import { EliminadosappService } from 'src/app/servicios/administracion/eliminadosapp.service';
 import { CertipresuService } from 'src/app/servicios/contabilidad/certipresu.service';
-import { EjecucionService } from 'src/app/servicios/contabilidad/ejecucion.service';
+import { EjecucionService } from 'src/app/servicios/contabilidad/ejecucio.service';
 import { PartixcertiService } from 'src/app/servicios/contabilidad/partixcerti.service';
 import { PresupueService } from 'src/app/servicios/contabilidad/presupue.service';
 import Swal from 'sweetalert2';

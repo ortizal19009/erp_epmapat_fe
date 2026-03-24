@@ -3,13 +3,19 @@ import { AbstractControl, AsyncValidatorFn, FormBuilder, FormGroup, ValidationEr
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import { EjecucioCreateDTO } from 'src/app/dtos/contabilidad/ejecucio.dto';
+import { TransaciCreateDTO } from 'src/app/dtos/contabilidad/transaci.dto';
 import { Documentos } from 'src/app/modelos/administracion/documentos.model';
 import { Asientos } from 'src/app/modelos/contabilidad/asientos.model';
 import { Beneficiarios } from 'src/app/modelos/contabilidad/beneficiarios.model';
 import { Cuentas } from 'src/app/modelos/contabilidad/cuentas.model';
+import { Presupue } from 'src/app/modelos/contabilidad/presupue.model';
+import { Transaci } from 'src/app/modelos/contabilidad/transaci.model';
 import { DocumentosService } from 'src/app/servicios/administracion/documentos.service';
 import { AsientosService } from 'src/app/servicios/contabilidad/asientos.service';
 import { CuentasService } from 'src/app/servicios/contabilidad/cuentas.service';
+import { EjecucionService } from 'src/app/servicios/contabilidad/ejecucion.service';
+import { PreingresoService } from 'src/app/servicios/contabilidad/preingreso.service';
 import { TransaciService } from 'src/app/servicios/contabilidad/transaci.service';
 
 @Component({
@@ -22,18 +28,17 @@ export class AddTransaciComponent implements OnInit {
    formTransaci: FormGroup;
    idasiento: number;
    iAsiento = {} as interfaceAsiento; //Interface para los datos del Asiento
-   _cuentas: any[] = [];
+   cuentas: Cuentas[] = [];
    idcuenta: number | null;
-   _documentos: any;
+   documentos: Documentos[] = [];
    totDebe: number;
    totHaber: number;
-   tmp: number;
-
-   documento: Documentos = new Documentos;
-   beneficiario: Beneficiarios = new Beneficiarios;
+   valorfrmt: number;
+   partida: { intpre: number | null; codpar: String };
 
    constructor(private router: Router, private fb: FormBuilder, private asiService: AsientosService, public authService: AutorizaService,
-      private cueService: CuentasService, private docuService: DocumentosService, private tranService: TransaciService) { }
+      private cueService: CuentasService, private docuService: DocumentosService, private tranService: TransaciService,
+      private preingService: PreingresoService, private ejecuService: EjecucionService) { }
 
    ngOnInit(): void {
       sessionStorage.setItem('ventana', '/transaci');
@@ -45,33 +50,23 @@ export class AddTransaciComponent implements OnInit {
       this.totDebe = +datosToAddtransaci.totDebe;
       this.totHaber = +datosToAddtransaci.totHaber;
 
-      const asiento: Asientos = new Asientos;
-      asiento.idasiento = this.idasiento;
-      this.beneficiario.idbene = 1;
-      let date: Date = new Date();
       this.formTransaci = this.fb.group({
-         orden: 10,
-         idcuenta: ['', Validators.required, this.valCuenta.bind(this)],
+         orden: [+datosToAddtransaci.orden, Validators.required],
+         idcuenta: ['', Validators.required, this.valCuenta()],
          codcue: '',
-         nomcue: ['', Validators.required],
-         debcre: ['', Validators.required],
-         valor: ['', [Validators.required, this.decimalValidator]],
-         intdoc: this.documento,
+         nomcue: [''],
+         intdoc: this.documentos,
          numdoc: ['', Validators.required],
-         idbene: this.beneficiario,
-         idasiento: asiento,
-         tiptran: 0,
-         totbene: 0,
+         debcre: ['', Validators.required],
+         valor: ['', [Validators.required]],
          descri: '',
-         swconcili: 0,
-         usucrea: this.authService.idusuario,
-         feccrea: date
-      },
-         { updateOn: "blur" });
+         intpre: '',
+         codpar: '',
+         nompar: ''
+      }, { updateOn: "blur" });
 
       this.datosAsiento();
       this.listarDocumentos();
-
    }
 
    colocaColor(colores: any) {
@@ -89,14 +84,15 @@ export class AddTransaciComponent implements OnInit {
 
    datosAsiento() {
       this.asiService.unAsiento(this.idasiento).subscribe({
-         next: datos => {
+         next: (datos: Asientos) => {
+            this.iAsiento.idasiento = datos.idasiento;
             this.iAsiento.asiento = datos.asiento;
             this.iAsiento.fecha = datos.fecha;
-            this.iAsiento.comprobante = nomcomprobante(datos.tipcom) + datos.compro.toString();
+            this.iAsiento.tipasi = datos.tipasi;
+            this.iAsiento.comprobante = this.authService.comprobante(datos.tipcom, datos.compro);
             this.iAsiento.benefi = datos.idbene.nomben;
             this.iAsiento.documento = datos.intdoc.nomdoc + ' ' + datos.numdoc;
             this.iAsiento.intdoc = datos.intdoc.intdoc;
-            this.documento.intdoc = this.iAsiento.intdoc;
             this.formTransaci.patchValue({
                intdoc: this.iAsiento.intdoc,
                numdoc: datos.numdoc,
@@ -110,99 +106,140 @@ export class AddTransaciComponent implements OnInit {
    cuentasxTiptran(e: any) {
       if (e.target.value != '') {
          this.cueService.findByTiptran(0, e.target.value).subscribe({
-            next: datos => this._cuentas = datos,
+            next: (cuentas: Cuentas[]) => this.cuentas = cuentas,
             error: err => console.error(err.error),
          });
       }
    }
    onCuentaSelected(e: any) {
-      const selectedOption = this._cuentas.find((x: { codcue: any; }) => x.codcue === e.target.value);
+      const selectedOption = this.cuentas.find((x: { codcue: any; }) => x.codcue === e.target.value);
       if (selectedOption) {
          this.idcuenta = selectedOption.idcuenta
          this.f['codcue'].setValue(selectedOption.codcue);
          this.f['nomcue'].setValue(selectedOption.nomcue);
+         //Para asiento financiero con cuenta que tiene asohaber busca la partida
+         if (this.iAsiento.tipasi == 2 && selectedOption.asohaber && selectedOption.asohaber.length > 6) {    //Ok asi porque asohaber no siempre es nulo
+            this.preingService.getByCodpar(selectedOption.asohaber).subscribe({
+               next: (presupue: Presupue) => {
+                  if (presupue) {
+                     this.partida = { intpre: presupue.intpre, codpar: presupue.codpar };
+                     this.formTransaci.controls['codpar'].setValue(presupue.codpar);
+                     this.formTransaci.controls['nompar'].setValue(presupue.nompar);
+                     this.formTransaci.controls['debcre'].setValue(2);
+                  }
+                  else {
+                     this.authService.swal('warning', `No Existe la Partida: ${selectedOption.asohaber} `)
+                     this.partida = { intpre: null, codpar: '' };
+                  }
+               },
+               error: err => console.error(err.error)
+            });
+         } else { this.partida = { intpre: null, codpar: '' }; }
       }
       else {
          this.idcuenta = null;
          this.formTransaci.controls['nomcue'].setValue('');
+         this.partida = { intpre: null, codpar: '' };
       };
    }
 
    listarDocumentos() {
       this.docuService.getListaDocumentos().subscribe({
-         next: datos => this._documentos = datos,
+         next: (documentos: Documentos[]) => this.documentos = documentos,
          error: (err) => console.error(err.error)
       });
    }
 
+   seleccionarTexto(event: FocusEvent): void {
+      const input = event.target as HTMLInputElement;
+      input.select();
+   }
+
    onSubmit() {
-      const cuenta: Cuentas = new Cuentas();
-      cuenta.idcuenta = this.idcuenta!;
-      this.f['idcuenta'].setValue( cuenta );
-
-      this.documento.intdoc = this.formTransaci.get('intdoc')!.value;
-      this.f['intdoc'].setValue( this.documento );
-
-      this.f['valor'].setValue(this.tmp);
-
-      this.tranService.saveTransa(this.formTransaci.value).subscribe({
-         next: nex => {
-            if (this.formTransaci.get('debcre')!.value == 1) this.totDebe = this.totDebe + +this.formTransaci.get('valor')!.value
-            else this.totHaber = this.totHaber + +this.formTransaci.get('valor')!.value
-            this.asiService.updateTotdebAndTotcre(this.idasiento, +this.totDebe, +this.totHaber).subscribe({
-               next: resp => this.regresar(),
-               error: err => console.error(err.error)
-            });
+      const dto: TransaciCreateDTO = {
+         idasiento: { idasiento: this.idasiento },
+         tiptran: 0,
+         orden: this.formTransaci.value.orden,
+         idcuenta: { idcuenta: this.idcuenta! },
+         codcue: this.formTransaci.value.codcue,
+         debcre: this.formTransaci.value.debcre,
+         valor: this.formTransaci.value.valor,
+         intdoc: { intdoc: this.formTransaci.value.intdoc },
+         numdoc: this.formTransaci.value.numdoc,
+         descri: this.formTransaci.value.descri,
+         idbene: { idbene: 1 },
+         totbene: 0,
+         intpre: null,
+         usucrea: this.authService.idusuario,
+         feccrea: new Date(),
+      };
+      this.tranService.saveTransaci(dto).subscribe({
+         next: (transaci: Transaci) => {
+            if (this.partida.intpre) {
+               const dtoEjecucio: EjecucioCreateDTO = {
+                  codpar: this.partida.codpar,
+                  fecha_eje: this.iAsiento.fecha,
+                  tipeje: 3,
+                  modifi: 0,
+                  prmiso: 0,
+                  totdeven: 0,
+                  devengado: this.formTransaci.value.valor,
+                  cobpagado: 0,
+                  concep: this.formTransaci.value.descri,
+                  usucrea: this.authService.idusuario,
+                  feccrea: new Date(),
+                  idasiento: this.idasiento,
+                  inttra: transaci.inttra,
+                  intpre: { intpre: this.partida.intpre },
+                  idrefo: 0,
+                  idtrata: 0
+               }
+               this.ejecuService.saveEjecu(dtoEjecucio).subscribe({
+                  next: () => { },
+                  error: err => { console.error(err.error); this.authService.mostrarError('Error al guardar Ejecucio', err.error) }
+               });
+            }
+            this.authService.swal('success', `Transacción de la Cuenta ${transaci.codcue} guardada con éxito`);
             this.regresar()
          },
-         error: err => console.error(err.error)
+         error: err => { console.error(err.error); this.authService.mostrarError('Error al guardar', err.error) }
       });
    }
 
    //Valida que se haya seleccionado una Cuenta
-   valCuenta(control: AbstractControl) {
-      if (this.idcuenta == null) return of({ 'invalido': true });
-      else return of(null);
-   }
-
-   decimalValidator(control: AbstractControl): ValidationErrors | null {
-      const value = control.value;
-      if (value === null || value === undefined || value === '') { return null; }
-      const regex = /^-?\d{1,3}(,\d{3})*(\.\d{0,2})?$/;
-      return regex.test(value) ? null : { invalidDecimal: true };
-   }
-
-   formatInput() {
-      this.tmp = this.formTransaci.get('valor')!.value;
-      let valorFormateado: string;
-      let valor = this.formTransaci.get('valor')!.value;
-      if (valor === '' || isNaN(valor)) valorFormateado = '';         // Comprueba si el valor está vacío o NaN
-      else {
-         valorFormateado = parseFloat(valor).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      }
-      this.f['valor'].setValue(valorFormateado);
-      // console.log("this.formTransaci.get('valor')!.value: ", this.formTransaci.get('valor')!.value)
+   valCuenta(): AsyncValidatorFn {
+      return (_control: AbstractControl): any => {
+         if (this.idcuenta == null) { return of({ invalido: true }); } else { return of(null); }
+      };
    }
 
 }
 
 interface interfaceAsiento {
+   idasiento: number;
    asiento: number;
    fecha: Date;
+   tipasi: number;
    comprobante: string;
    documento: String;
    benefi: String;
    intdoc: number;
 }
 
-//Nombre Tipo de Comprobante
-function nomcomprobante(tipcom: number): string {
-   switch (tipcom) {
-      case 1: return 'I-';
-      case 2: return 'E-';
-      case 3: return 'DC-';
-      case 4: return 'DI-';
-      case 5: return 'DE-';
-      default: return '';
-   }
+interface interfaceEjecucio {
+   inteje: number | null;
+   codpar: String;
+   fecha_eje: Date;
+   tipeje: number;
+   modifi: number;
+   prmiso: number;
+   totdeven: number;
+   devengado: number;
+   cobpagado: number;
+   concep: string;
+   usucrea: number;
+   feccrea: Date;
+   idasiento: number;
+   inttra: number;
+   intpre: Presupue;
 }

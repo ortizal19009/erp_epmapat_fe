@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Certipresu } from 'src/app/modelos/contabilidad/certipresu.model';
 import { Partixcerti } from 'src/app/modelos/contabilidad/partixcerti.model';
+import { CertipresuService } from 'src/app/servicios/contabilidad/certipresu.service';
 import { PartixcertiService } from 'src/app/servicios/contabilidad/partixcerti.service';
 import Swal from 'sweetalert2';
 

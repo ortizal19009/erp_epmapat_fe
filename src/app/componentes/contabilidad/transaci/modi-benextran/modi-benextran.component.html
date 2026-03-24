@@ -1,0 +1,265 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start sombra border cabecera ">
+         <div class="col-sm-12">
+            <form [formGroup]="formAsiento">
+               <div class="row my-0">
+
+                  <div class="input-group input-group-sm col-sm-3 mb-1">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold">Asiento</span>
+                     </div>
+                     <input type="text" class="form-control text-center" formControlName="numero" readonly
+                        tabindex="-1">
+                     <input type="text" class="form-control text-center" formControlName="comprobante" readonly
+                        tabindex="-1">
+                  </div>
+                  <div class="input-group input-group-sm col-sm-2 mb-1 mr-0 ">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold">Fecha</span>
+                     </div>
+                     <input type="text" class="form-control text-center"
+                        [value]="formAsiento.get('fecha')?.value | date:'dd-MM-yyyy'" readonly tabindex="-1">
+                  </div>
+                  <div class="input-group input-group-sm col-sm-3 mb-1 ml-0">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold">Documento</span>
+                     </div>
+                     <input type="text" class="form-control" formControlName="documentonum" readonly tabindex="-1">
+                  </div>
+                  <div class="input-group input-group-sm col-sm-4 mb-1 ml-0">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold">Beneficiario</span>
+                     </div>
+                     <input type="text" class="form-control form-control-sm" formControlName="beneficiario" readonly
+                        tabindex="-1">
+                  </div>
+               </div>
+            </form>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row">
+         <div class="col-sm-12 mt-0">
+            <div class="card card-body sombra detalle pt-0 px-2">
+               <form [formGroup]="formTransaci" class="pt-1">
+                  <h5 class="font-weight-bold text-center cabecera border mt-0 py-1">{{tiptran.nombre}}</h5>
+                  <div class="row roboto">
+
+                     <div class="form-group col-md-2 mb-1">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text" for="orden">Orden<sup class="green">*</sup></label>
+                           </div>
+                           <input type="number" class="form-control text-center" formControlName="orden" [ngClass]="{'is-invalid': f['orden'].invalid && f['orden'].touched,
+                                       'is-valid': f['orden'].valid, '': f['orden'].untouched}">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-8 mb-1">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text" for="fecha">Cuenta<sup class="green">*</sup></label>
+                           </div>
+                           <input type="text" class="form-control form-control-sm col-3" formControlName="codcue"
+                              readonly tabindex="-1">
+                           <input type="text" class="form-control" formControlName="nomcue" aria-label="Small"
+                              aria-describedby="inputGroup-sizing-sm" readonly tabindex="-1">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-2 mb-1">
+                        <div class="input-group mb-1 input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">{{nomDebcre}}<sup class="green">*</sup></label>
+                           </div>
+                           <input type="text" class="form-control text-right" formControlName="valor" appVisualFormat
+                              [minDecimals]="2" readonly tabindex="-1">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-4 mb-1">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Documento<sup class="green">*</sup></label>
+                           </div>
+                           <select type="text" class="custom-select" formControlName="intdoc">
+                              <option class="documentos" *ngFor="let doc of documentos" [ngValue]="doc.intdoc"> {{
+                                 doc.nomdoc }}
+                              </option>
+                           </select>
+                           <input type="text" class="form-control text-center col-sm-4" formControlName="numdoc"
+                              [ngClass]="{'is-invalid': f['numdoc'].invalid && f['numdoc'].touched,
+                                       'is-valid': f['numdoc'].valid, '': f['numdoc'].untouched}">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-8 mb-2">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Concepto</label>
+                           </div>
+                           <textarea class="form-control" formControlName="descri" rows="1" [ngClass]="{'is-invalid': f['descri'].invalid && f['descri'].touched,
+                                       'is-valid': f['descri'].valid, '': f['descri'].untouched}"></textarea>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="text-center">
+                     <button type="submit" class="btn btn-success btn-sm mx-1"
+                        [disabled]="formTransaci.pristine || !formTransaci.valid" (click)="guardarFilas()">
+                        <i class="fa fa-check-circle"></i> Aceptar</button>
+                     <button type="button" class="btn btn-outline-success btn-sm mx-1" (click)="regresar()"><i
+                           class="fa fa-times-circle"></i> Cancelar
+                     </button>
+                  </div>
+
+                  <div class="row mt-3 justify-content-center">
+                     <div class="col-9">
+                        <form [formGroup]="formTransaci">
+                           <table class="table table-hover table-bordered table-sm mb-0 sombra">
+                              <thead>
+                                 <tr class="pad0 cabecera">
+                                    <th class="col-md-6 fantacyblack"> &nbsp;Beneficiario<sup>*</sup></th>
+                                    <th class="text-right fantacyblack">{{tiptran.cabecera1}}<sup>*</sup>&nbsp;&nbsp;
+                                    </th>
+                                    <th class="text-right fantacyblack">{{tiptran.cabecera2}}</th>
+                                    <th class="text-right fantacyblack">Saldo</th>
+                                    <th class="text-center"><i class="bi-plus-circle-fill fantacyblack"
+                                          data-toggle="tooltip" title="Nuevo" (click)="agregarFila()"></i></th>
+                                 </tr>
+                              </thead>
+                              <tbody class="detalle" formArrayName="registros">
+                                 <tr class="pad0" *ngFor="let fila of registros.controls; let i = index"
+                                    [formGroupName]="i">
+                                    <td>
+                                       <input type="text" class="form-control form-control-sm" formControlName="nomben"
+                                          [attr.list]="'beneficiariosList' + i"
+                                          (input)="onBenefiSelected(i, $event); benefixNombre(i, $event)"
+                                          [readonly]="fila.get('totpagcob')?.value > 0" />
+                                       <datalist role="listbox" [id]="'beneficiariosList' + i">
+                                          <option *ngFor="let bene of arrBeneficiarios[i]" [value]="bene.nomben">
+                                             {{ bene.idgrupo.nomgru }}
+                                          </option>
+                                       </datalist>
+                                       <div
+                                          *ngIf="authService.msgval && registros.at(i).get('nomben')?.invalid && registros.at(i).get('nomben')?.touched">
+                                          <div *ngIf="registros.at(i).get('nomben')?.errors?.['required']"
+                                             class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border"
+                                             role="alert">
+                                             <strong>Ups!</strong> El Beneficiario es obligatorio
+                                          </div>
+                                          <div *ngIf="registros.at(i).get('nomben')?.errors?.['invalido']"
+                                             class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border"
+                                             role="alert">
+                                             <strong>Ups!</strong> No ha seleccionado un Beneficiario
+                                          </div>
+                                       </div>
+                                    </td>
+
+                                    <td class="py-0">
+                                       <input type="text" class="form-control form-control-sm text-right"
+                                          formControlName="valor" (focus)="seleccionarTexto($event)" appVisualFormat
+                                          [minDecimals]="2" [maxDecimals]="2"
+                                          [readonly]="fila.get('idbene')?.value == null || fila.get('totpagcob')?.value > 0"
+                                          [ngClass]="{'is-invalid': fila.get('valor')?.invalid && fila.get('valor')?.touched,'is-valid': fila.get('valor')?.valid}">
+                                       <div
+                                          *ngIf="authService.msgval && registros.at(i).get('valor')?.invalid && registros.at(i).get('valor')?.touched">
+                                          <div *ngIf="registros.at(i).get('valor')?.errors?.['required']"
+                                             class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border"
+                                             role="alert">
+                                             <strong>Ups!</strong> El Valor es obligatorio
+                                          </div>
+                                          <div *ngIf="registros.at(i).get('valor')?.errors?.['min']"
+                                             class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border"
+                                             role="alert">
+                                             <strong>Ups!</strong> No puede ser negativo
+                                          </div>
+                                       </div>
+                                    </td>
+
+                                    <td class="align-middle text-right"
+                                       [ngClass]="{'transparente': fila.get('totpagcob')?.value == 0}">
+                                       {{fila.get('totpagcob')?.value|number:'1.2-2'}}
+                                       <button *ngIf="fila.get('totpagcob')?.value > 0" type="button"
+                                          class="btn btn-info btn-xs dropdown-toggle py-0 ml-1" data-toggle="dropdown"
+                                          aria-expanded="false"
+                                          (click)="buscaPagoscobros(fila.get('idbenxtra')?.value)">
+                                       </button>
+
+                                       <div class="dropdown-menu dropdown-menu-right py-0">
+                                          <table
+                                             class="table table-hover table-bordered table-sm sombra mb-0 pagoscobros robotosmall">
+                                             <thead>
+                                                <tr class="pad0">
+                                                   <th colspan="2" class="text-center">Asiento</th>
+                                                   <th class="text-center">Fecha</th>
+                                                   <th class="text-right">Valor</th>
+                                                   <th class="text-left">Concepto</th>
+                                                </tr>
+                                             </thead>
+                                             <tbody class="detalle">
+                                                <tr *ngFor="let pagcob of pagoscobros">
+                                                   <td class="text-center">{{ pagcob.inttra.idasiento.asiento }}</td>
+                                                   <td class="text-center">{{
+                                                      authService.comprobante(pagcob.inttra.idasiento.tipcom,
+                                                      pagcob.inttra.idasiento.compro) }}</td>
+                                                   <td>{{ pagcob.inttra.idasiento.fecha | date:'dd-MM-yyyy' }}</td>
+                                                   <td class="text-right">{{ pagcob.valor | number: '1.2-2'}}</td>
+                                                   <td class="text-truncate ancho200" data-toggle="tooltip"
+                                                      [ngClass]="{toolt: pagcob.inttra.descri.length > 30}"
+                                                      [title]="pagcob.inttra.descri.length > 30 ? pagcob.inttra.descri : ''">
+                                                      {{ pagcob.inttra.descri }}</td>
+                                                </tr>
+                                             </tbody>
+                                             <tfoot *ngIf="pagoscobros.length > 1">
+                                                <tr class="pad0 font-weight-bold">
+                                                   <td></td>
+                                                   <td></td>
+                                                   <td>TOTAL: {{pagoscobros.length}}</td>
+                                                   <td class="text-right">{{totPagoscobros|number: '1.2-2'}}
+                                                   </td>
+                                                </tr>
+                                             </tfoot>
+                                          </table>
+                                       </div>
+                                    </td>
+                                    <td class="align-middle text-right">{{fila.get('saldo')?.value|number:'1.2-2'}}</td>
+                                    <td class="align-middle text-center">
+                                       <button type="button" class="btn btn-sm text-danger"
+                                          [disabled]="fila.get('totpagcob')?.value > 0"
+                                          [title]="registros.at(i).get('estado')!.value < 3 ? 'Eliminar' : 'Quitar'"
+                                          (click)="accionFila(i)">
+                                          <i
+                                             [ngClass]="registros.at(i).get('estado')!.value < 3 ? 'bi-trash-fill' : 'bi-x-circle-fill'"></i>
+                                       </button>
+                                    </td>
+                                    <!-- <td>{{fila.get('estado')?.value}}</td> -->
+                                 </tr>
+                              </tbody>
+                              <tfoot>
+                                 <tr class="pad0 font-weight-bold">
+                                    <td>TOTAL: {{registros.length}}</td>
+                                    <td class="text-right">{{ totales.totalValor | number: '1.2-2' }}&nbsp;&nbsp;&nbsp;
+                                    </td>
+                                    <td class="text-right">{{ totales.totalTotpagcob | number: '1.2-2' }}</td>
+                                    <td class="text-right">{{ totales.totalSaldo | number: '1.2-2' }}</td>
+                                 </tr>
+                              </tfoot>
+                           </table>
+
+                        </form>
+                     </div>
+                  </div>
+
+               </form>
+
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

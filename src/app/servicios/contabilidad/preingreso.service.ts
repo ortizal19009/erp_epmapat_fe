@@ -12,6 +12,7 @@ const baseUrl = `${apiUrl}/preingresos`;
    providedIn: 'root'
 })
 
+
 export class PreingresoService {
 
    constructor(private http: HttpClient) { }
@@ -52,6 +53,11 @@ export class PreingresoService {
 
    getById(intpre: number) {
       return this.http.get<Presupue>(baseUrl + "/" + intpre);
+   }
+
+   //Un Partida por codpar
+   getByCodpar(codpar: String): Observable<Presupue> {
+      return this.http.get<Presupue>(`${baseUrl}/codpar/${codpar}`);
    }
 
    savePreingreso(preingresos: Presupue): Observable<Object> {

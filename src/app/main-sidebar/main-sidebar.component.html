@@ -3,8 +3,7 @@
   [ngClass]="{'fondo1-background': fondo1 == 1, 'sidebar-dark-primary': fondo1!=1}">
   <!-- Brand Logo -->
   <a class="brand-link" [ngClass]="{'fondo1-background': fondo1 == 1}">
-    <img src="./assets/img/E_3.png" alt="EpmapaT Logo" class="brand-image img-circle elevation-3"
-      style="opacity: .8">
+    <img src="./assets/img/E_3.png" alt="EpmapaT Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
     <span class="brand-text font-weight-light">EpmapaT</span>
   </a>
 
@@ -388,7 +387,7 @@
         <!-- =============== FINANCIERO ==================== -->
         <li *ngIf="authService.modulo == 2" class="nav-item">
           <a href="#" class="nav-link bg-info">
-            <i class="bi-app-indicator nav-icon"></i>
+            <i class="bi-app-indicator nav-icon text-warning"></i>
             <p> Contabilidad
               <i class="fas fa-angle-right right"></i>
               <span class="badge badge-warning right">1</span>
@@ -397,34 +396,33 @@
           <ul class="nav nav-treeview">
             <li class="nav-item">
               <a routerLink="/cuentas" class="nav-link">
-                <!-- <i class="bi-book-fill nav-icon"></i> -->
-                <i class="bi-book-half"></i>
-                <p class="text-warning"> Cuentas</p>
+                <i class="bi bi-book-half nav-icon text-info"></i>
+                <p>&nbsp; Cuentas</p>
               </a>
             </li>
             <li class="nav-item">
               <a routerLink="/asientos" class="nav-link">
-                <i class="bi-calendar3-range-fill"></i>
-                <p class="text-warning"> &nbsp;Diario general</p>
+                <i class="bi-calendar3-range-fill nav-icon text-info"></i>
+                <p> &nbsp;Diario general</p>
               </a>
             </li>
             <li class="nav-item">
               <a routerLink="/bancos" class="nav-link">
-                <i class="bi-bank2 nav-icon"></i>
-                <p class="text-warning"> Control de bancos</p>
+                <i class="bi-bank2 nav-icon text-info"></i>
+                <p> Control de bancos</p>
               </a>
             </li>
             <li class="nav-item">
               <a routerLink="/sinafip" class="nav-link">
-                <i class="bi-hurricane nav-icon"></i>
-                <p class="text-warning"> SINAFIP</p>
+                <i class="bi-hurricane nav-icon text-info"></i>
+                <p> SINAFIP</p>
               </a>
             </li>
 
             <li class="nav-item">
               <a href="#" class="nav-link">
-                <i class="bi-back nav-icon"></i>
-                <p class="text-warning font-weight-bold"> Homologación NIIFs
+                <i class="bi-back nav-icon text-info"></i>
+                <p class="font-weight-bold"> Homologación NIIFs
                   <i class="right fas fa-angle-right"></i>
                 </p>
               </a>
@@ -432,22 +430,22 @@
                 <li class="nav-item">
                   <a routerLink="/niifcuentas" class="nav-link py-0">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <i class="bi-book-half nav-icon"></i>
-                    <p class="small text-warning">&nbsp; Plan de cuentas NIIF</p>
+                    <i class="bi-book-half nav-icon text-info"></i>
+                    <p class="small">&nbsp; Plan de cuentas NIIF</p>
                   </a>
                 </li>
                 <li class="nav-item">
                   <a routerLink="/usoitems" class="nav-link py-0">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <i class="bi-file-ruled-fill nav-icon"></i>
-                    <p class="small text-warning">&nbsp; Balance general</p>
+                    <i class="bi-file-ruled-fill nav-icon text-info"></i>
+                    <p class="small">&nbsp; Balance general</p>
                   </a>
                 </li>
                 <li class="nav-item">
                   <a routerLink="/rubros" class="nav-link pt-0">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <i class="bi-file-diff-fill nav-icon"></i>
-                    <p class="small text-warning">&nbsp; Estado de resultados</p>
+                    <i class="bi-file-diff-fill nav-icon text-info"></i>
+                    <p class="small">&nbsp; Estado de resultados</p>
                   </a>
                 </li>
               </ul>
@@ -456,7 +454,7 @@
         </li>
         <li *ngIf="authService.modulo == 2" class="nav-item">
           <a href="#" class="nav-link bg-info">
-            <i class="bi-piggy-bank nav-icon"></i>
+            <i class="bi-piggy-bank nav-icon text-warning"></i>
             <p> Tesorería
               <i class="fas fa-angle-right right"></i>
               <span class="badge badge-warning right">2</span>
@@ -465,33 +463,33 @@
           <ul class="nav nav-treeview">
             <li class="nav-item">
               <a routerLink="/beneficiarios" class="nav-link">
-                <i class="bi-people nav-icon"></i>
-                <p class="text-warning"> Beneficiarios</p>
+                <i class="bi-people nav-icon text-info"></i>
+                <p> Beneficiarios</p>
               </a>
             </li>
             <li class="nav-item">
               <a routerLink="/egresos" class="nav-link">
-                <i class="bi-arrow-up-left-circle-fill nav-icon"></i>
-                <p class="text-warning"> Egresos</p>
+                <i class="bi-arrow-up-left-circle-fill nav-icon text-info"></i>
+                <p> Egresos</p>
               </a>
             </li>
             <li class="nav-item">
               <a routerLink="/regrecauda" class="nav-link">
-                <i class="bi-arrow-down-right-circle-fill nav-icon"></i>
-                <p class="text-warning"> Recaudación</p>
+                <i class="bi-arrow-down-right-circle-fill nav-icon text-info"></i>
+                <p> Recaudación</p>
               </a>
             </li>
             <li class="nav-item">
               <a routerLink="/retenciones" class="nav-link">
-                <i class="bi-scissors nav-icon"></i>
-                <p class="text-warning"> Retenciones</p>
+                <i class="bi-scissors nav-icon text-info"></i>
+                <p> Retenciones</p>
               </a>
             </li>
           </ul>
         </li>
         <li *ngIf="authService.modulo == 2" class="nav-item">
           <a href="#" class="nav-link bg-info">
-            <i class="bi-table nav-icon"></i>
+            <i class="bi-table nav-icon text-warning"></i>
             <p> Presupuesto
               <i class="fas fa-angle-right right"></i>
               <span class="badge badge-warning right">3</span>
@@ -500,45 +498,69 @@
           <ul class="nav nav-treeview">
             <li class="nav-item">
               <a routerLink="/preingresos" class="nav-link">
-                <i class="bi-cone-striped nav-icon"></i>
-                <p class="text-warning"> Presupuesto de ingresos</p>
+                <i class="bi-cone-striped nav-icon text-info"></i>
+                <p> Presupuesto de ingresos</p>
               </a>
             </li>
             <li class="nav-item">
               <a routerLink="/pregastos" class="nav-link">
-                <i class="bi-file-earmark-ppt-fill nav-icon"></i>
-                <p class="text-warning"> Presupuesto de gastos</p>
+                <i class="bi-file-earmark-ppt-fill nav-icon text-info"></i>
+                <p> Presupuesto de gastos</p>
               </a>
             </li>
+            <!-- <li class="nav-item">
+                     <a routerLink="/certipresu" class="nav-link">
+                        <i class=" nav-icon text-info"></i>
+                        <p> </p>
+                     </a>
+                  </li> -->
             <li class="nav-item">
-              <a routerLink="/certipresu" class="nav-link">
-                <i class="bi-bookmark-check-fill nav-icon"></i>
-                <p class="text-warning"> Certificaciones</p>
+              <a href="#" class="nav-link">
+                <i class="bi-bookmark-check-fill nav-icon text-info"></i>
+                <p class="font-weight-bold"> Certificaciones
+                  <i class="right fas fa-angle-right"></i>
+                </p>
               </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a routerLink="/certipresu" class="nav-link py-0">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <i class="bi-file-plus-fill nav-icon text-info"></i>
+                    <p class="small">&nbsp; Certificar</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a routerLink="/reintegradas" class="nav-link py-0">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <i class="bi-file-minus-fill nav-icon text-info"></i>
+                    <p class="small">&nbsp; Reintegrar</p>
+                  </a>
+                </li>
+              </ul>
             </li>
             <li class="nav-item">
               <a routerLink="/tramipresu" class="nav-link">
-                <i class="bi-badge-tm-fill nav-icon"></i>
-                <p class="text-warning"> Trámites presupuestarios</p>
+                <i class="bi-badge-tm-fill nav-icon text-info"></i>
+                <p> Trámites presupuestarios</p>
               </a>
             </li>
             <li class="nav-item">
               <a routerLink="/reformas" class="nav-link">
-                <i class="bi-bootstrap-reboot nav-icon"></i>
-                <p class="text-warning"> Reformas</p>
+                <i class="bi-bootstrap-reboot nav-icon text-info"></i>
+                <p> Reformas</p>
               </a>
             </li>
             <li class="nav-item">
               <a routerLink="/clasificador" class="nav-link">
-                <i class="bi-bezier nav-icon"></i>
-                <p class="text-warning"> Clasificador</p>
+                <i class="bi-bezier nav-icon text-info"></i>
+                <p> Clasificador</p>
               </a>
             </li>
           </ul>
         </li>
         <li *ngIf="authService.modulo == 2" class="nav-item">
           <a href="#" class="nav-link bg-info">
-            <i class="bi-card-list nav-icon"></i>
+            <i class="bi-card-list nav-icon text-warning"></i>
             <p> Info financiera
               <i class="fas fa-angle-right right"></i>
               <span class="badge badge-warning right">4</span>
@@ -547,67 +569,61 @@
           <ul class="nav nav-treeview">
             <li class="nav-item">
               <a routerLink="/comprobacion" class="nav-link py-0">
-                <i class="bi-card-checklist nav-icon"></i>
-                <p class="text-warning"> Balance comprobación</p>
+                <i class="bi-card-checklist nav-icon text-info"></i>
+                <p> Balance comprobación</p>
               </a>
             </li>
             <li class="nav-item">
               <a routerLink="/estsituacion" class="nav-link py-0">
-                <i class="bi-card-list nav-icon"></i>
-                <p class="text-warning"> Estado de situación</p>
+                <i class="bi-card-list nav-icon text-info"></i>
+                <p> Estado de situación</p>
               </a>
             </li>
             <li class="nav-item">
               <a routerLink="/estresultados" class="nav-link py-0">
-                <i class="bi-card-heading nav-icon"></i>
-                <p class="text-warning"> Estado de resultados</p>
+                <i class="bi-card-heading nav-icon text-info"></i>
+                <p> Estado de resultados</p>
               </a>
             </li>
             <li class="nav-item">
               <a routerLink="/flujoefectivo" class="nav-link py-0">
-                <i class="bi-cash-coin nav-icon"></i>
-                <p class="text-warning"> Flujo del efectivo</p>
+                <i class="bi-cash-coin nav-icon text-info"></i>
+                <p> Flujo del efectivo</p>
               </a>
             </li>
             <li class="nav-item">
               <a routerLink="/ejecupresup" class="nav-link py-0">
-                <i class="bi-file-break nav-icon"></i>
-                <p class="text-warning"> Ejecución presupuestaria</p>
+                <i class="bi-file-break nav-icon text-info"></i>
+                <p> Ejecución presupuestaria</p>
               </a>
             </li>
             <li class="nav-item">
               <a routerLink="/unicostos" class="nav-link py-0">
-                <i class="bi-currency-dollar nav-icon"></i>
-                <p class="text-warning"> Costos</p>
+                <i class="bi-currency-dollar nav-icon text-info"></i>
+                <p> Costos</p>
               </a>
             </li>
           </ul>
         </li>
         <li *ngIf="authService.modulo == 2" class="nav-item">
           <a href="#" class="nav-link bg-info">
-            <i class="fa fa-shopping-basket nav-icon"></i>
+            <i class="fa fa-shopping-basket nav-icon text-warning"></i>
             <p> Catálogos
               <i class="fas fa-angle-right right"></i>
               <span class="badge badge-warning right">5</span>
             </p>
           </a>
           <ul class="nav nav-treeview">
-            <!-- <li class="nav-item">
-                     <a href="pages/mailbox/compose.html" class="nav-link">
-                        <i class="far fa-circle nav-icon"></i>
-                        <p> Niveles de las cuentas</p>
-                     </a>
-                  </li> -->
             <li class="nav-item">
               <a routerLink="/estrfunc" class="nav-link">
-                <i class="bi-hdd-stack nav-icon"></i>
-                <p class="text-warning"> Estructura Funcional</p>
+                <i class="bi-hdd-stack nav-icon text-info"></i>
+                <p> Estructura Funcional</p>
               </a>
             </li>
             <li class="nav-item">
               <a routerLink="/ifinan" class="nav-link">
-                <i class="bi-bank2 nav-icon"></i>
-                <p class="text-warning"> Instituciones Financieras</p>
+                <i class="bi-bank2 nav-icon text-info"></i>
+                <p> Instituciones Financieras</p>
               </a>
             </li>
           </ul>

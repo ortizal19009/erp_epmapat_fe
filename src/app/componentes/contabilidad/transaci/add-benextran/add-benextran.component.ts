@@ -17,6 +17,7 @@ import { AsientosService } from 'src/app/servicios/contabilidad/asientos.service
 import { BeneficiariosService } from 'src/app/servicios/contabilidad/beneficiarios.service';
 import { BenextranService } from 'src/app/servicios/contabilidad/benextran.service';
 import { CuentasService } from 'src/app/servicios/contabilidad/cuentas.service';
+import { EjecucionService } from 'src/app/servicios/contabilidad/ejecucio.service';
 import { TransaciService } from 'src/app/servicios/contabilidad/transaci.service';
 
 @Component({

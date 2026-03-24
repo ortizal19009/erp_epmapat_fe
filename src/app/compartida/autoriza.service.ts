@@ -28,6 +28,8 @@ export class AutorizaService implements OnDestroy, CanActivate {
   perfil: string;
   msgval: boolean = true; //OJO: Obtener en el login del usuario
   modules: any;
+  backend: number = 1;
+  anio = 2025;
   private intervalId: any;
 
 

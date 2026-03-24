@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { EjecucionService } from './ejecucion.service';
+import { EliminadosappService } from './eliminadosapp.service';
 
-describe('EjecucionService', () => {
-  let service: EjecucionService;
+describe('EliminadosappService', () => {
+  let service: EliminadosappService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(EjecucionService);
+    service = TestBed.inject(EliminadosappService);
   });
 
   it('should be created', () => {
