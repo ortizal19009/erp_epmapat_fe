@@ -14,7 +14,7 @@ import { Transaci } from 'src/app/modelos/contabilidad/transaci.model';
 import { DocumentosService } from 'src/app/servicios/administracion/documentos.service';
 import { AsientosService } from 'src/app/servicios/contabilidad/asientos.service';
 import { CuentasService } from 'src/app/servicios/contabilidad/cuentas.service';
-import { EjecucionService } from 'src/app/servicios/contabilidad/ejecucion.service';
+import { EjecucionService } from 'src/app/servicios/contabilidad/ejecucio.service';
 import { PreingresoService } from 'src/app/servicios/contabilidad/preingreso.service';
 import { TransaciService } from 'src/app/servicios/contabilidad/transaci.service';
 

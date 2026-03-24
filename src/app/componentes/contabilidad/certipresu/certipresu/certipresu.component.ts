@@ -85,8 +85,8 @@ export class CertipresuComponent implements OnInit {
    }
 
    ultimaCertipresu() {
-      this.certiService.ultimo().subscribe({
-         next: resp => {
+      this.certiService.ultima(1).subscribe({
+         next: (resp: Certipresu) => {
             let desde = resp.numero - 16;
             if (desde <= 0) desde = 1;
             this.formBuscar.patchValue({
@@ -105,7 +105,7 @@ export class CertipresuComponent implements OnInit {
       if (this.formBuscar.value.desdeNum != null) { desdeNum = this.formBuscar.value.desdeNum; }
       let hastaNum: number = 999999999;
       if (this.formBuscar.value.hastaNum != null) { hastaNum = this.formBuscar.value.hastaNum; }
-      this.certiService.getDesdeHasta(desdeNum, hastaNum, this.formBuscar.value.desdeFecha, this.formBuscar.value.hastaFecha).subscribe({
+      this.certiService.getDesdeHasta(1,desdeNum, hastaNum, this.formBuscar.value.desdeFecha, this.formBuscar.value.hastaFecha).subscribe({
          next: datos => {
             this._certificaciones = datos;
             //Guarda los datos de búsqueda
@@ -143,7 +143,7 @@ export class CertipresuComponent implements OnInit {
       else this.swfiltro = false;
    }
 
-   nuevo() {      this.router.navigate(['add-certipresu']);   }
+   nuevo() { this.router.navigate(['add-certipresu']); }
 
    modiCertipresu(idcerti: number) {
       sessionStorage.setItem("idcertiToModi", idcerti.toString());

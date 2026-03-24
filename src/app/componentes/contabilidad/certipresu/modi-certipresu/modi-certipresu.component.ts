@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, AsyncValidatorFn, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BeneficiariosService } from 'src/app/servicios/contabilidad/beneficiarios.service';
 import { CertipresuService } from 'src/app/servicios/contabilidad/certipresu.service';
 import { DocumentosService } from 'src/app/servicios/administracion/documentos.service';
 import { Documentos } from 'src/app/modelos/administracion/documentos.model';
 import { Beneficiarios } from 'src/app/modelos/contabilidad/beneficiarios.model';
-import { map } from 'rxjs';
+import { catchError, map, Observable, of } from 'rxjs';
 import { PartixcertiService } from 'src/app/servicios/contabilidad/partixcerti.service';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Certipresu } from 'src/app/modelos/contabilidad/certipresu.model';

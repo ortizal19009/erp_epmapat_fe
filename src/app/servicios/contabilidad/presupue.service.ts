@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Presupue } from 'src/app/modelos/contabilidad/presupue.model';
@@ -14,6 +14,12 @@ const baseUrl = `${apiUrl}/presupue`;
 export class PresupueService {
 
    constructor(private http: HttpClient) { }
+
+   // Partidas por naturaleza (para cobrado/pagado)
+   findByNaturaleza(tippar: number, inicio: number, naturaleza: string): Observable<Presupue[]> {
+      const params = new HttpParams().set('tippar', tippar).set('inicio', inicio).set('naturaleza', naturaleza);
+      return this.http.get<Presupue[]>(`${baseUrl}/naturaleza`, { params });
+   }
 
    getCodpar(tippar: number, codpar: String) {
       return this.http.get<Presupue[]>(`${baseUrl}?tippar=${tippar}&codpar=${codpar}`);
@@ -53,6 +59,7 @@ export class PresupueService {
    }
 
    getByCodigoG(codpar: String) {
+      console.log(`${baseUrl}?codpar=${codpar}`)
       return this.http.get<Presupue[]>(`${baseUrl}?codpar=${codpar}`);
    }
 
@@ -89,6 +96,5 @@ export class PresupueService {
    deletePregasto(intpre: number): Observable<Object> {
       return this.http.delete(`${baseUrl}/${intpre}`);
    }
-
 
 }

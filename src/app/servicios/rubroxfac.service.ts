@@ -221,4 +221,11 @@ export class RubroxfacService {
     );
     return rubros;
   }
+
+  //Recaudación diaria - Año Actual (firstValueFrom en el ts)
+  getTotalRubrosActual(fecha: Date | string, hasta: string): Observable<any[]> {
+    // Ojo: si fecha es Date → lo convertimos a string ISO o YYYY-MM-DD
+    const fechaStr = fecha instanceof Date ? fecha.toISOString().split('T')[0] : fecha;
+    return this.http.get<any[]>(`${baseUrl}/totalrubrosactual?fecha=${fechaStr}&hasta=${hasta}`);
+  }
 }

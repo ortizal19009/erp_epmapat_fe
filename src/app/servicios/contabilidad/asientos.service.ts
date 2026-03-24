@@ -107,9 +107,9 @@ export class AsientosService {
    }
 
    //Actualizar los Totales del Asiento
-   // updateTotdebAndTotcre(idasiento: number, totdeb: number, totcre: number): Observable<any> {
-   //    return this.http.patch(`${baseUrl}/totales?idasiento=${idasiento}&totdeb=${totdeb}&totcre=${totcre}`, null);
-   // }
+   updateTotdebAndTotcre(idasiento: number, totdeb: number, totcre: number): Observable<any> {
+      return this.http.patch(`${baseUrl}/totales?idasiento=${idasiento}&totdeb=${totdeb}&totcre=${totcre}`, null);
+   }
 
    // Save usando DTO
    saveAsiento(asiento: AsientoCreateDTO): Observable<Asientos> {

@@ -312,6 +312,7 @@ import { VisualFormatDirective } from './directives/visual-format.directive';
 
 @NgModule({
   declarations: [
+    VisualFormatDirective,
     AppComponent,
     MainHeaderComponent,
     MainSidebarComponent,

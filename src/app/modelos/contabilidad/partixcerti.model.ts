@@ -7,6 +7,7 @@ export class Partixcerti {
   valor: number;
   saldo: number;
   totprmisos: number;
+  swreinte: number;
   usucrea: number;
   feccrea: Date;
   usumodi: number;
