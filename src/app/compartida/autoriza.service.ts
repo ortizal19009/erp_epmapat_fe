@@ -29,7 +29,7 @@ export class AutorizaService implements OnDestroy, CanActivate {
   msgval: boolean = true; //OJO: Obtener en el login del usuario
   modules: any;
   backend: number = 1;
-  anio = 2025;
+  anio = 2026;
   private intervalId: any;
 
 
@@ -152,6 +152,7 @@ export class AutorizaService implements OnDestroy, CanActivate {
   getEmpresa() {
     this.defService.getByIddefinir(1).subscribe({
       next: (definir: Definir) => {
+        console.log(definir)
         // OJO: Falta validar la Empresa con la licencia
         this.setDatosEmpresa({
           empresa: definir.empresa,

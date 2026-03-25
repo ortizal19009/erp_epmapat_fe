@@ -1,5 +1,5 @@
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { PageResponse } from 'src/app/interfaces/page-response';
 import { Abonados } from 'src/app/modelos/abonados';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
@@ -47,7 +47,7 @@ export class RecargosxcuentaComponent implements OnInit {
   // emisiones
   _emisiones: any[] = [];
   emisionSelected: any;
-  lastEmision: any;
+  lastEmision: any = null;
 
   //recargos
   _recargosList: any[] = [];
@@ -89,6 +89,7 @@ export class RecargosxcuentaComponent implements OnInit {
     private rutasService: RutasService,
     private usuarioService: UsuarioService,
     private authService: AutorizaService,
+    private cdr: ChangeDetectorRef,
   ) { }
 
   ngOnInit(): void {
@@ -637,8 +638,109 @@ export class RecargosxcuentaComponent implements OnInit {
     });
   }
 
-  modiRecargo(recargo: any) {
-    console.log(recargo)
+  recargoSeleccionado: any = null;
 
+  modiRecargo(recargo: any) {
+    // Hacer una copia profunda para no modificar el original directamente
+    this.recargoSeleccionado = JSON.parse(JSON.stringify(recargo));
+
+    // Asegurarse de que idrubro_rubros existe
+    if (!this.recargoSeleccionado.idrubro_rubros) {
+      this.recargoSeleccionado.idrubro_rubros = { valor: 0, descripcion: '' };
+    }
+
+    // Asegurarse de que observaciones existe
+    if (this.recargoSeleccionado.observaciones === undefined) {
+      this.recargoSeleccionado.observaciones = '';
+    }
+
+    // Convertir fecha a formato YYYY-MM-DD para el input date
+    if (this.recargoSeleccionado.fecha) {
+      const fecha = new Date(this.recargoSeleccionado.fecha);
+      this.recargoSeleccionado.fecha = fecha.toISOString().split('T')[0];
+    }
+
+    // Forzar detección de cambios para que *ngIf renderice el modal antes de abrirlo
+    this.cdr.detectChanges();
+
+    const modalElement = document.getElementById('modalModificarRecargo');
+    if (modalElement) {
+      ($(modalElement) as any).modal('show');
+    }
+  }
+
+  guardarModificacion() {
+    if (!this.recargoSeleccionado) return;
+
+    const req: any = {
+      idabonado_abonados: { idabonado: this.recargoSeleccionado.idabonado_abonados.idabonado },
+      idemision_emisiones: { idemision: this.emisionSelected?.idemision },
+      idrubro_rubros: { idrubro: this.recargoSeleccionado.idrubro_rubros.idrubro },
+      tipo: this.recargoSeleccionado.tipo,
+      observacion: this.recargoSeleccionado.observaciones ?? '',
+      usumodi: this.authService.idusuario,
+      fecmodi: new Date().toISOString().split('T')[0],
+      usuresp: this.recargoSeleccionado.usuresp,
+      fecha: this.recargoSeleccionado.fecha,
+    };
+
+    this.recargosxcuentaService.actualizar(this.recargoSeleccionado.idrecargoxcuenta, req)
+      .subscribe({
+        next: () => {
+          this.swal('success', 'Recargo modificado');
+          this.cerrarModalModificar();
+          this.cagarRecargosxemision(this.emisionSelected?.idemision);
+        },
+        error: (e: any) => {
+          console.error(e);
+          this.swal('error', 'Error al modificar el recargo');
+        }
+      });
+  }
+
+  eliminarRecargo(cuenta: any) {
+    Swal.fire({
+      title: '¿Eliminar recargo?',
+      html: `Cuenta: <strong>${cuenta.idabonado_abonados?.idabonado}</strong><br>
+             Rubro: <strong>${cuenta.idrubro_rubros?.descripcion}</strong>`,
+      icon: 'warning',
+      input: 'textarea',
+      inputLabel: 'Observación (opcional)',
+      inputPlaceholder: 'Motivo de eliminación...',
+      showCancelButton: true,
+      confirmButtonColor: '#dc3545',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: '<i class="bi bi-trash"></i> Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      customClass: { popup: 'eliminar' },
+    }).then((result) => {
+      if (!result.isConfirmed) return;
+
+      const req = {
+        usumodi: this.authService.idusuario,
+        observacion: result.value || 'Sin observación',
+        tipo: 'ELIMINACION',
+      };
+
+      this.recargosxcuentaService.eliminar(cuenta.idrecargoxcuenta, req).subscribe({
+        next: () => {
+          this.swal('success', 'Recargo eliminado');
+          this.cagarRecargosxemision(this.emisionSelected?.idemision);
+        },
+        error: (e: any) => {
+          console.error(e);
+          this.swal('error', 'Error al eliminar el recargo');
+        }
+      });
+    });
+  }
+
+  cerrarModalModificar() {
+    const modalElement = document.getElementById('modalModificarRecargo');
+    if (modalElement) {
+      ($(modalElement) as any).modal('hide');
+    }
+    // Limpiar tras la animación de cierre de Bootstrap
+    setTimeout(() => { this.recargoSeleccionado = null; }, 300);
   }
 }

@@ -175,6 +175,7 @@ export class ModiCertipresuComponent implements OnInit {
          const datos = this.authService.getDatosEmpresa();
          const añoEmpresa = datos?.fechap?.toString().slice(0, 4);
          const añoDigitado = control.value?.toString().slice(0, 4);
+         console.log(añoEmpresa, añoDigitado)
          const esValido = añoEmpresa === añoDigitado;
          return of(esValido ? null : { añoinvalido: true });
       };

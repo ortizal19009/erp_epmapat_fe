@@ -40,7 +40,7 @@
           </button>
 
           <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-            <button class="dropdown-item" type="button" data-toggle="modal" [disabled]="lastEmision.estado != 0"
+            <button class="dropdown-item" type="button" data-toggle="modal" [disabled]="lastEmision?.estado != 0"
               data-target="#addRecargo">
               <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo
             </button>
@@ -95,7 +95,7 @@
                 <div class="dropdown-menu dropdown-menu-right popLista">
                   <button class="dropdown-item" type="button" (click)="modiRecargo(cuenta)">
                     <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
-                  <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalEliminar">
+                  <button class="dropdown-item" type="button" (click)="eliminarRecargo(cuenta)">
                     <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
                 </div>
               </div>
@@ -441,6 +441,96 @@
 </div>
 
 <!-- =======================
-     MODAL: MODIFICACIONES
+     MODAL: MODIFICAR RECARGO
 ======================== -->
+<div class="modal fade" id="modalModificarRecargo" data-backdrop="static" data-keyboard="false" tabindex="-1"
+  aria-labelledby="modalModificarRecargoLabel" aria-hidden="true" *ngIf="recargoSeleccionado">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
 
+      <div class="modal-header cabecera text-white">
+        <h5 class="modal-title mb-0" id="modalModificarRecargoLabel">
+          Modificar Recargo
+        </h5>
+        <button type="button" class="close text-white" aria-label="Close" (click)="cerrarModalModificar()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form #modificarForm="ngForm">
+          <!-- Cuenta (solo lectura) -->
+          <div class="form-row">
+            <div class="form-group col-md-4">
+              <label class="mb-1 small text-muted">Cuenta</label>
+              <input type="text" class="form-control form-control-sm" [readonly]="true"
+                [ngModel]="recargoSeleccionado?.idabonado_abonados?.idabonado || ''" name="cuenta"
+                [ngModelOptions]="{standalone: true}">
+            </div>
+
+            <div class="form-group col-md-8">
+              <label class="mb-1 small text-muted">Cliente</label>
+              <input type="text" class="form-control form-control-sm" [readonly]="true"
+                [ngModel]="recargoSeleccionado?.idabonado_abonados?.idresponsable?.nombre || ''" name="cliente"
+                [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+
+          <!-- Fecha Notificación -->
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label class="mb-1 small text-muted">Fecha Notificación</label>
+              <input type="date" class="form-control form-control-sm" [(ngModel)]="recargoSeleccionado.fecha"
+                name="fecha" [ngModelOptions]="{standalone: true}">
+            </div>
+
+            <div class="form-group col-md-6">
+              <label class="mb-1 small text-muted">Fecha Registro</label>
+              <input type="text" class="form-control form-control-sm" [readonly]="true"
+                [ngModel]="(recargoSeleccionado?.feccrea | date:'dd/MM/yyyy') || '-'" name="feccrea"
+                [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+
+          <!-- Rubro y Valor -->
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label class="mb-1 small text-muted">Rubro</label>
+              <input type="text" class="form-control form-control-sm" [readonly]="true"
+                [ngModel]="recargoSeleccionado?.idrubro_rubros?.descripcion || ''" name="rubro"
+                [ngModelOptions]="{standalone: true}">
+            </div>
+
+            <div class="form-group col-md-6">
+              <label class="mb-1 small text-muted">Valor Recargo ($)</label>
+              <input type="number" class="form-control form-control-sm text-right"
+                [(ngModel)]="recargoSeleccionado.idrubro_rubros.valor" name="valor" [readonly]="true"
+                [ngModelOptions]="{standalone: true}" step="0.01" min="0">
+            </div>
+          </div>
+
+          <!-- Observaciones -->
+          <div class="form-row">
+            <div class="form-group col-12">
+              <label class="mb-1 small text-muted">Observaciones</label>
+              <textarea class="form-control form-control-sm" rows="3" [(ngModel)]="recargoSeleccionado.observaciones"
+                name="observaciones" [ngModelOptions]="{standalone: true}"
+                placeholder="Ingrese observaciones adicionales..."></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-secondary" (click)="cerrarModalModificar()">
+          Cancelar
+        </button>
+        <button type="button" class="btn btn-sm btn-primary" (click)="guardarModificacion()"
+          [disabled]="!recargoSeleccionado">
+          <i class="bi bi-check-circle"></i> Guardar Cambios
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
