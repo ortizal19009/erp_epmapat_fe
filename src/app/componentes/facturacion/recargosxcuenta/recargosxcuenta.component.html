@@ -40,7 +40,8 @@
           </button>
 
           <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-            <button class="dropdown-item" type="button" data-toggle="modal" data-target="#addRecargo">
+            <button class="dropdown-item" type="button" data-toggle="modal" [disabled]="lastEmision.estado != 0"
+              data-target="#addRecargo">
               <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo
             </button>
             <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
@@ -67,9 +68,11 @@
             <th style="width:40px;"></th>
             <th>Cuenta</th>
             <th>Cliente</th>
-            <th>Fecha</th>
+            <th>Fecha Notificación</th>
+            <th>Fecha R.</th>
             <th>Rubro</th>
             <th>Recargo</th>
+            <th></th>
           </tr>
         </thead>
 
@@ -80,14 +83,29 @@
             </td>
             <td class="text-center">{{ cuenta.idabonado_abonados.idabonado }}</td>
             <td>{{ cuenta.idabonado_abonados.idresponsable.nombre }}</td>
-            <td>{{ cuenta.fecha ? (cuenta.fecha | date:'dd/MM/yyyy') : '-' }}</td>
+            <td class="text-center">{{ cuenta.fecha ? (cuenta.fecha | date:'dd/MM/yyyy') : '-' }}</td>
+            <td class="text-center">{{ cuenta.feccrea ? (cuenta.feccrea | date:'dd/MM/yyyy') : '-' }}</td>
             <td>{{cuenta.idrubro_rubros.descripcion}}</td>
             <td class="text-right">{{ cuenta.idrubro_rubros.valor | number: '1.2-2' }} $</td>
+            <td class="text-center">
+              <div class="btn-group py-0">
+                <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
+                  aria-expanded="false">
+                </button>
+                <div class="dropdown-menu dropdown-menu-right popLista">
+                  <button class="dropdown-item" type="button" (click)="modiRecargo(cuenta)">
+                    <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
+                  <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalEliminar">
+                    <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
+                </div>
+              </div>
+            </td>
           </tr>
 
           <tr *ngIf="(_recargosxcuenta.length || 0) === 0">
-            <td colspan="6" class="text-center text-muted py-3">No hay resultados</td>
+            <td colspan="8" class="text-center text-muted py-3">No hay resultados</td>
           </tr>
+
         </tbody>
       </table>
     </div>
@@ -306,7 +324,7 @@
           Cerrar
         </button>
 
-        <button type="button" class="btn btn-xs btn-outline-success" [disabled]="selectedCount === 0 || !usuarioId"
+        <button type="button" class="btn btn-xs btn-outline-success" [disabled]="selectedCount === 0 || !usuarioId "
           (click)="procesarSeleccionados()">
           <i class="bi bi-check2-circle"></i>
           Guardar selección ({{ selectedCount }})
@@ -421,3 +439,8 @@
     </div>
   </div>
 </div>
+
+<!-- =======================
+     MODAL: MODIFICACIONES
+======================== -->
+

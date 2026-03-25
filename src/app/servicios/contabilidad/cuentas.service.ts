@@ -2,6 +2,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, firstValueFrom } from 'rxjs';
 import { Cuentas } from 'src/app/modelos/contabilidad/cuentas.model';
+import { DatasetReportRequest } from 'src/app/utileria/dataset-report-request';
+import { ReportRequest } from 'src/app/utileria/report-request';
 import { environment } from 'src/environments/environment';
 
 const apiUrl = environment.API_URL;

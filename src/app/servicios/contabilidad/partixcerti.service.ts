@@ -1,6 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { PartixcertiCreateDTO, PartixcertiUpdateDTO } from 'src/app/componentes/contabilidad/partixcerti/partixcerti/partixcerti.component';
+import { PartixreinteCreateDTO } from 'src/app/componentes/contabilidad/reintegradas/add-partixreinte/add-partixreinte.component';
 import { Partixcerti } from 'src/app/modelos/contabilidad/partixcerti.model';
 import { environment } from 'src/environments/environment';
 

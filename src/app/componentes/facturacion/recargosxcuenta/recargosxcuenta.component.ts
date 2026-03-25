@@ -89,7 +89,7 @@ export class RecargosxcuentaComponent implements OnInit {
     private rutasService: RutasService,
     private usuarioService: UsuarioService,
     private authService: AutorizaService,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // ✅ fecha por defecto = hoy
@@ -132,8 +132,10 @@ export class RecargosxcuentaComponent implements OnInit {
       })
       .subscribe({
         next: (res: PageResponse<Abonados>) => {
+          console.log(res)
           this._abonados = (res.content || []).map((x: any) => {
             const saved = this.selectedStore.get(x.idabonado);
+            console.log(saved)
             return {
               ...x,
               selected: saved?.selected ?? false,
@@ -162,7 +164,7 @@ export class RecargosxcuentaComponent implements OnInit {
   private validarAbonadosEnPagina(): void {
     if (!this.lastEmision?.idemision) return;
 
-    // fecha escogida en modal
+    // fecha escogida en modal - today
     const fecha = this.fechaNotificaStr
       ? new Date(this.fechaNotificaStr + 'T00:00:00')
       : new Date();
@@ -179,9 +181,9 @@ export class RecargosxcuentaComponent implements OnInit {
       fecha: fecha.toISOString(),
       items,
     };
-
     this.recargosxcuentaService.validarBatch(reqValidacion).subscribe({
       next: (resp: any) => {
+        console.log(resp)
         // Soporta 2 formas comunes de respuesta
         const bloqueos: Array<{
           idabonado: number;
@@ -191,6 +193,7 @@ export class RecargosxcuentaComponent implements OnInit {
 
         const mapBloq = new Map<string, string>(); // key: `${id}-${tipo}` => motivo
         for (const b of bloqueos) {
+          console.log(b)
           mapBloq.set(
             `${Number(b.idabonado)}-${Number(b.tipo)}`,
             b.motivo || 'Bloqueado',
@@ -281,6 +284,7 @@ export class RecargosxcuentaComponent implements OnInit {
    * ✅ Guardar estado UI por fila
    */
   persistRowState(cuenta: any): void {
+    console.log(cuenta)
     const id = Number(cuenta.idabonado);
 
     // si ambos están bloqueados => no se puede seleccionar
@@ -631,5 +635,10 @@ export class RecargosxcuentaComponent implements OnInit {
       showConfirmButton: false,
       timer: 3000,
     });
+  }
+
+  modiRecargo(recargo: any) {
+    console.log(recargo)
+
   }
 }
