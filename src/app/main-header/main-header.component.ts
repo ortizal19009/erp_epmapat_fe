@@ -1,7 +1,7 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { MainFooterComponent } from '../main-footer/main-footer.component';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { AutorizaService } from '@core/auth/autoriza.service';
+import { AutorizaService } from '../compartida/autoriza.service';
 import { UsuarioService } from '../servicios/administracion/usuario.service';
 import { Router } from '@angular/router';
 import { ErpmodulosService } from '../servicios/administracion/erpmodulos.service';
