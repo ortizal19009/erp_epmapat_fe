@@ -80,6 +80,16 @@ export class AbonadosService {
     return this.http.put<any>(`${baseUrl}/${abonado.idabonado}`, abonado);
   }
 
+  updateAbonadoAuditoria(
+    abonado: any,
+    usumodi: number,
+    observacion: string,
+    tipo: string = 'MODIFICACION'
+  ): Observable<any> {
+    const params = { usumodi, tipo, observacion };
+    return this.http.put<any>(`${baseUrl}/${abonado.idabonado}`, abonado, { params });
+  }
+
   getAbonadoByQuery(dato: String) {
     return this.http.get<Abonados>(`${baseUrl}?consulta=${dato}`);
   }

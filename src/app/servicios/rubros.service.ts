@@ -49,12 +49,22 @@ export class RubrosService {
     return this.http.post(baseUrl, rubro);
   }
 
-updateRubro(idrubro: number, rubro: any): Promise<any> {
-  const headers = new HttpHeaders({
-  'Content-Type': 'application/json'
-});
-  return firstValueFrom(this.http.put(`${baseUrl}/${idrubro}`, rubro, { headers }));
-}
+  updateRubro(idrubro: number, rubro: any): Promise<any> {
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return firstValueFrom(this.http.put(`${baseUrl}/${idrubro}`, rubro, { headers }));
+  }
+
+  updateRubroAuditoria(
+    idrubro: number,
+    rubro: any,
+    usumodi: number,
+    observacion: string,
+    tipo: string = 'MODIFICACION'
+  ): Promise<any> {
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    const params = { usumodi, tipo, observacion };
+    return firstValueFrom(this.http.put(`${baseUrl}/${idrubro}`, rubro, { headers, params }));
+  }
 
 
   deleteRubro(idrubro: number): Observable<Object> {

@@ -12,6 +12,7 @@ import { Modulos } from 'src/app/modelos/modulos.model';
 import { Rubros } from 'src/app/modelos/rubros.model';
 import { ModulosService } from 'src/app/servicios/modulos.service';
 import { RubrosService } from 'src/app/servicios/rubros.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-modi-rubro',
@@ -109,35 +110,54 @@ export class ModiRubroComponent implements OnInit {
   }
 
   async onSubmit() {
-    let rubro: Rubros = new Rubros();
-    let f: any = this.formRubro.value;
+    const f: any = this.formRubro.value;
+    const rubro: Rubros = new Rubros();
     rubro.idrubro = this.idrubro;
     rubro.descripcion = f.descripcion;
-    rubro.estado = f.estado
-    rubro.calculable = f.calculable
-    rubro.valor = f.valor
-    rubro.swiva = f.swiva
-    rubro.tipo = f.tipo
-    rubro.esiva = f.esiva
-    rubro.esdebito = f.esdebito
-    rubro.facturable = f.facturable
-    rubro.idmodulo_modulos = f.idmodulo_modulos
-    rubro.usucrea = f.usucrea
-    rubro.feccrea = f.feccrea
-    rubro.usumodi = f.usumodi
-    rubro.fecmodi = f.fecmodi
-try {
-  const datos = await this.rubService.updateRubro(this.idrubro, rubro);
-  this.retornar();
-} catch (error) {
-  console.error('Error al actualizar rubro', error);
-}
+    rubro.estado = f.estado;
+    rubro.calculable = f.calculable;
+    rubro.valor = f.valor;
+    rubro.swiva = f.swiva;
+    rubro.tipo = f.tipo;
+    rubro.esiva = f.esiva;
+    rubro.esdebito = f.esdebito;
+    rubro.facturable = f.facturable;
+    rubro.idmodulo_modulos = f.idmodulo_modulos;
+    rubro.usucrea = f.usucrea;
+    rubro.feccrea = f.feccrea;
+    rubro.usumodi = this.authService.idusuario;
+    rubro.fecmodi = new Date();
 
+    const result = await Swal.fire({
+      title: '¿Guardar cambios?',
+      html: `Rubro: <strong>${rubro.descripcion}</strong>`,
+      icon: 'question',
+      input: 'textarea',
+      inputLabel: 'Observación del cambio',
+      inputPlaceholder: 'Describa brevemente qué se modificó...',
+      showCancelButton: true,
+      confirmButtonColor: '#28a745',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: '<i class="bi bi-check-circle"></i> Guardar',
+      cancelButtonText: 'Cancelar',
+    });
 
-    /*     this.rubService.updateRubro(this.idrubro, rubro).subscribe({
-          next: (resp: any) => { console.log(resp); this.retornar() },
-          error: (err) => console.error(err),
-        }); */
+    if (!result.isConfirmed) return;
+
+    try {
+      await this.rubService.updateRubroAuditoria(
+        this.idrubro,
+        rubro,
+        this.authService.idusuario,
+        result.value || 'Sin observación',
+        'MODIFICACION'
+      );
+      Swal.fire({ toast: true, icon: 'success', title: 'Rubro modificado', position: 'top', showConfirmButton: false, timer: 2000 });
+      this.retornar();
+    } catch (error: any) {
+      console.error('Error al actualizar rubro', error);
+      Swal.fire({ icon: 'error', title: 'Error al guardar', text: error?.error?.message ?? 'Error inesperado' });
+    }
   }
 
   retornar() {

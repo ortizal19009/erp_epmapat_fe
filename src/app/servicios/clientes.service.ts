@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { firstValueFrom, Observable } from 'rxjs';
 import { Clientes } from '../modelos/clientes';
 import { environment } from 'src/environments/environment';
+import { ClienteUpdateReq } from '../interfaces/clientes/clienteUpdateReq';
 
 const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/clientes`;
@@ -70,6 +71,16 @@ export class ClientesService {
 
   updateCliente(clientes: Clientes): Observable<Object> {
     return this.http.put(`${baseUrl}/${clientes.idcliente}`, clientes);
+  }
+
+  updateClienteAuditoria(
+    cliente: Clientes,
+    usumodi: number,
+    observacion: string,
+    tipo: string = 'MODIFICACION'
+  ): Observable<Object> {
+    const params = { usumodi, tipo, observacion };
+    return this.http.put(`${baseUrl}/${cliente.idcliente}`, cliente, { params });
   }
   getTotalClientes() {
     return this.http.get(`${baseUrl}/total`);

@@ -194,13 +194,14 @@ export class AddSuspensionesComponent implements OnInit {
   }
 
   actualizarAbonado(abonado: Abonados) {
-    this.s_abonado.updateAbonado(abonado).subscribe({
-      next: (datos) => {
-        console.log('Abonado Acutalizado', datos);
-      },
-      error: (e) => {
-        console.error(e);
-      },
+    this.s_abonado.updateAbonadoAuditoria(
+      abonado,
+      this.authService.idusuario,
+      this.f_dsuspension.value.observa || 'Suspensión de medidor',
+      'SUSPENSION'
+    ).subscribe({
+      next: () => console.log('Abonado actualizado', abonado.idabonado),
+      error: (e) => console.error(e),
     });
   }
 }

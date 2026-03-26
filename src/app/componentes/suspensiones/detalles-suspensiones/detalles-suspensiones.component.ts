@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { NgControlStatus } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Abonados } from 'src/app/modelos/abonados';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { AboxsuspensionService } from 'src/app/servicios/aboxsuspension.service';
@@ -27,7 +27,7 @@ export class DetallesSuspensionesComponent implements OnInit {
   l_abonadosRetirados: any = [];
 
   constructor(private aboxsuspService: AboxsuspensionService, private router: Router,
-    private aboService: AbonadosService) { }
+    private aboService: AbonadosService, private authService: AutorizaService) { }
 
   ngOnInit(): void { this.listarAboxSusp();  }
 
@@ -71,8 +71,8 @@ export class DetallesSuspensionesComponent implements OnInit {
 
   actAbonado(abonado: Abonados, estado: number) {
     abonado.estado = estado;
-    this.aboService.updateAbonado(abonado).subscribe(datos => {
-    })
+    const tipo = estado === 2 ? 'SUSPENSION' : estado === 3 ? 'RETIRO_MEDIDOR' : 'MODIFICACION';
+    this.aboService.updateAbonadoAuditoria(abonado, this.authService.idusuario, tipo, tipo).subscribe();
   }
 
   abonadosSuspendidos() {

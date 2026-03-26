@@ -16,6 +16,7 @@ import { EstadomService } from 'src/app/servicios/estadom.service';
 import { RutasService } from 'src/app/servicios/rutas.service';
 import { TipopagoService } from 'src/app/servicios/tipopago.service';
 import { UbicacionmService } from 'src/app/servicios/ubicacionm.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-modificar-abonados',
@@ -155,10 +156,39 @@ export class ModificarAbonadosComponent implements OnInit {
     this.abonadoForm.value.idresponsable = this.v_idresponsable;
     this.abonadoForm.value.idcliente_clientes = this.cliente;
     this.abonadoForm.value.usumodi = this.authService.idusuario;
-    this.abonadoForm.value.fecmodi = this.date;
-    this.abonadosS.updateAbonado(this.abonadoForm.value).subscribe({
-      next: (resp) => { this.retornar() },
-      error: (err) => console.error(err),
+    this.abonadoForm.value.fecmodi = new Date().toISOString().split('T')[0];
+
+    Swal.fire({
+      title: '¿Guardar cambios?',
+      html: `Cuenta: <strong>${this.abonadoForm.value.idabonado}</strong><br>
+             Medidor: <strong>${this.abonadoForm.value.nromedidor}</strong>`,
+      icon: 'question',
+      input: 'textarea',
+      inputLabel: 'Observación del cambio',
+      inputPlaceholder: 'Describa brevemente qué se modificó...',
+      showCancelButton: true,
+      confirmButtonColor: '#28a745',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: '<i class="bi bi-check-circle"></i> Guardar',
+      cancelButtonText: 'Cancelar',
+    }).then((result) => {
+      if (!result.isConfirmed) return;
+
+      this.abonadosS.updateAbonadoAuditoria(
+        this.abonadoForm.value,
+        this.authService.idusuario,
+        result.value || 'Sin observación',
+        'MODIFICACION'
+      ).subscribe({
+        next: () => {
+          Swal.fire({ toast: true, icon: 'success', title: 'Abonado modificado', position: 'top', showConfirmButton: false, timer: 2000 });
+          this.retornar();
+        },
+        error: (err) => {
+          console.error(err);
+          Swal.fire({ icon: 'error', title: 'Error al guardar', text: err?.error?.message ?? 'Error inesperado' });
+        },
+      });
     });
   }
 

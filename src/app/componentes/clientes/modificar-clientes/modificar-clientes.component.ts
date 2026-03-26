@@ -18,6 +18,7 @@ import { ClientesService } from 'src/app/servicios/clientes.service';
 import { NacionalidadService } from 'src/app/servicios/nacionalidad.service';
 import { PersoneriaJuridicaService } from 'src/app/servicios/personeria-juridica.service';
 import { TpidentificaService } from 'src/app/servicios/tpidentifica.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-modificar-clientes',
@@ -254,16 +255,75 @@ export class ModificarClientesComponent implements OnInit {
   }
 
   onSubmit() {
-    this.cliService.updateCliente(this.formCliente.value).subscribe({
-      next: (datos) => {
-        this.retornar();
-      },
-      error: (err) => console.error(err.error),
+    if (this.formCliente.invalid) {
+      this.formCliente.markAllAsTouched();
+      return;
+    }
+
+    Swal.fire({
+      title: '¿Guardar cambios?',
+      html: `Cliente: <strong>${this.formCliente.value.nombre}</strong><br>
+             Identificación: <strong>${this.formCliente.value.cedula}</strong>`,
+      icon: 'question',
+      input: 'textarea',
+      inputLabel: 'Observación del cambio',
+      inputPlaceholder: 'Describa brevemente qué se modificó...',
+      inputAttributes: { 'aria-label': 'Observación' },
+      showCancelButton: true,
+      confirmButtonColor: '#28a745',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: '<i class="bi bi-check-circle"></i> Guardar',
+      cancelButtonText: 'Cancelar',
+    }).then((result) => {
+      if (!result.isConfirmed) return;
+
+      const formVal = this.formCliente.value;
+
+      const clienteBody = {
+        ...formVal,
+        idnacionalidad_nacionalidad: {
+          idnacionalidad: formVal.idnacionalidad_nacionalidad?.idnacionalidad
+            ?? formVal.idnacionalidad_nacionalidad
+        },
+        idtpidentifica_tpidentifica: {
+          idtpidentifica: formVal.idtpidentifica_tpidentifica?.idtpidentifica
+            ?? formVal.idtpidentifica_tpidentifica
+        },
+        idpjuridica_personeriajuridica: {
+          idpjuridica: formVal.idpjuridica_personeriajuridica?.idpjuridica
+            ?? formVal.idpjuridica_personeriajuridica
+        },
+        usumodi: this.authService.idusuario,
+        fecmodi: new Date().toISOString().split('T')[0],
+      };
+
+      this.cliService.updateClienteAuditoria(
+        clienteBody,
+        this.authService.idusuario,
+        result.value || 'Sin observación',
+        'MODIFICACION'
+      ).subscribe({
+        next: () => {
+          Swal.fire({
+            toast: true,
+            icon: 'success',
+            title: 'Cliente modificado correctamente',
+            position: 'top',
+            showConfirmButton: false,
+            timer: 2000,
+          });
+          this.retornar();
+        },
+        error: (err) => {
+          console.error(err.error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error al guardar',
+            text: err?.error?.message ?? 'Ocurrió un error inesperado.',
+          });
+        },
+      });
     });
-    /* if ((this.validar == true) && (this.validarporc == true)) {
-      } else {
-         alert("ERROR DE INGRESO DE INFORMACIÓN");
-      } */
   }
 
   compararNacionalidad(o1: Nacionalidad, o2: Nacionalidad): boolean {

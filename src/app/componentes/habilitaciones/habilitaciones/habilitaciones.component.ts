@@ -138,8 +138,13 @@ export class HabilitacionesComponent implements OnInit {
 
   habilitarMedidor() {
     this.abonado.estado = 1;
-    this.s_abonado.updateAbonado(this.abonado).subscribe({
-      next: (datos) => {
+    this.s_abonado.updateAbonadoAuditoria(
+      this.abonado,
+      this.authService.idusuario,
+      this.f_habilitacion.value.observacion || 'Habilitación de medidor',
+      'HABILITACION'
+    ).subscribe({
+      next: () => {
         this.l_habilitaciones = true;
         this.guardarHabilitacion();
       },

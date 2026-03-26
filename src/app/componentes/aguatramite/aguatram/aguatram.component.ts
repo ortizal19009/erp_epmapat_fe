@@ -253,7 +253,8 @@ export class AguatramComponent implements OnInit {
    actualizarAbonado(abonado: Abonados) {
       abonado.usumodi = this.authService.idusuario;
       abonado.fecmodi = new Date();
-      this.s_abonados.updateAbonado(abonado).subscribe({
+      const observacion = this.observaciones || 'Trámite de agua';
+      this.s_abonados.updateAbonadoAuditoria(abonado, this.authService.idusuario, observacion, 'MODIFICACION').subscribe({
          next: (datos) => {
             this.regresar();
          },
