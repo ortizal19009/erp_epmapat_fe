@@ -17,10 +17,8 @@
                   </div>
 
                   <div class="input-group col-sm-5 px-1 ">
-                     <input type="date" class="form-control form-control-sm text-center" formControlName="desdeFecha"
-                        max="{{ today | date : 'yyyy-MM-dd' }}" />
-                     <input type="date" class="form-control form-control-sm text-center" formControlName="hastaFecha"
-                        max="{{ date | date : 'yyyy-MM-dd' }}" />
+                     <input type="date" class="form-control form-control-sm text-center" formControlName="desdeFecha" />
+                     <input type="date" class="form-control form-control-sm text-center" formControlName="hastaFecha" />
                   </div>
 
                   <div class="col-sm-2">
@@ -46,9 +44,15 @@
             </button>
             <div class="dropdown-menu dropdown-menu-right bg-dark roboto ">
                <button class="dropdown-item" type="button" (click)="nuevo()">
-                  <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+                  <i class="bi-file-earmark-plus text-info"></i>&nbsp; Nuevo</button>
+               <button class="dropdown-item" type="button" (click)="generaJasperDataset()"
+                  [disabled]="certipresu.length == 0">
+                  <i class="bi bi-view-list text-info"></i>&nbsp; Reporte</button>
+
                <button class="dropdown-item" type="button">
-                  <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
+                  <i class="bi bi-printer text-info"></i>&nbsp; Imprimir / Exportar</button>
+               <button class="dropdown-item" type="button" (click)="cerrar()">
+                  <i class="bi-x-circle text-info"></i>&nbsp; Cerrar</button>
             </div>
          </div>
       </div>
@@ -72,18 +76,28 @@
                </tr>
             </thead>
             <tbody class="detalle roboto small pad0">
-               <tr class="fila" *ngFor="let certificacion of _certificaciones | filter: filtro; let i=index"
+               <tr class="fila" *ngFor="let certificacion of certipresu | filter: filtro; let i=index"
                   (click)="onCellClick($event, certificacion)">
-                  <td class="text-center">{{ certificacion.numero }}</td>
+                  <td class="text-center"><i *ngIf="certificacion.idcerti == ultIdSelec"
+                        class="bi bi-caret-right-fill text-primary"></i>{{ certificacion.numero }}</td>
                   <td class="text-center">{{ certificacion.fecha | date: 'dd-MM-yyyy' }}</td>
                   <td [ngClass]="{'transparente': certificacion.intdoc.intdoc == 1}">{{
                      certificacion.intdoc.nomdoc}} {{ certificacion.numdoc }}</td>
                   <td [ngClass]="{'transparente': certificacion.idbene.idbene == 1}">{{ certificacion.idbene.nomben}}
                   </td>
-                  <td class="text-right">{{ certificacion.valor | number:'1.2-2' }}</td>
-                  <td>{{ certificacion.idbeneres.nomben}}</td>
-                  <td class="text-left text-truncate ancho" data-toggle="tooltip"
-                     title="{{ certificacion.descripcion }}"> {{ certificacion.descripcion }}</td>
+                  <td class="text-right" [ngClass]="{'transparente': certificacion.valor == 0}">{{ certificacion.valor |
+                     number:'1.2-2' }}</td>
+                  <!-- <td>{{ certificacion.idbeneres.nomben}}</td> -->
+                  <td class="text-truncate ancho300" data-toggle="tooltip"
+                     [ngClass]="{'toolt': certificacion.idbeneres.nomben.length > 40}"
+                     [title]="certificacion.idbeneres.nomben.length > 40 ? certificacion.idbeneres.nomben : ''">
+                     {{ certificacion.idbeneres.nomben }}
+                  </td> 
+                  <td class="text-truncate ancho300" data-toggle="tooltip"
+                     [ngClass]="{'toolt': certificacion.descripcion.length > 50}"
+                     [title]="certificacion.descripcion.length > 50 ? certificacion.descripcion : ''">
+                     {{ certificacion.descripcion }}
+                  </td>
                   <td class="text-center">
                      <div class="btn-group py-0">
                         <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
@@ -93,8 +107,7 @@
                            <button class="dropdown-item" type="button"
                               (click)="modiCertipresu( certificacion.idcerti )">
                               <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
-                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#eliminar"
-                              (click)="eliminar( certificacion )">
+                           <button class="dropdown-item" type="button" (click)="eliminar( certificacion )">
                               <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
                         </div>
                      </div>
@@ -111,44 +124,6 @@
                </tr>
             </tfoot>
          </table>
-      </div>
-   </div>
-
-   <!-- Modal Eliminar-->
-   <div class='modal fade' id='eliminar' tabindex='-1' aria-hidden='true'>
-      <div class='modal-dialog modal-dialog-centered'>
-         <div class='modal-content'>
-            <div class='modal-header justify-content-center cabecera border py-2'>
-               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Mensaje</h5>
-            </div>
-            <div *ngIf="totmovi == 0; then thenBlock else elseBlock"></div>
-            <ng-template #thenBlock>
-               <div class='modal-body text-center roboto fondo'>
-                  ¿ Eliminar la Certificación Nro <span class="fantacysombra"> {{certipresu.numero}} </span>?
-               </div>
-               <div class='modal-footer justify-content-center detalle border py-1'>
-                  <button type='button' class='btn btn-success btn-sm' data-dismiss='modal' id='btnSi'
-                     (click)="elimina()">
-                     <i class="fa fa-check-circle"></i> Aceptar
-                  </button>
-                  <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
-                     <i class="fa fa-times-circle" style="font-size:24pxi"></i> Cancelar</button>
-               </div>
-            </ng-template>
-            <ng-template #elseBlock>
-               <div class='modal-body detalle'>
-                  <div class="alert alert-warning text-center" role="alert">
-                     No puede eliminar la Certificación <span class="fantacygreen"> {{certipresu.numero}}</span>
-                     <br>tiene registrado <span class="fantacygreen">{{totmovi}}</span> Partida(s).
-                  </div>
-               </div>
-               <div class='text-center detalle'>
-                  <button type='button' class='btn btn-success btn-sm mb-3' data-dismiss='modal'>
-                     <i class="fa fa-check-circle"></i>&nbsp; Aceptar
-                  </button>
-               </div>
-            </ng-template>
-         </div>
       </div>
    </div>
 </div>

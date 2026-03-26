@@ -662,7 +662,7 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
       lectura.idrutaxemision_rutasxemision = nuevarutaxemi;
       lectura.total1 = 0;
       lectura.idfactura = nuevoIdfactura;
-
+      lectura.fotoPath = '';
       const newLectura = await this.s_lecturas.saveLecturaAsync(lectura);
 
       // 3) calcular planilla y crear emision_individual (tu método ya lo hace)
@@ -829,4 +829,5 @@ interface Lectura {
   total1: number;
   total31: number;
   total32: number;
+  fotoPath: string;
 }

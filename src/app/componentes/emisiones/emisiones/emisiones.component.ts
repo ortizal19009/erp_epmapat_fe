@@ -615,6 +615,7 @@ export class EmisionesComponent implements OnInit {
       lectura.idrutaxemision_rutasxemision = nuevarutaxemi;
       lectura.total1 = 0;
       lectura.idfactura = nuevoIdfactura;
+      lectura.fotoPath = '';
       try {
         let newLectura = await this.s_lecturas.saveLecturaAsync(lectura);
         if (this.f_lecturas.value.lecturaactual > 0) {
@@ -2330,6 +2331,7 @@ interface Lectura {
   total1: number;
   total31: number;
   total32: number;
+  fotoPath: string;
 }
 interface RutaXEmisionUI {
   idrutaxemision: number;

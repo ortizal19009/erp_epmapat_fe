@@ -4,5 +4,6 @@ export interface AbonadosFilters {
   estado?: number | null;
   cedula?: string | null;
   cuenta?: number | null;
-  ruta?:string | null;
+  ruta?: string | null;
+  idcategoria?: number | null;
 }

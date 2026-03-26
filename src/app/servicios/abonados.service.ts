@@ -9,9 +9,7 @@ import { PageResponse } from '../interfaces/page-response';
 const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/abonados`;
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class AbonadosService {
   constructor(private http: HttpClient) { }
 
@@ -19,18 +17,10 @@ export class AbonadosService {
     return this.http.get<Abonados>(`${baseUrl}/${idabonado}`);
   }
 
-  /*   saveSerxAbo(idabonado: number, idservicio: number): Observable<Object> {
-      return this.http.put(`${baseUrl}/${idabonado}/s/${idservicio}`, null);
-   } */
-  //Abonados de un Cliente (Cuentas por Cliente)
-
-  //Abonados por Ruta
-
   getOneAbonado(idabonado: number) {
-    return this.http.get<Abonados>(
-      `${baseUrl}/oneabonado?idabonado=${idabonado}`
-    );
+    return this.http.get<Abonados>(`${baseUrl}/oneabonado?idabonado=${idabonado}`);
   }
+
   tmpTodos(): Observable<Abonados[]> {
     return this.http.get<Abonados[]>(`${baseUrl}/tmp`);
   }
@@ -47,12 +37,10 @@ export class AbonadosService {
     return this.http.delete(`${baseUrl}/${idabonado}`);
   }
 
-  //Buscar con parametro idabonado (Ok para validar al importar lecturas)
   getByIdabonado(idabonado: number): Observable<Abonados> {
     return this.http.get<Abonados>(`${baseUrl}?idabonado=${idabonado}`);
   }
 
-  //Buscar con abonados/idabonado
   getById(idabonado: number): Observable<Abonados> {
     return this.http.get<Abonados>(`${baseUrl}/${idabonado}`);
   }
@@ -69,23 +57,15 @@ export class AbonadosService {
     return this.http.get<Abonados>(`${baseUrl}/cuenta/${idabonado}`);
   }
 
-  //Un Abonado
   unAbonado(idabonado: number): Observable<Abonados> {
-    return this.http.get<Abonados>(
-      `${baseUrl}/unabonado?idabonado=${idabonado}`
-    );
+    return this.http.get<Abonados>(`${baseUrl}/unabonado?idabonado=${idabonado}`);
   }
 
   updateAbonado(abonado: any): Observable<any> {
     return this.http.put<any>(`${baseUrl}/${abonado.idabonado}`, abonado);
   }
 
-  updateAbonadoAuditoria(
-    abonado: any,
-    usumodi: number,
-    observacion: string,
-    tipo: string = 'MODIFICACION'
-  ): Observable<any> {
+  updateAbonadoAuditoria(abonado: any, usumodi: number, observacion: string, tipo: string = 'MODIFICACION'): Observable<any> {
     const params = { usumodi, tipo, observacion };
     return this.http.put<any>(`${baseUrl}/${abonado.idabonado}`, abonado, { params });
   }
@@ -97,27 +77,21 @@ export class AbonadosService {
   saveSerxAbo(idabonado: number, idservicio: number): Observable<Object> {
     return this.http.put(`${baseUrl}/${idabonado}/s/${idservicio}`, null);
   }
-  //Abonados de un Cliente (Cuentas por Cliente)
+
   getByIdcliente(idcliente: number) {
     return this.http.get<Abonados>(`${baseUrl}?idcliente=${idcliente}`);
   }
 
-  //Abonados por Ruta
   getByIdruta(idruta: number) {
     return this.http.get<Abonados[]>(`${baseUrl}?idruta=${idruta}`);
   }
 
-  //Abonados por Ruta Async
   async getByIdrutaAsync(idruta: number): Promise<Abonados[]> {
-    const observable = this.http.get<Abonados[]>(`${baseUrl}?idruta=${idruta}`);
-    return await firstValueFrom(observable);
+    return await firstValueFrom(this.http.get<Abonados[]>(`${baseUrl}?idruta=${idruta}`));
   }
 
-  //Verifica si un Cliente tiene Abonados (Cuentas)
   tieneAbonados(idcliente: number): Observable<boolean> {
-    return this.http.get<boolean>(
-      `${baseUrl}/clienteTieneAbonados?idcliente=${idcliente}`
-    );
+    return this.http.get<boolean>(`${baseUrl}/clienteTieneAbonados?idcliente=${idcliente}`);
   }
 
   getListaById(idabonado: number) {
@@ -133,98 +107,114 @@ export class AbonadosService {
   }
 
   getByIdCliente(idcliente: number) {
-    return this.http.get<Abonados[]>(
-      `${baseUrl}/cliente?idcliente=${idcliente}`
-    );
+    return this.http.get<Abonados[]>(`${baseUrl}/cliente?idcliente=${idcliente}`);
   }
 
-  //Para reporte de campos especificos
   getCampos(): Observable<Abonados[]> {
     return this.http.get<Abonados[]>(`${baseUrl}/campos`);
   }
+
   async getDeudasCuentasByRuta(idruta: number) {
-    let resp = this.http.get(`${baseUrl}/deudas?idruta=${idruta}`);
-    return await firstValueFrom(resp);
+    return await firstValueFrom(this.http.get(`${baseUrl}/deudas?idruta=${idruta}`));
   }
+
   async DeudasCuentasByRuta(idruta: number) {
-    let resp = this.http.get(`${baseUrl}/deudasByRuta?idruta=${idruta}`);
-    return await firstValueFrom(resp);
+    return await firstValueFrom(this.http.get(`${baseUrl}/deudasByRuta?idruta=${idruta}`));
   }
+
   getResAbonado(cuenta: number) {
     return this.http.get(`${baseUrl}/resabonado?idabonado=${cuenta}`);
   }
+
   getResAbonadoNombre(nombre: string) {
     return this.http.get(`${baseUrl}/resabonado/nombre?nombre=${nombre}`);
   }
+
   getResAbonadoIdentificacion(identificacion: string) {
     return this.http.get(`${baseUrl}/resabonado/identificacion?identificacion=${identificacion}`);
   }
+
   getResAbonadoCliente(idcliente: number) {
     return this.http.get(`${baseUrl}/resabonado/idcliente?idcliente=${idcliente}`);
   }
+
   getResAbonadoResponsable(idresponsable: number) {
     return this.http.get(`${baseUrl}/resabonado/respago?idresp=${idresponsable}`);
   }
+
+  getResAbonadoByEstado(estado: number) {
+    return this.http.get(`${baseUrl}/estado/${estado}`);
+  }
+
+  getResAbonadoByRuta(idruta: number) {
+    return this.http.get(`${baseUrl}/resabonado/ruta?idruta=${idruta}`);
+  }
+
+  getResAbonadoByCategoria(idcategoria: number) {
+    return this.http.get(`${baseUrl}/resabonado/categoria?idcategoria=${idcategoria}`);
+  }
+
   getCuentasByCategoria() {
     return firstValueFrom(this.http.get(`${baseUrl}/ncuentasByCategoria`));
-
   }
+
   getCuentasByEstado() {
     return firstValueFrom(this.http.get(`${baseUrl}/ncuentasByEstado`));
+  }
 
+  getResAbonadoCliente2(idcliente: number) {
+    return this.http.get(`${baseUrl}/resabonado/idcliente?idcliente=${idcliente}`);
+  }
+
+  getAbonadosByCategoriaPageable(idcategoria: number, page: number, size: number): Observable<PageResponse<Abonados>> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString())
+      .set('sort', 'idabonado,asc');
+    return this.http.get<PageResponse<Abonados>>(`${baseUrl}/categoria/${idcategoria}/pageable`, { params });
+  }
+
+  getAbonadosByEstadoPageable(estado: number, page: number, size: number): Observable<PageResponse<Abonados>> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString())
+      .set('sort', 'idabonado,asc');
+    return this.http.get<PageResponse<Abonados>>(`${baseUrl}/estado/${estado}/pageable`, { params });
+  }
+
+  getAbonadosByRutaPageable(idruta: number, page: number, size: number): Observable<PageResponse<Abonados>> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString())
+      .set('sort', 'idabonado,asc');
+    return this.http.get<PageResponse<Abonados>>(`${baseUrl}/ruta/${idruta}/pageable`, { params });
   }
 
   getAbonadosPage(
     page: number,
     size: number,
-    sort: string = 'idabonado,desc',
+    sort: string = 'idabonado,asc',
     filters: AbonadosFilters = {}
   ): Observable<PageResponse<Abonados>> {
-
     let params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString())
       .set('sort', sort);
 
-    /* ======================
-       Filtros numéricos
-    ====================== */
-
-    if (filters.idruta !== null && filters.idruta !== undefined) {
-      params = params.set('idruta', filters.idruta.toString());
-    }
-
-    if (filters.estado !== null && filters.estado !== undefined) {
-      params = params.set('estado', filters.estado.toString());
-    }
-
-    if (filters.cuenta !== null && filters.cuenta !== undefined) {
-      params = params.set('cuenta', filters.cuenta.toString());
-    }
-
-    /* ======================
-       Filtros texto (trim)
-    ====================== */
+    if (filters.idruta != null)     params = params.set('idruta', filters.idruta.toString());
+    if (filters.estado != null)     params = params.set('estado', filters.estado.toString());
+    if (filters.cuenta != null)     params = params.set('cuenta', filters.cuenta.toString());
+    if (filters.idcategoria != null) params = params.set('idcategoria', filters.idcategoria.toString());
 
     const responsable = (filters.responsable ?? '').trim();
-    if (responsable.length > 0) {
-      params = params.set('responsable', responsable);
-    }
+    if (responsable) params = params.set('responsable', responsable);
 
     const cedula = (filters.cedula ?? '').trim();
-    if (cedula.length > 0) {
-      params = params.set('cedula', cedula);
-    }
+    if (cedula) params = params.set('cedula', cedula);
 
     const ruta = (filters.ruta ?? '').trim();
-    if (ruta.length > 0) {
-      params = params.set('ruta', ruta);
-    }
+    if (ruta) params = params.set('ruta', ruta);
 
-    return this.http.get<PageResponse<Abonados>>(
-      `${baseUrl}/buscar`,
-      { params }
-    );
+    return this.http.get<PageResponse<Abonados>>(`${baseUrl}/buscar`, { params });
   }
-
 }

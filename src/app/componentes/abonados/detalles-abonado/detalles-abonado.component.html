@@ -64,7 +64,12 @@
       <div class="card card-outline cardCliente mt-1">
         <div class="card-body box-profile">
 
-          <h3 class="profile-username text-center">{{ abonado.nombre }}</h3>
+          <h3 class="profile-username text-center">
+            <a role="button" class="text-dark" style="cursor:pointer; text-decoration:underline dotted;"
+              (click)="irDetallesCliente()" title="Ver detalles del cliente">
+              {{ abonado.nombre }}
+            </a>
+          </h3>
           <p class="text-muted text-center">
             <span class="badge badge-light">Cuenta: {{abonado.idabonado}}</span>
           </p>

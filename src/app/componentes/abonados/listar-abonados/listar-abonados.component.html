@@ -55,6 +55,75 @@
   </div>
 </div>
 
+<!-- =====================
+     CARD DE FILTROS
+===================== -->
+<div class="container-fluid mt-2 mb-1">
+  <div class="card sombra detalle">
+    <div class="card-body py-2">
+      <div class="form-row align-items-end">
+
+        <!-- Filtro por Estado -->
+        <div class="form-group col-12 col-md-3 mb-2">
+          <label class="mb-1 small text-muted">Estado</label>
+          <select class="form-control form-control-sm" [(ngModel)]="filtroEstado" (ngModelChange)="onFiltroEstado()">
+            <option [ngValue]="null">— Todos —</option>
+            <option [ngValue]="1">Activo</option>
+            <option [ngValue]="2">Suspendido</option>
+            <option [ngValue]="3">Retirado</option>
+            <option [ngValue]="0">Eliminado</option>
+          </select>
+        </div>
+
+        <!-- Filtro por Categoría -->
+        <div class="form-group col-12 col-md-3 mb-2">
+          <label class="mb-1 small text-muted">Categoría</label>
+          <select class="form-control form-control-sm" [(ngModel)]="filtroCategoria" (ngModelChange)="onFiltroCategoria()">
+            <option [ngValue]="null">— Todas —</option>
+            <option *ngFor="let c of _categorias" [ngValue]="c.idcategoria">{{ c.descripcion }}</option>
+          </select>
+        </div>
+
+        <!-- Filtro por Ruta -->
+        <div class="form-group col-12 col-md-3 mb-2">
+          <label class="mb-1 small text-muted">Ruta</label>
+          <select class="form-control form-control-sm" [(ngModel)]="filtroRuta" (ngModelChange)="onFiltroRuta()">
+            <option [ngValue]="null">— Todas —</option>
+            <option *ngFor="let r of _rutas" [ngValue]="r.idruta">{{ r.descripcion }}</option>
+          </select>
+        </div>
+
+        <!-- Botón limpiar -->
+        <div class="form-group col-12 col-md-3 mb-2 d-flex align-items-end">
+          <button class="btn btn-sm btn-outline-secondary w-100" type="button" (click)="limpiarFiltros()">
+            <i class="bi bi-x-circle"></i> Limpiar filtros
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Resumen -->
+      <div class="d-flex justify-content-between align-items-center mt-1" *ngIf="_abonados.length >= 0">
+        <small class="text-muted">
+          Mostrando <strong>{{ (_abonados | filter: filterTerm).length }}</strong> resultado(s)
+          <ng-container *ngIf="modoFiltro"> de <strong>{{ totalElements }}</strong> total</ng-container>
+          <span *ngIf="filtroEstado !== null || filtroCategoria !== null || filtroRuta !== null"
+            class="badge badge-info ml-1">Filtros activos</span>
+        </small>
+
+        <!-- Items por página (solo en modo filtro) -->
+        <div *ngIf="modoFiltro" class="d-flex align-items-center">
+          <small class="text-muted mr-2">Items por página:</small>
+          <select class="form-control form-control-sm" style="width:70px;" (change)="cambiarSize($event)">
+            <option *ngFor="let s of PAGE_SIZES" [value]="s" [selected]="s === size">{{ s }}</option>
+          </select>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <div class="container-fluid">
   <div class="row mb-0">
     <div class="col-sm">
@@ -74,20 +143,59 @@
           <tr class="fila" *ngFor="let abonado of _abonados | filter:filterTerm; let i= index"
             (click)="detallesAbonado( abonado )">
             <td class="text-center small font-weight-bold">{{i+1}}</td>
-            <td>{{ abonado.nombre }}</td>
-            <td class="text-center">{{ abonado.identificacion }}</td>
+            <td>{{ abonado.nombre || abonado.idresponsable?.nombre || abonado.idcliente_clientes?.nombre }}</td>
+            <td class="text-center">{{ abonado.identificacion || abonado.idresponsable?.cedula }}</td>
             <td class="text-center"
               [ngClass]="{'fontwarning': abonado.estado === 0,'fantacygreen': abonado.estado === 2 || abonado.estado === 3}">
               {{abonado.idabonado }}</td>
-            <td>{{ abonado.categoria }}</td>
-            <td>{{ abonado.ruta }}</td>
-            <td>{{ abonado.direccion }}</td>
+            <td>{{ abonado.categoria || abonado.idcategoria_categorias?.descripcion }}</td>
+            <td>{{ abonado.ruta || abonado.idruta_rutas?.descripcion }}</td>
+            <td>{{ abonado.direccion || abonado.direccionubicacion }}</td>
           </tr>
-          <tr *ngIf="(_abonados?.length || 0) === 0">
+          <tr *ngIf="(_abonados.length || 0) === 0">
             <td colspan="7" class="text-center text-muted py-3">No hay resultados</td>
           </tr>
         </tbody>
       </table>
+
+      <!-- PAGINACIÓN (solo en modo filtro) -->
+      <div *ngIf="modoFiltro && totalPages > 1"
+        class="d-flex justify-content-between align-items-center py-2 px-1">
+
+        <small class="text-muted">
+          Página <strong>{{ page + 1 }}</strong> de <strong>{{ totalPages }}</strong>
+          &nbsp;|&nbsp; {{ totalElements }} registros
+        </small>
+
+        <nav>
+          <ul class="pagination pagination-sm mb-0">
+            <li class="page-item" [class.disabled]="page === 0">
+              <button class="page-link" (click)="cambiarPagina(0)" title="Primera">
+                <i class="bi bi-chevron-double-left"></i>
+              </button>
+            </li>
+            <li class="page-item" [class.disabled]="page === 0">
+              <button class="page-link" (click)="cambiarPagina(page - 1)" title="Anterior">
+                <i class="bi bi-chevron-left"></i>
+              </button>
+            </li>
+            <li class="page-item" *ngFor="let p of paginasVisibles"
+              [class.active]="p === page">
+              <button class="page-link" (click)="cambiarPagina(p)">{{ p + 1 }}</button>
+            </li>
+            <li class="page-item" [class.disabled]="page + 1 >= totalPages">
+              <button class="page-link" (click)="cambiarPagina(page + 1)" title="Siguiente">
+                <i class="bi bi-chevron-right"></i>
+              </button>
+            </li>
+            <li class="page-item" [class.disabled]="page + 1 >= totalPages">
+              <button class="page-link" (click)="cambiarPagina(totalPages - 1)" title="Última">
+                <i class="bi bi-chevron-double-right"></i>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
     </div>
   </div>
 
@@ -100,13 +208,32 @@
         </div>
         <div class='modal-body cuerpo'>
 
-          <div class="input-group mb-3 input-group-sm">
-            <div class="input-group-prepend">
-              <label class="input-group-text" for="inputGroupSelect01">Reporte</label>
+          <!-- Info de lo que se va a imprimir -->
+          <div class="alert alert-info py-1 px-2 small mb-2">
+            <i class="bi bi-info-circle"></i>
+            <ng-container *ngIf="!modoFiltro">
+              Búsqueda: <strong>{{ _abonados.length }}</strong> abonado(s) en pantalla
+            </ng-container>
+            <ng-container *ngIf="modoFiltro">
+              Filtro activo: <strong>{{ totalElements }}</strong> abonados en total
+              (página actual: <strong>{{ _abonados.length }}</strong>)
+            </ng-container>
+          </div>
+
+          <!-- Alcance (solo en modo filtro paginado) -->
+          <div class="form-group mb-2" *ngIf="modoFiltro">
+            <label class="small text-muted mb-1">Alcance del reporte</label>
+            <div class="d-flex flex-column" style="gap:4px">
+              <label class="mb-0">
+                <input type="radio" [(ngModel)]="pdfAlcance" [value]="'pagina'"> &nbsp;
+                Solo página actual ({{ _abonados.length }} registros)
+              </label>
+              <label class="mb-0">
+                <input type="radio" [(ngModel)]="pdfAlcance" [value]="'todos'"> &nbsp;
+                Todos los registros ({{ totalElements }})
+                <small class="text-muted">— puede tardar</small>
+              </label>
             </div>
-            <select class="custom-select" id="inputGroupSelect01">
-              <option selected>Abonados</option>
-            </select>
           </div>
 
           <div class="input-group input-group-sm mb-0">
@@ -121,7 +248,7 @@
           <div class='row justify-content-center mt-3'>
             <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="pdf()"
               [attr.data-target]="otraPagina ? null : '#pdf'" data-toggle="modal">
-              <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+              <i class="fa fa-check-circle"></i>&nbsp; Generar PDF</button>
             <button type='button' class='btn btn-sm btn-outline-success btn-sm mx-1' data-dismiss='modal'>
               <i class="bi bi-x-circle"></i> Cancelar</button>
           </div>

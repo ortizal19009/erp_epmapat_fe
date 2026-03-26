@@ -195,6 +195,7 @@ export class GeneEmisionComponent implements OnInit {
                 lectura.idrutaxemision_rutasxemision = nuevarutaxemi;
                 lectura.total1 = 0;
                 lectura.idfactura = nuevoIdfactura;
+                lectura.fotoPath = '';
                 try {
                   await this.lecService.saveLecturaAsync(lectura);
                 } catch (error) {
@@ -279,4 +280,5 @@ interface Lectura {
   total1: number;
   total31: number;
   total32: number;
+  fotoPath: string;
 }

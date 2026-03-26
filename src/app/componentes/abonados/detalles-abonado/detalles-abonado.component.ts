@@ -392,6 +392,14 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     this.router.navigate(['/modificar-abonado']);
   }
 
+  irDetallesCliente() {
+    const idcliente = this._abonado?.[0]?.idcliente_clientes?.idcliente;
+    if (!idcliente) return;
+    localStorage.setItem('idclienteToDetalles', idcliente.toString());
+    sessionStorage.setItem('padreDetalleAbonado', '2');
+    this.router.navigate(['detalles-cliente']);
+  }
+
   subtotal() {
     let suma12: number = 0;
     let suma0: number = 0;

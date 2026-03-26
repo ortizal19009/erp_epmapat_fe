@@ -52,6 +52,7 @@ export class PartixcertiComponent implements OnInit {
       if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
 
       const datosToPartixcertiJSON = sessionStorage.getItem('datosToPartixcerti');
+      console.log(datosToPartixcertiJSON)
       if (datosToPartixcertiJSON) {
          const datosToPartixcerti = JSON.parse(datosToPartixcertiJSON);
          this.idcerti = datosToPartixcerti.idcerti;
@@ -85,6 +86,7 @@ export class PartixcertiComponent implements OnInit {
    }
 
    buscaCertipresu() {
+      console.log(this.idcerti)
       this.certiService.getByIdCerti(this.idcerti).subscribe({
          next: (certipresu: Certipresu) => {
             this.navegador = certipresu.numero;
