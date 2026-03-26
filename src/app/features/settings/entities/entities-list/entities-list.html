@@ -1,0 +1,64 @@
+<div class="container py-4 gd-page">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <h3 class="mb-0">Entidades</h3>
+      <small class="text-muted">Administra entidades (ej: EPMAPA-T)</small>
+    </div>
+    <button class="btn btn-primary" (click)="goNew()">+ Nueva entidad</button>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="row align-items-end">
+        <div class="col-md-6">
+          <label class="control-label mb-1">Buscar</label>
+          <input class="form-control" [(ngModel)]="q" placeholder="Código o nombre..." />
+        </div>
+        <div class="col-md-2 ">
+          <button class="btn btn-outline-primary" (click)="load()">Buscar</button>
+        </div>
+        <div class="col-md-2 ">
+          <button class="btn btn-outline-secondary" (click)="clear()">Limpiar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="alert alert-info">Cargando...</div>
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th style="width: 160px;">Código</th>
+            <th>Nombre</th>
+            <th style="width: 120px;">Estado</th>
+            <th style="width: 160px;" class="text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let e of items">
+            <td class="font-weight-bold">{{ e.codigo }}</td>
+            <td>{{ e.nombre }}</td>
+            <td><span class="badge" [ngClass]="e.activo ? 'bg-success' : 'bg-secondary'">{{ e.activo ? 'ACTIVO' : 'INACTIVO' }}</span></td>
+            <td class="text-right">
+              <div class="btn-group">
+                <button class="btn btn-outline-primary btn-sm" (click)="edit(e)">Editar</button>
+                <button class="btn btn-outline-dark btn-sm" (click)="toggle(e)">{{ e.activo ? 'Desactivar' : 'Activar' }}</button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="!loading && items.length === 0">
+            <td colspan="4" class="text-center text-muted py-4">No se encontraron entidades.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+

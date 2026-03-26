@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { AutorizaService } from './compartida/autoriza.service';
+import { AutorizaService } from '@core/auth/autoriza.service';
 
 @Component({
   selector: 'app-root',

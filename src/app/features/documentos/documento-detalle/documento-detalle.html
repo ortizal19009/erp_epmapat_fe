@@ -1,0 +1,183 @@
+<div class="page gd-page gd-doc-detalle">
+  <div class="page gd-page-header cabecera d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h2 class="mb-0">Detalle de documento</h2>
+      <small class="text-muted" *ngIf="doc">{{ doc.numero_oficial || 'Sin número' }} · {{ doc.estado }}</small>
+    </div>
+    <div class="d-flex">
+      <button class="btn btn-outline-secondary mr-2" (click)="back()">Volver</button>
+      <button class="btn btn-outline-primary mr-2" [disabled]="!canEdit()" (click)="edit()">Editar</button>
+      <button class="btn btn-outline-success" [disabled]="!canEmit()" (click)="emit()">Emitir</button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="alert alert-info">Cargando...</div>
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+  <div *ngIf="actionError" class="alert alert-warning">{{ actionError }}</div>
+
+  <div *ngIf="!loading && doc" class="row">
+    <div class="col-lg-7">
+      <div class="card shadow-sm border-0 p-3 mb-3">
+        <h6 class="mb-3">Información general</h6>
+        <div class="row small">
+          <div class="col-md-6"><span class="detail-label">Asunto</span><span class="detail-value">{{ doc.asunto }}</span></div>
+          <div class="col-md-6"><span class="detail-label">Referencia</span><span class="detail-value">{{ doc.referencia || '—' }}</span></div>
+          <div class="col-md-6"><span class="detail-label">Tipo</span><span class="detail-value">{{ doc.tipo_codigo || doc.type_id }}</span></div>
+          <div class="col-md-6"><span class="detail-label">Flujo</span><span class="detail-value">{{ doc.flujo }}</span></div>
+          <div class="col-md-6"><span class="detail-label">Dependencia</span><span class="detail-value">{{ doc.dep_nombre || doc.dependency_id }}</span></div>
+          <div class="col-md-6"><span class="detail-label">Origen</span><span class="detail-value">{{ doc.origen }}</span></div>
+          <div class="col-md-6"><span class="detail-label">Fecha elaboración</span><span class="detail-value">{{ doc.fecha_elaboracion | date:'yyyy-MM-dd' }}</span></div>
+          <div class="col-md-6"><span class="detail-label">Fecha plazo</span><span class="detail-value">{{ doc.fecha_plazo ? (doc.fecha_plazo | date:'yyyy-MM-dd') : 'No aplica' }}</span></div>
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0 p-3 mt-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="mb-0">Línea de tiempo</h6>
+          <span class="badge badge-light">{{ timeline.length }}</span>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li *ngFor="let t of timeline" class="list-group-item px-0">
+            <div class="font-weight-bold">{{ t.event_type || t.evento || t.tipo || 'Evento' }}</div>
+            <small class="text-muted">{{ t.occurred_at || t.created_at || t.created_en | date:'yyyy-MM-dd HH:mm' }}</small>
+            <div class="small" *ngIf="t.description || t.descripcion || t.detalle">{{ t.description || t.descripcion || t.detalle }}</div>
+          </li>
+          <li *ngIf="timeline.length === 0" class="list-group-item px-0 text-muted">Sin eventos.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card shadow-sm border-0 p-3 mb-3" *ngIf="canReceive()">
+        <h6 class="mb-2">Registrar recepción</h6>
+        <div class="row">
+          <div class="col-12">
+            <label class="small text-muted d-block mb-1">Dependencia receptora</label>
+            <select class="custom-select custom-select-sm" [(ngModel)]="receivePayload.dependencia_id" name="depRecep">
+              <option value="">(Opcional)</option>
+              <option *ngFor="let d of dependencies" [value]="d.id">{{ d.codigo }} - {{ d.nombre }}</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="small text-muted d-block mb-1">Usuario receptor</label>
+            <select class="custom-select custom-select-sm" [(ngModel)]="receivePayload.receptor_id" name="userRecep">
+              <option value="">(Opcional)</option>
+              <option *ngFor="let u of users" [value]="u.id">{{ u.full_name || u.name || u.email }}</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <textarea class="form-control form-control-sm" rows="2" [(ngModel)]="receivePayload.comentario" name="recComment" placeholder="Comentario"></textarea>
+          </div>
+          <div class="col-12 ">
+            <button class="btn btn-sm btn-outline-dark" (click)="receive()">Registrar recepción</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="derive-card" class="card shadow-sm border-0 p-3 mb-3" *ngIf="canDerive()">
+        <h6 class="mb-2">Derivar documento</h6>
+        <div class="row">
+          <div class="col-12">
+            <label class="small text-muted d-block mb-1">Dependencia destino</label>
+            <select class="custom-select custom-select-sm" [(ngModel)]="derivePayload.to_dependency_id" name="depDerive">
+              <option value="">(Opcional)</option>
+              <option *ngFor="let d of dependencies" [value]="d.id">{{ d.codigo }} - {{ d.nombre }}</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="small text-muted d-block mb-1">Usuario destino</label>
+            <select class="custom-select custom-select-sm" [(ngModel)]="derivePayload.to_user_id" name="userDerive">
+              <option value="">(Opcional)</option>
+              <option *ngFor="let u of users" [value]="u.id">{{ u.full_name || u.name || u.email }}</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="small text-muted d-block mb-1">Vence en</label>
+            <input type="datetime-local" class="form-control form-control-sm" [(ngModel)]="derivePayload.due_at" name="dueDerive" />
+          </div>
+          <div class="col-12">
+            <textarea class="form-control form-control-sm" rows="2" [(ngModel)]="derivePayload.comment" name="deriveComment" placeholder="Comentario"></textarea>
+          </div>
+          <div class="col-12 ">
+            <button class="btn btn-sm btn-outline-primary" (click)="derive()">Derivar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0 p-3 mb-3" *ngIf="canRespond()">
+        <h6 class="mb-2">Responder derivación</h6>
+        <div class="row">
+          <div class="col-12">
+            <label class="small text-muted d-block mb-1">Derivación</label>
+            <select class="custom-select custom-select-sm" [(ngModel)]="respondPayload.derivation_id" name="respDerivation">
+              <option value="">(Selecciona)</option>
+              <option *ngFor="let d of derivations" [value]="d.id">
+                {{ d.estado || 'SIN_ESTADO' }} · {{ (d.para_user_id || d.para_dependencia_id || 'destino') }}
+              </option>
+            </select>
+          </div>
+          <div class="col-12 mt-2">
+            <input type="text" class="form-control form-control-sm" [(ngModel)]="respondPayload.subject" name="respSubject" placeholder="Asunto de respuesta" />
+          </div>
+          <div class="col-12 mt-2">
+            <textarea class="form-control form-control-sm" rows="3" [(ngModel)]="respondPayload.body" name="respBody" placeholder="Contenido de respuesta"></textarea>
+          </div>
+          <div class="col-12 mt-2">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="nestedResp" [(ngModel)]="respondPayload.nested" name="nestedResp" />
+              <label class="form-check-label small" for="nestedResp">Crear documento de respuesta relacionado</label>
+            </div>
+          </div>
+          <div class="col-12 mt-2">
+            <button class="btn btn-sm btn-outline-success" (click)="respondDerivation()">Responder derivación</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0 p-3 mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="mb-0">Archivos</h6>
+          <label class="btn btn-sm btn-outline-primary mb-0">
+            {{ uploading ? 'Subiendo...' : 'Subir' }}
+            <input type="file" hidden (change)="onFileSelected($event)" [disabled]="uploading" />
+          </label>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li *ngFor="let f of files" class="list-group-item px-0 d-flex justify-content-between align-items-center">
+            <div>
+              <div class="font-weight-bold small">{{ f.original_filename || f.nombre || 'Archivo' }}</div>
+              <small class="text-muted">{{ f.file_kind || f.tipo || '' }}</small>
+            </div>
+            <a class="btn btn-sm btn-outline-secondary" [href]="fileDownloadUrl(f)" target="_blank">Descargar</a>
+          </li>
+          <li *ngIf="files.length === 0" class="list-group-item px-0 text-muted">Sin adjuntos.</li>
+        </ul>
+      </div>
+
+      <div class="card shadow-sm border-0 p-3 mt-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="mb-0">Derivaciones</h6>
+          <span class="badge badge-light">{{ derivations.length }}</span>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li *ngFor="let d of derivations" class="list-group-item px-0">
+            <div class="small"><strong>Destino:</strong> {{ d.para_dependencia_id || d.para_user_id || d.to_dependency_name || d.to_user_name || '—' }}</div>
+            <div class="small d-flex align-items-center">
+              <strong class="mr-2">Estado:</strong>
+              <span class="badge" [ngClass]="derivationBadgeClass(d.status || d.estado)">{{ d.status || d.estado || '—' }}</span>
+            </div>
+            <small class="text-muted">{{ d.created_at || d.creado_en | date:'yyyy-MM-dd HH:mm' }}</small>
+            <div class="mt-2" *ngIf="canRespond() && (d.estado==='PENDIENTE' || d.estado==='LEIDO')">
+              <button class="btn btn-sm btn-outline-warning" (click)="attendDerivation(d.id)">Atender</button>
+            </div>
+          </li>
+          <li *ngIf="derivations.length === 0" class="list-group-item px-0 text-muted">Sin derivaciones.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+

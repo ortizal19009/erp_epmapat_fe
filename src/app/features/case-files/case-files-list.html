@@ -1,0 +1,54 @@
+<div class="page gd-page">
+  <div class="page gd-page-header cabecera"><div class="d-flex align-items-center"><h2 class="page gd-page-title mb-0">Expedientes electrónicos</h2><app-info-help key="case_files"></app-info-help></div></div>
+
+  <div class="page gd-page-card detalle mb-3">
+    <div class="row align-items-end">
+      <div class="col-md-3"><label class="control-label">Código</label><input class="form-control" [(ngModel)]="code" /></div>
+      <div class="col-md-5"><label class="control-label">Título</label><input class="form-control" [(ngModel)]="title" /></div>
+      <div class="col-md-3"><label class="control-label">Dependencia responsable</label><select class="custom-select" [(ngModel)]="ownerDependencyId"><option [ngValue]="null">(sin dependencia)</option><option *ngFor="let d of deps" [ngValue]="d.id">{{ d.codigo }} - {{ d.nombre }}</option></select></div>
+      <div class="col-md-1 "><button class="btn btn-primary" (click)="create()">Crear</button></div>
+    </div>
+  </div>
+
+  <div class="page gd-page-card detalle p-0 overflow-hidden">
+    <div class="table-wrap">
+      <table class="table table-hover align-middle mb-0">
+        <thead><tr><th>Código</th><th>Título</th><th>Estado</th><th>Apertura</th><th>Cierre</th><th>Acción</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let r of rows">
+            <td>{{ r.code }}</td><td>{{ r.title }}</td><td><span class="badge" [ngClass]="r.status==='CERRADO' ? 'bg-secondary' : 'bg-success'">{{ r.status }}</span></td>
+            <td>{{ r.opened_at | date:'yyyy-MM-dd HH:mm' }}</td>
+            <td>{{ r.closed_at ? (r.closed_at | date:'yyyy-MM-dd HH:mm') : '-' }}</td>
+            <td class="d-flex "><button class="btn btn-sm btn-outline-secondary" (click)="viewItems(r)">Ver índice</button><button class="btn btn-sm btn-outline-danger" (click)="close(r)" [disabled]="r.status==='CERRADO'">Cerrar</button></td>
+          </tr>
+          <tr *ngIf="rows.length===0"><td colspan="6" class="text-center text-muted py-3">Sin expedientes</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<div class="page gd-page-card detalle mt-3" *ngIf="selectedCaseId">
+  <h5>Índice del expediente seleccionado</h5>
+  <div class="alert alert-warning py-2" *ngIf="selectedCaseStatus==='CERRADO'">Expediente CERRADO: no admite nuevos documentos.</div>
+  <div class="table-wrap">
+    <table class="table table-sm align-middle mb-0">
+      <thead><tr><th>Orden</th><th>Folio</th><th>Documento</th><th>Asunto</th><th>Estado</th><th>Incorporado</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let i of selectedCaseItems">
+          <td>{{ i.order_index }}</td>
+          <td>{{ i.folio }}</td>
+          <td>{{ i.document_id }}</td>
+          <td>{{ i.asunto }}</td>
+          <td>{{ i.estado }}</td>
+          <td>{{ i.incorporated_at | date:'yyyy-MM-dd HH:mm' }}</td>
+        </tr>
+        <tr *ngIf="selectedCaseItems.length===0"><td colspan="6" class="text-center text-muted">Sin actuaciones</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+

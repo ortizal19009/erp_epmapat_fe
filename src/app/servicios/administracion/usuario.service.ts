@@ -6,6 +6,7 @@ import { environment } from 'src/environments/environment';
 
 const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/usuarios`;
+const authUrl = `${apiUrl}/api/auth`;
 
 @Injectable({
   providedIn: 'root',
@@ -15,6 +16,10 @@ export class UsuarioService {
 
   getUsuarios(): Observable<Usuarios[]> {
     return this.http.get<Usuarios[]>(baseUrl);
+  }
+
+  getUsuariosWithPersonal(): Observable<any[]> {
+    return this.http.get<any[]>(`${baseUrl}/with-personal`);
   }
 
   //
@@ -47,6 +52,15 @@ export class UsuarioService {
   updateUsuario(idusuario: number, usuario: Usuarios): Observable<Object> {
     return this.http.put(baseUrl + '/' + idusuario, usuario);
   }
+
+  linkPersonal(idusuario: number, idpersonal: number, usumodi?: number) {
+    return this.http.patch(`${baseUrl}/${idusuario}/personal`, { idpersonal, usumodi: usumodi || null });
+  }
+
+  unlinkPersonal(idusuario: number, usumodi?: number) {
+    const q = usumodi ? `?usumodi=${usumodi}` : '';
+    return this.http.delete(`${baseUrl}/${idusuario}/personal${q}`);
+  }
   getDatosOfOne(idusuario: number) {
     return this.http.get(`${baseUrl}/one?idusuario=${idusuario}`);
   }
@@ -60,6 +74,10 @@ export class UsuarioService {
 getByCargos(ids: number[]): Observable<any> {
   const params = ids.join(',');
   return this.http.get<any>(`${baseUrl}/cargo?ids=${params}`);
+}
+
+loginAuth(payload: { username: string; password: string; platform?: string }) {
+  return this.http.post<any>(`${authUrl}/login`, payload);
 }
 
 }

@@ -1,0 +1,11 @@
+.gd-doc-detalle .page-card {
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+}
+
+.control-label-sm {
+  font-size: 0.78rem;
+  margin-bottom: 0.2rem;
+  color: #5f6b7a;
+}
+

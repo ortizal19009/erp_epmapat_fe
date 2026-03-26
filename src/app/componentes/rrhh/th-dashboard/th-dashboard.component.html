@@ -1,0 +1,26 @@
+<div class="container-fluid mt-2 rrhh-page">
+  <div class="row m-0 px-2 py-2 mb-2 align-items-center cabecera sombra border rounded">
+    <h5 class="mb-0">Dashboard Talento Humano</h5>
+  </div>
+
+  <div class="row mb-3 detalle p-2 rounded">
+    <div class="col-sm-5">
+      <select class="form-control form-control-sm" [(ngModel)]="idpersonal" (change)="cargar()">
+        <option [ngValue]="0">Seleccione personal...</option>
+        <option *ngFor="let p of personalList" [ngValue]="p.idpersonal">{{p.apellidos}}, {{p.nombres}} - {{p.identificacion}}</option>
+      </select>
+    </div>
+    <div class="col-sm-2">
+      <button class="btn btn-sm btn-primary" (click)="cargar()">Actualizar</button>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-2"><div class="small-box bg-info"><div class="inner"><h3>{{totalSolicitudes}}</h3><p>Solicitudes</p></div></div></div>
+    <div class="col-sm-2"><div class="small-box bg-warning"><div class="inner"><h3>{{solicitadas}}</h3><p>Pendientes</p></div></div></div>
+    <div class="col-sm-2"><div class="small-box bg-success"><div class="inner"><h3>{{aprobadas}}</h3><p>Aprobadas</p></div></div></div>
+    <div class="col-sm-2"><div class="small-box bg-danger"><div class="inner"><h3>{{rechazadas}}</h3><p>Rechazadas</p></div></div></div>
+    <div class="col-sm-2"><div class="small-box bg-primary"><div class="inner"><h3>{{totalAcciones}}</h3><p>Acciones TH</p></div></div></div>
+    <div class="col-sm-2"><div class="small-box bg-secondary"><div class="inner"><h3>{{saldoDisponible}}</h3><p>Saldo disponible</p></div></div></div>
+  </div>
+</div>

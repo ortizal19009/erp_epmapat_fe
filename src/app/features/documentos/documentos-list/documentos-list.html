@@ -1,0 +1,195 @@
+<div class="page gd-page documents-page">
+  <div class="page gd-page-header cabecera documents-header">
+    <div>
+      <div class="d-flex align-items-center"><h2 class="page gd-page-title mb-0">Documentos</h2><app-info-help key="documents"></app-info-help></div>
+      <p class="page gd-page-subtitle">Gestión documental de entrada y salida • Entidad: EPMAPA-T</p>
+    </div>
+    <div class="d-flex ">
+    <button *ngIf="hasRole('SUPERVISOR','ADMIN')" class="btn btn-outline-secondary" (click)="refreshOverdueNow()">Refrescar vencidos</button>
+    <button *ngIf="hasRole('SUPERVISOR','ADMIN')" class="btn btn-outline-warning" (click)="generateAlertsNow()">Generar alertas</button>
+    <button *ngIf="hasRole('RECEPCION','RESPONSABLE','SUPERVISOR','ADMIN')" class="btn btn-outline-primary shadow-sm" (click)="goNewIngreso()">+ Nuevo ingreso</button>
+    <button *ngIf="hasRole('RECEPCION','RESPONSABLE','SUPERVISOR','ADMIN')" class="btn btn-primary shadow-sm" (click)="goNew()">+ Nuevo documento</button>
+  </div>
+  </div>
+
+
+  <div class="row mb-3">
+    <div class="col-md-3"><div class="page gd-page-card detalle py-2"><div class="small text-muted">Pendientes</div><div class="h5 mb-0">{{ kpiPendientes }}</div></div></div>
+    <div class="col-md-3"><div class="page gd-page-card detalle py-2"><div class="small text-muted">Por vencer</div><div class="h5 mb-0 text-warning">{{ kpiPorVencer }}</div></div></div>
+    <div class="col-md-3"><div class="page gd-page-card detalle py-2"><div class="small text-muted">Vencidos</div><div class="h5 mb-0 text-danger">{{ kpiVencidos }}</div></div></div>
+    <div class="col-md-3"><div class="page gd-page-card detalle py-2"><div class="small text-muted">Respondidos</div><div class="h5 mb-0 text-success">{{ kpiRespondidos }}</div></div></div>
+  </div>
+  <div class="page gd-page-card detalle mb-3" *ngIf="overdueItems.length > 0">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h6 class="mb-0 text-danger">Documentos vencidos</h6>
+      <span class="badge bg-danger">{{ overdueItems.length }}</span>
+    </div>
+    <div class="small text-muted mb-2">Documentos con plazo de respuesta vencido.</div>
+    <ul class="mb-0 pl-3">
+      <li *ngFor="let o of overdueItems">
+        <strong>{{ o.tipo_codigo }}</strong> - {{ o.asunto }}
+        <span class="text-danger">(Plazo: {{ o.fecha_plazo | date:'yyyy-MM-dd HH:mm' }})</span>
+      </li>
+    </ul>
+  </div>
+
+
+  <div class="page gd-page-card detalle mb-3" *ngIf="dueSoonItems.length > 0">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h6 class="mb-0 text-warning">Documentos por vencer (48h)</h6>
+      <span class="badge bg-warning text-dark">{{ dueSoonItems.length }}</span>
+    </div>
+    <div class="small text-muted mb-2">Documentos que requieren respuesta y vencen pronto.</div>
+    <ul class="mb-0 pl-3">
+      <li *ngFor="let o of dueSoonItems">
+        <strong>{{ o.tipo_codigo }}</strong> - {{ o.asunto }}
+        <span class="text-warning">(Plazo: {{ o.fecha_plazo | date:'yyyy-MM-dd HH:mm' }})</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="page gd-page-card detalle filters-card mb-3">
+    <div class="row align-items-end">
+      <div class="col-lg-5">
+        <label class="control-label">Buscar</label>
+        <input class="form-control" [(ngModel)]="q" placeholder="Buscar por asunto o remitente" />
+      </div>
+
+      <div class="col-lg-3 col-md-6">
+        <label class="control-label">Flujo</label>
+        <select class="custom-select" [(ngModel)]="flow">
+          <option value="">Todos</option>
+          <option value="INGRESO">INGRESO</option>
+          <option value="SALIDA">SALIDA</option>
+        </select>
+      </div>
+
+      <div class="col-lg-3 col-md-6">
+        <label class="control-label">Estado</label>
+        <select class="custom-select" [(ngModel)]="status">
+          <option value="">Todos</option>
+          <option value="BORRADOR">BORRADOR</option>
+          <option value="EN_REVISION">EN_REVISION</option>
+          <option value="EMITIDO">EMITIDO</option>
+          <option value="DERIVADO">DERIVADO</option>
+          <option value="RECIBIDO">RECIBIDO</option>
+          <option value="ARCHIVADO">ARCHIVADO</option>
+          <option value="ANULADO">ANULADO</option>
+        </select>
+      </div>
+
+      <div class="col-lg-1 col-md-12 ">
+        <button class="btn btn-outline-primary" (click)="load()">Aplicar</button>
+      </div>
+
+      <div class="col-12 d-flex justify-content-end">
+        <button class="btn btn-sm btn-outline-secondary" (click)="clearFilters()">Limpiar filtros</button>
+      </div>
+    </div>
+  </div>
+
+  
+
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <small class="text-muted">Total: {{ total }}</small>
+    <div class="btn-group btn-group-sm">
+      <button class="btn btn-outline-secondary" (click)="prevPage()" [disabled]="page<=1">Anterior</button>
+      <button class="btn btn-outline-secondary" disabled>Página {{ page }} / {{ pages }}</button>
+      <button class="btn btn-outline-secondary" (click)="nextPage()" [disabled]="page>=pages">Siguiente</button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="alert alert-info border-0">Cargando documentos...</div>
+  <div *ngIf="error" class="alert alert-danger border-0">{{ error }}</div>
+
+  <div class="page gd-page-card detalle p-0 overflow-hidden">
+    <div class="table-wrap">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th style="width: 160px; cursor:pointer" (click)="setSort('numero_oficial')">No. {{ sortIcon('numero_oficial') }}</th>
+            <th style="width: 120px; cursor:pointer" (click)="setSort('tipo_codigo')">Tipo {{ sortIcon('tipo_codigo') }}</th>
+            <th style="width: 130px; cursor:pointer" (click)="setSort('series_code')">Serie {{ sortIcon('series_code') }}</th>
+            <th style="width: 130px; cursor:pointer" (click)="setSort('subseries_code')">Subserie {{ sortIcon('subseries_code') }}</th>
+            <th style="width: 150px; cursor:pointer" (click)="setSort('final_disposition')">TRD {{ sortIcon('final_disposition') }}</th>
+            <th style="cursor:pointer" (click)="setSort('asunto')">Asunto {{ sortIcon('asunto') }}</th>
+            <th style="width: 130px; cursor:pointer" (click)="setSort('dep_codigo')">Área {{ sortIcon('dep_codigo') }}</th>
+            <th style="width: 95px; cursor:pointer" (click)="setSort('flujo')">Flujo {{ sortIcon('flujo') }}</th>
+            <th style="width: 120px; cursor:pointer" (click)="setSort('estado')">Estado {{ sortIcon('estado') }}</th>
+            <th style="width: 170px; cursor:pointer" (click)="setSort('fecha_plazo')">Plazo {{ sortIcon('fecha_plazo') }}</th>
+            <th style="width: 210px;" class="text-right">Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let d of items">
+            <td>
+              <div class="font-weight-bold">{{ d.numero_oficial || '—' }}</div>
+              <small class="text-muted">{{ d.fecha_emision || d.fecha_elaboracion }}</small>
+            </td>
+
+            <td>
+              <span class="font-weight-bold">{{ d.tipo_codigo }}</span>
+              <div class="text-muted small">{{ d.tipo_nombre }}</div>
+            </td>
+
+            <td>
+              <span class="font-weight-bold">{{ ($any(d).series_code) || '—' }}</span>
+              <div class="text-muted small">{{ ($any(d).series_name) || '' }}</div>
+            </td>
+
+            <td>
+              <span class="font-weight-bold">{{ ($any(d).subseries_code) || '—' }}</span>
+              <div class="text-muted small">{{ ($any(d).subseries_name) || '' }}</div>
+            </td>
+
+            <td>
+              <span class="badge badge-light">{{ ($any(d).final_disposition) || '—' }}</span>
+            </td>
+
+            <td>
+              <div class="font-weight-bold text-truncate" style="max-width: 320px">{{ d.asunto }}</div>
+              <div class="text-muted small">{{ d.origen }} <span *ngIf="d.referencia">• {{ d.referencia }}</span></div>
+            </td>
+
+            <td>
+              <span class="font-weight-bold">{{ d.dep_codigo || '—' }}</span>
+              <div class="text-muted small">{{ d.dep_nombre || '' }}</div>
+            </td>
+
+            <td><span class="badge badge-light">{{ d.flujo }}</span></td>
+
+            <td>
+              <span class="badge" [ngClass]="badgeClass(d.estado)">{{ d.estado }}</span>
+            </td>
+
+            <td><span [class]="deadlineClass(d)">{{ deadlineLabel(d) }}</span></td>
+
+            <td class="text-right">
+              <div class="btn-group btn-group-sm actions-group">
+                <button class="btn btn-outline-secondary" (click)="view(d)">Ver</button>
+                <button class="btn btn-outline-primary" [disabled]="!canEdit(d)" (click)="edit(d)">Editar</button>
+                <button class="btn btn-outline-success" [disabled]="!canEmit(d)" (click)="emit(d)">Emitir</button>
+                <button class="btn btn-outline-dark" [disabled]="!canReceive(d)" (click)="receive(d)">Recibir</button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="!loading && items.length === 0">
+            <td colspan="11">
+              <div class="empty-state">
+                <div class="empty-title">No se encontraron documentos</div>
+                <div class="empty-text">Prueba cambiando filtros o crea un nuevo documento.</div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+
+
+

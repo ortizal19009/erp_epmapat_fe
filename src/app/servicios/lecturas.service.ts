@@ -146,6 +146,11 @@ export class LecturasService {
   getByIdEmisionesR(idemision: number) {
     return this.http.get(`${baseUrl}/reporte/emision?idemision=${idemision}`);
   }
+
+  // Nuevo endpoint backend para consultas por lista de rutasxemision
+  downloadByRutasxEmisionIds(ids: number[]) {
+    return this.http.post<Lecturas[]>(`${baseUrl}/by-rutas`, { ids });
+  }
   /* Reporte de emisiones */
   findInicial(idemision: number) {
     return this.http.get(

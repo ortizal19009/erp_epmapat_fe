@@ -1,0 +1,36 @@
+<div class="container-fluid mt-2 rrhh-page">
+  <div class="row m-0 px-2 py-2 mb-2 align-items-center cabecera sombra border rounded">
+    <h5 class="mb-0">Auditoría TH</h5>
+  </div>
+
+  <div class="alert alert-danger py-1" *ngIf="error">{{ error }}</div>
+
+  <div class="row mb-2 detalle p-2 rounded">
+    <div class="col-sm-3">
+      <select class="form-control form-control-sm" [(ngModel)]="entidad">
+        <option *ngFor="let e of entidades" [value]="e">{{e}}</option>
+      </select>
+    </div>
+    <div class="col-sm-2">
+      <input class="form-control form-control-sm" type="number" [(ngModel)]="idregistro" placeholder="Id registro (opcional)">
+    </div>
+    <div class="col-sm-2">
+      <button class="btn btn-sm btn-primary" (click)="buscar()">Buscar</button>
+    </div>
+  </div>
+
+  <table class="table table-sm table-bordered">
+    <thead class="cabecera"><tr><th>ID</th><th>Entidad</th><th>Registro</th><th>Acción</th><th>Detalle</th><th>Usuario</th><th>Fecha</th></tr></thead>
+    <tbody class="detalle">
+      <tr *ngFor="let l of logs">
+        <td>{{l.idaudit}}</td>
+        <td>{{l.entidad}}</td>
+        <td>{{l.idregistro}}</td>
+        <td>{{l.accion}}</td>
+        <td>{{l.detalle}}</td>
+        <td>{{l.usuario}}</td>
+        <td>{{l.fecha | date:'yyyy-MM-dd HH:mm'}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

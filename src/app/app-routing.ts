@@ -184,25 +184,25 @@ import { EstrfuncComponent } from './componentes/contabilidad/estrfunc/estrfunc/
 import { InfoEstrfuncComponent } from './componentes/contabilidad/estrfunc/info-estrfunc/info-estrfunc.component';
 
 // ============ ADMINISTRACION CENTRAL ==========================
-import { Tabla4Component } from './componentes/administracion/tabla4/tabla4/tabla4.component';
-import { AddTabla4Component } from './componentes/administracion/tabla4/add-tabla4/add-tabla4.component';
-import { InfoTabla4Component } from './componentes/administracion/tabla4/info-tabla4/info-tabla4.component';
-import { ModiTabla4Component } from './componentes/administracion/tabla4/modi-tabla4/modi-tabla4.component';
+import { Tabla4Component } from './features/admin-central/pages/administracion/tabla4/tabla4/tabla4.component';
+import { AddTabla4Component } from './features/admin-central/pages/administracion/tabla4/add-tabla4/add-tabla4.component';
+import { InfoTabla4Component } from './features/admin-central/pages/administracion/tabla4/info-tabla4/info-tabla4.component';
+import { ModiTabla4Component } from './features/admin-central/pages/administracion/tabla4/modi-tabla4/modi-tabla4.component';
 
 // import { LoginComponent } from './compartida/login/login.component';
 
-import { DocumentosComponent } from './componentes/administracion/documentos/documentos/documentos.component';
-import { AddDocumentoComponent } from './componentes/administracion/documentos/add-documento/add-documento.component';
-import { InfoDocumentoComponent } from './componentes/administracion/documentos/info-documento/info-documento.component';
-import { ModiDocumentoComponent } from './componentes/administracion/documentos/modi-documento/modi-documento.component';
+import { DocumentosComponent } from './features/admin-central/pages/administracion/documentos/documentos/documentos.component';
+import { AddDocumentoComponent } from './features/admin-central/pages/administracion/documentos/add-documento/add-documento.component';
+import { InfoDocumentoComponent } from './features/admin-central/pages/administracion/documentos/info-documento/info-documento.component';
+import { ModiDocumentoComponent } from './features/admin-central/pages/administracion/documentos/modi-documento/modi-documento.component';
 
-import { UsuariosComponent } from './componentes/administracion/usuarios/usuarios/usuarios.component';
-import { ModiUsuarioComponent } from './componentes/administracion/usuarios/modi-usuario/modi-usuario.component';
+import { UsuariosComponent } from './features/admin-central/pages/administracion/usuarios/usuarios/usuarios.component';
+import { ModiUsuarioComponent } from './features/admin-central/pages/administracion/usuarios/modi-usuario/modi-usuario.component';
 
-import { ColoresComponent } from './componentes/administracion/colores/colores.component';
+import { ColoresComponent } from './features/admin-central/pages/administracion/colores/colores.component';
 import { CertitmpComponent } from './componentes/ccertificaciones/certitmp/certitmp.component';
 import { TransferenciasComponent } from './componentes/recaudacion/transferencias/transferencias.component';
-import { PerfilUsuarioComponent } from './componentes/administracion/usuarios/perfil-usuario/perfil-usuario.component';
+import { PerfilUsuarioComponent } from './features/admin-central/pages/administracion/usuarios/perfil-usuario/perfil-usuario.component';
 import { RecalFacturaComponent } from './componentes/facturas/recal-factura/recal-factura.component';
 import { AddConvenioComponent } from './componentes/convenios/add-convenio/add-convenio.component';
 import { GeneradorxmlComponent } from './componentes/facelectro/generadorxml/generadorxml.component';
@@ -262,13 +262,18 @@ import { ImpUnicostosComponent } from './componentes/contabilidad/costos/imp-uni
 import { IfinanComponent } from './componentes/contabilidad/ifinan/ifinan/ifinan.component';
 import { PersonalComponent } from './componentes/rrhh/personal/personal.component';
 import { AddPersonalComponent } from './componentes/rrhh/personal/add-personal/add-personal.component';
+import { ThActionsComponent } from './componentes/rrhh/th-actions/th-actions.component';
+import { ThLeaveComponent } from './componentes/rrhh/th-leave/th-leave.component';
+import { ThFilesComponent } from './componentes/rrhh/th-files/th-files.component';
+import { ThAuditComponent } from './componentes/rrhh/th-audit/th-audit.component';
+import { ThDashboardComponent } from './componentes/rrhh/th-dashboard/th-dashboard.component';
 import { RemisionComponent } from './componentes/coactivas/remision/remision.component';
 import { AddRemisionComponent } from './componentes/coactivas/remision/add-remision/add-remision.component';
 import { DetallePlanillaComponent } from './componentes/facturas/detalle-planilla/detalle-planilla.component';
 import { NtacreditoComponent } from './componentes/ntacredito/ntacredito.component';
 import { AddNtacreditoComponent } from './componentes/ntacredito/add-ntacredito/add-ntacredito.component';
-import { DefinirComponent } from './componentes/administracion/definir/definir.component';
-import { HomeComponent } from './componentes/administracion/home/home.component';
+import { DefinirComponent } from './features/admin-central/pages/administracion/definir/definir.component';
+import { HomeComponent } from './features/admin-central/pages/administracion/home/home.component';
 import { StatusConveniosComponent } from './componentes/convenios/status-convenios/status-convenios.component';
 import { CvClientesComponent } from './componentes/coactivas/carteras-vencidas/cv-clientes/cv-clientes.component';
 import { AnularConvenioComponent } from './componentes/convenios/anular-convenio/anular-convenio.component';
@@ -1279,6 +1284,12 @@ const routes: Routes = [
 
   //================ RRHH =============================
   { path: 'personal', component: PersonalComponent, canActivate: [AuthGuard] },
+  { path: 'th-actions', component: ThActionsComponent, canActivate: [AuthGuard] },
+  { path: 'th-leave', component: ThLeaveComponent, canActivate: [AuthGuard] },
+  { path: 'th-files', component: ThFilesComponent, canActivate: [AuthGuard] },
+  { path: 'th-audit', component: ThAuditComponent, canActivate: [AuthGuard] },
+  { path: 'th-dashboard', component: ThDashboardComponent, canActivate: [AuthGuard] },
+
   {
     path: 'add-personal',
     component: AddPersonalComponent,
@@ -1343,6 +1354,16 @@ const routes: Routes = [
     component: ReportesjrComponent,
     canActivate: [AuthGuard],
   },
+  {
+    path: 'admin/swagger-microservicios',
+    loadComponent: () => import('./features/settings/swagger-hub/swagger-hub').then(m => m.SwaggerHubComponent),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'admin/access-control',
+    loadComponent: () => import('./features/settings/access-admin/access-admin').then(m => m.AccessAdminComponent),
+    canActivate: [AuthGuard],
+  },
 
   /* COACTIVAS */
   { path: 'cv-rubros', component: CvRubrosComponent, canActivate: [AuthGuard] },
@@ -1365,6 +1386,29 @@ const routes: Routes = [
 
   // { path: 'login', component: LoginComponent, canActivate: [AuthGuard]},
 
+  // ================== GESTIÓN DOCUMENTAL ==================
+  { path: 'gd/documentos', loadComponent: () => import('./features/documentos/documentos-list/documentos-list').then(m => m.DocumentosListComponent), canActivate: [AuthGuard] },
+  { path: 'gd/documentos/nuevo', loadComponent: () => import('./features/documentos/documento-form/documento-form').then(m => m.DocumentoFormComponent), canActivate: [AuthGuard] },
+  { path: 'gd/documentos/:id', loadComponent: () => import('./features/documentos/documento-detalle/documento-detalle').then(m => m.DocumentoDetalleComponent), canActivate: [AuthGuard] },
+  { path: 'gd/documentos/:id/editar', loadComponent: () => import('./features/documentos/documento-form/documento-form').then(m => m.DocumentoFormComponent), canActivate: [AuthGuard] },
+
+  { path: 'gd/inbox', loadComponent: () => import('./features/documentos/inbox/inbox').then(m => m.InboxComponent), canActivate: [AuthGuard] },
+  { path: 'gd/alerts', loadComponent: () => import('./features/documentos/alerts/alerts').then(m => m.AlertsComponent), canActivate: [AuthGuard] },
+  { path: 'gd/dashboard', loadComponent: () => import('./features/documentos/dashboard/dashboard').then(m => m.DashboardEjecutivoComponent), canActivate: [AuthGuard] },
+  { path: 'gd/case-files', loadComponent: () => import('./features/case-files/case-files-list').then(m => m.CaseFilesListComponent), canActivate: [AuthGuard] },
+  { path: 'gd/settings/system', loadComponent: () => import('./features/settings/system/system-settings').then(m => m.SystemSettingsComponent), canActivate: [AuthGuard] },
+  { path: 'gd/settings/ccd', loadComponent: () => import('./features/settings/ccd/ccd-settings').then(m => m.CcdSettingsComponent), canActivate: [AuthGuard] },
+  { path: 'gd/settings/trd', loadComponent: () => import('./features/settings/trd/trd-settings').then(m => m.TrdSettingsComponent), canActivate: [AuthGuard] },
+  { path: 'gd/settings/entities', redirectTo: 'tthh/entidades', pathMatch: 'full' },
+  { path: 'gd/settings/document-types', loadComponent: () => import('./features/settings/document-types/document-types-list/document-types-list').then(m => m.DocumentTypesListComponent), canActivate: [AuthGuard] },
+  { path: 'gd/settings/dependencies', redirectTo: 'tthh/dependencias', pathMatch: 'full' },
+  { path: 'gd/settings/usuarios', redirectTo: 'tthh/dependencias', pathMatch: 'full' },
+  { path: 'gd/my-profile', loadComponent: () => import('./features/documentos/my-profile/my-profile').then(m => m.GdMyProfileComponent), canActivate: [AuthGuard] },
+
+  { path: 'tthh/entidades', loadComponent: () => import('./features/settings/entities/entities-list/entities-list').then(m => m.EntitiesListComponent), canActivate: [AuthGuard] },
+  { path: 'tthh/dependencias', loadComponent: () => import('./features/settings/dependencies/dependencies-list/dependencies-list').then(m => m.DependenciesListComponent), canActivate: [AuthGuard] },
+  { path: 'service-unavailable', loadComponent: () => import('./extras/service-unavailable/service-unavailable').then(m => m.ServiceUnavailableComponent) },
+
   { path: '', redirectTo: 'inicio', pathMatch: 'full' },
   { path: '**', redirectTo: 'inicio' },
 ];
@@ -1374,3 +1418,9 @@ const routes: Routes = [
   exports: [RouterModule],
 })
 export class AppRoutingModule {}
+
+
+
+
+
+

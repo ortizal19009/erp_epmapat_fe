@@ -1,0 +1,26 @@
+.documents-page .documents-header {
+  margin-bottom: 14px;
+}
+
+.filters-card {
+  border-radius: 16px;
+}
+
+.filters-card .control-label {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+.actions-group .btn {
+  min-width: 56px;
+}
+
+.table tbody td {
+  vertical-align: middle;
+}
+
+.table thead th {
+  white-space: nowrap;
+}
+

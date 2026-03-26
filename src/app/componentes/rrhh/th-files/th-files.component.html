@@ -1,0 +1,41 @@
+<div class="container-fluid mt-2 rrhh-page">
+  <div class="row m-0 px-2 py-2 mb-2 align-items-center cabecera sombra border rounded">
+    <h5 class="mb-0">Expediente digital (TH Files)</h5>
+  </div>
+
+  <div class="alert alert-success py-1" *ngIf="msg">{{ msg }}</div>
+  <div class="alert alert-danger py-1" *ngIf="error">{{ error }}</div>
+
+  <div class="card p-2 mb-3 detalle">
+    <div class="row mb-2">
+      <div class="col-sm-5">
+        <select class="form-control form-control-sm" [(ngModel)]="idpersonal" (change)="cargar()">
+          <option [ngValue]="0">Seleccione personal...</option>
+          <option *ngFor="let p of personalList" [ngValue]="p.idpersonal">{{ p.apellidos }}, {{ p.nombres }} - {{ p.identificacion }}</option>
+        </select>
+      </div>
+      <div class="col-sm-2"><button class="btn btn-sm btn-primary" (click)="cargar()">Cargar</button></div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-2">
+        <select class="form-control form-control-sm" [(ngModel)]="model.tipo_doc">
+          <option>CONTRATO</option><option>CERTIFICADO</option><option>CEDULA</option><option>OTRO</option>
+        </select>
+      </div>
+      <div class="col-sm-3"><input class="form-control form-control-sm" [(ngModel)]="model.nombre_archivo" placeholder="Nombre archivo"></div>
+      <div class="col-sm-3"><input class="form-control form-control-sm" [(ngModel)]="model.ruta_archivo" placeholder="Ruta archivo"></div>
+      <div class="col-sm-2"><input class="form-control form-control-sm" [(ngModel)]="model.hash_archivo" placeholder="Hash (opcional)"></div>
+      <div class="col-sm-2"><button class="btn btn-sm btn-success" (click)="guardar()">Registrar</button></div>
+    </div>
+  </div>
+
+  <table class="table table-sm table-bordered">
+    <thead class="cabecera"><tr><th>ID</th><th>Tipo</th><th>Nombre</th><th>Ruta</th><th>Versión</th><th>Estado</th></tr></thead>
+    <tbody class="detalle">
+      <tr *ngFor="let f of files">
+        <td>{{f.idfile}}</td><td>{{f.tipo_doc}}</td><td>{{f.nombre_archivo}}</td><td>{{f.ruta_archivo}}</td><td>{{f.version_doc}}</td><td>{{f.estado}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

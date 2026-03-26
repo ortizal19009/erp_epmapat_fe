@@ -17,4 +17,24 @@ export class UsrxmodulosService {
   saveAccessModulos(usrmodulos: any) {
     return this.http.post(`${baseUrl}`, usrmodulos);
   }
+
+  getAccessProfile(idusuario: number, platform: string) {
+    return this.http.get<any[]>(`${apiUrl}/access/profile?idusuario=${idusuario}&platform=${platform}`);
+  }
+
+  saveAccessSeccion(payload: { idusuario: number; iderpseccion: number; enabled: boolean }) {
+    return this.http.post(`${apiUrl}/access/sections`, payload);
+  }
+
+  getSectionCatalog(iderpmodulo: number, platform: string = 'WEB') {
+    return this.http.get<any[]>(`${apiUrl}/access/sections/catalog?iderpmodulo=${iderpmodulo}&platform=${platform}`);
+  }
+
+  saveSectionCatalog(payload: any) {
+    return this.http.post<any>(`${apiUrl}/access/sections/catalog`, payload);
+  }
+
+  updateSectionCatalog(iderpseccion: number, payload: any) {
+    return this.http.put<any>(`${apiUrl}/access/sections/catalog/${iderpseccion}`, payload);
+  }
 }

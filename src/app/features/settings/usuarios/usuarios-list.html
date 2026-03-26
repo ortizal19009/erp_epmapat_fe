@@ -1,0 +1,67 @@
+<div class="page gd-page">
+  <div class="page gd-page-header cabecera">
+    <div>
+      <div class="d-flex align-items-center"><h2 class="page gd-page-title mb-0">Administración de usuarios</h2><app-info-help key="usuarios"></app-info-help></div>
+      <div class="page gd-page-subtitle">Roles, estado y filtros operativos</div>
+    </div>
+  </div>
+
+  <div class="page gd-page-card detalle mb-3">
+    <div class="row align-items-end">
+      <div class="col-md-4"><label class="control-label">Buscar</label><input class="form-control" [(ngModel)]="q" placeholder="Usuario o nombre" /></div>
+      <div class="col-md-3"><label class="control-label">Rol</label><select class="custom-select" [(ngModel)]="roleFilter"><option value="">Todos</option><option *ngFor="let r of roles" [value]="r">{{ r }}</option></select></div>
+      <div class="col-md-3"><label class="control-label">Activo</label><select class="custom-select" [(ngModel)]="activeFilter"><option value="">Todos</option><option value="1">Sí</option><option value="0">No</option></select></div>
+      <div class="col-md-2 "><button class="btn btn-primary" (click)="load()">Filtrar</button></div>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="alert alert-info">Cargando...</div>
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <div class="page gd-page-card detalle p-0 overflow-hidden">
+    <div class="table-wrap">
+      <table class="table table-hover align-middle mb-0">
+        <thead><tr><th>Usuario</th><th>Nombre</th><th>Dependencia</th><th>Rol</th><th>Activo</th><th>Acciones</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let u of rows">
+            <td>{{ u.username }}</td>
+            <td>{{ u.nombre }}</td>
+            <td>{{ u.dependencia_codigo || '-' }} {{ u.dependencia_nombre || '' }}</td>
+            <td>
+              <select class="custom-select custom-select-sm" [ngModel]="u.rol || ''" (ngModelChange)="setRole(u, $event)">
+                <option value="">(sin rol)</option>
+                <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
+              </select>
+            </td>
+            <td><span class="badge" [ngClass]="u.activo ? 'bg-success' : 'bg-secondary'">{{ u.activo ? 'Sí' : 'No' }}</span></td>
+            <td><button class="btn btn-sm btn-outline-primary" (click)="toggleActive(u)">{{ u.activo ? 'Desactivar' : 'Activar' }}</button></td>
+          </tr>
+          <tr *ngIf="rows.length===0 && !loading"><td colspan="6" class="text-muted text-center py-3">Sin usuarios</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<div class="page gd-page-card detalle mt-3">
+  <h5>Auditoría administrativa</h5>
+  <div class="table-wrap">
+    <table class="table table-sm align-middle mb-0">
+      <thead><tr><th>Fecha</th><th>Actor</th><th>Acción</th><th>Objetivo</th><th>Detalle</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let a of auditRows">
+          <td>{{ a.created_at | date:'yyyy-MM-dd HH:mm:ss' }}</td>
+          <td>{{ a.actor_user_id || '-' }}</td>
+          <td>{{ a.action }}</td>
+          <td>{{ a.target_type }} / {{ a.target_id }}</td>
+          <td><small>{{ a.detail | json }}</small></td>
+        </tr>
+        <tr *ngIf="auditRows.length===0"><td colspan="5" class="text-muted text-center py-3">Sin movimientos</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+

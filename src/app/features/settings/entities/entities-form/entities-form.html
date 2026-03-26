@@ -1,0 +1,36 @@
+<div class="container py-4 gd-page">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <h3 class="mb-0">{{ title() }}</h3>
+      <small class="text-muted">Configuración / Entidades</small>
+    </div>
+    <div class="d-flex ">
+      <button class="btn btn-outline-secondary" (click)="cancel()">Volver</button>
+      <button class="btn btn-primary" [disabled]="saving()" (click)="save()">{{ saving() ? 'Guardando...' : 'Guardar' }}</button>
+    </div>
+  </div>
+
+  <div *ngIf="loading()" class="alert alert-info">Cargando...</div>
+  <div *ngIf="error()" class="alert alert-danger">{{ error() }}</div>
+
+  <div class="card" *ngIf="!loading()">
+    <div class="card-body">
+      <form [formGroup]="form" class="row">
+        <div class="col-md-4">
+          <label class="control-label">Código</label>
+          <input class="form-control" formControlName="codigo" placeholder="EPMAPA-T" />
+          <div class="text-danger small" *ngIf="form.get('codigo')?.touched && form.get('codigo')?.invalid">El código es obligatorio (mínimo 2 caracteres).</div>
+        </div>
+
+        <div class="col-md-8">
+          <label class="control-label">Nombre</label>
+          <input class="form-control" formControlName="nombre" placeholder="Empresa Pública..." />
+          <div class="text-danger small" *ngIf="form.get('nombre')?.touched && form.get('nombre')?.invalid">El nombre es obligatorio (mínimo 3 caracteres).</div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+

@@ -1,0 +1,158 @@
+<div class="page gd-page">
+  <div class="page gd-page-header cabecera d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h2 class="mb-0">{{ title }}</h2>
+      <small class="text-muted">Gestión documental · {{ id ? 'edición' : 'creación' }} <span *ngIf="id">· Estado: {{ currentState }}</span></small>
+    </div>
+    <button class="btn btn-outline-secondary" (click)="cancel()">Volver</button>
+  </div>
+
+  <div *ngIf="loading" class="alert alert-info">Cargando...</div>
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <form *ngIf="!loading" [formGroup]="form" class="card shadow-sm border-0" (ngSubmit)="save()">
+    <div class="card-header bg-light py-2">
+      <strong>Cabecera del documento</strong>
+    </div>
+    <div class="card-body">
+    <div class="row">
+      <div class="col-md-4">
+        <label class="d-block mb-1 text-muted">Tipo de documento</label>
+        <select class="custom-select" formControlName="tipo_doc_id">
+          <option value="">Seleccione...</option>
+          <option *ngFor="let t of docTypes" [value]="t.id">{{ t.codigo }} - {{ t.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label class="d-block mb-1 text-muted">Dependencia emisora</label>
+        <select class="custom-select" formControlName="dependencia_emisora_id">
+          <option value="">Seleccione...</option>
+          <option *ngFor="let d of dependencies" [value]="d.id">{{ d.codigo }} - {{ d.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label class="d-block mb-1 text-muted">Flujo</label>
+        <select class="custom-select" formControlName="flujo" [disabled]="mesaEntradaMode">
+          <option value="INGRESO">INGRESO</option>
+          <option value="SALIDA">SALIDA</option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label class="d-block mb-1 text-muted">Prioridad</label>
+        <select class="custom-select" formControlName="prioridad">
+          <option value="BAJA">BAJA</option>
+          <option value="MEDIA">MEDIA</option>
+          <option value="ALTA">ALTA</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label class="d-block mb-1 text-muted">Serie</label>
+        <select class="custom-select" formControlName="series_id" (change)="onSeriesChange()">
+          <option value="">Sin serie</option>
+          <option *ngFor="let s of series" [value]="s.id">{{ s.codigo }} - {{ s.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label class="d-block mb-1 text-muted">Subserie</label>
+        <select class="custom-select" formControlName="subseries_id">
+          <option value="">Sin subserie</option>
+          <option *ngFor="let s of subseries" [value]="s.id">{{ s.codigo }} - {{ s.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label class="d-block mb-1 text-muted">F. elaboración</label>
+        <input type="date" class="form-control" formControlName="fecha_elaboracion" />
+      </div>
+
+      <div class="col-md-2">
+        <label class="d-block mb-1 text-muted">F. plazo</label>
+        <input type="date" class="form-control" formControlName="fecha_plazo" />
+      </div>
+
+      <div class="col-12">
+        <label class="d-block mb-1 text-muted">Asunto</label>
+        <input class="form-control" formControlName="asunto" maxlength="250" />
+      </div>
+
+      <div class="col-12">
+        <label class="d-block mb-1 text-muted">Referencia</label>
+        <input class="form-control" formControlName="referencia" maxlength="120" />
+      </div>
+
+      <div class="col-md-6">
+        <label class="d-block mb-1 text-muted">Remitente externo</label>
+        <input class="form-control" formControlName="remitente_externo" maxlength="200" />
+      </div>
+
+      <div class="col-12">
+        <label class="d-block mb-1 text-muted">Contenido / Resumen</label>
+        <textarea class="form-control" rows="2" formControlName="cuerpo"></textarea>
+      </div>
+
+      <div class="col-12">
+        <label class="d-block mb-1 text-muted">Observaciones de recepción</label>
+        <textarea class="form-control" rows="2" formControlName="observaciones"></textarea>
+      </div>
+
+      <div class="col-md-4">
+        <label class="d-block mb-1 text-muted">Origen</label>
+        <select class="custom-select" formControlName="origen" [disabled]="mesaEntradaMode">
+          <option value="INTERNO">INTERNO</option>
+          <option value="EXTERNO">EXTERNO</option>
+        </select>
+      </div>
+
+      <div class="col-12" *ngIf="isMesaEntrada()">
+        <div class="alert alert-info py-2 mb-2">
+          <strong>Mesa de entrada activa:</strong> para ingreso externo se requiere remitente externo y documento escaneado.
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <label class="d-block mb-1 text-muted">Documento escaneado</label>
+        <input type="file" class="form-control" (change)="onFileSelected($event)" />
+        <small class="text-muted" *ngIf="selectedFile">Seleccionado: {{ selectedFile.name }}</small>
+      </div>
+
+      <div class="col-md-6">
+        <label class="d-block mb-1 text-muted">Etiquetar usuarios (destinatarios)</label>
+        <select class="custom-select" multiple size="4" (change)="onTargetUsersChange($event)">
+          <option *ngFor="let u of users" [value]="u.id">{{ u.full_name || u.name || u.email }}</option>
+        </select>
+      </div>
+
+      <div class="col-md-6">
+        <label class="d-block mb-1 text-muted">Dirigir a dependencias</label>
+        <select class="custom-select" multiple size="4" (change)="onTargetDepsChange($event)">
+          <option *ngFor="let d of dependencies" [value]="d.id">{{ d.codigo }} - {{ d.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="col-md-4 d-flex align-items-end">
+        <div class="form-check mb-2 mr-3">
+          <input id="reqResp" type="checkbox" class="form-check-input" formControlName="requiere_respuesta" />
+          <label for="reqResp" class="form-check-label">Requiere respuesta</label>
+        </div>
+        <div class="form-check mb-2" *ngIf="!id && !isMesaEntrada()">
+          <input id="uploadNow" type="checkbox" class="form-check-input" [(ngModel)]="uploadOnCreate" [ngModelOptions]="{standalone: true}" />
+          <label for="uploadNow" class="form-check-label">Adjuntar al guardar</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-right mt-4">
+      <button type="button" class="btn btn-outline-secondary mr-2" (click)="cancel()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="saving || (!id && !canCreate()) || (id && !canEditByState())">{{ saving ? 'Guardando...' : 'Guardar' }}</button>
+    </div>
+    </div>
+  </form>
+</div>
+
+
+

@@ -1,0 +1,24 @@
+.cabecera {
+   background-color: var(--bgcolor1);
+   color: white;
+}
+.nuevoBG1 { background-color: var(--bgcolor1); }
+
+.detalle { background-color: var(--bgcolor2); }
+.nuevoBG2 { background-color: var(--bgcolor2); }
+
+.fila:hover {
+   background-color: #117a8B;
+   color: white;
+   cursor: pointer;
+}
+
+.form-elegante {
+   border-radius: 10px;
+   box-shadow: 0 8px 24px rgba(0,0,0,.12);
+}
+.form-elegante .card-header {
+   border-top-left-radius: 10px;
+   border-top-right-radius: 10px;
+}
+

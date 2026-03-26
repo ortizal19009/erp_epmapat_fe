@@ -1,0 +1,64 @@
+.rrhh-page .card {
+  border-radius: .35rem;
+}
+
+.rrhh-page .card-header {
+  background: #f8f9fa;
+}
+
+.rrhh-page .table thead th {
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.rrhh-page .table td {
+  vertical-align: middle;
+}
+
+.filtro-estado {
+  width: 190px;
+}
+
+.gap-sm > * + * {
+  margin-left: .5rem;
+}
+
+@media (max-width: 768px) {
+  .filtro-estado {
+    width: 140px;
+  }
+}
+
+:host {
+  --bgcolor1: rgb(80, 4, 80);
+  --bgcolor2: rgb(250, 200, 250);
+  --header-text-color: #ffffff;
+}
+
+.cabecera {
+  background-color: var(--bgcolor1);
+  color: var(--header-text-color);
+}
+
+.detalle {
+  background-color: var(--bgcolor2);
+}
+
+.nuevoBG1 {
+  background-color: var(--bgcolor1) !important;
+  color: var(--header-text-color) !important;
+}
+
+.nuevoBG2 {
+  background-color: var(--bgcolor2) !important;
+}
+
+.cabecera .form-control,
+.cabecera select,
+.cabecera input {
+  background-color: var(--header-text-color);
+  color: #212529;
+}
+
+
+

@@ -57,7 +57,7 @@
             <i class="bi-droplet-half nav-icon" style="font-size: 15px;"></i>
             <p> Consumo Agua
               <i class="fas fa-angle-right right"></i>
-              <span class="badge badge-warning right">1</span>
+              <span class="badge badge-warning right">6</span>
             </p>
           </a>
           <ul class="nav nav-treeview">
@@ -223,7 +223,7 @@
             <i class="bi-badge-tm-fill nav-icon" style="font-size: 15px; "></i>
             <p> Trámites
               <i class="fas fa-angle-right right"></i>
-              <span class="badge badge-warning right">3</span>
+              <span class="badge badge-warning right">6</span>
             </p>
           </a>
           <ul class="nav nav-treeview">
@@ -259,7 +259,7 @@
             <i class="bi-archive-fill nav-icon" style="font-size: 15px;"></i>
             <p> Recaudación
               <i class="fas fa-angle-right right"></i>
-              <span class="badge badge-warning right">4</span>
+              <span class="badge badge-warning right">6</span>
             </p>
           </a>
           <ul class="nav nav-treeview">
@@ -317,7 +317,7 @@
             <i class="bi-wallet-fill nav-icon" style="font-size: 15px;"></i>
             <p> Catálogos
               <i class="fas fa-angle-right right"></i>
-              <span class="badge badge-warning right">5</span>
+              <span class="badge badge-warning right">6</span>
             </p>
           </a>
           <ul class="nav nav-treeview">
@@ -390,7 +390,7 @@
             <i class="bi-app-indicator nav-icon text-warning"></i>
             <p> Contabilidad
               <i class="fas fa-angle-right right"></i>
-              <span class="badge badge-warning right">1</span>
+              <span class="badge badge-warning right">6</span>
             </p>
           </a>
           <ul class="nav nav-treeview">
@@ -492,7 +492,7 @@
             <i class="bi-table nav-icon text-warning"></i>
             <p> Presupuesto
               <i class="fas fa-angle-right right"></i>
-              <span class="badge badge-warning right">3</span>
+              <span class="badge badge-warning right">6</span>
             </p>
           </a>
           <ul class="nav nav-treeview">
@@ -563,7 +563,7 @@
             <i class="bi-card-list nav-icon text-warning"></i>
             <p> Info financiera
               <i class="fas fa-angle-right right"></i>
-              <span class="badge badge-warning right">4</span>
+              <span class="badge badge-warning right">6</span>
             </p>
           </a>
           <ul class="nav nav-treeview">
@@ -610,7 +610,7 @@
             <i class="fa fa-shopping-basket nav-icon text-warning"></i>
             <p> Catálogos
               <i class="fas fa-angle-right right"></i>
-              <span class="badge badge-warning right">5</span>
+              <span class="badge badge-warning right">6</span>
             </p>
           </a>
           <ul class="nav nav-treeview">
@@ -634,15 +634,50 @@
             <i class="bi bi-person-lines-fill"></i>
             <p> Admin Personal
               <i class="fas fa-angle-right right"></i>
-              <span class="badge badge-warning right">1</span>
+              <span class="badge badge-warning right">8</span>
             </p>
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
+              <a routerLink="/th-dashboard" class="nav-link">
+                <i class="bi bi-speedometer2 nav-icon"></i>
+                <p class="text-warning"> Dashboard TH</p>
+              </a>
+            </li>
+            <li class="nav-item">
               <a routerLink="/personal" class="nav-link">
-                <!-- <i class="bi-book-fill nav-icon"></i> -->
                 <i class="fa fa-users" aria-hidden="true"></i>
                 <p class="text-warning"> Personal</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a routerLink="/th-actions" class="nav-link">
+                <i class="bi bi-journal-check nav-icon"></i>
+                <p class="text-warning"> Acciones TH</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a routerLink="/th-files" class="nav-link">
+                <i class="bi bi-folder2-open nav-icon"></i>
+                <p class="text-warning"> Expediente digital</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a routerLink="/th-leave" class="nav-link">
+                <i class="bi bi-calendar2-check nav-icon"></i>
+                <p class="text-warning"> Vacaciones y permisos</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a routerLink="/tthh/entidades" class="nav-link">
+                <i class="bi bi-building nav-icon"></i>
+                <p class="text-warning"> Entidades</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a routerLink="/tthh/dependencias" class="nav-link">
+                <i class="bi bi-diagram-2 nav-icon"></i>
+                <p class="text-warning"> Dependencias</p>
               </a>
             </li>
           </ul>
@@ -654,7 +689,7 @@
             <i class="bi-gear nav-icon"></i>
             <p> Carteras Vencidas
               <i class="fas fa-angle-right right"></i>
-              <span class="badge badge-warning right">1</span>
+              <span class="badge badge-warning right">6</span>
             </p>
           </a>
           <ul class="nav nav-treeview">
@@ -684,7 +719,7 @@
             <i class="bi bi-stars"></i>
             <p> Remisión I/M/R
               <i class="fas fa-angle-right right"></i>
-              <span class="badge badge-warning right">1</span>
+              <span class="badge badge-warning right">6</span>
             </p>
           </a>
           <ul class="nav nav-treeview">
@@ -698,37 +733,153 @@
           </ul>
         </li>
         <!-- =============== ADMINISTRACION CENTRAL ==================== -->
-        <li *ngIf="authService.modulo == 7" class="nav-item">
+        <li *ngIf="authService.modulo == 7 && canAnySection(['AC_UTIL_DOCS','AC_UTIL_USUARIOS','AC_UTIL_REPORTES','AC_UTIL_ACCESS','AC_UTIL_SWAGGER'])" class="nav-item">
           <a href="#" class="nav-link bg-info" [ngClass]="{'disabled': !isOptionEnabled(5, 220)}">
             <i class="bi-gear nav-icon"></i>
             <p> Utilería
               <i class="fas fa-angle-right right"></i>
-              <span class="badge badge-warning right">1</span>
+              <span class="badge badge-warning right">6</span>
             </p>
           </a>
           <ul class="nav nav-treeview">
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canSection('AC_UTIL_DOCS')">
               <a routerLink="/documentos" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(5, 221)}">
                 <i class="bi bi-file-text-fill nav-icon"></i>
                 <p class="text-warning"> Documentos de respaldo</p>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canSection('AC_UTIL_USUARIOS')">
               <a class="nav-link" (click)="navUsuario()" routerLink=""
                 [ngClass]="{'disabled': !isOptionEnabled(5, 222)}">
                 <i class="bi-people"></i>
                 <p class="text-warning">&nbsp; Usuarios</p>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canSection('AC_UTIL_REPORTES')">
               <a routerLink="/reportesjr" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(5, 221)}">
                 <i class="bi bi-file-text-fill nav-icon"></i>
                 <p class="text-warning">Cargar Reportes</p>
               </a>
             </li>
+            <li class="nav-item" *ngIf="canSection('AC_UTIL_SWAGGER') || authService.idusuario == 1">
+              <a routerLink="/admin/swagger-microservicios" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(5, 221)}">
+                <i class="bi bi-journal-code nav-icon"></i>
+                <p class="text-warning">Swagger Microservicios</p>
+              </a>
+            </li>
+            <li class="nav-item" *ngIf="canSection('AC_UTIL_ACCESS')">
+              <a routerLink="/admin/access-control" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(5, 221)}">
+                <i class="bi bi-shield-lock nav-icon"></i>
+                <p class="text-warning">Accesos y permisos</p>
+              </a>
+            </li>
+
           </ul>
         </li>
-        <li *ngIf="authService.modulo == 7" class="nav-item">
+
+        <li *ngIf="authService.modulo == 12 && canAnySection(['GD_DASHBOARD','GD_DOCUMENTOS','GD_INBOX','GD_ALERTS','GD_EXPEDIENTES','GD_CFG_SYSTEM','GD_CFG_CCD','GD_CFG_TRD','GD_CFG_TIPOS','GD_PERFIL'])" class="nav-item gd-menu">
+          <a href="#" class="nav-link bg-info">
+            <i class="bi bi-folder2-open nav-icon" style="font-size: 15px;"></i>
+            <p> Gestión Documental
+              <i class="fas fa-angle-right right"></i>
+              <span class="badge badge-warning right">5</span>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item" *ngIf="canSection('GD_DASHBOARD')">
+              <a routerLink="/gd/dashboard" class="nav-link">
+                <i class="bi bi-speedometer2 nav-icon"></i>
+                <p class="text-warning"> Dashboard</p>
+              </a>
+            </li>
+            <li class="nav-item" *ngIf="canSection('GD_DOCUMENTOS')">
+              <a routerLink="/gd/documentos" class="nav-link">
+                <i class="bi bi-file-earmark-text nav-icon"></i>
+                <p class="text-warning"> Documentos</p>
+              </a>
+            </li>
+            <li class="nav-item" *ngIf="canSection('GD_INBOX')">
+              <a routerLink="/gd/inbox" class="nav-link">
+                <i class="bi bi-inbox nav-icon"></i>
+                <p class="text-warning"> Bandeja</p>
+              </a>
+            </li>
+            <li class="nav-item" *ngIf="canSection('GD_ALERTS')">
+              <a routerLink="/gd/alerts" class="nav-link">
+                <i class="bi bi-bell nav-icon"></i>
+                <p class="text-warning"> Alertas</p>
+              </a>
+            </li>
+            <li class="nav-item" *ngIf="canSection('GD_EXPEDIENTES')">
+              <a routerLink="/gd/case-files" class="nav-link">
+                <i class="bi bi-archive nav-icon"></i>
+                <p class="text-warning"> Expedientes</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="bi bi-gear nav-icon"></i>
+                <p class="text-warning font-weight-bold"> Configuración
+                  <i class="right fas fa-angle-right"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item" *ngIf="canSection('GD_CFG_SYSTEM')">
+                  <a routerLink="/gd/settings/system" class="nav-link py-0">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <i class="bi bi-sliders nav-icon"></i>
+                    <p class="small text-warning"> Sistema</p>
+                  </a>
+                </li>
+                <li class="nav-item" *ngIf="canSection('GD_CFG_CCD')">
+                  <a routerLink="/gd/settings/ccd" class="nav-link py-0">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <i class="bi bi-diagram-3 nav-icon"></i>
+                    <p class="small text-warning"> CCD</p>
+                  </a>
+                </li>
+                <li class="nav-item" *ngIf="canSection('GD_CFG_TRD')">
+                  <a routerLink="/gd/settings/trd" class="nav-link py-0">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <i class="bi bi-calendar-range nav-icon"></i>
+                    <p class="small text-warning"> TRD</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a routerLink="/tthh/entidades" class="nav-link py-0">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <i class="bi bi-building nav-icon"></i>
+                    <p class="small text-warning"> Entidades (TTHH)</p>
+                  </a>
+                </li>
+                <li class="nav-item" *ngIf="canSection('GD_CFG_TIPOS')">
+                  <a routerLink="/gd/settings/document-types" class="nav-link py-0">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <i class="bi bi-file-earmark-medical nav-icon"></i>
+                    <p class="small text-warning"> Tipos de documento</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a routerLink="/tthh/dependencias" class="nav-link py-0">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <i class="bi bi-diagram-2 nav-icon"></i>
+                    <p class="small text-warning"> Dependencias (TTHH)</p>
+                  </a>
+                </li>
+                <li class="nav-item" *ngIf="canSection('GD_PERFIL')">
+                  <a routerLink="/gd/my-profile" class="nav-link py-0">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <i class="bi bi-person-circle nav-icon"></i>
+                    <p class="small text-warning"> Mi Perfil GD</p>
+                  </a>
+                </li>
+
+              </ul>
+            </li>
+          </ul>
+        </li>
+
+        <li *ngIf="authService.modulo == 7 && canAnySection(['AC_SRI_COMPROB','AC_SRI_FIRMA'])" class="nav-item">
           <a href="#" class="nav-link bg-info" [ngClass]="{'disabled': !isOptionEnabled(5, 223)}">
             <i class="bi bi-scissors nav-icon"></i>
             <p> SRI
@@ -737,13 +888,13 @@
             </p>
           </a>
           <ul class="nav nav-treeview">
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canSection('AC_SRI_COMPROB')">
               <a routerLink="/tabla4" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(5, 224)}">
                 <i class="bi bi-eraser nav-icon"></i>
                 <p class="text-warning"> Comprobantes SRI</p>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="canSection('AC_SRI_FIRMA')">
               <a class="nav-link" routerLink="/definir" [ngClass]="{'disabled': !isOptionEnabled(5, 224)}">
                 <i class="bi-people"></i>
                 <p class="text-warning">&nbsp; Firma Electrónica</p>
@@ -757,3 +908,12 @@
   </div>
   <!-- /.sidebar -->
 </aside>
+
+
+
+
+
+
+
+
+

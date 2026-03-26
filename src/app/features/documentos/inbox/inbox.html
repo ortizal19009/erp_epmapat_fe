@@ -1,0 +1,124 @@
+<div class="page gd-page">
+  <div class="page gd-page-header cabecera">
+    <div class="d-flex ">
+      <button *ngIf="hasRole('SUPERVISOR','ADMIN')" class="btn btn-outline-secondary" (click)="exportCsv()">Exportar CSV</button>
+    </div>
+    <div>
+      <div class="d-flex align-items-center"><h2 class="page gd-page-title mb-0">Bandeja de derivaciones</h2><app-info-help key="inbox"></app-info-help></div>
+      <div class="page gd-page-subtitle">Seguimiento de pendientes por usuario/dependencia</div>
+    </div>
+  </div>
+
+  <div class="page gd-page-card detalle mb-3">
+    <div class="row align-items-end">
+      <div class="col-md-4">
+        <label class="control-label">Usuario destino (sesión)</label>
+        <select class="custom-select" [(ngModel)]="toUserId" disabled>
+          <option *ngFor="let u of users" [value]="u.id">{{ u.nombre || u.username }}</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="control-label">Dependencia destino</label>
+        <select class="custom-select" [(ngModel)]="toDependencyId">
+          <option value="">Todas</option>
+          <option *ngFor="let d of dependencies" [value]="d.id">{{ d.codigo }} - {{ d.nombre }}</option>
+        </select>
+        <div class="form-check mt-1">
+          <input id="onlyMyDep" class="form-check-input" type="checkbox" [(ngModel)]="onlyMyDependency" />
+          <label class="form-check-label small" for="onlyMyDep">Solo mi dependencia</label>
+        </div>
+      </div>
+      <div class="col-md-4 ">
+        <button class="btn btn-primary mr-2" (click)="load()">Consultar derivaciones</button>
+        <button class="btn btn-outline-primary" (click)="loadReceptions()">Consultar recepciones</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <small class="text-muted">Total: {{ total }}</small>
+    <div class="btn-group btn-group-sm">
+      <button class="btn btn-outline-secondary" (click)="prevPage()" [disabled]="page<=1">Anterior</button>
+      <button class="btn btn-outline-secondary" disabled>Página {{ page }} / {{ pages }}</button>
+      <button class="btn btn-outline-secondary" (click)="nextPage()" [disabled]="page>=pages">Siguiente</button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="alert alert-info">Cargando...</div>
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <div class="page gd-page-card detalle p-0 overflow-hidden mb-3">
+    <div class="table-wrap">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th style="cursor:pointer" (click)="setSort('documento_id')">Documento {{ sortIcon('documento_id') }}</th>
+            <th style="cursor:pointer" (click)="setSort('asunto')">Asunto {{ sortIcon('asunto') }}</th>
+            <th style="cursor:pointer" (click)="setSort('fecha_plazo')">Plazo {{ sortIcon('fecha_plazo') }}</th>
+            <th style="cursor:pointer" (click)="setSort('estado')">Estado {{ sortIcon('estado') }}</th>
+            <th class="text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of rows">
+            <td>
+              <a [routerLink]="['/gd/documentos', r.documento_id]">{{ r.documento_id }}</a>
+            </td>
+            <td>{{ r.asunto }}</td>
+            <td>{{ r.fecha_plazo ? (r.fecha_plazo | date:'yyyy-MM-dd HH:mm') : '—' }}</td>
+            <td><span class="badge" [ngClass]="statusBadge(r.estado)">{{ r.estado }}</span></td>
+            <td class="text-right">
+              <div class="btn-group btn-group-sm">
+                <button class="btn btn-outline-secondary" (click)="goRespond(r)">Responder</button>
+                <button *ngIf="hasRole('RECEPCION','RESPONSABLE','SUPERVISOR','ADMIN')" class="btn btn-outline-primary" (click)="markRead(r)">Marcar leído</button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="rows.length===0 && !loading">
+            <td colspan="5" class="text-center text-muted py-4">Sin derivaciones pendientes</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="page gd-page-card detalle p-0 overflow-hidden">
+    <div class="p-3 border-bottom"><strong>Bandeja de recepciones pendientes</strong></div>
+    <div class="table-wrap">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Documento</th>
+            <th>Asunto</th>
+            <th>Dependencia</th>
+            <th>Edad pendiente</th>
+            <th>Estado doc</th>
+            <th class="text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of receptionRows">
+            <td><a [routerLink]="['/gd/documentos', r.documento_id]">{{ r.numero_oficial || r.documento_id }}</a></td>
+            <td>{{ r.asunto }}</td>
+            <td>{{ dependencyLabel(r.dependencia_id) }}</td>
+            <td><span [class]="pendingAgeClass(r)">{{ pendingAgeLabel(r) }}</span></td>
+            <td><span class="badge badge-secondary">{{ r.estado_documento }}</span></td>
+            <td class="text-right">
+              <div class="btn-group btn-group-sm">
+                <button class="btn btn-outline-success" (click)="receivePending(r)">Recibir</button>
+                <button class="btn btn-success" (click)="receivePending(r, true)">Recibir y abrir</button>
+                <button class="btn btn-outline-primary" (click)="receivePending(r, true, true)">Tomar y derivar</button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="receptionRows.length===0">
+            <td colspan="6" class="text-center text-muted py-3">Sin recepciones pendientes</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+

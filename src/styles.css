@@ -482,6 +482,7 @@ tr:not(.cursor-pointer):not(.fila) td:hover{ cursor: default; }
     font-size: .9rem;
   }
 }
+<<<<<<< HEAD
 /* Estilos Globales. Tambien se pueden importar otros archivos*/
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap');
 

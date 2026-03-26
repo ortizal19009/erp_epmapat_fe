@@ -1,0 +1,385 @@
+<div class="container-fluid mt-2">
+  <div class="row justify-content-center">
+    <div class="col-sm-12 col-md-11 col-lg-10">
+
+      <!-- CABECERA -->
+      <div class="d-flex align-items-center justify-content-between cabecera sombra border px-3 py-2 rounded">
+        <div class="d-flex align-items-center">
+          <i class="bi bi-people-fill mr-2"></i>
+          <h5 class="m-0 font-weight-bold">Usuarios</h5>
+        </div>
+
+        <div class="d-flex align-items-center">
+          <input
+            type="text"
+            class="form-control form-control-sm text-center mr-2"
+            placeholder="Filtrar..."
+            [(ngModel)]="filtro"
+            style="width: 200px;"
+          />
+
+          <select class="custom-select custom-select-sm mr-2" style="width: 160px;" [(ngModel)]="filtroEstado">
+            <option value="ACTIVOS">Solo activos</option>
+            <option value="INACTIVOS">Solo inactivos</option>
+            <option value="TODOS">Todos</option>
+          </select>
+
+          <select class="custom-select custom-select-sm mr-2" style="width: 180px;" [(ngModel)]="filtroVinculo">
+            <option value="TODOS">Vínculo: Todos</option>
+            <option value="VINCULADOS">Vínculo: Vinculados</option>
+            <option value="NO_VINCULADOS">Vínculo: No vinculados</option>
+          </select>
+
+          <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-outline-light dropdown-toggle" data-toggle="dropdown">
+              <i class="bi bi-menu-button-wide"></i>
+            </button>
+
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+              <button class="dropdown-item text-white" type="button" (click)="openAddForm()">
+                <i class="bi bi-file-earmark-plus"></i>&nbsp; Nuevo
+              </button>
+
+              <button class="dropdown-item text-white" type="button" data-toggle="modal" data-target="#imprimir">
+                <i class="bi bi-printer"></i>&nbsp; Imprimir
+              </button>
+
+              <button class="dropdown-item text-muted" type="button" disabled>
+                <i class="bi bi-file-earmark-arrow-down"></i>&nbsp; Exportar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLA -->
+      <div class="mt-2 sombra border rounded detalle" *ngIf="!showAddForm">
+        <div class="table-responsive">
+        <table class="table table-hover table-sm mb-0">
+          <thead class="text-center">
+            <tr>
+              <th style="width: 50px;">#</th>
+              <th class="text-left">Identificación</th>
+              <th class="text-left">Alias</th>
+              <th class="text-left">Nombre</th>
+              <th style="width: 220px;">Vínculo RRHH</th>
+              <th style="width: 130px;">Estado</th>
+              <th style="width: 60px;"></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let usuario of usuariosFiltrados; let i=index" class="text-center fila">
+              <td class="font-weight-bold small">{{ i + 1 }}</td>
+
+              <td class="text-left" [ngClass]="{'tachado': !usuario.estado}">
+                {{ usuario.identificausu }}
+              </td>
+
+              <td class="text-left" [ngClass]="{'tachado': !usuario.estado}">
+                {{ usuario.alias }}
+              </td>
+
+              <td class="text-left" [ngClass]="{'tachado': !usuario.estado}">
+                {{ usuario.nomusu }}
+              </td>
+
+              <td class="text-left small">
+                <div class="d-flex align-items-center justify-content-between">
+                  <span [class]="hasPersonalLink(usuario) ? 'text-success font-weight-bold' : 'text-muted'">
+                    <i class="bi" [ngClass]="hasPersonalLink(usuario) ? 'bi-check-circle-fill' : 'bi-x-circle'"></i>
+                    {{ personalLinkLabel(usuario) }}
+                  </span>
+                  <button *ngIf="!hasPersonalLink(usuario)" type="button" class="btn btn-sm btn-outline-primary ml-2"
+                    data-toggle="modal" data-target="#modalPersonalLink" (click)="openLinkPersonal(usuario)">
+                    Unir
+                  </button>
+                  <div *ngIf="hasPersonalLink(usuario)" class="btn-group btn-group-sm ml-2">
+                    <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#modalPersonalLink" (click)="openLinkPersonal(usuario)">Cambiar</button>
+                    <button type="button" class="btn btn-outline-danger" (click)="unlinkPersonalUsuario(usuario)">Desvincular</button>
+                  </div>
+                </div>
+              </td>
+
+              <td class="text-center">
+                <div class="custom-control custom-switch d-inline-block">
+                  <input type="checkbox" class="custom-control-input" [id]="'swU'+usuario.idusuario" [checked]="!!usuario.estado"
+                    (change)="toggleEstadoUsuario(usuario)">
+                  <label class="custom-control-label" [for]="'swU'+usuario.idusuario">
+                    <span [class]="usuario.estado ? 'text-success' : 'text-muted'">{{ usuario.estado ? 'Activo' : 'Inactivo' }}</span>
+                  </label>
+                </div>
+              </td>
+
+              <td class="text-right">
+                <div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-warning dropdown-toggle" data-toggle="dropdown">
+                    <i class="bi bi-gear-fill"></i>
+                  </button>
+                  <div class="dropdown-menu dropdown-menu-right popLista">
+                    <button class="dropdown-item" type="button" (click)="perfil(usuario.idusuario)">
+                      <i class="bi bi-person-badge"></i>&nbsp; Perfil
+                    </button>
+                    <button class="dropdown-item" type="button" (click)="modificar(usuario.idusuario)">
+                      <i class="bi bi-pencil-square"></i>&nbsp; Modificar
+                    </button>
+                    <button class="dropdown-item" type="button" (click)="toggleEstadoUsuario(usuario)">
+                      <i class="bi" [ngClass]="usuario.estado ? 'bi-toggle-off text-danger' : 'bi-toggle-on text-success'"></i>
+                      &nbsp; {{ usuario.estado ? 'Inactivar' : 'Activar' }}
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+
+            <tr *ngIf="usuariosFiltrados.length === 0">
+              <td colspan="7" class="text-center text-muted py-3">
+                No se encontraron usuarios.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="container-fluid">
+  <div class="row justify-content-center">
+    <div class="col-sm-12 col-md-11 col-lg-10">
+
+      <div class="mt-2" *ngIf="showAddForm">
+        <div class="card sombra border-0 form-elegante">
+          <div class="card-header bg-success text-white d-flex align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold">
+              <i class="bi bi-person-plus-fill"></i>&nbsp; Añadir nuevo usuario
+            </h6>
+            <button class="btn btn-sm btn-outline-light" type="button" (click)="closeAddForm()">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <form [formGroup]="f_usuario">
+            <div class="card-body">
+
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group mb-2">
+                    <label class="font-weight-bold">Identificación</label>
+                    <input type="text" class="form-control form-control-sm" formControlName="identificausu" placeholder="Identificación">
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="form-group mb-2">
+                    <label class="font-weight-bold">Nombre usuario</label>
+                    <input type="text" class="form-control form-control-sm" formControlName="nomusu" placeholder="Nombre usuario">
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group mb-2">
+                    <label class="font-weight-bold">Alias</label>
+                    <input type="text" class="form-control form-control-sm" formControlName="alias" placeholder="Alias">
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="form-group mb-2">
+                    <label class="font-weight-bold">E-mail</label>
+                    <input type="email" class="form-control form-control-sm" formControlName="email" placeholder="E-mail">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Unir Personal -->
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group mb-2">
+                    <label class="font-weight-bold">Personal vinculado</label>
+
+                    <div class="input-group input-group-sm">
+                      <input type="text"
+                        class="form-control"
+                        [value]="personalSeleccionadoLabel || ''"
+                        placeholder="No vinculado"
+                        readonly
+                      >
+                      <div class="input-group-append">
+                        <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#modalPersonalAdd">
+                          <i class="bi bi-search"></i>&nbsp; Buscar
+                        </button>
+                        <button type="button" class="btn btn-outline-danger" (click)="limpiarPersonalAdd()" [disabled]="!personalSeleccionadoId">
+                          <i class="bi bi-x-circle"></i>
+                        </button>
+                      </div>
+                    </div>
+
+                    <small class="text-muted">Selecciona un registro de RRHH para vincularlo al usuario.</small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Password -->
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group mb-2">
+                    <label class="font-weight-bold">Password</label>
+                    <input type="password" class="form-control form-control-sm" formControlName="password" placeholder="Password">
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="form-group mb-2">
+                    <label class="font-weight-bold">Conf. Password</label>
+                    <input type="password" class="form-control form-control-sm"
+                      (keyup)="verifyPassword($event)"
+                      formControlName="conf_password"
+                      placeholder="Confirmación">
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="card-footer text-center">
+              <button type="button" class="btn btn-sm btn-outline-secondary mr-2" (click)="closeAddForm()">
+                <i class="bi bi-x-circle"></i>&nbsp; Cancelar
+              </button>
+
+              <button type="button" class="btn btn-sm btn-success" [disabled]="pass == ''" (click)="saveUser()">
+                <i class="bi bi-check-circle"></i>&nbsp; Guardar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="modalPersonalAdd" tabindex="-1" role="dialog" aria-labelledby="modalPersonalAddTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalPersonalAddTitle">Buscar Personal</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-sm-12">
+            <label class="w-100 mb-0">
+              Buscar Personal
+              <input type="text" [(ngModel)]="filtrarPersonalAdd" class="form-control form-control-sm" placeholder="Ingrese nombre o identificación">
+            </label>
+          </div>
+        </div>
+
+        <div class="row mt-3">
+          <div class="col-sm-12 table-responsive">
+            <table class="table table-hover table-sm mb-0">
+              <thead class="thead-light text-center">
+                <tr>
+                  <th style="width:60px">#</th>
+                  <th>Identificación</th>
+                  <th>Nombre</th>
+                  <th>Cargo</th>
+                  <th style="width:120px">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let per of _personal | filter:filtrarPersonalAdd; let i=index" class="text-center">
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ per.identificacion }}</td>
+                  <td class="text-left">{{ per.apellidos }} {{ per.nombres }}</td>
+                  <td class="text-left">{{ per.idcargo_cargos?.descripcion }}</td>
+                  <td>
+                    <button type="button" class="btn btn-sm btn-success" (click)="seleccionarPersonalAdd(per)" data-dismiss="modal">
+                      <i class="bi bi-link-45deg"></i> Unir
+                    </button>
+                  </td>
+                </tr>
+
+                <tr *ngIf="(_personal | filter:filtrarPersonalAdd)?.length === 0">
+                  <td colspan="5" class="text-center text-muted py-3">No se encontraron resultados.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">
+          Cerrar
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalPersonalLink" tabindex="-1" role="dialog" aria-labelledby="modalPersonalLinkTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalPersonalLinkTitle">Vincular usuario con personal</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="alert alert-info py-2" *ngIf="usuarioLinkTarget">
+          Usuario: <b>{{ usuarioLinkTarget.alias || usuarioLinkTarget.nomusu }}</b>
+        </div>
+
+        <label class="w-100 mb-2">
+          Buscar personal
+          <input type="text" [(ngModel)]="filtrarPersonalVinculo" class="form-control form-control-sm" placeholder="Nombre o identificación">
+        </label>
+
+        <div class="table-responsive">
+          <table class="table table-hover table-sm mb-0">
+            <thead class="thead-light text-center">
+              <tr>
+                <th style="width:60px">#</th>
+                <th>Identificación</th>
+                <th>Nombre</th>
+                <th>Cargo</th>
+                <th style="width:120px">Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let per of _personal | filter:filtrarPersonalVinculo; let i=index" class="text-center">
+                <td>{{ i + 1 }}</td>
+                <td>{{ per.identificacion }}</td>
+                <td class="text-left">{{ per.apellidos }} {{ per.nombres }}</td>
+                <td class="text-left">{{ per.idcargo_cargos?.descripcion }}</td>
+                <td>
+                  <button type="button" class="btn btn-sm btn-success" (click)="seleccionarPersonalParaUsuario(per)" data-dismiss="modal">
+                    <i class="bi bi-link-45deg"></i> Unir
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="(_personal | filter:filtrarPersonalVinculo)?.length === 0">
+                <td colspan="5" class="text-center text-muted py-3">No se encontraron resultados.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>

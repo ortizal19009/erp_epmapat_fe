@@ -1,0 +1,74 @@
+<div class="container-fluid mt-2 rrhh-page">
+  <div class="row m-0 px-2 py-2 mb-2 align-items-center cabecera sombra border rounded">
+    <h5 class="mb-0">TH Actions</h5>
+  </div>
+
+  <div class="alert alert-success py-1" *ngIf="msg">{{ msg }}</div>
+  <div class="alert alert-danger py-1" *ngIf="error">{{ error }}</div>
+
+  <div class="card p-2 mb-3 detalle">
+    <div class="row mb-2">
+      <div class="col-sm-5">
+        <select class="form-control form-control-sm" [(ngModel)]="idpersonal" (change)="buscar()">
+          <option [ngValue]="0">Seleccione personal...</option>
+          <option *ngFor="let p of personalList" [ngValue]="p.idpersonal">
+            {{ p.apellidos }}, {{ p.nombres }} - {{ p.identificacion }}
+          </option>
+        </select>
+      </div>
+      <div class="col-sm-2"><button class="btn btn-sm btn-primary" (click)="buscar()">Buscar</button></div>
+      <div class="col-sm-2"><button class="btn btn-sm btn-outline-secondary" (click)="refreshAll()">Refrescar</button></div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-2">
+        <select class="form-control form-control-sm" [(ngModel)]="model.tipoaccion">
+          <option>INGRESO</option><option>MOVIMIENTO</option><option>ENCARGO</option>
+          <option>SUBROGACION</option><option>DESVINCULACION</option><option>REINCORPORACION</option>
+        </select>
+      </div>
+      <div class="col-sm-3"><input class="form-control form-control-sm" [(ngModel)]="model.motivo" placeholder="Motivo"></div>
+      <div class="col-sm-3"><input class="form-control form-control-sm" [(ngModel)]="model.observacion" placeholder="Observación"></div>
+      <div class="col-sm-2"><input class="form-control form-control-sm" type="date" [(ngModel)]="model.fecvigencia"></div>
+      <div class="col-sm-2"><button class="btn btn-sm btn-success" (click)="guardar()">Guardar</button></div>
+    </div>
+  </div>
+
+  <div class="row mb-2 detalle p-2 rounded">
+    <div class="col-sm-2">
+      <select class="form-control form-control-sm" [(ngModel)]="tipoFiltro" (change)="cambiarFiltros()">
+        <option value="TODOS">Todos los tipos</option>
+        <option>INGRESO</option><option>MOVIMIENTO</option><option>ENCARGO</option>
+        <option>SUBROGACION</option><option>DESVINCULACION</option><option>REINCORPORACION</option>
+      </select>
+    </div>
+    <div class="col-sm-2">
+      <select class="form-control form-control-sm" [(ngModel)]="estadoFiltro" (change)="cambiarFiltros()">
+        <option value="TODOS">Todos los estados</option>
+        <option value="ACTIVO">Activo</option>
+        <option value="INACTIVO">Inactivo</option>
+      </select>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="small text-muted">Cargando...</div>
+
+  <table class="table table-sm table-bordered" *ngIf="!loading">
+    <thead class="cabecera"><tr><th>ID</th><th>Tipo</th><th>Vigencia</th><th>Motivo</th><th>Estado</th></tr></thead>
+    <tbody class="detalle">
+      <tr *ngFor="let a of accionesFiltradas">
+        <td>{{a.idaction}}</td>
+        <td>{{a.tipoaccion}}</td>
+        <td>{{formatFecha(a.fecvigencia)}}</td>
+        <td>{{a.motivo}}</td>
+        <td><span [ngClass]="estadoClass(a.estado)">{{a.estado ? 'ACTIVO' : 'INACTIVO'}}</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="d-flex justify-content-end align-items-center" *ngIf="!loading">
+    <button class="btn btn-sm btn-light mr-2" (click)="prevPage()" [disabled]="page<=1">Anterior</button>
+    <span class="small mr-2">Página {{page}} / {{totalPages}}</span>
+    <button class="btn btn-sm btn-light" (click)="nextPage()" [disabled]="page>=totalPages">Siguiente</button>
+  </div>
+</div>

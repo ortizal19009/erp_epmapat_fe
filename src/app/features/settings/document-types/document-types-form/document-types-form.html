@@ -1,0 +1,50 @@
+<div class="page gd-page">
+  <div class="page gd-page-header cabecera">
+    <div>
+      <h1 class="page gd-page-title">{{ title() }}</h1>
+      <div class="page gd-page-subtitle">Entidad: {{ 'EPMAPA-T' }}</div>
+    </div>
+
+    <div class="d-flex ">
+      <button class="btn btn-outline-secondary" (click)="cancel()">Volver</button>
+      <button class="btn btn-primary" [disabled]="saving()" (click)="save()">{{ saving() ? 'Guardando...' : 'Guardar' }}</button>
+    </div>
+  </div>
+
+  <div *ngIf="loading()" class="alert alert-info">Cargando...</div>
+  <div *ngIf="error()" class="alert alert-danger">{{ error() }}</div>
+
+  <div class="page gd-page-card detalle" *ngIf="!loading()">
+    <form [formGroup]="form" class="row">
+      <div class="col-md-3">
+        <label class="control-label">Código</label>
+        <input class="form-control" formControlName="codigo" placeholder="MEMO / INF / OFI" />
+        <div class="text-danger small mt-1" *ngIf="form.controls.codigo.touched && form.controls.codigo.invalid">El código es obligatorio.</div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="control-label">Nombre</label>
+        <input class="form-control" formControlName="nombre" placeholder="Memorando / Informe / Oficio..." />
+        <div class="text-danger small mt-1" *ngIf="form.controls.nombre.touched && form.controls.nombre.invalid">El nombre es obligatorio.</div>
+      </div>
+
+      <div class="col-md-3">
+        <label class="control-label">Flujo</label>
+        <select class="custom-select" formControlName="flujo">
+          <option value="INGRESO">INGRESO</option>
+          <option value="SALIDA">SALIDA</option>
+        </select>
+      </div>
+
+      <div class="col-12">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" formControlName="activo" id="activeChk" />
+          <label class="form-check-label" for="activeChk">Activo</label>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+

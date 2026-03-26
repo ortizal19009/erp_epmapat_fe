@@ -2,7 +2,7 @@ import { RouterModule } from '@angular/router';
 
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -122,15 +122,16 @@ import { AddReformaComponent } from './componentes/contabilidad/reformas/add-ref
 import { EjecucionComponent } from './componentes/contabilidad/ejecucion/ejecucion/ejecucion.component';
 
 // =========== Administración Central ==================
-import { Tabla4Component } from './componentes/administracion/tabla4/tabla4/tabla4.component';
-import { AddTabla4Component } from './componentes/administracion/tabla4/add-tabla4/add-tabla4.component';
-import { DocumentosComponent } from './componentes/administracion/documentos/documentos/documentos.component';
-import { AddDocumentoComponent } from './componentes/administracion/documentos/add-documento/add-documento.component';
-import { InfoDocumentoComponent } from './componentes/administracion/documentos/info-documento/info-documento.component';
-import { ModiDocumentoComponent } from './componentes/administracion/documentos/modi-documento/modi-documento.component';
-import { InfoTabla4Component } from './componentes/administracion/tabla4/info-tabla4/info-tabla4.component';
-import { ModiTabla4Component } from './componentes/administracion/tabla4/modi-tabla4/modi-tabla4.component';
+import { Tabla4Component } from './features/admin-central/pages/administracion/tabla4/tabla4/tabla4.component';
+import { AddTabla4Component } from './features/admin-central/pages/administracion/tabla4/add-tabla4/add-tabla4.component';
+import { DocumentosComponent } from './features/admin-central/pages/administracion/documentos/documentos/documentos.component';
+import { AddDocumentoComponent } from './features/admin-central/pages/administracion/documentos/add-documento/add-documento.component';
+import { InfoDocumentoComponent } from './features/admin-central/pages/administracion/documentos/info-documento/info-documento.component';
+import { ModiDocumentoComponent } from './features/admin-central/pages/administracion/documentos/modi-documento/modi-documento.component';
+import { InfoTabla4Component } from './features/admin-central/pages/administracion/tabla4/info-tabla4/info-tabla4.component';
+import { ModiTabla4Component } from './features/admin-central/pages/administracion/tabla4/modi-tabla4/modi-tabla4.component';
 import { LoginComponent } from './compartida/login/login.component';
+import { ServiceErrorInterceptor } from './compartida/service-error.interceptor';
 
 // ================ Pipes ==========================
 import { NombreEmisionPipe } from './pipes/nombre-emision.pipe';
@@ -156,7 +157,7 @@ import { AddUsoitemsComponent } from './componentes/usoitems/add-usoitems/add-us
 import { ModiUsoitemsComponent } from './componentes/usoitems/modi-usoitems/modi-usoitems.component';
 import { ModiRubroComponent } from './componentes/rubros/modi-rubro/modi-rubro.component';
 import { CertipresuComponent } from './componentes/contabilidad/certipresu/certipresu/certipresu.component';
-import { UsuariosComponent } from './componentes/administracion/usuarios/usuarios/usuarios.component';
+import { UsuariosComponent } from './features/admin-central/pages/administracion/usuarios/usuarios/usuarios.component';
 import { ModiReformaComponent } from './componentes/contabilidad/reformas/modi-reforma/modi-reforma.component';
 import { ModiEjecucionComponent } from './componentes/contabilidad/ejecucion/modi-ejecucion/modi-ejecucion.component';
 import { AddEjecucionComponent } from './componentes/contabilidad/ejecucion/add-ejecucion/add-ejecucion.component';
@@ -168,7 +169,7 @@ import { GeneEmisionComponent } from './componentes/emisiones/gene-emision/gene-
 import { ImporLecturasComponent } from './componentes/lecturas/impor-lecturas/impor-lecturas.component';
 import { BancosComponent } from './componentes/contabilidad/bancos/bancos/bancos.component';
 import { ConciliabanComponent } from './componentes/contabilidad/bancos/conciliaban/conciliaban.component';
-import { ColoresComponent } from './componentes/administracion/colores/colores.component';
+import { ColoresComponent } from './features/admin-central/pages/administracion/colores/colores.component';
 import { Pliego24Component } from './componentes/pliego24/pliego24/pliego24.component';
 import { ProyeccionComponent } from './componentes/pliego24/proyeccion/proyeccion.component';
 import { AuxIngresoComponent } from './componentes/contabilidad/preingresos/aux-ingreso/aux-ingreso.component';
@@ -203,7 +204,7 @@ import { CertitmpComponent } from './componentes/ccertificaciones/certitmp/certi
 import { GeneCertificacionComponent } from './componentes/ccertificaciones/gene-certificacion/gene-certificacion.component';
 import { AguatramComponent } from './componentes/aguatramite/aguatram/aguatram.component';
 import { BuscarClienteComponent } from './componentes/clientes/buscar-cliente/buscar-cliente.component';
-import { ModiUsuarioComponent } from './componentes/administracion/usuarios/modi-usuario/modi-usuario.component';
+import { ModiUsuarioComponent } from './features/admin-central/pages/administracion/usuarios/modi-usuario/modi-usuario.component';
 import { BuscarRutaComponent } from './componentes/suspensiones/buscar-ruta/buscar-ruta.component';
 import { HabilitacionesComponent } from './componentes/habilitaciones/habilitaciones/habilitaciones.component';
 import { AddHabilitacionComponent } from './componentes/habilitaciones/add-habilitacion/add-habilitacion.component';
@@ -213,9 +214,9 @@ import {
   PathLocationStrategy,
 } from '@angular/common';
 import { HistorialconsumoComponent } from './componentes/abonados/historialconsumo/historialconsumo.component';
-import { PerfilUsuarioComponent } from './componentes/administracion/usuarios/perfil-usuario/perfil-usuario.component';
+import { PerfilUsuarioComponent } from './features/admin-central/pages/administracion/usuarios/perfil-usuario/perfil-usuario.component';
 import { RecalFacturaComponent } from './componentes/facturas/recal-factura/recal-factura.component';
-import { DefinirComponent } from './componentes/administracion/definir/definir.component';
+import { DefinirComponent } from './features/admin-central/pages/administracion/definir/definir.component';
 import { GeneradorxmlComponent } from './componentes/facelectro/generadorxml/generadorxml.component';
 import { ImpLecturasComponent } from './componentes/lecturas/imp-lecturas/imp-lecturas.component';
 import { LecturasComponent } from './componentes/lecturas/lecturas.component';
@@ -279,12 +280,17 @@ import { IfinanComponent } from './componentes/contabilidad/ifinan/ifinan/ifinan
 import { InfoLiquidaComponent } from './componentes/contabilidad/beneficiarios/info-beneficiario/info-liquida/info-liquida/info-liquida.component';
 import { PersonalComponent } from './componentes/rrhh/personal/personal.component';
 import { AddPersonalComponent } from './componentes/rrhh/personal/add-personal/add-personal.component';
+import { ThActionsComponent } from './componentes/rrhh/th-actions/th-actions.component';
+import { ThLeaveComponent } from './componentes/rrhh/th-leave/th-leave.component';
+import { ThFilesComponent } from './componentes/rrhh/th-files/th-files.component';
+import { ThAuditComponent } from './componentes/rrhh/th-audit/th-audit.component';
+import { ThDashboardComponent } from './componentes/rrhh/th-dashboard/th-dashboard.component';
 import { RemisionComponent } from './componentes/coactivas/remision/remision.component';
 import { AddRemisionComponent } from './componentes/coactivas/remision/add-remision/add-remision.component';
 import { SafePipe } from './pipes/safe.pipe';
 import { NtacreditoComponent } from './componentes/ntacredito/ntacredito.component';
 import { AddNtacreditoComponent } from './componentes/ntacredito/add-ntacredito/add-ntacredito.component';
-import { HomeComponent } from './componentes/administracion/home/home.component';
+import { HomeComponent } from './features/admin-central/pages/administracion/home/home.component';
 import { StatusConveniosComponent } from './componentes/convenios/status-convenios/status-convenios.component';
 import { CvClientesComponent } from './componentes/coactivas/carteras-vencidas/cv-clientes/cv-clientes.component';
 import { AnularConvenioComponent } from './componentes/convenios/anular-convenio/anular-convenio.component';
@@ -576,6 +582,11 @@ import { VisualFormatDirective } from './directives/visual-format.directive';
     DetallePlanillaComponent,
     PersonalComponent,
     AddPersonalComponent,
+    ThActionsComponent,
+    ThLeaveComponent,
+    ThFilesComponent,
+    ThAuditComponent,
+    ThDashboardComponent,
     RemisionComponent,
     AddRemisionComponent,
     SafePipe,
@@ -617,6 +628,7 @@ import { VisualFormatDirective } from './directives/visual-format.directive';
   providers: [
     MainFooterComponent,
     { provide: LocationStrategy, useClass: HashLocationStrategy },
+    { provide: HTTP_INTERCEPTORS, useClass: ServiceErrorInterceptor, multi: true },
     /* https://angular.io/api/common/HashLocationStrategy */
   ],
 

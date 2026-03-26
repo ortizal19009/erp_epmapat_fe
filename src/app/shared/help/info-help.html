@@ -1,0 +1,49 @@
+﻿<button type="button" class="btn btn-sm btn-outline-info ms-2" (click)="open = true" title="Información">ℹ️</button>
+
+<div class="modal d-block" tabindex="-1" *ngIf="open && item">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <h5 class="modal-title mb-0">{{ item.title }}</h5>
+          <span class="badge level-badge" [ngClass]="'level-' + item.level" *ngIf="item.level">
+            <span class="level-dot">●</span> Nivel normativo: {{ item.level }}
+          </span>
+        </div>
+        <button type="button" class="btn-close" (click)="open = false"></button>
+      </div>
+      <div class="modal-body">
+        <div class="help-summary">
+          <div class="help-section-title">Resumen ejecutivo</div>
+          <div>{{ item.purpose }}</div>
+        </div>
+
+        <div class="help-section-title">Base legal relacionada</div>
+        <ul><li *ngFor="let l of item.legal">{{ l }}</li></ul>
+
+        <div class="help-section-title">Instrucciones operativas</div>
+        <ul><li *ngFor="let s of item.instructions">{{ s }}</li></ul>
+
+
+
+        <div class="help-section-title" *ngIf="item.roles?.length">Responsabilidades por rol</div>
+        <ul *ngIf="item.roles?.length"><li *ngFor="let r of item.roles">{{ r }}</li></ul>
+
+        <div *ngIf="item.warnings?.length" class="alert alert-warning">
+          <strong>Riesgos por incumplimiento</strong>
+          <ul class="mb-0 mt-2"><li *ngFor="let w of item.warnings">{{ w }}</li></ul>
+        </div>
+
+        <div class="help-section-title">Checklist rápido</div>
+        <div class="help-checks">
+          <div class="help-check">☑ Metadatos completos</div>
+          <div class="help-check">☑ Trazabilidad verificable</div>
+          <div class="help-check">☑ Retención aplicada</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="open = false">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
