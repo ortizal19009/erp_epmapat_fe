@@ -1,13 +1,10 @@
-import { Injectable, OnDestroy, OnInit } from '@angular/core';
-import { UsrxmodulosService } from '../servicios/administracion/usrxmodulos.service';
-import { CanActivate, Router } from '@angular/router';
+import { Injectable, OnDestroy } from '@angular/core';
 import { AbstractControl, AsyncValidatorFn, ValidationErrors } from '@angular/forms';
+import { CanActivate, Router } from '@angular/router';
+import { Definir } from '../modelos/administracion/definir.model';
+import { DefinirService } from '../servicios/administracion/definir.service';
 import { Observable, of } from 'rxjs';
 import Swal from 'sweetalert2';
-import { Definir } from '../modelos/administracion/definir.model';
-import { environment } from 'src/environments/environment';
-import { DefinirService } from '../servicios/administracion/definir.service';
-const backend = environment.BACK;
 
 @Injectable({
   providedIn: 'root',
@@ -26,16 +23,14 @@ export class AutorizaService implements OnDestroy, CanActivate {
   alias: string;
   priusu: string;
   perfil: string;
-  msgval: boolean = true; //OJO: Obtener en el login del usuario
+  msgval: boolean = true;
   modules: any;
-  backend: number = 1;
-  anio = 2026;
+  anio: number = 2025;
   private intervalId: any;
-
 
   ngOnDestroy(): void {
     if (this.intervalId) {
-      clearInterval(this.intervalId); // limpia el intervalo cuando el componente se destruya
+      clearInterval(this.intervalId);
     }
   }
 
@@ -45,9 +40,8 @@ export class AutorizaService implements OnDestroy, CanActivate {
     if (!this.sessionlog) {
       this.router.navigate(['/inicio']);
     }
-    //OJO: Controlar con usuarios.perfil
-    if (this.idusuario == 1)
-      this.enabled = [true, true, false, false, true, true, true];
+
+    if (this.idusuario == 1) this.enabled = [true, true, false, false, true, true, true];
     else this.enabled = [true, false, false, false, false, false, true];
 
     this.colorenabled = true;
@@ -93,12 +87,13 @@ export class AutorizaService implements OnDestroy, CanActivate {
       this.router.navigate(['/inicio']);
     }
   }
+
   canActivate(): boolean {
-    const sessionlog = localStorage.getItem('sessionlog'); // ejemplo, cámbialo según tu app
+    const sessionlog = localStorage.getItem('sessionlog');
     if (sessionlog === 'true') {
-      return true; // ✅ acceso permitido
+      return true;
     } else {
-      this.router.navigate(['/inicio']); // 🚫 redirige si no hay sesión
+      this.router.navigate(['/inicio']);
       return false;
     }
   }
@@ -152,7 +147,6 @@ export class AutorizaService implements OnDestroy, CanActivate {
   getEmpresa() {
     this.defService.getByIddefinir(1).subscribe({
       next: (definir: Definir) => {
-        console.log(definir)
         // OJO: Falta validar la Empresa con la licencia
         this.setDatosEmpresa({
           empresa: definir.empresa,
@@ -208,6 +202,7 @@ export class AutorizaService implements OnDestroy, CanActivate {
     const seg = totalSeg % 60;
     return `${min}m ${seg}s`;
   }
+
 }
 export interface DatosEmpresa {
   empresa?: String;

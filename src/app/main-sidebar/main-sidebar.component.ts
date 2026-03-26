@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { AutorizaService } from '@core/auth/autoriza.service';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { UsrxmodulosService } from '../servicios/administracion/usrxmodulos.service';
+import { AutorizaService } from '../compartida/autoriza.service';
 
 @Component({
   selector: 'app-main-sidebar',
@@ -16,7 +16,7 @@ export class MainSidebarComponent implements OnInit {
   enabledSections = new Set<string>();
 
   constructor(
-    public authService: AutorizaService,
+    private authService: AutorizaService,
     private router: Router,
     private usrxmodulosService: UsrxmodulosService
   ) {}
