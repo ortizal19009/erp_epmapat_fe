@@ -16,10 +16,37 @@ export class MainSidebarComponent implements OnInit {
   enabledSections = new Set<string>();
 
   constructor(
-    private authService: AutorizaService,
+    public authService: AutorizaService,
     private router: Router,
     private usrxmodulosService: UsrxmodulosService
   ) {}
+
+  private normalizeAccessCode(code: any): string {
+    return String(code || '')
+      .trim()
+      .toUpperCase()
+      .replace(/\s+/g, '')
+      .replace(/[.-]+/g, '_');
+  }
+
+  private collectEnabledCodes(node: any): void {
+    if (!node) return;
+
+    const isEnabled = node.enabled !== false;
+    const rawCode = node.codigo ?? node.code ?? node.codseccion ?? node.codsubseccion;
+    if (isEnabled && rawCode) {
+      this.enabledSections.add(String(rawCode).trim().toUpperCase());
+      this.enabledSections.add(this.normalizeAccessCode(rawCode));
+    }
+
+    const children = [
+      ...(Array.isArray(node.secciones) ? node.secciones : []),
+      ...(Array.isArray(node.subsecciones) ? node.subsecciones : []),
+      ...(Array.isArray(node.children) ? node.children : []),
+    ];
+
+    children.forEach((child: any) => this.collectEnabledCodes(child));
+  }
 
   ngOnInit(): void {
     //Fondo
@@ -115,9 +142,7 @@ export class MainSidebarComponent implements OnInit {
         this.enabledSections.clear();
         (rows || []).forEach((m: any) => {
           if (!m?.enabled) return;
-          (m?.secciones || []).forEach((s: any) => {
-            if (s?.enabled && s?.codigo) this.enabledSections.add(String(s.codigo));
-          });
+          this.collectEnabledCodes(m);
         });
         this.accessLoaded = true;
       },
@@ -130,7 +155,8 @@ export class MainSidebarComponent implements OnInit {
   canSection(code: string): boolean {
     if (this.authService.idusuario == 1) return true;
     if (!this.accessLoaded) return false;
-    return this.enabledSections.has(code);
+    return this.enabledSections.has(String(code).trim().toUpperCase())
+      || this.enabledSections.has(this.normalizeAccessCode(code));
   }
 
   canAnySection(codes: string[]): boolean {

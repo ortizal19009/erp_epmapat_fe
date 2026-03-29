@@ -37,6 +37,20 @@ export class PerfilUsuarioComponent implements OnInit {
     private s_usrxmodulos: UsrxmodulosService
   ) {}
 
+  private normalizeText(value: any): string {
+    return (value || '').toString().trim().toUpperCase();
+  }
+
+  private getModulePlatform(module: any): string {
+    return this.normalizeText(module?.platform || module?.plataform || 'WEB');
+  }
+
+  private getModuleMatchKey(module: any): string {
+    const descripcion = this.normalizeText(module?.descripcion);
+    const platform = this.getModulePlatform(module);
+    return `${descripcion}::${platform}`;
+  }
+
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/usuarios');
     let coloresJSON = sessionStorage.getItem('/usuarios');
@@ -143,53 +157,82 @@ export class PerfilUsuarioComponent implements OnInit {
   getAllErpModulos() {
     this._usrxmodulo = [];
 
+    // Primero obtener todos los módulos del ERP
     this.s_erpmodulos.getAllErpModulos().subscribe({
       next: (mods: any[]) => {
-        const catalog = (mods || []).filter((m: any) => {
-          const pf = String(m?.platform || 'BOTH').toUpperCase();
-          return pf === 'WEB' || pf === 'BOTH';
-        });
+        const catalog = mods || [];
 
-        this.s_usrxmodulos.getAccessProfile(this.idusuario, 'WEB').subscribe({
-          next: (rows: any[]) => {
+        // Obtener módulos asignados al usuario (sin filtrar por plataforma)
+        this.s_usrxmodulos.getAllModulos(this.idusuario).subscribe({
+          next: (userModules: any[]) => {
             const byId = new Map<number, any>();
-            (rows || []).forEach((r: any) => byId.set(+r.iderpmodulo, r));
+            const byKey = new Map<string, any>();
+
+            (userModules || []).forEach((r: any) => {
+              const moduleId = Number(r?.iderpmodulo);
+              if (!Number.isNaN(moduleId) && moduleId > 0) {
+                byId.set(moduleId, r);
+              }
+
+              byKey.set(this.getModuleMatchKey(r), r);
+            });
 
             this._usrxmodulo = catalog.map((m: any) => {
               const id = +m.iderpmodulo;
-              const assigned = byId.get(id);
+              const assigned = byId.get(id) || byKey.get(this.getModuleMatchKey(m));
               return {
                 iderpmodulo_erpmodulos: m,
                 enabled: !!assigned?.enabled,
                 idusuario_usuarios: this._user,
                 secciones: assigned?.secciones || [],
-                platform: 'WEB',
+                platform: m.platform || m.plataform || 'WEB',
               };
             });
           },
-          error: (e: any) => console.error(e),
+          error: (e: any) => {
+            console.error('Error obteniendo módulos del usuario:', e);
+            // Si falla, mostrar todos los módulos como deshabilitados
+            this._usrxmodulo = catalog.map((m: any) => ({
+              iderpmodulo_erpmodulos: m,
+              enabled: false,
+              idusuario_usuarios: this._user,
+              secciones: [],
+              platform: m.platform || m.plataform || 'WEB',
+            }));
+          }
         });
       },
-      error: (e: any) => console.error(e),
+      error: (e: any) => console.error('Error obteniendo módulos ERP:', e),
     });
   }
   setModuloToUser(e: any, data: any): void {
     const enabled = !!e.target.checked;
+    const previousState = data.enabled;
     data.enabled = enabled;
 
     const payload = {
       ...data,
       enabled,
-      platform: 'WEB',
+      platform: data.platform || 'WEB', // Usar la plataforma del módulo o WEB por defecto
       idusuario_usuarios: this._user,
       iderpmodulo_erpmodulos: data.iderpmodulo_erpmodulos,
     };
 
+    // Mostrar indicador de carga
+    data.saving = true;
+
     this.s_usrxmodulos.saveAccessModulos(payload).subscribe({
-      next: () => {},
+      next: () => {
+        data.saving = false;
+        console.log(`Módulo ${data.iderpmodulo_erpmodulos.descripcion} ${enabled ? 'habilitado' : 'deshabilitado'} para el usuario`);
+        // Aquí podrías mostrar un toast de éxito si tienes un servicio de notificaciones
+      },
       error: (err: any) => {
-        console.error(err);
-        data.enabled = !enabled;
+        data.saving = false;
+        console.error('Error al guardar módulo:', err);
+        data.enabled = previousState; // Revertir cambio
+        // Aquí podrías mostrar un toast de error
+        alert(`Error al ${enabled ? 'habilitar' : 'deshabilitar'} el módulo: ${err.error?.message || 'Error desconocido'}`);
       }
     });
   }
@@ -199,15 +242,22 @@ export class PerfilUsuarioComponent implements OnInit {
     const prev = !!sec.enabled;
     sec.enabled = enabled;
 
+    sec.saving = true;
+
     this.s_usrxmodulos.saveAccessSeccion({
       idusuario: this.idusuario,
       iderpseccion: +sec.iderpseccion,
       enabled,
     }).subscribe({
-      next: () => {},
+      next: () => {
+        sec.saving = false;
+        console.log(`Sección ${sec.descripcion} ${enabled ? 'habilitada' : 'deshabilitada'} para el usuario`);
+      },
       error: (err: any) => {
-        console.error(err);
-        sec.enabled = prev;
+        sec.saving = false;
+        console.error('Error al guardar sección:', err);
+        sec.enabled = prev; // Revertir cambio
+        alert(`Error al ${enabled ? 'habilitar' : 'deshabilitar'} la sección: ${err.error?.message || 'Error desconocido'}`);
       }
     });
   }
@@ -258,7 +308,7 @@ export class PerfilUsuarioComponent implements OnInit {
     this.s_erpmodulos.update(m.iderpmodulo, {
       descripcion: m.descripcion,
       platform: (m.platform || 'WEB').toUpperCase(),
-    }).subscribe({
+    }, this.idusuario).subscribe({
       next: () => {
         this.loadAllModulesCatalog();
         this.getAllErpModulos();
@@ -272,10 +322,13 @@ export class PerfilUsuarioComponent implements OnInit {
       this.sectionCatalog = [];
       return;
     }
-    this.s_usrxmodulos.getSectionCatalog(this.selectedModuleId, 'WEB').subscribe({
-      next: (rows: any[]) => this.sectionCatalog = rows || [],
-      error: (e: any) => console.error(e),
-    });
+    // Temporalmente deshabilitado hasta que se implemente el endpoint en el backend
+    console.log('Secciones no disponibles - endpoint pendiente de implementación');
+    this.sectionCatalog = [];
+    // this.s_usrxmodulos.getSectionCatalog(this.selectedModuleId, 'WEB').subscribe({
+    //   next: (rows: any[]) => this.sectionCatalog = rows || [],
+    //   error: (e: any) => console.error(e),
+    // });
   }
 
   saveNewSectionCatalog() {

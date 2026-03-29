@@ -1,3 +1,4 @@
+import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
@@ -11,8 +12,8 @@ export class UsrxmodulosService {
   getAccesoModulos(idusuario: number, plataform: string) {
     return this.http.get(`${baseUrl}/access?idusuario=${idusuario}&plataform=${plataform}`);
   }
-  getAllModulos(idusuario: number, platform: string){
-    return this.http.get(`${baseUrl}?idusuario=${idusuario}&platform=${platform}`);
+  getAllModulos(idusuario: number): Observable<any[]> {
+    return this.http.get<any[]>(`${baseUrl}?idusuario=${idusuario}`);
   }
   saveAccessModulos(usrmodulos: any) {
     return this.http.post(`${baseUrl}`, usrmodulos);
@@ -26,8 +27,9 @@ export class UsrxmodulosService {
     return this.http.post(`${apiUrl}/access/sections`, payload);
   }
 
-  getSectionCatalog(iderpmodulo: number, platform: string = 'WEB') {
-    return this.http.get<any[]>(`${apiUrl}/access/sections/catalog?iderpmodulo=${iderpmodulo}&platform=${platform}`);
+  getSectionCatalog(iderpmodulo: number, platform: string = 'WEB'): Observable<any[]> {
+    // Cambiar a usar endpoint existente hasta que se implemente el correcto
+    return this.http.get<any[]>(`${baseUrl}/sections?iderpmodulo=${iderpmodulo}&platform=${platform}`);
   }
 
   saveSectionCatalog(payload: any) {

@@ -1,26 +1,304 @@
 <div class="container-fluid mt-2 rrhh-page">
-  <div class="row m-0 px-2 py-2 mb-2 align-items-center cabecera sombra border rounded">
-    <h5 class="mb-0">Dashboard Talento Humano</h5>
-  </div>
+  <div class="row justify-content-center">
+    <div class="col-sm-12 col-md-11 col-lg-10">
 
-  <div class="row mb-3 detalle p-2 rounded">
-    <div class="col-sm-5">
-      <select class="form-control form-control-sm" [(ngModel)]="idpersonal" (change)="cargar()">
-        <option [ngValue]="0">Seleccione personal...</option>
-        <option *ngFor="let p of personalList" [ngValue]="p.idpersonal">{{p.apellidos}}, {{p.nombres}} - {{p.identificacion}}</option>
-      </select>
-    </div>
-    <div class="col-sm-2">
-      <button class="btn btn-sm btn-primary" (click)="cargar()">Actualizar</button>
-    </div>
-  </div>
+      <div class="d-flex align-items-center justify-content-between cabecera sombra border px-3 py-2 rounded flex-wrap">
+        <div class="d-flex align-items-center mb-2 mb-md-0">
+          <i class="bi bi-people-fill mr-2"></i>
+          <div>
+            <h5 class="m-0 font-weight-bold">Dashboard Talento Humano</h5>
+            <small class="op-9">Vista ejecutiva de rotacion, ausentismo, reclutamiento, nomina y bienestar</small>
+          </div>
+        </div>
 
-  <div class="row">
-    <div class="col-sm-2"><div class="small-box bg-info"><div class="inner"><h3>{{totalSolicitudes}}</h3><p>Solicitudes</p></div></div></div>
-    <div class="col-sm-2"><div class="small-box bg-warning"><div class="inner"><h3>{{solicitadas}}</h3><p>Pendientes</p></div></div></div>
-    <div class="col-sm-2"><div class="small-box bg-success"><div class="inner"><h3>{{aprobadas}}</h3><p>Aprobadas</p></div></div></div>
-    <div class="col-sm-2"><div class="small-box bg-danger"><div class="inner"><h3>{{rechazadas}}</h3><p>Rechazadas</p></div></div></div>
-    <div class="col-sm-2"><div class="small-box bg-primary"><div class="inner"><h3>{{totalAcciones}}</h3><p>Acciones TH</p></div></div></div>
-    <div class="col-sm-2"><div class="small-box bg-secondary"><div class="inner"><h3>{{saldoDisponible}}</h3><p>Saldo disponible</p></div></div></div>
+        <div class="d-flex align-items-center flex-wrap justify-content-end tools-bar">
+          <span class="badge badge-light text-dark mr-2 mb-1">TH estratégico</span>
+          <button type="button" class="btn btn-sm btn-outline-light mb-1" (click)="cargar()">
+            <i class="bi bi-arrow-clockwise"></i>&nbsp; Actualizar
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-2 sombra border rounded detalle p-3">
+        <div class="row align-items-end">
+          <div class="col-md-4 mb-2">
+            <label class="small font-weight-bold">Colaborador de referencia</label>
+            <select class="custom-select custom-select-sm" [(ngModel)]="idpersonal" (change)="cargar()">
+              <option [ngValue]="0">Todos / base general</option>
+              <option *ngFor="let p of personalList" [ngValue]="p.idpersonal">
+                {{ p.apellidos }}, {{ p.nombres }} - {{ p.identificacion }}
+              </option>
+            </select>
+          </div>
+          <div class="col-md-3 mb-2">
+            <label class="small font-weight-bold">Area</label>
+            <select class="custom-select custom-select-sm" [(ngModel)]="areaFilter" (change)="cargar()">
+              <option *ngFor="let area of areaOptions" [ngValue]="area">
+                {{ area === 'ALL' ? 'Todas las areas' : area }}
+              </option>
+            </select>
+          </div>
+          <div class="col-md-3 mb-2">
+            <label class="small font-weight-bold">Tipo de contrato</label>
+            <select class="custom-select custom-select-sm" [(ngModel)]="contractFilter" (change)="cargar()">
+              <option *ngFor="let contract of contractOptions" [ngValue]="contract">
+                {{ contract === 'ALL' ? 'Todos los contratos' : contract }}
+              </option>
+            </select>
+          </div>
+          <div class="col-md-2 mb-2">
+            <label class="small font-weight-bold">Periodo</label>
+            <select class="custom-select custom-select-sm" [(ngModel)]="periodFilter" (change)="cargar()">
+              <option *ngFor="let period of periodOptions" [ngValue]="period.value">{{ period.label }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-2 sombra border rounded detalle resumen-wrap px-3 py-3">
+        <div class="d-flex align-items-center justify-content-between flex-wrap mb-2">
+          <div>
+            <div class="small text-muted text-uppercase font-weight-bold">Panel ejecutivo</div>
+            <div class="small text-muted">Indicadores prioritarios para gerencia y jefaturas</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-6 col-lg-4 col-xl-2 mb-2" *ngFor="let card of executiveKpis">
+            <div class="summary-box h-100">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <div class="summary-label">{{ card.label }}</div>
+                  <div class="summary-value">{{ card.value }}</div>
+                  <div class="summary-help">{{ card.help }}</div>
+                </div>
+                <div class="summary-icon" [ngClass]="'tone-' + card.tone">
+                  <i [class]="card.icon"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-2">
+        <div class="col-lg-8 mb-2">
+          <div class="sombra border rounded detalle p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
+              <div>
+                <h6 class="m-0 font-weight-bold">Alertas automaticas</h6>
+                <small class="text-muted">Seguimiento de rotacion, ausentismo y clima laboral</small>
+              </div>
+              <span class="badge badge-dark mt-2 mt-lg-0">{{ alerts.length }} alertas</span>
+            </div>
+
+            <div class="alert-stack">
+              <div class="alert-card" *ngFor="let alert of alerts" [ngClass]="'alert-' + alert.tone">
+                <div class="font-weight-bold">{{ alert.title }}</div>
+                <div class="small">{{ alert.message }}</div>
+              </div>
+            </div>
+
+            <div class="row mt-3">
+              <div class="col-md-6 mb-2">
+                <div class="insight-card h-100">
+                  <div class="insight-title">Medidor de satisfaccion</div>
+                  <div class="gauge-wrap">
+                    <div class="gauge-ring">
+                      <div class="gauge-hole">
+                        <strong>{{ wellbeingMetrics[0].value || '0%' }}</strong>
+                        <small>Clima laboral</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 mb-2">
+                <div class="insight-card h-100">
+                  <div class="insight-title">Productividad por empleado</div>
+                  <div class="line-kpi">
+                    <div class="line-track">
+                      <span class="line-fill"></span>
+                    </div>
+                    <div class="line-legend">
+                      <strong>Meta operacional</strong>
+                      <small>Seguimiento sobre cargas, acciones TH y continuidad operativa</small>
+                    </div>
+                  </div>
+                  <div class="d-flex justify-content-between small text-muted mt-3">
+                    <span>Bajo</span>
+                    <span>Objetivo</span>
+                    <span>Alto</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 mb-2">
+          <div class="sombra border rounded detalle p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
+              <div>
+                <h6 class="m-0 font-weight-bold">Reclutamiento y seleccion</h6>
+                <small class="text-muted">Pipeline del proceso de contratacion</small>
+              </div>
+              <span class="badge badge-info mt-2 mt-lg-0">Hiring</span>
+            </div>
+
+            <div class="metric-list">
+              <div class="metric-item" *ngFor="let row of candidatePipeline; trackBy: trackByLabel">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <span>{{ row.label }}</span>
+                  <strong>{{ row.value }}</strong>
+                </div>
+                <div class="metric-bar"><span [style.width.%]="row.pct"></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-2">
+        <div class="col-lg-6 mb-2">
+          <div class="sombra border rounded detalle p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
+              <div>
+                <h6 class="m-0 font-weight-bold">Administracion de personal</h6>
+                <small class="text-muted">Headcount, movimientos y distribucion por area</small>
+              </div>
+              <span class="badge badge-primary mt-2 mt-lg-0">{{ filteredPersonal.length }} activos</span>
+            </div>
+
+            <div class="metric-list">
+              <div class="metric-item" *ngFor="let row of areaDistribution; trackBy: trackByLabel">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <span>{{ row.label }}</span>
+                  <strong>{{ row.value }}</strong>
+                </div>
+                <div class="metric-bar tone-info"><span [style.width.%]="row.pct"></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6 mb-2">
+          <div class="sombra border rounded detalle p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
+              <div>
+                <h6 class="m-0 font-weight-bold">Desempeno y capacitacion</h6>
+                <small class="text-muted">Avance de evaluaciones y formacion del personal</small>
+              </div>
+              <span class="badge badge-success mt-2 mt-lg-0">Learning</span>
+            </div>
+
+            <div class="metric-list">
+              <div class="metric-item" *ngFor="let row of performanceMetrics; trackBy: trackByLabel">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <span>{{ row.label }}</span>
+                  <strong>{{ row.value }}</strong>
+                </div>
+                <div class="metric-bar tone-success"><span [style.width.%]="row.pct"></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-2">
+        <div class="col-lg-6 mb-2">
+          <div class="sombra border rounded detalle p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
+              <div>
+                <h6 class="m-0 font-weight-bold">Compensacion y nomina</h6>
+                <small class="text-muted">Costo laboral, horas extra y beneficios</small>
+              </div>
+              <span class="badge badge-warning mt-2 mt-lg-0">Payroll</span>
+            </div>
+
+            <div class="metric-list">
+              <div class="metric-item" *ngFor="let row of payrollMetrics; trackBy: trackByLabel">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <span>{{ row.label }}</span>
+                  <strong>{{ row.value }}</strong>
+                </div>
+                <div class="metric-bar tone-warning"><span [style.width.%]="row.pct"></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6 mb-2">
+          <div class="sombra border rounded detalle p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
+              <div>
+                <h6 class="m-0 font-weight-bold">Clima y bienestar</h6>
+                <small class="text-muted">Satisfaccion, participacion y retencion</small>
+              </div>
+              <span class="badge badge-danger mt-2 mt-lg-0">People care</span>
+            </div>
+
+            <div class="metric-list">
+              <div class="metric-item" *ngFor="let row of wellbeingMetrics; trackBy: trackByLabel">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <span>{{ row.label }}</span>
+                  <strong>{{ row.value }}</strong>
+                </div>
+                <div class="metric-bar tone-danger"><span [style.width.%]="row.pct"></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-2 sombra border rounded detalle p-3">
+        <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
+          <div>
+            <h6 class="m-0 font-weight-bold">Indicadores operativos actuales</h6>
+            <small class="text-muted">Datos directos de solicitudes, acciones y saldos del colaborador seleccionado</small>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-6 col-lg-2 mb-2">
+            <div class="ops-box tone-info">
+              <div class="ops-label">Solicitudes</div>
+              <div class="ops-value">{{ totalSolicitudes }}</div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 mb-2">
+            <div class="ops-box tone-warning">
+              <div class="ops-label">Pendientes</div>
+              <div class="ops-value">{{ solicitadas }}</div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 mb-2">
+            <div class="ops-box tone-success">
+              <div class="ops-label">Aprobadas</div>
+              <div class="ops-value">{{ aprobadas }}</div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 mb-2">
+            <div class="ops-box tone-danger">
+              <div class="ops-label">Rechazadas</div>
+              <div class="ops-value">{{ rechazadas }}</div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 mb-2">
+            <div class="ops-box tone-primary">
+              <div class="ops-label">Acciones TH</div>
+              <div class="ops-value">{{ totalAcciones }}</div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 mb-2">
+            <div class="ops-box tone-muted">
+              <div class="ops-label">Saldo disponible</div>
+              <div class="ops-value">{{ saldoDisponible }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
 </div>

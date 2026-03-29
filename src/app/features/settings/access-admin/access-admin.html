@@ -5,6 +5,10 @@
       <span class="badge badge-info">Solo admin</span>
     </div>
 
+    <div *ngIf="!modulesWriteEnabled && modulesWriteMessage" class="alert alert-warning py-2">
+      {{ modulesWriteMessage }}
+    </div>
+
     <div class="small text-muted mb-1">Crear nuevo módulo</div>
     <div class="form-row mb-3">
       <div class="col-md-6 mb-2"><input class="form-control form-control-sm" [(ngModel)]="adminNewModulo.descripcion" placeholder="Descripción módulo"></div>
@@ -13,7 +17,7 @@
           <option value="WEB">WEB</option><option value="MOBILE">MOBILE</option><option value="BOTH">BOTH</option>
         </select>
       </div>
-      <div class="col-md-3 mb-2"><button class="btn btn-sm btn-success btn-block" (click)="saveNewModulo()">Guardar módulo</button></div>
+      <div class="col-md-3 mb-2"><button class="btn btn-sm btn-success btn-block" (click)="saveNewModulo()" [disabled]="!modulesWriteEnabled">Guardar módulo</button></div>
     </div>
 
     <div class="small text-muted mb-1">Editar módulos</div>
@@ -24,7 +28,7 @@
           <td>{{i+1}}</td>
           <td><input class="form-control form-control-sm" [(ngModel)]="m.descripcion"></td>
           <td><select class="custom-select custom-select-sm" [(ngModel)]="m.platform"><option>WEB</option><option>MOBILE</option><option>BOTH</option></select></td>
-          <td><button class="btn btn-sm btn-outline-success" (click)="saveModuloEdit(m)">Guardar</button></td>
+          <td><button class="btn btn-sm btn-outline-success" (click)="saveModuloEdit(m)" [disabled]="!modulesWriteEnabled">Guardar</button></td>
         </tr>
       </tbody>
     </table>
@@ -40,7 +44,11 @@
       <div class="col-md-6 small text-muted pt-1">Usa códigos jerárquicos para subsecciones (ej: GD_CFG.SYSTEM)</div>
     </div>
 
-    <table class="table table-sm table-bordered" *ngIf="selectedModuleId">
+    <div *ngIf="!sectionsCatalogEnabled && sectionsCatalogMessage" class="alert alert-warning py-2">
+      {{ sectionsCatalogMessage }}
+    </div>
+
+    <table class="table table-sm table-bordered" *ngIf="selectedModuleId && sectionsCatalogEnabled">
       <thead><tr><th>Código</th><th>Descripción</th><th>Ruta</th><th>Orden</th><th>Platform</th><th>Activo</th><th></th></tr></thead>
       <tbody>
         <tr *ngFor="let s of sectionCatalog">
@@ -55,7 +63,7 @@
       </tbody>
     </table>
 
-    <div class="border rounded p-2" *ngIf="selectedModuleId">
+    <div class="border rounded p-2" *ngIf="selectedModuleId && sectionsCatalogEnabled">
       <div class="small font-weight-bold mb-2">Nueva sección/subsección</div>
       <div class="form-row">
         <div class="col-sm-2 mb-1"><input class="form-control form-control-sm" placeholder="Código" [(ngModel)]="adminNewSection.codigo"></div>

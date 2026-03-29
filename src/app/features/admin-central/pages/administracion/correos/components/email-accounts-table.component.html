@@ -1,0 +1,51 @@
+<div class="table-shell">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 admin-table">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Codigo</th>
+          <th>Provider</th>
+          <th>Correo remitente</th>
+          <th>Transporte</th>
+          <th>Host / API</th>
+          <th>Activa</th>
+          <th>Por defecto</th>
+          <th>Uso</th>
+          <th class="text-right">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of rows">
+          <td>
+            <div class="cell-title">{{ row.name }}</div>
+            <div class="cell-subtitle">{{ row.fromName }}</div>
+          </td>
+          <td class="mono">{{ row.code }}</td>
+          <td>{{ row.provider }}</td>
+          <td>{{ row.fromAddress }}</td>
+          <td><app-email-status-badge [label]="row.transportType" [tone]="row.transportType === 'SMTP' ? 'info' : 'primary'"></app-email-status-badge></td>
+          <td>
+            <div class="truncate mono">{{ resolveEndpoint(row) }}</div>
+            <div class="cell-subtitle" *ngIf="row.lastConnectionCheck">Ultima prueba: {{ row.lastConnectionCheck | date:'dd/MM/yyyy HH:mm' }}</div>
+          </td>
+          <td><app-email-status-badge [label]="row.active ? 'ACTIVA' : 'INACTIVA'" [tone]="row.active ? 'success' : 'muted'"></app-email-status-badge></td>
+          <td><app-email-status-badge [label]="row.defaultAccount ? 'SI' : 'NO'" [tone]="row.defaultAccount ? 'success' : 'muted'"></app-email-status-badge></td>
+          <td>{{ row.defaultForType }}</td>
+          <td class="text-right action-cell">
+            <button type="button" class="btn btn-sm btn-action" (click)="openMenuId = openMenuId === row.id ? null : row.id"><i class="bi bi-three-dots"></i></button>
+            <div class="row-menu" *ngIf="openMenuId === row.id">
+              <button type="button" (click)="view.emit(row); openMenuId = null">Ver detalle</button>
+              <button type="button" (click)="edit.emit(row); openMenuId = null">Editar</button>
+              <button type="button" (click)="toggle.emit(row); openMenuId = null">{{ row.active ? 'Desactivar' : 'Activar' }}</button>
+              <button type="button" (click)="test.emit(row); openMenuId = null">Probar conexion</button>
+              <button type="button" (click)="makeDefault.emit(row); openMenuId = null">Marcar predeterminada</button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="rows.length === 0"><td colspan="10" class="text-center text-muted py-4">No hay cuentas de envio para los filtros aplicados.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+

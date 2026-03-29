@@ -237,6 +237,11 @@ export class LecturasService {
       `${baseUrl}/simular/v2?m3=${datos.m3}&categoria=${datos.categoria}&swMunicipio=${datos.swMunicipio}&swAdultoMayor=${datos.swAdultoMayor}&swAguapotable=${datos.swAguapotable}&swbasura=${datos.swbasura} `,
     );
   }
+  getValoresSimuladosV2_async(datos: any) {
+    return firstValueFrom(this.http.get(
+      `${baseUrl}/simular/v2?m3=${datos.m3}&categoria=${datos.categoria}&swMunicipio=${datos.swMunicipio}&swAdultoMayor=${datos.swAdultoMayor}&swAguapotable=${datos.swAguapotable}&swbasura=${datos.swbasura} `,
+    ));
+  }
   deleteRubrosEmision(idemision: any) {
     return this.http.delete(`${baseUrl}/emision?idemision=${idemision}`);
   }

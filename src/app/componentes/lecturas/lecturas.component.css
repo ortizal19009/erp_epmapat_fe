@@ -50,3 +50,39 @@ table tbody tr:hover  {
 .check{
 color:rgba(233, 146, 146, 0.548);
 }
+
+.fila-negativa {
+   background-color: #ffe3e3;
+}
+
+.fila-negativa td {
+   color: #8b0000;
+   font-weight: 600;
+}
+
+table tbody tr.fila-negativa:hover {
+   background-color: #d9534f;
+   color: white;
+}
+
+table tbody tr.fila-negativa:hover td {
+   color: white;
+}
+
+.fila-consumo-alto {
+   background-color: #fff3cd;
+}
+
+.fila-consumo-alto td {
+   color: #7a5200;
+   font-weight: 600;
+}
+
+table tbody tr.fila-consumo-alto:hover {
+   background-color: #d39e00;
+   color: white;
+}
+
+table tbody tr.fila-consumo-alto:hover td {
+   color: white;
+}

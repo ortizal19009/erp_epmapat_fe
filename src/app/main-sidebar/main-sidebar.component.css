@@ -15,6 +15,36 @@
    color: rgb(231, 214, 236);
 }
 
+.nav-sidebar .nav-link {
+   padding-top: .36rem;
+   padding-bottom: .36rem;
+}
+
+.nav-sidebar .nav-link > p {
+   font-size: .84rem;
+   line-height: 1.12rem;
+   margin-bottom: 0;
+}
+
+.nav-sidebar .nav-link .nav-icon {
+   font-size: .9rem;
+}
+
+.nav-sidebar .nav-treeview .nav-link > p {
+   font-size: .78rem;
+   line-height: 1.02rem;
+}
+
+.nav-sidebar .nav-treeview .nav-treeview .nav-link > p,
+.nav-sidebar .small.text-warning {
+   font-size: .72rem !important;
+   line-height: .96rem;
+}
+
+.nav-sidebar .badge.right {
+   font-size: .62rem;
+}
+
 /* Gestión Documental - orden visual estilo ERP */
 .gd-menu > .nav-treeview > .nav-item > .nav-link {
    padding-top: .35rem;

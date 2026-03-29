@@ -17,6 +17,10 @@ import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { nextTick } from 'process';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { EmisionService } from 'src/app/servicios/emision.service';
+import { PdfService } from 'src/app/servicios/pdf.service';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-lecturas',
@@ -68,6 +72,7 @@ export class LecturasComponent implements OnInit {
   mostrarModal: boolean = false;
   idusuario: number;
   novedades: any;
+  tieneLecturasNegativas: boolean = false;
 
   porcResidencial: number[] = [
     0.777, 0.78, 0.78, 0.78, 0.78, 0.78, 0.778, 0.778, 0.78, 0.78, 0.78, 0.68,
@@ -91,6 +96,7 @@ export class LecturasComponent implements OnInit {
     private s_novedad: NovedadesService,
     private loadingService: LoadingService,
     private emisionService: EmisionService,
+    private pdfService: PdfService,
   ) { }
 
   ngOnInit(): void {
@@ -106,6 +112,11 @@ export class LecturasComponent implements OnInit {
         this._lecturas = resp;
         this.abonados = this._lecturas.length;
         this.total();
+        const lecturasNegativas = this.getLecturasNegativas();
+        this.tieneLecturasNegativas = lecturasNegativas.length > 0;
+        if (lecturasNegativas.length > 0) {
+          void this.mostrarLecturasNegativas(lecturasNegativas);
+        }
       },
       error: (err) => console.error(err.error),
     });
@@ -267,6 +278,113 @@ export class LecturasComponent implements OnInit {
     this.router.navigate(['/impor-lecturas']);
   }
 
+  private getConsumo(lectura: any): number {
+    return Number(lectura?.lecturaactual || 0) - Number(lectura?.lecturaanterior || 0);
+  }
+
+  hasNegativeConsumption(lectura: any): boolean {
+    return this.getConsumo(lectura) < 0;
+  }
+
+  hasHighConsumptionVsAverage(lectura: any): boolean {
+    const consumo = this.getConsumo(lectura);
+    const promedio = Number(lectura?.idabonado_abonados?.promedio || 0);
+
+    if (consumo < 0 || promedio <= 0) return false;
+
+    return consumo > promedio * 2;
+  }
+
+  private getLecturasNegativas(): any[] {
+    return (this._lecturas || []).filter((lectura: any) => this.getConsumo(lectura) < 0);
+  }
+
+  private async mostrarLecturasNegativas(lecturasNegativas: any[]): Promise<void> {
+    const detalle = lecturasNegativas
+      .slice(0, 12)
+      .map((lectura: any, index: number) => {
+        const cuenta = lectura?.idabonado_abonados?.idabonado ?? 'S/N';
+        const nombre = lectura?.idabonado_abonados?.idcliente_clientes?.nombre ?? 'Sin nombre';
+        const anterior = lectura?.lecturaanterior ?? 0;
+        const actual = lectura?.lecturaactual ?? 0;
+        const consumo = this.getConsumo(lectura);
+        return `${index + 1}. Cuenta ${cuenta} - ${nombre}<br>Anterior: ${anterior} | Actual: ${actual} | Consumo: ${consumo}`;
+      })
+      .join('<br><br>');
+
+    const restantes = lecturasNegativas.length - Math.min(lecturasNegativas.length, 12);
+    const extra = restantes > 0 ? `<br><br>Y ${restantes} lectura(s) adicional(es).` : '';
+
+    const result = await Swal.fire({
+      icon: 'warning',
+      title: 'Hay lecturas con consumo negativo',
+      html: `<div style="text-align:left;max-height:280px;overflow:auto;font-size:13px;">${detalle}${extra}</div>`,
+      confirmButtonText: 'Revisar',
+      showDenyButton: true,
+      denyButtonText: 'Imprimir',
+      width: '560px',
+    });
+
+    if (result.isDenied) {
+      this.imprimirLecturasNegativas(lecturasNegativas);
+    }
+  }
+
+  private imprimirLecturasNegativas(lecturasNegativas: any[]): void {
+    const doc = new jsPDF('p', 'pt', 'a4');
+    this.pdfService.header('Lecturas con consumo negativo', doc);
+
+    const resumen = [
+      ['Emision', `${this.rutaxemision?.emision || ''}`],
+      ['Ruta', `${this.rutaxemision?.ruta || ''}`],
+      ['Codigo', `${this.rutaxemision?.codigo || ''}`],
+      ['Total cuentas', `${lecturasNegativas.length}`],
+    ];
+
+    autoTable(doc, {
+      startY: 80,
+      theme: 'grid',
+      body: resumen,
+      styles: { fontSize: 9, cellPadding: 4 },
+      columnStyles: {
+        0: { fontStyle: 'bold', cellWidth: 90 },
+        1: { cellWidth: 390 },
+      },
+    });
+
+    const body = lecturasNegativas.map((lectura: any, index: number) => {
+      const cuenta = lectura?.idabonado_abonados?.idabonado ?? 'S/N';
+      const abonado = lectura?.idabonado_abonados?.idcliente_clientes?.nombre ?? 'Sin nombre';
+      const anterior = Number(lectura?.lecturaanterior || 0);
+      const actual = Number(lectura?.lecturaactual || 0);
+      const consumo = this.getConsumo(lectura);
+
+      return [index + 1, cuenta, abonado, anterior, actual, consumo];
+    });
+
+    autoTable(doc, {
+      startY: (doc as any).lastAutoTable.finalY + 12,
+      theme: 'grid',
+      head: [['#', 'Cuenta', 'Abonado', 'Anterior', 'Actual', 'M3']],
+      body,
+      styles: { fontSize: 8, cellPadding: 3 },
+      headStyles: { halign: 'center' },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 28 },
+        1: { halign: 'center', cellWidth: 55 },
+        2: { cellWidth: 210 },
+        3: { halign: 'right', cellWidth: 60 },
+        4: { halign: 'right', cellWidth: 60 },
+        5: { halign: 'right', cellWidth: 50 },
+      },
+    });
+
+    this.pdfService.setfooter(doc);
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+  }
+
   regresar() {
     this.router.navigate(['/emisiones']);
   }
@@ -331,6 +449,20 @@ export class LecturasComponent implements OnInit {
   }
 
   actuValor() {
+    const lecturaAnterior = Number(this.formValor.value.lecturaanterior || 0);
+    const lecturaActual = Number(this.formValor.value.lecturaactual || 0);
+    const consumo = lecturaActual - lecturaAnterior;
+
+    if (lecturaAnterior < 0 || lecturaActual < 0 || consumo < 0) {
+      void Swal.fire({
+        icon: 'warning',
+        title: 'Lectura no válida',
+        html: `La cuenta ${this.cuenta} tiene valores inválidos.<br>Anterior: ${lecturaAnterior} | Actual: ${lecturaActual} | Consumo: ${consumo}`,
+        confirmButtonText: 'Entendido',
+      });
+      return;
+    }
+
     this.datosLectura.lecturaanterior = this.formValor.value.lecturaanterior;
     this.datosLectura.lecturaactual = this.formValor.value.lecturaactual;
     this.datosLectura.idnovedad_novedades =
@@ -345,6 +477,7 @@ export class LecturasComponent implements OnInit {
           this.formValor.value.idnovedad_novedades;
 
         this.total();
+        this.tieneLecturasNegativas = this.getLecturasNegativas().length > 0;
       },
       error: (err) => console.error(err.error),
     });
@@ -475,6 +608,12 @@ export class LecturasComponent implements OnInit {
 
   //Calcula los valores a recaudar
   async calcular() {
+    const lecturasNegativas = this.getLecturasNegativas();
+    if (lecturasNegativas.length > 0) {
+      await this.mostrarLecturasNegativas(lecturasNegativas);
+      return;
+    }
+
     this.totalcalc = 0;
     for (let i = 0; i < this._lecturas.length; i++) {
       let categoria =
@@ -489,10 +628,12 @@ export class LecturasComponent implements OnInit {
         swMunicipio: municipio,
         swAdultoMayor: adultomayor,
         swAguapotable: this._lecturas[i].idabonado_abonados.swalcantarillado,
+        swbasura: this._lecturas[i].idabonado_abonados.swbasura,
+
       };
 
       let suma = 0;
-      let calculos: any = await this.lecService.getValoresSimulados_asyc(body);
+      let calculos: any = this.lecService.getValoresSimuladosV2(body);
       suma = calculos.Total;
       this.totalcalc = suma;
       this._lecturas[i].total1 = suma;
@@ -520,6 +661,12 @@ export class LecturasComponent implements OnInit {
 
   //Genera Planillas (Tabla Facturas)
   generar() {
+    const lecturasNegativas = this.getLecturasNegativas();
+    if (lecturasNegativas.length > 0) {
+      void this.mostrarLecturasNegativas(lecturasNegativas);
+      return;
+    }
+
     this.disabled = true;
     this.modulo = new Modulos();
     this.modulo.idmodulo = 4;

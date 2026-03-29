@@ -1,0 +1,98 @@
+<div class="container-fluid mt-2 rrhh-section-page">
+  <div class="row justify-content-center">
+    <div class="col-sm-12 col-md-11 col-lg-10">
+      <div class="d-flex align-items-center justify-content-between cabecera sombra border px-3 py-2 rounded flex-wrap">
+        <div class="d-flex align-items-center mb-2 mb-md-0">
+          <i [class]="pageIcon + ' mr-2'"></i>
+          <div>
+            <h5 class="m-0 font-weight-bold">{{ title }}</h5>
+            <small class="op-9">{{ subtitle }}</small>
+          </div>
+        </div>
+        <span class="badge badge-light text-dark mb-1">{{ sectionName }}</span>
+      </div>
+
+      <div class="mt-2 sombra border rounded detalle resumen-wrap px-3 py-3">
+        <div class="row">
+          <div class="col-sm-6 col-lg-3 mb-2" *ngFor="let card of summaryCards; trackBy: trackByLabel">
+            <div class="summary-box h-100">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <div class="summary-label">{{ card.label }}</div>
+                  <div class="summary-value">{{ card.value }}</div>
+                  <div class="summary-help">{{ card.help }}</div>
+                </div>
+                <div class="summary-icon" [ngClass]="'tone-' + card.tone">
+                  <i [class]="card.icon"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-2">
+        <div class="col-lg-8 mb-2">
+          <div class="sombra border rounded detalle p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
+              <div>
+                <h6 class="m-0 font-weight-bold">{{ tableTitle }}</h6>
+                <small class="text-muted">{{ tableSubtitle }}</small>
+              </div>
+            </div>
+
+            <div class="row mb-2" *ngIf="filters.length">
+              <div class="col-md-4 mb-2" *ngFor="let filter of filters; trackBy: trackByLabel">
+                <label class="small font-weight-bold">{{ filter.label }}</label>
+                <select class="custom-select custom-select-sm" [(ngModel)]="filter.value">
+                  <option *ngFor="let option of filter.options" [ngValue]="option.value">{{ option.label }}</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="table-responsive mb-0">
+              <table class="table table-sm table-hover mb-0 admin-table">
+                <thead>
+                  <tr>
+                    <th *ngFor="let column of tableColumns">{{ column.label }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let row of tableRows">
+                    <td *ngFor="let column of tableColumns">{{ cell(row, column.key) }}</td>
+                  </tr>
+                  <tr *ngIf="!tableRows.length">
+                    <td [attr.colspan]="tableColumns.length" class="text-center py-4 text-muted">
+                      Sin registros disponibles para esta sección.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 mb-2">
+          <div class="sombra border rounded detalle p-3 h-100">
+            <div class="font-weight-bold mb-2">{{ highlightTitle }}</div>
+
+            <div class="alert-stack" *ngIf="alerts.length">
+              <div class="alert-card" *ngFor="let alert of alerts" [ngClass]="'alert-' + alert.tone">
+                <div class="font-weight-bold">{{ alert.title }}</div>
+                <div class="small">{{ alert.message }}</div>
+              </div>
+            </div>
+
+            <div class="highlight-list mt-3">
+              <div class="highlight-item" *ngFor="let item of highlights; trackBy: trackByLabel">
+                <div class="highlight-title">{{ item.title }}</div>
+                <div class="highlight-value">{{ item.value }}</div>
+                <div class="highlight-help">{{ item.help }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

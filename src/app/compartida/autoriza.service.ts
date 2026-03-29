@@ -25,7 +25,7 @@ export class AutorizaService implements OnDestroy, CanActivate {
   perfil: string;
   msgval: boolean = true;
   modules: any;
-  anio: number = 2025;
+  anio: number = 2025
   private intervalId: any;
 
   ngOnDestroy(): void {
@@ -34,7 +34,7 @@ export class AutorizaService implements OnDestroy, CanActivate {
     }
   }
 
-  constructor(private router: Router, private defService: DefinirService) { }
+  constructor(private router: Router,private defService: DefinirService) { }
 
   public enabModulos(): void {
     if (!this.sessionlog) {
@@ -97,7 +97,6 @@ export class AutorizaService implements OnDestroy, CanActivate {
       return false;
     }
   }
-
   formatearFecha(fecha: Date): string {
     const anio = fecha.getFullYear();
     const mes = String(fecha.getMonth() + 1).padStart(2, '0');
@@ -204,6 +203,7 @@ export class AutorizaService implements OnDestroy, CanActivate {
   }
 
 }
+
 export interface DatosEmpresa {
   empresa?: String;
   ruc: string;

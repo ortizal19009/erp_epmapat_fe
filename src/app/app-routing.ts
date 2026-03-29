@@ -267,6 +267,20 @@ import { ThLeaveComponent } from './componentes/rrhh/th-leave/th-leave.component
 import { ThFilesComponent } from './componentes/rrhh/th-files/th-files.component';
 import { ThAuditComponent } from './componentes/rrhh/th-audit/th-audit.component';
 import { ThDashboardComponent } from './componentes/rrhh/th-dashboard/th-dashboard.component';
+import { ThVacanciesComponent } from './componentes/rrhh/th-vacancies/th-vacancies.component';
+import { ThCandidatesComponent } from './componentes/rrhh/th-candidates/th-candidates.component';
+import { ThInterviewsComponent } from './componentes/rrhh/th-interviews/th-interviews.component';
+import { ThOnboardingComponent } from './componentes/rrhh/th-onboarding/th-onboarding.component';
+import { ThTrainingComponent } from './componentes/rrhh/th-training/th-training.component';
+import { ThPerformanceComponent } from './componentes/rrhh/th-performance/th-performance.component';
+import { ThCareerComponent } from './componentes/rrhh/th-career/th-career.component';
+import { ThMentoringComponent } from './componentes/rrhh/th-mentoring/th-mentoring.component';
+import { ThPayrollComponent } from './componentes/rrhh/th-payroll/th-payroll.component';
+import { ThBenefitsComponent } from './componentes/rrhh/th-benefits/th-benefits.component';
+import { ThIncentivesComponent } from './componentes/rrhh/th-incentives/th-incentives.component';
+import { ThClimateComponent } from './componentes/rrhh/th-climate/th-climate.component';
+import { ThWellbeingComponent } from './componentes/rrhh/th-wellbeing/th-wellbeing.component';
+import { ThConflictsComponent } from './componentes/rrhh/th-conflicts/th-conflicts.component';
 import { RemisionComponent } from './componentes/coactivas/remision/remision.component';
 import { AddRemisionComponent } from './componentes/coactivas/remision/add-remision/add-remision.component';
 import { DetallePlanillaComponent } from './componentes/facturas/detalle-planilla/detalle-planilla.component';
@@ -1289,6 +1303,20 @@ const routes: Routes = [
   { path: 'th-files', component: ThFilesComponent, canActivate: [AuthGuard] },
   { path: 'th-audit', component: ThAuditComponent, canActivate: [AuthGuard] },
   { path: 'th-dashboard', component: ThDashboardComponent, canActivate: [AuthGuard] },
+  { path: 'th-vacancies', component: ThVacanciesComponent, canActivate: [AuthGuard] },
+  { path: 'th-candidates', component: ThCandidatesComponent, canActivate: [AuthGuard] },
+  { path: 'th-interviews', component: ThInterviewsComponent, canActivate: [AuthGuard] },
+  { path: 'th-onboarding', component: ThOnboardingComponent, canActivate: [AuthGuard] },
+  { path: 'th-training', component: ThTrainingComponent, canActivate: [AuthGuard] },
+  { path: 'th-performance', component: ThPerformanceComponent, canActivate: [AuthGuard] },
+  { path: 'th-career', component: ThCareerComponent, canActivate: [AuthGuard] },
+  { path: 'th-mentoring', component: ThMentoringComponent, canActivate: [AuthGuard] },
+  { path: 'th-payroll', component: ThPayrollComponent, canActivate: [AuthGuard] },
+  { path: 'th-benefits', component: ThBenefitsComponent, canActivate: [AuthGuard] },
+  { path: 'th-incentives', component: ThIncentivesComponent, canActivate: [AuthGuard] },
+  { path: 'th-climate', component: ThClimateComponent, canActivate: [AuthGuard] },
+  { path: 'th-wellbeing', component: ThWellbeingComponent, canActivate: [AuthGuard] },
+  { path: 'th-conflicts', component: ThConflictsComponent, canActivate: [AuthGuard] },
 
   {
     path: 'add-personal',
@@ -1364,6 +1392,11 @@ const routes: Routes = [
     loadComponent: () => import('./features/settings/access-admin/access-admin').then(m => m.AccessAdminComponent),
     canActivate: [AuthGuard],
   },
+  {
+    path: 'admin/correos',
+    loadComponent: () => import('./features/admin-central/pages/administracion/correos/email-admin.component').then(m => m.EmailAdminComponent),
+    canActivate: [AuthGuard],
+  },
 
   /* COACTIVAS */
   { path: 'cv-rubros', component: CvRubrosComponent, canActivate: [AuthGuard] },
@@ -1418,6 +1451,7 @@ const routes: Routes = [
   exports: [RouterModule],
 })
 export class AppRoutingModule {}
+
 
 
 

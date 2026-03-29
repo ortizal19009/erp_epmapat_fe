@@ -57,7 +57,7 @@
             <i class="bi-droplet-half nav-icon" style="font-size: 15px;"></i>
             <p> Consumo Agua
               <i class="fas fa-angle-right right"></i>
-              <span class="badge badge-warning right">6</span>
+              <span class="badge badge-warning right">7</span>
             </p>
           </a>
           <ul class="nav nav-treeview">
@@ -223,7 +223,7 @@
             <i class="bi-badge-tm-fill nav-icon" style="font-size: 15px; "></i>
             <p> Trámites
               <i class="fas fa-angle-right right"></i>
-              <span class="badge badge-warning right">6</span>
+              <span class="badge badge-warning right">7</span>
             </p>
           </a>
           <ul class="nav nav-treeview">
@@ -259,7 +259,7 @@
             <i class="bi-archive-fill nav-icon" style="font-size: 15px;"></i>
             <p> Recaudación
               <i class="fas fa-angle-right right"></i>
-              <span class="badge badge-warning right">6</span>
+              <span class="badge badge-warning right">7</span>
             </p>
           </a>
           <ul class="nav nav-treeview">
@@ -317,7 +317,7 @@
             <i class="bi-wallet-fill nav-icon" style="font-size: 15px;"></i>
             <p> Catálogos
               <i class="fas fa-angle-right right"></i>
-              <span class="badge badge-warning right">6</span>
+              <span class="badge badge-warning right">7</span>
             </p>
           </a>
           <ul class="nav nav-treeview">
@@ -390,7 +390,7 @@
             <i class="bi-app-indicator nav-icon text-warning"></i>
             <p> Contabilidad
               <i class="fas fa-angle-right right"></i>
-              <span class="badge badge-warning right">6</span>
+              <span class="badge badge-warning right">7</span>
             </p>
           </a>
           <ul class="nav nav-treeview">
@@ -492,7 +492,7 @@
             <i class="bi-table nav-icon text-warning"></i>
             <p> Presupuesto
               <i class="fas fa-angle-right right"></i>
-              <span class="badge badge-warning right">6</span>
+              <span class="badge badge-warning right">7</span>
             </p>
           </a>
           <ul class="nav nav-treeview">
@@ -563,7 +563,7 @@
             <i class="bi-card-list nav-icon text-warning"></i>
             <p> Info financiera
               <i class="fas fa-angle-right right"></i>
-              <span class="badge badge-warning right">6</span>
+              <span class="badge badge-warning right">7</span>
             </p>
           </a>
           <ul class="nav nav-treeview">
@@ -610,7 +610,7 @@
             <i class="fa fa-shopping-basket nav-icon text-warning"></i>
             <p> Catálogos
               <i class="fas fa-angle-right right"></i>
-              <span class="badge badge-warning right">6</span>
+              <span class="badge badge-warning right">7</span>
             </p>
           </a>
           <ul class="nav nav-treeview">
@@ -631,53 +631,209 @@
         <!-- =============== RRHH ==================== -->
         <li *ngIf="authService.modulo == 5" class="nav-item">
           <a href="#" class="nav-link bg-info">
-            <i class="bi bi-person-lines-fill"></i>
-            <p> Admin Personal
+            <i class="bi bi-speedometer2 nav-icon"></i>
+            <p> Dashboard TH
               <i class="fas fa-angle-right right"></i>
-              <span class="badge badge-warning right">8</span>
+              <span class="badge badge-warning right">1</span>
             </p>
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
               <a routerLink="/th-dashboard" class="nav-link">
                 <i class="bi bi-speedometer2 nav-icon"></i>
-                <p class="text-warning"> Dashboard TH</p>
+                <p class="text-warning">Resumen ejecutivo</p>
               </a>
             </li>
+          </ul>
+        </li>
+        <li *ngIf="authService.modulo == 5" class="nav-item">
+          <a href="#" class="nav-link bg-info">
+            <i class="bi bi-people nav-icon"></i>
+            <p> Administración de Personal
+              <i class="fas fa-angle-right right"></i>
+              <span class="badge badge-warning right">4</span>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
             <li class="nav-item">
               <a routerLink="/personal" class="nav-link">
-                <i class="fa fa-users" aria-hidden="true"></i>
-                <p class="text-warning"> Personal</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a routerLink="/th-actions" class="nav-link">
-                <i class="bi bi-journal-check nav-icon"></i>
-                <p class="text-warning"> Acciones TH</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a routerLink="/th-files" class="nav-link">
-                <i class="bi bi-folder2-open nav-icon"></i>
-                <p class="text-warning"> Expediente digital</p>
+                <i class="fa fa-users nav-icon" aria-hidden="true"></i>
+                <p class="text-warning">Listado de empleados</p>
               </a>
             </li>
             <li class="nav-item">
               <a routerLink="/th-leave" class="nav-link">
                 <i class="bi bi-calendar2-check nav-icon"></i>
-                <p class="text-warning"> Vacaciones y permisos</p>
+                <p class="text-warning">Horarios, turnos y vacaciones</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a routerLink="/th-files" class="nav-link">
+                <i class="bi bi-folder2-open nav-icon"></i>
+                <p class="text-warning">Hojas de vida y expedientes</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a routerLink="/th-actions" class="nav-link">
+                <i class="bi bi-journal-check nav-icon"></i>
+                <p class="text-warning">Documentación legal y acciones</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li *ngIf="authService.modulo == 5" class="nav-item">
+          <a href="#" class="nav-link bg-info">
+            <i class="bi bi-person-workspace nav-icon"></i>
+            <p> Reclutamiento y Selección
+              <i class="fas fa-angle-right right"></i>
+              <span class="badge badge-warning right">4</span>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a routerLink="/th-vacancies" class="nav-link">
+                <i class="bi bi-megaphone nav-icon"></i>
+                <p class="text-warning">Vacantes</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a routerLink="/th-candidates" class="nav-link">
+                <i class="bi bi-funnel nav-icon"></i>
+                <p class="text-warning">Candidatos y filtros</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a routerLink="/th-interviews" class="nav-link">
+                <i class="bi bi-ui-checks-grid nav-icon"></i>
+                <p class="text-warning">Entrevistas y pruebas</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a routerLink="/th-onboarding" class="nav-link">
+                <i class="bi bi-box-arrow-in-right nav-icon"></i>
+                <p class="text-warning">Onboarding e inducción</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li *ngIf="authService.modulo == 5" class="nav-item">
+          <a href="#" class="nav-link bg-info">
+            <i class="bi bi-mortarboard nav-icon"></i>
+            <p> Desarrollo y Capacitación
+              <i class="fas fa-angle-right right"></i>
+              <span class="badge badge-warning right">4</span>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a routerLink="/th-training" class="nav-link">
+                <i class="bi bi-journal-bookmark nav-icon"></i>
+                <p class="text-warning">Planes de formación</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a routerLink="/th-performance" class="nav-link">
+                <i class="bi bi-clipboard-data nav-icon"></i>
+                <p class="text-warning">Evaluación de desempeño</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a routerLink="/th-career" class="nav-link">
+                <i class="bi bi-signpost-2 nav-icon"></i>
+                <p class="text-warning">Carrera y sucesión</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a routerLink="/th-mentoring" class="nav-link">
+                <i class="bi bi-chat-heart nav-icon"></i>
+                <p class="text-warning">Mentoría y coaching</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li *ngIf="authService.modulo == 5" class="nav-item">
+          <a href="#" class="nav-link bg-info">
+            <i class="bi bi-cash-coin nav-icon"></i>
+            <p> Compensación y Beneficios
+              <i class="fas fa-angle-right right"></i>
+              <span class="badge badge-warning right">3</span>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a routerLink="/th-payroll" class="nav-link">
+                <i class="bi bi-receipt nav-icon"></i>
+                <p class="text-warning">Nómina</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a routerLink="/th-benefits" class="nav-link">
+                <i class="bi bi-heart-pulse nav-icon"></i>
+                <p class="text-warning">Beneficios sociales</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a routerLink="/th-incentives" class="nav-link">
+                <i class="bi bi-award nav-icon"></i>
+                <p class="text-warning">Incentivos y reconocimientos</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li *ngIf="authService.modulo == 5" class="nav-item">
+          <a href="#" class="nav-link bg-info">
+            <i class="bi bi-heart nav-icon"></i>
+            <p> Bienestar y Cultura
+              <i class="fas fa-angle-right right"></i>
+              <span class="badge badge-warning right">3</span>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a routerLink="/th-climate" class="nav-link">
+                <i class="bi bi-bar-chart-line nav-icon"></i>
+                <p class="text-warning">Clima laboral y encuestas</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a routerLink="/th-wellbeing" class="nav-link">
+                <i class="bi bi-universal-access nav-icon"></i>
+                <p class="text-warning">Programas de bienestar</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a routerLink="/th-conflicts" class="nav-link">
+                <i class="bi bi-people-fill nav-icon"></i>
+                <p class="text-warning">Conflictos y mediación</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li *ngIf="authService.modulo == 5" class="nav-item">
+          <a href="#" class="nav-link bg-info">
+            <i class="bi bi-shield-check nav-icon"></i>
+            <p> Cumplimiento y Normativa
+              <i class="fas fa-angle-right right"></i>
+              <span class="badge badge-warning right">3</span>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a routerLink="/th-audit" class="nav-link">
+                <i class="bi bi-clipboard-check nav-icon"></i>
+                <p class="text-warning">Auditorías y reportes legales</p>
               </a>
             </li>
             <li class="nav-item">
               <a routerLink="/tthh/entidades" class="nav-link">
                 <i class="bi bi-building nav-icon"></i>
-                <p class="text-warning"> Entidades</p>
+                <p class="text-warning">Políticas / entidades</p>
               </a>
             </li>
             <li class="nav-item">
               <a routerLink="/tthh/dependencias" class="nav-link">
                 <i class="bi bi-diagram-2 nav-icon"></i>
-                <p class="text-warning"> Dependencias</p>
+                <p class="text-warning">Estructura y dependencias</p>
               </a>
             </li>
           </ul>
@@ -689,7 +845,7 @@
             <i class="bi-gear nav-icon"></i>
             <p> Carteras Vencidas
               <i class="fas fa-angle-right right"></i>
-              <span class="badge badge-warning right">6</span>
+              <span class="badge badge-warning right">7</span>
             </p>
           </a>
           <ul class="nav nav-treeview">
@@ -719,7 +875,7 @@
             <i class="bi bi-stars"></i>
             <p> Remisión I/M/R
               <i class="fas fa-angle-right right"></i>
-              <span class="badge badge-warning right">6</span>
+              <span class="badge badge-warning right">7</span>
             </p>
           </a>
           <ul class="nav nav-treeview">
@@ -733,12 +889,14 @@
           </ul>
         </li>
         <!-- =============== ADMINISTRACION CENTRAL ==================== -->
-        <li *ngIf="authService.modulo == 7 && canAnySection(['AC_UTIL_DOCS','AC_UTIL_USUARIOS','AC_UTIL_REPORTES','AC_UTIL_ACCESS','AC_UTIL_SWAGGER'])" class="nav-item">
+        <li
+          *ngIf="authService.modulo == 7 && canAnySection(['AC_UTIL_DOCS','AC_UTIL_USUARIOS','AC_UTIL_REPORTES','AC_UTIL_ACCESS','AC_UTIL_SWAGGER','AC_UTIL_CORREOS'])"
+          class="nav-item">
           <a href="#" class="nav-link bg-info" [ngClass]="{'disabled': !isOptionEnabled(5, 220)}">
             <i class="bi-gear nav-icon"></i>
             <p> Utilería
               <i class="fas fa-angle-right right"></i>
-              <span class="badge badge-warning right">6</span>
+              <span class="badge badge-warning right">7</span>
             </p>
           </a>
           <ul class="nav nav-treeview">
@@ -762,7 +920,8 @@
               </a>
             </li>
             <li class="nav-item" *ngIf="canSection('AC_UTIL_SWAGGER') || authService.idusuario == 1">
-              <a routerLink="/admin/swagger-microservicios" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(5, 221)}">
+              <a routerLink="/admin/swagger-microservicios" class="nav-link"
+                [ngClass]="{'disabled': !isOptionEnabled(5, 221)}">
                 <i class="bi bi-journal-code nav-icon"></i>
                 <p class="text-warning">Swagger Microservicios</p>
               </a>
@@ -773,13 +932,21 @@
                 <p class="text-warning">Accesos y permisos</p>
               </a>
             </li>
+            <li class="nav-item" *ngIf="canSection('AC_UTIL_CORREOS') || authService.idusuario == 1">
+              <a routerLink="/admin/correos" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(5, 221)}">
+                <i class="fa fa-envelope-o" aria-hidden="true"> </i>
+                <p class="text-warning">Administracion de Correos</p>
+              </a>
+            </li>
 
           </ul>
         </li>
 
-        <li *ngIf="authService.modulo == 12 && canAnySection(['GD_DASHBOARD','GD_DOCUMENTOS','GD_INBOX','GD_ALERTS','GD_EXPEDIENTES','GD_CFG_SYSTEM','GD_CFG_CCD','GD_CFG_TRD','GD_CFG_TIPOS','GD_PERFIL'])" class="nav-item gd-menu">
+        <li
+          *ngIf="authService.modulo == 8 && canAnySection(['GD_DASHBOARD','GD_DOCUMENTOS','GD_INBOX','GD_ALERTS','GD_EXPEDIENTES','GD_CFG_SYSTEM','GD_CFG_CCD','GD_CFG_TRD','GD_CFG_TIPOS','GD_PERFIL'])"
+          class="nav-item gd-menu">
           <a href="#" class="nav-link bg-info">
-            <i class="bi bi-folder2-open nav-icon" style="font-size: 15px;"></i>
+            <i class="bi bi-folder2-open nav-icon" style="font-size: 15px;"> </i>
             <p> Gestión Documental
               <i class="fas fa-angle-right right"></i>
               <span class="badge badge-warning right">5</span>
@@ -908,12 +1075,3 @@
   </div>
   <!-- /.sidebar -->
 </aside>
-
-
-
-
-
-
-
-
-

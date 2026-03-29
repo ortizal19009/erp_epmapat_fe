@@ -1,0 +1,35 @@
+<div class="table-shell">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 admin-table">
+      <thead>
+        <tr>
+          <th>Valor bloqueado</th>
+          <th>Tipo</th>
+          <th>Motivo</th>
+          <th>Activo</th>
+          <th>Fecha creacion</th>
+          <th class="text-right">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of rows">
+          <td class="mono">{{ row.value }}</td>
+          <td>{{ row.type }}</td>
+          <td>{{ row.reason }}</td>
+          <td><app-email-status-badge [label]="row.active ? 'ACTIVO' : 'INACTIVO'" [tone]="row.active ? 'danger' : 'muted'"></app-email-status-badge></td>
+          <td>{{ row.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td class="text-right action-cell">
+            <button type="button" class="btn btn-sm btn-action" (click)="openMenuId = openMenuId === row.id ? null : row.id"><i class="bi bi-three-dots"></i></button>
+            <div class="row-menu" *ngIf="openMenuId === row.id">
+              <button type="button" (click)="edit.emit(row); openMenuId = null">Editar</button>
+              <button type="button" (click)="toggle.emit(row); openMenuId = null">{{ row.active ? 'Desactivar' : 'Activar' }}</button>
+              <button type="button" class="text-danger" (click)="remove.emit(row); openMenuId = null">Eliminar</button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="rows.length === 0"><td colspan="6" class="text-center text-muted py-4">No existen registros en la lista negra con este filtro.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+

@@ -46,3 +46,36 @@
 .fondoDefinir {
    background-color: #434b4b;
 }
+
+.current-module {
+   flex-direction: column;
+   align-items: flex-start;
+   justify-content: center;
+   margin-left: 1rem;
+   padding: .15rem .85rem;
+   border-left: 1px solid rgba(255, 255, 255, .18);
+}
+
+.current-module__label {
+   font-size: .68rem;
+   line-height: 1;
+   text-transform: uppercase;
+   letter-spacing: .08em;
+   color: rgba(255, 255, 255, .65);
+}
+
+.current-module__title {
+   font-size: 1.05rem;
+   line-height: 1.1;
+   font-weight: 700;
+   color: #fff;
+}
+
+.current-module-mobile {
+   max-width: 180px;
+   overflow: hidden;
+   text-overflow: ellipsis;
+   white-space: nowrap;
+   font-size: .85rem;
+   font-weight: 600;
+}

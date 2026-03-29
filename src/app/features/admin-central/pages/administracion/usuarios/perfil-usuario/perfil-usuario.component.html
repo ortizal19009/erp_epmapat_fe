@@ -102,22 +102,26 @@
         <table class="table table-sm table-hover table-bordered sombra">
           <thead class="cabecera">
             <tr>
-              <th></th>
+              <th>N°</th>
               <th>Descripción</th>
+              <th>Plataforma</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             <ng-container *ngFor="let modulo of _usrxmodulo; let i = index">
               <tr>
-                <td>{{i+1}}</td>
-                <td class="font-weight-bold">{{modulo.iderpmodulo_erpmodulos.descripcion}}</td>
-                <td>
+                <td class="font-weight-bold">{{i+1}}</td>
+                <td>{{modulo.iderpmodulo_erpmodulos.descripcion}}</td>
+                <td class="text-center">{{modulo.iderpmodulo_erpmodulos.platform}}</td>
+
+                <td class="text-center">
                   <div class="input-group mb-1">
                     <div class="input-group-prepend">
                       <div class="input-group-text">
-                        <input type="checkbox" [checked]="modulo.enabled" (click)="setModuloToUser($event, modulo)"
-                          aria-label="Checkbox for following text input">
+                        <input type="checkbox" [checked]="modulo.enabled" (change)="setModuloToUser($event, modulo)"
+                          [disabled]="modulo.saving" aria-label="Checkbox for following text input">
+                        <i *ngIf="modulo.saving" class="fas fa-spinner fa-spin ml-1 text-primary"></i>
                       </div>
                     </div>
                   </div>
@@ -132,7 +136,8 @@
                     <div class="input-group-prepend">
                       <div class="input-group-text">
                         <input type="checkbox" [checked]="sec.enabled" (change)="setSectionToUser($event, sec)"
-                          aria-label="Checkbox for section">
+                          [disabled]="sec.saving" aria-label="Checkbox for section">
+                        <i *ngIf="sec.saving" class="fas fa-spinner fa-spin ml-1 text-primary"></i>
                       </div>
                     </div>
                   </div>

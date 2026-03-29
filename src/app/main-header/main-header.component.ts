@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+﻿import { Component, HostListener, OnInit } from '@angular/core';
 import { MainFooterComponent } from '../main-footer/main-footer.component';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { AutorizaService } from '../compartida/autoriza.service';
@@ -52,7 +52,7 @@ export class MainHeaderComponent implements OnInit {
 
     // console.log('Esta en ngOnInit() de header')
     this.authService.valsession();
-
+    this.syncModuleName();
 
     this.formDefinir = this.fb.group({
       fdesde: '',
@@ -65,15 +65,40 @@ export class MainHeaderComponent implements OnInit {
       .findByPlatform('WEB')
       .then((data: any[]) => {
         this.modulos = data.map((i) => i.descripcion);
-        this.authService.nomodulo =
-          this.modulos[this.authService.moduActual - 1]; //No hay modulos
         if (this.authService.sessionlog) this.authService.enabModulos();
         else this.enabled = [false, false, false, false, false, false, false];
+        this.syncModuleName();
         this.startInterval();
       })
       .catch((e) => console.error(e));
   }
 
+
+  private getModuleId(module: any, index: number): number {
+    return +(
+      module?.iderpmodulo ??
+      module?.idmodulo ??
+      module?.modulo ??
+      module?.id ??
+      (index + 1)
+    );
+  }
+
+  private syncModuleName(): void {
+    if (!Array.isArray(this.modules) || !this.modules.length) return;
+    const current = this.modules.find((m: any, index: number) => this.getModuleId(m, index) === this.authService.moduActual);
+    if (current?.descripcion) {
+      this.authService.nomodulo = current.descripcion;
+    }
+  }
+
+  selectModule(module: any, index: number): void {
+    const moduleId = this.getModuleId(module, index);
+    this.authService.selecModulo(moduleId);
+    if (module?.descripcion) {
+      this.authService.nomodulo = module.descripcion;
+    }
+  }
   private intervalId: any;
 
   private startInterval(): void {
@@ -147,3 +172,4 @@ export class MainHeaderComponent implements OnInit {
     });
   }
 }
+

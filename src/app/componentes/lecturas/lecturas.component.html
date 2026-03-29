@@ -30,7 +30,9 @@
    <!--        <button class="dropdown-item" *ngIf="idusuario===1" type="button" (click) = "calcularMultaBasura()"><i class="bi-calculator"></i>
             <span>&nbsp; Calcular Multa basura</span></button> -->
           <button class="dropdown-item" type="button" (click)="mostrarModal = true" data-toggle="modal"
-            data-target="#modalCerrar" [ngClass]="{'disabled' : rutaxemision.estado == 1}">
+            data-target="#modalCerrar"
+            [ngClass]="{'disabled' : rutaxemision.estado == 1 || tieneLecturasNegativas}"
+            [disabled]="rutaxemision.estado == 1 || tieneLecturasNegativas">
             <i class="bi bi-door-closed"></i>&nbsp; Cerrar emisión ruta</button>
           <button class="dropdown-item" type="button" (click)="imprimir()">
             <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
@@ -71,9 +73,11 @@
           </tr>
         </thead>
         <tbody class="detalle">
-          <tr *ngFor="let lectura of _lecturas | filter: filtro; let i=index" class="fila">
+          <tr *ngFor="let lectura of _lecturas | filter: filtro; let i=index" class="fila"
+            [ngClass]="{'fila-negativa': hasNegativeConsumption(lectura), 'fila-consumo-alto': !hasNegativeConsumption(lectura) && hasHighConsumptionVsAverage(lectura)}">
             <td class="small text-center font-weight-bold"><i class="bi-bookmark-check-fill check"
-                *ngIf="i == antIndice"></i>{{i+1}}</td>
+                *ngIf="i == antIndice"></i><i class="bi bi-exclamation-triangle-fill text-warning mr-1"
+                *ngIf="!hasNegativeConsumption(lectura) && hasHighConsumptionVsAverage(lectura)"></i>{{i+1}}</td>
             <td class="text-center">{{ lectura.idabonado_abonados.idabonado }}</td>
             <td class="description">{{ lectura.idabonado_abonados.idcliente_clientes.nombre }}</td>
             <td class="">{{ lectura.idabonado_abonados.idcategoria_categorias.descripcion }}</td>

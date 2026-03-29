@@ -19,6 +19,10 @@ export class AccessAdminComponent implements OnInit {
   selectedModuleId: number | null = null;
   sectionCatalog: any[] = [];
   adminNewSection: any = { codigo: '', descripcion: '', ruta: '', orden: 0, platform: 'WEB', activo: true };
+  sectionsCatalogEnabled = true;
+  modulesWriteEnabled = true;
+  sectionsCatalogMessage = '';
+  modulesWriteMessage = '';
 
   constructor(
     public auth: AutorizaService,
@@ -49,6 +53,7 @@ export class AccessAdminComponent implements OnInit {
   }
 
   saveNewModulo() {
+    if (!this.modulesWriteEnabled) return;
     if (!this.adminNewModulo.descripcion?.trim()) return;
     const payload = {
       descripcion: this.adminNewModulo.descripcion.trim(),
@@ -59,17 +64,32 @@ export class AccessAdminComponent implements OnInit {
         this.adminNewModulo = { descripcion: '', platform: 'WEB' };
         this.loadAllModulesCatalog();
       },
-      error: (e: any) => console.error(e),
+      error: (e: any) => {
+        if (e?.status === 405 || e?.status === 404) {
+          this.modulesWriteEnabled = false;
+          this.modulesWriteMessage = 'El backend actual no permite crear módulos desde esta pantalla.';
+          return;
+        }
+        console.error(e);
+      },
     });
   }
 
   saveModuloEdit(m: any) {
+    if (!this.modulesWriteEnabled) return;
     this.erpmodulos.update(m.iderpmodulo, {
       descripcion: m.descripcion,
       platform: (m.platform || 'WEB').toUpperCase(),
-    }).subscribe({
+    }, this.auth.idusuario).subscribe({
       next: () => this.loadAllModulesCatalog(),
-      error: (e: any) => console.error(e),
+      error: (e: any) => {
+        if (e?.status === 405 || e?.status === 404) {
+          this.modulesWriteEnabled = false;
+          this.modulesWriteMessage = 'El backend actual no permite editar módulos desde esta pantalla.';
+          return;
+        }
+        console.error(e);
+      },
     });
   }
 
@@ -78,14 +98,26 @@ export class AccessAdminComponent implements OnInit {
       this.sectionCatalog = [];
       return;
     }
-    this.usrxmodulos.getSectionCatalog(this.selectedModuleId, 'ALL').subscribe({
-      next: (rows: any[]) => this.sectionCatalog = rows || [],
-      error: (e: any) => console.error(e),
+    this.usrxmodulos.getSectionCatalog(this.selectedModuleId, 'WEB').subscribe({
+      next: (rows: any[]) => {
+        this.sectionsCatalogEnabled = true;
+        this.sectionsCatalogMessage = '';
+        this.sectionCatalog = rows || [];
+      },
+      error: (e: any) => {
+        this.sectionCatalog = [];
+        if (e?.status === 404 || e?.status === 405) {
+          this.sectionsCatalogEnabled = false;
+          this.sectionsCatalogMessage = 'El endpoint de catálogo de secciones no está disponible en este backend.';
+          return;
+        }
+        console.error(e);
+      },
     });
   }
 
   saveNewSectionCatalog() {
-    if (!this.selectedModuleId) return;
+    if (!this.sectionsCatalogEnabled || !this.selectedModuleId) return;
     if (!this.adminNewSection.codigo?.trim() || !this.adminNewSection.descripcion?.trim()) return;
     const payload = {
       iderpmodulo: this.selectedModuleId,
@@ -101,11 +133,19 @@ export class AccessAdminComponent implements OnInit {
         this.adminNewSection = { codigo: '', descripcion: '', ruta: '', orden: 0, platform: 'WEB', activo: true };
         this.loadSectionCatalog();
       },
-      error: (e: any) => console.error(e),
+      error: (e: any) => {
+        if (e?.status === 404 || e?.status === 405) {
+          this.sectionsCatalogEnabled = false;
+          this.sectionsCatalogMessage = 'El backend actual no permite guardar secciones desde esta pantalla.';
+          return;
+        }
+        console.error(e);
+      },
     });
   }
 
   saveSectionEdit(sec: any) {
+    if (!this.sectionsCatalogEnabled) return;
     this.usrxmodulos.updateSectionCatalog(sec.iderpseccion, {
       codigo: sec.codigo,
       descripcion: sec.descripcion,
@@ -115,7 +155,14 @@ export class AccessAdminComponent implements OnInit {
       activo: !!sec.activo,
     }).subscribe({
       next: () => this.loadSectionCatalog(),
-      error: (e: any) => console.error(e),
+      error: (e: any) => {
+        if (e?.status === 404 || e?.status === 405) {
+          this.sectionsCatalogEnabled = false;
+          this.sectionsCatalogMessage = 'El backend actual no permite actualizar secciones desde esta pantalla.';
+          return;
+        }
+        console.error(e);
+      },
     });
   }
 }

@@ -1,485 +1,351 @@
-<!-- EPMAPA-T ERP Dashboard — Angular Template (solo HTML + CSS mejorado, lógica intacta) -->
-<div class="dash-root container-fluid">
+﻿<div class="container-fluid mt-2 home-admin-page">
+  <div class="row justify-content-center">
+    <div class="col-sm-12 col-md-11 col-lg-10">
 
-  <!-- ══════════════════════════════════════
-       HEADER
-  ══════════════════════════════════════ -->
-  <header class="dash-header">
-    <div class="dash-header__left">
-      <div class="dash-header__logo">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-          <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
-        </svg>
-        <div class="dash-header__logo-pulse"></div>
-      </div>
-      <div class="dash-header__brand">
-        <span class="dash-header__title">EPMAPA<span class="dash-header__title-accent">-T</span></span>
-        <span class="dash-header__sub">Sistema ERP · Panel de Control</span>
-      </div>
-    </div>
-    <div class="dash-header__center">
-      <div class="dash-header__nav">
-        <span class="dash-nav-pill dash-nav-pill--active">Dashboard</span>
-        <span class="dash-nav-pill">Recaudación</span>
-        <span class="dash-nav-pill">Comercial</span>
-        <span class="dash-nav-pill">Reportes</span>
-      </div>
-    </div>
-    <div class="dash-header__right">
-      <div class="dash-header__status">
-        <span class="dash-status-dot"></span>
-        <span class="dash-header__status-text">Sistema en línea</span>
-      </div>
-      <span class="dash-header__date">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
-          <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-        </svg>
-        {{ hoy | date:'EEEE d \'de\' MMMM, yyyy' }}
-      </span>
-    </div>
-  </header>
-
-  <!-- ══════════════════════════════════════
-       BREADCRUMB / PAGE TITLE
-  ══════════════════════════════════════ -->
-  <div class="dash-page-header">
-    <div class="dash-page-header__left">
-      <h1 class="dash-page-title">Panel de Control</h1>
-      <p class="dash-page-sub">Resumen ejecutivo del sistema de agua potable y alcantarillado</p>
-    </div>
-    <div class="dash-page-header__right">
-      <div class="dash-wave-bar">
-        <span></span><span></span><span></span><span></span><span></span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════
-       KPI CARDS
-  ══════════════════════════════════════ -->
-  <section class="dash-kpis">
-
-    <div class="dash-kpi dash-kpi--teal">
-      <div class="dash-kpi__glow"></div>
-      <div class="dash-kpi__icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-          <circle cx="9" cy="7" r="4"/>
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-        </svg>
-      </div>
-      <div class="dash-kpi__body">
-        <span class="dash-kpi__label">Total Abonados</span>
-        <span class="dash-kpi__value">{{ totalAbonados || '—' }}</span>
-        <span class="dash-kpi__sub">Cuentas registradas</span>
-      </div>
-      <div class="dash-kpi__trend dash-kpi__trend--up">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
-        <span>+2.4%</span>
-      </div>
-    </div>
-
-    <div class="dash-kpi dash-kpi--green">
-      <div class="dash-kpi__glow"></div>
-      <div class="dash-kpi__icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-        </svg>
-      </div>
-      <div class="dash-kpi__body">
-        <span class="dash-kpi__label">Valor Cobrado</span>
-        <span class="dash-kpi__value">${{ totalCobrado.toFixed(2) || '0.00' }}</span>
-        <span class="dash-kpi__sub">Emisión actual</span>
-      </div>
-      <div class="dash-kpi__trend dash-kpi__trend--up">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
-        <span>+5.1%</span>
-      </div>
-    </div>
-
-    <div class="dash-kpi dash-kpi--amber">
-      <div class="dash-kpi__glow"></div>
-      <div class="dash-kpi__icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <polyline points="12 6 12 12 16 14"/>
-        </svg>
-      </div>
-      <div class="dash-kpi__body">
-        <span class="dash-kpi__label">Valor Pendiente</span>
-        <span class="dash-kpi__value">${{ totalPendiente.toFixed(2) || '0.00' }}</span>
-        <span class="dash-kpi__sub">Por cobrar</span>
-      </div>
-      <div class="dash-kpi__trend dash-kpi__trend--down">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-        <span>-1.8%</span>
-      </div>
-    </div>
-
-    <div class="dash-kpi dash-kpi--blue">
-      <div class="dash-kpi__glow"></div>
-      <div class="dash-kpi__icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
-        </svg>
-      </div>
-      <div class="dash-kpi__body">
-        <span class="dash-kpi__label">M³ Emitidos</span>
-        <span class="dash-kpi__value">{{ totalM3 || '—' }}</span>
-        <span class="dash-kpi__sub">Emisión actual</span>
-      </div>
-      <div class="dash-kpi__trend dash-kpi__trend--up">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
-        <span>+0.9%</span>
-      </div>
-    </div>
-
-    <div class="dash-kpi dash-kpi--purple">
-      <div class="dash-kpi__glow"></div>
-      <div class="dash-kpi__icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-        </svg>
-      </div>
-      <div class="dash-kpi__body">
-        <span class="dash-kpi__label">Rutas Activas</span>
-        <span class="dash-kpi__value">{{ _rutas?.length || '—' }}</span>
-        <span class="dash-kpi__sub">Sectores de lectura</span>
-      </div>
-      <div class="dash-kpi__trend dash-kpi__trend--neutral">—</div>
-    </div>
-
-  </section>
-
-  <!-- ══════════════════════════════════════
-       FILA 2: Mapa + Rutas
-  ══════════════════════════════════════ -->
-  <div class="dash-grid dash-grid--map">
-
-    <div class="dash-card dash-card--map">
-      <div class="dash-card__header">
-        <div class="dash-card__title-group">
-          <div class="dash-card__title-icon dash-card__title-icon--teal">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polygon points="3 11 22 2 13 21 11 13 3 11"/>
-            </svg>
+      <div class="d-flex align-items-center justify-content-between cabecera sombra border px-3 py-2 rounded flex-wrap">
+        <div class="d-flex align-items-center mb-2 mb-md-0">
+          <i class="bi bi-speedometer2 mr-2"></i>
+          <div>
+            <h5 class="m-0 font-weight-bold">Panel de Control</h5>
+            <small class="text-light op-9">Resumen ejecutivo de abonados, emisiones, rutas e instalaciones del ERP</small>
           </div>
-          <span class="dash-card__title">Mapa de Rutas</span>
         </div>
-        <div class="dash-card__actions">
-          <span class="dash-badge dash-badge--teal dash-badge--pulse">{{ _abonados.length || 0 }} puntos</span>
-        </div>
-      </div>
-      <div class="dash-card__body dash-card__body--nopad">
-        <div id="map" style="width:100%; height:380px; border-radius: 0 0 12px 12px;"></div>
-      </div>
-    </div>
 
-    <div class="dash-card">
-      <div class="dash-card__header">
-        <div class="dash-card__title-group">
-          <div class="dash-card__title-icon dash-card__title-icon--blue">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
-              <line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/>
-              <line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
-            </svg>
-          </div>
-          <span class="dash-card__title">Rutas</span>
-        </div>
-        <span class="dash-badge">{{ _rutas?.length || 0 }}</span>
-      </div>
-      <div class="dash-card__search">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-        </svg>
-        <input type="text" class="dash-search" [(ngModel)]="filtro" placeholder="Buscar ruta..." />
-      </div>
-      <div class="dash-card__body dash-card__body--scroll">
-        <div *ngFor="let ruta of _rutas | filter:filtro; let i = index"
-          class="dash-ruta-item"
-          [style.animation-delay]="(i * 40) + 'ms'"
-          (click)="getAbonadosByRutas(ruta.idruta)">
-          <div class="dash-ruta-item__num">{{ i + 1 }}</div>
-          <div class="dash-ruta-item__info">
-            <span class="dash-ruta-item__name">{{ ruta.descripcion }}</span>
-          </div>
-          <span class="dash-badge dash-badge--sm dash-badge--teal">{{ ruta.ncuentas }}</span>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="dash-ruta-item__arrow">
-            <path d="M9 18l6-6-6-6"/>
-          </svg>
+        <div class="d-flex align-items-center flex-wrap justify-content-end tools-bar">
+          <span class="badge badge-light text-dark mr-2 mb-1">
+            <i class="bi bi-calendar3 mr-1"></i>{{ hoy | date:'EEEE d \'de\' MMMM, yyyy' }}
+          </span>
+          <span class="badge badge-success mb-1">Sistema en linea</span>
         </div>
       </div>
-    </div>
 
-  </div>
-
-  <!-- ══════════════════════════════════════
-       FILA 3: Tabla emisiones
-  ══════════════════════════════════════ -->
-  <div class="dash-grid dash-grid--data">
-    <div class="dash-card">
-      <div class="dash-card__header">
-        <div class="dash-card__title-group">
-          <div class="dash-card__title-icon dash-card__title-icon--green">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-            </svg>
+      <div class="mt-2 sombra border rounded detalle px-3 py-2">
+        <div class="row align-items-center">
+          <div class="col-md-8 mb-2 mb-md-0">
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb bg-transparent p-0 m-0 small">
+                <li class="breadcrumb-item"><a href="javascript:void(0)">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="javascript:void(0)">Administracion Central</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Panel de Control</li>
+              </ol>
+            </nav>
+            <div class="small text-muted mt-1">Monitoreo general de operacion comercial y lectura de rutas.</div>
           </div>
-          <span class="dash-card__title">Resumen de Emisiones</span>
+          <div class="col-md-4 text-md-right">
+            <span class="badge badge-info mr-1 mb-1">Abonados</span>
+            <span class="badge badge-secondary mr-1 mb-1">Rutas</span>
+            <span class="badge badge-primary mb-1">Emisiones</span>
+          </div>
         </div>
-        <span class="dash-badge dash-badge--teal">Últimas {{ _resumenEmisiones?.length || 0 }}</span>
       </div>
-      <div class="dash-card__body dash-card__body--nopad">
-        <div class="dash-table-wrap">
-          <table class="dash-table">
+
+      <div class="mt-2 sombra border rounded detalle resumen-wrap px-3 py-3">
+        <div class="d-flex align-items-center justify-content-between flex-wrap mb-2">
+          <div>
+            <div class="small text-muted text-uppercase font-weight-bold">Resumen operativo</div>
+            <div class="small text-muted">Indicadores principales del panel administrativo</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-6 col-lg-3 col-xl mb-2">
+            <div class="summary-box h-100">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <div class="summary-label">Total abonados</div>
+                  <div class="summary-value">{{ totalAbonados || 0 }}</div>
+                  <div class="summary-help">Cuentas registradas por estado</div>
+                </div>
+                <div class="summary-icon tone-info"><i class="bi bi-people-fill"></i></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-6 col-lg-3 col-xl mb-2">
+            <div class="summary-box h-100">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <div class="summary-label">Valor cobrado</div>
+                  <div class="summary-value mono money-value">${{ totalCobrado.toFixed(2) }}</div>
+                  <div class="summary-help">Recaudacion de la ultima emision</div>
+                </div>
+                <div class="summary-icon tone-success"><i class="bi bi-cash-stack"></i></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-6 col-lg-3 col-xl mb-2">
+            <div class="summary-box h-100">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <div class="summary-label">Valor pendiente</div>
+                  <div class="summary-value mono money-value">${{ totalPendiente.toFixed(2) }}</div>
+                  <div class="summary-help">Pendiente por recaudar</div>
+                </div>
+                <div class="summary-icon tone-warning"><i class="bi bi-clock-history"></i></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-6 col-lg-3 col-xl mb-2">
+            <div class="summary-box h-100">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <div class="summary-label">M3 emitidos</div>
+                  <div class="summary-value">{{ totalM3 || 0 }}</div>
+                  <div class="summary-help">Consumo total de la emision</div>
+                </div>
+                <div class="summary-icon tone-primary"><i class="bi bi-droplet-half"></i></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-6 col-lg-3 col-xl mb-2">
+            <div class="summary-box h-100">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <div class="summary-label">Rutas activas</div>
+                  <div class="summary-value">{{ _rutas?.length || 0 }}</div>
+                  <div class="summary-help">Sectores disponibles para lectura</div>
+                </div>
+                <div class="summary-icon tone-muted"><i class="bi bi-signpost-split-fill"></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-2">
+        <div class="col-lg-8 mb-2">
+          <div class="sombra border rounded detalle h-100">
+            <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom flex-wrap section-head">
+              <div>
+                <h6 class="m-0 font-weight-bold">Mapa de rutas</h6>
+                <small class="text-muted">Ubicacion de cuentas y punto principal de operacion</small>
+              </div>
+              <span class="badge badge-info mt-2 mt-lg-0">{{ _abonados.length || 0 }} puntos</span>
+            </div>
+            <div class="p-2">
+              <div id="map" class="map-frame"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 mb-2">
+          <div class="sombra border rounded detalle h-100 d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom flex-wrap section-head">
+              <div>
+                <h6 class="m-0 font-weight-bold">Rutas</h6>
+                <small class="text-muted">Selecciona una ruta para cargar sus cuentas</small>
+              </div>
+              <span class="badge badge-secondary mt-2 mt-lg-0">{{ _rutas?.length || 0 }}</span>
+            </div>
+            <div class="px-3 pt-2 pb-1 border-bottom bg-light">
+              <label class="small font-weight-bold mb-1">Buscar ruta</label>
+              <input type="text" class="form-control form-control-sm" [(ngModel)]="filtro" placeholder="Descripcion de ruta">
+            </div>
+            <div class="route-list flex-fill">
+              <button type="button" class="route-item text-left w-100" *ngFor="let ruta of _rutas | filter:filtro; let i = index" (click)="getAbonadosByRutas(ruta.idruta)">
+                <span class="route-index">{{ i + 1 }}</span>
+                <span class="route-name">{{ ruta.descripcion }}</span>
+                <span class="badge badge-info badge-pill ml-2">{{ ruta.ncuentas }}</span>
+              </button>
+              <div class="empty-state text-center py-4 m-2" *ngIf="(_rutas | filter:filtro)?.length === 0">
+                <i class="bi bi-signpost display-4 text-muted"></i>
+                <div class="font-weight-bold mt-2">Sin rutas visibles</div>
+                <div class="text-muted small">No hay coincidencias para el filtro actual.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-2 sombra border rounded detalle">
+        <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom flex-wrap section-head">
+          <div>
+            <h6 class="m-0 font-weight-bold">Resumen de emisiones</h6>
+            <small class="text-muted">Estado economico de las ultimas emisiones registradas</small>
+          </div>
+          <span class="badge badge-primary mt-2 mt-lg-0">Ultimas {{ _resumenEmisiones?.length || 0 }}</span>
+        </div>
+        <div class="table-responsive mb-0">
+          <table class="table table-sm table-hover mb-0 admin-table">
             <thead>
               <tr>
-                <th class="dash-th dash-th--center">#</th>
-                <th class="dash-th">Emisión</th>
-                <th class="dash-th dash-th--center">Abonados</th>
-                <th class="dash-th dash-th--center">M³</th>
-                <th class="dash-th dash-th--right">Emitido</th>
-                <th class="dash-th dash-th--right">Cobrado</th>
-                <th class="dash-th dash-th--right">Pendiente</th>
-                <th class="dash-th dash-th--center">Avance</th>
+                <th class="text-center">#</th>
+                <th>Emision</th>
+                <th class="text-center">Abonados</th>
+                <th class="text-center">M3</th>
+                <th class="text-right">Emitido</th>
+                <th class="text-right">Cobrado</th>
+                <th class="text-right">Pendiente</th>
+                <th class="text-center">Avance</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let r of _resumenEmisiones; let i = index" class="dash-tr">
-                <td class="dash-td dash-td--center dash-td--muted">{{ i+1 }}</td>
-                <td class="dash-td dash-td--mono dash-td--bold">
-                  <span class="dash-emision-tag">{{ r.emision }}</span>
-                </td>
-                <td class="dash-td dash-td--center">{{ r.ncuentas }}</td>
-                <td class="dash-td dash-td--center">
-                  <span class="dash-m3-chip">{{ r.m3 }} m³</span>
-                </td>
-                <td class="dash-td dash-td--right dash-td--mono">${{ r.valemision.toFixed(2) }}</td>
-                <td class="dash-td dash-td--right dash-td--mono dash-td--green">
-                  <span class="dash-amount dash-amount--green">${{ r.total_pagado.toFixed(2) }}</span>
-                </td>
-                <td class="dash-td dash-td--right dash-td--mono dash-td--amber">
-                  <span class="dash-amount dash-amount--amber">${{ r.total_pendiente.toFixed(2) }}</span>
-                </td>
-                <td class="dash-td dash-td--center">
-                  <div class="dash-progress-wrap">
-                    <div class="dash-progress">
-                      <div class="dash-progress__bar"
-                        [style.width.%]="r.valemision > 0 ? (r.total_pagado / r.valemision * 100) : 0"
-                        [class.dash-progress__bar--high]="(r.total_pagado / r.valemision) > 0.7"
-                        [class.dash-progress__bar--mid]="(r.total_pagado / r.valemision) <= 0.7 && (r.total_pagado / r.valemision) > 0.4"
-                        [class.dash-progress__bar--low]="(r.total_pagado / r.valemision) <= 0.4">
-                      </div>
-                    </div>
-                    <span class="dash-progress-pct">
-                      {{ r.valemision > 0 ? (r.total_pagado / r.valemision * 100).toFixed(0) : 0 }}%
-                    </span>
+              <tr *ngFor="let r of _resumenEmisiones; let i = index">
+                <td class="text-center text-muted mono">{{ i + 1 }}</td>
+                <td><span class="badge badge-light border mono">{{ r.emision }}</span></td>
+                <td class="text-center">{{ r.ncuentas }}</td>
+                <td class="text-center"><span class="badge badge-primary badge-pill">{{ r.m3 }} m3</span></td>
+                <td class="text-right mono">${{ r.valemision.toFixed(2) }}</td>
+                <td class="text-right mono text-success font-weight-bold">${{ r.total_pagado.toFixed(2) }}</td>
+                <td class="text-right mono text-warning font-weight-bold">${{ r.total_pendiente.toFixed(2) }}</td>
+                <td class="text-center progress-cell">
+                  <div class="progress progress-sm mx-auto">
+                    <div class="progress-bar" role="progressbar" [style.width.%]="r.valemision > 0 ? (r.total_pagado / r.valemision * 100) : 0"></div>
                   </div>
+                  <small class="text-muted mono d-block mt-1">{{ r.valemision > 0 ? (r.total_pagado / r.valemision * 100).toFixed(0) : 0 }}%</small>
                 </td>
+              </tr>
+              <tr *ngIf="!_resumenEmisiones?.length">
+                <td colspan="8" class="text-center py-4 text-muted">Sin informacion de emisiones disponible.</td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
+
+      <div class="row mt-2">
+        <div class="col-lg-4 mb-2">
+          <div class="sombra border rounded detalle h-100">
+            <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom section-head">
+              <div>
+                <h6 class="m-0 font-weight-bold">Abonados por estado</h6>
+                <small class="text-muted">Consulta cuentas agrupadas por estado</small>
+              </div>
+              <span class="badge badge-warning">{{ _ByEstados?.length || 0 }}</span>
+            </div>
+            <div class="table-responsive mb-0">
+              <table class="table table-sm table-hover mb-0 admin-table">
+                <thead>
+                  <tr>
+                    <th class="text-center">#</th>
+                    <th>Estado</th>
+                    <th class="text-center">Cuentas</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let e of _ByEstados; let i = index" class="clickable-row" (click)="findCuentasByEstado(e)" data-toggle="modal" data-target="#detalles">
+                    <td class="text-center text-muted mono">{{ i + 1 }}</td>
+                    <td>
+                      <span class="status-dot mr-2" [ngClass]="e.estado == 1 ? 'status-dot-active' : 'status-dot-muted'"></span>
+                      {{ e.descripcion }}
+                    </td>
+                    <td class="text-center"><span class="badge badge-light border">{{ e.ncuentas }}</span></td>
+                  </tr>
+                  <tr *ngIf="!_ByEstados?.length">
+                    <td colspan="3" class="text-center py-4 text-muted">Sin estados disponibles.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 mb-2">
+          <div class="sombra border rounded detalle h-100">
+            <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom section-head">
+              <div>
+                <h6 class="m-0 font-weight-bold">Abonados por categoria</h6>
+                <small class="text-muted">Participacion por categoria comercial</small>
+              </div>
+              <span class="badge badge-secondary">{{ _ByCategorias?.length || 0 }}</span>
+            </div>
+            <div class="table-responsive mb-0">
+              <table class="table table-sm table-hover mb-0 admin-table">
+                <thead>
+                  <tr>
+                    <th class="text-center">#</th>
+                    <th>Categoria</th>
+                    <th class="text-center">Cuentas</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let c of _ByCategorias; let i = index">
+                    <td class="text-center text-muted mono">{{ i + 1 }}</td>
+                    <td>{{ c.descripcion }}</td>
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <div class="mini-bar mr-2 flex-fill"><span [style.width.%]="getCategoriaPct(c.ncuentas)"></span></div>
+                        <small class="mono text-muted">{{ c.ncuentas }}</small>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr *ngIf="!_ByCategorias?.length">
+                    <td colspan="3" class="text-center py-4 text-muted">Sin categorias disponibles.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 mb-2">
+          <div class="sombra border rounded detalle h-100 d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom section-head">
+              <div>
+                <h6 class="m-0 font-weight-bold">Instalaciones</h6>
+                <small class="text-muted">Accesos rapidos a ubicaciones clave</small>
+              </div>
+              <span class="badge badge-info">{{ _ubicaciones.length || 0 }}</span>
+            </div>
+            <div class="p-3 flex-fill">
+              <button type="button" class="location-item text-left w-100" *ngFor="let ub of _ubicaciones" (click)="verUbicacion(ub)">
+                <span class="location-icon" [ngClass]="'tone-' + ub.color"><i class="bi bi-geo-alt-fill"></i></span>
+                <span class="location-text">
+                  <strong>{{ ub.nombre }}</strong>
+                  <small>{{ ub.direccion }}</small>
+                </span>
+                <i class="bi bi-eye text-muted"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
-
-  <!-- ══════════════════════════════════════
-       FILA 4: Estado + Categoría + Ubicaciones
-  ══════════════════════════════════════ -->
-  <div class="dash-grid dash-grid--three">
-
-    <!-- Abonados por estado -->
-    <div class="dash-card">
-      <div class="dash-card__header">
-        <div class="dash-card__title-group">
-          <div class="dash-card__title-icon dash-card__title-icon--amber">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-            </svg>
-          </div>
-          <span class="dash-card__title">Por Estado</span>
-        </div>
-        <button class="dash-icon-btn" title="Imprimir">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="6 9 6 2 18 2 18 9"/>
-            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-            <rect x="6" y="14" width="12" height="8"/>
-          </svg>
-        </button>
-      </div>
-      <div class="dash-card__body dash-card__body--nopad">
-        <table class="dash-table">
-          <thead>
-            <tr>
-              <th class="dash-th dash-th--center">#</th>
-              <th class="dash-th">Estado</th>
-              <th class="dash-th dash-th--center">Cuentas</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let e of _ByEstados; let i = index" class="dash-tr dash-tr--clickable"
-              (click)="findCuentasByEstado(e)" data-toggle="modal" data-target="#detalles">
-              <td class="dash-td dash-td--center dash-td--muted">{{ i+1 }}</td>
-              <td class="dash-td">
-                <span class="dash-estado-dot" [class.dash-estado-dot--active]="e.estado == 1"></span>
-                {{ e.descripcion }}
-              </td>
-              <td class="dash-td dash-td--center">
-                <span class="dash-badge dash-badge--sm">{{ e.ncuentas }}</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Abonados por categoría -->
-    <div class="dash-card">
-      <div class="dash-card__header">
-        <div class="dash-card__title-group">
-          <div class="dash-card__title-icon dash-card__title-icon--purple">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
-              <line x1="7" y1="7" x2="7.01" y2="7"/>
-            </svg>
-          </div>
-          <span class="dash-card__title">Por Categoría</span>
-        </div>
-      </div>
-      <div class="dash-card__body dash-card__body--nopad">
-        <table class="dash-table">
-          <thead>
-            <tr>
-              <th class="dash-th dash-th--center">#</th>
-              <th class="dash-th">Categoría</th>
-              <th class="dash-th dash-th--center">Cuentas</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let c of _ByCategorias; let i = index" class="dash-tr">
-              <td class="dash-td dash-td--center dash-td--muted">{{ i+1 }}</td>
-              <td class="dash-td">{{ c.descripcion }}</td>
-              <td class="dash-td dash-td--center">
-                <div class="dash-bar-mini-wrap">
-                  <div class="dash-bar-mini">
-                    <div class="dash-bar-mini__fill" [style.width.%]="getCategoriaPct(c.ncuentas)"></div>
-                  </div>
-                  <span class="dash-td--mono" style="font-size:11px">{{ c.ncuentas }}</span>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Ubicaciones clave -->
-    <div class="dash-card">
-      <div class="dash-card__header">
-        <div class="dash-card__title-group">
-          <div class="dash-card__title-icon dash-card__title-icon--teal">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-              <circle cx="12" cy="10" r="3"/>
-            </svg>
-          </div>
-          <span class="dash-card__title">Instalaciones</span>
-        </div>
-      </div>
-      <div class="dash-card__body">
-        <div class="dash-ubicacion" *ngFor="let ub of _ubicaciones">
-          <div class="dash-ubicacion__icon" [class]="'dash-ubicacion__icon--' + ub.color">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-              <circle cx="12" cy="10" r="3"/>
-            </svg>
-          </div>
-          <div class="dash-ubicacion__info">
-            <span class="dash-ubicacion__name">{{ ub.nombre }}</span>
-            <span class="dash-ubicacion__addr">{{ ub.direccion }}</span>
-          </div>
-          <button class="dash-icon-btn dash-icon-btn--teal" (click)="verUbicacion(ub)">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-              <circle cx="12" cy="12" r="3"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
 </div>
 
-<!-- ══════════════════════════════════════
-     MODAL DETALLES
-══════════════════════════════════════ -->
-<div class="modal fade" id="detalles" data-backdrop="static" data-keyboard="false"
-  tabindex="-1" aria-labelledby="detallesLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <div class="modal-content dash-modal">
-      <div class="dash-modal__header cabecera">
-        <div class="dash-modal__title-group">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
-          </svg>
-          <span class="dash-modal__title">{{ txtModal }}</span>
-        </div>
-        <div class="dash-modal__actions">
-          <div class="dash-modal__search">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="2">
-              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-            </svg>
-            <input type="text" class="dash-modal__search-input" placeholder="Filtrar...">
-          </div>
-          <button type="button" class="dash-modal__close" data-dismiss="modal">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-      <div class="modal-body p-0">
-        <table class="dash-table">
-          <thead>
-            <tr>
-              <th class="dash-th dash-th--center">#</th>
-              <th class="dash-th dash-th--center">Cuenta</th>
-              <th class="dash-th">Cliente</th>
-              <th class="dash-th">Categoría</th>
-            </tr>
-          </thead>
-          <tbody class="detalle">
-            <tr *ngFor="let a of abonados; let i = index" class="dash-tr">
-              <td class="dash-td dash-td--center dash-td--muted">{{ i+1 }}</td>
-              <td class="dash-td dash-td--center">
-                <span class="dash-badge dash-badge--sm dash-badge--teal">{{ a.idabonado }}</span>
-              </td>
-              <td class="dash-td">{{ a.idresponsable.nombre || 'S/N' }}</td>
-              <td class="dash-td">
-                <span class="dash-cat-badge">{{ a.idcategoria_categorias.descripcion || 'S/C' }}</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="modal-footer dash-modal__footer">
-        <button type="button" class="dash-btn dash-btn--outline" data-dismiss="modal">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="6 9 6 2 18 2 18 9"/>
-            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-            <rect x="6" y="14" width="12" height="8"/>
-          </svg>
-          Imprimir
+<div class="modal fade" id="detalles" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="detallesLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content form-elegante border-0">
+      <div class="modal-header cabecera text-white py-2 px-3">
+        <h6 class="modal-title font-weight-bold"><i class="bi bi-list-ul mr-2"></i>{{ txtModal }}</h6>
+        <button type="button" class="close text-white m-0" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
         </button>
-        <button type="button" class="dash-btn dash-btn--primary" data-dismiss="modal">Cerrar</button>
+      </div>
+      <div class="modal-body detalle p-0">
+        <div class="table-responsive mb-0">
+          <table class="table table-sm table-hover mb-0 admin-table">
+            <thead>
+              <tr>
+                <th class="text-center">#</th>
+                <th class="text-center">Cuenta</th>
+                <th>Cliente</th>
+                <th>Categoria</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let a of abonados; let i = index">
+                <td class="text-center text-muted mono">{{ i + 1 }}</td>
+                <td class="text-center"><span class="badge badge-info badge-pill">{{ a.idabonado }}</span></td>
+                <td>{{ a.idresponsable.nombre || 'S/N' }}</td>
+                <td><span class="badge badge-light border">{{ a.idcategoria_categorias.descripcion || 'S/C' }}</span></td>
+              </tr>
+              <tr *ngIf="!abonados?.length">
+                <td colspan="4" class="text-center py-4 text-muted">No existen abonados para el estado seleccionado.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer detalle py-2">
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Cerrar</button>
       </div>
     </div>
   </div>
 </div>
+

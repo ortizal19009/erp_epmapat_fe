@@ -1,0 +1,53 @@
+<div class="table-shell">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 admin-table">
+      <thead>
+        <tr>
+          <th>Creacion</th>
+          <th>Envio</th>
+          <th>Asunto</th>
+          <th>Tipo</th>
+          <th>Estado</th>
+          <th>Remitente</th>
+          <th>Cuenta usada</th>
+          <th>Destinatarios</th>
+          <th>Intentos</th>
+          <th>CorrelationId</th>
+          <th>Ultimo error</th>
+          <th class="text-right">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of rows">
+          <td class="nowrap">{{ row.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td class="nowrap">{{ row.sentAt ? (row.sentAt | date:'dd/MM/yyyy HH:mm') : 'Sin envio' }}</td>
+          <td><div class="cell-title">{{ row.subject }}</div><div class="cell-subtitle">ID {{ row.id }}</div></td>
+          <td>{{ row.type }}</td>
+          <td><app-email-status-badge [label]="row.state" [tone]="badgeTone(row.state)"></app-email-status-badge></td>
+          <td>{{ row.fromAddress }}</td>
+          <td><div class="cell-title">{{ row.accountName || accountLabel(row.accountId) }}</div><div class="cell-subtitle mono">{{ row.accountCode }}</div></td>
+          <td><div class="truncate">{{ recipientsPreview(row) }}</div><div class="cell-subtitle">{{ row.to.length }} destinatario(s)</div></td>
+          <td>{{ row.attempts }}</td>
+          <td class="mono">{{ row.correlationId }}</td>
+          <td>
+            <span class="text-muted" *ngIf="!row.lastError">Sin errores</span>
+            <button *ngIf="row.lastError" type="button" class="btn btn-link btn-sm p-0 align-baseline" (click)="viewError.emit(row)">Ver error</button>
+          </td>
+          <td class="text-right action-cell">
+            <button type="button" class="btn btn-sm btn-action" (click)="openMenuId = openMenuId === row.id ? null : row.id"><i class="bi bi-three-dots"></i></button>
+            <div class="row-menu" *ngIf="openMenuId === row.id">
+              <button type="button" (click)="viewDetail.emit(row); openMenuId = null">Ver detalle</button>
+              <button type="button" (click)="retry.emit(row); openMenuId = null" *ngIf="row.state === 'FAILED' || row.state === 'PENDING'">Reenviar</button>
+              <button type="button" (click)="editRetry.emit(row); openMenuId = null" *ngIf="row.state === 'FAILED' || row.state === 'PENDING'">Editar y reenviar</button>
+              <button type="button" (click)="cancel.emit(row); openMenuId = null" *ngIf="row.state === 'PENDING'">Cancelar</button>
+              <button type="button" (click)="viewError.emit(row); openMenuId = null" *ngIf="row.lastError">Ver error tecnico</button>
+              <button type="button" (click)="viewAttachments.emit(row); openMenuId = null" *ngIf="row.attachments.length">Ver adjuntos</button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="rows.length === 0"><td colspan="12" class="text-center text-muted py-4">No existen correos emitidos para el filtro seleccionado.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+

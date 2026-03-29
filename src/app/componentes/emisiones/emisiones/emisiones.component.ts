@@ -38,6 +38,7 @@ import { from, of, firstValueFrom, forkJoin } from 'rxjs';
 import { isFunction } from 'chart.js/dist/helpers/helpers.core';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { JasperReportService } from 'src/app/servicios/jasper-report.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-emisiones',
@@ -2019,8 +2020,21 @@ export class EmisionesComponent implements OnInit {
     });
   }
   /** Lanza el cierre de TODAS las rutas abiertas en paralelo (concurrencia limitada) */
-  cerrarRutas() {
+  async cerrarRutas() {
     if (!this._rutasxemi?.length) return;
+
+    let lecturasNegativasPorRuta: RutaLecturasNegativas[] = [];
+    this.s_loading.showLoading();
+    try {
+      lecturasNegativasPorRuta = await this.obtenerLecturasNegativasPorRuta();
+    } finally {
+      this.s_loading.hideLoading();
+    }
+
+    if (lecturasNegativasPorRuta.length > 0) {
+      await this.mostrarLecturasNegativasPorRuta(lecturasNegativasPorRuta);
+      return;
+    }
 
     this.enProceso = true;
 
@@ -2043,6 +2057,175 @@ export class EmisionesComponent implements OnInit {
         next: () => console.log('✅ Todas las rutas procesadas'),
         error: (e) => console.error('❌ Error en cierre masivo de rutas', e),
       });
+  }
+
+  private async obtenerLecturasNegativasPorRuta(): Promise<RutaLecturasNegativas[]> {
+    const rutasAbiertas = (this._rutasxemi || []).filter((ruta) => ruta.estado === 0);
+
+    const resultados = await Promise.all(
+      rutasAbiertas.map(async (ruta) => {
+        try {
+          const lecturas = await firstValueFrom(
+            this.s_lecturas.get_Lecturas(ruta.idrutaxemision),
+          );
+
+          const negativas = (lecturas || []).filter((lectura: any) => {
+            const lecturaAnterior = Number(lectura?.lecturaanterior || 0);
+            const lecturaActual = Number(lectura?.lecturaactual || 0);
+            return lecturaActual - lecturaAnterior < 0;
+          });
+
+          if (negativas.length === 0) {
+            return null;
+          }
+
+          return {
+            idrutaxemision: ruta.idrutaxemision,
+            codigo: ruta?.idruta_rutas?.codigo || '',
+            ruta: ruta?.idruta_rutas?.descripcion || 'Sin ruta',
+            lecturas: negativas.map((lectura: any) => {
+              const lecturaAnterior = Number(lectura?.lecturaanterior || 0);
+              const lecturaActual = Number(lectura?.lecturaactual || 0);
+
+              return {
+                cuenta: lectura?.idabonado_abonados?.idabonado ?? 'S/N',
+                abonado:
+                  lectura?.idabonado_abonados?.idcliente_clientes?.nombre ??
+                  'Sin nombre',
+                lecturaAnterior,
+                lecturaActual,
+                consumo: lecturaActual - lecturaAnterior,
+              };
+            }),
+          } as RutaLecturasNegativas;
+        } catch (error) {
+          console.error('Error validando lecturas negativas por ruta', {
+            ruta,
+            error,
+          });
+          return null;
+        }
+      }),
+    );
+
+    return resultados.filter((item): item is RutaLecturasNegativas => item !== null);
+  }
+
+  private async mostrarLecturasNegativasPorRuta(
+    rutasConNovedad: RutaLecturasNegativas[],
+  ): Promise<void> {
+    const html = rutasConNovedad
+      .map((ruta) => {
+        const detalleLecturas = ruta.lecturas
+          .slice(0, 10)
+          .map(
+            (lectura, index) =>
+              `${index + 1}. Cuenta ${lectura.cuenta} - ${lectura.abonado}<br>` +
+              `Anterior: ${lectura.lecturaAnterior} | Actual: ${lectura.lecturaActual} | M3: ${lectura.consumo}`,
+          )
+          .join('<br><br>');
+
+        const restantes = ruta.lecturas.length - Math.min(ruta.lecturas.length, 10);
+        const extra =
+          restantes > 0
+            ? `<br><br>Y ${restantes} cuenta(s) adicional(es) en esta ruta.`
+            : '';
+
+        return (
+          `<div style="text-align:left;margin-bottom:16px;">` +
+          `<strong>Ruta ${ruta.codigo} - ${ruta.ruta}</strong><br>` +
+          `${detalleLecturas}${extra}` +
+          `</div>`
+        );
+      })
+      .join('<hr>');
+
+    const result = await Swal.fire({
+      icon: 'warning',
+      title: 'No se pueden cerrar las rutas',
+      html:
+        `<div style="text-align:left;max-height:280px;overflow:auto;font-size:13px;">` +
+        `Se encontraron lecturas con metros cubicos negativos en las siguientes rutas:<br><br>` +
+        `${html}</div>`,
+      confirmButtonText: 'Revisar',
+      showDenyButton: true,
+      denyButtonText: 'Imprimir',
+      width: '560px',
+    });
+
+    if (result.isDenied) {
+      this.imprimirLecturasNegativasPorRuta(rutasConNovedad);
+    }
+  }
+
+  private imprimirLecturasNegativasPorRuta(
+    rutasConNovedad: RutaLecturasNegativas[],
+  ): void {
+    const doc = new jsPDF('p', 'pt', 'a4');
+    this._pdf.header('Rutas con lecturas negativas', doc);
+
+    const resumen = [
+      ['Emision', `${this.selEmision || ''}`],
+      ['Total rutas', `${rutasConNovedad.length}`],
+      [
+        'Total cuentas',
+        `${rutasConNovedad.reduce((total, ruta) => total + ruta.lecturas.length, 0)}`,
+      ],
+    ];
+
+    autoTable(doc, {
+      startY: 80,
+      theme: 'grid',
+      body: resumen,
+      styles: { fontSize: 9, cellPadding: 4 },
+      columnStyles: {
+        0: { fontStyle: 'bold', cellWidth: 90 },
+        1: { cellWidth: 390 },
+      },
+    });
+
+    rutasConNovedad.forEach((ruta, rutaIndex) => {
+      const inicio = rutaIndex === 0 ? (doc as any).lastAutoTable.finalY + 12 : (doc as any).lastAutoTable.finalY + 18;
+
+      autoTable(doc, {
+        startY: inicio,
+        theme: 'grid',
+        head: [[`Ruta ${ruta.codigo} - ${ruta.ruta}`]],
+        styles: { fontSize: 9, cellPadding: 4, halign: 'center' },
+        headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0] },
+      });
+
+      const body = ruta.lecturas.map((lectura, index) => [
+        index + 1,
+        lectura.cuenta,
+        lectura.abonado,
+        lectura.lecturaAnterior,
+        lectura.lecturaActual,
+        lectura.consumo,
+      ]);
+
+      autoTable(doc, {
+        startY: (doc as any).lastAutoTable.finalY,
+        theme: 'grid',
+        head: [['#', 'Cuenta', 'Abonado', 'Anterior', 'Actual', 'M3']],
+        body,
+        styles: { fontSize: 8, cellPadding: 3 },
+        headStyles: { halign: 'center' },
+        columnStyles: {
+          0: { halign: 'center', cellWidth: 28 },
+          1: { halign: 'center', cellWidth: 55 },
+          2: { cellWidth: 210 },
+          3: { halign: 'right', cellWidth: 60 },
+          4: { halign: 'right', cellWidth: 60 },
+          5: { halign: 'right', cellWidth: 50 },
+        },
+      });
+    });
+
+    this._pdf.setfooter(doc);
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
   }
 
   /** Procesa UNA ruta: trae lecturas, calcula valores en paralelo y cierra la ruta */
@@ -2344,4 +2527,19 @@ interface RutaXEmisionUI {
   progreso?: number; // 0..100
   estadoTemp?: 'abierta' | 'cerrando' | 'cerrada';
   usuariocierre?: number | null;
+}
+
+interface RutaLecturasNegativas {
+  idrutaxemision: number;
+  codigo: string;
+  ruta: string;
+  lecturas: LecturaNegativaDetalle[];
+}
+
+interface LecturaNegativaDetalle {
+  cuenta: number | string;
+  abonado: string;
+  lecturaAnterior: number;
+  lecturaActual: number;
+  consumo: number;
 }

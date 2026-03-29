@@ -1,0 +1,406 @@
+﻿<div class="container-fluid mt-2 email-admin-page">
+  <div class="row justify-content-center">
+    <div class="col-sm-12 col-md-11 col-lg-10">
+
+      <div class="d-flex align-items-center justify-content-between cabecera sombra border px-3 py-2 rounded flex-wrap">
+        <div class="d-flex align-items-center mb-2 mb-md-0">
+          <i class="bi bi-envelope-gear-fill mr-2"></i>
+          <div>
+            <h5 class="m-0 font-weight-bold">Administración de Correos</h5>
+            <small class="text-light op-9">Cuentas de envío, monitoreo de correos y lista negra de destinos bloqueados</small>
+          </div>
+        </div>
+
+        <div class="d-flex align-items-center flex-wrap justify-content-end tools-bar">
+          <span class="badge badge-light text-dark mr-2 mb-1">Spring Boot ready</span>
+          <button type="button" class="btn btn-sm btn-outline-light mr-2 mb-1" (click)="loadAll()">
+            <i class="bi bi-arrow-clockwise"></i>&nbsp; Actualizar
+          </button>
+
+          <div class="btn-group mb-1">
+            <button type="button" class="btn btn-sm btn-outline-light dropdown-toggle" data-toggle="dropdown">
+              <i class="bi bi-menu-button-wide"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+              <button class="dropdown-item text-white" type="button" *ngIf="activeSection === 'accounts'" (click)="openNewAccount()">
+                <i class="bi bi-plus-circle"></i>&nbsp; Nueva cuenta
+              </button>
+              <button class="dropdown-item text-white" type="button" *ngIf="activeSection === 'blacklist'" (click)="openBlacklistModal()">
+                <i class="bi bi-shield-plus"></i>&nbsp; Nuevo bloqueo
+              </button>
+              <button class="dropdown-item text-white" type="button" (click)="activeSection = 'accounts'">
+                <i class="bi bi-send-check"></i>&nbsp; Cuentas de envío
+              </button>
+              <button class="dropdown-item text-white" type="button" (click)="activeSection = 'emails'">
+                <i class="bi bi-inbox"></i>&nbsp; Correos emitidos
+              </button>
+              <button class="dropdown-item text-white" type="button" (click)="activeSection = 'blacklist'">
+                <i class="bi bi-shield-slash"></i>&nbsp; Lista negra
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-2 sombra border rounded detalle resumen-wrap px-3 py-3">
+        <div class="d-flex align-items-center justify-content-between flex-wrap mb-2">
+          <div>
+            <div class="small text-muted text-uppercase font-weight-bold">Resumen operativo</div>
+            <div class="small text-muted">Métricas rápidas del módulo de correo saliente</div>
+          </div>
+          <div class="small text-muted mt-2 mt-md-0">
+            Endpoints: <span class="mono">/api/v1/email-accounts</span>,
+            <span class="mono">/api/v1/emails</span>,
+            <span class="mono">/api/v1/email-blacklist</span>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 col-xl-3 mb-2" *ngFor="let card of summaryCards">
+            <div class="summary-box h-100">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <div class="summary-label">{{ card.label }}</div>
+                  <div class="summary-value">{{ card.value }}</div>
+                  <div class="summary-help">{{ card.help }}</div>
+                </div>
+                <div class="summary-icon" [ngClass]="'tone-' + card.tone">
+                  <i [class]="card.icon"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-2 sombra border rounded detalle p-2">
+        <div class="d-flex flex-wrap align-items-center">
+          <button type="button" class="btn btn-sm mr-2 mb-2 section-btn" [ngClass]="activeSection === 'accounts' ? 'btn-info' : 'btn-outline-secondary'" (click)="activeSection = 'accounts'">
+            <i class="bi bi-send-check"></i>&nbsp; Cuentas de envío
+          </button>
+          <button type="button" class="btn btn-sm mr-2 mb-2 section-btn" [ngClass]="activeSection === 'emails' ? 'btn-info' : 'btn-outline-secondary'" (click)="activeSection = 'emails'">
+            <i class="bi bi-inbox"></i>&nbsp; Correos emitidos
+          </button>
+          <button type="button" class="btn btn-sm mb-2 section-btn" [ngClass]="activeSection === 'blacklist' ? 'btn-info' : 'btn-outline-secondary'" (click)="activeSection = 'blacklist'">
+            <i class="bi bi-shield-slash"></i>&nbsp; Lista negra
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-2 alert alert-danger py-2" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+      <div class="mt-2 alert py-2" [ngClass]="{
+        'alert-success': toastTone === 'success',
+        'alert-danger': toastTone === 'danger',
+        'alert-warning': toastTone === 'warning',
+        'alert-info': toastTone === 'info'
+      }" *ngIf="toastMessage">{{ toastMessage }}</div>
+
+      <div class="mt-2 sombra border rounded detalle p-4 text-center" *ngIf="loading">
+        <div class="spinner-border text-info mb-2" role="status"></div>
+        <div class="text-muted">Cargando administración de correos...</div>
+      </div>
+
+      <ng-container *ngIf="!loading">
+        <div class="mt-2 sombra border rounded detalle p-3" *ngIf="activeSection === 'accounts'">
+          <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
+            <div>
+              <h6 class="m-0 font-weight-bold">Cuentas de envío</h6>
+              <small class="text-muted">Administra remitentes SMTP o API_HTTP, activación, conexión y uso predeterminado.</small>
+            </div>
+            <button type="button" class="btn btn-sm btn-success mt-2 mt-md-0" (click)="openNewAccount()">
+              <i class="bi bi-plus-circle"></i>&nbsp; Nueva cuenta
+            </button>
+          </div>
+
+          <div class="row mb-2">
+            <div class="col-md-6 col-xl-7 mb-2">
+              <input type="text" class="form-control form-control-sm" [(ngModel)]="accountSearch" placeholder="Buscar por nombre, código, provider o correo remitente">
+            </div>
+            <div class="col-md-3 col-xl-2 mb-2">
+              <select class="custom-select custom-select-sm" [(ngModel)]="accountTransportFilter">
+                <option value="ALL">Transporte: Todos</option>
+                <option *ngFor="let option of transportOptions" [value]="option">{{ option }}</option>
+              </select>
+            </div>
+            <div class="col-md-3 col-xl-3 mb-2">
+              <select class="custom-select custom-select-sm" [(ngModel)]="accountStatusFilter">
+                <option value="ALL">Estado: Todos</option>
+                <option value="ACTIVE">Solo activas</option>
+                <option value="INACTIVE">Solo inactivas</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="empty-state text-center py-4" *ngIf="filteredAccounts.length === 0">
+            <i class="bi bi-envelope-x display-4 text-muted"></i>
+            <div class="font-weight-bold mt-2">Sin cuentas visibles</div>
+            <div class="text-muted small">No hay cuentas de envío para los filtros aplicados.</div>
+          </div>
+
+          <app-email-accounts-table
+            *ngIf="filteredAccounts.length > 0"
+            [rows]="filteredAccounts"
+            (view)="openAccountDetail($event)"
+            (edit)="openEditAccount($event)"
+            (toggle)="confirmToggleAccount($event)"
+            (test)="testConnection($event)"
+            (makeDefault)="markAsDefault($event)">
+          </app-email-accounts-table>
+        </div>
+
+        <div class="mt-2 sombra border rounded detalle p-3" *ngIf="activeSection === 'emails'">
+          <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
+            <div>
+              <h6 class="m-0 font-weight-bold">Correos emitidos</h6>
+              <small class="text-muted">Consulta estados, errores, reintentos, cancelaciones y detalle de cada mensaje.</small>
+            </div>
+            <div class="d-flex flex-wrap mt-2 mt-md-0 legend-compact">
+              <app-email-status-badge label="PENDING" tone="warning"></app-email-status-badge>
+              <app-email-status-badge label="SENT" tone="success"></app-email-status-badge>
+              <app-email-status-badge label="FAILED" tone="danger"></app-email-status-badge>
+              <app-email-status-badge label="CANCELLED" tone="muted"></app-email-status-badge>
+            </div>
+          </div>
+
+          <div class="row mb-2">
+            <div class="col-md-6 col-xl-3 mb-2"><input type="text" class="form-control form-control-sm" [(ngModel)]="emailSearch" placeholder="Destinatario o asunto"></div>
+            <div class="col-md-6 col-xl-2 mb-2"><select class="custom-select custom-select-sm" [(ngModel)]="emailStatusFilter"><option value="ALL">Estado: Todos</option><option *ngFor="let option of stateOptions" [value]="option">{{ option }}</option></select></div>
+            <div class="col-md-6 col-xl-2 mb-2"><select class="custom-select custom-select-sm" [(ngModel)]="emailTypeFilter"><option value="ALL">Tipo: Todos</option><option *ngFor="let option of typeOptions" [value]="option">{{ option }}</option></select></div>
+            <div class="col-md-6 col-xl-2 mb-2"><select class="custom-select custom-select-sm" [(ngModel)]="emailAccountFilter"><option value="ALL">Cuenta: Todas</option><option *ngFor="let account of accounts" [value]="account.id">{{ account.name }}</option></select></div>
+            <div class="col-md-6 col-xl-3 mb-2"><input type="text" class="form-control form-control-sm" [(ngModel)]="emailCorrelationFilter" placeholder="CorrelationId"></div>
+            <div class="col-md-6 col-xl-2 mb-2"><input type="date" class="form-control form-control-sm" [(ngModel)]="emailDateFrom"></div>
+            <div class="col-md-6 col-xl-2 mb-2"><input type="date" class="form-control form-control-sm" [(ngModel)]="emailDateTo"></div>
+          </div>
+
+          <div class="empty-state text-center py-4" *ngIf="filteredEmails.length === 0">
+            <i class="bi bi-inbox display-4 text-muted"></i>
+            <div class="font-weight-bold mt-2">Sin correos emitidos</div>
+            <div class="text-muted small">No se encontraron registros para el rango y filtros seleccionados.</div>
+          </div>
+
+          <app-emitted-emails-table
+            *ngIf="filteredEmails.length > 0"
+            [rows]="filteredEmails"
+            [accounts]="accounts"
+            (viewDetail)="openEmailDetail($event)"
+            (retry)="openCompose($event, 'retry')"
+            (editRetry)="openCompose($event, 'edit-resend')"
+            (cancel)="cancelPendingEmail($event)"
+            (viewError)="showError($event)"
+            (viewAttachments)="showAttachments($event)">
+          </app-emitted-emails-table>
+        </div>
+
+        <div class="mt-2 sombra border rounded detalle p-3" *ngIf="activeSection === 'blacklist'">
+          <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
+            <div>
+              <h6 class="m-0 font-weight-bold">Lista negra</h6>
+              <small class="text-muted">Bloquea dominios, hosts o correos exactos para impedir envíos salientes.</small>
+            </div>
+            <button type="button" class="btn btn-sm btn-danger mt-2 mt-md-0" (click)="openBlacklistModal()">
+              <i class="bi bi-shield-plus"></i>&nbsp; Nuevo bloqueo
+            </button>
+          </div>
+
+          <div class="alert alert-warning py-2">Estos registros impiden el envío si el destinatario coincide con un dominio, host o correo bloqueado.</div>
+
+          <div class="row mb-2">
+            <div class="col-md-6 col-xl-6 mb-2"><input type="text" class="form-control form-control-sm" [(ngModel)]="blacklistSearch" placeholder="Buscar por valor o motivo"></div>
+            <div class="col-md-3 col-xl-3 mb-2"><select class="custom-select custom-select-sm" [(ngModel)]="blacklistTypeFilter"><option value="ALL">Tipo: Todos</option><option *ngFor="let option of blacklistTypeOptions" [value]="option">{{ option }}</option></select></div>
+            <div class="col-md-3 col-xl-3 mb-2"><select class="custom-select custom-select-sm" [(ngModel)]="blacklistStatusFilter"><option value="ALL">Estado: Todos</option><option value="ACTIVE">Solo activos</option><option value="INACTIVE">Solo inactivos</option></select></div>
+          </div>
+
+          <div class="empty-state text-center py-4" *ngIf="filteredBlacklist.length === 0">
+            <i class="bi bi-shield-check display-4 text-muted"></i>
+            <div class="font-weight-bold mt-2">Lista negra vacía</div>
+            <div class="text-muted small">No existen registros para los filtros actuales.</div>
+          </div>
+
+          <app-email-blacklist-table
+            *ngIf="filteredBlacklist.length > 0"
+            [rows]="filteredBlacklist"
+            (edit)="openBlacklistModal($event)"
+            (toggle)="toggleBlacklist($event)"
+            (remove)="removeBlacklist($event)">
+          </app-email-blacklist-table>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="accountDrawerOpen">
+  <div class="modal-card modal-card-wide form-elegante">
+    <div class="card-header bg-info text-white d-flex align-items-center justify-content-between">
+      <h6 class="m-0 font-weight-bold"><i class="bi bi-send-fill"></i>&nbsp; {{ selectedAccount ? 'Editar cuenta de envío' : 'Nueva cuenta de envío' }}</h6>
+      <button class="btn btn-sm btn-outline-light" type="button" (click)="accountDrawerOpen = false"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <form class="drawer-body" [formGroup]="accountForm">
+      <div class="row">
+        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Code</label><input type="text" class="form-control form-control-sm" formControlName="code"><small class="text-muted">Identificador técnico único para backend y auditoría.</small></div></div>
+        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Name</label><input type="text" class="form-control form-control-sm" formControlName="name"></div></div>
+        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Provider</label><input type="text" class="form-control form-control-sm" formControlName="provider"></div></div>
+        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Tipo de transporte</label><select class="custom-select custom-select-sm" formControlName="transportType"><option *ngFor="let option of transportOptions" [value]="option">{{ option }}</option></select></div></div>
+        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Correo remitente</label><input type="email" class="form-control form-control-sm" formControlName="fromAddress"></div></div>
+        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Nombre remitente</label><input type="text" class="form-control form-control-sm" formControlName="fromName"></div></div>
+        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">ReplyTo</label><input type="email" class="form-control form-control-sm" formControlName="replyTo"></div></div>
+        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Uso por defecto</label><select class="custom-select custom-select-sm" formControlName="defaultForType"><option *ngFor="let option of defaultUseOptions" [value]="option">{{ option }}</option></select></div></div>
+      </div>
+
+      <div class="border rounded p-2 mb-3" *ngIf="transportType() === 'SMTP'">
+        <div class="small font-weight-bold text-info mb-2">Configuración SMTP</div>
+        <div class="row">
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Host</label><input type="text" class="form-control form-control-sm" formControlName="host"><small class="text-muted">Ejemplo: smtp.office365.com</small></div></div>
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Port</label><input type="number" class="form-control form-control-sm" formControlName="port"></div></div>
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Protocol</label><input type="text" class="form-control form-control-sm" formControlName="protocol"></div></div>
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">SecurityType</label><select class="custom-select custom-select-sm" formControlName="securityType"><option *ngFor="let option of securityOptions" [value]="option">{{ option }}</option></select></div></div>
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold d-block">Auth required</label><input type="checkbox" formControlName="authRequired"></div></div>
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Username</label><input type="text" class="form-control form-control-sm" formControlName="username"></div></div>
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Password</label><input type="password" class="form-control form-control-sm" formControlName="password"></div></div>
+        </div>
+      </div>
+
+      <div class="border rounded p-2 mb-3" *ngIf="transportType() === 'API_HTTP'">
+        <div class="small font-weight-bold text-info mb-2">Configuración de llave API HTTP</div>
+        <div class="row">
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Llave API</label><input type="text" class="form-control form-control-sm" formControlName="apiKeyName" placeholder="notificacionesEpmapat"></div></div>
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Clave</label><input type="password" class="form-control form-control-sm" formControlName="apiKey" placeholder="**********F0B38"></div></div>
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Nivel de acceso</label><select class="custom-select custom-select-sm" formControlName="apiAccessLevel"><option *ngFor="let option of apiAccessLevelOptions" [value]="option">{{ option }}</option></select></div></div>
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold d-block">Acceso restringido</label><input type="checkbox" formControlName="apiRestrictedAccess"></div></div>
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold d-block">Llave habilitada</label><input type="checkbox" formControlName="apiKeyEnabled"></div></div>
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Vence</label><input type="date" class="form-control form-control-sm" formControlName="apiExpiresAt"><small class="text-muted">Déjalo vacío si no expira.</small></div></div>
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Creado</label><input type="text" class="form-control form-control-sm" formControlName="apiCreatedAt" placeholder="2026-03-27T22:02:00"></div></div>
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Última actividad</label><input type="text" class="form-control form-control-sm" formControlName="apiLastActivityAt" placeholder="Nunca"></div></div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold d-block">Cuenta activa</label><input type="checkbox" formControlName="active"></div></div>
+        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold d-block">Cuenta predeterminada</label><input type="checkbox" formControlName="defaultAccount"></div></div>
+      </div>
+    </form>
+
+    <div class="card-footer text-center">
+      <button type="button" class="btn btn-sm btn-outline-secondary mr-2" (click)="accountDrawerOpen = false"><i class="bi bi-x-circle"></i>&nbsp; Cancelar</button>
+      <button type="button" class="btn btn-sm btn-success" (click)="submitAccount()"><i class="bi bi-check-circle"></i>&nbsp; Guardar cuenta</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="composeDrawerOpen">
+  <div class="modal-card modal-card-wide form-elegante">
+    <div class="card-header bg-warning text-dark d-flex align-items-center justify-content-between">
+      <h6 class="m-0 font-weight-bold"><i class="bi bi-arrow-repeat"></i>&nbsp; {{ composeMode === 'edit-resend' ? 'Editar y reenviar' : 'Reenviar correo' }}</h6>
+      <button class="btn btn-sm btn-outline-dark" type="button" (click)="composeDrawerOpen = false"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <form class="drawer-body" [formGroup]="composeForm">
+      <div class="row">
+        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Cuenta de envío</label><select class="custom-select custom-select-sm" formControlName="accountId"><option *ngFor="let account of accounts" [ngValue]="account.id">{{ account.name }}</option></select></div></div>
+        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Asunto</label><input type="text" class="form-control form-control-sm" formControlName="subject"></div></div>
+        <div class="col-md-12"><div class="form-group mb-2"><label class="small font-weight-bold">To</label><input type="text" class="form-control form-control-sm" formControlName="to" placeholder="correo1@dominio.com, correo2@dominio.com"></div></div>
+        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Cc</label><input type="text" class="form-control form-control-sm" formControlName="cc"></div></div>
+        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Bcc</label><input type="text" class="form-control form-control-sm" formControlName="bcc"></div></div>
+        <div class="col-md-12"><div class="form-group mb-2"><label class="small font-weight-bold">Contenido HTML o texto</label><textarea rows="10" class="form-control form-control-sm" formControlName="body"></textarea></div></div>
+      </div>
+    </form>
+
+    <div class="card-footer text-center">
+      <button type="button" class="btn btn-sm btn-outline-secondary mr-2" (click)="composeDrawerOpen = false">Cancelar</button>
+      <button type="button" class="btn btn-sm btn-warning" (click)="submitCompose()"><i class="bi bi-send"></i>&nbsp; {{ composeMode === 'edit-resend' ? 'Guardar y reenviar' : 'Reenviar ahora' }}</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="detailDrawerOpen">
+  <div class="modal-card modal-card-wide form-elegante">
+    <div class="card-header bg-secondary text-white d-flex align-items-center justify-content-between">
+      <h6 class="m-0 font-weight-bold"><i class="bi bi-card-list"></i>&nbsp; {{ detailMode === 'email' ? 'Detalle de correo' : 'Detalle de cuenta' }}</h6>
+      <button class="btn btn-sm btn-outline-light" type="button" (click)="closeDetail()"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <div class="drawer-body detail-stack" *ngIf="detailMode === 'email' && selectedEmail">
+      <div class="detail-item"><span>ID</span><strong class="mono">{{ selectedEmail.id }}</strong></div>
+      <div class="detail-item"><span>Estado</span><app-email-status-badge [label]="selectedEmail.state" [tone]="toneForState(selectedEmail.state)"></app-email-status-badge></div>
+      <div class="detail-item"><span>Tipo</span><strong>{{ selectedEmail.type }}</strong></div>
+      <div class="detail-item"><span>Cuenta usada</span><strong>{{ selectedAccount?.name }} ({{ selectedEmail.accountCode }})</strong></div>
+      <div class="detail-item"><span>FromAddress</span><strong>{{ selectedEmail.fromAddress }}</strong></div>
+      <div class="detail-item"><span>To</span><strong>{{ selectedEmail.to.join(', ') }}</strong></div>
+      <div class="detail-item"><span>Cc</span><strong>{{ selectedEmail.cc.join(', ') || 'Sin copia' }}</strong></div>
+      <div class="detail-item"><span>Bcc</span><strong>{{ selectedEmail.bcc.join(', ') || 'Sin copia oculta' }}</strong></div>
+      <div class="detail-item"><span>CorrelationId</span><strong>{{ selectedEmail.correlationId }}</strong></div>
+      <div class="detail-item"><span>Intentos</span><strong>{{ selectedEmail.attempts }}</strong></div>
+      <div class="detail-item"><span>LastError</span><strong>{{ selectedEmail.lastError || 'Sin error' }}</strong></div>
+      <div class="detail-item"><span>CreatedAt</span><strong>{{ selectedEmail.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</strong></div>
+      <div class="detail-item"><span>SentAt</span><strong>{{ selectedEmail.sentAt ? (selectedEmail.sentAt | date:'dd/MM/yyyy HH:mm:ss') : 'Pendiente' }}</strong></div>
+      <div class="border rounded p-2 bg-white"><div class="font-weight-bold mb-2">Contenido</div><div [innerHTML]="selectedEmail.body"></div></div>
+      <div class="border rounded p-2 bg-white"><div class="font-weight-bold mb-2">Adjuntos</div><div *ngIf="!selectedEmail.attachments.length" class="text-muted">Sin adjuntos</div><div *ngFor="let attachment of selectedEmail.attachments">{{ attachment.name }} - {{ attachment.sizeLabel }}</div></div>
+    </div>
+
+    <div class="drawer-body detail-stack" *ngIf="detailMode === 'account' && selectedAccount">
+      <div class="detail-item"><span>Código</span><strong>{{ selectedAccount.code }}</strong></div>
+      <div class="detail-item"><span>Provider</span><strong>{{ selectedAccount.provider }}</strong></div>
+      <div class="detail-item"><span>Correo remitente</span><strong>{{ selectedAccount.fromAddress }}</strong></div>
+      <div class="detail-item"><span>ReplyTo</span><strong>{{ selectedAccount.replyTo }}</strong></div>
+      <div class="detail-item"><span>Transporte</span><strong>{{ selectedAccount.transportType }}</strong></div>
+      <div class="detail-item"><span>Uso por defecto</span><strong>{{ selectedAccount.defaultForType }}</strong></div>
+      <div class="detail-item"><span>Activa</span><app-email-status-badge [label]="selectedAccount.active ? 'ACTIVA' : 'INACTIVA'" [tone]="selectedAccount.active ? 'success' : 'muted'"></app-email-status-badge></div>
+      <div class="detail-item"><span>Predeterminada</span><app-email-status-badge [label]="selectedAccount.defaultAccount ? 'SI' : 'NO'" [tone]="selectedAccount.defaultAccount ? 'success' : 'muted'"></app-email-status-badge></div>
+      <div class="detail-item" *ngIf="selectedAccount.transportType === 'SMTP'"><span>Host</span><strong>{{ selectedAccount.host }}:{{ selectedAccount.port }}</strong></div>
+      <div class="detail-item" *ngIf="selectedAccount.transportType === 'SMTP'"><span>Seguridad</span><strong>{{ selectedAccount.securityType }}</strong></div>
+      <div class="detail-item" *ngIf="selectedAccount.transportType === 'API_HTTP'"><span>Llave API</span><strong>{{ selectedAccount.apiKeyName }}</strong></div>
+      <div class="detail-item" *ngIf="selectedAccount.transportType === 'API_HTTP'"><span>Clave</span><strong>{{ selectedAccount.apiKey }}</strong></div>
+      <div class="detail-item" *ngIf="selectedAccount.transportType === 'API_HTTP'"><span>Nivel de acceso</span><strong>{{ selectedAccount.apiAccessLevel }}</strong></div>
+      <div class="detail-item" *ngIf="selectedAccount.transportType === 'API_HTTP'"><span>Acceso restringido</span><strong>{{ selectedAccount.apiRestrictedAccess ? 'Sí' : 'No' }}</strong></div>
+      <div class="detail-item" *ngIf="selectedAccount.transportType === 'API_HTTP'"><span>Llave habilitada</span><strong>{{ selectedAccount.apiKeyEnabled ? 'Sí' : 'No' }}</strong></div>
+      <div class="detail-item" *ngIf="selectedAccount.transportType === 'API_HTTP'"><span>Creado</span><strong>{{ selectedAccount.apiCreatedAt ? (selectedAccount.apiCreatedAt | date:'dd/MM/yyyy HH:mm') : 'Sin registro' }}</strong></div>
+      <div class="detail-item" *ngIf="selectedAccount.transportType === 'API_HTTP'"><span>Última actividad</span><strong>{{ selectedAccount.apiLastActivityAt ? (selectedAccount.apiLastActivityAt | date:'dd/MM/yyyy HH:mm') : 'Nunca' }}</strong></div>
+      <div class="detail-item" *ngIf="selectedAccount.transportType === 'API_HTTP'"><span>Vence</span><strong>{{ selectedAccount.apiExpiresAt ? (selectedAccount.apiExpiresAt | date:'dd/MM/yyyy') : 'Nunca' }}</strong></div>
+      <div class="detail-item"><span>Última prueba</span><strong>{{ selectedAccount.lastConnectionCheck ? (selectedAccount.lastConnectionCheck | date:'dd/MM/yyyy HH:mm:ss') : 'Sin registro' }}</strong></div>
+    </div>
+
+    <div class="card-footer text-center">
+      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="closeDetail()"><i class="bi bi-x-circle"></i>&nbsp; Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="blacklistModalOpen">
+  <div class="modal-card form-elegante">
+    <div class="card-header bg-danger text-white d-flex align-items-center justify-content-between">
+      <h6 class="m-0 font-weight-bold"><i class="bi bi-shield-slash"></i>&nbsp; {{ selectedBlacklist ? 'Editar bloqueo' : 'Nuevo bloqueo' }}</h6>
+      <button class="btn btn-sm btn-outline-light" type="button" (click)="blacklistModalOpen = false"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <form class="drawer-body" [formGroup]="blacklistForm">
+      <div class="row">
+        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Tipo de bloqueo</label><select class="custom-select custom-select-sm" formControlName="type"><option *ngFor="let option of blacklistTypeOptions" [value]="option">{{ option }}</option></select></div></div>
+        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Valor</label><input type="text" class="form-control form-control-sm" formControlName="value" placeholder="gmail.com o usuario@dominio.com"></div></div>
+        <div class="col-md-12"><div class="form-group mb-2"><label class="small font-weight-bold">Motivo</label><textarea rows="4" class="form-control form-control-sm" formControlName="reason"></textarea></div></div>
+        <div class="col-md-12"><div class="form-group mb-2"><label class="small font-weight-bold d-block">Bloqueo activo</label><input type="checkbox" formControlName="active"></div></div>
+      </div>
+    </form>
+
+    <div class="card-footer text-center">
+      <button type="button" class="btn btn-sm btn-outline-secondary mr-2" (click)="blacklistModalOpen = false">Cancelar</button>
+      <button type="button" class="btn btn-sm btn-danger" (click)="submitBlacklist()"><i class="bi bi-check-circle"></i>&nbsp; Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="confirmDialog.open">
+  <div class="confirm-card form-elegante">
+    <div class="card-header bg-dark text-white"><h6 class="m-0 font-weight-bold">{{ confirmDialog.title }}</h6></div>
+    <div class="p-3"><p class="mb-0">{{ confirmDialog.message }}</p></div>
+    <div class="card-footer text-center">
+      <button type="button" class="btn btn-sm btn-outline-secondary mr-2" (click)="closeConfirm()">Cancelar</button>
+      <button type="button" class="btn btn-sm btn-danger" (click)="confirmNow()">{{ confirmDialog.confirmLabel }}</button>
+    </div>
+  </div>
+</div>
+
+
+
+

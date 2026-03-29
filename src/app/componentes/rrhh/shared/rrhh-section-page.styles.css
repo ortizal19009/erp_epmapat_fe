@@ -1,0 +1,34 @@
+:host {
+  --bgcolor1: rgb(80, 4, 80);
+  --bgcolor2: rgb(250, 200, 250);
+  --header-text-color: #ffffff;
+}
+
+.rrhh-section-page { min-height: calc(100vh - 57px); }
+.cabecera { background-color: var(--bgcolor1); color: var(--header-text-color); }
+.detalle { background-color: var(--bgcolor2); }
+.sombra { box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+.op-9 { opacity: .9; }
+.resumen-wrap { background: linear-gradient(180deg, rgba(255,255,255,.97), rgba(248,250,252,.98)); }
+.summary-box { border: 1px solid rgba(17, 122, 139, .14); border-radius: 10px; background: #fff; padding: .9rem 1rem; box-shadow: 0 8px 24px rgba(0,0,0,.06); }
+.summary-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #6b7280; }
+.summary-value { font-size: 1.45rem; line-height: 1; font-weight: 700; color: #1f2937; margin-top: .2rem; }
+.summary-help { margin-top: .35rem; font-size: .78rem; color: #6b7280; }
+.summary-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+.summary-icon.tone-info { background: #dbeafe; color: #175cd3; }
+.summary-icon.tone-success { background: #d9f7e8; color: #0b7a43; }
+.summary-icon.tone-warning { background: #fff1cc; color: #946200; }
+.summary-icon.tone-danger { background: #ffe0df; color: #b42318; }
+.summary-icon.tone-primary { background: #d6f4ff; color: #117a8b; }
+.summary-icon.tone-muted { background: #eceff3; color: #495057; }
+.admin-table thead th { background: linear-gradient(180deg, #f8fafc, #edf2f7); border-top: 0; border-bottom: 1px solid rgba(0,0,0,.08); font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: #6b7280; white-space: nowrap; }
+.admin-table tbody td { vertical-align: middle; font-size: .82rem; }
+.alert-stack, .highlight-list { display: grid; gap: .75rem; }
+.alert-card, .highlight-item { border-radius: .8rem; padding: .8rem .9rem; border: 1px solid rgba(0,0,0,.06); background: #fff; }
+.alert-card.alert-warning { background: #fff8e6; border-color: #ffe39a; color: #8a6000; }
+.alert-card.alert-danger { background: #fff0ef; border-color: #ffc7c2; color: #a13229; }
+.alert-card.alert-info { background: #eef7ff; border-color: #c9e2ff; color: #175cd3; }
+.alert-card.alert-success { background: #ebfbf3; border-color: #b8ebce; color: #147d4a; }
+.highlight-title { font-size: .76rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #6b7280; }
+.highlight-value { margin-top: .3rem; font-size: 1.2rem; font-weight: 700; color: #1f2937; }
+.highlight-help { margin-top: .25rem; font-size: .78rem; color: #6b7280; }
