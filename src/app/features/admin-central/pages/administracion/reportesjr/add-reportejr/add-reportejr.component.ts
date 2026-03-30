@@ -9,9 +9,9 @@ import { RepoxopcionService } from '@servicios/administracion/repoxopcion.servic
 import { map, of } from 'rxjs';
 
 @Component({
-  selector: 'app-add-reportejr',
-  templateUrl: './add-reportejr.component.html',
-  styleUrls: ['./add-reportejr.component.css']
+   selector: 'app-add-reportejr',
+   templateUrl: './add-reportejr.component.html',
+   styleUrls: ['./add-reportejr.component.css']
 })
 export class AddReportejrComponent implements OnInit {
 
@@ -64,7 +64,10 @@ export class AddReportejrComponent implements OnInit {
       console.log('e.target.value: ', e.target.value)
       if (e.target.value != '') {
          this.repoxopService.datalist(e.target.value).subscribe({
-            next: datos => this.repoxopcion = datos,
+            next: datos => {
+               this.repoxopcion = datos;
+               console.log('repoxopcion: ', this.repoxopcion);
+            },
             error: err => {
                console.error(err.error);
                this.authService.mostrarError('Error al buscar en Repoxopcion', err.error);

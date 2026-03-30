@@ -635,7 +635,6 @@ export class LecturasComponent implements OnInit {
 
       let suma = 0;
       let calculos: any = await this.lecService.getValoresSimuladosV2_async(body);
-      console.log(`Cálculos para cuenta ${this._lecturas[i].idabonado_abonados.idabonado}:`, calculos);
       suma = calculos.Total;
       this.totalcalc = suma;
       this._lecturas[i].total1 = suma;
