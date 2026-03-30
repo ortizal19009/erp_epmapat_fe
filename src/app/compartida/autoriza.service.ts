@@ -5,6 +5,8 @@ import { Definir } from '../modelos/administracion/definir.model';
 import { DefinirService } from '../servicios/administracion/definir.service';
 import { Observable, of } from 'rxjs';
 import Swal from 'sweetalert2';
+import { environment } from 'src/environments/environment';
+const backend = environment.BACK;
 
 @Injectable({
   providedIn: 'root',
@@ -25,7 +27,7 @@ export class AutorizaService implements OnDestroy, CanActivate {
   perfil: string;
   msgval: boolean = true;
   modules: any;
-  anio: number = 2025
+  anio = 2026;
   private intervalId: any;
 
   ngOnDestroy(): void {
@@ -34,7 +36,7 @@ export class AutorizaService implements OnDestroy, CanActivate {
     }
   }
 
-  constructor(private router: Router,private defService: DefinirService) { }
+  constructor(private router: Router, private defService: DefinirService) { }
 
   public enabModulos(): void {
     if (!this.sessionlog) {
@@ -146,6 +148,7 @@ export class AutorizaService implements OnDestroy, CanActivate {
   getEmpresa() {
     this.defService.getByIddefinir(1).subscribe({
       next: (definir: Definir) => {
+        console.log('Definir obtenido: ', definir);
         // OJO: Falta validar la Empresa con la licencia
         this.setDatosEmpresa({
           empresa: definir.empresa,

@@ -1,0 +1,134 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start cabecera border sombra">
+         <div class="col-sm-3">
+            <h5 class="font-weight-bold text-truncate mt-0 my-0"> <i class="bi bi-columns text-warning"></i>&nbsp;
+               Reportes Jasper</h5>
+         </div>
+         <div class="col-sm-9">
+            <form [formGroup]="formBuscar" (ngSubmit)="buscar()">
+               <div class="row my-0">
+
+                  <div class="input-group col-sm-7">
+                     <input type="text" class="form-control form-control-sm col-sm-3" formControlName="repoxopcion"
+                        list="repoxopcionList" (input)="datalistRepoxopcion($event)" placeholder="Opción">
+                     <datalist role="listbox" id="repoxopcionList">
+                        <option *ngFor="let r of repoxopcion" [value]="r.codigo"> {{ r.opcion +': '+ r.nombre }}
+                        </option>
+                     </datalist>
+                     <input type="text" class="form-control form-control-sm col-sm-4" formControlName="nomrep"
+                        placeholder="Nombre">
+                     <input type="text" class="form-control form-control-sm text-center" formControlName="desrep"
+                        placeholder="Descripción">
+                  </div>
+
+                  <div class="input-group col-sm-2">
+                     <button class="btn btn-primary btn-sm">
+                        <i *ngIf="swbuscando" class="fa fa-spinner"></i>
+                        <i *ngIf="!swbuscando" class="fa fa-search"></i> {{txtbuscar}}
+                     </button>
+                  </div>
+
+                  <div *ngIf="reportesjr.length" class="input-group col-sm-2">
+                     <input type="text" class="form-control form-control-sm text-center" formControlName="filtroControl"
+                        placeholder="Filtrar...">
+                  </div>
+
+                  <div class="btn-group ml-auto mt-0">
+                     <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
+                        data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+                     </button>
+                     <div class="dropdown-menu dropdown-menu-right bg-dark roboto ">
+                        <button class="dropdown-item" type="button" (click)="nuevo()">
+                           <i class="bi-file-earmark-plus text-info"></i>&nbsp; Nuevo</button>
+                        <button class="dropdown-item" type="button" (click)="imprimir()">
+                           <i class="bi bi-printer text-info"></i>&nbsp; Imprimir / Exportar</button>
+                        <button class="dropdown-item" type="button" (click)="cerrar()">
+                           <i class="bi-x-circle text-info"></i>&nbsp; Cerrar</button>
+                     </div>
+                  </div>
+               </div>
+            </form>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="container-fluid">
+   <div class="row mb-0">
+      <div class="col-sm-12">
+         <table *ngIf="reportesjr.length" class="table table-hover table-bordered table-sm sombra">
+            <thead class="cabecera">
+               <tr class="pad0">
+                  <th class=" text-truncate cursor" (click)="ordenarPor('codigo')">Código
+                     <i *ngIf="ordenColumna === 'codigo'"
+                        [ngClass]="{'bi bi-caret-up-fill force-warning': ordenAscendente,'bi bi-caret-down-fill text-warning': !ordenAscendente}"></i>
+                  </th>
+
+                  <th class="text-truncate cursor" (click)="ordenarPor('opcion')">Opción
+                     <i *ngIf="ordenColumna === 'opcion'"
+                        [ngClass]="{'bi bi-caret-up-fill force-warning': ordenAscendente,'bi bi-caret-down-fill text-warning': !ordenAscendente}"></i>
+                  </th>
+
+                  <th class="cursor" (click)="ordenarPor('nomrep')">Nombre
+                     <i *ngIf="ordenColumna === 'nomrep'"
+                        [ngClass]="{'bi bi-caret-up-fill force-warning': ordenAscendente,'bi bi-caret-down-fill text-warning': !ordenAscendente}"></i>
+                  </th>
+
+                  <th class="cursor text-center" (click)="ordenarPor('nomrep')">Mtd
+                     <i *ngIf="ordenColumna === 'nomrep'"
+                        [ngClass]="{'bi bi-caret-up-fill force-warning': ordenAscendente,'bi bi-caret-down-fill text-warning': !ordenAscendente}"></i>
+                  </th>
+
+                  <th class="col-sm-3 cursor" (click)="ordenarPor('desrep')">Descripción
+                     <i *ngIf="ordenColumna === 'desrep'"
+                        [ngClass]="{'bi bi-caret-up-fill force-warning': ordenAscendente,'bi bi-caret-down-fill text-warning': !ordenAscendente}"></i>
+                  </th>
+                  <th class="col-sm-1">Parámetros</th>
+                  <th></th>
+               </tr>
+            </thead>
+
+            <tbody class="detalle roboto small">
+               <tr *ngFor="let repojr of repojrFiltrados; let i = index" 
+               [ngClass]="{ 'fila': repojr.metodo === 1, 'pad0': true }"
+                  (click)="onCellClick($event, repojr )">
+                  <td><i *ngIf="repojr.idreporte == ultIdSelec" class="bi bi-caret-right-fill text-primary"></i>
+                     {{ repojr.repoxopcion!.codigo}}</td>
+                  <td>{{ repojr.repoxopcion!.opcion}}</td>
+                  <td>{{ repojr.nomrep}}</td>
+                  <td class="text-center toolt" [title]="nombreMetodo(repojr.metodo!)">{{repojr.metodo}}</td>
+                  <td class="text-left text-truncate ancho200" data-toggle="tooltip"
+                     [title]="repojr.desrep && repojr.desrep.length > 30 ? repojr.desrep : ''">
+                     {{ repojr.desrep }}
+                  </td>
+
+                  <td class="text-left text-truncate ancho100"> {{ repojr.parametros | json }} </td>
+
+                  <td class="text-center">
+                     <div class="btn-group py-0">
+                        <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
+                           aria-expanded="false">
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right popLista">
+                           <button class="dropdown-item" type="button" (click)="parametros(repojr)">
+                              <i class="bi bi-filter-circle"></i>&nbsp; Parámetros</button>
+                           <button class="dropdown-item" type="button" (click)="modificar(repojr)">
+                              <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
+                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#elimArticulo"
+                              (click)="eliminar( repojr )">
+                              <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
+                        </div>
+                     </div>
+                  </td>
+               </tr>
+            </tbody>
+            <tfoot class="font-weight-bold detalle roboto small pad0">
+               <td></td>
+               <td colspan="6">TOTAL: {{repojrFiltrados.length}}</td>
+            </tfoot>
+         </table>
+      </div>
+   </div>
+
+</div>

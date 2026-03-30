@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import { AutorizaService } from '@compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Eliminadosapp } from 'src/app/modelos/administracion/eliminadosapp.model';
 import { Certipresu } from 'src/app/modelos/contabilidad/certipresu.model';
@@ -19,15 +19,15 @@ import Swal from 'sweetalert2';
 
 export class CertipresuComponent implements OnInit {
 
-   formBuscar: FormGroup;
+   formBuscar!: FormGroup;
    certipresu: Certipresu[] = [];
-   buscarCertipresu: { desdeNum: number, hastaNum: number, desdeFecha: string, hastaFecha: string }
-   swdesdehasta: boolean; //Visibilidad Buscar últimos
-   filtro: string;
-   tot: number;
-   sumvalor: number;
-   swfiltro: boolean;
-   ultIdSelec: number = -1;
+   buscarCertipresu: { desdeNum: number, hastaNum: number, desdeFecha: string, hastaFecha: string } | null = null;
+   swdesdehasta = false; //Visibilidad Buscar últimos
+   filtro = '';
+   tot = 0;
+   sumvalor = 0;
+   swfiltro = false;
+   ultIdSelec = -1;
 
    constructor(private fb: FormBuilder, private router: Router, public authService: AutorizaService, private coloresService: ColoresService,
       private certiService: CertipresuService, private parxcerService: PartixcertiService, private elimService: EliminadosappService) { }
@@ -39,14 +39,29 @@ export class CertipresuComponent implements OnInit {
       if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
       else this.buscaColor();
 
-      const datos = this.authService.getDatosEmpresa()
-      const año = datos!.fechap.toString().slice(0, 4);
+      const datos = this.authService.getDatosEmpresa();
+      let año = new Date().getFullYear().toString();
+      if (datos && datos.fechap) {
+         const fecha = new Date(datos.fechap);
+         if (!isNaN(fecha.getTime())) {
+            año = fecha.getFullYear().toString();
+         }
+      } else {
+         // Trigger async loading of company data for future views if not present
+         this.authService.getEmpresa();
+      }
+
       this.formBuscar = this.fb.group({
          desdeNum: '',
          hastaNum: '',
          desdeFecha: año + '-01-01',
          hastaFecha: año + '-12-31',
       });
+
+      this.formBuscar.patchValue({
+         desdeFecha: año + '-01-01',
+         hastaFecha: año + '-12-31',
+      })
 
       //Datos de búsqueda: últimas Certificaciones o guardadas
       this.ultIdSelec = sessionStorage.getItem('ultidcerti') ? Number(sessionStorage.getItem('ultidcerti')) : 0;

@@ -308,7 +308,6 @@ import { HomeComponent } from './features/admin-central/pages/administracion/hom
 import { StatusConveniosComponent } from './componentes/convenios/status-convenios/status-convenios.component';
 import { CvClientesComponent } from './componentes/coactivas/carteras-vencidas/cv-clientes/cv-clientes.component';
 import { AnularConvenioComponent } from './componentes/convenios/anular-convenio/anular-convenio.component';
-import { ReportesjrComponent } from './componentes/reportesjr/reportesjr.component';
 import { RutaToLectorComponent } from './componentes/rutas/ruta-to-lector/ruta-to-lector.component';
 import { SimuladordosComponent } from './componentes/pliego24/simuladordos/simuladordos.component';
 import { SimuladortresComponent } from './componentes/pliego24/simuladortres/simuladortres.component';
@@ -327,6 +326,11 @@ import { AddTrandetramiComponent } from './componentes/contabilidad/transaci/add
 import { ModiBenextranComponent } from './componentes/contabilidad/transaci/modi-benextran/modi-benextran.component';
 import { ModiPagoscobrosComponent } from './componentes/contabilidad/transaci/modi-pagoscobros/modi-pagoscobros.component';
 import { VisualFormatDirective } from './directives/visual-format.directive';
+import { AddReportejrComponent } from './features/admin-central/pages/administracion/reportesjr/add-reportejr/add-reportejr.component';
+import { ImpReportejrComponent } from './features/admin-central/pages/administracion/reportesjr/imp-reportejr/imp-reportejr.component';
+import { ModiReportejrComponent } from './features/admin-central/pages/administracion/reportesjr/modi-reportejr/modi-reportejr.component';
+import { RepoxopcionComponent } from './features/admin-central/pages/administracion/repoxopcion/repoxopcion/repoxopcion.component';
+import { ReportesjrComponent } from '@features/admin-central/pages/administracion/reportesjr/reportejr/reportejr.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
@@ -624,7 +628,6 @@ import { VisualFormatDirective } from './directives/visual-format.directive';
     StatusConveniosComponent,
     CvClientesComponent,
     AnularConvenioComponent,
-    ReportesjrComponent,
     RutaToLectorComponent,
     RecargosxcuentaComponent,
     ReFacturacionesComponent,
@@ -639,8 +642,13 @@ import { VisualFormatDirective } from './directives/visual-format.directive';
     AddPagoscobrosComponent,
     AddTrandetramiComponent,
     ModiBenextranComponent,
-    ModiPagoscobrosComponent, 
-    ],
+    ModiPagoscobrosComponent,
+    AddReportejrComponent,
+    ImpReportejrComponent,
+    ModiReportejrComponent,
+    ReportesjrComponent,
+    RepoxopcionComponent,
+  ],
 
   imports: [
     BrowserModule,

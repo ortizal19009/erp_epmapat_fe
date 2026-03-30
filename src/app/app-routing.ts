@@ -291,13 +291,16 @@ import { HomeComponent } from './features/admin-central/pages/administracion/hom
 import { StatusConveniosComponent } from './componentes/convenios/status-convenios/status-convenios.component';
 import { CvClientesComponent } from './componentes/coactivas/carteras-vencidas/cv-clientes/cv-clientes.component';
 import { AnularConvenioComponent } from './componentes/convenios/anular-convenio/anular-convenio.component';
-import { ReportesjrComponent } from './componentes/reportesjr/reportesjr.component';
 import { AuthGuard } from './servicios/administracion/auth-guard';
 import { CliDuplicadosComponent } from './componentes/clientes/cli-duplicados/cli-duplicados.component';
 import { RutaToLectorComponent } from './componentes/rutas/ruta-to-lector/ruta-to-lector.component';
 import { RecargosxcuentaComponent } from './componentes/facturacion/recargosxcuenta/recargosxcuenta.component';
 import { SriEmitidosImportComponent } from './componentes/facelectro/sri-emitidos-import/sri-emitidos-import.component';
 import { ReFacturacionesComponent } from './componentes/facturas/re-facturaciones/re-facturaciones.component';
+import { ReportesjrComponent } from '@features/admin-central/pages/administracion/reportesjr/reportejr/reportejr.component';
+import { AddReportejrComponent } from '@features/admin-central/pages/administracion/reportesjr/add-reportejr/add-reportejr.component';
+import { ModiReportejrComponent } from '@features/admin-central/pages/administracion/reportesjr/modi-reportejr/modi-reportejr.component';
+import { ImpReportejrComponent } from '@features/admin-central/pages/administracion/reportesjr/imp-reportejr/imp-reportejr.component';
 
 const routes: Routes = [
   //Consumo de Agua
@@ -1377,11 +1380,10 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   { path: 'definir', component: DefinirComponent, canActivate: [AuthGuard] },
-  {
-    path: 'reportesjr',
-    component: ReportesjrComponent,
-    canActivate: [AuthGuard],
-  },
+  { path: 'reportesjr', component: ReportesjrComponent, canActivate: [AuthGuard] },
+  { path: 'add-reportejr', component: AddReportejrComponent, canActivate: [AuthGuard] },
+  { path: 'modi-reportejr', component: ModiReportejrComponent, canActivate: [AuthGuard] },
+  { path: 'imp-reportejr', component: ImpReportejrComponent, canActivate: [AuthGuard] },
   {
     path: 'admin/swagger-microservicios',
     loadComponent: () => import('./features/settings/swagger-hub/swagger-hub').then(m => m.SwaggerHubComponent),
@@ -1450,7 +1452,7 @@ const routes: Routes = [
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],
 })
-export class AppRoutingModule {}
+export class AppRoutingModule { }
 
 
 

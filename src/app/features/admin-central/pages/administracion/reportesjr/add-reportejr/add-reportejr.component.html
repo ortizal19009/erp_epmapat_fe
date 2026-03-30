@@ -1,0 +1,133 @@
+<div class="content-header">
+   <div class="container-fluid">
+      <div class="row mt-5 justify-content-center text-center">
+         <div class="col-sm-7 sombra cabecera border">
+            <h5 class="font-weight-bold mt-2">Nuevo Reporte Jasper</h5>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="card card-body col-sm-7 detalle sombra roboto">
+            <form [formGroup]="formReportejr">
+               <div class="row">
+                  <div class="form-group col-md-12 mt-1">
+                     <div class="input-group input-group-sm mb-1 ">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold robotosmall">Opción<sup
+                                 class="green">*</sup></span>
+                        </div>
+                        <input type="text" class="form-control form-control-sm col-sm-3" formControlName="repoxopcion"
+                           list="repoxopcionList" (input)="onRepoxopcionSelected($event); repoxopcionxCodigo($event)"
+                           [ngClass]="{'is-invalid': f['repoxopcion'].invalid && f['repoxopcion'].touched,'is-valid': f['repoxopcion'].valid, '': f['repoxopcion'].untouched}">
+                        <datalist role="listbox" id="repoxopcionList">
+                           <option *ngFor="let repoxop of repoxopcion" [value]="repoxop.codigo"> {{ repoxop.nombre }}
+                           </option>
+                        </datalist>
+                        <input type="text" class="form-control" formControlName="nombre" readonly tabindex="-1">
+                     </div>
+                     <div *ngIf="authService.msgval && f['repoxopcion'].errors && f['repoxopcion'].touched">
+                        <div *ngIf="f['repoxopcion'].errors['required']"
+                           class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border" role="alert">
+                           <strong>Ups!</strong> La opción a la que se añadirá el Reporte es obligatoria
+                        </div>
+                        <div *ngIf="f['repoxopcion'].errors['invalido']"
+                           class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border" role="alert">
+                           <strong>Ups!</strong> No ha seleccionado una opción
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-12">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <input type="file" class="custom-file-input" id="archivos" (change)="onFilesSelected($event)"
+                              accept=".jrxml,.jasper" multiple>
+                           <label class="custom-file-label" for="archivos" data-browse="Buscar">
+                              {{ fileLabel || 'Seleccionar los archivos (JRXML y JASPER)' }}
+                           </label>
+                        </div>
+                     </div>
+                     <!-- Validaciones del FormControl 'archivos' -->
+                     <div *ngIf="f['archivos'].errors && f['archivos'].touched">
+                        <div *ngIf="f['archivos'].errors['archivosIncompletos']"
+                           class="alert alert-warning py-1 px-2 border robotosmall">
+                           <strong>Ups!</strong> Debes seleccionar ambos archivos: JRXML y JASPER.
+                        </div>
+                        <div *ngIf="f['archivos'].errors['excesoArchivos']"
+                           class="alert alert-warning py-1 px-2 border robotosmall">
+                           <strong>Ups!</strong> Seleccionaste más de dos archivos. Solo se permite un JRXML y un
+                           JASPER.
+                        </div>
+                        <div *ngIf="f['archivos'].errors['nombresNoCoinciden']"
+                           class="alert alert-warning py-1 px-2 border robotosmall">
+                           <strong>Ups!</strong> Los nombres base de los archivos no coinciden.
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-6">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Nombre<sup class="green">*</sup></span>
+                        </div>
+                        <input type="text" class="form-control" formControlName="nomrep" readonly tabindex="-1"
+                           [ngClass]="{'is-invalid': f['nomrep'].invalid && f['nomrep'].touched,
+                        'is-valid': f['nomrep'].valid, '': f['nomrep'].untouched}">
+                     </div>
+                     <div *ngIf="authService.msgval && f['nomrep'].errors && f['nomrep'].touched">
+                        <div *ngIf="f['nomrep'].errors['required']"
+                           class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border" role="alert">
+                           <strong>Ups!</strong> El Nombre de Reporte es obligatorio
+                        </div>
+                        <div *ngIf="f['nomrep'].errors['minlength']"
+                           class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border" role="alert">
+                           <strong>Ups!</strong> Debe tener al menos 3 caracteres alfabéticos
+                        </div>
+                        <div *ngIf="f['nomrep'].errors['existe']"
+                           class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border" role="alert">
+                           <strong>Ups!</strong> Ese Reporte ya existe
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-6">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Método<sup class="green">*</sup></label>
+                        </div>
+                        <select class="custom-select" formControlName="metodo">
+                           <option value=1>1. SQL Directo</option>
+                           <option value=2>2. Conjunto de Beans</option>
+                           <option value=3>3. Desde el Frontend</option>
+                        </select>
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-12 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <span class="input-group-text font-weight-bold">Descripción</span>
+                        </div>
+                        <input type="text" class="form-control form-control-sm" formControlName="desrep">
+                     </div>
+                  </div>
+               </div>
+            </form>
+
+            <div class="mt-3 mb-0 text-center">
+               <button type="button" class="btn btn-success btn-sm mb-1" [disabled]="!formReportejr.valid"
+                  (click)="guardar()">
+                  <i class="fa fa-check-circle"></i> Aceptar</button>
+               <button class="btn btn-outline-success btn-sm mx-2 btn-sm mb-1" (click)="regresar()">
+                  <i class="fa fa-times-circle"></i> Cancelar</button>
+            </div>
+
+         </div>
+      </div>
+   </div>
+
+</div>

@@ -609,6 +609,7 @@ export class LecturasComponent implements OnInit {
   //Calcula los valores a recaudar
   async calcular() {
     const lecturasNegativas = this.getLecturasNegativas();
+    console.log('Lecturas con consumo negativo:', lecturasNegativas);
     if (lecturasNegativas.length > 0) {
       await this.mostrarLecturasNegativas(lecturasNegativas);
       return;
@@ -633,7 +634,8 @@ export class LecturasComponent implements OnInit {
       };
 
       let suma = 0;
-      let calculos: any = this.lecService.getValoresSimuladosV2(body);
+      let calculos: any = await this.lecService.getValoresSimuladosV2_async(body);
+      console.log(`Cálculos para cuenta ${this._lecturas[i].idabonado_abonados.idabonado}:`, calculos);
       suma = calculos.Total;
       this.totalcalc = suma;
       this._lecturas[i].total1 = suma;

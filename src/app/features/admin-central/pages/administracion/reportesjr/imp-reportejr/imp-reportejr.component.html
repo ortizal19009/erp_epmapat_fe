@@ -1,0 +1,156 @@
+<div class="content mt-1 pt-1 px-2">
+   <div class="container-fluid">
+      <div class="row mt-0 px-1 pt-1 justify-content-center cabecera border sombra">
+         <h4 *ngIf="swimprimir" class="font-weight-bold text-truncate ml-2">
+            <i class="bi-printer impexp" (click)="impriexpor()"></i> &nbsp; Imprimir {{nomrep}}.jasper
+         </h4>
+         <h4 *ngIf="!swimprimir" class="font-weight-bold text-truncate">
+            <i class="bi-file-earmark-arrow-up impexp" (click)="impriexpor()"></i> &nbsp; Exportar {{nomrep}}.jasper
+         </h4>
+      </div>
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="card card-body col-sm-7 detalle sombra">
+            <form *ngIf="repoxopcion" [formGroup]="formImprimir">
+               <div class="row">
+
+                  <div class="form-group col-md-12">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Opción</label>
+                        </div>
+                        <input type="text" class="form-control col-md-4" formControlName="opcion" readonly
+                           tabindex="-1">
+                        <input type="text" class="form-control robotosmall" formControlName="nomopcion" readonly
+                           tabindex="-1">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-6">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Método<sup class="green">*</sup></label>
+                        </div>
+                        <input type="text" class="form-control" formControlName="metodo" readonly
+                           tabindex="-1">
+                        <!-- <select class="custom-select" formControlName="" readonly tabindex="-1">
+                           <option value=1>1. SQL Directo</option>
+                           <option value=2>2. Conjunto de Beans</option>
+                           <option value=3>3. Desde el Frontend</option>
+                        </select> -->
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-12">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Descripción</label>
+                        </div>
+                        <input type="text" class="form-control robotosmall" formControlName="desrep" readonly
+                           tabindex="-1">
+                     </div>
+                  </div>
+
+                  <div class="form-group col-md-8">
+                     <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text">Reporte guardado</label>
+                        </div>
+                        <input type="text" class="form-control robotosmall" formControlName="jrxml" readonly
+                           tabindex="-1" [ngClass]="{'text-danger': nomrep !== f['jrxml'].value}">
+                     </div>
+                  </div>
+
+                  <div *ngIf="!swimprimir" class="form-group col-sm-10 my-0 py-0">
+                     <div class="input-group input-group-sm mb-3">
+                        <div class="input-group-prepend">
+                           <label class="input-group-text" id="inputGroup-sizing-sm">Nombre del archivo</label>
+                        </div>
+                        <input type="text" class="form-control" formControlName="nombrearchivo" maxlength="25"
+                           [ngClass]="{'is-invalid': f['nombrearchivo'].invalid && f['nombrearchivo'].touched,
+                           'is-valid': f['nombrearchivo'].valid, '': f['nombrearchivo'].untouched}">
+                        <input type="text" class="form-control robotosmall col-md-2 text-center"
+                           formControlName="extension" readonly tabindex="-1">
+                        <div class="input-group-append">
+                           <div class="btn-group py-0">
+                              <button type="button" class="btn btn-info btn-xs dropdown-toggle py-0"
+                                 data-toggle="dropdown" aria-expanded="false">
+                              </button>
+                              <div class="dropdown-menu dropdown-menu-right dropdownApp">
+                                 <button class="dropdown-item" type="button"
+                                    *ngFor="let exten of extensiones; let i = index" (click)="seleccionarExtension(i)">
+                                    <i [class]="exten.icono"></i>&nbsp;&nbsp;&nbsp; {{exten.nombre}}
+                                 </button>
+                              </div>
+                           </div>
+                        </div>
+
+                     </div>
+                  </div>
+
+                  <!-- ==== Card de PARAMETROS ===== -->
+                  <div class="d-flex col-sm-12 justify-content-center">
+                     <div *ngIf="swparametros" class="card col-sm-8 px-0 detalle">
+                        <div class="card-header cabecera mb-2">
+                           <h5 class="my-0"><i class="bi-filter-circle text-warning"></i> &nbsp; Parámetros</h5>
+                        </div>
+                        <div *ngFor="let p of parametros">
+                           <div class="input-group input-group-sm mb-2">
+                              <div class="input-group-prepend" [ngClass]="'col-sm-' + p.anchoCampo">
+                                 <label class="input-group-text">{{ p.nombre }}</label>
+                                 <ng-container [ngSwitch]="p.tipo">
+                                    <input class="form-control form-control-sm" *ngSwitchCase="'java.lang.String'"
+                                       type="text" [formControlName]="p.nombre" />
+                                    <input class="form-control form-control-sm text-center"
+                                       *ngSwitchCase="'java.lang.Integer'" type="number" [formControlName]="p.nombre" />
+                                    <input class="form-control form-control-sm text-center"
+                                       *ngSwitchCase="'java.util.Date'" type="date" [formControlName]="p.nombre" />
+                                    <input class="form-control form-control-sm" *ngSwitchCase="'java.lang.Boolean'"
+                                       type="checkbox" [formControlName]="p.nombre" />
+                                    <input class="form-control form-control-sm" *ngSwitchDefault type="text"
+                                       [formControlName]="p.nombre" />
+                                 </ng-container>
+
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+
+
+               </div>
+            </form>
+            <!-- Botones de Aceptar o Cancelar -->
+            <div *ngIf="!swbotones" class="text-center">
+               <button *ngIf="swimprimir" type='button' class='btn btn-success btn-sm mx-1' [disabled]="swbotones"
+                  (click)="generarJasper()">
+                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+               <button *ngIf="!swimprimir" type='button' class='btn btn-warning btn-sm mx-1' (click)="generarJasper()"
+                  [disabled]="!formImprimir.valid">
+                  <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+               <button class="btn btn-outline-success btn-sm mx-1" (click)="retornar()"><i
+                     class="fa fa-times-circle"></i> Cancelar</button>
+            </div>
+            <!-- Boton Mostrar reporte o Descargar -->
+            <div *ngIf="swbotones" class="text-center">
+               <button *ngIf="swimprimir" type="button" class="btn btn-success btn-block" data-toggle="modal"
+                  [disabled]="swcalculando" (click)="showReport()">
+                  <i *ngIf="swcalculando" class="fa fa-spinner"></i>
+                  <i *ngIf="!swcalculando" class="bi-eye"></i>&nbsp;&nbsp;&nbsp;{{txtcalculando}}
+               </button>
+               <button *ngIf="!swimprimir" type="button" class="btn btn-warning btn-block" [disabled]="swcalculando"
+                  (click)="descargarArchivo()">
+                  <i *ngIf="swcalculando" class="fa fa-spinner"></i>
+                  <i *ngIf="!swcalculando" class="bi-eye"></i>&nbsp;&nbsp;&nbsp;{{txtcalculando}}
+               </button>
+
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

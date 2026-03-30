@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ReportesjrComponent } from './reportesjr.component';
+import { RepoxopcionComponent } from './repoxopcion.component';
 
-describe('ReportesjrComponent', () => {
-  let component: ReportesjrComponent;
-  let fixture: ComponentFixture<ReportesjrComponent>;
+describe('RepoxopcionComponent', () => {
+  let component: RepoxopcionComponent;
+  let fixture: ComponentFixture<RepoxopcionComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ReportesjrComponent ]
+      declarations: [ RepoxopcionComponent ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ReportesjrComponent);
+    fixture = TestBed.createComponent(RepoxopcionComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

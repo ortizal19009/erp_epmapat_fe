@@ -52,7 +52,6 @@ export class PartixcertiComponent implements OnInit {
       if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
 
       const datosToPartixcertiJSON = sessionStorage.getItem('datosToPartixcerti');
-      console.log(datosToPartixcertiJSON)
       if (datosToPartixcertiJSON) {
          const datosToPartixcerti = JSON.parse(datosToPartixcertiJSON);
          this.idcerti = datosToPartixcerti.idcerti;
@@ -86,7 +85,6 @@ export class PartixcertiComponent implements OnInit {
    }
 
    buscaCertipresu() {
-      console.log(this.idcerti)
       this.certiService.getByIdCerti(this.idcerti).subscribe({
          next: (certipresu: Certipresu) => {
             this.navegador = certipresu.numero;
@@ -135,7 +133,6 @@ export class PartixcertiComponent implements OnInit {
       this.intpre = partixcerti.intpre.intpre;
       this.partida.saldo = +partixcerti.saldo;
       this.partida.newsaldo = this.partida.saldo - partixcerti.valor;
-      // console.log('this.partida.newsaldo: ', this.partida.newsaldo)
       this.formPartixcerti.patchValue({
          intpre: partixcerti.intpre,
          codpar: partixcerti.intpre.codpar,
@@ -283,7 +280,6 @@ export class PartixcertiComponent implements OnInit {
    }
 
    imprimir() {
-      // console.log('Envia: ', this.idcerti)
       sessionStorage.setItem("partixcertiToImpExp", this.iCertificacion.numero.toString());
       this.router.navigate(['/imp-partixcerti']);
    }
