@@ -1,4 +1,4 @@
-﻿<div class="container-fluid mt-2 email-admin-page">
+<div class="container-fluid mt-2 email-admin-page">
   <div class="row justify-content-center">
     <div class="col-sm-12 col-md-11 col-lg-10">
 
@@ -238,49 +238,74 @@
     </div>
 
     <form class="drawer-body" [formGroup]="accountForm">
+      <div class="alert alert-info py-2 small">
+        Completa los campos segun el tipo de transporte. Los campos marcados como <strong>Obligatorio</strong> son necesarios para guardar la cuenta y para que el envio funcione correctamente.
+      </div>
+
       <div class="row">
-        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Code</label><input type="text" class="form-control form-control-sm" formControlName="code"><small class="text-muted">Identificador técnico único para backend y auditoría.</small></div></div>
-        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Name</label><input type="text" class="form-control form-control-sm" formControlName="name"></div></div>
-        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Provider</label><input type="text" class="form-control form-control-sm" formControlName="provider"></div></div>
-        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Tipo de transporte</label><select class="custom-select custom-select-sm" formControlName="transportType"><option *ngFor="let option of transportOptions" [value]="option">{{ option }}</option></select></div></div>
-        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Correo remitente</label><input type="email" class="form-control form-control-sm" formControlName="fromAddress"></div></div>
-        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Nombre remitente</label><input type="text" class="form-control form-control-sm" formControlName="fromName"></div></div>
-        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">ReplyTo</label><input type="email" class="form-control form-control-sm" formControlName="replyTo"></div></div>
-        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Uso por defecto</label><select class="custom-select custom-select-sm" formControlName="defaultForType"><option *ngFor="let option of defaultUseOptions" [value]="option">{{ option }}</option></select></div></div>
+        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Código</label><input type="text" class="form-control form-control-sm" formControlName="code"><small class="text-muted">Obligatorio. Identificador único de la cuenta en backend, auditoría y trazabilidad. Ejemplo: <span class="mono">MAIL_FACT_01</span>.</small></div></div>
+        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Nombre</label><input type="text" class="form-control form-control-sm" formControlName="name"><small class="text-muted">Obligatorio. Nombre descriptivo para reconocer la cuenta en el ERP. Ejemplo: Facturación principal.</small></div></div>
+        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Proveedor</label><input type="text" class="form-control form-control-sm" formControlName="provider"><small class="text-muted">Obligatorio. Indica el servicio que entrega el correo, por ejemplo Microsoft 365, Gmail SMTP o proveedor institucional.</small></div></div>
+        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Tipo de transporte</label><select class="custom-select custom-select-sm" formControlName="transportType"><option *ngFor="let option of transportOptions" [value]="option">{{ option }}</option></select><small class="text-muted">Obligatorio. Define qué bloque debes completar: <strong>SMTP</strong> para servidor de correo tradicional o <strong>API_HTTP</strong> para integración por llave/API.</small></div></div>
+        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Correo remitente</label><input type="email" class="form-control form-control-sm" formControlName="fromAddress"><small class="text-muted">Obligatorio. Dirección que verá el destinatario como remitente. Debe existir y estar autorizada por el proveedor.</small></div></div>
+        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Nombre remitente</label><input type="text" class="form-control form-control-sm" formControlName="fromName"><small class="text-muted">Obligatorio. Nombre visible junto al correo remitente. Ejemplo: ERP EPMAPAT.</small></div></div>
+        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Reply-To</label><input type="email" class="form-control form-control-sm" formControlName="replyTo"><small class="text-muted">Obligatorio. Correo al que llegarán las respuestas. Puede ser igual o distinto al remitente.</small></div></div>
+        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Uso por defecto</label><select class="custom-select custom-select-sm" formControlName="defaultForType"><option *ngFor="let option of defaultUseOptions" [value]="option">{{ option }}</option></select><small class="text-muted">Obligatorio. Clasifica la cuenta para facturación, notificaciones, envíos personalizados o uso general.</small></div></div>
       </div>
 
       <div class="border rounded p-2 mb-3" *ngIf="transportType() === 'SMTP'">
         <div class="small font-weight-bold text-info mb-2">Configuración SMTP</div>
+        <div class="alert alert-light py-2 small mb-2">
+          Para <strong>SMTP</strong> normalmente son obligatorios host, puerto, protocolo, seguridad y, si el servidor lo exige, usuario y contraseña.
+        </div>
         <div class="row">
-          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Host</label><input type="text" class="form-control form-control-sm" formControlName="host"><small class="text-muted">Ejemplo: smtp.office365.com</small></div></div>
-          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Port</label><input type="number" class="form-control form-control-sm" formControlName="port"></div></div>
-          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Protocol</label><input type="text" class="form-control form-control-sm" formControlName="protocol"></div></div>
-          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">SecurityType</label><select class="custom-select custom-select-sm" formControlName="securityType"><option *ngFor="let option of securityOptions" [value]="option">{{ option }}</option></select></div></div>
-          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold d-block">Auth required</label><input type="checkbox" formControlName="authRequired"></div></div>
-          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Username</label><input type="text" class="form-control form-control-sm" formControlName="username"></div></div>
-          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Password</label><input type="password" class="form-control form-control-sm" formControlName="password"></div></div>
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Host</label><input type="text" class="form-control form-control-sm" formControlName="host"><small class="text-muted">Obligatorio en SMTP. Dirección del servidor saliente. Ejemplo: <span class="mono">smtp.office365.com</span>.</small></div></div>
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Puerto</label><input type="number" class="form-control form-control-sm" formControlName="port"><small class="text-muted">Obligatorio en SMTP. Los más comunes son <span class="mono">587</span> para STARTTLS o <span class="mono">465</span> para SSL/TLS.</small></div></div>
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Protocolo</label><input type="text" class="form-control form-control-sm" formControlName="protocol"><small class="text-muted">Obligatorio en SMTP. Generalmente se usa <span class="mono">smtp</span>.</small></div></div>
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Tipo de seguridad</label><select class="custom-select custom-select-sm" formControlName="securityType"><option *ngFor="let option of securityOptions" [value]="option">{{ option }}</option></select><small class="text-muted">Obligatorio en SMTP. Debe coincidir con la configuración real del proveedor: NONE, STARTTLS o SSL_TLS.</small></div></div>
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold d-block">Requiere autenticación</label><input type="checkbox" formControlName="authRequired"><small class="text-muted d-block">Marca esta opción si el servidor exige usuario y contraseña. En la mayoría de proveedores modernos, sí es obligatorio.</small></div></div>
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Usuario</label><input type="text" class="form-control form-control-sm" formControlName="username"><small class="text-muted">Obligatorio si activas autenticación. Suele ser el correo completo o el usuario SMTP.</small></div></div>
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Contraseña</label><input type="password" class="form-control form-control-sm" formControlName="password"><small class="text-muted">Obligatoria si activas autenticación. Usa la clave SMTP, app password o secreto entregado por el proveedor.</small></div></div>
         </div>
       </div>
 
       <div class="border rounded p-2 mb-3" *ngIf="transportType() === 'API_HTTP'">
-        <div class="small font-weight-bold text-info mb-2">Configuración de llave API HTTP</div>
+        <div class="small font-weight-bold text-info mb-2">Configuración API HTTP</div>
+        <div class="alert alert-light py-2 small mb-2">
+          Para <strong>API_HTTP</strong> tu backend requiere al menos <strong>apiUrl</strong> y <strong>apiKey</strong>. La cabecera y el esquema de autenticación son opcionales, pero es buena práctica registrarlos para mantener claro cómo se autentica el proveedor.
+        </div>
         <div class="row">
-          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Llave API</label><input type="text" class="form-control form-control-sm" formControlName="apiKeyName" placeholder="notificacionesEpmapat"></div></div>
-          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Clave</label><input type="password" class="form-control form-control-sm" formControlName="apiKey" placeholder="**********F0B38"></div></div>
-          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Nivel de acceso</label><select class="custom-select custom-select-sm" formControlName="apiAccessLevel"><option *ngFor="let option of apiAccessLevelOptions" [value]="option">{{ option }}</option></select></div></div>
-          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold d-block">Acceso restringido</label><input type="checkbox" formControlName="apiRestrictedAccess"></div></div>
-          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold d-block">Llave habilitada</label><input type="checkbox" formControlName="apiKeyEnabled"></div></div>
-          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Vence</label><input type="date" class="form-control form-control-sm" formControlName="apiExpiresAt"><small class="text-muted">Déjalo vacío si no expira.</small></div></div>
-          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Creado</label><input type="text" class="form-control form-control-sm" formControlName="apiCreatedAt" placeholder="2026-03-27T22:02:00"></div></div>
-          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Última actividad</label><input type="text" class="form-control form-control-sm" formControlName="apiLastActivityAt" placeholder="Nunca"></div></div>
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">URL del endpoint API</label><input type="text" class="form-control form-control-sm" formControlName="apiUrl" placeholder="https://api.mail.example/send"><small class="text-muted">Obligatorio en API_HTTP. URL exacta del servicio que recibirá la solicitud de envío.</small></div></div>
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Clave API</label><input type="password" class="form-control form-control-sm" formControlName="apiKey" placeholder="**********F0B38"><small class="text-muted">Obligatoria al crear la cuenta. En edición puedes dejarla vacía si deseas conservar la que ya está guardada en backend.</small></div></div>
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Cabecera de autenticación</label><input type="text" class="form-control form-control-sm" formControlName="apiAuthHeader" placeholder="Authorization"><small class="text-muted">Opcional. Normalmente se usa <span class="mono">Authorization</span>.</small></div></div>
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Esquema de autenticación</label><select class="custom-select custom-select-sm" formControlName="apiAuthScheme"><option *ngFor="let option of apiAuthSchemeOptions" [value]="option">{{ option }}</option></select><small class="text-muted">Opcional. El valor más común es <span class="mono">Bearer</span>.</small></div></div>
         </div>
       </div>
 
       <div class="row">
-        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold d-block">Cuenta activa</label><input type="checkbox" formControlName="active"></div></div>
-        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold d-block">Cuenta predeterminada</label><input type="checkbox" formControlName="defaultAccount"></div></div>
+        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold d-block">Cuenta activa</label><input type="checkbox" formControlName="active"><small class="text-muted d-block">Recomendado. Si está desmarcada, la cuenta queda registrada pero no debería usarse para envíos.</small></div></div>
+        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold d-block">Cuenta predeterminada</label><input type="checkbox" formControlName="defaultAccount"><small class="text-muted d-block">Opcional. Marca esta opción solo si quieres que sea la cuenta principal para el tipo de uso seleccionado.</small></div></div>
       </div>
     </form>
+
+    <div class="px-3 pb-2">
+      <div class="border rounded p-2 bg-light">
+        <div class="small font-weight-bold text-info mb-2">Enviar correo de prueba</div>
+        <div class="small text-muted mb-2">Usa esta opción para comprobar que una cuenta ya guardada realmente puede encolar un mensaje hacia el correo que tú indiques.</div>
+        <div class="row align-items-end">
+          <div class="col-md-8 mb-2">
+            <label class="small font-weight-bold">Correo destino de prueba</label>
+            <input type="email" class="form-control form-control-sm" [(ngModel)]="testEmailRecipient" [ngModelOptions]="{standalone: true}" placeholder="usuario@dominio.com">
+            <small class="text-muted">Disponible solo para cuentas ya existentes. Si estás creando una cuenta nueva, primero guárdala.</small>
+          </div>
+          <div class="col-md-4 mb-2 text-md-right">
+            <button type="button" class="btn btn-sm btn-outline-info" (click)="sendTestEmail()" [disabled]="!canSendTestEmail()">
+              <i class="bi bi-envelope-paper"></i>&nbsp; {{ sendingTestEmail ? 'Enviando...' : 'Enviar prueba' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <div class="card-footer text-center">
       <button type="button" class="btn btn-sm btn-outline-secondary mr-2" (click)="accountDrawerOpen = false"><i class="bi bi-x-circle"></i>&nbsp; Cancelar</button>
@@ -350,14 +375,10 @@
       <div class="detail-item"><span>Predeterminada</span><app-email-status-badge [label]="selectedAccount.defaultAccount ? 'SI' : 'NO'" [tone]="selectedAccount.defaultAccount ? 'success' : 'muted'"></app-email-status-badge></div>
       <div class="detail-item" *ngIf="selectedAccount.transportType === 'SMTP'"><span>Host</span><strong>{{ selectedAccount.host }}:{{ selectedAccount.port }}</strong></div>
       <div class="detail-item" *ngIf="selectedAccount.transportType === 'SMTP'"><span>Seguridad</span><strong>{{ selectedAccount.securityType }}</strong></div>
-      <div class="detail-item" *ngIf="selectedAccount.transportType === 'API_HTTP'"><span>Llave API</span><strong>{{ selectedAccount.apiKeyName }}</strong></div>
-      <div class="detail-item" *ngIf="selectedAccount.transportType === 'API_HTTP'"><span>Clave</span><strong>{{ selectedAccount.apiKey }}</strong></div>
-      <div class="detail-item" *ngIf="selectedAccount.transportType === 'API_HTTP'"><span>Nivel de acceso</span><strong>{{ selectedAccount.apiAccessLevel }}</strong></div>
-      <div class="detail-item" *ngIf="selectedAccount.transportType === 'API_HTTP'"><span>Acceso restringido</span><strong>{{ selectedAccount.apiRestrictedAccess ? 'Sí' : 'No' }}</strong></div>
-      <div class="detail-item" *ngIf="selectedAccount.transportType === 'API_HTTP'"><span>Llave habilitada</span><strong>{{ selectedAccount.apiKeyEnabled ? 'Sí' : 'No' }}</strong></div>
-      <div class="detail-item" *ngIf="selectedAccount.transportType === 'API_HTTP'"><span>Creado</span><strong>{{ selectedAccount.apiCreatedAt ? (selectedAccount.apiCreatedAt | date:'dd/MM/yyyy HH:mm') : 'Sin registro' }}</strong></div>
-      <div class="detail-item" *ngIf="selectedAccount.transportType === 'API_HTTP'"><span>Última actividad</span><strong>{{ selectedAccount.apiLastActivityAt ? (selectedAccount.apiLastActivityAt | date:'dd/MM/yyyy HH:mm') : 'Nunca' }}</strong></div>
-      <div class="detail-item" *ngIf="selectedAccount.transportType === 'API_HTTP'"><span>Vence</span><strong>{{ selectedAccount.apiExpiresAt ? (selectedAccount.apiExpiresAt | date:'dd/MM/yyyy') : 'Nunca' }}</strong></div>
+      <div class="detail-item" *ngIf="selectedAccount.transportType === 'API_HTTP'"><span>Endpoint API</span><strong>{{ selectedAccount.apiUrl || 'Sin registro' }}</strong></div>
+      <div class="detail-item" *ngIf="selectedAccount.transportType === 'API_HTTP'"><span>Cabecera auth</span><strong>{{ selectedAccount.apiAuthHeader || 'Sin registro' }}</strong></div>
+      <div class="detail-item" *ngIf="selectedAccount.transportType === 'API_HTTP'"><span>Esquema de autenticación</span><strong>{{ selectedAccount.apiAuthScheme || 'Sin registro' }}</strong></div>
+      <div class="detail-item" *ngIf="selectedAccount.transportType === 'API_HTTP'"><span>Clave API registrada</span><strong>{{ selectedAccount.hasApiKey ? 'Sí' : 'No' }}</strong></div>
       <div class="detail-item"><span>Última prueba</span><strong>{{ selectedAccount.lastConnectionCheck ? (selectedAccount.lastConnectionCheck | date:'dd/MM/yyyy HH:mm:ss') : 'Sin registro' }}</strong></div>
     </div>
 
@@ -400,6 +421,11 @@
     </div>
   </div>
 </div>
+
+
+
+
+
 
 
 

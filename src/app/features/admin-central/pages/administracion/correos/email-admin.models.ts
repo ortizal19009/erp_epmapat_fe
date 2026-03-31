@@ -4,7 +4,7 @@ export type EmailDefaultUse = 'FACTURACION' | 'NOTIFICACION' | 'CUSTOM' | 'GENER
 export type EmailMessageState = 'PENDING' | 'SENT' | 'FAILED' | 'CANCELLED';
 export type EmailMessageType = 'DOC_ELECTRONICO' | 'NOTIFICACION' | 'CUSTOM';
 export type BlacklistEntryType = 'DOMAIN' | 'HOST' | 'EMAIL';
-export type ApiKeyAccessLevel = 'FULL' | 'CUSTOM';
+export type EmailApiAuthScheme = 'Bearer' | 'Basic' | 'Token';
 
 export interface EmailAccount {
   id: number;
@@ -22,18 +22,17 @@ export interface EmailAccount {
   authRequired?: boolean;
   username?: string;
   password?: string;
-  apiKeyName?: string;
+  apiUrl?: string;
+  apiAuthHeader?: string;
+  apiAuthScheme?: EmailApiAuthScheme;
   apiKey?: string;
-  apiAccessLevel?: ApiKeyAccessLevel;
-  apiRestrictedAccess?: boolean;
-  apiKeyEnabled?: boolean;
-  apiCreatedAt?: string;
-  apiLastActivityAt?: string;
-  apiExpiresAt?: string;
+  hasApiKey?: boolean;
   active: boolean;
   defaultAccount: boolean;
   defaultForType: EmailDefaultUse;
   lastConnectionCheck?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface EmailAttachment {
@@ -86,14 +85,10 @@ export interface EmailAccountFormValue {
   authRequired: boolean;
   username: string;
   password: string;
-  apiKeyName: string;
+  apiUrl: string;
+  apiAuthHeader: string;
+  apiAuthScheme: EmailApiAuthScheme;
   apiKey: string;
-  apiAccessLevel: ApiKeyAccessLevel;
-  apiRestrictedAccess: boolean;
-  apiKeyEnabled: boolean;
-  apiCreatedAt: string;
-  apiLastActivityAt: string;
-  apiExpiresAt: string;
   active: boolean;
   defaultAccount: boolean;
   defaultForType: EmailDefaultUse;
@@ -121,4 +116,4 @@ export const EMAIL_DEFAULT_USE_OPTIONS: EmailDefaultUse[] = ['FACTURACION', 'NOT
 export const EMAIL_STATE_OPTIONS: EmailMessageState[] = ['PENDING', 'SENT', 'FAILED', 'CANCELLED'];
 export const EMAIL_TYPE_OPTIONS: EmailMessageType[] = ['DOC_ELECTRONICO', 'NOTIFICACION', 'CUSTOM'];
 export const BLACKLIST_TYPE_OPTIONS: BlacklistEntryType[] = ['DOMAIN', 'HOST', 'EMAIL'];
-export const API_KEY_ACCESS_LEVEL_OPTIONS: ApiKeyAccessLevel[] = ['FULL', 'CUSTOM'];
+export const EMAIL_API_AUTH_SCHEME_OPTIONS: EmailApiAuthScheme[] = ['Bearer', 'Basic', 'Token'];

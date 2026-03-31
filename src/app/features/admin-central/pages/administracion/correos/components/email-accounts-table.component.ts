@@ -23,6 +23,6 @@ export class EmailAccountsTableComponent {
   resolveEndpoint(row: EmailAccount): string {
     return row.transportType === 'SMTP'
       ? `${row.host}:${row.port}`
-      : `${row.apiKeyName || 'Llave API'}${row.apiKey ? ' / ' + row.apiKey : ''}`;
+      : `${row.apiUrl || 'Endpoint API'}${row.hasApiKey ? ' / API key registrada' : ''}`;
   }
 }

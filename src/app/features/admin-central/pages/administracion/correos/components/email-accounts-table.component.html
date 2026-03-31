@@ -38,7 +38,7 @@
               <button type="button" (click)="view.emit(row); openMenuId = null">Ver detalle</button>
               <button type="button" (click)="edit.emit(row); openMenuId = null">Editar</button>
               <button type="button" (click)="toggle.emit(row); openMenuId = null">{{ row.active ? 'Desactivar' : 'Activar' }}</button>
-              <button type="button" (click)="test.emit(row); openMenuId = null">Probar conexion</button>
+              <button type="button" (click)="test.emit(row); openMenuId = null">Abrir prueba de envio</button>
               <button type="button" (click)="makeDefault.emit(row); openMenuId = null">Marcar predeterminada</button>
             </div>
           </td>
@@ -48,4 +48,5 @@
     </table>
   </div>
 </div>
+
 

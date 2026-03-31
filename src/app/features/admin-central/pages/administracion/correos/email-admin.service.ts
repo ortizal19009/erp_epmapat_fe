@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { delay, map } from 'rxjs/operators';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
 import {
   BlacklistFormValue,
   EmailAccount,
@@ -10,7 +11,6 @@ import {
   EmailComposeFormValue,
   EmailLog,
 } from './email-admin.models';
-import { EMAIL_ACCOUNTS_MOCK, EMAIL_BLACKLIST_MOCK, EMAIL_LOGS_MOCK } from './email-admin.mocks';
 
 @Injectable({
   providedIn: 'root',
@@ -18,6 +18,7 @@ import { EMAIL_ACCOUNTS_MOCK, EMAIL_BLACKLIST_MOCK, EMAIL_LOGS_MOCK } from './em
 export class EmailAdminService {
   readonly endpoints = {
     accounts: '/api/v1/email-accounts',
+    accountDetail: (id: number) => `/api/v1/email-accounts/${id}`,
     accountActivate: (id: number) => `/api/v1/email-accounts/${id}/activate`,
     accountDeactivate: (id: number) => `/api/v1/email-accounts/${id}/deactivate`,
     emails: '/api/v1/emails',
@@ -25,6 +26,7 @@ export class EmailAdminService {
     retryEmail: (id: string) => `/api/v1/emails/${id}/retry`,
     cancelEmail: (id: string) => `/api/v1/emails/${id}/cancel`,
     blacklist: '/api/v1/email-blacklist',
+    blacklistDetail: (id: number) => `/api/v1/email-blacklist/${id}`,
     blacklistActivate: (id: number) => `/api/v1/email-blacklist/${id}/activate`,
     blacklistDeactivate: (id: number) => `/api/v1/email-blacklist/${id}/deactivate`,
     sendCustom: '/api/v1/emails/custom',
@@ -32,187 +34,290 @@ export class EmailAdminService {
     sendDocuments: '/api/v1/emails/documents',
   };
 
-  private accountsSubject = new BehaviorSubject<EmailAccount[]>(this.clone(EMAIL_ACCOUNTS_MOCK));
-  private emailsSubject = new BehaviorSubject<EmailLog[]>(this.clone(EMAIL_LOGS_MOCK));
-  private blacklistSubject = new BehaviorSubject<EmailBlacklistEntry[]>(this.clone(EMAIL_BLACKLIST_MOCK));
+  private accountsSubject = new BehaviorSubject<EmailAccount[]>([]);
+  private blacklistSubject = new BehaviorSubject<EmailBlacklistEntry[]>([]);
 
   constructor(private http: HttpClient) {}
 
   getAccounts(): Observable<EmailAccount[]> {
-    return this.accountsSubject.asObservable().pipe(map((rows) => this.clone(rows)), delay(120));
+    return this.http.get<unknown>(this.url(this.endpoints.accounts)).pipe(
+      map((response) => this.extractCollection(response).map((item) => this.mapAccount(item))),
+      tap((rows) => this.accountsSubject.next(rows))
+    );
   }
 
   getEmails(): Observable<EmailLog[]> {
-    return this.emailsSubject.asObservable().pipe(map((rows) => this.clone(rows)), delay(120));
+    return this.http.get<unknown>(this.url(this.endpoints.emails)).pipe(
+      map((response) => this.extractCollection(response).map((item) => this.mapEmail(item)))
+    );
   }
 
   getBlacklist(): Observable<EmailBlacklistEntry[]> {
-    return this.blacklistSubject.asObservable().pipe(map((rows) => this.clone(rows)), delay(120));
+    return this.http.get<unknown>(this.url(this.endpoints.blacklist)).pipe(
+      map((response) => this.extractCollection(response).map((item) => this.mapBlacklist(item))),
+      tap((rows) => this.blacklistSubject.next(rows))
+    );
   }
 
   saveAccount(formValue: EmailAccountFormValue, editingId?: number): Observable<EmailAccount> {
-    const rows = this.clone(this.accountsSubject.value);
-    const payload: EmailAccount = {
-      id: editingId || this.nextNumericId(rows),
+    const payload = this.buildAccountPayload(formValue);
+    const request$ = editingId
+      ? this.http.put<unknown>(this.url(this.endpoints.accountDetail(editingId)), payload)
+      : this.http.post<unknown>(this.url(this.endpoints.accounts), payload);
+
+    return request$.pipe(map((response) => this.mapAccount(response)));
+  }
+
+  toggleAccountActive(accountId: number): Observable<void> {
+    const account = this.accountsSubject.value.find((item) => item.id === accountId);
+    const endpoint = account?.active
+      ? this.endpoints.accountDeactivate(accountId)
+      : this.endpoints.accountActivate(accountId);
+
+    return this.http.post<unknown>(this.url(endpoint), {}).pipe(map(() => void 0));
+  }
+
+  markAccountAsDefault(accountId: number): Observable<void> {
+    return throwError(() => new Error('El backend de cuentas de correo no expone un endpoint para marcar cuenta predeterminada.'));
+  }
+
+  testConnection(accountId: number): Observable<{ success: boolean; message: string }> {
+    return throwError(() => new Error('El backend de cuentas de correo no expone un endpoint para probar conexion.'));
+  }
+
+  retryEmail(emailId: string, compose: EmailComposeFormValue, mode: 'retry' | 'edit-resend'): Observable<EmailLog> {
+    if (mode === 'retry') {
+      return this.http.post<unknown>(this.url(this.endpoints.retryEmail(emailId)), {}).pipe(
+        map((response) => this.mapQueuedEmailResponse(response, compose, emailId))
+      );
+    }
+
+    return this.http.post<unknown>(this.url(this.endpoints.sendCustom), this.buildSendEmailPayload(compose)).pipe(
+      map((response) => this.mapQueuedEmailResponse(response, compose, emailId))
+    );
+  }
+
+  cancelEmail(emailId: string): Observable<void> {
+    return this.http.post<unknown>(this.url(this.endpoints.cancelEmail(emailId)), {}).pipe(map(() => void 0));
+  }
+
+  sendTestEmail(accountId: number, to: string): Observable<void> {
+    const payload = {
+      accountId,
+      to: [this.toText(to)],
+      cc: [],
+      bcc: [],
+      subject: 'Prueba de configuracion de correo',
+      body: '<p>Este es un correo de prueba enviado desde el modulo de administracion de correos.</p>',
+    };
+
+    return this.http.post<unknown>(this.url(this.endpoints.sendCustom), payload).pipe(map(() => void 0));
+  }
+
+  saveBlacklist(formValue: BlacklistFormValue, editingId?: number): Observable<EmailBlacklistEntry> {
+    const payload = {
+      type: formValue.type,
+      value: formValue.value.trim(),
+      reason: formValue.reason.trim(),
+      active: !!formValue.active,
+    };
+    const request$ = editingId
+      ? this.http.put<unknown>(this.url(this.endpoints.blacklistDetail(editingId)), payload)
+      : this.http.post<unknown>(this.url(this.endpoints.blacklist), payload);
+
+    return request$.pipe(map((response) => this.mapBlacklist(response)));
+  }
+
+  toggleBlacklistActive(id: number): Observable<void> {
+    const entry = this.blacklistSubject.value.find((item) => item.id === id);
+    const endpoint = entry?.active
+      ? this.endpoints.blacklistDeactivate(id)
+      : this.endpoints.blacklistActivate(id);
+
+    return this.http.post<unknown>(this.url(endpoint), {}).pipe(map(() => void 0));
+  }
+
+  removeBlacklist(id: number): Observable<void> {
+    return throwError(() => new Error('El backend de lista negra no expone un endpoint para eliminar registros.'));
+  }
+
+  private url(path: string): string {
+    return `${environment.API_URL}${path}`;
+  }
+
+  private buildAccountPayload(formValue: EmailAccountFormValue): Record<string, unknown> {
+    const transportType = formValue.transportType;
+
+    return {
       code: formValue.code.trim(),
       name: formValue.name.trim(),
       provider: formValue.provider.trim(),
       fromAddress: formValue.fromAddress.trim(),
       fromName: formValue.fromName.trim(),
       replyTo: formValue.replyTo.trim(),
-      transportType: formValue.transportType,
-      host: formValue.transportType === 'SMTP' ? formValue.host.trim() : '',
-      port: formValue.transportType === 'SMTP' ? Number(formValue.port || 0) : undefined,
-      protocol: formValue.transportType === 'SMTP' ? formValue.protocol.trim() : '',
-      securityType: formValue.transportType === 'SMTP' ? formValue.securityType : undefined,
-      authRequired: formValue.transportType === 'SMTP' ? !!formValue.authRequired : false,
-      username: formValue.transportType === 'SMTP' ? formValue.username.trim() : '',
-      password: formValue.transportType === 'SMTP' ? formValue.password.trim() : '',
-      apiKeyName: formValue.transportType === 'API_HTTP' ? formValue.apiKeyName.trim() : '',
-      apiKey: formValue.transportType === 'API_HTTP' ? formValue.apiKey.trim() : '',
-      apiAccessLevel: formValue.transportType === 'API_HTTP' ? formValue.apiAccessLevel : undefined,
-      apiRestrictedAccess: formValue.transportType === 'API_HTTP' ? !!formValue.apiRestrictedAccess : false,
-      apiKeyEnabled: formValue.transportType === 'API_HTTP' ? !!formValue.apiKeyEnabled : false,
-      apiCreatedAt: formValue.transportType === 'API_HTTP' ? (formValue.apiCreatedAt || new Date().toISOString()) : '',
-      apiLastActivityAt: formValue.transportType === 'API_HTTP' ? formValue.apiLastActivityAt.trim() : '',
-      apiExpiresAt: formValue.transportType === 'API_HTTP' ? formValue.apiExpiresAt.trim() : '',
+      transportType,
+      host: transportType === 'SMTP' ? this.nullableText(formValue.host) : null,
+      port: transportType === 'SMTP' ? Number(formValue.port || 0) : null,
+      protocol: transportType === 'SMTP' ? this.nullableText(formValue.protocol) : null,
+      securityType: transportType === 'SMTP' ? formValue.securityType : null,
+      authRequired: transportType === 'SMTP' ? !!formValue.authRequired : false,
+      username: transportType === 'SMTP' ? this.nullableText(formValue.username) : null,
+      password: transportType === 'SMTP' ? this.nullableText(formValue.password) : null,
+      apiUrl: transportType === 'API_HTTP' ? this.nullableText(formValue.apiUrl) : null,
+      apiAuthHeader: transportType === 'API_HTTP' ? this.nullableText(formValue.apiAuthHeader) : null,
+      apiAuthScheme: transportType === 'API_HTTP' ? this.nullableText(formValue.apiAuthScheme) : null,
+      apiKey: transportType === 'API_HTTP' ? this.nullableText(formValue.apiKey) : null,
       active: !!formValue.active,
       defaultAccount: !!formValue.defaultAccount,
-      defaultForType: formValue.defaultForType,
-      lastConnectionCheck: editingId
-        ? rows.find((item) => item.id === editingId)?.lastConnectionCheck
-        : new Date().toISOString(),
+      defaultForType: this.mapDefaultForTypeToBackend(formValue.defaultForType),
     };
-
-    const nextRows = payload.defaultAccount
-      ? rows.map((item) => ({
-          ...item,
-          defaultAccount: item.id === payload.id,
-          defaultForType: item.id === payload.id ? payload.defaultForType : item.defaultForType,
-        }))
-      : rows;
-
-    const index = nextRows.findIndex((item) => item.id === payload.id);
-    if (index >= 0) {
-      nextRows[index] = payload;
-    } else {
-      nextRows.unshift(payload);
-    }
-
-    this.accountsSubject.next(nextRows);
-    return of(payload).pipe(delay(180));
   }
 
-  toggleAccountActive(accountId: number): Observable<void> {
-    const nextRows = this.clone(this.accountsSubject.value).map((item) =>
-      item.id === accountId ? { ...item, active: !item.active } : item
-    );
-    this.accountsSubject.next(nextRows);
-    return of(void 0).pipe(delay(120));
-  }
-
-  markAccountAsDefault(accountId: number): Observable<void> {
-    const target = this.accountsSubject.value.find((item) => item.id === accountId);
-    if (!target) {
-      return of(void 0);
-    }
-    const nextRows = this.clone(this.accountsSubject.value).map((item) => ({
-      ...item,
-      defaultAccount: item.id === accountId,
-      defaultForType: item.id === accountId ? target.defaultForType : item.defaultForType,
-    }));
-    this.accountsSubject.next(nextRows);
-    return of(void 0).pipe(delay(120));
-  }
-
-  testConnection(accountId: number): Observable<{ success: boolean; message: string }> {
-    const nextRows = this.clone(this.accountsSubject.value).map((item) =>
-      item.id === accountId ? { ...item, lastConnectionCheck: new Date().toISOString() } : item
-    );
-    const account = nextRows.find((item) => item.id === accountId);
-    this.accountsSubject.next(nextRows);
-    return of({
-      success: true,
-      message: `Conexion verificada correctamente para ${account?.code || 'la cuenta seleccionada'}.`,
-    }).pipe(delay(320));
-  }
-
-  retryEmail(emailId: string, compose: EmailComposeFormValue, mode: 'retry' | 'edit-resend'): Observable<EmailLog> {
-    const source = this.emailsSubject.value.find((item) => item.id === emailId);
-    const account = this.accountsSubject.value.find((item) => item.id === compose.accountId);
-    const nextEmail: EmailLog = {
-      id: this.nextEmailId(),
-      subject: compose.subject.trim(),
-      type: source?.type || 'CUSTOM',
-      state: 'PENDING',
-      fromAddress: account?.fromAddress || source?.fromAddress || '',
-      accountId: account?.id || source?.accountId || 0,
-      accountCode: account?.code || source?.accountCode || '',
-      accountName: account?.name || source?.accountName || '',
+  private buildSendEmailPayload(compose: EmailComposeFormValue): Record<string, unknown> {
+    return {
+      accountId: compose.accountId,
       to: this.parseList(compose.to),
       cc: this.parseList(compose.cc),
       bcc: this.parseList(compose.bcc),
-      attempts: mode === 'retry' ? (source?.attempts || 0) + 1 : 1,
-      correlationId: `${source?.correlationId || 'MAIL'}-R${new Date().getTime().toString().slice(-4)}`,
+      subject: this.toText(compose.subject),
+      body: this.toText(compose.body),
+    };
+  }
+
+  private extractCollection(response: any): any[] {
+    if (Array.isArray(response)) {
+      return response;
+    }
+    if (Array.isArray(response?.content)) {
+      return response.content;
+    }
+    if (Array.isArray(response?.data)) {
+      return response.data;
+    }
+    if (Array.isArray(response?.items)) {
+      return response.items;
+    }
+    return [];
+  }
+
+  private mapQueuedEmailResponse(response: any, compose: EmailComposeFormValue, sourceId?: string): EmailLog {
+    const queuedId = this.toText(response?.id ?? response?.emailId ?? sourceId ?? crypto.randomUUID());
+    return {
+      id: queuedId,
+      subject: this.toText(compose.subject),
+      type: 'CUSTOM',
+      state: 'PENDING',
+      fromAddress: '',
+      accountId: Number(compose.accountId || 0),
+      accountCode: '',
+      accountName: undefined,
+      to: this.parseList(compose.to),
+      cc: this.parseList(compose.cc),
+      bcc: this.parseList(compose.bcc),
+      attempts: 0,
+      correlationId: '',
       lastError: '',
       createdAt: new Date().toISOString(),
-      body: compose.body,
-      attachments: this.clone(source?.attachments || []),
+      body: this.toText(compose.body),
+      attachments: [],
     };
-
-    this.emailsSubject.next([nextEmail, ...this.clone(this.emailsSubject.value)]);
-    return of(nextEmail).pipe(delay(180));
   }
 
-  cancelEmail(emailId: string): Observable<void> {
-    const nextRows = this.clone(this.emailsSubject.value).map((item) =>
-      item.id === emailId
-        ? {
-            ...item,
-            state: 'CANCELLED' as const,
-            lastError: item.lastError || 'Cancelado manualmente por operador.',
-          }
-        : item
-    );
-    this.emailsSubject.next(nextRows);
-    return of(void 0).pipe(delay(140));
+  private mapAccount(raw: any): EmailAccount {
+    return {
+      id: Number(raw?.id ?? raw?.accountId ?? 0),
+      code: this.toText(raw?.code ?? raw?.codigo),
+      name: this.toText(raw?.name ?? raw?.nombre),
+      provider: this.toText(raw?.provider ?? raw?.proveedor),
+      fromAddress: this.toText(raw?.fromAddress ?? raw?.from ?? raw?.correoDesde),
+      fromName: this.toText(raw?.fromName ?? raw?.nombreDesde),
+      replyTo: this.toText(raw?.replyTo ?? raw?.reply_to ?? raw?.responderA),
+      transportType: this.toTransportType(raw?.transportType ?? raw?.tipoTransporte),
+      host: this.nullableText(raw?.host),
+      port: this.toOptionalNumber(raw?.port),
+      protocol: this.nullableText(raw?.protocol ?? raw?.protocolo),
+      securityType: this.toSecurityType(raw?.securityType ?? raw?.tipoSeguridad),
+      authRequired: this.toBoolean(raw?.authRequired ?? raw?.requiereAuth, false),
+      username: this.nullableText(raw?.username ?? raw?.usuario),
+      password: this.nullableText(raw?.password ?? raw?.clave),
+      apiUrl: this.nullableText(raw?.apiUrl ?? raw?.apiKeyName ?? raw?.nombreApiKey),
+      apiAuthHeader: this.nullableText(raw?.apiAuthHeader),
+      apiAuthScheme: this.toApiAuthScheme(raw?.apiAuthScheme ?? raw?.apiAccessLevel ?? raw?.nivelAccesoApi),
+      apiKey: this.nullableText(raw?.apiKey),
+      hasApiKey: this.toBoolean(raw?.hasApiKey ?? raw?.apiKeyEnabled, false),
+      active: this.toBoolean(raw?.active ?? raw?.activo, false),
+      defaultAccount: this.toBoolean(raw?.defaultAccount ?? raw?.cuentaDefault, false),
+      defaultForType: this.toDefaultUse(raw?.defaultForType ?? raw?.usoPorDefecto),
+      lastConnectionCheck: this.nullableText(raw?.lastConnectionCheck ?? raw?.ultimaVerificacionConexion),
+      createdAt: this.nullableText(raw?.createdAt),
+      updatedAt: this.nullableText(raw?.updatedAt),
+    };
   }
 
-  saveBlacklist(formValue: BlacklistFormValue, editingId?: number): Observable<EmailBlacklistEntry> {
-    const rows = this.clone(this.blacklistSubject.value);
-    const payload: EmailBlacklistEntry = {
-      id: editingId || this.nextNumericId(rows),
-      type: formValue.type,
-      value: formValue.value.trim(),
-      reason: formValue.reason.trim(),
-      active: !!formValue.active,
-      createdAt: editingId
-        ? rows.find((item) => item.id === editingId)?.createdAt || new Date().toISOString()
-        : new Date().toISOString(),
-    };
+  private mapEmail(raw: any): EmailLog {
+    const attachmentSource = raw?.attachments ?? raw?.adjuntos ?? [];
 
-    const index = rows.findIndex((item) => item.id === payload.id);
-    if (index >= 0) {
-      rows[index] = payload;
-    } else {
-      rows.unshift(payload);
+    return {
+      id: this.toText(raw?.id ?? raw?.emailId),
+      subject: this.toText(raw?.subject ?? raw?.asunto),
+      type: this.toMessageType(raw?.type ?? raw?.tipo),
+      state: this.toMessageState(raw?.state ?? raw?.status ?? raw?.estado),
+      fromAddress: this.toText(raw?.fromAddress ?? raw?.from ?? raw?.correoDesde),
+      accountId: Number(raw?.accountId ?? raw?.emailAccountId ?? raw?.cuentaId ?? 0),
+      accountCode: this.toText(raw?.accountCode ?? raw?.codigoCuenta),
+      accountName: this.nullableText(raw?.accountName ?? raw?.nombreCuenta),
+      to: this.toStringArray(raw?.to ?? raw?.destinatarios),
+      cc: this.toStringArray(raw?.cc),
+      bcc: this.toStringArray(raw?.bcc),
+      attempts: Number(raw?.attempts ?? raw?.intentos ?? 0),
+      correlationId: this.toText(raw?.correlationId ?? raw?.correlacion ?? raw?.traceId),
+      lastError: this.toText(raw?.lastError ?? raw?.error ?? raw?.ultimoError),
+      createdAt: this.toText(raw?.createdAt ?? raw?.fechaCreacion ?? new Date().toISOString()),
+      sentAt: this.nullableText(raw?.sentAt ?? raw?.fechaEnvio),
+      body: this.toText(raw?.body ?? raw?.contenidoHtml ?? raw?.contenido),
+      attachments: Array.isArray(attachmentSource)
+        ? attachmentSource.map((item: any) => ({
+            name: this.toText(item?.name ?? item?.nombre),
+            sizeLabel: this.resolveAttachmentSize(item),
+          }))
+        : [],
+    };
+  }
+
+  private mapBlacklist(raw: any): EmailBlacklistEntry {
+    return {
+      id: Number(raw?.id ?? raw?.blacklistId ?? 0),
+      type: this.toBlacklistType(raw?.type ?? raw?.tipo),
+      value: this.toText(raw?.value ?? raw?.valor),
+      reason: this.toText(raw?.reason ?? raw?.motivo),
+      active: this.toBoolean(raw?.active ?? raw?.activo, false),
+      createdAt: this.toText(raw?.createdAt ?? raw?.fechaCreacion ?? new Date().toISOString()),
+    };
+  }
+
+  private resolveAttachmentSize(raw: any): string {
+    const directLabel = this.nullableText(raw?.sizeLabel ?? raw?.tamanoLabel);
+    if (directLabel) {
+      return directLabel;
     }
-    this.blacklistSubject.next(rows);
-    return of(payload).pipe(delay(160));
+
+    const sizeValue = Number(raw?.size ?? raw?.bytes ?? 0);
+    if (!sizeValue) {
+      return '0 KB';
+    }
+
+    if (sizeValue >= 1024 * 1024) {
+      return `${(sizeValue / (1024 * 1024)).toFixed(1)} MB`;
+    }
+
+    return `${Math.max(1, Math.round(sizeValue / 1024))} KB`;
   }
 
-  toggleBlacklistActive(id: number): Observable<void> {
-    const nextRows = this.clone(this.blacklistSubject.value).map((item) =>
-      item.id === id ? { ...item, active: !item.active } : item
-    );
-    this.blacklistSubject.next(nextRows);
-    return of(void 0).pipe(delay(120));
-  }
-
-  removeBlacklist(id: number): Observable<void> {
-    const nextRows = this.clone(this.blacklistSubject.value).filter((item) => item.id !== id);
-    this.blacklistSubject.next(nextRows);
-    return of(void 0).pipe(delay(120));
+  private toStringArray(value: unknown): string[] {
+    if (Array.isArray(value)) {
+      return value.map((item) => this.toText(item)).filter(Boolean);
+    }
+    return this.parseList(this.toText(value));
   }
 
   private parseList(raw: string): string[] {
@@ -222,16 +327,113 @@ export class EmailAdminService {
       .filter(Boolean);
   }
 
-  private nextNumericId<T extends { id: number }>(rows: T[]): number {
-    return rows.reduce((max, item) => Math.max(max, item.id), 0) + 1;
+  private toText(value: unknown, fallback = ''): string {
+    if (value === null || value === undefined) {
+      return fallback;
+    }
+    return String(value).trim();
   }
 
-  private nextEmailId(): string {
-    const chunk = new Date().getTime().toString(16).slice(-12).padStart(12, '0');
-    return `00000000-0000-4000-8000-${chunk}`;
+  private nullableText(value: unknown): string | undefined {
+    const text = this.toText(value);
+    return text ? text : undefined;
   }
 
-  private clone<T>(value: T): T {
-    return JSON.parse(JSON.stringify(value));
+  private toBoolean(value: unknown, fallback: boolean): boolean {
+    if (typeof value === 'boolean') {
+      return value;
+    }
+    if (typeof value === 'string') {
+      return ['true', '1', 'yes', 'si'].includes(value.toLowerCase());
+    }
+    if (typeof value === 'number') {
+      return value !== 0;
+    }
+    return fallback;
+  }
+
+  private toOptionalNumber(value: unknown): number | undefined {
+    const next = Number(value);
+    return Number.isFinite(next) && next > 0 ? next : undefined;
+  }
+
+  private toTransportType(value: unknown): 'SMTP' | 'API_HTTP' {
+    const text = this.toText(value, 'SMTP').toUpperCase();
+    return text === 'API_HTTP' ? 'API_HTTP' : 'SMTP';
+  }
+
+  private toSecurityType(value: unknown): 'NONE' | 'STARTTLS' | 'SSL_TLS' | undefined {
+    const text = this.toText(value).toUpperCase();
+    if (text === 'NONE' || text === 'STARTTLS' || text === 'SSL_TLS') {
+      return text;
+    }
+    return undefined;
+  }
+
+  private toApiAuthScheme(value: unknown): 'Bearer' | 'Basic' | 'Token' | undefined {
+    const text = this.toText(value);
+    if (!text) {
+      return undefined;
+    }
+    const normalized = text.toLowerCase();
+    if (normalized === 'bearer') {
+      return 'Bearer';
+    }
+    if (normalized === 'basic') {
+      return 'Basic';
+    }
+    if (normalized === 'token') {
+      return 'Token';
+    }
+    return undefined;
+  }
+
+  private toDefaultUse(value: unknown): 'FACTURACION' | 'NOTIFICACION' | 'CUSTOM' | 'GENERAL' {
+    const text = this.toText(value, 'GENERAL').toUpperCase();
+    if (text === 'DOC_ELECTRONICO') {
+      return 'FACTURACION';
+    }
+    if (text === 'FACTURACION' || text === 'NOTIFICACION' || text === 'CUSTOM' || text === 'GENERAL') {
+      return text;
+    }
+    return 'GENERAL';
+  }
+
+  private mapDefaultForTypeToBackend(value: 'FACTURACION' | 'NOTIFICACION' | 'CUSTOM' | 'GENERAL'): 'DOC_ELECTRONICO' | 'NOTIFICACION' | 'CUSTOM' {
+    switch (value) {
+      case 'FACTURACION':
+        return 'DOC_ELECTRONICO';
+      case 'NOTIFICACION':
+        return 'NOTIFICACION';
+      case 'CUSTOM':
+        return 'CUSTOM';
+      case 'GENERAL':
+      default:
+        return 'CUSTOM';
+    }
+  }
+
+  private toMessageState(value: unknown): 'PENDING' | 'SENT' | 'FAILED' | 'CANCELLED' {
+    const text = this.toText(value, 'PENDING').toUpperCase();
+    if (text === 'SENT' || text === 'FAILED' || text === 'CANCELLED') {
+      return text;
+    }
+    return 'PENDING';
+  }
+
+  private toMessageType(value: unknown): 'DOC_ELECTRONICO' | 'NOTIFICACION' | 'CUSTOM' {
+    const text = this.toText(value, 'CUSTOM').toUpperCase();
+    if (text === 'DOC_ELECTRONICO' || text === 'NOTIFICACION' || text === 'CUSTOM') {
+      return text;
+    }
+    return 'CUSTOM';
+  }
+
+  private toBlacklistType(value: unknown): 'DOMAIN' | 'HOST' | 'EMAIL' {
+    const text = this.toText(value, 'DOMAIN').toUpperCase();
+    if (text === 'HOST' || text === 'EMAIL') {
+      return text;
+    }
+    return 'DOMAIN';
   }
 }

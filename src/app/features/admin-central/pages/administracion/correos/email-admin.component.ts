@@ -1,12 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { EmailAdminService } from './email-admin.service';
 import {
-  API_KEY_ACCESS_LEVEL_OPTIONS,
   BLACKLIST_TYPE_OPTIONS,
+  EMAIL_API_AUTH_SCHEME_OPTIONS,
   EMAIL_DEFAULT_USE_OPTIONS,
   EMAIL_SECURITY_OPTIONS,
   EMAIL_STATE_OPTIONS,
@@ -45,7 +44,7 @@ export class EmailAdminComponent implements OnInit {
   readonly stateOptions = EMAIL_STATE_OPTIONS;
   readonly typeOptions = EMAIL_TYPE_OPTIONS;
   readonly blacklistTypeOptions = BLACKLIST_TYPE_OPTIONS;
-  readonly apiAccessLevelOptions = API_KEY_ACCESS_LEVEL_OPTIONS;
+  readonly apiAuthSchemeOptions = EMAIL_API_AUTH_SCHEME_OPTIONS;
 
   activeSection: 'accounts' | 'emails' | 'blacklist' = 'accounts';
   loading = true;
@@ -72,6 +71,9 @@ export class EmailAdminComponent implements OnInit {
   blacklistSearch = '';
   blacklistTypeFilter = 'ALL';
   blacklistStatusFilter = 'ALL';
+
+  testEmailRecipient = '';
+  sendingTestEmail = false;
 
   accountDrawerOpen = false;
   composeDrawerOpen = false;
@@ -108,14 +110,10 @@ export class EmailAdminComponent implements OnInit {
     authRequired: [true],
     username: [''],
     password: [''],
-    apiKeyName: [''],
+    apiUrl: [''],
+    apiAuthHeader: ['Authorization'],
+    apiAuthScheme: ['Bearer'],
     apiKey: [''],
-    apiAccessLevel: ['CUSTOM'],
-    apiRestrictedAccess: [true],
-    apiKeyEnabled: [true],
-    apiCreatedAt: [''],
-    apiLastActivityAt: [''],
-    apiExpiresAt: [''],
     active: [true],
     defaultAccount: [false],
     defaultForType: ['GENERAL', Validators.required],
@@ -181,7 +179,7 @@ export class EmailAdminComponent implements OnInit {
 
   get filteredAccounts(): EmailAccount[] {
     return this.accounts.filter((item) => {
-      const search = `${item.name} ${item.code} ${item.provider} ${item.fromAddress} ${item.apiKeyName || ''}`.toLowerCase();
+      const search = `${item.name} ${item.code} ${item.provider} ${item.fromAddress} ${item.apiUrl || ''}`.toLowerCase();
       const matchesSearch = !this.accountSearch || search.includes(this.accountSearch.toLowerCase());
       const matchesTransport = this.accountTransportFilter === 'ALL' || item.transportType === this.accountTransportFilter;
       const matchesStatus =
@@ -244,13 +242,30 @@ export class EmailAdminComponent implements OnInit {
   openNewAccount(): void {
     this.selectedAccount = null;
     this.accountForm.reset({
-      code: '', name: '', provider: '', fromAddress: '', fromName: '', replyTo: '', transportType: 'SMTP',
-      host: '', port: 587, protocol: 'smtp', securityType: 'STARTTLS', authRequired: true,
-      username: '', password: '', apiKeyName: '', apiKey: '', apiAccessLevel: 'CUSTOM', apiRestrictedAccess: true,
-      apiKeyEnabled: true, apiCreatedAt: '', apiLastActivityAt: '', apiExpiresAt: '',
-      active: true, defaultAccount: false, defaultForType: 'GENERAL',
+      code: '',
+      name: '',
+      provider: '',
+      fromAddress: '',
+      fromName: '',
+      replyTo: '',
+      transportType: 'SMTP',
+      host: '',
+      port: 587,
+      protocol: 'smtp',
+      securityType: 'STARTTLS',
+      authRequired: true,
+      username: '',
+      password: '',
+      apiUrl: '',
+      apiAuthHeader: 'Authorization',
+      apiAuthScheme: 'Bearer',
+      apiKey: '',
+      active: true,
+      defaultAccount: false,
+      defaultForType: 'GENERAL',
     });
     this.applyTransportValidators();
+    this.testEmailRecipient = '';
     this.accountDrawerOpen = true;
   }
 
@@ -270,33 +285,36 @@ export class EmailAdminComponent implements OnInit {
       securityType: account.securityType || 'STARTTLS',
       authRequired: !!account.authRequired,
       username: account.username || '',
-      password: account.password || '',
-      apiKeyName: account.apiKeyName || '',
-      apiKey: account.apiKey || '',
-      apiAccessLevel: account.apiAccessLevel || 'CUSTOM',
-      apiRestrictedAccess: account.apiRestrictedAccess ?? true,
-      apiKeyEnabled: account.apiKeyEnabled ?? true,
-      apiCreatedAt: account.apiCreatedAt || '',
-      apiLastActivityAt: account.apiLastActivityAt || '',
-      apiExpiresAt: account.apiExpiresAt || '',
+      password: '',
+      apiUrl: account.apiUrl || '',
+      apiAuthHeader: account.apiAuthHeader || 'Authorization',
+      apiAuthScheme: account.apiAuthScheme || 'Bearer',
+      apiKey: '',
       active: account.active,
       defaultAccount: account.defaultAccount,
       defaultForType: account.defaultForType,
     });
     this.applyTransportValidators();
+    this.testEmailRecipient = account.replyTo || account.fromAddress || '';
     this.accountDrawerOpen = true;
   }
 
   submitAccount(): void {
     if (this.accountForm.invalid) {
       this.accountForm.markAllAsTouched();
+      this.showToast(this.invalidAccountFormMessage(), 'warning');
       return;
     }
     const formValue = { ...this.accountForm.getRawValue() } as any;
-    this.emailAdminService.saveAccount(formValue, this.selectedAccount?.id).subscribe(() => {
-      this.accountDrawerOpen = false;
-      this.loadAll();
-      this.showToast(this.selectedAccount ? 'Cuenta actualizada correctamente.' : 'Cuenta creada correctamente.', 'success');
+    this.emailAdminService.saveAccount(formValue, this.selectedAccount?.id).subscribe({
+      next: () => {
+        this.accountDrawerOpen = false;
+        this.loadAll();
+        this.showToast(this.selectedAccount ? 'Cuenta actualizada correctamente.' : 'Cuenta creada correctamente.', 'success');
+      },
+      error: (error: any) => {
+        this.handleActionError(error, 'No fue posible guardar la cuenta en el backend.');
+      },
     });
   }
 
@@ -329,10 +347,8 @@ export class EmailAdminComponent implements OnInit {
   }
 
   testConnection(account: EmailAccount): void {
-    this.emailAdminService.testConnection(account.id).subscribe((result) => {
-      this.loadAll();
-      this.showToast(result.message, 'success');
-    });
+    this.openEditAccount(account);
+    this.showToast('Tu backend no expone prueba de conexion. Usa el bloque de envio de prueba dentro de la cuenta.', 'info');
   }
 
   openEmailDetail(email: EmailLog): void {
@@ -453,20 +469,42 @@ export class EmailAdminComponent implements OnInit {
     }
   }
 
-  apiLastActivityLabel(): string {
-    const value = this.accountForm.get('apiLastActivityAt')?.value;
-    return value ? String(value) : 'Nunca';
+  canSendTestEmail(): boolean {
+    return !!this.selectedAccount?.id && this.isValidEmail(this.testEmailRecipient) && !this.sendingTestEmail;
   }
 
-  apiExpiresLabel(): string {
-    const value = this.accountForm.get('apiExpiresAt')?.value;
-    return value ? String(value) : 'Nunca';
+  sendTestEmail(): void {
+    if (!this.selectedAccount?.id) {
+      this.showToast('Primero guarda la cuenta para poder enviar un correo de prueba.', 'warning');
+      return;
+    }
+    if (!this.isValidEmail(this.testEmailRecipient)) {
+      this.showToast('Ingresa un correo valido para la prueba.', 'warning');
+      return;
+    }
+
+    this.sendingTestEmail = true;
+    this.emailAdminService.sendTestEmail(this.selectedAccount.id, this.testEmailRecipient).subscribe({
+      next: () => {
+        this.sendingTestEmail = false;
+        this.showToast('Correo de prueba enviado a ' + this.testEmailRecipient + '.', 'success');
+        this.loadAll();
+      },
+      error: (error: any) => {
+        this.sendingTestEmail = false;
+        this.handleActionError(error, 'No fue posible enviar el correo de prueba.');
+      },
+    });
+  }
+
+  private isValidEmail(value: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
   }
 
   private applyTransportValidators(): void {
     const smtpFields = ['host', 'port', 'protocol', 'securityType'];
     const authFields = ['username', 'password'];
-    const apiFields = ['apiKeyName', 'apiKey', 'apiAccessLevel'];
+    const apiFields = ['apiUrl', 'apiKey'];
     const isSmtp = this.transportType() === 'SMTP';
     smtpFields.forEach((field) => {
       const control = this.accountForm.get(field);
@@ -483,6 +521,54 @@ export class EmailAdminComponent implements OnInit {
       control?.setValidators(!isSmtp ? [Validators.required] : []);
       control?.updateValueAndValidity({ emitEvent: false });
     });
+  }
+
+  private invalidAccountFormMessage(): string {
+    const labels: Record<string, string> = {
+      code: 'Codigo',
+      name: 'Nombre',
+      provider: 'Proveedor',
+      fromAddress: 'Correo remitente',
+      fromName: 'Nombre remitente',
+      replyTo: 'Reply-To',
+      transportType: 'Tipo de transporte',
+      host: 'Host SMTP',
+      port: 'Puerto SMTP',
+      protocol: 'Protocolo SMTP',
+      securityType: 'Seguridad SMTP',
+      username: 'Usuario SMTP',
+      password: 'Contrasena SMTP',
+      apiUrl: 'URL del endpoint API',
+      apiKey: 'Clave API',
+      defaultForType: 'Uso por defecto',
+    };
+    const missing = Object.keys(this.accountForm.controls)
+      .filter((key) => this.accountForm.get(key)?.invalid)
+      .map((key) => labels[key] || key);
+
+    return missing.length
+      ? 'Revisa estos campos obligatorios: ' + missing.join(', ') + '.'
+      : 'El formulario tiene datos invalidos. Revisa los campos obligatorios.';
+  }
+
+  private extractErrorMessage(error: any, fallback: string): string {
+    if (typeof error?.error === 'string' && error.error.trim()) {
+      return error.error.trim();
+    }
+    if (typeof error?.error?.message === 'string' && error.error.message.trim()) {
+      return error.error.message.trim();
+    }
+    if (typeof error?.message === 'string' && error.message.trim()) {
+      return error.message.trim();
+    }
+    if (error?.status) {
+      return fallback + ' (HTTP ' + error.status + ').';
+    }
+    return fallback;
+  }
+
+  private handleActionError(error: any, fallback: string): void {
+    this.showToast(this.extractErrorMessage(error, fallback), 'danger');
   }
 
   private showToast(message: string, tone: 'success' | 'danger' | 'warning' | 'info'): void {
