@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { PersonalService } from 'src/app/servicios/rrhh/personal.service';
 
@@ -15,7 +16,8 @@ export class PersonalComponent implements OnInit {
   constructor(
     private s_personal: PersonalService,
     private coloresService: ColoresService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -48,6 +50,34 @@ export class PersonalComponent implements OnInit {
     const detalle = document.querySelector('.detalle');
     if (detalle) detalle.classList.add('nuevoBG2');
   }
+
+  onEditPersonal(personal: any) {
+    sessionStorage.setItem('idpersonalToModi', personal.idpersonal.toString());
+    this.router.navigate(['/modi-personal']);
+  }
+
+  onInfoPersonal(personal: any) {
+    sessionStorage.setItem('idpersonalToInfo', personal.idpersonal.toString());
+    this.router.navigate(['/info-personal']);
+  }
+
+  onDeletePersonal(personal: any) {
+    if (!personal || !personal.idpersonal) return;
+    const confirmDelete = window.confirm(
+      `¿Eliminar al personal ${personal.apellidos}, ${personal.nombres}?`
+    );
+    if (!confirmDelete) return;
+    this.s_personal.deletePersonal(personal.idpersonal).subscribe({
+      next: () => {
+        this.getAllPersonal();
+      },
+      error: (error: any) => {
+        console.error('Error eliminando personal:', error);
+        alert('No se pudo eliminar. Ver consola.');
+      },
+    });
+  }
+
   getAllPersonal() {
     this.s_personal.getAllPersonal().subscribe({
       next: (datos: any) => {

@@ -262,6 +262,8 @@ import { ImpUnicostosComponent } from './componentes/contabilidad/costos/imp-uni
 import { IfinanComponent } from './componentes/contabilidad/ifinan/ifinan/ifinan.component';
 import { PersonalComponent } from './componentes/rrhh/personal/personal.component';
 import { AddPersonalComponent } from './componentes/rrhh/personal/add-personal/add-personal.component';
+import { ModiPersonalComponent } from './componentes/rrhh/personal/modi-personal/modi-personal.component';
+import { InfoPersonalComponent } from './componentes/rrhh/personal/info-personal/info-personal.component';
 import { ThActionsComponent } from './componentes/rrhh/th-actions/th-actions.component';
 import { ThLeaveComponent } from './componentes/rrhh/th-leave/th-leave.component';
 import { ThFilesComponent } from './componentes/rrhh/th-files/th-files.component';
@@ -1324,6 +1326,16 @@ const routes: Routes = [
   {
     path: 'add-personal',
     component: AddPersonalComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'modi-personal',
+    component: ModiPersonalComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'info-personal',
+    component: InfoPersonalComponent,
     canActivate: [AuthGuard],
   },
 

@@ -7,7 +7,7 @@ import { environment } from '../../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class LookupsApi {
   private base = `${((environment as any).GD_API_URL || environment.API_URL) + '/api'}/lookups`;
-  private rrhhPersonal = `${environment.API_URL}/personal`;
+  private rrhhPersonal = `${environment.API_URL}/api/personal`;
   constructor(private http: HttpClient) {}
 
   users(entityCode: string, q?: string, page: number = 1, pageSize: number = 100) {

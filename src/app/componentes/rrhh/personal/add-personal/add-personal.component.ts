@@ -171,10 +171,25 @@ export class AddPersonalComponent implements OnInit {
   setContactoEmergencia(contemer: any) {
     console.log(contemer);
     this.f_personal.patchValue({
-      idcontemergencia_contemergencias: contemer.nombre,
+      idcontemergencia_contemergencias: contemer,
     });
     this.personal.idcontemergencia_contemergencias = contemer;
   }
+
+  compareById(o1: any, o2: any): boolean {
+    if (!o1 || !o2) return o1 === o2;
+    if (o1.idcontemergencia !== undefined && o2.idcontemergencia !== undefined) {
+      return o1.idcontemergencia === o2.idcontemergencia;
+    }
+    if (o1.idcargo !== undefined && o2.idcargo !== undefined) {
+      return o1.idcargo === o2.idcargo;
+    }
+    if (o1.idtpcontratos !== undefined && o2.idtpcontratos !== undefined) {
+      return o1.idtpcontratos === o2.idtpcontratos;
+    }
+    return o1 === o2;
+  }
+
   saveContEmergencia() {
     this.s_contemergencia
       .saveContEmergencia(this.f_contEmergencia.value)
@@ -182,7 +197,7 @@ export class AddPersonalComponent implements OnInit {
         next: (datos: any) => {
           console.log(datos);
           this.f_personal.patchValue({
-            idcontemergencia_contemergencias: datos.nombre,
+            idcontemergencia_contemergencias: datos,
           });
           this.personal.idcontemergencia_contemergencias = datos;
           this.changeNuevo();

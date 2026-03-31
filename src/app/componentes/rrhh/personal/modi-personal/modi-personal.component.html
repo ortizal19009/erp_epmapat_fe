@@ -1,0 +1,112 @@
+<div class="content mt-1 pt-1 pl-0">
+  <div class="container-fluid">
+    <div class="row m-0 px-0 py-1 justify-content-start cabecera sombra border">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fa fa-edit"></i> Modificar Personal
+        </h5>
+      </div>
+    </div>
+
+    <div class="row justify-content-center mt-3">
+      <div class="col-sm-10">
+        <div class="card sombra">
+          <div class="card-header cabecera">
+            <strong>Datos de Personal</strong>
+          </div>
+          <div class="card-body fondo detalle">
+            <form [formGroup]="f_personal" (ngSubmit)="onSubmit()" class="mt-2">
+              <div class="row">
+                <div class="form-group col-sm-2">
+                  <label>Código</label>
+                  <input formControlName="codigo" class="form-control form-control-sm" />
+                </div>
+                <div class="form-group col-sm-2">
+                  <label>Sufijo</label>
+                  <input formControlName="sufijo" class="form-control form-control-sm" />
+                </div>
+                <div class="form-group col-sm-2">
+                  <label>Título</label>
+                  <input formControlName="tituloprofesional" class="form-control form-control-sm" />
+                </div>
+                <div class="form-group col-sm-2">
+                  <label>Fecha Nac.</label>
+                  <input type="date" formControlName="fecnacimiento" class="form-control form-control-sm" />
+                </div>
+                <div class="form-group col-sm-2">
+                  <label>Fecha Inicio</label>
+                  <input type="date" formControlName="fecinicio" class="form-control form-control-sm" />
+                </div>
+                <div class="form-group col-sm-2">
+                  <label>Firma</label>
+                  <input formControlName="nomfirma" class="form-control form-control-sm" />
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="form-group col-sm-3">
+                  <label>Identificación</label>
+                  <input formControlName="identificacion" class="form-control form-control-sm" />
+                </div>
+                <div class="form-group col-sm-3">
+                  <label>Apellidos</label>
+                  <input formControlName="apellidos" class="form-control form-control-sm" />
+                </div>
+                <div class="form-group col-sm-3">
+                  <label>Nombres</label>
+                  <input formControlName="nombres" class="form-control form-control-sm" />
+                </div>
+                <div class="form-group col-sm-3">
+                  <label>Email</label>
+                  <input formControlName="email" class="form-control form-control-sm" />
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="form-group col-sm-3">
+                  <label>Teléfono</label>
+                  <input formControlName="celular" class="form-control form-control-sm" />
+                </div>
+                <div class="form-group col-sm-3">
+                  <label>Dirección</label>
+                  <input formControlName="direccion" class="form-control form-control-sm" />
+                </div>
+                <div class="form-group col-sm-3">
+                  <label>Cargo</label>
+                  <select formControlName="idcargo_cargos" class="form-control form-control-sm" [compareWith]="compareById">
+                    <option [ngValue]="cargo" *ngFor="let cargo of _cargos">{{cargo.descripcion}}</option>
+                  </select>
+                </div>
+                <div class="form-group col-sm-3">
+                  <label>Tipo Contrato</label>
+                  <select formControlName="idtpcontrato_tpcontratos" class="form-control form-control-sm" [compareWith]="compareById">
+                    <option [ngValue]="tp" *ngFor="let tp of _tpcontratos">{{tp.descripcion}}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="form-group col-sm-12">
+                  <label>Contacto emergencia</label>
+                  <select formControlName="idcontemergencia_contemergencias" class="form-control form-control-sm" [compareWith]="compareById">
+                    <option [ngValue]="null">--Seleccione contacto emergencia--</option>
+                    <option [ngValue]="ce" *ngFor="let ce of _contemergencia">{{ce.nombre}} - {{ce.parentesco}}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="row mt-2">
+                <div class="col-sm-12 text-right">
+                  <button type="button" class="btn btn-outline-secondary btn-sm" (click)="regresar()">
+                    Cancelar
+                  </button>
+                  <button type="submit" class="btn btn-primary btn-sm ml-2">Guardar cambios</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

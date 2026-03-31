@@ -48,7 +48,7 @@
                                                 aria-hidden="true"></i>
                                         </button>
                                     </div>
-                                    <select class="custom-select" id="cargo" formControlName="idcargo_cargos">
+                                    <select class="custom-select" id="cargo" formControlName="idcargo_cargos" [compareWith]="compareById">
                                         <option [ngValue]="cargo" *ngFor="let cargo of _cargos">{{cargo.descripcion}}
                                         </option>
                                     </select>
@@ -66,7 +66,7 @@
                                         </button>
                                     </div>
                                     <select class="custom-select" id="tpcontrato"
-                                        formControlName="idtpcontrato_tpcontratos">
+                                        formControlName="idtpcontrato_tpcontratos" [compareWith]="compareById">
                                         <option [ngValue]="tpcontrato" *ngFor="let tpcontrato of _tpcontratos">
                                             {{tpcontrato.descripcion}}</option>
                                     </select>
@@ -166,8 +166,10 @@
                                             for="idcontemergencia_contemergencias">Contacto
                                             emergencia</button>
                                     </div>
-                                    <input type="text" readonly class="form-control form-control-sm"
-                                        formControlName="idcontemergencia_contemergencias">
+                                    <select class="form-control form-control-sm" formControlName="idcontemergencia_contemergencias" [compareWith]="compareById">
+                                        <option [ngValue]="null">--Seleccione contacto emergencia--</option>
+                                        <option [ngValue]="c" *ngFor="let c of _contemergencia">{{c.nombre}} {{c.parentesco}}</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>

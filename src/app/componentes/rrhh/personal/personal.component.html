@@ -53,12 +53,13 @@
             <table class="table table-hover table-bordered table-sm sombra">
                 <thead class="text-center cabecera">
                     <tr>
-                        <th></th>
+                        <th>#</th>
                         <th>Nombre</th>
                         <th>Identificación</th>
                         <th>Email</th>
                         <th>Teléfono</th>
                         <th>Cargo</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="detalle">
@@ -66,10 +67,23 @@
                         <td class="text-center small font-weight-bold">{{i+1}}</td>
                         <td>{{ personal.apellidos }}, {{personal.nombres}}</td>
                         <td class="text-center">{{ personal.identificacion}}</td>
-                        <td class="text-center">
-                            {{personal.email}}</td>
+                        <td class="text-center">{{personal.email}}</td>
                         <td>{{ personal.celular }}</td>
                         <td>{{ personal.idcargo_cargos.descripcion }}</td>
+                        <td class="text-center">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-xs btn-warning dropdown-toggle" style="background-color: #FFC107; border-color: #FFC107; color: #212529;"
+                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fa fa-chevron-down"></i>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <button class="dropdown-item" (click)="onEditPersonal(personal)">Modificar</button>
+                                    <button class="dropdown-item" (click)="onDeletePersonal(personal)">Eliminar</button>
+                                    <button class="dropdown-item"
+                                        (click)="onInfoPersonal(personal)">Información</button>
+                                </div>
+                            </div>
+                        </td>
                     </tr>
                 </tbody>
             </table>
