@@ -8,6 +8,7 @@ import { ConvenioService } from 'src/app/servicios/convenio.service';
 import { CuotasService } from 'src/app/servicios/cuotas.service';
 import { FacxconvenioService } from 'src/app/servicios/facxconvenio.service';
 import { DocumentosService } from 'src/app/servicios/administracion/documentos.service';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { NtacreditoService } from 'src/app/servicios/ntacredito.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { Ntacredito } from 'src/app/modelos/ntacredito';
@@ -57,6 +58,7 @@ export class AnularConvenioComponent implements OnInit {
     private s_documentos: DocumentosService,
     private s_ntacredito: NtacreditoService,
     private facturaService: FacturaService,
+    private authService: AutorizaService,
     private fb: FormBuilder,
     private router: Router
   ) {}
@@ -297,6 +299,8 @@ export class AnularConvenioComponent implements OnInit {
     }
 
     try {
+      await this.actualizarFacturasPorEliminacion();
+
       await firstValueFrom(
         this.s_convenio.updateEstado(
           this._convenio.idconvenio,
@@ -481,7 +485,7 @@ export class AnularConvenioComponent implements OnInit {
     }
 
     const hoy = new Date();
-    const userElimina = this._convenio.idresponsable || this._convenio.usucrea || 0;
+    const userElimina = this.authService.idusuario || this._convenio.idresponsable || this._convenio.usucrea || 0;
     const razon = `Anulación del convenio ${this._convenio.nroconvenio || this._convenio.idconvenio}`;
 
     const updates: Promise<any>[] = [];
@@ -534,6 +538,37 @@ export class AnularConvenioComponent implements OnInit {
 
     if (updates.length > 0) {
       await Promise.all(updates);
+    }
+  }
+
+  private async actualizarFacturasPorEliminacion(): Promise<void> {
+    if (!this._convenio) return;
+
+    const hoy = new Date();
+    const userElimina = this.authService.idusuario || this._convenio.idresponsable || this._convenio.usucrea || 0;
+    const razon = `Eliminación del convenio ${this._convenio.nroconvenio || this._convenio.idconvenio}`;
+    const facturasActualizar = (this.facNuevas || []).filter((f) => f?.idfactura);
+
+    for (const fac of facturasActualizar) {
+      try {
+        const facCompleta: any = await firstValueFrom(this.facturaService.getById(fac.idfactura));
+        if (!facCompleta) {
+          console.warn(`Factura ${fac.idfactura} no encontrada antes de actualizar por eliminación`);
+          continue;
+        }
+
+        const upd = {
+          ...facCompleta,
+          usuarioeliminacion: userElimina,
+          fechaeliminacion: hoy,
+          razoneliminacion: razon,
+        };
+
+        await this.facturaService.updateFacturaAsync(upd);
+      } catch (err) {
+        console.error(`Error actualizando factura ${fac.idfactura} por eliminación:`, err);
+        throw err;
+      }
     }
   }
 
