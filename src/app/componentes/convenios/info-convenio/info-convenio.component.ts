@@ -28,7 +28,8 @@ export class InfoConvenioComponent implements OnInit {
   _cuotas: any;
   _rubroxfac: any;
   idconvenio: number;
-  sweliminar: boolean = true
+  sweliminar: boolean = true;
+  hasFacturasCobradas: boolean = false;
   totalInteres: number;
   constructor(
     private convService: ConvenioService,
@@ -137,9 +138,16 @@ export class InfoConvenioComponent implements OnInit {
 
   facxConvenio() {
     this.fxconvService.getFacByConvenio(this.idconvenio).subscribe({
-      next: (datos) => {
+      next: (datos: any[]) => {
         this._facxconvenio = datos;
         this.totalFacturas();
+        this.hasFacturasCobradas = Array.isArray(datos)
+          ? datos.some((fx: any) =>
+              fx?.idfactura_facturas?.pagado === 1 ||
+              fx?.idfactura_facturas?.pagado === '1' ||
+              fx?.idfactura_facturas?.pagado === true
+            )
+          : false;
       },
       error: (err) => console.error(err.error),
     });

@@ -565,46 +565,6 @@ export class RecaudacionComponent implements OnInit {
   //   PLANILLAS SIN COBRO
   // =====================
 
-  __sinCobro(idcliente: number) {
-    this.loadingService.showLoading();
-    this.swbusca = 0;
-
-    this.facService.getFacSincobro(idcliente).subscribe({
-      next: (sincobrar: any[]) => {
-        if (!sincobrar.length) {
-          this.swbusca = 2;
-          this.loadingService.hideLoading();
-        }
-
-        sincobrar.map(async (item: any, i: number) => {
-          if (item.idAbonado !== 0 && item.idmodulo !== 27) {
-            const abonado: Abonados = await this.getAbonado(item.idAbonado);
-            item.direccion = abonado.direccionubicacion;
-            item.responsablePago = abonado.idresponsable.nombre;
-            const emision: any = await this.getEmision(item.idfactura);
-            item.fechaemision = emision;
-            item.iva = 0;
-          } else {
-            const cliente: Clientes = await this.getCliente(item.idCliente);
-            item.direccion = cliente.direccion;
-            item.responsablePago = cliente.nombre;
-            item.fechaemision = item.feccrea;
-            const iva: any = await this.calIva(item.idfactura);
-            item.iva = (iva.length ? iva[0][1] : 0);
-          }
-
-          if (i + 1 === sincobrar.length) {
-            this.loadingService.hideLoading();
-            this.swbusca = 3;
-          }
-        });
-
-        this._sincobro = sincobrar;
-        this.listaFiltrada = [...sincobrar];
-      },
-      error: (e) => console.error(e),
-    });
-  }
   sinCobro(idcliente: number) {
     this.loadingService.showLoading();
     this.swbusca = 0;
@@ -791,35 +751,6 @@ export class RecaudacionComponent implements OnInit {
             item.pagado = 0;
           }
         });
-      }
-    } else {
-      this._sincobro[index].pagado = this._sincobro[index].pagado ? 1 : 0;
-    }
-
-    this.totalAcobrar();
-  }
-  __marcarAnteriores(e: any, index: number, cuenta: number) {
-    this.ntaCredito(cuenta, e.target.checked);
-
-    if (this._sincobro[index].idmodulo === 3 || this._sincobro[index].idmodulo === 4) {
-      if (this._sincobro[index].pagado) {
-        let antCuenta = this._sincobro[index].idAbonado;
-        let i = index - 1;
-        while (i >= 0) {
-          if (antCuenta !== this._sincobro[i].idAbonado) break;
-          this._sincobro[i].pagado = 1;
-          antCuenta = this._sincobro[i].idAbonado;
-          i--;
-        }
-      } else {
-        let antCuenta = this._sincobro[index].idAbonado;
-        let i = index;
-        while (i <= this._sincobro.length - 1) {
-          if (antCuenta !== this._sincobro[i].idAbonado) break;
-          this._sincobro[i].pagado = 0;
-          antCuenta = this._sincobro[i].idAbonado;
-          i++;
-        }
       }
     } else {
       this._sincobro[index].pagado = this._sincobro[index].pagado ? 1 : 0;

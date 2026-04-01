@@ -17,7 +17,7 @@ export class FacxconvenioService {
 
    //Pre Facturas por idconvenio
    getFacByConvenio(idconvenio: number) {
-      return this.http.get<Facxconvenio>(`${baseUrl}?idconvenio=${idconvenio}`)
+      return this.http.get<Facxconvenio[]>(`${baseUrl}?idconvenio=${idconvenio}`);
    }
 
    saveFacByConvenio(fxc: Facxconvenio): Observable<Object> {

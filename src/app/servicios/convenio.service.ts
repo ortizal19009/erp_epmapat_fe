@@ -60,6 +60,32 @@ export class ConvenioService {
     return this.http.put(`${baseUrl}/${idconvenio}`, convenio);
   }
 
+  updateWithAudit(
+    idconvenio: number,
+    convenio: Convenios,
+    usumodi: number = 0,
+    tipo: string = 'MODIFICACION',
+    observacion: string = 'Actualización de convenio'
+  ): Observable<Object> {
+    return this.http.put(
+      `${baseUrl}/${idconvenio}?usumodi=${usumodi}&tipo=${encodeURIComponent(tipo)}&observacion=${encodeURIComponent(observacion)}`,
+      convenio
+    );
+  }
+
+  updateEstado(
+    idconvenio: number,
+    estado: number,
+    usumodi: number = 0,
+    observacion: string = 'Cambio de estado de convenio',
+    tipo: string = 'CAMBIO_DE_ESTADO'
+  ): Observable<Object> {
+    return this.http.put(
+      `${baseUrl}/${idconvenio}/estado?estado=${estado}&usumodi=${usumodi}&observacion=${encodeURIComponent(observacion)}&tipo=${encodeURIComponent(tipo)}`,
+      null
+    );
+  }
+
   deleteConvenio(idconvenio: number): Observable<Object> {
     return this.http.delete(`${baseUrl}/${idconvenio}`);
   }

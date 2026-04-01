@@ -1,356 +1,507 @@
-<div class="container-fluid my-3">
-  <div class="card sombra border-0 erp-card">
-
-    <!-- ===== HEADER ===== -->
-    <div class="card-header cabecera erp-header border-bottom py-3">
-      <div class="d-flex flex-wrap align-items-center justify-content-between">
-
-        <div class="mb-2 mb-md-0">
-          <div class="erp-meta">Convenio</div>
-
-          <div class="d-flex align-items-center flex-wrap">
-            <div class="h6 mb-0 mr-2 erp-section-title">
-              N° {{ _convenio?.nroconvenio }}
-            </div>
-
-            <span class="badge erp-chip"
-              [ngClass]="_convenio?.estado === 1 ? 'badge-success' : 'badge-danger'">
-              {{ _convenio?.estado === 1 ? 'ACTIVO' : 'INACTIVO' }}
-            </span>
-
-            <span *ngIf="tieneFacturaVencidaNueva" class="badge erp-chip badge-warning ml-2">
-              <i class="bi bi-exclamation-triangle mr-1"></i>
-              {{ cantVencidasNuevas }} factura(s) nueva(s) vencida(s)
-            </span>
-          </div>
-        </div>
-
-        <div class="text-md-right">
-          <div class="erp-meta">Autorización</div>
-          <div class="font-weight-bold">{{ _convenio?.nroautorizacion || '-' }}</div>
-        </div>
-
+<div class="content mt-1 pt-1 pl-0">
+  <div class="container-fluid">
+    <div class="row m-0 px-0 py-1 border cabecera sombra mb-2">
+      <div class="col-12">
+        <h4 class="m-0 font-weight-bold">
+          <i class="bi bi-file-earmark-x mr-2"></i>
+          {{ modo === 'eliminar' ? 'Eliminar Convenio' : 'Anular Convenio' }}
+        </h4>
       </div>
     </div>
+  </div>
 
-    <div class="card-body detalle">
+  <div class="container-fluid my-3">
+    <div class="card sombra border-0 erp-card">
 
-      <!-- ===== RESUMEN ===== -->
-      <div class="row">
-        <div class="col-lg-8">
-          <div class="mb-3">
-            <div class="erp-meta">Referencia</div>
-            <div class="font-weight-bold">{{ _convenio?.referencia || '-' }}</div>
-          </div>
+      <!-- ===== HEADER ===== -->
+      <div class="card-header erp-header border-bottom py-3">
+        <div class="d-flex flex-wrap align-items-center justify-content-between">
 
-          <div class="mb-2">
-            <div class="erp-meta">Observaciones</div>
-            <div class="text-muted">
-              {{ _convenio?.observaciones || 'Sin observaciones.' }}
+          <div class="mb-2 mb-md-0 ">
+            <div class="erp-meta">Convenio</div>
+
+            <div class="d-flex align-items-center flex-wrap">
+              <div class="h6 mb-0 mr-2 erp-section-title">
+                N° {{ _convenio?.nroconvenio }}
+              </div>
+
+              <span class="badge erp-chip" [ngClass]="_convenio?.estado === 1 ? 'badge-success' : 'badge-danger'">
+                {{ _convenio?.estado === 1 ? 'ACTIVO' : 'INACTIVO' }}
+              </span>
+
+              <span *ngIf="tieneFacturaVencidaNueva" class="badge erp-chip badge-warning ml-2">
+                <i class="bi bi-exclamation-triangle mr-1"></i>
+                {{ cantVencidasNuevas }} factura(s) nueva(s) vencida(s)
+              </span>
             </div>
           </div>
-        </div>
 
-        <div class="col-lg-4">
-          <div class="erp-kpi">
-            <div class="d-flex justify-content-between">
-              <span class="erp-meta">Fecha creación</span>
-              <span class="font-weight-bold">{{ _convenio?.feccrea || '-' }}</span>
-            </div>
-            <div class="d-flex justify-content-between mt-2">
-              <span class="erp-meta">Creado por</span>
-              <span class="font-weight-bold">{{ _convenio?.usucrea || '-' }}</span>
-            </div>
+          <div class="text-md-right">
+            <div class="erp-meta">Autorización</div>
+            <div class="font-weight-bold">{{ _convenio?.nroautorizacion || '-' }}</div>
           </div>
+
         </div>
       </div>
 
-      <hr class="my-3" />
+      <div class="card-body detalle">
 
-      <!-- ===== ACORDEONES SUPERIORES ===== -->
-      <div class="row">
+        <!-- ===== RESUMEN ===== -->
+        <div class="row mb-3">
+          <div class="col-12">
+            <div class="card border erp-card p-3">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <h6 class="m-0 font-weight-bold">Resumen del Convenio</h6>
+                <span class="badge erp-chip badge-info">ID {{ _convenio?.idconvenio || 'N/A' }}</span>
+              </div>
 
-        <!-- FINANCIEROS -->
-        <div class="col-lg-6 mb-3">
-          <div class="card border erp-card">
-            <div class="card-header bg-white py-2 d-flex align-items-center justify-content-between">
-              <button class="btn btn-link p-0 font-weight-bold erp-accordion-btn" type="button"
-                data-toggle="collapse" data-target="#collapseFinancieros" aria-expanded="true"
-                aria-controls="collapseFinancieros">
-                <i class="bi bi-cash-coin mr-2"></i> Datos financieros
-              </button>
+              <div class="row">
+                <div class="col-sm-6 col-lg-3 mb-2">
+                  <div class="erp-meta">Nro. convenio</div>
+                  <div class="erp-field">{{ _convenio?.nroconvenio || '-' }}</div>
+                </div>
 
-              <button class="btn btn-sm btn-light border" type="button" data-toggle="collapse"
-                data-target="#collapseFinancieros" aria-expanded="true" aria-controls="collapseFinancieros"
-                title="Expandir/Colapsar">
-                <i class="bi bi-chevron-down"></i>
-              </button>
-            </div>
-
-            <div id="collapseFinancieros" class="collapse show">
-              <div class="card-body py-2">
-                <div class="row">
-
-                  <div class="col-6 mb-2">
-                    <div class="erp-meta">Total convenio</div>
-                    <div class="erp-field">
-                      {{ _convenio?.totalconvenio | number:'1.2-2' }} $
-                    </div>
+                <div class="col-sm-6 col-lg-3 mb-2">
+                  <div class="erp-meta">Estado</div>
+                  <div
+                    class="erp-field"
+                    [ngClass]="_convenio?.estado === 1 ? 'text-success' : 'text-danger'"
+                  >
+                    {{ _convenio?.estado === 1 ? 'Activo' : 'Inactivo' }}
                   </div>
+                </div>
 
-                  <div class="col-6 mb-2">
-                    <div class="erp-meta">Pago mensual</div>
-                    <div class="erp-field">
-                      {{ _convenio?.pagomensual | number:'1.2-2' }} $
-                    </div>
+                <div class="col-sm-6 col-lg-3 mb-2">
+                  <div class="erp-meta">Total convenio</div>
+                  <div class="erp-field">{{ _convenio?.totalconvenio | number:'1.2-2' }} $</div>
+                </div>
+
+                <div class="col-sm-6 col-lg-3 mb-2">
+                  <div class="erp-meta">Pago mensual</div>
+                  <div class="erp-field">{{ _convenio?.pagomensual | number:'1.2-2' }} $</div>
+                </div>
+
+                <div class="col-sm-6 col-lg-3 mb-2">
+                  <div class="erp-meta">Referencia</div>
+                  <div class="erp-field">{{ _convenio?.referencia || '-' }}</div>
+                </div>
+
+                <div class="col-sm-6 col-lg-3 mb-2">
+                  <div class="erp-meta">Responsable</div>
+                  <div class="erp-field">{{ _convenio?.idabonado?.idresponsable?.nombre || '-' }}</div>
+                </div>
+
+                <div class="col-sm-6 col-lg-3 mb-2">
+                  <div class="erp-meta">Fecha creación</div>
+                  <div class="erp-field">{{ _convenio?.feccrea || '-' }}</div>
+                </div>
+
+                <div class="col-sm-6 col-lg-3 mb-2">
+                  <div class="erp-meta">Creado por</div>
+                  <div class="erp-field">{{ _convenio?.usucrea || '-' }}</div>
+                </div>
+
+                <div class="col-12 mb-2">
+                  <div class="erp-meta">Dirección</div>
+                  <div class="erp-field">{{ _convenio?.idabonado?.direccionubicacion || '-' }}</div>
+                </div>
+
+                <div class="col-12">
+                  <div class="erp-meta">Observaciones</div>
+                  <div class="erp-field" style="min-height: 54px; align-items:flex-start;">
+                    {{ _convenio?.observaciones || 'Sin observaciones.' }}
                   </div>
-
-                  <div class="col-6 mb-2">
-                    <div class="erp-meta">Cuota inicial</div>
-                    <div class="erp-field">
-                      {{ _convenio?.cuotainicial | number:'1.2-2' }} $
-                    </div>
-                  </div>
-
-                  <div class="col-6 mb-2">
-                    <div class="erp-meta">Cuota final</div>
-                    <div class="erp-field">
-                      {{ _convenio?.cuotafinal | number:'1.2-2' }} $
-                    </div>
-                  </div>
-
-                  <div class="col-6 mb-2">
-                    <div class="erp-meta">N° de cuotas</div>
-                    <div class="erp-field">
-                      {{ _convenio?.cuotas || 0 }}
-                    </div>
-                  </div>
-
-                  <div class="col-6 mb-2">
-                    <div class="erp-meta">Estado</div>
-                    <div class="erp-field"
-                      [ngClass]="_convenio?.estado === 1 ? 'text-success' : 'text-danger'">
-                      {{ _convenio?.estado === 1 ? 'Activo' : 'Inactivo' }}
-                    </div>
-                  </div>
-
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- ABONADO -->
-        <div class="col-lg-6 mb-3">
-          <div class="card border erp-card">
-            <div class="card-header bg-white py-2 d-flex align-items-center justify-content-between">
-              <button class="btn btn-link p-0 font-weight-bold erp-accordion-btn" type="button"
-                data-toggle="collapse" data-target="#collapseAbonado" aria-expanded="true"
-                aria-controls="collapseAbonado">
-                <i class="bi bi-person-badge mr-2"></i> Datos del abonado
-              </button>
+        <hr class="my-3" />
 
-              <button class="btn btn-sm btn-light border" type="button" data-toggle="collapse"
-                data-target="#collapseAbonado" aria-expanded="true" aria-controls="collapseAbonado"
-                title="Expandir/Colapsar">
-                <i class="bi bi-chevron-down"></i>
-              </button>
-            </div>
+        <!-- ===== ACORDEONES SUPERIORES ===== -->
+        <div class="row">
 
-            <div id="collapseAbonado" class="collapse show">
-              <div class="card-body py-2">
-                <div class="row">
+          <!-- FINANCIEROS -->
+          <div class="col-lg-6 mb-3">
+            <div class="card border erp-card">
+              <div class="card-header bg-white py-2 d-flex align-items-center justify-content-between">
+                <button class="btn btn-link p-0 font-weight-bold erp-accordion-btn" type="button" data-toggle="collapse"
+                  data-target="#collapseFinancieros" aria-expanded="true" aria-controls="collapseFinancieros">
+                  <i class="bi bi-cash-coin mr-2"></i> Datos financieros
+                </button>
 
-                  <div class="col-6 mb-2">
-                    <div class="erp-meta">ID abonado</div>
-                    <div class="erp-field">
-                      {{ _convenio?.idabonado?.idabonado || '-' }}
+                <button class="btn btn-sm btn-light border" type="button" data-toggle="collapse"
+                  data-target="#collapseFinancieros" aria-expanded="true" aria-controls="collapseFinancieros"
+                  title="Expandir/Colapsar">
+                  <i class="bi bi-chevron-down"></i>
+                </button>
+              </div>
+
+              <div id="collapseFinancieros" class="collapse show">
+                <div class="card-body py-2">
+                  <div class="row">
+
+                    <div class="col-6 mb-2">
+                      <div class="erp-meta">Total convenio</div>
+                      <div class="erp-field">
+                        {{ _convenio?.totalconvenio | number:'1.2-2' }} $
+                      </div>
                     </div>
-                  </div>
 
-                  <div class="col-6 mb-2">
-                    <div class="erp-meta">Nro. medidor</div>
-                    <div class="erp-field">
-                      {{ _convenio?.idabonado?.nromedidor || '-' }}
+                    <div class="col-6 mb-2">
+                      <div class="erp-meta">Pago mensual</div>
+                      <div class="erp-field">
+                        {{ _convenio?.pagomensual | number:'1.2-2' }} $
+                      </div>
                     </div>
-                  </div>
 
-                  <div class="col-6 mb-2">
-                    <div class="erp-meta">Lectura inicial</div>
-                    <div class="erp-field">
-                      {{ _convenio?.idabonado?.lecturainicial || '-' }}
+                    <div class="col-6 mb-2">
+                      <div class="erp-meta">Cuota inicial</div>
+                      <div class="erp-field">
+                        {{ _convenio?.cuotainicial | number:'1.2-2' }} $
+                      </div>
                     </div>
-                  </div>
 
-                  <div class="col-6 mb-2">
-                    <div class="erp-meta">Fecha instalación</div>
-                    <div class="erp-field left">
-                      {{ _convenio?.idabonado?.fechainstalacion || '-' }}
+                    <div class="col-6 mb-2">
+                      <div class="erp-meta">Cuota final</div>
+                      <div class="erp-field">
+                        {{ _convenio?.cuotafinal | number:'1.2-2' }} $
+                      </div>
                     </div>
-                  </div>
 
+                    <div class="col-6 mb-2">
+                      <div class="erp-meta">N° de cuotas</div>
+                      <div class="erp-field">
+                        {{ _convenio?.cuotas || 0 }}
+                      </div>
+                    </div>
+
+                    <div class="col-6 mb-2">
+                      <div class="erp-meta">Estado</div>
+                      <div class="erp-field" [ngClass]="_convenio?.estado === 1 ? 'text-success' : 'text-danger'">
+                        {{ _convenio?.estado === 1 ? 'Activo' : 'Inactivo' }}
+                      </div>
+                    </div>
+
+                  </div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <!-- ABONADO -->
+          <div class="col-lg-6 mb-3">
+            <div class="card border erp-card">
+              <div class="card-header bg-white py-2 d-flex align-items-center justify-content-between">
+                <button class="btn btn-link p-0 font-weight-bold erp-accordion-btn" type="button" data-toggle="collapse"
+                  data-target="#collapseAbonado" aria-expanded="true" aria-controls="collapseAbonado">
+                  <i class="bi bi-person-badge mr-2"></i> Datos del abonado
+                </button>
+
+                <button class="btn btn-sm btn-light border" type="button" data-toggle="collapse"
+                  data-target="#collapseAbonado" aria-expanded="true" aria-controls="collapseAbonado"
+                  title="Expandir/Colapsar">
+                  <i class="bi bi-chevron-down"></i>
+                </button>
+              </div>
+
+              <div id="collapseAbonado" class="collapse show">
+                <div class="card-body py-2">
+                  <div class="row">
+
+                    <div class="col-6 mb-2">
+                      <div class="erp-meta">ID abonado</div>
+                      <div class="erp-field">
+                        {{ _convenio?.idabonado?.idabonado || '-' }}
+                      </div>
+                    </div>
+
+                    <div class="col-6 mb-2">
+                      <div class="erp-meta">Nro. medidor</div>
+                      <div class="erp-field">
+                        {{ _convenio?.idabonado?.nromedidor || '-' }}
+                      </div>
+                    </div>
+
+                    <div class="col-6 mb-2">
+                      <div class="erp-meta">Lectura inicial</div>
+                      <div class="erp-field">
+                        {{ _convenio?.idabonado?.lecturainicial || '-' }}
+                      </div>
+                    </div>
+
+                    <div class="col-6 mb-2">
+                      <div class="erp-meta">Fecha instalación</div>
+                      <div class="erp-field left">
+                        {{ _convenio?.idabonado?.fechainstalacion || '-' }}
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ===== FACTURAS DEL CONVENIO ===== -->
+        <div class="card border mb-2 erp-card">
+          <div class="card-header bg-white d-flex flex-wrap align-items-center justify-content-between">
+            <div class="font-weight-bold erp-section-title">
+              <i class="bi bi-receipt-cutoff mr-2"></i> Facturas del convenio
+              <span class="badge badge-light border ml-2">
+                Nuevas: <strong>{{ facNuevas.length }}</strong> · Viejas: <strong>{{ facViejas.length }}</strong>
+              </span>
+            </div>
+
+            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="toggleFacturas()">
+              <i class="bi bi-arrows-collapse mr-1"></i> Colapsar / Expandir
+            </button>
+          </div>
+
+          <div class="card-body p-2">
+            <div id="accordionFacturas">
+
+              <!-- ===== FACTURAS NUEVAS ===== -->
+              <div class="card sombra mb-2 erp-card">
+                <div class="card-header p-2 d-flex justify-content-between align-items-center">
+                  <button class="btn btn-link btn-block text-left p-0 font-weight-bold erp-accordion-btn" type="button"
+                    data-toggle="collapse" data-target="#collapseFacNuevas" aria-expanded="true"
+                    aria-controls="collapseFacNuevas">
+                    📄 Facturas nuevas del convenio
+                  </button>
+                  <small class="text-muted">Marque facturas pagadas y luego haga clic en Anular para generar Nota de Crédito.</small>
+                </div>
+
+                <div id="collapseFacNuevas" class="collapse show" data-parent="#accordionFacturas">
+                  <div class="card-body p-2">
+                    <div class="table-responsive">
+                      <table class="table table-sm table-bordered mb-0 erp-table">
+                        <thead class="text-center">
+                          <tr>
+                            <th class="sticky" style="width:40px;">Sel.</th>
+                            <th class="sticky" style="width:140px;">Nro</th>
+                            <th class="sticky" style="width:120px;">Emisión</th>
+                            <th class="sticky" style="width:140px;">Módulo</th>
+                            <th class="sticky" style="width:120px;">Total</th>
+                            <th class="sticky" style="width:120px;">Estado</th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          <tr *ngFor="let f of facNuevas">
+                            <td class="text-center">
+                              <input
+                                type="checkbox"
+                                class="form-check-input"
+                                [(ngModel)]="f.selected"
+                                [ngModelOptions]="{ standalone: true }"
+                                [disabled]="!esPagadaNueva(f)"
+                              />
+                            </td>
+                            <td class="text-center">{{ f.nrofactura || f.idfactura }}</td>
+                            <td class="text-center">{{ f.feccrea || '-' }}</td>
+                            <td class="text-center">{{ f.idmodulo?.descripcion || f.idmodulo || '-' }}</td>
+                            <td class="text-right text-danger font-weight-bold">
+                              {{ (f.totaltarifa || 0) | number:'1.2-2' }}
+                            </td>
+                            <td class="text-center">
+                              <span class="badge erp-chip"
+                                [ngClass]="(f.pagado === 1) ? 'badge-success' : 'badge-warning'">
+                                {{ (f.pagado === 1) ? 'Pagada' : 'Pendiente' }}
+                              </span>
+                            </td>
+                          </tr>
+
+                          <!-- FIX: colspan correcto (5 columnas) -->
+                          <tr *ngIf="facNuevas.length === 0">
+                            <td colspan="6" class="text-center text-muted py-3">Sin facturas nuevas</td>
+                          </tr>
+                        </tbody>
+                      <tfoot>
+                        <tr>
+                          <td colspan="4" class="text-right font-weight-bold">Total Nota de Crédito:</td>
+                          <td class="text-right font-weight-bold">{{ totalValorNotaCredito | number:'1.2-2' }}</td>
+                          <td></td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ===== FACTURAS VIEJAS ===== -->
+              <div class="card sombra erp-card">
+                <div class="card-header p-2 d-flex justify-content-between align-items-center">
+                  <button class="btn btn-link btn-block text-left p-0 font-weight-bold erp-accordion-btn" type="button"
+                    data-toggle="collapse" data-target="#collapseFacViejas" aria-expanded="false"
+                    aria-controls="collapseFacViejas">
+                    🧾 Facturas viejas incluidas en el convenio
+                  </button>
+
+                  <span class="badge badge-secondary erp-chip">{{ facViejas.length }}</span>
+                </div>
+
+                <div id="collapseFacViejas" class="collapse" data-parent="#accordionFacturas">
+                  <div class="card-body p-2">
+
+                    <div class="table-responsive">
+                      <table class="table table-sm table-bordered mb-0 erp-table">
+                        <thead class="text-center">
+                          <tr>
+                            <th class="sticky" style="width:140px;">Nro</th>
+                            <th class="sticky" style="width:120px;">Periodo</th>
+                            <th class="sticky">Detalle</th>
+                            <th class="sticky" style="width:120px;">Total</th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          <tr *ngFor="let f of facViejas">
+                            <td class="text-center">{{ f.nrofactura || f.idfactura }}</td>
+                            <td class="text-center">{{ f.feccrea || '-' }}</td>
+                            <td class="text-center">{{ f.idmodulo?.descripcion || f.idmodulo || '-' }}</td>
+                            <td class="text-right text-danger font-weight-bold">
+                              {{ (f.totaltarifa || 0) | number:'1.2-2' }}
+                            </td>
+                          </tr>
+
+                          <!-- FIX: colspan correcto (4 columnas) -->
+                          <tr *ngIf="facViejas.length === 0">
+                            <td colspan="4" class="text-center text-muted py-3">Sin facturas viejas incluidas</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
 
       </div>
 
-      <!-- ===== FACTURAS DEL CONVENIO ===== -->
-      <div class="card border mb-2 erp-card">
-        <div class="card-header bg-white d-flex flex-wrap align-items-center justify-content-between">
-          <div class="font-weight-bold erp-section-title">
-            <i class="bi bi-receipt-cutoff mr-2"></i> Facturas del convenio
-            <span class="badge badge-light border ml-2">
-              Nuevas: <strong>{{ facNuevas.length }}</strong> · Viejas: <strong>{{ facViejas.length }}</strong>
-            </span>
-          </div>
+      <!-- ===== FOOTER ===== -->
+      <div class="card-footer bg-white border-top d-flex flex-wrap justify-content-between align-items-center">
+        <small class="text-muted mb-2 mb-md-0">
+          Última actualización: {{ _convenio?.fecmodi || '-' }} ·
+          Usuario: <strong>{{ _convenio?.usucrea || '-' }}</strong>
+        </small>
 
-          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="toggleFacturas()">
-            <i class="bi bi-arrows-collapse mr-1"></i> Colapsar / Expandir
+        <div class="btn-group btn-group-sm">
+
+          <button *ngIf="modo === 'anular'" type="button" class="btn btn-outline-success"
+            (click)="anularConvenio()" [disabled]="!(_convenio?.estado == 1) || selectedPagadasCount === 0" title="Anular convenio">
+            <i class="bi bi-slash-circle mr-1"></i>
+            Anular ({{ selectedPagadasCount }} factura(s) pagada(s) seleccionada(s))
           </button>
+
+          <button *ngIf="modo === 'eliminar'" type="button" class="btn btn-outline-danger"
+            (click)="eliminarConvenio()" [disabled]="!(_convenio?.estado == 1)" title="Eliminar convenio">
+            <i class="bi bi-trash mr-1"></i> Eliminar
+          </button>
+
+          <button type="button" class="btn btn-outline-secondary" (click)="cancelar()" title="Cancelar">
+            <i class="bi bi-x-circle mr-1"></i> Cancelar
+          </button>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!-- Modal Anular Convenio / Notas de Crédito -->
+<div *ngIf="modalVisible && modo === 'anular'" class="modal d-block fade show" tabindex="-1" aria-labelledby="anularConvenioModalLabel" aria-modal="true" role="dialog">
+  <div class="modal-backdrop fade show"></div>
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="anularConvenioModalLabel">Generar Notas de Crédito y Anular Convenio</h5>
+        <button type="button" class="close " (click)="closeNcModal()" aria-label="Cerrar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="modalError" class="alert alert-danger">{{ modalError }}</div>
+
+        <p>Facturas pagadas disponibles para generar nota de crédito (seleccione las que correspondan):</p>
+
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered">
+            <thead class="thead-light">
+              <tr>
+                <th style="width: 30px;">Sel.</th>
+                <th>Nro. Factura</th>
+                <th>Fecha</th>
+                <th class="text-right">Total</th>
+                <th class="text-right">Valor NC</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let f of facturasPagadas">
+                <td class="text-center">
+                  <input type="checkbox" class="form-check-input" [(ngModel)]="f.selected" [ngModelOptions]="{standalone:true}" />
+                </td>
+                <td>{{ f.nrofactura || f.idfactura }}</td>
+                <td>{{ f.feccrea | date:'dd/MM/yyyy' }}</td>
+                <td class="text-right">{{ f.totaltarifa | number:'1.2-2' }}</td>
+                <td class="text-right" style="width: 140px;" >
+                  <input type="number" class="form-control form-control-sm text-right" readonly [min]="0.01" [max]="f.totaltarifa || 0" [(ngModel)]="f.valorNc" [ngModelOptions]="{standalone:true}" />
+                </td>
+              </tr>
+              <tr *ngIf="facturasPagadas.length === 0">
+                <td colspan="5" class="text-center text-muted py-3">No hay facturas pagadas para generar nota de crédito.</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="4" class="text-right font-weight-bold">Total Nota de Crédito</td>
+                <td class="text-right font-weight-bold">{{ totalValorNotaCredito | number:'1.2-2' }}</td>
+              </tr>
+            </tfoot>
+          </table>
         </div>
 
-        <div class="card-body p-2">
-          <div id="accordionFacturas">
+        <hr />
 
-            <!-- ===== FACTURAS NUEVAS ===== -->
-            <div class="card sombra mb-2 erp-card">
-              <div class="card-header p-2 d-flex justify-content-between align-items-center">
-                <button class="btn btn-link btn-block text-left p-0 font-weight-bold erp-accordion-btn" type="button"
-                  data-toggle="collapse" data-target="#collapseFacNuevas" aria-expanded="true"
-                  aria-controls="collapseFacNuevas">
-                  📄 Facturas nuevas del convenio
-                </button>
-
-                <span class="badge badge-primary erp-chip">{{ facNuevas.length }}</span>
-              </div>
-
-              <div id="collapseFacNuevas" class="collapse show" data-parent="#accordionFacturas">
-                <div class="card-body p-2">
-
-                  <div class="table-responsive">
-                    <table class="table table-sm table-bordered mb-0 erp-table">
-                      <thead class="text-center">
-                        <tr>
-                          <th class="sticky" style="width:140px;">Nro</th>
-                          <th class="sticky" style="width:120px;">Emisión</th>
-                          <th class="sticky" style="width:140px;">Módulo</th>
-                          <th class="sticky" style="width:120px;">Total</th>
-                          <th class="sticky" style="width:120px;">Estado</th>
-                        </tr>
-                      </thead>
-
-                      <tbody>
-                        <tr *ngFor="let f of facNuevas">
-                          <td class="text-center">{{ f.nrofactura || f.idfactura }}</td>
-                          <td class="text-center">{{ f.feccrea || '-' }}</td>
-                          <td class="text-center">{{ f.idmodulo?.descripcion || f.idmodulo || '-' }}</td>
-                          <td class="text-right text-danger font-weight-bold">
-                            {{ (f.totaltarifa || 0) | number:'1.2-2' }}
-                          </td>
-                          <td class="text-center">
-                            <span class="badge erp-chip"
-                              [ngClass]="(f.pagado === 1) ? 'badge-success' : 'badge-warning'">
-                              {{ (f.pagado === 1) ? 'Pagada' : 'Pendiente' }}
-                            </span>
-                          </td>
-                        </tr>
-
-                        <!-- FIX: colspan correcto (5 columnas) -->
-                        <tr *ngIf="facNuevas.length === 0">
-                          <td colspan="5" class="text-center text-muted py-3">Sin facturas nuevas</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-
-                </div>
-              </div>
+        <form [formGroup]="notaCreditoForm">
+          <div class="form-row">
+            <div class="form-group col-md-4">
+              <label>Documento</label>
+              <select class="form-control form-control-sm" formControlName="iddocumento_documentos">
+                <option [ngValue]="null">-- Seleccione --</option>
+                <option *ngFor="let doc of documentos" [ngValue]="doc">{{ doc.nomdoc }}</option>
+              </select>
+              <small class="text-danger" *ngIf="notaCreditoForm.get('iddocumento_documentos')?.invalid && notaCreditoForm.get('iddocumento_documentos')?.touched">Documento es obligatorio.</small>
             </div>
-
-            <!-- ===== FACTURAS VIEJAS ===== -->
-            <div class="card sombra erp-card">
-              <div class="card-header p-2 d-flex justify-content-between align-items-center">
-                <button class="btn btn-link btn-block text-left p-0 font-weight-bold erp-accordion-btn" type="button"
-                  data-toggle="collapse" data-target="#collapseFacViejas" aria-expanded="false"
-                  aria-controls="collapseFacViejas">
-                  🧾 Facturas viejas incluidas en el convenio
-                </button>
-
-                <span class="badge badge-secondary erp-chip">{{ facViejas.length }}</span>
-              </div>
-
-              <div id="collapseFacViejas" class="collapse" data-parent="#accordionFacturas">
-                <div class="card-body p-2">
-
-                  <div class="table-responsive">
-                    <table class="table table-sm table-bordered mb-0 erp-table">
-                      <thead class="text-center">
-                        <tr>
-                          <th class="sticky" style="width:140px;">Nro</th>
-                          <th class="sticky" style="width:120px;">Periodo</th>
-                          <th class="sticky">Detalle</th>
-                          <th class="sticky" style="width:120px;">Total</th>
-                        </tr>
-                      </thead>
-
-                      <tbody>
-                        <tr *ngFor="let f of facViejas">
-                          <td class="text-center">{{ f.nrofactura || f.idfactura }}</td>
-                          <td class="text-center">{{ f.feccrea || '-' }}</td>
-                          <td class="text-center">{{ f.idmodulo?.descripcion || f.idmodulo || '-' }}</td>
-                          <td class="text-right text-danger font-weight-bold">
-                            {{ (f.totaltarifa || 0) | number:'1.2-2' }}
-                          </td>
-                        </tr>
-
-                        <!-- FIX: colspan correcto (4 columnas) -->
-                        <tr *ngIf="facViejas.length === 0">
-                          <td colspan="4" class="text-center text-muted py-3">Sin facturas viejas incluidas</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-
-                </div>
-              </div>
+            <div class="form-group col-md-4">
+              <label>Ref. Documento</label>
+              <input class="form-control form-control-sm" type="text" formControlName="refdocumento" maxlength="30" />
+              <small class="text-danger" *ngIf="notaCreditoForm.get('refdocumento')?.invalid && notaCreditoForm.get('refdocumento')?.touched">Referencia es obligatoria (máx. 30 caracteres).</small>
             </div>
-
+            <div class="form-group col-md-4">
+              <label>Observación</label>
+              <input class="form-control form-control-sm" type="text" formControlName="observacion" maxlength="300" />
+              <small class="text-danger" *ngIf="notaCreditoForm.get('observacion')?.invalid && notaCreditoForm.get('observacion')?.touched">Observación obligatoria (10-300 caracteres).</small>
+            </div>
           </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ===== FOOTER ===== -->
-    <div class="card-footer bg-white border-top d-flex flex-wrap justify-content-between align-items-center">
-      <small class="text-muted mb-2 mb-md-0">
-        Última actualización: {{ _convenio?.fecmodi || '-' }} ·
-        Usuario: <strong>{{ _convenio?.usucrea || '-' }}</strong>
-      </small>
-
-      <div class="btn-group btn-group-sm">
-
-        <!-- ANULAR: solo si NO hay ninguna factura pagada en nuevas -->
-        <button *ngIf="!tieneFacturaPagadaNueva" type="button" class="btn btn-outline-success"
-          (click)="anularConvenio()" [disabled]="_convenio?.estado !== 1" title="Anular convenio">
-          <i class="bi bi-slash-circle mr-1"></i> Anular
-        </button>
-
-        <!-- ELIMINAR: solo si EXISTE al menos una factura pagada en nuevas -->
-        <button *ngIf="tieneFacturaPagadaNueva" type="button" class="btn btn-outline-danger"
-          (click)="eliminarConvenio()" title="Eliminar convenio">
-          <i class="bi bi-trash mr-1"></i> Eliminar
-        </button>
-
-        <button type="button" class="btn btn-outline-secondary" (click)="cancelar()" title="Cancelar">
-          <i class="bi bi-x-circle mr-1"></i> Cancelar
-        </button>
+        </form>
 
       </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-success btn-sm " (click)="closeNcModal()">Cerrar</button>
+        <button type="button" class="btn btn-success btn-sm " [disabled]="modalProcessing" (click)="generarNotasCredito()">
+          <span *ngIf="modalProcessing" class="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span>
+          Generar notas y anular
+        </button>
+      </div>
     </div>
-
   </div>
 </div>

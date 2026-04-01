@@ -168,3 +168,34 @@ table {
 .badge-warning {
   color: #212529;
 }
+
+/* Modal custom para forzar z-index en este componente */
+.modal.d-block {
+  display: block !important;
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  z-index: 2050 !important;
+  background: rgba(0, 0, 0, 0.45); /* oscurece pantalla global */
+}
+
+.modal-backdrop {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45) !important;
+  z-index: 2040 !important;
+}
+
+.modal-dialog {
+  z-index: 2060 !important;
+}
+
+.modal-content {
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.45) !important;
+}
