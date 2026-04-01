@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
@@ -17,13 +17,14 @@ import { RutasService } from 'src/app/servicios/rutas.service';
 import { TipopagoService } from 'src/app/servicios/tipopago.service';
 import { UbicacionmService } from 'src/app/servicios/ubicacionm.service';
 import Swal from 'sweetalert2';
+import * as L from 'leaflet';
 
 @Component({
   selector: 'app-modificar-abonados',
   templateUrl: './modificar-abonados.component.html',
   styleUrls: ['./modi-abonado.component.css'],
 })
-export class ModificarAbonadosComponent implements OnInit {
+export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
   abonado: Abonados = new Abonados();
   abonadoForm: FormGroup;
   f_responsablePago: FormGroup;
@@ -40,6 +41,13 @@ export class ModificarAbonadosComponent implements OnInit {
   v_idresponsable: any;
   setCategoria: any;
   date: Date = new Date();
+  fotoCasaPreview: string | null = null;
+  fotoMedidorPreview: string | null = null;
+  geoError: string | null = null;
+  map!: L.Map | undefined;
+  marker!: L.Marker | undefined;
+  defaultCoords: L.LatLngExpression = [0.8038125013453109, -77.72763063596486];
+  @ViewChild('mapEditor', { static: false }) mapEditor?: ElementRef;
 
   constructor(
     public fb: FormBuilder,
@@ -78,6 +86,9 @@ export class ModificarAbonadosComponent implements OnInit {
       idestadom_estadom: ['', Validators.required],
       medidorprincipal: ['', Validators.required],
       usucrea: this.authService.idusuario,
+      geolocalizacion: [''],
+      fotocasa: [''],
+      fotomedidor: [''],
       adultomayor: '',
       municipio: '',
       swalcantarillado: '',
@@ -101,6 +112,10 @@ export class ModificarAbonadosComponent implements OnInit {
     this.listarTipoPago();
     this.listarRutas();
     this.obtenerAbonado();
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => this.renderMapFromForm(), 300);
   }
 
   listarCategorias() {
@@ -220,6 +235,9 @@ export class ModificarAbonadosComponent implements OnInit {
         idtipopago_tipopago: datos.idtipopago_tipopago,
         idestadom_estadom: datos.idestadom_estadom,
         medidorprincipal: datos.medidorprincipal,
+        geolocalizacion: datos.geolocalizacion || '',
+        fotocasa: datos.fotocasa || '',
+        fotomedidor: datos.fotomedidor || '',
         municipio: datos.municipio,
         adultomayor: datos.adultomayor,
         swbasura: datos.swbasura,
@@ -229,6 +247,9 @@ export class ModificarAbonadosComponent implements OnInit {
         usucrea: datos.usucrea,
         feccrea: datos.feccrea,
       });
+      this.fotoCasaPreview = datos.fotocasa || null;
+      this.fotoMedidorPreview = datos.fotomedidor || null;
+      setTimeout(() => this.renderMapFromForm(), 100);
     });
   }
 
@@ -377,5 +398,114 @@ export class ModificarAbonadosComponent implements OnInit {
   setResponsablePago(respPago: any) {
     this.v_idresponsable = respPago;
     this.abonadoForm.patchValue({ idresponsable: respPago.nombre });
+  }
+
+  onFileSelected(event: Event, controlName: 'fotocasa' | 'fotomedidor'): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files && input.files.length ? input.files[0] : null;
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = typeof reader.result === 'string' ? reader.result : '';
+      this.abonadoForm.patchValue({ [controlName]: result });
+
+      if (controlName === 'fotocasa') {
+        this.fotoCasaPreview = result;
+      } else {
+        this.fotoMedidorPreview = result;
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  capturarGeolocalizacion(): void {
+    this.geoError = null;
+
+    if (!navigator.geolocation) {
+      this.geoError = 'El navegador no permite obtener geolocalización.';
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        this.abonadoForm.patchValue({
+          geolocalizacion: JSON.stringify([lat, lng]),
+        });
+        this.setMarkerPosition([lat, lng], true);
+      },
+      () => {
+        this.geoError = 'No se pudo obtener la ubicación actual.';
+      }
+    );
+  }
+
+  private renderMapFromForm(): void {
+    const coords = this.parseGeolocalizacion(this.abonadoForm?.value?.geolocalizacion);
+    const center = coords || this.defaultCoords;
+
+    if (!this.map && this.mapEditor?.nativeElement) {
+      this.map = L.map(this.mapEditor.nativeElement).setView(center, coords ? 18 : 15);
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap',
+      }).addTo(this.map);
+
+      this.map.on('click', (e: L.LeafletMouseEvent) => {
+        const point: [number, number] = [e.latlng.lat, e.latlng.lng];
+        this.updateGeolocalizacion(point);
+        this.setMarkerPosition(point, false);
+      });
+    }
+
+    if (!this.map) return;
+
+    this.setMarkerPosition(center, false);
+    setTimeout(() => this.map?.invalidateSize(), 100);
+  }
+
+  private setMarkerPosition(coords: L.LatLngExpression, shouldCenter: boolean): void {
+    if (!this.map) return;
+
+    if (!this.marker) {
+      this.marker = L.marker(coords, { draggable: true }).addTo(this.map);
+      this.marker.on('dragend', () => {
+        const latlng = this.marker?.getLatLng();
+        if (!latlng) return;
+        this.updateGeolocalizacion([latlng.lat, latlng.lng]);
+      });
+    } else {
+      this.marker.setLatLng(coords);
+    }
+
+    if (shouldCenter) {
+      this.map.setView(coords, 18);
+    }
+  }
+
+  private updateGeolocalizacion(coords: [number, number]): void {
+    this.abonadoForm.patchValue({
+      geolocalizacion: JSON.stringify(coords),
+    });
+  }
+
+  private parseGeolocalizacion(value: string | null | undefined): [number, number] | null {
+    if (!value) return null;
+
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed) && parsed.length >= 2) {
+        const lat = Number(parsed[0]);
+        const lng = Number(parsed[1]);
+        if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
+          return [lat, lng];
+        }
+      }
+    } catch {
+      return null;
+    }
+
+    return null;
   }
 }

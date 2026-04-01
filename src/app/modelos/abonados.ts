@@ -36,4 +36,6 @@ export class Abonados {
     promedio: number;
     geolocalizacion: string;
     swbasura: Boolean;
+    fotocasa?: string;
+    fotomedidor?: string;
 }
