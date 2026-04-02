@@ -4,10 +4,10 @@
       <div class="col-lg-11 pt-3">
         <h4 class="font-weight-bold text-center border py-2 titAbonado">Modificar Abonado</h4>
 
-        <div class="card shadow-sm fondoAbonado">
+        <div class="card shadow-sm fondoAbonado detalle">
           <div class="card-body">
             <form [formGroup]="abonadoForm">
-              <div class="card border-0 shadow-sm mb-3">
+              <div class="card border-0 detalle roboto shadow-sm mb-3">
                 <div class="card-header bg-light py-2">
                   <strong>Datos principales</strong>
                 </div>
@@ -237,8 +237,13 @@
                   <div class="row">
                     <div class="form-group col-md-6">
                       <label class="font-weight-bold mb-1">Foto de la casa</label>
-                      <input type="file" class="form-control form-control-sm" accept="image/*"
-                        (change)="onFileSelected($event, 'fotocasa')">
+                      <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="fotocasa" accept="image/*"
+                          (change)="onFileSelected($event, 'fotocasa')">
+                        <label class="custom-file-label" for="fotocasa">
+                          {{ abonadoForm.get('fotocasa')?.value || 'Seleccionar foto de la casa' }}
+                        </label>
+                      </div>
                       <div *ngIf="fotoCasaPreview" class="mt-2 text-center">
                         <img [src]="fotoCasaPreview" alt="Foto de la casa" class="img-thumbnail"
                           style="max-height: 180px;">
@@ -247,8 +252,13 @@
 
                     <div class="form-group col-md-6">
                       <label class="font-weight-bold mb-1">Foto del medidor</label>
-                      <input type="file" class="form-control form-control-sm" accept="image/*"
-                        (change)="onFileSelected($event, 'fotomedidor')">
+                      <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="fotomedidor" accept="image/*"
+                          (change)="onFileSelected($event, 'fotomedidor')">
+                        <label class="custom-file-label" for="fotomedidor">
+                          {{ abonadoForm.get('fotomedidor')?.value || 'Seleccionar foto del medidor' }}
+                        </label>
+                      </div>
                       <div *ngIf="fotoMedidorPreview" class="mt-2 text-center">
                         <img [src]="fotoMedidorPreview" alt="Foto del medidor" class="img-thumbnail"
                           style="max-height: 180px;">

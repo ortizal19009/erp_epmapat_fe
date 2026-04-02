@@ -38,4 +38,6 @@ export class Abonados {
     swbasura: Boolean;
     fotoPath?: string;
     foto_path?: string;
+    fotocasa?: string;
+    fotomedidor?: string;
 }

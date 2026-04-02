@@ -1,21 +1,35 @@
-.container-fluid{
-   --bgcolor1: rgb(148, 150, 63);
-   --bgcolor2: rgb(248, 248, 218);
+.container-fluid {
+  --bgcolor1: rgb(148, 150, 63);
+  --bgcolor2: rgb(247, 247, 174);
 }
 
 .titAbonado {
-   background-color: var(--bgcolor1);
-   color: white;
-   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  background-color: var(--bgcolor1);
+  color: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
-.fondoAbonado{
-   background-color: var(--bgcolor2);
-   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+.fondoAbonado {
+  background-color: var(--bgcolor2);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
-input:required{
-   border-left-style: solid;
-   border-left-color: green;
-   border-left-width: 4px;
+.detalle {
+  background-color: var(--bgcolor2);
+}
+
+.custom-file-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.custom-file-input ~ .custom-file-label::after {
+  content: "Buscar";
+}
+
+input:required {
+  border-left-style: solid;
+  border-left-color: green;
+  border-left-width: 4px;
 }

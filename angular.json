@@ -18,7 +18,9 @@
               "core-js",
               "raf",
               "exceljs",
-              "xml-js"
+              "xml-js",
+              "sweetalert2",
+              "file-saver"
             ],
             "outputPath": "dist/proylte32",
             "index": "src/index.html",

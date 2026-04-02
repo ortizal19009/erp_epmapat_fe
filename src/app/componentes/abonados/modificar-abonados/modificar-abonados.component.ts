@@ -18,6 +18,8 @@ import { TipopagoService } from 'src/app/servicios/tipopago.service';
 import { UbicacionmService } from 'src/app/servicios/ubicacionm.service';
 import Swal from 'sweetalert2';
 import * as L from 'leaflet';
+import { of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-modificar-abonados',
@@ -43,6 +45,8 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
   date: Date = new Date();
   fotoCasaPreview: string | null = null;
   fotoMedidorPreview: string | null = null;
+  fotoCasaFile: File | null = null;
+  fotoMedidorFile: File | null = null;
   geoError: string | null = null;
   map!: L.Map | undefined;
   marker!: L.Marker | undefined;
@@ -168,15 +172,21 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
   }
 
   onSubmit() {
-    this.abonadoForm.value.idresponsable = this.v_idresponsable;
-    this.abonadoForm.value.idcliente_clientes = this.cliente;
-    this.abonadoForm.value.usumodi = this.authService.idusuario;
-    this.abonadoForm.value.fecmodi = new Date().toISOString().split('T')[0];
+    const payload = {
+      ...this.abonadoForm.getRawValue(),
+      idresponsable: this.v_idresponsable,
+      idcliente_clientes: this.cliente,
+      usumodi: this.authService.idusuario,
+      fecmodi: new Date().toISOString().split('T')[0],
+    };
+
+    delete payload.fotocasa;
+    delete payload.fotomedidor;
 
     Swal.fire({
       title: '¿Guardar cambios?',
-      html: `Cuenta: <strong>${this.abonadoForm.value.idabonado}</strong><br>
-             Medidor: <strong>${this.abonadoForm.value.nromedidor}</strong>`,
+      html: `Cuenta: <strong>${payload.idabonado}</strong><br>
+             Medidor: <strong>${payload.nromedidor}</strong>`,
       icon: 'question',
       input: 'textarea',
       inputLabel: 'Observación del cambio',
@@ -189,13 +199,40 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
     }).then((result) => {
       if (!result.isConfirmed) return;
 
+      const observacion = result.value || 'Sin observación';
+      const hayFotos = !!this.fotoCasaFile || !!this.fotoMedidorFile;
+
       this.abonadosS.updateAbonadoAuditoria(
-        this.abonadoForm.value,
+        payload,
         this.authService.idusuario,
-        result.value || 'Sin observación',
+        observacion,
         'MODIFICACION'
+      ).pipe(
+        switchMap(() => {
+          if (!hayFotos) {
+            return of(null);
+          }
+
+          return this.abonadosS.uploadFotosAbonado(
+            payload.idabonado,
+            {
+              fotocasa: this.fotoCasaFile,
+              fotomedidor: this.fotoMedidorFile,
+            },
+            this.authService.idusuario,
+            observacion,
+            'MODIFICACION'
+          );
+        })
       ).subscribe({
         next: () => {
+          this.refreshFotoPreviews(payload.idabonado);
+          this.fotoCasaFile = null;
+          this.fotoMedidorFile = null;
+          this.abonadoForm.patchValue({
+            fotocasa: '',
+            fotomedidor: '',
+          });
           Swal.fire({ toast: true, icon: 'success', title: 'Abonado modificado', position: 'top', showConfirmButton: false, timer: 2000 });
           this.retornar();
         },
@@ -236,8 +273,8 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
         idestadom_estadom: datos.idestadom_estadom,
         medidorprincipal: datos.medidorprincipal,
         geolocalizacion: datos.geolocalizacion || '',
-        fotocasa: datos.fotocasa || '',
-        fotomedidor: datos.fotomedidor || '',
+        fotocasa: '',
+        fotomedidor: '',
         municipio: datos.municipio,
         adultomayor: datos.adultomayor,
         swbasura: datos.swbasura,
@@ -247,8 +284,7 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
         usucrea: datos.usucrea,
         feccrea: datos.feccrea,
       });
-      this.fotoCasaPreview = datos.fotocasa || null;
-      this.fotoMedidorPreview = datos.fotomedidor || null;
+      this.refreshFotoPreviews(datos.idabonado);
       setTimeout(() => this.renderMapFromForm(), 100);
     });
   }
@@ -405,18 +441,26 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
     const file = input.files && input.files.length ? input.files[0] : null;
     if (!file) return;
 
+    this.abonadoForm.patchValue({ [controlName]: file.name });
+
     const reader = new FileReader();
     reader.onload = () => {
       const result = typeof reader.result === 'string' ? reader.result : '';
-      this.abonadoForm.patchValue({ [controlName]: result });
 
       if (controlName === 'fotocasa') {
+        this.fotoCasaFile = file;
         this.fotoCasaPreview = result;
       } else {
+        this.fotoMedidorFile = file;
         this.fotoMedidorPreview = result;
       }
     };
     reader.readAsDataURL(file);
+  }
+
+  private refreshFotoPreviews(idabonado: number): void {
+    this.fotoCasaPreview = this.abonadosS.getFotoCasaUrl(idabonado);
+    this.fotoMedidorPreview = this.abonadosS.getFotoMedidorUrl(idabonado);
   }
 
   capturarGeolocalizacion(): void {

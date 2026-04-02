@@ -97,6 +97,10 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
   map!: L.Map | undefined;
   mostrarMapa: boolean = false;
   fotoAbonadoUrl: string | null = null;
+  fotoCasaUrl: string | null = null;
+  fotoMedidorUrl: string | null = null;
+  fotoModalUrl: string | null = null;
+  fotoModalTitulo: string = '';
 
   swEmail: boolean = false;
   selectedFile: File | null = null;
@@ -207,6 +211,8 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
         this.abonado.fotoPath =
           this._abonado[0].foto_path ?? this._abonado[0].fotoPath ?? null;
         this.fotoAbonadoUrl = this.getFotoUrl(this.abonado.fotoPath);
+        this.fotoCasaUrl = this.aboService.getFotoCasaUrl(this.abonado.idabonado);
+        this.fotoMedidorUrl = this.aboService.getFotoMedidorUrl(this.abonado.idabonado);
       },
       error: (err) => console.error(err.error),
     });
@@ -247,7 +253,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
       const coordsArray: L.LatLngExpression = JSON.parse(
         abonado.geolocalizacion
       );
-      const fotoUrl = this.getFotoUrl(abonado.fotoPath);
+      const fotoUrl = this.fotoCasaUrl || this.getFotoUrl(abonado.fotoPath);
       this.mostrarMapa = true;
       setTimeout(() => {
         if (this.map) {
@@ -1046,6 +1052,11 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
     const baseUrl = environment.API_URL.replace(/\/$/, '');
     const path = normalizada.replace(/^\/+/, '');
     return `${baseUrl}/${path}`;
+  }
+
+  abrirFoto(url: string | null, titulo: string): void {
+    this.fotoModalUrl = url;
+    this.fotoModalTitulo = titulo;
   }
 }
 interface calcInteres {

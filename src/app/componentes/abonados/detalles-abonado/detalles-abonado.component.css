@@ -85,6 +85,19 @@ table {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
+.foto-preview-tab {
+  width: 100%;
+  max-width: 340px;
+  height: 240px;
+  object-fit: cover;
+}
+
+.foto-preview-mapa {
+  max-width: 280px;
+  max-height: 180px;
+  object-fit: cover;
+}
+
 .map-photo-panel {
   background-color: #fffef1;
 }

@@ -70,6 +70,38 @@ export class AbonadosService {
     return this.http.put<any>(`${baseUrl}/${abonado.idabonado}`, abonado, { params });
   }
 
+  uploadFotosAbonado(
+    idabonado: number,
+    fotos: { fotocasa?: File | null; fotomedidor?: File | null },
+    usumodi: number,
+    observacion: string,
+    tipo: string = 'MODIFICACION'
+  ): Observable<Abonados> {
+    const formData = new FormData();
+
+    if (fotos.fotocasa) {
+      formData.append('fotocasa', fotos.fotocasa);
+    }
+
+    if (fotos.fotomedidor) {
+      formData.append('fotomedidor', fotos.fotomedidor);
+    }
+
+    formData.append('usumodi', usumodi.toString());
+    formData.append('observacion', observacion);
+    formData.append('tipo', tipo);
+
+    return this.http.post<Abonados>(`${baseUrl}/${idabonado}/fotos`, formData);
+  }
+
+  getFotoCasaUrl(idabonado: number): string {
+    return `${baseUrl}/${idabonado}/fotocasa`;
+  }
+
+  getFotoMedidorUrl(idabonado: number): string {
+    return `${baseUrl}/${idabonado}/fotomedidor`;
+  }
+
   getAbonadoByQuery(dato: String) {
     return this.http.get<Abonados>(`${baseUrl}?consulta=${dato}`);
   }

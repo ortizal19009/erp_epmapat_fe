@@ -128,9 +128,10 @@
               Modificar
             </button>
             <button class="btn btn-info btn-xs mx-1" type="button" data-toggle="modal" data-target="#modalFotoAbonado"
-              [disabled]="!fotoAbonadoUrl">
+              (click)="abrirFoto(fotoCasaUrl || fotoMedidorUrl, 'Fotos del abonado')"
+              [disabled]="!fotoCasaUrl && !fotoMedidorUrl">
               <i class="bi bi-image"></i>
-              Ver foto
+              Ver fotos
             </button>
             <button class="btn btn-danger btn-xs mx-1" [disabled]="elimdisabled" data-toggle="modal"
               data-target="#modalEliminar">
@@ -172,6 +173,11 @@
               <a class="nav-link cardTab" href="#georeferencia" data-toggle="tab" role="tab"
                 (click)="drawCuenta(abonado)">
                 <i class="bi bi-geo-alt"></i> Ubicación
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link cardTab" href="#fotosabonado" data-toggle="tab" role="tab">
+                <i class="bi bi-images"></i> Fotos
               </a>
             </li>
           </ul>
@@ -333,16 +339,64 @@
                 <div class="card-body p-0">
                   <ng-container *ngIf="mostrarMapa">
                     <div id="map" style="height: 400px;"></div>
-                    <div class="map-photo-panel border-top" *ngIf="fotoAbonadoUrl">
-                      <div class="small text-muted px-3 pt-2">Foto del abonado</div>
+                    <div class="map-photo-panel border-top" *ngIf="fotoCasaUrl">
+                      <div class="small text-muted px-3 pt-2">Foto de la casa</div>
                       <div class="px-3 pb-3">
-                        <img [src]="fotoAbonadoUrl" alt="Foto del abonado" class="foto-preview">
+                        <img [src]="fotoCasaUrl" alt="Foto de la casa" class="foto-preview foto-preview-mapa">
                       </div>
                     </div>
                   </ng-container>
                   <div *ngIf="!mostrarMapa" class="text-center py-4">
                     <i class="bi bi-geo-alt fa-2x text-muted mb-2"></i>
                     <h6 class="text-muted">Ubicación no disponible</h6>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="tab-pane" id="fotosabonado" role="tabpanel">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header theadPlanillas py-2">
+                      <strong>Foto de la casa</strong>
+                    </div>
+                    <div class="card-body text-center bodyPlanillas">
+                      <ng-container *ngIf="fotoCasaUrl; else sinFotoCasa">
+                        <img [src]="fotoCasaUrl" alt="Foto de la casa" class="foto-preview foto-preview-tab mb-3">
+                        <div>
+                          <button type="button" class="btn btn-outline-primary btn-sm" data-toggle="modal"
+                            data-target="#modalFotoAbonado" (click)="abrirFoto(fotoCasaUrl, 'Foto de la casa')">
+                            <i class="bi bi-zoom-in"></i> Agrandar
+                          </button>
+                        </div>
+                      </ng-container>
+                      <ng-template #sinFotoCasa>
+                        <div class="py-4 text-muted">No hay foto de la casa registrada.</div>
+                      </ng-template>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header theadPlanillas py-2">
+                      <strong>Foto del medidor</strong>
+                    </div>
+                    <div class="card-body text-center bodyPlanillas">
+                      <ng-container *ngIf="fotoMedidorUrl; else sinFotoMedidor">
+                        <img [src]="fotoMedidorUrl" alt="Foto del medidor" class="foto-preview foto-preview-tab mb-3">
+                        <div>
+                          <button type="button" class="btn btn-outline-primary btn-sm" data-toggle="modal"
+                            data-target="#modalFotoAbonado" (click)="abrirFoto(fotoMedidorUrl, 'Foto del medidor')">
+                            <i class="bi bi-zoom-in"></i> Agrandar
+                          </button>
+                        </div>
+                      </ng-container>
+                      <ng-template #sinFotoMedidor>
+                        <div class="py-4 text-muted">No hay foto del medidor registrada.</div>
+                      </ng-template>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -361,14 +415,16 @@
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header cliente py-2 justify-content-center">
-        <h5 class="modal-title font-weight-bold" id="modalFotoAbonadoLabel">Foto del abonado {{ abonado.idabonado }}</h5>
+        <h5 class="modal-title font-weight-bold" id="modalFotoAbonadoLabel">
+          {{ fotoModalTitulo || ('Fotos del abonado ' + abonado.idabonado) }}
+        </h5>
       </div>
       <div class="modal-body text-center">
-        <ng-container *ngIf="fotoAbonadoUrl; else sinFotoAbonado">
-          <img [src]="fotoAbonadoUrl" alt="Foto del abonado" class="foto-preview">
+        <ng-container *ngIf="fotoModalUrl || fotoCasaUrl || fotoMedidorUrl; else sinFotoAbonado">
+          <img [src]="fotoModalUrl || fotoCasaUrl || fotoMedidorUrl" alt="Foto del abonado" class="foto-preview">
         </ng-container>
         <ng-template #sinFotoAbonado>
-          <div class="py-4 text-muted">No hay foto registrada para este abonado.</div>
+          <div class="py-4 text-muted">No hay fotos registradas para este abonado.</div>
         </ng-template>
       </div>
       <div class="modal-footer justify-content-center">
