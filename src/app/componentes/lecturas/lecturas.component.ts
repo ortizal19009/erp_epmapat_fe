@@ -986,12 +986,20 @@ export class LecturasComponent implements OnInit {
           swbasura: lectura.idabonado_abonados.swbasura,
         };
         try {
-          let total = await this.lecService.asycalcular_Valores_v2(datos);
+          const totalResp = await this.lecService.asycalcular_Valores_v2(datos);
+          const total = this.getTotalFromResponse(totalResp);
           this._lecturas[this.kontador].total1 = total;
           this._lecturas[this.kontador].estado = 1;
+
+          const patch = {
+            ...this._lecturas[this.kontador],
+            total1: total,
+            estado: 1,
+          };
+
           await this.lecService.updateLecturaAsync(
             this._lecturas[this.kontador].idlectura,
-            this._lecturas[this.kontador],
+            patch,
           );
         } catch (e) {
           console.error('Error en calcularValores:', e);
@@ -1018,6 +1026,45 @@ export class LecturasComponent implements OnInit {
         next: (nex) => (this.btncerrar = true),
         error: (err) => console.error(err.error),
       });
+  }
+
+  private getTotalFromResponse(totalResp: any): number {
+    if (totalResp == null) {
+      console.warn('Respuesta de cálculo de valores es nula/indefinida. Se utiliza 0.');
+      return 0;
+    }
+
+    if (typeof totalResp === 'number' && !isNaN(totalResp)) {
+      return totalResp;
+    }
+
+    if (typeof totalResp === 'string' && !isNaN(Number(totalResp))) {
+      return Number(totalResp);
+    }
+
+    if (typeof totalResp === 'object') {
+      const possibilities = ['Total', 'total', 'total1'];
+      for (const key of possibilities) {
+        if (Object.prototype.hasOwnProperty.call(totalResp, key)) {
+          const valor = totalResp[key];
+          if (typeof valor === 'number' && !isNaN(valor)) return valor;
+          if (typeof valor === 'string' && !isNaN(Number(valor))) return Number(valor);
+        }
+      }
+
+      const numericValue = Object.values(totalResp).find(
+        (v) => typeof v === 'number' && !isNaN(v),
+      );
+      if (numericValue != null) {
+        return Number(numericValue);
+      }
+    }
+
+    console.warn(
+      'No se pudo normalizar totalResp al valor numérico:',
+      totalResp,
+    );
+    return 0;
   }
 
   // 👇 Interceptar cierre o recarga de página

@@ -28,6 +28,7 @@ import { map } from 'rxjs';
 import { Intereses } from 'src/app/modelos/intereses';
 import { InteresesService } from 'src/app/servicios/intereses.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-add-convenio',
@@ -365,6 +366,22 @@ export class AddConvenioComponent implements OnInit {
   }
 
   guardar() {
+    Swal.fire({
+      title: '¿Está seguro?',
+      text: '¿Desea crear este convenio?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, crear convenio',
+      cancelButtonText: 'No, cancelar',
+      reverseButtons: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.confirmarGuardar();
+      }
+    });
+  }
+
+  private confirmarGuardar() {
     this.s_loading.showLoading();
     let abonado: Abonados = new Abonados();
     abonado.idabonado = this.formConvenio.value.idabonado;
@@ -386,9 +403,16 @@ export class AddConvenioComponent implements OnInit {
     this.convService.saveConvenio(convenio).subscribe({
       next: async (resp) => {
         this.newconvenio = resp;
-        this.creaFacturas();
+        await this.creaFacturas();
+        this.s_loading.hideLoading();
+        Swal.fire('¡Operación exitosa!', 'Convenio creado correctamente.', 'success');
+        this.router.navigate(['convenios']);
       },
-      error: (err) => console.error(err.error),
+      error: (err) => {
+        this.s_loading.hideLoading();
+        console.error(err.error);
+        Swal.fire('Error', 'No se pudo crear el convenio. Intente nuevamente.', 'error');
+      },
     });
   }
 
