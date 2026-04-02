@@ -3,12 +3,15 @@ import {
   Component,
   ElementRef,
   Input,
+  OnDestroy,
   OnInit,
   ViewChild,
 } from '@angular/core';
 import { Router } from '@angular/router';
+import { Categoria } from 'src/app/modelos/categoria.model';
 import { Lecturas } from 'src/app/modelos/lecturas.model';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
+import { CategoriaService } from 'src/app/servicios/categoria.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
@@ -37,7 +40,7 @@ import { environment } from 'src/environments/environment';
   templateUrl: './detalles-abonado.component.html',
   styleUrls: ['./detalles-abonado.component.css'],
 })
-export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
+export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestroy {
   abonado = {} as datAbonado; //Interface para los datos del Abonado
 
   n_factura: String;
@@ -101,6 +104,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
   fotoMedidorUrl: string | null = null;
   fotoModalUrl: string | null = null;
   fotoModalTitulo: string = '';
+  categoriasMap = new Map<number, string>();
 
   swEmail: boolean = false;
   selectedFile: File | null = null;
@@ -135,6 +139,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
 
   constructor(
     private aboService: AbonadosService,
+    private categoriaService: CategoriaService,
     private facService: FacturaService,
     private rubxfacService: RubroxfacService,
     private lecService: LecturasService,
@@ -161,10 +166,13 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
       mensaje: '',
     });
     this.obtenerDatosAbonado();
+    this.cargarCategorias();
     this.listarIntereses();
     this.usuario = this.authService.idusuario;
   }
   ngAfterViewInit(): void { }
+  ngOnDestroy(): void {
+  }
   cancelarFE() {
     if (this.facElectro != true) {
       this.facElectro = !this.facElectro;
@@ -211,8 +219,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
         this.abonado.fotoPath =
           this._abonado[0].foto_path ?? this._abonado[0].fotoPath ?? null;
         this.fotoAbonadoUrl = this.getFotoUrl(this.abonado.fotoPath);
-        this.fotoCasaUrl = this.aboService.getFotoCasaUrl(this.abonado.idabonado);
-        this.fotoMedidorUrl = this.aboService.getFotoMedidorUrl(this.abonado.idabonado);
+        this.cargarFotosAbonado(this._abonado[0]);
       },
       error: (err) => console.error(err.error),
     });
@@ -1057,6 +1064,60 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
   abrirFoto(url: string | null, titulo: string): void {
     this.fotoModalUrl = url;
     this.fotoModalTitulo = titulo;
+  }
+
+  getLecturaNovedad(lectura: any): string {
+    return lectura?.idnovedad_novedades?.descripcion || 'Sin novedad';
+  }
+
+  getLecturaCategoria(lectura: any): string {
+    const idcategoria = Number(lectura?.idcategoria);
+    if (!Number.isNaN(idcategoria) && this.categoriasMap.has(idcategoria)) {
+      return this.categoriasMap.get(idcategoria) ?? 'Sin categoria';
+    }
+    return 'Sin categoria';
+  }
+
+  getLecturaFotoUrl(lectura: any): string | null {
+    return this.getFotoUrl(lectura?.foto_path ?? lectura?.fotoPath ?? null);
+  }
+
+  verFotoLectura(event: Event, lectura: any): void {
+    event.stopPropagation();
+    const fotoUrl = this.getLecturaFotoUrl(lectura);
+    if (!fotoUrl) return;
+    const cuenta = lectura?.idabonado_abonados?.idabonado ?? this.abonado.idabonado;
+    this.abrirFoto(fotoUrl, `Foto del medidor - Cuenta ${cuenta}`);
+  }
+
+  private cargarFotosAbonado(abonado: any): void {
+    const idabonado = Number(abonado?.idabonado);
+    const tieneFotoCasa = !!abonado?.fotocasa;
+    const tieneFotoMedidor = !!abonado?.fotomedidor;
+
+    this.fotoCasaUrl =
+      tieneFotoCasa && idabonado > 0
+        ? this.aboService.getFotoCasaUrl(idabonado)
+        : null;
+
+    this.fotoMedidorUrl =
+      tieneFotoMedidor && idabonado > 0
+        ? this.aboService.getFotoMedidorUrl(idabonado)
+        : null;
+  }
+
+  private cargarCategorias(): void {
+    this.categoriaService.getListCategoria().subscribe({
+      next: (categorias: Categoria[]) => {
+        this.categoriasMap = new Map(
+          (categorias || []).map((categoria) => [
+            Number(categoria.idcategoria),
+            String(categoria.descripcion),
+          ])
+        );
+      },
+      error: (err) => console.error(err),
+    });
   }
 }
 interface calcInteres {

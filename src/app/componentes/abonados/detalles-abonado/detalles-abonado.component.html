@@ -254,10 +254,13 @@
                       <thead class="theadPlanillas">
                         <tr class="text-center">
                           <th>Emisión</th>
+                          <th>Categorí­a</th>
+                          <th>Novedad</th>
                           <th>Consumo</th>
                           <th>Anterior</th>
                           <th>Actual</th>
                           <th>Planilla</th>
+                          <th>Foto</th>
                         </tr>
                       </thead>
                       <tbody class="bodyPlanillas">
@@ -266,12 +269,21 @@
                           <td class="text-left small">
                             {{ lectura.idrutaxemision_rutasxemision.idemision_emisiones.emision | nombreEmision }}
                           </td>
+                          <td>{{ getLecturaCategoria(lectura) }}</td>
+                          <td>{{ getLecturaNovedad(lectura) }}</td>
                           <td class="font-weight-bold">
                             {{ (lectura.lecturaactual - lectura.lecturaanterior) | number:'1.0-0' }}
                           </td>
                           <td>{{ lectura.lecturaanterior | number:'1.0-0' }}</td>
                           <td>{{ lectura.lecturaactual | number:'1.0-0' }}</td>
                           <td>{{ lectura.idfactura }}</td>
+                          <td>
+                            <button type="button" class="btn btn-outline-info btn-xs" data-toggle="modal"
+                              data-target="#modalFotoAbonado" (click)="verFotoLectura($event, lectura)"
+                              [disabled]="!getLecturaFotoUrl(lectura)">
+                              <i class="bi bi-camera"></i> Ver
+                            </button>
+                          </td>
                         </tr>
                       </tbody>
                     </table>
