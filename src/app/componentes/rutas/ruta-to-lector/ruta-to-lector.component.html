@@ -55,6 +55,7 @@
             </div>
             <div class="col-sm-2">
               <select class="form-control py-1 form-control-sm w-15 float-right" [(ngModel)]="emisionSelected"
+                (ngModelChange)="onEmisionChange()"
                 value="emision.idemision">
                 <option *ngFor="let emision of _emisiones" [ngValue]="emision">{{emision.emision}} -
                   {{emision.estado}}</option>
@@ -142,13 +143,22 @@
               </tr>
             </thead>
             <tbody class="detalle">
-              <tr *ngFor="let r of _rutas | filter:filtrarRutas; let i = index">
+              <tr *ngFor="let r of _rutas | filter:filtrarRutas; let i = index"
+                [ngClass]="{
+                  'table-secondary text-muted': esRutaCerrada(r),
+                  'table-warning': esOcupadaPorOtro(r),
+                  'table-success': isRutaAsignada(r)
+                }">
                 <td class="text-center text-strong">{{i+1}}</td>
                 <td>{{r.descripcion}}</td>
                 <td class="text-center">
-                  <input type="checkbox" [checked]="isRutaAsignada(r)" [disabled]="esOcupada(r) && !isRutaAsignada(r)"
+                  <input type="checkbox" [checked]="isRutaAsignada(r)"
+                    [disabled]="esRutaCerrada(r) || (esOcupada(r) && !isRutaAsignada(r))"
                     (change)="selectRuta($event, r)" />
-                  <span *ngIf="esOcupada(r) && !isRutaAsignada(r)" class="badge badge-danger ml-2">
+                  <span *ngIf="esRutaCerrada(r)" class="badge badge-secondary ml-2">
+                    Cerrada
+                  </span>
+                  <span *ngIf="esOcupadaPorOtro(r)" class="badge badge-danger ml-2">
                     Ocupada
                   </span>
 
@@ -158,7 +168,7 @@
           </table>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-sm btn-outline-success" data-dismiss="modal">Cancelar</button>
+          <button #btnCerrarModal type="button" class="btn btn-sm btn-outline-success" data-dismiss="modal">Cancelar</button>
           <button type="button" class="btn btn-sm btn-success" (click)="onSubmit()">Aceptar</button>
         </div>
       </div>

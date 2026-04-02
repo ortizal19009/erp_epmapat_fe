@@ -226,7 +226,13 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
         })
       ).subscribe({
         next: () => {
-          this.refreshFotoPreviews(payload.idabonado);
+          this.abonado = {
+            ...this.abonado,
+            idabonado: payload.idabonado,
+            fotocasa: this.fotoCasaFile ? this.fotoCasaFile.name : this.abonado?.fotocasa,
+            fotomedidor: this.fotoMedidorFile ? this.fotoMedidorFile.name : this.abonado?.fotomedidor,
+          };
+          this.refreshFotoPreviews(this.abonado);
           this.fotoCasaFile = null;
           this.fotoMedidorFile = null;
           this.abonadoForm.patchValue({
@@ -247,6 +253,7 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
   obtenerAbonado() {
     let idabonado = sessionStorage.getItem('idabonadoToModi');
     this.abonadosS.getById(+idabonado!).subscribe((datos) => {
+      this.abonado = datos;
       this.setCategoria = datos.idcategoria_categorias.descripcion;
       this.cliente = datos.idcliente_clientes;
       this.v_idresponsable = datos.idresponsable;
@@ -284,7 +291,7 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
         usucrea: datos.usucrea,
         feccrea: datos.feccrea,
       });
-      this.refreshFotoPreviews(datos.idabonado);
+      this.refreshFotoPreviews(datos);
       setTimeout(() => this.renderMapFromForm(), 100);
     });
   }
@@ -458,9 +465,20 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
     reader.readAsDataURL(file);
   }
 
-  private refreshFotoPreviews(idabonado: number): void {
-    this.fotoCasaPreview = this.abonadosS.getFotoCasaUrl(idabonado);
-    this.fotoMedidorPreview = this.abonadosS.getFotoMedidorUrl(idabonado);
+  private refreshFotoPreviews(abonado: Abonados | null | undefined): void {
+    const idabonado = Number(abonado?.idabonado);
+    const tieneFotoCasa = !!abonado?.fotocasa;
+    const tieneFotoMedidor = !!abonado?.fotomedidor;
+
+    this.fotoCasaPreview =
+      tieneFotoCasa && idabonado > 0
+        ? this.abonadosS.getFotoCasaUrl(idabonado)
+        : null;
+
+    this.fotoMedidorPreview =
+      tieneFotoMedidor && idabonado > 0
+        ? this.abonadosS.getFotoMedidorUrl(idabonado)
+        : null;
   }
 
   capturarGeolocalizacion(): void {

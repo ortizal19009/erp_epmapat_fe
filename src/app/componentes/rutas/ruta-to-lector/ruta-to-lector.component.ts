@@ -1,6 +1,6 @@
 import { UsrxrutaServiceService } from './../../../servicios/usrxruta-service.service';
 import { Usuarios } from './../../../modelos/administracion/usuarios.model';
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Rutas } from 'src/app/modelos/rutas.model';
 import { UsuarioService } from 'src/app/servicios/administracion/usuario.service';
 import { EmisionService } from 'src/app/servicios/emision.service';
@@ -13,6 +13,7 @@ import Swal from 'sweetalert2';
   styleUrls: ['./ruta-to-lector.component.css'],
 })
 export class RutaToLectorComponent implements OnInit {
+  @ViewChild('btnCerrarModal', { static: false }) btnCerrarModal?: ElementRef<HTMLButtonElement>;
   _usuarios: any[] = [];
   filtro: string = '';
   _rutas: any[] = [];
@@ -50,6 +51,7 @@ export class RutaToLectorComponent implements OnInit {
   }
   onCellClick(event: any, usuario: any) {
     this.usuarioSeletced = usuario;
+    this.cargarOcupadas();
 
     // Si no hay emisión seleccionada todavía, evita romper (por si acaso)
     if (!this.emisionSelected?.idemision) {
@@ -104,7 +106,19 @@ export class RutaToLectorComponent implements OnInit {
       } else {
         this.swaddruta = false;
       }
+      this.cargarOcupadas();
     });
+  }
+
+  onEmisionChange() {
+    if (!this.emisionSelected) return;
+
+    this.swaddruta = this.emisionSelected.estado === 0;
+    this.cargarOcupadas();
+
+    if (this.usuarioSeletced) {
+      this.onCellClick(null, this.usuarioSeletced);
+    }
   }
 
   cargarOcupadas() {
@@ -117,8 +131,21 @@ export class RutaToLectorComponent implements OnInit {
   esOcupada(r: any): boolean {
     return this.ocupadas.has(r.idruta);
   }
+
+  esOcupadaPorOtro(r: any): boolean {
+    return this.esOcupada(r) && !this.isRutaAsignada(r);
+  }
+
+  esRutaCerrada(r: any): boolean {
+    return r?.estado === 0 || r?.estado === false;
+  }
   /* Select rutas */
   selectRuta(e: any, r: any) {
+    if (this.esRutaCerrada(r)) {
+      if (e?.target) e.target.checked = false;
+      return;
+    }
+
     if (!e.target.checked) {
       this.dropRuta(r);
       return;
@@ -156,6 +183,8 @@ export class RutaToLectorComponent implements OnInit {
       next: (datos: any) => {
         console.log(datos);
         this.swal('success', 'Datos guardados');
+        this.cargarOcupadas();
+        this.btnCerrarModal?.nativeElement.click();
       },
       error: (e: any) => console.error(e.error),
     });
