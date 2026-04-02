@@ -22,5 +22,6 @@ export class Lecturas {
     total1: number;         //Total con el Nuevo Pliego (Gradualidad: Un solo año )
     total31: number;        //Total con el Nuevo Pliego (1er año de 3)
     total32: number;        //Total con el Nuevo Pliego (2do año de 3)
-    fotoPath: string;
+    fotoPath?: string;
+    foto_path?: string;
 }

@@ -30,6 +30,7 @@ import { JasperReportService } from 'src/app/servicios/jasper-report.service';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { SriService } from 'src/app/servicios/sri.service';
 import Swal from 'sweetalert2';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-detalles-abonado',
@@ -95,6 +96,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
   edificioMatriz: any = [0.8038125013453109, -77.72763063596486];
   map!: L.Map | undefined;
   mostrarMapa: boolean = false;
+  fotoAbonadoUrl: string | null = null;
 
   swEmail: boolean = false;
   selectedFile: File | null = null;
@@ -202,6 +204,9 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
         this.abonado.responsablepago = this._abonado[0].idresponsable.nombre;
         this.abonado.geolocalizacion = this._abonado[0].geolocalizacion;
         this.abonado.swbasura = this._abonado[0].swbasura;
+        this.abonado.fotoPath =
+          this._abonado[0].foto_path ?? this._abonado[0].fotoPath ?? null;
+        this.fotoAbonadoUrl = this.getFotoUrl(this.abonado.fotoPath);
       },
       error: (err) => console.error(err.error),
     });
@@ -242,15 +247,23 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
       const coordsArray: L.LatLngExpression = JSON.parse(
         abonado.geolocalizacion
       );
+      const fotoUrl = this.getFotoUrl(abonado.fotoPath);
       this.mostrarMapa = true;
       setTimeout(() => {
+        if (this.map) {
+          this.map.remove();
+          this.map = undefined;
+        }
         this.map = L.map('map').setView(coordsArray, 19);
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '&copy; EPMAPA-T',
         }).addTo(this.map);
+        const popupFoto = fotoUrl
+          ? `<div style="margin-top:8px;"><img src="${fotoUrl}" alt="Foto del abonado" style="width:220px;max-width:100%;max-height:180px;object-fit:cover;border-radius:6px;" /></div>`
+          : '<div style="margin-top:8px;color:#666;">Sin foto registrada</div>';
         L.marker(coordsArray)
           .addTo(this.map)
-          .bindPopup(`${abonado.idabonado} <br/> ${abonado.direccionubicacion}`)
+          .bindPopup(`<strong>${abonado.idabonado}</strong><br/>${abonado.direccionubicacion}${popupFoto}`)
           .openPopup();
       }, 300);
     } else {
@@ -1024,6 +1037,16 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit {
       }
     );
   }
+
+  private getFotoUrl(fotoPath?: string | null): string | null {
+    if (!fotoPath || typeof fotoPath !== 'string') return null;
+    const normalizada = fotoPath.trim().replace(/\\/g, '/');
+    if (!normalizada) return null;
+    if (/^(https?:|data:|blob:)/i.test(normalizada)) return normalizada;
+    const baseUrl = environment.API_URL.replace(/\/$/, '');
+    const path = normalizada.replace(/^\/+/, '');
+    return `${baseUrl}/${path}`;
+  }
 }
 interface calcInteres {
   anio: number;
@@ -1049,6 +1072,7 @@ interface datAbonado {
   responsablepago: string;
   geolocalizacion: string;
   swbasura: boolean;
+  fotoPath?: string | null;
 }
 
 function getEstadoText(estado: number): string {

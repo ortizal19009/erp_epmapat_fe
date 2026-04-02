@@ -18,6 +18,7 @@ import { nextTick } from 'process';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { EmisionService } from 'src/app/servicios/emision.service';
 import { PdfService } from 'src/app/servicios/pdf.service';
+import { environment } from 'src/environments/environment';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import Swal from 'sweetalert2';
@@ -73,6 +74,8 @@ export class LecturasComponent implements OnInit {
   idusuario: number;
   novedades: any;
   tieneLecturasNegativas: boolean = false;
+  fotoLecturaUrl: string | null = null;
+  fotoLecturaTitulo: string = '';
 
   porcResidencial: number[] = [
     0.777, 0.78, 0.78, 0.78, 0.78, 0.78, 0.778, 0.778, 0.78, 0.78, 0.78, 0.68,
@@ -276,6 +279,30 @@ export class LecturasComponent implements OnInit {
 
   cargar() {
     this.router.navigate(['/impor-lecturas']);
+  }
+
+  getFotoPath(item: any): string | null {
+    const foto = item?.foto_path ?? item?.fotoPath ?? null;
+    if (!foto || typeof foto !== 'string') return null;
+    const normalizada = foto.trim().replace(/\\/g, '/');
+    return normalizada.length > 0 ? normalizada : null;
+  }
+
+  getFotoUrl(item: any): string | null {
+    const fotoPath = this.getFotoPath(item);
+    if (!fotoPath) return null;
+    if (/^(https?:|data:|blob:)/i.test(fotoPath)) return fotoPath;
+    const baseUrl = environment.API_URL.replace(/\/$/, '');
+    const path = fotoPath.replace(/^\/+/, '');
+    return `${baseUrl}/${path}`;
+  }
+
+  abrirFotoLectura(lectura: any): void {
+    this.fotoLecturaUrl = this.getFotoUrl(lectura);
+    const cuenta = lectura?.idabonado_abonados?.idabonado ?? '';
+    this.fotoLecturaTitulo = cuenta
+      ? `Foto de lectura - Cuenta ${cuenta}`
+      : 'Foto de lectura';
   }
 
   private getConsumo(lectura: any): number {

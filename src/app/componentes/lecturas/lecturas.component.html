@@ -107,6 +107,9 @@
                   <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalHistorial"
                     (click)="setIdabonado(lectura, i)">
                     <i class="bi bi-file-minus"></i>&nbsp; Historial consumo</button>
+                  <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalFotoLectura"
+                    [disabled]="!getFotoPath(lectura)" (click)="abrirFotoLectura(lectura)">
+                    <i class="bi bi-image"></i>&nbsp; Ver foto lectura</button>
                 </div>
               </div>
             </td>
@@ -318,6 +321,29 @@
             <button type='button' class='btn btn-sm btn-outline-success btn-sm mx-1' data-dismiss='modal'>
               <i class="bi bi-x-circle"></i> Cancelar</button>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modalFotoLectura" tabindex="-1" aria-labelledby="modalFotoLecturaLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border">
+        <div class='modal-header py-2 justify-content-center cabecera'>
+          <h5 class='modal-title font-weight-bold' id='modalFotoLecturaLabel'>{{ fotoLecturaTitulo }}</h5>
+        </div>
+        <div class='modal-body detalle text-center'>
+          <ng-container *ngIf="fotoLecturaUrl; else sinFotoLectura">
+            <img [src]="fotoLecturaUrl" alt="Foto de lectura" class="foto-preview">
+          </ng-container>
+          <ng-template #sinFotoLectura>
+            <div class="py-4 text-muted">No hay foto registrada para esta lectura.</div>
+          </ng-template>
+        </div>
+        <div class='modal-footer justify-content-center'>
+          <button type='button' class='btn btn-sm btn-outline-success' data-dismiss='modal'>
+            <i class="bi bi-x-circle"></i> Cerrar</button>
         </div>
       </div>
     </div>

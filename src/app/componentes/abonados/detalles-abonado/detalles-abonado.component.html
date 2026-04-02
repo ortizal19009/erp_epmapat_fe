@@ -127,6 +127,11 @@
               <i class="fa fa-edit" style="font-size:24pxi"></i>
               Modificar
             </button>
+            <button class="btn btn-info btn-xs mx-1" type="button" data-toggle="modal" data-target="#modalFotoAbonado"
+              [disabled]="!fotoAbonadoUrl">
+              <i class="bi bi-image"></i>
+              Ver foto
+            </button>
             <button class="btn btn-danger btn-xs mx-1" [disabled]="elimdisabled" data-toggle="modal"
               data-target="#modalEliminar">
               <i class="fa fa-times-circle" style="font-size:24pxi"></i>
@@ -328,6 +333,12 @@
                 <div class="card-body p-0">
                   <ng-container *ngIf="mostrarMapa">
                     <div id="map" style="height: 400px;"></div>
+                    <div class="map-photo-panel border-top" *ngIf="fotoAbonadoUrl">
+                      <div class="small text-muted px-3 pt-2">Foto del abonado</div>
+                      <div class="px-3 pb-3">
+                        <img [src]="fotoAbonadoUrl" alt="Foto del abonado" class="foto-preview">
+                      </div>
+                    </div>
                   </ng-container>
                   <div *ngIf="!mostrarMapa" class="text-center py-4">
                     <i class="bi bi-geo-alt fa-2x text-muted mb-2"></i>
@@ -344,6 +355,30 @@
 
   </div><!-- row -->
 </div><!-- container-fluid -->
+
+<div class="modal fade" id="modalFotoAbonado" tabindex="-1" aria-labelledby="modalFotoAbonadoLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header cliente py-2 justify-content-center">
+        <h5 class="modal-title font-weight-bold" id="modalFotoAbonadoLabel">Foto del abonado {{ abonado.idabonado }}</h5>
+      </div>
+      <div class="modal-body text-center">
+        <ng-container *ngIf="fotoAbonadoUrl; else sinFotoAbonado">
+          <img [src]="fotoAbonadoUrl" alt="Foto del abonado" class="foto-preview">
+        </ng-container>
+        <ng-template #sinFotoAbonado>
+          <div class="py-4 text-muted">No hay foto registrada para este abonado.</div>
+        </ng-template>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn btn-outline-success btn-sm" data-dismiss="modal">
+          <i class="fa fa-times-circle"></i> Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 <!-- ===========================
