@@ -1,0 +1,42 @@
+<div class="file-upload">
+  <input
+    type="file"
+    class="form-control form-control-sm"
+    [attr.aria-label]="buttonLabel"
+    [accept]="accept"
+    (change)="onFile($event)"
+  />
+
+  <small class="text-muted d-block mt-1" *ngIf="!archivo">
+    {{ buttonLabel }}
+  </small>
+
+  <small class="text-muted d-block mt-1" *ngIf="archivo">
+    {{ archivo }}
+  </small>
+
+  <div *ngIf="previewUrl" class="mt-2 text-center">
+    <img
+      [src]="previewUrl"
+      alt="Vista previa"
+      class="img-thumbnail file-upload-preview"
+    />
+  </div>
+
+  <div *ngIf="uploading || progress" class="progress mt-2">
+    <div
+      class="progress-bar"
+      role="progressbar"
+      [style.width.%]="progress"
+      [attr.aria-valuenow]="progress"
+      aria-valuemin="0"
+      aria-valuemax="100"
+    >
+      {{ progress }}%
+    </div>
+  </div>
+
+  <small *ngIf="ruta" class="text-success d-block mt-2">
+    {{ archivo }} cargado
+  </small>
+</div>

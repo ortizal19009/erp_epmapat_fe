@@ -55,6 +55,10 @@ export class LecturasService {
     return this.http.get<Lecturas>(baseUrl + '/' + idlectura);
   }
 
+  getFotoLecturaUrl(idlectura: number): string {
+    return `${baseUrl}/${idlectura}/foto`;
+  }
+
   //Lectura por Planilla
   getByIdfactura(idfactura: number) {
     return this.http.get<Lecturas[]>(`${baseUrl}/planilla/${idfactura}`);

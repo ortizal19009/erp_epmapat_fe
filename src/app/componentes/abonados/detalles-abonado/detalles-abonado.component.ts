@@ -32,8 +32,10 @@ import * as L from 'leaflet';
 import { JasperReportService } from 'src/app/servicios/jasper-report.service';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { SriService } from 'src/app/servicios/sri.service';
+import { StorageService } from 'src/app/servicios/storage.service';
 import Swal from 'sweetalert2';
 import { environment } from 'src/environments/environment';
+declare const $: any;
 
 @Component({
   selector: 'app-detalles-abonado',
@@ -104,6 +106,9 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
   fotoMedidorUrl: string | null = null;
   fotoModalUrl: string | null = null;
   fotoModalTitulo: string = '';
+  fotoModalError: boolean = false;
+  fotoModalRutaOriginal: string | null = null;
+  fotoModalMensaje: string = 'No hay fotos registradas para este abonado.';
   categoriasMap = new Map<number, string>();
 
   swEmail: boolean = false;
@@ -154,7 +159,8 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
     private s_condonar: CondmultasinteresesService,
     private s_jasperreport: JasperReportService,
     private f: FormBuilder,
-    private s_sri: SriService
+    private s_sri: SriService,
+    private storageService: StorageService
   ) { }
 
   ngOnInit(): void {
@@ -1053,9 +1059,19 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
 
   private getFotoUrl(fotoPath?: string | null): string | null {
     if (!fotoPath || typeof fotoPath !== 'string') return null;
-    const normalizada = fotoPath.trim().replace(/\\/g, '/');
+    let normalizada = fotoPath.trim().replace(/\\/g, '/');
     if (!normalizada) return null;
     if (/^(https?:|data:|blob:)/i.test(normalizada)) return normalizada;
+
+    const marcadoresPublicos = ['/nube-local/', '/abonados/lectura/', '/lecturas/'];
+    for (const marcador of marcadoresPublicos) {
+      const idx = normalizada.toLowerCase().indexOf(marcador.toLowerCase());
+      if (idx >= 0) {
+        normalizada = normalizada.substring(idx + (marcador === '/nube-local/' ? '/nube-local'.length : 0));
+        break;
+      }
+    }
+
     const baseUrl = environment.API_URL.replace(/\/$/, '');
     const path = normalizada.replace(/^\/+/, '');
     return `${baseUrl}/${path}`;
@@ -1064,6 +1080,28 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
   abrirFoto(url: string | null, titulo: string): void {
     this.fotoModalUrl = url;
     this.fotoModalTitulo = titulo;
+    this.fotoModalError = false;
+    this.fotoModalRutaOriginal = null;
+    this.fotoModalMensaje = 'No hay fotos registradas para este abonado.';
+  }
+
+  private abrirFotoConContexto(url: string | null, titulo: string, rutaOriginal?: string | null): void {
+    this.abrirFoto(url, titulo);
+    this.fotoModalRutaOriginal = rutaOriginal ?? null;
+
+    if (!rutaOriginal) {
+      this.fotoModalMensaje = 'No existe una ruta de imagen registrada para esta lectura.';
+      return;
+    }
+
+    if (/^[a-zA-Z]:\//.test(rutaOriginal.replace(/\\/g, '/'))) {
+      this.fotoModalMensaje =
+        'La lectura tiene una ruta local del servidor, pero esa carpeta no esta publicada como URL accesible desde el navegador.';
+      return;
+    }
+
+    this.fotoModalMensaje =
+      'La imagen no pudo cargarse desde la URL publicada por el servidor.';
   }
 
   getLecturaNovedad(lectura: any): string {
@@ -1079,29 +1117,89 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   getLecturaFotoUrl(lectura: any): string | null {
-    return this.getFotoUrl(lectura?.foto_path ?? lectura?.fotoPath ?? null);
+    const ruta = lectura?.foto_path ?? lectura?.fotoPath ?? null;
+    if (ruta) return this.storageService.viewUrl(ruta);
+    const idlectura = Number(lectura?.idlectura);
+    if (Number.isNaN(idlectura) || idlectura <= 0) return null;
+    return this.lecService.getFotoLecturaUrl(idlectura);
+  }
+
+  getFechaLectura(lectura: any): string | Date | null {
+    return lectura?.fechalectura ?? lectura?.fechaemision ?? null;
+  }
+
+  abrirDetalleLectura(lectura: any): void {
+    this.getRubroxfac(lectura.idfactura);
+    $('#DetalleFacturaModal').modal('show');
   }
 
   verFotoLectura(event: Event, lectura: any): void {
+    event.preventDefault();
     event.stopPropagation();
-    const fotoUrl = this.getLecturaFotoUrl(lectura);
-    if (!fotoUrl) return;
     const cuenta = lectura?.idabonado_abonados?.idabonado ?? this.abonado.idabonado;
-    this.abrirFoto(fotoUrl, `Foto del medidor - Cuenta ${cuenta}`);
+    const abrirModalConFoto = (data: any) => {
+      const fotoUrl = this.getLecturaFotoUrl(data);
+      const rutaOriginal =
+        data?.foto_path ??
+        data?.fotoPath ??
+        data?.fotopath ??
+        data?.pathfoto ??
+        null;
+      console.log('Lectura para foto:', data);
+      console.log('URL foto lectura:', fotoUrl);
+      if (!fotoUrl) {
+        this.abrirFotoConContexto(null, `Foto del medidor - Cuenta ${cuenta}`, rutaOriginal);
+        $('#modalFotoAbonado').modal('show');
+        return;
+      }
+      this.abrirFotoConContexto(fotoUrl, `Foto del medidor - Cuenta ${cuenta}`, rutaOriginal);
+      $('#modalFotoAbonado').modal('show');
+    };
+
+    const fotoLista = this.getLecturaFotoUrl(lectura);
+    if (fotoLista) {
+      abrirModalConFoto(lectura);
+      return;
+    }
+
+    this.lecService.getByIdlectura(lectura.idlectura).subscribe({
+      next: (detalle) => abrirModalConFoto(detalle),
+      error: (err) => {
+        console.error('No se pudo obtener la foto de la lectura:', err);
+        this.abrirFotoConContexto(null, `Foto del medidor - Cuenta ${cuenta}`, null);
+        $('#modalFotoAbonado').modal('show');
+      }
+    });
+  }
+
+  onFotoModalError(): void {
+    this.fotoModalError = true;
+    if (this.fotoModalRutaOriginal && /^[a-zA-Z]:\//.test(this.fotoModalRutaOriginal.replace(/\\/g, '/'))) {
+      this.fotoModalMensaje =
+        'El sistema reconoce la ruta de almacenamiento, pero el navegador no puede abrir rutas locales del servidor. Esa carpeta debe exponerse como URL publica en el backend.';
+      return;
+    }
+
+    this.fotoModalMensaje =
+      'La imagen existe como referencia, pero el servidor no la esta publicando en una URL accesible o ya no permite acceso a esa ruta.';
   }
 
   private cargarFotosAbonado(abonado: any): void {
     const idabonado = Number(abonado?.idabonado);
-    const tieneFotoCasa = !!abonado?.fotocasa;
-    const tieneFotoMedidor = !!abonado?.fotomedidor;
+    const fotoCasaRuta = abonado?.fotocasaPath ?? abonado?.fotocasa ?? null;
+    const fotoMedidorRuta = abonado?.fotomedidorPath ?? abonado?.fotomedidor ?? null;
 
     this.fotoCasaUrl =
-      tieneFotoCasa && idabonado > 0
+      fotoCasaRuta
+        ? this.aboService.getFotoCasaUrl(idabonado)
+        : idabonado > 0 && abonado?.fotocasa
         ? this.aboService.getFotoCasaUrl(idabonado)
         : null;
 
     this.fotoMedidorUrl =
-      tieneFotoMedidor && idabonado > 0
+      fotoMedidorRuta
+        ? this.aboService.getFotoMedidorUrl(idabonado)
+        : idabonado > 0 && abonado?.fotomedidor
         ? this.aboService.getFotoMedidorUrl(idabonado)
         : null;
   }

@@ -3,6 +3,7 @@ import { Chart, registerables } from 'chart.js';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
+import { StorageService } from 'src/app/servicios/storage.service';
 
 @Component({
   selector: 'app-historialconsumo',
@@ -20,8 +21,15 @@ export class HistorialconsumoComponent implements OnInit {
   totprom: number = 0;
   suma: number = 0;
   sobre: number = 0;
+  fotoModalUrl: string | null = null;
+  fotoModalTitulo: string = '';
   @Input() abonado: any;
-  constructor(private lecService: LecturasService, private facService: FacturaService, private rubxfacService: RubroxfacService) { }
+  constructor(
+    private lecService: LecturasService,
+    private facService: FacturaService,
+    private rubxfacService: RubroxfacService,
+    private storageService: StorageService
+  ) { }
 
   ngOnInit(): void {
     this.facturasxAbonado(this.abonado);
@@ -89,6 +97,28 @@ export class HistorialconsumoComponent implements OnInit {
       next: datos => { this._lecturas = datos; },
       error: err => console.error(err.error)
     });
+  }
+
+  getLecturaFotoUrl(lectura: any): string | null {
+    const ruta = lectura?.foto_path ?? lectura?.fotoPath ?? null;
+    if (ruta) return this.storageService.viewUrl(ruta);
+    const idlectura = Number(lectura?.idlectura);
+    if (Number.isNaN(idlectura) || idlectura <= 0) return null;
+    return this.lecService.getFotoLecturaUrl(idlectura);
+  }
+
+  getFechaLectura(lectura: any): string | Date | null {
+    return lectura?.fechalectura ?? lectura?.fechaemision ?? null;
+  }
+
+  verFotoLectura(event: Event, lectura: any): void {
+    event.stopPropagation();
+    const fotoUrl = this.getLecturaFotoUrl(lectura);
+    if (!fotoUrl) return;
+
+    const cuenta = lectura?.idabonado_abonados?.idabonado ?? this.abonado;
+    this.fotoModalUrl = fotoUrl;
+    this.fotoModalTitulo = `Foto de lectura - Cuenta ${cuenta}`;
   }
 
 }

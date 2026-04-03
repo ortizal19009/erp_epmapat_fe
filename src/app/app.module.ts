@@ -333,6 +333,7 @@ import { ImpReportejrComponent } from './features/admin-central/pages/administra
 import { ModiReportejrComponent } from './features/admin-central/pages/administracion/reportesjr/modi-reportejr/modi-reportejr.component';
 import { RepoxopcionComponent } from './features/admin-central/pages/administracion/repoxopcion/repoxopcion/repoxopcion.component';
 import { ReportesjrComponent } from '@features/admin-central/pages/administracion/reportesjr/reportejr/reportejr.component';
+import { FileUploadComponent } from './shared/file-upload/file-upload.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
@@ -652,6 +653,7 @@ import { ReportesjrComponent } from '@features/admin-central/pages/administracio
     ModiReportejrComponent,
     ReportesjrComponent,
     RepoxopcionComponent,
+    FileUploadComponent,
   ],
 
   imports: [

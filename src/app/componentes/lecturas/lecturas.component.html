@@ -57,6 +57,7 @@
             <th class="text-center">Cuenta</th>
             <th class="col-sm-3">Responsable del Pago</th>
             <th>Categoría</th>
+            <th class="text-center">Fecha lectura</th>
             <th class="text-right">Anterior</th>
             <th class="text-right">Actual</th>
             <th class="text-right">Cnsm</th>
@@ -80,6 +81,7 @@
             <td class="text-center">{{ lectura.idabonado_abonados.idabonado }}</td>
             <td class="description">{{ lectura.idabonado_abonados.idcliente_clientes.nombre }}</td>
             <td class="">{{ lectura.idabonado_abonados.idcategoria_categorias.descripcion }}</td>
+            <td class="text-center">{{ getFechaLectura(lectura) | date:'dd/MM/yyyy HH:mm' }}</td>
             <td class="text-right"
               [ngClass]="{'fontwarning': lectura.lecturaanterior == 0 && lectura.lecturaactual == 0 }">{{
               lectura.lecturaanterior | number: '1.0' }}</td>
@@ -116,7 +118,7 @@
           </tr>
         </tbody>
         <tfoot class="detalle">
-          <td *ngIf="!swfiltro" colspan="6" class="font-weight-bold text-right">TOTAL</td>
+          <td *ngIf="!swfiltro" colspan="7" class="font-weight-bold text-right">TOTAL</td>
           <td *ngIf="!swfiltro" class="font-weight-bold text-right">{{ totales[0] | number: '1.0'}}
           </td>
           <td *ngIf="!swfiltro" class="font-weight-bold text-right">{{ totales[1] | number: '1.0'}}
@@ -242,6 +244,33 @@
                     <option [ngValue]=novedad *ngFor="let novedad of novedades">{{novedad.descripcion}}
                     </option>
                   </select>
+                </div>
+                <div class="input-group input-group-sm mt-3 mb-3">
+                  <div class="input-group-prepend"><span class="input-group-text">Fecha lectura</span></div>
+                  <input type="text" class="form-control" formControlName="fechalectura" readonly>
+                </div>
+                <div class="input-group input-group-sm mb-3">
+                  <div class="input-group-prepend"><span class="input-group-text">Usuario lectura</span></div>
+                  <input type="text" class="form-control text-right" formControlName="usuariolectura" readonly>
+                </div>
+                <div class="input-group input-group-sm mb-3">
+                  <div class="input-group-prepend"><span class="input-group-text">Fec. modificación</span></div>
+                  <input type="text" class="form-control" formControlName="fecmodi" readonly>
+                </div>
+                <div class="input-group input-group-sm mb-0">
+                  <div class="input-group-prepend"><span class="input-group-text">Usu. modificación</span></div>
+                  <input type="text" class="form-control text-right" formControlName="usumodi" readonly>
+                </div>
+                <div class="mt-3">
+                  <label class="font-weight-bold mb-1 d-block">Foto de lectura</label>
+                  <app-file-upload
+                    folder="lecturas"
+                    [entidadId]="idlectura"
+                    accept="image/*"
+                    buttonLabel="Seleccionar foto de lectura"
+                    [currentRoute]="datosLectura?.foto_path || datosLectura?.fotoPath || null"
+                    (uploaded)="onFotoLecturaUploaded($event)">
+                  </app-file-upload>
                 </div>
               </div>
             </form>

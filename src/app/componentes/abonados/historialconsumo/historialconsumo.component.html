@@ -13,11 +13,13 @@
                                     <tr class="text-center">
                                         <th></th>
                                         <th>Emisión</th>
+                                        <th>Fecha lectura</th>
                                         <th>Consumo</th>
                                         <th>Anterior</th>
                                         <th>Actual</th>
                                         <th>Novedad</th>
                                         <th>Planilla</th>
+                                        <th>Foto</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bodyHisconsumo">
@@ -28,11 +30,19 @@
                                             lectura.idrutaxemision_rutasxemision.idemision_emisiones.emision |
                                             nombreEmision
                                             }}</td>
+                                        <td>{{ getFechaLectura(lectura) | date: 'dd/MM/yyyy HH:mm' }}</td>
                                         <td>{{ lectura.lecturaactual - lectura.lecturaanterior | number: '1.0'}}</td>
                                         <td>{{lectura.lecturaanterior | number: '1.0'}}</td>
                                         <td>{{ lectura.lecturaactual | number: '1.0' }}</td>
                                         <td>{{ lectura.idnovedad_novedades.descripcion}}</td>
                                         <td>{{lectura.idfactura}}</td>
+                                        <td>
+                                            <button type="button" class="btn btn-outline-info btn-xs" data-toggle="modal"
+                                                data-target="#modalFotoLectura" (click)="verFotoLectura($event, lectura)"
+                                                [disabled]="!getLecturaFotoUrl(lectura)">
+                                                Ver
+                                            </button>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -64,6 +74,30 @@
 
 
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalFotoLectura" tabindex="-1" aria-labelledby="modalFotoLecturaLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalFotoLecturaLabel">
+                    {{ fotoModalTitulo || 'Foto de lectura' }}
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <ng-container *ngIf="fotoModalUrl; else sinFotoLectura">
+                    <img [src]="fotoModalUrl" alt="Foto de lectura" class="img-fluid img-thumbnail foto-lectura-modal">
+                </ng-container>
+                <ng-template #sinFotoLectura>
+                    <div class="py-4 text-muted">No hay imagen disponible para esta lectura.</div>
+                </ng-template>
             </div>
         </div>
     </div>

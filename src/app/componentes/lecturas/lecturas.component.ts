@@ -18,6 +18,7 @@ import { nextTick } from 'process';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { EmisionService } from 'src/app/servicios/emision.service';
 import { PdfService } from 'src/app/servicios/pdf.service';
+import { StorageService } from 'src/app/servicios/storage.service';
 import { environment } from 'src/environments/environment';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -100,6 +101,7 @@ export class LecturasComponent implements OnInit {
     private loadingService: LoadingService,
     private emisionService: EmisionService,
     private pdfService: PdfService,
+    private storageService: StorageService,
   ) { }
 
   ngOnInit(): void {
@@ -132,6 +134,10 @@ export class LecturasComponent implements OnInit {
       disabled: false,
       consumo: 0,
       idnovedad_novedades: '',
+      fechalectura: '',
+      usuariolectura: '',
+      fecmodi: '',
+      usumodi: '',
     });
 
     this.formValor.get('lecturaactual')?.valueChanges.subscribe((valor) => {
@@ -292,17 +298,44 @@ export class LecturasComponent implements OnInit {
     const fotoPath = this.getFotoPath(item);
     if (!fotoPath) return null;
     if (/^(https?:|data:|blob:)/i.test(fotoPath)) return fotoPath;
-    const baseUrl = environment.API_URL.replace(/\/$/, '');
-    const path = fotoPath.replace(/^\/+/, '');
-    return `${baseUrl}/${path}`;
+    return this.storageService.viewUrl(fotoPath);
   }
 
   abrirFotoLectura(lectura: any): void {
-    this.fotoLecturaUrl = this.getFotoUrl(lectura);
+    const fotoRuta = this.getFotoPath(lectura);
+    const idlectura = Number(lectura?.idlectura);
+    this.fotoLecturaUrl = fotoRuta
+      ? this.storageService.viewUrl(fotoRuta)
+      : !Number.isNaN(idlectura) && idlectura > 0
+      ? this.lecService.getFotoLecturaUrl(idlectura)
+      : null;
     const cuenta = lectura?.idabonado_abonados?.idabonado ?? '';
     this.fotoLecturaTitulo = cuenta
       ? `Foto de lectura - Cuenta ${cuenta}`
       : 'Foto de lectura';
+  }
+
+  getFechaLectura(lectura: any): string | Date | null {
+    return lectura?.fechalectura ?? lectura?.fechaemision ?? null;
+  }
+
+  formatFechaControl(valor: any): string {
+    if (!valor) return '';
+    const fecha = new Date(valor);
+    if (Number.isNaN(fecha.getTime())) return '';
+
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${pad(fecha.getDate())}/${pad(fecha.getMonth() + 1)}/${fecha.getFullYear()} ${pad(fecha.getHours())}:${pad(fecha.getMinutes())}`;
+  }
+
+  private construirCamposControl(fechaBase?: any): any {
+    const fechaControl = fechaBase ? new Date(fechaBase) : new Date();
+    return {
+      fechalectura: fechaControl,
+      usuariolectura: this.authService.idusuario,
+      fecmodi: new Date(),
+      usumodi: this.authService.idusuario,
+    };
   }
 
   private getConsumo(lectura: any): number {
@@ -469,6 +502,10 @@ export class LecturasComponent implements OnInit {
           lecturaactual: resp.lecturaactual,
           consumo: resp.lecturaactual - resp.lecturaanterior,
           idnovedad_novedades: resp.idnovedad_novedades,
+          fechalectura: this.formatFechaControl(this.getFechaLectura(resp)),
+          usuariolectura: resp.usuariolectura ?? this.authService.idusuario,
+          fecmodi: this.formatFechaControl(resp.fecmodi),
+          usumodi: resp.usumodi ?? this.authService.idusuario,
         });
       },
       error: (err) => console.error(err.error),
@@ -494,6 +531,7 @@ export class LecturasComponent implements OnInit {
     this.datosLectura.lecturaactual = this.formValor.value.lecturaactual;
     this.datosLectura.idnovedad_novedades =
       this.formValor.value.idnovedad_novedades;
+    Object.assign(this.datosLectura, this.construirCamposControl());
     this.lecService.updateLectura(this.idlectura, this.datosLectura).subscribe({
       next: (nex) => {
         this._lecturas[this.fila].lecturaanterior =
@@ -502,9 +540,34 @@ export class LecturasComponent implements OnInit {
           this.formValor.value.lecturaactual;
         this._lecturas[this.fila].idnovedad_novedades =
           this.formValor.value.idnovedad_novedades;
+        Object.assign(this._lecturas[this.fila], this.construirCamposControl());
 
         this.total();
         this.tieneLecturasNegativas = this.getLecturasNegativas().length > 0;
+      },
+      error: (err) => console.error(err.error),
+    });
+  }
+
+  onFotoLecturaUploaded(ruta: string): void {
+    if (!this.datosLectura || !this.idlectura) return;
+
+    this.datosLectura.foto_path = ruta;
+    this.datosLectura.fotoPath = ruta;
+    this.fotoLecturaUrl = this.storageService.viewUrl(ruta);
+
+    this.lecService.updateLectura(this.idlectura, {
+      ...this.datosLectura,
+      foto_path: ruta,
+      fotoPath: ruta,
+      fecmodi: new Date(),
+      usumodi: this.authService.idusuario,
+    }).subscribe({
+      next: () => {
+        if (this._lecturas?.[this.fila]) {
+          this._lecturas[this.fila].foto_path = ruta;
+          this._lecturas[this.fila].fotoPath = ruta;
+        }
       },
       error: (err) => console.error(err.error),
     });
@@ -681,6 +744,8 @@ export class LecturasComponent implements OnInit {
 
   async updateLectura(idlectura: number, lectura: any): Promise<void> {
     try {
+      lectura.fecmodi = new Date();
+      lectura.usumodi = this.authService.idusuario;
       await this.lecService.updateLecturaAsync(idlectura, lectura);
     } catch (error) {
       console.error(`Al actualizar la Lectura: `, error);

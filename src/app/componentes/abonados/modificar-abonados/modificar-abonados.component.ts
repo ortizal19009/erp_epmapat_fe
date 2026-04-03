@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { of, switchMap } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Abonados } from 'src/app/modelos/abonados';
 import { Categoria } from 'src/app/modelos/categoria.model';
@@ -18,8 +19,6 @@ import { TipopagoService } from 'src/app/servicios/tipopago.service';
 import { UbicacionmService } from 'src/app/servicios/ubicacionm.service';
 import Swal from 'sweetalert2';
 import * as L from 'leaflet';
-import { of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-modificar-abonados',
@@ -45,8 +44,8 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
   date: Date = new Date();
   fotoCasaPreview: string | null = null;
   fotoMedidorPreview: string | null = null;
-  fotoCasaFile: File | null = null;
-  fotoMedidorFile: File | null = null;
+  selectedFotoCasa: File | null = null;
+  selectedFotoMedidor: File | null = null;
   geoError: string | null = null;
   map!: L.Map | undefined;
   marker!: L.Marker | undefined;
@@ -180,9 +179,6 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
       fecmodi: new Date().toISOString().split('T')[0],
     };
 
-    delete payload.fotocasa;
-    delete payload.fotomedidor;
-
     Swal.fire({
       title: '¿Guardar cambios?',
       html: `Cuenta: <strong>${payload.idabonado}</strong><br>
@@ -200,45 +196,38 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
       if (!result.isConfirmed) return;
 
       const observacion = result.value || 'Sin observación';
-      const hayFotos = !!this.fotoCasaFile || !!this.fotoMedidorFile;
-
       this.abonadosS.updateAbonadoAuditoria(
         payload,
         this.authService.idusuario,
         observacion,
         'MODIFICACION'
       ).pipe(
-        switchMap(() => {
-          if (!hayFotos) {
-            return of(null);
+        switchMap((abonadoActualizado) => {
+          if (!this.selectedFotoCasa && !this.selectedFotoMedidor) {
+            return of(abonadoActualizado);
           }
 
           return this.abonadosS.uploadFotosAbonado(
             payload.idabonado,
             {
-              fotocasa: this.fotoCasaFile,
-              fotomedidor: this.fotoMedidorFile,
+              fotocasa: this.selectedFotoCasa,
+              fotomedidor: this.selectedFotoMedidor,
             },
             this.authService.idusuario,
-            observacion,
+            'Actualización de fotos de abonado',
             'MODIFICACION'
           );
         })
       ).subscribe({
-        next: () => {
-          this.abonado = {
-            ...this.abonado,
-            idabonado: payload.idabonado,
-            fotocasa: this.fotoCasaFile ? this.fotoCasaFile.name : this.abonado?.fotocasa,
-            fotomedidor: this.fotoMedidorFile ? this.fotoMedidorFile.name : this.abonado?.fotomedidor,
-          };
-          this.refreshFotoPreviews(this.abonado);
-          this.fotoCasaFile = null;
-          this.fotoMedidorFile = null;
+        next: (abonadoActualizado) => {
+          this.abonado = abonadoActualizado;
+          this.selectedFotoCasa = null;
+          this.selectedFotoMedidor = null;
           this.abonadoForm.patchValue({
-            fotocasa: '',
-            fotomedidor: '',
+            fotocasa: abonadoActualizado.fotocasaPath ?? abonadoActualizado.fotocasa ?? '',
+            fotomedidor: abonadoActualizado.fotomedidorPath ?? abonadoActualizado.fotomedidor ?? '',
           });
+          this.refreshFotoPreviews(abonadoActualizado);
           Swal.fire({ toast: true, icon: 'success', title: 'Abonado modificado', position: 'top', showConfirmButton: false, timer: 2000 });
           this.retornar();
         },
@@ -280,8 +269,8 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
         idestadom_estadom: datos.idestadom_estadom,
         medidorprincipal: datos.medidorprincipal,
         geolocalizacion: datos.geolocalizacion || '',
-        fotocasa: '',
-        fotomedidor: '',
+        fotocasa: datos.fotocasaPath || datos.fotocasa || '',
+        fotomedidor: datos.fotomedidorPath || datos.fotomedidor || '',
         municipio: datos.municipio,
         adultomayor: datos.adultomayor,
         swbasura: datos.swbasura,
@@ -443,42 +432,45 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
     this.abonadoForm.patchValue({ idresponsable: respPago.nombre });
   }
 
-  onFileSelected(event: Event, controlName: 'fotocasa' | 'fotomedidor'): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files && input.files.length ? input.files[0] : null;
-    if (!file) return;
+  onFotoCasaUploaded(ruta: string): void {
+    this.abonadoForm.patchValue({ fotocasa: ruta });
+    this.fotoCasaPreview = this.abonadosS.getFotoCasaUrl(this.v_idabonado);
+  }
 
-    this.abonadoForm.patchValue({ [controlName]: file.name });
+  onFotoMedidorUploaded(ruta: string): void {
+    this.abonadoForm.patchValue({ fotomedidor: ruta });
+    this.fotoMedidorPreview = this.abonadosS.getFotoMedidorUrl(this.v_idabonado);
+  }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = typeof reader.result === 'string' ? reader.result : '';
+  onFotoCasaSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0] ?? null;
+    this.selectedFotoCasa = file;
+    this.fotoCasaPreview = file ? URL.createObjectURL(file) : this.getFotoCasaPersistedUrl();
+  }
 
-      if (controlName === 'fotocasa') {
-        this.fotoCasaFile = file;
-        this.fotoCasaPreview = result;
-      } else {
-        this.fotoMedidorFile = file;
-        this.fotoMedidorPreview = result;
-      }
-    };
-    reader.readAsDataURL(file);
+  onFotoMedidorSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0] ?? null;
+    this.selectedFotoMedidor = file;
+    this.fotoMedidorPreview = file ? URL.createObjectURL(file) : this.getFotoMedidorPersistedUrl();
   }
 
   private refreshFotoPreviews(abonado: Abonados | null | undefined): void {
-    const idabonado = Number(abonado?.idabonado);
-    const tieneFotoCasa = !!abonado?.fotocasa;
-    const tieneFotoMedidor = !!abonado?.fotomedidor;
+    this.fotoCasaPreview = this.getFotoCasaPersistedUrl(abonado);
+    this.fotoMedidorPreview = this.getFotoMedidorPersistedUrl(abonado);
+  }
 
-    this.fotoCasaPreview =
-      tieneFotoCasa && idabonado > 0
-        ? this.abonadosS.getFotoCasaUrl(idabonado)
-        : null;
+  private getFotoCasaPersistedUrl(abonado?: Abonados | null): string | null {
+    const actual = abonado ?? this.abonado;
+    const idabonado = Number(actual?.idabonado ?? this.v_idabonado);
+    const ruta = actual?.fotocasaPath ?? actual?.fotocasa ?? null;
+    return idabonado > 0 && ruta ? this.abonadosS.getFotoCasaUrl(idabonado) : null;
+  }
 
-    this.fotoMedidorPreview =
-      tieneFotoMedidor && idabonado > 0
-        ? this.abonadosS.getFotoMedidorUrl(idabonado)
-        : null;
+  private getFotoMedidorPersistedUrl(abonado?: Abonados | null): string | null {
+    const actual = abonado ?? this.abonado;
+    const idabonado = Number(actual?.idabonado ?? this.v_idabonado);
+    const ruta = actual?.fotomedidorPath ?? actual?.fotomedidor ?? null;
+    return idabonado > 0 && ruta ? this.abonadosS.getFotoMedidorUrl(idabonado) : null;
   }
 
   capturarGeolocalizacion(): void {

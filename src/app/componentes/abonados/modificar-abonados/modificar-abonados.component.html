@@ -237,31 +237,17 @@
                   <div class="row">
                     <div class="form-group col-md-6">
                       <label class="font-weight-bold mb-1">Foto de la casa</label>
-                      <div class="custom-file">
-                        <input type="file" class="custom-file-input" id="fotocasa" accept="image/*"
-                          (change)="onFileSelected($event, 'fotocasa')">
-                        <label class="custom-file-label" for="fotocasa">
-                          {{ abonadoForm.get('fotocasa')?.value || 'Seleccionar foto de la casa' }}
-                        </label>
-                      </div>
-                      <div *ngIf="fotoCasaPreview" class="mt-2 text-center">
-                        <img [src]="fotoCasaPreview" alt="Foto de la casa" class="img-thumbnail"
-                          style="max-height: 180px;">
+                      <input type="file" class="form-control-file" accept="image/*" (change)="onFotoCasaSelected($event)">
+                      <div class="mt-2" *ngIf="fotoCasaPreview">
+                        <img [src]="fotoCasaPreview" alt="Foto de la casa" class="img-thumbnail" style="max-height: 220px;">
                       </div>
                     </div>
 
                     <div class="form-group col-md-6">
                       <label class="font-weight-bold mb-1">Foto del medidor</label>
-                      <div class="custom-file">
-                        <input type="file" class="custom-file-input" id="fotomedidor" accept="image/*"
-                          (change)="onFileSelected($event, 'fotomedidor')">
-                        <label class="custom-file-label" for="fotomedidor">
-                          {{ abonadoForm.get('fotomedidor')?.value || 'Seleccionar foto del medidor' }}
-                        </label>
-                      </div>
-                      <div *ngIf="fotoMedidorPreview" class="mt-2 text-center">
-                        <img [src]="fotoMedidorPreview" alt="Foto del medidor" class="img-thumbnail"
-                          style="max-height: 180px;">
+                      <input type="file" class="form-control-file" accept="image/*" (change)="onFotoMedidorSelected($event)">
+                      <div class="mt-2" *ngIf="fotoMedidorPreview">
+                        <img [src]="fotoMedidorPreview" alt="Foto del medidor" class="img-thumbnail" style="max-height: 220px;">
                       </div>
                     </div>
                   </div>

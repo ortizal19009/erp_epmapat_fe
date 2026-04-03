@@ -1,6 +1,7 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import * as ExcelJS from 'exceljs';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
 import { RutasxemisionService } from 'src/app/servicios/rutasxemision.service';
 
@@ -26,7 +27,12 @@ export class ImporLecturasComponent implements OnInit {
    contador: number;
    public progreso = 0;
 
-   constructor(private router: Router, private rutaxemiService: RutasxemisionService, private lecService: LecturasService) { }
+   constructor(
+      private router: Router,
+      private rutaxemiService: RutasxemisionService,
+      private lecService: LecturasService,
+      private authService: AutorizaService
+   ) { }
 
    ngOnInit(): void {
       this.idrutaxemision = +sessionStorage.getItem("idrutaxemisionToLectura")!;
@@ -141,6 +147,10 @@ export class ImporLecturasComponent implements OnInit {
             resp.lecturaanterior = this.importedData[this.contador - 1][3];
             resp.lecturaactual = this.importedData[this.contador - 1][4];
             resp.idnovedad_novedades = {idnovedad: this.importedData[this.contador - 1][6]};
+            resp.fechalectura = new Date();
+            resp.usuariolectura = this.authService.idusuario;
+            resp.fecmodi = new Date();
+            resp.usumodi = this.authService.idusuario;
             this.lecService.updateLectura(idlectura, resp).subscribe({
                next: nex => '',
                error: err => console.error(err.error)

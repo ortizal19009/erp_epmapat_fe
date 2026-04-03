@@ -7,6 +7,10 @@ export class Lecturas {
     idlectura: number;
     estado: number;
     fechaemision: Date;
+    fechalectura?: Date | string;
+    usuariolectura?: number;
+    fecmodi?: Date | string;
+    usumodi?: number;
     lecturaanterior: number;
     lecturaactual: number;
     lecturadigitada: number;

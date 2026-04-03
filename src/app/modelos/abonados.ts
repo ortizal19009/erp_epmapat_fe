@@ -40,4 +40,6 @@ export class Abonados {
     foto_path?: string;
     fotocasa?: string;
     fotomedidor?: string;
+    fotocasaPath?: string;
+    fotomedidorPath?: string;
 }

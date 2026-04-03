@@ -256,6 +256,7 @@
                           <th>Emisión</th>
                           <th>Categorí­a</th>
                           <th>Novedad</th>
+                          <th>Fecha lectura</th>
                           <th>Consumo</th>
                           <th>Anterior</th>
                           <th>Actual</th>
@@ -264,13 +265,14 @@
                         </tr>
                       </thead>
                       <tbody class="bodyPlanillas">
-                        <tr *ngFor="let lectura of _lecturas" class="text-center fila" data-toggle="modal"
-                          data-target="#DetalleFacturaModal" (click)="getRubroxfac(lectura.idfactura)">
+                        <tr *ngFor="let lectura of _lecturas" class="text-center fila"
+                          (click)="abrirDetalleLectura(lectura)">
                           <td class="text-left small">
                             {{ lectura.idrutaxemision_rutasxemision.idemision_emisiones.emision | nombreEmision }}
                           </td>
                           <td>{{ getLecturaCategoria(lectura) }}</td>
                           <td>{{ getLecturaNovedad(lectura) }}</td>
+                          <td>{{ getFechaLectura(lectura) | date:'dd/MM/yyyy HH:mm' }}</td>
                           <td class="font-weight-bold">
                             {{ (lectura.lecturaactual - lectura.lecturaanterior) | number:'1.0-0' }}
                           </td>
@@ -278,8 +280,8 @@
                           <td>{{ lectura.lecturaactual | number:'1.0-0' }}</td>
                           <td>{{ lectura.idfactura }}</td>
                           <td>
-                            <button type="button" class="btn btn-outline-info btn-xs" data-toggle="modal"
-                              data-target="#modalFotoAbonado" (click)="verFotoLectura($event, lectura)"
+                            <button type="button" class="btn btn-outline-info btn-xs"
+                              (click)="verFotoLectura($event, lectura)"
                               [disabled]="!getLecturaFotoUrl(lectura)">
                               <i class="bi bi-camera"></i> Ver
                             </button>
@@ -432,11 +434,16 @@
         </h5>
       </div>
       <div class="modal-body text-center">
-        <ng-container *ngIf="fotoModalUrl || fotoCasaUrl || fotoMedidorUrl; else sinFotoAbonado">
-          <img [src]="fotoModalUrl || fotoCasaUrl || fotoMedidorUrl" alt="Foto del abonado" class="foto-preview">
+        <ng-container *ngIf="(fotoModalUrl || fotoCasaUrl || fotoMedidorUrl) && !fotoModalError; else sinFotoAbonado">
+          <img [src]="fotoModalUrl || fotoCasaUrl || fotoMedidorUrl" alt="Foto del abonado" class="foto-preview"
+            (error)="onFotoModalError()">
         </ng-container>
         <ng-template #sinFotoAbonado>
-          <div class="py-4 text-muted">No hay fotos registradas para este abonado.</div>
+          <div class="py-3 text-muted">{{ fotoModalMensaje }}</div>
+          <div *ngIf="fotoModalRutaOriginal" class="small text-break text-left border rounded bg-light p-2 mt-2">
+            <strong>Ruta registrada:</strong><br>
+            {{ fotoModalRutaOriginal }}
+          </div>
         </ng-template>
       </div>
       <div class="modal-footer justify-content-center">
