@@ -22,6 +22,9 @@ import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 export class ListarCajaComponent implements OnInit {
   _cajas: any;
   filtro: string;
+  filtroEstado: string = '1';
+  ordenColumna: 'establecimiento' | 'codigo' | 'descripcion' | 'usuario' = 'establecimiento';
+  ordenAscendente: boolean = true;
   otraPagina: boolean = false;
   usuario: Usuarios = new Usuarios();
   caja = {} as Caja;
@@ -86,6 +89,60 @@ export class ListarCajaComponent implements OnInit {
     this.cajaService.getListaCaja().subscribe((datos) => {
       this._cajas = datos;
     });
+  }
+
+  get cajasFiltradas(): any[] {
+    if (!Array.isArray(this._cajas)) {
+      return [];
+    }
+
+    let cajas = [...this._cajas];
+
+    if (this.filtroEstado === 'T') {
+      return this.ordenarCajas(cajas);
+    }
+
+    cajas = cajas.filter((caja: any) => String(caja.estado) === this.filtroEstado);
+    return this.ordenarCajas(cajas);
+  }
+
+  ordenarPor(
+    columna: 'establecimiento' | 'codigo' | 'descripcion' | 'usuario'
+  ): void {
+    if (this.ordenColumna === columna) {
+      this.ordenAscendente = !this.ordenAscendente;
+      return;
+    }
+
+    this.ordenColumna = columna;
+    this.ordenAscendente = true;
+  }
+
+  private ordenarCajas(cajas: any[]): any[] {
+    return cajas.sort((a: any, b: any) => {
+      const valorA = this.obtenerValorOrden(a);
+      const valorB = this.obtenerValorOrden(b);
+      const comparacion = valorA.localeCompare(valorB, 'es', {
+        numeric: true,
+        sensitivity: 'base',
+      });
+
+      return this.ordenAscendente ? comparacion : -comparacion;
+    });
+  }
+
+  private obtenerValorOrden(caja: any): string {
+    switch (this.ordenColumna) {
+      case 'codigo':
+        return String(caja?.codigo ?? '');
+      case 'descripcion':
+        return String(caja?.descripcion ?? '');
+      case 'usuario':
+        return String(caja?.idusuario_usuarios?.nomusu ?? '');
+      case 'establecimiento':
+      default:
+        return String(caja?.idptoemision_ptoemision?.establecimiento ?? '');
+    }
   }
 
   public info(idcaja: number) {

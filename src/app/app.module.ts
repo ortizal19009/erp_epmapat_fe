@@ -209,6 +209,7 @@ import { BuscarRutaComponent } from './componentes/suspensiones/buscar-ruta/busc
 import { HabilitacionesComponent } from './componentes/habilitaciones/habilitaciones/habilitaciones.component';
 import { AddHabilitacionComponent } from './componentes/habilitaciones/add-habilitacion/add-habilitacion.component';
 import {
+  CommonModule,
   HashLocationStrategy,
   LocationStrategy,
   PathLocationStrategy,
@@ -657,6 +658,7 @@ import { FileUploadComponent } from './shared/file-upload/file-upload.component'
   ],
 
   imports: [
+    CommonModule,
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators, FormControl, FormGroup } from '@angular/forms';
 import { DocumentTypeApi } from '../../../../core/api/document-type-api';
@@ -22,12 +22,12 @@ type DocumentTypeForm = FormGroup<{
   templateUrl: './document-types-form.html',
 })
 export class DocumentTypeFormComponent implements OnInit {
-  loading = signal(true);
-  saving = signal(false);
-  error = signal<string | null>(null);
+  loading = true;
+  saving = false;
+  error: string | null = null;
 
-  id = signal<string | null>(null);
-  title = computed(() => (this.id() ? 'Editar tipo de documento' : 'Nuevo tipo de documento'));
+  id: string | null = null;
+  title = 'Nuevo tipo de documento';
 
   form: DocumentTypeForm;
 
@@ -47,10 +47,11 @@ export class DocumentTypeFormComponent implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    this.id.set(id);
+    this.id = id;
+    this.title = this.id ? 'Editar tipo de documento' : 'Nuevo tipo de documento';
 
     if (!id) {
-      this.loading.set(false);
+      this.loading = false;
       return;
     }
 
@@ -62,22 +63,22 @@ export class DocumentTypeFormComponent implements OnInit {
           flujo: (t.flujo ?? 'SALIDA') as Flow,
           activo: !!t.activo,
         });
-        this.loading.set(false);
+        this.loading = false;
       },
       error: (e) => this.fail(e),
     });
   }
 
   save(): void {
-    this.error.set(null);
+    this.error = null;
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
-    this.saving.set(true);
-    const id = this.id();
+    this.saving = true;
+    const id = this.id;
     const raw = this.form.getRawValue();
 
     if (!id) {
@@ -113,14 +114,14 @@ export class DocumentTypeFormComponent implements OnInit {
   }
 
   private done(): void {
-    this.saving.set(false);
+    this.saving = false;
     this.router.navigate(['/document-types']);
   }
 
   private fail(e: any, isSaving = false): void {
-    if (isSaving) this.saving.set(false);
-    this.loading.set(false);
-    this.error.set(e?.error?.detail || e?.message || 'Error inesperado');
+    if (isSaving) this.saving = false;
+    this.loading = false;
+    this.error = e?.error?.detail || e?.message || 'Error inesperado';
   }
 }
 

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
   FormBuilder,
   ReactiveFormsModule,
@@ -27,14 +27,13 @@ type DependencyFormGroup = FormGroup<{
   templateUrl: './dependencies-form.html',
 })
 export class DependencyFormComponent implements OnInit {
-  loading = signal(true);
-  saving = signal(false);
-  error = signal<string | null>(null);
+  loading = true;
+  saving = false;
+  error: string | null = null;
 
-  id = signal<string | null>(null);
-  dependencies = signal<Dependencia[]>([]);
-
-  title = computed(() => (this.id() ? 'Editar dependencia' : 'Nueva dependencia'));
+  id: string | null = null;
+  dependencies: Dependencia[] = [];
+  title = 'Nueva dependencia';
 
   form: DependencyFormGroup;
 
@@ -64,14 +63,15 @@ export class DependencyFormComponent implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    this.id.set(id);
+    this.id = id;
+    this.title = this.id ? 'Editar dependencia' : 'Nueva dependencia';
 
     this.api.list(ENTITY_CODE).subscribe({
       next: (deps) => {
-        this.dependencies.set(deps ?? []);
+        this.dependencies = deps ?? [];
 
         if (!id) {
-          this.loading.set(false);
+          this.loading = false;
           return;
         }
 
@@ -82,7 +82,7 @@ export class DependencyFormComponent implements OnInit {
               nombre: (d.nombre ?? '').toString(),
               padre_id: d.padre_id ?? null,
             });
-            this.loading.set(false);
+            this.loading = false;
           },
           error: (e) => this.fail(e),
         });
@@ -92,14 +92,14 @@ export class DependencyFormComponent implements OnInit {
   }
 
   save(): void {
-    this.error.set(null);
+    this.error = null;
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
-    this.saving.set(true);
+    this.saving = true;
 
     const raw = this.form.getRawValue();
     const payload = {
@@ -109,10 +109,10 @@ export class DependencyFormComponent implements OnInit {
       padre_id: raw.padre_id || null,
     };
 
-    const currentId = this.id();
+    const currentId = this.id;
     if (currentId && payload.padre_id === currentId) {
-      this.saving.set(false);
-      this.error.set('Una dependencia no puede ser su propio padre.');
+      this.saving = false;
+      this.error = 'Una dependencia no puede ser su propio padre.';
       return;
     }
 
@@ -120,7 +120,7 @@ export class DependencyFormComponent implements OnInit {
 
     req$.subscribe({
       next: () => {
-        this.saving.set(false);
+        this.saving = false;
         this.router.navigate(['/dependencies']);
       },
       error: (e) => this.fail(e, true),
@@ -132,9 +132,9 @@ export class DependencyFormComponent implements OnInit {
   }
 
   private fail(e: any, isSaving = false): void {
-    if (isSaving) this.saving.set(false);
-    this.loading.set(false);
-    this.error.set(e?.error?.detail || e?.message || 'Error inesperado');
+    if (isSaving) this.saving = false;
+    this.loading = false;
+    this.error = e?.error?.detail || e?.message || 'Error inesperado';
   }
 }
 

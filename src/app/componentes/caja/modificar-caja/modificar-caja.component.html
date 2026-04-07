@@ -4,9 +4,9 @@
          <div class="col-sm mt-2 mb-0 text-center">
             <h4 class="font-weight-bold">Modificar Caja</h4>
          </div>
-      </div><!-- /.row -->
-   </div><!-- /.container-fluid -->
-</div><!-- /.content-header -->
+      </div>
+   </div>
+</div>
 
 <div class="content">
    <div class="container">
@@ -15,13 +15,13 @@
          <form [formGroup]="cajaForm">
             <div class="row">
                <div class="form-group col-sm my-0 py-0">
-                  <label class="form-label col-form-label-sm">Punto de emisión
+                  <label class="form-label col-form-label-sm">Punto de emision
                      <input class="form-control form-control-sm text-center" type="text" minlength="3" maxlength="3"
-                        id="codigo" formControlName="codigo" readonly pattern="[0-9]{3}" title="Codigo de 3 números" />
+                        id="codigo" formControlName="codigo" readonly pattern="[0-9]{3}" title="Codigo de 3 numeros" />
                   </label>
                </div>
                <div class="form-group col-sm-4 my-0 py-0">
-                  <label for="" class="form-label col-form-label-sm">Establecimiento
+                  <label class="form-label col-form-label-sm">Establecimiento
                      <select class="form-control form-control-sm" id="ptoemision"
                         formControlName="idptoemision_ptoemision" [compareWith]="compararPtoEmision">
                         <option [ngValue]="ptoemisionDatos" *ngFor="let ptoemisionDatos of ptoemision">
@@ -31,44 +31,53 @@
                   </label>
                </div>
                <div class="form-group col-sm my-0 py-0">
-                  <label for="" class="form-label col-form-label-sm">Estado
+                  <label class="form-label col-form-label-sm">Estado
                      <select class="form-control form-control-sm" id="estado" formControlName="estado">
-                        <option value=0>Inactivo</option>
-                        <option value=1>Activo</option>
-                     </select></label>
+                        <option [ngValue]="0">Inactivo</option>
+                        <option [ngValue]="1">Activo</option>
+                     </select>
+                  </label>
                </div>
                <div class="form-group col-sm-12 my-0 py-0">
-                  <label for="descripcion" class="form-label col-form-label-sm col-12">Descripción
-                     <input type="text" class="form-control form-control-sm " id="descripcion"
+                  <label for="descripcion" class="form-label col-form-label-sm col-12">Descripcion
+                     <input type="text" class="form-control form-control-sm" id="descripcion"
                         formControlName="descripcion" />
                   </label>
+                  <small class="text-danger"
+                     *ngIf="cajaForm.get('descripcion')?.touched && cajaForm.get('descripcion')?.invalid">
+                     Ingrese una descripcion de al menos 3 caracteres.
+                  </small>
                </div>
                <div class="form-group col-sm-12 my-0 py-0">
-                  <label for="descripcion" class="form-label col-form-label-sm col-12">Usuario
-                     <input readonly type="text" class="form-control form-control-sm " id="descripcion"
-                        formControlName="usuario" />
+                  <label class="form-label col-form-label-sm col-12">Usuario
+                     <input type="text" class="form-control form-control-sm" formControlName="usuarioBusqueda"
+                        list="usuariosCajaEditar" placeholder="Escriba o seleccione un usuario"
+                        (input)="onUsuarioInput($any($event.target).value)" />
+                     <datalist id="usuariosCajaEditar">
+                        <option *ngFor="let usuario of _usuariosDisponibles" [value]="usuario.nomusu">
+                           {{ usuario.alias || usuario.codusu || usuario.email }}
+                        </option>
+                     </datalist>
                   </label>
+                  <small class="text-muted" *ngIf="!cajaForm.value.idusuario_usuarios && !usuarioInvalido">
+                     Esta caja no tiene usuario asignado. Puede seleccionar uno del listado.
+                  </small>
+                  <small class="text-danger" *ngIf="usuarioInvalido">
+                     Seleccione un usuario valido del listado.
+                  </small>
                </div>
             </div>
 
             <div class="row justify-content-center mb-3 mt-3">
-               <button type="button" class="btn btn-success btn-sm" (click)="onSubmit()">
-                  <i class="fa fa-check-circle" style="font-size:24pxi"></i> Aceptar </button>
+               <button type="button" class="btn btn-success btn-sm" [disabled]="disabled" (click)="onSubmit()">
+                  <i class="fa fa-check-circle" style="font-size:24pxi"></i> Aceptar
+               </button>
                <button class="btn btn-sm btn-outline-success mx-2" type="button" data-toggle="collapse"
                   data-target="#modiCaja" (click)="retornar()">
-                  <i class="fa fa-times-circle" style="font-size:24pxi"></i> Cancelar</button>
+                  <i class="fa fa-times-circle" style="font-size:24pxi"></i> Cancelar
+               </button>
             </div>
          </form>
-         <div *ngIf="rtn == 1">
-            <div class="alert alert-danger text-center" role="alert">
-               <strong>Código</strong> de Caja incorrecto !
-            </div>
-         </div>
-         <div *ngIf="rtn == 2">
-            <div class="alert alert-warning text-center" role="alert">
-               Ya existe la Caja <strong>{{codigo}}</strong>
-            </div>
-         </div>
       </div>
    </div>
 </div>

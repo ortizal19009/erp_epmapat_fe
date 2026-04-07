@@ -1,7 +1,7 @@
 <div class="content pt-1 pl-3">
     <div class="container-fluid">
         <p>
-            <select class="form-select form-select-sm" [(ngModel)]="seleccionado">
+            <select class="form-select form-select-sm" [value]="seleccionado" (change)="onSeleccionChange($event)">
                 <option [value]="item" *ngFor="let item of lista">{{item}}</option>
             </select>
         </p>

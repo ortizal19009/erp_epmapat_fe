@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { EntitiesApi } from '../../../../core/api/entities-api';
@@ -11,12 +11,12 @@ import { EntitiesApi } from '../../../../core/api/entities-api';
   templateUrl: './entities-form.html',
 })
 export class EntitiesFormComponent implements OnInit {
-  loading = signal(true);
-  saving = signal(false);
-  error = signal<string | null>(null);
+  loading = true;
+  saving = false;
+  error: string | null = null;
 
-  id = signal<string | null>(null);
-  title = computed(() => (this.id() ? 'Editar entidad' : 'Nueva entidad'));
+  id: string | null = null;
+  title = 'Nueva entidad';
   form: any;
 
   constructor(
@@ -34,10 +34,11 @@ export class EntitiesFormComponent implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    this.id.set(id);
+    this.id = id;
+    this.title = this.id ? 'Editar entidad' : 'Nueva entidad';
 
     if (!id) {
-      this.loading.set(false);
+      this.loading = false;
       return;
     }
 
@@ -45,28 +46,28 @@ export class EntitiesFormComponent implements OnInit {
       next: (e) => {
         console.log('Loaded entity:', e);
         this.form.patchValue({ codigo: e.codigo, nombre: e.nombre });
-        this.loading.set(false);
+        this.loading = false;
       },
       error: (err) => this.fail(err),
     });
   }
 
   save(): void {
-    this.error.set(null);
+    this.error = null;
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
-    this.saving.set(true);
+    this.saving = true;
     const payload = this.form.getRawValue();
-    const id = this.id();
+    const id = this.id;
 
     const req$ = id ? this.api.update(id, payload) : this.api.create(payload);
 
     req$.subscribe({
       next: () => {
-        this.saving.set(false);
+        this.saving = false;
         this.router.navigate(['/settings/entities']);
       },
       error: (e) => this.fail(e, true),
@@ -78,9 +79,9 @@ export class EntitiesFormComponent implements OnInit {
   }
 
   private fail(e: any, isSaving = false) {
-    if (isSaving) this.saving.set(false);
-    this.loading.set(false);
-    this.error.set(e?.error?.detail || e?.message || 'Error inesperado');
+    if (isSaving) this.saving = false;
+    this.loading = false;
+    this.error = e?.error?.detail || e?.message || 'Error inesperado';
   }
 }
 

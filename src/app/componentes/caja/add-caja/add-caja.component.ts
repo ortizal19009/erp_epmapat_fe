@@ -1,161 +1,239 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { forkJoin, of, switchMap } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import { Usuarios } from 'src/app/modelos/administracion/usuarios.model';
+import { Cajas } from 'src/app/modelos/cajas.model';
 import { Ptoemision } from 'src/app/modelos/ptoemision';
+import { Recaudaxcaja } from 'src/app/modelos/recaudaxcaja.model';
 import { CajaService } from 'src/app/servicios/caja.service';
+import { UsuarioService } from 'src/app/servicios/administracion/usuario.service';
 import { PtoemisionService } from 'src/app/servicios/ptoemision.service';
+import { RecaudaxcajaService } from 'src/app/servicios/recaudaxcaja.service';
 
 @Component({
-   selector: 'app-add-caja',
-   templateUrl: './add-caja.component.html',
-   styleUrls: ['./add-caja.component.css']
+  selector: 'app-add-caja',
+  templateUrl: './add-caja.component.html',
+  styleUrls: ['./add-caja.component.css'],
 })
-
-
 export class AddCajaComponent implements OnInit {
+  _ptoemision: Ptoemision[] = [];
+  _usuariosDisponibles: Usuarios[] = [];
+  formCaja: FormGroup;
+  rtn1: number = 0;
+  rtn2: number = 0;
+  codigos: string = '';
+  descripcion: string = '';
+  usuarioInvalido: boolean = false;
+  guardando: boolean = false;
 
-   _ptoemision: any;
-   formCaja: FormGroup;
-   disabled: boolean = true;
-   vecvalido: Boolean[] = [false, false];
-   rtn1: number = 0; rtn2: number = 0;
-   codigos: String;
-   descripcion: String;
+  constructor(
+    public fb: FormBuilder,
+    private cajaService: CajaService,
+    public ptoemiService: PtoemisionService,
+    private authService: AutorizaService,
+    private usuarioService: UsuarioService,
+    private recaudaxcajaService: RecaudaxcajaService
+  ) {}
 
-   ptoEmision: Ptoemision = new Ptoemision();
+  ngOnInit(): void {
+    const date = new Date();
 
-   constructor(public fb: FormBuilder, private cajaService: CajaService,
-      public ptoemiService: PtoemisionService,private authService:AutorizaService) { }
+    this.formCaja = this.fb.group({
+      descripcion: ['', [Validators.required, Validators.minLength(3)]],
+      codigo: [
+        '',
+        [Validators.required, Validators.pattern(/^[0-9]{3}$/)],
+      ],
+      estado: [1, Validators.required],
+      idptoemision_ptoemision: [null, Validators.required],
+      usucrea: [this.authService.idusuario],
+      feccrea: [date],
+      idusuario_usuarios: [null, Validators.required],
+      usuarioBusqueda: ['', Validators.required],
+    });
 
-   ngOnInit(): void {
-      let date: Date = new Date();
+    this.listarPtoEmision();
+    this.cargarUsuariosDisponibles();
+  }
 
-      this.ptoEmision.idptoemision = 1;
+  get disabled(): boolean {
+    return (
+      this.guardando ||
+      this.formCaja.invalid ||
+      this.usuarioInvalido ||
+      !this.formCaja.value.idusuario_usuarios
+    );
+  }
 
-      this.formCaja = this.fb.group({
-         descripcion: ['', Validators.required],
-         codigo: ['', Validators.required],
-         estado: 1,
-         idptoemision_ptoemision: this.ptoEmision,
-         usucrea: this.authService.idusuario,
-         feccrea: date,
-      });
+  onUsuarioInput(valor: string): void {
+    const texto = (valor ?? '').trim();
+    const usuarioSeleccionado =
+      this._usuariosDisponibles.find((usuario) => usuario.nomusu === texto) ??
+      this._usuariosDisponibles.find((usuario) => usuario.alias === texto) ??
+      null;
 
-      this.listarPtoEmision();
-      this.valCodigoCaja();
-      this.valDescriCaja();
-   }
+    this.formCaja.patchValue(
+      { idusuario_usuarios: usuarioSeleccionado },
+      { emitEvent: false }
+    );
+    this.usuarioInvalido = !!texto && !usuarioSeleccionado;
+  }
 
-   onSubmit() {
-      let idptoemision = this.formCaja.value.idptoemision_ptoemision.idptoemision;
-      let h_codigo = document.getElementById("codigo") as HTMLInputElement;
-      let l_codigo = h_codigo.value;
-      this.findByCodigos(idptoemision, l_codigo);
-      let h_descripcion = document.getElementById("descripcion") as HTMLInputElement;
-      let l_descripcion = h_descripcion.value;
-      this.cajaService.getByDescri(l_descripcion).subscribe(datos => {
-         this.rtn2 = 0;
-         if (datos.length >= 1) {
-            this.rtn2 = 1;
-            this.descripcion = l_descripcion;
-         }
-      }, error => console.error(error));
-   }
+  onSubmit(): void {
+    this.rtn1 = 0;
+    this.rtn2 = 0;
+    this.formCaja.markAllAsTouched();
 
-   findByDescri(descripcion: String) {
-      this.cajaService.getByDescri(descripcion).subscribe(datos => {
-         this.rtn2 = 0;
-         if (datos.length >= 1) {
+    if (this.disabled) {
+      return;
+    }
+
+    const descripcion = this.formCaja.value.descripcion.trim();
+    const codigo = this.formCaja.value.codigo.trim();
+    forkJoin({
+      cajas: this.cajaService.getListaCaja(),
+      cajasPorDescripcion: this.cajaService.getByDescri(descripcion),
+    })
+      .pipe(
+        switchMap(({ cajas, cajasPorDescripcion }) => {
+          const cajaConCodigo = (cajas ?? []).find(
+            (caja: any) => String(caja.codigo).trim() === codigo
+          );
+
+          if (cajaConCodigo) {
+            this.rtn1 = 1;
+            this.codigos = `${cajaConCodigo.idptoemision_ptoemision?.establecimiento ?? ''}.${codigo}`;
+          }
+
+          if (cajasPorDescripcion.length > 0) {
             this.rtn2 = 1;
             this.descripcion = descripcion;
-         }
-      }, error => console.error(error));
-   }
+          }
 
-   guardaCaja() {
-      let idptoemision = this.formCaja.value.idptoemision_ptoemision.idptoemision;
-      let h_codigo = document.getElementById("codigo") as HTMLInputElement;
-      let l_codigo = h_codigo.value;
-      this.rtn2 = 0;
-      this.findByCodigos(idptoemision, l_codigo);
-      let h_descripcion = document.getElementById("descripcion") as HTMLInputElement;
-      let l_descripcion = h_descripcion.value;
-      this.findByDescri(l_descripcion);
-      //alert(" rtn1 y rtn2 =" + this.rtn1 + ' '+this.rtn2)
-      if (this.rtn1 == 0 && this.rtn2 == 0) {
-         this.guardarCaja();
-      }
-   }
+          if (this.rtn1 === 1 || this.rtn2 === 1) {
+            return of(null);
+          }
 
-   guardarCaja(): void {
-      // this.cajaService.saveCaja(this.cajaForm.value).subscribe(datos => {
-      //    window.location.reload();
-      // }, error => console.error(error));
-      alert("Guarda")
-   }
-
-   valCodigoCaja() {
-      let h_codigo = document.getElementById("codigo") as HTMLInputElement;
-      h_codigo.addEventListener('keyup', () => {
-         let l_value = h_codigo.value;
-         if (l_value.length === 3 && +l_value > 0) {
-            h_codigo.style.border = '';
-            this.vecvalido[0] = true;
-         } else {
-            h_codigo.style.border = "#F54500 1px solid";
-            this.vecvalido[0] = false;
-         }
-         this.disabled = funvalidar(...this.vecvalido);
+          this.guardando = true;
+          return this.guardarCaja();
+        })
+      )
+      .subscribe({
+        next: (respuesta) => {
+          if (!respuesta) {
+            return;
+          }
+          window.location.reload();
+        },
+        error: (error) => {
+          this.guardando = false;
+          console.error(error);
+        },
       });
-   }
+  }
 
-   valDescriCaja() {
-      let h_descripcion = document.getElementById("descripcion") as HTMLInputElement;
-      h_descripcion.addEventListener('keyup', () => {
-         let l_value = h_descripcion.value;
-         if (l_value.length >= 3) {
-            h_descripcion.style.border = '';
-            this.vecvalido[1] = true;
-            this.disabled = funvalidar(...this.vecvalido);
-         } else {
-            h_descripcion.style.border = "#F54500 1px solid";
-            this.vecvalido[1] = false;
-            this.disabled = funvalidar(...this.vecvalido);
-         }
-      });
-   }
+  private guardarCaja() {
+    const caja = this.construirCaja();
 
-   listarPtoEmision() {
-      this.ptoemiService.getListaPtoEmision().subscribe({
-         next: datos => {
-            this._ptoemision = datos
-            this.formCaja.patchValue({ idptoemision_ptoemision: 1 });
-         },
-         error: err => console.error(err.error)
-      });
-   }
+    return this.cajaService.saveCaja(caja).pipe(
+      switchMap((cajaCreada: any) => {
+        const idcaja = this.obtenerIdCaja(cajaCreada);
+        if (!idcaja) {
+          return of(cajaCreada);
+        }
 
-   findByCodigos(idptoemision: number, codigo: String) {
-      let rtn = 0;
-      this.cajaService.getByCodigos(idptoemision, codigo).subscribe(datos => {
-         this.rtn1 = 0;
-         if (datos.length >= 1) {
-            this.rtn1 = 1;
-            rtn = 1;
-            this.codigos = datos[0].idptoemision_ptoemision.establecimiento + "." + codigo;
-         }
-         return rtn;
-      }, error => console.error(error));
-   }
+        return this.cajaService.getById(idcaja).pipe(
+          switchMap((cajaGuardada: Cajas) => {
+            const recaudaxcaja = this.construirRecaudaxcaja(cajaGuardada);
+            return this.recaudaxcajaService.saveRecaudaxcaja(recaudaxcaja);
+          })
+        );
+      })
+    );
+  }
 
-}
+  private construirCaja(): Cajas {
+    const fecha = new Date();
+    const descripcion = this.formCaja.value.descripcion.trim();
+    const codigo = this.formCaja.value.codigo.trim();
+    const ptoEmision = this.formCaja.value.idptoemision_ptoemision as Ptoemision;
+    const usuario = this.formCaja.value.idusuario_usuarios as Usuarios;
+    const caja = new Cajas();
 
-//Recorre el vector de validación para verificar si todos los campos son válidos
-function funvalidar(...vector: Boolean[]) {
-   for (let i = 0; i < vector.length; i++) {
-      if (vector[i] == false) {
-         return true
-      }
-   }
-   return false
+    caja.descripcion = descripcion;
+    caja.codigo = codigo;
+    caja.estado = 1;
+    caja.idptoemision_ptoemision = {
+      idptoemision: ptoEmision.idptoemision,
+    } as Ptoemision;
+    caja.usucrea = this.authService.idusuario;
+    caja.feccrea = fecha;
+    caja.idusuario_usuarios = { idusuario: usuario.idusuario } as Usuarios;
+    caja.ultimafact = '1';
+
+    return caja;
+  }
+
+  private construirRecaudaxcaja(caja: Cajas): Recaudaxcaja {
+    const fecha = new Date();
+    const usuario = this.formCaja.value.idusuario_usuarios as Usuarios;
+
+    return {
+      estado: 1,
+      facinicio: 1,
+      facfin: 1,
+      fechainiciolabor: fecha,
+      horainicio: fecha,
+      idcaja_cajas: caja,
+      idusuario_usuarios: caja.idusuario_usuarios ?? usuario,
+    } as Recaudaxcaja;
+  }
+
+  private obtenerIdCaja(cajaCreada: any): number | null {
+    if (typeof cajaCreada === 'number') {
+      return cajaCreada;
+    }
+
+    if (typeof cajaCreada === 'string') {
+      const id = Number(cajaCreada);
+      return Number.isNaN(id) ? null : id;
+    }
+
+    return cajaCreada?.idcaja ?? null;
+  }
+
+  listarPtoEmision(): void {
+    this.ptoemiService.getListaPtoEmision().subscribe({
+      next: (datos: Ptoemision[]) => {
+        this._ptoemision = datos ?? [];
+        if (this._ptoemision.length > 0) {
+          this.formCaja.patchValue({
+            idptoemision_ptoemision: this._ptoemision[0],
+          });
+        }
+      },
+      error: (err) => console.error(err.error),
+    });
+  }
+
+  cargarUsuariosDisponibles(): void {
+    forkJoin({
+      usuarios: this.usuarioService.getUsuarios(),
+      cajas: this.cajaService.getListaCaja(),
+    }).subscribe({
+      next: ({ usuarios, cajas }) => {
+        const usuariosOcupados = new Set(
+          (cajas ?? [])
+            .map((caja) => caja?.idusuario_usuarios?.idusuario)
+            .filter((idusuario) => !!idusuario)
+        );
+
+        this._usuariosDisponibles = (usuarios ?? []).filter(
+          (usuario) => usuario.estado !== false && !usuariosOcupados.has(usuario.idusuario)
+        );
+      },
+      error: (err) => console.error(err.error ?? err),
+    });
+  }
 }

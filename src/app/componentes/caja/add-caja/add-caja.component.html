@@ -8,9 +8,8 @@
                <div class="input-group-prepend">
                   <label class="input-group-text">Establecimiento</label>
                </div>
-               <select type="text" class="custom-select text-center" formControlName="idptoemision_ptoemision">
-                  <option [ngValue]="ptoemision" *ngFor="let ptoemision of _ptoemision"
-                     [ngValue]="ptoemision.idptoemision">
+               <select class="custom-select text-center" formControlName="idptoemision_ptoemision">
+                  <option *ngFor="let ptoemision of _ptoemision" [ngValue]="ptoemision">
                      {{ ptoemision.establecimiento }}
                   </option>
                </select>
@@ -22,9 +21,19 @@
                <div class="input-group-prepend">
                   <label class="input-group-text">Punto emision</label>
                </div>
-               <input type="text" class="form-control text-center" formControlName="codigo" placeholder="000" id="codigo"
-                  aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+               <input
+                  type="text"
+                  class="form-control text-center"
+                  formControlName="codigo"
+                  placeholder="000"
+                  id="codigo"
+                  maxlength="3"
+                  aria-label="Small"
+                  aria-describedby="inputGroup-sizing-sm">
             </div>
+            <small class="text-danger" *ngIf="formCaja.get('codigo')?.touched && formCaja.get('codigo')?.invalid">
+               Ingrese un codigo numerico de 3 digitos.
+            </small>
          </div>
 
          <div class="form-group col-md-12">
@@ -32,9 +41,43 @@
                <div class="input-group-prepend">
                   <label class="input-group-text">Nombre</label>
                </div>
-               <input type="text" class="form-control text-center" formControlName="descripcion" id="descripcion"
-                  aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+               <input
+                  type="text"
+                  class="form-control text-center"
+                  formControlName="descripcion"
+                  id="descripcion"
+                  aria-label="Small"
+                  aria-describedby="inputGroup-sizing-sm">
             </div>
+            <small class="text-danger" *ngIf="formCaja.get('descripcion')?.touched && formCaja.get('descripcion')?.invalid">
+               Ingrese una descripcion de al menos 3 caracteres.
+            </small>
+         </div>
+
+         <div class="form-group col-md-12">
+            <div class="input-group mb-0 input-group-sm">
+               <div class="input-group-prepend">
+                  <label class="input-group-text">Usuario</label>
+               </div>
+               <input
+                  type="text"
+                  class="form-control"
+                  formControlName="usuarioBusqueda"
+                  list="usuariosCajaList"
+                  placeholder="Escriba o seleccione un usuario"
+                  (input)="onUsuarioInput($any($event.target).value)">
+               <datalist id="usuariosCajaList">
+                  <option *ngFor="let usuario of _usuariosDisponibles" [value]="usuario.nomusu">
+                     {{ usuario.alias || usuario.codusu || usuario.email }}
+                  </option>
+               </datalist>
+            </div>
+            <small class="text-danger" *ngIf="usuarioInvalido">
+               Seleccione un usuario valido del listado.
+            </small>
+            <small class="text-muted" *ngIf="_usuariosDisponibles.length === 0">
+               No hay usuarios disponibles para asignar a una nueva caja.
+            </small>
          </div>
 
       </div>
@@ -49,7 +92,7 @@
    </form>
    <div *ngIf="rtn1 == 1">
       <div class="alert alert-warning text-center" role="alert">
-         Ya existe la Caja <strong>{{ codigos }}</strong>
+         Ya existe el punto de emision <strong>{{ codigos }}</strong>
       </div>
    </div>
    <div *ngIf="rtn2 == 1">

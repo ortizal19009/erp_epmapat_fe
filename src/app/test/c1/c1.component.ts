@@ -13,4 +13,9 @@ export class C1Component implements OnInit {
   ngOnInit(): void {
   }
 
+  onSeleccionChange(event: Event): void {
+    const valor = (event.target as HTMLSelectElement).value;
+    this.seleccionado = valor;
+  }
+
 }

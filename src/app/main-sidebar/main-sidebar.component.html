@@ -1,8 +1,8 @@
 <!-- Main Sidebar Container -->
 <aside class="main-sidebar sidebar-dark elevation-4"
-  [ngClass]="{'fondo1-background': fondo1 == 1, 'sidebar-dark-primary': fondo1!=1}">
+  [class.fondo1-background]="fondo1 == 1" [class.sidebar-dark-primary]="fondo1 != 1">
   <!-- Brand Logo -->
-  <a class="brand-link" [ngClass]="{'fondo1-background': fondo1 == 1}">
+  <a class="brand-link" [class.fondo1-background]="fondo1 == 1">
     <img src="./assets/img/E_3.png" alt="EpmapaT Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
     <span class="brand-text font-weight-light">EpmapaT</span>
   </a>
@@ -17,7 +17,7 @@
           alt="User Image">
       </div>
       <div class="info">
-        <span class="d-block text-white small roboto" [ngClass]="{'fondo1-texto': fondo1 == 1}"><span
+        <span class="d-block text-white small roboto" [class.fondo1-texto]="fondo1 == 1"><span
             *ngIf="authService.idusuario != 1">Usuario:&nbsp;</span> <span class="text-warning">
             {{authService.alias}}</span></span>
       </div>
@@ -26,11 +26,11 @@
     <!-- SidebarSearch Form -->
     <!-- <div class="form-inline" *ngIf="authService.modulo > 0">
          <div class="input-group" data-widget="sidebar-search">
-            <input class="form-control form-control-sidebar" [ngClass]="{'fondo1-input': fondo1 == 1}" type="search"
+            <input class="form-control form-control-sidebar" [class.fondo1-input]="fondo1 == 1" type="search"
                placeholder="Buscar" aria-label="Search">
-            <div class="input-group-append" [ngClass]="{'fondo1-input': fondo1 == 1}">
-               <button class="btn btn-sidebar" [ngClass]="{'fondo1-input': fondo1 == 1}">
-                  <i class="fas fa-search fa-fw" [ngClass]="{'fondo1-i': fondo1 == 1}"></i>
+            <div class="input-group-append" [class.fondo1-input]="fondo1 == 1">
+               <button class="btn btn-sidebar" [class.fondo1-input]="fondo1 == 1">
+                  <i class="fas fa-search fa-fw" [class.fondo1-i]="fondo1 == 1"></i>
                </button>
             </div>
          </div>
@@ -38,11 +38,11 @@
 
     <div class="form-inline">
       <div class="input-group" data-widget="sidebar-search">
-        <input class="form-control form-control-sidebar" [ngClass]="{'fondo1-input': fondo1 == 1}" type="search"
+        <input class="form-control form-control-sidebar" [class.fondo1-input]="fondo1 == 1" type="search"
           placeholder="Buscar" aria-label="Search">
-        <div class="input-group-append" [ngClass]="{'fondo1-input': fondo1 == 1}">
-          <button class="btn btn-sidebar" [ngClass]="{'fondo1-input': fondo1 == 1}">
-            <i class="fas fa-search fa-fw" [ngClass]="{'fondo1-i': fondo1 == 1}"></i>
+        <div class="input-group-append" [class.fondo1-input]="fondo1 == 1">
+          <button class="btn btn-sidebar" [class.fondo1-input]="fondo1 == 1">
+            <i class="fas fa-search fa-fw" [class.fondo1-i]="fondo1 == 1"></i>
           </button>
         </div>
       </div>
@@ -53,7 +53,7 @@
       <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
 
         <li *ngIf="authService.modulo == 1" class="nav-item">
-          <a href="#" class="nav-link bg-info" [ngClass]="{'disabled': !isOptionEnabled(0, 50)}">
+          <a href="#" class="nav-link bg-info" [class.disabled]="!isOptionEnabled(0, 50)">
             <i class="bi-droplet-half nav-icon" style="font-size: 15px;"></i>
             <p> Consumo Agua
               <i class="fas fa-angle-right right"></i>
@@ -63,25 +63,25 @@
           <ul class="nav nav-treeview">
             <li class="nav-item">
               <!-- 0: Comercializacion   52: Clientes -->
-              <a routerLink="/clientes" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 51)}">
+              <a routerLink="/clientes" class="nav-link" [class.disabled]="!isOptionEnabled(0, 51)">
                 &nbsp;<i class="bi-person-circle nav-icon"></i>
                 <p class="text-warning">&nbsp;&nbsp; Clientes</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/abonados" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 60)}">
+              <a routerLink="/abonados" class="nav-link" [class.disabled]="!isOptionEnabled(0, 60)">
                 <i class="fa fa-building nav-icon"></i>
                 <p class="text-warning"> Abonados</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/emisiones" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 70)}">
+              <a routerLink="/emisiones" class="nav-link" [class.disabled]="!isOptionEnabled(0, 70)">
                 <i class="bi bi-moisture nav-icon"></i>
                 <p class="text-warning">&nbsp;&nbsp; Emisiones</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="#" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 80)}">
+              <a href="#" class="nav-link" [class.disabled]="!isOptionEnabled(0, 80)">
                 <i class="fa fa-calculator nav-icon"></i>
                 <p class="text-warning font-weight-bold"> Medidores
                   <i class="right fas fa-angle-right"></i>
@@ -89,14 +89,14 @@
               </a>
               <ul class="nav nav-treeview">
                 <li class="nav-item">
-                  <a routerLink="/suspensiones" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 81)}">
+                  <a routerLink="/suspensiones" class="nav-link" [class.disabled]="!isOptionEnabled(0, 81)">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <i class="fa fa-gavel nav-icon"></i>
                     <p class="text-warning"> Suspensiones</p>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a routerLink="/habilitaciones" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 90)}">
+                  <a routerLink="/habilitaciones" class="nav-link" [class.disabled]="!isOptionEnabled(0, 90)">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <i class="fa fa-gift nav-icon"></i>
                     <p class="text-warning"> Habilitaciones</p>
@@ -107,19 +107,19 @@
             </li>
 
             <li class="nav-item">
-              <a routerLink="/rutas" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 100)}">
+              <a routerLink="/rutas" class="nav-link" [class.disabled]="!isOptionEnabled(0, 100)">
                 <i class="fa fa-bus nav-icon"></i>
                 <p class="text-warning"> Rutas</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/pliego" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 110)}">
+              <a routerLink="/pliego" class="nav-link" [class.disabled]="!isOptionEnabled(0, 110)">
                 <i class="bi-asterisk nav-icon"></i>
                 <p class="text-warning"> Pliego tarifario</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/pliego24" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 111)}">
+              <a routerLink="/pliego24" class="nav-link" [class.disabled]="!isOptionEnabled(0, 111)">
                 <i class="fa fa-history nav-icon"></i>
                 <p class="text-warning"> Nuevo Pliego</p>
               </a>
@@ -128,7 +128,7 @@
         </li>
 
         <li *ngIf="authService.modulo == 1" class="nav-item">
-          <a href="#" class="nav-link bg-info" [ngClass]="{'disabled': !isOptionEnabled(0, 150)}">
+          <a href="#" class="nav-link bg-info" [class.disabled]="!isOptionEnabled(0, 150)">
             <i class="bi-bookmarks-fill nav-icon" style="font-size: 15px;"></i>
             <p> Facturación
               <i class="fas fa-angle-right right"></i>
@@ -137,13 +137,13 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a routerLink="/facturacion" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 151)}">
+              <a routerLink="/facturacion" class="nav-link" [class.disabled]="!isOptionEnabled(0, 151)">
                 <i class="fa fa-bookmark nav-icon"></i>
                 <p class="text-warning"> Facturación</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="#" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 185)}">
+              <a href="#" class="nav-link" [class.disabled]="!isOptionEnabled(0, 185)">
                 <i class="fa fa-laptop nav-icon"></i>
                 <!-- <i class="fa fa-shopping-basket nav-icon"></i> -->
                 <p class="text-warning font-weight-bold"> Fac. Electrónica
@@ -160,7 +160,7 @@
                      </a> -->
               <ul class="nav nav-treeview">
                 <li class="nav-item">
-                  <a routerLink="/fecfactura" class="nav-link py-0" [ngClass]="{'disabled': !isOptionEnabled(0, 176)}">
+                  <a routerLink="/fecfactura" class="nav-link py-0" [class.disabled]="!isOptionEnabled(0, 176)">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <i class="bi-arrow-up-left-square-fill nav-icon"></i>
                     <p class="small text-warning">&nbsp; Exportar</p>
@@ -168,7 +168,7 @@
                 </li>
                 <li class="nav-item">
                   <a routerLink="/generadorxml" class="nav-link py-0"
-                    [ngClass]="{'disabled': !isOptionEnabled(0, 185)}">
+                    [class.disabled]="!isOptionEnabled(0, 185)">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <i class="bi-file-earmark-binary nav-icon"></i>
                     <p class="small text-warning">&nbsp; Generar</p>
@@ -178,14 +178,14 @@
               </ul>
             </li>
             <li class="nav-item">
-              <a routerLink="/facturas" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 165)}">
+              <a routerLink="/facturas" class="nav-link" [class.disabled]="!isOptionEnabled(0, 165)">
                 <i class="fa fa-calendar nav-icon"></i>
                 <p class="text-warning"> Planillas</p>
               </a>
             </li>
 
             <li class="nav-item">
-              <a href="#" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 175)}">
+              <a href="#" class="nav-link" [class.disabled]="!isOptionEnabled(0, 175)">
                 <i class="fa fa-shopping-basket nav-icon"></i>
                 <p class="text-warning font-weight-bold"> Catálogo
                   <i class="right fas fa-angle-right"></i>
@@ -194,21 +194,21 @@
               <ul class="nav nav-treeview">
                 <li class="nav-item">
                   <a routerLink="/catalogoitems" class="nav-link py-0"
-                    [ngClass]="{'disabled': !isOptionEnabled(0, 176)}">
+                    [class.disabled]="!isOptionEnabled(0, 176)">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <i class="bi-file-ruled nav-icon"></i>
                     <p class="small text-warning">&nbsp; Productos</p>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a routerLink="/usoitems" class="nav-link py-0" [ngClass]="{'disabled': !isOptionEnabled(0, 185)}">
+                  <a routerLink="/usoitems" class="nav-link py-0" [class.disabled]="!isOptionEnabled(0, 185)">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <i class="bi bi-diagram-3 nav-icon"></i>
                     <p class="small text-warning">&nbsp; Usos de los productos</p>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a routerLink="/rubros" class="nav-link pt-0" [ngClass]="{'disabled': !isOptionEnabled(0, 195)}">
+                  <a routerLink="/rubros" class="nav-link pt-0" [class.disabled]="!isOptionEnabled(0, 195)">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <i class="bi-bullseye nav-icon"></i>
                     <p class="small text-warning">&nbsp; Rubros (planillas)</p>
@@ -219,7 +219,7 @@
           </ul>
         </li>
         <li *ngIf="authService.modulo == 1" class="nav-item">
-          <a href="#" class="nav-link bg-info" [ngClass]="{'disabled': !isOptionEnabled(0, 3)}">
+          <a href="#" class="nav-link bg-info" [class.disabled]="!isOptionEnabled(0, 3)">
             <i class="bi-badge-tm-fill nav-icon" style="font-size: 15px; "></i>
             <p> Trámites
               <i class="fas fa-angle-right right"></i>
@@ -228,26 +228,26 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a routerLink="/aguatramite" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 4)}">
+              <a routerLink="/aguatramite" class="nav-link" [class.disabled]="!isOptionEnabled(0, 4)">
                 <i class="fa fa-bath nav-icon"></i>
                 <p class="text-warning"> Trámites de agua</p>
               </a>
             </li>
 
             <li class="nav-item">
-              <a routerLink="/ctramites" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 10)}">
+              <a routerLink="/ctramites" class="nav-link" [class.disabled]="!isOptionEnabled(0, 10)">
                 <i class="fa fa-inbox nav-icon"></i>
                 <p class="text-warning"> Trámites externos</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/reclamos" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 20)}">
+              <a routerLink="/reclamos" class="nav-link" [class.disabled]="!isOptionEnabled(0, 20)">
                 <i class="fa fa-bug nav-icon"></i>
                 <p class="text-warning"> Reclamos</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/ccertificaciones" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 30)}">
+              <a routerLink="/ccertificaciones" class="nav-link" [class.disabled]="!isOptionEnabled(0, 30)">
                 <i class="fa fa-certificate nav-icon"></i>
                 <p class="text-warning"> Certificaciones</p>
               </a>
@@ -255,7 +255,7 @@
           </ul>
         </li>
         <li *ngIf="authService.modulo == 1" class="nav-item">
-          <a href="#" class="nav-link bg-info" [ngClass]="{'disabled': !isOptionEnabled(0, 112)}">
+          <a href="#" class="nav-link bg-info" [class.disabled]="!isOptionEnabled(0, 112)">
             <i class="bi-archive-fill nav-icon" style="font-size: 15px;"></i>
             <p> Recaudación
               <i class="fas fa-angle-right right"></i>
@@ -264,7 +264,7 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a routerLink="recaudaciones" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 202)}">
+              <a routerLink="recaudaciones" class="nav-link" [class.disabled]="!isOptionEnabled(0, 202)">
                 &nbsp;<i class="bi bi-cash-coin nav-icon"></i>
                 <p class="text-warning"> &nbsp;Cobros</p>
               </a>
@@ -272,7 +272,7 @@
           </ul>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a routerLink="transferencias" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 113)}">
+              <a routerLink="transferencias" class="nav-link" [class.disabled]="!isOptionEnabled(0, 113)">
                 <i class="bi-folder-symlink nav-icon"></i>
                 <p class="text-warning"> &nbsp;Transferencias</p>
               </a>
@@ -280,7 +280,7 @@
           </ul>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a routerLink="anulaciones-bajas" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 120)}">
+              <a routerLink="anulaciones-bajas" class="nav-link" [class.disabled]="!isOptionEnabled(0, 120)">
                 <i class="bi-trash nav-icon"></i>
                 <p class="text-warning"> &nbsp;Anulaciones y bajas</p>
               </a>
@@ -288,7 +288,7 @@
           </ul>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a routerLink="convenios" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 130)}">
+              <a routerLink="convenios" class="nav-link" [class.disabled]="!isOptionEnabled(0, 130)">
                 <i class="fa fa-american-sign-language-interpreting nav-icon" aria-hidden="true"></i>
                 <p class="text-warning"> Convenios de Pago</p>
               </a>
@@ -296,7 +296,7 @@
           </ul>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a routerLink="ntacredito" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 130)}">
+              <a routerLink="ntacredito" class="nav-link" [class.disabled]="!isOptionEnabled(0, 130)">
                 <i class="fa fa-sticky-note" aria-hidden="true"></i>
                 <p class="text-warning">&nbsp;Notas de crédito</p>
               </a>
@@ -304,7 +304,7 @@
           </ul>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a routerLink="cajas" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 140)}">
+              <a routerLink="cajas" class="nav-link" [class.disabled]="!isOptionEnabled(0, 140)">
                 <i class="fa fa-th nav-icon" aria-hidden="true"></i>
                 <p class="text-warning"> Cajas</p>
               </a>
@@ -313,7 +313,7 @@
         </li>
 
         <li *ngIf="authService.modulo == 1" class="nav-item">
-          <a href="#" class="nav-link bg-info" [ngClass]="{'disabled': !isOptionEnabled(0, 205)}">
+          <a href="#" class="nav-link bg-info" [class.disabled]="!isOptionEnabled(0, 205)">
             <i class="bi-wallet-fill nav-icon" style="font-size: 15px;"></i>
             <p> Catálogos
               <i class="fas fa-angle-right right"></i>
@@ -322,61 +322,61 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a routerLink="/categorias" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 206)}">
+              <a routerLink="/categorias" class="nav-link" [class.disabled]="!isOptionEnabled(0, 206)">
                 <i class="fa fa-compass nav-icon"></i>
                 <p class="text-warning"> Categorías</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/ptoemision" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 207)}">
+              <a routerLink="/ptoemision" class="nav-link" [class.disabled]="!isOptionEnabled(0, 207)">
                 <i class="fa fa-folder nav-icon"></i>
                 <p class="text-warning"> Establecimientos</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/estadom" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 208)}">
+              <a routerLink="/estadom" class="nav-link" [class.disabled]="!isOptionEnabled(0, 208)">
                 <i class="fa fa-eye nav-icon"></i>
                 <p class="text-warning"> Estado de los medidores</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/intereses" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 209)}">
+              <a routerLink="/intereses" class="nav-link" [class.disabled]="!isOptionEnabled(0, 209)">
                 <i class="fa fa-info nav-icon"></i>
                 <p class="text-warning">Intereses</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/nacionalidades" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 210)}">
+              <a routerLink="/nacionalidades" class="nav-link" [class.disabled]="!isOptionEnabled(0, 210)">
                 <i class="fa fa-globe nav-icon"></i>
                 <p class="text-warning">Nacionalidades</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/novedades" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 211)}">
+              <a routerLink="/novedades" class="nav-link" [class.disabled]="!isOptionEnabled(0, 211)">
                 <i class="fa fa-bell nav-icon"></i>
                 <p class="text-warning">Novedades</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/tpidentificas" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 212)}">
+              <a routerLink="/tpidentificas" class="nav-link" [class.disabled]="!isOptionEnabled(0, 212)">
                 <i class="fa  fa-id-card nav-icon"></i>
                 <p class="text-warning">Tipos de identificación</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/tipopago" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 213)}">
+              <a routerLink="/tipopago" class="nav-link" [class.disabled]="!isOptionEnabled(0, 213)">
                 <i class="fa fa-credit-card nav-icon"></i>
                 <p class="text-warning">Tipos de pago</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/tpreclamos" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 214)}">
+              <a routerLink="/tpreclamos" class="nav-link" [class.disabled]="!isOptionEnabled(0, 214)">
                 <i class="fa fa-lemon nav-icon"></i>
                 <p class="text-warning">Tipos de reclamo</p>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/ubicacionm" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(0, 215)}">
+              <a routerLink="/ubicacionm" class="nav-link" [class.disabled]="!isOptionEnabled(0, 215)">
                 <i class="fa fa-qrcode nav-icon"></i>
                 <p class="text-warning">Ubicación medidores</p>
               </a>
@@ -892,7 +892,7 @@
         <li
           *ngIf="authService.modulo == 7 && canAnySection(['AC_UTIL_DOCS','AC_UTIL_USUARIOS','AC_UTIL_REPORTES','AC_UTIL_ACCESS','AC_UTIL_SWAGGER','AC_UTIL_CORREOS'])"
           class="nav-item">
-          <a href="#" class="nav-link bg-info" [ngClass]="{'disabled': !isOptionEnabled(5, 220)}">
+          <a href="#" class="nav-link bg-info" [class.disabled]="!isOptionEnabled(5, 220)">
             <i class="bi-gear nav-icon"></i>
             <p> Utilería
               <i class="fas fa-angle-right right"></i>
@@ -901,39 +901,39 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item" *ngIf="canSection('AC_UTIL_DOCS')">
-              <a routerLink="/documentos" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(5, 221)}">
+              <a routerLink="/documentos" class="nav-link" [class.disabled]="!isOptionEnabled(5, 221)">
                 <i class="bi bi-file-text-fill nav-icon"></i>
                 <p class="text-warning"> Documentos de respaldo</p>
               </a>
             </li>
             <li class="nav-item" *ngIf="canSection('AC_UTIL_USUARIOS')">
               <a class="nav-link" (click)="navUsuario()" routerLink=""
-                [ngClass]="{'disabled': !isOptionEnabled(5, 222)}">
+                [class.disabled]="!isOptionEnabled(5, 222)">
                 <i class="bi-people"></i>
                 <p class="text-warning">&nbsp; Usuarios</p>
               </a>
             </li>
             <li class="nav-item" *ngIf="canSection('AC_UTIL_REPORTES')">
-              <a routerLink="/reportesjr" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(5, 221)}">
+              <a routerLink="/reportesjr" class="nav-link" [class.disabled]="!isOptionEnabled(5, 221)">
                 <i class="bi bi-file-text-fill nav-icon"></i>
                 <p class="text-warning">Cargar Reportes</p>
               </a>
             </li>
             <li class="nav-item" *ngIf="canSection('AC_UTIL_SWAGGER') || authService.idusuario == 1">
               <a routerLink="/admin/swagger-microservicios" class="nav-link"
-                [ngClass]="{'disabled': !isOptionEnabled(5, 221)}">
+                [class.disabled]="!isOptionEnabled(5, 221)">
                 <i class="bi bi-journal-code nav-icon"></i>
                 <p class="text-warning">Swagger Microservicios</p>
               </a>
             </li>
             <li class="nav-item" *ngIf="canSection('AC_UTIL_ACCESS')">
-              <a routerLink="/admin/access-control" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(5, 221)}">
+              <a routerLink="/admin/access-control" class="nav-link" [class.disabled]="!isOptionEnabled(5, 221)">
                 <i class="bi bi-shield-lock nav-icon"></i>
                 <p class="text-warning">Accesos y permisos</p>
               </a>
             </li>
             <li class="nav-item" *ngIf="canSection('AC_UTIL_CORREOS') || authService.idusuario == 1">
-              <a routerLink="/admin/correos" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(5, 221)}">
+              <a routerLink="/admin/correos" class="nav-link" [class.disabled]="!isOptionEnabled(5, 221)">
                 <i class="fa fa-envelope-o" aria-hidden="true"> </i>
                 <p class="text-warning">Administracion de Correos</p>
               </a>
@@ -1047,7 +1047,7 @@
         </li>
 
         <li *ngIf="authService.modulo == 7 && canAnySection(['AC_SRI_COMPROB','AC_SRI_FIRMA'])" class="nav-item">
-          <a href="#" class="nav-link bg-info" [ngClass]="{'disabled': !isOptionEnabled(5, 223)}">
+          <a href="#" class="nav-link bg-info" [class.disabled]="!isOptionEnabled(5, 223)">
             <i class="bi bi-scissors nav-icon"></i>
             <p> SRI
               <i class="fas fa-angle-right right"></i>
@@ -1056,13 +1056,13 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item" *ngIf="canSection('AC_SRI_COMPROB')">
-              <a routerLink="/tabla4" class="nav-link" [ngClass]="{'disabled': !isOptionEnabled(5, 224)}">
+              <a routerLink="/tabla4" class="nav-link" [class.disabled]="!isOptionEnabled(5, 224)">
                 <i class="bi bi-eraser nav-icon"></i>
                 <p class="text-warning"> Comprobantes SRI</p>
               </a>
             </li>
             <li class="nav-item" *ngIf="canSection('AC_SRI_FIRMA')">
-              <a class="nav-link" routerLink="/definir" [ngClass]="{'disabled': !isOptionEnabled(5, 224)}">
+              <a class="nav-link" routerLink="/definir" [class.disabled]="!isOptionEnabled(5, 224)">
                 <i class="bi-people"></i>
                 <p class="text-warning">&nbsp; Firma Electrónica</p>
               </a>

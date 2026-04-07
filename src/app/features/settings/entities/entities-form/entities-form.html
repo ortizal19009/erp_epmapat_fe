@@ -1,19 +1,19 @@
 <div class="container py-4 gd-page">
   <div class="d-flex align-items-center justify-content-between mb-3">
     <div>
-      <h3 class="mb-0">{{ title() }}</h3>
+      <h3 class="mb-0">{{ title }}</h3>
       <small class="text-muted">Configuración / Entidades</small>
     </div>
     <div class="d-flex ">
       <button class="btn btn-outline-secondary" (click)="cancel()">Volver</button>
-      <button class="btn btn-primary" [disabled]="saving()" (click)="save()">{{ saving() ? 'Guardando...' : 'Guardar' }}</button>
+      <button class="btn btn-primary" [disabled]="saving" (click)="save()">{{ saving ? 'Guardando...' : 'Guardar' }}</button>
     </div>
   </div>
 
-  <div *ngIf="loading()" class="alert alert-info">Cargando...</div>
-  <div *ngIf="error()" class="alert alert-danger">{{ error() }}</div>
+  <div *ngIf="loading" class="alert alert-info">Cargando...</div>
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
 
-  <div class="card" *ngIf="!loading()">
+  <div class="card" *ngIf="!loading">
     <div class="card-body">
       <form [formGroup]="form" class="row">
         <div class="col-md-4">

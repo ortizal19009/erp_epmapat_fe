@@ -9,6 +9,15 @@
                [(ngModel)]="filtro" [ngModelOptions]="{standalone: true}" />
          </div>
 
+         <div class="col-sm-3">
+            <select class="form-control form-control-sm text-center" [(ngModel)]="filtroEstado"
+               [ngModelOptions]="{standalone: true}">
+               <option value="1">Activas</option>
+               <option value="0">Inactivas</option>
+               <option value="T">Todas</option>
+            </select>
+         </div>
+
          <div class="btn-group ml-auto mt-0">
             <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
                data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
@@ -33,20 +42,36 @@
             <thead class="cabecera">
                <tr>
                   <th></th>
-                  <th>Estab</th>
-                  <th>Pto.Emi</th>
-                  <th class="text-center">Nombre</th>
+                  <th role="button" (click)="ordenarPor('establecimiento')">
+                     Estab
+                     <span *ngIf="ordenColumna === 'establecimiento'">{{ ordenAscendente ? '▲' : '▼' }}</span>
+                  </th>
+                  <th role="button" (click)="ordenarPor('codigo')">
+                     Pto.Emi
+                     <span *ngIf="ordenColumna === 'codigo'">{{ ordenAscendente ? '▲' : '▼' }}</span>
+                  </th>
+                  <th class="text-center" role="button" (click)="ordenarPor('descripcion')">
+                     Nombre
+                     <span *ngIf="ordenColumna === 'descripcion'">{{ ordenAscendente ? '▲' : '▼' }}</span>
+                  </th>
+                  <th class="text-center" role="button" (click)="ordenarPor('usuario')">
+                     Usuario
+                     <span *ngIf="ordenColumna === 'usuario'">{{ ordenAscendente ? '▲' : '▼' }}</span>
+                  </th>
                   <th></th>
                </tr>
             </thead>
             <tbody class="detalle">
-               <tr class="fila" *ngFor="let caja of _cajas  | filter: filtro; let i=index"
+               <tr class="fila" *ngFor="let caja of cajasFiltradas | filter: filtro; let i=index"
                   (click)="onCellClick($event, caja.idcaja)">
                   <td class="text-center small font-weight-bold">{{i+1}}</td>
                   <td [ngClass]="{'tachado': caja.estado == 0 }" class="text-center">{{
                      caja.idptoemision_ptoemision.establecimiento }}</td>
                   <td [ngClass]="{'tachado': caja.estado == 0 }" class="text-center">{{ caja.codigo }}</td>
                   <td [ngClass]="{'tachado': caja.estado == 0 }">{{ caja.descripcion }}</td>
+                  <td [ngClass]="{'tachado': caja.estado == 0 }">
+                     {{ caja.idusuario_usuarios?.nomusu || '' }}
+                  </td>
                   <td>
                      <div class="btn-group py-0">
                         <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"

@@ -1,14 +1,14 @@
 <div class="page gd-page">
   <div class="page gd-page-header cabecera d-flex align-items-end justify-content-between ">
     <div>
-      <h2 class="page gd-page-title mb-1">{{ title() }}</h2>
+      <h2 class="page gd-page-title mb-1">{{ title }}</h2>
       <div class="page gd-page-subtitle">Una dependencia representa un área organizacional de la institución.</div>
     </div>
   </div>
 
-  <div *ngIf="error()" class="alert alert-danger mt-3">{{ error() }}</div>
+  <div *ngIf="error" class="alert alert-danger mt-3">{{ error }}</div>
 
-  <div class="page gd-page-card detalle mt-3" *ngIf="!loading()">
+  <div class="page gd-page-card detalle mt-3" *ngIf="!loading">
     <form [formGroup]="form" (ngSubmit)="save()">
       <div class="alert alert-primary d-flex  align-items-start mb-4">
         <i class="bi bi-info-circle fs-4"></i>
@@ -41,7 +41,7 @@
           <label class="control-label">Dependencia padre</label>
           <select class="custom-select" formControlName="padre_id" [class.is-invalid]="form.controls.padre_id.touched && form.controls.padre_id.invalid">
             <option [ngValue]="null">Sin dependencia padre (esta es principal)</option>
-            <option *ngFor="let d of dependencies()" [ngValue]="d.id">{{ d.codigo }} - {{ d.nombre }}</option>
+            <option *ngFor="let d of dependencies" [ngValue]="d.id">{{ d.codigo }} - {{ d.nombre }}</option>
           </select>
           <div class="form-text">Selecciona una dependencia padre solo si esta área pertenece a otra.</div>
         </div>
@@ -49,9 +49,9 @@
 
       <div class="d-flex justify-content-end  mt-4">
         <button type="button" class="btn btn-outline-secondary" (click)="cancel()">Cancelar</button>
-        <button type="submit" class="btn btn-primary" [disabled]="saving()">
-          <span *ngIf="!saving()">Guardar</span>
-          <span *ngIf="saving()" class="d-inline-flex align-items-center "><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Guardando...</span>
+        <button type="submit" class="btn btn-primary" [disabled]="saving">
+          <span *ngIf="!saving">Guardar</span>
+          <span *ngIf="saving" class="d-inline-flex align-items-center "><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Guardando...</span>
         </button>
       </div>
     </form>
