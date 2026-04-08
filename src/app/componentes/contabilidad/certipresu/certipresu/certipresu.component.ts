@@ -39,24 +39,38 @@ export class CertipresuComponent implements OnInit {
       if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
       else this.buscaColor();
 
-      const datos = this.authService.getDatosEmpresa();
-      let año = new Date().getFullYear().toString();
-      if (datos && datos.fechap) {
-         const fecha = new Date(datos.fechap);
-         if (!isNaN(fecha.getTime())) {
-            año = fecha.getFullYear().toString();
-         }
-      } else {
-         // Trigger async loading of company data for future views if not present
-         this.authService.getEmpresa();
-      }
+      /*       const datos = this.authService.getDatosEmpresa();
+            console.log('Datos Empresa: ', datos);
+            let año = new Date().getFullYear().toString();
+            console.log('Año actual: ', año);
+            if (datos && datos.fechap) {
+               const fecha = new Date(datos.fechap);
+               if (!isNaN(fecha.getTime())) {
+                  año = fecha.getFullYear().toString();
+               }
+            } else {
+               // Trigger async loading of company data for future views if not present
+               this.authService.getEmpresa();
+            }
+      
+            this.formBuscar = this.fb.group({
+               desdeNum: '',
+               hastaNum: '',
+               desdeFecha: año + '-01-01',
+               hastaFecha: año + '-12-31',
+            }); */
 
+      const datos = this.authService.getDatosEmpresa()
+      console.log('Datos Empresa: ', datos);
+      const año = datos!.fechap.toString().slice(0, 4);
+      console.log('Año actual: ', año);
       this.formBuscar = this.fb.group({
          desdeNum: '',
          hastaNum: '',
          desdeFecha: año + '-01-01',
          hastaFecha: año + '-12-31',
       });
+
 
       this.formBuscar.patchValue({
          desdeFecha: año + '-01-01',
