@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ColoresService } from 'src/app/compartida/colores.service';
@@ -12,6 +12,7 @@ import { CategoriaService } from 'src/app/servicios/categoria.service';
 import { RutasService } from 'src/app/servicios/rutas.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { PageResponse } from 'src/app/interfaces/page-response';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-listar-abonados',
@@ -19,6 +20,9 @@ import { PageResponse } from 'src/app/interfaces/page-response';
   styleUrls: ['./listar-abonados.component.css'],
 })
 export class ListarAbonadosComponent implements OnInit {
+  @ViewChild('importExcelInput') importExcelInputRef!: ElementRef<HTMLInputElement>;
+  @ViewChild('btnAbrirPreviewImportacion') btnAbrirPreviewImportacionRef!: ElementRef<HTMLButtonElement>;
+  @ViewChild('btnCerrarPreviewImportacion') btnCerrarPreviewImportacionRef!: ElementRef<HTMLButtonElement>;
 
   // tabla
   _abonados: any[] = [];
@@ -47,8 +51,16 @@ export class ListarAbonadosComponent implements OnInit {
   _campos: any;
   rolepermission = 1;
   ventana = 'abonados';
+  importandoExcel = false;
+  mensajeImportacion = '';
+  detalleImportacion: string[] = [];
+  previewImportacion: PreviewImportacionRow[] = [];
+  previewImportacionArchivo = '';
+  previewPage = 0;
+  previewSize = 10;
 
   readonly PAGE_SIZES = [10, 20, 50, 100];
+  readonly PREVIEW_PAGE_SIZES = [10, 20, 50];
 
   constructor(
     public fb: FormBuilder,
@@ -288,6 +300,132 @@ export class ListarAbonadosComponent implements OnInit {
   // =====================
   exportar() { this.archExportar = 'Abonados'; }
 
+  abrirSelectorExcel() {
+    this.mensajeImportacion = '';
+    this.detalleImportacion = [];
+    this.importExcelInputRef?.nativeElement.click();
+  }
+
+  async importarGeolocalizaciones(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.importandoExcel = true;
+    this.mensajeImportacion = '';
+    this.detalleImportacion = [];
+    this.loadingService.showLoading();
+
+    try {
+      const filas = await this.leerArchivoExcel(file);
+      if (filas.length === 0) {
+        this.mensajeImportacion = 'El archivo no contiene registros para importar.';
+        return;
+      }
+      this.previewImportacionArchivo = file.name;
+      this.previewPage = 0;
+      this.previewImportacion = await this.generarPreviewImportacion(filas);
+      this.btnAbrirPreviewImportacionRef?.nativeElement.click();
+    } catch (error: any) {
+      console.error(error);
+      this.mensajeImportacion = error?.message || 'No se pudo procesar el archivo Excel.';
+    } finally {
+      this.importandoExcel = false;
+      this.loadingService.hideLoading();
+      if (this.importExcelInputRef) this.importExcelInputRef.nativeElement.value = '';
+    }
+  }
+
+  async confirmarImportacionGeolocalizaciones() {
+    const filasActualizar = this.previewImportacion.filter((fila) => fila.estado === 'ACTUALIZAR');
+    if (filasActualizar.length === 0) {
+      this.mensajeImportacion = 'No hay abonados pendientes por actualizar.';
+      return;
+    }
+
+    this.importandoExcel = true;
+    this.mensajeImportacion = '';
+    this.detalleImportacion = [];
+    this.loadingService.showLoading();
+
+    try {
+      const resultado = await this.actualizarGeolocalizaciones(filasActualizar);
+      this.mensajeImportacion =
+        `Importación finalizada. Actualizados: ${resultado.actualizados}. Errores: ${resultado.errores.length}.`;
+      this.detalleImportacion = resultado.errores;
+
+      if (resultado.actualizados > 0) {
+        this.previewImportacion = this.previewImportacion.map((fila) => {
+          if (fila.estado !== 'ACTUALIZAR') return fila;
+          const errorFila = resultado.errores.find((err) => err.includes(`Cuenta ${fila.idabonado}:`));
+          if (errorFila) {
+            return { ...fila, estado: 'ERROR', mensaje: errorFila };
+          }
+          return {
+            ...fila,
+            geolocalizacionActual: fila.geolocalizacionNueva,
+            estado: 'SIN_CAMBIOS',
+            mensaje: 'Actualizado correctamente.',
+          };
+        });
+        if (this.modoFiltro) this.buscarConFiltros();
+        else if (this.buscarAbonadoForm.value.buscarAbonado) this.onSubmit();
+      }
+
+      if (resultado.errores.length === 0) {
+        this.btnCerrarPreviewImportacionRef?.nativeElement.click();
+      }
+    } catch (error: any) {
+      console.error(error);
+      this.mensajeImportacion = error?.message || 'No se pudo completar la importación.';
+    } finally {
+      this.importandoExcel = false;
+      this.loadingService.hideLoading();
+    }
+  }
+
+  cambiarPreviewPagina(nuevaPagina: number) {
+    if (nuevaPagina < 0 || nuevaPagina >= this.previewTotalPages) return;
+    this.previewPage = nuevaPagina;
+  }
+
+  cambiarPreviewSize(event: Event) {
+    this.previewSize = +(event.target as HTMLSelectElement).value;
+    this.previewPage = 0;
+  }
+
+  get previewTotalPages(): number {
+    return Math.max(1, Math.ceil(this.previewImportacion.length / this.previewSize));
+  }
+
+  get previewPaginasVisibles(): number[] {
+    const rango = 2;
+    const inicio = Math.max(0, this.previewPage - rango);
+    const fin = Math.min(this.previewTotalPages - 1, this.previewPage + rango);
+    return Array.from({ length: fin - inicio + 1 }, (_, i) => inicio + i);
+  }
+
+  get previewImportacionPagina(): PreviewImportacionRow[] {
+    const inicio = this.previewPage * this.previewSize;
+    return this.previewImportacion.slice(inicio, inicio + this.previewSize);
+  }
+
+  get previewTotalRegistros(): number {
+    return this.previewImportacion.length;
+  }
+
+  get previewTotalActualizar(): number {
+    return this.previewImportacion.filter((fila) => fila.estado === 'ACTUALIZAR').length;
+  }
+
+  get previewTotalSinCambios(): number {
+    return this.previewImportacion.filter((fila) => fila.estado === 'SIN_CAMBIOS').length;
+  }
+
+  get previewTotalErrores(): number {
+    return this.previewImportacion.filter((fila) => fila.estado === 'ERROR').length;
+  }
+
   pdf() {
     // Si modo filtro y quiere todos, descarga primero y luego genera
     if (this.modoFiltro && this.pdfAlcance === 'todos') {
@@ -496,4 +634,130 @@ export class ListarAbonadosComponent implements OnInit {
       error: (err) => console.error(err.error),
     });
   }
+
+  private async leerArchivoExcel(file: File): Promise<Array<{ idabonado: number; geolocalizacion: string }>> {
+    const buffer = await file.arrayBuffer();
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(buffer);
+
+    const worksheet = workbook.getWorksheet(1);
+    if (!worksheet) {
+      throw new Error('No se encontró la primera hoja del archivo.');
+    }
+
+    const filas: Array<{ idabonado: number; geolocalizacion: string }> = [];
+
+    worksheet.eachRow((row, rowNumber) => {
+      const idRaw = row.getCell(1).value;
+      const geoRaw = row.getCell(2).value;
+
+      const idabonado = this.parseNumeroExcel(idRaw);
+      const geolocalizacion = this.parseTextoExcel(geoRaw);
+
+      if (rowNumber === 1) {
+        const encabezadoId = this.parseTextoExcel(idRaw).toLowerCase();
+        const encabezadoGeo = this.parseTextoExcel(geoRaw).toLowerCase();
+        const pareceEncabezado =
+          encabezadoId.includes('idabonado') || encabezadoGeo.includes('geolocalizacion');
+        if (pareceEncabezado) return;
+      }
+
+      if (!idabonado && !geolocalizacion) return;
+
+      if (!idabonado || !geolocalizacion) {
+        this.detalleImportacion.push(`Fila ${rowNumber}: idabonado o geolocalización inválidos.`);
+        return;
+      }
+
+      filas.push({ idabonado, geolocalizacion });
+    });
+
+    return filas;
+  }
+
+  private async actualizarGeolocalizaciones(
+    filas: Array<{ idabonado: number; geolocalizacionNueva: string }>
+  ): Promise<{ actualizados: number; errores: string[] }> {
+    let actualizados = 0;
+    const errores = [...this.detalleImportacion];
+
+    for (const fila of filas) {
+      try {
+        const abonado: any = await firstValueFrom(this.aboService.getById(fila.idabonado));
+        abonado.geolocalizacion = fila.geolocalizacionNueva;
+        abonado.usumodi = this.authService.idusuario;
+        abonado.fecmodi = new Date();
+        await firstValueFrom(this.aboService.updateAbonado(abonado));
+        actualizados++;
+      } catch (error: any) {
+        console.error(`Error actualizando abonado ${fila.idabonado}`, error);
+        errores.push(
+          `Cuenta ${fila.idabonado}: ${error?.error?.message || error?.error?.detail || 'no se pudo actualizar.'}`
+        );
+      }
+    }
+
+    return { actualizados, errores };
+  }
+
+  private async generarPreviewImportacion(
+    filas: Array<{ idabonado: number; geolocalizacion: string }>
+  ): Promise<PreviewImportacionRow[]> {
+    const preview = await Promise.all(
+      filas.map(async (fila, index) => {
+        try {
+          const abonado: any = await firstValueFrom(this.aboService.getById(fila.idabonado));
+          const geolocalizacionActual = this.parseTextoExcel(abonado?.geolocalizacion);
+          const geolocalizacionNueva = fila.geolocalizacion;
+          const cambia = geolocalizacionActual !== geolocalizacionNueva;
+
+          return {
+            fila: index + 2,
+            idabonado: fila.idabonado,
+            nombre: abonado?.nombre || abonado?.idresponsable?.nombre || abonado?.idcliente_clientes?.nombre || '',
+            geolocalizacionActual,
+            geolocalizacionNueva,
+            estado: cambia ? 'ACTUALIZAR' : 'SIN_CAMBIOS',
+            mensaje: cambia ? 'Se actualizará la geolocalización.' : 'La geolocalización ya coincide.',
+          } as PreviewImportacionRow;
+        } catch (error: any) {
+          return {
+            fila: index + 2,
+            idabonado: fila.idabonado,
+            nombre: '',
+            geolocalizacionActual: '',
+            geolocalizacionNueva: fila.geolocalizacion,
+            estado: 'ERROR',
+            mensaje: error?.error?.message || error?.error?.detail || 'No se encontró el abonado.',
+          } as PreviewImportacionRow;
+        }
+      })
+    );
+
+    return preview;
+  }
+
+  private parseNumeroExcel(value: any): number {
+    if (value == null) return 0;
+    if (typeof value === 'number') return Number(value);
+    const texto = this.parseTextoExcel(value).replace(/[^0-9.-]/g, '');
+    return Number(texto || 0);
+  }
+
+  private parseTextoExcel(value: any): string {
+    if (value == null) return '';
+    if (typeof value === 'object' && 'text' in value) return String((value as any).text || '').trim();
+    if (typeof value === 'object' && 'result' in value) return String((value as any).result || '').trim();
+    return String(value).trim();
+  }
+}
+
+interface PreviewImportacionRow {
+  fila: number;
+  idabonado: number;
+  nombre: string;
+  geolocalizacionActual: string;
+  geolocalizacionNueva: string;
+  estado: 'ACTUALIZAR' | 'SIN_CAMBIOS' | 'ERROR';
+  mensaje: string;
 }

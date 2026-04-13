@@ -46,6 +46,7 @@ export class ThDashboardComponent implements OnInit {
   areaFilter = 'ALL';
   contractFilter = 'ALL';
   periodFilter = 'Q1';
+  showStatistics = false;
 
   executiveKpis: ExecutiveKpi[] = [];
   alerts: AlertItem[] = [];
@@ -345,6 +346,10 @@ export class ThDashboardComponent implements OnInit {
 
   trackByLabel(_: number, row: MetricRow): string {
     return row.label;
+  }
+
+  toggleStatistics(): void {
+    this.showStatistics = !this.showStatistics;
   }
 
   private aplicarContrasteCabecera(color: string) {

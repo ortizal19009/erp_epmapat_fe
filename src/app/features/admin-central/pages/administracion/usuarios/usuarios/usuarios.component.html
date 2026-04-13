@@ -331,7 +331,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="modalPersonalLinkTitle">Vincular usuario con personal</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="modalPersonalLinkCloseX">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -339,6 +339,9 @@
       <div class="modal-body">
         <div class="alert alert-info py-2" *ngIf="usuarioLinkTarget">
           Usuario: <b>{{ usuarioLinkTarget.alias || usuarioLinkTarget.nomusu }}</b>
+        </div>
+        <div class="alert alert-danger py-2" *ngIf="mensajeLinkError">
+          {{ mensajeLinkError }}
         </div>
 
         <label class="w-100 mb-2">
@@ -364,7 +367,7 @@
                 <td class="text-left">{{ per.apellidos }} {{ per.nombres }}</td>
                 <td class="text-left">{{ per.idcargo_cargos?.descripcion }}</td>
                 <td>
-                  <button type="button" class="btn btn-sm btn-success" (click)="seleccionarPersonalParaUsuario(per)" data-dismiss="modal">
+                  <button type="button" class="btn btn-sm btn-success" (click)="seleccionarPersonalParaUsuario(per)" [disabled]="guardandoLink">
                     <i class="bi bi-link-45deg"></i> Unir
                   </button>
                 </td>

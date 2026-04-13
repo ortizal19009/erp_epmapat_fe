@@ -1,0 +1,216 @@
+<div class="content mt-1 pt-1 pl-0">
+  <div class="container-fluid px-0">
+    <div class="row m-0 px-0 py-1 align-items-center justify-content-between cabecera border sombra">
+      <div class="col-12 col-lg-3 mb-2 mb-lg-0">
+        <h4 class="m-0 font-weight-bold">
+          <i class="bi bi-diagram-3"></i> Monitor de combinacion de clientes
+        </h4>
+      </div>
+
+      <div class="col-12 col-lg-8">
+        <form [formGroup]="form" (ngSubmit)="buscar()" autocomplete="off">
+          <div class="form-row align-items-end">
+            <div class="col-12 col-md-3 mb-2 mb-md-0">
+              <label class="small font-weight-bold mb-1">Buscar</label>
+              <input class="form-control form-control-sm" type="text" formControlName="q"
+                placeholder="Merge, master, nombre o cedula">
+            </div>
+            <div class="col-6 col-md-2 mb-2 mb-md-0">
+              <label class="small font-weight-bold mb-1">Master</label>
+              <input class="form-control form-control-sm" type="number" formControlName="masterId" placeholder="ID">
+            </div>
+            <div class="col-6 col-md-2 mb-2 mb-md-0">
+              <label class="small font-weight-bold mb-1">Usuario</label>
+              <input class="form-control form-control-sm" type="number" formControlName="usuario" placeholder="ID">
+            </div>
+            <div class="col-6 col-md-2 mb-2 mb-md-0">
+              <label class="small font-weight-bold mb-1">Desde</label>
+              <input class="form-control form-control-sm" type="date" formControlName="desde">
+            </div>
+            <div class="col-6 col-md-2 mb-2 mb-md-0">
+              <label class="small font-weight-bold mb-1">Hasta</label>
+              <input class="form-control form-control-sm" type="date" formControlName="hasta">
+            </div>
+            <div class="col-12 col-md-1 mb-2 mb-md-0 d-flex">
+              <button class="btn btn-primary btn-sm mr-1" type="submit" [disabled]="loading" title="Buscar">
+                <i class="bi bi-search"></i>
+              </button>
+              <button class="btn btn-light btn-sm" type="button" (click)="limpiar()" [disabled]="loading" title="Limpiar">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="btn-group ml-auto">
+        <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
+          aria-expanded="false" aria-haspopup="true">
+          <i class="bi-menu-button-wide text-white"></i>
+        </button>
+        <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+          <button class="dropdown-item" type="button" (click)="nuevoMerge()">
+            <i class="bi bi-plus-circle mr-2"></i> Nuevo merge
+          </button>
+          <button class="dropdown-item" type="button" (click)="imprimirGeneral()" [disabled]="!rows.length">
+            <i class="bi bi-printer mr-2"></i> Imprimir reporte general
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid px-0">
+    <div class="row no-gutters">
+      <div class="col-lg-8 pr-lg-2 mb-2">
+        <div class="card border-0 sombra">
+          <div class="table-responsive merge-table-wrap">
+            <table class="table table-hover table-bordered table-sm table-no-wrap mb-0">
+              <thead class="cabecera text-center">
+                <tr>
+                  <th>Merge</th>
+                  <th>Fecha</th>
+                  <th>Master</th>
+                  <th>Usuario</th>
+                  <th>Clientes</th>
+                  <th>Abonados</th>
+                  <th>Facturas</th>
+                  <th>Lecturas</th>
+                  <th>Total</th>
+                  <th style="width:45px;"></th>
+                </tr>
+              </thead>
+              <tbody class="detalle">
+                <tr *ngFor="let row of rows" (click)="seleccionar(row)" [class.active-row]="row.idMerge === selectedId">
+                  <td class="text-center font-weight-bold">#{{ row.idMerge }}</td>
+                  <td class="text-center">{{ row.fechaMerge | date:'yyyy-MM-dd HH:mm' }}</td>
+                  <td>
+                    <div class="font-weight-semibold">{{ row.masterNombre || 'Cliente sin nombre' }}</div>
+                    <small class="text-muted">ID {{ row.masterId }} - {{ row.masterCedula || 'sin cedula' }}</small>
+                  </td>
+                  <td class="text-center">{{ row.usuarioMerge || '-' }}</td>
+                  <td class="text-center"><span class="badge badge-secondary">{{ row.clientesCount || 0 }}</span></td>
+                  <td class="text-center"><span class="badge badge-info">{{ row.abonadosCount || 0 }}</span></td>
+                  <td class="text-center"><span class="badge badge-warning">{{ row.facturasCount || 0 }}</span></td>
+                  <td class="text-center"><span class="badge badge-success">{{ row.lecturasCount || 0 }}</span></td>
+                  <td class="text-center font-weight-bold">{{ totalAfectados(row) }}</td>
+                  <td class="text-center">
+                    <button class="btn btn-outline-secondary btn-sm btn-icon" type="button"
+                      (click)="imprimirResumen(row, $event)" title="Imprimir resumen">
+                      <i class="bi bi-printer"></i>
+                    </button>
+                  </td>
+                </tr>
+
+                <tr *ngIf="!loading && rows.length === 0">
+                  <td colspan="10" class="text-center text-muted py-4">
+                    <i class="bi bi-inbox mr-2"></i> No hay merges registrados
+                  </td>
+                </tr>
+
+                <tr *ngIf="loading">
+                  <td colspan="10" class="text-center text-muted py-4">
+                    <span class="spinner-border spinner-border-sm mr-2"></span> Cargando merges...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="d-flex flex-wrap align-items-center justify-content-between p-2 border-top">
+            <div class="small text-muted mb-2 mb-md-0">
+              Mostrando <strong>{{ desde }}</strong> - <strong>{{ hasta }}</strong> de
+              <strong>{{ totalElements }}</strong>
+            </div>
+
+            <div class="d-flex align-items-center flex-wrap">
+              <small class="text-muted mr-2">Filas:</small>
+              <select class="form-control form-control-sm mr-2" style="width:90px;" [ngModel]="size"
+                (ngModelChange)="onChangeSize($event)">
+                <option [ngValue]="10">10</option>
+                <option [ngValue]="20">20</option>
+                <option [ngValue]="50">50</option>
+                <option [ngValue]="100">100</option>
+              </select>
+
+              <ul class="pagination pagination-sm mb-0">
+                <li class="page-item" [class.disabled]="page === 0">
+                  <button class="page-link" type="button" (click)="goTo(0)">&lt;&lt;</button>
+                </li>
+                <li class="page-item" [class.disabled]="page === 0">
+                  <button class="page-link" type="button" (click)="goTo(page - 1)">&lt;</button>
+                </li>
+                <li class="page-item" *ngFor="let p of pages" [class.active]="p === page">
+                  <button class="page-link" type="button" (click)="goTo(p)">{{ p + 1 }}</button>
+                </li>
+                <li class="page-item" [class.disabled]="page >= totalPages - 1">
+                  <button class="page-link" type="button" (click)="goTo(page + 1)">&gt;</button>
+                </li>
+                <li class="page-item" [class.disabled]="page >= totalPages - 1">
+                  <button class="page-link" type="button" (click)="goTo(totalPages - 1)">&gt;&gt;</button>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4 pl-lg-2 mb-2">
+        <div class="card border-0 sombra h-100">
+          <div class="card-header cabecera py-2">
+            <strong>Detalles</strong>
+            <div class="small text-muted" *ngIf="selectedId">Merge #{{ selectedId }}</div>
+          </div>
+
+          <div class="card-body p-2 detail-panel">
+            <div *ngIf="!selectedId" class="text-center text-muted py-5">
+              Selecciona un merge para ver clientes, abonados, facturas y lecturas.
+            </div>
+
+            <div *ngIf="loadingDetalle" class="text-center text-muted py-5">
+              <span class="spinner-border spinner-border-sm mr-2"></span> Cargando detalle...
+            </div>
+
+            <ng-container *ngIf="detalle && !loadingDetalle">
+              <div class="detail-section">
+                <div class="detail-title">Clientes absorbidos</div>
+                <div class="detail-item" *ngFor="let c of detalle.clientes">
+                  <span>Cliente duplicado</span>
+                  <strong>{{ c.clienteDupId }}</strong>
+                </div>
+                <div class="empty-detail" *ngIf="!detalle.clientes.length">Sin clientes</div>
+              </div>
+
+              <div class="detail-section">
+                <div class="detail-title">Abonados reasignados</div>
+                <div class="detail-item" *ngFor="let a of detalle.abonados">
+                  <span>Abonado {{ a.abonadoId }}</span>
+                  <strong>Origen {{ a.clienteOrigen }}</strong>
+                </div>
+                <div class="empty-detail" *ngIf="!detalle.abonados.length">Sin abonados</div>
+              </div>
+
+              <div class="detail-section">
+                <div class="detail-title">Facturas reasignadas</div>
+                <div class="detail-item" *ngFor="let f of detalle.facturas">
+                  <span>Factura {{ f.facturaId }}</span>
+                  <strong>Origen {{ f.clienteOrigen }}</strong>
+                </div>
+                <div class="empty-detail" *ngIf="!detalle.facturas.length">Sin facturas</div>
+              </div>
+
+              <div class="detail-section mb-0">
+                <div class="detail-title">Lecturas reasignadas</div>
+                <div class="detail-item" *ngFor="let l of detalle.lecturas">
+                  <span>Lectura {{ l.idLectura }}</span>
+                  <strong>Origen {{ l.idClienteOrigen }}</strong>
+                </div>
+                <div class="empty-detail" *ngIf="!detalle.lecturas.length">Sin lecturas</div>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>

@@ -1,10 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { time } from 'console';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
-import { Contemergencia } from 'src/app/modelos/rrhh/contemergencia';
 import { Personal } from 'src/app/modelos/rrhh/personal';
 import { CargosService } from 'src/app/servicios/rrhh/cargos.service';
 import { ContemergenciaService } from 'src/app/servicios/rrhh/contemergencia.service';
@@ -35,6 +33,7 @@ export class AddPersonalComponent implements OnInit {
   cargoTitle: string = 'Registrar Cargo';
   cargoForm: boolean = true;
   personal: Personal = new Personal();
+  mensajeError: string = '';
 
   constructor(
     private coloresService: ColoresService,
@@ -51,21 +50,24 @@ export class AddPersonalComponent implements OnInit {
   ngOnInit(): void {
     this.f_personal = this.fb.group({
       bspersonal: '',
-      codigo: '',
-      idcargo_cargos: '',
-      idtpcontrato_tpcontratos: '',
-      identificacion: '',
-      apellidos: '',
-      nombres: '',
-      fecnacimiento: '',
-      email: '',
-      celular: '',
-      direccion: '',
+      codigo: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(20)]],
+      idcargo_cargos: [null, Validators.required],
+      idtpcontrato_tpcontratos: [null, Validators.required],
+      identificacion: [
+        '',
+        [Validators.required, Validators.minLength(5), Validators.maxLength(20), Validators.pattern(/^[0-9A-Za-z-]+$/)],
+      ],
+      apellidos: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
+      nombres: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
+      fecnacimiento: [''],
+      email: ['', [Validators.required, Validators.email, Validators.maxLength(100)]],
+      celular: ['', [Validators.required, Validators.pattern(/^[0-9+\-\s]{7,15}$/)]],
+      direccion: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(150)]],
       idcontemergencia_contemergencias: '',
-      sufijo: '',
-      tituloprofesional: '',
-      fecinicio: '',
-      nomfirma:''
+      sufijo: ['', [Validators.maxLength(20)]],
+      tituloprofesional: ['', [Validators.maxLength(100)]],
+      fecinicio: ['', Validators.required],
+      nomfirma: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(120)]],
     });
     this.f_buscarContEmergencia = this.fb.group({
       contemergencia: '',
@@ -91,7 +93,7 @@ export class AddPersonalComponent implements OnInit {
       sueldo: 0,
     });
     this.f_personal.patchValue({
-      fecinicio: this.date.toISOString,
+      fecinicio: this.formatDate(this.date),
     });
     sessionStorage.setItem('ventana', '/personal');
     let coloresJSON = sessionStorage.getItem('/personal');
@@ -101,6 +103,7 @@ export class AddPersonalComponent implements OnInit {
     this.getAllTpcontratos();
     this.getAllContEmergencia();
     this.getDetCargos();
+    this.getAllPersonal();
   }
 
   get f() {
@@ -133,7 +136,22 @@ export class AddPersonalComponent implements OnInit {
     this.cargoForm = !this.cargoForm;
   }
   savePersonal() {
-    let valuesForm: any = this.f_personal.value;
+    this.mensajeError = '';
+    this.f_personal.markAllAsTouched();
+
+    if (this.f_personal.invalid) {
+      this.mensajeError = 'Revise los campos marcados antes de guardar el personal.';
+      return;
+    }
+
+    let valuesForm: any = this.normalizaPersonalForm(this.f_personal.value);
+
+    if (this.existePersonalDuplicado(valuesForm)) {
+      this.mensajeError =
+        'Ya existe un personal registrado con la misma identificación o código.';
+      return;
+    }
+
     this.personal.nombres = valuesForm.nombres;
     this.personal.apellidos = valuesForm.apellidos;
     this.personal.identificacion = valuesForm.identificacion;
@@ -151,12 +169,15 @@ export class AddPersonalComponent implements OnInit {
     this.personal.sufijo = valuesForm.sufijo;
     this.personal.tituloprofesional = valuesForm.tituloprofesional;
     this.personal.fecinicio = valuesForm.fecinicio;
-    this.personal.nomfirma =valuesForm.nomfirma;
+    this.personal.nomfirma = valuesForm.nomfirma;
     this.s_personal.savePaersonal(this.personal).subscribe({
       next: (datos: any) => {
         this.router.navigate(['/personal']);
       },
-      error: (e: any) => console.error(e),
+      error: (e: any) => {
+        console.error(e);
+        this.mensajeError = this.getMensajeErrorPersonal(e);
+      },
     });
   }
   regresar() {}
@@ -226,6 +247,14 @@ export class AddPersonalComponent implements OnInit {
       error: (e: any) => console.error(e),
     });
   }
+  getAllPersonal() {
+    this.s_personal.getAllPersonal().subscribe({
+      next: (datos: any) => {
+        this._personal = datos || [];
+      },
+      error: (e: any) => console.error(e),
+    });
+  }
   getAllContEmergenciaByNombre(nombre: string) {
     console.log(nombre);
     this.s_contemergencia.getAllContEmergenciaByNombre(nombre).subscribe({
@@ -288,6 +317,62 @@ export class AddPersonalComponent implements OnInit {
       },
       error: (e: any) => console.error(e),
     });
+  }
+
+  private normalizaPersonalForm(valuesForm: any) {
+    return {
+      ...valuesForm,
+      codigo: this.trimValue(valuesForm.codigo),
+      identificacion: this.trimValue(valuesForm.identificacion),
+      apellidos: this.trimValue(valuesForm.apellidos).toUpperCase(),
+      nombres: this.trimValue(valuesForm.nombres).toUpperCase(),
+      email: this.trimValue(valuesForm.email).toLowerCase(),
+      celular: this.trimValue(valuesForm.celular),
+      direccion: this.trimValue(valuesForm.direccion),
+      sufijo: this.trimValue(valuesForm.sufijo),
+      tituloprofesional: this.trimValue(valuesForm.tituloprofesional),
+      nomfirma: this.trimValue(valuesForm.nomfirma),
+    };
+  }
+
+  private existePersonalDuplicado(valuesForm: any): boolean {
+    if (!Array.isArray(this._personal)) return false;
+
+    return this._personal.some((personal: any) => {
+      const mismaIdentificacion =
+        this.trimValue(personal?.identificacion).toLowerCase() ===
+        valuesForm.identificacion.toLowerCase();
+      const mismoCodigo =
+        this.trimValue(personal?.codigo).toLowerCase() ===
+        valuesForm.codigo.toLowerCase();
+
+      return mismaIdentificacion || mismoCodigo;
+    });
+  }
+
+  private getMensajeErrorPersonal(error: any): string {
+    if (error?.status === 409) {
+      return (
+        error?.error?.message ||
+        error?.error?.detail ||
+        error?.error?.error ||
+        'No se pudo guardar: ya existe un personal con esa identificación o código.'
+      );
+    }
+
+    return (
+      error?.error?.message ||
+      error?.error?.detail ||
+      'No se pudo guardar el personal. Revise los datos e intente nuevamente.'
+    );
+  }
+
+  private trimValue(value: any): string {
+    return (value ?? '').toString().trim();
+  }
+
+  private formatDate(date: Date): string {
+    return date.toISOString().split('T')[0];
   }
 }
 function debounce<T extends (...args: any[]) => void>(

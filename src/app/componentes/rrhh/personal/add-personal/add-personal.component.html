@@ -4,7 +4,10 @@
             <div class="col-sm-8 mt-5">
                 <h4 class="font-weight-bold text-center cabecera sombra border py-1">Nuevo Personal EPMAPA-T</h4>
                 <div class="card card-body sombra fondo detalle">
-                    <form [formGroup]="f_personal">
+                    <form [formGroup]="f_personal" (ngSubmit)="savePersonal()">
+                        <div class="alert alert-danger py-2" *ngIf="mensajeError">
+                            {{mensajeError}}
+                        </div>
                         <div class="row">
                             <div class="form-group col-sm-4">
                                 <div class="input-group mb-1 input-group-sm">
@@ -14,6 +17,7 @@
                                     <input class="form-control" [ngClass]="{'is-invalid': f['sufijo'].invalid && f['sufijo'].touched,
                                     'is-valid': f['sufijo'].valid, '': f['sufijo'].untouched}" id="sufijo"
                                         formControlName="sufijo">
+                                    <div class="invalid-feedback">Máximo 20 caracteres.</div>
                                 </div>
                             </div>
                             <div class="form-group col-sm-6">
@@ -25,6 +29,7 @@
                                     <input class="form-control" [ngClass]="{'is-invalid': f['tituloprofesional'].invalid && f['tituloprofesional'].touched,
                                     'is-valid': f['tituloprofesional'].valid, '': f['tituloprofesional'].untouched}"
                                         id="tituloprofesional" formControlName="tituloprofesional">
+                                    <div class="invalid-feedback">Máximo 100 caracteres.</div>
                                 </div>
                             </div>
                             <div class="form-group col-sm-3">
@@ -35,6 +40,7 @@
                                     <input class="form-control" id="codigo" [ngClass]="{'is-invalid': f['codigo'].invalid && f['codigo'].touched,
                                     'is-valid': f['codigo'].valid, '': f['codigo'].untouched}"
                                         formControlName="codigo">
+                                    <div class="invalid-feedback">Ingrese un código válido.</div>
                                 </div>
                             </div>
                             <div class="form-group col-sm-3">
@@ -43,7 +49,7 @@
                                         <label class="input-group-text" for="cargo">Cargo</label>
                                     </div>
                                     <div class="input-group-prepend">
-                                        <button class="btn btn-sm btn-success" data-toggle="modal"
+                                        <button type="button" class="btn btn-sm btn-success" data-toggle="modal"
                                             data-target="#modalCargo" for="tpcontrato"><i class="fa fa-plus-square-o"
                                                 aria-hidden="true"></i>
                                         </button>
@@ -60,7 +66,7 @@
                                         <label class="input-group-text" for="tpcontrato">Tipo contrato</label>
                                     </div>
                                     <div class="input-group-prepend">
-                                        <button class="btn btn-sm btn-success" data-toggle="modal"
+                                        <button type="button" class="btn btn-sm btn-success" data-toggle="modal"
                                             data-target="#modalTpContrato" for="tpcontrato"><i
                                                 class="fa fa-plus-square-o" aria-hidden="true"></i>
                                         </button>
@@ -80,6 +86,7 @@
                                     <input class="form-control" [ngClass]="{'is-invalid': f['identificacion'].invalid && f['identificacion'].touched,
                                     'is-valid': f['identificacion'].valid, '': f['identificacion'].untouched}"
                                         id="identificacion" formControlName="identificacion" />
+                                    <div class="invalid-feedback">Ingrese una identificación válida, sin espacios.</div>
                                 </div>
                             </div>
 
@@ -94,6 +101,7 @@
                                         placeholder="Nombres" aria-label="Small" aria-describedby="inputGroup-sizing-sm"
                                         [ngClass]="{'is-invalid': f['nombres'].invalid && f['nombres'].touched,
                             'is-valid': f['nombres'].valid, '': f['nombres'].untouched}">
+                                    <div class="invalid-feedback">Ingrese apellidos y nombres.</div>
                                 </div>
                             </div>
                             <div class="form-group col-sm-4">
@@ -114,6 +122,7 @@
                                     <input type="text" class="form-control form-control-sm" formControlName="nomfirma"
                                         [ngClass]="{'is-invalid': f['nomfirma'].invalid && f['nomfirma'].touched,
                             'is-valid': f['nomfirma'].valid, '': f['nomfirma'].untouched}">
+                                    <div class="invalid-feedback">Ingrese el nombre de preferencia.</div>
                                 </div>
                             </div>
 
@@ -126,6 +135,7 @@
                                     <input type="text" class="form-control form-control-sm" formControlName="email"
                                         [ngClass]="{'is-invalid': f['email'].invalid && f['email'].touched,
                             'is-valid': f['email'].valid, '': f['email'].untouched}">
+                                    <div class="invalid-feedback">Ingrese un correo válido.</div>
                                 </div>
                             </div>
                             <div class="form-group col-sm-4">
@@ -134,7 +144,10 @@
                                         <label class="input-group-text" for="fecinicio">Fecha Inicio</label>
                                     </div>
                                     <input type="date" class="form-control text-center" formControlName="fecinicio"
-                                        id="fecinicio" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+                                        id="fecinicio" aria-label="Small" aria-describedby="inputGroup-sizing-sm"
+                                        [ngClass]="{'is-invalid': f['fecinicio'].invalid && f['fecinicio'].touched,
+                            'is-valid': f['fecinicio'].valid, '': f['fecinicio'].untouched}">
+                                    <div class="invalid-feedback">Seleccione la fecha de inicio.</div>
                                 </div>
                             </div>
                             <div class="form-group col-sm-6 mt-1">
@@ -146,6 +159,7 @@
                                     <input type="text" class="form-control form-control-sm" formControlName="celular"
                                         [ngClass]="{'is-invalid': f['celular'].invalid && f['celular'].touched,
                             'is-valid': f['celular'].valid, '': f['celular'].untouched}">
+                                    <div class="invalid-feedback">Ingrese un celular válido.</div>
                                 </div>
                             </div>
                             <div class="form-group col-sm-6 mt-1">
@@ -156,12 +170,13 @@
                                     <input type="text" class="form-control form-control-sm" formControlName="direccion"
                                         [ngClass]="{'is-invalid': f['direccion'].invalid && f['direccion'].touched,
                             'is-valid': f['direccion'].valid, '': f['direccion'].untouched}">
+                                    <div class="invalid-feedback">Ingrese la dirección.</div>
                                 </div>
                             </div>
                             <div class="form-group col-sm-12 mt-1">
                                 <div class="input-group input-group-sm mb-1 ">
                                     <div class="input-group-prepend">
-                                        <button class="btn btn-group btn-primary" data-toggle="modal"
+                                        <button type="button" class="btn btn-group btn-primary" data-toggle="modal"
                                             data-target="#btncontemergencia"
                                             for="idcontemergencia_contemergencias">Contacto
                                             emergencia</button>
@@ -175,8 +190,7 @@
                         </div>
 
                         <div class="text-center">
-                            <button type="submit" class="btn btn-success btn-sm mx-1" (click)="savePersonal()"
-                                [disabled]="!f_personal.valid">
+                            <button type="submit" class="btn btn-success btn-sm mx-1">
                                 <i class="fa fa-check-circle"></i> Aceptar</button>
                             <button type="button" class="btn btn-outline-success btn-sm mb-0"
                                 [routerLink]="['/personal']"><i class="fa fa-times-circle"></i> Cancelar

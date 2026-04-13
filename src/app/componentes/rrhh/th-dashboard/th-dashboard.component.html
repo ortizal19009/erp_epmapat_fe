@@ -13,6 +13,15 @@
 
         <div class="d-flex align-items-center flex-wrap justify-content-end tools-bar">
           <span class="badge badge-light text-dark mr-2 mb-1">TH estratégico</span>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-light mb-1"
+            (click)="toggleStatistics()"
+            [attr.aria-pressed]="showStatistics"
+            [attr.title]="showStatistics ? 'Ocultar estadisticas' : 'Ver estadisticas'">
+            <i [class]="showStatistics ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>&nbsp;
+            {{ showStatistics ? 'Ocultar estadisticas' : 'Ver estadisticas' }}
+          </button>
           <button type="button" class="btn btn-sm btn-outline-light mb-1" (click)="cargar()">
             <i class="bi bi-arrow-clockwise"></i>&nbsp; Actualizar
           </button>
@@ -55,6 +64,7 @@
         </div>
       </div>
 
+      <ng-container *ngIf="showStatistics">
       <div class="mt-2 sombra border rounded detalle resumen-wrap px-3 py-3">
         <div class="d-flex align-items-center justify-content-between flex-wrap mb-2">
           <div>
@@ -298,6 +308,7 @@
           </div>
         </div>
       </div>
+      </ng-container>
 
     </div>
   </div>

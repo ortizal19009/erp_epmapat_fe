@@ -39,6 +39,8 @@ export class UsuariosComponent implements OnInit {
   personalSeleccionadoId: number | null = null;
   personalSeleccionadoLabel: string = '';
   usuarioLinkTarget: any | null = null;
+  mensajeLinkError: string = '';
+  guardandoLink = false;
 
   constructor(
     public usuService: UsuarioService,
@@ -237,6 +239,7 @@ export class UsuariosComponent implements OnInit {
   openLinkPersonal(usuario: any) {
     this.usuarioLinkTarget = usuario;
     this.filtrarPersonalVinculo = '';
+    this.mensajeLinkError = '';
   }
 
   async unlinkPersonalUsuario(usuario: any) {
@@ -250,18 +253,12 @@ export class UsuariosComponent implements OnInit {
     });
     if (!r.isConfirmed) return;
 
-    this.usuService.unlinkPersonal(usuario.idusuario, this.authService.idusuario).subscribe({
-      next: () => {
-        usuario.personalIdpersonal = null;
-        usuario.personalNombre = null;
-        if (usuario.personal) usuario.personal = null;
-      },
-      error: (e) => console.error(e),
-    });
+    this.actualizarVinculoPersonal(usuario, null);
   }
 
   seleccionarPersonalParaUsuario(per: any) {
     if (!this.usuarioLinkTarget) return;
+    this.mensajeLinkError = '';
 
     const usedBy = (this._usuarios || []).find((u: any) =>
       +u?.idusuario !== +this.usuarioLinkTarget.idusuario &&
@@ -278,15 +275,7 @@ export class UsuariosComponent implements OnInit {
       return;
     }
 
-    this.usuService.linkPersonal(this.usuarioLinkTarget.idusuario, per.idpersonal, this.authService.idusuario).subscribe({
-      next: () => {
-        this.usuarioLinkTarget.personalIdpersonal = per.idpersonal;
-        this.usuarioLinkTarget.personalNombre = `${per.apellidos || ''} ${per.nombres || ''}`.trim();
-        this.usuarioLinkTarget.personal = { idpersonal: per.idpersonal, apellidos: per.apellidos, nombres: per.nombres };
-        this.usuarioLinkTarget = null;
-      },
-      error: (e) => console.error(e),
-    });
+    this.actualizarVinculoPersonal(this.usuarioLinkTarget, per);
   }
 
   // =========================
@@ -462,6 +451,58 @@ export class UsuariosComponent implements OnInit {
       const container: any = document.getElementById('pdf');
       container.appendChild(embed);
     }
+  }
+
+  private actualizarVinculoPersonal(usuario: any, per: any | null) {
+    this.guardandoLink = true;
+    this.mensajeLinkError = '';
+
+    this.usuService.getByIdusuario(usuario.idusuario).subscribe({
+      next: (usuarioActual: any) => {
+        const payload: any = {
+          ...usuarioActual,
+          personal: per ? { idpersonal: per.idpersonal } : null,
+          usumodi: this.authService.idusuario,
+          fecmodi: new Date(),
+        };
+
+        this.usuService.updateUsuario(usuario.idusuario, payload).subscribe({
+          next: () => {
+            usuario.personalIdpersonal = per?.idpersonal ?? null;
+            usuario.personalNombre = per
+              ? `${per.apellidos || ''} ${per.nombres || ''}`.trim()
+              : null;
+            usuario.personal = per
+              ? { idpersonal: per.idpersonal, apellidos: per.apellidos, nombres: per.nombres }
+              : null;
+
+            this.guardandoLink = false;
+            this.mensajeLinkError = '';
+            this.usuarioLinkTarget = null;
+            const closeBtn = document.getElementById('modalPersonalLinkCloseX') as HTMLButtonElement | null;
+            closeBtn?.click();
+          },
+          error: (e: any) => {
+            this.guardandoLink = false;
+            this.mensajeLinkError =
+              e?.error?.message ||
+              e?.error?.detail ||
+              'No se pudo guardar la vinculación entre usuario y personal.';
+            console.error(e);
+            Swal.fire({ icon: 'error', title: 'No se pudo guardar la vinculación', text: this.mensajeLinkError });
+          },
+        });
+      },
+      error: (e: any) => {
+        this.guardandoLink = false;
+        this.mensajeLinkError =
+          e?.error?.message ||
+          e?.error?.detail ||
+          'No se pudo cargar el usuario antes de actualizar la vinculación.';
+        console.error(e);
+        Swal.fire({ icon: 'error', title: 'No se pudo cargar el usuario', text: this.mensajeLinkError });
+      },
+    });
   }
 }
 

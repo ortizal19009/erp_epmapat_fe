@@ -44,8 +44,11 @@
             [disabled]="rolepermission!=3" (click)="importar()">
             <i class="bi-file-earmark-arrow-up"></i>&nbsp; Importar
           </button>
-          <button class="dropdown-item text-warning" type="button" [routerLink]="['/clientesDuplicados']">
+<!--           <button class="dropdown-item text-warning" type="button" [routerLink]="['/clientesDuplicados']">
             <i class="bi bi-exclamation-triangle mr-2"></i> Clientes duplicados
+          </button> -->
+          <button class="dropdown-item text-info" type="button" [routerLink]="['/clientesMergeMonitor']">
+            <i class="bi bi-eye mr-2"></i> Clientes duplicados
           </button>
 
         </div>
