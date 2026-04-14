@@ -294,6 +294,7 @@ import { StatusConveniosComponent } from './componentes/convenios/status-conveni
 import { CvClientesComponent } from './componentes/coactivas/carteras-vencidas/cv-clientes/cv-clientes.component';
 import { AnularConvenioComponent } from './componentes/convenios/anular-convenio/anular-convenio.component';
 import { AuthGuard } from './servicios/administracion/auth-guard';
+import { AdminOnlyGuard } from './servicios/administracion/admin-only.guard';
 import { CliDuplicadosComponent } from './componentes/clientes/cli-duplicados/cli-duplicados.component';
 import { ClienteMergeMonitorComponent } from './componentes/clientes/cliente-merge-monitor/cliente-merge-monitor.component';
 import { RutaToLectorComponent } from './componentes/rutas/ruta-to-lector/ruta-to-lector.component';
@@ -1405,17 +1406,17 @@ const routes: Routes = [
   {
     path: 'admin/swagger-microservicios',
     loadComponent: () => import('./features/settings/swagger-hub/swagger-hub').then(m => m.SwaggerHubComponent),
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, AdminOnlyGuard],
   },
   {
     path: 'admin/access-control',
     loadComponent: () => import('./features/settings/access-admin/access-admin').then(m => m.AccessAdminComponent),
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, AdminOnlyGuard],
   },
   {
     path: 'admin/correos',
     loadComponent: () => import('./features/admin-central/pages/administracion/correos/email-admin.component').then(m => m.EmailAdminComponent),
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, AdminOnlyGuard],
   },
 
   /* COACTIVAS */

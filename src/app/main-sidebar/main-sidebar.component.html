@@ -919,20 +919,20 @@
                 <p class="text-warning">Cargar Reportes</p>
               </a>
             </li>
-            <li class="nav-item" *ngIf="canSection('AC_UTIL_SWAGGER') || authService.idusuario == 1">
+            <li class="nav-item" *ngIf="authService.idusuario == 1">
               <a routerLink="/admin/swagger-microservicios" class="nav-link"
                 [class.disabled]="!isOptionEnabled(5, 221)">
                 <i class="bi bi-journal-code nav-icon"></i>
                 <p class="text-warning">Swagger Microservicios</p>
               </a>
             </li>
-            <li class="nav-item" *ngIf="canSection('AC_UTIL_ACCESS')">
+            <li class="nav-item" *ngIf="authService.idusuario == 1">
               <a routerLink="/admin/access-control" class="nav-link" [class.disabled]="!isOptionEnabled(5, 221)">
                 <i class="bi bi-shield-lock nav-icon"></i>
                 <p class="text-warning">Accesos y permisos</p>
               </a>
             </li>
-            <li class="nav-item" *ngIf="canSection('AC_UTIL_CORREOS') || authService.idusuario == 1">
+            <li class="nav-item" *ngIf="authService.idusuario == 1">
               <a routerLink="/admin/correos" class="nav-link" [class.disabled]="!isOptionEnabled(5, 221)">
                 <i class="fa fa-envelope-o" aria-hidden="true"> </i>
                 <p class="text-warning">Administracion de Correos</p>

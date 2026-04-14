@@ -96,6 +96,12 @@ export class FecfacturaService {
     return this.http.get<Fecfactura[]>(`${baseUrl}/cliente?cliente=${cliente}`);
   }
 
+  getByFechaEmisionReenvio(desde: string, hasta: string): Observable<Fecfactura[]> {
+    return this.http.get<Fecfactura[]>(
+      `${baseUrl}/reenvio?desde=${desde}&hasta=${hasta}`
+    );
+  }
+
   //Save
   save(f: Fecfactura) {
     return this.http.post(`${baseUrl}`, f);

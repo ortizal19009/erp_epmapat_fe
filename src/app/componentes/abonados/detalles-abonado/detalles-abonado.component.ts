@@ -31,10 +31,11 @@ import { CondmultasinteresesService } from 'src/app/servicios/condmultasinterese
 import * as L from 'leaflet';
 import { JasperReportService } from 'src/app/servicios/jasper-report.service';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { SriService } from 'src/app/servicios/sri.service';
 import { StorageService } from 'src/app/servicios/storage.service';
+import { OutboxAttachment, OutboxEmailService } from 'src/app/servicios/outbox-email.service';
 import Swal from 'sweetalert2';
 import { environment } from 'src/environments/environment';
+import { firstValueFrom } from 'rxjs';
 declare const $: any;
 
 @Component({
@@ -159,7 +160,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
     private s_condonar: CondmultasinteresesService,
     private s_jasperreport: JasperReportService,
     private f: FormBuilder,
-    private s_sri: SriService,
+    private outboxEmailService: OutboxEmailService,
     private storageService: StorageService
   ) { }
 
@@ -955,68 +956,107 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
       this.selectedFile = event.target.files[0];
     }
   }
-  sendEmail() {
-    if (this.swEmail === true) {
-      //const pdfBlob = this.dataURItoBlob(this.dataURI);
+  async sendEmail(): Promise<void> {
+    if (!this.swEmail) {
+      return;
+    }
 
-      let pdfBlob: Blob;
+    this.s_loading.showLoading();
 
-      if (this.dataURI instanceof Blob) {
-        // Ya es un Blob, úsalo directamente
-        pdfBlob = this.dataURI;
-      } else {
-        // No es Blob, asume que es un Data URI y conviértelo
-        pdfBlob = this.dataURItoBlob(this.dataURI);
+    try {
+      const formValue = this.f_sendEmail.getRawValue();
+      const recipients = this.parseRecipients(formValue.receptores);
+
+      if (!recipients.length) {
+        this.swal('warning', 'Debe ingresar al menos un correo destinatario');
+        this.s_loading.hideLoading();
+        return;
       }
 
-      const formData = new FormData();
+      const attachments = await this.buildNotificationAttachments();
+      const mensajeHtml =
+        `${formValue.mensaje || ''}${this.mensajeBody}` +
+        ` <p style="margin: 10px 0 0; font-size: 12px; color: #888;">Este mensaje fué enviado por: ${this.authService.alias}.</p>`;
 
-      const formValue = this.f_sendEmail.value;
-
-      // Campos normales
-      //formData.append('emisor', formValue.email); // o usa formValue.emisor si así se llama
-      //formData.append('password', formValue.password); // si se requiere
-      formValue.mensaje += `${this.mensajeBody} <p style="margin: 10px 0 0; font-size: 12px; color: #888;">Este mensaje fué enviado por: ${this.authService.alias}.</p>`;
-      formData.append('asunto', formValue.asunto || 'Sin asunto');
-      formData.append('mensaje', formValue.mensaje);
-      // Adjuntar PDF generado
-      formData.append('file', pdfBlob, this.nameFile);
-      // Adjuntar receptores (separados por coma)
-      const receptores = formValue.receptores
-        .split(',')
-        .map((r: string) => r.trim());
-      receptores.forEach((email: string) => {
-        formData.append('receptores', email);
-      });
-
-      // Adjuntar archivo adicional si se seleccionó uno
-      if (this.selectedFile) {
-        formData.append('file', this.selectedFile); // OJO: esto reemplaza el PDF anterior
-        // Si quieres enviar ambos archivos, usa otro nombre como 'file2'
-        // formData.append('file2', this.selectedFile);
-      }
-
-      this.s_sri.sendEmailNotification(formData).subscribe({
-        next: (datos: any) => {
-          this.swal('success', datos.message);
+      this.outboxEmailService.sendNotificationEmail({
+        to: recipients,
+        subject: formValue.asunto || 'Sin asunto',
+        html: mensajeHtml,
+        text: this.stripHtml(mensajeHtml),
+        correlationId: this.buildNotificationCorrelationId(),
+        attachments,
+      }).subscribe({
+        next: () => {
+          this.swal('success', 'Notificación enviada a la cola de correos');
+          this.selectedFile = null;
           this.s_loading.hideLoading();
         },
         error: (e: any) => {
-          console.error('Error al enviar:', e);
-          this.swal('danger', 'Error al Enivar');
+          console.error('Error al enviar notificación:', e);
+          this.swal('danger', this.extractEmailError(e));
           this.s_loading.hideLoading();
         },
       });
+    } catch (error) {
+      console.error('Error preparando notificación:', error);
+      this.swal('danger', 'No se pudo preparar la notificación para envío');
+      this.s_loading.hideLoading();
     }
   }
-  sendFacturaEmail() {
+
+  async sendFacturaEmail(): Promise<void> {
     this.nameFile = 'Factura.pdf';
     this.f_sendEmail.patchValue({
       asunto: 'Factura EPMAPA-T',
       receptores: this.email,
     });
-    this.sendEmail();
-    this.active = false;
+
+    this.s_loading.showLoading();
+
+    try {
+      const recipients = this.parseRecipients(this.email);
+      if (!recipients.length) {
+        this.swal('warning', 'El abonado no tiene correo registrado');
+        this.s_loading.hideLoading();
+        return;
+      }
+
+      const attachment = await this.resolvePrimaryAttachment();
+      if (!attachment) {
+        this.swal('warning', 'Primero genere la factura electrónica para poder enviarla');
+        this.s_loading.hideLoading();
+        return;
+      }
+      const xmlAttachment = await this.resolveFacturaXmlAttachment();
+
+      const asunto = `Factura EPMAPA-T ${this.detalleFactura?.nrofactura || this.factura?.nrofactura || this.idfactura}`;
+      const html = this.buildFacturaEmailHtml();
+      const attachments = xmlAttachment ? [attachment, xmlAttachment] : [attachment];
+
+      this.outboxEmailService.sendDocumentEmail({
+        to: recipients,
+        subject: asunto,
+        html,
+        text: this.stripHtml(html),
+        correlationId: this.buildFacturaCorrelationId(),
+        attachments,
+      }).subscribe({
+        next: () => {
+          this.swal('success', 'Factura enviada a la cola de correos');
+          this.s_loading.hideLoading();
+          this.active = false;
+        },
+        error: (e: any) => {
+          console.error('Error al enviar factura:', e);
+          this.swal('danger', this.extractEmailError(e));
+          this.s_loading.hideLoading();
+        },
+      });
+    } catch (error) {
+      console.error('Error preparando factura:', error);
+      this.swal('danger', 'No se pudo preparar la factura para envío');
+      this.s_loading.hideLoading();
+    }
   }
 
   async getSumaFac(idfactura: number): Promise<any> {
@@ -1216,6 +1256,196 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
       },
       error: (err) => console.error(err),
     });
+  }
+
+  private parseRecipients(value: string | null | undefined): string[] {
+    return String(value || '')
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  private async buildNotificationAttachments(): Promise<OutboxAttachment[]> {
+    const attachments: OutboxAttachment[] = [];
+    const generated = await this.resolvePrimaryAttachment();
+    if (generated) {
+      attachments.push(generated);
+    }
+    if (this.selectedFile) {
+      attachments.push(await this.fileToAttachment(this.selectedFile, this.selectedFile.name));
+    }
+    return attachments;
+  }
+
+  private async resolvePrimaryAttachment(): Promise<OutboxAttachment | null> {
+    if (!this.dataURI) {
+      return null;
+    }
+
+    if (this.dataURI instanceof Blob) {
+      return this.fileToAttachment(this.dataURI, this.nameFile || 'adjunto.pdf');
+    }
+
+    const blob = this.dataURItoBlob(this.dataURI);
+    return this.fileToAttachment(blob, this.nameFile || 'adjunto.pdf');
+  }
+
+  private async fileToAttachment(file: Blob, fileName: string): Promise<OutboxAttachment> {
+    const base64 = await this.blobToBase64(file);
+    return {
+      name: fileName,
+      contentType: file.type || 'application/octet-stream',
+      base64,
+    };
+  }
+
+  private blobToBase64(blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = String(reader.result || '');
+        const commaIndex = result.indexOf(',');
+        resolve(commaIndex >= 0 ? result.substring(commaIndex + 1) : result);
+      };
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  private stripHtml(value: string): string {
+    return String(value || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  private buildFacturaCorrelationId(): string {
+    return `FACTURA-${this.idfactura}-${this.abonado.idabonado}`;
+  }
+
+  private buildNotificationCorrelationId(): string {
+    return `NOTIFICACION-${this.abonado.idabonado}-${Date.now()}`;
+  }
+
+  private extractEmailError(error: any): string {
+    if (typeof error?.error === 'string' && error.error.trim()) {
+      return error.error.trim();
+    }
+    if (typeof error?.error?.message === 'string' && error.error.message.trim()) {
+      return error.error.message.trim();
+    }
+    if (typeof error?.message === 'string' && error.message.trim()) {
+      return error.message.trim();
+    }
+    return 'No fue posible enviar el correo';
+  }
+
+  private buildFacturaEmailHtml(): string {
+    const cliente =
+      this.detalleFactura?.idcliente?.nombre ||
+      this.detalleFactura?.razonsocialcomprador ||
+      this.abonado?.nombre ||
+      'cliente';
+    const nroFactura =
+      this.detalleFactura?.nrofactura ||
+      this.factura?.nrofactura ||
+      this.idfactura ||
+      '';
+    const cuenta = this.abonado?.idabonado || '';
+    const anio = new Date().getFullYear();
+
+    return `<div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px; background: #f9f9f9;">
+      <div style="text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #0b5394;">
+        <img src="https://epmapatulcan.gob.ec/wp/wp-content/uploads/2021/05/LOGO-HORIZONTAL.png" alt="EPMAPA-T" style="max-width: 200px;" />
+      </div>
+
+      <h2 style="color: #0b5394; text-align: center; margin-bottom: 10px;">Factura Electronica Autorizada</h2>
+      <p style="text-align: center; color: #666; font-size: 14px; margin-bottom: 25px;">Comprobante electronico generado automaticamente</p>
+
+      <div style="background: #e8f4ff; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+        <p style="margin: 0;">Estimado/a <strong>${cliente}</strong>,</p>
+      </div>
+
+      <p>Le informamos que su comprobante electronico ha sido <strong>autorizado</strong> por el Servicio de Rentas Internas (SRI) y se encuentra disponible para su descarga.</p>
+
+      <div style="background: #ffffff; border: 1px solid #d8e4f0; border-radius: 5px; padding: 15px; margin: 20px 0;">
+        <h4 style="color: #0b5394; margin: 0 0 10px 0;">Datos del comprobante</h4>
+        <p style="margin: 6px 0;"><strong>Factura:</strong> ${nroFactura}</p>
+        <p style="margin: 6px 0;"><strong>Cuenta:</strong> ${cuenta}</p>
+        <p style="margin: 6px 0;"><strong>Cliente:</strong> ${cliente}</p>
+      </div>
+
+      <div style="background: #f0f8f0; border: 1px solid #4caf50; border-radius: 5px; padding: 12px; margin: 20px 0;">
+        <p style="margin: 0; text-align: center;"><strong>Estado SRI:</strong> <span style="color: #2e7d32; font-weight: bold;">AUTORIZADO</span></p>
+      </div>
+
+      <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 5px; padding: 15px; margin: 20px 0;">
+        <h4 style="color: #856404; margin-top: 0;">Documentos adjuntos</h4>
+        <p style="margin: 5px 0;">• <strong>Factura en formato PDF</strong> - Documento legible</p>
+        <p style="margin: 5px 0;">• <strong>Archivo XML</strong> - Comprobante electronico oficial</p>
+      </div>
+
+      <hr style="border: none; border-top: 2px dashed #ccc; margin: 25px 0;">
+
+      <h3 style="color: #0b5394; border-bottom: 1px solid #0b5394; padding-bottom: 8px;">Informacion de contacto</h3>
+      <div style="line-height: 1.6;">
+        <p><strong>EPMAPA-T</strong><br>
+        Empresa Publica Municipal de Agua Potable y Alcantarillado de Tulcan</p>
+        <p><strong>Direccion:</strong> Ca. Juan Ramon Arellano y Bolivar, Tulcan - Ecuador<br>
+        <strong>Horario de atencion:</strong> Lunes a Viernes 07h30 - 16h30<br>
+        <strong>Telefono:</strong> +(593) 06 298 0021<br>
+        <strong>Portal web:</strong> <a href="https://epmapatulcan.gob.ec/wp/" target="_blank" style="color: #0b5394;">epmapatulcan.gob.ec</a></p>
+      </div>
+
+      <h4 style="color: #0b5394; margin-top: 25px;">Canales oficiales</h4>
+      <div style="background: #f8f9fa; padding: 12px; border-radius: 5px;">
+        <p style="margin: 5px 0;">Facebook: <a href="https://www.facebook.com/epmapat2023" target="_blank" style="color: #0b5394;">facebook.com/epmapat2023</a></p>
+        <p style="margin: 5px 0;">Instagram: <a href="https://www.instagram.com/epmapat_/" target="_blank" style="color: #0b5394;">@epmapat_</a></p>
+        <p style="margin: 5px 0;">WhatsApp: <a href="https://api.whatsapp.com/send?phone=593963967739" target="_blank" style="color: #0b5394;">+593 963967739</a></p>
+      </div>
+
+      <div style="background: #fff3f3; border: 1px solid #dc3545; border-radius: 5px; padding: 15px; margin: 25px 0;">
+        <h4 style="color: #dc3545; margin-top: 0; text-align: center;">Importante</h4>
+        <p style="margin: 10px 0; text-align: center; font-weight: bold;">Este es un mensaje automatico, por favor no responda a este correo.</p>
+        <p style="margin: 10px 0; text-align: center; font-size: 14px;">Si necesita contactarnos, utilice los canales oficiales mencionados anteriormente.</p>
+        <p style="margin: 10px 0; text-align: center; font-size: 14px;">Este correo fue enviado por: <strong>${this.authService.alias}</strong>.</p>
+      </div>
+
+      <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+        <p style="margin: 0; color: #666;">Gracias por confiar en nuestros servicios</p>
+        <p style="margin: 10px 0 0 0; font-weight: bold; color: #0b5394;">Atentamente,<br>EPMAPA-T</p>
+      </div>
+
+      <div style="text-align: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; font-size: 12px; color: #999;">
+        <p style="margin: 0;">© ${anio} EPMAPA-T. Todos los derechos reservados.</p>
+        <p style="margin: 5px 0 0 0;">Este correo electronico fue generado automaticamente.</p>
+      </div>
+    </div>`;
+  }
+
+  private async resolveFacturaXmlAttachment(): Promise<OutboxAttachment | null> {
+    try {
+      const response: any = await firstValueFrom(this._fecFacturaService.getByIdFactura(this.idfactura));
+      const fecFactura =
+        response?.xmlautorizado ? response :
+        response?.value?.xmlautorizado ? response.value :
+        response?.body?.xmlautorizado ? response.body :
+        response?.body?.value?.xmlautorizado ? response.body.value :
+        null;
+
+      const xml = String(fecFactura?.xmlautorizado || '').trim();
+      if (!xml) {
+        return null;
+      }
+
+      const nroFactura =
+        this.detalleFactura?.nrofactura ||
+        this.factura?.nrofactura ||
+        this.idfactura ||
+        'factura';
+      const blob = new Blob([xml], { type: 'application/xml' });
+      return this.fileToAttachment(blob, `factura_${nroFactura}.xml`);
+    } catch (error) {
+      console.error('No se pudo obtener el XML autorizado de la factura:', error);
+      return null;
+    }
   }
 }
 interface calcInteres {

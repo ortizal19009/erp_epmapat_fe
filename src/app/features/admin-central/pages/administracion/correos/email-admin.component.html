@@ -182,35 +182,37 @@
           <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
             <div>
               <h6 class="m-0 font-weight-bold">Correos emitidos</h6>
-              <small class="text-muted">Consulta estados, errores, reintentos, cancelaciones y detalle de cada mensaje.</small>
+              <small class="text-muted">Este modulo solo controla si el ERP entrego el correo al proveedor. La trazabilidad final del envio la administra Cmaginet.</small>
             </div>
             <div class="d-flex flex-wrap mt-2 mt-md-0 legend-compact">
-              <app-email-status-badge label="PENDING" tone="warning"></app-email-status-badge>
-              <app-email-status-badge label="SENT" tone="success"></app-email-status-badge>
-              <app-email-status-badge label="FAILED" tone="danger"></app-email-status-badge>
-              <app-email-status-badge label="CANCELLED" tone="muted"></app-email-status-badge>
+              <app-email-status-badge label="PENDIENTE ERP" tone="warning"></app-email-status-badge>
+              <app-email-status-badge label="ENVIADO A PROVEEDOR" tone="success"></app-email-status-badge>
+              <app-email-status-badge label="NO ENVIADO" tone="danger"></app-email-status-badge>
+              <app-email-status-badge label="CANCELADO" tone="muted"></app-email-status-badge>
             </div>
           </div>
 
           <div class="row mb-2">
             <div class="col-md-6 col-xl-3 mb-2"><input type="text" class="form-control form-control-sm" [(ngModel)]="emailSearch" placeholder="Destinatario o asunto"></div>
-            <div class="col-md-6 col-xl-2 mb-2"><select class="custom-select custom-select-sm" [(ngModel)]="emailStatusFilter"><option value="ALL">Estado: Todos</option><option *ngFor="let option of stateOptions" [value]="option">{{ option }}</option></select></div>
+            <div class="col-md-6 col-xl-2 mb-2"><select class="custom-select custom-select-sm" [(ngModel)]="emailStatusFilter"><option value="ALL">Estado: Todos</option><option *ngFor="let option of stateOptions" [value]="option">{{ displayEmailState(option) }}</option></select></div>
             <div class="col-md-6 col-xl-2 mb-2"><select class="custom-select custom-select-sm" [(ngModel)]="emailTypeFilter"><option value="ALL">Tipo: Todos</option><option *ngFor="let option of typeOptions" [value]="option">{{ option }}</option></select></div>
             <div class="col-md-6 col-xl-2 mb-2"><select class="custom-select custom-select-sm" [(ngModel)]="emailAccountFilter"><option value="ALL">Cuenta: Todas</option><option *ngFor="let account of accounts" [value]="account.id">{{ account.name }}</option></select></div>
             <div class="col-md-6 col-xl-3 mb-2"><input type="text" class="form-control form-control-sm" [(ngModel)]="emailCorrelationFilter" placeholder="CorrelationId"></div>
             <div class="col-md-6 col-xl-2 mb-2"><input type="date" class="form-control form-control-sm" [(ngModel)]="emailDateFrom"></div>
             <div class="col-md-6 col-xl-2 mb-2"><input type="date" class="form-control form-control-sm" [(ngModel)]="emailDateTo"></div>
+            <div class="col-md-6 col-xl-2 mb-2"><button type="button" class="btn btn-sm btn-info w-100" (click)="applyEmailFilters()"><i class="bi bi-search"></i>&nbsp; Aplicar</button></div>
+            <div class="col-md-6 col-xl-2 mb-2"><button type="button" class="btn btn-sm btn-outline-secondary w-100" (click)="clearEmailFilters()">Limpiar</button></div>
           </div>
 
-          <div class="empty-state text-center py-4" *ngIf="filteredEmails.length === 0">
+          <div class="empty-state text-center py-4" *ngIf="emails.length === 0">
             <i class="bi bi-inbox display-4 text-muted"></i>
             <div class="font-weight-bold mt-2">Sin correos emitidos</div>
             <div class="text-muted small">No se encontraron registros para el rango y filtros seleccionados.</div>
           </div>
 
           <app-emitted-emails-table
-            *ngIf="filteredEmails.length > 0"
-            [rows]="filteredEmails"
+            *ngIf="emails.length > 0"
+            [rows]="emails"
             [accounts]="accounts"
             (viewDetail)="openEmailDetail($event)"
             (retry)="openCompose($event, 'retry')"
@@ -219,6 +221,27 @@
             (viewError)="showError($event)"
             (viewAttachments)="showAttachments($event)">
           </app-emitted-emails-table>
+
+          <div class="d-flex justify-content-between align-items-center mt-3" *ngIf="emailTotalElements > 0">
+            <small class="text-muted">
+              Mostrando {{ ((emailPage - 1) * emailPageSize) + 1 }} -
+              {{ ((emailPage - 1) * emailPageSize) + emails.length }}
+              de {{ emailTotalElements }} correos
+            </small>
+            <div>
+              <button type="button" class="btn btn-sm btn-outline-secondary mr-2"
+                      [disabled]="emailPage <= 1"
+                      (click)="goToEmailPage(emailPage - 1)">
+                Anterior
+              </button>
+              <span class="small text-muted mr-2">Página {{ emailPage }} de {{ emailTotalPages }}</span>
+              <button type="button" class="btn btn-sm btn-outline-secondary"
+                      [disabled]="emailPage >= emailTotalPages"
+                      (click)="goToEmailPage(emailPage + 1)">
+                Siguiente
+              </button>
+            </div>
+          </div>
         </div>
 
         <div class="mt-2 sombra border rounded detalle p-3" *ngIf="activeSection === 'blacklist'">
@@ -248,11 +271,32 @@
 
           <app-email-blacklist-table
             *ngIf="filteredBlacklist.length > 0"
-            [rows]="filteredBlacklist"
+            [rows]="pagedBlacklist"
             (edit)="openBlacklistModal($event)"
             (toggle)="toggleBlacklist($event)"
             (remove)="removeBlacklist($event)">
           </app-email-blacklist-table>
+
+          <div class="d-flex justify-content-between align-items-center mt-3" *ngIf="filteredBlacklist.length > 0">
+            <small class="text-muted">
+              Mostrando {{ (blacklistPage - 1) * blacklistPageSize + 1 }} -
+              {{ ((blacklistPage - 1) * blacklistPageSize) + pagedBlacklist.length }}
+              de {{ filteredBlacklist.length }} registros
+            </small>
+            <div>
+              <button type="button" class="btn btn-sm btn-outline-secondary mr-2"
+                      [disabled]="blacklistPage <= 1"
+                      (click)="goToBlacklistPage(blacklistPage - 1)">
+                Anterior
+              </button>
+              <span class="small text-muted mr-2">Página {{ blacklistPage }} de {{ blacklistTotalPages }}</span>
+              <button type="button" class="btn btn-sm btn-outline-secondary"
+                      [disabled]="blacklistPage >= blacklistTotalPages"
+                      (click)="goToBlacklistPage(blacklistPage + 1)">
+                Siguiente
+              </button>
+            </div>
+          </div>
         </div>
       </ng-container>
     </div>
@@ -362,8 +406,8 @@
 
     <div class="drawer-body detail-stack" *ngIf="detailMode === 'email' && selectedEmail">
       <div class="detail-item"><span>ID</span><strong class="mono">{{ selectedEmail.id }}</strong></div>
-      <div class="detail-item"><span>Estado</span><app-email-status-badge [label]="selectedEmail.state" [tone]="toneForState(selectedEmail.state)"></app-email-status-badge></div>
-      <div class="detail-item"><span>Tipo</span><strong>{{ selectedEmail.type }}</strong></div>
+      <div class="detail-item"><span>Estado</span><app-email-status-badge [label]="displayEmailState(selectedEmail.state)" [tone]="toneForState(selectedEmail.state)"></app-email-status-badge></div>
+      <div class="detail-item"><span>Tipo</span><strong>{{ displayEmailType(selectedEmail.type) }}</strong></div>
       <div class="detail-item"><span>Cuenta usada</span><strong>{{ selectedAccount?.name }} ({{ selectedEmail.accountCode }})</strong></div>
       <div class="detail-item"><span>FromAddress</span><strong>{{ selectedEmail.fromAddress }}</strong></div>
       <div class="detail-item"><span>To</span><strong>{{ selectedEmail.to.join(', ') }}</strong></div>
@@ -373,7 +417,7 @@
       <div class="detail-item"><span>Intentos</span><strong>{{ selectedEmail.attempts }}</strong></div>
       <div class="detail-item"><span>LastError</span><strong>{{ selectedEmail.lastError || 'Sin error' }}</strong></div>
       <div class="detail-item"><span>CreatedAt</span><strong>{{ selectedEmail.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</strong></div>
-      <div class="detail-item"><span>SentAt</span><strong>{{ selectedEmail.sentAt ? (selectedEmail.sentAt | date:'dd/MM/yyyy HH:mm:ss') : 'Pendiente' }}</strong></div>
+      <div class="detail-item"><span>Entregado al proveedor</span><strong>{{ selectedEmail.sentAt ? (selectedEmail.sentAt | date:'dd/MM/yyyy HH:mm:ss') : 'Pendiente ERP' }}</strong></div>
       <div class="border rounded p-2 bg-white"><div class="font-weight-bold mb-2">Contenido</div><div [innerHTML]="selectedEmail.body"></div></div>
       <div class="border rounded p-2 bg-white"><div class="font-weight-bold mb-2">Adjuntos</div><div *ngIf="!selectedEmail.attachments.length" class="text-muted">Sin adjuntos</div><div *ngFor="let attachment of selectedEmail.attachments">{{ attachment.name }} - {{ attachment.sizeLabel }}</div></div>
     </div>
@@ -410,12 +454,12 @@
     </div>
 
     <form class="drawer-body" [formGroup]="blacklistForm">
-      <div class="row">
-        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Tipo de bloqueo</label><select class="custom-select custom-select-sm" formControlName="type"><option *ngFor="let option of blacklistTypeOptions" [value]="option">{{ option }}</option></select></div></div>
-        <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Valor</label><input type="text" class="form-control form-control-sm" formControlName="value" placeholder="gmail.com o usuario@dominio.com"></div></div>
-        <div class="col-md-12"><div class="form-group mb-2"><label class="small font-weight-bold">Motivo</label><textarea rows="4" class="form-control form-control-sm" formControlName="reason"></textarea></div></div>
-        <div class="col-md-12"><div class="form-group mb-2"><label class="small font-weight-bold d-block">Bloqueo activo</label><input type="checkbox" formControlName="active"></div></div>
-      </div>
+        <div class="row">
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Tipo de bloqueo</label><select class="custom-select custom-select-sm" formControlName="type"><option *ngFor="let option of blacklistTypeOptions" [value]="option">{{ option }}</option></select></div></div>
+          <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold">Valor</label><input type="text" class="form-control form-control-sm" formControlName="value" placeholder="gmail.com o usuario@dominio.com"><small class="text-muted">Obligatorio. Ingresa el dominio, host o correo exacto que deseas bloquear.</small></div></div>
+          <div class="col-md-12"><div class="form-group mb-2"><label class="small font-weight-bold">Motivo</label><textarea rows="4" class="form-control form-control-sm" formControlName="reason" placeholder="Opcional"></textarea><small class="text-muted">Opcional. Sirve para dejar la razon operativa del bloqueo.</small></div></div>
+          <div class="col-md-12"><div class="form-group mb-2"><label class="small font-weight-bold d-block">Bloqueo activo</label><input type="checkbox" formControlName="active"></div></div>
+        </div>
     </form>
 
     <div class="card-footer text-center">

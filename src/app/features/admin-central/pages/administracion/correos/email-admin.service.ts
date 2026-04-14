@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
@@ -9,7 +9,9 @@ import {
   EmailAccountFormValue,
   EmailBlacklistEntry,
   EmailComposeFormValue,
+  EmailDashboardSummary,
   EmailLog,
+  EmailLogPage,
 } from './email-admin.models';
 
 @Injectable({
@@ -22,6 +24,7 @@ export class EmailAdminService {
     accountActivate: (id: number) => `/api/v1/email-accounts/${id}/activate`,
     accountDeactivate: (id: number) => `/api/v1/email-accounts/${id}/deactivate`,
     emails: '/api/v1/emails',
+    emailSummary: '/api/v1/emails/summary',
     emailDetail: (id: string) => `/api/v1/emails/${id}`,
     retryEmail: (id: string) => `/api/v1/emails/${id}/retry`,
     cancelEmail: (id: string) => `/api/v1/emails/${id}/cancel`,
@@ -46,9 +49,54 @@ export class EmailAdminService {
     );
   }
 
-  getEmails(): Observable<EmailLog[]> {
-    return this.http.get<unknown>(this.url(`${this.endpoints.emails}?size=200`)).pipe(
-      map((response) => this.extractCollection(response).map((item) => this.mapEmail(item)))
+  getAccountById(accountId: number): Observable<EmailAccount> {
+    return this.http.get<unknown>(this.url(this.endpoints.accountDetail(accountId))).pipe(
+      map((response) => this.mapAccount(response))
+    );
+  }
+
+  getEmails(filters: {
+    page: number;
+    size: number;
+    status?: string;
+    type?: string;
+    accountId?: string;
+    correlationId?: string;
+    search?: string;
+    dateFrom?: string;
+    dateTo?: string;
+  }): Observable<EmailLogPage> {
+    let params = new HttpParams()
+      .set('page', String(filters.page))
+      .set('size', String(filters.size));
+
+    if (filters.status && filters.status !== 'ALL') params = params.set('status', filters.status);
+    if (filters.type && filters.type !== 'ALL') params = params.set('type', filters.type);
+    if (filters.accountId && filters.accountId !== 'ALL') params = params.set('accountId', filters.accountId);
+    if (filters.correlationId) params = params.set('correlationId', this.toText(filters.correlationId));
+    if (filters.search) params = params.set('search', this.toText(filters.search));
+    if (filters.dateFrom) params = params.set('dateFrom', filters.dateFrom);
+    if (filters.dateTo) params = params.set('dateTo', filters.dateTo);
+
+    return this.http.get<unknown>(this.url(this.endpoints.emails), { params }).pipe(
+      map((response: any) => ({
+        rows: this.extractCollection(response).map((item) => this.mapEmail(item)),
+        totalElements: Number(response?.totalElements ?? 0),
+        totalPages: Number(response?.totalPages ?? 0),
+        page: Number(response?.number ?? filters.page),
+        size: Number(response?.size ?? filters.size),
+      }))
+    );
+  }
+
+  getEmailSummary(): Observable<EmailDashboardSummary> {
+    return this.http.get<any>(this.url(this.endpoints.emailSummary)).pipe(
+      map((response) => ({
+        activeAccounts: Number(response?.activeAccounts ?? 0),
+        pendingEmails: Number(response?.pendingEmails ?? 0),
+        failedEmails: Number(response?.failedEmails ?? 0),
+        blockedDomains: Number(response?.blockedDomains ?? 0),
+      }))
     );
   }
 
@@ -126,7 +174,7 @@ export class EmailAdminService {
     const payload = {
       type: formValue.type,
       value: formValue.value.trim(),
-      reason: formValue.reason.trim(),
+      reason: this.toText(formValue.reason),
       active: !!formValue.active,
     };
     const request$ = editingId

@@ -12,13 +12,33 @@
         </small>
       </div>
 
-      <div class="d-flex align-items-center" >
-        <a class="btn btn-outline-primary btn-sm mr-2" *ngIf="idusuario===1" routerLink="/sri-txt">
-          <i class="bi bi-upload"></i>&nbsp; Upload TXT
-        </a>
+      <div class="d-flex align-items-center flex-wrap" >
+        <div class="dropdown mr-2">
+          <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" id="accionesFacturasDropdown"
+                  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="bi bi-list"></i>&nbsp; Opciones
+          </button>
+          <div class="dropdown-menu dropdown-menu-right shadow" aria-labelledby="accionesFacturasDropdown">
+            <button class="dropdown-item" type="button" *ngIf="idusuario===1" routerLink="/sri-txt">
+              <i class="bi bi-upload text-primary mr-2"></i> Upload TXT
+            </button>
+            <button class="dropdown-item" type="button" (click)="toggleExportFilters()">
+              <i class="bi bi-funnel text-info mr-2"></i> Exportar por filtros
+            </button>
+            <button class="dropdown-item" type="button" *ngIf="idusuario===1" (click)="toggleReenvioPanel()">
+              <i class="bi bi-envelope-paper text-success mr-2"></i> Reenviar facturas
+            </button>
+            <button class="dropdown-item" type="button" (click)="showFacturasExportadas()">
+              <i class="bi bi-table text-secondary mr-2"></i> Facturas exportadas
+            </button>
+          </div>
+        </div>
 
-        <button class="btn btn-outline-secondary btn-sm" (click)="regresar()">
-          <i class="bi bi-arrow-left"></i>&nbsp; Volver
+        <button class="btn rounded-circle d-flex align-items-center justify-content-center p-0"
+                type="button"
+                (click)="regresar()"
+                style="width: 34px; height: 34px; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.55);">
+          <i class="bi bi-arrow-left text-white"></i>
         </button>
       </div>
 
@@ -33,7 +53,7 @@
     <div class="row justify-content-center">
       <div class="col-lg-8 col-md-10">
 
-        <div class="card detalle sombra mt-3">
+        <div class="card detalle sombra mt-3" *ngIf="showExportFilters">
           <div class="card-header cabecera">
             <div class="d-flex justify-content-between  align-items-center">
               <span class="font-weight-bold">Filtros de exportación</span>
@@ -140,8 +160,93 @@
       </div>
     </div>
 
+    <div class="row justify-content-center" *ngIf="showReenvioPanel">
+      <div class="col-lg-10">
+        <div class="card sombra mt-3 border-success">
+          <div class="card-header bg-white">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+              <span class="font-weight-bold text-success">Reenvio de facturas autorizadas</span>
+              <span class="badge badge-success" *ngIf="facturasReenvio.length">
+                Total: {{ facturasReenvio.length }}
+              </span>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <form [formGroup]="formReenvio" novalidate>
+              <div class="form-row align-items-end">
+                <div class="form-group col-md-4">
+                  <label class="small font-weight-bold">Desde fecha emision</label>
+                  <input type="date" class="form-control form-control-sm text-center" formControlName="desdeFecha">
+                </div>
+
+                <div class="form-group col-md-4">
+                  <label class="small font-weight-bold">Hasta fecha emision</label>
+                  <input type="date" class="form-control form-control-sm text-center" formControlName="hastaFecha">
+                </div>
+
+                <div class="form-group col-md-4 d-flex flex-wrap">
+                  <button type="button" class="btn btn-primary btn-sm mr-2 mb-2" (click)="buscarFacturasReenvio()">
+                    <i class="bi bi-search"></i>&nbsp; Consultar
+                  </button>
+                  <button type="button" class="btn btn-success btn-sm mr-2 mb-2"
+                          [disabled]="!facturasReenvio.length || reenviandoFacturas"
+                          (click)="reenviarFacturas()">
+                    <i class="bi bi-send"></i>&nbsp; Reenviar
+                  </button>
+                  <button type="button" class="btn btn-outline-secondary btn-sm mb-2" (click)="toggleReenvioPanel()">
+                    Cerrar
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            <div *ngIf="reenviandoFacturas" class="alert alert-light text-center py-2 mb-3">
+              <div class="progress" style="height: 14px;">
+                <div class="progress-bar bg-success" role="progressbar" [style.width.%]="progresoReenvio">
+                  {{ progresoReenvio }}%
+                </div>
+              </div>
+              <small class="text-muted d-block mt-1">Procesando reenvio de facturas</small>
+            </div>
+
+            <div class="table-responsive" *ngIf="facturasReenvio.length" style="max-height: 280px; overflow:auto;">
+              <table class="table table-sm table-bordered table-hover mb-0">
+                <thead class="thead-light" style="position: sticky; top: 0; z-index: 1;">
+                  <tr class="text-center">
+                    <th>#</th>
+                    <th>Factura</th>
+                    <th>Fecha Emision</th>
+                    <th>Cliente</th>
+                    <th>Correo</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let facturaReenvio of facturasReenvio; let i = index">
+                    <td class="text-center">{{ i + 1 }}</td>
+                    <td class="text-center">
+                      {{ facturaReenvio.establecimiento }}-{{ facturaReenvio.puntoemision }}-{{ facturaReenvio.secuencial }}
+                    </td>
+                    <td class="text-center">{{ facturaReenvio.fechaemision | date:'yyyy-MM-dd' }}</td>
+                    <td>{{ facturaReenvio.razonsocialcomprador }}</td>
+                    <td>{{ facturaReenvio.emailcomprador }}</td>
+                    <td class="text-center">
+                      <span class="badge" [ngClass]="facturaReenvio.estado === 'A' ? 'badge-success' : 'badge-warning'">
+                        {{ facturaReenvio.estado }}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ===================== TABLA ===================== -->
-    <div class="row mt-4">
+    <div class="row mt-4" *ngIf="selectedView === 'facturas' || selectedView === null">
       <div class="col-12">
         <div class="card sombra">
 

@@ -1,10 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
-import { rejects } from 'assert';
-import { truncate } from 'fs/promises';
-import { resolve } from 'path';
-import { interval, lastValueFrom, take } from 'rxjs';
+import { firstValueFrom, interval, lastValueFrom, take } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Abonados } from 'src/app/modelos/abonados';
@@ -18,6 +15,7 @@ import { FecFacturaDetallesService } from 'src/app/servicios/fec-factura-detalle
 import { FecFacturaPagosService } from 'src/app/servicios/fec-factura-pagos.service';
 import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
+import { OutboxAttachment, OutboxEmailService } from 'src/app/servicios/outbox-email.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import Swal from 'sweetalert2';
 
@@ -29,6 +27,7 @@ import Swal from 'sweetalert2';
 export class FecfacturaComponent implements OnInit {
   empresa: any;
   formExportar: FormGroup;
+  formReenvio: FormGroup;
   swbotones: boolean = false;
   swcalculando: boolean = false;
   txtcalculando = 'Calculando';
@@ -69,8 +68,13 @@ export class FecfacturaComponent implements OnInit {
     { nombre: 'Datos incompletos', letra: 'E' },
   ];
   idusuario: number;
-
   filter: string;
+  showExportFilters = false;
+  showReenvioPanel = false;
+  selectedView: 'facturas' | 'exportar' | 'reenviar' | null = 'facturas';
+  facturasReenvio: Fecfactura[] = [];
+  reenviandoFacturas = false;
+  progresoReenvio = 0;
   constructor(
     private router: Router,
     private fb: FormBuilder,
@@ -85,7 +89,8 @@ export class FecfacturaComponent implements OnInit {
     private fec_facPagosService: FecFacturaPagosService,
     private aboService: AbonadosService,
     private s_usuario: UsuarioService,
-    private s_lecturas: LecturasService
+    private s_lecturas: LecturasService,
+    private outboxEmailService: OutboxEmailService
   ) {}
 
   ngOnInit(): void {
@@ -105,6 +110,10 @@ export class FecfacturaComponent implements OnInit {
       desdeFecha: obtenerFechaActualString(fechaActual),
       hastaFecha: obtenerFechaActualString(fechaActual),
       ambiente: '',
+    });
+    this.formReenvio = this.fb.group({
+      desdeFecha: obtenerFechaActualString(fechaActual),
+      hastaFecha: obtenerFechaActualString(fechaActual),
     });
     // this.getFecFactura();
     this.getByEstado(this.v_estado, this.limit);
@@ -153,6 +162,25 @@ export class FecfacturaComponent implements OnInit {
   regresar() {
     this.router.navigate(['/inicio']);
   }
+
+  toggleExportFilters() {
+    this.setView(this.selectedView === 'exportar' ? null : 'exportar');
+  }
+
+  toggleReenvioPanel() {
+    this.setView(this.selectedView === 'reenviar' ? null : 'reenviar');
+  }
+
+  showFacturasExportadas() {
+    this.setView('facturas');
+  }
+
+  private setView(view: 'facturas' | 'exportar' | 'reenviar' | null) {
+    this.selectedView = view;
+    this.showExportFilters = view === 'exportar';
+    this.showReenvioPanel = view === 'reenviar';
+  }
+
   buscar() {
     this.conter = 0;
     this.datosDefinirAsync();
@@ -198,6 +226,136 @@ export class FecfacturaComponent implements OnInit {
       });
     }
   }
+
+  buscarFacturasReenvio() {
+    const desde = this.formReenvio.value.desdeFecha;
+    const hasta = this.formReenvio.value.hastaFecha;
+
+    if (!desde || !hasta) {
+      this.swal('warning', 'Seleccione el rango de fechas para la busqueda');
+      return;
+    }
+
+    if (desde > hasta) {
+      this.swal('warning', 'La fecha desde no puede ser mayor que la fecha hasta');
+      return;
+    }
+
+    this.fecfacService.getByFechaEmisionReenvio(desde, hasta).subscribe({
+      next: (datos: any) => {
+        this.facturasReenvio = (datos || []).filter((item: Fecfactura) =>
+          item?.estado === 'A' || item?.estado === 'O'
+        );
+
+        if (!this.facturasReenvio.length) {
+          this.swal('info', 'No se encontraron facturas con estado A u O en ese rango');
+          return;
+        }
+
+        this.swal(
+          'success',
+          `Se encontraron ${this.facturasReenvio.length} facturas listas para reenvio`
+        );
+      },
+      error: (e) => {
+        console.error(e);
+        this.swal('error', 'No se pudo consultar las facturas para reenvio');
+      },
+    });
+  }
+
+  async reenviarFacturas() {
+    if (!this.facturasReenvio.length) {
+      this.swal('warning', 'Primero consulte las facturas a reenviar');
+      return;
+    }
+
+    this.reenviandoFacturas = true;
+    this.progresoReenvio = 0;
+
+    let enviados = 0;
+    let actualizados = 0;
+    let omitidos = 0;
+
+    for (let i = 0; i < this.facturasReenvio.length; i++) {
+      const factura = this.facturasReenvio[i];
+
+      try {
+        const enviado = await this.reenviarFacturaIndividual(factura);
+        if (enviado) {
+          enviados++;
+          if (factura.estado === 'O') {
+            actualizados++;
+            factura.estado = 'A';
+          }
+        } else {
+          omitidos++;
+        }
+      } catch (error) {
+        omitidos++;
+        console.error(`Error reenviando factura ${factura.idfactura}:`, error);
+      }
+
+      this.progresoReenvio = Math.round(((i + 1) * 100) / this.facturasReenvio.length);
+    }
+
+    this.reenviandoFacturas = false;
+    this.changeDato();
+    this.swal(
+      enviados ? 'success' : 'warning',
+      `Reenvio finalizado. Enviadas: ${enviados}, actualizadas O->A: ${actualizados}, omitidas: ${omitidos}`
+    );
+  }
+
+  private async reenviarFacturaIndividual(factura: Fecfactura): Promise<boolean> {
+    const destinatarios = this.parseRecipients(factura?.emailcomprador);
+    if (!destinatarios.length) {
+      return false;
+    }
+
+    const pdfBlob = await this.facService.generarPDF_FacElectronica(factura.idfactura);
+    const pdfAdjunto = await this.fileToAttachment(
+      pdfBlob,
+      `factura_${this.getNumeroFacturaDisplay(factura)}.pdf`
+    );
+
+    const adjuntos: OutboxAttachment[] = [pdfAdjunto];
+    if (factura?.xmlautorizado) {
+      adjuntos.push(
+        await this.fileToAttachment(
+          new Blob([String(factura.xmlautorizado || '')], { type: 'application/xml' }),
+          `factura_${this.getNumeroFacturaDisplay(factura)}.xml`
+        )
+      );
+    }
+
+    const asunto = `Factura EPMAPA-T ${this.getNumeroFacturaDisplay(factura)}`;
+    const html = this.buildFacturaEmailHtml(factura);
+
+    await firstValueFrom(
+      this.outboxEmailService.sendDocumentEmail({
+        to: destinatarios,
+        subject: asunto,
+        html,
+        text: this.stripHtml(html),
+        correlationId: `FACTURA-REENVIO-${factura.idfactura}-${Date.now()}`,
+        attachments: adjuntos,
+      })
+    );
+
+    if (factura.estado === 'O') {
+      await firstValueFrom(
+        this.fecfacService.updateSriFields(factura.idfactura, {
+          claveacceso: String(factura.claveacceso || ''),
+          xmlautorizado: String(factura.xmlautorizado || ''),
+          estado: 'A',
+        })
+      );
+    }
+
+    return true;
+  }
+
   exportar() {
     /* this._factu
     ras.forEach((item: any, index: number) => {
@@ -714,6 +872,90 @@ export class FecfacturaComponent implements OnInit {
       showConfirmButton: false,
       timer: 3000,
     });
+  }
+
+  private parseRecipients(value: any): string[] {
+    return String(value || '')
+      .split(/[;,]/)
+      .map((item) => item.trim())
+      .filter((item) => !!item);
+  }
+
+  private async fileToAttachment(file: Blob, fileName: string): Promise<OutboxAttachment> {
+    const base64 = await this.blobToBase64(file);
+    return {
+      name: fileName,
+      contentType: file.type || 'application/octet-stream',
+      base64,
+    };
+  }
+
+  private blobToBase64(blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = String(reader.result || '');
+        const commaIndex = result.indexOf(',');
+        resolve(commaIndex >= 0 ? result.substring(commaIndex + 1) : result);
+      };
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  private stripHtml(value: string): string {
+    return String(value || '')
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  private getNumeroFacturaDisplay(factura: any): string {
+    return `${factura?.establecimiento || ''}-${factura?.puntoemision || ''}-${factura?.secuencial || factura?.idfactura || ''}`;
+  }
+
+  private buildFacturaEmailHtml(factura: Fecfactura): string {
+    const cliente = factura?.razonsocialcomprador || 'cliente';
+    const nroFactura = this.getNumeroFacturaDisplay(factura);
+    const cuenta = factura?.referencia || 'S/N';
+    const anio = new Date().getFullYear();
+
+    return `<div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px; background: #f9f9f9;">
+      <div style="text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #0b5394;">
+        <img src="https://epmapatulcan.gob.ec/wp/wp-content/uploads/2021/05/LOGO-HORIZONTAL.png" alt="EPMAPA-T" style="max-width: 200px;" />
+      </div>
+      <h2 style="color: #0b5394; text-align: center; margin-bottom: 10px;">Factura Electronica Autorizada</h2>
+      <p style="text-align: center; color: #666; font-size: 14px; margin-bottom: 25px;">Comprobante electronico generado automaticamente</p>
+      <div style="background: #e8f4ff; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+        <p style="margin: 0;">Estimado/a <strong>${cliente}</strong>,</p>
+      </div>
+      <p>Le informamos que su comprobante electronico ha sido autorizado por el Servicio de Rentas Internas (SRI) y se encuentra disponible para su descarga.</p>
+      <div style="background: #ffffff; border: 1px solid #d8e4f0; border-radius: 5px; padding: 15px; margin: 20px 0;">
+        <h4 style="color: #0b5394; margin: 0 0 10px 0;">Datos del comprobante</h4>
+        <p style="margin: 6px 0;"><strong>Factura:</strong> ${nroFactura}</p>
+        <p style="margin: 6px 0;"><strong>Cuenta:</strong> ${cuenta}</p>
+        <p style="margin: 6px 0;"><strong>Cliente:</strong> ${cliente}</p>
+      </div>
+      <div style="background: #f0f8f0; border: 1px solid #4caf50; border-radius: 5px; padding: 12px; margin: 20px 0;">
+        <p style="margin: 0; text-align: center;"><strong>Estado SRI:</strong> <span style="color: #2e7d32; font-weight: bold;">AUTORIZADO</span></p>
+      </div>
+      <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 5px; padding: 15px; margin: 20px 0;">
+        <h4 style="color: #856404; margin-top: 0;">Documentos adjuntos</h4>
+        <p style="margin: 5px 0;">• <strong>Factura en PDF</strong> - Documento legible</p>
+        <p style="margin: 5px 0;">• <strong>Archivo XML</strong> - Comprobante electronico oficial</p>
+      </div>
+      <div style="background: #fff3f3; border: 1px solid #dc3545; border-radius: 5px; padding: 15px; margin: 25px 0;">
+        <h4 style="color: #dc3545; margin-top: 0; text-align: center;">IMPORTANTE</h4>
+        <p style="margin: 10px 0; text-align: center; font-weight: bold;">Este es un mensaje automatico, por favor no responda a este correo.</p>
+      </div>
+      <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+        <p style="margin: 0; color: #666;">Gracias por confiar en nuestros servicios</p>
+        <p style="margin: 10px 0 0 0; font-weight: bold; color: #0b5394;">Atentamente,<br>EPMAPA-T</p>
+      </div>
+      <div style="text-align: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; font-size: 12px; color: #999;">
+        <p style="margin: 0;">© ${anio} EPMAPA-T. Todos los derechos reservados.</p>
+      </div>
+    </div>`;
   }
 }
 

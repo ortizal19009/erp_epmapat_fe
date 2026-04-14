@@ -61,6 +61,21 @@ export interface EmailLog {
   attachments: EmailAttachment[];
 }
 
+export interface EmailLogPage {
+  rows: EmailLog[];
+  totalElements: number;
+  totalPages: number;
+  page: number;
+  size: number;
+}
+
+export interface EmailDashboardSummary {
+  activeAccounts: number;
+  pendingEmails: number;
+  failedEmails: number;
+  blockedDomains: number;
+}
+
 export interface EmailBlacklistEntry {
   id: number;
   type: BlacklistEntryType;

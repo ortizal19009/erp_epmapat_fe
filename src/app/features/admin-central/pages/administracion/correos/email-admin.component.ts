@@ -14,6 +14,7 @@ import {
   EMAIL_TYPE_OPTIONS,
   EmailAccount,
   EmailBlacklistEntry,
+  EmailDashboardSummary,
   EmailLog,
 } from './email-admin.models';
 import { EmailSummaryCardComponent } from './components/email-summary-card.component';
@@ -56,6 +57,12 @@ export class EmailAdminComponent implements OnInit, OnDestroy {
   accounts: EmailAccount[] = [];
   emails: EmailLog[] = [];
   blacklist: EmailBlacklistEntry[] = [];
+  emailSummary: EmailDashboardSummary = {
+    activeAccounts: 0,
+    pendingEmails: 0,
+    failedEmails: 0,
+    blockedDomains: 0,
+  };
 
   accountSearch = '';
   accountTransportFilter = 'ALL';
@@ -68,10 +75,16 @@ export class EmailAdminComponent implements OnInit, OnDestroy {
   emailCorrelationFilter = '';
   emailDateFrom = '';
   emailDateTo = '';
+  emailPage = 1;
+  readonly emailPageSize = 10;
+  emailTotalPages = 1;
+  emailTotalElements = 0;
 
   blacklistSearch = '';
   blacklistTypeFilter = 'ALL';
   blacklistStatusFilter = 'ALL';
+  blacklistPage = 1;
+  readonly blacklistPageSize = 5;
 
   testAccountId: number | null = null;
   testEmailRecipient = '';
@@ -134,7 +147,7 @@ export class EmailAdminComponent implements OnInit, OnDestroy {
   readonly blacklistForm = this.fb.group({
     type: ['DOMAIN', Validators.required],
     value: ['', Validators.required],
-    reason: ['', [Validators.required, Validators.maxLength(180)]],
+    reason: ['', [Validators.maxLength(180)]],
     active: [true],
   });
 
@@ -155,28 +168,28 @@ export class EmailAdminComponent implements OnInit, OnDestroy {
     return [
       {
         label: 'Cuentas activas',
-        value: String(this.accounts.filter((item) => item.active).length),
+        value: String(this.emailSummary.activeAccounts),
         help: 'Canales habilitados para envio inmediato',
         icon: 'bi bi-send-check',
         tone: 'success' as const,
       },
       {
-        label: 'Correos pendientes',
-        value: String(this.emails.filter((item) => item.state === 'PENDING').length),
-        help: 'Mensajes en cola o listos para reproceso',
+        label: 'Pendientes ERP',
+        value: String(this.emailSummary.pendingEmails),
+        help: 'Correos aun no entregados por el ERP al proveedor',
         icon: 'bi bi-hourglass-split',
         tone: 'warning' as const,
       },
       {
-        label: 'Correos fallidos',
-        value: String(this.emails.filter((item) => item.state === 'FAILED').length),
-        help: 'Eventos que requieren revision operativa',
+        label: 'No enviados',
+        value: String(this.emailSummary.failedEmails),
+        help: 'Intentos que el ERP no pudo entregar al proveedor',
         icon: 'bi bi-exclamation-octagon',
         tone: 'danger' as const,
       },
       {
         label: 'Dominios bloqueados',
-        value: String(this.blacklist.filter((item) => item.active).length),
+        value: String(this.emailSummary.blockedDomains),
         help: 'Entradas activas que impiden el envio',
         icon: 'bi bi-shield-slash',
         tone: 'info' as const,
@@ -197,21 +210,6 @@ export class EmailAdminComponent implements OnInit, OnDestroy {
     });
   }
 
-  get filteredEmails(): EmailLog[] {
-    return this.emails.filter((item) => {
-      const quickSearch = `${item.subject} ${item.to.join(',')} ${item.fromAddress}`.toLowerCase();
-      const createdDate = item.createdAt.slice(0, 10);
-      const matchesSearch = !this.emailSearch || quickSearch.includes(this.emailSearch.toLowerCase());
-      const matchesState = this.emailStatusFilter === 'ALL' || item.state === this.emailStatusFilter;
-      const matchesType = this.emailTypeFilter === 'ALL' || item.type === this.emailTypeFilter;
-      const matchesAccount = this.emailAccountFilter === 'ALL' || String(item.accountId) === String(this.emailAccountFilter);
-      const matchesCorrelation = !this.emailCorrelationFilter || item.correlationId.toLowerCase().includes(this.emailCorrelationFilter.toLowerCase());
-      const matchesFrom = !this.emailDateFrom || createdDate >= this.emailDateFrom;
-      const matchesTo = !this.emailDateTo || createdDate <= this.emailDateTo;
-      return matchesSearch && matchesState && matchesType && matchesAccount && matchesCorrelation && matchesFrom && matchesTo;
-    });
-  }
-
   get filteredBlacklist(): EmailBlacklistEntry[] {
     return this.blacklist.filter((item) => {
       const search = `${item.value} ${item.reason}`.toLowerCase();
@@ -225,21 +223,32 @@ export class EmailAdminComponent implements OnInit, OnDestroy {
     });
   }
 
+  get blacklistTotalPages(): number {
+    return Math.max(1, Math.ceil(this.filteredBlacklist.length / this.blacklistPageSize));
+  }
+
+  get pagedBlacklist(): EmailBlacklistEntry[] {
+    const start = (this.blacklistPage - 1) * this.blacklistPageSize;
+    return this.filteredBlacklist.slice(start, start + this.blacklistPageSize);
+  }
+
   loadAll(): void {
     this.loading = true;
     this.errorMessage = '';
     forkJoin({
       accounts: this.emailAdminService.getAccounts(),
-      emails: this.emailAdminService.getEmails(),
+      summary: this.emailAdminService.getEmailSummary(),
       blacklist: this.emailAdminService.getBlacklist(),
     }).subscribe({
-      next: ({ accounts, emails, blacklist }) => {
+      next: ({ accounts, summary, blacklist }) => {
         this.accounts = accounts;
-        this.emails = emails;
+        this.emailSummary = summary;
         this.blacklist = blacklist;
+        this.ensureBlacklistPageInRange();
         if (this.testAccountId && !this.accounts.some((item) => item.id === this.testAccountId)) {
           this.testAccountId = null;
         }
+        this.loadEmailPage();
         this.loading = false;
       },
       error: () => {
@@ -280,32 +289,39 @@ export class EmailAdminComponent implements OnInit, OnDestroy {
   }
 
   openEditAccount(account: EmailAccount): void {
-    this.selectedAccount = account;
-    this.accountForm.reset({
-      code: account.code,
-      name: account.name,
-      provider: account.provider,
-      fromAddress: account.fromAddress,
-      fromName: account.fromName,
-      replyTo: account.replyTo,
-      transportType: account.transportType,
-      host: account.host || '',
-      port: account.port || 587,
-      protocol: account.protocol || 'smtp',
-      securityType: account.securityType || 'STARTTLS',
-      authRequired: !!account.authRequired,
-      username: account.username || '',
-      password: '',
-      apiUrl: account.apiUrl || '',
-      apiAuthHeader: account.apiAuthHeader || 'Authorization',
-      apiAuthScheme: account.apiAuthScheme || 'Bearer',
-      apiKey: '',
-      active: account.active,
-      defaultAccount: account.defaultAccount,
-      defaultForType: account.defaultForType,
+    this.emailAdminService.getAccountById(account.id).subscribe({
+      next: (detail) => {
+        this.selectedAccount = detail;
+        this.accountForm.reset({
+          code: detail.code,
+          name: detail.name,
+          provider: detail.provider,
+          fromAddress: detail.fromAddress,
+          fromName: detail.fromName,
+          replyTo: detail.replyTo,
+          transportType: detail.transportType,
+          host: detail.host || '',
+          port: detail.port || 587,
+          protocol: detail.protocol || 'smtp',
+          securityType: detail.securityType || 'STARTTLS',
+          authRequired: !!detail.authRequired,
+          username: detail.username || '',
+          password: detail.password || '',
+          apiUrl: detail.apiUrl || '',
+          apiAuthHeader: detail.apiAuthHeader || 'Authorization',
+          apiAuthScheme: detail.apiAuthScheme || 'Bearer',
+          apiKey: detail.apiKey || '',
+          active: detail.active,
+          defaultAccount: detail.defaultAccount,
+          defaultForType: detail.defaultForType,
+        });
+        this.applyTransportValidators();
+        this.accountDrawerOpen = true;
+      },
+      error: (error: any) => {
+        this.handleActionError(error, 'No fue posible cargar la cuenta para edicion.');
+      },
     });
-    this.applyTransportValidators();
-    this.accountDrawerOpen = true;
   }
 
   submitAccount(): void {
@@ -425,14 +441,45 @@ export class EmailAdminComponent implements OnInit, OnDestroy {
   submitBlacklist(): void {
     if (this.blacklistForm.invalid) {
       this.blacklistForm.markAllAsTouched();
+      this.showToast(this.invalidBlacklistFormMessage(), 'warning');
       return;
     }
     const blacklistValue = { ...this.blacklistForm.getRawValue() } as any;
-    this.emailAdminService.saveBlacklist(blacklistValue, this.selectedBlacklist?.id).subscribe(() => {
-      this.blacklistModalOpen = false;
-      this.loadAll();
-      this.showToast(this.selectedBlacklist ? 'Bloqueo actualizado.' : 'Registro agregado a la lista negra.', 'success');
+    this.emailAdminService.saveBlacklist(blacklistValue, this.selectedBlacklist?.id).subscribe({
+      next: () => {
+        this.blacklistModalOpen = false;
+        this.loadAll();
+        this.showToast(this.selectedBlacklist ? 'Bloqueo actualizado.' : 'Registro agregado a la lista negra.', 'success');
+      },
+      error: (error: any) => {
+        this.handleActionError(error, 'No fue posible guardar el registro en la lista negra.');
+      },
     });
+  }
+
+  applyEmailFilters(): void {
+    this.emailPage = 1;
+    this.loadEmailPage();
+  }
+
+  clearEmailFilters(): void {
+    this.emailSearch = '';
+    this.emailStatusFilter = 'ALL';
+    this.emailTypeFilter = 'ALL';
+    this.emailAccountFilter = 'ALL';
+    this.emailCorrelationFilter = '';
+    this.emailDateFrom = '';
+    this.emailDateTo = '';
+    this.emailPage = 1;
+    this.loadEmailPage();
+  }
+
+  goToEmailPage(page: number): void {
+    if (page < 1 || page > this.emailTotalPages) {
+      return;
+    }
+    this.emailPage = page;
+    this.loadEmailPage();
   }
 
   toggleBlacklist(entry: EmailBlacklistEntry): void {
@@ -627,6 +674,29 @@ export class EmailAdminComponent implements OnInit, OnDestroy {
       : 'El formulario tiene datos invalidos. Revisa los campos obligatorios.';
   }
 
+  goToBlacklistPage(page: number): void {
+    if (page < 1 || page > this.blacklistTotalPages) {
+      return;
+    }
+    this.blacklistPage = page;
+  }
+
+  private invalidBlacklistFormMessage(): string {
+    const labels: Record<string, string> = {
+      type: 'Tipo de bloqueo',
+      value: 'Valor',
+      reason: 'Motivo',
+    };
+
+    const invalid = Object.keys(this.blacklistForm.controls)
+      .filter((key) => this.blacklistForm.get(key)?.invalid)
+      .map((key) => labels[key] || key);
+
+    return invalid.length
+      ? 'Revisa estos campos de la lista negra: ' + invalid.join(', ') + '.'
+      : 'El formulario de lista negra tiene datos invalidos.';
+  }
+
   private extractErrorMessage(error: any, fallback: string): string {
     if (typeof error?.error === 'string' && error.error.trim()) {
       return error.error.trim();
@@ -655,5 +725,66 @@ export class EmailAdminComponent implements OnInit, OnDestroy {
         this.toastMessage = '';
       }
     }, 3400);
+  }
+
+  private ensureBlacklistPageInRange(): void {
+    if (this.blacklistPage > this.blacklistTotalPages) {
+      this.blacklistPage = this.blacklistTotalPages;
+    }
+    if (this.blacklistPage < 1) {
+      this.blacklistPage = 1;
+    }
+  }
+
+  displayEmailState(state: string): string {
+    switch (state) {
+      case 'PENDING':
+        return 'PENDIENTE ERP';
+      case 'SENT':
+        return 'ENVIADO A PROVEEDOR';
+      case 'FAILED':
+        return 'NO ENVIADO';
+      case 'CANCELLED':
+        return 'CANCELADO';
+      default:
+        return state || 'SIN ESTADO';
+    }
+  }
+
+  displayEmailType(type: string): string {
+    switch (type) {
+      case 'DOC_ELECTRONICO':
+        return 'FACTURACION';
+      case 'NOTIFICACION':
+        return 'NOTIFICACION';
+      case 'CUSTOM':
+        return 'PERSONALIZADO';
+      default:
+        return type || 'SIN TIPO';
+    }
+  }
+
+  private loadEmailPage(): void {
+    this.emailAdminService.getEmails({
+      page: this.emailPage - 1,
+      size: this.emailPageSize,
+      status: this.emailStatusFilter,
+      type: this.emailTypeFilter,
+      accountId: this.emailAccountFilter,
+      correlationId: this.emailCorrelationFilter,
+      search: this.emailSearch,
+      dateFrom: this.emailDateFrom,
+      dateTo: this.emailDateTo,
+    }).subscribe({
+      next: (page) => {
+        this.emails = page.rows;
+        this.emailTotalElements = page.totalElements;
+        this.emailTotalPages = Math.max(1, page.totalPages || 1);
+        this.emailPage = page.page + 1;
+      },
+      error: (error: any) => {
+        this.handleActionError(error, 'No fue posible cargar los correos emitidos.');
+      },
+    });
   }
 }

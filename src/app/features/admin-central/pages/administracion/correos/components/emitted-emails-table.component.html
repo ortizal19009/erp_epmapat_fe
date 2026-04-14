@@ -4,15 +4,11 @@
       <thead>
         <tr>
           <th>Creacion</th>
-          <th>Envio</th>
           <th>Asunto</th>
-          <th>Tipo</th>
           <th>Estado</th>
-          <th>Remitente</th>
           <th>Cuenta usada</th>
           <th>Destinatarios</th>
           <th>Intentos</th>
-          <th>CorrelationId</th>
           <th>Ultimo error</th>
           <th class="text-right">Acciones</th>
         </tr>
@@ -20,16 +16,14 @@
       <tbody>
         <tr *ngFor="let row of rows">
           <td class="nowrap">{{ row.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
-          <td class="nowrap">{{ row.sentAt ? (row.sentAt | date:'dd/MM/yyyy HH:mm') : 'Sin envio' }}</td>
-          <td><div class="cell-title">{{ row.subject }}</div><div class="cell-subtitle">ID {{ row.id }}</div></td>
-          <td>{{ row.type }}</td>
-          <td><app-email-status-badge [label]="row.state" [tone]="badgeTone(row.state)"></app-email-status-badge></td>
-          <td>{{ row.fromAddress }}</td>
-          <td><div class="cell-title">{{ row.accountName || accountLabel(row.accountId) }}</div><div class="cell-subtitle mono">{{ row.accountCode }}</div></td>
-          <td><div class="truncate">{{ recipientsPreview(row) }}</div><div class="cell-subtitle">{{ row.to.length }} destinatario(s)</div></td>
+          <td class="single-line-cell">
+            <div class="cell-title truncate-line">{{ subjectPreview(row) || 'Sin asunto' }}</div>
+          </td>
+          <td><app-email-status-badge [label]="displayState(row.state)" [tone]="badgeTone(row.state)"></app-email-status-badge></td>
+          <td class="single-line-cell"><div class="truncate-line">{{ row.accountName || accountLabel(row.accountId) }}</div></td>
+          <td class="single-line-cell"><div class="truncate-line">{{ recipientsPreview(row) }}</div></td>
           <td>{{ row.attempts }}</td>
-          <td class="mono">{{ row.correlationId }}</td>
-          <td>
+          <td class="single-line-cell">
             <span class="text-muted" *ngIf="!row.lastError">Sin errores</span>
             <button *ngIf="row.lastError" type="button" class="btn btn-link btn-sm p-0 align-baseline" (click)="viewError.emit(row)">Ver error</button>
           </td>
@@ -45,7 +39,7 @@
             </div>
           </td>
         </tr>
-        <tr *ngIf="rows.length === 0"><td colspan="12" class="text-center text-muted py-4">No existen correos emitidos para el filtro seleccionado.</td></tr>
+        <tr *ngIf="rows.length === 0"><td colspan="7" class="text-center text-muted py-4">No existen correos emitidos para el filtro seleccionado.</td></tr>
       </tbody>
     </table>
   </div>
