@@ -59,7 +59,8 @@
                      <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Fecha</span>
                   </div>
                   <input type="text" class="form-control text-center" aria-label="Sizing example input"
-                     aria-describedby="inputGroup-sizing-sm" [value]="asiento.fecha | date: 'dd-MM-yyyy'" readonly tabindex="-1">
+                     aria-describedby="inputGroup-sizing-sm" [value]="asiento.fecha | date: 'dd-MM-yyyy'" readonly
+                     tabindex="-1">
                </div>
                <div class="input-group input-group-sm col-sm-2 mb-1 ml-0">
                   <div class="input-group-prepend">
@@ -76,7 +77,6 @@
                   <input type="text" class="form-control" aria-label="Sizing example input"
                      aria-describedby="inputGroup-sizing-sm" [value]="asiento.idbene.nomben" readonly tabindex="-1">
 
-
                   <div class="btn-group ml-auto mt-0 px-0">
                      <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
                         data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
@@ -87,8 +87,12 @@
                            <i class="bi-file-earmark-plus text-info"></i>&nbsp; Nuevo</button>
                         <button class="dropdown-item" type="button" (click)="imprimir()">
                            <i class="bi bi-printer text-info"></i>&nbsp; Imprimir / Exportar</button>
-                        <button class="dropdown-item" type="button" (click)="regresar()">
-                           <i class="bi-arrow-left-circle text-info"></i>&nbsp; Regresar</button>
+                        <button class="dropdown-item" type="button" [class.disabled]="padre === 'Ninguno'"
+                           [style.pointer-events]="padre === 'ninguno' ? 'none' : 'auto'"
+                           (click)="padre !== 'Ninguno' && regresar()">
+                           <i class="bi-arrow-left-circle" [class.text-muted]="padre === 'Ninguno'"
+                              [class.text-info]="padre !== 'Ninguno'"></i>&nbsp; Regresar
+                        </button>
                         <button class="dropdown-item" type="button" (click)="cerrar()">
                            <i class="bi-x-circle text-info"></i>&nbsp; Cerrar</button>
                      </div>
@@ -128,6 +132,7 @@
                         class="bi bi-caret-right-fill text-primary"></i>{{transa.codcue}}</td>
                   <td>{{transa.idcuenta.nomcue}}</td>
                   <td [ngClass]="{'transparente': transa.idbene.idbene == 1, 'cursor fila': transa.idbene.idbene > 1}"
+                     data-toggle="tooltip" [title]="transa.idbene.idbene > 1 ? 'Modificar' : ''"
                      (click)="transa.idbene.idbene > 1 && modificar(transa.inttra, transa.tiptran)">
                      {{transa.idbene.nomben}}
                      <ng-container *ngIf="transa.totbene > 1"> (y {{ transa.totbene - 1 }} más) </ng-container>

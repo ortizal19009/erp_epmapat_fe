@@ -12,17 +12,21 @@ export class Ejecucio {
   devengado: number;
   cobpagado: number;
   concep: string;
-  usucrea: number;
-  feccrea: Date;
-  usumodi: number;
-  fecmodi: Date;
+  
   idrefo: number;
   idtrami: number;
   idparxcer: number;
   idasiento: number;
   inttra: number;
-  intpre: Presupue;
   idprmiso: number;
   idevenga: number;
+  idtrata: number;
+
+  usucrea: number;
+  feccrea: Date;
+  usumodi: number;
+  fecmodi: Date;
+  
+  intpre: Presupue;
 
 }

@@ -106,11 +106,6 @@ export class AsientosService {
       return this.http.get<boolean>(`${baseUrl}/valcompro?tipcom=${tipcom}&compro=${compro}`);
    }
 
-   //Actualizar los Totales del Asiento
-   updateTotdebAndTotcre(idasiento: number, totdeb: number, totcre: number): Observable<any> {
-      return this.http.patch(`${baseUrl}/totales?idasiento=${idasiento}&totdeb=${totdeb}&totcre=${totcre}`, null);
-   }
-
    // Save usando DTO
    saveAsiento(asiento: AsientoCreateDTO): Observable<Asientos> {
       return this.http.post<Asientos>(`${baseUrl}`, asiento);
@@ -133,5 +128,4 @@ export class AsientosService {
    deleteAsiento(idasiento: number): Observable<any> {
       return this.http.delete(`${baseUrl}/${idasiento}`, { responseType: 'text' });
    }
-
 }

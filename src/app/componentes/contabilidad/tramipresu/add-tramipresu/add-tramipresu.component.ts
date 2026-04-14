@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, AsyncValidatorFn, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { map, of } from 'rxjs';
+import { Tramipresu } from '@modelos/contabilidad/tramipresu.model';
+import { catchError, map, Observable, of } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Documentos } from 'src/app/modelos/administracion/documentos.model';
 import { Beneficiarios } from 'src/app/modelos/contabilidad/beneficiarios.model';
@@ -18,16 +19,13 @@ import { TramipresuService } from 'src/app/servicios/contabilidad/tramipresu.ser
 export class AddTramipresuComponent implements OnInit {
 
    formTramipresu: FormGroup;
-   _documentos: any;
-   _beneficiarios: any[] = [];
-   date: Date = new Date();
+   documentos: Documentos[] = [];
+   beneficiarios: Beneficiarios[] = [];
    idbene: number | null;
+   inicioFormulario: number = 0;
 
-   documento: Documentos = new Documentos;
-   beneficiario: Beneficiarios = new Beneficiarios;
-   
    constructor(
-      private s_documentos: DocumentosService, private fb: FormBuilder, private router: Router,
+      private docService: DocumentosService, private fb: FormBuilder, private router: Router,
       public authService: AutorizaService, private tramiService: TramipresuService, private beneService: BeneficiariosService) { }
 
    ngOnInit(): void {
@@ -37,21 +35,17 @@ export class AddTramipresuComponent implements OnInit {
 
       this.formTramipresu = this.fb.group({
          numero: ['', [Validators.required, Validators.min(1)], this.valNumero.bind(this)],
-         fecha: ['', [Validators.required], this.valFecha.bind(this)],
+         fecha: ['', [Validators.required], this.valAño()],
          intdoc: '',
          numdoc: ['', Validators.required],
          fecdoc: ['', Validators.required],
-         totmiso: 0,
-         idbene: ['', [Validators.required], [this.valBenefi.bind(this)] ],
+         idbene: ['', [Validators.required], [this.valBenefi()]],
          descri: '',
-         swreinte: 0,
-         usucrea: this.authService.idusuario,
-         feccrea: this.date
-      },
-         { updateOn: "blur" });
+      }, { updateOn: "blur" });
 
+      this.inicioFormulario = Date.now();
       this.listarDocumentos();
-      this.setValores();
+      this.ultimo();
    }
 
    colocaColor(colores: any) {
@@ -65,66 +59,92 @@ export class AddTramipresuComponent implements OnInit {
 
    get f() { return this.formTramipresu.controls; }
 
-   setValores() {
+   ultimo() {
       this.tramiService.ultimoTramipresu().subscribe({
-         next: resp => {
+         next: (tramipresu: Tramipresu) => {
             this.formTramipresu.patchValue({
-               numero: +resp.numero! + 1,
-               fecha: resp.fecha,
-               fecdoc: resp.fecha,
+               numero: +tramipresu.numero! + 1,
+               fecha: tramipresu.fecha,
+               fecdoc: tramipresu.fecha,
             });
          },
-         error: err => console.error(err.error),
+         error: err => { console.error(err.error); this.authService.mostrarError('Error al buscar el Último Trámite', err.error) }
       });
    }
 
    listarDocumentos() {
-      this.s_documentos.getListaDocumentos().subscribe({
-         next: datos => {
-            this._documentos = datos;
+      this.docService.getListaDocumentos().subscribe({
+         next: (documentos: Documentos[]) => {
+            this.documentos = documentos;
             this.formTramipresu.controls['intdoc'].setValue(1);
          },
-         error: err => console.error(err.error),
+         error: err => { console.error(err.error); this.authService.mostrarError('Error al buscar los Documentos', err.error) }
       });
    }
 
    benefixNombre(e: any) {
       if (e.target.value != '') {
          this.beneService.findByNomben(e.target.value).subscribe({
-            next: datos => this._beneficiarios = datos,
+            next: (beneficiarios: Beneficiarios[]) => this.beneficiarios = beneficiarios,
             error: err => console.error(err.error),
          });
       }
    }
    onBenefiSelected(e: any) {
-      const selectedOption = this._beneficiarios.find((x: { nomben: any; }) => x.nomben === e.target.value);
+      const selectedOption = this.beneficiarios.find((x: { nomben: any; }) => x.nomben === e.target.value);
       if (selectedOption) this.idbene = selectedOption.idbene;
       else this.idbene = null;
    }
 
    guardar() {
-      this.documento.intdoc = this.formTramipresu.value.intdoc
-      this.formTramipresu.value.intdoc = this.documento;
-
-      this.beneficiario.idbene = this.idbene!;
-      this.formTramipresu.value.idbene = this.beneficiario;
-
-      this.tramiService.saveTramipresu(this.formTramipresu.value).subscribe({
-         next: () => {
-            //Actualiza los datos de búsqueda para que se muestre en la lista de Trámites
-            let buscaDesdeNum = this.f['numero'].value - 16;
-            if (buscaDesdeNum <= 0) buscaDesdeNum = 1;
-            let year = new Date(this.f['fecha'].value).getFullYear(); // Extraer el año de la fecha 
-            const buscarTramipresu = {
-               desdeNum: buscaDesdeNum,
-               hastaNum: this.f['numero'].value,
-               desdeFecha: year.toString() + "-01-01",
-               hastaFecha: year.toString() + "-12-31",
-            };
-            sessionStorage.setItem("buscarTramipresu", JSON.stringify(buscarTramipresu));
-            this.regresar();
-         },
-         error: err => console.error(err.error),
+      // Vuelve a validar el número (Mientras toman café ...)
+      this.validaNumeroAntesDeGuardar().subscribe(esValido => {
+         if (!esValido) {
+            const fin = Date.now();
+            const tiempoTranscurrido = fin - this.inicioFormulario;
+            this.authService.mensaje404(`El Trámite ${this.formTramipresu.value.numero} ya fue creado por otro Usuario. 
+               Tiempo transcurrido: ${this.authService.formatearTiempo(tiempoTranscurrido)}`);
+            return;
+         }
+         const dto: TramipresuCreateDTO = {
+            numero: this.formTramipresu.value.numero,
+            fecha: this.formTramipresu.value.fecha,
+            intdoc: { intdoc: this.formTramipresu.value.intdoc },
+            numdoc: this.formTramipresu.value.numdoc,
+            fecdoc: this.formTramipresu.value.fecdoc,
+            idbene: { idbene: this.idbene },
+            descri: this.formTramipresu.value.descri,
+            totmiso: 0,
+            swreinte: 0,
+            usucrea: this.authService.idusuario,
+            feccrea: new Date()
+         }
+         this.tramiService.saveTramipresu(dto).subscribe({
+            next: (nuevo: Tramipresu) => {
+               //Actualiza los datos de búsqueda para que se muestre en la lista de Trámites
+               let buscaDesdeNum = this.f['numero'].value - 16;
+               if (buscaDesdeNum <= 0) buscaDesdeNum = 1;
+               let year = new Date(this.f['fecha'].value).getFullYear(); // Extraer el año de la fecha 
+               const buscarTramipresu = {
+                  desdeNum: buscaDesdeNum,
+                  hastaNum: this.f['numero'].value,
+                  desdeFecha: year.toString() + "-01-01",
+                  hastaFecha: year.toString() + "-12-31",
+               };
+               sessionStorage.setItem("buscarTramipresu", JSON.stringify(buscarTramipresu));
+               this.authService.swal('success', `Trámite ${nuevo.numero} guardado con éxito`);
+               sessionStorage.setItem('ultidtrami', nuevo.idtrami.toString());
+               //Abre partidas del trámite
+               const datosToPrmisoxtrami = {
+                  idtrami: nuevo.idtrami,
+                  desdeNum: buscaDesdeNum,
+                  hastaNum: this.f['numero'].value
+               };
+               sessionStorage.setItem('datosToPrmisoxtrami', JSON.stringify(datosToPrmisoxtrami));
+               this.router.navigate(['prmisoxtrami']);
+            },
+            error: err => { console.error(err.error); this.authService.mostrarError('Error al guardar el Trámite', err.error) }
+         });
       });
    }
 
@@ -137,18 +157,47 @@ export class AddTramipresuComponent implements OnInit {
       );
    }
 
+   // Al guardar Valida el número nuevamente
+   validaNumeroAntesDeGuardar(): Observable<boolean> {
+      const valor = this.formTramipresu.get('numero')?.value;
+      if (valor === null || valor === undefined || valor === '') { return of(true); }
+      return this.tramiService.valNumero(valor).pipe(
+         map(existe => !existe),
+         catchError(() => of(true))
+      );
+   }
+
    //Valida periodo
-   valFecha(control: AbstractControl) {
-      // let anio  = control.value.slice(0,4)
-      // console.log('fecha en valFecha: ', fecha )
-      if ( control.value.slice(0,4)  != 2024) return of({ 'invalido': true });
-      else return of(null);
+   valAño(): AsyncValidatorFn {
+      return (control: AbstractControl): Observable<ValidationErrors | null> => {
+         const datos = this.authService.getDatosEmpresa();
+         const añoEmpresa = datos?.fechap?.toString().slice(0, 4);
+         const añoDigitado = control.value?.toString().slice(0, 4);
+         const esValido = añoEmpresa === añoDigitado;
+         return of(esValido ? null : { añoinvalido: true });
+      };
    }
 
    //Valida que se haya seleccionado un Beneficiario
-   valBenefi(control: AbstractControl) {
-      if (this.idbene == null) return of({ 'invalido': true });
-      else return of(null);
+   valBenefi(): AsyncValidatorFn {
+      return (_control: AbstractControl): Observable<ValidationErrors | null> => {
+         const esValido = this.idbene != null;
+         return of(esValido ? null : { invalido: true });
+      };
    }
 
+}
+
+export interface TramipresuCreateDTO {
+   numero: number;
+   fecha: Date;
+   intdoc: { intdoc: number };
+   numdoc: String;
+   fecdoc: Date;
+   idbene: { idbene: number | null };
+   descri: String;
+   totmiso: number;
+   swreinte: number;
+   usucrea: number;
+   feccrea: Date;
 }

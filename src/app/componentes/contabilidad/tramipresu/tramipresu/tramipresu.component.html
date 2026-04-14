@@ -3,7 +3,7 @@
       <div class="row m-0 py-1 justify-content-start cabecera border sombra">
          <div class="col-sm-3">
             <h5 class="m-0 font-weight-bold text-truncate">
-               <i class="bi-badge-tm-fill"></i> Trámites presupuestarios
+               <i class="bi-badge-tm-fill text-warning"></i> Trámites presupuestarios
             </h5>
          </div>
          <div class="col-sm-6">
@@ -18,10 +18,8 @@
                   </div>
 
                   <div class="input-group col-sm-5 px-1 ">
-                     <input type="date" class="form-control form-control-sm text-center" formControlName="desdeFecha"
-                        max="{{ today | date : 'yyyy-MM-dd' }}" />
-                     <input type="date" class="form-control form-control-sm text-center" formControlName="hastaFecha"
-                        max="{{ today | date : 'yyyy-MM-dd' }}" />
+                     <input type="date" class="form-control form-control-sm text-center" formControlName="desdeFecha">
+                     <input type="date" class="form-control form-control-sm text-center" formControlName="hastaFecha">
                   </div>
 
                   <div class="col-sm">
@@ -52,11 +50,13 @@
                </button>
                <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
                   <button class="dropdown-item" type="button" (click)="addTramite()">
-                     <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo
+                     <i class="bi-file-earmark-plus text-info"></i>&nbsp; Nuevo
                   </button>
                   <button class="dropdown-item" type="button" data-toggle="modal" data-target="#PDFModal">
-                     <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar
+                     <i class="bi bi-printer text-info"></i>&nbsp; Imprimir / Exportar
                   </button>
+                  <button class="dropdown-item" type="button" (click)="cerrar()">
+                     <i class="bi-x-circle text-info"></i>&nbsp; Cerrar</button>
                </div>
             </div>
          </div>
@@ -69,28 +69,29 @@
    <div class="row mb-0">
       <div class="col-sm">
          <table class="table table-hover table-bordered table-sm sombra">
-            <thead class="text-center cabecera">
+            <thead class="cabecera">
                <tr class="pad0">
-                  <th>Nro.</th>
-                  <th>Fecha</th>
+                  <th class="text-center">Nro.</th>
+                  <th class="text-center">Fecha</th>
                   <th>Documento</th>
                   <th>Beneficiario</th>
-                  <th>Total</th>
+                  <th class="text-right">Total</th>
                   <th>Descripción</th>
                   <th></th>
                </tr>
             </thead>
             <tbody class="detalle roboto small">
-               <tr class="fila pad0" *ngFor="let tramipresu of _tramipresu | filter: filtro"
-                  (click)="compromisos($event, tramipresu)">
-                  <td class="text-center">{{ tramipresu.numero }}</td>
-                  <td class="text-center"> {{ tramipresu.fecha | date : "dd-MM-yyyy"}} </td>
-                  <td class="doc-{{ tramipresu.intdoc.intdoc }}"> {{ tramipresu.intdoc.nomdoc }}
-                     {{ tramipresu.numdoc }} </td>
-                  <td class="bene-{{ tramipresu.idbene }}">{{tramipresu.idbene.nomben}}</td>
-                  <td class="text-right">{{tramipresu.totmiso | number: '1.2-2' }}</td>
-                  <td class="text-truncate ancho" data-toggle="tooltip" title="{{ tramipresu.descri }}">
-                     {{tramipresu.descri}}</td>
+               <tr class="fila pad0" *ngFor="let tramite of tramipresu | filter: filtro"
+                  (click)="compromisos($event, tramite)">
+                  <td class="text-center"><i *ngIf="tramite.idtrami == ultIdSelec"
+                        class="bi bi-caret-right-fill text-primary"></i>{{ tramite.numero }}</td>
+                  <td class="text-center"> {{ tramite.fecha | date : "dd-MM-yyyy"}} </td>
+                  <td class="doc-{{ tramite.intdoc.intdoc }}"> {{ tramite.intdoc.nomdoc }}
+                     {{ tramite.numdoc }} </td>
+                  <td class="bene-{{ tramite.idbene }}">{{tramite.idbene.nomben}}</td>
+                  <td class="text-right">{{tramite.totmiso | number: '1.2-2' }}</td>
+                  <td class="text-truncate ancho" data-toggle="tooltip" title="{{ tramite.descri }}">
+                     {{tramite.descri}}</td>
                   <td class="text-center">
                      <div class="btn-group py-0">
                         <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
@@ -98,10 +99,9 @@
                         </button>
 
                         <div class="dropdown-menu dropdown-menu-right popLista">
-                           <button class="dropdown-item" type="button" (click)="modiTramipresu( tramipresu )">
+                           <button class="dropdown-item" type="button" (click)="modiTramipresu( tramite )">
                               <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
-                           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#eliminar"
-                              (click)="eliminar( tramipresu )">
+                           <button class="dropdown-item" type="button" (click)="eliminar(tramite)">
                               <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
                         </div>
                      </div>
@@ -109,45 +109,15 @@
 
                </tr>
             </tbody>
+            <tfoot *ngIf="!filtro" class="detalle font-weight-bold pad0 roboto small">
+               <tr>
+                  <td></td>
+                  <td colspan="3">TOTAL: {{ tramipresu.length }}</td>
+                  <td class="text-right">{{total | number: '1.2-2'}}</td>
+                  <td colspan="2"></td>
+               </tr>
+            </tfoot>
          </table>
-      </div>
-   </div>
-
-   <!-- Modal Eliminar-->
-   <div class='modal fade' id='eliminar' tabindex='-1' aria-hidden='true'>
-      <div class='modal-dialog modal-dialog-centered'>
-         <div class='modal-content'>
-            <div class='modal-header justify-content-center cabecera border py-2'>
-               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Mensaje</h5>
-            </div>
-            <div *ngIf="totmovi == 0; then thenBlock else elseBlock"></div>
-            <ng-template #thenBlock>
-               <div class='modal-body text-center roboto fondo'>
-                  ¿ Eliminar el Trámite Nro <span class="fantacysombra"> {{tramipresu.numero}} </span>?
-               </div>
-               <div class='modal-footer justify-content-center detalle border py-1'>
-                  <button type='button' class='btn btn-success btn-sm' data-dismiss='modal' id='btnSi'
-                     (click)="elimina()">
-                     <i class="fa fa-check-circle"></i> Aceptar
-                  </button>
-                  <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
-                     <i class="fa fa-times-circle" style="font-size:24pxi"></i> Cancelar</button>
-               </div>
-            </ng-template>
-            <ng-template #elseBlock>
-               <div class='modal-body detalle'>
-                  <div class="alert alert-warning text-center" role="alert">
-                     No puede eliminar el Trámite <span class="fantacygreen"> {{tramipresu.numero}}</span>
-                     <br>tiene registrado <span class="fantacygreen">{{totmovi}}</span> Partida(s).
-                  </div>
-               </div>
-               <div class='text-center detalle'>
-                  <button type='button' class='btn btn-success btn-sm mb-3' data-dismiss='modal'>
-                     <i class="fa fa-check-circle"></i>&nbsp; Aceptar
-                  </button>
-               </div>
-            </ng-template>
-         </div>
       </div>
    </div>
 </div>

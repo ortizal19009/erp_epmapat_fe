@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { PartixcertiCreateDTO, PartixcertiUpdateDTO } from 'src/app/componentes/contabilidad/partixcerti/partixcerti/partixcerti.component';
@@ -30,6 +30,18 @@ export class PartixcertiService {
       return this.http.get<number>(`${baseUrl}/count/${idcerti}`);
    }
 
+   // Partixcerti por intpre (Certificaciones de una partida)
+   // getByIntpre(intpre: number) {
+   //    return this.http.get<Partixcerti[]>(`${baseUrl}/porIntpre/${intpre}`);
+   // }
+   buscarPorIntpre(intpre: number, desde: string, hasta: string): Observable<Partixcerti[]> {
+      const params = new HttpParams()
+         .set('intpre', intpre)
+         .set('desde', desde)   // formato yyyy-MM-dd
+         .set('hasta', hasta);  // formato yyyy-MM-dd
+      return this.http.get<Partixcerti[]>(`${baseUrl}/porIntpre`, { params });
+   }
+
    // Save usando DTO
    savePartixcerti(nueva: PartixcertiCreateDTO): Observable<Partixcerti> {
       return this.http.post<Partixcerti>(`${baseUrl}`, nueva);
@@ -51,4 +63,3 @@ export class PartixcertiService {
    }
 
 }
-

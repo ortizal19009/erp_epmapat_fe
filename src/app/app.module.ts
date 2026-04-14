@@ -655,6 +655,7 @@ import { FileUploadComponent } from './shared/file-upload/file-upload.component'
     ReportesjrComponent,
     RepoxopcionComponent,
     FileUploadComponent,
+    
   ],
 
   imports: [

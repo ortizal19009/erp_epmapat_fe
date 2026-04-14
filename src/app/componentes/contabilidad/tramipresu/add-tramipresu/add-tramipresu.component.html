@@ -16,12 +16,12 @@
                <div class="row">
 
                   <div class="form-group col-md-4 my-0 py-0">
-                     <div class="input-group mb-1 input-group-sm">
+                     <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
-                           <span class="input-group-text font-weight-bold">Número<sup class="green">*</sup></span>
+                           <label class="input-group-text">Número<sup class="green">*</sup></label>
                         </div>
                         <input type="number" class="form-control form-control-sm text-center " formControlName="numero"
-                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" autofocus
+                           aria-label="Small" aria-describedby="inputGroup-sizing-sm" autofocus min="1"
                            [ngClass]="{'is-invalid': f['numero'].invalid && f['numero'].touched, 'is-valid': f['numero'].valid, '': f['numero'].untouched}">
                      </div>
                      <div *ngIf="authService.msgval && f['numero'].errors && f['numero'].touched">
@@ -42,8 +42,8 @@
 
                   </div>
 
-                  <div class="form-group col-md-4 my-0 py-0">
-                     <div class="input-group mb-1 input-group-sm">
+                  <div class="form-group col-md-5 my-0 py-0">
+                     <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
                            <label class="input-group-text">Fecha<sup class="green">*</sup></label>
                         </div>
@@ -54,11 +54,11 @@
                      <div *ngIf="authService.msgval && f['fecha'].errors && f['fecha'].touched" class="my-0 py-0">
                         <div *ngIf="f['fecha'].errors['required']" class="alert alert-warning py-0 mt-0 roboto small"
                            role="alert">
-                           <strong>Ups!</strong> La fecha es obligatorio.
+                           <strong>Ups!</strong> La fecha es obligatoria
                         </div>
-                        <div *ngIf="f['fecha'].errors['invalido']" class="alert alert-warning py-0 mt-0 roboto small"
+                        <div *ngIf="f['fecha'].errors['añoinvalido']" class="alert alert-warning py-0 mt-0 roboto small"
                            role="alert">
-                           <strong>Ups!</strong> No corresponde al período.
+                           <strong>Ups!</strong> El Período (año) es incorrecto
                         </div>
                      </div>
                   </div>
@@ -69,7 +69,7 @@
                            <label class="input-group-text">Documento<sup class="green">*</sup></label>
                         </div>
                         <select type="text" class="custom-select" formControlName="intdoc">
-                           <option [ngValue]="documento.intdoc" *ngFor="let documento of _documentos"
+                           <option [ngValue]="documento.intdoc" *ngFor="let documento of documentos"
                               id="intdoc_{{documento.intdoc}}">
                               {{ documento.nomdoc }}
                            </option>
@@ -82,19 +82,19 @@
                      <div *ngIf="authService.msgval && f['numdoc'].errors && f['numdoc'].touched" class="my-0 py-0">
                         <div *ngIf="f['numdoc'].errors['required']" class="alert alert-warning py-0 mt-0 roboto small"
                            role="alert">
-                           <strong>Ups!</strong> Número de documento obligatorio.
+                           <strong>Ups!</strong> El Número de documento es obligatorio
                         </div>
                      </div>
                      <div *ngIf="authService.msgval && f['fecdoc'].errors && f['fecdoc'].touched" class="my-0 py-0">
                         <div *ngIf="f['fecdoc'].errors['required']" class="alert alert-warning py-0 mt-0 roboto small"
                            role="alert">
-                           <strong>Ups!</strong> Fecha de documento obligatorio.
+                           <strong>Ups!</strong> La Fecha del documento es obligatoria
                         </div>
                      </div>
                   </div>
 
-                  <div class="form-group col-md-12 mt-1">
-                     <div class="input-group input-group-sm mb-1 ">
+                  <div class="form-group col-md-12">
+                     <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
                            <label class="input-group-text">Beneficiario<sup class="green">*</sup></label>
                         </div>
@@ -102,13 +102,23 @@
                            (input)="onBenefiSelected($event); benefixNombre($event)"
                            [ngClass]="{'is-invalid': f['idbene'].invalid && f['idbene'].touched,'is-valid': f['idbene'].valid, '': f['idbene'].untouched}">
                         <datalist role="listbox" id="benList">
-                           <option *ngFor="let beneficiario of _beneficiarios" value={{beneficiario.nomben}}> </option>
+                           <option *ngFor="let beneficiario of beneficiarios" value={{beneficiario.nomben}}> </option>
                         </datalist>
+                     </div>
+                     <div *ngIf="authService.msgval && f['idbene'].errors && f['idbene'].touched">
+                        <div *ngIf="f['idbene'].errors['required']"
+                           class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border" role="alert">
+                           <strong>Ups!</strong> El Beneficiario es obligatorio
+                        </div>
+                        <div *ngIf="f['idbene'].errors['invalido']"
+                           class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border" role="alert">
+                           <strong>Ups!</strong> No ha seleccionado un Beneficiario
+                        </div>
                      </div>
                   </div>
 
                   <div class="form-group col-md-12 my-0">
-                     <div class="input-group mb-1 input-group-sm">
+                     <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
                            <label class="input-group-text">Descripción</label>
                         </div>
@@ -118,7 +128,7 @@
 
                </div>
 
-               <div class="mt-1 mb-3 text-center">
+               <div class="mt-3 text-center">
                   <button type="button" class="btn btn-success btn-sm mx-1 mt-1" (click)="guardar()"
                      [disabled]="!formTramipresu.valid">
                      <i class="fa fa-check-circle"></i>&nbsp; Aceptar

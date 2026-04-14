@@ -23,6 +23,7 @@ import { TransaciService } from 'src/app/servicios/contabilidad/transaci.service
    templateUrl: './add-transaci.component.html',
    styleUrls: ['./add-transaci.component.css']
 })
+
 export class AddTransaciComponent implements OnInit {
 
    formTransaci: FormGroup;
@@ -177,22 +178,25 @@ export class AddTransaciComponent implements OnInit {
          next: (transaci: Transaci) => {
             if (this.partida.intpre) {
                const dtoEjecucio: EjecucioCreateDTO = {
+                  tipeje: 3,
+                  intpre: { intpre: this.partida.intpre },
                   codpar: this.partida.codpar,
                   fecha_eje: this.iAsiento.fecha,
-                  tipeje: 3,
                   modifi: 0,
                   prmiso: 0,
                   totdeven: 0,
                   devengado: this.formTransaci.value.valor,
                   cobpagado: 0,
                   concep: this.formTransaci.value.descri,
-                  usucrea: this.authService.idusuario,
-                  feccrea: new Date(),
+                  idtrata: 0,
+                  idtrami: null,
                   idasiento: this.idasiento,
                   inttra: transaci.inttra,
-                  intpre: { intpre: this.partida.intpre },
+                  idparxcer: null,
+                  idprmiso: null,
                   idrefo: 0,
-                  idtrata: 0
+                  usucrea: this.authService.idusuario,
+                  feccrea: new Date(),
                }
                this.ejecuService.saveEjecu(dtoEjecucio).subscribe({
                   next: () => { },
@@ -243,3 +247,4 @@ interface interfaceEjecucio {
    inttra: number;
    intpre: Presupue;
 }
+

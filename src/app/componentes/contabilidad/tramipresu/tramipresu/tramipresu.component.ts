@@ -1,10 +1,24 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Eliminadosapp } from '@modelos/administracion/eliminadosapp.model';
+import { Clasificador } from '@modelos/clasificador.model';
+import { Cuentas } from '@modelos/contabilidad/cuentas.model';
+import { Estrfunc } from '@modelos/contabilidad/estrfunc.model';
+import { Presupue } from '@modelos/contabilidad/presupue.model';
+import { Tramipresu } from '@modelos/contabilidad/tramipresu.model';
+import { EliminadosappService } from '@servicios/administracion/eliminadosapp.service';
+import { ClasificadorService } from '@servicios/clasificador.service';
+import { CuentasService } from '@servicios/contabilidad/cuentas.service';
+import { EjecucionService } from '@servicios/contabilidad/ejecucio.service';
+import { EstrfuncService } from '@servicios/contabilidad/estrfunc.service';
+import { PregastoService } from '@servicios/contabilidad/pregasto.service';
+import { map } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 // import { Tramipresu } from 'src/app/modelos/contabilidad/tramipresu.model';
 import { TramipresuService } from 'src/app/servicios/contabilidad/tramipresu.service';
+import Swal from 'sweetalert2';
 
 @Component({
    selector: 'app-tramipresu',
@@ -15,17 +29,17 @@ export class TramipresuComponent implements OnInit {
 
    formBuscar: FormGroup;
    filtro: string;
-   today: number = Date.now();
-   _tramipresu: any;
+   tramipresu: Tramipresu[] = [];
    buscarTramipresu: { desdeNum: number, hastaNum: number, desdeFecha: string, hastaFecha: string }
+   total: number;
    swdesdehasta: boolean; //Visibilidad Buscar últimos
-   tramipresu = {} as iTramipresu; //Interface para los datos del Trámite a eliminar
-   totmovi: number = 1;  //Por default no puede eliminar
+   ultIdSelec: number = -1;
 
    constructor(private fb: FormBuilder, private router: Router, public authService: AutorizaService, private coloresService: ColoresService,
-      private tramiService: TramipresuService) { }
+      private tramiService: TramipresuService, private ejecuService: EjecucionService, private elimService: EliminadosappService) { }
 
    ngOnInit(): void {
+      if (!this.authService.sessionlog) { this.router.navigate(['/inicio']); }
       sessionStorage.setItem('ventana', '/tramipresu');
       let coloresJSON = sessionStorage.getItem('/tramipresu');
       if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
@@ -41,6 +55,7 @@ export class TramipresuComponent implements OnInit {
       });
 
       //Datos de búsqueda: últimos Trámites o guardados
+      this.ultIdSelec = sessionStorage.getItem('ultidtrami') ? Number(sessionStorage.getItem('ultidtrami')) : 0;
       this.buscarTramipresu = JSON.parse(sessionStorage.getItem("buscarTramipresu")!);
       if (this.buscarTramipresu == null) this.ultimoTramipresu();
       else {
@@ -83,19 +98,19 @@ export class TramipresuComponent implements OnInit {
             });
             this.buscar();
          },
-         error: err => console.error(err.error)
+         error: err => { console.error(err.error); this.authService.mostrarError('Error al buscar el último', err.error) }
       });
    }
 
    buscar() {
-      //Numeros
       let desdeNum: number = 1;
       if (this.formBuscar.value.desdeNum != null) { desdeNum = this.formBuscar.value.desdeNum; }
       let hastaNum: number = 999999999;
       if (this.formBuscar.value.hastaNum != null) { hastaNum = this.formBuscar.value.hastaNum; }
       this.tramiService.getDesdeHasta(desdeNum, hastaNum, this.formBuscar.value.desdeFecha, this.formBuscar.value.hastaFecha).subscribe({
-         next: datos => {
-            this._tramipresu = datos;
+         next: (tramites: Tramipresu[]) => {
+            this.tramipresu = tramites;
+            this.total = this.sumarTotmiso();
             this.buscarTramipresu = {  //Guarda los datos de búsqueda
                desdeNum: this.formBuscar.value.desdeNum,
                hastaNum: this.formBuscar.value.hastaNum,
@@ -104,8 +119,15 @@ export class TramipresuComponent implements OnInit {
             };
             sessionStorage.setItem("buscarTramipresu", JSON.stringify(this.buscarTramipresu));
          },
-         error: (err) => console.error(err.error),
+         error: err => { console.error(err.error); this.authService.mostrarError('Error al buscar los Trámites', err.error) }
       });
+   }
+
+   sumarTotmiso(): number {
+      return this.tramipresu.reduce((acum, item) => {
+         const valor = Number(item.totmiso) || 0;
+         return acum + valor;
+      }, 0);
    }
 
    changeDesdeHasta() { this.swdesdehasta = true; }
@@ -118,57 +140,107 @@ export class TramipresuComponent implements OnInit {
 
    addTramite() { this.router.navigate(['add-tramipresu']); }
 
-   compromisos(event: any, tramipresu: iTramipresu) {
+   compromisos(event: any, tramipresu: Tramipresu) {
       const tagName = event.target.tagName;
+      this.ultIdSelec = tramipresu.idtrami;
+      sessionStorage.setItem('ultidtrami', this.ultIdSelec.toString());
       if (tagName === 'TD') {
-         sessionStorage.setItem('idtramiToPrmisoxtrami', tramipresu.idtrami.toString());
+         const datosToPrmisoxtrami = {
+            idtrami: tramipresu.idtrami,
+            desdeNum: this.formBuscar.value.desdeNum,
+            hastaNum: this.formBuscar.value.hastaNum
+         };
+         sessionStorage.setItem('datosToPrmisoxtrami', JSON.stringify(datosToPrmisoxtrami));
          this.router.navigate(['prmisoxtrami']);
       }
-   }
-
-   listarTramiPresuOld() {
-      // this.tramiService.getDesdeHasta().subscribe({
-      //    next: (datos) => {
-      //       console.log(datos);
-      //       this.v_tramipresu = datos;
-      //    },
-      //    error: (e) => console.error(e),
-      // });
-   }
-
-   // retroceder() { this.targ_partida = true; }
-
-   selectPartidas(partidas: any) {
-      this.router.navigate(['add-tramipresu', partidas.idparxcer]);
    }
 
    modiTramipresu(tramipresu: any) {
       sessionStorage.setItem("idtramiToModi", tramipresu.idtrami.toString());
       this.router.navigate(['/modi-tramipresu']);
    }
-   
-   eliminar(tramipresu: iTramipresu) {
-      this.tramipresu.idtrami = tramipresu.idtrami;
-      this.tramipresu.numero = tramipresu.numero;
-      //this.numero = certipresu.numero;  //Para el mensaje de eliminar
-      // this.idcerti = certipresu.idcerti;
-      this.totmovi = 1;  //Para que por default no pueda eliminar
-      // this.ejecuService.countByIntpre(preing.intpre).subscribe({
-      //    next: resp => this.totmovi = resp,
-      //    error: err => console.error('Al contar los movimientos de la partida: ', err.error)
-      // });
+
+   eliminar(tramipresu: Tramipresu) {
+      this.ejecuService.countByIdtrami(tramipresu.idtrami).subscribe({
+         next: registros => {
+            if (registros > 0) {
+               Swal.fire({
+                  icon: 'error',
+                  title: `No puede eliminar el Trámite Nro: ${tramipresu.numero}`,
+                  text: `Tiene comprometido ${registros} Partida(s)`,
+                  confirmButtonText: '<i class="bi-check"></i> Continuar ',
+                  customClass: {
+                     popup: 'noeliminar',
+                     title: 'robotobig',
+                     confirmButton: 'btn btn-warning',
+                  },
+               });
+            } else {
+               Swal.fire({
+                  width: '500px',
+                  title: 'Mensaje',
+                  text: `Eliminar el Trámite: ${tramipresu.numero} ?`,
+                  icon: 'warning',
+                  showCancelButton: true,
+                  confirmButtonText: '<i class="fa fa-check"></i> Aceptar',
+                  cancelButtonText: '<i class="fa fa-times"></i> Cancelar',
+                  customClass: {
+                     popup: 'eliminar',
+                     title: 'robotobig',
+                     confirmButton: 'btn btn-success',
+                     cancelButton: 'btn btn-success'
+                  },
+               }).then((resultado) => {
+                  if (resultado.isConfirmed) this.elimina(tramipresu);
+               });
+            }
+         },
+         error: err => { console.error('Al buscar las Partidas de la Certificación: ', err.error); },
+      });
    }
 
-   elimina() {
-      // this.tramiService. .deleteCertipresu(this.certipresu.idcerti).subscribe({
-      //    next: datos => this.buscar(),
-      //    error: err => console.log(err.error)
-      // });
+   elimina(tramipresu: Tramipresu) {
+      this.tramiService.deleteTramipresu(tramipresu.idtrami).subscribe({
+         next: (response: DeleteResponse) => {
+            if (response.deleted === true) {  // Eliminado correctamente
+               let eliminado: Eliminadosapp = new Eliminadosapp();
+               eliminado.idusuario = this.authService.idusuario!;
+               eliminado.modulo = this.authService.moduActual;
+               eliminado.fecha = new Date();
+               eliminado.routerlink = 'tramipresu';
+               eliminado.tabla = 'TRAMITES';
+               eliminado.datos = `Nro. ${tramipresu.numero} del ${tramipresu.fecha} Beneficiario: ${tramipresu.idbene.nomben}`;
+               this.elimService.save(eliminado).subscribe({
+                  next: () => {
+                     this.authService.swal('success', `Trámite ${tramipresu.numero} eliminada con éxito`);
+                     this.buscar();
+                  },
+                  error: err => { console.error(err.error); this.authService.mostrarError('Error al guardar eliminado', err.error); }
+               });
+               return;
+            }
+            if (response.deleted === false) {   // No existía
+               this.authService.mensaje404(`El Trámite ${tramipresu.numero} no existe o fue eliminada por otro Usuario`);
+               this.buscar();
+               return;
+            }
+            if (response.error === true) { // Error real del backend
+               this.authService.mostrarError('Error al eliminar el Trámite', `${response.error} ${response.message}`);
+               return;
+            }
+         },
+         error: (err) => {
+            this.authService.mostrarError('Error al eliminar el Trámite', err.error);
+         }
+      });
    }
+
+   cerrar() { this.router.navigate(['/inicio']); }
 
 }
 
-interface iTramipresu {
-   idtrami: number;
-   numero: number
+export interface DeleteResponse {
+   deleted?: boolean;  // true si se eliminó, false si no existía
+   error?: boolean;    // true si hubo un error real (500)
+   message: string;    // mensaje del backend
 }

@@ -103,30 +103,31 @@ export class TransaciService {
    }
 
    //Save con retorno del idtransa generado (no se usa porque debe devolver el registro completo para colocar en benxtran)
-   saveTransaIdOld(transaci: Transaci): Observable<any> {
-      return this.http.post(`${baseUrl}`, transaci).pipe(
-         map((response: any) => {
-            const id = response.idtransa;
-            return id;
-         })
-      );
-   }
+   // saveTransaIdOld(transaci: Transaci): Observable<any> {
+   //    return this.http.post(`${baseUrl}`, transaci).pipe(
+   //       map((response: any) => {
+   //          const id = response.idtransa;
+   //          return id;
+   //       })
+   //    );
+   // }
 
    // getByInttra(inttra: number) {
    //    return this.http.get<Transaci[]>(`${baseUrl}/${inttra}`);
    // }
 
 
+   // Este se esta usando en Bancos, cambiar a dto
    updateTransaci(transaci: Transaci) {
       return this.http.put(`${baseUrl}/updtransaci/${transaci.inttra}`, transaci);
    }
 
    //Actualiza indicando el Id
-   updateTransaci1(idtransa: number, transaci: Transaci): Observable<Object> {
-      return this.http.put(`${baseUrl}/${idtransa}`, transaci);
-   }
+   // updateTransaci1(idtransa: number, transaci: Transaci): Observable<Object> {
+   //    return this.http.put(`${baseUrl}/${idtransa}`, transaci);
+   // }
 
-   // Actualiza solo modificados
+   // Actualiza solo modificados (El Back actualiza la ejecucio)
    updateTransa(inttra: number, dto: TransaciUpdateDTO): Observable<Transaci> {
       return this.http.put<Transaci>(`${baseUrl}/${inttra}`, dto);
    }

@@ -13,7 +13,7 @@ export class Presupue {
   totmisos: number;
   totdeven: number;
   funcion: String;
-  intest: number;       //En revision
+  intest: number;
   codacti: String;
   intcla: Clasificador;
   codpart: String;

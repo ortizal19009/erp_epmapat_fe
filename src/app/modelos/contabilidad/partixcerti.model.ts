@@ -3,13 +3,13 @@ import { Presupue } from './presupue.model';
 
 export class Partixcerti {
   idparxcer: number;
-  descripcion: String;
   valor: number;
   saldo: number;
   totprmisos: number;
   swreinte: number;
   usucrea: number;
   feccrea: Date;
+  descripcion: String;
   usumodi: number;
   fecmodi: Date;
   idejecucion: number;

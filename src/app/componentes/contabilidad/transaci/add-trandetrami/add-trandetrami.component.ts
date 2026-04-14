@@ -335,10 +335,10 @@ export class AddTrandetramiComponent implements OnInit {
         } else {
           //Actualiza total del Asiento
           const totcre = +this.iAsiento.totcre + +this.formTransaci.get('valor')!.value
-          this.asiService.updateTotdebAndTotcre(this.idasiento, +this.iAsiento.totdeb, totcre).subscribe({
-            next: () => this.regresar(),
-            error: err => console.error('Al actualizar TotdebAndTotcre: ', err.error)
-          });
+          /*           this.asiService.updateTotdebAndTotcre(this.idasiento, +this.iAsiento.totdeb, totcre).subscribe({
+                      next: () => this.regresar(),
+                      error: err => console.error('Al actualizar TotdebAndTotcre: ', err.error)
+                    }); */
           // this.regresar()
         };
       },

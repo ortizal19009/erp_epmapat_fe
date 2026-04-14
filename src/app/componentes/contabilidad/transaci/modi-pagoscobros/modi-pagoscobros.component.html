@@ -119,42 +119,92 @@
                         </div>
                      </div>
 
-                     <div *ngIf="tiptran == 9 || tiptran == 12" class="form-group col-md-11 mb-2">
+                     <!-- <div *ngIf="tiptran == 9 || tiptran == 12" class="form-group col-md-11 mb-2">
                         <div class="input-group input-group-sm">
                            <div class="input-group-prepend">
-                              <label class="input-group-text" [ngClass]="{'bg-info': !ejecucio}">Cobrado
-                                 presupuestario</label>
+                              <label class="input-group-text"
+                                 [ngClass]="{'bg-info': !ejecucio}">{{txtPresupuestario}}</label>
                            </div>
-                           <input type="text" class="form-control col-sm-2" formControlName="codpar" readonly
-                              tabindex="-1">
-                           <div class="btn-group py-0">
-                              <button type="button" class="btn btn-info btn-xs dropdown-toggle py-0"
-                                 data-toggle="dropdown" aria-expanded="false" (click)="partidasPorNaturaleza()">
-                              </button>
-                              <div class="dropdown-menu dropdown-menu-left dropdownApp">
-                                 <button class="dropdown-item" type="button" *ngFor="let partida of presupue"
-                                    (click)="changePartida(partida)">
-                                    {{ partida.codpar }} {{ partida.nompar }}
-                                 </button>
-                              </div>
-                           </div>
+                           <input type="text" class="form-control form-control-sm col-sm-3" formControlName="intpre"
+                              autoFocus list="codparList" (input)="onPartidaSelected($event); partidaxCodpar($event)"
+                              [ngClass]="{'is-invalid': f['intpre'].invalid && f['intpre'].touched,'is-valid': f['intpre'].valid, '': f['intpre'].untouched}">
+                           <datalist role="listbox" id="codparList">
+                              <option *ngFor="let partida of presupue" value={{partida.codpar}}>
+                                 {{partida.nompar}}</option>
+                           </datalist>
                            <input type="text" class="form-control col-sm-7" formControlName="nompar" readonly
                               tabindex="-1">
                            <input type="text" class="form-control col-sm-2 text-right" formControlName="cobpagado"
                               appVisualFormat [minDecimals]="2" readonly tabindex="-1">
-                           <div class="input-group-append">
-                              <button class="btn btn-sm btn-primary" [disabled]="!swCobpagado" (click)="cobpagado()">
-                                 <i class="fa fa-save"></i>  {{txtCobpagado}}</button>
+                           <div *ngIf="txtCobpagado != 'noVisible' && txtCobpagado != 'Automático'"
+                              class="input-group-append">
+                              <button class="btn btn-sm btn-primary" (click)="cobpagado(true)">
+                                 <i class="fa fa-save"></i> {{txtCobpagado}}</button>
                            </div>
                         </div>
+                        <div *ngIf="authService.msgval && f['intpre'].errors && f['intpre'].touched">
+                           <div *ngIf="f['intpre'].errors['required']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> El Código de la Partida presupuestaria es obligatorio
+                           </div>
+                           <div *ngIf="f['intpre'].errors['invalido']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> No ha seleccionado una Partida
+                           </div>
+                           <div *ngIf="f['intpre'].errors['naturalezaInvalida']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> El Código de la Partida presupuestaria debe ser del Grupo
+                              {{naturaleza}}
+                           </div>
+                        </div>
+                     </div> -->
 
+                     <div *ngIf="tiptran == 9 || tiptran == 12" class="form-group col-md-11 mb-2">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text"
+                                 [ngClass]="{'bg-info': !ejecucio}">{{txtPresupuestario}}</label>
+                           </div>
+                           <input type="text" class="form-control form-control-sm col-sm-3" formControlName="codpar"
+                              autoFocus list="codparList" (input)="onPartidaSelected($event); partidaxCodpar($event)"
+                              [ngClass]="{'is-invalid': f['codpar'].invalid && f['codpar'].touched,'is-valid': f['codpar'].valid, '': f['codpar'].untouched}">
+                           <datalist role="listbox" id="codparList">
+                              <option *ngFor="let partida of presupue" value={{partida.codpar}}>
+                                 {{partida.nompar}}</option>
+                           </datalist>
+                           <input type="text" class="form-control col-sm-7" formControlName="nompar" readonly
+                              tabindex="-1">
+                           <input type="text" class="form-control col-sm-2 text-right" formControlName="cobpagado"
+                              appVisualFormat [minDecimals]="2" readonly tabindex="-1">
+                           <div *ngIf="txtCobpagado != 'noVisible' && txtCobpagado != 'Automático'"
+                              class="input-group-append">
+                              <button class="btn btn-sm btn-primary" (click)="cobpagado(true)">
+                                 <i class="fa fa-save"></i> {{txtCobpagado}}</button>
+                           </div>
+                        </div>
+                        <div *ngIf="authService.msgval && f['codpar'].errors && f['codpar'].touched">
+                           <div *ngIf="f['codpar'].errors['required']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> El Código de la Partida presupuestaria es obligatorio
+                           </div>
+                           <div *ngIf="f['codpar'].errors['invalido']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> No ha seleccionado una Partida
+                           </div>
+                           <div *ngIf="f['codpar'].errors['naturalezaInvalida']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> El Código de la Partida presupuestaria debe ser del Grupo
+                              {{naturaleza}}
+                           </div>
+                        </div>
                      </div>
 
                   </div>
 
                   <div class="text-center">
                      <button type="submit" class="btn btn-success btn-sm mx-1"
-                        [disabled]="formTransaci.pristine || !formTransaci.valid" (click)="guardarFilas()">
+                        [disabled]="formTransaci.pristine || !formTransaci.valid || swCobpagado"
+                        (click)="actualizFilas()">
                         <i class="fa fa-check-circle"></i> Aceptar</button>
                      <button type="button" class="btn btn-outline-success btn-sm mx-1" (click)="regresar()"><i
                            class="fa fa-times-circle"></i> Cancelar
@@ -193,8 +243,8 @@
                                        {{ fila.get('saldo')?.value | number:'1.2-2' }}
                                     </td>
                                     <td class="align-middle">{{fila.get('nomben')?.value}}</td>
-                                    <td class="py-0">
-                                       <input type="text" class="form-control form-control-sm text-right"
+                                    <td  class="py-0">
+                                       <input type="text" class="form-control form-control-sm text-right" [disabled]="true"
                                           formControlName="valor" (focus)="seleccionarTexto($event)" appVisualFormat
                                           [minDecimals]="2" [maxDecimals]="2"
                                           [ngClass]="{'is-invalid': fila.get('valor')?.invalid && fila.get('valor')?.touched,'is-valid': fila.get('valor')?.valid}">
@@ -205,19 +255,21 @@
                                              role="alert">
                                              <strong>Ups!</strong> El Valor es obligatorio
                                           </div>
-                                          <div *ngIf="registros.at(i).get('valor')?.errors?.['min']"
+                                          <div *ngIf="registros.at(i).get('valor')?.errors?.['signoInvalido']"
                                              class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border"
                                              role="alert">
-                                             <strong>Ups!</strong> No puede ser negativo
+                                             <strong>Ups!</strong>
+                                             {{registros.at(i).get('valor')?.errors?.['signoInvalido']?.mensaje
+                                             }}
                                           </div>
-                                          <div *ngIf="registros.at(i).get('valor')?.errors?.['saldoNegativo']"
+
+                                          <div *ngIf="registros.at(i).get('valor')?.errors?.['liquidaExcede']"
                                              class="alert alert-danger m-0 py-0 px-1 pr-0 robotosmall border"
                                              role="alert">
                                              <strong>Ups!</strong>
                                              No puede ser mayor que {{
-                                             registros.at(i).get('valor')?.errors?.['saldoNegativo']?.maxPermitido |
-                                             number:
-                                             '1.2-2' }}
+                                             registros.at(i).get('valor')?.errors?.['liquidaExcede']?.maxPermitido|number:'1.2-2'
+                                             }}
                                           </div>
 
                                        </div>

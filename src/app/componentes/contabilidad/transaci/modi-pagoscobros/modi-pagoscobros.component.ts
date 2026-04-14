@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, AsyncValidatorFn, FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, AsyncValidatorFn, FormArray, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { firstValueFrom, of } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
-import { EjecucioCreateDTO } from 'src/app/dtos/contabilidad/ejecucio.dto';
+import { EjecucioCreateDTO, EjecucioUpdateDTO } from 'src/app/dtos/contabilidad/ejecucio.dto';
 import { PagoscobrosUpdateDTO } from 'src/app/dtos/contabilidad/pagoscobros.dto';
 import { TransaciUpdateDTO } from 'src/app/dtos/contabilidad/transaci.dto';
 import { Documentos } from 'src/app/modelos/administracion/documentos.model';
@@ -52,7 +52,10 @@ export class ModiPagoscobrosComponent implements OnInit {
    anttotbene: number;
    formPagoscobros!: FormGroup;
    swCobpagado: boolean = false;
-   txtCobpagado: string = 'Guardar';
+   txtCobpagado: String = 'noVisible';
+   txtPresupuestario: string = 'Cobrado presupuestario';
+   intpre: number | null;
+   naturaleza: string;
    totales: { totBenextranValor: number; totTotpagcob: number; totSaldo: number; totValor: number; }
       = { totBenextranValor: 0, totTotpagcob: 0, totSaldo: 0, totValor: 0 };
 
@@ -67,8 +70,8 @@ export class ModiPagoscobrosComponent implements OnInit {
 
    ngOnInit(): void {
       if (!this.authService.sessionlog) { this.router.navigate(['/inicio']); }
-      sessionStorage.setItem('ventana', '/pagoscobros');
-      let coloresJSON = sessionStorage.getItem('/pagoscobros');
+      sessionStorage.setItem('ventana', '/add-pagoscobros');
+      let coloresJSON = sessionStorage.getItem('/add-pagoscobros');
       if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
       else this.buscaColor();
 
@@ -78,8 +81,8 @@ export class ModiPagoscobrosComponent implements OnInit {
       this.totDebe = +datosToModiTransaci.totDebe;
       this.totHaber = +datosToModiTransaci.totHaber;
       this.tiptran = datosToModiTransaci.tiptran;
+      if (this.tiptran == 12) this.txtPresupuestario = 'Pagado presupuestario'
       this.nombretiptran = nombreTiptran(this.tiptran)
-      // let debcre = 1;   //tiptran 2,3 y 4 => Debe  5,6 y 7 Haber
       if (datosToModiTransaci.tiptran > 4) { this.nomDebcre = 'Haber'; };
 
       this.formAsiento = this.fb.group({
@@ -99,8 +102,7 @@ export class ModiPagoscobrosComponent implements OnInit {
          numdoc: ['', Validators.required],
          descri: [''],
          registros: this.fb.array([]),
-         intpre: '',
-         codpar: '',
+         codpar: ['', Validators.required, this.valCodpar()],
          nompar: '',
          cobpagado: ''
       }, { updateOn: "blur" });
@@ -161,6 +163,7 @@ export class ModiPagoscobrosComponent implements OnInit {
             this.antidbene = transaci.idbene.idbene;
             this.antvalor = transaci.valor;
             this.anttotbene = transaci.totbene;
+            this.naturaleza = '61'  //transaci.idcuenta.codcue.slice(??)
             this.formTransaci.patchValue({
                orden: transaci.orden,
                intdoc: transaci.intdoc.intdoc,
@@ -175,7 +178,7 @@ export class ModiPagoscobrosComponent implements OnInit {
                   next: (ejecucio: Ejecucio | null) => {
                      this.ejecucio = ejecucio;
                      if (ejecucio) {
-                        this.txtCobpagado = 'Actualizar';
+                        this.intpre = ejecucio.intpre.intpre;
                         this.formTransaci.patchValue({
                            codpar: ejecucio.intpre.codpar,
                            nompar: ejecucio.intpre.nompar,
@@ -193,35 +196,37 @@ export class ModiPagoscobrosComponent implements OnInit {
 
    get f() { return this.formTransaci.controls; }
 
-   // Partidas por Naturaleza para cobrado/pagado
-   partidasPorNaturaleza() {
-      const naturaleza = '14'
-      this.presuService.findByNaturaleza(1, 1, naturaleza).subscribe({
-         next: (presupue: Presupue[]) => {
-            this.presupue = presupue;
-         },
-         error: err => { console.error(err.error); this.authService.mostrarError('Error al buscar la Transacción', err.error) }
-      });
+   //Datalist de codpar 
+   partidaxCodpar(e: any) {
+      if (e.target.value != '') {
+         this.presuService.findByCodpar(2, e.target.value).subscribe({
+            next: (partidas: Presupue[]) => this.presupue = partidas,
+            error: err => console.error(err.error),
+         });
+      }
    }
-
-   changePartida(partida: Presupue) {
-      this.f['intpre'].setValue(partida.intpre);
-      this.f['codpar'].setValue(partida.codpar);
-      this.swCobpagado = true;
-      this.f['nompar'].setValue(partida.nompar);
-      this.f['cobpagado'].setValue(this.f['valor'].value);
+   onPartidaSelected(e: any) {
+      const selectedOption = this.presupue.find((x: { codpar: any; }) => x.codpar === e.target.value);
+      if (selectedOption) {
+         this.intpre = selectedOption.intpre;
+         this.swCobpagado = true;
+         this.f['codpar'].setValue(selectedOption.codpar);
+         this.f['nompar'].setValue(selectedOption.nompar);
+         this.f['cobpagado'].setValue(this.f['valor'].value);
+         if (!this.ejecucio) {
+            this.txtCobpagado = 'Guardar'
+            this.registros.disable();
+         }
+         else this.txtCobpagado = 'Actualizar'
+      }
+      else {
+         this.intpre = null;
+         this.formTransaci.patchValue({ nompar: '' })
+      }
    }
 
    // Getter para acceder al FormArray
    get registros(): FormArray { return this.formTransaci.get('registros') as FormArray }
-
-   private getFilaCampoOld(index: number, campo: string): AbstractControl | null {
-      const fila = this.registros.at(index) as FormGroup | undefined;
-      if (!fila) { return null }
-      const control = fila.get(campo);
-      if (!control) { return null }
-      return control;
-   }
 
    // Crea un FormGroup para un registro
    crearRegistro(index: number): FormGroup {
@@ -232,7 +237,7 @@ export class ModiPagoscobrosComponent implements OnInit {
          idbene: '',
          nomben: '',
          benextran_valor: '',
-         valor: [0, [Validators.required, Validators.min(0)], [this.valValor()]],
+         valor: [0, [Validators.required], [this.valValor()]],
          antvalor: '',
          totpagcob: [0],
          saldo: [0],
@@ -248,17 +253,13 @@ export class ModiPagoscobrosComponent implements OnInit {
       // Suscripción al control 'valor' de esta fila para recalcular saldo
       fila.get('valor')!.valueChanges.subscribe(nuevoValorRaw => {
          const nuevoValor = Number(nuevoValorRaw) || 0;
-
          const antvalor = Number(fila.get('antvalor')!.value) || 0;
          const totpagcobActual = Number(fila.get('totpagcob')!.value) || 0;
          const benextranValor = Number(fila.get('benextran_valor')!.value) || 0;
-
          // Ajustar totpagcob: quitar el valor anterior y sumar el nuevo
          const totpagcobNuevo = totpagcobActual - antvalor + nuevoValor;
-
          // Recalcular saldo directamente
          const saldo = benextranValor - totpagcobNuevo;
-
          fila.patchValue({ totpagcob: totpagcobNuevo, saldo, antvalor: nuevoValor, estado: 2 }, { emitEvent: false });
          this.sumaTotales();
       });
@@ -275,7 +276,6 @@ export class ModiPagoscobrosComponent implements OnInit {
          saldo: pagoscobros.idbenxtra.valor - pagoscobros.idbenxtra.totpagcob,
          idpagcob: pagoscobros.idpagcob,
       });
-      // }
       this.registros.push(fila);
    }
 
@@ -304,19 +304,21 @@ export class ModiPagoscobrosComponent implements OnInit {
          this.totales.totValor += typeof valor === 'number' ? valor : 0;
       });
       this.formTransaci.get('valor')?.setValue(this.totales.totValor, { emitEvent: false });
+      if (this.ejecucio) {
+         this.formTransaci.get('cobpagado')?.setValue(this.totales.totValor, { emitEvent: false });
+         this.txtCobpagado = 'Automático'
+      }
    }
 
-   // Guarda las filas modificadas
-   async guardarFilas(): Promise<void> {
+   // Actualiza las filas modificadas
+   async actualizFilas(): Promise<void> {
       let swerror = false;
       for (let i = 0; i < this.registros.length; i++) {
          const fila = this.registros.at(i) as FormGroup;
          if (i == 0) this.primeridbene = fila.get('idbene')?.value;
-         // console.log('En el for this.primeridbene: ', this.primeridbene)
          if (fila.get('estado')?.value == 2) {
             const dtoPagoscobros: PagoscobrosUpdateDTO = {
                idbene: { idbene: fila.get('idbeneficiario')?.value },
-               // intpre?: { intpre: number },
                valor: fila.get('valor')?.value
             }
             try {
@@ -342,7 +344,7 @@ export class ModiPagoscobrosComponent implements OnInit {
       Swal.fire({
          icon: 'warning',
          title: 'Mensaje',
-         text: `Eliminar el Beneficiario: ${valoresFila.nomben} de ${this.nombretiptran.nombre} ?`,
+         text: `Eliminar ${this.nombretiptran.cabecera3} del Beneficiario: ${valoresFila.nomben} ?`,
          showCancelButton: true,
          confirmButtonText: '<i class="fa fa-check"></i> Aceptar',
          cancelButtonText: '<i class="fa fa-times"></i> Cancelar',
@@ -388,6 +390,7 @@ export class ModiPagoscobrosComponent implements OnInit {
    }
 
    actualizaTransaci(swregresar: boolean) {
+      if (this.txtCobpagado == 'Automático') this.cobpagado(false)
       // Crea el dto con los campos modificados (Todos son opcionales)
       const dtoTransaci: TransaciUpdateDTO = {};
       if (this.f['orden'].dirty) { dtoTransaci.orden = this.formTransaci.value.orden }
@@ -396,15 +399,14 @@ export class ModiPagoscobrosComponent implements OnInit {
       if (this.antvalor != this.f['valor'].value) { dtoTransaci.valor = this.f['valor'].value };
       if (this.f['descri'].dirty) { dtoTransaci.descri = this.f['descri'].value };
       if (this.antidbene != this.primeridbene) {
-         if (this.primeridbene == 0) { dtoTransaci.idbene = { idbene: 1 } }
+         if (this.primeridbene == 0) {
+            dtoTransaci.idbene = { idbene: 1 };
+            dtoTransaci.totbene = 0;
+         }
          else { dtoTransaci.idbene = { idbene: this.primeridbene } }
       }
       dtoTransaci.usumodi = this.authService.idusuario;
       dtoTransaci.fecmodi = new Date();
-      // if (Object.keys(dtoTransaci).length === 2) { // Solo tiene usumodi y fecmodi → no hubo cambios reales
-      //    // console.log("No hay cambios, no se envía actualización");
-      //    return;
-      // }
       this.tranService.updateTransa(this.inttra!, dtoTransaci).subscribe({
          next: () => {
             if (swregresar) {
@@ -418,62 +420,130 @@ export class ModiPagoscobrosComponent implements OnInit {
       });
    }
 
-   cobpagado() {
+   // Añade o actualiza Ejecución (cobpagado presupuestario)
+   cobpagado(mensaje: boolean) {
       if (this.txtCobpagado == 'Guardar') {
          let tipeje = 4;
          const dtoEjecucio: EjecucioCreateDTO = {
+            tipeje: tipeje,
+            intpre: { intpre: this.intpre! },
             codpar: this.formTransaci.value.codpar,
             fecha_eje: this.formAsiento.value.fecha,
-            tipeje: tipeje,
             modifi: 0,
             prmiso: 0,
             totdeven: 0,
             devengado: 0,
             cobpagado: this.formTransaci.value.valor,
             concep: this.formTransaci.value.descri,
-            usucrea: this.authService.idusuario,
-            feccrea: new Date(),
+            idrefo: 0,
+            idtrami: null,
             idasiento: this.idasiento,
             inttra: this.transaci.inttra,
-            intpre: { intpre: this.formTransaci.value.intpre },
-            idrefo: 0,
-            idtrata: 0
+            idparxcer: null,
+            idprmiso: null,
+            idtrata: 0,
+            usucrea: this.authService.idusuario,
+            feccrea: new Date(),
          }
          this.ejecuService.saveEjecu(dtoEjecucio).subscribe({
-            next: () => {
-               this.authService.swal('success', `Cobrado/Pagado guardado con éxito`)
-               // this.regresar()
+            next: (_ejecucio: Ejecucio) => {
+               this.authService.swal('success', `Cobrado/Pagado guardado con éxito`);
+               this.swCobpagado = false;
+               this.txtCobpagado = 'noVisible';
+               this.registros.enable();
             },
             error: err => { console.error(err.error); this.authService.mostrarError('Error al guardar Ejecucio', err.error) }
          });
       }
-      else {   //Actualizar cobpagado
-         let tipeje = 5;
-         
-         this.authService.swal('success', `FALTA Cobrado/Pagado actualizado con éxito`)
+      else {   //Actualiza cobpagado
+         if (this.txtCobpagado == 'Actualizar') {
+            // let intpre = this.formTransaci.value.intpre;
+            const dto: EjecucioUpdateDTO = {};
+            // No usar dirty (se colocan programáticamente)
+            { dto.intpre = { intpre: this.intpre! } };
+            { dto.codpar = this.formTransaci.value.codpar };
+            { dto.cobpagado = this.formTransaci.value.cobpagado };
+            dto.usumodi = this.authService.idusuario;
+            dto.fecmodi = new Date();
+            this.ejecuService.updateEjecucio(this.ejecucio!.inteje, dto).subscribe({
+               next: (_ejecucio: Ejecucio) => {
+                  if (mensaje) this.authService.swal('success', `Cobrado/Pagado actualizado con éxito`);
+                  this.swCobpagado = false;
+                  this.txtCobpagado = 'noVisible';
+               },
+               error: err => { console.error(err.error); this.authService.mostrarError('Error al actualizar Ejecucio', err.error) }
+            });
+         }
       }
    }
 
    regresar() { this.router.navigate(['/transaci']); }
 
-   // Valida 'valor', devuelve también maxPermitido
+   valCodpar(): AsyncValidatorFn {
+      return (control: AbstractControl) => {
+         if (this.intpre == null) { return of<ValidationErrors>({ invalido: true }); }
+         const valor: string = control.value ?? '';
+         const sub = valor.substring(3, 5);
+         if (sub !== this.naturaleza) { 
+            this.txtCobpagado = 'noVisible';
+            return of<ValidationErrors>({ naturalezaInvalida: true }); }
+         return of(null);
+      };
+   }
+
    valValor(): AsyncValidatorFn {
       return (control: AbstractControl) => {
          const fila = control.parent as FormGroup;
          if (!fila) return of(null);
-
          const nuevoValor = Number(control.value) || 0;
          const antvalor = Number(fila.get('antvalor')?.value) || 0;
          const totpagcobActual = Number(fila.get('totpagcob')?.value) || 0;
          const benextranValor = Number(fila.get('benextran_valor')?.value) || 0;
-
+         // Recalcular totpagcob con el nuevo valor
          const totpagcobNuevo = totpagcobActual - antvalor + nuevoValor;
-         const saldo = benextranValor - totpagcobNuevo;
 
-         // Si saldo < 0, devuelve error con el monto máximo permitido
-         if (saldo < 0) {
-            const maxPermitido = antvalor + (benextranValor - totpagcobActual);
-            return of({ saldoNegativo: { maxPermitido: maxPermitido } });
+         // Saldo original y saldo resultante
+         const saldoOriginal = benextranValor - totpagcobActual;
+         const saldoNuevo = benextranValor - totpagcobNuevo;
+
+         const esNegativo = benextranValor < 0;
+         const valorEsNegativo = nuevoValor < 0;
+         // --- REGLA DE SIGNO ---
+         if (esNegativo && !valorEsNegativo) {
+            return of({
+               signoInvalido: {
+                  // mensaje: `El ${this.tiptran.cabecera2} debe ser negativo`
+                  mensaje: `Debe ser negativo`
+               }
+            });
+         }
+         if (!esNegativo && valorEsNegativo) {
+            return of({
+               signoInvalido: {
+                  // mensaje: `El ${this.tiptran.cabecera2} debe ser positivo`
+                  mensaje: `Debe ser positivo`
+               }
+            });
+         }
+         // --- VALIDACIÓN DE EXCESO ---
+         if (esNegativo) {
+            // Si el saldo resultante queda positivo → excede
+            if (saldoNuevo > 0) {
+               return of({
+                  liquidaExcede: {
+                     maxPermitido: saldoOriginal
+                  }
+               });
+            }
+         } else {
+            // Saldo positivo → no puede exceder el saldo original
+            if (nuevoValor > saldoOriginal) {
+               return of({
+                  liquidaExcede: {
+                     maxPermitido: saldoOriginal
+                  }
+               });
+            }
          }
 
          return of(null);

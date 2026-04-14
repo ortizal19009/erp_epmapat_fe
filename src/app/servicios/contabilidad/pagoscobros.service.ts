@@ -12,48 +12,54 @@ const baseUrl = `${apiUrl}/pagoscobros`;
   providedIn: 'root'
 })
 
+
 export class PagoscobrosService {
 
-  constructor(private http: HttpClient) { }
+   constructor(private http: HttpClient) { }
 
-  //Liquidaciones de un Movimiento (benextran)
-  getByIdbenxtra(idbenxtra: number): Observable<Pagoscobros[]> {
-    // console.log(`${baseUrl}?idbenxtra=${idbenxtra}`)
-    return this.http.get<Pagoscobros[]>(`${baseUrl}?idbenxtra=${idbenxtra}`);
-  }
-  //Liquidaciones de un Movimiento (benextran) async
-  async getByIdbenxtraAsync(idbenxtra: number): Promise<any[]> {
-    const resp = await firstValueFrom(this.http.get<any[]>(`${baseUrl}?idbenxtra=${idbenxtra}`));
-    return resp;
-  }
+   //Liquidaciones de un Movimiento (benextran)
+   getByIdbenxtra(idbenxtra: number): Observable<Pagoscobros[]> {
+      // console.log(`${baseUrl}?idbenxtra=${idbenxtra}`)
+      return this.http.get<Pagoscobros[]>(`${baseUrl}?idbenxtra=${idbenxtra}`);
+   }
+   //Liquidaciones de un Movimiento (benextran) async
+   async getByIdbenxtraAsync(idbenxtra: number): Promise<any[]> {
+      const resp = await firstValueFrom(this.http.get<any[]>(`${baseUrl}?idbenxtra=${idbenxtra}`));
+      return resp;
+   }
 
-  //Pagoscobros de una transaci.inttra
-  obtenerPorInttra(inttra: number): Observable<Pagoscobros[]> {
-    return this.http.get<Pagoscobros[]>(`${baseUrl}/inttra/${inttra}`);
-  }
+   //Pagoscobros de una transaci.inttra
+   obtenerPorInttra(inttra: number): Observable<Pagoscobros[]> {
+      return this.http.get<Pagoscobros[]>(`${baseUrl}/inttra/${inttra}`);
+   }
 
-  //Pagoscobros de un benextran.idbenxtra
-  obtenerPorBenextran(idbenxtra: number): Observable<Pagoscobros[]> {
-    return this.http.get<Pagoscobros[]>(`${baseUrl}/idbenxtra/${idbenxtra}`);
-  }
+   //Pagoscobros de un benextran.idbenxtra
+   obtenerPorBenextran(idbenxtra: number): Observable<Pagoscobros[]> {
+      return this.http.get<Pagoscobros[]>(`${baseUrl}/idbenxtra/${idbenxtra}`);
+   }
 
-  //Guarda
-  save(x: Pagoscobros): Observable<Object> {
-    return this.http.post(`${baseUrl}`, x);
-  }
-  // Save usando DTO
-  savePagocobro(nuevo: PagoscobrosCreateDTO): Observable<Pagoscobros> {
-    return this.http.post<Pagoscobros>(`${baseUrl}`, nuevo);
-  }
+   //Cuenta los Pagoscobros de una transaci.inttra
+   countByInttra(inttra: number) {
+      return this.http.get<number>(`${baseUrl}/count/inttra/${inttra}`);
+   }
 
-  // Update Pagoscobros usando dto
-  updatePagoscobros(idpagcob: number, pagcobDTO: PagoscobrosUpdateDTO): Observable<Pagoscobros> {
-    return this.http.put<Pagoscobros>(baseUrl + "/" + idpagcob, pagcobDTO);
-  }
+   //Guarda
+   save(x: Pagoscobros): Observable<Object> {
+      return this.http.post(`${baseUrl}`, x);
+   }
+   // Save usando DTO
+   savePagocobro(nuevo: PagoscobrosCreateDTO): Observable<Pagoscobros> {
+      return this.http.post<Pagoscobros>(`${baseUrl}`, nuevo);
+   }
 
-  // Elimina (controlando 200, 204 y 500)
-  deletePagoscobros(idpagcob: number): Observable<any> {
-    return this.http.delete(`${baseUrl}/${idpagcob}`, { observe: 'response' });
-  }
+   // Update Pagoscobros usando dto
+   updatePagoscobros(idpagcob: number, pagcobDTO: PagoscobrosUpdateDTO): Observable<Pagoscobros> {
+      return this.http.put<Pagoscobros>(baseUrl + "/" + idpagcob, pagcobDTO);
+   }
+
+   // Elimina (controlando 200, 204 y 500)
+   deletePagoscobros(idpagcob: number): Observable<any> {
+      return this.http.delete(`${baseUrl}/${idpagcob}`, { observe: 'response' });
+   }
 
 }

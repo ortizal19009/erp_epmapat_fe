@@ -86,7 +86,7 @@ export class AddLiquiacfpComponent implements OnInit {
          usucrea: this.authService.idusuario,
          feccrea: date,
          nomben: ''
-      },{ updateOn: "blur" });
+      }, { updateOn: "blur" });
 
       this.datosAsiento();
       this.listarDocumentos();
@@ -165,13 +165,13 @@ export class AddLiquiacfpComponent implements OnInit {
       }
    }
 
-   blurNomben(){ this.nomben = this.formTransaci.get('nomben')!.value;   }
+   blurNomben() { this.nomben = this.formTransaci.get('nomben')!.value; }
 
    //Anticipos, CxC, F.Terceros y CxP de la cuenta seleccionada
    acfp() {
       const hasta = new Date(this.iAsiento.fecha);
       let nomben: string = '';
-      if (this.nomben != null ) nomben = this.nomben
+      if (this.nomben != null) nomben = this.nomben
       this.bxtService.getACFP(hasta, nomben, this.tiptran.numero - 6, this._cuentas[0].codcue).subscribe({
          next: datos => {
             this._benextran = datos;
@@ -254,10 +254,10 @@ export class AddLiquiacfpComponent implements OnInit {
             //Actualiza Totales del Asiento
             if (this.formTransaci.get('debcre')!.value == 1) this.totDebe = this.totDebe + +this.formTransaci.get('valor')!.value
             else this.totHaber = this.totHaber + +this.formTransaci.get('valor')!.value
-            this.asiService.updateTotdebAndTotcre(this.idasiento, +this.totDebe, +this.totHaber).subscribe({
+       /*      this.asiService.updateTotdebAndTotcre(this.idasiento, +this.totDebe, +this.totHaber).subscribe({
                next: () => this.regresar(),
                error: err => console.error(err.error)
-            });
+            }); */
          },
          error: (error) => {
             console.error('Error al guardar transaci:', error);

@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { PresupueUpdateDTO } from '@comercializacion/contabilidad/pregastos/modi-pregasto/modi-pregasto.component';
 import { firstValueFrom, Observable } from 'rxjs';
 
 import { Presupue } from 'src/app/modelos/contabilidad/presupue.model';
@@ -61,8 +62,14 @@ export class PregastoService {
       return this.http.post(baseUrl, pregas);
    }
 
-   updatePregasto(intpre: number, Presupue: Presupue): Observable<Object> {
-      return this.http.put(baseUrl + "/" + intpre, Presupue);
+   // updatePregasto(intpre: number, Presupue: Presupue): Observable<Presupue> {
+   //    return this.http.put<Presupue>(baseUrl + "/" + intpre, Presupue);
+   // }
+
+   // Actualiza solo modificados con dto
+   updatePartida(intpre: number, dto: PresupueUpdateDTO): Observable<Presupue> {
+      console.log(`${baseUrl}/${intpre}`)
+      return this.http.patch<Presupue>(`${baseUrl}/${intpre}`, dto);
    }
 
    deletePregasto(intpre: number): Observable<Object> {

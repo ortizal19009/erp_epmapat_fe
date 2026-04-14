@@ -19,6 +19,7 @@ import Swal from 'sweetalert2';
    styleUrls: ['./asientos.component.css'],
 })
 
+
 export class AsientosComponent implements OnInit {
 
    asientos: Asientos[] = [];
@@ -41,6 +42,7 @@ export class AsientosComponent implements OnInit {
       private reteService: RetencionesService, private elimService: EliminadosappService) { }
 
    ngOnInit(): void {
+      if (!this.authService.sessionlog) { this.router.navigate(['/inicio']); }
       sessionStorage.setItem('ventana', '/asientos');
       let coloresJSON = sessionStorage.getItem('/asientos');
       if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
@@ -150,7 +152,7 @@ export class AsientosComponent implements OnInit {
       let hastaNum: number = 999999999;
       if (this.formBuscar.value.hastaNum != null) { hastaNum = this.formBuscar.value.hastaNum; }
       //Busca Asientos
-      console.log('this.formBuscar.value.hastaFecha: ', this.formBuscar.value.hastaFecha)
+      // console.log('this.formBuscar.value.hastaFecha: ', this.formBuscar.value.hastaFecha)
       if (this.formBuscar.value.tipcom == 0)
          this.asiService.getAsientos(1, desdeNum, hastaNum,
             this.formBuscar.value.desdeFecha, this.formBuscar.value.hastaFecha).subscribe({
@@ -179,7 +181,6 @@ export class AsientosComponent implements OnInit {
    totales() {
       this.sumTotdeb = this.asientos.reduce((acc, a) => acc + (a.totdeb ?? 0), 0);
       this.sumTotcre = this.asientos.reduce((acc, a) => acc + (a.totcre ?? 0), 0);
-
    }
 
    busquedainicial() {
@@ -203,7 +204,7 @@ export class AsientosComponent implements OnInit {
          } else {    //Si se muestran comprobantes ultimo = actual
             hastaNum = asiento.asiento;
             desdeNum = hastaNum - 16
-            if (desdeNum < 1 ) desdeNum = 1
+            if (desdeNum < 1) desdeNum = 1
          }
          let datosToTransaci = {
             idasiento: asiento.idasiento,

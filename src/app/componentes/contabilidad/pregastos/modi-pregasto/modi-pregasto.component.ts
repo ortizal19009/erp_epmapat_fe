@@ -1,6 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AutorizaService } from '@compartida/autoriza.service';
+import { Clasificador } from '@modelos/clasificador.model';
+import { Cuentas } from '@modelos/contabilidad/cuentas.model';
+import { Estrfunc } from '@modelos/contabilidad/estrfunc.model';
+import { Presupue } from '@modelos/contabilidad/presupue.model';
+import { CuentasService } from '@servicios/contabilidad/cuentas.service';
 import { map } from 'rxjs';
 import { ClasificadorService } from 'src/app/servicios/clasificador.service';
 import { EjecucionService } from 'src/app/servicios/contabilidad/ejecucio.service';
@@ -15,18 +21,21 @@ import { PregastoService } from 'src/app/servicios/contabilidad/pregasto.service
 
 export class ModiPregastoComponent implements OnInit {
 
-   formPregasto: any;
+   formPregasto: FormGroup;
+   partida: Presupue;
    intpre: number;
-   _actividades: any;
-   _clasificador: any;
+   actividades: Estrfunc[] = [];
+   clasificador: Clasificador[] = [];
    antcodpar: String;
    codactividad: String;
    codificado: number;
    reformas: number;
    movimientos: boolean;
+   asocuentas: Cuentas[] = [];
 
    constructor(public fb: FormBuilder, public pregasService: PregastoService, private estrfuncService: EstrfuncService,
-      private clasiService: ClasificadorService, private router: Router, private ejecuService: EjecucionService) { }
+      private clasiService: ClasificadorService, private router: Router, private ejecuService: EjecucionService,
+      private cueService: CuentasService, private authService: AutorizaService) { }
 
    ngOnInit(): void {
       sessionStorage.setItem('ventana', '/pregastos');
@@ -36,30 +45,19 @@ export class ModiPregastoComponent implements OnInit {
       this.intpre = +sessionStorage.getItem("intpreGToModi")!;
 
       this.formPregasto = this.fb.group({
-         tippar: 2,
-         codigo: '',
          intest: '',
          codacti: ['', Validators.required],
          intcla: [, [Validators.required, Validators.minLength(8), Validators.maxLength(8)]],
          codpart: ['', Validators.required],
+         nomcla: '',
          codpar: ['', [Validators.required, Validators.minLength(17), Validators.maxLength(17)], this.valCodpar.bind(this)],
          nompar: [null, [Validators.required, Validators.minLength(3)]],
          inicia: ['', [Validators.required]],
-         totmod: [],
-         totcerti: [],
-         totmisos: '',
-         totdeven: '',
-         nomcla: '',
-         usucrea: 1,
-         feccrea: '',
-         usumodi: 1,
-         fecmodi: '',
-         swpluri: '',
-         codificado: 0
-      },
-         { updateOn: "blur" }
-      );
-      this.datosPargasto();
+         totmod: '',
+         codificado: ''
+      }, { updateOn: "blur" });
+
+      this.buscaPartida();
    }
 
    colocaColor(colores: any) {
@@ -71,33 +69,25 @@ export class ModiPregastoComponent implements OnInit {
       if (detalle) detalle.classList.add('nuevoBG2');
    }
 
-   datosPargasto() {
-      let date: Date = new Date();
+   buscaPartida() {
       this.pregasService.getById(this.intpre).subscribe({
-         next: datos => {
-            this.antcodpar = datos.codpar;
-            this.codactividad = datos.codacti;
-            this.reformas = datos.totmod;
-            this.codificado = datos.inicia + datos.totmod;
+         next: (partida: Presupue) => {
+            this.partida = partida;
+            this.antcodpar = partida.codpar;
+            this.codactividad = partida.codacti;
+            this.reformas = partida.totmod;
+            this.codificado = partida.inicia + partida.totmod;
             this.formPregasto.patchValue({
-               intest: datos.intest,
-               codacti: datos.codacti,
-               intcla: datos.intcla,
-               codpart: datos.codpart,
-               nompar: datos.nompar,
-               codpar: datos.codpar,
-               inicia: datos.inicia,
-               totcerti: datos.totcerti,
-               totmod: datos.totmod,
-               totmisos: datos.totmisos,
-               totdeven: datos.totdeven,
-               nomcla: datos.intcla.nompar,
-               usucrea: datos.usucrea,
-               feccrea: datos.feccrea,
-               usumodi: 1,
-               fecmodi: date,
-               swpluri: datos.swpluri,
-               codificado: datos.inicia + datos.totmod
+               intest: partida.intest,
+               codacti: partida.codacti,
+               intcla: partida.intcla,
+               codpart: partida.codpart,
+               nomcla: partida.intcla.nompar,
+               codpar: partida.codpar,
+               nompar: partida.nompar,
+               inicia: partida.inicia,
+               totmod: partida.totmod,
+               codificado: partida.inicia + partida.totmod
             });
             this.movimi()
          },
@@ -117,8 +107,8 @@ export class ModiPregastoComponent implements OnInit {
    listaActividades(e: any) {
       if (e.target.value != '') {
          this.estrfuncService.getCodigoNombre(e.target.value.toLowerCase()).subscribe({
-            next: datos => {
-               this._actividades = datos;
+            next: (estrfunc: Estrfunc[]) => {
+               this.actividades = estrfunc;
                this.codactividad = e.target.value;
                this.formPregasto.controls['codpar'].setValue(e.target.value);
             },
@@ -130,8 +120,8 @@ export class ModiPregastoComponent implements OnInit {
    listaClasificador(e: any) {
       if (e.target.value != '') {
          this.clasiService.getPartidasG(e.target.value.toLowerCase()).subscribe({
-            next: datos => {
-               this._clasificador = datos;
+            next: (clasificador: Clasificador[]) => {
+               this.clasificador = clasificador;
                this.formPregasto.controls['codpar'].setValue(this.codactividad + '.' + e.target.value);
             },
             error: err => console.error(err.error),
@@ -139,39 +129,42 @@ export class ModiPregastoComponent implements OnInit {
       }
    }
 
-   reinicia() {
-      if (this.formPregasto.get('codpar').value.length < 2) {
-         this.formPregasto.patchValue({
-            codacti: '',
-            codpart: '',
-         });
-         this.formPregasto.controls['codacti'].touched = false;
-         this.formPregasto.controls['codpart'].touched = false;
-      }
-      if (this.formPregasto.get('codpar').value.length < 11) {
-         this.formPregasto.patchValue({
-            codpart: '',
-         });
-         this.formPregasto.controls['codpart'].touched = false;
-      }
+   cuentasAsociadas() {
+      this.cueService.getByAsodebe(this.partida.codigo).subscribe({
+         next: (cuentas: Cuentas[]) => this.asocuentas = cuentas,
+         error: err => { console.error(err.error); this.authService.mostrarError('Error al recuperar las Cuentas asociadas', err.error) }
+      });
    }
 
-   onSubmit() {
-      const codpar: string = this.formPregasto.get('codpar').value;
-      this.formPregasto.value.codacti = codpar.substring(0, 2);
-      this.formPregasto.value.codigo = codpar.substring(3, 20);
-      this.formPregasto.value.codpart = codpar.substring(3, 11);
-      this.pregasService.updatePregasto(this.intpre, this.formPregasto.value).subscribe({
+   actualizar() {
+      const dto: PresupueUpdateDTO = {};   // Todos los campos opcionales
+      if (this.f['codacti'].dirty) { dto.codacti = this.f['codacti'].value; }
+      if (this.f['intest'].dirty) { dto.intest = { intest: this.f['intest'].value }; }
+      if (this.f['codpart'].dirty) { dto.codpart = this.f['codpart'].value; }
+      if (this.f['intcla']?.dirty) { dto.intcla = { intcla: this.f['intcla'].value }; }
+      if (this.f['codpar'].dirty) { 
+         dto.codpar = this.f['codpar'].value; 
+         dto.codigo = this.f['codpar'].value.substring(3, 20)
+      }
+      if (this.f['nompar'].dirty) { dto.nompar = this.f['nompar'].value; }
+      dto.usumodi = this.authService.idusuario;
+      dto.fecmodi = new Date();
+
+      const codpar: string = this.formPregasto.get('codpar')?.value;
+      this.pregasService.updatePartida(this.intpre, dto).subscribe({
          next: resp => {
             if (this.antcodpar != codpar) {
                this.ejecuService.actualizarCodpar(this.intpre, codpar).subscribe({
-                  next: nex => { },
-                  error: err => console.error(err.error)
+                  next: () => {
+                     // this.authService.swal('success', `Partida ${resp.codpar} actualizada con éxito`);
+                  },
+                  error: err => { console.error(err.error); this.authService.mostrarError('Error al actualizar Ejecución', err.error) }
                });
             }
+            this.authService.swal('success', `Partida ${resp.codpar} actualizada con éxito`);
             this.regresar();
          },
-         error: err => console.error(err.error)
+         error: err => { console.error(err.error); this.authService.mostrarError('Error al actualizar', err.error) }
       });
    }
 
@@ -184,4 +177,18 @@ export class ModiPregastoComponent implements OnInit {
          );
    }
 
+}
+
+export interface PresupueUpdateDTO {
+   codacti?: String;
+   intest?: { intest: number | null };
+   codpart?: String;
+   intcla?: { intcla: number | null };
+   codpar?: String;
+   codigo?: String;
+   nompar?: String;
+   inicia?: number;
+   swpluri?: number;
+   usumodi?: number;
+   fecmodi?: Date;
 }

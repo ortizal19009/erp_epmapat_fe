@@ -69,8 +69,7 @@ export class CuentasService {
 
    //Cuentas asociadas a una Parttida (Al debe)
    getByAsodebe(asodebe: String) {
-      // console.log(`${baseUrl}?asodebe=${asodebe}`)
-      return this.http.get<Cuentas[]>(`${baseUrl}?asodebe=${asodebe}`);
+      return this.http.get<Cuentas[]>(`${baseUrl}/porAsodebe?asodebe=${asodebe}`);
    }
 
    //Cuentas por Tiptran
