@@ -101,6 +101,10 @@
   border-radius: 10px;
 }
 
+.test-mail-panel {
+  border-color: rgba(23, 92, 211, .12) !important;
+}
+
 .overlay,
 .modal-overlay {
   position: fixed;

@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { Subscription, forkJoin, of, timer } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 import { EmailAdminService } from './email-admin.service';
 import {
   BLACKLIST_TYPE_OPTIONS,
@@ -37,7 +38,7 @@ import { EmailStatusBadgeComponent } from './components/email-status-badge.compo
   templateUrl: './email-admin.component.html',
   styleUrls: ['./email-admin.component.css'],
 })
-export class EmailAdminComponent implements OnInit {
+export class EmailAdminComponent implements OnInit, OnDestroy {
   readonly transportOptions = EMAIL_TRANSPORT_OPTIONS;
   readonly securityOptions = EMAIL_SECURITY_OPTIONS;
   readonly defaultUseOptions = EMAIL_DEFAULT_USE_OPTIONS;
@@ -72,8 +73,10 @@ export class EmailAdminComponent implements OnInit {
   blacklistTypeFilter = 'ALL';
   blacklistStatusFilter = 'ALL';
 
+  testAccountId: number | null = null;
   testEmailRecipient = '';
   sendingTestEmail = false;
+  private testEmailMonitor?: Subscription;
 
   accountDrawerOpen = false;
   composeDrawerOpen = false;
@@ -142,6 +145,10 @@ export class EmailAdminComponent implements OnInit {
     this.accountForm.get('authRequired')?.valueChanges.subscribe(() => this.applyTransportValidators());
     this.applyTransportValidators();
     this.loadAll();
+  }
+
+  ngOnDestroy(): void {
+    this.testEmailMonitor?.unsubscribe();
   }
 
   get summaryCards() {
@@ -230,6 +237,9 @@ export class EmailAdminComponent implements OnInit {
         this.accounts = accounts;
         this.emails = emails;
         this.blacklist = blacklist;
+        if (this.testAccountId && !this.accounts.some((item) => item.id === this.testAccountId)) {
+          this.testAccountId = null;
+        }
         this.loading = false;
       },
       error: () => {
@@ -264,8 +274,8 @@ export class EmailAdminComponent implements OnInit {
       defaultAccount: false,
       defaultForType: 'GENERAL',
     });
+    this.applyLegacyFacturaSmtpDefaults(false);
     this.applyTransportValidators();
-    this.testEmailRecipient = '';
     this.accountDrawerOpen = true;
   }
 
@@ -295,7 +305,6 @@ export class EmailAdminComponent implements OnInit {
       defaultForType: account.defaultForType,
     });
     this.applyTransportValidators();
-    this.testEmailRecipient = account.replyTo || account.fromAddress || '';
     this.accountDrawerOpen = true;
   }
 
@@ -352,10 +361,18 @@ export class EmailAdminComponent implements OnInit {
   }
 
   openEmailDetail(email: EmailLog): void {
-    this.selectedEmail = email;
     this.selectedAccount = this.accounts.find((item) => item.id === email.accountId) || null;
     this.detailMode = 'email';
     this.detailDrawerOpen = true;
+    this.selectedEmail = email;
+    this.emailAdminService.getEmailById(email.id).subscribe({
+      next: (detail) => {
+        this.selectedEmail = detail;
+      },
+      error: () => {
+        this.showToast('No fue posible cargar el detalle completo del correo.', 'warning');
+      },
+    });
   }
 
   openCompose(email: EmailLog, mode: 'retry' | 'edit-resend'): void {
@@ -470,12 +487,12 @@ export class EmailAdminComponent implements OnInit {
   }
 
   canSendTestEmail(): boolean {
-    return !!this.selectedAccount?.id && this.isValidEmail(this.testEmailRecipient) && !this.sendingTestEmail;
+    return !!this.testAccountId && this.isValidEmail(this.testEmailRecipient) && !this.sendingTestEmail;
   }
 
   sendTestEmail(): void {
-    if (!this.selectedAccount?.id) {
-      this.showToast('Primero guarda la cuenta para poder enviar un correo de prueba.', 'warning');
+    if (!this.testAccountId) {
+      this.showToast('Selecciona una cuenta guardada para poder enviar un correo de prueba.', 'warning');
       return;
     }
     if (!this.isValidEmail(this.testEmailRecipient)) {
@@ -484,11 +501,11 @@ export class EmailAdminComponent implements OnInit {
     }
 
     this.sendingTestEmail = true;
-    this.emailAdminService.sendTestEmail(this.selectedAccount.id, this.testEmailRecipient).subscribe({
-      next: () => {
-        this.sendingTestEmail = false;
-        this.showToast('Correo de prueba enviado a ' + this.testEmailRecipient + '.', 'success');
+    this.emailAdminService.sendTestEmail(this.testAccountId, this.testEmailRecipient).subscribe({
+      next: (queuedEmail) => {
+        this.showToast('Correo de prueba encolado para ' + this.testEmailRecipient + '. Verificando entrega...', 'info');
         this.loadAll();
+        this.monitorTestEmail(queuedEmail.id, this.testEmailRecipient);
       },
       error: (error: any) => {
         this.sendingTestEmail = false;
@@ -497,8 +514,67 @@ export class EmailAdminComponent implements OnInit {
     });
   }
 
+  applyLegacyFacturaSmtpDefaults(preserveCurrentValues = true): void {
+    const current = this.accountForm.getRawValue() as any;
+    const fromAddress = preserveCurrentValues ? (current.fromAddress || '') : '';
+    const nextUsername = (preserveCurrentValues ? current.username : '') || fromAddress;
+    this.accountForm.patchValue({
+      provider: current.provider || 'CMAGINET SMTP',
+      transportType: 'SMTP',
+      host: 'smtp.cmaginet.net',
+      port: 465,
+      protocol: 'smtp',
+      securityType: 'SSL_TLS',
+      authRequired: true,
+      replyTo: current.replyTo || fromAddress,
+      username: nextUsername,
+    });
+    this.applyTransportValidators();
+    this.showToast('Se cargó la configuración SMTP legacy de facturación. Revisa usuario, remitente y contraseña antes de guardar.', 'info');
+  }
+
   private isValidEmail(value: string): boolean {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
+  }
+
+  private monitorTestEmail(emailId: string, recipient: string): void {
+    let pollCount = 0;
+    this.testEmailMonitor?.unsubscribe();
+    this.testEmailMonitor = timer(2000, 2000).pipe(
+      switchMap(() => this.emailAdminService.getEmailById(emailId).pipe(catchError(() => of(null))))
+    ).subscribe((email) => {
+      pollCount += 1;
+
+      if (!email) {
+        this.sendingTestEmail = false;
+        this.showToast('No fue posible consultar el estado del correo de prueba.', 'warning');
+        this.testEmailMonitor?.unsubscribe();
+        return;
+      }
+
+      if (email.state === 'SENT') {
+        this.sendingTestEmail = false;
+        this.loadAll();
+        this.showToast('Correo de prueba entregado a ' + recipient + '.', 'success');
+        this.testEmailMonitor?.unsubscribe();
+        return;
+      }
+
+      if (email.state === 'FAILED') {
+        this.sendingTestEmail = false;
+        this.loadAll();
+        this.showToast(email.lastError || 'El correo de prueba fallo durante el envio.', 'danger');
+        this.testEmailMonitor?.unsubscribe();
+        return;
+      }
+
+      if (pollCount >= 12) {
+        this.sendingTestEmail = false;
+        this.loadAll();
+        this.showToast('El correo de prueba sigue pendiente en la cola. Revisa intentos y ultimo error.', 'warning');
+        this.testEmailMonitor?.unsubscribe();
+      }
+    });
   }
 
   private applyTransportValidators(): void {

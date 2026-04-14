@@ -147,6 +147,35 @@
             (test)="testConnection($event)"
             (makeDefault)="markAsDefault($event)">
           </app-email-accounts-table>
+
+          <div class="mt-3 border rounded p-3 bg-white test-mail-panel">
+            <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
+              <div>
+                <div class="font-weight-bold">Enviar correo de prueba</div>
+                <div class="small text-muted">Prueba una cuenta ya guardada sin entrar al formulario de creación o edición.</div>
+              </div>
+            </div>
+            <div class="row align-items-end">
+              <div class="col-md-5 mb-2">
+                <label class="small font-weight-bold">Cuenta de envío</label>
+                <select class="custom-select custom-select-sm" [(ngModel)]="testAccountId">
+                  <option [ngValue]="null">Selecciona una cuenta</option>
+                  <option *ngFor="let account of accounts" [ngValue]="account.id">
+                    {{ account.name }} ({{ account.code }})
+                  </option>
+                </select>
+              </div>
+              <div class="col-md-5 mb-2">
+                <label class="small font-weight-bold">Correo destino de prueba</label>
+                <input type="email" class="form-control form-control-sm" [(ngModel)]="testEmailRecipient" placeholder="usuario@dominio.com">
+              </div>
+              <div class="col-md-2 mb-2 text-md-right">
+                <button type="button" class="btn btn-sm btn-outline-info w-100" (click)="sendTestEmail()" [disabled]="!canSendTestEmail()">
+                  <i class="bi bi-envelope-paper"></i>&nbsp; {{ sendingTestEmail ? 'Probando...' : 'Enviar prueba' }}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="mt-2 sombra border rounded detalle p-3" *ngIf="activeSection === 'emails'">
@@ -254,7 +283,12 @@
       </div>
 
       <div class="border rounded p-2 mb-3" *ngIf="transportType() === 'SMTP'">
-        <div class="small font-weight-bold text-info mb-2">Configuración SMTP</div>
+        <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
+          <div class="small font-weight-bold text-info">Configuración SMTP</div>
+          <button type="button" class="btn btn-sm btn-outline-info mt-2 mt-md-0" (click)="applyLegacyFacturaSmtpDefaults()">
+            <i class="bi bi-magic"></i>&nbsp; Usar SMTP de facturación
+          </button>
+        </div>
         <div class="alert alert-light py-2 small mb-2">
           Para <strong>SMTP</strong> normalmente son obligatorios host, puerto, protocolo, seguridad y, si el servidor lo exige, usuario y contraseña.
         </div>
@@ -287,26 +321,6 @@
         <div class="col-md-6"><div class="form-group mb-2"><label class="small font-weight-bold d-block">Cuenta predeterminada</label><input type="checkbox" formControlName="defaultAccount"><small class="text-muted d-block">Opcional. Marca esta opción solo si quieres que sea la cuenta principal para el tipo de uso seleccionado.</small></div></div>
       </div>
     </form>
-
-    <div class="px-3 pb-2">
-      <div class="border rounded p-2 bg-light">
-        <div class="small font-weight-bold text-info mb-2">Enviar correo de prueba</div>
-        <div class="small text-muted mb-2">Usa esta opción para comprobar que una cuenta ya guardada realmente puede encolar un mensaje hacia el correo que tú indiques.</div>
-        <div class="row align-items-end">
-          <div class="col-md-8 mb-2">
-            <label class="small font-weight-bold">Correo destino de prueba</label>
-            <input type="email" class="form-control form-control-sm" [(ngModel)]="testEmailRecipient" [ngModelOptions]="{standalone: true}" placeholder="usuario@dominio.com">
-            <small class="text-muted">Disponible solo para cuentas ya existentes. Si estás creando una cuenta nueva, primero guárdala.</small>
-          </div>
-          <div class="col-md-4 mb-2 text-md-right">
-            <button type="button" class="btn btn-sm btn-outline-info" (click)="sendTestEmail()" [disabled]="!canSendTestEmail()">
-              <i class="bi bi-envelope-paper"></i>&nbsp; {{ sendingTestEmail ? 'Enviando...' : 'Enviar prueba' }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div class="card-footer text-center">
       <button type="button" class="btn btn-sm btn-outline-secondary mr-2" (click)="accountDrawerOpen = false"><i class="bi bi-x-circle"></i>&nbsp; Cancelar</button>
       <button type="button" class="btn btn-sm btn-success" (click)="submitAccount()"><i class="bi bi-check-circle"></i>&nbsp; Guardar cuenta</button>

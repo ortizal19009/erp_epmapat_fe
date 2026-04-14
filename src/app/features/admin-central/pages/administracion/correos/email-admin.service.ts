@@ -47,8 +47,14 @@ export class EmailAdminService {
   }
 
   getEmails(): Observable<EmailLog[]> {
-    return this.http.get<unknown>(this.url(this.endpoints.emails)).pipe(
+    return this.http.get<unknown>(this.url(`${this.endpoints.emails}?size=200`)).pipe(
       map((response) => this.extractCollection(response).map((item) => this.mapEmail(item)))
+    );
+  }
+
+  getEmailById(emailId: string): Observable<EmailLog> {
+    return this.http.get<unknown>(this.url(this.endpoints.emailDetail(emailId))).pipe(
+      map((response) => this.mapEmail(response))
     );
   }
 
@@ -101,17 +107,19 @@ export class EmailAdminService {
     return this.http.post<unknown>(this.url(this.endpoints.cancelEmail(emailId)), {}).pipe(map(() => void 0));
   }
 
-  sendTestEmail(accountId: number, to: string): Observable<void> {
-    const payload = {
+  sendTestEmail(accountId: number, to: string): Observable<EmailLog> {
+    const compose: EmailComposeFormValue = {
       accountId,
-      to: [this.toText(to)],
-      cc: [],
-      bcc: [],
+      to: this.toText(to),
+      cc: '',
+      bcc: '',
       subject: 'Prueba de configuracion de correo',
       body: '<p>Este es un correo de prueba enviado desde el modulo de administracion de correos.</p>',
     };
 
-    return this.http.post<unknown>(this.url(this.endpoints.sendCustom), payload).pipe(map(() => void 0));
+    return this.http.post<unknown>(this.url(this.endpoints.sendCustom), this.buildSendEmailPayload(compose)).pipe(
+      map((response) => this.mapQueuedEmailResponse(response, compose))
+    );
   }
 
   saveBlacklist(formValue: BlacklistFormValue, editingId?: number): Observable<EmailBlacklistEntry> {
@@ -180,7 +188,8 @@ export class EmailAdminService {
       cc: this.parseList(compose.cc),
       bcc: this.parseList(compose.bcc),
       subject: this.toText(compose.subject),
-      body: this.toText(compose.body),
+      html: this.toText(compose.body),
+      text: this.stripHtml(this.toText(compose.body)),
     };
   }
 
@@ -274,10 +283,10 @@ export class EmailAdminService {
       lastError: this.toText(raw?.lastError ?? raw?.error ?? raw?.ultimoError),
       createdAt: this.toText(raw?.createdAt ?? raw?.fechaCreacion ?? new Date().toISOString()),
       sentAt: this.nullableText(raw?.sentAt ?? raw?.fechaEnvio),
-      body: this.toText(raw?.body ?? raw?.contenidoHtml ?? raw?.contenido),
+      body: this.toText(raw?.bodyHtml ?? raw?.body ?? raw?.contenidoHtml ?? raw?.contenido ?? raw?.bodyText),
       attachments: Array.isArray(attachmentSource)
         ? attachmentSource.map((item: any) => ({
-            name: this.toText(item?.name ?? item?.nombre),
+            name: this.toText(item?.name ?? item?.nombre ?? item?.filename),
             sizeLabel: this.resolveAttachmentSize(item),
           }))
         : [],
@@ -325,6 +334,10 @@ export class EmailAdminService {
       .split(',')
       .map((item) => item.trim())
       .filter(Boolean);
+  }
+
+  private stripHtml(value: string): string {
+    return value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
   }
 
   private toText(value: unknown, fallback = ''): string {
