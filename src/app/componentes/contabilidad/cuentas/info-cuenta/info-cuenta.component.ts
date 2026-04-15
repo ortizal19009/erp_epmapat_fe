@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AutorizaService } from '@compartida/autoriza.service';
 import { CuentasService } from 'src/app/servicios/contabilidad/cuentas.service';
 import { TransaciService } from 'src/app/servicios/contabilidad/transaci.service';
 
@@ -21,7 +22,7 @@ export class InfoCuentaComponent implements OnInit {
    sumhaber: number;
 
    constructor(private router: Router, private fb: FormBuilder, private cueService: CuentasService,
-      private traService: TransaciService) { }
+      private traService: TransaciService, private authService: AutorizaService) { }
 
    ngOnInit(): void {
       sessionStorage.setItem('ventana', '/cuentas');
@@ -30,7 +31,7 @@ export class InfoCuentaComponent implements OnInit {
 
       //codcue enviada desde cuentas
       this.codcue = sessionStorage.getItem('codcueToInfo')!;
-      
+
       //Fechas guardadas o actuales
       let desde: string; let hasta: string;
       const fechasMayorJSON = sessionStorage.getItem('fechasMayor');
@@ -39,11 +40,12 @@ export class InfoCuentaComponent implements OnInit {
          desde = fechasMayor.desde
          hasta = fechasMayor.hasta
       } else {
-         const fechaActual = new Date();
-         hasta = fechaActual.toISOString().slice(0, 10);
-         let fechaRestada: Date = new Date();
-         fechaRestada.setMonth(fechaActual.getMonth() - 1);
-         desde = fechaRestada.toISOString().slice(0, 10);
+         const año = this.authService.getDatosEmpresa()!.fechap.toString().slice(0, 4)
+         let date: Date = new Date();
+         let fecha = date.toISOString();
+         desde = año + fecha.slice(4,7) + '-01'
+         hasta = año + fecha.slice(4,10)
+         console.log(fecha, desde, hasta)
       }
       this.formFechas = this.fb.group({
          codcue: this.codcue,
@@ -134,6 +136,7 @@ export class InfoCuentaComponent implements OnInit {
    }
 
    regresar() { this.router.navigate(['/cuentas']); }
+   cerrar() { this.router.navigate(['/inicio']); }
 
    imprimir() {
       let codcue = this.formFechas.value.codcue;

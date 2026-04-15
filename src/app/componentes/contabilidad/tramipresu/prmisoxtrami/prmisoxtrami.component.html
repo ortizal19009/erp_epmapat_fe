@@ -1,59 +1,84 @@
 <div class="content mt-1 pt-1 pl-0">
    <div class="container-fluid">
       <div class="row m-0 px-0 py-1 justify-content-start sombra cabecera border">
-         <div class="col-sm-12 p-0.">
+         <div class="col-sm-12">
             <div class="row p-0">
                <div class="input-group input-group-sm col-sm-2 mb-1 ml-0">
                   <div class="input-group-prepend">
-                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Trámite</span>
+                     <label class="input-group-text" id="inputGroup-sizing-sm">Trámite</label>
                   </div>
                   <input type="text" class="form-control text-center" aria-label="Sizing example input"
-                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iTramite.numero" readonly>
+                     aria-describedby="inputGroup-sizing-sm" [value]="iTramite.numero" readonly tabindex="-1">
+
+                  <div class="dropdown input-group-apppend">
+                     <button type="button" class="btn btn-xs dropdown-toggle btn-info pb-2" data-toggle="dropdown"
+                        (click)="actual()" aria-expanded="false" [disabled]="swmodificar">
+                     </button>
+                     <div class="dropdown-menu dropdown-menu-left border roboto sombra bg-info py-0"
+                        (click)="$event.stopPropagation()">
+                        <div class="p-1 text-center text-white">
+                           <!-- Barra de navegación -->
+                           <div class="btn-group btn-group-sm" role="group">
+                              <button class="btn btn-info" (click)="irPrimero()">⏮</button>
+                              <button class="btn btn-info" (click)="retroceder()">◀</button>
+                              <input #nav type="number"
+                                 class="form-control form-control-sm text-center nav-input nav-input-wide"
+                                 [(ngModel)]="navegador" [ngModelOptions]="{standalone: true}"
+                                 (keyup.enter)="irA(navegador)" (change)="irA(navegador)" min="1">
+                              <button class="btn btn-info" (click)="avanzar()">▶</button>
+                              <button class="btn btn-info" (click)="irUltimo()">⏭</button>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
                </div>
                <div class="input-group input-group-sm col-sm-2 mb-1 mr-0 ">
                   <div class="input-group-prepend">
-                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Fecha</span>
+                     <label class="input-group-text" id="inputGroup-sizing-sm">Fecha</label>
                   </div>
-                  <input type="text" class="form-control text-center" aria-label="Sizing example input"
-                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iTramite.fecha" readonly>
+                  <input type="date" class="form-control text-center" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [value]="iTramite.fecha" readonly>
                </div>
                <div class="input-group input-group-sm col-sm-3 mb-1 ml-0">
                   <div class="input-group-prepend">
-                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Doc</span>
+                     <label class="input-group-text" id="inputGroup-sizing-sm">Doc</label>
                   </div>
                   <input type="text" class="form-control" aria-label="Sizing example input"
-                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iTramite.docu" readonly>
+                     aria-describedby="inputGroup-sizing-sm" [value]="iTramite.docu" readonly>
                </div>
-               <div class="input-group input-group-sm col-sm-4 mb-1 ml-0">
+               <div class="input-group input-group-sm col-sm-5 mb-1 ml-0">
                   <div class="input-group-prepend">
-                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Beneficiario</span>
+                     <label class="input-group-text" id="inputGroup-sizing-sm">Beneficiario</label>
                   </div>
                   <input type="text" class="form-control" aria-label="Sizing example input"
-                     aria-describedby="inputGroup-sizing-sm" [(ngModel)]="iTramite.beneficiario" readonly tabindex="-1">
-               </div>
-
-               <div class="btn-group ml-auto mt-0 px-0">
-                  <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
-                     data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
-                  </button>
-
-                  <div class="dropdown-menu dropdown-menu-right bg-dark roboto px-0">
-                     <button class="dropdown-item" type="button" [disabled]="swnuevo || swmodificar" (click)="nuevo()">
-                        <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
-                     <button class="dropdown-item" type="button">
-                        <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
-                  </div>
-
-                  <div class="col-sm px-0">
-                     <button class="bg-transparent border-0" type="submit" (click)="regresar()">
-                        <i class="bi-arrow-left-circle text-white icoRegresar"></i>
+                     aria-describedby="inputGroup-sizing-sm" [value]="iTramite.beneficiario" readonly tabindex="-1">
+                  <div class="btn-group ml-auto mt-0 px-0">
+                     <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
+                        data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
                      </button>
+
+                     <div class="dropdown-menu dropdown-menu-right bg-dark roboto px-0">
+                        <button class="dropdown-item" type="button" [disabled]="swmodificar" (click)="nuevo()">
+                           <i class="bi-file-earmark-plus text-info"></i>&nbsp; Nuevo</button>
+                        <button class="dropdown-item" type="button">
+                           <i class="bi bi-printer text-info"></i>&nbsp; Imprimir / Exportar</button>
+                        <!-- <button class="dropdown-item" type="button" (click)="regresar()">
+                           <i class="bi-arrow-left-circle text-info"></i>&nbsp; Regresar
+                        </button> -->
+                        <button class="dropdown-item" type="button" [class.disabled]="padre === 'Ninguno'"
+                           [style.pointer-events]="padre === 'ninguno' ? 'none' : 'auto'"
+                           (click)="padre !== 'Ninguno' && regresar()">
+                           <i class="bi-arrow-left-circle" [class.text-muted]="padre === 'Ninguno'"
+                              [class.text-info]="padre !== 'Ninguno'"></i>&nbsp; Regresar
+                        </button>
+                        <button class="dropdown-item" type="button" (click)="cerrar()">
+                           <i class="bi-x-circle text-info"></i>&nbsp; Cerrar</button>
+                     </div>
                   </div>
                </div>
             </div>
-
          </div>
-
       </div>
    </div>
 </div>
@@ -61,14 +86,13 @@
 <div class="container-fluid">
    <div class="row mb-0">
       <div class="col-sm-12">
-         <table class="table table-hover table-bordered table-sm sombra">
+         <table *ngIf="compromisos.length > 0" class="table table-hover table-bordered table-sm sombra">
             <thead class="cabecera">
                <tr class="pad0">
                   <th>Partida</th>
                   <th>Denominación</th>
-                  <th>Certifi</th>
+                  <th class="text-center">Certifi</th>
                   <th class="text-right">Compromiso</th>
-                  <th class="text-center">D</th>
                   <th class="text-right">Devengado</th>
                   <th>Descripción</th>
                   <th class="text-center">
@@ -82,32 +106,85 @@
                </tr>
             </thead>
             <tbody class="detalle roboto small pad0">
-               <tr class="fila" *ngFor="let prmisoxtrami of _prmisoxtrami">
-                  <td>{{ prmisoxtrami.intpre.codpar}}</td>
-                  <td class="text-truncate ancho toolt" data-toggle="tooltip"
-                     [title]="prmisoxtrami.intpre.nompar.length > 60 ? prmisoxtrami.intpre.nompar : ''">{{
-                     prmisoxtrami.intpre.nompar }}</td>
-                  <td class="text-center">{{ prmisoxtrami.certificacion }}</td>
-                  <td class="text-right">{{ prmisoxtrami.prmiso | number: '1.2-2'}}</td>
-                  <td class="bg-modificar text-center">
-                     <i *ngIf="prmisoxtrami.inteje > 0" class="bi-check-circle " (click)="handleClick( prmisoxtrami )"
-                        data-toggle="tooltip" title="Compromiso(s)"></i>
+               <tr class="fila" *ngFor="let compromiso of compromisos">
+                  <!-- <td class="fila cursor" data-toggle="tooltip" title="Abrir la Partida en otra pestaña">{{
+                     compromiso.intpre.codpar}}</td> -->
+                  <td>{{compromiso.intpre.codpar}}</td>
+                  <td class="text-truncate ancho300" data-toggle="tooltip"
+                     [ngClass]="{'toolt': compromiso.intpre.nompar.length > 60}"
+                     [title]="compromiso.intpre.nompar.length > 60 ? compromiso.intpre.nompar : ''">{{
+                     compromiso.intpre.nompar }}</td>
+                  <td class="fila cursor text-center" data-toggle="tooltip" (click)="abrirCertipresu(compromiso)"
+                     title="Abrir la Certificación en otra pestaña">{{ compromiso.partixcerti?.idcerti?.numero }}</td>
+                  <td class="text-right">{{ compromiso.prmiso | number: '1.2-2'}}</td>
+
+                  <td class="text-right" [ngClass]="{'transparente': compromiso.totdeven == 0}">
+                     {{compromiso.totdeven|number: '1.2-2'}}
+                     <button *ngIf="compromiso.totdeven > 0" type="button"
+                        class="btn btn-info btn-xs dropdown-toggle py-0 ml-1" data-toggle="dropdown"
+                        aria-expanded="false" (click)="buscaDevengados(compromiso.inteje)">
+                     </button>
+                     <div class="dropdown-menu dropdown-menu-right py-0">
+                        <table class="table table-hover table-bordered table-sm sombra mb-0 robotosmall">
+                           <thead>
+                              <tr class="pad0 bg-info">
+                                 <th colspan="2" class="text-center">Asiento</th>
+                                 <th class="text-center">Fecha</th>
+                                 <th class="text-right">Valor</th>
+                                 <th class="text-left">Concepto</th>
+                              </tr>
+                           </thead>
+                           <tbody *ngIf="devengados && devengados.length > 0" class="detalle">
+                              <tr *ngFor="let ejecu of devengados">
+                                 <ng-container *ngIf="ejecu.asiento">
+                                    <td class="fila cursor text-center" (click)="abrirAsiento(ejecu.asiento)"
+                                       data-toggle="tooltip" title="Abrir el Asiento en otra pestaña">
+                                       {{ ejecu.asiento.asiento }}
+                                    </td>
+
+                                    <td class="text-center">
+                                       {{ authService.comprobante(ejecu.asiento.tipcom, ejecu.asiento.compro) }}
+                                    </td>
+                                 </ng-container>
+                                 <ng-container *ngIf="!ejecu.asiento">
+                                    <td class="text-center">...</td>
+                                    <td class="text-center">...</td>
+                                 </ng-container>
+
+                                 <td>{{ ejecu.fecha_eje | date:'dd-MM-yyyy' }}</td>
+                                 <td class="text-right">{{ ejecu.devengado | number: '1.2-2'}}</td>
+                                 <td class="text-truncate ancho300" data-toggle="tooltip"
+                                    [ngClass]="{toolt: ejecu.concep.length > 30}"
+                                    [title]="ejecu.concep.length > 30 ? ejecu.concep : ''">
+                                    {{ ejecu.concep }}</td>
+                              </tr>
+                           </tbody>
+                           <tfoot *ngIf="devengados.length > 1" class="detalle">
+                              <tr class="pad0 font-weight-bold">
+                                 <td colspan="3">TOTAL: {{devengados.length}}</td>
+                                 <td class="text-right">{{totDevengado|number:'1.2-2'}}</td>
+                                 <td></td>
+                              </tr>
+                           </tfoot>
+                        </table>
+                     </div>
                   </td>
-                  <td class="text-right">{{ prmisoxtrami.totdeven | number: '1.2-2'}}</td>
-                  <td class="text-truncate ancho toolt" data-toggle="tooltip"
-                     [title]="prmisoxtrami.concep.length > 60 ? prmisoxtrami.concep : ''">{{
-                     prmisoxtrami.concep }}</td>
+
+                  <td class="text-truncate ancho300" data-toggle="tooltip"
+                     [ngClass]="{'toolt': compromiso.concep.length > 60}"
+                     [title]="compromiso && compromiso.concep.length > 60 ? compromiso.concep : ''">{{
+                     compromiso.concep }}</td>
                   <td class="text-center">
                      <div class="btn-group py-0">
                         <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"
                            aria-expanded="false">
                         </button>
                         <div class="dropdown-menu dropdown-menu-right popLista">
-                           <button class="dropdown-item" type="button" [disabled]="swnuevo || swmodificar"
-                              (click)="modificar(prmisoxtrami)">
+                           <button class="dropdown-item" type="button" [disabled]="swmodificar"
+                              (click)="modificar(compromiso)">
                               <i class="bi bi-pencil"></i>&nbsp; Modificar</button>
-                           <button class="dropdown-item" type="button" [disabled]="swnuevo || swmodificar"
-                              data-toggle="modal" data-target="#eliminar">
+                           <button class="dropdown-item" type="button" [disabled]="swmodificar"
+                              (click)="eliminar(compromiso)">
                               <i class="bi bi-file-minus"></i>&nbsp; Eliminar</button>
                         </div>
                      </div>
@@ -116,129 +193,30 @@
             </tbody>
             <tfoot class="detalle font-weight-bold pad0 roboto small">
                <tr>
-                  <td *ngIf="_prmisoxtrami">TOTAL: {{_prmisoxtrami.length}}</td>
-                  <td colspan="3" class="text-right">{{suma | number: '1.2-2'}}</td>
-                  <td colspan="4"></td>
+                  <td *ngIf="compromisos">TOTAL: {{compromisos.length}}</td>
+                  <td colspan="3" class="text-right">{{sumCompromiso | number: '1.2-2'}}</td>
+                  <td class="text-right">{{sumDevengado | number: '1.2-2'}}</td>
+                  <td colspan="2"></td>
                </tr>
             </tfoot>
 
          </table>
-      </div>
-   </div>
-
-   <!-- Nueva partida del Trámite -->
-   <div *ngIf="swnuevo" class="row mb-0 justify-content-center">
-      <div class="card card-body col-sm-11 detalle sombra pt-1">
-         <h6 class="font-weight-bold text-center mt-2">Nuevo Compromiso del Trámite <span class="fantacygreen">
-               {{iTramite.numero}} </span>
-         </h6>
-         <form [formGroup]="formPrmisoxtrami">
-            <div class="row">
-
-               <div class="form-group col-md-4 mb-0">
-                  <div class="input-group mb-1 input-group-sm">
-                     <div class="input-group-prepend">
-                        <span class="input-group-text font-weight-bold">Número de Certificación:<sup
-                              class="green">*</sup></span>
-                     </div>
-                     <input type="number" class="form-control form-control-sm text-center " formControlName="numcerti"
-                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" autofocus (change)="changeNumcerti()"
-                        [ngClass]="{'is-invalid': f['numcerti'].invalid && f['numcerti'].touched, 'is-valid': f['numcerti'].valid, '': f['numcerti'].untouched}">
-                  </div>
-                  <div *ngIf="authService.msgval && f['numcerti'].errors && f['numcerti'].touched" class="my-0 py-0">
-                     <div *ngIf="f['numcerti'].errors['required']" class="alert alert-warning py-0 mt-0 roboto small"
-                        role="alert">
-                        <strong>Ups!</strong> Número de certificación requerido.
-                     </div>
-                     <div *ngIf="f['numcerti'].errors['min']" class="alert alert-warning py-0 mt-0 roboto small"
-                        role="alert">
-                        <strong>Ups!</strong> Debe ser mayor que cero.
-                     </div>
-                  </div>
-               </div>
-
-               <div *ngIf="swnumcerti == 1" class="form-group col-md-3 mb-0">
-                  <div class="input-group mb-1 input-group-sm">
-                     <div class="input-group-prepend">
-                        <span class="input-group-text font-weight-bold">Fecha</span>
-                     </div>
-                     <input type="date" class="form-control form-control-sm text-center " formControlName="fecha"
-                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly>
-                  </div>
-               </div>
-
-               <div *ngIf="swnumcerti == 1" class="form-group col-md-12">
-                  <div class="input-group mb-1 input-group-sm">
-                     <div class="input-group-prepend">
-                        <span class="input-group-text font-weight-bold">Descripción</span>
-                     </div>
-                     <input type="text" class="form-control form-control-sm text-center " formControlName="descripcion"
-                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly>
-                  </div>
-               </div>
-
-               <div *ngIf="swnumcerti == 0">
-                  No existe
-               </div>
-
-            </div>
-         </form>
-         <table *ngIf="swnumcerti == 1" class="table table-hover table-bordered table-sm sombra">
-            <thead class="cabecera">
-               <tr class="pad0">
-                  <th>Partida</th>
-                  <th>Denominación</th>
-                  <th class="text-right">Valor</th>
-                  <th class="text-right">Saldo</th>
-                  <th class="text-right col-sm-2">A comprometer</th>
-                  <th class="text-right">Nuevo saldo</th>
-               </tr>
-            </thead>
-            <tbody class="detalle roboto small">
-               <tr class="fila" *ngFor="let partixcerti of _partixcerti">
-                  <td>{{ partixcerti.intpre.codpar}}</td>
-                  <td>{{ partixcerti.intpre.nompar}}</td>
-                  <td class="text-right">{{ partixcerti.valor | number: '1.2-2'}}</td>
-                  <td class="text-right">{{ partixcerti.valor - partixcerti.totprmisos | number: '1.2-2'}}</td>
-                  <td class="py-0">
-                     <input class="form-control form-control-sm text-right" type="text" [(ngModel)]="partixcerti.compromiso" 
-                     [disabled]="partixcerti.valor - partixcerti.totprmisos <= 0" mask='separator.2'
-                     (blur)="calcular(partixcerti)" (keyup.enter)="calcular(partixcerti)"/>
-                  </td>
-                  <td class="text-right col-sm-2" [ngClass]="{'text-danger font-weight-bold': partixcerti.valor - partixcerti.totprmisos - partixcerti.compromiso < 0}">{{ partixcerti.valor - partixcerti.totprmisos - partixcerti.compromiso | number: '1.2-2'}}</td>
-               </tr>
-            </tbody>
-            <tfoot class="detalle font-weight-bold pad0 roboto small">
-               <tr>
-                  <td *ngIf="_partixcerti">TOTAL: {{_partixcerti.length}}</td>
-                  <td colspan="2" class="text-right">{{tots[0] | number: '1.2-2'}}</td>
-                  <td class="text-right">{{tots[1] | number: '1.2-2'}}</td>
-                  <td class="text-right">{{tots[2] | number: '1.2-2'}}</td>
-                  <td class="text-right" [ngClass]="{'text-danger font-weight-bold': tots[3] < 0}">{{tots[3] | number: '1.2-2'}}</td>
-               </tr>
-            </tfoot>
-         </table>
-         <div class="mt-3 text-center">
-            <button type="submit" class="btn btn-success btn-sm mx-1" disabled>
-               <i class="fa fa-check-circle"></i> Aceptar</button>
-            <button type="button" class="btn btn-success mx-1 btn-sm" (click)="cancelar()"><i
-                  class="fa fa-times-circle"></i> Cancelar
-            </button>
-         </div>
       </div>
    </div>
 
    <!-- Modificar partida del Trámite -->
    <div *ngIf="swmodificar" class="row mb-0 justify-content-center">
-      <div class="card card-body col-sm-8 detalle sombra">
-         <h6 class="font-weight-bold text-center mt-0 mb-1">Modificar Compromiso del Trámite <span
-               class="fantacygreen"> {{iTramite.numero}} </span>
-         </h6>
+      <div class="card card-body col-sm-8 detalle sombra pt-0 pb-1 px-2">
+         <div class="row mt-0 justify-content-center text-center">
+            <div class="col-sm-12 cabecera border mb-2">
+               <h5 class="font-weight-bold mt-2">Modificar Compromiso del Trámite Nro: {{iTramite.numero}}</h5>
+            </div>
+         </div>
          <form [formGroup]="formModi">
-            <div class="row">
+            <div class="row px-3">
 
                <div class="form-group col-md-12 mt-1">
-                  <div class="input-group input-group-sm mb-1 ">
+                  <div class="input-group input-group-sm">
                      <div class="input-group-prepend">
                         <label class="input-group-text">Partida</label>
                      </div>
@@ -249,64 +227,91 @@
                   </div>
                </div>
 
-               <div class="form-group col-md-4 mb-0">
-                  <div class="input-group mb-1 input-group-sm">
+               <div class="form-group col-md-4">
+                  <div class="input-group input-group-sm">
                      <div class="input-group-prepend">
                         <span class="input-group-text font-weight-bold">Certificación</span>
                      </div>
                      <input type="number" class="form-control form-control-sm text-center " formControlName="numcerti"
-                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly>
+                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabindex="-1">
                   </div>
                </div>
 
+               <div class="form-group col-md-4">
+                  <div class="input-group input-group-sm">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold">Valor Certificado</span>
+                     </div>
+                     <input type="text" class="form-control form-control-sm text-right " formControlName="valorcerti"
+                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" appVisualFormat [minDecimals]="2"
+                        [maxDecimals]="2" readonly tabIndex="-1">
+                  </div>
+               </div>
 
                <div class="form-group col-md-4">
-                  <div class="input-group mb-1 input-group-sm">
+                  <div class="input-group input-group-sm">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold">Saldo</span>
+                     </div>
+                     <input type="text" class="form-control form-control-sm text-right " formControlName="saldo"
+                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" appVisualFormat [minDecimals]="2"
+                        [maxDecimals]="2" readonly tabIndex="-1">
+                  </div>
+               </div>
+
+               <div class="form-group col-md-4">
+                  <div class="input-group input-group-sm">
                      <div class="input-group-prepend">
                         <span class="input-group-text font-weight-bold">Compromiso<sup class="green">*</sup></span>
                      </div>
                      <input type="text" class="form-control form-control-sm text-right" formControlName="prmiso"
-                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabIndex="-1">
+                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" appVisualFormat [minDecimals]="2"
+                        [maxDecimals]="2" (focus)="seleccionarTexto($event)"
+                        [ngClass]="{'is-invalid': f['prmiso'].invalid && f['prmiso'].touched, 'is-valid': f['prmiso'].valid, '': f['prmiso'].untouched}">
                   </div>
-               </div>
-<!-- 
-               <div class="form-group col-md-4">
-                  <div class="input-group mb-1 input-group-sm">
-                     <div class="input-group-prepend">
-                        <span class="input-group-text font-weight-bold">Valor<sup class="green">*</sup></span>
+                  <div *ngIf="authService.msgval && f['prmiso'].errors && f['prmiso'].touched">
+                     <div *ngIf="f['prmiso'].errors['required']"
+                        class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                        <strong>Ups!</strong> El Compromiso es obligatorio
                      </div>
-                     <input type="text" class="form-control form-control-sm text-right" formControlName="valor"
-                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" required autoFocus mask='separator.2'
-                        [ngClass]="{'is-invalid': f['valor'].invalid && f['valor'].touched, 'is-valid': f['valor'].valid, '': f['valor'].untouched}">
+                     <div *ngIf="f['prmiso'].errors['min']" class="alert alert-warning m-0 px-1 py-0 robotosmall border"
+                        role="alert">
+                        <strong>Ups!</strong> No puede ser menor a 0.01
+                     </div>
+                     <div *ngIf="f['prmiso'].errors['prmisoMayorSaldo']"
+                        class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                        <strong>Ups!</strong> No puede ser mayor que <strong>{{f['saldo'].value +
+                           f['prmisoOriginal'].value |
+                           number:'1.2-2'}}</strong>
+                     </div>
                   </div>
                </div>
 
-               <div class="form-group col-md-4">
-                  <div class="input-group mb-1 input-group-sm">
+               <div *ngIf="formModi.get('prmiso')?.dirty && formModi.get('prmiso')?.valid" class="form-group col-md-4">
+                  <div class="input-group input-group-sm">
                      <div class="input-group-prepend">
-                        <span class="input-group-text font-weight-bold"
-                           [ngClass]="{'text-danger': partida.newsaldo < 0}">Nuevo Saldo</span>
+                        <span class="input-group-text font-weight-bold">Nuevo Saldo</span>
                      </div>
-                     <input type="text" class="form-control form-control-sm text-right" formControlName="newsaldo"
-                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabIndex="-1"
-                        [ngClass]="{'text-danger': partida.newsaldo < 0}">
+                     <input type="text" class="form-control form-control-sm text-right " formControlName="newsaldo"
+                        aria-label="Small" aria-describedby="inputGroup-sizing-sm" appVisualFormat [minDecimals]="2"
+                        [maxDecimals]="2" readonly tabIndex="-1">
                   </div>
-               </div> -->
+               </div>
 
-               <div class="form-group col-md-12 my-0">
+               <div class="form-group col-md-12 my-0 mb-1">
                   <div class="input-group mb-1 input-group-sm">
                      <div class="input-group-prepend">
                         <label class="input-group-text">Descripción</label>
                      </div>
-                     <textarea class="form-control" formControlName="descripcion" rows="3"></textarea>
+                     <textarea class="form-control" formControlName="concep" rows="3"></textarea>
                   </div>
                </div>
 
             </div>
 
-            <div class="mt-3 text-center">
+            <div class="my-1 text-center">
                <button type="submit" class="btn btn-success btn-sm mx-1"
-                  [disabled]="formPrmisoxtrami.pristine || !formPrmisoxtrami.valid">
+                  [disabled]="formModi.pristine || !formModi.valid" (click)="actualiza()">
                   <i class="fa fa-check-circle"></i> Aceptar</button>
                <button type="button" class="btn btn-success mx-1 btn-sm" (click)="cancelar()"><i
                      class="fa fa-times-circle"></i> Cancelar
@@ -316,41 +321,17 @@
       </div>
    </div>
 
-   <!-- Modal Eliminar-->
-   <div class='modal fade' id='eliminar' tabindex='-1' aria-hidden='true'>
-      <div class='modal-dialog modal-dialog-centered'>
-         <div class='modal-content'>
-            <div class='modal-header justify-content-center cabecera border py-2'>
-               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Mensaje</h5>
+</div>
+
+<div *ngIf="compromisos.length == 0 && swbusca" class="content mt-5">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="card col-sm-6 card-inclinada">
+            <div class="card-body text-center">
+               <p class="texto-inclinado  opaco" (mouseenter)="hover = true" (mouseleave)="hover = false"
+                  [ngClass]="{ 'no-opaco': hover }">¡ No existen registros !</p>
             </div>
-            <div *ngIf="sweliminar; then thenBlock else elseBlock"></div>
-            <ng-template #thenBlock>
-               <div class='modal-body text-center roboto detalle'>
-                  ¿ Eliminar la Partida <span class="fantacygreen"> {{partida.saldo}} </span> de este Trámite ?
-               </div>
-               <div class='modal-footer justify-content-center detalle border py-1'>
-                  <button type='button' class='btn btn-success btn-sm' data-dismiss='modal'>
-                     <i class="fa fa-check-circle"></i> Aceptar
-                  </button>
-                  <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
-                     <i class="fa fa-times-circle"></i> Cancelar</button>
-               </div>
-            </ng-template>
-            <ng-template #elseBlock>
-               <div class='modal-body detalle'>
-                  <div class="alert alert-warning text-center" role="alert">
-                     No puede eliminar la Partida <span class="fantacygreen"> {{partida.codpar}}</span>
-                     <br> de este Trámite, tiene devengado(s).
-                  </div>
-               </div>
-               <div class='text-center detalle'>
-                  <button type='button' class='btn btn-success btn-sm mb-3' data-dismiss='modal'>
-                     <i class="fa fa-check-circle"></i>&nbsp; Aceptar
-                  </button>
-               </div>
-            </ng-template>
          </div>
       </div>
    </div>
-
 </div>

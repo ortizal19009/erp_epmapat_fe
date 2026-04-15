@@ -14,7 +14,7 @@ import { PregastoService } from 'src/app/servicios/contabilidad/pregasto.service
 })
 export class PregastosComponent implements OnInit {
 
-   _partidas: any;
+   partidas: Presupue[] = [];
    buscarPregasto = { codpar: String, nompar: String }
    pargasto = {} as Presupue;
    filtro: string;
@@ -25,11 +25,13 @@ export class PregastosComponent implements OnInit {
    totCodificado = 0; totInicia = 0; totModifi = 0;
    totales = false;
    sweliminar: boolean;
+   ultIdSelec: number = -1;
 
    constructor(public fb: FormBuilder, private pregasService: PregastoService, private router: Router,
       public authService: AutorizaService, private coloresService: ColoresService, private ejecuService: EjecucionService) { }
 
    ngOnInit(): void {
+      if (!this.authService.sessionlog) { this.router.navigate(['/inicio']); }
       sessionStorage.setItem('ventana', '/pregastos');
       let coloresJSON = sessionStorage.getItem('/pregastos');
       if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
@@ -39,7 +41,8 @@ export class PregastosComponent implements OnInit {
          codpar: '',
          nompar: '',
       });
-      //Datos de búsqueda: guardados o toda el Preingreso
+      //Datos de búsqueda: guardados o todas
+      this.ultIdSelec = sessionStorage.getItem('ultIDpregas') ? Number(sessionStorage.getItem('ultIDpregas')) : 0;
       this.buscarPregasto = JSON.parse(sessionStorage.getItem("buscarPregasto")!);
       if (this.buscarPregasto != null) {
          this.formBuscar.patchValue({
@@ -76,15 +79,13 @@ export class PregastosComponent implements OnInit {
       let nompar = '';
       if (this.formBuscar.value.nompar != null) nompar = this.formBuscar.value.nompar.toLowerCase();
       this.pregasService.getPregasto(2, codpar, nompar).subscribe({
-         next: resp => {
-            this._partidas = resp;
+         next: (presupue: Presupue[]) => {
+            this.partidas = presupue;
             this.buscarPregasto = {
                codpar: this.formBuscar.value.codpar,
                nompar: this.formBuscar.value.nompar
             };
             sessionStorage.setItem("buscarPregasto", JSON.stringify(this.buscarPregasto));
-            // sessionStorage.setItem('busPregasCodpar', this.formBuscar.controls['codpar'].value == null ? '' : this.formBuscar.controls['codpar'].value);
-            // sessionStorage.setItem('busPregasNompar', this.formBuscar.controls['nompar'].value == null ? '' : this.formBuscar.controls['nompar'].value);
             this.totales = true;
             this.total();
          },
@@ -96,9 +97,9 @@ export class PregastosComponent implements OnInit {
       let sumInicia: number = 0;
       let sumModifi: number = 0;
       let i = 0;
-      this._partidas.forEach(() => {
-         sumInicia += this._partidas[i].inicia;
-         sumModifi += this._partidas[i].totmod;
+      this.partidas.forEach(() => {
+         sumInicia += this.partidas[i].inicia;
+         sumModifi += this.partidas[i].totmod;
          i++;
       });
       this.totInicia = sumInicia;
@@ -118,12 +119,16 @@ export class PregastosComponent implements OnInit {
 
    onCellClick(event: any, pargas: Presupue) {
       const tagName = event.target.tagName;
+      this.ultIdSelec = pargas.intpre;
+      sessionStorage.setItem('ultIDpregas', this.ultIdSelec.toString());
       if (tagName === 'TD') {
-         //Guarda los datos a enviar a aux-gasto
-         let codpar = pargas.codpar;
-         let nompar = pargas.nompar;
-         let inicia = pargas.inicia;
-         sessionStorage.setItem("pargasToAuxiliar", JSON.stringify( { codpar, nompar, inicia } ));
+         //Datos a enviar a aux-gasto
+         sessionStorage.setItem("datosToAuxGasto", JSON.stringify({
+            intpre: pargas.intpre,
+            codpar: pargas.codpar,
+            nompar: pargas.nompar,
+            inicia: pargas.inicia
+         }));
          this.router.navigate(['aux-gasto']);
       }
    }
@@ -158,4 +163,7 @@ export class PregastosComponent implements OnInit {
       sessionStorage.setItem("pregastoToImpExp", JSON.stringify(this.buscarPregasto));
       this.router.navigate(['/imp-pregasto']);
    }
+
+   cerrar() { this.router.navigate(['/inicio']); }
+
 }

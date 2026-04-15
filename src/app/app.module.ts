@@ -335,6 +335,10 @@ import { ModiReportejrComponent } from './features/admin-central/pages/administr
 import { RepoxopcionComponent } from './features/admin-central/pages/administracion/repoxopcion/repoxopcion/repoxopcion.component';
 import { ReportesjrComponent } from '@features/admin-central/pages/administracion/reportesjr/reportejr/reportejr.component';
 import { FileUploadComponent } from './shared/file-upload/file-upload.component';
+import { AddTrandecompromComponent } from './componentes/contabilidad/transaci/add-trandecomprom/add-trandecomprom.component';
+import { ModiDesdetramiteComponent } from './componentes/contabilidad/transaci/modi-desdetramite/modi-desdetramite.component';
+import { AddPartixcertiComponent } from './componentes/contabilidad/partixcerti/add-partixcerti/add-partixcerti.component';
+import { AddPartixtramiteComponent } from './componentes/contabilidad/tramipresu/add-partixtramite/add-partixtramite.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
@@ -655,6 +659,10 @@ import { FileUploadComponent } from './shared/file-upload/file-upload.component'
     ReportesjrComponent,
     RepoxopcionComponent,
     FileUploadComponent,
+    AddTrandecompromComponent,
+    ModiDesdetramiteComponent,
+    AddPartixcertiComponent,
+    AddPartixtramiteComponent,
     
   ],
 

@@ -1,0 +1,334 @@
+<p>add-trandecomprom works!</p>
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start sombra cabecera border">
+         <div class="col-sm-12">
+            <form [formGroup]="formAsiento">
+               <div class="row my-0">
+
+                  <div class="input-group input-group-sm col-sm-3 mb-1">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold">Asiento</span>
+                     </div>
+                     <input type="text" class="form-control text-center" formControlName="numero" readonly
+                        tabindex="-1">
+                     <input type="text" class="form-control text-center" formControlName="comprobante" readonly
+                        tabindex="-1">
+                  </div>
+                  <div class="input-group input-group-sm col-sm-2 mb-1 mr-0 ">
+                     <div class="input-group-prepend">
+                        <label class="input-group-text">Fecha</label>
+                     </div>
+                     <input type="date" class="form-control text-center" formControlName="fecha" readonly tabindex="-1"
+                        [ngClass]="{ 'red': swfechamayor == true}">
+                  </div>
+                  <div class="input-group input-group-sm col-sm-2 mb-1 ml-0">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold">Doc</span>
+                     </div>
+                     <input type="text" class="form-control" formControlName="documentonum" readonly tabindex="-1">
+                  </div>
+                  <div class="input-group input-group-sm col-sm-5 mb-1 ml-0">
+                     <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold">Beneficiario</span>
+                     </div>
+                     <input type="text" class="form-control form-control-sm" formControlName="beneficiario" readonly
+                        tabindex="-1" [ngClass]="{ 'red': swbenediferente == true}">
+                  </div>
+               </div>
+            </form>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row">
+         <div class="col-sm-12 mt-0">
+            <div class="card card-body sombra detalle px-0 py-0">
+               <form [formGroup]="formTransaci" class="pt-0 mb-0">
+                  <h5 class="text-center cabecera border mt-0 py-1 font-weight-bold">Nueva Transacción (Desde
+                     Trámite)
+                  </h5>
+                  <div class="row pb-0 mb-0 px-2">
+
+                     <div class="form-group col-md-3 mb-1">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text" for="orden">Orden</label>
+                           </div>
+                           <input type="number" class="form-control text-center" formControlName="orden"
+                              aria-label="Small" aria-describedby="inputGroup-sizing-sm" [ngClass]="{'is-invalid': f['orden'].invalid && f['orden'].touched,
+                           'is-valid': f['orden'].valid, '': f['orden'].untouched}" min="1">
+                        </div>
+                        <div *ngIf="authService.msgval && f['orden'].errors && f['orden'].touched">
+                           <div *ngIf="f['orden'].errors['required']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> El Orden es obligatorio
+                           </div>
+                           <div *ngIf="f['orden'].errors['min']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> Valor mínimo 1
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-5 mb-1">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Documento</label>
+                           </div>
+                           <select type="text" class="custom-select robotosmall" formControlName="intdoc">
+                              <option class="robotosmall" *ngFor="let documento of documentos"
+                                 [ngValue]="documento.intdoc"> {{
+                                 documento.nomdoc }}
+                              </option>
+                           </select>
+                           <input type="text" class="form-control text-center col-sm-4" formControlName="numdoc"
+                              [ngClass]="{'is-invalid': f['numdoc'].invalid && f['numdoc'].touched,
+                                       'is-valid': f['numdoc'].valid, '': f['numdoc'].untouched}" maxlength="12">
+                        </div>
+                        <div *ngIf="authService.msgval && f['numdoc'].errors && f['numdoc'].touched">
+                           <div *ngIf="f['numdoc'].errors['required']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> El Número de Documento es obligatorio
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-3 mb-1">
+                        <div class="input-group mb-1 input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Débito</label>
+                           </div>
+                           <input type="text" class="form-control text-right font-weight-bold" formControlName="valor"
+                              aria-label="Small" aria-describedby="inputGroup-sizing-sm" appVisualFormat
+                              [minDecimals]="2" readonly tabindex="-1">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-12 mb-2">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Concepto</label>
+                           </div>
+                           <textarea class="form-control" formControlName="descri" rows="1"></textarea>
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-3 mb-1">
+                        <div class="input-group mb-1 input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Trámite Nro.<sup class="green">*</sup></label>
+                           </div>
+                           <input type="number" class="form-control text-center" min="1" formControlName="numero"
+                              (blur)="buscaTramite()"
+                              [ngClass]="{'is-invalid': f['numero'].invalid && f['numero'].touched, 'is-valid': f['numero'].valid, '': f['numero'].untouched}">
+                        </div>
+                        <div *ngIf="authService.msgval && f['numero'].errors && f['numero'].touched">
+                           <div *ngIf="f['numero'].errors['required']"
+                              class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> Número obligatorio
+                           </div>
+                           <div *ngIf="f['numero'].errors['min']"
+                              class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> Número incorrecto
+                           </div>
+                           <div *ngIf="f['numero'].errors['existe']"
+                              class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> No existe el Trámite Nro. {{ f['numero'].value }}
+                           </div>
+                        </div>
+                     </div>
+
+                     <div *ngIf="idtrami" class="form-group col-md-2 mb-1">
+                        <div class="input-group mb-1 input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Fecha</label>
+                           </div>
+                           <input type="date" class="form-control text-center" formControlName="fectramite" readonly
+                              tabindex="-1" [ngClass]="{ 'red': swfechamayor == true}">
+                        </div>
+                     </div>
+
+                     <div *ngIf="idtrami" class="form-group col-md-5 mb-1">
+                        <div class="input-group mb-1 input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Beneficiario</label>
+                           </div>
+                           <input type="text" class="form-control" formControlName="nomben" readonly tabindex="-1"
+                              [ngClass]="{ 'red': swbenediferente == true}">
+                        </div>
+                     </div>
+
+                  </div>
+
+                  <div class="row justify-content-center">
+                     <div class="col-sm-3 justify-content-center text-center">
+                        <div class="form-group mb-0 pb-0">
+                           <div class="input-group mb-1 input-group-sm">
+                              <button type="button" class="btn btn-success btn-sm mx-1"
+                                 [disabled]="!formTransaci.valid || !formDevengar.valid" (click)="onSubmit()">
+                                 <i class="fa fa-check-circle"></i> Aceptar</button>
+                              <button type="button" class="btn btn-outline-success btn-sm mx-1" (click)="regresar()"><i
+                                    class="fa fa-times-circle"></i> Cancelar
+                              </button>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </form>
+
+               <div class="row mt-1 px-3" *ngIf="compromisos && this.compromisos.length > 0">
+                  <div class="col-sm-12">
+                     <form [formGroup]="formDevengar">
+                        <div formArrayName="devengar">
+                           <table class="table table-hover table-bordered table-sm sombra borde">
+                              <thead class="cabecera">
+                                 <tr>
+                                    <th class="py-0">Partida</th>
+                                    <th class="py-0">Denominación</th>
+                                    <th class="py-0 text-right">Valor</th>
+                                    <th class="py-0 text-right">Saldo</th>
+                                    <th class="py-0 text-right">Devengar</th>
+                                    <th class="py-0">Cuenta</th>
+                                 </tr>
+                              </thead>
+                              <tbody class="detalle">
+                                 <tr class="robotosmall" *ngFor="let compromiso of compromisos; let i=index">
+                                    <td>{{ compromiso.intpre.codpar }}</td>
+                                    <td>{{ compromiso.intpre.nompar }}</td>
+                                    <td class="text-right">{{ compromiso.prmiso | number: '1.2-2' }}</td>
+                                    <td class="text-right">{{ compromiso.prmiso - compromiso.totdeven | number:
+                                       '1.2-2'
+                                       }}
+                                       <button *ngIf="compromiso.totdeven > 0" type="button"
+                                          class="btn btn-info btn-xs dropdown-toggle py-0 ml-1" data-toggle="dropdown"
+                                          aria-expanded="false" (click)="buscaDevengados(compromiso.inteje)">
+                                       </button>
+                                       <div class="dropdown-menu dropdown-menu-right py-0">
+                                          <table
+                                             class="table table-hover table-bordered table-sm sombra mb-0 pagoscobros robotosmall">
+                                             <thead>
+                                                <tr class="pad0 bg-info">
+                                                   <th colspan="2" class="text-center">Asiento</th>
+                                                   <th class="text-center">Fecha</th>
+                                                   <th class="text-right">Valor</th>
+                                                   <th class="text-left">Concepto</th>
+                                                </tr>
+                                             </thead>
+                                             <tbody *ngIf="devengados && devengados.length > 0" class="detalle">
+                                                <tr *ngFor="let ejecu of devengados">
+                                                   <ng-container *ngIf="ejecu.asiento">
+                                                      <td class="fila cursor text-center"
+                                                         (click)="abrirAsiento(ejecu.asiento)" data-toggle="tooltip"
+                                                         title="Abrir el Asiento en otra pestaña">
+                                                         {{ ejecu.asiento.asiento }}
+                                                      </td>
+
+                                                      <td class="text-center">
+                                                         {{ authService.comprobante(ejecu.asiento.tipcom,
+                                                         ejecu.asiento.compro) }}
+                                                      </td>
+                                                   </ng-container>
+                                                   <ng-container *ngIf="!ejecu.asiento">
+                                                      <td class="text-center">...</td>
+                                                      <td class="text-center">...</td>
+                                                   </ng-container>
+
+                                                   <td>{{ ejecu.fecha_eje | date:'dd-MM-yyyy' }}</td>
+                                                   <td class="text-right">{{ ejecu.devengado | number: '1.2-2'}}</td>
+                                                   <td class="text-truncate ancho300" data-toggle="tooltip"
+                                                      [ngClass]="{toolt: ejecu.concep.length > 30}"
+                                                      [title]="ejecu.concep.length > 30 ? ejecu.concep : ''">
+                                                      {{ ejecu.concep }}</td>
+                                                </tr>
+                                             </tbody>
+                                             <tfoot class="detalle" *ngIf="devengados.length > 1">
+                                                <tr class="pad0 font-weight-bold">
+                                                   <td colspan="3">TOTAL: {{devengados.length}}</td>
+                                                   <td class="text-right">{{totDevengado|number:'1.2-2'}}</td>
+                                                   <td></td>
+                                                </tr>
+                                             </tfoot>
+                                          </table>
+                                       </div>
+                                    </td>
+                                    <td class="py-0">
+                                       <input type="text" class="form-control form-control-sm text-right"
+                                          appVisualFormat [minDecimals]="2" [formControlName]="i"
+                                          (dblclick)="dobleclick(i)" (change)="changeValor(i)"
+                                          (focus)="seleccionarTexto($event)"
+                                          [ngClass]="{'is-valid': formArrayDevengar.at(i).valid && formArrayDevengar.at(i).touched,'is-invalid': formArrayDevengar.at(i).invalid && formArrayDevengar.at(i).touched}">
+                                       <div
+                                          *ngIf="authService.msgval && formArrayDevengar.at(i).errors && formArrayDevengar.at(i).touched">
+                                          <div *ngIf="formArrayDevengar.at(i).hasError('required')"
+                                             class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border"
+                                             role="alert">
+                                             <strong>Ups!</strong> El valor a Devengar es obligatorio
+                                          </div>
+                                          <div *ngIf="formArrayDevengar.at(i).hasError('min')"
+                                             class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border"
+                                             role="alert">
+                                             <strong>Ups!</strong> No puede ser negativo
+                                          </div>
+                                          <div *ngIf="formArrayDevengar.at(i).hasError('devengarExcede')"
+                                             class="alert alert-danger m-0 py-0 px-1 pr-0 robotosmall border"
+                                             role="alert">
+                                             <strong>Ups!</strong> No puede ser mayor que {{
+                                             formArrayDevengar.at(i).getError('devengarExcede')?.maxPermitido | number:
+                                             '1.2-2'
+                                             }}
+                                          </div>
+
+                                          <div *ngIf="formArrayDevengar.at(i).hasError('noTienecuenta')"
+                                             class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border"
+                                             role="alert">
+                                             <strong>Ups!</strong> No tiene una Cuenta asociada
+                                          </div>
+                                       </div>
+                                    </td>
+
+                                    <td>{{ cuentaSeleccionada[i]?.codcue || '' }}&nbsp;&nbsp;
+                                       <div *ngIf="cuentaSeleccionada[i]?.codcue" class="btn-group py-0">
+                                          <button type="button" class="btn btn-info btn-xs dropdown-toggle py-0"
+                                             data-toggle="dropdown" aria-expanded="false">
+                                          </button>
+                                          <div class="dropdown-menu dropdown-menu-right bg-info">
+                                             <button class="dropdown-item" type="button"
+                                                *ngFor="let cuen of cuentasAsociadas[i]"
+                                                (click)="changeCuenta(i, cuen)">
+                                                {{ cuen.codcue }} &nbsp;&nbsp;{{ cuen.nomcue }}
+                                             </button>
+                                          </div>
+                                       </div>
+                                    </td>
+
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </div>
+                     </form>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+
+</div>
+
+<div *ngIf="compromisos && this.compromisos.length == 0 && idtrami! > 0" class="content mt-1">
+<!-- <div class="content mt-1"> -->
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="card col-sm-6 card-inclinada">
+            <div class="card-body text-center">
+               <p class="texto-inclinado  opaco" (mouseenter)="hover = true" (mouseleave)="hover = false"
+                  [ngClass]="{ 'no-opaco': hover }">¡ No existen registros !</p>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

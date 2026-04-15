@@ -182,7 +182,7 @@
                                        </div>
                                     </td>
 
-                                    <td class="align-middle text-right"
+                                    <td class="align-middle robotosmall text-right"
                                        [ngClass]="{'transparente': fila.get('totpagcob')?.value == 0}">
                                        {{fila.get('totpagcob')?.value|number:'1.2-2'}}
                                        <button *ngIf="fila.get('totpagcob')?.value > 0" type="button"
@@ -228,7 +228,7 @@
                                           </table>
                                        </div>
                                     </td>
-                                    <td class="align-middle text-right">{{fila.get('saldo')?.value|number:'1.2-2'}}</td>
+                                    <td class="align-middle robotosmall text-right">{{fila.get('saldo')?.value|number:'1.2-2'}}</td>
                                     <td class="align-middle text-center">
                                        <button type="button" class="btn btn-sm text-danger"
                                           [disabled]="fila.get('totpagcob')?.value > 0"
@@ -238,7 +238,6 @@
                                              [ngClass]="registros.at(i).get('estado')!.value < 3 ? 'bi-trash-fill' : 'bi-x-circle-fill'"></i>
                                        </button>
                                     </td>
-                                    <!-- <td>{{fila.get('estado')?.value}}</td> -->
                                  </tr>
                               </tbody>
                               <tfoot>

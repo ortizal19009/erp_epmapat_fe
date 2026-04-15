@@ -20,14 +20,14 @@ import { Certipresu } from 'src/app/modelos/contabilidad/certipresu.model';
 export class ModiCertipresuComponent implements OnInit {
 
    formCertipresu: FormGroup;
+   idcerti: number;
+   antnumero: number;
    documentos: Documentos[] = [];
    intdoc: number;
    beneficiarios: Beneficiarios[] = [];
    idbene: number | null;
    responsables: Beneficiarios[] = [];;
    idbeneres: number | null;
-   idcerti: number;
-   antnumero: number;
    partidas: number = 0;
 
    constructor(private beneService: BeneficiariosService, private router: Router, private fb: FormBuilder,
@@ -148,7 +148,7 @@ export class ModiCertipresuComponent implements OnInit {
             this.authService.swal('success', `Certificación ${actualizada.numero} actualizada con éxito`);
             this.retornar();
          },
-         error: err => { console.error('Al actualizar la Certificación: ', err.error); this.authService.mostrarError('Error al actualizar', err.error) }
+         error: err => { console.error(err.error); this.authService.mostrarError('Error al actualizar', err.error) }
       });
    }
 
@@ -175,7 +175,6 @@ export class ModiCertipresuComponent implements OnInit {
          const datos = this.authService.getDatosEmpresa();
          const añoEmpresa = datos?.fechap?.toString().slice(0, 4);
          const añoDigitado = control.value?.toString().slice(0, 4);
-         console.log(añoEmpresa, añoDigitado)
          const esValido = añoEmpresa === añoDigitado;
          return of(esValido ? null : { añoinvalido: true });
       };

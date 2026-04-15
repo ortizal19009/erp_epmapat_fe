@@ -3,12 +3,12 @@ export interface TransaciCreateDTO {
    tiptran: number;
    orden: number;
    idcuenta: { idcuenta: number };
-   codcue: string;
+   codcue: String ;
    intdoc: { intdoc: number };
    numdoc: string;
    debcre: number;
    valor: number;
-   descri: String;
+   descri: string;
    intpre: number | null;
    idbene: { idbene: number };
    totbene: number;

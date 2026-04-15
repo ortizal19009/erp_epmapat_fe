@@ -19,15 +19,15 @@ import Swal from 'sweetalert2';
 
 export class CertipresuComponent implements OnInit {
 
-   formBuscar!: FormGroup;
+   formBuscar: FormGroup;
    certipresu: Certipresu[] = [];
-   buscarCertipresu: { desdeNum: number, hastaNum: number, desdeFecha: string, hastaFecha: string } | null = null;
-   swdesdehasta = false; //Visibilidad Buscar últimos
-   filtro = '';
-   tot = 0;
-   sumvalor = 0;
-   swfiltro = false;
-   ultIdSelec = -1;
+   buscarCertipresu: { desdeNum: number, hastaNum: number, desdeFecha: string, hastaFecha: string }
+   swdesdehasta: boolean; //Visibilidad Buscar últimos
+   filtro: string;
+   tot: number;
+   sumvalor: number;
+   swfiltro: boolean;
+   ultIdSelec: number = -1;
 
    constructor(private fb: FormBuilder, private router: Router, public authService: AutorizaService, private coloresService: ColoresService,
       private certiService: CertipresuService, private parxcerService: PartixcertiService, private elimService: EliminadosappService) { }
@@ -39,43 +39,14 @@ export class CertipresuComponent implements OnInit {
       if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
       else this.buscaColor();
 
-      /*       const datos = this.authService.getDatosEmpresa();
-            console.log('Datos Empresa: ', datos);
-            let año = new Date().getFullYear().toString();
-            console.log('Año actual: ', año);
-            if (datos && datos.fechap) {
-               const fecha = new Date(datos.fechap);
-               if (!isNaN(fecha.getTime())) {
-                  año = fecha.getFullYear().toString();
-               }
-            } else {
-               // Trigger async loading of company data for future views if not present
-               this.authService.getEmpresa();
-            }
-      
-            this.formBuscar = this.fb.group({
-               desdeNum: '',
-               hastaNum: '',
-               desdeFecha: año + '-01-01',
-               hastaFecha: año + '-12-31',
-            }); */
-
       const datos = this.authService.getDatosEmpresa()
-      console.log('Datos Empresa: ', datos);
       const año = datos!.fechap.toString().slice(0, 4);
-      console.log('Año actual: ', año);
       this.formBuscar = this.fb.group({
          desdeNum: '',
          hastaNum: '',
          desdeFecha: año + '-01-01',
          hastaFecha: año + '-12-31',
       });
-
-
-      this.formBuscar.patchValue({
-         desdeFecha: año + '-01-01',
-         hastaFecha: año + '-12-31',
-      })
 
       //Datos de búsqueda: últimas Certificaciones o guardadas
       this.ultIdSelec = sessionStorage.getItem('ultidcerti') ? Number(sessionStorage.getItem('ultidcerti')) : 0;
@@ -129,7 +100,7 @@ export class CertipresuComponent implements OnInit {
             });
             this.buscar();
          },
-         error: err => console.error(err.error)
+         error: err => { console.error(err.error); this.authService.mostrarError('Error al buscar la última Certificación', err.error) }
       });
    }
 
@@ -157,8 +128,8 @@ export class CertipresuComponent implements OnInit {
 
    total() {
       this.sumvalor = 0;
-      this.certipresu.forEach((certificacion: any) => {
-         this.sumvalor = this.sumvalor + certificacion.valor;
+      this.certipresu.forEach((certipresu: Certipresu) => {
+         this.sumvalor = this.sumvalor + certipresu.valor;
       });
       this.tot = this.certipresu.length;
    }

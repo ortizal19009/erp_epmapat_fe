@@ -23,7 +23,6 @@ import { TransaciService } from 'src/app/servicios/contabilidad/transaci.service
    templateUrl: './add-transaci.component.html',
    styleUrls: ['./add-transaci.component.css']
 })
-
 export class AddTransaciComponent implements OnInit {
 
    formTransaci: FormGroup;

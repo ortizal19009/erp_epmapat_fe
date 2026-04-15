@@ -2,7 +2,7 @@
    <div class="container-fluid">
       <div class="row m-0 px-0 pt-1 pb-0 cabecera border sombra">
          <div class="col-sm-3 mx-0 ml-1 px-0">
-            <h5 class="mx-0 mt-1 font-weight-bold text-truncate"><i class="bi-blockquote-right"></i>&nbsp; Mayor de la
+            <h5 class="mx-0 mt-1 font-weight-bold text-truncate"><i class="bi-blockquote-right text-warning"></i>&nbsp; Mayor de la
                Cuenta</h5>
          </div>
          <form [formGroup]="formFechas" class="col-sm-6 px-0">
@@ -32,17 +32,18 @@
                placeholder="Filtrar..." [(ngModel)]="filtro" (ngModelChange)="onFiltroChange()" />
          </div>
 
-         <div class="btn-group">
+         <div class="btn-group  ml-auto my-1">
             <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
                aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
                <button class="dropdown-item" type="button" [disabled]="!_mayor" (click)="imprimir()">
-                  <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
+                  <i class="bi bi-printer text-info"></i>&nbsp; Imprimir / Exportar</button>
+               <button class="dropdown-item" type="button" (click)="regresar()">
+                  <i class="bi-arrow-left-circle text-info"></i>&nbsp; Regresar</button>
+               <button class="dropdown-item" type="button" (click)="cerrar()">
+                  <i class="bi-x-circle text-info"></i>&nbsp; Cerrar</button>
             </div>
-            <button class="bg-transparent border-0" type="button" (click)="regresar()">
-               <i class="bi-arrow-left-circle text-white icoRegresar"></i>
-            </button>
          </div>
 
       </div>
@@ -73,11 +74,12 @@
             </thead>
             <tbody class="detalle small roboto">
                <tr *ngFor="let transa of _mayor | filter: filtro;">
-                  <td class="text-center py-0">{{ transa.idasiento.fecha | date: 'yyyy-MM-dd' }}</td>
+                  <td class="text-center py-0">{{ transa.idasiento.fecha | date: 'dd-MM-yyyy' }}</td>
                   <td class="text-center py-0">{{ transa.idasiento.asiento }}</td>
                   <td class="text-center py-0">{{ comprobante(transa.idasiento.tipcom, transa.idasiento.compro) }}</td>
                   <td class="text-truncate ancho220 py-0" [ngClass]="{'transparente': transa.idbene.idbene == 1}"
-                     data-toggle="tooltip" [title]="transa.idbene.nomben.length > 34 ? transa.idbene.nomben : ''">{{ transa.idbene.nomben }}</td>
+                     data-toggle="tooltip" [title]="transa.idbene.nomben.length > 34 ? transa.idbene.nomben : ''">{{
+                     transa.idbene.nomben }}</td>
                   <td class="text-right py-0" [ngClass]="{'transparente': debito(transa.debcre, transa.valor) == 0}">{{
                      debito(transa.debcre, transa.valor) | number: '1.2-2' }}</td>
                   <td class="text-right py-0" [ngClass]="{'transparente': credito(transa.debcre, transa.valor) == 0}">{{

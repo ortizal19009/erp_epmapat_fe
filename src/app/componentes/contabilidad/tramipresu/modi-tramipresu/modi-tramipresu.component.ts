@@ -16,7 +16,6 @@ import { TramipresuService } from 'src/app/servicios/contabilidad/tramipresu.ser
    templateUrl: './modi-tramipresu.component.html',
    styleUrls: ['./modi-tramipresu.component.css']
 })
-
 export class ModiTramipresuComponent implements OnInit {
 
    formTramipresu: FormGroup;

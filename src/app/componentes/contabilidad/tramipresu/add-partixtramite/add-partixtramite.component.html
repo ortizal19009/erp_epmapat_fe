@@ -1,0 +1,251 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start sombra cabecera border">
+         <div class="col-sm-12">
+            <div class="row p-0">
+               <div class="input-group input-group-sm col-sm-2 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <label class="input-group-text" id="inputGroup-sizing-sm">Trámite</label>
+                  </div>
+                  <input type="text" class="form-control text-center" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [value]="iTramite.numero" readonly tabindex="-1">
+               </div>
+               <div class="input-group input-group-sm col-sm-2 mb-1 mr-0 ">
+                  <div class="input-group-prepend">
+                     <label class="input-group-text" id="inputGroup-sizing-sm">Fecha</label>
+                  </div>
+                  <input type="date" class="form-control text-center" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [value]="iTramite.fecha" readonly>
+               </div>
+               <div class="input-group input-group-sm col-sm-3 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <label class="input-group-text" id="inputGroup-sizing-sm">Doc</label>
+                  </div>
+                  <input type="text" class="form-control" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [value]="iTramite.docu" readonly>
+               </div>
+               <div class="input-group input-group-sm col-sm-5 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <label class="input-group-text" id="inputGroup-sizing-sm">Beneficiario</label>
+                  </div>
+                  <input type="text" class="form-control" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [value]="iTramite.beneficiario" readonly tabindex="-1">
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row">
+         <div class="col-sm-12 mt-0">
+            <div class="card card-body sombra detalle px-0 py-0">
+               <form [formGroup]="formCertipresu" class="pt-0 mb-0">
+                  <h5 class="text-center cabecera border mt-0 py-1 font-weight-bold">Registrar Partida(s) en el Trámite:
+                     {{iTramite.numero}}
+                  </h5>
+
+                  <div class="row pb-0 mb-0 px-2 justify-content-center">
+
+                     <div class="form-group col-md-3">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Nro.Certificación</label>
+                           </div>
+                           <input type="number" class="form-control text-center" formControlName="numero"
+                              (change)="changeNumcerti()" aria-label="Small" aria-describedby="inputGroup-sizing-sm"
+                              [ngClass]="{'is-invalid': f['numero'].invalid && f['numero'].touched,
+                           'is-valid': f['numero'].valid, '': f['numero'].untouched}" min="1">
+                        </div>
+                        <div *ngIf="authService.msgval && f['numero'].errors && f['numero'].touched">
+                           <div *ngIf="f['numero'].errors['required']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> El Número es obligatorio
+                           </div>
+                           <div *ngIf="f['numero'].errors['min']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> Valor mínimo 1
+                           </div>
+                        </div>
+                     </div>
+
+                     <div *ngIf="swnumcerti" class="form-group col-md-2">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Fecha</label>
+                           </div>
+                           <input type="date" class="form-control form-control-sm text-center " formControlName="fecha"
+                              aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabindex="-1">
+                        </div>
+                     </div>
+
+                     <div *ngIf="swnumcerti" class="form-group col-md-7">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Descripción</label>
+                           </div>
+                           <textarea class="form-control" formControlName="descripcion" rows="1" readonly
+                              tabindex="-1"></textarea>
+                        </div>
+                     </div>
+
+                     <div class="mb-2 text-center">
+                        <button type="submit" class="btn btn-success btn-sm mx-1" 
+                        [disabled]="totalesCalculados.totalComprometido == 0 " (click)="guardar()">
+                           <i class="fa fa-check-circle"></i> Aceptar</button>
+                        <button type="button" class="btn btn-success mx-1 btn-sm" (click)="regresar()"><i
+                              class="fa fa-times-circle"></i> Cancelar
+                        </button>
+                     </div>
+
+                  </div>
+               </form>
+
+               <div class="row mt-1 px-3" *ngIf="partixcerti && this.partixcerti.length > 0">
+                  <div class="col-sm-12">
+                     <form [formGroup]="formAComprometer">
+                        <div formArrayName="acomprometer">
+                           <table class="table table-hover table-bordered table-sm sombra borde">
+                              <thead class="cabecera">
+                                 <tr>
+                                    <th class="py-0">Partida</th>
+                                    <th class="py-0">Denominación</th>
+                                    <th class="py-0 text-right">Valor</th>
+                                    <th class="py-0 text-right">Saldo</th>
+                                    <th class="py-0 text-right">A Comprometer</th>
+                                    <th class="py-0 text-right">Nuevo saldo</th>
+                                 </tr>
+                              </thead>
+                              <tbody class="detalle">
+                                 <tr class="robotosmall" *ngFor="let parxcer of partixcerti; let i=index">
+                                    <td>{{ parxcer.intpre.codpar }}</td>
+                                    <td>{{ parxcer.intpre.nompar }}</td>
+                                    <td class="text-right">{{ parxcer.valor | number: '1.2-2' }}</td>
+                                    <td class="text-right">{{ parxcer.valor - parxcer.totprmisos | number: '1.2-2'}}
+                                    </td>
+                                    <!-- <td class="text-right">{{ parxcer.valor - parxcer.totprmisos | number:
+                                       '1.2-2'
+                                       }}
+                                       <button *ngIf="parxcer.totprmisos > 0" type="button"
+                                          class="btn btn-info btn-xs dropdown-toggle py-0 ml-1" data-toggle="dropdown"
+                                          aria-expanded="false" (click)="buscaDevengados(parxcer.idparxcer)">
+                                       </button>
+                                       <div class="dropdown-menu dropdown-menu-right py-0">
+                                          <table
+                                             class="table table-hover table-bordered table-sm sombra mb-0 pagoscobros robotosmall">
+                                             <thead>
+                                                <tr class="pad0 bg-info">
+                                                   <th colspan="2" class="text-center">Asiento</th>
+                                                   <th class="text-center">Fecha</th>
+                                                   <th class="text-right">Valor</th>
+                                                   <th class="text-left">Concepto</th>
+                                                </tr>
+                                             </thead>
+                                             <tbody *ngIf="devengados && devengados.length > 0" class="detalle">
+                                                <tr *ngFor="let ejecu of devengados">
+                                                   <ng-container *ngIf="ejecu.asiento">
+                                                      <td class="fila cursor text-center"
+                                                         (click)="abrirAsiento(ejecu.asiento)" data-toggle="tooltip"
+                                                         title="Abrir el Asiento en otra pestaña">
+                                                         {{ ejecu.asiento.asiento }}
+                                                      </td>
+
+                                                      <td class="text-center">
+                                                         {{ authService.comprobante(ejecu.asiento.tipcom,
+                                                         ejecu.asiento.compro) }}
+                                                      </td>
+                                                   </ng-container>
+                                                   <ng-container *ngIf="!ejecu.asiento">
+                                                      <td class="text-center">...</td>
+                                                      <td class="text-center">...</td>
+                                                   </ng-container>
+
+                                                   <td>{{ ejecu.fecha_eje | date:'dd-MM-yyyy' }}</td>
+                                                   <td class="text-right">{{ ejecu.devengado | number: '1.2-2'}}</td>
+                                                   <td class="text-truncate ancho300" data-toggle="tooltip"
+                                                      [ngClass]="{toolt: ejecu.concep.length > 30}"
+                                                      [title]="ejecu.concep.length > 30 ? ejecu.concep : ''">
+                                                      {{ ejecu.concep }}</td>
+                                                </tr>
+                                             </tbody>
+                                             <tfoot class="detalle" *ngIf="devengados.length > 1">
+                                                <tr class="pad0 font-weight-bold">
+                                                   <td colspan="3">TOTAL: {{devengados.length}}</td>
+                                                   <td class="text-right">{{totDevengado|number:'1.2-2'}}</td>
+                                                   <td></td>
+                                                </tr>
+                                             </tfoot>
+                                          </table>
+                                       </div>
+                                    </td> -->
+                                    <td class="py-0">
+                                       <input type="text" class="form-control form-control-sm text-right"
+                                          appVisualFormat [minDecimals]="2" [formControlName]="i"
+                                          (dblclick)="dobleclick(i)" 
+                                          (focus)="seleccionarTexto($event)"
+                                          [ngClass]="{'is-valid': geterFormArray.at(i).valid && geterFormArray.at(i).touched,'is-invalid': geterFormArray.at(i).invalid && geterFormArray.at(i).touched}">
+                                       <div
+                                          *ngIf="authService.msgval && geterFormArray.at(i).errors && geterFormArray.at(i).touched">
+                                          <div *ngIf="geterFormArray.at(i).hasError('required')"
+                                             class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border"
+                                             role="alert">
+                                             <strong>Ups!</strong> El valor a Comprometer es obligatorio
+                                          </div>
+                                          <div *ngIf="geterFormArray.at(i).hasError('min')"
+                                             class="alert alert-warning m-0 py-0 px-1 pr-0 robotosmall border"
+                                             role="alert">
+                                             <strong>Ups!</strong> No puede ser negativo
+                                          </div>
+                                          <div *ngIf="geterFormArray.at(i).hasError('compromisoExcede')"
+                                             class="alert alert-danger m-0 py-0 px-1 pr-0 robotosmall border"
+                                             role="alert">
+                                             <strong>Ups!</strong> No puede ser mayor que {{
+                                             geterFormArray.at(i).getError('compromisoExcede')?.maxPermitido | number:
+                                             '1.2-2'
+                                             }}
+                                          </div>
+                                       </div>
+                                    </td>
+                                    <td class="text-right col-sm-2"
+                                       [ngClass]="{'text-danger font-weight-bold': parxcer.valor - parxcer.totprmisos - geterFormArray.at(i).value < 0}">
+                                       {{ parxcer.valor - parxcer.totprmisos - geterFormArray.at(i).value | number:
+                                       '1.2-2'}}
+                                    </td>
+                                    <!-- <td>{{ cuentaSeleccionada[i]?.codcue || '' }}&nbsp;&nbsp;
+                                       <div *ngIf="cuentaSeleccionada[i]?.codcue" class="btn-group py-0">
+                                          <button type="button" class="btn btn-info btn-xs dropdown-toggle py-0"
+                                             data-toggle="dropdown" aria-expanded="false">
+                                          </button>
+                                          <div class="dropdown-menu dropdown-menu-right bg-info">
+                                             <button class="dropdown-item" type="button"
+                                                *ngFor="let cuen of cuentasAsociadas[i]"
+                                                (click)="changeCuenta(i, cuen)">
+                                                {{ cuen.codcue }} &nbsp;&nbsp;{{ cuen.nomcue }}
+                                             </button>
+                                          </div>
+                                       </div>
+                                    </td> -->
+
+                                 </tr>
+                              </tbody>
+                              <tfoot class="font-weight-bold detalle roboto small pad0">
+                                 <td>TOTAL: {{partixcerti.length}}</td>
+                                 <td></td>
+                                 <td class="text-right">{{ totalesCalculados.totalValor | number: '1.2-2' }}</td>
+                                 <td class="text-right">{{ totalesCalculados.totalSaldo | number: '1.2-2' }}</td>
+                                 <td class="text-right">{{ totalesCalculados.totalComprometido | number: '1.2-2' }}</td>
+                                 <td class="text-right">{{ totalesCalculados.totalNuevoSaldo | number: '1.2-2' }}</td>
+                              </tfoot>
+                           </table>
+                        </div>
+                     </form>
+                  </div>
+               </div>
+
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

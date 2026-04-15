@@ -1,0 +1,154 @@
+<div class="content mt-1 pt-1 pl-0">
+   <div class="container-fluid">
+      <div class="row m-0 px-0 py-1 justify-content-start sombra cabecera border">
+         <div class="col-sm-12 p-0.">
+            <div class="row p-0">
+
+               <div class="input-group input-group-sm col-md-3 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <label class="input-group-text" id="inputGroup-sizing-sm">Certificación</label>
+                  </div>
+                  <input type="number" class="form-control text-center" [value]="iCertificacion.numero" readonly
+                     tabindex="-1">
+               </div>
+
+               <div class="input-group input-group-sm col-sm-2 mb-1 mr-0 ">
+                  <div class="input-group-prepend">
+                     <label class="input-group-text" id="inputGroup-sizing-sm">Fecha</label>
+                  </div>
+                  <input type="date" class="form-control text-center" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [value]="iCertificacion.fecha" readonly tabindex="-1">
+               </div>
+               <div class="input-group input-group-sm col-sm-3 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Doc</span>
+                  </div>
+                  <input type="text" class="form-control" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [value]="iCertificacion.docu" readonly tabindex="-1">
+               </div>
+
+               <div class="input-group input-group-sm col-sm-4 mb-1 ml-0">
+                  <div class="input-group-prepend">
+                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm">Responsable</span>
+                  </div>
+                  <input type="text" class="form-control" aria-label="Sizing example input"
+                     aria-describedby="inputGroup-sizing-sm" [value]="iCertificacion.respon" readonly tabindex="-1">
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="content">
+   <div class="container-fluid">
+      <div class="row justify-content-center">
+         <div class="col-sm-9 mt-5">
+            <h5 class="font-weight-bold text-center cabecera sombra border py-1">Nueva Partida de la Certificación Nro:
+               {{iCertificacion.numero}}
+            </h5>
+            <div class="card card-body sombra fondo detalle">
+               <form *ngIf="iCertificacion" [formGroup]="formPartixcerti">
+                  <div class="row">
+
+                     <div class="form-group col-md-12">
+                        <div class="input-group input-group-sm ">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Partida<sup class="green">*</sup></label>
+                           </div>
+                           <input type="text" class="form-control form-control-sm col-sm-3" formControlName="intpre"
+                              list="codparList" (input)="onPartidaSelected($event); partidaxCodpar($event)"
+                              [ngClass]="{'is-invalid': f['intpre'].invalid && f['intpre'].touched,'is-valid': f['intpre'].valid, '': f['intpre'].untouched}">
+                           <datalist role="listbox" id="codparList">
+                              <option *ngFor="let partida of presupue" value={{partida.codpar}}>
+                                 {{partida.nompar}}</option>
+                           </datalist>
+                           <input type="text" class="form-control form-control-sm col-sm-8" formControlName="nompar"
+                              aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabIndex="-1">
+                        </div>
+                        <div *ngIf="authService.msgval && f['intpre'].errors && f['intpre'].touched">
+                           <div *ngIf="f['intpre'].errors['required']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> La Partida presupuestaria de gastos es obligatorio
+                           </div>
+                           <div *ngIf="f['intpre'].errors['invalido']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> No ha seleccionado una Partida presupuestaria de gastos
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-4">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Saldo</label>
+                           </div>
+                           <input type="text" class="form-control form-control-sm text-right" formControlName="saldo"
+                              aria-label="Small" aria-describedby="inputGroup-sizing-sm" readonly tabIndex="-1"
+                              appVisualFormat [minDecimals]="2" [maxDecimals]="2">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-4">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Valor<sup class="green">*</sup></label>
+                           </div>
+                           <input type="text" class="form-control form-control-sm text-right" formControlName="valor"
+                              appVisualFormat [minDecimals]="2" [maxDecimals]="2" (focus)="seleccionarTexto($event)"
+                              [ngClass]="{'is-invalid': f['valor'].invalid && f['valor'].touched, 'is-valid': f['valor'].valid, '': f['valor'].untouched}">
+                        </div>
+                        <div *ngIf="authService.msgval && f['valor'].errors && f['valor'].touched">
+                           <div *ngIf="f['valor'].errors['required']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> El valor es obligatorio
+                           </div>
+                           <div *ngIf="f['valor'].errors['min']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> No puede ser menor a 0.01
+                           </div>
+                           <div *ngIf="f['valor'].errors['invalido']"
+                              class="alert alert-warning m-0 px-1 py-0 robotosmall border" role="alert">
+                              <strong>Ups!</strong> No puede ser mayor que <strong>{{f['saldo'].value |
+                                 number:'1.2-2'}}</strong>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-4">
+                        <div class="input-group input-group-sm">
+                           <div class="input-group-prepend">
+                                 <label class="input-group-text">Nuevo Saldo</label>
+                           </div>
+                              <input type="text" class="form-control form-control-sm text-right" formControlName="newsaldo"
+                              appVisualFormat [minDecimals]="2" [maxDecimals]="2" readonly tabIndex="-1"
+                              [ngClass]="{'text-danger': f['newsaldo'].value < 0}">
+                        </div>
+                     </div>
+
+                     <div class="form-group col-md-12">
+                        <div class="input-group mb-0 input-group-sm">
+                           <div class="input-group-prepend">
+                              <label class="input-group-text">Concepto</label>
+                           </div>
+                           <textarea class="form-control" formControlName="descripcion" rows="3"></textarea>
+                        </div>
+                     </div>
+
+                  </div>
+
+                  <div class="text-center">
+                     <button type="submit" class="btn btn-success btn-sm mx-1" [disabled]="!formPartixcerti.valid"
+                        (click)="guardar()">
+                        <i class="fa fa-check-circle"></i> Aceptar</button>
+                     <button type="button" class="btn btn-outline-success btn-sm mb-0" (click)="regresar()"><i
+                           class="fa fa-times-circle"></i> Cancelar
+                     </button>
+                  </div>
+
+               </form>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

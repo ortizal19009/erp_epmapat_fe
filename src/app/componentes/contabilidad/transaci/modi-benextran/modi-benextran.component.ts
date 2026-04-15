@@ -332,10 +332,18 @@ export class ModiBenextranComponent implements OnInit {
       if (this.antvalor != this.f['valor'].value) { dto.valor = this.f['valor'].value };
       if (this.f['descri'].dirty) { dto.descri = this.f['descri'].value };
       if (this.anttotbene != this.registros.length) { dto.totbene = this.registros.length };
-      if (this.registros.length == 0) { dto.idbene = { idbene: 1 } }
-      else if (this.antidbene != this.primeridbene) { dto.idbene = { idbene: this.primeridbene } };
+      // console.log('this.antidbene y this.primeridbene: ', this.antidbene, this.primeridbene)
+      if (this.antidbene != this.primeridbene) {
+         if (this.primeridbene == 0) {
+            dto.idbene = { idbene: 1 };
+            dto.totbene = 0;
+         }
+         else { dto.idbene = { idbene: this.primeridbene } }
+      }
       dto.usumodi = this.authService.idusuario;
       dto.fecmodi = new Date();
+      // console.log('dto: ', dto)
+      // return
       this.tranService.updateTransa(this.inttra!, dto).subscribe({
          next: (transaci: Transaci) => {
             if (swregresar) {
@@ -385,8 +393,10 @@ export class ModiBenextranComponent implements OnInit {
                   next: () => {
                      this.registros.removeAt(index);
                      this.sumaTotales();
-                     if (this.registros.length === 0) { this.actualizaTransaci(true) }
-                     else { this.actualizaTransaci(false) }
+                     if (this.registros.length === 0) { this.primeridbene = 0; this.actualizaTransaci(true) }
+                     else {
+                        this.primeridbene = this.getFilaCampo(0, 'idbene')?.value; this.actualizaTransaci(false)
+                     }
                   },
                   error: err => { console.error(err.error); this.authService.mostrarError('Error al guardar eliminado', err.error); }
                });
@@ -402,22 +412,17 @@ export class ModiBenextranComponent implements OnInit {
       this.pagcobService.obtenerPorBenextran(idbenxtra).subscribe({
          next: (pagoscobros: Pagoscobros[]) => {
             this.pagoscobros = pagoscobros;
-            // Solo calcular si hay más de una fila
-            if (this.pagoscobros.length > 1) {
+            if (this.pagoscobros.length > 1) {  // Calcula total si hay más de una fila
                this.totPagoscobros = this.pagoscobros
                   .map(p => p.valor)
                   .reduce((acc, val) => acc + val, 0);
-            } else {
-               this.totPagoscobros = 0;
-            }
+            } else { this.totPagoscobros = 0 }
          },
          error: (err) => { console.error(err); this.authService.mostrarError('Error al recuperar Pagoscobros', err.error) }
       });
    }
 
    regresar() { this.router.navigate(['/transaci']); }
-
-   // cerrar() { this.router.navigate(['/inicio']); }
 
    //Valida Beneficiario
    valBeneficiario(i: number): AsyncValidatorFn {

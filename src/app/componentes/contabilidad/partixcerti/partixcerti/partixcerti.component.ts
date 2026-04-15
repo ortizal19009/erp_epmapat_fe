@@ -1,8 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, AsyncValidatorFn, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
+import { ColoresService } from '@compartida/colores.service';
+import { TramipresuService } from '@servicios/contabilidad/tramipresu.service';
+import { Observable, of } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
+import { EjecucioVM } from 'src/app/dtos/contabilidad/ejecucio.dto';
 import { Eliminadosapp } from 'src/app/modelos/administracion/eliminadosapp.model';
 import { Certipresu } from 'src/app/modelos/contabilidad/certipresu.model';
 import { Partixcerti } from 'src/app/modelos/contabilidad/partixcerti.model';
@@ -26,11 +29,9 @@ export class PartixcertiComponent implements OnInit {
    idcerti: number;
    iCertificacion = {} as interfaceCertificacion; //Interface para los datos de la Certificación
    partixcerti: Partixcerti[] = [];
-   swnuevo: boolean
+   padre: string;
    presupue: Presupue[] = [];
    idparxcer: number;      //Para modificar
-   intpre: number | null;
-   partida: { codpar: String, saldo: number, newsaldo: number } = { codpar: '', saldo: 0, newsaldo: 0 };
    swmodificar: boolean;
    sweliminar: boolean = false;
    swbusca: boolean = false;
@@ -40,26 +41,30 @@ export class PartixcertiComponent implements OnInit {
    ultima: number;
    sumValor: number = 0;
    sumTotprmisos: number = 0;
+   compromisos: EjecucioVM[] = [];
+   totComprometido: number = 0;
+   datosToPartixcerti: { idcerti: number; desdeNum: number; hastaNum: number; ultima: number; padre: string; };
 
    constructor(private router: Router, private fb: FormBuilder, public authService: AutorizaService, private ejecuService: EjecucionService,
       private certiService: CertipresuService, private parxcerService: PartixcertiService, private presuService: PresupueService,
-      private elimService: EliminadosappService) { }
+      private elimService: EliminadosappService, private tramiService: TramipresuService, private coloresService: ColoresService) { }
 
    ngOnInit(): void {
       if (!this.authService.sessionlog) { this.router.navigate(['/inicio']); }
       sessionStorage.setItem('ventana', '/certipresu');
       let coloresJSON = sessionStorage.getItem('/certipresu');
       if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
+      else this.buscaColor();
 
       const datosToPartixcertiJSON = sessionStorage.getItem('datosToPartixcerti');
       if (datosToPartixcertiJSON) {
-         const datosToPartixcerti = JSON.parse(datosToPartixcertiJSON);
-         this.idcerti = datosToPartixcerti.idcerti;
-         this.primera = +datosToPartixcerti.desdeNum;
-         this.ultima = +datosToPartixcerti.hastaNum;
+         this.datosToPartixcerti = JSON.parse(datosToPartixcertiJSON);
+         this.idcerti = this.datosToPartixcerti.idcerti;
+         this.primera = +this.datosToPartixcerti.desdeNum;
+         this.ultima = +this.datosToPartixcerti.hastaNum;
+         this.padre = this.datosToPartixcerti.padre
       }
       this.buscaCertipresu();
-      this.creaForm();
    }
 
    colocaColor(colores: any) {
@@ -71,17 +76,13 @@ export class PartixcertiComponent implements OnInit {
       if (detalle) detalle.classList.add('nuevoBG2');
    }
 
-   creaForm() {
-      //Form de nueva/modificar partixcerti
-      this.formPartixcerti = this.fb.group({
-         intpre: ['', Validators.required, this.valCodpar()],
-         codpar: '',
-         nompar: '',
-         saldo: '',
-         valor: ['', [Validators.required, Validators.min(0.01)], this.valValor.bind(this)],
-         newsaldo: '',
-         descripcion: this.iCertificacion.descripcion
-      }, { updateOn: "blur" });
+   async buscaColor() {
+      try {
+         const datos = await this.coloresService.setcolor(this.authService.idusuario, 'certipresu');
+         const coloresJSON = JSON.stringify(datos);
+         sessionStorage.setItem('/certipresu', coloresJSON);
+         this.colocaColor(datos);
+      } catch (error) { console.error(error); }
    }
 
    buscaCertipresu() {
@@ -110,87 +111,80 @@ export class PartixcertiComponent implements OnInit {
       });
    }
 
-   get f() { return this.formPartixcerti.controls; }
-
    calcularTotales(): void {
       this.sumValor = this.partixcerti.map(p => Number(p.valor) || 0).reduce((acc, val) => acc + val, 0);
       this.sumTotprmisos = this.partixcerti.map(p => Number(p.totprmisos) || 0).reduce((acc, val) => acc + val, 0);
    }
 
-   nuevo() {
-      this.swnuevo = true;
-      this.creaForm();
+   // Compromisos de una partixcerti
+   buscaCompromisos(idprmiso: number) {
+      this.ejecuService.obtenerPorIdparxcer(idprmiso).subscribe({
+         next: (ejecucio: EjecucioVM[]) => {
+            this.compromisos = ejecucio;
+            // Calcula el total de compromisos
+            this.totComprometido = this.compromisos.length > 1
+               ? this.compromisos.reduce((sum, e) => sum + (e.prmiso || 0), 0)
+               : (this.compromisos[0]?.devengado || 0);
+            // Carga los Trámites
+            this.compromisos.forEach((e, index) => {
+               if (e.idtrami) {
+                  this.tramiService.findById(e.idtrami).subscribe(tramipresu => {
+                     this.compromisos[index].tramite = tramipresu;
+                  });
+               }
+            });
+         },
+         error: (err) => { console.error(err); this.authService.mostrarError('Error al buscar los Compromisos', err.error) }
+      });
    }
 
-   cancelar() {
-      this.swnuevo = false;
-      this.swmodificar = false;
+   abrirTramite(idtrami: number) {
+      this.tramiService.ultimoTramipresu().subscribe({
+         next: resp => {
+            const datosToPrmisoxtrami = {
+               idtrami: idtrami,
+               desdeNum: 1,
+               hastaNum: resp.numero,
+               padre: 'Ninguno'
+            };
+            sessionStorage.setItem('datosToPrmisoxtrami', JSON.stringify(datosToPrmisoxtrami));
+            const url = `${window.location.origin}/prmisoxtrami`;
+            window.open(url, '_blank');
+         },
+         error: err => { console.error(err.error); this.authService.mostrarError('Error al buscar el último', err.error) }
+      });
    }
+
+   nuevo() {
+      this.datosToPartixcerti.idcerti = this.idcerti
+      sessionStorage.setItem('datosToPartixcerti', JSON.stringify(this.datosToPartixcerti));
+      sessionStorage.setItem('idcertiToAddPartixcerti', this.idcerti.toString());
+      this.router.navigate(['/add-partixcerti']);
+   }
+
+   get f() { return this.formPartixcerti.controls; }
 
    modificar(partixcerti: Partixcerti) {
       this.swmodificar = true;
+      this.formPartixcerti = this.fb.group({
+         intpre: '',
+         codpar: '',
+         nompar: '',
+         saldo: '',
+         valor: ['', [Validators.required, Validators.min(0.01)], this.valValor()],
+         newsaldo: '',
+         descripcion: this.iCertificacion.descripcion
+      }, { updateOn: "blur" });
+
       this.idparxcer = partixcerti.idparxcer;
-      this.intpre = partixcerti.intpre.intpre;
-      this.partida.saldo = +partixcerti.saldo;
-      this.partida.newsaldo = this.partida.saldo - partixcerti.valor;
       this.formPartixcerti.patchValue({
          intpre: partixcerti.intpre,
          codpar: partixcerti.intpre.codpar,
          nompar: partixcerti.intpre.nompar,
-         saldo: this.partida.saldo,
+         saldo: partixcerti.saldo,
          valor: partixcerti.valor,
-         newsaldo: this.partida.newsaldo,
+         newsaldo: partixcerti.saldo - partixcerti.valor,
          descripcion: partixcerti.descripcion,
-      });
-   }
-
-   //Datalist de codpar 
-   partidaxCodpar(e: any) {
-      if (e.target.value != '') {
-         this.presuService.findByCodpar(2, e.target.value).subscribe({
-            next: (partidas: Presupue[]) => this.presupue = partidas,
-            error: err => console.error(err.error),
-         });
-      }
-   }
-   onPartidaSelected(e: any) {
-      const selectedOption = this.presupue.find((x: { codpar: any; }) => x.codpar === e.target.value);
-      if (selectedOption) {
-         this.intpre = selectedOption.intpre;
-         this.partida.saldo = selectedOption.inicia + selectedOption.totmod - selectedOption.totcerti;
-         this.formPartixcerti.patchValue({
-            nompar: selectedOption.nompar,
-            saldo: this.partida.saldo,
-            valor: '',
-            newsaldo: ''
-         });
-      }
-      else {
-         this.intpre = null;
-         this.formPartixcerti.patchValue({ nompar: '' })
-      }
-   }
-
-   guardar() {
-      const dto: PartixcertiCreateDTO = {
-         idcerti: { idcerti: this.idcerti },
-         intpre: { intpre: this.intpre },
-         saldo: this.formPartixcerti.value.saldo,
-         valor: this.formPartixcerti.value.valor,
-         descripcion: this.formPartixcerti.value.descripcion,
-         totprmisos: 0,
-         swreinte: 0,
-         usucrea: this.authService.idusuario,
-         feccrea: new Date(),
-      };
-      this.parxcerService.savePartixcerti(dto).subscribe({
-         next: (partixcerti: Partixcerti) => {
-            this.authService.swal('success', `Partida ${partixcerti.intpre.codpar} guardada en la Certificación con éxito `);
-            sessionStorage.setItem('ultidparxcer', partixcerti.idparxcer.toString());
-            this.buscaPartixcerti();
-            this.swnuevo = false;
-         },
-         error: err => { console.error(err.error); this.authService.mostrarError('Error al guardar', err.error) }
       });
    }
 
@@ -210,6 +204,8 @@ export class PartixcertiComponent implements OnInit {
       });
 
    }
+
+   cancelar() { this.swmodificar = false }
 
    eliminar(partixcerti: Partixcerti) {
       this.ejecuService.countByIdparxcer(partixcerti.idparxcer).subscribe({
@@ -340,20 +336,23 @@ export class PartixcertiComponent implements OnInit {
       input.select();
    }
 
-   //Valida que se haya seleccionado una Partida
-   valCodpar(): AsyncValidatorFn {
-      return (_control: AbstractControl) => {
-         if (this.intpre == null) { return of<ValidationErrors>({ invalido: true }); }
+   //Valida el Valor
+   // valValor(_control: AbstractControl) {
+   //    this.partida.newsaldo = Math.round((this.partida.saldo - +this.formPartixcerti.controls['valor'].value) * 100) / 100;
+   //    this.formPartixcerti.controls['newsaldo'].setValue(this.partida.newsaldo);
+   //    if (this.partida.newsaldo < 0) return of({ 'invalido': true });
+   //    else return of(null);
+   // }
+   valValor(): AsyncValidatorFn {
+      return (control: AbstractControl): Observable<ValidationErrors | null> => {
+         const valor = +control.value;
+         const saldo = this.formPartixcerti.controls['saldo'].value
+         const newsaldo = Math.round((saldo - valor) * 100) / 100;
+         // Coloca newsaldo
+         this.formPartixcerti.get('newsaldo')?.setValue(newsaldo, { emitEvent: false });
+         if (newsaldo < 0) { return of({ invalido: true }) }
          return of(null);
       };
-   }
-
-   //Valida el Valor
-   valValor(_control: AbstractControl) {
-      this.partida.newsaldo = Math.round((this.partida.saldo - +this.formPartixcerti.controls['valor'].value) * 100) / 100;
-      this.formPartixcerti.controls['newsaldo'].setValue(this.partida.newsaldo);
-      if (this.partida.newsaldo < 0) return of({ 'invalido': true });
-      else return of(null);
    }
 
 }
@@ -364,18 +363,6 @@ interface interfaceCertificacion {
    docu: string;
    respon: string;
    descripcion: String;
-}
-
-export interface PartixcertiCreateDTO {
-   idcerti: { idcerti: number | null };
-   intpre: { intpre: number | null };
-   saldo: number;
-   valor: number;
-   descripcion: String;
-   totprmisos: number;
-   swreinte: number
-   usucrea: number;
-   feccrea: Date;
 }
 
 export interface PartixcertiUpdateDTO {
