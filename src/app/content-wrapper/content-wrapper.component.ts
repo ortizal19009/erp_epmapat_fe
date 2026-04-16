@@ -21,7 +21,7 @@ export class ContentWrapperComponent implements OnInit {
     public authService: AutorizaService,
     private usuService: UsuarioService,
     private s_usrxmodulos: UsrxmodulosService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/inicio');
@@ -74,6 +74,7 @@ export class ContentWrapperComponent implements OnInit {
           sessionStorage.setItem('abc', btoa(JSON.stringify(abc)));
 
           this.authService.enabModulos();
+          this.authService.getEmpresa();
         } else {
           this.msg = true;
           this.kont++;

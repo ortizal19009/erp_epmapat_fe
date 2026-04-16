@@ -71,7 +71,6 @@ export class ImpPartixcertiComponent implements OnInit {
          this.repoxopService.porCodigo(this.codigo).subscribe({
             next: (datos: Repoxopcion[]) => {
                this.repoxopcion = datos;
-               // console.log('this.repoxopcion: ', this.repoxopcion)
                if (this.repoxopcion.length > 0) {
                   this.formImprimir.patchValue({ repoxopcion: this.repoxopcion[0].idrepoxopcion });
                   //Obtiene los reportes Jasper de la primera opción
@@ -183,14 +182,12 @@ export class ImpPartixcertiComponent implements OnInit {
                valorInicial = existe ? this.partixcertiToImpExp[existe] ?? '' : '';
                break;
             case 'java.lang.Integer':
-               // console.log('this.certi:', this.certi)
                // if (param.nombre == 'Desde') valorInicial = this.proy.desdeNum || 0;
                // else if (param.nombre == 'Hasta') valorInicial = this.proy.hastaNum || 0;
                // else valorInicial = 0;
                valorInicial = this.partixcertiToImpExp;
                break;
             case 'java.util.Date':
-               // console.log('this.certi.desdeFecha: ', this.certi.desdeFecha)
                // if (param.nombre == 'DesdeFecha') valorInicial = this.proy.desdeFecha;
                // if (param.nombre == 'HastaFecha') valorInicial = this.proy.hastaFecha;
                // else valorInicial = convertirFechaDefecto('01/01/2025');
@@ -282,7 +279,6 @@ export class ImpPartixcertiComponent implements OnInit {
       // console.log('dto: ', dto);
       this.repojrService.ejecutaReporteSQL(dto).subscribe({
          next: (data: Blob) => {
-            console.log('data: ', data)
             switch (dto.extension) {
                case 'pdf': {
                   const blob = new Blob([data], { type: 'application/pdf' });

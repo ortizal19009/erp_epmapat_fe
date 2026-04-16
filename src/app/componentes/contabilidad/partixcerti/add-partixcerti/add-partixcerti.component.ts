@@ -33,7 +33,6 @@ export class AddPartixcertiComponent implements OnInit {
       if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
 
       this.idcerti = Number(sessionStorage.getItem('idcertiToAddPartixcerti'));
-console.log('Recibe: ', this.idcerti )
 
       this.formPartixcerti = this.fb.group({
                intpre: ['', Validators.required, this.valCodpar()],

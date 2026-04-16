@@ -69,8 +69,6 @@ export class MainHeaderComponent implements OnInit {
         else this.enabled = [false, false, false, false, false, false, false];
         this.syncModuleName();
         this.startInterval();
-        this.authService.getEmpresa();
-        console.log('Módulos obtenidos: ', this.modulos);
       })
       .catch((e) => console.error(e));
   }
