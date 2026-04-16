@@ -142,7 +142,6 @@ export class ImpBancosComponent implements OnInit {
          case 2:  //Conciliación
             try {
                this._conciliacion = await this.conciService.getByIdcuentaMesAsync(+this.formBancos.value.idcuenta, +this.formBancos.value.mes!);
-               console.log('this._conciliacion: ', this._conciliacion)
                this.swcalculando = false;
                if (this.swimprimir) this.txtcalculando = 'Mostrar'
                else this.txtcalculando = 'Descargar'

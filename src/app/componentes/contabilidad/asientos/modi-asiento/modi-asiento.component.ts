@@ -151,7 +151,6 @@ export class ModiAsientoComponent implements OnInit {
       if (this.f['glosa'].dirty) { dto.glosa = this.f['glosa'].value; }
       dto.usumodi = this.authService.idusuario;
       dto.fecmodi = new Date();
-      console.log('Envia: ', dto)
       this.asiService.updateAsiento(this.idasiento, dto).subscribe({
          next: (actualizado: Asientos) => {
             this.authService.swal('success', `Asiento ${actualizado.asiento} modificado con éxito`);

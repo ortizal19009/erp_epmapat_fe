@@ -462,7 +462,6 @@ export class ImpAsientosComponent implements OnInit {
       celdaE.numFmt = '#,##0.00';
       celdaE.font = { bold: true };
       celdaE.value = { formula: 'SUM(E4:' + 'E' + (this._asientos.length + 3).toString() + ')', result: 0, sharedFormula: undefined, date1904: false };
-      console.log('celdaE: ', celdaE)
 
       let celdaF = worksheet.getCell('F' + (this._asientos.length + 4).toString());
       celdaF.numFmt = '#,##0.00';

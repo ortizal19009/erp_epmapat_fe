@@ -87,7 +87,6 @@ export class ImpMovibeneComponent implements OnInit {
             try {
                this._movibene = await this.bxtService.getByIdbeneDesdeHastaAsync(this.idbene, this.formImprimir.value.desde, this.formImprimir.value.hasta);
                this.total();
-               // console.log('this._movibene: ', this._movibene)
                this.swcalculando = false;
                if (this.swimprimir) this.txtcalculando = 'Mostrar'
                else this.txtcalculando = 'Descargar'

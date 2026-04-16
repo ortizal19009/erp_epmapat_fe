@@ -145,10 +145,9 @@ export class AutorizaService implements OnDestroy, CanActivate {
   }
 
   //Obtiene el nombre de la Empresa
-  getEmpresa() {
+  public getEmpresa() {
     this.defService.getByIddefinir(1).subscribe({
       next: (definir: Definir) => {
-        console.log('Definir obtenido: ', definir);
         // OJO: Falta validar la Empresa con la licencia
         this.setDatosEmpresa({
           empresa: definir.empresa,

@@ -216,11 +216,11 @@ export class ComprobacionComponent implements OnInit {
                      });
                   }
                } else {
-                  console.log('Registrocta no existe', this.codcue_par);
+                  console.info('Registrocta no existe', this.codcue_par);
                };
             }
          } else {
-            console.log('ctas no existe', this.codcue);
+            console.info('ctas no existe', this.codcue);
          };
       }
 

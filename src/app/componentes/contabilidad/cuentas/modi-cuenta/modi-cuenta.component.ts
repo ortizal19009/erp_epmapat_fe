@@ -150,24 +150,19 @@ export class ModiCuentaComponent implements OnInit {
             try {
                const resp = this.tranService.tieneTransaciAsync(this.antcodcue.toString());
                if (await resp) {
-                  console.log('Devuelve true')
                   rtn = true;
                   return of({ 'movimiento': true })
                }
                else {
-                  console.log('Devuelve false')
                   rtn = false;
                   return of(null)
                }
 
             } catch (error) { console.error(error); }
-            // console.log('rtn: ', rtn)
             if (rtn) {
-               console.log('Regresa movimiento:', true)
                return of({ 'movimiento': true })
             }
             else {
-               console.log('Regresa null')
                return of(null)
             }
          }

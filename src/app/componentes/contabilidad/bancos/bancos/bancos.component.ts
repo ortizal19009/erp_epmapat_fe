@@ -171,12 +171,10 @@ export class BancosComponent implements OnInit {
 
    cambioDatosCheck(e: any, transaci: any) {
       let date: Date = new Date();
-      // console.log(e.target.checked);
 
       if (e.target.checked === false) {
          transaci.mesconcili = 0;
          this.updateTransaci(transaci);
-         console.log(transaci);
       } else if (e.target.checked === true) {
          transaci.mesconcili = date.getMonth();
          //transaci.mesconcili = 1;

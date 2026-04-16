@@ -1185,8 +1185,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
         data?.fotopath ??
         data?.pathfoto ??
         null;
-      console.log('Lectura para foto:', data);
-      console.log('URL foto lectura:', fotoUrl);
+
       if (!fotoUrl) {
         this.abrirFotoConContexto(null, `Foto del medidor - Cuenta ${cuenta}`, rutaOriginal);
         $('#modalFotoAbonado').modal('show');

@@ -305,6 +305,21 @@ import { ReportesjrComponent } from '@features/admin-central/pages/administracio
 import { AddReportejrComponent } from '@features/admin-central/pages/administracion/reportesjr/add-reportejr/add-reportejr.component';
 import { ModiReportejrComponent } from '@features/admin-central/pages/administracion/reportesjr/modi-reportejr/modi-reportejr.component';
 import { ImpReportejrComponent } from '@features/admin-central/pages/administracion/reportesjr/imp-reportejr/imp-reportejr.component';
+import { AddPartixcertiComponent } from '@comercializacion/contabilidad/partixcerti/add-partixcerti/add-partixcerti.component';
+import { ImpPartixcertiComponent } from '@comercializacion/contabilidad/partixcerti/imp-partixcerti/imp-partixcerti.component';
+import { ReintegradasComponent } from '@comercializacion/contabilidad/reintegradas/reintegradas/reintegradas.component';
+import { AddReintegradaComponent } from '@comercializacion/contabilidad/reintegradas/add-reintegrada/add-reintegrada.component';
+import { ModiReintegradaComponent } from '@comercializacion/contabilidad/reintegradas/modi-reintegrada/modi-reintegrada.component';
+import { PartixreinteComponent } from '@comercializacion/contabilidad/reintegradas/partixreinte/partixreinte.component';
+import { AddPartixreinteComponent } from '@comercializacion/contabilidad/reintegradas/add-partixreinte/add-partixreinte.component';
+import { AddPartixtramiteComponent } from '@comercializacion/contabilidad/tramipresu/add-partixtramite/add-partixtramite.component';
+import { ImpjCuentasComponent } from '@comercializacion/contabilidad/cuentas/impj-cuentas/impj-cuentas.component';
+import { AddTrandetramiComponent } from '@comercializacion/contabilidad/transaci/add-trandetrami/add-trandetrami.component';
+import { ModiBenextranComponent } from '@comercializacion/contabilidad/transaci/modi-benextran/modi-benextran.component';
+import { AddPagoscobrosComponent } from '@comercializacion/contabilidad/transaci/add-pagoscobros/add-pagoscobros.component';
+import { ModiPagoscobrosComponent } from '@comercializacion/contabilidad/transaci/modi-pagoscobros/modi-pagoscobros.component';
+import { AddTrandecompromComponent } from '@comercializacion/contabilidad/transaci/add-trandecomprom/add-trandecomprom.component';
+import { ModiDesdetramiteComponent } from '@comercializacion/contabilidad/transaci/modi-desdetramite/modi-desdetramite.component';
 
 const routes: Routes = [
   //Consumo de Agua
@@ -901,412 +916,130 @@ const routes: Routes = [
   },
   //================ CONTABILIDAD =============================
   { path: 'cuentas', component: CuentasComponent, canActivate: [AuthGuard] },
-  {
-    path: 'add-cuenta',
-    component: AddCuentaComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'modi-cuenta',
-    component: ModiCuentaComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'info-cuenta',
-    component: InfoCuentaComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'imp-cuentas',
-    component: ImpCuentasComponent,
-    canActivate: [AuthGuard],
-  },
-  { path: 'imp-mayor', component: ImpMayorComponent, canActivate: [AuthGuard] },
+   { path: 'add-cuenta', component: AddCuentaComponent, canActivate: [AuthGuard] },
+   { path: 'modi-cuenta', component: ModiCuentaComponent, canActivate: [AuthGuard] },
+   { path: 'info-cuenta', component: InfoCuentaComponent, canActivate: [AuthGuard] },
+   { path: 'imp-cuentas', component: ImpCuentasComponent, canActivate: [AuthGuard] },
+   { path: 'impj-cuentas', component: ImpjCuentasComponent, canActivate: [AuthGuard] },
+   { path: 'imp-mayor', component: ImpMayorComponent, canActivate: [AuthGuard] },
 
-  { path: 'asientos', component: AsientosComponent, canActivate: [AuthGuard] },
-  {
-    path: 'add-asiento',
-    component: AddAsientoComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'imp-asientos',
-    component: ImpAsientosComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'modi-asiento',
-    component: ModiAsientoComponent,
-    canActivate: [AuthGuard],
-  },
+   { path: 'asientos', component: AsientosComponent, canActivate: [AuthGuard] },
+   { path: 'add-asiento', component: AddAsientoComponent, canActivate: [AuthGuard] },
+   { path: 'imp-asientos', component: ImpAsientosComponent, canActivate: [AuthGuard] },
+   { path: 'modi-asiento', component: ModiAsientoComponent, canActivate: [AuthGuard] },
 
-  { path: 'transaci', component: TransaciComponent, canActivate: [AuthGuard] },
-  {
-    path: 'add-transaci',
-    component: AddTransaciComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'modi-transaci',
-    component: ModiTransaciComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'imp-transaci',
-    component: ImpTransaciComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'add-benextran',
-    component: AddBenextranComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'add-liquiacfp',
-    component: AddLiquiacfpComponent,
-    canActivate: [AuthGuard],
-  },
+   { path: 'transaci', component: TransaciComponent, canActivate: [AuthGuard] },
+   { path: 'add-transaci', component: AddTransaciComponent, canActivate: [AuthGuard] },
+   { path: 'modi-transaci', component: ModiTransaciComponent, canActivate: [AuthGuard] },
+   { path: 'imp-transaci', component: ImpTransaciComponent, canActivate: [AuthGuard] },
+   { path: 'add-trandetrami', component: AddTrandetramiComponent, canActivate: [AuthGuard] },
+   { path: 'add-benextran', component: AddBenextranComponent, canActivate: [AuthGuard] },
+   { path: 'modi-benextran', component: ModiBenextranComponent, canActivate: [AuthGuard] },
+   { path: 'add-liquiacfp', component: AddLiquiacfpComponent, canActivate: [AuthGuard] },   //es pagoscobros
+   { path: 'add-pagoscobros', component: AddPagoscobrosComponent, canActivate: [AuthGuard] },
+   { path: 'modi-pagoscobros', component: ModiPagoscobrosComponent, canActivate: [AuthGuard] },
+   { path: 'add-trandecomprom', component: AddTrandecompromComponent, canActivate: [AuthGuard] },
+   { path: 'modi-desdetramite', component: ModiDesdetramiteComponent, canActivate: [AuthGuard] },
 
-  { path: 'bancos', component: BancosComponent, canActivate: [AuthGuard] },
-  {
-    path: 'conciliaban',
-    component: ConciliabanComponent,
-    canActivate: [AuthGuard],
-  }, //No se necesita: Ahora esta en el modal
-  {
-    path: 'imp-bancos',
-    component: ImpBancosComponent,
-    canActivate: [AuthGuard],
-  },
+   { path: 'bancos', component: BancosComponent, canActivate: [AuthGuard] },
+   { path: 'conciliaban', component: ConciliabanComponent, canActivate: [AuthGuard] },   //No se necesita: Ahora esta en el modal
+   { path: 'imp-bancos', component: ImpBancosComponent, canActivate: [AuthGuard] },
 
-  { path: 'sinafip', component: SinafipComponent, canActivate: [AuthGuard] },
+   { path: 'sinafip', component: SinafipComponent, canActivate: [AuthGuard] },
 
-  {
-    path: 'niifcuentas',
-    component: NiifcuentasComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'add-homologa',
-    component: AddHomologaComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'add-niifcuenta',
-    component: AddNiifcuentaComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'modi-niifcuenta',
-    component: ModiNiifcuentaComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'imp-niifcuentas',
-    component: ImpNiifcuentasComponent,
-    canActivate: [AuthGuard],
-  },
+   { path: 'niifcuentas', component: NiifcuentasComponent, canActivate: [AuthGuard] },
+   { path: 'add-homologa', component: AddHomologaComponent, canActivate: [AuthGuard] },
+   { path: 'add-niifcuenta', component: AddNiifcuentaComponent, canActivate: [AuthGuard] },
+   { path: 'modi-niifcuenta', component: ModiNiifcuentaComponent, canActivate: [AuthGuard] },
+   { path: 'imp-niifcuentas', component: ImpNiifcuentasComponent, canActivate: [AuthGuard] },
 
-  {
-    path: 'beneficiarios',
-    component: BeneficiariosComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'add-beneficiario',
-    component: AddBeneficiarioComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'info-beneficiario',
-    component: InfoBeneficiarioComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'modi-beneficiario',
-    component: ModiBeneficiarioComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'imp-beneficiarios',
-    component: ImpBeneficiariosComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'imp-movibene',
-    component: ImpMovibeneComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'info-liquida',
-    component: InfoLiquidaComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'imp-liquida',
-    component: ImpLiquidaComponent,
-    canActivate: [AuthGuard],
-  },
+   { path: 'beneficiarios', component: BeneficiariosComponent, canActivate: [AuthGuard] },
+   { path: 'add-beneficiario', component: AddBeneficiarioComponent, canActivate: [AuthGuard] },
+   { path: 'info-beneficiario', component: InfoBeneficiarioComponent, canActivate: [AuthGuard] },
+   { path: 'modi-beneficiario', component: ModiBeneficiarioComponent, canActivate: [AuthGuard] },
+   { path: 'imp-beneficiarios', component: ImpBeneficiariosComponent, canActivate: [AuthGuard] },
+   { path: 'imp-movibene', component: ImpMovibeneComponent, canActivate: [AuthGuard] },
+   { path: 'info-liquida', component: InfoLiquidaComponent, canActivate: [AuthGuard] },
+   { path: 'imp-liquida', component: ImpLiquidaComponent, canActivate: [AuthGuard], },
 
-  { path: 'egresos', component: EgresosComponent, canActivate: [AuthGuard] },
-  {
-    path: 'modi-egreso',
-    component: ModiEgresoComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'imp-egresos',
-    component: ImpEgresosComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'add-egreso',
-    component: AddEgresoComponent,
-    canActivate: [AuthGuard],
-  },
+   { path: 'egresos', component: EgresosComponent, canActivate: [AuthGuard] },
+   { path: 'modi-egreso', component: ModiEgresoComponent, canActivate: [AuthGuard] },
+   { path: 'imp-egresos', component: ImpEgresosComponent, canActivate: [AuthGuard] },
+   { path: 'add-egreso', component: AddEgresoComponent, canActivate: [AuthGuard] },
 
-  {
-    path: 'regrecauda',
-    component: RegrecaudaComponent
-  },
+   { path: 'regrecauda', component: RegrecaudaComponent, canActivate: [AuthGuard] },
 
-  {
-    path: 'retenciones',
-    component: RetencionesComponent
-  },
-  {
-    path: 'imp-retenciones',
-    component: ImpRetencionesComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'add-retencion',
-    component: AddRetencionComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'modi-retencion',
-    component: ModiRetencionComponent,
-    canActivate: [AuthGuard],
-  },
+   { path: 'retenciones', component: RetencionesComponent, canActivate: [AuthGuard] },
+   { path: 'imp-retenciones', component: ImpRetencionesComponent, canActivate: [AuthGuard] },
+   { path: 'add-retencion', component: AddRetencionComponent, canActivate: [AuthGuard] },
+   { path: 'modi-retencion', component: ModiRetencionComponent, canActivate: [AuthGuard] },
 
-  {
-    path: 'preingresos',
-    component: PreingresosComponent,
-    canActivate: [AuthGuard],
-  },
-  // { path: 'info-preingreso', component: InfoPreingresoComponent, canActivate: [AuthGuard]},
-  {
-    path: 'add-preingreso',
-    component: AddPreingresoComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'modi-preingreso',
-    component: ModiPreingresoComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'aux-ingreso',
-    component: AuxIngresoComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'imp-preingreso',
-    component: ImpPreingresoComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'imp-auxingreso',
-    component: ImpAuxingresoComponent,
-    canActivate: [AuthGuard],
-  },
+   { path: 'preingresos', component: PreingresosComponent, canActivate: [AuthGuard] },
+   // { path: 'info-preingreso', component: InfoPreingresoComponent },
+   { path: 'add-preingreso', component: AddPreingresoComponent, canActivate: [AuthGuard] },
+   { path: 'modi-preingreso', component: ModiPreingresoComponent, canActivate: [AuthGuard] },
+   { path: 'aux-ingreso', component: AuxIngresoComponent, canActivate: [AuthGuard] },
+   { path: 'imp-preingreso', component: ImpPreingresoComponent, canActivate: [AuthGuard] },
+   { path: 'imp-auxingreso', component: ImpAuxingresoComponent, canActivate: [AuthGuard], },
 
-  {
-    path: 'pregastos',
-    component: PregastosComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'add-pregasto',
-    component: AddPregastoComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'modi-pregasto',
-    component: ModiPregastoComponent,
-    canActivate: [AuthGuard],
-  },
-  { path: 'aux-gasto', component: AuxGastoComponent, canActivate: [AuthGuard] },
-  {
-    path: 'imp-pregasto',
-    component: ImpPregastoComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'imp-auxgasto',
-    component: ImpAuxgastoComponent,
-    canActivate: [AuthGuard],
-  },
+   { path: 'pregastos', component: PregastosComponent, canActivate: [AuthGuard] },
+   { path: 'add-pregasto', component: AddPregastoComponent, canActivate: [AuthGuard] },
+   { path: 'modi-pregasto', component: ModiPregastoComponent, canActivate: [AuthGuard] },
+   { path: 'aux-gasto', component: AuxGastoComponent, canActivate: [AuthGuard] },
+   { path: 'imp-pregasto', component: ImpPregastoComponent, canActivate: [AuthGuard] },
+   { path: 'imp-auxgasto', component: ImpAuxgastoComponent, canActivate: [AuthGuard], },
 
-  {
-    path: 'certipresu',
-    component: CertipresuComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'modi-certipresu',
-    component: ModiCertipresuComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'add-certipresu',
-    component: AddCertipresuComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'partixcerti',
-    component: PartixcertiComponent,
-    canActivate: [AuthGuard],
-  },
+   { path: 'certipresu', component: CertipresuComponent, canActivate: [AuthGuard] },
+   { path: 'modi-certipresu', component: ModiCertipresuComponent, canActivate: [AuthGuard] },
+   { path: 'add-certipresu', component: AddCertipresuComponent, canActivate: [AuthGuard] },
+   { path: 'partixcerti', component: PartixcertiComponent, canActivate: [AuthGuard] },
+   { path: 'add-partixcerti', component: AddPartixcertiComponent, canActivate: [AuthGuard] },
+   { path: 'imp-partixcerti', component: ImpPartixcertiComponent, canActivate: [AuthGuard] },
 
-  {
-    path: 'tramipresu',
-    component: TramipresuComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'add-tramipresu',
-    component: AddTramipresuComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'modi-tramipresu',
-    component: ModiTramipresuComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'prmisoxtrami',
-    component: PrmisoxtramiComponent,
-    canActivate: [AuthGuard],
-  },
+   { path: 'reintegradas', component: ReintegradasComponent, canActivate: [AuthGuard] },
+   { path: 'add-reintegrada', component: AddReintegradaComponent, canActivate: [AuthGuard] },
+   { path: 'modi-reintegrada', component: ModiReintegradaComponent, canActivate: [AuthGuard] },
+   { path: 'partixreinte', component: PartixreinteComponent, canActivate: [AuthGuard] },
+   { path: 'add-partixreinte', component: AddPartixreinteComponent, canActivate: [AuthGuard] },
 
-  { path: 'reformas', component: ReformasComponent, canActivate: [AuthGuard] },
-  {
-    path: 'add-reforma',
-    component: AddReformaComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'modi-reforma',
-    component: ModiReformaComponent,
-    canActivate: [AuthGuard],
-  },
+   { path: 'tramipresu', component: TramipresuComponent, canActivate: [AuthGuard] },
+   { path: 'add-tramipresu', component: AddTramipresuComponent, canActivate: [AuthGuard] },
+   { path: 'modi-tramipresu', component: ModiTramipresuComponent, canActivate: [AuthGuard] },
+   { path: 'prmisoxtrami', component: PrmisoxtramiComponent, canActivate: [AuthGuard] },
+   { path: 'add-partixtramite', component: AddPartixtramiteComponent, canActivate: [AuthGuard] },
 
-  {
-    path: 'clasificador',
-    component: ClasificadorComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'info-clasificador',
-    component: InfoClasificadorComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'modi-clasificador',
-    component: ModiClasificadorComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'add-clasificador',
-    component: AddClasificadorComponent,
-    canActivate: [AuthGuard],
-  },
+   { path: 'reformas', component: ReformasComponent, canActivate: [AuthGuard] },
+   { path: 'add-reforma', component: AddReformaComponent, canActivate: [AuthGuard] },
+   { path: 'modi-reforma', component: ModiReformaComponent, canActivate: [AuthGuard], },  
 
-  {
-    path: 'ejecucion',
-    component: EjecucionComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'modi-ejecucion',
-    component: ModiEjecucionComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'add-ejecucion',
-    component: AddEjecucionComponent,
-    canActivate: [AuthGuard],
-  },
+   { path: 'clasificador', component: ClasificadorComponent, canActivate: [AuthGuard] },
+   { path: 'info-clasificador', component: InfoClasificadorComponent, canActivate: [AuthGuard] },
+   { path: 'modi-clasificador', component: ModiClasificadorComponent, canActivate: [AuthGuard] },
+   { path: 'add-clasificador', component: AddClasificadorComponent, canActivate: [AuthGuard] },
 
-  { path: 'bancos', component: BancosComponent, canActivate: [AuthGuard] },
-  {
-    path: 'conciliaban',
-    component: ConciliabanComponent,
-    canActivate: [AuthGuard],
-  },
+   { path: 'ejecucion', component: EjecucionComponent, canActivate: [AuthGuard] },
+   { path: 'modi-ejecucion', component: ModiEjecucionComponent, canActivate: [AuthGuard] },
+   { path: 'add-ejecucion', component: AddEjecucionComponent, canActivate: [AuthGuard] },
 
-  {
-    path: 'comprobacion',
-    component: ComprobacionComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'estsituacion',
-    component: EstFinancieraComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'estresultados',
-    component: EstResultadosComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'flujoefectivo',
-    component: EstFlujoEfeComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'ejecupresup',
-    component: EstEjecucionPreComponent,
-    canActivate: [AuthGuard],
-  },
+   { path: 'bancos', component: BancosComponent, canActivate: [AuthGuard] },
+   { path: 'conciliaban', component: ConciliabanComponent, canActivate: [AuthGuard] },
 
-  {
-    path: 'unicostos',
-    component: UnicostosComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'cuecostos',
-    component: CuecostosComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'comparativo',
-    component: ComparativoComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'resulcostos',
-    component: ResulcostosComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'imp-unicostos',
-    component: ImpUnicostosComponent,
-    canActivate: [AuthGuard],
-  },
+   { path: 'comprobacion', component: ComprobacionComponent, canActivate: [AuthGuard] },
+   { path: 'estsituacion', component: EstFinancieraComponent, canActivate: [AuthGuard] },
+   { path: 'estresultados', component: EstResultadosComponent, canActivate: [AuthGuard] },
+   { path: 'flujoefectivo', component: EstFlujoEfeComponent, canActivate: [AuthGuard] },
+   { path: 'ejecupresup', component: EstEjecucionPreComponent, canActivate: [AuthGuard] },
 
-  { path: 'estrfunc', component: EstrfuncComponent, canActivate: [AuthGuard] },
-  {
-    path: 'info-estrfunc',
-    component: InfoEstrfuncComponent,
-    canActivate: [AuthGuard],
-  },
+   { path: 'unicostos', component: UnicostosComponent, canActivate: [AuthGuard] },
+   { path: 'cuecostos', component: CuecostosComponent, canActivate: [AuthGuard] },
+   { path: 'comparativo', component: ComparativoComponent, canActivate: [AuthGuard] },
+   { path: 'resulcostos', component: ResulcostosComponent, canActivate: [AuthGuard] },
+   { path: 'imp-unicostos', component: ImpUnicostosComponent, canActivate: [AuthGuard] },
 
-  { path: 'ifinan', component: IfinanComponent, canActivate: [AuthGuard] },
+   { path: 'estrfunc', component: EstrfuncComponent, canActivate: [AuthGuard] },
+   { path: 'info-estrfunc', component: InfoEstrfuncComponent, canActivate: [AuthGuard], },
+
+   { path: 'ifinan', component: IfinanComponent, canActivate: [AuthGuard] },
 
   //================ RRHH =============================
   { path: 'personal', component: PersonalComponent, canActivate: [AuthGuard] },

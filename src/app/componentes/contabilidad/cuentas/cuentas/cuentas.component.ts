@@ -172,7 +172,6 @@ export class CuentasComponent implements OnInit {
          asohaber: p.asohaber,
       }));
 
-      // console.log('dtoPreingresos: ', dtoPreingresos)
       const nomrep = 'cuentas';
       this.repojrService.valNomrep(nomrep).subscribe({
          next: sw => {

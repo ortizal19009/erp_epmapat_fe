@@ -59,9 +59,7 @@ export class ResulcostosComponent implements OnInit {
 
       this.cueService.getCuecostos().subscribe({
          next: datos => {
-            console.log('datos: ', datos);
             this._tmp = datos;
-            console.log('this._tmp: ', this._tmp);
             this.arr = datos;
             // this.arr = datos;
 

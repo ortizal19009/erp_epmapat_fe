@@ -152,7 +152,6 @@ export class AsientosComponent implements OnInit {
       let hastaNum: number = 999999999;
       if (this.formBuscar.value.hastaNum != null) { hastaNum = this.formBuscar.value.hastaNum; }
       //Busca Asientos
-      // console.log('this.formBuscar.value.hastaFecha: ', this.formBuscar.value.hastaFecha)
       if (this.formBuscar.value.tipcom == 0)
          this.asiService.getAsientos(1, desdeNum, hastaNum,
             this.formBuscar.value.desdeFecha, this.formBuscar.value.hastaFecha).subscribe({

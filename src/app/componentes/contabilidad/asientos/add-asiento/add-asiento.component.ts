@@ -65,8 +65,7 @@ export class AddAsientoComponent implements OnInit {
    ultimafecha() {
       this.asiService.obtenerUltimaFecha().subscribe({
          next: (ultimafecha: Date) => {
-            // console.log('ultimafecha: ', ultimafecha)
-            // const soloFecha = ultimafecha.toString().substring(0, 10);
+
             this.formAsiento.patchValue({ fecha: ultimafecha })
       },
          error: err => console.error('Error al obtener la última fecha', err.error)
@@ -201,7 +200,6 @@ export class AddAsientoComponent implements OnInit {
    // Valida nuevamente el momento de gaurdar
    validaComprobanteAntesDeGuardar(): Observable<boolean> {
       const compro = this.formAsiento.get('compro')?.value;
-      // console.log('Valida: ', this.tipcom, compro)
       return this.asiService.valCompro(this.tipcom, compro).pipe(
          map(existe => existe)
       );
