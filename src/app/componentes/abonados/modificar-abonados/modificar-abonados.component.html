@@ -50,7 +50,7 @@
 
                     <div class="form-group col-md-3">
                       <label class="font-weight-bold mb-1">Estado</label>
-                      <select class="custom-select custom-select-sm" formControlName="estado" [disabled]="true">
+                      <select class="custom-select custom-select-sm" formControlName="estado">
                         <option value="1">Habilitado</option>
                         <option value="2">Suspendido</option>
                         <option value="3">Retirado</option>
@@ -239,7 +239,7 @@
                       <label class="font-weight-bold mb-1">Foto de la casa</label>
                       <input type="file" class="form-control-file" accept="image/*" (change)="onFotoCasaSelected($event)">
                       <div class="mt-2" *ngIf="fotoCasaPreview">
-                        <img [src]="fotoCasaPreview" alt="Foto de la casa" class="img-thumbnail" style="max-height: 220px;">
+                        <img [src]="fotoCasaPreview | safe" alt="Foto de la casa" class="img-thumbnail" style="max-height: 220px;">
                       </div>
                     </div>
 
@@ -247,7 +247,7 @@
                       <label class="font-weight-bold mb-1">Foto del medidor</label>
                       <input type="file" class="form-control-file" accept="image/*" (change)="onFotoMedidorSelected($event)">
                       <div class="mt-2" *ngIf="fotoMedidorPreview">
-                        <img [src]="fotoMedidorPreview" alt="Foto del medidor" class="img-thumbnail" style="max-height: 220px;">
+                        <img [src]="fotoMedidorPreview | safe" alt="Foto del medidor" class="img-thumbnail" style="max-height: 220px;">
                       </div>
                     </div>
                   </div>

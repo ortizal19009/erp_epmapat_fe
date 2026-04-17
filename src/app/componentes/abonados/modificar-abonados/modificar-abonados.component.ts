@@ -71,7 +71,7 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
       idabonado: [''],
       nromedidor: ['', Validators.required],
       lecturainicial: ['', Validators.required],
-      estado: [''],
+      estado: [{ value: '', disabled: true }],
       fechainstalacion: ['', Validators.required],
       marca: ['', Validators.required],
       secuencia: ['', Validators.required],
