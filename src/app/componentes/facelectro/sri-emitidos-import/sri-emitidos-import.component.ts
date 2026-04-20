@@ -27,7 +27,7 @@ export class SriEmitidosImportComponent {
   archivoNombre = '';
 
   private API_XML_AUTORIZADO =
-    'http://192.168.0.165:9090/api/singsend/autorizacion';
+    'http://192.168.0.33:9090/api/singsend/autorizacion';
 
   constructor(
     private facturaService: FacturaService,
