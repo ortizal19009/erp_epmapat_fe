@@ -72,18 +72,25 @@
                            <table class="table table-hover table-sm table-bordered sombra">
                               <thead class="cabecera">
                                  <tr class="text-center">
-                                    <th>Cuota</th>
-                                    <th>Planilla</th>
-                                    <th>Fecha</th>
-                                    <th>Factura</th>
-                                    <th>F.Cobro</th>
-                                    <th>Valor</th>
-                                    <th>Interés</th>
+                                    <th class="sortable" style="cursor:pointer; user-select:none;"
+                                       (click)="toggleCuotaSort('cuota')">Cuota {{ getCuotaSortIndicator('cuota') }}</th>
+                                    <th class="sortable" style="cursor:pointer; user-select:none;"
+                                       (click)="toggleCuotaSort('planilla')">Planilla {{ getCuotaSortIndicator('planilla') }}</th>
+                                    <th class="sortable" style="cursor:pointer; user-select:none;"
+                                       (click)="toggleCuotaSort('fecha')">Fecha {{ getCuotaSortIndicator('fecha') }}</th>
+                                    <th class="sortable" style="cursor:pointer; user-select:none;"
+                                       (click)="toggleCuotaSort('factura')">Factura {{ getCuotaSortIndicator('factura') }}</th>
+                                    <th class="sortable" style="cursor:pointer; user-select:none;"
+                                       (click)="toggleCuotaSort('fcobro')">F.Cobro {{ getCuotaSortIndicator('fcobro') }}</th>
+                                    <th class="sortable" style="cursor:pointer; user-select:none;"
+                                       (click)="toggleCuotaSort('valor')">Valor {{ getCuotaSortIndicator('valor') }}</th>
+                                    <th class="sortable" style="cursor:pointer; user-select:none;"
+                                       (click)="toggleCuotaSort('interes')">Interes {{ getCuotaSortIndicator('interes') }}</th>
                                     <th></th>
                                  </tr>
                               </thead>
                               <tbody class="detalle">
-                                 <tr *ngFor="let cuota of _cuotas" class="text-center">
+                                 <tr *ngFor="let cuota of cuotasOrdenadas" class="text-center">
                                     <td>{{ cuota.nrocuota }}</td>
                                     <td>{{ cuota.idfactura.idfactura }}</td>
                                     <td>{{ cuota.idfactura.feccrea }}</td>
@@ -128,15 +135,19 @@
                               <thead class="cabecera">
                                  <tr class="text-center">
                                     <th></th>
-                                    <th>Nro.</th>
-                                    <th>Fecha</th>
-                                    <th>Módulo</th>
-                                    <th>Valor</th>
+                                    <th class="sortable" style="cursor:pointer; user-select:none;"
+                                       (click)="toggleConvenioSort('nro')">Nro. {{ getConvenioSortIndicator('nro') }}</th>
+                                    <th class="sortable" style="cursor:pointer; user-select:none;"
+                                       (click)="toggleConvenioSort('fecha')">Fecha {{ getConvenioSortIndicator('fecha') }}</th>
+                                    <th class="sortable" style="cursor:pointer; user-select:none;"
+                                       (click)="toggleConvenioSort('modulo')">Modulo {{ getConvenioSortIndicator('modulo') }}</th>
+                                    <th class="sortable" style="cursor:pointer; user-select:none;"
+                                       (click)="toggleConvenioSort('valor')">Valor {{ getConvenioSortIndicator('valor') }}</th>
                                     <th></th>
                                  </tr>
                               </thead>
                               <tbody class="detalle">
-                                 <tr *ngFor="let facxconv of _facxconvenio; let i=index" class="text-center">
+                                 <tr *ngFor="let facxconv of facxConvenioOrdenadas; let i=index" class="text-center">
                                     <td class="text-center font-weight-bold small">{{i+1}}</td>
                                     <td>{{ facxconv.idfactura_facturas.idfactura }}</td>
                                     <td>{{ facxconv.idfactura_facturas.feccrea | date: 'dd-MM-y' }}</td>
@@ -179,9 +190,6 @@
          <div class="modal-content">
             <div class="modal-header">
                <h5 class="modal-title" id="facturaDetallesModalLabel">Pre Factura: {{ v_idfactura }}</h5>
-               <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-               </button> -->
             </div>
             <div class="modal-body">
                <table class="table table-hover table-sm table-bordered">
@@ -225,12 +233,9 @@
       <div class='modal-dialog modal-sm'>
          <div class='modal-content'>
             <div class='modal-header'>
-               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Seleccione Opción</h5>
+               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Seleccione Opcion</h5>
             </div>
             <div class='modal-body'>
-               <!--                <div class="alert alert-info" role="alert">
-                  ¿Eliminar el Convenio de Pago {{ convenio.nroconvenio }} ?
-               </div> -->
                <div class="container-fluid">
                   <div class="row">
                      <div class="col-sm">
@@ -262,7 +267,7 @@
             </div>
             <div class='modal-body'>
                <div class="alert alert-info" role="alert">
-                  ¿Eliminar el Convenio de Pago {{ convenio.nroconvenio }} ?
+                  Eliminar el Convenio de Pago {{ convenio.nroconvenio }} ?
                </div>
             </div>
             <div class='modal-footer' id='idButtons'>

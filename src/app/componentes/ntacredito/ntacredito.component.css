@@ -12,7 +12,9 @@
 .nuevoBG2 {
   background-color: var(--bgcolor2);
 }
-
+.card-size{
+  height: 500px;
+}
 .fila:hover {
   background-color: #117a8b;
   color: white;

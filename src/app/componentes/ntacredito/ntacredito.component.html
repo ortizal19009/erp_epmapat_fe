@@ -3,7 +3,7 @@
         <div class="row m-0 px-0 py-1 justify-content-start cabecera sombra border">
             <div class="col-sm-2">
                 <h5 class="m-0 font-weight-bold description"><i class="fa fa-sticky-note" aria-hidden="true"></i>
-                    Notas de créditos</h5>
+                    Notas de crÃ©ditos</h5>
             </div>
             <div class="col-sm-6">
                 <div class="container-fluid">
@@ -14,7 +14,7 @@
                                     formControlName="selecTipoBusqueda">
                                     <option value="1">Cuenta</option>
                                     <option value="2">Nombre</option>
-                                    <option value="3">Identificación</option>
+                                    <option value="3">IdentificaciÃ³n</option>
                                 </select>
                             </div>
                             <div class="col-sm-5">
@@ -34,7 +34,7 @@
             </div>
             <div class="col-sm-2">
                 <input type="text" class="form-control mx-0 form-control-sm text-center" placeholder="Filtrar..."
-                    [(ngModel)]="filterTerm" />
+                    [(ngModel)]="filterTerm" (ngModelChange)="onFilterChange()" />
             </div>
             <div class="btn-group ml-auto mt-0">
                 <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
@@ -58,11 +58,11 @@
             <table class="table table-hover text-nowrap table-striped table-bordered table-sm sombra">
                 <thead class="cabecera">
                     <tr class="text-center ">
-                        <th class="col-sm-1">N°</th>
+                        <th class="col-sm-1">NÂ°</th>
                         <th>Cuenta</th>
                         <th>Cliente</th>
-                        <th>Identificación</th>
                         <th>Planilla</th>
+                        <th>IdentificaciÃ³n</th>
                         <th>Valor</th>
                         <th>Devengado</th>
                         <th>Saldo</th>
@@ -70,12 +70,12 @@
                     </tr>
                 </thead>
                 <tbody class="detalle">
-                    <tr *ngFor="let ntacredito of _ntacreditos | filter:filterTerm; let i = index ">
+                    <tr *ngFor="let ntacredito of notasCreditosVisibles; let i = index ">
                         <td class="col-sm-1 text-center">{{i+1 + (page * size)}}</td>
                         <td class="text-center">{{ntacredito.idabonado_abonados.idabonado}}</td>
                         <td class="description">{{ntacredito.idcliente_clientes.nombre}}</td>
-                        <td class="col-sm-1 text-right">{{ntacredito.idcliente_clientes.cedula}}</td>
                         <td class="text-center">{{ntacredito.nrofactura}}</td>
+                        <td class="col-sm-1 text-right">{{ntacredito.idcliente_clientes.cedula}}</td>
                         <td class="text-right">{{ntacredito.valor}}</td>
                         <td class="text-right">{{ntacredito.devengado}}</td>
                         <td class="text-right">{{(ntacredito.valor - ntacredito.devengado).toFixed(2)}}</td>
@@ -102,7 +102,7 @@
             <nav aria-label="Page navigation example">
                 <ul class="pagination justify-content-end">
                     <li class="page-item">
-                        <button class="btn btn-sm btn-primary" (click)="onPreviousPage()"> <span
+                        <button class="btn btn-sm btn-primary" (click)="onPreviousPage()" [disabled]="page === 0"> <span
                                 aria-hidden="true">&laquo;</span>
                         </button>
                     </li>
@@ -113,7 +113,8 @@
                         </button>
                     </li>
                     <li class="page-item">
-                        <button class="btn btn-sm btn-primary" (click)="onNextPage()"> <span
+                        <button class="btn btn-sm btn-primary" (click)="onNextPage()"
+                            [disabled]="page >= totalPagesVisibles - 1"> <span
                                 aria-hidden="true">&raquo;</span>
                         </button>
                     </li>
