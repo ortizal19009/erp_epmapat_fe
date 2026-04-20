@@ -7,7 +7,7 @@ nvm use 20
 # ============================================
 # Deploy Frontend Angular - EPMAPA-T
 # ============================================
-
+FRONTEND_DIR="/home/devadmin/gitRepository/erp_epmapat_fe"
 NGINX_DIR="/var/www/erp_epmapat_fe/dist"
 BACKUP_DIR="/home/devadmin/backups/frontend"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
