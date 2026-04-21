@@ -369,3 +369,313 @@ te
 .empty-state-img {
   opacity: 0.7;
 }
+
+/* ===== UI MODERNA PARA ALINEARSE CON add-recauda ===== */
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #102a43 0%, #1f6f8b 55%, #2d9cdb 100%) !important;
+}
+
+.card {
+  border: 1px solid rgba(16, 42, 67, 0.10) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.card-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.card-body.bg-light {
+  background: linear-gradient(180deg, #f8fbff 0%, #eef5ff 100%) !important;
+}
+
+.table-container {
+  padding: 0.75rem;
+  background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+}
+
+.table-modern {
+  margin-bottom: 0;
+}
+
+.thead-modern {
+  background: linear-gradient(135deg, #1d3557 0%, #2a6f97 55%, #3a86ff 100%);
+  color: white;
+}
+
+.thead-modern th {
+  border: 0 !important;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0.9rem 0.75rem;
+  white-space: nowrap;
+}
+
+.table-scroll-container {
+  position: relative;
+  max-height: 65vh;
+  overflow: auto;
+  border-radius: 14px;
+  border: 1px solid rgba(16, 42, 67, 0.10);
+  background: white;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.table-modern tbody td {
+  vertical-align: middle;
+  padding: 0.75rem;
+  border-color: rgba(16, 42, 67, 0.08);
+}
+
+.table-hover tbody tr {
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+}
+
+.table-hover tbody tr:hover {
+  background: #f3f8ff;
+}
+
+.serial-number,
+.account-number,
+.invoice-number,
+.date-cell,
+.amount-cell,
+.module-name {
+  white-space: nowrap;
+}
+
+.truncate-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.amount-value {
+  color: #102a43;
+  font-weight: 800;
+}
+
+.badge-light.badge-sm {
+  background: #eef4ff;
+  color: #274060;
+  border: 1px solid rgba(39, 64, 96, 0.12);
+}
+
+.btn-cobrar {
+  border-radius: 14px;
+  box-shadow: 0 10px 22px rgba(34, 197, 94, 0.22);
+}
+
+.btn-group .dropdown-menu {
+  border: 1px solid rgba(16, 42, 67, 0.10);
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+}
+
+.empty-state {
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.empty-state-img {
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.12));
+}
+
+.client-avatar .avatar-circle-sm {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22);
+}
+
+.ntaCre {
+  color: #c2410c;
+  font-weight: 700;
+}
+
+.table-warning {
+  background-color: rgba(255, 193, 7, 0.12) !important;
+}
+
+.btn i {
+  margin-right: 4px;
+}
+
+.btn {
+  white-space: nowrap;
+}
+
+/* === Ajustes para el módulo antiguo alineados al nuevo estilo === */
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #102a43 0%, #1f6f8b 55%, #2d9cdb 100%) !important;
+}
+
+.card {
+  border: 1px solid rgba(16, 42, 67, 0.10) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.card-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.card-body.bg-light {
+  background: linear-gradient(180deg, #f8fbff 0%, #eef5ff 100%) !important;
+}
+
+.table-container {
+  padding: 0.75rem;
+  background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+}
+
+.table-modern {
+  margin-bottom: 0;
+}
+
+.thead-modern {
+  background: linear-gradient(135deg, #1d3557 0%, #2a6f97 55%, #3a86ff 100%);
+  color: white;
+}
+
+.thead-modern th {
+  border: 0 !important;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0.9rem 0.75rem;
+  white-space: nowrap;
+}
+
+.table-scroll-container {
+  position: relative;
+  max-height: 65vh;
+  overflow: auto;
+  border-radius: 14px;
+  border: 1px solid rgba(16, 42, 67, 0.10);
+  background: white;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.table-modern tbody td {
+  vertical-align: middle;
+  padding: 0.75rem;
+  border-color: rgba(16, 42, 67, 0.08);
+}
+
+.table-hover tbody tr {
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+}
+
+.table-hover tbody tr:hover {
+  background: #f3f8ff;
+}
+
+.serial-number,
+.account-number,
+.invoice-number,
+.date-cell,
+.amount-cell,
+.module-name {
+  white-space: nowrap;
+}
+
+.truncate-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.amount-value {
+  color: #102a43;
+  font-weight: 800;
+}
+
+.badge-light.badge-sm {
+  background: #eef4ff;
+  color: #274060;
+  border: 1px solid rgba(39, 64, 96, 0.12);
+}
+
+.btn-cobrar {
+  border-radius: 14px;
+  box-shadow: 0 10px 22px rgba(34, 197, 94, 0.22);
+}
+
+.btn-group .dropdown-menu {
+  border: 1px solid rgba(16, 42, 67, 0.10);
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+}
+
+.empty-state {
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.empty-state-img {
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.12));
+}
+
+.client-avatar .avatar-circle-sm {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22);
+}
+
+.ntaCre {
+  color: #c2410c;
+  font-weight: 700;
+}
+
+.table-warning {
+  background-color: rgba(255, 193, 7, 0.12) !important;
+}
+
+.btn i {
+  margin-right: 4px;
+}
+
+.btn {
+  white-space: nowrap;
+}
+
+.selected-row {
+  background-color: rgba(37, 99, 235, 0.08) !important;
+  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.16);
+}
+
+.action-cell {
+  min-width: 132px;
+}
+
+.action-cell .btn-group {
+  gap: 0.25rem;
+}
+
+.action-cell .btn-icon {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.action-cell .btn-icon i {
+  margin-right: 0;
+}

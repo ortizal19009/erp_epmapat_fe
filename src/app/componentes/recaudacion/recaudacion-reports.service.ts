@@ -7,6 +7,7 @@ import { CategoriaService } from 'src/app/servicios/categoria.service';
 import { ClientesService } from 'src/app/servicios/clientes.service';
 import { EmisionService } from 'src/app/servicios/emision.service';
 import { FacxncService } from 'src/app/servicios/facxnc.service';
+import { JasperReportService } from 'src/app/servicios/jasper-report.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { text } from 'stream/consumers';
 
@@ -39,7 +40,8 @@ export class RecaudacionReportsService {
     private s_usuarios: UsuarioService,
     private s_categoria: CategoriaService,
     private s_emision: EmisionService,
-    private s_facxnc: FacxncService
+    private s_facxnc: FacxncService,
+    private s_jasperReport: JasperReportService
   ) { }
   async cabeceraConsumoAgua(
     datos: any,
@@ -667,6 +669,27 @@ export class RecaudacionReportsService {
       iframe.contentWindow?.focus();
       iframe.contentWindow?.print();
     };
+  }
+
+  async imprimirComprobanteBackend(factura: any): Promise<void> {
+    const idfactura = factura?.idfactura;
+    if (!idfactura) {
+      return;
+    }
+
+    const pdfBlob = await this.s_jasperReport.getComprobantePago(idfactura);
+    const blobUrl = URL.createObjectURL(pdfBlob);
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = blobUrl;
+    document.body.appendChild(iframe);
+
+    iframe.onload = () => {
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+    };
+
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
   }
 
 

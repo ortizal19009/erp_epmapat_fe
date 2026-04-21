@@ -182,19 +182,19 @@ export class FacturasComponent implements OnInit {
       next: (d_factura: any) => {
         let modulo: number = d_factura.idmodulo.idmodulo;
         if (modulo === 3 || modulo === 4) {
-          this.lecService.getOnefactura(d_factura.idfactura).subscribe({
+              this.lecService.getOnefactura(d_factura.idfactura).subscribe({
             next: (datos: any) => {
               lectura = datos;
               if (datos != null) {
-                this.s_pdfRecaudacion.reimprimircomprobantePago(lectura, d_factura);
+                this.s_pdfRecaudacion.imprimirComprobanteBackend(d_factura);
               } else {
-                this.s_pdfRecaudacion.reimprimircomprobantePago(null, d_factura);
+                this.s_pdfRecaudacion.imprimirComprobanteBackend(d_factura);
               }
             },
             error: (e) => console.error(e),
           });
         } else {
-          this.s_pdfRecaudacion.reimprimircomprobantePago(null, d_factura);
+          this.s_pdfRecaudacion.imprimirComprobanteBackend(d_factura);
         }
       },
       error: (e) => console.error(e),

@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+﻿import { DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -238,7 +238,7 @@ export class CertipresuComponent implements OnInit {
    }
 
 
-   // Imprime el reporte (vista actual) en una nueva pestaÃ±a
+   // Imprime el reporte (vista actual) en una nueva pestaña
    generaJasperDataset() {
       // let dtoPreingresos: Reporte[] = [];
       // dtoPreingresos = this.partiFiltradas.map(p => ({
@@ -286,3 +286,6 @@ export class CertipresuComponent implements OnInit {
    cerrar() { this.router.navigate(['/inicio']); }
 
 }
+
+
+

@@ -5,6 +5,7 @@
     "rootDir": "src",
     "baseUrl": "./",
     "outDir": "./dist/out-tsc",
+    "charset": "utf8",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitOverride": true,

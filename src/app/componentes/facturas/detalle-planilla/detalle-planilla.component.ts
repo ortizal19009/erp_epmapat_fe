@@ -1,7 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { Rubroxfac } from 'src/app/modelos/rubroxfac.model';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
-import { RecaudacionService } from 'src/app/servicios/microservicios/recaudacion.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 
 @Component({
@@ -20,8 +19,7 @@ export class DetallePlanillaComponent implements OnInit {
   sumaDetail: number = 0;
   constructor(
     private s_rubroxfac: RubroxfacService,
-    private s_lectutas: LecturasService,
-    private ms_recaudacion: RecaudacionService
+    private s_lectutas: LecturasService
   ) {}
 
   ngOnInit(): void {
@@ -38,29 +36,6 @@ export class DetallePlanillaComponent implements OnInit {
       .catch((e: any) => {
         console.error(e);
       });
-    await this.ms_recaudacion.getInteres(this.idfactura).then((item: any) => {
-      if (item.body > 0) {
-        this._rubros.push({
-          cantidad: 1,
-          idrubro_rubros: {
-            descripcion: 'Intereses',
-          },
-          idfactura_facturas: { idfactura: this.idfactura },
-          valorunitario: item.body,
-        });
-      }
-    });
-    await this.ms_recaudacion.getImpuestos(this.idfactura).then((item: any) => {
-      if (item.body > 0) {
-        this._rubros.push({
-          cantidad: 1,
-          idrubro_rubros: {
-            descripcion: 'IVA',
-          },
-          valorunitario: item.body,
-        });
-      }
-    });
     await this.s_lectutas
       .getByIdfacturaAsync(this.idfactura)
       .then((item: any) => {

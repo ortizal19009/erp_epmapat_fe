@@ -33,6 +33,18 @@ export class JasperReportService {
 
   }
 
+  getComprobantePago(idfactura: number): Promise<Blob> {
+    const facturaId = Number(idfactura);
+    if (!Number.isFinite(facturaId) || facturaId <= 0) {
+      return Promise.reject(new Error('idfactura inválido para comprobante.'));
+    }
+    return firstValueFrom(
+      this.http.get(`${environment.API_URL}/facturas/comprobante/pago?idfactura=${facturaId}`, {
+        responseType: 'blob',
+      })
+    );
+  }
+
 
   /**
    * Unifica varios comprobantes en un solo PDF (backend merge).

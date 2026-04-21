@@ -1,4 +1,4 @@
-<header class="bg-light border-bottom shadow-sm py-2 ">
+﻿<header class="bg-light border-bottom shadow-sm py-2 ">
   <div class="container-fluid cabecera sombra border">
     <div class="row align-items-center ">
 
@@ -12,10 +12,10 @@
 
       <!-- Formulario de búsqueda -->
       <div class="col-sm-6">
-        <form [formGroup]="f_buscar" class="row g-2">
+        <form [formGroup]="f_buscar" class="row g-2" (ngSubmit)="btn_buscar()">
           <div class="col-md-5 d-flex">
             <input class="form-control form-control-sm text-center mr-1" type="number" formControlName="cuenta"
-              placeholder="Cuenta" min="1" (click)="txtCuenta($event)" (keypress)="txtCuenta($event)" />
+              placeholder="Cuenta / Idabonado" min="1" (click)="txtCuenta($event)" (keypress)="txtCuenta($event)" />
             <input class="form-control form-control-sm text-center" type="text" formControlName="identificacion"
               placeholder="Identificación" (click)="txtIdentificacion($event)" (keypress)="txtIdentificacion($event)" />
           </div>
@@ -38,6 +38,12 @@
               <i class="bi bi-check-lg mx-0"></i>Cobrar:
               <strong>{{ totalapagar.toFixed(2) }}</strong>
             </button>
+          </div>
+
+          <div class="col-12">
+            <small class="text-white-50">
+              Busca por <strong>Cuenta / Idabonado</strong> o por <strong>Identificación</strong>.
+            </small>
           </div>
         </form>
       </div>
@@ -64,8 +70,19 @@
               [disabled]="!swcaja">
               <i class="bi-door-closed"></i>&nbsp; Cerrar caja
             </button>
-            <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
-              <i class="bi-printer"></i>&nbsp; Imprimir
+            <button class="dropdown-item" type="button" (click)="abrirModalReimpresion()">
+              <i class="bi-printer"></i>&nbsp; Reimprimir factura
+            </button>
+            <div class="dropdown-divider" *ngIf="ultimasFacturasCobro.length"></div>
+            <button class="dropdown-item" type="button" (click)="reimprimirUltimoCobro()"
+              [disabled]="!ultimasFacturasCobro.length">
+              <i class="bi-files"></i>&nbsp; Imprimir todo el cobro
+            </button>
+            <button class="dropdown-item" type="button" (click)="probarImpresoraQz()">
+              <i class="bi-printer-fill"></i>&nbsp; Probar impresora
+            </button>
+            <button class="dropdown-item" type="button" (click)="abrirConfiguracionImpresion()">
+              <i class="bi-gear"></i>&nbsp; Configurar impresión
             </button>
           </div>
         </div>
@@ -118,11 +135,28 @@
       <div class="card sombra">
         <div class="card-header">
           <h4 class="profile-username text-center">{{_cliente?.nombre}}</h4>
-          <p class="text-muted text-center">{{_cliente?.cedula}}</p>
+          <p class="text-muted text-center mb-1">{{_cliente?.cedula}}</p>
+          <div class="text-center small text-muted mb-2" *ngIf="_cliente?.direccion">
+            <i class="bi bi-geo-alt mr-1"></i>{{ _cliente?.direccion }}
+          </div>
+          <div *ngIf="mensajeNotaCredito" class="alert mb-0 py-2 text-center rounded-pill filter-chip"
+            [ngClass]="tieneNotaCredito ? 'alert-info' : 'alert-light border'">
+            <small class="font-weight-bold">{{ mensajeNotaCredito }}</small>
+
+          </div>
+
         </div>
         <div class="card-body box-profile d-flex justify-content-center">
+          <div *ngIf="consultandoCartera"
+            class="alert consulta-estado border-0 w-100 mb-3 d-flex align-items-center justify-content-center">
+            <div class="spinner-border spinner-border-sm mr-2" role="status"></div>
+            <div>
+              Consultando cartera
+              <span *ngIf="consultandoCarteraTexto">de {{ consultandoCarteraTexto }}</span>...
+            </div>
+          </div>
 
-          <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+          <div class="table-responsive" style="max-height: 700px; overflow-y: auto;">
             <table class="table table-hover table-sm table-bordered">
               <thead class="recaudacabecera">
                 <tr class="text-center">
@@ -137,44 +171,60 @@
                   <th>Módulo</th>
                   <th>Valor</th>
                   <th>
-                    <input type="checkbox" class="cursor" [disabled]="filtrar" />
+                    <ng-container *ngIf="mostrarCheckboxCabecera(); else selVacio">
+                      <input type="checkbox" class="cursor checkbox-maestro"
+                        [class.checkbox-maestro-disabled]="!!filtrar" [checked]="checkboxCabeceraMarcado()"
+                        [disabled]="!!filtrar"
+                        [attr.title]="filtrar ? 'Limpia el filtro para seleccionar todas' : 'Seleccionar todas las facturas pendientes'"
+                        (change)="toggleSeleccionTodasPendientesEvento($event)" />
+                    </ng-container>
+                    <ng-template #selVacio>
+                      <span class="text-white-50 small">Sel.</span>
+                    </ng-template>
                   </th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let factura of _sincobro| filter:filtrar; let i = index "
-                  [ngClass]="{ transferido: factura.estado === 3 }">
+                <tr *ngFor="let factura of _sincobro| filter:filtrar; let i = index " [ngClass]="{
+                    transferido: factura.estado === 3,
+                    'selected-row': estaSeleccionada(factura)
+                  }">
                   <td class="small font-weight-bold">{{i+1}}</td>
-                  <td class="text-center">{{factura.idabonado}}</td>
+                  <td class="text-center">{{factura.cuenta || factura.idabonado}}</td>
                   <td class="truncate-text" [attr.title]="factura.nombre">{{factura.nombre}}</td>
                   <td>{{factura.idfactura}}</td>
-                  <td class="truncate-text" [attr.title]="factura.direccion">
-                    {{factura.direccion}}
+                  <td class="truncate-text" [attr.title]="factura.direccionubicacion || factura.direccion">
+                    {{factura.direccionubicacion || factura.direccion}}
                   </td>
-                  <td class="description">{{factura.feccrea}}</td>
-                  <td class="text-left description">{{factura.modulo}}</td>
+                  <td class="description text-capitalize">{{ formatPeriodoFactura(factura) }}</td>
+                  <td class="text-left description">{{factura.idmodulo}}</td>
                   <td class="text-right">
                     {{ sumaIndividual(factura.total, factura.interes, factura.iva == null ? 0 : factura.iva)
                     }}
                   </td>
                   <td>
-                    <input type="checkbox" class="cursor" (change)="calcular($event, factura)" />
+                    <input type="checkbox" class="cursor" [checked]="estaSeleccionada(factura)"
+                      [disabled]="esFacturaPagada(factura)" (change)="calcular($event, factura)" />
                   </td>
-                  <td class="col-sm-1 text-nowrap">
-                    <button class="btn btn-outline-info badge-xs btn-xs cursor" data-toggle="modal"
-                      data-target="#DetallePlanillaModal" (click)="facturaDetalle(factura.idfactura)">
-                      <i class="fa fa-info-circle"></i> Info
-                    </button>
-                    <button class="btn btn-outline-info btn-xs cursor" *ngIf="swImprimir">
-                      <i class="fa fa-print"></i> Imprimir
-                    </button>
+                  <td class="col-sm-1 text-nowrap action-cell">
+                    <div class="btn-group btn-group-sm" role="group">
+                      <button *ngIf="!esFacturaPagada(factura)" class="btn btn-info btn-xs btn-icon cursor"
+                        data-toggle="modal" data-target="#DetallePlanillaModal"
+                        (click)="facturaDetalle(factura.idfactura)">
+                        Info
+                      </button>
+                      <button *ngIf="esFacturaPagada(factura)" class="btn btn-primary btn-xs btn-icon cursor"
+                        type="button" (click)="abrirModalReimpresion(factura)">
+                        <i class="fa fa-eye"></i> Ver
+                      </button>
+                    </div>
                   </td>
 
                 </tr>
                 <tr>
 
-                  <td class="font-weight-bold text-right" colspan="7">TOTAL</td>
+                  <td class="font-weight-bold text-right" colspan="8">TOTAL</td>
                   <td class="text-center font-weight-bold" colspan="2">{{totalapagar.toFixed(2)}}</td>
 
                 </tr>
@@ -186,6 +236,107 @@
       </div>
     </div>
 
+  </div>
+
+  <div class="row mt-2" *ngIf="ultimasFacturasCobro.length">
+    <div class="col-sm">
+      <div class="card sombra">
+        <div class="card-header recaudacabecera">
+          <h5 class="m-0">Último cobro realizado</h5>
+        </div>
+        <div class="card-body p-2">
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered table-hover mb-0">
+              <thead class="recaudacabecera">
+                <tr class="text-center">
+                  <th>#</th>
+                  <th>Cuenta</th>
+                  <th>Responsable</th>
+                  <th>Dirección ubicación</th>
+                  <th>Módulo</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let factura of ultimasFacturasCobro; let i = index">
+                  <td class="text-center">{{ i + 1 }}</td>
+                  <td class="text-center">{{ factura.cuenta || factura.idabonado }}</td>
+                  <td>{{ factura.nombre }}</td>
+                  <td>{{ factura.direccionubicacion || factura.direccion }}</td>
+                  <td>{{ factura.modulo }}</td>
+                  <td class="text-center">
+                    <button class="btn btn-xs btn-outline-info" type="button" (click)="imprimirCobroDirecto(factura)">
+                      <i class="fa fa-print"></i> Imprimir
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modalReimpresion" data-backdrop="static" tabindex="-1"
+    aria-labelledby="modalReimpresionLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+      <div class="modal-content recaudadetalle">
+        <div class="modal-header py-2 justify-content-center recaudacabecera">
+          <h5 class="modal-title fantacyblack" id="modalReimpresionLabel">Reimpresión de comprobante</h5>
+          <button type="button" class="close text-white position-absolute" style="right: 16px;"
+            (click)="cerrarModalReimpresion()" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="row align-items-end">
+            <div class="col-md-4">
+              <label class="font-weight-bold">ID factura</label>
+              <input type="number" class="form-control form-control-sm text-center"
+                [(ngModel)]="modalReimpresionFacturaId" min="1" placeholder="Ingrese ID de factura" />
+            </div>
+            <div class="col-md-8 text-right mt-3 mt-md-0">
+              <button type="button" class="btn btn-primary btn-sm mr-2" (click)="buscarComprobanteReimpresion()"
+                [disabled]="previewLoading">
+                <i class="fa fa-search"></i> Buscar
+              </button>
+              <button type="button" class="btn btn-success btn-sm mr-2" (click)="imprimirVistaPrevia()"
+                [disabled]="!previewPdfUrl">
+                <i class="fa fa-print"></i> Imprimir
+              </button>
+              <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cerrarModalReimpresion()">
+                Cancelar
+              </button>
+            </div>
+          </div>
+
+          <div class="mt-3" *ngIf="previewLoading">
+            <div class="alert alert-info mb-0 text-center">
+              Buscando comprobante...
+            </div>
+          </div>
+
+          <div class="mt-3" *ngIf="previewFactura && !previewLoading">
+            <div class="alert alert-light border">
+              <div><strong>Factura:</strong> {{ previewFactura.idfactura }}</div>
+              <div><strong>Cuenta:</strong> {{ previewFactura.cuenta || previewFactura.idabonado }}</div>
+              <div><strong>Responsable:</strong> {{ previewFactura.nombre }}</div>
+              <div><strong>Módulo:</strong> {{ previewFactura.modulo }}</div>
+            </div>
+          </div>
+
+          <div class="mt-2 border rounded bg-white" style="min-height: 70vh;">
+            <iframe #pdfViewer *ngIf="previewPdfUrl" [src]="previewPdfUrl" type="application/pdf" class="w-100"
+              style="height: 70vh; border: 0;"></iframe>
+            <div *ngIf="!previewPdfUrl && !previewLoading" class="d-flex align-items-center justify-content-center"
+              style="height: 70vh;">
+              <span class="text-muted">Ingrese un ID y pulse Buscar para visualizar el comprobante.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Modal Buscar cliente -->
@@ -225,6 +376,10 @@
         <div class="modal-body col-md-12">
           <form [formGroup]="f_cobrar">
             <div class="col-md-12">
+              <div *ngIf="mensajeNotaCredito" class="alert py-2 mb-2 text-center"
+                [ngClass]="tieneNotaCredito ? 'alert-info' : 'alert-light border'">
+                <small>{{ mensajeNotaCredito }}</small>
+              </div>
               <div class="input-group input-group-sm">
                 <div class="input-group-prepend">
                   <label class="input-group-text">Forma cobro</label>
@@ -251,8 +406,8 @@
                 <input type="number" class="form-control text-center" (change)="vuelto($event)"
                   formControlName="dinero">
                 <div class="input-group-append">
-                  <button type="button" class="btn btn-outline-success btn-xm" (click)="vuelto($event)">
-                    <i class="bi bi-chevron-double-down"></i></button>
+                  <button type="button" class="btn btn-outline-success btn-xm" (click)="usarMontoACobrar()">
+                    <i class="bi bi-currency-dollar"></i></button>
                 </div>
               </div>
               <div class="input-group mb-3">
@@ -465,33 +620,128 @@
   </div>
 </div>
 
+<div class="modal fade" id="modalImpresion" tabindex="-1" aria-labelledby="modalImpresionLabel" data-backdrop="static"
+  aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content recaudadetalle">
+      <div class="modal-header py-2 justify-content-center recaudacabecera">
+        <h5 class="modal-title font-weight-bold fantacyblack" id="modalImpresionLabel">
+          Configuración de impresión
+        </h5>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="font-weight-bold">Impresora</label>
+          <select class="custom-select custom-select-sm" [(ngModel)]="qzPrinterMode" (change)="onPrinterModeChange()">
+            <option value="auto">Automática</option>
+            <option value="tm-t88v">Epson TM-T88V</option>
+            <option value="manual">Elegir impresora guardada</option>
+          </select>
+        </div>
+
+        <div class="form-group" *ngIf="qzPrinterMode === 'manual'">
+          <label class="font-weight-bold">Impresora guardada</label>
+          <select class="custom-select custom-select-sm" [(ngModel)]="qzPrinterName">
+            <option *ngFor="let printer of qzPrintersAvailable" [value]="printer">
+              {{ printer }}
+            </option>
+          </select>
+          <small class="text-muted d-block mt-1">
+            Si QZ Tray está abierto, aquí aparecerán las impresoras detectadas.
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label class="font-weight-bold">Copias por defecto</label>
+          <input type="number" min="1" max="20" class="form-control form-control-sm text-center"
+            [(ngModel)]="qzDefaultCopies" />
+          <small class="text-muted d-block mt-1">
+            Se aplicará a impresiones directas y pruebas. Valor recomendado: 2.
+          </small>
+        </div>
+
+        <div class="form-group mb-2">
+          <div class="custom-control custom-checkbox">
+            <input type="checkbox" class="custom-control-input" id="qzSilentPrinting"
+              [(ngModel)]="qzSilentPrinting">
+            <label class="custom-control-label" for="qzSilentPrinting">
+              Impresión directa sin confirmación
+            </label>
+          </div>
+          <small class="text-muted d-block mt-1">
+            Activa esta opción para enviar el trabajo de impresión directamente a QZ Tray.
+          </small>
+        </div>
+
+        <div *ngIf="qzSettingsLoading" class="alert alert-info py-2 text-center mb-2">
+          Cargando impresoras...
+        </div>
+
+        <div *ngIf="qzSettingsError" class="alert alert-warning py-2 text-center mb-2">
+          {{ qzSettingsError }}
+        </div>
+      </div>
+      <div class="row justify-content-center mt-0 mb-3">
+        <button type="button" class="btn btn-success btn-sm mx-1" (click)="guardarConfiguracionImpresion()">
+          <i class="fa fa-check-circle"></i>&nbsp; Guardar
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-success mx-1" data-dismiss="modal">
+          <i class="bi bi-x-circle"></i> Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Modal -->
 <div #consultaModal class="modal fade" id="consultaModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content consulta-panel">
       <div class="modal-header cabecera">
-        <h5 class="modal-title">Consulta usuario {{f_buscar.value.identificacion}}</h5>
+        <div>
+          <h5 class="modal-title mb-0">Consulta de cliente</h5>
+          <small class="text-white-50">Búsqueda por identificación: {{ clienteBusquedaTexto || '...' }}</small>
+        </div>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <table class="table-sm table-hover table-bordered table-responsive">
-          <thead class="text-center">
-            <tr>
-              <th>N°</th>
-              <th>Nombre</th>
-              <th>Dirección</th>
-            </tr>
-          </thead>
-          <tbody class="detalle">
-            <tr *ngFor="let cliente of _clientes; let i = index" (click)="buscarCuentasOfCliente(cliente)">
-              <td class="text-bold text-center">{{i+1}}</td>
-              <td>{{cliente.nombre}}</td>
-              <td>{{cliente.direccion}}</td>
-            </tr>
-          </tbody>
-        </table>
+        <div *ngIf="clientesLoading" class="text-center py-4">
+          <div class="spinner-border text-primary mb-3" role="status"></div>
+          <div class="font-weight-bold">Buscando clientes...</div>
+          <small class="text-muted">Esto puede tardar un momento si hay muchos resultados.</small>
+        </div>
+
+        <div *ngIf="!clientesLoading && clientesSinResultados" class="alert alert-warning border-0 mb-0">
+          No se encontraron clientes para la identificación ingresada.
+        </div>
+
+        <div *ngIf="!clientesLoading && clientesEncontrados > 0" class="alert consulta-estado border-0 mb-3">
+          <strong>{{ clientesEncontrados }}</strong> cliente(s) encontrado(s). Haz clic sobre uno para cargar sus
+          deudas.
+        </div>
+
+        <div *ngIf="!clientesLoading && _clientes.length > 0" class="table-responsive">
+          <table class="table table-hover table-sm table-bordered mb-0 client-table">
+            <thead class="text-center">
+              <tr>
+                <th width="60">#</th>
+                <th>Nombre</th>
+                <th width="170">Identificación</th>
+                <th>Dirección</th>
+              </tr>
+            </thead>
+            <tbody class="detalle">
+              <tr *ngFor="let cliente of _clientes; let i = index" (click)="buscarCuentasOfCliente(cliente)">
+                <td class="text-bold text-center">{{i+1}}</td>
+                <td class="font-weight-bold">{{cliente.nombre}}</td>
+                <td class="text-center">{{cliente.cedula}}</td>
+                <td>{{cliente.direccion}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

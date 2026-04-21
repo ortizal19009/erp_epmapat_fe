@@ -1542,18 +1542,7 @@ export class RecaudacionComponent implements OnInit {
   }
 
   private async generarComprobanteBlob(datos: any): Promise<Blob> {
-    let body: any;
-
-    if (datos.idAbonado > 0 && (datos.idmodulo === 4 || datos.idmodulo === 3)) {
-      body = { reportName: 'CompPagoConsumoAgua', parameters: { idfactura: datos.idfactura }, extencion: '.pdf' };
-    } else if (datos.idmodulo === 27) {
-      body = { reportName: 'CompPagoConvenios', parameters: { idfactura: datos.idfactura }, extencion: '.pdf' };
-    } else {
-      body = { reportName: 'CompPagoServicios', parameters: { idfactura: datos.idfactura }, extencion: '.pdf' };
-    }
-
-    const reporte = await this.s_jasperReport.getReporte(body);
-    return new Blob([reporte], { type: 'application/pdf' });
+    return this.s_jasperReport.getComprobantePago(datos.idfactura);
   }
 
   async impComprobante(datos: any) {
@@ -1563,9 +1552,8 @@ export class RecaudacionComponent implements OnInit {
       return;
     }
 
-    const body = this.buildJasperBodyPorFactura(datos);
     try {
-      const reporte = await this.s_jasperReport.getReporte(body);
+      const reporte = await this.s_jasperReport.getComprobantePago(datos.idfactura);
       const fileURL = URL.createObjectURL(reporte);
       newTab.location.href = fileURL;
 
@@ -1580,22 +1568,6 @@ export class RecaudacionComponent implements OnInit {
   // versión vieja -> delega
   async _impComprobante(datos: any) {
     await this.impComprobante(datos);
-  }
-
-  private buildJasperBodyPorFactura(datos: any) {
-    let reportName: string;
-    if (datos.idAbonado > 0 && (datos.idmodulo === 4 || datos.idmodulo === 3)) {
-      reportName = 'CompPagoConsumoAgua';
-    } else if (datos.idmodulo === 27) {
-      reportName = 'CompPagoConvenios';
-    } else {
-      reportName = 'CompPagoServicios';
-    }
-    return {
-      reportName,
-      parameters: { idfactura: datos.idfactura },
-      extencion: '.pdf',
-    };
   }
 
   async imprimirTodasEnUno() {
