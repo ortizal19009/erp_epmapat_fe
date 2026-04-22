@@ -419,7 +419,7 @@ export class ConveniosComponent implements OnInit {
       return;
     }
 
-    const doc = new jsPDF('p', 'pt', 'a4');
+    const doc = new jsPDF('l', 'pt', 'a4');
     this.pdfService.header('Reporte de convenios', doc);
 
     const body = convenios.map((c: any, index: number) => {
@@ -439,8 +439,10 @@ export class ConveniosComponent implements OnInit {
     });
 
     autoTable(doc, {
-      startY: 110,
+      startY: 95,
       theme: 'grid',
+      margin: { top: 85, left: 20, right: 20, bottom: 20 },
+      tableWidth: 'auto',
       head: [[
         '#',
         'Nro',
@@ -454,8 +456,20 @@ export class ConveniosComponent implements OnInit {
         'Estado',
       ]],
       body,
-      styles: { fontSize: 8, cellPadding: 2 },
+      styles: { fontSize: 7, cellPadding: 1.5 },
       headStyles: { fillColor: [41, 128, 185], textColor: [255, 255, 255], halign: 'center' },
+      columnStyles: {
+        0: { cellWidth: 20 },
+        1: { cellWidth: 45 },
+        2: { cellWidth: 60 },
+        3: { cellWidth: 60 },
+        4: { cellWidth: 150 },
+        5: { cellWidth: 60 },
+        6: { cellWidth: 40 },
+        7: { cellWidth: 50 },
+        8: { cellWidth: 50 },
+        9: { cellWidth: 55 },
+      },
     });
 
     this.pdfService.setfooter(doc);

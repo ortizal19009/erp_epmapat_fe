@@ -28,7 +28,7 @@ import { Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { JasperReportService, MergeItem } from 'src/app/servicios/jasper-report.service';
-import { QzTrayService } from 'src/app/servicios/qz-tray.service';
+import { PrintBridgeService, PrintProfile } from 'src/app/servicios/print-bridge.service';
 declare var bootstrap: any; // 👈 para usar la librería de Bootstrap JS
 
 @Component({
@@ -40,7 +40,7 @@ export class AddRecaudaComponent implements OnInit {
   private recaCobroService = inject(RecaudacionCobroService);
   private jasperReportService = inject(JasperReportService);
   private aboService = inject(AbonadosService);
-  private qzTrayService = inject(QzTrayService);
+  private qzTrayService = inject(PrintBridgeService);
   filtrar: string;
   _sincobro: any[] = [];
   _cliente: any;
@@ -783,18 +783,17 @@ export class AddRecaudaComponent implements OnInit {
       const pdf = await this.jasperReportService.getComprobantePago(idfactura);
       const blob = pdf instanceof Blob ? pdf : new Blob([pdf], { type: 'application/pdf' });
       try {
-        await this.qzTrayService.printPdf(blob, `Factura ${idfactura}`);
+        await this.qzTrayService.printPdf(
+          blob,
+          `Factura ${idfactura}`,
+          this.obtenerImpresoraDirecta(this.obtenerPerfilImpresionFactura(factura)),
+          this.obtenerPerfilImpresionFactura(factura),
+        );
         this.swal('success', 'Comprobante enviado a la impresora.');
         return;
       } catch (qzError) {
-        console.warn('QZ Tray no disponible o sin impresora detectada, usando vista previa.', qzError);
-        if (this.qzSilentPrinting) {
-          this.swal('error', 'No se pudo imprimir directo con QZ Tray.');
-          return;
-        }
-      }
-      if (!this.abrirPdfDirectoParaImpresion(blob, `Factura ${idfactura}`)) {
-        this.swal('warning', 'Permite ventanas emergentes para imprimir el comprobante.');
+        console.error(qzError);
+        this.swal('error', 'No se pudo imprimir con el puente local.');
       }
     } catch (e) {
       console.error(e);
@@ -805,10 +804,10 @@ export class AddRecaudaComponent implements OnInit {
   async probarImpresoraQz() {
     try {
       await this.qzTrayService.printTestTicket('PRUEBA DE IMPRESION');
-      this.swal('success', 'Se envió una prueba a la impresora.');
+      this.swal('success', 'Se envio una prueba al puente de impresion.');
     } catch (e) {
       console.error(e);
-      this.swal('error', 'No se pudo enviar la prueba de impresión. Verifica QZ Tray y la impresora.');
+      this.swal('error', 'No se pudo enviar la prueba de impresion. Verifica el puente local y la impresora.');
     }
   }
 
@@ -816,10 +815,6 @@ export class AddRecaudaComponent implements OnInit {
     this.cargarConfiguracionImpresion();
     this.qzSettingsError = '';
     this.qzPrintersAvailable = [];
-
-    if (this.qzPrinterMode === 'manual') {
-      await this.cargarImpresorasQz();
-    }
 
     this.openModal('modalImpresion');
   }
@@ -835,18 +830,13 @@ export class AddRecaudaComponent implements OnInit {
       }
     } catch (e) {
       console.error(e);
-      this.qzSettingsError = 'No se pudo cargar la lista de impresoras. Verifica que QZ Tray esté abierto.';
+      this.qzSettingsError = 'No se pudo cargar la lista de impresoras. Verifica que el puente local este abierto.';
     } finally {
       this.qzSettingsLoading = false;
     }
   }
 
   onPrinterModeChange() {
-    if (this.qzPrinterMode === 'manual') {
-      this.cargarImpresorasQz();
-      return;
-    }
-
     this.qzSettingsError = '';
     if (this.qzPrinterMode === 'tm-t88v') {
       this.qzPrinterName = '';
@@ -863,7 +853,7 @@ export class AddRecaudaComponent implements OnInit {
     this.qzTrayService.setSilentPrinting(this.qzSilentPrinting);
     this.qzTrayService.setPrinterPreference(this.qzPrinterMode, this.qzPrinterName);
     this.qzDefaultCopies = copies;
-    this.swal('success', 'Configuración de impresión guardada.');
+    this.swal('success', 'Configuracion de impresion guardada.');
     this.closeModal('modalImpresion');
   }
 
@@ -946,23 +936,54 @@ export class AddRecaudaComponent implements OnInit {
       const pdf = await this.jasperReportService.mergeComprobantes({ items });
       const blob = pdf instanceof Blob ? pdf : new Blob([pdf], { type: 'application/pdf' });
       try {
-        await this.qzTrayService.printPdf(blob, 'Cobro unificado');
+        const profile = this.obtenerPerfilImpresionLote(this.ultimasFacturasCobro);
+        await this.qzTrayService.printPdf(
+          blob,
+          'Cobro unificado',
+          this.obtenerImpresoraDirecta(profile),
+          profile,
+        );
         this.swal('success', 'Cobro enviado a la impresora.');
         return;
       } catch (qzError) {
-        console.warn('QZ Tray no disponible o sin impresora detectada, usando vista previa.', qzError);
-        if (this.qzSilentPrinting) {
-          this.swal('error', 'No se pudo imprimir directo el cobro unificado.');
-          return;
-        }
-      }
-      if (!this.abrirPdfDirectoParaImpresion(blob, 'Cobro unificado')) {
-        this.swal('warning', 'Permite ventanas emergentes para imprimir el comprobante.');
+        console.error(qzError);
+        this.swal('error', 'No se pudo imprimir el cobro unificado con el puente local.');
       }
     } catch (e) {
       console.error(e);
       this.swal('error', 'No se pudo generar el comprobante unificado.');
     }
+  }
+
+  private obtenerImpresoraDirecta(profile: PrintProfile = 'default'): string {
+    const modo = this.qzTrayService.getSavedPrinterMode(profile);
+    const nombre = this.qzTrayService.getSavedPrinterName(profile);
+
+    if (modo === 'manual' && nombre) {
+      return nombre;
+    }
+
+    return '';
+  }
+
+  private obtenerPerfilImpresionFactura(factura: any): PrintProfile {
+    const modulo = Number(factura?.idmodulo?.idmodulo ?? factura?.idmodulo ?? 0);
+    const convenio = Number(factura?.conveniopago ?? 0);
+
+    if (convenio > 0 || modulo === 27) {
+      return 'convenio';
+    }
+
+    if (modulo === 4) {
+      return 'servicios';
+    }
+
+    return 'consumo';
+  }
+
+  private obtenerPerfilImpresionLote(facturas: any[]): PrintProfile {
+    const primera = Array.isArray(facturas) && facturas.length ? facturas[0] : null;
+    return this.obtenerPerfilImpresionFactura(primera);
   }
 
   private abrirPdfDirectoParaImpresion(pdf: Blob, titulo: string): boolean {
@@ -1254,3 +1275,5 @@ export class AddRecaudaComponent implements OnInit {
 interface SinCobrarVisual {
   idabonado: number;
 }
+
+

@@ -1,9 +1,9 @@
 <div class="container-fluid py-3">
-  <div class="card shadow-sm border-0 qz-card">
-    <div class="card-header qz-header d-flex align-items-center justify-content-between">
+  <div class="card shadow-sm border-0 bridge-card">
+    <div class="card-header bridge-header d-flex align-items-center justify-content-between">
       <div>
-        <h4 class="mb-0">Configuración de impresión</h4>
-        <small class="text-white-50">Administra QZ Tray, la Epson TM-T88V y el número de copias por defecto.</small>
+        <h4 class="mb-0">Configuracion de impresion</h4>
+        <small class="text-white-50">Administra puente local, la Epson TM-T88V y el numero de copias por defecto.</small>
       </div>
       <button type="button" class="btn btn-light btn-sm" (click)="volver()">
         <i class="bi bi-arrow-left-circle"></i> Volver
@@ -18,9 +18,21 @@
       <div class="row">
         <div class="col-lg-6">
           <div class="form-group">
+            <label class="font-weight-bold">Perfil de impresion</label>
+            <select class="custom-select" [(ngModel)]="qzProfile" (change)="onProfileChange()">
+              <option value="consumo">Consumo de agua</option>
+              <option value="servicios">Servicios</option>
+              <option value="convenio">Convenio</option>
+            </select>
+            <small class="text-muted d-block mt-1">
+              Perfil activo: {{ profileLabel() }}.
+            </small>
+          </div>
+
+          <div class="form-group">
             <label class="font-weight-bold">Modo de impresora</label>
             <select class="custom-select" [(ngModel)]="qzPrinterMode" (change)="onPrinterModeChange()">
-              <option value="auto">Automática</option>
+              <option value="auto">Automatica</option>
               <option value="tm-t88v">Epson TM-T88V</option>
               <option value="manual">Elegir impresora guardada</option>
             </select>
@@ -28,12 +40,15 @@
 
           <div class="form-group" *ngIf="qzPrinterMode === 'manual'">
             <label class="font-weight-bold">Impresora guardada</label>
-            <select class="custom-select" [(ngModel)]="qzPrinterName">
-              <option *ngFor="let printer of qzPrintersAvailable" [value]="printer">{{ printer }}</option>
-            </select>
+            <input type="text" class="form-control" [(ngModel)]="qzPrinterName"
+              placeholder="Ej: EPSON TM-T88V Receipt5" />
             <small class="text-muted d-block mt-1">
-              Si QZ Tray está abierto, aquí aparecerán las impresoras detectadas.
+              Escribe el nombre exacto de la impresora para evitar consultar la lista de impresoras.
             </small>
+            <button type="button" class="btn btn-outline-primary btn-sm mt-2" (click)="cargarImpresoras()"
+              [disabled]="qzLoading">
+              <i class="bi bi-arrow-repeat"></i> Buscar impresoras solo si lo necesitas
+            </button>
           </div>
 
           <div class="form-group">
@@ -45,32 +60,50 @@
           </div>
 
           <div class="form-group">
+            <label class="font-weight-bold">Escala del PDF</label>
+            <input type="number" min="0.5" max="3" step="0.05" class="form-control" [(ngModel)]="qzPdfScale" />
+            <small class="text-muted d-block mt-1">
+              1.00 es el tamaño normal. Prueba 1.10 o 1.20 si el comprobante sale muy pequeño.
+            </small>
+          </div>
+
+          <div class="form-group">
+            <label class="font-weight-bold">Formato de papel</label>
+            <select class="custom-select" [(ngModel)]="qzPdfPaperFormat">
+              <option value="ticket80">Ticket 80 mm</option>
+              <option value="ticket58">Ticket 58 mm</option>
+              <option value="a4">A4</option>
+            </select>
+            <small class="text-muted d-block mt-1">
+              Usa Ticket 80 mm para la Epson TM-T88V. A4 deja el PDF tal como viene del reporte.
+            </small>
+          </div>
+
+          <div class="form-group">
             <div class="custom-control custom-checkbox">
               <input type="checkbox" class="custom-control-input" id="silentQz" [(ngModel)]="qzSilentPrinting" />
               <label class="custom-control-label" for="silentQz">
-                Impresión directa sin confirmación
+                Impresion directa sin confirmacion
               </label>
             </div>
           </div>
         </div>
 
         <div class="col-lg-6">
-          <div class="qz-panel mb-3">
+          <div class="bridge-panel mb-3">
             <div class="text-uppercase small text-muted">Estado actual</div>
             <div class="mt-2"><strong>Modo:</strong> {{ qzPrinterMode }}</div>
-            <div><strong>Impresora:</strong> {{ qzPrinterName || 'Automática' }}</div>
+            <div><strong>Impresora:</strong> {{ printerModeLabel() }}</div>
             <div><strong>Copias:</strong> {{ qzDefaultCopies }}</div>
-            <div><strong>Silencioso:</strong> {{ qzSilentPrinting ? 'Sí' : 'No' }}</div>
+            <div><strong>Escala PDF:</strong> {{ pdfScaleLabel() }}</div>
+            <div><strong>Formato papel:</strong> {{ paperFormatLabel() }}</div>
+            <div><strong>Silencioso:</strong> {{ qzSilentPrinting ? 'Si' : 'No' }}</div>
           </div>
 
           <div class="d-flex flex-wrap gap-2">
-            <button type="button" class="btn btn-outline-primary mr-2 mb-2" (click)="cargarImpresoras()"
-              [disabled]="qzLoading">
-              <i class="bi bi-arrow-repeat"></i> Cargar impresoras
-            </button>
             <button type="button" class="btn btn-success mr-2 mb-2" (click)="guardarConfiguracion()"
               [disabled]="qzSaving">
-              <i class="fa fa-save"></i> Guardar configuración
+              <i class="fa fa-save"></i> Guardar configuracion
             </button>
             <button type="button" class="btn btn-info mb-2" (click)="probarImpresora()">
               <i class="bi bi-printer-fill"></i> Probar impresora

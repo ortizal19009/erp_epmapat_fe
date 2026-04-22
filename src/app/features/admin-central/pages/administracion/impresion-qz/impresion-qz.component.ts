@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { QzTrayService } from 'src/app/servicios/qz-tray.service';
+import { PdfPaperFormat, PrintBridgeService, PrintProfile, PrinterMode } from 'src/app/servicios/print-bridge.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -16,27 +16,36 @@ export class ImpresionQzComponent implements OnInit {
   qzPrinterName = '';
   qzDefaultCopies = 2;
   qzSilentPrinting = true;
+  qzPdfScale = 1;
+  qzPdfPaperFormat: PdfPaperFormat = 'ticket80';
+  qzProfile: PrintProfile = 'consumo';
   qzPrintersAvailable: string[] = [];
   qzLoading = false;
   qzSaving = false;
   qzMessage = '';
   qzMessageClass = 'alert-light border';
 
-  constructor(private qzTrayService: QzTrayService) {}
+  constructor(private qzTrayService: PrintBridgeService) {}
 
   ngOnInit(): void {
+    this.qzProfile = this.qzTrayService.getSavedProfileSelection();
     this.cargarConfiguracion();
+    void this.cargarImpresoras();
   }
 
   cargarConfiguracion(): void {
-    this.qzPrinterMode = this.qzTrayService.getSavedPrinterMode();
-    this.qzPrinterName = this.qzTrayService.getSavedPrinterName();
-    this.qzDefaultCopies = this.qzTrayService.getSavedCopies();
-    this.qzSilentPrinting = this.qzTrayService.getSilentPrinting();
+    const profile = this.qzProfile;
+    this.qzPrinterMode = this.qzTrayService.getSavedPrinterMode(profile);
+    this.qzPrinterName = this.qzTrayService.getSavedPrinterName(profile);
+    this.qzDefaultCopies = this.qzTrayService.getSavedCopies(profile);
+    this.qzSilentPrinting = this.qzTrayService.getSilentPrinting(profile);
+    this.qzPdfScale = this.qzTrayService.getSavedPdfScale(profile);
+    this.qzPdfPaperFormat = this.qzTrayService.getSavedPdfPaperFormat(profile);
+  }
 
-    if (this.qzPrinterMode === 'manual') {
-      void this.cargarImpresoras();
-    }
+  onProfileChange(): void {
+    this.qzTrayService.setSavedProfileSelection(this.qzProfile);
+    this.cargarConfiguracion();
   }
 
   async cargarImpresoras(): Promise<void> {
@@ -50,7 +59,7 @@ export class ImpresionQzComponent implements OnInit {
       }
     } catch (error) {
       console.error(error);
-      this.qzMessage = 'No se pudo cargar la lista de impresoras. Verifica que QZ Tray esté abierto.';
+      this.qzMessage = 'No se pudo cargar la lista de impresoras. Verifica que puente local este abierto.';
       this.qzMessageClass = 'alert-warning border';
     } finally {
       this.qzLoading = false;
@@ -58,35 +67,61 @@ export class ImpresionQzComponent implements OnInit {
   }
 
   onPrinterModeChange(): void {
-    this.qzMessage = '';
-    this.qzMessageClass = 'alert-light border';
+      this.qzMessage = '';
+      this.qzMessageClass = 'alert-light border';
+      if (this.qzPrinterMode !== 'manual') {
+        this.qzPrinterName = '';
+      }
+  }
 
-    if (this.qzPrinterMode === 'manual') {
-      void this.cargarImpresoras();
-      return;
+  printerModeLabel(): string {
+    if (this.qzPrinterMode === 'tm-t88v') {
+      return 'Epson TM-T88V';
     }
 
-    this.qzPrinterName = '';
+    if (this.qzPrinterMode === 'manual') {
+      return this.qzPrinterName?.trim() || 'Manual sin definir';
+    }
+
+    return 'Automatica';
+  }
+
+  pdfScaleLabel(): string {
+    return `${this.qzPdfScale.toFixed(2)}x`;
+  }
+
+  paperFormatLabel(): string {
+    if (this.qzPdfPaperFormat === 'a4') {
+      return 'A4';
+    }
+
+    if (this.qzPdfPaperFormat === 'ticket58') {
+      return 'Ticket 58 mm';
+    }
+
+    return 'Ticket 80 mm';
   }
 
   guardarConfiguracion(): void {
     if (this.qzPrinterMode === 'manual' && !this.qzPrinterName.trim()) {
-      Swal.fire('Atención', 'Selecciona una impresora para el modo manual.', 'warning');
+      Swal.fire('Atencion', 'Selecciona una impresora para el modo manual.', 'warning');
       return;
     }
 
     this.qzSaving = true;
     try {
-      const copies = this.qzTrayService.setDefaultCopies(this.qzDefaultCopies);
-      this.qzTrayService.setSilentPrinting(this.qzSilentPrinting);
-      this.qzTrayService.setPrinterPreference(this.qzPrinterMode, this.qzPrinterName);
+      const copies = this.qzTrayService.setDefaultCopies(this.qzDefaultCopies, this.qzProfile);
+      this.qzTrayService.setSilentPrinting(this.qzSilentPrinting, this.qzProfile);
+      this.qzPdfScale = this.qzTrayService.setPdfScale(this.qzPdfScale, this.qzProfile);
+      this.qzPdfPaperFormat = this.qzTrayService.setPdfPaperFormat(this.qzPdfPaperFormat, this.qzProfile);
+      this.qzTrayService.setPrinterPreference(this.qzPrinterMode, this.qzPrinterName, this.qzProfile);
       this.qzDefaultCopies = copies;
-      this.qzMessage = 'Configuración guardada correctamente.';
+      this.qzMessage = 'Configuracion guardada correctamente.';
       this.qzMessageClass = 'alert-success border';
       Swal.fire({
         toast: true,
         icon: 'success',
-        title: 'Configuración de impresión guardada.',
+        title: 'Configuracion de impresion guardada.',
         position: 'top-end',
         showConfirmButton: false,
         timer: 2500,
@@ -98,7 +133,7 @@ export class ImpresionQzComponent implements OnInit {
 
   async probarImpresora(): Promise<void> {
     try {
-      await this.qzTrayService.printTestTicket('PRUEBA DE IMPRESION DESDE ADMIN CENTRAL');
+      await this.qzTrayService.printTestTicket('PRUEBA DE IMPRESION DESDE ADMIN CENTRAL', this.qzProfile);
       Swal.fire({
         toast: true,
         icon: 'success',
@@ -112,7 +147,7 @@ export class ImpresionQzComponent implements OnInit {
       Swal.fire({
         toast: true,
         icon: 'error',
-        title: 'No se pudo enviar la prueba de impresión.',
+        title: 'No se pudo enviar la prueba de impresion.',
         position: 'top-end',
         showConfirmButton: false,
         timer: 3500,
@@ -123,4 +158,17 @@ export class ImpresionQzComponent implements OnInit {
   volver(): void {
     window.history.back();
   }
+
+  profileLabel(): string {
+    switch (this.qzProfile) {
+      case 'servicios':
+        return 'Servicios';
+      case 'convenio':
+        return 'Convenio';
+      default:
+        return 'Consumo de agua';
+    }
+  }
 }
+
+

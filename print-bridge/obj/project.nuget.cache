@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "dgSpecHash": "XTWOAmMiq1s=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Alexi\\Documents\\PROYECTOS_EPMAPA-T\\erp_epmapat_fe\\print-bridge\\PrintBridge.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Alexi\\.nuget\\packages\\microsoft.extensions.hosting.windowsservices\\8.0.1\\microsoft.extensions.hosting.windowsservices.8.0.1.nupkg.sha512",
+    "C:\\Users\\Alexi\\.nuget\\packages\\pdfiumviewer.native.x86_64.v8-xfa\\2018.4.8.256\\pdfiumviewer.native.x86_64.v8-xfa.2018.4.8.256.nupkg.sha512",
+    "C:\\Users\\Alexi\\.nuget\\packages\\pdfiumviewer.updated\\2.14.5\\pdfiumviewer.updated.2.14.5.nupkg.sha512",
+    "C:\\Users\\Alexi\\.nuget\\packages\\system.serviceprocess.servicecontroller\\8.0.1\\system.serviceprocess.servicecontroller.8.0.1.nupkg.sha512",
+    "C:\\Users\\Alexi\\.nuget\\packages\\microsoft.windows.sdk.net.ref\\10.0.19041.57\\microsoft.windows.sdk.net.ref.10.0.19041.57.nupkg.sha512"
+  ],
+  "logs": []
+}
