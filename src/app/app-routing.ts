@@ -1132,6 +1132,11 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   { path: 'definir', component: DefinirComponent, canActivate: [AuthGuard] },
+  {
+    path: 'admin/configuracion-impresion',
+    loadComponent: () => import('./features/admin-central/pages/administracion/impresion-qz/impresion-qz.component').then(m => m.ImpresionQzComponent),
+    canActivate: [AuthGuard, AdminOnlyGuard],
+  },
   { path: 'reportesjr', component: ReportesjrComponent, canActivate: [AuthGuard] },
   { path: 'add-reportejr', component: AddReportejrComponent, canActivate: [AuthGuard] },
   { path: 'modi-reportejr', component: ModiReportejrComponent, canActivate: [AuthGuard] },

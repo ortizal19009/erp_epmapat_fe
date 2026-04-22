@@ -551,14 +551,12 @@ export class AddRecaudaComponent implements OnInit {
       const abonado = Array.isArray(abonados) ? abonados[0] : null;
       const idcliente = Number(abonado?.idcliente_clientes?.idcliente ?? 0) || null;
 
-      if (idcliente == null) {
-        const sincobro = await this.recaCobroService.getSincobroByCuenta(cuenta);
-        this._sincobro = Array.isArray(sincobro) ? sincobro : [];
-      } else {
+      if (idcliente != null) {
         this.getClienteById(idcliente);
-        const sincobro = await this.recaCobroService.getSincobroByCliente(idcliente);
-        this._sincobro = Array.isArray(sincobro) ? sincobro : [];
       }
+
+      const sincobro = await this.recaCobroService.getSincobroByCuenta(cuenta);
+      this._sincobro = Array.isArray(sincobro) ? sincobro : [];
 
       if (!this._sincobro.length) {
         this.swal('warning', 'No tiene valores pendientes');

@@ -1,0 +1,87 @@
+<div class="container-fluid py-3">
+  <div class="card shadow-sm border-0 qz-card">
+    <div class="card-header qz-header d-flex align-items-center justify-content-between">
+      <div>
+        <h4 class="mb-0">Configuración de impresión</h4>
+        <small class="text-white-50">Administra QZ Tray, la Epson TM-T88V y el número de copias por defecto.</small>
+      </div>
+      <button type="button" class="btn btn-light btn-sm" (click)="volver()">
+        <i class="bi bi-arrow-left-circle"></i> Volver
+      </button>
+    </div>
+
+    <div class="card-body">
+      <div *ngIf="qzMessage" class="alert py-2 mb-3" [ngClass]="qzMessageClass">
+        {{ qzMessage }}
+      </div>
+
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="form-group">
+            <label class="font-weight-bold">Modo de impresora</label>
+            <select class="custom-select" [(ngModel)]="qzPrinterMode" (change)="onPrinterModeChange()">
+              <option value="auto">Automática</option>
+              <option value="tm-t88v">Epson TM-T88V</option>
+              <option value="manual">Elegir impresora guardada</option>
+            </select>
+          </div>
+
+          <div class="form-group" *ngIf="qzPrinterMode === 'manual'">
+            <label class="font-weight-bold">Impresora guardada</label>
+            <select class="custom-select" [(ngModel)]="qzPrinterName">
+              <option *ngFor="let printer of qzPrintersAvailable" [value]="printer">{{ printer }}</option>
+            </select>
+            <small class="text-muted d-block mt-1">
+              Si QZ Tray está abierto, aquí aparecerán las impresoras detectadas.
+            </small>
+          </div>
+
+          <div class="form-group">
+            <label class="font-weight-bold">Copias por defecto</label>
+            <input type="number" min="1" max="20" class="form-control" [(ngModel)]="qzDefaultCopies" />
+            <small class="text-muted d-block mt-1">
+              Valor recomendado: 2.
+            </small>
+          </div>
+
+          <div class="form-group">
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" id="silentQz" [(ngModel)]="qzSilentPrinting" />
+              <label class="custom-control-label" for="silentQz">
+                Impresión directa sin confirmación
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="qz-panel mb-3">
+            <div class="text-uppercase small text-muted">Estado actual</div>
+            <div class="mt-2"><strong>Modo:</strong> {{ qzPrinterMode }}</div>
+            <div><strong>Impresora:</strong> {{ qzPrinterName || 'Automática' }}</div>
+            <div><strong>Copias:</strong> {{ qzDefaultCopies }}</div>
+            <div><strong>Silencioso:</strong> {{ qzSilentPrinting ? 'Sí' : 'No' }}</div>
+          </div>
+
+          <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-outline-primary mr-2 mb-2" (click)="cargarImpresoras()"
+              [disabled]="qzLoading">
+              <i class="bi bi-arrow-repeat"></i> Cargar impresoras
+            </button>
+            <button type="button" class="btn btn-success mr-2 mb-2" (click)="guardarConfiguracion()"
+              [disabled]="qzSaving">
+              <i class="fa fa-save"></i> Guardar configuración
+            </button>
+            <button type="button" class="btn btn-info mb-2" (click)="probarImpresora()">
+              <i class="bi bi-printer-fill"></i> Probar impresora
+            </button>
+          </div>
+
+          <div *ngIf="qzLoading" class="alert alert-info mt-3 mb-0 py-2 text-center">
+            Cargando impresoras...
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

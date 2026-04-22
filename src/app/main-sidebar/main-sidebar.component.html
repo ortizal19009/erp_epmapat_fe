@@ -919,6 +919,12 @@
                 <p class="text-warning">Cargar Reportes</p>
               </a>
             </li>
+            <li class="nav-item" *ngIf="canSection('AC_UTIL_REPORTES') || authService.idusuario == 1">
+              <a routerLink="/admin/configuracion-impresion" class="nav-link" [class.disabled]="!isOptionEnabled(5, 221)">
+                <i class="bi bi-printer-fill nav-icon"></i>
+                <p class="text-warning">Configuracion de impresion</p>
+              </a>
+            </li>
             <li class="nav-item" *ngIf="authService.idusuario == 1">
               <a routerLink="/admin/swagger-microservicios" class="nav-link"
                 [class.disabled]="!isOptionEnabled(5, 221)">

@@ -1,0 +1,16 @@
+.qz-card {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.qz-header {
+  background: linear-gradient(135deg, #1f4d8a 0%, #17385f 100%);
+  color: #fff;
+}
+
+.qz-panel {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  background: #f8fbff;
+  padding: 1rem;
+}

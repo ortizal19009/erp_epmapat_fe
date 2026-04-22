@@ -1,12 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { DefinirService } from 'src/app/servicios/administracion/definir.service';
 import { AirxreteService } from 'src/app/servicios/contabilidad/airxrete.service';
 import { FecReteimpuService } from 'src/app/servicios/contabilidad/fec-reteimpu.service';
 import { FecRetencionesService } from 'src/app/servicios/contabilidad/fec-retenciones.service';
+import { RetencionesSriService } from 'src/app/servicios/contabilidad/retenciones-sri.service';
 import { RetencionesService } from 'src/app/servicios/contabilidad/retenciones.service';
 import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
 
@@ -26,6 +28,9 @@ export class RetencionesComponent implements OnInit {
    date: Date = new Date();
    swdesdehasta: boolean; //Visibilidad Buscar últimos
    filtro: string;
+   filtroEstado: string = '';
+   filtroDesdeAut: string = '';
+   filtroHastaAut: string = '';
    sumtotal: number = 0;
    seleccionados: number;
    secretencion1: string;
@@ -33,11 +38,24 @@ export class RetencionesComponent implements OnInit {
    swbotones: boolean = true;
    swenviando: boolean;
    txtenviar: string = 'Aceptar';
+   accionEnCursoId: number | null = null;
+   estadosSri: any[] = [];
+   estadosDisponibles = [
+      { value: '', label: 'Todos' },
+      { value: 'PENDIENTE', label: 'Pendiente' },
+      { value: 'GENERADA', label: 'Generada' },
+      { value: 'AUTORIZADA', label: 'Autorizada' },
+      { value: 'ENVIADA', label: 'Enviada' },
+      { value: 'ERROR_ENVIO', label: 'Error envío' },
+   ];
+   retencionCorreoModal: any = null;
+   correosModal: string = '';
+   guardandoCorreo: boolean = false;
 
    constructor(private fb: FormBuilder, private router: Router, public authService: AutorizaService,
       private coloresService: ColoresService, private reteService: RetencionesService, private fecfacService: FecfacturaService,
       private defService: DefinirService, private fec_reteService: FecRetencionesService, private fec_reteimpuService: FecReteimpuService,
-      private airxreteService: AirxreteService) { }
+      private airxreteService: AirxreteService, private sriRetencionesService: RetencionesSriService) { }
 
    ngOnInit(): void {
       sessionStorage.setItem('ventana', '/retenciones');
@@ -123,6 +141,7 @@ export class RetencionesComponent implements OnInit {
 
                this._retenciones = datos;
                this.total();
+               this.cargarEstadosSri();
             },
             error: err => console.error(err.error)
          });
@@ -148,6 +167,10 @@ export class RetencionesComponent implements OnInit {
    }
 
    changeDesdeHasta() { this.swdesdehasta = true; }
+
+   changeFiltroEstado() {
+      this.cargarEstadosSri();
+   }
 
    changeEscoge(i: number) {
       // this.secretencion1 = this._retenciones[i].secretencion1;
@@ -266,6 +289,248 @@ export class RetencionesComponent implements OnInit {
    imprimir() {
       sessionStorage.setItem("retencionesToImpExp", JSON.stringify(this.buscaRetenciones));
       this.router.navigate(['/imp-retenciones']);
+   }
+
+   retencionesFiltradas() {
+      const texto = (this.filtro || '').toLowerCase().trim();
+      return (this._retenciones || []).filter((retencion: any) => {
+         const coincideTexto = !texto
+            || String(retencion.secretencion1 ?? '').toLowerCase().includes(texto)
+            || String(retencion.idbene?.nomben ?? '').toLowerCase().includes(texto)
+            || String(retencion.iddocu?.nomdoc ?? '').toLowerCase().includes(texto)
+            || String(retencion.numautoriza_e ?? '').toLowerCase().includes(texto)
+            || String(retencion.fecautoriza ?? '').toLowerCase().includes(texto)
+            || String(this.estadoSri(retencion) ?? '').toLowerCase().includes(texto);
+         const estado = this.estadoSri(retencion);
+         const coincideEstado = !this.filtroEstado || estado === this.filtroEstado;
+         const coincideFechaAut = this.coincideRangoFechaAut(retencion);
+         return coincideTexto && coincideEstado && coincideFechaAut;
+      });
+   }
+
+   async cargarEstadosSri() {
+      try {
+         this.estadosSri = await firstValueFrom(this.sriRetencionesService.listar());
+      } catch (error) {
+         console.error('No se pudo cargar el estado SRI de retenciones', error);
+         this.estadosSri = [];
+      }
+   }
+
+   estadoSri(retencion: any): string {
+      const idretencion = this.getIdRetencion(retencion);
+      const registro = this.estadosSri.find((item: any) => Number(item.idretencion) === idretencion);
+      if (registro?.estado) {
+         return registro.estado;
+      }
+      if (String(retencion?.numautoriza_e ?? '').trim()) {
+         return 'AUTORIZADA';
+      }
+      return 'PENDIENTE';
+   }
+
+   claseEstadoSri(retencion: any): string {
+      switch (this.estadoSri(retencion)) {
+         case 'GENERADA':
+            return 'badge badge-info';
+         case 'AUTORIZADA':
+            return 'badge badge-warning';
+         case 'ENVIADA':
+            return 'badge badge-success';
+         case 'ERROR_ENVIO':
+            return 'badge badge-danger';
+         default:
+            return 'badge badge-secondary';
+      }
+   }
+
+   puedeGenerarPdf(retencion: any): boolean {
+      return this.estadoSri(retencion) === 'AUTORIZADA';
+   }
+
+   getCorreoRetencion(retencion: any): string {
+      const correo = retencion?.idbene?.mailben ?? retencion?.emailsujetoretenido ?? '';
+      return String(correo || '').trim();
+   }
+
+   async descargarPdf(retencion: any) {
+      const idretencion = this.getIdRetencion(retencion);
+      if (!idretencion) {
+         this.authService.swal('warning', 'No se pudo identificar la retención');
+         return;
+      }
+      if (!this.puedeGenerarPdf(retencion)) {
+         this.authService.swal('warning', 'La retención debe estar autorizada para generar el PDF');
+         return;
+      }
+      this.accionEnCursoId = idretencion;
+      try {
+         const blob = await firstValueFrom(this.sriRetencionesService.generarPdf(idretencion));
+         const blobUrl = window.URL.createObjectURL(blob);
+         const opened = window.open(blobUrl, '_blank');
+         if (!opened) {
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = `retencion_${this.getSecuencialArchivo(retencion)}.pdf`;
+            link.click();
+         }
+         setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
+         this.authService.swal('success', 'PDF generado correctamente');
+         await this.cargarEstadosSri();
+      } catch (error: any) {
+         console.error(error);
+         this.authService.swal('error', 'No se pudo generar el PDF');
+      } finally {
+         this.accionEnCursoId = null;
+      }
+   }
+
+   async procesarSri(retencion: any) {
+      const idretencion = this.getIdRetencion(retencion);
+      if (!idretencion) {
+         this.authService.swal('warning', 'No se pudo identificar la retención');
+         return;
+      }
+      this.accionEnCursoId = idretencion;
+      try {
+         const destinatario = this.getCorreoRetencion(retencion);
+         const asunto = `Retención ${this.getSecuencialArchivo(retencion)} autorizada`;
+         const mensaje = 'Adjuntamos su comprobante de retención autorizado en formato PDF.';
+         const resultado = await firstValueFrom(
+            this.sriRetencionesService.procesar(idretencion, destinatario, asunto, mensaje)
+         );
+         this.authService.swal('success', `Retención autorizada y enviada${resultado?.email ? ` a ${resultado.email}` : ''}`);
+         await this.cargarEstadosSri();
+      } catch (error: any) {
+         console.error(error);
+         const detalle = error?.error?.detalle || error?.error?.error || error?.message || 'No se pudo procesar la retención';
+         this.authService.swal('error', detalle);
+      } finally {
+         this.accionEnCursoId = null;
+      }
+   }
+
+   async descargarXml(retencion: any) {
+      const idretencion = this.getIdRetencion(retencion);
+      if (!idretencion) {
+         this.authService.swal('warning', 'No se pudo identificar la retención');
+         return;
+      }
+      this.accionEnCursoId = idretencion;
+      try {
+         const xml = await firstValueFrom(this.sriRetencionesService.descargarXml(idretencion));
+         const blob = new Blob([xml], { type: 'application/xml;charset=utf-8' });
+         const url = window.URL.createObjectURL(blob);
+         const link = document.createElement('a');
+         link.href = url;
+         link.download = `retencion_${this.getSecuencialArchivo(retencion)}.xml`;
+         link.click();
+         setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+         this.authService.swal('success', 'XML descargado correctamente');
+         await this.cargarEstadosSri();
+      } catch (error: any) {
+         console.error(error);
+         this.authService.swal('error', 'No se pudo descargar el XML');
+      } finally {
+         this.accionEnCursoId = null;
+      }
+   }
+
+   reenviarCorreo(retencion: any) {
+      this.retencionCorreoModal = retencion;
+      this.correosModal = this.normalizeEmailList(this.getCorreoRetencion(retencion)) || '';
+   }
+
+   normalizarCorreosModal() {
+      this.correosModal = this.normalizeEmailList(this.correosModal);
+   }
+
+   async confirmarReenvioCorreo() {
+      const retencion = this.retencionCorreoModal;
+      const idretencion = this.getIdRetencion(retencion);
+      if (!idretencion) {
+         this.authService.swal('warning', 'No se pudo identificar la retención');
+         return;
+      }
+
+      const correo = this.normalizeEmailList(this.correosModal).replace(/;+\s*$/g, '');
+      if (!correo.trim()) {
+         this.authService.swal('warning', 'Debes indicar al menos un correo destino');
+         return;
+      }
+
+      this.guardandoCorreo = true;
+      this.accionEnCursoId = idretencion;
+      try {
+         const asunto = `Retención ${this.getSecuencialArchivo(retencion)}`;
+         const mensaje = 'Adjuntamos su comprobante de retención en formato PDF.';
+         await firstValueFrom(this.sriRetencionesService.reenviarCorreo(idretencion, correo, asunto, mensaje));
+         this.authService.swal('success', `Correo enviado a ${correo}`);
+         this.retencionCorreoModal = null;
+         this.correosModal = '';
+         await this.cargarEstadosSri();
+      } catch (error: any) {
+         console.error(error);
+         this.authService.swal('error', 'No se pudo reenviar el correo');
+      } finally {
+         this.guardandoCorreo = false;
+         this.accionEnCursoId = null;
+      }
+   }
+
+   cerrarModalCorreo() {
+      this.retencionCorreoModal = null;
+      this.correosModal = '';
+   }
+
+   private getIdRetencion(retencion: any): number {
+      const valor = retencion?.idrete ?? retencion?.idretencion ?? retencion?.idRetencion ?? 0;
+      const id = Number(valor);
+      return Number.isFinite(id) ? id : 0;
+   }
+
+   private getSecuencialArchivo(retencion: any): string {
+      const raw = retencion?.secretencion1 ?? retencion?.secuencial ?? this.getIdRetencion(retencion);
+      const texto = String(raw ?? '').replace(/\D/g, '');
+      return texto || String(this.getIdRetencion(retencion));
+   }
+
+   private normalizeEmailList(value: string): string {
+      return String(value || '')
+         .replace(/\s+/g, ';')
+         .replace(/;+/g, ';')
+         .replace(/;\s*;/g, ';')
+         .replace(/^;|;$/g, '')
+         .trim();
+   }
+
+   private coincideRangoFechaAut(retencion: any): boolean {
+      const fechaAut = this.fechaComparable(retencion?.fecautoriza);
+      if (!fechaAut) {
+         return !this.filtroDesdeAut && !this.filtroHastaAut;
+      }
+
+      const desde = this.fechaComparable(this.filtroDesdeAut);
+      const hasta = this.fechaComparable(this.filtroHastaAut);
+
+      if (desde && fechaAut < desde) {
+         return false;
+      }
+      if (hasta && fechaAut > hasta) {
+         return false;
+      }
+      return true;
+   }
+
+   private fechaComparable(value: any): Date | null {
+      if (!value) {
+         return null;
+      }
+      const fecha = new Date(value);
+      if (Number.isNaN(fecha.getTime())) {
+         return null;
+      }
+      return new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
    }
 
 }

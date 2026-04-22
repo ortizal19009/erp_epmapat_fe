@@ -36,6 +36,24 @@
   background: linear-gradient(180deg, rgba(255,255,255,.97), rgba(248,250,252,.98));
 }
 
+.quick-access {
+  background: linear-gradient(135deg, rgba(17, 122, 139, .08), rgba(255,255,255,.98));
+  border-left: 4px solid #117a8b;
+}
+
+.quick-label {
+  color: #117a8b;
+  letter-spacing: .06em;
+  font-size: .72rem;
+}
+
+.btn-quick {
+  border-radius: 999px;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  box-shadow: 0 8px 20px rgba(23, 162, 184, .18);
+}
+
 .summary-box {
   border: 1px solid rgba(17, 122, 139, .14);
   border-radius: 10px;

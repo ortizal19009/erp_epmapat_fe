@@ -34,7 +34,23 @@
          <div class="btn-group col-sm-3 justify-content-end my-1 pb-0">
             <div class="text-left">
                <input class="form-control form-control-sm text-center col-sm-11 mb-0" type="text"
-                  placeholder="Filtrar..." [(ngModel)]="filtro" />
+                  placeholder="Cliente, autorización, secuencial..." [(ngModel)]="filtro" />
+            </div>
+            <div class="text-left mt-1">
+               <select class="form-control form-control-sm text-center col-sm-11 mb-0" [(ngModel)]="filtroEstado"
+                  (change)="changeFiltroEstado()">
+                  <option *ngFor="let estado of estadosDisponibles" [ngValue]="estado.value">
+                     {{ estado.label }}
+                  </option>
+               </select>
+            </div>
+            <div class="text-left mt-1">
+               <div class="input-group input-group-sm col-sm-11 p-0">
+                  <input type="date" class="form-control form-control-sm text-center" [(ngModel)]="filtroDesdeAut"
+                     placeholder="Autorizada desde">
+                  <input type="date" class="form-control form-control-sm text-center" [(ngModel)]="filtroHastaAut"
+                     placeholder="Autorizada hasta">
+               </div>
             </div>
             <button *ngIf="swdesdehasta" class="bg-transparent border-0 mt-0" type="submit" (click)="listainicial()"
                data-toggle="tooltip" title="Ultimos">
@@ -71,11 +87,13 @@
                   <th>Documento</th>
                   <th>Número de autorización</th>
                   <th>Fecha autorización</th>
+                  <th>Estado SRI</th>
                   <th>Valor</th>
+                  <th style="width: 70px;">Acciones</th>
                </tr>
             </thead>
             <tbody class="detalle roboto small">
-               <tr class="pad0" *ngFor="let retencion of _retenciones | filter: filtro; let i=index ">
+               <tr class="pad0" *ngFor="let retencion of retencionesFiltradas(); let i=index ">
                   <td class="text-center"><input type="checkbox" [(ngModel)]="retencion.escoge" (change)="changeEscoge(i)" [disabled]="retencion.estado != 0"></td>
                   <td class="text-center"> {{ retencion.secretencion1 }}</td>
                   <td class="text-center">{{ retencion.fechaemiret1 | date: 'dd-MM-yyyy' }}</td>
@@ -86,20 +104,93 @@
                      retencion.iddocu.nomdoc}}&nbsp; {{retencion.numdoc}} </td>
                   <td class="text-center"> {{ retencion.numautoriza_e }}</td>
                   <td class="text-center"> {{ retencion.fecautoriza }}</td>
+                  <td class="text-center">
+                     <span [class]="claseEstadoSri(retencion)">
+                        {{ estadoSri(retencion) }}
+                     </span>
+                  </td>
                   <td class="text-right">
                      {{ retencion.valorretbienes + retencion.valorretservicios + retencion.valretserv100 +
                      retencion.valretair | number:'1.2-2' }}</td>
+                  <td class="text-center">
+                     <div class="btn-group">
+                       <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle py-0 px-2"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                           [disabled]="accionEnCursoId === retencion.idrete">
+                           <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right popLista">
+                           <button class="dropdown-item" type="button"
+                              [disabled]="accionEnCursoId === retencion.idrete"
+                              (click)="procesarSri(retencion)">
+                              <i class="bi bi-send mr-2"></i> Enviar a SRI
+                           </button>
+                           <button class="dropdown-item" type="button"
+                              [disabled]="accionEnCursoId === retencion.idrete || !puedeGenerarPdf(retencion)"
+                              (click)="descargarPdf(retencion)">
+                              <i class="bi bi-file-earmark-pdf mr-2"></i> Generar PDF
+                           </button>
+                           <button class="dropdown-item" type="button"
+                              [disabled]="accionEnCursoId === retencion.idrete"
+                              (click)="reenviarCorreo(retencion)">
+                              <i class="bi bi-envelope mr-2"></i> Reenviar correo
+                           </button>
+                           <button class="dropdown-item" type="button"
+                              [disabled]="accionEnCursoId === retencion.idrete"
+                              (click)="descargarXml(retencion)">
+                              <i class="bi bi-filetype-xml mr-2"></i> Descargar XML
+                           </button>
+                        </div>
+                     </div>
+                  </td>
                </tr>
             </tbody>
             <tfoot class="font-weight-bold text-right detalle roboto small pad0">
                <tr>
                   <td colspan="4" class="text-right">Seleccionadas&nbsp;&nbsp; </td>
                   <td class="text-center">{{seleccionados}}</td>
-                  <td colspan="2" class="text-right">TOTAL&nbsp;&nbsp; </td>
+                  <td colspan="3" class="text-right">TOTAL&nbsp;&nbsp; </td>
                   <td class="text-right">{{sumtotal | number: '1.2-2'}}</td>
+                  <td></td>
                </tr>
             </tfoot>
          </table>
+      </div>
+   </div>
+
+   <div class='modal fade' id='correoRetencion' tabindex='-1' aria-labelledby='correoRetencionLabel'
+      aria-hidden='true'>
+      <div class='modal-dialog modal-dialog-centered modal-lg'>
+         <div class='modal-content'>
+            <div class='modal-header justify-content-center cabecera border py-2'>
+               <h4 class='modal-title font-weight-bold' id='correoRetencionLabel'>Reenviar retención por correo</h4>
+            </div>
+            <div class='modal-body detalle'>
+               <div class="row">
+                  <div class="col-12 mb-2">
+                     <strong>Retención:</strong> {{ retencionCorreoModal?.secretencion1 || 'Sin seleccionar' }}
+                  </div>
+                  <div class="col-12 mb-2">
+                     <label class="font-weight-bold mb-1">Destinatarios</label>
+                     <input type="text" class="form-control form-control-sm"
+                        placeholder="correo1@dominio.com;correo2@dominio.com"
+                        [(ngModel)]="correosModal" (input)="normalizarCorreosModal()" autocomplete="off">
+                     <small class="text-muted">Separa varios correos con punto y coma. Si escribes un espacio, se convierte en `;`.</small>
+                  </div>
+               </div>
+            </div>
+            <div class='modal-footer justify-content-center detalle border py-1'>
+               <button type='button' class='btn btn-success btn-sm' (click)="confirmarReenvioCorreo()"
+                  [disabled]="guardandoCorreo || !correosModal.trim()">
+                  <i *ngIf="guardandoCorreo" class="fa fa-spinner fa-spin"></i>
+                  <i *ngIf="!guardandoCorreo" class="fa fa-paper-plane"></i>&nbsp; Enviar
+               </button>
+               <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'
+                  (click)="cerrarModalCorreo()">
+                  <i class="fa fa-times-circle"></i> Cancelar
+               </button>
+            </div>
+         </div>
       </div>
    </div>
 
