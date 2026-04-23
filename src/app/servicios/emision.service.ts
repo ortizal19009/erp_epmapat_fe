@@ -57,9 +57,17 @@ export class EmisionService {
     return firstValueFrom(resp);
   }
 
-    recalcularMultaBasura1011(idemision: number, idruta: number) {
+  recalcularMultaBasura1011(idemision: number, idruta: number) {
     const url = `${baseUrl}/${idemision}/rutaxemision/${idruta}/multa-basura/recalcular`;
     return this.http.post<any[]>(url, {});
+  }
+
+  reabrirEmision(idemision: number, usumodi: number) {
+    return this.http.post<any>(`${baseUrl}/${idemision}/reabrir?usumodi=${usumodi}`, {});
+  }
+
+  eliminarEmision(idemision: number, usumodi: number) {
+    return this.http.post<any>(`${baseUrl}/${idemision}/eliminar?usumodi=${usumodi}`, {});
   }
 
   // Si prefieres async/await

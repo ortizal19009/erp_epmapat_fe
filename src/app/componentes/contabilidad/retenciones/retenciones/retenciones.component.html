@@ -1,4 +1,4 @@
-<div class="content mt-1 pt-1 pl-0">
+﻿<div class="content mt-1 pt-1 pl-0">
    <div class="container-fluid">
       <div class="row m-0 px-0 py-1 justify-content-start sombra border cabecera ">
          <div class="col-sm-9 my-1">
@@ -33,7 +33,7 @@
 
          <div class="btn-group col-sm-3 justify-content-end my-1 pb-0">
             <div class="text-left">
-               <input class="form-control form-control-sm text-center col-sm-11 mb-0" type="text"
+                  <input class="form-control form-control-sm text-center col-sm-11 mb-0" type="text"
                   placeholder="Cliente, autorización, secuencial..." [(ngModel)]="filtro" />
             </div>
             <div class="text-left mt-1">
@@ -130,11 +130,12 @@
                               (click)="descargarPdf(retencion)">
                               <i class="bi bi-file-earmark-pdf mr-2"></i> Generar PDF
                            </button>
-                           <button class="dropdown-item" type="button"
-                              [disabled]="accionEnCursoId === retencion.idrete"
-                              (click)="reenviarCorreo(retencion)">
-                              <i class="bi bi-envelope mr-2"></i> Reenviar correo
-                           </button>
+                            <button class="dropdown-item" type="button"
+                               [disabled]="accionEnCursoId === retencion.idrete || !puedeReenviarCorreo(retencion)"
+                               data-toggle="modal" data-target="#correoRetencion"
+                               (click)="reenviarCorreo(retencion)">
+                               <i class="bi bi-envelope mr-2"></i> Reenviar correo
+                            </button>
                            <button class="dropdown-item" type="button"
                               [disabled]="accionEnCursoId === retencion.idrete"
                               (click)="descargarXml(retencion)">
@@ -166,16 +167,22 @@
                <h4 class='modal-title font-weight-bold' id='correoRetencionLabel'>Reenviar retención por correo</h4>
             </div>
             <div class='modal-body detalle'>
-               <div class="row">
-                  <div class="col-12 mb-2">
+               <div class='row'>
+                  <div class='col-12 mb-2'>
                      <strong>Retención:</strong> {{ retencionCorreoModal?.secretencion1 || 'Sin seleccionar' }}
                   </div>
-                  <div class="col-12 mb-2">
-                     <label class="font-weight-bold mb-1">Destinatarios</label>
-                     <input type="text" class="form-control form-control-sm"
-                        placeholder="correo1@dominio.com;correo2@dominio.com"
-                        [(ngModel)]="correosModal" (input)="normalizarCorreosModal()" autocomplete="off">
-                     <small class="text-muted">Separa varios correos con punto y coma. Si escribes un espacio, se convierte en `;`.</small>
+                  <div class='col-12 mb-2' *ngIf='correoOriginalModal'>
+                     <strong>Correo actual:</strong> {{ correoOriginalModal }}
+                  </div>
+                  <div class='col-12 mb-2'>
+                     <label class='font-weight-bold mb-1'>Destinatarios</label>
+                     <input type='text' class='form-control form-control-sm'
+                        placeholder='correo1@dominio.com;correo2@dominio.com'
+                        [(ngModel)]='correosModal' (input)='normalizarCorreosModal()' autocomplete='off'>
+                     <small class='text-muted'>
+                        Puedes modificar el correo antes de enviar. Se adjuntarán el PDF y el XML autorizado.
+                        Separa varios correos con punto y coma. Si escribes un espacio, se convierte en `;`.
+                     </small>
                   </div>
                </div>
             </div>

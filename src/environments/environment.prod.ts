@@ -4,6 +4,7 @@ export const environment = {
   //API_URL: 'http://192.168.0.88:8888/erp_epmapat-v0.1'
   //API_URL: 'http://192.168.100.16:9080/erp_epmapat-v0.1'
   API_URL: 'http://192.168.0.165:8080',
+  SINGSEND_API_URL: 'http://192.168.0.33:9090',
   PRINT_BRIDGE_URL: 'http://localhost:8787',
   PRINT_BRIDGE_TOKEN: '',
   BACK: 1,

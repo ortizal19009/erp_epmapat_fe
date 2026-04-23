@@ -10,6 +10,7 @@ import { FecReteimpuService } from 'src/app/servicios/contabilidad/fec-reteimpu.
 import { FecRetencionesService } from 'src/app/servicios/contabilidad/fec-retenciones.service';
 import { RetencionesSriService } from 'src/app/servicios/contabilidad/retenciones-sri.service';
 import { RetencionesService } from 'src/app/servicios/contabilidad/retenciones.service';
+import { CorreosEnviadosService } from 'src/app/servicios/administracion/correos-enviados.service';
 import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
 
 @Component({
@@ -50,13 +51,15 @@ export class RetencionesComponent implements OnInit {
       { value: 'ERROR_ENVIO', label: 'Error envío' },
    ];
    retencionCorreoModal: any = null;
+   correoOriginalModal: string = '';
    correosModal: string = '';
    guardandoCorreo: boolean = false;
 
    constructor(private fb: FormBuilder, private router: Router, public authService: AutorizaService,
       private coloresService: ColoresService, private reteService: RetencionesService, private fecfacService: FecfacturaService,
       private defService: DefinirService, private fec_reteService: FecRetencionesService, private fec_reteimpuService: FecReteimpuService,
-      private airxreteService: AirxreteService, private sriRetencionesService: RetencionesSriService) { }
+      private airxreteService: AirxreteService, private sriRetencionesService: RetencionesSriService,
+      private correosEnviadosService: CorreosEnviadosService) { }
 
    ngOnInit(): void {
       sessionStorage.setItem('ventana', '/retenciones');
@@ -311,16 +314,20 @@ export class RetencionesComponent implements OnInit {
 
    async cargarEstadosSri() {
       try {
-         this.estadosSri = await firstValueFrom(this.sriRetencionesService.listar());
+         this.estadosSri = await firstValueFrom(this.fec_reteService.getLista());
       } catch (error) {
          console.error('No se pudo cargar el estado SRI de retenciones', error);
          this.estadosSri = [];
       }
    }
 
-   estadoSri(retencion: any): string {
+   private getEstadoSriRegistro(retencion: any): any | null {
       const idretencion = this.getIdRetencion(retencion);
-      const registro = this.estadosSri.find((item: any) => Number(item.idretencion) === idretencion);
+      return this.estadosSri.find((item: any) => Number(item.idretencion) === idretencion) ?? null;
+   }
+
+   estadoSri(retencion: any): string {
+      const registro = this.getEstadoSriRegistro(retencion);
       if (registro?.estado) {
          return this.normalizarEstadoSri(registro.estado);
       }
@@ -340,6 +347,12 @@ export class RetencionesComponent implements OnInit {
             return 'badge badge-info';
          case 'PENDIENTE_AUTORIZACION':
             return 'badge badge-warning';
+         case 'SIN_AUTORIZACION_EN_SRI':
+            return 'badge badge-warning';
+         case 'YA_AUTORIZADA':
+            return 'badge badge-success';
+         case 'CLAVE_DUPLICADA':
+            return 'badge badge-danger';
          case 'AUTORIZADA':
             return 'badge badge-warning';
          case 'ENVIADA':
@@ -355,10 +368,16 @@ export class RetencionesComponent implements OnInit {
       switch (this.estadoSri(retencion)) {
          case 'PENDIENTE_AUTORIZACION':
             return 'Pendiente de autorización';
+         case 'SIN_AUTORIZACION_EN_SRI':
+            return 'Sin autorización en SRI';
          case 'PENDIENTE':
             return 'Pendiente';
          case 'GENERADA':
             return 'Generada';
+         case 'YA_AUTORIZADA':
+            return 'Ya autorizada';
+         case 'CLAVE_DUPLICADA':
+            return 'Clave duplicada';
          case 'AUTORIZADA':
             return 'Autorizada';
          case 'ENVIADA':
@@ -371,27 +390,64 @@ export class RetencionesComponent implements OnInit {
    }
 
    puedeGenerarPdf(retencion: any): boolean {
-      return this.estadoSri(retencion) === 'AUTORIZADA';
+      return this.tieneAutorizacion(retencion);
+   }
+
+   puedeReenviarCorreo(retencion: any): boolean {
+      return this.tieneAutorizacion(retencion);
    }
 
    getCorreoRetencion(retencion: any): string {
-      const correo = retencion?.idbene?.mailben ?? retencion?.emailsujetoretenido ?? '';
+      const registro = this.getEstadoSriRegistro(retencion);
+      const correo = retencion?.idbene?.mailben ?? retencion?.emailsujetoretenido ?? registro?.emailsujetoretenido ?? '';
       return String(correo || '').trim();
    }
 
+   getClaveAccesoRetencion(retencion: any): string {
+      const registro = this.getEstadoSriRegistro(retencion);
+      const clave = registro?.claveacceso
+         ?? retencion?.claveacceso
+         ?? this.calcularClaveAccesoLocal(retencion);
+      return String(clave || '').trim();
+   }
+
+   private calcularClaveAccesoLocal(retencion: any): string {
+      const fechaRaw = String(retencion?.fechaemiret1 ?? retencion?.fechaemision ?? '').trim();
+      const secuencialRaw = String(retencion?.secretencion1 ?? retencion?.secuencial ?? '').trim();
+      const ruc = String(this.empresa?.ruc ?? '').trim();
+      const ambiente = String(this.empresa?.tipoambiente ?? '').trim();
+      if (!fechaRaw || !secuencialRaw || !ruc || !ambiente) {
+         return '';
+      }
+
+      const fecha = formatearFecha(1, fechaRaw);
+      const serie = '001001';
+      const secuencial = padStart(secuencialRaw, 9);
+      const codigonumerico = codigoNumerico(secuencial.slice(1, 9));
+      const tipoemision = '1';
+      const base = `${fecha}07${ruc}${ambiente}${serie}${secuencial}${codigonumerico}${tipoemision}`;
+      return base + modulo11(base);
+   }
+
+   private tieneAutorizacion(retencion: any): boolean {
+      const numeroAutorizacion = String(retencion?.numautoriza_e ?? retencion?.numautoriza ?? '').trim();
+      const fechaAutorizacion = String(retencion?.fecautoriza ?? '').trim();
+      return Boolean(numeroAutorizacion && fechaAutorizacion);
+   }
+
    async descargarPdf(retencion: any) {
-      const idretencion = this.getIdRetencion(retencion);
-      if (!idretencion) {
-         this.authService.swal('warning', 'No se pudo identificar la retenciÃ³n');
+      const claveAcceso = this.getClaveAccesoRetencion(retencion);
+      if (!claveAcceso) {
+         this.authService.swal('warning', 'No se pudo identificar la clave de acceso de la retención');
          return;
       }
       if (!this.puedeGenerarPdf(retencion)) {
-         this.authService.swal('warning', 'La retenciÃ³n debe estar autorizada para generar el PDF');
+         this.authService.swal('warning', 'La retención debe estar autorizada para generar el PDF');
          return;
       }
-      this.accionEnCursoId = idretencion;
+      this.accionEnCursoId = this.getIdRetencion(retencion);
       try {
-         const blob = await firstValueFrom(this.sriRetencionesService.generarPdf(idretencion));
+         const blob = await firstValueFrom(this.sriRetencionesService.generarPdf(claveAcceso));
          const blobUrl = window.URL.createObjectURL(blob);
          const opened = window.open(blobUrl, '_blank');
          if (!opened) {
@@ -413,45 +469,56 @@ export class RetencionesComponent implements OnInit {
 
    async procesarSri(retencion: any) {
       const idretencion = this.getIdRetencion(retencion);
-      if (!idretencion) {
-         this.authService.swal('warning', 'No se pudo identificar la retención');
-         return;
-      }
-      this.accionEnCursoId = idretencion;
+      this.accionEnCursoId = this.getIdRetencion(retencion);
       try {
          const destinatario = this.getCorreoRetencion(retencion);
          const asunto = `Retención ${this.getSecuencialArchivo(retencion)} autorizada`;
          const mensaje = 'Adjuntamos su comprobante de retención autorizado en formato PDF.';
          const resultado = await firstValueFrom(
-            this.sriRetencionesService.procesar(idretencion, destinatario, asunto, mensaje)
+            this.sriRetencionesService.procesarPorId(idretencion, destinatario, asunto, mensaje)
          );
-         if (this.normalizarEstadoSri(resultado?.estado) === 'PENDIENTE_AUTORIZACION') {
+         const estadoResultado = this.normalizarEstadoSri(resultado?.estado);
+         if (estadoResultado === 'PENDIENTE_AUTORIZACION' || estadoResultado === 'PENDIENTE' || estadoResultado === 'SIN_AUTORIZACION_EN_SRI') {
             this.authService.swal(
                'info',
-               `${resultado?.detalle || 'La autorización todavía no devuelve XML autorizado'}. Quedó registrada como pendiente.`
+               `${resultado?.detalle || 'La autorización todavía no devuelve XML autorizado'}. Quedó registrada sin autorización en SRI.`
             );
+         } else if (estadoResultado === 'LIMITE_INTENTOS_DIARIO') {
+            this.authService.swal(
+               'info',
+               resultado?.detalle || 'El SRI ya alcanzó el límite diario de intentos para esta retención. Intente nuevamente mañana.'
+            );
+         } else if (estadoResultado === 'YA_AUTORIZADA' || estadoResultado === 'CLAVE_DUPLICADA') {
+            this.authService.swal('info', resultado?.detalle || 'La retención ya fue enviada o la clave de acceso está duplicada.');
          } else {
             this.authService.swal('success', `Retención autorizada y enviada${resultado?.email ? ` a ${resultado.email}` : ''}`);
          }
          await this.cargarEstadosSri();
       } catch (error: any) {
-         console.error(error);
+         const estado = this.normalizarEstadoSri(error?.error?.estado);
          const detalle = error?.error?.detalle || error?.error?.error || error?.message || 'No se pudo procesar la retención';
-         this.authService.swal('error', detalle);
+         const correoNoDisponible = estado === 'CORREO_NO_DISPONIBLE' || error?.status === 503 || error?.error?.status === 503;
+         if (correoNoDisponible) {
+            console.warn(error);
+            this.authService.swal('warning', detalle);
+         } else {
+            console.error(error);
+            this.authService.swal('error', detalle);
+         }
       } finally {
          this.accionEnCursoId = null;
       }
    }
 
    async descargarXml(retencion: any) {
-      const idretencion = this.getIdRetencion(retencion);
-      if (!idretencion) {
-         this.authService.swal('warning', 'No se pudo identificar la retenciÃ³n');
+      const claveAcceso = this.getClaveAccesoRetencion(retencion);
+      if (!claveAcceso) {
+         this.authService.swal('warning', 'No se pudo identificar la clave de acceso de la retención');
          return;
       }
-      this.accionEnCursoId = idretencion;
+      this.accionEnCursoId = this.getIdRetencion(retencion);
       try {
-         const xml = await firstValueFrom(this.sriRetencionesService.descargarXml(idretencion));
+         const xml = await firstValueFrom(this.sriRetencionesService.descargarXml(claveAcceso));
          const blob = new Blob([xml], { type: 'application/xml;charset=utf-8' });
          const url = window.URL.createObjectURL(blob);
          const link = document.createElement('a');
@@ -470,8 +537,13 @@ export class RetencionesComponent implements OnInit {
    }
 
    reenviarCorreo(retencion: any) {
+      if (!this.puedeReenviarCorreo(retencion)) {
+         this.authService.swal('warning', 'La retención todavía no tiene número y fecha de autorización');
+         return;
+      }
       this.retencionCorreoModal = retencion;
-      this.correosModal = this.normalizeEmailList(this.getCorreoRetencion(retencion)) || '';
+      this.correoOriginalModal = this.normalizeEmailList(this.getCorreoRetencion(retencion)) || '';
+      this.correosModal = this.correoOriginalModal;
    }
 
    normalizarCorreosModal() {
@@ -481,10 +553,6 @@ export class RetencionesComponent implements OnInit {
    async confirmarReenvioCorreo() {
       const retencion = this.retencionCorreoModal;
       const idretencion = this.getIdRetencion(retencion);
-      if (!idretencion) {
-         this.authService.swal('warning', 'No se pudo identificar la retenciÃ³n');
-         return;
-      }
 
       const correo = this.normalizeEmailList(this.correosModal).replace(/;+\s*$/g, '');
       if (!correo.trim()) {
@@ -493,18 +561,62 @@ export class RetencionesComponent implements OnInit {
       }
 
       this.guardandoCorreo = true;
-      this.accionEnCursoId = idretencion;
+      this.accionEnCursoId = this.getIdRetencion(retencion);
       try {
-         const asunto = `RetenciÃ³n ${this.getSecuencialArchivo(retencion)}`;
-         const mensaje = 'Adjuntamos su comprobante de retenciÃ³n en formato PDF.';
-         await firstValueFrom(this.sriRetencionesService.reenviarCorreo(idretencion, correo, asunto, mensaje));
+         const asunto = `Retención ${this.getSecuencialArchivo(retencion)}`;
+         const mensaje = 'Adjuntamos su comprobante de retención en formato PDF.';
+         const resultado = await firstValueFrom(
+            this.sriRetencionesService.reenviarCorreoPorId(idretencion, correo, asunto, mensaje)
+         );
+         const estadoResultado = this.normalizarEstadoSri(resultado?.estado);
+         if (estadoResultado === 'PENDIENTE_AUTORIZACION' || estadoResultado === 'PENDIENTE' || estadoResultado === 'SIN_AUTORIZACION_EN_SRI') {
+            this.authService.swal('info', resultado?.detalle || 'La autorización todavía no devuelve XML autorizado.');
+            await this.cargarEstadosSri();
+            return;
+         }
+         if (estadoResultado === 'LIMITE_INTENTOS_DIARIO') {
+            this.authService.swal(
+               'info',
+               resultado?.detalle || 'El SRI ya alcanzó el límite diario de intentos para esta retención. Intente nuevamente mañana.'
+            );
+            await this.cargarEstadosSri();
+            return;
+         }
+         if (estadoResultado === 'YA_AUTORIZADA' || estadoResultado === 'CLAVE_DUPLICADA') {
+            this.authService.swal('info', resultado?.detalle || 'La retención ya fue enviada o la clave de acceso está duplicada.');
+            await this.cargarEstadosSri();
+            return;
+        }
          this.authService.swal('success', `Correo enviado a ${correo}`);
+         try {
+            await firstValueFrom(this.correosEnviadosService.registrarEnvio({
+               modulo: 'RETENCIONES',
+               documentoid: this.getIdRetencion(retencion),
+               documento: 'RETENCION',
+               destinatarios: correo,
+               asunto,
+               remitente: 'msvc-sri',
+               archivoadjunto: `retencion_${this.getSecuencialArchivo(retencion)}.pdf, retencion_${this.getSecuencialArchivo(retencion)}.xml`,
+               estado: 'ENVIADO',
+               detalle: `Reenvio de retencion registrado. emailQueueId=${resultado?.emailQueueId || ''}`
+            }));
+         } catch (registroError) {
+            console.warn('No se pudo registrar el correo en el control de mails', registroError);
+         }
          this.retencionCorreoModal = null;
          this.correosModal = '';
          await this.cargarEstadosSri();
       } catch (error: any) {
-         console.error(error);
-         this.authService.swal('error', 'No se pudo reenviar el correo');
+         const estado = this.normalizarEstadoSri(error?.error?.estado);
+         const detalle = error?.error?.detalle || error?.message || 'No se pudo reenviar el correo';
+         const correoNoDisponible = estado === 'CORREO_NO_DISPONIBLE' || error?.status === 503 || error?.error?.status === 503;
+         if (correoNoDisponible) {
+            console.warn(error);
+            this.authService.swal('warning', detalle);
+         } else {
+            console.error(error);
+            this.authService.swal('error', 'No se pudo reenviar el correo');
+         }
       } finally {
          this.guardandoCorreo = false;
          this.accionEnCursoId = null;
@@ -513,6 +625,7 @@ export class RetencionesComponent implements OnInit {
 
    cerrarModalCorreo() {
       this.retencionCorreoModal = null;
+      this.correoOriginalModal = '';
       this.correosModal = '';
    }
 
@@ -573,6 +686,12 @@ export class RetencionesComponent implements OnInit {
       }
       if (texto.includes('PENDIENTE_AUTORIZACION')) {
          return 'PENDIENTE_AUTORIZACION';
+      }
+      if (texto.includes('LIMITE_INTENTOS_DIARIO')) {
+         return 'LIMITE_INTENTOS_DIARIO';
+      }
+      if (texto.includes('SIN_AUTORIZACION_EN_SRI')) {
+         return 'SIN_AUTORIZACION_EN_SRI';
       }
       if (texto.includes('PENDIENTE')) {
          return 'PENDIENTE';

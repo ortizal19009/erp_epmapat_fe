@@ -26,6 +26,8 @@ export class ConveniosComponent implements OnInit {
   txtbuscar: string = 'Buscar';
   private readonly DIAS_VENCIMIENTO = 30;
   private vencimientoCache = new Map<number, { label: string; css: string }>();
+  private conveniosBaseLocal: any[] = [];
+  private usaPaginacionLocal = false;
 
   page: number = 0;
   size: number = 20;
@@ -110,11 +112,7 @@ export class ConveniosComponent implements OnInit {
   }
 
   buscarConvenios(page: number = 0): void {
-    this.swbuscando = true;
-    this.txtbuscar = 'Buscando';
     this.page = page;
-    this.s_loading.showLoading();
-    this.vencimientoCache.clear();
 
     sessionStorage.setItem('desdeconvenio', String(this.formBuscar.value.desde ?? ''));
     sessionStorage.setItem('hastaconvenio', String(this.formBuscar.value.hasta ?? ''));
@@ -124,6 +122,18 @@ export class ConveniosComponent implements OnInit {
       page: this.page,
       size: this.size,
     };
+
+    if (filtros.vencimiento) {
+      void this.buscarConveniosConVencimientoLocal(filtros);
+      return;
+    }
+
+    this.usaPaginacionLocal = false;
+    this.conveniosBaseLocal = [];
+    this.swbuscando = true;
+    this.txtbuscar = 'Buscando';
+    this.s_loading.showLoading();
+    this.vencimientoCache.clear();
 
     this.convService.buscarConvenios(filtros).subscribe({
       next: async (resp) => {
@@ -265,6 +275,12 @@ export class ConveniosComponent implements OnInit {
       if (!result.isDenied) return;
 
       this.s_loading.showLoading();
+      if (this.usaPaginacionLocal) {
+        this.generarPdfConvenios(this.conveniosBaseLocal || []);
+        this.s_loading.hideLoading();
+        return;
+      }
+
       const filtros = this.getFiltrosBusqueda();
       const total = this.totalElements > 0 ? this.totalElements : this.size;
 
@@ -289,19 +305,31 @@ export class ConveniosComponent implements OnInit {
 
   onPreviousPage(): void {
     if (this.page > 0) {
-      this.buscarConvenios(this.page - 1);
+      if (this.usaPaginacionLocal) {
+        this.aplicarPaginacionLocal(this.page - 1);
+      } else {
+        this.buscarConvenios(this.page - 1);
+      }
     }
   }
 
   onNextPage(): void {
     if (this.page + 1 < this.totalPages) {
-      this.buscarConvenios(this.page + 1);
+      if (this.usaPaginacionLocal) {
+        this.aplicarPaginacionLocal(this.page + 1);
+      } else {
+        this.buscarConvenios(this.page + 1);
+      }
     }
   }
 
   onGoToPage(page: number): void {
     if (page >= 0 && page < this.totalPages) {
-      this.buscarConvenios(page);
+      if (this.usaPaginacionLocal) {
+        this.aplicarPaginacionLocal(page);
+      } else {
+        this.buscarConvenios(page);
+      }
     }
   }
 
@@ -435,15 +463,23 @@ export class ConveniosComponent implements OnInit {
   }
 
   private async prepararConveniosConVencimiento(convenios: any[]): Promise<any[]> {
-    const enriquecidos = await Promise.all(
-      convenios.map(async (convenio) => {
-        const info = await this.calcularVencimientoConvenio(convenio);
-        if (convenio?.idconvenio != null) {
-          this.vencimientoCache.set(Number(convenio.idconvenio), info);
+    const enriquecidos: any[] = [];
+    const loteTamano = 4;
+
+    for (let i = 0; i < convenios.length; i += loteTamano) {
+      const lote = convenios.slice(i, i + loteTamano);
+      for (const convenio of lote) {
+        try {
+          const info = await this.calcularVencimientoConvenio(convenio);
+          if (convenio?.idconvenio != null) {
+            this.vencimientoCache.set(Number(convenio.idconvenio), info);
+          }
+        } catch (error) {
+          console.error('Error al preparar vencimiento del convenio', convenio?.idconvenio, error);
         }
-        return convenio;
-      })
-    );
+        enriquecidos.push(convenio);
+      }
+    }
 
     const filtro = (this.formBuscar.value.vencimiento ?? '').trim();
     if (!filtro) return enriquecidos;
@@ -453,6 +489,56 @@ export class ConveniosComponent implements OnInit {
       const vencido = info?.label === 'Vencido';
       return filtro === 'vencidos' ? vencido : !vencido;
     });
+  }
+
+  private async buscarConveniosConVencimientoLocal(filtros: {
+    nroDesde?: number | null;
+    nroHasta?: number | null;
+    nombre?: string | null;
+    estado?: number | null;
+    minPendientes?: number | null;
+    maxPendientes?: number | null;
+    cuenta?: number | null;
+    page?: number;
+    size?: number;
+    vencimiento?: string;
+  }): Promise<void> {
+    this.swbuscando = true;
+    this.txtbuscar = 'Buscando';
+    this.s_loading.showLoading();
+    this.vencimientoCache.clear();
+
+    try {
+      const preview = await firstValueFrom(this.convService.buscarConvenios({
+        ...filtros,
+        page: 0,
+        size: this.size,
+      }));
+
+      const total = preview.totalElements ?? (preview.content?.length ?? 0);
+      const fullResponse = total > this.size
+        ? await firstValueFrom(this.convService.buscarConvenios({
+          ...filtros,
+          page: 0,
+          size: total,
+        }))
+        : preview;
+
+      const convenios = await this.prepararConveniosConVencimiento(fullResponse.content || []);
+      this.usaPaginacionLocal = true;
+      this.conveniosBaseLocal = convenios;
+      this.totalElements = convenios.length;
+      this.totalPages = this.totalElements > 0 ? Math.ceil(this.totalElements / this.size) : 0;
+      this.page = 0;
+      this.aplicarPaginacionLocal(0);
+    } catch (error) {
+      console.error(error);
+      this.resetBusqueda();
+    } finally {
+      this.swbuscando = false;
+      this.txtbuscar = 'Buscar';
+      this.s_loading.hideLoading();
+    }
   }
 
   private toDate(fecha: any): Date | null {
@@ -637,6 +723,8 @@ export class ConveniosComponent implements OnInit {
   }
 
   private buscarConveniosPorRango(desde: number, hasta: number): void {
+    this.usaPaginacionLocal = false;
+    this.conveniosBaseLocal = [];
     this.vencimientoCache.clear();
     this.convService.conveniosDesdeHasta(desde, hasta).subscribe({
       next: async (datos: any) => {
@@ -659,12 +747,24 @@ export class ConveniosComponent implements OnInit {
   private resetBusqueda(): void {
     this._convenios = [];
     this.vencimientoCache.clear();
+    this.usaPaginacionLocal = false;
+    this.conveniosBaseLocal = [];
     this.totalPages = 0;
     this.totalElements = 0;
     this.pages = [];
     this.swbuscando = false;
     this.txtbuscar = 'Buscar';
     this.s_loading.hideLoading();
+  }
+
+  private aplicarPaginacionLocal(page: number): void {
+    const inicio = page * this.size;
+    const fin = inicio + this.size;
+    this.page = page;
+    this._convenios = (this.conveniosBaseLocal || []).slice(inicio, fin);
+    this.totalElements = (this.conveniosBaseLocal || []).length;
+    this.totalPages = this.totalElements > 0 ? Math.ceil(this.totalElements / this.size) : 0;
+    this.updatePages();
   }
 }
 

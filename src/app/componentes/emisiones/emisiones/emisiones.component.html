@@ -116,10 +116,10 @@
               <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
             <button class="dropdown-item" [disabled]="estado==1" (click)="cerrarRutas()" type="button">
               <i class="bi bi-printer"></i>&nbsp; Cerrar Rutas</button>
-<!--             <button class="dropdown-item" (click)="validarCierre()" type="button">
-              <i class="bi bi-printer"></i>&nbsp; Validar cierre</button> -->
-            <button class="dropdown-item" (click)="abrirRutasAndEmision()" *ngIf="idusuario ==1" data-toggle="modal" data-target="#modalReporteFacuras" type="button">
-              <i class="bi bi-printer"></i>&nbsp; Abrir rutas</button>
+            <button class="dropdown-item" (click)="confirmarReabrirEmision()" [disabled]="estado == 0" type="button">
+              <i class="bi bi-arrow-counterclockwise"></i>&nbsp; Reabrir emisión</button>
+            <button class="dropdown-item" (click)="abrirRutasAndEmision()" data-toggle="modal" data-target="#modalReporteFacuras" type="button">
+              <i class="bi bi-trash"></i>&nbsp; Eliminar emisión</button>
             <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar"
               (click)="exportar1()">
               <i class="bi-file-earmark-arrow-down"></i>&nbsp; Exportar</button>
@@ -212,7 +212,7 @@
 
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-          <button type="button" class="btn btn-primary" (click)="continuarApertura()" >Continuar</button>
+          <button type="button" class="btn btn-danger" (click)="continuarApertura()" >Eliminar emisión</button>
         </div>
       </div>
     </div>

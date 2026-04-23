@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { EmisionService } from 'src/app/servicios/emision.service';
@@ -66,7 +66,7 @@ export class EmisionesComponent implements OnInit {
   otraPagina: boolean = false;
   archExportar: string;
   opcExportar: number;
-  swgenerar: boolean = false; //Controla el si hay rutas por emisión (DIV mensaje 'Gnerar ?')
+  swgenerar: boolean = false; //Controla el si hay rutas por emisiÃ³n (DIV mensaje 'Gnerar ?')
   totalSuma: number = 0;
   _rubrosEmision: any;
   optImprimir = '0';
@@ -245,7 +245,7 @@ export class EmisionesComponent implements OnInit {
     this.router.navigate(['modiemision', idemision]);
   }
 
-  //Buscas las Rutas de la emisión seleccionada (Recibe la emisión y el indice seleccionado)
+  //Buscas las Rutas de la emisiÃ³n seleccionada (Recibe la emisiÃ³n y el indice seleccionado)
   info(emision: any, indiEmi: number) {
     this.totalSuma = 0;
     this.showDiv = true;
@@ -393,18 +393,18 @@ export class EmisionesComponent implements OnInit {
   nuevo() {
     this.emiService.ultimo().subscribe({
       next: (datos) => {
-        let nuevoaño: string;
+        let nuevoAnio: string;
         let nuevomes: string;
-        let año = datos.emision.substring(0, 2);
+        let anio = datos.emision.substring(0, 2);
         let mes = datos.emision.substring(datos.emision.length - 2);
         if (mes == '12') {
           nuevomes = '01';
-          nuevoaño = (+año! + 1).toString();
+          nuevoAnio = (+anio! + 1).toString();
         } else {
-          nuevoaño = año;
+          nuevoAnio = anio;
           nuevomes = (+mes + 1).toString().padStart(2, '0');
         }
-        this.nuevaemision = nuevoaño.concat(nuevomes);
+        this.nuevaemision = nuevoAnio.concat(nuevomes);
         this.formAddEmision.patchValue({ emision: this.nuevaemision });
       },
       error: (err) => console.error(err.error),
@@ -704,7 +704,7 @@ export class EmisionesComponent implements OnInit {
     /*  this.pli24Service.getBloque(categoria, consumo).subscribe({
       next: async (resp) => {
         if (!resp) {
-          //No hay Tarifa para esta Categoría y Consumo
+          //No hay Tarifa para esta CategorÃ­a y Consumo
         } else {
           this.tarifa = resp;
 
@@ -757,7 +757,7 @@ export class EmisionesComponent implements OnInit {
           suma =
             Math.round((num1 + num2 + num3 + num4 + num5 + 0.1 + num7) * 100) /
             100;
-          //Categoria 9 no tiene tarifario es el 50% de la Residencial. Abonados del Municipio también 50%
+          //Categoria 9 no tiene tarifario es el 50% de la Residencial. Abonados del Municipio tambiÃ©n 50%
           if (swcate9 || swmunicipio) suma = Math.round((suma / 2) * 100) / 100;
           this.newtotal = suma;
           let rxf: any = {};
@@ -925,7 +925,7 @@ export class EmisionesComponent implements OnInit {
     doc.setFont('times', 'bold');
     doc.setFontSize(12);
     doc.text('EMISIONES', m_izquierda, 16);
-    // doc.setFont("times", "bold"); doc.setFontSize(11); doc.text('Emisión: ', m_izquierda, 20);
+    // doc.setFont("times", "bold"); doc.setFontSize(11); doc.text('EmisiÃ³n: ', m_izquierda, 20);
     // doc.setFont("times", "normal"); doc.setFontSize(11); doc.text(nombreEmision.transform(this.rutaxemision.emision), m_izquierda + 16, 20);
     // doc.setFont("times", "bold"); doc.setFontSize(11); doc.text('Ruta:', m_izquierda, 24);
     // doc.setFont("times", "normal"); doc.setFontSize(11); doc.text(this.rutaxemision.ruta.toString(), m_izquierda + 12, 24)
@@ -948,7 +948,7 @@ export class EmisionesComponent implements OnInit {
         doc.setPage(i);
         doc.setFontSize(10);
         doc.text(
-          'Página ' + i + ' de ' + (pageCount - 1),
+          'PÃ¡gina ' + i + ' de ' + (pageCount - 1),
           m_izquierda,
           doc.internal.pageSize.height - 10,
         );
@@ -1027,7 +1027,7 @@ export class EmisionesComponent implements OnInit {
     }
   }
 
-  //Rutas por Emisión
+  //Rutas por EmisiÃ³n
   pdf1() {
     const nombreEmision = new NombreEmisionPipe(); // Crea una instancia del pipe
     let m_izquierda = 30;
@@ -1037,10 +1037,10 @@ export class EmisionesComponent implements OnInit {
     doc.text('EpmapaT', m_izquierda, 10);
     doc.setFont('times', 'bold');
     doc.setFontSize(12);
-    doc.text('RUTAS POR EMISIÓN', m_izquierda, 16);
+    doc.text('RUTAS POR EMISIÃ“N', m_izquierda, 16);
     doc.setFont('times', 'bold');
     doc.setFontSize(11);
-    doc.text('Emisión: ', m_izquierda, 20);
+    doc.text('EmisiÃ³n: ', m_izquierda, 20);
     doc.setFont('times', 'normal');
     doc.setFontSize(11);
     doc.text(nombreEmision.transform(this.selEmision), m_izquierda + 16, 20);
@@ -1076,7 +1076,7 @@ export class EmisionesComponent implements OnInit {
         doc.setPage(i);
         doc.setFontSize(10);
         doc.text(
-          'Página ' + i + ' de ' + (pageCount - 1),
+          'PÃ¡gina ' + i + ' de ' + (pageCount - 1),
           m_izquierda,
           doc.internal.pageSize.height - 10,
         );
@@ -1084,7 +1084,7 @@ export class EmisionesComponent implements OnInit {
     };
 
     autoTable(doc, {
-      head: [['#', 'Código', 'Ruta', 'Fecha Cierre', 'm3']],
+      head: [['#', 'CÃ³digo', 'Ruta', 'Fecha Cierre', 'm3']],
       theme: 'grid',
       headStyles: {
         fillColor: [68, 103, 114],
@@ -1208,7 +1208,7 @@ export class EmisionesComponent implements OnInit {
         doc.setPage(i);
         doc.setFontSize(10);
         doc.text(
-          'Página ' + i + ' de ' + (pageCount - 1),
+          'PÃ¡gina ' + i + ' de ' + (pageCount - 1),
           m_izquierda,
           doc.internal.pageSize.height - 10,
         );
@@ -1216,7 +1216,7 @@ export class EmisionesComponent implements OnInit {
     };
 
     autoTable(doc, {
-      head: [['#', 'N°Rubro', 'Descripción', 'Valor']],
+      head: [['#', 'NÂ°Rubro', 'DescripciÃ³n', 'Valor']],
       theme: 'grid',
       headStyles: {
         fillColor: [68, 103, 114],
@@ -1373,7 +1373,7 @@ export class EmisionesComponent implements OnInit {
         doc.setPage(i);
         doc.setFontSize(10);
         doc.text(
-          'Página ' + i + ' de ' + (pageCount - 1),
+          'PÃ¡gina ' + i + ' de ' + (pageCount - 1),
           m_izquierda,
           doc.internal.pageSize.height - 10,
         );
@@ -1381,7 +1381,7 @@ export class EmisionesComponent implements OnInit {
     };
 
     autoTable(doc, {
-      head: [['#', 'N°Rubro', 'Descripción', 'Valor']],
+      head: [['#', 'NÂ°Rubro', 'DescripciÃ³n', 'Valor']],
       theme: 'grid',
       headStyles: {
         fillColor: [68, 103, 114],
@@ -1415,7 +1415,7 @@ export class EmisionesComponent implements OnInit {
       },
     });
     autoTable(doc, {
-      head: [['#', 'N°Rubro', 'Nro.Facturas', 'Descripción', 'Valor']],
+      head: [['#', 'NÂ°Rubro', 'Nro.Facturas', 'DescripciÃ³n', 'Valor']],
       theme: 'grid',
       headStyles: {
         fillColor: [68, 103, 114],
@@ -1450,7 +1450,7 @@ export class EmisionesComponent implements OnInit {
       },
     });
     autoTable(doc, {
-      head: [['#', 'N°Rubro', 'Nro.Facturas', 'Descripción', 'Valor']],
+      head: [['#', 'NÂ°Rubro', 'Nro.Facturas', 'DescripciÃ³n', 'Valor']],
       theme: 'grid',
       headStyles: {
         fillColor: [68, 103, 114],
@@ -1583,7 +1583,7 @@ export class EmisionesComponent implements OnInit {
       body: [
         [
           {
-            content: `N° lectura: ${emisionIndividual.idlecturaanterior.idlectura} `,
+            content: `NÂ° lectura: ${emisionIndividual.idlecturaanterior.idlectura} `,
           },
           {
             content: `Planilla: ${emisionIndividual.idlecturaanterior.idfactura}`,
@@ -1619,7 +1619,7 @@ export class EmisionesComponent implements OnInit {
         2: { halign: 'center' },
         3: { halign: 'right' },
       },
-      head: [['Cod.Rubro', 'Descripción', 'Cant', 'Valor unitario']],
+      head: [['Cod.Rubro', 'DescripciÃ³n', 'Cant', 'Valor unitario']],
       body: l_anteriores,
       foot: [['TOTAL: ', sum_anterior.toFixed(2)]],
     });
@@ -1658,7 +1658,7 @@ export class EmisionesComponent implements OnInit {
       head: [[{ content: 'Lectura nueva', colSpan: 5 }]],
       body: [
         [
-          `N° lectura: ${emisionIndividual.idlecturanueva.idlectura} `,
+          `NÂ° lectura: ${emisionIndividual.idlecturanueva.idlectura} `,
           `Planilla: ${emisionIndividual.idlecturanueva.idfactura}`,
         ],
         [
@@ -1691,7 +1691,7 @@ export class EmisionesComponent implements OnInit {
         2: { halign: 'center' },
         3: { halign: 'right' },
       },
-      head: [['Cod.Rubro', 'Descripción', 'Cant', 'Valor unitario']],
+      head: [['Cod.Rubro', 'DescripciÃ³n', 'Cant', 'Valor unitario']],
       body: l_nuevos,
       foot: [['TOTAL: ', sum_nuevos.toFixed(2)]],
     });
@@ -1711,7 +1711,7 @@ export class EmisionesComponent implements OnInit {
           }/${dateEmision.getDate()}`,
         ],
         [
-          `Fecha impresión:  ${currentDate.getFullYear()}/${currentDate.getMonth() + 1
+          `Fecha impresiÃ³n:  ${currentDate.getFullYear()}/${currentDate.getMonth() + 1
           }/${currentDate.getDate()}`,
         ],
       ],
@@ -1747,14 +1747,14 @@ export class EmisionesComponent implements OnInit {
     this.opcExportar = 0;
   }
   exportar1() {
-    this.archExportar = 'Emisión_' + this.selEmision;
+    this.archExportar = 'EmisiÃ³n_' + this.selEmision;
     this.opcExportar = 1;
   }
 
   exporta() {
     if (this.opcExportar == 0)
       this.exporta0(); //Exporta Emisiones
-    else this.exporta1(); //Exporta Rutas por Emisión
+    else this.exporta1(); //Exporta Rutas por EmisiÃ³n
   }
 
   //Exporta Emisiones
@@ -1779,7 +1779,7 @@ export class EmisionesComponent implements OnInit {
 
     worksheet.addRow([]);
 
-    const cabecera = ['Emisión', 'm3', 'Fecha Cierre'];
+    const cabecera = ['EmisiÃ³n', 'm3', 'Fecha Cierre'];
     const headerRowCell = worksheet.addRow(cabecera);
     headerRowCell.eachCell((cell) => {
       cell.fill = {
@@ -1794,7 +1794,7 @@ export class EmisionesComponent implements OnInit {
       };
     });
 
-    // Agrega los datos a la hoja de cálculo
+    // Agrega los datos a la hoja de cÃ¡lculo
     this._emisiones.forEach((item: any) => {
       const row = [
         nombreEmision.transform(item.emision),
@@ -1850,7 +1850,7 @@ export class EmisionesComponent implements OnInit {
         });
     });
 
-    // Formato numérico
+    // Formato numÃ©rico
     const numeroStyle = { numFmt: '#,##0' };
     const columnsToFormat = [2];
     for (let i = 4; i <= this._emisiones.length + 2; i++) {
@@ -1877,16 +1877,16 @@ export class EmisionesComponent implements OnInit {
     });
   }
 
-  //Exporta Rutas por Emisión
+  //Exporta Rutas por EmisiÃ³n
   async exporta1() {
     const nombreEmision = new NombreEmisionPipe(); // Crea una instancia del pipe
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Rutas por Emisión');
+    const worksheet = workbook.addWorksheet('Rutas por EmisiÃ³n');
 
     worksheet.addRow([
       '',
       '',
-      'Rutas por Emisión: ' + nombreEmision.transform(this.selEmision),
+      'Rutas por EmisiÃ³n: ' + nombreEmision.transform(this.selEmision),
     ]);
 
     // Formato Celda C1
@@ -1903,7 +1903,7 @@ export class EmisionesComponent implements OnInit {
 
     worksheet.addRow([]);
 
-    const cabecera = ['#', 'Código', 'Ruta', 'Fecha Cierre', 'm3'];
+    const cabecera = ['#', 'CÃ³digo', 'Ruta', 'Fecha Cierre', 'm3'];
     const headerRowCell = worksheet.addRow(cabecera);
     headerRowCell.eachCell((cell) => {
       cell.fill = {
@@ -1918,7 +1918,7 @@ export class EmisionesComponent implements OnInit {
       };
     });
 
-    // Agrega los datos a la hoja de cálculo
+    // Agrega los datos a la hoja de cÃ¡lculo
     let i = 1;
     this._rutasxemi.forEach((item: any) => {
       let fila = worksheet.addRow([
@@ -1930,10 +1930,10 @@ export class EmisionesComponent implements OnInit {
       ]);
       if (item.fechacierre != null) {
         let celdaDi = fila.getCell('D'); //Celda de Fechacierre
-        let año = item.fechacierre.toString().slice(0, 4);
+        let anio = item.fechacierre.toString().slice(0, 4);
         let mes = item.fechacierre.toString().slice(5, 7);
         let dia = item.fechacierre.toString().slice(8, 10);
-        let fecha = `DATE(${año},${mes},${dia})`;
+        let fecha = `DATE(${anio},${mes},${dia})`;
         celdaDi.value = {
           formula: fecha,
           result: 0,
@@ -1993,7 +1993,7 @@ export class EmisionesComponent implements OnInit {
         });
     });
 
-    // Formato numérico
+    // Formato numÃ©rico
     const numeroStyle = { numFmt: '#,##0' };
     const columnsToFormat = [5];
     for (let i = 4; i <= this._rutasxemi.length + 2; i++) {
@@ -2054,8 +2054,8 @@ export class EmisionesComponent implements OnInit {
         }),
       )
       .subscribe({
-        next: () => console.log('✅ Todas las rutas procesadas'),
-        error: (e) => console.error('❌ Error en cierre masivo de rutas', e),
+        next: () => console.log('âœ… Todas las rutas procesadas'),
+        error: (e) => console.error('âŒ Error en cierre masivo de rutas', e),
       });
   }
 
@@ -2232,7 +2232,7 @@ export class EmisionesComponent implements OnInit {
   private procesarRuta(ruta: RutaXEmisionUI) {
     return this.s_lecturas.getLecturas(ruta.idrutaxemision).pipe(
       mergeMap((lecturas: Lecturas) => {
-        // Si no hay lecturas → cerrar en 0
+        // Si no hay lecturas â†’ cerrar en 0
         if (!Array.isArray(lecturas) || lecturas.length === 0) {
           return this.cerrarRutaPersistiendo(ruta, 0);
         }
@@ -2333,7 +2333,7 @@ export class EmisionesComponent implements OnInit {
       );
   }
 
-  /** Si aún quieres procesar una ruta al hacer click en la fila */
+  /** Si aÃºn quieres procesar una ruta al hacer click en la fila */
   lecturasCaluloIndividual(idrutaxemision: number) {
     const ruta = this._rutasxemi.find(
       (r) => r.idrutaxemision === idrutaxemision,
@@ -2370,49 +2370,66 @@ export class EmisionesComponent implements OnInit {
 
 
   }
-  continuarApertura() {
-    this.s_loading.showLoading();
-    let swcerrando: boolean = false;
-    this._rutasxemi.forEach((ruta: any) => {
-      console.log(ruta);
-      if (ruta.estado === 1) {
-        swcerrando = true;
-        const payload = {
-          estado: 0,
-          usuariocierre: '',
-          fechacierre: '',
-          m3: 0,
-          usucrea: this.authService.idusuario,
-          feccrea: ruta.feccrea,
-          idrutaxemision: ruta.idrutaxemision,
-          idemision_emisiones: ruta.idemision_emisiones,
-          idruta_rutas: ruta.idruta_rutas,
-        };
-
-        this.ruxemiService.updateRutaxemision(ruta.idrutaxemision, payload).subscribe({
-          next: () => {
-            console.log('✅ Ruta reabierta: ' + ruta.idrutaxemision);
-          },
-          error: (e) => {
-            console.error('❌ Error al reabrir ruta', { error: e, ruta });
-            swcerrando = false;
-            this.s_loading.hideLoading();
-          }
-        });
-      }
-
+  async confirmarReabrirEmision() {
+    const result = await Swal.fire({
+      icon: 'question',
+      title: 'Reabrir emisiÃ³n',
+      text: 'Se reabrirÃ¡ la emisiÃ³n y todas sus rutas para permitir modificaciones en las lecturas.',
+      showCancelButton: true,
+      confirmButtonText: 'Reabrir',
+      cancelButtonText: 'Cancelar',
     });
-    if (swcerrando) {
-      this.s_lecturas.deleteRubrosEmision(this.idemision).subscribe({
-        next: () => {
-          console.log('✅ Rubros de ruta eliminados');
-          swcerrando = false;
-          this.s_loading.hideLoading();
-        },
-      });
+
+    if (!result.isConfirmed) {
+      return;
     }
 
+    this.s_loading.showLoading();
+    this.emiService.reabrirEmision(this.idemision, this.authService.idusuario).subscribe({
+      next: () => {
+        this.s_loading.hideLoading();
+        Swal.fire({
+          icon: 'success',
+          title: 'EmisiÃ³n reabierta',
+          text: 'La emisiÃ³n y sus rutas quedaron abiertas nuevamente.',
+        });
+        this.buscar();
+      },
+      error: (e) => {
+        this.s_loading.hideLoading();
+        console.error('Error al reabrir emisiÃ³n', e);
+        Swal.fire({
+          icon: 'error',
+          title: 'No se pudo reabrir',
+          text: e?.error?.message || e?.error?.detalle || e?.message || 'Verifica el backend.',
+        });
+      },
+    });
+  }
 
+  continuarApertura() {
+    this.s_loading.showLoading();
+    this.emiService.eliminarEmision(this.idemision, this.authService.idusuario).subscribe({
+      next: (resp: any) => {
+        console.log('Emision eliminada/reiniciada', resp);
+        this.s_loading.hideLoading();
+        Swal.fire({
+          icon: 'success',
+          title: 'Emisión eliminada',
+          text: 'La emisión, rutas y rubros quedaron restablecidos a estado 0.',
+        });
+        this.buscar();
+      },
+      error: (e) => {
+        this.s_loading.hideLoading();
+        console.error('Error al eliminar emisión', e);
+        Swal.fire({
+          icon: 'error',
+          title: 'No se pudo eliminar',
+          text: e?.error?.message || e?.error?.detalle || e?.message || 'Verifica el backend.',
+        });
+      },
+    });
   }
 
   async impComprobante(idemision: any) {
@@ -2543,3 +2560,4 @@ interface LecturaNegativaDetalle {
   lecturaActual: number;
   consumo: number;
 }
+
