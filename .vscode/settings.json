@@ -9,5 +9,8 @@
         "titleBar.activeBackground": "#47a2de",
         "titleBar.inactiveBackground": "#47a2de99"
     },
-    "peacock.color": "#47a2de"
+    "peacock.color": "#47a2de",
+    "files.encoding": "utf8",
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "typescript.enablePromptUseWorkspaceTsdk": true
 }

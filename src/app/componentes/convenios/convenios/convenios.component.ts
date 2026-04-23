@@ -220,10 +220,10 @@ export class ConveniosComponent implements OnInit {
 
     Swal.fire({
       title: 'Marcar convenio como pagado',
-      text: `Â¿Desea actualizar el convenio ${convenio?.nroconvenio ?? ''} al estado Pagado?`,
+      text: `¿Desea actualizar el convenio ${convenio?.nroconvenio ?? ''} al estado Pagado?`,
       icon: 'question',
       showCancelButton: true,
-      confirmButtonText: 'SÃ­, marcar',
+      confirmButtonText: 'Sí, marcar',
       cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (!result.isConfirmed) return;
@@ -259,7 +259,7 @@ export class ConveniosComponent implements OnInit {
 
     Swal.fire({
       title: 'Imprimir convenios',
-      text: 'Seleccione quÃ© desea imprimir.',
+      text: 'Seleccione qué desea imprimir.',
       icon: 'question',
       showCancelButton: true,
       showDenyButton: true,
@@ -396,7 +396,7 @@ export class ConveniosComponent implements OnInit {
 
   getTooltipMarcarPagado(convenio: any): string {
     if (Number(convenio?.estado) === 3) {
-      return 'El convenio ya estÃ¡ marcado como pagado.';
+      return 'El convenio ya está marcado como pagado.';
     }
     if (this.getConvenioPendientes(convenio) > 0) {
       return 'No se puede marcar como pagado mientras existan cartas pendientes.';

@@ -375,12 +375,12 @@ export class ImpInfoCajasComponent implements OnInit {
     doc.setFont('times', 'bold');
     doc.setFontSize(10);
     /* doc.text(
-        'RESUMEN RECAUDACIÃ“N DIARIA: ' + this.formImprimir.value.fecha,
+        'RESUMEN RECAUDACIÓN DIARIA: ' + this.formImprimir.value.fecha,
         m_izquierda,
         16
       ); */
     this._pdf.header(
-      'RESUMEN RECAUDACIÃ“N: ' +
+      'RESUMEN RECAUDACIÓN: ' +
       this.formImprimir.value.d_fecha +
       ' - ' +
       this.formImprimir.value.h_fecha,
@@ -391,7 +391,7 @@ export class ImpInfoCajasComponent implements OnInit {
     this.total = 0;
     let kont = 1; //Para la fila de la segunda Tabla
     let suma: number = 0;
-    datos.push(['', 'PERÃODO ACTUAL']);
+    datos.push(['', 'PERÍODO ACTUAL']);
     let i = 0;
     let iva1 = 0;
     this._cobradas.forEach((item: any) => {
@@ -430,7 +430,7 @@ export class ImpInfoCajasComponent implements OnInit {
     let suma1 = 0;
     i = 0;
     let iva2 = 0;
-    datos.push(['', 'PERÃODOS ANTERIORES']);
+    datos.push(['', 'PERÍODOS ANTERIORES']);
     this._rubrosanterior.forEach(() => {
       if (this._rubrosanterior[i][0] != 165) {
         let totalRecaudado = this._rubrosanterior[i][2];
@@ -582,12 +582,12 @@ export class ImpInfoCajasComponent implements OnInit {
     doc.setFont('times', 'bold');
     doc.setFontSize(12);
     /* doc.text(
-        'RECAUDACIÃ“N DIARIA - PLANILLAS: ' + this.formImprimir.value.fecha,
+        'RECAUDACIÓN DIARIA - PLANILLAS: ' + this.formImprimir.value.fecha,
         m_izquierda,
         16
       ); */
     this._pdf.header(
-      'RECAUDACIÃ“N - PLANILLAS: ' +
+      'RECAUDACIÓN - PLANILLAS: ' +
       this.formImprimir.value.d_fecha +
       ' - ' +
       this.formImprimir.value.h_fecha,
@@ -797,7 +797,7 @@ export class ImpInfoCajasComponent implements OnInit {
     };
     cellB1.font = customStyle.font;
 
-    // Aplicar el estilo personalizado a los TÃ­tulos
+    // Aplicar el estilo personalizado a los Títulos
     const cellC1 = worksheet.getCell('C1');
     cellC1.font = customStyle.font;
 
@@ -873,7 +873,7 @@ export class ImpInfoCajasComponent implements OnInit {
         });
     });
 
-    // Formato numÃ©rico
+    // Formato numérico
     // const numeroStyle = { numFmt: '#,##0' };
     // const columnsToFormat = [1 ];
     // for (let i = 4; i <= this._cobradas.length + 2; i++) {
@@ -883,7 +883,7 @@ export class ImpInfoCajasComponent implements OnInit {
     //    });
     // }
 
-    // Formato numÃ©rico con decimales
+    // Formato numérico con decimales
     const numeroStyle1 = { numFmt: '#,##0.00' };
     const columnsToFormat1 = [3];
     for (let i = 4; i <= this._cobradas.length + 3; i++) {
@@ -929,7 +929,7 @@ export class ImpInfoCajasComponent implements OnInit {
     };
     cellD1.font = customStyle.font;
 
-    // Aplicar el estilo personalizado a los TÃ­tulos
+    // Aplicar el estilo personalizado a los Títulos
     const cellC1 = worksheet.getCell('C1');
     cellC1.font = customStyle.font;
 
@@ -1024,7 +1024,7 @@ export class ImpInfoCajasComponent implements OnInit {
         });
     });
 
-    // Formato numÃ©rico
+    // Formato numérico
     // const numeroStyle = { numFmt: '#,##0' };
     // const columnsToFormat = [1 ];
     // for (let i = 4; i <= this._cobradas.length + 2; i++) {
@@ -1034,7 +1034,7 @@ export class ImpInfoCajasComponent implements OnInit {
     //    });
     // }
 
-    // Formato numÃ©rico con decimales
+    // Formato numérico con decimales
     const numeroStyle1 = { numFmt: '#,##0.00' };
     const columnsToFormat1 = [7];
     for (let i = 4; i <= this._cobradas.length + 3; i++) {
@@ -1080,7 +1080,7 @@ export class ImpInfoCajasComponent implements OnInit {
     };
     cellA1.font = customStyle.font;
 
-    // Aplicar el estilo personalizado a los TÃ­tulos
+    // Aplicar el estilo personalizado a los Títulos
     // const cellC1 = worksheet.getCell('C1');
     // cellC1.font = customStyle.font;
 

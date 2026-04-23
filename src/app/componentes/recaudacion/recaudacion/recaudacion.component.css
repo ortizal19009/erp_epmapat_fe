@@ -132,7 +132,7 @@ label {
   border: none;
 }
 
-/* ===== NOTIFICACIÃ“N FLOTANTE ===== */
+/* ===== NOTIFICACIÓN FLOTANTE ===== */
 .floating-notification {
   position: fixed;
   bottom: 25px;
@@ -278,7 +278,7 @@ te
   background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
 }
 
-/* ===== ALINEACIÃ“N DE FORMULARIO ===== */
+/* ===== ALINEACIÓN DE FORMULARIO ===== */
 .card-body .row.align-items-end {
   align-items: flex-end !important;
 }
@@ -313,7 +313,7 @@ te
   background-color: rgba(255, 193, 7, 0.1) !important;
 }
 
-/* Botones pequeÃ±os */
+/* Botones pequeños */
 .btn-xs {
   padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
@@ -360,7 +360,7 @@ te
   color: white;
 }
 
-/* Estados vacÃ­os */
+/* Estados vacíos */
 .empty-state {
   padding: 3rem 1rem;
   text-align: center;

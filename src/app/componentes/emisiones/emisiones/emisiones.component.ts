@@ -38,6 +38,8 @@ import { from, of, firstValueFrom, forkJoin } from 'rxjs';
 import { isFunction } from 'chart.js/dist/helpers/helpers.core';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { JasperReportService } from 'src/app/servicios/jasper-report.service';
+import { EmisionAuditService } from 'src/app/servicios/emision-audit.service';
+import { EmisionAuditEntry, EmisionAuditSnapshot } from 'src/app/interfaces/emisiones/emision-audit-entry';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -66,7 +68,7 @@ export class EmisionesComponent implements OnInit {
   otraPagina: boolean = false;
   archExportar: string;
   opcExportar: number;
-  swgenerar: boolean = false; //Controla el si hay rutas por emisiÃ³n (DIV mensaje 'Gnerar ?')
+  swgenerar: boolean = false; //Controla el si hay rutas por emisión (DIV mensaje 'Gnerar ?')
   totalSuma: number = 0;
   _rubrosEmision: any;
   optImprimir = '0';
@@ -115,6 +117,10 @@ export class EmisionesComponent implements OnInit {
   _rutasxemi: RutaXEmisionUI[] = [];
   _lecturas: any[] = [];
   idusuario: number;
+  auditoriaEmision: EmisionAuditViewRow[] = [];
+  auditoriaEmisionCargando = false;
+  auditoriaEmisionError = '';
+  auditoriaEmisionResumen = '';
 
   porcResidencial: number[] = [
     0.777, 0.78, 0.78, 0.78, 0.78, 0.778, 0.778, 0.778, 0.78, 0.78, 0.78, 0.68,
@@ -141,7 +147,8 @@ export class EmisionesComponent implements OnInit {
     private s_rxfService: RubroxfacService,
     private s_emisionesIndividuales: EmisionIndividualService,
     private s_loading: LoadingService,
-    private s_jasperreport: JasperReportService
+    private s_jasperreport: JasperReportService,
+    private s_emisionAudit: EmisionAuditService
   ) { }
 
   ngOnInit(): void {
@@ -245,7 +252,7 @@ export class EmisionesComponent implements OnInit {
     this.router.navigate(['modiemision', idemision]);
   }
 
-  //Buscas las Rutas de la emisiÃ³n seleccionada (Recibe la emisiÃ³n y el indice seleccionado)
+  //Buscas las Rutas de la emisión seleccionada (Recibe la emisión y el indice seleccionado)
   info(emision: any, indiEmi: number) {
     this.totalSuma = 0;
     this.showDiv = true;
@@ -254,6 +261,7 @@ export class EmisionesComponent implements OnInit {
     this.idemision = emision.idemision;
     this.selEmision = emision.emision;
     this.estado = emision.estado;
+    this.limpiarAuditoriaEmision();
 
     this.ruxemiService.getByIdEmision(this.idemision).subscribe({
       next: (datos: any) => {
@@ -327,6 +335,35 @@ export class EmisionesComponent implements OnInit {
   ocultar() {
     this.showDiv = false;
     sessionStorage.setItem('showDiv', 'false');
+  }
+
+  limpiarAuditoriaEmision() {
+    this.auditoriaEmision = [];
+    this.auditoriaEmisionError = '';
+    this.auditoriaEmisionResumen = '';
+  }
+
+  async abrirAuditoriaEmision() {
+    this.auditoriaEmisionError = '';
+    this.auditoriaEmisionResumen = '';
+    this.auditoriaEmision = [];
+
+    if (!this.idemision) {
+      this.auditoriaEmisionError = 'Selecciona primero una emisión para consultar su auditoría.';
+      return;
+    }
+
+    this.auditoriaEmisionCargando = true;
+    try {
+      const resp = await firstValueFrom(this.s_emisionAudit.porEmision(this.idemision));
+      this.auditoriaEmision = this.normalizarAuditoriaConsulta(resp);
+      this.auditoriaEmisionResumen = this.armarResumenAuditoria(this.auditoriaEmision);
+    } catch (err) {
+      console.error('No se pudo cargar la auditoria de emision', err);
+      this.auditoriaEmisionError = 'No se pudo cargar la auditoría de la emisión.';
+    } finally {
+      this.auditoriaEmisionCargando = false;
+    }
   }
 
   lecturas(idrutaxemision: number) {
@@ -704,7 +741,7 @@ export class EmisionesComponent implements OnInit {
     /*  this.pli24Service.getBloque(categoria, consumo).subscribe({
       next: async (resp) => {
         if (!resp) {
-          //No hay Tarifa para esta CategorÃ­a y Consumo
+          //No hay Tarifa para esta Categoría y Consumo
         } else {
           this.tarifa = resp;
 
@@ -757,7 +794,7 @@ export class EmisionesComponent implements OnInit {
           suma =
             Math.round((num1 + num2 + num3 + num4 + num5 + 0.1 + num7) * 100) /
             100;
-          //Categoria 9 no tiene tarifario es el 50% de la Residencial. Abonados del Municipio tambiÃ©n 50%
+          //Categoria 9 no tiene tarifario es el 50% de la Residencial. Abonados del Municipio también 50%
           if (swcate9 || swmunicipio) suma = Math.round((suma / 2) * 100) / 100;
           this.newtotal = suma;
           let rxf: any = {};
@@ -925,7 +962,7 @@ export class EmisionesComponent implements OnInit {
     doc.setFont('times', 'bold');
     doc.setFontSize(12);
     doc.text('EMISIONES', m_izquierda, 16);
-    // doc.setFont("times", "bold"); doc.setFontSize(11); doc.text('EmisiÃ³n: ', m_izquierda, 20);
+    // doc.setFont("times", "bold"); doc.setFontSize(11); doc.text('Emisión: ', m_izquierda, 20);
     // doc.setFont("times", "normal"); doc.setFontSize(11); doc.text(nombreEmision.transform(this.rutaxemision.emision), m_izquierda + 16, 20);
     // doc.setFont("times", "bold"); doc.setFontSize(11); doc.text('Ruta:', m_izquierda, 24);
     // doc.setFont("times", "normal"); doc.setFontSize(11); doc.text(this.rutaxemision.ruta.toString(), m_izquierda + 12, 24)
@@ -948,7 +985,7 @@ export class EmisionesComponent implements OnInit {
         doc.setPage(i);
         doc.setFontSize(10);
         doc.text(
-          'PÃ¡gina ' + i + ' de ' + (pageCount - 1),
+          'Página ' + i + ' de ' + (pageCount - 1),
           m_izquierda,
           doc.internal.pageSize.height - 10,
         );
@@ -1027,7 +1064,7 @@ export class EmisionesComponent implements OnInit {
     }
   }
 
-  //Rutas por EmisiÃ³n
+  //Rutas por Emisión
   pdf1() {
     const nombreEmision = new NombreEmisionPipe(); // Crea una instancia del pipe
     let m_izquierda = 30;
@@ -1037,10 +1074,10 @@ export class EmisionesComponent implements OnInit {
     doc.text('EpmapaT', m_izquierda, 10);
     doc.setFont('times', 'bold');
     doc.setFontSize(12);
-    doc.text('RUTAS POR EMISIÃ“N', m_izquierda, 16);
+    doc.text('RUTAS POR EMISIÓN', m_izquierda, 16);
     doc.setFont('times', 'bold');
     doc.setFontSize(11);
-    doc.text('EmisiÃ³n: ', m_izquierda, 20);
+    doc.text('Emisión: ', m_izquierda, 20);
     doc.setFont('times', 'normal');
     doc.setFontSize(11);
     doc.text(nombreEmision.transform(this.selEmision), m_izquierda + 16, 20);
@@ -1076,7 +1113,7 @@ export class EmisionesComponent implements OnInit {
         doc.setPage(i);
         doc.setFontSize(10);
         doc.text(
-          'PÃ¡gina ' + i + ' de ' + (pageCount - 1),
+          'Página ' + i + ' de ' + (pageCount - 1),
           m_izquierda,
           doc.internal.pageSize.height - 10,
         );
@@ -1084,7 +1121,7 @@ export class EmisionesComponent implements OnInit {
     };
 
     autoTable(doc, {
-      head: [['#', 'CÃ³digo', 'Ruta', 'Fecha Cierre', 'm3']],
+      head: [['#', 'Código', 'Ruta', 'Fecha Cierre', 'm3']],
       theme: 'grid',
       headStyles: {
         fillColor: [68, 103, 114],
@@ -1208,7 +1245,7 @@ export class EmisionesComponent implements OnInit {
         doc.setPage(i);
         doc.setFontSize(10);
         doc.text(
-          'PÃ¡gina ' + i + ' de ' + (pageCount - 1),
+          'Página ' + i + ' de ' + (pageCount - 1),
           m_izquierda,
           doc.internal.pageSize.height - 10,
         );
@@ -1216,7 +1253,7 @@ export class EmisionesComponent implements OnInit {
     };
 
     autoTable(doc, {
-      head: [['#', 'NÂ°Rubro', 'DescripciÃ³n', 'Valor']],
+      head: [['#', 'N°Rubro', 'Descripción', 'Valor']],
       theme: 'grid',
       headStyles: {
         fillColor: [68, 103, 114],
@@ -1373,7 +1410,7 @@ export class EmisionesComponent implements OnInit {
         doc.setPage(i);
         doc.setFontSize(10);
         doc.text(
-          'PÃ¡gina ' + i + ' de ' + (pageCount - 1),
+          'Página ' + i + ' de ' + (pageCount - 1),
           m_izquierda,
           doc.internal.pageSize.height - 10,
         );
@@ -1381,7 +1418,7 @@ export class EmisionesComponent implements OnInit {
     };
 
     autoTable(doc, {
-      head: [['#', 'NÂ°Rubro', 'DescripciÃ³n', 'Valor']],
+      head: [['#', 'N°Rubro', 'Descripción', 'Valor']],
       theme: 'grid',
       headStyles: {
         fillColor: [68, 103, 114],
@@ -1415,7 +1452,7 @@ export class EmisionesComponent implements OnInit {
       },
     });
     autoTable(doc, {
-      head: [['#', 'NÂ°Rubro', 'Nro.Facturas', 'DescripciÃ³n', 'Valor']],
+      head: [['#', 'N°Rubro', 'Nro.Facturas', 'Descripción', 'Valor']],
       theme: 'grid',
       headStyles: {
         fillColor: [68, 103, 114],
@@ -1450,7 +1487,7 @@ export class EmisionesComponent implements OnInit {
       },
     });
     autoTable(doc, {
-      head: [['#', 'NÂ°Rubro', 'Nro.Facturas', 'DescripciÃ³n', 'Valor']],
+      head: [['#', 'N°Rubro', 'Nro.Facturas', 'Descripción', 'Valor']],
       theme: 'grid',
       headStyles: {
         fillColor: [68, 103, 114],
@@ -1583,7 +1620,7 @@ export class EmisionesComponent implements OnInit {
       body: [
         [
           {
-            content: `NÂ° lectura: ${emisionIndividual.idlecturaanterior.idlectura} `,
+            content: `N° lectura: ${emisionIndividual.idlecturaanterior.idlectura} `,
           },
           {
             content: `Planilla: ${emisionIndividual.idlecturaanterior.idfactura}`,
@@ -1619,7 +1656,7 @@ export class EmisionesComponent implements OnInit {
         2: { halign: 'center' },
         3: { halign: 'right' },
       },
-      head: [['Cod.Rubro', 'DescripciÃ³n', 'Cant', 'Valor unitario']],
+      head: [['Cod.Rubro', 'Descripción', 'Cant', 'Valor unitario']],
       body: l_anteriores,
       foot: [['TOTAL: ', sum_anterior.toFixed(2)]],
     });
@@ -1658,7 +1695,7 @@ export class EmisionesComponent implements OnInit {
       head: [[{ content: 'Lectura nueva', colSpan: 5 }]],
       body: [
         [
-          `NÂ° lectura: ${emisionIndividual.idlecturanueva.idlectura} `,
+          `N° lectura: ${emisionIndividual.idlecturanueva.idlectura} `,
           `Planilla: ${emisionIndividual.idlecturanueva.idfactura}`,
         ],
         [
@@ -1691,7 +1728,7 @@ export class EmisionesComponent implements OnInit {
         2: { halign: 'center' },
         3: { halign: 'right' },
       },
-      head: [['Cod.Rubro', 'DescripciÃ³n', 'Cant', 'Valor unitario']],
+      head: [['Cod.Rubro', 'Descripción', 'Cant', 'Valor unitario']],
       body: l_nuevos,
       foot: [['TOTAL: ', sum_nuevos.toFixed(2)]],
     });
@@ -1711,7 +1748,7 @@ export class EmisionesComponent implements OnInit {
           }/${dateEmision.getDate()}`,
         ],
         [
-          `Fecha impresiÃ³n:  ${currentDate.getFullYear()}/${currentDate.getMonth() + 1
+          `Fecha impresión:  ${currentDate.getFullYear()}/${currentDate.getMonth() + 1
           }/${currentDate.getDate()}`,
         ],
       ],
@@ -1747,14 +1784,14 @@ export class EmisionesComponent implements OnInit {
     this.opcExportar = 0;
   }
   exportar1() {
-    this.archExportar = 'EmisiÃ³n_' + this.selEmision;
+    this.archExportar = 'Emisión_' + this.selEmision;
     this.opcExportar = 1;
   }
 
   exporta() {
     if (this.opcExportar == 0)
       this.exporta0(); //Exporta Emisiones
-    else this.exporta1(); //Exporta Rutas por EmisiÃ³n
+    else this.exporta1(); //Exporta Rutas por Emisión
   }
 
   //Exporta Emisiones
@@ -1779,7 +1816,7 @@ export class EmisionesComponent implements OnInit {
 
     worksheet.addRow([]);
 
-    const cabecera = ['EmisiÃ³n', 'm3', 'Fecha Cierre'];
+    const cabecera = ['Emisión', 'm3', 'Fecha Cierre'];
     const headerRowCell = worksheet.addRow(cabecera);
     headerRowCell.eachCell((cell) => {
       cell.fill = {
@@ -1794,7 +1831,7 @@ export class EmisionesComponent implements OnInit {
       };
     });
 
-    // Agrega los datos a la hoja de cÃ¡lculo
+    // Agrega los datos a la hoja de cálculo
     this._emisiones.forEach((item: any) => {
       const row = [
         nombreEmision.transform(item.emision),
@@ -1850,7 +1887,7 @@ export class EmisionesComponent implements OnInit {
         });
     });
 
-    // Formato numÃ©rico
+    // Formato numérico
     const numeroStyle = { numFmt: '#,##0' };
     const columnsToFormat = [2];
     for (let i = 4; i <= this._emisiones.length + 2; i++) {
@@ -1877,16 +1914,16 @@ export class EmisionesComponent implements OnInit {
     });
   }
 
-  //Exporta Rutas por EmisiÃ³n
+  //Exporta Rutas por Emisión
   async exporta1() {
     const nombreEmision = new NombreEmisionPipe(); // Crea una instancia del pipe
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Rutas por EmisiÃ³n');
+    const worksheet = workbook.addWorksheet('Rutas por Emisión');
 
     worksheet.addRow([
       '',
       '',
-      'Rutas por EmisiÃ³n: ' + nombreEmision.transform(this.selEmision),
+      'Rutas por Emisión: ' + nombreEmision.transform(this.selEmision),
     ]);
 
     // Formato Celda C1
@@ -1903,7 +1940,7 @@ export class EmisionesComponent implements OnInit {
 
     worksheet.addRow([]);
 
-    const cabecera = ['#', 'CÃ³digo', 'Ruta', 'Fecha Cierre', 'm3'];
+    const cabecera = ['#', 'Código', 'Ruta', 'Fecha Cierre', 'm3'];
     const headerRowCell = worksheet.addRow(cabecera);
     headerRowCell.eachCell((cell) => {
       cell.fill = {
@@ -1918,7 +1955,7 @@ export class EmisionesComponent implements OnInit {
       };
     });
 
-    // Agrega los datos a la hoja de cÃ¡lculo
+    // Agrega los datos a la hoja de cálculo
     let i = 1;
     this._rutasxemi.forEach((item: any) => {
       let fila = worksheet.addRow([
@@ -1993,7 +2030,7 @@ export class EmisionesComponent implements OnInit {
         });
     });
 
-    // Formato numÃ©rico
+    // Formato numérico
     const numeroStyle = { numFmt: '#,##0' };
     const columnsToFormat = [5];
     for (let i = 4; i <= this._rutasxemi.length + 2; i++) {
@@ -2232,7 +2269,7 @@ export class EmisionesComponent implements OnInit {
   private procesarRuta(ruta: RutaXEmisionUI) {
     return this.s_lecturas.getLecturas(ruta.idrutaxemision).pipe(
       mergeMap((lecturas: Lecturas) => {
-        // Si no hay lecturas â†’ cerrar en 0
+        // Si no hay lecturas → cerrar en 0
         if (!Array.isArray(lecturas) || lecturas.length === 0) {
           return this.cerrarRutaPersistiendo(ruta, 0);
         }
@@ -2333,7 +2370,7 @@ export class EmisionesComponent implements OnInit {
       );
   }
 
-  /** Si aÃºn quieres procesar una ruta al hacer click en la fila */
+  /** Si aún quieres procesar una ruta al hacer click en la fila */
   lecturasCaluloIndividual(idrutaxemision: number) {
     const ruta = this._rutasxemi.find(
       (r) => r.idrutaxemision === idrutaxemision,
@@ -2373,8 +2410,8 @@ export class EmisionesComponent implements OnInit {
   async confirmarReabrirEmision() {
     const result = await Swal.fire({
       icon: 'question',
-      title: 'Reabrir emisiÃ³n',
-      text: 'Se reabrirÃ¡ la emisiÃ³n y todas sus rutas para permitir modificaciones en las lecturas.',
+      title: 'Reabrir emisión',
+      text: 'Se reabrirá la emisión y todas sus rutas para permitir modificaciones en las lecturas.',
       showCancelButton: true,
       confirmButtonText: 'Reabrir',
       cancelButtonText: 'Cancelar',
@@ -2384,20 +2421,48 @@ export class EmisionesComponent implements OnInit {
       return;
     }
 
+    let snapshot: EmisionAuditSnapshot | null = null;
+    try {
+      snapshot = await this.capturarAuditoriaEmision();
+    } catch (err) {
+      console.warn('No se pudo capturar la auditoria previa de emision', err);
+    }
     this.s_loading.showLoading();
     this.emiService.reabrirEmision(this.idemision, this.authService.idusuario).subscribe({
       next: () => {
+        if (snapshot) {
+          void this.guardarAuditoriaEmision(
+            this.construirAuditoriaEmision(
+              snapshot,
+              'REABRIR',
+              'OK',
+              'La emision quedo reabierta.',
+              1,
+            ),
+          );
+        }
         this.s_loading.hideLoading();
         Swal.fire({
           icon: 'success',
-          title: 'EmisiÃ³n reabierta',
-          text: 'La emisiÃ³n y sus rutas quedaron abiertas nuevamente.',
+          title: 'Emisión reabierta',
+          text: 'La emisión y sus rutas quedaron abiertas nuevamente.',
         });
         this.buscar();
       },
       error: (e) => {
+        if (snapshot) {
+          void this.guardarAuditoriaEmision(
+            this.construirAuditoriaEmision(
+              snapshot,
+              'REABRIR',
+              'ERROR',
+              e?.error?.message || e?.error?.detalle || e?.message || 'No se pudo reabrir la emision.',
+              this.estado ?? 0,
+            ),
+          );
+        }
         this.s_loading.hideLoading();
-        console.error('Error al reabrir emisiÃ³n', e);
+        console.error('Error al reabrir emisión', e);
         Swal.fire({
           icon: 'error',
           title: 'No se pudo reabrir',
@@ -2407,11 +2472,29 @@ export class EmisionesComponent implements OnInit {
     });
   }
 
-  continuarApertura() {
+  async continuarApertura() {
+    let snapshot: EmisionAuditSnapshot | null = null;
+    try {
+      snapshot = await this.capturarAuditoriaEmision();
+    } catch (err) {
+      console.warn('No se pudo capturar la auditoria previa de emision', err);
+    }
+
     this.s_loading.showLoading();
     this.emiService.eliminarEmision(this.idemision, this.authService.idusuario).subscribe({
       next: (resp: any) => {
         console.log('Emision eliminada/reiniciada', resp);
+        if (snapshot) {
+          void this.guardarAuditoriaEmision(
+            this.construirAuditoriaEmision(
+              snapshot,
+              'ELIMINAR',
+              'OK',
+              'La emision, rutas, lecturas y facturas quedaron restablecidas a estado 0.',
+              0,
+            ),
+          );
+        }
         this.s_loading.hideLoading();
         Swal.fire({
           icon: 'success',
@@ -2421,6 +2504,17 @@ export class EmisionesComponent implements OnInit {
         this.buscar();
       },
       error: (e) => {
+        if (snapshot) {
+          void this.guardarAuditoriaEmision(
+            this.construirAuditoriaEmision(
+              snapshot,
+              'ELIMINAR',
+              'ERROR',
+              e?.error?.message || e?.error?.detalle || e?.message || 'No se pudo eliminar la emision.',
+              this.estado ?? 0,
+            ),
+          );
+        }
         this.s_loading.hideLoading();
         console.error('Error al eliminar emisión', e);
         Swal.fire({
@@ -2430,6 +2524,329 @@ export class EmisionesComponent implements OnInit {
         });
       },
     });
+  }
+
+  private guardarAuditoriaEmision(entry: EmisionAuditEntry) {
+    this.s_emisionAudit.registrar(entry).subscribe({
+      error: (err) => console.warn('No se pudo registrar la auditoria de emisiones', err),
+    });
+  }
+
+  private construirAuditoriaEmision(
+    snapshot: EmisionAuditSnapshot,
+    accion: 'REABRIR' | 'ELIMINAR',
+    resultado: 'OK' | 'ERROR',
+    mensaje: string,
+    estadoNuevo: number,
+  ): EmisionAuditEntry {
+    const detalle = {
+      accion,
+      resultado,
+      mensaje,
+      usuario: this.authService.idusuario,
+      fecha: new Date().toISOString(),
+      emision: {
+        idemision: this.idemision,
+        emision: this.selEmision,
+        estado_anterior: this.estado,
+        estado_nuevo: estadoNuevo,
+        metadata: snapshot.emision,
+      },
+      resumen: {
+        rutas: snapshot.rutas.length,
+        lecturas: snapshot.lecturas.length,
+      facturas: snapshot.facturas.length,
+    },
+    rutas: snapshot.rutas,
+    lecturas: snapshot.lecturas,
+    facturas: snapshot.facturas,
+    documentos: snapshot.facturas.map((factura) => ({
+      idfactura: factura.idfactura,
+      iddocumento_documentos: factura.iddocumento_documentos,
+      numdoc: factura.numdoc,
+    })),
+  };
+
+    return {
+      entidad: 'EMISION',
+      idregistro: this.idemision,
+      accion: `${accion}_${resultado}`,
+      detalle: JSON.stringify(detalle),
+      usuario: this.authService.idusuario,
+      fecha: new Date().toISOString(),
+    };
+  }
+
+  private async capturarAuditoriaEmision(): Promise<EmisionAuditSnapshot> {
+    const [emision, rutasRaw, lecturasRaw, facturasRaw] = await Promise.all([
+      this.safeFirstValueFrom<any>(this.emiService.getByIdemision(this.idemision), null),
+      this.safeFirstValueFrom<any[]>(this.ruxemiService.getByIdEmision(this.idemision), []),
+      this.safeFirstValueFrom<any[]>(this.s_lecturas.getByIdEmision(this.idemision), []),
+      this.safeFirstValueFrom<any[]>(this.facService.findCobradasByIdemision(this.idemision), []),
+    ]);
+
+    return {
+      emision,
+      rutas: this.normalizarRutasAuditoria(rutasRaw),
+      lecturas: this.normalizarLecturasAuditoria(lecturasRaw),
+      facturas: this.normalizarFacturasAuditoria(facturasRaw),
+    };
+  }
+
+  private normalizarRutasAuditoria(rutasRaw: any[]): any[] {
+    return (Array.isArray(rutasRaw) ? rutasRaw : []).map((ruta: any) => ({
+      idrutaxemision: ruta?.idrutaxemision ?? null,
+      idruta: ruta?.idruta_rutas?.idruta ?? ruta?.idruta ?? null,
+      codigo: ruta?.idruta_rutas?.codigo ?? ruta?.codigo ?? null,
+      descripcion: ruta?.idruta_rutas?.descripcion ?? ruta?.descripcion ?? null,
+      estado: ruta?.estado ?? null,
+      m3: ruta?.m3 ?? null,
+    }));
+  }
+
+  private normalizarLecturasAuditoria(lecturasRaw: any[]): any[] {
+    return (Array.isArray(lecturasRaw) ? lecturasRaw : []).map((lectura: any) => ({
+      idlectura: lectura?.idlectura ?? null,
+      idfactura: lectura?.idfactura ?? null,
+      idabonado: lectura?.idabonado_abonados?.idabonado ?? lectura?.idabonado ?? null,
+      estado: lectura?.estado ?? null,
+      lecturaanterior: lectura?.lecturaanterior ?? null,
+      lecturaactual: lectura?.lecturaactual ?? null,
+      lecturadigitada: lectura?.lecturadigitada ?? null,
+      usuariolectura: lectura?.usuariolectura ?? null,
+    }));
+  }
+
+  private normalizarFacturasAuditoria(facturasRaw: any[]): any[] {
+    return (Array.isArray(facturasRaw) ? facturasRaw : []).map((factura: any) => ({
+      idfactura: factura?.idfactura ?? null,
+      nrofactura: factura?.nrofactura ?? factura?.nrofact ?? null,
+      idabonado: factura?.idabonado_abonados?.idabonado ?? factura?.idabonado ?? null,
+      estado: factura?.estado ?? null,
+      total: factura?.total ?? factura?.valortotal ?? null,
+      iddocumento_documentos: this.extraerIdDocumentoAuditoria(factura),
+      numdoc: this.extraerNumeroDocumentoAuditoria(factura),
+      documento: this.extraerDocumentoAuditoria(factura),
+    }));
+  }
+
+  private extraerDocumentoAuditoria(factura: any): any {
+    return (
+      factura?.iddocumento_documentos ??
+      factura?.documento ??
+      factura?.intdoc ??
+      factura?.document ??
+      null
+    );
+  }
+
+  private extraerIdDocumentoAuditoria(factura: any): number | string | null {
+    const doc = this.extraerDocumentoAuditoria(factura);
+    if (doc && typeof doc === 'object') {
+      return doc.iddocumento ?? doc.iddocumento_documentos ?? doc.id ?? doc.documentoid ?? null;
+    }
+    return factura?.iddocumento_documentos ?? factura?.documentoid ?? factura?.iddocumento ?? null;
+  }
+
+  private extraerNumeroDocumentoAuditoria(factura: any): string | null {
+    const doc = this.extraerDocumentoAuditoria(factura);
+    const numero =
+      factura?.numdoc ??
+      factura?.nrodocumento ??
+      factura?.numero_documento ??
+      factura?.numeroDocumento ??
+      factura?.documento_numero ??
+      factura?.nrofactura ??
+      null;
+
+    if (numero != null && numero !== '') {
+      return String(numero);
+    }
+
+    if (doc && typeof doc === 'object') {
+      const docNumero =
+        doc.numdoc ??
+        doc.nrodocumento ??
+        doc.numero_oficial ??
+        doc.numeroDocumento ??
+        doc.referencia ??
+        null;
+      return docNumero != null && docNumero !== '' ? String(docNumero) : null;
+    }
+
+    return null;
+  }
+
+  private async safeFirstValueFrom<T>(obs: any, fallback: T): Promise<T> {
+    try {
+      return await firstValueFrom(obs);
+    } catch {
+      return fallback;
+    }
+  }
+
+  private normalizarAuditoriaConsulta(resp: any): EmisionAuditViewRow[] {
+    const lista = this.extraerListaAuditoria(resp);
+
+    return lista
+      .map((item: any) => {
+        const detalleObjeto = this.parseDetalleAuditoria(item?.detalle ?? item?.descripcion ?? item?.observacion);
+        const rutas = this.extraerListaAuditoria(detalleObjeto?.rutas ?? item?.rutas);
+        const lecturas = this.extraerListaAuditoria(detalleObjeto?.lecturas ?? item?.lecturas);
+        const facturas = this.extraerListaAuditoria(detalleObjeto?.facturas ?? item?.facturas);
+        const documentos = facturas.length
+          ? this.normalizarDocumentosAuditoria(facturas)
+          : this.normalizarDocumentosAuditoria(this.extraerListaAuditoria(detalleObjeto?.documentos ?? item?.documentos));
+        const detalleTexto = this.formatearDetalleAuditoria(detalleObjeto, item);
+
+        return {
+          idaudit: item?.idaudit ?? item?.id ?? item?.idregistro ?? null,
+          accion: item?.accion ?? detalleObjeto?.accion ?? '',
+          resultado: item?.resultado ?? detalleObjeto?.resultado ?? '',
+          fecha: item?.fecha ?? item?.feccrea ?? item?.fechaini ?? item?.created_at ?? null,
+          usuario: item?.usuario ?? item?.idusuario ?? detalleObjeto?.usuario ?? null,
+          idregistro: item?.idregistro ?? item?.idemision ?? this.idemision ?? null,
+          resumen: this.armarResumenAuditoriaRow(item, detalleObjeto, rutas, lecturas, facturas, documentos),
+          detalleTexto,
+          detalleObjeto,
+          rutas,
+          lecturas,
+          facturas,
+          documentos,
+        } as EmisionAuditViewRow;
+      })
+      .sort((a, b) => {
+        const fa = a.fecha ? new Date(a.fecha as any).getTime() : 0;
+        const fb = b.fecha ? new Date(b.fecha as any).getTime() : 0;
+        return fb - fa;
+      });
+  }
+
+  private extraerListaAuditoria(valor: any): any[] {
+    if (Array.isArray(valor)) {
+      return valor;
+    }
+
+    if (valor && Array.isArray(valor.items)) {
+      return valor.items;
+    }
+
+    if (valor && Array.isArray(valor.data)) {
+      return valor.data;
+    }
+
+    if (valor && Array.isArray(valor.logs)) {
+      return valor.logs;
+    }
+
+    if (valor && Array.isArray(valor.auditoria)) {
+      return valor.auditoria;
+    }
+
+    return valor ? [valor] : [];
+  }
+
+  private parseDetalleAuditoria(valor: any): any {
+    if (!valor) {
+      return {};
+    }
+
+    if (typeof valor === 'string') {
+      const texto = valor.trim();
+      if (!texto) {
+        return {};
+      }
+
+      try {
+        return JSON.parse(texto);
+      } catch {
+        return { texto };
+      }
+    }
+
+    return valor;
+  }
+
+  private formatearDetalleAuditoria(detalleObjeto: any, item: any): string {
+    if (typeof item?.detalle === 'string' && item.detalle.trim()) {
+      return item.detalle;
+    }
+
+    if (typeof detalleObjeto?.texto === 'string' && detalleObjeto.texto.trim()) {
+      return detalleObjeto.texto;
+    }
+
+    if (detalleObjeto && Object.keys(detalleObjeto).length > 0) {
+      try {
+        return JSON.stringify(detalleObjeto, null, 2);
+      } catch {
+        return String(detalleObjeto);
+      }
+    }
+
+    return item?.detalle != null ? String(item.detalle) : '';
+  }
+
+  private normalizarDocumentosAuditoria(facturasRaw: any[]): EmisionAuditDocumentoView[] {
+    return (Array.isArray(facturasRaw) ? facturasRaw : []).map((factura: any) => ({
+      idfactura: factura?.idfactura ?? factura?.id ?? null,
+      iddocumento_documentos: this.extraerIdDocumentoAuditoria(factura),
+      numdoc: this.extraerNumeroDocumentoAuditoria(factura),
+    }));
+  }
+
+  private armarResumenAuditoriaRow(
+    item: any,
+    detalleObjeto: any,
+    rutas: any[],
+    lecturas: any[],
+    facturas: any[],
+    documentos: EmisionAuditDocumentoView[],
+  ): string {
+    const partes: string[] = [];
+    const accion = item?.accion ?? detalleObjeto?.accion ?? null;
+    const resultado = item?.resultado ?? detalleObjeto?.resultado ?? null;
+
+    if (accion) {
+      partes.push(`Acción: ${accion}`);
+    }
+    if (resultado) {
+      partes.push(`Resultado: ${resultado}`);
+    }
+    partes.push(`Rutas: ${rutas.length}`);
+    partes.push(`Lecturas: ${lecturas.length}`);
+    partes.push(`Facturas: ${facturas.length || documentos.length}`);
+
+    const mensaje = item?.mensaje ?? detalleObjeto?.mensaje ?? detalleObjeto?.texto ?? null;
+    if (mensaje) {
+      partes.push(String(mensaje));
+    }
+
+    return partes.join(' | ');
+  }
+
+  private armarResumenAuditoria(logs: EmisionAuditViewRow[]): string {
+    if (!logs.length) {
+      return 'Sin registros de auditoría para esta emisión.';
+    }
+
+    return `Se encontraron ${logs.length} registro(s) de auditoría para la emisión ${this.selEmision}.`;
+  }
+
+  formatearDocumentosAuditoria(documentos: EmisionAuditDocumentoView[]): string {
+    if (!documentos?.length) {
+      return '-';
+    }
+
+    return documentos
+      .map((doc) => {
+        const idFactura = doc.idfactura != null ? `Fact ${doc.idfactura}` : 'Fact -';
+        const idDocumento =
+          doc.iddocumento_documentos != null ? `Doc ${doc.iddocumento_documentos}` : 'Doc -';
+        const numero = doc.numdoc ? `Nro ${doc.numdoc}` : 'Nro -';
+        return `${idFactura} | ${idDocumento} | ${numero}`;
+      })
+      .join('; ');
   }
 
   async impComprobante(idemision: any) {
@@ -2559,5 +2976,27 @@ interface LecturaNegativaDetalle {
   lecturaAnterior: number;
   lecturaActual: number;
   consumo: number;
+}
+
+interface EmisionAuditDocumentoView {
+  idfactura: number | string | null;
+  iddocumento_documentos: number | string | null;
+  numdoc: string | null;
+}
+
+interface EmisionAuditViewRow {
+  idaudit: number | string | null;
+  accion: string;
+  resultado: string;
+  fecha: string | Date | null;
+  usuario: number | string | null;
+  idregistro: number | string | null;
+  resumen: string;
+  detalleTexto: string;
+  detalleObjeto: any;
+  rutas: any[];
+  lecturas: any[];
+  facturas: any[];
+  documentos: EmisionAuditDocumentoView[];
 }
 

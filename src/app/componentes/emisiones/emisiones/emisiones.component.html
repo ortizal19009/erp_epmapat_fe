@@ -120,6 +120,9 @@
               <i class="bi bi-arrow-counterclockwise"></i>&nbsp; Reabrir emisión</button>
             <button class="dropdown-item" (click)="abrirRutasAndEmision()" data-toggle="modal" data-target="#modalReporteFacuras" type="button">
               <i class="bi bi-trash"></i>&nbsp; Eliminar emisión</button>
+            <button class="dropdown-item" type="button" data-toggle="modal" data-target="#auditoriaEmision"
+              (click)="abrirAuditoriaEmision()" [disabled]="!showDiv || !idemision">
+              <i class="bi bi-journal-text"></i>&nbsp; Auditoría emisión</button>
             <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar"
               (click)="exportar1()">
               <i class="bi-file-earmark-arrow-down"></i>&nbsp; Exportar</button>
@@ -190,6 +193,91 @@
 
     </div>
 
+  </div>
+
+  <div class="modal fade" id="auditoriaEmision" tabindex="-1" aria-labelledby="auditoriaEmisionLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header cabecera">
+          <div>
+            <h5 class="modal-title mb-0" id="auditoriaEmisionLabel">Auditoría de emisión</h5>
+            <small class="text-light">Emisión {{ selEmision | nombreEmision }}</small>
+          </div>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body detalle">
+          <div class="alert alert-info py-1 mb-2" *ngIf="auditoriaEmisionResumen">
+            {{ auditoriaEmisionResumen }}
+          </div>
+          <div class="alert alert-danger py-1 mb-2" *ngIf="auditoriaEmisionError">
+            {{ auditoriaEmisionError }}
+          </div>
+
+          <div class="text-center py-4" *ngIf="auditoriaEmisionCargando">
+            <div class="spinner-border text-primary" role="status"></div>
+            <div class="mt-2">Cargando auditoría...</div>
+          </div>
+
+          <ng-container *ngIf="!auditoriaEmisionCargando">
+            <div class="table-responsive" *ngIf="auditoriaEmision.length; else sinAuditoriaEmision">
+              <table class="table table-sm table-bordered table-hover auditoria-table mb-0">
+                <thead class="cabecera">
+                  <tr class="text-center">
+                    <th>ID</th>
+                    <th>Fecha</th>
+                    <th>Acción</th>
+                    <th>Resultado</th>
+                    <th>Usuario</th>
+                    <th>Resumen</th>
+                    <th>Documentos afectados</th>
+                    <th>Detalle</th>
+                  </tr>
+                </thead>
+                <tbody class="detalle">
+                  <tr *ngFor="let log of auditoriaEmision">
+                    <td class="text-center">{{ log.idaudit }}</td>
+                    <td class="text-center">{{ log.fecha | date:'dd-MM-yyyy HH:mm:ss' }}</td>
+                    <td class="text-center font-weight-bold">{{ log.accion }}</td>
+                    <td class="text-center">
+                      <span class="badge"
+                        [ngClass]="{
+                          'badge-success': log.resultado === 'OK',
+                          'badge-danger': log.resultado === 'ERROR',
+                          'badge-secondary': log.resultado !== 'OK' && log.resultado !== 'ERROR'
+                        }">
+                        {{ log.resultado || '-' }}
+                      </span>
+                    </td>
+                    <td class="text-center">{{ log.usuario || '-' }}</td>
+                    <td>{{ log.resumen }}</td>
+                    <td class="small">{{ formatearDocumentosAuditoria(log.documentos) }}</td>
+                    <td class="small">
+                      <details>
+                        <summary class="text-primary">Ver detalle</summary>
+                        <pre class="auditoria-json mb-0">{{ log.detalleTexto }}</pre>
+                      </details>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <ng-template #sinAuditoriaEmision>
+              <div class="text-center py-4 auditoria-empty">
+                <h6 class="mb-1">No hay registros de auditoría para esta emisión.</h6>
+                <p class="mb-0">Cuando reabras o elimines la emisión, aquí aparecerán las acciones y documentos afectados.</p>
+              </div>
+            </ng-template>
+          </ng-container>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Modal -->

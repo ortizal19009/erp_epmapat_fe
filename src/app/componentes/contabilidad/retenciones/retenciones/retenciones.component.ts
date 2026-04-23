@@ -27,7 +27,7 @@ export class RetencionesComponent implements OnInit {
    formBuscar: FormGroup;
    today: number = Date.now();
    date: Date = new Date();
-   swdesdehasta: boolean; //Visibilidad Buscar Ãºltimos
+   swdesdehasta: boolean; //Visibilidad Buscar últimos
    filtro: string;
    filtroEstado: string = '';
    filtroDesdeAut: string = '';
@@ -76,7 +76,7 @@ export class RetencionesComponent implements OnInit {
          hastaFecha: año + '-12-31',
       });
 
-      //Datos de bÃºsqueda Ãºltima RetenciÃ³n o guardadas
+      //Datos de búsqueda última Retención o guardadas
       this.buscaRetenciones = JSON.parse(sessionStorage.getItem("buscaRetenciones")!);
       if (this.buscaRetenciones == null) {
          this.ultimaRetencion();
@@ -134,7 +134,7 @@ export class RetencionesComponent implements OnInit {
       this.reteService.getDesdeHasta(this.formBuscar.value.desdeSecu, this.formBuscar.value.hastaSecu,
          this.formBuscar.value.desdeFecha, this.formBuscar.value.hastaFecha).subscribe({
             next: datos => {
-               //Guarda los datos de bÃºsqueda
+               //Guarda los datos de búsqueda
                this.buscaRetenciones = {
                   desdeSecu: this.formBuscar.value.desdeSecu,
                   hastaSecu: this.formBuscar.value.hastaSecu,
@@ -218,7 +218,7 @@ export class RetencionesComponent implements OnInit {
             fec_retencion.telefonosujetoretenido = this._retenciones[i].idbene.tlfben;
             fec_retencion.emailsujetoretenido = this._retenciones[i].idbene.mailben;
             this.fec_reteService.saveAsync(fec_retencion)
-            // console.log('Guarda RetenciÃ³n Ok!');
+            // console.log('Guarda Retención Ok!');
             await this.AIR(this._retenciones[i]);
             if (this._retenciones[i].valorretbienes != 0) { await this.IVA(this._retenciones[i], '1', this._retenciones[i].valorretbienes); }
             if (this._retenciones[i].valorretservicios != 0) { await this.IVA(this._retenciones[i], '2', this._retenciones[i].valorretservicios); }
@@ -237,7 +237,7 @@ export class RetencionesComponent implements OnInit {
             let fec_reteimpu = {} as Fec_reteimpu;
             fec_reteimpu.idretencionesimpuestos = +(retencion.idrete.toString() + index.toString());
             fec_reteimpu.idretencion = retencion.idrete;
-            fec_reteimpu.codigo = '1'; //1=RENTA: TABLA 19 de la Ficha TÃ©cnica de comprobantes electrÃ³nicos 
+            fec_reteimpu.codigo = '1'; //1=RENTA: TABLA 19 de la Ficha Técnica de comprobantes electrónicos 
             fec_reteimpu.codigoporcentaje = impuesto.idtabla10.codretair;   //
             fec_reteimpu.baseimponible = impuesto.baseimpair;
             fec_reteimpu.codigodocumentosustento = '01'; //Factura
@@ -257,7 +257,7 @@ export class RetencionesComponent implements OnInit {
       let fec_reteimpu = {} as Fec_reteimpu;
       fec_reteimpu.idretencionesimpuestos = +(retencion.idrete.toString() + '0' + codigoporcentaje);  //Id de fec_retenciones_impuesto: idrete+0(1,2 o 3)
       fec_reteimpu.idretencion = retencion.idrete;
-      fec_reteimpu.codigo = '2'; // 2=IVA: TABLA 19 de la Ficha TÃ©cnica de comprobantes electrÃ³nicos 
+      fec_reteimpu.codigo = '2'; // 2=IVA: TABLA 19 de la Ficha Técnica de comprobantes electrónicos 
       fec_reteimpu.codigoporcentaje = codigoporcentaje;   //1:Bienes, 2:Servicios, 3:100%
       fec_reteimpu.baseimponible = monto;
       fec_reteimpu.codigodocumentosustento = '01'; //Factura
@@ -267,7 +267,7 @@ export class RetencionesComponent implements OnInit {
          this.fec_reteimpuService.saveAsync(fec_reteimpu);
          // console.log(retencion, 'IVA Ok!')
       }
-      catch (error) { console.error('Al guardar la retenciÃ³n del IVA en fec_reteimpu: ', error) }
+      catch (error) { console.error('Al guardar la retención del IVA en fec_reteimpu: ', error) }
    }
 
    continuar() {
@@ -280,14 +280,14 @@ export class RetencionesComponent implements OnInit {
       this.claveacceso = '';
       let fecha = formatearFecha(1, this._retenciones[i].fechaemiret1);   //1: Sin slash para la Clave de acceso
       let ruc = this.empresa.ruc;
-      let ambiente = this.empresa.tipoambiente.toString();  //1: Pruebas  2: ProducciÃ³n
+      let ambiente = this.empresa.tipoambiente.toString();  //1: Pruebas  2: Producción
       let serie = '001001'
       let secuencial = padStart(this._retenciones[i].secretencion1, 9)
       let codigonumerico = codigoNumerico(secuencial.slice(1, 9));
       let tipoemision = '1';  //1: Normal
       this.claveacceso = this.claveacceso + fecha + '07' + ruc + ambiente + serie + secuencial + codigonumerico + tipoemision;
       let verificador = modulo11(this.claveacceso);
-      this.claveacceso = this.claveacceso + verificador	//DÃ­gito Verificador (MÃ³dulo 11)
+      this.claveacceso = this.claveacceso + verificador	//Dígito Verificador (Módulo 11)
    }
 
    imprimir() {
@@ -753,7 +753,7 @@ function formatearFecha(opcion: number, fecha: string): string {
 }
 
 
-//CÃ³digo numÃ©rico de la Clave de acceso
+//Código numérico de la Clave de acceso
 function codigoNumerico(as_numero: string): string {
    let ls_rtn = "";
    for (let li_i = as_numero.length - 1; li_i >= 0; li_i--) {
@@ -777,10 +777,10 @@ function modulo11(as_clave: string): string {
       const ll_numero = parseInt(ls_evalc.charAt(li_i), 10);
       const ll_producto = ll_numero * multiplicadores[ll_kont]; // Aplica el multiplicador
       ll_total += ll_producto;
-      ll_kont = (ll_kont + 1) % 6; // Actualiza el contador cÃ­clico (0-5)
+      ll_kont = (ll_kont + 1) % 6; // Actualiza el contador cíclico (0-5)
    }
 
-   //Calcula el Residuo y el DÃ­gito verificador
+   //Calcula el Residuo y el Dígito verificador
    let ll_residuo = ll_total % 11;
    let ll_rtn = 11 - ll_residuo;
 
