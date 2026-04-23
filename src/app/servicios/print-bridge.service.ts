@@ -28,6 +28,12 @@ interface PrintTextRequest {
 })
 export class PrintBridgeService {
   private readonly profileSelectionKey = 'print.bridge.profile.current';
+  private readonly legacyCopiesKey = 'print.bridge.copies';
+  private readonly legacySilentKey = 'print.bridge.silent';
+  private readonly legacyPdfScaleKey = 'print.bridge.pdfScale';
+  private readonly legacyPdfPaperFormatKey = 'print.bridge.pdfPaperFormat';
+  private readonly legacyPrinterModeKey = 'print.bridge.mode';
+  private readonly legacyPrinterNameKey = 'print.bridge.name';
   private readonly bridgeUrl = String((environment as any).PRINT_BRIDGE_URL ?? 'http://localhost:8787').replace(/\/+$/, '');
   private readonly bridgeToken = String((environment as any).PRINT_BRIDGE_TOKEN ?? '').trim();
   private connecting: Promise<void> | null = null;
@@ -44,18 +50,18 @@ export class PrintBridgeService {
   }
 
   getSavedPrinterMode(profile: PrintProfile = 'default'): PrinterMode {
-    const raw = localStorage.getItem(this.profileKey(profile, 'mode')) as PrinterMode | null;
+    const raw = this.readProfileValue(profile, 'mode', this.legacyPrinterModeKey) as PrinterMode | null;
     return raw === 'auto' || raw === 'tm-t88v' || raw === 'manual'
       ? raw
       : this.getDefaultPrinterMode(profile);
   }
 
   getSavedPrinterName(profile: PrintProfile = 'default'): string {
-    return localStorage.getItem(this.profileKey(profile, 'name'))?.trim() ?? '';
+    return this.readProfileValue(profile, 'name', this.legacyPrinterNameKey)?.trim() ?? '';
   }
 
   getSavedCopies(profile: PrintProfile = 'default'): number {
-    const raw = localStorage.getItem(this.profileKey(profile, 'copies')) ?? String(this.getDefaultCopies(profile));
+    const raw = this.readProfileValue(profile, 'copies', this.legacyCopiesKey) ?? String(this.getDefaultCopies(profile));
     const copies = this.normalizeCopies(Number(raw));
     return copies;
   }
@@ -83,7 +89,7 @@ export class PrintBridgeService {
   }
 
   getSilentPrinting(profile: PrintProfile = 'default'): boolean {
-    const value = localStorage.getItem(this.profileKey(profile, 'silent'));
+    const value = this.readProfileValue(profile, 'silent', this.legacySilentKey);
     return value === null ? this.getDefaultSilent(profile) : value === 'true';
   }
 
@@ -92,18 +98,22 @@ export class PrintBridgeService {
   }
 
   getSavedPdfScale(profile: PrintProfile = 'default'): number {
-    const raw = localStorage.getItem(this.profileKey(profile, 'pdfScale')) ?? String(this.getDefaultPdfScale(profile));
-    return this.normalizePdfScale(Number(raw));
+    const raw = this.readProfileValue(profile, 'pdfScale', this.legacyPdfScaleKey) ?? String(this.getDefaultPdfScale(profile));
+    const clamped = this.clampPdfScale(Number(raw), profile);
+    const effective = Math.max(clamped, this.getRecommendedPdfScale(profile));
+    this.persistPdfScale(effective, profile);
+    return effective;
   }
 
   setPdfScale(scale: number, profile: PrintProfile = 'default'): number {
-    const normalized = this.normalizePdfScale(scale);
-    localStorage.setItem(this.profileKey(profile, 'pdfScale'), String(normalized));
-    return normalized;
+    const clamped = this.clampPdfScale(scale, profile);
+    const effective = Math.max(clamped, this.getRecommendedPdfScale(profile));
+    this.persistPdfScale(effective, profile);
+    return effective;
   }
 
   getSavedPdfPaperFormat(profile: PrintProfile = 'default'): PdfPaperFormat {
-    const value = localStorage.getItem(this.profileKey(profile, 'pdfPaperFormat')) as PdfPaperFormat | null;
+    const value = this.readProfileValue(profile, 'pdfPaperFormat', this.legacyPdfPaperFormatKey) as PdfPaperFormat | null;
     return value === 'ticket58' || value === 'a4' ? value : this.getDefaultPdfPaperFormat(profile);
   }
 
@@ -150,7 +160,7 @@ export class PrintBridgeService {
       printerName: printer,
       copies: this.getSavedCopies(profile),
       silent: this.getSilentPrinting(profile),
-      pdfScaleFactor: this.getSavedPdfScale(profile),
+      pdfScaleFactor: this.getEffectivePdfScale(profile),
       pdfPaperFormat: this.getSavedPdfPaperFormat(profile),
       pdfBase64: await this.blobToBase64(pdf),
     };
@@ -270,7 +280,7 @@ export class PrintBridgeService {
 
   private normalizeCopies(copies: number): number {
     const normalized = Math.floor(Number(copies) || 0);
-    if (!Number.isFinite(normalized) || normalized < 1) {
+    if (!Number.isFinite(normalized) || normalized < 2) {
       return 2;
     }
     return Math.min(normalized, 20);
@@ -288,6 +298,37 @@ export class PrintBridgeService {
     return `print.bridge.${this.normalizeProfile(profile)}.${suffix}`;
   }
 
+  private persistPdfScale(scale: number, profile: PrintProfile): void {
+    const normalizedProfile = this.normalizeProfile(profile);
+    const value = String(this.normalizePdfScale(scale));
+    localStorage.setItem(this.profileKey(normalizedProfile, 'pdfScale'), value);
+
+    if (normalizedProfile !== 'default') {
+      localStorage.setItem(this.profileKey('default', 'pdfScale'), value);
+    }
+  }
+
+  private readProfileValue(profile: PrintProfile, suffix: string, legacyKey: string): string | null {
+    const scopedValue = localStorage.getItem(this.profileKey(profile, suffix));
+    if (scopedValue !== null && scopedValue !== '') {
+      return scopedValue;
+    }
+
+    const legacyValue = localStorage.getItem(legacyKey);
+    if (legacyValue !== null && legacyValue !== '') {
+      return legacyValue;
+    }
+
+    if (profile !== 'default') {
+      const defaultValue = localStorage.getItem(this.profileKey('default', suffix));
+      if (defaultValue !== null && defaultValue !== '') {
+        return defaultValue;
+      }
+    }
+
+    return null;
+  }
+
   private normalizeProfile(profile: PrintProfile | null | undefined): PrintProfile {
     return profile === 'consumo' || profile === 'servicios' || profile === 'convenio' ? profile : 'default';
   }
@@ -297,7 +338,7 @@ export class PrintBridgeService {
   }
 
   private getDefaultCopies(profile: PrintProfile): number {
-    return profile === 'convenio' ? 1 : 2;
+    return 2;
   }
 
   private getDefaultSilent(profile: PrintProfile): boolean {
@@ -305,15 +346,34 @@ export class PrintBridgeService {
   }
 
   private getDefaultPdfScale(profile: PrintProfile): number {
-    if (profile === 'convenio') {
-      return 1;
-    }
+    return 1.5;
+  }
 
-    return 1.15;
+  private getRecommendedPdfScale(profile: PrintProfile): number {
+    return 1.5;
+  }
+
+  private getEffectivePdfScale(profile: PrintProfile): number {
+    return this.getSavedPdfScale(profile);
+  }
+
+  private clampPdfScale(scale: number, profile: PrintProfile): number {
+    const normalized = this.normalizePdfScale(scale);
+    const minimum = this.getMinimumPdfScale(profile);
+    const maximum = this.getMaximumPdfScale(profile);
+    return Math.min(Math.max(normalized, minimum), maximum);
+  }
+
+  private getMinimumPdfScale(profile: PrintProfile): number {
+    return 1.5;
+  }
+
+  private getMaximumPdfScale(profile: PrintProfile): number {
+    return 1.5;
   }
 
   private getDefaultPdfPaperFormat(profile: PrintProfile): PdfPaperFormat {
-    return profile === 'convenio' ? 'a4' : 'ticket80';
+    return 'ticket80';
   }
 
   private async requestJson<T>(path: string, init: RequestInit = {}): Promise<T> {

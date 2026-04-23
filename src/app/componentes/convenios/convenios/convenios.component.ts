@@ -1,10 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import Swal from 'sweetalert2';
+import { firstValueFrom } from 'rxjs';
 import { ConvenioService } from 'src/app/servicios/convenio.service';
+import { CuotasService } from 'src/app/servicios/cuotas.service';
 import { PdfService } from 'src/app/servicios/pdf.service';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
@@ -22,6 +24,8 @@ export class ConveniosComponent implements OnInit {
   swdesdehasta: boolean = false;
   swbuscando: boolean = false;
   txtbuscar: string = 'Buscar';
+  private readonly DIAS_VENCIMIENTO = 30;
+  private vencimientoCache = new Map<number, { label: string; css: string }>();
 
   page: number = 0;
   size: number = 20;
@@ -32,6 +36,7 @@ export class ConveniosComponent implements OnInit {
 
   constructor(
     private convService: ConvenioService,
+    private cuotaService: CuotasService,
     private pdfService: PdfService,
     private router: Router,
     private fb: FormBuilder,
@@ -51,6 +56,7 @@ export class ConveniosComponent implements OnInit {
       hasta: [''],
       nombre: [''],
       estado: [''],
+      vencimiento: [''],
       minPendientes: [''],
       maxPendientes: [''],
       cuenta: [''],
@@ -108,6 +114,7 @@ export class ConveniosComponent implements OnInit {
     this.txtbuscar = 'Buscando';
     this.page = page;
     this.s_loading.showLoading();
+    this.vencimientoCache.clear();
 
     sessionStorage.setItem('desdeconvenio', String(this.formBuscar.value.desde ?? ''));
     sessionStorage.setItem('hastaconvenio', String(this.formBuscar.value.hasta ?? ''));
@@ -119,8 +126,9 @@ export class ConveniosComponent implements OnInit {
     };
 
     this.convService.buscarConvenios(filtros).subscribe({
-      next: (resp) => {
-        this._convenios = resp.content || [];
+      next: async (resp) => {
+        const convenios = await this.prepararConveniosConVencimiento(resp.content || []);
+        this._convenios = convenios;
         this.totalPages = resp.totalPages || 0;
         this.totalElements = resp.totalElements || 0;
         this.page = resp.number || 0;
@@ -144,18 +152,28 @@ export class ConveniosComponent implements OnInit {
     sessionStorage.removeItem('desdeconvenio');
     sessionStorage.removeItem('hastaconvenio');
     this.swdesdehasta = false;
+    this.vencimientoCache.clear();
     this.formBuscar.patchValue({
       nombre: '',
       estado: '',
+      vencimiento: '',
       minPendientes: '',
       maxPendientes: '',
       cuenta: '',
     });
+    this.filtro = '';
     this.ultimoNroconvenio();
   }
 
   changeDesdeHasta() {
     this.swdesdehasta = true;
+  }
+
+  aplicarFiltroRapido(): void {
+    this.formBuscar.patchValue({
+      nombre: (this.filtro ?? '').trim(),
+    });
+    this.buscarConvenios(0);
   }
 
   nuevo() {
@@ -192,10 +210,10 @@ export class ConveniosComponent implements OnInit {
 
     Swal.fire({
       title: 'Marcar convenio como pagado',
-      text: `¿Desea actualizar el convenio ${convenio?.nroconvenio ?? ''} al estado Pagado?`,
+      text: `Â¿Desea actualizar el convenio ${convenio?.nroconvenio ?? ''} al estado Pagado?`,
       icon: 'question',
       showCancelButton: true,
-      confirmButtonText: 'Sí, marcar',
+      confirmButtonText: 'SÃ­, marcar',
       cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (!result.isConfirmed) return;
@@ -231,7 +249,7 @@ export class ConveniosComponent implements OnInit {
 
     Swal.fire({
       title: 'Imprimir convenios',
-      text: 'Seleccione qué desea imprimir.',
+      text: 'Seleccione quÃ© desea imprimir.',
       icon: 'question',
       showCancelButton: true,
       showDenyButton: true,
@@ -255,9 +273,10 @@ export class ConveniosComponent implements OnInit {
         page: 0,
         size: total,
       }).subscribe({
-        next: (resp) => {
+        next: async (resp) => {
           this.s_loading.hideLoading();
-          this.generarPdfConvenios(resp.content || []);
+          const convenios = await this.prepararConveniosConVencimiento(resp.content || []);
+          this.generarPdfConvenios(convenios);
         },
         error: (err) => {
           console.error(err);
@@ -349,7 +368,7 @@ export class ConveniosComponent implements OnInit {
 
   getTooltipMarcarPagado(convenio: any): string {
     if (Number(convenio?.estado) === 3) {
-      return 'El convenio ya está marcado como pagado.';
+      return 'El convenio ya estÃ¡ marcado como pagado.';
     }
     if (this.getConvenioPendientes(convenio) > 0) {
       return 'No se puede marcar como pagado mientras existan cartas pendientes.';
@@ -396,6 +415,7 @@ export class ConveniosComponent implements OnInit {
   private getFiltrosBusqueda() {
     const nombre = (this.formBuscar.value.nombre ?? '').trim();
     const estado = this.parseNumber(this.formBuscar.value.estado);
+    const vencimiento = (this.formBuscar.value.vencimiento ?? '').trim();
     const minPendientes = this.parseNumber(this.formBuscar.value.minPendientes);
     const maxPendientes = this.parseNumber(this.formBuscar.value.maxPendientes);
     const cuenta = this.parseNumber(this.formBuscar.value.cuenta);
@@ -407,10 +427,124 @@ export class ConveniosComponent implements OnInit {
       nroHasta: usarFiltrosDirectosBackend ? null : this.parseNumber(this.formBuscar.value.hasta),
       nombre,
       estado,
+      vencimiento,
       minPendientes,
       maxPendientes,
       cuenta,
     };
+  }
+
+  private async prepararConveniosConVencimiento(convenios: any[]): Promise<any[]> {
+    const enriquecidos = await Promise.all(
+      convenios.map(async (convenio) => {
+        const info = await this.calcularVencimientoConvenio(convenio);
+        if (convenio?.idconvenio != null) {
+          this.vencimientoCache.set(Number(convenio.idconvenio), info);
+        }
+        return convenio;
+      })
+    );
+
+    const filtro = (this.formBuscar.value.vencimiento ?? '').trim();
+    if (!filtro) return enriquecidos;
+
+    return enriquecidos.filter((convenio) => {
+      const info = this.vencimientoCache.get(Number(convenio?.idconvenio));
+      const vencido = info?.label === 'Vencido';
+      return filtro === 'vencidos' ? vencido : !vencido;
+    });
+  }
+
+  private toDate(fecha: any): Date | null {
+    if (!fecha) return null;
+    if (fecha instanceof Date) return fecha;
+
+    const d = new Date(fecha);
+    if (!Number.isNaN(d.getTime())) return d;
+
+    if (typeof fecha === 'string' && fecha.includes('/')) {
+      const [dd, mm, yyyy] = fecha.split('/').map(Number);
+      if (dd && mm && yyyy) return new Date(yyyy, mm - 1, dd);
+    }
+
+    return null;
+  }
+
+  private async calcularVencimientoConvenio(convenio: any): Promise<{ label: string; css: string }> {
+    if (Number(convenio?.estado) !== 1) {
+      return { label: 'No aplica', css: 'badge-secondary' };
+    }
+
+    const idconvenio = Number(convenio?.idconvenio);
+    if (!idconvenio) {
+      return { label: 'Sin datos', css: 'badge-secondary' };
+    }
+
+    try {
+      const cuotasRaw = await firstValueFrom(this.cuotaService.getByIdconvenio(idconvenio));
+      const cuotas = Array.isArray(cuotasRaw) ? cuotasRaw : [];
+      const hoy = new Date();
+      const pendientes = cuotas
+        .filter((cuota: any) => this.isCuotaPendiente(cuota))
+        .sort((a: any, b: any) => this.compareCuotasPendientes(a, b));
+
+      if (!pendientes.length) {
+        return { label: 'Al día', css: 'badge-success' };
+      }
+
+      const cuotaPendienteMasAntigua = pendientes[0];
+      if (this.isCuotaVencida(cuotaPendienteMasAntigua, hoy)) {
+        return { label: 'Vencido', css: 'badge-warning' };
+      }
+
+      return { label: 'Vigente', css: 'badge-info' };
+    } catch (error) {
+      console.error('Error al calcular vencimiento del convenio', idconvenio, error);
+      return { label: 'Sin datos', css: 'badge-secondary' };
+    }
+  }
+
+  getConvenioVencimientoLabel(convenio: any): string {
+    const info = this.vencimientoCache.get(Number(convenio?.idconvenio));
+    if (info) return info.label;
+    if (Number(convenio?.estado) !== 1) return 'No aplica';
+    return 'Calculando...';
+  }
+
+  getConvenioVencimientoClass(convenio: any): string {
+    const info = this.vencimientoCache.get(Number(convenio?.idconvenio));
+    if (info) return info.css;
+    if (Number(convenio?.estado) !== 1) return 'badge-secondary';
+    return 'badge-light';
+  }
+
+  private isCuotaVencida(cuota: any, hoy: Date): boolean {
+    if (!this.isCuotaPendiente(cuota)) return false;
+
+    const fechaBase = this.toDate(cuota?.idfactura?.fechacobro) || this.toDate(cuota?.idfactura?.feccrea);
+    if (!fechaBase) return false;
+
+    const vencimiento = new Date(fechaBase);
+    vencimiento.setDate(vencimiento.getDate() + this.DIAS_VENCIMIENTO);
+
+    return hoy > vencimiento;
+  }
+
+  private isCuotaPendiente(cuota: any): boolean {
+    return Number(cuota?.idfactura?.pagado ?? 0) === 0;
+  }
+
+  private compareCuotasPendientes(a: any, b: any): number {
+    const cuotaA = Number(a?.nrocuota ?? a?.idfactura?.idfactura ?? 0);
+    const cuotaB = Number(b?.nrocuota ?? b?.idfactura?.idfactura ?? 0);
+    if (cuotaA !== cuotaB) return cuotaA - cuotaB;
+
+    const fechaA = this.toDate(a?.idfactura?.fechacobro) || this.toDate(a?.idfactura?.feccrea);
+    const fechaB = this.toDate(b?.idfactura?.fechacobro) || this.toDate(b?.idfactura?.feccrea);
+    if (fechaA && fechaB) return fechaA.getTime() - fechaB.getTime();
+    if (fechaA) return -1;
+    if (fechaB) return 1;
+    return 0;
   }
 
   private generarPdfConvenios(convenios: any[]): void {
@@ -432,6 +566,7 @@ export class ConveniosComponent implements OnInit {
         this.getConvenioNombre(c),
         Number(c?.totalconvenio || 0).toFixed(2),
         c?.cuotas ?? '',
+        this.getConvenioVencimientoLabel(c),
         this.getConvenioPendientes(c),
         this.getConvenioPagadas(c),
         this.getConvenioEstadoLabel(c?.estado),
@@ -451,6 +586,7 @@ export class ConveniosComponent implements OnInit {
         'Abonado',
         'Total',
         'Cuotas',
+        'Vencimiento',
         'Pendientes',
         'Pagadas',
         'Estado',
@@ -465,10 +601,11 @@ export class ConveniosComponent implements OnInit {
         3: { cellWidth: 60 },
         4: { cellWidth: 150 },
         5: { cellWidth: 60 },
-        6: { cellWidth: 40 },
+        6: { cellWidth: 60 },
         7: { cellWidth: 50 },
         8: { cellWidth: 50 },
         9: { cellWidth: 55 },
+        10: { cellWidth: 55 },
       },
     });
 
@@ -500,9 +637,10 @@ export class ConveniosComponent implements OnInit {
   }
 
   private buscarConveniosPorRango(desde: number, hasta: number): void {
+    this.vencimientoCache.clear();
     this.convService.conveniosDesdeHasta(desde, hasta).subscribe({
-      next: (datos: any) => {
-        this._convenios = Array.isArray(datos) ? datos : [];
+      next: async (datos: any) => {
+        this._convenios = await this.prepararConveniosConVencimiento(Array.isArray(datos) ? datos : []);
         this.totalElements = this._convenios.length;
         this.totalPages = this.totalElements > 0 ? 1 : 0;
         this.page = 0;
@@ -520,6 +658,7 @@ export class ConveniosComponent implements OnInit {
 
   private resetBusqueda(): void {
     this._convenios = [];
+    this.vencimientoCache.clear();
     this.totalPages = 0;
     this.totalElements = 0;
     this.pages = [];
@@ -528,3 +667,4 @@ export class ConveniosComponent implements OnInit {
     this.s_loading.hideLoading();
   }
 }
+

@@ -92,8 +92,7 @@ Payload esperado:
 
 ## Perfiles de impresion
 
-- `consumo` y `servicios` usan por defecto `ticket80`.
-- `convenio` usa por defecto `a4`.
+- `consumo`, `servicios` y `convenio` usan por defecto `ticket80`.
 - Cada perfil guarda su propia impresora, copias, escala y formato de papel.
 
 ## Flujo recomendado
@@ -112,8 +111,9 @@ Payload esperado:
 
 - El puente local de desarrollo puede levantarse con `print-bridge/scripts/run-bridge-dev.ps1`.
 - Ese modo escucha en `http://localhost:8788` y evita depender del servicio de Windows ya instalado.
+- Si `8788` ya esta ocupado, el script muestra el proceso dueño del puerto y no intenta abrir una segunda instancia.
 - El modo manual `print-bridge/scripts/run-bridge.ps1` tambien usa `http://localhost:8788` por
-  defecto para no chocar con el servicio instalado en `8787`.
+  defecto y aplica la misma validacion de puerto.
 
 ## Inicio automatico
 

@@ -44,14 +44,14 @@
                   </option>
                </select>
             </div>
-            <div class="text-left mt-1">
+ <!--            <div class="text-left mt-1">
                <div class="input-group input-group-sm col-sm-11 p-0">
                   <input type="date" class="form-control form-control-sm text-center" [(ngModel)]="filtroDesdeAut"
                      placeholder="Autorizada desde">
                   <input type="date" class="form-control form-control-sm text-center" [(ngModel)]="filtroHastaAut"
                      placeholder="Autorizada hasta">
                </div>
-            </div>
+            </div> -->
             <button *ngIf="swdesdehasta" class="bg-transparent border-0 mt-0" type="submit" (click)="listainicial()"
                data-toggle="tooltip" title="Ultimos">
                <i class="bi-skip-end text-white icoRegresar"></i>
@@ -106,7 +106,7 @@
                   <td class="text-center"> {{ retencion.fecautoriza }}</td>
                   <td class="text-center">
                      <span [class]="claseEstadoSri(retencion)">
-                        {{ estadoSri(retencion) }}
+                        {{ estadoSriLabel(retencion) }}
                      </span>
                   </td>
                   <td class="text-right">

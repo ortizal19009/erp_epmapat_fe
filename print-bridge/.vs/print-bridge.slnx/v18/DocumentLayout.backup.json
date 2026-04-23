@@ -7,20 +7,16 @@
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Services\\WindowsPrintBridgeService.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Alexi\\Documents\\PROYECTOS_EPMAPA-T\\erp_epmapat_fe\\print-bridge\\Services\\IPrintBridgeService.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Services\\IPrintBridgeService.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Alexi\\Documents\\PROYECTOS_EPMAPA-T\\erp_epmapat_fe\\print-bridge\\Services\\AuthTokenGate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Services\\AuthTokenGate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Alexi\\Documents\\PROYECTOS_EPMAPA-T\\erp_epmapat_fe\\print-bridge\\Program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Alexi\\Documents\\PROYECTOS_EPMAPA-T\\erp_epmapat_fe\\print-bridge\\README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Alexi\\Documents\\PROYECTOS_EPMAPA-T\\erp_epmapat_fe\\print-bridge\\Services\\IPrintBridgeService.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Services\\IPrintBridgeService.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -30,24 +26,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "AuthTokenGate.cs",
-              "DocumentMoniker": "C:\\Users\\Alexi\\Documents\\PROYECTOS_EPMAPA-T\\erp_epmapat_fe\\print-bridge\\Services\\AuthTokenGate.cs",
-              "RelativeDocumentMoniker": "Services\\AuthTokenGate.cs",
-              "ToolTip": "C:\\Users\\Alexi\\Documents\\PROYECTOS_EPMAPA-T\\erp_epmapat_fe\\print-bridge\\Services\\AuthTokenGate.cs",
-              "RelativeToolTip": "Services\\AuthTokenGate.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-22T19:31:32.794Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
               "Title": "README.md",
               "DocumentMoniker": "C:\\Users\\Alexi\\Documents\\PROYECTOS_EPMAPA-T\\erp_epmapat_fe\\print-bridge\\README.md",
               "RelativeDocumentMoniker": "README.md",
@@ -55,11 +38,12 @@
               "RelativeToolTip": "README.md",
               "ViewState": "AgIAAFEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
-              "WhenOpened": "2026-04-22T18:46:11.473Z"
+              "WhenOpened": "2026-04-22T18:46:11.473Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 1,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\Alexi\\Documents\\PROYECTOS_EPMAPA-T\\erp_epmapat_fe\\print-bridge\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
@@ -67,7 +51,8 @@
               "RelativeToolTip": "Program.cs",
               "ViewState": "AgIAAFoAAAAAAAAAAAAAAB0AAAADAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-22T18:46:10.726Z"
+              "WhenOpened": "2026-04-22T18:46:10.726Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -77,20 +62,20 @@
               "RelativeDocumentMoniker": "Services\\WindowsPrintBridgeService.cs",
               "ToolTip": "C:\\Users\\Alexi\\Documents\\PROYECTOS_EPMAPA-T\\erp_epmapat_fe\\print-bridge\\Services\\WindowsPrintBridgeService.cs",
               "RelativeToolTip": "Services\\WindowsPrintBridgeService.cs",
-              "ViewState": "AgIAANwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAACMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-04-22T18:44:25.357Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "IPrintBridgeService.cs",
               "DocumentMoniker": "C:\\Users\\Alexi\\Documents\\PROYECTOS_EPMAPA-T\\erp_epmapat_fe\\print-bridge\\Services\\IPrintBridgeService.cs",
               "RelativeDocumentMoniker": "Services\\IPrintBridgeService.cs",
               "ToolTip": "C:\\Users\\Alexi\\Documents\\PROYECTOS_EPMAPA-T\\erp_epmapat_fe\\print-bridge\\Services\\IPrintBridgeService.cs",
               "RelativeToolTip": "Services\\IPrintBridgeService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAHAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-04-22T18:44:24.38Z",
               "EditorCaption": ""

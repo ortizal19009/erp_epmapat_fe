@@ -1,7 +1,9 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\scripts",
+    "\\Services"
   ],
-  "SelectedNode": "\\PrintBridge.csproj",
+  "SelectedNode": "\\Services\\WindowsPrintBridgeService.cs",
   "PreviewInSolutionExplorer": false
 }

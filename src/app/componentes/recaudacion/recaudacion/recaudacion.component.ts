@@ -78,6 +78,7 @@ export class RecaudacionComponent implements OnInit {
   acobrardec = '';
   swbusca = 0; // 0: sin búsqueda, 1: no existe, 2: sin planillas, 3: con planillas
   swcobrado = false;
+  private pdfPreviewObjectUrl: string | null = null;
   disabledcobro = true;
   totfac = 0;
   idfactura: number;
@@ -1545,23 +1546,32 @@ export class RecaudacionComponent implements OnInit {
     return this.s_jasperReport.getComprobantePago(datos.idfactura);
   }
 
-  async impComprobante(datos: any) {
-    const newTab = window.open('', '_blank');
-    if (!newTab) {
-      alert('Tu navegador bloqueó la apertura del PDF. Permite ventanas emergentes.');
-      return;
+  private limpiarVistaPdf() {
+    if (this.pdfPreviewObjectUrl) {
+      URL.revokeObjectURL(this.pdfPreviewObjectUrl);
+      this.pdfPreviewObjectUrl = null;
     }
 
+    const iframe = document.getElementById('pdfViewerRecaudacion') as HTMLIFrameElement | null;
+    if (iframe) {
+      iframe.src = '';
+    }
+  }
+
+  private abrirVistaPdf(pdf: Blob) {
+    this.limpiarVistaPdf();
+    this.pdfPreviewObjectUrl = this.s_jasperReport.openPdfInViewer(pdf, 'pdfViewerRecaudacion');
+    this.openModal('modalVistaPdf');
+  }
+
+  async impComprobante(datos: any) {
     try {
       const reporte = await this.s_jasperReport.getComprobantePago(datos.idfactura);
-      const fileURL = URL.createObjectURL(reporte);
-      newTab.location.href = fileURL;
-
-      setTimeout(() => URL.revokeObjectURL(fileURL), 3000);
+      const file = reporte instanceof Blob ? reporte : new Blob([reporte], { type: 'application/pdf' });
+      this.abrirVistaPdf(file);
     } catch (e) {
       console.error(e);
       this.swal('error', 'No se pudo generar el comprobante.');
-      newTab.close();
     }
   }
 
@@ -1572,11 +1582,6 @@ export class RecaudacionComponent implements OnInit {
 
   async imprimirTodasEnUno() {
     try {
-      const newTab = window.open('', '_blank');
-      if (!newTab) {
-        alert('Tu navegador bloqueó la apertura del PDF. Permite ventanas emergentes.');
-        return;
-      }
       const items: MergeItem[] = (this._sincobro || [])
         .filter((s: any) => s.procesada && s.pagado)
         .map((s: any) => ({
@@ -1591,16 +1596,30 @@ export class RecaudacionComponent implements OnInit {
       }
 
       const reporte = await this.s_jasperReport.mergeComprobantes({ items });
-
-      const fileURL = URL.createObjectURL(reporte);
-      newTab.location.href = fileURL;
-
+      const blob = reporte instanceof Blob ? reporte : new Blob([reporte], { type: 'application/pdf' });
+      this.abrirVistaPdf(blob);
       this.swal('success', 'PDF unificado generado.');
-      setTimeout(() => URL.revokeObjectURL(fileURL), 10000);
     } catch (e) {
       console.error(e);
       this.swal('error', 'No se pudo generar el PDF unificado.');
     }
+  }
+
+  imprimirVistaPdf() {
+    const iframe = document.getElementById('pdfViewerRecaudacion') as HTMLIFrameElement | null;
+    const win = iframe?.contentWindow;
+    if (!win) {
+      this.swal('warning', 'Primero genera un comprobante para visualizarlo.');
+      return;
+    }
+
+    win.focus();
+    win.print();
+  }
+
+  cerrarVistaPdf() {
+    this.closeModal('modalVistaPdf');
+    this.limpiarVistaPdf();
   }
 
   // =====================

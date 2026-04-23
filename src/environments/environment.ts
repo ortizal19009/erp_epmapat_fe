@@ -4,12 +4,12 @@
 
 export const environment = {
   production: false,
-  API_URL: 'http://localhost:9080',
-  GD_API_URL: 'http://localhost:9080',
+  API_URL: 'http://192.168.0.165:8080',
+  GD_API_URL: 'http://192.168.0.165:8080',
   PRINT_BRIDGE_URL: 'http://localhost:8788',
   PRINT_BRIDGE_TOKEN: '',
   SWAGGER_GATEWAYS: [
-    { key: 'dev', label: 'Desarrollo', baseUrl: 'http://localhost:9080' },
+    { key: 'dev', label: 'Desarrollo', baseUrl: 'http://192.168.0.165:8080' },
     { key: 'qa', label: 'QA', baseUrl: 'http://localhost:9081' },
     { key: 'prod', label: 'Producción', baseUrl: 'https://api.tu-dominio.com' },
   ],

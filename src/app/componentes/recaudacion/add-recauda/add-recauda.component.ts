@@ -67,6 +67,9 @@ export class AddRecaudaComponent implements OnInit {
   private previewPdfObjectUrl: string | null = null;
   previewFactura: any = null;
   previewLoading: boolean = false;
+  imprimiendoFacturaId: number | null = null;
+  imprimiendoCobroUnificado: boolean = false;
+  imprimiendoPruebaImpresora: boolean = false;
   qzPrinterMode: 'auto' | 'tm-t88v' | 'manual' = 'auto';
   qzPrinterName: string = '';
   qzDefaultCopies: number = 2;
@@ -150,6 +153,10 @@ export class AddRecaudaComponent implements OnInit {
     this.previewPdfUrl = null;
     this.previewFactura = null;
     this.previewLoading = false;
+  }
+
+  private obtenerPdfViewerElement(): HTMLIFrameElement | null {
+    return this.pdfViewer?.nativeElement ?? document.getElementById('pdfViewer') as HTMLIFrameElement | null;
   }
 
   private limpiarEstadoNotaCredito() {
@@ -779,15 +786,17 @@ export class AddRecaudaComponent implements OnInit {
       return;
     }
 
+    this.imprimiendoFacturaId = idfactura;
     try {
-      const pdf = await this.jasperReportService.getComprobantePago(idfactura);
+      const profile = this.obtenerPerfilImpresionFactura(factura);
+      const pdf = await this.jasperReportService.getComprobantePago(idfactura, profile);
       const blob = pdf instanceof Blob ? pdf : new Blob([pdf], { type: 'application/pdf' });
       try {
         await this.qzTrayService.printPdf(
           blob,
           `Factura ${idfactura}`,
-          this.obtenerImpresoraDirecta(this.obtenerPerfilImpresionFactura(factura)),
-          this.obtenerPerfilImpresionFactura(factura),
+          this.obtenerImpresoraDirecta(profile),
+          profile,
         );
         this.swal('success', 'Comprobante enviado a la impresora.');
         return;
@@ -798,16 +807,21 @@ export class AddRecaudaComponent implements OnInit {
     } catch (e) {
       console.error(e);
       this.swal('error', 'No se pudo generar el comprobante.');
+    } finally {
+      this.imprimiendoFacturaId = null;
     }
   }
 
   async probarImpresoraQz() {
+    this.imprimiendoPruebaImpresora = true;
     try {
       await this.qzTrayService.printTestTicket('PRUEBA DE IMPRESION');
       this.swal('success', 'Se envio una prueba al puente de impresion.');
     } catch (e) {
       console.error(e);
       this.swal('error', 'No se pudo enviar la prueba de impresion. Verifica el puente local y la impresora.');
+    } finally {
+      this.imprimiendoPruebaImpresora = false;
     }
   }
 
@@ -888,9 +902,13 @@ export class AddRecaudaComponent implements OnInit {
     this.previewLoading = true;
 
     try {
-      const pdf = await this.jasperReportService.getComprobantePago(idfactura);
+      const pdf = await this.jasperReportService.getComprobantePago(idfactura, this.obtenerPerfilImpresionFactura(this.previewFactura ?? { idfactura }));
       const blob = pdf instanceof Blob ? pdf : new Blob([pdf], { type: 'application/pdf' });
-      this.previewPdfObjectUrl = URL.createObjectURL(blob);
+      const viewer = this.obtenerPdfViewerElement();
+      if (!viewer) {
+        throw new Error('No se encontró el visor PDF para mostrar el comprobante.');
+      }
+      this.previewPdfObjectUrl = this.jasperReportService.openPdfInViewer(blob, viewer);
       this.previewPdfUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.previewPdfObjectUrl);
       this.previewFactura = this.ultimasFacturasCobro.find((f: any) => Number(f?.idfactura) === idfactura) ?? { idfactura };
     } catch (e) {
@@ -932,6 +950,7 @@ export class AddRecaudaComponent implements OnInit {
       return;
     }
 
+    this.imprimiendoCobroUnificado = true;
     try {
       const pdf = await this.jasperReportService.mergeComprobantes({ items });
       const blob = pdf instanceof Blob ? pdf : new Blob([pdf], { type: 'application/pdf' });
@@ -952,7 +971,13 @@ export class AddRecaudaComponent implements OnInit {
     } catch (e) {
       console.error(e);
       this.swal('error', 'No se pudo generar el comprobante unificado.');
+    } finally {
+      this.imprimiendoCobroUnificado = false;
     }
+  }
+
+  estaImprimiendoFactura(factura: any): boolean {
+    return this.imprimiendoFacturaId === Number(factura?.idfactura ?? 0);
   }
 
   private obtenerImpresoraDirecta(profile: PrintProfile = 'default'): string {
@@ -967,6 +992,7 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   private obtenerPerfilImpresionFactura(factura: any): PrintProfile {
+    console.log('Obteniendo perfil de impresión para factura:', factura);
     const modulo = Number(factura?.idmodulo?.idmodulo ?? factura?.idmodulo ?? 0);
     const convenio = Number(factura?.conveniopago ?? 0);
 
@@ -1110,7 +1136,10 @@ export class AddRecaudaComponent implements OnInit {
     try {
       for (let i = 0; i < this.ultimasFacturasCobro.length; i++) {
         const idfactura = this.ultimasFacturasCobro[i];
-        const pdf = await this.jasperReportService.getComprobantePago(idfactura);
+        const pdf = await this.jasperReportService.getComprobantePago(
+          idfactura,
+          this.obtenerPerfilImpresionLote(this.ultimasFacturasCobro),
+        );
         const blob = pdf instanceof Blob ? pdf : new Blob([pdf], { type: 'application/pdf' });
         const fileURL = URL.createObjectURL(blob);
         tabs[i].location.href = fileURL;
@@ -1131,22 +1160,13 @@ export class AddRecaudaComponent implements OnInit {
       return;
     }
 
-    const newTab = window.open('', '_blank');
-    if (!newTab) {
-      this.swal('warning', 'Permite ventanas emergentes para ver el comprobante.');
-      return;
-    }
-
     try {
-      const pdf = await this.jasperReportService.getComprobantePago(idfactura);
-      const blob = pdf instanceof Blob ? pdf : new Blob([pdf], { type: 'application/pdf' });
-      const fileURL = URL.createObjectURL(blob);
-      newTab.location.href = fileURL;
-      setTimeout(() => URL.revokeObjectURL(fileURL), 10000);
+      this.abrirModalReimpresion(factura);
+      this.modalReimpresionFacturaId = String(idfactura);
+      await this.buscarComprobanteReimpresion();
     } catch (e) {
       console.error(e);
       this.swal('error', 'No se pudo generar el comprobante individual.');
-      newTab.close();
     }
   }
   vuelto(e: any) {
@@ -1275,5 +1295,3 @@ export class AddRecaudaComponent implements OnInit {
 interface SinCobrarVisual {
   idabonado: number;
 }
-
-

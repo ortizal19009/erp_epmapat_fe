@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
@@ -55,8 +55,7 @@ export class ImpCajasComponent implements OnInit {
     let coloresJSON = sessionStorage.getItem('/cajas');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
 
-    const fecha: Date = new Date();
-    const strfecha = fecha.toISOString().slice(0, 10);
+    const strfecha = this.getLocalDate();
     this.formImprimir = this.fb.group({
       reporte: '1',
       d_fecha: strfecha,
@@ -65,9 +64,16 @@ export class ImpCajasComponent implements OnInit {
       hasta: '2023-12-31',
       nombrearchivo: ['', [Validators.required, Validators.minLength(3)]],
       otrapagina: '',
-      horad: '',
-      horah: ''
+      horad: '07:30',
+      horah: '16:30'
     });
+  }
+
+  private getLocalDate(): string {
+    const fecha = new Date();
+    const offset = fecha.getTimezoneOffset();
+    const local = new Date(fecha.getTime() - offset * 60000);
+    return local.toISOString().slice(0, 10);
   }
 
   colocaColor(colores: any) {
@@ -86,9 +92,9 @@ export class ImpCajasComponent implements OnInit {
   changeReporte() {
     this.opcreporte = +this.formImprimir.value.reporte;
     this.formImprimir.patchValue({
-      horad: '06:30:00',
-      horah: '18:30:00'
-    })
+      horad: '07:30',
+      horah: '16:30'
+    });
   }
 
   impriexpor() {
@@ -119,7 +125,7 @@ export class ImpCajasComponent implements OnInit {
     let year: number = +d_fecha.slice(0, 4)!;
     let hasta = `${year - 1}-12-31`;
     switch (this.opcreporte) {
-      case 1: // Recaudacion diaria - Resumen
+      case 1: // Recaudación diaria - Resumen
         try {
           this._cobradas = await this.rxfService.getTotalRubrosActualAsync(
             fecha,
@@ -147,7 +153,7 @@ export class ImpCajasComponent implements OnInit {
           console.error('Error al obtener los Rubros actuales:', error);
         }
         break;
-      case 2: // Recaudacion diaria - Planillas
+      case 2: // Recaudación diaria - Planillas
         try {
           this._cobradas = await this.facService.getByFechacobroTotAsync(fecha);
           this._cobradas.map(async (item: any) => {
@@ -161,7 +167,7 @@ export class ImpCajasComponent implements OnInit {
           console.error('Error al obtener las Planillas:', error);
         }
         break;
-      case 4: // Recaudacion diaria - Resumen
+      case 4: // Recaudación diaria - Resumen
         /*         this.facService
                   .reporteFacturasRubros(
                     this.formImprimir.value.d_fecha,
@@ -214,7 +220,7 @@ export class ImpCajasComponent implements OnInit {
           console.error('Error al obtener los Rubros actuales:', error);
         }
         break;
-      case 5: // Recaudacion diaria - Planillas
+      case 5: // Recaudación diaria - Planillas
         /*         this.facService
                   .reporteFacturas(
                     this.formImprimir.value.d_fecha,
@@ -364,24 +370,24 @@ export class ImpCajasComponent implements OnInit {
     this.swcalculando = false;
     this.txtcalculando = 'Calculando';
     switch (this.opcreporte) {
-      case 1: // Recaudacion diaria - Resumen
+      case 1: // Recaudación diaria - Resumen
         if (this.swimprimir) this.imprimirResumen();
         else this.exportarResumen();
         break;
-      case 2: // Recaudacion diaria - Planillas
+      case 2: // Recaudación diaria - Planillas
         if (this.swimprimir) this.imprimirFacturas();
         else this.exportarFacturas();
         break;
-      case 4: // Recaudacion diaria - Resumen
+      case 4: // Recaudación diaria - Resumen
         this.formImprimir.value.fecha = this.formImprimir.value.d_fecha;
         if (this.swimprimir) this.imprimirResumen();
         else this.exportarResumen();
         break;
-      case 5: // Recaudacion diaria - Planillas
+      case 5: // Recaudación diaria - Planillas
         if (this.swimprimir) this.imprimirFacturas();
         else this.exportarFacturas();
         break;
-      case 6: // Recaudacion diaria - Planillas
+      case 6: // Recaudación diaria - Planillas
         if (this.swimprimir) this.imprimirTransferenciasCobradas();
         else this.exportarFacturas();
         break;
@@ -406,19 +412,19 @@ export class ImpCajasComponent implements OnInit {
     doc.setFont('times', 'bold');
     doc.setFontSize(12);
     doc.text(
-      'RESUMEN RECAUDACIÓN DIARIA: ' + this.formImprimir.value.fecha,
+      'RESUMEN RECAUDACIÃ“N DIARIA: ' + this.formImprimir.value.fecha,
       m_izquierda,
       16
     );
     this._pdf.header(
-      'RESUMEN RECAUDACIÓN DIARIA: ' + this.formImprimir.value.fecha,
+      'RESUMEN RECAUDACIÃ“N DIARIA: ' + this.formImprimir.value.fecha,
       doc
     );
     const datos: any = [];
     this.total = 0;
     let kont = 1; //Para la fila de la segunda Tabla
     let suma: number = 0;
-    datos.push(['', 'PERÍODO ACTUAL']);
+    datos.push(['', 'PERÃODO ACTUAL']);
     let i = 0;
     let iva1 = 0;
     this._cobradas.forEach((item: any) => {
@@ -456,7 +462,7 @@ export class ImpCajasComponent implements OnInit {
     let suma1 = 0;
     let iva2 = 0;
     i = 0;
-    datos.push(['', 'PERÍODOS ANTERIORES']);
+    datos.push(['', 'PERÃODOS ANTERIORES']);
     this._rubrosanterior.forEach(() => {
       if (this._rubrosanterior[i][0] != 165) {
         let totalRecaudado = this._rubrosanterior[i][2];
@@ -602,7 +608,7 @@ export class ImpCajasComponent implements OnInit {
     doc.setFont('times', 'bold');
     doc.setFontSize(12);
     doc.text(
-      'RECAUDACIÓN DIARIA - PLANILLAS: ' + this.formImprimir.value.fecha,
+      'RECAUDACIÃ“N DIARIA - PLANILLAS: ' + this.formImprimir.value.fecha,
       m_izquierda,
       16
     );
@@ -686,7 +692,7 @@ export class ImpCajasComponent implements OnInit {
     doc.setFont('times', 'bold');
     doc.setFontSize(12);
     doc.text(
-      'RESUMEN RECAUDACIÓN DIARIA: ' + this.formImprimir.value.fecha,
+      'RESUMEN RECAUDACIÃ“N DIARIA: ' + this.formImprimir.value.fecha,
       m_izquierda,
       16
     );
@@ -694,7 +700,7 @@ export class ImpCajasComponent implements OnInit {
     this.total = 0;
     let kont = 1; //Para la fila de la segunda Tabla
     let suma: number = 0;
-    datos.push(['', 'PERÍODO ACTUAL']);
+    datos.push(['', 'PERÃODO ACTUAL']);
     let i = 0;
     let iva1 = 0;
     this._cobradas.forEach(() => {
@@ -731,7 +737,7 @@ export class ImpCajasComponent implements OnInit {
     let suma1 = 0;
     let iva2 = 0;
     i = 0;
-    datos.push(['', 'PERÍODOS ANTERIORES']);
+    datos.push(['', 'PERÃODOS ANTERIORES']);
     this._rubrosanterior.forEach(() => {
       if (this._rubrosanterior[i][0] != 165) {
         let totalRecaudado = this._rubrosanterior[i][2];
@@ -874,7 +880,7 @@ export class ImpCajasComponent implements OnInit {
     doc.setFont('times', 'bold');
     doc.setFontSize(12);
     doc.text(
-      'RECAUDACIÓN DIARIA - PLANILLAS: ' + this.formImprimir.value.fecha,
+      'RECAUDACIÃ“N DIARIA - PLANILLAS: ' + this.formImprimir.value.fecha,
       m_izquierda,
       16
     );
@@ -996,7 +1002,7 @@ export class ImpCajasComponent implements OnInit {
     };
 
     autoTable(doc, {
-      head: [['Establecimiento', 'Pto.Emisón', 'Nombre']],
+      head: [['Establecimiento', 'Pto.Emisión', 'Nombre']],
       theme: 'grid',
       headStyles: {
         fillColor: [68, 103, 114],
@@ -1039,7 +1045,7 @@ export class ImpCajasComponent implements OnInit {
     doc.setFont('times', 'bold');
     doc.setFontSize(12);
     doc.text(
-      'RECAUDACIÓN DIARIA - PLANILLAS: ' +
+      'RECAUDACIÃ“N DIARIA - PLANILLAS: ' +
       this.formImprimir.value.d_fecha +
       ' / ' +
       this.formImprimir.value.h_fecha,
@@ -1216,22 +1222,15 @@ export class ImpCajasComponent implements OnInit {
     else {
       const pdfBlob = doc.output('blob');
       const blobUrl = URL.createObjectURL(pdfBlob);
-      //Si ya existe el <embed> primero lo remueve
-      const elementoExistente = document.getElementById('idembed');
-      if (elementoExistente) {
-        elementoExistente.remove();
+      const pdfViewer = document.getElementById('pdfViewer') as HTMLIFrameElement;
+      if (pdfViewer) {
+        if (pdfViewer.src?.startsWith('blob:')) {
+          URL.revokeObjectURL(pdfViewer.src);
+        }
+        pdfViewer.src = blobUrl;
+      } else {
+        window.open(blobUrl, '_blank');
       }
-      //Crea el <embed>
-      var embed = document.createElement('embed');
-      embed.setAttribute('src', blobUrl);
-      embed.setAttribute('type', 'application/pdf');
-      embed.setAttribute('width', '70%');
-      embed.setAttribute('height', '100%');
-      embed.setAttribute('id', 'idembed');
-      //Agrega el <embed> al contenedor del Modal
-      var container: any;
-      container = document.getElementById('pdf');
-      container.appendChild(embed);
     }
   }
 
@@ -1239,7 +1238,7 @@ export class ImpCajasComponent implements OnInit {
     this.nombrearchivo = this.formImprimir.value.nombrearchivo;
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet(this.nombrearchivo);
-    let titulo = 'Resumen recaudacion diaria ' + this.formImprimir.value.fecha;
+    let titulo = 'Resumen recaudación diaria ' + this.formImprimir.value.fecha;
     worksheet.addRow(['', titulo]);
     // Celda B1
     const cellB1 = worksheet.getCell('B1');
@@ -1253,7 +1252,7 @@ export class ImpCajasComponent implements OnInit {
     };
     cellB1.font = customStyle.font;
 
-    // Aplicar el estilo personalizado a los Títulos
+    // Aplicar el estilo personalizado a los TÃ­tulos
     const cellC1 = worksheet.getCell('C1');
     cellC1.font = customStyle.font;
 
@@ -1329,7 +1328,7 @@ export class ImpCajasComponent implements OnInit {
         });
     });
 
-    // Formato numérico
+    // Formato numÃ©rico
     // const numeroStyle = { numFmt: '#,##0' };
     // const columnsToFormat = [1 ];
     // for (let i = 4; i <= this._cobradas.length + 2; i++) {
@@ -1339,7 +1338,7 @@ export class ImpCajasComponent implements OnInit {
     //    });
     // }
 
-    // Formato numérico con decimales
+    // Formato numÃ©rico con decimales
     const numeroStyle1 = { numFmt: '#,##0.00' };
     const columnsToFormat1 = [3];
     for (let i = 4; i <= this._cobradas.length + 3; i++) {
@@ -1371,7 +1370,7 @@ export class ImpCajasComponent implements OnInit {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet(this.nombrearchivo);
     let titulo =
-      'Recaudacion diaria - Planillas ' + this.formImprimir.value.fecha;
+      'Recaudación diaria - Planillas ' + this.formImprimir.value.fecha;
     worksheet.addRow(['', '', '', titulo]);
     // Celda D1
     const cellD1 = worksheet.getCell('D1');
@@ -1385,7 +1384,7 @@ export class ImpCajasComponent implements OnInit {
     };
     cellD1.font = customStyle.font;
 
-    // Aplicar el estilo personalizado a los Títulos
+    // Aplicar el estilo personalizado a los TÃ­tulos
     const cellC1 = worksheet.getCell('C1');
     cellC1.font = customStyle.font;
 
@@ -1483,7 +1482,7 @@ export class ImpCajasComponent implements OnInit {
         });
     });
 
-    // Formato numérico
+    // Formato numÃ©rico
     // const numeroStyle = { numFmt: '#,##0' };
     // const columnsToFormat = [1 ];
     // for (let i = 4; i <= this._cobradas.length + 2; i++) {
@@ -1493,7 +1492,7 @@ export class ImpCajasComponent implements OnInit {
     //    });
     // }
 
-    // Formato numérico con decimales
+    // Formato numÃ©rico con decimales
     const numeroStyle1 = { numFmt: '#,##0.00' };
     const columnsToFormat1 = [7];
     for (let i = 4; i <= this._cobradas.length + 3; i++) {
@@ -1539,7 +1538,7 @@ export class ImpCajasComponent implements OnInit {
     };
     cellA1.font = customStyle.font;
 
-    // Aplicar el estilo personalizado a los Títulos
+    // Aplicar el estilo personalizado a los TÃ­tulos
     // const cellC1 = worksheet.getCell('C1');
     // cellC1.font = customStyle.font;
 
@@ -1619,3 +1618,6 @@ export class ImpCajasComponent implements OnInit {
 function formatNumber(num: number) {
   return num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
 }
+
+
+

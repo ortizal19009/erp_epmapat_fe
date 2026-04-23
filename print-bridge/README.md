@@ -27,10 +27,18 @@ Por defecto escucha en `http://localhost:8788` cuando se ejecuta con `dotnet run
 
 ## Modo de desarrollo rapido
 
-Si no quieres tocar el servicio de Windows instalado, puedes levantar una segunda instancia en `http://localhost:8788` con:
+Si no quieres tocar el servicio de Windows instalado, puedes levantar una instancia de desarrollo en `http://localhost:8788` con:
 
 ```powershell
 .\scripts\run-bridge-dev.ps1
+```
+
+Si el puerto ya esta ocupado, el script muestra el proceso activo y no intenta abrir otra instancia.
+
+Si el puerto ya esta ocupado y quieres reiniciar el proceso, usa:
+
+```powershell
+.\scripts\run-bridge-dev.ps1 -ForceRestart
 ```
 
 Ese modo es ideal para el frontend en desarrollo, porque evita bloquear el archivo del servicio instalado en `8787`.
@@ -49,6 +57,11 @@ Si el servicio ya estaba corriendo, `publish-bridge.ps1` lo detiene, publica y l
 
 Antes de ejecutar `install-service.ps1`, asegurate de que exista la carpeta publicada, por ejemplo `.\publish`.
 
+## Puertos usados
+
+- `8787` para el servicio de Windows.
+- `8788` para desarrollo con `dotnet run`.
+
 ## Escala del PDF
 
 - El puente acepta `pdfScaleFactor` al imprimir PDFs.
@@ -64,8 +77,7 @@ Antes de ejecutar `install-service.ps1`, asegurate de que exista la carpeta publ
 
 ## Perfiles de impresion
 
-- `consumo` y `servicios` usan por defecto `ticket80`.
-- `convenio` usa por defecto `a4`.
+- `consumo`, `servicios` y `convenio` usan por defecto `ticket80`.
 - Cada perfil guarda su propia impresora, copias, escala y formato de papel.
 
 ## Modo de prueba sin servicio
@@ -76,7 +88,8 @@ Si no quieres instalar el servicio todavia, puedes levantar el puente en una con
 .\scripts\run-bridge.ps1 -PublishDir .\publish
 ```
 
-Ese comando usa `http://localhost:8788` por defecto para no chocar con el servicio instalado en `8787`.
+Ese comando usa `http://localhost:8788` por defecto y valida que el puerto no este ocupado antes de arrancar.
+Si ya esta en uso, te mostrara el proceso que lo esta usando.
 
 ## Scripts utiles
 

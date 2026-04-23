@@ -551,16 +551,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
     let reporte = await this.s_jasperreport.getReporte(body);
     setTimeout(() => {
       const file = new Blob([reporte], { type: 'application/pdf' });
-      const fileURL = URL.createObjectURL(file);
-
-      // Asignar el blob al iframe
-      const pdfViewer = document.getElementById(
-        'pdfViewer'
-      ) as HTMLIFrameElement;
-
-      if (pdfViewer) {
-        pdfViewer.src = fileURL;
-      }
+      this.s_jasperreport.openPdfInViewer(file, 'pdfViewer');
     }, 1000);
     this.facElectro = false;
     this.s_loading.hideLoading();
@@ -576,16 +567,8 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
     // Crear blob desde los datos del backend
     setTimeout(() => {
       const file = new Blob([fact], { type: 'application/pdf' });
-      const fileURL = URL.createObjectURL(file);
       this.dataURI = fact;
-      // Asignar el blob al iframe
-      const pdfViewer = document.getElementById(
-        'pdfViewer'
-      ) as HTMLIFrameElement;
-
-      if (pdfViewer) {
-        pdfViewer.src = fileURL;
-      }
+      this.s_jasperreport.openPdfInViewer(file, 'pdfViewer');
     }, 1000);
 
     this.s_loading.hideLoading();

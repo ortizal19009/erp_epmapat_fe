@@ -75,8 +75,9 @@
             </button>
             <div class="dropdown-divider" *ngIf="ultimasFacturasCobro.length"></div>
             <button class="dropdown-item" type="button" (click)="reimprimirUltimoCobro()"
-              [disabled]="!ultimasFacturasCobro.length">
-              <i class="bi-files"></i>&nbsp; Imprimir todo el cobro
+              [disabled]="!ultimasFacturasCobro.length || imprimiendoCobroUnificado">
+              <span *ngIf="imprimiendoCobroUnificado" class="spinner-border spinner-border-sm mr-2" role="status"></span>
+              <i *ngIf="!imprimiendoCobroUnificado" class="bi-files"></i>&nbsp; Imprimir todo el cobro
             </button>
           </div>
         </div>
@@ -259,8 +260,12 @@
                   <td>{{ factura.direccionubicacion || factura.direccion }}</td>
                   <td>{{ factura.modulo }}</td>
                   <td class="text-center">
-                    <button class="btn btn-xs btn-outline-info" type="button" (click)="imprimirCobroDirecto(factura)">
-                      <i class="fa fa-print"></i> Imprimir
+                    <button class="btn btn-xs btn-outline-info" type="button"
+                      (click)="imprimirCobroDirecto(factura)"
+                      [disabled]="estaImprimiendoFactura(factura)">
+                      <span *ngIf="estaImprimiendoFactura(factura)" class="spinner-border spinner-border-sm mr-1"
+                        role="status"></span>
+                      <i *ngIf="!estaImprimiendoFactura(factura)" class="fa fa-print"></i> Imprimir
                     </button>
                   </td>
                 </tr>
@@ -321,10 +326,10 @@
           </div>
 
           <div class="mt-2 border rounded bg-white" style="min-height: 70vh;">
-            <iframe #pdfViewer *ngIf="previewPdfUrl" [src]="previewPdfUrl" type="application/pdf" class="w-100"
+            <iframe #pdfViewer [src]="previewPdfUrl" type="application/pdf" class="w-100"
               style="height: 70vh; border: 0;"></iframe>
             <div *ngIf="!previewPdfUrl && !previewLoading" class="d-flex align-items-center justify-content-center"
-              style="height: 70vh;">
+              style="height: 70vh; margin-top: -70vh; pointer-events: none;">
               <span class="text-muted">Ingrese un ID y pulse Buscar para visualizar el comprobante.</span>
             </div>
           </div>

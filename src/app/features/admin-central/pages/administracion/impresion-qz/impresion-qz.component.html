@@ -53,7 +53,7 @@
 
           <div class="form-group">
             <label class="font-weight-bold">Copias por defecto</label>
-            <input type="number" min="1" max="20" class="form-control" [(ngModel)]="qzDefaultCopies" />
+            <input type="number" min="2" max="20" class="form-control" [(ngModel)]="qzDefaultCopies" />
             <small class="text-muted d-block mt-1">
               Valor recomendado: 2.
             </small>
@@ -61,9 +61,9 @@
 
           <div class="form-group">
             <label class="font-weight-bold">Escala del PDF</label>
-            <input type="number" min="0.5" max="3" step="0.05" class="form-control" [(ngModel)]="qzPdfScale" />
+            <input type="number" min="1.5" max="3" step="0.05" class="form-control" [(ngModel)]="qzPdfScale" />
             <small class="text-muted d-block mt-1">
-              1.00 es el tamaño normal. Prueba 1.10 o 1.20 si el comprobante sale muy pequeño.
+              Valor recomendado para todos los perfiles: 1.50.
             </small>
           </div>
 
@@ -74,9 +74,9 @@
               <option value="ticket58">Ticket 58 mm</option>
               <option value="a4">A4</option>
             </select>
-            <small class="text-muted d-block mt-1">
-              Usa Ticket 80 mm para la Epson TM-T88V. A4 deja el PDF tal como viene del reporte.
-            </small>
+              <small class="text-muted d-block mt-1">
+                Usa Ticket 80 mm para la Epson TM-T88V. Ticket 58 mm es para rollo angosto.
+              </small>
           </div>
 
           <div class="form-group">

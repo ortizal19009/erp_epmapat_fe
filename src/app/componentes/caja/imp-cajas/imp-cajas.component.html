@@ -1,4 +1,4 @@
-<div class="content mt-1 pt-1 px-2">
+﻿<div class="content mt-1 pt-1 px-2">
   <div class="container-fluid">
     <div class="row mt-0 px-1 py-1 justify-content-start cabecera border sombra">
       <div class="col-sm-6">
@@ -33,7 +33,7 @@
                 <option value="6">Transferencias cobradas</option>
                 <option value="7">Transferencias general</option>
                 <option value="3">Lista de cajas</option>
-                <option value="8" *ngIf="idusuario ==1">Recaudacion x facturas</option>
+                <option value="8" *ngIf="idusuario ==1">Recaudación x facturas</option>
                 <option value="9" *ngIf="idusuario ==1">Recaudación x rubros</option>
 
               </select>
@@ -96,18 +96,6 @@
                   aria-label="Small" aria-describedby="inputGroup-sizing-sm">
               </div>
             </div>
-
-            <div *ngIf="swimprimir" class="form-group col-md-3">
-              <div class="input-group input-group-sm mb-3">
-                <div class="input-group-prepend">
-                  <span class="input-group-text font-weight-bold">Abrir en otra página</span>
-                  <div class="input-group-text">
-                    <input type="checkbox" formControlName="otrapagina">
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <div *ngIf="!swimprimir" class="form-group col-sm-10 my-0 py-0">
               <div class="input-group input-group-sm mb-3">
                 <div class="input-group-prepend">
@@ -135,7 +123,7 @@
 
         <div *ngIf="swbotones" class="text-center">
           <button *ngIf="swimprimir" type="button" class="btn btn-success btn-block"
-            [attr.data-target]="otrapagina ? null : '#pdf'" data-toggle="modal" [disabled]="swcalculando"
+            data-target="#pdf" data-toggle="modal" [disabled]="swcalculando"
             (click)="imprime()">
             <i *ngIf="swcalculando" class="fa fa-spinner"></i>
             <i *ngIf="!swcalculando" class="bi-eye"></i>&nbsp;&nbsp;&nbsp;{{txtcalculando}}
@@ -179,3 +167,6 @@
 
   </div>
 </div>
+
+
+

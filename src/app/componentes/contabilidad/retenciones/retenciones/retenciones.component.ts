@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -26,7 +26,7 @@ export class RetencionesComponent implements OnInit {
    formBuscar: FormGroup;
    today: number = Date.now();
    date: Date = new Date();
-   swdesdehasta: boolean; //Visibilidad Buscar últimos
+   swdesdehasta: boolean; //Visibilidad Buscar Ãºltimos
    filtro: string;
    filtroEstado: string = '';
    filtroDesdeAut: string = '';
@@ -44,6 +44,7 @@ export class RetencionesComponent implements OnInit {
       { value: '', label: 'Todos' },
       { value: 'PENDIENTE', label: 'Pendiente' },
       { value: 'GENERADA', label: 'Generada' },
+      { value: 'PENDIENTE_AUTORIZACION', label: 'Pendiente autorización' },
       { value: 'AUTORIZADA', label: 'Autorizada' },
       { value: 'ENVIADA', label: 'Enviada' },
       { value: 'ERROR_ENVIO', label: 'Error envío' },
@@ -72,7 +73,7 @@ export class RetencionesComponent implements OnInit {
          hastaFecha: año + '-12-31',
       });
 
-      //Datos de búsqueda última Retención o guardadas
+      //Datos de bÃºsqueda Ãºltima RetenciÃ³n o guardadas
       this.buscaRetenciones = JSON.parse(sessionStorage.getItem("buscaRetenciones")!);
       if (this.buscaRetenciones == null) {
          this.ultimaRetencion();
@@ -130,7 +131,7 @@ export class RetencionesComponent implements OnInit {
       this.reteService.getDesdeHasta(this.formBuscar.value.desdeSecu, this.formBuscar.value.hastaSecu,
          this.formBuscar.value.desdeFecha, this.formBuscar.value.hastaFecha).subscribe({
             next: datos => {
-               //Guarda los datos de búsqueda
+               //Guarda los datos de bÃºsqueda
                this.buscaRetenciones = {
                   desdeSecu: this.formBuscar.value.desdeSecu,
                   hastaSecu: this.formBuscar.value.hastaSecu,
@@ -214,7 +215,7 @@ export class RetencionesComponent implements OnInit {
             fec_retencion.telefonosujetoretenido = this._retenciones[i].idbene.tlfben;
             fec_retencion.emailsujetoretenido = this._retenciones[i].idbene.mailben;
             this.fec_reteService.saveAsync(fec_retencion)
-            // console.log('Guarda Retención Ok!');
+            // console.log('Guarda RetenciÃ³n Ok!');
             await this.AIR(this._retenciones[i]);
             if (this._retenciones[i].valorretbienes != 0) { await this.IVA(this._retenciones[i], '1', this._retenciones[i].valorretbienes); }
             if (this._retenciones[i].valorretservicios != 0) { await this.IVA(this._retenciones[i], '2', this._retenciones[i].valorretservicios); }
@@ -233,7 +234,7 @@ export class RetencionesComponent implements OnInit {
             let fec_reteimpu = {} as Fec_reteimpu;
             fec_reteimpu.idretencionesimpuestos = +(retencion.idrete.toString() + index.toString());
             fec_reteimpu.idretencion = retencion.idrete;
-            fec_reteimpu.codigo = '1'; //1=RENTA: TABLA 19 de la Ficha Técnica de comprobantes electrónicos 
+            fec_reteimpu.codigo = '1'; //1=RENTA: TABLA 19 de la Ficha TÃ©cnica de comprobantes electrÃ³nicos 
             fec_reteimpu.codigoporcentaje = impuesto.idtabla10.codretair;   //
             fec_reteimpu.baseimponible = impuesto.baseimpair;
             fec_reteimpu.codigodocumentosustento = '01'; //Factura
@@ -253,7 +254,7 @@ export class RetencionesComponent implements OnInit {
       let fec_reteimpu = {} as Fec_reteimpu;
       fec_reteimpu.idretencionesimpuestos = +(retencion.idrete.toString() + '0' + codigoporcentaje);  //Id de fec_retenciones_impuesto: idrete+0(1,2 o 3)
       fec_reteimpu.idretencion = retencion.idrete;
-      fec_reteimpu.codigo = '2'; // 2=IVA: TABLA 19 de la Ficha Técnica de comprobantes electrónicos 
+      fec_reteimpu.codigo = '2'; // 2=IVA: TABLA 19 de la Ficha TÃ©cnica de comprobantes electrÃ³nicos 
       fec_reteimpu.codigoporcentaje = codigoporcentaje;   //1:Bienes, 2:Servicios, 3:100%
       fec_reteimpu.baseimponible = monto;
       fec_reteimpu.codigodocumentosustento = '01'; //Factura
@@ -263,7 +264,7 @@ export class RetencionesComponent implements OnInit {
          this.fec_reteimpuService.saveAsync(fec_reteimpu);
          // console.log(retencion, 'IVA Ok!')
       }
-      catch (error) { console.error('Al guardar la retención del IVA en fec_reteimpu: ', error) }
+      catch (error) { console.error('Al guardar la retenciÃ³n del IVA en fec_reteimpu: ', error) }
    }
 
    continuar() {
@@ -276,14 +277,14 @@ export class RetencionesComponent implements OnInit {
       this.claveacceso = '';
       let fecha = formatearFecha(1, this._retenciones[i].fechaemiret1);   //1: Sin slash para la Clave de acceso
       let ruc = this.empresa.ruc;
-      let ambiente = this.empresa.tipoambiente.toString();  //1: Pruebas  2: Producción
+      let ambiente = this.empresa.tipoambiente.toString();  //1: Pruebas  2: ProducciÃ³n
       let serie = '001001'
       let secuencial = padStart(this._retenciones[i].secretencion1, 9)
       let codigonumerico = codigoNumerico(secuencial.slice(1, 9));
       let tipoemision = '1';  //1: Normal
       this.claveacceso = this.claveacceso + fecha + '07' + ruc + ambiente + serie + secuencial + codigonumerico + tipoemision;
       let verificador = modulo11(this.claveacceso);
-      this.claveacceso = this.claveacceso + verificador	//Dígito Verificador (Módulo 11)
+      this.claveacceso = this.claveacceso + verificador	//DÃ­gito Verificador (MÃ³dulo 11)
    }
 
    imprimir() {
@@ -321,7 +322,11 @@ export class RetencionesComponent implements OnInit {
       const idretencion = this.getIdRetencion(retencion);
       const registro = this.estadosSri.find((item: any) => Number(item.idretencion) === idretencion);
       if (registro?.estado) {
-         return registro.estado;
+         return this.normalizarEstadoSri(registro.estado);
+      }
+      const estadoRetencion = this.normalizarEstadoSri(retencion?.estado);
+      if (estadoRetencion) {
+         return estadoRetencion;
       }
       if (String(retencion?.numautoriza_e ?? '').trim()) {
          return 'AUTORIZADA';
@@ -333,6 +338,8 @@ export class RetencionesComponent implements OnInit {
       switch (this.estadoSri(retencion)) {
          case 'GENERADA':
             return 'badge badge-info';
+         case 'PENDIENTE_AUTORIZACION':
+            return 'badge badge-warning';
          case 'AUTORIZADA':
             return 'badge badge-warning';
          case 'ENVIADA':
@@ -341,6 +348,25 @@ export class RetencionesComponent implements OnInit {
             return 'badge badge-danger';
          default:
             return 'badge badge-secondary';
+      }
+   }
+
+   estadoSriLabel(retencion: any): string {
+      switch (this.estadoSri(retencion)) {
+         case 'PENDIENTE_AUTORIZACION':
+            return 'Pendiente de autorización';
+         case 'PENDIENTE':
+            return 'Pendiente';
+         case 'GENERADA':
+            return 'Generada';
+         case 'AUTORIZADA':
+            return 'Autorizada';
+         case 'ENVIADA':
+            return 'Enviada';
+         case 'ERROR_ENVIO':
+            return 'Error de envío';
+         default:
+            return this.estadoSri(retencion) || 'Sin estado';
       }
    }
 
@@ -356,11 +382,11 @@ export class RetencionesComponent implements OnInit {
    async descargarPdf(retencion: any) {
       const idretencion = this.getIdRetencion(retencion);
       if (!idretencion) {
-         this.authService.swal('warning', 'No se pudo identificar la retención');
+         this.authService.swal('warning', 'No se pudo identificar la retenciÃ³n');
          return;
       }
       if (!this.puedeGenerarPdf(retencion)) {
-         this.authService.swal('warning', 'La retención debe estar autorizada para generar el PDF');
+         this.authService.swal('warning', 'La retenciÃ³n debe estar autorizada para generar el PDF');
          return;
       }
       this.accionEnCursoId = idretencion;
@@ -399,7 +425,14 @@ export class RetencionesComponent implements OnInit {
          const resultado = await firstValueFrom(
             this.sriRetencionesService.procesar(idretencion, destinatario, asunto, mensaje)
          );
-         this.authService.swal('success', `Retención autorizada y enviada${resultado?.email ? ` a ${resultado.email}` : ''}`);
+         if (this.normalizarEstadoSri(resultado?.estado) === 'PENDIENTE_AUTORIZACION') {
+            this.authService.swal(
+               'info',
+               `${resultado?.detalle || 'La autorización todavía no devuelve XML autorizado'}. Quedó registrada como pendiente.`
+            );
+         } else {
+            this.authService.swal('success', `Retención autorizada y enviada${resultado?.email ? ` a ${resultado.email}` : ''}`);
+         }
          await this.cargarEstadosSri();
       } catch (error: any) {
          console.error(error);
@@ -413,7 +446,7 @@ export class RetencionesComponent implements OnInit {
    async descargarXml(retencion: any) {
       const idretencion = this.getIdRetencion(retencion);
       if (!idretencion) {
-         this.authService.swal('warning', 'No se pudo identificar la retención');
+         this.authService.swal('warning', 'No se pudo identificar la retenciÃ³n');
          return;
       }
       this.accionEnCursoId = idretencion;
@@ -449,7 +482,7 @@ export class RetencionesComponent implements OnInit {
       const retencion = this.retencionCorreoModal;
       const idretencion = this.getIdRetencion(retencion);
       if (!idretencion) {
-         this.authService.swal('warning', 'No se pudo identificar la retención');
+         this.authService.swal('warning', 'No se pudo identificar la retenciÃ³n');
          return;
       }
 
@@ -462,8 +495,8 @@ export class RetencionesComponent implements OnInit {
       this.guardandoCorreo = true;
       this.accionEnCursoId = idretencion;
       try {
-         const asunto = `Retención ${this.getSecuencialArchivo(retencion)}`;
-         const mensaje = 'Adjuntamos su comprobante de retención en formato PDF.';
+         const asunto = `RetenciÃ³n ${this.getSecuencialArchivo(retencion)}`;
+         const mensaje = 'Adjuntamos su comprobante de retenciÃ³n en formato PDF.';
          await firstValueFrom(this.sriRetencionesService.reenviarCorreo(idretencion, correo, asunto, mensaje));
          this.authService.swal('success', `Correo enviado a ${correo}`);
          this.retencionCorreoModal = null;
@@ -533,6 +566,32 @@ export class RetencionesComponent implements OnInit {
       return new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
    }
 
+   private normalizarEstadoSri(estado: any): string {
+      const texto = String(estado ?? '').trim().toUpperCase();
+      if (!texto) {
+         return '';
+      }
+      if (texto.includes('PENDIENTE_AUTORIZACION')) {
+         return 'PENDIENTE_AUTORIZACION';
+      }
+      if (texto.includes('PENDIENTE')) {
+         return 'PENDIENTE';
+      }
+      if (texto.includes('AUTORIZADA')) {
+         return 'AUTORIZADA';
+      }
+      if (texto.includes('GENERADA')) {
+         return 'GENERADA';
+      }
+      if (texto.includes('ENVIADA')) {
+         return 'ENVIADA';
+      }
+      if (texto.includes('ERROR')) {
+         return 'ERROR_ENVIO';
+      }
+      return texto;
+   }
+
 }
 
 interface Fec_retencion {
@@ -575,7 +634,7 @@ function formatearFecha(opcion: number, fecha: string): string {
 }
 
 
-//Código numérico de la Clave de acceso
+//CÃ³digo numÃ©rico de la Clave de acceso
 function codigoNumerico(as_numero: string): string {
    let ls_rtn = "";
    for (let li_i = as_numero.length - 1; li_i >= 0; li_i--) {
@@ -599,10 +658,10 @@ function modulo11(as_clave: string): string {
       const ll_numero = parseInt(ls_evalc.charAt(li_i), 10);
       const ll_producto = ll_numero * multiplicadores[ll_kont]; // Aplica el multiplicador
       ll_total += ll_producto;
-      ll_kont = (ll_kont + 1) % 6; // Actualiza el contador cíclico (0-5)
+      ll_kont = (ll_kont + 1) % 6; // Actualiza el contador cÃ­clico (0-5)
    }
 
-   //Calcula el Residuo y el Dígito verificador
+   //Calcula el Residuo y el DÃ­gito verificador
    let ll_residuo = ll_total % 11;
    let ll_rtn = 11 - ll_residuo;
 
@@ -635,3 +694,6 @@ function formatDate(date: Date): string {
 
    return `${formattedMonth}/${formattedYear}`;
 }
+
+
+

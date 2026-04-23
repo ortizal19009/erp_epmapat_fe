@@ -12,3 +12,18 @@
    color: white;
    cursor: pointer;
 }
+
+.filtros-convenios {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+   gap: .5rem;
+   align-items: end;
+}
+
+.filtros-convenios > * {
+   min-width: 0;
+}
+
+.btn-aplicar-filtro {
+   white-space: nowrap;
+}

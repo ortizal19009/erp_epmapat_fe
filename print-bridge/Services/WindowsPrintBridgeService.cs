@@ -9,6 +9,7 @@ namespace PrintBridge.Services;
 public sealed class WindowsPrintBridgeService : IPrintBridgeService
 {
   private static readonly Lazy<nint> PdfiumLibraryHandle = new(LoadPdfiumLibrary);
+  private const int MaxTicketHeightMm = 297;
 
   public Task<IReadOnlyList<string>> ListPrintersAsync()
   {
@@ -27,15 +28,20 @@ public sealed class WindowsPrintBridgeService : IPrintBridgeService
     ValidatePrinter(request.PrinterName);
     _ = PdfiumLibraryHandle.Value;
 
-    var pdfBytes = Convert.FromBase64String(request.PdfBase64);
-    using var stream = new MemoryStream(pdfBytes);
-    using var document = PdfDocument.Load(stream);
-    var settings = CreatePdfPrintSettings(request.PdfScaleFactor);
-    using var printDocument = document.CreatePrintDocument(settings);
+    var paperFormat = NormalizePaperFormat(request.PdfPaperFormat);
+    var copies = Math.Clamp(request.Copies, 2, 20);
+    for (var i = 0; i < copies; i++)
+    {
+      var pdfBytes = Convert.FromBase64String(request.PdfBase64);
+      using var stream = new MemoryStream(pdfBytes);
+      using var document = PdfDocument.Load(stream);
+      var settings = CreatePdfPrintSettings(paperFormat, request.PdfScaleFactor);
+      using var printDocument = document.CreatePrintDocument(settings);
 
-    ConfigurePrinter(printDocument, request.PrinterName, request.JobName, request.Copies);
-    ApplyPaperFormat(printDocument, request.PdfPaperFormat);
-    printDocument.Print();
+      ConfigurePrinter(printDocument, request.PrinterName, request.JobName, 1);
+      ApplyPaperFormat(printDocument, document, paperFormat);
+      printDocument.Print();
+    }
 
     return Task.CompletedTask;
   }
@@ -45,7 +51,8 @@ public sealed class WindowsPrintBridgeService : IPrintBridgeService
     ValidatePrinter(request.PrinterName);
 
     using var printDocument = new PrintDocument();
-    ConfigurePrinter(printDocument, request.PrinterName, request.JobName, request.Copies);
+    ConfigurePrinter(printDocument, request.PrinterName, request.JobName, 1);
+    ApplyPaperFormat(printDocument, "ticket80");
 
     var lines = request.Lines?.ToArray() ?? Array.Empty<string>();
     var lineIndex = 0;
@@ -73,7 +80,11 @@ public sealed class WindowsPrintBridgeService : IPrintBridgeService
       e.HasMorePages = false;
     };
 
-    printDocument.Print();
+    var copies = Math.Clamp(request.Copies, 2, 20);
+    for (var i = 0; i < copies; i++)
+    {
+      printDocument.Print();
+    }
     font.Dispose();
 
     return Task.CompletedTask;
@@ -85,7 +96,7 @@ public sealed class WindowsPrintBridgeService : IPrintBridgeService
     printDocument.PrinterSettings = new PrinterSettings
     {
       PrinterName = printerName,
-      Copies = (short)Math.Clamp(copies, 1, 20),
+      Copies = 1,
       Collate = true,
       PrintRange = PrintRange.AllPages,
     };
@@ -101,30 +112,83 @@ public sealed class WindowsPrintBridgeService : IPrintBridgeService
     }
   }
 
-  private static PdfPrintSettings CreatePdfPrintSettings(double scaleFactor)
+  private static PdfPrintSettings CreatePdfPrintSettings(string paperFormat, double scaleFactor)
   {
+    var format = NormalizePaperFormat(paperFormat);
     var normalizedScale = double.IsFinite(scaleFactor) && scaleFactor > 0
       ? Math.Clamp(scaleFactor, 0.5, 3.0)
       : 1.0;
 
-    return new PdfPrintSettings(PdfPrintMode.Scale, normalizedScale);
+    return format == "a4"
+      ? new PdfPrintSettings(PdfPrintMode.Scale, normalizedScale)
+      : new PdfPrintSettings(PdfPrintMode.CutMargin);
+  }
+
+  private static void ApplyPaperFormat(PrintDocument printDocument, PdfDocument document, string paperFormat)
+  {
+    var format = NormalizePaperFormat(paperFormat);
+
+    var pdfPageSize = TryGetFirstPageSize(document);
+    var paperSize = format switch
+    {
+      "a4" => new PaperSize("A4", MmToHundredthsInch(210), MmToHundredthsInch(297)),
+      "ticket58" => pdfPageSize.HasValue
+        ? ToPaperSize("Receipt58mm", pdfPageSize.Value)
+        : new PaperSize("Receipt58mm", MmToHundredthsInch(58), MmToHundredthsInch(MaxTicketHeightMm)),
+      _ => pdfPageSize.HasValue
+        ? ToPaperSize("Receipt80mm", pdfPageSize.Value)
+        : new PaperSize("Receipt80mm", MmToHundredthsInch(80), MmToHundredthsInch(MaxTicketHeightMm)),
+    };
+
+    printDocument.DefaultPageSettings.PaperSize = paperSize;
+    printDocument.DefaultPageSettings.Landscape = format == "a4"
+      ? true
+      : (pdfPageSize?.Width ?? paperSize.Width) > (pdfPageSize?.Height ?? paperSize.Height);
+    printDocument.OriginAtMargins = false;
   }
 
   private static void ApplyPaperFormat(PrintDocument printDocument, string paperFormat)
   {
-    var format = string.IsNullOrWhiteSpace(paperFormat)
-      ? "ticket80"
-      : paperFormat.Trim().ToLowerInvariant();
-
+    var format = NormalizePaperFormat(paperFormat);
     var paperSize = format switch
     {
       "a4" => new PaperSize("A4", MmToHundredthsInch(210), MmToHundredthsInch(297)),
-      "ticket58" => new PaperSize("Receipt58mm", MmToHundredthsInch(58), 32767),
-      _ => new PaperSize("Receipt80mm", MmToHundredthsInch(80), 32767),
+      "ticket58" => new PaperSize("Receipt58mm", MmToHundredthsInch(58), MmToHundredthsInch(MaxTicketHeightMm)),
+      _ => new PaperSize("Receipt80mm", MmToHundredthsInch(80), MmToHundredthsInch(MaxTicketHeightMm)),
     };
 
     printDocument.DefaultPageSettings.PaperSize = paperSize;
+    printDocument.DefaultPageSettings.Landscape = format == "a4";
     printDocument.OriginAtMargins = false;
+  }
+
+  private static PaperSize ToPaperSize(string name, SizeF pageSizeInPoints)
+  {
+    var width = PointsToHundredthsInch(pageSizeInPoints.Width);
+    var height = PointsToHundredthsInch(pageSizeInPoints.Height);
+    return new PaperSize(name, width, height);
+  }
+
+  private static SizeF? TryGetFirstPageSize(PdfDocument document)
+  {
+    if (document.PageSizes == null || document.PageSizes.Count == 0)
+    {
+      return null;
+    }
+
+    return document.PageSizes[0];
+  }
+
+  private static int PointsToHundredthsInch(float points)
+  {
+    return (int)Math.Round(points / 72f * 100f);
+  }
+
+  private static string NormalizePaperFormat(string paperFormat)
+  {
+    return string.IsNullOrWhiteSpace(paperFormat)
+      ? "ticket80"
+      : paperFormat.Trim().ToLowerInvariant();
   }
 
   private static int MmToHundredthsInch(int millimeters)

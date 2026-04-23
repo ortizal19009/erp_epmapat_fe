@@ -1,4 +1,4 @@
-.container-fluid {
+﻿.container-fluid {
   --recaudacabecera: DarkSlateGray;
   --recaudadetalle: AliceBlue;
   --clientecabecera: Olive;
@@ -132,7 +132,7 @@ label {
   border: none;
 }
 
-/* ===== NOTIFICACIÓN FLOTANTE ===== */
+/* ===== NOTIFICACIÃ“N FLOTANTE ===== */
 .floating-notification {
   position: fixed;
   bottom: 25px;
@@ -149,7 +149,7 @@ label {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
   border-left: 4px solid #dc3545;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   transition: all 0.3s ease;
 }
 
@@ -278,7 +278,7 @@ te
   background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
 }
 
-/* ===== ALINEACIÓN DE FORMULARIO ===== */
+/* ===== ALINEACIÃ“N DE FORMULARIO ===== */
 .card-body .row.align-items-end {
   align-items: flex-end !important;
 }
@@ -313,7 +313,7 @@ te
   background-color: rgba(255, 193, 7, 0.1) !important;
 }
 
-/* Botones pequeños */
+/* Botones pequeÃ±os */
 .btn-xs {
   padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
@@ -360,7 +360,7 @@ te
   color: white;
 }
 
-/* Estados vacíos */
+/* Estados vacÃ­os */
 .empty-state {
   padding: 3rem 1rem;
   text-align: center;
@@ -379,7 +379,7 @@ te
   border: 1px solid rgba(16, 42, 67, 0.10) !important;
   border-radius: 18px !important;
   box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .card-header {
@@ -448,7 +448,7 @@ te
 }
 
 .truncate-text {
-  overflow: hidden;
+  overflow: visible;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -473,6 +473,16 @@ te
   border: 1px solid rgba(16, 42, 67, 0.10);
   border-radius: 14px;
   box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+  z-index: 2000;
+}
+
+.card-header .btn-group {
+  position: relative;
+  z-index: 2001;
+}
+
+.card-header .dropdown-menu {
+  z-index: 2002;
 }
 
 .empty-state {
@@ -512,7 +522,7 @@ te
   white-space: nowrap;
 }
 
-/* === Ajustes para el m�dulo antiguo alineados al nuevo estilo === */
+/* === Ajustes para el módulo antiguo alineados al nuevo estilo === */
 .bg-gradient-primary {
   background: linear-gradient(135deg, #102a43 0%, #1f6f8b 55%, #2d9cdb 100%) !important;
 }
@@ -521,7 +531,7 @@ te
   border: 1px solid rgba(16, 42, 67, 0.10) !important;
   border-radius: 18px !important;
   box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .card-header {
@@ -590,7 +600,7 @@ te
 }
 
 .truncate-text {
-  overflow: hidden;
+  overflow: visible;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -615,6 +625,16 @@ te
   border: 1px solid rgba(16, 42, 67, 0.10);
   border-radius: 14px;
   box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+  z-index: 2000;
+}
+
+.card-header .btn-group {
+  position: relative;
+  z-index: 2001;
+}
+
+.card-header .dropdown-menu {
+  z-index: 2002;
 }
 
 .empty-state {
@@ -679,3 +699,4 @@ te
 .action-cell .btn-icon i {
   margin-right: 0;
 }
+
