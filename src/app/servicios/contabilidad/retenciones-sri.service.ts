@@ -12,6 +12,10 @@ export class RetencionesSriService {
 
   constructor(private http: HttpClient) {}
 
+  streamRetenciones(): EventSource {
+    return new EventSource(`${this.erpBaseUrl}/stream`);
+  }
+
   generarPdf(claveAcceso: string): Observable<Blob> {
     return this.http.get(`${this.baseUrl}/pdf?claveAcceso=${encodeURIComponent(claveAcceso)}`, {
       responseType: 'blob',
@@ -20,6 +24,12 @@ export class RetencionesSriService {
 
   descargarXml(claveAcceso: string): Observable<string> {
     return this.http.get(`${this.baseUrl}/xml?claveAcceso=${encodeURIComponent(claveAcceso)}`, {
+      responseType: 'text',
+    });
+  }
+
+  descargarXmlSinFirmarPorId(idretencion: number): Observable<string> {
+    return this.http.get(`${this.erpBaseUrl}/xml?idretencion=${encodeURIComponent(String(idretencion))}`, {
       responseType: 'text',
     });
   }
@@ -80,7 +90,7 @@ export class RetencionesSriService {
     idretencion: number,
     destinatario?: string,
     asunto?: string,
-    mensaje?: string,
+    mensaje?: string
   ): Observable<any> {
     const params = new URLSearchParams();
     params.set('idretencion', String(idretencion));
@@ -100,7 +110,7 @@ export class RetencionesSriService {
     idretencion: number,
     destinatario?: string,
     asunto?: string,
-    mensaje?: string,
+    mensaje?: string
   ): Observable<any> {
     const params = new URLSearchParams();
     params.set('idretencion', String(idretencion));
