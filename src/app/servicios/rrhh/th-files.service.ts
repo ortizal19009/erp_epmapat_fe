@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 
 const apiUrl = environment.API_URL;
-const baseUrl = `${apiUrl}/th-files`;
+const baseUrl = `${apiUrl}/api/th-files`;
 
 @Injectable({ providedIn: 'root' })
 export class ThFilesService {
