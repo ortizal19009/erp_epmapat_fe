@@ -20,7 +20,10 @@
               "exceljs",
               "xml-js",
               "sweetalert2",
-              "file-saver"
+              "file-saver",
+              "rgbcolor",
+              "leaflet",
+              "html2canvas"
             ],
             "outputPath": "dist/proylte32",
             "index": "src/index.html",
