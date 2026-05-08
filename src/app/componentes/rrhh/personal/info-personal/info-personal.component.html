@@ -1,34 +1,181 @@
-<div class="content mt-1 pt-1 pl-0">
+<div class="content mt-1 pt-1 pl-0 employee-dashboard">
   <div class="container-fluid">
-    <div class="row m-0 px-0 py-1 justify-content-start cabecera sombra border">
-      <div class="col-sm-12">
-        <h5 class="m-0 font-weight-bold">
-          <i class="fa fa-info-circle"></i> Información de Personal
-        </h5>
-      </div>
+  <div class="dashboard-header cabecera sombra border">
+    <button class="btn btn-outline-secondary btn-sm" type="button" (click)="regresar()">
+      <i class="bi bi-arrow-left"></i> Volver
+    </button>
+    <div class="header-actions">
+      <button class="btn btn-outline-secondary btn-sm" type="button" (click)="imprimir()">
+        <i class="bi bi-printer"></i> Imprimir ficha
+      </button>
+      <button class="btn btn-outline-primary btn-sm" type="button" (click)="editar()">
+        <i class="bi bi-pencil"></i> Editar
+      </button>
     </div>
+  </div>
 
-    <div class="row mt-2">
-      <div class="col-sm-6">
-        <div class="card">
-          <div class="card-body">
-            <h6>Datos generales</h6>
-            <p><strong>Nombre:</strong> {{ personal.apellidos }}, {{ personal.nombres }}</p>
-            <p><strong>Identificación:</strong> {{ personal.identificacion }}</p>
-            <p><strong>Email:</strong> {{ personal.email }}</p>
-            <p><strong>Celular:</strong> {{ personal.celular }}</p>
-            <p><strong>Dirección:</strong> {{ personal.direccion }}</p>
-            <p><strong>Cargo:</strong> {{ personal?.idcargo_cargos?.descripcion }}</p>
-            <p><strong>Tipo contrato:</strong> {{ personal?.idtpcontrato_tpcontratos?.descripcion }}</p>
+  <div class="loading-card" *ngIf="cargando">
+    <div class="spinner-border text-primary"></div>
+    <span>Cargando dashboard del empleado...</span>
+  </div>
+
+  <ng-container *ngIf="!cargando">
+    <section class="profile-hero sombra">
+      <div class="profile-main">
+        <div class="profile-avatar">{{ iniciales() || 'TH' }}</div>
+        <div>
+          <p class="eyebrow mb-1">Dashboard individual</p>
+          <h3>{{ nombreCompleto() || 'Empleado sin nombre' }}</h3>
+          <div class="profile-meta">
+            <span><i class="bi bi-person-vcard"></i> {{ personal.identificacion || 'Sin cedula' }}</span>
+            <span><i class="bi bi-briefcase"></i> {{ cargo() }}</span>
+            <span class="badge badge-success">{{ estadoLaboral() }}</span>
           </div>
+        </div>
+      </div>
+      <div class="profile-side">
+        <button class="btn btn-light btn-sm" type="button" (click)="crearUsuario()">
+          <i class="bi bi-person-plus"></i> Crear usuario
+        </button>
+        <button class="btn btn-light btn-sm" type="button" (click)="resetPassword()">
+          <i class="bi bi-key"></i> Reset password
+        </button>
+      </div>
+    </section>
+
+    <div class="kpi-grid">
+      <div class="kpi-card" *ngFor="let kpi of kpis()">
+        <i class="bi" [ngClass]="kpi.icon"></i>
+        <div>
+          <strong>{{ kpi.value }}</strong>
+          <span>{{ kpi.label }} {{ kpi.hint }}</span>
         </div>
       </div>
     </div>
 
-    <div class="row mt-2">
-      <div class="col-sm-12 text-right">
-        <button class="btn btn-secondary btn-sm" (click)="regresar()">Volver</button>
+    <ul class="nav nav-tabs dashboard-tabs">
+      <li class="nav-item" *ngFor="let tab of tabs">
+        <button class="nav-link" type="button" [class.active]="activeTab === tab.id" (click)="activeTab = tab.id">
+          <i class="bi" [ngClass]="tab.icon"></i> {{ tab.label }}
+        </button>
+      </li>
+    </ul>
+
+    <section class="tab-panel sombra" *ngIf="activeTab === 'resumen'">
+      <div class="info-grid">
+        <div class="info-card">
+          <h6>Informacion general</h6>
+          <dl>
+            <dt>Correo</dt><dd>{{ personal.email || 'No registrado' }}</dd>
+            <dt>Telefono</dt><dd>{{ personal.celular || 'No registrado' }}</dd>
+            <dt>Direccion</dt><dd>{{ personal.direccion || 'No registrada' }}</dd>
+            <dt>Edad</dt><dd>{{ edad() }}</dd>
+          </dl>
+        </div>
+        <div class="info-card">
+          <h6>Informacion laboral</h6>
+          <dl>
+            <dt>Cargo actual</dt><dd>{{ cargo() }}</dd>
+            <dt>Departamento</dt><dd>{{ personal.departamento || personal.area || 'No definido' }}</dd>
+            <dt>Jefe inmediato</dt><dd>{{ personal.jefeInmediato || 'No asignado' }}</dd>
+            <dt>Fecha ingreso</dt><dd>{{ personal.fecinicio || personal.fechaIngreso || 'No definida' }}</dd>
+            <dt>Antiguedad</dt><dd>{{ antiguedad() }}</dd>
+            <dt>Contrato</dt><dd>{{ tipoContrato() }}</dd>
+          </dl>
+        </div>
       </div>
-    </div>
+    </section>
+
+    <section class="tab-panel sombra" *ngIf="activeTab === 'vacaciones'">
+      <div class="vacation-layout">
+        <div class="progress-card">
+          <h6>Balance de vacaciones</h6>
+          <div class="vacation-numbers">
+            <span><strong>{{ diasGanados() }}</strong> Ganados</span>
+            <span><strong>{{ diasUsados() }}</strong> Usados</span>
+            <span><strong>{{ diasPendientes() }}</strong> Pendientes</span>
+          </div>
+          <div class="progress">
+            <div class="progress-bar" [style.width.%]="avanceVacaciones()">{{ avanceVacaciones() }}%</div>
+          </div>
+        </div>
+        <div class="info-card">
+          <h6>Solicitudes recientes</h6>
+          <div class="mini-row" *ngFor="let solicitud of solicitudesVacaciones">
+            <span>{{ solicitud.fechaInicio || solicitud.desde || 'N/D' }}</span>
+            <strong>{{ solicitud.estado || 'Registrada' }}</strong>
+          </div>
+          <p class="text-muted mb-0" *ngIf="solicitudesVacaciones.length === 0">Sin solicitudes registradas.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="tab-panel sombra" *ngIf="activeTab === 'historial'">
+      <div class="timeline">
+        <div class="timeline-item" *ngFor="let item of historial">
+          <span class="dot"></span>
+          <div>
+            <strong>{{ item.tipo || item.accion || 'Movimiento laboral' }}</strong>
+            <p>{{ item.descripcion || item.observacion || 'Sin descripcion' }}</p>
+            <small>{{ item.fecha || item.feccrea || 'Fecha no registrada' }}</small>
+          </div>
+        </div>
+        <p class="text-muted" *ngIf="historial.length === 0">Aun no hay eventos laborales registrados.</p>
+      </div>
+    </section>
+
+    <section class="tab-panel sombra" *ngIf="activeTab === 'documentos'">
+      <div class="document-grid">
+        <div class="document-card" *ngFor="let doc of documentos">
+          <i class="bi bi-file-earmark-text"></i>
+          <strong>{{ doc.nombre || doc.tipo || 'Documento' }}</strong>
+          <span>{{ doc.estado || 'Vigente' }}</span>
+        </div>
+        <div class="document-card muted" *ngIf="documentos.length === 0">
+          <i class="bi bi-folder2-open"></i>
+          <strong>Repositorio documental</strong>
+          <span>Contratos, titulos, certificados y evaluaciones apareceran aqui.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="tab-panel sombra" *ngIf="activeTab === 'usuario'">
+      <div class="info-grid">
+        <div class="info-card">
+          <h6>Cuenta del sistema</h6>
+          <dl>
+            <dt>Usuario</dt><dd>{{ personal.usuarioSistema || 'No vinculado' }}</dd>
+            <dt>Roles</dt><dd>{{ personal.roles || 'Empleado' }}</dd>
+            <dt>Ultimo acceso</dt><dd>{{ personal.ultimoAcceso || 'Sin registros' }}</dd>
+            <dt>Estado cuenta</dt><dd>{{ personal.estadoCuenta || 'Pendiente' }}</dd>
+          </dl>
+        </div>
+        <div class="info-card">
+          <h6>Auditoria reciente</h6>
+          <div class="mini-row" *ngFor="let item of auditoria">
+            <span>{{ item.fecha || item.feccrea || 'N/D' }}</span>
+            <strong>{{ item.accion || item.campo || 'Cambio' }}</strong>
+          </div>
+          <p class="text-muted mb-0" *ngIf="auditoria.length === 0">Sin auditoria disponible.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="tab-panel sombra" *ngIf="activeTab === 'evaluacion'">
+      <div class="info-grid">
+        <div class="info-card">
+          <h6>Evaluacion de desempeno</h6>
+          <div class="score-ring">92%</div>
+          <p class="text-muted">Indicador visual preparado para conectar evaluaciones, metas y observaciones.</p>
+        </div>
+        <div class="info-card">
+          <h6>Capacitaciones</h6>
+          <div class="mini-row"><span>Horas acumuladas</span><strong>{{ personal.horasCapacitacion || 0 }}</strong></div>
+          <div class="mini-row"><span>Certificados</span><strong>{{ personal.certificados || 0 }}</strong></div>
+          <div class="mini-row"><span>Pendientes</span><strong>{{ personal.capacitacionesPendientes || 0 }}</strong></div>
+        </div>
+      </div>
+    </section>
+  </ng-container>
   </div>
 </div>

@@ -1,124 +1,201 @@
-<div class="content mt-1 pt-1 pl-0">
-    <div class="container-fluid">
-        <div class="row m-0 px-0 py-1 justify-content-start cabecera sombra border">
-            <div class="col-sm-2">
-                <h5 class="m-0 font-weight-bold"><i class="fa fa-building"></i> Personal EPMAPAT</h5>
-            </div>
-            <div class="col-sm-6">
-                <div class="container-fluid">
-                    <form [formGroup]="f_personal" class="formGroup">
-                        <div class="row">
-                            <div class="col-sm-5">
-                                <div class="container">
-                                    <input type="text" placeholder="Buscar" class="form-control form-control-sm"
-                                        autofocus id="buscarAbonado" formControlName="bspersonal" />
-                                </div>
-                            </div>
-                            <div class="col-sm-3">
-                                <button class="btn btn-primary btn-sm">
-                                    <i class="fa fa-search" style="font-size:24pxi"></i> Buscar
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            <div class="col-sm-2">
-                <input type="text" class="form-control mx-0 form-control-sm text-center" placeholder="Filtrar..."
-                    [(ngModel)]="filterTerm" />
-            </div>
+<div class="content mt-1 pt-1 pl-0 rrhh-personal-page">
+  <div class="container-fluid">
+  <div class="personal-toolbar cabecera sombra border">
+    <div>
+      <p class="eyebrow mb-1">Talento humano</p>
+      <h5 class="mb-0 font-weight-bold"><i class="fa fa-building"></i> Personal / Empleados</h5>
+    </div>
+    <div class="toolbar-actions">
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="exportarCsv()">
+        <i class="bi bi-file-earmark-spreadsheet"></i> Excel
+      </button>
+      <button type="button" class="btn btn-outline-secondary btn-sm" onclick="window.print()">
+        <i class="bi bi-printer"></i> Imprimir
+      </button>
+      <button type="button" class="btn btn-primary btn-sm" [routerLink]="['/add-personal']">
+        <i class="bi bi-person-plus"></i> Nuevo empleado
+      </button>
+    </div>
+  </div>
 
-            <div class="btn-group ml-auto mt-0">
-                <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
-                    aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+  <form [formGroup]="f_personal" class="filter-panel detalle sombra border" (ngSubmit)="buscarPersonal()">
+    <div class="quick-search">
+      <div class="search-box">
+        <i class="bi bi-search"></i>
+        <input
+          type="search"
+          class="form-control"
+          placeholder="Buscar por nombre, cedula, correo, telefono, cargo, area..."
+          formControlName="q"
+          (keyup.enter)="buscarPersonal()"
+        />
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">
+        <i class="bi bi-search"></i> Buscar
+      </button>
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="filtrosAvanzados = !filtrosAvanzados">
+        <i class="bi bi-sliders"></i> Filtros
+      </button>
+      <button type="button" class="btn btn-link btn-sm" (click)="limpiar()">Limpiar</button>
+    </div>
+
+    <div class="advanced-grid" *ngIf="filtrosAvanzados">
+      <input class="form-control form-control-sm" placeholder="Nombres" formControlName="nombres" />
+      <input class="form-control form-control-sm" placeholder="Apellidos" formControlName="apellidos" />
+      <input class="form-control form-control-sm" placeholder="Cedula" formControlName="identificacion" />
+      <input class="form-control form-control-sm" placeholder="Correo" formControlName="email" />
+      <input class="form-control form-control-sm" placeholder="Telefono" formControlName="celular" />
+      <input class="form-control form-control-sm" placeholder="Puesto / cargo" formControlName="cargo" />
+      <input class="form-control form-control-sm" placeholder="Departamento" formControlName="departamento" />
+      <input class="form-control form-control-sm" placeholder="Direccion" formControlName="direccion" />
+      <select class="custom-select custom-select-sm" formControlName="estadoLaboral">
+        <option value="">Estado laboral</option>
+        <option>Activo</option>
+        <option>Vacaciones</option>
+        <option>Suspendido</option>
+        <option>Encargado</option>
+        <option>Comision</option>
+        <option>Desvinculado</option>
+      </select>
+      <input class="form-control form-control-sm" placeholder="Tipo contrato" formControlName="tipoContrato" />
+      <input class="form-control form-control-sm" placeholder="Usuario sistema" formControlName="usuarioSistema" />
+      <input class="form-control form-control-sm" placeholder="Area" formControlName="area" />
+      <input class="form-control form-control-sm" placeholder="Sucursal" formControlName="sucursal" />
+      <input type="date" class="form-control form-control-sm" formControlName="fechaIngresoDesde" title="Ingreso desde" />
+      <input type="date" class="form-control form-control-sm" formControlName="fechaIngresoHasta" title="Ingreso hasta" />
+    </div>
+  </form>
+
+  <div class="kpi-strip">
+    <div class="kpi-card detalle sombra border">
+      <span>Total</span>
+      <strong>{{ totalElements }}</strong>
+    </div>
+    <div class="kpi-card detalle sombra border">
+      <span>Activos</span>
+      <strong>{{ personalFiltrado.length }}</strong>
+    </div>
+    <div class="kpi-card detalle sombra border">
+      <span>Pagina</span>
+      <strong>{{ page + 1 }} / {{ totalPages }}</strong>
+    </div>
+    <div class="kpi-card detalle sombra border">
+      <span>Acciones</span>
+      <strong>{{ quickActions.length }}</strong>
+    </div>
+  </div>
+
+  <div class="table-shell sombra border">
+    <div class="table-state" *ngIf="cargando">
+      <div class="spinner-border text-primary" role="status"></div>
+      <span>Cargando personal...</span>
+    </div>
+
+    <div class="alert alert-warning py-2 mb-2" *ngIf="errorListado">
+      <i class="bi bi-exclamation-triangle"></i> {{ errorListado }}
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover table-sm rrhh-table mb-0">
+        <thead class="cabecera">
+          <tr>
+            <th style="width: 52px;">#</th>
+            <th class="sortable" (click)="ordenar('apellidos')">Empleado <i class="bi" [ngClass]="sortIcon('apellidos')"></i></th>
+            <th class="sortable" (click)="ordenar('identificacion')">Cedula <i class="bi" [ngClass]="sortIcon('identificacion')"></i></th>
+            <th>Contacto</th>
+            <th class="sortable" (click)="ordenar('cargo')">Cargo <i class="bi" [ngClass]="sortIcon('cargo')"></i></th>
+            <th class="sortable" (click)="ordenar('tipoContrato')">Contrato <i class="bi" [ngClass]="sortIcon('tipoContrato')"></i></th>
+            <th class="sortable" (click)="ordenar('estadoLaboral')">Estado <i class="bi" [ngClass]="sortIcon('estadoLaboral')"></i></th>
+            <th style="width: 170px;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="detalle">
+          <tr *ngFor="let personal of personalPagina; let i = index; trackBy: trackByPersonal">
+            <td class="text-muted text-center">{{ page * size + i + 1 }}</td>
+            <td>
+              <div class="employee-cell">
+                <div class="avatar">{{ iniciales(personal) }}</div>
+                <div>
+                  <button class="btn btn-link p-0 employee-name" type="button" (click)="onInfoPersonal(personal)">
+                    {{ nombreCompleto(personal) || 'Sin nombre' }}
+                  </button>
+                  <div class="text-muted small">Codigo {{ personal.codigo || 'N/D' }}</div>
+                </div>
+              </div>
+            </td>
+            <td>{{ personal.identificacion || 'N/D' }}</td>
+            <td>
+              <div>{{ personal.email || 'Sin correo' }}</div>
+              <small class="text-muted">{{ personal.celular || 'Sin telefono' }}</small>
+            </td>
+            <td>{{ cargo(personal) }}</td>
+            <td>{{ tipoContrato(personal) }}</td>
+            <td>
+              <span class="badge" [ngClass]="badgeEstado(personal)">
+                {{ estadoLaboral(personal) }}
+              </span>
+            </td>
+            <td>
+              <div class="btn-group btn-group-sm">
+                <button class="btn btn-outline-primary" type="button" title="Ver detalle" (click)="onInfoPersonal(personal)">
+                  <i class="bi bi-eye"></i>
                 </button>
-                <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-                    <button class="dropdown-item" [routerLink]="['/add-personal']" type="button">
-                        <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
-                    <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
-                        <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
-                    <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar"><i
-                            class="bi-file-earmark-arrow-up"></i>&nbsp; Exportar</button>
+                <button class="btn btn-outline-secondary" type="button" title="Editar" (click)="onEditPersonal(personal)">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-outline-warning" type="button" title="Activar o desactivar" (click)="onDeletePersonal(personal)">
+                  <i class="bi bi-power"></i>
+                </button>
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown">
+                  <i class="bi bi-three-dots"></i>
+                </button>
+                <div class="dropdown-menu dropdown-menu-right">
+                  <button class="dropdown-item" type="button" *ngFor="let action of quickActions" (click)="accionRapida(personal, action.label)">
+                    <i class="bi mr-2" [ngClass]="action.icon"></i>{{ action.label }}
+                  </button>
+                  <div class="dropdown-divider"></div>
+                  <button class="dropdown-item" type="button" (click)="imprimirFicha(personal)">
+                    <i class="bi bi-printer mr-2"></i>Imprimir ficha
+                  </button>
                 </div>
-            </div>
-
-
-        </div>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="!cargando && personalPagina.length === 0">
+            <td colspan="8" class="empty-state">
+              <i class="bi bi-person-lines-fill"></i>
+              <span>No hay empleados con los filtros seleccionados.</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-</div>
+  </div>
 
-<div class="container-fluid">
-    <div class="row mb-0">
-        <div class="col-sm">
-            <table class="table table-hover table-bordered table-sm sombra">
-                <thead class="text-center cabecera">
-                    <tr>
-                        <th>#</th>
-                        <th>Nombre</th>
-                        <th>Identificación</th>
-                        <th>Email</th>
-                        <th>Teléfono</th>
-                        <th>Cargo</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody class="detalle">
-                    <tr class="fila" *ngFor="let personal of _personal; let i = index">
-                        <td class="text-center small font-weight-bold">{{i+1}}</td>
-                        <td>{{ personal.apellidos }}, {{personal.nombres}}</td>
-                        <td class="text-center">{{ personal.identificacion}}</td>
-                        <td class="text-center">{{personal.email}}</td>
-                        <td>{{ personal.celular }}</td>
-                        <td>{{ personal.idcargo_cargos.descripcion }}</td>
-                        <td class="text-center">
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-xs btn-warning dropdown-toggle" style="background-color: #FFC107; border-color: #FFC107; color: #212529;"
-                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fa fa-chevron-down"></i>
-                                </button>
-                                <div class="dropdown-menu dropdown-menu-right">
-                                    <button class="dropdown-item" (click)="onEditPersonal(personal)">Modificar</button>
-                                    <button class="dropdown-item" (click)="onDeletePersonal(personal)">Eliminar</button>
-                                    <button class="dropdown-item"
-                                        (click)="onInfoPersonal(personal)">Información</button>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+  <div class="pagination-bar detalle sombra border">
+    <div class="d-flex align-items-center">
+      <span class="text-muted small mr-2">Filas por pagina</span>
+      <select class="custom-select custom-select-sm page-size" [(ngModel)]="size" (change)="cambiarTamanoPagina()">
+        <option *ngFor="let option of pageSizes" [ngValue]="option">{{ option }}</option>
+      </select>
     </div>
-
-    <!-- MODAL Imprimir-->
-    <div class="modal fade" id="imprimir" tabindex="-1" aria-labelledby="imprimirLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content border">
-                <div class='modal-header py-2 justify-content-center cabecera'>
-                    <h5 class='modal-title font-weight-bold' id='ModalLabel'>Imprimir</h5>
-                </div>
-                <div class='modal-body cuerpo'>
-
-                    <div class="input-group mb-3 input-group-sm">
-                        <div class="input-group-prepend">
-                            <label class="input-group-text" for="inputGroupSelect01">Reporte</label>
-                        </div>
-                        <select class="custom-select" id="inputGroupSelect01">
-                            <option selected>Abonados</option>
-                        </select>
-                    </div>
-
-                    <div class='row justify-content-center mt-3'>
-                        <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal'
-                            data-toggle="modal">
-                            <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
-                        <button type='button' class='btn btn-sm btn-outline-success btn-sm mx-1' data-dismiss='modal'>
-                            <i class="bi bi-x-circle"></i> Cancelar</button>
-                    </div>
-
-                </div>
-            </div>
-        </div>
+    <div class="btn-group btn-group-sm">
+      <button class="btn btn-outline-secondary" type="button" [disabled]="page === 0" (click)="cambiarPagina(page - 1)">
+        <i class="bi bi-chevron-left"></i>
+      </button>
+      <button
+        class="btn"
+        type="button"
+        *ngFor="let item of paginasVisibles"
+        [ngClass]="item === page ? 'btn-primary' : 'btn-outline-secondary'"
+        (click)="cambiarPagina(item)"
+      >
+        {{ item + 1 }}
+      </button>
+      <button class="btn btn-outline-secondary" type="button" [disabled]="page >= totalPages - 1" (click)="cambiarPagina(page + 1)">
+        <i class="bi bi-chevron-right"></i>
+      </button>
     </div>
-
+  </div>
+  </div>
 </div>

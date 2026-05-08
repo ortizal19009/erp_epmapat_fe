@@ -9,6 +9,7 @@ import { ContemergenciaService } from 'src/app/servicios/rrhh/contemergencia.ser
 import { DetcargoService } from 'src/app/servicios/rrhh/detcargo.service';
 import { PersonalService } from 'src/app/servicios/rrhh/personal.service';
 import { TpcontratosService } from 'src/app/servicios/rrhh/tpcontratos.service';
+import { PersonalValidators } from '../personal-validators';
 
 @Component({
   selector: 'app-add-personal',
@@ -34,6 +35,7 @@ export class AddPersonalComponent implements OnInit {
   cargoForm: boolean = true;
   personal: Personal = new Personal();
   mensajeError: string = '';
+  edadMinima = 18;
 
   constructor(
     private coloresService: ColoresService,
@@ -55,11 +57,17 @@ export class AddPersonalComponent implements OnInit {
       idtpcontrato_tpcontratos: [null, Validators.required],
       identificacion: [
         '',
-        [Validators.required, Validators.minLength(5), Validators.maxLength(20), Validators.pattern(/^[0-9A-Za-z-]+$/)],
+        [
+          Validators.required,
+          Validators.minLength(10),
+          Validators.maxLength(10),
+          Validators.pattern(/^\d{10}$/),
+          PersonalValidators.cedulaEcuatoriana(),
+        ],
       ],
       apellidos: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
       nombres: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
-      fecnacimiento: [''],
+      fecnacimiento: ['', [PersonalValidators.edadMinima(this.edadMinima)]],
       email: ['', [Validators.required, Validators.email, Validators.maxLength(100)]],
       celular: ['', [Validators.required, Validators.pattern(/^[0-9+\-\s]{7,15}$/)]],
       direccion: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(150)]],

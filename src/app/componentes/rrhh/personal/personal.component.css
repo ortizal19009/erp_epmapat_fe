@@ -1,15 +1,199 @@
-.cabecera {
-    background-color: var(--bgcolor1);
-    color: white;
- }
- .nuevoBG1 { background-color: var(--bgcolor1); }
- 
- .detalle { background-color: var(--bgcolor2); }
- .nuevoBG2 { background-color: var(--bgcolor2); }
- 
- .fila:hover {
-    background-color: #117a8B;
-    color: white;
-    cursor: pointer;
- }
- 
+.rrhh-personal-page {
+  min-height: calc(100vh - 70px);
+  padding-bottom: 16px;
+  color: #233041;
+}
+
+.personal-toolbar,
+.filter-panel,
+.table-shell,
+.pagination-bar {
+  border: 1px solid #dde5ef;
+  border-radius: 4px;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.personal-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+}
+
+.personal-toolbar,
+.personal-toolbar .eyebrow {
+  color: #fff;
+}
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.toolbar-actions,
+.quick-search,
+.pagination-bar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.filter-panel {
+  margin-top: 8px;
+  padding: 12px;
+}
+
+.quick-search {
+  flex-wrap: wrap;
+}
+
+.search-box {
+  position: relative;
+  flex: 1 1 360px;
+}
+
+.search-box .bi {
+  color: #667085;
+  left: 12px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.search-box input {
+  padding-left: 36px;
+}
+
+.advanced-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin-top: 12px;
+}
+
+.kpi-strip {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  margin: 12px 0;
+}
+
+.kpi-card {
+  border: 1px solid #dde5ef;
+  border-left: 4px solid var(--bgcolor1, #117a8b);
+  border-radius: 4px;
+  padding: 10px 12px;
+}
+
+.kpi-card span {
+  color: #667085;
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.kpi-card strong {
+  color: #172033;
+  font-size: 22px;
+}
+
+.table-shell {
+  overflow: hidden;
+}
+
+.table-state {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.86);
+  display: flex;
+  gap: 10px;
+  padding: 12px 16px;
+}
+
+.rrhh-table thead th {
+  border-bottom: 1px solid #d8e2ed;
+  color: #fff;
+  font-size: 12px;
+  text-transform: uppercase;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.rrhh-table td {
+  border-top: 1px solid #edf1f6;
+  vertical-align: middle;
+}
+
+.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.employee-cell {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  min-width: 220px;
+}
+
+.avatar {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #c9dcff;
+  border-radius: 50%;
+  color: #1557b0;
+  display: flex;
+  flex: 0 0 36px;
+  font-size: 12px;
+  font-weight: 800;
+  height: 36px;
+  justify-content: center;
+  width: 36px;
+}
+
+.employee-name {
+  color: var(--bgcolor1, #117a8b);
+  font-weight: 700;
+  text-align: left;
+}
+
+.badge {
+  border-radius: 4px;
+  font-size: 11px;
+  padding: 6px 9px;
+}
+
+.empty-state {
+  color: #667085;
+  padding: 34px !important;
+  text-align: center;
+}
+
+.empty-state .bi {
+  display: block;
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.pagination-bar {
+  justify-content: space-between;
+  margin-top: 12px;
+  padding: 10px 12px;
+}
+
+.page-size {
+  width: 82px;
+}
+
+@media (max-width: 768px) {
+  .personal-toolbar,
+  .pagination-bar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .toolbar-actions {
+    flex-wrap: wrap;
+  }
+}

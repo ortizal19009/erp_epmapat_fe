@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { PersonalService } from 'src/app/servicios/rrhh/personal.service';
 import { CargosService } from 'src/app/servicios/rrhh/cargos.service';
 import { TpcontratosService } from 'src/app/servicios/rrhh/tpcontratos.service';
 import { ContemergenciaService } from 'src/app/servicios/rrhh/contemergencia.service';
+import { PersonalValidators } from '../personal-validators';
 
 @Component({
   selector: 'app-modi-personal',
@@ -18,6 +19,7 @@ export class ModiPersonalComponent implements OnInit {
   _cargos: any;
   _tpcontratos: any;
   _contemergencia: any;
+  edadMinima = 18;
 
   constructor(
     private fb: FormBuilder,
@@ -33,16 +35,25 @@ export class ModiPersonalComponent implements OnInit {
     this.personalId = Number(sessionStorage.getItem('idpersonalToModi'));
 
     this.f_personal = this.fb.group({
-      codigo: [''],
-      identificacion: [''],
-      apellidos: [''],
-      nombres: [''],
-      fecnacimiento: [''],
-      email: [''],
-      celular: [''],
-      direccion: [''],
-      idcargo_cargos: [''],
-      idtpcontrato_tpcontratos: [''],
+      codigo: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(20)]],
+      identificacion: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(10),
+          Validators.maxLength(10),
+          Validators.pattern(/^\d{10}$/),
+          PersonalValidators.cedulaEcuatoriana(),
+        ],
+      ],
+      apellidos: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
+      nombres: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
+      fecnacimiento: ['', [PersonalValidators.edadMinima(this.edadMinima)]],
+      email: ['', [Validators.required, Validators.email, Validators.maxLength(100)]],
+      celular: ['', [Validators.required, Validators.pattern(/^[0-9+\-\s]{7,15}$/)]],
+      direccion: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(150)]],
+      idcargo_cargos: ['', Validators.required],
+      idtpcontrato_tpcontratos: ['', Validators.required],
       idcontemergencia_contemergencias: [''],
       sufijo: [''],
       tituloprofesional: [''],
@@ -136,6 +147,11 @@ export class ModiPersonalComponent implements OnInit {
 
   onSubmit() {
     if (!this.personalId) return;
+    this.f_personal.markAllAsTouched();
+    if (this.f_personal.invalid) {
+      alert('Revise los campos marcados antes de guardar.');
+      return;
+    }
 
     this.s_personal
       .updatePersonal(this.personalId, this.f_personal.value)
