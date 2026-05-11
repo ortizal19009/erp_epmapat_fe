@@ -1463,7 +1463,7 @@ export class RecaudacionComponent implements OnInit {
 
   getRubroxfacReimpresion(idfactura: number, interes: number) {
     this.totfac = 0;
-    this.rubxfacService.getByIdfactura(+idfactura!).subscribe({
+    this.rubxfacService.getDetalleByIdfactura(+idfactura!).subscribe({
       next: (detalle: any) => {
         this._rubrosxfac = detalle;
         this._subtotal(interes);

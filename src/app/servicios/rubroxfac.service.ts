@@ -45,6 +45,18 @@ export class RubroxfacService {
   getByIdfactura(idfactura: number) {
     return this.http.get<Rubroxfac[]>(`${baseUrl}?idfactura=${idfactura}`);
   }
+
+  getDetalleByIdfactura(idfactura: number) {
+    return this.http.get<Rubroxfac[]>(`${baseUrl}/detalle?idfactura=${idfactura}`);
+  }
+
+  async getDetalleByIdfacturaAsync(idfactura: number) {
+    const response = await firstValueFrom(
+      this.http.get<Rubroxfac[]>(`${baseUrl}/detalle?idfactura=${idfactura}`)
+    );
+    return response;
+  }
+
   async getByIdfacturaAsync(idfactura: number) {
     const response = await firstValueFrom(
       this.http.get<Rubroxfac[]>(`${baseUrl}?idfactura=${idfactura}`)

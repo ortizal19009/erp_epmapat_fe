@@ -581,7 +581,7 @@ export class InfoConvenioComponent implements OnInit {
 
   getRubroxfac(idfactura: number) {
     this.v_idfactura = idfactura;
-    this.rxfService.getByIdfactura(+idfactura!).subscribe({
+    this.rxfService.getDetalleByIdfactura(+idfactura!).subscribe({
       next: (detalle) => {
         this._rubroxfac = detalle;
         this.subtotal();

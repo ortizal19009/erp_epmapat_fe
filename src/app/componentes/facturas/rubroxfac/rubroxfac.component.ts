@@ -42,7 +42,7 @@ export class RubroxfacComponent implements OnInit {
 
    getRubroxfac() {
       let idFactura = sessionStorage.getItem('idfacturaToInfo');
-      this.rxfService.getByIdfactura(+idFactura!).subscribe(detalle => {
+      this.rxfService.getDetalleByIdfactura(+idFactura!).subscribe(detalle => {
          this.rubroxfac = detalle;
          this.subtotal();
       }, error => console.error(error));

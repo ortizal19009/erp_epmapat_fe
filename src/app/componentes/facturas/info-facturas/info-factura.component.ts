@@ -154,7 +154,7 @@ export class InfoFacturasComponent implements OnInit {
   }
 
   getRubroxfac() {
-    this.rxfService.getByIdfactura(this.idFactura!).subscribe({
+    this.rxfService.getDetalleByIdfactura(this.idFactura!).subscribe({
       next: (datos) => {
         this._rubroxfac = datos;
         this.subtotal();

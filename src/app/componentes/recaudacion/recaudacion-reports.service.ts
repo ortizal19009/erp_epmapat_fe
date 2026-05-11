@@ -178,7 +178,7 @@ export class RecaudacionReportsService {
       },
       error: (e) => console.error(e),
     });
-    this.rubxfacService.getByIdfactura(idfactura).subscribe({
+    this.rubxfacService.getDetalleByIdfactura(idfactura).subscribe({
       next: (_rubrosxfac: any) => {
         let rubros: any = [];
         _rubrosxfac.forEach((item: any) => {
@@ -335,7 +335,7 @@ export class RecaudacionReportsService {
       },
       error: (e) => console.error(e),
     });
-    this.rubxfacService.getByIdfactura(idfactura).subscribe({
+    this.rubxfacService.getDetalleByIdfactura(idfactura).subscribe({
       next: async (_rubrosxfac: any) => {
         let rubros: any = [];
         _rubrosxfac.forEach((item: any) => {
@@ -517,7 +517,7 @@ export class RecaudacionReportsService {
             this.cabeceraOtros(factura, doc, usuario);
           }
 
-          this.rubxfacService.getByIdfactura(idfactura).subscribe({
+          this.rubxfacService.getDetalleByIdfactura(idfactura).subscribe({
             next: (_rubrosxfac: any) => {
               let rubros: any = [];
               _rubrosxfac.forEach((item: any) => {

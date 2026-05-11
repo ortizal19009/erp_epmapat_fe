@@ -37,7 +37,7 @@ export class HistorialconsumoComponent implements OnInit {
   }
   getRubroxfac(idfactura: number) {
     this.idfactura = idfactura;
-    this.rubxfacService.getByIdfactura(+idfactura!).subscribe({
+    this.rubxfacService.getDetalleByIdfactura(+idfactura!).subscribe({
       next: detalle => {
         this._rubrosxfac = detalle;
         this.subtotal()

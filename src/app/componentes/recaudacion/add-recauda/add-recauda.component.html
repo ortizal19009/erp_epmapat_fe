@@ -15,9 +15,11 @@
         <form [formGroup]="f_buscar" class="row g-2" (ngSubmit)="btn_buscar()">
           <div class="col-md-5 d-flex">
             <input class="form-control form-control-sm text-center mr-1" type="number" formControlName="cuenta"
-              placeholder="Cuenta / Idabonado" min="1" (click)="txtCuenta($event)" (keypress)="txtCuenta($event)" />
+              placeholder="Cuenta / Idabonado" min="1" (click)="txtCuenta($event)" (keypress)="txtCuenta($event)"
+              (keydown.enter)="btn_buscar()" />
             <input class="form-control form-control-sm text-center" type="text" formControlName="identificacion"
-              placeholder="Identificación" (click)="txtIdentificacion($event)" (keypress)="txtIdentificacion($event)" />
+              placeholder="Identificación" (click)="txtIdentificacion($event)" (keypress)="txtIdentificacion($event)"
+              (keydown.enter)="btn_buscar()" />
           </div>
 
           <div class="col-md-2 d-flex align-items-center">
@@ -40,11 +42,11 @@
             </button>
           </div>
 
-          <div class="col-12">
+  <!--         <div class="col-12">
             <small class="text-white-50">
               Busca por <strong>Cuenta / Idabonado</strong> o por <strong>Identificación</strong>.
             </small>
-          </div>
+          </div> -->
         </form>
       </div>
 
@@ -95,21 +97,11 @@
 
 <div class="container-fluid">
   <div class="row">
-    <div class="col-sm mt-1 " *ngIf="!swSincobro()">
+    <div class="col-sm mt-1 " *ngIf="!mostrarResultadoCliente()">
       <div class=" card sombra ">
         <div class="card-body box-profile d-flex justify-content-center">
           <div class="col-sm-12 text-center">
             <img src="assets/img/logo.png" width="400" />
-          </div>
-        </div>
-      </div>
-      <div class="col-md-12" *ngIf="swNotFound ">
-        <div class="row justify-content-center">
-          <div class="callout callout-info text-center col-md-8">
-            <div class="alert alert-info">
-              <h5><i class="fas fa-info"></i> <strong> Mensaje</strong></h5>
-              No existe la <strong></strong>
-            </div>
           </div>
         </div>
       </div>
@@ -126,7 +118,7 @@
     </div>
   </div>
   <div class="row mt-1 mb-0 justify-content-left">
-    <div class="col-sm" *ngIf="swSincobro()">
+    <div class="col-sm" *ngIf="mostrarResultadoCliente()">
       <div class="card sombra">
         <div class="card-header">
           <h4 class="profile-username text-center">{{_cliente?.nombre}}</h4>
@@ -151,7 +143,12 @@
             </div>
           </div>
 
-          <div class="table-responsive" style="max-height: 700px; overflow-y: auto;">
+          <div *ngIf="swNotFound && !consultandoCartera" class="alert alert-info text-center w-100 mb-0">
+            <h5 class="mb-2"><i class="fas fa-info-circle mr-1"></i> Mensaje</h5>
+            {{ mensajeSinPendientes }}
+          </div>
+
+          <div *ngIf="swSincobro()" class="table-responsive" style="max-height: 700px; overflow-y: auto;">
             <table class="table table-hover table-sm table-bordered">
               <thead class="recaudacabecera">
                 <tr class="text-center">
@@ -326,7 +323,7 @@
           </div>
 
           <div class="mt-2 border rounded bg-white" style="min-height: 70vh;">
-            <iframe #pdfViewer [src]="previewPdfUrl" type="application/pdf" class="w-100"
+            <iframe *ngIf="previewPdfUrl" #pdfViewer [src]="previewPdfUrl" type="application/pdf" class="w-100"
               style="height: 70vh; border: 0;"></iframe>
             <div *ngIf="!previewPdfUrl && !previewLoading" class="d-flex align-items-center justify-content-center"
               style="height: 70vh; margin-top: -70vh; pointer-events: none;">
@@ -473,12 +470,20 @@
               <div class="input-group-prepend">
                 <span class="input-group-text" for="establecimiento">Establecimiento</span>
               </div>
-              <input type="text" id="establecimiento" value="{{abrirCaja.establecimiento}}"
-                [(ngModel)]="abrirCaja.establecimiento" readonly class="form-control form-control-sm" />
+              <select id="establecimiento" class="custom-select custom-select-sm"
+                [(ngModel)]="abrirCaja.idptoemision" [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="onEstablecimientoChange($event)">
+                <option *ngFor="let establecimiento of establecimientos" [ngValue]="establecimiento.idptoemision">
+                  {{ establecimiento.establecimiento }}
+                </option>
+              </select>
             </div>
+            <small class="text-muted d-block mb-3">
+              La apertura de caja usa el establecimiento asignado al usuario.
+            </small>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
-                <span class="input-group-text" for="establecimiento">Nro. Factura</span>
+                <span class="input-group-text" for="establecimiento">Última factura</span>
               </div>
               <input type="text" id="establecimiento" value="" [(ngModel)]="abrirCaja.nrofactura" readonly
                 class="form-control form-control-sm" />

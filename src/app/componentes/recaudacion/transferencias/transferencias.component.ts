@@ -272,7 +272,7 @@ export class TransferenciasComponent implements OnInit {
         _lecturas = resp;
         this.consumo =
           _lecturas[0].lecturaactual - _lecturas[0].lecturaanterior;
-        this.rubxfacService.getByIdfactura(idfactura).subscribe({
+        this.rubxfacService.getDetalleByIdfactura(idfactura).subscribe({
           next: (detalle) => {
             this._rubrosxfac = detalle;
             this.subtotal();

@@ -383,29 +383,52 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
     this._rubrosxfac = [];
     this.factura = new Facturas();
     this.detalleFactura = await this.facService.getByIdAsync(idfactura);
-    this.rubxfacService.getByIdfactura(+idfactura!).subscribe({
+    this.cargarRubrosFactura(idfactura);
+  }
+
+  private cargarRubrosFactura(idfactura: number) {
+    this.rubxfacService.getDetalleByIdfactura(+idfactura!).subscribe({
       next: (detalle: any) => {
-        this._rubrosxfac = detalle;
-        this.factura = detalle[0].idfactura_facturas;
-        if (detalle[0].idfactura_facturas.pagado === 1) {
-          this._fecFacturaService.getByIdFactura(+idfactura!).subscribe({
-            next: (fecfactura: any) => {
-              this.esFE = fecfactura.estado;
-              if (fecfactura != null) {
-                this.estadoFE = this.estado_FE(fecfactura.estado);
-              } else {
-                this.estadoFE = 'SIN GENERAR';
-              }
-            },
-            error: (e) => console.error(e),
-          });
-        } else if (detalle[0].idfactura_facturas.pagado === 0) {
-          this.estadoFE = 'PAGO PENDIENTE';
-        }
-        this.subtotal();
+        const rubros = Array.isArray(detalle) ? detalle : [];
+        this.procesarDetalleRubros(idfactura, rubros);
       },
-      error: (err) => console.error(err.error),
+      error: (err) => {
+        console.error(err.error);
+        this.procesarDetalleRubros(idfactura, []);
+      },
     });
+  }
+
+  private procesarDetalleRubros(idfactura: number, rubros: any[]) {
+    this._rubrosxfac = rubros;
+    const primerDetalle = this._rubrosxfac[0];
+    const facturaDetalle = primerDetalle?.idfactura_facturas ?? this.detalleFactura;
+
+    this.factura = facturaDetalle ?? new Facturas();
+
+    if (!this._rubrosxfac.length) {
+      this.estadoFE = 'SIN DETALLE';
+      this.subtotal();
+      return;
+    }
+
+    if (facturaDetalle?.pagado === 1) {
+      this._fecFacturaService.getByIdFactura(+idfactura!).subscribe({
+        next: (fecfactura: any) => {
+          this.esFE = fecfactura.estado;
+          if (fecfactura != null) {
+            this.estadoFE = this.estado_FE(fecfactura.estado);
+          } else {
+            this.estadoFE = 'SIN GENERAR';
+          }
+        },
+        error: (e) => console.error(e),
+      });
+    } else if (facturaDetalle?.pagado === 0) {
+      this.estadoFE = 'PAGO PENDIENTE';
+    }
+
+    this.subtotal();
   }
 
   detallesHistorial(lectura: Lecturas) { }

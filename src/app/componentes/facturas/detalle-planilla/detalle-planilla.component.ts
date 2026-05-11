@@ -28,13 +28,15 @@ export class DetallePlanillaComponent implements OnInit {
   }
   async getDatos() {
     let _sumaDetail: number = 0;
+    const rubrosAdicionales = Array.isArray(this.addRubro) ? this.addRubro : [];
     await this.s_rubroxfac
-      .getByIdfacturaAsync(this.idfactura)
+      .getDetalleByIdfacturaAsync(this.idfactura)
       .then((item: any) => {
-       this._rubros = [...item, ...this.addRubro];
+       this._rubros = [...item, ...rubrosAdicionales];
       })
       .catch((e: any) => {
         console.error(e);
+        this._rubros = [...rubrosAdicionales];
       });
     await this.s_lectutas
       .getByIdfacturaAsync(this.idfactura)
@@ -49,7 +51,7 @@ export class DetallePlanillaComponent implements OnInit {
       .catch((e: any) => {
         console.error(e);
       });
-    this._rubros.forEach((item: any) => {
+    (this._rubros || []).forEach((item: any) => {
       console.log(item);
       _sumaDetail += item.cantidad * item.valorunitario;
     });

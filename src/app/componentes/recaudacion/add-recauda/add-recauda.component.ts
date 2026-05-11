@@ -29,6 +29,10 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { JasperReportService, MergeItem } from 'src/app/servicios/jasper-report.service';
 import { PrintBridgeService, PrintProfile } from 'src/app/servicios/print-bridge.service';
+import { Ptoemision } from 'src/app/modelos/ptoemision';
+import { PtoemisionService } from 'src/app/servicios/ptoemision.service';
+import { RecaudaxcajaService } from 'src/app/servicios/recaudaxcaja.service';
+import { CajaService } from 'src/app/servicios/caja.service';
 declare var bootstrap: any; // 👈 para usar la librería de Bootstrap JS
 
 @Component({
@@ -52,6 +56,7 @@ export class AddRecaudaComponent implements OnInit {
   swBuscar: Boolean = false;
   swImprimir: Boolean = false;
   swNotFound: Boolean = false;
+  mensajeSinPendientes: string = '';
   swcaja: boolean = false;
   totalapagar: number = 0;
   fencola: any[] = [];
@@ -80,9 +85,14 @@ export class AddRecaudaComponent implements OnInit {
   saldoNotaCredito: number = 0;
   tieneNotaCredito: boolean = false;
   mensajeNotaCredito: string = '';
+  establecimientos: Ptoemision[] = [];
+  ultimoNumeroFactura: number = 1;
+  codigoCaja: string = '';
+  establecimientoAsignado: string = '';
   abrirCaja: any = {
     usuario: '',
     password: '',
+    idptoemision: null,
     establecimiento: '',
     nrofactura: '',
   };
@@ -105,7 +115,10 @@ export class AddRecaudaComponent implements OnInit {
     private authService: AutorizaService,
     private sanitizer: DomSanitizer,
     private router: Router,
-    private coloresService: ColoresService
+    private coloresService: ColoresService,
+    private ptoemisionService: PtoemisionService,
+    private recaudaxcajaService: RecaudaxcajaService,
+    private cajaService: CajaService
   ) {}
 
   ngOnInit(): void {
@@ -137,6 +150,7 @@ export class AddRecaudaComponent implements OnInit {
       colores1: t,
     });
     this.getAllFormaCobro();
+    this.getAllPtoEmision();
     this.getEstadoCaja();
     this.cargarConfiguracionImpresion();
   }
@@ -428,29 +442,48 @@ export class AddRecaudaComponent implements OnInit {
     this.recaCobroService.getCajaEstado(this.authService.idusuario).subscribe({
       next: async (item: any) => {
         this._estadoCaja = item;
+        this.codigoCaja = item?.codigo ?? this.codigoCaja;
+        this.ultimoNumeroFactura =
+          Number(item?.secuencial ?? item?.siguienteSecuencial ?? this.ultimoNumeroFactura) || 1;
         if (item.estado === 1) {
           this.swcaja = true;
           this.abrirCaja.usuario = item.username;
-          this.abrirCaja.nrofactura = `${item.establecimiento}-${item.codigo}-${String(item.secuencial ?? 0).padStart(9, '0')}`;
-          this.abrirCaja.establecimiento = item.establecimiento;
+          this.establecimientoAsignado = String(item.establecimiento ?? '');
+          this.seleccionarEstablecimientoPorCodigo(item.establecimiento);
+          this.actualizarNumeroFacturaCaja();
         } else {
           /* generar una consulta para traer user name de  */
           this.abrirCaja.usuario = this.authService.alias;
           this.swcaja = false;
+          this.cargarConfiguracionCajaUsuario();
         }
       },
       error: (e: any) => console.error(e),
     });
   }
   fnabrirCaja() {
+    const password = String(this.abrirCaja.password ?? '').trim();
+    if (!password) {
+      this.swal('error', 'Ingresa la contraseña para iniciar caja.');
+      return;
+    }
+
     this.recaCobroService
-      .abrirCaja(this.abrirCaja.usuario, this.abrirCaja.password)
+      .abrirCaja(this.abrirCaja.usuario, password)
       .subscribe({
         next: (item: any) => {
+          this.abrirCaja.password = '';
           this.swal('info', item.mensaje ?? 'Caja abierta correctamente.');
           this.getEstadoCaja();
         },
-        error: (e: any) => console.error(e),
+        error: (e: any) => {
+          console.error(e);
+          const mensaje =
+            e?.error?.mensaje ||
+            e?.error?.message ||
+            'La contraseña es incorrecta o no se pudo iniciar la caja.';
+          this.swal('error', mensaje);
+        },
       });
   }
   swal(icon: any, mensaje: any) {
@@ -481,9 +514,120 @@ export class AddRecaudaComponent implements OnInit {
     });
   }
 
+  getAllPtoEmision() {
+    this.ptoemisionService.getListaPtoEmision().subscribe({
+      next: (datos: Ptoemision[]) => {
+        this.establecimientos = datos ?? [];
+        if (!this.abrirCaja.idptoemision && this.establecimientos.length) {
+          const primero = this.establecimientos[0];
+          this.abrirCaja.idptoemision = primero.idptoemision;
+          this.abrirCaja.establecimiento = String(primero.establecimiento ?? '');
+          this.actualizarNumeroFacturaCaja();
+        }
+      },
+      error: (e: any) => console.error(e),
+    });
+  }
+
+  private cargarConfiguracionCajaUsuario() {
+    this.cajaService.getByIdUsuario(this.authService.idusuario).subscribe({
+      next: (caja: any) => {
+        if (!caja) {
+          return;
+        }
+
+        this.codigoCaja = caja?.codigo ?? this.codigoCaja;
+        const establecimiento = caja?.idptoemision_ptoemision?.establecimiento ?? '';
+        this.establecimientoAsignado = String(establecimiento ?? '');
+        this.seleccionarEstablecimientoPorCodigo(establecimiento);
+
+        const ultimoLocal = Number(caja?.ultimafact ?? 0);
+        if (ultimoLocal > 0) {
+          this.ultimoNumeroFactura = ultimoLocal;
+        }
+
+        if (!caja?.idcaja) {
+          this.actualizarNumeroFacturaCaja();
+          return;
+        }
+
+        this.recaudaxcajaService.getLastConexion(caja.idcaja).subscribe({
+          next: (conexion: any) => {
+            const ultimo = Number(caja?.ultimafact ?? conexion?.facfin ?? 0);
+            if (ultimo > 0) {
+              this.ultimoNumeroFactura = ultimo;
+            }
+            this.actualizarNumeroFacturaCaja();
+          },
+          error: (e: any) => {
+            console.error(e);
+            this.actualizarNumeroFacturaCaja();
+          },
+        });
+      },
+      error: (e: any) => console.error(e),
+    });
+  }
+
+  onEstablecimientoChange(idptoemision: any) {
+    const id = Number(idptoemision);
+    const seleccionado = this.establecimientos.find(
+      (item) => Number(item?.idptoemision) === id
+    );
+    const nuevoEstablecimiento = String(seleccionado?.establecimiento ?? '');
+
+    if (
+      this.establecimientoAsignado &&
+      nuevoEstablecimiento &&
+      nuevoEstablecimiento !== this.establecimientoAsignado
+    ) {
+      this.swal(
+        'info',
+        'La apertura de caja usa el establecimiento asignado al usuario. Para cambiarlo se requiere ajustar la caja del usuario o el endpoint de apertura.'
+      );
+      this.seleccionarEstablecimientoPorCodigo(this.establecimientoAsignado);
+      this.actualizarNumeroFacturaCaja();
+      return;
+    }
+
+    this.abrirCaja.idptoemision = Number.isFinite(id) ? id : null;
+    this.abrirCaja.establecimiento = nuevoEstablecimiento;
+    this.actualizarNumeroFacturaCaja();
+  }
+
+  private seleccionarEstablecimientoPorCodigo(codigo: string) {
+    const seleccionado = this.establecimientos.find(
+      (item) => String(item?.establecimiento ?? '') === String(codigo ?? '')
+    );
+
+    if (seleccionado) {
+      this.abrirCaja.idptoemision = seleccionado.idptoemision;
+      this.abrirCaja.establecimiento = String(
+        seleccionado.establecimiento ?? ''
+      );
+      return;
+    }
+
+    this.abrirCaja.establecimiento = String(codigo ?? '');
+  }
+
+  private actualizarNumeroFacturaCaja() {
+    const establecimiento = String(this.abrirCaja.establecimiento ?? '').trim();
+    const codigoCaja = String(this.codigoCaja ?? '').trim();
+    const numero = String(Number(this.ultimoNumeroFactura ?? 0)).padStart(9, '0');
+
+    if (!establecimiento || !codigoCaja) {
+      this.abrirCaja.nrofactura = numero !== '000000000' ? numero : '';
+      return;
+    }
+
+    this.abrirCaja.nrofactura = `${establecimiento}-${codigoCaja}-${numero}`;
+  }
+
   btn_buscar() {
     this.fencola = [];
     this.limpiarEstadoNotaCredito();
+    this.limpiarMensajeSinPendientes();
     let f = this.f_buscar.value;
     if (f.cuenta != '') {
       if (
@@ -553,6 +697,7 @@ export class AddRecaudaComponent implements OnInit {
     this._sincobro = [];
     this.totalapagar = 0;
     this.limpiarEstadoNotaCredito();
+    this.limpiarMensajeSinPendientes();
     try {
       const abonados = await firstValueFrom(this.aboService.getByidabonado(cuenta));
       const abonado = Array.isArray(abonados) ? abonados[0] : null;
@@ -566,7 +711,7 @@ export class AddRecaudaComponent implements OnInit {
       this._sincobro = Array.isArray(sincobro) ? sincobro : [];
 
       if (!this._sincobro.length) {
-        this.swal('warning', 'No tiene valores pendientes');
+        this.mostrarMensajeSinPendientes();
         return;
       }
 
@@ -586,6 +731,7 @@ export class AddRecaudaComponent implements OnInit {
     this._sincobro = [];
     this.totalapagar = 0;
     this.limpiarEstadoNotaCredito();
+    this.limpiarMensajeSinPendientes();
     this.consultandoCartera = true;
     const idcliente = this.obtenerIdCliente(cliente);
     if (idcliente == null) {
@@ -599,9 +745,13 @@ export class AddRecaudaComponent implements OnInit {
       .getSincobroByCliente(idcliente)
       .then((sincobro: any) => {
         this._sincobro = [...sincobro];
-        this.ordenarFacturasPendientes();
         this.getClienteById(idcliente);
-        this.actualizarContextoNotaCredito();
+        if (this._sincobro.length) {
+          this.ordenarFacturasPendientes();
+          this.actualizarContextoNotaCredito();
+        } else {
+          this.mostrarMensajeSinPendientes();
+        }
         this.loadingService.hideLoading();
         this.consultandoCartera = false;
         this.consultandoCarteraTexto = '';
@@ -619,6 +769,9 @@ export class AddRecaudaComponent implements OnInit {
     }
     return false;
   }
+  mostrarResultadoCliente() {
+    return !!this._cliente || this.consultandoCartera || !!this.mensajeSinPendientes;
+  }
   validarCampo(campo: any) {
     const regex = /^\s+/;
     return !regex.test(campo);
@@ -634,6 +787,17 @@ export class AddRecaudaComponent implements OnInit {
     this.s_cliente.getListaById(idcliente).subscribe((cliente: any) => {
       this._cliente = cliente;
     });
+  }
+
+  private limpiarMensajeSinPendientes() {
+    this.mensajeSinPendientes = '';
+    this.swNotFound = false;
+  }
+
+  private mostrarMensajeSinPendientes() {
+    const nombre = this._cliente?.nombre ? ` ${this._cliente.nombre}` : '';
+    this.mensajeSinPendientes = `El cliente${nombre} no tiene valores pendientes con la empresa.`;
+    this.swNotFound = true;
   }
 
   private obtenerIdCliente(origen: any): number | null {
