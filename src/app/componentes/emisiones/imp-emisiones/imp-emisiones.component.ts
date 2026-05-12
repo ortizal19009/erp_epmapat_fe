@@ -909,7 +909,7 @@ export class ImpEmisionesComponent implements OnInit {
     let valores = this.s_lecturas
       .findReporteValEmitidosxEmision(idemision)
       .toPromise();
-    return valores;
+    return this.filtrarRegistrosActivos(await valores);
   }
   async getEmisionIndividualByIdEmision(idemision: number) {
     let doc = new jsPDF();
@@ -972,7 +972,7 @@ export class ImpEmisionesComponent implements OnInit {
   }
   async getRubLectInicial(idemision: number) {
     let inicial = this.s_lecturas.findInicial(idemision).toPromise();
-    return inicial;
+    return this.filtrarRegistrosActivos(await inicial);
   }
   async getCM3Inicial(idemision: number) {
     let inicial = this.s_lecturas.findCM3Inicial(idemision).toPromise();
@@ -980,19 +980,19 @@ export class ImpEmisionesComponent implements OnInit {
   }
   async getRubLectEliminados(idemision: number) {
     let eliminados = this.s_lecturas.findEliminados(idemision).toPromise();
-    return eliminados;
+    return this.filtrarRegistrosActivos(await eliminados);
   }
   async getRubLectNuevos(idemision: number) {
     let nuevos = this.s_lecturas.findNuevos(idemision).toPromise();
-    return nuevos;
+    return this.filtrarRegistrosActivos(await nuevos);
   }
   async getRubLectActual(idemision: number) {
     let actual = this.s_lecturas.findActual(idemision).toPromise();
-    return actual;
+    return this.filtrarRegistrosActivos(await actual);
   }
   async getConsumoXCategoria(idemision: number) {
     let cxc = this.s_lecturas.findConsumoxCategoria(idemision).toPromise();
-    return cxc;
+    return this.filtrarRegistrosActivos(await cxc);
   }
   async getRefacturacionxEmision(idemision: number) {
     let reporte = this.s_emisionindividual
@@ -1090,5 +1090,13 @@ export class ImpEmisionesComponent implements OnInit {
   async getEmision(idemision: number) {
     const emision = await this.emiService.getByIdemision(idemision).toPromise();
     return emision;
+  }
+
+  private filtrarRegistrosActivos<T>(registros: T): T {
+    if (!Array.isArray(registros)) {
+      return registros;
+    }
+
+    return registros.filter((item: any) => item?.estado !== 0) as T;
   }
 }

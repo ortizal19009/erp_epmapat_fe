@@ -1034,7 +1034,7 @@ export class RecaudacionComponent implements OnInit {
                           await this.saveRubxFac(fac, rubro, item.interes);
                         }
                         if (fac.formapago !== 4) {
-                          this.s_fecfacturas.generateXmlOfPago(fac.idfactura);
+                          await this.s_fecfacturas.generarFacturaElectronica(fac);
                         }
                         item.procesando = false;
                         item.procesada = true;
@@ -1181,7 +1181,7 @@ export class RecaudacionComponent implements OnInit {
                           await this.saveRubxFac(fac, rubro, item.interes);
                         }
                         if (fac.formapago !== 4) {
-                          this.s_fecfacturas.generateXmlOfPago(fac.idfactura);
+                          await this.s_fecfacturas.generarFacturaElectronica(fac);
                         }
                         item.procesando = false;
                         item.procesada = true;
@@ -1461,11 +1461,15 @@ export class RecaudacionComponent implements OnInit {
     this.disabledcobro = this.formCobrar.controls['vuelto'].value < 0;
   }
 
+  private filtrarRubrosActivos(rubros: any[]): any[] {
+    return (rubros || []).filter((item: any) => item?.estado !== 0);
+  }
+
   getRubroxfacReimpresion(idfactura: number, interes: number) {
     this.totfac = 0;
     this.rubxfacService.getDetalleByIdfactura(+idfactura!).subscribe({
       next: (detalle: any) => {
-        this._rubrosxfac = detalle;
+        this._rubrosxfac = this.filtrarRubrosActivos(detalle);
         this._subtotal(interes);
       },
       error: (err) => console.error(err),

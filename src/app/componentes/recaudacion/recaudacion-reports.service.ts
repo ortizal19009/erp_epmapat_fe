@@ -43,6 +43,10 @@ export class RecaudacionReportsService {
     private s_facxnc: FacxncService,
     private s_jasperReport: JasperReportService
   ) { }
+
+  private filtrarRubrosActivos(rubros: any[]): any[] {
+    return (rubros || []).filter((item: any) => item?.estado !== 0);
+  }
   async cabeceraConsumoAgua(
     datos: any,
     doc: jsPDF,
@@ -180,8 +184,9 @@ export class RecaudacionReportsService {
     });
     this.rubxfacService.getDetalleByIdfactura(idfactura).subscribe({
       next: (_rubrosxfac: any) => {
+        const rubrosActivos = this.filtrarRubrosActivos(_rubrosxfac);
         let rubros: any = [];
-        _rubrosxfac.forEach((item: any) => {
+        rubrosActivos.forEach((item: any) => {
           if (item.idrubro_rubros.swiva === true) {
             this.iva += item.valorunitario * item.cantidad * 0.15;
           }
@@ -337,8 +342,9 @@ export class RecaudacionReportsService {
     });
     this.rubxfacService.getDetalleByIdfactura(idfactura).subscribe({
       next: async (_rubrosxfac: any) => {
+        const rubrosActivos = this.filtrarRubrosActivos(_rubrosxfac);
         let rubros: any = [];
-        _rubrosxfac.forEach((item: any) => {
+        rubrosActivos.forEach((item: any) => {
           if (item.idrubro_rubros.swiva === true) {
             this.iva += item.valorunitario * item.cantidad * 0.15;
           }
@@ -519,8 +525,9 @@ export class RecaudacionReportsService {
 
           this.rubxfacService.getDetalleByIdfactura(idfactura).subscribe({
             next: (_rubrosxfac: any) => {
+              const rubrosActivos = this.filtrarRubrosActivos(_rubrosxfac);
               let rubros: any = [];
-              _rubrosxfac.forEach((item: any) => {
+              rubrosActivos.forEach((item: any) => {
                 if (item.idrubro_rubros.swiva === true) {
                   this.iva += item.valorunitario * item.cantidad * 0.15;
                 }

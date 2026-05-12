@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Fecfactura } from '../modelos/fecfactura.model';
-import { Observable, firstValueFrom, from, interval } from 'rxjs';
+import { Observable, firstValueFrom, from, interval, lastValueFrom } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AutorizaService } from '../compartida/autoriza.service';
 import { DefinirService } from './administracion/definir.service';
@@ -76,6 +76,200 @@ export class FecfacturaService {
     private s_lecturas: LecturasService
   ) {}
 
+  private esRubroActivo(rubro: any): boolean {
+    const estados = [
+      rubro?.estado,
+      rubro?.idrubro_rubros?.estado,
+      rubro?.idrubro?.estado,
+    ].filter((estado) => estado !== undefined);
+
+    if (!estados.length) {
+      return true;
+    }
+
+    return estados.every(
+      (estado) => estado !== 0 && estado !== '0' && estado !== false
+    );
+  }
+
+  private async getRubrosActivosAsync(idfactura: number): Promise<any[]> {
+    const rubros = await this.rxfService.getRubrosAsync(idfactura);
+    return (rubros || []).filter((item: any) => this.esRubroActivo(item));
+  }
+
+  private resolverCodigoImpuesto(fechaCobro: any): number {
+    return fechaCobro <= '2024-03-31' ? 2 : 4;
+  }
+
+  private normalizarFechaEmision(fecha: any): string {
+    if (!fecha) {
+      return new Date().toISOString().slice(0, 19);
+    }
+
+    if (fecha instanceof Date) {
+      return fecha.toISOString().slice(0, 19);
+    }
+
+    const valor = String(fecha).trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(valor)) {
+      return `${valor}T00:00:00`;
+    }
+
+    const fechaConvertida = new Date(valor);
+    if (!Number.isNaN(fechaConvertida.getTime())) {
+      return fechaConvertida.toISOString().slice(0, 19);
+    }
+
+    return valor;
+  }
+
+  private calcularIvaRubro(rxf: any, codImpuesto: number): number {
+    if (rxf?.idrubro_rubros?.swiva !== true) {
+      return 0;
+    }
+
+    if (codImpuesto === 2) {
+      return rxf.valorunitario * rxf.cantidad * 0.12;
+    }
+
+    if (codImpuesto === 4) {
+      return rxf.valorunitario * rxf.cantidad * 0.15;
+    }
+
+    return 0;
+  }
+
+  private async guardarDetallesFacturaElectronica(
+    idfactura: number,
+    codImpuesto: number,
+    rubros: any[]
+  ): Promise<number> {
+    let sumaTotal = 0;
+
+    for (let i = 0; i < rubros.length; i++) {
+      const rxf = rubros[i];
+      const baseImponible = rxf.cantidad * rxf.valorunitario;
+      const detalle = {} as Fec_factura_detalles;
+      detalle.idfacturadetalle = rxf.idrubroxfac;
+      detalle.idfactura = idfactura;
+      detalle.codigoprincipal = rxf.idrubro_rubros.idrubro;
+      detalle.descripcion = rxf.idrubro_rubros.descripcion;
+      detalle.cantidad = rxf.cantidad;
+      detalle.preciounitario = rxf.valorunitario;
+      detalle.descuento = 0;
+
+      await lastValueFrom(this.fec_facdetalleService.saveFacDetalle(detalle));
+
+      const detalleImpuesto = {} as Fec_factura_detalles_impuestos;
+      detalleImpuesto.idfacturadetalleimpuestos = +`${rxf.idrubroxfac}${i}`;
+      detalleImpuesto.idfacturadetalle = rxf.idrubroxfac;
+      detalleImpuesto.codigoimpuesto = '2';
+
+      if (rxf?.idrubro_rubros?.swiva === true) {
+        detalleImpuesto.codigoporcentaje = codImpuesto.toString();
+      } else {
+        detalleImpuesto.codigoporcentaje = '0';
+      }
+
+      detalleImpuesto.baseimponible = baseImponible;
+      await this.fec_facdetimpService.saveFacDetalleImpuesto(detalleImpuesto);
+
+      sumaTotal += baseImponible + this.calcularIvaRubro(rxf, codImpuesto);
+    }
+
+    return sumaTotal;
+  }
+
+  async generarFacturaElectronica(factura: any): Promise<any> {
+    await this.datosDefinirAsync();
+    this._facturas = factura;
+
+    const rubros = await this.getRubrosActivosAsync(factura.idfactura);
+    if (!rubros.length) {
+      throw new Error(
+        `La factura ${factura.idfactura} no tiene rubros activos para exportar a facturación electrónica.`
+      );
+    }
+
+    const usuario = await this.s_usuario.getByIdusuarioAsync(
+      factura.usuariocobro
+    );
+
+    const fecfactura = {} as Fec_factura;
+    fecfactura.idfactura = factura.idfactura;
+    this.claveAcceso(0);
+    fecfactura.claveacceso = this.claveacceso;
+    fecfactura.secuencial = factura.nrofactura.slice(8, 18);
+    fecfactura.estado = 'I';
+    fecfactura.establecimiento = factura.nrofactura.slice(0, 3);
+    fecfactura.puntoemision = factura.nrofactura.slice(4, 7);
+    fecfactura.direccionestablecimiento = this.empresa.direccion;
+    fecfactura.fechaemision = this.normalizarFechaEmision(factura.fechacobro) as any;
+    fecfactura.tipoidentificacioncomprador =
+      factura.idcliente.idtpidentifica_tpidentifica.codigo;
+
+    if (
+      (factura.idmodulo.idmodulo === 3 && factura.idabonado > 0) ||
+      factura.idmodulo.idmodulo === 4
+    ) {
+      const abonado: Abonados = await this.getAbonado(factura.idabonado);
+      const lecturas = await this.getLectura(factura.idfactura);
+      const fecEmision: Date = new Date(lecturas[0].fechaemision);
+      fecfactura.razonsocialcomprador = abonado.idresponsable.nombre;
+      fecfactura.identificacioncomprador = abonado.idresponsable.cedula;
+      fecfactura.direccioncomprador = abonado.direccionubicacion;
+      fecfactura.referencia = factura.idabonado;
+      fecfactura.concepto = `${
+        fecEmision.getMonth() + 1
+      } del ${fecEmision.getFullYear()} Nro medidor: ${
+        lecturas[0].idabonado_abonados.nromedidor
+      }`;
+    } else {
+      fecfactura.razonsocialcomprador = factura.idcliente.nombre;
+      fecfactura.identificacioncomprador = factura.idcliente.cedula;
+      fecfactura.concepto = 'OTROS SERVICIOS';
+      fecfactura.referencia = 'S/N';
+      fecfactura.direccioncomprador = factura.idcliente.direccion;
+    }
+
+    fecfactura.telefonocomprador = factura.idcliente.telefono;
+    fecfactura.emailcomprador = factura.idcliente.email;
+    fecfactura.recaudador = usuario.nomusu;
+    this.tipocobro = factura.formapago;
+
+    const respuesta: any = await firstValueFrom(this.save(fecfactura));
+    const codImpuesto = this.resolverCodigoImpuesto(factura.fechacobro);
+    const total = await this.guardarDetallesFacturaElectronica(
+      factura.idfactura,
+      codImpuesto,
+      rubros
+    );
+
+    const pagos = {} as Fec_factura_pagos;
+    switch (this.tipocobro.toString()) {
+      case '1':
+      case '3':
+      case '6':
+        pagos.formapago = '01';
+        break;
+      case '4':
+      case '7':
+        pagos.formapago = '20';
+        break;
+      case '5':
+        pagos.formapago = '19';
+        break;
+    }
+    pagos.idfacturapagos = +`${factura.idfactura}0`;
+    pagos.idfactura = factura.idfactura;
+    pagos.total = total;
+    pagos.plazo = 0;
+    pagos.unidadtiempo = 'dias';
+    await firstValueFrom(this.fec_facPagosService.saveFacPago(pagos));
+
+    return respuesta;
+  }
+
   getLista(): Observable<Fecfactura[]> {
     return this.http.get<Fecfactura[]>(`${baseUrl}`);
   }
@@ -139,13 +333,7 @@ export class FecfacturaService {
   /* Exportar datos */
   async expDesdeAbonados(factura: any): Promise<any> {
     console.log('exportando desde abonados', factura.idfactura);
-    //await this.datosDefinirAsync();
-    // this.buildFactura(factura);
-    return firstValueFrom(
-      this.http.get<any>(
-        `${baseUrl}/createFacElectro?idfactura=${factura.idfactura}`
-      )
-    );
+    return this.generarFacturaElectronica(factura);
   }
 
   async datosDefinirAsync() {

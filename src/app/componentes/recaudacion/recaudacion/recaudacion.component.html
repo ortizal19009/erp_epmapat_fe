@@ -127,9 +127,14 @@
                         <i class="bi bi-telephone mr-1"></i>
                         <strong>Teléfono:</strong> {{ cliente.telefono }}
                       </span>
-                      <span class="text-muted small ntaCre" *ngIf="formCobrar.value.saldo">
-                        <i class="bi bi-credit-card mr-1"></i>
-                        <strong>Nota Crédito:</strong> {{ formCobrar.value.saldo }}
+                      <span class="ntaCre d-inline-flex align-items-center px-3 py-2 rounded shadow-sm"
+                        *ngIf="formCobrar.value.saldo"
+                        style="font-size: 1.1rem;font-weight: 700;background:#fff3cd; color: #856404; border: 2px solid #ffeeba; ">
+                        <i class="bi bi-credit-card mr-2" style="font-size: 1.3rem;"></i>
+
+                        <strong class="mr-2">Nota Crédito:</strong>
+
+                        {{ formCobrar.value.saldo }}
                       </span>
                     </div>
                   </div>
@@ -214,8 +219,7 @@
                   </thead>
                   <tbody>
                     <tr *ngFor="let sincobro of listaFiltrada; let i = index"
-                      [class.table-warning]="sincobro.estado == 3"
-                      [class.selected-row]="sincobro.pagado == 1">
+                      [class.table-warning]="sincobro.estado == 3" [class.selected-row]="sincobro.pagado == 1">
                       <td class="text-center serial-number small">{{ i+1 }}</td>
                       <td class="text-center account-number">
                         <span [ngClass]="{'text-muted': sincobro.idabonado == 0}" class="badge badge-light badge-sm">

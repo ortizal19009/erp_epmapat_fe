@@ -457,7 +457,7 @@ export class TransferenciasComponent implements OnInit {
           }
           this.facService.updateFacturas(fac).subscribe({
             next: async (nex) => {
-              await this.fecFacturaS.generateXmlOfPago(fac.idfactura)
+              await this.fecFacturaS.generarFacturaElectronica(fac);
               this.swtransferido = true;
               /* =============== */
               let nrofac = this._nroFactura.split('-', 3);

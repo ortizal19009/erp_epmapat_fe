@@ -137,6 +137,7 @@ export class InfoCajaComponent implements OnInit {
   cargarUltimaConexionPorDefecto() {
     this.recxcaja.getLastConexion(this.idcaja).subscribe({
       next: (dato) => {
+        console.log('Última conexión:', dato);
         const registros = dato ? [dato] : [];
         this._recaudaxcaja = this.ordenarRecaudaciones(registros);
         this.sinHistorial = this._recaudaxcaja.length === 0;
