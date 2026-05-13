@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Abonados } from 'src/app/modelos/abonados';
@@ -10,9 +11,12 @@ import { Ntacredito } from 'src/app/modelos/ntacredito';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { DocumentosService } from 'src/app/servicios/administracion/documentos.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
+import { JasperReportService } from 'src/app/servicios/jasper-report.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { NtacreditoService } from 'src/app/servicios/ntacredito.service';
+import { OutboxAttachment, OutboxEmailService } from 'src/app/servicios/outbox-email.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-add-ntacredito',
@@ -43,7 +47,9 @@ export class AddNtacreditoComponent implements OnInit {
     private loading: LoadingService,
     private s_abonado: AbonadosService,
     private s_ntacredito: NtacreditoService,
-    private s_documento: DocumentosService
+    private s_documento: DocumentosService,
+    private outboxEmailService: OutboxEmailService,
+    private jasperReportService: JasperReportService
   ) {}
 
   ngOnInit(): void {
@@ -146,9 +152,14 @@ export class AddNtacreditoComponent implements OnInit {
     ntacredito.iddocumento_documentos = f.iddocumento_documentos;
     ntacredito.refdocumento = f.refdocumento;
 
+    this.loading.showLoading();
     this.s_ntacredito.saveNtacredito(ntacredito).subscribe({
-      next: () => this.router.navigate(['/ntacredito']),
+      next: async (notaGuardada: any) => {
+        this.loading.hideLoading();
+        await this.solicitarEnvioNotificacion(notaGuardada);
+      },
       error: (e: any) => {
+        this.loading.hideLoading();
         console.error(e);
         this.formError = 'No se pudo guardar la nota de crédito. Revise e intente nuevamente.';
       }
@@ -292,5 +303,185 @@ export class AddNtacreditoComponent implements OnInit {
       cuenta: dato.idabonado,
       cliente: dato.idresponsable?.nombre ?? '',
     });
+  }
+
+  private async solicitarEnvioNotificacion(notaGuardada: any): Promise<void> {
+    const correoCliente = String(this.resppago?.email ?? '').trim();
+    const modal = await Swal.fire({
+      title: 'Notificar nota de crédito',
+      html: `
+        <p class="text-left mb-2">Confirma o agrega más correos separados por <strong>;</strong>.</p>
+        <input id="swal-nota-credito-emails" class="swal2-input" placeholder="correo1@dominio.com; correo2@dominio.com" value="${this.escapeHtml(correoCliente)}">
+      `,
+      icon: 'question',
+      showCancelButton: true,
+      showDenyButton: true,
+      confirmButtonText: 'Guardar y enviar',
+      denyButtonText: 'Guardar sin enviar',
+      cancelButtonText: 'Cancelar envío',
+      focusConfirm: false,
+      preConfirm: () => {
+        const input = document.getElementById('swal-nota-credito-emails') as HTMLInputElement | null;
+        const raw = input?.value ?? '';
+        const destinatarios = this.parseRecipients(raw);
+
+        if (!destinatarios.length) {
+          Swal.showValidationMessage('Ingresa al menos un correo válido para enviar la notificación.');
+          return false;
+        }
+
+        const invalidos = destinatarios.filter((correo) => !this.isValidEmail(correo));
+        if (invalidos.length) {
+          Swal.showValidationMessage(`Corrige los correos inválidos: ${invalidos.join('; ')}`);
+          return false;
+        }
+
+        return raw;
+      },
+    });
+
+    if (modal.isConfirmed) {
+      const destinatarios = this.parseRecipients(String(modal.value ?? ''));
+      this.loading.showLoading();
+      try {
+        const attachment = await this.buildNotaCreditoAttachment(notaGuardada);
+        const html = this.buildNotaCreditoEmailHtml(notaGuardada);
+
+        await firstValueFrom(
+          this.outboxEmailService.sendNotificationEmail({
+            to: destinatarios,
+            subject: `Nota de crédito disponible ${this.getNotaCreditoDisplay(notaGuardada)}`,
+            html,
+            text: this.stripHtml(html),
+            correlationId: `NOTA-CREDITO-${notaGuardada?.idntacredito ?? 'NUEVA'}-${Date.now()}`,
+            attachments: [attachment],
+          })
+        );
+
+        this.loading.hideLoading();
+        await Swal.fire({
+          icon: 'success',
+          title: 'Nota guardada',
+          text: 'La notificación fue enviada a la cola de correos.',
+        });
+      } catch (error) {
+        this.loading.hideLoading();
+        console.error('Error enviando notificación de nota de crédito:', error);
+        await Swal.fire({
+          icon: 'warning',
+          title: 'Nota guardada',
+          text: this.extractEmailError(error),
+        });
+      }
+    } else {
+      await Swal.fire({
+        icon: 'success',
+        title: 'Nota guardada',
+        text: 'La nota de crédito se registró correctamente.',
+        timer: 1800,
+        showConfirmButton: false,
+      });
+    }
+
+    await this.router.navigate(['/ntacredito']);
+  }
+
+  private parseRecipients(raw: string): string[] {
+    return String(raw ?? '')
+      .split(/[;,]/)
+      .map((item) => item.trim())
+      .filter((item) => !!item)
+      .filter((item, index, arr) => arr.indexOf(item) === index);
+  }
+
+  private isValidEmail(email: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email ?? '').trim());
+  }
+
+  private async buildNotaCreditoAttachment(notaGuardada: any): Promise<OutboxAttachment> {
+    const body = {
+      reportName: 'NtaCreditoIndividual',
+      parameters: {
+        idntacredito: notaGuardada?.idntacredito,
+        idusuario: this.authService.idusuario,
+      },
+      extencion: '.pdf',
+    };
+
+    const reporte = await this.jasperReportService.getReporte(body);
+    const blob = reporte instanceof Blob ? reporte : new Blob([reporte], { type: 'application/pdf' });
+    return this.fileToAttachment(blob, `nota_credito_${this.getNotaCreditoDisplay(notaGuardada)}.pdf`);
+  }
+
+  private async fileToAttachment(file: Blob, name: string): Promise<OutboxAttachment> {
+    const base64 = await this.blobToBase64(file);
+    return {
+      name,
+      contentType: file.type || 'application/octet-stream',
+      base64,
+    };
+  }
+
+  private blobToBase64(file: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = String(reader.result || '');
+        resolve(result.includes(',') ? result.split(',')[1] : result);
+      };
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  private buildNotaCreditoEmailHtml(notaGuardada: any): string {
+    const cliente = this.resppago?.nombre ?? 'cliente';
+    const cuenta = this._cuenta?.idabonado ?? '';
+    const valor = Number(notaGuardada?.valor ?? 0).toFixed(2);
+    const nota = this.getNotaCreditoDisplay(notaGuardada);
+    const usuario = this.authService.alias ?? 'sistema';
+
+    return `
+      <p>Estimado(a) ${cliente},</p>
+      <p>Se ha registrado una nota de crédito a su favor.</p>
+      <p><strong>Nota de crédito:</strong> ${nota}</p>
+      <p><strong>Cuenta:</strong> ${cuenta}</p>
+      <p><strong>Valor:</strong> ${valor}</p>
+      <p>Adjuntamos el PDF con el detalle e historial de uso de la nota de crédito.</p>
+      <p style="margin-top:16px;">Atentamente,<br>EPMAPA-T</p>
+      <p style="margin-top:12px; font-size:12px; color:#777;">Notificación generada por ${usuario}.</p>
+    `;
+  }
+
+  private stripHtml(html: string): string {
+    return html.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  private getNotaCreditoDisplay(notaGuardada: any): string {
+    return notaGuardada?.idntacredito != null ? String(notaGuardada.idntacredito) : 's_n';
+  }
+
+  private extractEmailError(error: any): string {
+    if (typeof error?.error === 'string' && error.error.trim()) {
+      return error.error.trim();
+    }
+    if (typeof error?.error?.message === 'string' && error.error.message.trim()) {
+      return error.error.message.trim();
+    }
+    if (Array.isArray(error?.error?.errors) && error.error.errors.length) {
+      return error.error.errors.join(' | ');
+    }
+    if (typeof error?.message === 'string' && error.message.trim()) {
+      return error.message.trim();
+    }
+    return 'La nota se guardó, pero no se pudo enviar la notificación por correo.';
+  }
+
+  private escapeHtml(value: string): string {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
   }
 }

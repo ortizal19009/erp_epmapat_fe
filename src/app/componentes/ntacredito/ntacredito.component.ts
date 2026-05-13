@@ -12,6 +12,7 @@ import { PdfService } from 'src/app/servicios/pdf.service';
 
 type SortColumn = 'cuenta' | 'cliente' | 'planilla' | 'identificacion' | 'valor' | 'devengado' | 'saldo';
 type SortDirection = 'asc' | 'desc';
+type EstadoFiltro = 'todos' | 'con-saldo' | 'agotadas' | 'pagadas-total';
 
 @Component({
   selector: 'app-ntacredito',
@@ -51,8 +52,18 @@ type SortDirection = 'asc' | 'desc';
                 </div>
             </div>
             <div class="col-sm-2">
-                <input type="text" class="form-control mx-0 form-control-sm text-center" placeholder="Filtrar..."
+                <input type="text" class="form-control mx-0 form-control-sm text-center"
+                    placeholder="Buscar cliente, identificación o cuenta..."
                     [(ngModel)]="filterTerm" (ngModelChange)="onFilterChange()" />
+            </div>
+            <div class="col-sm-2">
+                <select class="form-control form-control-sm text-center"
+                    [(ngModel)]="estadoFiltro" (ngModelChange)="onFilterChange()">
+                    <option value="todos">Todas</option>
+                    <option value="con-saldo">Con saldo a favor</option>
+                    <option value="agotadas">Usadas totalmente</option>
+                    <option value="pagadas-total">Pagadas totalmente</option>
+                </select>
             </div>
             <div class="btn-group ml-auto mt-0">
                 <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
@@ -98,6 +109,7 @@ type SortDirection = 'asc' | 'desc';
                         <th class="sortable" (click)="toggleSort('saldo')" style="cursor:pointer; user-select:none;">
                             Saldo {{ getSortIndicator('saldo') }}
                         </th>
+                        <th>Estado</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -110,7 +122,16 @@ type SortDirection = 'asc' | 'desc';
                         <td class="col-sm-1 text-right">{{ntacredito.idcliente_clientes.cedula}}</td>
                         <td class="text-right">{{ntacredito.valor}}</td>
                         <td class="text-right">{{ntacredito.devengado}}</td>
-                        <td class="text-right">{{(ntacredito.valor - ntacredito.devengado).toFixed(2)}}</td>
+                        <td class="text-right">{{getSaldo(ntacredito).toFixed(2)}}</td>
+                        <td class="text-center">
+                            <span class="badge"
+                                [ngClass]="{
+                                  'badge-success': getEstadoNotaCredito(ntacredito) === 'Con saldo a favor',
+                                  'badge-secondary': getEstadoNotaCredito(ntacredito) !== 'Con saldo a favor'
+                                }">
+                                {{ getEstadoNotaCredito(ntacredito) }}
+                            </span>
+                        </td>
                         <td class="text-center">
                             <div class="btn-group py-0">
                                 <button type="button" class="btn btn-warning btn-badged dropdown-toggle py-0"
@@ -180,6 +201,7 @@ type SortDirection = 'asc' | 'desc';
 export class NtacreditoComponent implements OnInit {
   f_bntacredito: FormGroup;
   filterTerm = '';
+  estadoFiltro: EstadoFiltro = 'todos';
   _ntacreditos: any;
   _ntacreditosAll: any[] = [];
   sortColumn: SortColumn = 'cuenta';
@@ -254,19 +276,15 @@ export class NtacreditoComponent implements OnInit {
   }
 
   get filteringActive(): boolean {
-    return !!this.filterTerm?.trim();
+    return !!this.filterTerm?.trim() || this.estadoFiltro !== 'todos';
   }
 
   get filteredNotasCreditos(): any[] {
     const term = (this.filterTerm || '').trim().toLowerCase();
     const source = this.filteringActive ? this._ntacreditosAll : this._ntacreditos;
 
-    if (!term) {
-      return source ?? [];
-    }
-
     return (source ?? []).filter((ntacredito: any) =>
-      this.matchesFilter(ntacredito, term),
+      this.matchesEstadoFiltro(ntacredito) && this.matchesFilter(ntacredito, term),
     );
   }
 
@@ -468,13 +486,17 @@ export class NtacreditoComponent implements OnInit {
   /* Fin de configuracion de paginacion */
 
   private matchesFilter(ntacredito: any, term: string): boolean {
+    if (!term) {
+      return true;
+    }
+
     const cuenta = String(ntacredito?.idabonado_abonados?.idabonado ?? '').toLowerCase();
     const cliente = String(ntacredito?.idcliente_clientes?.nombre ?? '').toLowerCase();
     const cedula = String(ntacredito?.idcliente_clientes?.cedula ?? '').toLowerCase();
     const planilla = String(ntacredito?.nrofactura ?? '').toLowerCase();
     const valor = String(ntacredito?.valor ?? '').toLowerCase();
     const devengado = String(ntacredito?.devengado ?? '').toLowerCase();
-    const saldo = String((ntacredito?.valor ?? 0) - (ntacredito?.devengado ?? 0)).toLowerCase();
+    const saldo = String(this.getSaldo(ntacredito)).toLowerCase();
 
     return (
       cuenta.includes(term) ||
@@ -485,6 +507,33 @@ export class NtacreditoComponent implements OnInit {
       devengado.includes(term) ||
       saldo.includes(term)
     );
+  }
+
+  getSaldo(ntacredito: any): number {
+    const valor = Number(ntacredito?.valor ?? 0);
+    const devengado = Number(ntacredito?.devengado ?? 0);
+    return +(valor - devengado).toFixed(2);
+  }
+
+  getEstadoNotaCredito(ntacredito: any): string {
+    const saldo = this.getSaldo(ntacredito);
+    return saldo > 0 ? 'Con saldo a favor' : 'Pagada totalmente';
+  }
+
+  private matchesEstadoFiltro(ntacredito: any): boolean {
+    const saldo = this.getSaldo(ntacredito);
+
+    switch (this.estadoFiltro) {
+      case 'con-saldo':
+        return saldo > 0;
+      case 'agotadas':
+        return saldo <= 0;
+      case 'pagadas-total':
+        return saldo <= 0;
+      case 'todos':
+      default:
+        return true;
+    }
   }
 
   async impDocumento(idntacredito: number) {

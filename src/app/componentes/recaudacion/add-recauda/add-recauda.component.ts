@@ -1256,7 +1256,7 @@ export class AddRecaudaComponent implements OnInit {
     const saldoNc = Number(this.saldoNotaCredito ?? 0);
 
     if (!this.tieneNotaCredito || total <= 0 || saldoNc <= 0) {
-      if (+this.f_cobrar.value.idformacobro === 6) {
+      if (+this.f_cobrar.value.idformacobro === 3 || +this.f_cobrar.value.idformacobro === 6) {
         this.f_cobrar.patchValue({ idformacobro: 1 });
       }
       return;
@@ -1264,7 +1264,7 @@ export class AddRecaudaComponent implements OnInit {
 
     if (saldoNc >= total) {
       this.f_cobrar.patchValue({
-        idformacobro: 6,
+        idformacobro: 3,
         ncvalor: total.toFixed(2),
         dinero: total.toFixed(2),
         vuelto: 0,
@@ -1273,7 +1273,7 @@ export class AddRecaudaComponent implements OnInit {
     }
 
     this.f_cobrar.patchValue({
-      idformacobro: 1,
+      idformacobro: 3,
       ncvalor: saldoNc.toFixed(2),
       dinero: (total - saldoNc).toFixed(2),
       vuelto: 0,
@@ -1406,13 +1406,22 @@ export class AddRecaudaComponent implements OnInit {
     console.log(e.target.value);
     const idformacobro = +this.f_cobrar.value.idformacobro!;
     if (idformacobro === 3) {
-      this.actualizarFormaCobroDesdeNotaCredito();
+      const total = Number(this.totalapagar ?? 0);
+      const saldoNc = Number(this.saldoNotaCredito ?? 0);
+      const ncAplicada = this.tieneNotaCredito ? Math.min(saldoNc, total) : 0;
+      const resto = Math.max(total - ncAplicada, 0);
+      this.f_cobrar.patchValue({
+        ncvalor: ncAplicada > 0 ? ncAplicada.toFixed(2) : '',
+        dinero: resto.toFixed(2),
+        vuelto: 0,
+      });
       return;
     }
 
     if (idformacobro === 6) {
       const total = Number(this.totalapagar ?? 0);
       this.f_cobrar.patchValue({
+        idformacobro: 3,
         ncvalor: total.toFixed(2),
         dinero: total.toFixed(2),
         vuelto: 0,
@@ -1434,7 +1443,7 @@ export class AddRecaudaComponent implements OnInit {
         });
         if (resto === 0) {
           this.f_cobrar.patchValue({
-            idformacobro: 6,
+            idformacobro: 3,
           });
         }
       } else {
