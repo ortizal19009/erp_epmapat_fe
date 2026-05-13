@@ -45,6 +45,7 @@ import { JasperReportService, MergeItem } from 'src/app/servicios/jasper-report.
 import { PtoemisionService } from 'src/app/servicios/ptoemision.service';
 import { DefinirService } from 'src/app/servicios/administracion/definir.service';
 import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
+import { RecaudacionCobroService } from 'src/app/servicios/recaudacion-cobro.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -145,6 +146,7 @@ export class RecaudacionComponent implements OnInit {
     private recaService: RecaudacionService,
     private facxrService: FacxrecaudaService,
     private s_recaudaxcaja: RecaudaxcajaService,
+    private recaCobroService: RecaudacionCobroService,
     private s_modulo: ModulosService,
     private loadingService: LoadingService,
     private s_ntacredito: NtacreditoService,
@@ -896,33 +898,76 @@ export class RecaudacionComponent implements OnInit {
 
   cobrar() {
     const fecha = new Date();
-    const r = {} as iRecaudacion;
+    const seleccionadas = (this._sincobro || []).filter(
+      (item: any) => item.pagado === 1 || item.pagado === true
+    );
 
-    r.fechacobro = fecha;
-    r.recaudador = this.authService.idusuario;
-    r.totalpagar = +this.formCobrar.value.valorAcobrar;
-    r.recibo = +this.formCobrar.value.dinero;
-    r.cambio = +this.formCobrar.value.vuelto;
-    r.formapago = this.idformacobro;
-    r.valor = +this.formCobrar.value.valorAcobrar;
-    r.estado = 1;
-    r.ncvalor = +this.formCobrar.value.ncvalor;
-    r.usucrea = this.authService.idusuario;
-    r.feccrea = fecha;
+    if (!seleccionadas.length) {
+      this.swal('warning', 'Selecciona al menos una factura para cobrar.');
+      return;
+    }
 
-    this.recaService.saveRecaudacion(r).subscribe({
-      next: async (resp) => {
-        const recaCreada = resp as Recaudacion;
-        try {
-          await this.facxrecauda(recaCreada, 0);
-          this.swal("success", "Recaudación cobrada con éxito.");
-        } catch (err) {
-          console.error('Error en facxrecauda:', err);
-          this.swal("error", "Ocurrió un problema al procesar las facturas.");
-        }
-      },
-      error: (err) => console.error('Al crear la Recaudación: ', err?.error ?? err),
+    const recaudacion = {} as iRecaudacion;
+    recaudacion.fechacobro = fecha;
+    recaudacion.recaudador = this.authService.idusuario;
+    recaudacion.totalpagar = +this.formCobrar.value.valorAcobrar;
+    recaudacion.recibo = +this.formCobrar.value.dinero;
+    recaudacion.cambio = +this.formCobrar.value.vuelto;
+    recaudacion.formapago = this.idformacobro;
+    recaudacion.valor = +this.formCobrar.value.valorAcobrar;
+    recaudacion.estado = 1;
+    recaudacion.ncvalor = +this.formCobrar.value.ncvalor;
+    recaudacion.usucrea = this.authService.idusuario;
+    recaudacion.feccrea = fecha;
+
+    seleccionadas.forEach((item: any) => {
+      item.procesando = true;
+      item.procesada = false;
     });
+
+    this.recaCobroService
+      .cobrarFacturas({
+        facturas: seleccionadas.map((item: any) => item.idfactura),
+        autentification: this.authService.idusuario,
+        recaudacion,
+        idcaja: this._caja?.idcaja,
+      })
+      .subscribe({
+        next: (resp: any) => {
+          const facturasResp = Array.isArray(resp?.facturas) ? resp.facturas : [];
+          const porId = new Map<number, any>(
+            facturasResp.map((item: any) => [Number(item?.idfactura), item] as [number, any])
+          );
+
+          seleccionadas.forEach((item: any) => {
+            const actualizada = porId.get(Number(item.idfactura));
+            if (actualizada) {
+              item.nrofactura = actualizada.nrofactura ?? item.nrofactura;
+              item.fechacobro = actualizada.feccrea ?? item.fechacobro;
+            }
+            item.procesando = false;
+            item.procesada = true;
+          });
+
+          if (resp?.numeroFacturaSiguiente) {
+            this._nroFactura = resp.numeroFacturaSiguiente;
+          }
+
+          if (resp?.caja) {
+            this.recxcaja = { ...this.recxcaja, ...resp.caja };
+          }
+
+          this.swcobrado = true;
+          this.swal('success', 'Recaudación cobrada y factura electrónica generada con éxito.');
+        },
+        error: (err) => {
+          seleccionadas.forEach((item: any) => {
+            item.procesando = false;
+          });
+          console.error('Error al cobrar facturas:', err?.error ?? err);
+          this.swal('error', 'Ocurrió un problema al procesar las facturas.');
+        },
+      });
   }
 
   private swal(icon: 'success' | 'error' | 'info' | 'warning', mensaje: string) {
@@ -939,136 +984,6 @@ export class RecaudacionComponent implements OnInit {
   // =====================
   //   FACxRECAUDA
   // =====================
-
-  ___facxrecauda(recaCreada: Recaudacion, i: number): Promise<void> {
-    return new Promise((resolve, reject) => {
-
-      const avanzar = (idx: number) => {
-        if (idx >= this._sincobro.length) {
-          resolve();
-          return;
-        }
-
-        const item = this._sincobro[idx];
-
-        if (item.pagado !== 1 && item.pagado !== true) {
-          item.procesando = false;
-          avanzar(idx + 1);
-          return;
-        }
-
-        item.procesando = true;
-
-        const idfactura: number = item.idfactura;
-        const valfactura: number = item.total + item.interes;
-        const fechacobro: Date = new Date();
-        const horaActual: string =
-          `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`;
-
-        const rubro: Rubros = new Rubros();
-        rubro.idrubro = 5;
-
-        this.facService.getById(idfactura).subscribe({
-          next: (fac: any) => {
-            fac.valornotacredito = this.calcularNCByFactura(valfactura, this.valorNtaCredito);
-
-            const facxr = {} as iFacxrecauda;
-            facxr.idrecaudacion = recaCreada;
-            facxr.idfactura = fac;
-            facxr.estado = 1;
-
-            this.facxrService.save(facxr).subscribe({
-              next: () => {
-                this.rubxfacService.getIva(this.iva, fac.idfactura).subscribe({
-                  next: (iva: any) => {
-                    fac.swiva = (iva && iva[0]) ? iva[0][1] : 0;
-                    fac.fechacobro = fechacobro;
-                    fac.horacobro = horaActual;
-
-                    if (this.swNC === true) {
-                      fac.formapago = 3;
-                    }
-
-                    fac.usuariocobro = this.authService.idusuario;
-                    fac.interescobrado = item.interes;
-                    fac.pagado = 1;
-                    fac.estado = (fac.estado === 2) ? 2 : 1;
-
-                    if (fac.nrofactura === null) {
-                      const nrofac = this._nroFactura.split('-', 3);
-                      const nrofac_f = +nrofac[2]! + 1;
-                      sessionStorage.setItem('ultfac', nrofac_f.toString().padStart(9, '0'));
-                      this.formatNroFactura(nrofac_f);
-                      fac.nrofactura =
-                        `${this._codRecaudador}-${nrofac_f.toString().padStart(9, '0')}`;
-
-                      this.s_recaudaxcaja.getLastConexion(this._caja.idcaja).subscribe({
-                        next: (datos) => {
-                          this.recxcaja = datos;
-                          this.recxcaja.facfin = nrofac_f;
-                          this.s_recaudaxcaja.updateRecaudaxcaja(this.recxcaja).subscribe({
-                            next: () => { },
-                            error: (e) => console.error(e),
-                          });
-                        },
-                        error: (e) => console.error(e),
-                      });
-                    }
-
-                    this.facService.updateFacturas(fac).subscribe({
-                      next: async (nex: any) => {
-                        if (this._nc.length > 0 && fac.valornotacredito > 0) {
-                          const valoresnc: Valoresnc = new Valoresnc();
-                          valoresnc.estado = 1;
-                          valoresnc.idntacredito_ntacredito = this._nc[0];
-                          valoresnc.valor = this.formCobrar.value.ncvalor;
-                          valoresnc.fechaaplicado = new Date();
-                          valoresnc.saldo =
-                            this._nc[0].saldo - this.formCobrar.value.ncvalor;
-                          this.guardarValoresNc(valoresnc, nex);
-                        }
-
-                        this.swcobrado = true;
-
-                        if (nex.idmodulo.idmodulo !== 27 || nex.interescobrado > 0) {
-                          await this.saveRubxFac(fac, rubro, item.interes);
-                        }
-                        if (fac.formapago !== 4) {
-                          await this.s_fecfacturas.generarFacturaElectronica(fac);
-                        }
-                        item.procesando = false;
-                        item.procesada = true;
-
-                        avanzar(idx + 1);
-                      },
-                      error: (err) => {
-                        item.procesando = false;
-                        reject(err?.error ?? err);
-                      },
-                    });
-                  },
-                  error: (e) => {
-                    item.procesando = false;
-                    reject(e);
-                  },
-                });
-              },
-              error: (err) => {
-                item.procesando = false;
-                reject(err?.error ?? err);
-              },
-            });
-          },
-          error: (err) => {
-            item.procesando = false;
-            reject(err?.error ?? err);
-          },
-        });
-      };
-
-      avanzar(i);
-    });
-  }
 
   facxrecauda(recaCreada: Recaudacion, i: number): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -1179,9 +1094,6 @@ export class RecaudacionComponent implements OnInit {
 
                         if (nex.idmodulo.idmodulo !== 27 || nex.interescobrado > 0) {
                           await this.saveRubxFac(fac, rubro, item.interes);
-                        }
-                        if (fac.formapago !== 4) {
-                          await this.s_fecfacturas.generarFacturaElectronica(fac);
                         }
                         item.procesando = false;
                         item.procesada = true;

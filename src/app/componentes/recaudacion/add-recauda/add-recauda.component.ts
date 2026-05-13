@@ -933,7 +933,7 @@ export class AddRecaudaComponent implements OnInit {
           vuelto: '',
         });
         this.limpiarEstadoNotaCredito();
-        this.swal('success', 'Cobro realizado. Puedes reimprimir el comprobante desde el menú.');
+        this.swal('success', 'Cobro realizado y factura electrónica generada. Puedes reimprimir el comprobante desde el menú.');
         this.getEstadoCaja();
       },
       error: (e: any) => {

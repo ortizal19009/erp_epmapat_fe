@@ -180,6 +180,9 @@ export class FecfacturaService {
     return sumaTotal;
   }
 
+  // OBSOLETO / REVISAR:
+  // Este flujo construye fec_factura desde frontend.
+  // La fuente de verdad recomendada ahora es el backend via /fec_factura/createFacElectro.
   async generarFacturaElectronica(factura: any): Promise<any> {
     await this.datosDefinirAsync();
     this._facturas = factura;
@@ -333,7 +336,7 @@ export class FecfacturaService {
   /* Exportar datos */
   async expDesdeAbonados(factura: any): Promise<any> {
     console.log('exportando desde abonados', factura.idfactura);
-    return this.generarFacturaElectronica(factura);
+    return this.generateXmlOfPago(factura.idfactura);
   }
 
   async datosDefinirAsync() {
@@ -342,6 +345,8 @@ export class FecfacturaService {
       this.empresa = def;
     } catch (error) {}
   }
+  // OBSOLETO / REVISAR:
+  // Flujo legacy de armado manual de fec_factura en cliente.
   async buildFactura(factura: any) {
     this._facturas = factura;
     let i = 0;
@@ -401,6 +406,8 @@ export class FecfacturaService {
       error: (e) => console.error(e),
     });
   }
+  // OBSOLETO / REVISAR:
+  // Parte del flujo legacy de construccion FE en frontend.
   buildDetalle(resp: any, codImpuesto: any) {
     this.rxfService
       .getRubrosAsync(resp.idfactura)
@@ -434,6 +441,8 @@ export class FecfacturaService {
       })
       .catch();
   }
+  // OBSOLETO / REVISAR:
+  // Parte del flujo legacy de construccion FE en frontend.
   buildDetalleImpuesto(
     rxf: any,
     codImpuesto: any,
@@ -464,6 +473,8 @@ export class FecfacturaService {
       .saveFacDetalleImpuesto(detalleImpuesto)
       .then((dato) => {});
   }
+  // OBSOLETO / REVISAR:
+  // Parte del flujo legacy de construccion FE en frontend.
   buildPago(resp: any, total: number) {
     let pagos = {} as Fec_factura_pagos;
     switch (this.tipocobro.toString()) {
@@ -497,6 +508,8 @@ export class FecfacturaService {
       error: (e) => console.error(e),
     });
   }
+  // OBSOLETO / REVISAR:
+  // Exportacion legacy que arma fec_factura desde frontend.
   async _exportar(i: number, factura: any) {
     this._facturas = factura;
     let j = 0;
@@ -629,6 +642,8 @@ export class FecfacturaService {
     return lectura;
   }
 
+  // OBSOLETO / REVISAR:
+  // Generacion de clave en frontend; mantener solo mientras existan pantallas legacy.
   claveAcceso(i: number) {
     this.claveacceso = '';
     let fecha = formatearFecha(1, this._facturas.fechacobro); //1: Sin slash para la Clave de acceso
@@ -655,6 +670,8 @@ export class FecfacturaService {
     this.claveacceso = this.claveacceso + verificador; //Dígito Verificador (Módulo 11)
   }
 
+  // OBSOLETO / REVISAR:
+  // Grabacion de pagos FE desde frontend.
   pagos = (resp: any, sumaTotal: number) => {
     let pagos = {} as Fec_factura_pagos;
     switch (this.tipocobro.toString()) {
@@ -778,10 +795,38 @@ function obtenerFechaActualString(fecha: Date) {
 }
 
 //Transforma la fecha: opcion 1: para la clave de acceso sin slash opcion=2 para el XML con slash
-function formatearFecha(opcion: number, fecha: string): string {
-  const dia = fecha.slice(8, 11);
-  const mes = fecha.slice(5, 7);
-  const año = fecha.slice(0, 4);
+function normalizarFechaTexto(fecha: any): string {
+  if (!fecha) {
+    return obtenerFechaActualString(new Date());
+  }
+
+  if (fecha instanceof Date) {
+    return obtenerFechaActualString(fecha);
+  }
+
+  const valor = String(fecha).trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(valor)) {
+    return valor.slice(0, 10);
+  }
+
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(valor)) {
+    const [dia, mes, anio] = valor.split('/');
+    return `${anio}-${mes}-${dia}`;
+  }
+
+  const fechaConvertida = new Date(valor);
+  if (!Number.isNaN(fechaConvertida.getTime())) {
+    return obtenerFechaActualString(fechaConvertida);
+  }
+
+  return obtenerFechaActualString(new Date());
+}
+
+function formatearFecha(opcion: number, fecha: any): string {
+  const fechaTexto = normalizarFechaTexto(fecha);
+  const dia = fechaTexto.slice(8, 10);
+  const mes = fechaTexto.slice(5, 7);
+  const año = fechaTexto.slice(0, 4);
   if (opcion == 1) return `${dia}${mes}${año}`;
   else return `${dia}/${mes}/${año}`;
 }

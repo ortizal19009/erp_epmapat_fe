@@ -74,6 +74,60 @@ export class ImpInfoCajasComponent implements OnInit {
     return local.toISOString().slice(0, 10);
   }
 
+  private getTotalResumen(rubro: any): number {
+    const total = Number(rubro?.[2] ?? 0);
+    return Number.isFinite(total) ? total : 0;
+  }
+
+  private debeMostrarRubroResumen(rubro: any): boolean {
+    return Math.abs(this.getTotalResumen(rubro)) > 0;
+  }
+
+  private calcularIvaResumen(rubro: any, fechaCorte: string): number {
+    const totalRecaudado = this.getTotalResumen(rubro);
+    if (rubro?.[3] !== true || totalRecaudado === 0) {
+      return 0;
+    }
+    return totalRecaudado * (fechaCorte >= '2024-04-01' ? 0.15 : 0.12);
+  }
+
+  private construirFilasResumenExcel(
+    fechaCorte: string
+  ): { filas: any[][]; totalGeneral: number } {
+    const filas: any[][] = [];
+    const agregarBloque = (titulo: string, rubros: any[]) => {
+      let subtotal = 0;
+      let iva = 0;
+      filas.push(['', titulo, '']);
+      (rubros || []).forEach((rubro: any) => {
+        if (!this.debeMostrarRubroResumen(rubro)) {
+          return;
+        }
+        const totalRecaudado = this.getTotalResumen(rubro);
+        subtotal += totalRecaudado;
+        iva += this.calcularIvaResumen(rubro, fechaCorte);
+        filas.push([rubro[0], rubro[1], totalRecaudado]);
+      });
+      if (iva > 0) {
+        filas.push(['', 'IVA', +iva.toFixed(2)]);
+      }
+      filas.push(['', 'SUBTOTAL', +(subtotal + iva).toFixed(2)]);
+      return subtotal + iva;
+    };
+
+    const totalActual = agregarBloque('PERÍODO ACTUAL', this._cobradas);
+    const totalAnterior = agregarBloque('PERÍODOS ANTERIORES', this._rubrosanterior);
+    const totalGeneral = +((totalActual || 0) + (totalAnterior || 0)).toFixed(2);
+    filas.push(['', 'TOTAL', totalGeneral]);
+    return { filas, totalGeneral };
+  }
+
+  private getTotalFacturaExportacion(factura: any): number {
+    const total = Number(factura?.total ?? 0);
+    const iva = Number(factura?.iva ?? 0);
+    return +((Number.isFinite(total) ? total : 0) + (Number.isFinite(iva) ? iva : 0)).toFixed(2);
+  }
+
   private toLocalDateTime(date: Date, time: string): string {
     const offset = date.getTimezoneOffset();
     const local = new Date(date.getTime() - offset * 60000);
@@ -395,7 +449,11 @@ export class ImpInfoCajasComponent implements OnInit {
     let i = 0;
     let iva1 = 0;
     this._cobradas.forEach((item: any) => {
-      let totalRecaudado = this._cobradas[i][2];
+      let totalRecaudado = this.getTotalResumen(this._cobradas[i]);
+      if (!this.debeMostrarRubroResumen(this._cobradas[i])) {
+        i++;
+        return;
+      }
       if (
         this._cobradas[i][3] === true &&
         this.formImprimir.value.d_fecha >= '2024-04-01' === true
@@ -408,14 +466,12 @@ export class ImpInfoCajasComponent implements OnInit {
       ) {
         iva1 += totalRecaudado * 0.12;
       }
-      if (this._cobradas[i][0] != 165) {
-        datos.push([
-          this._cobradas[i][0],
-          this._cobradas[i][1],
-          formatNumber(totalRecaudado),
-        ]);
-        suma += totalRecaudado;
-      }
+      datos.push([
+        this._cobradas[i][0],
+        this._cobradas[i][1],
+        formatNumber(totalRecaudado),
+      ]);
+      suma += totalRecaudado;
       i++;
     });
     kont = kont + i;
@@ -432,8 +488,8 @@ export class ImpInfoCajasComponent implements OnInit {
     let iva2 = 0;
     datos.push(['', 'PERÍODOS ANTERIORES']);
     this._rubrosanterior.forEach(() => {
-      if (this._rubrosanterior[i][0] != 165) {
-        let totalRecaudado = this._rubrosanterior[i][2];
+      if (this.debeMostrarRubroResumen(this._rubrosanterior[i])) {
+        let totalRecaudado = this.getTotalResumen(this._rubrosanterior[i]);
         // Math.round(this._rubrosanterior[i][2] * 100) / 100;
         if (
           this._rubrosanterior[i][3] === true &&
@@ -817,32 +873,10 @@ export class ImpInfoCajasComponent implements OnInit {
       };
     });
 
-    // Agrega los datos a la hoja de cálculo
-    let i = 0;
-    this._cobradas.forEach(() => {
-      let totalRecaudado = Math.round(this._cobradas[i][2] * 100) / 100;
-      const row = [this._cobradas[i][0], this._cobradas[i][1], totalRecaudado];
-      worksheet.addRow(row);
-      i++;
-    });
-
-    //Coloca la fila del Total
-    worksheet.addRow(['', 'TOTAL']);
-    worksheet.getCell('B' + (this._cobradas.length + 4).toString()).font = {
-      bold: true,
-    };
-
-    let celdaC = worksheet.getCell(
-      'C' + (this._cobradas.length + 4).toString()
+    const { filas } = this.construirFilasResumenExcel(
+      this.formImprimir.value.d_fecha
     );
-    celdaC.numFmt = '#,##0.00';
-    celdaC.font = { bold: true };
-    celdaC.value = {
-      formula: 'SUM(C4:' + 'C' + (this._cobradas.length + 3).toString() + ')',
-      result: 0,
-      sharedFormula: undefined,
-      date1904: false,
-    };
+    filas.forEach((row) => worksheet.addRow(row));
 
     // Establece el ancho de las columnas
     const anchoConfig = [
@@ -886,11 +920,25 @@ export class ImpInfoCajasComponent implements OnInit {
     // Formato numérico con decimales
     const numeroStyle1 = { numFmt: '#,##0.00' };
     const columnsToFormat1 = [3];
-    for (let i = 4; i <= this._cobradas.length + 3; i++) {
+    const ultimaFila = worksheet.rowCount;
+    for (let i = 4; i <= ultimaFila; i++) {
       columnsToFormat1.forEach((columnIndex) => {
         const cell = worksheet.getCell(i, columnIndex);
         cell.style = numeroStyle1;
       });
+    }
+
+    for (let i = 4; i <= ultimaFila; i++) {
+      const label = worksheet.getCell(`B${i}`).value;
+      if (
+        label === 'PERÍODO ACTUAL' ||
+        label === 'PERÍODOS ANTERIORES' ||
+        label === 'IVA' ||
+        label === 'SUBTOTAL' ||
+        label === 'TOTAL'
+      ) {
+        worksheet.getRow(i).font = { bold: true };
+      }
     }
 
     // Crea el archivo Excel
@@ -959,7 +1007,7 @@ export class ImpInfoCajasComponent implements OnInit {
 
     // Agrega los datos a la hoja de cálculo
     this._cobradas.forEach((factura: any) => {
-      let total = factura.total;
+      const total = this.getTotalFacturaExportacion(factura);
       const row = [
         factura[0].idfactura,
         factura[0].feccrea,
@@ -975,17 +1023,16 @@ export class ImpInfoCajasComponent implements OnInit {
 
     //Coloca la fila del Total
     worksheet.addRow(['', 'TOTAL']);
-    worksheet.getCell('B' + (this._cobradas.length + 4).toString()).font = {
+    const filaTotal = worksheet.rowCount;
+    worksheet.getCell('B' + filaTotal.toString()).font = {
       bold: true,
     };
 
-    let celdaG = worksheet.getCell(
-      'G' + (this._cobradas.length + 4).toString()
-    );
+    let celdaG = worksheet.getCell('G' + filaTotal.toString());
     celdaG.numFmt = '#,##0.00';
     celdaG.font = { bold: true };
     celdaG.value = {
-      formula: 'SUM(G4:' + 'G' + (this._cobradas.length + 3).toString() + ')',
+      formula: 'SUM(G4:' + 'G' + (filaTotal - 1).toString() + ')',
       result: 0,
       sharedFormula: undefined,
       date1904: false,
