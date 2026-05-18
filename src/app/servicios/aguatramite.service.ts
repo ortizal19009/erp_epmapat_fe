@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Aguatramite } from '../modelos/aguatramite.model';
@@ -23,6 +23,25 @@ export class AguatramiteService {
       let d = `${year - 1}-${month}-${day}`;
       let h = `${year}-${month}-${day}`;
       return this.http.get<Aguatramite>(`${baseUrl}/tipotramite/${idtipotramite}/${estado}/${d}/${h}`);
+   }
+
+   buscarPageable(payload: {
+      idtipotramite: number;
+      estado?: number | null;
+      cliente?: string | null;
+      fechaDesde?: string | null;
+      fechaHasta?: string | null;
+      page?: number;
+      size?: number;
+   }): Observable<any> {
+      let params = new HttpParams().set('idtipotramite', String(payload.idtipotramite));
+      if (payload.estado != null) params = params.set('estado', String(payload.estado));
+      if (payload.cliente) params = params.set('cliente', payload.cliente);
+      if (payload.fechaDesde) params = params.set('fechaDesde', payload.fechaDesde);
+      if (payload.fechaHasta) params = params.set('fechaHasta', payload.fechaHasta);
+      params = params.set('page', String(payload.page ?? 0));
+      params = params.set('size', String(payload.size ?? 10));
+      return this.http.get<any>(`${baseUrl}/buscar`, { params });
    }
 
    getAll(): Observable<Aguatramite[]> {

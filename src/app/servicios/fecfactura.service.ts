@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Fecfactura } from '../modelos/fecfactura.model';
-import { Observable, firstValueFrom, from, interval, lastValueFrom } from 'rxjs';
+import { Observable, firstValueFrom, from, interval, lastValueFrom, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AutorizaService } from '../compartida/autoriza.service';
 import { DefinirService } from './administracion/definir.service';
@@ -297,6 +297,32 @@ export class FecfacturaService {
     return this.http.get<Fecfactura[]>(
       `${baseUrl}/reenvio?desde=${desde}&hasta=${hasta}`
     );
+  }
+
+  buscarGestion(payload: any): Observable<Fecfactura[]> {
+    let params = new HttpParams();
+
+    Object.entries(payload || {}).forEach(([key, value]) => {
+      if (value !== null && value !== undefined && value !== '') {
+        params = params.set(key, String(value));
+      }
+    });
+
+    console.log('[fec_factura][gestion][service] query params:', params.toString());
+    return this.http.get<Fecfactura[]>(`${baseUrl}/gestion`, { params }).pipe(
+      tap((respuesta) => {
+        console.log('[fec_factura][gestion][service] total recibido:', respuesta?.length || 0);
+      })
+    );
+  }
+
+  enqueueMailQueue(payload: {
+    idfacturas: number[];
+    usuarioSolicita: number;
+    prioridad?: number;
+    ipSolicita?: string;
+  }): Observable<any> {
+    return this.http.post(`${baseUrl}/mail-queue`, payload);
   }
 
   //Save

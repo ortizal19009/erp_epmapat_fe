@@ -339,6 +339,7 @@ import { AddTrandecompromComponent } from './componentes/contabilidad/transaci/a
 import { ModiDesdetramiteComponent } from './componentes/contabilidad/transaci/modi-desdetramite/modi-desdetramite.component';
 import { AddPartixcertiComponent } from './componentes/contabilidad/partixcerti/add-partixcerti/add-partixcerti.component';
 import { AddPartixtramiteComponent } from './componentes/contabilidad/tramipresu/add-partixtramite/add-partixtramite.component';
+import { UsuarioAutocompleteComponent } from './componentes/facelectro/usuario-autocomplete/usuario-autocomplete.component';
 
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
@@ -663,6 +664,7 @@ import { AddPartixtramiteComponent } from './componentes/contabilidad/tramipresu
     ModiDesdetramiteComponent,
     AddPartixcertiComponent,
     AddPartixtramiteComponent,
+    UsuarioAutocompleteComponent,
     
   ],
 

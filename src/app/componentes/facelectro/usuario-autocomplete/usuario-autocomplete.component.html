@@ -1,0 +1,35 @@
+<div class="position-relative">
+  <div class="input-group input-group-sm">
+    <input
+      type="text"
+      class="form-control"
+      [disabled]="disabled"
+      [value]="searchTerm"
+      [placeholder]="placeholder"
+      (input)="onInputChange($any($event.target).value)"
+      autocomplete="off">
+    <div class="input-group-append" *ngIf="searchTerm">
+      <button type="button" class="btn btn-outline-secondary" (click)="limpiar()">
+        <i class="bi bi-x"></i>
+      </button>
+    </div>
+  </div>
+
+  <div
+    *ngIf="sugerencias.length"
+    class="list-group position-absolute w-100 shadow-sm"
+    style="z-index: 1050; max-height: 220px; overflow-y: auto;">
+    <button
+      type="button"
+      class="list-group-item list-group-item-action"
+      *ngFor="let usuario of sugerencias"
+      (click)="seleccionarUsuario(usuario)">
+      <div class="font-weight-bold">{{ usuario.nomusu || usuario.alias }}</div>
+      <small class="text-muted">
+        ID {{ usuario.idusuario }}<span *ngIf="usuario.identificausu"> · {{ usuario.identificausu }}</span>
+      </small>
+    </button>
+  </div>
+
+  <small class="text-muted" *ngIf="cargando">Cargando usuarios...</small>
+</div>

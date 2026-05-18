@@ -20,6 +20,7 @@ import { CategoriaService } from 'src/app/servicios/categoria.service';
 import { FacturaService } from 'src/app/servicios/factura.service';
 import { FacturamodificacionesService } from 'src/app/servicios/facturamodificaciones.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
+import { LecturasService } from 'src/app/servicios/lecturas.service';
 import { TramiteNuevoService } from 'src/app/servicios/tramite-nuevo.service';
 import { TramitesAguaService } from 'src/app/servicios/tramites-agua.service';
 import Swal from 'sweetalert2';
@@ -38,6 +39,7 @@ export class AguatramComponent implements OnInit {
    cambioCategoria: boolean = false;
    cambioMedidor: boolean = false;
    cambioPropietario: boolean = false;
+   cambioResponsablePago: boolean = false;
    btnActivate: boolean = true;
    f_datos: FormGroup;
    f_categoria: FormGroup;
@@ -57,7 +59,7 @@ export class AguatramComponent implements OnInit {
    categoria: Categoria = new Categoria();
    tramitenuevo: TramiteNuevo = new TramiteNuevo();
    ruta: Rutas = new Rutas();
-   date: Date = new Date();
+   date: Date = this.obtenerFechaActualLocal();
    tipoTramite: Tipotramite = new Tipotramite();
    // especificaTramite: EspecificaTramite = new EspecificaTramite();
    observaciones: string = '';
@@ -87,9 +89,39 @@ export class AguatramComponent implements OnInit {
       private s_documentos: DocumentosService,
       private s_facturas: FacturaService,
       private s_facturasModi: FacturamodificacionesService,
-      private s_loading: LoadingService
+      private s_loading: LoadingService,
+      private s_lecturas: LecturasService
 
    ) { }
+
+   private obtenerFechaActualLocal(): Date {
+      const ahora = new Date();
+      return new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 12, 0, 0, 0);
+   }
+
+   private formatearFechaInput(fecha: Date): string {
+      const anio = fecha.getFullYear();
+      const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+      const dia = String(fecha.getDate()).padStart(2, '0');
+      return `${anio}-${mes}-${dia}`;
+   }
+
+   private normalizarFechaLocal(valor?: string | Date | null): Date {
+      if (!valor) {
+         return this.obtenerFechaActualLocal();
+      }
+
+      if (valor instanceof Date) {
+         return new Date(valor.getFullYear(), valor.getMonth(), valor.getDate(), 12, 0, 0, 0);
+      }
+
+      const [anio, mes, dia] = valor.split('-').map(Number);
+      if (!anio || !mes || !dia) {
+         return this.obtenerFechaActualLocal();
+      }
+
+      return new Date(anio, mes - 1, dia, 12, 0, 0, 0);
+   }
 
    ngOnInit(): void {
 
@@ -130,6 +162,11 @@ export class AguatramComponent implements OnInit {
          case 5: {
             this.titulo = 'Cambio de propietario';
             this.cambioPropietario = true;
+            break;
+         }
+         case 10: {
+            this.titulo = 'Cambio de responsable de pago';
+            this.cambioResponsablePago = true;
             break;
          }
          case 6: {
@@ -186,7 +223,7 @@ export class AguatramComponent implements OnInit {
          iddocumento_documentos: [1, Validators.required],
          nrodocumento: ['', Validators.required],
       });
-      const fechaFormateada = this.date.toISOString().split('T')[0]; // "2025-07-29"
+      const fechaFormateada = this.formatearFechaInput(this.date);
 
       this.f_retiroMedidor.patchValue({
          fecmedidor: fechaFormateada
@@ -225,7 +262,7 @@ export class AguatramComponent implements OnInit {
       let abonado: Abonados = this.abonado;
       if (abonado.estado === 1 || abonado.estado === 2) {
          abonado.estado = 3;
-         this.date = this.f_retiroMedidor.value.fecmedidor;
+         this.date = this.normalizarFechaLocal(this.f_retiroMedidor.value.fecmedidor);
          this.observaciones = this.f_retiroMedidor.value.ubimedidor;
          this.aguatramite.nrodocumento = this.f_retiroMedidor.value.nrodocumento
          this.aguatramite.iddocumento_documentos = +this.f_retiroMedidor.value.iddocumento_documentos!
@@ -252,7 +289,7 @@ export class AguatramComponent implements OnInit {
 
    actualizarAbonado(abonado: Abonados) {
       abonado.usumodi = this.authService.idusuario;
-      abonado.fecmodi = new Date();
+      abonado.fecmodi = this.obtenerFechaActualLocal();
       const observacion = this.observaciones || 'Trámite de agua';
       this.s_abonados.updateAbonadoAuditoria(abonado, this.authService.idusuario, observacion, 'MODIFICACION').subscribe({
          next: (datos) => {
@@ -308,16 +345,18 @@ export class AguatramComponent implements OnInit {
    }
 
    guardarAguaTramite(abonado: Abonados, codmedidor: any) {
+      const fechaRegistro = this.normalizarFechaLocal(this.date);
+      this.date = fechaRegistro;
       this.aguatramite.codmedidor = codmedidor;
       this.aguatramite.comentario = '';
       this.aguatramite.estado = 3;
       this.aguatramite.sistema = 0;
-      this.aguatramite.fechaterminacion = this.date;
+      this.aguatramite.fechaterminacion = fechaRegistro;
       this.aguatramite.observacion = this.observaciones;
       this.aguatramite.idtipotramite_tipotramite = this.tipoTramite;
       this.aguatramite.idcliente_clientes = abonado.idcliente_clientes;
       this.aguatramite.usucrea = this.authService.idusuario;
-      this.aguatramite.feccrea = this.date;
+      this.aguatramite.feccrea = fechaRegistro;
 
       this.s_aguatramite.saveAguaTramite(this.aguatramite).subscribe({
          next: (datos) => {
@@ -343,6 +382,14 @@ export class AguatramComponent implements OnInit {
 
    }
 
+   confCambioResponsablePago() {
+      if (this._facturas.length === 0) {
+         this.actualizarResponsablePago();
+      } else {
+         this.modalConfirmacion?.show();
+      }
+   }
+
    async actualizarPropietario() {
       this.s_loading.showLoading();
       this.abonado.idcliente_clientes = this.selectClient;
@@ -363,8 +410,30 @@ export class AguatramComponent implements OnInit {
       this.s_loading.hideLoading();
    }
 
+   async actualizarResponsablePago() {
+      this.s_loading.showLoading();
+      this.abonado.idresponsable = this.selectClient;
+      this.observaciones = this.f_camPropietario.value.observaciones;
+      this.aguatramite.nrodocumento = this.f_camPropietario.value.nrodocumento;
+      this.aguatramite.iddocumento_documentos = +this.f_camPropietario.value.iddocumento_documentos!;
+
+      if (this.swActualizar) {
+         await this.actualizarFacturas();
+      }
+
+      this.actualizarAbonado(this.abonado);
+      this.guardarAguaTramite(this.abonado, null);
+      this.modalConfirmacion.hide();
+      this.swal("success", `Responsable de pago actualizado`);
+      this.s_loading.hideLoading();
+   }
+
    async actualizarFacturas(): Promise<void> {
       const facturas: any[] = this._facturas;
+      const actividadAuditoria = this.cambioResponsablePago
+         ? `CAMBIO DE RESPONSABLE DE PAGO CUENTA ${this.abonado?.idabonado ?? ''}`
+         : `CAMBIO DE PROPIETARIO CUENTA ${this.abonado?.idabonado ?? ''}`;
+      const tipoCambio = this.cambioResponsablePago ? 'RESPONSABLE_PAGO' : 'PROPIETARIO';
 
       // Mapeamos cada factura a una promesa
       const promesas = facturas.map(async (item: any) => {
@@ -374,11 +443,17 @@ export class AguatramComponent implements OnInit {
          facturaModi.idfactura = item.idfactura;
          facturaModi.datosfactura = JSON.stringify(item);
          facturaModi.detalle = JSON.stringify({
-            actividad: `CAMBIO DE PROPIETARIO CUENTA ${this.abonado}`,
+            tipoCambio,
+            actividad: actividadAuditoria,
+            cuenta: this.abonado?.idabonado ?? null,
+            clienteAnterior: this.abonado?.idcliente_clientes?.idcliente ?? null,
+            responsableAnterior: this.abonado?.idresponsable?.idcliente ?? null,
+            clienteNuevo: this.cambioPropietario ? this.selectClient?.idcliente ?? null : null,
+            responsableNuevo: this.selectClient?.idcliente ?? null,
             observacion: this.f_camPropietario.value.observacion,
             documento: this.f_camPropietario.value.nrodocumento
          });
-         facturaModi.fechacrea = this.date;
+         facturaModi.fechacrea = this.normalizarFechaLocal(this.date);
 
          // Espera a guardar la modificación
          await lastValueFrom(this.s_facturasModi.saveFacturacionModificaciones(facturaModi));
@@ -386,8 +461,23 @@ export class AguatramComponent implements OnInit {
          // Una vez guardado, actualiza la factura
          factura.idcliente = this.selectClient;
          factura.usumodi = this.authService.idusuario;
-         factura.fecmodi = this.date;
+         factura.fecmodi = this.normalizarFechaLocal(this.date);
          await this.s_facturas.saveFacturaAsync(factura);
+
+         const lecturas = await this.s_lecturas.getByIdfacturaAsync(item.idfactura);
+         if (Array.isArray(lecturas) && lecturas.length > 0) {
+            await Promise.all(
+               lecturas.map(async (lectura: any) => {
+                  lectura.idresponsable = this.selectClient.idcliente;
+                  lectura.usumodi = this.authService.idusuario;
+                  lectura.fecmodi = this.normalizarFechaLocal(this.date);
+                  if (this.cambioPropietario && lectura.idabonado_abonados) {
+                     lectura.idabonado_abonados.idcliente_clientes = this.selectClient;
+                  }
+                  await this.s_lecturas.updateLecturaAsync(lectura.idlectura, lectura);
+               })
+            );
+         }
       });
 
       // Espera a que todas las promesas terminen
@@ -407,11 +497,47 @@ export class AguatramComponent implements OnInit {
          adultomayor: abonado.adultomayor,
          municipio: abonado.municipio,
       });
-      if (this.cambioPropietario) {
+      if (this.cambioPropietario || this.cambioResponsablePago) {
          let facturas: any = await this.s_facturas.getAllFacturasByCuenta(abonado.idabonado);
          this.swal("warning", `Cuenta con ${facturas.length} facturas pendientes`)
          this._facturas = facturas;
       }
+   }
+
+   get etiquetaCambioTitular(): string {
+      return this.cambioResponsablePago ? 'Datos del nuevo responsable de pago' : 'Datos del nuevo propietario';
+   }
+
+   get etiquetaSeleccionTitular(): string {
+      return this.cambioResponsablePago ? 'Nuevo responsable de pago' : 'Nuevo propietario';
+   }
+
+   get mensajeConfirmacionFacturas(): string {
+      return this.cambioResponsablePago
+         ? 'Desea modificar el responsable de pago de las facturas?'
+         : 'Desea modificar el propietario y responsable de pago de las facturas?';
+   }
+
+   get notaConfirmacionFacturas(): string {
+      return this.cambioResponsablePago
+         ? `*NOTA: A las ${this._facturas.length} planillas pendientes se les modificará el responsable de pago.`
+         : `*NOTA: A las ${this._facturas.length} planillas pendientes se les modificará el propietario/responsable de pago.`;
+   }
+
+   confirmarCambioTitularidad(): void {
+      if (this.cambioResponsablePago) {
+         this.confCambioResponsablePago();
+         return;
+      }
+      this.confCambioPropietario();
+   }
+
+   aceptarCambioTitularidad(): void {
+      if (this.cambioResponsablePago) {
+         this.actualizarResponsablePago();
+         return;
+      }
+      this.actualizarPropietario();
    }
    swal(icon: any, mensaje: any) {
       Swal.fire({

@@ -5,6 +5,7 @@ import { firstValueFrom, interval, lastValueFrom, take } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Abonados } from 'src/app/modelos/abonados';
+import { Usuarios } from 'src/app/modelos/administracion/usuarios.model';
 import { Fecfactura } from 'src/app/modelos/fecfactura.model';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { DefinirService } from 'src/app/servicios/administracion/definir.service';
@@ -75,6 +76,21 @@ export class FecfacturaComponent implements OnInit {
   facturasReenvio: Fecfactura[] = [];
   reenviandoFacturas = false;
   progresoReenvio = 0;
+  showAdvancedFilters = true;
+  fecFacturasBase: Fecfactura[] = [];
+  fecFacturasFiltradas: Fecfactura[] = [];
+  seleccionados = new Set<number>();
+  selectedUsuario: Usuarios | null = null;
+  queuePreview: Fecfactura[] = [];
+  queueSummaryMessage = '';
+  usuariosGestion: Usuarios[] = [];
+  sugerenciasUsuariosGestion: Usuarios[] = [];
+  usuarioGestionTexto = '';
+  estadosGestion = this.estados;
+  estadosCorreo = ['ENVIADO', 'NO_ENVIADO', 'ERROR_ENVIO', 'REINTENTO'];
+  filasActualizadas = new Set<number>();
+  sortColumn: string = 'fechaemision';
+  sortDirection: 'asc' | 'desc' = 'desc';
   constructor(
     private router: Router,
     private fb: FormBuilder,
@@ -115,10 +131,27 @@ export class FecfacturaComponent implements OnInit {
       desdeFecha: obtenerFechaActualString(fechaActual),
       hastaFecha: obtenerFechaActualString(fechaActual),
     });
+    this.formGestion = this.fb.group({
+      numeroFactura: '',
+      claveAcceso: '',
+      estadoSri: '',
+      establecimiento: '',
+      puntoEmision: '',
+      secuencialDesde: '',
+      secuencialHasta: '',
+      fechaDesde: '',
+      fechaHasta: '',
+      emailEstado: '',
+      swmail: '',
+      soloFallidos: false,
+      soloSeleccionadas: false,
+    });
     // this.getFecFactura();
     this.getByEstado(this.v_estado, this.limit);
     this.validarReenvio();
+    this.cargarUsuariosGestion();
   }
+  formGestion: FormGroup;
 
   colocaColor(colores: any) {
     document.documentElement.style.setProperty('--bgcolor1', colores[0]);
@@ -175,10 +208,60 @@ export class FecfacturaComponent implements OnInit {
     this.setView('facturas');
   }
 
+  toggleAdvancedFilters() {
+    this.showAdvancedFilters = !this.showAdvancedFilters;
+  }
+
   private setView(view: 'facturas' | 'exportar' | 'reenviar' | null) {
     this.selectedView = view;
     this.showExportFilters = view === 'exportar';
     this.showReenvioPanel = view === 'reenviar';
+  }
+
+  onUsuarioGestionSelected(usuario: Usuarios | null) {
+    this.selectedUsuario = usuario;
+    this.usuarioGestionTexto = usuario?.nomusu ?? '';
+    this.sugerenciasUsuariosGestion = [];
+    this.aplicarFiltrosGestion();
+  }
+
+  cargarUsuariosGestion(): void {
+    this.s_usuario.getUsuarios().subscribe({
+      next: (usuarios: Usuarios[]) => {
+        this.usuariosGestion = (usuarios || []).filter((usuario) => usuario?.estado !== false);
+      },
+      error: (e) => console.error(e),
+    });
+  }
+
+  onUsuarioGestionInput(value: string): void {
+    this.usuarioGestionTexto = value;
+    const criterio = this.normalizarTexto(value);
+
+    if (!criterio) {
+      this.selectedUsuario = null;
+      this.sugerenciasUsuariosGestion = [];
+      return;
+    }
+
+    this.sugerenciasUsuariosGestion = this.usuariosGestion
+      .filter((usuario) =>
+        [usuario.nomusu, usuario.alias, usuario.identificausu]
+          .filter(Boolean)
+          .some((campo) => this.normalizarTexto(campo).includes(criterio))
+      )
+      .slice(0, 8);
+  }
+
+  seleccionarUsuarioGestion(usuario: Usuarios): void {
+    this.onUsuarioGestionSelected(usuario);
+  }
+
+  limpiarUsuarioGestion(): void {
+    this.usuarioGestionTexto = '';
+    this.selectedUsuario = null;
+    this.sugerenciasUsuariosGestion = [];
+    this.aplicarFiltrosGestion();
   }
 
   buscar() {
@@ -286,8 +369,8 @@ export class FecfacturaComponent implements OnInit {
           enviados++;
           if (factura.estado === 'O') {
             actualizados++;
-            factura.estado = 'A';
           }
+          this.marcarFacturaComoEnviada(factura.idfactura);
         } else {
           omitidos++;
         }
@@ -300,7 +383,6 @@ export class FecfacturaComponent implements OnInit {
     }
 
     this.reenviandoFacturas = false;
-    this.changeDato();
     this.swal(
       enviados ? 'success' : 'warning',
       `Reenvio finalizado. Enviadas: ${enviados}, actualizadas O->A: ${actualizados}, omitidas: ${omitidos}`
@@ -313,6 +395,7 @@ export class FecfacturaComponent implements OnInit {
       return false;
     }
 
+    factura = await this.asegurarXmlAutorizadoDisponible(factura);
     const pdfBlob = await this.facService.generarPDF_FacElectronica(factura.idfactura);
     const pdfAdjunto = await this.fileToAttachment(
       pdfBlob,
@@ -354,6 +437,43 @@ export class FecfacturaComponent implements OnInit {
     }
 
     return true;
+  }
+
+  private async asegurarXmlAutorizadoDisponible(factura: Fecfactura): Promise<Fecfactura> {
+    if (this.esXmlAutorizadoValido(factura?.xmlautorizado)) {
+      return factura;
+    }
+
+    const actualizada = await firstValueFrom(this.fecfacService.setxml(factura)) as Fecfactura;
+    if (actualizada) {
+      factura.xmlautorizado = actualizada.xmlautorizado;
+      factura.estado = actualizada.estado;
+      factura.claveacceso = actualizada.claveacceso;
+    }
+
+    if (!this.esXmlAutorizadoValido(factura?.xmlautorizado)) {
+      const estado = String(factura?.estado || '').trim().toUpperCase();
+      if (estado === 'P' || estado === 'X' || this.esRespuestaPendienteSri(factura?.xmlautorizado)) {
+        throw new Error('La factura todavia no tiene XML autorizado disponible en el SRI');
+      }
+      throw new Error('La factura no tiene un XML autorizado valido para generar el PDF');
+    }
+
+    return factura;
+  }
+
+  private esXmlAutorizadoValido(valor: any): boolean {
+    const texto = String(valor || '').trim();
+    return !!texto && texto.startsWith('<');
+  }
+
+  private esRespuestaPendienteSri(valor: any): boolean {
+    const texto = String(valor || '').trim();
+    return texto.startsWith('{') && texto.includes('"estado"') && texto.toUpperCase().includes('PENDIENTE');
+  }
+
+  puedeReenviarFactura(factura: Fecfactura): boolean {
+    return !this.esRespuestaPendienteSri(factura?.xmlautorizado);
   }
 
   exportar() {
@@ -583,6 +703,7 @@ export class FecfacturaComponent implements OnInit {
     this.fecfacService.getLista().subscribe({
       next: (datos: any) => {
         this.fec_facturas = datos;
+        this.applyCurrentSort();
       },
       error: (e) => {
         console.error(e);
@@ -596,6 +717,9 @@ export class FecfacturaComponent implements OnInit {
     this.fecfacService.getByEstado(estado, limit).subscribe({
       next: (datos: any) => {
         this.fec_facturas = datos;
+        this.fecFacturasBase = [...(datos || [])];
+        this.aplicarFiltrosGestionLocal(false);
+        this.applyCurrentSort();
       },
       error: (e) => console.error(e),
     });
@@ -609,15 +733,390 @@ export class FecfacturaComponent implements OnInit {
             this.fecfacService.getByCuenta(this.datoBusqueda).subscribe({
               next: (datos: any) => {
                 this.fec_facturas = datos;
+                this.fecFacturasBase = [...(datos || [])];
+                this.aplicarFiltrosGestionLocal(false);
+                this.applyCurrentSort();
               },
               error: (e) => console.error(e),
             });
           } else {
             this.fec_facturas = dato;
+            this.fecFacturasBase = [...(dato || [])];
+            this.aplicarFiltrosGestionLocal(false);
+            this.applyCurrentSort();
           }
         },
         error: (e) => console.error(e),
       });
+  }
+
+  aplicarFiltrosGestion(resetSeleccion = true): void {
+    const filtros = this.formGestion.getRawValue();
+    const payload = {
+      numeroFactura: filtros.numeroFactura || null,
+      claveAcceso: filtros.claveAcceso || null,
+      estadoSri: filtros.estadoSri || null,
+      establecimiento: filtros.establecimiento || null,
+      puntoEmision: filtros.puntoEmision || null,
+      secuencialDesde: filtros.secuencialDesde || null,
+      secuencialHasta: filtros.secuencialHasta || null,
+      fechaDesde: filtros.fechaDesde || null,
+      fechaHasta: filtros.fechaHasta || null,
+      emailEstado: filtros.emailEstado || null,
+      swmail: filtros.swmail === '' ? null : filtros.swmail === 'true',
+      soloFallidos: !!filtros.soloFallidos,
+      limit: this.limit || 300,
+    };
+    console.log('Payload de búsqueda:', payload);
+
+    this.fecfacService.buscarGestion(payload).subscribe({
+      next: (datos: Fecfactura[]) => {
+        this.fecFacturasBase = [...(datos || [])];
+        this.fecFacturasFiltradas = [...this.fecFacturasBase];
+        this.fec_facturas = [...this.fecFacturasBase];
+        this.applyCurrentSort();
+        if (resetSeleccion) {
+          this.seleccionados.clear();
+        }
+      },
+      error: (e) => {
+        console.error(e);
+        this.aplicarFiltrosGestionLocal(resetSeleccion);
+        if (e?.status === 400 || e?.status === 405) {
+          this.swal('warning', 'Se aplico el filtrado local para conservar la logica actual de estados FE');
+          return;
+        }
+        this.swal('error', 'No se pudo consultar la bandeja de comprobantes');
+      },
+    });
+  }
+
+  aplicarFiltrosGestionLocal(resetSeleccion = true): void {
+    const filtros = this.formGestion.getRawValue();
+    const numeroFactura = this.normalizarTexto(filtros.numeroFactura);
+    const claveAcceso = this.normalizarTexto(filtros.claveAcceso);
+    const establecimiento = this.normalizarTexto(filtros.establecimiento);
+    const puntoEmision = this.normalizarTexto(filtros.puntoEmision);
+    const emailEstado = this.normalizarTexto(filtros.emailEstado);
+    const swmail = String(filtros.swmail ?? '').trim();
+    const estadoSri = String(filtros.estadoSri || '').trim();
+    const desde = this.parseFechaLocal(filtros.fechaDesde);
+    const hasta = this.parseFechaLocal(filtros.fechaHasta);
+    const secDesde = this.parseSecuencial(filtros.secuencialDesde);
+    const secHasta = this.parseSecuencial(filtros.secuencialHasta);
+
+    this.fecFacturasFiltradas = (this.fecFacturasBase || []).filter((factura) => {
+      const numero = this.getNumeroFacturaDisplay(factura);
+      const fecha = this.parseFechaLocal(factura?.fechaemision);
+      const secuencial = this.parseSecuencial(factura?.secuencial);
+      const estadoCorreoFactura = this.obtenerEstadoCorreo(factura);
+      const swMailFactura = factura?.swmail;
+
+      if (numeroFactura && !this.normalizarTexto(numero).includes(numeroFactura)) return false;
+      if (claveAcceso && !this.normalizarTexto(factura?.claveacceso).includes(claveAcceso)) return false;
+      if (establecimiento && !this.normalizarTexto(factura?.establecimiento).includes(establecimiento)) return false;
+      if (puntoEmision && !this.normalizarTexto(`${factura?.establecimiento || ''}-${factura?.puntoemision || ''}`).includes(puntoEmision)) return false;
+      if (estadoSri && String(factura?.estado || '').trim().toUpperCase() !== estadoSri) return false;
+      if (emailEstado && estadoCorreoFactura !== emailEstado) return false;
+      if (swmail !== '' && String(!!swMailFactura) !== swmail) return false;
+      if (desde && (!fecha || fecha < desde)) return false;
+      if (hasta && (!fecha || fecha > hasta)) return false;
+      if (secDesde !== null && (secuencial === null || secuencial < secDesde)) return false;
+      if (secHasta !== null && (secuencial === null || secuencial > secHasta)) return false;
+      if (filtros.soloFallidos && estadoCorreoFactura !== 'ERROR_ENVIO') return false;
+      if (filtros.soloSeleccionadas && !this.seleccionados.has(factura.idfactura)) return false;
+      return true;
+    });
+
+    this.fec_facturas = [...this.fecFacturasFiltradas];
+    this.applyCurrentSort();
+
+    if (resetSeleccion) {
+      this.seleccionados.clear();
+    }
+  }
+
+  limpiarFiltrosGestion(): void {
+    this.formGestion.reset({
+      numeroFactura: '',
+      claveAcceso: '',
+      estadoSri: '',
+      establecimiento: '',
+      puntoEmision: '',
+      secuencialDesde: '',
+      secuencialHasta: '',
+      fechaDesde: '',
+      fechaHasta: '',
+      emailEstado: '',
+      swmail: '',
+      soloFallidos: false,
+      soloSeleccionadas: false,
+    });
+    this.selectedUsuario = null;
+    this.usuarioGestionTexto = '';
+    this.sugerenciasUsuariosGestion = [];
+    this.queuePreview = [];
+    this.queueSummaryMessage = '';
+    this.seleccionados.clear();
+    this.aplicarFiltrosGestion(false);
+  }
+
+  toggleSeleccionFactura(idfactura: number, checked: boolean): void {
+    const factura = (this.fec_facturas || []).find((item: Fecfactura) => item.idfactura === idfactura);
+    if (checked && factura && !this.puedeReenviarFactura(factura)) {
+      this.swal('warning', 'La factura seleccionada aun no tiene XML autorizado disponible');
+      return;
+    }
+    if (checked) this.seleccionados.add(idfactura);
+    else this.seleccionados.delete(idfactura);
+  }
+
+  toggleSeleccionTodas(event: any): void {
+    const checked = !!event?.target?.checked;
+    this.seleccionados.clear();
+    if (checked) {
+      this.fec_facturas
+        .filter((factura: Fecfactura) => this.puedeReenviarFactura(factura))
+        .forEach((factura: Fecfactura) => this.seleccionados.add(factura.idfactura));
+    }
+  }
+
+  estaSeleccionada(idfactura: number): boolean {
+    return this.seleccionados.has(idfactura);
+  }
+
+  get totalSeleccionadas(): number {
+    return this.seleccionados.size;
+  }
+
+  sortBy(column: string): void {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+    this.applyCurrentSort();
+  }
+
+  getSortIcon(column: string): string {
+    if (this.sortColumn !== column) {
+      return 'bi-arrow-down-up';
+    }
+    return this.sortDirection === 'asc' ? 'bi-sort-up' : 'bi-sort-down';
+  }
+
+  private applyCurrentSort(): void {
+    if (!Array.isArray(this.fec_facturas) || !this.fec_facturas.length) {
+      return;
+    }
+
+    const direction = this.sortDirection === 'asc' ? 1 : -1;
+    this.fec_facturas = [...this.fec_facturas].sort((a: Fecfactura, b: Fecfactura) => {
+      const valorA = this.getSortValue(a, this.sortColumn);
+      const valorB = this.getSortValue(b, this.sortColumn);
+      return this.compareSortValues(valorA, valorB) * direction;
+    });
+  }
+
+  private getSortValue(factura: Fecfactura, column: string): any {
+    switch (column) {
+      case 'idfactura':
+        return factura?.idfactura ?? 0;
+      case 'referencia':
+        return factura?.referencia ?? '';
+      case 'cliente':
+        return factura?.razonsocialcomprador ?? '';
+      case 'fechaemision':
+        return this.parseFechaLocal(factura?.fechaemision)?.getTime() ?? 0;
+      case 'numeroFactura':
+        return this.getNumeroFacturaDisplay(factura);
+      case 'estadoSri':
+        return this.obtenerEstadoSriGestion(factura);
+      case 'estadoEmail':
+        return this.obtenerEstadoCorreo(factura);
+      default:
+        return (factura as any)?.[column] ?? '';
+    }
+  }
+
+  private compareSortValues(a: any, b: any): number {
+    if (typeof a === 'number' && typeof b === 'number') {
+      return a - b;
+    }
+
+    return String(a ?? '').localeCompare(String(b ?? ''), 'es', {
+      numeric: true,
+      sensitivity: 'base',
+    });
+  }
+
+  async reenviarFacturasSeleccionadas(): Promise<void> {
+    const seleccionadas: Fecfactura[] = (this.fec_facturas || []).filter((factura: Fecfactura) =>
+      this.seleccionados.has(factura.idfactura)
+    );
+
+    if (!seleccionadas.length) {
+      this.swal('warning', 'Seleccione al menos una factura para reenviar');
+      return;
+    }
+
+    const confirmacion = await Swal.fire({
+      icon: 'question',
+      title: 'Confirmar reenvio',
+      text: `Se reenviaran ${seleccionadas.length} comprobantes a sus correos registrados. Desea continuar?`,
+      showCancelButton: true,
+      confirmButtonText: 'Si, reenviar',
+      cancelButtonText: 'Cancelar',
+      reverseButtons: true,
+    });
+
+    if (!confirmacion.isConfirmed) {
+      return;
+    }
+
+    this.reenviandoFacturas = true;
+    this.progresoReenvio = 0;
+
+    let enviados = 0;
+    let actualizados = 0;
+    let omitidos = 0;
+
+    for (let i = 0; i < seleccionadas.length; i++) {
+      const factura = seleccionadas[i];
+
+      try {
+        const enviado = await this.reenviarFacturaIndividual(factura);
+        if (enviado) {
+          enviados++;
+          if (factura.estado === 'O') {
+            actualizados++;
+          }
+          this.marcarFacturaComoEnviada(factura.idfactura);
+        } else {
+          omitidos++;
+        }
+      } catch (error) {
+        omitidos++;
+        console.error(`Error reenviando factura ${factura.idfactura}:`, error);
+      }
+
+      this.progresoReenvio = Math.round(((i + 1) * 100) / seleccionadas.length);
+    }
+
+    this.reenviandoFacturas = false;
+    this.queueSummaryMessage =
+      `Reenvio manual completado: ${enviados} enviados, ${actualizados} actualizados O->A, ${omitidos} omitidos.`;
+    this.swal(
+      enviados ? 'success' : 'warning',
+      `Reenvio manual finalizado. Enviadas: ${enviados}, actualizadas O->A: ${actualizados}, omitidas: ${omitidos}`
+    );
+  }
+
+  private marcarFacturaComoEnviada(idfactura: number): void {
+    const actualizar = (factura: Fecfactura | undefined | null): void => {
+      if (!factura) return;
+      if (factura.estado === 'O') {
+        factura.estado = 'A';
+      }
+      factura.swmail = true;
+      factura.mail_error = null as any;
+      factura.email_estado = 'ENVIADO';
+      factura.mail_intentos = (factura.mail_intentos || 0) + 1;
+    };
+
+    actualizar(this.facturasReenvio.find((item) => item.idfactura === idfactura));
+    actualizar(this.fecFacturasBase.find((item) => item.idfactura === idfactura));
+    actualizar(this.fecFacturasFiltradas.find((item) => item.idfactura === idfactura));
+    actualizar(this.fec_facturas.find((item: Fecfactura) => item.idfactura === idfactura));
+
+    this.fecFacturasBase = [...this.fecFacturasBase];
+    this.fecFacturasFiltradas = [...this.fecFacturasFiltradas];
+    this.fec_facturas = [...this.fec_facturas];
+    this.facturasReenvio = [...this.facturasReenvio];
+    this.marcarFilaActualizada(idfactura);
+    this.applyCurrentSort();
+  }
+
+  private marcarFilaActualizada(idfactura: number): void {
+    this.filasActualizadas.add(idfactura);
+    setTimeout(() => {
+      this.filasActualizadas.delete(idfactura);
+    }, 3000);
+  }
+
+  esFilaActualizada(idfactura: number): boolean {
+    return this.filasActualizadas.has(idfactura);
+  }
+
+  prepararReenvioLote(): void {
+    const base: Fecfactura[] = (this.fec_facturas || []).filter((factura: Fecfactura) =>
+      this.seleccionados.has(factura.idfactura)
+    );
+
+    if (!base.length) {
+      this.swal('warning', 'Seleccione al menos una factura para preparar el lote');
+      return;
+    }
+
+    this.queuePreview = base.filter((factura: Fecfactura) => this.parseRecipients(factura?.emailcomprador).length > 0);
+    const sinCorreo = base.length - this.queuePreview.length;
+    this.queueSummaryMessage =
+      `Lote preparado: ${this.queuePreview.length} comprobantes listos para cola.` +
+      (sinCorreo ? ` ${sinCorreo} quedaron fuera por no tener correo válido.` : '');
+    this.swal('info', 'El frontend dejó preparado el lote. El envío masivo debe ejecutarse desde una cola backend.');
+  }
+
+  reenviarSeleccionManual(): void {
+    this.swal(
+      'warning',
+      'El reenvío masivo síncrono fue desaconsejado. Usa la preparación de lote y conecta este botón a una cola backend.'
+    );
+  }
+
+  obtenerEstadoSriGestion(factura: Fecfactura): string {
+    const estado = String(factura?.estado || '').trim().toUpperCase();
+    const estadoEncontrado = this.estados.find((item) => item.letra === estado);
+    return estadoEncontrado ? `${estadoEncontrado.nombre} (${estadoEncontrado.letra})` : estado;
+  }
+
+  obtenerEstadoCorreo(factura: Fecfactura): string {
+    const estado = String(factura?.email_estado || '').trim().toUpperCase();
+    if (estado) {
+      return estado;
+    }
+    if (this.esRespuestaPendienteSri(factura?.xmlautorizado)) return 'PENDIENTE_AUTORIZACION';
+    if (factura?.mail_error) return 'ERROR_ENVIO';
+    if (factura?.swmail === true) return 'ENVIADO';
+    if ((factura?.mail_intentos || 0) > 0) return 'REINTENTO';
+    return 'NO_ENVIADO';
+  }
+
+  getBadgeCorreoClass(factura: Fecfactura): string {
+    const estado = this.obtenerEstadoCorreo(factura);
+    if (estado === 'ENVIADO') return 'badge-success';
+    if (estado === 'PENDIENTE_AUTORIZACION') return 'badge-info';
+    if (estado === 'ERROR_ENVIO') return 'badge-danger';
+    if (estado === 'REINTENTO') return 'badge-warning';
+    return 'badge-secondary';
+  }
+
+  getBadgeSriClass(factura: Fecfactura): string {
+    const estado = String(factura?.estado || '').trim().toUpperCase();
+    if (estado === 'A' || estado === 'O') return 'badge-success';
+    if (estado === 'L' || estado === 'M' || estado === 'U' || estado === 'E') return 'badge-danger';
+    if (estado === 'I' || estado === 'P') return 'badge-secondary';
+    if (estado === 'G' || estado === 'C') return 'badge-warning';
+    return 'badge-light';
+  }
+
+  private normalizarTexto(valor: any): string {
+    return String(valor || '').trim().toLowerCase();
+  }
+
+  private parseSecuencial(valor: any): number | null {
+    const limpio = String(valor || '').replace(/\D/g, '');
+    return limpio ? Number(limpio) : null;
   }
   setFactura(factura: any) {
     this.txtDetails = true;
@@ -842,7 +1341,8 @@ export class FecfacturaComponent implements OnInit {
   getFechaColor(): string {
     if (!this.factura?.fechaemision) return 'text-dark';
 
-    const fechaEmision = new Date(this.factura.fechaemision);
+    const fechaEmision = this.parseFechaLocal(this.factura.fechaemision);
+    if (!fechaEmision) return 'text-dark';
     const hoy = new Date();
 
     // días de diferencia
@@ -861,6 +1361,31 @@ export class FecfacturaComponent implements OnInit {
 
     // Por defecto negra
     return 'text-dark';
+  }
+
+  formatFechaEmision(fecha: any): string {
+    const fechaLocal = this.parseFechaLocal(fecha);
+    return fechaLocal ? obtenerFechaActualString(fechaLocal) : '';
+  }
+
+  private parseFechaLocal(value: any): Date | null {
+    if (!value) return null;
+    if (value instanceof Date) {
+      return new Date(value.getFullYear(), value.getMonth(), value.getDate(), 12, 0, 0, 0);
+    }
+
+    const texto = String(value).trim();
+    const match = texto.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (match) {
+      const year = Number(match[1]);
+      const month = Number(match[2]) - 1;
+      const day = Number(match[3]);
+      return new Date(year, month, day, 12, 0, 0, 0);
+    }
+
+    const parsed = new Date(texto);
+    if (Number.isNaN(parsed.getTime())) return null;
+    return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate(), 12, 0, 0, 0);
   }
 
   swal(icon: any, mensaje: any) {

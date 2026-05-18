@@ -19,4 +19,10 @@ export class Fecfactura {
   concepto: String; 
   referencia: String; 
   recaudador: String; 
+  usuariocobro?: number;
+  swmail?: boolean;
+  mail_intentos?: number;
+  mail_error?: String;
+  email_estado?: String;
+  fecha_reenvio?: Date;
 }

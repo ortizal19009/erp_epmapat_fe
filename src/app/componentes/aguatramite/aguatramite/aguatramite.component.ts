@@ -25,7 +25,13 @@ export class AguatramiteComponent implements OnInit {
    _aguatramite: any;
    aguatramites: any;
    filterTerm: string;
-   l_tipotramite: any;  //Solo 1,2,5, y 9
+   totalElements = 0;
+   totalPages = 0;
+   currentPage = 0;
+   pageSize = 10;
+   sortColumn: string = 'feccrea';
+   sortDirection: 'asc' | 'desc' = 'desc';
+   l_tipotramite: any;  //Solo 1,2,4,5,9 y cambio responsable de pago
    btnSelectTpTramite: boolean = false;
    estados: any = [
       { valor: 1, estado: 'Recien ingresado' },
@@ -56,6 +62,9 @@ export class AguatramiteComponent implements OnInit {
       this.formBuscar = this.fb.group({
          idtipotramite_tipotramite: 1,
          estado: 1,
+         cliente: '',
+         fechaDesde: this.getInicioAnioActual(),
+         fechaHasta: formatDate(this.today, 'yyyy-MM-dd', 'en-US'),
       });
       this.optImprimir = this.fb.group({
          opt: 0,
@@ -99,7 +108,9 @@ export class AguatramiteComponent implements OnInit {
                   dato.idtipotramite === 2 ||
                   dato.idtipotramite === 4 ||
                   dato.idtipotramite === 5 ||
-                  dato.idtipotramite === 9
+                  dato.idtipotramite === 9 ||
+                  dato.idtipotramite === 10 ||
+                  `${dato.descripcion || ''}`.toLowerCase().includes('responsable de pago')
                ) {
                   tipTramite.push(dato);
                }
@@ -111,14 +122,171 @@ export class AguatramiteComponent implements OnInit {
    }
 
    listarByTipoTramite() {
-      if (+this.formBuscar.value.idtipotramite_tipotramite! != 1) this.optAcciones = false;
-      else this.optAcciones = true;
-      this.aguatramiService.getByTipoTramite(this.formBuscar.value.idtipotramite_tipotramite, this.formBuscar.value.estado).subscribe({
-         next: (datos) => {
-            this._aguatramite = datos;
+      this.currentPage = 0;
+      this.buscarPagina();
+   }
+
+   buscarPagina(page: number = this.currentPage) {
+      const idTipo = +this.formBuscar.value.idtipotramite_tipotramite!;
+      const estadoConsulta = this.debeFiltrarPorEstado() ? +this.formBuscar.value.estado! : 3;
+      this.optAcciones = idTipo === 1;
+      this.currentPage = page;
+
+      if (!this.debeFiltrarPorEstado()) {
+         this.formBuscar.patchValue({ estado: 3 }, { emitEvent: false });
+      }
+
+      this.aguatramiService.buscarPageable({
+         idtipotramite: idTipo,
+         estado: estadoConsulta,
+         cliente: this.formBuscar.value.cliente || null,
+         fechaDesde: this.formBuscar.value.fechaDesde || null,
+         fechaHasta: this.formBuscar.value.fechaHasta || null,
+         page: this.currentPage,
+         size: this.pageSize,
+      }).subscribe({
+         next: (datos: any) => {
+            this._aguatramite = datos?.content || [];
+            this.totalElements = datos?.totalElements || 0;
+            this.totalPages = datos?.totalPages || 0;
+            this.aplicarOrdenActual();
          },
          error: (e) => console.error(e),
       });
+   }
+
+   onTipoTramiteChange(): void {
+      if (!this.debeFiltrarPorEstado()) {
+         this.formBuscar.patchValue({ estado: 3 }, { emitEvent: false });
+      }
+   }
+
+   debeFiltrarPorEstado(): boolean {
+      return +this.formBuscar?.value?.idtipotramite_tipotramite === 1;
+   }
+
+   cambiarPagina(delta: number): void {
+      const nuevaPagina = this.currentPage + delta;
+      if (nuevaPagina < 0 || nuevaPagina >= this.totalPages) return;
+      this.buscarPagina(nuevaPagina);
+   }
+
+   irPagina(page: number): void {
+      if (page < 0 || page >= this.totalPages || page === this.currentPage) return;
+      this.buscarPagina(page);
+   }
+
+   cambiarTamanoPagina(size: number | string): void {
+      this.pageSize = Number(size) || 10;
+      this.currentPage = 0;
+      this.buscarPagina(0);
+   }
+
+   get paginasVisibles(): number[] {
+      if (!this.totalPages || this.totalPages <= 0) return [0];
+
+      const maxBotones = 5;
+      let inicio = Math.max(this.currentPage - 2, 0);
+      let fin = Math.min(inicio + maxBotones - 1, this.totalPages - 1);
+
+      if (fin - inicio + 1 < maxBotones) {
+         inicio = Math.max(fin - maxBotones + 1, 0);
+      }
+
+      const paginas: number[] = [];
+      for (let i = inicio; i <= fin; i++) {
+         paginas.push(i);
+      }
+      return paginas;
+   }
+
+   limpiarFiltrosBusqueda(): void {
+      this.formBuscar.patchValue({
+         cliente: '',
+         fechaDesde: this.getInicioAnioActual(),
+         fechaHasta: formatDate(this.today, 'yyyy-MM-dd', 'en-US')
+      });
+      this.listarByTipoTramite();
+   }
+
+   getInicioAnioActual(): string {
+      return `${this.today.getFullYear()}-01-01`;
+   }
+
+   toggleSort(column: string): void {
+      if (this.sortColumn === column) {
+         this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+         this.sortColumn = column;
+         this.sortDirection = column === 'feccrea' ? 'desc' : 'asc';
+      }
+      this.aplicarOrdenActual();
+   }
+
+   getSortIcon(column: string): string {
+      if (this.sortColumn !== column) {
+         return 'fa-sort text-muted';
+      }
+      return this.sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down';
+   }
+
+   private aplicarOrdenActual(): void {
+      if (!Array.isArray(this._aguatramite) || this._aguatramite.length === 0) {
+         return;
+      }
+
+      const direction = this.sortDirection === 'asc' ? 1 : -1;
+      this._aguatramite = [...this._aguatramite].sort((a: any, b: any) =>
+         this.compararValores(this.obtenerValorOrden(a, this.sortColumn), this.obtenerValorOrden(b, this.sortColumn)) * direction
+      );
+   }
+
+   private obtenerValorOrden(item: any, column: string): any {
+      switch (column) {
+         case 'cliente':
+            return item?.idcliente_clientes?.nombre ?? '';
+         case 'codmedidor':
+            return item?.codmedidor ?? '';
+         case 'feccrea':
+            return item?.feccrea ?? '';
+         case 'estado':
+            return this.setEstado(item?.estado ?? 0);
+         case 'observacion':
+            return item?.observacion ?? '';
+         default:
+            return item?.[column] ?? '';
+      }
+   }
+
+   private compararValores(a: any, b: any): number {
+      const valorA = this.normalizarValorOrden(a);
+      const valorB = this.normalizarValorOrden(b);
+
+      if (valorA < valorB) return -1;
+      if (valorA > valorB) return 1;
+      return 0;
+   }
+
+   private normalizarValorOrden(valor: any): any {
+      if (valor === null || valor === undefined) {
+         return '';
+      }
+
+      if (typeof valor === 'number') {
+         return valor;
+      }
+
+      const fecha = new Date(valor);
+      if (!Number.isNaN(fecha.getTime()) && `${valor}`.includes('-')) {
+         return fecha.getTime();
+      }
+
+      const numero = Number(valor);
+      if (!Number.isNaN(numero) && `${valor}`.trim() !== '') {
+         return numero;
+      }
+
+      return `${valor}`.toLowerCase();
    }
 
    listarTramiteNuevo() {
@@ -185,6 +353,14 @@ export class AguatramiteComponent implements OnInit {
    modificarAguaTramite(aguatramite: Aguatramite) {
       localStorage.setItem('idaguatramite', aguatramite.idaguatramite.toString());
       this.router.navigate(['/modificar-aguatramite']);
+   }
+
+   async reimprimirComprobante(aguatramite: any): Promise<void> {
+      await this.s_genpdf.genComprobanteTramite(aguatramite);
+   }
+
+   puedeReimprimir(aguatramite: any): boolean {
+      return +aguatramite?.idtipotramite_tipotramite?.idtipotramite !== 1;
    }
 
    eliminarAguaTramite(idaguatramite: number) {

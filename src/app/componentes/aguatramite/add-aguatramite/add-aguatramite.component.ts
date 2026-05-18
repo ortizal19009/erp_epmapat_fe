@@ -32,6 +32,11 @@ export class AddAguatramiteComponent implements OnInit {
    slect_disabled: boolean = true;
    direccion: string = '';
 
+   private obtenerFechaActualLocal(): Date {
+      const ahora = new Date();
+      return new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 12, 0, 0, 0);
+   }
+
    constructor(private router: Router, private aguatramiService: AguatramiteService, private facturasS: FacturaService,
       private fb: FormBuilder, private s_pdf: PdfService, private authService: AutorizaService,
       private traminuevoService: TramiteNuevoService, private tramiteaguaService: TramitesAguaService) { }
@@ -41,12 +46,12 @@ export class AddAguatramiteComponent implements OnInit {
       let coloresJSON = sessionStorage.getItem('/aguatramite');
       if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
 
-      let date: Date = new Date();
+      const date = this.obtenerFechaActualLocal();
 
       this.formAguatram1 = this.fb.group({
          estado: 1,
          sistema: 'Instalación de agua y alcantarillado',
-         fechaterminacion: null,
+         fechaterminacion: date,
          observacion: 'Instalacion Nueva-Agua Potable',
          idtipotramite: { idtipotramite: 1 },
          idcliente_clientes: ['', Validators.required],
@@ -93,16 +98,17 @@ export class AddAguatramiteComponent implements OnInit {
    retornarListaAguaTramites() { this.router.navigate(['/aguatramite']); }
 
    guardarAguatramite() {
+      const fechaRegistro = this.obtenerFechaActualLocal();
       this.aguatramite.idcliente_clientes = this.formAguatram1.value.idcliente_clientes;
       this.aguatramite.estado = this.formAguatram1.value.estado;
       this.aguatramite.sistema = this.formAguatram1.value.sistema;
       this.aguatramite.comentario = '';
-      this.aguatramite.fechaterminacion = this.formAguatram1.value.fechaterminacion;
+      this.aguatramite.fechaterminacion = this.formAguatram1.value.fechaterminacion ?? fechaRegistro;
       this.aguatramite.observacion = this.formAguatram1.value.observacion;
       this.aguatramite.idtipotramite_tipotramite = this.formAguatram1.value.idtipotramite;
       this.aguatramite.idfactura_facturas = this.formAguatram1.value.idfactura_facturas;
       this.aguatramite.usucrea = this.formAguatram1.value.usucrea;
-      this.aguatramite.feccrea = this.formAguatram1.value.feccrea;
+      this.aguatramite.feccrea = this.formAguatram1.value.feccrea ?? fechaRegistro;
       this.aguatramiService.saveAguaTramite(this.aguatramite).subscribe({
          next: (datos: any) => {
             this.guardarTramiteNuevo(datos);

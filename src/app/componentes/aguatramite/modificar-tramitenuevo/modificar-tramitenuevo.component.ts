@@ -39,7 +39,7 @@ export class ModificarTramitenuevoComponent implements OnInit {
    aprobado: boolean = true;
    secuenciaAfectada: number;
    ruta: any;
-   date: Date = new Date();
+   date: Date = this.obtenerFechaActualLocal();
    aguatramite: Aguatramite = new Aguatramite();
    abonado: any;
    v_adultomayor: boolean = false;
@@ -51,6 +51,44 @@ export class ModificarTramitenuevoComponent implements OnInit {
    constructor(private traminuevoService: TramiteNuevoService, private router: Router,
       private aguatramService: AguatramiteService, private cateService: CategoriaService, private fb: FormBuilder,
       private aboService: AbonadosService, private authService: AutorizaService) { }
+
+   private obtenerFechaActualLocal(): Date {
+      const ahora = new Date();
+      return new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 12, 0, 0, 0);
+   }
+
+   private formatearFechaInput(valor?: string | Date | null): string | null {
+      if (!valor) {
+         return null;
+      }
+
+      const fecha = valor instanceof Date ? valor : new Date(`${valor}T12:00:00`);
+      if (Number.isNaN(fecha.getTime())) {
+         return null;
+      }
+
+      const anio = fecha.getFullYear();
+      const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+      const dia = String(fecha.getDate()).padStart(2, '0');
+      return `${anio}-${mes}-${dia}`;
+   }
+
+   private normalizarFechaLocal(valor?: string | Date | null): Date {
+      if (!valor) {
+         return this.obtenerFechaActualLocal();
+      }
+
+      if (valor instanceof Date) {
+         return new Date(valor.getFullYear(), valor.getMonth(), valor.getDate(), 12, 0, 0, 0);
+      }
+
+      const [anio, mes, dia] = valor.split('-').map(Number);
+      if (!anio || !mes || !dia) {
+         return this.obtenerFechaActualLocal();
+      }
+
+      return new Date(anio, mes - 1, dia, 12, 0, 0, 0);
+   }
 
    ngOnInit(): void {
       sessionStorage.setItem('ventana', '/aguatramite');
@@ -150,7 +188,7 @@ export class ModificarTramitenuevoComponent implements OnInit {
                solicitaalcantarillado: datos.solicitaalcantarillado,
                aprobadoagua: datos.aprobadoagua,
                aprobadoalcantarillado: datos.aprobadoagua,
-               fechainspeccion: datos.fechainspeccion,
+               fechainspeccion: this.formatearFechaInput(datos.fechainspeccion),
                medidorempresa: datos.medidorempresa,
                medidormarca: datos.medidormarca,
                medidornumero: datos.medidornumero,
@@ -163,10 +201,10 @@ export class ModificarTramitenuevoComponent implements OnInit {
                inspector: datos.inspector,
                areaconstruccion: datos.areaconstruccion,
                notificado: datos.notificado,
-               fechanotificacion: datos.fechanotificacion,
+               fechanotificacion: this.formatearFechaInput(datos.fechanotificacion),
                observaciones: datos.observaciones,
                estado: datos.estado,
-               fechafinalizacion: datos.fechafinalizacion,
+               fechafinalizacion: this.formatearFechaInput(datos.fechafinalizacion),
                medidordiametro: datos.medidordiametro,
                idcategoria_categorias: datos.idcategoria_categorias,
                idaguatramite_aguatramite: datos.idaguatramite_aguatramite,
@@ -189,7 +227,19 @@ export class ModificarTramitenuevoComponent implements OnInit {
    }
 
    guardarTramite() {
-      this.traminuevoService.saveTramiteNuevo(this.formTramitenuevo.value).subscribe({
+      const payload = {
+         ...this.formTramitenuevo.getRawValue(),
+         fechainspeccion: this.normalizarFechaLocal(this.formTramitenuevo.getRawValue().fechainspeccion),
+         fechanotificacion: this.formTramitenuevo.getRawValue().fechanotificacion
+            ? this.normalizarFechaLocal(this.formTramitenuevo.getRawValue().fechanotificacion)
+            : null,
+         fechafinalizacion: this.normalizarFechaLocal(this.formTramitenuevo.getRawValue().fechafinalizacion),
+         feccrea: this.normalizarFechaLocal(this.formTramitenuevo.getRawValue().feccrea),
+         fecmodi: this.obtenerFechaActualLocal(),
+         usumodi: this.authService.idusuario,
+      };
+
+      this.traminuevoService.saveTramiteNuevo(payload).subscribe({
          next: (datos) => {
             this.guardarAbonado();
             this.actualizarAguaTramite(3);   //Estado 3
@@ -210,7 +260,7 @@ export class ModificarTramitenuevoComponent implements OnInit {
       abonado.nromedidor = this.formTramitenuevo.value.medidornumero;
       abonado.lecturainicial = 0;
       abonado.estado = 1;
-      abonado.fechainstalacion = this.formTramitenuevo.value.fechafinalizacion;
+      abonado.fechainstalacion = this.normalizarFechaLocal(this.formTramitenuevo.value.fechafinalizacion);
       abonado.marca = this.formTramitenuevo.value.medidormarca;
       abonado.secuencia = this.formTramitenuevo.value.secuencia;
       abonado.direccionubicacion = this.formTramitenuevo.value.direccion;
@@ -226,7 +276,7 @@ export class ModificarTramitenuevoComponent implements OnInit {
       abonado.idtipopago_tipopago = tipopago;
       abonado.idestadom_estadom = estadom;
       abonado.usucrea = this.authService.idusuario;
-      abonado.feccrea = this.date;
+      abonado.feccrea = this.obtenerFechaActualLocal();
       abonado.medidorprincipal = 0;
       abonado.adultomayor = this.v_adultomayor;
       abonado.municipio = this.v_municipio;

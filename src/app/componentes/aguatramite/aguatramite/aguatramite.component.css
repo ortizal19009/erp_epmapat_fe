@@ -12,3 +12,27 @@
    color: white;
    cursor: pointer;
 }
+
+.tramites-toolbar {
+   row-gap: 0.5rem;
+}
+
+.tramites-toolbar-form {
+   row-gap: 0.25rem;
+}
+
+.sortable-header {
+   cursor: pointer;
+   user-select: none;
+   white-space: nowrap;
+}
+
+.sortable-header:hover {
+   background-color: rgba(255, 255, 255, 0.12);
+}
+
+@media (min-width: 1200px) {
+   .tramites-toolbar-form {
+      flex-wrap: nowrap;
+   }
+}
