@@ -17,6 +17,7 @@ import { TramitesAguaService } from 'src/app/servicios/tramites-agua.service';
 })
 
 export class AguatramiteComponent implements OnInit {
+   private readonly sortStorageKey = 'aguatramite-sort';
 
    f_aguatramite: FormGroup;
    f_Tipotramite: FormGroup;
@@ -55,6 +56,7 @@ export class AguatramiteComponent implements OnInit {
    ) { }
 
    ngOnInit(): void {
+      this.restaurarOrdenGuardado();
       this.f_Tipotramite = this.fb.group({
          idtitpotramite: 1,
       });
@@ -220,6 +222,7 @@ export class AguatramiteComponent implements OnInit {
          this.sortColumn = column;
          this.sortDirection = column === 'feccrea' ? 'desc' : 'asc';
       }
+      this.guardarOrdenActual();
       this.aplicarOrdenActual();
    }
 
@@ -287,6 +290,32 @@ export class AguatramiteComponent implements OnInit {
       }
 
       return `${valor}`.toLowerCase();
+   }
+
+   private guardarOrdenActual(): void {
+      sessionStorage.setItem(this.sortStorageKey, JSON.stringify({
+         column: this.sortColumn,
+         direction: this.sortDirection,
+      }));
+   }
+
+   private restaurarOrdenGuardado(): void {
+      const saved = sessionStorage.getItem(this.sortStorageKey);
+      if (!saved) {
+         return;
+      }
+
+      try {
+         const parsed = JSON.parse(saved);
+         if (parsed?.column) {
+            this.sortColumn = parsed.column;
+         }
+         if (parsed?.direction === 'asc' || parsed?.direction === 'desc') {
+            this.sortDirection = parsed.direction;
+         }
+      } catch {
+         sessionStorage.removeItem(this.sortStorageKey);
+      }
    }
 
    listarTramiteNuevo() {

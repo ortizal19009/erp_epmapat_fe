@@ -24,6 +24,34 @@
         <div class="col-sm">
             <div class="card mt-1">
                 <div class="card-header cardTab">
+                    <form [formGroup]="formFiltrosHistorico" class="mb-2">
+                        <div class="row align-items-end">
+                            <div class="col-sm-2">
+                                <label class="small mb-1">Cuenta</label>
+                                <input type="text" class="form-control form-control-sm" formControlName="cuenta" placeholder="Cuenta">
+                            </div>
+                            <div class="col-sm-3">
+                                <label class="small mb-1">Cliente</label>
+                                <input type="text" class="form-control form-control-sm" formControlName="cliente" placeholder="Nombre del cliente">
+                            </div>
+                            <div class="col-sm-2">
+                                <label class="small mb-1">Desde</label>
+                                <input type="date" class="form-control form-control-sm" formControlName="fechaDesde">
+                            </div>
+                            <div class="col-sm-2">
+                                <label class="small mb-1">Hasta</label>
+                                <input type="date" class="form-control form-control-sm" formControlName="fechaHasta">
+                            </div>
+                            <div class="col-sm-3 text-right">
+                                <button type="button" class="btn btn-sm btn-primary mr-1" (click)="filtrarHistoricos()">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" (click)="limpiarFiltrosHistorico()" title="Limpiar filtros">
+                                    <i class="fa fa-paint-brush"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
                     <ul class="nav nav-tabs card-header-tabs cardTab">
                         <li class="nav-item"><a class="nav-link active cardTab" href="#anuladas" data-toggle="tab">
                                 <i class="bi bi-file-earmark-minus"></i> Fac.Anuladas</a></li>
@@ -96,11 +124,10 @@
                                                 <th>Planilla</th>
                                                 <th>Fecha Eliminación</th>
                                                 <th class="col-sm-5">Cliente</th>
+                                                <th>Cuenta</th>
                                                 <th class="col-sm-2">Razón E.</th>
                                                 <th>Módulo</th>
-                                                <th>
-                                                <input type="number" [(ngModel)]="c_limit" (change)="setValor()" class="form-control-form-control-sm numSize">
-                                                </th>
+                                                <th></th>
                                             </tr>
                                         </thead>
                                         <tbody class="bodyFacelectro">
@@ -109,6 +136,7 @@
                                                 <td class="text-center">{{faceliminada.idfactura}}</td>
                                                 <td class="text-center">{{faceliminada.fechaeliminacion}}</td>
                                                 <td class="_description">{{faceliminada.idcliente.nombre}}</td>
+                                                <td class="text-center">{{faceliminada.idabonado}}</td>
                                                 <td class="_description">{{faceliminada.razoneliminacion}}</td>
                                                 <td class="_description">{{faceliminada.idmodulo.descripcion}}</td>
                                                 <td class="text-center">

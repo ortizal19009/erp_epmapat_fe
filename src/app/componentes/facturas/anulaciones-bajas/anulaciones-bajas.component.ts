@@ -17,6 +17,7 @@ import { PdfService } from 'src/app/servicios/pdf.service';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-anulaciones-bajas',
@@ -25,6 +26,7 @@ import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 })
 export class AnulacionesBajasComponent implements OnInit {
   formBuscar: FormGroup;
+  formFiltrosHistorico: FormGroup;
   f_factura: FormGroup;
   f_reportes: FormGroup;
   today: number = Date.now();
@@ -39,6 +41,8 @@ export class AnulacionesBajasComponent implements OnInit {
 
   _fAnuladas: any;
   _fEliminadas: any;
+  _fAnuladasBase: any[] = [];
+  _fEliminadasBase: any[] = [];
   c_limit: number = 10;
   txttitulo: string = 'Anulación';
   swtitulo: boolean = true;
@@ -88,7 +92,13 @@ export class AnulacionesBajasComponent implements OnInit {
       idfactura: '',
       idabonado: '',
       fechaDesde: año + '-01-01',
-      fechaHasta: año + '-12-31',
+      fechaHasta: this.sliceDate,
+    });
+    this.formFiltrosHistorico = this.fb.group({
+      cuenta: '',
+      cliente: '',
+      fechaDesde: año + '-01-01',
+      fechaHasta: this.sliceDate,
     });
     this.userAuth = this.authService.idusuario;
     this.f_factura = this.fb.group({
@@ -118,12 +128,10 @@ export class AnulacionesBajasComponent implements OnInit {
       this.campo = 2;
       this.buscar();
     }
-    this.getAllFacAnuladas(this.c_limit);
-    this.getAllFacEliminadas(this.c_limit);
+    this.cargarHistoricos();
   }
   setValor() {
-    this.getAllFacAnuladas(this.c_limit);
-    this.getAllFacEliminadas(this.c_limit);
+    this.cargarHistoricos();
   }
 
   getFragmentToShow(opt: string) {
@@ -243,6 +251,74 @@ export class AnulacionesBajasComponent implements OnInit {
       error: (e) => console.error(e),
     });
   }
+  cargarHistoricos(): void {
+    const desde = this.formFiltrosHistorico?.value?.fechaDesde;
+    const hasta = this.formFiltrosHistorico?.value?.fechaHasta;
+
+    if (desde && hasta) {
+      forkJoin({
+        anuladas: this.facServicio.getByFecAnulaciones(desde, hasta),
+        eliminadas: this.facServicio.getByFecEliminacion(desde, hasta),
+      }).subscribe({
+        next: ({ anuladas, eliminadas }: any) => {
+          this._fAnuladasBase = Array.isArray(anuladas) ? anuladas : [];
+          this._fEliminadasBase = Array.isArray(eliminadas) ? eliminadas : [];
+          this.aplicarFiltrosHistoricoLocal();
+        },
+        error: (e) => console.error(e),
+      });
+      return;
+    }
+
+    forkJoin({
+      anuladas: this.facServicio.findAnulaciones(this.c_limit),
+      eliminadas: this.facServicio.findEliminadas(this.c_limit),
+    }).subscribe({
+      next: ({ anuladas, eliminadas }: any) => {
+        this._fAnuladasBase = Array.isArray(anuladas) ? anuladas : [];
+        this._fEliminadasBase = Array.isArray(eliminadas) ? eliminadas : [];
+        this.aplicarFiltrosHistoricoLocal();
+      },
+      error: (e) => console.error(e),
+    });
+  }
+
+  filtrarHistoricos(): void {
+    this.cargarHistoricos();
+  }
+
+  limpiarFiltrosHistorico(): void {
+    const fecha = new Date();
+    const año = fecha.getFullYear();
+    this.formFiltrosHistorico.patchValue({
+      cuenta: '',
+      cliente: '',
+      fechaDesde: `${año}-01-01`,
+      fechaHasta: this.sliceDate,
+    });
+    this.cargarHistoricos();
+  }
+
+  private aplicarFiltrosHistoricoLocal(): void {
+    const cuenta = `${this.formFiltrosHistorico?.value?.cuenta ?? ''}`.trim().toLowerCase();
+    const cliente = `${this.formFiltrosHistorico?.value?.cliente ?? ''}`.trim().toLowerCase();
+
+    this._fAnuladas = this._fAnuladasBase.filter((item: any) =>
+      this.coincideHistorico(item, cuenta, cliente)
+    );
+    this._fEliminadas = this._fEliminadasBase.filter((item: any) =>
+      this.coincideHistorico(item, cuenta, cliente)
+    );
+  }
+
+  private coincideHistorico(item: any, cuenta: string, cliente: string): boolean {
+    const cuentaItem = `${item?.idabonado ?? ''}`.toLowerCase();
+    const clienteItem = `${item?.idcliente?.nombre ?? ''}`.toLowerCase();
+
+    const coincideCuenta = !cuenta || cuentaItem.includes(cuenta);
+    const coincideCliente = !cliente || clienteItem.includes(cliente);
+    return coincideCuenta && coincideCliente;
+  }
   setCliente(e: any) {
     this.formBuscar.patchValue({
       idfactura: '',
@@ -360,12 +436,13 @@ export class AnulacionesBajasComponent implements OnInit {
             fmodi.idfactura = factura.idfactura;
             this.s_facmodificaciones
               .saveFacturacionModificaciones(fmodi)
-              .subscribe({
-                next: (modiDatos) => {
-                  this.f_factura.reset();
-                  this.formBuscar.reset();
-                  this._cliente = new Clientes();
-                },
+                .subscribe({
+                  next: (modiDatos) => {
+                    this.f_factura.reset();
+                    this.formBuscar.reset();
+                    this._cliente = new Clientes();
+                    this.cargarHistoricos();
+                  },
                 error: (e) => console.error(e),
               });
           },
@@ -393,8 +470,14 @@ export class AnulacionesBajasComponent implements OnInit {
                     this.f_factura.reset();
                     this.formBuscar.reset();
                     this._cliente = new Clientes();
+                    this.cargarHistoricos();
                   },
                 });
+            } else {
+              this.f_factura.reset();
+              this.formBuscar.reset();
+              this._cliente = new Clientes();
+              this.cargarHistoricos();
             }
           },
           error: (e) => console.error(e),
