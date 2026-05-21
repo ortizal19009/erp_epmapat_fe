@@ -264,7 +264,7 @@ export class AddFacturacionComponent implements OnInit {
       rubrosxpla.cantidad = this.arrRubros[i][1];
       rubrosxpla.valorunitario =
         this.arrRubros[i][2] / this.formCuotas.value.cuotas;
-      rubrosxpla.estado = 0;
+      rubrosxpla.estado = 1;
       rubrosxpla.idfactura_facturas = this.factura;
       this.rubService.getRubroById(this.arrRubros[i][5]).subscribe({
         //El elemento 5 es el Id del Rubro

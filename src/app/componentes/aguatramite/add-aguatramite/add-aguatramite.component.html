@@ -31,6 +31,10 @@
                                           aria-label="Small" value={{formAguatram1.value.idcliente_clientes.nombre}}
                                           aria-describedby="inputGroup-sizing-sm" readonly>
                                     </div>
+                                    <small class="text-danger"
+                                       *ngIf="f['idcliente_clientes'].invalid && f['idcliente_clientes'].touched">
+                                       Selecciona un cliente.
+                                    </small>
                                  </div>
 
                               </div>
@@ -47,6 +51,10 @@
                                           formControlName="direccion" [ngClass]="{'is-invalid': f['direccion'].invalid && f['direccion'].touched,
                                           'is-valid': f['direccion'].valid, '': f['direccion'].untouched}">
                                     </div>
+                                    <small class="text-danger"
+                                       *ngIf="f['direccion'].invalid && f['direccion'].touched">
+                                       Ingresa la dirección del trámite.
+                                    </small>
                                  </div>
                               </div>
                            </div>
@@ -96,6 +104,33 @@
                                        <input type="text" class="form-control form-control-sm" id="referencia"
                                           formControlName="referencia" />
                                     </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="row">
+                              <div class="col-sm">
+                                 <div class="form-group col-sm my-0 py-0">
+                                    <div class="input-group mb-1 input-group-sm">
+                                       <div class="input-group-prepend">
+                                          <label class="input-group-text" for="correosNotificacion">Correo<sup
+                                                class="green">*</sup></label>
+                                       </div>
+                                       <input type="text" class="form-control form-control-sm"
+                                          id="correosNotificacion" formControlName="correosNotificacion"
+                                          placeholder="cliente@correo.com; copia@correo.com"
+                                          [ngClass]="{'is-invalid': f['correosNotificacion'].invalid && f['correosNotificacion'].touched,
+                                          'is-valid': f['correosNotificacion'].valid && f['correosNotificacion'].touched}">
+                                    </div>
+                                    <small class="text-muted">Puedes ingresar uno o varios correos separados por
+                                       `;` o `,`.</small>
+                                    <small class="text-danger"
+                                       *ngIf="f['correosNotificacion'].errors?.['required'] && f['correosNotificacion'].touched">
+                                       Debes ingresar al menos un correo.
+                                    </small>
+                                    <small class="text-danger"
+                                       *ngIf="f['correosNotificacion'].errors?.['emailInvalido'] && f['correosNotificacion'].touched">
+                                       Revisa el formato de los correos ingresados.
+                                    </small>
                                  </div>
                               </div>
                            </div>
@@ -171,10 +206,16 @@
                                        </div>
                                        <div class="input-group-text">
                                           <input type="checkbox" class="form-control form-control-sm"
-                                             (change)="setMedidorEmpresaValue($event)" formControlName="medidorempresa">
+                                             (change)="setEscriturasValue($event)" formControlName="presentaescritura">
                                        </div>
                                     </div>
                                  </div>
+                              </div>
+                           </div>
+                           <div class="row" *ngIf="formAguatram1.errors?.['servicioRequerido'] && formAguatram1.touched">
+                              <div class="col-sm">
+                                 <small class="text-danger">Debes seleccionar al menos un servicio: agua o
+                                    alcantarillado.</small>
                               </div>
                            </div>
                         </div>
@@ -184,7 +225,7 @@
                </div>
                <div class="m-2 text-center">
                   <button type="button" class="btn btn-sm btn-success mx-1" (click)="onSubmit()"
-                     [disabled]="!formAguatram1.valid">
+                     [disabled]="formAguatram1.invalid || guardando">
                      <i class="fa fa-check-circle"></i>&nbsp; Aceptar
                   </button>
                   <button type="button" class="btn btn-outline-success btn-sm mx-1"

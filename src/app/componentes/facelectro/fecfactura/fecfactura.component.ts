@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -89,6 +90,7 @@ export class FecfacturaComponent implements OnInit {
   estadosGestion = this.estados;
   estadosCorreo = ['ENVIADO', 'NO_ENVIADO', 'ERROR_ENVIO', 'REINTENTO'];
   filasActualizadas = new Set<number>();
+  reenvioErrores: ReenvioErrorItem[] = [];
   sortColumn: string = 'fechaemision';
   sortDirection: 'asc' | 'desc' = 'desc';
   constructor(
@@ -977,6 +979,7 @@ export class FecfacturaComponent implements OnInit {
 
     this.reenviandoFacturas = true;
     this.progresoReenvio = 0;
+    this.reenvioErrores = [];
 
     let enviados = 0;
     let actualizados = 0;
@@ -998,6 +1001,7 @@ export class FecfacturaComponent implements OnInit {
         }
       } catch (error) {
         omitidos++;
+        await this.registrarErrorReenvio(factura, error);
         console.error(`Error reenviando factura ${factura.idfactura}:`, error);
       }
 
@@ -1047,6 +1051,10 @@ export class FecfacturaComponent implements OnInit {
 
   esFilaActualizada(idfactura: number): boolean {
     return this.filasActualizadas.has(idfactura);
+  }
+
+  limpiarErroresReenvio(): void {
+    this.reenvioErrores = [];
   }
 
   prepararReenvioLote(): void {
@@ -1435,6 +1443,129 @@ export class FecfacturaComponent implements OnInit {
       .trim();
   }
 
+  private async registrarErrorReenvio(factura: Fecfactura, error: unknown): Promise<void> {
+    const detalle = await this.extraerDetalleErrorReenvio(error);
+    this.reenvioErrores = [
+      ...this.reenvioErrores,
+      {
+        idfactura: factura.idfactura,
+        numeroFactura: this.getNumeroFacturaDisplay(factura),
+        cliente: String(factura?.razonsocialcomprador || ''),
+        estadoHttp: detalle.estadoHttp,
+        resumen: detalle.resumen,
+        detalle: detalle.detalle,
+      },
+    ];
+  }
+
+  private async extraerDetalleErrorReenvio(error: unknown): Promise<ReenvioErrorDetalle> {
+    if (error instanceof HttpErrorResponse) {
+      const cuerpo = await this.normalizarErrorHttp(error.error);
+      return {
+        estadoHttp: error.status || null,
+        resumen: this.obtenerResumenErrorHttp(error, cuerpo),
+        detalle: this.obtenerDetalleErrorHttp(error, cuerpo),
+      };
+    }
+
+    if (error instanceof Error) {
+      return {
+        estadoHttp: null,
+        resumen: 'Error inesperado en el reenvio',
+        detalle: error.message || 'No se recibieron mas detalles.',
+      };
+    }
+
+    return {
+      estadoHttp: null,
+      resumen: 'Error inesperado en el reenvio',
+      detalle: String(error || 'No se recibieron mas detalles.'),
+    };
+  }
+
+  private async normalizarErrorHttp(error: any): Promise<any> {
+    if (error instanceof Blob) {
+      const texto = await error.text();
+      return this.tryParseJson(texto);
+    }
+
+    if (typeof error === 'string') {
+      return this.tryParseJson(error);
+    }
+
+    return error;
+  }
+
+  private tryParseJson(value: string): any {
+    const texto = String(value || '').trim();
+    if (!texto) {
+      return '';
+    }
+
+    try {
+      return JSON.parse(texto);
+    } catch {
+      return texto;
+    }
+  }
+
+  private obtenerResumenErrorHttp(error: HttpErrorResponse, cuerpo: any): string {
+    if (typeof cuerpo === 'object' && cuerpo !== null) {
+      const resumen = cuerpo.message || cuerpo.error || cuerpo.title || cuerpo.detail;
+      if (resumen) {
+        return String(resumen);
+      }
+    }
+
+    if (typeof cuerpo === 'string' && cuerpo.trim()) {
+      return cuerpo.trim().slice(0, 180);
+    }
+
+    return `Error HTTP ${error.status || ''}`.trim();
+  }
+
+  private obtenerDetalleErrorHttp(error: HttpErrorResponse, cuerpo: any): string {
+    if (typeof cuerpo === 'object' && cuerpo !== null) {
+      const partes: string[] = [];
+
+      if (cuerpo.message) partes.push(`Mensaje: ${cuerpo.message}`);
+      if (cuerpo.error && cuerpo.error !== cuerpo.message) partes.push(`Error: ${cuerpo.error}`);
+      if (cuerpo.detail && cuerpo.detail !== cuerpo.message) partes.push(`Detalle: ${cuerpo.detail}`);
+
+      const erroresLista = Array.isArray(cuerpo.errors)
+        ? cuerpo.errors
+        : Array.isArray(cuerpo.violations)
+          ? cuerpo.violations
+          : null;
+
+      if (erroresLista?.length) {
+        const textos = erroresLista
+          .map((item: any) => {
+            if (!item) return '';
+            if (typeof item === 'string') return item;
+            return item.message || item.defaultMessage || item.error || JSON.stringify(item);
+          })
+          .filter((item: string) => !!item);
+
+        if (textos.length) {
+          partes.push(`Validaciones: ${textos.join(' | ')}`);
+        }
+      }
+
+      if (partes.length) {
+        return partes.join(' | ');
+      }
+
+      return JSON.stringify(cuerpo);
+    }
+
+    if (typeof cuerpo === 'string' && cuerpo.trim()) {
+      return cuerpo.trim();
+    }
+
+    return error.message || 'No se recibieron detalles del servidor.';
+  }
+
   private getNumeroFacturaDisplay(factura: any): string {
     return `${factura?.establecimiento || ''}-${factura?.puntoemision || ''}-${factura?.secuencial || factura?.idfactura || ''}`;
   }
@@ -1530,6 +1661,21 @@ interface Fec_factura_pagos {
   plazo: number;
   unidadtiempo: String;
 }
+interface ReenvioErrorItem {
+  idfactura: number;
+  numeroFactura: string;
+  cliente: string;
+  estadoHttp: number | null;
+  resumen: string;
+  detalle: string;
+}
+
+interface ReenvioErrorDetalle {
+  estadoHttp: number | null;
+  resumen: string;
+  detalle: string;
+}
+
 function obtenerFechaActualString(fecha: Date) {
   const milisegundos = fecha.getTime(); // Obtener milisegundos desde la fecha
   const fechaActual = new Date(milisegundos);

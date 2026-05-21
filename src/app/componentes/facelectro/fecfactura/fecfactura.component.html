@@ -281,6 +281,41 @@
             <div class="alert alert-info mt-3 mb-0" *ngIf="queueSummaryMessage">
               {{ queueSummaryMessage }}
             </div>
+
+            <div class="alert alert-danger mt-3 mb-0" *ngIf="reenvioErrores.length">
+              <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                  <strong>Se detectaron {{ reenvioErrores.length }} errores en el reenvio.</strong>
+                  <div class="small mt-1">Ahora puede revisar el detalle sin abrir la consola.</div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-danger mt-2 mt-md-0" (click)="limpiarErroresReenvio()">
+                  Limpiar detalle
+                </button>
+              </div>
+
+              <div class="table-responsive mt-3">
+                <table class="table table-sm table-bordered bg-white mb-0">
+                  <thead class="thead-light">
+                    <tr>
+                      <th>Factura</th>
+                      <th>Cliente</th>
+                      <th>HTTP</th>
+                      <th>Resumen</th>
+                      <th>Detalle</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let item of reenvioErrores">
+                      <td class="text-center">{{ item.numeroFactura }}</td>
+                      <td>{{ item.cliente || 'Sin cliente' }}</td>
+                      <td class="text-center">{{ item.estadoHttp ?? 'N/D' }}</td>
+                      <td>{{ item.resumen }}</td>
+                      <td class="small">{{ item.detalle }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
 
           <div class="card-header bg-white border-top">

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { lastValueFrom } from 'rxjs';
+import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Abonados } from 'src/app/modelos/abonados';
 import { Aguatramite } from 'src/app/modelos/aguatramite.model';
@@ -21,11 +21,12 @@ import { FacturaService } from 'src/app/servicios/factura.service';
 import { FacturamodificacionesService } from 'src/app/servicios/facturamodificaciones.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
+import { OutboxAttachment, OutboxEmailService } from 'src/app/servicios/outbox-email.service';
 import { TramiteNuevoService } from 'src/app/servicios/tramite-nuevo.service';
 import { TramitesAguaService } from 'src/app/servicios/tramites-agua.service';
 import Swal from 'sweetalert2';
 
-declare var bootstrap: any; // Para que TypeScript no se queje
+declare var bootstrap: any;
 
 @Component({
    selector: 'app-aguatram',
@@ -33,25 +34,25 @@ declare var bootstrap: any; // Para que TypeScript no se queje
    styleUrls: ['./aguatram.component.css'],
 })
 export class AguatramComponent implements OnInit {
-   aguatamshow: boolean = true;
-   retMedidor: boolean = false;
-   suspMedidor: boolean = false;
-   cambioCategoria: boolean = false;
-   cambioMedidor: boolean = false;
-   cambioPropietario: boolean = false;
-   cambioResponsablePago: boolean = false;
-   btnActivate: boolean = true;
-   f_datos: FormGroup;
-   f_categoria: FormGroup;
-   f_nMedidor: FormGroup;
-   f_retiroMedidor: FormGroup;
+   aguatamshow = true;
+   retMedidor = false;
+   suspMedidor = false;
+   cambioCategoria = false;
+   cambioMedidor = false;
+   cambioPropietario = false;
+   cambioResponsablePago = false;
+   btnActivate = true;
+   f_datos!: FormGroup;
+   f_categoria!: FormGroup;
+   f_nMedidor!: FormGroup;
+   f_retiroMedidor!: FormGroup;
    f_camPropietario!: FormGroup;
-   f_camMedidor: FormGroup;
-   filterTerm: string;
-   filterClient: string;
+   f_camMedidor!: FormGroup;
+   filterTerm!: string;
+   filterClient!: string;
    categorias: any;
    selectClient: Clientes = new Clientes();
-   titulo: string = 'Formulario de tramites de Agua';
+   titulo = 'Formulario de tramites de Agua';
    abonados: any;
    abonado: Abonados = new Abonados();
    cliente: Clientes = new Clientes();
@@ -61,8 +62,7 @@ export class AguatramComponent implements OnInit {
    ruta: Rutas = new Rutas();
    date: Date = this.obtenerFechaActualLocal();
    tipoTramite: Tipotramite = new Tipotramite();
-   // especificaTramite: EspecificaTramite = new EspecificaTramite();
-   observaciones: string = '';
+   observaciones = '';
    opciones = [
       { opcion: 'Cuenta', valor: 1 },
       { opcion: 'Nombre o apellido', valor: 2 },
@@ -71,9 +71,10 @@ export class AguatramComponent implements OnInit {
    _documentos: any;
    _facturas: any = [];
    aguatramite: Aguatramite = new Aguatramite();
-   swActualizar: boolean = true;
+   swActualizar = true;
    private modalConfirmacion: any | null = null;
-
+   procesandoTramite = false;
+   correosTramiteActual: string[] = [];
 
    constructor(
       private actRouter: ActivatedRoute,
@@ -90,8 +91,8 @@ export class AguatramComponent implements OnInit {
       private s_facturas: FacturaService,
       private s_facturasModi: FacturamodificacionesService,
       private s_loading: LoadingService,
-      private s_lecturas: LecturasService
-
+      private s_lecturas: LecturasService,
+      private outboxEmailService: OutboxEmailService
    ) { }
 
    private obtenerFechaActualLocal(): Date {
@@ -124,7 +125,6 @@ export class AguatramComponent implements OnInit {
    }
 
    ngOnInit(): void {
-
       const modalEl = document.getElementById('modalConfirmacion');
       if (modalEl) {
          this.modalConfirmacion = new bootstrap.Modal(modalEl);
@@ -133,83 +133,73 @@ export class AguatramComponent implements OnInit {
       this.tramitenuevo.usucrea = this.authService.idusuario;
 
       sessionStorage.setItem('ventana', '/aguatramite');
-      let coloresJSON = sessionStorage.getItem('/aguatramite');
-      if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
+      const coloresJSON = sessionStorage.getItem('/aguatramite');
+      if (coloresJSON) {
+         this.colocaColor(JSON.parse(coloresJSON));
+      }
 
-      let id = this.actRouter.snapshot.paramMap.get('id');
+      const id = this.actRouter.snapshot.paramMap.get('id');
       this.tipoTramite.idtipotramite = +id!;
-      // this.especificaTramite.idespecificatramite = +id!;
       switch (+id!) {
-         case 1: {
+         case 1:
             this.aguatamshow = false;
             break;
-         }
-         case 2: {
+         case 2:
             this.titulo = 'Retiro de medidor - taponamiento';
             this.retMedidor = true;
             break;
-         }
-         case 3: {
+         case 3:
             this.titulo = 'Suspender medidor';
             this.suspMedidor = true;
             break;
-         }
-         case 4: {
+         case 4:
             this.titulo = 'Cambio de medidor';
             this.cambioMedidor = true;
             break;
-         }
-         case 5: {
+         case 5:
             this.titulo = 'Cambio de propietario';
             this.cambioPropietario = true;
             break;
-         }
-         case 10: {
+         case 10:
             this.titulo = 'Cambio de responsable de pago';
             this.cambioResponsablePago = true;
             break;
-         }
-         case 6: {
+         case 6:
             this.titulo = 'Traspaso de medidor';
             break;
-         }
-         case 7: {
+         case 7:
             this.titulo = 'Habilitación de cuenta';
             break;
-         }
-         case 8: {
+         case 8:
             this.titulo = 'Nuevo medidor (sin derechos de agua)';
             break;
-         }
-         case 9: {
+         case 9:
             this.titulo = 'Cambio de Categoría';
             this.cambioCategoria = true;
             break;
-         }
-         default: {
+         default:
             this.aguatamshow = true;
             break;
-         }
-
       }
+
       this.f_datos = this.fb.group({ tipoBusqueda: 1, buscarAbonado: '' });
       this.f_categoria = this.fb.group({
-         idcategoria_categorias: 1,
+         idcategoria_categorias: [1, Validators.required],
          adultomayor: false,
          municipio: false,
-         observaciones: '',
-         iddocumento_documentos: 1,
-         nrodocumento: ''
+         observaciones: ['', Validators.required],
+         iddocumento_documentos: [1, Validators.required],
+         nrodocumento: ['', Validators.required]
       });
       this.f_nMedidor = this.fb.group({
-         medidormarca: '',
-         medidornumero: '',
-         codmedidor: '',
-         medidordiametro: '',
-         medidornroesferas: '',
-         observaciones: '',
-         iddocumento_documentos: 1,
-         nrodocumento: ''
+         medidormarca: ['', Validators.required],
+         medidornumero: ['', Validators.required],
+         codmedidor: ['', Validators.required],
+         medidordiametro: ['', Validators.required],
+         medidornroesferas: ['', Validators.required],
+         observaciones: ['', Validators.required],
+         iddocumento_documentos: [1, Validators.required],
+         nrodocumento: ['', Validators.required]
       });
       this.f_retiroMedidor = this.fb.group({
          ubimedidor: ['', Validators.required],
@@ -223,10 +213,8 @@ export class AguatramComponent implements OnInit {
          iddocumento_documentos: [1, Validators.required],
          nrodocumento: ['', Validators.required],
       });
-      const fechaFormateada = this.formatearFechaInput(this.date);
-
       this.f_retiroMedidor.patchValue({
-         fecmedidor: fechaFormateada
+         fecmedidor: this.formatearFechaInput(this.date)
       });
       this.listarCategorias();
       this.listDocumentos();
@@ -243,30 +231,35 @@ export class AguatramComponent implements OnInit {
 
    listarCategorias() {
       this.s_categorias.getListCategoria().subscribe({
-         next: (datos) => {
-            this.categorias = datos;
-         },
+         next: (datos) => this.categorias = datos,
          error: (e) => console.error(e),
       });
    }
+
    listDocumentos() {
       this.s_documentos.getListaDocumentos().subscribe({
-         next: (documentos: any) => {
-            this._documentos = documentos
-         },
+         next: (documentos: any) => this._documentos = documentos,
          error: (e: any) => console.error(e)
-      })
+      });
    }
 
-   retiroMedidor() {
-      let abonado: Abonados = this.abonado;
+   async retiroMedidor() {
+      const abonado: Abonados = this.abonado;
       if (abonado.estado === 1 || abonado.estado === 2) {
+         const correos = await this.confirmarTramiteConCorreo(
+            'Retiro de medidor',
+            `Cuenta ${abonado.idabonado} - Medidor ${abonado.nromedidor || 'SN'}`,
+            abonado.idcliente_clientes?.email
+         );
+         if (!correos) return;
+
          abonado.estado = 3;
          this.date = this.normalizarFechaLocal(this.f_retiroMedidor.value.fecmedidor);
          this.observaciones = this.f_retiroMedidor.value.ubimedidor;
-         this.aguatramite.nrodocumento = this.f_retiroMedidor.value.nrodocumento
-         this.aguatramite.iddocumento_documentos = +this.f_retiroMedidor.value.iddocumento_documentos!
-         this.guardarAguaTramite(abonado, abonado.nromedidor);
+         this.aguatramite.nrodocumento = this.f_retiroMedidor.value.nrodocumento;
+         this.aguatramite.iddocumento_documentos = +this.f_retiroMedidor.value.iddocumento_documentos!;
+         const tramite = await this.guardarAguaTramite(abonado, abonado.nromedidor);
+         await this.enviarCorreoComprobante(tramite, correos);
          this.actualizarAbonado(abonado);
       } else if (abonado.estado === 3) {
          alert('CUENTA TAPONADA');
@@ -275,15 +268,22 @@ export class AguatramComponent implements OnInit {
       }
    }
 
-   suspenderMedidor() {
-      /* Realizar taponamiento */
-      let abonado: Abonados = this.abonado;
+   async suspenderMedidor() {
+      const abonado: Abonados = this.abonado;
       if (abonado.estado === 3) {
          alert('ESTE MEDIDOR ESTA TAPONADO');
       } else {
+         const correos = await this.confirmarTramiteConCorreo(
+            'Suspender medidor',
+            `Cuenta ${abonado.idabonado} - Cliente ${abonado.idcliente_clientes?.nombre || ''}`,
+            abonado.idcliente_clientes?.email
+         );
+         if (!correos) return;
+
          abonado.estado = 2;
          this.actualizarAbonado(abonado);
-         this.guardarAguaTramite(abonado, null);
+         const tramite = await this.guardarAguaTramite(abonado, null);
+         await this.enviarCorreoComprobante(tramite, correos);
       }
    }
 
@@ -292,24 +292,33 @@ export class AguatramComponent implements OnInit {
       abonado.fecmodi = this.obtenerFechaActualLocal();
       const observacion = this.observaciones || 'Trámite de agua';
       this.s_abonados.updateAbonadoAuditoria(abonado, this.authService.idusuario, observacion, 'MODIFICACION').subscribe({
-         next: (datos) => {
-            this.regresar();
-         },
+         next: () => this.regresar(),
          error: (e) => console.error(e),
       });
    }
 
-   actualizarCategoria() {
-      this.abonado.idcategoria_categorias =
-         this.f_categoria.value.idcategoria_categorias;
+   async actualizarCategoria() {
+      if (this.f_categoria.invalid) {
+         this.f_categoria.markAllAsTouched();
+         this.swal('warning', 'Completa los datos del cambio de categoría');
+         return;
+      }
+      const correos = await this.confirmarTramiteConCorreo(
+         'Cambio de categoría',
+         `Cuenta ${this.abonado.idabonado} - Nueva categoría ${this.f_categoria.value.idcategoria_categorias?.descripcion || ''}`,
+         this.abonado.idcliente_clientes?.email
+      );
+      if (!correos) return;
+
+      this.abonado.idcategoria_categorias = this.f_categoria.value.idcategoria_categorias;
       this.abonado.adultomayor = this.f_categoria.value.adultomayor;
       this.abonado.municipio = this.f_categoria.value.municipio;
-      this.aguatramite.nrodocumento = this.f_categoria.value.nrodocumento
-      this.aguatramite.iddocumento_documentos = +this.f_categoria.value.iddocumento_documentos!
+      this.aguatramite.nrodocumento = this.f_categoria.value.nrodocumento;
+      this.aguatramite.iddocumento_documentos = +this.f_categoria.value.iddocumento_documentos!;
       this.observaciones = this.f_categoria.value.observaciones;
       this.actualizarAbonado(this.abonado);
-      this.guardarAguaTramite(this.abonado, null);
-
+      const tramite = await this.guardarAguaTramite(this.abonado, null);
+      await this.enviarCorreoComprobante(tramite, correos);
    }
 
    regresar() {
@@ -317,34 +326,46 @@ export class AguatramComponent implements OnInit {
    }
 
    compareCategoria(o1: Categoria, o2: Categoria): boolean {
-      if (o1 === undefined && o2 === undefined) {
-         return true;
-      } else {
-         return o1 === null || o2 === null || o1 === undefined || o2 === undefined
-            ? false
-            : o1.idcategoria == o2.idcategoria;
-      }
+      if (o1 === undefined && o2 === undefined) return true;
+      return o1 === null || o2 === null || o1 === undefined || o2 === undefined
+         ? false
+         : o1.idcategoria == o2.idcategoria;
    }
 
-   actualizarNuevoMedidor() {
+   async actualizarNuevoMedidor() {
+      if (this.f_nMedidor.invalid) {
+         this.f_nMedidor.markAllAsTouched();
+         this.swal('warning', 'Completa los datos del nuevo medidor');
+         return;
+      }
+      const correos = await this.confirmarTramiteConCorreo(
+         'Cambio de medidor',
+         `Cuenta ${this.abonado.idabonado} - Nuevo medidor ${this.f_nMedidor.value.medidornumero || ''}`,
+         this.abonado.idcliente_clientes?.email
+      );
+      if (!correos) return;
+
       this.abonado.marca = this.f_nMedidor.value.medidormarca;
       this.abonado.nromedidor = this.f_nMedidor.value.medidornumero;
       this.abonado.lecturainicial = 0;
       this.observaciones = this.f_nMedidor.value.observaciones;
-      this.aguatramite.nrodocumento = this.f_nMedidor.value.nrodocumento
-      this.aguatramite.iddocumento_documentos = +this.f_nMedidor.value.iddocumento_documentos!
+      this.aguatramite.nrodocumento = this.f_nMedidor.value.nrodocumento;
+      this.aguatramite.iddocumento_documentos = +this.f_nMedidor.value.iddocumento_documentos!;
       this.actualizarAbonado(this.abonado);
-      this.guardarAguaTramite(this.abonado, this.f_nMedidor.value.codmedidor);
+      const tramite = await this.guardarAguaTramite(this.abonado, this.f_nMedidor.value.codmedidor);
+      await this.enviarCorreoComprobante(tramite, correos);
       this.regresar();
    }
+
    get f() {
       return this.f_nMedidor.controls;
    }
+
    get fp() {
       return this.f_camPropietario.controls;
    }
 
-   guardarAguaTramite(abonado: Abonados, codmedidor: any) {
+   async guardarAguaTramite(abonado: Abonados, codmedidor: any): Promise<Aguatramite> {
       const fechaRegistro = this.normalizarFechaLocal(this.date);
       this.date = fechaRegistro;
       this.aguatramite.codmedidor = codmedidor;
@@ -357,17 +378,16 @@ export class AguatramComponent implements OnInit {
       this.aguatramite.idcliente_clientes = abonado.idcliente_clientes;
       this.aguatramite.usucrea = this.authService.idusuario;
       this.aguatramite.feccrea = fechaRegistro;
-
-      this.s_aguatramite.saveAguaTramite(this.aguatramite).subscribe({
-         next: (datos) => {
-            this.s_tramiteagua.genContratoTramite(datos, this.abonado, this.titulo);
-            this.swal("success", "Datos guardados con exito")
-         },
-         error: (e) => {
-            console.error(e);
-            this.swal("error", "Error al guardar tramite de agua")
-         },
-      });
+      try {
+         const datos = await firstValueFrom(this.s_aguatramite.saveAguaTramite(this.aguatramite)) as Aguatramite;
+         await this.s_tramiteagua.genContratoTramite(datos, this.abonado, this.titulo);
+         this.swal('success', 'Datos guardados con exito');
+         return datos;
+      } catch (e) {
+         console.error(e);
+         this.swal('error', 'Error al guardar tramite de agua');
+         throw e;
+      }
    }
 
    setClient(cliente: any) {
@@ -375,15 +395,17 @@ export class AguatramComponent implements OnInit {
    }
 
    confCambioPropietario() {
-      if (this._facturas.length === 0) { this.actualizarPropietario() } else {
+      if (this._facturas.length === 0) {
+         this.procesandoTramite = true;
+         this.actualizarPropietario();
+      } else {
          this.modalConfirmacion?.show();
-
       }
-
    }
 
    confCambioResponsablePago() {
       if (this._facturas.length === 0) {
+         this.procesandoTramite = true;
          this.actualizarResponsablePago();
       } else {
          this.modalConfirmacion?.show();
@@ -392,40 +414,45 @@ export class AguatramComponent implements OnInit {
 
    async actualizarPropietario() {
       this.s_loading.showLoading();
-      this.abonado.idcliente_clientes = this.selectClient;
-      this.abonado.idresponsable = this.selectClient;
-      this.observaciones = this.f_camPropietario.value.observaciones;
-      this.aguatramite.nrodocumento = this.f_camPropietario.value.nrodocumento;
-      this.aguatramite.iddocumento_documentos = +this.f_camPropietario.value.iddocumento_documentos!;
-      if (this.swActualizar) {
+      try {
+         this.abonado.idcliente_clientes = this.selectClient;
+         this.abonado.idresponsable = this.selectClient;
+         this.observaciones = this.f_camPropietario.value.observaciones;
+         this.aguatramite.nrodocumento = this.f_camPropietario.value.nrodocumento;
+         this.aguatramite.iddocumento_documentos = +this.f_camPropietario.value.iddocumento_documentos!;
+         if (this.swActualizar) await this.actualizarFacturas();
 
-         // Espera a que todas las facturas se actualicen antes de seguir
-         await this.actualizarFacturas();
+         this.actualizarAbonado(this.abonado);
+         const tramite = await this.guardarAguaTramite(this.abonado, null);
+         await this.enviarCorreoComprobante(tramite, this.correosTramiteActual);
+         this.modalConfirmacion?.hide();
+         this.swal('success', 'Datos guardados y actualizados');
+      } finally {
+         this.procesandoTramite = false;
+         this.correosTramiteActual = [];
+         this.s_loading.hideLoading();
       }
-
-      this.actualizarAbonado(this.abonado);
-      this.guardarAguaTramite(this.abonado, null);
-      this.modalConfirmacion.hide();
-      this.swal("success", `Datos guardados y actualizados`);
-      this.s_loading.hideLoading();
    }
 
    async actualizarResponsablePago() {
       this.s_loading.showLoading();
-      this.abonado.idresponsable = this.selectClient;
-      this.observaciones = this.f_camPropietario.value.observaciones;
-      this.aguatramite.nrodocumento = this.f_camPropietario.value.nrodocumento;
-      this.aguatramite.iddocumento_documentos = +this.f_camPropietario.value.iddocumento_documentos!;
+      try {
+         this.abonado.idresponsable = this.selectClient;
+         this.observaciones = this.f_camPropietario.value.observaciones;
+         this.aguatramite.nrodocumento = this.f_camPropietario.value.nrodocumento;
+         this.aguatramite.iddocumento_documentos = +this.f_camPropietario.value.iddocumento_documentos!;
+         if (this.swActualizar) await this.actualizarFacturas();
 
-      if (this.swActualizar) {
-         await this.actualizarFacturas();
+         this.actualizarAbonado(this.abonado);
+         const tramite = await this.guardarAguaTramite(this.abonado, null);
+         await this.enviarCorreoComprobante(tramite, this.correosTramiteActual);
+         this.modalConfirmacion?.hide();
+         this.swal('success', 'Responsable de pago actualizado');
+      } finally {
+         this.procesandoTramite = false;
+         this.correosTramiteActual = [];
+         this.s_loading.hideLoading();
       }
-
-      this.actualizarAbonado(this.abonado);
-      this.guardarAguaTramite(this.abonado, null);
-      this.modalConfirmacion.hide();
-      this.swal("success", `Responsable de pago actualizado`);
-      this.s_loading.hideLoading();
    }
 
    async actualizarFacturas(): Promise<void> {
@@ -435,10 +462,9 @@ export class AguatramComponent implements OnInit {
          : `CAMBIO DE PROPIETARIO CUENTA ${this.abonado?.idabonado ?? ''}`;
       const tipoCambio = this.cambioResponsablePago ? 'RESPONSABLE_PAGO' : 'PROPIETARIO';
 
-      // Mapeamos cada factura a una promesa
       const promesas = facturas.map(async (item: any) => {
-         let facturaModi = new Facturamodificaciones();
-         let factura: any = await this.s_facturas.getByIdAsync(item.idfactura);
+         const facturaModi = new Facturamodificaciones();
+         const factura: any = await this.s_facturas.getByIdAsync(item.idfactura);
 
          facturaModi.idfactura = item.idfactura;
          facturaModi.datosfactura = JSON.stringify(item);
@@ -455,10 +481,8 @@ export class AguatramComponent implements OnInit {
          });
          facturaModi.fechacrea = this.normalizarFechaLocal(this.date);
 
-         // Espera a guardar la modificación
          await lastValueFrom(this.s_facturasModi.saveFacturacionModificaciones(facturaModi));
 
-         // Una vez guardado, actualiza la factura
          factura.idcliente = this.selectClient;
          factura.usumodi = this.authService.idusuario;
          factura.fecmodi = this.normalizarFechaLocal(this.date);
@@ -480,10 +504,8 @@ export class AguatramComponent implements OnInit {
          }
       });
 
-      // Espera a que todas las promesas terminen
       await Promise.all(promesas);
    }
-
 
    async setAbonado(abonado: any) {
       this.abonado = abonado;
@@ -498,8 +520,8 @@ export class AguatramComponent implements OnInit {
          municipio: abonado.municipio,
       });
       if (this.cambioPropietario || this.cambioResponsablePago) {
-         let facturas: any = await this.s_facturas.getAllFacturasByCuenta(abonado.idabonado);
-         this.swal("warning", `Cuenta con ${facturas.length} facturas pendientes`)
+         const facturas: any = await this.s_facturas.getAllFacturasByCuenta(abonado.idabonado);
+         this.swal('warning', `Cuenta con ${facturas.length} facturas pendientes`);
          this._facturas = facturas;
       }
    }
@@ -524,7 +546,21 @@ export class AguatramComponent implements OnInit {
          : `*NOTA: A las ${this._facturas.length} planillas pendientes se les modificará el propietario/responsable de pago.`;
    }
 
-   confirmarCambioTitularidad(): void {
+   async confirmarCambioTitularidad(): Promise<void> {
+      if (this.f_camPropietario.invalid) {
+         this.f_camPropietario.markAllAsTouched();
+         this.swal('warning', 'Completa la información requerida');
+         return;
+      }
+      const destino = this.selectClient?.email || this.abonado?.idcliente_clientes?.email;
+      const correos = await this.confirmarTramiteConCorreo(
+         this.cambioResponsablePago ? 'Cambio de responsable de pago' : 'Cambio de propietario',
+         `Cuenta ${this.abonado.idabonado} - ${this.selectClient?.nombre || 'Cliente no seleccionado'}`,
+         destino
+      );
+      if (!correos) return;
+
+      this.correosTramiteActual = correos;
       if (this.cambioResponsablePago) {
          this.confCambioResponsablePago();
          return;
@@ -533,20 +569,153 @@ export class AguatramComponent implements OnInit {
    }
 
    aceptarCambioTitularidad(): void {
+      this.procesandoTramite = true;
       if (this.cambioResponsablePago) {
          this.actualizarResponsablePago();
          return;
       }
       this.actualizarPropietario();
    }
+
+   cancelarConfirmacionTitularidad(): void {
+      this.procesandoTramite = false;
+      this.correosTramiteActual = [];
+      this.modalConfirmacion?.hide();
+   }
+
+   private async confirmarTramiteConCorreo(
+      titulo: string,
+      detalle: string,
+      correoPorDefecto?: String | null
+   ): Promise<string[] | null> {
+      const resultado = await Swal.fire({
+         title: titulo,
+         icon: 'question',
+         html: `
+            <div class="text-left">
+               <p><strong>Detalle:</strong> ${detalle}</p>
+               <p class="mb-2">Confirma el trámite y, si lo deseas, ajusta el correo del cliente.</p>
+            </div>
+         `,
+         input: 'text',
+         inputLabel: 'Correo(s) de notificación',
+         inputValue: correoPorDefecto ? String(correoPorDefecto) : '',
+         inputPlaceholder: 'cliente@correo.com; copia@correo.com',
+         showCancelButton: true,
+         confirmButtonText: 'Aceptar',
+         cancelButtonText: 'Cancelar',
+         preConfirm: (value) => {
+            const correos = this.parseRecipients(value || '');
+            if (!correos.length) {
+               Swal.showValidationMessage('Ingresa al menos un correo');
+               return null;
+            }
+            if (correos.some((correo) => !this.isValidEmail(correo))) {
+               Swal.showValidationMessage('Revisa el formato de los correos');
+               return null;
+            }
+            return correos;
+         },
+      });
+
+      return resultado.isConfirmed ? (resultado.value as string[]) : null;
+   }
+
+   private async enviarCorreoComprobante(aguatramite: Aguatramite, correos: string[]): Promise<void> {
+      if (!correos?.length) return;
+
+      const comprobante = await this.s_tramiteagua.buildComprobanteTramiteBlob(aguatramite);
+      const attachments: OutboxAttachment[] = [
+         await this.fileToAttachment(
+            comprobante,
+            `comprobante-tramite-${aguatramite.idaguatramite || 'agua'}.pdf`
+         ),
+      ];
+
+      await firstValueFrom(
+         this.outboxEmailService.sendNotificationEmail({
+            to: correos,
+            subject: `Comprobante de trámite de agua #${aguatramite.idaguatramite}`,
+            html: this.buildHtmlCorreoComprobante(aguatramite),
+            text:
+               `Adjuntamos el comprobante del trámite de agua #${aguatramite.idaguatramite}. ` +
+               `Cliente: ${aguatramite?.idcliente_clientes?.nombre || ''}.`,
+            attachments,
+         })
+      );
+
+      this.swal('success', `Correo enviado a: ${correos.join(', ')}`);
+   }
+
+   private parseRecipients(value: string): string[] {
+      return String(value || '')
+         .split(/[;,]/)
+         .map((item) => item.trim())
+         .filter(Boolean);
+   }
+
+   private isValidEmail(value: string): boolean {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
+   }
+
+   private async fileToAttachment(file: Blob, fileName: string): Promise<OutboxAttachment> {
+      const base64 = await this.blobToBase64(file);
+      return {
+         name: fileName,
+         contentType: file.type || 'application/pdf',
+         base64,
+      };
+   }
+
+   private blobToBase64(blob: Blob): Promise<string> {
+      return new Promise((resolve, reject) => {
+         const reader = new FileReader();
+         reader.onloadend = () => {
+            const result = reader.result;
+            if (typeof result !== 'string') {
+               reject(new Error('No se pudo convertir el archivo adjunto'));
+               return;
+            }
+            resolve(result.split(',')[1] || '');
+         };
+         reader.onerror = () => reject(reader.error);
+         reader.readAsDataURL(blob);
+      });
+   }
+
+   private buildHtmlCorreoComprobante(aguatramite: Aguatramite): string {
+      return `
+         <div style="font-family: Arial, Helvetica, sans-serif; background:#f4f7fb; padding:24px; color:#1f2937;">
+            <div style="max-width:700px; margin:0 auto; background:#ffffff; border-radius:12px; overflow:hidden; border:1px solid #dbe4ee;">
+               <div style="background:#1d4ed8; color:#ffffff; padding:20px 24px;">
+                  <h2 style="margin:0; font-size:22px;">Comprobante de trámite de agua</h2>
+                  <p style="margin:8px 0 0 0; font-size:14px;">EPMAPA-T</p>
+               </div>
+               <div style="padding:24px;">
+                  <p style="margin-top:0;">Estimado/a <strong>${aguatramite?.idcliente_clientes?.nombre || 'cliente'}</strong>,</p>
+                  <p>Se procesó correctamente su solicitud.</p>
+                  <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px; margin:16px 0;">
+                     <p style="margin:0 0 8px 0;"><strong>Nro. de trámite:</strong> ${aguatramite?.idaguatramite || ''}</p>
+                     <p style="margin:0 0 8px 0;"><strong>Tipo:</strong> ${this.titulo}</p>
+                     <p style="margin:0 0 8px 0;"><strong>Cliente:</strong> ${aguatramite?.idcliente_clientes?.nombre || 'No registrado'}</p>
+                     <p style="margin:0;"><strong>Observación:</strong> ${aguatramite?.observacion || 'Sin observaciones'}</p>
+                  </div>
+                  <p>Adjuntamos el comprobante del trámite para su respaldo.</p>
+                  <p style="margin-bottom:0;">Gracias por utilizar nuestros servicios.</p>
+               </div>
+            </div>
+         </div>
+      `;
+   }
+
    swal(icon: any, mensaje: any) {
       Swal.fire({
          toast: true,
-         icon: icon,
+         icon,
          title: mensaje,
          position: 'top-end',
          showConfirmButton: false,
-         timer: 3000,
+         timer: 3500,
       });
    }
 }

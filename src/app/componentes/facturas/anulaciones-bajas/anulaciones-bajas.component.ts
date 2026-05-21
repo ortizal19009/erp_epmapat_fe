@@ -43,7 +43,21 @@ export class AnulacionesBajasComponent implements OnInit {
   _fEliminadas: any;
   _fAnuladasBase: any[] = [];
   _fEliminadasBase: any[] = [];
+  anuladasFiltradas: any[] = [];
+  eliminadasFiltradas: any[] = [];
   c_limit: number = 10;
+  pageSize: number = 10;
+  readonly pageSizeOptions: number[] = [10, 20, 50];
+  anuladasCurrentPage: number = 1;
+  anuladasTotalPages: number = 1;
+  anuladasTotalElements: number = 0;
+  eliminadasCurrentPage: number = 1;
+  eliminadasTotalPages: number = 1;
+  eliminadasTotalElements: number = 0;
+  sortAnuladasColumn: string = 'fechaanulacion';
+  sortAnuladasDirection: 'asc' | 'desc' = 'desc';
+  sortEliminadasColumn: string = 'fechaeliminacion';
+  sortEliminadasDirection: 'asc' | 'desc' = 'desc';
   txttitulo: string = 'Anulación';
   swtitulo: boolean = true;
   //detalles factura
@@ -64,6 +78,7 @@ export class AnulacionesBajasComponent implements OnInit {
   userAuth: number;
   selectedFragment: string = 'formNew';
   size: string = 'sm';
+  private readonly historicoStateKey = 'anulaciones-bajas-historico-state';
 
   constructor(
     private facServicio: FacturaService,
@@ -100,6 +115,7 @@ export class AnulacionesBajasComponent implements OnInit {
       fechaDesde: año + '-01-01',
       fechaHasta: this.sliceDate,
     });
+    this.restaurarEstadoHistorico();
     this.userAuth = this.authService.idusuario;
     this.f_factura = this.fb.group({
       usuarioanulacion: '',
@@ -128,10 +144,63 @@ export class AnulacionesBajasComponent implements OnInit {
       this.campo = 2;
       this.buscar();
     }
+    this.anuladasCurrentPage = 1;
+    this.eliminadasCurrentPage = 1;
     this.cargarHistoricos();
   }
   setValor() {
+    this.guardarEstadoHistorico();
     this.cargarHistoricos();
+  }
+
+  private restaurarEstadoHistorico(): void {
+    const stateJson = sessionStorage.getItem(this.historicoStateKey);
+    if (!stateJson) {
+      return;
+    }
+
+    try {
+      const state = JSON.parse(stateJson);
+      this.formFiltrosHistorico.patchValue({
+        cuenta: state?.cuenta ?? '',
+        cliente: state?.cliente ?? '',
+        fechaDesde: state?.fechaDesde ?? this.formFiltrosHistorico.value.fechaDesde,
+        fechaHasta: state?.fechaHasta ?? this.formFiltrosHistorico.value.fechaHasta,
+      });
+      this.pageSize = this.pageSizeOptions.includes(state?.pageSize)
+        ? state.pageSize
+        : this.pageSize;
+      this.anuladasCurrentPage = Number(state?.anuladasCurrentPage) || 1;
+      this.eliminadasCurrentPage = Number(state?.eliminadasCurrentPage) || 1;
+      this.sortAnuladasColumn = state?.sortAnuladasColumn || this.sortAnuladasColumn;
+      this.sortAnuladasDirection =
+        state?.sortAnuladasDirection === 'asc' || state?.sortAnuladasDirection === 'desc'
+          ? state.sortAnuladasDirection
+          : this.sortAnuladasDirection;
+      this.sortEliminadasColumn =
+        state?.sortEliminadasColumn || this.sortEliminadasColumn;
+      this.sortEliminadasDirection =
+        state?.sortEliminadasDirection === 'asc' ||
+        state?.sortEliminadasDirection === 'desc'
+          ? state.sortEliminadasDirection
+          : this.sortEliminadasDirection;
+    } catch (error) {
+      sessionStorage.removeItem(this.historicoStateKey);
+    }
+  }
+
+  private guardarEstadoHistorico(): void {
+    const state = {
+      ...this.formFiltrosHistorico.value,
+      pageSize: this.pageSize,
+      anuladasCurrentPage: this.anuladasCurrentPage,
+      eliminadasCurrentPage: this.eliminadasCurrentPage,
+      sortAnuladasColumn: this.sortAnuladasColumn,
+      sortAnuladasDirection: this.sortAnuladasDirection,
+      sortEliminadasColumn: this.sortEliminadasColumn,
+      sortEliminadasDirection: this.sortEliminadasDirection,
+    };
+    sessionStorage.setItem(this.historicoStateKey, JSON.stringify(state));
   }
 
   getFragmentToShow(opt: string) {
@@ -284,18 +353,24 @@ export class AnulacionesBajasComponent implements OnInit {
   }
 
   filtrarHistoricos(): void {
+    this.anuladasCurrentPage = 1;
+    this.eliminadasCurrentPage = 1;
+    this.guardarEstadoHistorico();
     this.cargarHistoricos();
   }
 
   limpiarFiltrosHistorico(): void {
     const fecha = new Date();
     const año = fecha.getFullYear();
+    this.anuladasCurrentPage = 1;
+    this.eliminadasCurrentPage = 1;
     this.formFiltrosHistorico.patchValue({
       cuenta: '',
       cliente: '',
       fechaDesde: `${año}-01-01`,
       fechaHasta: this.sliceDate,
     });
+    this.guardarEstadoHistorico();
     this.cargarHistoricos();
   }
 
@@ -303,12 +378,13 @@ export class AnulacionesBajasComponent implements OnInit {
     const cuenta = `${this.formFiltrosHistorico?.value?.cuenta ?? ''}`.trim().toLowerCase();
     const cliente = `${this.formFiltrosHistorico?.value?.cliente ?? ''}`.trim().toLowerCase();
 
-    this._fAnuladas = this._fAnuladasBase.filter((item: any) =>
+    this.anuladasFiltradas = this._fAnuladasBase.filter((item: any) =>
       this.coincideHistorico(item, cuenta, cliente)
     );
-    this._fEliminadas = this._fEliminadasBase.filter((item: any) =>
+    this.eliminadasFiltradas = this._fEliminadasBase.filter((item: any) =>
       this.coincideHistorico(item, cuenta, cliente)
     );
+    this.recalcularHistoricos();
   }
 
   private coincideHistorico(item: any, cuenta: string, cliente: string): boolean {
@@ -318,6 +394,222 @@ export class AnulacionesBajasComponent implements OnInit {
     const coincideCuenta = !cuenta || cuentaItem.includes(cuenta);
     const coincideCliente = !cliente || clienteItem.includes(cliente);
     return coincideCuenta && coincideCliente;
+  }
+
+  toggleSort(tabla: 'anuladas' | 'eliminadas', columna: string): void {
+    if (tabla === 'anuladas') {
+      if (this.sortAnuladasColumn === columna) {
+        this.sortAnuladasDirection =
+          this.sortAnuladasDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.sortAnuladasColumn = columna;
+        this.sortAnuladasDirection = 'asc';
+      }
+    } else {
+      if (this.sortEliminadasColumn === columna) {
+        this.sortEliminadasDirection =
+          this.sortEliminadasDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.sortEliminadasColumn = columna;
+        this.sortEliminadasDirection = 'asc';
+      }
+    }
+    this.guardarEstadoHistorico();
+    this.recalcularHistoricos();
+  }
+
+  getSortIcon(tabla: 'anuladas' | 'eliminadas', columna: string): string {
+    const columnaActual =
+      tabla === 'anuladas' ? this.sortAnuladasColumn : this.sortEliminadasColumn;
+    const direccionActual =
+      tabla === 'anuladas'
+        ? this.sortAnuladasDirection
+        : this.sortEliminadasDirection;
+
+    if (columnaActual !== columna) {
+      return 'fa fa-sort text-muted';
+    }
+
+    return direccionActual === 'asc' ? 'fa fa-sort-up' : 'fa fa-sort-down';
+  }
+
+  cambiarPagina(tabla: 'anuladas' | 'eliminadas', delta: number): void {
+    if (tabla === 'anuladas') {
+      const nuevaPagina = this.anuladasCurrentPage + delta;
+      if (nuevaPagina >= 1 && nuevaPagina <= this.anuladasTotalPages) {
+        this.anuladasCurrentPage = nuevaPagina;
+        this.guardarEstadoHistorico();
+        this.paginarAnuladas();
+      }
+      return;
+    }
+
+    const nuevaPagina = this.eliminadasCurrentPage + delta;
+    if (nuevaPagina >= 1 && nuevaPagina <= this.eliminadasTotalPages) {
+      this.eliminadasCurrentPage = nuevaPagina;
+      this.guardarEstadoHistorico();
+      this.paginarEliminadas();
+    }
+  }
+
+  irPagina(tabla: 'anuladas' | 'eliminadas', pagina: number): void {
+    if (tabla === 'anuladas') {
+      this.anuladasCurrentPage = pagina;
+      this.guardarEstadoHistorico();
+      this.paginarAnuladas();
+      return;
+    }
+
+    this.eliminadasCurrentPage = pagina;
+    this.guardarEstadoHistorico();
+    this.paginarEliminadas();
+  }
+
+  cambiarTamanoPagina(): void {
+    this.anuladasCurrentPage = 1;
+    this.eliminadasCurrentPage = 1;
+    this.guardarEstadoHistorico();
+    this.recalcularHistoricos();
+  }
+
+  paginasVisibles(tabla: 'anuladas' | 'eliminadas'): number[] {
+    const totalPages =
+      tabla === 'anuladas' ? this.anuladasTotalPages : this.eliminadasTotalPages;
+    const currentPage =
+      tabla === 'anuladas'
+        ? this.anuladasCurrentPage
+        : this.eliminadasCurrentPage;
+    const inicio = Math.max(1, currentPage - 2);
+    const fin = Math.min(totalPages, inicio + 4);
+    const paginas: number[] = [];
+
+    for (let pagina = inicio; pagina <= fin; pagina++) {
+      paginas.push(pagina);
+    }
+
+    return paginas;
+  }
+
+  private recalcularHistoricos(): void {
+    this.ordenarAnuladas();
+    this.ordenarEliminadas();
+    this.paginarAnuladas();
+    this.paginarEliminadas();
+  }
+
+  private ordenarAnuladas(): void {
+    const ordenadas = [...this.anuladasFiltradas];
+    ordenadas.sort((a: any, b: any) =>
+      this.compararValores(
+        this.obtenerValorOrden(a, this.sortAnuladasColumn),
+        this.obtenerValorOrden(b, this.sortAnuladasColumn),
+        this.sortAnuladasDirection
+      )
+    );
+    this.anuladasFiltradas = ordenadas;
+    this.anuladasTotalElements = ordenadas.length;
+    this.anuladasTotalPages = Math.max(
+      1,
+      Math.ceil(this.anuladasTotalElements / this.pageSize)
+    );
+    if (this.anuladasCurrentPage > this.anuladasTotalPages) {
+      this.anuladasCurrentPage = this.anuladasTotalPages;
+    }
+  }
+
+  private ordenarEliminadas(): void {
+    const ordenadas = [...this.eliminadasFiltradas];
+    ordenadas.sort((a: any, b: any) =>
+      this.compararValores(
+        this.obtenerValorOrden(a, this.sortEliminadasColumn),
+        this.obtenerValorOrden(b, this.sortEliminadasColumn),
+        this.sortEliminadasDirection
+      )
+    );
+    this.eliminadasFiltradas = ordenadas;
+    this.eliminadasTotalElements = ordenadas.length;
+    this.eliminadasTotalPages = Math.max(
+      1,
+      Math.ceil(this.eliminadasTotalElements / this.pageSize)
+    );
+    if (this.eliminadasCurrentPage > this.eliminadasTotalPages) {
+      this.eliminadasCurrentPage = this.eliminadasTotalPages;
+    }
+  }
+
+  private paginarAnuladas(): void {
+    const inicio = (this.anuladasCurrentPage - 1) * this.pageSize;
+    this._fAnuladas = this.anuladasFiltradas.slice(inicio, inicio + this.pageSize);
+  }
+
+  private paginarEliminadas(): void {
+    const inicio = (this.eliminadasCurrentPage - 1) * this.pageSize;
+    this._fEliminadas = this.eliminadasFiltradas.slice(inicio, inicio + this.pageSize);
+  }
+
+  private obtenerValorOrden(item: any, columna: string): any {
+    switch (columna) {
+      case 'idfactura':
+        return item?.idfactura;
+      case 'fechaanulacion':
+        return item?.fechaanulacion;
+      case 'fechaeliminacion':
+        return item?.fechaeliminacion;
+      case 'nrofactura':
+        return item?.nrofactura;
+      case 'cliente':
+        return item?.idcliente?.nombre;
+      case 'modulo':
+        return item?.idmodulo?.descripcion;
+      case 'cuenta':
+        return item?.idabonado;
+      case 'razonanulacion':
+        return item?.razonanulacion;
+      case 'razoneliminacion':
+        return item?.razoneliminacion;
+      default:
+        return item?.[columna];
+    }
+  }
+
+  private compararValores(
+    valorA: any,
+    valorB: any,
+    direccion: 'asc' | 'desc'
+  ): number {
+    const a = this.normalizarValorOrden(valorA);
+    const b = this.normalizarValorOrden(valorB);
+    let resultado = 0;
+
+    if (a < b) {
+      resultado = -1;
+    } else if (a > b) {
+      resultado = 1;
+    }
+
+    return direccion === 'asc' ? resultado : -resultado;
+  }
+
+  private normalizarValorOrden(valor: any): any {
+    if (valor === null || valor === undefined || valor === '') {
+      return '';
+    }
+
+    if (typeof valor === 'number') {
+      return valor;
+    }
+
+    const fecha = new Date(valor);
+    if (!Number.isNaN(fecha.getTime())) {
+      return fecha.getTime();
+    }
+
+    const numero = Number(valor);
+    if (!Number.isNaN(numero) && `${valor}`.trim() !== '') {
+      return numero;
+    }
+
+    return `${valor}`.toLowerCase();
   }
   setCliente(e: any) {
     this.formBuscar.patchValue({

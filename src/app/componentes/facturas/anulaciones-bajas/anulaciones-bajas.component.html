@@ -43,6 +43,13 @@
                                 <input type="date" class="form-control form-control-sm" formControlName="fechaHasta">
                             </div>
                             <div class="col-sm-3 text-right">
+                                <div class="d-inline-flex align-items-center mr-2">
+                                    <label class="small mb-0 mr-1">Mostrar</label>
+                                    <select class="form-control form-control-sm" [(ngModel)]="pageSize"
+                                        [ngModelOptions]="{standalone: true}" (change)="cambiarTamanoPagina()">
+                                        <option *ngFor="let size of pageSizeOptions" [value]="size">{{size}}</option>
+                                    </select>
+                                </div>
                                 <button type="button" class="btn btn-sm btn-primary mr-1" (click)="filtrarHistoricos()">
                                     <i class="fa fa-search"></i>
                                 </button>
@@ -77,15 +84,15 @@
                                         </div>
                                     </div>
                                     <table class="table table-head-fixed text-nowrap table-bordered table-hover table-sm table-responsive-sm">
-                                        <thead class="theadCuentas">
+<thead class="theadCuentas">
                                             <tr class="text-center">
-                                                <th>Planilla</th>
-                                                <th>Fecha anulación</th>
-                                                <th>Nro.Factura</th>
-                                                <th>Cliente</th>
-                                                <th>Módulo</th>
-                                                <th>Cuenta</th>
-                                                <th>Razón A.</th>
+                                                <th class="sortable-header" (click)="toggleSort('anuladas', 'idfactura')">Planilla <i [class]="getSortIcon('anuladas', 'idfactura')"></i></th>
+                                                <th class="sortable-header" (click)="toggleSort('anuladas', 'fechaanulacion')">Fecha anulación <i [class]="getSortIcon('anuladas', 'fechaanulacion')"></i></th>
+                                                <th class="sortable-header" (click)="toggleSort('anuladas', 'nrofactura')">Nro.Factura <i [class]="getSortIcon('anuladas', 'nrofactura')"></i></th>
+                                                <th class="sortable-header" (click)="toggleSort('anuladas', 'cliente')">Cliente <i [class]="getSortIcon('anuladas', 'cliente')"></i></th>
+                                                <th class="sortable-header" (click)="toggleSort('anuladas', 'modulo')">Módulo <i [class]="getSortIcon('anuladas', 'modulo')"></i></th>
+                                                <th class="sortable-header" (click)="toggleSort('anuladas', 'cuenta')">Cuenta <i [class]="getSortIcon('anuladas', 'cuenta')"></i></th>
+                                                <th class="sortable-header" (click)="toggleSort('anuladas', 'razonanulacion')">Razón A. <i [class]="getSortIcon('anuladas', 'razonanulacion')"></i></th>
                                             </tr>
                                         </thead>
                                         <tbody class="bodyCuentas">
@@ -99,8 +106,30 @@
                                                 <td class="text-left _description">{{fanuladas.idabonado}} </td>
                                                 <td class="_description">{{fanuladas.razonanulacion}} </td>
                                             </tr>
+                                            <tr *ngIf="!_fAnuladas?.length">
+                                                <td colspan="7" class="text-center text-muted py-3">No hay anulaciones para mostrar</td>
+                                            </tr>
                                         </tbody>
                                     </table>
+                                    <div class="d-flex flex-wrap justify-content-between align-items-center p-2 border-top bg-white">
+                                        <small class="text-muted">
+                                            {{anuladasTotalElements}} registros | Página {{anuladasCurrentPage}} de {{anuladasTotalPages}}
+                                        </small>
+                                        <div class="btn-group btn-group-sm mt-1 mt-sm-0">
+                                            <button type="button" class="btn btn-outline-secondary" [disabled]="anuladasCurrentPage === 1"
+                                                (click)="cambiarPagina('anuladas', -1)">Anterior</button>
+                                            <button type="button" class="btn btn-outline-secondary"
+                                                *ngFor="let pagina of paginasVisibles('anuladas')"
+                                                [class.btn-primary]="pagina === anuladasCurrentPage"
+                                                [class.text-white]="pagina === anuladasCurrentPage"
+                                                (click)="irPagina('anuladas', pagina)">
+                                                {{pagina}}
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary"
+                                                [disabled]="anuladasCurrentPage === anuladasTotalPages"
+                                                (click)="cambiarPagina('anuladas', 1)">Siguiente</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -119,14 +148,14 @@
                                         </div>
                                     </div>
                                     <table class="table table-hover table-sm table-bordered mb-0">
-                                        <thead class="theadFacelectro">
+<thead class="theadFacelectro">
                                             <tr class="text-center">
-                                                <th>Planilla</th>
-                                                <th>Fecha Eliminación</th>
-                                                <th class="col-sm-5">Cliente</th>
-                                                <th>Cuenta</th>
-                                                <th class="col-sm-2">Razón E.</th>
-                                                <th>Módulo</th>
+                                                <th class="sortable-header" (click)="toggleSort('eliminadas', 'idfactura')">Planilla <i [class]="getSortIcon('eliminadas', 'idfactura')"></i></th>
+                                                <th class="sortable-header" (click)="toggleSort('eliminadas', 'fechaeliminacion')">Fecha Eliminación <i [class]="getSortIcon('eliminadas', 'fechaeliminacion')"></i></th>
+                                                <th class="col-sm-5 sortable-header" (click)="toggleSort('eliminadas', 'cliente')">Cliente <i [class]="getSortIcon('eliminadas', 'cliente')"></i></th>
+                                                <th class="sortable-header" (click)="toggleSort('eliminadas', 'cuenta')">Cuenta <i [class]="getSortIcon('eliminadas', 'cuenta')"></i></th>
+                                                <th class="col-sm-2 sortable-header" (click)="toggleSort('eliminadas', 'razoneliminacion')">Razón E. <i [class]="getSortIcon('eliminadas', 'razoneliminacion')"></i></th>
+                                                <th class="sortable-header" (click)="toggleSort('eliminadas', 'modulo')">Módulo <i [class]="getSortIcon('eliminadas', 'modulo')"></i></th>
                                                 <th></th>
                                             </tr>
                                         </thead>
@@ -145,8 +174,30 @@
                                                     </button>
                                                 </td>
                                             </tr>
+                                            <tr *ngIf="!_fEliminadas?.length">
+                                                <td colspan="7" class="text-center text-muted py-3">No hay eliminaciones para mostrar</td>
+                                            </tr>
                                         </tbody>
                                     </table>
+                                    <div class="d-flex flex-wrap justify-content-between align-items-center p-2 border-top bg-white">
+                                        <small class="text-muted">
+                                            {{eliminadasTotalElements}} registros | Página {{eliminadasCurrentPage}} de {{eliminadasTotalPages}}
+                                        </small>
+                                        <div class="btn-group btn-group-sm mt-1 mt-sm-0">
+                                            <button type="button" class="btn btn-outline-secondary" [disabled]="eliminadasCurrentPage === 1"
+                                                (click)="cambiarPagina('eliminadas', -1)">Anterior</button>
+                                            <button type="button" class="btn btn-outline-secondary"
+                                                *ngFor="let pagina of paginasVisibles('eliminadas')"
+                                                [class.btn-primary]="pagina === eliminadasCurrentPage"
+                                                [class.text-white]="pagina === eliminadasCurrentPage"
+                                                (click)="irPagina('eliminadas', pagina)">
+                                                {{pagina}}
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary"
+                                                [disabled]="eliminadasCurrentPage === eliminadasTotalPages"
+                                                (click)="cambiarPagina('eliminadas', 1)">Siguiente</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

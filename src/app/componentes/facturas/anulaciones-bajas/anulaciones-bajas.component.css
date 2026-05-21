@@ -33,3 +33,13 @@
 .numSize{
 width: 40px;
 }
+
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.sortable-header i {
+  margin-left: 4px;
+}

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Impuestos } from 'src/app/modelos/impuestos';
@@ -8,6 +8,7 @@ import { InteresesService } from 'src/app/servicios/intereses.service';
 import { JasperReportService } from 'src/app/servicios/jasper-report.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
+import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
 
 @Component({
   selector: 'app-info-factura',
@@ -27,6 +28,7 @@ export class InfoFacturasComponent implements OnInit {
   swreturn: boolean = true;
   datos: boolean = true;
   idusuario: number;
+  private currentLoadId = 0;
   constructor(
     private facService: FacturaService,
     private router: Router,
@@ -35,31 +37,59 @@ export class InfoFacturasComponent implements OnInit {
     private s_interes: InteresesService,
     private s_jasperreport: JasperReportService,
     private s_loading: LoadingService,
-    private authorizaService: AutorizaService
+    private authorizaService: AutorizaService,
+    private fecfacturaService: FecfacturaService
   ) { }
 
   ngOnInit(): void {
-    console.log(this.idfac);
     this.idusuario = this.authorizaService.idusuario;
-    this.idFactura = +sessionStorage.getItem('idfacturaToInfo')!;
-    sessionStorage.removeItem('idfacturaToInfo');
-    if (this.idFactura == 0 || this.idFactura == null) {
-      this.idFactura = this.idfac;
-      this.swreturn = false;
-    }
-    if ((this.idFactura == 0 || this.idFactura == null) && this.idfac == null) {
-      this.regresar();
-    }
-    this.datosPlanilla();
     this.getImpuestoAcutal();
+    this.cargarPlanillaActual();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if ('idfac' in changes && !changes['idfac'].firstChange) {
+      this.cargarPlanillaActual();
+    }
   }
   getImpuestoAcutal() {
     this.s_impuestos.getCurrentlyInteres().subscribe({
       next: (datos: any) => {
         this._impuesto = datos;
+        if (Array.isArray(this._rubroxfac) && this._rubroxfac.length) {
+          this.subtotal();
+        }
       },
       error: (e: any) => console.error(e),
     });
+  }
+  private cargarPlanillaActual(): void {
+    const idDesdeInput = Number(this.idfac);
+    const idDesdeStorage = Number(sessionStorage.getItem('idfacturaToInfo'));
+
+    this.idFactura = idDesdeInput > 0 ? idDesdeInput : idDesdeStorage;
+    this.swreturn = !(idDesdeInput > 0);
+    sessionStorage.removeItem('idfacturaToInfo');
+
+    if (!this.idFactura) {
+      if (this.idfac == null) {
+        this.regresar();
+      }
+      return;
+    }
+
+    this.resetPlanillaState();
+    this.datosPlanilla();
+  }
+
+  private resetPlanillaState(): void {
+    this.planilla = {} as Planilla;
+    this._rubroxfac = [];
+    this.suma12 = 0;
+    this.suma0 = 0;
+    this.valoriva = 0;
+    this.interes = 0;
+    this.datos = true;
   }
   async impComprobantePago(idfactura: number) {
     this.datos = true;
@@ -133,9 +163,17 @@ export class InfoFacturasComponent implements OnInit {
     this.datos = false;
   }
   async datosPlanilla() {
+    const loadId = ++this.currentLoadId;
     this.interes = await this.s_interes.getInteresFactura(this.idFactura!);
+    if (loadId !== this.currentLoadId) {
+      return;
+    }
+
     this.facService.getById(this.idFactura!).subscribe({
       next: (resp: any) => {
+        if (loadId !== this.currentLoadId) {
+          return;
+        }
         this.planilla.idfactura = resp.idfactura;
         this.planilla.modulo = resp.idmodulo.descripcion;
         this.planilla.idmodulo = resp.idmodulo;
@@ -147,6 +185,11 @@ export class InfoFacturasComponent implements OnInit {
         this.planilla.valorbase = resp.valorbase;
         this.planilla.idabonado = resp.idabonado;
         this.planilla.pagado = resp.pagado;
+        this.planilla.estado = resp.estado;
+        this.planilla.fechaanulacion = resp.fechaanulacion;
+        this.planilla.razonanulacion = resp.razonanulacion;
+        this.planilla.fechaeliminacion = resp.fechaeliminacion;
+        this.planilla.razoneliminacion = resp.razoneliminacion;
         this.getRubroxfac();
       },
       error: (err) => console.error(err.error),
@@ -156,7 +199,7 @@ export class InfoFacturasComponent implements OnInit {
   getRubroxfac() {
     this.rxfService.getDetalleByIdfactura(this.idFactura!).subscribe({
       next: (datos) => {
-        this._rubroxfac = datos;
+        this._rubroxfac = Array.isArray(datos) ? datos : [];
         this.subtotal();
       },
       error: (err) => console.error(err.error),
@@ -168,28 +211,22 @@ export class InfoFacturasComponent implements OnInit {
   }
 
   subtotal() {
-    let suma12: number = 0;
-    let suma0: number = 0;
+    let suma12 = 0;
+    let suma0 = 0;
     let valoriva = 0;
-    let i = 0;
-    this._rubroxfac.forEach(() => {
-      if (this._rubroxfac[i].idrubro_rubros.swiva == 1) {
-        suma12 +=
-          this._rubroxfac[i].cantidad * this._rubroxfac[i].valorunitario;
-        valoriva +=
-          this._rubroxfac[i].cantidad *
-          this._rubroxfac[i].valorunitario *
-          (this._impuesto.valor / 100);
-      } else {
-        if (this._rubroxfac[i].idrubro_rubros.esiva == 0) {
-          suma0 +=
-            this._rubroxfac[i].cantidad * this._rubroxfac[i].valorunitario;
-        } else {
-          // this.valoriva = this.rubroxfac[i].valorunitario;
-        }
+    const porcentajeIva = Number(this._impuesto?.valor || 0) / 100;
+
+    (this._rubroxfac || []).forEach((rubro: any) => {
+      const totalRubro = Number(rubro?.cantidad || 0) * Number(rubro?.valorunitario || 0);
+
+      if (rubro?.idrubro_rubros?.swiva == 1) {
+        suma12 += totalRubro;
+        valoriva += totalRubro * porcentajeIva;
+      } else if (rubro?.idrubro_rubros?.esiva == 0) {
+        suma0 += totalRubro;
       }
-      i++;
     });
+
     this.suma12 = suma12;
     this.suma0 = suma0;
     this.valoriva = valoriva;
@@ -208,6 +245,69 @@ export class InfoFacturasComponent implements OnInit {
       }
     );
   }
+
+  estaEliminada(): boolean {
+    return !!this.planilla?.fechaeliminacion;
+  }
+
+  estaAnulada(): boolean {
+    return !this.estaEliminada() && !!this.planilla?.fechaanulacion;
+  }
+
+  getEstadoPlanilla(): string {
+    if (this.estaEliminada()) {
+      return 'ELIMINADA';
+    }
+
+    if (this.estaAnulada()) {
+      return 'ANULADA';
+    }
+
+    return 'ACTIVA';
+  }
+
+  getEstadoPlanillaClass(): string {
+    if (this.estaEliminada()) {
+      return 'badge-danger';
+    }
+
+    if (this.estaAnulada()) {
+      return 'badge-warning';
+    }
+
+    return 'badge-success';
+  }
+
+  puedeGenerarFacturaElectronica(): boolean {
+    return !this.planilla?.nrofactura && !this.estaEliminada() && !this.estaAnulada();
+  }
+
+  async generarFacturaElectronica(): Promise<void> {
+    if (!this.planilla?.idfactura || !this.puedeGenerarFacturaElectronica()) {
+      return;
+    }
+
+    const confirmar = confirm(
+      `¿Desea generar la factura electrónica para la planilla ${this.planilla.idfactura}?`
+    );
+
+    if (!confirmar) {
+      return;
+    }
+
+    this.s_loading.showLoading();
+
+    try {
+      await this.fecfacturaService.generateXmlOfPago(this.planilla.idfactura);
+      await this.datosPlanilla();
+      alert('Factura electrónica generada correctamente.');
+    } catch (error) {
+      console.error('Error al generar la factura electrónica', error);
+      alert('No se pudo generar la factura electrónica.');
+    } finally {
+      this.s_loading.hideLoading();
+    }
+  }
 }
 
 interface Planilla {
@@ -222,4 +322,9 @@ interface Planilla {
   idabonado: number;
   pagado: number;
   idmodulo: number;
+  estado: number;
+  fechaanulacion: Date;
+  razonanulacion: String;
+  fechaeliminacion: Date;
+  razoneliminacion: String;
 }

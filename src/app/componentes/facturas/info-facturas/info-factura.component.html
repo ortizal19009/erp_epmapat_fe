@@ -20,6 +20,9 @@
             <button class="dropdown-item" type="button" [disabled]="planilla.pagado !=1"
               (click)="impFacturaElectronica(planilla.idfactura)">
               <i class="bi bi-printer"></i>&nbsp; Factura electrónica</button>
+            <button class="dropdown-item" type="button" *ngIf="idusuario===1 && puedeGenerarFacturaElectronica()"
+              (click)="generarFacturaElectronica()">
+              <i class="bi bi-file-earmark-plus"></i>&nbsp; Generar factura electrónica</button>
             <button class="dropdown-item" type="button" *ngIf="idusuario===1"
               (click)="multaCalculate(planilla.idfactura)">
               <i class="bi bi-printer"></i>&nbsp; Multas</button>
@@ -42,6 +45,9 @@
         <div class="card-body box-profile">
           <h3 class="profile-username text-center"><strong>Nro:</strong> {{ planilla.idfactura }}</h3>
           <p class="text-center text-muted">{{ planilla.modulo}}</p>
+          <div class="text-center mb-3">
+            <span class="badge badge-pill" [ngClass]="getEstadoPlanillaClass()">{{ getEstadoPlanilla() }}</span>
+          </div>
           <ul class="list-group list-group-unbordered mb-3">
             <li class="list-group-item">
               <b>Fecha</b> <a class="float-right">{{ planilla.fecha | date:'dd-MM-y'}}</a>
@@ -57,6 +63,20 @@
             </li>
             <li class="list-group-item" [hidden]="planilla.idabonado <= 0">
               <b>Cuenta</b> <a class="float-right">{{ planilla.idabonado}}</a>
+            </li>
+            <li class="list-group-item" *ngIf="estaAnulada()">
+              <b>Fec. anulación</b> <a class="float-right">{{ planilla.fechaanulacion | date: 'dd-MM-y' }}</a>
+            </li>
+            <li class="list-group-item" *ngIf="estaAnulada()">
+              <b>Razón anulación</b>
+              <div class="text-muted small mt-1">{{ planilla.razonanulacion || 'Sin detalle' }}</div>
+            </li>
+            <li class="list-group-item" *ngIf="estaEliminada()">
+              <b>Fec. eliminación</b> <a class="float-right">{{ planilla.fechaeliminacion | date: 'dd-MM-y' }}</a>
+            </li>
+            <li class="list-group-item" *ngIf="estaEliminada()">
+              <b>Razón eliminación</b>
+              <div class="text-muted small mt-1">{{ planilla.razoneliminacion || 'Sin detalle' }}</div>
             </li>
           </ul>
         </div>

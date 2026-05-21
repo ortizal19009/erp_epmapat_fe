@@ -361,7 +361,6 @@ export class FecfacturaService {
   }
   /* Exportar datos */
   async expDesdeAbonados(factura: any): Promise<any> {
-    console.log('exportando desde abonados', factura.idfactura);
     return this.generateXmlOfPago(factura.idfactura);
   }
 

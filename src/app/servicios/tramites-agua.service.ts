@@ -12,7 +12,7 @@ import { PersonalService } from './rrhh/personal.service';
 export class TramitesAguaService {
   administradores = [
     { nombre: 'Ing. Juan Diego Delgado', cargo: 'Director Comercial' },
-    { nombre: 'Ab. AndrÃ©s Montenegro', cargo: 'Asesor Legal' },
+    { nombre: 'Ab. Andrés Montenegro', cargo: 'Asesor Legal' },
   ];
 
   constructor(
@@ -22,19 +22,27 @@ export class TramitesAguaService {
   ) {}
 
   listaTramitesAgua(datos: any) {
-    const titulo = 'Lista de tramites de agua';
+    const titulo = 'Lista de trámites de agua';
     const doc = new jsPDF('p', 'pt', 'a4');
     this.s_header.header(titulo, doc);
     autoTable(doc, {
       html: `#${datos}`,
     });
-    const blob = doc.output('blob');
+    return doc.output('blob');
+  }
+
+  private openBlobInNewTab(blob: Blob): void {
     const url = URL.createObjectURL(blob);
     window.open(url, '_blank');
   }
 
   async genContratoTramite(aguatramite: any, abonado: any, servicio: string) {
-    const titulo = 'CONCESIÃ“N DE SERVICIOS';
+    const blob = await this.buildContratoTramiteBlob(aguatramite, abonado, servicio);
+    this.openBlobInNewTab(blob);
+  }
+
+  async buildContratoTramiteBlob(aguatramite: any, abonado: any, servicio: string): Promise<Blob> {
+    const titulo = 'CONCESIÓN DE SERVICIOS';
     const doc = new jsPDF('p', 'pt', 'a4');
     const margin = 30;
     const directorComercial = await this.obtenerDirectorComercialActivo();
@@ -42,12 +50,12 @@ export class TramitesAguaService {
 
     this.s_header.header(titulo, doc);
     doc.setFontSize(10);
-    doc.text(`TRAMITE: ${aguatramite.idaguatramite}`, margin, 160);
-    doc.text(`Tipo de servicio, ${servicio}`, margin, 190);
+    doc.text(`TRÁMITE: ${aguatramite.idaguatramite}`, margin, 160);
+    doc.text(`Tipo de servicio: ${servicio}`, margin, 190);
     doc.text(`Nro. cuenta: ${abonado.idabonado}`, margin, 210);
-    doc.text(`Propietario Cuenta: ${abonado.idcliente_clientes.nombre}`, margin, 225);
+    doc.text(`Propietario cuenta: ${abonado.idcliente_clientes.nombre}`, margin, 225);
     doc.text(`C.I.: ${abonado.idcliente_clientes.cedula}`, margin, 240);
-    doc.text(`DirecciÃ³n Cuenta: ${abonado.idcliente_clientes.direccion}`, margin, 255);
+    doc.text(`Dirección cuenta: ${abonado.idcliente_clientes.direccion}`, margin, 255);
     doc.text('El solicitante ha cancelado los siguientes valores', margin, 270);
 
     autoTable(doc, {
@@ -60,7 +68,7 @@ export class TramitesAguaService {
       startY: 280,
       margin,
       body: [
-        ['No genero Rubros.'],
+        ['No generó rubros.'],
         [`Solicitante: ${abonado.idcliente_clientes.nombre}`],
         [`Observaciones: ${aguatramite.observacion}`],
       ],
@@ -70,24 +78,27 @@ export class TramitesAguaService {
       director: directorComercial,
       cliente: {
         nombre: abonado?.idcliente_clientes?.nombre || 'No registrado',
-        detalle: abonado?.idcliente_clientes?.cedula || 'Sin identificacion',
+        detalle: abonado?.idcliente_clientes?.cedula || 'Sin identificación',
       },
       responsable: usuarioResponsable,
       startY: (doc as any).lastAutoTable.finalY + 50,
       margin,
     });
 
-    const blob = doc.output('blob');
-    const url = URL.createObjectURL(blob);
-    window.open(url, '_blank');
+    return doc.output('blob');
   }
 
   async genComprobanteTramite(aguatramite: any) {
-    const titulo = 'COMPROBANTE DE TRAMITE DE AGUA';
+    const blob = await this.buildComprobanteTramiteBlob(aguatramite);
+    this.openBlobInNewTab(blob);
+  }
+
+  async buildComprobanteTramiteBlob(aguatramite: any): Promise<Blob> {
+    const titulo = 'COMPROBANTE DE TRÁMITE DE AGUA';
     const doc = new jsPDF('p', 'pt', 'a4');
     const margin = 30;
     const tipoTramite =
-      aguatramite?.idtipotramite_tipotramite?.descripcion || 'Tramite de agua';
+      aguatramite?.idtipotramite_tipotramite?.descripcion || 'Trámite de agua';
     const cliente = aguatramite?.idcliente_clientes?.nombre || 'No registrado';
     const identificacion = aguatramite?.idcliente_clientes?.cedula || 'No registrada';
     const medidor = aguatramite?.codmedidor || 'No aplica';
@@ -104,14 +115,14 @@ export class TramitesAguaService {
 
     this.s_header.header(titulo, doc);
     doc.setFontSize(10);
-    doc.text(`TRAMITE NRO: ${aguatramite?.idaguatramite ?? ''}`, margin, 160);
-    doc.text(`TIPO DE TRAMITE: ${tipoTramite}`, margin, 180);
+    doc.text(`TRÁMITE NRO: ${aguatramite?.idaguatramite ?? ''}`, margin, 160);
+    doc.text(`TIPO DE TRÁMITE: ${tipoTramite}`, margin, 180);
     doc.text(`CLIENTE: ${cliente}`, margin, 200);
-    doc.text(`IDENTIFICACION: ${identificacion}`, margin, 220);
+    doc.text(`IDENTIFICACIÓN: ${identificacion}`, margin, 220);
     doc.text(`MEDIDOR / REFERENCIA: ${medidor}`, margin, 240);
     doc.text(`DOCUMENTO DE RESPALDO: ${nroDocumento}`, margin, 260);
     doc.text(`FECHA DE INGRESO: ${fechaCrea}`, margin, 280);
-    doc.text(`FECHA DE FINALIZACION: ${fechaTermina}`, margin, 300);
+    doc.text(`FECHA DE FINALIZACIÓN: ${fechaTermina}`, margin, 300);
     doc.text('DETALLE DEL COMPROBANTE', margin, 330);
 
     autoTable(doc, {
@@ -121,9 +132,7 @@ export class TramitesAguaService {
         fontSize: 10,
         cellPadding: 6,
       },
-      body: [
-        ['Observaciones', observacion],
-      ],
+      body: [['Observaciones', observacion]],
     });
 
     this.agregarFirmasTramite(doc, {
@@ -137,12 +146,15 @@ export class TramitesAguaService {
       margin,
     });
 
-    const blob = doc.output('blob');
-    const url = URL.createObjectURL(blob);
-    window.open(url, '_blank');
+    return doc.output('blob');
   }
 
   async genHojaInspeccion(datos: any, titulo: string) {
+    const blob = await this.buildHojaInspeccionBlob(datos, titulo);
+    this.openBlobInNewTab(blob);
+  }
+
+  async buildHojaInspeccionBlob(datos: any, titulo: string): Promise<Blob> {
     let medidor = 'NO';
     let agua = '';
     let alcantarillado = '';
@@ -150,10 +162,10 @@ export class TramitesAguaService {
       medidor = 'SI';
     }
     if (datos.agua === 1) {
-      agua = 'InstalaciÃ³n agua potable:';
+      agua = 'Instalación agua potable:';
     }
     if (datos.alcantarillado === 1) {
-      alcantarillado = 'InstalaciÃ³n alcantarillado:';
+      alcantarillado = 'Instalación alcantarillado:';
     }
 
     const doc = new jsPDF('p', 'pt', 'a4');
@@ -165,9 +177,9 @@ export class TramitesAguaService {
     doc.setFontSize(10);
     this.s_header.header(titulo, doc);
     doc.setFontSize(10);
-    doc.text('Tipo de trÃ¡mite: ', margx, 130);
-    doc.text('Tramite Nro: ', margx, 150);
-    doc.text(`Fecha creaciÃ³n: ${datos.feccrea}`, margx + 300, 150);
+    doc.text('Tipo de trámite: ', margx, 130);
+    doc.text('Trámite Nro: ', margx, 150);
+    doc.text(`Fecha creación: ${datos.feccrea}`, margx + 300, 150);
     doc.text('Servicios solicitados: ', margx, 170);
     doc.text(`${agua}`, margx + 20, 190);
     doc.text(`${alcantarillado}`, margx + 20, 210);
@@ -175,14 +187,14 @@ export class TramitesAguaService {
     doc.text(`Medidor empresa: ${medidor}`, margx + 300, 190);
     doc.text('DATOS DEL SOLICITANTE ', margx, 230);
     doc.text(`Nombres: ${datos.idcliente_clientes.nombre}`, margx + 20, 240);
-    doc.text(`DirecciÃ³n: ${datos.direccion}`, margx + 20, 250);
+    doc.text(`Dirección: ${datos.direccion}`, margx + 20, 250);
     doc.text(`Barrio: ${datos.barrio}`, margx + 20, 260);
     doc.text(`Ced/RUC: ${datos.idcliente_clientes.cedula}`, margx + 300, 240);
     doc.text(`Departamento: ${datos.departamento}`, margx + 300, 250);
     doc.text(`Nro. Casa: ${datos.nrocasa}`, margx + 300, 260);
     doc.text(datos.idcliente_clientes.nombre, margx + 275, 330);
     doc.text(
-      'Solicito a la empresa/municipalidad, se sirva disponer el trÃ¡mite para la factibilidad de \nconcesiÃ³n del servicio requerido.',
+      'Solicito a la empresa/municipalidad, se sirva disponer el trámite para la factibilidad de \nconcesión del servicio requerido.',
       margx,
       280
     );
@@ -191,13 +203,13 @@ export class TramitesAguaService {
     doc.text('CROQUIS. ', margx, 360);
     doc.line(margx, 500, margy, 500);
     doc.text('FACTIBILIDAD. ', margx, 510);
-    doc.text('TuberÃ­a principal: ', margx, 530);
+    doc.text('Tubería principal: ', margx, 530);
     doc.line(margx + 140, 530, margy, 530);
-    doc.text('Estado de la vÃ­a: ', margx, 545);
-    doc.text('Tierra()  Adoquin() Asfalto() Cemento() Otro() ', margx + 140, 545);
-    doc.text('CategorÃ­a: ', margx, 560);
+    doc.text('Estado de la vía: ', margx, 545);
+    doc.text('Tierra()  Adoquín() Asfalto() Cemento() Otro() ', margx + 140, 545);
+    doc.text('Categoría: ', margx, 560);
     doc.text(
-      'Residencial()  DomÃ©stica() Comercial() Oficial() Industrial() \nEspecial() Otro:_______',
+      'Residencial()  Doméstica() Comercial() Oficial() Industrial() \nEspecial() Otro:_______',
       margx + 140,
       560
     );
@@ -218,44 +230,47 @@ export class TramitesAguaService {
       director: directorComercial,
       cliente: {
         nombre: datos?.idcliente_clientes?.nombre || 'No registrado',
-        detalle: datos?.idcliente_clientes?.cedula || 'Sin identificacion',
+        detalle: datos?.idcliente_clientes?.cedula || 'Sin identificación',
       },
       responsable: usuarioResponsable,
       startY: 710,
       margin: margx,
     });
 
-    const blob = doc.output('blob');
-    const url = URL.createObjectURL(blob);
-    window.open(url, '_blank');
+    return doc.output('blob');
   }
 
   async genContrato(datos: any) {
-    const titulo = 'CONTRATO DE CONCESIÃ“N DE SERVICIOS';
+    const blob = await this.buildContratoBlob(datos);
+    this.openBlobInNewTab(blob);
+  }
+
+  async buildContratoBlob(datos: any): Promise<Blob> {
+    const titulo = 'CONTRATO DE CONCESIÓN DE SERVICIOS';
     const doc = new jsPDF('p', 'pt', 'a4');
     const margin = 30;
     const directorComercial = await this.obtenerDirectorComercialActivo();
     const usuarioResponsable = await this.obtenerUsuarioResponsable(
       datos?.idaguatramite_aguatramite?.usucrea
     );
-    const p1 = `Comparecen por una parte Gerente General de la Empresa PÃºblica Municipal de Agua Potable y Alcantarillado de TulcÃ¡n EPMAPA-T, conjuntamente con el seÃ±or(a) Asesor Legal, en calidad de concesionario, por otra parte en calidad de cliente el (la) SeÃ±or(a). ${datos.idaguatramite_aguatramite.idcliente_clientes.nombre}, domiciliado en ${datos.direccion}, para la concesiÃ³n del servicio de agua potable y/o alcantarillado de acuerdo a las siguientes clausulas: `;
-    const p2 = `PRIMERA.- ConexiÃ³n del Servicio de Agua Potable. La EPMAPA-T, por medio del Departamento TÃ©cnico, realizarÃ¡ la conexiÃ³n del servicio de Agua Potable desde la tuberÃ­a matriz hasta el medidor de consumo, una vez que el cliente cumpla los requisitos legales establecidos. `;
-    const p3 = `SEGUNDA.- Valores. Los derechos de instalaciÃ³n, reparaciÃ³n, desconexiÃ³n y otros servicios conexos se encuentran establecidos en la Ordenanza que Regula la DeterminaciÃ³n, RecaudaciÃ³n y AdministraciÃ³n de las Tasas por los Servicios de Agua Potable, Alcantarillado, Saneamiento, ConservaciÃ³n de Fuentes y RecolecciÃ³n de Basura, para la ciudad de TulcÃ¡n la cual normaliza l a operaciÃ³n y el funcionamiento de los sistemas de agua potable y alcantarillado. Los valores que pagarÃ¡ el usuario han sido establecidos de acuerdo con el valor de mano de obra, gastos administrativos y materiales ha utilizarse, mismos que se hallan detallados en la factura respectiva.\nEl medidor de consumo lo ha proporcionado la empresa el solicitante. `;
-    const p4 = `TERCERA.- Materiales. La EPMAPA-T dotarÃ¡ del medidor y demÃ¡s materiales para la conexiÃ³n del servicio, sin embargo el costo deberÃ¡ ser asumido por el usuario, por la condiciÃ³n social o econÃ³mica dicho costo podrÃ¡ ser prorrateado para ser pagado en cuotas. Art. 17 del Reglamento de servicios.`;
-    const p5 = `CUARTA.- El diÃ¡metro de la tuberÃ­a para la conexiÃ³n del Agua Potable, se concederÃ¡ de acuerdo a la necesidad del solicitante, y , previo la justificaciÃ³n del informe del Departamento TÃ©cnico, los valores ha cobrarse se establecerÃ¡n de acuerdo a lo determinado en la ordenanza y reglamento citados en la clÃ¡usula segunda de este documento.`;
-    const p7 = `QUINTA.- Responsabilidades del Usuario. El propietario del inmueble serÃ¡ el Ãºnico responsable ante la EPMAPA-T por las relaciones derivadas de los servicios de agua potable y/o alcantarillado. En tal virtud, no podrÃ¡ alegar mora de su inquilino cuando el inmueble estuviere arrendado, asÃ­ como tambiÃ©n cambio de propietario. El usuario estÃ¡ en la obligaciÃ³n de permitir al personal de la EPMAPA-T, debidamente identificado, acceder al medidor y las instalaciones internas sin que esto constituya una violaciÃ³n a sus derechos. `;
-    const p8 = `6.1 La EPMAPA-T emitirÃ¡ dentro de los 5 primeros dÃ­as de cada mes, las facturas por los servicios de agua potable y/o alcantarillado. `;
-    const p9 = `6.2 la EPMAPA-T reconocerÃ¡ como vÃ¡lidos Ãºnicamente los pagos que se realicen en los lugares autorizados. `;
-    const p10 = `6.3 Los inmuebles declarados de propiedad horizontal, que mantengan un solo medidor, serÃ¡n facturados con una sola planilla.`;
-    const p11 = `6.4 El plazo para el pago de las planillas por consumo de agua potable y/o alcantarillado es de treinta (30) dÃ­as, contados a partir de la fecha de emisiÃ³n. `;
-    const p12 = `6.5 El usuario que no haya cancelado su factura despuÃ©s de sesenta (60) dÃ­as, contados a partir de su emisiÃ³n, serÃ¡ sujeto de suspensiÃ³n de servicio previa notificaciÃ³n, en caso de no pago, se iniciarÃ¡ la acciÃ³n coactiva.`;
-    const p13 = `6.6 Los reclamos y observaciones a las plantillas se presentarÃ¡n en un plazo de hasta sesenta (60) dÃ­as a partir de la fecha de emisiÃ³n de la facturaciÃ³n, complidos los cuales, la facturaciÃ³n realizada se la darÃ¡ por aceptada y sin opciÃ³n a reclamo. `;
-    const p14 = `SÃ‰PTIMA.- AceptaciÃ³n. El solicitante declara estar de acuerdo en todo el contenido y se compromete a cumplir con todas las clausulas y las disposiciones descritas en el presente contrato. Para constancia y en acuerdo de las partes, se firma el presente contrato en original y copia de igual tenor y contenido. `;
+    const p1 = `Comparecen por una parte el Gerente General de la Empresa Pública Municipal de Agua Potable y Alcantarillado de Tulcán EPMAPA-T, conjuntamente con el señor(a) Asesor Legal, en calidad de concesionario, y por otra parte, en calidad de cliente, el (la) Señor(a) ${datos.idaguatramite_aguatramite.idcliente_clientes.nombre}, domiciliado en ${datos.direccion}, para la concesión del servicio de agua potable y/o alcantarillado de acuerdo a las siguientes cláusulas: `;
+    const p2 = `PRIMERA.- Conexión del servicio de agua potable. La EPMAPA-T, por medio del Departamento Técnico, realizará la conexión del servicio de agua potable desde la tubería matriz hasta el medidor de consumo, una vez que el cliente cumpla los requisitos legales establecidos. `;
+    const p3 = `SEGUNDA.- Valores. Los derechos de instalación, reparación, desconexión y otros servicios conexos se encuentran establecidos en la ordenanza que regula la determinación, recaudación y administración de las tasas por los servicios de agua potable, alcantarillado, saneamiento, conservación de fuentes y recolección de basura, para la ciudad de Tulcán, la cual normaliza la operación y el funcionamiento de los sistemas de agua potable y alcantarillado. Los valores que pagará el usuario han sido establecidos de acuerdo con el valor de mano de obra, gastos administrativos y materiales a utilizarse, mismos que se hallan detallados en la factura respectiva.\nEl medidor de consumo lo ha proporcionado la empresa al solicitante. `;
+    const p4 = `TERCERA.- Materiales. La EPMAPA-T dotará del medidor y demás materiales para la conexión del servicio; sin embargo, el costo deberá ser asumido por el usuario. Por la condición social o económica, dicho costo podrá ser prorrateado para ser pagado en cuotas. Art. 17 del Reglamento de servicios.`;
+    const p5 = `CUARTA.- El diámetro de la tubería para la conexión del agua potable se concederá de acuerdo a la necesidad del solicitante y, previa la justificación del informe del Departamento Técnico, los valores a cobrarse se establecerán de acuerdo a lo determinado en la ordenanza y reglamento citados en la cláusula segunda de este documento.`;
+    const p7 = `QUINTA.- Responsabilidades del usuario. El propietario del inmueble será el único responsable ante la EPMAPA-T por las relaciones derivadas de los servicios de agua potable y/o alcantarillado. En tal virtud, no podrá alegar mora de su inquilino cuando el inmueble estuviere arrendado, así como también cambio de propietario. El usuario está en la obligación de permitir al personal de la EPMAPA-T, debidamente identificado, acceder al medidor y a las instalaciones internas sin que esto constituya una violación a sus derechos. `;
+    const p8 = `6.1 La EPMAPA-T emitirá dentro de los 5 primeros días de cada mes las facturas por los servicios de agua potable y/o alcantarillado. `;
+    const p9 = `6.2 La EPMAPA-T reconocerá como válidos únicamente los pagos que se realicen en los lugares autorizados. `;
+    const p10 = `6.3 Los inmuebles declarados de propiedad horizontal, que mantengan un solo medidor, serán facturados con una sola planilla.`;
+    const p11 = `6.4 El plazo para el pago de las planillas por consumo de agua potable y/o alcantarillado es de treinta (30) días, contados a partir de la fecha de emisión. `;
+    const p12 = `6.5 El usuario que no haya cancelado su factura después de sesenta (60) días, contados a partir de su emisión, será sujeto de suspensión de servicio previa notificación; en caso de no pago, se iniciará la acción coactiva.`;
+    const p13 = `6.6 Los reclamos y observaciones a las planillas se presentarán en un plazo de hasta sesenta (60) días a partir de la fecha de emisión de la facturación, cumplidos los cuales, la facturación realizada se dará por aceptada y sin opción a reclamo. `;
+    const p14 = `SÉPTIMA.- Aceptación. El solicitante declara estar de acuerdo con todo el contenido y se compromete a cumplir con todas las cláusulas y disposiciones descritas en el presente contrato. Para constancia y en acuerdo de las partes, se firma el presente contrato en original y copia de igual tenor y contenido. `;
 
     this.s_header.header(titulo, doc);
     doc.setFontSize(10);
-    doc.text(`TRAMITE: ${datos.idaguatramite_aguatramite.idaguatramite}`, margin, 160);
-    doc.text(`TULCAN, ${datos.fechafinalizacion}`, margin, 250);
+    doc.text(`TRÁMITE: ${datos.idaguatramite_aguatramite.idaguatramite}`, margin, 160);
+    doc.text(`TULCÁN, ${datos.fechafinalizacion}`, margin, 250);
     doc.text(`Nro. cuenta: ${datos}`, margin, 270);
 
     autoTable(doc, {
@@ -282,9 +297,7 @@ export class TramitesAguaService {
       margin,
     });
 
-    const blob = doc.output('blob');
-    const url = URL.createObjectURL(blob);
-    window.open(url, '_blank');
+    return doc.output('blob');
   }
 
   private async obtenerDirectorComercialActivo(): Promise<{ nombre: string; cargo: string }> {
@@ -322,7 +335,7 @@ export class TramitesAguaService {
       const usuario: any = await this.s_usuario.getByIdusuarioAsync(idusuario);
       return { nombre: usuario?.nomusu || usuario?.alias || `Usuario ${idusuario}` };
     } catch (error) {
-      console.error('No se pudo obtener el usuario responsable del tramite', error);
+      console.error('No se pudo obtener el usuario responsable del trámite', error);
       return { nombre: `Usuario ${idusuario}` };
     }
   }
@@ -348,7 +361,7 @@ export class TramitesAguaService {
       body: [
         ['______________________________', '______________________________', '______________________________'],
         [data.director.nombre, data.cliente.nombre, data.responsable.nombre],
-        [data.director.cargo, data.cliente.detalle || 'Cliente dueno del tramite', 'Responsable del tramite'],
+        [data.director.cargo, data.cliente.detalle || 'Cliente dueño del trámite', 'Responsable del trámite'],
       ],
     });
   }
