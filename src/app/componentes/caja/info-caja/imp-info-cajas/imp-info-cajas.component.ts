@@ -11,6 +11,7 @@ import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { UsuarioService } from 'src/app/servicios/administracion/usuario.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { JasperReportService } from 'src/app/servicios/jasper-report.service';
+import { saveAs } from 'file-saver';
 
 @Component({
   selector: 'app-imp-info-cajas',
@@ -18,6 +19,7 @@ import { JasperReportService } from 'src/app/servicios/jasper-report.service';
   styleUrls: ['./imp-info-cajas.component.css'],
 })
 export class ImpInfoCajasComponent implements OnInit {
+  readonly extensionesReporte = ['pdf', 'xml', 'xlsx', 'csv'];
   swimprimir: boolean = true;
   formImprimir: FormGroup;
   opcreporte: number = 1;
@@ -55,7 +57,8 @@ export class ImpInfoCajasComponent implements OnInit {
 
     const strfecha = this.getLocalDate();
     this.formImprimir = this.fb.group({
-      reporte: '1',
+      reporte: '4',
+      extencion: 'pdf',
       d_fecha: strfecha,
       h_fecha: strfecha,
       hasta: `${new Date().getFullYear() - 1}-12-31`,
@@ -292,22 +295,10 @@ export class ImpInfoCajasComponent implements OnInit {
             usuariocobro: recaudador,
           },
 
-          extencion: '.pdf',
+          extencion: this.getExtensionSeleccionada(),
         };
         let _reporte = await this.s_jasperreport.getReporte(body);
-        setTimeout(() => {
-          const file = new Blob([_reporte], { type: 'application/pdf' });
-          const fileURL = URL.createObjectURL(file);
-
-          // Asignar el blob al iframe
-          const pdfViewer = document.getElementById(
-            'pdfViewer'
-          ) as HTMLIFrameElement;
-
-          if (pdfViewer) {
-            pdfViewer.src = fileURL;
-          }
-        }, 1000);
+        this.procesarRespuestaReporte(_reporte, body.reportName);
         this.swcalculando = false;
         if (this.swimprimir) this.txtcalculando = 'Mostrar';
         else this.txtcalculando = 'Descargar';
@@ -323,33 +314,42 @@ export class ImpInfoCajasComponent implements OnInit {
           parameters: {
             desde: d_fecha,
             hasta: h_fecha,
-            hdesde: hdesde,
-            hhasta: hhasta,
             tope: hasta,
             idusuario: this.authService.idusuario,
             usuariocobro: recaudador,
           },
-          extencion: '.pdf',
+          extencion: this.getExtensionSeleccionada(),
         };
         let reporte = await this.s_jasperreport.getReporte(data);
-        setTimeout(() => {
-          const file = new Blob([reporte], { type: 'application/pdf' });
-          const fileURL = URL.createObjectURL(file);
-
-          // Asignar el blob al iframe
-          const pdfViewer = document.getElementById(
-            'pdfViewer'
-          ) as HTMLIFrameElement;
-
-          if (pdfViewer) {
-            pdfViewer.src = fileURL;
-          }
-        }, 1000);
+        this.procesarRespuestaReporte(reporte, data.reportName);
         this.swcalculando = false;
         if (this.swimprimir) this.txtcalculando = 'Mostrar';
         else this.txtcalculando = 'Descargar';
         this.s_loading.hideLoading();
         break;
+      case 6:
+        this.s_loading.showLoading();
+        if (elementoExistente) {
+          elementoExistente.remove();
+        }
+        let _data: any = {
+          reportName: 'FacturasCobradasRec',
+          parameters: {
+            desde: d_fecha,
+            hasta: h_fecha,
+            idusuario: this.authService.idusuario,
+            usuariocobro: recaudador,
+          },
+          extencion: this.getExtensionSeleccionada(),
+        };
+        let _eporte = await this.s_jasperreport.getReporte(_data);
+        this.procesarRespuestaReporte(_eporte, _data.reportName);
+        this.swcalculando = false;
+        if (this.swimprimir) this.txtcalculando = 'Mostrar';
+        else this.txtcalculando = 'Descargar';
+        this.s_loading.hideLoading();
+        break;
+
 
       case 5:
         this.s_loading.showLoading();
@@ -364,22 +364,10 @@ export class ImpInfoCajasComponent implements OnInit {
             idusuario: this.authService.idusuario,
             usuariocobro: recaudador,
           },
-          extencion: '.pdf',
+          extencion: this.getExtensionSeleccionada(),
         };
         let rep: any = await this.s_jasperreport.getReporte(d);
-        setTimeout(() => {
-          const file = new Blob([rep], { type: 'application/pdf' });
-          const fileURL = URL.createObjectURL(file);
-
-          // Asignar el blob al iframe
-          const pdfViewer = document.getElementById(
-            'pdfViewer'
-          ) as HTMLIFrameElement;
-
-          if (pdfViewer) {
-            pdfViewer.src = fileURL;
-          }
-        }, 1000);
+        this.procesarRespuestaReporte(rep, d.reportName);
         this.swcalculando = false;
         if (this.swimprimir) this.txtcalculando = 'Mostrar';
         else this.txtcalculando = 'Descargar';
@@ -1197,6 +1185,52 @@ export class ImpInfoCajasComponent implements OnInit {
 
   retornar() {
     this.router.navigate(['/cajas']);
+  }
+
+  private getExtensionSeleccionada(): string {
+    return (this.formImprimir.value.extencion || 'pdf').toString().trim().toLowerCase();
+  }
+
+  usaVistaPreviaPdf(): boolean {
+    return this.getExtensionSeleccionada() === 'pdf';
+  }
+
+  private procesarRespuestaReporte(reporte: Blob, reportName: string): void {
+    const extension = this.getExtensionSeleccionada();
+    const mimeType = this.getMimeType(extension);
+    const file = new Blob([reporte], { type: mimeType });
+
+    if (extension === 'pdf') {
+      setTimeout(() => {
+        const fileURL = URL.createObjectURL(file);
+        const pdfViewer = document.getElementById('pdfViewer') as HTMLIFrameElement;
+
+        if (pdfViewer) {
+          if (pdfViewer.src?.startsWith('blob:')) {
+            URL.revokeObjectURL(pdfViewer.src);
+          }
+          pdfViewer.src = fileURL;
+        }
+      }, 300);
+      return;
+    }
+
+    saveAs(file, `${reportName}.${extension}`);
+  }
+
+  private getMimeType(extension: string): string {
+    switch (extension) {
+      case 'pdf':
+        return 'application/pdf';
+      case 'xml':
+        return 'application/xml';
+      case 'xlsx':
+        return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+      case 'csv':
+        return 'text/csv';
+      default:
+        return 'application/octet-stream';
+    }
   }
 }
 function formatNumber(num: number) {

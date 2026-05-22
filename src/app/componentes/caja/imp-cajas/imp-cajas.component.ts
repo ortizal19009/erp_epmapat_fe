@@ -20,6 +20,7 @@ import { Time } from '@angular/common';
   styleUrls: ['./imp-cajas.component.css'],
 })
 export class ImpCajasComponent implements OnInit {
+  readonly extensionesReporte = ['pdf', 'xml', 'xlsx', 'csv'];
   swimprimir: boolean = true;
   formImprimir: FormGroup;
   opcreporte: number = 1;
@@ -57,7 +58,8 @@ export class ImpCajasComponent implements OnInit {
 
     const strfecha = this.getLocalDate();
     this.formImprimir = this.fb.group({
-      reporte: '1',
+      reporte: '8',
+      extencion: 'pdf',
       d_fecha: strfecha,
       h_fecha: strfecha,
       fecha: strfecha,
@@ -352,28 +354,14 @@ export class ImpCajasComponent implements OnInit {
           "parameters": {
             "desde": d_fecha,
             "hasta": h_fecha,
-            "hdesde": horad,
-            "hhasta": horah,
             "idusuario": this.authService.idusuario
           },
-          "extencion": ".pdf"
+          "extencion": this.getExtensionSeleccionada()
         }
           ;
 
         let reporte = await this.jrService.getReporte(data);
-        setTimeout(() => {
-          const file = new Blob([reporte], { type: 'application/pdf' });
-          const fileURL = URL.createObjectURL(file);
-
-          // Asignar el blob al iframe
-          const pdfViewer = document.getElementById(
-            'pdfViewer'
-          ) as HTMLIFrameElement;
-
-          if (pdfViewer) {
-            pdfViewer.src = fileURL;
-          }
-        }, 1000);
+        this.procesarRespuestaReporte(reporte, data.reportName);
         this.swcalculando = false;
         if (this.swimprimir) this.txtcalculando = 'Mostrar';
         else this.txtcalculando = 'Descargar';
@@ -386,29 +374,15 @@ export class ImpCajasComponent implements OnInit {
           "parameters": {
             "desde": d_fecha,
             "hasta": h_fecha,
-            "hdesde": horad,
-            "hhasta": horah,
             "tope": hasta,
             "idusuario": this.authService.idusuario
           },
-          "extencion": ".pdf"
+          "extencion": this.getExtensionSeleccionada()
         }
           ;
 
         let _reporte: any = await this.jrService.getReporte(body);
-        setTimeout(() => {
-          const file = new Blob([_reporte], { type: 'application/pdf' });
-          const fileURL = URL.createObjectURL(file);
-
-          // Asignar el blob al iframe
-          const pdfViewer = document.getElementById(
-            'pdfViewer'
-          ) as HTMLIFrameElement;
-
-          if (pdfViewer) {
-            pdfViewer.src = fileURL;
-          }
-        }, 1000);
+        this.procesarRespuestaReporte(_reporte, body.reportName);
         this.swcalculando = false;
         if (this.swimprimir) this.txtcalculando = 'Mostrar';
         else this.txtcalculando = 'Descargar';
@@ -1660,6 +1634,52 @@ export class ImpCajasComponent implements OnInit {
   getFacturaById(idfactura: number) {
     let factura = this.facService.getById(idfactura).toPromise();
     return factura;
+  }
+
+  private getExtensionSeleccionada(): string {
+    return (this.formImprimir.value.extencion || 'pdf').toString().trim().toLowerCase();
+  }
+
+  usaVistaPreviaPdf(): boolean {
+    return this.getExtensionSeleccionada() === 'pdf';
+  }
+
+  private procesarRespuestaReporte(reporte: Blob, reportName: string): void {
+    const extension = this.getExtensionSeleccionada();
+    const mimeType = this.getMimeType(extension);
+    const file = new Blob([reporte], { type: mimeType });
+
+    if (extension === 'pdf') {
+      setTimeout(() => {
+        const fileURL = URL.createObjectURL(file);
+        const pdfViewer = document.getElementById('pdfViewer') as HTMLIFrameElement;
+
+        if (pdfViewer) {
+          if (pdfViewer.src?.startsWith('blob:')) {
+            URL.revokeObjectURL(pdfViewer.src);
+          }
+          pdfViewer.src = fileURL;
+        }
+      }, 300);
+      return;
+    }
+
+    saveAs(file, `${reportName}.${extension}`);
+  }
+
+  private getMimeType(extension: string): string {
+    switch (extension) {
+      case 'pdf':
+        return 'application/pdf';
+      case 'xml':
+        return 'application/xml';
+      case 'xlsx':
+        return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+      case 'csv':
+        return 'text/csv';
+      default:
+        return 'application/octet-stream';
+    }
   }
 }
 

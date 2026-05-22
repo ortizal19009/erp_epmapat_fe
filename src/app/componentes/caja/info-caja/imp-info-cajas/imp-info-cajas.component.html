@@ -26,10 +26,11 @@
                 <label *ngIf="!swimprimir" class="input-group-text">Exportar</label>
               </div>
               <select class="custom-select" formControlName="reporte" (change)="changeReporte()">
-                <option value="1">Resumen Recaudación </option>
-                <option value="2">Recaudación - Planillas</option>
+                <!-- <option value="1">Resumen Recaudación </option>
+                <option value="2">Recaudación - Planillas</option> -->
+                <option value="4">Recaudación Rubros</option>
+                <option value="6">Recaudación Planillas</option>
                 <option value="3">Recaudación Facturas Horas</option>
-                <!--<option value="4">Recaudación Rubros</option>-->
                 <option value="5" *ngIf="idrec==10041">Recaudación Facilito</option>
               </select>
             </div>
@@ -88,6 +89,20 @@
               </div>
             </div>
 
+            <div *ngIf="opcreporte === 3 || opcreporte === 4 || opcreporte === 5 || opcreporte === 6"
+              class="form-group col-sm-10 my-0 py-0">
+              <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-weight-bold">Formato</span>
+                </div>
+                <select class="custom-select" formControlName="extencion">
+                  <option *ngFor="let extension of extensionesReporte" [value]="extension">
+                    {{ extension.toUpperCase() }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
           </div>
         </form>
         <div *ngIf="!swbotones" class="text-center">
@@ -103,8 +118,8 @@
 
         <div *ngIf="swbotones" class="text-center">
           <button *ngIf="swimprimir" type="button" class="btn btn-success btn-block"
-            data-target="#pdf" data-toggle="modal" [disabled]="swcalculando"
-            (click)="imprime()">
+            [attr.data-target]="usaVistaPreviaPdf() ? '#pdf' : null"
+            [attr.data-toggle]="usaVistaPreviaPdf() ? 'modal' : null" [disabled]="swcalculando" (click)="imprime()">
             <i *ngIf="swcalculando" class="fa fa-spinner"></i>
             <i *ngIf="!swcalculando" class="bi-eye"></i>&nbsp;&nbsp;&nbsp;{{txtcalculando}}
           </button>
@@ -146,6 +161,3 @@
     </div>
   </div>
 </div>
-
-
-
