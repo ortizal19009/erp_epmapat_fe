@@ -99,9 +99,26 @@ export class HistorialconsumoComponent implements OnInit {
     });
   }
 
+  private getLecturaFotoPath(lectura: any): string | null {
+    const ruta =
+      lectura?.foto_path ??
+      lectura?.fotoPath ??
+      lectura?.fotopath ??
+      lectura?.pathfoto ??
+      lectura?.foto ??
+      null;
+
+    if (!ruta || typeof ruta !== 'string') return null;
+    const normalizada = ruta.trim().replace(/\\/g, '/');
+    return normalizada.length > 0 ? normalizada : null;
+  }
+
   getLecturaFotoUrl(lectura: any): string | null {
-    const ruta = lectura?.foto_path ?? lectura?.fotoPath ?? null;
-    if (ruta) return this.storageService.viewUrl(ruta);
+    const ruta = this.getLecturaFotoPath(lectura);
+    if (ruta) {
+      if (/^(https?:|data:|blob:)/i.test(ruta)) return ruta;
+      return this.storageService.viewUrl(ruta);
+    }
     const idlectura = Number(lectura?.idlectura);
     if (Number.isNaN(idlectura) || idlectura <= 0) return null;
     return this.lecService.getFotoLecturaUrl(idlectura);
