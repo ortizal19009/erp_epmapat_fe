@@ -164,15 +164,48 @@ export class RutaToLectorComponent implements OnInit {
     if (existe) return;
 
     this._rutasAsignadas = [...this._rutasAsignadas, r];
+    this.ocupadas.add(r.idruta);
   }
 
   dropRuta(r: any) {
     this._rutasAsignadas = this._rutasAsignadas.filter(
       (ruta: any) => ruta.idruta !== r.idruta
     );
+    this.ocupadas.delete(r.idruta);
     if (this.rutaPreview?.idruta === r?.idruta) {
       this.cerrarVistaPreviaPdf();
     }
+  }
+
+  eliminarRutaAsignada(r: any) {
+    if (!this.usuarioSeletced?.idusuario || !this.emisionSelected?.idemision) {
+      this.swal('warning', 'Seleccione un lector y una emisión');
+      return;
+    }
+
+    const rutasPrevias = [...this._rutasAsignadas];
+    const ocupadasPrevias = new Set(this.ocupadas);
+
+    this.dropRuta(r);
+
+    const payload = {
+      rutas: this._rutasAsignadas,
+      idusuario_usuarios: { idusuario: this.usuarioSeletced.idusuario },
+      idemision_emisiones: { idemision: this.emisionSelected.idemision },
+    };
+
+    this.usrxrutaService.save(payload).subscribe({
+      next: () => {
+        this.swal('success', 'Ruta desvinculada correctamente');
+        this.cargarOcupadas();
+      },
+      error: (e: any) => {
+        this._rutasAsignadas = rutasPrevias;
+        this.ocupadas = ocupadasPrevias;
+        console.error(e.error);
+        this.swal('error', 'No se pudo desvincular la ruta');
+      },
+    });
   }
 
   isRutaAsignada(r: any): boolean {
