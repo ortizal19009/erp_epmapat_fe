@@ -725,8 +725,7 @@ export class RecaudacionComponent implements OnInit {
   }
   marcarAnteriores(e: any, index: number, cuenta: number) {
     this.ntaCredito(cuenta, e.target.checked);
-
-    if (this._sincobro[index].idmodulo === 3 || this._sincobro[index].idmodulo === 4) {
+    if ((this._sincobro[index].idmodulo == 3 && this._sincobro[index].idabonado > 0) || this._sincobro[index].idmodulo == 4) {
       if (this._sincobro[index].pagado) {
         // Al MARCAR: marcar todas las facturas anteriores del mismo abonado
         const fechaSeleccionada = new Date(this._sincobro[index].feccrea).getTime();
