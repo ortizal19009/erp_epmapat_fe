@@ -28,6 +28,7 @@ import { AddRutasComponent } from './componentes/rutas/add-rutas/add-rutas.compo
 import { EmisionesComponent } from './componentes/emisiones/emisiones/emisiones.component';
 import { AddEmisionComponent } from './componentes/emisiones/add-emision/add-emision.component';
 import { ModiEmisionComponent } from './componentes/emisiones/modi-emision/modi-emision.component';
+import { ControlEmisionesComponent } from './componentes/emisiones/control-emisiones/control-emisiones.component';
 import { RutasxemisionComponent } from './componentes/rutasxemision/rutasxemision/rutasxemision.component';
 import { EmiactualComponent } from './componentes/rutasxemision/emiactual/emiactual.component';
 
@@ -361,6 +362,7 @@ import { UsuarioAutocompleteComponent } from './componentes/facelectro/usuario-a
     AddRutasComponent,
     InfoRutaComponent,
     EmisionesComponent,
+    ControlEmisionesComponent,
     AddEmisionComponent,
     ModiEmisionComponent,
     RutasxemisionComponent,

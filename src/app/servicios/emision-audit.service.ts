@@ -21,4 +21,28 @@ export class EmisionAuditService {
     const params = new HttpParams().set('idemision', String(idemision));
     return this.http.get<any>(baseUrl, { params });
   }
+
+  listar(filtros?: {
+    idemision?: number | null;
+    accion?: string | null;
+    desde?: string | null;
+    hasta?: string | null;
+  }): Observable<any> {
+    let params = new HttpParams();
+
+    if (filtros?.idemision != null && `${filtros.idemision}`.trim() !== '') {
+      params = params.set('idemision', String(filtros.idemision));
+    }
+    if (filtros?.accion) {
+      params = params.set('accion', filtros.accion);
+    }
+    if (filtros?.desde) {
+      params = params.set('desde', filtros.desde);
+    }
+    if (filtros?.hasta) {
+      params = params.set('hasta', filtros.hasta);
+    }
+
+    return this.http.get<any>(baseUrl, { params });
+  }
 }

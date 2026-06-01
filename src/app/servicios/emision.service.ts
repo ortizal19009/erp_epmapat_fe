@@ -70,6 +70,13 @@ export class EmisionService {
     return this.http.post<any>(`${baseUrl}/${idemision}/eliminar?usumodi=${usumodi}`, {});
   }
 
+  anularEmision(
+    idemision: number,
+    payload: { iddocumento: number; motivo: string; referenciaDocumento?: string }
+  ) {
+    return this.http.post<any>(`${baseUrl}/${idemision}/anular`, payload);
+  }
+
   // Si prefieres async/await
   async recalcularMultaBasura1011Async(idemision: number, idruta: number) {
     return await firstValueFrom(this.recalcularMultaBasura1011(idemision, idruta));

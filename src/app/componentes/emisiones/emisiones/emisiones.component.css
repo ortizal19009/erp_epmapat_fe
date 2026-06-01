@@ -70,3 +70,25 @@ table tbody tr:hover  {
    border: 1px dashed rgba(0, 0, 0, 0.2);
    border-radius: 0.35rem;
 }
+
+.facturas-cobradas-table-wrap {
+   max-height: 320px;
+   overflow: auto;
+   border: 1px solid rgba(0, 0, 0, 0.12);
+   border-radius: 0.25rem;
+   background-color: var(--bgcolor2);
+}
+
+.facturas-cobradas-table {
+   margin-bottom: 0;
+   box-shadow: none;
+}
+
+.facturas-cobradas-table thead th {
+   position: sticky;
+   top: 0;
+   z-index: 2;
+   background-color: var(--bgcolor1);
+   color: white;
+   box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.15);
+}

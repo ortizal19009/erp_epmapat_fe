@@ -46,6 +46,8 @@
           <button class="dropdown-item" type="button" routerLink="/imp-emisiones" data-toggle="modal"
             data-target="#imprimir">
             <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+          <button class="dropdown-item" type="button" routerLink="/control-emisiones">
+            <i class="bi bi-journal-text"></i>&nbsp; Control emisiones</button>
           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar" (click)="exportar0()">
             <i class="bi-file-earmark-arrow-up"></i>&nbsp; Exportar </button>
         </div>
@@ -118,11 +120,14 @@
               <i class="bi bi-printer"></i>&nbsp; Cerrar Rutas</button>
             <button class="dropdown-item" (click)="confirmarReabrirEmision()" [disabled]="estado == 0" type="button">
               <i class="bi bi-arrow-counterclockwise"></i>&nbsp; Reabrir emisión</button>
-            <button class="dropdown-item" (click)="abrirRutasAndEmision()" data-toggle="modal" data-target="#modalReporteFacuras" type="button">
-              <i class="bi bi-trash"></i>&nbsp; Eliminar emisión</button>
+            <button class="dropdown-item text-danger" type="button" data-toggle="modal" data-target="#anularEmisionModal"
+              (click)="abrirModalAnularEmision()" [disabled]="!canAnularEmision()">
+              <i class="fa fa-ban"></i>&nbsp; Anular emisión</button>
             <button class="dropdown-item" type="button" data-toggle="modal" data-target="#auditoriaEmision"
               (click)="abrirAuditoriaEmision()" [disabled]="!showDiv || !idemision">
               <i class="bi bi-journal-text"></i>&nbsp; Auditoría emisión</button>
+            <button class="dropdown-item" type="button" routerLink="/control-emisiones">
+              <i class="bi bi-clipboard-data"></i>&nbsp; Monitoreo y control</button>
             <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar"
               (click)="exportar1()">
               <i class="bi-file-earmark-arrow-down"></i>&nbsp; Exportar</button>
@@ -194,6 +199,252 @@
     </div>
 
   </div>
+
+  <div class="modal fade" id="anularEmisionModal" tabindex="-1" aria-labelledby="anularEmisionModalLabel"
+    data-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header cabecera">
+          <div>
+            <h5 class="modal-title mb-0" id="anularEmisionModalLabel">Anular emisión</h5>
+            <small class="text-light">Proceso controlado y auditable</small>
+          </div>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"
+            [disabled]="anularEmisionGuardando">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body detalle">
+          <div class="alert alert-warning">
+            Solo se pueden anular emisiones en estado <strong>Cerrada</strong> o <strong>Reabierta</strong>. La anulación no elimina el historial y requiere documento de respaldo.
+          </div>
+
+          <div class="alert alert-danger py-2"
+            *ngIf="!cargandoResumenAnulacion && resumenAnulacion.totalFacturasCobradas > 0">
+            Esta emisión tiene <strong>{{ resumenAnulacion.totalFacturasCobradas }}</strong> factura(s) cobrada(s) o con movimientos financieros asociados. No es posible realizar la anulación.
+          </div>
+
+          <div class="row">
+            <div class="col-sm-6">
+              <table class="table table-sm table-bordered mb-3">
+                <tbody>
+                  <tr>
+                    <th class="w-50">ID Emisión</th>
+                    <td>{{ idemision || '-' }}</td>
+                  </tr>
+                  <tr>
+                    <th>Descripción</th>
+                    <td>{{ selEmision | nombreEmision }}</td>
+                  </tr>
+                  <tr>
+                    <th>Periodo</th>
+                    <td>{{ selEmision || '-' }}</td>
+                  </tr>
+                  <tr>
+                    <th>Estado actual</th>
+                    <td>{{ estadoEmisionTexto(estado) }}</td>
+                  </tr>
+                  <tr>
+                    <th>Fecha generación</th>
+                    <td>{{ fechaemision | date:'dd-MM-yyyy' }}</td>
+                  </tr>
+                  <tr>
+                    <th>Total facturas</th>
+                    <td>
+                      <span *ngIf="!cargandoResumenAnulacion; else cargandoResumenAnulacionTpl">{{ resumenAnulacion.totalFacturas }}</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>Total abonados</th>
+                    <td>
+                      <span *ngIf="!cargandoResumenAnulacion; else cargandoResumenAnulacionTpl">{{ resumenAnulacion.totalAbonados }}</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>Facturas cobradas</th>
+                    <td>
+                      <span *ngIf="!cargandoResumenAnulacion; else cargandoResumenAnulacionTpl">
+                        {{ resumenAnulacion.totalFacturasCobradas }}
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>Valor total emitido</th>
+                    <td>$ {{ totalSuma.toFixed(2) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="col-sm-6">
+              <form [formGroup]="formAnularEmision">
+                <div class="form-group">
+                  <label class="font-weight-bold mb-1">Buscar documento de respaldo</label>
+                  <input type="text" class="form-control form-control-sm" [(ngModel)]="filtroDocumentoAnulacion"
+                    [ngModelOptions]="{standalone: true}" (ngModelChange)="filtrarDocumentosAnulacion()"
+                    placeholder="Buscar por número, nombre o descripción">
+                </div>
+
+                <div class="form-group">
+                  <label class="font-weight-bold mb-1">Documento de respaldo</label>
+                  <select class="form-control form-control-sm" formControlName="iddocumento"
+                    [ngClass]="{'is-invalid': documentoAnulacionControl?.invalid && documentoAnulacionControl?.touched}">
+                    <option [ngValue]="null">Seleccione un documento</option>
+                    <option *ngFor="let doc of documentosAnulacionFiltrados" [ngValue]="doc.iddocumento || doc.intdoc">
+                      {{ doc.iddocumento || doc.intdoc }} - {{ doc.nomdoc }}
+                    </option>
+                  </select>
+                  <small class="text-muted" *ngIf="cargandoDocumentosAnulacion">Cargando documentos...</small>
+                  <small class="text-danger"
+                    *ngIf="documentoAnulacionControl?.invalid && documentoAnulacionControl?.touched">
+                    Debe seleccionar un documento de respaldo para continuar.
+                  </small>
+                </div>
+
+                <div class="form-group">
+                  <label class="font-weight-bold mb-1">Referencia o descripción del documento</label>
+                  <input type="text" class="form-control form-control-sm" formControlName="referenciaDocumento"
+                    placeholder="Ejemplo: Informe Técnico 014-2026 o Memorando G-2026-145">
+                  <small class="text-muted">Campo adicional para registrar número de informe, memorando u otra referencia.</small>
+                </div>
+
+                <div class="form-group">
+                  <label class="font-weight-bold mb-1">Motivo de anulación</label>
+                  <textarea rows="6" class="form-control form-control-sm" formControlName="motivo"
+                    [ngClass]="{'is-invalid': motivoAnulacionControl?.invalid && motivoAnulacionControl?.touched}"
+                    placeholder="Describe el motivo de la anulación con suficiente detalle"></textarea>
+                  <div class="d-flex justify-content-between mt-1">
+                    <small class="text-muted">Mínimo 20 y máximo 500 caracteres.</small>
+                    <small [ngClass]="{'text-danger': motivoAnulacionLength < 20 || motivoAnulacionLength > 500}">
+                      {{ motivoAnulacionLength }}/500
+                    </small>
+                  </div>
+                  <small class="text-danger"
+                    *ngIf="motivoAnulacionControl?.invalid && motivoAnulacionControl?.touched">
+                    El motivo es obligatorio y debe tener entre 20 y 500 caracteres.
+                  </small>
+                </div>
+
+                <div class="card border-danger" *ngIf="selectedDocumentoAnulacion as documentoSeleccionado">
+                  <div class="card-body py-2 px-3">
+                    <div><strong>Documento seleccionado:</strong> {{ documentoSeleccionado.nomdoc }}</div>
+                    <div><strong>ID:</strong> {{ documentoSeleccionado.iddocumento || documentoSeleccionado.intdoc }}</div>
+                    <div *ngIf="referenciaDocumentoControl?.value"><strong>Referencia:</strong> {{ referenciaDocumentoControl?.value }}</div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="mt-3" *ngIf="!cargandoResumenAnulacion && facturasCobradasAnulacion.length > 0">
+            <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap">
+              <h6 class="mb-1">Facturas cobradas que bloquean la anulación</h6>
+              <div class="d-flex align-items-center">
+                <small class="text-muted mr-2">
+                  Registros: {{ facturasCobradasAnulacionFiltradas.length }} | Página {{ facturasCobradasPage }} de {{ facturasCobradasTotalPages }}
+                </small>
+                <select class="form-control form-control-sm" style="width: 90px;"
+                  [ngModel]="facturasCobradasPageSize"
+                  [ngModelOptions]="{standalone: true}"
+                  (ngModelChange)="onFacturasCobradasPageSizeChange($event)">
+                  <option *ngFor="let size of facturasCobradasPageSizeOptions" [value]="size">{{ size }}</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row mb-2">
+              <div class="col-sm-8">
+                <input class="form-control form-control-sm"
+                  [(ngModel)]="filtroGeneralFacturasCobradas"
+                  [ngModelOptions]="{standalone: true}"
+                  (ngModelChange)="onFacturasCobradasFilterChange()"
+                  placeholder="Filtrar por factura, cuenta, cliente, fecha, forma de pago o usuario">
+              </div>
+              <div class="col-sm-4 text-right">
+                <button type="button" class="btn btn-sm btn-outline-secondary"
+                  (click)="limpiarFiltroFacturasCobradas()"
+                  [disabled]="!filtroGeneralFacturasCobradas">
+                  Limpiar filtro
+                </button>
+              </div>
+            </div>
+
+            <div class="table-responsive facturas-cobradas-table-wrap">
+              <table class="table table-sm table-bordered table-striped mb-0 facturas-cobradas-table">
+                <thead class="cabecera">
+                  <tr class="text-center">
+                    <th style="cursor:pointer" (click)="toggleFacturasCobradasSort('idfactura')">
+                      ID Factura <i [class]="getFacturasCobradasSortIcon('idfactura')"></i>
+                    </th>
+                    <th style="cursor:pointer" (click)="toggleFacturasCobradasSort('nrofactura')">
+                      Nro. Factura <i [class]="getFacturasCobradasSortIcon('nrofactura')"></i>
+                    </th>
+                    <th style="cursor:pointer" (click)="toggleFacturasCobradasSort('cuenta')">
+                      Cuenta <i [class]="getFacturasCobradasSortIcon('cuenta')"></i>
+                    </th>
+                    <th style="cursor:pointer" (click)="toggleFacturasCobradasSort('cliente')">
+                      Cliente <i [class]="getFacturasCobradasSortIcon('cliente')"></i>
+                    </th>
+                    <th style="cursor:pointer" (click)="toggleFacturasCobradasSort('fechaCobro')">
+                      Fecha cobro <i [class]="getFacturasCobradasSortIcon('fechaCobro')"></i>
+                    </th>
+                    <th style="cursor:pointer" (click)="toggleFacturasCobradasSort('formaPago')">
+                      Forma pago <i [class]="getFacturasCobradasSortIcon('formaPago')"></i>
+                    </th>
+                    <th style="cursor:pointer" (click)="toggleFacturasCobradasSort('usuario')">
+                      Usuario <i [class]="getFacturasCobradasSortIcon('usuario')"></i>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="detalle">
+                  <tr *ngFor="let factura of facturasCobradasAnulacionPaginadas">
+                    <td class="text-center">{{ factura.idfactura }}</td>
+                    <td class="text-center">{{ factura.nrofactura }}</td>
+                    <td class="text-center">{{ factura.cuenta }}</td>
+                    <td>{{ factura.cliente }}</td>
+                    <td class="text-center">{{ factura.fechaCobro | date:'dd-MM-yyyy' }}</td>
+                    <td>{{ factura.formaPago }}</td>
+                    <td>{{ factura.usuario }}</td>
+                  </tr>
+                  <tr *ngIf="facturasCobradasAnulacionFiltradas.length === 0">
+                    <td colspan="7" class="text-center text-muted py-3">No hay registros que coincidan con los filtros.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="d-flex justify-content-end align-items-center mt-2">
+              <button type="button" class="btn btn-sm btn-outline-secondary mr-1"
+                [disabled]="facturasCobradasPage === 1"
+                (click)="changeFacturasCobradasPage(-1)">
+                Anterior
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary"
+                [disabled]="facturasCobradasPage >= facturasCobradasTotalPages"
+                (click)="changeFacturasCobradasPage(1)">
+                Siguiente
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"
+            [disabled]="anularEmisionGuardando">Cancelar</button>
+          <button type="button" class="btn btn-danger btn-sm" (click)="confirmarAnulacionEmision()"
+            [disabled]="anularEmisionGuardando || cargandoDocumentosAnulacion || cargandoResumenAnulacion || resumenAnulacion.totalFacturasCobradas > 0">
+            <span *ngIf="anularEmisionGuardando" class="spinner-border spinner-border-sm mr-1" role="status"
+              aria-hidden="true"></span>
+            <i *ngIf="!anularEmisionGuardando" class="fa fa-ban"></i>
+            {{ anularEmisionGuardando ? ' Anulando...' : ' Anular emisión' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #cargandoResumenAnulacionTpl>
+    <span class="text-muted">Cargando...</span>
+  </ng-template>
 
   <div class="modal fade" id="auditoriaEmision" tabindex="-1" aria-labelledby="auditoriaEmisionLabel"
     aria-hidden="true">

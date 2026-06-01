@@ -1,0 +1,272 @@
+<div class="content mt-1 pt-1 pl-0">
+  <div class="container-fluid">
+    <div class="row m-0 px-0 py-1 justify-content-start cabecera border sombra">
+      <div class="col-sm-4">
+        <h4 class="m-0 font-weight-bold">
+          <i class="bi bi-journal-text"></i>&nbsp; Control de emisiones
+        </h4>
+      </div>
+      <div class="btn-group ml-auto">
+        <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
+          aria-expanded="false">
+          <i class="bi-menu-button-wide text-white"></i>
+        </button>
+        <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+          <button class="dropdown-item" type="button" (click)="cargarRegistros()">
+            <i class="fa fa-refresh"></i>&nbsp; Actualizar
+          </button>
+          <button class="dropdown-item" type="button" data-toggle="modal" data-target="#impViewerControlEmisiones"
+            (click)="abrirReporte()">
+            <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid">
+  <div class="card mt-1 sombra">
+    <div class="card-header cardTab">
+      <form [formGroup]="formFiltros">
+        <div class="row align-items-end">
+          <div class="col-sm-2">
+            <label class="small mb-1">Id emisión</label>
+            <input type="number" class="form-control form-control-sm" formControlName="idemision"
+              placeholder="Opcional">
+          </div>
+          <div class="col-sm-2">
+            <label class="small mb-1">Acción</label>
+            <select class="form-control form-control-sm" formControlName="accion">
+              <option value="TODAS">Todas</option>
+              <option value="ANULAR">Anulación</option>
+              <option value="REABRIR">Reapertura</option>
+              <option value="ELIMINAR">Eliminación</option>
+            </select>
+          </div>
+          <div class="col-sm-2">
+            <label class="small mb-1">Desde</label>
+            <input type="date" class="form-control form-control-sm" formControlName="desde">
+          </div>
+          <div class="col-sm-2">
+            <label class="small mb-1">Hasta</label>
+            <input type="date" class="form-control form-control-sm" formControlName="hasta">
+          </div>
+          <div class="col-sm-2">
+            <label class="small mb-1">Filtro general</label>
+            <input type="text" class="form-control form-control-sm" [(ngModel)]="filtroGeneral"
+              [ngModelOptions]="{standalone: true}" (ngModelChange)="onFiltroGeneralChange()"
+              placeholder="Buscar en todos los campos">
+          </div>
+          <div class="col-sm-2 text-right">
+            <div class="d-inline-flex align-items-center mr-2">
+              <label class="small mb-0 mr-1">Mostrar</label>
+              <select class="form-control form-control-sm" [(ngModel)]="pageSize"
+                [ngModelOptions]="{standalone: true}" (change)="cambiarTamanoPagina()">
+                <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</option>
+              </select>
+            </div>
+            <button type="button" class="btn btn-sm btn-primary mr-1" (click)="cargarRegistros()">
+              <i class="fa fa-search"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="limpiarFiltros()"
+              title="Limpiar filtros">
+              <i class="fa fa-paint-brush"></i>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="card-body detalle">
+      <div class="row mb-3">
+        <div class="col-sm-3">
+          <div class="small-box bg-info">
+            <div class="inner">
+              <h3>{{ resumen.total }}</h3>
+              <p>Registros monitoreados</p>
+            </div>
+            <div class="icon"><i class="bi bi-list-check"></i></div>
+          </div>
+        </div>
+        <div class="col-sm-3">
+          <div class="small-box bg-danger">
+            <div class="inner">
+              <h3>{{ resumen.anulaciones }}</h3>
+              <p>Anulaciones</p>
+            </div>
+            <div class="icon"><i class="fa fa-ban"></i></div>
+          </div>
+        </div>
+        <div class="col-sm-3">
+          <div class="small-box bg-warning">
+            <div class="inner">
+              <h3>{{ resumen.reaperturas }}</h3>
+              <p>Reaperturas</p>
+            </div>
+            <div class="icon"><i class="bi bi-arrow-counterclockwise"></i></div>
+          </div>
+        </div>
+        <div class="col-sm-3">
+          <div class="small-box bg-secondary">
+            <div class="inner">
+              <h3>{{ resumen.eliminaciones }}</h3>
+              <p>Eliminaciones</p>
+            </div>
+            <div class="icon"><i class="bi bi-trash"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="error" class="alert alert-danger py-2">{{ error }}</div>
+      <div *ngIf="cargando" class="text-center py-4">
+        <span class="spinner-border spinner-border-sm mr-2"></span>
+        Cargando monitoreo de emisiones...
+      </div>
+
+      <div *ngIf="!cargando" class="table-responsive tabla-control-wrap">
+        <table class="table table-sm table-bordered table-hover table-striped mb-0">
+          <thead class="cabecera sticky-head">
+            <tr class="text-center">
+              <th class="sortable-header" (click)="toggleSort('idemision')">Id <i [class]="getSortIcon('idemision')"></i></th>
+              <th class="sortable-header" (click)="toggleSort('emision')">Emisión <i [class]="getSortIcon('emision')"></i></th>
+              <th class="sortable-header" (click)="toggleSort('accion')">Acción <i [class]="getSortIcon('accion')"></i></th>
+              <th class="sortable-header" (click)="toggleSort('fecha')">Fecha <i [class]="getSortIcon('fecha')"></i></th>
+              <th class="sortable-header" (click)="toggleSort('usuario')">Usuario <i [class]="getSortIcon('usuario')"></i></th>
+              <th class="sortable-header" (click)="toggleSort('estadoAnterior')">Estado anterior <i [class]="getSortIcon('estadoAnterior')"></i></th>
+              <th class="sortable-header" (click)="toggleSort('estadoNuevo')">Estado nuevo <i [class]="getSortIcon('estadoNuevo')"></i></th>
+              <th>Documento</th>
+              <th>Referencia</th>
+              <th>Motivo</th>
+              <th>IP</th>
+              <th>Equipo</th>
+              <th>Det.</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let fila of filasPagina">
+              <td class="text-center">{{ fila.idemision || '-' }}</td>
+              <td>{{ fila.emision || '-' }}</td>
+              <td class="text-center">
+                <span class="badge badge-danger" *ngIf="fila.accion === 'ANULAR'">Anular</span>
+                <span class="badge badge-warning" *ngIf="fila.accion === 'REABRIR'">Reabrir</span>
+                <span class="badge badge-secondary" *ngIf="fila.accion === 'ELIMINAR'">Eliminar</span>
+                <span class="badge badge-info" *ngIf="fila.accion !== 'ANULAR' && fila.accion !== 'REABRIR' && fila.accion !== 'ELIMINAR'">{{ fila.accion }}</span>
+              </td>
+              <td>{{ formatFecha(fila.fecha) }}</td>
+              <td>{{ fila.usuario || '-' }}</td>
+              <td>{{ fila.estadoAnterior || '-' }}</td>
+              <td>{{ fila.estadoNuevo || '-' }}</td>
+              <td>{{ fila.documento || '-' }}</td>
+              <td>{{ fila.referenciaDocumento || '-' }}</td>
+              <td class="motivo-col">{{ fila.motivo || '-' }}</td>
+              <td>{{ fila.ip || '-' }}</td>
+              <td>{{ fila.equipo || '-' }}</td>
+              <td class="text-center">
+                <button class="btn btn-sm btn-outline-primary" data-toggle="modal"
+                  data-target="#detalleControlEmisionModal" (click)="verDetalle(fila)">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="!filasPagina.length">
+              <td colspan="13" class="text-center text-muted py-3">
+                No existen registros con los filtros seleccionados.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="d-flex flex-wrap justify-content-between align-items-center p-2 border-top bg-white">
+        <small class="text-muted">
+          {{ totalElements }} registros | Página {{ currentPage }} de {{ totalPages }}
+        </small>
+        <div class="btn-group btn-group-sm mt-1 mt-sm-0">
+          <button type="button" class="btn btn-outline-secondary" [disabled]="currentPage === 1"
+            (click)="cambiarPagina(-1)">Anterior</button>
+          <button type="button" class="btn btn-outline-secondary" *ngFor="let pagina of paginasVisibles()"
+            [class.btn-primary]="pagina === currentPage" [class.text-white]="pagina === currentPage"
+            (click)="irPagina(pagina)">
+            {{ pagina }}
+          </button>
+          <button type="button" class="btn btn-outline-secondary" [disabled]="currentPage === totalPages"
+            (click)="cambiarPagina(1)">Siguiente</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="detalleControlEmisionModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header cabecera">
+        <h5 class="modal-title">Detalle de control de emisión</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body detalle" *ngIf="detalleSeleccionado as fila">
+        <div class="row">
+          <div class="col-sm-6">
+            <table class="table table-sm table-bordered">
+              <tbody>
+                <tr><th class="w-50">Id auditoría</th><td>{{ fila.idauditoria || '-' }}</td></tr>
+                <tr><th>Id emisión</th><td>{{ fila.idemision || '-' }}</td></tr>
+                <tr><th>Emisión</th><td>{{ fila.emision || '-' }}</td></tr>
+                <tr><th>Acción</th><td>{{ fila.accion || '-' }}</td></tr>
+                <tr><th>Fecha</th><td>{{ formatFecha(fila.fecha) }}</td></tr>
+                <tr><th>Usuario</th><td>{{ fila.usuario || '-' }}</td></tr>
+                <tr><th>Estado anterior</th><td>{{ fila.estadoAnterior || '-' }}</td></tr>
+                <tr><th>Estado nuevo</th><td>{{ fila.estadoNuevo || '-' }}</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="col-sm-6">
+            <table class="table table-sm table-bordered">
+              <tbody>
+                <tr><th class="w-50">Documento</th><td>{{ fila.documento || '-' }}</td></tr>
+                <tr><th>Referencia</th><td>{{ fila.referenciaDocumento || '-' }}</td></tr>
+                <tr><th>IP</th><td>{{ fila.ip || '-' }}</td></tr>
+                <tr><th>Equipo</th><td>{{ fila.equipo || '-' }}</td></tr>
+                <tr><th>Facturas actualizadas</th><td>{{ fila.facturasActualizadas }}</td></tr>
+                <tr><th>Rubros actualizados</th><td>{{ fila.rubrosActualizados }}</td></tr>
+                <tr><th>Total rutas</th><td>{{ fila.totalRutas }}</td></tr>
+                <tr><th>Rutas actualizadas</th><td>{{ fila.rutasActualizadas }}</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="font-weight-bold">Motivo / observación</label>
+          <textarea rows="4" class="form-control form-control-sm" [value]="fila.motivo" readonly></textarea>
+        </div>
+        <div class="form-group">
+          <label class="font-weight-bold">JSON del evento</label>
+          <pre class="json-box">{{ fila.detalle | json }}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="impViewerControlEmisiones" data-backdrop="static" data-keyboard="false" tabindex="-1"
+  aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Vista de reporte</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <iframe id="pdfViewer" src="" width="100%" height="600px"></iframe>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-success" data-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>

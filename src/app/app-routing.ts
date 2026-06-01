@@ -30,6 +30,7 @@ import { EmisionesComponent } from './componentes/emisiones/emisiones/emisiones.
 import { AddEmisionComponent } from './componentes/emisiones/add-emision/add-emision.component';
 import { ModiEmisionComponent } from './componentes/emisiones/modi-emision/modi-emision.component';
 import { GeneEmisionComponent } from './componentes/emisiones/gene-emision/gene-emision.component';
+import { ControlEmisionesComponent } from './componentes/emisiones/control-emisiones/control-emisiones.component';
 import { RutasxemisionComponent } from './componentes/rutasxemision/rutasxemision/rutasxemision.component'; //OJO: Se usa?
 import { EmiactualComponent } from './componentes/rutasxemision/emiactual/emiactual.component'; //OJO: Se usa?
 //Pliego Tarifario
@@ -798,6 +799,11 @@ const routes: Routes = [
   {
     path: 'imp-emisiones',
     component: ImpEmisionesComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'control-emisiones',
+    component: ControlEmisionesComponent,
     canActivate: [AuthGuard],
   },
 

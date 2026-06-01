@@ -1,0 +1,35 @@
+.tabla-control-wrap {
+  max-height: 620px;
+  overflow: auto;
+}
+
+.sticky-head th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: var(--bgcolor1, #0d6efd);
+  color: #fff;
+}
+
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.motivo-col {
+  min-width: 240px;
+  max-width: 320px;
+  white-space: normal;
+}
+
+.json-box {
+  max-height: 320px;
+  overflow: auto;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 12px;
+  font-size: 12px;
+  margin-bottom: 0;
+}

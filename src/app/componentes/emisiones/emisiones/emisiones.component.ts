@@ -1,5 +1,5 @@
 ﻿import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { EmisionService } from 'src/app/servicios/emision.service';
 import { RutasxemisionService } from 'src/app/servicios/rutasxemision.service';
@@ -41,6 +41,9 @@ import { JasperReportService } from 'src/app/servicios/jasper-report.service';
 import { EmisionAuditService } from 'src/app/servicios/emision-audit.service';
 import { EmisionAuditEntry, EmisionAuditSnapshot } from 'src/app/interfaces/emisiones/emision-audit-entry';
 import Swal from 'sweetalert2';
+import { DocumentosService } from 'src/app/servicios/administracion/documentos.service';
+import { Documentos } from 'src/app/modelos/administracion/documentos.model';
+import { UsrxmodulosService } from 'src/app/servicios/administracion/usrxmodulos.service';
 
 @Component({
   selector: 'app-emisiones',
@@ -52,6 +55,7 @@ export class EmisionesComponent implements OnInit {
   formAddEmision: FormGroup;
   f_emisionIndividual: FormGroup;
   f_lecturas: FormGroup;
+  formAnularEmision: FormGroup;
   filtro: string;
   swfiltro: boolean;
   _emisiones: any;
@@ -121,6 +125,33 @@ export class EmisionesComponent implements OnInit {
   auditoriaEmisionCargando = false;
   auditoriaEmisionError = '';
   auditoriaEmisionResumen = '';
+  documentosAnulacion: Documentos[] = [];
+  documentosAnulacionFiltrados: Documentos[] = [];
+  filtroDocumentoAnulacion = '';
+  cargandoDocumentosAnulacion = false;
+  cargandoResumenAnulacion = false;
+  anularEmisionGuardando = false;
+  accessLoaded = false;
+  enabledSections = new Set<string>();
+  resumenAnulacion = {
+    totalFacturas: 0,
+    totalAbonados: 0,
+    totalFacturasCobradas: 0,
+  };
+  facturasCobradasAnulacion: any[] = [];
+  filtroGeneralFacturasCobradas = '';
+  facturasCobradasSortColumn:
+    | 'idfactura'
+    | 'nrofactura'
+    | 'cuenta'
+    | 'cliente'
+    | 'fechaCobro'
+    | 'formaPago'
+    | 'usuario' = 'fechaCobro';
+  facturasCobradasSortDirection: 'asc' | 'desc' = 'desc';
+  facturasCobradasPage = 1;
+  facturasCobradasPageSize = 5;
+  readonly facturasCobradasPageSizeOptions = [5, 10, 20, 50];
 
   porcResidencial: number[] = [
     0.777, 0.78, 0.78, 0.78, 0.78, 0.778, 0.778, 0.778, 0.78, 0.78, 0.78, 0.68,
@@ -148,7 +179,9 @@ export class EmisionesComponent implements OnInit {
     private s_emisionesIndividuales: EmisionIndividualService,
     private s_loading: LoadingService,
     private s_jasperreport: JasperReportService,
-    private s_emisionAudit: EmisionAuditService
+    private s_emisionAudit: EmisionAuditService,
+    private s_documentos: DocumentosService,
+    private usrxmodulosService: UsrxmodulosService
   ) { }
 
   ngOnInit(): void {
@@ -163,6 +196,11 @@ export class EmisionesComponent implements OnInit {
     this.formBuscar = this.fb.group({
       desde: '',
       hasta: '',
+    });
+    this.formAnularEmision = this.fb.group({
+      iddocumento: [null, Validators.required],
+      referenciaDocumento: ['', [Validators.maxLength(250)]],
+      motivo: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(500)]],
     });
     let hasta: String;
     this.emiService.ultimo().subscribe({
@@ -202,6 +240,7 @@ export class EmisionesComponent implements OnInit {
     });
     this.getAllEmisiones();
     this.getAllNovedades();
+    this.loadSectionAccess();
   }
 
   colocaColor(colores: any) {
@@ -242,6 +281,550 @@ export class EmisionesComponent implements OnInit {
         },
         error: (err) => console.error(err.error),
       });
+  }
+
+  private normalizeAccessCode(code: any): string {
+    return String(code || '')
+      .trim()
+      .toUpperCase()
+      .replace(/\s+/g, '')
+      .replace(/[.-]+/g, '_');
+  }
+
+  private collectEnabledCodes(node: any): void {
+    if (!node) return;
+
+    const isEnabled = node.enabled !== false;
+    const rawCode = node.codigo ?? node.code ?? node.codseccion ?? node.codsubseccion;
+    if (isEnabled && rawCode) {
+      this.enabledSections.add(String(rawCode).trim().toUpperCase());
+      this.enabledSections.add(this.normalizeAccessCode(rawCode));
+    }
+
+    const children = [
+      ...(Array.isArray(node.secciones) ? node.secciones : []),
+      ...(Array.isArray(node.subsecciones) ? node.subsecciones : []),
+      ...(Array.isArray(node.children) ? node.children : []),
+    ];
+
+    children.forEach((child: any) => this.collectEnabledCodes(child));
+  }
+
+  private loadSectionAccess(): void {
+    const userId = this.authService.idusuario;
+    if (!userId || userId === 1) {
+      this.accessLoaded = true;
+      return;
+    }
+
+    this.usrxmodulosService.getAccessProfile(userId, 'WEB').subscribe({
+      next: (rows: any[]) => {
+        this.enabledSections.clear();
+        (rows || []).forEach((m: any) => {
+          if (!m?.enabled) return;
+          this.collectEnabledCodes(m);
+        });
+        this.accessLoaded = true;
+      },
+      error: () => {
+        this.accessLoaded = true;
+      },
+    });
+  }
+
+  canSection(code: string): boolean {
+    if (this.authService.idusuario === 1) return true;
+    if (!this.accessLoaded) return false;
+    return this.enabledSections.has(String(code).trim().toUpperCase())
+      || this.enabledSections.has(this.normalizeAccessCode(code));
+  }
+
+  get motivoAnulacionControl() {
+    return this.formAnularEmision.get('motivo');
+  }
+
+  get documentoAnulacionControl() {
+    return this.formAnularEmision.get('iddocumento');
+  }
+
+  get referenciaDocumentoControl() {
+    return this.formAnularEmision.get('referenciaDocumento');
+  }
+
+  get motivoAnulacionLength(): number {
+    return (this.motivoAnulacionControl?.value || '').trim().length;
+  }
+
+  get selectedDocumentoAnulacion(): Documentos | null {
+    const iddocumento = +this.documentoAnulacionControl?.value;
+    if (!iddocumento) {
+      return null;
+    }
+
+    return (
+      this.documentosAnulacion.find(
+        (doc) => +(doc.iddocumento ?? doc.intdoc ?? 0) === iddocumento
+      ) || null
+    );
+  }
+
+  canAnularEmision(): boolean {
+    return this.canSection('EMISION_ANULAR') && [1, 2].includes(+this.estado);
+  }
+
+  estadoEmisionTexto(estado: number | null | undefined): string {
+    switch (Number(estado ?? -1)) {
+      case 0:
+        return 'Abierta';
+      case 1:
+        return 'Cerrada';
+      case 2:
+        return 'Reabierta';
+      case 3:
+        return 'Anulada';
+      default:
+        return 'Sin estado';
+    }
+  }
+
+  abrirModalAnularEmision() {
+    if (!this.idemision) {
+      this.authService.swal('warning', 'Selecciona primero una emisión.');
+      return;
+    }
+
+    if (!this.canSection('EMISION_ANULAR')) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Sin permiso',
+        text: 'No tienes permiso EMISION_ANULAR para ejecutar esta operación.',
+      });
+      return;
+    }
+
+    if (![1, 2].includes(+this.estado)) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Estado no permitido',
+        text: 'Solo se pueden anular emisiones cerradas o reabiertas.',
+      });
+      return;
+    }
+
+    this.resetAnulacionForm();
+    this.cargarDocumentosAnulacion();
+    this.cargarResumenAnulacion();
+  }
+
+  resetAnulacionForm() {
+    this.formAnularEmision.reset({
+      iddocumento: null,
+      referenciaDocumento: '',
+      motivo: '',
+    });
+    this.filtroDocumentoAnulacion = '';
+    this.documentosAnulacionFiltrados = [...this.documentosAnulacion];
+    this.anularEmisionGuardando = false;
+    this.resumenAnulacion = {
+      totalFacturas: 0,
+      totalAbonados: 0,
+      totalFacturasCobradas: 0,
+    };
+    this.facturasCobradasAnulacion = [];
+    this.resetTablaFacturasCobradas();
+  }
+
+  async cargarResumenAnulacion() {
+    if (!this.idemision) {
+      return;
+    }
+
+    this.cargandoResumenAnulacion = true;
+    try {
+      const [lecturas, facturasCobradas] = await Promise.all([
+        firstValueFrom(this.s_lecturas.getByIdEmision(this.idemision)),
+        firstValueFrom(this.facService.findCobradasByIdemision(this.idemision)),
+      ]);
+
+      const lecturasLista = Array.isArray(lecturas) ? lecturas : [];
+      const cobradasLista = Array.isArray(facturasCobradas) ? facturasCobradas : [];
+
+      const facturasIds = new Set<number | string>();
+      const abonadosIds = new Set<number | string>();
+      const facturasCobradasIds = new Set<number | string>();
+
+      lecturasLista.forEach((lectura: any) => {
+        const idfactura = lectura?.idfactura ?? null;
+        const idabonado =
+          lectura?.idabonado_abonados?.idabonado ??
+          lectura?.idabonado ??
+          null;
+
+        if (idfactura != null && idfactura !== '') {
+          facturasIds.add(idfactura);
+        }
+        if (idabonado != null && idabonado !== '') {
+          abonadosIds.add(idabonado);
+        }
+      });
+
+      cobradasLista.forEach((factura: any) => {
+        const idfactura = factura?.idfactura ?? factura?.id ?? null;
+        if (idfactura != null && idfactura !== '') {
+          facturasCobradasIds.add(idfactura);
+        }
+      });
+
+      this.resumenAnulacion = {
+        totalFacturas: facturasIds.size,
+        totalAbonados: abonadosIds.size,
+        totalFacturasCobradas: facturasCobradasIds.size,
+      };
+      this.facturasCobradasAnulacion = cobradasLista.map((factura: any) => ({
+        idfactura: factura?.idfactura ?? factura?.id ?? null,
+        nrofactura: factura?.nrofactura ?? factura?.numdoc ?? '-',
+        cuenta:
+          factura?.idabonado_abonados?.idabonado ??
+          factura?.idabonado_abonados ??
+          factura?.idabonado ??
+          '-',
+        cliente:
+          factura?.nombre ??
+          factura?.cliente ??
+          factura?.idcliente?.nombre ??
+          factura?.idcliente_clientes?.nombre ??
+          '-',
+        usuario: factura?.nomusu ?? factura?.usuario ?? '-',
+        fechaCobro: factura?.fechacobro ?? null,
+        formaPago: factura?.descripcion ?? factura?.formapago ?? '-',
+      }));
+      this.resetTablaFacturasCobradas();
+    } catch (err) {
+      console.error('No se pudo cargar el resumen de anulación', err);
+      this.resumenAnulacion = {
+        totalFacturas: 0,
+        totalAbonados: 0,
+        totalFacturasCobradas: 0,
+      };
+      this.facturasCobradasAnulacion = [];
+      this.resetTablaFacturasCobradas();
+    } finally {
+      this.cargandoResumenAnulacion = false;
+    }
+  }
+
+  resetTablaFacturasCobradas() {
+    this.facturasCobradasPage = 1;
+    this.filtroGeneralFacturasCobradas = '';
+    this.facturasCobradasSortColumn = 'fechaCobro';
+    this.facturasCobradasSortDirection = 'desc';
+  }
+
+  onFacturasCobradasFilterChange() {
+    this.facturasCobradasPage = 1;
+  }
+
+  limpiarFiltroFacturasCobradas() {
+    this.filtroGeneralFacturasCobradas = '';
+    this.facturasCobradasPage = 1;
+  }
+
+  toggleFacturasCobradasSort(
+    column: 'idfactura' | 'nrofactura' | 'cuenta' | 'cliente' | 'fechaCobro' | 'formaPago' | 'usuario'
+  ) {
+    if (this.facturasCobradasSortColumn === column) {
+      this.facturasCobradasSortDirection =
+        this.facturasCobradasSortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.facturasCobradasSortColumn = column;
+      this.facturasCobradasSortDirection = column === 'fechaCobro' ? 'desc' : 'asc';
+    }
+    this.facturasCobradasPage = 1;
+  }
+
+  getFacturasCobradasSortIcon(
+    column: 'idfactura' | 'nrofactura' | 'cuenta' | 'cliente' | 'fechaCobro' | 'formaPago' | 'usuario'
+  ): string {
+    if (this.facturasCobradasSortColumn !== column) {
+      return 'fa fa-sort text-muted';
+    }
+    return this.facturasCobradasSortDirection === 'asc'
+      ? 'fa fa-sort-up'
+      : 'fa fa-sort-down';
+  }
+
+  get facturasCobradasAnulacionFiltradas(): any[] {
+    const filtro = (this.filtroGeneralFacturasCobradas || '').trim().toLowerCase();
+    return (this.facturasCobradasAnulacion || []).filter((factura) => {
+      if (!filtro) {
+        return true;
+      }
+      const textoBusqueda = [
+        factura?.idfactura,
+        factura?.nrofactura,
+        factura?.cuenta,
+        factura?.cliente,
+        this.formatFechaFiltro(factura?.fechaCobro),
+        factura?.formaPago,
+        factura?.usuario,
+      ]
+        .filter((v) => v != null && v !== '')
+        .join(' ')
+        .toLowerCase();
+
+      return textoBusqueda.includes(filtro);
+    });
+  }
+
+  get facturasCobradasAnulacionOrdenadas(): any[] {
+    const items = [...this.facturasCobradasAnulacionFiltradas];
+    const direction = this.facturasCobradasSortDirection === 'asc' ? 1 : -1;
+    return items.sort((a, b) => {
+      const valorA = this.getFacturaCobradaSortValue(a, this.facturasCobradasSortColumn);
+      const valorB = this.getFacturaCobradaSortValue(b, this.facturasCobradasSortColumn);
+      return this.compararValoresFacturaCobrada(valorA, valorB) * direction;
+    });
+  }
+
+  get facturasCobradasAnulacionPaginadas(): any[] {
+    const inicio = (this.facturasCobradasPage - 1) * this.facturasCobradasPageSize;
+    return this.facturasCobradasAnulacionOrdenadas.slice(
+      inicio,
+      inicio + this.facturasCobradasPageSize
+    );
+  }
+
+  get facturasCobradasTotalPages(): number {
+    return Math.max(
+      1,
+      Math.ceil(this.facturasCobradasAnulacionFiltradas.length / this.facturasCobradasPageSize)
+    );
+  }
+
+  changeFacturasCobradasPage(delta: number) {
+    const nuevaPagina = this.facturasCobradasPage + delta;
+    if (nuevaPagina < 1 || nuevaPagina > this.facturasCobradasTotalPages) {
+      return;
+    }
+    this.facturasCobradasPage = nuevaPagina;
+  }
+
+  onFacturasCobradasPageSizeChange(size: number | string) {
+    this.facturasCobradasPageSize = Number(size) || 5;
+    this.facturasCobradasPage = 1;
+  }
+
+  private formatFechaFiltro(valor: any): string {
+    if (!valor) {
+      return '';
+    }
+    const fecha = new Date(valor);
+    if (Number.isNaN(fecha.getTime())) {
+      return String(valor);
+    }
+    const dd = String(fecha.getDate()).padStart(2, '0');
+    const mm = String(fecha.getMonth() + 1).padStart(2, '0');
+    const yyyy = fecha.getFullYear();
+    return `${dd}-${mm}-${yyyy}`;
+  }
+
+  private getFacturaCobradaSortValue(
+    factura: any,
+    column: 'idfactura' | 'nrofactura' | 'cuenta' | 'cliente' | 'fechaCobro' | 'formaPago' | 'usuario'
+  ): any {
+    if (column === 'fechaCobro') {
+      return factura?.fechaCobro ? new Date(factura.fechaCobro).getTime() : 0;
+    }
+    return factura?.[column] ?? '';
+  }
+
+  private compararValoresFacturaCobrada(a: any, b: any): number {
+    if (a == null && b == null) return 0;
+    if (a == null) return -1;
+    if (b == null) return 1;
+    const na = Number(a);
+    const nb = Number(b);
+    if (!Number.isNaN(na) && !Number.isNaN(nb)) {
+      return na - nb;
+    }
+    return String(a).localeCompare(String(b), 'es', { sensitivity: 'base' });
+  }
+
+  cargarDocumentosAnulacion() {
+    if (this.documentosAnulacion.length) {
+      this.filtrarDocumentosAnulacion();
+      return;
+    }
+
+    this.cargandoDocumentosAnulacion = true;
+    this.s_documentos.getListaDocumentos().subscribe({
+      next: (docs) => {
+        this.documentosAnulacion = Array.isArray(docs) ? docs : [];
+        this.filtrarDocumentosAnulacion();
+        this.cargandoDocumentosAnulacion = false;
+      },
+      error: (err) => {
+        this.cargandoDocumentosAnulacion = false;
+        console.error('No se pudieron cargar los documentos', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Documentos no disponibles',
+          text: 'No se pudo cargar el listado de documentos de respaldo.',
+        });
+      },
+    });
+  }
+
+  filtrarDocumentosAnulacion() {
+    const termino = (this.filtroDocumentoAnulacion || '').trim().toLowerCase();
+    this.documentosAnulacionFiltrados = this.documentosAnulacion.filter((doc) => {
+      if (!termino) {
+        return true;
+      }
+
+      const texto = [
+        doc.iddocumento,
+        doc.intdoc,
+        doc.nomdoc,
+        (doc as any)?.descripcion,
+        (doc as any)?.documento,
+      ]
+        .filter((v) => v != null && v !== '')
+        .join(' ')
+        .toLowerCase();
+
+      return texto.includes(termino);
+    });
+  }
+
+  async confirmarAnulacionEmision() {
+    if (!this.idemision) {
+      return;
+    }
+
+    if (!this.canSection('EMISION_ANULAR')) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Sin permiso',
+        text: 'No tienes permiso EMISION_ANULAR para ejecutar esta operación.',
+      });
+      return;
+    }
+
+    if (![1, 2].includes(+this.estado)) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Estado no permitido',
+        text: 'Solo se pueden anular emisiones cerradas o reabiertas.',
+      });
+      return;
+    }
+
+    if (this.cargandoResumenAnulacion) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Validando emisión',
+        text: 'Espera un momento mientras se verifica el resumen de la emisión.',
+      });
+      return;
+    }
+
+    if ((this.resumenAnulacion?.totalFacturasCobradas || 0) > 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'No se puede anular',
+        text: 'Existen movimientos financieros asociados a esta emisión. No es posible realizar la anulación.',
+      });
+      return;
+    }
+
+    this.formAnularEmision.markAllAsTouched();
+    const motivo = (this.motivoAnulacionControl?.value || '').trim();
+    const referenciaDocumento = (this.referenciaDocumentoControl?.value || '').trim();
+    const documento = this.selectedDocumentoAnulacion;
+
+    if (!documento) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Documento requerido',
+        text: 'Debe seleccionar un documento de respaldo para continuar.',
+      });
+      return;
+    }
+
+    if (!motivo || motivo.length < 20 || motivo.length > 500) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Motivo inválido',
+        text: 'El motivo de anulación debe tener entre 20 y 500 caracteres.',
+      });
+      return;
+    }
+
+    const result = await Swal.fire({
+      icon: 'warning',
+      title: 'ATENCIÓN',
+      html:
+        `<div class="text-left">` +
+        `<p>La emisión será anulada de forma permanente.</p>` +
+        `<p>La información histórica permanecerá registrada.</p>` +
+        `<p>Esta acción no podrá revertirse desde la interfaz del sistema.</p>` +
+        `<hr>` +
+        `<p><strong>ID Emisión:</strong> ${this.idemision}</p>` +
+        `<p><strong>Emisión:</strong> ${this.selEmision}</p>` +
+        `<p><strong>Estado actual:</strong> ${this.estadoEmisionTexto(this.estado)}</p>` +
+        `<p><strong>Documento de respaldo:</strong> ${documento.nomdoc}</p>` +
+        `<p><strong>Referencia del documento:</strong> ${referenciaDocumento || 'No registrada'}</p>` +
+        `<p><strong>Motivo:</strong> ${motivo}</p>` +
+        `<p><strong>Usuario:</strong> ${this.authService.alias || this.authService.idusuario}</p>` +
+        `</div>`,
+      showCancelButton: true,
+      confirmButtonText: 'Anular emisión',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#c82333',
+    });
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
+    this.ejecutarAnulacionEmision(+this.documentoAnulacionControl?.value, motivo, referenciaDocumento);
+  }
+
+  private ejecutarAnulacionEmision(iddocumento: number, motivo: string, referenciaDocumento: string) {
+    this.anularEmisionGuardando = true;
+    this.s_loading.showLoading();
+
+    this.emiService.anularEmision(this.idemision, { iddocumento, motivo, referenciaDocumento }).subscribe({
+      next: (resp: any) => {
+        this.anularEmisionGuardando = false;
+        this.s_loading.hideLoading();
+        this.estado = 3;
+        this.buscar();
+        Swal.fire({
+          icon: 'success',
+          title: 'Emisión anulada',
+          text: resp?.message || 'Emisión anulada correctamente.',
+        });
+      },
+      error: (e) => {
+        this.anularEmisionGuardando = false;
+        this.s_loading.hideLoading();
+        console.error('Error al anular emisión', e);
+        const backendMessage =
+          typeof e?.error === 'string'
+            ? e.error
+            : e?.error?.message ||
+              e?.error?.detalle ||
+              e?.error?.error ||
+              e?.message;
+        Swal.fire({
+          icon: 'error',
+          title: 'No se pudo anular',
+          text: backendMessage || 'Ocurrió un error al intentar anular la emisión.',
+        });
+      },
+    });
   }
 
   eliminaEmision(idemision: number) {
@@ -2408,6 +2991,45 @@ export class EmisionesComponent implements OnInit {
 
   }
   async confirmarReabrirEmision() {
+    if (!this.idemision) {
+      this.authService.swal('warning', 'Selecciona primero una emisión.');
+      return;
+    }
+
+    try {
+      const [facturasCobradas, emisiones] = await Promise.all([
+        firstValueFrom(this.facService.findCobradasByIdemision(this.idemision)),
+        firstValueFrom(this.emiService.findAllEmisiones()),
+      ]);
+
+      if (Array.isArray(facturasCobradas) && facturasCobradas.length > 0) {
+        await Swal.fire({
+          icon: 'warning',
+          title: 'No se puede reabrir',
+          text: 'La emisión tiene facturas cobradas asociadas. No es posible reabrirla.',
+        });
+        return;
+      }
+
+      const emisionPosteriorGenerada = this.buscarEmisionPosteriorGenerada(emisiones);
+      if (emisionPosteriorGenerada) {
+        await Swal.fire({
+          icon: 'warning',
+          title: 'No se puede reabrir',
+          text: `No es posible reabrir la emisión ${this.selEmision} porque existe una emisión posterior generada: ${emisionPosteriorGenerada.emision} (${this.estadoEmisionTexto(emisionPosteriorGenerada.estado)}).`,
+        });
+        return;
+      }
+    } catch (err) {
+      console.error('Error validando reapertura de emisión', err);
+      await Swal.fire({
+        icon: 'error',
+        title: 'No se pudo validar',
+        text: 'Ocurrió un problema al validar facturas cobradas o emisiones posteriores.',
+      });
+      return;
+    }
+
     const result = await Swal.fire({
       icon: 'question',
       title: 'Reabrir emisión',
@@ -2470,6 +3092,42 @@ export class EmisionesComponent implements OnInit {
         });
       },
     });
+  }
+
+  private buscarEmisionPosteriorGenerada(emisiones: any[]): any | null {
+    if (!Array.isArray(emisiones) || !this.selEmision) {
+      return null;
+    }
+
+    const emisionActual = this.normalizarCodigoEmision(this.selEmision);
+    if (emisionActual === null) {
+      return null;
+    }
+
+    return (
+      emisiones.find((emision: any) => {
+        const codigo = this.normalizarCodigoEmision(emision?.emision);
+        return (
+          codigo !== null &&
+          codigo > emisionActual &&
+          [0, 1, 2].includes(Number(emision?.estado))
+        );
+      }) || null
+    );
+  }
+
+  private normalizarCodigoEmision(emision: any): number | null {
+    if (emision == null) {
+      return null;
+    }
+
+    const texto = String(emision).trim();
+    if (!texto) {
+      return null;
+    }
+
+    const numero = Number(texto);
+    return Number.isNaN(numero) ? null : numero;
   }
 
   async continuarApertura() {
