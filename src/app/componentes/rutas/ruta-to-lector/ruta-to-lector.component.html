@@ -11,11 +11,20 @@
             aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
           </button>
           <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-            <button class="dropdown-item" type="button">
-              <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
-            <button class="dropdown-item" type="button" [routerLink]="['/add-ruta-lector']">
-              <i class="bi-file-earmark-arrow-up"></i>&nbsp;
-              Ruta a Lector</button>
+            <button class="dropdown-item" type="button" data-toggle="modal" data-target="#pdfRutaAsignadaModal"
+              (click)="exportarReporteGeneral('pdf')">
+              <i class="bi bi-printer"></i>&nbsp; Imprimir reporte general
+            </button>
+            <button class="dropdown-item" type="button" (click)="exportarReporteGeneral('xml')">
+              <i class="bi bi-filetype-xml"></i>&nbsp; Exportar XML general
+            </button>
+            <button class="dropdown-item" type="button" data-toggle="modal" data-target="#pdfRutaAsignadaModal"
+              (click)="exportarLecturasGenerales('pdf')">
+              <i class="bi bi-file-earmark-text"></i>&nbsp; Imprimir lecturas
+            </button>
+            <button class="dropdown-item" type="button" (click)="exportarLecturasGenerales('xml')">
+              <i class="bi bi-filetype-xml"></i>&nbsp; Exportar XML lecturas
+            </button>
           </div>
         </div>
 
@@ -34,7 +43,8 @@
           </tr>
         </thead>
         <tbody class="detalle">
-          <tr class="fila" *ngFor="let usuario of _usuarios | filter: filtro;" (click)="onCellClick($event, usuario)">
+          <tr class="fila" *ngFor="let usuario of _usuarios | filter: filtro;" (click)="onCellClick($event, usuario)"
+            [class.fila-seleccionada]="usuarioSeletced?.idusuario === usuario.idusuario">
             <td class="text-center">{{ usuario.idusuario }}</td>
             <td> {{ usuario.nomusu }} </td>
           </tr>
@@ -47,6 +57,9 @@
           <div class="row">
             <div class="col-sm">
               <h5 class="font-weight-bold py-1 text-center titDocumentos">Lista de rutas asignadas</h5>
+              <div class="text-center lector-seleccionado" *ngIf="usuarioSeletced?.nomusu">
+                Lector seleccionado: {{ usuarioSeletced.nomusu }}
+              </div>
             </div>
             <div class="col-sm-2">
               <select class="form-control py-1 form-control-sm w-15 float-right" [(ngModel)]="emisionSelected"
@@ -124,7 +137,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="pdfRutaAsignadaModalLabel">
-            Vista previa PDF {{ rutaPreview?.descripcion ? '- ' + rutaPreview.descripcion : '' }}
+            {{ previewTitulo }} {{ rutaPreview?.descripcion ? '- ' + rutaPreview.descripcion : '' }}
           </h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="cerrarVistaPreviaPdf()">
             <span aria-hidden="true">&times;</span>

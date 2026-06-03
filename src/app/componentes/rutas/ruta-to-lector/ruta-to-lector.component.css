@@ -18,3 +18,16 @@
   color: white;
   cursor: pointer;
 }
+
+.fila-seleccionada {
+  background-color: #117a8b;
+  color: white;
+}
+
+.lector-seleccionado {
+  color: #ffd54f;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.1;
+  margin-top: -0.15rem;
+}

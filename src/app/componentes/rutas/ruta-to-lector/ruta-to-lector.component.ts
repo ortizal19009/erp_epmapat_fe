@@ -35,6 +35,7 @@ export class RutaToLectorComponent implements OnInit {
   pdfPreviewUrl: SafeResourceUrl | null = null;
   private pdfPreviewObjectUrl: string | null = null;
   rutaPreview: any = null;
+  previewTitulo = 'Vista previa PDF';
 
   constructor(
     private usuarioService: UsuarioService,
@@ -254,7 +255,7 @@ export class RutaToLectorComponent implements OnInit {
       }
 
       if (formato === 'pdf') {
-        this.abrirVistaPreviaPdf(reporte);
+        this.abrirVistaPreviaPdf(reporte, 'Hoja de lectura por ruta asignada');
       } else {
         this.generarXmlRutaAsignada(reporte);
       }
@@ -316,11 +317,12 @@ export class RutaToLectorComponent implements OnInit {
     };
   }
 
-  private abrirVistaPreviaPdf(reporte: any) {
+  private abrirVistaPreviaPdf(reporte: any, titulo: string) {
     this.limpiarVistaPreviaPdf();
     this.pdfPreviewObjectUrl = URL.createObjectURL(this.buildPdfRutaAsignada(reporte));
     this.pdfPreviewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.pdfPreviewObjectUrl);
     this.rutaPreview = reporte.ruta;
+    this.previewTitulo = titulo;
   }
 
   private buildPdfRutaAsignada(reporte: any): Blob {
@@ -445,6 +447,327 @@ export class RutaToLectorComponent implements OnInit {
       this.pdfPreviewUrl = null;
     }
     this.rutaPreview = null;
+    this.previewTitulo = 'Vista previa PDF';
+  }
+
+  async exportarReporteGeneral(formato: 'pdf' | 'xml') {
+    if (!this.emisionSelected?.idemision) {
+      this.swal('warning', 'Seleccione una emisión');
+      return;
+    }
+
+    this.exportandoReporte = true;
+
+    try {
+      const reporte = await this.construirReporteGeneralAsignaciones();
+
+      if (!reporte.detalles.length) {
+        this.swal('info', 'No hay rutas asignadas para la emisión seleccionada');
+        return;
+      }
+
+      if (formato === 'pdf') {
+        this.limpiarVistaPreviaPdf();
+        this.pdfPreviewObjectUrl = URL.createObjectURL(this.buildPdfReporteGeneral(reporte));
+        this.pdfPreviewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.pdfPreviewObjectUrl);
+        this.rutaPreview = null;
+        this.previewTitulo = 'Reporte general de rutas asignadas';
+      } else {
+        this.generarXmlReporteGeneral(reporte);
+      }
+    } catch (error) {
+      console.error('Error exportando reporte general:', error);
+      this.swal('error', 'No se pudo generar el reporte general');
+    } finally {
+      this.exportandoReporte = false;
+    }
+  }
+
+  async exportarLecturasGenerales(formato: 'pdf' | 'xml') {
+    if (!this.emisionSelected?.idemision) {
+      this.swal('warning', 'Seleccione una emisión');
+      return;
+    }
+
+    this.exportandoReporte = true;
+
+    try {
+      const reporte = await this.construirReporteLecturasGenerales();
+
+      if (!reporte.detalles.length) {
+        this.swal('info', 'No se encontraron lecturas para la emisión seleccionada');
+        return;
+      }
+
+      if (formato === 'pdf') {
+        this.limpiarVistaPreviaPdf();
+        this.pdfPreviewObjectUrl = URL.createObjectURL(this.buildPdfLecturasGenerales(reporte));
+        this.pdfPreviewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.pdfPreviewObjectUrl);
+        this.rutaPreview = null;
+        this.previewTitulo = 'Reporte general de lecturas';
+      } else {
+        this.generarXmlLecturasGenerales(reporte);
+      }
+    } catch (error) {
+      console.error('Error exportando lecturas generales:', error);
+      this.swal('error', 'No se pudo generar el reporte de lecturas');
+    } finally {
+      this.exportandoReporte = false;
+    }
+  }
+
+  private async construirReporteGeneralAsignaciones(): Promise<any> {
+    const asignaciones: any[] = await firstValueFrom(
+      this.usrxrutaService.findByEmision(this.emisionSelected.idemision)
+    ) as any[];
+
+    const detalles = (asignaciones ?? []).map((item: any, index: number) => ({
+      numero: index + 1,
+      idusuario: item?.idusuario_usuarios?.idusuario ?? item?.idusuario ?? '',
+      lector: item?.idusuario_usuarios?.nomusu ?? item?.nomusu ?? '',
+      totalRutas: (item?.rutas ?? []).length,
+      rutas: (item?.rutas ?? []).map((ruta: any) => ({
+        idruta: ruta?.idruta ?? '',
+        codigo: ruta?.codigo ?? '',
+        descripcion: ruta?.descripcion ?? ''
+      }))
+    }));
+
+    return {
+      emision: this.emisionSelected?.emision ?? '',
+      fechaGeneracion: new Date(),
+      detalles
+    };
+  }
+
+  private async construirReporteLecturasGenerales(): Promise<any> {
+    const asignaciones: any[] = await firstValueFrom(
+      this.usrxrutaService.findByEmision(this.emisionSelected.idemision)
+    ) as any[];
+
+    const detalles: any[] = [];
+
+    for (const asignacion of asignaciones ?? []) {
+      const lector = asignacion?.idusuario_usuarios?.nomusu ?? asignacion?.nomusu ?? 'Sin lector';
+      const idusuario = asignacion?.idusuario_usuarios?.idusuario ?? asignacion?.idusuario ?? '';
+
+      for (const ruta of asignacion?.rutas ?? []) {
+        const rutaEmision: any = await firstValueFrom(
+          this.rutasxemisionService.getByEmisionRuta(this.emisionSelected.idemision, ruta.idruta)
+        );
+
+        if (!rutaEmision?.idrutaxemision) {
+          continue;
+        }
+
+        const lecturas: any[] = await firstValueFrom(
+          this.lecturasService.get_Lecturas(rutaEmision.idrutaxemision)
+        );
+
+        for (const lectura of lecturas ?? []) {
+          detalles.push({
+            numero: detalles.length + 1,
+            lector,
+            idusuario,
+            rutaCodigo: rutaEmision?.idruta_rutas?.codigo ?? ruta?.codigo ?? '',
+            rutaDescripcion: rutaEmision?.idruta_rutas?.descripcion ?? ruta?.descripcion ?? '',
+            idabonado: lectura?.idabonado_abonados?.idabonado ?? '',
+            responsablePago:
+              lectura?.idabonado_abonados?.idresponsable?.nombre ??
+              lectura?.idabonado_abonados?.idcliente_clientes?.nombre ??
+              '',
+            identificacion:
+              lectura?.idabonado_abonados?.idresponsable?.cedula ??
+              lectura?.idabonado_abonados?.idcliente_clientes?.cedula ??
+              '',
+            categoria:
+              lectura?.idabonado_abonados?.idcategoria_categorias?.descripcion ?? '',
+            lecturaAnterior: lectura?.lecturaanterior ?? '',
+            lecturaActual: lectura?.lecturaactual ?? '',
+            observacion: lectura?.observaciones ?? lectura?.observacion ?? ''
+          });
+        }
+      }
+    }
+
+    return {
+      emision: this.emisionSelected?.emision ?? '',
+      fechaGeneracion: new Date(),
+      detalles
+    };
+  }
+
+  private buildPdfReporteGeneral(reporte: any): Blob {
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const fecha = reporte.fechaGeneracion.toLocaleDateString('es-EC');
+    const hora = reporte.fechaGeneracion.toLocaleTimeString('es-EC');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    doc.text('Reporte general de rutas asignadas', 14, 12);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text(`Emisión: ${reporte.emision}`, 14, 19);
+    doc.text(`Fecha: ${fecha} ${hora}`, 14, 25);
+
+    autoTable(doc, {
+      startY: 32,
+      theme: 'grid',
+      styles: { fontSize: 8, cellPadding: 1.5, valign: 'middle' },
+      headStyles: { fillColor: [52, 73, 94] },
+      margin: { left: 8, right: 8 },
+      head: [[
+        'N°',
+        'Cod. lector',
+        'Lector',
+        'Total rutas',
+        'Rutas asignadas'
+      ]],
+      body: reporte.detalles.map((item: any) => [
+        item.numero,
+        item.idusuario,
+        item.lector,
+        item.totalRutas,
+        item.rutas.map((ruta: any) => `${ruta.codigo || ruta.idruta} - ${ruta.descripcion}`).join('\n')
+      ])
+    });
+
+    return doc.output('blob');
+  }
+
+  private buildPdfLecturasGenerales(reporte: any): Blob {
+    const doc = new jsPDF('l', 'mm', 'a4');
+    const fecha = reporte.fechaGeneracion.toLocaleDateString('es-EC');
+    const hora = reporte.fechaGeneracion.toLocaleTimeString('es-EC');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    doc.text('Reporte general de lecturas', 14, 12);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text(`Emisión: ${reporte.emision}`, 14, 19);
+    doc.text(`Fecha: ${fecha} ${hora}`, 14, 25);
+
+    autoTable(doc, {
+      startY: 32,
+      theme: 'grid',
+      styles: { fontSize: 7, cellPadding: 1.2, valign: 'middle' },
+      headStyles: { fillColor: [52, 73, 94] },
+      margin: { left: 6, right: 6 },
+      head: [[
+        'N°',
+        'Lector',
+        'Ruta',
+        'Id abonado',
+        'Responsable',
+        'Identificación',
+        'Categoría',
+        'Lect. ant.',
+        'Lect. act.',
+        'Observación'
+      ]],
+      body: reporte.detalles.map((item: any) => [
+        item.numero,
+        item.lector,
+        `${item.rutaCodigo} - ${item.rutaDescripcion}`,
+        item.idabonado,
+        item.responsablePago,
+        item.identificacion,
+        item.categoria,
+        item.lecturaAnterior,
+        item.lecturaActual,
+        item.observacion
+      ])
+    });
+
+    return doc.output('blob');
+  }
+
+  private generarXmlReporteGeneral(reporte: any) {
+    const detallesXml = reporte.detalles.map((item: any) => [
+      '    <asignacion>',
+      `      <numero>${this.escapeXml(item.numero)}</numero>`,
+      `      <idusuario>${this.escapeXml(item.idusuario)}</idusuario>`,
+      `      <lector>${this.escapeXml(item.lector)}</lector>`,
+      `      <totalRutas>${this.escapeXml(item.totalRutas)}</totalRutas>`,
+      '      <rutas>',
+      ...(item.rutas ?? []).map((ruta: any) => [
+        '        <ruta>',
+        `          <idruta>${this.escapeXml(ruta.idruta)}</idruta>`,
+        `          <codigo>${this.escapeXml(ruta.codigo)}</codigo>`,
+        `          <descripcion>${this.escapeXml(ruta.descripcion)}</descripcion>`,
+        '        </ruta>'
+      ].join('\n')),
+      '      </rutas>',
+      '    </asignacion>'
+    ].join('\n')).join('\n');
+
+    const contenido = [
+      '<?xml version="1.0" encoding="UTF-8"?>',
+      '<reporteGeneralRutas>',
+      '  <cabecera>',
+      `    <emision>${this.escapeXml(reporte.emision)}</emision>`,
+      `    <fechaGeneracion>${this.escapeXml(reporte.fechaGeneracion.toISOString())}</fechaGeneracion>`,
+      '  </cabecera>',
+      '  <asignaciones>',
+      detallesXml,
+      '  </asignaciones>',
+      '</reporteGeneralRutas>'
+    ].join('\n');
+
+    const blob = new Blob([contenido], { type: 'application/xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `reporte_general_rutas_${this.emisionSelected?.emision ?? 'emision'}.xml`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    this.swal('success', 'XML general generado correctamente');
+  }
+
+  private generarXmlLecturasGenerales(reporte: any) {
+    const detallesXml = reporte.detalles.map((item: any) => [
+      '    <lectura>',
+      `      <numero>${this.escapeXml(item.numero)}</numero>`,
+      `      <lector>${this.escapeXml(item.lector)}</lector>`,
+      `      <idusuario>${this.escapeXml(item.idusuario)}</idusuario>`,
+      `      <rutaCodigo>${this.escapeXml(item.rutaCodigo)}</rutaCodigo>`,
+      `      <rutaDescripcion>${this.escapeXml(item.rutaDescripcion)}</rutaDescripcion>`,
+      `      <idabonado>${this.escapeXml(item.idabonado)}</idabonado>`,
+      `      <responsablePago>${this.escapeXml(item.responsablePago)}</responsablePago>`,
+      `      <identificacion>${this.escapeXml(item.identificacion)}</identificacion>`,
+      `      <categoria>${this.escapeXml(item.categoria)}</categoria>`,
+      `      <lecturaAnterior>${this.escapeXml(item.lecturaAnterior)}</lecturaAnterior>`,
+      `      <lecturaActual>${this.escapeXml(item.lecturaActual)}</lecturaActual>`,
+      `      <observacion>${this.escapeXml(item.observacion)}</observacion>`,
+      '    </lectura>'
+    ].join('\n')).join('\n');
+
+    const contenido = [
+      '<?xml version="1.0" encoding="UTF-8"?>',
+      '<reporteGeneralLecturas>',
+      '  <cabecera>',
+      `    <emision>${this.escapeXml(reporte.emision)}</emision>`,
+      `    <fechaGeneracion>${this.escapeXml(reporte.fechaGeneracion.toISOString())}</fechaGeneracion>`,
+      '  </cabecera>',
+      '  <lecturas>',
+      detallesXml,
+      '  </lecturas>',
+      '</reporteGeneralLecturas>'
+    ].join('\n');
+
+    const blob = new Blob([contenido], { type: 'application/xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `reporte_general_lecturas_${this.emisionSelected?.emision ?? 'emision'}.xml`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    this.swal('success', 'XML de lecturas generado correctamente');
   }
 
   private buildNombreArchivo(ruta: any, extension: 'pdf' | 'xml'): string {
