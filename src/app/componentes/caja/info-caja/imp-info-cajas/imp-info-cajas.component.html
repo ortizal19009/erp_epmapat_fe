@@ -26,10 +26,10 @@
                 <label *ngIf="!swimprimir" class="input-group-text">Exportar</label>
               </div>
               <select class="custom-select" formControlName="reporte" (change)="changeReporte()">
-                <!-- <option value="1">Resumen Recaudación </option>
-                <option value="2">Recaudación - Planillas</option> -->
-                <option value="4">Recaudación Rubros</option>
-                <option value="6">Recaudación Planillas</option>
+                <option value="1">Resumen Recaudación </option>
+                <option value="2">Recaudación - Planillas</option>
+<!--                 <option value="4">Recaudación Rubros</option>
+                <option value="6">Recaudación Planillas</option> -->
                 <option value="3">Recaudación Facturas Horas</option>
                 <option value="5" *ngIf="idrec==10041">Recaudación Facilito</option>
               </select>
