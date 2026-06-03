@@ -50,7 +50,7 @@ import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-recaudacion',
-  templateUrl: './recaudacion.component.html',
+  templateUrl: './recaudacion.component.view.html',
   styleUrls: ['./recaudacion.component.css'],
 })
 export class RecaudacionComponent implements OnInit {
@@ -601,7 +601,7 @@ export class RecaudacionComponent implements OnInit {
           })
         );
 
-        // Ordenar: primero por idAbonado (agrupando), luego por feccrea dentro de cada grupo
+        // Ordenar: primero por idAbonado (agrupando), luego por fechaemision dentro de cada grupo
         const listaOrdenada = [...sincobrar].sort((a, b) => {
           // Items sin abonado (idAbonado === 0 o idmodulo === 27) van al final
           const aEsAbonado = a.idAbonado !== 0 && a.idmodulo !== 27;
@@ -615,12 +615,12 @@ export class RecaudacionComponent implements OnInit {
             if (a.idAbonado !== b.idAbonado) {
               return a.idAbonado - b.idAbonado; // Ordenar por idAbonado
             }
-            // Mismo abonado: ordenar por feccrea
-            return new Date(a.feccrea).getTime() - new Date(b.feccrea).getTime();
+            // Mismo abonado: ordenar por fechaemision
+            return this.resolveFechaOrdenCobro(a) - this.resolveFechaOrdenCobro(b);
           }
 
-          // Ambos sin abonado: ordenar por feccrea
-          return new Date(a.feccrea).getTime() - new Date(b.feccrea).getTime();
+          // Ambos sin abonado: ordenar por fechaemision
+          return this.resolveFechaOrdenCobro(a) - this.resolveFechaOrdenCobro(b);
         });
 
         this._sincobro = listaOrdenada;
@@ -725,31 +725,47 @@ export class RecaudacionComponent implements OnInit {
   }
   marcarAnteriores(e: any, index: number, cuenta: number) {
     this.ntaCredito(cuenta, e.target.checked);
-    if ((this._sincobro[index].idmodulo == 3 && this._sincobro[index].idabonado > 0) || this._sincobro[index].idmodulo == 4) {
-      if (this._sincobro[index].pagado) {
-        // Al MARCAR: marcar todas las facturas anteriores del mismo abonado
-        const fechaSeleccionada = new Date(this._sincobro[index].feccrea).getTime();
-        const idAbonado = this._sincobro[index].idAbonado;
+    const seleccionada = this._sincobro[index];
+    const moduloId = this.resolveModuloId(seleccionada);
+    const aplicaMarcadoEncadenado =
+      ((moduloId === 3 && Number(seleccionada?.idAbonado) > 0) || moduloId === 4);
 
+    if (aplicaMarcadoEncadenado) {
+      const idAbonado = Number(seleccionada?.idAbonado);
+      const fechaSeleccionada = this.resolveFechaOrdenCobro(seleccionada);
+      const idFacturaSeleccionada = Number(seleccionada?.idfactura ?? 0);
+
+      if (seleccionada?.pagado) {
+        // Al marcar: incluir solo facturas anteriores o de la misma fecha con menor id.
         this._sincobro.forEach((item: any) => {
-          if (
-            item.idAbonado === idAbonado &&
-            new Date(item.feccrea).getTime() <= fechaSeleccionada
-          ) {
+          if (Number(item?.idAbonado) !== idAbonado) {
+            return;
+          }
+
+          const fechaItem = this.resolveFechaOrdenCobro(item);
+          const idFacturaItem = Number(item?.idfactura ?? 0);
+          const esAnterior =
+            fechaItem < fechaSeleccionada ||
+            (fechaItem === fechaSeleccionada && idFacturaItem <= idFacturaSeleccionada);
+
+          if (esAnterior) {
             item.pagado = 1;
           }
         });
-
       } else {
-        // Al DESMARCAR: desmarcar todas las facturas posteriores del mismo abonado
-        const fechaSeleccionada = new Date(this._sincobro[index].feccrea).getTime();
-        const idAbonado = this._sincobro[index].idAbonado;
-
+        // Al desmarcar: quitar la actual y cualquier factura posterior del mismo abonado.
         this._sincobro.forEach((item: any) => {
-          if (
-            item.idAbonado === idAbonado &&
-            new Date(item.feccrea).getTime() >= fechaSeleccionada
-          ) {
+          if (Number(item?.idAbonado) !== idAbonado) {
+            return;
+          }
+
+          const fechaItem = this.resolveFechaOrdenCobro(item);
+          const idFacturaItem = Number(item?.idfactura ?? 0);
+          const esPosteriorOActual =
+            fechaItem > fechaSeleccionada ||
+            (fechaItem === fechaSeleccionada && idFacturaItem >= idFacturaSeleccionada);
+
+          if (esPosteriorOActual) {
             item.pagado = 0;
           }
         });
@@ -759,6 +775,17 @@ export class RecaudacionComponent implements OnInit {
     }
 
     this.totalAcobrar();
+  }
+
+  private resolveModuloId(item: any): number {
+    return Number(item?.idmodulo?.idmodulo ?? item?.idmodulo ?? 0);
+  }
+
+  private resolveFechaOrdenCobro(item: any): number {
+    const fechaBase = item?.fechaemision ?? null;
+    const fecha = fechaBase ? new Date(fechaBase) : null;
+    const time = fecha?.getTime?.() ?? Number.NaN;
+    return Number.isNaN(time) ? 0 : time;
   }
 
   valCheckBox(cuenta: number, swcobrado: any) {

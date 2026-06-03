@@ -1,294 +1,438 @@
-<div class="content">
+<div class="content abonado-edit-page">
   <div class="container-fluid">
     <div class="row justify-content-center">
-      <div class="col-lg-11 pt-3">
-        <h4 class="font-weight-bold text-center border py-2 titAbonado">Modificar Abonado</h4>
-
-        <div class="card shadow-sm fondoAbonado detalle">
-          <div class="card-body">
-            <form [formGroup]="abonadoForm">
-              <div class="card border-0 detalle roboto shadow-sm mb-3">
-                <div class="card-header bg-light py-2">
-                  <strong>Datos principales</strong>
-                </div>
-                <div class="card-body">
-                  <div class="row">
-                    <div class="form-group col-md-2">
-                      <label class="font-weight-bold mb-1">Cuenta</label>
-                      <input type="text" class="form-control form-control-sm text-center" formControlName="idabonado"
-                        readonly>
-                    </div>
-
-                    <div class="form-group col-md-3">
-                      <label class="font-weight-bold mb-1">Nro. medidor</label>
-                      <input type="text" class="form-control form-control-sm text-center"
-                        formControlName="nromedidor">
-                    </div>
-
-                    <div class="form-group col-md-3">
-                      <label class="font-weight-bold mb-1">Marca</label>
-                      <input type="text" class="form-control form-control-sm text-center" formControlName="marca">
-                    </div>
-
-                    <div class="form-group col-md-2">
-                      <label class="font-weight-bold mb-1">Lectura inicial</label>
-                      <input type="number" min="0" class="form-control form-control-sm text-center"
-                        formControlName="lecturainicial">
-                    </div>
-
-                    <div class="form-group col-md-2">
-                      <label class="font-weight-bold mb-1">Secuencia</label>
-                      <input type="number" min="0" class="form-control form-control-sm text-center"
-                        formControlName="secuencia">
-                    </div>
-
-                    <div class="form-group col-md-3">
-                      <label class="font-weight-bold mb-1">Fecha instalación</label>
-                      <input type="date" class="form-control form-control-sm text-center"
-                        formControlName="fechainstalacion">
-                    </div>
-
-                    <div class="form-group col-md-3">
-                      <label class="font-weight-bold mb-1">Estado</label>
-                      <select class="custom-select custom-select-sm" formControlName="estado">
-                        <option value="1">Habilitado</option>
-                        <option value="2">Suspendido</option>
-                        <option value="3">Retirado</option>
-                      </select>
-                    </div>
-
-                    <div class="form-group col-md-3">
-                      <label class="font-weight-bold mb-1">Medidor principal</label>
-                      <input type="number" min="0" class="form-control form-control-sm text-center"
-                        formControlName="medidorprincipal">
-                    </div>
-
-                    <div class="form-group col-md-3">
-                      <label class="font-weight-bold mb-1">Departamento</label>
-                      <input type="text" class="form-control form-control-sm" formControlName="departamento">
-                    </div>
-
-                    <div class="form-group col-md-2">
-                      <label class="font-weight-bold mb-1">Piso</label>
-                      <input type="text" class="form-control form-control-sm" formControlName="piso">
-                    </div>
-
-                    <div class="form-group col-md-5">
-                      <label class="font-weight-bold mb-1">Observaciones</label>
-                      <input type="text" class="form-control form-control-sm" formControlName="observacion">
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="card border-0 shadow-sm mb-3">
-                <div class="card-header bg-light py-2">
-                  <strong>Ubicación del servicio</strong>
-                </div>
-                <div class="card-body">
-                  <div class="row">
-                    <div class="form-group col-md-6">
-                      <label class="font-weight-bold mb-1">Dirección</label>
-                      <input type="text" class="form-control form-control-sm" formControlName="direccionubicacion">
-                    </div>
-
-                    <div class="form-group col-md-6">
-                      <label class="font-weight-bold mb-1">Localización</label>
-                      <input type="text" class="form-control form-control-sm" formControlName="localizacion">
-                    </div>
-
-                    <div class="form-group col-md-4">
-                      <label class="font-weight-bold mb-1">Ubicación del medidor</label>
-                      <select class="custom-select custom-select-sm" formControlName="idubicacionm_ubicacionm"
-                        [compareWith]="compararUbicacion">
-                        <option [ngValue]="ubicacion" *ngFor="let ubicacion of ubicacionm">
-                          {{ ubicacion.descripcion }}
-                        </option>
-                      </select>
-                    </div>
-
-                    <div class="form-group col-md-8">
-                      <label class="font-weight-bold mb-1">Geolocalización de la casa</label>
-                      <div class="input-group input-group-sm">
-                        <input type="text" class="form-control" formControlName="geolocalizacion"
-                          placeholder='Ejemplo: [-0.81123,-77.71789]'>
-                        <div class="input-group-append">
-                          <button type="button" class="btn btn-outline-primary"
-                            (click)="capturarGeolocalizacion()">
-                            Usar ubicación actual
-                          </button>
-                        </div>
-                      </div>
-                      <small class="text-muted d-block mt-1">
-                        Formato esperado: `[latitud, longitud]`
-                      </small>
-                      <small *ngIf="geoError" class="text-danger d-block mt-1">{{ geoError }}</small>
-                    </div>
-
-                    <div class="form-group col-md-12">
-                      <label class="font-weight-bold mb-2">Mapa de ubicación</label>
-                      <div class="border rounded overflow-hidden">
-                        <div #mapEditor style="height: 360px; width: 100%;"></div>
-                      </div>
-                      <small class="text-muted d-block mt-2">
-                        Haz clic en el mapa para señalar la casa o arrastra el marcador para corregir la ubicación.
-                      </small>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="card border-0 shadow-sm mb-3">
-                <div class="card-header bg-light py-2">
-                  <strong>Clasificación y estado</strong>
-                </div>
-                <div class="card-body">
-                  <div class="row">
-                    <div class="form-group col-md-3">
-                      <label class="font-weight-bold mb-1">Categoría</label>
-                      <input type="text" class="form-control form-control-sm" [value]="setCategoria" readonly>
-                    </div>
-
-                    <div class="form-group col-md-3">
-                      <label class="font-weight-bold mb-1">Ruta</label>
-                      <select class="custom-select custom-select-sm" formControlName="idruta_rutas"
-                        [compareWith]="compararCategorias">
-                        <option [ngValue]="rut" *ngFor="let rut of ruta">
-                          {{ rut.descripcion }}
-                        </option>
-                      </select>
-                    </div>
-
-                    <div class="form-group col-md-3">
-                      <label class="font-weight-bold mb-1">Tipo pago</label>
-                      <select class="custom-select custom-select-sm" formControlName="idtipopago_tipopago"
-                        [compareWith]="compararTpPago">
-                        <option [ngValue]="tippag" *ngFor="let tippag of tipopago">
-                          {{ tippag.descripcion }}
-                        </option>
-                      </select>
-                    </div>
-
-                    <div class="form-group col-md-3">
-                      <label class="font-weight-bold mb-1">Estado medidor</label>
-                      <select class="custom-select custom-select-sm" formControlName="idestadom_estadom"
-                        [compareWith]="compararEstadoM">
-                        <option [ngValue]="estado" *ngFor="let estado of estadom">
-                          {{ estado.descripcion }}
-                        </option>
-                      </select>
-                    </div>
-
-                    <div class="form-group col-md-3">
-                      <label class="font-weight-bold mb-1">No alcantarillado</label>
-                      <input type="checkbox" class="form-control form-control-sm text-center"
-                        formControlName="swalcantarillado" readonly>
-                    </div>
-
-                    <div class="form-group col-md-3">
-                      <label class="font-weight-bold mb-1">No recolección basura</label>
-                      <input type="checkbox" class="form-control form-control-sm text-center"
-                        formControlName="swbasura" readonly>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="card border-0 shadow-sm mb-3">
-                <div class="card-header bg-light py-2">
-                  <strong>Responsables</strong>
-                </div>
-                <div class="card-body">
-                  <div class="row">
-                    <div class="form-group col-md-6">
-                      <label class="font-weight-bold mb-1">Cliente</label>
-                      <div class="input-group input-group-sm">
-                        <div class="input-group-prepend">
-                          <button type="button" class="btn btn-primary" disabled data-toggle="modal"
-                            data-target="#clienteModal">
-                            Cliente
-                          </button>
-                        </div>
-                        <input type="text" class="form-control" formControlName="idcliente_clientes" readonly>
-                      </div>
-                    </div>
-
-                    <div class="form-group col-md-6">
-                      <label class="font-weight-bold mb-1">Responsable de pagos</label>
-                      <div class="input-group input-group-sm">
-                        <div class="input-group-prepend">
-                          <button type="button" class="btn btn-primary" disabled data-toggle="modal"
-                            data-target="#responsablePagoModal">
-                            Responsable
-                          </button>
-                        </div>
-                        <input type="text" class="form-control" formControlName="idresponsable" readonly>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="card border-0 shadow-sm mb-3">
-                <div class="card-header bg-light py-2">
-                  <strong>Evidencia fotográfica</strong>
-                </div>
-                <div class="card-body">
-                  <div class="row">
-                    <div class="form-group col-md-6">
-                      <label class="font-weight-bold mb-1">Foto de la casa</label>
-                      <input type="file" class="form-control-file" accept="image/*" (change)="onFotoCasaSelected($event)">
-                      <div class="mt-2" *ngIf="fotoCasaPreview">
-                        <img [src]="fotoCasaPreview | safe" alt="Foto de la casa" class="img-thumbnail" style="max-height: 220px;">
-                      </div>
-                    </div>
-
-                    <div class="form-group col-md-6">
-                      <label class="font-weight-bold mb-1">Foto del medidor</label>
-                      <input type="file" class="form-control-file" accept="image/*" (change)="onFotoMedidorSelected($event)">
-                      <div class="mt-2" *ngIf="fotoMedidorPreview">
-                        <img [src]="fotoMedidorPreview | safe" alt="Foto del medidor" class="img-thumbnail" style="max-height: 220px;">
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="text-center mt-4">
-                <button type="button" class="btn btn-success px-4" (click)="cargarDatos()">
-                  <i class="fa fa-check-circle"></i> Guardar cambios
-                </button>
-                <button type="button" class="btn btn-outline-secondary px-4 ml-2" (click)="retornar()">
-                  <i class="fa fa-times-circle"></i> Cancelar
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-
-      <div class="modal fade" id="responsablePagoModal" tabindex="-1" aria-labelledby="responsablePagoModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="responsablePagoModalLabel">Buscar responsable de pago</h5>
+      <div class="col-xl-11 col-12 pt-3">
+        <div class="edit-hero mb-3">
+          <div class="edit-hero__content">
+            <div>
+              <div class="edit-hero__eyebrow">Gestión de abonados</div>
+              <h3 class="edit-hero__title mb-1">Modificar abonado</h3>
+              <p class="edit-hero__subtitle mb-0">
+                Actualiza datos técnicos, ubicación, responsables y evidencia fotográfica desde una sola vista.
+              </p>
             </div>
-            <div class="modal-body">
-              <app-buscar-cliente (setCliente)="setResponsablePago($event)"></app-buscar-cliente>
+            <div class="edit-hero__badge">
+              <span class="edit-hero__badge-label">Cuenta</span>
+              <span class="edit-hero__badge-value">{{ abonadoForm.value.idabonado || abonado?.idabonado || '--' }}</span>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="modal fade" id="clienteModal" tabindex="-1" aria-labelledby="clienteModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="clienteModalLabel">Buscar cliente</h5>
+        <div class="row">
+          <div class="col-lg-4 col-xl-3 mb-3">
+            <div class="card border-0 shadow-sm abonado-sidecard">
+              <div class="card-body">
+                <div class="abonado-sidecard__header">
+                  <div class="abonado-sidecard__icon">
+                    <i class="bi bi-house-door"></i>
+                  </div>
+                  <div>
+                    <div class="abonado-sidecard__kicker">Resumen rápido</div>
+                    <h5 class="mb-0">{{ abonadoForm.value.idcliente_clientes || 'Abonado' }}</h5>
+                  </div>
+                </div>
+
+                <div class="abonado-sidecard__grid mt-3">
+                  <div class="mini-stat">
+                    <span class="mini-stat__label">Medidor</span>
+                    <span class="mini-stat__value">{{ abonadoForm.value.nromedidor || '--' }}</span>
+                  </div>
+                  <div class="mini-stat">
+                    <span class="mini-stat__label">Marca</span>
+                    <span class="mini-stat__value">{{ abonadoForm.value.marca || '--' }}</span>
+                  </div>
+                  <div class="mini-stat">
+                    <span class="mini-stat__label">Ruta</span>
+                    <span class="mini-stat__value">{{ abonadoForm.value.idruta_rutas?.descripcion || '--' }}</span>
+                  </div>
+                  <div class="mini-stat">
+                    <span class="mini-stat__label">Estado medidor</span>
+                    <span class="mini-stat__value">{{ abonadoForm.value.idestadom_estadom?.descripcion || '--' }}</span>
+                  </div>
+                </div>
+
+                <div class="status-panel mt-3">
+                  <div class="status-panel__row">
+                    <span class="status-panel__label">Estado del servicio</span>
+                    <span class="status-chip">
+                      {{ abonadoForm.value.estado == 1 ? 'Habilitado' : abonadoForm.value.estado == 2 ? 'Suspendido' : abonadoForm.value.estado == 3 ? 'Retirado' : '--' }}
+                    </span>
+                  </div>
+                  <div class="status-panel__row">
+                    <span class="status-panel__label">Lectura inicial</span>
+                    <strong>{{ abonadoForm.value.lecturainicial || 0 }}</strong>
+                  </div>
+                  <div class="status-panel__row">
+                    <span class="status-panel__label">Instalación</span>
+                    <strong>{{ abonadoForm.value.fechainstalacion || '--' }}</strong>
+                  </div>
+                </div>
+
+                <div class="side-photos mt-3">
+                  <div class="side-photo-card">
+                    <div class="side-photo-card__title">Foto casa</div>
+                    <ng-container *ngIf="fotoCasaPreview; else noCasa">
+                      <img [src]="fotoCasaPreview | safe" alt="Foto de la casa" class="side-photo-card__image">
+                    </ng-container>
+                    <ng-template #noCasa>
+                      <div class="side-photo-card__empty">Sin imagen</div>
+                    </ng-template>
+                  </div>
+                  <div class="side-photo-card">
+                    <div class="side-photo-card__title">Foto medidor</div>
+                    <ng-container *ngIf="fotoMedidorPreview; else noMedidor">
+                      <img [src]="fotoMedidorPreview | safe" alt="Foto del medidor" class="side-photo-card__image">
+                    </ng-container>
+                    <ng-template #noMedidor>
+                      <div class="side-photo-card__empty">Sin imagen</div>
+                    </ng-template>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="modal-body">
-              <app-buscar-cliente (setCliente)="setCliente($event)"></app-buscar-cliente>
+          </div>
+
+          <div class="col-lg-8 col-xl-9">
+            <div class="card shadow-sm fondoAbonado detalle edit-shell border-0">
+              <div class="card-body p-3 p-lg-4">
+                <form [formGroup]="abonadoForm">
+                  <div class="edit-section mb-4">
+                    <div class="edit-section__header">
+                      <div>
+                        <div class="edit-section__eyebrow">Sección 1</div>
+                        <h5 class="edit-section__title mb-1">Datos principales</h5>
+                        <p class="edit-section__subtitle mb-0">Información operativa del abonado y del medidor.</p>
+                      </div>
+                    </div>
+                    <div class="edit-card">
+                      <div class="row">
+                        <div class="form-group col-md-2">
+                          <label class="field-label">Cuenta</label>
+                          <input type="text" class="form-control form-control-sm text-center field-input field-input--readonly"
+                            formControlName="idabonado" readonly>
+                        </div>
+
+                        <div class="form-group col-md-3">
+                          <label class="field-label">Nro. medidor</label>
+                          <input type="text" class="form-control form-control-sm text-center field-input" formControlName="nromedidor">
+                        </div>
+
+                        <div class="form-group col-md-3">
+                          <label class="field-label">Marca</label>
+                          <input type="text" class="form-control form-control-sm text-center field-input" formControlName="marca">
+                        </div>
+
+                        <div class="form-group col-md-2">
+                          <label class="field-label">Lectura inicial</label>
+                          <input type="number" min="0" class="form-control form-control-sm text-center field-input"
+                            formControlName="lecturainicial">
+                        </div>
+
+                        <div class="form-group col-md-2">
+                          <label class="field-label">Secuencia</label>
+                          <input type="number" min="0" class="form-control form-control-sm text-center field-input"
+                            formControlName="secuencia">
+                        </div>
+
+                        <div class="form-group col-md-3">
+                          <label class="field-label">Fecha instalación</label>
+                          <input type="date" class="form-control form-control-sm text-center field-input"
+                            formControlName="fechainstalacion">
+                        </div>
+
+                        <div class="form-group col-md-3">
+                          <label class="field-label">Estado</label>
+                          <select class="custom-select custom-select-sm field-input" formControlName="estado">
+                            <option value="1">Habilitado</option>
+                            <option value="2">Suspendido</option>
+                            <option value="3">Retirado</option>
+                          </select>
+                        </div>
+
+                        <div class="form-group col-md-3">
+                          <label class="field-label">Medidor principal</label>
+                          <input type="number" min="0" class="form-control form-control-sm text-center field-input"
+                            formControlName="medidorprincipal">
+                        </div>
+
+                        <div class="form-group col-md-3">
+                          <label class="field-label">Departamento</label>
+                          <input type="text" class="form-control form-control-sm field-input" formControlName="departamento">
+                        </div>
+
+                        <div class="form-group col-md-2">
+                          <label class="field-label">Piso</label>
+                          <input type="text" class="form-control form-control-sm field-input" formControlName="piso">
+                        </div>
+
+                        <div class="form-group col-md-10">
+                          <label class="field-label">Observaciones</label>
+                          <textarea class="form-control form-control-sm field-input field-textarea"
+                            formControlName="observacion" rows="3"
+                            placeholder="Agrega notas útiles sobre el medidor, acceso, particularidades del predio o novedades relevantes."></textarea>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="edit-section mb-4">
+                    <div class="edit-section__header">
+                      <div>
+                        <div class="edit-section__eyebrow">Sección 2</div>
+                        <h5 class="edit-section__title mb-1">Ubicación del servicio</h5>
+                        <p class="edit-section__subtitle mb-0">Define la ubicación física y geográfica del abonado.</p>
+                      </div>
+                    </div>
+                    <div class="edit-card">
+                      <div class="row">
+                        <div class="form-group col-md-6">
+                          <label class="field-label">Dirección</label>
+                          <input type="text" class="form-control form-control-sm field-input" formControlName="direccionubicacion">
+                        </div>
+
+                        <div class="form-group col-md-6">
+                          <label class="field-label">Localización</label>
+                          <input type="text" class="form-control form-control-sm field-input" formControlName="localizacion">
+                        </div>
+
+                        <div class="form-group col-md-4">
+                          <label class="field-label">Ubicación del medidor</label>
+                          <select class="custom-select custom-select-sm field-input" formControlName="idubicacionm_ubicacionm"
+                            [compareWith]="compararUbicacion">
+                            <option [ngValue]="ubicacion" *ngFor="let ubicacion of ubicacionm">
+                              {{ ubicacion.descripcion }}
+                            </option>
+                          </select>
+                        </div>
+
+                        <div class="form-group col-md-8">
+                          <label class="field-label">Geolocalización de la casa</label>
+                          <div class="geo-toolbar">
+                            <input type="text" class="form-control form-control-sm field-input geo-toolbar__input"
+                              formControlName="geolocalizacion" placeholder="Ejemplo: [-0.81123,-77.71789]">
+                            <button type="button" class="btn btn-outline-primary btn-sm geo-toolbar__button"
+                              (click)="capturarGeolocalizacion()">
+                              <i class="bi bi-crosshair"></i> Usar ubicación actual
+                            </button>
+                          </div>
+                          <small class="text-muted d-block mt-2">Formato esperado: <code>[latitud, longitud]</code></small>
+                          <small *ngIf="geoError" class="text-danger d-block mt-1">{{ geoError }}</small>
+                        </div>
+
+                        <div class="col-12">
+                          <div class="map-card">
+                            <div class="map-card__header">
+                              <div>
+                                <h6 class="mb-1">Mapa de ubicación</h6>
+                                <small>Haz clic para ubicar la casa o arrastra el marcador para corregirla.</small>
+                              </div>
+                            </div>
+                            <div class="map-card__body">
+                              <div #mapEditor class="map-editor-surface"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="edit-section mb-4">
+                    <div class="edit-section__header">
+                      <div>
+                        <div class="edit-section__eyebrow">Sección 3</div>
+                        <h5 class="edit-section__title mb-1">Clasificación y estado</h5>
+                        <p class="edit-section__subtitle mb-0">Configura los atributos tarifarios y de operación del abonado.</p>
+                      </div>
+                    </div>
+                    <div class="edit-card">
+                      <div class="row">
+                        <div class="form-group col-md-3">
+                          <label class="field-label">Categoría</label>
+                          <input type="text" class="form-control form-control-sm field-input field-input--readonly" [value]="setCategoria" readonly>
+                        </div>
+
+                        <div class="form-group col-md-3">
+                          <label class="field-label">Ruta</label>
+                          <select class="custom-select custom-select-sm field-input" formControlName="idruta_rutas"
+                            [compareWith]="compararCategorias">
+                            <option [ngValue]="rut" *ngFor="let rut of ruta">
+                              {{ rut.descripcion }}
+                            </option>
+                          </select>
+                        </div>
+
+                        <div class="form-group col-md-3">
+                          <label class="field-label">Tipo pago</label>
+                          <select class="custom-select custom-select-sm field-input" formControlName="idtipopago_tipopago"
+                            [compareWith]="compararTpPago">
+                            <option [ngValue]="tippag" *ngFor="let tippag of tipopago">
+                              {{ tippag.descripcion }}
+                            </option>
+                          </select>
+                        </div>
+
+                        <div class="form-group col-md-3">
+                          <label class="field-label">Estado medidor</label>
+                          <select class="custom-select custom-select-sm field-input" formControlName="idestadom_estadom"
+                            [compareWith]="compararEstadoM">
+                            <option [ngValue]="estado" *ngFor="let estado of estadom">
+                              {{ estado.descripcion }}
+                            </option>
+                          </select>
+                        </div>
+
+                        <div class="col-12">
+                          <div class="switch-grid">
+                            <div class="switch-card">
+                              <div>
+                                <div class="switch-card__title">No alcantarillado</div>
+                                <small class="text-muted">Indica si el servicio no posee alcantarillado asociado.</small>
+                              </div>
+                              <label class="switch">
+                                <input type="checkbox" formControlName="swalcantarillado">
+                                <span class="switch__slider"></span>
+                              </label>
+                            </div>
+
+                            <div class="switch-card">
+                              <div>
+                                <div class="switch-card__title">No recolección basura</div>
+                                <small class="text-muted">Marca esta opción cuando no aplique el servicio de recolección.</small>
+                              </div>
+                              <label class="switch">
+                                <input type="checkbox" formControlName="swbasura">
+                                <span class="switch__slider"></span>
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="edit-section mb-4">
+                    <div class="edit-section__header">
+                      <div>
+                        <div class="edit-section__eyebrow">Sección 4</div>
+                        <h5 class="edit-section__title mb-1">Responsables</h5>
+                        <p class="edit-section__subtitle mb-0">Consulta las personas asociadas al abonado.</p>
+                      </div>
+                    </div>
+                    <div class="edit-card">
+                      <div class="row">
+                        <div class="form-group col-md-6">
+                          <label class="field-label">Cliente</label>
+                          <div class="readonly-stack">
+                            <div class="readonly-stack__icon"><i class="bi bi-person-badge"></i></div>
+                            <input type="text" class="form-control form-control-sm field-input field-input--readonly"
+                              formControlName="idcliente_clientes" readonly>
+                          </div>
+                        </div>
+
+                        <div class="form-group col-md-6">
+                          <label class="field-label">Responsable de pagos</label>
+                          <div class="readonly-stack">
+                            <div class="readonly-stack__icon"><i class="bi bi-cash-stack"></i></div>
+                            <input type="text" class="form-control form-control-sm field-input field-input--readonly"
+                              formControlName="idresponsable" readonly>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="edit-section mb-4">
+                    <div class="edit-section__header">
+                      <div>
+                        <div class="edit-section__eyebrow">Sección 5</div>
+                        <h5 class="edit-section__title mb-1">Evidencia fotográfica</h5>
+                        <p class="edit-section__subtitle mb-0">Carga o actualiza imágenes de referencia del predio y del medidor.</p>
+                      </div>
+                    </div>
+                    <div class="edit-card">
+                      <div class="row">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                          <div class="photo-upload-card h-100">
+                            <div class="photo-upload-card__header">
+                              <h6 class="mb-1">Foto de la casa</h6>
+                              <small>Imagen general del inmueble.</small>
+                            </div>
+                            <label class="upload-dropzone">
+                              <input type="file" accept="image/*" (change)="onFotoCasaSelected($event)">
+                              <span class="upload-dropzone__icon"><i class="bi bi-cloud-arrow-up"></i></span>
+                              <span class="upload-dropzone__text">Seleccionar imagen</span>
+                              <span class="upload-dropzone__hint">PNG, JPG o WEBP</span>
+                            </label>
+                            <div class="photo-preview-shell mt-3" *ngIf="fotoCasaPreview">
+                              <img [src]="fotoCasaPreview | safe" alt="Foto de la casa" class="photo-preview-shell__img">
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="col-md-6">
+                          <div class="photo-upload-card h-100">
+                            <div class="photo-upload-card__header">
+                              <h6 class="mb-1">Foto del medidor</h6>
+                              <small>Imagen clara del dispositivo instalado.</small>
+                            </div>
+                            <label class="upload-dropzone">
+                              <input type="file" accept="image/*" (change)="onFotoMedidorSelected($event)">
+                              <span class="upload-dropzone__icon"><i class="bi bi-camera"></i></span>
+                              <span class="upload-dropzone__text">Seleccionar imagen</span>
+                              <span class="upload-dropzone__hint">PNG, JPG o WEBP</span>
+                            </label>
+                            <div class="photo-preview-shell mt-3" *ngIf="fotoMedidorPreview">
+                              <img [src]="fotoMedidorPreview | safe" alt="Foto del medidor" class="photo-preview-shell__img">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="action-bar">
+                    <div class="action-bar__text">
+                      <strong>Antes de guardar</strong>
+                      <span>Verifica estado, ubicación y evidencia para evitar inconsistencias futuras.</span>
+                    </div>
+                    <div class="action-bar__buttons">
+                      <button type="button" class="btn btn-outline-secondary px-4 mr-2" (click)="retornar()">
+                        <i class="fa fa-times-circle"></i> Cancelar
+                      </button>
+                      <button type="button" class="btn btn-success px-4 action-bar__primary" (click)="cargarDatos()">
+                        <i class="fa fa-check-circle"></i> Guardar cambios
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal fade" id="responsablePagoModal" tabindex="-1" aria-labelledby="responsablePagoModalLabel"
+          aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="responsablePagoModalLabel">Buscar responsable de pago</h5>
+              </div>
+              <div class="modal-body">
+                <app-buscar-cliente (setCliente)="setResponsablePago($event)"></app-buscar-cliente>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal fade" id="clienteModal" tabindex="-1" aria-labelledby="clienteModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="clienteModalLabel">Buscar cliente</h5>
+              </div>
+              <div class="modal-body">
+                <app-buscar-cliente (setCliente)="setCliente($event)"></app-buscar-cliente>
+              </div>
             </div>
           </div>
         </div>
