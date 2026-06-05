@@ -15,23 +15,38 @@
             <strong>Datos de Personal</strong>
           </div>
           <div class="card-body fondo detalle">
-            <form [formGroup]="f_personal" (ngSubmit)="onSubmit()" class="mt-2">
+            <form [formGroup]="f_personal" (ngSubmit)="onSubmit()" class="mt-2" novalidate>
               <div class="row">
                 <div class="form-group col-sm-2">
-                  <label>Código</label>
-                  <input formControlName="codigo" class="form-control form-control-sm" />
+                  <label>Codigo</label>
+                  <input
+                    formControlName="codigo"
+                    class="form-control form-control-sm"
+                    [ngClass]="{'is-invalid': controlInvalid('codigo')}"
+                  />
+                  <small class="text-danger validation-message" *ngIf="controlInvalid('codigo')">
+                    {{ getErrorMessage('codigo') }}
+                  </small>
                 </div>
                 <div class="form-group col-sm-2">
                   <label>Sufijo</label>
                   <input formControlName="sufijo" class="form-control form-control-sm" />
                 </div>
                 <div class="form-group col-sm-2">
-                  <label>Título</label>
+                  <label>Titulo</label>
                   <input formControlName="tituloprofesional" class="form-control form-control-sm" />
                 </div>
                 <div class="form-group col-sm-2">
                   <label>Fecha Nac.</label>
-                  <input type="date" formControlName="fecnacimiento" class="form-control form-control-sm" />
+                  <input
+                    type="date"
+                    formControlName="fecnacimiento"
+                    class="form-control form-control-sm"
+                    [ngClass]="{'is-invalid': controlInvalid('fecnacimiento')}"
+                  />
+                  <small class="text-danger validation-message" *ngIf="controlInvalid('fecnacimiento')">
+                    {{ getErrorMessage('fecnacimiento') }}
+                  </small>
                 </div>
                 <div class="form-group col-sm-2">
                   <label>Fecha Inicio</label>
@@ -45,52 +60,122 @@
 
               <div class="row">
                 <div class="form-group col-sm-3">
-                  <label>Identificación</label>
-                  <input formControlName="identificacion" class="form-control form-control-sm" />
+                  <label>Identificacion</label>
+                  <input
+                    formControlName="identificacion"
+                    class="form-control form-control-sm"
+                    [ngClass]="{'is-invalid': controlInvalid('identificacion')}"
+                  />
+                  <small class="text-danger validation-message" *ngIf="controlInvalid('identificacion')">
+                    {{ getErrorMessage('identificacion') }}
+                  </small>
                 </div>
                 <div class="form-group col-sm-3">
                   <label>Apellidos</label>
-                  <input formControlName="apellidos" class="form-control form-control-sm" />
+                  <input
+                    formControlName="apellidos"
+                    class="form-control form-control-sm"
+                    [ngClass]="{'is-invalid': controlInvalid('apellidos')}"
+                  />
+                  <small class="text-danger validation-message" *ngIf="controlInvalid('apellidos')">
+                    {{ getErrorMessage('apellidos') }}
+                  </small>
                 </div>
                 <div class="form-group col-sm-3">
                   <label>Nombres</label>
-                  <input formControlName="nombres" class="form-control form-control-sm" />
+                  <input
+                    formControlName="nombres"
+                    class="form-control form-control-sm"
+                    [ngClass]="{'is-invalid': controlInvalid('nombres')}"
+                  />
+                  <small class="text-danger validation-message" *ngIf="controlInvalid('nombres')">
+                    {{ getErrorMessage('nombres') }}
+                  </small>
                 </div>
                 <div class="form-group col-sm-3">
                   <label>Email</label>
-                  <input formControlName="email" class="form-control form-control-sm" />
+                  <input
+                    formControlName="email"
+                    class="form-control form-control-sm"
+                    [ngClass]="{'is-invalid': controlInvalid('email')}"
+                  />
+                  <small class="text-danger validation-message" *ngIf="controlInvalid('email')">
+                    {{ getErrorMessage('email') }}
+                  </small>
                 </div>
               </div>
 
               <div class="row">
                 <div class="form-group col-sm-3">
-                  <label>Teléfono</label>
-                  <input formControlName="celular" class="form-control form-control-sm" />
+                  <label>Telefono</label>
+                  <input
+                    formControlName="celular"
+                    class="form-control form-control-sm"
+                    [ngClass]="{'is-invalid': controlInvalid('celular')}"
+                  />
+                  <small class="text-danger validation-message" *ngIf="controlInvalid('celular')">
+                    {{ getErrorMessage('celular') }}
+                  </small>
                 </div>
                 <div class="form-group col-sm-3">
-                  <label>Dirección</label>
-                  <input formControlName="direccion" class="form-control form-control-sm" />
+                  <label>Direccion</label>
+                  <input
+                    formControlName="direccion"
+                    class="form-control form-control-sm"
+                    [ngClass]="{'is-invalid': controlInvalid('direccion')}"
+                  />
+                  <small class="text-danger validation-message" *ngIf="controlInvalid('direccion')">
+                    {{ getErrorMessage('direccion') }}
+                  </small>
                 </div>
                 <div class="form-group col-sm-3">
                   <label>Cargo</label>
-                  <select formControlName="idcargo_cargos" class="form-control form-control-sm" [compareWith]="compareById">
-                    <option [ngValue]="cargo" *ngFor="let cargo of _cargos">{{cargo.descripcion}}</option>
+                  <select
+                    formControlName="idcargo_cargos"
+                    class="form-control form-control-sm"
+                    [compareWith]="compareById"
+                    [ngClass]="{'is-invalid': controlInvalid('idcargo_cargos')}"
+                  >
+                    <option [ngValue]="null">-- Seleccione cargo --</option>
+                    <option [ngValue]="cargo" *ngFor="let cargo of _cargos">
+                      {{ cargo.descripcion }}
+                    </option>
                   </select>
+                  <small class="text-danger validation-message" *ngIf="controlInvalid('idcargo_cargos')">
+                    {{ getErrorMessage('idcargo_cargos') }}
+                  </small>
                 </div>
                 <div class="form-group col-sm-3">
                   <label>Tipo Contrato</label>
-                  <select formControlName="idtpcontrato_tpcontratos" class="form-control form-control-sm" [compareWith]="compareById">
-                    <option [ngValue]="tp" *ngFor="let tp of _tpcontratos">{{tp.descripcion}}</option>
+                  <select
+                    formControlName="idtpcontrato_tpcontratos"
+                    class="form-control form-control-sm"
+                    [compareWith]="compareById"
+                    [ngClass]="{'is-invalid': controlInvalid('idtpcontrato_tpcontratos')}"
+                  >
+                    <option [ngValue]="null">-- Seleccione contrato --</option>
+                    <option [ngValue]="tp" *ngFor="let tp of _tpcontratos">
+                      {{ tp.descripcion }}
+                    </option>
                   </select>
+                  <small class="text-danger validation-message" *ngIf="controlInvalid('idtpcontrato_tpcontratos')">
+                    {{ getErrorMessage('idtpcontrato_tpcontratos') }}
+                  </small>
                 </div>
               </div>
 
               <div class="row">
                 <div class="form-group col-sm-12">
                   <label>Contacto emergencia</label>
-                  <select formControlName="idcontemergencia_contemergencias" class="form-control form-control-sm" [compareWith]="compareById">
-                    <option [ngValue]="null">--Seleccione contacto emergencia--</option>
-                    <option [ngValue]="ce" *ngFor="let ce of _contemergencia">{{ce.nombre}} - {{ce.parentesco}}</option>
+                  <select
+                    formControlName="idcontemergencia_contemergencias"
+                    class="form-control form-control-sm"
+                    [compareWith]="compareById"
+                  >
+                    <option [ngValue]="null">-- Seleccione contacto emergencia --</option>
+                    <option [ngValue]="ce" *ngFor="let ce of _contemergencia">
+                      {{ ce.nombre }} - {{ ce.parentesco }}
+                    </option>
                   </select>
                 </div>
               </div>
@@ -100,7 +185,9 @@
                   <button type="button" class="btn btn-outline-secondary btn-sm" (click)="regresar()">
                     Cancelar
                   </button>
-                  <button type="submit" class="btn btn-primary btn-sm ml-2">Guardar cambios</button>
+                  <button type="submit" class="btn btn-primary btn-sm ml-2">
+                    Guardar cambios
+                  </button>
                 </div>
               </div>
             </form>

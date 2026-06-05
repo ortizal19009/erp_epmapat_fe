@@ -51,6 +51,25 @@ export class PerfilUsuarioComponent implements OnInit {
     return `${descripcion}::${platform}`;
   }
 
+  private getModuleId(module: any): number {
+    return Number(
+      module?.iderpmodulo ??
+      module?.iderpmodulo_erpmodulos?.iderpmodulo ??
+      module?.idmodulo ??
+      0
+    ) || 0;
+  }
+
+  private isEnabled(value: any): boolean {
+    if (typeof value === 'boolean') return value;
+    if (typeof value === 'number') return value === 1;
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      return normalized === 'true' || normalized === '1' || normalized === 't';
+    }
+    return false;
+  }
+
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/usuarios');
     let coloresJSON = sessionStorage.getItem('/usuarios');
@@ -169,12 +188,13 @@ export class PerfilUsuarioComponent implements OnInit {
             const byKey = new Map<string, any>();
 
             (userModules || []).forEach((r: any) => {
-              const moduleId = Number(r?.iderpmodulo);
+              const moduleId = this.getModuleId(r);
               if (!Number.isNaN(moduleId) && moduleId > 0) {
                 byId.set(moduleId, r);
               }
 
-              byKey.set(this.getModuleMatchKey(r), r);
+              const keySource = r?.iderpmodulo_erpmodulos || r;
+              byKey.set(this.getModuleMatchKey(keySource), r);
             });
 
             this._usrxmodulo = catalog.map((m: any) => {
@@ -182,7 +202,7 @@ export class PerfilUsuarioComponent implements OnInit {
               const assigned = byId.get(id) || byKey.get(this.getModuleMatchKey(m));
               return {
                 iderpmodulo_erpmodulos: m,
-                enabled: !!assigned?.enabled,
+                enabled: this.isEnabled(assigned?.enabled ?? assigned?.estado ?? assigned?.activo),
                 idusuario_usuarios: this._user,
                 secciones: assigned?.secciones || [],
                 platform: m.platform || m.plataform || 'WEB',

@@ -143,6 +143,17 @@
 
           <!-- Actions -->
           <div class="mt-3 text-center">
+            <div *ngIf="personalSeleccionadoLabel" class="alert alert-info py-2 px-3 text-left mb-3">
+              <strong>Personal vinculado:</strong> {{ personalSeleccionadoLabel }}
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-danger float-right"
+                (click)="limpiarPersonal()"
+              >
+                Quitar
+              </button>
+            </div>
+
             <button
               type="button"
               class="btn btn-outline-primary btn-sm mx-1"

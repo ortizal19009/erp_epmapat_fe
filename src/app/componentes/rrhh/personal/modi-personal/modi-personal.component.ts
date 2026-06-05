@@ -7,6 +7,7 @@ import { CargosService } from 'src/app/servicios/rrhh/cargos.service';
 import { TpcontratosService } from 'src/app/servicios/rrhh/tpcontratos.service';
 import { ContemergenciaService } from 'src/app/servicios/rrhh/contemergencia.service';
 import { PersonalValidators } from '../personal-validators';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-modi-personal',
@@ -149,19 +150,74 @@ export class ModiPersonalComponent implements OnInit {
     if (!this.personalId) return;
     this.f_personal.markAllAsTouched();
     if (this.f_personal.invalid) {
-      alert('Revise los campos marcados antes de guardar.');
+      this.swal('warning', 'Revise los campos marcados antes de guardar.');
       return;
     }
 
     this.s_personal
       .updatePersonal(this.personalId, this.f_personal.value)
       .subscribe({
-        next: () => this.router.navigate(['/personal']),
+        next: () => {
+          this.swal('success', 'Personal actualizado correctamente.');
+          this.router.navigate(['/personal']);
+        },
         error: (e: any) => {
           console.error('Error actualizando personal', e);
-          alert('No se pudo actualizar. Ver consola.');
+          this.swal(
+            'error',
+            e?.error?.message ||
+              e?.error?.detail ||
+              'No se pudo actualizar el personal.'
+          );
         },
       });
+  }
+
+  controlInvalid(controlName: string): boolean {
+    const control = this.f_personal.get(controlName);
+    return !!(control && control.invalid && (control.touched || control.dirty));
+  }
+
+  getErrorMessage(controlName: string): string {
+    const control = this.f_personal.get(controlName);
+    if (!control?.errors) return '';
+
+    if (control.errors['required']) return 'Este campo es obligatorio.';
+    if (control.errors['minlength']) {
+      return `Debe tener al menos ${control.errors['minlength'].requiredLength} caracteres.`;
+    }
+    if (control.errors['maxlength']) {
+      return `No debe exceder ${control.errors['maxlength'].requiredLength} caracteres.`;
+    }
+    if (control.errors['email']) return 'Ingrese un correo válido.';
+    if (control.errors['pattern']) {
+      if (controlName === 'identificacion') {
+        return 'La identificación debe tener 10 dígitos numéricos.';
+      }
+      if (controlName === 'celular') {
+        return 'Ingrese un teléfono válido.';
+      }
+      return 'Formato inválido.';
+    }
+    if (control.errors['cedulaEcuatoriana']) {
+      return 'La cédula ecuatoriana no es válida.';
+    }
+    if (control.errors['edadMinima']) {
+      return `Debe tener al menos ${this.edadMinima} años.`;
+    }
+
+    return 'Verifique este campo.';
+  }
+
+  private swal(icon: 'success' | 'error' | 'warning' | 'info', title: string) {
+    Swal.fire({
+      toast: true,
+      icon,
+      title,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+    });
   }
 
   regresar() {
