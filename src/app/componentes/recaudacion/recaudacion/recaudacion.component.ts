@@ -107,6 +107,7 @@ export class RecaudacionComponent implements OnInit {
   estadoCajaT = true;
   cajaActiva = false;
   recxcaja: Recaudaxcaja = new Recaudaxcaja();
+  establecimientoAsignadoId: number | null = null;
 
   // ==== Colores ====
   _tonoscabecera: any;
@@ -158,6 +159,10 @@ export class RecaudacionComponent implements OnInit {
     private s_fecfacturas: FecfacturaService,
     private router: Router
   ) { }
+
+  private get ultimoPtoEmisionStorageKey(): string {
+    return `recaudacion.ultimoPtoEmision.${this.authService.idusuario}`;
+  }
 
   // =====================
   //   CICLO DE VIDA
@@ -226,10 +231,7 @@ export class RecaudacionComponent implements OnInit {
     this.listarIntereses();
 
     // Estado de caja desde sesión
-    const getEstadoCaja = sessionStorage.getItem('estadoCaja');
-    if (getEstadoCaja !== '0') {
-      this.abrirCaja();
-    }
+    this.abrirCaja();
     this.disabledcobro = this.estadoCajaT;
   }
 
@@ -307,34 +309,47 @@ export class RecaudacionComponent implements OnInit {
           this._caja = dcaja;
           this._usuario = dcaja.idusuario_usuarios;
           this._establecimiento = dcaja.idptoemision_ptoemision ?? null;
+          this.establecimientoAsignadoId =
+            Number(dcaja?.idptoemision_ptoemision?.idptoemision ?? 0) || null;
 
           const establecimiento = dcaja?.idptoemision_ptoemision?.establecimiento ?? '';
           this._codRecaudador = `${establecimiento}-${dcaja.codigo}`;
         }),
         switchMap((dcaja: any) =>
-          this.s_recaudaxcaja.getLastConexion(dcaja.idcaja).pipe(
-            tap((drxc: any) => {
-              if (!drxc) {
-                this.cajaActiva = false;
-                this.estadoCajaT = true;
-                if (dcaja?.ultimafact) {
-                  this.formatNroFactura(dcaja.ultimafact);
-                }
-                return;
-              }
+          this.recaCobroService.getCajaEstado(this.authService.idusuario).pipe(
+            switchMap((estadoCaja: any) =>
+              this.s_recaudaxcaja.getLastConexion(dcaja.idcaja).pipe(
+                tap((drxc: any) => {
+                  const estadoAbierto = Number(estadoCaja?.estado) === 1;
+                  this.cajaActiva = estadoAbierto;
+                  this.estadoCajaT = !estadoAbierto;
+                  sessionStorage.setItem('estadoCaja', estadoAbierto ? '1' : '0');
 
-              const hoy = new Date();
-              const inicio = new Date(drxc.fechainiciolabor);
-              const estadoCaja = sessionStorage.getItem('estadoCaja');
-              const mismaFecha = this.isSameYMD(hoy, inicio);
-              this.cajaActiva = (mismaFecha && estadoCaja !== '0');
-              this.estadoCajaT = this.cajaActiva;
+                  const establecimientoEstado = String(
+                    estadoCaja?.establecimiento ?? ''
+                  );
 
-              const nro = dcaja?.ultimafact ?? drxc?.facfin;
-              if (nro) {
-                this.formatNroFactura(nro);
-              }
-            })
+                  if (establecimientoEstado) {
+                    this.seleccionarEstablecimientoPorDefecto(establecimientoEstado);
+                  } else {
+                    this.aplicarUltimoPtoEmisionGuardado();
+                  }
+
+                  const nro =
+                    Number(
+                      estadoCaja?.secuencial ??
+                      estadoCaja?.siguienteSecuencial ??
+                      dcaja?.ultimafact ??
+                      drxc?.facfin ??
+                      0
+                    ) || 0;
+
+                  if (nro > 0) {
+                    this.formatNroFactura(nro);
+                  }
+                })
+              )
+            )
           )
         ),
         catchError((err) => {
@@ -357,13 +372,25 @@ export class RecaudacionComponent implements OnInit {
 
   getAllPtoEmision() {
     this.s_ptoemision.getListaPtoEmision().subscribe({
-      next: (datos: any) => (this._ptoemision = datos),
+      next: (datos: any) => {
+        this._ptoemision = datos ?? [];
+        this.aplicarUltimoPtoEmisionGuardado();
+      },
       error: (e: any) => console.error(e),
     });
   }
 
   changeEstablecimiento(e: any) {
     this._caja.idptoemision_ptoemision = this._establecimiento;
+    const establecimiento = this._establecimiento?.establecimiento ?? '';
+    this._codRecaudador = `${establecimiento}-${this._caja?.codigo ?? ''}`;
+    this.guardarUltimoPtoEmisionSeleccionado(
+      Number(this._establecimiento?.idptoemision ?? 0) || null
+    );
+    const nroActual = Number(this._nroFactura?.split('-', 3)?.[2] ?? 0);
+    if (nroActual > 0) {
+      this.formatNroFactura(nroActual);
+    }
   }
 
   formatNroFactura(nroFactura: number) {
@@ -388,7 +415,11 @@ export class RecaudacionComponent implements OnInit {
     this.s_recaudaxcaja.saveRecaudaxcaja(this.recxcaja).subscribe({
       next: (data: any) => {
         this.estadoCajaT = false;
+        this.cajaActiva = true;
         sessionStorage.setItem('estadoCaja', '1');
+        this.guardarUltimoPtoEmisionSeleccionado(
+          Number(this._establecimiento?.idptoemision ?? 0) || null
+        );
 
         this.s_cajas.updateCaja(this._caja).subscribe({
           next: (datos: any) => {/* window.location.reload() */
@@ -410,6 +441,7 @@ export class RecaudacionComponent implements OnInit {
         this.recxcaja.estado = 0;
         this.recxcaja.fechafinlabor = c_fecha;
         this.estadoCajaT = true;
+        this.cajaActiva = false;
         this.recxcaja.facfin = +nrofac[2]!;
 
         this.s_recaudaxcaja.updateRecaudaxcaja(this.recxcaja).subscribe({
@@ -422,6 +454,67 @@ export class RecaudacionComponent implements OnInit {
       },
       error: (e) => console.error(e),
     });
+  }
+
+  private obtenerUltimoPtoEmisionGuardado(): number | null {
+    const valor = localStorage.getItem(this.ultimoPtoEmisionStorageKey);
+    const id = Number(valor);
+    return Number.isFinite(id) && id > 0 ? id : null;
+  }
+
+  private guardarUltimoPtoEmisionSeleccionado(idptoemision: number | null) {
+    const id = Number(idptoemision);
+    if (Number.isFinite(id) && id > 0) {
+      localStorage.setItem(this.ultimoPtoEmisionStorageKey, String(id));
+    }
+  }
+
+  private aplicarUltimoPtoEmisionGuardado() {
+    if (!Array.isArray(this._ptoemision) || !this._ptoemision.length) {
+      return;
+    }
+
+    const idGuardado = this.obtenerUltimoPtoEmisionGuardado();
+    const seleccionado =
+      this._ptoemision.find(
+        (item: any) => Number(item?.idptoemision) === Number(idGuardado)
+      ) ??
+      this._ptoemision.find(
+        (item: any) =>
+          Number(item?.idptoemision) === Number(this.establecimientoAsignadoId)
+      ) ??
+      this._ptoemision[0];
+
+    if (!seleccionado) {
+      return;
+    }
+
+    this._establecimiento = seleccionado;
+    this._caja.idptoemision_ptoemision = seleccionado;
+    const establecimiento = seleccionado?.establecimiento ?? '';
+    this._codRecaudador = `${establecimiento}-${this._caja?.codigo ?? ''}`;
+  }
+
+  private seleccionarEstablecimientoPorDefecto(codigo: string) {
+    if (!Array.isArray(this._ptoemision) || !this._ptoemision.length) {
+      return;
+    }
+
+    const seleccionado = this._ptoemision.find(
+      (item: any) => String(item?.establecimiento ?? '') === String(codigo ?? '')
+    );
+
+    if (!seleccionado) {
+      return;
+    }
+
+    this._establecimiento = seleccionado;
+    this._caja.idptoemision_ptoemision = seleccionado;
+    this.guardarUltimoPtoEmisionSeleccionado(
+      Number(seleccionado?.idptoemision ?? 0) || null
+    );
+    const establecimiento = seleccionado?.establecimiento ?? '';
+    this._codRecaudador = `${establecimiento}-${this._caja?.codigo ?? ''}`;
   }
 
   // =====================

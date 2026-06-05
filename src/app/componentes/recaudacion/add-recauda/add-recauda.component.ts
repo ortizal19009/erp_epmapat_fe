@@ -89,6 +89,7 @@ export class AddRecaudaComponent implements OnInit {
   ultimoNumeroFactura: number = 1;
   codigoCaja: string = '';
   establecimientoAsignado: string = '';
+  establecimientoAsignadoId: number | null = null;
   abrirCaja: any = {
     usuario: '',
     password: '',
@@ -120,6 +121,10 @@ export class AddRecaudaComponent implements OnInit {
     private recaudaxcajaService: RecaudaxcajaService,
     private cajaService: CajaService
   ) {}
+
+  private get ultimoPtoEmisionStorageKey(): string {
+    return `recaudacion.ultimoPtoEmision.${this.authService.idusuario}`;
+  }
 
   ngOnInit(): void {
     console.log(this.authService.sessionlog);
@@ -445,11 +450,14 @@ export class AddRecaudaComponent implements OnInit {
         this.codigoCaja = item?.codigo ?? this.codigoCaja;
         this.ultimoNumeroFactura =
           Number(item?.secuencial ?? item?.siguienteSecuencial ?? this.ultimoNumeroFactura) || 1;
-        if (item.estado === 1) {
+        if (Number(item?.estado) === 1) {
           this.swcaja = true;
           this.abrirCaja.usuario = item.username;
           this.establecimientoAsignado = String(item.establecimiento ?? '');
+          this.establecimientoAsignadoId =
+            this.buscarIdPtoEmisionPorCodigo(item.establecimiento);
           this.seleccionarEstablecimientoPorCodigo(item.establecimiento);
+          this.guardarUltimoPtoEmisionSeleccionado(this.abrirCaja.idptoemision);
           this.actualizarNumeroFacturaCaja();
         } else {
           /* generar una consulta para traer user name de  */
@@ -469,10 +477,15 @@ export class AddRecaudaComponent implements OnInit {
     }
 
     this.recaCobroService
-      .abrirCaja(this.abrirCaja.usuario, password)
+      .abrirCaja(
+        this.abrirCaja.usuario,
+        password,
+        this.abrirCaja.idptoemision
+      )
       .subscribe({
         next: (item: any) => {
           this.abrirCaja.password = '';
+          this.guardarUltimoPtoEmisionSeleccionado(this.abrirCaja.idptoemision);
           this.swal('info', item.mensaje ?? 'Caja abierta correctamente.');
           this.getEstadoCaja();
         },
@@ -518,12 +531,7 @@ export class AddRecaudaComponent implements OnInit {
     this.ptoemisionService.getListaPtoEmision().subscribe({
       next: (datos: Ptoemision[]) => {
         this.establecimientos = datos ?? [];
-        if (!this.abrirCaja.idptoemision && this.establecimientos.length) {
-          const primero = this.establecimientos[0];
-          this.abrirCaja.idptoemision = primero.idptoemision;
-          this.abrirCaja.establecimiento = String(primero.establecimiento ?? '');
-          this.actualizarNumeroFacturaCaja();
-        }
+        this.aplicarPtoEmisionPorDefecto();
       },
       error: (e: any) => console.error(e),
     });
@@ -539,7 +547,8 @@ export class AddRecaudaComponent implements OnInit {
         this.codigoCaja = caja?.codigo ?? this.codigoCaja;
         const establecimiento = caja?.idptoemision_ptoemision?.establecimiento ?? '';
         this.establecimientoAsignado = String(establecimiento ?? '');
-        this.seleccionarEstablecimientoPorCodigo(establecimiento);
+        this.establecimientoAsignadoId = Number(caja?.idptoemision_ptoemision?.idptoemision ?? 0) || null;
+        this.aplicarPtoEmisionPorDefecto();
 
         const ultimoLocal = Number(caja?.ultimafact ?? 0);
         if (ultimoLocal > 0) {
@@ -576,22 +585,9 @@ export class AddRecaudaComponent implements OnInit {
     );
     const nuevoEstablecimiento = String(seleccionado?.establecimiento ?? '');
 
-    if (
-      this.establecimientoAsignado &&
-      nuevoEstablecimiento &&
-      nuevoEstablecimiento !== this.establecimientoAsignado
-    ) {
-      this.swal(
-        'info',
-        'La apertura de caja usa el establecimiento asignado al usuario. Para cambiarlo se requiere ajustar la caja del usuario o el endpoint de apertura.'
-      );
-      this.seleccionarEstablecimientoPorCodigo(this.establecimientoAsignado);
-      this.actualizarNumeroFacturaCaja();
-      return;
-    }
-
     this.abrirCaja.idptoemision = Number.isFinite(id) ? id : null;
     this.abrirCaja.establecimiento = nuevoEstablecimiento;
+    this.guardarUltimoPtoEmisionSeleccionado(this.abrirCaja.idptoemision);
     this.actualizarNumeroFacturaCaja();
   }
 
@@ -609,6 +605,52 @@ export class AddRecaudaComponent implements OnInit {
     }
 
     this.abrirCaja.establecimiento = String(codigo ?? '');
+  }
+
+  private buscarIdPtoEmisionPorCodigo(codigo: string): number | null {
+    const seleccionado = this.establecimientos.find(
+      (item) => String(item?.establecimiento ?? '') === String(codigo ?? '')
+    );
+    return Number(seleccionado?.idptoemision ?? 0) || null;
+  }
+
+  private obtenerUltimoPtoEmisionGuardado(): number | null {
+    const valor = localStorage.getItem(this.ultimoPtoEmisionStorageKey);
+    const id = Number(valor);
+    return Number.isFinite(id) && id > 0 ? id : null;
+  }
+
+  private guardarUltimoPtoEmisionSeleccionado(idptoemision: number | null) {
+    const id = Number(idptoemision);
+    if (Number.isFinite(id) && id > 0) {
+      localStorage.setItem(this.ultimoPtoEmisionStorageKey, String(id));
+    }
+  }
+
+  private aplicarPtoEmisionPorDefecto() {
+    if (!this.establecimientos.length) {
+      return;
+    }
+
+    const idGuardado = this.obtenerUltimoPtoEmisionGuardado();
+    const idPreferido = idGuardado ?? this.establecimientoAsignadoId;
+
+    const seleccionado =
+      this.establecimientos.find(
+        (item) => Number(item?.idptoemision) === Number(idPreferido)
+      ) ??
+      this.establecimientos.find(
+        (item) =>
+          String(item?.establecimiento ?? '') ===
+          String(this.establecimientoAsignado ?? '')
+      ) ??
+      this.establecimientos[0];
+
+    this.abrirCaja.idptoemision = seleccionado?.idptoemision ?? null;
+    this.abrirCaja.establecimiento = String(
+      seleccionado?.establecimiento ?? ''
+    );
+    this.actualizarNumeroFacturaCaja();
   }
 
   private actualizarNumeroFacturaCaja() {

@@ -83,8 +83,20 @@ export class RecaudacionCobroService {
     );
   }
 
-  abrirCaja(username: string, password: string): Observable<any> {
-    return this.http.get(`${baseUrl}/caja/abrir?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`);
+  abrirCaja(
+    username: string,
+    password: string,
+    idptoemision?: number | null
+  ): Observable<any> {
+    let url =
+      `${baseUrl}/caja/abrir?username=${encodeURIComponent(username)}` +
+      `&password=${encodeURIComponent(password)}`;
+
+    if (idptoemision != null && Number.isFinite(Number(idptoemision))) {
+      url += `&idptoemision=${Number(idptoemision)}`;
+    }
+
+    return this.http.get(url);
   }
 
   cerrarCaja(username: string): Observable<any> {
