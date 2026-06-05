@@ -178,7 +178,7 @@ export class AddFacturacionComponent implements OnInit {
       let prodxfact = {} as Prodxfact; //Interface para los datos de los Productos x Facturación
       prodxfact.cantidad = this.arrRubros[i][1];
       prodxfact.descuento = 0;
-      prodxfact.estado = 0;
+      prodxfact.estado = 1;
       prodxfact.valorunitario =
         this.arrRubros[i][2] / this.formCuotas.value.cuotas;
       prodxfact.idfacturacion_facturacion = this._facturacion;
