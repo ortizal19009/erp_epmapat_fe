@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { Aguatramite } from 'src/app/modelos/aguatramite.model';
 import { TramiteNuevoService } from 'src/app/servicios/tramite-nuevo.service';
 import { Clientes } from 'src/app/modelos/clientes';
@@ -26,7 +26,7 @@ export class InfoAguatramiteComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    let idtramitenuevo = this.getRouter.snapshot.paramMap.get('id');
+    const idtramitenuevo = this.getRouter.snapshot.paramMap.get('id');
     this.idtramite = +idtramitenuevo!;
     this.getTramNuevoById(+idtramitenuevo!);
     this.setcolor();
@@ -34,12 +34,14 @@ export class InfoAguatramiteComponent implements OnInit {
 
   setcolor() {
     let colores: string[];
-    let coloresJSON = sessionStorage.getItem('/aguatramite');
+    const coloresJSON = sessionStorage.getItem('/aguatramite');
     if (!coloresJSON) {
       colores = ['rgb(144, 123, 5)', 'rgb(249, 249, 175)'];
-      const coloresJSON = JSON.stringify(colores);
-      sessionStorage.setItem('/aguatramite', coloresJSON);
-    } else colores = JSON.parse(coloresJSON);
+      const coloresIniciales = JSON.stringify(colores);
+      sessionStorage.setItem('/aguatramite', coloresIniciales);
+    } else {
+      colores = JSON.parse(coloresJSON);
+    }
 
     document.documentElement.style.setProperty('--bgcolor1', colores[0]);
     const cabecera = document.querySelector('.cabecera');
@@ -62,7 +64,7 @@ export class InfoAguatramiteComponent implements OnInit {
   }
 
   setEstado(estado: number) {
-    let estadotram = [
+    const estadotram = [
       { valor: 0, estado: 'Eliminado' },
       { valor: 1, estado: 'Recien ingresado' },
       { valor: 2, estado: 'Inspeccionando' },
@@ -72,7 +74,7 @@ export class InfoAguatramiteComponent implements OnInit {
       { valor: 6, estado: 'Negado' },
     ];
 
-    let consulta = estadotram.find(
+    const consulta = estadotram.find(
       (estadot: { valor: number }) => estadot.valor === estado
     );
     this.estadoTramite = consulta?.estado;
@@ -94,7 +96,14 @@ export class InfoAguatramiteComponent implements OnInit {
 
   genHojaInspeccion() {
     this.tramiaguaService.genHojaInspeccion(
-      this.tramitenuevo.idaguatramite_aguatramite,
+      {
+        ...this.tramitenuevo,
+        idaguatramite: this.tramitenuevo?.idaguatramite_aguatramite?.idaguatramite,
+        idcliente_clientes: this.tramitenuevo?.idaguatramite_aguatramite?.idcliente_clientes,
+        feccrea: this.tramitenuevo?.idaguatramite_aguatramite?.feccrea,
+        observacion: this.tramitenuevo?.idaguatramite_aguatramite?.observacion,
+        usucrea: this.tramitenuevo?.idaguatramite_aguatramite?.usucrea,
+      },
       'Concesión de servicios'
     );
   }

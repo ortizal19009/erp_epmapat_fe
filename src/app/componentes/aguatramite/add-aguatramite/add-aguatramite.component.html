@@ -26,10 +26,11 @@
                                              data-target="#clienteModal"> Cliente<sup>*</sup>
                                           </button>
                                        </div>
-                                       <input type="idcliente_clientes" class="form-control"
-                                          formControlName="idcliente_clientes" id="idcliente_clientes"
-                                          aria-label="Small" value={{formAguatram1.value.idcliente_clientes.nombre}}
-                                          aria-describedby="inputGroup-sizing-sm" readonly>
+                                        <input type="text" class="form-control"
+                                           id="idcliente_clientes"
+                                           aria-label="Small"
+                                           [value]="nombreClienteSeleccionado"
+                                           aria-describedby="inputGroup-sizing-sm" readonly>
                                     </div>
                                     <small class="text-danger"
                                        *ngIf="f['idcliente_clientes'].invalid && f['idcliente_clientes'].touched">
@@ -189,7 +190,7 @@
                                     <div class="input-group-prepend">
                                        <div class="input-group-prepend">
                                           <label class="input-group-text" for="idcliente_clientes">Cédula
-                                             ciudadania</label>
+                                             ciudadanía</label>
                                        </div>
                                        <div class="input-group-text">
                                           <input type="checkbox" class="form-control form-control-sm"

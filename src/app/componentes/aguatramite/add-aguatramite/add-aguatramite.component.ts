@@ -107,6 +107,10 @@ export class AddAguatramiteComponent implements OnInit {
 
    get f() { return this.formAguatram1.controls; }
 
+   get nombreClienteSeleccionado(): string {
+      return this.formAguatram1?.get('idcliente_clientes')?.value?.nombre || '';
+   }
+
    get serviciosSeleccionados(): string[] {
       const seleccionados: string[] = [];
       if (+this.formAguatram1?.value?.agua === 1) {
@@ -282,7 +286,7 @@ export class AddAguatramiteComponent implements OnInit {
       return agua || alcantarillado ? null : { servicioRequerido: true };
    }
 
-   private emailListValidator(control: AbstractControl): ValidationErrors | null {
+   private emailListValidator = (control: AbstractControl): ValidationErrors | null => {
       const emails = String(control.value || '')
          .split(/[;,]/)
          .map((item) => item.trim())

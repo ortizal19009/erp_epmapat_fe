@@ -104,12 +104,8 @@ export class TramitesAguaService {
     const medidor = aguatramite?.codmedidor || 'No aplica';
     const nroDocumento = aguatramite?.nrodocumento || 'No registrado';
     const observacion = aguatramite?.observacion || 'Sin observaciones';
-    const fechaCrea = aguatramite?.feccrea
-      ? new Date(aguatramite.feccrea).toLocaleDateString('es-EC')
-      : 'No registrada';
-    const fechaTermina = aguatramite?.fechaterminacion
-      ? new Date(aguatramite.fechaterminacion).toLocaleDateString('es-EC')
-      : 'No registrada';
+    const fechaCrea = this.formatDate(aguatramite?.feccrea);
+    const fechaTermina = this.formatDate(aguatramite?.fechaterminacion);
     const directorComercial = await this.obtenerDirectorComercialActivo();
     const usuarioResponsable = await this.obtenerUsuarioResponsable(aguatramite?.usucrea);
 
@@ -156,42 +152,54 @@ export class TramitesAguaService {
 
   async buildHojaInspeccionBlob(datos: any, titulo: string): Promise<Blob> {
     let medidor = 'NO';
-    let agua = '';
-    let alcantarillado = '';
     if (+datos.medidorempresa! === 1) {
       medidor = 'SI';
-    }
-    if (datos.agua === 1) {
-      agua = 'Instalación agua potable:';
-    }
-    if (datos.alcantarillado === 1) {
-      alcantarillado = 'Instalación alcantarillado:';
     }
 
     const doc = new jsPDF('p', 'pt', 'a4');
     const margx = 30;
     const margy = 570;
+    const fechaCreacion = this.formatDate(datos?.feccrea);
+    const direccion = this.getDisplayValue(datos?.direccion);
+    const barrio = this.getDisplayValue(datos?.barrio);
+    const departamento = this.getDisplayValue(datos?.departamento ?? datos?.nrodepar);
+    const nroCasa = this.getDisplayValue(datos?.nrocasa);
+    const observacion = this.getDisplayValue(datos?.observacion);
+    const serviciosSolicitados = this.buildServiciosSolicitados(datos);
     const directorComercial = await this.obtenerDirectorComercialActivo();
     const usuarioResponsable = await this.obtenerUsuarioResponsable(datos?.usucrea);
 
-    doc.setFontSize(10);
     this.s_header.header(titulo, doc);
     doc.setFontSize(10);
-    doc.text('Tipo de trámite: ', margx, 130);
-    doc.text('Trámite Nro: ', margx, 150);
-    doc.text(`Fecha creación: ${datos.feccrea}`, margx + 300, 150);
-    doc.text('Servicios solicitados: ', margx, 170);
-    doc.text(`${agua}`, margx + 20, 190);
-    doc.text(`${alcantarillado}`, margx + 20, 210);
-    doc.text('Adicional: ', margx + 300, 170);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Tipo de trámite:', margx, 130);
+    doc.text('Trámite Nro:', margx, 148);
+    doc.text('Fecha creación:', margx + 280, 148);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`${titulo || 'Concesión de servicios'}`, margx + 85, 130);
+    doc.text(`${datos?.idaguatramite ?? ''}`, margx + 80, 148);
+    doc.text(fechaCreacion, margx + 365, 148);
+    doc.line(margx, 158, 560, 158);
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Servicios solicitados:', margx, 178);
+    doc.text('Adicional:', margx + 300, 178);
+    doc.setFont('helvetica', 'normal');
+    const lineasServicios = serviciosSolicitados.split('\n');
+    lineasServicios.forEach((linea, index) => {
+      doc.text(linea, margx + 20, 190 + index * 16);
+    });
     doc.text(`Medidor empresa: ${medidor}`, margx + 300, 190);
-    doc.text('DATOS DEL SOLICITANTE ', margx, 230);
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('DATOS DEL SOLICITANTE', margx, 230);
+    doc.setFont('helvetica', 'normal');
     doc.text(`Nombres: ${datos.idcliente_clientes.nombre}`, margx + 20, 240);
-    doc.text(`Dirección: ${datos.direccion}`, margx + 20, 250);
-    doc.text(`Barrio: ${datos.barrio}`, margx + 20, 260);
+    doc.text(`Dirección: ${direccion}`, margx + 20, 250);
+    doc.text(`Barrio: ${barrio}`, margx + 20, 260);
     doc.text(`Ced/RUC: ${datos.idcliente_clientes.cedula}`, margx + 300, 240);
-    doc.text(`Departamento: ${datos.departamento}`, margx + 300, 250);
-    doc.text(`Nro. Casa: ${datos.nrocasa}`, margx + 300, 260);
+    doc.text(`Departamento: ${departamento}`, margx + 300, 250);
+    doc.text(`Nro. Casa: ${nroCasa}`, margx + 300, 260);
     doc.text(datos.idcliente_clientes.nombre, margx + 275, 330);
     doc.text(
       'Solicito a la empresa/municipalidad, se sirva disponer el trámite para la factibilidad de \nconcesión del servicio requerido.',
@@ -200,26 +208,26 @@ export class TramitesAguaService {
     );
     doc.line(margx + 270, 320, margy - 50, 320);
     doc.line(margx, 350, margy, 350);
-    doc.text('CROQUIS. ', margx, 360);
+    doc.text('CROQUIS.', margx, 360);
     doc.line(margx, 500, margy, 500);
-    doc.text('FACTIBILIDAD. ', margx, 510);
-    doc.text('Tubería principal: ', margx, 530);
+    doc.text('FACTIBILIDAD.', margx, 510);
+    doc.text('Tubería principal:', margx, 530);
     doc.line(margx + 140, 530, margy, 530);
-    doc.text('Estado de la vía: ', margx, 545);
-    doc.text('Tierra()  Adoquín() Asfalto() Cemento() Otro() ', margx + 140, 545);
-    doc.text('Categoría: ', margx, 560);
+    doc.text('Estado de la vía:', margx, 545);
+    doc.text('Tierra()  Adoquín() Asfalto() Cemento() Otro()', margx + 140, 545);
+    doc.text('Categoría:', margx, 560);
     doc.text(
       'Residencial()  Doméstica() Comercial() Oficial() Industrial() \nEspecial() Otro:_______',
       margx + 140,
       560
     );
-    doc.text('Cuenta ref.(vecino): ', margx, 585);
+    doc.text('Cuenta ref.(vecino):', margx, 585);
     doc.line(margx + 140, 585, margy, 585);
-    doc.text('Observaciones: ', margx, 600);
-    doc.text(`${datos.observacion}`, margx + 140, 600);
+    doc.text('Observaciones:', margx, 600);
+    doc.text(observacion, margx + 140, 600);
     doc.line(margx + 140, 602, margy, 602);
     doc.line(margx + 140, 615, margy, 615);
-    doc.text('Materiales a facturar: ', margx, 630);
+    doc.text('Materiales a facturar:', margx, 630);
     doc.line(margx + 140, 630, margy, 630);
     doc.line(margx, 645, margy, 645);
     doc.line(margx, 660, margy, 660);
@@ -298,6 +306,43 @@ export class TramitesAguaService {
     });
 
     return doc.output('blob');
+  }
+
+  private formatDate(value: string | Date | null | undefined): string {
+    if (!value) {
+      return 'No registrada';
+    }
+
+    const fecha = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(fecha.getTime())) {
+      return 'No registrada';
+    }
+
+    return fecha.toLocaleDateString('es-EC', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+  }
+
+  private getDisplayValue(value: unknown, fallback = 'SN'): string {
+    const normalized = String(value ?? '').trim();
+    return normalized && normalized !== 'undefined' && normalized !== 'null' ? normalized : fallback;
+  }
+
+  private buildServiciosSolicitados(datos: any): string {
+    const servicios: string[] = [];
+    const agua = Number(datos?.agua ?? datos?.solicitaagua ?? 0);
+    const alcantarillado = Number(datos?.alcantarillado ?? datos?.solicitaalcantarillado ?? 0);
+
+    if (agua === 1) {
+      servicios.push('- Instalación agua potable');
+    }
+    if (alcantarillado === 1) {
+      servicios.push('- Instalación alcantarillado');
+    }
+
+    return servicios.length ? servicios.join('\n') : '- No especificado';
   }
 
   private async obtenerDirectorComercialActivo(): Promise<{ nombre: string; cargo: string }> {

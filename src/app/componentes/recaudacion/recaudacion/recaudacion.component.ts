@@ -676,6 +676,8 @@ export class RecaudacionComponent implements OnInit {
         // Procesar todos los items en paralelo
         await Promise.all(
           sincobrar.map(async (item: any, i: number) => {
+            item.interes = Number(await this.cInteres(item)) || 0;
+
             if (item.idAbonado !== 0 && item.idmodulo !== 27) {
               const abonado: Abonados = await this.getAbonado(item.idAbonado);
               item.direccion = abonado.direccionubicacion;
