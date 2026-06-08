@@ -3,8 +3,6 @@ import { Injectable } from '@angular/core';
 import { firstValueFrom, Observable } from 'rxjs';
 import { Intereses } from '../modelos/intereses';
 import { environment } from 'src/environments/environment';
-import { Facturas } from '../modelos/facturas.model';
-import { FacturaService } from './factura.service';
 import { TmpinteresxfacService } from './tmpinteresxfac.service';
 
 const apiUrl = environment.API_URL;
@@ -54,11 +52,12 @@ export class InteresesService {
   }
 
   async getInteresFactura(idfactura: number) {
-    return this.fetchInteresCalculado(idfactura);
+    const response = await this.tmpInteresxfacService.getByIdFactura(idfactura);
+    return this.normalizeInteresResponse(response);
   }
 
   getInteresFacturaAsync(idfactura: number) {
-    return this.fetchInteresCalculado(idfactura);
+    return this.getInteresFactura(idfactura);
   }
 
   async getAllIntereses() {
@@ -77,15 +76,7 @@ export class InteresesService {
   }
 
   async getInteresTemporal(idfactura: number) {
-    return this.fetchInteresCalculado(idfactura);
-  }
-
-  private async fetchInteresCalculado(idfactura: number): Promise<number> {
-    const response = await firstValueFrom(
-      this.http.get<any>(`${baseUrl}/calcular?idfactura=${idfactura}`)
-    );
-
-    return this.normalizeInteresResponse(response);
+    return this.getInteresFactura(idfactura);
   }
 
   private normalizeInteresResponse(response: any): number {
