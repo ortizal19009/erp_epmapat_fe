@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { first, firstValueFrom, Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { Intereses } from '../modelos/intereses';
 import { environment } from 'src/environments/environment';
 import { Facturas } from '../modelos/facturas.model';
@@ -52,17 +52,13 @@ export class InteresesService {
   updateInteres(idinteres: number, interes: Intereses): Observable<Object> {
     return this.http.put(baseUrl + '/' + idinteres, interes);
   }
+
   async getInteresFactura(idfactura: number) {
-    let interes = await this.tmpInteresxfacService.getByIdFactura(idfactura)
-
-    return interes;
+    return this.fetchInteresCalculado(idfactura);
   }
-  getInteresFacturaAsync(idfactura: number) {
-    let interes = firstValueFrom(
-      this.http.get<any>(`${baseUrl}/calcular?idfactura=${idfactura}`)
-    );
 
-    return interes;
+  getInteresFacturaAsync(idfactura: number) {
+    return this.fetchInteresCalculado(idfactura);
   }
 
   async getAllIntereses() {
@@ -79,7 +75,48 @@ export class InteresesService {
     console.log('consultando');
     return this.http.get(`${baseUrl}/facturas/${idfactura}/preview`);
   }
+
   async getInteresTemporal(idfactura: number) {
-    return await this.tmpInteresxfacService.getByIdFactura(idfactura);
+    return this.fetchInteresCalculado(idfactura);
+  }
+
+  private async fetchInteresCalculado(idfactura: number): Promise<number> {
+    const response = await firstValueFrom(
+      this.http.get<any>(`${baseUrl}/calcular?idfactura=${idfactura}`)
+    );
+
+    return this.normalizeInteresResponse(response);
+  }
+
+  private normalizeInteresResponse(response: any): number {
+    if (response == null) {
+      return 0;
+    }
+
+    if (typeof response === 'number') {
+      return Number.isFinite(response) ? response : 0;
+    }
+
+    if (typeof response === 'string') {
+      const parsed = Number(response);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    const candidates = [
+      response?.interes,
+      response?.interesapagar,
+      response?.valor,
+      response?.total,
+      response?.monto,
+    ];
+
+    for (const candidate of candidates) {
+      const parsed = Number(candidate);
+      if (Number.isFinite(parsed)) {
+        return parsed;
+      }
+    }
+
+    return 0;
   }
 }
