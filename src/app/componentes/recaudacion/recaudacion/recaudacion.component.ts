@@ -6,7 +6,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { catchError, debounceTime, distinctUntilChanged, EMPTY, of, switchMap, tap } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, EMPTY, firstValueFrom, of, switchMap, tap } from 'rxjs';
 
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Usuarios } from 'src/app/modelos/administracion/usuarios.model';
@@ -1054,7 +1054,7 @@ export class RecaudacionComponent implements OnInit {
         idcaja: this._caja?.idcaja,
       })
       .subscribe({
-        next: (resp: any) => {
+        next: async (resp: any) => {
           const facturasResp = Array.isArray(resp?.facturas) ? resp.facturas : [];
           const porId = new Map<number, any>(
             facturasResp.map((item: any) => [Number(item?.idfactura), item] as [number, any])
@@ -1076,6 +1076,17 @@ export class RecaudacionComponent implements OnInit {
 
           if (resp?.caja) {
             this.recxcaja = { ...this.recxcaja, ...resp.caja };
+          }
+
+          try {
+            await this.persistirInteresesRecaudacion(seleccionadas);
+          } catch (persistError) {
+            console.error('Error al persistir intereses de la recaudacion:', persistError);
+            this.swal(
+              'warning',
+              'El cobro se registro, pero hubo un problema al guardar los intereses cobrados.'
+            );
+            return;
           }
 
           this.swcobrado = true;
@@ -1267,6 +1278,58 @@ export class RecaudacionComponent implements OnInit {
     rubrosxfac.cantidad = 1;
     rubrosxfac.estado = 1;
     await this.rubxfacService.saveRubroxfacAsync(rubrosxfac);
+  }
+
+  private async persistirInteresesRecaudacion(seleccionadas: any[]): Promise<void> {
+    for (const item of seleccionadas) {
+      const idfactura = Number(item?.idfactura ?? 0);
+      if (!Number.isFinite(idfactura) || idfactura <= 0) {
+        continue;
+      }
+
+      const interesTmp = Number(await this.interService.getInteresFactura(idfactura)) || 0;
+      item.interes = interesTmp;
+
+      await this.actualizarFacturaConInteres(idfactura, interesTmp);
+      await this.guardarRubroInteres(idfactura, interesTmp);
+    }
+  }
+
+  private async actualizarFacturaConInteres(idfactura: number, interes: number): Promise<void> {
+    const factura = await firstValueFrom(this.facService.getById(idfactura));
+    factura.interescobrado = interes;
+    await firstValueFrom(this.facService.updateFacturas(factura));
+  }
+
+  private async guardarRubroInteres(idfactura: number, interes: number): Promise<void> {
+    const rubroInteresId = 5;
+    const detalle = await this.rubxfacService.getByIdfacturaAsync(idfactura);
+    const rubroInteresExistente = detalle.find(
+      (rubro: any) =>
+        Number(rubro?.idrubro_rubros?.idrubro ?? rubro?.idrubro_rubros) === rubroInteresId
+    );
+
+    if (rubroInteresExistente) {
+      rubroInteresExistente.valorunitario = interes;
+      rubroInteresExistente.cantidad = 1;
+      rubroInteresExistente.estado = 1;
+      await firstValueFrom(
+        this.rubxfacService.updateRubroxfac(
+          rubroInteresExistente.idrubroxfac,
+          rubroInteresExistente
+        )
+      );
+      return;
+    }
+
+    if (interes <= 0) {
+      return;
+    }
+
+    const factura = await firstValueFrom(this.facService.getById(idfactura));
+    const rubro = new Rubros();
+    rubro.idrubro = rubroInteresId;
+    await this.saveRubxFac(factura, rubro, interes);
   }
 
   // =====================
