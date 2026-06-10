@@ -1,12 +1,28 @@
-<div class="content">
+<div class="content rrhh-add-personal">
     <div class="container-fluid">
         <div class="row justify-content-center">
-            <div class="col-sm-8 mt-5">
-                <h4 class="font-weight-bold text-center cabecera sombra border py-1">Nuevo Personal EPMAPA-T</h4>
-                <div class="card card-body sombra fondo detalle">
-                    <form [formGroup]="f_personal" (ngSubmit)="savePersonal()">
+            <div class="col-xl-10 col-lg-11 mt-3">
+                <div class="personal-hero cabecera sombra border">
+                    <div>
+                        <span class="eyebrow">Talento humano</span>
+                        <h4>Nuevo Personal EPMAPA-T</h4>
+                        <p>Registra datos de identidad, contacto e informacion laboral.</p>
+                    </div>
+                    <button type="button" class="btn btn-light btn-sm" [routerLink]="['/personal']">
+                        <i class="fa fa-arrow-left"></i> Volver
+                    </button>
+                </div>
+                <div class="card card-body sombra fondo detalle personal-card">
+                    <form [formGroup]="f_personal" (ngSubmit)="savePersonal()" class="personal-form" novalidate>
                         <div class="alert alert-danger py-2" *ngIf="mensajeError">
-                            {{mensajeError}}
+                            <i class="fa fa-exclamation-triangle mr-1"></i>{{mensajeError}}
+                        </div>
+                        <div class="form-intro">
+                            <div>
+                                <strong>Ficha de personal</strong>
+                                <span>Los campos marcados con * son obligatorios.</span>
+                            </div>
+                            <span class="status-pill">Activo al guardar</span>
                         </div>
                         <div class="row">
                             <div class="form-group col-sm-4">
@@ -14,7 +30,7 @@
                                     <div class="input-group-prepend">
                                         <label class="input-group-text" for="sufijo">Sufijo</label>
                                     </div>
-                                    <input class="form-control" [ngClass]="{'is-invalid': f['sufijo'].invalid && f['sufijo'].touched,
+                                    <input class="form-control" placeholder="Ej. Ing., Mgtr." [ngClass]="{'is-invalid': f['sufijo'].invalid && f['sufijo'].touched,
                                     'is-valid': f['sufijo'].valid, '': f['sufijo'].untouched}" id="sufijo"
                                         formControlName="sufijo">
                                     <div class="invalid-feedback">Máximo 20 caracteres.</div>
@@ -26,7 +42,7 @@
                                         <label class="input-group-text" for="tituloprofesional">Titulo
                                             profesional</label>
                                     </div>
-                                    <input class="form-control" [ngClass]="{'is-invalid': f['tituloprofesional'].invalid && f['tituloprofesional'].touched,
+                                    <input class="form-control" placeholder="Titulo academico" [ngClass]="{'is-invalid': f['tituloprofesional'].invalid && f['tituloprofesional'].touched,
                                     'is-valid': f['tituloprofesional'].valid, '': f['tituloprofesional'].untouched}"
                                         id="tituloprofesional" formControlName="tituloprofesional">
                                     <div class="invalid-feedback">Máximo 100 caracteres.</div>
@@ -37,7 +53,7 @@
                                     <div class="input-group-prepend">
                                         <label class="input-group-text" for="codigo">Código</label>
                                     </div>
-                                    <input class="form-control" id="codigo" [ngClass]="{'is-invalid': f['codigo'].invalid && f['codigo'].touched,
+                                    <input class="form-control" id="codigo" placeholder="Codigo interno" [ngClass]="{'is-invalid': f['codigo'].invalid && f['codigo'].touched,
                                     'is-valid': f['codigo'].valid, '': f['codigo'].untouched}"
                                         formControlName="codigo">
                                     <div class="invalid-feedback">Ingrese un código válido.</div>
@@ -55,6 +71,7 @@
                                         </button>
                                     </div>
                                     <select class="custom-select" id="cargo" formControlName="idcargo_cargos" [compareWith]="compareById">
+                                        <option [ngValue]="null">-- Seleccione cargo --</option>
                                         <option [ngValue]="cargo" *ngFor="let cargo of _cargos">{{cargo.descripcion}}
                                         </option>
                                     </select>
@@ -73,6 +90,7 @@
                                     </div>
                                     <select class="custom-select" id="tpcontrato"
                                         formControlName="idtpcontrato_tpcontratos" [compareWith]="compareById">
+                                        <option [ngValue]="null">-- Seleccione contrato --</option>
                                         <option [ngValue]="tpcontrato" *ngFor="let tpcontrato of _tpcontratos">
                                             {{tpcontrato.descripcion}}</option>
                                     </select>
@@ -83,7 +101,7 @@
                                     <div class="input-group-prepend">
                                         <label class="input-group-text" for="identificacion">Identificación</label>
                                     </div>
-                                    <input class="form-control" [ngClass]="{'is-invalid': f['identificacion'].invalid && f['identificacion'].touched,
+                                    <input class="form-control" maxlength="10" placeholder="10 digitos" [ngClass]="{'is-invalid': f['identificacion'].invalid && f['identificacion'].touched,
                                     'is-valid': f['identificacion'].valid, '': f['identificacion'].untouched}"
                                         id="identificacion" formControlName="identificacion" />
                                     <div class="invalid-feedback">Ingrese una identificación válida, sin espacios.</div>
@@ -120,6 +138,7 @@
                                                 class="green">*</sup></label>
                                     </div>
                                     <input type="text" class="form-control form-control-sm" formControlName="nomfirma"
+                                        placeholder="Nombre que aparecera en firma/documentos"
                                         [ngClass]="{'is-invalid': f['nomfirma'].invalid && f['nomfirma'].touched,
                             'is-valid': f['nomfirma'].valid, '': f['nomfirma'].untouched}">
                                     <div class="invalid-feedback">Ingrese el nombre de preferencia.</div>
@@ -132,7 +151,8 @@
                                         <label class="input-group-text" for="fecha">Email personal<sup
                                                 class="green">*</sup></label>
                                     </div>
-                                    <input type="text" class="form-control form-control-sm" formControlName="email"
+                                    <input type="email" class="form-control form-control-sm" formControlName="email"
+                                        placeholder="correo@dominio.com"
                                         [ngClass]="{'is-invalid': f['email'].invalid && f['email'].touched,
                             'is-valid': f['email'].valid, '': f['email'].untouched}">
                                     <div class="invalid-feedback">Ingrese un correo válido.</div>
@@ -157,6 +177,7 @@
                                                 class="green">*</sup></label>
                                     </div>
                                     <input type="text" class="form-control form-control-sm" formControlName="celular"
+                                        placeholder="0999999999"
                                         [ngClass]="{'is-invalid': f['celular'].invalid && f['celular'].touched,
                             'is-valid': f['celular'].valid, '': f['celular'].untouched}">
                                     <div class="invalid-feedback">Ingrese un celular válido.</div>
@@ -168,6 +189,7 @@
                                         <label class="input-group-text" for="fecha">Dirección</label>
                                     </div>
                                     <input type="text" class="form-control form-control-sm" formControlName="direccion"
+                                        placeholder="Direccion domiciliaria"
                                         [ngClass]="{'is-invalid': f['direccion'].invalid && f['direccion'].touched,
                             'is-valid': f['direccion'].valid, '': f['direccion'].untouched}">
                                     <div class="invalid-feedback">Ingrese la dirección.</div>
@@ -191,7 +213,7 @@
 
                         <div class="text-center">
                             <button type="submit" class="btn btn-success btn-sm mx-1">
-                                <i class="fa fa-check-circle"></i> Aceptar</button>
+                                <i class="fa fa-check-circle"></i> Guardar personal</button>
                             <button type="button" class="btn btn-outline-success btn-sm mb-0"
                                 [routerLink]="['/personal']"><i class="fa fa-times-circle"></i> Cancelar
                             </button>

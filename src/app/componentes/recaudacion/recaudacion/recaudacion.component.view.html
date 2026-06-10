@@ -269,8 +269,8 @@
                         <div class="custom-control custom-checkbox custom-control-sm">
                           <input type="checkbox" class="custom-control-input" [id]="'check_' + i"
                             [(ngModel)]="sincobro.pagado"
-                            (change)="marcarAnteriores($event, i, sincobro.idAbonado)"
-                            [disabled]="valCheckBox(sincobro.idAbonado, swcobrado)">
+                            (change)="marcarAnteriores($event, sincobro)"
+                            [disabled]="valCheckBox(sincobro, swcobrado)">
                           <label class="custom-control-label" [for]="'check_' + i"></label>
                         </div>
                       </td>

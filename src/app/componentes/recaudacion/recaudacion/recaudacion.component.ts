@@ -94,6 +94,7 @@ export class RecaudacionComponent implements OnInit {
   formaCobro: Formacobro = new Formacobro();
   formacobroNC = false;
   idformacobro: number;
+  facturaReferenciaCobro: any = null;
   _nc: any[] = [];
   swNC = false;
 
@@ -533,8 +534,78 @@ export class RecaudacionComponent implements OnInit {
 
   changeFormacobro() {
     const formacobro = this.formCobrar.get('idformacobro')!.value;
-    this.idformacobro = formacobro.idformacobro;
-    this.formacobroNC = (formacobro.idformacobro === 3);
+    const idformacobro = this.obtenerIdFormaCobro(formacobro);
+    this.idformacobro = idformacobro;
+    this.formacobroNC = (idformacobro === 3);
+  }
+
+  private obtenerIdFormaCobro(formacobro: any): number {
+    const id = Number(
+      formacobro?.idformacobro ??
+      formacobro?.idFormaCobro ??
+      formacobro?.id ??
+      formacobro
+    );
+    return Number.isFinite(id) ? id : 0;
+  }
+
+  private obtenerFormaCobroPorFactura(factura: any): any {
+    const idformacobro = this.obtenerIdFormaCobroFactura(factura);
+
+    return (
+      this._formascobro.find(
+        (formacobro: any) => Number(formacobro?.idformacobro) === idformacobro
+      ) ??
+      this._formascobro[0]
+    );
+  }
+
+  private obtenerIdFormaCobroFactura(factura: any): number {
+    const candidatos = [
+      factura?.formacobro,
+      factura?.formapago,
+      factura?.['forma de pago'],
+      factura?.formaPago,
+      factura?.forma_de_pago,
+      factura?.idformacobro,
+      factura?.idFormaCobro,
+      factura?.idformacobro_formacobro,
+      factura?.factura?.formacobro,
+      factura?.factura?.formapago,
+      factura?.factura?.['forma de pago'],
+      factura?.factura?.formaPago,
+      factura?.factura?.forma_de_pago,
+      factura?.facturas?.formacobro,
+      factura?.facturas?.formapago,
+      factura?.facturas?.['forma de pago'],
+      factura?.facturas?.formaPago,
+      factura?.facturas?.forma_de_pago,
+      factura?.idfactura?.formacobro,
+      factura?.idfactura?.formapago,
+      factura?.idfactura?.['forma de pago'],
+      factura?.idfactura?.formaPago,
+      factura?.idfactura?.forma_de_pago,
+      factura?.idfactura_facturas?.formacobro,
+      factura?.idfactura_facturas?.formapago,
+      factura?.idfactura_facturas?.['forma de pago'],
+      factura?.idfactura_facturas?.formaPago,
+      factura?.idfactura_facturas?.forma_de_pago,
+    ];
+
+    for (const candidato of candidatos) {
+      const id = this.obtenerIdFormaCobro(candidato);
+      if (id > 0) {
+        return id;
+      }
+    }
+
+    return 0;
+  }
+
+  private aplicarFormaCobroFormulario(formacobro: any): void {
+    this.idformacobro = this.obtenerIdFormaCobro(formacobro);
+    this.formacobroNC = this.idformacobro === 3;
+    this.formCobrar.patchValue({ idformacobro: formacobro });
   }
 
   // =====================
@@ -693,6 +764,8 @@ export class RecaudacionComponent implements OnInit {
               const iva: any = await this.calIva(item.idfactura);
               item.iva = (iva.length ? iva[0][1] : 0);
             }
+
+            this.normalizarSeleccionInicial(item);
           })
         );
 
@@ -767,6 +840,7 @@ export class RecaudacionComponent implements OnInit {
     this.cliente.porcexonera = null;
     this.cliente.porcdiscapacidad = null;
     this.totInteres = 0;
+    this.facturaReferenciaCobro = null;
     this.formCobrar.reset();
     this.formBuscar.patchValue({ filtrar: '' });
     if (this._sincobro) {
@@ -812,15 +886,35 @@ export class RecaudacionComponent implements OnInit {
   // =====================
 
   marcarTodas(event: any) {
-    const valor = event.target.checked ? 1 : 0;
-    this._sincobro.forEach((s, i) => {
-      this._sincobro[i].pagado = valor;
+    const checked = !!event.target.checked;
+    const idFormaReferencia = checked
+      ? this.obtenerIdFormaCobroSeleccionada() || this.obtenerIdFormaCobroFactura(this._sincobro[0])
+      : 0;
+
+    this._sincobro.forEach((item) => {
+      item.pagado = checked && this.obtenerIdFormaCobroFactura(item) === idFormaReferencia ? 1 : 0;
     });
+    this.facturaReferenciaCobro = checked
+      ? this._sincobro.find((item: any) => item.pagado === 1 || item.pagado === true) ?? null
+      : null;
     this.totalAcobrar();
   }
-  marcarAnteriores(e: any, index: number, cuenta: number) {
-    this.ntaCredito(cuenta, e.target.checked);
-    const seleccionada = this._sincobro[index];
+  marcarAnteriores(e: any, factura: any) {
+    const seleccionada = this._sincobro.find(
+      (item: any) => Number(item?.idfactura) === Number(factura?.idfactura)
+    ) ?? factura;
+    const checked = !!e.target.checked;
+
+    if (checked && !this.esFormaCobroCompatible(seleccionada, seleccionada?.idfactura)) {
+      seleccionada.pagado = 0;
+      factura.pagado = 0;
+      e.target.checked = false;
+      this.swal('warning', 'No puedes combinar facturas con diferente forma de pago.');
+      this.totalAcobrar();
+      return;
+    }
+
+    this.ntaCredito(seleccionada.idAbonado, checked);
     const moduloId = this.resolveModuloId(seleccionada);
     const aplicaMarcadoEncadenado =
       ((moduloId === 3 && Number(seleccionada?.idAbonado) > 0) || moduloId === 4);
@@ -844,6 +938,9 @@ export class RecaudacionComponent implements OnInit {
             (fechaItem === fechaSeleccionada && idFacturaItem <= idFacturaSeleccionada);
 
           if (esAnterior) {
+            if (this.obtenerIdFormaCobroFactura(item) !== this.obtenerIdFormaCobroFactura(seleccionada)) {
+              return;
+            }
             item.pagado = 1;
           }
         });
@@ -866,10 +963,34 @@ export class RecaudacionComponent implements OnInit {
         });
       }
     } else {
-      this._sincobro[index].pagado = this._sincobro[index].pagado ? 1 : 0;
+      seleccionada.pagado = seleccionada.pagado ? 1 : 0;
     }
 
     this.totalAcobrar();
+    this.facturaReferenciaCobro = checked
+      ? seleccionada
+      : (this._sincobro || []).find((item: any) => item.pagado === 1 || item.pagado === true) ?? null;
+  }
+
+  private normalizarSeleccionInicial(item: any): void {
+    if (Number(item?.pagado) === 1 && this.obtenerIdFormaCobroFactura(item) === 4) {
+      item.pagado = 0;
+    }
+  }
+
+  private obtenerIdFormaCobroSeleccionada(idfacturaExcluir?: number): number {
+    const seleccionada = (this._sincobro || []).find(
+      (item: any) =>
+        (item.pagado === 1 || item.pagado === true) &&
+        Number(item?.idfactura) !== Number(idfacturaExcluir ?? 0)
+    );
+    return this.obtenerIdFormaCobroFactura(seleccionada);
+  }
+
+  private esFormaCobroCompatible(factura: any, idfacturaExcluir?: number): boolean {
+    const idFormaSeleccionada = this.obtenerIdFormaCobroSeleccionada(idfacturaExcluir);
+    const idFormaFactura = this.obtenerIdFormaCobroFactura(factura);
+    return !idFormaSeleccionada || !idFormaFactura || idFormaSeleccionada === idFormaFactura;
   }
 
   private resolveModuloId(item: any): number {
@@ -883,9 +1004,12 @@ export class RecaudacionComponent implements OnInit {
     return Number.isNaN(time) ? 0 : time;
   }
 
-  valCheckBox(cuenta: number, swcobrado: any) {
+  valCheckBox(sincobro: any, swcobrado: any) {
+    const cuenta = Number(sincobro?.idAbonado ?? sincobro?.idabonado ?? 0);
     if (swcobrado === true) {
       return swcobrado;
+    } else if (!this.esFormaCobroCompatible(sincobro)) {
+      return true;
     } else if (
       cuenta !== this.arrCuenta[0] &&
       this.arrCuenta.length > 0 &&
@@ -985,25 +1109,24 @@ export class RecaudacionComponent implements OnInit {
     const decimal = (acobrar - entero).toFixed(2);
     this.acobrardec = decimal.toString().slice(1);
 
-    const primerPagado = this._sincobro.find(
-      (registro: { pagado: number }) => registro.pagado == 1
-    );
 
-    let fcobro: any = 0;
-    if (primerPagado?.estado === 3) {
-      fcobro = this._formascobro[1];
-    } else {
-      fcobro = this._formascobro[0];
-    }
+    const referenciaSeleccionada =
+      this.facturaReferenciaCobro &&
+      (this.facturaReferenciaCobro.pagado === 1 || this.facturaReferenciaCobro.pagado === true)
+        ? this.facturaReferenciaCobro
+        : this._sincobro.find((registro: any) => registro.pagado === 1 || registro.pagado === true);
 
+    const fcobro = this.obtenerFormaCobroPorFactura(referenciaSeleccionada);
+    console.log('Factura de referencia para forma de cobro:', referenciaSeleccionada);
+    console.log('Forma de cobro aplicada:', fcobro);
     this.formCobrar.patchValue({
-      idformacobro: fcobro,
       valorAcobrar: acobrar,
       acobrar: entero,
       dinero: '',
       vuelto: '',
       ncvalor: '',
     });
+    this.aplicarFormaCobroFormulario(fcobro);
   }
 
   valorDinero() {
@@ -1034,7 +1157,11 @@ export class RecaudacionComponent implements OnInit {
     recaudacion.totalpagar = +this.formCobrar.value.valorAcobrar;
     recaudacion.recibo = +this.formCobrar.value.dinero;
     recaudacion.cambio = +this.formCobrar.value.vuelto;
-    recaudacion.formapago = this.idformacobro;
+    const idformacobro = this.obtenerIdFormaCobro(
+      this.formCobrar.get('idformacobro')!.value
+    ) || this.idformacobro;
+    this.idformacobro = idformacobro;
+    recaudacion.formapago = idformacobro;
     recaudacion.valor = +this.formCobrar.value.valorAcobrar;
     recaudacion.estado = 1;
     recaudacion.ncvalor = +this.formCobrar.value.ncvalor;
@@ -1162,8 +1289,11 @@ export class RecaudacionComponent implements OnInit {
                     fac.fechacobro = fechacobro;
                     fac.horacobro = horaActual;
 
+                    const idFormaCobroFactura = this.obtenerIdFormaCobroFactura(item);
                     if (this.swNC === true) {
                       fac.formapago = 3;
+                    } else if (idFormaCobroFactura > 0) {
+                      fac.formapago = idFormaCobroFactura;
                     }
 
                     fac.usuariocobro = this.authService.idusuario;
@@ -1290,14 +1420,26 @@ export class RecaudacionComponent implements OnInit {
       const interesTmp = Number(await this.interService.getInteresFactura(idfactura)) || 0;
       item.interes = interesTmp;
 
-      await this.actualizarFacturaConInteres(idfactura, interesTmp);
+      await this.actualizarFacturaConInteres(idfactura, interesTmp, item);
       await this.guardarRubroInteres(idfactura, interesTmp);
     }
   }
 
-  private async actualizarFacturaConInteres(idfactura: number, interes: number): Promise<void> {
+  private async actualizarFacturaConInteres(idfactura: number, interes: number, item: any): Promise<void> {
     const factura = await firstValueFrom(this.facService.getById(idfactura));
+    const idFormaCobroFormulario = this.obtenerIdFormaCobro(
+      this.formCobrar.get('idformacobro')!.value
+    );
+    const idFormaCobroFactura = this.obtenerIdFormaCobroFactura(item);
+
     factura.interescobrado = interes;
+
+    if (idFormaCobroFormulario === 3 || this.swNC === true) {
+      factura.formapago = 3;
+    } else if (idFormaCobroFactura > 0) {
+      factura.formapago = idFormaCobroFactura;
+    }
+
     await firstValueFrom(this.facService.updateFacturas(factura));
   }
 

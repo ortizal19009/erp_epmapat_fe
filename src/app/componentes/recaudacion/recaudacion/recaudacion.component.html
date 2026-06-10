@@ -243,17 +243,17 @@
                       [class.selected-row]="sincobro.pagado == 1">
                       <td class="text-center serial-number small">{{ i+1 }}</td>
                       <td class="text-center account-number">
-                        <span [ngClass]="{'text-muted': sincobro.idabonado == 0}" class="badge badge-light badge-sm">
+                        <span [ngClass]="{'text-muted': sincobro.idabonado == 0}" class="badge badge-light badge-lg">
                           {{ sincobro.idAbonado }}
                         </span>
                       </td>
-                      <td class="responsible-name small truncate-text" [attr.title]="sincobro.responsablePago">
+                      <td class="responsible-name small description truncate-text" [attr.title]="sincobro.responsablePago">
                         <strong>{{ sincobro.responsablePago }}</strong>
                       </td>
                       <td class="text-center invoice-number">
                         <span class="badge badge-primary badge-sm">{{ sincobro.idfactura }}</span>
                       </td>
-                      <td class="address-cell small truncate-text" [attr.title]="sincobro.direccion">
+                      <td class="address-cell small description truncate-text" [attr.title]="sincobro.direccion">
                         {{ sincobro.direccion }}
                       </td>
                       <td class="text-center date-cell small">

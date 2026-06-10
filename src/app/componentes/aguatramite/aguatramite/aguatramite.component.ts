@@ -2,9 +2,10 @@ import { formatDate } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { firstValueFrom } from 'rxjs';
 import { Aguatramite } from 'src/app/modelos/aguatramite.model';
 import { AguatramiteService } from 'src/app/servicios/aguatramite.service';
-import { JasperReportService } from 'src/app/servicios/jasper-report.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { TipoTramiteService } from 'src/app/servicios/tipo-tramite.service';
 import { TramiteNuevoService } from 'src/app/servicios/tramite-nuevo.service';
@@ -47,11 +48,13 @@ export class AguatramiteComponent implements OnInit {
    formulario: boolean = true
    size = "md"
    today: Date = new Date();
+   pdfViewerSrc: SafeResourceUrl | null = null;
+   private pdfObjectUrl: string | null = null;
 
    constructor(private router: Router, private fb: FormBuilder, private aguatramiService: AguatramiteService,
       private tipotramiService: TipoTramiteService, private tramitenuevoService: TramiteNuevoService,
       private s_genpdf: TramitesAguaService,
-      private s_jasperreport: JasperReportService,
+      private sanitizer: DomSanitizer,
       private s_loading: LoadingService
    ) { }
 
@@ -248,8 +251,8 @@ export class AguatramiteComponent implements OnInit {
       switch (column) {
          case 'cliente':
             return item?.idcliente_clientes?.nombre ?? '';
-         case 'codmedidor':
-            return item?.codmedidor ?? '';
+         case 'cuenta':
+            return this.getCuentaTramite(item);
          case 'feccrea':
             return item?.feccrea ?? '';
          case 'estado':
@@ -325,54 +328,50 @@ export class AguatramiteComponent implements OnInit {
       });
    }
    optFechas() {
-      let opt = false;
-      if (+this.optImprimir.value.opt! === 1) {
-         opt = true
-      }
-      else { opt = false }
-      return opt;
+      return +this.optImprimir.value.opt! === 1;
    }
    async genPdf() {
       let opt = +this.optImprimir.value.opt!
       switch (opt) {
          case 0:
-            this.repGeneralByEstado()
+            await this.repGeneralByEstado()
             break;
          case 1:
-            let f = this.optImprimir.value
-            this.s_loading.showLoading();
-
-            let body: any = {
-               "reportName": "TramitesDeAgua",
-               "parameters": {
-                  "desde": f.desde,
-                  "hasta": f.hasta
-               },
-               "extencion": ".pdf"
-            }
-            let reporte: any = await this.s_jasperreport.getReporte(body);
-            setTimeout(() => {
-               const file = new Blob([reporte], { type: 'application/pdf' });
-               const fileURL = URL.createObjectURL(file);
-
-               // Asignar el blob al iframe
-               const pdfViewer = document.getElementById(
-                  'pdfViewer'
-               ) as HTMLIFrameElement;
-
-               if (pdfViewer) {
-                  pdfViewer.src = fileURL;
-               }
-            }, 1000);
-
-            this.s_loading.hideLoading();
-            this.size = "lg"
-            this.formulario = false;
+            await this.repTotalPorFecha();
             break;
       }
    }
-   repGeneralByEstado() {
-      this.s_genpdf.listaTramitesAgua('my-table');
+   async repGeneralByEstado() {
+      this.s_loading.showLoading();
+      try {
+         const tramites = await this.obtenerTramitesFiltradosParaImpresion();
+         this.mostrarPdfEnModal(
+            this.s_genpdf.listaTramitesAguaFiltrados(tramites, 'Trámites de agua filtrados')
+         );
+      } catch (error) {
+         console.error(error);
+      } finally {
+         this.s_loading.hideLoading();
+      }
+   }
+
+   async repTotalPorFecha() {
+      this.s_loading.showLoading();
+      try {
+         const tramites = await this.obtenerTramitesPorFechaParaImpresion();
+         const desde = this.optImprimir.value.desde || '';
+         const hasta = this.optImprimir.value.hasta || '';
+         this.mostrarPdfEnModal(
+            this.s_genpdf.listaTramitesAguaFiltrados(
+               tramites,
+               `Trámites de agua por fecha ${desde} - ${hasta}`
+            )
+         );
+      } catch (error) {
+         console.error(error);
+      } finally {
+         this.s_loading.hideLoading();
+      }
    }
 
    addAguaTramite() {
@@ -410,6 +409,88 @@ export class AguatramiteComponent implements OnInit {
          (estado: { valor: number }) => estado.valor === i_estado
       );
       return est.estado;
+   }
+
+   getCuentaTramite(aguatramite: any): string {
+      return `${aguatramite?.idabonado ?? aguatramite?.idabonado_abonados?.idabonado ?? aguatramite?.abonado?.idabonado ?? aguatramite?.codmedidor ?? ''}`;
+   }
+
+   private async obtenerTramitesFiltradosParaImpresion(): Promise<any[]> {
+      const idTipo = +this.formBuscar.value.idtipotramite_tipotramite!;
+      const estadoConsulta = this.debeFiltrarPorEstado() ? +this.formBuscar.value.estado! : 3;
+      const size = Math.max(this.totalElements || 0, this.pageSize, 100);
+      const respuesta: any = await firstValueFrom(
+         this.aguatramiService.buscarPageable({
+            idtipotramite: idTipo,
+            estado: estadoConsulta,
+            cliente: this.formBuscar.value.cliente || null,
+            fechaDesde: this.formBuscar.value.fechaDesde || null,
+            fechaHasta: this.formBuscar.value.fechaHasta || null,
+            page: 0,
+            size,
+         })
+      );
+
+      const registros = Array.isArray(respuesta?.content) ? respuesta.content : [];
+      const ordenados = [...registros].sort((a: any, b: any) =>
+         this.compararValores(this.obtenerValorOrden(a, this.sortColumn), this.obtenerValorOrden(b, this.sortColumn)) *
+         (this.sortDirection === 'asc' ? 1 : -1)
+      );
+
+      return this.aplicarFiltroRapido(ordenados, this.filterTerm);
+   }
+
+   private async obtenerTramitesPorFechaParaImpresion(): Promise<any[]> {
+      const idTipo = +this.formBuscar.value.idtipotramite_tipotramite!;
+      const estadoConsulta = this.debeFiltrarPorEstado() ? +this.formBuscar.value.estado! : 3;
+      const size = Math.max(this.totalElements || 0, this.pageSize, 1000);
+      const respuesta: any = await firstValueFrom(
+         this.aguatramiService.buscarPageable({
+            idtipotramite: idTipo,
+            estado: estadoConsulta,
+            cliente: null,
+            fechaDesde: this.optImprimir.value.desde || null,
+            fechaHasta: this.optImprimir.value.hasta || null,
+            page: 0,
+            size,
+         })
+      );
+
+      const registros = Array.isArray(respuesta?.content) ? respuesta.content : [];
+      return [...registros].sort((a: any, b: any) =>
+         this.compararValores(this.obtenerValorOrden(a, this.sortColumn), this.obtenerValorOrden(b, this.sortColumn)) *
+         (this.sortDirection === 'asc' ? 1 : -1)
+      );
+   }
+
+   private mostrarPdfEnModal(blob: Blob): void {
+      if (this.pdfObjectUrl) {
+         URL.revokeObjectURL(this.pdfObjectUrl);
+      }
+
+      this.pdfObjectUrl = URL.createObjectURL(blob);
+      this.pdfViewerSrc = this.sanitizer.bypassSecurityTrustResourceUrl(this.pdfObjectUrl);
+      this.size = 'lg';
+      this.formulario = false;
+   }
+
+   private aplicarFiltroRapido(registros: any[], termino: string): any[] {
+      const filtro = `${termino || ''}`.trim().toLowerCase();
+      if (!filtro) {
+         return registros;
+      }
+
+      return registros.filter((item: any) => {
+         const valores = [
+            item?.idcliente_clientes?.nombre,
+            this.getCuentaTramite(item),
+            item?.feccrea ? formatDate(item.feccrea, 'dd-MM-y', 'en-US') : '',
+            this.setEstado(item?.estado),
+            item?.observacion,
+         ];
+
+         return valores.some((valor) => `${valor || ''}`.toLowerCase().includes(filtro));
+      });
    }
 
 }

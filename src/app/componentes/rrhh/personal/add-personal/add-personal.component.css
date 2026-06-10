@@ -18,3 +18,189 @@
   color: white;
   cursor: pointer;
 }
+
+.rrhh-add-personal {
+  --panel-border: rgba(19, 41, 75, 0.11);
+  --muted-text: #5b677a;
+  --field-bg: #fbfcff;
+  background:
+    linear-gradient(180deg, rgba(244, 248, 252, 0.96), rgba(235, 241, 246, 0.85));
+  min-height: calc(100vh - 56px);
+  padding: 0.85rem 0 1.5rem;
+}
+
+.personal-hero {
+  align-items: center;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+  padding: 1rem 1.15rem;
+}
+
+.personal-hero h4 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.25;
+  margin: 0.1rem 0;
+}
+
+.personal-hero p {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.86rem;
+  margin: 0;
+}
+
+.personal-hero .eyebrow {
+  color: rgba(255, 255, 255, 0.76);
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.personal-card {
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 1rem 1.05rem;
+}
+
+.form-intro {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding: 0.75rem 0.85rem;
+}
+
+.form-intro strong {
+  color: #23344d;
+  display: block;
+  font-size: 0.95rem;
+}
+
+.form-intro span {
+  color: var(--muted-text);
+  font-size: 0.8rem;
+}
+
+.status-pill {
+  background: #eaf7ef;
+  border: 1px solid #c7ead3;
+  border-radius: 999px;
+  color: #1f7a3d !important;
+  font-weight: 700;
+  padding: 0.28rem 0.65rem;
+  white-space: nowrap;
+}
+
+.personal-form .row {
+  margin-left: -0.4rem;
+  margin-right: -0.4rem;
+}
+
+.personal-form .form-group {
+  margin-bottom: 0.85rem;
+  padding-left: 0.4rem;
+  padding-right: 0.4rem;
+}
+
+.personal-form .input-group {
+  border-radius: 7px;
+  box-shadow: 0 1px 2px rgba(19, 41, 75, 0.05);
+}
+
+.personal-form .input-group-text {
+  background: #eef3f7;
+  border-color: #d8e1ea;
+  color: #253852;
+  font-size: 0.76rem;
+  font-weight: 700;
+  min-width: 7.75rem;
+}
+
+.personal-form .form-control,
+.personal-form .custom-select {
+  background-color: var(--field-bg);
+  border-color: #d8e1ea;
+  color: #1f2f46;
+  font-size: 0.82rem;
+  min-height: 2rem;
+}
+
+.personal-form .form-control:focus,
+.personal-form .custom-select:focus {
+  background-color: #fff;
+  border-color: #4d8ebf;
+  box-shadow: 0 0 0 0.14rem rgba(77, 142, 191, 0.18);
+}
+
+.personal-form .btn-success,
+.personal-form .btn-primary {
+  font-weight: 700;
+}
+
+.personal-form .text-center:last-child {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  margin-top: 0.35rem;
+  padding: 0.75rem;
+}
+
+.validation-message {
+  display: block;
+  font-size: 0.76rem;
+  margin-top: 0.25rem;
+}
+
+.form-control.is-invalid,
+.custom-select.is-invalid {
+  box-shadow: 0 0 0 0.12rem rgba(220, 53, 69, 0.1);
+}
+
+@media (max-width: 767.98px) {
+  .rrhh-add-personal {
+    padding-top: 0.4rem;
+  }
+
+  .personal-hero,
+  .form-intro {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .personal-hero .btn,
+  .status-pill {
+    margin-top: 0.65rem;
+  }
+
+  .personal-card {
+    padding: 0.85rem;
+  }
+
+  .personal-form .input-group {
+    display: block;
+  }
+
+  .personal-form .input-group-prepend,
+  .personal-form .input-group-append {
+    display: flex;
+  }
+
+  .personal-form .input-group-text {
+    border-radius: 6px 6px 0 0;
+    width: 100%;
+  }
+
+  .personal-form .form-control,
+  .personal-form .custom-select {
+    border-radius: 0 0 6px 6px;
+    width: 100%;
+  }
+}

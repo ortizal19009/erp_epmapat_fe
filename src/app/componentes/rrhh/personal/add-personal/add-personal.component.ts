@@ -118,6 +118,39 @@ export class AddPersonalComponent implements OnInit {
     return this.f_personal.controls;
   }
 
+  controlInvalid(controlName: string): boolean {
+    const control = this.f_personal.get(controlName);
+    return !!(control && control.invalid && (control.touched || control.dirty));
+  }
+
+  controlValid(controlName: string): boolean {
+    const control = this.f_personal.get(controlName);
+    return !!(control && control.valid && (control.touched || control.dirty));
+  }
+
+  getErrorMessage(controlName: string): string {
+    const control = this.f_personal.get(controlName);
+    if (!control?.errors) return '';
+
+    if (control.errors['required']) return 'Este campo es obligatorio.';
+    if (control.errors['minlength']) {
+      return `Debe tener al menos ${control.errors['minlength'].requiredLength} caracteres.`;
+    }
+    if (control.errors['maxlength']) {
+      return `No debe exceder ${control.errors['maxlength'].requiredLength} caracteres.`;
+    }
+    if (control.errors['email']) return 'Ingrese un correo valido.';
+    if (control.errors['pattern']) {
+      if (controlName === 'identificacion') return 'La identificacion debe tener 10 digitos numericos.';
+      if (controlName === 'celular') return 'Ingrese un celular valido.';
+      return 'Formato invalido.';
+    }
+    if (control.errors['cedulaEcuatoriana']) return 'La cedula ecuatoriana no es valida.';
+    if (control.errors['edadMinima']) return `Debe tener al menos ${this.edadMinima} anios.`;
+
+    return 'Verifique este campo.';
+  }
+
   async buscaColor() {
     try {
       const datos = await this.coloresService.setcolor(1, 'abonados');

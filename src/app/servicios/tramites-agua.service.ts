@@ -12,6 +12,7 @@ import { PersonalService } from './rrhh/personal.service';
 export class TramitesAguaService {
   administradores = [
     { nombre: 'Ing. Juan Diego Delgado', cargo: 'Director Comercial' },
+    { nombre: 'Director de Gestión Técnica', cargo: 'DIRECTOR DE GESTIÓN TÉCNICA' },
     { nombre: 'Ab. Andrés Montenegro', cargo: 'Asesor Legal' },
   ];
 
@@ -28,6 +29,31 @@ export class TramitesAguaService {
     autoTable(doc, {
       html: `#${datos}`,
     });
+    return doc.output('blob');
+  }
+
+  listaTramitesAguaFiltrados(datos: any[], titulo = 'Lista de trámites de agua'): Blob {
+    const doc = new jsPDF('p', 'pt', 'a4');
+    this.s_header.header(titulo, doc);
+
+    autoTable(doc, {
+      startY: 150,
+      styles: {
+        fontSize: 9,
+        cellPadding: 4,
+        overflow: 'linebreak',
+      },
+      head: [['#', 'Cliente', 'Cuenta', 'F. Inicia', 'Estado', 'Observaciones']],
+      body: (datos || []).map((item: any, index: number) => [
+        String(index + 1),
+        item?.idcliente_clientes?.nombre || '',
+        this.getCuentaTramite(item),
+        this.formatDate(item?.feccrea),
+        this.getEstadoTexto(item?.estado),
+        item?.observacion || '',
+      ]),
+    });
+
     return doc.output('blob');
   }
 
@@ -166,19 +192,18 @@ export class TramitesAguaService {
     const nroCasa = this.getDisplayValue(datos?.nrocasa);
     const observacion = this.getDisplayValue(datos?.observacion);
     const serviciosSolicitados = this.buildServiciosSolicitados(datos);
-    const directorComercial = await this.obtenerDirectorComercialActivo();
+    const tituloDocumento = titulo || 'Concesión de servicios';
+    const directorGestionTecnica = await this.obtenerDirectorGestionTecnicaActivo();
     const usuarioResponsable = await this.obtenerUsuarioResponsable(datos?.usucrea);
 
-    this.s_header.header(titulo, doc);
+    this.s_header.header(tituloDocumento, doc);
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
-    doc.text('Tipo de trámite:', margx, 130);
-    doc.text('Trámite Nro:', margx, 148);
-    doc.text('Fecha creación:', margx + 280, 148);
+    doc.text('Trámite Nro:', margx, 150);
+    doc.text('Fecha creación:', margx + 280, 150);
     doc.setFont('helvetica', 'normal');
-    doc.text(`${titulo || 'Concesión de servicios'}`, margx + 85, 130);
-    doc.text(`${datos?.idaguatramite ?? ''}`, margx + 80, 148);
-    doc.text(fechaCreacion, margx + 365, 148);
+    doc.text(`${datos?.idaguatramite ?? ''}`, margx + 80, 150);
+    doc.text(fechaCreacion, margx + 365, 150);
     doc.line(margx, 158, 560, 158);
 
     doc.setFont('helvetica', 'bold');
@@ -234,14 +259,14 @@ export class TramitesAguaService {
     doc.line(margx, 675, margy, 675);
     doc.line(margx, 700, margy, 700);
 
-    this.agregarFirmasTramite(doc, {
-      director: directorComercial,
+    this.agregarFirmasHojaInspeccion(doc, {
+      director: directorGestionTecnica,
       cliente: {
         nombre: datos?.idcliente_clientes?.nombre || 'No registrado',
         detalle: datos?.idcliente_clientes?.cedula || 'Sin identificación',
       },
       responsable: usuarioResponsable,
-      startY: 710,
+      startY: 740,
       margin: margx,
     });
 
@@ -330,6 +355,24 @@ export class TramitesAguaService {
     return normalized && normalized !== 'undefined' && normalized !== 'null' ? normalized : fallback;
   }
 
+  private getEstadoTexto(estado: number): string {
+    const estados: Record<number, string> = {
+      0: 'Eliminado',
+      1: 'Recien ingresado',
+      2: 'Inspeccionando',
+      3: 'Aprobado',
+      4: 'Notificado',
+      5: 'Contrato generado',
+      6: 'Negado',
+    };
+
+    return estados[estado] || '';
+  }
+
+  private getCuentaTramite(aguatramite: any): string {
+    return `${aguatramite?.idabonado ?? aguatramite?.idabonado_abonados?.idabonado ?? aguatramite?.abonado?.idabonado ?? aguatramite?.codmedidor ?? ''}`;
+  }
+
   private buildServiciosSolicitados(datos: any): string {
     const servicios: string[] = [];
     const agua = Number(datos?.agua ?? datos?.solicitaagua ?? 0);
@@ -371,6 +414,42 @@ export class TramitesAguaService {
     return this.administradores[0];
   }
 
+  private async obtenerDirectorGestionTecnicaActivo(): Promise<{ nombre: string; cargo: string }> {
+    try {
+      const personal: any = await firstValueFrom(this.s_personal.getAllPersonal());
+      const lista = Array.isArray(personal) ? personal : [];
+      const director = lista.find((item: any) => {
+        const cargo = this.normalizarTexto(
+          item?.idcargo_cargos?.descripcion || item?.cargoActual || item?.cargo || ''
+        );
+        return item?.estado === true && cargo.includes('director de gestion tecnica');
+      });
+
+      if (director) {
+        const nombreCompleto = [director?.sufijo || '', director?.apellidos || '', director?.nombres || '']
+          .map((value: string) => value.trim())
+          .filter(Boolean)
+          .join(' ');
+        return {
+          nombre: nombreCompleto || director?.nomfirma?.trim() || this.administradores[1].nombre,
+          cargo: 'DIRECTOR DE GESTIÓN TÉCNICA',
+        };
+      }
+    } catch (error) {
+      console.error('No se pudo obtener el director de gestion tecnica activo', error);
+    }
+
+    return this.administradores[1];
+  }
+
+  private normalizarTexto(value: string): string {
+    return String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+  }
+
   private async obtenerUsuarioResponsable(idusuario: number | null | undefined): Promise<{ nombre: string }> {
     if (!idusuario) {
       return { nombre: 'Usuario no registrado' };
@@ -407,6 +486,39 @@ export class TramitesAguaService {
         ['______________________________', '______________________________', '______________________________'],
         [data.director.nombre, data.cliente.nombre, data.responsable.nombre],
         [data.director.cargo, data.cliente.detalle || 'Cliente dueño del trámite', 'Responsable del trámite'],
+      ],
+    });
+  }
+
+  private agregarFirmasHojaInspeccion(
+    doc: jsPDF,
+    data: {
+      director: { nombre: string; cargo: string };
+      cliente: { nombre: string; detalle: string };
+      responsable: { nombre: string };
+      startY: number;
+      margin: number;
+    }
+  ) {
+    autoTable(doc, {
+      startY: data.startY,
+      margin: data.margin,
+      theme: 'plain',
+      styles: {
+        fontSize: 8,
+        halign: 'center',
+        cellPadding: 2,
+      },
+      columnStyles: {
+        0: { cellWidth: 130 },
+        1: { cellWidth: 130 },
+        2: { cellWidth: 130 },
+        3: { cellWidth: 130 },
+      },
+      body: [
+        ['________________________', '________________________', '________________________', '________________________'],
+        ['________________________', data.cliente.nombre, data.responsable.nombre, data.director.nombre],
+        ['INSPECTOR', data.cliente.detalle || 'Usuario', 'RESPONSABLE DEL TRAMITE', data.director.cargo],
       ],
     });
   }
