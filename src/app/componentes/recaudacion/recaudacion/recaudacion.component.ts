@@ -133,6 +133,8 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
   _rubrosxfac: any[] = [];
   filtro: string = ''; // para el modal de clientes
   private cajaEstadoEventSource: EventSource | null = null;
+  private streamCajaActivo = true;
+  private streamCajaReconnectTimeout: number | null = null;
   constructor(
     public fb: FormBuilder,
     public fb1: FormBuilder,
@@ -244,6 +246,8 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.streamCajaActivo = false;
+    this.cancelarReconexionStreamCaja();
     this.cerrarStreamCaja();
   }
 
@@ -356,6 +360,9 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
   }
 
   private iniciarStreamCaja(): void {
+    if (!this.streamCajaActivo) {
+      return;
+    }
     this.cerrarStreamCaja();
     this.cajaEstadoEventSource = this.recaCobroService.streamCajaEstado(this.authService.idusuario);
 
@@ -369,7 +376,11 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
 
     this.cajaEstadoEventSource.onerror = () => {
       this.cerrarStreamCaja();
-      window.setTimeout(() => this.iniciarStreamCaja(), 3000);
+      if (!this.streamCajaActivo) {
+        return;
+      }
+      this.cancelarReconexionStreamCaja();
+      this.streamCajaReconnectTimeout = window.setTimeout(() => this.iniciarStreamCaja(), 3000);
     };
   }
 
@@ -377,6 +388,13 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
     if (this.cajaEstadoEventSource) {
       this.cajaEstadoEventSource.close();
       this.cajaEstadoEventSource = null;
+    }
+  }
+
+  private cancelarReconexionStreamCaja(): void {
+    if (this.streamCajaReconnectTimeout !== null) {
+      window.clearTimeout(this.streamCajaReconnectTimeout);
+      this.streamCajaReconnectTimeout = null;
     }
   }
 

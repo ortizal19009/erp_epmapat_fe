@@ -106,6 +106,8 @@ export class AddRecaudaComponent implements OnInit {
   ordenColumna: keyof SinCobrarVisual = 'idabonado';
   ordenAscendente: boolean = true;
   private cajaEstadoEventSource: EventSource | null = null;
+  private streamCajaActivo = true;
+  private streamCajaReconnectTimeout: number | null = null;
   @ViewChild('pdfViewer') pdfViewer!: ElementRef<HTMLIFrameElement>;
   @ViewChild('consultaModal') consultaModal!: ElementRef;
   //_mensaje: any;
@@ -165,6 +167,8 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   ngOnDestroy(): void {
+    this.streamCajaActivo = false;
+    this.cancelarReconexionStreamCaja();
     this.cerrarStreamCaja();
     this.limpiarPreviewPdf();
   }
@@ -456,6 +460,9 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   private iniciarStreamCaja() {
+    if (!this.streamCajaActivo) {
+      return;
+    }
     this.cerrarStreamCaja();
     this.cajaEstadoEventSource = this.recaCobroService.streamCajaEstado(this.authService.idusuario);
 
@@ -469,7 +476,11 @@ export class AddRecaudaComponent implements OnInit {
 
     this.cajaEstadoEventSource.onerror = () => {
       this.cerrarStreamCaja();
-      window.setTimeout(() => this.iniciarStreamCaja(), 3000);
+      if (!this.streamCajaActivo) {
+        return;
+      }
+      this.cancelarReconexionStreamCaja();
+      this.streamCajaReconnectTimeout = window.setTimeout(() => this.iniciarStreamCaja(), 3000);
     };
   }
 
@@ -477,6 +488,13 @@ export class AddRecaudaComponent implements OnInit {
     if (this.cajaEstadoEventSource) {
       this.cajaEstadoEventSource.close();
       this.cajaEstadoEventSource = null;
+    }
+  }
+
+  private cancelarReconexionStreamCaja(): void {
+    if (this.streamCajaReconnectTimeout !== null) {
+      window.clearTimeout(this.streamCajaReconnectTimeout);
+      this.streamCajaReconnectTimeout = null;
     }
   }
 
