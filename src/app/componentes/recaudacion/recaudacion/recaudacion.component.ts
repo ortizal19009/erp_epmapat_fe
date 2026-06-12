@@ -773,7 +773,6 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
 
     this.facService.getFacSincobro(idcliente).subscribe({
       next: async (sincobrar: any[]) => {
-        console.log('Planillas sin cobrar obtenidas:', sincobrar);
         if (!sincobrar.length) {
           this.swbusca = 2;
           this.loadingService.hideLoading();
@@ -784,7 +783,6 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
         await Promise.all(
           sincobrar.map(async (item: any, i: number) => {
             item.interes = Number(await this.cInteres(item)) || 0;
-            console.log(`Interés calculado para factura ${item.idfactura}:`, item.interes);
             if (item.idAbonado !== 0 && item.idmodulo !== 27) {
               const abonado: Abonados = await this.getAbonado(item.idAbonado);
               item.direccion = abonado.direccionubicacion;
@@ -801,7 +799,6 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
               item.iva = (iva.length ? iva[0][1] : 0);
             }
             item.total = Number(item.total) + Number(item.interes) + Number(item.iva);
-            console.log(`Total calculado para factura ${item.idfactura}:`, item.total);
 
             this.normalizarSeleccionInicial(item);
           })
@@ -828,7 +825,6 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
           // Ambos sin abonado: ordenar por fechaemision
           return this.resolveFechaOrdenCobro(a) - this.resolveFechaOrdenCobro(b);
         });
-        console.log('Lista ordenada:', listaOrdenada);
 
         this._sincobro = listaOrdenada;
         this.listaFiltrada = [...listaOrdenada];
@@ -853,7 +849,6 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
     }
 
     this.arrFacturas.forEach((f: any) => {
-      console.log('Factura incluida en el cálculo:', f);
       this.sumtotal += Number(f.total || 0);
       this.acobrar += Number(f.total || 0);
     });
@@ -987,7 +982,6 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
       } else {
         // Al desmarcar: quitar la actual y cualquier factura posterior del mismo abonado.
         this._sincobro.forEach((item: any) => {
-          console.log(item);
           if (Number(item?.idAbonado) !== idAbonado) {
             return;
           }
@@ -1133,8 +1127,6 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
   totalAcobrar() {
     let suma = 0;
     this._sincobro.forEach((item) => {
-      console.log('Evaluando factura:', item);
-      console.log(`Factura ID ${item.idfactura}: pagado=${item.pagado}, total=${item.total}`);
       if (item.pagado === true || item.pagado === 1) {
         suma += Number(item.total || 0);
       }
@@ -1160,8 +1152,6 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
         : this._sincobro.find((registro: any) => registro.pagado === 1 || registro.pagado === true);
 
     const fcobro = this.obtenerFormaCobroPorFactura(referenciaSeleccionada);
-    console.log('Factura de referencia para forma de cobro:', referenciaSeleccionada);
-    console.log('Forma de cobro aplicada:', fcobro);
     this.formCobrar.patchValue({
       valorAcobrar: acobrar,
       acobrar: entero,
@@ -1698,12 +1688,10 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
   }
 
   cInteres(factura: any) {
-    console.log('Obteniendo interés para factura ID:', factura?.idfactura);
     return this.interService.getInteresFactura(factura.idfactura);
   }
 
   async calIva(idfactura: any) {
-    console.log('Calculando IVA para factura ID:', idfactura);
     return this.rubxfacService.getIva(0.15, idfactura).toPromise();
   }
 
