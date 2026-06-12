@@ -315,13 +315,19 @@ export class AddFacturacionComponent implements OnInit {
   }
 
   aniadir(producto: Catalogoitems) {
-    let nuevo = this.arrRubros.push([
-      producto.idrubro_rubros.descripcion.toString(),
+    const rubro = producto?.idrubro_rubros;
+    if (!rubro) {
+      console.warn('Producto sin rubro asociado, no se puede añadir a facturación', producto);
+      return;
+    }
+
+    this.arrRubros.push([
+      String(rubro.descripcion || producto?.descripcion || 'Rubro sin descripción'),
       1,
-      +producto.idrubro_rubros.valor!,
-      +producto.idrubro_rubros.swiva!,
-      +producto.idcatalogoitems!,
-      +producto.idrubro_rubros.idrubro!,
+      Number(rubro.valor || 0),
+      Number(rubro.swiva || 0),
+      Number(producto?.idcatalogoitems || 0),
+      Number(rubro.idrubro || 0),
     ]);
     this.subtotal();
   }
@@ -329,13 +335,20 @@ export class AddFacturacionComponent implements OnInit {
   todos() {
     let i = 0;
     this._productos.forEach(() => {
+      const producto = this._productos[i];
+      const rubro = producto?.idrubro_rubros;
+      if (!rubro) {
+        i++;
+        return;
+      }
+
       this.arrRubros.push([
-        this._productos[i].idrubro_rubros.descripcion.toString(),
+        String(rubro.descripcion || producto?.descripcion || 'Rubro sin descripción'),
         1,
-        +this._productos[i].idrubro_rubros.valor!,
-        +this._productos[i].idrubro_rubros.swiva!,
-        +this._productos[i].idcatalogoitems!,
-        +this._productos[i].idrubro_rubros.idrubro!,
+        Number(rubro.valor || 0),
+        Number(rubro.swiva || 0),
+        Number(producto?.idcatalogoitems || 0),
+        Number(rubro.idrubro || 0),
       ]);
       i++;
     });

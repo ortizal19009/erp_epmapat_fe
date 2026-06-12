@@ -83,13 +83,17 @@
         <tbody>
           <tr *ngFor="let factu of _facturacion | filter: filtro; let i = index" (click)="info(factu)">
             <td class="text-center">{{ factu.idfacturacion }}</td>
+            <td class="text-center">{{ factu.feccrea | date:'dd-MM-y' }}</td>
             <td>{{ factu.idcliente_clientes.nombre }}</td>
             <td>{{ factu.descripcion }}</td>
             <td class="text-right">{{factu.total | number: '1.2-2'}}</td>
             <td class="text-center">{{factu.cuotas}}</td>
           </tr>
-          <td *ngIf="!swfiltro" colspan="4" class="font-weight-bold text-right">TOTAL</td>
-          <td *ngIf="!swfiltro" class="font-weight-bold text-right">{{ sumtotal | number: '1.2-2' }}</td>
+          <tr *ngIf="!swfiltro">
+            <td colspan="4" class="font-weight-bold text-right">TOTAL</td>
+            <td class="font-weight-bold text-right">{{ sumtotal | number: '1.2-2' }}</td>
+            <td></td>
+          </tr>
         </tbody>
       </table>
     </div>

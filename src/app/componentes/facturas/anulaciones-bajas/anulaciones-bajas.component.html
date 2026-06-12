@@ -100,10 +100,10 @@
                                                 <td class="text-center">{{fanuladas.idfactura}} </td>
                                                 <td class="text-center _description">{{fanuladas.fechaanulacion}}</td>
                                                 <td class="text-left _description">{{fanuladas.nrofactura}}</td>
-                                                <td class="_description">{{fanuladas.idcliente.nombre}}</td>
-                                                <td class="text-left _description">{{fanuladas.idmodulo.descripcion}}
+                                                <td class="_description">{{ getNombreClienteHistorico(fanuladas) || 'Sin cliente' }}</td>
+                                                <td class="text-left _description">{{ getModuloHistorico(fanuladas) || 'Sin módulo' }}
                                                 </td>
-                                                <td class="text-left _description">{{fanuladas.idabonado}} </td>
+                                                <td class="text-left _description">{{ getCuentaHistorico(fanuladas) }} </td>
                                                 <td class="_description">{{fanuladas.razonanulacion}} </td>
                                             </tr>
                                             <tr *ngIf="!_fAnuladas?.length">
@@ -164,10 +164,10 @@
                                             <tr *ngFor="let faceliminada of _fEliminadas" class="fila">
                                                 <td class="text-center">{{faceliminada.idfactura}}</td>
                                                 <td class="text-center">{{faceliminada.fechaeliminacion}}</td>
-                                                <td class="_description">{{faceliminada.idcliente.nombre}}</td>
-                                                <td class="text-center">{{faceliminada.idabonado}}</td>
+                                                <td class="_description">{{ getNombreClienteHistorico(faceliminada) || 'Sin cliente' }}</td>
+                                                <td class="text-center">{{ getCuentaHistorico(faceliminada) }}</td>
                                                 <td class="_description">{{faceliminada.razoneliminacion}}</td>
-                                                <td class="_description">{{faceliminada.idmodulo.descripcion}}</td>
+                                                <td class="_description">{{ getModuloHistorico(faceliminada) || 'Sin módulo' }}</td>
                                                 <td class="text-center">
                                                     <button class="btn btn-sm btn-danger" (click)="generarReport(faceliminada.idfactura)" data-toggle="modal" data-target="#impViewer">
                                                         <i class="bi bi-file-earmark-pdf"></i>

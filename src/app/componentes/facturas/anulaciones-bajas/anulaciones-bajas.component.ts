@@ -388,8 +388,8 @@ export class AnulacionesBajasComponent implements OnInit {
   }
 
   private coincideHistorico(item: any, cuenta: string, cliente: string): boolean {
-    const cuentaItem = `${item?.idabonado ?? ''}`.toLowerCase();
-    const clienteItem = `${item?.idcliente?.nombre ?? ''}`.toLowerCase();
+    const cuentaItem = `${this.getCuentaHistorico(item) ?? ''}`.toLowerCase();
+    const clienteItem = `${this.getNombreClienteHistorico(item) ?? ''}`.toLowerCase();
 
     const coincideCuenta = !cuenta || cuentaItem.includes(cuenta);
     const coincideCliente = !cliente || clienteItem.includes(cliente);
@@ -558,11 +558,11 @@ export class AnulacionesBajasComponent implements OnInit {
       case 'nrofactura':
         return item?.nrofactura;
       case 'cliente':
-        return item?.idcliente?.nombre;
+        return this.getNombreClienteHistorico(item);
       case 'modulo':
-        return item?.idmodulo?.descripcion;
+        return this.getModuloHistorico(item);
       case 'cuenta':
-        return item?.idabonado;
+        return this.getCuentaHistorico(item);
       case 'razonanulacion':
         return item?.razonanulacion;
       case 'razoneliminacion':
@@ -570,6 +570,42 @@ export class AnulacionesBajasComponent implements OnInit {
       default:
         return item?.[columna];
     }
+  }
+
+  getNombreClienteHistorico(item: any): string {
+    return (
+      item?.idcliente?.nombre ||
+      item?.idcliente_clientes?.nombre ||
+      item?.idabonado_abonados?.idcliente_clientes?.nombre ||
+      item?.idabonado_abonados?.idresponsable?.nombre ||
+      item?.idresponsable?.nombre ||
+      item?.abonado?.idcliente_clientes?.nombre ||
+      item?.cliente?.nombre ||
+      ''
+    );
+  }
+
+  getModuloHistorico(item: any): string {
+    return (
+      item?.idmodulo?.descripcion ||
+      item?.idmodulo_modulos?.descripcion ||
+      item?.idfactura?.idmodulo?.descripcion ||
+      item?.idfactura_facturas?.idmodulo?.descripcion ||
+      item?.modulo ||
+      ''
+    );
+  }
+
+  getCuentaHistorico(item: any): string | number {
+    return (
+      item?.idabonado ??
+      item?.idabonado_abonados?.idabonado ??
+      item?.abonado?.idabonado ??
+      item?.idfactura?.idabonado ??
+      item?.idfactura_facturas?.idabonado ??
+      item?.cuenta ??
+      ''
+    );
   }
 
   private compararValores(

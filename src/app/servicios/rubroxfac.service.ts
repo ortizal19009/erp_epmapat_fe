@@ -1,18 +1,128 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Rubroxfac } from '../modelos/rubroxfac.model';
-import { Observable, firstValueFrom } from 'rxjs';
+import { Observable, catchError, firstValueFrom, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { Facxrecauda } from '../modelos/facxrecauda.model';
 
-const apiUrl = environment.API_URL;
-const baseUrl = `${apiUrl}/rubroxfac`;
+const apiUrl = environment.API_URL.replace(/\/$/, '');
+const apiBaseUrl = `${apiUrl}/api/rubroxfac`;
+const legacyBaseUrl = `${apiUrl}/rubroxfac`;
+const baseUrl = legacyBaseUrl;
 
 @Injectable({
   providedIn: 'root',
 })
 export class RubroxfacService {
   constructor(private http: HttpClient) { }
+
+  private toNumber(value: any): number {
+    if (typeof value === 'number') {
+      return Number.isFinite(value) ? value : 0;
+    }
+
+    if (typeof value === 'string') {
+      const cleanValue = value.trim();
+      if (!cleanValue) {
+        return 0;
+      }
+
+      let normalized = cleanValue.replace(/[^0-9,.-]/g, '');
+      const lastComma = normalized.lastIndexOf(',');
+      const lastDot = normalized.lastIndexOf('.');
+
+      if (lastComma >= 0 && lastDot >= 0) {
+        normalized =
+          lastComma > lastDot
+            ? normalized.replace(/\./g, '').replace(',', '.')
+            : normalized.replace(/,/g, '');
+      } else if (lastComma >= 0) {
+        normalized = normalized.replace(',', '.');
+      }
+
+      const parsed = Number(normalized);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    return 0;
+  }
+
+  private normalizeDetalleItem(item: any): any {
+    if (!item || typeof item !== 'object') {
+      return item;
+    }
+
+    const rubro = item.idrubro_rubros && typeof item.idrubro_rubros === 'object'
+      ? item.idrubro_rubros
+      : {};
+
+    const descripcion =
+      rubro.descripcion ||
+      rubro.nombre ||
+      (typeof item.idrubro_rubros === 'string' ? item.idrubro_rubros : '') ||
+      item.descripcion ||
+      item.rubro ||
+      item.nombre ||
+      'Rubro';
+
+    const cantidad =
+      this.toNumber(
+        item.cantidad ??
+        item.cant ??
+        item.qty ??
+        item.cantidadrubro ??
+        item.cantidad_rubro
+      ) || 1;
+
+    const valorunitario = this.toNumber(
+      item.valorunitario ??
+      item.valorUnitario ??
+      item.preciounitario ??
+      item.precioUnitario ??
+      item.valor ??
+      item.monto
+    );
+
+    const totalRubro = this.toNumber(
+      item.totalRubro ??
+      item.totalrubro ??
+      item.subtotal ??
+      item.total ??
+      item.importe
+    );
+
+    return {
+      ...item,
+      cantidad,
+      valorunitario: valorunitario || (cantidad > 0 ? totalRubro / cantidad : 0),
+      totalRubro,
+      estado: item.estado ?? 1,
+      idrubro_rubros: {
+        ...rubro,
+        descripcion,
+        nombre: rubro.nombre || descripcion,
+        swiva: rubro.swiva ?? item.swiva ?? item.esIva ?? 0,
+        esiva: rubro.esiva ?? item.esiva ?? item.es_rubro_iva ?? 0,
+      },
+      idfactura_facturas:
+        item.idfactura_facturas ??
+        (item.idfactura ? { idfactura: item.idfactura } : undefined),
+    };
+  }
+
+  private normalizeDetalleResponse(items: any): Rubroxfac[] {
+    if (!Array.isArray(items)) {
+      return [];
+    }
+
+    return items.map((item) => this.normalizeDetalleItem(item));
+  }
+
+  private getWithFallback<T>(path: string, legacyPath: string = path): Observable<T> {
+    return this.http
+      .get<T>(`${legacyBaseUrl}${legacyPath}`)
+      .pipe(catchError(() => this.http.get<T>(`${apiBaseUrl}${path}`)));
+  }
 
   async getSumaValoresUnitarios(idfactura: number): Promise<any> {
     let res = await firstValueFrom(this.http.get<any>(`${baseUrl}/sumavalores?idfactura=${idfactura}`));
@@ -43,23 +153,31 @@ export class RubroxfacService {
   }
 
   getByIdfactura(idfactura: number) {
-    return this.http.get<Rubroxfac[]>(`${baseUrl}?idfactura=${idfactura}`);
+    return this.http
+      .get<Rubroxfac[]>(`${baseUrl}?idfactura=${idfactura}`)
+      .pipe(map((items) => this.normalizeDetalleResponse(items)));
   }
 
   getDetalleByIdfactura(idfactura: number) {
-    return this.http.get<Rubroxfac[]>(`${baseUrl}/detalle?idfactura=${idfactura}`);
+    return this.getWithFallback<Rubroxfac[]>(`/detalle?idfactura=${idfactura}`).pipe(
+      map((items) => this.normalizeDetalleResponse(items))
+    );
   }
 
   async getDetalleByIdfacturaAsync(idfactura: number) {
     const response = await firstValueFrom(
-      this.http.get<Rubroxfac[]>(`${baseUrl}/detalle?idfactura=${idfactura}`)
+      this.getWithFallback<Rubroxfac[]>(`/detalle?idfactura=${idfactura}`).pipe(
+        map((items) => this.normalizeDetalleResponse(items))
+      )
     );
     return response;
   }
 
   async getByIdfacturaAsync(idfactura: number) {
     const response = await firstValueFrom(
-      this.http.get<Rubroxfac[]>(`${baseUrl}?idfactura=${idfactura}`)
+      this.http
+        .get<Rubroxfac[]>(`${baseUrl}?idfactura=${idfactura}`)
+        .pipe(map((items) => this.normalizeDetalleResponse(items)))
     );
     return response;
   }
@@ -161,7 +279,7 @@ export class RubroxfacService {
   }
 
   getByIdrubro(idrubro: number) {
-    return this.http.get<Rubroxfac[]>(`${baseUrl}/rubro/${idrubro}`);
+    return this.getWithFallback<Rubroxfac[]>(`/rubro/${idrubro}`);
   }
 
   getById(idrubroxfac: number) {

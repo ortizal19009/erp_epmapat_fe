@@ -7,11 +7,9 @@
   },
   "files": [
     "src/main.ts",
-    "src/polyfills.ts",
-    "src/app/componentes/convenios/convenios-reports.service.ts"
+    "src/polyfills.ts"
   ],
   "include": [
-    "src/**/*.ts",
     "src/**/*.d.ts"
   ],
   "exclude": [

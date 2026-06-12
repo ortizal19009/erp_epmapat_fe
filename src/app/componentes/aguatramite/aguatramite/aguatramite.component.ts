@@ -79,6 +79,7 @@ export class AguatramiteComponent implements OnInit {
       this.listartipotramite();
       this.listarByTipoTramite();
       this.setcolor();
+      this.actualizarEstadoControl();
       this.optImprimir.patchValue({
          desde: formatDate(this.today, 'yyyy-MM-dd', 'en-US'),
          hasta: formatDate(this.today, 'yyyy-MM-dd', 'en-US')
@@ -151,6 +152,7 @@ export class AguatramiteComponent implements OnInit {
          size: this.pageSize,
       }).subscribe({
          next: (datos: any) => {
+            console.log('Datos recibidos:', datos);
             this._aguatramite = datos?.content || [];
             this.totalElements = datos?.totalElements || 0;
             this.totalPages = datos?.totalPages || 0;
@@ -161,13 +163,26 @@ export class AguatramiteComponent implements OnInit {
    }
 
    onTipoTramiteChange(): void {
-      if (!this.debeFiltrarPorEstado()) {
-         this.formBuscar.patchValue({ estado: 3 }, { emitEvent: false });
-      }
+      this.actualizarEstadoControl();
    }
 
    debeFiltrarPorEstado(): boolean {
       return +this.formBuscar?.value?.idtipotramite_tipotramite === 1;
+   }
+
+   private actualizarEstadoControl(): void {
+      const estadoControl = this.formBuscar?.get('estado');
+      if (!estadoControl) {
+         return;
+      }
+
+      if (this.debeFiltrarPorEstado()) {
+         estadoControl.enable({ emitEvent: false });
+         return;
+      }
+
+      estadoControl.setValue(3, { emitEvent: false });
+      estadoControl.disable({ emitEvent: false });
    }
 
    cambiarPagina(delta: number): void {
@@ -250,7 +265,7 @@ export class AguatramiteComponent implements OnInit {
    private obtenerValorOrden(item: any, column: string): any {
       switch (column) {
          case 'cliente':
-            return item?.idcliente_clientes?.nombre ?? '';
+            return this.getNombreClienteTramite(item);
          case 'cuenta':
             return this.getCuentaTramite(item);
          case 'feccrea':
@@ -411,8 +426,40 @@ export class AguatramiteComponent implements OnInit {
       return est.estado;
    }
 
+   getNombreClienteTramite(aguatramite: any): string {
+      console.log('Obteniendo nombre cliente para trámite:', aguatramite);
+      const candidato =
+         aguatramite?.idcliente_clientes ||
+         aguatramite?.cliente ||
+         aguatramite?.abonado?.idcliente_clientes ||
+         aguatramite?.idabonado_abonados?.idcliente_clientes ||
+         aguatramite?.idaguatramite_aguatramite?.idcliente_clientes ||
+         aguatramite?.idtramitenuevo_tramitenuevo?.idaguatramite_aguatramite?.idcliente_clientes ||
+         null;
+
+      return (
+         candidato?.nombre ||
+         candidato?.nombres ||
+         candidato?.razonsocial ||
+         aguatramite?.nombre ||
+         aguatramite?.nombres ||
+         aguatramite?.razonsocial ||
+         ''
+      );
+   }
+
    getCuentaTramite(aguatramite: any): string {
-      return `${aguatramite?.idabonado ?? aguatramite?.idabonado_abonados?.idabonado ?? aguatramite?.abonado?.idabonado ?? aguatramite?.codmedidor ?? ''}`;
+      const cuenta =
+         aguatramite?.idabonado ??
+         aguatramite?.idabonado_abonados?.idabonado ??
+         aguatramite?.abonado?.idabonado ??
+         aguatramite?.idtramitenuevo_tramitenuevo?.idaguatramite_aguatramite?.idabonado ??
+         aguatramite?.idaguatramite_aguatramite?.idabonado ??
+         aguatramite?.cuenta ??
+         aguatramite?.codmedidor ??
+         '';
+
+      return `${cuenta}`;
    }
 
    private async obtenerTramitesFiltradosParaImpresion(): Promise<any[]> {
@@ -482,7 +529,7 @@ export class AguatramiteComponent implements OnInit {
 
       return registros.filter((item: any) => {
          const valores = [
-            item?.idcliente_clientes?.nombre,
+            this.getNombreClienteTramite(item),
             this.getCuentaTramite(item),
             item?.feccrea ? formatDate(item.feccrea, 'dd-MM-y', 'en-US') : '',
             this.setEstado(item?.estado),

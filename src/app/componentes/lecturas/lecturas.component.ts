@@ -236,12 +236,12 @@ export class LecturasComponent implements OnInit {
     const csvData = [
       columnTitles,
       ...this._lecturas.map((lectura: any) => [
-        lectura.idabonado_abonados.idabonado,
-        lectura.idabonado_abonados.nromedidor,
-        lectura.idabonado_abonados.idcliente_clientes.nombre,
+        lectura?.idabonado_abonados?.idabonado ?? '',
+        lectura?.idabonado_abonados?.nromedidor ?? '',
+        this.getAbonadoNombre(lectura),
         lectura.lecturaanterior,
-        lectura.idabonado_abonados.direccionubicacion,
-        lectura.idabonado_abonados.idcategoria_categorias.descripcion,
+        lectura?.idabonado_abonados?.direccionubicacion ?? '',
+        this.getCategoriaDescripcion(lectura),
         60,
         '',
         '',
@@ -250,8 +250,8 @@ export class LecturasComponent implements OnInit {
         '',
         '',
         0,
-        'Ciclo 02/Sector 040' + lectura.idabonado_abonados.direccionubicacion,
-        lectura.idabonado_abonados.secuencia,
+        'Ciclo 02/Sector 040' + (lectura?.idabonado_abonados?.direccionubicacion ?? ''),
+        lectura?.idabonado_abonados?.secuencia ?? '',
         lectura.idlectura,
       ]),
     ];
@@ -317,6 +317,14 @@ export class LecturasComponent implements OnInit {
 
   getFechaLectura(lectura: any): string | Date | null {
     return lectura?.fechalectura ?? lectura?.fechaemision ?? null;
+  }
+
+  private getAbonadoNombre(lectura: any): string {
+    return lectura?.idabonado_abonados?.idcliente_clientes?.nombre ?? 'Sin nombre';
+  }
+
+  private getCategoriaDescripcion(lectura: any): string {
+    return lectura?.idabonado_abonados?.idcategoria_categorias?.descripcion ?? '';
   }
 
   formatFechaControl(valor: any): string {
@@ -469,8 +477,8 @@ export class LecturasComponent implements OnInit {
         suma +=
           this._lecturas[i].lecturaactual - this._lecturas[i].lecturaanterior;
       }
-      promedio += this._lecturas[i].idabonado_abonados.promedio;
-      arecaudar += this._lecturas[i].total1;
+      promedio += Number(this._lecturas[i]?.idabonado_abonados?.promedio || 0);
+      arecaudar += Number(this._lecturas[i]?.total1 || 0);
       i++;
     });
     this.sumtotal = suma;

@@ -1,19 +1,27 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, firstValueFrom, map } from 'rxjs';
+import { Observable, catchError, firstValueFrom, map } from 'rxjs';
 import { Facturas } from '../modelos/facturas.model';
 import { environment } from 'src/environments/environment';
 import { InteresesService } from './intereses.service';
 import { PageResponse } from '../interfaces/page-response';
 
-const apiUrl = environment.API_URL;
-const baseUrl = `${apiUrl}/facturas`;
+const apiUrl = environment.API_URL.replace(/\/$/, '');
+const apiBaseUrl = `${apiUrl}/api/facturas`;
+const legacyBaseUrl = `${apiUrl}/facturas`;
+const baseUrl = legacyBaseUrl;
 
 @Injectable({
   providedIn: 'root',
 })
 export class FacturaService {
   constructor(private http: HttpClient, private s_interes: InteresesService) { }
+
+  private getWithFallback<T>(path: string, legacyPath: string = path): Observable<T> {
+    return this.http
+      .get<T>(`${legacyBaseUrl}${legacyPath}`)
+      .pipe(catchError(() => this.http.get<T>(`${apiBaseUrl}${path}`)));
+  }
 
   getListaByNroFactura(nrofactura: String) {
     return this.http.get<Facturas>(`${baseUrl}?nrofactura=${nrofactura}`);
@@ -77,8 +85,8 @@ export class FacturaService {
 
   //Una Planilla (como lista)
   getPlanilla(idfactura: number) {
-    return this.http.get<Facturas[]>(
-      `${baseUrl}/planilla?idfactura=${idfactura}`
+    return this.getWithFallback<Facturas[]>(
+      `/planilla?idfactura=${idfactura}`
     );
   }
 
@@ -88,8 +96,8 @@ export class FacturaService {
     fechaDesde: Date,
     fechaHasta: Date
   ): Observable<Facturas[]> {
-    return this.http.get<Facturas[]>(
-      `${baseUrl}/porabonado?idabonado=${idabonado}&fechaDesde=${fechaDesde}&fechaHasta=${fechaHasta}`
+    return this.getWithFallback<Facturas[]>(
+      `/porabonado?idabonado=${idabonado}&fechaDesde=${fechaDesde}&fechaHasta=${fechaHasta}`
     );
   }
   /* GLOBALES */
@@ -193,7 +201,7 @@ export class FacturaService {
   }
 
   getById(idfactura: number): Observable<Facturas> {
-    return this.http.get<Facturas>(`${baseUrl}/${idfactura}`);
+    return this.getWithFallback<Facturas>(`/${idfactura}`);
   }
   async getByIdAsync(idfactura: number): Promise<any> {
     let response = firstValueFrom(

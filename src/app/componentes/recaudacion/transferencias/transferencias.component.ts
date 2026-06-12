@@ -264,28 +264,37 @@ export class TransferenciasComponent implements OnInit {
 
   //Modal del Detalle de la Planilla
   getRubroxfac(idfactura: number) {
-    let _lecturas: any;
     this.consumo = 0;
     this.idfactura = idfactura;
-    this.lecService.getByIdfactura(idfactura).subscribe({
-      next: (resp) => {
-        _lecturas = resp;
-        this.consumo =
-          _lecturas[0].lecturaactual - _lecturas[0].lecturaanterior;
-        this.rubxfacService.getDetalleByIdfactura(idfactura).subscribe({
-          next: (detalle) => {
-            this._rubrosxfac = detalle;
-            this.subtotal();
-          },
-          error: (err) =>
-            console.error(
-              'Al recuperar el datalle de la Planilla: ',
-              err.error
-            ),
-        });
+    this.rubxfacService.getDetalleByIdfactura(idfactura).subscribe({
+      next: (detalle) => {
+        this._rubrosxfac = (detalle || []).filter(
+          (item: any) => Number(item?.estado ?? 1) !== 0
+        );
+        this.subtotal();
       },
       error: (err) =>
-        console.error('Al recuperar la Lectura de la Planilla: ', err.error),
+        console.error(
+          'Al recuperar el datalle de la Planilla: ',
+          err.error
+        ),
+    });
+
+    this.lecService.getByIdfactura(idfactura).subscribe({
+      next: (resp) => {
+        const lectura = Array.isArray(resp) ? resp[0] : null;
+        if (!lectura) {
+          this.consumo = 0;
+          return;
+        }
+
+        this.consumo =
+          Number(lectura.lecturaactual || 0) - Number(lectura.lecturaanterior || 0);
+      },
+      error: (err) => {
+        this.consumo = 0;
+        console.error('Al recuperar la Lectura de la Planilla: ', err.error);
+      },
     });
   }
 

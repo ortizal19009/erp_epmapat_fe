@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { Aguatramite } from 'src/app/modelos/aguatramite.model';
-import { TramiteNuevoService } from 'src/app/servicios/tramite-nuevo.service';
 import { Clientes } from 'src/app/modelos/clientes';
+import { TramiteNuevoService } from 'src/app/servicios/tramite-nuevo.service';
 import { TramiteNuevo } from 'src/app/modelos/tramite-nuevo';
 import { TramitesAguaService } from 'src/app/servicios/tramites-agua.service';
+import { ClientesService } from 'src/app/servicios/clientes.service';
 
 @Component({
   selector: 'app-info-aguatramite',
@@ -22,7 +24,8 @@ export class InfoAguatramiteComponent implements OnInit {
   constructor(
     private getRouter: ActivatedRoute,
     private traminuevoService: TramiteNuevoService,
-    private tramiaguaService: TramitesAguaService
+    private tramiaguaService: TramitesAguaService,
+    private clientesService: ClientesService
   ) {}
 
   ngOnInit(): void {
@@ -55,9 +58,10 @@ export class InfoAguatramiteComponent implements OnInit {
     this.traminuevoService.getListaById(id).subscribe({
       next: (datos) => {
         this.tramitenuevo = datos;
-        this.cliente = datos.idaguatramite_aguatramite.idcliente_clientes;
-        this.aguatramite = datos.idaguatramite_aguatramite;
-        this.setEstado(datos.idaguatramite_aguatramite.estado);
+        this.aguatramite = datos?.idaguatramite_aguatramite || new Aguatramite();
+        this.cliente = this.aguatramite?.idcliente_clientes || new Clientes();
+        this.cargarClienteCompleto();
+        this.setEstado(Number(this.aguatramite?.estado || 0));
       },
       error: (e) => console.error(e),
     });
@@ -106,5 +110,40 @@ export class InfoAguatramiteComponent implements OnInit {
       },
       'Concesión de servicios'
     );
+  }
+
+  getNombreCliente(): string {
+    return String(
+      this.cliente?.nombre ||
+      this.aguatramite?.idcliente_clientes?.nombre ||
+      this.tramitenuevo?.idaguatramite_aguatramite?.idcliente_clientes?.nombre ||
+      'Sin cliente'
+    );
+  }
+
+  getCuenta(): string {
+    return (
+      `${this.aguatramite?.idaguatramite ?? ''}` ||
+      `${this.tramitenuevo?.idaguatramite_aguatramite?.idaguatramite ?? ''}` ||
+      `${this.aguatramite?.idfactura_facturas ?? ''}` ||
+      ''
+    );
+  }
+
+  private cargarClienteCompleto(): void {
+    const idcliente = this.aguatramite?.idcliente_clientes?.idcliente;
+    if (!idcliente || this.cliente?.nombre) {
+      return;
+    }
+
+    this.clientesService.getListaById(idcliente).subscribe({
+      next: (datos: any) => {
+        const cliente = Array.isArray(datos) ? datos?.[0] : datos;
+        if (cliente) {
+          this.cliente = cliente;
+        }
+      },
+      error: (e) => console.error('No se pudo cargar el cliente completo', e),
+    });
   }
 }

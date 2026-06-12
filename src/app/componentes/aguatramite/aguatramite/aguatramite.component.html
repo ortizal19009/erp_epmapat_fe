@@ -15,8 +15,7 @@
                      </select>
                   </div>
                   <div class="col-12 col-md-6 col-lg-2 col-xl-2 px-1 mb-1 mb-lg-0">
-                     <select name="" id="" class="form-control form-control-sm" formControlName="estado"
-                        [disabled]="!debeFiltrarPorEstado()">
+                     <select name="" id="" class="form-control form-control-sm" formControlName="estado">
                         <option *ngFor="let estado of estados" value={{estado.valor}}>{{estado.estado}}</option>
                      </select>
                   </div>
@@ -93,7 +92,7 @@
             <tbody>
                <tr *ngFor="let aguatramite of _aguatramite | filter:filterTerm; let i= index">
                   <td class="text-center font-weight-bold small">{{i+1}}</td>
-                  <td class="description">{{ aguatramite.idcliente_clientes.nombre }}</td>
+                  <td class="description">{{ getNombreClienteTramite(aguatramite) || 'Sin cliente' }}</td>
                   <td>{{ getCuentaTramite(aguatramite) }}</td>
                   <td class="text-center">{{ aguatramite.feccrea | date: 'dd-MM-y' }}</td>
                   <td>{{ setEstado( aguatramite.estado) }}</td>

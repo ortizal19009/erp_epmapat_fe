@@ -9,7 +9,7 @@
         <h4 class="m-0 font-weight-bold">
           <i class="fa fa-building"></i> Abonado
           <small class="ml-2 badge badge-light">
-            Cuenta: {{abonado.idabonado}}
+            Cuenta: {{ abonado.idabonado || '' }}
           </small>
         </h4>
       </div>
@@ -67,37 +67,37 @@
           <h3 class="profile-username text-center">
             <a role="button" class="text-dark" style="cursor:pointer; text-decoration:underline dotted;"
               (click)="irDetallesCliente()" title="Ver detalles del cliente">
-              {{ abonado.nombre }}
+              {{ abonado.nombre || 'Sin datos del abonado' }}
             </a>
           </h3>
           <p class="text-muted text-center">
-            <span class="badge badge-light">Cuenta: {{abonado.idabonado}}</span>
+            <span class="badge badge-light">Cuenta: {{ abonado.idabonado || '' }}</span>
           </p>
 
           <ul class="list-group list-group-unbordered mb-3">
             <li class="list-group-item">
-              <b>Categoría</b> <a class="float-right">{{ abonado.categoria }}</a>
+              <b>Categoría</b> <a class="float-right">{{ abonado.categoria || '' }}</a>
             </li>
             <li class="list-group-item">
-              <b>Estado</b> <a class="float-right">{{ abonado.textestado }}</a>
+              <b>Estado</b> <a class="float-right">{{ abonado.textestado || '' }}</a>
             </li>
             <li class="list-group-item">
-              <b>Nro. Medidor</b> <a class="float-right">{{ abonado.nromedidor }}</a>
+              <b>Nro. Medidor</b> <a class="float-right">{{ abonado.nromedidor || '' }}</a>
             </li>
             <li class="list-group-item">
               <b>Fecha instalación</b>
               <a class="float-right">{{ abonado.fechainstalacion | date:'dd/MM/y' }}</a>
             </li>
             <li class="list-group-item">
-              <b>Ruta</b> <a class="float-right">{{ abonado.ruta }}</a>
+              <b>Ruta</b> <a class="float-right">{{ abonado.ruta || '' }}</a>
             </li>
             <li class="list-group-item">
               <b>Dirección</b>
-              <a class="float-right">{{ abonado.direccionubicacion }}</a>
+              <a class="float-right">{{ abonado.direccionubicacion || '' }}</a>
             </li>
             <li class="list-group-item">
               <b>Responsable pago</b>
-              <a class="float-right">{{ abonado.responsablepago }}</a>
+              <a class="float-right">{{ abonado.responsablepago || '' }}</a>
             </li>
             <li class="list-group-item">
               <b>Adulto mayor</b>
@@ -666,7 +666,7 @@
 
                       <tr>
                         <th class="theadPlanillas">Cliente</th>
-                        <td class="bodyPlanillas description">{{detalleFactura?.idcliente.nombre}}</td>
+                        <td class="bodyPlanillas description">{{ getNombreClienteFactura() }}</td>
                       </tr>
 
                       <tr *ngIf="detalleFactura?.fechaeliminacion">

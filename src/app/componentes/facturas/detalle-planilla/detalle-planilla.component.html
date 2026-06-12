@@ -28,9 +28,9 @@
             <tbody>
                 <tr class="fila" *ngFor="let r of _rubros">
                     <td class="text-center font-weight-bold small">{{r.cantidad}}</td>
-                    <td>{{r.idrubro_rubros.descripcion}}</td>
-                    <td class="text-right">{{r.valorunitario.toFixed(2)}}</td>
-                    <td class="text-right">{{(r.cantidad * r.valorunitario).toFixed(2)}}</td>
+                    <td>{{ getDescripcionRubro(r) }}</td>
+                    <td class="text-right">{{ getValorUnitarioRubro(r).toFixed(2) }}</td>
+                    <td class="text-right">{{ getTotalRubro(r).toFixed(2) }}</td>
                 </tr>
                 <tr>
                     <td colspan="3" class="font-weight-bold text-right">Subtotal tarifa IVA</td>

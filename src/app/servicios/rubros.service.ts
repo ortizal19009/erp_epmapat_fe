@@ -1,11 +1,13 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { firstValueFrom, Observable } from 'rxjs';
+import { catchError, firstValueFrom, Observable } from 'rxjs';
 import { Rubros } from '../modelos/rubros.model';
 import { environment } from 'src/environments/environment';
 
-const apiUrl = environment.API_URL;
-const baseUrl = `${apiUrl}/rubros`;
+const apiUrl = environment.API_URL.replace(/\/$/, '');
+const apiBaseUrl = `${apiUrl}/api/rubros`;
+const legacyBaseUrl = `${apiUrl}/rubros`;
+const baseUrl = legacyBaseUrl;
 
 @Injectable({
   providedIn: 'root',
@@ -13,13 +15,19 @@ const baseUrl = `${apiUrl}/rubros`;
 export class RubrosService {
   constructor(private http: HttpClient) { }
 
+  private getWithFallback<T>(path: string, legacyPath: string = path): Observable<T> {
+    return this.http
+      .get<T>(`${legacyBaseUrl}${legacyPath}`)
+      .pipe(catchError(() => this.http.get<T>(`${apiBaseUrl}${path}`)));
+  }
+
   getAll(): Observable<Rubros[]> {
     return this.http.get<Rubros[]>(baseUrl);
   }
 
   //Rubros por módulo (Sección)
   getByIdmodulo(idmodulo: number) {
-    return this.http.get<Rubros>(`${baseUrl}/modulo/${idmodulo}`);
+    return this.getWithFallback<Rubros>(`/modulo/${idmodulo}`);
   }
 
   //Rubros por módulo (Sección) y descripcion
@@ -30,7 +38,7 @@ export class RubrosService {
   }
 
   getRubroById(idrubro: number) {
-    return this.http.get<Rubros>(`${baseUrl}/${idrubro}`);
+    return this.getWithFallback<Rubros>(`/${idrubro}`);
   }
 
   //Validar por Módulo y nombre

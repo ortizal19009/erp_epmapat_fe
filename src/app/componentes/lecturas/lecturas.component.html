@@ -78,9 +78,9 @@
             <td class="small text-center font-weight-bold"><i class="bi-bookmark-check-fill check"
                 *ngIf="i == antIndice"></i><i class="bi bi-exclamation-triangle-fill text-warning mr-1"
                 *ngIf="!hasNegativeConsumption(lectura) && hasHighConsumptionVsAverage(lectura)"></i>{{i+1}}</td>
-            <td class="text-center">{{ lectura.idabonado_abonados.idabonado }}</td>
-            <td class="description">{{ lectura.idabonado_abonados.idcliente_clientes.nombre }}</td>
-            <td class="">{{ lectura.idabonado_abonados.idcategoria_categorias.descripcion }}</td>
+            <td class="text-center">{{ lectura?.idabonado_abonados?.idabonado ?? '' }}</td>
+            <td class="description">{{ lectura?.idabonado_abonados?.idcliente_clientes?.nombre ?? 'Sin nombre' }}</td>
+            <td class="">{{ lectura?.idabonado_abonados?.idcategoria_categorias?.descripcion ?? '' }}</td>
             <td class="text-center">{{ getFechaLectura(lectura) | date:'dd/MM/yyyy HH:mm' }}</td>
             <td class="text-right"
               [ngClass]="{'fontwarning': lectura.lecturaanterior == 0 && lectura.lecturaactual == 0 }">{{
@@ -91,9 +91,9 @@
             <td class="text-right"
               [ngClass]="{'fontwarning': ((lectura.lecturaanterior == 0 && lectura.lecturaactual == 0) || lectura.lecturaactual - lectura.lecturaanterior <= 0 || (lectura.lecturaanterior > 0 && lectura.lecturaactual == 0)), 'transparente': !swcargado }">
               {{ lectura.lecturaactual - lectura.lecturaanterior | number: '1.0' }}</td>
-            <td class="text-right">{{ lectura.idabonado_abonados.promedio }}</td>
+            <td class="text-right">{{ lectura?.idabonado_abonados?.promedio ?? 0 }}</td>
             <td class="text-right">{{ lectura.total1 | number: '1.2-2' }}</td>
-            <td>{{ lectura.idnovedad_novedades.descripcion }}</td>
+            <td>{{ lectura?.idnovedad_novedades?.descripcion ?? '' }}</td>
             <td class="text-center">
               <div class="btn-group py-0">
                 <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"

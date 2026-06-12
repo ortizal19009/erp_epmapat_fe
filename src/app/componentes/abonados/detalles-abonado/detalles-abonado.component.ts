@@ -201,13 +201,23 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
   }
   getFactura() {
     this.facturasPage = 0;
-    this.facturasxAbonado(this.abonado.idabonado, 0);
+    const idabonado = this.resolverIdAbonado();
+    if (idabonado) {
+      this.facturasxAbonado(idabonado, 0);
+    }
   }
 
   private resolverIdAbonado(): number | null {
     const rawId = this.cuenta ?? sessionStorage.getItem('idabonadoToFactura');
     const idabonado = Number(rawId);
     return Number.isFinite(idabonado) && idabonado > 0 ? idabonado : null;
+  }
+
+  private normalizarAbonado(datos: any): any {
+    if (Array.isArray(datos)) {
+      return datos.find((item) => !!item) ?? {};
+    }
+    return datos ?? {};
   }
 
   obtenerDatosAbonado() {
@@ -223,11 +233,16 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
 
     this.aboService.getById(idabonado).subscribe({
       next: (datos: any) => {
-        const abonadoActual = datos ?? {};
+        const abonadoActual = this.normalizarAbonado(datos);
         const responsable = abonadoActual.idresponsable ?? {};
         const cliente = abonadoActual.idcliente_clientes ?? {};
         const ruta = abonadoActual.idruta_rutas ?? {};
         const categoria = abonadoActual.idcategoria_categorias ?? {};
+        const nombreAbonado =
+          cliente.nombre ||
+          responsable.nombre ||
+          abonadoActual.nombre ||
+          '';
 
         this.email = responsable.email?.toString?.() ?? '';
         this.f_sendEmail.patchValue({
@@ -236,19 +251,19 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
 
         this._abonado = [abonadoActual];
         this.abonado.idabonado = abonadoActual.idabonado;
-        this.abonado.nombre = cliente.nombre;
+        this.abonado.nombre = nombreAbonado;
         this.abonado.nromedidor = abonadoActual.nromedidor;
         this.abonado.marca = abonadoActual.marca;
         this.abonado.fechainstalacion = abonadoActual.fechainstalacion;
         this.abonado.direccionubicacion = abonadoActual.direccionubicacion;
-        this.abonado.ruta = ruta.descripcion;
-        this.abonado.categoria = categoria.descripcion;
+        this.abonado.ruta = ruta.descripcion || '';
+        this.abonado.categoria = categoria.descripcion || '';
         this.abonado.estado = abonadoActual.estado;
         this.abonado.textestado = getEstadoText(abonadoActual.estado);
         this.abonado.municipio = abonadoActual.municipio;
         this.abonado.adultomayor = abonadoActual.adultomayor;
         this.abonado.promedio = abonadoActual.promedio;
-        this.abonado.responsablepago = responsable.nombre;
+        this.abonado.responsablepago = responsable.nombre || '';
         this.abonado.geolocalizacion = abonadoActual.geolocalizacion;
         this.abonado.swbasura = abonadoActual.swbasura;
         this.abonado.fotoPath =
@@ -447,7 +462,25 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
       return valor;
     }
   }
+
+  getNombreClienteFactura(): string {
+    const facturaActual: any = this.factura;
+    return (
+      this.detalleFactura?.idcliente?.nombre ||
+      this.detalleFactura?.idcliente_clientes?.nombre ||
+      this.detalleFactura?.razonsocialcomprador ||
+      facturaActual?.idcliente?.nombre ||
+      facturaActual?.idcliente_clientes?.nombre ||
+      this.abonado?.nombre ||
+      'Sin cliente'
+    );
+  }
+
   lecturasxAbonado(idabonado: number) {
+    if (!idabonado) {
+      this._lecturas = [];
+      return;
+    }
     this.lecService.getLecturasxIdabonado(idabonado, 15).subscribe({
       next: (datos) => {
         this._lecturas = datos;

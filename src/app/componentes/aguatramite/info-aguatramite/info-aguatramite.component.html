@@ -31,7 +31,8 @@
       <div class="col-sm-3">
          <div class="card card-outline sombra">
             <div class="card-body box-profile detalle">
-               <h3 class="profile-username text-center">{{cliente.nombre}} </h3>
+               <h3 class="profile-username text-center">{{ getNombreCliente() }} </h3>
+               <p class="text-center mb-1"><strong>Cuenta:</strong> {{ getCuenta() }}</p>
                <p class="text-muted text-center">Tramite Nro: {{tramitenuevo.idtramitenuevo}}<strong
                      id="esmedidor"></strong></p>
                <p class="text-muted text-center">Estado: {{estadoTramite}}<strong id="esmedidor"></strong>

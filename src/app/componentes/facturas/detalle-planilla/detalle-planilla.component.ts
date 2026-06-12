@@ -173,6 +173,26 @@ export class DetallePlanillaComponent implements OnInit, OnChanges {
     this.sumaDetail = this.totalPlanilla;
   }
 
+  getDescripcionRubro(rubro: any): string {
+    return (
+      rubro?.idrubro_rubros?.descripcion ||
+      rubro?.idrubro_rubros?.nombre ||
+      (typeof rubro?.idrubro_rubros === 'string' ? rubro.idrubro_rubros : '') ||
+      rubro?.descripcion ||
+      rubro?.rubro ||
+      rubro?.nombre ||
+      'Rubro'
+    );
+  }
+
+  getValorUnitarioRubro(rubro: any): number {
+    return Number(rubro?.valorunitario || 0);
+  }
+
+  getTotalRubro(rubro: any): number {
+    return Number(rubro?.cantidad || 0) * this.getValorUnitarioRubro(rubro);
+  }
+
   get totalPlanilla(): number {
     const totalTarifa = Number(this.planilla?.totaltarifa || 0);
     const interes = Number(this.interes || 0);

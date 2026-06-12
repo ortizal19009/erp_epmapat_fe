@@ -16,9 +16,9 @@
       </tr>
 
       <tr *ngFor="let item of _itemxfact" class="fila">
-         <td class="text-left">{{item.idcatalogoitems_catalogoitems.descripcion}}</td>
-         <td>{{item.idcatalogoitems_catalogoitems.idrubro_rubros.idrubro}}</td>
-         <td class="text-left">{{item.idcatalogoitems_catalogoitems.idrubro_rubros.descripcion}}</td>
+         <td class="text-left">{{item?.idcatalogoitems_catalogoitems?.descripcion || ''}}</td>
+         <td>{{item?.idcatalogoitems_catalogoitems?.idrubro_rubros?.idrubro || ''}}</td>
+         <td class="text-left">{{item?.idcatalogoitems_catalogoitems?.idrubro_rubros?.descripcion || ''}}</td>
          <td class="text-center">{{item.cantidad}}</td>
          <td class="text-right">{{item.valorunitario | number:'1.2-2'}}</td>
          <td class="text-right">{{item.cantidad * item.valorunitario | number:'1.2-2'}}</td>

@@ -8,65 +8,77 @@ import { LiquidafacService } from 'src/app/servicios/liquidafac.service';
   templateUrl: './info-facturacion.component.html',
   styleUrls: ['./info-facturacion.component.css']
 })
-
 export class InfoFacturacionComponent implements OnInit {
-
-  facturacion = {} as Facturacion; //Interface para los datos del registro de la Facturación
+  facturacion = {} as FacturacionView;
   elimdisabled = true;
   _liquidafac: any;
   totfac: number;
 
-  constructor(private factuService: FacturacionService, private router: Router,
-    private liqfacService: LiquidafacService) { }
+  constructor(
+    private factuService: FacturacionService,
+    private router: Router,
+    private liqfacService: LiquidafacService
+  ) {}
 
-  ngOnInit(): void { this.getDatosFacturacion(); }
+  ngOnInit(): void {
+    this.getDatosFacturacion();
+  }
 
   getDatosFacturacion() {
-    let idFacturacion = sessionStorage.getItem('idfacturacionToInfo');
+    const idFacturacion = sessionStorage.getItem('idfacturacionToInfo');
     this.factuService.getById(+idFacturacion!).subscribe({
-      next: datos => {
-        this.facturacion.idfacturacion = datos.idfacturacion;
-        this.facturacion.descripcion = datos.descripcion;
-        this.facturacion.fecha = datos.feccrea;
-        this.facturacion.nomcli = datos.idcliente_clientes.nombre;
-        this.facturacion.total = datos.total;
-        this.facturacion.cuotas = datos.cuotas;
+      next: (datos: any) => {
+        this.facturacion.idfacturacion = Number(datos?.idfacturacion || 0);
+        this.facturacion.descripcion = datos?.descripcion || '';
+        this.facturacion.fecha = datos?.feccrea || datos?.fecha || null;
+        this.facturacion.nomcli = this.resolveNombreCliente(datos);
+        this.facturacion.total = Number(datos?.total || 0);
+        this.facturacion.cuotas = Number(datos?.cuotas || 0);
       },
-      error: err => console.error(err.error)
-    })
+      error: (err) => console.error(err.error)
+    });
   }
 
-  regresarFacturacion() { this.router.navigate(['/facturacion']); }
-
-  modiFacturacion() {
+  regresarFacturacion() {
+    this.router.navigate(['/facturacion']);
   }
+
+  modiFacturacion() {}
 
   liquidafac(idfacturacion: number) {
     this.liqfacService.getByIdfacturacion(idfacturacion).subscribe({
-      next: datos => {
+      next: (datos) => {
         this._liquidafac = datos;
         this.subtotal();
       },
-      error: err => console.error(err.error)
-    })
+      error: (err) => console.error(err.error)
+    });
   }
 
   subtotal() {
-    let suma: number = 0;
+    let suma = 0;
     let i = 0;
     this._liquidafac.forEach(() => {
-      suma += this._liquidafac[i].idfactura_facturas.totaltarifa
+      suma += Number(this._liquidafac[i]?.idfactura_facturas?.totaltarifa || 0);
       i++;
     });
     this.totfac = suma;
   }
 
+  private resolveNombreCliente(datos: any): string {
+    return (
+      datos?.idcliente_clientes?.nombre ||
+      datos?.nomcli ||
+      datos?.cliente ||
+      ''
+    );
+  }
 }
 
-interface Facturacion {
+interface FacturacionView {
   idfacturacion: number;
   descripcion: String;
-  fecha: Date;
+  fecha: Date | string | null;
   nomcli: String;
   total: number;
   cuotas: number;

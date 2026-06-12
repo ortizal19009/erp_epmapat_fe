@@ -24,9 +24,10 @@ export class ItemxfactComponent implements OnInit {
     this.ixfServicio.getByIdfacturacion(this.idfacturacion).subscribe({
       next: (datos: any) => {
         console.log(datos);
-        this._itemxfact = datos;
+        this._itemxfact = Array.isArray(datos) ? datos.filter((x) => !!x) : [];
+        const primerItem = this._itemxfact[0];
         this.usoitem =
-          this._itemxfact[0].idcatalogoitems_catalogoitems.idusoitems_usoitems.descripcion;
+          primerItem?.idcatalogoitems_catalogoitems?.idusoitems_usoitems?.descripcion || '';
         this.subtotal();
       },
       error: (err) => console.error(err.error),
@@ -47,17 +48,13 @@ export class ItemxfactComponent implements OnInit {
   subtotal() {
     let suma = 0;
     let sumiva = 0;
-    let i = 0;
-    this._itemxfact.forEach(() => {
-      suma += this._itemxfact[i].cantidad * this._itemxfact[i].valorunitario;
-      if (
-        this._itemxfact[i].idcatalogoitems_catalogoitems.idrubro_rubros.swiva ==
-        1
-      ) {
-        sumiva +=
-          this._itemxfact[i].cantidad * this._itemxfact[i].valorunitario * 0.15;
+    this._itemxfact.forEach((item: any) => {
+      const cantidad = Number(item?.cantidad || 0);
+      const valorunitario = Number(item?.valorunitario || 0);
+      suma += cantidad * valorunitario;
+      if (item?.idcatalogoitems_catalogoitems?.idrubro_rubros?.swiva == 1) {
+        sumiva += cantidad * valorunitario * 0.15;
       }
-      i++;
     });
     this.totfac = suma;
     this.totiva = sumiva;
