@@ -204,49 +204,62 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
     this.facturasxAbonado(this.abonado.idabonado, 0);
   }
 
+  private resolverIdAbonado(): number | null {
+    const rawId = this.cuenta ?? sessionStorage.getItem('idabonadoToFactura');
+    const idabonado = Number(rawId);
+    return Number.isFinite(idabonado) && idabonado > 0 ? idabonado : null;
+  }
+
   obtenerDatosAbonado() {
-    let idabonado: any;
-    if (!this.cuenta) {
-      this.swreturn = false;
-      idabonado = sessionStorage.getItem('idabonadoToFactura');
-    } else {
-      this.swreturn = true;
-      idabonado = this.cuenta;
+    const idabonado = this.resolverIdAbonado();
+    this.swreturn = !!this.cuenta;
+
+    if (!idabonado) {
+      console.error('No se pudo resolver un idabonado válido para detalles de abonado.');
+      this._abonado = [];
+      this._facturas = [];
+      return;
     }
-    this.aboService.getByIdabonado(+idabonado!).subscribe({
+
+    this.aboService.getById(idabonado).subscribe({
       next: (datos: any) => {
-        this.email = datos[0].idresponsable.email.toString();
+        const abonadoActual = datos ?? {};
+        const responsable = abonadoActual.idresponsable ?? {};
+        const cliente = abonadoActual.idcliente_clientes ?? {};
+        const ruta = abonadoActual.idruta_rutas ?? {};
+        const categoria = abonadoActual.idcategoria_categorias ?? {};
+
+        this.email = responsable.email?.toString?.() ?? '';
         this.f_sendEmail.patchValue({
-          receptores: datos[0].idresponsable.email,
+          receptores: this.email,
         });
 
-        this._abonado = datos;
-        this.abonado.idabonado = this._abonado[0].idabonado;
-        this.abonado.nombre = this._abonado[0].idcliente_clientes.nombre;
-        this.abonado.nromedidor = this._abonado[0].nromedidor;
-        this.abonado.marca = this._abonado[0].marca;
-        this.abonado.fechainstalacion = this._abonado[0].fechainstalacion;
-        this.abonado.direccionubicacion = this._abonado[0].direccionubicacion;
-        this.abonado.ruta = this._abonado[0].idruta_rutas.descripcion;
-        this.abonado.categoria =
-          this._abonado[0].idcategoria_categorias.descripcion;
-        this.abonado.estado = this._abonado[0].estado;
-        this.abonado.textestado = getEstadoText(this._abonado[0].estado);
-        this.abonado.municipio = this._abonado[0].municipio;
-        this.abonado.adultomayor = this._abonado[0].adultomayor;
-        this.abonado.promedio = this._abonado[0].promedio;
-        this.abonado.responsablepago = this._abonado[0].idresponsable.nombre;
-        this.abonado.geolocalizacion = this._abonado[0].geolocalizacion;
-        this.abonado.swbasura = this._abonado[0].swbasura;
+        this._abonado = [abonadoActual];
+        this.abonado.idabonado = abonadoActual.idabonado;
+        this.abonado.nombre = cliente.nombre;
+        this.abonado.nromedidor = abonadoActual.nromedidor;
+        this.abonado.marca = abonadoActual.marca;
+        this.abonado.fechainstalacion = abonadoActual.fechainstalacion;
+        this.abonado.direccionubicacion = abonadoActual.direccionubicacion;
+        this.abonado.ruta = ruta.descripcion;
+        this.abonado.categoria = categoria.descripcion;
+        this.abonado.estado = abonadoActual.estado;
+        this.abonado.textestado = getEstadoText(abonadoActual.estado);
+        this.abonado.municipio = abonadoActual.municipio;
+        this.abonado.adultomayor = abonadoActual.adultomayor;
+        this.abonado.promedio = abonadoActual.promedio;
+        this.abonado.responsablepago = responsable.nombre;
+        this.abonado.geolocalizacion = abonadoActual.geolocalizacion;
+        this.abonado.swbasura = abonadoActual.swbasura;
         this.abonado.fotoPath =
-          this._abonado[0].foto_path ?? this._abonado[0].fotoPath ?? null;
+          abonadoActual.foto_path ?? abonadoActual.fotoPath ?? null;
         this.fotoAbonadoUrl = this.getFotoUrl(this.abonado.fotoPath);
-        this.cargarFotosAbonado(this._abonado[0]);
+        this.cargarFotosAbonado(abonadoActual);
       },
       error: (err) => console.error(err.error),
     });
 
-    this.facturasxAbonado(+idabonado!, 0);
+    this.facturasxAbonado(idabonado, 0);
     //this.drawAllCuentas();
   }
   estado_FE(estado: String) {
