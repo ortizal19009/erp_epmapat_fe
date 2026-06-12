@@ -192,8 +192,7 @@
                   <td class="description text-capitalize">{{ formatPeriodoFactura(factura) }}</td>
                   <td class="text-left description">{{factura.idmodulo}}</td>
                   <td class="text-right">
-                    {{ sumaIndividual(factura.total, factura.interes, factura.iva == null ? 0 : factura.iva)
-                    }}
+                    {{ sumaIndividual(factura.total, factura.interes, factura.iva == null ? 0 : factura.iva) }}
                   </td>
                   <td>
                     <input type="checkbox" class="cursor" [checked]="estaSeleccionada(factura)"

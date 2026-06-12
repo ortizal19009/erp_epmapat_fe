@@ -61,6 +61,14 @@ export interface RecaudacionCobroResponse {
 export class RecaudacionCobroService {
   constructor(private http: HttpClient) {}
 
+  streamCajaEstado(idusuario: number): EventSource {
+    return new EventSource(`${baseUrl}/caja/stream?idusuario=${encodeURIComponent(String(idusuario))}`);
+  }
+
+  streamCajasEstadoGlobal(): EventSource {
+    return new EventSource(`${baseUrl}/caja/stream/global`);
+  }
+
   async getSincobroByCuenta(cuenta: number): Promise<RecaudacionCobroItem[]> {
     return await firstValueFrom(
       this.http.get<RecaudacionCobroItem[]>(
@@ -83,6 +91,10 @@ export class RecaudacionCobroService {
     );
   }
 
+  getCajasAbiertas(): Observable<RecaudacionCajaDTO[]> {
+    return this.http.get<RecaudacionCajaDTO[]>(`${baseUrl}/caja/abiertas`);
+  }
+
   abrirCaja(
     username: string,
     password: string,
@@ -101,6 +113,10 @@ export class RecaudacionCobroService {
 
   cerrarCaja(username: string): Observable<any> {
     return this.http.put(`${baseUrl}/caja/cerrar?username=${encodeURIComponent(username)}`, null);
+  }
+
+  cerrarCajaPorId(idcaja: number): Observable<any> {
+    return this.http.put(`${baseUrl}/caja/cerrar/idcaja?idcaja=${encodeURIComponent(String(idcaja))}`, null);
   }
 
   cobrarFacturas(request: RecaudacionCobroRequest) {

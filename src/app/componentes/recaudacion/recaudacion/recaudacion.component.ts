@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -53,7 +53,7 @@ import Swal from 'sweetalert2';
   templateUrl: './recaudacion.component.view.html',
   styleUrls: ['./recaudacion.component.css'],
 })
-export class RecaudacionComponent implements OnInit {
+export class RecaudacionComponent implements OnInit, OnDestroy {
 
   // ==== Formularios ====
   formBuscar: FormGroup;
@@ -132,6 +132,7 @@ export class RecaudacionComponent implements OnInit {
   $event: any;
   _rubrosxfac: any[] = [];
   filtro: string = ''; // para el modal de clientes
+  private cajaEstadoEventSource: EventSource | null = null;
   constructor(
     public fb: FormBuilder,
     public fb1: FormBuilder,
@@ -158,7 +159,8 @@ export class RecaudacionComponent implements OnInit {
     private s_ptoemision: PtoemisionService,
     private s_definir: DefinirService,
     private s_fecfacturas: FecfacturaService,
-    private router: Router
+    private router: Router,
+    private ngZone: NgZone
   ) { }
 
   private get ultimoPtoEmisionStorageKey(): string {
@@ -233,11 +235,16 @@ export class RecaudacionComponent implements OnInit {
 
     // Estado de caja desde sesión
     this.abrirCaja();
+    this.iniciarStreamCaja();
     this.disabledcobro = this.estadoCajaT;
   }
 
   get f() {
     return this.formCobrar.controls;
+  }
+
+  ngOnDestroy(): void {
+    this.cerrarStreamCaja();
   }
 
   // =====================
@@ -271,7 +278,7 @@ export class RecaudacionComponent implements OnInit {
         item.direccion,                             // Dirección
         item.modulo,                                // Módulo
         item.fechaemision,                          // Fecha (sin formatear)
-        (item.total + item.interes + item.iva)      // Total a cobrar
+        item.total                                   // Total a cobrar
       ];
 
       // Buscar si el término aparece en alguno de esos campos
@@ -321,33 +328,10 @@ export class RecaudacionComponent implements OnInit {
             switchMap((estadoCaja: any) =>
               this.s_recaudaxcaja.getLastConexion(dcaja.idcaja).pipe(
                 tap((drxc: any) => {
-                  const estadoAbierto = Number(estadoCaja?.estado) === 1;
-                  this.cajaActiva = estadoAbierto;
-                  this.estadoCajaT = !estadoAbierto;
-                  sessionStorage.setItem('estadoCaja', estadoAbierto ? '1' : '0');
-
-                  const establecimientoEstado = String(
-                    estadoCaja?.establecimiento ?? ''
+                  this.aplicarEstadoCaja(
+                    estadoCaja,
+                    dcaja?.ultimafact ?? drxc?.facfin ?? 0
                   );
-
-                  if (establecimientoEstado) {
-                    this.seleccionarEstablecimientoPorDefecto(establecimientoEstado);
-                  } else {
-                    this.aplicarUltimoPtoEmisionGuardado();
-                  }
-
-                  const nro =
-                    Number(
-                      estadoCaja?.secuencial ??
-                      estadoCaja?.siguienteSecuencial ??
-                      dcaja?.ultimafact ??
-                      drxc?.facfin ??
-                      0
-                    ) || 0;
-
-                  if (nro > 0) {
-                    this.formatNroFactura(nro);
-                  }
                 })
               )
             )
@@ -369,6 +353,57 @@ export class RecaudacionComponent implements OnInit {
   // Wrapper para compatibilidad con código antiguo
   __abrirCaja(): void {
     this.abrirCaja();
+  }
+
+  private iniciarStreamCaja(): void {
+    this.cerrarStreamCaja();
+    this.cajaEstadoEventSource = this.recaCobroService.streamCajaEstado(this.authService.idusuario);
+
+    this.cajaEstadoEventSource.addEventListener('caja.estado', ((event: MessageEvent) => {
+      this.ngZone.run(() => this.aplicarEstadoCaja(JSON.parse(event.data)));
+    }) as EventListener);
+
+    this.cajaEstadoEventSource.addEventListener('caja.secuencial', ((event: MessageEvent) => {
+      this.ngZone.run(() => this.aplicarEstadoCaja(JSON.parse(event.data)));
+    }) as EventListener);
+
+    this.cajaEstadoEventSource.onerror = () => {
+      this.cerrarStreamCaja();
+      window.setTimeout(() => this.iniciarStreamCaja(), 3000);
+    };
+  }
+
+  private cerrarStreamCaja(): void {
+    if (this.cajaEstadoEventSource) {
+      this.cajaEstadoEventSource.close();
+      this.cajaEstadoEventSource = null;
+    }
+  }
+
+  private aplicarEstadoCaja(estadoCaja: any, fallbackSecuencial?: number): void {
+    const estadoAbierto = Number(estadoCaja?.estado) === 1;
+    this.cajaActiva = estadoAbierto;
+    this.estadoCajaT = !estadoAbierto;
+    this.disabledcobro = this.estadoCajaT;
+    sessionStorage.setItem('estadoCaja', estadoAbierto ? '1' : '0');
+
+    const establecimientoEstado = String(estadoCaja?.establecimiento ?? '');
+    if (establecimientoEstado) {
+      this.seleccionarEstablecimientoPorDefecto(establecimientoEstado);
+    } else {
+      this.aplicarUltimoPtoEmisionGuardado();
+    }
+
+    const nro = Number(
+      estadoCaja?.secuencial ??
+      estadoCaja?.siguienteSecuencial ??
+      fallbackSecuencial ??
+      0
+    ) || 0;
+
+    if (nro > 0) {
+      this.formatNroFactura(nro);
+    }
   }
 
   getAllPtoEmision() {
@@ -738,6 +773,7 @@ export class RecaudacionComponent implements OnInit {
 
     this.facService.getFacSincobro(idcliente).subscribe({
       next: async (sincobrar: any[]) => {
+        console.log('Planillas sin cobrar obtenidas:', sincobrar);
         if (!sincobrar.length) {
           this.swbusca = 2;
           this.loadingService.hideLoading();
@@ -748,7 +784,7 @@ export class RecaudacionComponent implements OnInit {
         await Promise.all(
           sincobrar.map(async (item: any, i: number) => {
             item.interes = Number(await this.cInteres(item)) || 0;
-
+            console.log(`Interés calculado para factura ${item.idfactura}:`, item.interes);
             if (item.idAbonado !== 0 && item.idmodulo !== 27) {
               const abonado: Abonados = await this.getAbonado(item.idAbonado);
               item.direccion = abonado.direccionubicacion;
@@ -764,6 +800,8 @@ export class RecaudacionComponent implements OnInit {
               const iva: any = await this.calIva(item.idfactura);
               item.iva = (iva.length ? iva[0][1] : 0);
             }
+            item.total = Number(item.total) + Number(item.interes) + Number(item.iva);
+            console.log(`Total calculado para factura ${item.idfactura}:`, item.total);
 
             this.normalizarSeleccionInicial(item);
           })
@@ -790,6 +828,7 @@ export class RecaudacionComponent implements OnInit {
           // Ambos sin abonado: ordenar por fechaemision
           return this.resolveFechaOrdenCobro(a) - this.resolveFechaOrdenCobro(b);
         });
+        console.log('Lista ordenada:', listaOrdenada);
 
         this._sincobro = listaOrdenada;
         this.listaFiltrada = [...listaOrdenada];
@@ -814,8 +853,9 @@ export class RecaudacionComponent implements OnInit {
     }
 
     this.arrFacturas.forEach((f: any) => {
-      this.sumtotal += f.total + f.iva + f.interes;
-      this.acobrar += f.total + f.iva + f.interes;
+      console.log('Factura incluida en el cálculo:', f);
+      this.sumtotal += Number(f.total || 0);
+      this.acobrar += Number(f.total || 0);
     });
   }
 
@@ -947,6 +987,7 @@ export class RecaudacionComponent implements OnInit {
       } else {
         // Al desmarcar: quitar la actual y cualquier factura posterior del mismo abonado.
         this._sincobro.forEach((item: any) => {
+          console.log(item);
           if (Number(item?.idAbonado) !== idAbonado) {
             return;
           }
@@ -1092,8 +1133,10 @@ export class RecaudacionComponent implements OnInit {
   totalAcobrar() {
     let suma = 0;
     this._sincobro.forEach((item) => {
+      console.log('Evaluando factura:', item);
+      console.log(`Factura ID ${item.idfactura}: pagado=${item.pagado}, total=${item.total}`);
       if (item.pagado === true || item.pagado === 1) {
-        suma += item.total + item.iva + item.interes;
+        suma += Number(item.total || 0);
       }
     });
     this.acobrar = +suma.toFixed(2)!;
@@ -1140,7 +1183,7 @@ export class RecaudacionComponent implements OnInit {
   }
 
 
-  cobrar() {
+  async cobrar() {
     const fecha = new Date();
     const seleccionadas = (this._sincobro || []).filter(
       (item: any) => item.pagado === 1 || item.pagado === true
@@ -1167,6 +1210,15 @@ export class RecaudacionComponent implements OnInit {
     recaudacion.ncvalor = +this.formCobrar.value.ncvalor;
     recaudacion.usucrea = this.authService.idusuario;
     recaudacion.feccrea = fecha;
+
+    let interesesPorFactura = new Map<number, number>();
+    try {
+      interesesPorFactura = await this.obtenerInteresesTemporales(seleccionadas);
+    } catch (error) {
+      console.error('Error al obtener intereses temporales:', error);
+      this.swal('error', 'No se pudo obtener el interes temporal de las facturas.');
+      return;
+    }
 
     seleccionadas.forEach((item: any) => {
       item.procesando = true;
@@ -1206,7 +1258,7 @@ export class RecaudacionComponent implements OnInit {
           }
 
           try {
-            await this.persistirInteresesRecaudacion(seleccionadas);
+            await this.persistirInteresesRecaudacion(seleccionadas, interesesPorFactura);
           } catch (persistError) {
             console.error('Error al persistir intereses de la recaudacion:', persistError);
             this.swal(
@@ -1264,13 +1316,10 @@ export class RecaudacionComponent implements OnInit {
         item.procesando = true;
 
         const idfactura: number = item.idfactura;
-        const valfactura: number = item.total + item.interes;
+        const valfactura: number = Number(item.total || 0);
         const fechacobro: Date = new Date();
         const horaActual: string =
           `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`;
-
-        const rubro: Rubros = new Rubros();
-        rubro.idrubro = 5;
 
         this.facService.getById(idfactura).subscribe({
           next: async (fac: any) => {
@@ -1355,7 +1404,7 @@ export class RecaudacionComponent implements OnInit {
                         this.swcobrado = true;
 
                         if (nex.idmodulo.idmodulo !== 27 || nex.interescobrado > 0) {
-                          await this.saveRubxFac(fac, rubro, item.interes);
+                          await this.guardarRubroInteres(fac.idfactura, item.interes);
                         }
                         item.procesando = false;
                         item.procesada = true;
@@ -1410,14 +1459,38 @@ export class RecaudacionComponent implements OnInit {
     await this.rubxfacService.saveRubroxfacAsync(rubrosxfac);
   }
 
-  private async persistirInteresesRecaudacion(seleccionadas: any[]): Promise<void> {
+  private async obtenerInteresesTemporales(seleccionadas: any[]): Promise<Map<number, number>> {
+    const intereses = new Map<number, number>();
+
     for (const item of seleccionadas) {
       const idfactura = Number(item?.idfactura ?? 0);
       if (!Number.isFinite(idfactura) || idfactura <= 0) {
         continue;
       }
 
-      const interesTmp = Number(await this.interService.getInteresFactura(idfactura)) || 0;
+      const interesTmp = this.normalizarValorMonetario(
+        await this.interService.getInteresFactura(idfactura)
+      );
+      intereses.set(idfactura, interesTmp);
+      item.interes = interesTmp;
+    }
+
+    return intereses;
+  }
+
+  private async persistirInteresesRecaudacion(
+    seleccionadas: any[],
+    interesesPorFactura: Map<number, number>
+  ): Promise<void> {
+    for (const item of seleccionadas) {
+      const idfactura = Number(item?.idfactura ?? 0);
+      if (!Number.isFinite(idfactura) || idfactura <= 0) {
+        continue;
+      }
+
+      const interesTmp = this.normalizarValorMonetario(
+        interesesPorFactura.get(idfactura) ?? item?.interes ?? 0
+      );
       item.interes = interesTmp;
 
       await this.actualizarFacturaConInteres(idfactura, interesTmp, item);
@@ -1432,7 +1505,7 @@ export class RecaudacionComponent implements OnInit {
     );
     const idFormaCobroFactura = this.obtenerIdFormaCobroFactura(item);
 
-    factura.interescobrado = interes;
+    factura.interescobrado = this.normalizarValorMonetario(interes);
 
     if (idFormaCobroFormulario === 3 || this.swNC === true) {
       factura.formapago = 3;
@@ -1445,33 +1518,57 @@ export class RecaudacionComponent implements OnInit {
 
   private async guardarRubroInteres(idfactura: number, interes: number): Promise<void> {
     const rubroInteresId = 5;
+    const interesNormalizado = this.normalizarValorMonetario(interes);
     const detalle = await this.rubxfacService.getByIdfacturaAsync(idfactura);
-    const rubroInteresExistente = detalle.find(
+    const rubrosInteres = (detalle || []).filter(
       (rubro: any) =>
         Number(rubro?.idrubro_rubros?.idrubro ?? rubro?.idrubro_rubros) === rubroInteresId
     );
+    const rubroInteresExistente =
+      rubrosInteres.find((rubro: any) => Number(rubro?.estado ?? 1) !== 0) ??
+      rubrosInteres[0];
 
     if (rubroInteresExistente) {
-      rubroInteresExistente.valorunitario = interes;
+      rubroInteresExistente.valorunitario = interesNormalizado;
       rubroInteresExistente.cantidad = 1;
-      rubroInteresExistente.estado = 1;
+      rubroInteresExistente.estado = interesNormalizado > 0 ? 1 : 0;
       await firstValueFrom(
         this.rubxfacService.updateRubroxfac(
           rubroInteresExistente.idrubroxfac,
           rubroInteresExistente
         )
       );
+
+      const duplicados = rubrosInteres.filter(
+        (rubro: any) => rubro?.idrubroxfac !== rubroInteresExistente.idrubroxfac
+      );
+      for (const duplicado of duplicados) {
+        duplicado.valorunitario = 0;
+        duplicado.cantidad = 1;
+        duplicado.estado = 0;
+        await firstValueFrom(
+          this.rubxfacService.updateRubroxfac(duplicado.idrubroxfac, duplicado)
+        );
+      }
       return;
     }
 
-    if (interes <= 0) {
+    if (interesNormalizado <= 0) {
       return;
     }
 
     const factura = await firstValueFrom(this.facService.getById(idfactura));
     const rubro = new Rubros();
     rubro.idrubro = rubroInteresId;
-    await this.saveRubxFac(factura, rubro, interes);
+    await this.saveRubxFac(factura, rubro, interesNormalizado);
+  }
+
+  private normalizarValorMonetario(value: any): number {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      return 0;
+    }
+    return Math.round(parsed * 100) / 100;
   }
 
   // =====================
@@ -1601,10 +1698,12 @@ export class RecaudacionComponent implements OnInit {
   }
 
   cInteres(factura: any) {
+    console.log('Obteniendo interés para factura ID:', factura?.idfactura);
     return this.interService.getInteresFactura(factura.idfactura);
   }
 
   async calIva(idfactura: any) {
+    console.log('Calculando IVA para factura ID:', idfactura);
     return this.rubxfacService.getIva(0.15, idfactura).toPromise();
   }
 
@@ -1715,10 +1814,10 @@ export class RecaudacionComponent implements OnInit {
   }
   getRubroxfac(idfactura: number, idmodulo?: any, sincobro?: any) {
     this.idfactura = idfactura;
-    this.valoriva = sincobro?.iva ?? 0;
-    this.totInteres = sincobro?.interes ?? 0;
-    let interes = sincobro?.interes ?? 0;
-    this.consumo = sincobro?.consumo ?? 0;
+    this.valoriva = this.obtenerNumeroDetalle(sincobro?.iva);
+    this.totInteres = this.obtenerNumeroDetalle(sincobro?.interes);
+    let interes = this.totInteres;
+    this.consumo = this.obtenerNumeroDetalle(sincobro?.consumo);
     this.getRubroxfacReimpresion(idfactura, interes);
   }
   reImpComprobante(datos: any) {
@@ -1726,23 +1825,97 @@ export class RecaudacionComponent implements OnInit {
   }
 
   _subtotal(interes: any) {
-    this.totfac = 0;
-    let suma12 = 0;
-    let suma0 = 0;
-    let i = 0;
-    this._rubrosxfac.forEach((index: any) => {
-      if (this._rubrosxfac[i].idrubro_rubros.swiva === 1) {
-        suma12 +=
-          this._rubrosxfac[i].cantidad * this._rubrosxfac[i].valorunitario;
-      } else {
-        if (this._rubrosxfac[i].idrubro_rubros.esiva === 0) {
-          suma0 +=
-            this._rubrosxfac[i].cantidad * this._rubrosxfac[i].valorunitario;
-        }
+    const totalRubros = (this._rubrosxfac || []).reduce(
+      (total: number, rubro: any) => total + this.getTotalRubroDetalle(rubro),
+      0
+    );
+    this.totfac =
+      totalRubros +
+      this.obtenerNumeroDetalle(this.valoriva) +
+      this.obtenerNumeroDetalle(interes);
+  }
+
+  getCantidadRubroDetalle(rubro: any): number {
+    const cantidad = this.obtenerNumeroDetalle(
+      rubro?.cantidad ??
+        rubro?.cant ??
+        rubro?.qty ??
+        rubro?.cantidadrubro ??
+        rubro?.cantidad_rubro
+    );
+    return cantidad > 0 ? cantidad : 1;
+  }
+
+  getValorUnitarioRubroDetalle(rubro: any): number {
+    const valor = this.obtenerNumeroDetalle(
+      rubro?.valorunitario ??
+        rubro?.valorUnitario ??
+        rubro?.preciounitario ??
+        rubro?.precioUnitario ??
+        rubro?.valor ??
+        rubro?.monto
+    );
+    if (valor > 0) {
+      return valor;
+    }
+
+    const total = this.obtenerNumeroDetalle(
+      rubro?.totalRubro ??
+        rubro?.totalrubro ??
+        rubro?.subtotal ??
+        rubro?.total ??
+        rubro?.importe
+    );
+    return total > 0 ? total / this.getCantidadRubroDetalle(rubro) : 0;
+  }
+
+  getTotalRubroDetalle(rubro: any): number {
+    const totalGuardado = this.obtenerNumeroDetalle(rubro?.totalRubro ?? rubro?.totalrubro);
+    if (totalGuardado > 0) {
+      return totalGuardado;
+    }
+
+    return this.getCantidadRubroDetalle(rubro) * this.getValorUnitarioRubroDetalle(rubro);
+  }
+
+  getDescripcionRubroDetalle(rubro: any): string {
+    return (
+      rubro?.idrubro_rubros?.descripcion ||
+      rubro?.idrubro_rubros?.nombre ||
+      (typeof rubro?.idrubro_rubros === 'string' ? rubro.idrubro_rubros : '') ||
+      rubro?.descripcion ||
+      rubro?.rubro ||
+      rubro?.nombre ||
+      'Rubro'
+    );
+  }
+
+  private obtenerNumeroDetalle(value: any): number {
+    if (typeof value === 'string') {
+      const cleanValue = value.trim();
+      if (!cleanValue) {
+        return 0;
       }
-      this.totfac = suma12 + suma0 + interes
-      i++;
-    });
+
+      let normalized = cleanValue.replace(/[^0-9,.-]/g, '');
+      const lastComma = normalized.lastIndexOf(',');
+      const lastDot = normalized.lastIndexOf('.');
+
+      if (lastComma >= 0 && lastDot >= 0) {
+        normalized =
+          lastComma > lastDot
+            ? normalized.replace(/\./g, '').replace(',', '.')
+            : normalized.replace(/,/g, '');
+      } else if (lastComma >= 0) {
+        normalized = normalized.replace(',', '.');
+      }
+
+      const parsed = Number(normalized);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
   }
 
   // =====================

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Cajas } from 'src/app/modelos/cajas.model';
@@ -17,13 +17,14 @@ import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { FacxrecaudaService } from 'src/app/servicios/facxrecauda.service';
 import { RecaudacionService } from 'src/app/servicios/recaudacion.service';
 import { AutorizaService } from '@compartida/autoriza.service';
+import { RecaudacionCobroService } from 'src/app/servicios/recaudacion-cobro.service';
 
 @Component({
   selector: 'app-info-caja',
   templateUrl: './info-caja.component.html',
   styleUrls: ['./info-caja.component.css'],
 })
-export class InfoCajaComponent implements OnInit {
+export class InfoCajaComponent implements OnInit, OnDestroy {
   caja = {} as Caja; //Interface para los datos de la Caja
   cajaData: Cajas | null = null;
   elimdisabled: boolean = false;
@@ -49,6 +50,9 @@ export class InfoCajaComponent implements OnInit {
   ordenAscendente: boolean = false;
 
   idusuario: number;
+  cajaEnLinea: boolean = false;
+  cerrandoCaja: boolean = false;
+  private cajasEstadoEventSource: EventSource | null = null;
 
   constructor(
     private router: Router,
@@ -60,7 +64,9 @@ export class InfoCajaComponent implements OnInit {
     private s_rubroxfac: RubroxfacService,
     private s_facxrecauda: FacxrecaudaService,
     private s_recaudacion: RecaudacionService, 
-    private authorizaService: AutorizaService
+    private authorizaService: AutorizaService,
+    private recaudacionCobroService: RecaudacionCobroService,
+    private ngZone: NgZone
   ) { }
 
   ngOnInit(): void {
@@ -93,6 +99,11 @@ export class InfoCajaComponent implements OnInit {
     });
     this.desde = desde;
     this.hasta = hasta;
+    this.iniciarStreamCajas();
+  }
+
+  ngOnDestroy(): void {
+    this.cerrarStreamCajas();
   }
 
   colocaColor(colores: any) {
@@ -141,10 +152,12 @@ export class InfoCajaComponent implements OnInit {
         const registros = dato ? [dato] : [];
         this._recaudaxcaja = this.ordenarRecaudaciones(registros);
         this.sinHistorial = this._recaudaxcaja.length === 0;
+        this.cajaEnLinea = Number(dato?.estado) === 1;
       },
       error: (err) => {
         this._recaudaxcaja = [];
         this.sinHistorial = true;
+        this.cajaEnLinea = false;
         console.error(err.error ?? err);
       },
     });
@@ -217,6 +230,30 @@ export class InfoCajaComponent implements OnInit {
         this.creandoPrimerRegistro = false;
         console.error(err.error ?? err);
       },
+    });
+  }
+
+  cerrarCajaEnLinea(): void {
+    if (!this.idcaja || this.cerrandoCaja || !this.cajaEnLinea) {
+      return;
+    }
+
+    const confirmar = window.confirm('¿Desea cerrar esta caja ahora? El cobro se bloqueará de inmediato.');
+    if (!confirmar) {
+      return;
+    }
+
+    this.cerrandoCaja = true;
+    this.recaudacionCobroService.cerrarCajaPorId(this.idcaja).subscribe({
+      next: () => {
+        this.cerrandoCaja = false;
+        this.cajaEnLinea = false;
+        this.cargarUltimaConexionPorDefecto();
+      },
+      error: (err) => {
+        this.cerrandoCaja = false;
+        console.error(err);
+      }
     });
   }
 
@@ -430,6 +467,39 @@ export class InfoCajaComponent implements OnInit {
         return registro?.[this.ordenColumna]
           ? new Date(registro[this.ordenColumna]).getTime()
           : null;
+    }
+  }
+
+  private iniciarStreamCajas(): void {
+    this.cerrarStreamCajas();
+    this.cajasEstadoEventSource = this.recaudacionCobroService.streamCajasEstadoGlobal();
+
+    this.cajasEstadoEventSource.addEventListener('caja.global.estado', ((event: MessageEvent) => {
+      this.ngZone.run(() => this.aplicarCambioCaja(JSON.parse(event.data)));
+    }) as EventListener);
+
+    this.cajasEstadoEventSource.onerror = () => {
+      this.cerrarStreamCajas();
+      window.setTimeout(() => this.iniciarStreamCajas(), 3000);
+    };
+  }
+
+  private cerrarStreamCajas(): void {
+    if (this.cajasEstadoEventSource) {
+      this.cajasEstadoEventSource.close();
+      this.cajasEstadoEventSource = null;
+    }
+  }
+
+  private aplicarCambioCaja(evento: any): void {
+    if (Number(evento?.idcaja) !== Number(this.idcaja)) {
+      return;
+    }
+
+    this.cajaEnLinea = Number(evento?.estado) === 1;
+
+    if (!this.cajaEnLinea) {
+      this.cargarUltimaConexionPorDefecto();
     }
   }
 }

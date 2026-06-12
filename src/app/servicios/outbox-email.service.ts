@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { PageResponse } from '../interfaces/page-response';
 
 export interface OutboxAttachment {
   name: string;
@@ -21,6 +22,25 @@ export interface OutboxEmailPayload {
   attachments?: OutboxAttachment[];
 }
 
+export interface OutboxEmailHistory {
+  id: string;
+  type: string;
+  status: string;
+  subject: string;
+  correlationId: string;
+  accountId?: number | null;
+  accountCode?: string | null;
+  accountName?: string | null;
+  fromAddress?: string | null;
+  attempts: number;
+  lastError?: string | null;
+  createdAt: string;
+  sentAt?: string | null;
+  to: string[];
+  cc: string[];
+  bcc: string[];
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -35,5 +55,16 @@ export class OutboxEmailService {
 
   sendNotificationEmail(payload: OutboxEmailPayload): Observable<any> {
     return this.http.post(`${this.baseUrl}/notifications`, payload);
+  }
+
+  getNotificationHistoryByAbonado(
+    idabonado: number,
+    page: number = 0,
+    size: number = 10
+  ): Observable<PageResponse<OutboxEmailHistory>> {
+    const correlationId = `NOTIFICACION-${idabonado}-`;
+    return this.http.get<PageResponse<OutboxEmailHistory>>(
+      `${this.baseUrl}?type=NOTIFICACION&correlationId=${encodeURIComponent(correlationId)}&page=${page}&size=${size}`
+    );
   }
 }

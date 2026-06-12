@@ -4,6 +4,7 @@ import { Observable, firstValueFrom, map } from 'rxjs';
 import { Facturas } from '../modelos/facturas.model';
 import { environment } from 'src/environments/environment';
 import { InteresesService } from './intereses.service';
+import { PageResponse } from '../interfaces/page-response';
 
 const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/facturas`;
@@ -66,6 +67,11 @@ export class FacturaService {
   getByIdabonadorango(idabonado: number, limit: number) {
     return this.http.get<Facturas[]>(
       `${baseUrl}/abonado/${idabonado}/${limit}`
+    );
+  }
+  getByIdabonadoPage(idabonado: number, page: number, size: number) {
+    return this.http.get<PageResponse<Facturas>>(
+      `${baseUrl}/abonado/${idabonado}/page?page=${page}&size=${size}`
     );
   }
 

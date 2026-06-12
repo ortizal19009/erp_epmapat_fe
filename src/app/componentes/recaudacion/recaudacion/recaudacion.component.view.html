@@ -262,7 +262,7 @@
                       <td class="module-name small">{{ sincobro.modulo }}</td>
                       <td class="text-right amount-cell">
                         <strong class="amount-value small">
-                          ${{ (sincobro.total + sincobro.interes + sincobro.iva).toFixed(2) }}
+                          ${{ (+sincobro.total || 0).toFixed(2) }}
                         </strong>
                       </td>
                       <td class="text-center">
@@ -514,28 +514,36 @@
             <thead class="thead-light">
               <tr>
                 <th class="small">#</th>
+                <th class="text-center small">Cantidad</th>
                 <th class="small">Rubro</th>
-                <th class="text-right small">Valor</th>
+                <th class="text-right small">Valor unitario</th>
+                <th class="text-right small">Total</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let rubroxfac of _rubrosxfac; let i=index">
-                <td class="text-center small">{{i+1}}</td>
-                <td class="small">{{ rubroxfac.idrubro_rubros.descripcion}}</td>
-                <td class="text-right small">{{ rubroxfac.valorunitario | number:'1.2-2'}}</td>
+                <td class="text-center small">{{ i + 1 }}</td>
+                <td class="text-center small">{{ getCantidadRubroDetalle(rubroxfac) | number:'1.0-2' }}</td>
+                <td class="small">{{ getDescripcionRubroDetalle(rubroxfac) }}</td>
+                <td class="text-right small">{{ getValorUnitarioRubroDetalle(rubroxfac) | number:'1.2-2' }}</td>
+                <td class="text-right small">{{ getTotalRubroDetalle(rubroxfac) | number:'1.2-2' }}</td>
               </tr>
               <tr *ngIf="valoriva > 0">
                 <td></td>
+                <td class="text-center small">1</td>
                 <td>IVA</td>
+                <td class="text-right small">{{ valoriva | number:'1.2-2'}}</td>
                 <td class="text-right small">{{ valoriva | number:'1.2-2'}}</td>
               </tr>
               <tr *ngIf="totInteres > 0">
                 <td></td>
+                <td class="text-center small">1</td>
                 <td>Interés</td>
+                <td class="text-right small">{{ totInteres | number:'1.2-2'}}</td>
                 <td class="text-right small">{{ totInteres | number:'1.2-2'}}</td>
               </tr>
               <tr class="table-active">
-                <td colspan="2" class="font-weight-bold small">TOTAL</td>
+                <td colspan="4" class="font-weight-bold small">TOTAL</td>
                 <td class="font-weight-bold text-right small">{{ totfac | number:'1.2-2'}}</td>
               </tr>
             </tbody>

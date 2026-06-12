@@ -22,6 +22,7 @@
                     <th>Cntd.</th>
                     <th class="col-md-9">Rubro</th>
                     <th>Valor</th>
+                    <th>Total</th>
                 </tr>
             </thead>
             <tbody>
@@ -29,11 +30,31 @@
                     <td class="text-center font-weight-bold small">{{r.cantidad}}</td>
                     <td>{{r.idrubro_rubros.descripcion}}</td>
                     <td class="text-right">{{r.valorunitario.toFixed(2)}}</td>
+                    <td class="text-right">{{(r.cantidad * r.valorunitario).toFixed(2)}}</td>
                 </tr>
                 <tr>
-                    <td></td>
-                    <td class="font-weight-bold">TOTAL</td>
-                    <td class="font-weight-bold text-right">{{sumaDetail.toFixed(2)}}</td>
+                    <td colspan="3" class="font-weight-bold text-right">Subtotal tarifa IVA</td>
+                    <td class="font-weight-bold text-right">{{suma12.toFixed(2)}}</td>
+                </tr>
+                <tr>
+                    <td colspan="3" class="font-weight-bold text-right">Subtotal 0%</td>
+                    <td class="font-weight-bold text-right">{{suma0.toFixed(2)}}</td>
+                </tr>
+                <tr>
+                    <td colspan="3" class="font-weight-bold text-right">Subtotal sin IVA</td>
+                    <td class="font-weight-bold text-right">{{subtotalSinIva.toFixed(2)}}</td>
+                </tr>
+                <tr>
+                    <td colspan="3" class="font-weight-bold text-right">IVA</td>
+                    <td class="font-weight-bold text-right">{{valoriva.toFixed(2)}}</td>
+                </tr>
+                <tr>
+                    <td colspan="3" class="font-weight-bold text-right">Interes</td>
+                    <td class="font-weight-bold text-right">{{interes.toFixed(2)}}</td>
+                </tr>
+                <tr>
+                    <td colspan="3" class="font-weight-bold text-right">TOTAL</td>
+                    <td class="font-weight-bold text-right">{{totalPlanilla.toFixed(2)}}</td>
                 </tr>
             </tbody>
         </table>

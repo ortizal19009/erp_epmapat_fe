@@ -84,6 +84,13 @@ export class InteresesService {
       return 0;
     }
 
+    if (Array.isArray(response)) {
+      const activos = response.filter((item: any) => item?.estado !== 0);
+      const registros = activos.length ? activos : response;
+      const ultimo = registros[registros.length - 1];
+      return this.normalizeInteresResponse(ultimo);
+    }
+
     if (typeof response === 'number') {
       return Number.isFinite(response) ? response : 0;
     }

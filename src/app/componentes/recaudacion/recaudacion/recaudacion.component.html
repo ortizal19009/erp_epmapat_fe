@@ -262,7 +262,7 @@
                       <td class="module-name small">{{ sincobro.modulo }}</td>
                       <td class="text-right amount-cell">
                         <strong class="amount-value small">
-                          ${{ (sincobro.total + sincobro.interes + sincobro.iva).toFixed(2) }}
+                          ${{ (+sincobro.total || 0).toFixed(2) }}
                         </strong>
                       </td>
                       <td class="text-center">

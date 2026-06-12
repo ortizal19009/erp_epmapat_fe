@@ -3,6 +3,7 @@ import {
   ElementRef,
   HostListener,
   inject,
+  NgZone,
   OnDestroy,
   OnInit,
   ViewChild,
@@ -104,6 +105,7 @@ export class AddRecaudaComponent implements OnInit {
   _clientes: any[] = [];
   ordenColumna: keyof SinCobrarVisual = 'idabonado';
   ordenAscendente: boolean = true;
+  private cajaEstadoEventSource: EventSource | null = null;
   @ViewChild('pdfViewer') pdfViewer!: ElementRef<HTMLIFrameElement>;
   @ViewChild('consultaModal') consultaModal!: ElementRef;
   //_mensaje: any;
@@ -119,7 +121,8 @@ export class AddRecaudaComponent implements OnInit {
     private coloresService: ColoresService,
     private ptoemisionService: PtoemisionService,
     private recaudaxcajaService: RecaudaxcajaService,
-    private cajaService: CajaService
+    private cajaService: CajaService,
+    private ngZone: NgZone
   ) {}
 
   private get ultimoPtoEmisionStorageKey(): string {
@@ -157,10 +160,12 @@ export class AddRecaudaComponent implements OnInit {
     this.getAllFormaCobro();
     this.getAllPtoEmision();
     this.getEstadoCaja();
+    this.iniciarStreamCaja();
     this.cargarConfiguracionImpresion();
   }
 
   ngOnDestroy(): void {
+    this.cerrarStreamCaja();
     this.limpiarPreviewPdf();
   }
 
@@ -241,10 +246,8 @@ export class AddRecaudaComponent implements OnInit {
 
   private recalcularTotalSeleccionado() {
     this.totalapagar = this.fencola.reduce((acc: number, f: any) => {
-      const subtotal = Number(f?.total ?? 0);
-      const interes = Number(f?.interes ?? 0);
-      const iva = Number(f?.iva ?? 0);
-      return acc + subtotal + interes + iva;
+      const total = Number(f?.total ?? 0);
+      return acc + total;
     }, 0);
 
     this.f_cobrar.patchValue({
@@ -446,28 +449,58 @@ export class AddRecaudaComponent implements OnInit {
   getEstadoCaja() {
     this.recaCobroService.getCajaEstado(this.authService.idusuario).subscribe({
       next: async (item: any) => {
-        this._estadoCaja = item;
-        this.codigoCaja = item?.codigo ?? this.codigoCaja;
-        this.ultimoNumeroFactura =
-          Number(item?.secuencial ?? item?.siguienteSecuencial ?? this.ultimoNumeroFactura) || 1;
-        if (Number(item?.estado) === 1) {
-          this.swcaja = true;
-          this.abrirCaja.usuario = item.username;
-          this.establecimientoAsignado = String(item.establecimiento ?? '');
-          this.establecimientoAsignadoId =
-            this.buscarIdPtoEmisionPorCodigo(item.establecimiento);
-          this.seleccionarEstablecimientoPorCodigo(item.establecimiento);
-          this.guardarUltimoPtoEmisionSeleccionado(this.abrirCaja.idptoemision);
-          this.actualizarNumeroFacturaCaja();
-        } else {
-          /* generar una consulta para traer user name de  */
-          this.abrirCaja.usuario = this.authService.alias;
-          this.swcaja = false;
-          this.cargarConfiguracionCajaUsuario();
-        }
+        this.aplicarEstadoCaja(item);
       },
       error: (e: any) => console.error(e),
     });
+  }
+
+  private iniciarStreamCaja() {
+    this.cerrarStreamCaja();
+    this.cajaEstadoEventSource = this.recaCobroService.streamCajaEstado(this.authService.idusuario);
+
+    this.cajaEstadoEventSource.addEventListener('caja.estado', ((event: MessageEvent) => {
+      this.ngZone.run(() => this.aplicarEstadoCaja(JSON.parse(event.data)));
+    }) as EventListener);
+
+    this.cajaEstadoEventSource.addEventListener('caja.secuencial', ((event: MessageEvent) => {
+      this.ngZone.run(() => this.aplicarEstadoCaja(JSON.parse(event.data)));
+    }) as EventListener);
+
+    this.cajaEstadoEventSource.onerror = () => {
+      this.cerrarStreamCaja();
+      window.setTimeout(() => this.iniciarStreamCaja(), 3000);
+    };
+  }
+
+  private cerrarStreamCaja() {
+    if (this.cajaEstadoEventSource) {
+      this.cajaEstadoEventSource.close();
+      this.cajaEstadoEventSource = null;
+    }
+  }
+
+  private aplicarEstadoCaja(item: any) {
+    this._estadoCaja = item;
+    this.codigoCaja = item?.codigo ?? this.codigoCaja;
+    this.ultimoNumeroFactura =
+      Number(item?.secuencial ?? item?.siguienteSecuencial ?? this.ultimoNumeroFactura) || 1;
+
+    if (Number(item?.estado) === 1) {
+      this.swcaja = true;
+      this.abrirCaja.usuario = item.username;
+      this.establecimientoAsignado = String(item.establecimiento ?? '');
+      this.establecimientoAsignadoId =
+        this.buscarIdPtoEmisionPorCodigo(item.establecimiento);
+      this.seleccionarEstablecimientoPorCodigo(item.establecimiento);
+      this.guardarUltimoPtoEmisionSeleccionado(this.abrirCaja.idptoemision);
+      this.actualizarNumeroFacturaCaja();
+      return;
+    }
+
+    this.abrirCaja.usuario = this.authService.alias;
+    this.swcaja = false;
+    this.cargarConfiguracionCajaUsuario();
   }
   fnabrirCaja() {
     const password = String(this.abrirCaja.password ?? '').trim();
@@ -819,7 +852,7 @@ export class AddRecaudaComponent implements OnInit {
     return !regex.test(campo);
   }
   sumaIndividual(subtotal: number, interes: number, impuesto: number) {
-    return (subtotal + interes + impuesto).toFixed(2);
+    return Number(subtotal || 0).toFixed(2);
   }
 
   getClienteById(idcliente: number) {
@@ -927,10 +960,8 @@ export class AddRecaudaComponent implements OnInit {
 
     // Recalcular total una sola vez (asegurando conversión a Number)
     this.totalapagar = this.fencola.reduce((acc: number, f: any) => {
-      const t = Number(f.total || 0);
-      const inter = Number(f.interes || 0);
-      const iva = Number(f.iva || 0);
-      return acc + t + inter + iva;
+      const total = Number(f.total || 0);
+      return acc + total;
     }, 0);
 
     // Patchear el formulario solo una vez

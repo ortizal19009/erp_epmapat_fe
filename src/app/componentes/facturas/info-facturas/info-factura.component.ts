@@ -19,11 +19,12 @@ export class InfoFacturasComponent implements OnInit {
   idFactura: number = 0;
   planilla = {} as Planilla; //Interface para los datos del registro de la Facturación
   _rubroxfac: any;
-  suma12: number;
-  suma0: number;
-  valoriva: number;
+  suma12: number = 0;
+  suma0: number = 0;
+  subtotalSinIva: number = 0;
+  valoriva: number = 0;
   _impuesto: Impuestos = new Impuestos();
-  interes: any = 0;
+  interes: number = 0;
   @Input() idfac: any = null;
   swreturn: boolean = true;
   datos: boolean = true;
@@ -183,6 +184,8 @@ export class InfoFacturasComponent implements OnInit {
         this.planilla.fechacobro = resp.fechacobro;
         this.planilla.totaltarifa = resp.totaltarifa;
         this.planilla.valorbase = resp.valorbase;
+        this.planilla.interescobrado = Number(resp.interescobrado || 0);
+        this.planilla.swiva = Number(resp.swiva || 0);
         this.planilla.idabonado = resp.idabonado;
         this.planilla.pagado = resp.pagado;
         this.planilla.estado = resp.estado;
@@ -213,23 +216,60 @@ export class InfoFacturasComponent implements OnInit {
   subtotal() {
     let suma12 = 0;
     let suma0 = 0;
-    let valoriva = 0;
+    let subtotalSinIva = 0;
+    let valorivaCalculado = 0;
     const porcentajeIva = Number(this._impuesto?.valor || 0) / 100;
 
     (this._rubroxfac || []).forEach((rubro: any) => {
       const totalRubro = Number(rubro?.cantidad || 0) * Number(rubro?.valorunitario || 0);
+      const esRubroIva = Number(rubro?.idrubro_rubros?.esiva || 0) === 1;
 
-      if (rubro?.idrubro_rubros?.swiva == 1) {
+      if (esRubroIva) {
+        return;
+      }
+
+      if (rubro?.idrubro_rubros?.swiva == 1 || rubro?.idrubro_rubros?.swiva === true) {
         suma12 += totalRubro;
-        valoriva += totalRubro * porcentajeIva;
-      } else if (rubro?.idrubro_rubros?.esiva == 0) {
+        valorivaCalculado += totalRubro * porcentajeIva;
+      } else {
         suma0 += totalRubro;
       }
+
+      subtotalSinIva += totalRubro;
     });
 
     this.suma12 = suma12;
     this.suma0 = suma0;
-    this.valoriva = valoriva;
+    this.subtotalSinIva = subtotalSinIva;
+    this.valoriva = this.resolveIva(valorivaCalculado);
+    this.interes = this.resolveInteres();
+  }
+
+  get totalPlanilla(): number {
+    const totalTarifa = Number(this.planilla?.totaltarifa || 0);
+    const interes = Number(this.interes || 0);
+
+    if (totalTarifa > 0) {
+      return totalTarifa + interes;
+    }
+
+    return this.subtotalSinIva + this.valoriva + interes;
+  }
+
+  private resolveIva(valorivaCalculado: number): number {
+    const ivaPlanilla = Number(this.planilla?.swiva || 0);
+    if (ivaPlanilla > 0) {
+      return ivaPlanilla;
+    }
+    return valorivaCalculado;
+  }
+
+  private resolveInteres(): number {
+    const interesCobrado = Number(this.planilla?.interescobrado || 0);
+    if (interesCobrado > 0) {
+      return interesCobrado;
+    }
+    return Number(this.interes || 0);
   }
 
   multaCalculate(idfactura: number) {
@@ -319,6 +359,8 @@ interface Planilla {
   fechacobro: Date;
   totaltarifa: number;
   valorbase: number;
+  interescobrado: number;
+  swiva: number;
   idabonado: number;
   pagado: number;
   idmodulo: number;

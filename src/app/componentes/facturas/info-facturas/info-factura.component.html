@@ -119,7 +119,7 @@
                       </tr>
                       <tr class="font-weight-bold text-right py-0">
                         <td colspan="2"></td>
-                        <td>SubTOTAL {{_impuesto.descripcion}}</td>
+                        <td>Subtotal tarifa IVA</td>
                         <td>{{ suma12 | number: '1.2-2'}}</td>
                       </tr>
                       <tr class="font-weight-bold text-right py-0">
@@ -130,22 +130,22 @@
                       <tr class="font-weight-bold text-right py-0">
                         <td colspan="2"></td>
                         <td>SubTOTAL sin IVA </td>
-                        <td class="text-right">{{ suma0 + suma12 | number: '1.2-2'}} </td>
+                        <td class="text-right">{{ subtotalSinIva | number: '1.2-2'}} </td>
                       </tr>
                       <tr class="font-weight-bold text-right py-0">
                         <td colspan="2"></td>
-                        <td>IVA </td>
+                        <td>IVA</td>
                         <td class="text-right">{{ valoriva | number: '1.2-2'}}</td>
                       </tr>
                       <tr class="font-weight-bold text-right py-0">
                         <td colspan="2"></td>
-                        <td>INTERES </td>
+                        <td>INTERES</td>
                         <td class="text-right">{{ interes | number: '1.2-2'}}</td>
                       </tr>
                       <tr class="font-weight-bold text-right py-0">
                         <td colspan="2"></td>
-                        <td>TOTAL </td>
-                        <td class="text-right">{{ suma0 + suma12 + valoriva + interes | number: '1.2-2'}}
+                        <td>TOTAL</td>
+                        <td class="text-right">{{ totalPlanilla | number: '1.2-2'}}
                         </td>
                       </tr>
                     </tbody>

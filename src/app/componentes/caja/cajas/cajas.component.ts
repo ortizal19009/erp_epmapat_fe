@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { format } from '@formkit/tempo';
 import jsPDF from 'jspdf';
@@ -13,13 +13,14 @@ import { PdfService } from 'src/app/servicios/pdf.service';
 import { RecaudacionService } from 'src/app/servicios/recaudacion.service';
 import { RubrosService } from 'src/app/servicios/rubros.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
+import { RecaudacionCobroService } from 'src/app/servicios/recaudacion-cobro.service';
 
 @Component({
   selector: 'app-cajas',
   templateUrl: './cajas.component.html',
   styleUrls: ['./cajas.component.css'],
 })
-export class ListarCajaComponent implements OnInit {
+export class ListarCajaComponent implements OnInit, OnDestroy {
   _cajas: any;
   filtro: string;
   filtroEstado: string = '1';
@@ -35,6 +36,7 @@ export class ListarCajaComponent implements OnInit {
   swAddCaja: boolean = false;
   idcaja: number;
   _iduser: number;
+  private cajasEstadoEventSource: EventSource | null = null;
   @ViewChild('swModi', { read: TemplateRef }) swModi: TemplateRef<unknown> | undefined;
 
   constructor(
@@ -47,7 +49,9 @@ export class ListarCajaComponent implements OnInit {
     private s_rubroxfac: RubroxfacService,
     private s_recaudacion: RecaudacionService,
     private s_rubro: RubrosService,
-    private s_pdf: PdfService
+    private s_pdf: PdfService,
+    private recaudacionCobroService: RecaudacionCobroService,
+    private ngZone: NgZone
   ) { }
 
   ngOnInit(): void {
@@ -57,9 +61,14 @@ export class ListarCajaComponent implements OnInit {
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
     else this.buscaColor();
     this.listarCajas();
+    this.iniciarStreamCajas();
     let fDate = format(fechaActual, 'YYYY-MM-DD');
     this.desde = fDate;
     this.hasta = fDate;
+  }
+
+  ngOnDestroy(): void {
+    this.cerrarStreamCajas();
   }
 
   async buscaColor() {
@@ -87,7 +96,62 @@ export class ListarCajaComponent implements OnInit {
 
   public listarCajas() {
     this.cajaService.getListaCaja().subscribe((datos) => {
-      this._cajas = datos;
+      this._cajas = (datos ?? []).map((caja: any) => ({
+        ...caja,
+        abierta: false,
+      }));
+      this.cargarCajasAbiertas();
+    });
+  }
+
+  private cargarCajasAbiertas(): void {
+    this.recaudacionCobroService.getCajasAbiertas().subscribe({
+      next: (cajasAbiertas) => {
+        const abiertas = new Set((cajasAbiertas ?? []).map((item) => Number(item.idcaja)));
+        this._cajas = (this._cajas ?? []).map((caja: any) => ({
+          ...caja,
+          abierta: abiertas.has(Number(caja?.idcaja)),
+        }));
+      },
+      error: (err) => console.error(err),
+    });
+  }
+
+  private iniciarStreamCajas(): void {
+    this.cerrarStreamCajas();
+    this.cajasEstadoEventSource = this.recaudacionCobroService.streamCajasEstadoGlobal();
+
+    this.cajasEstadoEventSource.addEventListener('caja.global.estado', ((event: MessageEvent) => {
+      this.ngZone.run(() => this.aplicarCambioCaja(JSON.parse(event.data)));
+    }) as EventListener);
+
+    this.cajasEstadoEventSource.onerror = () => {
+      this.cerrarStreamCajas();
+      window.setTimeout(() => this.iniciarStreamCajas(), 3000);
+    };
+  }
+
+  private cerrarStreamCajas(): void {
+    if (this.cajasEstadoEventSource) {
+      this.cajasEstadoEventSource.close();
+      this.cajasEstadoEventSource = null;
+    }
+  }
+
+  private aplicarCambioCaja(evento: any): void {
+    if (!Array.isArray(this._cajas) || !evento?.idcaja) {
+      return;
+    }
+
+    this._cajas = this._cajas.map((caja: any) => {
+      if (Number(caja?.idcaja) !== Number(evento.idcaja)) {
+        return caja;
+      }
+
+      return {
+        ...caja,
+        abierta: Number(evento.estado) === 1,
+      };
     });
   }
 

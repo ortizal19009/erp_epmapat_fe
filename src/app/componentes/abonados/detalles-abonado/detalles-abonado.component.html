@@ -180,6 +180,12 @@
                 <i class="bi bi-images"></i> Fotos
               </a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link cardTab" href="#historialnotificaciones" data-toggle="tab" role="tab"
+                (click)="cargarHistorialNotificaciones()">
+                <i class="bi bi-bell"></i> Recargos
+              </a>
+            </li>
           </ul>
         </div>
 
@@ -195,7 +201,7 @@
 
                   <table class="table table-hover table-sm table-bordered mb-0">
                     <caption class="small mark">
-                      Últimas <strong>{{rango}}</strong> Planillas&nbsp;&nbsp;&nbsp;&nbsp;
+                      Planillas registradas: <strong>{{facturasTotalElements}}</strong>&nbsp;&nbsp;&nbsp;&nbsp;
                       <input type="number" min="1" class="form-control form-control-sm d-inline-block w-auto"
                         [(ngModel)]="rango" (change)="getFactura()">
                     </caption>
@@ -230,6 +236,23 @@
                       </tr>
                     </tbody>
                   </table>
+
+                  <div class="d-flex justify-content-between align-items-center mt-2" *ngIf="facturasTotalPages > 0">
+                    <div class="small text-muted">
+                      Página {{facturasPage + 1}} de {{facturasTotalPages}}
+                    </div>
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-outline-secondary btn-sm"
+                        (click)="cambiarPaginaFacturas(-1)" [disabled]="facturasPage === 0 || facturasLoading">
+                        Anterior
+                      </button>
+                      <button type="button" class="btn btn-outline-secondary btn-sm"
+                        (click)="cambiarPaginaFacturas(1)"
+                        [disabled]="facturasPage + 1 >= facturasTotalPages || facturasLoading">
+                        Siguiente
+                      </button>
+                    </div>
+                  </div>
 
                 </div>
               </div>
@@ -411,6 +434,62 @@
                         <div class="py-4 text-muted">No hay foto del medidor registrada.</div>
                       </ng-template>
                     </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="tab-pane" id="historialnotificaciones" role="tabpanel">
+              <div class="post">
+                <div class="user-block mb-0">
+	                  <div *ngIf="notificacionesLoading" class="text-center py-4 text-muted">
+	                    Cargando historial de recargos...
+	                  </div>
+
+                  <div *ngIf="!notificacionesLoading && historialNotificaciones.length > 0">
+                    <table class="table table-hover table-sm table-bordered mb-0">
+                      <thead class="theadPlanillas">
+	                        <tr class="text-center">
+	                          <th>Fecha</th>
+	                          <th>Emisión</th>
+	                          <th>Tipo</th>
+	                          <th>Rubro</th>
+	                          <th>Observación</th>
+	                        </tr>
+                      </thead>
+                      <tbody class="bodyPlanillas">
+	                        <tr *ngFor="let notificacion of historialNotificaciones" class="small">
+	                          <td>{{ getFechaRecargo(notificacion) | date:'dd/MM/yyyy' }}</td>
+	                          <td class="text-center">{{ notificacion.idemision_emisiones.emision || notificacion.idemision_emisiones.idemision || 'Sin emisión' }}</td>
+	                          <td class="text-center">{{ formatRecargoTipo(notificacion.tipo) }}</td>
+	                          <td>{{ notificacion.idrubro_rubros.descripcion || 'Sin rubro' }}</td>
+	                          <td>{{ notificacion.observacion || 'Sin observación' }}</td>
+	                        </tr>
+                      </tbody>
+                    </table>
+
+                    <div class="d-flex justify-content-between align-items-center mt-2" *ngIf="notificacionesTotalPages > 0">
+                      <div class="small text-muted">
+                        Página {{notificacionesPage + 1}} de {{notificacionesTotalPages}}
+                      </div>
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-outline-secondary btn-sm"
+                          (click)="cambiarPaginaNotificaciones(-1)"
+                          [disabled]="notificacionesPage === 0 || notificacionesLoading">
+                          Anterior
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm"
+                          (click)="cambiarPaginaNotificaciones(1)"
+                          [disabled]="notificacionesPage + 1 >= notificacionesTotalPages || notificacionesLoading">
+                          Siguiente
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div *ngIf="!notificacionesLoading && notificacionesLoaded && historialNotificaciones.length === 0"
+                    class="border rounded bg-light text-center text-muted py-4 px-3">
+	                    La cuenta no tiene recargos registrados por emisión.
                   </div>
                 </div>
               </div>

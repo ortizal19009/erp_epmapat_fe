@@ -42,6 +42,7 @@
             <thead class="cabecera">
                <tr>
                   <th></th>
+                  <th class="text-center">En línea</th>
                   <th role="button" (click)="ordenarPor('establecimiento')">
                      Estab
                      <span *ngIf="ordenColumna === 'establecimiento'">{{ ordenAscendente ? '▲' : '▼' }}</span>
@@ -65,6 +66,17 @@
                <tr class="fila" *ngFor="let caja of cajasFiltradas | filter: filtro; let i=index"
                   (click)="onCellClick($event, caja.idcaja)">
                   <td class="text-center small font-weight-bold">{{i+1}}</td>
+                  <td class="text-center align-middle">
+                     <span class="d-inline-block rounded-circle"
+                        [ngStyle]="{
+                          width: '12px',
+                          height: '12px',
+                          'background-color': caja.abierta ? '#28a745' : '#d1d5db',
+                          border: caja.abierta ? '1px solid #1e7e34' : '1px solid #9ca3af'
+                        }"
+                        [title]="caja.abierta ? 'Caja en línea' : 'Caja fuera de línea'">
+                     </span>
+                  </td>
                   <td [ngClass]="{'tachado': caja.estado == 0 }" class="text-center">{{
                      caja.idptoemision_ptoemision.establecimiento }}</td>
                   <td [ngClass]="{'tachado': caja.estado == 0 }" class="text-center">{{ caja.codigo }}</td>

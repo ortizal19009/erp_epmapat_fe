@@ -33,6 +33,8 @@ import { JasperReportService } from 'src/app/servicios/jasper-report.service';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { StorageService } from 'src/app/servicios/storage.service';
 import { OutboxAttachment, OutboxEmailService } from 'src/app/servicios/outbox-email.service';
+import { Recargosxcuenta } from 'src/app/modelos/recargosxcuenta.model';
+import { RecargosxcuentaService } from 'src/app/servicios/recargosxcuenta.service';
 import Swal from 'sweetalert2';
 import { environment } from 'src/environments/environment';
 import { firstValueFrom } from 'rxjs';
@@ -58,6 +60,10 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
   f_sendEmail: FormGroup;
 
   rango: number = 15;
+  facturasPage: number = 0;
+  facturasTotalPages: number = 0;
+  facturasTotalElements: number = 0;
+  facturasLoading: boolean = false;
   estadoFE: string;
   esFE: string;
   factura: Facturas = new Facturas();
@@ -118,6 +124,13 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
   nameFile: string = 'Vacío...';
   email: string;
   active: boolean = false;
+  historialNotificaciones: Recargosxcuenta[] = [];
+  notificacionesPage: number = 0;
+  notificacionesSize: number = 10;
+  notificacionesTotalPages: number = 0;
+  notificacionesTotalElements: number = 0;
+  notificacionesLoading: boolean = false;
+  notificacionesLoaded: boolean = false;
 
   mensajeBody = `<h3>Se adjunta su documénto electrónico. No responder este mensaje.</h3>
 
@@ -161,7 +174,8 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
     private s_jasperreport: JasperReportService,
     private f: FormBuilder,
     private outboxEmailService: OutboxEmailService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private recargosxcuentaService: RecargosxcuentaService
   ) { }
 
   ngOnInit(): void {
@@ -186,7 +200,8 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
     }
   }
   getFactura() {
-    this.facturasxAbonado(this.abonado.idabonado);
+    this.facturasPage = 0;
+    this.facturasxAbonado(this.abonado.idabonado, 0);
   }
 
   obtenerDatosAbonado() {
@@ -231,7 +246,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
       error: (err) => console.error(err.error),
     });
 
-    this.facturasxAbonado(+idabonado!);
+    this.facturasxAbonado(+idabonado!, 0);
     //this.drawAllCuentas();
   }
   estado_FE(estado: String) {
@@ -292,33 +307,96 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
     }
   }
 
-  facturasxAbonado(idabonado: number) {
+  facturasxAbonado(idabonado: number, page: number = this.facturasPage) {
+    this.facturasLoading = true;
     this.s_loading.showLoading();
-    this.facService.getByIdabonadorango(idabonado, this.rango).subscribe({
-      next: (datos: any) => {
-        if (datos.length > 0) {
-          datos.map(async (item: any) => {
-            let _feccrea = await this.getEmisionoByFactura(item.idfactura);
-            if (_feccrea != null) {
-              item.feccrea = _feccrea;
+    this.facService.getByIdabonadoPage(idabonado, page, this.rango).subscribe({
+      next: async (response: any) => {
+        const contenido = Array.isArray(response?.content) ? response.content : [];
+        this.facturasPage = response?.number ?? page;
+        this.facturasTotalPages = response?.totalPages ?? 0;
+        this.facturasTotalElements = response?.totalElements ?? 0;
+        this._facturas = await Promise.all(
+          contenido.map(async (item: any) => {
+            const factura = { ...item };
+            const feccrea = await this.getEmisionoByFactura(factura.idfactura);
+            if (feccrea != null) {
+              factura.feccrea = feccrea;
             }
-            if (item.pagado === 0) {
-              let inte = await this.cInteres(item);
-              item.interescobrado = +inte.toFixed(2);
+            if (factura.pagado === 0) {
+              const inte = await this.cInteres(factura);
+              factura.interescobrado = +inte.toFixed(2);
             }
-            if (item.pagado === 1 && item.interescobrado === null) {
-              item.interescobrado = 0;
+            if (factura.pagado === 1 && factura.interescobrado === null) {
+              factura.interescobrado = 0;
             }
-            /*           item.feccrea = await this.getEmisionoByFactura(item.idfactura);
-             */ this.s_loading.hideLoading();
-          });
-          this._facturas = datos;
-        } else {
-          this.s_loading.hideLoading();
-        }
+            return factura;
+          })
+        );
+        this.facturasLoading = false;
+        this.s_loading.hideLoading();
       },
-      error: (err) => console.error(err.error),
+      error: (err) => {
+        console.error(err.error);
+        this._facturas = [];
+        this.facturasTotalPages = 0;
+        this.facturasTotalElements = 0;
+        this.facturasLoading = false;
+        this.s_loading.hideLoading();
+      },
     });
+  }
+
+  cambiarPaginaFacturas(delta: number): void {
+    const nuevaPagina = this.facturasPage + delta;
+    if (nuevaPagina < 0 || nuevaPagina >= this.facturasTotalPages) {
+      return;
+    }
+    this.facturasxAbonado(this.abonado.idabonado, nuevaPagina);
+  }
+
+  cargarHistorialNotificaciones(page: number = 0): void {
+    if (!this.abonado?.idabonado) {
+      return;
+    }
+    this.notificacionesLoading = true;
+    this.recargosxcuentaService.getRecargosxcuentaByAbonado(this.abonado.idabonado).subscribe({
+      next: (response: any) => {
+        this.historialNotificaciones = Array.isArray(response) ? response : [];
+        this.notificacionesLoaded = true;
+        this.notificacionesLoading = false;
+      },
+      error: (err) => {
+        console.error('Error cargando historial de recargos por cuenta:', err);
+        this.historialNotificaciones = [];
+        this.notificacionesLoaded = true;
+        this.notificacionesLoading = false;
+      }
+    });
+  }
+
+  cambiarPaginaNotificaciones(delta: number): void {
+    return;
+  }
+
+  formatDestinatarios(destinatarios: string[] | null | undefined): string {
+    return Array.isArray(destinatarios) && destinatarios.length
+      ? destinatarios.join(', ')
+      : 'Sin destinatarios';
+  }
+
+  formatRecargoTipo(tipo: number | null | undefined): string {
+    if (tipo === 1) {
+      return 'Notificación';
+    }
+    if (tipo === 2) {
+      return 'Inspección';
+    }
+    return 'Sin tipo';
+  }
+
+  getFechaRecargo(recargo: Recargosxcuenta): Date | string | null {
+    return recargo?.fecha ?? recargo?.feccrea ?? null;
   }
 
   formatInteres(interes: any) {

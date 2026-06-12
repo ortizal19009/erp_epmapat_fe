@@ -22,6 +22,10 @@ export class RecargosxcuentaService {
     return this.http.get(`${baseUrl}/byEmision?idemision=${idemision}`);
   }
 
+  getRecargosxcuentaByAbonado(idabonado: number) {
+    return this.http.get(`${baseUrl}/byAbonado?idabonado=${idabonado}`);
+  }
+
   validarBatch(req: ValidarBatchRequest): Observable<ValidarBatchResponse> {
     return this.http.post<ValidarBatchResponse>(`${baseUrl}/validar`, req);
   }
