@@ -81,22 +81,22 @@
                   <td class="text-center"><i *ngIf="certificacion.idcerti == ultIdSelec"
                         class="bi bi-caret-right-fill text-primary"></i>{{ certificacion.numero }}</td>
                   <td class="text-center">{{ certificacion.fecha | date: 'dd-MM-yyyy' }}</td>
-                  <td [ngClass]="{'transparente': certificacion.intdoc.intdoc == 1}">{{
-                     certificacion.intdoc.nomdoc}} {{ certificacion.numdoc }}</td>
-                  <td [ngClass]="{'transparente': certificacion.idbene.idbene == 1}">{{ certificacion.idbene.nomben}}
+                  <td [ngClass]="{'transparente': certificacion.intdoc?.intdoc == 1}">{{
+                     certificacion.intdoc?.nomdoc || 'Sin documento' }} {{ certificacion.numdoc }}</td>
+                  <td [ngClass]="{'transparente': certificacion.idbene?.idbene == 1}">{{ certificacion.idbene?.nomben || 'Sin beneficiario' }}
                   </td>
                   <td class="text-right" [ngClass]="{'transparente': certificacion.valor == 0}">{{ certificacion.valor |
                      number:'1.2-2' }}</td>
                   <!-- <td>{{ certificacion.idbeneres.nomben}}</td> -->
                   <td class="text-truncate ancho300" data-toggle="tooltip"
-                     [ngClass]="{'toolt': certificacion.idbeneres.nomben.length > 40}"
-                     [title]="certificacion.idbeneres.nomben.length > 40 ? certificacion.idbeneres.nomben : ''">
-                     {{ certificacion.idbeneres.nomben }}
-                  </td> 
+                     [ngClass]="{'toolt': (certificacion.idbeneres?.nomben?.length || 0) > 40}"
+                     [title]="(certificacion.idbeneres?.nomben?.length || 0) > 40 ? certificacion.idbeneres?.nomben : ''">
+                     {{ certificacion.idbeneres?.nomben || 'Sin responsable' }}
+                  </td>
                   <td class="text-truncate ancho300" data-toggle="tooltip"
-                     [ngClass]="{'toolt': certificacion.descripcion.length > 50}"
-                     [title]="certificacion.descripcion.length > 50 ? certificacion.descripcion : ''">
-                     {{ certificacion.descripcion }}
+                     [ngClass]="{'toolt': (certificacion.descripcion?.length || 0) > 50}"
+                     [title]="(certificacion.descripcion?.length || 0) > 50 ? certificacion.descripcion : ''">
+                     {{ certificacion.descripcion || '' }}
                   </td>
                   <td class="text-center">
                      <div class="btn-group py-0">

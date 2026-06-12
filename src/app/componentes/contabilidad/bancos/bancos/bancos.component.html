@@ -66,10 +66,10 @@
             </thead>
             <tbody class="detalle">
                <tr class="roboto small pad0" *ngFor="let movibank of _movibank | filter: filtro;">
-                  <td class="col-sm-1 text-center">{{movibank.idasiento.fecha}}</td>
-                  <td class="text-center">{{movibank.idasiento.asiento}}</td>
-                  <td class="text-center">{{ comprobante(movibank.idasiento.tipcom, movibank.idasiento.compro )}}</td>
-                  <td>{{movibank.intdoc.nomdoc +' '+movibank.numdoc}}</td>
+                  <td class="col-sm-1 text-center">{{movibank.idasiento?.fecha || ''}}</td>
+                  <td class="text-center">{{movibank.idasiento?.asiento || ''}}</td>
+                  <td class="text-center">{{ comprobante(movibank.idasiento?.tipcom, movibank.idasiento?.compro) }}</td>
+                  <td>{{movibank.intdoc?.nomdoc || 'Sin documento'}} {{movibank.numdoc || ''}}</td>
                   <td class="text-center">
                      <div *ngIf="mal(movibank)">
                         <i class="bi-x bg-red" aria-hidden="true"></i>
@@ -90,7 +90,7 @@
                   <ng-template #haber>
                      <td></td>
                   </ng-template>
-                  <td>{{movibank.idasiento.idbene.nomben}}</td>
+                  <td>{{movibank.idasiento?.idbene?.nomben || 'Sin beneficiario'}}</td>
                   <td class="text-truncate ancho">{{movibank.descri}}</td>
 
                   <td class="text-center">
