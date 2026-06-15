@@ -276,7 +276,7 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
     this.cargando = true;
     this.s_emisionindividual.getByIdEmision(idemision).subscribe({
       next: (datos: any[]) => {
-        this._emisionindividual = datos || [];
+        this._emisionindividual = (datos || []).filter((item) => !!item);
       },
       error: (e) => console.error(e),
       complete: () => (this.cargando = false),

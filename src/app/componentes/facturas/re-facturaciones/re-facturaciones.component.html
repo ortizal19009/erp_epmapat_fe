@@ -140,15 +140,15 @@
               </td>
               <td class="text-center">
                 <span class="badge badge-light border text-dark">
-                  {{ it.idlecturanueva.idabonado_abonados.idabonado }}
+                  {{ it?.idlecturanueva?.idabonado_abonados?.idabonado || '-' }}
                 </span>
               </td>
-              <td>{{it.idlecturanueva.idabonado_abonados.idresponsable.nombre}}</td>
-              <td>{{it.idlecturanueva.idabonado_abonados.idresponsable.cedula}}</td>
-              <td class="text-right">{{ it.idlecturaanterior.idlectura }}</td>
-              <td class="text-right">{{ it.idlecturanueva.idlectura }}</td>
-              <td class="text-right">{{ it.idlecturaanterior.idfactura }}</td>
-              <td class="text-right">{{ it.idlecturanueva.idfactura }}</td>
+              <td>{{ it?.idlecturanueva?.idabonado_abonados?.idresponsable?.nombre || '-' }}</td>
+              <td>{{ it?.idlecturanueva?.idabonado_abonados?.idresponsable?.cedula || '-' }}</td>
+              <td class="text-right">{{ it?.idlecturaanterior?.idlectura || '-' }}</td>
+              <td class="text-right">{{ it?.idlecturanueva?.idlectura || '-' }}</td>
+              <td class="text-right">{{ it?.idlecturaanterior?.idfactura || '-' }}</td>
+              <td class="text-right">{{ it?.idlecturanueva?.idfactura || '-' }}</td>
 
               <td class="text-center">
                 <button class="btn btn-sm btn-outline-danger" title="Imprimir" (click)="imprimirItem(it)">

@@ -466,7 +466,19 @@ export class TransferenciasComponent implements OnInit {
           }
           this.facService.updateFacturas(fac).subscribe({
             next: async (nex) => {
-              await this.fecFacturaS.generateXmlOfPago(fac.idfactura);
+              try {
+                await this.fecFacturaS.generateXmlOfPago(fac.idfactura);
+              } catch (error) {
+                console.error(
+                  'Error al generar la factura electrónica de la transferencia:',
+                  error
+                );
+                const mensaje =
+                  error instanceof Error
+                    ? error.message
+                    : 'No se pudo generar la factura electrónica de la transferencia.';
+                alert(mensaje);
+              }
               this.swtransferido = true;
               /* =============== */
               let nrofac = this._nroFactura.split('-', 3);

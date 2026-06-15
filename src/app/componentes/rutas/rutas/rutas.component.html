@@ -220,10 +220,10 @@
                       <td>{{dr.nombre}}</td>
                       <td>{{dr.cedula}}</td>
                       <td>{{dr.cuenta}}</td>
-                      <td>{{dr.subtotal.toFixed(2)}}</td>
-                      <td>{{dr.total_interes.toFixed(2)}}</td>
-                      <td>{{dr.total_final.toFixed(2)}}</td>
-                      <td>{{dr.total_facturas}}</td>
+                      <td>{{ (dr?.subtotal ?? 0) | number:'1.2-2' }}</td>
+                      <td>{{ (dr?.total_interes ?? 0) | number:'1.2-2' }}</td>
+                      <td>{{ (dr?.total_final ?? 0) | number:'1.2-2' }}</td>
+                      <td>{{ dr?.total_facturas ?? 0 }}</td>
                     </tr>
                   </tbody>
                 </table>

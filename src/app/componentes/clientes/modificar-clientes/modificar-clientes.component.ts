@@ -7,7 +7,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { map, of } from 'rxjs';
+import { forkJoin, map, of } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Clientes } from 'src/app/modelos/clientes';
@@ -29,9 +29,10 @@ export class ModificarClientesComponent implements OnInit {
   private parent: string | null;
   formCliente: FormGroup;
   cliente: Clientes;
-  nacionalidad: any;
-  personeriajuridica: any;
-  _tpidentifica: any;
+  nacionalidad: Nacionalidad[] = [];
+  personeriajuridica: PersoneriaJuridica[] = [];
+  _tpidentifica: Tpidentifica[] = [];
+  private clienteOriginal: any = null;
   validar: boolean = false;
   validarporc: boolean = false;
   codidentifica: any;
@@ -99,8 +100,8 @@ export class ModificarClientesComponent implements OnInit {
     this.formCliente = this.fb.group(
       {
         idcliente: '',
-        idnacionalidad_nacionalidad: ['', Validators.required],
-        idtpidentifica_tpidentifica: '',
+        idnacionalidad_nacionalidad: [null, Validators.required],
+        idtpidentifica_tpidentifica: [null, Validators.required],
         cedula: [
           '',
           Validators.required,
@@ -115,7 +116,7 @@ export class ModificarClientesComponent implements OnInit {
         porcexonera: ['', Validators.required],
         estado: '',
         email: ['', [Validators.required, Validators.email]],
-        idpjuridica_personeriajuridica: ['', Validators.required],
+        idpjuridica_personeriajuridica: [null, Validators.required],
         usumodi: this.authService.idusuario,
         fecmodi: date,
         usucrea: this.authService.idusuario,
@@ -133,10 +134,7 @@ export class ModificarClientesComponent implements OnInit {
       { validators: this.passwordMatchValidator }
     );
 
-    this.listarNacionalidades();
-    this.listarPersoneriaJuridica();
-    this.listarTpIdentifica();
-    this.buscaCliente();
+    this.cargarCatalogosYCliente();
   }
   passwordMatchValidator(group: AbstractControl) {
     const pass = group.get('password')?.value;
@@ -159,24 +157,26 @@ export class ModificarClientesComponent implements OnInit {
     return this.formCliente.controls;
   }
 
-  listarNacionalidades() {
-    this.nacionalidadS.getListaNacionalidades().subscribe({
-      next: (datos) => (this.nacionalidad = datos),
-      error: (err) => console.error(err.error),
-    });
-  }
+  private cargarCatalogosYCliente() {
+    const idcliente = Number(sessionStorage.getItem('idclienteToModi'));
+    if (!idcliente) {
+      console.error('No se encontró el id del cliente a modificar');
+      return;
+    }
 
-  listarPersoneriaJuridica() {
-    this.personeriajuridicaS.getListaPersoneriaJuridica().subscribe({
-      next: (datos) => (this.personeriajuridica = datos),
-      error: (err) => console.error(err.error),
-    });
-  }
-
-  listarTpIdentifica() {
-    this.tpidentiService.getListaTpIdentifica().subscribe({
-      next: (datos) => (this._tpidentifica = datos),
-      error: (err) => console.error(err.error),
+    forkJoin({
+      nacionalidades: this.nacionalidadS.getListaNacionalidades(),
+      personerias: this.personeriajuridicaS.getListaPersoneriaJuridica(),
+      tiposIdentificacion: this.tpidentiService.getListaTpIdentifica(),
+      cliente: this.cliService.getListaById(idcliente),
+    }).subscribe({
+      next: ({ nacionalidades, personerias, tiposIdentificacion, cliente }: any) => {
+        this.nacionalidad = nacionalidades ?? [];
+        this.personeriajuridica = personerias ?? [];
+        this._tpidentifica = tiposIdentificacion ?? [];
+        this.aplicarClienteFormulario(cliente);
+      },
+      error: (err) => console.error(err?.error ?? err),
     });
   }
 
@@ -193,47 +193,88 @@ export class ModificarClientesComponent implements OnInit {
     this.router.navigate(['/nacionalidades']);
   }
 
-  buscaCliente() {
-    let idcliente = sessionStorage.getItem('idclienteToModi');
-    //let cli: any = this.cliService.getListaById()
-    this.cliService.getListaById(+idcliente!).subscribe({
-      next: (datos: any) => {
-        this.cliente = datos;
-        this.codidentifica = this.cliente.idtpidentifica_tpidentifica.codigo;
-        this.antcedula = datos.cedula;
-        this.formCliente.patchValue({
-          idcliente: datos.idcliente,
-          idnacionalidad_nacionalidad: datos.idnacionalidad_nacionalidad,
-          idtpidentifica_tpidentifica: datos.idtpidentifica_tpidentifica,
-          cedula: datos.cedula,
-          nombre: datos.nombre,
-          direccion: datos.direccion,
-          telefono: datos.telefono,
-          fechanacimiento: datos.fechanacimiento,
-          discapacitado: datos.discapacitado,
-          porcdiscapacidad: datos.porcdiscapacidad,
-          porcexonera: datos.porcexonera,
-          estado: datos.estado,
-          email: datos.email,
-          idpjuridica_personeriajuridica: datos.idpjuridica_personeriajuridica,
-          usucrea: datos.usucrea,
-          feccrea: datos.feccrea,
-          usumodi: this.authService.idusuario,
-          fecmodi: this.date,
-        });
-        this.formCredenciales.patchValue({
-          username: datos.username,
-        });
-      },
-      error: (err) => console.error(err.error),
+  private aplicarClienteFormulario(datos: any) {
+    console.log('Datos del cliente recibidos:', datos);
+    this.clienteOriginal = datos;
+    this.cliente = datos;
+    this.codidentifica = datos?.idtpidentifica_tpidentifica?.codigo ?? '';
+    this.antcedula = datos?.cedula;
+
+    const nacionalidadSeleccionada = this.buscarPorId(
+      this.nacionalidad,
+      'idnacionalidad',
+      datos?.idnacionalidad_nacionalidad
+    );
+    const tipoIdentificacionSeleccionado = this.buscarPorId(
+      this._tpidentifica,
+      'idtpidentifica',
+      datos?.idtpidentifica_tpidentifica
+    );
+    const personeriaSeleccionada = this.buscarPorId(
+      this.personeriajuridica,
+      'idpjuridica',
+      datos?.idpjuridica_personeriajuridica
+    );
+
+    this.formCliente.patchValue({
+      idcliente: datos.idcliente,
+      idnacionalidad_nacionalidad: nacionalidadSeleccionada,
+      idtpidentifica_tpidentifica: tipoIdentificacionSeleccionado,
+      cedula: datos.cedula,
+      nombre: datos.nombre,
+      direccion: datos.direccion,
+      telefono: datos.telefono,
+      fechanacimiento: this.normalizarFechaInput(datos.fechanacimiento),
+      discapacitado: String(datos.discapacitado ?? ''),
+      porcdiscapacidad: datos.porcdiscapacidad,
+      porcexonera: String(datos.porcexonera ?? '0'),
+      estado: datos.estado,
+      email: datos.email,
+      idpjuridica_personeriajuridica: personeriaSeleccionada,
+      usucrea: datos.usucrea,
+      feccrea: datos.feccrea,
+      usumodi: this.authService.idusuario,
+      fecmodi: this.date,
     });
+    this.formCliente.markAsPristine();
+
+    this.formCredenciales.patchValue({
+      username: datos.username ?? '',
+    });
+  }
+
+  private buscarPorId<T extends Record<string, any>>(
+    lista: T[],
+    campoId: string,
+    valor: any
+  ): T | null {
+    const idBuscado = valor?.[campoId] ?? valor;
+    if (!idBuscado) {
+      return null;
+    }
+    return (
+      lista.find(
+        (item) => String(item?.[campoId] ?? '') === String(idBuscado)
+      ) ?? null
+    );
+  }
+
+  private normalizarFechaInput(valor: any): string {
+    if (!valor) {
+      return '';
+    }
+    const fecha = new Date(valor);
+    if (Number.isNaN(fecha.getTime())) {
+      return '';
+    }
+    return fecha.toISOString().split('T')[0];
   }
 
   changeNacion() {
     const idtpidentificaControl = this.formCliente.get(
       'idtpidentifica_tpidentifica'
     )!;
-    idtpidentificaControl.setValue('');
+    idtpidentificaControl.setValue(null);
     const cedulaControl = this.formCliente.get('cedula');
     if (cedulaControl) {
       cedulaControl.setValue('');
@@ -246,7 +287,69 @@ export class ModificarClientesComponent implements OnInit {
       cedulaControl.setValue('');
     }
     this.codidentifica =
-      this.formCliente.value.idtpidentifica_tpidentifica.codigo;
+      this.formCliente.value.idtpidentifica_tpidentifica?.codigo ?? '';
+  }
+
+  private construirPayloadCliente() {
+    const formVal = this.formCliente.getRawValue();
+
+    return {
+      ...formVal,
+      idnacionalidad_nacionalidad: {
+        idnacionalidad:
+          formVal.idnacionalidad_nacionalidad?.idnacionalidad ??
+          formVal.idnacionalidad_nacionalidad,
+      },
+      idtpidentifica_tpidentifica: {
+        idtpidentifica:
+          formVal.idtpidentifica_tpidentifica?.idtpidentifica ??
+          formVal.idtpidentifica_tpidentifica,
+      },
+      idpjuridica_personeriajuridica: {
+        idpjuridica:
+          formVal.idpjuridica_personeriajuridica?.idpjuridica ??
+          formVal.idpjuridica_personeriajuridica,
+      },
+      usumodi: this.authService.idusuario,
+      fecmodi: new Date().toISOString().split('T')[0],
+    };
+  }
+
+  private resumirCambios(): string[] {
+    if (!this.clienteOriginal) {
+      return [];
+    }
+
+    const actual = this.formCliente.getRawValue();
+    const original = this.clienteOriginal;
+    const cambios: string[] = [];
+
+    const comparaciones = [
+      ['Nacionalidad', original.idnacionalidad_nacionalidad?.descripcion, actual.idnacionalidad_nacionalidad?.descripcion],
+      ['Tipo identificación', original.idtpidentifica_tpidentifica?.nombre, actual.idtpidentifica_tpidentifica?.nombre],
+      ['Identificación', original.cedula, actual.cedula],
+      ['Nombre', original.nombre, actual.nombre],
+      ['Dirección', original.direccion, actual.direccion],
+      ['Teléfono', original.telefono, actual.telefono],
+      ['Fecha nacimiento', this.normalizarFechaInput(original.fechanacimiento), actual.fechanacimiento],
+      ['Discapacidad', String(original.discapacitado ?? ''), String(actual.discapacitado ?? '')],
+      ['% Discapacidad', String(original.porcdiscapacidad ?? ''), String(actual.porcdiscapacidad ?? '')],
+      ['% Exoneración', String(original.porcexonera ?? ''), String(actual.porcexonera ?? '')],
+      ['Email', original.email, actual.email],
+      ['Personería jurídica', original.idpjuridica_personeriajuridica?.descripcion, actual.idpjuridica_personeriajuridica?.descripcion],
+    ];
+
+    for (const [etiqueta, anterior, nuevo] of comparaciones) {
+      const valorAnterior = anterior ?? '';
+      const valorNuevo = nuevo ?? '';
+      if (String(valorAnterior) !== String(valorNuevo)) {
+        cambios.push(
+          `<li><strong>${etiqueta}:</strong> ${valorAnterior || 'Sin dato'} -> ${valorNuevo || 'Sin dato'}</li>`
+        );
+      }
+    }
+
+    return cambios;
   }
 
   retornar() {
@@ -259,6 +362,70 @@ export class ModificarClientesComponent implements OnInit {
       this.formCliente.markAllAsTouched();
       return;
     }
+    const cambios = this.resumirCambios();
+    if (cambios.length === 0) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Sin cambios',
+        text: 'No hay cambios para actualizar en el cliente.',
+      });
+      return;
+    }
+
+    void Swal.fire({
+      title: 'Confirmar actualización',
+      html:
+        `Cliente: <strong>${this.formCliente.value.nombre}</strong><br>` +
+        `Identificación: <strong>${this.formCliente.value.cedula}</strong><hr>` +
+        `<div class="text-left"><strong>Cambios detectados:</strong><ul>${cambios.join('')}</ul></div>`,
+      icon: 'question',
+      input: 'textarea',
+      inputLabel: 'Observación del cambio',
+      inputPlaceholder: 'Describa brevemente qué se modificó...',
+      inputAttributes: { 'aria-label': 'Observación' },
+      showCancelButton: true,
+      confirmButtonColor: '#28a745',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: '<i class="bi bi-check-circle"></i> Guardar',
+      cancelButtonText: 'Cancelar',
+    }).then((result) => {
+      if (!result.isConfirmed) return;
+
+      const clienteBody = this.construirPayloadCliente();
+
+      this.cliService.updateClienteAuditoria(
+        clienteBody,
+        this.authService.idusuario,
+        result.value || 'Sin observación',
+        'MODIFICACION'
+      ).subscribe({
+        next: () => {
+          this.clienteOriginal = {
+            ...this.clienteOriginal,
+            ...this.formCliente.getRawValue(),
+          };
+          this.formCliente.markAsPristine();
+          Swal.fire({
+            toast: true,
+            icon: 'success',
+            title: 'Cliente modificado correctamente',
+            position: 'top',
+            showConfirmButton: false,
+            timer: 2000,
+          });
+          this.retornar();
+        },
+        error: (err) => {
+          console.error(err.error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error al guardar',
+            text: err?.error?.message ?? 'Ocurrió un error inesperado.',
+          });
+        },
+      });
+    });
+    return;
 
     Swal.fire({
       title: '¿Guardar cambios?',
@@ -327,36 +494,42 @@ export class ModificarClientesComponent implements OnInit {
   }
 
   compararNacionalidad(o1: Nacionalidad, o2: Nacionalidad): boolean {
-    if (o1 === undefined && o2 === undefined) {
+    const id1 = o1 && 'idnacionalidad' in o1 ? o1.idnacionalidad : (o1 as any);
+    const id2 = o2 && 'idnacionalidad' in o2 ? o2.idnacionalidad : (o2 as any);
+    if (id1 == null && id2 == null) {
       return true;
-    } else {
-      return o1 === null || o2 === null || o1 === undefined || o2 === undefined
-        ? false
-        : o1.idnacionalidad == o2.idnacionalidad;
     }
+    if (id1 == null || id2 == null) {
+      return false;
+    }
+    return String(id1) === String(id2);
   }
 
   compararPersoneriaJuridica(
     o1: PersoneriaJuridica,
     o2: PersoneriaJuridica
   ): boolean {
-    if (o1 === undefined && o2 === undefined) {
+    const id1 = o1 && 'idpjuridica' in o1 ? o1.idpjuridica : (o1 as any);
+    const id2 = o2 && 'idpjuridica' in o2 ? o2.idpjuridica : (o2 as any);
+    if (id1 == null && id2 == null) {
       return true;
-    } else {
-      return o1 === null || o2 === null || o1 === undefined || o2 === undefined
-        ? false
-        : o1.idpjuridica == o2.idpjuridica;
     }
+    if (id1 == null || id2 == null) {
+      return false;
+    }
+    return String(id1) === String(id2);
   }
 
   compararTpIdentifica(o1: Tpidentifica, o2: Tpidentifica): boolean {
-    if (o1 === undefined && o2 === undefined) {
+    const id1 = o1 && 'idtpidentifica' in o1 ? o1.idtpidentifica : (o1 as any);
+    const id2 = o2 && 'idtpidentifica' in o2 ? o2.idtpidentifica : (o2 as any);
+    if (id1 == null && id2 == null) {
       return true;
-    } else {
-      return o1 === null || o2 === null || o1 === undefined || o2 === undefined
-        ? false
-        : o1.idtpidentifica == o2.idtpidentifica;
     }
+    if (id1 == null || id2 == null) {
+      return false;
+    }
+    return String(id1) === String(id2);
   }
 
   valIdentifica(control: AbstractControl) {

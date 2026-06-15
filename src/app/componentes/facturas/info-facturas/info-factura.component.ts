@@ -343,7 +343,11 @@ export class InfoFacturasComponent implements OnInit {
       alert('Factura electrónica generada correctamente.');
     } catch (error) {
       console.error('Error al generar la factura electrónica', error);
-      alert('No se pudo generar la factura electrónica.');
+      const mensaje =
+        error instanceof Error
+          ? error.message
+          : 'No se pudo generar la factura electrónica.';
+      alert(mensaje);
     } finally {
       this.s_loading.hideLoading();
     }

@@ -196,7 +196,7 @@ export class ModificarTramitenuevoComponent implements OnInit {
                tuberiaprincipal: datos.tuberiaprincipal,
                tipovia: datos.tipovia,
                codmedidor: datos.codmedidor,
-               codmedidorvecino: '',
+               codmedidorvecino: datos.codmedidorvecino,
                secuencia: datos.secuencia,
                inspector: datos.inspector,
                areaconstruccion: datos.areaconstruccion,
@@ -216,7 +216,7 @@ export class ModificarTramitenuevoComponent implements OnInit {
                fecmodi: datos.fecmodi,
             });
             this.aguatramite = datos.idaguatramite_aguatramite;
-            //this.validarFormulario();
+            this.formTramitenuevo.updateValueAndValidity();
          },
          error: (e) => console.error(e),
       });

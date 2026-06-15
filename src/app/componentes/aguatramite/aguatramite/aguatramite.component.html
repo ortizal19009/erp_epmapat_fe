@@ -92,7 +92,7 @@
             <tbody>
                <tr *ngFor="let aguatramite of _aguatramite | filter:filterTerm; let i= index">
                   <td class="text-center font-weight-bold small">{{i+1}}</td>
-                  <td class="description">{{ getNombreClienteTramite(aguatramite) || 'Sin cliente' }}</td>
+                  <td class="description">{{ getNombreClienteVisible(aguatramite) || 'Sin cliente' }}</td>
                   <td>{{ getCuentaTramite(aguatramite) }}</td>
                   <td class="text-center">{{ aguatramite.feccrea | date: 'dd-MM-y' }}</td>
                   <td>{{ setEstado( aguatramite.estado) }}</td>

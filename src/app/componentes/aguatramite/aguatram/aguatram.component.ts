@@ -184,11 +184,11 @@ export class AguatramComponent implements OnInit {
 
       this.f_datos = this.fb.group({ tipoBusqueda: 1, buscarAbonado: '' });
       this.f_categoria = this.fb.group({
-         idcategoria_categorias: [1, Validators.required],
+         idcategoria_categorias: [null, Validators.required],
          adultomayor: false,
          municipio: false,
          observaciones: ['', Validators.required],
-         iddocumento_documentos: [1, Validators.required],
+         iddocumento_documentos: [null, Validators.required],
          nrodocumento: ['', Validators.required]
       });
       this.f_nMedidor = this.fb.group({
@@ -198,19 +198,19 @@ export class AguatramComponent implements OnInit {
          medidordiametro: ['', Validators.required],
          medidornroesferas: ['', Validators.required],
          observaciones: ['', Validators.required],
-         iddocumento_documentos: [1, Validators.required],
+         iddocumento_documentos: [null, Validators.required],
          nrodocumento: ['', Validators.required]
       });
       this.f_retiroMedidor = this.fb.group({
          ubimedidor: ['', Validators.required],
          fecmedidor: ['', Validators.required],
-         iddocumento_documentos: 1,
-         nrodocumento: ''
+         iddocumento_documentos: [null, Validators.required],
+         nrodocumento: ['', Validators.required]
       });
       this.f_camPropietario = this.fb.group({
-         cliente: '',
+         cliente: [null, Validators.required],
          observaciones: ['', Validators.required],
-         iddocumento_documentos: [1, Validators.required],
+         iddocumento_documentos: [null, Validators.required],
          nrodocumento: ['', Validators.required],
       });
       this.f_retiroMedidor.patchValue({
@@ -231,14 +231,26 @@ export class AguatramComponent implements OnInit {
 
    listarCategorias() {
       this.s_categorias.getListCategoria().subscribe({
-         next: (datos) => this.categorias = datos,
+         next: (datos) => {
+            this.categorias = datos;
+            if (!this.f_categoria.value.idcategoria_categorias && Array.isArray(datos) && datos.length > 0) {
+               this.f_categoria.patchValue({ idcategoria_categorias: datos[0] });
+            }
+         },
          error: (e) => console.error(e),
       });
    }
 
    listDocumentos() {
       this.s_documentos.getListaDocumentos().subscribe({
-         next: (documentos: any) => this._documentos = documentos,
+         next: (documentos: any) => {
+            this._documentos = documentos;
+            const documentoPorDefecto = Array.isArray(documentos) && documentos.length > 0 ? documentos[0].intdoc : null;
+            this.f_categoria.patchValue({ iddocumento_documentos: documentoPorDefecto });
+            this.f_nMedidor.patchValue({ iddocumento_documentos: documentoPorDefecto });
+            this.f_retiroMedidor.patchValue({ iddocumento_documentos: documentoPorDefecto });
+            this.f_camPropietario.patchValue({ iddocumento_documentos: documentoPorDefecto });
+         },
          error: (e: any) => console.error(e)
       });
    }
@@ -392,6 +404,9 @@ export class AguatramComponent implements OnInit {
 
    setClient(cliente: any) {
       this.selectClient = cliente;
+      this.f_camPropietario.patchValue({ cliente });
+      this.f_camPropietario.get('cliente')?.markAsTouched();
+      this.f_camPropietario.updateValueAndValidity();
    }
 
    confCambioPropietario() {
@@ -550,6 +565,12 @@ export class AguatramComponent implements OnInit {
       if (this.f_camPropietario.invalid) {
          this.f_camPropietario.markAllAsTouched();
          this.swal('warning', 'Completa la información requerida');
+         return;
+      }
+      if (!this.selectClient?.idcliente) {
+         this.f_camPropietario.get('cliente')?.setErrors({ required: true });
+         this.f_camPropietario.get('cliente')?.markAsTouched();
+         this.swal('warning', 'Selecciona el nuevo cliente');
          return;
       }
       const destino = this.selectClient?.email || this.abonado?.idcliente_clientes?.email;

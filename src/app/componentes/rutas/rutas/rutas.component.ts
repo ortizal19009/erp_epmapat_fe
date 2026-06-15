@@ -132,8 +132,15 @@ export class RutasComponent implements OnInit {
   async getDeudasOfRuta(idruta: number) {
     this.loading.showLoading();
     this._deudasRuta = [];
-    this._deudasRuta = await this.rutService.getDeudaOfCuentasByIdrutas(idruta);
-    this.loading.hideLoading();
+    try {
+      const datos = await this.rutService.getDeudaOfCuentasByIdrutas(idruta);
+      this._deudasRuta = this.normalizarDeudasRuta(datos);
+    } catch (error) {
+      console.error(error);
+      this._deudasRuta = [];
+    } finally {
+      this.loading.hideLoading();
+    }
   }
   getAbonadosByRuta(idruta: number) {
     this.loading.showLoading();
@@ -175,6 +182,16 @@ export class RutasComponent implements OnInit {
     } finally {
       this.exportandoReporte = false;
     }
+  }
+
+  private normalizarDeudasRuta(datos: any): any[] {
+    return (Array.isArray(datos) ? datos : []).map((item: any) => ({
+      ...item,
+      subtotal: Number(item?.subtotal ?? 0),
+      total_interes: Number(item?.total_interes ?? 0),
+      total_final: Number(item?.total_final ?? 0),
+      total_facturas: Number(item?.total_facturas ?? 0),
+    }));
   }
 
   descargarPdfPreview() {

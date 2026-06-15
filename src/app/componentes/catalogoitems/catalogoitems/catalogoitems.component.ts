@@ -18,7 +18,7 @@ export class CatalogoitemsComponent implements OnInit {
 
    buscarForm: any;
    _modulos: any;
-   _catalogoitems: any;
+   _catalogoitems: any[] = [];
    filtro: string;
    idmodulo: number;
    rtn: number;
@@ -71,9 +71,40 @@ export class CatalogoitemsComponent implements OnInit {
       if (this.buscarForm.value.descripcion == null) descripcion = '';
       else descripcion = this.buscarForm.value.descripcion.toLowerCase();
       this.catitemService.getProductos(idmodulo1, idmodulo2, descripcion).subscribe({
-         next: datos => this._catalogoitems = datos,
-         error: err => console.error(err.error)
+         next: datos => this._catalogoitems = this.normalizarCatalogoitems(datos),
+         error: err => {
+            console.error(err.error);
+            this._catalogoitems = [];
+         }
       })
+   }
+
+   private normalizarCatalogoitems(datos: any): any[] {
+      const lista = Array.isArray(datos) ? datos : datos ? [datos] : [];
+
+      return lista
+         .filter((item) => !!item)
+         .map((item: any) => {
+            const uso = item?.idusoitems_usoitems ?? {};
+            const modulo = uso?.idmodulo_modulos ?? item?.idmodulo_modulos ?? {};
+            const rubro = item?.idrubro_rubros ?? {};
+
+            return {
+               ...item,
+               idusoitems_usoitems: {
+                  ...uso,
+                  descripcion: uso?.descripcion ?? '',
+                  idmodulo_modulos: {
+                     ...modulo,
+                     descripcion: modulo?.descripcion ?? '',
+                  },
+               },
+               idrubro_rubros: {
+                  ...rubro,
+                  descripcion: rubro?.descripcion ?? '',
+               },
+            };
+         });
    }
 
    public infoCatalogoitem(catalogoitems: Catalogoitems) {
@@ -119,9 +150,9 @@ export class CatalogoitemsComponent implements OnInit {
       let i = 0;
       this._catalogoitems.forEach(() => {
          datos.push([this._catalogoitems[i].descripcion,
-         this._catalogoitems[i].idusoitems_usoitems.idmodulo_modulos.descripcion,
-         this._catalogoitems[i].idusoitems_usoitems.descripcion,
-         this._catalogoitems[i].idrubro_rubros.descripcion]);
+         this._catalogoitems[i]?.idusoitems_usoitems?.idmodulo_modulos?.descripcion || '-',
+         this._catalogoitems[i]?.idusoitems_usoitems?.descripcion || '-',
+         this._catalogoitems[i]?.idrubro_rubros?.descripcion || '-']);
          i++;
       });
 

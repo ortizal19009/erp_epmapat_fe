@@ -5,7 +5,9 @@ import { Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { firstValueFrom } from 'rxjs';
 import { Aguatramite } from 'src/app/modelos/aguatramite.model';
+import { Clientes } from 'src/app/modelos/clientes';
 import { AguatramiteService } from 'src/app/servicios/aguatramite.service';
+import { ClientesService } from 'src/app/servicios/clientes.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { TipoTramiteService } from 'src/app/servicios/tipo-tramite.service';
 import { TramiteNuevoService } from 'src/app/servicios/tramite-nuevo.service';
@@ -50,12 +52,14 @@ export class AguatramiteComponent implements OnInit {
    today: Date = new Date();
    pdfViewerSrc: SafeResourceUrl | null = null;
    private pdfObjectUrl: string | null = null;
+   private clientesCache = new Map<number, Clientes>();
 
    constructor(private router: Router, private fb: FormBuilder, private aguatramiService: AguatramiteService,
       private tipotramiService: TipoTramiteService, private tramitenuevoService: TramiteNuevoService,
       private s_genpdf: TramitesAguaService,
       private sanitizer: DomSanitizer,
-      private s_loading: LoadingService
+      private s_loading: LoadingService,
+      private clientesService: ClientesService
    ) { }
 
    ngOnInit(): void {
@@ -154,6 +158,7 @@ export class AguatramiteComponent implements OnInit {
          next: (datos: any) => {
             console.log('Datos recibidos:', datos);
             this._aguatramite = datos?.content || [];
+            this.completarClientesFaltantes(this._aguatramite);
             this.totalElements = datos?.totalElements || 0;
             this.totalPages = datos?.totalPages || 0;
             this.aplicarOrdenActual();
@@ -265,7 +270,7 @@ export class AguatramiteComponent implements OnInit {
    private obtenerValorOrden(item: any, column: string): any {
       switch (column) {
          case 'cliente':
-            return this.getNombreClienteTramite(item);
+            return this.getNombreClienteVisible(item);
          case 'cuenta':
             return this.getCuentaTramite(item);
          case 'feccrea':
@@ -460,6 +465,108 @@ export class AguatramiteComponent implements OnInit {
          '';
 
       return `${cuenta}`;
+   }
+
+   getNombreClienteVisible(aguatramite: any): string {
+      const candidato = this.obtenerClienteDesdeTramite(aguatramite);
+
+      return (
+         candidato?.nombre ||
+         candidato?.nombres ||
+         candidato?.razonsocial ||
+         aguatramite?.nombre ||
+         aguatramite?.nombres ||
+         aguatramite?.razonsocial ||
+         ''
+      );
+   }
+
+   private completarClientesFaltantes(tramites: any[]): void {
+      if (!Array.isArray(tramites) || tramites.length === 0) {
+         return;
+      }
+
+      tramites.forEach((tramite: any) => {
+         const nombre = this.getNombreClienteVisible(tramite);
+         if (nombre) {
+            return;
+         }
+
+         const idcliente = this.obtenerIdClienteDesdeTramite(tramite);
+         if (!idcliente) {
+            return;
+         }
+
+         const clienteCacheado = this.clientesCache.get(idcliente);
+         if (clienteCacheado) {
+            this.asignarClienteATramite(tramite, clienteCacheado);
+            return;
+         }
+
+         this.clientesService.getListaById(idcliente).subscribe({
+            next: (datos: any) => {
+               const clienteCompleto = Array.isArray(datos) ? datos?.[0] : datos;
+               if (!clienteCompleto) {
+                  return;
+               }
+
+               this.clientesCache.set(idcliente, clienteCompleto);
+               this.asignarClienteATramite(tramite, clienteCompleto);
+            },
+            error: (e) => console.error(`No se pudo cargar el cliente ${idcliente}`, e),
+         });
+      });
+   }
+
+   private obtenerClienteDesdeTramite(aguatramite: any): any {
+      const clienteDirecto = aguatramite?.idcliente_clientes;
+      if (clienteDirecto && typeof clienteDirecto === 'object') {
+         return clienteDirecto;
+      }
+
+      const candidato =
+         aguatramite?.cliente ||
+         aguatramite?.idcliente ||
+         aguatramite?.abonado?.idcliente_clientes ||
+         aguatramite?.idabonado_abonados?.idcliente_clientes ||
+         aguatramite?.idaguatramite_aguatramite?.idcliente_clientes ||
+         aguatramite?.idtramitenuevo_tramitenuevo?.idaguatramite_aguatramite?.idcliente_clientes ||
+         null;
+
+      return typeof candidato === 'object' ? candidato : null;
+   }
+
+   private obtenerIdClienteDesdeTramite(aguatramite: any): number | null {
+      const candidato =
+         this.obtenerClienteDesdeTramite(aguatramite)?.idcliente ??
+         aguatramite?.idcliente_clientes?.idcliente ??
+         aguatramite?.idcliente_clientes ??
+         aguatramite?.idcliente?.idcliente ??
+         aguatramite?.idcliente ??
+         aguatramite?.cliente?.idcliente ??
+         aguatramite?.abonado?.idcliente_clientes?.idcliente ??
+         aguatramite?.idabonado_abonados?.idcliente_clientes?.idcliente ??
+         aguatramite?.idaguatramite_aguatramite?.idcliente_clientes?.idcliente ??
+         aguatramite?.idtramitenuevo_tramitenuevo?.idaguatramite_aguatramite?.idcliente_clientes?.idcliente;
+
+      const idcliente = Number(candidato);
+      return Number.isFinite(idcliente) && idcliente > 0 ? idcliente : null;
+   }
+
+   private asignarClienteATramite(aguatramite: any, cliente: Clientes): void {
+      if (!aguatramite || !cliente) {
+         return;
+      }
+
+      if (aguatramite?.idcliente_clientes && typeof aguatramite.idcliente_clientes === 'object') {
+         aguatramite.idcliente_clientes = {
+            ...aguatramite.idcliente_clientes,
+            ...cliente,
+         };
+         return;
+      }
+
+      aguatramite.idcliente_clientes = cliente;
    }
 
    private async obtenerTramitesFiltradosParaImpresion(): Promise<any[]> {

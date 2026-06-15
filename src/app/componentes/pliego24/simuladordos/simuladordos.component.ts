@@ -40,6 +40,7 @@ export class SimuladordosComponent implements OnInit {
       swAdultoMayor: [{ value: false, disabled: true }],
 
       swAguapotable: false,
+      swbasura: false,
 
       // ✅ MUN inicia bloqueado (solo categoría 4)
       swMunicipio: [{ value: false, disabled: true }],
@@ -131,6 +132,7 @@ export class SimuladordosComponent implements OnInit {
     const categoria = Number(f.categoria ?? 1);
     const swAdultoMayor = !!f.swAdultoMayor;
     const swAguapotable = !!f.swAguapotable;
+    const swbasura = !!f.swbasura;
     const swMunicipio = !!f.swMunicipio; // ✅ ya controlado por categoría 4
 
     this.cargando = true;
@@ -145,6 +147,7 @@ export class SimuladordosComponent implements OnInit {
           categoria,
           swAdultoMayor,
           swAguapotable,
+          swbasura,
           swMunicipio, // ✅ se envía al servicio
         };
 
@@ -161,6 +164,7 @@ export class SimuladordosComponent implements OnInit {
       this.filasPliego = rows.sort((a, b) => a.m3 - b.m3);
     } catch (e) {
       console.error(e);
+      alert('No se pudo realizar la simulación. Verifica los datos e inténtalo nuevamente.');
     } finally {
       this.cargando = false;
     }

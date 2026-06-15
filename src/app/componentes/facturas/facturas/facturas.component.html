@@ -66,9 +66,9 @@
                   class="fila">
                   <td class="text-center">{{ fac.idfactura }}</td>
                   <td class="text-center">{{ fac.feccrea | date :'dd-MM-y' }}</td>
-                  <td>{{ fac.idcliente.nombre }}</td>
-                  <td class="small">{{ fac.idmodulo.descripcion }}</td>
-                  <td class="text-center">{{ fac.nrofactura }}</td>
+                  <td>{{ fac?.idcliente?.nombre || fac?.idcliente?.razonsocial || '-' }}</td>
+                  <td class="small">{{ fac?.idmodulo?.descripcion || '-' }}</td>
+                  <td class="text-center">{{ fac.nrofactura || '-' }}</td>
                   <td class="text-center">{{ fac.fechacobro | date: 'dd-MM-y' }}</td>
                   <td class="text-right">{{ fac.totaltarifa | number: '1.2-2' }}</td>
                   <td class="text-center">
@@ -78,7 +78,7 @@
                         </button>
                         <div class="dropdown-menu dropdown-menu-right popLista">
                            <button class="dropdown-item" type="button" (click)="recalcular( fac.idfactura )"
-                              [disabled]="fac.idmodulo.idmodulo != 4">
+                              [disabled]="fac?.idmodulo?.idmodulo != 4">
                               <i class="bi-calculator-fill"></i>&nbsp; Recalcular</button>
                            <button class="dropdown-item" type="button" [disabled]="fac.pagado ===0" (click)="impComprobante( fac )">
                               <i class="bi bi-file-earmark-check"></i>&nbsp; Imprimir comprobante</button>
@@ -88,6 +88,9 @@
                         </div>
                      </div>
                   </td>
+               </tr>
+               <tr *ngIf="(_facturas | filter: filtro).length === 0">
+                  <td colspan="8" class="text-center text-muted py-3">No se encontraron planillas.</td>
                </tr>
             </tbody>
          </table>

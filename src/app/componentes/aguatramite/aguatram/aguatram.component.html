@@ -18,19 +18,19 @@
                   <td><button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalAbonados"><i
                            class="fa fa-search" aria-hidden="true"></i>
                         Cuenta&nbsp;&nbsp;</button>&nbsp;&nbsp;{{abonado.idabonado}}</td>
-                  <td colspan="2">Nombre y apellidos: {{cliente.nombre}}</td>
+                  <td colspan="2">Nombre y apellidos: {{cliente && cliente.nombre}}</td>
                   <td>Identificación: {{cliente.cedula}}</td>
                </tr>
                <tr>
-                  <td colspan="2">Direccion: {{cliente.direccion}}</td>
-                  <td>Ruta: {{ruta.descripcion}}</td>
-                  <td>Piso: {{abonado.piso}} Departamento: {{abonado.departamento}}</td>
+                  <td colspan="2">Direccion: {{cliente && cliente.direccion}}</td>
+                  <td>Ruta: {{ruta && ruta.descripcion}}</td>
+                  <td>Piso: {{abonado && abonado.piso}} Departamento: {{abonado && abonado.departamento}}</td>
                </tr>
                <tr>
-                  <td>Nro. medidor: {{abonado.nromedidor}}</td>
-                  <td>Marca: {{abonado.marca}}</td>
-                  <td>Categoria: {{categoria.descripcion}}</td>
-                  <td>Estado medidor: {{estadom.descripcion}}</td>
+                  <td>Nro. medidor: {{abonado && abonado.nromedidor}}</td>
+                  <td>Marca: {{abonado && abonado.marca}}</td>
+                  <td>Categoria: {{categoria && categoria.descripcion}}</td>
+                  <td>Estado medidor: {{estadom && estadom.descripcion}}</td>
                </tr>
             </tbody>
          </table>
@@ -176,6 +176,10 @@
                                  <button class="btn btn-sm btn-outline-primary ml-2" data-toggle="modal"
                                     data-target="#modalClientes"><i class="fa fa-search"
                                        aria-hidden="true"></i></button>
+                                 <small class="text-danger d-block ml-3"
+                                    *ngIf="fp['cliente'].invalid && fp['cliente'].touched">
+                                    Selecciona el cliente.
+                                 </small>
                               </div>
                            </div>
                            <!-- Select Documentos -->

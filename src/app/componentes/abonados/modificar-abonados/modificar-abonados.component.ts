@@ -30,11 +30,11 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
   abonadoForm: FormGroup;
   f_responsablePago: FormGroup;
   f_clientes: FormGroup;
-  categoria: any;
-  ruta: any;
-  ubicacionm: any;
-  tipopago: any;
-  estadom: any;
+  categoria: Categoria[] = [];
+  ruta: Rutas[] = [];
+  ubicacionm: Ubicacionm[] = [];
+  tipopago: Tipopago[] = [];
+  estadom: Estadom[] = [];
   v_idabonado: number;
   v_cliente: any;
   cliente: any;
@@ -71,12 +71,12 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
       idabonado: [''],
       nromedidor: ['', Validators.required],
       lecturainicial: ['', Validators.required],
-      estado: [{ value: '', disabled: true }],
+      estado: ['', Validators.required],
       fechainstalacion: ['', Validators.required],
       marca: ['', Validators.required],
       secuencia: ['', Validators.required],
       direccionubicacion: ['', Validators.required],
-      localizacion: ['', Validators.required],
+      localizacion: [''],
       observacion: ['', Validators.required],
       departamento: ['', Validators.required],
       piso: ['', Validators.required],
@@ -121,10 +121,19 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
     setTimeout(() => this.renderMapFromForm(), 300);
   }
 
+  get f() {
+    return this.abonadoForm.controls;
+  }
+
+  esInvalido(controlName: string): boolean {
+    const control = this.abonadoForm.get(controlName);
+    return !!control && control.invalid && control.touched;
+  }
+
   listarCategorias() {
     this.categoriaS.getListCategoria().subscribe(
       (datos:any) => {
-        this.categoria = datos;
+      this.categoria = datos;
       },
       (error) => console.error(error)
     );
@@ -171,6 +180,16 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
   }
 
   onSubmit() {
+    if (this.abonadoForm.invalid) {
+      this.abonadoForm.markAllAsTouched();
+      Swal.fire({
+        icon: 'warning',
+        title: 'Formulario incompleto',
+        text: 'Revisa los campos obligatorios antes de guardar.',
+      });
+      return;
+    }
+
     const payload = {
       ...this.abonadoForm.getRawValue(),
       idresponsable: this.v_idresponsable,
@@ -247,12 +266,12 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
       this.cliente = datos.idcliente_clientes;
       this.v_idresponsable = datos.idresponsable;
       this.v_idabonado = +idabonado!;
-      this.abonadoForm.setValue({
+      this.abonadoForm.patchValue({
         idabonado: datos.idabonado,
         nromedidor: datos.nromedidor,
         lecturainicial: datos.lecturainicial,
         estado: datos.estado,
-        fechainstalacion: datos.fechainstalacion,
+        fechainstalacion: this.normalizarFechaInput(datos.fechainstalacion),
         marca: datos.marca,
         secuencia: datos.secuencia,
         direccionubicacion: datos.direccionubicacion,
@@ -276,10 +295,11 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
         swbasura: datos.swbasura,
         swalcantarillado: datos.swalcantarillado,
         usumodi: datos.usumodi,
-        fecmodi: datos.fecmodi,
+        fecmodi: this.normalizarFechaInput(datos.fecmodi),
         usucrea: datos.usucrea,
-        feccrea: datos.feccrea,
+        feccrea: this.normalizarFechaInput(datos.feccrea),
       });
+      this.abonadoForm.markAsPristine();
       this.refreshFotoPreviews(datos);
       setTimeout(() => this.renderMapFromForm(), 100);
     });
@@ -291,53 +311,64 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
   }
 
   compararCategorias(o1: Categoria, o2: Categoria): boolean {
-    if (o1 === undefined && o2 === undefined) {
+    const id1 = o1 && 'idcategoria' in o1 ? o1.idcategoria : (o1 as any);
+    const id2 = o2 && 'idcategoria' in o2 ? o2.idcategoria : (o2 as any);
+    if (id1 == null && id2 == null) {
       return true;
-    } else {
-      return o1 === null || o2 === null || o1 === undefined || o2 === undefined
-        ? false
-        : o1.idcategoria == o2.idcategoria;
     }
+    if (id1 == null || id2 == null) return false;
+    return String(id1) === String(id2);
   }
 
   compararRutas(o1: Rutas, o2: Rutas): boolean {
-    if (o1 === undefined && o2 === undefined) {
+    const id1 = o1 && 'idruta' in o1 ? o1.idruta : (o1 as any);
+    const id2 = o2 && 'idruta' in o2 ? o2.idruta : (o2 as any);
+    if (id1 == null && id2 == null) {
       return true;
-    } else {
-      return o1 === null || o2 === null || o1 === undefined || o2 === undefined
-        ? false
-        : o1.idruta == o2.idruta;
     }
+    if (id1 == null || id2 == null) return false;
+    return String(id1) === String(id2);
   }
 
   compararUbicacion(o1: Ubicacionm, o2: Ubicacionm): boolean {
-    if (o1 === undefined && o2 === undefined) {
+    const id1 = o1 && 'idubicacionm' in o1 ? o1.idubicacionm : (o1 as any);
+    const id2 = o2 && 'idubicacionm' in o2 ? o2.idubicacionm : (o2 as any);
+    if (id1 == null && id2 == null) {
       return true;
-    } else {
-      return o1 === null || o2 === null || o1 === undefined || o2 === undefined
-        ? false
-        : o1.idubicacionm == o2.idubicacionm;
     }
+    if (id1 == null || id2 == null) return false;
+    return String(id1) === String(id2);
   }
 
   compararTpPago(o1: Tipopago, o2: Tipopago): boolean {
-    if (o1 === undefined && o2 === undefined) {
+    const id1 = o1 && 'idtipopago' in o1 ? o1.idtipopago : (o1 as any);
+    const id2 = o2 && 'idtipopago' in o2 ? o2.idtipopago : (o2 as any);
+    if (id1 == null && id2 == null) {
       return true;
-    } else {
-      return o1 === null || o2 === null || o1 === undefined || o2 === undefined
-        ? false
-        : o1.idtipopago == o2.idtipopago;
     }
+    if (id1 == null || id2 == null) return false;
+    return String(id1) === String(id2);
   }
 
   compararEstadoM(o1: Estadom, o2: Estadom): boolean {
-    if (o1 === undefined && o2 === undefined) {
+    const id1 = o1 && 'idestadom' in o1 ? o1.idestadom : (o1 as any);
+    const id2 = o2 && 'idestadom' in o2 ? o2.idestadom : (o2 as any);
+    if (id1 == null && id2 == null) {
       return true;
-    } else {
-      return o1 === null || o2 === null || o1 === undefined || o2 === undefined
-        ? false
-        : o1.idestadom == o2.idestadom;
     }
+    if (id1 == null || id2 == null) return false;
+    return String(id1) === String(id2);
+  }
+
+  private normalizarFechaInput(valor: any): string {
+    if (!valor) {
+      return '';
+    }
+    const fecha = new Date(valor);
+    if (Number.isNaN(fecha.getTime())) {
+      return '';
+    }
+    return fecha.toISOString().split('T')[0];
   }
 
   mensajeSuccess(n: String) {

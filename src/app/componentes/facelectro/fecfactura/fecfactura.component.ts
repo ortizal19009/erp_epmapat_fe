@@ -1268,10 +1268,14 @@ export class FecfacturaComponent implements OnInit {
       // 3) Opcional: recargar tabla/lista de facturas
       // this.loadFacturas();
       // o mostrar un mensaje
-      // this.toastr.success('Factura recreada correctamente');
+      this.swal('success', 'Factura recreada correctamente');
     } catch (err) {
       console.error('❌ Error al recrear factura', err);
-      // this.toastr.error('Ocurrió un error al recrear la factura');
+      const mensaje =
+        err instanceof Error
+          ? err.message
+          : 'Ocurrió un error al recrear la factura';
+      this.swal('error', mensaje);
     }
   }
   getXmlAutorizadoSri(fecfactura: any) {

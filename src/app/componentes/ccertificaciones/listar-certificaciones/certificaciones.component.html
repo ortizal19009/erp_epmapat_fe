@@ -82,11 +82,11 @@
                   <!-- <td class="text-center font-weight-bold">{{i+1}}</td> -->
                   <td>{{certificacion.numero}}</td>
                   <td class="text-center">{{certificacion.feccrea | date: "dd-MM-y"}}</td>
-                  <td>{{certificacion.idfactura_facturas.idcliente.nombre}}</td>
-                  <td>{{certificacion.idtpcertifica_tpcertifica.descripcion}}</td>
+                  <td>{{ certificacion?.idfactura_facturas?.idcliente?.nombre || '-' }}</td>
+                  <td>{{ certificacion?.idtpcertifica_tpcertifica?.descripcion || '-' }}</td>
                   <!-- <td>{{certificacionesDatos.idfactura_facturas.idfactura}}</td> -->
-                  <td class="text-center">{{certificacion.idfactura_facturas.idfactura}}</td>
-                  <td>{{certificacion.idfactura_facturas.nrofactura}}</td>
+                  <td class="text-center">{{ certificacion?.idfactura_facturas?.idfactura || '-' }}</td>
+                  <td>{{ certificacion?.idfactura_facturas?.nrofactura || '-' }}</td>
                   <td class="text-center">
                      <div class="btn-group py-0">
                         <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"

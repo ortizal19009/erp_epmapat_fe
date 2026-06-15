@@ -15,7 +15,7 @@ import { RecaudacionReportsService } from '../../recaudacion/recaudacion-reports
 })
 export class FacturasComponent implements OnInit {
   formBuscar: FormGroup;
-  _facturas: any;
+  _facturas: any[] = [];
   filtro: string;
   campo: number = 0; //0:Ninguno, 1:Planilla,  2:Abonado
   swbusca: boolean;
@@ -96,7 +96,7 @@ export class FacturasComponent implements OnInit {
     if (!this.formBuscar.value.idfactura) this.campo = 0;
     else {
       this.campo = 1;
-      this._facturas = null;
+      this._facturas = [];
     }
   }
 
@@ -105,23 +105,32 @@ export class FacturasComponent implements OnInit {
     if (!this.formBuscar.value.idabonado) this.campo = 0;
     else {
       this.campo = 2;
-      this._facturas = null;
+      this._facturas = [];
     }
   }
 
   buscar() {
     if (this.campo == 1) {
+      this.swbuscando = true;
+      this.txtbuscar = 'Buscando';
       let idfactura = this.formBuscar.value.idfactura;
       sessionStorage.setItem('idfacturaPlanillas', idfactura.toString());
       sessionStorage.removeItem('idabonadoPlanillas');
       if (idfactura) {
         this.facServicio.getPlanilla(idfactura).subscribe({
           next: (datos) => {
-            this._facturas = datos;
+            this._facturas = this.normalizarFacturas(datos);
             this.swbusca = true;
             this.swbuscando = false;
+            this.txtbuscar = 'Buscar';
           },
-          error: (err) => console.error(err.error),
+          error: (err) => {
+            console.error(err.error);
+            this._facturas = [];
+            this.swbusca = true;
+            this.swbuscando = false;
+            this.txtbuscar = 'Buscar';
+          },
         });
       }
     }
@@ -149,14 +158,34 @@ export class FacturasComponent implements OnInit {
           .subscribe({
             next: (datos) => {
               this.swbusca = true;
-              this._facturas = datos;
+              this._facturas = this.normalizarFacturas(datos);
               this.swbuscando = false;
               this.txtbuscar = 'Buscar';
             },
-            error: (err) => console.error(err.error),
+            error: (err) => {
+              console.error(err.error);
+              this._facturas = [];
+              this.swbusca = true;
+              this.swbuscando = false;
+              this.txtbuscar = 'Buscar';
+            },
           });
       }
     }
+  }
+
+  private normalizarFacturas(datos: any): any[] {
+    const lista = Array.isArray(datos) ? datos : datos ? [datos] : [];
+
+    return lista
+      .filter((item) => !!item)
+      .map((item: any) => ({
+        ...item,
+        idcliente: item?.idcliente ?? item?.idcliente_clientes ?? null,
+        idmodulo: item?.idmodulo ?? item?.idmodulo_modulos ?? null,
+        feccrea: item?.feccrea ?? item?.fecha ?? null,
+        totaltarifa: Number(item?.totaltarifa ?? item?.valorbase ?? 0),
+      }));
   }
 
   public infoOld(facturas: Facturas) {

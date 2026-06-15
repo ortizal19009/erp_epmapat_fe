@@ -122,8 +122,12 @@ export class ListarCertificacionesComponent implements OnInit {
       this.formBuscar.controls['desde'].setValue('');
       this.formBuscar.controls['hasta'].setValue('');
       this.certiService.getByCliente(cliente).subscribe({
-        next: (datos) => (this._certificaciones = datos),
-        error: (err) => console.error(err.error),
+        next: (datos) =>
+          (this._certificaciones = this.normalizarCertificaciones(datos)),
+        error: (err) => {
+          console.error(err.error);
+          this._certificaciones = [];
+        },
       });
     } else {
       sessionStorage.setItem(
@@ -138,12 +142,43 @@ export class ListarCertificacionesComponent implements OnInit {
       if (hasta == '' || hasta == null) hasta = 999999999;
       this.certiService.getDesdeHasta(desde, hasta).subscribe({
         next: (datos) => {
-          this._certificaciones = datos;
+          this._certificaciones = this.normalizarCertificaciones(datos);
         },
-        error: (err) =>
-          console.error('Al recuperar las Certificaciones: ', err.error),
+        error: (err) => {
+          console.error('Al recuperar las Certificaciones: ', err.error);
+          this._certificaciones = [];
+        },
       });
     }
+  }
+
+  private normalizarCertificaciones(datos: any): any[] {
+    const lista = Array.isArray(datos) ? datos : datos ? [datos] : [];
+
+    return lista
+      .filter((item) => !!item)
+      .map((item: any) => {
+        const factura = item?.idfactura_facturas ?? {};
+        const cliente = factura?.idcliente ?? {};
+        const tipo = item?.idtpcertifica_tpcertifica ?? {};
+
+        return {
+          ...item,
+          idfactura_facturas: {
+            ...factura,
+            idfactura: factura?.idfactura ?? null,
+            nrofactura: factura?.nrofactura ?? '',
+            idcliente: {
+              ...cliente,
+              nombre: cliente?.nombre ?? '',
+            },
+          },
+          idtpcertifica_tpcertifica: {
+            ...tipo,
+            descripcion: tipo?.descripcion ?? '',
+          },
+        };
+      });
   }
 
   public nuevo() {

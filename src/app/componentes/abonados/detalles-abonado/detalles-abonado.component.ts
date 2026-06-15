@@ -199,6 +199,47 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
       this.facElectro = !this.facElectro;
     }
   }
+
+  cerrarModalFoto(): void {
+    this.fotoModalUrl = null;
+    this.fotoModalError = false;
+    this.fotoModalRutaOriginal = null;
+    this.fotoModalMensaje = 'No hay fotos registradas para este abonado.';
+    $('#modalFotoAbonado').modal('hide');
+    $('body').removeClass('modal-open');
+    $('.modal-backdrop').remove();
+  }
+
+  getFacturaActual(): any {
+    return this.detalleFactura ?? this.factura ?? {};
+  }
+
+  puedeVerComprobante(): boolean {
+    const facturaActual = this.getFacturaActual();
+    return Number(facturaActual?.pagado) === 1 && Number(facturaActual?.idfactura) > 0;
+  }
+
+  puedeVerFacturaElectronica(): boolean {
+    if (!this.puedeVerComprobante()) {
+      return false;
+    }
+
+    return ['A', 'O'].includes(String(this.esFE || '').trim().toUpperCase());
+  }
+
+  puedeGenerarFacturaElectronica(): boolean {
+    const facturaActual = this.getFacturaActual();
+    const estado = String(this.esFE || '').trim().toUpperCase();
+    const pagado = Number(facturaActual?.pagado) === 1;
+    const eliminada = !!facturaActual?.fechaeliminacion;
+    const anulada = !!facturaActual?.fechaanulacion;
+
+    if (!pagado || eliminada || anulada || this.usuario !== 1) {
+      return false;
+    }
+
+    return !['A', 'O'].includes(estado);
+  }
   getFactura() {
     this.facturasPage = 0;
     const idabonado = this.resolverIdAbonado();
@@ -529,6 +570,8 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
     const facturaDetalle = primerDetalle?.idfactura_facturas ?? this.detalleFactura;
 
     this.factura = facturaDetalle ?? new Facturas();
+    this.esFE = '';
+    this.estadoFE = 'SIN GENERAR';
 
     if (!this._rubrosxfac.length) {
       this.estadoFE = 'SIN DETALLE';
@@ -539,14 +582,18 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
     if (facturaDetalle?.pagado === 1) {
       this._fecFacturaService.getByIdFactura(+idfactura!).subscribe({
         next: (fecfactura: any) => {
-          this.esFE = fecfactura.estado;
+          this.esFE = fecfactura?.estado ?? '';
           if (fecfactura != null) {
             this.estadoFE = this.estado_FE(fecfactura.estado);
           } else {
             this.estadoFE = 'SIN GENERAR';
           }
         },
-        error: (e) => console.error(e),
+        error: (e) => {
+          console.error(e);
+          this.esFE = '';
+          this.estadoFE = 'SIN GENERAR';
+        },
       });
     } else if (facturaDetalle?.pagado === 0) {
       this.estadoFE = 'PAGO PENDIENTE';
@@ -661,6 +708,11 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
     this.grafic = false;
   }
   async impComprobante(datos: any) {
+    if (!this.puedeVerComprobante()) {
+      this.swal('warning', 'El comprobante de pago solo está disponible para planillas pagadas.');
+      return;
+    }
+
     let idfactura = datos.idfactura;
     //this.facElectro = true;
 
@@ -704,6 +756,14 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
     this.s_loading.hideLoading();
   }
   async impFacturaElectronica(datos: any) {
+    if (!this.puedeVerFacturaElectronica()) {
+      this.swal(
+        'warning',
+        'La factura electrónica solo está disponible cuando el comprobante ya fue autorizado.'
+      );
+      return;
+    }
+
     this.facElectro = true;
     this.dataURI = '';
     this.swEmail = true;

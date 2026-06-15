@@ -215,14 +215,22 @@ export class LecturasService {
     return this.http.get<any[]>(`${baseUrl}/preview/lecturas/${idcliente}`);
   }
   getValoresSimulados(datos: any) {
+    const swMunicipio = !!datos?.swMunicipio;
+    const swAdultoMayor = !!datos?.swAdultoMayor;
+    const swAguapotable = !!datos?.swAguapotable;
+    const swbasura = !!datos?.swbasura;
     return this.http.get(
-      `${baseUrl}/simular?m3=${datos.m3}&categoria=${datos.categoria}&swMunicipio=${datos.swMunicipio}&swAdultoMayor=${datos.swAdultoMayor}&swAguapotable=${datos.swAguapotable}&swbasura=${datos.swbasura} `,
+      `${baseUrl}/simular?m3=${datos.m3}&categoria=${datos.categoria}&swMunicipio=${swMunicipio}&swAdultoMayor=${swAdultoMayor}&swAguapotable=${swAguapotable}&swbasura=${swbasura}`,
     );
   }
   async getValoresSimulados_asyc(datos: any): Promise<any> {
+    const swMunicipio = !!datos?.swMunicipio;
+    const swAdultoMayor = !!datos?.swAdultoMayor;
+    const swAguapotable = !!datos?.swAguapotable;
+    const swbasura = !!datos?.swbasura;
     return firstValueFrom(
       this.http.get(
-        `${baseUrl}/simular?m3=${datos.m3}&categoria=${datos.categoria}&swMunicipio=${datos.swMunicipio}&swAdultoMayor=${datos.swAdultoMayor}&swAguapotable=${datos.swAguapotable}&swbasura=${datos.swbasura} `,
+        `${baseUrl}/simular?m3=${datos.m3}&categoria=${datos.categoria}&swMunicipio=${swMunicipio}&swAdultoMayor=${swAdultoMayor}&swAguapotable=${swAguapotable}&swbasura=${swbasura}`,
       ),
     );
   }
@@ -237,13 +245,21 @@ export class LecturasService {
 
 
   getValoresSimuladosV2(datos: any) {
+    const swMunicipio = !!datos?.swMunicipio;
+    const swAdultoMayor = !!datos?.swAdultoMayor;
+    const swAguapotable = !!datos?.swAguapotable;
+    const swbasura = !!datos?.swbasura;
     return this.http.get(
-      `${baseUrl}/simular/v2?m3=${datos.m3}&categoria=${datos.categoria}&swMunicipio=${datos.swMunicipio}&swAdultoMayor=${datos.swAdultoMayor}&swAguapotable=${datos.swAguapotable}&swbasura=${datos.swbasura} `,
+      `${baseUrl}/simular/v2?m3=${datos.m3}&categoria=${datos.categoria}&swMunicipio=${swMunicipio}&swAdultoMayor=${swAdultoMayor}&swAguapotable=${swAguapotable}&swbasura=${swbasura}`,
     );
   }
   getValoresSimuladosV2_async(datos: any) {
+    const swMunicipio = !!datos?.swMunicipio;
+    const swAdultoMayor = !!datos?.swAdultoMayor;
+    const swAguapotable = !!datos?.swAguapotable;
+    const swbasura = !!datos?.swbasura;
     return firstValueFrom(this.http.get(
-      `${baseUrl}/simular/v2?m3=${datos.m3}&categoria=${datos.categoria}&swMunicipio=${datos.swMunicipio}&swAdultoMayor=${datos.swAdultoMayor}&swAguapotable=${datos.swAguapotable}&swbasura=${datos.swbasura} `,
+      `${baseUrl}/simular/v2?m3=${datos.m3}&categoria=${datos.categoria}&swMunicipio=${swMunicipio}&swAdultoMayor=${swAdultoMayor}&swAguapotable=${swAguapotable}&swbasura=${swbasura}`,
     ));
   }
   deleteRubrosEmision(idemision: any) {

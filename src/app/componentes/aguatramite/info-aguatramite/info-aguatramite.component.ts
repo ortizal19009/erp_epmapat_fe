@@ -59,7 +59,7 @@ export class InfoAguatramiteComponent implements OnInit {
       next: (datos) => {
         this.tramitenuevo = datos;
         this.aguatramite = datos?.idaguatramite_aguatramite || new Aguatramite();
-        this.cliente = this.aguatramite?.idcliente_clientes || new Clientes();
+        this.cliente = this.obtenerClienteDesdeFuentes() || new Clientes();
         this.cargarClienteCompleto();
         this.setEstado(Number(this.aguatramite?.estado || 0));
       },
@@ -113,10 +113,12 @@ export class InfoAguatramiteComponent implements OnInit {
   }
 
   getNombreCliente(): string {
+    const cliente = this.obtenerClienteDesdeFuentes();
+
     return String(
-      this.cliente?.nombre ||
-      this.aguatramite?.idcliente_clientes?.nombre ||
-      this.tramitenuevo?.idaguatramite_aguatramite?.idcliente_clientes?.nombre ||
+      cliente?.nombre ||
+      cliente?.['nombres'] ||
+      cliente?.['razonsocial'] ||
       'Sin cliente'
     );
   }
@@ -131,7 +133,7 @@ export class InfoAguatramiteComponent implements OnInit {
   }
 
   private cargarClienteCompleto(): void {
-    const idcliente = this.aguatramite?.idcliente_clientes?.idcliente;
+    const idcliente = this.obtenerIdCliente();
     if (!idcliente || this.cliente?.nombre) {
       return;
     }
@@ -145,5 +147,39 @@ export class InfoAguatramiteComponent implements OnInit {
       },
       error: (e) => console.error('No se pudo cargar el cliente completo', e),
     });
+  }
+
+  private obtenerClienteDesdeFuentes(): any {
+    const aguatramiteAny = this.aguatramite as any;
+    const aguatramiteAnidado: any = this.tramitenuevo?.idaguatramite_aguatramite;
+
+    const candidato =
+      this.cliente ||
+      this.aguatramite?.idcliente_clientes ||
+      aguatramiteAny?.idcliente ||
+      aguatramiteAnidado?.idcliente_clientes ||
+      aguatramiteAnidado?.idcliente ||
+      null;
+
+    return candidato && typeof candidato === 'object' ? candidato : null;
+  }
+
+  private obtenerIdCliente(): number | null {
+    const aguatramiteAny = this.aguatramite as any;
+    const aguatramiteAnidado: any = this.tramitenuevo?.idaguatramite_aguatramite;
+
+    const candidato =
+      this.cliente?.idcliente ??
+      this.aguatramite?.idcliente_clientes?.idcliente ??
+      this.aguatramite?.idcliente_clientes ??
+      aguatramiteAny?.idcliente?.idcliente ??
+      aguatramiteAny?.idcliente ??
+      aguatramiteAnidado?.idcliente_clientes?.idcliente ??
+      aguatramiteAnidado?.idcliente_clientes ??
+      aguatramiteAnidado?.idcliente?.idcliente ??
+      aguatramiteAnidado?.idcliente;
+
+    const idcliente = Number(candidato);
+    return Number.isFinite(idcliente) && idcliente > 0 ? idcliente : null;
   }
 }

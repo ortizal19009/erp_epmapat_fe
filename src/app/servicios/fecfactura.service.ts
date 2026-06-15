@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Fecfactura } from '../modelos/fecfactura.model';
 import { Observable, firstValueFrom, from, interval, lastValueFrom, tap } from 'rxjs';
@@ -752,12 +752,39 @@ export class FecfacturaService {
   async generateXmlOfPago(idfactura: number): Promise<any> {
     //let url_prov = 'http://192.168.0.165:9090';//esta url es provicional para llenar la tabla fec_factura y proceder a crear los xml
     //let url_prov = 'http://localhost:8080';
-    return firstValueFrom(
-      this.http.get(`${baseUrl}/createFacElectro?idfactura=${idfactura}`)
-    );
+    try {
+      return await firstValueFrom(
+        this.http.get(`${baseUrl}/createFacElectro?idfactura=${idfactura}`)
+      );
+    } catch (error) {
+      throw this.buildFacturaElectronicaError(error, idfactura);
+    }
   }
   deleteFecFactura(idfactura: any) {
     return this.http.delete(`${baseUrl}/${idfactura}`);
+  }
+
+  private buildFacturaElectronicaError(error: unknown, idfactura: number): Error {
+    if (error instanceof HttpErrorResponse) {
+      const backendMessage =
+        error.error?.message ||
+        error.error?.detalle ||
+        error.error?.error ||
+        error.message;
+
+      return new Error(
+        backendMessage ||
+          `No se pudo generar la factura electrónica para la factura ${idfactura}.`
+      );
+    }
+
+    if (error instanceof Error) {
+      return error;
+    }
+
+    return new Error(
+      `No se pudo generar la factura electrónica para la factura ${idfactura}.`
+    );
   }
 }
 

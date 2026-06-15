@@ -511,6 +511,10 @@
         <h5 class="modal-title font-weight-bold" id="modalFotoAbonadoLabel">
           {{ fotoModalTitulo || ('Fotos del abonado ' + abonado.idabonado) }}
         </h5>
+        <button type="button" class="close position-absolute" style="right: 12px; top: 8px;" aria-label="Close"
+          (click)="cerrarModalFoto()">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body text-center">
         <ng-container *ngIf="(fotoModalUrl || fotoCasaUrl || fotoMedidorUrl) && !fotoModalError; else sinFotoAbonado">
@@ -526,7 +530,7 @@
         </ng-template>
       </div>
       <div class="modal-footer justify-content-center">
-        <button type="button" class="btn btn-outline-success btn-sm" data-dismiss="modal">
+        <button type="button" class="btn btn-outline-success btn-sm" (click)="cerrarModalFoto()">
           <i class="fa fa-times-circle"></i> Cerrar
         </button>
       </div>
@@ -579,10 +583,10 @@
             aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
           </button>
           <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-            <button class="dropdown-item" type="button" [disabled]="factura.pagado != 1" data-toggle="modal"
+            <button class="dropdown-item" type="button" [disabled]="!puedeVerComprobante()" data-toggle="modal"
               (click)="impComprobante(factura)">
               <i class="bi bi-printer"></i>&nbsp; Comprobante pago</button>
-            <button class="dropdown-item" type="button" [disabled]="factura.pagado != 1"
+            <button class="dropdown-item" type="button" [disabled]="!puedeVerFacturaElectronica()"
               (click)="impFacturaElectronica(factura)">
               <i class="bi-file-earmark-arrow-down"></i>&nbsp; Factura electrónica</button>
             <button class="dropdown-item" (click)="active = true" *ngIf="!facElectro">Reenviar F. a Email</button>
@@ -747,7 +751,7 @@
         <button type="button" class="btn btn-outline-success btn-sm" (click)="cancelarFE()" data-dismiss="modal">
           <i class="fa fa-times-circle"></i> Cerrar</button>
         <button type="button" class="btn btn-success btn-sm"
-          [disabled]="esFE ==='A' || esFE == 'O'  || factura.pagado === 0 || usuario != 1 "
+          [disabled]="!puedeGenerarFacturaElectronica()"
           (click)="expFacElectronica(idfactura)" data-dismiss="modal">
           <i class="bi bi-send"></i> Fac. Electronica</button>
 

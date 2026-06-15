@@ -191,6 +191,16 @@ export class TramitesAguaService {
     const departamento = this.getDisplayValue(datos?.departamento ?? datos?.nrodepar);
     const nroCasa = this.getDisplayValue(datos?.nrocasa);
     const observacion = this.getDisplayValue(datos?.observacion);
+    const nombreSolicitante = this.getDisplayValue(datos?.idcliente_clientes?.nombre, 'No registrado');
+    const cedulaSolicitante = this.getDisplayValue(
+      datos?.idcliente_clientes?.cedula,
+      'Sin identificaciÃ³n'
+    );
+    datos.idcliente_clientes = {
+      ...(datos?.idcliente_clientes || {}),
+      nombre: nombreSolicitante,
+      cedula: cedulaSolicitante,
+    };
     const serviciosSolicitados = this.buildServiciosSolicitados(datos);
     const tituloDocumento = titulo || 'Concesión de servicios';
     const directorGestionTecnica = await this.obtenerDirectorGestionTecnicaActivo();
@@ -219,13 +229,13 @@ export class TramitesAguaService {
     doc.setFont('helvetica', 'bold');
     doc.text('DATOS DEL SOLICITANTE', margx, 230);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Nombres: ${datos.idcliente_clientes.nombre}`, margx + 20, 240);
+    doc.text(`Nombres: ${nombreSolicitante}`, margx + 20, 240);
     doc.text(`Dirección: ${direccion}`, margx + 20, 250);
     doc.text(`Barrio: ${barrio}`, margx + 20, 260);
-    doc.text(`Ced/RUC: ${datos.idcliente_clientes.cedula}`, margx + 300, 240);
+    doc.text(`Ced/RUC: ${cedulaSolicitante}`, margx + 300, 240);
     doc.text(`Departamento: ${departamento}`, margx + 300, 250);
     doc.text(`Nro. Casa: ${nroCasa}`, margx + 300, 260);
-    doc.text(datos.idcliente_clientes.nombre, margx + 275, 330);
+    doc.text(nombreSolicitante, margx + 275, 330);
     doc.text(
       'Solicito a la empresa/municipalidad, se sirva disponer el trámite para la factibilidad de \nconcesión del servicio requerido.',
       margx,
@@ -286,6 +296,22 @@ export class TramitesAguaService {
     const usuarioResponsable = await this.obtenerUsuarioResponsable(
       datos?.idaguatramite_aguatramite?.usucrea
     );
+    const nombreCliente = this.getDisplayValue(
+      datos?.idaguatramite_aguatramite?.idcliente_clientes?.nombre,
+      'No registrado'
+    );
+    const cedulaCliente = this.getDisplayValue(
+      datos?.idaguatramite_aguatramite?.idcliente_clientes?.cedula,
+      'Sin identificaciÃ³n'
+    );
+    datos.idaguatramite_aguatramite = {
+      ...(datos?.idaguatramite_aguatramite || {}),
+      idcliente_clientes: {
+        ...(datos?.idaguatramite_aguatramite?.idcliente_clientes || {}),
+        nombre: nombreCliente,
+        cedula: cedulaCliente,
+      },
+    };
     const p1 = `Comparecen por una parte el Gerente General de la Empresa Pública Municipal de Agua Potable y Alcantarillado de Tulcán EPMAPA-T, conjuntamente con el señor(a) Asesor Legal, en calidad de concesionario, y por otra parte, en calidad de cliente, el (la) Señor(a) ${datos.idaguatramite_aguatramite.idcliente_clientes.nombre}, domiciliado en ${datos.direccion}, para la concesión del servicio de agua potable y/o alcantarillado de acuerdo a las siguientes cláusulas: `;
     const p2 = `PRIMERA.- Conexión del servicio de agua potable. La EPMAPA-T, por medio del Departamento Técnico, realizará la conexión del servicio de agua potable desde la tubería matriz hasta el medidor de consumo, una vez que el cliente cumpla los requisitos legales establecidos. `;
     const p3 = `SEGUNDA.- Valores. Los derechos de instalación, reparación, desconexión y otros servicios conexos se encuentran establecidos en la ordenanza que regula la determinación, recaudación y administración de las tasas por los servicios de agua potable, alcantarillado, saneamiento, conservación de fuentes y recolección de basura, para la ciudad de Tulcán, la cual normaliza la operación y el funcionamiento de los sistemas de agua potable y alcantarillado. Los valores que pagará el usuario han sido establecidos de acuerdo con el valor de mano de obra, gastos administrativos y materiales a utilizarse, mismos que se hallan detallados en la factura respectiva.\nEl medidor de consumo lo ha proporcionado la empresa al solicitante. `;

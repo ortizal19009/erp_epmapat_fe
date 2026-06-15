@@ -83,9 +83,9 @@
                   (click)="infoCatalogoitem(catitem)">
                   <td class="text-center font-weight-bold small">{{ i+1 }}</td>
                   <td [ngClass]="{'tachado': !catitem.estado }">{{ catitem.descripcion }}</td>
-                  <td>{{ catitem.idusoitems_usoitems.idmodulo_modulos.descripcion }}</td>
-                  <td>{{ catitem.idusoitems_usoitems.descripcion }}</td>
-                  <td>{{ catitem.idrubro_rubros.descripcion }}</td>
+                  <td>{{ catitem?.idusoitems_usoitems?.idmodulo_modulos?.descripcion || '-' }}</td>
+                  <td>{{ catitem?.idusoitems_usoitems?.descripcion || '-' }}</td>
+                  <td>{{ catitem?.idrubro_rubros?.descripcion || '-' }}</td>
                </tr>
             </tbody>
          </table>

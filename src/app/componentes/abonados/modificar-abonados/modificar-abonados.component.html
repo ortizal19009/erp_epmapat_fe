@@ -114,7 +114,9 @@
 
                         <div class="form-group col-md-3">
                           <label class="field-label">Nro. medidor</label>
-                          <input type="text" class="form-control form-control-sm text-center field-input" formControlName="nromedidor">
+                          <input type="text" class="form-control form-control-sm text-center field-input"
+                            [ngClass]="{'is-invalid': esInvalido('nromedidor')}" formControlName="nromedidor">
+                          <small class="text-danger" *ngIf="esInvalido('nromedidor')">Ingresa el número del medidor.</small>
                         </div>
 
                         <div class="form-group col-md-3">
@@ -125,51 +127,63 @@
                         <div class="form-group col-md-2">
                           <label class="field-label">Lectura inicial</label>
                           <input type="number" min="0" class="form-control form-control-sm text-center field-input"
-                            formControlName="lecturainicial">
+                            [ngClass]="{'is-invalid': esInvalido('lecturainicial')}" formControlName="lecturainicial">
+                          <small class="text-danger" *ngIf="esInvalido('lecturainicial')">Ingresa la lectura inicial.</small>
                         </div>
 
                         <div class="form-group col-md-2">
                           <label class="field-label">Secuencia</label>
                           <input type="number" min="0" class="form-control form-control-sm text-center field-input"
-                            formControlName="secuencia">
+                            [ngClass]="{'is-invalid': esInvalido('secuencia')}" formControlName="secuencia">
+                          <small class="text-danger" *ngIf="esInvalido('secuencia')">Ingresa la secuencia.</small>
                         </div>
 
                         <div class="form-group col-md-3">
                           <label class="field-label">Fecha instalación</label>
                           <input type="date" class="form-control form-control-sm text-center field-input"
-                            formControlName="fechainstalacion">
+                            [ngClass]="{'is-invalid': esInvalido('fechainstalacion')}" formControlName="fechainstalacion">
+                          <small class="text-danger" *ngIf="esInvalido('fechainstalacion')">Selecciona la fecha de instalación.</small>
                         </div>
 
                         <div class="form-group col-md-3">
                           <label class="field-label">Estado</label>
-                          <select class="custom-select custom-select-sm field-input" formControlName="estado">
+                          <select class="custom-select custom-select-sm field-input"
+                            [ngClass]="{'is-invalid': esInvalido('estado')}" formControlName="estado">
                             <option value="1">Habilitado</option>
                             <option value="2">Suspendido</option>
                             <option value="3">Retirado</option>
                           </select>
+                          <small class="text-danger" *ngIf="esInvalido('estado')">Selecciona el estado del servicio.</small>
                         </div>
 
                         <div class="form-group col-md-3">
                           <label class="field-label">Medidor principal</label>
                           <input type="number" min="0" class="form-control form-control-sm text-center field-input"
-                            formControlName="medidorprincipal">
+                            [ngClass]="{'is-invalid': esInvalido('medidorprincipal')}" formControlName="medidorprincipal">
+                          <small class="text-danger" *ngIf="esInvalido('medidorprincipal')">Ingresa el valor del medidor principal.</small>
                         </div>
 
                         <div class="form-group col-md-3">
                           <label class="field-label">Departamento</label>
-                          <input type="text" class="form-control form-control-sm field-input" formControlName="departamento">
+                          <input type="text" class="form-control form-control-sm field-input"
+                            [ngClass]="{'is-invalid': esInvalido('departamento')}" formControlName="departamento">
+                          <small class="text-danger" *ngIf="esInvalido('departamento')">Ingresa el departamento.</small>
                         </div>
 
                         <div class="form-group col-md-2">
                           <label class="field-label">Piso</label>
-                          <input type="text" class="form-control form-control-sm field-input" formControlName="piso">
+                          <input type="text" class="form-control form-control-sm field-input"
+                            [ngClass]="{'is-invalid': esInvalido('piso')}" formControlName="piso">
+                          <small class="text-danger" *ngIf="esInvalido('piso')">Ingresa el piso.</small>
                         </div>
 
                         <div class="form-group col-md-10">
                           <label class="field-label">Observaciones</label>
                           <textarea class="form-control form-control-sm field-input field-textarea"
+                            [ngClass]="{'is-invalid': esInvalido('observacion')}"
                             formControlName="observacion" rows="3"
                             placeholder="Agrega notas útiles sobre el medidor, acceso, particularidades del predio o novedades relevantes."></textarea>
+                          <small class="text-danger" *ngIf="esInvalido('observacion')">Ingresa una observación.</small>
                         </div>
                       </div>
                     </div>
@@ -187,22 +201,26 @@
                       <div class="row">
                         <div class="form-group col-md-6">
                           <label class="field-label">Dirección</label>
-                          <input type="text" class="form-control form-control-sm field-input" formControlName="direccionubicacion">
+                          <input type="text" class="form-control form-control-sm field-input"
+                            [ngClass]="{'is-invalid': esInvalido('direccionubicacion')}" formControlName="direccionubicacion">
+                          <small class="text-danger" *ngIf="esInvalido('direccionubicacion')">Ingresa la dirección del servicio.</small>
                         </div>
 
                         <div class="form-group col-md-6">
                           <label class="field-label">Localización</label>
-                          <input type="text" class="form-control form-control-sm field-input" formControlName="localizacion">
+                          <input type="text" class="form-control form-control-sm field-input"
+                            [ngClass]="{'is-invalid': esInvalido('localizacion')}" formControlName="localizacion">
                         </div>
 
                         <div class="form-group col-md-4">
                           <label class="field-label">Ubicación del medidor</label>
                           <select class="custom-select custom-select-sm field-input" formControlName="idubicacionm_ubicacionm"
-                            [compareWith]="compararUbicacion">
+                            [ngClass]="{'is-invalid': esInvalido('idubicacionm_ubicacionm')}" [compareWith]="compararUbicacion">
                             <option [ngValue]="ubicacion" *ngFor="let ubicacion of ubicacionm">
                               {{ ubicacion.descripcion }}
                             </option>
                           </select>
+                          <small class="text-danger" *ngIf="esInvalido('idubicacionm_ubicacionm')">Selecciona la ubicación del medidor.</small>
                         </div>
 
                         <div class="form-group col-md-8">
@@ -215,7 +233,7 @@
                               <i class="bi bi-crosshair"></i> Usar ubicación actual
                             </button>
                           </div>
-                          <small class="text-muted d-block mt-2">Formato esperado: <code>[latitud, longitud]</code></small>
+                          <small class="text-muted d-block mt-2">Formato válido: <code>[latitud,longitud]</code> o <code>[latitud, longitud]</code></small>
                           <small *ngIf="geoError" class="text-danger d-block mt-1">{{ geoError }}</small>
                         </div>
 
@@ -254,31 +272,34 @@
                         <div class="form-group col-md-3">
                           <label class="field-label">Ruta</label>
                           <select class="custom-select custom-select-sm field-input" formControlName="idruta_rutas"
-                            [compareWith]="compararCategorias">
+                            [ngClass]="{'is-invalid': esInvalido('idruta_rutas')}" [compareWith]="compararRutas">
                             <option [ngValue]="rut" *ngFor="let rut of ruta">
                               {{ rut.descripcion }}
                             </option>
                           </select>
+                          <small class="text-danger" *ngIf="esInvalido('idruta_rutas')">Selecciona la ruta.</small>
                         </div>
 
                         <div class="form-group col-md-3">
                           <label class="field-label">Tipo pago</label>
                           <select class="custom-select custom-select-sm field-input" formControlName="idtipopago_tipopago"
-                            [compareWith]="compararTpPago">
+                            [ngClass]="{'is-invalid': esInvalido('idtipopago_tipopago')}" [compareWith]="compararTpPago">
                             <option [ngValue]="tippag" *ngFor="let tippag of tipopago">
                               {{ tippag.descripcion }}
                             </option>
                           </select>
+                          <small class="text-danger" *ngIf="esInvalido('idtipopago_tipopago')">Selecciona el tipo de pago.</small>
                         </div>
 
                         <div class="form-group col-md-3">
                           <label class="field-label">Estado medidor</label>
                           <select class="custom-select custom-select-sm field-input" formControlName="idestadom_estadom"
-                            [compareWith]="compararEstadoM">
+                            [ngClass]="{'is-invalid': esInvalido('idestadom_estadom')}" [compareWith]="compararEstadoM">
                             <option [ngValue]="estado" *ngFor="let estado of estadom">
                               {{ estado.descripcion }}
                             </option>
                           </select>
+                          <small class="text-danger" *ngIf="esInvalido('idestadom_estadom')">Selecciona el estado del medidor.</small>
                         </div>
 
                         <div class="col-12">
