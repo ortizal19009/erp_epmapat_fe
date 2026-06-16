@@ -101,10 +101,10 @@
                                     <div class="input-group-prepend">
                                         <label class="input-group-text" for="identificacion">Identificación</label>
                                     </div>
-                                    <input class="form-control" maxlength="10" placeholder="10 digitos" [ngClass]="{'is-invalid': f['identificacion'].invalid && f['identificacion'].touched,
+                                    <input class="form-control" maxlength="20" placeholder="Cédula, RUC o pasaporte" [ngClass]="{'is-invalid': f['identificacion'].invalid && f['identificacion'].touched,
                                     'is-valid': f['identificacion'].valid, '': f['identificacion'].untouched}"
                                         id="identificacion" formControlName="identificacion" />
-                                    <div class="invalid-feedback">Ingrese una identificación válida, sin espacios.</div>
+                                    <div class="invalid-feedback">{{ getErrorMessage('identificacion') }}</div>
                                 </div>
                             </div>
 

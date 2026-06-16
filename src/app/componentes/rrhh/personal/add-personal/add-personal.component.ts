@@ -59,10 +59,9 @@ export class AddPersonalComponent implements OnInit {
         '',
         [
           Validators.required,
-          Validators.minLength(10),
-          Validators.maxLength(10),
-          Validators.pattern(/^\d{10}$/),
-          PersonalValidators.cedulaEcuatoriana(),
+          Validators.minLength(5),
+          Validators.maxLength(20),
+          Validators.pattern(/^[A-Za-z0-9]+$/),
         ],
       ],
       apellidos: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
@@ -141,11 +140,10 @@ export class AddPersonalComponent implements OnInit {
     }
     if (control.errors['email']) return 'Ingrese un correo valido.';
     if (control.errors['pattern']) {
-      if (controlName === 'identificacion') return 'La identificacion debe tener 10 digitos numericos.';
+      if (controlName === 'identificacion') return 'La identificación solo puede contener letras y números, sin espacios.';
       if (controlName === 'celular') return 'Ingrese un celular valido.';
       return 'Formato invalido.';
     }
-    if (control.errors['cedulaEcuatoriana']) return 'La cedula ecuatoriana no es valida.';
     if (control.errors['edadMinima']) return `Debe tener al menos ${this.edadMinima} anios.`;
 
     return 'Verifique este campo.';

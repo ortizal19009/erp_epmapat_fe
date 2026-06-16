@@ -15,6 +15,7 @@ export class TramitesAguaService {
     { nombre: 'Director de Gestión Técnica', cargo: 'DIRECTOR DE GESTIÓN TÉCNICA' },
     { nombre: 'Ab. Andrés Montenegro', cargo: 'Asesor Legal' },
   ];
+  private readonly firmaManual = '______________________________';
 
   constructor(
     private s_header: TemplateHeaderService,
@@ -102,11 +103,14 @@ export class TramitesAguaService {
 
     this.agregarFirmasTramite(doc, {
       director: directorComercial,
+      asesorLegal: {
+        nombre: usuarioResponsable.nombre,
+        cargo: 'Responsable del trámite',
+      },
       cliente: {
         nombre: abonado?.idcliente_clientes?.nombre || 'No registrado',
         detalle: abonado?.idcliente_clientes?.cedula || 'Sin identificación',
       },
-      responsable: usuarioResponsable,
       startY: (doc as any).lastAutoTable.finalY + 50,
       margin,
     });
@@ -160,11 +164,14 @@ export class TramitesAguaService {
 
     this.agregarFirmasTramite(doc, {
       director: directorComercial,
+      asesorLegal: {
+        nombre: usuarioResponsable.nombre,
+        cargo: 'Responsable del trámite',
+      },
       cliente: {
         nombre: cliente,
         detalle: identificacion,
       },
-      responsable: usuarioResponsable,
       startY: (doc as any).lastAutoTable.finalY + 30,
       margin,
     });
@@ -204,8 +211,18 @@ export class TramitesAguaService {
     };
     const serviciosSolicitados = this.buildServiciosSolicitados(datos);
     const tituloDocumento = titulo || 'Concesión de servicios';
-    const directorGestionTecnica = await this.obtenerDirectorGestionTecnicaActivo();
-    const usuarioResponsable = await this.obtenerUsuarioResponsable(datos?.usucrea);
+    const directorGestionTecnica = await this.obtenerPersonalActivoPorCargo(
+      ['director tecnico', 'director de gestion tecnica'],
+      'DIRECTOR TÉCNICO'
+    );
+    const topografoActivo = await this.obtenerPersonalActivoPorCargo(
+      ['topografo', 'topografa'],
+      'TOPÓGRAFO'
+    );
+    const plomeroActivo = await this.obtenerPersonalActivoPorCargo(
+      ['plomero', 'fontanero'],
+      'PLOMERO'
+    );
 
     this.s_header.header(tituloDocumento, doc);
     doc.setFontSize(10);
@@ -271,12 +288,13 @@ export class TramitesAguaService {
     doc.line(margx, 700, margy, 700);
 
     this.agregarFirmasHojaInspeccion(doc, {
+      plomero: plomeroActivo,
       director: directorGestionTecnica,
       cliente: {
         nombre: datos?.idcliente_clientes?.nombre || 'No registrado',
         detalle: datos?.idcliente_clientes?.cedula || 'Sin identificación',
       },
-      responsable: usuarioResponsable,
+      topografo: topografoActivo,
       startY: 740,
       margin: margx,
     });
@@ -294,8 +312,9 @@ export class TramitesAguaService {
     const doc = new jsPDF('p', 'pt', 'a4');
     const margin = 30;
     const directorComercial = await this.obtenerDirectorComercialActivo();
-    const usuarioResponsable = await this.obtenerUsuarioResponsable(
-      datos?.idaguatramite_aguatramite?.usucrea
+    const asesorLegal = await this.obtenerPersonalActivoPorCargo(
+      ['asesor legal'],
+      'ASESOR LEGAL'
     );
     const nombreCliente = this.getDisplayValue(
       datos?.idaguatramite_aguatramite?.idcliente_clientes?.nombre,
@@ -348,11 +367,11 @@ export class TramitesAguaService {
 
     this.agregarFirmasTramite(doc, {
       director: directorComercial,
+      asesorLegal,
       cliente: {
         nombre: `${datos.idaguatramite_aguatramite.idcliente_clientes.nombre}`,
         detalle: `${datos.idaguatramite_aguatramite.idcliente_clientes.cedula}`,
       },
-      responsable: usuarioResponsable,
       startY: (doc as any).lastAutoTable.finalY + 30,
       margin,
     });
@@ -494,6 +513,48 @@ export class TramitesAguaService {
     return this.administradores[1];
   }
 
+  private async obtenerPersonalActivoPorCargo(
+    cargosBuscados: string[],
+    cargoFallback: string
+  ): Promise<{ nombre: string; cargo: string }> {
+    try {
+      const personal: any = await firstValueFrom(this.s_personal.getAllPersonal());
+      const lista = Array.isArray(personal) ? personal : [];
+      const encontrado = lista.find((item: any) => {
+        const cargo = this.normalizarTexto(
+          item?.idcargo_cargos?.descripcion || item?.cargoActual || item?.cargo || ''
+        );
+        const activo = item?.estado === true || item?.estado === 1;
+        return activo && cargosBuscados.some((buscado) => cargo.includes(this.normalizarTexto(buscado)));
+      });
+
+      if (encontrado) {
+        return {
+          nombre: this.obtenerNombreFirmaPersonal(encontrado) || this.firmaManual,
+          cargo:
+            encontrado?.idcargo_cargos?.descripcion ||
+            encontrado?.cargoActual ||
+            encontrado?.cargo ||
+            cargoFallback,
+        };
+      }
+    } catch (error) {
+      console.error(`No se pudo obtener personal activo para ${cargoFallback}`, error);
+    }
+
+    return { nombre: this.firmaManual, cargo: cargoFallback };
+  }
+
+  private obtenerNombreFirmaPersonal(personal: any): string {
+    return (
+      personal?.nomfirma?.trim() ||
+      [personal?.sufijo || '', personal?.apellidos || '', personal?.nombres || '']
+        .map((value: string) => String(value || '').trim())
+        .filter(Boolean)
+        .join(' ')
+    );
+  }
+
   private normalizarTexto(value: string): string {
     return String(value || '')
       .normalize('NFD')
@@ -520,8 +581,8 @@ export class TramitesAguaService {
     doc: jsPDF,
     data: {
       director: { nombre: string; cargo: string };
+      asesorLegal?: { nombre: string; cargo: string };
       cliente: { nombre: string; detalle: string };
-      responsable: { nombre: string };
       startY: number;
       margin: number;
     }
@@ -536,8 +597,16 @@ export class TramitesAguaService {
       },
       body: [
         ['______________________________', '______________________________', '______________________________'],
-        [data.director.nombre, data.cliente.nombre, data.responsable.nombre],
-        [data.director.cargo, data.cliente.detalle || 'Cliente dueño del trámite', 'Responsable del trámite'],
+        [
+          data.director.nombre || this.firmaManual,
+          data.asesorLegal?.nombre || this.firmaManual,
+          data.cliente.nombre || this.firmaManual,
+        ],
+        [
+          data.director.cargo || 'DIRECTOR COMERCIAL',
+          data.asesorLegal?.cargo || 'ASESOR LEGAL',
+          data.cliente.detalle || 'CLIENTE DUEÑO DEL CONTRATO',
+        ],
       ],
     });
   }
@@ -545,9 +614,10 @@ export class TramitesAguaService {
   private agregarFirmasHojaInspeccion(
     doc: jsPDF,
     data: {
+      plomero: { nombre: string; cargo: string };
       director: { nombre: string; cargo: string };
       cliente: { nombre: string; detalle: string };
-      responsable: { nombre: string };
+      topografo: { nombre: string; cargo: string };
       startY: number;
       margin: number;
     }
@@ -569,8 +639,18 @@ export class TramitesAguaService {
       },
       body: [
         ['________________________', '________________________', '________________________', '________________________'],
-        ['________________________', data.cliente.nombre, data.responsable.nombre, data.director.nombre],
-        ['INSPECTOR', data.cliente.detalle || 'Usuario', 'RESPONSABLE DEL TRAMITE', data.director.cargo],
+        [
+          data.plomero.nombre || this.firmaManual,
+          data.cliente.nombre || this.firmaManual,
+          data.topografo.nombre || this.firmaManual,
+          data.director.nombre || this.firmaManual,
+        ],
+        [
+          'PLOMERO',
+          data.cliente.detalle || 'CLIENTE',
+          data.topografo.cargo || 'TOPÓGRAFO',
+          data.director.cargo || 'DIRECTOR TÉCNICO',
+        ],
       ],
     });
   }

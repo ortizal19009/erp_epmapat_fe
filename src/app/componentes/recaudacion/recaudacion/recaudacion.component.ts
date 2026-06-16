@@ -1499,9 +1499,13 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
       const interesTmp = this.normalizarValorMonetario(
         interesesPorFactura.get(idfactura) ?? item?.interes ?? 0
       );
-      item.interes = interesTmp;
+      const interesCobrado = await this.obtenerInteresCobradoFactura(
+        idfactura,
+        interesTmp
+      );
+      item.interes = interesCobrado;
 
-      await this.actualizarFacturaConInteres(idfactura, interesTmp, item);
+      await this.actualizarFacturaConInteres(idfactura, interesCobrado, item);
       await this.guardarRubroInteres(idfactura, interesTmp);
     }
   }
@@ -1569,6 +1573,30 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
     const rubro = new Rubros();
     rubro.idrubro = rubroInteresId;
     await this.saveRubxFac(factura, rubro, interesNormalizado);
+  }
+
+  private async obtenerInteresCobradoFactura(
+    idfactura: number,
+    interesCalculado: number
+  ): Promise<number> {
+    const rubroInteresId = 5;
+    const detalle = await this.rubxfacService.getByIdfacturaAsync(idfactura);
+    const rubroInteresExistente = (detalle || [])
+      .filter(
+        (rubro: any) =>
+          Number(rubro?.estado ?? 1) !== 0 &&
+          Number(rubro?.idrubro_rubros?.idrubro ?? rubro?.idrubro_rubros) ===
+            rubroInteresId
+      )
+      .reduce((acumulado: number, rubro: any) => {
+        const cantidad = this.obtenerNumeroDetalle(rubro?.cantidad ?? 1);
+        const valor = this.obtenerNumeroDetalle(rubro?.valorunitario ?? 0);
+        return acumulado + cantidad * valor;
+      }, 0);
+
+    return this.normalizarValorMonetario(
+      this.normalizarValorMonetario(interesCalculado) + rubroInteresExistente
+    );
   }
 
   private normalizarValorMonetario(value: any): number {
