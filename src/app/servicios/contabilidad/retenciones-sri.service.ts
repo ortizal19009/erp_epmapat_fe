@@ -22,6 +22,12 @@ export class RetencionesSriService {
     });
   }
 
+  generarPdfPorId(idretencion: number): Observable<Blob> {
+    return this.http.get(`${this.erpBaseUrl}/pdf?idretencion=${encodeURIComponent(String(idretencion))}`, {
+      responseType: 'blob',
+    });
+  }
+
   descargarXml(claveAcceso: string): Observable<string> {
     return this.http.get(`${this.baseUrl}/xml?claveAcceso=${encodeURIComponent(claveAcceso)}`, {
       responseType: 'text',

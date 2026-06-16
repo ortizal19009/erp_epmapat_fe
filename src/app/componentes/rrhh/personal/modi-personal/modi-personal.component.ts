@@ -41,10 +41,9 @@ export class ModiPersonalComponent implements OnInit {
         '',
         [
           Validators.required,
-          Validators.minLength(10),
-          Validators.maxLength(10),
-          Validators.pattern(/^\d{10}$/),
-          PersonalValidators.cedulaEcuatoriana(),
+          Validators.minLength(5),
+          Validators.maxLength(20),
+          Validators.pattern(/^[A-Za-z0-9]+$/),
         ],
       ],
       apellidos: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
@@ -192,15 +191,12 @@ export class ModiPersonalComponent implements OnInit {
     if (control.errors['email']) return 'Ingrese un correo válido.';
     if (control.errors['pattern']) {
       if (controlName === 'identificacion') {
-        return 'La identificación debe tener 10 dígitos numéricos.';
+        return 'La identificación solo puede contener letras y números, sin espacios.';
       }
       if (controlName === 'celular') {
         return 'Ingrese un teléfono válido.';
       }
       return 'Formato inválido.';
-    }
-    if (control.errors['cedulaEcuatoriana']) {
-      return 'La cédula ecuatoriana no es válida.';
     }
     if (control.errors['edadMinima']) {
       return `Debe tener al menos ${this.edadMinima} años.`;

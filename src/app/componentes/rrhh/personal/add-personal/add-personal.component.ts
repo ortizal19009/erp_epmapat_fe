@@ -52,29 +52,30 @@ export class AddPersonalComponent implements OnInit {
   ngOnInit(): void {
     this.f_personal = this.fb.group({
       bspersonal: '',
-      codigo: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(20)]],
+      codigo: ['', [Validators.required, PersonalValidators.requeridoSinEspacios(), Validators.minLength(2), Validators.maxLength(20)]],
       idcargo_cargos: [null, Validators.required],
       idtpcontrato_tpcontratos: [null, Validators.required],
       identificacion: [
         '',
         [
           Validators.required,
+          PersonalValidators.requeridoSinEspacios(),
           Validators.minLength(5),
           Validators.maxLength(20),
           Validators.pattern(/^[A-Za-z0-9]+$/),
         ],
       ],
-      apellidos: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
-      nombres: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
+      apellidos: ['', [Validators.required, PersonalValidators.requeridoSinEspacios(), Validators.minLength(2), Validators.maxLength(80)]],
+      nombres: ['', [Validators.required, PersonalValidators.requeridoSinEspacios(), Validators.minLength(2), Validators.maxLength(80)]],
       fecnacimiento: ['', [PersonalValidators.edadMinima(this.edadMinima)]],
-      email: ['', [Validators.required, Validators.email, Validators.maxLength(100)]],
-      celular: ['', [Validators.required, Validators.pattern(/^[0-9+\-\s]{7,15}$/)]],
-      direccion: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(150)]],
+      email: ['', [Validators.required, PersonalValidators.requeridoSinEspacios(), Validators.email, Validators.maxLength(100)]],
+      celular: ['', [Validators.required, PersonalValidators.requeridoSinEspacios(), Validators.pattern(/^[0-9+\-\s]{7,15}$/)]],
+      direccion: ['', [Validators.required, PersonalValidators.requeridoSinEspacios(), Validators.minLength(3), Validators.maxLength(150)]],
       idcontemergencia_contemergencias: '',
       sufijo: ['', [Validators.maxLength(20)]],
       tituloprofesional: ['', [Validators.maxLength(100)]],
       fecinicio: ['', Validators.required],
-      nomfirma: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(120)]],
+      nomfirma: ['', [Validators.required, PersonalValidators.requeridoSinEspacios(), Validators.minLength(2), Validators.maxLength(120)]],
     });
     this.f_buscarContEmergencia = this.fb.group({
       contemergencia: '',
@@ -111,6 +112,11 @@ export class AddPersonalComponent implements OnInit {
     this.getAllContEmergencia();
     this.getDetCargos();
     this.getAllPersonal();
+    this.f_personal.statusChanges.subscribe(() => {
+      if (this.mensajeError && this.f_personal.valid) {
+        this.mensajeError = '';
+      }
+    });
   }
 
   get f() {
@@ -132,6 +138,7 @@ export class AddPersonalComponent implements OnInit {
     if (!control?.errors) return '';
 
     if (control.errors['required']) return 'Este campo es obligatorio.';
+    if (control.errors['requeridoSinEspacios']) return 'Este campo no puede contener solo espacios.';
     if (control.errors['minlength']) {
       return `Debe tener al menos ${control.errors['minlength'].requiredLength} caracteres.`;
     }
@@ -145,8 +152,34 @@ export class AddPersonalComponent implements OnInit {
       return 'Formato invalido.';
     }
     if (control.errors['edadMinima']) return `Debe tener al menos ${this.edadMinima} anios.`;
+    if (control.errors['fechaInvalida']) return 'Ingrese una fecha valida.';
 
     return 'Verifique este campo.';
+  }
+
+  canSavePersonal(): boolean {
+    return this.f_personal.valid;
+  }
+
+  getInvalidControls(): string[] {
+    const labels: Record<string, string> = {
+      codigo: 'codigo',
+      idcargo_cargos: 'cargo',
+      idtpcontrato_tpcontratos: 'tipo de contrato',
+      identificacion: 'identificacion',
+      apellidos: 'apellidos',
+      nombres: 'nombres',
+      fecnacimiento: 'fecha de nacimiento',
+      email: 'email',
+      celular: 'celular',
+      direccion: 'direccion',
+      fecinicio: 'fecha de inicio',
+      nomfirma: 'nombre de preferencia',
+    };
+
+    return Object.keys(this.f_personal.controls)
+      .filter((key) => this.f_personal.get(key)?.invalid)
+      .map((key) => labels[key] ?? key);
   }
 
   async buscaColor() {
@@ -179,7 +212,10 @@ export class AddPersonalComponent implements OnInit {
     this.f_personal.markAllAsTouched();
 
     if (this.f_personal.invalid) {
-      this.mensajeError = 'Revise los campos marcados antes de guardar el personal.';
+      const campos = this.getInvalidControls();
+      this.mensajeError = campos.length
+        ? `Complete o corrija: ${campos.join(', ')}.`
+        : 'Revise los campos marcados antes de guardar el personal.';
       return;
     }
 

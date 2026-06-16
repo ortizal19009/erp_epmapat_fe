@@ -463,18 +463,24 @@ export class RetencionesComponent implements OnInit, OnDestroy {
    }
 
    async descargarPdf(retencion: any) {
+      const idretencion = this.getIdRetencion(retencion);
       const claveAcceso = this.getClaveAccesoRetencion(retencion);
-      if (!claveAcceso) {
-         this.authService.swal('warning', 'No se pudo identificar la clave de acceso de la retención');
+      if (!idretencion && !claveAcceso) {
+         this.authService.swal('warning', 'No se pudo identificar la retención a descargar');
          return;
       }
       if (!this.puedeGenerarPdf(retencion)) {
          this.authService.swal('warning', 'La retención debe estar autorizada para generar el PDF');
          return;
       }
-      this.accionEnCursoId = this.getIdRetencion(retencion);
+      this.accionEnCursoId = idretencion;
       try {
-         const blob = await firstValueFrom(this.sriRetencionesService.generarPdf(claveAcceso));
+         let blob: Blob;
+         if (idretencion > 0) {
+            blob = await firstValueFrom(this.sriRetencionesService.generarPdfPorId(idretencion));
+         } else {
+            blob = await firstValueFrom(this.sriRetencionesService.generarPdf(claveAcceso));
+         }
          const blobUrl = window.URL.createObjectURL(blob);
          const opened = window.open(blobUrl, '_blank');
          if (!opened) {
@@ -488,7 +494,8 @@ export class RetencionesComponent implements OnInit, OnDestroy {
          await this.cargarEstadosSri();
       } catch (error: any) {
          console.error(error);
-         this.authService.swal('error', 'No se pudo generar el PDF');
+         const detalle = this.getSriErrorDetail(error, 'No se pudo generar el PDF');
+         this.authService.swal('error', detalle);
       } finally {
          this.accionEnCursoId = null;
       }
@@ -523,7 +530,7 @@ export class RetencionesComponent implements OnInit, OnDestroy {
          await this.cargarEstadosSri();
       } catch (error: any) {
          const estado = this.normalizarEstadoSri(error?.error?.estado);
-         const detalle = error?.error?.detalle || error?.error?.error || error?.message || 'No se pudo procesar la retención';
+         const detalle = this.getSriErrorDetail(error, 'No se pudo procesar la retención');
          const correoNoDisponible = estado === 'CORREO_NO_DISPONIBLE' || error?.status === 503 || error?.error?.status === 503;
          if (correoNoDisponible) {
             console.warn(error);
@@ -659,7 +666,7 @@ export class RetencionesComponent implements OnInit, OnDestroy {
          await this.cargarEstadosSri();
       } catch (error: any) {
          const estado = this.normalizarEstadoSri(error?.error?.estado);
-         const detalle = error?.error?.detalle || error?.message || 'No se pudo reenviar el correo';
+         const detalle = this.getSriErrorDetail(error, 'No se pudo reenviar el correo');
          const correoNoDisponible = estado === 'CORREO_NO_DISPONIBLE' || error?.status === 503 || error?.error?.status === 503;
          if (correoNoDisponible) {
             console.warn(error);
@@ -771,6 +778,16 @@ export class RetencionesComponent implements OnInit, OnDestroy {
          return 'ERROR_ENVIO';
       }
       return texto;
+   }
+
+   private getSriErrorDetail(error: any, fallback: string): string {
+      return (
+         error?.error?.detalle ||
+         error?.error?.message ||
+         error?.error?.error ||
+         error?.message ||
+         fallback
+      );
    }
 
    private iniciarStreamRetenciones(): void {

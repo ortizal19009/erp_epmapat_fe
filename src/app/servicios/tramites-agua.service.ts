@@ -15,7 +15,7 @@ export class TramitesAguaService {
     { nombre: 'Director de Gestión Técnica', cargo: 'DIRECTOR DE GESTIÓN TÉCNICA' },
     { nombre: 'Ab. Andrés Montenegro', cargo: 'Asesor Legal' },
   ];
-  private readonly firmaManual = '______________________________';
+  private readonly firmaManual = '___________________________';
 
   constructor(
     private s_header: TemplateHeaderService,
@@ -462,10 +462,12 @@ export class TramitesAguaService {
   private async obtenerDirectorComercialActivo(): Promise<{ nombre: string; cargo: string }> {
     try {
       const personal: any = await firstValueFrom(this.s_personal.getAllPersonal());
-      const lista = Array.isArray(personal) ? personal : [];
+      const lista = this.normalizarListaPersonal(personal);
       const director = lista.find((item: any) => {
-        const cargo = `${item?.idcargo_cargos?.descripcion || item?.cargoActual || item?.cargo || ''}`.toLowerCase();
-        return item?.estado === true && cargo.includes('director comercial');
+        const cargo = this.normalizarTexto(
+          item?.idcargo_cargos?.descripcion || item?.cargoActual || item?.cargo || ''
+        );
+        return this.personalActivo(item) && cargo.includes('director comercial');
       });
 
       if (director) {
@@ -488,12 +490,15 @@ export class TramitesAguaService {
   private async obtenerDirectorGestionTecnicaActivo(): Promise<{ nombre: string; cargo: string }> {
     try {
       const personal: any = await firstValueFrom(this.s_personal.getAllPersonal());
-      const lista = Array.isArray(personal) ? personal : [];
+      const lista = this.normalizarListaPersonal(personal);
       const director = lista.find((item: any) => {
         const cargo = this.normalizarTexto(
           item?.idcargo_cargos?.descripcion || item?.cargoActual || item?.cargo || ''
         );
-        return item?.estado === true && cargo.includes('director de gestion tecnica');
+        return this.personalActivo(item) && (
+          cargo.includes('director de gestion tecnica') ||
+          cargo.includes('director tecnico')
+        );
       });
 
       if (director) {
@@ -518,14 +523,13 @@ export class TramitesAguaService {
     cargoFallback: string
   ): Promise<{ nombre: string; cargo: string }> {
     try {
-      const personal: any = await firstValueFrom(this.s_personal.getAllPersonal());
-      const lista = Array.isArray(personal) ? personal : [];
+      const lista = await this.buscarPersonalPorCargos(cargosBuscados);
       const encontrado = lista.find((item: any) => {
         const cargo = this.normalizarTexto(
           item?.idcargo_cargos?.descripcion || item?.cargoActual || item?.cargo || ''
         );
-        const activo = item?.estado === true || item?.estado === 1;
-        return activo && cargosBuscados.some((buscado) => cargo.includes(this.normalizarTexto(buscado)));
+        return this.personalActivo(item) &&
+          cargosBuscados.some((buscado) => cargo.includes(this.normalizarTexto(buscado)));
       });
 
       if (encontrado) {
@@ -543,6 +547,67 @@ export class TramitesAguaService {
     }
 
     return { nombre: this.firmaManual, cargo: cargoFallback };
+  }
+
+  private async buscarPersonalPorCargos(cargosBuscados: string[]): Promise<any[]> {
+    const acumulado: any[] = [];
+
+    for (const cargo of cargosBuscados) {
+      try {
+        const response: any = await firstValueFrom(
+          this.s_personal.searchPersonal({ cargo, page: 0, size: 200 })
+        );
+        acumulado.push(...this.normalizarListaPersonal(response));
+      } catch (error) {
+        console.warn(`No se pudo buscar personal por cargo "${cargo}"`, error);
+      }
+    }
+
+    if (acumulado.length) {
+      return this.deduplicarPersonal(acumulado);
+    }
+
+    const personal: any = await firstValueFrom(this.s_personal.getAllPersonal());
+    return this.normalizarListaPersonal(personal);
+  }
+
+  private deduplicarPersonal(lista: any[]): any[] {
+    const mapa = new Map<number | string, any>();
+    for (const item of lista) {
+      const key = item?.idpersonal ?? item?.identificacion ?? JSON.stringify(item);
+      if (!mapa.has(key)) {
+        mapa.set(key, item);
+      }
+    }
+    return Array.from(mapa.values());
+  }
+
+  private normalizarListaPersonal(response: any): any[] {
+    if (Array.isArray(response)) {
+      return response;
+    }
+    if (Array.isArray(response?.content)) {
+      return response.content;
+    }
+    if (Array.isArray(response?.data)) {
+      return response.data;
+    }
+    return [];
+  }
+
+  private personalActivo(item: any): boolean {
+    const estado = item?.estado;
+    const estadoLaboral = this.normalizarTexto(item?.estadoLaboral || '');
+    if (estado === true || estado === 1 || estado === '1' || estado === 'ACTIVO') {
+      return true;
+    }
+    if (estado === false || estado === 0 || estado === '0') {
+      return false;
+    }
+    if (!estadoLaboral) {
+      return true;
+    }
+    return !estadoLaboral.includes('desvinculado') && !estadoLaboral.includes('inactivo');
   }
 
   private obtenerNombreFirmaPersonal(personal: any): string {

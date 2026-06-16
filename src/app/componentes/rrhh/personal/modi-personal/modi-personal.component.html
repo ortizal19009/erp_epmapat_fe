@@ -63,6 +63,8 @@
                   <label>Identificacion</label>
                   <input
                     formControlName="identificacion"
+                    maxlength="20"
+                    placeholder="Cédula, RUC o pasaporte"
                     class="form-control form-control-sm"
                     [ngClass]="{'is-invalid': controlInvalid('identificacion')}"
                   />

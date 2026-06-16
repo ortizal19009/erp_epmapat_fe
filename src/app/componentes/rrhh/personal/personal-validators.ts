@@ -1,6 +1,13 @@
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
 export class PersonalValidators {
+  static requeridoSinEspacios(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = String(control.value ?? '');
+      return value.trim().length > 0 ? null : { requeridoSinEspacios: true };
+    };
+  }
+
   static cedulaEcuatoriana(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const value = String(control.value || '').trim();
