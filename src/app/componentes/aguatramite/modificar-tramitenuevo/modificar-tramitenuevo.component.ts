@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Abonados } from 'src/app/modelos/abonados';
 import { Aguatramite } from 'src/app/modelos/aguatramite.model';
@@ -11,7 +12,10 @@ import { Ubicacionm } from 'src/app/modelos/ubicacionm.model';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { AguatramiteService } from 'src/app/servicios/aguatramite.service';
 import { CategoriaService } from 'src/app/servicios/categoria.service';
+import { OutboxAttachment, OutboxEmailService } from 'src/app/servicios/outbox-email.service';
 import { TramiteNuevoService } from 'src/app/servicios/tramite-nuevo.service';
+import { TramitesAguaService } from 'src/app/servicios/tramites-agua.service';
+import Swal from 'sweetalert2';
 
 @Component({
    selector: 'app-modificar-tramitenuevo',
@@ -50,7 +54,9 @@ export class ModificarTramitenuevoComponent implements OnInit {
 
    constructor(private traminuevoService: TramiteNuevoService, private router: Router,
       private aguatramService: AguatramiteService, private cateService: CategoriaService, private fb: FormBuilder,
-      private aboService: AbonadosService, private authService: AutorizaService) { }
+      private aboService: AbonadosService, private authService: AutorizaService,
+      private tramiteAguaService: TramitesAguaService,
+      private outboxEmailService: OutboxEmailService) { }
 
    private obtenerFechaActualLocal(): Date {
       const ahora = new Date();
@@ -222,11 +228,23 @@ export class ModificarTramitenuevoComponent implements OnInit {
       });
    }
 
-   onSubmit() {
-      this.guardarTramite();
+   async onSubmit() {
+      await this.guardarTramite();
    }
 
-   guardarTramite() {
+   async guardarTramite() {
+      if (this.formTramitenuevo.invalid) {
+         this.formTramitenuevo.markAllAsTouched();
+         return;
+      }
+
+      const correos = await this.confirmarEnvioContrato(
+         this.formTramitenuevo.getRawValue().idaguatramite_aguatramite?.idcliente_clientes?.email
+      );
+      if (!correos) {
+         return;
+      }
+
       const payload = {
          ...this.formTramitenuevo.getRawValue(),
          fechainspeccion: this.normalizarFechaLocal(this.formTramitenuevo.getRawValue().fechainspeccion),
@@ -239,17 +257,43 @@ export class ModificarTramitenuevoComponent implements OnInit {
          usumodi: this.authService.idusuario,
       };
 
-      this.traminuevoService.saveTramiteNuevo(payload).subscribe({
-         next: (datos) => {
-            this.guardarAbonado();
-            this.actualizarAguaTramite(3);   //Estado 3
-            this.retornarListaTramites();
-         },
-         error: (e) => console.error('Al guardar en TramiteNuevo: ', e),
-      });
+      try {
+         const datos: any = await firstValueFrom(this.traminuevoService.saveTramiteNuevo(payload));
+         const abonadoCreado = await this.guardarAbonadoAsync();
+         await this.actualizarAguaTramiteAsync(3);
+         await this.enviarContratoPorCorreo(
+            {
+               ...datos,
+               direccion: datos?.direccion || payload.direccion,
+               fechafinalizacion: datos?.fechafinalizacion || payload.fechafinalizacion,
+               idaguatramite_aguatramite: {
+                  ...(datos?.idaguatramite_aguatramite || payload.idaguatramite_aguatramite || {}),
+                  idcliente_clientes: {
+                     ...(datos?.idaguatramite_aguatramite?.idcliente_clientes ||
+                        payload?.idaguatramite_aguatramite?.idcliente_clientes ||
+                        {}),
+                  },
+               },
+            },
+            abonadoCreado,
+            correos
+         );
+         this.retornarListaTramites();
+      } catch (e) {
+         console.error('Al guardar en TramiteNuevo: ', e);
+         Swal.fire({
+            icon: 'error',
+            title: 'No se pudo completar el trámite',
+            text: 'Revisa la información e intenta nuevamente.',
+         });
+      }
    }
 
    guardarAbonado() {
+      this.guardarAbonadoAsync().catch((e) => console.error('Al crear el Abonado: ', e));
+   }
+
+   async guardarAbonadoAsync(): Promise<Abonados> {
       let abonado: Abonados = new Abonados();
       let estadom: Estadom = new Estadom();
       let tipopago: Tipopago = new Tipopago();
@@ -281,12 +325,9 @@ export class ModificarTramitenuevoComponent implements OnInit {
       abonado.adultomayor = this.v_adultomayor;
       abonado.municipio = this.v_municipio;
 
-      this.aboService.saveAbonado(abonado).subscribe({
-         next: (datos: any) => {
-            this._abonado = datos;
-         },
-         error: (e) => console.error('Al crear el Abonado: ', e),
-      });
+      const datos: any = await firstValueFrom(this.aboService.saveAbonado(abonado));
+      this._abonado = datos;
+      return datos;
    }
 
    compararCategoria(o1: Categoria, o2: Categoria): boolean {
@@ -358,11 +399,159 @@ export class ModificarTramitenuevoComponent implements OnInit {
    }
 
    actualizarAguaTramite(estado: number) {
+      this.actualizarAguaTramiteAsync(estado).catch((e) => console.error(e));
+   }
+
+   async actualizarAguaTramiteAsync(estado: number): Promise<any> {
       this.aguatramite.estado = estado;
-      this.aguatramService.updateAguatramite(this.aguatramite).subscribe({
-         next: (datos) => {
+      return firstValueFrom(this.aguatramService.updateAguatramite(this.aguatramite));
+   }
+
+   private async confirmarEnvioContrato(correoPorDefecto?: string | null): Promise<string[] | null> {
+      const correoInicial = correoPorDefecto ? String(correoPorDefecto).trim() : '';
+      const alertaCorreo = correoInicial
+         ? `<div style="margin-top:12px; padding:10px 12px; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:8px; color:#065f46;">
+               <strong>Correo registrado:</strong> ${correoInicial}
+            </div>`
+         : `<div style="margin-top:12px; padding:10px 12px; background:#fff7ed; border:1px solid #fdba74; border-radius:8px; color:#9a3412;">
+               <strong>Cliente sin correo registrado.</strong><br>
+               Puedes escribir un correo en este momento para enviar la notificación o actualizarlo luego en clientes.
+            </div>`;
+
+      const resultado = await Swal.fire({
+         title: 'Completar trámite y enviar contrato',
+         icon: 'question',
+         html: `
+            <div class="text-left">
+               <p class="mb-2">Verifica el correo del cliente antes de enviar la notificación.</p>
+               <p class="mb-0"><strong>Cuenta:</strong> ${this.aguatramite?.idaguatramite || this.idTramite}</p>
+               ${alertaCorreo}
+            </div>
+         `,
+         input: 'text',
+         inputLabel: 'Correo(s) de notificación',
+         inputValue: correoInicial,
+         inputPlaceholder: 'cliente@correo.com; copia@correo.com',
+         showCancelButton: true,
+         confirmButtonText: 'Completar y enviar',
+         cancelButtonText: 'Cancelar',
+         preConfirm: (value) => {
+            const correos = this.parseRecipients(value || '');
+            if (!correos.length) {
+               Swal.showValidationMessage('Ingresa al menos un correo');
+               return null;
+            }
+            if (correos.some((correo) => !this.isValidEmail(correo))) {
+               Swal.showValidationMessage('Revisa el formato de los correos');
+               return null;
+            }
+            return correos;
          },
-         error: (e) => console.error(e),
+      });
+
+      return resultado.isConfirmed ? (resultado.value as string[]) : null;
+   }
+
+   private async enviarContratoPorCorreo(
+      tramite: any,
+      abonado: Abonados | null,
+      correos: string[]
+   ): Promise<void> {
+      if (!correos.length) {
+         return;
+      }
+
+      const contrato = await this.tramiteAguaService.buildContratoBlob(tramite);
+      const attachments: OutboxAttachment[] = [
+         await this.fileToAttachment(
+            contrato,
+            `contrato-tramite-${tramite?.idaguatramite_aguatramite?.idaguatramite || this.idTramite}.pdf`
+         ),
+      ];
+
+      const cliente = tramite?.idaguatramite_aguatramite?.idcliente_clientes || {};
+
+      await firstValueFrom(
+         this.outboxEmailService.sendNotificationEmail({
+            to: correos,
+            subject: `Contrato de trámite de agua #${tramite?.idaguatramite_aguatramite?.idaguatramite || this.idTramite}`,
+            html: this.buildHtmlCorreoContrato(tramite, abonado),
+            text:
+               `Adjuntamos el contrato del trámite de agua #${tramite?.idaguatramite_aguatramite?.idaguatramite || this.idTramite}. ` +
+               `Cliente: ${cliente?.nombre || 'No registrado'}.`,
+            attachments,
+         })
+      );
+
+      Swal.fire({
+         toast: true,
+         icon: 'success',
+         title: `Contrato enviado a: ${correos.join(', ')}`,
+         position: 'top-end',
+         showConfirmButton: false,
+         timer: 3500,
+      });
+   }
+
+   private buildHtmlCorreoContrato(tramite: any, abonado: Abonados | null): string {
+      const cliente = tramite?.idaguatramite_aguatramite?.idcliente_clientes || {};
+      return `
+         <div style="font-family: Arial, Helvetica, sans-serif; background:#f4f7fb; padding:24px; color:#1f2937;">
+            <div style="max-width:700px; margin:0 auto; background:#ffffff; border-radius:12px; overflow:hidden; border:1px solid #dbe4ee;">
+               <div style="background:#0f766e; color:#ffffff; padding:20px 24px;">
+                  <h2 style="margin:0; font-size:22px;">Contrato de trámite de agua</h2>
+                  <p style="margin:8px 0 0 0; font-size:14px;">EPMAPA-T</p>
+               </div>
+               <div style="padding:24px;">
+                  <p style="margin-top:0;">Estimado/a <strong>${cliente?.nombre || 'cliente'}</strong>,</p>
+                  <p>Su trámite ha sido completado correctamente. Adjuntamos el contrato para su respaldo.</p>
+                  <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px; margin:16px 0;">
+                     <p style="margin:0 0 8px 0;"><strong>Nro. de trámite:</strong> ${tramite?.idaguatramite_aguatramite?.idaguatramite || ''}</p>
+                     <p style="margin:0 0 8px 0;"><strong>Cliente:</strong> ${cliente?.nombre || 'No registrado'}</p>
+                     <p style="margin:0 0 8px 0;"><strong>Identificación:</strong> ${cliente?.cedula || 'Sin identificación'}</p>
+                     <p style="margin:0;"><strong>Cuenta generada:</strong> ${abonado?.idabonado || 'En proceso'}</p>
+                  </div>
+                  <p>Si necesitas actualizar tus datos de contacto o realizar una consulta, comunícate con EPMAPA-T.</p>
+                  <p style="margin-bottom:0;">Gracias por utilizar nuestros servicios.</p>
+               </div>
+            </div>
+         </div>
+      `;
+   }
+
+   private parseRecipients(value: string): string[] {
+      return String(value || '')
+         .split(/[;,]/)
+         .map((item) => item.trim())
+         .filter(Boolean);
+   }
+
+   private isValidEmail(value: string): boolean {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
+   }
+
+   private async fileToAttachment(file: Blob, fileName: string): Promise<OutboxAttachment> {
+      const base64 = await this.blobToBase64(file);
+      return {
+         name: fileName,
+         contentType: file.type || 'application/pdf',
+         base64,
+      };
+   }
+
+   private blobToBase64(blob: Blob): Promise<string> {
+      return new Promise((resolve, reject) => {
+         const reader = new FileReader();
+         reader.onloadend = () => {
+            const result = reader.result;
+            if (typeof result !== 'string') {
+               reject(new Error('No se pudo convertir el archivo adjunto'));
+               return;
+            }
+            resolve(result.split(',')[1] || '');
+         };
+         reader.onerror = () => reject(reader.error);
+         reader.readAsDataURL(blob);
       });
    }
 

@@ -156,7 +156,6 @@ export class AguatramiteComponent implements OnInit {
          size: this.pageSize,
       }).subscribe({
          next: (datos: any) => {
-            console.log('Datos recibidos:', datos);
             this._aguatramite = datos?.content || [];
             this.completarClientesFaltantes(this._aguatramite);
             this.totalElements = datos?.totalElements || 0;

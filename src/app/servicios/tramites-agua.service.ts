@@ -46,7 +46,7 @@ export class TramitesAguaService {
       head: [['#', 'Cliente', 'Cuenta', 'F. Inicia', 'Estado', 'Observaciones']],
       body: (datos || []).map((item: any, index: number) => [
         String(index + 1),
-        item?.idcliente_clientes?.nombre || '',
+        this.getClienteNombre(item),
         this.getCuentaTramite(item),
         this.formatDate(item?.feccrea),
         this.getEstadoTexto(item?.estado),
@@ -125,8 +125,9 @@ export class TramitesAguaService {
     const margin = 30;
     const tipoTramite =
       aguatramite?.idtipotramite_tipotramite?.descripcion || 'Trámite de agua';
-    const cliente = aguatramite?.idcliente_clientes?.nombre || 'No registrado';
-    const identificacion = aguatramite?.idcliente_clientes?.cedula || 'No registrada';
+    const clienteData = this.normalizarCliente(aguatramite);
+    const cliente = clienteData.nombre;
+    const identificacion = clienteData.cedula;
     const medidor = aguatramite?.codmedidor || 'No aplica';
     const nroDocumento = aguatramite?.nrodocumento || 'No registrado';
     const observacion = aguatramite?.observacion || 'Sin observaciones';
@@ -397,6 +398,31 @@ export class TramitesAguaService {
 
   private getCuentaTramite(aguatramite: any): string {
     return `${aguatramite?.idabonado ?? aguatramite?.idabonado_abonados?.idabonado ?? aguatramite?.abonado?.idabonado ?? aguatramite?.codmedidor ?? ''}`;
+  }
+
+  private getClienteNombre(origen: any): string {
+    return this.normalizarCliente(origen).nombre;
+  }
+
+  private normalizarCliente(origen: any): { nombre: string; cedula: string; direccion: string } {
+    const cliente =
+      origen?.idcliente_clientes ||
+      origen?.idcliente ||
+      origen?.cliente ||
+      origen?.idaguatramite_aguatramite?.idcliente_clientes ||
+      origen?.idaguatramite_aguatramite?.idcliente ||
+      origen?.abonado?.idcliente_clientes ||
+      origen?.idabonado_abonados?.idcliente_clientes ||
+      {};
+
+    return {
+      nombre: this.getDisplayValue(
+        cliente?.nombre || cliente?.nombres || cliente?.razonsocial,
+        'No registrado'
+      ),
+      cedula: this.getDisplayValue(cliente?.cedula, 'Sin identificación'),
+      direccion: this.getDisplayValue(cliente?.direccion, 'SN'),
+    };
   }
 
   private buildServiciosSolicitados(datos: any): string {

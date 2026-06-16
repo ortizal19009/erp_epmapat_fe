@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { of, switchMap } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
@@ -47,6 +47,7 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
   selectedFotoCasa: File | null = null;
   selectedFotoMedidor: File | null = null;
   geoError: string | null = null;
+  formSubmitted = false;
   map!: L.Map | undefined;
   marker!: L.Marker | undefined;
   defaultCoords: L.LatLngExpression = [0.8038125013453109, -77.72763063596486];
@@ -80,16 +81,16 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
       observacion: ['', Validators.required],
       departamento: ['', Validators.required],
       piso: ['', Validators.required],
-      idresponsable: this.v_idresponsable,
+      idresponsable: ['', Validators.required],
       idcategoria_categorias: ['', Validators.required],
       idruta_rutas: ['', Validators.required],
-      idcliente_clientes: this.cliente,
+      idcliente_clientes: ['', Validators.required],
       idubicacionm_ubicacionm: ['', Validators.required],
       idtipopago_tipopago: ['', Validators.required],
       idestadom_estadom: ['', Validators.required],
       medidorprincipal: ['', Validators.required],
       usucrea: this.authService.idusuario,
-      geolocalizacion: [''],
+      geolocalizacion: ['', this.geolocalizacionValidator],
       fotocasa: [''],
       fotomedidor: [''],
       adultomayor: '',
@@ -127,7 +128,35 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
 
   esInvalido(controlName: string): boolean {
     const control = this.abonadoForm.get(controlName);
-    return !!control && control.invalid && control.touched;
+    return !!control && control.invalid && (control.touched || this.formSubmitted);
+  }
+
+  get camposInvalidos(): string[] {
+    const etiquetas: Record<string, string> = {
+      nromedidor: 'Nro. medidor',
+      lecturainicial: 'Lectura inicial',
+      estado: 'Estado',
+      fechainstalacion: 'Fecha instalación',
+      marca: 'Marca',
+      secuencia: 'Secuencia',
+      direccionubicacion: 'Dirección',
+      observacion: 'Observaciones',
+      departamento: 'Departamento',
+      piso: 'Piso',
+      idresponsable: 'Responsable de pagos',
+      idcategoria_categorias: 'Categoría',
+      idruta_rutas: 'Ruta',
+      idcliente_clientes: 'Cliente',
+      idubicacionm_ubicacionm: 'Ubicación del medidor',
+      idtipopago_tipopago: 'Tipo pago',
+      idestadom_estadom: 'Estado medidor',
+      medidorprincipal: 'Medidor principal',
+      geolocalizacion: 'Geolocalización',
+    };
+
+    return Object.keys(this.abonadoForm.controls)
+      .filter((key) => this.abonadoForm.get(key)?.invalid)
+      .map((key) => etiquetas[key] || key);
   }
 
   listarCategorias() {
@@ -180,19 +209,22 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
   }
 
   onSubmit() {
+    this.formSubmitted = true;
     if (this.abonadoForm.invalid) {
       this.abonadoForm.markAllAsTouched();
       Swal.fire({
         icon: 'warning',
         title: 'Formulario incompleto',
-        text: 'Revisa los campos obligatorios antes de guardar.',
+        text: this.camposInvalidos.length
+          ? `Revisa estos campos: ${this.camposInvalidos.join(', ')}.`
+          : 'Revisa los campos obligatorios antes de guardar.',
       });
       return;
     }
 
     const payload = {
       ...this.abonadoForm.getRawValue(),
-      idresponsable: this.v_idresponsable,
+      idresponsable: this.v_idresponsable ?? this.cliente,
       idcliente_clientes: this.cliente,
       usumodi: this.authService.idusuario,
       fecmodi: new Date().toISOString().split('T')[0],
@@ -279,10 +311,10 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
         observacion: datos.observacion,
         departamento: datos.departamento,
         piso: datos.piso,
-        idresponsable: datos.idresponsable.nombre,
+        idresponsable: datos.idresponsable?.nombre ?? '',
         idcategoria_categorias: datos.idcategoria_categorias,
         idruta_rutas: datos.idruta_rutas,
-        idcliente_clientes: datos.idcliente_clientes.nombre,
+        idcliente_clientes: datos.idcliente_clientes?.nombre ?? '',
         idubicacionm_ubicacionm: datos.idubicacionm_ubicacionm,
         idtipopago_tipopago: datos.idtipopago_tipopago,
         idestadom_estadom: datos.idestadom_estadom,
@@ -456,11 +488,14 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
 
   setCliente(cliente: any) {
     this.cliente = cliente;
-    this.abonadoForm.patchValue({ idcliente_clientes: cliente.nombre });
+    this.abonadoForm.patchValue({ idcliente_clientes: cliente?.nombre ?? '' });
+    if (!this.v_idresponsable) {
+      this.setResponsablePago(cliente);
+    }
   }
   setResponsablePago(respPago: any) {
     this.v_idresponsable = respPago;
-    this.abonadoForm.patchValue({ idresponsable: respPago.nombre });
+    this.abonadoForm.patchValue({ idresponsable: respPago?.nombre ?? '' });
   }
 
   onFotoCasaUploaded(ruta: string): void {
@@ -573,6 +608,31 @@ export class ModificarAbonadosComponent implements OnInit, AfterViewInit {
     this.abonadoForm.patchValue({
       geolocalizacion: JSON.stringify(coords),
     });
+    this.abonadoForm.get('geolocalizacion')?.markAsTouched();
+  }
+
+  private geolocalizacionValidator(control: AbstractControl): ValidationErrors | null {
+    const value = `${control.value ?? ''}`.trim();
+    if (!value) {
+      return null;
+    }
+
+    try {
+      const parsed = JSON.parse(value);
+      if (!Array.isArray(parsed) || parsed.length < 2) {
+        return { geolocalizacionFormato: true };
+      }
+
+      const lat = Number(parsed[0]);
+      const lng = Number(parsed[1]);
+      if (Number.isNaN(lat) || Number.isNaN(lng)) {
+        return { geolocalizacionFormato: true };
+      }
+
+      return null;
+    } catch {
+      return { geolocalizacionFormato: true };
+    }
   }
 
   private parseGeolocalizacion(value: string | null | undefined): [number, number] | null {

@@ -17,6 +17,9 @@
                <button class="dropdown-item" type="button" [disabled]="valEstado()" (click)="genContrato()">
                   <i class="bi bi-printer"></i>&nbsp; Imprimir contrato
                </button>
+               <button class="dropdown-item" type="button" [disabled]="valEstado()" (click)="enviarContratoPorCorreo()">
+                  <i class="bi bi-envelope"></i>&nbsp; Enviar contrato por correo
+               </button>
                <!-- <button class="dropdown-item" type="button">
                   <i class="bi-file-earmark-arrow-down"></i>&nbsp; Exportar
                </button> -->

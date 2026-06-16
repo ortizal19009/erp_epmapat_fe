@@ -96,6 +96,11 @@
             <div class="card shadow-sm fondoAbonado detalle edit-shell border-0">
               <div class="card-body p-3 p-lg-4">
                 <form [formGroup]="abonadoForm">
+                  <div class="alert alert-warning mb-4" *ngIf="formSubmitted && abonadoForm.invalid">
+                    <strong>Faltan datos por revisar.</strong>
+                    <span class="d-block mt-1">Campos pendientes: {{ camposInvalidos.join(', ') }}</span>
+                  </div>
+
                   <div class="edit-section mb-4">
                     <div class="edit-section__header">
                       <div>
@@ -121,7 +126,9 @@
 
                         <div class="form-group col-md-3">
                           <label class="field-label">Marca</label>
-                          <input type="text" class="form-control form-control-sm text-center field-input" formControlName="marca">
+                          <input type="text" class="form-control form-control-sm text-center field-input"
+                            [ngClass]="{'is-invalid': esInvalido('marca')}" formControlName="marca">
+                          <small class="text-danger" *ngIf="esInvalido('marca')">Ingresa la marca del medidor.</small>
                         </div>
 
                         <div class="form-group col-md-2">
@@ -227,6 +234,7 @@
                           <label class="field-label">Geolocalización de la casa</label>
                           <div class="geo-toolbar">
                             <input type="text" class="form-control form-control-sm field-input geo-toolbar__input"
+                              [ngClass]="{'is-invalid': esInvalido('geolocalizacion')}"
                               formControlName="geolocalizacion" placeholder="Ejemplo: [-0.81123,-77.71789]">
                             <button type="button" class="btn btn-outline-primary btn-sm geo-toolbar__button"
                               (click)="capturarGeolocalizacion()">
@@ -234,6 +242,9 @@
                             </button>
                           </div>
                           <small class="text-muted d-block mt-2">Formato válido: <code>[latitud,longitud]</code> o <code>[latitud, longitud]</code></small>
+                          <small class="text-danger d-block mt-1" *ngIf="abonadoForm.get('geolocalizacion')?.hasError('geolocalizacionFormato') && (abonadoForm.get('geolocalizacion')?.touched || formSubmitted)">
+                            Formato esperado: [latitud, longitud]
+                          </small>
                           <small *ngIf="geoError" class="text-danger d-block mt-1">{{ geoError }}</small>
                         </div>
 
@@ -266,7 +277,9 @@
                       <div class="row">
                         <div class="form-group col-md-3">
                           <label class="field-label">Categoría</label>
-                          <input type="text" class="form-control form-control-sm field-input field-input--readonly" [value]="setCategoria" readonly>
+                          <input type="text" class="form-control form-control-sm field-input field-input--readonly"
+                            [ngClass]="{'is-invalid': esInvalido('idcategoria_categorias')}" [value]="setCategoria" readonly>
+                          <small class="text-danger" *ngIf="esInvalido('idcategoria_categorias')">La categoría del abonado es obligatoria.</small>
                         </div>
 
                         <div class="form-group col-md-3">
@@ -346,8 +359,14 @@
                           <div class="readonly-stack">
                             <div class="readonly-stack__icon"><i class="bi bi-person-badge"></i></div>
                             <input type="text" class="form-control form-control-sm field-input field-input--readonly"
+                              [ngClass]="{'is-invalid': esInvalido('idcliente_clientes')}"
                               formControlName="idcliente_clientes" readonly>
+                            <button type="button" class="btn btn-outline-primary btn-sm ml-2"
+                              data-toggle="modal" data-target="#clienteModal">
+                              Cambiar
+                            </button>
                           </div>
+                          <small class="text-danger" *ngIf="esInvalido('idcliente_clientes')">Selecciona el cliente del abonado.</small>
                         </div>
 
                         <div class="form-group col-md-6">
@@ -355,8 +374,14 @@
                           <div class="readonly-stack">
                             <div class="readonly-stack__icon"><i class="bi bi-cash-stack"></i></div>
                             <input type="text" class="form-control form-control-sm field-input field-input--readonly"
+                              [ngClass]="{'is-invalid': esInvalido('idresponsable')}"
                               formControlName="idresponsable" readonly>
+                            <button type="button" class="btn btn-outline-primary btn-sm ml-2"
+                              data-toggle="modal" data-target="#responsablePagoModal">
+                              Cambiar
+                            </button>
                           </div>
+                          <small class="text-danger" *ngIf="esInvalido('idresponsable')">Selecciona el responsable de pagos.</small>
                         </div>
                       </div>
                     </div>
