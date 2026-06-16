@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 
 import { ConvenioService } from 'src/app/servicios/convenio.service';
 import { CuotasService } from 'src/app/servicios/cuotas.service';
@@ -15,288 +16,7 @@ type SortDirection = 'asc' | 'desc';
 
 @Component({
   selector: 'app-info-convenio',
-  template: `
-<div class="content mt-1 pt-1 pl-0">
-   <div class="container-fluid">
-      <div class="row m-0 px-0 py-1 border cabecera sombra">
-         <div class="col-sm-5">
-            <h4 class="m-0 font-weight-bold"><i class="fa fa-american-sign-language-interpreting"></i> Convenio de Pago
-            </h4>
-         </div>
-         <div class="btn-group ml-auto mx-0">
-            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
-               aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
-            </button>
-            <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
-                  <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
-               <button class="dropdown-item" type="button" [routerLink]="['/anular-convenio', idconvenio]" [class.disabled]="!hasFacturasCobradas"
-                  [attr.aria-disabled]="!hasFacturasCobradas">
-                  <i class="fa fa-exchange" aria-hidden="true"></i>
-                  <span>&nbsp;Anular</span></button>
-               <button class="dropdown-item" type="button" [routerLink]="['/anular-convenio', idconvenio]"
-                  [queryParams]="{modo: 'eliminar'}" [class.disabled]="hasFacturasCobradas" [attr.aria-disabled]="hasFacturasCobradas">
-                  <i class="fa fa-minus-square-o" aria-hidden="true"></i>
-                  <span>&nbsp;Eliminar</span></button>
-            </div>
-            <div class="col-sm-1">
-               <button class="bg-transparent border-0" type="submit" (click)="regresar()">
-                  <i class="bi-arrow-left-circle text-white icoRegresar"></i>
-               </button>
-            </div>
-         </div>
-      </div>
-   </div>
-</div>
-
-<div class="container-fluid">
-   <div class="row mb-0">
-      <div class="col-sm-3">
-         <div class="card card-info detalle sombra">
-            <div class="card-body box-profile">
-               <h3 class="profile-username text-center">Nro: {{ convenio.nroconvenio }}</h3>
-               <p class="text-muted text-center">{{ convenio.nomcli }}<br>Cuenta: {{ convenio.cuenta}} </p>
-               <ul class="list-group list-group-unbordered mb-3">
-                  <li class="list-group-item detalle">
-                     <b>Total</b> <a class="float-right">{{ convenio.totalconvenio | number: '1.2-2'}}</a>
-                  </li>
-                  <li class="list-group-item detalle">
-                     <b>Cuota inicial</b> <a class="float-right">{{ convenio.cuotainicial | number: '1.2-2'}}</a>
-                  </li>
-                  <li class="list-group-item detalle">
-                     <b>Cuota final</b> <a class="float-right">{{ convenio.cuotafinal | number: '1.2-2'}}</a>
-                  </li>
-               </ul>
-            </div>
-         </div>
-      </div>
-
-      <div class="col-sm-9">
-         <div class="card">
-            <div class="card-header cabecera">
-               <ul class="nav nav-tabs card-header-tabs cabecera">
-                  <li class="nav-item"><a class="nav-link active cabecera" href="#cuotas" data-toggle="tab">Cuotas</a>
-                  </li>
-                  <li class="nav-item"><a class="nav-link cabecera" href="#prefacturas" data-toggle="tab"
-                        (click)="facxConvenio()">Planillas</a></li>
-               </ul>
-            </div>
-
-            <div class="card-body py-1">
-               <div class="tab-content">
-                  <div class="tab-pane active" id="cuotas">
-                     <div class="post">
-                        <div class="user-block">
-                           <table class="table table-hover table-sm table-bordered sombra">
-                              <thead class="cabecera">
-                                 <tr class="text-center">
-                                    <th class="sortable" style="cursor:pointer; user-select:none;"
-                                       (click)="toggleCuotaSort('cuota')">Cuota {{ getCuotaSortIndicator('cuota') }}</th>
-                                    <th class="sortable" style="cursor:pointer; user-select:none;"
-                                       (click)="toggleCuotaSort('planilla')">Planilla {{ getCuotaSortIndicator('planilla') }}</th>
-                                    <th class="sortable" style="cursor:pointer; user-select:none;"
-                                       (click)="toggleCuotaSort('fecha')">Fecha {{ getCuotaSortIndicator('fecha') }}</th>
-                                    <th class="sortable" style="cursor:pointer; user-select:none;"
-                                       (click)="toggleCuotaSort('factura')">Factura {{ getCuotaSortIndicator('factura') }}</th>
-                                    <th class="sortable" style="cursor:pointer; user-select:none;"
-                                       (click)="toggleCuotaSort('fcobro')">F.Cobro {{ getCuotaSortIndicator('fcobro') }}</th>
-                                    <th class="sortable" style="cursor:pointer; user-select:none;"
-                                       (click)="toggleCuotaSort('valor')">Valor {{ getCuotaSortIndicator('valor') }}</th>
-                                    <th class="sortable" style="cursor:pointer; user-select:none;"
-                                       (click)="toggleCuotaSort('interes')">Interes {{ getCuotaSortIndicator('interes') }}</th>
-                                    <th></th>
-                                 </tr>
-                              </thead>
-                              <tbody class="detalle">
-                                 <tr *ngFor="let cuota of cuotasOrdenadas" class="text-center">
-                                    <td>{{ cuota.nrocuota }}</td>
-                                    <td>{{ cuota.idfactura.idfactura }}</td>
-                                    <td>{{ cuota.idfactura.feccrea }}</td>
-                                    <td>{{ cuota.idfactura.nrofactura }}</td>
-                                    <td>{{ cuota.idfactura.fechacobro }}</td>
-                                    <td class="text-right">{{cuota.idfactura.totaltarifa | number: '1.2-2'}}</td>
-                                    <td class="text-right">{{cuota.interesacobrar | number: '1.2-2'}}
-                                    </td>
-                                    <td>
-                                       <button class="btn btn-outline-info btn-xs" data-toggle="modal"
-                                          data-target="#facturaDetallesModal"
-                                          (click)="getRubroxfac( cuota.idfactura.idfactura )">
-                                          <i class="fa fa-info-circle"></i> Info
-                                       </button>
-                                    </td>
-                                 </tr>
-                                 <tr>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td class="text-right font-weight-bold">Total </td>
-                                    <td class="text-right font-weight-bold">{{ total1 | number: '1.2-2'}}</td>
-                                    <td class="text-right font-weight-bold">{{ totalInteres | number: '1.2-2'}}</td>
-                                    <td *ngIf="dif1" class="text-center"><span class="badge badge-danger"
-                                          data-toggle="tooltip" title="Diferencia">{{ convenio.totalconvenio - total1 |
-                                          number:
-                                          '1.2-2' }}</span>
-                                    </td>
-                                    <td></td>
-                                 </tr>
-                              </tbody>
-                           </table>
-                        </div>
-                     </div>
-                  </div>
-
-                  <div class="tab-pane" id="prefacturas">
-                     <div class="post">
-                        <div class="user-block">
-                           <table class="table table-hover table-sm table-bordered col-sm-8 sombra centro">
-                              <thead class="cabecera">
-                                 <tr class="text-center">
-                                    <th></th>
-                                    <th class="sortable" style="cursor:pointer; user-select:none;"
-                                       (click)="toggleConvenioSort('nro')">Nro. {{ getConvenioSortIndicator('nro') }}</th>
-                                    <th class="sortable" style="cursor:pointer; user-select:none;"
-                                       (click)="toggleConvenioSort('fecha')">Fecha {{ getConvenioSortIndicator('fecha') }}</th>
-                                    <th class="sortable" style="cursor:pointer; user-select:none;"
-                                       (click)="toggleConvenioSort('modulo')">Modulo {{ getConvenioSortIndicator('modulo') }}</th>
-                                    <th class="sortable" style="cursor:pointer; user-select:none;"
-                                       (click)="toggleConvenioSort('valor')">Valor {{ getConvenioSortIndicator('valor') }}</th>
-                                    <th></th>
-                                 </tr>
-                              </thead>
-                              <tbody class="detalle">
-                                 <tr *ngFor="let facxconv of facxConvenioOrdenadas; let i=index" class="text-center">
-                                    <td class="text-center font-weight-bold small">{{i+1}}</td>
-                                    <td>{{ facxconv.idfactura_facturas.idfactura }}</td>
-                                    <td>{{ facxconv.idfactura_facturas.feccrea | date: 'dd-MM-y' }}</td>
-                                    <td class="text-left">{{ facxconv.idfactura_facturas.idmodulo.descripcion}}</td>
-                                    <td class="text-right">{{ facxconv.idfactura_facturas.totaltarifa | number:
-                                       '1.2-2'}}</td>
-                                    <td>
-                                       <button class="btn btn-outline-info btn-xs" data-toggle="modal"
-                                          data-target="#facturaDetallesModal"
-                                          (click)="getRubroxfac( facxconv.idfactura_facturas.idfactura )">
-                                          <i class="fa fa-info-circle"></i> Info
-                                       </button>
-                                    </td>
-                                 </tr>
-                                 <tr>
-                                    <td colspan="4" class="text-right font-weight-bold">Total </td>
-                                    <td class="text-right font-weight-bold">{{ total2 | number: '1.2-2'}} </td>
-                                    <td *ngIf="dif2" class="text-center"><span class="badge badge-danger"
-                                          data-toggle="tooltip" title="Diferencia">{{ convenio.totalconvenio - total2 |
-                                          number:
-                                          '1.2-2' }}</span>
-                                    </td>
-                                    <td *ngIf="!dif2"></td>
-                                 </tr>
-                              </tbody>
-                           </table>
-                        </div>
-                     </div>
-                  </div>
-               </div>
-            </div>
-         </div>
-      </div>
-   </div>
-
-   <div class="modal fade" id="facturaDetallesModal" tabindex="-1" aria-labelledby="facturaDetallesModalLabel"
-      aria-hidden="true">
-      <div class="modal-dialog">
-         <div class="modal-content">
-            <div class="modal-header">
-               <h5 class="modal-title" id="facturaDetallesModalLabel">Pre Factura: {{ v_idfactura }}</h5>
-            </div>
-            <div class="modal-body">
-               <table class="table table-hover table-sm table-bordered">
-                  <thead class="bg-primary">
-                     <tr class="text-center">
-                        <th></th>
-                        <th class="col-md-6">Rubro</th>
-                        <th>Cant</th>
-                        <th>Valor</th>
-                        <th>Subtotal</th>
-                     </tr>
-                  </thead>
-                  <tbody>
-                     <tr *ngFor="let rubroxfac of _rubroxfac; let i=index">
-                        <td class="text-center font-weight-bold small">{{i+1}}</td>
-                        <td>{{ rubroxfac.idrubro_rubros.descripcion}}</td>
-                        <td class="text-center">{{ rubroxfac.cantidad}}</td>
-                        <td class="text-right">{{ rubroxfac.valorunitario | number:'1.2-2'}}</td>
-                        <td class="text-right">{{ rubroxfac.cantidad * rubroxfac.valorunitario | number:'1.2-2'}}</td>
-                     </tr>
-                     <tr>
-                        <td></td>
-                        <td class="font-weight-bold">Total</td>
-                        <td></td>
-                        <td></td>
-                        <td class="font-weight-bold text-right">{{ totfac | number:'1.2-2'}}</td>
-                     </tr>
-                  </tbody>
-               </table>
-            </div>
-            <div class="modal-footer">
-               <button type="button" class="btn btn-outline-success btn-sm" data-dismiss="modal">
-                  <i class="fa fa-times-circle"></i> Cerrar</button>
-            </div>
-         </div>
-      </div>
-   </div>
-
-   <div class='modal fade' id='imprimir' tabindex='-1' aria-labelledby='imprimir' aria-hidden='true'>
-      <div class='modal-dialog modal-sm'>
-         <div class='modal-content'>
-            <div class='modal-header'>
-               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Seleccione Opcion</h5>
-            </div>
-            <div class='modal-body'>
-               <div class="container-fluid">
-                  <div class="row">
-                     <div class="col-sm">
-                        <select name="" id="" class="form-control">
-                           <option value="0">Convenio</option>
-                        </select>
-                     </div>
-                  </div>
-               </div>
-            </div>
-            <div class='modal-footer' id='idButtons'>
-               <button type='button' class='btn btn-success btn-sm' data-dismiss='modal' (click)="imprimirPdf(convenio)"
-                  id='btnSi'>
-                  <i class="fa fa-check-circle" style="font-size:24pxi"></i>&nbsp;&nbsp;&nbsp;Si&nbsp;&nbsp;&nbsp;
-               </button>
-               <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
-                  <i class="fa fa-times-circle" style="font-size:24pxi"></i>&nbsp;&nbsp;No&nbsp;&nbsp;</button>
-            </div>
-         </div>
-      </div>
-   </div>
-   <div class='modal fade' id='modalEliminar' tabindex='-1' aria-labelledby='modalEliminar' aria-hidden='true'>
-      <div class='modal-dialog modal-sm'>
-         <div class='modal-content'>
-            <div class='modal-header'>
-               <h5 class='modal-title font-weight-bold' id='ModalLabel'>Mensaje</h5>
-            </div>
-            <div class='modal-body'>
-               <div class="alert alert-info" role="alert">
-                  Eliminar el Convenio de Pago {{ convenio.nroconvenio }} ?
-               </div>
-            </div>
-            <div class='modal-footer' id='idButtons'>
-               <button type='button' class='btn btn-success btn-sm' data-dismiss='modal'
-                  (click)="confirmaEliminarConvenio()" id='btnSi'>
-                  <i class="fa fa-check-circle" style="font-size:24pxi"></i>&nbsp;&nbsp;&nbsp;Si&nbsp;&nbsp;&nbsp;
-               </button>
-               <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
-                  <i class="fa fa-times-circle" style="font-size:24pxi"></i>&nbsp;&nbsp;No&nbsp;&nbsp;</button>
-            </div>
-         </div>
-      </div>
-   </div>
-</div>
-  `,
+  templateUrl: './info-convenio.component.html',
   styleUrls: ['./info-convenio.component.css'],
 })
 export class InfoConvenioComponent implements OnInit {
@@ -316,6 +36,8 @@ export class InfoConvenioComponent implements OnInit {
   sweliminar: boolean = true;
   hasFacturasCobradas: boolean = false;
   totalInteres: number;
+  cuotasLoading: boolean = false;
+  facturasLoading: boolean = false;
   cuotaSortColumn: CuotaSortColumn = 'cuota';
   cuotaSortDirection: SortDirection = 'asc';
   convenioSortColumn: ConvenioSortColumn = 'nro';
@@ -385,23 +107,36 @@ export class InfoConvenioComponent implements OnInit {
   }
 
   cuotasxConvenio(idconvenio: number) {
+    this.cuotasLoading = true;
     this.cuotaService.getByIdconvenio(idconvenio).subscribe({
-      next: (datos: any) => {
+      next: async (datos: any) => {
         this.totalInteres = 0;
-
-        this._cuotas = datos;
-        datos.forEach(async (item: any, index: number) => {
-          if (item.idfactura.pagado === 0) {
-            this._cuotas[index].interesacobrar = await this.s_intereses.getInteresFacturaAsync(item.idfactura.idfactura)
-          } else {
-            this._cuotas[index].interesacobrar = item.idfactura.interescobrado
-          }
-          this.totalInteres += this._cuotas[index].interesacobrar;
-        })
-
+        const cuotas = Array.isArray(datos) ? datos : [];
+        this._cuotas = await Promise.all(
+          cuotas.map(async (item: any) => {
+            const cuota = { ...item };
+            cuota.idfactura = await this.resolveFacturaCompleta(item?.idfactura);
+            const factura = cuota.idfactura || {};
+            const facturaId = Number(factura?.idfactura ?? 0);
+            if (facturaId > 0 && Number(factura?.pagado) === 0) {
+              cuota.interesacobrar = await this.s_intereses.getInteresFacturaAsync(facturaId);
+            } else {
+              cuota.interesacobrar = Number(factura?.interescobrado ?? 0);
+            }
+            this.totalInteres += Number(cuota.interesacobrar ?? 0);
+            return cuota;
+          })
+        );
         this.totalCuotas();
+        this.cuotasLoading = false;
       },
-      error: (err) => console.error(err.error),
+      error: (err) => {
+        console.error(err.error);
+        this._cuotas = [];
+        this.total1 = 0;
+        this.totalInteres = 0;
+        this.cuotasLoading = false;
+      },
     });
   }
 
@@ -513,15 +248,11 @@ export class InfoConvenioComponent implements OnInit {
 
   totalCuotas() {
     this.total1 = 0;
-    let i = 0;
-    this._cuotas.forEach(() => {
-      this.total1 += this._cuotas[i].idfactura.totaltarifa;
-      i++;
+    (this._cuotas ?? []).forEach((item: any) => {
+      this.total1 += Number(item?.idfactura?.totaltarifa ?? 0);
     });
     this.total1 = Number(this.total1.toFixed(2));
-    if (Number(this.convenio.totalconvenio.toFixed(2)) - this.total1 != 0) {
-      this.dif1 = true;
-    }
+    this.dif1 = Number(this.convenio.totalconvenio?.toFixed?.(2) ?? 0) - this.total1 !== 0;
   }
 
   nombreClienteOld(idfactura: number) {
@@ -532,33 +263,43 @@ export class InfoConvenioComponent implements OnInit {
   }
 
   facxConvenio() {
+    this.facturasLoading = true;
     this.fxconvService.getFacByConvenio(this.idconvenio).subscribe({
-      next: (datos: any[]) => {
-        this._facxconvenio = datos;
+      next: async (datos: any[]) => {
+        const facturas = Array.isArray(datos) ? datos : [];
+        this._facxconvenio = await Promise.all(
+          facturas.map(async (item: any) => ({
+            ...item,
+            idfactura_facturas: await this.resolveFacturaCompleta(item?.idfactura_facturas),
+          }))
+        );
         this.totalFacturas();
-        this.hasFacturasCobradas = Array.isArray(datos)
-          ? datos.some((fx: any) =>
+        this.hasFacturasCobradas = Array.isArray(this._facxconvenio)
+          ? this._facxconvenio.some((fx: any) =>
               fx?.idfactura_facturas?.pagado === 1 ||
               fx?.idfactura_facturas?.pagado === '1' ||
               fx?.idfactura_facturas?.pagado === true
             )
           : false;
+        this.facturasLoading = false;
       },
-      error: (err) => console.error(err.error),
+      error: (err) => {
+        console.error(err.error);
+        this._facxconvenio = [];
+        this.total2 = 0;
+        this.hasFacturasCobradas = false;
+        this.facturasLoading = false;
+      },
     });
   }
 
   totalFacturas() {
     this.total2 = 0;
-    let i = 0;
-    this._facxconvenio.forEach(() => {
-      this.total2 += this._facxconvenio[i].idfactura_facturas.totaltarifa;
-      i++;
+    (this._facxconvenio ?? []).forEach((item: any) => {
+      this.total2 += Number(item?.idfactura_facturas?.totaltarifa ?? 0);
     });
     this.total2 = Number(this.total2.toFixed(2));
-    if (Number(this.convenio.totalconvenio.toFixed(2)) - this.total2 != 0) {
-      this.dif2 = true;
-    }
+    this.dif2 = Number(this.convenio.totalconvenio?.toFixed?.(2) ?? 0) - this.total2 !== 0;
   }
 
   regresar() {
@@ -615,6 +356,51 @@ export class InfoConvenioComponent implements OnInit {
   }
   imprimirPdf(convenio: any) {
     this.s_report.impContratoConvenio(convenio, this._cuotas);
+  }
+
+  getFacturaCuota(item: any): any {
+    return item?.idfactura ?? {};
+  }
+
+  getFacturaConvenio(item: any): any {
+    return item?.idfactura_facturas ?? {};
+  }
+
+  private async resolveFacturaCompleta(facturaRef: any): Promise<any> {
+    if (!facturaRef) {
+      return {};
+    }
+
+    const facturaId = this.resolveFacturaId(facturaRef);
+    if (!facturaId) {
+      return facturaRef;
+    }
+
+    const tieneDatosSuficientes =
+      facturaRef?.nrofactura != null &&
+      facturaRef?.totaltarifa != null &&
+      facturaRef?.idmodulo != null;
+
+    if (tieneDatosSuficientes) {
+      return facturaRef;
+    }
+
+    try {
+      const factura = await firstValueFrom(this.facService.getById(facturaId));
+      return { ...facturaRef, ...(factura || {}) };
+    } catch (error) {
+      console.error(`No se pudo completar la factura ${facturaId}:`, error);
+      return facturaRef;
+    }
+  }
+
+  private resolveFacturaId(facturaRef: any): number {
+    const rawId =
+      facturaRef?.idfactura ??
+      facturaRef?.id ??
+      facturaRef;
+    const facturaId = Number(rawId);
+    return Number.isFinite(facturaId) && facturaId > 0 ? facturaId : 0;
   }
 }
 

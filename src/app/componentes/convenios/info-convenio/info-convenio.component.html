@@ -90,22 +90,31 @@
                                  </tr>
                               </thead>
                               <tbody class="detalle">
+                                 <tr *ngIf="cuotasLoading">
+                                    <td colspan="8" class="text-center text-muted py-3">Cargando cuotas...</td>
+                                 </tr>
                                  <tr *ngFor="let cuota of cuotasOrdenadas" class="text-center">
+                                    <ng-container *ngIf="getFacturaCuota(cuota) as factura">
                                     <td>{{ cuota.nrocuota }}</td>
-                                    <td>{{ cuota.idfactura.idfactura }}</td>
-                                    <td>{{ cuota.idfactura.feccrea }}</td>
-                                    <td>{{ cuota.idfactura.nrofactura }}</td>
-                                    <td>{{ cuota.idfactura.fechacobro }}</td>
-                                    <td class="text-right">{{cuota.idfactura.totaltarifa | number: '1.2-2'}}</td>
+                                    <td>{{ factura.idfactura || '-' }}</td>
+                                    <td>{{ factura.feccrea ? (factura.feccrea | date:'dd/MM/yyyy') : '-' }}</td>
+                                    <td>{{ factura.nrofactura || '-' }}</td>
+                                    <td>{{ factura.fechacobro ? (factura.fechacobro | date:'dd/MM/yyyy') : '-' }}</td>
+                                    <td class="text-right">{{ (factura.totaltarifa ?? 0) | number: '1.2-2'}}</td>
                                     <td class="text-right">{{cuota.interesacobrar | number: '1.2-2'}}
                                     </td>
                                     <td>
                                        <button class="btn btn-outline-info btn-xs" data-toggle="modal"
                                           data-target="#facturaDetallesModal"
-                                          (click)="getRubroxfac( cuota.idfactura.idfactura )">
+                                          [disabled]="!factura.idfactura"
+                                          (click)="getRubroxfac( factura.idfactura )">
                                           <i class="fa fa-info-circle"></i> Info
                                        </button>
                                     </td>
+                                    </ng-container>
+                                 </tr>
+                                 <tr *ngIf="!cuotasLoading && !cuotasOrdenadas.length">
+                                    <td colspan="8" class="text-center text-muted py-3">No hay cuotas registradas para este convenio.</td>
                                  </tr>
                                  <tr>
                                     <td></td>
@@ -147,20 +156,29 @@
                                  </tr>
                               </thead>
                               <tbody class="detalle">
+                                 <tr *ngIf="facturasLoading">
+                                    <td colspan="6" class="text-center text-muted py-3">Cargando planillas...</td>
+                                 </tr>
                                  <tr *ngFor="let facxconv of facxConvenioOrdenadas; let i=index" class="text-center">
+                                    <ng-container *ngIf="getFacturaConvenio(facxconv) as factura">
                                     <td class="text-center font-weight-bold small">{{i+1}}</td>
-                                    <td>{{ facxconv.idfactura_facturas.idfactura }}</td>
-                                    <td>{{ facxconv.idfactura_facturas.feccrea | date: 'dd-MM-y' }}</td>
-                                    <td class="text-left">{{ facxconv.idfactura_facturas.idmodulo.descripcion}}</td>
-                                    <td class="text-right">{{ facxconv.idfactura_facturas.totaltarifa | number:
+                                    <td>{{ factura.idfactura || '-' }}</td>
+                                    <td>{{ factura.feccrea ? (factura.feccrea | date: 'dd-MM-y') : '-' }}</td>
+                                    <td class="text-left">{{ factura.idmodulo?.descripcion || '-'}}</td>
+                                    <td class="text-right">{{ (factura.totaltarifa ?? 0) | number:
                                        '1.2-2'}}</td>
                                     <td>
                                        <button class="btn btn-outline-info btn-xs" data-toggle="modal"
                                           data-target="#facturaDetallesModal"
-                                          (click)="getRubroxfac( facxconv.idfactura_facturas.idfactura )">
+                                          [disabled]="!factura.idfactura"
+                                          (click)="getRubroxfac( factura.idfactura )">
                                           <i class="fa fa-info-circle"></i> Info
                                        </button>
                                     </td>
+                                    </ng-container>
+                                 </tr>
+                                 <tr *ngIf="!facturasLoading && !facxConvenioOrdenadas.length">
+                                    <td colspan="6" class="text-center text-muted py-3">No hay planillas asociadas al convenio.</td>
                                  </tr>
                                  <tr>
                                     <td colspan="4" class="text-right font-weight-bold">Total </td>

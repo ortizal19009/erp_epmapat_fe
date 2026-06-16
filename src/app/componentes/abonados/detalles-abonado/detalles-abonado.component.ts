@@ -66,6 +66,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
   facturasLoading: boolean = false;
   estadoFE: string;
   esFE: string;
+  fecFacturaActual: any = null;
   factura: Facturas = new Facturas();
 
   _convenios: any;
@@ -224,7 +225,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
       return false;
     }
 
-    return ['A', 'O'].includes(String(this.esFE || '').trim().toUpperCase());
+    return ['A', 'O', 'X'].includes(String(this.esFE || '').trim().toUpperCase());
   }
 
   puedeGenerarFacturaElectronica(): boolean {
@@ -238,7 +239,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
       return false;
     }
 
-    return !['A', 'O'].includes(estado);
+    return !['A', 'O', 'X'].includes(estado);
   }
   getFactura() {
     this.facturasPage = 0;
@@ -326,6 +327,12 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
       case 'O':
         this.swFE = false;
         return 'APROBADO, NO ENVIADO MAIL ';
+      case 'X':
+        this.swFE = false;
+        return 'AUTORIZADO, XML RECUPERADO';
+      case 'P':
+        this.swFE = true;
+        return 'PENDIENTE DE AUTORIZACION';
       case 'C':
         this.swFE = true;
         return 'DEVUELTA';
@@ -567,35 +574,53 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
   private procesarDetalleRubros(idfactura: number, rubros: any[]) {
     this._rubrosxfac = rubros;
     const primerDetalle = this._rubrosxfac[0];
-    const facturaDetalle = primerDetalle?.idfactura_facturas ?? this.detalleFactura;
+    const facturaDetalle = {
+      ...(primerDetalle?.idfactura_facturas || {}),
+      ...(this.detalleFactura || {}),
+    };
 
     this.factura = facturaDetalle ?? new Facturas();
+    this.fecFacturaActual = null;
     this.esFE = '';
     this.estadoFE = 'SIN GENERAR';
 
-    if (!this._rubrosxfac.length) {
-      this.estadoFE = 'SIN DETALLE';
+    if (!facturaDetalle?.idfactura) {
+      this.estadoFE = 'SIN DETALLE DE FACTURA';
       this.subtotal();
       return;
     }
 
-    if (facturaDetalle?.pagado === 1) {
+    if (!this._rubrosxfac.length) {
+      this.estadoFE = 'SIN DETALLE';
+    }
+
+    const pagadoRaw = facturaDetalle?.pagado;
+    const pagadoNumero = pagadoRaw === null || pagadoRaw === undefined || pagadoRaw === ''
+      ? null
+      : Number(pagadoRaw);
+    const facturaNoPagada = pagadoNumero === 0;
+
+    if (!facturaNoPagada) {
+      this.estadoFE = 'CONSULTANDO FE...';
       this._fecFacturaService.getByIdFactura(+idfactura!).subscribe({
-        next: (fecfactura: any) => {
-          this.esFE = fecfactura?.estado ?? '';
-          if (fecfactura != null) {
-            this.estadoFE = this.estado_FE(fecfactura.estado);
+        next: (response: any) => {
+          const fecfactura = this.normalizarFecFacturaResponse(response);
+          this.fecFacturaActual = fecfactura;
+          this.esFE = String(fecfactura?.estado || '').trim();
+          if (fecfactura) {
+            this.estadoFE = this.estado_FE(String(fecfactura.estado || '').trim());
           } else {
-            this.estadoFE = 'SIN GENERAR';
+            this.estadoFE = facturaNoPagada ? 'PAGO PENDIENTE' : 'SIN GENERAR';
           }
         },
         error: (e) => {
           console.error(e);
+          this.fecFacturaActual = null;
           this.esFE = '';
-          this.estadoFE = 'SIN GENERAR';
+          this.estadoFE = facturaNoPagada ? 'PAGO PENDIENTE' : 'SIN GENERAR';
         },
       });
-    } else if (facturaDetalle?.pagado === 0) {
+    } else {
       this.estadoFE = 'PAGO PENDIENTE';
     }
 
@@ -769,7 +794,8 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
     this.swEmail = true;
     this.s_loading.showLoading();
 
-    let fact = await this.facService.generarPDF_FacElectronica(datos.idfactura);
+    const facturaId = Number(datos?.idfactura || this.detalleFactura?.idfactura || this.factura?.idfactura);
+    let fact = await this.facService.generarPDF_FacElectronica(facturaId);
     //this.facElectro = true;
     // Crear blob desde los datos del backend
     setTimeout(() => {
@@ -1624,12 +1650,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
   private async resolveFacturaXmlAttachment(): Promise<OutboxAttachment | null> {
     try {
       const response: any = await firstValueFrom(this._fecFacturaService.getByIdFactura(this.idfactura));
-      const fecFactura =
-        response?.xmlautorizado ? response :
-        response?.value?.xmlautorizado ? response.value :
-        response?.body?.xmlautorizado ? response.body :
-        response?.body?.value?.xmlautorizado ? response.body.value :
-        null;
+      const fecFactura = this.normalizarFecFacturaResponse(response);
 
       const xml = String(fecFactura?.xmlautorizado || '').trim();
       if (!xml) {
@@ -1647,6 +1668,42 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
       console.error('No se pudo obtener el XML autorizado de la factura:', error);
       return null;
     }
+  }
+
+  private normalizarFecFacturaResponse(response: any): any | null {
+    if (!response) {
+      return null;
+    }
+
+    if (Array.isArray(response)) {
+      return response.find((item) => !!item) ?? null;
+    }
+
+    if (response?.xmlautorizado || response?.estado || response?.idfactura) {
+      return response;
+    }
+
+    if (Array.isArray(response?.body)) {
+      return response.body.find((item: any) => !!item) ?? null;
+    }
+
+    if (response?.body?.xmlautorizado || response?.body?.estado || response?.body?.idfactura) {
+      return response.body;
+    }
+
+    if (response?.value?.xmlautorizado || response?.value?.estado || response?.value?.idfactura) {
+      return response.value;
+    }
+
+    if (response?.body?.value?.xmlautorizado || response?.body?.value?.estado || response?.body?.value?.idfactura) {
+      return response.body.value;
+    }
+
+    if (Array.isArray(response?.content)) {
+      return response.content.find((item: any) => !!item) ?? null;
+    }
+
+    return null;
   }
 }
 interface calcInteres {
