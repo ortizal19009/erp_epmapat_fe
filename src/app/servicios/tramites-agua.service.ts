@@ -12,7 +12,7 @@ import { PersonalService } from './rrhh/personal.service';
 export class TramitesAguaService {
   administradores = [
     { nombre: 'Ing. Juan Diego Delgado', cargo: 'Director Comercial' },
-    { nombre: 'Director de Gestión Técnica', cargo: 'DIRECTOR DE GESTIÓN TÉCNICA' },
+    { nombre: 'Ing. Luis Tobar', cargo: 'DIRECTOR DE GESTIÓN TÉCNICA' },
     { nombre: 'Ab. Andrés Montenegro', cargo: 'Asesor Legal' },
   ];
   private readonly firmaManual = '___________________________';
@@ -185,6 +185,7 @@ export class TramitesAguaService {
   }
 
   async buildHojaInspeccionBlob(datos: any, titulo: string): Promise<Blob> {
+    console.log('Generando hoja de inspección con datos:', datos);
     let medidor = 'NO';
     if (+datos.medidorempresa! === 1) {
       medidor = 'SI';
@@ -212,11 +213,11 @@ export class TramitesAguaService {
     const serviciosSolicitados = this.buildServiciosSolicitados(datos);
     const tituloDocumento = titulo || 'Concesión de servicios';
     const directorGestionTecnica = await this.obtenerPersonalActivoPorCargo(
-      ['director tecnico', 'director de gestion tecnica'],
+      ['director tecnico', 'director de gestion tecnica', 'DIRECTOR DE GESTIÓN TÉCNICA', 'direccion tecnica', 'director area tecnica'],
       'DIRECTOR TÉCNICO'
     );
     const topografoActivo = await this.obtenerPersonalActivoPorCargo(
-      ['topografo', 'topografa'],
+      ['topografo', 'topografa', 'TOPÓGRAFO', 'TOPOGRAFO'],
       'TOPÓGRAFO'
     );
     const plomeroActivo = await this.obtenerPersonalActivoPorCargo(
@@ -461,7 +462,7 @@ export class TramitesAguaService {
 
   private async obtenerDirectorComercialActivo(): Promise<{ nombre: string; cargo: string }> {
     return this.obtenerPersonalActivoPorCargo(
-      ['director comercial', 'direccion comercial', 'director area comercial'],
+      ['director comercial', 'direccion comercial', 'director area comercial', 'DIRECTOR COMERCIAL'],
       'Director Comercial',
       this.administradores[0]
     );
@@ -475,6 +476,8 @@ export class TramitesAguaService {
         'direccion tecnica',
         'director tecnico',
         'director area tecnica',
+        'DIRECTOR DE GESTIÓN TÉCNICA',
+        'DIRECTOR TÉCNICO',
       ],
       'DIRECTOR DE GESTIÓN TÉCNICA',
       this.administradores[1]
@@ -486,6 +489,7 @@ export class TramitesAguaService {
     cargoFallback: string,
     firmaFallback?: { nombre: string; cargo: string }
   ): Promise<{ nombre: string; cargo: string }> {
+    console.log(`Buscando personal activo para cargo "${cargoFallback}" con patrones:`, cargosBuscados);
     const firmaRespaldo = firmaFallback || this.obtenerFirmaFallbackPorCargo(cargoFallback);
     const cargosNormalizados = this.expandirPatronesCargo(cargosBuscados, cargoFallback);
 
