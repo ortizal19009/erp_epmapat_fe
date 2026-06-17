@@ -25,44 +25,63 @@
         <input
           type="search"
           class="form-control"
-          placeholder="Buscar por nombre, cedula, correo, telefono, cargo, area..."
+          [placeholder]="usaBusquedaGeneral ? 'Buscar por nombre, identificación, correo, teléfono o cargo...' : 'Selecciona un filtro específico...'"
           formControlName="q"
           (keyup.enter)="buscarPersonal()"
+          [readonly]="!usaBusquedaGeneral"
         />
       </div>
+      <select class="custom-select filtro-modo" formControlName="tipoBusqueda">
+        <option *ngFor="let tipo of tiposBusqueda" [ngValue]="tipo.value">{{ tipo.label }}</option>
+      </select>
       <button type="submit" class="btn btn-primary btn-sm">
         <i class="bi bi-search"></i> Buscar
       </button>
       <button type="button" class="btn btn-outline-secondary btn-sm" (click)="filtrosAvanzados = !filtrosAvanzados">
-        <i class="bi bi-sliders"></i> Filtros
+        <i class="bi bi-sliders"></i> Opciones
       </button>
       <button type="button" class="btn btn-link btn-sm" (click)="limpiar()">Limpiar</button>
     </div>
 
     <div class="advanced-grid" *ngIf="filtrosAvanzados">
-      <input class="form-control form-control-sm" placeholder="Nombres" formControlName="nombres" />
-      <input class="form-control form-control-sm" placeholder="Apellidos" formControlName="apellidos" />
-      <input class="form-control form-control-sm" placeholder="Cedula" formControlName="identificacion" />
-      <input class="form-control form-control-sm" placeholder="Correo" formControlName="email" />
-      <input class="form-control form-control-sm" placeholder="Telefono" formControlName="celular" />
-      <input class="form-control form-control-sm" placeholder="Puesto / cargo" formControlName="cargo" />
-      <input class="form-control form-control-sm" placeholder="Departamento" formControlName="departamento" />
-      <input class="form-control form-control-sm" placeholder="Direccion" formControlName="direccion" />
-      <select class="custom-select custom-select-sm" formControlName="estadoLaboral">
-        <option value="">Estado laboral</option>
-        <option>Activo</option>
-        <option>Vacaciones</option>
-        <option>Suspendido</option>
-        <option>Encargado</option>
-        <option>Comision</option>
-        <option>Desvinculado</option>
-      </select>
-      <input class="form-control form-control-sm" placeholder="Tipo contrato" formControlName="tipoContrato" />
-      <input class="form-control form-control-sm" placeholder="Usuario sistema" formControlName="usuarioSistema" />
-      <input class="form-control form-control-sm" placeholder="Area" formControlName="area" />
-      <input class="form-control form-control-sm" placeholder="Sucursal" formControlName="sucursal" />
-      <input type="date" class="form-control form-control-sm" formControlName="fechaIngresoDesde" title="Ingreso desde" />
-      <input type="date" class="form-control form-control-sm" formControlName="fechaIngresoHasta" title="Ingreso hasta" />
+      <div class="filter-block" *ngIf="usaBusquedaGeneral">
+        <div class="filter-block-title">Campos donde buscar</div>
+        <div class="filter-chip-list">
+          <label class="filter-chip" *ngFor="let campo of camposBusquedaDisponibles" [class.active]="campoBusquedaActivo(campo.key)">
+            <input
+              type="checkbox"
+              [checked]="campoBusquedaActivo(campo.key)"
+              (change)="toggleCampoBusqueda(campo.key)"
+            />
+            <span>{{ campo.label }}</span>
+          </label>
+        </div>
+        <small class="text-muted">Puedes combinar varios campos para una búsqueda más precisa.</small>
+      </div>
+
+      <div class="filter-block" *ngIf="usaBusquedaCargo">
+        <div class="filter-block-title">Filtrar por cargo o puesto</div>
+        <select class="custom-select" formControlName="cargo">
+          <option value="">Todos los cargos</option>
+          <option *ngFor="let cargo of _cargos" [ngValue]="cargo.descripcion">{{ cargo.descripcion }}</option>
+        </select>
+      </div>
+
+      <div class="filter-block" *ngIf="usaBusquedaContrato">
+        <div class="filter-block-title">Filtrar por tipo de contrato</div>
+        <select class="custom-select" formControlName="tipoContrato">
+          <option value="">Todos los contratos</option>
+          <option *ngFor="let contrato of _tpcontratos" [ngValue]="contrato.descripcion">{{ contrato.descripcion }}</option>
+        </select>
+      </div>
+
+      <div class="filter-block" *ngIf="usaBusquedaEstado">
+        <div class="filter-block-title">Filtrar por estado laboral</div>
+        <select class="custom-select" formControlName="estadoLaboral">
+          <option value="">Todos los estados</option>
+          <option *ngFor="let estado of estadosLaborales" [ngValue]="estado">{{ estado }}</option>
+        </select>
+      </div>
     </div>
   </form>
 
@@ -73,7 +92,7 @@
     </div>
     <div class="kpi-card detalle sombra border">
       <span>Activos</span>
-      <strong>{{ personalFiltrado.length }}</strong>
+      <strong>{{ totalActivos }}</strong>
     </div>
     <div class="kpi-card detalle sombra border">
       <span>Pagina</span>

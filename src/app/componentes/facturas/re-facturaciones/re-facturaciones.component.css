@@ -78,3 +78,104 @@ table tbody tr:hover  {
   justify-content: center;
   z-index: 5;
 }
+
+.panel-refacturacion{
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at top right, rgba(17,122,139,.08), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.98), rgba(244,251,252,.96));
+}
+
+.panel-lateral{
+  min-height: 100%;
+}
+
+.panel-kicker{
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: #117a8b;
+  font-weight: 700;
+}
+
+.refact-alert{
+  border-radius: 12px;
+}
+
+.resumen-abonado{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.resumen-item{
+  padding: 12px 14px;
+  border: 1px solid rgba(17,122,139,.15);
+  border-radius: 14px;
+  background: rgba(255,255,255,.8);
+  box-shadow: 0 4px 12px rgba(17,122,139,.05);
+}
+
+.resumen-item-full{
+  grid-column: 1 / -1;
+}
+
+.resumen-label,
+.metric-label{
+  display: block;
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: #6c757d;
+  margin-bottom: 4px;
+}
+
+.refacturacion-metrics{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.metric-card{
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(17,122,139,.15);
+  background: linear-gradient(135deg, rgba(17,122,139,.08), rgba(255,255,255,.95));
+}
+
+.metric-card strong{
+  display: block;
+  font-size: 1.15rem;
+  color: #20343a;
+}
+
+.metric-card small{
+  color: #5c7075;
+}
+
+.facturas-eliminadas-grid{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.factura-eliminada-chip{
+  min-width: 150px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #fff9e8;
+  border: 1px solid rgba(255,193,7,.35);
+  box-shadow: 0 4px 10px rgba(255,193,7,.08);
+}
+
+.factura-eliminada-chip strong,
+.factura-eliminada-chip span{
+  display: block;
+}
+
+@media (max-width: 767.98px){
+  .resumen-abonado,
+  .refacturacion-metrics{
+    grid-template-columns: 1fr;
+  }
+}

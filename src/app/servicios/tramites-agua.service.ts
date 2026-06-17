@@ -460,85 +460,45 @@ export class TramitesAguaService {
   }
 
   private async obtenerDirectorComercialActivo(): Promise<{ nombre: string; cargo: string }> {
-    try {
-      const personal: any = await firstValueFrom(this.s_personal.getAllPersonal());
-      const lista = this.normalizarListaPersonal(personal);
-      const director = lista.find((item: any) => {
-        const cargo = this.normalizarTexto(
-          item?.idcargo_cargos?.descripcion || item?.cargoActual || item?.cargo || ''
-        );
-        return this.personalActivo(item) && cargo.includes('director comercial');
-      });
-
-      if (director) {
-        const nombreCompleto = [director?.sufijo || '', director?.apellidos || '', director?.nombres || '']
-          .map((value: string) => value.trim())
-          .filter(Boolean)
-          .join(' ');
-        return {
-          nombre: nombreCompleto || director?.nomfirma?.trim() || this.administradores[0].nombre,
-          cargo: director?.idcargo_cargos?.descripcion || director?.cargoActual || 'Director Comercial',
-        };
-      }
-    } catch (error) {
-      console.error('No se pudo obtener el director comercial activo', error);
-    }
-
-    return this.administradores[0];
+    return this.obtenerPersonalActivoPorCargo(
+      ['director comercial', 'direccion comercial', 'director area comercial'],
+      'Director Comercial',
+      this.administradores[0]
+    );
   }
 
   private async obtenerDirectorGestionTecnicaActivo(): Promise<{ nombre: string; cargo: string }> {
-    try {
-      const personal: any = await firstValueFrom(this.s_personal.getAllPersonal());
-      const lista = this.normalizarListaPersonal(personal);
-      const director = lista.find((item: any) => {
-        const cargo = this.normalizarTexto(
-          item?.idcargo_cargos?.descripcion || item?.cargoActual || item?.cargo || ''
-        );
-        return this.personalActivo(item) && (
-          cargo.includes('director de gestion tecnica') ||
-          cargo.includes('director tecnico')
-        );
-      });
-
-      if (director) {
-        const nombreCompleto = [director?.sufijo || '', director?.apellidos || '', director?.nombres || '']
-          .map((value: string) => value.trim())
-          .filter(Boolean)
-          .join(' ');
-        return {
-          nombre: nombreCompleto || director?.nomfirma?.trim() || this.administradores[1].nombre,
-          cargo: 'DIRECTOR DE GESTIÓN TÉCNICA',
-        };
-      }
-    } catch (error) {
-      console.error('No se pudo obtener el director de gestion tecnica activo', error);
-    }
-
-    return this.administradores[1];
+    return this.obtenerPersonalActivoPorCargo(
+      [
+        'director de gestion tecnica',
+        'director gestion tecnica',
+        'direccion tecnica',
+        'director tecnico',
+        'director area tecnica',
+      ],
+      'DIRECTOR DE GESTIÓN TÉCNICA',
+      this.administradores[1]
+    );
   }
 
   private async obtenerPersonalActivoPorCargo(
     cargosBuscados: string[],
-    cargoFallback: string
+    cargoFallback: string,
+    firmaFallback?: { nombre: string; cargo: string }
   ): Promise<{ nombre: string; cargo: string }> {
+    const firmaRespaldo = firmaFallback || this.obtenerFirmaFallbackPorCargo(cargoFallback);
+    const cargosNormalizados = this.expandirPatronesCargo(cargosBuscados, cargoFallback);
+
     try {
-      const lista = await this.buscarPersonalPorCargos(cargosBuscados);
-      const encontrado = lista.find((item: any) => {
-        const cargo = this.normalizarTexto(
-          item?.idcargo_cargos?.descripcion || item?.cargoActual || item?.cargo || ''
-        );
-        return this.personalActivo(item) &&
-          cargosBuscados.some((buscado) => cargo.includes(this.normalizarTexto(buscado)));
-      });
+      const lista = await this.buscarPersonalPorCargos(cargosNormalizados);
+      const encontrado = this.encontrarMejorPersonalPorCargo(lista, cargosNormalizados);
 
       if (encontrado) {
         return {
-          nombre: this.obtenerNombreFirmaPersonal(encontrado) || this.firmaManual,
+          nombre: this.obtenerNombreFirmaPersonal(encontrado) || firmaRespaldo?.nombre || this.firmaManual,
           cargo:
-            encontrado?.idcargo_cargos?.descripcion ||
-            encontrado?.cargoActual ||
-            encontrado?.cargo ||
+            this.obtenerCargoPersonal(encontrado) ||
+            firmaRespaldo?.cargo ||
             cargoFallback,
         };
       }
@@ -546,7 +506,10 @@ export class TramitesAguaService {
       console.error(`No se pudo obtener personal activo para ${cargoFallback}`, error);
     }
 
-    return { nombre: this.firmaManual, cargo: cargoFallback };
+    return {
+      nombre: firmaRespaldo?.nombre || this.firmaManual,
+      cargo: firmaRespaldo?.cargo || cargoFallback,
+    };
   }
 
   private async buscarPersonalPorCargos(cargosBuscados: string[]): Promise<any[]> {
@@ -611,13 +574,162 @@ export class TramitesAguaService {
   }
 
   private obtenerNombreFirmaPersonal(personal: any): string {
+    const nombreFirma = String(personal?.nomfirma || '').trim();
+    const nombreCompleto = [personal?.sufijo || '', personal?.apellidos || '', personal?.nombres || '']
+      .map((value: string) => String(value || '').trim())
+      .filter(Boolean)
+      .join(' ');
+
+    if (this.esNombreDeFirmaValido(nombreFirma, personal)) {
+      return nombreFirma;
+    }
+
+    return nombreCompleto;
+  }
+
+  private obtenerCargoPersonal(personal: any): string {
     return (
-      personal?.nomfirma?.trim() ||
-      [personal?.sufijo || '', personal?.apellidos || '', personal?.nombres || '']
-        .map((value: string) => String(value || '').trim())
-        .filter(Boolean)
-        .join(' ')
-    );
+      personal?.cargoActual ||
+      personal?.idcargo_cargos?.descripcion ||
+      personal?.cargo ||
+      ''
+    ).toString().trim();
+  }
+
+  private esNombreDeFirmaValido(nombreFirma: string, personal: any): boolean {
+    if (!nombreFirma) {
+      return false;
+    }
+
+    const firmaNormalizada = this.normalizarTexto(nombreFirma);
+    const cargoNormalizado = this.normalizarTexto(this.obtenerCargoPersonal(personal));
+
+    if (!firmaNormalizada || firmaNormalizada.includes('_____')) {
+      return false;
+    }
+
+    if (cargoNormalizado && firmaNormalizada === cargoNormalizado) {
+      return false;
+    }
+
+    if (cargoNormalizado && firmaNormalizada.includes(cargoNormalizado)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private obtenerFirmaFallbackPorCargo(cargoFallback: string): { nombre: string; cargo: string } | undefined {
+    const cargo = this.normalizarTexto(cargoFallback);
+    if (cargo.includes('director comercial')) {
+      return this.administradores[0];
+    }
+    if (cargo.includes('director') && cargo.includes('tecn')) {
+      return this.administradores[1];
+    }
+    if (cargo.includes('asesor legal') || cargo.includes('juridic') || cargo.includes('abog')) {
+      return this.administradores[2];
+    }
+    return undefined;
+  }
+
+  private expandirPatronesCargo(cargosBuscados: string[], cargoFallback: string): string[] {
+    const patrones = new Set((cargosBuscados || []).filter(Boolean));
+    const cargo = this.normalizarTexto(cargoFallback);
+
+    if (cargo.includes('director comercial')) {
+      patrones.add('director comercial');
+      patrones.add('direccion comercial');
+      patrones.add('director area comercial');
+    }
+
+    if (cargo.includes('director') && cargo.includes('tecn')) {
+      patrones.add('director tecnico');
+      patrones.add('director de gestion tecnica');
+      patrones.add('director gestion tecnica');
+      patrones.add('direccion tecnica');
+      patrones.add('director area tecnica');
+    }
+
+    if (cargo.includes('asesor legal') || cargo.includes('juridic') || cargo.includes('abog')) {
+      patrones.add('asesor legal');
+      patrones.add('abogado');
+      patrones.add('abogada');
+      patrones.add('asesoria juridica');
+      patrones.add('direccion juridica');
+    }
+
+    if (cargo.includes('topograf')) {
+      patrones.add('topografo');
+      patrones.add('topografa');
+      patrones.add('topografia');
+      patrones.add('auxiliar topografia');
+      patrones.add('tecnico topografo');
+      patrones.add('inspector topografo');
+      patrones.add('tecnico de topografia');
+    }
+
+    if (cargo.includes('plomer') || cargo.includes('fontaner')) {
+      patrones.add('plomero');
+      patrones.add('fontanero');
+      patrones.add('gasfitero');
+      patrones.add('tecnico de agua potable');
+    }
+
+    return Array.from(patrones);
+  }
+
+  private encontrarMejorPersonalPorCargo(lista: any[], cargosBuscados: string[]): any | undefined {
+    const candidatos = (lista || []).filter((item: any) => this.personalActivo(item));
+    if (!candidatos.length) {
+      return undefined;
+    }
+
+    const patrones = cargosBuscados
+      .map((cargo) => this.normalizarTexto(cargo))
+      .filter(Boolean);
+
+    const puntuados = candidatos
+      .map((item: any) => {
+        const cargo = this.normalizarTexto(this.obtenerCargoPersonal(item));
+        const score = this.calcularPuntajeCoincidenciaCargo(cargo, patrones);
+        return { item, score };
+      })
+      .filter((entry) => entry.score > 0)
+      .sort((a, b) => b.score - a.score);
+
+    return puntuados[0]?.item;
+  }
+
+  private calcularPuntajeCoincidenciaCargo(cargo: string, patrones: string[]): number {
+    if (!cargo) {
+      return 0;
+    }
+
+    let score = 0;
+    for (const patron of patrones) {
+      if (!patron) {
+        continue;
+      }
+
+      if (cargo === patron) {
+        score = Math.max(score, 100);
+        continue;
+      }
+
+      if (cargo.includes(patron)) {
+        score = Math.max(score, 80);
+        continue;
+      }
+
+      const palabras = patron.split(/\s+/).filter(Boolean);
+      const coincidencias = palabras.filter((palabra) => cargo.includes(palabra)).length;
+      if (coincidencias > 0) {
+        score = Math.max(score, coincidencias * 15);
+      }
+    }
+
+    return score;
   }
 
   private normalizarTexto(value: string): string {

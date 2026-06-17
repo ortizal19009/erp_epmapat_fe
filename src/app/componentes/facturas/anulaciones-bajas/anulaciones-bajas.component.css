@@ -43,3 +43,28 @@ width: 40px;
 .sortable-header i {
   margin-left: 4px;
 }
+
+.detail-card {
+  border: 1px solid #d9e6f2;
+  box-shadow: 0 10px 24px rgba(17, 122, 139, 0.08);
+}
+
+.detail-eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6c757d;
+}
+
+.detail-box {
+  border: 1px solid #dde7ef;
+  border-radius: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: linear-gradient(180deg, #fbfdff 0%, #f4f8fb 100%);
+}
+
+.detail-box-title {
+  font-weight: 600;
+  color: #0f5c6a;
+  margin-bottom: 0.5rem;
+}

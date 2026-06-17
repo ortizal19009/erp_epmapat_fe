@@ -112,12 +112,50 @@ export class RecargosxcuentaComponent implements OnInit {
     }
     return count;
   }
+
+  private nombreResponsable(item: any): string {
+    return (
+      item?.idresponsable?.nombre ||
+      item?.idresponsable?.razonsocial ||
+      item?.idcliente_clientes?.nombre ||
+      item?.idcliente_clientes?.razonsocial ||
+      ''
+    );
+  }
+
+  private cedulaResponsable(item: any): string {
+    return (
+      item?.idresponsable?.cedula ||
+      item?.idcliente_clientes?.cedula ||
+      ''
+    );
+  }
+
+  private normalizarAbonado(abonado: any): any {
+    return {
+      ...abonado,
+      idresponsable: abonado?.idresponsable || abonado?.idcliente_clientes || null,
+      responsableNombre: this.nombreResponsable(abonado),
+      responsableCedula: this.cedulaResponsable(abonado),
+    };
+  }
+
+  private normalizarRecargo(recargo: any): any {
+    const abonado = this.normalizarAbonado(recargo?.idabonado_abonados || {});
+    return {
+      ...recargo,
+      idabonado_abonados: abonado,
+    };
+  }
+
   cagarRecargosxemision(idemision: number) {
     this.recargosxcuentaService
       .getRecargosxcuentaByEmision(idemision)
       .subscribe({
         next: (datos: any) => {
-          this._recargosxcuenta = datos;
+          this._recargosxcuenta = (datos ?? []).map((item: any) =>
+            this.normalizarRecargo(item)
+          );
         },
         error: (e: any) => console.error(e.error),
       });
@@ -135,10 +173,11 @@ export class RecargosxcuentaComponent implements OnInit {
         next: (res: PageResponse<Abonados>) => {
           console.log(res)
           this._abonados = (res.content || []).map((x: any) => {
+            const normalizado = this.normalizarAbonado(x);
             const saved = this.selectedStore.get(x.idabonado);
             console.log(saved)
             return {
-              ...x,
+              ...normalizado,
               selected: saved?.selected ?? false,
               swNotificacion: saved?.swNotificacion ?? false,
               swInspeccion: saved?.swInspeccion ?? false,

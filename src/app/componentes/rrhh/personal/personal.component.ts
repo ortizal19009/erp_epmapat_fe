@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { ColoresService } from 'src/app/compartida/colores.service';
-import {
-  PersonalSearchParams,
-  PersonalService,
-} from 'src/app/servicios/rrhh/personal.service';
+import { CargosService } from 'src/app/servicios/rrhh/cargos.service';
+import { PersonalService } from 'src/app/servicios/rrhh/personal.service';
+import { TpcontratosService } from 'src/app/servicios/rrhh/tpcontratos.service';
 
 interface SortState {
   field: string;
@@ -22,9 +22,13 @@ export class PersonalComponent implements OnInit {
   _personal: any[] = [];
   personalFiltrado: any[] = [];
   personalPagina: any[] = [];
+  _cargos: any[] = [];
+  _tpcontratos: any[] = [];
   cargando = false;
   errorListado = '';
   filtrosAvanzados = false;
+  cargoMap = new Map<number, string>();
+  contratoMap = new Map<number, string>();
 
   page = 0;
   size = 10;
@@ -40,39 +44,49 @@ export class PersonalComponent implements OnInit {
     { icon: 'bi-clock-history', label: 'Historial laboral' },
     { icon: 'bi-folder2-open', label: 'Expediente' },
   ];
+  tiposBusqueda = [
+    { value: 'general', label: 'Búsqueda general' },
+    { value: 'cargo', label: 'Cargo / puesto' },
+    { value: 'contrato', label: 'Tipo de contrato' },
+    { value: 'estado', label: 'Estado laboral' },
+  ];
+  camposBusquedaDisponibles = [
+    { key: 'nombres', label: 'Nombres' },
+    { key: 'apellidos', label: 'Apellidos' },
+    { key: 'identificacion', label: 'Identificación' },
+    { key: 'email', label: 'Correo' },
+    { key: 'celular', label: 'Celular' },
+    { key: 'cargo', label: 'Cargo' },
+    { key: 'tipoContrato', label: 'Contrato' },
+    { key: 'direccion', label: 'Dirección' },
+  ];
+  camposBusquedaSeleccionados: string[] = ['nombres', 'apellidos', 'identificacion', 'cargo'];
+  estadosLaborales = ['Activo', 'Vacaciones', 'Suspendido', 'Encargado', 'Comision', 'Desvinculado'];
 
   constructor(
     private s_personal: PersonalService,
     private coloresService: ColoresService,
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private cargosService: CargosService,
+    private tpcontratosService: TpcontratosService
   ) {}
 
   ngOnInit(): void {
     this.f_personal = this.fb.group({
+      tipoBusqueda: ['general'],
       q: [''],
-      nombres: [''],
-      apellidos: [''],
-      identificacion: [''],
-      email: [''],
-      celular: [''],
       cargo: [''],
-      departamento: [''],
-      direccion: [''],
-      estadoLaboral: [''],
       tipoContrato: [''],
-      usuarioSistema: [''],
-      fechaIngresoDesde: [''],
-      fechaIngresoHasta: [''],
-      area: [''],
-      sucursal: [''],
+      estadoLaboral: [''],
     });
 
     sessionStorage.setItem('ventana', '/personal');
     const coloresJSON = sessionStorage.getItem('/personal');
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
     else this.buscaColor();
-    this.buscarPersonal();
+    this.configurarReaccionesFormulario();
+    void this.cargarCatalogosYPersonal();
   }
 
   async buscaColor() {
@@ -91,50 +105,40 @@ export class PersonalComponent implements OnInit {
     document.documentElement.style.setProperty('--bgcolor2', colores[1]);
   }
 
-  buscarPersonal(resetPage = true) {
-    if (resetPage) this.page = 0;
+  private async cargarCatalogosYPersonal(): Promise<void> {
     this.cargando = true;
     this.errorListado = '';
-
-    const params: PersonalSearchParams = {
-      ...this.limpiarFiltros(this.f_personal.value),
-      page: this.page,
-      size: this.size,
-      sort: this.sort.field,
-      direction: this.sort.direction,
-    };
-
-    this.s_personal.searchPersonal(params).subscribe({
-      next: (datos: any) => {
-        this.hidratarListado(datos);
-        this.cargando = false;
-      },
-      error: (error: any) => {
-        console.error(error);
-        this.errorListado =
-          'No se pudo consultar con filtros server-side. Se intentara cargar el listado base.';
-        this.cargarListadoBase();
-      },
-    });
-  }
-
-  cargarListadoBase() {
-    this.s_personal.getAllPersonal().subscribe({
-      next: (datos: any) => {
-        this.hidratarListado(datos);
-        this.cargando = false;
-      },
-      error: (error: any) => {
-        console.error(error);
-        this.errorListado = 'No se pudo cargar el listado de personal.';
-        this.cargando = false;
-      },
-    });
+    try {
+      const [cargos, contratos, personal] = await Promise.all([
+        firstValueFrom(this.cargosService.getAllCargos()),
+        firstValueFrom(this.tpcontratosService.getAllTpcontratos()),
+        firstValueFrom(this.s_personal.getAllPersonal()),
+      ]);
+      this._cargos = Array.isArray(cargos) ? cargos : [];
+      this._tpcontratos = Array.isArray(contratos) ? contratos : [];
+      this.cargoMap = new Map(
+        this._cargos.map((item: any) => [Number(item?.idcargo), String(item?.descripcion || '')])
+      );
+      this.contratoMap = new Map(
+        this._tpcontratos.map((item: any) => [Number(item?.idtpcontratos), String(item?.descripcion || '')])
+      );
+      this.hidratarListado(personal);
+    } catch (error: any) {
+      console.error(error);
+      this.errorListado = 'No se pudo cargar el listado de personal.';
+      this._personal = [];
+      this.personalFiltrado = [];
+      this.personalPagina = [];
+    } finally {
+      this.cargando = false;
+    }
   }
 
   hidratarListado(datos: any) {
     const pageContent = Array.isArray(datos?.content) ? datos.content : null;
-    const rows = pageContent || (Array.isArray(datos) ? datos : []);
+    const rows = (pageContent || (Array.isArray(datos) ? datos : [])).map((item: any) =>
+      this.normalizarPersonal(item)
+    );
 
     this._personal = rows;
     this.totalElements = Number(datos?.totalElements ?? rows.length);
@@ -170,40 +174,30 @@ export class PersonalComponent implements OnInit {
     } else {
       this.sort = { field, direction: 'asc' };
     }
-    this.buscarPersonal(false);
+    this.aplicarFiltrosLocales();
   }
 
   cambiarPagina(page: number) {
     if (page < 0 || page > this.totalPages - 1) return;
     this.page = page;
-    this.buscarPersonal(false);
+    this.aplicarFiltrosLocales();
   }
 
   cambiarTamanoPagina() {
     this.page = 0;
-    this.buscarPersonal(false);
+    this.aplicarFiltrosLocales();
   }
 
   limpiar() {
     this.f_personal.reset({
+      tipoBusqueda: 'general',
       q: '',
-      nombres: '',
-      apellidos: '',
-      identificacion: '',
-      email: '',
-      celular: '',
       cargo: '',
-      departamento: '',
-      direccion: '',
-      estadoLaboral: '',
       tipoContrato: '',
-      usuarioSistema: '',
-      fechaIngresoDesde: '',
-      fechaIngresoHasta: '',
-      area: '',
-      sucursal: '',
+      estadoLaboral: '',
     });
-    this.buscarPersonal();
+    this.camposBusquedaSeleccionados = ['nombres', 'apellidos', 'identificacion', 'cargo'];
+    this.aplicarFiltrosLocales();
   }
 
   onEditPersonal(personal: any) {
@@ -298,10 +292,19 @@ export class PersonalComponent implements OnInit {
     URL.revokeObjectURL(link.href);
   }
 
+  buscarPersonal(resetPage = true) {
+    if (resetPage) this.page = 0;
+    this.aplicarFiltrosLocales();
+  }
+
   get paginasVisibles(): number[] {
     const start = Math.max(0, this.page - 2);
     const end = Math.min(this.totalPages, start + 5);
     return Array.from({ length: end - start }, (_, index) => start + index);
+  }
+
+  get totalActivos(): number {
+    return this.personalFiltrado.filter((item) => this.esActivo(item)).length;
   }
 
   nombreCompleto(personal: any): string {
@@ -325,6 +328,7 @@ export class PersonalComponent implements OnInit {
       personal?.cargoActual ||
       personal?.cargo ||
       personal?.idcargo_cargos?.descripcion ||
+      this.cargoMap.get(this.obtenerIdRelacionado(personal?.idcargo_cargos, 'idcargo')) ||
       'Sin cargo'
     );
   }
@@ -333,6 +337,9 @@ export class PersonalComponent implements OnInit {
     return (
       personal?.tipoContrato ||
       personal?.idtpcontrato_tpcontratos?.descripcion ||
+      this.contratoMap.get(
+        this.obtenerIdRelacionado(personal?.idtpcontrato_tpcontratos, 'idtpcontratos')
+      ) ||
       'No definido'
     );
   }
@@ -374,25 +381,7 @@ export class PersonalComponent implements OnInit {
 
   private coincideConFiltros(personal: any, filtros: any): boolean {
     const q = this.normalizar(filtros.q);
-    const searchBlob = this.normalizar(
-      [
-        personal?.nombres,
-        personal?.apellidos,
-        personal?.identificacion,
-        personal?.email,
-        personal?.celular,
-        personal?.direccion,
-        this.cargo(personal),
-        this.tipoContrato(personal),
-        personal?.departamento,
-        personal?.area,
-        personal?.sucursal,
-        personal?.usuarioSistema,
-        this.estadoLaboral(personal),
-      ].join(' ')
-    );
-    if (q && !searchBlob.includes(q)) return false;
-
+    const tipoBusqueda = filtros.tipoBusqueda || 'general';
     const fieldMap: any = {
       nombres: personal?.nombres,
       apellidos: personal?.apellidos,
@@ -400,20 +389,35 @@ export class PersonalComponent implements OnInit {
       email: personal?.email,
       celular: personal?.celular,
       cargo: this.cargo(personal),
-      departamento: personal?.departamento,
       direccion: personal?.direccion,
-      estadoLaboral: this.estadoLaboral(personal),
       tipoContrato: this.tipoContrato(personal),
-      usuarioSistema: personal?.usuarioSistema,
-      area: personal?.area,
-      sucursal: personal?.sucursal,
+      estadoLaboral: this.estadoLaboral(personal),
     };
 
-    return Object.keys(fieldMap).every((key) => {
-      const filtro = this.normalizar(filtros[key]);
-      if (!filtro) return true;
-      return this.normalizar(fieldMap[key]).includes(filtro);
-    });
+    if (tipoBusqueda === 'cargo') {
+      const cargoFiltro = this.normalizar(filtros.cargo);
+      return !cargoFiltro || this.normalizar(this.cargo(personal)).includes(cargoFiltro);
+    }
+
+    if (tipoBusqueda === 'contrato') {
+      const contratoFiltro = this.normalizar(filtros.tipoContrato);
+      return !contratoFiltro || this.normalizar(this.tipoContrato(personal)).includes(contratoFiltro);
+    }
+
+    if (tipoBusqueda === 'estado') {
+      const estadoFiltro = this.normalizar(filtros.estadoLaboral);
+      return !estadoFiltro || this.normalizar(this.estadoLaboral(personal)).includes(estadoFiltro);
+    }
+
+    if (!q) {
+      return true;
+    }
+
+    const campos = this.camposBusquedaSeleccionados.length
+      ? this.camposBusquedaSeleccionados
+      : ['nombres', 'apellidos', 'identificacion', 'cargo'];
+
+    return campos.some((key) => this.normalizar(fieldMap[key]).includes(q));
   }
 
   private comparar(a: any, b: any): number {
@@ -443,5 +447,75 @@ export class PersonalComponent implements OnInit {
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .trim();
+  }
+
+  toggleCampoBusqueda(key: string): void {
+    if (this.camposBusquedaSeleccionados.includes(key)) {
+      if (this.camposBusquedaSeleccionados.length === 1) {
+        return;
+      }
+      this.camposBusquedaSeleccionados = this.camposBusquedaSeleccionados.filter((item) => item !== key);
+    } else {
+      this.camposBusquedaSeleccionados = [...this.camposBusquedaSeleccionados, key];
+    }
+    this.aplicarFiltrosLocales();
+  }
+
+  campoBusquedaActivo(key: string): boolean {
+    return this.camposBusquedaSeleccionados.includes(key);
+  }
+
+  get usaBusquedaGeneral(): boolean {
+    return this.f_personal?.get('tipoBusqueda')?.value === 'general';
+  }
+
+  get usaBusquedaCargo(): boolean {
+    return this.f_personal?.get('tipoBusqueda')?.value === 'cargo';
+  }
+
+  get usaBusquedaContrato(): boolean {
+    return this.f_personal?.get('tipoBusqueda')?.value === 'contrato';
+  }
+
+  get usaBusquedaEstado(): boolean {
+    return this.f_personal?.get('tipoBusqueda')?.value === 'estado';
+  }
+
+  private configurarReaccionesFormulario(): void {
+    this.f_personal.valueChanges.subscribe(() => {
+      this.page = 0;
+      this.aplicarFiltrosLocales();
+    });
+  }
+
+  private normalizarPersonal(personal: any): any {
+    return {
+      ...personal,
+      cargoActual:
+        personal?.cargoActual ||
+        personal?.cargo ||
+        personal?.idcargo_cargos?.descripcion ||
+        this.cargoMap.get(this.obtenerIdRelacionado(personal?.idcargo_cargos, 'idcargo')) ||
+        '',
+      tipoContrato:
+        personal?.tipoContrato ||
+        personal?.idtpcontrato_tpcontratos?.descripcion ||
+        this.contratoMap.get(
+          this.obtenerIdRelacionado(personal?.idtpcontrato_tpcontratos, 'idtpcontratos')
+        ) ||
+        '',
+    };
+  }
+
+  private obtenerIdRelacionado(value: any, idField: string): number {
+    if (value == null) {
+      return 0;
+    }
+    if (typeof value === 'object') {
+      const id = Number(value?.[idField] ?? value?.id ?? 0);
+      return Number.isFinite(id) ? id : 0;
+    }
+    const id = Number(value);
+    return Number.isFinite(id) ? id : 0;
   }
 }

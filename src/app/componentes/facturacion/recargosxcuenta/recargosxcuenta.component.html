@@ -82,7 +82,7 @@
               {{i+1}}
             </td>
             <td class="text-center">{{ cuenta.idabonado_abonados.idabonado }}</td>
-            <td>{{ cuenta.idabonado_abonados.idresponsable.nombre }}</td>
+            <td>{{ cuenta.idabonado_abonados?.responsableNombre || '—' }}</td>
             <td class="text-center">{{ cuenta.fecha ? (cuenta.fecha | date:'dd/MM/yyyy') : '-' }}</td>
             <td class="text-center">{{ cuenta.feccrea ? (cuenta.feccrea | date:'dd/MM/yyyy') : '-' }}</td>
             <td>{{cuenta.idrubro_rubros.descripcion}}</td>
@@ -276,7 +276,7 @@
 
                 <td class="text-center">{{ cuenta.idabonado }}</td>
 
-                <td class="truncate-text" [title]="cuenta.idresponsable?.nombre || cuenta.idresponsable?.razonsocial">
+                <td class="truncate-text" [title]="cuenta.responsableNombre || '—'">
                   {{ cuenta.idresponsable?.nombre || cuenta.idresponsable?.razonsocial || '—' }}
                 </td>
 

@@ -1,4 +1,4 @@
-<div class="content mt-1 pt-1 pl-0">
+﻿<div class="content mt-1 pt-1 pl-0">
     <div class="container-fluid">
         <div class="row m-0 px-0 pt-1 justify-content-start border cabecera sombra">
             <div class="col-sm-4">
@@ -10,7 +10,7 @@
                 </button>
                 <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
                     <button class="dropdown-item" type="button" data-toggle="modal"
-                        (click)="getFragmentToShow('formNew')" data-target="#newAnulBajas">
+                        (click)="abrirNuevoModal()" data-target="#newAnulBajas">
                         <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
                     <button class="dropdown-item" type="button" data-toggle="modal" data-target="#impReporte">
                         <i class="bi bi-printer"></i>&nbsp; Imprimir / Exportar</button>
@@ -87,12 +87,12 @@
 <thead class="theadCuentas">
                                             <tr class="text-center">
                                                 <th class="sortable-header" (click)="toggleSort('anuladas', 'idfactura')">Planilla <i [class]="getSortIcon('anuladas', 'idfactura')"></i></th>
-                                                <th class="sortable-header" (click)="toggleSort('anuladas', 'fechaanulacion')">Fecha anulación <i [class]="getSortIcon('anuladas', 'fechaanulacion')"></i></th>
+                                                <th class="sortable-header" (click)="toggleSort('anuladas', 'fechaanulacion')">Fecha anulaci&oacute;n <i [class]="getSortIcon('anuladas', 'fechaanulacion')"></i></th>
                                                 <th class="sortable-header" (click)="toggleSort('anuladas', 'nrofactura')">Nro.Factura <i [class]="getSortIcon('anuladas', 'nrofactura')"></i></th>
                                                 <th class="sortable-header" (click)="toggleSort('anuladas', 'cliente')">Cliente <i [class]="getSortIcon('anuladas', 'cliente')"></i></th>
-                                                <th class="sortable-header" (click)="toggleSort('anuladas', 'modulo')">Módulo <i [class]="getSortIcon('anuladas', 'modulo')"></i></th>
+                                                <th class="sortable-header" (click)="toggleSort('anuladas', 'modulo')">M&oacute;dulo <i [class]="getSortIcon('anuladas', 'modulo')"></i></th>
                                                 <th class="sortable-header" (click)="toggleSort('anuladas', 'cuenta')">Cuenta <i [class]="getSortIcon('anuladas', 'cuenta')"></i></th>
-                                                <th class="sortable-header" (click)="toggleSort('anuladas', 'razonanulacion')">Razón A. <i [class]="getSortIcon('anuladas', 'razonanulacion')"></i></th>
+                                                <th class="sortable-header" (click)="toggleSort('anuladas', 'razonanulacion')">Raz&oacute;n A. <i [class]="getSortIcon('anuladas', 'razonanulacion')"></i></th>
                                             </tr>
                                         </thead>
                                         <tbody class="bodyCuentas">
@@ -101,7 +101,7 @@
                                                 <td class="text-center _description">{{fanuladas.fechaanulacion}}</td>
                                                 <td class="text-left _description">{{fanuladas.nrofactura}}</td>
                                                 <td class="_description">{{ getNombreClienteHistorico(fanuladas) || 'Sin cliente' }}</td>
-                                                <td class="text-left _description">{{ getModuloHistorico(fanuladas) || 'Sin módulo' }}
+                                                <td class="text-left _description">{{ getModuloHistorico(fanuladas) || 'Sin m&oacute;dulo' }}
                                                 </td>
                                                 <td class="text-left _description">{{ getCuentaHistorico(fanuladas) }} </td>
                                                 <td class="_description">{{fanuladas.razonanulacion}} </td>
@@ -113,7 +113,7 @@
                                     </table>
                                     <div class="d-flex flex-wrap justify-content-between align-items-center p-2 border-top bg-white">
                                         <small class="text-muted">
-                                            {{anuladasTotalElements}} registros | Página {{anuladasCurrentPage}} de {{anuladasTotalPages}}
+                                            {{anuladasTotalElements}} registros | P&aacute;gina {{anuladasCurrentPage}} de {{anuladasTotalPages}}
                                         </small>
                                         <div class="btn-group btn-group-sm mt-1 mt-sm-0">
                                             <button type="button" class="btn btn-outline-secondary" [disabled]="anuladasCurrentPage === 1"
@@ -151,11 +151,11 @@
 <thead class="theadFacelectro">
                                             <tr class="text-center">
                                                 <th class="sortable-header" (click)="toggleSort('eliminadas', 'idfactura')">Planilla <i [class]="getSortIcon('eliminadas', 'idfactura')"></i></th>
-                                                <th class="sortable-header" (click)="toggleSort('eliminadas', 'fechaeliminacion')">Fecha Eliminación <i [class]="getSortIcon('eliminadas', 'fechaeliminacion')"></i></th>
+                                                <th class="sortable-header" (click)="toggleSort('eliminadas', 'fechaeliminacion')">Fecha eliminaci&oacute;n <i [class]="getSortIcon('eliminadas', 'fechaeliminacion')"></i></th>
                                                 <th class="col-sm-5 sortable-header" (click)="toggleSort('eliminadas', 'cliente')">Cliente <i [class]="getSortIcon('eliminadas', 'cliente')"></i></th>
                                                 <th class="sortable-header" (click)="toggleSort('eliminadas', 'cuenta')">Cuenta <i [class]="getSortIcon('eliminadas', 'cuenta')"></i></th>
-                                                <th class="col-sm-2 sortable-header" (click)="toggleSort('eliminadas', 'razoneliminacion')">Razón E. <i [class]="getSortIcon('eliminadas', 'razoneliminacion')"></i></th>
-                                                <th class="sortable-header" (click)="toggleSort('eliminadas', 'modulo')">Módulo <i [class]="getSortIcon('eliminadas', 'modulo')"></i></th>
+                                                <th class="col-sm-2 sortable-header" (click)="toggleSort('eliminadas', 'razoneliminacion')">Raz&oacute;n E. <i [class]="getSortIcon('eliminadas', 'razoneliminacion')"></i></th>
+                                                <th class="sortable-header" (click)="toggleSort('eliminadas', 'modulo')">M&oacute;dulo <i [class]="getSortIcon('eliminadas', 'modulo')"></i></th>
                                                 <th></th>
                                             </tr>
                                         </thead>
@@ -167,7 +167,7 @@
                                                 <td class="_description">{{ getNombreClienteHistorico(faceliminada) || 'Sin cliente' }}</td>
                                                 <td class="text-center">{{ getCuentaHistorico(faceliminada) }}</td>
                                                 <td class="_description">{{faceliminada.razoneliminacion}}</td>
-                                                <td class="_description">{{ getModuloHistorico(faceliminada) || 'Sin módulo' }}</td>
+                                                <td class="_description">{{ getModuloHistorico(faceliminada) || 'Sin m&oacute;dulo' }}</td>
                                                 <td class="text-center">
                                                     <button class="btn btn-sm btn-danger" (click)="generarReport(faceliminada.idfactura)" data-toggle="modal" data-target="#impViewer">
                                                         <i class="bi bi-file-earmark-pdf"></i>
@@ -181,7 +181,7 @@
                                     </table>
                                     <div class="d-flex flex-wrap justify-content-between align-items-center p-2 border-top bg-white">
                                         <small class="text-muted">
-                                            {{eliminadasTotalElements}} registros | Página {{eliminadasCurrentPage}} de {{eliminadasTotalPages}}
+                                            {{eliminadasTotalElements}} registros | P&aacute;gina {{eliminadasCurrentPage}} de {{eliminadasTotalPages}}
                                         </small>
                                         <div class="btn-group btn-group-sm mt-1 mt-sm-0">
                                             <button type="button" class="btn btn-outline-secondary" [disabled]="eliminadasCurrentPage === 1"
@@ -267,7 +267,7 @@
                     <div class="row">
                         <div class="col-sm">
                             <form [formGroup]="f_reportes">
-                                <label> Seleccionar opción</label>
+                                <label> Seleccionar opci&oacute;n</label>
                                 <select type="text" class="form-control form-control-sm" formControlName="opt">
                                     <option value="0">Anulaciones</option>
                                     <option value="1">Eliminaciones</option>
@@ -323,7 +323,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="newAnulBajasLabel">{{txttitulo}}</h5>
-                    <button type="button" (click)="getFragmentToShow('formNew')" class="btn btn-xs btn-outline-success">
+                    <button type="button" (click)="abrirNuevoModal()" class="btn btn-xs btn-outline-success">
                         <i class="bi bi-arrow-return-left"></i>
                     </button>
                 </div>
@@ -332,6 +332,59 @@
                         *ngTemplateOutlet="selectedFragment ==='formNew'?formNew:selectedFragment === 'cliente'?cliente:selectedFragment ==='abonado'?abonado:facturas"></ng-container>
 
                     <ng-template #formNew>
+                        <div class="row mt-3" *ngIf="textodato">
+                            <div class="col-sm-12">
+                                <div class="card detail-card">
+                                    <div class="card-body py-3">
+                                        <div class="d-flex justify-content-between align-items-center flex-wrap">
+                                            <div>
+                                                <div class="detail-eyebrow">Factura seleccionada</div>
+                                                <h6 class="mb-0">Factura {{textodato}}</h6>
+                                            </div>
+                                            <span class="badge badge-pill"
+                                                [ngClass]="option === '0' ? 'badge-warning' : 'badge-danger'">
+                                                {{ option === '0' ? 'Anulaci&oacute;n' : 'Eliminaci&oacute;n l&oacute;gica' }}
+                                            </span>
+                                        </div>
+                                        <div class="row mt-3">
+                                            <div class="col-md-6 mb-2">
+                                                <div class="detail-box h-100">
+                                                    <div class="detail-box-title">Resumen de factura</div>
+                                                    <div><b>Id factura:</b> {{_factura.idfactura || '-'}}</div>
+                                                    <div><b>Nro. factura:</b> {{_factura.nrofactura || 'Sin n&uacute;mero'}}</div>
+                                                    <div><b>Cliente:</b> {{_factura.idcliente.nombre || _cliente.nombre || '-'}}</div>
+                                                    <div><b>M&oacute;dulo:</b> {{_factura.idmodulo.descripcion || '-'}}</div>
+                                                    <div><b>Cuenta:</b> {{_factura.idabonado || '-'}}</div>
+                                                    <div><b>Total:</b> {{_factura.totaltarifa | number:'1.2-2'}}</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 mb-2">
+                                                <div class="detail-box h-100">
+                                                    <div class="detail-box-title">Factura electr&oacute;nica / SRI</div>
+                                                    <div><b>Estado:</b> {{ estadoFecFacturaTexto }}</div>
+                                                    <div><b>Clave acceso:</b> {{ detalleOperacion?.fecFactura?.claveacceso || '-' }}</div>
+                                                    <div><b>Correo:</b> {{ detalleOperacion?.fecFactura?.emailcomprador || '-' }}</div>
+                                                    <div><b>Enviada al SRI:</b> {{ detalleOperacion?.enviadaSri ? 'S&iacute;' : 'No' }}</div>
+                                                    <div><b>Existe en fec_factura:</b> {{ detalleOperacion?.tieneFacturaElectronica ? 'S&iacute;' : 'No' }}</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 mb-2" *ngIf="detalleOperacion?.lecturas?.length">
+                                                <div class="detail-box">
+                                                    <div class="detail-box-title">Lectura / emisi&oacute;n asociada</div>
+                                                    <div class="row">
+                                                        <div class="col-md-3"><b>Emisi&oacute;n:</b> {{ detalleOperacion?.emision?.[0]?.emision || '-' }}</div>
+                                                        <div class="col-md-3"><b>Fecha emisi&oacute;n:</b> {{ detalleOperacion?.emision?.[0]?.feccrea | date:'yyyy-MM-dd' }}</div>
+                                                        <div class="col-md-2"><b>M3:</b> {{ detalleOperacion?.m3 ?? '-' }}</div>
+                                                        <div class="col-md-2"><b>Lect. anterior:</b> {{ _lectura.lecturaanterior }}</div>
+                                                        <div class="col-md-2"><b>Lect. actual:</b> {{ _lectura.lecturaactual }}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="row">
                             <div class="col-sm">
                                 <div class="card card-outline cardCliente">
@@ -339,8 +392,8 @@
                                         <!--  <h3 class="profile-username text-center"> Nueva {{txttitulo}}</h3> -->
                                         <select class="from-control form-control-sm col-sm-12" [(ngModel)]="option"
                                             (change)="changeTitulo($event)">
-                                            <option value=0>Anulación</option>
-                                            <option value=1>Eliminación</option>
+                                            <option value=0>Anulaci&oacute;n</option>
+                                            <option value=1>Eliminaci&oacute;n</option>
                                         </select>
                                         <hr>
                                         <div class="text-center">
@@ -410,17 +463,22 @@
                                                             <div class="col-sm" *ngIf="swtitulo">
                                                                 <textarea
                                                                     class="form-control form-control-sm text-center"
-                                                                    type="text" placeholder="Razon anulación"
+                                                                    type="text" placeholder="Raz&oacute;n anulaci&oacute;n"
                                                                     formControlName="razonanulacion"> </textarea>
                                                             </div>
                                                             <div class="col-sm" *ngIf="!swtitulo">
                                                                 <textarea
                                                                     class="form-control form-control-sm text-center"
-                                                                    type="text" placeholder="Razon eliminación"
+                                                                    type="text" placeholder="Raz&oacute;n eliminaci&oacute;n"
                                                                     formControlName="razoneliminacion"> </textarea>
                                                             </div>
                                                         </div>
                                                     </div>
+                                                </div>
+                                                <div class="alert alert-light border mt-3 mb-0" *ngIf="textodato">
+                                                    <b>Validaci&oacute;n previa:</b>
+                                                    <span *ngIf="option === '0'"> se verificar&aacute; el estado en <code>fec_factura</code> y se guardar&aacute; la trazabilidad completa antes de eliminarla.</span>
+                                                    <span *ngIf="option === '1'"> se mostrar&aacute; la emisi&oacute;n y el consumo asociado para confirmar la baja.</span>
                                                 </div>
                                                 <div class="row mt-3">
                                                     <div class="col-sm">
@@ -430,8 +488,10 @@
                                                     </div>
                                                     <div class="col-sm">
                                                         <button class="btn btn-outline-success btn-sm"
-                                                            data-dismiss="modal" type="button" (click)="actualizar()"
-                                                            [disabled]="campo === 0 || textodato == ''">Aceptar
+                                                            type="button" (click)="actualizar()"
+                                                            [disabled]="!puedeGuardar">
+                                                            <span *ngIf="procesandoAccion" class="spinner-border spinner-border-sm mr-1"></span>
+                                                            {{ procesandoAccion ? 'Procesando...' : 'Aceptar' }}
                                                         </button>
                                                     </div>
                                                 </div>
@@ -452,12 +512,15 @@
                         <input type="text" class="form-control form-control-sm col-sm-3" [(ngModel)]="mfiltrar"
                             placeholder="Filtrar...">
                         <hr>
+                        <div *ngIf="mensajeBusqueda" class="alert alert-info py-2">
+                            {{ mensajeBusqueda }}
+                        </div>
                         <table class="table table-sm table-hover table-bordered">
                             <thead>
                                 <tr>
                                     <th>Planilla</th>
                                     <th>Cliente</th>
-                                    <th>Módulo</th>
+                                    <th>M&oacute;dulo</th>
                                     <th>Cuenta</th>
                                     <th>Nro. Factura</th>
                                 </tr>
@@ -466,10 +529,15 @@
                                 <tr *ngFor="let factura of _facturas | filter:mfiltrar" (click)="setFactura(factura)"
                                     data-dismiss="modal">
                                     <td>{{factura.idfactura}}</td>
-                                    <td class="_description">{{factura.idcliente.nombre}}</td>
-                                    <td>{{factura.idmodulo.descripcion}}</td>
+                                    <td class="_description">{{factura?.idcliente?.nombre || 'Sin cliente'}}</td>
+                                    <td>{{factura?.idmodulo?.descripcion || 'Sin m&oacute;dulo'}}</td>
                                     <td>{{factura.idabonado}}</td>
                                     <td>{{factura.nrofactura}}</td>
+                                </tr>
+                                <tr *ngIf="!swbuscando && !_facturas?.length">
+                                    <td colspan="5" class="text-center text-muted py-3">
+                                        No hay facturas para mostrar en esta consulta
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -478,3 +546,5 @@
             </div>
         </div>
     </div>
+
+

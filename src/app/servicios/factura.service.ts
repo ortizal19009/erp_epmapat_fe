@@ -293,6 +293,19 @@ export class FacturaService {
     return this.http.put(`${baseUrl}/${fac.idfactura}`, fac);
   }
 
+  getDetalleAnulacionBaja(idfactura: number) {
+    return this.http.get<any>(`${baseUrl}/${idfactura}/anulacion-baja-detalle`);
+  }
+
+  ejecutarAnulacionBaja(payload: {
+    idfactura: number;
+    accion: 'ANULACION' | 'ELIMINACION';
+    motivo: string;
+    idusuario: number;
+  }) {
+    return this.http.post(`${baseUrl}/anulaciones-bajas`, payload);
+  }
+
   //Update async
   async updateFacturaAsync(fac: any): Promise<Object> {
     const observable = this.http.put(`${baseUrl}/${fac.idfactura}`, fac);

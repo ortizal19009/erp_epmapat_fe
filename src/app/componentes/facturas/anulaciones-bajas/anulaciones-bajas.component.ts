@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+﻿import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { RecaudacionReportsService } from '../../recaudacion/recaudacion-reports.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
@@ -17,7 +17,10 @@ import { PdfService } from 'src/app/servicios/pdf.service';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+
+declare const $: any;
 
 @Component({
   selector: 'app-anulaciones-bajas',
@@ -58,7 +61,7 @@ export class AnulacionesBajasComponent implements OnInit {
   sortAnuladasDirection: 'asc' | 'desc' = 'desc';
   sortEliminadasColumn: string = 'fechaeliminacion';
   sortEliminadasDirection: 'asc' | 'desc' = 'desc';
-  txttitulo: string = 'Anulación';
+  txttitulo: string = 'Anulacion';
   swtitulo: boolean = true;
   //detalles factura
   _rubrosxfac: any;
@@ -69,11 +72,14 @@ export class AnulacionesBajasComponent implements OnInit {
   nombreCliente: String;
   option = '0';
   textodato: string;
+  mensajeBusqueda: string = '';
   /* SELECCIONAR FACTURA */
   _factura: Facturas = new Facturas();
   _fac: any;
   /* SELECCIONAR LECTURA */
   _lectura: Lecturas = new Lecturas();
+  detalleOperacion: any = null;
+  procesandoAccion: boolean = false;
   sliceDate: string = new Date().toISOString().slice(0, 10);
   userAuth: number;
   selectedFragment: string = 'formNew';
@@ -102,17 +108,17 @@ export class AnulacionesBajasComponent implements OnInit {
     if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
     else this.buscaColor();
     const fecha = new Date();
-    const año = fecha.getFullYear();
+    const anio = fecha.getFullYear();
     this.formBuscar = this.fb.group({
       idfactura: '',
       idabonado: '',
-      fechaDesde: año + '-01-01',
+      fechaDesde: anio + '-01-01',
       fechaHasta: this.sliceDate,
     });
     this.formFiltrosHistorico = this.fb.group({
       cuenta: '',
       cliente: '',
-      fechaDesde: año + '-01-01',
+      fechaDesde: anio + '-01-01',
       fechaHasta: this.sliceDate,
     });
     this.restaurarEstadoHistorico();
@@ -213,14 +219,14 @@ export class AnulacionesBajasComponent implements OnInit {
       this.txttitulo = 'SELECCIONAR FACTURA';
     }
     if (opt === 'formNew') {
-      this.size = 'sm';
+      this.size = this.textodato ? 'lg' : 'sm';
       if (this.option === '0') {
-        this.txttitulo = 'Nueva Anulación';
+        this.txttitulo = 'Nueva Anulacion';
         this.swtitulo = true;
       }
 
       if (this.option === '1') {
-        this.txttitulo = 'Nueva Eliminación';
+        this.txttitulo = 'Nueva Eliminacion';
         this.swtitulo = false;
         //this.option = '1';
       }
@@ -249,6 +255,9 @@ export class AnulacionesBajasComponent implements OnInit {
     }
   }
   buscar() {
+    this.swbuscando = true;
+    this.mensajeBusqueda = '';
+    this._facturas = [];
     this.textodato = '';
     if (this.formBuscar.value.idfactura != '') {
       this.getFacCobrada();
@@ -260,6 +269,11 @@ export class AnulacionesBajasComponent implements OnInit {
       this.formBuscar.value.idabonado === '' &&
       this.formBuscar.value.idfactura === ''
     ) {
+      if (!this._cliente?.idcliente) {
+        this.swbuscando = false;
+        this.mensajeBusqueda = 'Selecciona un cliente para consultar sus facturas.';
+        return;
+      }
       if (this.option === '0') {
         this.getFacCobradas();
       }
@@ -292,13 +306,13 @@ export class AnulacionesBajasComponent implements OnInit {
   changeTitulo(e: any) {
     this.option = e.target.value;
     if (e.target.value === '0') {
-      this.txttitulo = 'Nueva Anulación';
+      this.txttitulo = 'Nueva Anulacion';
       this.swtitulo = true;
       this.textodato = '';
     }
 
     if (e.target.value === '1') {
-      this.txttitulo = 'Nueva Eliminación';
+      this.txttitulo = 'Nueva Eliminacion';
       this.swtitulo = false;
       //this.option = '1';
       this.textodato = '';
@@ -361,13 +375,13 @@ export class AnulacionesBajasComponent implements OnInit {
 
   limpiarFiltrosHistorico(): void {
     const fecha = new Date();
-    const año = fecha.getFullYear();
+    const anio = fecha.getFullYear();
     this.anuladasCurrentPage = 1;
     this.eliminadasCurrentPage = 1;
     this.formFiltrosHistorico.patchValue({
       cuenta: '',
       cliente: '',
-      fechaDesde: `${año}-01-01`,
+      fechaDesde: `${anio}-01-01`,
       fechaHasta: this.sliceDate,
     });
     this.guardarEstadoHistorico();
@@ -654,19 +668,85 @@ export class AnulacionesBajasComponent implements OnInit {
     });
     this.campo = 1;
     this.textodato = '';
+    this.mensajeBusqueda = '';
     this._cliente = e;
-    this.selectedFragment = 'formNew';
-    this.size = 'sm';
+    this.selectedFragment = 'facturas';
+    this.size = 'xl';
+    this.swbuscando = true;
+    this._facturas = [];
+
+    if (this.option === '0') {
+      this.getFacCobradas();
+    } else {
+      this.getFacSinCobro();
+    }
     /*    this.f_tramites.patchValue({
       idcliente_clientes: e,
     }); */
   }
+
+  private facturaTieneRelacionesCompletas(factura: any): boolean {
+    return !!factura?.idcliente?.nombre && !!factura?.idmodulo?.descripcion;
+  }
+
+  private normalizarFactura(factura: any, detalle?: any): any {
+    const base = detalle || factura || {};
+    return {
+      ...factura,
+      ...detalle,
+      idcliente: base?.idcliente || factura?.idcliente || null,
+      idmodulo: base?.idmodulo || factura?.idmodulo || null,
+    };
+  }
+
+  private hidratarFacturasBusqueda(facturas: any[]): void {
+    const lista = Array.isArray(facturas) ? facturas : [];
+    if (!lista.length) {
+      this._facturas = [];
+      this.swbuscando = false;
+      this.mensajeBusqueda =
+        this.option === '0'
+          ? 'El cliente no tiene facturas cobradas para anular.'
+          : 'El cliente no tiene facturas pendientes de pago para eliminar.';
+      return;
+    }
+
+    const solicitudes = lista.map((factura: any) => {
+      if (this.facturaTieneRelacionesCompletas(factura)) {
+        return of(this.normalizarFactura(factura));
+      }
+
+      return this.facServicio.getById(factura.idfactura).pipe(
+        map((detalle: any) => this.normalizarFactura(factura, detalle)),
+        catchError(() => of(this.normalizarFactura(factura)))
+      );
+    });
+
+    forkJoin(solicitudes).subscribe({
+      next: (facturasHidratadas: any[]) => {
+        this._facturas = facturasHidratadas;
+        this.swbuscando = false;
+        this.mensajeBusqueda = '';
+        this.getFragmentToShow('facturas');
+      },
+      error: (e) => {
+        console.error(e);
+        this._facturas = lista;
+        this.swbuscando = false;
+        this.mensajeBusqueda = 'Se recuperaron facturas con datos parciales.';
+        this.getFragmentToShow('facturas');
+      },
+    });
+  }
+
   getFacCobradas() {
     this.facServicio.findCobradas(this._cliente.idcliente).subscribe({
       next: (datos: any) => {
-        this._facturas = datos;
+        this.hidratarFacturasBusqueda(datos);
       },
       error: (e) => {
+        this.swbuscando = false;
+        this.mensajeBusqueda = 'No fue posible consultar las facturas cobradas.';
         console.error(e);
       },
     });
@@ -674,33 +754,59 @@ export class AnulacionesBajasComponent implements OnInit {
   getFacSinCobro() {
     this.facServicio.getSinCobro(this._cliente.idcliente).subscribe({
       next: (datos: any) => {
-        this._facturas = datos;
+        this.hidratarFacturasBusqueda(datos);
       },
-      error: (e) => console.error(e),
+      error: (e) => {
+        this.swbuscando = false;
+        this.mensajeBusqueda =
+          'No fue posible consultar las facturas pendientes de pago.';
+        console.error(e);
+      },
     });
   }
   getFacCobrada() {
     this.facServicio.getById(this.formBuscar.value.idfactura).subscribe({
       next: (datos: any) => {
         this._cliente = datos.idcliente;
+        this.getFragmentToShow('facturas');
         if (this.option === '0') {
           if (datos.fechaeliminacion === null && datos.pagado === 1) {
-            this._facturas = [datos];
+            this.hidratarFacturasBusqueda([datos]);
+            return;
           }
+          this._facturas = [];
+          this.swbuscando = false;
+          this.mensajeBusqueda = 'La factura consultada no está cobrada o ya fue eliminada.';
         }
         if (this.option === '1') {
           if (datos.fechaeliminacion === null && datos.pagado === 0) {
-            this._facturas = [datos];
+            this.hidratarFacturasBusqueda([datos]);
+            return;
           }
+          this._facturas = [];
+          this.swbuscando = false;
+          this.mensajeBusqueda =
+            'La factura consultada no está pendiente de pago o ya fue eliminada.';
         }
       },
-      error: (e) => console.error(e),
+      error: (e) => {
+        this.swbuscando = false;
+        this._facturas = [];
+        this.mensajeBusqueda = 'No se encontró la factura consultada.';
+        console.error(e);
+      },
     });
   }
   getClienteByAbonado() {
     this.s_abonados.getByIdabonado(this.formBuscar.value.idabonado).subscribe({
       next: (datos: any) => {
-        this._cliente = datos[0].idcliente_clientes;
+        this._cliente = Array.isArray(datos) && datos.length ? datos[0].idcliente_clientes : null;
+        if (!this._cliente?.idcliente) {
+          this._facturas = [];
+          this.swbuscando = false;
+          this.mensajeBusqueda = 'No se encontró un cliente asociado al abonado consultado.';
+          return;
+        }
         if (this.option === '0') {
           this.getFacCobradas();
         }
@@ -708,7 +814,12 @@ export class AnulacionesBajasComponent implements OnInit {
           this.getFacSinCobro();
         }
       },
-      error: (e) => console.error(e),
+      error: (e) => {
+        this.swbuscando = false;
+        this._facturas = [];
+        this.mensajeBusqueda = 'No se encontró el abonado consultado.';
+        console.error(e);
+      },
     });
   }
   setFactura(factura: any) {
@@ -719,101 +830,148 @@ export class AnulacionesBajasComponent implements OnInit {
     }
     this._fac = JSON.stringify(factura);
     this._factura = factura;
-    if (
-      this.option === '1' &&
-      (factura.idmodulo.idmodulo === 3 || factura.idmodulo.idmodulo === 4) &&
-      factura.idabonado > 0
-    ) {
-      this.s_lectura.getByIdfactura(factura.idfactura).subscribe({
-        next: (d_lectura: any) => {
-          this._lectura = d_lectura[0];
-        },
-      });
-    }
+    this.detalleOperacion = null;
+    this.facServicio.getDetalleAnulacionBaja(factura.idfactura).subscribe({
+      next: (detalle: any) => {
+        this.detalleOperacion = detalle;
+        this._lectura =
+          Array.isArray(detalle?.lecturas) && detalle.lecturas.length > 0
+            ? detalle.lecturas[0]
+            : new Lecturas();
+        this.size = 'lg';
+      },
+      error: (e) => console.error(e),
+    });
     this.getFragmentToShow('formNew');
   }
   buscarCliente() {}
 
+  get motivoActual(): string {
+    return this.option === '0'
+      ? this.f_factura?.value?.razonanulacion ?? ''
+      : this.f_factura?.value?.razoneliminacion ?? '';
+  }
+
+  abrirNuevoModal(): void {
+    const fechaDesdeActual = this.formBuscar?.value?.fechaDesde ?? '';
+    const fechaHastaActual = this.formBuscar?.value?.fechaHasta ?? this.sliceDate;
+
+    this.f_factura.reset({
+      usuarioanulacion: '',
+      razonanulacion: '',
+      usuarioeliminacion: '',
+      razoneliminacion: '',
+    });
+    this.formBuscar.reset({
+      idfactura: '',
+      idabonado: '',
+      fechaDesde: fechaDesdeActual,
+      fechaHasta: fechaHastaActual,
+    });
+    this._facturas = [];
+    this._cliente = new Clientes();
+    this._factura = new Facturas();
+    this._lectura = new Lecturas();
+    this.detalleOperacion = null;
+    this._fac = null;
+    this.textodato = '';
+    this.mensajeBusqueda = '';
+    this.campo = 0;
+    this.filtro = '';
+    this.mfiltrar = '';
+    this.swbuscando = false;
+    this.getFragmentToShow('formNew');
+  }
+
+  get puedeGuardar(): boolean {
+    return (
+      this.campo !== 0 &&
+      !!this.textodato &&
+      !!this._factura?.idfactura &&
+      this.motivoActual.trim().length >= 5 &&
+      !this.procesandoAccion
+    );
+  }
+
+  get estadoFecFacturaTexto(): string {
+    const estado = this.detalleOperacion?.fecFactura?.estado;
+    const estados: Record<string, string> = {
+      I: 'Inicial',
+      P: 'Proceso',
+      G: 'Generado',
+      L: 'Error al validar',
+      M: 'Error al firmar',
+      C: 'Devuelta',
+      U: 'Error al autorizar',
+      A: 'Autorizado / enviado',
+      O: 'Autorizado / no enviado',
+      E: 'Datos incompletos',
+    };
+    return estado ? `${estado} - ${estados[estado] || 'Estado no mapeado'}` : 'Sin registro';
+  }
+
+  private resetFormularioAccion(): void {
+    this.f_factura.reset();
+    this.formBuscar.reset();
+    this._cliente = new Clientes();
+    this._factura = new Facturas();
+    this._lectura = new Lecturas();
+    this.detalleOperacion = null;
+    this.textodato = '';
+    this.mensajeBusqueda = '';
+    this.campo = 0;
+    this.swbuscando = false;
+  }
+
   actualizar() {
-    let factura: any = this._factura;
-    let formFactura = this.f_factura.value;
-    let date: Date = new Date();
-    switch (this.option) {
-      case '0':
-        factura.fechaanulacion = date;
-        factura.nrofactura = null;
-        factura.razonanulacion = formFactura.razonanulacion;
-        factura.fechacobro = '';
-        factura.pagado = 0;
-        factura.usuariocobro = null;
-        factura.usuarioanulacion = this.authService.idusuario;
-        if (factura.formapago === 4) {
-          factura.estado = 1;
-          factura.formapago = 1;
-        }
-        if (factura.estadoconvenio === 1) {
-          factura.estado = 2;
-        }
-        this.s_factura.updateFacturas(factura).subscribe({
-          next: (facDato) => {
-            let date: Date = new Date();
+    if (!this.puedeGuardar) {
+      return;
+    }
+
+    const accion = this.option === '0' ? 'ANULACION' : 'ELIMINACION';
+    const motivo = this.motivoActual.trim();
+    this.procesandoAccion = true;
+
+    this.s_factura
+      .ejecutarAnulacionBaja({
+        idfactura: this._factura.idfactura,
+        accion,
+        motivo,
+        idusuario: this.authService.idusuario,
+      })
+      .subscribe({
+        next: () => {
+          if (accion === 'ANULACION') {
             let fmodi: Facturamodificaciones = new Facturamodificaciones();
             fmodi.datosfactura = this._fac;
-            fmodi.fechacrea = date;
-            fmodi.detalle = formFactura.razonanulacion;
-            fmodi.idfactura = factura.idfactura;
-            this.s_facmodificaciones
-              .saveFacturacionModificaciones(fmodi)
-                .subscribe({
-                  next: (modiDatos) => {
-                    this.f_factura.reset();
-                    this.formBuscar.reset();
-                    this._cliente = new Clientes();
-                    this.cargarHistoricos();
-                  },
-                error: (e) => console.error(e),
-              });
-          },
-          error: (e) => console.error(e),
-        });
-        break;
-      case '1':
-        factura.fechaeliminacion = date;
-        factura.razoneliminacion = formFactura.razoneliminacion;
-        factura.estado = 0;
-        factura.usuarioeliminacion = this.authService.idusuario;
-        this.s_factura.updateFacturas(factura).subscribe({
-          next: (facDato) => {
-            if (
-              (factura.idmodulo.idmodulo === 3 ||
-                factura.idmodulo.idmodulo === 4) &&
-              factura.idabonado > 0
-            ) {
-              this._lectura.estado = 0;
-              this._lectura.observaciones = formFactura.razoneliminacion;
-              this.s_lectura
-                .updateLectura(this._lectura.idlectura, this._lectura)
-                .subscribe({
-                  next: (d_lectura: any) => {
-                    this.f_factura.reset();
-                    this.formBuscar.reset();
-                    this._cliente = new Clientes();
-                    this.cargarHistoricos();
-                  },
-                });
-            } else {
-              this.f_factura.reset();
-              this.formBuscar.reset();
-              this._cliente = new Clientes();
-              this.cargarHistoricos();
-            }
-          },
-          error: (e) => console.error(e),
-        });
-        break;
-    }
-    this.textodato = '';
-    //this.facServicio.updateFacturas()
+            fmodi.fechacrea = new Date();
+            fmodi.detalle = motivo;
+            fmodi.idfactura = this._factura.idfactura;
+            this.s_facmodificaciones.saveFacturacionModificaciones(fmodi).subscribe({
+              next: () => {
+                this.resetFormularioAccion();
+                this.cargarHistoricos();
+                $('#newAnulBajas').modal('hide');
+                this.procesandoAccion = false;
+              },
+              error: (e) => {
+                this.procesandoAccion = false;
+                console.error(e);
+              },
+            });
+            return;
+          }
+
+          this.resetFormularioAccion();
+          this.cargarHistoricos();
+          $('#newAnulBajas').modal('hide');
+          this.procesandoAccion = false;
+        },
+        error: (e) => {
+          this.procesandoAccion = false;
+          console.error(e);
+        },
+      });
   }
 
   /* REPORTES  */
@@ -916,7 +1074,7 @@ export class AnulacionesBajasComponent implements OnInit {
       ]);
     });
     autoTable(doc, {
-      head: [['Nro planilla', 'Modulo', 'Usu elimina', 'Razón', 'Total']],
+      head: [['Nro planilla', 'Modulo', 'Usu elimina', 'Razon', 'Total']],
       body: bajas,
     });
     const blobUrl  = doc.output('datauri');
@@ -942,7 +1100,7 @@ export class AnulacionesBajasComponent implements OnInit {
       ]);
     });
     autoTable(doc, {
-      head: [['Nro planilla', 'Modulo', 'Usu anula', 'Razón', 'Total']],
+      head: [['Nro planilla', 'Modulo', 'Usu anula', 'Razon', 'Total']],
       body: anuladas,
     });
     /*     this.s_pdf.header(
@@ -963,23 +1121,23 @@ export class AnulacionesBajasComponent implements OnInit {
       body: [
         [
           `Nombre Cliente: ${bodyCliente.nombreCliente}`,
-          `Identificación: ${bodyCliente.identificacion}`,
+          `Identificacion: ${bodyCliente.identificacion}`,
           ``,
         ],
         [
           {
-            content: `Dirección: ${bodyCliente.direccion}`,
+            content: `Direccion: ${bodyCliente.direccion}`,
             colSpan: 3,
           },
         ],
         [
           `Fec. Eliminacion: ${bodyCliente.fechaeliminacion}`,
           ``,
-          `Módulo: ${bodyCliente.modulo}`,
+          `Modulo: ${bodyCliente.modulo}`,
         ],
         [
           {
-            content: `Razón eliminación: ${bodyCliente.razoneliminacion}`,
+            content: `Razon eliminacion: ${bodyCliente.razoneliminacion}`,
             colSpan: 3,
           },
         ],
@@ -991,10 +1149,10 @@ export class AnulacionesBajasComponent implements OnInit {
           [
             `Cuenta: ${bodyAbonado.cuenta}`,
             `Responsable pago: ${bodyAbonado.responsablepago}`,
-            `Identificación: ${bodyAbonado.identificacion}`,
+            `Identificacion: ${bodyAbonado.identificacion}`,
           ],
           [`Categoria: ${bodyAbonado.categoria}`, ` `, ``],
-          [{ content: `Dirección: ${bodyAbonado.direccion}`, colSpan: 3 }],
+          [{ content: `Direccion: ${bodyAbonado.direccion}`, colSpan: 3 }],
         ],
       });
     } else {
@@ -1007,9 +1165,9 @@ export class AnulacionesBajasComponent implements OnInit {
     const horaImpresion = getDateTime();
     doc.setFontSize(10);
 
-    // Agregar el pie de página
+    // Agregar el pie de pagina
     doc.text(
-      `Fecha y hora de impresión: ${horaImpresion}`,
+      `Fecha y hora de impresion: ${horaImpresion}`,
       doc.internal.pageSize.getWidth() / 2,
       doc.internal.pageSize.getHeight() - 10,
       { align: 'center' }
@@ -1036,3 +1194,4 @@ function getDateTime() {
     day + '/' + month + '/' + year + ' ' + hour + ':' + minute + ':' + second
   );
 }
+

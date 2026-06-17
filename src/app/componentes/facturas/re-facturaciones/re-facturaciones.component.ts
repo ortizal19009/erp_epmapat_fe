@@ -29,6 +29,7 @@ type Vista = 'LISTA' | 'NUEVA';
 @Component({
   selector: 'app-re-facturaciones',
   templateUrl: './re-facturaciones.component.html',
+  styleUrls: ['./re-facturaciones.component.css'],
 })
 export class ReFacturacionesComponent implements OnInit, OnDestroy {
   vista: Vista = 'LISTA';
@@ -62,6 +63,10 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
 
   // Facturas antiguas eliminadas (fechaelimina/fechaeliminacion != null)
   _facturasEliminadas: any[] = [];
+  resumenLectura: { consumoActual: number; tieneNovedad: boolean } = {
+    consumoActual: 0,
+    tieneNovedad: false,
+  };
 
   private subs: Subscription[] = [];
   swMulta: boolean = false;
@@ -89,7 +94,7 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
     this.f_lecturas = this.fb.group({
       lecturaanterior: 0,
       lecturaactual: 0,
-      idnovedad_novedades: '',
+      idnovedad_novedades: null,
     });
 
     sessionStorage.setItem('ventana', '/re-facturacion');
@@ -109,6 +114,7 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
 
     this.subs.push(
       this.f_lecturas.valueChanges.subscribe(() => {
+        this.actualizarResumenLectura();
         if (this.vista === 'NUEVA') {
           this.cambiosPendientes = true;
           this.guardadoOk = false;
@@ -118,6 +124,7 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
 
     this.getAllEmisiones();
     this.getAllNovedades();
+    this.actualizarResumenLectura();
   }
 
   ngOnDestroy(): void {
@@ -210,9 +217,10 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
 
     this.f_emisionIndividual.patchValue({ abonado: '' }, { emitEvent: false });
     this.f_lecturas.patchValue(
-      { lecturaanterior: 0, lecturaactual: 0, idnovedad_novedades: '' },
+      { lecturaanterior: 0, lecturaactual: 0, idnovedad_novedades: null },
       { emitEvent: false },
     );
+    this.actualizarResumenLectura();
 
     this.cambiosPendientes = false;
     this.guardadoOk = false;
@@ -343,7 +351,10 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
               {
                 lecturaanterior: datos[0].lecturaanterior,
                 lecturaactual: datos[0].lecturaactual,
-                idnovedad_novedades: datos[0].idnovedad_novedades,
+                idnovedad_novedades:
+                  datos[0]?.idnovedad_novedades?.idnovedad ??
+                  datos[0]?.idnovedad_novedades ??
+                  null,
               },
               { emitEvent: false },
             );
@@ -352,13 +363,33 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
             this._lectura = { observaciones: '' };
 
             this.f_lecturas.patchValue(
-              { lecturaanterior: 0, lecturaactual: 0, idnovedad_novedades: '' },
+              { lecturaanterior: 0, lecturaactual: 0, idnovedad_novedades: null },
               { emitEvent: false },
             );
           }
+          this.actualizarResumenLectura();
         },
         error: (e) => console.error(e),
       });
+  }
+
+  get novedadSeleccionada(): any {
+    const idNovedad = this.f_lecturas?.value?.idnovedad_novedades;
+    return this.novedades.find((n: any) => n?.idnovedad === idNovedad) ?? null;
+  }
+
+  get consumoDigitado(): number {
+    const anterior = Number(this.f_lecturas?.value?.lecturaanterior ?? 0);
+    const actual = Number(this.f_lecturas?.value?.lecturaactual ?? 0);
+    const consumo = actual - anterior;
+    return Number.isFinite(consumo) ? consumo : 0;
+  }
+
+  actualizarResumenLectura(): void {
+    this.resumenLectura = {
+      consumoActual: this.consumoDigitado,
+      tieneNovedad: !!this.novedadSeleccionada,
+    };
   }
 
   // =======================
@@ -375,7 +406,7 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
     this.cargando = true;
     try {
       // 1) obtener Novedad seleccionada
-      const novedad: any = this.f_lecturas.value.idnovedad_novedades;
+      const novedad: any = this.novedadSeleccionada;
 
       // 2) crear/obtener RutaxEmision (si en tu lógica la refacturación depende de una ruta)
       //    ✅ Si tu backend ya te devuelve la rutaxemision actual por abonado+emision, reemplaza este bloque.
@@ -644,7 +675,7 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
       this.idfactura = nuevoIdfactura;
 
       // 2) Crear Lectura
-      let lectura = {} as Lectura;
+    let lectura = {} as Lectura;
       lectura.estado = this.lecturaestado;
       lectura.fechaemision = dateEmision;
 
@@ -653,7 +684,7 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
       lectura.lecturadigitada = this.f_lecturas.value.lecturaactual;
       lectura.mesesmulta = 0;
 
-      lectura.idnovedad_novedades = novedad;
+      lectura.idnovedad_novedades = novedad ?? null;
       lectura.idemision = this.f_emisionIndividual.value.emision;
       lectura.idabonado_abonados = this.abonado;
       lectura.idresponsable = this.abonado.idresponsable.idcliente;
