@@ -41,6 +41,8 @@ export class BuscarClienteComponent implements OnInit {
         this.ventana
       );
     }
+      console.log("BuscarClienteComponent cargado");
+
   }
 
   // buscarCliente() {
@@ -72,6 +74,7 @@ export class BuscarClienteComponent implements OnInit {
   //     this.btn_search = false;
   //   }
   // }
+
 
   getClienteValue(cliente: Clientes) {
     this.setCliente.emit(cliente);

@@ -41,7 +41,7 @@ export class ModificarTramitenuevoComponent implements OnInit {
    medidor: boolean = true;
    notificado: boolean = true;
    aprobado: boolean = true;
-   secuenciaAfectada: number;
+   secuenciaAfectada: number | null;
    ruta: any;
    date: Date = this.obtenerFechaActualLocal();
    aguatramite: Aguatramite = new Aguatramite();
@@ -168,12 +168,44 @@ export class ModificarTramitenuevoComponent implements OnInit {
    }
 
    setAbonado(abonado: any) {
+      this.abonado = abonado;
       this.ruta = abonado.idruta_rutas;
       this.formTramitenuevo.patchValue({
          codmedidorvecino: abonado.idabonado,
          secuencia: abonado.secuencia + 1,
       });
       this.secuenciaAfectada = abonado.secuencia;
+   }
+
+   private cargarAbonadoAfectadoSiExiste(idAbonado?: number | string | null) {
+      const id = Number(idAbonado);
+      if (!id) {
+         this.abonado = null;
+         this.ruta = null;
+         this.secuenciaAfectada = null;
+         return;
+      }
+
+      this.aboService.getByidabonado(id).subscribe({
+         next: (abonado) => {
+            if (abonado) {
+               this.setAbonado(abonado);
+            }
+         },
+         error: (error) => console.error('No se pudo cargar la cuenta afectada del trámite:', error),
+      });
+   }
+
+   private extraerMensajeHttp(error: any, fallback: string): string {
+      const backendMessage =
+         error?.error?.message ||
+         error?.error?.mensaje ||
+         error?.error?.error ||
+         error?.message;
+
+      return typeof backendMessage === 'string' && backendMessage.trim().length > 0
+         ? backendMessage
+         : fallback;
    }
 
    obtenerDatosTramite() {
@@ -223,6 +255,7 @@ export class ModificarTramitenuevoComponent implements OnInit {
             });
             this.aguatramite = datos.idaguatramite_aguatramite;
             this.formTramitenuevo.updateValueAndValidity();
+            this.cargarAbonadoAfectadoSiExiste(datos.codmedidorvecino);
          },
          error: (e) => console.error(e),
       });
@@ -284,7 +317,7 @@ export class ModificarTramitenuevoComponent implements OnInit {
          Swal.fire({
             icon: 'error',
             title: 'No se pudo completar el trámite',
-            text: 'Revisa la información e intenta nuevamente.',
+            text: this.extraerMensajeHttp(e, 'Revisa la información e intenta nuevamente.'),
          });
       }
    }
@@ -294,6 +327,16 @@ export class ModificarTramitenuevoComponent implements OnInit {
    }
 
    async guardarAbonadoAsync(): Promise<Abonados> {
+      if (!this.ruta?.idruta) {
+         throw new Error('Debes seleccionar o recuperar la cuenta afectada antes de guardar el trámite.');
+      }
+
+      const tramite = this.formTramitenuevo.getRawValue().idaguatramite_aguatramite;
+      const cliente = tramite?.idcliente_clientes;
+      if (!cliente?.idcliente) {
+         throw new Error('El trámite no tiene un cliente válido asociado.');
+      }
+
       let abonado: Abonados = new Abonados();
       let estadom: Estadom = new Estadom();
       let tipopago: Tipopago = new Tipopago();
@@ -312,10 +355,10 @@ export class ModificarTramitenuevoComponent implements OnInit {
       abonado.observacion = this.formTramitenuevo.value.observaciones;
       abonado.departamento = this.formTramitenuevo.value.nrodepar;
       abonado.piso = this.formTramitenuevo.value.piso;
-      abonado.idresponsable = this.formTramitenuevo.value.idaguatramite_aguatramite.idcliente_clientes;
+      abonado.idresponsable = cliente;
       abonado.idcategoria_categorias = this.formTramitenuevo.value.idcategoria_categorias;
       abonado.idruta_rutas = this.ruta;
-      abonado.idcliente_clientes = this.formTramitenuevo.value.idaguatramite_aguatramite.idcliente_clientes;
+      abonado.idcliente_clientes = cliente;
       abonado.idubicacionm_ubicacionm = ubicacionm;
       abonado.idtipopago_tipopago = tipopago;
       abonado.idestadom_estadom = estadom;
