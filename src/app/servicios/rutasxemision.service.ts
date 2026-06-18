@@ -53,7 +53,10 @@ export class RutasxemisionService {
     idrutaemision: number,
     rutaxemision: any
   ): Observable<Object> {
-    return this.http.put(baseUrl + '/' + idrutaemision, rutaxemision);
+    return this.http.put(
+      baseUrl + '/' + idrutaemision,
+      this.normalizarPayloadFechas(rutaxemision)
+    );
   }
 
   // rutasxemision.service.ts
@@ -61,7 +64,10 @@ update_Rutaxemision(
   idrutaemision: number,
   cambios: Partial<Rutasxemision>
 ): Observable<object> {
-  return this.http.patch(`${baseUrl}/${idrutaemision}`, cambios);
+  return this.http.patch(
+    `${baseUrl}/${idrutaemision}`,
+    this.normalizarPayloadFechas(cambios)
+  );
 }
 
 
@@ -69,5 +75,26 @@ update_Rutaxemision(
     return this.http.get(
       `${baseUrl}/emiruta?idemision=${idemision}&idruta=${idruta}`
     );
+  }
+
+  private normalizarPayloadFechas<T>(payload: T): T {
+    if (!payload || typeof payload !== 'object') {
+      return payload;
+    }
+
+    const normalizado: any = { ...(payload as any) };
+
+    if (normalizado.fechacierre instanceof Date) {
+      normalizado.fechacierre = this.toLocalDateString(normalizado.fechacierre);
+    }
+
+    return normalizado as T;
+  }
+
+  private toLocalDateString(fecha: Date): string {
+    const year = fecha.getFullYear();
+    const month = String(fecha.getMonth() + 1).padStart(2, '0');
+    const day = String(fecha.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }
