@@ -478,9 +478,9 @@
         </form>
       </div>
       <div class="modal-footer py-2">
-        <button type="button" class="btn btn-success btn-sm" [disabled]="disabledcobro" (click)="cobrar()"
-          data-dismiss="modal">
-          <i class="fa fa-check-circle"></i> Confirmar Cobro
+        <button type="button" class="btn btn-success btn-sm" [disabled]="disabledcobro || procesandoCobro" (click)="cobrar()">
+          <i class="fa" [ngClass]="procesandoCobro ? 'fa-spinner fa-spin' : 'fa-check-circle'"></i>
+          {{ procesandoCobro ? ' Procesando...' : ' Confirmar Cobro' }}
         </button>
         <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">
           <i class="bi bi-x-circle"></i> Cancelar

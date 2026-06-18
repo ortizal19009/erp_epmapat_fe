@@ -81,6 +81,7 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
   swcobrado = false;
   private pdfPreviewObjectUrl: string | null = null;
   disabledcobro = true;
+  procesandoCobro = false;
   totfac = 0;
   idfactura: number;
   consumo = 0;
@@ -1190,8 +1191,37 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
     this.disabledcobro = false;
   }
 
+  private limpiarFormularioCobro(): void {
+    const formaCobroActual =
+      this.formCobrar.get('idformacobro')?.value ??
+      this._formascobro.find(
+        (formacobro: any) =>
+          Number(formacobro?.idformacobro) === Number(this.idformacobro)
+      ) ??
+      this._formascobro[0] ??
+      this.formaCobro;
+
+    this.formCobrar.reset();
+    this.formCobrar.patchValue({
+      idformacobro: formaCobroActual,
+      valorAcobrar: 0,
+      acobrar: 0,
+      dinero: '',
+      vuelto: '',
+      ncvalor: '',
+      saldo: '',
+    });
+
+    this.aplicarFormaCobroFormulario(formaCobroActual);
+    this.disabledcobro = true;
+  }
+
 
   async cobrar() {
+    if (this.procesandoCobro) {
+      return;
+    }
+
     const fecha = new Date();
     const seleccionadas = (this._sincobro || []).filter(
       (item: any) => item.pagado === 1 || item.pagado === true
@@ -1219,15 +1249,7 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
     recaudacion.usucrea = this.authService.idusuario;
     recaudacion.feccrea = fecha;
 
-    let interesesPorFactura = new Map<number, number>();
-    try {
-      interesesPorFactura = await this.obtenerInteresesTemporales(seleccionadas);
-    } catch (error) {
-      console.error('Error al obtener intereses temporales:', error);
-      this.swal('error', 'No se pudo obtener el interes temporal de las facturas.');
-      return;
-    }
-
+    this.procesandoCobro = true;
     seleccionadas.forEach((item: any) => {
       item.procesando = true;
       item.procesada = false;
@@ -1241,7 +1263,7 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
         idcaja: this._caja?.idcaja,
       })
       .subscribe({
-        next: async (resp: any) => {
+        next: (resp: any) => {
           const facturasResp = Array.isArray(resp?.facturas) ? resp.facturas : [];
           const porId = new Map<number, any>(
             facturasResp.map((item: any) => [Number(item?.idfactura), item] as [number, any])
@@ -1252,6 +1274,9 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
             if (actualizada) {
               item.nrofactura = actualizada.nrofactura ?? item.nrofactura;
               item.fechacobro = actualizada.feccrea ?? item.fechacobro;
+              if (actualizada.interescobrado != null) {
+                item.interes = this.normalizarValorMonetario(actualizada.interescobrado);
+              }
             }
             item.procesando = false;
             item.procesada = true;
@@ -1265,24 +1290,17 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
             this.recxcaja = { ...this.recxcaja, ...resp.caja };
           }
 
-          try {
-            await this.persistirInteresesRecaudacion(seleccionadas, interesesPorFactura);
-          } catch (persistError) {
-            console.error('Error al persistir intereses de la recaudacion:', persistError);
-            this.swal(
-              'warning',
-              'El cobro se registro, pero hubo un problema al guardar los intereses cobrados.'
-            );
-            return;
-          }
-
+          this.procesandoCobro = false;
           this.swcobrado = true;
+          this.limpiarFormularioCobro();
+          this.closeModal('modalCobrar');
           this.swal('success', 'Recaudación cobrada y factura electrónica generada con éxito.');
         },
         error: (err) => {
           seleccionadas.forEach((item: any) => {
             item.procesando = false;
           });
+          this.procesandoCobro = false;
           console.error('Error al cobrar facturas:', err?.error ?? err);
           this.swal('error', 'Ocurrió un problema al procesar las facturas.');
         },
