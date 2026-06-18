@@ -1,4 +1,4 @@
-<div class="content mt-3">
+﻿<div class="content mt-3">
   <div class="container-fluid">
     <div class="card shadow-sm border-0 mb-4">
       <div class="card-header bg-gradient-primary text-white py-4">
@@ -21,7 +21,7 @@
 
           <div class="d-flex align-items-center">
             <div class="btn-group mr-2">
-              <button type="button" class="btn btn-light btn-sm dropdown-toggle" data-toggle="dropdown"
+              <button type="button" class="btn btn-light btn-sm dropdown-toggle" data-toggle="dropdown" title="Opciones de recaudación" aria-label="Opciones de recaudación"
                 aria-haspopup="true" aria-expanded="false">
                 <i class="bi bi-menu-button-wide"></i>
               </button>
@@ -41,7 +41,7 @@
               </div>
             </div>
 
-            <button *ngIf="swbusca != 0" class="btn btn-warning btn-sm" (click)="reiniciar()">
+            <button *ngIf="swbusca != 0" type="button" class="btn btn-warning btn-sm" (click)="reiniciar()">
               <i class="bi bi-arrow-left-circle"></i> Volver
             </button>
           </div>
@@ -52,15 +52,15 @@
         <form [formGroup]="formBuscar" (ngSubmit)="onSubmit()">
           <div class="row align-items-end">
             <div class="col-lg-3 col-md-6 mb-2">
-              <label class="small font-weight-bold text-muted mb-1 d-block">Cuenta</label>
-              <input class="form-control form-control-sm" type="text" formControlName="cuenta"
+              <label for="buscarCuenta" class="small font-weight-bold text-muted mb-1 d-block">Cuenta</label>
+              <input id="buscarCuenta" class="form-control form-control-sm" type="text" formControlName="cuenta"
                 placeholder="Cuenta / Idabonado"
                 (focus)="formBuscar.get('identificacion')?.setValue('')" />
             </div>
 
             <div class="col-lg-3 col-md-6 mb-2">
-              <label class="small font-weight-bold text-muted mb-1 d-block">Identificación</label>
-              <input class="form-control form-control-sm" type="text" formControlName="identificacion"
+              <label for="buscarIdentificacion" class="small font-weight-bold text-muted mb-1 d-block">Identificación</label>
+              <input id="buscarIdentificacion" class="form-control form-control-sm" type="text" formControlName="identificacion"
                 placeholder="Cédula / RUC"
                 (focus)="formBuscar.get('cuenta')?.setValue('')" />
             </div>
@@ -92,8 +92,8 @@
             </div>
 
             <div class="col-lg-2 col-md-12 mb-2">
-              <label class="small font-weight-bold text-muted mb-1 d-block">Filtro en resultados</label>
-              <input class="form-control form-control-sm" type="text" formControlName="filtro"
+              <label for="filtroResultados" class="small font-weight-bold text-muted mb-1 d-block">Filtro en resultados</label>
+              <input id="filtroResultados" class="form-control form-control-sm" type="text" formControlName="filtro"
                 placeholder="Filtrar tabla..." />
             </div>
           </div>
@@ -146,8 +146,7 @@
                 <div class="small text-muted font-weight-bold">Total seleccionado</div>
                 <div class="h4 mb-0 text-primary">${{ acobrar | number: '1.2-2' }}</div>
               </div>
-              <div *ngIf="formCobrar.value.saldo" class="ntaCre d-inline-flex align-items-center px-3 py-2 rounded shadow-sm"
-                style="font-size: 1rem; font-weight: 700; background:#fff3cd; color:#856404; border: 2px solid #ffeeba;">
+              <div *ngIf="formCobrar.value.saldo" class="ntaCre nta-cre-highlight d-inline-flex align-items-center px-3 py-2 rounded shadow-sm">
                 <i class="bi bi-credit-card mr-2"></i>
                 <strong class="mr-2">NC:</strong>
                 {{ formCobrar.value.saldo }}
@@ -167,7 +166,7 @@
           <div class="card-body p-0">
             <div *ngIf="swbusca == 0" class="text-center py-5">
               <div class="empty-state">
-                <img src="/assets/img/logo.png" alt="Logo" class="empty-state-img mb-4" style="max-width: 250px;">
+                <img src="/assets/img/logo.png" alt="Logo" class="empty-state-img empty-state-img--large mb-4">
                 <h5 class="text-muted">Sistema de Recaudación</h5>
                 <p class="text-muted small">Utiliza la búsqueda para cargar planillas pendientes y comenzar la recaudación.</p>
               </div>
@@ -224,14 +223,14 @@
                       <th class="min-width-200">Responsable de pago</th>
                       <th width="120" class="text-center">Planilla</th>
                       <th width="150" class="text-center">Dirección</th>
-                      <th width="110" class="text-center">F. emisión</th>
+                      <th width="110" class="text-center">F. emisiÃ³n</th>
                       <th class="min-width-150">Módulo</th>
                       <th width="130" class="text-right">Valor</th>
                       <th width="80" class="text-center">
                         <div class="custom-control custom-checkbox custom-control-sm">
-                          <input type="checkbox" class="custom-control-input" id="selectAll"
+                          <input type="checkbox" class="custom-control-input" id="selectAll" aria-label="Seleccionar todas las planillas" title="Seleccionar todas las planillas"
                             (change)="marcarTodas($event)" [disabled]="filtro || !deshabilitarImprimirTodo">
-                          <label class="custom-control-label" for="selectAll"></label>
+                          <label class="custom-control-label" for="selectAll"><span class="sr-only">Seleccionar todas las planillas</span></label>
                         </div>
                       </th>
                       <th width="110" class="text-center">Acción</th>
@@ -346,7 +345,7 @@
           <div class="col-md-9">
             <form [formGroup]="formBusClientes">
               <div class="input-group input-group-sm">
-                <input type="text" placeholder="Nombre ó identificación (Mínimo 5 caracteres)"
+                <input type="text" placeholder="Nombre o identificación (Mínimo 5 caracteres)"
                   class="form-control form-control-sm" autofocus id="nombre_identifica"
                   formControlName="nombre_identifica" required minlength="5" />
                 <div class="input-group-append">
@@ -372,14 +371,18 @@
                     <th width="50">#</th>
                     <th>Nombre</th>
                     <th>Identificación</th>
+                    <th>Estado</th>
+                    <th>Dirección</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr *ngFor="let cliente of _clientes | filter:filtro; let i= index" (click)="selecCliente(cliente)"
-                    style="cursor: pointer;">
+                    class="client-row-clickable">
                     <td class="text-center small">{{i+1}}</td>
                     <td class="small">{{cliente.nombre}}</td>
                     <td class="small">{{cliente.cedula}}</td>
+                    <td class="small">{{cliente.estado}}</td>
+                    <td class="small">{{cliente.direccion}}</td>
                   </tr>
                 </tbody>
               </table>
@@ -409,8 +412,8 @@
       <div class="modal-body py-2">
         <form [formGroup]="formCobrar">
           <div class="form-group mb-2">
-            <label class="font-weight-bold small">Forma de cobro</label>
-            <select class="custom-select form-control-sm" formControlName="idformacobro" (change)="changeFormacobro()">
+            <label for="idformacobro" class="font-weight-bold small">Forma de cobro</label>
+            <select id="idformacobro" class="custom-select form-control-sm" formControlName="idformacobro" (change)="changeFormacobro()">
               <option *ngFor="let formacobro of _formascobro" [ngValue]="formacobro">
                 {{ formacobro.descripcion }}
               </option>
@@ -418,9 +421,9 @@
           </div>
 
           <div class="form-group mb-2">
-            <label class="font-weight-bold small">A Cobrar</label>
+            <label for="acobrar" class="font-weight-bold small">A Cobrar</label>
             <div class="input-group input-group-sm">
-              <input type="text" class="form-control text-right" formControlName="acobrar" readonly />
+              <input id="acobrar" type="text" class="form-control text-right" formControlName="acobrar" readonly />
               <div class="input-group-append">
                 <span class="input-group-text">{{ acobrardec }}</span>
               </div>
@@ -428,8 +431,8 @@
           </div>
 
           <div *ngIf="formacobroNC || f['ncvalor'].value > 0" class="form-group mb-2">
-            <label class="font-weight-bold small">Saldo NC</label>
-            <input type="text" class="form-control form-control-sm text-center" formControlName="saldo" readonly
+            <label for="saldo" class="font-weight-bold small">Saldo NC</label>
+            <input id="saldo" type="text" class="form-control form-control-sm text-center" formControlName="saldo" readonly
               [ngClass]="{
                 'is-invalid': f['saldo'].invalid && f['saldo'].touched,
                 'is-valid': f['saldo'].valid && f['saldo'].touched
@@ -437,8 +440,8 @@
           </div>
 
           <div *ngIf="formacobroNC || f['ncvalor'].value > 0" class="form-group mb-2">
-            <label class="font-weight-bold small">Valor NC</label>
-            <input type="text" class="form-control form-control-sm text-center" formControlName="ncvalor" [ngClass]="{
+            <label for="ncvalor" class="font-weight-bold small">Valor NC</label>
+            <input id="ncvalor" type="text" class="form-control form-control-sm text-center" formControlName="ncvalor" [ngClass]="{
               'is-invalid': f['ncvalor'].invalid && f['ncvalor'].touched,
               'is-valid': f['ncvalor'].valid,
               '': f['ncvalor'].untouched
@@ -446,9 +449,9 @@
           </div>
 
           <div *ngIf="!formacobroNC" class="form-group mb-2">
-            <label class="font-weight-bold small">Dinero Recibido</label>
+            <label for="dinero" class="font-weight-bold small">Dinero Recibido</label>
             <div class="input-group input-group-sm">
-              <input type="text" class="form-control text-center" formControlName="dinero" [ngClass]="{
+              <input id="dinero" type="text" class="form-control text-center" formControlName="dinero" [ngClass]="{
                 'is-invalid': f['dinero'].invalid && f['dinero'].touched,
                 'is-valid': f['dinero'].valid,
                 '': f['dinero'].untouched
@@ -462,9 +465,9 @@
           </div>
 
           <div class="form-group mb-2">
-            <label class="font-weight-bold small">Vuelto</label>
+            <label for="vuelto" class="font-weight-bold small">Vuelto</label>
             <div class="input-group input-group-sm">
-              <input type="text" class="form-control text-center" formControlName="vuelto" readonly />
+              <input id="vuelto" type="text" class="form-control text-center" formControlName="vuelto" readonly />
               <div class="input-group-append">
                 <span *ngIf="disabledcobro" class="input-group-text bg-danger text-white">
                   <i class="bi bi-x-circle"></i>
@@ -567,8 +570,8 @@
           <input type="text" class="form-control form-control-sm" value="{{ _usuario.alias }}" readonly />
         </div>
         <div class="form-group mb-2">
-          <label class="small font-weight-bold">Establecimiento</label>
-          <select class="custom-select form-control-sm" (change)="changeEstablecimiento($event)"
+          <label for="establecimientoCaja" class="small font-weight-bold">Establecimiento</label>
+          <select id="establecimientoCaja" class="custom-select form-control-sm" (change)="changeEstablecimiento($event)"
             [(ngModel)]="_establecimiento">
             <option *ngFor="let ptoemision of _ptoemision" [ngValue]="ptoemision">
               {{ ptoemision.establecimiento }}
@@ -649,8 +652,8 @@
             <i class="bi bi-x-circle"></i> Cerrar
           </button>
         </div>
-        <div class="border rounded" style="min-height: 70vh; background: #fff;">
-          <iframe id="pdfViewerRecaudacion" src="" width="100%" height="700px" style="border:none;"></iframe>
+        <div class="border rounded pdf-preview-container">
+          <iframe id="pdfViewerRecaudacion" src="" width="100%" height="700px" class="pdf-preview-frame"></iframe>
         </div>
       </div>
     </div>
@@ -668,14 +671,14 @@
       </div>
       <div class="modal-body">
         <div class="form-group mb-2">
-          <label class="small font-weight-bold">Opciones</label>
-          <select class="custom-select form-control-sm">
+          <label for="opcionImpresion" class="small font-weight-bold">Opciones</label>
+          <select id="opcionImpresion" class="custom-select form-control-sm">
             <option selected>Reimprimir planilla</option>
           </select>
         </div>
         <div class="form-group mb-2">
-          <label class="small font-weight-bold">N° planilla</label>
-          <input type="text" class="form-control form-control-sm" [(ngModel)]="cuenta" />
+          <label for="numeroPlanillaReimpresion" class="small font-weight-bold">N° planilla</label>
+          <input id="numeroPlanillaReimpresion" type="text" class="form-control form-control-sm" [(ngModel)]="cuenta" />
         </div>
       </div>
       <div class="modal-footer">
@@ -690,3 +693,6 @@
     </div>
   </div>
 </div>
+
+
+
