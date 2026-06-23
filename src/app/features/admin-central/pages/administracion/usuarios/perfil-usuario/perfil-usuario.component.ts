@@ -244,7 +244,6 @@ export class PerfilUsuarioComponent implements OnInit {
     this.s_usrxmodulos.saveAccessModulos(payload).subscribe({
       next: () => {
         data.saving = false;
-        console.log(`Módulo ${data.iderpmodulo_erpmodulos.descripcion} ${enabled ? 'habilitado' : 'deshabilitado'} para el usuario`);
         // Aquí podrías mostrar un toast de éxito si tienes un servicio de notificaciones
       },
       error: (err: any) => {
@@ -343,7 +342,6 @@ export class PerfilUsuarioComponent implements OnInit {
       return;
     }
     // Temporalmente deshabilitado hasta que se implemente el endpoint en el backend
-    console.log('Secciones no disponibles - endpoint pendiente de implementación');
     this.sectionCatalog = [];
     // this.s_usrxmodulos.getSectionCatalog(this.selectedModuleId, 'WEB').subscribe({
     //   next: (rows: any[]) => this.sectionCatalog = rows || [],

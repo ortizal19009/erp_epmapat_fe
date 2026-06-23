@@ -98,7 +98,6 @@ export class ImpCuentasComponent implements OnInit {
                this._cuentas = await this.cueService.getByCodigoyNombreAsync(codcue, nomcue);
                // let i = 0
                this.saldos(0);
-               // console.log('Después de this.saldos(i)')
                // this.swcalculando = false;
                // if (this.swimprimir) this.txtcalculando = 'Mostrar'
                // else this.txtcalculando = 'Descargar'
@@ -115,7 +114,6 @@ export class ImpCuentasComponent implements OnInit {
       //Débitos
       let desde = this.formImprimir.value.desde;
       let hasta = this.formImprimir.value.hasta;
-      // console.log(desde, hasta)
       this.tranService.sumValor(this._cuentas[i].codcue, 1, desde, hasta).subscribe({
          next: resp1 => {
             this._cuentas[i].debitos = Math.round(resp1 * 100) / 100;

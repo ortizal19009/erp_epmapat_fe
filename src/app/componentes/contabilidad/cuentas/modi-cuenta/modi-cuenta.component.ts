@@ -167,7 +167,6 @@ export class ModiCuentaComponent implements OnInit {
             }
          }
          else {
-            console.log('Regresa por aqui')
             return of(null)
          }
       }
@@ -190,28 +189,22 @@ export class ModiCuentaComponent implements OnInit {
       }
       else {   //Al cambiar a No movimiento valida que no tenga transacciones
          // if (this.antcodcue && this.antmovcuebool != control.value) {
-         // console.log('if: ', this.antmovcuebool, control.value)
          if (this.antmovcuebool != control.value) {
-            // console.log('Envia: ', this.antcodcue.toString())
             this.tranService.tieneTransaci(this.antcodcue.toString()).subscribe({
                next: resp => {
                   if (resp) {
-                     console.log('Devuelve true');
                      rtn = true;
                      return of({ 'movimiento': true })
                   } else {
-                     console.log('Devuelve false');
                      rtn = false;
                      return of(null)
                   }
-                  console.log('rtn: ', rtn)
                   if (rtn) return of({ 'movimiento': true })
                   else return of(null)
                },
                error: (error) => { console.error(error); }
             });
             if (rtn != null) {
-               console.log('Pasa por aqui rtn: ', rtn)
                if (rtn) return of({ 'movimiento': true })
                else return of(null)
             }

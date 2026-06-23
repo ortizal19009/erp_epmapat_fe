@@ -185,7 +185,6 @@ export class TramitesAguaService {
   }
 
   async buildHojaInspeccionBlob(datos: any, titulo: string): Promise<Blob> {
-    console.log('Generando hoja de inspección con datos:', datos);
     let medidor = 'NO';
     if (+datos.medidorempresa! === 1) {
       medidor = 'SI';
@@ -489,7 +488,6 @@ export class TramitesAguaService {
     cargoFallback: string,
     firmaFallback?: { nombre: string; cargo: string }
   ): Promise<{ nombre: string; cargo: string }> {
-    console.log(`Buscando personal activo para cargo "${cargoFallback}" con patrones:`, cargosBuscados);
     const firmaRespaldo = firmaFallback || this.obtenerFirmaFallbackPorCargo(cargoFallback);
     const cargosNormalizados = this.expandirPatronesCargo(cargosBuscados, cargoFallback);
 

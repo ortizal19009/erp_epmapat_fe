@@ -39,7 +39,6 @@ export class ModiNiifcuentaComponent implements OnInit {
    get f() { return this.formNiifcuenta.controls; }
 
    onSubmit() {
-      console.log(this.formNiifcuenta.value);
       this.guardarNiffCuenta();
    }
 

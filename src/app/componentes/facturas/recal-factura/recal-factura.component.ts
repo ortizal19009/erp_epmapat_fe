@@ -113,7 +113,6 @@ export class RecalFacturaComponent implements OnInit {
          this._lecturas[0].idabonado_abonados.idcategoria_categorias.idcategoria;
       let consumo =
          this._lecturas[0].lecturaactual - this._lecturas[0].lecturaanterior;
-      console.log(consumo);
       let adultomayor = this._lecturas[0].idabonado_abonados.adultomayor;
       let noAlcantarillado =
          this._lecturas[0].idabonado_abonados.swalcantarillado;

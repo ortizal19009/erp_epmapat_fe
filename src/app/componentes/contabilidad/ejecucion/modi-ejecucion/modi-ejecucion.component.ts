@@ -43,7 +43,7 @@ export class ModiEjecucionComponent implements OnInit {
         this.reforma.tipo = resp.tipo;
         this.reforma.concepto = resp.concepto;
       },
-      error: err => console.log(err.error)
+      error: err => console.error(err.error)
     });
 
 
@@ -91,7 +91,6 @@ export class ModiEjecucionComponent implements OnInit {
   listarPresupue() {
     // this.presupueService.getListaPresupue().subscribe({
     //   next: resp => this._presupue = resp,
-    //   error: err => console.log(err.error.msg)
     // });
   }
 
@@ -123,7 +122,7 @@ export class ModiEjecucionComponent implements OnInit {
           idevenga: datos.idevenga,
         })
       },
-      error: err => console.log(err.msg.error)
+      error: err => console.error(err.msg.error)
     });
   }
 
@@ -132,7 +131,7 @@ export class ModiEjecucionComponent implements OnInit {
   onSubmit() {
     this.ejecuService.updateEjecucion(this.idejecu, this.ejecucioForm.value).subscribe({
       next: resp => this.retornar(),
-      error: err => console.log(err.error.msg)
+      error: err => console.error(err.error.msg)
     });
   }
 
@@ -152,7 +151,6 @@ export class ModiEjecucionComponent implements OnInit {
   }
 
   buscarPresupue() {
-    console.log("Envia: " + this.formBusPresupue.value.codpar + "  " + this.formBusPresupue.value.nompar)
     if (this.reforma.tipo == "G") {
       this.tippar = 2;
     } else {
@@ -163,7 +161,7 @@ export class ModiEjecucionComponent implements OnInit {
     //     this._presupue = datos;
     //     console.log("this._presupue.length= " + this._presupue.length)
     //   },
-    //   error: err => console.log(err.error)
+    //   error: err => console.error(err.error)
     // })
 
   }

@@ -59,7 +59,6 @@ export class PresupueService {
    }
 
    getByCodigoG(codpar: String) {
-      console.log(`${baseUrl}?codpar=${codpar}`)
       return this.http.get<Presupue[]>(`${baseUrl}?codpar=${codpar}`);
    }
 

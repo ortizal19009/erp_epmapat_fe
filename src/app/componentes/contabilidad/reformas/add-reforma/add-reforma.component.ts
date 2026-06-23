@@ -96,7 +96,7 @@ export class AddReformaComponent implements OnInit {
             sessionStorage.setItem("buscarReformas", JSON.stringify(buscarReformas));
             this.regresar();
          },
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       });
    }
 

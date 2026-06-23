@@ -41,7 +41,6 @@ export class BuscarClienteComponent implements OnInit {
         this.ventana
       );
     }
-      console.log("BuscarClienteComponent cargado");
 
   }
 

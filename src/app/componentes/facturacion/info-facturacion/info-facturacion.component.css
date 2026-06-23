@@ -1,36 +1,250 @@
-.container-fluid{
-   --bgcolor1: rgb(57, 95, 95);
-   --bgcolor2: rgba(196, 204, 207);
-   --bgcolor3: rgb(50, 88, 51);
-   --bgcolor4: rgba(193, 224, 181);
+.facturacion-view {
+  --bgcolor1: rgb(57, 95, 95);
+  --bgcolor2: rgb(236, 242, 241);
+  --bgcolor3: rgb(46, 81, 52);
+  --bgcolor4: rgb(229, 240, 231);
+  --accent: rgb(205, 145, 55);
+  --text-dark: rgb(37, 52, 52);
+  --muted: rgb(102, 118, 118);
 }
 
-.fila:hover{ 
-   background-color: #117a8B;
-   color: white;
-   cursor: pointer; 
+.facturacion-header {
+  background:
+    linear-gradient(135deg, rgba(57, 95, 95, 0.98), rgba(31, 58, 58, 0.96)),
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.18), transparent 30%);
+  color: white;
+  box-shadow: 0 12px 28px rgba(18, 34, 34, 0.25);
 }
 
-.facturacion{
-   background-color: var(--bgcolor1);
-   color: white;
-   box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+.header-subtitle {
+  display: block;
+  margin-top: 0.2rem;
+  color: rgba(255, 255, 255, 0.82);
 }
-.cardfacturacion, .cardfacturacion li, .titulos{
-   background-color: var(--bgcolor2);
-   /* color: rgb(211, 248, 3); */
-}
-.facturacion a{   color: white;}
-.facturacion a:hover{   color: rgb(45, 53, 2);}
 
-/* Planillas */
-.planillas{
-   box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+.summary-card,
+.detail-card {
+  border: 0;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff, var(--bgcolor2));
+  box-shadow: 0 14px 32px rgba(28, 42, 42, 0.12);
 }
-.planillas thead{
-   background-color: var(--bgcolor3);
-   color: white;
+
+.summary-card {
+  padding: 1rem 1.1rem;
+  min-height: 136px;
 }
-.planillas tbody{
-   background-color: var(--bgcolor4);
+
+.accent-card {
+  background: linear-gradient(180deg, rgba(205, 145, 55, 0.12), #ffffff);
+}
+
+.summary-label {
+  display: inline-block;
+  margin-bottom: 0.55rem;
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.summary-value {
+  font-size: 1.55rem;
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.summary-text {
+  font-size: 1.05rem;
+}
+
+.summary-meta {
+  display: block;
+  margin-top: 0.65rem;
+  color: var(--muted);
+}
+
+.panel-title {
+  color: var(--text-dark);
+  font-weight: 700;
+}
+
+.info-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 12px;
+  background: rgba(57, 95, 95, 0.05);
+}
+
+.info-row span {
+  color: var(--muted);
+}
+
+.info-row strong {
+  color: var(--text-dark);
+  text-align: right;
+}
+
+.progress-card {
+  padding: 1rem;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(46, 81, 52, 0.08), rgba(46, 81, 52, 0.02));
+}
+
+.slim-progress {
+  height: 10px;
+  border-radius: 999px;
+  background-color: rgba(57, 95, 95, 0.12);
+}
+
+.slim-progress .progress-bar {
+  background: linear-gradient(90deg, var(--accent), rgb(222, 178, 96));
+  border-radius: 999px;
+}
+
+.planilla-stats small {
+  display: block;
+  color: var(--muted);
+}
+
+.planilla-stats strong {
+  color: var(--text-dark);
+  font-size: 1rem;
+}
+
+.detail-tabs {
+  border-bottom: 0;
+  background: transparent;
+  padding-bottom: 0;
+}
+
+.detail-tabs .nav-tabs {
+  border-bottom: 0;
+  gap: 0.5rem;
+}
+
+.detail-tabs .nav-link {
+  border: 0;
+  border-radius: 999px;
+  color: var(--text-dark);
+  background: rgba(57, 95, 95, 0.08);
+  font-weight: 600;
+}
+
+.detail-tabs .nav-link.active {
+  background: linear-gradient(135deg, var(--bgcolor1), rgb(74, 122, 122));
+  color: white;
+}
+
+.section-heading h5 {
+  color: var(--text-dark);
+  font-weight: 700;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.badge-soft-success {
+  color: rgb(28, 92, 54);
+  background: rgba(56, 161, 105, 0.18);
+}
+
+.badge-soft-warning {
+  color: rgb(140, 92, 11);
+  background: rgba(221, 162, 36, 0.2);
+}
+
+.badge-soft-danger {
+  color: rgb(145, 52, 52);
+  background: rgba(229, 62, 62, 0.15);
+}
+
+.badge-soft-info {
+  color: rgb(32, 90, 115);
+  background: rgba(49, 130, 206, 0.16);
+}
+
+.badge-soft-secondary {
+  color: rgb(84, 95, 107);
+  background: rgba(113, 128, 150, 0.18);
+}
+
+.planillas {
+  overflow: hidden;
+  border-radius: 14px;
+  box-shadow: 0 10px 24px rgba(28, 42, 42, 0.12);
+}
+
+.planillas thead {
+  background-color: var(--bgcolor3);
+  color: white;
+}
+
+.planillas tbody {
+  background-color: var(--bgcolor4);
+}
+
+.fila:hover {
+  background-color: #117a8b;
+  color: white;
+  cursor: pointer;
+}
+
+.mini-badge {
+  display: inline-block;
+  min-width: 84px;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.mini-badge-success {
+  background: rgba(56, 161, 105, 0.16);
+  color: rgb(28, 92, 54);
+}
+
+.mini-badge-warning {
+  background: rgba(221, 162, 36, 0.18);
+  color: rgb(140, 92, 11);
+}
+
+.total-row {
+  background: rgba(57, 95, 95, 0.12);
+}
+
+.facturacion-header .icoRegresar {
+  font-size: 1.4rem;
+}
+
+@media (max-width: 991.98px) {
+  .summary-card {
+    min-height: auto;
+  }
+
+  .info-row {
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .info-row strong {
+    text-align: left;
+  }
 }

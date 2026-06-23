@@ -198,7 +198,6 @@ export class HabilitacionesComponent implements OnInit {
   }
 
   setAbonado(abonado: any) {
-    console.log(abonado);
     this.abonado = abonado;
     this.cliente = abonado.idcliente_clientes;
     this.l_habilitaciones = false;

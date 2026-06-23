@@ -122,12 +122,10 @@ export class NiifcuentasComponent implements OnInit {
    // }
 
    getByIdNiifCue(cuentaniif: any) {
-      console.log(cuentaniif);
       this.listaNef = cuentaniif.movcue;
       this.niifcuenta = cuentaniif;
       this.s_niifhomologa.getByIdNiifCue(cuentaniif.idniifcue).subscribe({
          next: (datos: any) => {
-            console.log(datos);
             if (datos.length != 0 || cuentaniif.movcue === true) {
                this.homologacionesNiif = datos;
                this.listaNef = true;

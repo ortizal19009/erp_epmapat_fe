@@ -74,7 +74,7 @@ export class ModiClasificadorComponent implements OnInit {
 
    actualizar() {
       this.clasifService.updateClasificador(this.formClasificador.value).subscribe(datos => {
-      }, error => console.log(error));
+      }, error => console.error(error));
       this.retornar();
    }
 

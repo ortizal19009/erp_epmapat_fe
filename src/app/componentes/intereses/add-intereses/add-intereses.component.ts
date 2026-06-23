@@ -59,7 +59,6 @@ export class AddInteresesComponent implements OnInit {
             this.reset();
             this.parent.listarIntereses();
             let tempInteres = await this.inteService.recalcularBatchInteres();
-            console.log(tempInteres);
          },
          error: err => console.error(err.error),
       });

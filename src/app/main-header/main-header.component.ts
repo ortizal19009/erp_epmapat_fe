@@ -140,7 +140,6 @@ export class MainHeaderComponent implements OnInit {
       this.formDefinir.controls['otrapestania'].setValue(true);
     else this.formDefinir.controls['otrapestania'].setValue(false);
     const modulos: any = sessionStorage.getItem('modulos');
-    console.log(JSON.parse(modulos));
     this.modules = JSON.parse(modulos);
   }
 

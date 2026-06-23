@@ -325,7 +325,7 @@ export class EstFlujoEfeComponent implements OnInit {
             this.arreglo2.sort((a, b) => (a.grufluefec - b.grufluefec) || (a.codcue.localeCompare(b.codcue)));
 
          },
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       });
 
    }

@@ -2,6 +2,8 @@ import { Time } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { concatMap, finalize, forkJoin, from, map, Observable, of, switchMap, tap, toArray } from 'rxjs';
+import Swal from 'sweetalert2';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Catalogoitems } from 'src/app/modelos/catalogoitems.model';
 import { Clientes } from 'src/app/modelos/clientes';
@@ -16,6 +18,7 @@ import { FacturaService } from 'src/app/servicios/factura.service';
 import { FacturacionService } from 'src/app/servicios/facturacion.service';
 import { ItemxfactService } from 'src/app/servicios/itemxfact.service';
 import { LiquidafacService } from 'src/app/servicios/liquidafac.service';
+import { LoadingService } from 'src/app/servicios/loading.service';
 import { ModulosService } from 'src/app/servicios/modulos.service';
 import { RubrosService } from 'src/app/servicios/rubros.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
@@ -28,11 +31,11 @@ import { UsoitemsService } from 'src/app/servicios/usoitems.service';
 })
 export class AddFacturacionComponent implements OnInit {
   formFacturacion: FormGroup;
-  formBusClientes: FormGroup; //Formulario para buscar Clientes del Modal
+  formBusClientes: FormGroup;
   filtro: string;
   _clientes: any;
-  swvalido = 1; //Búsqueda de Clientes
-  privez = true; //Para resetear los datos de Búsqueda de Clientes
+  swvalido = 1;
+  privez = true;
   _modulos: any;
   formDetalle: FormGroup;
   _usoitems: any;
@@ -40,7 +43,7 @@ export class AddFacturacionComponent implements OnInit {
   _facturacion: any;
   arrRubros: any[] = [];
   formModiValor: FormGroup;
-  totProductos: number; //Para el botón de agregar todos
+  totProductos: number;
   totfac: number;
   totiva: number;
   indice: number;
@@ -64,13 +67,11 @@ export class AddFacturacionComponent implements OnInit {
     private rubxfacService: RubroxfacService,
     private rubService: RubrosService,
     private liqfacService: LiquidafacService,
-    private authService: AutorizaService
-  ) { }
+    private authService: AutorizaService,
+    private loadingService: LoadingService
+  ) {}
 
   ngOnInit(): void {
-    //Formulario de la cabecera
-    let cliente: Clientes = new Clientes();
-    cliente.idcliente = 1;
     this.formFacturacion = this.fb.group({
       fecha: new Date().toISOString().substring(0, 10),
       cliente: '',
@@ -83,25 +84,25 @@ export class AddFacturacionComponent implements OnInit {
       usucrea: this.authService.idusuario,
       feccrea: new Date().toISOString().substring(0, 10),
     });
-    //Formulario de Busqueda de Clientes (Modal)
+
     this.formBusClientes = this.fb1.group({
       nombre_identifica: [null, [Validators.required, Validators.minLength(5)]],
     });
-    //Formulario del detalle
-    var modulos: Modulos = new Modulos();
-    var usoitems: Usoitems = new Usoitems();
+
+    const modulos = new Modulos();
+    const usoitems = new Usoitems();
     this.formDetalle = this.fb2.group({
       seccion: modulos,
       uso: usoitems,
     });
-    //Formulario para modificar Cantidad y Valor
+
     this.formModiValor = this.fb2.group({
       rubro: '',
       cantidad: 0,
       valor: 0,
       indice: 0,
     });
-    //Formulario Cuotas
+
     this.formCuotas = this.fb2.group({
       cliente: '',
       total: '',
@@ -109,7 +110,6 @@ export class AddFacturacionComponent implements OnInit {
       cuotas: 1,
     });
 
-    //Seccion
     setTimeout(() => {
       this.moduService.getListaModulos().subscribe({
         next: (datos) => {
@@ -118,11 +118,11 @@ export class AddFacturacionComponent implements OnInit {
         error: (err) => console.error(err.error),
       });
     }, 1000);
+
     const seccion = document.getElementById('seccion') as HTMLSelectElement;
     seccion.addEventListener('change', () => {
       this._usoitems = [];
       this._productos = [];
-      // Recupera los Usos de la Sección(antes Módulo)
       this.usoiService
         .getByIdmodulo(this.formDetalle.value.seccion.idmodulo)
         .subscribe({
@@ -130,11 +130,10 @@ export class AddFacturacionComponent implements OnInit {
           error: (err) => console.error(err.error),
         });
     });
-    //Uso
+
     const uso = document.getElementById('uso') as HTMLSelectElement;
     uso.addEventListener('change', () => {
       this._productos = [];
-      // Recupera los Productos del Uso
       this.catiService
         .getByIdusoitems(this.formDetalle.value.uso.idusoitems)
         .subscribe({
@@ -148,138 +147,159 @@ export class AddFacturacionComponent implements OnInit {
   }
 
   onSubmit() {
-    this.formCuotas.controls['cliente'].setValue(
-      this.formFacturacion.value.cliente
-    );
-    if (this.totfac + this.totiva > 0)
-      this.formCuotas.controls['total'].setValue(
-        (this.totfac + this.totiva).toFixed(2).toString()
-      );
+    this.formCuotas.controls['cliente'].setValue(this.formFacturacion.value.cliente);
+    if (this.totfac + this.totiva > 0) {
+      this.formCuotas.controls['total'].setValue((this.totfac + this.totiva).toFixed(2).toString());
+    }
   }
 
   guardar() {
+    if (!this.cliente) {
+      this.authService.swal('warning', 'Seleccione un cliente');
+      return;
+    }
+    if (!this.arrRubros.length) {
+      this.authService.swal('warning', 'Debe agregar al menos un rubro');
+      return;
+    }
+
     this.formFacturacion.value.idcliente_clientes = this.cliente;
     this.formFacturacion.value.total = this.formCuotas.value.total;
     this.formFacturacion.value.cuotas = this.formCuotas.value.cuotas;
     this.formFacturacion.value.formapago = this.formCuotas.value.formapago;
-    this.factuService.save(this.formFacturacion.value).subscribe({
-      next: (resp) => {
-        this._facturacion = resp;
-        this.itemxfacturacion();
-        this.facturas();
-      },
-      error: (err) => console.error(err.error),
-    });
+
+    this.loadingService.showLoading();
+
+    this.factuService
+      .save(this.formFacturacion.value)
+      .pipe(
+        tap((resp) => (this._facturacion = resp)),
+        switchMap((facturacion) =>
+          forkJoin([this.guardarItemsFacturacion$(facturacion), this.guardarFacturasConRubros$(facturacion)])
+        ),
+        finalize(() => this.loadingService.hideLoading())
+      )
+      .subscribe({
+        next: () => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Facturación guardada',
+            text: 'La facturación y todos los rubros se guardaron con éxito.',
+            confirmButtonText: 'Aceptar',
+          }).then(() => this.router.navigate(['facturacion']));
+        },
+        error: (err) => {
+          console.error('Error al guardar la facturación:', err);
+          this.authService.mostrarError('Error al guardar la facturación', err?.error ?? err?.message ?? err);
+        },
+      });
   }
 
-  itemxfacturacion() {
-    let i = 0;
-    this.arrRubros.forEach(() => {
-      let prodxfact = {} as Prodxfact; //Interface para los datos de los Productos x Facturación
-      prodxfact.cantidad = this.arrRubros[i][1];
+  private guardarItemsFacturacion$(facturacion: Facturacion): Observable<any[]> {
+    if (!this.arrRubros.length) return of([]);
+
+    const items$ = this.arrRubros.map((item) => {
+      const prodxfact = {} as Prodxfact;
+      prodxfact.cantidad = item[1];
       prodxfact.descuento = 0;
       prodxfact.estado = 1;
-      prodxfact.valorunitario =
-        this.arrRubros[i][2] / this.formCuotas.value.cuotas;
-      prodxfact.idfacturacion_facturacion = this._facturacion;
-      this.catiService.getById(this.arrRubros[i][4]).subscribe({
-        //El elemento cuatro es el Id del Producto
-        next: (resp) => {
-          prodxfact.idcatalogoitems_catalogoitems = resp;
-          this.ixfService.save(prodxfact).subscribe({
-            next: (resp1) => {
-              // console.log("Ok!");
-            },
-            error: (err) => console.error(err.error),
-          });
-        },
-        error: (err) => console.error(err.error),
-      });
-      i++;
+      prodxfact.valorunitario = item[2] / this.formCuotas.value.cuotas;
+      prodxfact.idfacturacion_facturacion = facturacion;
+
+      return this.catiService.getById(item[4]).pipe(
+        switchMap((producto) => {
+          prodxfact.idcatalogoitems_catalogoitems = producto;
+          return this.ixfService.save(prodxfact);
+        })
+      );
     });
+
+    return forkJoin(items$);
   }
 
-  //Cabecera de la(s) Planilla(s) (Tabla Factura)
-  facturas() {
-    let n = this.formCuotas.value.cuotas;
-    for (let i = 1; i <= n; i++) {
-      // console.log("i del lazo= " + i)
-      let planilla = {} as Planilla;
-      planilla.idmodulo = this.formDetalle.value.seccion;
-      planilla.idcliente = this.cliente;
-      planilla.idabonado = 0;
-      planilla.porcexoneracion = 0;
-      planilla.totaltarifa = (this.totfac + this.totiva) / n;
-      planilla.pagado = 0;
-      planilla.conveniopago = 0;
-      planilla.estadoconvenio = 0;
-      planilla.formapago = this.formCuotas.value.formapago;
-      planilla.valorbase = (this.totfac + this.totiva) / n;
-      planilla.usucrea = this.authService.idusuario;
-      planilla.estado = 1;
-      //planilla.fechaanulacion= ;
-      planilla.swiva = this.totiva;
-      planilla.valornotacredito = 0;
-      planilla.secuencialfacilito = '';
-      //planilla.interescobrado = 0;
-      let fecha: Date = new Date();
-      fecha.setMonth(fecha.getMonth() + (i - 1));
-      planilla.feccrea = fecha;
-      this.facService.saveFactura(planilla).subscribe({
-        next: (resp) => {
-          this.factura = resp;
-          this.rubrosxfactura();
-          // console.log("Envia i= " + i)
-
-          // ========== this.creaLiquidafac(i); Genera la Liquidación ===========
-          let liquidafac = {} as Liquidafac; //Interface para los datos de la Liquidación de la Facturación
-          // let cuota = i;
-          liquidafac.cuota = i;
-          liquidafac.valor = this.totfac;
-          liquidafac.estado = 0;
-          liquidafac.idfacturacion_facturacion = this._facturacion;
-          liquidafac.idfactura_facturas = this.factura;
-          liquidafac.usucrea = this.authService.idusuario;
-          // let fecha: Date = new Date();
-          let fecha = new Date();
-          // console.log("Cuota= " + i)
-          fecha.setMonth(fecha.getMonth() + (i - 1));
-          liquidafac.feccrea = fecha;
-          this.liqfacService.saveLiquidafac(liquidafac).subscribe({
-            next: (nex) => '',
-            // console.log("liquidaxfac Ok!")
-            error: (err) => console.error(err.error),
-          });
-        },
-        error: (err) => console.error(err.error),
-      });
-    }
+  private guardarFacturasConRubros$(facturacion: Facturacion): Observable<any[]> {
+    const cuotas = Number(this.formCuotas.value.cuotas) || 1;
+    return from(Array.from({ length: cuotas }, (_, index) => index + 1)).pipe(
+      concatMap((cuota) => this.guardarFacturaCompleta$(facturacion, cuota, cuotas)),
+      toArray()
+    );
   }
 
-  //Detalle de la(s) Planilla(s) (Tabla rubroxfac)
-  rubrosxfactura() {
-    let i = 0;
-    this.arrRubros.forEach(() => {
-      let rubrosxpla = {} as Rubrosxpla; //Interface para los datos de los Rubros x Planilla
-      rubrosxpla.cantidad = this.arrRubros[i][1];
-      rubrosxpla.valorunitario =
-        this.arrRubros[i][2] / this.formCuotas.value.cuotas;
+  private guardarFacturaCompleta$(facturacion: Facturacion, cuota: number, totalCuotas: number): Observable<any> {
+    const planilla = this.crearPlanilla(cuota, totalCuotas);
+    return this.facService.saveFactura(planilla).pipe(
+      map((facturaGuardada) => facturaGuardada as Facturas),
+      switchMap((facturaGuardada) =>
+        forkJoin([
+          this.guardarRubrosFactura$(facturaGuardada),
+          this.guardarLiquidafac$(facturacion, facturaGuardada, cuota),
+        ]).pipe(
+          map(([rubrosGuardados, liquidacionGuardada]) => ({
+            factura: facturaGuardada,
+            rubros: rubrosGuardados,
+            liquidacion: liquidacionGuardada,
+          }))
+        )
+      )
+    );
+  }
+
+  private guardarRubrosFactura$(factura: Facturas): Observable<any[]> {
+    if (!this.arrRubros.length) return of([]);
+
+    const rubros$ = this.arrRubros.map((item) => {
+      const rubrosxpla = {} as Rubrosxpla;
+      rubrosxpla.cantidad = item[1];
+      rubrosxpla.valorunitario = item[2] / this.formCuotas.value.cuotas;
       rubrosxpla.estado = 1;
-      rubrosxpla.idfactura_facturas = this.factura;
-      this.rubService.getRubroById(this.arrRubros[i][5]).subscribe({
-        //El elemento 5 es el Id del Rubro
-        next: (resp) => {
-          rubrosxpla.idrubro_rubros = resp;
-          this.rubxfacService.saveRubroxfac(rubrosxpla).subscribe({
-            next: (nex) => { },
-            error: (err) => console.error(err.error),
-          });
-        },
-        error: (err) => console.error(err.error),
-      });
-      i++;
+      rubrosxpla.idfactura_facturas = factura;
+
+      return this.rubService.getRubroById(item[5]).pipe(
+        switchMap((rubro) => {
+          rubrosxpla.idrubro_rubros = rubro;
+          return this.rubxfacService.saveRubroxfac(rubrosxpla);
+        })
+      );
     });
-    this.listarFacturacion();
+
+    return forkJoin(rubros$);
+  }
+
+  private guardarLiquidafac$(facturacion: Facturacion, factura: Facturas, cuota: number): Observable<Object> {
+    const liquidafac = {} as Liquidafac;
+    liquidafac.cuota = cuota;
+    liquidafac.valor = this.totfac;
+    liquidafac.estado = 0;
+    liquidafac.idfacturacion_facturacion = facturacion;
+    liquidafac.idfactura_facturas = factura;
+    liquidafac.usucrea = this.authService.idusuario;
+    const fecha = new Date();
+    fecha.setMonth(fecha.getMonth() + (cuota - 1));
+    liquidafac.feccrea = fecha;
+    return this.liqfacService.saveLiquidafac(liquidafac);
+  }
+
+  private crearPlanilla(cuota: number, totalCuotas: number): Planilla {
+    const planilla = {} as Planilla;
+    planilla.idmodulo = this.formDetalle.value.seccion;
+    planilla.idcliente = this.cliente;
+    planilla.idabonado = 0;
+    planilla.porcexoneracion = 0;
+    planilla.totaltarifa = (this.totfac + this.totiva) / totalCuotas;
+    planilla.pagado = 0;
+    planilla.conveniopago = 0;
+    planilla.estadoconvenio = 0;
+    planilla.formapago = this.formCuotas.value.formapago;
+    planilla.valorbase = (this.totfac + this.totiva) / totalCuotas;
+    planilla.usucrea = this.authService.idusuario;
+    planilla.estado = 1;
+    planilla.swiva = this.totiva;
+    planilla.valornotacredito = 0;
+    planilla.secuencialfacilito = '';
+    const fecha = new Date();
+    fecha.setMonth(fecha.getMonth() + (cuota - 1));
+    planilla.feccrea = fecha;
+    return planilla;
   }
 
   listarFacturacion() {
@@ -296,16 +316,11 @@ export class AddFacturacionComponent implements OnInit {
   }
 
   buscarClientes() {
-    if (
-      this.formBusClientes.value.nombre_identifica != null &&
-      this.formBusClientes.value.nombre_identifica != ''
-    ) {
-      this.clieService
-        .getByNombreIdentifi(this.formBusClientes.value.nombre_identifica)
-        .subscribe({
-          next: (datos) => (this._clientes = datos),
-          error: (err) => console.error(err.error),
-        });
+    if (this.formBusClientes.value.nombre_identifica != null && this.formBusClientes.value.nombre_identifica != '') {
+      this.clieService.getByNombreIdentifi(this.formBusClientes.value.nombre_identifica).subscribe({
+        next: (datos) => (this._clientes = datos),
+        error: (err) => console.error(err.error),
+      });
     }
   }
 
@@ -403,7 +418,7 @@ interface Planilla {
   idfactura: number;
   idmodulo: Modulos;
   idcliente: Clientes;
-  idabonado: number; //Probar con Abonados;
+  idabonado: number;
   nrofactura: String;
   porcexoneracion: number;
   razonexonera: String;

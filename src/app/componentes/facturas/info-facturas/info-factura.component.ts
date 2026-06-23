@@ -276,7 +276,6 @@ export class InfoFacturasComponent implements OnInit {
     this.s_loading.showLoading();
     this.facService.calculateMultaAsync(idfactura).then(
       (resp) => {
-        console.log(resp);
         this.s_loading.hideLoading();
       },
       (error) => {

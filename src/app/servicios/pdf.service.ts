@@ -379,7 +379,6 @@ export class PdfService {
 
 
   private generarTabla(titulo: string, head: any[], body: any[], doc: any, columnStyles?: any) {
-    console.log(titulo)
     autoTable(doc, {
       headStyles: { fontSize: 6 },
       bodyStyles: { fontSize: 6 },

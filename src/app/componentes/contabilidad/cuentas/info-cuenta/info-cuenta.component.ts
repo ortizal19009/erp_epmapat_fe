@@ -41,12 +41,10 @@ export class InfoCuentaComponent implements OnInit {
          hasta = fechasMayor.hasta
       } else {
          const año = this.authService.getDatosEmpresa()!.fechap.toString().slice(0, 4)
-         console.log(año);
          let date: Date = new Date();
          let fecha = date.toISOString();
          desde = año + fecha.slice(4,7) + '-01'
          hasta = año + fecha.slice(4,10)
-         console.log(fecha, desde, hasta)
       }
       this.formFechas = this.fb.group({
          codcue: this.codcue,

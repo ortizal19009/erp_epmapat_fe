@@ -265,7 +265,7 @@ export class EstEjecucionPreComponent implements OnInit {
          next: resp => {
             this._cuentas = resp.filter(data => (data.asodebe != null && data.asohaber != null) && (data.asodebe.length === 2 || data.asohaber.length === 2));
          },
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       });
    }
 
@@ -274,7 +274,6 @@ export class EstEjecucionPreComponent implements OnInit {
    };
 
    pdf() {
-      console.log('pdf', this.arreglo1)
       const nombreEmision = new NombreAuxiliarPipe(); // Crea una instancia del pipe
       let m_izquierda = 20;
       var doc = new jsPDF({});

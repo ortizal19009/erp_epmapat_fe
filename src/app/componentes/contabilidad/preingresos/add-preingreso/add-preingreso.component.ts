@@ -75,7 +75,7 @@ export class AddPreingresoComponent implements OnInit {
          next: resp => {
             this.regresar();
          },
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       });
    }
 
@@ -93,7 +93,7 @@ export class AddPreingresoComponent implements OnInit {
       if (this.formBusClasificador.value.nompar == null) this.formBusClasificador.value.nompar = '';
       this.clasiService.getParingreso(this.formBusClasificador.value.codpar, this.formBusClasificador.value.nompar).subscribe({
          next: datos => this._clasificador = datos,
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       })
    }
 

@@ -86,7 +86,6 @@ export class RetencionesService {
    }
 
    verificar() {
-      console.log(`${this.apiUrl}/verificacion`)
       return this.http.get(`${this.apiUrl}/verificacion`);
    }
 

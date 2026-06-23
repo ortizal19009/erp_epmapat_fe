@@ -11,8 +11,10 @@ import { LiquidafacService } from 'src/app/servicios/liquidafac.service';
 export class InfoFacturacionComponent implements OnInit {
   facturacion = {} as FacturacionView;
   elimdisabled = true;
-  _liquidafac: any;
-  totfac: number;
+  _liquidafac: any[] = [];
+  totfac = 0;
+  planillasCobradas = 0;
+  planillasPendientes = 0;
 
   constructor(
     private factuService: FacturacionService,
@@ -48,7 +50,7 @@ export class InfoFacturacionComponent implements OnInit {
   liquidafac(idfacturacion: number) {
     this.liqfacService.getByIdfacturacion(idfacturacion).subscribe({
       next: (datos) => {
-        this._liquidafac = datos;
+        this._liquidafac = Array.isArray(datos) ? datos : [];
         this.subtotal();
       },
       error: (err) => console.error(err.error)
@@ -57,12 +59,63 @@ export class InfoFacturacionComponent implements OnInit {
 
   subtotal() {
     let suma = 0;
-    let i = 0;
-    this._liquidafac.forEach(() => {
-      suma += Number(this._liquidafac[i]?.idfactura_facturas?.totaltarifa || 0);
-      i++;
+    let cobradas = 0;
+    let pendientes = 0;
+
+    this._liquidafac.forEach((liqfac: any) => {
+      const factura = liqfac?.idfactura_facturas;
+      suma += Number(factura?.totaltarifa || 0);
+      if (factura?.fechacobro) {
+        cobradas++;
+      } else {
+        pendientes++;
+      }
     });
     this.totfac = suma;
+    this.planillasCobradas = cobradas;
+    this.planillasPendientes = pendientes;
+  }
+
+  get estadoFacturacion(): string {
+    if (!this.facturacion.cuotas) {
+      return 'Sin planillas';
+    }
+    if (!this._liquidafac.length) {
+      return 'Pendiente de carga';
+    }
+    if (this.planillasCobradas === this._liquidafac.length) {
+      return 'Completada';
+    }
+    if (this.planillasCobradas > 0) {
+      return 'En cobranza';
+    }
+    return 'Pendiente';
+  }
+
+  get estadoFacturacionClass(): string {
+    switch (this.estadoFacturacion) {
+      case 'Completada':
+        return 'badge-soft-success';
+      case 'En cobranza':
+        return 'badge-soft-warning';
+      case 'Pendiente de carga':
+        return 'badge-soft-info';
+      case 'Sin planillas':
+        return 'badge-soft-secondary';
+      default:
+        return 'badge-soft-danger';
+    }
+  }
+
+  get avanceCobro(): number {
+    if (!this._liquidafac.length) {
+      return 0;
+    }
+    return Math.round((this.planillasCobradas / this._liquidafac.length) * 100);
+  }
+
+  get diferenciaTotal(): number {
+    return Number(this.facturacion.total || 0) - Number(this.totfac || 0);
   }
 
   private resolveNombreCliente(datos: any): string {
@@ -77,9 +130,9 @@ export class InfoFacturacionComponent implements OnInit {
 
 interface FacturacionView {
   idfacturacion: number;
-  descripcion: String;
+  descripcion: string;
   fecha: Date | string | null;
-  nomcli: String;
+  nomcli: string;
   total: number;
   cuotas: number;
 }

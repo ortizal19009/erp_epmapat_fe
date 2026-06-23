@@ -111,9 +111,9 @@
                      compromiso.intpre.codpar}}</td> -->
                   <td>{{compromiso.intpre.codpar}}</td>
                   <td class="text-truncate ancho300" data-toggle="tooltip"
-                     [ngClass]="{'toolt': compromiso.intpre.nompar.length > 60}"
-                     [title]="compromiso.intpre.nompar.length > 60 ? compromiso.intpre.nompar : ''">{{
-                     compromiso.intpre.nompar }}</td>
+                     [ngClass]="{'toolt': (compromiso.intpre.nompar || '').length > 60}"
+                     [title]="(compromiso.intpre.nompar || '').length > 60 ? compromiso.intpre.nompar : ''">{{
+                     compromiso.intpre.nompar || '' }}</td>
                   <td class="fila cursor text-center" data-toggle="tooltip" (click)="abrirCertipresu(compromiso)"
                      title="Abrir la Certificación en otra pestaña">{{ compromiso.partixcerti?.idcerti?.numero }}</td>
                   <td class="text-right">{{ compromiso.prmiso | number: '1.2-2'}}</td>
@@ -154,9 +154,9 @@
                                  <td>{{ ejecu.fecha_eje | date:'dd-MM-yyyy' }}</td>
                                  <td class="text-right">{{ ejecu.devengado | number: '1.2-2'}}</td>
                                  <td class="text-truncate ancho300" data-toggle="tooltip"
-                                    [ngClass]="{toolt: ejecu.concep.length > 30}"
-                                    [title]="ejecu.concep.length > 30 ? ejecu.concep : ''">
-                                    {{ ejecu.concep }}</td>
+                                    [ngClass]="{toolt: (ejecu.concep || '').length > 30}"
+                                    [title]="(ejecu.concep || '').length > 30 ? ejecu.concep : ''">
+                                    {{ ejecu.concep || '' }}</td>
                               </tr>
                            </tbody>
                            <tfoot *ngIf="devengados.length > 1" class="detalle">
@@ -171,9 +171,9 @@
                   </td>
 
                   <td class="text-truncate ancho300" data-toggle="tooltip"
-                     [ngClass]="{'toolt': compromiso.concep.length > 60}"
-                     [title]="compromiso && compromiso.concep.length > 60 ? compromiso.concep : ''">{{
-                     compromiso.concep }}</td>
+                     [ngClass]="{'toolt': (compromiso.concep || '').length > 60}"
+                     [title]="(compromiso.concep || '').length > 60 ? compromiso.concep : ''">{{
+                     compromiso.concep || '' }}</td>
                   <td class="text-center">
                      <div class="btn-group py-0">
                         <button type="button" class="btn btn-warning btn-xs dropdown-toggle py-0" data-toggle="dropdown"

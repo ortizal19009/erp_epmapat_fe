@@ -38,7 +38,10 @@ export class EjecucionComponent {
             this.reforma.fecha = resp.fecha;
             this.reforma.tipo = 'Gasto'
             if (resp.tipo == 'I') this.reforma.tipo = 'Ingreso'
-            this.reforma.documento = resp.intdoc.nomdoc + ' ' + resp.numdoc;
+            const nomdoc = resp.intdoc?.nomdoc ?? '';
+            const numdoc = resp.numdoc ?? '';
+            this.reforma.documento = `${nomdoc} ${numdoc}`.trim();
+            this.reforma.concepto = resp.concepto;
          },
          error: err => console.error(err.error)
       });
@@ -53,7 +56,7 @@ export class EjecucionComponent {
                this.totalModfi += ejecucio.modifi;
             });
          },
-         error: err => console.log('Al recuperar las partidas de la reforma: ',err.error)
+         error: err => console.error('Al recuperar las partidas de la reforma: ',err.error)
       });
    }
 
@@ -94,7 +97,7 @@ export class EjecucionComponent {
                this.router.navigate(['/ejecucio']);
                location.reload(); // Agregar esta línea para refrescar la página
             },
-            error: err => console.log(err.error)
+            error: err => console.error(err.error)
          })
       }
    }

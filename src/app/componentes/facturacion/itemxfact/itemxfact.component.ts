@@ -23,7 +23,6 @@ export class ItemxfactComponent implements OnInit {
   public listar() {
     this.ixfServicio.getByIdfacturacion(this.idfacturacion).subscribe({
       next: (datos: any) => {
-        console.log(datos);
         this._itemxfact = Array.isArray(datos) ? datos.filter((x) => !!x) : [];
         const primerItem = this._itemxfact[0];
         this.usoitem =

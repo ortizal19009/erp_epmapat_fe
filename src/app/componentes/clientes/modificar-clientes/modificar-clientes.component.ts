@@ -194,7 +194,6 @@ export class ModificarClientesComponent implements OnInit {
   }
 
   private aplicarClienteFormulario(datos: any) {
-    console.log('Datos del cliente recibidos:', datos);
     this.clienteOriginal = datos;
     this.cliente = datos;
     this.codidentifica = datos?.idtpidentifica_tpidentifica?.codigo ?? '';

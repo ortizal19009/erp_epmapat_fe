@@ -792,7 +792,6 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
 
     this.facService.getFacSincobro(idcliente).subscribe({
       next: async (sincobrar: any[]) => {
-        console.log('Planillas sin cobro obtenidas:', sincobrar);
         if (!sincobrar.length) {
           this.swbusca = 2;
           this.loadingService.hideLoading();

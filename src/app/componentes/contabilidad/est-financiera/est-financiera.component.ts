@@ -125,14 +125,14 @@ export class EstFinancieraComponent implements OnInit {
             this.arreglo2 = this._cuentas;
             this.arreglo2.sort((a, b) => (a.intgrupo - b.intgrupo) || (a.codcue.localeCompare(b.codcue)));
          },
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       });
 
       this.nivelesService.getListaNiveles().subscribe({
          next: resp => {
             this._niveles = resp
          },
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       });
    }
 

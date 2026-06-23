@@ -101,7 +101,7 @@ export class ModiPreingresoComponent implements OnInit {
    onSubmit() {
       this.preingService.updatePreingreso(this.intpre, this.preingForm.value).subscribe({
          next: resp => this.regresar(),
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       });
    }
 
@@ -122,7 +122,7 @@ export class ModiPreingresoComponent implements OnInit {
       this.clasiService.getParingreso(this.formBusClasificador.value.codpar, this.formBusClasificador.value.nompar).subscribe({
          next: datos => {this._clasificador = datos;
          console.log("this._clasificador.length= "+this._clasificador.length)},
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       })
    }
 

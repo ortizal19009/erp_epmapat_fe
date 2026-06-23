@@ -143,7 +143,7 @@ export class AddBeneficiarioComponent implements OnInit {
 
       this.beneService.save(benefi).subscribe({
          next: resp => this.regresar(),
-         error: err => console.log(err.msg.error)
+         error: err => console.error(err.msg.error)
       });
    }
 

@@ -61,12 +61,10 @@ export class AddReportejrComponent implements OnInit {
 
    //Datalist de Repoxopcion
    repoxopcionxCodigo(e: any) {
-      console.log('e.target.value: ', e.target.value)
       if (e.target.value != '') {
          this.repoxopService.datalist(e.target.value).subscribe({
             next: datos => {
                this.repoxopcion = datos;
-               console.log('repoxopcion: ', this.repoxopcion);
             },
             error: err => {
                console.error(err.error);

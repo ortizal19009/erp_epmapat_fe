@@ -1,146 +1,249 @@
-<div class="content mt-1 pt-1 pl-0">
-   <div class="container-fluid">
-      <div class="row mt-0 mb-1 mx-0 px-0 py-1 justify-content-start facturacion border">
-         <div class="col-sm-5">
-            <h4 class="m-0 font-weight-bold"><i class="fa fa-bookmark"></i>&nbsp; Facturación</h4>
-         </div>
-         <div class="btn-group ml-auto mx-0">
-            <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
-               aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
-            </button>
-            <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
-                  <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
-               <button class="dropdown-item" type="button">
-                  <i class="bi-file-earmark-arrow-down"></i><span class="">&nbsp;
-                     Exportar</span></button>
+<div class="content mt-1 pt-1 pl-0 facturacion-view">
+  <div class="container-fluid">
+    <div class="row mt-0 mb-3 mx-0 px-0 py-2 justify-content-start facturacion-header border rounded-lg">
+      <div class="col-sm-7 col-lg-8">
+        <div class="d-flex align-items-center flex-wrap">
+          <div>
+            <h4 class="m-0 font-weight-bold">
+              <i class="fa fa-bookmark"></i>&nbsp; Facturacion #{{ facturacion.idfacturacion }}
+            </h4>
+            <small class="header-subtitle">
+              {{ facturacion.descripcion || 'Detalle completo de la facturacion' }}
+            </small>
+          </div>
+          <span class="status-pill ml-sm-3 mt-2 mt-sm-0" [ngClass]="estadoFacturacionClass">
+            {{ estadoFacturacion }}
+          </span>
+        </div>
+      </div>
+
+      <div class="btn-group ml-auto mx-0 align-items-center">
+        <button
+          type="button"
+          class="bg-transparent border-0 dropdown-toggle text-white"
+          data-toggle="dropdown"
+          aria-expanded="false">
+          <i class="bi-menu-button-wide text-white"></i>
+        </button>
+        <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
+          <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
+            <i class="bi bi-printer"></i>&nbsp; Imprimir
+          </button>
+          <button class="dropdown-item" type="button">
+            <i class="bi-file-earmark-arrow-down"></i><span>&nbsp; Exportar</span>
+          </button>
+        </div>
+
+        <button class="bg-transparent border-0 ml-2" type="button" (click)="regresarFacturacion()">
+          <i class="bi-arrow-left-circle text-white icoRegresar"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="row mb-3 summary-grid">
+      <div class="col-sm-6 col-lg-3 mb-3">
+        <div class="summary-card">
+          <span class="summary-label">Cliente</span>
+          <div class="summary-value summary-text">{{ facturacion.nomcli || 'No definido' }}</div>
+          <small class="summary-meta">Registro principal de la facturacion</small>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-3 mb-3">
+        <div class="summary-card">
+          <span class="summary-label">Fecha de emision</span>
+          <div class="summary-value">{{ facturacion.fecha | date:'dd-MM-y' }}</div>
+          <small class="summary-meta">Creacion del proceso</small>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-3 mb-3">
+        <div class="summary-card">
+          <span class="summary-label">Valor registrado</span>
+          <div class="summary-value">${{ facturacion.total | number:'1.2-2' }}</div>
+          <small class="summary-meta">Monto informado en cabecera</small>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-3 mb-3">
+        <div class="summary-card accent-card">
+          <span class="summary-label">Cuotas / planillas</span>
+          <div class="summary-value">{{ facturacion.cuotas || 0 }}</div>
+          <small class="summary-meta">Planillas generadas para esta facturacion</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mb-0">
+      <div class="col-lg-4 mb-3">
+        <div class="card detail-card h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start flex-wrap mb-3">
+              <div>
+                <h5 class="panel-title mb-1">Resumen ejecutivo</h5>
+                <small class="text-muted">Lectura rapida del estado general</small>
+              </div>
+              <span class="status-pill" [ngClass]="estadoFacturacionClass">{{ estadoFacturacion }}</span>
             </div>
 
-            <div class="col-sm-1">
-               <button class="bg-transparent border-0" type="submit" (click)="regresarFacturacion()">
-                  <i class="bi-arrow-left-circle text-white icoRegresar"></i>
-               </button>
+            <div class="info-list">
+              <div class="info-row">
+                <span>Numero</span>
+                <strong>{{ facturacion.idfacturacion }}</strong>
+              </div>
+              <div class="info-row">
+                <span>Descripcion</span>
+                <strong>{{ facturacion.descripcion || 'Sin descripcion' }}</strong>
+              </div>
+              <div class="info-row">
+                <span>Total cabecera</span>
+                <strong>${{ facturacion.total | number:'1.2-2' }}</strong>
+              </div>
+              <div class="info-row">
+                <span>Total planillas</span>
+                <strong>${{ totfac | number:'1.2-2' }}</strong>
+              </div>
+              <div class="info-row">
+                <span>Diferencia</span>
+                <strong [ngClass]="{ 'text-success': diferenciaTotal === 0, 'text-danger': diferenciaTotal !== 0 }">
+                  ${{ diferenciaTotal | number:'1.2-2' }}
+                </strong>
+              </div>
             </div>
-         </div>
 
-      </div>
-   </div>
-</div>
-
-<div class="container-fluid">
-   <div class="row mb-0">
-      <div class="col-sm-3">
-         <div class="card card-outline cardfacturacion">
-            <div class="card-body box-profile">
-               <h3 class="profile-username text-center"><span class="titulos">Nro</span>&nbsp;&nbsp;
-                  {{facturacion.idfacturacion}}</h3>
-               <p class="text-center">{{facturacion.descripcion}}</p>
-               <ul class="list-group list-group-unbordered mb-3">
-                  <li class="list-group-item">
-                     <b>Fecha</b> <a class="float-right">{{ facturacion.fecha | date:'dd-MM-y'}}</a>
-                  </li>
-                  <li class="list-group-item">
-                     <b>Cliente</b> <a class="float-right">{{facturacion.nomcli}}</a>
-                  </li>
-                  <li class="list-group-item">
-                     <b>Valor</b> <a class="float-right">{{facturacion.total | number:'1.2-2'}}</a>
-                  </li>
-               </ul>
-               <div class="row justify-content-center">
-                  <button class="btn btn-warning btn-xs mx-1" type="button" (click)="modiFacturacion()">
-                     <i class="fa fa-edit" style="font-size:24pxi"></i>
-                     Modificar
-                  </button>
-                  <button class="btn btn-danger btn-xs mx-1" [disabled]="elimdisabled" data-toggle="modal"
-                     data-target="#modalEliminar">
-                     <i class="fa fa-times-circle" style="font-size:24pxi"></i>
-                     Eliminar
-                  </button>
-               </div>
-
+            <div class="progress-card mt-4">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="summary-label mb-0">Avance de cobro</span>
+                <strong>{{ avanceCobro }}%</strong>
+              </div>
+              <div class="progress slim-progress">
+                <div
+                  class="progress-bar"
+                  role="progressbar"
+                  [style.width.%]="avanceCobro"
+                  [attr.aria-valuenow]="avanceCobro"
+                  aria-valuemin="0"
+                  aria-valuemax="100">
+                </div>
+              </div>
+              <div class="d-flex justify-content-between planilla-stats mt-3">
+                <div>
+                  <small>Cobradas</small>
+                  <strong>{{ planillasCobradas }}</strong>
+                </div>
+                <div>
+                  <small>Pendientes</small>
+                  <strong>{{ planillasPendientes }}</strong>
+                </div>
+                <div>
+                  <small>Total</small>
+                  <strong>{{ _liquidafac.length || facturacion.cuotas || 0 }}</strong>
+                </div>
+              </div>
             </div>
-         </div>
+
+            <div class="row justify-content-center mt-4">
+              <button class="btn btn-warning btn-xs mx-1" type="button" (click)="modiFacturacion()">
+                <i class="fa fa-edit"></i>
+                Modificar
+              </button>
+              <button
+                class="btn btn-danger btn-xs mx-1"
+                [disabled]="elimdisabled"
+                data-toggle="modal"
+                data-target="#modalEliminar">
+                <i class="fa fa-times-circle"></i>
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="col-sm-9">
-         <div class="card text-center card-info">
-            <div class="card-header">
-               <!-- <ul class="nav nav-pills"> -->
-               <ul class="nav nav-tabs card-header-tabs">
-                  <li class="nav-item"><a class="nav-link active" href="#detalle" data-toggle="tab">Detalle</a></li>
-                  <li class="nav-item"><a class="nav-link" href="#planillas" data-toggle="tab"
-                        (click)="liquidafac( facturacion.idfacturacion )">Planillas ({{facturacion.cuotas}})</a></li>
-                  <!-- <li class="nav-item"><a class="nav-link" href="#facturas" data-toggle="tab">Factura electrónica</a></li> -->
-               </ul>
-            </div><!-- /.card-header -->
 
-            <div class="card-body">
-               <div class="tab-content">
-                  <div class="active tab-pane" id="detalle">
-                     <div class="post">
-                        <div class="user-block">
-                              <app-itemxfact></app-itemxfact>
-                        </div>
-                     </div>
-                  </div>
-                  <div class="tab-pane" id="planillas">
-                     <div class="post">
-                        <div class="user-block">
-                           <table class="table table-hover table-sm table-bordered planillas">
-                              <thead>
-                                 <tr class="text-center">
-                                    <th>Cuota</th>
-                                    <th>Planilla</th>
-                                    <th>Fecha</th>
-                                    <th>Fac.Electrónica</th>
-                                    <th>F.Cobro</th>
-                                    <th>Valor</th>
-                                 </tr>
-                              </thead>
-                              <tbody>
-                                 <tr *ngFor="let liqfac of _liquidafac" class="fila">
-                                    <td>{{liqfac.cuota}}</td>
-                                    <td>{{ liqfac.idfactura_facturas.idfactura }}</td>
-                                    <td>{{ liqfac.idfactura_facturas.feccrea|date:'dd-MM-y' }}</td>
-                                    <td class="text-center">{{ liqfac.idfactura_facturas.nrofactura }}</td>
-                                    <td class="text-center">{{ liqfac.idfactura_facturas.fechacobro | date: 'dd-MM-y' }}
-                                    </td>
-                                    <td class="text-right">{{ liqfac.idfactura_facturas.totaltarifa | number:'1.2-2' }}
-                                    </td>
-                                 </tr>
-                                 <tr class="text-right font-weight-bold">
-                                    <td colspan="4"></td>
-                                    <td class="">Total </td>
-                                    <td class="">{{totfac | number:'1.2-2'}}</td>
-                                 </tr>
+      <div class="col-lg-8 mb-3">
+        <div class="card detail-card h-100">
+          <div class="card-header detail-tabs">
+            <ul class="nav nav-tabs card-header-tabs">
+              <li class="nav-item">
+                <a class="nav-link active" href="#detalle" data-toggle="tab">Rubros y conceptos</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#planillas" data-toggle="tab" (click)="liquidafac(facturacion.idfacturacion)">
+                  Estado de planillas
+                </a>
+              </li>
+            </ul>
+          </div>
 
-                              </tbody>
-                           </table>
+          <div class="card-body">
+            <div class="tab-content">
+              <div class="active tab-pane" id="detalle">
+                <div class="section-heading mb-3">
+                  <h5 class="mb-1">Detalle de rubros</h5>
+                  <small class="text-muted">Productos, rubros asociados y montos por item</small>
+                </div>
+                <app-itemxfact></app-itemxfact>
+              </div>
 
-                        </div>
-                     </div>
-                  </div>
-                  <!-- /.tab-pane -->
-                  <div class="tab-pane" id="facturas">
-                     <div class="post">
-                        <div class="user-block">
-                           <h2>-AREA PARA FACTURAS-</h2>
-                        </div>
-                     </div>
-                  </div>
-                  <!-- /.tab-pane -->
-                  <!-- /.tab-pane -->
-                  <div class="tab-pane" id="historialconsumo">
-                     <div class="post">
-                        <div class="user-block">
-                           <h2>-AREA PARA HISTORIAL CONSUMO-</h2>
-                        </div>
-                     </div>
-                  </div>
-                  <!-- /.tab-pane -->
-               </div>
-               <!-- /.tab-content -->
-            </div><!-- /.card-body -->
-         </div>
+              <div class="tab-pane" id="planillas">
+                <div class="section-heading mb-3">
+                  <h5 class="mb-1">Seguimiento de planillas</h5>
+                  <small class="text-muted">Control de emision, cobro y valores por cuota</small>
+                </div>
+
+                <div class="table-responsive">
+                  <table class="table table-hover table-sm table-bordered planillas">
+                    <thead>
+                      <tr class="text-center">
+                        <th>Cuota</th>
+                        <th>Planilla</th>
+                        <th>Fecha emision</th>
+                        <th>Factura electronica</th>
+                        <th>Estado</th>
+                        <th>Fecha cobro</th>
+                        <th>Valor</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let liqfac of _liquidafac" class="fila">
+                        <td class="text-center">{{ liqfac.cuota }}</td>
+                        <td class="text-center">{{ liqfac.idfactura_facturas?.idfactura }}</td>
+                        <td class="text-center">{{ liqfac.idfactura_facturas?.feccrea | date:'dd-MM-y' }}</td>
+                        <td class="text-center">{{ liqfac.idfactura_facturas?.nrofactura || 'Pendiente' }}</td>
+                        <td class="text-center">
+                          <span
+                            class="mini-badge"
+                            [ngClass]="liqfac.idfactura_facturas?.fechacobro ? 'mini-badge-success' : 'mini-badge-warning'">
+                            {{ liqfac.idfactura_facturas?.fechacobro ? 'Cobrada' : 'Pendiente' }}
+                          </span>
+                        </td>
+                        <td class="text-center">
+                          {{ liqfac.idfactura_facturas?.fechacobro | date:'dd-MM-y' }}
+                        </td>
+                        <td class="text-right">
+                          {{ liqfac.idfactura_facturas?.totaltarifa | number:'1.2-2' }}
+                        </td>
+                      </tr>
+
+                      <tr *ngIf="!_liquidafac.length">
+                        <td colspan="7" class="text-center text-muted py-4">
+                          No hay planillas cargadas para mostrar.
+                        </td>
+                      </tr>
+
+                      <tr class="text-right font-weight-bold total-row" *ngIf="_liquidafac.length">
+                        <td colspan="5"></td>
+                        <td>Total</td>
+                        <td>{{ totfac | number:'1.2-2' }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-   </div>
+    </div>
+  </div>
 </div>

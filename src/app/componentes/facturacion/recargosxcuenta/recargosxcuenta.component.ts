@@ -171,11 +171,9 @@ export class RecargosxcuentaComponent implements OnInit {
       })
       .subscribe({
         next: (res: PageResponse<Abonados>) => {
-          console.log(res)
           this._abonados = (res.content || []).map((x: any) => {
             const normalizado = this.normalizarAbonado(x);
             const saved = this.selectedStore.get(x.idabonado);
-            console.log(saved)
             return {
               ...normalizado,
               selected: saved?.selected ?? false,
@@ -223,7 +221,6 @@ export class RecargosxcuentaComponent implements OnInit {
     };
     this.recargosxcuentaService.validarBatch(reqValidacion).subscribe({
       next: (resp: any) => {
-        console.log(resp)
         // Soporta 2 formas comunes de respuesta
         const bloqueos: Array<{
           idabonado: number;
@@ -233,7 +230,6 @@ export class RecargosxcuentaComponent implements OnInit {
 
         const mapBloq = new Map<string, string>(); // key: `${id}-${tipo}` => motivo
         for (const b of bloqueos) {
-          console.log(b)
           mapBloq.set(
             `${Number(b.idabonado)}-${Number(b.tipo)}`,
             b.motivo || 'Bloqueado',
@@ -324,7 +320,6 @@ export class RecargosxcuentaComponent implements OnInit {
    * ✅ Guardar estado UI por fila
    */
   persistRowState(cuenta: any): void {
-    console.log(cuenta)
     const id = Number(cuenta.idabonado);
 
     // si ambos están bloqueados => no se puede seleccionar
@@ -587,8 +582,6 @@ export class RecargosxcuentaComponent implements OnInit {
 
         if (!resp?.ok) {
           this.erroresValidacion = resp?.errores ?? [];
-          console.log('Errores de validación:', this.erroresValidacion);
-
           this.swal(
             'error',
             `No se puede guardar. Errores: ${this.erroresValidacion.length}`,

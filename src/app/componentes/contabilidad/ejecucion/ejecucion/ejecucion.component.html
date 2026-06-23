@@ -56,6 +56,24 @@
 
 <div class="container-fluid">
    <div class="row mb-0">
+      <div class="col-12 mb-2">
+         <div class="card sombra detalle">
+            <div class="card-body py-2">
+               <div class="row small">
+                  <div class="col-md-2 font-weight-bold">Tipo</div>
+                  <div class="col-md-10">{{ reforma.tipo || '-' }}</div>
+               </div>
+               <div class="row small">
+                  <div class="col-md-2 font-weight-bold">Documento</div>
+                  <div class="col-md-10">{{ reforma.documento || 'Sin documento' }}</div>
+               </div>
+               <div class="row small">
+                  <div class="col-md-2 font-weight-bold">Descripción</div>
+                  <div class="col-md-10">{{ reforma.concepto || 'Sin descripción' }}</div>
+               </div>
+            </div>
+         </div>
+      </div>
       <div class="col-sm-6">
          <table class="table table-hover table-bordered table-sm sombra">
             <thead class="text-center cabecera">

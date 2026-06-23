@@ -431,7 +431,6 @@ export class AguatramiteComponent implements OnInit {
    }
 
    getNombreClienteTramite(aguatramite: any): string {
-      console.log('Obteniendo nombre cliente para trámite:', aguatramite);
       const candidato =
          aguatramite?.idcliente_clientes ||
          aguatramite?.cliente ||

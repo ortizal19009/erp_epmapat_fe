@@ -239,11 +239,11 @@ export class ImpPreingresoComponent implements OnInit {
                      this.nivel_par = presupue.codpar.substring(0, 8);
                      this.buscar_clasificador(presupue);
                   },
-                  error: err => console.log(err.error)
+                  error: err => console.error(err.error)
                });
             };
          },
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       });
    }
 
@@ -284,7 +284,7 @@ export class ImpPreingresoComponent implements OnInit {
                objetoEncontrado.saldo_cob += presupue.saldo_cob;
             }
          },
-         error: err => console.log(err.error)
+         error: err => console.error(err.error)
       });
    }
 

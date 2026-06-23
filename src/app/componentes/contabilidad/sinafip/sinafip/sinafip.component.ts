@@ -324,16 +324,10 @@ export class SinafipComponent implements OnInit {
    });
 
    aperturaInicial: Promise<any> = new Promise((resolve, rejects) => {
-      console.log('En aperturaInicial this.sw1 = ', this.sw1);
       if (this.sw1) {
-         console.log('Esta en aperturaInicial this.sw1');
          let initialValues: any[] = [];
-         console.log('Llama a getTransaciByTipAsi');
-
          this.getTransaciByTipAsi.then((values) => {
-
             let lcodcue: any = [];
-            console.log('values: ', values)
             values.forEach((value: any) => {
                let spltxt = value.codcue.split('.', 2);
                let addtxt = `${spltxt[0]}.${spltxt[1]}`;
@@ -383,9 +377,7 @@ export class SinafipComponent implements OnInit {
 
    /* DETALLE APERTURA INICIAL */
    formatDetalleApertura(data: any[]): string {
-      console.log(data);
       const formattedData = data.map((item) => {
-         console.log(item);
          let deb = 0;
          let cre = 0;
          let codcue = item.codcue.split('.');

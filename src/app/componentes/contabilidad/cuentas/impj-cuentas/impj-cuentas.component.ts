@@ -53,7 +53,6 @@ export class ImpjCuentasComponent implements OnInit {
       const cuentasJSON = sessionStorage.getItem('cuentasToImpExp');
       if (cuentasJSON) {
          this.cuentasToImpExp = JSON.parse(cuentasJSON);
-         // console.log('cuentasToImpExp: ', this.cuentasToImpExp)
          this.formImprimir = this.fb.group({
             repoxopcion: '',
             reportes: '',
@@ -225,13 +224,11 @@ export class ImpjCuentasComponent implements OnInit {
          type: p.tipo,
          value: valores[p.nombre],
       }));
-      // console.log('parametrosConTipo: ', parametrosConTipo);
       const dto: ReportRequest = {
          reportName: this.reporteSeleccionado.nomrep!,
          extension: this.extension,
          parameters: parametrosConTipo,
       };
-      // console.log('dto: ', dto);
       this.repojrService.ejecutaReporteSQL(dto).subscribe({
          next: (data: Blob) => {
             this.swcalculando = false;

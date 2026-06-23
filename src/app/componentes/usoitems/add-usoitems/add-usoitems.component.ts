@@ -70,7 +70,6 @@ export class AddUsoitemsComponent implements OnInit {
       },
       error: err => console.error(err.error),
     })
-    console.log("Datos del Formulario: " + JSON.stringify(this.formUso.value));
     this.usoService.saveUso(this.formUso.value).subscribe({
       next: resp => {
         this.reset();
