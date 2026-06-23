@@ -216,9 +216,9 @@ export class TramitesAguaService {
       ['director tecnico', 'director de gestion tecnica', 'DIRECTOR DE GESTIÓN TÉCNICA', 'direccion tecnica', 'director area tecnica'],
       'DIRECTOR TÉCNICO'
     );
-    const topografoActivo = await this.obtenerPersonalActivoPorCargo(
-      ['topografo', 'topografa', 'TOPÓGRAFO', 'TOPOGRAFO'],
-      'TOPÓGRAFO'
+    const TecnicoEpmapaTActivo = await this.obtenerPersonalActivoPorCargo(
+      ['TecnicoEpmapaT', 'TecnicoEpmapaT', 'TecnicoEpmapaT', 'TecnicoEpmapaT'],
+      'Tecnico EpmapaT'
     );
     const plomeroActivo = await this.obtenerPersonalActivoPorCargo(
       ['plomero', 'fontanero'],
@@ -295,7 +295,7 @@ export class TramitesAguaService {
         nombre: datos?.idcliente_clientes?.nombre || 'No registrado',
         detalle: datos?.idcliente_clientes?.cedula || 'Sin identificación',
       },
-      topografo: topografoActivo,
+      TecnicoEpmapaT: TecnicoEpmapaTActivo,
       startY: 740,
       margin: margx,
     });
@@ -664,12 +664,12 @@ export class TramitesAguaService {
     }
 
     if (cargo.includes('topograf')) {
-      patrones.add('topografo');
+      patrones.add('TecnicoEpmapaT');
       patrones.add('topografa');
       patrones.add('topografia');
       patrones.add('auxiliar topografia');
-      patrones.add('tecnico topografo');
-      patrones.add('inspector topografo');
+      patrones.add('tecnico TecnicoEpmapaT');
+      patrones.add('inspector TecnicoEpmapaT');
       patrones.add('tecnico de topografia');
     }
 
@@ -798,7 +798,7 @@ export class TramitesAguaService {
       plomero: { nombre: string; cargo: string };
       director: { nombre: string; cargo: string };
       cliente: { nombre: string; detalle: string };
-      topografo: { nombre: string; cargo: string };
+      TecnicoEpmapaT: { nombre: string; cargo: string };
       startY: number;
       margin: number;
     }
@@ -823,13 +823,13 @@ export class TramitesAguaService {
         [
           data.plomero.nombre || this.firmaManual,
           data.cliente.nombre || this.firmaManual,
-          data.topografo.nombre || this.firmaManual,
+          data.TecnicoEpmapaT.nombre || this.firmaManual,
           data.director.nombre || this.firmaManual,
         ],
         [
           'PLOMERO',
           data.cliente.detalle || 'CLIENTE',
-          data.topografo.cargo || 'TOPÓGRAFO',
+          data.TecnicoEpmapaT.cargo || 'TOPÓGRAFO',
           data.director.cargo || 'DIRECTOR TÉCNICO',
         ],
       ],
