@@ -668,7 +668,7 @@ export class RetencionesComponent implements OnInit, OnDestroy {
          const estado = this.normalizarEstadoSri(error?.error?.estado);
          const detalle = this.getSriErrorDetail(error, 'No se pudo reenviar el correo');
          const correoNoDisponible = estado === 'CORREO_NO_DISPONIBLE' || error?.status === 503 || error?.error?.status === 503;
-         if (correoNoDisponible) {
+         if (correoNoDisponible || error?.status === 400 || error?.status === 422) {
             console.warn(error);
             this.authService.swal('warning', detalle);
          } else {
