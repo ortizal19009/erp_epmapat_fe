@@ -218,6 +218,7 @@ import { ImpClienteComponent } from './componentes/clientes/imp-cliente/imp-clie
 import { ImpEmisionesComponent } from './componentes/emisiones/imp-emisiones/imp-emisiones.component';
 import { CvRubrosComponent } from './componentes/coactivas/carteras-vencidas/cv-rubros/cv-rubros.component';
 import { CvFacturasComponent } from './componentes/coactivas/carteras-vencidas/cv-facturas/cv-facturas.component';
+import { CvAbonadosComponent } from './componentes/coactivas/carteras-vencidas/cv-abonados/cv-abonados.component';
 import { ModiCuentaComponent } from './componentes/contabilidad/cuentas/modi-cuenta/modi-cuenta.component';
 import { InfoCuentaComponent } from './componentes/contabilidad/cuentas/info-cuenta/info-cuenta.component';
 import { ImpCuentasComponent } from './componentes/contabilidad/cuentas/imp-cuentas/imp-cuentas.component';
@@ -1165,6 +1166,7 @@ const routes: Routes = [
 
   /* COACTIVAS */
   { path: 'cv-rubros', component: CvRubrosComponent, canActivate: [AuthGuard] },
+  { path: 'cv-abonados', component: CvAbonadosComponent, canActivate: [AuthGuard] },
   {
     path: 'cv-facturas',
     component: CvFacturasComponent,

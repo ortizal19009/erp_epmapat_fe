@@ -140,6 +140,7 @@ export class ListarAbonadosComponent implements OnInit {
     this.loadingService.showLoading();
 
     const setDatos = (datos: any) => {
+      console.log('Datos obtenidos:', datos);
       this._abonados = datos;
       this._abonadosOriginal = datos;
       this.loadingService.hideLoading();
@@ -162,7 +163,9 @@ export class ListarAbonadosComponent implements OnInit {
   // =====================
   cargarCategorias() {
     this.categoriaService.getListCategoria().subscribe({
-      next: (datos) => this._categorias = datos,
+      next: (datos) => {
+        this._categorias = datos
+      },
       error: (e) => console.error(e),
     });
   }
@@ -199,33 +202,33 @@ export class ListarAbonadosComponent implements OnInit {
   }
 
   buscarConFiltros() {
-      this.modoFiltro = true;
-      this.buscarAbonadoForm.controls['buscarAbonado'].setValue('');
-      this._abonadosOriginal = [];
-      this.loadingService.showLoading();
+    this.modoFiltro = true;
+    this.buscarAbonadoForm.controls['buscarAbonado'].setValue('');
+    this._abonadosOriginal = [];
+    this.loadingService.showLoading();
 
-      const onSuccess = (resp: PageResponse<Abonados>) => {
-        this._abonados = resp.content;
-        this.totalElements = resp.totalElements;
-        this.totalPages = resp.totalPages;
-        this.page = resp.number;
-        this.loadingService.hideLoading();
-      };
-      const onError = (e: any) => { console.error(e); this.loadingService.hideLoading(); };
+    const onSuccess = (resp: PageResponse<Abonados>) => {
+      this._abonados = resp.content;
+      this.totalElements = resp.totalElements;
+      this.totalPages = resp.totalPages;
+      this.page = resp.number;
+      this.loadingService.hideLoading();
+    };
+    const onError = (e: any) => { console.error(e); this.loadingService.hideLoading(); };
 
-      if (this.filtroCategoria !== null) {
-        this.aboService.getAbonadosByCategoriaPageable(this.filtroCategoria, this.page, this.size)
-          .subscribe({ next: onSuccess, error: onError });
-      } else if (this.filtroEstado !== null) {
-        this.aboService.getAbonadosByEstadoPageable(this.filtroEstado, this.page, this.size)
-          .subscribe({ next: onSuccess, error: onError });
-      } else if (this.filtroRuta !== null) {
-        this.aboService.getAbonadosByRutaPageable(this.filtroRuta, this.page, this.size)
-          .subscribe({ next: onSuccess, error: onError });
-      } else {
-        this.loadingService.hideLoading();
-      }
+    if (this.filtroCategoria !== null) {
+      this.aboService.getAbonadosByCategoriaPageable(this.filtroCategoria, this.page, this.size)
+        .subscribe({ next: onSuccess, error: onError });
+    } else if (this.filtroEstado !== null) {
+      this.aboService.getAbonadosByEstadoPageable(this.filtroEstado, this.page, this.size)
+        .subscribe({ next: onSuccess, error: onError });
+    } else if (this.filtroRuta !== null) {
+      this.aboService.getAbonadosByRutaPageable(this.filtroRuta, this.page, this.size)
+        .subscribe({ next: onSuccess, error: onError });
+    } else {
+      this.loadingService.hideLoading();
     }
+  }
 
 
   cambiarPagina(nuevaPagina: number) {
@@ -539,20 +542,20 @@ export class ListarAbonadosComponent implements OnInit {
         valign: 'middle',
       },
       columnStyles: {
-        0: { halign: 'left',   cellWidth: col(28) },
-        1: { halign: 'center', cellWidth: col(9)  },
-        2: { halign: 'center', cellWidth: col(7)  },
-        3: { halign: 'left',   cellWidth: col(12) },
-        4: { halign: 'left',   cellWidth: col(20) },
-        5: { halign: 'left',   cellWidth: col(18) },
-        6: { halign: 'center', cellWidth: col(6)  },
+        0: { halign: 'left', cellWidth: col(28) },
+        1: { halign: 'center', cellWidth: col(9) },
+        2: { halign: 'center', cellWidth: col(7) },
+        3: { halign: 'left', cellWidth: col(12) },
+        4: { halign: 'left', cellWidth: col(20) },
+        5: { halign: 'left', cellWidth: col(18) },
+        6: { halign: 'center', cellWidth: col(6) },
       },
       margin: { left: margenL, right: margenR, bottom: 20 },
       body: rows,
       didParseCell: (data) => {
         if (data.section === 'body' && data.column.index === 6) {
           const val = String(data.cell.raw ?? '');
-          if (val === 'Eliminado')  { data.cell.styles.textColor = [220, 53, 69];  data.cell.styles.fontStyle = 'bold'; }
+          if (val === 'Eliminado') { data.cell.styles.textColor = [220, 53, 69]; data.cell.styles.fontStyle = 'bold'; }
           else if (val === 'Suspendido' || val === 'Retirado') { data.cell.styles.textColor = [200, 100, 0]; }
           else if (val === 'Activo') { data.cell.styles.textColor = [40, 167, 69]; }
         }

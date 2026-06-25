@@ -1,0 +1,185 @@
+<div class="content mt-1 pt-1 pl-0">
+  <div class="container-fluid">
+    <div class="row m-0 px-0 py-1 justify-content-start cabecera border sombra">
+      <div class="col-sm-3">
+        <h4 class="m-0 font-weight-bold"><i class="fa fa-list" aria-hidden="true"></i> C.V. Abonados</h4>
+      </div>
+      <div class="col-sm-8">
+        <form [formGroup]="f_buscar">
+          <div class="row col-sm-12 mt-0 mb-0">
+            <div class="col-sm-12">
+              <div class="row">
+                <div class="col-sm">
+                  <input type="date" class="form-control form-control-sm" formControlName="sDate" />
+                </div>
+                <div class="col-sm">
+                  <select class="form-control form-control-sm" formControlName="tipoFiltro">
+                    <option value="estado">Estado</option>
+                    <option value="categoria">Categoria</option>
+                    <option value="ruta">Ruta</option>
+                  </select>
+                </div>
+                <div class="col-sm" *ngIf="f_buscar.value.tipoFiltro === 'estado'">
+                  <select class="form-control form-control-sm" formControlName="estado">
+                    <option *ngFor="let estado of estados" [ngValue]="estado.id">{{ estado.descripcion }}</option>
+                  </select>
+                </div>
+                <div class="col-sm" *ngIf="f_buscar.value.tipoFiltro === 'categoria'">
+                  <select class="form-control form-control-sm" formControlName="idcategoria">
+                    <option *ngFor="let categoria of categorias" [ngValue]="categoria.idcategoria">{{ categoria.descripcion }}</option>
+                  </select>
+                </div>
+                <div class="col-sm" *ngIf="f_buscar.value.tipoFiltro === 'ruta'">
+                  <select class="form-control form-control-sm" formControlName="idruta">
+                    <option *ngFor="let ruta of rutas" [ngValue]="ruta.idruta">{{ ruta.descripcion }}</option>
+                  </select>
+                </div>
+                <div class="col-sm-2">
+                  <button class="btn btn-primary btn-sm btn-block" type="button" (click)="onBuscar()">
+                    <i class="fa fa-search"></i>
+                  </button>
+                </div>
+                <div class="col-sm-2">
+                  <button class="btn btn-success btn-sm btn-block" type="button" (click)="imprimirListado()">
+                    <i class="fa fa-print"></i>
+                  </button>
+                </div>
+                <div class="col-sm-2 px-0">
+                  <input
+                    type="text"
+                    class="form-control form-control-sm text-center"
+                    placeholder="Filtrar..."
+                    [(ngModel)]="filtro"
+                    formControlName="filtro"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid">
+  <div class="card">
+    <div class="card-body">
+      <div class="row mb-0">
+        <div class="col-sm">
+          <table class="table table-hover table-bordered table-sm sombra">
+            <thead class="cabecera text-center">
+              <tr>
+                <th></th>
+                <th class="sortable" (click)="ordenarPor('cuenta')">Cuenta <i [class]="getSortIcon('cuenta')"></i></th>
+                <th class="sortable" (click)="ordenarPor('responsable')">Responsable <i [class]="getSortIcon('responsable')"></i></th>
+                <th class="sortable" (click)="ordenarPor('identificacion')">Identificacion <i [class]="getSortIcon('identificacion')"></i></th>
+                <th class="sortable" (click)="ordenarPor('categoria')">Categoria <i [class]="getSortIcon('categoria')"></i></th>
+                <th class="sortable" (click)="ordenarPor('ruta')">Ruta <i [class]="getSortIcon('ruta')"></i></th>
+                <th class="sortable" (click)="ordenarPor('estado')">Estado <i [class]="getSortIcon('estado')"></i></th>
+                <th class="sortable" (click)="ordenarPor('facturas')">Facturas <i [class]="getSortIcon('facturas')"></i></th>
+                <th class="sortable" (click)="ordenarPor('valor')">Valor <i [class]="getSortIcon('valor')"></i></th>
+                <th class="sortable" (click)="ordenarPor('interes')">Interes <i [class]="getSortIcon('interes')"></i></th>
+                <th class="sortable" (click)="ordenarPor('totaldeuda')">Total deuda <i [class]="getSortIcon('totaldeuda')"></i></th>
+              </tr>
+            </thead>
+            <tbody class="detalle">
+              <tr *ngFor="let abonado of sortedAbonados | filter:filtro; let i = index"
+                (click)="verFacturas(abonado)" data-toggle="modal" data-target="#detallesAbonado">
+                <td class="small text-center font-weight-bold">{{ i + 1 }}</td>
+                <td class="text-center">{{ abonado.cuenta }}</td>
+                <td class="description">{{ abonado.responsable }}</td>
+                <td class="text-center">{{ abonado.identificacion }}</td>
+                <td class="description">{{ abonado.categoria }}</td>
+                <td class="description">{{ abonado.ruta }}</td>
+                <td class="text-center">{{ getEstadoDescripcion(abonado.estado) }}</td>
+                <td class="text-center">{{ abonado.facturas }}</td>
+                <td class="text-right">{{ abonado.valor?.toFixed(2) }} $</td>
+                <td class="text-right">{{ abonado.interes?.toFixed(2) }} $</td>
+                <td class="text-right">{{ (abonado.totaldeuda ?? ((abonado.valor || 0) + (abonado.interes || 0)))?.toFixed(2) }} $</td>
+              </tr>
+            </tbody>
+            <caption class="small mark">
+              <strong>{{page + 1}}/{{totalPages}}</strong> total registros {{totalElements}}
+              <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-end">
+                  <li class="page-item">
+                    <button class="btn btn-xs btn-primary" (click)="onPreviousPage()">
+                      <span aria-hidden="true">&laquo;</span>
+                    </button>
+                  </li>
+                  <li class="page-item" *ngFor="let p of pages">
+                    <button class="btn btn-xs btn-outline-primary" (click)="onGoToPage(p)" [class.active]="p === page">
+                      {{ p + 1 }}
+                    </button>
+                  </li>
+                  <li class="page-item">
+                    <button class="btn btn-xs btn-primary" (click)="onNextPage()">
+                      <span aria-hidden="true">&raquo;</span>
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            </caption>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="detallesAbonado" tabindex="-1" aria-labelledby="detallesAbonadoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header py-2 justify-content-center cabecera">
+          <h5 class="modal-title font-weight-bold" id="detallesAbonadoLabel">{{ nombreModal }}</h5>
+          <button class="bg-transparent border-0 text-white mr-2" type="button"
+            *ngIf="swfacturas && facturas.length"
+            (click)="imprimirNotificacionDeuda()">
+            <i class="fa fa-print"></i> Imprimir notificacion
+          </button>
+          <button class="bg-transparent border-0 text-white dropdown-menu-right" type="button"
+            *ngIf="!swfacturas" (click)="swfacturas = true">
+            <i class="bi-arrow-left-circle icoRegresar"> Ver mas facturas</i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <table class="table table-sm table-hover table-bordered sombra" *ngIf="swfacturas; else detalleFacturaTpl">
+            <thead class="text-center cabecera">
+              <tr>
+                <th></th>
+                <th>Planilla</th>
+                <th>Modulo</th>
+                <th>Cuenta</th>
+                <th>Fecha</th>
+                <th>Valor</th>
+                <th>Interes</th>
+                <th>Total deuda</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let factura of facturas; let i = index" (click)="getDetallePlanilla(factura.factura)">
+                <td class="small text-center font-weight-bold">{{ i + 1 }}</td>
+                <td>{{ factura.factura }}</td>
+                <td class="description">{{ factura.modulo }}</td>
+                <td class="text-center">{{ factura.cuenta || 0 }}</td>
+                <td class="description">{{ factura.feccrea }}</td>
+                <td class="text-right">{{ factura.total?.toFixed(2) }} $</td>
+                <td class="text-right">{{ factura.interes?.toFixed(2) }} $</td>
+                <td class="text-right">{{ (factura.totaldeuda ?? ((factura.total || 0) + (factura.interes || 0)))?.toFixed(2) }} $</td>
+              </tr>
+              <tr>
+                <td class="text-right font-weight-bold" colspan="4">Totales:</td>
+                <td class="text-right font-weight-bold">{{ totalFacturas.toFixed(2) }} $</td>
+                <td class="text-right font-weight-bold">{{ totalIntereses.toFixed(2) }} $</td>
+                <td class="text-right font-weight-bold">{{ totalDeuda.toFixed(2) }} $</td>
+              </tr>
+            </tbody>
+          </table>
+          <ng-template #detalleFacturaTpl>
+            <app-info-factura [idfac]="idplanilla"></app-info-factura>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

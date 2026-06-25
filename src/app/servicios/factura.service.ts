@@ -455,6 +455,22 @@ export class FacturaService {
   getCVNOconsumo(fecha: any, page: number, size: number) {
     return this.http.get(`${baseUrl}/CV_noconsumo?fecha=${fecha}&page=${page}&size=${size}`);
   }
+  getCVAbonados(fecha: any, page: number, size: number, filtros: {
+    estado?: number | null,
+    idcategoria?: number | null,
+    idruta?: number | null
+  }) {
+    let url = `${baseUrl}/CV_abonados?fecha=${fecha}&page=${page}&size=${size}`;
+    if (filtros.estado != null) url += `&estado=${filtros.estado}`;
+    if (filtros.idcategoria != null) url += `&idcategoria=${filtros.idcategoria}`;
+    if (filtros.idruta != null) url += `&idruta=${filtros.idruta}`;
+    return this.http.get(url);
+  }
+  getCvFacturasByAbonado(cuenta: number, fecha: any) {
+    return this.http.get(
+      `${baseUrl}/reportes/cv_facxabonado?cuenta=${cuenta}&fecha=${fecha}`
+    );
+  }
   getCvFacturasByRubro(idrubro: number, fecha: any) {
     return this.http.get(
       `${baseUrl}/reportes/cv_facxrubro?idrubro=${idrubro}&fecha=${fecha}`

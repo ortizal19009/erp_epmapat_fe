@@ -234,6 +234,7 @@ import { ImpEmisionesComponent } from './componentes/emisiones/imp-emisiones/imp
 import { FormatFechaPipe } from './pipes/format-fecha.pipe';
 import { CvRubrosComponent } from './componentes/coactivas/carteras-vencidas/cv-rubros/cv-rubros.component';
 import { CvFacturasComponent } from './componentes/coactivas/carteras-vencidas/cv-facturas/cv-facturas.component';
+import { CvAbonadosComponent } from './componentes/coactivas/carteras-vencidas/cv-abonados/cv-abonados.component';
 import { DetallePlanillaComponent } from './componentes/facturas/detalle-planilla/detalle-planilla.component';
 import { ImpAsientosComponent } from './componentes/contabilidad/asientos/imp-asientos/imp-asientos.component';
 import { ModiAsientoComponent } from './componentes/contabilidad/asientos/modi-asiento/modi-asiento.component';
@@ -608,6 +609,7 @@ import { UsuarioAutocompleteComponent } from './componentes/facelectro/usuario-a
     /* COACTIVAS */
     CvRubrosComponent,
     CvFacturasComponent,
+    CvAbonadosComponent,
     DetallePlanillaComponent,
     PersonalComponent,
     AddPersonalComponent,
