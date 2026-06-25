@@ -30,6 +30,7 @@ export class ImpLecturasComponent implements OnInit {
   otrapagina: boolean = false;
   swimprimir: boolean = true;
   nombrearchivo: string;
+  reporteCierreRuta: CierreRutaReporte | null = null;
 
   constructor(
     private coloresService: ColoresService,
@@ -201,6 +202,28 @@ export class ImpLecturasComponent implements OnInit {
           error: (err) => console.error(err?.error ?? err),
         });
 
+        break;
+      }
+
+      case 3: {
+        this.lecService.getReporteCierreRuta(this.idrutaxemision).subscribe({
+          next: (datos: any) => {
+            this.reporteCierreRuta = datos;
+            this.imprimirCierreRuta();
+          },
+          error: (err) => console.error(err?.error ?? err),
+        });
+        break;
+      }
+
+      case 4: {
+        this.lecService.getReporteCierreRuta(this.idrutaxemision).subscribe({
+          next: (datos: any) => {
+            this.reporteCierreRuta = datos;
+            this.imprimirMultasCierreRuta();
+          },
+          error: (err) => console.error(err?.error ?? err),
+        });
         break;
       }
 
@@ -509,6 +532,170 @@ export class ImpLecturasComponent implements OnInit {
     this.muestraPDF(doc);
   }
 
+  imprimirCierreRuta() {
+    if (!this.reporteCierreRuta) return;
+
+    this.otrapagina = this.formImprimir.value.otrapagina;
+    const nombreEmision = new NombreEmisionPipe();
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const cierre = this.reporteCierreRuta;
+    const fechaCierre = cierre.fechacierre
+      ? new Date(cierre.fechacierre).toLocaleDateString('es-EC')
+      : 'No registrada';
+
+    doc.setFont('times', 'bold');
+    doc.setFontSize(15);
+    doc.text('EPMAPA-T', 14, 12);
+    doc.setFontSize(12);
+    doc.text('REPORTE DE CIERRE DE RUTA', 14, 18);
+    doc.setFont('times', 'normal');
+    doc.setFontSize(10);
+    doc.text(
+      `Emision: ${nombreEmision.transform(cierre.emision || this.rutaxemision.emision)}`,
+      14,
+      24,
+    );
+    doc.text(`Ruta: ${cierre.ruta || this.rutaxemision.ruta}`, 14, 29);
+    doc.text(`Fecha cierre: ${fechaCierre}`, 14, 34);
+
+    const totales = cierre.totales || { cuentas: 0, m3: 0, total: 0 };
+    autoTable(doc, {
+      startY: 39,
+      head: [['Cuentas', 'M3', 'Total generado']],
+      body: [[
+        this.formatoNumero(totales.cuentas, 0),
+        this.formatoNumero(totales.m3, 2),
+        this.formatoMoneda(totales.total),
+      ]],
+      theme: 'grid',
+      headStyles: { fillColor: [68, 103, 114], halign: 'center' },
+      styles: { fontSize: 9, halign: 'center' },
+    });
+
+    autoTable(doc, {
+      startY: ((doc as any).lastAutoTable?.finalY ?? 39) + 8,
+      head: [['Categoria', 'Cuentas', 'Total']],
+      body: (cierre.categorias || []).map((item) => [
+        item.descripcion,
+        this.formatoNumero(item.cuentas, 0),
+        this.formatoMoneda(item.total),
+      ]),
+      theme: 'grid',
+      headStyles: { fillColor: [68, 103, 114], halign: 'center' },
+      styles: { fontSize: 8 },
+      columnStyles: {
+        1: { halign: 'center', cellWidth: 25 },
+        2: { halign: 'right', cellWidth: 35 },
+      },
+    });
+
+    autoTable(doc, {
+      startY: ((doc as any).lastAutoTable?.finalY ?? 39) + 8,
+      head: [['Rubro', 'Abonados', 'Total']],
+      body: (cierre.rubros || []).map((item) => [
+        item.descripcion,
+        this.formatoNumero(item.abonados, 0),
+        this.formatoMoneda(item.total),
+      ]),
+      theme: 'grid',
+      headStyles: { fillColor: [68, 103, 114], halign: 'center' },
+      styles: { fontSize: 8 },
+      columnStyles: {
+        1: { halign: 'center', cellWidth: 25 },
+        2: { halign: 'right', cellWidth: 35 },
+      },
+    });
+
+    this.pdf.setfooter(doc);
+    this.muestraPDF(doc);
+  }
+
+  imprimirMultasCierreRuta() {
+    if (!this.reporteCierreRuta) return;
+
+    this.otrapagina = this.formImprimir.value.otrapagina;
+    const nombreEmision = new NombreEmisionPipe();
+    const doc = new jsPDF('l', 'mm', 'a4');
+    const cierre = this.reporteCierreRuta;
+    const multas = cierre.multas || [];
+    const fechaCierre = cierre.fechacierre
+      ? new Date(cierre.fechacierre).toLocaleDateString('es-EC')
+      : 'No registrada';
+
+    doc.setFont('times', 'bold');
+    doc.setFontSize(15);
+    doc.text('EPMAPA-T', 14, 12);
+    doc.setFontSize(12);
+    doc.text('CUENTAS CON MULTA AL CIERRE', 14, 18);
+    doc.setFont('times', 'normal');
+    doc.setFontSize(10);
+    doc.text(
+      `Emision: ${nombreEmision.transform(cierre.emision || this.rutaxemision.emision)}`,
+      14,
+      24,
+    );
+    doc.text(`Ruta: ${cierre.ruta || this.rutaxemision.ruta}`, 14, 29);
+    doc.text(`Fecha cierre: ${fechaCierre}`, 14, 34);
+
+    autoTable(doc, {
+      startY: 39,
+      head: [[
+        'Cuenta',
+        'Responsable',
+        'Categoria',
+        'Factura',
+        'Nro factura',
+        'Multa',
+        'Pendientes al cierre',
+        'Facturas pendientes',
+        'Total factura',
+        'Fecha cobro',
+      ]],
+      body: multas.map((item) => [
+        this.formatoNumero(item.cuenta, 0),
+        item.nombre || '',
+        item.categoria || '',
+        this.formatoNumero(item.idfactura, 0),
+        item.nrofactura || '',
+        this.formatoMoneda(item.multa),
+        this.formatoNumero(item.pendientesalcierre, 0),
+        item.facturaspendientes || '',
+        this.formatoMoneda(item.totalfactura),
+        item.fechacobro ? new Date(item.fechacobro).toLocaleDateString('es-EC') : '',
+      ]),
+      theme: 'grid',
+      headStyles: { fillColor: [68, 103, 114], halign: 'center' },
+      styles: { fontSize: 7, cellPadding: 1.5 },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 18 },
+        1: { cellWidth: 55 },
+        2: { cellWidth: 28 },
+        3: { halign: 'center', cellWidth: 18 },
+        4: { cellWidth: 25 },
+        5: { halign: 'right', cellWidth: 20 },
+        6: { halign: 'center', cellWidth: 25 },
+        7: { cellWidth: 42 },
+        8: { halign: 'right', cellWidth: 22 },
+        9: { halign: 'center', cellWidth: 22 },
+      },
+    });
+
+    this.pdf.setfooter(doc);
+    this.muestraPDF(doc);
+  }
+
+  private formatoNumero(valor: any, decimales: number): string {
+    const numero = Number(valor ?? 0);
+    return numero.toLocaleString('en-US', {
+      minimumFractionDigits: decimales,
+      maximumFractionDigits: decimales,
+    });
+  }
+
+  private formatoMoneda(valor: any): string {
+    return this.formatoNumero(valor, 2);
+  }
+
   muestraPDF(doc: any) {
     var opciones = {
       filename: 'lecturas.pdf',
@@ -723,4 +910,42 @@ interface Rutaxemision {
   emision: String;
   ruta: String;
   estado: number;
+}
+
+interface CierreRutaReporte {
+  idrutaxemision: number;
+  idemision: number;
+  emision: string;
+  idruta: number;
+  ruta: string;
+  fechacierre: string;
+  totales: {
+    cuentas: number;
+    m3: number;
+    total: number;
+  };
+  categorias: Array<{
+    idcategoria: number;
+    descripcion: string;
+    cuentas: number;
+    total: number;
+  }>;
+  rubros: Array<{
+    idrubro: number;
+    descripcion: string;
+    total: number;
+    abonados: number;
+  }>;
+  multas: Array<{
+    cuenta: number;
+    nombre: string;
+    categoria: string;
+    idfactura: number;
+    nrofactura: string;
+    multa: number;
+    pendientesalcierre: number;
+    facturaspendientes: string;
+    totalfactura: number;
+    fechacobro: string | null;
+  }>;
 }

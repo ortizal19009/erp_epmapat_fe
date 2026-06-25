@@ -4,6 +4,7 @@ let authService: AutorizaService;
 export class Suspensiones {
   idsuspension: number;
   tipo: number = 1;
+  idsuspension_origen?: Suspensiones;
   fecha: Date;
   numero: number;
   total: number;

@@ -18,3 +18,11 @@
   color: white;
   cursor: pointer;
 }
+
+.pointer {
+  cursor: pointer;
+}
+
+table tbody tr td:nth-child(7) {
+  display: none;
+}

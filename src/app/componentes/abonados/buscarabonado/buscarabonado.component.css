@@ -1,0 +1,197 @@
+.picker-template {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.picker-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #24505a 0%, #3b6b76 100%);
+  color: #fff;
+  box-shadow: 0 16px 34px rgba(30, 63, 71, 0.22);
+}
+
+.picker-hero h6 {
+  font-weight: 700;
+}
+
+.picker-hero p {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 13px;
+}
+
+.selection-pill {
+  white-space: nowrap;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  font-weight: 700;
+}
+
+.search-panel,
+.quick-panel {
+  background: #fff;
+  border: 1px solid #dbe7ea;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 10px 24px rgba(27, 59, 66, 0.08);
+  height: 100%;
+}
+
+.field-label,
+.quick-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6d8890;
+  font-weight: 700;
+}
+
+.picker-control {
+  height: 38px;
+  border-radius: 10px;
+  border-color: #d3e1e4;
+}
+
+.picker-control:focus {
+  border-color: #4b8794;
+  box-shadow: 0 0 0 0.12rem rgba(75, 135, 148, 0.18);
+}
+
+.search-input-wrap {
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6f8b92;
+  z-index: 2;
+}
+
+.search-input {
+  padding-left: 34px;
+}
+
+.action-column {
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+}
+
+.picker-btn {
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.picker-empty {
+  text-align: center;
+  padding: 42px 20px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #f8fcfd 0%, #eef6f8 100%);
+  border: 1px solid #d8e7ea;
+}
+
+.empty-mark {
+  width: 68px;
+  height: 68px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #dceef1;
+  color: #24545e;
+  font-size: 28px;
+}
+
+.picker-table {
+  overflow: hidden;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 12px 30px rgba(28, 58, 64, 0.08);
+}
+
+.picker-table thead th {
+  border-top: 0;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+.picker-table tbody td {
+  vertical-align: middle;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.picker-table tbody tr:nth-child(even) td {
+  background: #f8fbfc;
+}
+
+.picker-table tbody tr:hover td {
+  background: #e7f2f4;
+  transition: background-color 0.18s ease;
+  cursor: pointer;
+}
+
+.client-name {
+  font-weight: 700;
+  color: #1e454e;
+}
+
+.account-chip,
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.account-chip {
+  background: #e5f0f3;
+  color: #21454e;
+}
+
+.status-active {
+  background: #e5f7ea;
+  color: #1f7a3f;
+}
+
+.status-suspended {
+  background: #fff2d9;
+  color: #9a6500;
+}
+
+.status-retired {
+  background: #fde7e7;
+  color: #a23333;
+}
+
+.status-neutral {
+  background: #edf1f3;
+  color: #4c6870;
+}
+
+.picker-checkbox {
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 767px) {
+  .picker-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

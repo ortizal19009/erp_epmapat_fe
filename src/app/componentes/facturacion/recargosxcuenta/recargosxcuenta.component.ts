@@ -1,10 +1,13 @@
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { PageResponse } from 'src/app/interfaces/page-response';
 import { Abonados } from 'src/app/modelos/abonados';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { UsuarioService } from 'src/app/servicios/administracion/usuario.service';
 import { EmisionService } from 'src/app/servicios/emision.service';
+import { PdfService } from 'src/app/servicios/pdf.service';
 import { RecargosxcuentaService } from 'src/app/servicios/recargosxcuenta.service';
 import { RutasService } from 'src/app/servicios/rutas.service';
 import Swal from 'sweetalert2';
@@ -24,6 +27,8 @@ export class RecargosxcuentaComponent implements OnInit {
 
   // filtros UI
   filterTerm = '';
+  sortColumn: SortColumn = 'cuenta';
+  sortDirection: 'asc' | 'desc' = 'asc';
 
   filtroRuta: string | null = null;
   filtroRutaDescripcion: string = '';
@@ -90,6 +95,7 @@ export class RecargosxcuentaComponent implements OnInit {
     private usuarioService: UsuarioService,
     private authService: AutorizaService,
     private cdr: ChangeDetectorRef,
+    private pdfService: PdfService,
   ) { }
 
   ngOnInit(): void {
@@ -132,11 +138,21 @@ export class RecargosxcuentaComponent implements OnInit {
   }
 
   private normalizarAbonado(abonado: any): any {
+    const categoriaDescripcion =
+      abonado?.idcategoria_categorias?.descripcion || '';
+    const rutaDescripcion = abonado?.idruta_rutas?.descripcion || '';
+    const estadoDescripcion =
+      abonado?.idestadom_estadom?.descripcion ||
+      this.getEstadoCuentaLabel(abonado?.estado);
+
     return {
       ...abonado,
       idresponsable: abonado?.idresponsable || abonado?.idcliente_clientes || null,
       responsableNombre: this.nombreResponsable(abonado),
       responsableCedula: this.cedulaResponsable(abonado),
+      categoriaDescripcion,
+      rutaDescripcion,
+      estadoDescripcion,
     };
   }
 
@@ -159,6 +175,181 @@ export class RecargosxcuentaComponent implements OnInit {
         },
         error: (e: any) => console.error(e.error),
       });
+  }
+
+  get recargosFiltrados(): any[] {
+    const term = (this.filterTerm || '').trim().toLowerCase();
+    const filtrados = (this._recargosxcuenta || []).filter((item: any) => {
+      if (!term) return true;
+
+      const valores = [
+        item?.idabonado_abonados?.idabonado,
+        item?.idabonado_abonados?.responsableNombre,
+        item?.idabonado_abonados?.responsableCedula,
+        item?.idabonado_abonados?.categoriaDescripcion,
+        item?.idabonado_abonados?.rutaDescripcion,
+        item?.idabonado_abonados?.estadoDescripcion,
+        item?.idrubro_rubros?.descripcion,
+        item?.fecha,
+        item?.feccrea,
+      ];
+
+      return valores.some((valor) =>
+        String(valor ?? '').toLowerCase().includes(term)
+      );
+    });
+
+    return filtrados.sort((a: any, b: any) => this.compararRecargos(a, b));
+  }
+
+  ordenarPor(columna: SortColumn): void {
+    if (this.sortColumn === columna) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+      return;
+    }
+    this.sortColumn = columna;
+    this.sortDirection = 'asc';
+  }
+
+  iconoOrden(columna: SortColumn): string {
+    if (this.sortColumn !== columna) return 'bi bi-arrow-down-up';
+    return this.sortDirection === 'asc'
+      ? 'bi bi-sort-down'
+      : 'bi bi-sort-up';
+  }
+
+  imprimirListado(): void {
+    const filas = this.recargosFiltrados;
+    const doc = new jsPDF('l', 'mm', 'a4');
+    const emision = this.emisionSelected?.emision || this.lastEmision?.emision || '';
+
+    this.pdfService.header('REPORTE DE RECARGOS POR CUENTA', doc);
+    doc.setFontSize(10);
+    doc.text(`Emision: ${emision}`, 14, 70);
+    doc.text(`Registros: ${filas.length}`, 14, 75);
+
+    autoTable(doc, {
+      startY: 80,
+      head: [[
+        'Cuenta',
+        'Cliente',
+        'Ruta',
+        'Categoria',
+        'Estado',
+        'Fecha notificacion',
+        'Fecha registro',
+        'Rubro',
+        'Recargo',
+      ]],
+      body: filas.map((cuenta: any) => [
+        cuenta.idabonado_abonados?.idabonado ?? '',
+        cuenta.idabonado_abonados?.responsableNombre ?? '',
+        cuenta.idabonado_abonados?.rutaDescripcion ?? '',
+        cuenta.idabonado_abonados?.categoriaDescripcion ?? '',
+        cuenta.idabonado_abonados?.estadoDescripcion ?? '',
+        this.formatearFecha(cuenta.fecha),
+        this.formatearFecha(cuenta.feccrea),
+        cuenta.idrubro_rubros?.descripcion ?? '',
+        this.formatearNumero(cuenta.idrubro_rubros?.valor),
+      ]),
+      theme: 'grid',
+      styles: { fontSize: 7, cellPadding: 1.5 },
+      headStyles: { fillColor: [68, 103, 114], halign: 'center' },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 18 },
+        1: { cellWidth: 55 },
+        2: { cellWidth: 28 },
+        3: { cellWidth: 28 },
+        4: { cellWidth: 26 },
+        5: { halign: 'center', cellWidth: 24 },
+        6: { halign: 'center', cellWidth: 24 },
+        7: { cellWidth: 40 },
+        8: { halign: 'right', cellWidth: 20 },
+      },
+    });
+
+    this.pdfService.setfooter(doc);
+    const pdfBlob = doc.output('blob');
+    const blobUrl = URL.createObjectURL(pdfBlob);
+    const pdfViewer = document.getElementById('pdfViewer') as HTMLIFrameElement;
+    if (pdfViewer) {
+      if (pdfViewer.src?.startsWith('blob:')) {
+        URL.revokeObjectURL(pdfViewer.src);
+      }
+      pdfViewer.src = blobUrl;
+    }
+  }
+
+  private getEstadoCuentaLabel(estado: any): string {
+    switch (Number(estado)) {
+      case 1:
+        return 'Habilitado';
+      case 2:
+        return 'Suspendido';
+      case 3:
+        return 'Retirado';
+      case 0:
+        return 'Inactivo';
+      default:
+        return estado == null ? '' : String(estado);
+    }
+  }
+
+  private compararRecargos(a: any, b: any): number {
+    const factor = this.sortDirection === 'asc' ? 1 : -1;
+    const valorA = this.obtenerValorOrden(a, this.sortColumn);
+    const valorB = this.obtenerValorOrden(b, this.sortColumn);
+
+    if (valorA == null && valorB == null) return 0;
+    if (valorA == null) return -1 * factor;
+    if (valorB == null) return 1 * factor;
+
+    if (typeof valorA === 'number' && typeof valorB === 'number') {
+      return (valorA - valorB) * factor;
+    }
+
+    return String(valorA).localeCompare(String(valorB), 'es', {
+      numeric: true,
+      sensitivity: 'base',
+    }) * factor;
+  }
+
+  private obtenerValorOrden(item: any, columna: SortColumn): string | number {
+    switch (columna) {
+      case 'cuenta':
+        return Number(item?.idabonado_abonados?.idabonado ?? 0);
+      case 'cliente':
+        return item?.idabonado_abonados?.responsableNombre ?? '';
+      case 'ruta':
+        return item?.idabonado_abonados?.rutaDescripcion ?? '';
+      case 'categoria':
+        return item?.idabonado_abonados?.categoriaDescripcion ?? '';
+      case 'estado':
+        return item?.idabonado_abonados?.estadoDescripcion ?? '';
+      case 'fecha':
+        return new Date(item?.fecha ?? 0).getTime();
+      case 'feccrea':
+        return new Date(item?.feccrea ?? 0).getTime();
+      case 'rubro':
+        return item?.idrubro_rubros?.descripcion ?? '';
+      case 'recargo':
+        return Number(item?.idrubro_rubros?.valor ?? 0);
+      default:
+        return '';
+    }
+  }
+
+  private formatearFecha(valor: any): string {
+    if (!valor) return '-';
+    const fecha = new Date(valor);
+    return Number.isNaN(fecha.getTime()) ? '-' : fecha.toLocaleDateString('es-EC');
+  }
+
+  private formatearNumero(valor: any): string {
+    return Number(valor ?? 0).toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   }
 
   cargarAbonados(): void {
@@ -776,3 +967,14 @@ export class RecargosxcuentaComponent implements OnInit {
     setTimeout(() => { this.recargoSeleccionado = null; }, 300);
   }
 }
+
+type SortColumn =
+  | 'cuenta'
+  | 'cliente'
+  | 'ruta'
+  | 'categoria'
+  | 'estado'
+  | 'fecha'
+  | 'feccrea'
+  | 'rubro'
+  | 'recargo';

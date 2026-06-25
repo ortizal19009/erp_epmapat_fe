@@ -191,6 +191,11 @@ export class LecturasService {
       `${baseUrl}/reportes/consumoxcategoria?idemision=${idemision}`,
     );
   }
+  getReporteCierreRuta(idrutaxemision: number) {
+    return this.http.get(
+      `${baseUrl}/reportes/cierre-ruta?idrutaxemision=${idrutaxemision}`,
+    );
+  }
   async findZeroByEmisiones(idemision: number) {
     return this.http.get<any>(
       `${baseUrl}/reportes/rubrozero?idemision=${idemision}`,

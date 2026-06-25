@@ -1,19 +1,15 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, RequiredValidator } from '@angular/forms';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Abonados } from 'src/app/modelos/abonados';
+import { Documentos } from 'src/app/modelos/administracion/documentos.model';
 import { Aboxsuspension } from 'src/app/modelos/aboxsuspension';
 import { BuscarabonadoComponent } from '../../abonados/buscarabonado/buscarabonado.component';
-import { Documentos } from 'src/app/modelos/administracion/documentos.model';
+import { AbonadosService } from 'src/app/servicios/abonados.service';
+import { AboxsuspensionService } from 'src/app/servicios/aboxsuspension.service';
 import { DocumentosService } from 'src/app/servicios/administracion/documentos.service';
 import { SuspensionesService } from 'src/app/servicios/suspensiones.service';
-import { AboxsuspensionService } from 'src/app/servicios/aboxsuspension.service';
-import { LecturasService } from 'src/app/servicios/lecturas.service';
-import { AbonadosService } from 'src/app/servicios/abonados.service';
-import { RutasService } from 'src/app/servicios/rutas.service';
-import { Rutas } from 'src/app/modelos/rutas.model';
-import { AutorizaService } from 'src/app/compartida/autoriza.service';
-import { FacturaService } from 'src/app/servicios/factura.service';
 
 @Component({
   selector: 'app-add-suspensiones',
@@ -21,53 +17,51 @@ import { FacturaService } from 'src/app/servicios/factura.service';
   styleUrls: ['./add-suspensiones.component.css'],
 })
 export class AddSuspensionesComponent implements OnInit {
-  titulo: string = 'Nueva Suspensión';
+  @ViewChild('buscadorAbonados') buscadorAbonados?: BuscarabonadoComponent;
+  titulo: string = 'Nueva Suspension';
   f_dsuspension: FormGroup;
-  f_rutas: FormGroup;
   filterTerm: string;
   v_documentos: any;
-  l_abonados: any = [];
-  l_lecturas: any;
-  aboxsuspension: Aboxsuspension = new Aboxsuspension();
+  l_abonados: any[] = [];
   documentos: Documentos = new Documentos();
   total = 0;
   date: Date = new Date();
-  today: number = Date.now();
-  ruta: any;
+  today: string = this.formatDateForInput(new Date());
+  tiposSuspension = [
+    { valor: 2, descripcion: 'Suspension' },
+    { valor: 3, descripcion: 'Suspension y retiro' },
+  ];
+  estadosSuspension = this.tiposSuspension;
 
   constructor(
     private router: Router,
     private s_documentos: DocumentosService,
     private s_suspensiones: SuspensionesService,
     private s_aboxsuspension: AboxsuspensionService,
-    private s_lecturas: LecturasService,
     private fb: FormBuilder,
     private s_abonado: AbonadosService,
-    private s_rutas: RutasService,
-    private authService: AutorizaService,
-    private s_facturas: FacturaService
+    private authService: AutorizaService
   ) {}
 
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/suspensiones');
-    let coloresJSON = sessionStorage.getItem('/suspensiones');
-    if (coloresJSON) this.colocaColor(JSON.parse(coloresJSON));
+    const coloresJSON = sessionStorage.getItem('/suspensiones');
+    if (coloresJSON) {
+      this.colocaColor(JSON.parse(coloresJSON));
+    }
 
     this.f_dsuspension = this.fb.group({
-      tipo: 1,
+      tipo: 2,
       fecha: this.today,
       numero: '',
       iddocumento_documentos: [1],
       observa: [''],
       numdoc: [''],
-      total: [''],
+      total: [0],
       usucrea: this.authService.idusuario,
       feccrea: this.date,
     });
 
-    this.f_rutas = this.fb.group({
-      codnomb: '',
-    });
     this.listarDocumentos();
     this.getUltimo();
   }
@@ -82,18 +76,61 @@ export class AddSuspensionesComponent implements OnInit {
   }
 
   onSubmit() {
-    console.log(this.f_dsuspension.value);
     this.guardarSuspension();
+  }
+
+  get puedeGuardar(): boolean {
+    return this.l_abonados.length > 0;
+  }
+
+  get tipoSeleccionado(): number {
+    return Number(this.f_dsuspension?.value?.tipo || 2);
+  }
+
+  get tipoSeleccionadoLabel(): string {
+    return this.tipoSeleccionado === 3 ? 'Suspension y retiro' : 'Suspension';
+  }
+
+  getTipoClase(tipo: number): string {
+    return Number(tipo) === 3 ? 'badge-retiro' : 'badge-suspension';
+  }
+
+  getEstadoLabel(estado: number): string {
+    switch (Number(estado)) {
+      case 1:
+        return 'Activo';
+      case 2:
+        return 'Suspendido';
+      case 3:
+        return 'Suspendido y retirado';
+      default:
+        return `${estado ?? ''}`;
+    }
+  }
+
+  getEstadoClase(estado: number): string {
+    switch (Number(estado)) {
+      case 1:
+        return 'status-active';
+      case 2:
+        return 'status-suspended';
+      case 3:
+        return 'status-retired';
+      default:
+        return 'status-neutral';
+    }
   }
 
   listarDocumentos() {
     this.s_documentos.getListaDocumentos().subscribe((datos) => {
       this.v_documentos = datos;
-      error: console.error;
     });
   }
 
   guardarSuspension() {
+    if (!this.l_abonados.length) {
+      return;
+    }
     this.f_dsuspension.value.iddocumento_documentos = {
       iddocumento: +this.f_dsuspension.value.iddocumento_documentos!,
     };
@@ -101,32 +138,24 @@ export class AddSuspensionesComponent implements OnInit {
       this.f_dsuspension.value.tipo !== '' &&
       this.f_dsuspension.value.fecha !== ''
     ) {
-      let suspensionSaved: any;
       this.s_suspensiones.saveSuspension(this.f_dsuspension.value).subscribe({
-        next: (datos) => {
-          suspensionSaved = datos;
-          this.guardarAboxSuspension(suspensionSaved);
-        },
+        next: (datos) => this.guardarAboxSuspension(datos),
         error: (e) => console.error(e),
       });
     }
   }
 
   guardarAboxSuspension(suspensionS: any) {
-    let abonado: Abonados = new Abonados();
-    this.l_lecturas.forEach((lectura: any) => {
-      abonado = lectura.idabonado_abonados;
-      this.aboxsuspension.idsuspension_suspensiones = suspensionS;
-      this.aboxsuspension.idabonado_abonados = abonado;
-      this.s_aboxsuspension.saveAboxSuspension(this.aboxsuspension).subscribe({
-        next: (datos) => {
-          console.log(datos);
-        },
-        error: (e) => {
-          console.error(e);
-        },
+    const estadoAbonado = Number(this.f_dsuspension.value.tipo || 2);
+    this.l_abonados.forEach((abonado: Abonados) => {
+      const relacion = new Aboxsuspension();
+      relacion.idsuspension_suspensiones = suspensionS;
+      relacion.idabonado_abonados = abonado;
+      this.s_aboxsuspension.saveAboxSuspension(relacion).subscribe({
+        next: () => undefined,
+        error: (e) => console.error(e),
       });
-      abonado.estado = 2;
+      abonado.estado = estadoAbonado;
       this.actualizarAbonado(abonado);
     });
     this.listarSuspensiones();
@@ -136,72 +165,61 @@ export class AddSuspensionesComponent implements OnInit {
     this.router.navigate(['suspensiones']);
   }
 
-  selecRuta(ruta: Rutas) {
-    let aboxdeuda: any = { abonado: {}, facturas: [] };
-    let date: Date = new Date();
-    let year = date.getFullYear();
-    let month = date.getMonth();
-    let current_s: any = `${year}-${month}-01`;
-    let current_f: any = `${year}-${month + 1}-01`;
-
-    this.s_abonado.getByIdrutaAsync(ruta.idruta).then((_abonados: any) => {
-      let dato_abonado : any;
-      _abonados.forEach((abonado: any) => {
-        this.s_facturas.getSinCobrarAboMod(abonado.idabonado).subscribe({
-          next: (deuda: any) => {
-            aboxdeuda.abonado = abonado;
-            aboxdeuda.facturas.deudas;
-            return aboxdeuda;
-          },
-          error: (e) => console.error(e),
-          complete: () => {
-          },
-        });
-      });
-    });
-    // this.s_lecturas.getDeudores(current_s, current_f, ruta.idruta).subscribe({
-    //    next: (datos: any) => {
-    //       this.f_dsuspension.patchValue({
-    //          total: datos.length,
-    //       });
-    //       this.total = datos.length;
-    //       this.l_lecturas = datos;
-    //    },
-    //    error: (e) => console.error(e),
-    // });
-  }
-
-  setRuta(e: any) {
-    this.ruta = e;
-    this.selecRuta(e);
-  }
-
   getUltimo() {
-    // this.s_suspensiones.getUltimo().subscribe({
-    //    next: (datos: any) => {
-    //       if (datos != null) {
-    //          this.f_dsuspension.patchValue({
-    //             numero: +datos.numero! + 1,
-    //          });
-    //       } else {
-    //          this.f_dsuspension.patchValue({
-    //             numero: 1,
-    //          });
-    //       }
-    //    },
-    //    error: (e) => console.error(e),
-    // });
+    this.s_suspensiones.getUltimo().subscribe({
+      next: (datos: any) => {
+        this.f_dsuspension.patchValue({
+          numero: datos?.numero ? datos.numero + 1 : 1,
+        });
+      },
+      error: () => {
+        this.f_dsuspension.patchValue({ numero: 1 });
+      },
+    });
   }
 
   actualizarAbonado(abonado: Abonados) {
-    this.s_abonado.updateAbonadoAuditoria(
-      abonado,
-      this.authService.idusuario,
-      this.f_dsuspension.value.observa || 'Suspensión de medidor',
-      'SUSPENSION'
-    ).subscribe({
-      next: () => console.log('Abonado actualizado', abonado.idabonado),
-      error: (e) => console.error(e),
+    this.s_abonado
+      .updateAbonadoAuditoria(
+        abonado,
+        this.authService.idusuario,
+        this.f_dsuspension.value.observa || 'Suspension de medidor',
+        Number(this.f_dsuspension.value.tipo) === 3 ? 'RETIRO_MEDIDOR' : 'SUSPENSION'
+      )
+      .subscribe({
+        next: () => undefined,
+        error: (e) => console.error(e),
+      });
+  }
+
+  setAbonadosSeleccionados(abonados: any[]) {
+    const mapa = new Map<number, any>();
+    [...this.l_abonados, ...abonados].forEach((item) => {
+      mapa.set(item.idabonado, item);
     });
+    this.l_abonados = Array.from(mapa.values());
+    this.actualizarTotal();
+  }
+
+  quitarAbonado(idabonado: number) {
+    this.l_abonados = this.l_abonados.filter((item) => item.idabonado !== idabonado);
+    this.actualizarTotal();
+  }
+
+  actualizarTotal() {
+    this.total = this.l_abonados.length;
+    this.f_dsuspension.patchValue({ total: this.total });
+  }
+
+  confirmarSeleccionAbonados() {
+    const abonados = this.buscadorAbonados?.seleccionados ?? [];
+    this.setAbonadosSeleccionados(abonados);
+  }
+
+  private formatDateForInput(date: Date): string {
+    const year = date.getFullYear();
+    const month = `${date.getMonth() + 1}`.padStart(2, '0');
+    const day = `${date.getDate()}`.padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

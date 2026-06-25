@@ -1,6 +1,5 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { Abonados } from 'src/app/modelos/abonados';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
 
 @Component({
@@ -12,11 +11,15 @@ import { AbonadosService } from 'src/app/servicios/abonados.service';
 export class BuscarabonadoComponent implements OnInit {
 
   filterTerm: string;
-  abonado: any;
+  abonado: any[] = [];
   abonadoSeleccionado: any;
-  titulo: string = "Buscar abonado";
+  titulo: string = 'Buscar abonado';
   f_abonado: FormGroup;
   @Output() abonadoEvent = new EventEmitter<string>();
+  @Output() abonadosEvent = new EventEmitter<any[]>();
+  @Input() multiple: boolean = false;
+  @Input() soloSuspendidos: boolean = false;
+  seleccionados: any[] = [];
 
   constructor(private fb: FormBuilder, private s_abonados: AbonadosService) { }
 
@@ -31,22 +34,72 @@ export class BuscarabonadoComponent implements OnInit {
   onSubmit() {
   }
 
+  get totalSeleccionados(): number {
+    return this.seleccionados.length;
+  }
+
+  get tituloVista(): string {
+    return this.multiple ? 'Seleccionar abonados' : 'Buscar abonado';
+  }
+
+  get descripcionVista(): string {
+    return this.multiple
+      ? 'Marca una o varias cuentas y confirma la seleccion.'
+      : 'Busca una cuenta y selecciona el registro correcto.';
+  }
+
+  get criterioSeleccionadoLabel(): string {
+    switch (Number(this.f_abonado?.value?.catBusqueda)) {
+      case 1:
+        return 'cuenta';
+      case 2:
+        return 'cliente';
+      case 3:
+        return 'identificacion';
+      case 4:
+        return 'ruta';
+      default:
+        return 'criterio';
+    }
+  }
+
+  get placeholderBusqueda(): string {
+    switch (Number(this.f_abonado?.value?.catBusqueda)) {
+      case 1:
+        return 'Ej. 1254';
+      case 2:
+        return 'Nombre o apellido';
+      case 3:
+        return 'Cedula o RUC';
+      case 4:
+        return 'Nombre de la ruta';
+      default:
+        return 'Buscar';
+    }
+  }
+
   bAbonado() {
     let cat = (+this.f_abonado.value.catBusqueda!);
+    const valor = `${this.f_abonado.value.buscarAbonado ?? ''}`.trim();
     switch (cat) {
       case 1:
-        this.s_abonados.getListaByidabonado(this.f_abonado.value.buscarAbonado).subscribe(datos => {
-          this.abonado = datos;
+        this.s_abonados.getAbonadosPage(0, 100, 'idabonado,asc', { cuenta: valor ? +valor : undefined }).subscribe(datos => {
+          this.abonado = this.postProcessResultados(datos.content ?? []);
         });
         break;
       case 2:
-        this.s_abonados.getListaByNombreCliente(this.f_abonado.value.buscarAbonado).subscribe(datos => {
-          this.abonado = datos;
+        this.s_abonados.getAbonadosPage(0, 100, 'idabonado,asc', { responsable: valor }).subscribe(datos => {
+          this.abonado = this.postProcessResultados(datos.content ?? []);
         });
         break;
       case 3:
-        this.s_abonados.getListaByidentIficacionCliente(this.f_abonado.value.buscarAbonado).subscribe(datos => {
-          this.abonado = datos;
+        this.s_abonados.getAbonadosPage(0, 100, 'idabonado,asc', { cedula: valor }).subscribe(datos => {
+          this.abonado = this.postProcessResultados(datos.content ?? []);
+        });
+        break;
+      case 4:
+        this.s_abonados.getAbonadosPage(0, 100, 'idabonado,asc', { ruta: valor }).subscribe(datos => {
+          this.abonado = this.postProcessResultados(datos.content ?? []);
         });
         break;
       default:
@@ -54,18 +107,73 @@ export class BuscarabonadoComponent implements OnInit {
     }
   }
 
+  postProcessResultados(resultados: any[]) {
+    if (!this.soloSuspendidos) {
+      return resultados;
+    }
+    return resultados.filter((item) => [2, 3].includes(Number(item?.estado)));
+  }
+
   tipoBusqueda() {
     let i_catBusqueda = document.getElementById("selecTipoBusqueda") as HTMLInputElement;
     let i_Busqueda = document.getElementById("buscarAbonado") as HTMLInputElement;
     i_catBusqueda.addEventListener('change', () => {
-      this.f_abonado.value.buscarAbonado = '';
+      this.f_abonado.patchValue({ buscarAbonado: '' });
       i_Busqueda.value = '';
       this.abonado = [];
     })
   }
 
   sAbonado(abonado: any) {
+    if (this.multiple) {
+      return;
+    }
     this.abonadoEvent.emit(abonado)
+  }
+
+  toggleSeleccion(abonado: any, checked: boolean) {
+    if (checked) {
+      const existe = this.seleccionados.some((item) => item.idabonado === abonado.idabonado);
+      if (!existe) {
+        this.seleccionados.push(abonado);
+      }
+      return;
+    }
+    this.seleccionados = this.seleccionados.filter((item) => item.idabonado !== abonado.idabonado);
+  }
+
+  estaSeleccionado(abonado: any): boolean {
+    return this.seleccionados.some((item) => item.idabonado === abonado.idabonado);
+  }
+
+  emitirSeleccionados() {
+    this.abonadosEvent.emit(this.seleccionados);
+  }
+
+  getEstadoLabel(estado: number): string {
+    switch (Number(estado)) {
+      case 1:
+        return 'Activo';
+      case 2:
+        return 'Suspendido';
+      case 3:
+        return 'Suspendido y retirado';
+      default:
+        return `${estado ?? ''}`;
+    }
+  }
+
+  getEstadoClase(estado: number): string {
+    switch (Number(estado)) {
+      case 1:
+        return 'status-active';
+      case 2:
+        return 'status-suspended';
+      case 3:
+        return 'status-retired';
+      default:
+        return 'status-neutral';
+    }
   }
 
 }

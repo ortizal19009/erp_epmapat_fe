@@ -136,6 +136,19 @@ export class SuspensionesComponent implements OnInit {
   setRuta(e: any) {
     this.router.navigate(['mora-abonados', e.idruta]);
   }
+
+  getTipoLabel(tipo: number): string {
+    switch (Number(tipo)) {
+      case 1:
+        return 'Habilitación';
+      case 2:
+        return 'Suspensión';
+      case 3:
+        return 'Suspensión y retiro';
+      default:
+        return `${tipo ?? ''}`;
+    }
+  }
   /* IMPRIMIR */
   i_deudasxruta(datos: any) {
     let doc = new jsPDF('p', 'pt', 'a4');

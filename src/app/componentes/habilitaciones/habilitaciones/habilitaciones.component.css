@@ -2,6 +2,9 @@
    background-color: var(--bgcolor1);
    color: white;
 }
+.suspension-template {
+   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
 .nuevoBG1 { background-color: var(--bgcolor1); }
 
 .detalle { background-color: var(--bgcolor2); }
@@ -11,4 +14,41 @@
    background-color: #117a8B;
    color: white;
    cursor: pointer;
+}
+
+.panel-hero {
+   border-radius: 14px;
+   box-shadow: 0 14px 32px rgba(36, 63, 71, 0.18);
+}
+
+.form-card {
+   border: 0;
+   border-radius: 14px;
+   overflow: hidden;
+}
+
+.modern-table {
+   overflow: hidden;
+   border-radius: 14px;
+   background: white;
+}
+
+.modern-table thead th {
+   border-top: 0;
+   font-size: 12px;
+   letter-spacing: 0.03em;
+   text-transform: uppercase;
+}
+
+.modern-table tbody td {
+   vertical-align: middle;
+}
+
+.modern-table tbody tr:nth-child(even) td {
+   background: #f7fbfc;
+}
+
+.modern-table tbody tr:hover td {
+   background: #e3f2f4;
+   transition: background-color 0.2s ease;
 }

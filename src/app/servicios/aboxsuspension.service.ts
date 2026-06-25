@@ -27,4 +27,8 @@ export class AboxsuspensionService {
     return this.http.get<Aboxsuspension[]>(`${baseUrl}/suspension/${idsuspension}`);
   }
 
+  getUltimaSuspensionActivaByAbonado(idabonado: number) {
+    return this.http.get<Aboxsuspension | null>(`${baseUrl}/abonado/${idabonado}/ultima-activa`);
+  }
+
 }

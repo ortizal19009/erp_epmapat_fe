@@ -66,22 +66,29 @@
         <thead>
           <tr class="text-center font-weight-bold cabecera">
             <th style="width:40px;"></th>
-            <th>Cuenta</th>
-            <th>Cliente</th>
+            <th class="pointer" (click)="ordenarPor('cuenta')">Cuenta <i [class]="iconoOrden('cuenta')"></i></th>
+            <th class="pointer" (click)="ordenarPor('cliente')">Cliente <i [class]="iconoOrden('cliente')"></i></th>
+            <th class="pointer" (click)="ordenarPor('ruta')">Ruta <i [class]="iconoOrden('ruta')"></i></th>
+            <th class="pointer" (click)="ordenarPor('categoria')">Categoría <i [class]="iconoOrden('categoria')"></i></th>
+            <th class="pointer" (click)="ordenarPor('estado')">Estado <i [class]="iconoOrden('estado')"></i></th>
             <th>Fecha Notificación</th>
-            <th>Fecha R.</th>
-            <th>Rubro</th>
-            <th>Recargo</th>
+            <th class="pointer" (click)="ordenarPor('feccrea')">Fecha R. <i [class]="iconoOrden('feccrea')"></i></th>
+            <th class="pointer" (click)="ordenarPor('rubro')">Rubro <i [class]="iconoOrden('rubro')"></i></th>
+            <th class="pointer" (click)="ordenarPor('recargo')">Recargo <i [class]="iconoOrden('recargo')"></i></th>
             <th></th>
           </tr>
         </thead>
 
         <tbody class="detalle">
-          <tr class="fila" *ngFor="let cuenta of _recargosxcuenta | filter: filterTerm; let i = index">
+          <tr class="fila" *ngFor="let cuenta of recargosFiltrados; let i = index">
             <td class="text-center">
               {{i+1}}
             </td>
             <td class="text-center">{{ cuenta.idabonado_abonados.idabonado }}</td>
+            <td>{{ cuenta.idabonado_abonados?.responsableNombre || '-' }}</td>
+            <td>{{ cuenta.idabonado_abonados?.rutaDescripcion || '-' }}</td>
+            <td>{{ cuenta.idabonado_abonados?.categoriaDescripcion || '-' }}</td>
+            <td>{{ cuenta.idabonado_abonados?.estadoDescripcion || '-' }}</td>
             <td>{{ cuenta.idabonado_abonados?.responsableNombre || '—' }}</td>
             <td class="text-center">{{ cuenta.fecha ? (cuenta.fecha | date:'dd/MM/yyyy') : '-' }}</td>
             <td class="text-center">{{ cuenta.feccrea ? (cuenta.feccrea | date:'dd/MM/yyyy') : '-' }}</td>
@@ -102,12 +109,36 @@
             </td>
           </tr>
 
-          <tr *ngIf="(_recargosxcuenta.length || 0) === 0">
-            <td colspan="8" class="text-center text-muted py-3">No hay resultados</td>
+          <tr *ngIf="(recargosFiltrados.length || 0) === 0">
+            <td colspan="11" class="text-center text-muted py-3">No hay resultados</td>
           </tr>
 
         </tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="imprimir" tabindex="-1" aria-labelledby="imprimirRecargosLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header cabecera text-white">
+        <h5 class="modal-title mb-0" id="imprimirRecargosLabel">Reporte de recargos por cuenta</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body p-0" style="height: 80vh;">
+        <iframe id="pdfViewer" title="Vista previa PDF" width="100%" height="100%" style="border: 0;"></iframe>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success btn-sm" (click)="imprimirListado()">
+          <i class="bi bi-printer"></i>&nbsp; Generar PDF
+        </button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-dismiss="modal">
+          Cerrar
+        </button>
+      </div>
     </div>
   </div>
 </div>

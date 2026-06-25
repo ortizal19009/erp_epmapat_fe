@@ -28,9 +28,11 @@ export class HabilitacionesComponent implements OnInit {
   cliente: Clientes = new Clientes();
   habilitacion: Suspensiones = new Suspensiones();
   aboxsuspension: Aboxsuspension = new Aboxsuspension();
+  suspensionOrigen: Suspensiones | null = null;
   l_habilitaciones: boolean = true;
   l_documentos: any;
   btn_habilitacion: boolean = true;
+  mensajeSeleccion = '';
   estado = [
     { valor: 1, estado: 'Activo' },
     { valor: 2, estado: 'Suspendido' },
@@ -137,6 +139,10 @@ export class HabilitacionesComponent implements OnInit {
   }
 
   habilitarMedidor() {
+    if (!this.suspensionOrigen?.idsuspension) {
+      this.mensajeSeleccion = 'La cuenta seleccionada no tiene una suspension activa registrada.';
+      return;
+    }
     this.abonado.estado = 1;
     this.s_abonado.updateAbonadoAuditoria(
       this.abonado,
@@ -173,7 +179,8 @@ export class HabilitacionesComponent implements OnInit {
     this.habilitacion.usucrea = this.authService.idusuario;
     this.habilitacion.feccrea = this.date;
     this.habilitacion.numero = this.f_habilitacion.value.numero;
-    this.habilitacion.tipo = 2;
+    this.habilitacion.tipo = 1;
+    this.habilitacion.idsuspension_origen = this.suspensionOrigen ?? undefined;
     this.habilitacion.fecha = this.date;
     this.habilitacion.numdoc = this.f_habilitacion.value.numdoc;
     this.habilitacion.iddocumento_documentos =
@@ -198,12 +205,29 @@ export class HabilitacionesComponent implements OnInit {
   }
 
   setAbonado(abonado: any) {
-    this.abonado = abonado;
-    this.cliente = abonado.idcliente_clientes;
-    this.l_habilitaciones = false;
-    if (abonado.estado != 1) {
-      this.btn_habilitacion = false;
+    this.mensajeSeleccion = '';
+    if (![2, 3].includes(Number(abonado?.estado))) {
+      this.mensajeSeleccion = 'Solo se pueden habilitar cuentas suspendidas o suspendidas y retiradas.';
+      return;
     }
+
+    this.s_aboxsuspension.getUltimaSuspensionActivaByAbonado(abonado.idabonado).subscribe({
+      next: (relacion: any) => {
+        if (!relacion?.idsuspension_suspensiones?.idsuspension) {
+          this.mensajeSeleccion = 'La cuenta no consta en la lista de suspensiones activas.';
+          return;
+        }
+        this.abonado = abonado;
+        this.cliente = abonado.idcliente_clientes;
+        this.suspensionOrigen = relacion.idsuspension_suspensiones;
+        this.l_habilitaciones = false;
+        this.btn_habilitacion = abonado.estado === 1;
+      },
+      error: (e) => {
+        this.mensajeSeleccion = 'No fue posible obtener la suspension de origen.';
+        console.error(e);
+      },
+    });
   }
 
   setEstado(estado: number) {
@@ -211,5 +235,18 @@ export class HabilitacionesComponent implements OnInit {
       (_estado: { valor: number }) => _estado.valor == estado
     );
     return es?.estado;
+  }
+
+  getTipoLabel(tipo: number): string {
+    switch (Number(tipo)) {
+      case 1:
+        return 'Habilitación';
+      case 2:
+        return 'Suspensión';
+      case 3:
+        return 'Suspensión y retiro';
+      default:
+        return `${tipo ?? ''}`;
+    }
   }
 }

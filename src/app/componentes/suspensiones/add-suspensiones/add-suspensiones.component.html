@@ -1,118 +1,207 @@
-<div class="content px-1 pt-1">
-   <div class="container-fluid">
-      <div class="row cabecera">
-         <div class="col-sm-3">
-            <h5 class="m-0 font-weight-bold py-1">{{ titulo }}</h5>
-         </div>
-         <div class="col-sm-2 py-1">
-            <p class="m-0 font-weight-bold">Total: {{total}}</p>
-         </div>
-         <div class="col-sm-4 py-1">
-            <button type="submit" class="btn btn-success btn-sm" (click)="onSubmit()">
-               <i class="fa fa-check-circle"></i> Aceptar
-            </button>
-            <button type="submit" class="btn btn-outline-success btn-sm mx-2" (click)="listarSuspensiones()">
-               <i class="fa fa-times-circle"></i> Cancelar
-            </button>
-         </div>
-         <div class="col-sm text-right py-1">
-            <button class="btn btn-success mx-2 btn-sm" data-toggle="modal" data-target="#rutaModal">
-               <i class="fa fa-plus-square-o" aria-hidden="true"> Rutas</i>
-            </button>
-         </div>
+<div class="content px-1 pt-1 suspension-template">
+  <div class="container-fluid">
+    <div class="row cabecera panel-hero">
+      <div class="col-sm-3">
+        <h5 class="m-0 font-weight-bold py-1">{{ titulo }}</h5>
       </div>
-   </div>
+      <div class="col-sm-2 py-1">
+        <p class="m-0 font-weight-bold summary-pill">Total seleccionados: {{ total }}</p>
+      </div>
+      <div class="col-sm-2 py-1">
+        <span class="type-badge" [ngClass]="getTipoClase(tipoSeleccionado)">
+          {{ tipoSeleccionadoLabel }}
+        </span>
+      </div>
+      <div class="col-sm-2 py-1">
+        <button type="submit" class="btn btn-success btn-sm action-btn" (click)="onSubmit()" [disabled]="!puedeGuardar">
+          <i class="fa fa-check-circle"></i> Aceptar
+        </button>
+        <button type="submit" class="btn btn-outline-light btn-sm mx-2 action-btn" (click)="listarSuspensiones()">
+          <i class="fa fa-times-circle"></i> Cancelar
+        </button>
+      </div>
+      <div class="col-sm text-right py-1">
+        <button class="btn btn-light mx-2 btn-sm action-btn" data-toggle="modal" data-target="#abonadoModal">
+          <i class="fa fa-plus-square-o" aria-hidden="true"> Abonados</i>
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="container-fluid px-0">
-   <form action="" [formGroup]="f_dsuspension">
-      <div class="row mx-1 cabecera">
-         <div class="col-sm-1">
-            <label for="" class="text-center">
-               Número
-               <input type="number" class="form-control form-control-sm text-center" formControlName="numero"
-                  readOnly />
-            </label>
-         </div>
-         <div class="col-sm-2 text-center">
-            <label for="" class="text-center"> Fecha
-               <input type="date" class="form-control form-control-sm text-center"
-                  value="{{f_dsuspension.value.fecha|date:'yyyy-MM-dd'}}" min="{{today|date:'yyyy-MM-dd'}}"
-                  formControlName="fecha" />
-            </label>
-         </div>
-         <div class="col-sm-2">
-            <label for="" class="col-sm-12">
-               Documento
-               <select type="text" class="form-control form-control-sm" formControlName="iddocumento_documentos">
-                  <option value={{d_documentos.iddocumento}} *ngFor="let d_documentos of v_documentos"
-                     id="id-d{{ d_documentos.iddocumento }}">
-                     {{ d_documentos.nomdoc }}
-                  </option>
-               </select>
-            </label>
-         </div>
-         <div class="col-sm-1">
-            <label for="" class="text-center"> Doc#
-               <input type="number" class="form-control form-control-sm" formControlName="numdoc" />
-            </label>
-         </div>
-         <div class="col-sm-6">
-            <label for="observa" class="col-sm-12 col-form-label-sm"> Observaciones
-               <input type="text" id="observa" class="form-control form-control-sm" formControlName="observa" />
-            </label>
-         </div>
+  <form action="" [formGroup]="f_dsuspension">
+    <div class="row mx-1 cabecera form-strip">
+      <div class="col-sm-1">
+        <label for="" class="text-center">
+          Numero
+          <input type="number" class="form-control form-control-sm text-center" formControlName="numero" readOnly />
+        </label>
       </div>
-   </form>
+      <div class="col-sm-2 text-center">
+        <label for="" class="text-center">
+          Fecha
+          <input
+            type="date"
+            class="form-control form-control-sm text-center"
+            formControlName="fecha"
+            [min]="today"
+          />
+        </label>
+      </div>
+      <div class="col-sm-2">
+        <label for="" class="col-sm-12">
+          Documento
+          <select type="text" class="form-control form-control-sm" formControlName="iddocumento_documentos">
+            <option value="{{ d_documentos.iddocumento }}" *ngFor="let d_documentos of v_documentos">
+              {{ d_documentos.nomdoc }}
+            </option>
+          </select>
+        </label>
+      </div>
+      <div class="col-sm-1">
+        <label for="" class="text-center">
+          Doc#
+          <input type="text" class="form-control form-control-sm" formControlName="numdoc" />
+        </label>
+      </div>
+      <div class="col-sm-2">
+        <label for="" class="col-sm-12">
+          Tipo
+          <select class="form-control form-control-sm" formControlName="tipo">
+            <option *ngFor="let tipo of tiposSuspension" [ngValue]="tipo.valor">
+              {{ tipo.descripcion }}
+            </option>
+          </select>
+        </label>
+      </div>
+      <div class="col-sm-4">
+        <label for="observa" class="col-sm-12 col-form-label-sm">
+          Observaciones
+          <input type="text" id="observa" class="form-control form-control-sm" formControlName="observa" />
+        </label>
+      </div>
+    </div>
+  </form>
 </div>
 
 <div class="container-fluid">
-   <div class="row">
-      <div class="col-sm-12">
-         <div class="card card-outline">
-            <div class="card-body">
-               <table class="table table-sm table-hover table-bordered">
-                  <thead class="text-center cabecera">
-                     <tr>
-                        <th>Nro.</th>
-                        <th>Cuenta</th>
-                        <th>Nombre cliente</th>
-                        <th>Identificación</th>
-                        <th>Meses deuda </th>
-                     </tr>
-                  </thead>
-                  <tbody>
-                     <tr *ngFor="let lectura of l_lecturas; let i= index">
-                        <td class="font-weight-bold text-center">{{i+1}}</td>
-                        <td class="text-center">{{ lectura.idabonado_abonados.idabonado }}</td>
-                        <td>{{ lectura.idabonado_abonados.idcliente_clientes.nombre }}</td>
-                        <td class="text-center">{{ lectura.idabonado_abonados.idcliente_clientes.cedula }}</td>
-                        <td class="text-center">
-                           {{lectura.mesesmulta}}
-                        </td>
-                     </tr>
-                  </tbody>
-               </table>
-
+  <div class="row mt-3 mb-2">
+    <div class="col-sm-8">
+      <div class="section-intro">
+        <h6 class="mb-1">Cuentas incluidas en la suspension</h6>
+        <p class="mb-0 text-muted">
+          Busca y selecciona una o varias cuentas por cliente, cedula, ruta o numero de abonado.
+        </p>
+      </div>
+    </div>
+    <div class="col-sm-4 text-right">
+      <button class="btn btn-outline-primary btn-sm action-btn" data-toggle="modal" data-target="#abonadoModal">
+        <i class="fa fa-search" aria-hidden="true"></i> Buscar cuentas
+      </button>
+    </div>
+  </div>
+  <div class="row mb-3">
+    <div class="col-sm-12">
+      <div class="selection-dashboard">
+        <div class="dashboard-item">
+          <span class="dashboard-label">Tipo aplicado</span>
+          <strong>{{ tipoSeleccionadoLabel }}</strong>
+        </div>
+        <div class="dashboard-item">
+          <span class="dashboard-label">Cuentas listas</span>
+          <strong>{{ total }}</strong>
+        </div>
+        <div class="dashboard-item">
+          <span class="dashboard-label">Documento</span>
+          <strong>{{ f_dsuspension.value.numdoc || 'Sin numero' }}</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card card-outline shadow-sm table-card">
+        <div class="card-body p-0">
+          <div *ngIf="!l_abonados.length" class="empty-state">
+            <div class="empty-icon">
+              <i class="fa fa-address-book-o" aria-hidden="true"></i>
             </div>
-         </div>
-      </div>
-   </div>
-</div>
-<!-- MODAL RUTAS -->
-<div class="modal fade" id="rutaModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-   aria-labelledby="rutaModalLabel" aria-hidden="true">
-   <div class="modal-dialog modal-dialog-scrollable modal-lg">
-      <div class="modal-content card-success card-outline">
-         <div class="modal-body">
-            <app-buscar-ruta (setRuta)="setRuta($event)"></app-buscar-ruta>
-         </div>
-         <div class="modal-footer">
-            <button class="btn btn-success btn-sm mx-1" data-dismiss="modal">
-               Cancelar
+            <h6 class="mb-1">Aun no has seleccionado cuentas</h6>
+            <p class="mb-3">Usa el boton "Buscar cuentas" para agregar abonados a esta suspension.</p>
+            <button class="btn btn-primary btn-sm action-btn" data-toggle="modal" data-target="#abonadoModal">
+              Seleccionar abonados
             </button>
-
-         </div>
+          </div>
+          <table class="table table-sm table-hover table-bordered mb-0 modern-table">
+            <thead class="text-center cabecera">
+              <tr>
+                <th>Nro.</th>
+                <th>Cuenta</th>
+                <th>Nombre cliente</th>
+                <th>Identificacion</th>
+                <th>Ruta</th>
+                <th>Categoria</th>
+                <th>Estado</th>
+                <th>Accion</th>
+              </tr>
+            </thead>
+            <tbody *ngIf="l_abonados.length">
+              <tr *ngFor="let abonado of l_abonados; let i = index">
+                <td class="font-weight-bold text-center">{{ i + 1 }}</td>
+                <td class="text-center"><span class="account-chip">#{{ abonado.idabonado }}</span></td>
+                <td>
+                  <div class="client-name">{{ abonado.idcliente_clientes?.nombre }}</div>
+                  <small class="text-muted">Medidor: {{ abonado.nromedidor || 'S/N' }}</small>
+                </td>
+                <td class="text-center">{{ abonado.idcliente_clientes?.cedula }}</td>
+                <td class="text-center">{{ abonado.idruta_rutas?.descripcion }}</td>
+                <td class="text-center">{{ abonado.idcategoria_categorias?.descripcion }}</td>
+                <td class="text-center">
+                  <span class="status-badge" [ngClass]="getEstadoClase(abonado.estado)">
+                    {{ getEstadoLabel(abonado.estado) }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <button type="button" class="btn btn-outline-danger btn-sm action-btn danger-soft" (click)="quitarAbonado(abonado.idabonado)">
+                    <i class="fa fa-trash-o" aria-hidden="true"></i> Quitar
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-   </div>
+    </div>
+  </div>
+</div>
+
+<div
+  class="modal fade"
+  id="abonadoModal"
+  data-backdrop="static"
+  data-keyboard="false"
+  tabindex="-1"
+  aria-labelledby="abonadoModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-scrollable modal-lg">
+    <div class="modal-content card-success card-outline modal-polish">
+      <div class="modal-header cabecera">
+        <h5 class="modal-title m-0" id="abonadoModalLabel">Seleccion de abonados</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <app-buscarabonado #buscadorAbonados [multiple]="true"></app-buscarabonado>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary btn-sm mx-1 action-btn" data-dismiss="modal" (click)="confirmarSeleccionAbonados()">
+          Agregar seleccionados
+        </button>
+        <button class="btn btn-success btn-sm mx-1" data-dismiss="modal">Cancelar</button>
+      </div>
+    </div>
+  </div>
 </div>

@@ -2,6 +2,9 @@
    --bgcolor1: rgb(68, 103, 114);
    --bgcolor2: rgba(231, 251, 253);
 }
+.suspension-template {
+   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
 .cabecera {
    background-color: var(--bgcolor1);
    color: white;
@@ -10,3 +13,207 @@
 
 .detalle { background-color: var(--bgcolor2); }
 .nuevoBG2 { background-color: var(--bgcolor2); }
+
+.panel-hero {
+   border-radius: 14px;
+   box-shadow: 0 14px 32px rgba(36, 63, 71, 0.18);
+   margin-bottom: 10px;
+   align-items: center;
+}
+
+.summary-pill {
+   display: inline-block;
+   padding: 8px 14px;
+   border-radius: 999px;
+   background: rgba(255, 255, 255, 0.18);
+}
+
+.type-badge,
+.status-badge,
+.account-chip {
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   border-radius: 999px;
+   padding: 6px 12px;
+   font-weight: 700;
+   font-size: 12px;
+   line-height: 1.2;
+}
+
+.type-badge {
+   background: rgba(255, 255, 255, 0.15);
+   color: #fff;
+}
+
+.badge-suspension {
+   background: rgba(255, 243, 205, 0.22);
+   border: 1px solid rgba(255, 243, 205, 0.35);
+}
+
+.badge-retiro {
+   background: rgba(255, 214, 214, 0.2);
+   border: 1px solid rgba(255, 214, 214, 0.32);
+}
+
+.form-strip {
+   border-radius: 12px;
+   margin-top: 10px;
+   padding-top: 6px;
+   padding-bottom: 6px;
+   box-shadow: 0 10px 24px rgba(41, 76, 84, 0.12);
+}
+
+.table-card {
+   border: 0;
+   border-radius: 14px;
+   overflow: hidden;
+   background: linear-gradient(180deg, #ffffff 0%, #f7fbfc 100%);
+}
+
+.modern-table thead th {
+   border-top: 0;
+   font-size: 12px;
+   letter-spacing: 0.03em;
+   text-transform: uppercase;
+   vertical-align: middle;
+}
+
+.modern-table tbody td {
+   vertical-align: middle;
+   background: #fff;
+   padding-top: 12px;
+   padding-bottom: 12px;
+}
+
+.modern-table tbody tr:nth-child(even) td {
+   background: #f7fbfc;
+}
+
+.modern-table tbody tr:hover td {
+   background: #e3f2f4;
+   transition: background-color 0.2s ease;
+}
+
+.action-btn {
+   border-radius: 999px;
+   padding-left: 14px;
+   padding-right: 14px;
+   font-weight: 600;
+   box-shadow: none;
+}
+
+.section-intro {
+   padding: 8px 4px;
+}
+
+.section-intro h6 {
+   font-weight: 700;
+   color: #22424a;
+}
+
+.selection-dashboard {
+   display: grid;
+   grid-template-columns: repeat(3, minmax(0, 1fr));
+   gap: 14px;
+   background: linear-gradient(135deg, #ffffff 0%, #f0f7f8 100%);
+   border: 1px solid #d9e8eb;
+   border-radius: 16px;
+   padding: 16px;
+}
+
+.dashboard-item {
+   padding: 12px 14px;
+   border-radius: 12px;
+   background: #fff;
+   border: 1px solid #e4eef0;
+   box-shadow: 0 6px 18px rgba(33, 72, 80, 0.06);
+}
+
+.dashboard-item strong {
+   display: block;
+   color: #183d45;
+   font-size: 18px;
+   margin-top: 4px;
+}
+
+.dashboard-label {
+   display: block;
+   font-size: 11px;
+   text-transform: uppercase;
+   letter-spacing: 0.05em;
+   color: #6a8790;
+}
+
+.empty-state {
+   padding: 34px 20px;
+   text-align: center;
+   background: linear-gradient(180deg, #f8fcfd 0%, #eef7f8 100%);
+   border-bottom: 1px solid #dbe9ec;
+}
+
+.empty-icon {
+   width: 64px;
+   height: 64px;
+   margin: 0 auto 14px;
+   border-radius: 50%;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   background: #d9eef1;
+   color: #24505a;
+   font-size: 26px;
+}
+
+.client-name {
+   font-weight: 700;
+   color: #1d4149;
+}
+
+.account-chip {
+   background: #e6f1f4;
+   color: #224851;
+}
+
+.status-active {
+   background: #e5f7ea;
+   color: #1f7a3f;
+}
+
+.status-suspended {
+   background: #fff2d9;
+   color: #9a6500;
+}
+
+.status-retired {
+   background: #fde7e7;
+   color: #a23333;
+}
+
+.status-neutral {
+   background: #edf1f3;
+   color: #4c6870;
+}
+
+.danger-soft {
+   border-color: #f1b7bc;
+   color: #b2404e;
+}
+
+.danger-soft:hover {
+   background: #b2404e;
+   border-color: #b2404e;
+   color: #fff;
+}
+
+.modal-polish {
+   border-radius: 16px;
+   overflow: hidden;
+   box-shadow: 0 18px 40px rgba(28, 53, 60, 0.22);
+}
+
+@media (max-width: 767px) {
+   .selection-dashboard {
+      grid-template-columns: 1fr;
+   }
+}
