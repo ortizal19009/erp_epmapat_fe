@@ -18,10 +18,13 @@ export class SuspensionesComponent implements OnInit {
   formSuspensiones: FormGroup;
   titulo: string = 'Suspensiones';
   filterTerm: string;
-  suspensiones: any;
-  today: number = Date.now();
+  suspensiones: any[] = [];
+  today: string = this.formatDateForInput(new Date());
+  startOfYear: string = this.formatDateForInput(new Date(new Date().getFullYear(), 0, 1));
   optImprimir: string = '1';
   _ruta: any;
+  currentSortColumn: string = '';
+  isAscending: boolean = true;
 
   constructor(
     private router: Router,
@@ -40,10 +43,10 @@ export class SuspensionesComponent implements OnInit {
     else this.buscaColor();
 
     this.formSuspensiones = this.fb.group({
-      desde: [],
-      hasta: [],
+      desde: [this.startOfYear],
+      hasta: [this.today],
     });
-    this.listarSuspensiones();
+    this.buscarxFecha();
   }
 
   async buscaColor() {
@@ -69,7 +72,8 @@ export class SuspensionesComponent implements OnInit {
   listarSuspensiones() {
     this.suspeService.getListaSuspensiones().subscribe({
       next: (datos) => {
-        this.suspensiones = datos;
+        this.suspensiones = Array.isArray(datos) ? datos : [];
+        this.applyCurrentSort();
       },
       error: (e) => console.error(e),
     });
@@ -105,7 +109,8 @@ export class SuspensionesComponent implements OnInit {
         )
         .subscribe({
           next: (datos) => {
-            this.suspensiones = datos;
+            this.suspensiones = Array.isArray(datos) ? datos : [];
+            this.applyCurrentSort();
           },
           error: (e) => console.error(e),
         });
@@ -148,6 +153,76 @@ export class SuspensionesComponent implements OnInit {
       default:
         return `${tipo ?? ''}`;
     }
+  }
+
+  sortData(column: string) {
+    if (this.currentSortColumn === column) {
+      this.isAscending = !this.isAscending;
+    } else {
+      this.currentSortColumn = column;
+      this.isAscending = true;
+    }
+
+    this.applyCurrentSort();
+  }
+
+  getSortIcon(column: string): string {
+    if (this.currentSortColumn !== column) return '';
+    return this.isAscending ? 'bi-caret-up-fill' : 'bi-caret-down-fill';
+  }
+
+  private applyCurrentSort() {
+    if (!this.currentSortColumn || !this.suspensiones?.length) {
+      return;
+    }
+    this.sortArrayInPlace(this.suspensiones, this.currentSortColumn, this.isAscending);
+  }
+
+  private sortArrayInPlace(arr: any[], column: string, asc: boolean) {
+    arr.sort((a: any, b: any) => {
+      const va = this.resolveSortValue(a, column);
+      const vb = this.resolveSortValue(b, column);
+
+      const na = Number(va);
+      const nb = Number(vb);
+      const bothNumbers = !Number.isNaN(na) && !Number.isNaN(nb) && va !== '' && vb !== '';
+
+      if (bothNumbers) {
+        return asc ? na - nb : nb - na;
+      }
+
+      const da = new Date(va).getTime();
+      const db = new Date(vb).getTime();
+      const bothDates = !Number.isNaN(da) && !Number.isNaN(db);
+
+      if (bothDates) {
+        return asc ? da - db : db - da;
+      }
+
+      const sa = String(va ?? '').toLowerCase();
+      const sb = String(vb ?? '').toLowerCase();
+      if (sa < sb) return asc ? -1 : 1;
+      if (sa > sb) return asc ? 1 : -1;
+      return 0;
+    });
+  }
+
+  private resolveSortValue(item: any, column: string): any {
+    switch (column) {
+      case 'documento':
+        return item?.iddocumento_documentos?.nomdoc ?? '';
+      case 'tipo':
+        return this.getTipoLabel(item?.tipo);
+      default:
+        return item?.[column] ?? '';
+    }
+  }
+
+  private formatDateForInput(date: Date): string {
+    const year = date.getFullYear();
+    const month = `${date.getMonth() + 1}`.padStart(2, '0');
+    const day = `${date.getDate()}`.padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
   /* IMPRIMIR */
   i_deudasxruta(datos: any) {

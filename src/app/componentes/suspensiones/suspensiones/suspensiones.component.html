@@ -13,7 +13,7 @@
                 class="form-control mx-0 form-control-sm text-center"
                 id="desde"
                 formControlName="desde"
-                max="{{ today | date : 'yyyy-MM-dd' }}"
+                [max]="today"
               />
             </div>
             <div class="col-sm">
@@ -22,7 +22,7 @@
                 class="form-control mx-0 form-control-sm text-center"
                 id="hasta"
                 formControlName="hasta"
-                max="{{ today | date : 'yyyy-MM-dd' }}"
+                [max]="today"
               />
             </div>
             <div class="col-sm-3">
@@ -68,12 +68,30 @@
       <table class="table table-hover table-bordered table-sm sombra modern-table">
         <thead class="text-center cabecera">
           <tr>
-            <th class="col-sm-1">Numero</th>
-            <th class="col-sm-1">Fecha</th>
-            <th class="col-sm-1">Total</th>
-            <th class="col-sm-1">Documento</th>
-            <th class="col-sm-1">Doc#</th>
-            <th class="col-sm-1">Tipo</th>
+            <th class="col-sm-1" style="cursor:pointer" (click)="sortData('numero')">
+              Numero
+              <i class="bi" [ngClass]="getSortIcon('numero')" *ngIf="currentSortColumn==='numero'"></i>
+            </th>
+            <th class="col-sm-1" style="cursor:pointer" (click)="sortData('fecha')">
+              Fecha
+              <i class="bi" [ngClass]="getSortIcon('fecha')" *ngIf="currentSortColumn==='fecha'"></i>
+            </th>
+            <th class="col-sm-1" style="cursor:pointer" (click)="sortData('total')">
+              Total
+              <i class="bi" [ngClass]="getSortIcon('total')" *ngIf="currentSortColumn==='total'"></i>
+            </th>
+            <th class="col-sm-1" style="cursor:pointer" (click)="sortData('documento')">
+              Documento
+              <i class="bi" [ngClass]="getSortIcon('documento')" *ngIf="currentSortColumn==='documento'"></i>
+            </th>
+            <th class="col-sm-1" style="cursor:pointer" (click)="sortData('numdoc')">
+              Doc#
+              <i class="bi" [ngClass]="getSortIcon('numdoc')" *ngIf="currentSortColumn==='numdoc'"></i>
+            </th>
+            <th class="col-sm-1" style="cursor:pointer" (click)="sortData('tipo')">
+              Tipo
+              <i class="bi" [ngClass]="getSortIcon('tipo')" *ngIf="currentSortColumn==='tipo'"></i>
+            </th>
             <th>Observaciones</th>
             <th></th>
           </tr>
