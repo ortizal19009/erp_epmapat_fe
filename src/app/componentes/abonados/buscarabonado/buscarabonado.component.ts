@@ -1,6 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { Rutas } from 'src/app/modelos/rutas.model';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
+import { RutasService } from 'src/app/servicios/rutas.service';
 
 @Component({
   selector: 'app-buscarabonado',
@@ -19,15 +21,22 @@ export class BuscarabonadoComponent implements OnInit {
   @Output() abonadosEvent = new EventEmitter<any[]>();
   @Input() multiple: boolean = false;
   @Input() soloSuspendidos: boolean = false;
+  @Input() estadosPermitidos: number[] | null = null;
   seleccionados: any[] = [];
+  rutas: Rutas[] = [];
 
-  constructor(private fb: FormBuilder, private s_abonados: AbonadosService) { }
+  constructor(
+    private fb: FormBuilder,
+    private s_abonados: AbonadosService,
+    private rutasService: RutasService
+  ) { }
 
   ngOnInit(): void {
     this.f_abonado = this.fb.group({
       catBusqueda: 1,
       buscarAbonado: ['']
     });
+    this.cargarRutas();
     this.tipoBusqueda();
   }
 
@@ -80,7 +89,8 @@ export class BuscarabonadoComponent implements OnInit {
 
   bAbonado() {
     let cat = (+this.f_abonado.value.catBusqueda!);
-    const valor = `${this.f_abonado.value.buscarAbonado ?? ''}`.trim();
+    const rawValor = this.f_abonado.value.buscarAbonado;
+    const valor = `${rawValor ?? ''}`.trim();
     switch (cat) {
       case 1:
         this.s_abonados.getAbonadosPage(0, 100, 'idabonado,asc', { cuenta: valor ? +valor : undefined }).subscribe(datos => {
@@ -98,7 +108,10 @@ export class BuscarabonadoComponent implements OnInit {
         });
         break;
       case 4:
-        this.s_abonados.getAbonadosPage(0, 100, 'idabonado,asc', { ruta: valor }).subscribe(datos => {
+        const idruta = Number(rawValor);
+        this.s_abonados.getAbonadosPage(0, 100, 'idabonado,asc', {
+          idruta: Number.isFinite(idruta) && idruta > 0 ? idruta : undefined
+        }).subscribe(datos => {
           this.abonado = this.postProcessResultados(datos.content ?? []);
         });
         break;
@@ -108,6 +121,10 @@ export class BuscarabonadoComponent implements OnInit {
   }
 
   postProcessResultados(resultados: any[]) {
+    if (this.estadosPermitidos?.length) {
+      const permitidos = this.estadosPermitidos.map((item) => Number(item));
+      return resultados.filter((item) => permitidos.includes(Number(item?.estado)));
+    }
     if (!this.soloSuspendidos) {
       return resultados;
     }
@@ -116,12 +133,19 @@ export class BuscarabonadoComponent implements OnInit {
 
   tipoBusqueda() {
     let i_catBusqueda = document.getElementById("selecTipoBusqueda") as HTMLInputElement;
-    let i_Busqueda = document.getElementById("buscarAbonado") as HTMLInputElement;
     i_catBusqueda.addEventListener('change', () => {
       this.f_abonado.patchValue({ buscarAbonado: '' });
-      i_Busqueda.value = '';
       this.abonado = [];
     })
+  }
+
+  cargarRutas() {
+    this.rutasService.getListaRutas().subscribe({
+      next: (datos) => {
+        this.rutas = Array.isArray(datos) ? datos : [];
+      },
+      error: (e) => console.error(e),
+    });
   }
 
   sAbonado(abonado: any) {

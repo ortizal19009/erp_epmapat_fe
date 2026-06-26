@@ -1,229 +1,213 @@
-<div class="content pt-1 pl-3">
+<div class="content pt-2 px-2 suspension-template">
   <div class="container-fluid">
-    <div class="row mt-0 mb-2">
-      <div class="col-sm-5">
+    <div class="row align-items-center mb-3">
+      <div class="col-sm-7">
         <h3 class="m-0 font-weight-bold">{{ titulo }}</h3>
+        <small class="text-muted">Consulta la suspension, su soporte documental y las cuentas vinculadas.</small>
       </div>
-      <div class="col-sm-7 d-flex justify-content-end">
-        <button class="btn btn-outline-primary btn-xs" type="submit" (click)="regresar()">
+      <div class="col-sm-5 text-right">
+        <button class="btn btn-outline-primary btn-sm" type="button" (click)="regresar()">
           <i class="fa fa-reply-all"></i> Regresar
         </button>
       </div>
     </div>
   </div>
-  <!-- /.container-fluid -->
 </div>
-<div class="container-fluid">
-  <div class="row mb-0">
-    <div class="col-sm-3">
-      <div class="card card-primary card-outline">
-        <div class="card-body box-profile">
-          <h3 class="profile-username text-center">Número suspensión</h3>
-          <p class="text-muted text-center">{{ numeroSuspension }}</p>
-          <ul class="list-group list-group-unbordered mb-3">
-            <li class="list-group-item">
-              <b>Nombre documento</b>
-              <a class="float-right">{{ nombreDocumento }} </a>
-            </li>
-          </ul>
 
-          <!-- <a href="#" class="btn btn-primary btn-block"><b>Follow</b></a> -->
-        </div>
-        <!-- /.card-body -->
-      </div>
-    </div>
-    <div class="col-sm-9">
-      <div class="card card-primary card-outline">
-        <div class="card-header p-2">
-          <ul class="nav nav-pills">
-            <li class="nav-item">
-              <a class="nav-link active" href="#prefacturas" data-toggle="tab">Medidores suspendidos</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#historialconsumo" data-toggle="tab">Medidores retirados</a>
-            </li>
-          </ul>
-        </div>
-        <!-- /.card-header -->
+<div class="container-fluid" *ngIf="detalleSuspension as detalle; else emptyState">
+  <div class="row mb-3">
+    <div class="col-sm-12">
+      <div class="card shadow-sm border-0">
         <div class="card-body">
-          <div class="tab-content">
-            <div class="active tab-pane" id="prefacturas">
-              <!-- Post -->
-              <div class="post">
-                <div class="user-block">
-                  <table class="table table-hover table-sm table-bordered">
-                    <thead class="bg-primary">
-                      <tr class="text-center">
-                        <th>Nro</th>
-                        <th>Cuenta</th>
-                        <th>Cliente</th>
-                        <th>Nro medidor</th>
-                        <th>Estado medidor</th>
-                        <th>Observaciones</th>
-                        <th>Acciones</th>
+          <div class="row">
+            <div class="col-md-2 mb-2">
+              <div class="small text-muted">Numero</div>
+              <div class="font-weight-bold">#{{ detalle.numero }}</div>
+            </div>
+            <div class="col-md-2 mb-2">
+              <div class="small text-muted">Fecha</div>
+              <div class="font-weight-bold">{{ detalle.fecha | date : 'dd/MM/yyyy' }}</div>
+            </div>
+            <div class="col-md-2 mb-2">
+              <div class="small text-muted">Total</div>
+              <div class="font-weight-bold">{{ totalCuentas }}</div>
+            </div>
+            <div class="col-md-3 mb-2">
+              <div class="small text-muted">Documento</div>
+              <div class="font-weight-bold">{{ detalle.iddocumento_documentos?.nomdoc || 'Sin documento' }}</div>
+            </div>
+            <div class="col-md-3 mb-2">
+              <div class="small text-muted">Doc#</div>
+              <div class="font-weight-bold">{{ detalle.numdoc || 'Sin numero' }}</div>
+            </div>
+          </div>
 
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr class="text-center" *ngFor="
-                          let d_suspensioin of l_suspension;
-                          let i = index
-                        ">
-                        <td>{{ i + 1 }}</td>
-                        <td class="text-center">
-                          {{ d_suspensioin.idabonado_abonados.idabonado }}
-                        </td>
-                        <td>
-                          {{
-                          d_suspensioin.idabonado_abonados.idcliente_clientes
-                          .nombre
-                          }}
-                        </td>
-                        <td class="text-center">
-                          {{ d_suspensioin.idabonado_abonados.nromedidor }}
-                        </td>
-                        <td class="text-center">
-                          {{ d_suspensioin.idabonado_abonados.estado }}
-                        </td>
-                        <td>
-                          {{ d_suspensioin.idsuspension_suspensiones.observa }}
-                        </td>
-                        <td class="text-center">
-                          <input type="checkbox" name="" value="{{d_suspensioin.idabonado_abonados.idabonado}}"
-                            (change)="seleccionarSuspendidos($event)">
-                        </td>
-                      </tr>
-
-                    </tbody>
-                  </table>
-                  <div class="row">
-                    <div class="col-sm">
-                      <div class="text-center">
-                        <button class="btn btn-outline-success btn-sm" (click)="retirarMedidor()">Retirar
-                          medidores</button>
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
-                <!-- /.user-block -->
+          <div class="row mt-2">
+            <div class="col-md-4 mb-2">
+              <div class="alert alert-light border mb-0">
+                <div class="small text-muted">Suspendidas</div>
+                <div class="h5 m-0">{{ cuentasSuspension.length }}</div>
               </div>
             </div>
-            <div class="tab-pane" id="historialconsumo">
-              <div class="post">
-                <div class="user-block">
-                  <table class="table table-hover table-sm table-bordered">
-                    <thead class="bg-primary">
-                      <tr class="text-center">
-                        <th>Nro</th>
-                        <th>Cuenta</th>
-                        <th>Cliente</th>
-                        <th>Nro medidor</th>
-                        <th>Estado medidor</th>
-                        <th>Observaciones</th>
-                        <th>Acciones</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr class="text-center" *ngFor="
-                          let d_suspensioin of l_suspendidos_retirados;
-                          let i = index
-                        ">
-                        <td>{{ i + 1 }}</td>
-                        <td class="text-center">
-                          {{ d_suspensioin.idabonado_abonados.idabonado }}
-                        </td>
-                        <td>
-                          {{
-                          d_suspensioin.idabonado_abonados.idcliente_clientes
-                          .nombre
-                          }}
-                        </td>
-                        <td class="text-center">
-                          {{ d_suspensioin.idabonado_abonados.nromedidor }}
-                        </td>
-                        <td class="text-center">
-                          {{ d_suspensioin.idabonado_abonados.estado }}
-                        </td>
-                        <td>
-                          {{ d_suspensioin.idsuspension_suspensiones.observa }}
-                        </td>
-                        <td class="text-center">
-                          <input type="checkbox" name="" value="{{d_suspensioin.idabonado_abonados.idabonado}}"
-                            (change)="seleccionarRetirados($event)">
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                  <div class="row">
-                    <div class="col-sm">
-                      <div class="text-center">
-                        <button class="btn btn-outline-success btn-sm" (click)="pagar()">Realizar pago</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <!-- /.user-block -->
+            <div class="col-md-4 mb-2">
+              <div class="alert alert-light border mb-0">
+                <div class="small text-muted">Retiradas</div>
+                <div class="h5 m-0">{{ cuentasRetiro.length }}</div>
+              </div>
+            </div>
+            <div class="col-md-4 mb-2">
+              <div class="alert alert-light border mb-0">
+                <div class="small text-muted">Otros estados</div>
+                <div class="h5 m-0">{{ cuentasOtras.length }}</div>
               </div>
             </div>
           </div>
-        </div>
-        <!-- /.card-body -->
-      </div>
-    </div>
-  </div>
-  <!-- Modal DETALLES FACTURAS -->
-  <div class="modal fade" id="facturaDetallesModal" tabindex="-1" aria-labelledby="facturaDetallesModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="facturaDetallesModalLabel">Factura:</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <table class="table table-hover table-sm table-bordered">
-            <thead class="bg-primary">
-              <tr class="text-center">
-                <th>Rubro</th>
-                <th>Valor unitario</th>
-                <th>Cantidad</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let rubroxfacDatos of f">
-                <td>{{ rubroxfacDatos.idrubro_rubros.descripcion }}</td>
-                <td class="text-center">{{ rubroxfacDatos.valorunitario }}</td>
-                <td class="text-center">{{ rubroxfacDatos.cantidad }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">
-            Close
-          </button>
-          <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+
+          <div class="row mt-2">
+            <div class="col-sm-12">
+              <div class="small text-muted">Observaciones</div>
+              <div>{{ detalle.observa || 'Sin observaciones registradas.' }}</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
-  <!-- MODAL SUSPENDER -->
-  <div class="modal fade" id="suspenderModal" tabindex="-1" aria-labelledby="suspenderModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <!-- <h5 class="modal-title" id="suspenderModalLabel">Modal title</h5> -->
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
+
+  <div class="row mb-3">
+    <div class="col-sm-5">
+      <input
+        type="text"
+        class="form-control form-control-sm"
+        placeholder="Filtrar por cuenta, cliente, cedula o ruta"
+        [(ngModel)]="filterTerm"
+      />
+    </div>
+  </div>
+
+  <div class="row mb-0">
+    <div class="col-sm-12">
+      <div class="card card-primary card-outline shadow-sm">
+        <div class="card-header p-2">
+          <ul class="nav nav-pills">
+            <li class="nav-item">
+              <a class="nav-link active" href="#prefacturas" data-toggle="tab">Suspendidas</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#historialconsumo" data-toggle="tab">Retiradas</a>
+            </li>
+            <li class="nav-item" *ngIf="cuentasOtras.length">
+              <a class="nav-link" href="#otrosEstados" data-toggle="tab">Otros estados</a>
+            </li>
+          </ul>
         </div>
-        <div class="modal-body">
-          <!--  <app-add-suspensiones [v_abonados]="abonadoSeleccionado"></app-add-suspensiones> -->
+        <div class="card-body">
+          <div class="tab-content">
+            <div class="active tab-pane" id="prefacturas">
+              <table class="table table-hover table-sm table-bordered">
+                <thead class="bg-primary text-center">
+                  <tr>
+                    <th>Nro</th>
+                    <th>Cuenta</th>
+                    <th>Cliente</th>
+                    <th>Identificacion</th>
+                    <th>Ruta</th>
+                    <th>Medidor</th>
+                    <th>Estado</th>
+                    <th>Accion</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="text-center" *ngFor="let item of cuentasSuspension | filter : filterTerm; let i = index">
+                    <td>{{ i + 1 }}</td>
+                    <td>{{ item.idabonado_abonados?.idabonado }}</td>
+                    <td class="text-left">{{ item.idabonado_abonados?.idcliente_clientes?.nombre }}</td>
+                    <td>{{ item.idabonado_abonados?.idcliente_clientes?.cedula }}</td>
+                    <td>{{ item.idabonado_abonados?.idruta_rutas?.descripcion }}</td>
+                    <td>{{ item.idabonado_abonados?.nromedidor || 'S/N' }}</td>
+                    <td>{{ getEstadoLabel(item.idabonado_abonados?.estado) }}</td>
+                    <td>
+                      <input type="checkbox" value="{{ item.idabonado_abonados?.idabonado }}" (change)="seleccionarSuspendidos($event)">
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="text-center">
+                <button class="btn btn-outline-success btn-sm" (click)="retirarMedidor()">Retirar medidores</button>
+              </div>
+            </div>
+
+            <div class="tab-pane" id="historialconsumo">
+              <table class="table table-hover table-sm table-bordered">
+                <thead class="bg-primary text-center">
+                  <tr>
+                    <th>Nro</th>
+                    <th>Cuenta</th>
+                    <th>Cliente</th>
+                    <th>Identificacion</th>
+                    <th>Ruta</th>
+                    <th>Medidor</th>
+                    <th>Estado</th>
+                    <th>Accion</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="text-center" *ngFor="let item of cuentasRetiro | filter : filterTerm; let i = index">
+                    <td>{{ i + 1 }}</td>
+                    <td>{{ item.idabonado_abonados?.idabonado }}</td>
+                    <td class="text-left">{{ item.idabonado_abonados?.idcliente_clientes?.nombre }}</td>
+                    <td>{{ item.idabonado_abonados?.idcliente_clientes?.cedula }}</td>
+                    <td>{{ item.idabonado_abonados?.idruta_rutas?.descripcion }}</td>
+                    <td>{{ item.idabonado_abonados?.nromedidor || 'S/N' }}</td>
+                    <td>{{ getEstadoLabel(item.idabonado_abonados?.estado) }}</td>
+                    <td>
+                      <input type="checkbox" value="{{ item.idabonado_abonados?.idabonado }}" (change)="seleccionarRetirados($event)">
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="text-center">
+                <button class="btn btn-outline-success btn-sm" (click)="pagar()">Realizar pago</button>
+              </div>
+            </div>
+
+            <div class="tab-pane" id="otrosEstados" *ngIf="cuentasOtras.length">
+              <table class="table table-hover table-sm table-bordered">
+                <thead class="bg-primary text-center">
+                  <tr>
+                    <th>Nro</th>
+                    <th>Cuenta</th>
+                    <th>Cliente</th>
+                    <th>Identificacion</th>
+                    <th>Ruta</th>
+                    <th>Medidor</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="text-center" *ngFor="let item of cuentasOtras | filter : filterTerm; let i = index">
+                    <td>{{ i + 1 }}</td>
+                    <td>{{ item.idabonado_abonados?.idabonado }}</td>
+                    <td class="text-left">{{ item.idabonado_abonados?.idcliente_clientes?.nombre }}</td>
+                    <td>{{ item.idabonado_abonados?.idcliente_clientes?.cedula }}</td>
+                    <td>{{ item.idabonado_abonados?.idruta_rutas?.descripcion }}</td>
+                    <td>{{ item.idabonado_abonados?.nromedidor || 'S/N' }}</td>
+                    <td>{{ getEstadoLabel(item.idabonado_abonados?.estado) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<ng-template #emptyState>
+  <div class="container-fluid">
+    <div class="alert alert-light border">
+      No se encontro informacion para la suspension seleccionada.
+    </div>
+  </div>
+</ng-template>

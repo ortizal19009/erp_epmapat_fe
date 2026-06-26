@@ -39,4 +39,8 @@ export class SuspensionesService {
       return this.http.get(`${baseUrl}/ultimo`)
    }
 
+   getUltimoPorTipo(tipo: number) {
+      return this.http.get(`${baseUrl}/ultimo/portipo?tipo=${tipo}`);
+   }
+
 }

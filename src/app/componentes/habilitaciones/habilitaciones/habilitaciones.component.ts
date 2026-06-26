@@ -21,9 +21,10 @@ export class HabilitacionesComponent implements OnInit {
   titulo: string = 'Habilitaciones';
   f_buscarxFechas: FormGroup;
   f_habilitacion: FormGroup;
-  today: Date = new Date();
+  today: string = this.formatDateForInput(new Date());
+  startOfYear: string = this.formatDateForInput(new Date(new Date().getFullYear(), 0, 1));
   filterTerm: string;
-  suspensiones: any;
+  suspensiones: any[] = [];
   abonado: Abonados = new Abonados();
   cliente: Clientes = new Clientes();
   habilitacion: Suspensiones = new Suspensiones();
@@ -58,8 +59,8 @@ export class HabilitacionesComponent implements OnInit {
     else this.buscaColor();
 
     this.f_buscarxFechas = this.fb.group({
-      desde: [],
-      hasta: [],
+      desde: [this.startOfYear],
+      hasta: [this.today],
     });
     this.f_habilitacion = this.fb.group({
       numero: '',
@@ -67,7 +68,7 @@ export class HabilitacionesComponent implements OnInit {
       iddocumento_documentos: '',
       observacion: '',
     });
-    this.listarSuspensiones();
+    this.buscarxFecha();
     this.getLastHabilitacion();
     this.listarDocumentos();
   }
@@ -95,7 +96,7 @@ export class HabilitacionesComponent implements OnInit {
   listarSuspensiones() {
     this.suspeService.getListaHabilitaciones().subscribe({
       next: (datos) => {
-        this.suspensiones = datos;
+        this.suspensiones = Array.isArray(datos) ? datos : [];
       },
       error: (e) => console.error(e),
     });
@@ -113,7 +114,7 @@ export class HabilitacionesComponent implements OnInit {
         )
         .subscribe({
           next: (datos) => {
-            this.suspensiones = datos;
+            this.suspensiones = Array.isArray(datos) ? datos : [];
           },
           error: (e) => console.error(e),
         });
@@ -159,7 +160,7 @@ export class HabilitacionesComponent implements OnInit {
   }
 
   getLastHabilitacion() {
-    this.suspeService.getUltimo().subscribe({
+    this.suspeService.getUltimoPorTipo(1).subscribe({
       next: (datos: any) => {
         if(datos != null){
           this.f_habilitacion.patchValue({
@@ -206,8 +207,8 @@ export class HabilitacionesComponent implements OnInit {
 
   setAbonado(abonado: any) {
     this.mensajeSeleccion = '';
-    if (![2, 3].includes(Number(abonado?.estado))) {
-      this.mensajeSeleccion = 'Solo se pueden habilitar cuentas suspendidas o suspendidas y retiradas.';
+    if (![0, 2, 3].includes(Number(abonado?.estado))) {
+      this.mensajeSeleccion = 'Solo se pueden habilitar cuentas con estado 0, suspendidas o suspendidas y retiradas.';
       return;
     }
 
@@ -248,5 +249,12 @@ export class HabilitacionesComponent implements OnInit {
       default:
         return `${tipo ?? ''}`;
     }
+  }
+
+  private formatDateForInput(date: Date): string {
+    const year = date.getFullYear();
+    const month = `${date.getMonth() + 1}`.padStart(2, '0');
+    const day = `${date.getDate()}`.padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

@@ -34,7 +34,7 @@
               </div>
               <div class="col-sm-6">
                 <label class="field-label">Valor de busqueda</label>
-                <div class="search-input-wrap">
+                <div class="search-input-wrap" *ngIf="f_abonado?.value?.catBusqueda !== 4; else rutaSelect">
                   <span class="search-icon"><i class="fa fa-search" aria-hidden="true"></i></span>
                   <input
                     type="text"
@@ -45,20 +45,18 @@
                     formControlName="buscarAbonado"
                   />
                 </div>
+                <ng-template #rutaSelect>
+                  <select class="form-control form-control-sm picker-control" formControlName="buscarAbonado">
+                    <option [ngValue]="null">Selecciona una ruta</option>
+                    <option *ngFor="let ruta of rutas" [ngValue]="ruta.idruta">
+                      {{ ruta.codigo }} - {{ ruta.descripcion }}
+                    </option>
+                  </select>
+                </ng-template>
               </div>
               <div class="col-sm-3 action-column">
                 <button class="btn btn-primary btn-sm picker-btn w-100" (click)="bAbonado()">
                   <i class="fa fa-search" aria-hidden="true"></i> Buscar
-                </button>
-                <button
-                  *ngIf="multiple"
-                  type="button"
-                  class="btn btn-success btn-sm picker-btn w-100 mt-2"
-                  [disabled]="seleccionados.length === 0"
-                  data-dismiss="modal"
-                  (click)="emitirSeleccionados()"
-                >
-                  Agregar seleccionados
                 </button>
               </div>
             </div>

@@ -132,7 +132,7 @@ export class AddSuspensionesComponent implements OnInit {
       return;
     }
     this.f_dsuspension.value.iddocumento_documentos = {
-      iddocumento: +this.f_dsuspension.value.iddocumento_documentos!,
+      intdoc: +this.f_dsuspension.value.iddocumento_documentos!,
     };
     if (
       this.f_dsuspension.value.tipo !== '' &&
@@ -166,7 +166,8 @@ export class AddSuspensionesComponent implements OnInit {
   }
 
   getUltimo() {
-    this.s_suspensiones.getUltimo().subscribe({
+    const tipo = Number(this.f_dsuspension?.value?.tipo || 2);
+    this.s_suspensiones.getUltimoPorTipo(tipo).subscribe({
       next: (datos: any) => {
         this.f_dsuspension.patchValue({
           numero: datos?.numero ? datos.numero + 1 : 1,

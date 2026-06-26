@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { forkJoin, of } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { Abonados } from 'src/app/modelos/abonados';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
@@ -10,63 +11,78 @@ import { AboxsuspensionService } from 'src/app/servicios/aboxsuspension.service'
   templateUrl: './detalles-suspensiones.component.html',
   styleUrls: ['./detalles-suspensiones.component.css']
 })
-
 export class DetallesSuspensionesComponent implements OnInit {
+  titulo: string = 'Detalle de suspension';
+  filterTerm: string = '';
+  detalleSuspension: any = null;
+  cuentasSuspension: any[] = [];
+  cuentasRetiro: any[] = [];
+  cuentasOtras: any[] = [];
+  seleccionadosSuspendidos: any[] = [];
+  seleccionadosRetirados: any[] = [];
 
-  titulo: string = "Detalles suspension";
-  f: any;
-  l_suspension: any = [];
-  l_suspendidos_retirados: any = [];
-  numeroSuspension: number;
-  nombreDocumento: string;
-  abonado: Abonados = new Abonados();
-  idsAbonados: any = [];
-  abonados_suspendidos: any;
-  estado: string;
-  l_abonadosSuspendidos: any = [];
-  l_abonadosRetirados: any = [];
+  constructor(
+    private aboxsuspService: AboxsuspensionService,
+    private router: Router,
+    private aboService: AbonadosService,
+    private authService: AutorizaService
+  ) { }
 
-  constructor(private aboxsuspService: AboxsuspensionService, private router: Router,
-    private aboService: AbonadosService, private authService: AutorizaService) { }
-
-  ngOnInit(): void { this.listarAboxSusp();  }
-
-  listarAboxSusp() {
-    let idsuspension = sessionStorage.getItem("idsuspensionToInfo")
-    this.aboxsuspService.getByIdsuspension(+idsuspension!).subscribe(datos => {
-      let i = 0;
-      datos.forEach(() => {
-        this.buscarAbonados(datos[i].idabonado_abonados.idabonado)
-        i++;
-      })
-      this.numeroSuspension = datos[0].idsuspension_suspensiones.numero;
-      this.nombreDocumento = datos[0].idsuspension_suspensiones.iddocumento_documentos.nomdoc;
-      //this.l_suspension = datos;
-      let j = 0;
-      datos.forEach(() => {
-        if (datos[j].idabonado_abonados.estado === 2) {
-          this.l_suspension.push(datos[j]);
-        } else if (datos[j].idabonado_abonados.estado === 3) {
-          this.l_suspendidos_retirados.push(datos[j]);
-        }
-        j++
-      })
-    })
+  ngOnInit(): void {
+    this.listarAboxSusp();
   }
 
-  regresar() { this.router.navigate(['suspensiones']);  }
+  listarAboxSusp() {
+    const idsuspension = sessionStorage.getItem('idsuspensionToInfo');
+    if (!idsuspension) {
+      return;
+    }
 
-  buscarAbonados(idabonado: number) {
-    let suspenderAbonado = 2;
-    let i = 0;
-    this.aboService.getByidabonado(idabonado).subscribe(datos => {
-      datos.forEach(() => {
-        if (datos[i].estado === 1) {
-          this.actAbonado(datos[i], suspenderAbonado);
-        }
-        i++;
-      })
-    })
+    this.aboxsuspService.getByIdsuspension(+idsuspension).subscribe((datos: any[]) => {
+      if (!datos?.length) {
+        this.detalleSuspension = null;
+        this.cuentasSuspension = [];
+        this.cuentasRetiro = [];
+        this.cuentasOtras = [];
+        return;
+      }
+
+      this.detalleSuspension = datos[0].idsuspension_suspensiones;
+      this.hidratarAbonados(datos);
+    });
+  }
+
+  private hidratarAbonados(datos: any[]) {
+    const requests = datos.map((item) => {
+      const idabonado = Number(item?.idabonado_abonados?.idabonado);
+      if (!idabonado) {
+        return of(item);
+      }
+
+      return this.aboService.getById(idabonado);
+    });
+
+    forkJoin(requests).subscribe({
+      next: (abonadosCompletos: any[]) => {
+        const datosEnriquecidos = datos.map((item, index) => ({
+          ...item,
+          idabonado_abonados: abonadosCompletos[index] ?? item.idabonado_abonados
+        }));
+
+        this.cuentasSuspension = datosEnriquecidos.filter((item) => Number(item?.idabonado_abonados?.estado) === 2);
+        this.cuentasRetiro = datosEnriquecidos.filter((item) => Number(item?.idabonado_abonados?.estado) === 3);
+        this.cuentasOtras = datosEnriquecidos.filter((item) => ![2, 3].includes(Number(item?.idabonado_abonados?.estado)));
+      },
+      error: () => {
+        this.cuentasSuspension = datos.filter((item) => Number(item?.idabonado_abonados?.estado) === 2);
+        this.cuentasRetiro = datos.filter((item) => Number(item?.idabonado_abonados?.estado) === 3);
+        this.cuentasOtras = datos.filter((item) => ![2, 3].includes(Number(item?.idabonado_abonados?.estado)));
+      }
+    });
+  }
+
+  regresar() {
+    this.router.navigate(['suspensiones']);
   }
 
   actAbonado(abonado: Abonados, estado: number) {
@@ -75,45 +91,62 @@ export class DetallesSuspensionesComponent implements OnInit {
     this.aboService.updateAbonadoAuditoria(abonado, this.authService.idusuario, tipo, tipo).subscribe();
   }
 
-  abonadosSuspendidos() {
-    this.aboService.getByEstado(2).subscribe(datos => {
-      this.abonados_suspendidos = datos;
-    });
-  }
-
   seleccionarSuspendidos(e: any) {
     if (e.target.checked === true) {
-      this.aboService.getListaById(+e.target.value!).subscribe(datos => {
-        this.l_abonadosSuspendidos.push(datos);
-      })
+      this.aboService.getListaById(+e.target.value!).subscribe((datos) => {
+        this.seleccionadosSuspendidos.push(datos);
+      });
     } else if (e.target.checked === false) {
-      let consulta = this.l_abonadosSuspendidos.find((abonado: { idabonado: number }) => abonado.idabonado === (+e.target.value!))
-      let index = this.l_abonadosSuspendidos.indexOf(consulta);
-      this.l_abonadosSuspendidos.splice(index, 1);
+      const consulta = this.seleccionadosSuspendidos.find(
+        (abonado: { idabonado: number }) => abonado.idabonado === (+e.target.value!)
+      );
+      const index = this.seleccionadosSuspendidos.indexOf(consulta);
+      this.seleccionadosSuspendidos.splice(index, 1);
     }
   }
 
   seleccionarRetirados(e: any) {
     if (e.target.checked === true) {
-      this.aboService.getListaById(+e.target.value!).subscribe(datos => {
-        this.l_abonadosRetirados.push(datos);
-      })
+      this.aboService.getListaById(+e.target.value!).subscribe((datos) => {
+        this.seleccionadosRetirados.push(datos);
+      });
     } else if (e.target.checked === false) {
-      let consulta = this.l_abonadosRetirados.find((abonado: { idabonado: number }) => abonado.idabonado === (+e.target.value!))
-      let index = this.l_abonadosRetirados.indexOf(consulta);
-      this.l_abonadosRetirados.splice(index, 1);
+      const consulta = this.seleccionadosRetirados.find(
+        (abonado: { idabonado: number }) => abonado.idabonado === (+e.target.value!)
+      );
+      const index = this.seleccionadosRetirados.indexOf(consulta);
+      this.seleccionadosRetirados.splice(index, 1);
     }
   }
 
   retirarMedidor() {
     let i = 0;
-    this.l_abonadosSuspendidos.forEach(() => {
-      this.l_abonadosSuspendidos[i]
-      this.actAbonado(this.l_abonadosSuspendidos[i], 3);
+    this.seleccionadosSuspendidos.forEach(() => {
+      this.actAbonado(this.seleccionadosSuspendidos[i], 3);
       i++;
-    })
+    });
   }
 
-  pagar(){  }
+  pagar() { }
 
+  get totalCuentas(): number {
+    return (this.cuentasSuspension?.length ?? 0)
+      + (this.cuentasRetiro?.length ?? 0)
+      + (this.cuentasOtras?.length ?? 0);
+  }
+
+  getEstadoLabel(estado: number): string {
+    switch (Number(estado)) {
+      case 0:
+        return 'Pendiente';
+      case 1:
+        return 'Activo';
+      case 2:
+        return 'Suspendido';
+      case 3:
+        return 'Suspendido y retirado';
+      default:
+        return `${estado ?? ''}`;
+    }
+  }
 }

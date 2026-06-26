@@ -20,11 +20,7 @@
           <i class="fa fa-times-circle"></i> Cancelar
         </button>
       </div>
-      <div class="col-sm text-right py-1">
-        <button class="btn btn-light mx-2 btn-sm action-btn" data-toggle="modal" data-target="#abonadoModal">
-          <i class="fa fa-plus-square-o" aria-hidden="true"> Abonados</i>
-        </button>
-      </div>
+      <div class="col-sm text-right py-1"></div>
     </div>
   </div>
 </div>
@@ -53,7 +49,7 @@
         <label for="" class="col-sm-12">
           Documento
           <select type="text" class="form-control form-control-sm" formControlName="iddocumento_documentos">
-            <option value="{{ d_documentos.iddocumento }}" *ngFor="let d_documentos of v_documentos">
+            <option value="{{ d_documentos.intdoc }}" *ngFor="let d_documentos of v_documentos">
               {{ d_documentos.nomdoc }}
             </option>
           </select>

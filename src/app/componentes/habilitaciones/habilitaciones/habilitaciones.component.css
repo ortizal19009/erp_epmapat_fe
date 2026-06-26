@@ -52,3 +52,55 @@
    background: #e3f2f4;
    transition: background-color 0.2s ease;
 }
+
+.form-strip {
+   border-radius: 14px;
+   margin-top: 8px;
+   box-shadow: 0 10px 24px rgba(36, 63, 71, 0.12);
+}
+
+.summary-pill {
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   min-height: 32px;
+   padding: 0 12px;
+   border-radius: 999px;
+   background: rgba(255, 255, 255, 0.18);
+}
+
+.section-intro h6 {
+   font-weight: 700;
+}
+
+.selection-dashboard {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+   gap: 12px;
+}
+
+.dashboard-item {
+   padding: 12px 14px;
+   border-radius: 12px;
+   background: #f7fbfc;
+   border: 1px solid #dbecef;
+}
+
+.dashboard-label {
+   display: block;
+   font-size: 12px;
+   text-transform: uppercase;
+   letter-spacing: 0.03em;
+   color: #5f7880;
+   margin-bottom: 4px;
+}
+
+.table-card {
+   border: 0;
+   border-radius: 14px;
+   overflow: hidden;
+}
+
+.action-btn {
+   border-radius: 10px;
+}
