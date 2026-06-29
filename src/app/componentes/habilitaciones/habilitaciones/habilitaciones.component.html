@@ -5,7 +5,7 @@
         <h5 class="m-0 font-weight-bold py-1">{{ titulo }}</h5>
       </div>
       <div class="col-sm-2 py-1">
-        <p class="m-0 font-weight-bold summary-pill">Registros: {{ suspensiones?.length || 0 }}</p>
+        <p class="m-0 font-weight-bold summary-pill">Registros: {{ suspensiones.length || 0 }}</p>
       </div>
       <div class="col-sm-4 py-1 text-right">
         <button class="btn btn-outline-light btn-sm action-btn" data-toggle="modal" data-target="#buscarAbonado">
@@ -99,7 +99,7 @@
             <div class="row mb-3">
               <div class="col-sm-12">
                 <div *ngIf="suspensionOrigen?.idsuspension" class="alert alert-info py-2 mb-2">
-                  Suspension origen: #{{ suspensionOrigen?.numero }}
+                  Suspension origen: #{{ suspensionOrigen!.numero }}
                 </div>
                 <div *ngIf="mensajeSeleccion" class="alert alert-warning py-2 mb-2">
                   {{ mensajeSeleccion }}
