@@ -91,7 +91,14 @@
                   <label class="col-sm-12 col-form-label-sm">
                     Factura
                     <div class="input-group input-group-sm">
-                      <input type="number" class="form-control form-control-sm" formControlName="factura" placeholder="Id factura" />
+                      <input
+                        type="number"
+                        class="form-control form-control-sm"
+                        formControlName="factura"
+                        placeholder="Id factura"
+                        (blur)="onFacturaBlur()"
+                        (keydown.enter)="onFacturaEnter($event)"
+                      />
                       <div class="input-group-append">
                         <button type="button" class="btn btn-outline-primary" (click)="buscarFactura()">
                           Buscar

@@ -40,6 +40,7 @@ export class HabilitacionesComponent implements OnInit {
   mensajeFactura = '';
   facturaValidada: Facturas | null = null;
   buscandoFactura = false;
+  ultimaFacturaConsultada: number | null = null;
   estado = [
     { valor: 1, estado: 'Activo' },
     { valor: 2, estado: 'Suspendido' },
@@ -219,6 +220,7 @@ export class HabilitacionesComponent implements OnInit {
     this.mensajeSeleccion = '';
     this.mensajeFactura = '';
     this.facturaValidada = null;
+    this.ultimaFacturaConsultada = null;
     this.f_habilitacion.patchValue({ factura: '' });
     if (![0, 2, 3].includes(Number(abonado?.estado))) {
       this.mensajeSeleccion = 'Solo se pueden habilitar cuentas con estado 0, suspendidas o suspendidas y retiradas.';
@@ -249,13 +251,24 @@ export class HabilitacionesComponent implements OnInit {
 
   buscarFactura() {
     const facturaId = Number(this.f_habilitacion.value.factura);
-    this.facturaValidada = null;
-    this.mensajeFactura = '';
 
     if (!Number.isFinite(facturaId) || facturaId <= 0) {
+      this.facturaValidada = null;
+      this.ultimaFacturaConsultada = null;
       this.mensajeFactura = 'Ingresa un id de factura válido.';
       return;
     }
+
+    if (
+      this.ultimaFacturaConsultada === facturaId &&
+      (this.facturaValidada?.idfactura === facturaId || !!this.mensajeFactura)
+    ) {
+      return;
+    }
+
+    this.facturaValidada = null;
+    this.mensajeFactura = '';
+    this.ultimaFacturaConsultada = facturaId;
 
     this.buscandoFactura = true;
     this.facturaService.getById(facturaId).subscribe({
@@ -278,6 +291,15 @@ export class HabilitacionesComponent implements OnInit {
         console.error(e);
       },
     });
+  }
+
+  onFacturaBlur() {
+    this.buscarFactura();
+  }
+
+  onFacturaEnter(event: Event) {
+    event.preventDefault();
+    this.buscarFactura();
   }
 
   facturaEstaPagada(): boolean {
