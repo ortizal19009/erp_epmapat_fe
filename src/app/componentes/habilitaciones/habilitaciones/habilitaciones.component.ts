@@ -41,6 +41,7 @@ export class HabilitacionesComponent implements OnInit {
   facturaValidada: Facturas | null = null;
   buscandoFactura = false;
   ultimaFacturaConsultada: number | null = null;
+  habilitacionesRegistradas: Suspensiones[] = [];
   estado = [
     { valor: 1, estado: 'Activo' },
     { valor: 2, estado: 'Suspendido' },
@@ -80,6 +81,7 @@ export class HabilitacionesComponent implements OnInit {
     this.buscarxFecha();
     this.getLastHabilitacion();
     this.listarDocumentos();
+    this.cargarHabilitacionesRegistradas();
   }
 
   async buscaColor() {
@@ -143,6 +145,23 @@ export class HabilitacionesComponent implements OnInit {
     this.s_documentos.getListaDocumentos().subscribe({
       next: (datos) => {
         this.l_documentos = datos;
+        const documentoPorDefecto = (this.l_documentos || []).find((documento: any) =>
+          this.esDocumentoNinguno(documento)
+        );
+        if (documentoPorDefecto) {
+          this.f_habilitacion.patchValue({
+            iddocumento_documentos: documentoPorDefecto,
+          });
+        }
+      },
+      error: (e) => console.error(e),
+    });
+  }
+
+  cargarHabilitacionesRegistradas() {
+    this.suspeService.getListaHabilitaciones().subscribe({
+      next: (datos) => {
+        this.habilitacionesRegistradas = Array.isArray(datos) ? datos : [];
       },
       error: (e) => console.error(e),
     });
@@ -151,6 +170,11 @@ export class HabilitacionesComponent implements OnInit {
   habilitarMedidor() {
     if (!this.facturaEstaPagada()) {
       this.mensajeFactura = 'Debes ingresar una factura pagada para continuar.';
+      return;
+    }
+    if (this.facturaYaUsadaEnHabilitacion(this.facturaValidada?.idfactura)) {
+      this.facturaValidada = null;
+      this.mensajeFactura = 'La factura ingresada ya fue registrada en otra habilitación.';
       return;
     }
     this.abonado.estado = 1;
@@ -193,8 +217,10 @@ export class HabilitacionesComponent implements OnInit {
     this.habilitacion.idsuspension_origen = this.suspensionOrigen ?? undefined;
     this.habilitacion.fecha = this.date;
     this.habilitacion.numdoc = this.f_habilitacion.value.numdoc;
-    this.habilitacion.iddocumento_documentos =
-      this.f_habilitacion.value.iddocumento_documentos;
+    const documentoSeleccionado =
+      this.f_habilitacion.value.iddocumento_documentos ||
+      (this.l_documentos || []).find((documento: any) => this.esDocumentoNinguno(documento));
+    this.habilitacion.iddocumento_documentos = documentoSeleccionado;
     this.habilitacion.observa = this.f_habilitacion.value.observacion;
     this.habilitacion.idfactura_facturas = this.facturaValidada ?? undefined;
     this.habilitacion.factura = this.facturaValidada?.idfactura;
@@ -282,6 +308,10 @@ export class HabilitacionesComponent implements OnInit {
           this.mensajeFactura = 'La factura existe, pero todavía no registra pago.';
           return;
         }
+        if (this.facturaYaUsadaEnHabilitacion(factura.idfactura)) {
+          this.mensajeFactura = 'La factura ingresada ya fue registrada en otra habilitación.';
+          return;
+        }
         this.facturaValidada = factura;
         this.mensajeFactura = `Factura #${factura.idfactura} validada correctamente.`;
       },
@@ -308,6 +338,29 @@ export class HabilitacionesComponent implements OnInit {
 
   puedeGuardar(): boolean {
     return !this.btn_habilitacion && this.facturaEstaPagada() && !this.buscandoFactura;
+  }
+
+  private facturaYaUsadaEnHabilitacion(idfactura?: number): boolean {
+    const facturaId = Number(idfactura ?? 0);
+    if (!Number.isFinite(facturaId) || facturaId <= 0) {
+      return false;
+    }
+
+    return (this.habilitacionesRegistradas || []).some((habilitacion: any) => {
+      const facturaRegistrada = Number(
+        habilitacion?.idfactura_facturas?.idfactura ??
+        habilitacion?.factura ??
+        0
+      );
+      return facturaRegistrada === facturaId;
+    });
+  }
+
+  private esDocumentoNinguno(documento: any): boolean {
+    const nombre = String(documento?.nomdoc ?? '')
+      .trim()
+      .toLowerCase();
+    return nombre === '(ninguno)' || nombre === 'ninguno';
   }
 
   setEstado(estado: number) {
