@@ -1,15 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Abonados } from 'src/app/modelos/abonados';
 import { Aboxsuspension } from 'src/app/modelos/aboxsuspension';
 import { Clientes } from 'src/app/modelos/clientes';
+import { Facturas } from 'src/app/modelos/facturas.model';
 import { Suspensiones } from 'src/app/modelos/suspensiones';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { AboxsuspensionService } from 'src/app/servicios/aboxsuspension.service';
 import { DocumentosService } from 'src/app/servicios/administracion/documentos.service';
+import { FacturaService } from 'src/app/servicios/factura.service';
 import { SuspensionesService } from 'src/app/servicios/suspensiones.service';
 
 @Component({
@@ -34,6 +37,9 @@ export class HabilitacionesComponent implements OnInit {
   l_documentos: any;
   btn_habilitacion: boolean = true;
   mensajeSeleccion = '';
+  mensajeFactura = '';
+  facturaValidada: Facturas | null = null;
+  buscandoFactura = false;
   estado = [
     { valor: 1, estado: 'Activo' },
     { valor: 2, estado: 'Suspendido' },
@@ -48,6 +54,7 @@ export class HabilitacionesComponent implements OnInit {
     private s_abonado: AbonadosService,
     private s_aboxsuspension: AboxsuspensionService,
     private s_documentos: DocumentosService,
+    private facturaService: FacturaService,
     private coloresService: ColoresService,
     private authService: AutorizaService
   ) {}
@@ -66,6 +73,7 @@ export class HabilitacionesComponent implements OnInit {
       numero: '',
       numdoc: '',
       iddocumento_documentos: '',
+      factura: '',
       observacion: '',
     });
     this.buscarxFecha();
@@ -140,8 +148,8 @@ export class HabilitacionesComponent implements OnInit {
   }
 
   habilitarMedidor() {
-    if (!this.suspensionOrigen?.idsuspension) {
-      this.mensajeSeleccion = 'La cuenta seleccionada no tiene una suspension activa registrada.';
+    if (!this.facturaEstaPagada()) {
+      this.mensajeFactura = 'Debes ingresar una factura pagada para continuar.';
       return;
     }
     this.abonado.estado = 1;
@@ -187,6 +195,8 @@ export class HabilitacionesComponent implements OnInit {
     this.habilitacion.iddocumento_documentos =
       this.f_habilitacion.value.iddocumento_documentos;
     this.habilitacion.observa = this.f_habilitacion.value.observacion;
+    this.habilitacion.idfactura_facturas = this.facturaValidada ?? undefined;
+    this.habilitacion.factura = this.facturaValidada?.idfactura;
     this.habilitacion.total = 1;
     this.suspeService.saveSuspension(this.habilitacion).subscribe({
       next: (datos: any) => {
@@ -205,30 +215,77 @@ export class HabilitacionesComponent implements OnInit {
     });
   }
 
-  setAbonado(abonado: any) {
+  async setAbonado(abonado: any) {
     this.mensajeSeleccion = '';
+    this.mensajeFactura = '';
+    this.facturaValidada = null;
+    this.f_habilitacion.patchValue({ factura: '' });
     if (![0, 2, 3].includes(Number(abonado?.estado))) {
       this.mensajeSeleccion = 'Solo se pueden habilitar cuentas con estado 0, suspendidas o suspendidas y retiradas.';
       return;
     }
 
-    this.s_aboxsuspension.getUltimaSuspensionActivaByAbonado(abonado.idabonado).subscribe({
-      next: (relacion: any) => {
-        if (!relacion?.idsuspension_suspensiones?.idsuspension) {
-          this.mensajeSeleccion = 'La cuenta no consta en la lista de suspensiones activas.';
+    this.abonado = abonado;
+    this.cliente = abonado.idcliente_clientes;
+    this.suspensionOrigen = null;
+    this.l_habilitaciones = false;
+    this.btn_habilitacion = abonado.estado === 1;
+
+    try {
+      const relacion: any = await firstValueFrom(
+        this.s_aboxsuspension.getUltimaSuspensionActivaByAbonado(abonado.idabonado)
+      );
+      if (relacion?.idsuspension_suspensiones?.idsuspension) {
+        this.suspensionOrigen = relacion.idsuspension_suspensiones;
+        this.mensajeSeleccion = `Se encontró la suspensión origen #${this.suspensionOrigen?.numero}.`;
+      } else {
+        this.mensajeSeleccion = 'La cuenta no consta en la lista de suspensiones activas, pero puedes registrar la habilitación.';
+      }
+    } catch (e) {
+      this.mensajeSeleccion = 'No fue posible obtener la suspensión de origen. La habilitación se registrará sin ese enlace.';
+      console.error(e);
+    }
+  }
+
+  buscarFactura() {
+    const facturaId = Number(this.f_habilitacion.value.factura);
+    this.facturaValidada = null;
+    this.mensajeFactura = '';
+
+    if (!Number.isFinite(facturaId) || facturaId <= 0) {
+      this.mensajeFactura = 'Ingresa un id de factura válido.';
+      return;
+    }
+
+    this.buscandoFactura = true;
+    this.facturaService.getById(facturaId).subscribe({
+      next: (factura: Facturas) => {
+        this.buscandoFactura = false;
+        if (!factura?.idfactura) {
+          this.mensajeFactura = 'No se encontró la factura ingresada.';
           return;
         }
-        this.abonado = abonado;
-        this.cliente = abonado.idcliente_clientes;
-        this.suspensionOrigen = relacion.idsuspension_suspensiones;
-        this.l_habilitaciones = false;
-        this.btn_habilitacion = abonado.estado === 1;
+        if (Number(factura.pagado) !== 1) {
+          this.mensajeFactura = 'La factura existe, pero todavía no registra pago.';
+          return;
+        }
+        this.facturaValidada = factura;
+        this.mensajeFactura = `Factura #${factura.idfactura} validada correctamente.`;
       },
       error: (e) => {
-        this.mensajeSeleccion = 'No fue posible obtener la suspension de origen.';
+        this.buscandoFactura = false;
+        this.mensajeFactura = 'No fue posible consultar la factura.';
         console.error(e);
       },
     });
+  }
+
+  facturaEstaPagada(): boolean {
+    return Number(this.facturaValidada?.pagado) === 1;
+  }
+
+  puedeGuardar(): boolean {
+    return !this.btn_habilitacion && this.facturaEstaPagada() && !this.buscandoFactura;
   }
 
   setEstado(estado: number) {

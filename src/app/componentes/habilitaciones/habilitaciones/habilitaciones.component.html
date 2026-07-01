@@ -87,7 +87,20 @@
                     </select>
                   </label>
                 </div>
-                <div class="col-sm-5">
+                <div class="col-sm-3">
+                  <label class="col-sm-12 col-form-label-sm">
+                    Factura
+                    <div class="input-group input-group-sm">
+                      <input type="number" class="form-control form-control-sm" formControlName="factura" placeholder="Id factura" />
+                      <div class="input-group-append">
+                        <button type="button" class="btn btn-outline-primary" (click)="buscarFactura()">
+                          Buscar
+                        </button>
+                      </div>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-sm-4">
                   <label class="col-sm-12 col-form-label-sm">
                     Observacion
                     <textarea class="form-control form-control-sm" formControlName="observacion"></textarea>
@@ -103,6 +116,9 @@
                 </div>
                 <div *ngIf="mensajeSeleccion" class="alert alert-warning py-2 mb-2">
                   {{ mensajeSeleccion }}
+                </div>
+                <div *ngIf="mensajeFactura" class="alert" [ngClass]="facturaEstaPagada() ? 'alert-success' : 'alert-warning'">
+                  {{ mensajeFactura }}
                 </div>
                 <div class="selection-dashboard">
                   <div class="dashboard-item">
@@ -126,7 +142,7 @@
             </div>
 
             <div class="text-center">
-              <button class="btn btn-sm btn-outline-success mx-3 action-btn" (click)="habilitarMedidor()" [disabled]="btn_habilitacion">
+              <button class="btn btn-sm btn-outline-success mx-3 action-btn" (click)="habilitarMedidor()" [disabled]="!puedeGuardar()">
                 Habilitar
               </button>
               <button class="btn btn-sm btn-success action-btn" (click)="l_habilitaciones = true">Cancelar</button>
