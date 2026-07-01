@@ -2,7 +2,7 @@
   <div class="container-fluid">
     <div class="row m-0 px-0 py-1 col-sm-12 cabecera border">
       <div class="col-sm-2 mx-0 px-0">
-        <h4 class="m-0 font-weight-bold text-truncate"><i class="bi-bookmark"></i> Facturación</h4>
+        <h4 class="m-0 font-weight-bold text-truncate"><i class="bi-bookmark"></i> Facturacion</h4>
       </div>
       <div class="col-sm-10 mx-0 px-0">
         <form [formGroup]="formBuscar" class="col-sm-12 px-0">
@@ -40,21 +40,40 @@
               </div>
             </div>
 
+            <div class="col-sm-2 mx-0 px-0 d-flex align-items-center">
+              <div class="custom-control custom-switch ml-2">
+                <input
+                  type="checkbox"
+                  class="custom-control-input"
+                  id="soloPendientesCuotas"
+                  [checked]="soloPendientesCuotas"
+                  (change)="togglePendientesCuotas()">
+                <label class="custom-control-label text-white small" for="soloPendientesCuotas">
+                  Cuotas pendientes
+                </label>
+              </div>
+            </div>
+
             <div class="btn-group ml-auto mt-0">
               <button type="button" class="bg-transparent border-0 dropdown-toggle text-white text-right"
-                data-toggle="dropdown" aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+                data-toggle="dropdown" aria-expanded="false">
+                <i class="bi-menu-button-wide text-white"></i>
               </button>
               <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
                 <button class="dropdown-item" type="button" (click)="nuevo()">
-                  <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+                  <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo
+                </button>
                 <button class="dropdown-item" type="button" [routerLink]="['/recargosxcuenta']">
                   <i class="fa fa-plus-square-o" aria-hidden="true"></i>
-                  &nbsp; Recargos cuentas</button>
+                  &nbsp; Recargos cuentas
+                </button>
                 <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
-                  <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir
+                </button>
                 <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar"
                   (click)="exportar()">
-                  <i class="bi-file-earmark-arrow-up"></i> &nbsp; Exportar</button>
+                  <i class="bi-file-earmark-arrow-up"></i> &nbsp; Exportar
+                </button>
               </div>
             </div>
 
@@ -71,35 +90,91 @@
     <div class="col-md-12">
       <table class="table table-hover table-bordered table-sm">
         <thead>
-          <tr class="text-center">
-            <th>Nro</th>
-            <th class="col-sm-1">Fecha</th>
-            <th class="col-sm-3">Cliente</th>
-            <th>Descripción</th>
-            <th>Valor</th>
-            <th>Cuotas</th>
+          <tr class="text-center" *ngIf="!soloPendientesCuotas">
+            <th class="sortable" (click)="ordenarPor('idfacturacion')">Nro <i class="bi" [ngClass]="getSortIcon('idfacturacion')"></i></th>
+            <th class="col-sm-1 sortable" (click)="ordenarPor('feccrea')">Fecha <i class="bi" [ngClass]="getSortIcon('feccrea')"></i></th>
+            <th class="col-sm-3 sortable" (click)="ordenarPor('cliente')">Cliente <i class="bi" [ngClass]="getSortIcon('cliente')"></i></th>
+            <th class="sortable" (click)="ordenarPor('descripcion')">Descripcion <i class="bi" [ngClass]="getSortIcon('descripcion')"></i></th>
+            <th class="sortable" (click)="ordenarPor('total')">Valor <i class="bi" [ngClass]="getSortIcon('total')"></i></th>
+            <th class="sortable" (click)="ordenarPor('cuotas')">Cuotas <i class="bi" [ngClass]="getSortIcon('cuotas')"></i></th>
+            <th class="sortable" (click)="ordenarPor('estado')">Estado <i class="bi" [ngClass]="getSortIcon('estado')"></i></th>
+          </tr>
+          <tr class="text-center" *ngIf="soloPendientesCuotas">
+            <th class="sortable" (click)="ordenarPor('idfacturacion')">Nro <i class="bi" [ngClass]="getSortIcon('idfacturacion')"></i></th>
+            <th class="col-sm-1 sortable" (click)="ordenarPor('feccrea')">Fecha <i class="bi" [ngClass]="getSortIcon('feccrea')"></i></th>
+            <th class="col-sm-3 sortable" (click)="ordenarPor('cliente')">Cliente <i class="bi" [ngClass]="getSortIcon('cliente')"></i></th>
+            <th class="sortable" (click)="ordenarPor('descripcion')">Descripcion <i class="bi" [ngClass]="getSortIcon('descripcion')"></i></th>
+            <th class="sortable" (click)="ordenarPor('cuotas')">Cuotas <i class="bi" [ngClass]="getSortIcon('cuotas')"></i></th>
+            <th class="sortable" (click)="ordenarPor('pagadas')">Pagadas <i class="bi" [ngClass]="getSortIcon('pagadas')"></i></th>
+            <th class="sortable" (click)="ordenarPor('pendientes')">Pendientes <i class="bi" [ngClass]="getSortIcon('pendientes')"></i></th>
+            <th class="sortable" (click)="ordenarPor('valorPendiente')">Valor pendiente <i class="bi" [ngClass]="getSortIcon('valorPendiente')"></i></th>
           </tr>
         </thead>
-        <tbody>
-          <tr *ngFor="let factu of _facturacion | filter: filtro; let i = index" (click)="info(factu)">
+
+        <tbody *ngIf="!soloPendientesCuotas">
+          <tr *ngFor="let factu of registrosPaginados; let i = index" (click)="info(factu)">
             <td class="text-center">{{ factu.idfacturacion }}</td>
             <td class="text-center">{{ factu.feccrea | date:'dd-MM-y' }}</td>
-            <td>{{ factu.idcliente_clientes.nombre }}</td>
+            <td>{{ factu.idcliente_clientes?.nombre || getClientePendiente(factu) }}</td>
             <td>{{ factu.descripcion }}</td>
-            <td class="text-right">{{factu.total | number: '1.2-2'}}</td>
-            <td class="text-center">{{factu.cuotas}}</td>
+            <td class="text-right">{{ factu.total | number: '1.2-2' }}</td>
+            <td class="text-center">{{ factu.cuotas }}</td>
+            <td class="text-center">
+              <span [class]="getClaseEstadoFacturacion(factu)">{{ getEstadoFacturacion(factu) }}</span>
+            </td>
           </tr>
-          <tr *ngIf="!swfiltro">
-            <td colspan="4" class="font-weight-bold text-right">TOTAL</td>
+          <tr *ngIf="registrosFiltrados.length > 0">
+            <td colspan="5" class="font-weight-bold text-right">TOTAL</td>
             <td class="font-weight-bold text-right">{{ sumtotal | number: '1.2-2' }}</td>
             <td></td>
           </tr>
         </tbody>
+
+        <tbody *ngIf="soloPendientesCuotas">
+          <tr *ngFor="let factu of registrosPaginados; let i = index" (click)="info(factu)">
+            <td class="text-center">{{ factu.idfacturacion }}</td>
+            <td class="text-center">{{ factu.feccrea | date:'dd-MM-y' }}</td>
+            <td>{{ getClientePendiente(factu) }}</td>
+            <td>{{ factu.descripcion }}</td>
+            <td class="text-center">{{ factu.cuotas }}</td>
+            <td class="text-center">{{ getPagadasPendiente(factu) }}</td>
+            <td class="text-center">{{ getPendientesPendiente(factu) }}</td>
+            <td class="text-right">{{ getValorPendientePendiente(factu) | number: '1.2-2' }}</td>
+          </tr>
+          <tr *ngIf="registrosFiltrados.length > 0">
+            <td colspan="6" class="font-weight-bold text-right">TOTAL</td>
+            <td class="font-weight-bold text-center">{{ totalFacturasPendientes }}</td>
+            <td class="font-weight-bold text-right">{{ totalValorPendiente | number: '1.2-2' }}</td>
+          </tr>
+        </tbody>
       </table>
+
+      <div class="d-flex justify-content-between align-items-center flex-wrap pagination-bar px-2 py-2">
+        <div class="small">
+          Registros: {{ registrosFiltrados.length }} de {{ totalRegistros }}
+        </div>
+        <div class="d-flex align-items-center">
+          <label class="mb-0 mr-2 small">Filas</label>
+          <select class="form-control form-control-sm mr-3 page-size-select" [value]="pageSize"
+            (change)="cambiarPageSize($any($event.target).value)">
+            <option *ngFor="let option of pageSizeOptions" [value]="option">{{ option }}</option>
+          </select>
+          <ul class="pagination pagination-sm mb-0">
+            <li class="page-item" [class.disabled]="page <= 1">
+              <button class="page-link" type="button" (click)="cambiarPagina(page - 1)">Anterior</button>
+            </li>
+            <li class="page-item disabled">
+              <span class="page-link">{{ page }} / {{ totalPaginas }}</span>
+            </li>
+            <li class="page-item" [class.disabled]="page >= totalPaginas">
+              <button class="page-link" type="button" (click)="cambiarPagina(page + 1)">Siguiente</button>
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- MODAL Convenio -->
   <div class='modal fade' id='modalConvenio' tabindex='-1' aria-labelledby='modalConvenio' aria-hidden='true'>
     <div class='modal-dialog modal-sm'>
       <div class='modal-content'>
@@ -109,10 +184,9 @@
 
         <div *ngIf="rtn==0; then thenBlock else elseBlock"></div>
         <ng-template #thenBlock>
-
           <div class='modal-body'>
             <div class="alert alert-info" role="alert">
-              ¿Eliminar el Trámite de Facturación {{numero}}?
+              ¿Eliminar el Tramite de Facturacion {{numero}}?
             </div>
           </div>
           <div class='modal-footer' id='idButtons'>
@@ -135,7 +209,6 @@
     </div>
   </div>
 
-  <!-- MODAL Imprimir-->
   <div class="modal fade" id="imprimir" tabindex="-1" aria-labelledby="imprimirLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
       <div class="modal-content border">
@@ -149,13 +222,13 @@
               <label class="input-group-text" for="inputGroupSelect01">Reporte</label>
             </div>
             <select class="custom-select" id="inputGroupSelect01">
-              <option selected>Lista de la Facturación</option>
+              <option selected>{{ soloPendientesCuotas ? 'Facturacion con cuotas pendientes' : 'Lista de la Facturacion' }}</option>
             </select>
           </div>
 
           <div class="input-group input-group-sm mb-0">
             <div class="input-group-prepend">
-              <small class="input-group-text">Abrir en otra página</small>
+              <small class="input-group-text">Abrir en otra pagina</small>
               <div class="input-group-text">
                 <input type="checkbox" [(ngModel)]="otraPagina">
               </div>
@@ -165,9 +238,11 @@
           <div class='row justify-content-center mt-3'>
             <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' (click)="pdf()"
               [attr.data-target]="otraPagina ? null : '#pdf'" data-toggle="modal">
-              <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+              <i class="fa fa-check-circle"></i>&nbsp; Aceptar
+            </button>
             <button type='button' class='btn btn-sm btn-outline-success btn-sm mx-1' data-dismiss='modal'>
-              <i class="bi bi-x-circle"></i> Cancelar</button>
+              <i class="bi bi-x-circle"></i> Cancelar
+            </button>
           </div>
 
         </div>
@@ -175,7 +250,6 @@
     </div>
   </div>
 
-  <!-- MODAL Exportar -->
   <div class="modal fade" id="exportar" tabindex="-1" aria-labelledby="exportarLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
       <div class="modal-content border">
@@ -184,23 +258,25 @@
         </div>
         <div class='modal-body cuerpo'>
 
-          <div class="form-group  my-0 py-0">
+          <div class="form-group my-0 py-0">
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
                 <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm" data-toggle="tooltip"
-                  title="Obligatorio y mínimo 3 caracteres">Archivo</span>
+                  title="Obligatorio y minimo 3 caracteres">Archivo</span>
               </div>
               <input type="text" class="form-control" [(ngModel)]="archExportar" aria-label="Small"
-                aria-describedby="inputGroup-sizing-sm" required minlength="3" maxlength="20">
+                aria-describedby="inputGroup-sizing-sm" required minlength="3" maxlength="50">
             </div>
           </div>
 
           <div class="row justify-content-center">
             <button type='button' class='btn btn-success btn-sm mx-1' data-dismiss='modal' data-toggle="modal"
               (click)="exporta()">
-              <i class="fa fa-check-circle"></i>&nbsp; Aceptar</button>
+              <i class="fa fa-check-circle"></i>&nbsp; Aceptar
+            </button>
             <button type='button' class='btn btn-sm btn-outline-success btn-sm mx-1' data-dismiss='modal'>
-              <i class="bi bi-x-circle"></i> Cancelar</button>
+              <i class="bi bi-x-circle"></i> Cancelar
+            </button>
           </div>
         </div>
       </div>
@@ -209,7 +285,6 @@
 
 </div>
 
-<!-- MODAL PDF (En la misma página)-->
 <div class='modal fade' id='pdf' tabindex='-1' aria-labelledby='pdf' aria-hidden='true'>
   <div class='modal-dialog modal-sm'>
   </div>

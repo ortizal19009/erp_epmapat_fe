@@ -213,15 +213,15 @@
                         <td class="text-center">
                           <span
                             class="mini-badge"
-                            [ngClass]="liqfac.idfactura_facturas?.fechacobro ? 'mini-badge-success' : 'mini-badge-warning'">
-                            {{ liqfac.idfactura_facturas?.fechacobro ? 'Cobrada' : 'Pendiente' }}
+                            [ngClass]="esPlanillaPagada(liqfac) ? 'mini-badge-success' : 'mini-badge-warning'">
+                            {{ esPlanillaPagada(liqfac) ? 'Pagada' : 'Pendiente' }}
                           </span>
                         </td>
                         <td class="text-center">
                           {{ liqfac.idfactura_facturas?.fechacobro | date:'dd-MM-y' }}
                         </td>
                         <td class="text-right">
-                          {{ liqfac.idfactura_facturas?.totaltarifa | number:'1.2-2' }}
+                          {{ getValorPlanilla(liqfac) | number:'1.2-2' }}
                         </td>
                       </tr>
 

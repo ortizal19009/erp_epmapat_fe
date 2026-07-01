@@ -64,8 +64,8 @@ export class InfoFacturacionComponent implements OnInit {
 
     this._liquidafac.forEach((liqfac: any) => {
       const factura = liqfac?.idfactura_facturas;
-      suma += Number(factura?.totaltarifa || 0);
-      if (factura?.fechacobro) {
+      suma += Number(liqfac?.valor ?? factura?.totaltarifa ?? 0);
+      if (Number(factura?.pagado) === 1) {
         cobradas++;
       } else {
         pendientes++;
@@ -116,6 +116,14 @@ export class InfoFacturacionComponent implements OnInit {
 
   get diferenciaTotal(): number {
     return Number(this.facturacion.total || 0) - Number(this.totfac || 0);
+  }
+
+  esPlanillaPagada(liqfac: any): boolean {
+    return Number(liqfac?.idfactura_facturas?.pagado) === 1;
+  }
+
+  getValorPlanilla(liqfac: any): number {
+    return Number(liqfac?.valor ?? liqfac?.idfactura_facturas?.totaltarifa ?? 0);
   }
 
   private resolveNombreCliente(datos: any): string {

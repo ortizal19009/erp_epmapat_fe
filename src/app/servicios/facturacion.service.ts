@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { FacturacionCuotasPendientes } from '../interfaces/facturacion/facturacion-cuotas-pendientes';
 import { Facturacion } from '../modelos/facturacion.model';
 import { environment } from 'src/environments/environment';
 
@@ -29,6 +30,14 @@ export class FacturacionService {
 
   getById(idfacturacion: number): Observable<Facturacion> {
     return this.http.get<Facturacion>(`${baseUrl}/${idfacturacion}`);
+  }
+
+  getPendientesCuotas(desde: number, hasta: number, del: Date, al: Date, cliente?: string) {
+    let url = `${baseUrl}/reportes/pendientes-cuotas?desde=${desde}&hasta=${hasta}&del=${del}&al=${al}`;
+    if (cliente != null && cliente !== '') {
+      url += `&cliente=${cliente}`;
+    }
+    return this.http.get<FacturacionCuotasPendientes[]>(url);
   }
 
   //Original (Funciona pero no se puede obtener el Id)

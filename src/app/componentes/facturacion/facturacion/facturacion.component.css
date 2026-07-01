@@ -21,10 +21,37 @@ table>thead>tr {
    color: white;
 }
 
+table>thead>tr>th.sortable {
+   cursor: pointer;
+   user-select: none;
+   white-space: nowrap;
+}
+
+table>thead>tr>th.sortable:hover {
+   background-color: #2f5454;
+}
+
 table tbody tr:hover  { 
    background-color: #117a8B;
    color: white;
    cursor: pointer; 
+}
+
+.pagination-bar {
+   background-color: var(--bgcolor2);
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.35);
+}
+
+.page-size-select {
+   width: 80px;
+}
+
+.pagination .page-link {
+   color: var(--bgcolor1);
+}
+
+.pagination .page-item.disabled .page-link {
+   color: #6c757d;
 }
 
 .transparente{ opacity: 0;}

@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { FacturacionCuotasPendientes } from 'src/app/interfaces/facturacion/facturacion-cuotas-pendientes';
 import { Facturacion } from 'src/app/modelos/facturacion.model';
 import { FacturacionService } from 'src/app/servicios/facturacion.service';
 import * as ExcelJS from 'exceljs';
@@ -22,6 +23,16 @@ export class FacturacionComponent implements OnInit {
   sumtotal: number = 0;
   otraPagina: boolean = false;
   archExportar: string;
+  soloPendientesCuotas = false;
+  facturacionesPendientes: FacturacionCuotasPendientes[] = [];
+  facturacionesPendientesMap = new Map<number, FacturacionCuotasPendientes>();
+  totalFacturasPendientes = 0;
+  totalValorPendiente = 0;
+  page = 1;
+  pageSize = 10;
+  readonly pageSizeOptions = [10, 25, 50, 100];
+  sortColumn = 'idfacturacion';
+  sortDirection: 'asc' | 'desc' = 'desc';
 
   constructor(
     private factuServicio: FacturacionService,
@@ -40,10 +51,6 @@ export class FacturacionComponent implements OnInit {
 
     this.factuServicio.ultimo().subscribe({
       next: (datos) => {
-        let hasta: string = datos.idfacturacion.toString();
-
-        let desde: string = (+hasta - 10).toString();
-
         let al: string = datos.feccrea.toString().slice(0, 10);
         let del: string = '';
         let fechaRestada: Date;
@@ -55,8 +62,8 @@ export class FacturacionComponent implements OnInit {
           cliente = sessionStorage.getItem('clienteFacturacion')!;
 
         this.formBuscar.patchValue({
-          desde: desde,
-          hasta: hasta,
+          desde: '',
+          hasta: '',
           del: del,
           al: al,
           cliente: cliente,
@@ -88,6 +95,11 @@ export class FacturacionComponent implements OnInit {
     sessionStorage.setItem('alFacturacion', this.formBuscar.value.al);
     sessionStorage.setItem('clienteFacturacion', this.formBuscar.value.cliente);
 
+    if (this.soloPendientesCuotas) {
+      this.buscarPendientesCuotas(desde, hasta, cliente);
+      return;
+    }
+
     if (cliente != '' && cliente != null) {
       this.formBuscar.controls['desde'].setValue('');
       this.formBuscar.controls['hasta'].setValue('');
@@ -98,7 +110,12 @@ export class FacturacionComponent implements OnInit {
           this.formBuscar.value.al
         )
         .subscribe({
-          next: (datos) => (this._facturacion = datos),
+          next: (datos) => {
+            this._facturacion = datos;
+            this.page = 1;
+            this.total();
+            this.cargarEstadosPendientes('', '', cliente);
+          },
           error: (err) => console.error(err.error),
         });
     } else {
@@ -116,11 +133,39 @@ export class FacturacionComponent implements OnInit {
         .subscribe({
           next: (datos) => {
             this._facturacion = datos;
+            this.page = 1;
             this.total();
+            this.cargarEstadosPendientes(desde, hasta, cliente);
           },
           error: (err) => console.error(err.error),
         });
     }
+  }
+
+  buscarPendientesCuotas(desde: any, hasta: any, cliente: any) {
+    if (desde == '' || desde == null) desde = 0;
+    if (hasta == '' || hasta == null) hasta = 999999999;
+
+    this.factuServicio
+      .getPendientesCuotas(
+        +desde,
+        +hasta,
+        this.formBuscar.value.del,
+        this.formBuscar.value.al,
+        cliente
+      )
+      .subscribe({
+        next: (datos) => {
+          this.facturacionesPendientes = Array.isArray(datos) ? datos : [];
+          this.facturacionesPendientesMap = new Map(
+            this.facturacionesPendientes.map((item) => [Number(item.idfacturacion), item])
+          );
+          this._facturacion = this.facturacionesPendientes;
+          this.page = 1;
+          this.totalPendientesCuotas();
+        },
+        error: (err) => console.error(err.error),
+      });
   }
 
   public modificar(idfacturacion: number) {
@@ -166,8 +211,23 @@ export class FacturacionComponent implements OnInit {
     this.sumtotal = subtotal;
   }
 
+  totalPendientesCuotas() {
+    this.totalFacturasPendientes = this.facturacionesPendientes.reduce(
+      (acc, item) => acc + Number(item.planillasPendientes || 0),
+      0
+    );
+    this.totalValorPendiente = this.facturacionesPendientes.reduce(
+      (acc, item) => acc + Number(item.valorPendiente || 0),
+      0
+    );
+  }
+
   //Emisiones
   pdf() {
+    if (this.soloPendientesCuotas) {
+      this.pdfPendientesCuotas();
+      return;
+    }
     //const nombreEmision = new NombreEmisionPipe(); // Crea una instancia del pipe
     let m_izquierda = 10;
     var doc = new jsPDF();
@@ -192,7 +252,7 @@ export class FacturacionComponent implements OnInit {
       datos.push([
         this._facturacion[i].idfacturacion,
         fecha,
-        this._facturacion[i].idcliente_clientes.nombre,
+        this.getClientePendiente(this._facturacion[i]),
         this._facturacion[i].descripcion,
         this._facturacion[i].total,
         this._facturacion[i].cuotas,
@@ -294,10 +354,16 @@ export class FacturacionComponent implements OnInit {
   }
 
   exportar() {
-    this.archExportar = 'Facturacion';
+    this.archExportar = this.soloPendientesCuotas
+      ? 'Facturacion_Cuotas_Pendientes'
+      : 'Facturacion';
   }
 
   exporta() {
+    if (this.soloPendientesCuotas) {
+      this.exportaPendientesCuotas();
+      return;
+    }
     //const nombreEmision = new NombreEmisionPipe(); // Crea una instancia del pipe
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Facturación');
@@ -359,7 +425,7 @@ export class FacturacionComponent implements OnInit {
       const row = [
         item.idfacturacion,
         ,
-        item.idcliente_clientes.nombre,
+        this.getClientePendiente(item),
         item.descripcion,
         item.total,
         item.cuotas,
@@ -455,6 +521,371 @@ export class FacturacionComponent implements OnInit {
 
       window.URL.revokeObjectURL(url); // Libera recursos
     });
+  }
+
+  togglePendientesCuotas() {
+    this.soloPendientesCuotas = !this.soloPendientesCuotas;
+    this.buscar();
+  }
+
+  get totalRegistros(): number {
+    return this.soloPendientesCuotas
+      ? this.facturacionesPendientes.length
+      : this._facturacion?.length || 0;
+  }
+
+  get totalPaginas(): number {
+    const total = this.registrosFiltrados.length;
+    return total > 0 ? Math.ceil(total / this.pageSize) : 1;
+  }
+
+  get registrosFiltrados(): any[] {
+    const datos = Array.isArray(this._facturacion) ? [...this._facturacion] : [];
+    const filtro = (this.filtro || '').trim().toLowerCase();
+
+    const filtrados = !filtro
+      ? datos
+      : datos.filter((item) => this.matchesFiltro(item, filtro));
+
+    return filtrados.sort((a, b) => this.compareItems(a, b));
+  }
+
+  get registrosPaginados(): any[] {
+    const inicio = (this.page - 1) * this.pageSize;
+    return this.registrosFiltrados.slice(inicio, inicio + this.pageSize);
+  }
+
+  ordenarPor(columna: string) {
+    if (this.sortColumn === columna) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = columna;
+      this.sortDirection = columna === 'idfacturacion' || columna === 'feccrea' ? 'desc' : 'asc';
+    }
+    this.page = 1;
+  }
+
+  getSortIcon(columna: string): string {
+    if (this.sortColumn !== columna) return 'bi-arrow-down-up';
+    return this.sortDirection === 'asc' ? 'bi-sort-up' : 'bi-sort-down';
+  }
+
+  cambiarPageSize(valor: string) {
+    const nuevo = Number(valor);
+    if (!Number.isNaN(nuevo) && nuevo > 0) {
+      this.pageSize = nuevo;
+      this.page = 1;
+    }
+  }
+
+  cambiarPagina(nuevaPagina: number) {
+    if (nuevaPagina < 1 || nuevaPagina > this.totalPaginas) return;
+    this.page = nuevaPagina;
+  }
+
+  getClientePendiente(item: any): string {
+    return item?.cliente ?? item?.nomcli ?? item?.idcliente_clientes?.nombre ?? '';
+  }
+
+  getPagadasPendiente(item: any): number {
+    return Number(item?.planillasPagadas ?? item?.pagadas ?? 0);
+  }
+
+  getPendientesPendiente(item: any): number {
+    return Number(item?.planillasPendientes ?? item?.pendientes ?? 0);
+  }
+
+  getValorPendientePendiente(item: any): number {
+    return Number(item?.valorPendiente ?? item?.totalPendiente ?? item?.pendiente ?? 0);
+  }
+
+  getEstadoFacturacion(item: any): string {
+    const idfacturacion = Number(item?.idfacturacion ?? 0);
+    if (this.facturacionesPendientesMap.has(idfacturacion)) {
+      return 'Pendiente';
+    }
+    return 'Pagada';
+  }
+
+  getClaseEstadoFacturacion(item: any): string {
+    return this.getEstadoFacturacion(item) === 'Pendiente' ? 'badge badge-warning' : 'badge badge-success';
+  }
+
+  private cargarEstadosPendientes(desde: any, hasta: any, cliente: any) {
+    let desdeFiltro = desde;
+    let hastaFiltro = hasta;
+    if (desdeFiltro === '' || desdeFiltro == null) desdeFiltro = 0;
+    if (hastaFiltro === '' || hastaFiltro == null) hastaFiltro = 999999999;
+
+    this.factuServicio
+      .getPendientesCuotas(
+        +desdeFiltro,
+        +hastaFiltro,
+        this.formBuscar.value.del,
+        this.formBuscar.value.al,
+        cliente
+      )
+      .subscribe({
+        next: (datos) => {
+          const pendientes = Array.isArray(datos) ? datos : [];
+          this.facturacionesPendientesMap = new Map(
+            pendientes.map((item) => [Number(item.idfacturacion), item])
+          );
+        },
+        error: () => {
+          this.facturacionesPendientesMap = new Map();
+        },
+      });
+  }
+
+  private matchesFiltro(item: any, filtro: string): boolean {
+    const valores = [
+      item?.idfacturacion,
+      this.getClientePendiente(item),
+      item?.descripcion,
+      item?.feccrea,
+      item?.total,
+      item?.cuotas,
+      this.getEstadoFacturacion(item),
+      this.getPagadasPendiente(item),
+      this.getPendientesPendiente(item),
+      this.getValorPendientePendiente(item),
+    ];
+
+    return valores.some((valor) =>
+      `${valor ?? ''}`.toLowerCase().includes(filtro)
+    );
+  }
+
+  private compareItems(a: any, b: any): number {
+    const valorA = this.getSortValue(a, this.sortColumn);
+    const valorB = this.getSortValue(b, this.sortColumn);
+    let comparacion = 0;
+
+    if (typeof valorA === 'number' && typeof valorB === 'number') {
+      comparacion = valorA - valorB;
+    } else {
+      comparacion = `${valorA ?? ''}`.localeCompare(`${valorB ?? ''}`, 'es', {
+        numeric: true,
+        sensitivity: 'base',
+      });
+    }
+
+    return this.sortDirection === 'asc' ? comparacion : comparacion * -1;
+  }
+
+  private getSortValue(item: any, columna: string): string | number {
+    switch (columna) {
+      case 'idfacturacion':
+        return Number(item?.idfacturacion ?? 0);
+      case 'feccrea':
+        return new Date(item?.feccrea ?? 0).getTime();
+      case 'cliente':
+        return this.getClientePendiente(item);
+      case 'descripcion':
+        return item?.descripcion ?? '';
+      case 'total':
+        return Number(item?.total ?? item?.valorFacturacion ?? 0);
+      case 'cuotas':
+        return Number(item?.cuotas ?? 0);
+      case 'estado':
+        return this.getEstadoFacturacion(item);
+      case 'pagadas':
+        return this.getPagadasPendiente(item);
+      case 'pendientes':
+        return this.getPendientesPendiente(item);
+      case 'valorPendiente':
+        return this.getValorPendientePendiente(item);
+      default:
+        return item?.[columna] ?? '';
+    }
+  }
+
+  private pdfPendientesCuotas() {
+    let m_izquierda = 10;
+    const doc = new jsPDF('l');
+    doc.setFont('times', 'bold');
+    doc.setFontSize(16);
+    doc.text('EpmapaT', m_izquierda, 10);
+    doc.setFontSize(12);
+    doc.text('FACTURACION CON CUOTAS PENDIENTES', m_izquierda, 16);
+
+    const datos = this.facturacionesPendientes.map((item) => [
+      item.idfacturacion,
+      this.formatFecha(item.feccrea),
+      item.cliente,
+      item.descripcion,
+      Number(item.cuotas || 0),
+      Number(item.planillasPagadas || 0),
+      Number(item.planillasPendientes || 0),
+      Number(item.valorPendiente || 0),
+    ]);
+
+    datos.push(['', '', '', 'TOTAL', '', '', this.totalFacturasPendientes, this.totalValorPendiente]);
+
+    autoTable(doc, {
+      head: [['Nro.', 'Fecha', 'Cliente', 'Descripcion', 'Cuotas', 'Pagadas', 'Pendientes', 'Valor pendiente']],
+      theme: 'grid',
+      headStyles: { fillColor: [68, 103, 114], fontStyle: 'bold', halign: 'center' },
+      styles: { font: 'helvetica', fontSize: 8, cellPadding: 1, halign: 'center' },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 14 },
+        1: { halign: 'center', cellWidth: 22 },
+        2: { halign: 'left', cellWidth: 65 },
+        3: { halign: 'left', cellWidth: 95 },
+        4: { halign: 'center', cellWidth: 16 },
+        5: { halign: 'center', cellWidth: 18 },
+        6: { halign: 'center', cellWidth: 20 },
+        7: { halign: 'right', cellWidth: 24 },
+      },
+      margin: { left: m_izquierda - 1, top: 19, right: 4, bottom: 13 },
+      body: datos,
+      didParseCell: (data) => {
+        const fila = data.row.index;
+        if (data.column.index === 7 && data.cell.section === 'body') {
+          data.cell.text[0] = formatNumber(+data.cell.raw!);
+        }
+        if (fila === datos.length - 1) {
+          data.cell.styles.fontStyle = 'bold';
+        }
+      },
+    });
+
+    this.abrirPdf(doc, m_izquierda);
+  }
+
+  private exportaPendientesCuotas() {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Cuotas pendientes');
+    worksheet.addRow(['', '', 'Facturacion con cuotas pendientes']);
+    worksheet.getCell('C1').font = {
+      name: 'Times New Roman',
+      bold: true,
+      size: 14,
+      color: { argb: '002060' },
+    };
+    worksheet.addRow([]);
+
+    const cabecera = [
+      'Nro',
+      'Fecha',
+      'Cliente',
+      'Descripcion',
+      'Cuotas',
+      'Pagadas',
+      'Pendientes',
+      'Valor pendiente',
+    ];
+    const headerRowCell = worksheet.addRow(cabecera);
+    headerRowCell.eachCell((cell) => {
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '002060' } };
+      cell.font = { bold: true, name: 'Times New Roman', color: { argb: 'FFFFFF' } };
+    });
+
+    this.facturacionesPendientes.forEach((item) => {
+      const fila = worksheet.addRow([
+        item.idfacturacion,
+        '',
+        item.cliente,
+        item.descripcion,
+        item.cuotas,
+        item.planillasPagadas,
+        item.planillasPendientes,
+        item.valorPendiente,
+      ]);
+      if (item.feccrea != null) {
+        const fecha = new Date(item.feccrea);
+        const celda = fila.getCell('B');
+        celda.value = fecha;
+        celda.numFmt = 'dd-mm-yyyy';
+      }
+    });
+
+    worksheet.addRow(['', '', '', 'TOTAL', '', '', this.totalFacturasPendientes, this.totalValorPendiente]);
+    const totalRow = this.facturacionesPendientes.length + 4;
+    worksheet.getCell(`D${totalRow}`).font = { bold: true };
+    worksheet.getCell(`G${totalRow}`).font = { bold: true };
+    worksheet.getCell(`H${totalRow}`).font = { bold: true };
+    worksheet.getCell(`H${totalRow}`).numFmt = '#,##0.00';
+
+    [1, 2, 5, 6, 7].forEach((columnIndex) => {
+      worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, (cell) => {
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      });
+    });
+    [8].forEach((columnIndex) => {
+      worksheet.getColumn(columnIndex).eachCell({ includeEmpty: true }, (cell) => {
+        cell.alignment = { horizontal: 'right' };
+        cell.numFmt = '#,##0.00';
+      });
+    });
+    worksheet.getColumn(2).width = 15;
+    worksheet.getColumn(3).width = 38;
+    worksheet.getColumn(4).width = 42;
+    worksheet.getColumn(8).width = 18;
+
+    workbook.xlsx.writeBuffer().then((buffer) => {
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${this.archExportar}.xlsx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    });
+  }
+
+  private abrirPdf(doc: jsPDF, margenIzq: number) {
+    const addPageNumbers = function () {
+      const pageCount = doc.internal.pages.length;
+      for (let i = 1; i <= pageCount - 1; i++) {
+        doc.setPage(i);
+        doc.setFontSize(10);
+        doc.text(
+          'Pagina ' + i + ' de ' + (pageCount - 1),
+          margenIzq,
+          doc.internal.pageSize.height - 10
+        );
+      }
+    };
+
+    addPageNumbers();
+
+    if (this.otraPagina) {
+      const blob = doc.output('blob');
+      const url = URL.createObjectURL(blob);
+      const ventana = window.open(url, '_blank');
+      if (ventana) {
+        ventana.addEventListener('unload', () => URL.revokeObjectURL(url));
+      }
+    } else {
+      const pdfBlob = doc.output('blob');
+      const blobUrl = URL.createObjectURL(pdfBlob);
+      const elementoExistente = document.getElementById('idembed');
+      if (elementoExistente) {
+        elementoExistente.remove();
+      }
+      const embed = document.createElement('embed');
+      embed.setAttribute('src', blobUrl);
+      embed.setAttribute('type', 'application/pdf');
+      embed.setAttribute('width', '50%');
+      embed.setAttribute('height', '100%');
+      embed.setAttribute('id', 'idembed');
+      const container: any = document.getElementById('pdf');
+      container.appendChild(embed);
+    }
+  }
+
+  private formatFecha(fecha: Date | string | null | undefined): string {
+    if (!fecha) return '';
+    const valor = new Date(fecha);
+    if (Number.isNaN(valor.getTime())) return '';
+    const dia = `${valor.getDate()}`.padStart(2, '0');
+    const mes = `${valor.getMonth() + 1}`.padStart(2, '0');
+    const anio = valor.getFullYear();
+    return `${dia}-${mes}-${anio}`;
   }
 }
 
