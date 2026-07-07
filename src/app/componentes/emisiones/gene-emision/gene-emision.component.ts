@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
@@ -32,6 +33,8 @@ export class GeneEmisionComponent implements OnInit {
   modulo: Modulos = new Modulos();
   cliente: Clientes;
   swgenerando: boolean = false;
+  resumenGeneracion: string = '';
+  detalleGeneracion: EmisionGeneracionResponse | null = null;
 
   constructor(
     private emiServicio: EmisionService,
@@ -90,13 +93,36 @@ export class GeneEmisionComponent implements OnInit {
   }
 
   async generar() {
-    const anio = parseInt(this.emision.substring(0, 2), 10) + 2000;
-    const mes = parseInt(this.emision.substring(2, 4), 10);
-    this.fechaemision = new Date(anio, mes - 1, 1);
-    this.totalrutas = this._rutas.length;
     this.swgenerando = true;
-    await this.generaRutaxemision();
-    this.regresar();
+    this.progreso = 10;
+    this.resumenGeneracion = '';
+    this.detalleGeneracion = null;
+    this.emiServicio
+      .generarPendientes(this.idemision, this.authService.idusuario)
+      .subscribe({
+        next: (resp: EmisionGeneracionResponse) => {
+          this.progreso = 100;
+          this.detalleGeneracion = resp;
+          this.resumenGeneracion =
+            `Rutas completas: ${resp.rutasCompletas}/${resp.totalRutasEsperadas}. ` +
+            `Lecturas creadas ahora: ${resp.lecturasCreadas}. ` +
+            `Lecturas pendientes: ${resp.lecturasPendientes}.`;
+          this.swgenerando = false;
+          if (resp.lecturasPendientes === 0) {
+            this.regresar();
+          }
+        },
+        error: (err) => {
+          this.swgenerando = false;
+          this.progreso = 0;
+          this.resumenGeneracion = this.getGeneracionErrorMessage(err);
+          console.error(err);
+        },
+      });
+  }
+
+  get rutasPendientes(): EmisionGeneracionRuta[] {
+    return this.detalleGeneracion?.rutas?.filter((ruta) => ruta.lecturasPendientes > 0) ?? [];
   }
 
   //Genera las Rutaxemision (Son 110)
@@ -214,6 +240,48 @@ export class GeneEmisionComponent implements OnInit {
   regresar() {
     this.router.navigate(['emisiones']);
   }
+
+  private getGeneracionErrorMessage(err: any): string {
+    const backendMessage = this.extractErrorText(err);
+    if (
+      backendMessage.includes('query did not return a unique result: 2') ||
+      backendMessage.includes('nonuniqueresultexception') ||
+      backendMessage.includes('incorrectresultsizedataaccessexception')
+    ) {
+      return 'No se pudo completar la generación porque existen facturas o lecturas duplicadas para uno o más abonados de esta emisión. Revisa los registros duplicados en el backend y vuelve a intentar.';
+    }
+
+    return (
+      err?.error?.message ||
+      err?.error?.detalle ||
+      err?.message ||
+      'No se pudo completar la generación de la emisión.'
+    );
+  }
+
+  private extractErrorText(err: any): string {
+    if (!err) {
+      return '';
+    }
+
+    if (typeof err === 'string') {
+      return err.toLowerCase();
+    }
+
+    if (err instanceof HttpErrorResponse) {
+      const payload =
+        typeof err.error === 'string'
+          ? err.error
+          : JSON.stringify(err.error || {});
+      return `${err.message || ''} ${payload}`.toLowerCase();
+    }
+
+    try {
+      return JSON.stringify(err).toLowerCase();
+    } catch {
+      return String(err).toLowerCase();
+    }
+  }
 }
 
 interface Rutasxemision {
@@ -281,4 +349,31 @@ interface Lectura {
   total31: number;
   total32: number;
   fotoPath: string;
+}
+
+interface EmisionGeneracionRuta {
+  idruta: number;
+  codigoRuta: string;
+  nombreRuta: string;
+  idrutaxemision: number;
+  rutaCreada: boolean;
+  abonadosEsperados: number;
+  lecturasExistentes: number;
+  lecturasCreadas: number;
+  lecturasPendientes: number;
+}
+
+interface EmisionGeneracionResponse {
+  idemision: number;
+  emision: string;
+  totalRutasEsperadas: number;
+  rutasExistentes: number;
+  rutasCreadas: number;
+  rutasCompletas: number;
+  rutasPendientes: number;
+  totalLecturasEsperadas: number;
+  lecturasExistentes: number;
+  lecturasCreadas: number;
+  lecturasPendientes: number;
+  rutas: EmisionGeneracionRuta[];
 }

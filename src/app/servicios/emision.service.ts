@@ -62,6 +62,17 @@ export class EmisionService {
     return this.http.post<any[]>(url, {});
   }
 
+  generarPendientes(idemision: number, idusuario: number) {
+    return this.http.post<any>(
+      `${baseUrl}/${idemision}/generar-pendientes?idusuario=${idusuario}`,
+      {}
+    );
+  }
+
+  validarApertura(idemision: number) {
+    return this.http.get<any>(`${baseUrl}/${idemision}/validar-apertura`);
+  }
+
   reabrirEmision(idemision: number, usumodi: number) {
     return this.http.post<any>(`${baseUrl}/${idemision}/reabrir?usumodi=${usumodi}`, {});
   }

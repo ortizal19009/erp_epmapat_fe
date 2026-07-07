@@ -1,7 +1,7 @@
 <div class="content">
    <div class="container-fluid">
       <div class="row justify-content-center">
-         <div class="col-sm-5 mt-5">
+         <div class="col-sm-8 col-lg-7 mt-5">
             <h4 class="font-weight-bold text-center cabecera sombra border roboto py-3">Generar Emisión</h4>
             <div class="card sombra">
                <div class="card-body text-center detalle roboto">
@@ -18,6 +18,34 @@
                   </div>
                   <div *ngIf="swgenerando" class="mt-2 progress">
                      <div class="progress-bar" [ngStyle]="{ 'width.%': progreso }">{{ progreso / 100 | percent:'1.2-2'}}
+                     </div>
+                  </div>
+                  <small *ngIf="resumenGeneracion" class="d-block mt-3">{{ resumenGeneracion }}</small>
+                  <div *ngIf="rutasPendientes.length > 0" class="mt-4 text-left">
+                     <h6 class="font-weight-bold">Rutas pendientes</h6>
+                     <div class="table-responsive">
+                        <table class="table table-sm table-bordered tabla-rutas-pendientes mb-0">
+                           <thead>
+                              <tr>
+                                 <th>Ruta</th>
+                                 <th>DescripciÃ³n</th>
+                                 <th>Esperadas</th>
+                                 <th>Existentes</th>
+                                 <th>Creadas</th>
+                                 <th>Faltan</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <tr *ngFor="let ruta of rutasPendientes">
+                                 <td>{{ ruta.codigoRuta }}</td>
+                                 <td>{{ ruta.nombreRuta }}</td>
+                                 <td>{{ ruta.abonadosEsperados }}</td>
+                                 <td>{{ ruta.lecturasExistentes }}</td>
+                                 <td>{{ ruta.lecturasCreadas }}</td>
+                                 <td class="font-weight-bold text-danger">{{ ruta.lecturasPendientes }}</td>
+                              </tr>
+                           </tbody>
+                        </table>
                      </div>
                   </div>
                </div>

@@ -12,3 +12,12 @@
   align-items: center;
   justify-content: center;
 }
+
+.tabla-rutas-pendientes {
+  background-color: #fff;
+}
+
+.tabla-rutas-pendientes th,
+.tabla-rutas-pendientes td {
+  vertical-align: middle;
+}

@@ -39,7 +39,7 @@
         </button>
         <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#addEmision" (click)="nuevo()"
-            [disabled]="cerrado == 0">
+            [disabled]="cerrado == 6">
             <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
           <button class="dropdown-item" type="button" (click)="emisionIndividual()">
             <i class="bi-file-earmark-plus"></i>&nbsp; Emisión individual</button>
@@ -120,6 +120,8 @@
               <i class="bi bi-printer"></i>&nbsp; Cerrar Rutas</button>
             <button class="dropdown-item" (click)="confirmarReabrirEmision()" [disabled]="estado == 0" type="button">
               <i class="bi bi-arrow-counterclockwise"></i>&nbsp; Reabrir emisión</button>
+            <button class="dropdown-item" type="button" (click)="validarORevalidarApertura()" [disabled]="!showDiv || !idemision">
+              <i class="bi bi-patch-check"></i>&nbsp; Validar apertura</button>
             <button class="dropdown-item text-danger" type="button" data-toggle="modal" data-target="#anularEmisionModal"
               (click)="abrirModalAnularEmision()" [disabled]="!canAnularEmision()">
               <i class="fa fa-ban"></i>&nbsp; Anular emisión</button>

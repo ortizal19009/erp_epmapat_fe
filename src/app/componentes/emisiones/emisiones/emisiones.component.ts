@@ -1,4 +1,5 @@
 ﻿import { Component, OnInit } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { EmisionService } from 'src/app/servicios/emision.service';
@@ -909,6 +910,110 @@ export class EmisionesComponent implements OnInit {
   generar() {
     sessionStorage.setItem('idemisionToGenerar', this.idemision.toString());
     this.router.navigate(['gene-emision']);
+  }
+
+  async validarORevalidarApertura() {
+    if (!this.idemision) {
+      this.authService.swal('warning', 'Selecciona primero una emisión.');
+      return;
+    }
+
+    this.s_loading.showLoading();
+    try {
+      const resp = await firstValueFrom(
+        this.emiService.validarApertura(this.idemision)
+      ) as EmisionGeneracionResponse;
+
+      this.s_loading.hideLoading();
+
+      const rutasPendientes = (resp.rutas || []).filter(
+        (ruta) => ruta.lecturasPendientes > 0
+      );
+
+      const detalleRutas = rutasPendientes.length
+        ? `<div style="max-height:220px;overflow:auto;text-align:left;font-size:13px;">
+            ${rutasPendientes
+              .slice(0, 14)
+              .map(
+                (ruta) =>
+                  `<div><strong>${ruta.codigoRuta}</strong> - ${ruta.nombreRuta}: ` +
+                  `esperadas ${ruta.abonadosEsperados}, existentes ${ruta.lecturasExistentes}, ` +
+                  `faltan ${ruta.lecturasPendientes}</div>`
+              )
+              .join('')}
+            ${rutasPendientes.length > 14 ? `<div class="mt-2">Y ${rutasPendientes.length - 14} ruta(s) adicional(es).</div>` : ''}
+          </div>`
+        : '<div>Todas las rutas de la emisión están completas.</div>';
+
+      const result = await Swal.fire({
+        icon: rutasPendientes.length ? 'warning' : 'success',
+        title: rutasPendientes.length
+          ? 'Apertura incompleta'
+          : 'Apertura validada',
+        html:
+          `<div class="text-left">` +
+          `<p><strong>Emisión:</strong> ${resp.emision}</p>` +
+          `<p><strong>Rutas esperadas:</strong> ${resp.totalRutasEsperadas}</p>` +
+          `<p><strong>Rutas completas:</strong> ${resp.rutasCompletas}</p>` +
+          `<p><strong>Rutas pendientes:</strong> ${resp.rutasPendientes}</p>` +
+          `<p><strong>Lecturas esperadas:</strong> ${resp.totalLecturasEsperadas}</p>` +
+          `<p><strong>Lecturas existentes:</strong> ${resp.lecturasExistentes}</p>` +
+          `<p><strong>Lecturas pendientes:</strong> ${resp.lecturasPendientes}</p>` +
+          `<hr>` +
+          detalleRutas +
+          `</div>`,
+        showCancelButton: rutasPendientes.length > 0,
+        confirmButtonText: rutasPendientes.length
+          ? 'Completar pendientes'
+          : 'Aceptar',
+        cancelButtonText: 'Cerrar',
+        width: 700,
+      });
+
+      if (result.isConfirmed && rutasPendientes.length > 0) {
+        await this.completarPendientesApertura();
+      }
+    } catch (err) {
+      this.s_loading.hideLoading();
+      console.error('Error validando apertura de emisión', err);
+      Swal.fire({
+        icon: 'error',
+        title: 'No se pudo validar',
+        text: 'Ocurrió un problema al validar la apertura de la emisión.',
+      });
+    }
+  }
+
+  private async completarPendientesApertura() {
+    this.s_loading.showLoading();
+    try {
+      const resp = await firstValueFrom(
+        this.emiService.generarPendientes(this.idemision, this.authService.idusuario)
+      ) as EmisionGeneracionResponse;
+
+      this.s_loading.hideLoading();
+      await Swal.fire({
+        icon: resp.lecturasPendientes > 0 ? 'warning' : 'success',
+        title: resp.lecturasPendientes > 0 ? 'Revalidación parcial' : 'Apertura completada',
+        text:
+          `Rutas completas: ${resp.rutasCompletas}/${resp.totalRutasEsperadas}. ` +
+          `Lecturas creadas: ${resp.lecturasCreadas}. ` +
+          `Lecturas pendientes: ${resp.lecturasPendientes}.`,
+      });
+      this.info({
+        idemision: this.idemision,
+        emision: this.selEmision,
+        estado: this.estado,
+      }, +(sessionStorage.getItem('indiEmi') || 0));
+    } catch (err) {
+      this.s_loading.hideLoading();
+      console.error('Error completando pendientes de apertura', err);
+      Swal.fire({
+        icon: 'error',
+        title: 'No se pudo completar',
+        text: this.getGeneracionPendientesErrorMessage(err),
+      });
+    }
   }
 
   nogenerar() {
@@ -3540,6 +3645,48 @@ export class EmisionesComponent implements OnInit {
     this.s_loading.hideLoading();
   }
 
+  private getGeneracionPendientesErrorMessage(err: any): string {
+    const backendMessage = this.extractGeneracionPendientesErrorText(err);
+    if (
+      backendMessage.includes('query did not return a unique result: 2') ||
+      backendMessage.includes('nonuniqueresultexception') ||
+      backendMessage.includes('incorrectresultsizedataaccessexception')
+    ) {
+      return 'La apertura no pudo completarse porque el backend encontró facturas o lecturas duplicadas para la misma emisión. Es necesario corregir esos duplicados antes de reintentar.';
+    }
+
+    return (
+      err?.error?.message ||
+      err?.error?.detalle ||
+      err?.message ||
+      'Ocurrió un problema al completar los pendientes de la apertura.'
+    );
+  }
+
+  private extractGeneracionPendientesErrorText(err: any): string {
+    if (!err) {
+      return '';
+    }
+
+    if (typeof err === 'string') {
+      return err.toLowerCase();
+    }
+
+    if (err instanceof HttpErrorResponse) {
+      const payload =
+        typeof err.error === 'string'
+          ? err.error
+          : JSON.stringify(err.error || {});
+      return `${err.message || ''} ${payload}`.toLowerCase();
+    }
+
+    try {
+      return JSON.stringify(err).toLowerCase();
+    } catch {
+      return String(err).toLowerCase();
+    }
+  }
+
 
 }
 
@@ -3656,5 +3803,32 @@ interface EmisionAuditViewRow {
   lecturas: any[];
   facturas: any[];
   documentos: EmisionAuditDocumentoView[];
+}
+
+interface EmisionGeneracionRutaDetalle {
+  idruta: number;
+  codigoRuta: string;
+  nombreRuta: string;
+  idrutaxemision: number;
+  rutaCreada: boolean;
+  abonadosEsperados: number;
+  lecturasExistentes: number;
+  lecturasCreadas: number;
+  lecturasPendientes: number;
+}
+
+interface EmisionGeneracionResponse {
+  idemision: number;
+  emision: string;
+  totalRutasEsperadas: number;
+  rutasExistentes: number;
+  rutasCreadas: number;
+  rutasCompletas: number;
+  rutasPendientes: number;
+  totalLecturasEsperadas: number;
+  lecturasExistentes: number;
+  lecturasCreadas: number;
+  lecturasPendientes: number;
+  rutas: EmisionGeneracionRutaDetalle[];
 }
 
