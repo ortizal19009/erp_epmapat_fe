@@ -309,6 +309,47 @@ export class ListarAbonadosComponent implements OnInit {
     this.importExcelInputRef?.nativeElement.click();
   }
 
+  descargarPlantillaGeolocalizacion() {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Geolocalizacion');
+
+    worksheet.columns = [
+      { header: 'idabonado', key: 'idabonado', width: 18 },
+      { header: 'geolocalizacion', key: 'geolocalizacion', width: 28 },
+      { header: 'observacion', key: 'observacion', width: 52 },
+    ];
+
+    const headerRow = worksheet.getRow(1);
+    headerRow.eachCell((cell) => {
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '1F4E78' } };
+      cell.font = { bold: true, color: { argb: 'FFFFFF' } };
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+    });
+
+    worksheet.addRow({
+      idabonado: 1001,
+      geolocalizacion: '[-0.22985,-78.52495]',
+      observacion: 'Ejemplo de formato. Reemplace estos datos con los reales.',
+    });
+    worksheet.addRow({
+      idabonado: 1002,
+      geolocalizacion: '[-0.21543,-78.49781]',
+      observacion: 'Use la cuenta del abonado y la geolocalizacion en formato [latitud,longitud].',
+    });
+
+    workbook.xlsx.writeBuffer().then((buffer) => {
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'plantilla-importacion-geolocalizacion.xlsx';
+      a.click();
+      window.URL.revokeObjectURL(url);
+    });
+  }
+
   async importarGeolocalizaciones(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -655,7 +696,7 @@ export class ListarAbonadosComponent implements OnInit {
       const geoRaw = row.getCell(2).value;
 
       const idabonado = this.parseNumeroExcel(idRaw);
-      const geolocalizacion = this.parseTextoExcel(geoRaw);
+      const geolocalizacion = this.normalizarGeolocalizacion(this.parseTextoExcel(geoRaw));
 
       if (rowNumber === 1) {
         const encabezadoId = this.parseTextoExcel(idRaw).toLowerCase();
@@ -669,6 +710,11 @@ export class ListarAbonadosComponent implements OnInit {
 
       if (!idabonado || !geolocalizacion) {
         this.detalleImportacion.push(`Fila ${rowNumber}: idabonado o geolocalización inválidos.`);
+        return;
+      }
+
+      if (!this.esGeolocalizacionValida(geolocalizacion)) {
+        this.detalleImportacion.push(`Fila ${rowNumber}: formato de geolocalizaciÃ³n invÃ¡lido. Use [latitud,longitud].`);
         return;
       }
 
@@ -706,8 +752,23 @@ export class ListarAbonadosComponent implements OnInit {
   private async generarPreviewImportacion(
     filas: Array<{ idabonado: number; geolocalizacion: string }>
   ): Promise<PreviewImportacionRow[]> {
+    const cuentasProcesadas = new Set<number>();
     const preview = await Promise.all(
       filas.map(async (fila, index) => {
+        if (cuentasProcesadas.has(fila.idabonado)) {
+          return {
+            fila: index + 2,
+            idabonado: fila.idabonado,
+            nombre: '',
+            geolocalizacionActual: '',
+            geolocalizacionNueva: fila.geolocalizacion,
+            estado: 'ERROR',
+            mensaje: 'Cuenta duplicada en el archivo. Deje una sola fila por abonado.',
+          } as PreviewImportacionRow;
+        }
+
+        cuentasProcesadas.add(fila.idabonado);
+
         try {
           const abonado: any = await firstValueFrom(this.aboService.getById(fila.idabonado));
           const geolocalizacionActual = this.parseTextoExcel(abonado?.geolocalizacion);
@@ -752,6 +813,27 @@ export class ListarAbonadosComponent implements OnInit {
     if (typeof value === 'object' && 'text' in value) return String((value as any).text || '').trim();
     if (typeof value === 'object' && 'result' in value) return String((value as any).result || '').trim();
     return String(value).trim();
+  }
+
+  private normalizarGeolocalizacion(value: string): string {
+    return value.replace(/\s+/g, '');
+  }
+
+  private esGeolocalizacionValida(value: string): boolean {
+    const match = value.match(/^\[(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)\]$/);
+    if (!match) return false;
+
+    const latitud = Number(match[1]);
+    const longitud = Number(match[2]);
+
+    return (
+      Number.isFinite(latitud) &&
+      Number.isFinite(longitud) &&
+      latitud >= -90 &&
+      latitud <= 90 &&
+      longitud >= -180 &&
+      longitud <= 180
+    );
   }
 }
 

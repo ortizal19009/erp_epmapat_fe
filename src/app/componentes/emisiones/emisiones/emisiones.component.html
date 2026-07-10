@@ -122,6 +122,9 @@
               <i class="bi bi-arrow-counterclockwise"></i>&nbsp; Reabrir emisión</button>
             <button class="dropdown-item" type="button" (click)="validarORevalidarApertura()" [disabled]="!showDiv || !idemision">
               <i class="bi bi-patch-check"></i>&nbsp; Validar apertura</button>
+            <button class="dropdown-item" type="button" *ngIf="authService.idusuario === 1"
+              (click)="generarFacturasCabeceraUltimaEmisionAbierta()">
+              <i class="bi bi-file-earmark-medical"></i>&nbsp; Generar facturas cabecera</button>
             <button class="dropdown-item text-danger" type="button" data-toggle="modal" data-target="#anularEmisionModal"
               (click)="abrirModalAnularEmision()" [disabled]="!canAnularEmision()">
               <i class="fa fa-ban"></i>&nbsp; Anular emisión</button>

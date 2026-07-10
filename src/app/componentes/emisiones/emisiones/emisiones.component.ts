@@ -984,6 +984,71 @@ export class EmisionesComponent implements OnInit {
     }
   }
 
+  async generarFacturasCabeceraUltimaEmisionAbierta() {
+    if (this.authService.idusuario !== 1) {
+      this.authService.swal('warning', 'Esta opción solo está habilitada para el usuario 1.');
+      return;
+    }
+
+    const result = await Swal.fire({
+      icon: 'question',
+      title: 'Generar facturas cabecera',
+      text: 'Se revisará la última emisión abierta y se crearán facturas vacías para las lecturas que no tienen idfactura. ¿Deseas continuar?',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, generar',
+      cancelButtonText: 'Cancelar',
+    });
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
+    this.s_loading.showLoading();
+    try {
+      const resp = await firstValueFrom(
+        this.emiService.generarFacturasCabeceraUltimaEmisionAbierta(this.authService.idusuario)
+      );
+
+      this.s_loading.hideLoading();
+      await Swal.fire({
+        icon: 'success',
+        title: 'Proceso completado',
+        html:
+          `<div class="text-left">` +
+          `<p><strong>Emisión:</strong> ${resp?.emision ?? '-'}</p>` +
+          `<p><strong>ID emisión:</strong> ${resp?.idemision ?? '-'}</p>` +
+          `<p><strong>Rutas recorridas:</strong> ${resp?.rutasRecorridas ?? 0}</p>` +
+          `<p><strong>Lecturas revisadas:</strong> ${resp?.lecturasRevisadas ?? 0}</p>` +
+          `<p><strong>Facturas cabecera creadas:</strong> ${resp?.facturasCreadas ?? 0}</p>` +
+          `</div>`,
+      });
+
+      this.buscar();
+      if (this.idemision && Number(resp?.idemision) === Number(this.idemision)) {
+        this.info(
+          {
+            idemision: this.idemision,
+            emision: this.selEmision,
+            estado: this.estado,
+          },
+          +(sessionStorage.getItem('indiEmi') || 0)
+        );
+      }
+    } catch (err: any) {
+      this.s_loading.hideLoading();
+      console.error('Error generando facturas cabecera de la última emisión abierta', err);
+      Swal.fire({
+        icon: 'error',
+        title: 'No se pudo completar',
+        text:
+          err?.error?.message ||
+          err?.error?.detalle ||
+          err?.message ||
+          'Ocurrió un problema al generar facturas cabecera para la última emisión abierta.',
+      });
+    }
+  }
+
   private async completarPendientesApertura() {
     this.s_loading.showLoading();
     try {

@@ -73,6 +73,13 @@ export class EmisionService {
     return this.http.get<any>(`${baseUrl}/${idemision}/validar-apertura`);
   }
 
+  generarFacturasCabeceraUltimaEmisionAbierta(idusuario: number) {
+    return this.http.post<any>(
+      `${baseUrl}/ultima-abierta/generar-facturas-cabecera?idusuario=${idusuario}`,
+      {}
+    );
+  }
+
   reabrirEmision(idemision: number, usumodi: number) {
     return this.http.post<any>(`${baseUrl}/${idemision}/reabrir?usumodi=${usumodi}`, {});
   }

@@ -394,6 +394,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
         this.facturasTotalElements = response?.totalElements ?? 0;
         this._facturas = await Promise.all(
           contenido.map(async (item: any) => {
+            console.log('Procesando factura:', item);
             const factura = { ...item };
             const feccrea = await this.getEmisionoByFactura(factura.idfactura);
             if (feccrea != null) {
