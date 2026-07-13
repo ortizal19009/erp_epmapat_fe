@@ -644,6 +644,7 @@ export class AguatramComponent implements OnInit {
 
    private async enviarCorreoComprobante(aguatramite: Aguatramite, correos: string[]): Promise<void> {
       if (!correos?.length) return;
+      try {
 
       const comprobante = await this.s_tramiteagua.buildComprobanteTramiteBlob(aguatramite);
       const attachments: OutboxAttachment[] = [
@@ -666,6 +667,10 @@ export class AguatramComponent implements OnInit {
       );
 
       this.swal('success', `Correo enviado a: ${correos.join(', ')}`);
+      } catch (error: any) {
+         console.error('No se pudo enviar el correo del trámite', error);
+         this.swal('warning', `Trámite guardado. Correo no enviado: ${this.extraerMensajeCorreo(error)}`);
+      }
    }
 
    private parseRecipients(value: string): string[] {
@@ -727,6 +732,16 @@ export class AguatramComponent implements OnInit {
             </div>
          </div>
       `;
+   }
+
+   private extraerMensajeCorreo(error: any): string {
+      if (typeof error?.error === 'string' && error.error.trim()) {
+         return error.error.trim();
+      }
+      if (typeof error?.message === 'string' && error.message.trim()) {
+         return error.message.trim();
+      }
+      return 'error no identificado';
    }
 
    swal(icon: any, mensaje: any) {

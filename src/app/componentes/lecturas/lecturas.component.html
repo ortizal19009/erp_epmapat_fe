@@ -27,10 +27,12 @@
           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalCalcular"
             [ngClass]="{'disabled' : rutaxemision.estado == 1}"><i class="bi-calculator"></i>
             <span>&nbsp; Calcular</span></button>
+          <button class="dropdown-item" type="button" (click)="verAnalisisRuta()">
+            <i class="bi bi-clipboard-data"></i>&nbsp; Analisis de ruta</button>
           <!--        <button class="dropdown-item" *ngIf="idusuario===1" type="button" (click) = "calcularMultaBasura()"><i class="bi-calculator"></i>
             <span>&nbsp; Calcular Multa basura</span></button> -->
-          <button class="dropdown-item" type="button" (click)="mostrarModal = true" data-toggle="modal"
-            data-target="#modalCerrar" [ngClass]="{'disabled' : rutaxemision.estado == 1 || tieneLecturasNegativas}"
+          <button class="dropdown-item" type="button" (click)="confirmarCierreRuta()"
+            [ngClass]="{'disabled' : rutaxemision.estado == 1 || tieneLecturasNegativas}"
             [disabled]="rutaxemision.estado == 1 || tieneLecturasNegativas">
             <i class="bi bi-door-closed"></i>&nbsp; Cerrar emisión ruta</button>
           <button class="dropdown-item" type="button" (click)="imprimir()">
@@ -46,6 +48,8 @@
     </div>
   </div>
 </div>
+
+<button id="abrirModalCerrarRuta" type="button" data-toggle="modal" data-target="#modalCerrar" class="d-none"></button>
 
 <div class="container-fluid">
   <div class="row mb-0">
@@ -74,10 +78,11 @@
         </thead>
         <tbody class="detalle">
           <tr *ngFor="let lectura of _lecturas | filter: filtro; let i=index" class="fila"
-            [ngClass]="{'fila-negativa': hasNegativeConsumption(lectura), 'fila-consumo-alto': !hasNegativeConsumption(lectura) && hasHighConsumptionVsAverage(lectura)}">
+            [ngClass]="getAlertClass(lectura)">
             <td class="small text-center font-weight-bold"><i class="bi-bookmark-check-fill check"
                 *ngIf="i == antIndice"></i><i class="bi bi-exclamation-triangle-fill text-warning mr-1"
-                *ngIf="!hasNegativeConsumption(lectura) && hasHighConsumptionVsAverage(lectura)"></i>{{i+1}}</td>
+                *ngIf="getAlertBadge(lectura)"></i>{{i+1}}
+            </td>
             <td class="text-center">{{ lectura?.idabonado_abonados?.idabonado ?? '' }}</td>
             <td class="description">{{ lectura?.idabonado_abonados?.idcliente_clientes?.nombre ?? 'Sin nombre' }}</td>
             <td class="">{{ lectura?.idabonado_abonados?.idcategoria_categorias?.descripcion ?? '' }}</td>
@@ -109,6 +114,8 @@
                   <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalHistorial"
                     (click)="setIdabonado(lectura, i)">
                     <i class="bi bi-file-minus"></i>&nbsp; Historial consumo</button>
+                  <button class="dropdown-item" type="button" (click)="mostrarInfoLectura(lectura)">
+                    <i class="bi bi-info-circle"></i>&nbsp; Info</button>
                   <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modalFotoLectura"
                     [disabled]="!getFotoPath(lectura)" (click)="abrirFotoLectura(lectura)">
                     <i class="bi bi-image"></i>&nbsp; Ver foto lectura</button>

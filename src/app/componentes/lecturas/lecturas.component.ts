@@ -75,6 +75,7 @@ export class LecturasComponent implements OnInit {
   idusuario: number;
   novedades: any;
   tieneLecturasNegativas: boolean = false;
+  tieneAlertasRuta: boolean = false;
   fotoLecturaUrl: string | null = null;
   fotoLecturaTitulo: string = '';
 
@@ -117,10 +118,11 @@ export class LecturasComponent implements OnInit {
         this._lecturas = resp;
         this.abonados = this._lecturas.length;
         this.total();
-        const lecturasNegativas = this.getLecturasNegativas();
-        this.tieneLecturasNegativas = lecturasNegativas.length > 0;
-        if (lecturasNegativas.length > 0) {
-          void this.mostrarLecturasNegativas(lecturasNegativas);
+        const alertas = this.getAlertasRuta();
+        this.tieneLecturasNegativas = alertas.negativas.length > 0;
+        this.tieneAlertasRuta = alertas.total > 0;
+        if (alertas.total > 0) {
+          void this.mostrarAnalisisRuta(alertas);
         }
       },
       error: (err) => console.error(err.error),
@@ -363,8 +365,253 @@ export class LecturasComponent implements OnInit {
     return consumo > promedio * 2;
   }
 
+  isResidentialHighConsumption(lectura: any): boolean {
+    const consumo = this.getConsumo(lectura);
+    if (consumo <= 70) return false;
+
+    const descripcion = String(
+      lectura?.idabonado_abonados?.idcategoria_categorias?.descripcion || ''
+    ).toLowerCase();
+    const idcategoria = Number(
+      lectura?.idabonado_abonados?.idcategoria_categorias?.idcategoria || 0
+    );
+
+    return descripcion.includes('resid') || idcategoria === 1;
+  }
+
+  isSpecialAdultoMayorHighConsumption(lectura: any): boolean {
+    const consumo = this.getConsumo(lectura);
+    const adultomayor = !!lectura?.idabonado_abonados?.adultomayor;
+    const descripcion = String(
+      lectura?.idabonado_abonados?.idcategoria_categorias?.descripcion || ''
+    ).toLowerCase();
+    const idcategoria = Number(
+      lectura?.idabonado_abonados?.idcategoria_categorias?.idcategoria || 0
+    );
+    const esEspecial = descripcion.includes('especial') || idcategoria === 9;
+
+    return adultomayor && esEspecial && consumo > 34;
+  }
+
+  getAlertClass(lectura: any): string {
+    if (this.hasNegativeConsumption(lectura)) return 'fila-negativa';
+    if (this.isSpecialAdultoMayorHighConsumption(lectura)) return 'fila-adulto-mayor';
+    if (this.isResidentialHighConsumption(lectura)) return 'fila-residencial-alta';
+    if (this.hasHighConsumptionVsAverage(lectura)) return 'fila-consumo-alto';
+    return '';
+  }
+
+  getAlertBadge(lectura: any): string {
+    if (this.hasNegativeConsumption(lectura)) return 'NEG';
+    if (this.isSpecialAdultoMayorHighConsumption(lectura)) return 'AM';
+    if (this.isResidentialHighConsumption(lectura)) return '70+';
+    if (this.hasHighConsumptionVsAverage(lectura)) return 'PROM';
+    return '';
+  }
+
+  getAlertDescription(lectura: any): string {
+    const consumo = this.getConsumo(lectura);
+    const promedio = Number(lectura?.idabonado_abonados?.promedio || 0);
+
+    if (this.hasNegativeConsumption(lectura)) {
+      return `Consumo negativo: ${consumo} m3`;
+    }
+    if (this.isSpecialAdultoMayorHighConsumption(lectura)) {
+      return `Especial adulto mayor supera 34 m3 (${consumo} m3)`;
+    }
+    if (this.isResidentialHighConsumption(lectura)) {
+      return `Residencial supera 70 m3 (${consumo} m3)`;
+    }
+    if (this.hasHighConsumptionVsAverage(lectura)) {
+      return `Consumo sobre promedio: ${consumo} m3 vs ${promedio} m3`;
+    }
+    return '';
+  }
+
+  async mostrarInfoLectura(lectura: any): Promise<void> {
+    const mensaje = this.getAlertDescription(lectura);
+    if (!mensaje) {
+      await Swal.fire({
+        icon: 'info',
+        title: 'Sin novedad de control',
+        text: 'Esta lectura no presenta alertas especiales.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
+    const cuenta = lectura?.idabonado_abonados?.idabonado ?? '';
+    const abonado = lectura?.idabonado_abonados?.idcliente_clientes?.nombre ?? 'Sin nombre';
+    const categoria = this.getCategoriaDescripcion(lectura);
+    const consumo = this.getConsumo(lectura);
+    const promedio = Number(lectura?.idabonado_abonados?.promedio || 0);
+
+    await Swal.fire({
+      icon: 'info',
+      title: `Info de lectura${cuenta ? ` - Cuenta ${cuenta}` : ''}`,
+      html:
+        `<div style="text-align:left;font-size:13px;">` +
+        `<b>Abonado:</b> ${abonado}<br>` +
+        `<b>Categoria:</b> ${categoria}<br>` +
+        `<b>Consumo:</b> ${consumo} m3<br>` +
+        `<b>Promedio:</b> ${promedio} m3<br><br>` +
+        `<b>Novedad:</b> ${mensaje}` +
+        `</div>`,
+      confirmButtonText: 'Aceptar',
+      width: '560px',
+    });
+  }
+
   private getLecturasNegativas(): any[] {
     return (this._lecturas || []).filter((lectura: any) => this.getConsumo(lectura) < 0);
+  }
+
+  private getAlertasRuta(): {
+    negativas: any[];
+    sobrePromedio: any[];
+    residencialesAltas: any[];
+    adultoMayorEspecial: any[];
+    total: number;
+  } {
+    const lecturas = this._lecturas || [];
+    const negativas = lecturas.filter((lectura: any) => this.hasNegativeConsumption(lectura));
+    const sobrePromedio = lecturas.filter((lectura: any) => !this.hasNegativeConsumption(lectura) && this.hasHighConsumptionVsAverage(lectura));
+    const residencialesAltas = lecturas.filter((lectura: any) => this.isResidentialHighConsumption(lectura));
+    const adultoMayorEspecial = lecturas.filter((lectura: any) => this.isSpecialAdultoMayorHighConsumption(lectura));
+
+    return {
+      negativas,
+      sobrePromedio,
+      residencialesAltas,
+      adultoMayorEspecial,
+      total:
+        negativas.length +
+        sobrePromedio.length +
+        residencialesAltas.length +
+        adultoMayorEspecial.length,
+    };
+  }
+
+  async verAnalisisRuta(): Promise<void> {
+    const alertas = this.getAlertasRuta();
+    this.tieneLecturasNegativas = alertas.negativas.length > 0;
+    this.tieneAlertasRuta = alertas.total > 0;
+
+    if (alertas.total === 0) {
+      await Swal.fire({
+        icon: 'success',
+        title: 'Ruta sin novedades de control',
+        text: 'No hay consumos negativos ni alertas especiales en esta ruta.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
+    await this.mostrarAnalisisRuta(alertas);
+  }
+
+  async confirmarCierreRuta(): Promise<void> {
+    const alertas = this.getAlertasRuta();
+    const html =
+      `<div style="text-align:left;font-size:13px;">` +
+      `<b>Emision:</b> ${this.rutaxemision?.emision || ''}<br>` +
+      `<b>Ruta:</b> ${this.rutaxemision?.ruta || ''}<br>` +
+      `<b>Abonados:</b> ${this.abonados || 0}<br>` +
+      `<b>Consumo total:</b> ${this.sumtotal || 0} m3<br>` +
+      `<b>Lecturas con consumo negativo:</b> ${alertas.negativas.length}<br>` +
+      `<b>Lecturas sobre promedio:</b> ${alertas.sobrePromedio.length}<br>` +
+      `<b>Residenciales mayores a 70 m3:</b> ${alertas.residencialesAltas.length}<br>` +
+      `<b>Especial adulto mayor mayores a 34 m3:</b> ${alertas.adultoMayorEspecial.length}<br><br>` +
+      `Verifique cuidadosamente estas novedades antes de cerrar la ruta.` +
+      `</div>`;
+
+    const result = await Swal.fire({
+      icon: 'warning',
+      title: 'Confirmar cierre de ruta',
+      html,
+      confirmButtonText: 'Continuar al cierre',
+      cancelButtonText: 'Cancelar',
+      showCancelButton: true,
+      width: '620px',
+    });
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
+    this.mostrarModal = true;
+    setTimeout(() => {
+      const boton = document.getElementById('abrirModalCerrarRuta') as HTMLButtonElement | null;
+      boton?.click();
+    }, 0);
+  }
+
+  private async mostrarAnalisisRuta(alertas: {
+    negativas: any[];
+    sobrePromedio: any[];
+    residencialesAltas: any[];
+    adultoMayorEspecial: any[];
+    total: number;
+  }): Promise<void> {
+    const resumen = [
+      `Lecturas con consumo negativo: <b>${alertas.negativas.length}</b>`,
+      `Lecturas sobre promedio: <b>${alertas.sobrePromedio.length}</b>`,
+      `Residenciales mayores a 70 m3: <b>${alertas.residencialesAltas.length}</b>`,
+      `Especial adulto mayor mayores a 34 m3: <b>${alertas.adultoMayorEspecial.length}</b>`,
+    ].join('<br>');
+
+    const detalle = this.construirDetalleAnalisisRuta(alertas);
+    const result = await Swal.fire({
+      icon: 'info',
+      title: 'Analisis de ruta',
+      html:
+        `<div style="text-align:left;font-size:13px;">${resumen}</div>` +
+        `<hr><div style="text-align:left;max-height:320px;overflow:auto;font-size:13px;">${detalle}</div>`,
+      confirmButtonText: 'Revisar',
+      showDenyButton: true,
+      denyButtonText: 'Imprimir reporte',
+      width: '720px',
+    });
+
+    if (result.isDenied) {
+      this.imprimirLecturasNegativas(alertas);
+    }
+  }
+
+  private construirDetalleAnalisisRuta(alertas: {
+    negativas: any[];
+    sobrePromedio: any[];
+    residencialesAltas: any[];
+    adultoMayorEspecial: any[];
+    total: number;
+  }): string {
+    const bloques = [
+      this.construirBloqueAnalisis('Consumo negativo', alertas.negativas),
+      this.construirBloqueAnalisis('Consumo sobre promedio', alertas.sobrePromedio),
+      this.construirBloqueAnalisis('Residenciales mayores a 70 m3', alertas.residencialesAltas),
+      this.construirBloqueAnalisis('Especial adulto mayor mayores a 34 m3', alertas.adultoMayorEspecial),
+    ].filter(Boolean);
+
+    return bloques.join('<br>');
+  }
+
+  private construirBloqueAnalisis(titulo: string, lecturas: any[]): string {
+    if (!lecturas.length) return '';
+
+    const items = lecturas
+      .slice(0, 8)
+      .map((lectura: any, index: number) => {
+        const cuenta = lectura?.idabonado_abonados?.idabonado ?? 'S/N';
+        const nombre = lectura?.idabonado_abonados?.idcliente_clientes?.nombre ?? 'Sin nombre';
+        const consumo = this.getConsumo(lectura);
+        const promedio = Number(lectura?.idabonado_abonados?.promedio || 0);
+        return `${index + 1}. Cuenta ${cuenta} - ${nombre}<br>Consumo: ${consumo} m3 | Promedio: ${promedio} m3`;
+      })
+      .join('<br><br>');
+
+    const restantes = lecturas.length - Math.min(lecturas.length, 8);
+    const extra = restantes > 0 ? `<br><br>Y ${restantes} lectura(s) adicional(es).` : '';
+    return `<b>${titulo} (${lecturas.length})</b><br>${items}${extra}`;
   }
 
   private async mostrarLecturasNegativas(lecturasNegativas: any[]): Promise<void> {
@@ -394,19 +641,28 @@ export class LecturasComponent implements OnInit {
     });
 
     if (result.isDenied) {
-      this.imprimirLecturasNegativas(lecturasNegativas);
+      this.imprimirLecturasNegativas(this.getAlertasRuta());
     }
   }
 
-  private imprimirLecturasNegativas(lecturasNegativas: any[]): void {
+  private imprimirLecturasNegativas(alertas: {
+    negativas: any[];
+    sobrePromedio: any[];
+    residencialesAltas: any[];
+    adultoMayorEspecial: any[];
+    total: number;
+  }): void {
     const doc = new jsPDF('p', 'pt', 'a4');
-    this.pdfService.header('Lecturas con consumo negativo', doc);
+    this.pdfService.header('Reporte de control de lecturas', doc);
 
     const resumen = [
       ['Emision', `${this.rutaxemision?.emision || ''}`],
       ['Ruta', `${this.rutaxemision?.ruta || ''}`],
       ['Codigo', `${this.rutaxemision?.codigo || ''}`],
-      ['Total cuentas', `${lecturasNegativas.length}`],
+      ['Consumo negativo', `${alertas.negativas.length}`],
+      ['Sobre promedio', `${alertas.sobrePromedio.length}`],
+      ['Residenciales > 70 m3', `${alertas.residencialesAltas.length}`],
+      ['Esp. adulto mayor > 34 m3', `${alertas.adultoMayorEspecial.length}`],
     ];
 
     autoTable(doc, {
@@ -420,37 +676,62 @@ export class LecturasComponent implements OnInit {
       },
     });
 
-    const body = lecturasNegativas.map((lectura: any, index: number) => {
-      const cuenta = lectura?.idabonado_abonados?.idabonado ?? 'S/N';
-      const abonado = lectura?.idabonado_abonados?.idcliente_clientes?.nombre ?? 'Sin nombre';
-      const anterior = Number(lectura?.lecturaanterior || 0);
-      const actual = Number(lectura?.lecturaactual || 0);
-      const consumo = this.getConsumo(lectura);
-
-      return [index + 1, cuenta, abonado, anterior, actual, consumo];
-    });
-
-    autoTable(doc, {
-      startY: (doc as any).lastAutoTable.finalY + 12,
-      theme: 'grid',
-      head: [['#', 'Cuenta', 'Abonado', 'Anterior', 'Actual', 'M3']],
-      body,
-      styles: { fontSize: 8, cellPadding: 3 },
-      headStyles: { halign: 'center' },
-      columnStyles: {
-        0: { halign: 'center', cellWidth: 28 },
-        1: { halign: 'center', cellWidth: 55 },
-        2: { cellWidth: 210 },
-        3: { halign: 'right', cellWidth: 60 },
-        4: { halign: 'right', cellWidth: 60 },
-        5: { halign: 'right', cellWidth: 50 },
-      },
-    });
+    let startY = (doc as any).lastAutoTable.finalY + 12;
+    startY = this.agregarTablaAlertaPdf(doc, startY, 'Lecturas con consumo negativo', alertas.negativas);
+    startY = this.agregarTablaAlertaPdf(doc, startY, 'Lecturas con consumo sobre promedio', alertas.sobrePromedio);
+    startY = this.agregarTablaAlertaPdf(doc, startY, 'Cuentas residenciales mayores a 70 m3', alertas.residencialesAltas);
+    this.agregarTablaAlertaPdf(doc, startY, 'Especial adulto mayor mayores a 34 m3', alertas.adultoMayorEspecial);
 
     this.pdfService.setfooter(doc);
     const blob = doc.output('blob');
     const url = URL.createObjectURL(blob);
     window.open(url, '_blank');
+  }
+
+  private agregarTablaAlertaPdf(doc: jsPDF, startY: number, titulo: string, lecturas: any[]): number {
+    if (!lecturas.length) {
+      return startY;
+    }
+
+    autoTable(doc, {
+      startY,
+      theme: 'plain',
+      body: [[titulo]],
+      styles: { fontSize: 10, fontStyle: 'bold', textColor: [33, 37, 41] },
+    });
+
+    const body = lecturas.map((lectura: any, index: number) => {
+      const cuenta = lectura?.idabonado_abonados?.idabonado ?? 'S/N';
+      const abonado = lectura?.idabonado_abonados?.idcliente_clientes?.nombre ?? 'Sin nombre';
+      const categoria = this.getCategoriaDescripcion(lectura) || '';
+      const promedio = Number(lectura?.idabonado_abonados?.promedio || 0);
+      const anterior = Number(lectura?.lecturaanterior || 0);
+      const actual = Number(lectura?.lecturaactual || 0);
+      const consumo = this.getConsumo(lectura);
+
+      return [index + 1, cuenta, abonado, categoria, promedio, anterior, actual, consumo];
+    });
+
+    autoTable(doc, {
+      startY: (doc as any).lastAutoTable.finalY + 4,
+      theme: 'grid',
+      head: [['#', 'Cuenta', 'Abonado', 'Categoria', 'Prom.', 'Anterior', 'Actual', 'M3']],
+      body,
+      styles: { fontSize: 8, cellPadding: 3 },
+      headStyles: { halign: 'center' },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 24 },
+        1: { halign: 'center', cellWidth: 48 },
+        2: { cellWidth: 150 },
+        3: { cellWidth: 90 },
+        4: { halign: 'right', cellWidth: 40 },
+        5: { halign: 'right', cellWidth: 50 },
+        6: { halign: 'right', cellWidth: 50 },
+        7: { halign: 'right', cellWidth: 40 },
+      },
+    });
+
+    return (doc as any).lastAutoTable.finalY + 12;
   }
 
   regresar() {
@@ -706,10 +987,10 @@ export class LecturasComponent implements OnInit {
 
   //Calcula los valores a recaudar
   async calcular() {
-    const lecturasNegativas = this.getLecturasNegativas();
-    console.log('Lecturas con consumo negativo:', lecturasNegativas);
-    if (lecturasNegativas.length > 0) {
-      await this.mostrarLecturasNegativas(lecturasNegativas);
+    const alertas = this.getAlertasRuta();
+    console.log('Analisis de ruta:', alertas);
+    if (alertas.negativas.length > 0) {
+      await this.mostrarAnalisisRuta(alertas);
       return;
     }
 

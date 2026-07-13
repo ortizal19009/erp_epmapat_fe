@@ -60,7 +60,7 @@ export class AddAguatramiteComponent implements OnInit {
       this.formAguatram1 = this.fb.group(
          {
             estado: 1,
-            sistema: 'Instalación de agua y alcantarillado',
+            sistema: 'Instalacion de agua y alcantarillado',
             fechaterminacion: date,
             observacion: 'Instalacion Nueva-Agua Potable',
             idtipotramite: { idtipotramite: 1 },
@@ -125,7 +125,7 @@ export class AddAguatramiteComponent implements OnInit {
    async onSubmit() {
       if (this.formAguatram1.invalid || this.guardando) {
          this.formAguatram1.markAllAsTouched();
-         this.swalToast('warning', 'Completa la información requerida antes de continuar');
+         this.swalToast('warning', 'Completa la informacion requerida antes de continuar');
          return;
       }
 
@@ -134,18 +134,18 @@ export class AddAguatramiteComponent implements OnInit {
       const detalleServicios = this.serviciosSeleccionados.join(', ');
 
       const confirmacion = await Swal.fire({
-         title: 'Confirmar nuevo trámite',
+         title: 'Confirmar nuevo tramite',
          icon: 'question',
          html: `
             <div class="text-left">
                <p><strong>Cliente:</strong> ${cliente?.nombre || 'No seleccionado'}</p>
-               <p><strong>Dirección:</strong> ${this.formAguatram1.value.direccion || 'No registrada'}</p>
+               <p><strong>Direccion:</strong> ${this.formAguatram1.value.direccion || 'No registrada'}</p>
                <p><strong>Servicios:</strong> ${detalleServicios || 'No seleccionado'}</p>
                <p><strong>Correos:</strong> ${correos.join(', ')}</p>
             </div>
          `,
          showCancelButton: true,
-         confirmButtonText: 'Sí, registrar',
+         confirmButtonText: 'Si, registrar',
          cancelButtonText: 'Cancelar',
          focusCancel: true,
       });
@@ -158,13 +158,31 @@ export class AddAguatramiteComponent implements OnInit {
       try {
          const aguatramite = await this.guardarAguatramite();
          const tramiteNuevo = await this.guardarTramiteNuevo(aguatramite);
-         await this.enviarCorreoTramiteNuevo(aguatramite, tramiteNuevo, correos);
-         await this.tramiteaguaService.genHojaInspeccion(this.formAguatram1.value, 'Concesión de servicios');
-         this.swalToast('success', `Trámite registrado y correo enviado a: ${correos.join(', ')}`);
+         let correoError: string | null = null;
+
+         try {
+            await this.enviarCorreoTramiteNuevo(aguatramite, tramiteNuevo, correos);
+            await this.tramiteaguaService.genHojaInspeccion(this.formAguatram1.value, 'Concesion de servicios');
+         } catch (emailError) {
+            console.error('El tramite se guardo, pero fallo el envio del correo.', emailError);
+            correoError = this.extraerMensajeHttp(emailError, 'No se pudo enviar el correo electronico.');
+         }
+
+         if (correoError) {
+            await Swal.fire({
+               icon: 'warning',
+               title: 'Tramite guardado',
+               text: `El tramite se registro correctamente, pero el correo no fue enviado: ${correoError}`,
+               confirmButtonText: 'Aceptar',
+            });
+         } else {
+            this.swalToast('success', `Tramite registrado y correo enviado a: ${correos.join(', ')}`);
+         }
+
          this.retornarListaAguaTramites();
       } catch (error) {
          console.error(error);
-         this.swalToast('error', 'No fue posible completar el trámite');
+         this.swalToast('error', 'No fue posible completar el tramite');
       } finally {
          this.guardando = false;
       }
@@ -219,7 +237,7 @@ export class AddAguatramiteComponent implements OnInit {
       const cliente = this.formAguatram1.value.idcliente_clientes as Clientes;
       const hojaInspeccion = await this.tramiteaguaService.buildHojaInspeccionBlob(
          this.formAguatram1.value,
-         'Concesión de servicios'
+         'Concesion de servicios'
       );
       const contrato = await this.tramiteaguaService.buildContratoBlob(tramiteNuevo);
       const attachments: OutboxAttachment[] = await Promise.all([
@@ -230,11 +248,11 @@ export class AddAguatramiteComponent implements OnInit {
       await firstValueFrom(
          this.outboxEmailService.sendNotificationEmail({
             to: correos,
-            subject: `Documentos de trámite de agua #${aguatramite.idaguatramite}`,
+            subject: `Documentos de tramite de agua #${aguatramite.idaguatramite}`,
             html: this.buildHtmlCorreoNuevoTramite(aguatramite, cliente),
             text:
-               `Estimado/a ${cliente?.nombre || 'cliente'}, adjuntamos el contrato y la hoja de inspección ` +
-               `del trámite de agua #${aguatramite.idaguatramite}.`,
+               `Estimado/a ${cliente?.nombre || 'cliente'}, adjuntamos el contrato y la hoja de inspeccion ` +
+               `del tramite de agua #${aguatramite.idaguatramite}.`,
             attachments,
          })
       );
@@ -341,28 +359,40 @@ export class AddAguatramiteComponent implements OnInit {
          <div style="font-family: Arial, Helvetica, sans-serif; background:#f4f7fb; padding:24px; color:#1f2937;">
             <div style="max-width:700px; margin:0 auto; background:#ffffff; border-radius:12px; overflow:hidden; border:1px solid #dbe4ee;">
                <div style="background:#0f766e; color:#ffffff; padding:20px 24px;">
-                  <h2 style="margin:0; font-size:22px;">Documentos de trámite de agua</h2>
+                  <h2 style="margin:0; font-size:22px;">Documentos de tramite de agua</h2>
                   <p style="margin:8px 0 0 0; font-size:14px;">EPMAPA-T</p>
                </div>
                <div style="padding:24px;">
                   <p style="margin-top:0;">Estimado/a <strong>${cliente?.nombre || 'cliente'}</strong>,</p>
-                  <p>Se registró correctamente su trámite de agua y alcantarillado.</p>
+                  <p>Se registro correctamente su tramite de agua y alcantarillado.</p>
                   <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px; margin:16px 0;">
-                     <p style="margin:0 0 8px 0;"><strong>Nro. de trámite:</strong> ${aguatramite.idaguatramite}</p>
+                     <p style="margin:0 0 8px 0;"><strong>Nro. de tramite:</strong> ${aguatramite.idaguatramite}</p>
                      <p style="margin:0 0 8px 0;"><strong>Cliente:</strong> ${cliente?.nombre || 'No registrado'}</p>
-                     <p style="margin:0 0 8px 0;"><strong>Dirección:</strong> ${this.formAguatram1.value.direccion || 'No registrada'}</p>
+                     <p style="margin:0 0 8px 0;"><strong>Direccion:</strong> ${this.formAguatram1.value.direccion || 'No registrada'}</p>
                      <p style="margin:0;"><strong>Servicios solicitados:</strong> ${this.serviciosSeleccionados.join(', ')}</p>
                   </div>
                   <p>Adjuntamos los siguientes documentos:</p>
                   <ul style="padding-left:20px;">
-                     <li>Contrato del trámite</li>
-                     <li>Hoja de inspección</li>
+                     <li>Contrato del tramite</li>
+                     <li>Hoja de inspeccion</li>
                   </ul>
                   <p style="margin-bottom:0;">Gracias por utilizar nuestros servicios.</p>
                </div>
             </div>
          </div>
       `;
+   }
+
+   private extraerMensajeHttp(error: any, fallback: string): string {
+      const backendMessage =
+         error?.error?.message ||
+         error?.error?.mensaje ||
+         error?.error?.error ||
+         error?.message;
+
+      return typeof backendMessage === 'string' && backendMessage.trim().length > 0
+         ? backendMessage
+         : fallback;
    }
 
    private swalToast(icon: 'success' | 'error' | 'warning', title: string): void {

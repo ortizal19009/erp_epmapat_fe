@@ -227,6 +227,17 @@ export class ImpLecturasComponent implements OnInit {
         break;
       }
 
+      case 5: {
+        this.lecService.getLecturas(this.idrutaxemision).subscribe({
+          next: (datos) => {
+            this._lecturas = datos;
+            this.imprimirControlLecturas();
+          },
+          error: (err) => console.error(err?.error ?? err),
+        });
+        break;
+      }
+
       default: {
         console.warn('Reporte no reconocido:', reporte);
         break;
@@ -682,6 +693,146 @@ export class ImpLecturasComponent implements OnInit {
 
     this.pdf.setfooter(doc);
     this.muestraPDF(doc);
+  }
+
+  private getConsumo(lectura: any): number {
+    return Number(lectura?.lecturaactual || 0) - Number(lectura?.lecturaanterior || 0);
+  }
+
+  private hasNegativeConsumption(lectura: any): boolean {
+    return this.getConsumo(lectura) < 0;
+  }
+
+  private hasHighConsumptionVsAverage(lectura: any): boolean {
+    const consumo = this.getConsumo(lectura);
+    const promedio = Number(lectura?.idabonado_abonados?.promedio || 0);
+    if (consumo < 0 || promedio <= 0) return false;
+    return consumo > promedio * 2;
+  }
+
+  private isResidentialHighConsumption(lectura: any): boolean {
+    const consumo = this.getConsumo(lectura);
+    if (consumo <= 70) return false;
+
+    const descripcion = String(
+      lectura?.idabonado_abonados?.idcategoria_categorias?.descripcion || ''
+    ).toLowerCase();
+    const idcategoria = Number(
+      lectura?.idabonado_abonados?.idcategoria_categorias?.idcategoria || 0
+    );
+
+    return descripcion.includes('resid') || idcategoria === 1;
+  }
+
+  private isSpecialAdultoMayorHighConsumption(lectura: any): boolean {
+    const consumo = this.getConsumo(lectura);
+    const adultomayor = !!lectura?.idabonado_abonados?.adultomayor;
+    const descripcion = String(
+      lectura?.idabonado_abonados?.idcategoria_categorias?.descripcion || ''
+    ).toLowerCase();
+    const idcategoria = Number(
+      lectura?.idabonado_abonados?.idcategoria_categorias?.idcategoria || 0
+    );
+    const esEspecial = descripcion.includes('especial') || idcategoria === 9;
+
+    return adultomayor && esEspecial && consumo > 34;
+  }
+
+  private getAlertasControlLecturas() {
+    const lecturas = this._lecturas || [];
+    const negativas = lecturas.filter((lectura: any) => this.hasNegativeConsumption(lectura));
+    const sobrePromedio = lecturas.filter((lectura: any) => !this.hasNegativeConsumption(lectura) && this.hasHighConsumptionVsAverage(lectura));
+    const residencialesAltas = lecturas.filter((lectura: any) => this.isResidentialHighConsumption(lectura));
+    const adultoMayorEspecial = lecturas.filter((lectura: any) => this.isSpecialAdultoMayorHighConsumption(lectura));
+
+    return { negativas, sobrePromedio, residencialesAltas, adultoMayorEspecial };
+  }
+
+  imprimirControlLecturas() {
+    this.otrapagina = this.formImprimir.value.otrapagina;
+    const nombreEmision = new NombreEmisionPipe();
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const alertas = this.getAlertasControlLecturas();
+    const cuentas = Array.isArray(this._lecturas) ? this._lecturas.length : 0;
+    const m3 = (this._lecturas || []).reduce((acc: number, lectura: any) => acc + this.getConsumo(lectura), 0);
+
+    doc.setFont('times', 'bold');
+    doc.setFontSize(15);
+    doc.text('EPMAPA-T', 14, 12);
+    doc.setFontSize(12);
+    doc.text('REPORTE DE CONTROL DE LECTURAS', 14, 18);
+    doc.setFont('times', 'normal');
+    doc.setFontSize(10);
+    doc.text(`Emision: ${nombreEmision.transform(this.rutaxemision.emision)}`, 14, 24);
+    doc.text(`Ruta: ${this.rutaxemision.ruta || ''}`, 14, 29);
+
+    autoTable(doc, {
+      startY: 34,
+      theme: 'grid',
+      head: [['Cuentas', 'M3', 'Negativas', 'Sobre promedio', 'Residenciales > 70', 'Esp. adulto mayor > 34']],
+      body: [[
+        this.formatoNumero(cuentas, 0),
+        this.formatoNumero(m3, 2),
+        this.formatoNumero(alertas.negativas.length, 0),
+        this.formatoNumero(alertas.sobrePromedio.length, 0),
+        this.formatoNumero(alertas.residencialesAltas.length, 0),
+        this.formatoNumero(alertas.adultoMayorEspecial.length, 0),
+      ]],
+      headStyles: { fillColor: [68, 103, 114], halign: 'center' },
+      styles: { fontSize: 8, halign: 'center' },
+    });
+
+    let startY = ((doc as any).lastAutoTable?.finalY ?? 34) + 8;
+    startY = this.agregarTablaControlLecturas(doc, startY, 'Lecturas con consumo negativo', alertas.negativas);
+    startY = this.agregarTablaControlLecturas(doc, startY, 'Lecturas con consumo sobre promedio', alertas.sobrePromedio);
+    startY = this.agregarTablaControlLecturas(doc, startY, 'Cuentas residenciales mayores a 70 m3', alertas.residencialesAltas);
+    this.agregarTablaControlLecturas(doc, startY, 'Especial adulto mayor mayores a 34 m3', alertas.adultoMayorEspecial);
+
+    this.pdf.setfooter(doc);
+    this.muestraPDF(doc);
+  }
+
+  private agregarTablaControlLecturas(doc: jsPDF, startY: number, titulo: string, lecturas: any[]): number {
+    if (!lecturas.length) {
+      return startY;
+    }
+
+    autoTable(doc, {
+      startY,
+      theme: 'plain',
+      body: [[titulo]],
+      styles: { fontSize: 10, fontStyle: 'bold', textColor: [33, 37, 41] },
+    });
+
+    autoTable(doc, {
+      startY: ((doc as any).lastAutoTable?.finalY ?? startY) + 2,
+      theme: 'grid',
+      head: [['Cuenta', 'Responsable', 'Categoria', 'Prom.', 'Anterior', 'Actual', 'M3', 'Novedad']],
+      body: lecturas.map((lectura: any) => [
+        this.formatoNumero(lectura?.idabonado_abonados?.idabonado, 0),
+        lectura?.idabonado_abonados?.idcliente_clientes?.nombre || '',
+        lectura?.idabonado_abonados?.idcategoria_categorias?.descripcion || '',
+        this.formatoNumero(lectura?.idabonado_abonados?.promedio || 0, 0),
+        this.formatoNumero(lectura?.lecturaanterior || 0, 0),
+        this.formatoNumero(lectura?.lecturaactual || 0, 0),
+        this.formatoNumero(this.getConsumo(lectura), 0),
+        lectura?.idnovedad_novedades?.descripcion || '',
+      ]),
+      headStyles: { fillColor: [68, 103, 114], halign: 'center' },
+      styles: { fontSize: 7, cellPadding: 1.5 },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 16 },
+        1: { cellWidth: 48 },
+        2: { cellWidth: 25 },
+        3: { halign: 'right', cellWidth: 14 },
+        4: { halign: 'right', cellWidth: 16 },
+        5: { halign: 'right', cellWidth: 16 },
+        6: { halign: 'right', cellWidth: 12 },
+        7: { cellWidth: 30 },
+      },
+    });
+
+    return ((doc as any).lastAutoTable?.finalY ?? startY) + 8;
   }
 
   private formatoNumero(valor: any, decimales: number): string {

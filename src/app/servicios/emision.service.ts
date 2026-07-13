@@ -52,6 +52,14 @@ export class EmisionService {
     );
     return resp;
   }
+
+  getControlDashboard(limit = 24) {
+    return this.http.get<any>(`${baseUrl}/control/dashboard?limit=${limit}`);
+  }
+
+  getControlDetalle(idemision: number) {
+    return this.http.get<any>(`${baseUrl}/${idemision}/control-detalle`);
+  }
   getAllEmisiones(): Promise<any> {
     let resp = this.http.get(`${baseUrl}/findall`);
     return firstValueFrom(resp);

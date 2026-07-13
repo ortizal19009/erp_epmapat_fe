@@ -1020,6 +1020,9 @@ export class EmisionesComponent implements OnInit {
           `<p><strong>Rutas recorridas:</strong> ${resp?.rutasRecorridas ?? 0}</p>` +
           `<p><strong>Lecturas revisadas:</strong> ${resp?.lecturasRevisadas ?? 0}</p>` +
           `<p><strong>Facturas cabecera creadas:</strong> ${resp?.facturasCreadas ?? 0}</p>` +
+          `<p><strong>Facturas reutilizadas:</strong> ${resp?.facturasReutilizadas ?? 0}</p>` +
+          `<p><strong>Lecturas actualizadas:</strong> ${resp?.lecturasActualizadas ?? 0}</p>` +
+          `<p><strong>Lecturas pendientes sin factura:</strong> ${resp?.lecturasPendientesSinFactura ?? 0}</p>` +
           `</div>`,
       });
 

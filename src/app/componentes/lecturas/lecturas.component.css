@@ -87,6 +87,43 @@ table tbody tr.fila-consumo-alto:hover td {
    color: white;
 }
 
+.fila-residencial-alta {
+   background-color: #ffe8cc;
+}
+
+.fila-residencial-alta td {
+   color: #8a4b08;
+   font-weight: 600;
+}
+
+table tbody tr.fila-residencial-alta:hover {
+   background-color: #e67e22;
+   color: white;
+}
+
+table tbody tr.fila-residencial-alta:hover td {
+   color: white;
+}
+
+.fila-adulto-mayor {
+   background-color: #f8d7da;
+}
+
+.fila-adulto-mayor td {
+   color: #842029;
+   font-weight: 700;
+}
+
+table tbody tr.fila-adulto-mayor:hover {
+   background-color: #c82333;
+   color: white;
+}
+
+table tbody tr.fila-adulto-mayor:hover td {
+   color: white;
+}
+
+
 .foto-preview {
    max-width: 100%;
    max-height: 70vh;

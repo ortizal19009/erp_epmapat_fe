@@ -1,6 +1,14 @@
-.tabla-control-wrap {
-  max-height: 620px;
+.tabla-panel {
+  max-height: 360px;
   overflow: auto;
+}
+
+.rutas-panel {
+  max-height: 340px;
+}
+
+.auditoria-panel {
+  max-height: 220px;
 }
 
 .sticky-head th {
@@ -11,25 +19,63 @@
   color: #fff;
 }
 
-.sortable-header {
+.clickable-row {
   cursor: pointer;
-  user-select: none;
-  white-space: nowrap;
 }
 
-.motivo-col {
-  min-width: 240px;
-  max-width: 320px;
-  white-space: normal;
+.clickable-row:hover {
+  background: rgba(13, 110, 253, 0.08);
 }
 
-.json-box {
-  max-height: 320px;
-  overflow: auto;
-  background: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  padding: 12px;
+.filtro-input {
+  width: 210px;
+}
+
+.acciones-toolbar {
+  gap: 8px;
+}
+
+.metric-card {
+  background: linear-gradient(135deg, #f7fbff 0%, #e7f1ff 100%);
+  border: 1px solid #d7e7ff;
+  border-radius: 12px;
+  padding: 12px 14px;
+  min-height: 78px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.metric-card.soft {
+  background: linear-gradient(135deg, #fffdf6 0%, #fff4d8 100%);
+  border-color: #f0dfae;
+}
+
+.metric-label {
   font-size: 12px;
-  margin-bottom: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #5f6b7a;
+  margin-bottom: 4px;
+}
+
+.section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 10px;
+}
+
+@media (max-width: 991px) {
+  .tabla-panel,
+  .rutas-panel,
+  .auditoria-panel {
+    max-height: none;
+  }
+
+  .filtro-input {
+    width: 100%;
+    margin-top: 8px;
+  }
 }

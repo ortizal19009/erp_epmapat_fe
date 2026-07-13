@@ -294,23 +294,38 @@ export class ModificarTramitenuevoComponent implements OnInit {
          const datos: any = await firstValueFrom(this.traminuevoService.saveTramiteNuevo(payload));
          const abonadoCreado = await this.guardarAbonadoAsync();
          await this.actualizarAguaTramiteAsync(3);
-         await this.enviarContratoPorCorreo(
-            {
-               ...datos,
-               direccion: datos?.direccion || payload.direccion,
-               fechafinalizacion: datos?.fechafinalizacion || payload.fechafinalizacion,
-               idaguatramite_aguatramite: {
-                  ...(datos?.idaguatramite_aguatramite || payload.idaguatramite_aguatramite || {}),
-                  idcliente_clientes: {
-                     ...(datos?.idaguatramite_aguatramite?.idcliente_clientes ||
-                        payload?.idaguatramite_aguatramite?.idcliente_clientes ||
-                        {}),
+         let correoError: string | null = null;
+         try {
+            await this.enviarContratoPorCorreo(
+               {
+                  ...datos,
+                  direccion: datos?.direccion || payload.direccion,
+                  fechafinalizacion: datos?.fechafinalizacion || payload.fechafinalizacion,
+                  idaguatramite_aguatramite: {
+                     ...(datos?.idaguatramite_aguatramite || payload.idaguatramite_aguatramite || {}),
+                     idcliente_clientes: {
+                        ...(datos?.idaguatramite_aguatramite?.idcliente_clientes ||
+                           payload?.idaguatramite_aguatramite?.idcliente_clientes ||
+                           {}),
+                     },
                   },
                },
-            },
-            abonadoCreado,
-            correos
-         );
+               abonadoCreado,
+               correos
+            );
+         } catch (emailError) {
+            console.error('El tramite se guardo, pero fallo el envio del correo.', emailError);
+            correoError = this.extraerMensajeHttp(emailError, 'No se pudo enviar el correo electronico.');
+         }
+
+         if (correoError) {
+            await Swal.fire({
+               icon: 'warning',
+               title: 'Tramite guardado',
+               text: `El tramite se completo correctamente, pero el correo no fue enviado: ${correoError}`,
+               confirmButtonText: 'Aceptar',
+            });
+         }
          this.retornarListaTramites();
       } catch (e) {
          console.error('Al guardar en TramiteNuevo: ', e);
