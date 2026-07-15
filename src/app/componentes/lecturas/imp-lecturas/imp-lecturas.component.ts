@@ -653,24 +653,24 @@ export class ImpLecturasComponent implements OnInit {
       head: [[
         'Cuenta',
         'Responsable',
+        'Cedula',
         'Categoria',
-        'Factura',
+        'Planillas',
         'Nro factura',
         'Multa',
         'Pendientes al cierre',
-        'Facturas pendientes',
         'Total factura',
         'Fecha cobro',
       ]],
       body: multas.map((item) => [
         this.formatoNumero(item.cuenta, 0),
         item.nombre || '',
+        item.cedula || item.identificacion || '',
         item.categoria || '',
         this.formatoNumero(item.idfactura, 0),
         item.nrofactura || '',
         this.formatoMoneda(item.multa),
         this.formatoNumero(item.pendientesalcierre, 0),
-        item.facturaspendientes || '',
         this.formatoMoneda(item.totalfactura),
         item.fechacobro ? new Date(item.fechacobro).toLocaleDateString('es-EC') : '',
       ]),
@@ -679,15 +679,15 @@ export class ImpLecturasComponent implements OnInit {
       styles: { fontSize: 7, cellPadding: 1.5 },
       columnStyles: {
         0: { halign: 'center', cellWidth: 18 },
-        1: { cellWidth: 55 },
-        2: { cellWidth: 28 },
-        3: { halign: 'center', cellWidth: 18 },
-        4: { cellWidth: 25 },
-        5: { halign: 'right', cellWidth: 20 },
-        6: { halign: 'center', cellWidth: 25 },
-        7: { cellWidth: 42 },
-        8: { halign: 'right', cellWidth: 22 },
-        9: { halign: 'center', cellWidth: 22 },
+        1: { cellWidth: 42 },
+        2: { cellWidth: 24 },
+        3: { cellWidth: 24 },
+        4: { halign: 'center', cellWidth: 18 },
+        5: { cellWidth: 25 },
+        6: { halign: 'right', cellWidth: 18 },
+        7: { halign: 'center', cellWidth: 22 },
+        8: { halign: 'right', cellWidth: 20 },
+        9: { halign: 'center', cellWidth: 20 },
       },
     });
 
@@ -1090,6 +1090,8 @@ interface CierreRutaReporte {
   multas: Array<{
     cuenta: number;
     nombre: string;
+    cedula?: string;
+    identificacion?: string;
     categoria: string;
     idfactura: number;
     nrofactura: string;
