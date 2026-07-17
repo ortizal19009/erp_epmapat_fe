@@ -47,6 +47,22 @@ table tbody tr:hover  {
 
 .red-icon { color: red; }
 
+.alert-icon-negativa {
+   color: #b91c1c;
+}
+
+.alert-icon-adulto-mayor {
+   color: #2563eb;
+}
+
+.alert-icon-residencial {
+   color: #d97706;
+}
+
+.alert-icon-promedio {
+   color: #a16207;
+}
+
 .check{
 color:rgba(233, 146, 146, 0.548);
 }
@@ -88,7 +104,8 @@ table tbody tr.fila-consumo-alto:hover td {
 }
 
 .fila-residencial-alta {
-   background-color: #ffe8cc;
+   background-color: #fff4d6;
+   box-shadow: inset 4px 0 0 #d97706;
 }
 
 .fila-residencial-alta td {
@@ -97,7 +114,7 @@ table tbody tr.fila-consumo-alto:hover td {
 }
 
 table tbody tr.fila-residencial-alta:hover {
-   background-color: #e67e22;
+   background-color: #d97706;
    color: white;
 }
 
@@ -106,16 +123,17 @@ table tbody tr.fila-residencial-alta:hover td {
 }
 
 .fila-adulto-mayor {
-   background-color: #f8d7da;
+   background-color: #e7f0ff;
+   box-shadow: inset 4px 0 0 #2563eb;
 }
 
 .fila-adulto-mayor td {
-   color: #842029;
+   color: #1d4ed8;
    font-weight: 700;
 }
 
 table tbody tr.fila-adulto-mayor:hover {
-   background-color: #c82333;
+   background-color: #2563eb;
    color: white;
 }
 

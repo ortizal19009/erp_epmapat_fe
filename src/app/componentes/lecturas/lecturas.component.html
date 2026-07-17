@@ -80,8 +80,8 @@
           <tr *ngFor="let lectura of _lecturas | filter: filtro; let i=index" class="fila"
             [ngClass]="getAlertClass(lectura)">
             <td class="small text-center font-weight-bold"><i class="bi-bookmark-check-fill check"
-                *ngIf="i == antIndice"></i><i class="bi bi-exclamation-triangle-fill text-warning mr-1"
-                *ngIf="getAlertBadge(lectura)"></i>{{i+1}}
+                *ngIf="i == antIndice"></i><i class="bi bi-exclamation-triangle-fill mr-1"
+                *ngIf="getAlertBadge(lectura)" [ngClass]="getAlertIconClass(lectura)"></i>{{i+1}}
             </td>
             <td class="text-center">{{ lectura?.idabonado_abonados?.idabonado ?? '' }}</td>
             <td class="description">{{ lectura?.idabonado_abonados?.idcliente_clientes?.nombre ?? 'Sin nombre' }}</td>

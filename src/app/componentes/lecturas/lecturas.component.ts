@@ -409,6 +409,14 @@ export class LecturasComponent implements OnInit {
     return '';
   }
 
+  getAlertIconClass(lectura: any): string {
+    if (this.hasNegativeConsumption(lectura)) return 'alert-icon-negativa';
+    if (this.isSpecialAdultoMayorHighConsumption(lectura)) return 'alert-icon-adulto-mayor';
+    if (this.isResidentialHighConsumption(lectura)) return 'alert-icon-residencial';
+    if (this.hasHighConsumptionVsAverage(lectura)) return 'alert-icon-promedio';
+    return '';
+  }
+
   getAlertDescription(lectura: any): string {
     const consumo = this.getConsumo(lectura);
     const promedio = Number(lectura?.idabonado_abonados?.promedio || 0);

@@ -1,253 +1,326 @@
-<div class="content mt-1 pt-1 pl-0"> 
+<div class="content mt-1 pt-1 pl-0 producto-view">
    <div class="container-fluid">
-      <div class="row mt-0 mb-1 mx-0 px-0 py-1 justify-content-start producto">
-         <div class="col-sm-5">
-            <h4 class="m-0 font-weight-bold"><i class="bi bi-file-ruled"></i>&nbsp; Producto</h4>
+      <div class="row mt-0 mb-3 mx-0 px-0 py-2 justify-content-start producto-header">
+         <div class="col-sm-6 col-lg-7">
+            <h4 class="m-0 font-weight-bold">
+               <i class="bi bi-file-ruled"></i>&nbsp; Producto
+            </h4>
+            <small class="header-subtitle">Movimientos de facturacion, cliente y facturas generadas</small>
          </div>
 
-         <div class="btn-group ml-auto mx-0">
+         <div class="btn-group ml-auto mx-0 align-items-center">
             <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
-               aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+               aria-expanded="false">
+               <i class="bi-menu-button-wide text-white"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
-                  <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
+                  <i class="bi bi-printer"></i>&nbsp; Imprimir
+               </button>
                <button class="dropdown-item" type="button">
-                  <i class="bi-file-earmark-arrow-down"></i><span class="">&nbsp;
-                     Exportar</span></button>
-            </div>
-
-            <div class="col-sm-1">
-               <button class="bg-transparent border-0" type="submit" (click)="regresar()">
-                  <i class="bi-arrow-left-circle text-white icoRegresar"></i>
+                  <i class="bi-file-earmark-arrow-down"></i><span>&nbsp; Exportar</span>
                </button>
             </div>
-         </div>
 
+            <button class="bg-transparent border-0 ml-2" type="button" (click)="regresar()">
+               <i class="bi-arrow-left-circle text-white icoRegresar"></i>
+            </button>
+         </div>
       </div>
    </div>
 </div>
 
-<div class="container-fluid">
-   <div class="row mb-0">
-      <div class="col-sm-3">
-         <div class="card card-outline cardProducto">
+<div class="container-fluid producto-content">
+   <div class="row mb-3">
+      <div class="col-lg-3 mb-3">
+         <div class="card cardProducto h-100">
             <div class="card-body box-profile">
                <h3 class="profile-username text-center">{{ producto.descripcion }}</h3>
-               <p class="text-muted text-center">{{ producto.nommodulo }}</p>
-               <ul class="list-group list-group-unbordered mb-3">
-                  <li class="list-group-item">
-                     <b>Uso</b> <a class="float-right">{{ producto.uso }}</a>
-                  </li>
-                  <li class="list-group-item">
-                     <b>Rubro</b> <a class="float-right">{{ producto.rubro }}</a>
-                  </li>
-               </ul>
-               <div class="row justify-content-center">
+               <p class="text-muted text-center mb-4">{{ producto.nommodulo }}</p>
+
+               <div class="summary-pills mb-4">
+                  <span class="summary-pill">Uso vinculado</span>
+                  <strong>{{ producto.uso }}</strong>
+                  <small *ngIf="producto.usoCodigo">Codigo: {{ producto.usoCodigo }}</small>
+               </div>
+
+               <div class="summary-pills">
+                  <span class="summary-pill">Rubro vinculado</span>
+                  <strong>{{ producto.rubro }}</strong>
+                  <small *ngIf="producto.rubroCodigo">Codigo: {{ producto.rubroCodigo }}</small>
+               </div>
+
+               <div class="row justify-content-center mt-4">
                   <button class="btn btn-warning btn-xs mx-1" type="button" (click)="modiProducto()">
-                     <i class="fa fa-edit" style="font-size:24pxi"></i>
+                     <i class="fa fa-edit"></i>
                      Modificar
                   </button>
                   <button class="btn btn-danger btn-xs mx-1" [disabled]="elimdisabled" data-toggle="modal"
                      data-target="#modalEliminar">
-                     <i class="fa fa-times-circle" style="font-size:24pxi"></i>
+                     <i class="fa fa-times-circle"></i>
                      Eliminar
                   </button>
                </div>
-
             </div>
          </div>
       </div>
 
-      <div class="col-sm-9">
-         <div class="card mt-2">
+      <div class="col-lg-9 mb-3">
+         <div class="card detail-card h-100">
             <div class="card-header cardTab">
-               <ul class="nav nav-tabs card-header-tabs cardTab">
-                  <li class="nav-item"><a class="nav-link active cardTab" href="#movixproducto" data-toggle="tab">
-                        <i class="fa fa-bookmark"></i> Movimientos <small class="text-muted">(Facturación)</small></a></li>
-                  <!-- <li class="nav-item"><a class="nav-link" href="#facelectro" data-toggle="tab">
-                        <i class="fa fa-laptop" style="font-size:12pxi"></i> Mov 2</a></li> -->
-               </ul>
-            </div><!-- /.card-header -->
+               <div class="d-flex justify-content-between align-items-center flex-wrap">
+                  <div>
+                     <h5 class="mb-1">Movimientos producto</h5>
+                     <small class="text-white-50">Haz clic en una fila para revisar la facturacion y sus facturas</small>
+                  </div>
+                  <span class="table-counter">{{ totalMovimientos }} registros</span>
+               </div>
+            </div>
 
             <div class="card-body">
-               <div class="tab-content">
-
-                  <div class="tab-pane active" id="movixproducto">
-                     <div class="post">
-                        <div class="user-block">
-                           <div *ngIf="noMovimientos">
-                              <div class="row justify-content-center">
-                                 <div class="callout callout-info col-sm-6 text-center">
-                                    <div class="alert alert-info">
-                                       <h5><i class="fas fa-info"></i> <strong> Mensaje</strong></h5>
-                                       No tiene Movimientos !
-                                    </div>
-                                 </div>
-                              </div>
-                           </div>
-                           <table *ngIf="!noMovimientos" class="table table-hover table-sm table-bordered movimientos">
-                              <thead>
-                                 <tr class="text-center">
-                                    <th>Facturación</th>
-                                    <th class="col-sm-2">Fecha</th>
-                                    <th>Cliente</th>
-                                    <th>Cantidad</th>
-                                    <th>Valor</th>
-                                 </tr>
-                              </thead>
-                              <tbody>
-                                 <tr *ngFor="let mov of _movxproducto" class="text-center fila">
-                                    <td>{{ mov.idfacturacion_facturacion.idfacturacion }}</td>
-                                    <td>{{ mov.idfacturacion_facturacion.feccrea|date:'dd-MM-y'}}</td>
-                                    <td class="text-left">{{ mov.idfacturacion_facturacion.idcliente_clientes.nombre}}</td>
-                                    <td>{{ mov.cantidad }}</td>
-                                    <td class="text-right">{{ mov.valorunitario }}</td>
-                                    <!-- <td>
-                                       <button class="btn btn-outline-info btn-xs" type="button">
-                                          <i class="fa fa-info-circle"></i> Info&nbsp;
-                                       </button>
-                                    </td> -->
-                                 </tr>
-                              </tbody>
-                           </table>
-                        </div>
-                     </div>
-                  </div>
-
-                  <div class="tab-pane" id="facelectro">
-                     <div class="post">
-                        <div class="user-block">
-                           <div *ngIf="noMovimientos">
-                              <div class="row justify-content-center">
-                                 <div class="callout callout-info col-sm-6 text-center">
-                                    <div class="alert alert-info">
-                                       <h5><i class="fas fa-info"></i> <strong> Mensaje</strong></h5>
-                                       No tiene Facturas !
-                                    </div>
-                                 </div>
-                              </div>
-                           </div>
-                           <table *ngIf="!noMovimientos" class="table table-hover table-sm table-bordered">
-                              <thead class="bg-primary">
-                                 <tr class="text-center">
-                                    <th>Nro.Factura</th>
-                                    <th>Pre.Fac</th>
-                                    <th class="col-sm-5">Concepto</th>
-                                    <th class="col-sm-2">F.Cobro</th>
-                                    <th>Valor</th>
-                                    <th></th>
-                                 </tr>
-                              </thead>
-                              <tbody>
-                                 <!-- <tr *ngFor="let mov of _movxproducto" class="text-center">
-                                    <td>{{ mov.nrofac }}</td>
-                                    <td>{{ mov.idfactura_facturas.idfactura }}</td>
-                                    <td class="text-left">{{ mov.concepto }}</td>
-                                    <td>{{ mov.idfactura_facturas.fechacobro | date: 'dd-MM-y'}}</td>
-                                    <td class="text-right">{{ mov.total | number: '1.2-2'}}</td>
-                                    <td>
-                                       <button class="btn btn-outline-info btn-xs" data-toggle="modal" data-target="#DetalleFacturaModal">
-                                          <i class="fa fa-info-circle"></i> Info
-                                       </button>
-                                    </td>
-                                 </tr> -->
-                              </tbody>
-                           </table>
-                        </div>
-                     </div>
-                  </div>
-
-                  <div class="tab-pane" id="prefacturas">
-                     <div class="post">
-                        <div class="user-block">
-                           <div *ngIf="noMovimientos">
-                              <div class="row justify-content-center">
-                                 <div class="callout callout-info col-sm-6 text-center">
-                                    <div class="alert alert-info">
-                                       <h5><i class="fas fa-info"></i> <strong> Mensaje</strong></h5>
-                                       No tiene Pre Facturas !
-                                    </div>
-                                 </div>
-                              </div>
-                           </div>
-                           <table *ngIf="!noMovimientos" class="table table-hover table-sm table-bordered">
-                              <thead class="bg-primary">
-                                 <tr class="text-center">
-                                    <th>Nro.</th>
-                                    <th>Fecha</th>
-                                    <th>Módulo</th>
-                                    <th>Factura</th>
-                                    <th>F.Cobro</th>
-                                    <th>Valor</th>
-                                    <th></th>
-                                 </tr>
-                              </thead>
-                              <tbody>
-                                 <!-- <tr *ngFor="let factura of _movimientos" class="text-center">
-                                    <td>{{ factura.idfactura }}</td>
-                                    <td>{{ factura.feccrea }}</td>
-                                    <td class="text-left">{{ factura.idmodulo.descripcion }}</td>
-                                    <td>{{ factura.nrofactura }}</td>
-                                    <td>{{ factura.fechacobro }}</td>
-                                    <td class="text-right">{{ factura.totaltarifa | number: '1.2-2'}}</td>
-                                    <td>
-                                       <button class="btn btn-outline-info btn-xs" data-toggle="modal"
-                                          data-target="#DetalleFacturaModal">
-                                          <i class="fa fa-info-circle"></i> Info
-                                       </button>
-                                    </td>
-                                 </tr> -->
-                              </tbody>
-                           </table>
-                        </div>
-                     </div>
-                  </div>
-
-                  <div class="tab-pane" id="tramites">
-                     <div class="post">
-                        <div class="user-block">
-                           <div *ngIf="noMovimientos">
-                              <div class="row justify-content-center">
-                                 <div class="callout callout-info col-sm-6 text-center">
-                                    <div class="alert alert-info">
-                                       <h5><i class="fas fa-info"></i> <strong> Mensaje</strong></h5>
-                                       No tiene Trámites !
-                                    </div>
-                                 </div>
-                              </div>
-                           </div>
-                           <table *ngIf="!noMovimientos" class="table table-hover table-sm table-bordered">
-                              <thead class="bg-primary">
-                                 <tr class="text-center">
-                                    <th>Nro.</th>
-                                    <th class="col-sm-2">Fecha</th>
-                                    <th>Descripción</th>
-                                    <th class="col-md-2">V.Hasta</th>
-                                    <th>Total</th>
-                                 </tr>
-                              </thead>
-                              <!-- <tbody>
-                                 <tr *ngFor="let tramite of _movimientos" class="text-center">
-                                    <td>{{ tramite.idtramite }}</td>
-                                    <td>{{ tramite.feccrea | date: 'dd-MM-y'}}</td>
-                                    <td class="text-left">{{ tramite.descripcion }}</td>
-                                    <td>{{ tramite.validohasta | date: 'dd-MM-y'}}</td>
-                                    <td class="text-right">{{ tramite.total | number: '1.2-2' }}</td>
-                                 </tr>
-                              </tbody> -->
-                           </table>
-
-                        </div>
-                     </div>
+               <div *ngIf="noMovimientos" class="empty-state">
+                  <div class="alert alert-info mb-0">
+                     <h5><i class="fas fa-info"></i> Mensaje</h5>
+                     No tiene movimientos registrados para este producto.
                   </div>
                </div>
+
+               <ng-container *ngIf="!noMovimientos">
+                  <div class="table-responsive">
+                     <table class="table table-hover table-sm table-bordered movimientos">
+                        <thead>
+                           <tr class="text-center">
+                              <th>Facturacion</th>
+                              <th>Fecha</th>
+                              <th>Cliente</th>
+                              <th>Cedula</th>
+                              <th>Estado</th>
+                              <th>Facturas</th>
+                              <th>Cantidad</th>
+                              <th>Valor</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <tr *ngFor="let mov of movimientosPaginados"
+                              class="text-center fila"
+                              [ngClass]="{ 'fila-activa': detalleSeleccionado?.idfacturacion === mov.idfacturacion }"
+                              (click)="seleccionarMovimiento(mov)">
+                              <td>
+                                 <div class="font-weight-bold">{{ mov.idfacturacion }}</div>
+                                 <small class="text-muted d-block">{{ mov.descripcionFacturacion }}</small>
+                              </td>
+                              <td>{{ mov.fecha | date:'dd-MM-y' }}</td>
+                              <td class="text-left">{{ mov.cliente }}</td>
+                              <td>{{ mov.cedula }}</td>
+                              <td>
+                                 <span [ngClass]="getEstadoPagoClase(mov)">
+                                    {{ getEstadoPagoTexto(mov) }}
+                                 </span>
+                              </td>
+                              <td>
+                                 <div class="font-weight-bold">{{ mov.totalFacturas }}</div>
+                                 <small class="text-muted d-block">
+                                    {{ mov.facturasPagadas }} pagadas / {{ mov.facturasPendientes }} pendientes
+                                 </small>
+                              </td>
+                              <td>{{ mov.cantidad | number:'1.0-2' }}</td>
+                              <td class="text-right">{{ mov.valorunitario | number:'1.2-2' }}</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+
+                  <div class="pagination-wrap" *ngIf="totalPages > 1">
+                     <button class="btn btn-outline-secondary btn-sm" type="button" (click)="changePage(currentPage - 1)">
+                        Anterior
+                     </button>
+                     <button
+                        *ngFor="let page of visiblePages"
+                        class="btn btn-sm"
+                        type="button"
+                        [disabled]="page === '...'"
+                        [ngClass]="page === currentPage ? 'btn-info' : 'btn-outline-secondary'"
+                        (click)="page !== '...' && changePage(+page)">
+                        {{ page }}
+                     </button>
+                     <button class="btn btn-outline-secondary btn-sm" type="button" (click)="changePage(currentPage + 1)">
+                        Siguiente
+                     </button>
+                  </div>
+               </ng-container>
             </div>
          </div>
       </div>
    </div>
 
-   <!-- Modal Eliminar-->
+   <div class="row" *ngIf="detalleSeleccionado">
+      <div class="col-12">
+         <div class="card detail-card">
+            <div class="card-header detail-header">
+               <div>
+                  <h5 class="mb-1">Detalle de facturacion #{{ detalleSeleccionado.idfacturacion }}</h5>
+                  <small class="text-muted">Desde aqui puedes revisar la cabecera y las facturas generadas</small>
+               </div>
+            </div>
+
+            <div class="card-body">
+               <div *ngIf="cargandoDetalle" class="alert alert-light border text-center mb-0">
+                  Cargando detalle de la facturacion seleccionada...
+               </div>
+
+               <div *ngIf="!cargandoDetalle && errorDetalle" class="alert alert-warning mb-0">
+                  {{ errorDetalle }}
+               </div>
+
+               <ng-container *ngIf="!cargandoDetalle && !errorDetalle">
+                  <div class="row mb-3">
+                     <div class="col-md-3 mb-3">
+                        <div class="metric-card">
+                           <span class="metric-label">Cliente</span>
+                           <strong>{{ detalleSeleccionado.cliente }}</strong>
+                           <small>{{ detalleSeleccionado.cedula }}</small>
+                        </div>
+                     </div>
+                     <div class="col-md-3 mb-3">
+                        <div class="metric-card">
+                           <span class="metric-label">Total facturacion</span>
+                           <strong>${{ detalleSeleccionado.totalFacturacion | number:'1.2-2' }}</strong>
+                           <small>{{ detalleSeleccionado.cuotas || 0 }} cuotas</small>
+                        </div>
+                     </div>
+                     <div class="col-md-3 mb-3">
+                        <div class="metric-card">
+                           <span class="metric-label">Facturas generadas</span>
+                           <strong>{{ totalFacturasGeneradas }}</strong>
+                           <small>{{ facturasPagadas }} pagadas / {{ facturasPendientes }} pendientes</small>
+                        </div>
+                     </div>
+                     <div class="col-md-3 mb-3">
+                        <div class="metric-card">
+                           <span class="metric-label">Total facturas</span>
+                           <strong>${{ totalFacturasDetalle | number:'1.2-2' }}</strong>
+                           <small>Valor acumulado liquidado</small>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="row">
+                     <div class="col-lg-5 mb-3">
+                        <div class="detail-panel">
+                           <h6 class="section-title">Cabecera de facturacion</h6>
+                           <div class="detail-list">
+                              <div class="detail-row">
+                                 <span>Numero</span>
+                                 <strong>{{ detalleSeleccionado.idfacturacion }}</strong>
+                              </div>
+                              <div class="detail-row">
+                                 <span>Descripcion</span>
+                                 <strong>{{ detalleSeleccionado.descripcionFacturacion }}</strong>
+                              </div>
+                              <div class="detail-row">
+                                 <span>Fecha</span>
+                                 <strong>{{ detalleSeleccionado.fecha | date:'dd-MM-y' }}</strong>
+                              </div>
+                              <div class="detail-row">
+                                 <span>Cliente</span>
+                                 <strong>{{ detalleSeleccionado.cliente }}</strong>
+                              </div>
+                              <div class="detail-row">
+                                 <span>Cedula</span>
+                                 <strong>{{ detalleSeleccionado.cedula }}</strong>
+                              </div>
+                              <div class="detail-row">
+                                 <span>Cantidad del producto</span>
+                                 <strong>{{ detalleSeleccionado.cantidad | number:'1.0-2' }}</strong>
+                              </div>
+                              <div class="detail-row">
+                                 <span>Valor unitario</span>
+                                 <strong>${{ detalleSeleccionado.valorunitario | number:'1.2-2' }}</strong>
+                              </div>
+                              <div class="detail-row">
+                                 <span>Total item</span>
+                                 <strong>${{ detalleSeleccionado.total | number:'1.2-2' }}</strong>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="col-lg-7 mb-3">
+                        <div class="detail-panel">
+                           <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+                              <h6 class="section-title mb-0">Facturas generadas por esta facturacion</h6>
+                              <span class="table-counter">{{ facturasDetalle.length }} registros</span>
+                           </div>
+
+                           <div *ngIf="!facturasDetalle.length" class="alert alert-secondary mb-0">
+                              Esta facturacion aun no tiene facturas generadas para mostrar.
+                           </div>
+
+                           <div class="table-responsive" *ngIf="facturasDetalle.length">
+                              <table class="table table-sm table-bordered facturas-relacionadas mb-0">
+                                 <thead>
+                                    <tr class="text-center">
+                                       <th>Cuota</th>
+                                       <th>Planilla</th>
+                                       <th>Factura</th>
+                                       <th>Fecha emision</th>
+                                       <th>Fecha cobro</th>
+                                       <th>Estado</th>
+                                       <th>Valor</th>
+                                       <th>Detalle</th>
+                                    </tr>
+                                 </thead>
+                                 <tbody>
+                                    <tr *ngFor="let factura of facturasDetalle" class="text-center">
+                                       <td>{{ factura.cuota }}</td>
+                                       <td>{{ factura.idfactura || 'Pendiente' }}</td>
+                                       <td>{{ factura.nrofactura || 'Sin electronica' }}</td>
+                                       <td>{{ factura.feccrea | date:'dd-MM-y' }}</td>
+                                       <td>{{ factura.fechacobro | date:'dd-MM-y' }}</td>
+                                       <td>
+                                          <span [ngClass]="getFacturaEstadoClase(factura)">
+                                             {{ getFacturaEstadoTexto(factura) }}
+                                          </span>
+                                       </td>
+                                       <td class="text-right">{{ factura.valor | number:'1.2-2' }}</td>
+                                       <td>
+                                          <button
+                                             type="button"
+                                             class="btn btn-outline-info btn-xs"
+                                             data-toggle="collapse"
+                                             [attr.data-target]="'#factura-detalle-' + factura.idfactura"
+                                             [attr.aria-controls]="'factura-detalle-' + factura.idfactura"
+                                             (click)="abrirDetalleFactura(factura.idfactura)">
+                                             Ver detalle
+                                          </button>
+                                       </td>
+                                    </tr>
+                                    <tr *ngFor="let factura of facturasDetalle">
+                                       <td colspan="8" class="detail-collapse-cell p-0">
+                                          <div class="collapse factura-collapse" [id]="'factura-detalle-' + factura.idfactura">
+                                             <div class="factura-detail-shell" *ngIf="factura.idfactura; else facturaPendiente">
+                                                <app-info-factura [idfac]="factura.idfactura"></app-info-factura>
+                                             </div>
+                                             <ng-template #facturaPendiente>
+                                                <div class="alert alert-light m-3 mb-0">
+                                                   Esta cuota aun no tiene una factura lista para consultar.
+                                                </div>
+                                             </ng-template>
+                                          </div>
+                                       </td>
+                                    </tr>
+                                 </tbody>
+                              </table>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </ng-container>
+            </div>
+         </div>
+      </div>
+   </div>
+
    <div class='modal fade' id='modalEliminar' tabindex='-1' aria-labelledby='modalEliminar' aria-hidden='true'>
       <div class='modal-dialog modal-dialog-centered'>
          <div class='modal-content'>
@@ -256,16 +329,16 @@
             </div>
             <div class='modal-body'>
                <div class="alert alert-info text-center" role="alert">
-                  ¿ Eliminar ?
+                  Eliminar?
                </div>
             </div>
             <div class='modal-footer' id='idButtons'>
-               <button type='button' class='btn btn-success btn-sm' data-dismiss='modal'
-                  id='btnSi'>
-                  <i class="fa fa-check-circle" style="font-size:24pxi"></i> Aceptar
+               <button type='button' class='btn btn-success btn-sm' data-dismiss='modal' id='btnSi'>
+                  <i class="fa fa-check-circle"></i> Aceptar
                </button>
                <button type='button' class='btn btn-outline-success btn-sm' data-dismiss='modal'>
-                  <i class="fa fa-times-circle" style="font-size:24pxi"></i> Cancelar</button>
+                  <i class="fa fa-times-circle"></i> Cancelar
+               </button>
             </div>
          </div>
       </div>

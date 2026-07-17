@@ -1,13 +1,15 @@
 <!-- <app-login></app-login> -->
 <!-- <ng-container *ngIf="authService.isLoginSuccessful">  -->
-<app-main-header></app-main-header>
-<app-main-sidebar></app-main-sidebar>
-<app-loading></app-loading>
+<div class="app-shell">
+    <app-main-header></app-main-header>
+    <app-main-sidebar></app-main-sidebar>
+    <app-loading></app-loading>
 
-<div class="content-wrapper">
-    <router-outlet></router-outlet>
+    <div class="content-wrapper">
+        <router-outlet></router-outlet>
+    </div>
+    <app-main-footer></app-main-footer>
 </div>
-<app-main-footer></app-main-footer>
 
 <!-- </ng-container> -->
 

@@ -53,6 +53,7 @@ export class AguatramiteComponent implements OnInit {
    pdfViewerSrc: SafeResourceUrl | null = null;
    private pdfObjectUrl: string | null = null;
    private clientesCache = new Map<number, Clientes>();
+   private cuentaTramiteCache = new Map<number, string>();
 
    constructor(private router: Router, private fb: FormBuilder, private aguatramiService: AguatramiteService,
       private tipotramiService: TipoTramiteService, private tramitenuevoService: TramiteNuevoService,
@@ -158,6 +159,7 @@ export class AguatramiteComponent implements OnInit {
          next: (datos: any) => {
             this._aguatramite = datos?.content || [];
             this.completarClientesFaltantes(this._aguatramite);
+            this.completarCuentasFaltantes(this._aguatramite);
             this.totalElements = datos?.totalElements || 0;
             this.totalPages = datos?.totalPages || 0;
             this.aplicarOrdenActual();
@@ -403,7 +405,32 @@ export class AguatramiteComponent implements OnInit {
    }
 
    async reimprimirComprobante(aguatramite: any): Promise<void> {
-      await this.s_genpdf.genComprobanteTramite(aguatramite);
+      let tramiteParaImprimir = aguatramite;
+
+      try {
+         const tramiteNuevoResp: any = await firstValueFrom(
+            this.tramitenuevoService.getByIdAguaTramite(aguatramite.idaguatramite)
+         );
+
+         const tramiteNuevo = Array.isArray(tramiteNuevoResp)
+            ? tramiteNuevoResp?.[0]
+            : tramiteNuevoResp;
+
+         if (tramiteNuevo) {
+            tramiteParaImprimir = {
+               ...aguatramite,
+               ...tramiteNuevo,
+               idaguatramite_aguatramite: {
+                  ...(tramiteNuevo?.idaguatramite_aguatramite || {}),
+                  ...aguatramite,
+               },
+            };
+         }
+      } catch (error) {
+         console.warn('No se pudo enriquecer el trámite para la reimpresión del comprobante.', error);
+      }
+
+      await this.s_genpdf.genComprobanteTramite(tramiteParaImprimir);
    }
 
    puedeReimprimir(aguatramite: any): boolean {
@@ -456,8 +483,12 @@ export class AguatramiteComponent implements OnInit {
          aguatramite?.idabonado ??
          aguatramite?.idabonado_abonados?.idabonado ??
          aguatramite?.abonado?.idabonado ??
+         aguatramite?.codmedidorvecino ??
          aguatramite?.idtramitenuevo_tramitenuevo?.idaguatramite_aguatramite?.idabonado ??
+         aguatramite?.idtramitenuevo_tramitenuevo?.codmedidorvecino ??
          aguatramite?.idaguatramite_aguatramite?.idabonado ??
+         aguatramite?.idaguatramite_aguatramite?.codmedidorvecino ??
+         aguatramite?.idtramitenuevo_tramitenuevo?.idabonado ??
          aguatramite?.cuenta ??
          aguatramite?.codmedidor ??
          '';
@@ -516,6 +547,45 @@ export class AguatramiteComponent implements OnInit {
       });
    }
 
+   private completarCuentasFaltantes(tramites: any[]): void {
+      if (!Array.isArray(tramites) || tramites.length === 0) {
+         return;
+      }
+
+      tramites.forEach((tramite: any) => {
+         const cuentaActual = this.getCuentaTramite(tramite).trim();
+         if (cuentaActual) {
+            return;
+         }
+
+         const idaguatramite = Number(tramite?.idaguatramite);
+         if (!Number.isFinite(idaguatramite) || idaguatramite <= 0) {
+            return;
+         }
+
+         const cuentaCacheada = this.cuentaTramiteCache.get(idaguatramite);
+         if (cuentaCacheada) {
+            this.asignarCuentaATramite(tramite, cuentaCacheada);
+            return;
+         }
+
+         this.tramitenuevoService.getByIdAguaTramite(idaguatramite).subscribe({
+            next: (datos: any) => {
+               const tramiteNuevo = Array.isArray(datos) ? datos?.[0] : datos;
+               const cuenta = this.extraerCuentaDesdeTramiteNuevo(tramiteNuevo);
+               if (!cuenta) {
+                  return;
+               }
+
+               this.cuentaTramiteCache.set(idaguatramite, cuenta);
+               this.asignarCuentaATramite(tramite, cuenta);
+               this.aplicarOrdenActual();
+            },
+            error: (e) => console.error(`No se pudo cargar la cuenta del trámite ${idaguatramite}`, e),
+         });
+      });
+   }
+
    private obtenerClienteDesdeTramite(aguatramite: any): any {
       const clienteDirecto = aguatramite?.idcliente_clientes;
       if (clienteDirecto && typeof clienteDirecto === 'object') {
@@ -565,6 +635,25 @@ export class AguatramiteComponent implements OnInit {
       }
 
       aguatramite.idcliente_clientes = cliente;
+   }
+
+   private extraerCuentaDesdeTramiteNuevo(tramiteNuevo: any): string {
+      const cuenta =
+         tramiteNuevo?.codmedidorvecino ??
+         tramiteNuevo?.idaguatramite_aguatramite?.idabonado ??
+         tramiteNuevo?.idaguatramite_aguatramite?.codmedidorvecino ??
+         tramiteNuevo?.idabonado ??
+         '';
+
+      return `${cuenta}`.trim();
+   }
+
+   private asignarCuentaATramite(aguatramite: any, cuenta: string): void {
+      if (!aguatramite || !cuenta) {
+         return;
+      }
+
+      aguatramite.cuenta = cuenta;
    }
 
    private async obtenerTramitesFiltradosParaImpresion(): Promise<any[]> {

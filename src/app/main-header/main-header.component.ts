@@ -18,6 +18,7 @@ export class MainHeaderComponent implements OnInit {
   formDefinir: FormGroup;
   tmpmodu: number;
   modules: any;
+  private readonly mobileBreakpoint = 992;
 
   constructor(
     private footer: MainFooterComponent,
@@ -59,6 +60,8 @@ export class MainHeaderComponent implements OnInit {
       fhasta: '',
       otrapestania: '',
     });
+
+    this.syncSidebarState();
   }
   getAllErpModulos(): void {
     this.s_erpmodulos
@@ -111,6 +114,25 @@ export class MainHeaderComponent implements OnInit {
 
   ngOnDestroy(): void {
     clearInterval(this.intervalId);
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.syncSidebarState();
+  }
+
+  toggleSidebar(event?: Event): void {
+    event?.preventDefault();
+
+    const body = document.body;
+    if (window.innerWidth < this.mobileBreakpoint) {
+      body.classList.toggle('sidebar-open');
+      body.classList.remove('sidebar-collapse');
+      return;
+    }
+
+    body.classList.toggle('sidebar-collapse');
+    body.classList.remove('sidebar-open');
   }
 
   checkModulos() {
@@ -169,6 +191,17 @@ export class MainHeaderComponent implements OnInit {
       },
       error: (err) => console.error(err.error),
     });
+  }
+
+  private syncSidebarState(): void {
+    const body = document.body;
+    if (window.innerWidth < this.mobileBreakpoint) {
+      body.classList.add('sidebar-collapse');
+      body.classList.remove('sidebar-open');
+      return;
+    }
+
+    body.classList.remove('sidebar-open');
   }
 }
 

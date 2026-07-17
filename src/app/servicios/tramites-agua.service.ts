@@ -132,7 +132,7 @@ export class TramitesAguaService {
     const clienteData = this.normalizarCliente(aguatramite);
     const cliente = clienteData.nombre;
     const identificacion = clienteData.cedula;
-    const medidor = aguatramite?.codmedidor || 'No aplica';
+    const cuentaAbonado = this.getCuentaTramite(aguatramite) || 'No aplica';
     const nroDocumento = aguatramite?.nrodocumento || 'No registrado';
     const observacion = aguatramite?.observacion || 'Sin observaciones';
     const fechaCrea = this.formatDate(aguatramite?.feccrea);
@@ -146,7 +146,7 @@ export class TramitesAguaService {
     doc.text(`TIPO DE TRÁMITE: ${tipoTramite}`, margin, 180);
     doc.text(`CLIENTE: ${cliente}`, margin, 200);
     doc.text(`IDENTIFICACIÓN: ${identificacion}`, margin, 220);
-    doc.text(`MEDIDOR / REFERENCIA: ${medidor}`, margin, 240);
+    doc.text(`MEDIDOR / REFERENCIA: ${cuentaAbonado}`, margin, 240);
     doc.text(`DOCUMENTO DE RESPALDO: ${nroDocumento}`, margin, 260);
     doc.text(`FECHA DE INGRESO: ${fechaCrea}`, margin, 280);
     doc.text(`FECHA DE FINALIZACIÓN: ${fechaTermina}`, margin, 300);
@@ -416,7 +416,18 @@ export class TramitesAguaService {
   }
 
   private getCuentaTramite(aguatramite: any): string {
-    return `${aguatramite?.idabonado ?? aguatramite?.idabonado_abonados?.idabonado ?? aguatramite?.abonado?.idabonado ?? aguatramite?.codmedidor ?? ''}`;
+    return `${
+      aguatramite?.idabonado ??
+      aguatramite?.idabonado_abonados?.idabonado ??
+      aguatramite?.abonado?.idabonado ??
+      aguatramite?.codmedidorvecino ??
+      aguatramite?.idaguatramite_aguatramite?.idabonado ??
+      aguatramite?.idaguatramite_aguatramite?.codmedidorvecino ??
+      aguatramite?.idtramitenuevo_tramitenuevo?.idaguatramite_aguatramite?.idabonado ??
+      aguatramite?.idtramitenuevo_tramitenuevo?.codmedidorvecino ??
+      aguatramite?.codmedidor ??
+      ''
+    }`;
   }
 
   private getClienteNombre(origen: any): string {

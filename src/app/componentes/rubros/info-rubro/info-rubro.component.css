@@ -1,43 +1,224 @@
-.container-fluid{
-   --bgcolor1: rgb(95, 57, 95);
-   --bgcolor2: rgba(231, 221, 228);
-   --bgplanillas1: rgb(50, 88, 51);
-   --bgplanillas2: rgba(193, 224, 181 );
+.container-fluid {
+   --bgcolor1: #6a4c93;
+   --bgcolor2: #f4eef8;
+   --bgcolor3: #ffffff;
+   --accent: #8763b0;
+   --accent-secondary: #3f7f5a;
+   --border-soft: #ddd4e8;
+   --text-soft: #66727d;
+   --success-soft: #d8f3e4;
+   --success-text: #1f6f43;
+   --warning-soft: #fff1c2;
+   --warning-text: #936200;
 }
 
-.rubro {
-   background-color: var(--bgcolor1);
+.rubro-view,
+.rubro-content {
+   padding-bottom: 1rem;
+}
+
+.rubro-header {
+   background: linear-gradient(135deg, var(--bgcolor1), var(--accent));
    color: white;
-   box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+   box-shadow: 0 10px 30px rgba(64, 43, 91, 0.18);
+   border-radius: 1rem;
+   padding-left: 1rem;
+   padding-right: 1rem;
 }
 
-.cardRubro{
+.header-subtitle {
+   color: rgba(255, 255, 255, 0.75);
+}
+
+.cardRubro,
+.detail-card {
+   border: 1px solid var(--border-soft);
+   border-radius: 1rem;
+   box-shadow: 0 16px 35px rgba(48, 41, 68, 0.08);
+   overflow: hidden;
+}
+
+.cardRubro {
    background-color: var(--bgcolor2);
-   box-shadow: 0 0 10px rgba(0, 0, 0, 1);
-}
-.cardRubro li, .bodyProductos{
-   background-color: var(--bgcolor2);
 }
 
-table {box-shadow: 0 0 10px rgba(0, 0, 0, 1);}
+.summary-pills {
+   background: rgba(255, 255, 255, 0.8);
+   border: 1px solid rgba(135, 99, 176, 0.12);
+   border-radius: 0.85rem;
+   padding: 0.9rem 1rem;
+   display: flex;
+   flex-direction: column;
+   gap: 0.2rem;
+}
 
-.theadProductos{
-   background-color: var(--bgcolor1);
+.summary-pill {
+   font-size: 0.78rem;
+   font-weight: 700;
+   letter-spacing: 0.03em;
+   text-transform: uppercase;
+   color: var(--accent);
+}
+
+.cardTab,
+.detail-header {
+   background: linear-gradient(135deg, var(--bgcolor1), var(--accent));
+   color: white;
+   border-bottom: 0;
+}
+
+.cardTab--secondary {
+   background: linear-gradient(135deg, var(--accent-secondary), #5b9b76);
+}
+
+.table-counter {
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   padding: 0.35rem 0.75rem;
+   border-radius: 999px;
+   background: rgba(255, 255, 255, 0.16);
+   color: white;
+   font-weight: 600;
+}
+
+.productos-table,
+.planillas-table {
+   box-shadow: 0 12px 25px rgba(28, 55, 77, 0.08);
+}
+
+.productos-table thead {
+   background-color: var(--accent);
    color: white;
 }
+
+.planillas-table thead {
+   background-color: var(--accent-secondary);
+   color: white;
+}
+
+.fila {
+   transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
 .fila:hover {
-   background-color: #117a8B;
+   background-color: #117a8b;
    color: white;
-   /* cursor: pointer;  */
+   cursor: pointer;
+   transform: translateY(-1px);
 }
 
-.tbodyPlanillas{ background-color: var(--bgplanillas2);}
-.theadPlanillas{
-   background-color: var(--bgplanillas1);
-   color: white;
+.fila:hover small,
+.fila:hover .text-muted {
+   color: rgba(255, 255, 255, 0.8) !important;
 }
 
-.cardTab{
-   background-color: var(--bgcolor1);
-   color: white;
+.fila-activa {
+   background-color: #e7dcf3 !important;
+   color: #39265b;
+}
+
+.metric-card,
+.detail-panel {
+   background: var(--bgcolor3);
+   border: 1px solid var(--border-soft);
+   border-radius: 1rem;
+   padding: 1rem;
+   height: 100%;
+}
+
+.metric-card {
+   display: flex;
+   flex-direction: column;
+   gap: 0.2rem;
+}
+
+.metric-label,
+.section-title {
+   color: var(--accent);
+   font-weight: 700;
+}
+
+.metric-card small {
+   color: var(--text-soft);
+}
+
+.detail-list {
+   display: flex;
+   flex-direction: column;
+   gap: 0.65rem;
+}
+
+.detail-row {
+   display: flex;
+   justify-content: space-between;
+   gap: 1rem;
+   padding-bottom: 0.55rem;
+   border-bottom: 1px solid rgba(135, 99, 176, 0.12);
+}
+
+.detail-row span {
+   color: var(--text-soft);
+}
+
+.estado-badge {
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   min-width: 96px;
+   border-radius: 999px;
+   padding: 0.25rem 0.8rem;
+   font-size: 0.78rem;
+   font-weight: 700;
+}
+
+.estado-ok {
+   background: var(--success-soft);
+   color: var(--success-text);
+}
+
+.estado-warn {
+   background: var(--warning-soft);
+   color: var(--warning-text);
+}
+
+.empty-state {
+   min-height: 180px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+}
+
+.pagination-wrap {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 0.5rem;
+   justify-content: flex-end;
+   margin-top: 1rem;
+}
+
+.btn-xs {
+   padding: 0.25rem 0.55rem;
+   font-size: 0.75rem;
+}
+
+@media (max-width: 991.98px) {
+   .detail-row {
+      flex-direction: column;
+      gap: 0.2rem;
+   }
+
+   .pagination-wrap {
+      justify-content: center;
+   }
+}
+
+@media (max-width: 767.98px) {
+   .rubro-header,
+   .cardRubro,
+   .detail-card,
+   .metric-card,
+   .detail-panel {
+      border-radius: 0.85rem;
+   }
 }

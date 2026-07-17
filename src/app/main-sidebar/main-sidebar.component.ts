@@ -14,6 +14,7 @@ export class MainSidebarComponent implements OnInit {
   private _sessionLog = new BehaviorSubject<boolean>(false);
   accessLoaded = false;
   enabledSections = new Set<string>();
+  private readonly mobileBreakpoint = 992;
 
   constructor(
     public authService: AutorizaService,
@@ -162,5 +163,12 @@ export class MainSidebarComponent implements OnInit {
   canAnySection(codes: string[]): boolean {
     if (this.authService.idusuario == 1) return true;
     return codes.some((c) => this.canSection(c));
+  }
+
+  closeSidebar(): void {
+    if (window.innerWidth < this.mobileBreakpoint) {
+      document.body.classList.remove('sidebar-open');
+      document.body.classList.add('sidebar-collapse');
+    }
   }
 }
