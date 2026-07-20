@@ -42,6 +42,12 @@ export class RutasxemisionComponent implements OnInit {
       this.router.navigate(['lecturas']);
    }
 
+   getProgresoLecturas(rutaxemi: any): string {
+      const cargadas = Number(rutaxemi?.lecturasCargadas ?? 0);
+      const total = Number(rutaxemi?.totalLecturas ?? 0);
+      return `${cargadas}/${total}`;
+   }
+
 }
 
 interface Emision {

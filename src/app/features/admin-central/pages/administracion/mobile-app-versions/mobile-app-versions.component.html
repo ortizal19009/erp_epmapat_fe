@@ -1,0 +1,105 @@
+<div class="container-fluid mt-2 apk-admin-page">
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-info text-white">
+          <h5 class="mb-0">Versiones APK Mobile</h5>
+          <small>Sube nuevas compilaciones y publica la versión que la app móvil debe consultar.</small>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-lg-5 mb-3">
+              <form [formGroup]="form" (ngSubmit)="subirApk()">
+                <div class="form-group">
+                  <label>Package Name</label>
+                  <input type="text" class="form-control" formControlName="packageName">
+                </div>
+                <div class="form-group">
+                  <label>Versión visible</label>
+                  <input type="text" class="form-control" formControlName="versionName" placeholder="Ej. 1.0.4">
+                </div>
+                <div class="form-group">
+                  <label>Version Code</label>
+                  <input type="number" class="form-control" formControlName="versionCode" placeholder="Ej. 4">
+                </div>
+                <div class="form-group">
+                  <label>Descripción</label>
+                  <textarea class="form-control" rows="4" formControlName="descripcion" placeholder="Cambios incluidos en esta versión"></textarea>
+                </div>
+                <div class="form-group">
+                  <label>Archivo APK</label>
+                  <input type="file" class="form-control-file" accept=".apk,application/vnd.android.package-archive" (change)="onFileSelected($event)">
+                  <small class="text-muted" *ngIf="archivoSeleccionado">{{ archivoSeleccionado.name }}</small>
+                </div>
+                <div class="form-check mb-3">
+                  <input type="checkbox" class="form-check-input" id="forceUpdate" formControlName="forceUpdate">
+                  <label class="form-check-label" for="forceUpdate">Forzar actualización al detectar cambio</label>
+                </div>
+                <button type="submit" class="btn btn-primary" [disabled]="guardando">
+                  {{ guardando ? 'Guardando...' : 'Publicar APK' }}
+                </button>
+              </form>
+            </div>
+
+            <div class="col-lg-7">
+              <div class="alert alert-light border" *ngIf="latestVersion as latest">
+                <div class="d-flex justify-content-between align-items-center flex-wrap">
+                  <div>
+                    <div class="font-weight-bold">Última versión publicada</div>
+                    <div class="small text-muted">
+                      {{ latest.versionName }} ({{ latest.versionCode }}) · {{ latest.entorno }} · {{ latest.feccrea | date:'dd/MM/yyyy HH:mm' }}
+                    </div>
+                  </div>
+                  <button class="btn btn-outline-primary btn-sm" (click)="descargar(latest)">Descargar APK</button>
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                  <thead class="thead-light">
+                    <tr>
+                      <th>#</th>
+                      <th>Versión</th>
+                      <th>Code</th>
+                      <th>Entorno</th>
+                      <th>Fecha</th>
+                      <th>Forzar</th>
+                      <th>APK</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let version of versiones; let i = index">
+                      <td>{{ i + 1 }}</td>
+                      <td>
+                        <div class="font-weight-bold">{{ version.versionName }}</div>
+                        <small class="text-muted">{{ version.descripcion || 'Sin descripción' }}</small>
+                      </td>
+                      <td>{{ version.versionCode }}</td>
+                      <td>{{ version.entorno || '-' }}</td>
+                      <td>{{ version.feccrea | date:'dd/MM/yyyy HH:mm' }}</td>
+                      <td>
+                        <span class="badge" [ngClass]="version.forceUpdate ? 'badge-danger' : 'badge-secondary'">
+                          {{ version.forceUpdate ? 'Sí' : 'No' }}
+                        </span>
+                      </td>
+                      <td>
+                        <button class="btn btn-sm btn-outline-info" (click)="descargar(version)">Descargar</button>
+                      </td>
+                      <td>
+                        <button class="btn btn-sm btn-outline-danger" (click)="eliminar(version)">Eliminar</button>
+                      </td>
+                    </tr>
+                    <tr *ngIf="!versiones.length">
+                      <td colspan="7" class="text-center text-muted py-4">No existen versiones APK registradas todavía.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

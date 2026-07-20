@@ -13,4 +13,6 @@ export class Emisiones {
   feccrea: Date;
   usumodi: number;
   fecmodi: Date;
+  totalLecturas?: number;
+  lecturasCargadas?: number;
 }

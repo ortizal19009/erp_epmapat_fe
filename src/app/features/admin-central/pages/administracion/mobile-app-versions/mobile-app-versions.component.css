@@ -1,0 +1,8 @@
+.apk-admin-page .card-header small {
+  opacity: 0.9;
+}
+
+.apk-admin-page .table td,
+.apk-admin-page .table th {
+  vertical-align: middle;
+}

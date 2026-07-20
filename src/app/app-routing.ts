@@ -292,6 +292,7 @@ import { NtacreditoComponent } from './componentes/ntacredito/ntacredito.compone
 import { AddNtacreditoComponent } from './componentes/ntacredito/add-ntacredito/add-ntacredito.component';
 import { DefinirComponent } from './features/admin-central/pages/administracion/definir/definir.component';
 import { HomeComponent } from './features/admin-central/pages/administracion/home/home.component';
+import { MobileAppVersionsComponent } from './features/admin-central/pages/administracion/mobile-app-versions/mobile-app-versions.component';
 import { StatusConveniosComponent } from './componentes/convenios/status-convenios/status-convenios.component';
 import { CvClientesComponent } from './componentes/coactivas/carteras-vencidas/cv-clientes/cv-clientes.component';
 import { AnularConvenioComponent } from './componentes/convenios/anular-convenio/anular-convenio.component';
@@ -1161,6 +1162,11 @@ const routes: Routes = [
   {
     path: 'admin/correos',
     loadComponent: () => import('./features/admin-central/pages/administracion/correos/email-admin.component').then(m => m.EmailAdminComponent),
+    canActivate: [AuthGuard, AdminOnlyGuard],
+  },
+  {
+    path: 'admin/mobile-apk',
+    component: MobileAppVersionsComponent,
     canActivate: [AuthGuard, AdminOnlyGuard],
   },
 

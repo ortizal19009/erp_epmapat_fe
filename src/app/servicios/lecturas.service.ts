@@ -155,6 +155,13 @@ export class LecturasService {
   downloadByRutasxEmisionIds(ids: number[]) {
     return this.http.post<Lecturas[]>(`${baseUrl}/by-rutas`, { ids });
   }
+
+  downloadByUsuarioEmision(idusuario: number, idemision: number) {
+    return this.http.post<any[]>(`${baseUrl}/by-usuario-emision`, {
+      idusuario,
+      idemision,
+    });
+  }
   /* Reporte de emisiones */
   findInicial(idemision: number) {
     return this.http.get(

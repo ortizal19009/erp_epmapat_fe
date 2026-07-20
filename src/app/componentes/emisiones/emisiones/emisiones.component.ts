@@ -1,5 +1,6 @@
 ﻿import { Component, OnInit } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
+import { OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { EmisionService } from 'src/app/servicios/emision.service';
@@ -36,6 +37,7 @@ import {
   reduce,
 } from 'rxjs/operators';
 import { from, of, firstValueFrom, forkJoin } from 'rxjs';
+import { interval, Subscription } from 'rxjs';
 import { isFunction } from 'chart.js/dist/helpers/helpers.core';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { JasperReportService } from 'src/app/servicios/jasper-report.service';
@@ -51,7 +53,7 @@ import { UsrxmodulosService } from 'src/app/servicios/administracion/usrxmodulos
   templateUrl: './emisiones.component.html',
   styleUrls: ['./emisiones.component.css'],
 })
-export class EmisionesComponent implements OnInit {
+export class EmisionesComponent implements OnInit, OnDestroy {
   formBuscar: FormGroup;
   formAddEmision: FormGroup;
   f_emisionIndividual: FormGroup;
@@ -121,6 +123,7 @@ export class EmisionesComponent implements OnInit {
   btncerrar: boolean = false;
   _rutasxemi: RutaXEmisionUI[] = [];
   _lecturas: any[] = [];
+  private rutasRefreshSub?: Subscription;
   idusuario: number;
   auditoriaEmision: EmisionAuditViewRow[] = [];
   auditoriaEmisionCargando = false;
@@ -282,6 +285,158 @@ export class EmisionesComponent implements OnInit {
         },
         error: (err) => console.error(err.error),
       });
+  }
+
+  getProgresoRuta(ruta: any): string {
+    const cargadas = Number(ruta?.lecturasCargadas ?? 0);
+    const total = Number(ruta?.totalLecturas ?? 0);
+    return `${cargadas}/${total}`;
+  }
+
+  ngOnDestroy(): void {
+    this.detenerAutoRefreshRutas();
+  }
+
+  private iniciarAutoRefreshRutas(): void {
+    this.detenerAutoRefreshRutas();
+    if (!this.idemision) return;
+
+    this.rutasRefreshSub = interval(8000).subscribe(() => {
+      this.refrescarRutasEnPantalla();
+    });
+  }
+
+  private detenerAutoRefreshRutas(): void {
+    this.rutasRefreshSub?.unsubscribe();
+    this.rutasRefreshSub = undefined;
+  }
+
+  private refrescarRutasEnPantalla(): void {
+    if (!this.idemision) return;
+
+    this.ruxemiService.getByIdEmision(this.idemision).subscribe({
+      next: (datos: any) => {
+        const rutasActuales = this._rutasxemi || [];
+        this._rutasxemi = (datos || []).map((ruta: RutaXEmisionUI) => {
+          const actual = rutasActuales.find(
+            (item) => item.idrutaxemision === ruta.idrutaxemision
+          );
+          return {
+            ...ruta,
+            processing: actual?.processing ?? false,
+            progreso: actual?.progreso ?? 0,
+            estadoTemp: actual?.estadoTemp,
+          };
+        });
+        this.actualizarEstadisticasRutasDesdeLecturas();
+      },
+      error: (err) => console.error(err?.error || err),
+    });
+  }
+
+  private actualizarEstadisticasRutasDesdeLecturas(): void {
+    const rutas = this._rutasxemi || [];
+    if (!rutas.length || !this.idemision || !this.authService.idusuario) {
+      this.total();
+      return;
+    }
+
+    this.s_lecturas
+      .downloadByUsuarioEmision(this.authService.idusuario, this.idemision)
+      .subscribe({
+      next: (lecturas: any[] = []) => {
+        const acumulado = new Map<number, { total: number; cargadas: number; m3: number }>();
+
+        lecturas.forEach((lectura: any) => {
+          const idRuta = Number(
+            lectura?.idrutaxemision ??
+              lectura?.idrutaxemision_rutasxemision?.idrutaxemision ??
+              0
+          );
+          if (!idRuta) return;
+
+          const actual = acumulado.get(idRuta) || { total: 0, cargadas: 0, m3: 0 };
+          const lecturaActual = Number(lectura?.lecturaactual ?? 0);
+          const lecturaAnterior = Number(lectura?.lecturaanterior ?? 0);
+          const tieneLectura =
+            lectura?.fechalectura != null || lecturaActual > 0;
+
+          actual.total += 1;
+          if (tieneLectura) {
+            actual.cargadas += 1;
+          }
+          actual.m3 += Math.max(lecturaActual - lecturaAnterior, 0);
+
+          acumulado.set(idRuta, actual);
+        });
+
+        this._rutasxemi = rutas.map((ruta) => {
+          const stats = acumulado.get(Number(ruta.idrutaxemision)) || {
+            total: 0,
+            cargadas: 0,
+            m3: Number(ruta.m3 ?? 0),
+          };
+
+          return {
+            ...ruta,
+            totalLecturas: stats.total,
+            lecturasCargadas: stats.cargadas,
+            m3: stats.m3,
+          };
+        });
+
+        this.total();
+      },
+      error: (err) => {
+        console.error(err?.error || err);
+        this.total();
+      },
+    });
+  }
+
+  private actualizarResumenRutaLocal(lecturaGuardada: any): void {
+    const idRuta = Number(
+      lecturaGuardada?.idrutaxemision_rutasxemision?.idrutaxemision
+    );
+    if (!idRuta) {
+      this.refrescarRutasEnPantalla();
+      return;
+    }
+
+    const ruta = this._rutasxemi.find(
+      (item) => item.idrutaxemision === idRuta
+    );
+    if (ruta) {
+      const lecturaActual = Number(lecturaGuardada?.lecturaactual ?? 0);
+      const lecturaAnterior = Number(lecturaGuardada?.lecturaanterior ?? 0);
+      const consumo = Math.max(lecturaActual - lecturaAnterior, 0);
+
+      ruta.lecturasCargadas = Number(ruta.lecturasCargadas ?? 0);
+      ruta.totalLecturas = Number(ruta.totalLecturas ?? 0);
+
+      if (lecturaActual > 0) {
+        ruta.lecturasCargadas += 1;
+        ruta.m3 = Number(ruta.m3 ?? 0) + consumo;
+      }
+
+      this.total();
+    }
+
+    this.ruxemiService.getById(idRuta).subscribe({
+      next: (rutaActualizada: any) => {
+        const index = this._rutasxemi.findIndex(
+          (item) => item.idrutaxemision === idRuta
+        );
+        if (index >= 0) {
+          this._rutasxemi[index] = {
+            ...this._rutasxemi[index],
+            ...rutaActualizada,
+          };
+          this.total();
+        }
+      },
+      error: () => this.refrescarRutasEnPantalla(),
+    });
   }
 
   private normalizeAccessCode(code: any): string {
@@ -850,6 +1005,7 @@ export class EmisionesComponent implements OnInit {
     this.ruxemiService.getByIdEmision(this.idemision).subscribe({
       next: (datos: any) => {
         this._rutasxemi = datos;
+        this.iniciarAutoRefreshRutas();
         this.s_lecturas.rubrosEmitidos(this.idemision).subscribe({
           next: (datos: any) => {
             datos.forEach((item: any) => {
@@ -1412,6 +1568,7 @@ export class EmisionesComponent implements OnInit {
       lectura.fotoPath = '';
       try {
         let newLectura = await this.s_lecturas.saveLecturaAsync(lectura);
+        this.actualizarResumenRutaLocal(newLectura);
         if (this.f_lecturas.value.lecturaactual > 0) {
           await this.planilla(newLectura);
         }
@@ -3828,6 +3985,8 @@ interface RutaXEmisionUI {
   idruta_rutas: { codigo: string; descripcion: string };
   fechacierre?: string | Date | null;
   m3: number;
+  totalLecturas?: number;
+  lecturasCargadas?: number;
   estado: 0 | 1; // 0 abierta, 1 cerrada (persistido)
   // ------- campos UI ------
   processing?: boolean; // en proceso

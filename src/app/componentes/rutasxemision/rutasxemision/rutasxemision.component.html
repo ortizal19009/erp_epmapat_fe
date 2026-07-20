@@ -26,6 +26,7 @@
                         <th></th>
                         <th>Codigo</th>
                         <th>Ruta</th>
+                        <th>Lecturas</th>
                         <th>F.Cierre</th>
                         <th>M3</th>
                         <th></th>
@@ -36,8 +37,9 @@
                         <td class="small text-center font-weight-bold">{{i+1}}</td>
                         <td>{{ rutaxemi.idruta_rutas.codigo }}</td>
                         <td>{{ rutaxemi.idruta_rutas.descripcion }}</td>
+                        <td class="text-center">{{ getProgresoLecturas(rutaxemi) }}</td>
                         <td class="text-center">{{ rutaxemi.fechacierre | date:'dd-MM-y'}}</td>
-                        <td class="text-right">{{ rutaxemi.m3 | number: '1.2-2'}}</td>
+                        <td class="text-right">{{ rutaxemi.m3 | number: '1.0-0'}}</td>
                         <!-- <td class="text-center"><button class="badge badge-info mr-1" (click)="lecturas(rutaxemi.idrutaxemision)">Lecturas</button></td> -->
                         <td class="text-center"><button class="btn btn-outline-info btn-xs mx-1" type="button" (click)="lecturas(rutaxemi.idrutaxemision)">
                             <i class="fa fa-book"></i> Lecturas

@@ -310,6 +310,7 @@ import { SafePipe } from './pipes/safe.pipe';
 import { NtacreditoComponent } from './componentes/ntacredito/ntacredito.component';
 import { AddNtacreditoComponent } from './componentes/ntacredito/add-ntacredito/add-ntacredito.component';
 import { HomeComponent } from './features/admin-central/pages/administracion/home/home.component';
+import { MobileAppVersionsComponent } from './features/admin-central/pages/administracion/mobile-app-versions/mobile-app-versions.component';
 import { StatusConveniosComponent } from './componentes/convenios/status-convenios/status-convenios.component';
 import { CvClientesComponent } from './componentes/coactivas/carteras-vencidas/cv-clientes/cv-clientes.component';
 import { AnularConvenioComponent } from './componentes/convenios/anular-convenio/anular-convenio.component';
@@ -640,6 +641,7 @@ import { UsuarioAutocompleteComponent } from './componentes/facelectro/usuario-a
     NtacreditoComponent,
     AddNtacreditoComponent,
     HomeComponent,
+    MobileAppVersionsComponent,
     StatusConveniosComponent,
     CvClientesComponent,
     AnularConvenioComponent,

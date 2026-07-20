@@ -955,6 +955,12 @@
                 <p class="text-warning">Administracion de Correos</p>
               </a>
             </li>
+            <li class="nav-item" *ngIf="authService.idusuario == 1">
+              <a routerLink="/admin/mobile-apk" class="nav-link" [class.disabled]="!isOptionEnabled(5, 221)">
+                <i class="bi bi-phone nav-icon"></i>
+                <p class="text-warning">Versiones APK Mobile</p>
+              </a>
+            </li>
 
           </ul>
         </li>

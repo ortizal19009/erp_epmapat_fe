@@ -12,4 +12,7 @@ export class Rutasxemision {
   idemision_emisiones: Emisiones;
   idruta_rutas: Rutas;
   m3: number;
+  total?: number;
+  totalLecturas?: number;
+  lecturasCargadas?: number;
 }
