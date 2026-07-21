@@ -7,6 +7,14 @@
 .detalle { background-color: var(--bgcolor2); }
 .nuevoBG2 { background-color: var(--bgcolor2); }
 
+.detalle.sombra.border.rounded {
+   overflow: visible;
+   position: relative;
+   z-index: 1;
+   padding-bottom: 5rem;
+   min-height: 10rem;
+}
+
 .fila:hover {
    background-color: #117a8B;
    color: white;
@@ -20,5 +28,30 @@
 .form-elegante .card-header {
    border-top-left-radius: 10px;
    border-top-right-radius: 10px;
+}
+
+.table-responsive {
+   overflow-x: auto;
+   overflow-y: visible;
+   position: relative;
+   z-index: 2;
+   padding-bottom: 4.5rem;
+}
+
+.table-responsive .btn-group,
+.table-responsive td,
+.table-responsive tr {
+   position: relative;
+}
+
+.table-responsive .dropdown-menu,
+.popLista {
+   z-index: 1060;
+}
+
+.table-responsive .btn-group.show,
+.table-responsive .dropdown.show,
+.table-responsive td.text-right {
+   z-index: 1070;
 }
 

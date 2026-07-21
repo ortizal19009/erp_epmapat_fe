@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 import { PdfPaperFormat, PrintBridgeService, PrintProfile, PrinterMode } from 'src/app/servicios/print-bridge.service';
+import { DefinirService } from 'src/app/servicios/administracion/definir.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -24,12 +26,20 @@ export class ImpresionQzComponent implements OnInit {
   qzSaving = false;
   qzMessage = '';
   qzMessageClass = 'alert-light border';
+  installerFile: File | null = null;
+  installerUploading = false;
+  installerInfo: any = null;
+  readonly definirId = 1;
 
-  constructor(private qzTrayService: PrintBridgeService) {}
+  constructor(
+    private qzTrayService: PrintBridgeService,
+    private definirService: DefinirService
+  ) {}
 
   ngOnInit(): void {
     this.qzProfile = this.qzTrayService.getSavedProfileSelection();
     this.cargarConfiguracion();
+    this.cargarInstaladorImpresion();
     void this.cargarImpresoras();
   }
 
@@ -63,6 +73,69 @@ export class ImpresionQzComponent implements OnInit {
       this.qzMessageClass = 'alert-warning border';
     } finally {
       this.qzLoading = false;
+    }
+  }
+
+  cargarInstaladorImpresion(): void {
+    this.definirService.getInstaladorImpresion(this.definirId).subscribe({
+      next: (info) => {
+        this.installerInfo = info;
+      },
+      error: (error) => {
+        console.error(error);
+        this.installerInfo = null;
+      },
+    });
+  }
+
+  onInstallerSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    this.installerFile = file;
+  }
+
+  installerDownloadUrl(): string {
+    return this.definirService.getInstaladorImpresionDownloadUrl(this.definirId);
+  }
+
+  async subirInstaladorImpresion(): Promise<void> {
+    if (!this.installerFile) {
+      Swal.fire('Atencion', 'Selecciona un archivo .exe para subir.', 'warning');
+      return;
+    }
+
+    if (!this.installerFile.name.toLowerCase().endsWith('.exe')) {
+      Swal.fire('Atencion', 'Solo se permite subir archivos .exe.', 'warning');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('archivo', this.installerFile);
+
+    this.installerUploading = true;
+    try {
+      const info = await firstValueFrom(
+        this.definirService.uploadInstaladorImpresion(this.definirId, formData)
+      );
+      this.installerInfo = info;
+      this.installerFile = null;
+      Swal.fire({
+        toast: true,
+        icon: 'success',
+        title: 'Instalador de impresión cargado correctamente.',
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2500,
+      });
+    } catch (error: any) {
+      console.error(error);
+      Swal.fire(
+        'Error',
+        error?.error?.message || error?.error?.detail || 'No se pudo subir el archivo .exe.',
+        'error'
+      );
+    } finally {
+      this.installerUploading = false;
     }
   }
 

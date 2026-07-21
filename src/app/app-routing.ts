@@ -1150,11 +1150,6 @@ const routes: Routes = [
   { path: 'modi-reportejr', component: ModiReportejrComponent, canActivate: [AuthGuard] },
   { path: 'imp-reportejr', component: ImpReportejrComponent, canActivate: [AuthGuard] },
   {
-    path: 'admin/swagger-microservicios',
-    loadComponent: () => import('./features/settings/swagger-hub/swagger-hub').then(m => m.SwaggerHubComponent),
-    canActivate: [AuthGuard, AdminOnlyGuard],
-  },
-  {
     path: 'admin/access-control',
     loadComponent: () => import('./features/settings/access-admin/access-admin').then(m => m.AccessAdminComponent),
     canActivate: [AuthGuard, AdminOnlyGuard],

@@ -1,12 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Usrxmodulos } from 'src/app/modelos/administracion/usrxmodulos.model';
 import { Usuarios } from 'src/app/modelos/administracion/usuarios.model';
 import { AccesoService } from 'src/app/servicios/administracion/acceso.service';
 import { ErpmodulosService } from 'src/app/servicios/administracion/erpmodulos.service';
 import { UsrxmodulosService } from 'src/app/servicios/administracion/usrxmodulos.service';
 import { UsuarioService } from 'src/app/servicios/administracion/usuario.service';
+import { firstValueFrom } from 'rxjs';
+
+declare const $: any;
 
 @Component({
   selector: 'app-perfil-usuario',
@@ -20,13 +22,21 @@ export class PerfilUsuarioComponent implements OnInit {
   _acceso: any;
   filtro: string;
   _erpmodulos: any;
-  _usrxmodulo: any = [];
+  _usrxmodulo: any[] = [];
   _user: Usuarios = new Usuarios();
   adminNewModulo = { descripcion: '', platform: 'WEB' };
   allModules: any[] = [];
   selectedModuleId: number | null = null;
   sectionCatalog: any[] = [];
-  adminNewSection: any = { codigo: '', descripcion: '', ruta: '', orden: 0, platform: 'WEB', activo: true };
+  adminNewSection: any = {
+    codigo: '',
+    descripcion: '',
+    ruta: '',
+    orden: 0,
+    platform: 'WEB',
+    activo: true,
+  };
+  savingModules = false;
 
   constructor(
     private router: Router,
@@ -52,12 +62,14 @@ export class PerfilUsuarioComponent implements OnInit {
   }
 
   private getModuleId(module: any): number {
-    return Number(
-      module?.iderpmodulo ??
-      module?.iderpmodulo_erpmodulos?.iderpmodulo ??
-      module?.idmodulo ??
-      0
-    ) || 0;
+    return (
+      Number(
+        module?.iderpmodulo ??
+          module?.iderpmodulo_erpmodulos?.iderpmodulo ??
+          module?.idmodulo ??
+          0
+      ) || 0
+    );
   }
 
   private isEnabled(value: any): boolean {
@@ -70,9 +82,33 @@ export class PerfilUsuarioComponent implements OnInit {
     return false;
   }
 
+  private buildModuloPayload(item: any): any | null {
+    const idusuario = Number(this._user?.idusuario || this.idusuario || 0);
+    const iderpmodulo = Number(
+      item?.iderpmodulo_erpmodulos?.iderpmodulo || 0
+    );
+
+    if (!idusuario || !iderpmodulo) {
+      return null;
+    }
+
+    return {
+      idusuario_usuarios: { idusuario },
+      iderpmodulo_erpmodulos: { iderpmodulo },
+      enabled: !!item?.enabled,
+      platform: this.getModulePlatform(item?.iderpmodulo_erpmodulos || item),
+    };
+  }
+
+  private cerrarModalModulos(): void {
+    $('#modulos').modal('hide');
+    $('body').removeClass('modal-open');
+    $('.modal-backdrop').remove();
+  }
+
   ngOnInit(): void {
     sessionStorage.setItem('ventana', '/usuarios');
-    let coloresJSON = sessionStorage.getItem('/usuarios');
+    const coloresJSON = sessionStorage.getItem('/usuarios');
     this.colocaColor(JSON.parse(coloresJSON!));
 
     this.idusuario = +sessionStorage.getItem('idusuarioToPerfil')!;
@@ -82,8 +118,8 @@ export class PerfilUsuarioComponent implements OnInit {
       identificausu: '',
       nomusu: '',
     });
+
     this.buscaUsuario();
-    this.getAllErpModulos();
     this.loadAllModulesCatalog();
   }
 
@@ -107,7 +143,10 @@ export class PerfilUsuarioComponent implements OnInit {
             identificausu: this.usuario.identificausu,
             nomusu: this.usuario.nomusu,
           });
-          if (this.usuario != null) this.buscaAcceso();
+          if (this.usuario != null) {
+            this.buscaAcceso();
+            this.getAllErpModulos();
+          }
         },
         error: (err) => console.error(err.error),
       });
@@ -116,7 +155,6 @@ export class PerfilUsuarioComponent implements OnInit {
     }
   }
 
-  //Recupera los registros de la Tabla Acceso
   buscaAcceso() {
     let regacc: number;
     this.accService.getAcceso().subscribe({
@@ -131,9 +169,8 @@ export class PerfilUsuarioComponent implements OnInit {
             this._acceso[i].selec = false;
             regacc = +this._acceso[i].regacc;
             if (this.usuario.priusu != null) {
-              if (+this.usuario.priusu.slice(regacc, regacc + 1) >= 5)
-                this._acceso[i].selec = true;
-              else this._acceso[i].selec = false;
+              this._acceso[i].selec =
+                +this.usuario.priusu.slice(regacc, regacc + 1) >= 5;
             }
             i++;
           });
@@ -169,19 +206,22 @@ export class PerfilUsuarioComponent implements OnInit {
     }
     this.usuario.priusu = priusu;
     this.usuService.updateUsuario(this.idusuario, this.usuario).subscribe({
-      next: (nex) => this.regresar(),
+      next: () => this.regresar(),
       error: (err) => console.error('Al actualizar el Usuario; ', err.error),
     });
   }
+
   getAllErpModulos() {
+    if (!this._user?.idusuario) {
+      return;
+    }
+
     this._usrxmodulo = [];
 
-    // Primero obtener todos los módulos del ERP
     this.s_erpmodulos.getAllErpModulos().subscribe({
       next: (mods: any[]) => {
         const catalog = mods || [];
 
-        // Obtener módulos asignados al usuario (sin filtrar por plataforma)
         this.s_usrxmodulos.getAllModulos(this.idusuario).subscribe({
           next: (userModules: any[]) => {
             const byId = new Map<number, any>();
@@ -199,61 +239,42 @@ export class PerfilUsuarioComponent implements OnInit {
 
             this._usrxmodulo = catalog.map((m: any) => {
               const id = +m.iderpmodulo;
-              const assigned = byId.get(id) || byKey.get(this.getModuleMatchKey(m));
+              const assigned =
+                byId.get(id) || byKey.get(this.getModuleMatchKey(m));
               return {
                 iderpmodulo_erpmodulos: m,
-                enabled: this.isEnabled(assigned?.enabled ?? assigned?.estado ?? assigned?.activo),
+                enabled: this.isEnabled(
+                  assigned?.enabled ?? assigned?.estado ?? assigned?.activo
+                ),
                 idusuario_usuarios: this._user,
                 secciones: assigned?.secciones || [],
                 platform: m.platform || m.plataform || 'WEB',
+                dirty: false,
+                saving: false,
               };
             });
           },
           error: (e: any) => {
-            console.error('Error obteniendo módulos del usuario:', e);
-            // Si falla, mostrar todos los módulos como deshabilitados
+            console.error('Error obteniendo mÃ³dulos del usuario:', e);
             this._usrxmodulo = catalog.map((m: any) => ({
               iderpmodulo_erpmodulos: m,
               enabled: false,
               idusuario_usuarios: this._user,
               secciones: [],
               platform: m.platform || m.plataform || 'WEB',
+              dirty: false,
+              saving: false,
             }));
-          }
+          },
         });
       },
-      error: (e: any) => console.error('Error obteniendo módulos ERP:', e),
+      error: (e: any) => console.error('Error obteniendo mÃ³dulos ERP:', e),
     });
   }
+
   setModuloToUser(e: any, data: any): void {
-    const enabled = !!e.target.checked;
-    const previousState = data.enabled;
-    data.enabled = enabled;
-
-    const payload = {
-      ...data,
-      enabled,
-      platform: data.platform || 'WEB', // Usar la plataforma del módulo o WEB por defecto
-      idusuario_usuarios: this._user,
-      iderpmodulo_erpmodulos: data.iderpmodulo_erpmodulos,
-    };
-
-    // Mostrar indicador de carga
-    data.saving = true;
-
-    this.s_usrxmodulos.saveAccessModulos(payload).subscribe({
-      next: () => {
-        data.saving = false;
-        // Aquí podrías mostrar un toast de éxito si tienes un servicio de notificaciones
-      },
-      error: (err: any) => {
-        data.saving = false;
-        console.error('Error al guardar módulo:', err);
-        data.enabled = previousState; // Revertir cambio
-        // Aquí podrías mostrar un toast de error
-        alert(`Error al ${enabled ? 'habilitar' : 'deshabilitar'} el módulo: ${err.error?.message || 'Error desconocido'}`);
-      }
-    });
+    data.enabled = !!e.target.checked;
+    data.dirty = true;
   }
 
   setSectionToUser(e: any, sec: any): void {
@@ -263,31 +284,77 @@ export class PerfilUsuarioComponent implements OnInit {
 
     sec.saving = true;
 
-    this.s_usrxmodulos.saveAccessSeccion({
-      idusuario: this.idusuario,
-      iderpseccion: +sec.iderpseccion,
-      enabled,
-    }).subscribe({
-      next: () => {
-        sec.saving = false;
-        console.log(`Sección ${sec.descripcion} ${enabled ? 'habilitada' : 'deshabilitada'} para el usuario`);
-      },
-      error: (err: any) => {
-        sec.saving = false;
-        console.error('Error al guardar sección:', err);
-        sec.enabled = prev; // Revertir cambio
-        alert(`Error al ${enabled ? 'habilitar' : 'deshabilitar'} la sección: ${err.error?.message || 'Error desconocido'}`);
-      }
-    });
+    this.s_usrxmodulos
+      .saveAccessSeccion({
+        idusuario: this.idusuario,
+        iderpseccion: +sec.iderpseccion,
+        enabled,
+      })
+      .subscribe({
+        next: () => {
+          sec.saving = false;
+          console.log(
+            `SecciÃ³n ${sec.descripcion} ${
+              enabled ? 'habilitada' : 'deshabilitada'
+            } para el usuario`
+          );
+        },
+        error: (err: any) => {
+          sec.saving = false;
+          console.error('Error al guardar secciÃ³n:', err);
+          sec.enabled = prev;
+          alert(
+            `Error al ${
+              enabled ? 'habilitar' : 'deshabilitar'
+            } la secciÃ³n: ${err.error?.message || 'Error desconocido'}`
+          );
+        },
+      });
   }
 
-  guardarModulos() {
-    this._usrxmodulo.forEach((item: any) => {
-      this.s_usrxmodulos.saveAccessModulos(item).subscribe({
-        next: () => {},
-        error: (e: any) => console.error(e),
+  async guardarModulos() {
+    if (this.savingModules) {
+      return;
+    }
+
+    const pendientes = this._usrxmodulo
+      .filter((item: any) => item?.dirty)
+      .map((item: any) => ({ item, payload: this.buildModuloPayload(item) }))
+      .filter((row: any) => !!row.payload);
+
+    if (!pendientes.length) {
+      this.cerrarModalModulos();
+      return;
+    }
+
+    this.savingModules = true;
+    pendientes.forEach((row: any) => (row.item.saving = true));
+
+    try {
+      await Promise.all(
+        pendientes.map((row: any) =>
+          firstValueFrom(this.s_usrxmodulos.saveAccessModulos(row.payload))
+        )
+      );
+
+      pendientes.forEach((row: any) => {
+        row.item.dirty = false;
+        row.item.saving = false;
       });
-    });
+
+      this.cerrarModalModulos();
+      this.getAllErpModulos();
+    } catch (e: any) {
+      pendientes.forEach((row: any) => (row.item.saving = false));
+      console.error('Error al guardar mÃ³dulos del usuario:', e);
+      alert(
+        `Error al guardar los mÃ³dulos del usuario: ${
+          e?.error?.message || 'Error desconocido'
+        }`
+      );
+    } finally {
+      this.savingModules = false;
+    }
   }
 
   loadAllModulesCatalog() {
@@ -324,16 +391,22 @@ export class PerfilUsuarioComponent implements OnInit {
 
   saveModuloEdit(m: any) {
     if (this.idusuario !== 1) return;
-    this.s_erpmodulos.update(m.iderpmodulo, {
-      descripcion: m.descripcion,
-      platform: (m.platform || 'WEB').toUpperCase(),
-    }, this.idusuario).subscribe({
-      next: () => {
-        this.loadAllModulesCatalog();
-        this.getAllErpModulos();
-      },
-      error: (e: any) => console.error(e),
-    });
+    this.s_erpmodulos
+      .update(
+        m.iderpmodulo,
+        {
+          descripcion: m.descripcion,
+          platform: (m.platform || 'WEB').toUpperCase(),
+        },
+        this.idusuario
+      )
+      .subscribe({
+        next: () => {
+          this.loadAllModulesCatalog();
+          this.getAllErpModulos();
+        },
+        error: (e: any) => console.error(e),
+      });
   }
 
   loadSectionCatalog() {
@@ -341,17 +414,16 @@ export class PerfilUsuarioComponent implements OnInit {
       this.sectionCatalog = [];
       return;
     }
-    // Temporalmente deshabilitado hasta que se implemente el endpoint en el backend
     this.sectionCatalog = [];
-    // this.s_usrxmodulos.getSectionCatalog(this.selectedModuleId, 'WEB').subscribe({
-    //   next: (rows: any[]) => this.sectionCatalog = rows || [],
-    //   error: (e: any) => console.error(e),
-    // });
   }
 
   saveNewSectionCatalog() {
     if (this.idusuario !== 1 || !this.selectedModuleId) return;
-    if (!this.adminNewSection.codigo?.trim() || !this.adminNewSection.descripcion?.trim()) return;
+    if (
+      !this.adminNewSection.codigo?.trim() ||
+      !this.adminNewSection.descripcion?.trim()
+    )
+      return;
 
     const payload = {
       iderpmodulo: this.selectedModuleId,
@@ -365,7 +437,14 @@ export class PerfilUsuarioComponent implements OnInit {
 
     this.s_usrxmodulos.saveSectionCatalog(payload).subscribe({
       next: () => {
-        this.adminNewSection = { codigo: '', descripcion: '', ruta: '', orden: 0, platform: 'WEB', activo: true };
+        this.adminNewSection = {
+          codigo: '',
+          descripcion: '',
+          ruta: '',
+          orden: 0,
+          platform: 'WEB',
+          activo: true,
+        };
         this.loadSectionCatalog();
         this.getAllErpModulos();
       },
@@ -375,20 +454,22 @@ export class PerfilUsuarioComponent implements OnInit {
 
   saveSectionEdit(sec: any) {
     if (this.idusuario !== 1) return;
-    this.s_usrxmodulos.updateSectionCatalog(sec.iderpseccion, {
-      codigo: sec.codigo,
-      descripcion: sec.descripcion,
-      ruta: sec.ruta,
-      orden: +sec.orden || 0,
-      platform: (sec.platform || 'WEB').toUpperCase(),
-      activo: !!sec.activo,
-    }).subscribe({
-      next: () => {
-        this.loadSectionCatalog();
-        this.getAllErpModulos();
-      },
-      error: (e: any) => console.error(e),
-    });
+    this.s_usrxmodulos
+      .updateSectionCatalog(sec.iderpseccion, {
+        codigo: sec.codigo,
+        descripcion: sec.descripcion,
+        ruta: sec.ruta,
+        orden: +sec.orden || 0,
+        platform: (sec.platform || 'WEB').toUpperCase(),
+        activo: !!sec.activo,
+      })
+      .subscribe({
+        next: () => {
+          this.loadSectionCatalog();
+          this.getAllErpModulos();
+        },
+        error: (e: any) => console.error(e),
+      });
   }
 
   regresar() {

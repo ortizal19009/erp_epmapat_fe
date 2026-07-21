@@ -28,4 +28,16 @@ export class DefinirService {
   upFirma(iddefinir: number, formData: any) {
     return firstValueFrom(this.http.put(`${baseUrl}/subir-firma/${iddefinir}`, formData));
   }
+
+  getInstaladorImpresion(iddefinir: number): Observable<any> {
+    return this.http.get(`${baseUrl}/instalador-impresion/${iddefinir}`);
+  }
+
+  uploadInstaladorImpresion(iddefinir: number, formData: FormData): Observable<any> {
+    return this.http.post(`${baseUrl}/instalador-impresion/${iddefinir}`, formData);
+  }
+
+  getInstaladorImpresionDownloadUrl(iddefinir: number): string {
+    return `${baseUrl}/instalador-impresion/${iddefinir}/download`;
+  }
 }

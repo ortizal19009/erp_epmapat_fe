@@ -22,6 +22,6 @@ export class StorageService {
   }
 
   viewUrl(ruta: string): string {
-    return `${this.baseUrl}/view?ruta=${encodeURIComponent(ruta)}`;
+    return `${this.baseUrl}/file?path=${encodeURIComponent(ruta)}`;
   }
 }
