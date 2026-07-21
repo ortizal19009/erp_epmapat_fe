@@ -323,65 +323,66 @@ export class EmisionesComponent implements OnInit, OnDestroy {
           );
           return {
             ...ruta,
+            totalLecturas: actual?.totalLecturas ?? ruta.totalLecturas ?? 0,
+            lecturasCargadas: actual?.lecturasCargadas ?? ruta.lecturasCargadas ?? 0,
+            m3: actual?.m3 ?? ruta.m3 ?? 0,
             processing: actual?.processing ?? false,
             progreso: actual?.progreso ?? 0,
             estadoTemp: actual?.estadoTemp,
           };
         });
-        this.actualizarEstadisticasRutasDesdeLecturas();
+        this.recalcularResumenRutasDesdeLecturas();
       },
       error: (err) => console.error(err?.error || err),
     });
   }
 
-  private actualizarEstadisticasRutasDesdeLecturas(): void {
-    const rutas = this._rutasxemi || [];
-    if (!rutas.length || !this.idemision || !this.authService.idusuario) {
+  private recalcularResumenRutasDesdeLecturas(): void {
+    if (!this.idemision || !this._rutasxemi?.length) {
       this.total();
       return;
     }
 
-    this.s_lecturas
-      .downloadByUsuarioEmision(this.authService.idusuario, this.idemision)
-      .subscribe({
+    this.s_lecturas.getByIdEmision(this.idemision).subscribe({
       next: (lecturas: any[] = []) => {
-        const acumulado = new Map<number, { total: number; cargadas: number; m3: number }>();
+        const acumulado = new Map<number, { total: number; tomadas: number; m3: number }>();
 
         lecturas.forEach((lectura: any) => {
           const idRuta = Number(
+            lectura?.idrutaxemision_rutasxemision?.idrutaxemision ??
+            lectura?.idrutaxemision_rutasxemision ??
             lectura?.idrutaxemision ??
-              lectura?.idrutaxemision_rutasxemision?.idrutaxemision ??
-              0
+            0
           );
           if (!idRuta) return;
 
-          const actual = acumulado.get(idRuta) || { total: 0, cargadas: 0, m3: 0 };
-          const lecturaActual = Number(lectura?.lecturaactual ?? 0);
-          const lecturaAnterior = Number(lectura?.lecturaanterior ?? 0);
-          const tieneLectura =
-            lectura?.fechalectura != null || lecturaActual > 0;
+          const actual = acumulado.get(idRuta) || { total: 0, tomadas: 0, m3: 0 };
+          const lecturaAnterior = Number(lectura?.lecturaanterior ?? -1);
+          const lecturaActual = Number(lectura?.lecturaactual ?? -1);
+          const consumo = lecturaActual - lecturaAnterior;
+          const tomada = consumo >= 0 || lecturaActual > 0;
 
           actual.total += 1;
-          if (tieneLectura) {
-            actual.cargadas += 1;
+          if (tomada) {
+            actual.tomadas += 1;
+            actual.m3 += Math.max(consumo, 0);
           }
-          actual.m3 += Math.max(lecturaActual - lecturaAnterior, 0);
 
           acumulado.set(idRuta, actual);
         });
 
-        this._rutasxemi = rutas.map((ruta) => {
-          const stats = acumulado.get(Number(ruta.idrutaxemision)) || {
+        this._rutasxemi = this._rutasxemi.map((ruta) => {
+          const resumen = acumulado.get(Number(ruta.idrutaxemision)) || {
             total: 0,
-            cargadas: 0,
-            m3: Number(ruta.m3 ?? 0),
+            tomadas: 0,
+            m3: 0,
           };
 
           return {
             ...ruta,
-            totalLecturas: stats.total,
-            lecturasCargadas: stats.cargadas,
-            m3: stats.m3,
+            totalLecturas: resumen.total,
+            lecturasCargadas: resumen.tomadas,
+            m3: resumen.m3,
           };
         });
 
@@ -409,34 +410,22 @@ export class EmisionesComponent implements OnInit, OnDestroy {
     if (ruta) {
       const lecturaActual = Number(lecturaGuardada?.lecturaactual ?? 0);
       const lecturaAnterior = Number(lecturaGuardada?.lecturaanterior ?? 0);
-      const consumo = Math.max(lecturaActual - lecturaAnterior, 0);
+      const consumo = lecturaActual - lecturaAnterior;
 
       ruta.lecturasCargadas = Number(ruta.lecturasCargadas ?? 0);
       ruta.totalLecturas = Number(ruta.totalLecturas ?? 0);
+      ruta.m3 = Number(ruta.m3 ?? 0);
 
-      if (lecturaActual > 0) {
-        ruta.lecturasCargadas += 1;
-        ruta.m3 = Number(ruta.m3 ?? 0) + consumo;
+      if (consumo >= 0 || lecturaActual > 0) {
+        if (ruta.lecturasCargadas < ruta.totalLecturas || ruta.totalLecturas === 0) {
+          ruta.lecturasCargadas += 1;
+        }
+        ruta.m3 += Math.max(consumo, 0);
       }
 
       this.total();
     }
-
-    this.ruxemiService.getById(idRuta).subscribe({
-      next: (rutaActualizada: any) => {
-        const index = this._rutasxemi.findIndex(
-          (item) => item.idrutaxemision === idRuta
-        );
-        if (index >= 0) {
-          this._rutasxemi[index] = {
-            ...this._rutasxemi[index],
-            ...rutaActualizada,
-          };
-          this.total();
-        }
-      },
-      error: () => this.refrescarRutasEnPantalla(),
-    });
+    setTimeout(() => this.refrescarRutasEnPantalla(), 500);
   }
 
   private normalizeAccessCode(code: any): string {
@@ -1006,6 +995,7 @@ export class EmisionesComponent implements OnInit, OnDestroy {
       next: (datos: any) => {
         this._rutasxemi = datos;
         this.iniciarAutoRefreshRutas();
+        this.recalcularResumenRutasDesdeLecturas();
         this.s_lecturas.rubrosEmitidos(this.idemision).subscribe({
           next: (datos: any) => {
             datos.forEach((item: any) => {

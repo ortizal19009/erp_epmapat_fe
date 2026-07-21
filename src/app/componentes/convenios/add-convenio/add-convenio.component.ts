@@ -452,7 +452,7 @@ export class AddConvenioComponent implements OnInit {
       factura.valorbase = this.facturas[i].totaltarifa;
       try {
         const nuevafac = await this.facService.saveFacturaAsync(factura);
-        await this.generarCuotas(i, nuevafac);
+        await this.generarCuotas(i, nuevafac, fechaCuota);
         await this.rubroxfac(i, nuevafac);
       } catch (error) {
         console.error(`Al guardar la factura ${i}`, error);
@@ -460,13 +460,13 @@ export class AddConvenioComponent implements OnInit {
     }
   }
 
-  async generarCuotas(i: number, factura: any) {
+  async generarCuotas(i: number, factura: any, fechaCuota: Date) {
     const cuota = new Cuotas();
     cuota.nrocuota = i + 1;
     cuota.idfactura = factura;
     cuota.idconvenio_convenios = this.newconvenio;
     cuota.usucrea = this.authService.idusuario;
-    cuota.feccrea = this.fecha;
+    cuota.feccrea = fechaCuota;
     try {
       await this.cuotService.saveCuotaAsync(cuota);
     } catch (error) {
