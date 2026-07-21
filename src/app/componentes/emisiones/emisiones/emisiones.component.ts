@@ -293,6 +293,12 @@ export class EmisionesComponent implements OnInit, OnDestroy {
     return `${cargadas}/${total}`;
   }
 
+  isRutaCompleta(ruta: any): boolean {
+    const cargadas = Number(ruta?.lecturasCargadas ?? 0);
+    const total = Number(ruta?.totalLecturas ?? 0);
+    return total > 0 && cargadas >= total;
+  }
+
   ngOnDestroy(): void {
     this.detenerAutoRefreshRutas();
   }

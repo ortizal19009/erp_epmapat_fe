@@ -169,7 +169,10 @@
               {{ rutasxemi.idruta_rutas.descripcion }}
             </td>
 
-            <td class="text-center">{{ getProgresoRuta(rutasxemi) }}</td>
+            <td class="text-center font-weight-bold"
+              [ngClass]="{ 'text-success': isRutaCompleta(rutasxemi) }">
+              {{ getProgresoRuta(rutasxemi) }}
+            </td>
 
             <td class="text-center">
               {{ rutasxemi.fechacierre | date: 'dd-MM-y' }}

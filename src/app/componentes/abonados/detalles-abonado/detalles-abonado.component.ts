@@ -52,6 +52,7 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
   _abonado: any;
   _facturas: any; //Planillas del Abonado
   _lecturas: any; //Historial de consumo
+  lecturasHistorial: any[] = [];
   elimdisabled = true;
   _rubrosxfac: any;
   totfac: number;
@@ -60,10 +61,16 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
   f_sendEmail: FormGroup;
 
   rango: number = 15;
+  readonly facturasPageSizeOptions: number[] = [10, 20, 50, 100];
   facturasPage: number = 0;
   facturasTotalPages: number = 0;
   facturasTotalElements: number = 0;
   facturasLoading: boolean = false;
+  readonly lecturasPageSizeOptions: number[] = [10, 20, 50, 100];
+  lecturasPage: number = 0;
+  lecturasSize: number = 10;
+  lecturasTotalPages: number = 0;
+  lecturasTotalElements: number = 0;
   estadoFE: string;
   esFE: string;
   fecFacturaActual: any = null;
@@ -432,6 +439,30 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
     this.facturasxAbonado(this.abonado.idabonado, nuevaPagina);
   }
 
+  irAPaginaFacturas(page: number): void {
+    if (page < 0 || page >= this.facturasTotalPages || page === this.facturasPage) {
+      return;
+    }
+    this.facturasxAbonado(this.abonado.idabonado, page);
+  }
+
+  onFacturasPageSizeChange(): void {
+    this.facturasPage = 0;
+    this.getFactura();
+  }
+
+  get facturasPageNumbers(): number[] {
+    const totalPages = Number(this.facturasTotalPages || 0);
+    if (totalPages <= 0) {
+      return [];
+    }
+    const current = Number(this.facturasPage || 0);
+    const start = Math.max(0, current - 2);
+    const end = Math.min(totalPages, start + 5);
+    const normalizedStart = Math.max(0, end - 5);
+    return Array.from({ length: end - normalizedStart }, (_, index) => normalizedStart + index);
+  }
+
   cargarHistorialNotificaciones(page: number = 0): void {
     if (!this.abonado?.idabonado) {
       return;
@@ -454,6 +485,54 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
 
   cambiarPaginaNotificaciones(delta: number): void {
     return;
+  }
+
+  imprimirHistorialConsumo(): void {
+    const lecturas = Array.isArray(this.lecturasHistorial) ? this.lecturasHistorial : [];
+    if (!lecturas.length) {
+      this.swal('warning', 'No hay datos en el historial de consumo para imprimir.');
+      return;
+    }
+
+    const doc = new jsPDF('p', 'pt', 'a4');
+    const cuenta = this.abonado?.idabonado ?? '';
+    const cliente = this.abonado?.nombre ?? 'Sin cliente';
+
+    doc.setFontSize(14);
+    doc.text('Historial de consumo', 40, 40);
+    doc.setFontSize(10);
+    doc.text(`Cuenta: ${cuenta}`, 40, 60);
+    doc.text(`Cliente: ${cliente}`, 40, 74);
+    doc.text(`Fecha: ${new Date().toLocaleDateString('es-EC')}`, 40, 88);
+
+    autoTable(doc, {
+      startY: 110,
+      head: [['#', 'Emision', 'Categoria', 'Novedad', 'F. Lectura', 'Consumo', 'Anterior', 'Actual', 'Planilla']],
+      body: lecturas.map((lectura: any, index: number) => [
+        index + 1,
+        lectura?.idrutaxemision_rutasxemision?.idemision_emisiones?.emision ?? '',
+        this.getLecturaCategoria(lectura),
+        this.getLecturaNovedad(lectura),
+        this.formatFechaReporte(this.getFechaLectura(lectura)),
+        Number((lectura?.lecturaactual ?? 0) - (lectura?.lecturaanterior ?? 0)).toFixed(0),
+        Number(lectura?.lecturaanterior ?? 0).toFixed(0),
+        Number(lectura?.lecturaactual ?? 0).toFixed(0),
+        lectura?.idfactura ?? '',
+      ]),
+      styles: { fontSize: 8, cellPadding: 4 },
+      headStyles: { fillColor: [52, 58, 64] },
+    });
+
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+  }
+
+  private formatFechaReporte(value: any): string {
+    if (!value) return '';
+    const fecha = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(fecha.getTime())) return '';
+    return fecha.toLocaleDateString('es-EC');
   }
 
   formatDestinatarios(destinatarios: string[] | null | undefined): string {
@@ -527,15 +606,71 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
 
   lecturasxAbonado(idabonado: number) {
     if (!idabonado) {
+      this.lecturasHistorial = [];
       this._lecturas = [];
+      this.lecturasPage = 0;
+      this.lecturasTotalPages = 0;
+      this.lecturasTotalElements = 0;
       return;
     }
-    this.lecService.getLecturasxIdabonado(idabonado, 15).subscribe({
+    this.lecService.getLecturasxIdabonado(idabonado, 1000).subscribe({
       next: (datos) => {
-        this._lecturas = datos;
+        this.lecturasHistorial = Array.isArray(datos) ? datos : [];
+        this.lecturasPage = 0;
+        this.aplicarPaginacionLecturas();
       },
       error: (err) => console.error(err.error),
     });
+  }
+
+  aplicarPaginacionLecturas(): void {
+    const historial = Array.isArray(this.lecturasHistorial) ? this.lecturasHistorial : [];
+    this.lecturasTotalElements = historial.length;
+    this.lecturasTotalPages = historial.length
+      ? Math.ceil(historial.length / this.lecturasSize)
+      : 0;
+
+    if (this.lecturasTotalPages > 0 && this.lecturasPage >= this.lecturasTotalPages) {
+      this.lecturasPage = this.lecturasTotalPages - 1;
+    }
+
+    const inicio = this.lecturasPage * this.lecturasSize;
+    const fin = inicio + this.lecturasSize;
+    this._lecturas = historial.slice(inicio, fin);
+  }
+
+  cambiarPaginaLecturas(delta: number): void {
+    const nuevaPagina = this.lecturasPage + delta;
+    if (nuevaPagina < 0 || nuevaPagina >= this.lecturasTotalPages) {
+      return;
+    }
+    this.lecturasPage = nuevaPagina;
+    this.aplicarPaginacionLecturas();
+  }
+
+  irAPaginaLecturas(page: number): void {
+    if (page < 0 || page >= this.lecturasTotalPages || page === this.lecturasPage) {
+      return;
+    }
+    this.lecturasPage = page;
+    this.aplicarPaginacionLecturas();
+  }
+
+  onLecturasPageSizeChange(): void {
+    this.lecturasPage = 0;
+    this.aplicarPaginacionLecturas();
+  }
+
+  get lecturasPageNumbers(): number[] {
+    const totalPages = Number(this.lecturasTotalPages || 0);
+    if (totalPages <= 0) {
+      return [];
+    }
+    const current = Number(this.lecturasPage || 0);
+    const start = Math.max(0, current - 2);
+    const end = Math.min(totalPages, start + 5);
+    const normalizedStart = Math.max(0, end - 5);
+    return Array.from({ length: end - normalizedStart }, (_, index) => normalizedStart + index);
   }
   getConveniosPago(idabonado: number) {
     this.s_convenios.getByReferencia(idabonado.toString()).subscribe({
@@ -686,15 +821,16 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
 
     var y = [];
     var emision: string;
-    for (let i = 0; i <= this._lecturas.length - 1; i++) {
+    const lecturasGrafico = Array.isArray(this.lecturasHistorial) ? this.lecturasHistorial : [];
+    for (let i = 0; i <= lecturasGrafico.length - 1; i++) {
       emision =
-        this._lecturas[i].idrutaxemision_rutasxemision.idemision_emisiones
+        lecturasGrafico[i].idrutaxemision_rutasxemision.idemision_emisiones
           .emision;
       emision = '20' + emision.substring(0, 2) + '-' + emision.substring(2, 4);
       y.push({
         mes: emision,
         consumo:
-          this._lecturas[i].lecturaactual - this._lecturas[i].lecturaanterior,
+          lecturasGrafico[i].lecturaactual - lecturasGrafico[i].lecturaanterior,
       });
     }
     // Si ya existía, primero lo destruye

@@ -201,9 +201,7 @@
 
                   <table class="table table-hover table-sm table-bordered mb-0">
                     <caption class="small mark">
-                      Planillas registradas: <strong>{{facturasTotalElements}}</strong>&nbsp;&nbsp;&nbsp;&nbsp;
-                      <input type="number" min="1" class="form-control form-control-sm d-inline-block w-auto"
-                        [(ngModel)]="rango" (change)="getFactura()">
+                      Planillas registradas: <strong>{{facturasTotalElements}}</strong>
                     </caption>
                     <thead class="theadPlanillas">
                       <tr class="text-center">
@@ -237,7 +235,47 @@
                     </tbody>
                   </table>
 
-                  <div class="d-flex justify-content-between align-items-center mt-2" *ngIf="facturasTotalPages > 0">
+                  <div class="d-flex justify-content-between align-items-center mt-2 flex-wrap"
+                    *ngIf="facturasTotalPages > 0">
+                    <div class="d-flex align-items-center flex-wrap mb-2 mb-md-0">
+                      <label class="small text-muted mb-0 mr-2">Ver:</label>
+                      <select class="form-control form-control-sm w-auto mr-3"
+                        [(ngModel)]="rango" (change)="onFacturasPageSizeChange()">
+                        <option *ngFor="let option of facturasPageSizeOptions" [ngValue]="option">
+                          {{ option }}
+                        </option>
+                      </select>
+                    </div>
+                    <div class="small text-muted mb-2 mb-md-0">
+                      PÃ¡gina {{facturasPage + 1}} de {{facturasTotalPages}}
+                    </div>
+                    <div class="d-flex align-items-center flex-wrap">
+                      <div class="btn-group mr-2">
+                        <button type="button" class="btn btn-outline-secondary btn-sm"
+                          (click)="cambiarPaginaFacturas(-1)" [disabled]="facturasPage === 0 || facturasLoading">
+                          Anterior
+                        </button>
+                      </div>
+                      <div class="btn-group mr-2">
+                        <button type="button" *ngFor="let pageNumber of facturasPageNumbers"
+                          class="btn btn-sm"
+                          [ngClass]="pageNumber === facturasPage ? 'btn-primary' : 'btn-outline-secondary'"
+                          (click)="irAPaginaFacturas(pageNumber)"
+                          [disabled]="facturasLoading">
+                          {{ pageNumber + 1 }}
+                        </button>
+                      </div>
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-outline-secondary btn-sm"
+                          (click)="cambiarPaginaFacturas(1)"
+                          [disabled]="facturasPage + 1 >= facturasTotalPages || facturasLoading">
+                          Siguiente
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="d-flex justify-content-between align-items-center mt-2" *ngIf="false && facturasTotalPages > 0">
                     <div class="small text-muted">
                       Página {{facturasPage + 1}} de {{facturasTotalPages}}
                     </div>
@@ -274,6 +312,9 @@
 
                   <div *ngIf="!grafic">
                     <table class="table table-hover table-sm table-bordered mb-0">
+                      <caption class="small mark">
+                        Lecturas registradas: <strong>{{lecturasTotalElements}}</strong>
+                      </caption>
                       <thead class="theadPlanillas">
                         <tr class="text-center">
                           <th>Emisión</th>
@@ -312,6 +353,48 @@
                         </tr>
                       </tbody>
                     </table>
+                    <div class="d-flex justify-content-between align-items-center mt-2 flex-wrap"
+                      *ngIf="lecturasTotalPages > 0">
+                      <div class="d-flex align-items-center flex-wrap mb-2 mb-md-0">
+                        <label class="small text-muted mb-0 mr-2">Ver:</label>
+                        <select class="form-control form-control-sm w-auto mr-3"
+                          [(ngModel)]="lecturasSize" (change)="onLecturasPageSizeChange()">
+                          <option *ngFor="let option of lecturasPageSizeOptions" [ngValue]="option">
+                            {{ option }}
+                          </option>
+                        </select>
+                        <button type="button" class="btn btn-outline-primary btn-sm"
+                          (click)="imprimirHistorialConsumo()">
+                          <i class="bi bi-printer"></i> Imprimir historial
+                        </button>
+                      </div>
+                      <div class="small text-muted mb-2 mb-md-0">
+                        P&aacute;gina {{lecturasPage + 1}} de {{lecturasTotalPages}}
+                      </div>
+                      <div class="d-flex align-items-center flex-wrap">
+                        <div class="btn-group mr-2">
+                          <button type="button" class="btn btn-outline-secondary btn-sm"
+                            (click)="cambiarPaginaLecturas(-1)" [disabled]="lecturasPage === 0">
+                            Anterior
+                          </button>
+                        </div>
+                        <div class="btn-group mr-2">
+                          <button type="button" *ngFor="let pageNumber of lecturasPageNumbers"
+                            class="btn btn-sm"
+                            [ngClass]="pageNumber === lecturasPage ? 'btn-primary' : 'btn-outline-secondary'"
+                            (click)="irAPaginaLecturas(pageNumber)">
+                            {{ pageNumber + 1 }}
+                          </button>
+                        </div>
+                        <div class="btn-group">
+                          <button type="button" class="btn btn-outline-secondary btn-sm"
+                            (click)="cambiarPaginaLecturas(1)"
+                            [disabled]="lecturasPage + 1 >= lecturasTotalPages">
+                            Siguiente
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <div *ngIf="grafic" class="text-center">
