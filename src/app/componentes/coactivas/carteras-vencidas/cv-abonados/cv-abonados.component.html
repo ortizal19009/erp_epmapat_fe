@@ -71,16 +71,16 @@
             <thead class="cabecera text-center">
               <tr>
                 <th></th>
-                <th class="sortable" (click)="ordenarPor('cuenta')">Cuenta <i [class]="getSortIcon('cuenta')"></i></th>
-                <th class="sortable" (click)="ordenarPor('responsable')">Responsable <i [class]="getSortIcon('responsable')"></i></th>
-                <th class="sortable" (click)="ordenarPor('identificacion')">Identificacion <i [class]="getSortIcon('identificacion')"></i></th>
-                <th class="sortable" (click)="ordenarPor('categoria')">Categoria <i [class]="getSortIcon('categoria')"></i></th>
-                <th class="sortable" (click)="ordenarPor('ruta')">Ruta <i [class]="getSortIcon('ruta')"></i></th>
-                <th class="sortable" (click)="ordenarPor('estado')">Estado <i [class]="getSortIcon('estado')"></i></th>
-                <th class="sortable" (click)="ordenarPor('facturas')">Facturas <i [class]="getSortIcon('facturas')"></i></th>
-                <th class="sortable" (click)="ordenarPor('valor')">Valor <i [class]="getSortIcon('valor')"></i></th>
-                <th class="sortable" (click)="ordenarPor('interes')">Interes <i [class]="getSortIcon('interes')"></i></th>
-                <th class="sortable" (click)="ordenarPor('totaldeuda')">Total deuda <i [class]="getSortIcon('totaldeuda')"></i></th>
+                <th class="sortable" (click)="ordenarPor('cuenta')">Cuenta <i class="bi" *ngIf="getSortIcon('cuenta')" [ngClass]="getSortIcon('cuenta')"></i></th>
+                <th class="sortable" (click)="ordenarPor('responsable')">Responsable <i class="bi" *ngIf="getSortIcon('responsable')" [ngClass]="getSortIcon('responsable')"></i></th>
+                <th class="sortable" (click)="ordenarPor('identificacion')">Identificacion <i class="bi" *ngIf="getSortIcon('identificacion')" [ngClass]="getSortIcon('identificacion')"></i></th>
+                <th class="sortable" (click)="ordenarPor('categoria')">Categoria <i class="bi" *ngIf="getSortIcon('categoria')" [ngClass]="getSortIcon('categoria')"></i></th>
+                <th class="sortable" (click)="ordenarPor('ruta')">Ruta <i class="bi" *ngIf="getSortIcon('ruta')" [ngClass]="getSortIcon('ruta')"></i></th>
+                <th class="sortable" (click)="ordenarPor('estado')">Estado <i class="bi" *ngIf="getSortIcon('estado')" [ngClass]="getSortIcon('estado')"></i></th>
+                <th class="sortable" (click)="ordenarPor('facturas')">Facturas <i class="bi" *ngIf="getSortIcon('facturas')" [ngClass]="getSortIcon('facturas')"></i></th>
+                <th class="sortable" (click)="ordenarPor('valor')">Valor <i class="bi" *ngIf="getSortIcon('valor')" [ngClass]="getSortIcon('valor')"></i></th>
+                <th class="sortable" (click)="ordenarPor('interes')">Interes <i class="bi" *ngIf="getSortIcon('interes')" [ngClass]="getSortIcon('interes')"></i></th>
+                <th class="sortable" (click)="ordenarPor('totaldeuda')">Total deuda <i class="bi" *ngIf="getSortIcon('totaldeuda')" [ngClass]="getSortIcon('totaldeuda')"></i></th>
               </tr>
             </thead>
             <tbody class="detalle">

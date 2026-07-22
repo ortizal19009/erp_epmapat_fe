@@ -268,8 +268,8 @@ export class CvAbonadosComponent implements OnInit {
   }
 
   getSortIcon(column: string): string {
-    if (this.sortColumn !== column) return 'fa fa-sort';
-    return this.sortDirection === 'asc' ? 'fa fa-sort-asc' : 'fa fa-sort-desc';
+    if (this.sortColumn !== column) return '';
+    return this.sortDirection === 'asc' ? 'bi-sort-up' : 'bi-sort-down';
   }
 
   imprimirListado() {
