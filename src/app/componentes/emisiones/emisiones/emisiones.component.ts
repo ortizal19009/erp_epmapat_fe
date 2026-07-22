@@ -372,7 +372,7 @@ export class EmisionesComponent implements OnInit, OnDestroy {
       const lecturaActual = Number(lecturaGuardada?.lecturaactual ?? 0);
       const lecturaAnterior = Number(lecturaGuardada?.lecturaanterior ?? 0);
       const consumo = lecturaActual - lecturaAnterior;
-      const lecturaTomada = lecturaActual > 0;
+      const lecturaTomada = lecturaActual > 0 && consumo >= 0;
 
       ruta.lecturasCargadas = Number(ruta.lecturasCargadas ?? 0);
       ruta.totalLecturas = Number(ruta.totalLecturas ?? 0);
