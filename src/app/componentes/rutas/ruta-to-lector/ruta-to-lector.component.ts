@@ -10,6 +10,7 @@ import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import * as ExcelJS from 'exceljs';
 
 @Component({
   selector: 'app-ruta-to-lector',
@@ -22,6 +23,7 @@ export class RutaToLectorComponent implements OnInit {
   _usuarios: any[] = [];
   filtro: string = '';
   _rutas: any[] = [];
+  rutasFiltradas: any[] = [];
   _emisiones: any[] = [];
   emisionSelected: any;
   usrxrutas: any;
@@ -30,10 +32,12 @@ export class RutaToLectorComponent implements OnInit {
   usrxruta: any;
   swaddruta: boolean = false;
   filtrarRutas: string = '';
+  cargandoRutas = false;
   ocupadas = new Set<number>();
   exportandoReporte = false;
   pdfPreviewUrl: SafeResourceUrl | null = null;
   private pdfPreviewObjectUrl: string | null = null;
+  private filtroRutasTimer: ReturnType<typeof setTimeout> | null = null;
   rutaPreview: any = null;
   previewTitulo = 'Vista previa PDF';
 
@@ -49,7 +53,6 @@ export class RutaToLectorComponent implements OnInit {
 
   ngOnInit(): void {
     this.getUsuarioLectores();
-    this.getAllRutas();
     this.getEmisiones();
   }
 
@@ -102,17 +105,50 @@ export class RutaToLectorComponent implements OnInit {
   }
 
   getAllRutas() {
-    this.rutasService.getListaRutas().subscribe((data: any) => {
-      this._rutas = data;
+    this.cargandoRutas = true;
+    this.rutasService.getRutasAsignacion(
+      this.emisionSelected?.idemision,
+      this.filtrarRutas,
+      true,
+      this.filtrarRutas?.trim() ? 300 : 200
+    ).subscribe({
+      next: (data: any) => {
+        this._rutas = Array.isArray(data) ? data : [];
+        this.rutasFiltradas = [...this._rutas];
+        this.ocupadas = new Set(
+          this._rutas
+            .filter((ruta: any) => !!ruta?.ocupada)
+            .map((ruta: any) => ruta.idruta)
+        );
+      },
+      error: (e: any) => {
+        console.error(e?.error ?? e);
+        this._rutas = [];
+        this.rutasFiltradas = [];
+      },
+      complete: () => {
+        this.cargandoRutas = false;
+      }
     });
   }
 
   getEmisiones() {
-    this.emisionesService.getAllEmisiones().then((data) => {
-      this._emisiones = data;
-      this.emisionSelected = data[0];
-      this.swaddruta = data[0]?.estado === 0;
-      this.cargarOcupadas();
+    this.emisionesService.findAllEmisionesBasic().subscribe({
+      next: (data: any) => {
+        this._emisiones = Array.isArray(data) ? data : [];
+
+        if (!this._emisiones.length) {
+          this.emisionSelected = null;
+          this.swaddruta = false;
+          this.ocupadas = new Set<number>();
+          return;
+        }
+
+        this.emisionSelected = this._emisiones[0];
+        this.swaddruta = this._emisiones[0]?.estado === 0;
+        this.cargarOcupadas();
+      },
+      error: (e: any) => console.error(e?.error ?? e),
     });
   }
 
@@ -120,8 +156,9 @@ export class RutaToLectorComponent implements OnInit {
     if (!this.emisionSelected) return;
 
     this.swaddruta = this.emisionSelected.estado === 0;
-    this.cargarOcupadas();
     this.cerrarVistaPreviaPdf();
+    this.filtrarRutas = '';
+    this.getAllRutas();
 
     if (this.usuarioSeletced) {
       this.onCellClick(null, this.usuarioSeletced);
@@ -129,6 +166,11 @@ export class RutaToLectorComponent implements OnInit {
   }
 
   cargarOcupadas() {
+    if (!this.emisionSelected?.idemision) {
+      this.ocupadas = new Set<number>();
+      return;
+    }
+
     this.usrxrutaService.getRutasOcupadas(this.emisionSelected.idemision).subscribe({
       next: (ids: number[]) => this.ocupadas = new Set(ids),
       error: (e) => console.error(e)
@@ -166,6 +208,17 @@ export class RutaToLectorComponent implements OnInit {
 
     this._rutasAsignadas = [...this._rutasAsignadas, r];
     this.ocupadas.add(r.idruta);
+  }
+
+  abrirModalRutas() {
+    this.getAllRutas();
+  }
+
+  onFiltroRutasChange() {
+    if (this.filtroRutasTimer) {
+      clearTimeout(this.filtroRutasTimer);
+    }
+    this.filtroRutasTimer = setTimeout(() => this.getAllRutas(), 250);
   }
 
   dropRuta(r: any) {
@@ -216,6 +269,14 @@ export class RutaToLectorComponent implements OnInit {
     return false;
   }
 
+  trackByRuta(_: number, ruta: any): number {
+    return ruta?.idruta;
+  }
+
+  trackByUsuario(_: number, usuario: any): number {
+    return usuario?.idusuario;
+  }
+
   onSubmit() {
     this.usrxruta = {
       rutas: this._rutasAsignadas,
@@ -233,7 +294,7 @@ export class RutaToLectorComponent implements OnInit {
     });
   }
 
-  async exportarRutaAsignada(ruta: any, formato: 'pdf' | 'xml') {
+  async exportarRutaAsignada(ruta: any, formato: 'pdf' | 'xlsx') {
     if (!this.usuarioSeletced?.idusuario || !this.emisionSelected?.idemision) {
       this.swal('warning', 'Seleccione un lector y una emisión');
       return;
@@ -257,7 +318,7 @@ export class RutaToLectorComponent implements OnInit {
       if (formato === 'pdf') {
         this.abrirVistaPreviaPdf(reporte, 'Hoja de lectura por ruta asignada');
       } else {
-        this.generarXmlRutaAsignada(reporte);
+        await this.generarExcelRutaAsignada(reporte);
       }
     } catch (error) {
       console.error('Error exportando ruta asignada:', error);
@@ -378,51 +439,48 @@ export class RutaToLectorComponent implements OnInit {
     return doc.output('blob');
   }
 
-  private generarXmlRutaAsignada(reporte: any) {
-    const detallesXml = reporte.detalles
-      .map((item: any) => [
-        '    <detalle>',
-        `      <numero>${this.escapeXml(item.numero)}</numero>`,
-        `      <idabonado>${this.escapeXml(item.idabonado)}</idabonado>`,
-        `      <responsablePago>${this.escapeXml(item.responsablePago)}</responsablePago>`,
-        `      <identificacion>${this.escapeXml(item.identificacion)}</identificacion>`,
-        `      <categoria>${this.escapeXml(item.categoria)}</categoria>`,
-        `      <lecturaAnterior>${this.escapeXml(item.lecturaAnterior)}</lecturaAnterior>`,
-        '      <lecturaActual></lecturaActual>',
-        `      <observacion>${this.escapeXml(item.observacion)}</observacion>`,
-        '    </detalle>'
-      ].join('\n'))
-      .join('\n');
+  private async generarExcelRutaAsignada(reporte: any) {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Ruta asignada');
 
-    const contenido = [
-      '<?xml version="1.0" encoding="UTF-8"?>',
-      '<reporteRutasAsignadas>',
-      '  <cabecera>',
-      `    <lector>${this.escapeXml(reporte.lector)}</lector>`,
-      `    <idusuario>${this.escapeXml(reporte.idusuario)}</idusuario>`,
-      `    <emision>${this.escapeXml(reporte.emision)}</emision>`,
-      `    <fechaGeneracion>${this.escapeXml(reporte.fechaGeneracion.toISOString())}</fechaGeneracion>`,
-      '  </cabecera>',
-      '  <ruta>',
-      `    <idruta>${this.escapeXml(reporte.ruta?.idruta)}</idruta>`,
-      `    <codigo>${this.escapeXml(reporte.ruta?.codigo)}</codigo>`,
-      `    <descripcion>${this.escapeXml(reporte.ruta?.descripcion)}</descripcion>`,
-      '  </ruta>',
-      '  <detalles>',
-      detallesXml,
-      '  </detalles>',
-      '</reporteRutasAsignadas>'
-    ].join('\n');
+    worksheet.addRow(['Hoja de lectura por ruta asignada']);
+    worksheet.addRow(['Lector', reporte.lector]);
+    worksheet.addRow(['Id usuario', reporte.idusuario]);
+    worksheet.addRow(['Emision', reporte.emision]);
+    worksheet.addRow(['Fecha', reporte.fechaGeneracion.toLocaleString('es-EC')]);
+    worksheet.addRow(['Ruta', reporte.ruta?.descripcion ?? '']);
+    worksheet.addRow(['Codigo ruta', reporte.ruta?.codigo ?? '']);
+    worksheet.addRow([]);
 
-    const blob = new Blob([contenido], { type: 'application/xml;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = this.buildNombreArchivo(reporte.ruta, 'xml');
-    a.click();
-    URL.revokeObjectURL(url);
+    const headerRow = worksheet.addRow([
+      'N°',
+      'Id abonado',
+      'Responsable de pago',
+      'Identificacion',
+      'Categoria',
+      'Lectura anterior',
+      'Lectura actual',
+      'Observacion'
+    ]);
+    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF34495E' } };
 
-    this.swal('success', 'XML generado correctamente');
+    reporte.detalles.forEach((item: any) => {
+      worksheet.addRow([
+        item.numero,
+        item.idabonado,
+        item.responsablePago,
+        item.identificacion,
+        item.categoria,
+        item.lecturaAnterior,
+        item.lecturaActual,
+        item.observacion
+      ]);
+    });
+
+    this.configurarAnchos(worksheet, [10, 14, 34, 18, 18, 16, 16, 32]);
+    await this.descargarWorkbook(workbook, this.buildNombreArchivo(reporte.ruta, 'xlsx'));
+    this.swal('success', 'Excel generado correctamente');
   }
 
   descargarPdfPreview() {
@@ -450,7 +508,7 @@ export class RutaToLectorComponent implements OnInit {
     this.previewTitulo = 'Vista previa PDF';
   }
 
-  async exportarReporteGeneral(formato: 'pdf' | 'xml') {
+  async exportarReporteGeneral(formato: 'pdf' | 'xlsx') {
     if (!this.emisionSelected?.idemision) {
       this.swal('warning', 'Seleccione una emisión');
       return;
@@ -473,7 +531,7 @@ export class RutaToLectorComponent implements OnInit {
         this.rutaPreview = null;
         this.previewTitulo = 'Reporte general de rutas asignadas';
       } else {
-        this.generarXmlReporteGeneral(reporte);
+        await this.generarExcelReporteGeneral(reporte);
       }
     } catch (error) {
       console.error('Error exportando reporte general:', error);
@@ -483,7 +541,7 @@ export class RutaToLectorComponent implements OnInit {
     }
   }
 
-  async exportarLecturasGenerales(formato: 'pdf' | 'xml') {
+  async exportarLecturasGenerales(formato: 'pdf' | 'xlsx') {
     if (!this.emisionSelected?.idemision) {
       this.swal('warning', 'Seleccione una emisión');
       return;
@@ -506,7 +564,7 @@ export class RutaToLectorComponent implements OnInit {
         this.rutaPreview = null;
         this.previewTitulo = 'Reporte general de lecturas';
       } else {
-        this.generarXmlLecturasGenerales(reporte);
+        await this.generarExcelLecturasGenerales(reporte);
       }
     } catch (error) {
       console.error('Error exportando lecturas generales:', error);
@@ -685,105 +743,112 @@ export class RutaToLectorComponent implements OnInit {
     return doc.output('blob');
   }
 
-  private generarXmlReporteGeneral(reporte: any) {
-    const detallesXml = reporte.detalles.map((item: any) => [
-      '    <asignacion>',
-      `      <numero>${this.escapeXml(item.numero)}</numero>`,
-      `      <idusuario>${this.escapeXml(item.idusuario)}</idusuario>`,
-      `      <lector>${this.escapeXml(item.lector)}</lector>`,
-      `      <totalRutas>${this.escapeXml(item.totalRutas)}</totalRutas>`,
-      '      <rutas>',
-      ...(item.rutas ?? []).map((ruta: any) => [
-        '        <ruta>',
-        `          <idruta>${this.escapeXml(ruta.idruta)}</idruta>`,
-        `          <codigo>${this.escapeXml(ruta.codigo)}</codigo>`,
-        `          <descripcion>${this.escapeXml(ruta.descripcion)}</descripcion>`,
-        '        </ruta>'
-      ].join('\n')),
-      '      </rutas>',
-      '    </asignacion>'
-    ].join('\n')).join('\n');
+  private async generarExcelReporteGeneral(reporte: any) {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Rutas asignadas');
 
-    const contenido = [
-      '<?xml version="1.0" encoding="UTF-8"?>',
-      '<reporteGeneralRutas>',
-      '  <cabecera>',
-      `    <emision>${this.escapeXml(reporte.emision)}</emision>`,
-      `    <fechaGeneracion>${this.escapeXml(reporte.fechaGeneracion.toISOString())}</fechaGeneracion>`,
-      '  </cabecera>',
-      '  <asignaciones>',
-      detallesXml,
-      '  </asignaciones>',
-      '</reporteGeneralRutas>'
-    ].join('\n');
+    worksheet.addRow(['Reporte general de rutas asignadas']);
+    worksheet.addRow(['Emision', reporte.emision]);
+    worksheet.addRow(['Fecha', reporte.fechaGeneracion.toLocaleString('es-EC')]);
+    worksheet.addRow([]);
 
-    const blob = new Blob([contenido], { type: 'application/xml;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `reporte_general_rutas_${this.emisionSelected?.emision ?? 'emision'}.xml`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const headerRow = worksheet.addRow([
+      'N°',
+      'Cod. lector',
+      'Lector',
+      'Total rutas',
+      'Rutas asignadas'
+    ]);
+    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF34495E' } };
 
-    this.swal('success', 'XML general generado correctamente');
+    reporte.detalles.forEach((item: any) => {
+      worksheet.addRow([
+        item.numero,
+        item.idusuario,
+        item.lector,
+        item.totalRutas,
+        item.rutas.map((ruta: any) => `${ruta.codigo || ruta.idruta} - ${ruta.descripcion}`).join(', ')
+      ]);
+    });
+
+    this.configurarAnchos(worksheet, [10, 14, 26, 14, 60]);
+    await this.descargarWorkbook(workbook, `reporte_general_rutas_${this.emisionSelected?.emision ?? 'emision'}.xlsx`);
+    this.swal('success', 'Excel general generado correctamente');
   }
 
-  private generarXmlLecturasGenerales(reporte: any) {
-    const detallesXml = reporte.detalles.map((item: any) => [
-      '    <lectura>',
-      `      <numero>${this.escapeXml(item.numero)}</numero>`,
-      `      <lector>${this.escapeXml(item.lector)}</lector>`,
-      `      <idusuario>${this.escapeXml(item.idusuario)}</idusuario>`,
-      `      <rutaCodigo>${this.escapeXml(item.rutaCodigo)}</rutaCodigo>`,
-      `      <rutaDescripcion>${this.escapeXml(item.rutaDescripcion)}</rutaDescripcion>`,
-      `      <idabonado>${this.escapeXml(item.idabonado)}</idabonado>`,
-      `      <responsablePago>${this.escapeXml(item.responsablePago)}</responsablePago>`,
-      `      <identificacion>${this.escapeXml(item.identificacion)}</identificacion>`,
-      `      <categoria>${this.escapeXml(item.categoria)}</categoria>`,
-      `      <lecturaAnterior>${this.escapeXml(item.lecturaAnterior)}</lecturaAnterior>`,
-      `      <lecturaActual>${this.escapeXml(item.lecturaActual)}</lecturaActual>`,
-      `      <observacion>${this.escapeXml(item.observacion)}</observacion>`,
-      '    </lectura>'
-    ].join('\n')).join('\n');
+  private async generarExcelLecturasGenerales(reporte: any) {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Lecturas');
 
-    const contenido = [
-      '<?xml version="1.0" encoding="UTF-8"?>',
-      '<reporteGeneralLecturas>',
-      '  <cabecera>',
-      `    <emision>${this.escapeXml(reporte.emision)}</emision>`,
-      `    <fechaGeneracion>${this.escapeXml(reporte.fechaGeneracion.toISOString())}</fechaGeneracion>`,
-      '  </cabecera>',
-      '  <lecturas>',
-      detallesXml,
-      '  </lecturas>',
-      '</reporteGeneralLecturas>'
-    ].join('\n');
+    worksheet.addRow(['Reporte general de lecturas']);
+    worksheet.addRow(['Emision', reporte.emision]);
+    worksheet.addRow(['Fecha', reporte.fechaGeneracion.toLocaleString('es-EC')]);
+    worksheet.addRow([]);
 
-    const blob = new Blob([contenido], { type: 'application/xml;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `reporte_general_lecturas_${this.emisionSelected?.emision ?? 'emision'}.xml`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const headerRow = worksheet.addRow([
+      'N°',
+      'Lector',
+      'Id usuario',
+      'Codigo ruta',
+      'Ruta',
+      'Id abonado',
+      'Responsable',
+      'Identificacion',
+      'Categoria',
+      'Lectura anterior',
+      'Lectura actual',
+      'Observacion'
+    ]);
+    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF34495E' } };
 
-    this.swal('success', 'XML de lecturas generado correctamente');
+    reporte.detalles.forEach((item: any) => {
+      worksheet.addRow([
+        item.numero,
+        item.lector,
+        item.idusuario,
+        item.rutaCodigo,
+        item.rutaDescripcion,
+        item.idabonado,
+        item.responsablePago,
+        item.identificacion,
+        item.categoria,
+        item.lecturaAnterior,
+        item.lecturaActual,
+        item.observacion
+      ]);
+    });
+
+    this.configurarAnchos(worksheet, [10, 24, 14, 14, 28, 14, 28, 18, 18, 16, 16, 30]);
+    await this.descargarWorkbook(workbook, `reporte_general_lecturas_${this.emisionSelected?.emision ?? 'emision'}.xlsx`);
+    this.swal('success', 'Excel de lecturas generado correctamente');
   }
 
-  private buildNombreArchivo(ruta: any, extension: 'pdf' | 'xml'): string {
+  private buildNombreArchivo(ruta: any, extension: 'pdf' | 'xlsx'): string {
     const lector = (this.usuarioSeletced?.nomusu ?? 'lector').replace(/\s+/g, '_');
     const emision = (this.emisionSelected?.emision ?? 'emision').toString().replace(/\s+/g, '_');
     const rutaNombre = (ruta?.descripcion ?? 'ruta').toString().replace(/\s+/g, '_');
     return `ruta_asignada_${rutaNombre}_${lector}_${emision}.${extension}`;
   }
 
-  private escapeXml(value: any): string {
-    return String(value ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&apos;');
+  private configurarAnchos(worksheet: ExcelJS.Worksheet, widths: number[]) {
+    widths.forEach((width, index) => {
+      worksheet.getColumn(index + 1).width = width;
+    });
+  }
+
+  private async descargarWorkbook(workbook: ExcelJS.Workbook, filename: string) {
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   private swal(icon: 'success' | 'error' | 'info' | 'warning', mensaje: string) {

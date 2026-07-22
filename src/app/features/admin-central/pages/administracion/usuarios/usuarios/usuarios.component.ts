@@ -23,6 +23,8 @@ export class UsuariosComponent implements OnInit {
   filtroEstado: 'ACTIVOS' | 'INACTIVOS' | 'TODOS' = 'ACTIVOS';
   filtroVinculo: 'TODOS' | 'VINCULADOS' | 'NO_VINCULADOS' = 'TODOS';
   showAddForm: boolean = false;
+  sortColumn: 'identificausu' | 'alias' | 'nomusu' | 'personal' | 'estado' = 'nomusu';
+  sortDirection: 'asc' | 'desc' = 'asc';
 
   // Modal eliminar
   usuario = {} as Usuario;
@@ -347,14 +349,66 @@ export class UsuariosComponent implements OnInit {
     if (this.filtroVinculo === 'VINCULADOS') base = base.filter((u: any) => this.hasPersonalLink(u));
     if (this.filtroVinculo === 'NO_VINCULADOS') base = base.filter((u: any) => !this.hasPersonalLink(u));
 
-    if (!term) return base;
+    if (term) {
+      base = base.filter((u: any) => {
+        const id = String(u?.identificausu || '').toLowerCase();
+        const alias = String(u?.alias || '').toLowerCase();
+        const nom = String(u?.nomusu || '').toLowerCase();
+        return id.includes(term) || alias.includes(term) || nom.includes(term);
+      });
+    }
 
-    return base.filter((u: any) => {
-      const id = String(u?.identificausu || '').toLowerCase();
-      const alias = String(u?.alias || '').toLowerCase();
-      const nom = String(u?.nomusu || '').toLowerCase();
-      return id.includes(term) || alias.includes(term) || nom.includes(term);
-    });
+    return [...base].sort((a: any, b: any) => this.compareUsuarios(a, b));
+  }
+
+  toggleSort(column: 'identificausu' | 'alias' | 'nomusu' | 'personal' | 'estado'): void {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+      return;
+    }
+
+    this.sortColumn = column;
+    this.sortDirection = 'asc';
+  }
+
+  getSortIcon(column: 'identificausu' | 'alias' | 'nomusu' | 'personal' | 'estado'): string {
+    if (this.sortColumn !== column) {
+      return '';
+    }
+    return this.sortDirection === 'asc' ? 'bi-sort-up' : 'bi-sort-down';
+  }
+
+  private compareUsuarios(a: any, b: any): number {
+    const av = this.getSortValue(a);
+    const bv = this.getSortValue(b);
+
+    let result = 0;
+    if (typeof av === 'number' && typeof bv === 'number') {
+      result = av - bv;
+    } else {
+      result = `${av}`.localeCompare(`${bv}`, 'es', {
+        numeric: true,
+        sensitivity: 'base',
+      });
+    }
+
+    return this.sortDirection === 'asc' ? result : -result;
+  }
+
+  private getSortValue(usuario: any): string | number {
+    switch (this.sortColumn) {
+      case 'estado':
+        return usuario?.estado ? 1 : 0;
+      case 'personal':
+        return this.personalLinkLabel(usuario);
+      case 'identificausu':
+        return usuario?.identificausu || '';
+      case 'alias':
+        return usuario?.alias || '';
+      case 'nomusu':
+      default:
+        return usuario?.nomusu || '';
+    }
   }
 
   // =========================

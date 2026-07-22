@@ -332,6 +332,7 @@ import { AddTrandetramiComponent } from './componentes/contabilidad/transaci/add
 import { ModiBenextranComponent } from './componentes/contabilidad/transaci/modi-benextran/modi-benextran.component';
 import { ModiPagoscobrosComponent } from './componentes/contabilidad/transaci/modi-pagoscobros/modi-pagoscobros.component';
 import { VisualFormatDirective } from './directives/visual-format.directive';
+import { AutoSortTableDirective } from './directives/auto-sort-table.directive';
 import { AddReportejrComponent } from './features/admin-central/pages/administracion/reportesjr/add-reportejr/add-reportejr.component';
 import { ImpReportejrComponent } from './features/admin-central/pages/administracion/reportesjr/imp-reportejr/imp-reportejr.component';
 import { ModiReportejrComponent } from './features/admin-central/pages/administracion/reportesjr/modi-reportejr/modi-reportejr.component';
@@ -349,6 +350,7 @@ import { UsuarioAutocompleteComponent } from './componentes/facelectro/usuario-a
 @NgModule({
   declarations: [
     VisualFormatDirective,
+    AutoSortTableDirective,
     AppComponent,
     MainHeaderComponent,
     MainSidebarComponent,

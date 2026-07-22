@@ -46,6 +46,10 @@ export class EmisionService {
   findAllEmisiones() {
     return this.http.get<Emisiones[]>(`${baseUrl}/findall`);
   }
+
+  findAllEmisionesBasic() {
+    return this.http.get<Emisiones[]>(`${baseUrl}/findall-basic`);
+  }
   getResumenEmision(limit: number) {
     let resp = firstValueFrom(
       this.http.get(`${baseUrl}/resumen?limit=${limit}`)
@@ -55,6 +59,10 @@ export class EmisionService {
 
   getControlDashboard(limit = 24) {
     return this.http.get<any>(`${baseUrl}/control/dashboard?limit=${limit}`);
+  }
+
+  getControlRango(desde: string, hasta: string) {
+    return this.http.get<any[]>(`${baseUrl}/control/rango?desde=${desde}&hasta=${hasta}`);
   }
 
   getControlDetalle(idemision: number) {

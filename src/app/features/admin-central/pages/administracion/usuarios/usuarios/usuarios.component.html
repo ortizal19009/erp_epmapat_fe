@@ -25,9 +25,9 @@
           </select>
 
           <select class="custom-select custom-select-sm mr-2" style="width: 180px;" [(ngModel)]="filtroVinculo">
-            <option value="TODOS">Vínculo: Todos</option>
-            <option value="VINCULADOS">Vínculo: Vinculados</option>
-            <option value="NO_VINCULADOS">Vínculo: No vinculados</option>
+            <option value="TODOS">Vinculo: Todos</option>
+            <option value="VINCULADOS">Vinculo: Vinculados</option>
+            <option value="NO_VINCULADOS">Vinculo: No vinculados</option>
           </select>
 
           <div class="btn-group">
@@ -59,11 +59,26 @@
           <thead class="text-center">
             <tr>
               <th style="width: 50px;">#</th>
-              <th class="text-left">Identificación</th>
-              <th class="text-left">Alias</th>
-              <th class="text-left">Nombre</th>
-              <th style="width: 220px;">Vínculo RRHH</th>
-              <th style="width: 130px;">Estado</th>
+              <th class="text-left" style="cursor:pointer; user-select:none;" (click)="toggleSort('identificausu')">
+                Identificacion
+                <i *ngIf="getSortIcon('identificausu')" class="bi ml-1" [ngClass]="getSortIcon('identificausu')"></i>
+              </th>
+              <th class="text-left" style="cursor:pointer; user-select:none;" (click)="toggleSort('alias')">
+                Alias
+                <i *ngIf="getSortIcon('alias')" class="bi ml-1" [ngClass]="getSortIcon('alias')"></i>
+              </th>
+              <th class="text-left" style="cursor:pointer; user-select:none;" (click)="toggleSort('nomusu')">
+                Nombre
+                <i *ngIf="getSortIcon('nomusu')" class="bi ml-1" [ngClass]="getSortIcon('nomusu')"></i>
+              </th>
+              <th style="width: 220px; cursor:pointer; user-select:none;" (click)="toggleSort('personal')">
+                Vinculo RRHH
+                <i *ngIf="getSortIcon('personal')" class="bi ml-1" [ngClass]="getSortIcon('personal')"></i>
+              </th>
+              <th style="width: 130px; cursor:pointer; user-select:none;" (click)="toggleSort('estado')">
+                Estado
+                <i *ngIf="getSortIcon('estado')" class="bi ml-1" [ngClass]="getSortIcon('estado')"></i>
+              </th>
               <th style="width: 60px;"></th>
             </tr>
           </thead>
@@ -153,7 +168,7 @@
         <div class="card sombra border-0 form-elegante">
           <div class="card-header bg-success text-white d-flex align-items-center justify-content-between">
             <h6 class="m-0 font-weight-bold">
-              <i class="bi bi-person-plus-fill"></i>&nbsp; Añadir nuevo usuario
+              <i class="bi bi-person-plus-fill"></i>&nbsp; Anadir nuevo usuario
             </h6>
             <button class="btn btn-sm btn-outline-light" type="button" (click)="closeAddForm()">
               <i class="bi bi-x-lg"></i>
@@ -166,8 +181,8 @@
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group mb-2">
-                    <label class="font-weight-bold">Identificación</label>
-                    <input type="text" class="form-control form-control-sm" formControlName="identificausu" placeholder="Identificación">
+                    <label class="font-weight-bold">Identificacion</label>
+                    <input type="text" class="form-control form-control-sm" formControlName="identificausu" placeholder="Identificacion">
                   </div>
                 </div>
 
@@ -238,7 +253,7 @@
                     <input type="password" class="form-control form-control-sm"
                       (keyup)="verifyPassword($event)"
                       formControlName="conf_password"
-                      placeholder="Confirmación">
+                      placeholder="Confirmacion">
                   </div>
                 </div>
               </div>
@@ -277,7 +292,7 @@
           <div class="col-sm-12">
             <label class="w-100 mb-0">
               Buscar Personal
-              <input type="text" [(ngModel)]="filtrarPersonalAdd" class="form-control form-control-sm" placeholder="Ingrese nombre o identificación">
+              <input type="text" [(ngModel)]="filtrarPersonalAdd" class="form-control form-control-sm" placeholder="Ingrese nombre o identificacion">
             </label>
           </div>
         </div>
@@ -288,10 +303,10 @@
               <thead class="thead-light text-center">
                 <tr>
                   <th style="width:60px">#</th>
-                  <th>Identificación</th>
+                  <th>Identificacion</th>
                   <th>Nombre</th>
                   <th>Cargo</th>
-                  <th style="width:120px">Acción</th>
+                  <th style="width:120px">Accion</th>
                 </tr>
               </thead>
               <tbody>
@@ -346,7 +361,7 @@
 
         <label class="w-100 mb-2">
           Buscar personal
-          <input type="text" [(ngModel)]="filtrarPersonalVinculo" class="form-control form-control-sm" placeholder="Nombre o identificación">
+          <input type="text" [(ngModel)]="filtrarPersonalVinculo" class="form-control form-control-sm" placeholder="Nombre o identificacion">
         </label>
 
         <div class="table-responsive">
@@ -354,10 +369,10 @@
             <thead class="thead-light text-center">
               <tr>
                 <th style="width:60px">#</th>
-                <th>Identificación</th>
+                <th>Identificacion</th>
                 <th>Nombre</th>
                 <th>Cargo</th>
-                <th style="width:120px">Acción</th>
+                <th style="width:120px">Accion</th>
               </tr>
             </thead>
             <tbody>

@@ -47,6 +47,7 @@ import Swal from 'sweetalert2';
 import { DocumentosService } from 'src/app/servicios/administracion/documentos.service';
 import { Documentos } from 'src/app/modelos/administracion/documentos.model';
 import { UsrxmodulosService } from 'src/app/servicios/administracion/usrxmodulos.service';
+import { MobileWebsocketService } from 'src/app/servicios/mobile-websocket.service';
 
 @Component({
   selector: 'app-emisiones',
@@ -124,6 +125,7 @@ export class EmisionesComponent implements OnInit, OnDestroy {
   _rutasxemi: RutaXEmisionUI[] = [];
   _lecturas: any[] = [];
   private rutasRefreshSub?: Subscription;
+  private mobileSocketSub?: Subscription;
   idusuario: number;
   auditoriaEmision: EmisionAuditViewRow[] = [];
   auditoriaEmisionCargando = false;
@@ -185,7 +187,8 @@ export class EmisionesComponent implements OnInit, OnDestroy {
     private s_jasperreport: JasperReportService,
     private s_emisionAudit: EmisionAuditService,
     private s_documentos: DocumentosService,
-    private usrxmodulosService: UsrxmodulosService
+    private usrxmodulosService: UsrxmodulosService,
+    private mobileWebsocketService: MobileWebsocketService
   ) { }
 
   ngOnInit(): void {
@@ -245,6 +248,12 @@ export class EmisionesComponent implements OnInit, OnDestroy {
     this.getAllEmisiones();
     this.getAllNovedades();
     this.loadSectionAccess();
+    this.mobileWebsocketService.connect(this.authService.idusuario);
+    this.mobileSocketSub = this.mobileWebsocketService.events$.subscribe((event) => {
+      if (event?.type === 'lectura_update') {
+        this.onLecturaSocketUpdate(event);
+      }
+    });
   }
 
   colocaColor(colores: any) {
@@ -272,7 +281,7 @@ export class EmisionesComponent implements OnInit, OnDestroy {
 
   buscar() {
     this.emiService
-      .getDesdeHasta(this.formBuscar.value.desde, this.formBuscar.value.hasta)
+      .getControlRango(this.formBuscar.value.desde, this.formBuscar.value.hasta)
       .subscribe({
         next: (datos) => {
           this._emisiones = datos;
@@ -301,16 +310,11 @@ export class EmisionesComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.detenerAutoRefreshRutas();
+    this.mobileSocketSub?.unsubscribe();
+    this.mobileWebsocketService.disconnect();
   }
 
-  private iniciarAutoRefreshRutas(): void {
-    this.detenerAutoRefreshRutas();
-    if (!this.idemision) return;
-
-    this.rutasRefreshSub = interval(8000).subscribe(() => {
-      this.refrescarRutasEnPantalla();
-    });
-  }
+  private iniciarAutoRefreshRutas(): void {}
 
   private detenerAutoRefreshRutas(): void {
     this.rutasRefreshSub?.unsubscribe();
@@ -320,84 +324,35 @@ export class EmisionesComponent implements OnInit, OnDestroy {
   private refrescarRutasEnPantalla(): void {
     if (!this.idemision) return;
 
-    this.ruxemiService.getByIdEmision(this.idemision).subscribe({
-      next: (datos: any) => {
+    this.emiService.getControlDetalle(this.idemision).subscribe({
+      next: (resp: any) => {
         const rutasActuales = this._rutasxemi || [];
-        this._rutasxemi = (datos || []).map((ruta: RutaXEmisionUI) => {
+        this._rutasxemi = (Array.isArray(resp?.rutas) ? resp.rutas : []).map((ruta: any) => {
           const actual = rutasActuales.find(
             (item) => item.idrutaxemision === ruta.idrutaxemision
           );
           return {
+            ...actual,
             ...ruta,
-            totalLecturas: actual?.totalLecturas ?? ruta.totalLecturas ?? 0,
-            lecturasCargadas: actual?.lecturasCargadas ?? ruta.lecturasCargadas ?? 0,
-            m3: actual?.m3 ?? ruta.m3 ?? 0,
+            idruta_rutas: {
+              ...(actual?.idruta_rutas || {}),
+              idruta: ruta.idruta,
+              codigo: ruta.codigoRuta,
+              descripcion: ruta.nombreRuta,
+            },
+            estado: ruta.estadoRuta,
+            totalLecturas: Number(ruta.lecturas ?? 0),
+            lecturasCargadas: Number(ruta.lecturasTomadas ?? 0),
+            m3: Number(ruta.m3 ?? 0),
             processing: actual?.processing ?? false,
             progreso: actual?.progreso ?? 0,
             estadoTemp: actual?.estadoTemp,
           };
         });
-        this.recalcularResumenRutasDesdeLecturas();
+        this.total();
+        this.actualizarFilaEmisionDesdeRutas();
       },
       error: (err) => console.error(err?.error || err),
-    });
-  }
-
-  private recalcularResumenRutasDesdeLecturas(): void {
-    if (!this.idemision || !this._rutasxemi?.length) {
-      this.total();
-      return;
-    }
-
-    this.s_lecturas.getByIdEmision(this.idemision).subscribe({
-      next: (lecturas: any[] = []) => {
-        const acumulado = new Map<number, { total: number; tomadas: number; m3: number }>();
-
-        lecturas.forEach((lectura: any) => {
-          const idRuta = Number(
-            lectura?.idrutaxemision_rutasxemision?.idrutaxemision ??
-            lectura?.idrutaxemision_rutasxemision ??
-            lectura?.idrutaxemision ??
-            0
-          );
-          if (!idRuta) return;
-
-          const actual = acumulado.get(idRuta) || { total: 0, tomadas: 0, m3: 0 };
-          const lecturaAnterior = Number(lectura?.lecturaanterior ?? -1);
-          const lecturaActual = Number(lectura?.lecturaactual ?? -1);
-          const consumo = lecturaActual - lecturaAnterior;
-          const tomada = consumo >= 0 || lecturaActual > 0;
-
-          actual.total += 1;
-          if (tomada) {
-            actual.tomadas += 1;
-            actual.m3 += Math.max(consumo, 0);
-          }
-
-          acumulado.set(idRuta, actual);
-        });
-
-        this._rutasxemi = this._rutasxemi.map((ruta) => {
-          const resumen = acumulado.get(Number(ruta.idrutaxemision)) || {
-            total: 0,
-            tomadas: 0,
-            m3: 0,
-          };
-
-          return {
-            ...ruta,
-            totalLecturas: resumen.total,
-            lecturasCargadas: resumen.tomadas,
-            m3: resumen.m3,
-          };
-        });
-
-        this.total();
-      },
-      error: (err) => {
-        console.error(err?.error || err);
-        this.total();
-      },
     });
   }
 
@@ -430,8 +385,37 @@ export class EmisionesComponent implements OnInit, OnDestroy {
       }
 
       this.total();
+      this.actualizarFilaEmisionDesdeRutas();
     }
-    setTimeout(() => this.refrescarRutasEnPantalla(), 500);
+  }
+
+  private onLecturaSocketUpdate(event: any): void {
+    const idemision = Number(event?.idemision ?? 0);
+    if (!idemision || idemision !== Number(this.idemision || 0)) {
+      return;
+    }
+    this.refrescarRutasEnPantalla();
+  }
+
+  private actualizarFilaEmisionDesdeRutas(): void {
+    const fila = (this._emisiones || []).find(
+      (item: any) => Number(item?.idemision) === Number(this.idemision || 0)
+    );
+    if (!fila || !Array.isArray(this._rutasxemi)) {
+      return;
+    }
+    fila.m3 = this._rutasxemi.reduce(
+      (sum: number, ruta: any) => sum + Number(ruta?.m3 ?? 0),
+      0
+    );
+    fila.totalLecturas = this._rutasxemi.reduce(
+      (sum: number, ruta: any) => sum + Number(ruta?.totalLecturas ?? 0),
+      0
+    );
+    fila.lecturasCargadas = this._rutasxemi.reduce(
+      (sum: number, ruta: any) => sum + Number(ruta?.lecturasCargadas ?? 0),
+      0
+    );
   }
 
   private normalizeAccessCode(code: any): string {
@@ -997,11 +981,24 @@ export class EmisionesComponent implements OnInit, OnDestroy {
     this.estado = emision.estado;
     this.limpiarAuditoriaEmision();
 
-    this.ruxemiService.getByIdEmision(this.idemision).subscribe({
-      next: (datos: any) => {
-        this._rutasxemi = datos;
+    this.emiService.getControlDetalle(this.idemision).subscribe({
+      next: (resp: any) => {
+        this._rutasxemi = (Array.isArray(resp?.rutas) ? resp.rutas : []).map((ruta: any) => ({
+          idrutaxemision: ruta.idrutaxemision,
+          idruta_rutas: {
+            idruta: ruta.idruta,
+            codigo: ruta.codigoRuta,
+            descripcion: ruta.nombreRuta,
+          },
+          estado: ruta.estadoRuta,
+          totalLecturas: Number(ruta.lecturas ?? 0),
+          lecturasCargadas: Number(ruta.lecturasTomadas ?? 0),
+          m3: Number(ruta.m3 ?? 0),
+          processing: false,
+          progreso: 0,
+        }));
         this.iniciarAutoRefreshRutas();
-        this.recalcularResumenRutasDesdeLecturas();
+        this.actualizarFilaEmisionDesdeRutas();
         this.s_lecturas.rubrosEmitidos(this.idemision).subscribe({
           next: (datos: any) => {
             datos.forEach((item: any) => {
@@ -1375,8 +1372,13 @@ export class EmisionesComponent implements OnInit, OnDestroy {
     this.router.navigate(['/re-facturacion']);
   }
   getAllEmisiones() {
-    this.emiService.findAllEmisiones().subscribe({
+    this.emiService.findAllEmisionesBasic().subscribe({
       next: (datos: any) => {
+        if (!Array.isArray(datos) || datos.length === 0) {
+          this._allemisiones = [];
+          this._emisionindividual = [];
+          return;
+        }
         this.emision = datos[0].idemision;
         this._allemisiones = datos;
         this.getEmisionIndividualByIdEmision(datos[0].idemision);

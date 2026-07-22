@@ -20,6 +20,18 @@ export class SriEmitidosImportComponent {
   cargando = false;
   cargandoEnriquecimiento = false;
   cargandoProcesamiento = false;
+  sortColumn:
+    | 'serie_comprobante'
+    | 'clave_acceso'
+    | 'fecha_emision'
+    | 'fecha_autorizacion'
+    | 'valor_sin_impuestos'
+    | 'iva'
+    | 'importe_total'
+    | 'idfactura'
+    | 'fechacobro'
+    | 'estadoProceso' = 'serie_comprobante';
+  sortDirection: 'asc' | 'desc' = 'asc';
 
   q = '';
   soloErrores = false;
@@ -334,7 +346,7 @@ export class SriEmitidosImportComponent {
   get rowsFiltradas(): SriEmitidoRow[] {
     const q = (this.q || '').toLowerCase().trim();
 
-    return this.rows
+    const filtradas = this.rows
       .filter(
         (r) =>
           !this.soloErrores ||
@@ -352,6 +364,98 @@ export class SriEmitidosImportComponent {
           (r.comprobante || '').toLowerCase().includes(q)
         );
       });
+
+    return [...filtradas].sort((a, b) => this.compareRows(a, b));
+  }
+
+  toggleSort(
+    column:
+      | 'serie_comprobante'
+      | 'clave_acceso'
+      | 'fecha_emision'
+      | 'fecha_autorizacion'
+      | 'valor_sin_impuestos'
+      | 'iva'
+      | 'importe_total'
+      | 'idfactura'
+      | 'fechacobro'
+      | 'estadoProceso',
+  ): void {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+      return;
+    }
+
+    this.sortColumn = column;
+    this.sortDirection = 'asc';
+  }
+
+  getSortIcon(
+    column:
+      | 'serie_comprobante'
+      | 'clave_acceso'
+      | 'fecha_emision'
+      | 'fecha_autorizacion'
+      | 'valor_sin_impuestos'
+      | 'iva'
+      | 'importe_total'
+      | 'idfactura'
+      | 'fechacobro'
+      | 'estadoProceso',
+  ): string {
+    if (this.sortColumn !== column) {
+      return '';
+    }
+
+    return this.sortDirection === 'asc' ? '▲' : '▼';
+  }
+
+  private compareRows(a: SriEmitidoRow, b: SriEmitidoRow): number {
+    const valueA = this.getSortValue(a, this.sortColumn);
+    const valueB = this.getSortValue(b, this.sortColumn);
+
+    let result = 0;
+
+    if (typeof valueA === 'number' && typeof valueB === 'number') {
+      result = valueA - valueB;
+    } else {
+      result = String(valueA).localeCompare(String(valueB), undefined, {
+        numeric: true,
+        sensitivity: 'base',
+      });
+    }
+
+    return this.sortDirection === 'asc' ? result : -result;
+  }
+
+  private getSortValue(
+    row: SriEmitidoRow,
+    column:
+      | 'serie_comprobante'
+      | 'clave_acceso'
+      | 'fecha_emision'
+      | 'fecha_autorizacion'
+      | 'valor_sin_impuestos'
+      | 'iva'
+      | 'importe_total'
+      | 'idfactura'
+      | 'fechacobro'
+      | 'estadoProceso',
+  ): string | number {
+    switch (column) {
+      case 'valor_sin_impuestos':
+      case 'iva':
+      case 'importe_total':
+        return Number(row[column] ?? 0);
+      case 'idfactura':
+        return Number(row.idfactura ?? 0);
+      case 'fechacobro':
+        return row.fechacobro || '';
+      case 'estadoProceso':
+        return row.estadoProceso || '';
+      default:
+        return row[column] || '';
+    }
   }
 
   // =========================

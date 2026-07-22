@@ -17,6 +17,28 @@ export class RutasService {
     return this.http.get<Rutas[]>(`${baseUrl}`);
   }
 
+  getResumenRutas(estado?: boolean): Observable<Partial<Rutas>[]> {
+    const query = estado === undefined ? '' : `?estado=${estado}`;
+    return this.http.get<Partial<Rutas>[]>(`${baseUrl}/resumen${query}`);
+  }
+
+  getRutasAsignacion(idemision?: number, filtro = '', estado = true, limit = 200): Observable<any[]> {
+    const params: string[] = [];
+    if (idemision !== undefined && idemision !== null) {
+      params.push(`idemision=${idemision}`);
+    }
+    if (estado !== undefined && estado !== null) {
+      params.push(`estado=${estado}`);
+    }
+    if (filtro.trim()) {
+      params.push(`filtro=${encodeURIComponent(filtro.trim())}`);
+    }
+    if (limit > 0) {
+      params.push(`limit=${limit}`);
+    }
+    return this.http.get<any[]>(`${baseUrl}/asignacion${params.length ? `?${params.join('&')}` : ''}`);
+  }
+
   saveRuta(ruta: Rutas): Observable<Object> {
     return this.http.post(`${baseUrl}`, ruta);
   }
