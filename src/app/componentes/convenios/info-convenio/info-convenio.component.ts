@@ -184,6 +184,20 @@ export class InfoConvenioComponent implements OnInit {
     return this.convenioSortDirection === 'asc' ? '▲' : '▼';
   }
 
+  getCuotaSortIcon(column: CuotaSortColumn): string {
+    if (this.cuotaSortColumn !== column) {
+      return '';
+    }
+    return this.cuotaSortDirection === 'asc' ? 'bi-sort-up' : 'bi-sort-down';
+  }
+
+  getConvenioSortIcon(column: ConvenioSortColumn): string {
+    if (this.convenioSortColumn !== column) {
+      return '';
+    }
+    return this.convenioSortDirection === 'asc' ? 'bi-sort-up' : 'bi-sort-down';
+  }
+
   private compareCuotas(a: any, b: any): number {
     const va = this.getCuotaSortValue(a, this.cuotaSortColumn);
     const vb = this.getCuotaSortValue(b, this.cuotaSortColumn);

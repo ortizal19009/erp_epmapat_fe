@@ -193,6 +193,10 @@ export class MainHeaderComponent implements OnInit {
     });
   }
 
+  cerrarSesion(): void {
+    this.authService.logout();
+  }
+
   private syncSidebarState(): void {
     const body = document.body;
     if (window.innerWidth < this.mobileBreakpoint) {

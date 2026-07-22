@@ -73,19 +73,19 @@
                               <thead class="cabecera">
                                  <tr class="text-center">
                                     <th class="sortable" style="cursor:pointer; user-select:none;"
-                                       (click)="toggleCuotaSort('cuota')">Cuota {{ getCuotaSortIndicator('cuota') }}</th>
+                                       (click)="toggleCuotaSort('cuota')">Cuota <i class="bi" *ngIf="getCuotaSortIcon('cuota')" [ngClass]="getCuotaSortIcon('cuota')"></i></th>
                                     <th class="sortable" style="cursor:pointer; user-select:none;"
-                                       (click)="toggleCuotaSort('planilla')">Planilla {{ getCuotaSortIndicator('planilla') }}</th>
+                                       (click)="toggleCuotaSort('planilla')">Planilla <i class="bi" *ngIf="getCuotaSortIcon('planilla')" [ngClass]="getCuotaSortIcon('planilla')"></i></th>
                                     <th class="sortable" style="cursor:pointer; user-select:none;"
-                                       (click)="toggleCuotaSort('fecha')">Fecha {{ getCuotaSortIndicator('fecha') }}</th>
+                                       (click)="toggleCuotaSort('fecha')">Fecha <i class="bi" *ngIf="getCuotaSortIcon('fecha')" [ngClass]="getCuotaSortIcon('fecha')"></i></th>
                                     <th class="sortable" style="cursor:pointer; user-select:none;"
-                                       (click)="toggleCuotaSort('factura')">Factura {{ getCuotaSortIndicator('factura') }}</th>
+                                       (click)="toggleCuotaSort('factura')">Factura <i class="bi" *ngIf="getCuotaSortIcon('factura')" [ngClass]="getCuotaSortIcon('factura')"></i></th>
                                     <th class="sortable" style="cursor:pointer; user-select:none;"
-                                       (click)="toggleCuotaSort('fcobro')">F.Cobro {{ getCuotaSortIndicator('fcobro') }}</th>
+                                       (click)="toggleCuotaSort('fcobro')">F.Cobro <i class="bi" *ngIf="getCuotaSortIcon('fcobro')" [ngClass]="getCuotaSortIcon('fcobro')"></i></th>
                                     <th class="sortable" style="cursor:pointer; user-select:none;"
-                                       (click)="toggleCuotaSort('valor')">Valor {{ getCuotaSortIndicator('valor') }}</th>
+                                       (click)="toggleCuotaSort('valor')">Valor <i class="bi" *ngIf="getCuotaSortIcon('valor')" [ngClass]="getCuotaSortIcon('valor')"></i></th>
                                     <th class="sortable" style="cursor:pointer; user-select:none;"
-                                       (click)="toggleCuotaSort('interes')">Interes {{ getCuotaSortIndicator('interes') }}</th>
+                                       (click)="toggleCuotaSort('interes')">Interes <i class="bi" *ngIf="getCuotaSortIcon('interes')" [ngClass]="getCuotaSortIcon('interes')"></i></th>
                                     <th></th>
                                  </tr>
                               </thead>
@@ -145,13 +145,13 @@
                                  <tr class="text-center">
                                     <th></th>
                                     <th class="sortable" style="cursor:pointer; user-select:none;"
-                                       (click)="toggleConvenioSort('nro')">Nro. {{ getConvenioSortIndicator('nro') }}</th>
+                                       (click)="toggleConvenioSort('nro')">Nro. <i class="bi" *ngIf="getConvenioSortIcon('nro')" [ngClass]="getConvenioSortIcon('nro')"></i></th>
                                     <th class="sortable" style="cursor:pointer; user-select:none;"
-                                       (click)="toggleConvenioSort('fecha')">Fecha {{ getConvenioSortIndicator('fecha') }}</th>
+                                       (click)="toggleConvenioSort('fecha')">Fecha <i class="bi" *ngIf="getConvenioSortIcon('fecha')" [ngClass]="getConvenioSortIcon('fecha')"></i></th>
                                     <th class="sortable" style="cursor:pointer; user-select:none;"
-                                       (click)="toggleConvenioSort('modulo')">Modulo {{ getConvenioSortIndicator('modulo') }}</th>
+                                       (click)="toggleConvenioSort('modulo')">Modulo <i class="bi" *ngIf="getConvenioSortIcon('modulo')" [ngClass]="getConvenioSortIcon('modulo')"></i></th>
                                     <th class="sortable" style="cursor:pointer; user-select:none;"
-                                       (click)="toggleConvenioSort('valor')">Valor {{ getConvenioSortIndicator('valor') }}</th>
+                                       (click)="toggleConvenioSort('valor')">Valor <i class="bi" *ngIf="getConvenioSortIcon('valor')" [ngClass]="getConvenioSortIcon('valor')"></i></th>
                                     <th></th>
                                  </tr>
                               </thead>

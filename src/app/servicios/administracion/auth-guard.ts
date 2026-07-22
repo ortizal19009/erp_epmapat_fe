@@ -8,7 +8,7 @@ export class AuthGuard implements CanActivate {
   constructor(private authService: AutorizaService, private router: Router) {}
 
   canActivate(): boolean {
-    if (!this.authService.sessionlog) {
+    if (!this.authService.sessionlog && !this.authService.canActivate()) {
       this.router.navigate(['/inicio']);
       return false;
     }

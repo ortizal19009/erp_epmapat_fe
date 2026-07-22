@@ -6,3 +6,36 @@
 
 .detalle { background-color: var(--bgcolor2); }
 .nuevoBG2 { background-color: var(--bgcolor2); }
+
+.info-caja-header {
+   row-gap: 0.5rem;
+}
+
+.info-caja-title-wrap {
+   min-width: 0;
+}
+
+.info-caja-subtitle {
+   font-size: 0.9rem;
+   line-height: 1.2;
+   color: rgba(255, 255, 255, 0.85);
+   font-weight: 500;
+}
+
+.info-caja-toolbar {
+   justify-content: flex-end;
+}
+
+.info-caja-status {
+   min-height: 31px;
+}
+
+.info-caja-actions {
+   align-items: center;
+}
+
+@media (max-width: 991.98px) {
+   .info-caja-toolbar {
+      justify-content: flex-start;
+   }
+}

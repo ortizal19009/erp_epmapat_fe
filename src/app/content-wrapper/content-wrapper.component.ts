@@ -15,6 +15,7 @@ export class ContentWrapperComponent implements OnInit {
   bloqueado: boolean;
   kont: number = 0;
   moduTmp: number;
+  showPassword = false;
 
   constructor(
     public fb: FormBuilder,
@@ -66,12 +67,14 @@ export class ContentWrapperComponent implements OnInit {
               xyz: true,
               modulo: 1,
               moduloActual: 1,
+              moduActual: 1,
             },
             idusuario: resp.idusuario,
             alias: resp.alias,
             priusu: resp.priusu,
           };
           sessionStorage.setItem('abc', btoa(JSON.stringify(abc)));
+          localStorage.setItem('sessionlog', 'true');
 
           this.authService.enabModulos();
           this.authService.getEmpresa();
@@ -94,6 +97,10 @@ export class ContentWrapperComponent implements OnInit {
   }
   reinicia() {
     this.msg = false;
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
   }
 }
 

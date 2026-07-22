@@ -89,25 +89,25 @@ type EstadoFiltro = 'todos' | 'con-saldo' | 'agotadas' | 'pagadas-total';
                     <tr class="text-center ">
                         <th class="col-sm-1">N°</th>
                         <th class="sortable" (click)="toggleSort('cuenta')" style="cursor:pointer; user-select:none;">
-                            Cuenta {{ getSortIndicator('cuenta') }}
+                            Cuenta <i class="bi" *ngIf="getSortIconClean('cuenta')" [ngClass]="getSortIconClean('cuenta')"></i>
                         </th>
                         <th class="sortable" (click)="toggleSort('cliente')" style="cursor:pointer; user-select:none;">
-                            Cliente {{ getSortIndicator('cliente') }}
+                            Cliente <i class="bi" *ngIf="getSortIconClean('cliente')" [ngClass]="getSortIconClean('cliente')"></i>
                         </th>
                         <th class="sortable" (click)="toggleSort('planilla')" style="cursor:pointer; user-select:none;">
-                            Planilla {{ getSortIndicator('planilla') }}
+                            Planilla <i class="bi" *ngIf="getSortIconClean('planilla')" [ngClass]="getSortIconClean('planilla')"></i>
                         </th>
                         <th class="sortable" (click)="toggleSort('identificacion')" style="cursor:pointer; user-select:none;">
-                            Identificacion {{ getSortIndicator('identificacion') }}
+                            Identificacion <i class="bi" *ngIf="getSortIconClean('identificacion')" [ngClass]="getSortIconClean('identificacion')"></i>
                         </th>
                         <th class="sortable" (click)="toggleSort('valor')" style="cursor:pointer; user-select:none;">
-                            Valor {{ getSortIndicator('valor') }}
+                            Valor <i class="bi" *ngIf="getSortIconClean('valor')" [ngClass]="getSortIconClean('valor')"></i>
                         </th>
                         <th class="sortable" (click)="toggleSort('devengado')" style="cursor:pointer; user-select:none;">
-                            Devengado {{ getSortIndicator('devengado') }}
+                            Devengado <i class="bi" *ngIf="getSortIconClean('devengado')" [ngClass]="getSortIconClean('devengado')"></i>
                         </th>
                         <th class="sortable" (click)="toggleSort('saldo')" style="cursor:pointer; user-select:none;">
-                            Saldo {{ getSortIndicator('saldo') }}
+                            Saldo <i class="bi" *ngIf="getSortIconClean('saldo')" [ngClass]="getSortIconClean('saldo')"></i>
                         </th>
                         <th>Estado</th>
                         <th></th>
@@ -339,6 +339,13 @@ export class NtacreditoComponent implements OnInit {
       return '';
     }
     return this.sortDirection === 'asc' ? '▲' : '▼';
+  }
+
+  getSortIconClean(column: SortColumn): string {
+    if (this.sortColumn !== column) {
+      return '';
+    }
+    return this.sortDirection === 'asc' ? 'bi-sort-up' : 'bi-sort-down';
   }
 
   private compareNotasCreditos(a: any, b: any): number {

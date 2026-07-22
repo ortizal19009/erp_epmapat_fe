@@ -119,25 +119,28 @@ export class InfoCajaComponent implements OnInit, OnDestroy {
     this.cajaService.getById(this.idcaja).subscribe({
       next: (datos) => {
         this.cajaData = datos;
+        const ptoEmision =
+          datos?.idptoemision_ptoemision ??
+          (datos as any)?.idptoemisionPtoemision ??
+          null;
+        const usuarioAsignado =
+          datos?.idusuario_usuarios ??
+          (datos as any)?.idusuarioUsuarios ??
+          null;
         this.caja.idcaja = datos.idcaja;
         this.caja.codigo = datos.codigo;
         this.caja.descripcion = datos.descripcion;
-        this.caja.ptoemi = datos.idptoemision_ptoemision.establecimiento;
-        if (datos.idusuario_usuarios == null) {
+        this.caja.ptoemi = ptoEmision?.establecimiento ?? '';
+        if (usuarioAsignado == null) {
           alert('NO PUEDE CONSULTAR DATOS EN ESTA CAJA');
           this.router.navigate(['cajas']);
         } else {
-          this.usuario = datos.idusuario_usuarios;
+          this.usuario = usuarioAsignado;
         }
         this.caja.estado = 'Habilitado';
         if (datos.estado == 0) this.caja.estado = 'Inahibilitado';
         this.formFechas.patchValue({
-          caja:
-            datos.idptoemision_ptoemision.establecimiento +
-            '-' +
-            datos.codigo +
-            ' ' +
-            datos.descripcion,
+          caja: `${ptoEmision?.establecimiento ?? ''}-${datos.codigo} ${datos.descripcion}`,
         });
         this.cargarUltimaConexionPorDefecto();
       },
@@ -467,6 +470,34 @@ export class InfoCajaComponent implements OnInit, OnDestroy {
           ? new Date(registro[this.ordenColumna]).getTime()
           : null;
     }
+  }
+
+  puedeCerrarCaja(): boolean {
+    return !this.cerrandoCaja && (this.cajaEnLinea || Number(this.idusuario) === 1);
+  }
+
+  ejecutarCierreCaja(): void {
+    if (!this.puedeCerrarCaja() || !this.idcaja) {
+      return;
+    }
+
+    const confirmar = window.confirm('Desea cerrar esta caja ahora? El cobro se bloqueara de inmediato.');
+    if (!confirmar) {
+      return;
+    }
+
+    this.cerrandoCaja = true;
+    this.recaudacionCobroService.cerrarCajaPorId(this.idcaja).subscribe({
+      next: () => {
+        this.cerrandoCaja = false;
+        this.cajaEnLinea = false;
+        this.cargarUltimaConexionPorDefecto();
+      },
+      error: (err) => {
+        this.cerrandoCaja = false;
+        console.error(err);
+      }
+    });
   }
 
   private iniciarStreamCajas(): void {

@@ -182,6 +182,16 @@ export class ListarCajaComponent implements OnInit, OnDestroy {
     this.ordenAscendente = true;
   }
 
+  getSortIcon(
+    columna: 'establecimiento' | 'codigo' | 'descripcion' | 'usuario'
+  ): string {
+    if (this.ordenColumna !== columna) {
+      return '';
+    }
+
+    return this.ordenAscendente ? 'bi-sort-up' : 'bi-sort-down';
+  }
+
   private ordenarCajas(cajas: any[]): any[] {
     return cajas.sort((a: any, b: any) => {
       const valorA = this.obtenerValorOrden(a);
@@ -205,8 +215,19 @@ export class ListarCajaComponent implements OnInit, OnDestroy {
         return String(caja?.idusuario_usuarios?.nomusu ?? '');
       case 'establecimiento':
       default:
-        return String(caja?.idptoemision_ptoemision?.establecimiento ?? '');
+        return this.getEstablecimientoCaja(caja);
     }
+  }
+
+  getEstablecimientoCaja(caja: any): string {
+  
+    return String(
+      caja?.idptoemision_ptoemision?.establecimiento ??
+      caja?.idptoemisionPtoemision?.establecimiento ??
+      caja?.idptoemision?.establecimiento ??
+      caja?.establecimiento ??
+      ''
+    );
   }
 
   public info(idcaja: number) {

@@ -57,7 +57,7 @@ export class MainSidebarComponent implements OnInit {
     // this.authService.modulo = +sessionStorage.getItem("moduloOld")!
     // this.authService.modulo = this.authService.moduActual
     // Verifica sesión al inicializar el componente
-    if (!this.authService.sessionlog) {
+    if (!this.authService.sessionlog && !this.authService.canActivate()) {
       this.router.navigate(['/inicio']); // redirige inmediatamente
     }
 

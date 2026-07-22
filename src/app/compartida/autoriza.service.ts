@@ -38,6 +38,47 @@ export class AutorizaService implements OnDestroy, CanActivate {
 
   constructor(private router: Router, private defService: DefinirService) { }
 
+  private restoreSessionFromStorage(): boolean {
+    const retrievedEncodedValues = sessionStorage.getItem('abc');
+    const sessionlog = localStorage.getItem('sessionlog');
+
+    if (!retrievedEncodedValues || sessionlog !== 'true') {
+      return false;
+    }
+
+    try {
+      const retrievedValues = JSON.parse(atob(retrievedEncodedValues));
+      this.sessionlog = true;
+      this.idusuario = +retrievedValues.idusuario || 0;
+      this.alias = retrievedValues.alias;
+      this.modulo =
+        retrievedValues?.object?.modulo ??
+        retrievedValues?.object?.moduloActual ??
+        retrievedValues?.modulo ??
+        1;
+      this.moduActual =
+        retrievedValues?.object?.moduActual ??
+        retrievedValues?.object?.moduloActual ??
+        retrievedValues?.moduActual ??
+        this.modulo;
+      this.priusu = retrievedValues.priusu;
+      this.modules =
+        retrievedValues.modules ??
+        JSON.parse(sessionStorage.getItem('modulos') || '[]');
+      return true;
+    } catch {
+      this.clearSession();
+      return false;
+    }
+  }
+
+  private clearSession(): void {
+    this.sessionlog = false;
+    localStorage.removeItem('sessionlog');
+    sessionStorage.removeItem('abc');
+    sessionStorage.removeItem('modulos');
+  }
+
   public enabModulos(): void {
     if (!this.sessionlog) {
       this.router.navigate(['/inicio']);
@@ -73,31 +114,37 @@ export class AutorizaService implements OnDestroy, CanActivate {
     sessionStorage.setItem('abc', btoa(JSON.stringify(values)));
   }
 
+  logout(): void {
+    this.clearSession();
+    this.enabled = [false, false, false, false, false, false, false];
+    this.colorenabled = false;
+    this.modulos = [];
+    this.modulo = 0;
+    this.nomodulo = '';
+    this.moduActual = 0;
+    this.idusuario = 0;
+    this.alias = '';
+    this.priusu = '';
+    this.modules = null;
+    this.router.navigate(['/inicio']);
+  }
+
   valsession() {
-    const retrievedEncodedValues = sessionStorage.getItem('abc');
-    if (retrievedEncodedValues !== null) {
-      const retrievedValues = JSON.parse(atob(retrievedEncodedValues));
-      this.sessionlog = true;
-      this.idusuario = retrievedValues.idusuario;
-      this.alias = retrievedValues.alias;
-      this.modulo = retrievedValues.object.modulo;
-      this.moduActual = retrievedValues.object.moduActual;
-      this.priusu = retrievedValues.priusu;
+    if (this.restoreSessionFromStorage()) {
       this.enabModulos();
+      return;
     }
-    {
-      this.router.navigate(['/inicio']);
-    }
+
+    this.router.navigate(['/inicio']);
   }
 
   canActivate(): boolean {
-    const sessionlog = localStorage.getItem('sessionlog');
-    if (sessionlog === 'true') {
+    if (this.sessionlog || this.restoreSessionFromStorage()) {
       return true;
-    } else {
-      this.router.navigate(['/inicio']);
-      return false;
     }
+
+    this.router.navigate(['/inicio']);
+    return false;
   }
   formatearFecha(fecha: Date): string {
     const anio = fecha.getFullYear();
