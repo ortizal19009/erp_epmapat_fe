@@ -9,6 +9,25 @@ import { PageResponse } from '../interfaces/page-response';
 const apiUrl = environment.API_URL;
 const baseUrl = `${apiUrl}/abonados`;
 
+export interface AbonadoGeoPreviewDto {
+  idabonado: number;
+  nombre: string;
+  geolocalizacion: string;
+}
+
+export interface AbonadoGeoUploadResultDto {
+  actualizados: number;
+  errores: string[];
+  detalles: AbonadoGeoUploadItemResultDto[];
+}
+
+export interface AbonadoGeoUploadItemResultDto {
+  idabonado: number | null;
+  success: boolean;
+  mensaje: string;
+  geolocalizacion: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AbonadosService {
   constructor(private http: HttpClient) { }
@@ -43,6 +62,23 @@ export class AbonadosService {
 
   getById(idabonado: number): Observable<Abonados> {
     return this.http.get<Abonados>(`${baseUrl}/${idabonado}`);
+  }
+
+  previewGeoUpload(items: Array<{ idabonado: number; geolocalizacion: string }>): Observable<AbonadoGeoPreviewDto[]> {
+    return this.http.post<AbonadoGeoPreviewDto[]>(`${baseUrl}/geo-upload/preview`, items);
+  }
+
+  applyGeoUpload(
+    items: Array<{ idabonado: number; geolocalizacion: string }>,
+    usumodi: number,
+    observacion: string = 'Carga masiva de geolocalizacion',
+    tipo: string = 'MODIFICACION'
+  ): Observable<AbonadoGeoUploadResultDto> {
+    const params = new HttpParams()
+      .set('usumodi', usumodi.toString())
+      .set('observacion', observacion)
+      .set('tipo', tipo);
+    return this.http.post<AbonadoGeoUploadResultDto>(`${baseUrl}/geo-upload/apply`, items, { params });
   }
 
   getListaByNombreCliente(nombre: string) {

@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Abonados } from 'src/app/modelos/abonados';
-import { AbonadosService } from 'src/app/servicios/abonados.service';
+import { AbonadosService, AbonadoGeoPreviewDto } from 'src/app/servicios/abonados.service';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as ExcelJS from 'exceljs';
@@ -36,12 +36,12 @@ export class ListarAbonadosComponent implements OnInit {
   filtroCategoria: number | null = null;
   filtroRuta: number | null = null;
 
-  // paginaciÃ³n (solo activa cuando se usan filtros)
+  // paginaciÃƒÆ’Ã‚Â³n (solo activa cuando se usan filtros)
   page = 0;
   size = 20;
   totalElements = 0;
   totalPages = 0;
-  modoFiltro = false; // true = paginado con filtros, false = bÃºsqueda individual
+  modoFiltro = false; // true = paginado con filtros, false = bÃƒÆ’Ã‚Âºsqueda individual
 
   // form y UI
   buscarAbonadoForm: FormGroup;
@@ -127,7 +127,7 @@ export class ListarAbonadosComponent implements OnInit {
   }
 
   // =====================
-  // BÃšSQUEDA INDIVIDUAL
+  // BÃƒÆ’Ã…Â¡SQUEDA INDIVIDUAL
   // =====================
   onSubmit() {
     sessionStorage.setItem('tipoBusqueda', this.buscarAbonadoForm.controls['selecTipoBusqueda'].value.toString());
@@ -273,7 +273,7 @@ export class ListarAbonadosComponent implements OnInit {
   }
 
   // =====================
-  // NAVEGACIÃ“N
+  // NAVEGACIÃƒÆ’Ã¢â‚¬Å“N
   // =====================
   onNavigationEnd() { this.router.navigate(['/app-listar-abonados']); }
   addAbonadoRouter() { this.router.navigate(['forms-aguatramite', 1]); }
@@ -409,18 +409,30 @@ export class ListarAbonadosComponent implements OnInit {
       this.mensajeImportacion =
         `Importación finalizada. Actualizados: ${resultado.actualizados}. Errores: ${resultado.errores.length}.`;
       this.detalleImportacion = resultado.errores;
+      const detallesPorCuenta = new Map<number, { success: boolean; mensaje: string; geolocalizacion: string | null }>(
+        (resultado.detalles || [])
+          .filter((detalle) => detalle.idabonado != null)
+          .map((detalle) => [
+            detalle.idabonado as number,
+            {
+              success: detalle.success,
+              mensaje: detalle.mensaje,
+              geolocalizacion: detalle.geolocalizacion,
+            },
+          ])
+      );
 
       this.previewImportacion = this.previewImportacion.map((fila) => {
         if (fila.estado !== 'PROCESANDO') return fila;
-        const errorFila = resultado.errores.find((err) => err.includes(`Cuenta ${fila.idabonado}:`));
-        if (errorFila) {
-          return { ...fila, estado: 'ERROR', mensaje: errorFila };
+        const detalleFila = detallesPorCuenta.get(fila.idabonado);
+        if (detalleFila && !detalleFila.success) {
+          return { ...fila, estado: 'ERROR', mensaje: detalleFila.mensaje };
         }
         return {
           ...fila,
-          geolocalizacionActual: fila.geolocalizacionNueva,
+          geolocalizacionActual: detalleFila?.geolocalizacion || fila.geolocalizacionNueva,
           estado: 'EXITO',
-          mensaje: 'Actualizado correctamente.',
+          mensaje: detalleFila?.mensaje || 'Actualizado correctamente.',
         };
       });
 
@@ -436,7 +448,7 @@ export class ListarAbonadosComponent implements OnInit {
       }
     } catch (error: any) {
       console.error(error);
-      this.mensajeImportacion = error?.message || 'No se pudo completar la importación.';
+      this.mensajeImportacion = error?.message || 'No se pudo completar la importaciÃƒÂ³n.';
     } finally {
       this.importandoExcel = false;
       this.loadingService.hideLoading();
@@ -568,10 +580,10 @@ export class ListarAbonadosComponent implements OnInit {
   private async mostrarResumenImportacion(): Promise<void> {
     await Swal.fire({
       icon: this.previewTotalErrores > 0 ? 'warning' : 'success',
-      title: 'Resumen de importación',
+      title: 'Resumen de importaciÃƒÂ³n',
       html:
         `<div class="text-left">` +
-        `<div><strong>Registros leídos:</strong> ${this.previewTotalRegistros}</div>` +
+        `<div><strong>Registros leÃƒÂ­dos:</strong> ${this.previewTotalRegistros}</div>` +
         `<div><strong>Abonados actualizados:</strong> ${this.previewTotalExitos}</div>` +
         `<div><strong>Sin cambios:</strong> ${this.previewTotalSinCambios}</div>` +
         `<div><strong>Con error:</strong> ${this.previewTotalErrores}</div>` +
@@ -876,77 +888,90 @@ export class ListarAbonadosComponent implements OnInit {
 
   private async actualizarGeolocalizaciones(
     filas: Array<{ idabonado: number; geolocalizacionNueva: string }>
-  ): Promise<{ actualizados: number; errores: string[] }> {
-    let actualizados = 0;
-    const errores = [...this.detalleImportacion];
+  ): Promise<{ actualizados: number; errores: string[]; detalles: Array<{ idabonado: number | null; success: boolean; mensaje: string; geolocalizacion: string | null }> }> {
+    const payload = filas.map((fila) => ({
+      idabonado: fila.idabonado,
+      geolocalizacion: fila.geolocalizacionNueva,
+    }));
 
-    for (const fila of filas) {
-      try {
-        const abonado: any = await firstValueFrom(this.aboService.getById(fila.idabonado));
-        abonado.geolocalizacion = fila.geolocalizacionNueva;
-        abonado.usumodi = this.authService.idusuario;
-        abonado.fecmodi = new Date();
-        await firstValueFrom(this.aboService.updateAbonado(abonado));
-        actualizados++;
-      } catch (error: any) {
-        console.error(`Error actualizando abonado ${fila.idabonado}`, error);
-        errores.push(
-          `Cuenta ${fila.idabonado}: ${error?.error?.message || error?.error?.detail || 'no se pudo actualizar.'}`
-        );
-      }
-    }
+    const resultado = await firstValueFrom(
+      this.aboService.applyGeoUpload(
+        payload,
+        this.authService.idusuario,
+        'Carga masiva de geolocalizacion',
+        'MODIFICACION'
+      )
+    );
 
-    return { actualizados, errores };
+    return {
+      actualizados: resultado.actualizados || 0,
+      errores: [...this.detalleImportacion, ...(resultado.errores || [])],
+      detalles: resultado.detalles || [],
+    };
   }
 
   private async generarPreviewImportacion(
     filas: Array<{ idabonado: number; geolocalizacion: string }>
   ): Promise<PreviewImportacionRow[]> {
     const cuentasProcesadas = new Set<number>();
-    const preview = await Promise.all(
-      filas.map(async (fila, index) => {
+    const preview: PreviewImportacionRow[] = [];
+    const itemsUnicos = filas
+      .filter((fila) => {
         if (cuentasProcesadas.has(fila.idabonado)) {
-          return {
-            fila: index + 2,
-            idabonado: fila.idabonado,
-            nombre: '',
-            geolocalizacionActual: '',
-            geolocalizacionNueva: fila.geolocalizacion,
-            estado: 'ERROR',
-            mensaje: 'Cuenta duplicada en el archivo. Deje una sola fila por abonado.',
-          } as PreviewImportacionRow;
+          return false;
         }
-
         cuentasProcesadas.add(fila.idabonado);
+        return true;
+      });
 
-        try {
-          const abonado: any = await firstValueFrom(this.aboService.getById(fila.idabonado));
-          const geolocalizacionActual = this.parseTextoExcel(abonado?.geolocalizacion);
-          const geolocalizacionNueva = fila.geolocalizacion;
-          const cambia = geolocalizacionActual !== geolocalizacionNueva;
-
-          return {
-            fila: index + 2,
-            idabonado: fila.idabonado,
-            nombre: abonado?.nombre || abonado?.idresponsable?.nombre || abonado?.idcliente_clientes?.nombre || '',
-            geolocalizacionActual,
-            geolocalizacionNueva,
-            estado: cambia ? 'ACTUALIZAR' : 'SIN_CAMBIOS',
-            mensaje: cambia ? 'Se actualizara la geolocalizacion.' : 'La geolocalizacion ya coincide.',
-          } as PreviewImportacionRow;
-        } catch (error: any) {
-          return {
-            fila: index + 2,
-            idabonado: fila.idabonado,
-            nombre: '',
-            geolocalizacionActual: '',
-            geolocalizacionNueva: fila.geolocalizacion,
-            estado: 'ERROR',
-            mensaje: error?.error?.message || error?.error?.detail || 'No se encontro el abonado.',
-          } as PreviewImportacionRow;
-        }
-      })
+    const abonadosPreview = await firstValueFrom(this.aboService.previewGeoUpload(itemsUnicos));
+    const abonadosPorId = new Map<number, AbonadoGeoPreviewDto>(
+      abonadosPreview.map((abonado) => [abonado.idabonado, abonado])
     );
+
+    filas.forEach((fila, index) => {
+      const repetido = filas.findIndex((item) => item.idabonado === fila.idabonado) !== index;
+      if (repetido) {
+        preview.push({
+          fila: index + 2,
+          idabonado: fila.idabonado,
+          nombre: '',
+          geolocalizacionActual: '',
+          geolocalizacionNueva: fila.geolocalizacion,
+          estado: 'ERROR',
+          mensaje: 'Cuenta duplicada en el archivo. Deje una sola fila por abonado.',
+        });
+        return;
+      }
+
+      const abonado = abonadosPorId.get(fila.idabonado);
+      if (!abonado) {
+        preview.push({
+          fila: index + 2,
+          idabonado: fila.idabonado,
+          nombre: '',
+          geolocalizacionActual: '',
+          geolocalizacionNueva: fila.geolocalizacion,
+          estado: 'ERROR',
+          mensaje: `La cuenta ${fila.idabonado} no existe en el sistema.`,
+        });
+        return;
+      }
+
+      const geolocalizacionActual = this.parseTextoExcel(abonado.geolocalizacion);
+      const geolocalizacionNueva = fila.geolocalizacion;
+      const cambia = geolocalizacionActual !== geolocalizacionNueva;
+
+      preview.push({
+        fila: index + 2,
+        idabonado: fila.idabonado,
+        nombre: abonado.nombre || '',
+        geolocalizacionActual,
+        geolocalizacionNueva,
+        estado: cambia ? 'ACTUALIZAR' : 'SIN_CAMBIOS',
+        mensaje: cambia ? 'Se actualizara la geolocalizacion.' : 'La geolocalizacion ya coincide.',
+      });
+    });
 
     return preview;
   }
