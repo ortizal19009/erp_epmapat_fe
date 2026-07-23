@@ -65,17 +65,67 @@ export class InfoCatalogoitemsComponent implements OnInit {
       this.ixfService.getByIdcatalogoitems(this.idcatalogoitems).subscribe({
          next: (resp: any) => {
             const movimientos = Array.isArray(resp) ? resp : [];
-            this._movxproducto = movimientos.map((mov: any) => this.mapMovimiento(mov));
-            this.noMovimientos = this._movxproducto.length === 0;
-            this.currentPage = 1;
-            this.refreshPagination();
+            const movimientosBase = movimientos.map((mov: any) => this.mapMovimiento(mov));
+            const idsFacturacion = Array.from(
+               new Set(
+                  movimientosBase
+                     .map(mov => Number(mov.idfacturacion || 0))
+                     .filter(id => id > 0)
+               )
+            );
 
-            if (this._movxproducto.length) {
-               this.seleccionarMovimiento(this._movxproducto[0]);
-            } else {
-               this.detalleSeleccionado = null;
-               this.facturasDetalle = [];
+            if (!idsFacturacion.length) {
+               this._movxproducto = movimientosBase;
+               this.noMovimientos = this._movxproducto.length === 0;
+               this.currentPage = 1;
+               this.refreshPagination();
+
+               if (this._movxproducto.length) {
+                  this.seleccionarMovimiento(this._movxproducto[0]);
+               } else {
+                  this.detalleSeleccionado = null;
+                  this.facturasDetalle = [];
+               }
+               return;
             }
+
+            const consultas: Record<string, any> = {};
+            idsFacturacion.forEach((id) => {
+               consultas[`fact_${id}`] = this.liquidafacService.getByIdfacturacion(id).pipe(
+                  catchError(() => of([]))
+               );
+            });
+
+            forkJoin(consultas).subscribe({
+               next: (resultado: Record<string, any>) => {
+                  const liquidacionesPorFacturacion = new Map<number, any[]>();
+                  idsFacturacion.forEach((id) => {
+                     const liquidaciones = Array.isArray(resultado[`fact_${id}`]) ? resultado[`fact_${id}`] : [];
+                     liquidacionesPorFacturacion.set(id, liquidaciones);
+                  });
+
+                  this._movxproducto = movimientosBase.map((mov) =>
+                     this.completarEstadoMovimiento(mov, liquidacionesPorFacturacion.get(mov.idfacturacion) || [])
+                  );
+                  this.noMovimientos = this._movxproducto.length === 0;
+                  this.currentPage = 1;
+                  this.refreshPagination();
+
+                  if (this._movxproducto.length) {
+                     this.seleccionarMovimiento(this._movxproducto[0]);
+                  } else {
+                     this.detalleSeleccionado = null;
+                     this.facturasDetalle = [];
+                  }
+               },
+               error: (err) => {
+                  console.error(err);
+                  this._movxproducto = movimientosBase;
+                  this.noMovimientos = this._movxproducto.length === 0;
+                  this.currentPage = 1;
+                  this.refreshPagination();
+               }
+            });
          },
          error: err => {
             console.error(err.error);
@@ -288,6 +338,25 @@ export class InfoCatalogoitemsComponent implements OnInit {
          totalFacturacion: Number(facturacion?.total || 0),
          formapago: facturacion?.formapago ?? null,
          facturacionRaw: facturacion
+      };
+   }
+
+   private completarEstadoMovimiento(mov: MovimientoProductoView, liquidaciones: any[]): MovimientoProductoView {
+      const facturas = Array.isArray(liquidaciones) ? liquidaciones : [];
+      if (!facturas.length) {
+         return mov;
+      }
+
+      const pagadas = facturas.filter((liq: any) => this.isFacturaPagada(liq?.idfactura_facturas)).length;
+      const pendientes = facturas.filter((liq: any) => !this.isFacturaPagada(liq?.idfactura_facturas)).length;
+
+      return {
+         ...mov,
+         pagado: pendientes === 0 && pagadas > 0,
+         totalFacturas: facturas.length,
+         facturasPagadas: pagadas,
+         facturasPendientes: pendientes,
+         cuotas: Number(mov?.cuotas || facturas.length || 0)
       };
    }
 

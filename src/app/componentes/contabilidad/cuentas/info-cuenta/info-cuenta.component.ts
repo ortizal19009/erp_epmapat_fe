@@ -86,20 +86,22 @@ export class InfoCuentaComponent implements OnInit {
    }
 
 
-   comprobante(tipcom: number, compro: number): string {
+   comprobante(tipcom: number, compro: number | null | undefined): string {
+      const numeroComprobante = compro != null ? compro.toString() : '0';
+
       switch (tipcom) {
          case 1:
-            return 'I-' + compro.toString();
+            return 'I-' + numeroComprobante;
          case 2:
-            return 'E-' + compro.toString();
+            return 'E-' + numeroComprobante;
          case 3:
-            return 'DC-' + compro.toString();
+            return 'DC-' + numeroComprobante;
          case 4:
-            return 'DI-' + compro.toString();
+            return 'DI-' + numeroComprobante;
          case 5:
-            return 'DE-' + compro.toString();
+            return 'DE-' + numeroComprobante;
          default:
-            return '-' + compro.toString();
+            return '-' + numeroComprobante;
       }
    }
 

@@ -93,7 +93,23 @@
             </div>
             <div class="modal-body text-center">
                 <ng-container *ngIf="fotoModalUrl; else sinFotoLectura">
-                    <img [src]="fotoModalUrl" alt="Foto de lectura" class="img-fluid img-thumbnail foto-lectura-modal">
+                    <div class="image-toolbar mb-2">
+                        <button type="button" class="btn btn-outline-secondary btn-sm mx-1" (click)="zoomFoto(-0.2)">-</button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm mx-1" (click)="resetFotoView()">{{ fotoZoomLabel }}</button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm mx-1" (click)="zoomFoto(0.2)">+</button>
+                    </div>
+                    <div class="image-stage"
+                        (wheel)="onFotoWheel($event)"
+                        (mousemove)="onFotoDrag($event)"
+                        (mouseup)="stopFotoDrag()"
+                        (mouseleave)="stopFotoDrag()">
+                        <img [src]="fotoModalUrl"
+                            alt="Foto de lectura"
+                            class="img-fluid img-thumbnail foto-lectura-modal zoomable-image"
+                            [class.dragging]="fotoDragging"
+                            [style.transform]="'translate(' + fotoTranslateX + 'px,' + fotoTranslateY + 'px) scale(' + fotoZoom + ')'"
+                            (mousedown)="startFotoDrag($event)">
+                    </div>
                 </ng-container>
                 <ng-template #sinFotoLectura>
                     <div class="py-4 text-muted">No hay imagen disponible para esta lectura.</div>

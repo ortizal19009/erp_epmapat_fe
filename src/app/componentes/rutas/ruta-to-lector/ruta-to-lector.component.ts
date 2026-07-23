@@ -425,6 +425,12 @@ export class RutaToLectorComponent implements OnInit {
         item.responsablePago,
         item.identificacion,
         item.categoria,
+        item.nromedidor,
+        item.promedio,
+        item.geolocalizacion,
+        item.fechalectura ? new Date(item.fechalectura).toLocaleDateString('es-EC') : '',
+        item.idnovedad,
+        item.novedad,
         item.lecturaAnterior,
         item.lecturaActual,
         item.observacion
@@ -458,6 +464,12 @@ export class RutaToLectorComponent implements OnInit {
       'Responsable de pago',
       'Identificacion',
       'Categoria',
+      'Nro medidor',
+      'Promedio',
+      'Geolocalizacion',
+      'Fecha lectura',
+      'Id novedad',
+      'Novedad',
       'Lectura anterior',
       'Lectura actual',
       'Observacion'
@@ -623,23 +635,30 @@ export class RutaToLectorComponent implements OnInit {
         );
 
         for (const lectura of lecturas ?? []) {
+          const abonado = lectura?.idabonado_abonados ?? {};
+          const novedad = lectura?.idnovedad_novedades ?? {};
           detalles.push({
             numero: detalles.length + 1,
             lector,
             idusuario,
             rutaCodigo: rutaEmision?.idruta_rutas?.codigo ?? ruta?.codigo ?? '',
             rutaDescripcion: rutaEmision?.idruta_rutas?.descripcion ?? ruta?.descripcion ?? '',
-            idabonado: lectura?.idabonado_abonados?.idabonado ?? '',
+            idabonado: abonado?.idabonado ?? '',
             responsablePago:
-              lectura?.idabonado_abonados?.idresponsable?.nombre ??
-              lectura?.idabonado_abonados?.idcliente_clientes?.nombre ??
+              abonado?.idresponsable?.nombre ??
+              abonado?.idcliente_clientes?.nombre ??
               '',
             identificacion:
-              lectura?.idabonado_abonados?.idresponsable?.cedula ??
-              lectura?.idabonado_abonados?.idcliente_clientes?.cedula ??
+              abonado?.idresponsable?.cedula ??
+              abonado?.idcliente_clientes?.cedula ??
               '',
-            categoria:
-              lectura?.idabonado_abonados?.idcategoria_categorias?.descripcion ?? '',
+            categoria: abonado?.idcategoria_categorias?.descripcion ?? '',
+            nromedidor: abonado?.nromedidor ?? '',
+            promedio: abonado?.promedio ?? '',
+            geolocalizacion: abonado?.geolocalizacion ?? '',
+            fechalectura: lectura?.fechalectura ?? '',
+            idnovedad: novedad?.idnovedad ?? '',
+            novedad: novedad?.descripcion ?? '',
             lecturaAnterior: lectura?.lecturaanterior ?? '',
             lecturaActual: lectura?.lecturaactual ?? '',
             observacion: lectura?.observaciones ?? lectura?.observacion ?? ''
@@ -722,6 +741,11 @@ export class RutaToLectorComponent implements OnInit {
         'Responsable',
         'Identificación',
         'Categoría',
+        'Medidor',
+        'Prom.',
+        'Fecha lec.',
+        'Id nov.',
+        'Novedad',
         'Lect. ant.',
         'Lect. act.',
         'Observación'
@@ -734,13 +758,23 @@ export class RutaToLectorComponent implements OnInit {
         item.responsablePago,
         item.identificacion,
         item.categoria,
+        item.nromedidor,
+        item.promedio,
+        item.fechalectura ? new Date(item.fechalectura).toLocaleDateString('es-EC') : '',
+        item.idnovedad,
+        item.novedad,
         item.lecturaAnterior,
-        item.lecturaActual,
+        this.getLecturaActualPdf(item.lecturaActual),
         item.observacion
       ])
     });
 
     return doc.output('blob');
+  }
+
+  private getLecturaActualPdf(lecturaActual: any): string | number {
+    const valor = Number(lecturaActual ?? 0);
+    return valor > 0 ? valor : '';
   }
 
   private async generarExcelReporteGeneral(reporte: any) {
@@ -820,7 +854,7 @@ export class RutaToLectorComponent implements OnInit {
       ]);
     });
 
-    this.configurarAnchos(worksheet, [10, 24, 14, 14, 28, 14, 28, 18, 18, 16, 16, 30]);
+    this.configurarAnchos(worksheet, [10, 24, 14, 14, 28, 14, 28, 18, 18, 18, 12, 26, 16, 12, 24, 16, 16, 30]);
     await this.descargarWorkbook(workbook, `reporte_general_lecturas_${this.emisionSelected?.emision ?? 'emision'}.xlsx`);
     this.swal('success', 'Excel de lecturas generado correctamente');
   }

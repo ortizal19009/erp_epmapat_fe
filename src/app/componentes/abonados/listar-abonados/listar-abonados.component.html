@@ -13,7 +13,7 @@
                   formControlName="selecTipoBusqueda">
                   <option value="1">Cuenta</option>
                   <option value="2">Nombre</option>
-                  <option value="3">Identificación</option>
+                  <option value="3">Identificaci&oacute;n</option>
                 </select>
               </div>
               <div class="col-sm-5">
@@ -46,9 +46,9 @@
           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
             <i class="bi bi-printer"></i>&nbsp; Imprimir</button>
           <button class="dropdown-item" type="button" (click)="descargarPlantillaGeolocalizacion()">
-            <i class="bi bi-download"></i>&nbsp; Descargar plantilla geolocalizaciÃ³n</button>
+            <i class="bi bi-download"></i>&nbsp; Descargar plantilla geolocalizaci&oacute;n</button>
           <button class="dropdown-item" type="button" (click)="abrirSelectorExcel()" [disabled]="importandoExcel">
-            <i class="bi bi-file-earmark-spreadsheet"></i>&nbsp; Importar geolocalización</button>
+            <i class="bi bi-file-earmark-spreadsheet"></i>&nbsp; Importar geolocalizaci&oacute;n</button>
           <button class="dropdown-item" type="button" data-toggle="modal" data-target="#exportar"
             (click)="exportar()"><i class="bi-file-earmark-arrow-up"></i>&nbsp; Exportar</button>
         </div>
@@ -73,7 +73,7 @@
         <div class="form-group col-12 col-md-3 mb-2">
           <label class="mb-1 small text-muted">Estado</label>
           <select class="form-control form-control-sm" [(ngModel)]="filtroEstado" (ngModelChange)="onFiltroEstado()">
-            <option [ngValue]="null">— Todos —</option>
+            <option [ngValue]="null">- Todos -</option>
             <option [ngValue]="1">Activo</option>
             <option [ngValue]="2">Suspendido</option>
             <option [ngValue]="3">Retirado</option>
@@ -81,11 +81,11 @@
           </select>
         </div>
 
-        <!-- Filtro por Categoría -->
+        <!-- Filtro por Categor&iacute;a -->
         <div class="form-group col-12 col-md-3 mb-2">
-          <label class="mb-1 small text-muted">Categoría</label>
+          <label class="mb-1 small text-muted">Categor&iacute;a</label>
           <select class="form-control form-control-sm" [(ngModel)]="filtroCategoria" (ngModelChange)="onFiltroCategoria()">
-            <option [ngValue]="null">— Todas —</option>
+            <option [ngValue]="null">- Todas -</option>
             <option *ngFor="let c of _categorias" [ngValue]="c.idcategoria">{{ c.descripcion }}</option>
           </select>
         </div>
@@ -94,12 +94,12 @@
         <div class="form-group col-12 col-md-3 mb-2">
           <label class="mb-1 small text-muted">Ruta</label>
           <select class="form-control form-control-sm" [(ngModel)]="filtroRuta" (ngModelChange)="onFiltroRuta()">
-            <option [ngValue]="null">— Todas —</option>
+            <option [ngValue]="null">- Todas -</option>
             <option *ngFor="let r of _rutas" [ngValue]="r.idruta">{{ r.descripcion }}</option>
           </select>
         </div>
 
-        <!-- Botón limpiar -->
+        <!-- Bot&oacute;n limpiar -->
         <div class="form-group col-12 col-md-3 mb-2 d-flex align-items-end">
           <button class="btn btn-sm btn-outline-secondary w-100" type="button" (click)="limpiarFiltros()">
             <i class="bi bi-x-circle"></i> Limpiar filtros
@@ -117,9 +117,9 @@
             class="badge badge-info ml-1">Filtros activos</span>
         </small>
 
-        <!-- Items por página (solo en modo filtro) -->
+        <!-- Items por p&aacute;gina (solo en modo filtro) -->
         <div *ngIf="modoFiltro" class="d-flex align-items-center">
-          <small class="text-muted mr-2">Items por página:</small>
+          <small class="text-muted mr-2">Items por p&aacute;gina:</small>
           <select class="form-control form-control-sm" style="width:70px;" (change)="cambiarSize($event)">
             <option *ngFor="let s of PAGE_SIZES" [value]="s" [selected]="s === size">{{ s }}</option>
           </select>
@@ -148,11 +148,11 @@
           <tr>
             <th></th>
             <th>Nombre</th>
-            <th>Identificación</th>
+            <th>Identificaci&oacute;n</th>
             <th>Cuenta</th>
-            <th>Categoría</th>
+            <th>Categor&iacute;a</th>
             <th>Ruta</th>
-            <th>Dirección</th>
+            <th>Direcci&oacute;n</th>
           </tr>
         </thead>
         <tbody class="detalle">
@@ -174,12 +174,12 @@
         </tbody>
       </table>
 
-      <!-- PAGINACIÓN (solo en modo filtro) -->
+      <!-- PAGINACI&Oacute;N (solo en modo filtro) -->
       <div *ngIf="modoFiltro && totalPages > 1"
         class="d-flex justify-content-between align-items-center py-2 px-1">
 
         <small class="text-muted">
-          Página <strong>{{ page + 1 }}</strong> de <strong>{{ totalPages }}</strong>
+          P&aacute;gina <strong>{{ page + 1 }}</strong> de <strong>{{ totalPages }}</strong>
           &nbsp;|&nbsp; {{ totalElements }} registros
         </small>
 
@@ -205,7 +205,7 @@
               </button>
             </li>
             <li class="page-item" [class.disabled]="page + 1 >= totalPages">
-              <button class="page-link" (click)="cambiarPagina(totalPages - 1)" title="Última">
+              <button class="page-link" (click)="cambiarPagina(totalPages - 1)" title="&Uacute;ltima">
                 <i class="bi bi-chevron-double-right"></i>
               </button>
             </li>
@@ -216,26 +216,26 @@
   </div>
 
   <div class="modal fade" id="previewImportacionModal" tabindex="-1" aria-labelledby="previewImportacionModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-dialog modal-dialog-centered modal-xl preview-importacion-dialog">
       <div class="modal-content border">
         <div class="modal-header cabecera py-2">
-          <h5 class="modal-title font-weight-bold" id="previewImportacionModalLabel">Vista previa de importación</h5>
+          <h5 class="modal-title font-weight-bold" id="previewImportacionModalLabel">Vista previa de importaci&oacute;n</h5>
           <button #btnCerrarPreviewImportacion type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <div class="modal-body detalle">
+        <div class="modal-body detalle preview-importacion-body">
           <div class="alert alert-info py-2">
             Archivo: <strong>{{ previewImportacionArchivo }}</strong>
           </div>
 
           <div class="alert alert-light border py-2">
-            Revise cuidadosamente las cuentas y coordenadas antes de confirmar. Solo se aplicarÃ¡n los registros con estado <strong>ACTUALIZAR</strong>.
+            Revise cuidadosamente las cuentas y coordenadas antes de confirmar. Solo se aplicar&aacute;n los registros con estado <strong>ACTUALIZAR</strong>.
           </div>
 
           <div class="row mb-3">
             <div class="col-md-4">
-              <div class="alert alert-primary py-2 mb-2">Registros leídos: <strong>{{ previewTotalRegistros }}</strong></div>
+              <div class="alert alert-primary py-2 mb-2">Registros le&iacute;dos: <strong>{{ previewTotalRegistros }}</strong></div>
             </div>
             <div class="col-md-4">
               <div class="alert alert-success py-2 mb-2">Abonados a actualizar: <strong>{{ previewTotalActualizar }}</strong></div>
@@ -245,29 +245,78 @@
             </div>
           </div>
 
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <small class="text-muted">
-              Página <strong>{{ previewPage + 1 }}</strong> de <strong>{{ previewTotalPages }}</strong>
-            </small>
-            <div class="d-flex align-items-center">
-              <small class="text-muted mr-2">Items por página:</small>
-              <select class="form-control form-control-sm" style="width:70px;" (change)="cambiarPreviewSize($event)">
-                <option *ngFor="let s of PREVIEW_PAGE_SIZES" [value]="s" [selected]="s === previewSize">{{ s }}</option>
-              </select>
+          <div class="row mb-2">
+            <div class="col-md-4">
+              <div class="alert alert-light border py-2 mb-2">Actualizados con &eacute;xito: <strong>{{ previewTotalExitos }}</strong></div>
+            </div>
+            <div class="col-md-4">
+              <div class="alert alert-light border py-2 mb-2">Procesando: <strong>{{ previewTotalProcesando }}</strong></div>
+            </div>
+            <div class="col-md-4">
+              <div class="alert alert-light border py-2 mb-2">Errores: <strong>{{ previewTotalErrores }}</strong></div>
+            </div>
+          </div>
+          <div class="preview-toolbar mb-3">
+            <div class="d-flex justify-content-between align-items-center flex-wrap preview-toolbar-header">
+              <button
+                class="btn btn-sm btn-light border preview-toggle-btn"
+                type="button"
+                (click)="togglePreviewFiltros()"
+                [attr.aria-expanded]="previewFiltrosAbiertos"
+                aria-controls="previewImportacionFiltros">
+                <i class="bi bi-sliders mr-1"></i> Filtros y b&uacute;squeda
+              </button>
+
+              <div class="d-flex align-items-center flex-wrap preview-toolbar-right">
+                <small class="text-muted mr-2">
+                  P&aacute;gina <strong>{{ previewPage + 1 }}</strong> de <strong>{{ previewTotalPages }}</strong>
+                </small>
+                <small class="text-muted mr-2">Items por p&aacute;gina:</small>
+                <select class="form-control form-control-sm preview-size-select" (change)="cambiarPreviewSize($event)">
+                  <option *ngFor="let s of PREVIEW_PAGE_SIZES" [value]="s" [selected]="s === previewSize">{{ s }}</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="preview-filtros-collapse mt-2" id="previewImportacionFiltros" *ngIf="previewFiltrosAbiertos">
+              <div class="card preview-filtros-card">
+                <div class="card-body py-3">
+                  <div class="row align-items-end">
+                    <div class="col-lg-5 mb-2">
+                      <label class="small text-muted mb-1 d-block">Buscar en la vista previa</label>
+                      <input
+                        type="text"
+                        class="form-control form-control-sm"
+                        [ngModel]="previewFiltroTexto"
+                        (ngModelChange)="onPreviewFiltroTextoChange($event)"
+                        placeholder="Cuenta, nombre, estado o detalle">
+                    </div>
+                    <div class="col-lg-7 mb-2">
+                      <label class="small text-muted mb-1 d-block">Filtrar por estado</label>
+                      <div class="preview-filter-group">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" [class.active]="previewFiltroEstado === 'TODOS'" (click)="setPreviewFiltroEstado('TODOS')">Todos</button>
+                        <button type="button" class="btn btn-sm btn-outline-success" [class.active]="previewFiltroEstado === 'ACTUALIZAR'" (click)="setPreviewFiltroEstado('ACTUALIZAR')">Actualizar</button>
+                        <button type="button" class="btn btn-sm btn-outline-info" [class.active]="previewFiltroEstado === 'EXITO'" (click)="setPreviewFiltroEstado('EXITO')">&Eacute;xito</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger" [class.active]="previewFiltroEstado === 'ERROR'" (click)="setPreviewFiltroEstado('ERROR')">Error</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="table-responsive">
-            <table class="table table-sm table-hover table-bordered mb-0">
+          <div class="table-responsive preview-importacion-table-wrap">
+            <table class="table table-sm table-hover table-bordered mb-0 preview-importacion-table">
               <thead class="text-center cabecera">
                 <tr>
-                  <th>Fila</th>
-                  <th>Cuenta</th>
-                  <th>Nombre</th>
-                  <th>Geolocalización actual</th>
-                  <th>Geolocalización nueva</th>
-                  <th>Estado</th>
-                  <th>Detalle</th>
+                  <th><button type="button" class="btn btn-link btn-sm preview-sort-btn" (click)="sortPreviewBy('fila')">Fila <i *ngIf="getPreviewSortIcon('fila')" [class]="getPreviewSortIcon('fila')"></i></button></th>
+                  <th><button type="button" class="btn btn-link btn-sm preview-sort-btn" (click)="sortPreviewBy('idabonado')">Cuenta <i *ngIf="getPreviewSortIcon('idabonado')" [class]="getPreviewSortIcon('idabonado')"></i></button></th>
+                  <th><button type="button" class="btn btn-link btn-sm preview-sort-btn" (click)="sortPreviewBy('nombre')">Nombre <i *ngIf="getPreviewSortIcon('nombre')" [class]="getPreviewSortIcon('nombre')"></i></button></th>
+                  <th><button type="button" class="btn btn-link btn-sm preview-sort-btn" (click)="sortPreviewBy('geolocalizacionActual')">Geolocalizaci&oacute;n actual <i *ngIf="getPreviewSortIcon('geolocalizacionActual')" [class]="getPreviewSortIcon('geolocalizacionActual')"></i></button></th>
+                  <th><button type="button" class="btn btn-link btn-sm preview-sort-btn" (click)="sortPreviewBy('geolocalizacionNueva')">Geolocalizaci&oacute;n nueva <i *ngIf="getPreviewSortIcon('geolocalizacionNueva')" [class]="getPreviewSortIcon('geolocalizacionNueva')"></i></button></th>
+                  <th><button type="button" class="btn btn-link btn-sm preview-sort-btn" (click)="sortPreviewBy('estado')">Estado <i *ngIf="getPreviewSortIcon('estado')" [class]="getPreviewSortIcon('estado')"></i></button></th>
+                  <th><button type="button" class="btn btn-link btn-sm preview-sort-btn" (click)="sortPreviewBy('mensaje')">Detalle <i *ngIf="getPreviewSortIcon('mensaje')" [class]="getPreviewSortIcon('mensaje')"></i></button></th>
                 </tr>
               </thead>
               <tbody class="detalle">
@@ -277,17 +326,23 @@
                   <td>{{ item.nombre || '-' }}</td>
                   <td>{{ item.geolocalizacionActual || '-' }}</td>
                   <td>{{ item.geolocalizacionNueva || '-' }}</td>
-                  <td class="text-center">
-                    <span class="badge"
-                      [ngClass]="{
-                        'badge-success': item.estado === 'ACTUALIZAR',
-                        'badge-secondary': item.estado === 'SIN_CAMBIOS',
-                        'badge-danger': item.estado === 'ERROR'
-                      }">
-                      {{ item.estado }}
+                  <td class="text-center estado-importacion-columna">
+                    <span class="estado-importacion-icono text-success" *ngIf="item.estado === 'EXITO'" title="Actualizado correctamente">
+                      <i class="bi bi-check-circle-fill"></i>
                     </span>
+                    <span class="estado-importacion-icono text-danger" *ngIf="item.estado === 'ERROR'" title="Error al actualizar">
+                      <i class="bi bi-x-circle-fill"></i>
+                    </span>
+                    <span class="estado-importacion-icono text-primary" *ngIf="item.estado === 'PROCESANDO'" title="Procesando">
+                      <i class="bi bi-arrow-repeat"></i>
+                    </span>
+                    <span class="badge badge-success" *ngIf="item.estado === 'ACTUALIZAR'">ACTUALIZAR</span>
+                    <span class="badge badge-secondary" *ngIf="item.estado === 'SIN_CAMBIOS'">SIN CAMBIOS</span>
                   </td>
-                  <td>{{ item.mensaje }}</td>
+                  <td>
+                    <div class="font-weight-bold small text-uppercase text-muted mb-1">{{ item.estado }}</div>
+                    {{ item.mensaje }}
+                  </td>
                 </tr>
                 <tr *ngIf="previewImportacionPagina.length === 0">
                   <td colspan="7" class="text-center text-muted py-3">No hay registros para mostrar.</td>
@@ -328,7 +383,7 @@
           <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Cerrar</button>
           <button type="button" class="btn btn-sm btn-success" (click)="confirmarImportacionGeolocalizaciones()"
             [disabled]="importandoExcel || previewTotalActualizar === 0">
-            <i class="fa fa-check-circle"></i>&nbsp; Confirmar importación
+            <i class="fa fa-check-circle"></i>&nbsp; Confirmar importaci&oacute;n
           </button>
         </div>
       </div>
@@ -348,11 +403,11 @@
           <div class="alert alert-info py-1 px-2 small mb-2">
             <i class="bi bi-info-circle"></i>
             <ng-container *ngIf="!modoFiltro">
-              Búsqueda: <strong>{{ _abonados.length }}</strong> abonado(s) en pantalla
+              B&uacute;squeda: <strong>{{ _abonados.length }}</strong> abonado(s) en pantalla
             </ng-container>
             <ng-container *ngIf="modoFiltro">
               Filtro activo: <strong>{{ totalElements }}</strong> abonados en total
-              (página actual: <strong>{{ _abonados.length }}</strong>)
+              (p&aacute;gina actual: <strong>{{ _abonados.length }}</strong>)
             </ng-container>
           </div>
 
@@ -362,19 +417,19 @@
             <div class="d-flex flex-column" style="gap:4px">
               <label class="mb-0">
                 <input type="radio" [(ngModel)]="pdfAlcance" [value]="'pagina'"> &nbsp;
-                Solo página actual ({{ _abonados.length }} registros)
+                Solo p&aacute;gina actual ({{ _abonados.length }} registros)
               </label>
               <label class="mb-0">
                 <input type="radio" [(ngModel)]="pdfAlcance" [value]="'todos'"> &nbsp;
                 Todos los registros ({{ totalElements }})
-                <small class="text-muted">— puede tardar</small>
+                <small class="text-muted">- puede tardar</small>
               </label>
             </div>
           </div>
 
           <div class="input-group input-group-sm mb-0">
             <div class="input-group-prepend">
-              <small class="input-group-text">Abrir en otra página</small>
+              <small class="input-group-text">Abrir en otra p&aacute;gina</small>
               <div class="input-group-text">
                 <input type="checkbox" [(ngModel)]="otraPagina">
               </div>
@@ -407,7 +462,7 @@
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
                 <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm" data-toggle="tooltip"
-                  title="Obligatorio y mínimo 3 caracteres">Archivo</span>
+                  title="Obligatorio y m&iacute;nimo 3 caracteres">Archivo</span>
               </div>
               <input type="text" class="form-control" [(ngModel)]="archExportar" aria-label="Small"
                 aria-describedby="inputGroup-sizing-sm" required minlength="3" maxlength="20">
@@ -428,7 +483,7 @@
 
 </div>
 
-<!-- MODAL PDF (En la misma página)-->
+<!-- MODAL PDF (En la misma p&aacute;gina)-->
 <div class='modal fade' id='pdf' tabindex='-1' aria-labelledby='pdf' aria-hidden='true'>
   <div class='modal-dialog modal-sm'>
   </div>

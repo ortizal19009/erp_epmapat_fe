@@ -91,23 +91,23 @@
       <table class="table table-hover table-bordered table-sm">
         <thead>
           <tr class="text-center" *ngIf="!soloPendientesCuotas">
-            <th class="sortable" (click)="ordenarPor('idfacturacion')">Nro <i class="bi" [ngClass]="getSortIcon('idfacturacion')"></i></th>
-            <th class="col-sm-1 sortable" (click)="ordenarPor('feccrea')">Fecha <i class="bi" [ngClass]="getSortIcon('feccrea')"></i></th>
-            <th class="col-sm-3 sortable" (click)="ordenarPor('cliente')">Cliente <i class="bi" [ngClass]="getSortIcon('cliente')"></i></th>
-            <th class="sortable" (click)="ordenarPor('descripcion')">Descripcion <i class="bi" [ngClass]="getSortIcon('descripcion')"></i></th>
-            <th class="sortable" (click)="ordenarPor('total')">Valor <i class="bi" [ngClass]="getSortIcon('total')"></i></th>
-            <th class="sortable" (click)="ordenarPor('cuotas')">Cuotas <i class="bi" [ngClass]="getSortIcon('cuotas')"></i></th>
-            <th class="sortable" (click)="ordenarPor('estado')">Estado <i class="bi" [ngClass]="getSortIcon('estado')"></i></th>
+            <th class="sortable" (click)="ordenarPor('idfacturacion')">Nro <i *ngIf="getSortIcon('idfacturacion')" class="bi" [ngClass]="getSortIcon('idfacturacion')"></i></th>
+            <th class="col-sm-1 sortable" (click)="ordenarPor('feccrea')">Fecha <i *ngIf="getSortIcon('feccrea')" class="bi" [ngClass]="getSortIcon('feccrea')"></i></th>
+            <th class="col-sm-3 sortable" (click)="ordenarPor('cliente')">Cliente <i *ngIf="getSortIcon('cliente')" class="bi" [ngClass]="getSortIcon('cliente')"></i></th>
+            <th class="sortable" (click)="ordenarPor('descripcion')">Descripcion <i *ngIf="getSortIcon('descripcion')" class="bi" [ngClass]="getSortIcon('descripcion')"></i></th>
+            <th class="sortable" (click)="ordenarPor('total')">Valor <i *ngIf="getSortIcon('total')" class="bi" [ngClass]="getSortIcon('total')"></i></th>
+            <th class="sortable" (click)="ordenarPor('cuotas')">Cuotas <i *ngIf="getSortIcon('cuotas')" class="bi" [ngClass]="getSortIcon('cuotas')"></i></th>
+            <th class="sortable" (click)="ordenarPor('estado')">Estado <i *ngIf="getSortIcon('estado')" class="bi" [ngClass]="getSortIcon('estado')"></i></th>
           </tr>
           <tr class="text-center" *ngIf="soloPendientesCuotas">
-            <th class="sortable" (click)="ordenarPor('idfacturacion')">Nro <i class="bi" [ngClass]="getSortIcon('idfacturacion')"></i></th>
-            <th class="col-sm-1 sortable" (click)="ordenarPor('feccrea')">Fecha <i class="bi" [ngClass]="getSortIcon('feccrea')"></i></th>
-            <th class="col-sm-3 sortable" (click)="ordenarPor('cliente')">Cliente <i class="bi" [ngClass]="getSortIcon('cliente')"></i></th>
-            <th class="sortable" (click)="ordenarPor('descripcion')">Descripcion <i class="bi" [ngClass]="getSortIcon('descripcion')"></i></th>
-            <th class="sortable" (click)="ordenarPor('cuotas')">Cuotas <i class="bi" [ngClass]="getSortIcon('cuotas')"></i></th>
-            <th class="sortable" (click)="ordenarPor('pagadas')">Pagadas <i class="bi" [ngClass]="getSortIcon('pagadas')"></i></th>
-            <th class="sortable" (click)="ordenarPor('pendientes')">Pendientes <i class="bi" [ngClass]="getSortIcon('pendientes')"></i></th>
-            <th class="sortable" (click)="ordenarPor('valorPendiente')">Valor pendiente <i class="bi" [ngClass]="getSortIcon('valorPendiente')"></i></th>
+            <th class="sortable" (click)="ordenarPor('idfacturacion')">Nro <i *ngIf="getSortIcon('idfacturacion')" class="bi" [ngClass]="getSortIcon('idfacturacion')"></i></th>
+            <th class="col-sm-1 sortable" (click)="ordenarPor('feccrea')">Fecha <i *ngIf="getSortIcon('feccrea')" class="bi" [ngClass]="getSortIcon('feccrea')"></i></th>
+            <th class="col-sm-3 sortable" (click)="ordenarPor('cliente')">Cliente <i *ngIf="getSortIcon('cliente')" class="bi" [ngClass]="getSortIcon('cliente')"></i></th>
+            <th class="sortable" (click)="ordenarPor('descripcion')">Descripcion <i *ngIf="getSortIcon('descripcion')" class="bi" [ngClass]="getSortIcon('descripcion')"></i></th>
+            <th class="sortable" (click)="ordenarPor('cuotas')">Cuotas <i *ngIf="getSortIcon('cuotas')" class="bi" [ngClass]="getSortIcon('cuotas')"></i></th>
+            <th class="sortable" (click)="ordenarPor('pagadas')">Pagadas <i *ngIf="getSortIcon('pagadas')" class="bi" [ngClass]="getSortIcon('pagadas')"></i></th>
+            <th class="sortable" (click)="ordenarPor('pendientes')">Pendientes <i *ngIf="getSortIcon('pendientes')" class="bi" [ngClass]="getSortIcon('pendientes')"></i></th>
+            <th class="sortable" (click)="ordenarPor('valorPendiente')">Valor pendiente <i *ngIf="getSortIcon('valorPendiente')" class="bi" [ngClass]="getSortIcon('valorPendiente')"></i></th>
           </tr>
         </thead>
 

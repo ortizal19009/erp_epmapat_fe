@@ -13,6 +13,7 @@ import { RutasService } from 'src/app/servicios/rutas.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
 import { PageResponse } from 'src/app/interfaces/page-response';
 import { firstValueFrom } from 'rxjs';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-listar-abonados',
@@ -35,12 +36,12 @@ export class ListarAbonadosComponent implements OnInit {
   filtroCategoria: number | null = null;
   filtroRuta: number | null = null;
 
-  // paginación (solo activa cuando se usan filtros)
+  // paginaciÃ³n (solo activa cuando se usan filtros)
   page = 0;
   size = 20;
   totalElements = 0;
   totalPages = 0;
-  modoFiltro = false; // true = paginado con filtros, false = búsqueda individual
+  modoFiltro = false; // true = paginado con filtros, false = bÃºsqueda individual
 
   // form y UI
   buscarAbonadoForm: FormGroup;
@@ -58,6 +59,11 @@ export class ListarAbonadosComponent implements OnInit {
   previewImportacionArchivo = '';
   previewPage = 0;
   previewSize = 10;
+  previewFiltroEstado: PreviewEstadoFiltro = 'TODOS';
+  previewFiltroTexto = '';
+  previewSortColumn: PreviewSortColumn = 'fila';
+  previewSortDirection: 'asc' | 'desc' = 'asc';
+  previewFiltrosAbiertos = false;
 
   readonly PAGE_SIZES = [10, 20, 50, 100];
   readonly PREVIEW_PAGE_SIZES = [10, 20, 50];
@@ -102,6 +108,7 @@ export class ListarAbonadosComponent implements OnInit {
     if (buscaAbonados !== '') this.onSubmit();
     this.cargarCategorias();
     this.cargarRutas();
+    this.previewFiltrosAbiertos = sessionStorage.getItem('previewImportacionFiltrosAbiertos') === 'true';
   }
 
   async buscaColor() {
@@ -120,7 +127,7 @@ export class ListarAbonadosComponent implements OnInit {
   }
 
   // =====================
-  // BÚSQUEDA INDIVIDUAL
+  // BÃšSQUEDA INDIVIDUAL
   // =====================
   onSubmit() {
     sessionStorage.setItem('tipoBusqueda', this.buscarAbonadoForm.controls['selecTipoBusqueda'].value.toString());
@@ -266,7 +273,7 @@ export class ListarAbonadosComponent implements OnInit {
   }
 
   // =====================
-  // NAVEGACIÓN
+  // NAVEGACIÃ“N
   // =====================
   onNavigationEnd() { this.router.navigate(['/app-listar-abonados']); }
   addAbonadoRouter() { this.router.navigate(['forms-aguatramite', 1]); }
@@ -369,7 +376,7 @@ export class ListarAbonadosComponent implements OnInit {
       this.previewImportacionArchivo = file.name;
       this.previewPage = 0;
       this.previewImportacion = await this.generarPreviewImportacion(filas);
-      this.btnAbrirPreviewImportacionRef?.nativeElement.click();
+      this.abrirPreviewImportacionModal();
     } catch (error: any) {
       console.error(error);
       this.mensajeImportacion = error?.message || 'No se pudo procesar el archivo Excel.';
@@ -393,31 +400,39 @@ export class ListarAbonadosComponent implements OnInit {
     this.loadingService.showLoading();
 
     try {
+      this.previewImportacion = this.previewImportacion.map((fila) =>
+        fila.estado === 'ACTUALIZAR'
+          ? { ...fila, estado: 'PROCESANDO', mensaje: 'Actualizando geolocalizacion...' }
+          : fila
+      );
       const resultado = await this.actualizarGeolocalizaciones(filasActualizar);
       this.mensajeImportacion =
         `Importación finalizada. Actualizados: ${resultado.actualizados}. Errores: ${resultado.errores.length}.`;
       this.detalleImportacion = resultado.errores;
 
+      this.previewImportacion = this.previewImportacion.map((fila) => {
+        if (fila.estado !== 'PROCESANDO') return fila;
+        const errorFila = resultado.errores.find((err) => err.includes(`Cuenta ${fila.idabonado}:`));
+        if (errorFila) {
+          return { ...fila, estado: 'ERROR', mensaje: errorFila };
+        }
+        return {
+          ...fila,
+          geolocalizacionActual: fila.geolocalizacionNueva,
+          estado: 'EXITO',
+          mensaje: 'Actualizado correctamente.',
+        };
+      });
+
       if (resultado.actualizados > 0) {
-        this.previewImportacion = this.previewImportacion.map((fila) => {
-          if (fila.estado !== 'ACTUALIZAR') return fila;
-          const errorFila = resultado.errores.find((err) => err.includes(`Cuenta ${fila.idabonado}:`));
-          if (errorFila) {
-            return { ...fila, estado: 'ERROR', mensaje: errorFila };
-          }
-          return {
-            ...fila,
-            geolocalizacionActual: fila.geolocalizacionNueva,
-            estado: 'SIN_CAMBIOS',
-            mensaje: 'Actualizado correctamente.',
-          };
-        });
         if (this.modoFiltro) this.buscarConFiltros();
         else if (this.buscarAbonadoForm.value.buscarAbonado) this.onSubmit();
       }
 
+      await this.mostrarResumenImportacion();
+
       if (resultado.errores.length === 0) {
-        this.btnCerrarPreviewImportacionRef?.nativeElement.click();
+        this.cerrarPreviewImportacionModal();
       }
     } catch (error: any) {
       console.error(error);
@@ -439,7 +454,7 @@ export class ListarAbonadosComponent implements OnInit {
   }
 
   get previewTotalPages(): number {
-    return Math.max(1, Math.ceil(this.previewImportacion.length / this.previewSize));
+    return Math.max(1, Math.ceil(this.previewImportacionFiltrada.length / this.previewSize));
   }
 
   get previewPaginasVisibles(): number[] {
@@ -451,7 +466,7 @@ export class ListarAbonadosComponent implements OnInit {
 
   get previewImportacionPagina(): PreviewImportacionRow[] {
     const inicio = this.previewPage * this.previewSize;
-    return this.previewImportacion.slice(inicio, inicio + this.previewSize);
+    return this.previewImportacionFiltrada.slice(inicio, inicio + this.previewSize);
   }
 
   get previewTotalRegistros(): number {
@@ -466,8 +481,143 @@ export class ListarAbonadosComponent implements OnInit {
     return this.previewImportacion.filter((fila) => fila.estado === 'SIN_CAMBIOS').length;
   }
 
+  get previewTotalExitos(): number {
+    return this.previewImportacion.filter((fila) => fila.estado === 'EXITO').length;
+  }
+
   get previewTotalErrores(): number {
     return this.previewImportacion.filter((fila) => fila.estado === 'ERROR').length;
+  }
+
+  get previewTotalProcesando(): number {
+    return this.previewImportacion.filter((fila) => fila.estado === 'PROCESANDO').length;
+  }
+
+  get previewImportacionFiltrada(): PreviewImportacionRow[] {
+    const filtroTexto = this.previewFiltroTexto.trim().toLowerCase();
+
+    return [...this.previewImportacion]
+      .filter((fila) => this.coincideEstadoPreview(fila))
+      .filter((fila) => {
+        if (!filtroTexto) return true;
+        return [
+          fila.fila,
+          fila.idabonado,
+          fila.nombre,
+          fila.geolocalizacionActual,
+          fila.geolocalizacionNueva,
+          fila.estado,
+          fila.mensaje,
+        ]
+          .map((valor) => String(valor ?? '').toLowerCase())
+          .some((valor) => valor.includes(filtroTexto));
+      })
+      .sort((a, b) => this.compararPreview(a, b));
+  }
+
+  setPreviewFiltroEstado(estado: PreviewEstadoFiltro): void {
+    this.previewFiltroEstado = estado;
+    this.previewPage = 0;
+  }
+
+  onPreviewFiltroTextoChange(value: string): void {
+    this.previewFiltroTexto = value;
+    this.previewPage = 0;
+  }
+
+  sortPreviewBy(column: PreviewSortColumn): void {
+    if (this.previewSortColumn === column) {
+      this.previewSortDirection = this.previewSortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.previewSortColumn = column;
+      this.previewSortDirection = 'asc';
+    }
+    this.previewPage = 0;
+  }
+
+  togglePreviewFiltros(): void {
+    this.previewFiltrosAbiertos = !this.previewFiltrosAbiertos;
+    sessionStorage.setItem('previewImportacionFiltrosAbiertos', String(this.previewFiltrosAbiertos));
+  }
+
+  getPreviewSortIcon(column: PreviewSortColumn): string {
+    if (this.previewSortColumn !== column) return '';
+    return this.previewSortDirection === 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill';
+  }
+
+  private abrirPreviewImportacionModal(): void {
+    const modal = document.getElementById('previewImportacionModal');
+    const win = window as any;
+    if (win?.$ && modal) {
+      win.$(modal).modal('show');
+      return;
+    }
+    this.btnAbrirPreviewImportacionRef?.nativeElement.click();
+  }
+
+  private cerrarPreviewImportacionModal(): void {
+    const modal = document.getElementById('previewImportacionModal');
+    const win = window as any;
+    if (win?.$ && modal) {
+      win.$(modal).modal('hide');
+      return;
+    }
+    this.btnCerrarPreviewImportacionRef?.nativeElement.click();
+  }
+
+  private async mostrarResumenImportacion(): Promise<void> {
+    await Swal.fire({
+      icon: this.previewTotalErrores > 0 ? 'warning' : 'success',
+      title: 'Resumen de importación',
+      html:
+        `<div class="text-left">` +
+        `<div><strong>Registros leídos:</strong> ${this.previewTotalRegistros}</div>` +
+        `<div><strong>Abonados actualizados:</strong> ${this.previewTotalExitos}</div>` +
+        `<div><strong>Sin cambios:</strong> ${this.previewTotalSinCambios}</div>` +
+        `<div><strong>Con error:</strong> ${this.previewTotalErrores}</div>` +
+        `</div>`,
+      confirmButtonText: 'Aceptar',
+    });
+  }
+
+  private coincideEstadoPreview(fila: PreviewImportacionRow): boolean {
+    if (this.previewFiltroEstado === 'TODOS') return true;
+    return fila.estado === this.previewFiltroEstado;
+  }
+
+  private compararPreview(a: PreviewImportacionRow, b: PreviewImportacionRow): number {
+    const valorA = this.obtenerValorPreview(a, this.previewSortColumn);
+    const valorB = this.obtenerValorPreview(b, this.previewSortColumn);
+
+    let comparacion = 0;
+    if (typeof valorA === 'number' && typeof valorB === 'number') {
+      comparacion = valorA - valorB;
+    } else {
+      comparacion = String(valorA).localeCompare(String(valorB), 'es', { sensitivity: 'base' });
+    }
+
+    return this.previewSortDirection === 'asc' ? comparacion : comparacion * -1;
+  }
+
+  private obtenerValorPreview(fila: PreviewImportacionRow, column: PreviewSortColumn): string | number {
+    switch (column) {
+      case 'fila':
+        return fila.fila;
+      case 'idabonado':
+        return fila.idabonado;
+      case 'nombre':
+        return fila.nombre || '';
+      case 'geolocalizacionActual':
+        return fila.geolocalizacionActual || '';
+      case 'geolocalizacionNueva':
+        return fila.geolocalizacionNueva || '';
+      case 'estado':
+        return fila.estado;
+      case 'mensaje':
+        return fila.mensaje || '';
+      default:
+        return '';
+    }
   }
 
   pdf() {
@@ -519,17 +669,17 @@ export class ListarAbonadosComponent implements OnInit {
     doc.setFontSize(11);
     doc.text('LISTADO DE ABONADOS', margenL, 46);
 
-    // Subtítulo con filtro activo
+    // Subtitulo con filtro activo
     let subtitulo = '';
     if (this.filtroEstado !== null) {
       const estados: any = { 0: 'Eliminado', 1: 'Activo', 2: 'Suspendido', 3: 'Retirado' };
-      subtitulo = `Filtro — Estado: ${estados[this.filtroEstado] ?? this.filtroEstado}`;
+      subtitulo = `Filtro - Estado: ${estados[this.filtroEstado] ?? this.filtroEstado}`;
     } else if (this.filtroCategoria !== null) {
       const cat = this._categorias.find(c => c.idcategoria === this.filtroCategoria);
-      subtitulo = `Filtro — Categoría: ${cat?.descripcion ?? this.filtroCategoria}`;
+      subtitulo = `Filtro - Categoria: ${cat?.descripcion ?? this.filtroCategoria}`;
     } else if (this.filtroRuta !== null) {
       const ruta = this._rutas.find(r => r.idruta === this.filtroRuta);
-      subtitulo = `Filtro — Ruta: ${ruta?.descripcion ?? this.filtroRuta}`;
+      subtitulo = `Filtro - Ruta: ${ruta?.descripcion ?? this.filtroRuta}`;
     }
 
     let startY = 56;
@@ -540,7 +690,7 @@ export class ListarAbonadosComponent implements OnInit {
       startY = 64;
     }
 
-    // Fecha y total — alineado a la derecha
+    // Fecha y total alineado a la derecha
     doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
     const infoText = `Fecha: ${fecha}   Total: ${datos.length} registros`;
@@ -560,13 +710,13 @@ export class ListarAbonadosComponent implements OnInit {
     ]);
 
     // Anchos proporcionales al usable (suman 100%)
-    // Nombre:28% Identif:9% Cuenta:7% Categ:12% Ruta:20% Dirección:18% Estado:6%
+    // Nombre:28% Identif:9% Cuenta:7% Categ:12% Ruta:20% Direccion:18% Estado:6%
     const col = (pct: number) => Math.floor(usable * pct / 100);
 
     autoTable(doc, {
       startY,
       tableWidth: usable,
-      head: [['Nombre', 'Identificación', 'Cuenta', 'Categoría', 'Ruta', 'Dirección', 'Estado']],
+      head: [['Nombre', 'Identificacion', 'Cuenta', 'Categoria', 'Ruta', 'Direccion', 'Estado']],
       theme: 'grid',
       headStyles: {
         fillColor: [44, 62, 80],
@@ -603,7 +753,7 @@ export class ListarAbonadosComponent implements OnInit {
       },
     });
 
-    // Números de página
+    // Numeros de pagina
     const pageCount = (doc.internal as any).getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
@@ -611,7 +761,7 @@ export class ListarAbonadosComponent implements OnInit {
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(100);
       doc.text(
-        `Página ${i} de ${pageCount}`,
+        `Pagina ${i} de ${pageCount}`,
         pageW / 2,
         doc.internal.pageSize.getHeight() - 8,
         { align: 'center' }
@@ -652,7 +802,7 @@ export class ListarAbonadosComponent implements OnInit {
         worksheet.getCell('A1').font = font;
         worksheet.getCell('C1').font = font;
         worksheet.addRow([]);
-        const cabecera = ['Cuenta', 'Nombre', 'Identificación', 'Dirección', 'Dirección Ubicación', 'Teléfono', 'F.Nacimiento', 'e-mail'];
+        const cabecera = ['Cuenta', 'Nombre', 'Identificacion', 'Direccion', 'Direccion Ubicacion', 'Telefono', 'F.Nacimiento', 'e-mail'];
         const headerRow = worksheet.addRow(cabecera);
         headerRow.eachCell((cell) => {
           cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '002060' } };
@@ -686,7 +836,7 @@ export class ListarAbonadosComponent implements OnInit {
 
     const worksheet = workbook.getWorksheet(1);
     if (!worksheet) {
-      throw new Error('No se encontró la primera hoja del archivo.');
+      throw new Error('No se encontro la primera hoja del archivo.');
     }
 
     const filas: Array<{ idabonado: number; geolocalizacion: string }> = [];
@@ -709,12 +859,12 @@ export class ListarAbonadosComponent implements OnInit {
       if (!idabonado && !geolocalizacion) return;
 
       if (!idabonado || !geolocalizacion) {
-        this.detalleImportacion.push(`Fila ${rowNumber}: idabonado o geolocalización inválidos.`);
+        this.detalleImportacion.push(`Fila ${rowNumber}: idabonado o geolocalizacion invalidos.`);
         return;
       }
 
       if (!this.esGeolocalizacionValida(geolocalizacion)) {
-        this.detalleImportacion.push(`Fila ${rowNumber}: formato de geolocalizaciÃ³n invÃ¡lido. Use [latitud,longitud].`);
+        this.detalleImportacion.push(`Fila ${rowNumber}: formato de geolocalizacion invalido. Use [latitud,longitud].`);
         return;
       }
 
@@ -782,7 +932,7 @@ export class ListarAbonadosComponent implements OnInit {
             geolocalizacionActual,
             geolocalizacionNueva,
             estado: cambia ? 'ACTUALIZAR' : 'SIN_CAMBIOS',
-            mensaje: cambia ? 'Se actualizará la geolocalización.' : 'La geolocalización ya coincide.',
+            mensaje: cambia ? 'Se actualizara la geolocalizacion.' : 'La geolocalizacion ya coincide.',
           } as PreviewImportacionRow;
         } catch (error: any) {
           return {
@@ -792,7 +942,7 @@ export class ListarAbonadosComponent implements OnInit {
             geolocalizacionActual: '',
             geolocalizacionNueva: fila.geolocalizacion,
             estado: 'ERROR',
-            mensaje: error?.error?.message || error?.error?.detail || 'No se encontró el abonado.',
+            mensaje: error?.error?.message || error?.error?.detail || 'No se encontro el abonado.',
           } as PreviewImportacionRow;
         }
       })
@@ -843,6 +993,23 @@ interface PreviewImportacionRow {
   nombre: string;
   geolocalizacionActual: string;
   geolocalizacionNueva: string;
-  estado: 'ACTUALIZAR' | 'SIN_CAMBIOS' | 'ERROR';
+  estado: 'ACTUALIZAR' | 'SIN_CAMBIOS' | 'ERROR' | 'PROCESANDO' | 'EXITO';
   mensaje: string;
 }
+
+type PreviewEstadoFiltro =
+  | 'TODOS'
+  | 'ACTUALIZAR'
+  | 'SIN_CAMBIOS'
+  | 'ERROR'
+  | 'PROCESANDO'
+  | 'EXITO';
+
+type PreviewSortColumn =
+  | 'fila'
+  | 'idabonado'
+  | 'nombre'
+  | 'geolocalizacionActual'
+  | 'geolocalizacionNueva'
+  | 'estado'
+  | 'mensaje';

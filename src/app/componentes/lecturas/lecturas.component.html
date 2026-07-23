@@ -371,14 +371,30 @@
         </div>
         <div class='modal-body detalle text-center'>
           <ng-container *ngIf="fotoLecturaUrl; else sinFotoLectura">
-            <img [src]="fotoLecturaUrl" alt="Foto de lectura" class="foto-preview">
+            <div class="image-toolbar mb-2">
+              <button type="button" class="btn btn-outline-light btn-sm mx-1" (click)="zoomFoto(-0.2)">-</button>
+              <button type="button" class="btn btn-outline-light btn-sm mx-1" (click)="resetFotoView()">{{ fotoZoomLabel }}</button>
+              <button type="button" class="btn btn-outline-light btn-sm mx-1" (click)="zoomFoto(0.2)">+</button>
+            </div>
+            <div class="image-stage"
+              (wheel)="onFotoWheel($event)"
+              (mousemove)="onFotoDrag($event)"
+              (mouseup)="stopFotoDrag()"
+              (mouseleave)="stopFotoDrag()">
+              <img [src]="fotoLecturaUrl"
+                alt="Foto de lectura"
+                class="foto-preview zoomable-image"
+                [class.dragging]="fotoDragging"
+                [style.transform]="'translate(' + fotoTranslateX + 'px,' + fotoTranslateY + 'px) scale(' + fotoZoom + ')'"
+                (mousedown)="startFotoDrag($event)">
+            </div>
           </ng-container>
           <ng-template #sinFotoLectura>
             <div class="py-4 text-muted">No hay foto registrada para esta lectura.</div>
           </ng-template>
         </div>
         <div class='modal-footer justify-content-center'>
-          <button type='button' class='btn btn-sm btn-outline-success' data-dismiss='modal'>
+          <button type='button' class='btn btn-sm btn-outline-success' data-dismiss='modal' (click)="resetFotoView()">
             <i class="bi bi-x-circle"></i> Cerrar</button>
         </div>
       </div>

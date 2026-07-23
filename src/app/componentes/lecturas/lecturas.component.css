@@ -149,3 +149,30 @@ table tbody tr.fila-adulto-mayor:hover td {
    border-radius: 6px;
    box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
 }
+
+.image-toolbar {
+   display: flex;
+   justify-content: center;
+}
+
+.image-stage {
+   width: 100%;
+   min-height: 55vh;
+   max-height: 70vh;
+   overflow: hidden;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   cursor: grab;
+}
+
+.zoomable-image {
+   transition: transform 0.08s ease-out;
+   transform-origin: center center;
+   user-select: none;
+}
+
+.zoomable-image.dragging {
+   cursor: grabbing;
+   transition: none;
+}

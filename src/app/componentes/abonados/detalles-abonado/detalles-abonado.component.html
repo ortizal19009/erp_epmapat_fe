@@ -601,8 +601,22 @@
       </div>
       <div class="modal-body text-center">
         <ng-container *ngIf="(fotoModalUrl || fotoCasaUrl || fotoMedidorUrl) && !fotoModalError; else sinFotoAbonado">
-          <img [src]="fotoModalUrl || fotoCasaUrl || fotoMedidorUrl" alt="Foto del abonado" class="foto-preview"
-            (error)="onFotoModalError()">
+          <div class="image-toolbar mb-2">
+            <button type="button" class="btn btn-outline-secondary btn-sm mx-1" (click)="zoomFoto(-0.2)">-</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm mx-1" (click)="resetFotoView()">{{ fotoZoomLabel }}</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm mx-1" (click)="zoomFoto(0.2)">+</button>
+          </div>
+          <div class="image-stage"
+            (wheel)="onFotoWheel($event)"
+            (mousemove)="onFotoDrag($event)"
+            (mouseup)="stopFotoDrag()"
+            (mouseleave)="stopFotoDrag()">
+            <img [src]="fotoModalUrl || fotoCasaUrl || fotoMedidorUrl" alt="Foto del abonado" class="foto-preview zoomable-image"
+              [class.dragging]="fotoDragging"
+              [style.transform]="'translate(' + fotoTranslateX + 'px,' + fotoTranslateY + 'px) scale(' + fotoZoom + ')'"
+              (mousedown)="startFotoDrag($event)"
+              (error)="onFotoModalError()">
+          </div>
         </ng-container>
         <ng-template #sinFotoAbonado>
           <div class="py-3 text-muted">{{ fotoModalMensaje }}</div>

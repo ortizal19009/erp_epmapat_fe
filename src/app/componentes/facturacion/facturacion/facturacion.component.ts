@@ -566,7 +566,7 @@ export class FacturacionComponent implements OnInit {
   }
 
   getSortIcon(columna: string): string {
-    if (this.sortColumn !== columna) return 'bi-arrow-down-up';
+    if (this.sortColumn !== columna) return '';
     return this.sortDirection === 'asc' ? 'bi-sort-up' : 'bi-sort-down';
   }
 

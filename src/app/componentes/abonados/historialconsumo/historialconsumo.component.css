@@ -9,3 +9,30 @@ text-size-adjust: 11px
     max-height: 70vh;
     object-fit: contain;
 }
+
+.image-toolbar {
+    display: flex;
+    justify-content: center;
+}
+
+.image-stage {
+    width: 100%;
+    min-height: 55vh;
+    max-height: 70vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+}
+
+.zoomable-image {
+    transition: transform 0.08s ease-out;
+    transform-origin: center center;
+    user-select: none;
+}
+
+.zoomable-image.dragging {
+    cursor: grabbing;
+    transition: none;
+}

@@ -27,6 +27,11 @@ table>thead>tr>th.sortable {
    white-space: nowrap;
 }
 
+table>thead>tr>th.sortable i.bi {
+   margin-left: 0.25rem;
+   font-size: 0.85rem;
+}
+
 table>thead>tr>th.sortable:hover {
    background-color: #2f5454;
 }

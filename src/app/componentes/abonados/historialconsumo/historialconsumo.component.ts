@@ -23,6 +23,12 @@ export class HistorialconsumoComponent implements OnInit {
   sobre: number = 0;
   fotoModalUrl: string | null = null;
   fotoModalTitulo: string = '';
+  fotoZoom = 1;
+  fotoTranslateX = 0;
+  fotoTranslateY = 0;
+  fotoDragging = false;
+  private fotoDragStartX = 0;
+  private fotoDragStartY = 0;
   @Input() abonado: any;
   constructor(
     private lecService: LecturasService,
@@ -136,6 +142,54 @@ export class HistorialconsumoComponent implements OnInit {
     const cuenta = lectura?.idabonado_abonados?.idabonado ?? this.abonado;
     this.fotoModalUrl = fotoUrl;
     this.fotoModalTitulo = `Foto de lectura - Cuenta ${cuenta}`;
+    this.resetFotoView();
+  }
+
+  resetFotoView(): void {
+    this.fotoZoom = 1;
+    this.fotoTranslateX = 0;
+    this.fotoTranslateY = 0;
+    this.fotoDragging = false;
+  }
+
+  get fotoZoomLabel(): string {
+    return `${Math.round(this.fotoZoom * 100)}%`;
+  }
+
+  zoomFoto(step: number): void {
+    const nextZoom = Math.min(5, Math.max(1, this.fotoZoom + step));
+    this.fotoZoom = nextZoom;
+    if (nextZoom === 1) {
+      this.fotoTranslateX = 0;
+      this.fotoTranslateY = 0;
+    }
+  }
+
+  onFotoWheel(event: WheelEvent): void {
+    event.preventDefault();
+    this.zoomFoto(event.deltaY < 0 ? 0.2 : -0.2);
+  }
+
+  startFotoDrag(event: MouseEvent): void {
+    if (this.fotoZoom <= 1) {
+      return;
+    }
+    event.preventDefault();
+    this.fotoDragging = true;
+    this.fotoDragStartX = event.clientX - this.fotoTranslateX;
+    this.fotoDragStartY = event.clientY - this.fotoTranslateY;
+  }
+
+  onFotoDrag(event: MouseEvent): void {
+    if (!this.fotoDragging) {
+      return;
+    }
+    this.fotoTranslateX = event.clientX - this.fotoDragStartX;
+    this.fotoTranslateY = event.clientY - this.fotoDragStartY;
+  }
+
+  stopFotoDrag(): void {
+    this.fotoDragging = false;
   }
 
 }
