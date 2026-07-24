@@ -51,6 +51,8 @@ export class RecargosxcuentaComponent implements OnInit {
 
   // emisiones
   _emisiones: any[] = [];
+  emisionesFiltradas: any[] = [];
+  filtroEmision = '';
   emisionSelected: any;
   lastEmision: any = null;
 
@@ -467,15 +469,56 @@ export class RecargosxcuentaComponent implements OnInit {
   }
 
   cargarEmisiones(): void {
-    this.emisionService.findAllEmisiones().subscribe({
+    this.emisionService.findAllEmisionesBasic().subscribe({
       next: (datos: any) => {
-        this._emisiones = datos ?? [];
-        this.emisionSelected = this._emisiones?.[0];
-        this.lastEmision = datos[0];
-        this.cagarRecargosxemision(datos[0].idemision);
+        this._emisiones = Array.isArray(datos) ? datos : [];
+        this.filtrarEmisiones();
+        this.emisionSelected = this.emisionesFiltradas?.[0] ?? null;
+        this.lastEmision = this.emisionSelected;
+
+        if (this.emisionSelected?.idemision) {
+          this.cagarRecargosxemision(this.emisionSelected.idemision);
+        } else {
+          this._recargosxcuenta = [];
+        }
       },
       error: (e: any) => console.error(e?.error ?? e),
     });
+  }
+
+  filtrarEmisiones(): void {
+    const termino = (this.filtroEmision || '').trim().toLowerCase();
+
+    this.emisionesFiltradas = this._emisiones.filter((emision: any) => {
+      if (!termino) return true;
+
+      return String(emision?.emision ?? '')
+        .toLowerCase()
+        .includes(termino);
+    });
+
+    if (
+      this.emisionSelected?.idemision &&
+      !this.emisionesFiltradas.some(
+        (emision: any) => emision?.idemision === this.emisionSelected?.idemision
+      )
+    ) {
+      this.emisionSelected = this.emisionesFiltradas[0] ?? null;
+    }
+  }
+
+  onEmisionInputChange(valor: string): void {
+    this.filtroEmision = valor;
+    this.filtrarEmisiones();
+
+    const seleccion = this._emisiones.find(
+      (emision: any) => String(emision?.emision ?? '') === valor
+    );
+
+    if (!seleccion?.idemision) return;
+
+    this.emisionSelected = seleccion;
+    this.changeEmision(seleccion);
   }
 
   cargarUsuario(): void {

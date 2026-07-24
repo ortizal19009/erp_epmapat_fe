@@ -33,7 +33,9 @@ export class ImpEmisionesComponent implements OnInit {
   public progreso = 0;
   _clientes: any = [];
   total: number;
-  l_emisiones: any;
+  l_emisiones: any[] = [];
+  l_emisionesFiltradas: any[] = [];
+  filtroEmision = '';
   _emisionindividual: any;
   /* Reporte lista emisiones */
   _emisiones: any;
@@ -468,12 +470,38 @@ export class ImpEmisionesComponent implements OnInit {
     });
   }
   listAllEmisiones() {
-    this.emiService.findAllEmisiones().subscribe({
+    this.emiService.findAllEmisionesBasic().subscribe({
       next: (emisiones: any) => {
-        this.l_emisiones = emisiones;
+        this.l_emisiones = Array.isArray(emisiones) ? emisiones : [];
+        this.filtrarEmisiones();
       },
       error: (e) => console.error(e),
     });
+  }
+
+  filtrarEmisiones() {
+    const termino = (this.filtroEmision || '').trim().toLowerCase();
+
+    this.l_emisionesFiltradas = this.l_emisiones.filter((emision: any) => {
+      if (!termino) return true;
+
+      return String(emision?.emision ?? '')
+        .toLowerCase()
+        .includes(termino);
+    });
+  }
+
+  onEmisionInputChange(valor: string) {
+    this.filtroEmision = valor;
+    this.filtrarEmisiones();
+
+    const seleccion = this.l_emisiones.find(
+      (emision: any) => String(emision?.emision ?? '') === valor
+    );
+
+    if (seleccion?.idemision != null) {
+      this.formImprimir.patchValue({ emision: seleccion.idemision });
+    }
   }
   async exportarValoresEmitidos(idemision: any) {
     this.nombrearchivo = this.formImprimir.value.nombrearchivo;

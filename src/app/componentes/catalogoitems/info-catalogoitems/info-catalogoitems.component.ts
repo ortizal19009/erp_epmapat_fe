@@ -2,6 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as ExcelJS from 'exceljs';
 import { CatalogoitemService } from 'src/app/servicios/catalogoitem.service';
 import { FacturacionService } from 'src/app/servicios/facturacion.service';
 import { ItemxfactService } from 'src/app/servicios/itemxfact.service';
@@ -25,6 +28,7 @@ export class InfoCatalogoitemsComponent implements OnInit {
    currentPage = 1;
    pageSize = 8;
    totalPages = 1;
+   filtroEstadoPago: EstadoPagoFiltro = 'TODAS';
 
    detalleSeleccionado: MovimientoProductoView | null = null;
    facturasDetalle: any[] = [];
@@ -191,7 +195,7 @@ export class InfoCatalogoitemsComponent implements OnInit {
    }
 
    refreshPagination() {
-      const totalItems = this._movxproducto.length;
+      const totalItems = this.movimientosFiltrados.length;
       this.totalPages = Math.max(1, Math.ceil(totalItems / this.pageSize));
 
       if (this.currentPage > this.totalPages) {
@@ -200,7 +204,7 @@ export class InfoCatalogoitemsComponent implements OnInit {
 
       const start = (this.currentPage - 1) * this.pageSize;
       const end = start + this.pageSize;
-      this.movimientosPaginados = this._movxproducto.slice(start, end);
+      this.movimientosPaginados = this.movimientosFiltrados.slice(start, end);
    }
 
    changePage(page: number) {
@@ -264,7 +268,7 @@ export class InfoCatalogoitemsComponent implements OnInit {
    }
 
    get totalMovimientos(): number {
-      return this._movxproducto.length;
+      return this.movimientosFiltrados.length;
    }
 
    get totalFacturasGeneradas(): number {
@@ -311,6 +315,114 @@ export class InfoCatalogoitemsComponent implements OnInit {
    modiProducto() {
       sessionStorage.setItem('idproductoToModi', this.idcatalogoitems.toString());
       this.router.navigate(['/modi-catalogoitems']);
+   }
+
+   cambiarFiltroEstadoPago(filtro: EstadoPagoFiltro) {
+      this.filtroEstadoPago = filtro;
+      this.currentPage = 1;
+      this.refreshPagination();
+
+      const disponible = this.movimientosFiltrados;
+      if (!disponible.length) {
+         this.detalleSeleccionado = null;
+         this.facturasDetalle = [];
+         return;
+      }
+
+      if (!this.detalleSeleccionado || !disponible.some((mov) => mov.idfacturacion === this.detalleSeleccionado?.idfacturacion)) {
+         this.seleccionarMovimiento(disponible[0]);
+      }
+   }
+
+   get movimientosFiltrados(): MovimientoProductoView[] {
+      if (this.filtroEstadoPago === 'PAGADAS') {
+         return this._movxproducto.filter((mov) => mov.pagado);
+      }
+
+      if (this.filtroEstadoPago === 'PENDIENTES') {
+         return this._movxproducto.filter((mov) => !mov.pagado);
+      }
+
+      return this._movxproducto;
+   }
+
+   exportarMovimientosPdf(): void {
+      const datos = this.movimientosFiltrados;
+      const doc = new jsPDF({ orientation: 'landscape' });
+      const titulo = `Movimientos producto - ${this.producto.descripcion || 'Producto'} - ${this.filtroEstadoPago.toLowerCase()}`;
+
+      doc.setFontSize(14);
+      doc.text(titulo, 14, 18);
+
+      autoTable(doc, {
+         startY: 24,
+         head: [['Facturacion', 'Fecha', 'Cliente', 'Cedula', 'Estado', 'Facturas', 'Cantidad', 'Valor']],
+         body: datos.map((mov) => [
+            `${mov.idfacturacion}\n${mov.descripcionFacturacion}`,
+            mov.fecha ? this.formatFecha(mov.fecha) : '-',
+            mov.cliente,
+            mov.cedula,
+            this.getEstadoPagoTexto(mov),
+            `${mov.totalFacturas} (${mov.facturasPagadas}/${mov.facturasPendientes})`,
+            mov.cantidad.toFixed(2),
+            mov.valorunitario.toFixed(2)
+         ]),
+         styles: { fontSize: 8, cellPadding: 2 },
+         headStyles: { fillColor: [45, 79, 108] }
+      });
+
+      doc.save(this.buildExportName('pdf'));
+   }
+
+   async exportarMovimientosExcel(): Promise<void> {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Movimientos');
+      const datos = this.movimientosFiltrados;
+
+      worksheet.addRow(['Producto', this.producto.descripcion || '']);
+      worksheet.addRow(['Filtro', this.filtroEstadoPago]);
+      worksheet.addRow([]);
+      worksheet.addRow(['Facturacion', 'Descripcion', 'Fecha', 'Cliente', 'Cedula', 'Estado', 'Facturas', 'Pagadas', 'Pendientes', 'Cantidad', 'Valor']);
+
+      const headerRow = worksheet.getRow(4);
+      headerRow.font = { bold: true, color: { argb: 'FFFFFF' } };
+      headerRow.eachCell((cell) => {
+         cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: '2D4F6C' }
+         };
+      });
+
+      datos.forEach((mov) => {
+         worksheet.addRow([
+            mov.idfacturacion,
+            mov.descripcionFacturacion,
+            mov.fecha ? this.formatFecha(mov.fecha) : '',
+            mov.cliente,
+            mov.cedula,
+            this.getEstadoPagoTexto(mov),
+            mov.totalFacturas,
+            mov.facturasPagadas,
+            mov.facturasPendientes,
+            mov.cantidad,
+            mov.valorunitario
+         ]);
+      });
+
+      worksheet.columns = [
+         { width: 14 }, { width: 34 }, { width: 14 }, { width: 30 }, { width: 18 },
+         { width: 14 }, { width: 12 }, { width: 12 }, { width: 12 }, { width: 12 }, { width: 12 }
+      ];
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = this.buildExportName('xlsx');
+      a.click();
+      window.URL.revokeObjectURL(url);
    }
 
    private mapMovimiento(mov: any): MovimientoProductoView {
@@ -363,6 +475,7 @@ export class InfoCatalogoitemsComponent implements OnInit {
    private resolveClienteNombre(facturacion: any, mov: MovimientoProductoView): string {
       return (
          facturacion?.idcliente_clientes?.nombre ||
+         facturacion?.idcliente?.nombre ||
          facturacion?.nomcli ||
          mov?.cliente ||
          'No definido'
@@ -372,10 +485,27 @@ export class InfoCatalogoitemsComponent implements OnInit {
    private resolveClienteCedula(facturacion: any, mov: MovimientoProductoView): string {
       return (
          facturacion?.idcliente_clientes?.cedula ||
+         facturacion?.idcliente?.cedula ||
          facturacion?.cedula ||
          mov?.cedula ||
          'No registrada'
       );
+   }
+
+   private formatFecha(value: Date | string | null | undefined): string {
+      if (!value) return '';
+      const fecha = new Date(value);
+      if (Number.isNaN(fecha.getTime())) return String(value);
+      const dia = `${fecha.getDate()}`.padStart(2, '0');
+      const mes = `${fecha.getMonth() + 1}`.padStart(2, '0');
+      const anio = fecha.getFullYear();
+      return `${dia}/${mes}/${anio}`;
+   }
+
+   private buildExportName(extension: 'pdf' | 'xlsx'): string {
+      const producto = (this.producto.descripcion || 'producto').toString().trim().replace(/\s+/g, '_');
+      const filtro = this.filtroEstadoPago.toLowerCase();
+      return `movimientos_${producto}_${filtro}.${extension}`;
    }
 
    private isFacturaPagada(factura: any): boolean {
@@ -424,3 +554,5 @@ interface MovimientoProductoView {
    totalFacturacion: number;
    formapago: number | null;
 }
+
+type EstadoPagoFiltro = 'TODAS' | 'PAGADAS' | 'PENDIENTES';

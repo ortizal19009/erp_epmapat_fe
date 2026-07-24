@@ -14,11 +14,11 @@
                <i class="bi-menu-button-wide text-white"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-               <button class="dropdown-item" type="button" data-toggle="modal" data-target="#imprimir">
-                  <i class="bi bi-printer"></i>&nbsp; Imprimir
+               <button class="dropdown-item" type="button" (click)="exportarMovimientosPdf()">
+                  <i class="bi bi-printer"></i>&nbsp; Exportar PDF
                </button>
-               <button class="dropdown-item" type="button">
-                  <i class="bi-file-earmark-arrow-down"></i><span>&nbsp; Exportar</span>
+               <button class="dropdown-item" type="button" (click)="exportarMovimientosExcel()">
+                  <i class="bi-file-earmark-arrow-down"></i><span>&nbsp; Exportar Excel</span>
                </button>
             </div>
 
@@ -86,6 +86,18 @@
                </div>
 
                <ng-container *ngIf="!noMovimientos">
+                  <div class="row mb-3">
+                     <div class="col-md-4 col-lg-3">
+                        <label class="small text-muted mb-1 d-block">Filtrar por estado</label>
+                        <select class="form-control form-control-sm" [ngModel]="filtroEstadoPago"
+                           (ngModelChange)="cambiarFiltroEstadoPago($event)">
+                           <option value="TODAS">Todas</option>
+                           <option value="PAGADAS">Pagadas</option>
+                           <option value="PENDIENTES">Pendientes</option>
+                        </select>
+                     </div>
+                  </div>
+
                   <div class="table-responsive">
                      <table class="table table-hover table-sm table-bordered movimientos">
                         <thead>

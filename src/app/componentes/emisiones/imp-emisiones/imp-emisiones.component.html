@@ -31,9 +31,9 @@
                                 <option value=4>Emisión final</option>
                                 <option value=5>Valores Emitidos</option>
                                 <option value=6>Consumos por categoría</option>
-                                <option value=12>Refacturaciónes</option>
-                                <option value=13>Refacturaciónes Emision</option>
-                                <option value=7 [disabled]="usuario !=1">Refacturación por emision</option>
+                                <option value=12>Refacturaciones</option>
+                                <option value=13>Refacturaciones Emisión</option>
+                                <option value=7 [disabled]="usuario !=1">Refacturación por emisión</option>
                                 <option value=8 [disabled]="usuario !=1"> Refacturación por fecha</option>
                                 <option value=9>Ref emision rubros</option>
                                 <option value=10>Ref fecha rubros</option>
@@ -64,10 +64,17 @@
                                     <span class="input-group-text font-weight-bold" id="inputGroup-sizing-sm"
                                         data-toggle="tooltip" title="Obligatorio">Emisión</span>
                                 </div>
-                                <select type="date" class="form-control text-center" formControlName="emision"
+                                <input type="text" class="form-control text-center" list="impEmisionesDatalist"
+                                    [(ngModel)]="filtroEmision" [ngModelOptions]="{standalone: true}"
+                                    (ngModelChange)="onEmisionInputChange($event)" placeholder="Buscar emision..."
                                     aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+                                <datalist id="impEmisionesDatalist">
+                                    <option *ngFor="let emision of l_emisionesFiltradas" [value]="emision.emision"></option>
+                                </datalist>
+                                <select type="date" class="form-control text-center d-none" formControlName="emision"
+                                    aria-label="Small" aria-describedby="inputGroup-sizing-sm" tabindex="-1">
                                     <option [ngValue]="emision.idemision" [disabled]="emision.estado === 0"
-                                        *ngFor="let emision of l_emisiones">
+                                        *ngFor="let emision of l_emisionesFiltradas">
                                         {{emision.emision}}
                                     </option>
                                 </select>

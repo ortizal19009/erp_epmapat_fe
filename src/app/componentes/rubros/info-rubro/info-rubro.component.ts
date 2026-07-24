@@ -22,6 +22,7 @@ export class InfoRubroComponent implements OnInit {
    productoSeleccionado: ProductoRubroView | null = null;
    planillaSeleccionada: PlanillaRubroView | null = null;
    planillaDetalleId: number | null = null;
+   planillaDetalleTitulo = '';
    idrubro: number;
 
    currentProductosPage = 1;
@@ -101,6 +102,7 @@ export class InfoRubroComponent implements OnInit {
    verDetallePlanilla(planilla: PlanillaRubroView): void {
       this.planillaSeleccionada = planilla;
       this.planillaDetalleId = planilla?.idfactura || null;
+      this.planillaDetalleTitulo = planilla?.facturaElectronica || `Planilla ${planilla?.idfactura || ''}`;
    }
 
    refreshProductosPagination(): void {
@@ -200,17 +202,27 @@ export class InfoRubroComponent implements OnInit {
       const factura = item?.idfactura_facturas || {};
       const cliente = factura?.idcliente || factura?.idcliente_clientes || {};
       const modulo = factura?.idmodulo || factura?.idmodulo_modulos || {};
-      const pagado = this.isFacturaPagada(factura);
+      const estadoFactura = this.getEstadoFactura(factura);
+      const pagado = estadoFactura.codigo === 'PAGADA';
+      const fecha =
+         factura?.fechacobro ||
+         factura?.feccrea ||
+         factura?.fechaconvenio ||
+         factura?.fechaanulacion ||
+         factura?.fechaeliminacion ||
+         null;
 
       return {
          idfactura: Number(factura?.idfactura || 0),
-         fecha: factura?.feccrea || null,
+         fecha,
          cliente: cliente?.nombre || cliente?.razonsocial || 'Sin cliente',
          cedula: cliente?.cedula || 'No registrada',
          modulo: modulo?.descripcion || 'No definido',
          valor: Number(item?.valorunitario || 0),
          pagado,
-         facturaElectronica: factura?.nrofactura || 'Pendiente'
+         facturaElectronica: factura?.nrofactura || 'Sin numero',
+         estadoDescripcion: estadoFactura.descripcion,
+         estadoClase: estadoFactura.clase
       };
    }
 
@@ -277,6 +289,30 @@ export class InfoRubroComponent implements OnInit {
 
       return Number(factura?.estado || 0) === 2;
    }
+
+   private getEstadoFactura(factura: any): { codigo: string; descripcion: string; clase: string } {
+      if (factura?.fechaeliminacion) {
+         return { codigo: 'ELIMINADA', descripcion: 'Eliminada', clase: 'estado-cancel' };
+      }
+
+      if (factura?.fechaanulacion) {
+         return { codigo: 'ANULADA', descripcion: 'Anulada', clase: 'estado-cancel' };
+      }
+
+      if (factura?.fechaconvenio) {
+         return { codigo: 'CONVENIO', descripcion: 'Convenio', clase: 'estado-info' };
+      }
+
+      if (this.isFacturaPagada(factura)) {
+         return { codigo: 'PAGADA', descripcion: 'Pagada', clase: 'estado-ok' };
+      }
+
+      if (factura?.nrofactura) {
+         return { codigo: 'EMITIDA', descripcion: 'Emitida', clase: 'estado-info' };
+      }
+
+      return { codigo: 'PENDIENTE', descripcion: 'Pendiente', clase: 'estado-warn' };
+   }
 }
 
 interface RubroView {
@@ -309,4 +345,6 @@ interface PlanillaRubroView {
    valor: number;
    pagado: boolean;
    facturaElectronica: string;
+   estadoDescripcion: string;
+   estadoClase: string;
 }

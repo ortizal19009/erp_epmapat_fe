@@ -12,12 +12,12 @@
 
       <!-- SELECT EMISIONES -->
       <div class="col-md-3 col-sm-12 mt-2 mt-md-0">
-        <select class="form-control form-control-sm" [(ngModel)]="emisionSelected"
-          (ngModelChange)="changeEmision($event)">
-          <option *ngFor="let emision of _emisiones" [ngValue]="emision">
-            {{ emision.emision }}
-          </option>
-        </select>
+        <input type="text" class="form-control form-control-sm" list="recargosEmisionesDatalist"
+          placeholder="Buscar emision..." [(ngModel)]="filtroEmision" [ngModelOptions]="{standalone: true}"
+          (ngModelChange)="onEmisionInputChange($event)" />
+        <datalist id="recargosEmisionesDatalist">
+          <option *ngFor="let emision of emisionesFiltradas" [value]="emision.emision"></option>
+        </datalist>
       </div>
 
       <!-- FILTRO LOCAL -->

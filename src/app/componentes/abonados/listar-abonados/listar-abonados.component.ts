@@ -441,6 +441,8 @@ export class ListarAbonadosComponent implements OnInit {
         else if (this.buscarAbonadoForm.value.buscarAbonado) this.onSubmit();
       }
 
+      this.importandoExcel = false;
+      this.loadingService.hideLoading();
       await this.mostrarResumenImportacion();
 
       if (resultado.errores.length === 0) {

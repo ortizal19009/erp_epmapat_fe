@@ -177,9 +177,19 @@
    color: var(--success-text);
 }
 
+.estado-info {
+   background: #d9eefc;
+   color: #12507d;
+}
+
 .estado-warn {
    background: var(--warning-soft);
    color: var(--warning-text);
+}
+
+.estado-cancel {
+   background: #fde2e4;
+   color: #a61d24;
 }
 
 .empty-state {
@@ -200,6 +210,24 @@
 .btn-xs {
    padding: 0.25rem 0.55rem;
    font-size: 0.75rem;
+}
+
+.planilla-modal-shell {
+   border: 0;
+   border-radius: 1.15rem;
+   overflow: hidden;
+   box-shadow: 0 24px 60px rgba(32, 35, 52, 0.22);
+}
+
+.planilla-modal-header {
+   background: linear-gradient(135deg, var(--accent-secondary), #467f65);
+   color: #fff;
+   border-bottom: 0;
+}
+
+.planilla-modal-body {
+   background: linear-gradient(180deg, #f7fbf9 0%, #ffffff 100%);
+   padding: 1rem;
 }
 
 @media (max-width: 991.98px) {
