@@ -148,6 +148,7 @@ export class FecfacturaService {
 
     for (let i = 0; i < rubros.length; i++) {
       const rxf = rubros[i];
+      console.log(`Guardando detalle de rubro ${i + 1}/${rubros.length} para factura ${idfactura} - Rubro: ${rxf.idrubro_rubros?.descripcion || 'N/A'}`);
       const baseImponible = rxf.cantidad * rxf.valorunitario;
       const detalle = {} as Fec_factura_detalles;
       detalle.idfacturadetalle = rxf.idrubroxfac;
@@ -165,7 +166,7 @@ export class FecfacturaService {
       detalleImpuesto.idfacturadetalle = rxf.idrubroxfac;
       detalleImpuesto.codigoimpuesto = '2';
 
-      if (rxf?.idrubro_rubros?.swiva === true) {
+      if (rxf?.idrubro_rubros?.rubros.swiva === true || rxf?.idrubro_rubros?.swiva === 1) {
         detalleImpuesto.codigoporcentaje = codImpuesto.toString();
       } else {
         detalleImpuesto.codigoporcentaje = '0';

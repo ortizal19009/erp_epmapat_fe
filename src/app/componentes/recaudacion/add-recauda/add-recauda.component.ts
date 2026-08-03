@@ -989,6 +989,10 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   cobrar() {
+    // Punto central del cobro en recaudación.
+    // Aquí solo se prepara el payload del frontend; la facturación electrónica
+    // no se arma en este componente, sino en el backend cuando se ejecuta
+    // `recaCobroService.cobrarFacturas(obj)`.
     let dinero: number = +this.f_cobrar.value.dinero!;
     let apagar: number = +this.totalapagar!.toFixed(2);
     let facturas: any[] = [];
@@ -1013,6 +1017,14 @@ export class AddRecaudaComponent implements OnInit {
       recaudacion: recaudacion,
       idcaja: this._estadoCaja?.idcaja,
     };
+
+    // Flujo esperado:
+    // 1. El frontend envía las facturas seleccionadas y los datos del cobro.
+    // 2. El backend registra la recaudación.
+    // 3. El backend marca las facturas cobradas.
+    // 4. El backend dispara la generación de factura electrónica si aplica.
+    // Si necesitas rastrear la facturación electrónica, este llamado es el
+    // mejor punto de entrada para seguir en `erp_epmapat_be`.
     this.recaCobroService.cobrarFacturas(obj).subscribe({
       next: (_cobrado: any) => {
         this.ultimasFacturasCobro = [...facturasSeleccionadas];
@@ -1247,7 +1259,8 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   private obtenerPerfilImpresionFactura(factura: any): PrintProfile {
-    console.log('Obteniendo perfil de impresión para factura:', factura);
+    // Este método solo decide qué plantilla de impresión usar para el comprobante.
+    // No genera factura electrónica; únicamente define el perfil del PDF/impresión.
     const modulo = Number(factura?.idmodulo?.idmodulo ?? factura?.idmodulo ?? 0);
     const convenio = Number(factura?.conveniopago ?? 0);
 

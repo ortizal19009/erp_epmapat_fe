@@ -356,10 +356,6 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
   }
 
   // Wrapper para compatibilidad con código antiguo
-  __abrirCaja(): void {
-    this.abrirCaja();
-  }
-
   private iniciarStreamCaja(): void {
     if (!this.streamCajaActivo) {
       return;
@@ -2043,10 +2039,6 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
   }
 
   // versión vieja -> delega
-  async _impComprobante(datos: any) {
-    await this.impComprobante(datos);
-  }
-
   async imprimirTodasEnUno() {
     try {
       const items: MergeItem[] = (this._sincobro || [])
