@@ -149,11 +149,9 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
     private authService: AutorizaService,
     private interService: InteresesService,
     private s_cajas: CajaService,
-    private recaService: RecaudacionService,
     private facxrService: FacxrecaudaService,
     private s_recaudaxcaja: RecaudaxcajaService,
     private recaCobroService: RecaudacionCobroService,
-    private s_modulo: ModulosService,
     private loadingService: LoadingService,
     private s_ntacredito: NtacreditoService,
     private s_valorNc: ValoresncService,
@@ -161,7 +159,6 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
     private s_jasperReport: JasperReportService,
     private s_ptoemision: PtoemisionService,
     private s_definir: DefinirService,
-    private s_fecfacturas: FecfacturaService,
     private router: Router,
     private ngZone: NgZone
   ) { }
