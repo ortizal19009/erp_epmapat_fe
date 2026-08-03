@@ -105,6 +105,31 @@ export class InfoCuentaComponent implements OnInit {
       }
    }
 
+   comprobanteTransa(transa: any): string {
+      return this.comprobante(transa?.idasiento?.tipcom ?? 0, transa?.idasiento?.compro);
+   }
+
+   asientoFecha(transa: any): string | null {
+      return transa?.idasiento?.fecha ?? null;
+   }
+
+   asientoNumero(transa: any): number | string {
+      return transa?.idasiento?.asiento ?? '';
+   }
+
+   beneficiarioId(transa: any): number {
+      return transa?.idbene?.idbene ?? 0;
+   }
+
+   beneficiarioNombre(transa: any): string {
+      return transa?.idbene?.nomben ?? 'Sin beneficiario';
+   }
+
+   beneficiarioTitulo(transa: any): string {
+      const nombre = this.beneficiarioNombre(transa);
+      return nombre.length > 34 ? nombre : '';
+   }
+
    debito(debcre: number, valor: number): number {
       if (debcre == 1) return valor;
       else return 0;

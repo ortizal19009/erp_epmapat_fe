@@ -1,4 +1,4 @@
-import { UsrxrutaServiceService } from './../../../servicios/usrxruta-service.service';
+﻿import { UsrxrutaServiceService } from './../../../servicios/usrxruta-service.service';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { UsuarioService } from 'src/app/servicios/administracion/usuario.service';
@@ -6,6 +6,7 @@ import { EmisionService } from 'src/app/servicios/emision.service';
 import { RutasService } from 'src/app/servicios/rutas.service';
 import { LecturasService } from 'src/app/servicios/lecturas.service';
 import { RutasxemisionService } from 'src/app/servicios/rutasxemision.service';
+import { LoadingService } from 'src/app/servicios/loading.service';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import jsPDF from 'jspdf';
@@ -19,6 +20,7 @@ import * as ExcelJS from 'exceljs';
 })
 export class RutaToLectorComponent implements OnInit {
   @ViewChild('btnCerrarModal', { static: false }) btnCerrarModal?: ElementRef<HTMLButtonElement>;
+  @ViewChild('btnCerrarReporteModal', { static: false }) btnCerrarReporteModal?: ElementRef<HTMLButtonElement>;
 
   _usuarios: any[] = [];
   filtro: string = '';
@@ -40,6 +42,8 @@ export class RutaToLectorComponent implements OnInit {
   private filtroRutasTimer: ReturnType<typeof setTimeout> | null = null;
   rutaPreview: any = null;
   previewTitulo = 'Vista previa PDF';
+  tipoReporteSeleccionado: 'general' | 'lecturas' = 'general';
+  formatoReporteSeleccionado: 'pdf' | 'xlsx' = 'pdf';
 
   constructor(
     private usuarioService: UsuarioService,
@@ -48,7 +52,8 @@ export class RutaToLectorComponent implements OnInit {
     private usrxrutaService: UsrxrutaServiceService,
     private lecturasService: LecturasService,
     private rutasxemisionService: RutasxemisionService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit(): void {
@@ -233,7 +238,7 @@ export class RutaToLectorComponent implements OnInit {
 
   eliminarRutaAsignada(r: any) {
     if (!this.usuarioSeletced?.idusuario || !this.emisionSelected?.idemision) {
-      this.swal('warning', 'Seleccione un lector y una emisión');
+      this.swal('warning', 'Seleccione un lector y una emisiÃ³n');
       return;
     }
 
@@ -296,7 +301,7 @@ export class RutaToLectorComponent implements OnInit {
 
   async exportarRutaAsignada(ruta: any, formato: 'pdf' | 'xlsx') {
     if (!this.usuarioSeletced?.idusuario || !this.emisionSelected?.idemision) {
-      this.swal('warning', 'Seleccione un lector y una emisión');
+      this.swal('warning', 'Seleccione un lector y una emisiÃ³n');
       return;
     }
 
@@ -306,6 +311,7 @@ export class RutaToLectorComponent implements OnInit {
     }
 
     this.exportandoReporte = true;
+    this.loadingService.showLoading();
 
     try {
       const reporte = await this.construirReporteRutaAsignada(ruta);
@@ -325,6 +331,7 @@ export class RutaToLectorComponent implements OnInit {
       this.swal('error', 'No se pudo generar el reporte');
     } finally {
       this.exportandoReporte = false;
+      this.loadingService.hideLoading();
     }
   }
 
@@ -398,10 +405,10 @@ export class RutaToLectorComponent implements OnInit {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     doc.text(`Lector: ${reporte.lector}`, 14, 19);
-    doc.text(`Emisión: ${reporte.emision}`, 14, 25);
+    doc.text(`EmisiÃ³n: ${reporte.emision}`, 14, 25);
     doc.text(`Fecha: ${fecha} ${hora}`, 14, 31);
     doc.text(`Ruta: ${reporte.ruta?.descripcion ?? ''}`, 14, 37);
-    doc.text(`Código ruta: ${reporte.ruta?.codigo ?? ''}`, 120, 37);
+    doc.text(`CÃ³digo ruta: ${reporte.ruta?.codigo ?? ''}`, 120, 37);
 
     autoTable(doc, {
       startY: 42,
@@ -410,14 +417,14 @@ export class RutaToLectorComponent implements OnInit {
       headStyles: { fillColor: [52, 73, 94] },
       margin: { left: 8, right: 8 },
       head: [[
-        'N°',
+        'NÂ°',
         'Id abonado',
         'Responsable de pago',
-        'Identificación',
-        'Categoría',
+        'IdentificaciÃ³n',
+        'CategorÃ­a',
         'Lectura anterior',
         'Lectura actual',
-        'Observación'
+        'ObservaciÃ³n'
       ]],
       body: reporte.detalles.map((item: any) => [
         item.numero,
@@ -459,7 +466,7 @@ export class RutaToLectorComponent implements OnInit {
     worksheet.addRow([]);
 
     const headerRow = worksheet.addRow([
-      'N°',
+      'NÂ°',
       'Id abonado',
       'Responsable de pago',
       'Identificacion',
@@ -522,17 +529,18 @@ export class RutaToLectorComponent implements OnInit {
 
   async exportarReporteGeneral(formato: 'pdf' | 'xlsx') {
     if (!this.emisionSelected?.idemision) {
-      this.swal('warning', 'Seleccione una emisión');
+      this.swal('warning', 'Seleccione una emisiÃ³n');
       return;
     }
 
     this.exportandoReporte = true;
+    this.loadingService.showLoading();
 
     try {
       const reporte = await this.construirReporteGeneralAsignaciones();
 
       if (!reporte.detalles.length) {
-        this.swal('info', 'No hay rutas asignadas para la emisión seleccionada');
+        this.swal('info', 'No hay rutas asignadas para la emisiÃ³n seleccionada');
         return;
       }
 
@@ -550,22 +558,24 @@ export class RutaToLectorComponent implements OnInit {
       this.swal('error', 'No se pudo generar el reporte general');
     } finally {
       this.exportandoReporte = false;
+      this.loadingService.hideLoading();
     }
   }
 
   async exportarLecturasGenerales(formato: 'pdf' | 'xlsx') {
     if (!this.emisionSelected?.idemision) {
-      this.swal('warning', 'Seleccione una emisión');
+      this.swal('warning', 'Seleccione una emisiÃ³n');
       return;
     }
 
     this.exportandoReporte = true;
+    this.loadingService.showLoading();
 
     try {
       const reporte = await this.construirReporteLecturasGenerales();
 
       if (!reporte.detalles.length) {
-        this.swal('info', 'No se encontraron lecturas para la emisión seleccionada');
+        this.swal('info', 'No se encontraron lecturas para la emisiÃ³n seleccionada');
         return;
       }
 
@@ -583,6 +593,7 @@ export class RutaToLectorComponent implements OnInit {
       this.swal('error', 'No se pudo generar el reporte de lecturas');
     } finally {
       this.exportandoReporte = false;
+      this.loadingService.hideLoading();
     }
   }
 
@@ -637,31 +648,38 @@ export class RutaToLectorComponent implements OnInit {
         for (const lectura of lecturas ?? []) {
           const abonado = lectura?.idabonado_abonados ?? {};
           const novedad = lectura?.idnovedad_novedades ?? {};
+          const lecturaAnterior = Number(lectura?.lecturaanterior ?? 0);
+          const lecturaActual = Number(lectura?.lecturaactual ?? 0);
+          const fechaHoraLectura = this.parseFechaLectura(lectura?.fechalectura);
+
           detalles.push({
             numero: detalles.length + 1,
             lector,
             idusuario,
             rutaCodigo: rutaEmision?.idruta_rutas?.codigo ?? ruta?.codigo ?? '',
             rutaDescripcion: rutaEmision?.idruta_rutas?.descripcion ?? ruta?.descripcion ?? '',
-            idabonado: abonado?.idabonado ?? '',
-            responsablePago:
+            cuenta: abonado?.idabonado ?? '',
+            nromedidor: abonado?.nromedidor ?? '',
+            abonado:
               abonado?.idresponsable?.nombre ??
               abonado?.idcliente_clientes?.nombre ??
               '',
-            identificacion:
-              abonado?.idresponsable?.cedula ??
-              abonado?.idcliente_clientes?.cedula ??
+            direccion:
+              abonado?.direccionubicacion ??
+              abonado?.idcliente_clientes?.direccion ??
               '',
             categoria: abonado?.idcategoria_categorias?.descripcion ?? '',
-            nromedidor: abonado?.nromedidor ?? '',
             promedio: abonado?.promedio ?? '',
             geolocalizacion: abonado?.geolocalizacion ?? '',
-            fechalectura: lectura?.fechalectura ?? '',
+            fecha: fechaHoraLectura.fecha,
+            hora: fechaHoraLectura.hora,
             idnovedad: novedad?.idnovedad ?? '',
             novedad: novedad?.descripcion ?? '',
-            lecturaAnterior: lectura?.lecturaanterior ?? '',
-            lecturaActual: lectura?.lecturaactual ?? '',
-            observacion: lectura?.observaciones ?? lectura?.observacion ?? ''
+            lecturaAnterior,
+            lecturaActual,
+            consumo: lecturaActual - lecturaAnterior,
+            observacion: lectura?.observaciones ?? lectura?.observacion ?? '',
+            confirmacion: this.getConfirmacionLectura(lectura)
           });
         }
       }
@@ -685,7 +703,7 @@ export class RutaToLectorComponent implements OnInit {
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
-    doc.text(`Emisión: ${reporte.emision}`, 14, 19);
+    doc.text(`EmisiÃ³n: ${reporte.emision}`, 14, 19);
     doc.text(`Fecha: ${fecha} ${hora}`, 14, 25);
 
     autoTable(doc, {
@@ -695,7 +713,7 @@ export class RutaToLectorComponent implements OnInit {
       headStyles: { fillColor: [52, 73, 94] },
       margin: { left: 8, right: 8 },
       head: [[
-        'N°',
+        'NÂ°',
         'Cod. lector',
         'Lector',
         'Total rutas',
@@ -720,53 +738,78 @@ export class RutaToLectorComponent implements OnInit {
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(14);
-    doc.text('Reporte general de lecturas', 14, 12);
+    doc.text('Reporte global de lecturas', 14, 12);
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
-    doc.text(`Emisión: ${reporte.emision}`, 14, 19);
+    doc.text(`Emision: ${reporte.emision}`, 14, 19);
     doc.text(`Fecha: ${fecha} ${hora}`, 14, 25);
 
     autoTable(doc, {
       startY: 32,
       theme: 'grid',
-      styles: { fontSize: 7, cellPadding: 1.2, valign: 'middle' },
+      styles: { fontSize: 6.2, cellPadding: 1, valign: 'middle' },
       headStyles: { fillColor: [52, 73, 94] },
       margin: { left: 6, right: 6 },
       head: [[
-        'N°',
-        'Lector',
-        'Ruta',
-        'Id abonado',
-        'Responsable',
-        'Identificación',
-        'Categoría',
-        'Medidor',
-        'Prom.',
-        'Fecha lec.',
-        'Id nov.',
+        'Cuenta',
+        'Nro. Medidor',
+        'Abonado',
+        'Direccion',
+        'Categoria',
+        'Lectura anterior',
+        'Lectura actual',
+        'Consumo',
+        'Promedio',
+        'Id novedad',
         'Novedad',
-        'Lect. ant.',
-        'Lect. act.',
-        'Observación'
+        'Observaciones',
+        'Geolocalizacion',
+        'Confirmacion',
+        'Lector',
+        'Fecha',
+        'Hora',
+        'Id novedad'
       ]],
       body: reporte.detalles.map((item: any) => [
-        item.numero,
-        item.lector,
-        `${item.rutaCodigo} - ${item.rutaDescripcion}`,
-        item.idabonado,
-        item.responsablePago,
-        item.identificacion,
-        item.categoria,
+        item.cuenta,
         item.nromedidor,
-        item.promedio,
-        item.fechalectura ? new Date(item.fechalectura).toLocaleDateString('es-EC') : '',
-        item.idnovedad,
-        item.novedad,
+        item.abonado,
+        item.direccion,
+        item.categoria,
         item.lecturaAnterior,
         this.getLecturaActualPdf(item.lecturaActual),
-        item.observacion
-      ])
+        item.consumo,
+        item.promedio,
+        item.idnovedad,
+        item.novedad,
+        item.observacion,
+        item.geolocalizacion,
+        item.confirmacion,
+        item.lector,
+        item.fecha,
+        item.hora,
+        item.idnovedad
+      ]),
+      columnStyles: {
+        0: { cellWidth: 15, halign: 'center' },
+        1: { cellWidth: 18, halign: 'center' },
+        2: { cellWidth: 36 },
+        3: { cellWidth: 35 },
+        4: { cellWidth: 35 },
+        5: { cellWidth: 16, halign: 'right' },
+        6: { cellWidth: 16, halign: 'right' },
+        7: { cellWidth: 16, halign: 'right' },
+        8: { cellWidth: 14, halign: 'right' },
+        9: { cellWidth: 14, halign: 'center' },
+        10: { cellWidth: 18 },
+        11: { cellWidth: 26 },
+        12: { cellWidth: 24 },
+        13: { cellWidth: 16, halign: 'center' },
+        14: { cellWidth: 24 },
+        15: { cellWidth: 16, halign: 'center' },
+        16: { cellWidth: 14, halign: 'center' },
+      }
     });
 
     return doc.output('blob');
@@ -787,7 +830,7 @@ export class RutaToLectorComponent implements OnInit {
     worksheet.addRow([]);
 
     const headerRow = worksheet.addRow([
-      'N°',
+      'NÂ°',
       'Cod. lector',
       'Lector',
       'Total rutas',
@@ -815,48 +858,97 @@ export class RutaToLectorComponent implements OnInit {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Lecturas');
 
-    worksheet.addRow(['Reporte general de lecturas']);
+    worksheet.addRow(['Reporte global de lecturas']);
     worksheet.addRow(['Emision', reporte.emision]);
     worksheet.addRow(['Fecha', reporte.fechaGeneracion.toLocaleString('es-EC')]);
     worksheet.addRow([]);
 
     const headerRow = worksheet.addRow([
-      'N°',
-      'Lector',
-      'Id usuario',
-      'Codigo ruta',
-      'Ruta',
-      'Id abonado',
-      'Responsable',
-      'Identificacion',
+      'Cuenta',
+      'Nro. Medidor',
+      'Abonado',
+      'Direccion',
       'Categoria',
       'Lectura anterior',
       'Lectura actual',
-      'Observacion'
+      'Consumo',
+      'Promedio',
+      'Id novedad',
+      'Novedad',
+      'Observaciones',
+      'Geolocalizacion',
+      'Confirmacion',
+      'Lector',
+      'Fecha',
+      'Hora',
+      'Id novedad'
     ]);
     headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
     headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF34495E' } };
 
     reporte.detalles.forEach((item: any) => {
       worksheet.addRow([
-        item.numero,
-        item.lector,
-        item.idusuario,
-        item.rutaCodigo,
-        item.rutaDescripcion,
-        item.idabonado,
-        item.responsablePago,
-        item.identificacion,
+        item.cuenta,
+        item.nromedidor,
+        item.abonado,
+        item.direccion,
         item.categoria,
         item.lecturaAnterior,
         item.lecturaActual,
-        item.observacion
+        item.consumo,
+        item.promedio,
+        item.idnovedad,
+        item.novedad,
+        item.observacion,
+        item.geolocalizacion,
+        item.confirmacion,
+        item.lector,
+        item.fecha,
+        item.hora,
+        item.idnovedad
       ]);
     });
 
-    this.configurarAnchos(worksheet, [10, 24, 14, 14, 28, 14, 28, 18, 18, 18, 12, 26, 16, 12, 24, 16, 16, 30]);
-    await this.descargarWorkbook(workbook, `reporte_general_lecturas_${this.emisionSelected?.emision ?? 'emision'}.xlsx`);
+    this.configurarAnchos(worksheet, [12, 16, 34, 34, 18, 16, 16, 12, 12, 14, 20, 26, 24, 16, 24, 14, 14]);
+    await this.descargarWorkbook(workbook, `reporte_global_lecturas_${this.emisionSelected?.emision ?? 'emision'}.xlsx`);
     this.swal('success', 'Excel de lecturas generado correctamente');
+  }
+
+  private parseFechaLectura(fechaLectura: any): { fecha: string; hora: string } {
+    if (!fechaLectura) {
+      return { fecha: '', hora: '' };
+    }
+
+    const fecha = new Date(fechaLectura);
+    if (Number.isNaN(fecha.getTime())) {
+      return { fecha: String(fechaLectura), hora: '' };
+    }
+
+    return {
+      fecha: fecha.toLocaleDateString('es-EC'),
+      hora: fecha.toLocaleTimeString('es-EC', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      })
+    };
+  }
+
+  private getConfirmacionLectura(lectura: any): string {
+    const valor = lectura?.confirmacion
+      ?? lectura?.confirmado
+      ?? lectura?.procesado
+      ?? lectura?.confirmada
+      ?? lectura?.swconfirmacion;
+
+    if (typeof valor === 'boolean') {
+      return valor ? 'SI' : 'NO';
+    }
+
+    if (valor === 1 || valor === '1') return 'SI';
+    if (valor === 0 || valor === '0') return 'NO';
+    if (valor == null || valor === '') return '';
+    return String(valor);
   }
 
   private buildNombreArchivo(ruta: any, extension: 'pdf' | 'xlsx'): string {
@@ -894,5 +986,21 @@ export class RutaToLectorComponent implements OnInit {
       showConfirmButton: false,
       timer: 3000,
     });
+  }
+
+  abrirModalReporte() {
+    this.tipoReporteSeleccionado = 'general';
+    this.formatoReporteSeleccionado = 'pdf';
+  }
+
+  async ejecutarReporteSeleccionado() {
+    this.btnCerrarReporteModal?.nativeElement.click();
+
+    if (this.tipoReporteSeleccionado === 'general') {
+      await this.exportarReporteGeneral(this.formatoReporteSeleccionado);
+      return;
+    }
+
+    await this.exportarLecturasGenerales(this.formatoReporteSeleccionado);
   }
 }

@@ -74,12 +74,11 @@
             </thead>
             <tbody class="detalle small roboto">
                <tr *ngFor="let transa of _mayor | filter: filtro;">
-                  <td class="text-center py-0">{{ transa.idasiento.fecha | date: 'dd-MM-yyyy' }}</td>
-                  <td class="text-center py-0">{{ transa.idasiento.asiento }}</td>
-                  <td class="text-center py-0">{{ comprobante(transa.idasiento.tipcom, transa.idasiento.compro) }}</td>
-                  <td class="text-truncate ancho220 py-0" [ngClass]="{'transparente': transa.idbene.idbene == 1}"
-                     data-toggle="tooltip" [title]="transa.idbene.nomben.length > 34 ? transa.idbene.nomben : ''">{{
-                     transa.idbene.nomben }}</td>
+                  <td class="text-center py-0">{{ asientoFecha(transa) | date: 'dd-MM-yyyy' }}</td>
+                  <td class="text-center py-0">{{ asientoNumero(transa) }}</td>
+                  <td class="text-center py-0">{{ comprobanteTransa(transa) }}</td>
+                  <td class="text-truncate ancho220 py-0" [ngClass]="{'transparente': beneficiarioId(transa) == 1}"
+                     data-toggle="tooltip" [title]="beneficiarioTitulo(transa)">{{ beneficiarioNombre(transa) }}</td>
                   <td class="text-right py-0" [ngClass]="{'transparente': debito(transa.debcre, transa.valor) == 0}">{{
                      debito(transa.debcre, transa.valor) | number: '1.2-2' }}</td>
                   <td class="text-right py-0" [ngClass]="{'transparente': credito(transa.debcre, transa.valor) == 0}">{{

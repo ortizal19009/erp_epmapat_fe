@@ -1,16 +1,22 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { AutorizaService } from 'src/app/compartida/autoriza.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { Eliminadosapp } from 'src/app/modelos/administracion/eliminadosapp.model';
+import { Documentos } from 'src/app/modelos/administracion/documentos.model';
 import { Asientos } from 'src/app/modelos/contabilidad/asientos.model';
+import { Beneficiarios } from 'src/app/modelos/contabilidad/beneficiarios.model';
+import { Cuentas } from 'src/app/modelos/contabilidad/cuentas.model';
 import { Ejecucio } from 'src/app/modelos/contabilidad/ejecucio.model';
 import { Transaci } from 'src/app/modelos/contabilidad/transaci.model';
 import { EliminadosappService } from 'src/app/servicios/administracion/eliminadosapp.service';
+import { DocumentosService } from 'src/app/servicios/administracion/documentos.service';
 import { AsientosService } from 'src/app/servicios/contabilidad/asientos.service';
 import { BenextranService } from 'src/app/servicios/contabilidad/benextran.service';
+import { BeneficiariosService } from 'src/app/servicios/contabilidad/beneficiarios.service';
+import { CuentasService } from 'src/app/servicios/contabilidad/cuentas.service';
 import { EjecucionService } from 'src/app/servicios/contabilidad/ejecucio.service';
 import { TransaciService } from 'src/app/servicios/contabilidad/transaci.service';
 import { tiptranNombre } from 'src/app/utileria/formateaStrings';
@@ -116,7 +122,7 @@ export class TransaciComponent implements OnInit {
                   this.ejecucio = ejecucio;
                   if (ejecucio.length > 1) this.totalesEjecucion();
                },
-               error: err => { console.error(err.error); this.authService.mostrarError('Error al buscar la Ejecución', err.error) },
+               error: err => { console.error(err.error); this.authService.mostrarError('Error al buscar la EjecuciÃ³n', err.error) },
             });
          },
          error: err => { console.error(err.error); this.authService.mostrarError('Error al buscar Transacciones', err.error) }
@@ -220,7 +226,7 @@ export class TransaciComponent implements OnInit {
       this.ultIdSelec = inttra;
       sessionStorage.setItem('ultinttra', this.ultIdSelec.toString());
       sessionStorage.setItem("datosToModiTransaci", JSON.stringify({ tiptran: tiptran, inttra: inttra, idasiento: this.idasiento, totDebe: this.totDebe, totHaber: this.totHaber }));
-      // Si se usó el navegador  => actualiza this.datosToTransaci
+      // Si se usÃ³ el navegador  => actualiza this.datosToTransaci
       if (this.datosToTransaci.idasiento != this.idasiento) {
          this.datosToTransaci.idasiento = this.idasiento;
          sessionStorage.setItem('datosToTransaci', JSON.stringify(this.datosToTransaci));
@@ -356,9 +362,9 @@ export class TransaciComponent implements OnInit {
    elimina(transaci: Transaci, codparElim: String) {
       let datos: string;
       if (codparElim != '') {
-         datos = `Cuenta: ${transaci.codcue} ${transaci.debcre === 1 ? 'Débito' : 'Crédito'} ${transaci.valor} Comprobante: ${this.authService.comprobante(transaci.idasiento.tipcom, transaci.idasiento.compro)} Partida: ${codparElim}`;;
+         datos = `Cuenta: ${transaci.codcue} ${transaci.debcre === 1 ? 'DÃ©bito' : 'CrÃ©dito'} ${transaci.valor} Comprobante: ${this.authService.comprobante(transaci.idasiento.tipcom, transaci.idasiento.compro)} Partida: ${codparElim}`;;
       } else {
-         datos = `Cuenta: ${transaci.codcue} ${transaci.debcre === 1 ? 'Débito' : 'Crédito'} ${transaci.valor} Comprobante: ${this.authService.comprobante(transaci.idasiento.tipcom, transaci.idasiento.compro)}`;
+         datos = `Cuenta: ${transaci.codcue} ${transaci.debcre === 1 ? 'DÃ©bito' : 'CrÃ©dito'} ${transaci.valor} Comprobante: ${this.authService.comprobante(transaci.idasiento.tipcom, transaci.idasiento.compro)}`;
       }
       this.observable$.subscribe({
          next: () => {
@@ -371,7 +377,7 @@ export class TransaciComponent implements OnInit {
             eliminado.datos = datos;
             this.elimService.save(eliminado).subscribe({
                next: () => {
-                  this.authService.swal('success', `Cuenta: ${transaci.codcue} eliminada con éxito del Asiento ${transaci.idasiento.asiento}`);
+                  this.authService.swal('success', `Cuenta: ${transaci.codcue} eliminada con Ã©xito del Asiento ${transaci.idasiento.asiento}`);
                   this.busca();
                },
                error: err => { console.error(err.error); this.authService.mostrarError('Error al eliminar', err.error); }
@@ -480,7 +486,7 @@ export class TransaciComponent implements OnInit {
                this.idasiento = asiento.idasiento;
                this.busca();
             }
-            else this.authService.swal('warning', `No existe el Asiento número: ${n}`);
+            else this.authService.swal('warning', `No existe el Asiento nÃºmero: ${n}`);
          },
          error: err => { console.error(err.error); this.authService.mostrarError('Error al buscar', err.error); }
       });
@@ -504,3 +510,4 @@ export class TransaciComponent implements OnInit {
    cerrar() { this.router.navigate(['/inicio']); }
 
 }
+

@@ -6,26 +6,11 @@
           <h4 class="m-0 font-weight-bold"><i class="fa fa-bus"></i>&nbsp; Asignar ruta a lectores</h4>
         </div>
 
-        <div class="btn-group ml-auto mt-0">
-          <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
-            aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+        <div class="ml-auto mt-0">
+          <button type="button" class="btn btn-sm btn-light font-weight-bold" data-toggle="modal"
+            data-target="#reporteRutaLectorModal" [disabled]="exportandoReporte" (click)="abrirModalReporte()">
+            <i class="bi bi-printer"></i>&nbsp; Imprimir
           </button>
-          <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
-            <button class="dropdown-item" type="button" data-toggle="modal" data-target="#pdfRutaAsignadaModal"
-              (click)="exportarReporteGeneral('pdf')">
-              <i class="bi bi-printer"></i>&nbsp; Imprimir reporte general
-            </button>
-            <button class="dropdown-item" type="button" (click)="exportarReporteGeneral('xlsx')">
-              <i class="bi bi-file-earmark-excel"></i>&nbsp; Exportar Excel general
-            </button>
-            <button class="dropdown-item" type="button" data-toggle="modal" data-target="#pdfRutaAsignadaModal"
-              (click)="exportarLecturasGenerales('pdf')">
-              <i class="bi bi-file-earmark-text"></i>&nbsp; Imprimir lecturas
-            </button>
-            <button class="dropdown-item" type="button" (click)="exportarLecturasGenerales('xlsx')">
-              <i class="bi bi-file-earmark-excel"></i>&nbsp; Exportar Excel lecturas
-            </button>
-          </div>
         </div>
 
       </div>
@@ -155,6 +140,44 @@
             (click)="cerrarVistaPreviaPdf()">Cerrar</button>
           <button type="button" class="btn btn-success btn-sm" [disabled]="!pdfPreviewUrl" (click)="descargarPdfPreview()">
             <i class="bi bi-download"></i>&nbsp; Descargar PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="reporteRutaLectorModal" tabindex="-1" aria-labelledby="reporteRutaLectorModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="reporteRutaLectorModalLabel">Generar reporte</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="tipoReporteRutaLector">Tipo de reporte</label>
+            <select id="tipoReporteRutaLector" class="form-control" [(ngModel)]="tipoReporteSeleccionado">
+              <option value="general">Reporte general</option>
+              <option value="lecturas">Lecturas</option>
+            </select>
+          </div>
+          <div class="form-group mb-0">
+            <label for="formatoReporteRutaLector">Formato</label>
+            <select id="formatoReporteRutaLector" class="form-control" [(ngModel)]="formatoReporteSeleccionado">
+              <option value="pdf">PDF</option>
+              <option value="xlsx">Excel</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button #btnCerrarReporteModal type="button" class="btn btn-outline-secondary btn-sm"
+            data-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary btn-sm" [disabled]="exportandoReporte"
+            (click)="ejecutarReporteSeleccionado()">
+            <i class="bi bi-play-circle"></i>&nbsp; Generar
           </button>
         </div>
       </div>
