@@ -767,8 +767,7 @@ export class RutaToLectorComponent implements OnInit {
         'Geolocalizacion',
         'Confirmacion',
         'Lector',
-        'Fecha',
-        'Id novedad'
+        'Fecha'
       ]],
       body: reporte.detalles.map((item: any) => [
         item.cuenta,
@@ -786,8 +785,7 @@ export class RutaToLectorComponent implements OnInit {
         item.geolocalizacion,
         item.confirmacion,
         item.lector,
-        item.fecha,
-        item.idnovedad
+        item.fecha
       ]),
       columnStyles: {
         0: { cellWidth: 15, halign: 'center' },
@@ -805,7 +803,6 @@ export class RutaToLectorComponent implements OnInit {
         12: { cellWidth: 24 },
         13: { cellWidth: 16, halign: 'center' },
         14: { cellWidth: 24 },
-        15: { cellWidth: 14, halign: 'center' },
       }
     });
 
@@ -876,8 +873,7 @@ export class RutaToLectorComponent implements OnInit {
       'Geolocalizacion',
       'Confirmacion',
       'Lector',
-      'Fecha',
-      'Id novedad'
+      'Fecha'
     ]);
     headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
     headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF34495E' } };
@@ -899,12 +895,11 @@ export class RutaToLectorComponent implements OnInit {
         item.geolocalizacion,
         item.confirmacion,
         item.lector,
-        item.fecha,
-        item.idnovedad
+        item.fecha
       ]);
     });
 
-    this.configurarAnchos(worksheet, [12, 16, 34, 34, 18, 16, 16, 12, 12, 14, 20, 26, 24, 16, 24, 14]);
+    this.configurarAnchos(worksheet, [12, 16, 34, 34, 18, 16, 16, 12, 12, 14, 20, 26, 24, 16, 24]);
     await this.descargarWorkbook(workbook, `reporte_global_lecturas_${this.emisionSelected?.emision ?? 'emision'}.xlsx`);
     this.swal('success', 'Excel de lecturas generado correctamente');
   }
