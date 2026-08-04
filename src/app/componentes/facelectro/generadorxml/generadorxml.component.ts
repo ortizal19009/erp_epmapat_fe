@@ -549,11 +549,43 @@ function valoresIVA(
   baseImponible: number,
   porciva: number
 ): [number, number] {
-  const valorIVA = swiva ? Math.round(baseImponible * porciva * 100) / 100 : 0;
+  const tasaDecimal = normalizarTasaIva(porciva);
+  const valorIVA = swiva ? Math.round(baseImponible * tasaDecimal * 100) / 100 : 0;
   const total = swiva
-    ? Math.round((baseImponible + baseImponible * porciva) * 100) / 100
+    ? Math.round((baseImponible + baseImponible * tasaDecimal) * 100) / 100
     : baseImponible;
   return [valorIVA, total];
+}
+
+function normalizarPorcentajeIva(porciva: number): number {
+  if (!Number.isFinite(porciva) || porciva <= 0) {
+    return 0;
+  }
+
+  return porciva <= 1 ? porciva * 100 : porciva;
+}
+
+function normalizarTasaIva(porciva: number): number {
+  const porcentaje = normalizarPorcentajeIva(porciva);
+  return porcentaje / 100;
+}
+
+function resolverCodigoPorcentajeIva(porciva: number): string {
+  const porcentaje = normalizarPorcentajeIva(porciva);
+
+  if (porcentaje === 12) {
+    return '2';
+  }
+
+  if (porcentaje === 15) {
+    return '4';
+  }
+
+  if (porcentaje === 5) {
+    return '5';
+  }
+
+  return '0';
 }
 
 function calculosIVA(
@@ -561,10 +593,12 @@ function calculosIVA(
   baseImponible: number,
   porciva: number
 ): [string, string, string] {
-  const codigoPorcentaje = swiva ? '2' : '0';
-  const tarifa = swiva ? porciva.toString() : '0';
+  const porcentaje = normalizarPorcentajeIva(porciva);
+  const tasaDecimal = normalizarTasaIva(porciva);
+  const codigoPorcentaje = swiva ? resolverCodigoPorcentajeIva(porciva) : '0';
+  const tarifa = swiva ? porcentaje.toString() : '0';
   const valorIVA = swiva
-    ? (Math.round(baseImponible * porciva * 100) / 100).toFixed(2)
+    ? (Math.round(baseImponible * tasaDecimal * 100) / 100).toFixed(2)
     : '0.00';
   return [codigoPorcentaje, tarifa, valorIVA];
 }

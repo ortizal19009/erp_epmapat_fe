@@ -49,6 +49,8 @@ export class FecfacturaComponent implements OnInit {
   impuestos: any = [];
   totalpreciounitario: number = 0;
   totalbaseimponible: number = 0;
+  totaliva: number = 0;
+  totalgeneraldetalle: number = 0;
   totalpagado: number = 0;
   estado: Boolean = false;
   btnRsend: Boolean = false;
@@ -474,6 +476,15 @@ export class FecfacturaComponent implements OnInit {
     return texto.startsWith('{') && texto.includes('"estado"') && texto.toUpperCase().includes('PENDIENTE');
   }
 
+  private rubroGeneraIva(rxf: any): boolean {
+    const swiva =
+      rxf?.idrubro_rubros?.swiva ??
+      rxf?.idrubro_rubros?.rubros?.swiva ??
+      rxf?.swiva;
+
+    return swiva === true || swiva === 1 || swiva === '1';
+  }
+
   puedeReenviarFactura(factura: Fecfactura): boolean {
     return !this.esRespuestaPendienteSri(factura?.xmlautorizado);
   }
@@ -582,15 +593,17 @@ export class FecfacturaComponent implements OnInit {
               this.fec_facdetalleService.saveFacDetalle(detalle).subscribe({
                 next: (datos: any) => {
                   let iva = 0;
-                  if (rxf.idrubro_rubros.swiva === true) {
-                    if ((codImpuesto = 2)) {
+                  let codigoPorcentaje = codImpuesto;
+
+                  if (this.rubroGeneraIva(rxf)) {
+                    if (codImpuesto === 2) {
                       iva = rxf.valorunitario * 0.12;
                     }
-                    if ((codImpuesto = 4)) {
+                    if (codImpuesto === 4) {
                       iva = rxf.valorunitario * 0.15;
                     }
                   } else {
-                    codImpuesto = 0;
+                    codigoPorcentaje = 0;
                   }
                   this.sumaTotal += rxf.cantidad * rxf.valorunitario + iva;
                   let secuencialImpuestos: String =
@@ -601,7 +614,7 @@ export class FecfacturaComponent implements OnInit {
                     +secuencialImpuestos!;
                   detalleImpuesto.idfacturadetalle = rxf.idrubroxfac;
                   detalleImpuesto.codigoimpuesto = '2';
-                  detalleImpuesto.codigoporcentaje = codImpuesto.toString();
+                  detalleImpuesto.codigoporcentaje = codigoPorcentaje.toString();
                   detalleImpuesto.baseimponible = basImponible;
                   /*          this.fec_facdetimpService
                     .saveFacDetalleImpuesto(detalleImpuesto)
@@ -1130,6 +1143,8 @@ export class FecfacturaComponent implements OnInit {
     this.txtDetails = true;
     this.totalpreciounitario = 0;
     this.totalbaseimponible = 0;
+    this.totaliva = 0;
+    this.totalgeneraldetalle = 0;
     this.totalpagado = 0;
     this.impuestos = [];
     this.factura = factura;
@@ -1139,14 +1154,20 @@ export class FecfacturaComponent implements OnInit {
         next: (detalles: any) => {
           this._detalles = detalles;
           detalles.forEach((item: any, index: number) => {
-            this.totalpreciounitario += item.preciounitario;
+            const cantidad = Number(item?.cantidad || 0);
+            const precioUnitario = Number(item?.preciounitario || 0);
+            this.totalpreciounitario += cantidad * precioUnitario;
             this.fec_facdetimpService
               .getFecFacDetalleService(item.idfacturadetalle)
               .subscribe({
                 next: (impuestos: any) => {
                   impuestos.forEach((item: any) => {
                     this.impuestos.push(item);
-                    this.totalbaseimponible += item.baseimponible;
+                    const baseImponible = Number(item?.baseimponible || 0);
+                    const valorIva = this.calcularValorIva(item);
+                    this.totalbaseimponible += baseImponible;
+                    this.totaliva += valorIva;
+                    this.totalgeneraldetalle += baseImponible + valorIva;
                   });
                 },
                 error: (e) => console.error(e),
@@ -1204,7 +1225,7 @@ export class FecfacturaComponent implements OnInit {
       // -------------------------------------------
       case 'U':
         this.estado = true;
-        this.btnRsend = this.totalbaseimponible === this.totalpagado;
+        this.btnRsend = this.totalgeneraldetalle === this.totalpagado;
         break;
 
       // -------------------------------------------
@@ -1277,6 +1298,27 @@ export class FecfacturaComponent implements OnInit {
           : 'Ocurrió un error al recrear la factura';
       this.swal('error', mensaje);
     }
+  }
+
+  getTarifaPorCodigoPorcentaje(codigoPorcentaje: any): number {
+    switch (String(codigoPorcentaje || '').trim()) {
+      case '2':
+        return 12;
+      case '3':
+        return 14;
+      case '4':
+        return 15;
+      case '5':
+        return 5;
+      default:
+        return 0;
+    }
+  }
+
+  calcularValorIva(impuesto: any): number {
+    const baseImponible = Number(impuesto?.baseimponible || 0);
+    const tarifa = this.getTarifaPorCodigoPorcentaje(impuesto?.codigoporcentaje);
+    return Math.round(baseImponible * (tarifa / 100) * 100) / 100;
   }
   getXmlAutorizadoSri(fecfactura: any) {
     this.fecfacService.setxml(fecfactura).subscribe({

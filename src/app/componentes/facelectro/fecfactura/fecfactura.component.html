@@ -441,7 +441,7 @@
 <div class="modal fade" id="detallesModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
   aria-labelledby="detallesModalLabel" aria-hidden="true">
 
-  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable detalles-modal-dialog">
     <div class="modal-content shadow-lg border-0">
       <div class="modal-header bg-light border-bottom-0 py-3">
         <div class="w-100 d-flex justify-content-between align-items-start">
@@ -558,7 +558,10 @@
                 <thead class="thead-dark">
                   <tr>
                     <th>N° Detalle</th>
+                    <th class="text-center">Cod. %</th>
+                    <th class="text-center">Tarifa</th>
                     <th>Base Imponible</th>
+                    <th>IVA</th>
                     <th *ngIf="validarEstado(factura.estado)">Accion</th>
                   </tr>
                 </thead>
@@ -566,7 +569,10 @@
                 <tbody>
                   <tr *ngFor="let imp of impuestos">
                     <td>{{imp.idfacturadetalle}}</td>
+                    <td class="text-center">{{imp.codigoporcentaje}}</td>
+                    <td class="text-center">{{getTarifaPorCodigoPorcentaje(imp.codigoporcentaje)}}%</td>
                     <td class="text-right">{{imp.baseimponible.toFixed(2)}}</td>
+                    <td class="text-right">{{calcularValorIva(imp).toFixed(2)}}</td>
                     <td *ngIf="validarEstado(factura.estado)" class="text-center">
                       <button class="btn btn-outline-danger btn-sm" (click)="deleteImpuesto(imp)">
                         <i class="fas fa-trash"></i>
@@ -576,7 +582,10 @@
 
                   <tr class="table-secondary font-weight-bold">
                     <td>Total</td>
+                    <td></td>
+                    <td></td>
                     <td class="text-right">{{totalbaseimponible.toFixed(2)}}</td>
+                    <td class="text-right">{{totaliva.toFixed(2)}}</td>
                     <td *ngIf="validarEstado(factura.estado)"></td>
                   </tr>
                 </tbody>
@@ -600,6 +609,31 @@
                   <tr *ngFor="let pago of _pagos">
                     <td>{{pago.idfactura}}</td>
                     <td class="text-right">{{pago.total.toFixed(2)}}</td>
+                  </tr>
+                  <tr class="table-secondary font-weight-bold">
+                    <td>Total cobrado</td>
+                    <td class="text-right">{{totalpagado.toFixed(2)}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <h6 class="section-title">Resumen</h6>
+            <div class="table-responsive">
+              <table class="table table-sm table-bordered table-striped">
+                <tbody>
+                  <tr>
+                    <th>Subtotal</th>
+                    <td class="text-right">{{totalbaseimponible.toFixed(2)}}</td>
+                  </tr>
+                  <tr>
+                    <th>IVA</th>
+                    <td class="text-right">{{totaliva.toFixed(2)}}</td>
+                  </tr>
+                  <tr class="table-secondary font-weight-bold">
+                    <th>Total factura</th>
+                    <td class="text-right">{{totalgeneraldetalle.toFixed(2)}}</td>
                   </tr>
                 </tbody>
               </table>

@@ -101,6 +101,15 @@ export class FecfacturaService {
     return fechaCobro <= '2024-03-31' ? 2 : 4;
   }
 
+  private rubroGeneraIva(rxf: any): boolean {
+    const swiva =
+      rxf?.idrubro_rubros?.swiva ??
+      rxf?.idrubro_rubros?.rubros?.swiva ??
+      rxf?.swiva;
+
+    return swiva === true || swiva === 1 || swiva === '1';
+  }
+
   private normalizarFechaEmision(fecha: any): string {
     if (!fecha) {
       return new Date().toISOString().slice(0, 19);
@@ -124,7 +133,7 @@ export class FecfacturaService {
   }
 
   private calcularIvaRubro(rxf: any, codImpuesto: number): number {
-    if (rxf?.idrubro_rubros?.swiva !== true) {
+    if (!this.rubroGeneraIva(rxf)) {
       return 0;
     }
 
@@ -166,7 +175,7 @@ export class FecfacturaService {
       detalleImpuesto.idfacturadetalle = rxf.idrubroxfac;
       detalleImpuesto.codigoimpuesto = '2';
 
-      if (rxf?.idrubro_rubros?.rubros.swiva === true || rxf?.idrubro_rubros?.swiva === 1) {
+      if (this.rubroGeneraIva(rxf)) {
         detalleImpuesto.codigoporcentaje = codImpuesto.toString();
       } else {
         detalleImpuesto.codigoporcentaje = '0';
@@ -536,128 +545,7 @@ export class FecfacturaService {
   }
   // OBSOLETO / REVISAR:
   // Exportacion legacy que arma fec_factura desde frontend.
-  async _exportar(i: number, factura: any) {
-    this._facturas = factura;
-    let j = 0;
-    let usuario = await this.s_usuario.getByIdusuarioAsync(
-      this._facturas.usuariocobro
-    );
-    let fecfactura = {} as Fec_factura;
 
-    fecfactura.idfactura = this._facturas.idfactura;
-    this.claveAcceso(i);
-    fecfactura.claveacceso = this.claveacceso;
-    fecfactura.secuencial = this._facturas.nrofactura.slice(8, 18);
-    fecfactura.estado = 'I';
-    fecfactura.establecimiento = this._facturas.nrofactura.slice(0, 3);
-    fecfactura.puntoemision = this._facturas.nrofactura.slice(4, 7);
-    fecfactura.direccionestablecimiento = this.empresa.direccion;
-    fecfactura.fechaemision = this._facturas.fechacobro;
-    fecfactura.tipoidentificacioncomprador =
-      this._facturas.idcliente.idtpidentifica_tpidentifica.codigo;
-    if (
-      (this._facturas.idmodulo.idmodulo === 3 &&
-        this._facturas.idabonado != 0) ||
-      this._facturas.idmodulo.idmodulo === 4
-    ) {
-      const abonado: Abonados = await this.getAbonado(this._facturas.idabonado);
-      const _lectura = await this.getLectura(this._facturas.idfactura);
-      let fecEmision: Date = new Date(_lectura[0].fechaemision);
-      fecfactura.razonsocialcomprador = abonado.idresponsable.nombre;
-      fecfactura.identificacioncomprador = abonado.idresponsable.cedula;
-      fecfactura.referencia = this._facturas.idabonado;
-      fecfactura.concepto = `${
-        fecEmision.getMonth() + 1
-      } del ${fecEmision.getFullYear()} Nro medidor: ${
-        _lectura[0].idabonado_abonados.nromedidor
-      }`;
-    } else {
-      fecfactura.razonsocialcomprador = this._facturas.idcliente.nombre;
-      fecfactura.identificacioncomprador = this._facturas.idcliente.cedula;
-      fecfactura.concepto = 'OTROS SERVICIOS';
-      fecfactura.referencia = 'S/N';
-    }
-    fecfactura.direccioncomprador = this._facturas.idcliente.direccion;
-    fecfactura.telefonocomprador = this._facturas.idcliente.telefono;
-    fecfactura.emailcomprador = this._facturas.idcliente.email;
-    fecfactura.referencia = this._facturas.idabonado;
-    fecfactura.recaudador = usuario.nomusu;
-    this.tipocobro = this._facturas.formapago;
-    this.save(fecfactura).subscribe({
-      next: async (resp: any) => {
-        this.swexportar = false;
-        //this.formExportar.controls['nrofactura'].setValue('');
-        this.swfacturas = false;
-        let codImpuesto = 0;
-        if (resp.fechacobro <= '2024-03-31') {
-          codImpuesto = 2;
-        } else {
-          codImpuesto = 4;
-        }
-        /* CONSULTO LOS RUBROS DE LA FACTURA */
-        await this.rxfService
-          .getRubrosAsync(resp.idfactura)
-          .then(async (item: any) => {
-            let i = 0;
-            this.sumaTotal = 0;
-            /* POR CADA RUBRO QUE TIENE LA FACTURA ARMO EL OBJETO DETALLE PARA GUARDARLO */
-            item.forEach(async (rxf: any) => {
-              let detalle = {} as Fec_factura_detalles;
-              let basImponible: number = 0;
-              detalle.idfacturadetalle = rxf.idrubroxfac;
-              detalle.idfactura = rxf.idfactura_facturas.idfactura;
-              detalle.codigoprincipal = rxf.idrubro_rubros.idrubro;
-              detalle.descripcion = rxf.idrubro_rubros.descripcion;
-              detalle.cantidad = rxf.cantidad;
-              detalle.preciounitario = rxf.valorunitario;
-              detalle.descuento = 0;
-              basImponible += rxf.cantidad * rxf.valorunitario;
-              /* GUARDO EL OBJETO DETALLE */
-              this.fec_facdetalleService.saveFacDetalle(detalle).subscribe({
-                next: async (datos: any) => {
-                  let iva = 0;
-                  if (rxf.idrubro_rubros.swiva === true) {
-                    if ((codImpuesto = 2)) {
-                      iva = rxf.valorunitario * 0.12;
-                    }
-                    if ((codImpuesto = 4)) {
-                      iva = rxf.valorunitario * 0.15;
-                    }
-                  } else {
-                    codImpuesto = 0;
-                  }
-                  this.sumaTotal += rxf.cantidad * rxf.valorunitario + iva;
-                  let secuencialImpuestos: String =
-                    rxf.idrubroxfac.toString() + i;
-                  /* MIENTRAS GUARDO EL DETALLE ARMO EL OBJETO DETALLE IMPUESTO */
-                  let detalleImpuesto = {} as Fec_factura_detalles_impuestos;
-                  detalleImpuesto.idfacturadetalleimpuestos =
-                    +secuencialImpuestos!;
-                  detalleImpuesto.idfacturadetalle = rxf.idrubroxfac;
-                  detalleImpuesto.codigoimpuesto = '2';
-                  detalleImpuesto.codigoporcentaje = codImpuesto.toString();
-                  detalleImpuesto.baseimponible = basImponible;
-                  /*          this.fec_facdetimpService
-                    .saveFacDetalleImpuesto(detalleImpuesto)
-                    .subscribe({
-                      next: (detimpuesto) => {
-                        j++;
-                      },
-                      error: (e) => console.error(e),
-                    }); */
-                  i++;
-                },
-                error: (e) => console.error(e),
-              });
-            });
-            this.pagos(resp, this.sumaTotal);
-          });
-      },
-      error: (err) => {
-        console.error('Al guardar en Fec_factura: ', err.error);
-      },
-    });
-  }
 
   async getAbonado(idabonado: number): Promise<any> {
     const abo = await this.aboService.getById(idabonado).toPromise();

@@ -44,7 +44,6 @@ import { FacxncService } from 'src/app/servicios/facxnc.service';
 import { JasperReportService, MergeItem } from 'src/app/servicios/jasper-report.service';
 import { PtoemisionService } from 'src/app/servicios/ptoemision.service';
 import { DefinirService } from 'src/app/servicios/administracion/definir.service';
-import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
 import { RecaudacionCobroService } from 'src/app/servicios/recaudacion-cobro.service';
 import Swal from 'sweetalert2';
 
@@ -1457,15 +1456,6 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
 
       avanzar(i);
     });
-  }
-
-  // Versiones antiguas delegando
-  _facxrecauda(recaCreada: Recaudacion, i: number): Promise<void> {
-    return this.facxrecauda(recaCreada, i);
-  }
-
-  __facxrecauda(recaCreada: Recaudacion, i: number): Promise<void> {
-    return this.facxrecauda(recaCreada, i);
   }
 
   async saveRubxFac(idfactura: any, idrubro: any, valorunitario: any) {

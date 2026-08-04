@@ -36,6 +36,14 @@
   border-radius: 8px;
 }
 
+.detalles-modal-dialog {
+  max-width: 92vw;
+}
+
+.detalles-modal-dialog .modal-body {
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
 .badge {
   font-size: 0.8rem;
   padding: 4px 8px;
