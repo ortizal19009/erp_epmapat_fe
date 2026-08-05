@@ -63,6 +63,7 @@
         <thead class="cabecera">
           <tr class="text-center">
             <th></th>
+            <th>F. Cierre</th>
             <th>Emisión</th>
 	            <th>M<sup>3</sup></th>
             <th>Est</th>
@@ -72,6 +73,7 @@
           <tr *ngFor="let emision of _emisiones; let i = index" class="fila"
             [ngClass]="{'font-weight-bold': emision.estado == 0}" (click)="info(emision, i)">
             <td class="small text-center font-weight-bold">{{ i+1 }}</td>
+            <td class="text-center">{{ emision.fechacierre | date: 'dd-MM-y HH:mm' }}</td>
 	            <td>{{ emision.emision | nombreEmision }}</td>
 	            <td [ngClass]="{'transparente': emision.estado == 0}" class="text-right">{{ emision.m3 | number:'1.0'
 	              }}</td>
