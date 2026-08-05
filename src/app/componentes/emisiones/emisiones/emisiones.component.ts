@@ -341,6 +341,7 @@ export class EmisionesComponent implements OnInit, OnDestroy {
               descripcion: ruta.nombreRuta,
             },
             estado: ruta.estadoRuta,
+            fechacierre: ruta.fechacierre ?? actual?.fechacierre ?? null,
             totalLecturas: Number(ruta.lecturas ?? 0),
             lecturasCargadas: Number(ruta.lecturasTomadas ?? 0),
             m3: Number(ruta.m3 ?? 0),
@@ -981,10 +982,51 @@ export class EmisionesComponent implements OnInit, OnDestroy {
     this.selEmision = emision.emision;
     this.estado = emision.estado;
     this.limpiarAuditoriaEmision();
+    this._rutasxemi = [];
+    this._rubrosEmision = [];
+    this._rubrosBajas = [];
+    this._rubrosActuales = [];
+    this.lecturasnuevas = [];
+    this.lecturasanteriores = 0;
+    this.s_loading.showLoading();
 
-    this.emiService.getControlDetalle(this.idemision).subscribe({
-      next: (resp: any) => {
-        this._rutasxemi = (Array.isArray(resp?.rutas) ? resp.rutas : []).map((ruta: any) => ({
+    forkJoin({
+      detalle: this.emiService.getControlDetalle(this.idemision),
+      rubros: this.s_lecturas.rubrosEmitidos(this.idemision).pipe(
+        catchError((e) => {
+          console.error(e);
+          return of([]);
+        })
+      ),
+      bajas: this.s_lecturas.getR_EmisionFinal(this.idemision).pipe(
+        catchError((e) => {
+          console.error(e);
+          return of([]);
+        })
+      ),
+      nuevas: this.s_emisionesIndividuales.getLecturasNuevas(this.idemision).pipe(
+        catchError((e) => {
+          console.error(e);
+          return of([]);
+        })
+      ),
+      anteriores: this.s_emisionesIndividuales.getLecturasAnteriores(this.idemision).pipe(
+        catchError((e) => {
+          console.error(e);
+          return of(0);
+        })
+      ),
+      actuales: this.s_lecturas.getR_EmisionActual(this.idemision).pipe(
+        catchError((e) => {
+          console.error(e);
+          return of([]);
+        })
+      ),
+    }).pipe(
+      finalize(() => this.s_loading.hideLoading())
+    ).subscribe({
+      next: ({ detalle, rubros, bajas, nuevas, anteriores, actuales }: any) => {
+        this._rutasxemi = (Array.isArray(detalle?.rutas) ? detalle.rutas : []).map((ruta: any) => ({
           idrutaxemision: ruta.idrutaxemision,
           idruta_rutas: {
             idruta: ruta.idruta,
@@ -992,36 +1034,43 @@ export class EmisionesComponent implements OnInit, OnDestroy {
             descripcion: ruta.nombreRuta,
           },
           estado: ruta.estadoRuta,
+          fechacierre: ruta.fechacierre ?? null,
           totalLecturas: Number(ruta.lecturas ?? 0),
           lecturasCargadas: Number(ruta.lecturasTomadas ?? 0),
           m3: Number(ruta.m3 ?? 0),
           processing: false,
           progreso: 0,
         }));
+
+        this._rubrosEmision = rubros;
+        this._rubrosBajas = bajas;
+        this.lecturasnuevas = nuevas;
+        this.lecturasanteriores = anteriores;
+        this._rubrosActuales = actuales;
+        this.totalSuma = (Array.isArray(rubros) ? rubros : []).reduce(
+          (sum: number, item: any) => sum + (item?.[0] != 5 ? Number(item?.[2] ?? 0) : 0),
+          0
+        );
+
         this.iniciarAutoRefreshRutas();
         this.actualizarFilaEmisionDesdeRutas();
-        this.s_lecturas.rubrosEmitidos(this.idemision).subscribe({
-          next: (datos: any) => {
-            datos.forEach((item: any) => {
-              if (item[0] != 5) {
-                this.totalSuma += item[2];
-              }
-            });
-            this._rubrosEmision = datos;
-          },
-          error: (e) => console.error(e),
-        });
-
         this.total();
-        this.getBajas();
-        this.getNuevasAnteriores();
-        this.getEmisionActual();
         if (this._rutasxemi.length == 0) {
           this.showDiv = false;
           this.swgenerar = true;
-        } else this.swgenerar = false;
+        } else {
+          this.swgenerar = false;
+        }
       },
-      error: (err) => console.error(err.error),
+      error: (err) => {
+        console.error(err.error);
+        this.showDiv = false;
+        this.swgenerar = false;
+        this.authService.swal(
+          'error',
+          err?.error?.message || err?.error?.detalle || 'No se pudo cargar el detalle de la emisión.'
+        );
+      },
     });
   }
   getBajas() {
