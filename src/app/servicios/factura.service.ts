@@ -306,6 +306,23 @@ export class FacturaService {
     return this.http.post(`${baseUrl}/anulaciones-bajas`, payload);
   }
 
+  reasignarNumeroFactura(payload: {
+    idfactura: number;
+    motivo: string;
+    idusuario: number;
+  }) {
+    return this.http.post(`${baseUrl}/reasignar-numero`, payload);
+  }
+
+  getReasignaciones(idfactura?: number) {
+    const query = idfactura != null ? `?idfactura=${idfactura}` : '';
+    return this.http.get<any[]>(`${baseUrl}/reasignaciones${query}`);
+  }
+
+  getReasignacionesByFactura(idfactura: number) {
+    return this.http.get<any[]>(`${baseUrl}/${idfactura}/reasignaciones`);
+  }
+
   //Update async
   async updateFacturaAsync(fac: any): Promise<Object> {
     const observable = this.http.put(`${baseUrl}/${fac.idfactura}`, fac);

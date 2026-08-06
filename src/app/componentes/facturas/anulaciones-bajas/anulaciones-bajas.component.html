@@ -64,6 +64,8 @@
                                 <i class="bi bi-file-earmark-minus"></i> Fac.Anuladas</a></li>
                         <li class="nav-item"><a class="nav-link cardTab" href="#eliminadas" data-toggle="tab">
                                 <i class="bi bi-file-earmark-x"></i> Fac.Eliminadas</a></li>
+                        <li class="nav-item"><a class="nav-link cardTab" href="#reasignadas" data-toggle="tab">
+                                <i class="bi bi-arrow-repeat"></i> Reasignaciones</a></li>
                     </ul>
                 </div>
                 
@@ -201,6 +203,55 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="tab-pane" id="reasignadas">
+                            <div class="post">
+                                <div class="user-block mb-0">
+                                    <table class="table table-hover table-sm table-bordered mb-0">
+                                        <thead class="theadFacelectro">
+                                            <tr class="text-center">
+                                                <th class="sortable-header" (click)="toggleSort('reasignaciones', 'idfactura')">Planilla <i [class]="getSortIcon('reasignaciones', 'idfactura')"></i></th>
+                                                <th class="sortable-header" (click)="toggleSort('reasignaciones', 'fechareasignacion')">Fecha <i [class]="getSortIcon('reasignaciones', 'fechareasignacion')"></i></th>
+                                                <th class="sortable-header" (click)="toggleSort('reasignaciones', 'nrofacturaanterior')">Factura anterior <i [class]="getSortIcon('reasignaciones', 'nrofacturaanterior')"></i></th>
+                                                <th class="sortable-header" (click)="toggleSort('reasignaciones', 'nrofacturanuevo')">Factura nueva <i [class]="getSortIcon('reasignaciones', 'nrofacturanuevo')"></i></th>
+                                                <th class="sortable-header" (click)="toggleSort('reasignaciones', 'observacion')">Motivo <i [class]="getSortIcon('reasignaciones', 'observacion')"></i></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bodyFacelectro">
+                                            <tr *ngFor="let item of _fReasignaciones" class="fila">
+                                                <td class="text-center">{{item.idfactura}}</td>
+                                                <td class="text-center">{{item.fechareasignacion | date:'yyyy-MM-dd HH:mm'}}</td>
+                                                <td>{{item.nrofacturaanterior || '-'}}</td>
+                                                <td>{{item.nrofacturanuevo || '-'}}</td>
+                                                <td class="_description">{{item.observacion || 'Sin observación'}}</td>
+                                            </tr>
+                                            <tr *ngIf="!_fReasignaciones?.length">
+                                                <td colspan="5" class="text-center text-muted py-3">No hay reasignaciones para mostrar</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <div class="d-flex flex-wrap justify-content-between align-items-center p-2 border-top bg-white">
+                                        <small class="text-muted">
+                                            {{reasignacionesTotalElements}} registros | P&aacute;gina {{reasignacionesCurrentPage}} de {{reasignacionesTotalPages}}
+                                        </small>
+                                        <div class="btn-group btn-group-sm mt-1 mt-sm-0">
+                                            <button type="button" class="btn btn-outline-secondary" [disabled]="reasignacionesCurrentPage === 1"
+                                                (click)="cambiarPagina('reasignaciones', -1)">Anterior</button>
+                                            <button type="button" class="btn btn-outline-secondary"
+                                                *ngFor="let pagina of paginasVisibles('reasignaciones')"
+                                                [class.btn-primary]="pagina === reasignacionesCurrentPage"
+                                                [class.text-white]="pagina === reasignacionesCurrentPage"
+                                                (click)="irPagina('reasignaciones', pagina)">
+                                                {{pagina}}
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary"
+                                                [disabled]="reasignacionesCurrentPage === reasignacionesTotalPages"
+                                                (click)="cambiarPagina('reasignaciones', 1)">Siguiente</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -319,7 +370,7 @@
     <!-- Modal -->
     <div class="modal" id="newAnulBajas" data-backdrop="static" data-keyboard="false" tabindex="-1"
         aria-labelledby="newAnulBajasLabel" aria-hidden="true">
-        <div class="modal-dialog modal-{{size}} modal-dialog-scrollable">
+        <div class="modal-dialog modal-{{size}} modal-dialog-scrollable modal-profesional-anulaciones">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="newAnulBajasLabel">{{txttitulo}}</h5>
@@ -336,14 +387,18 @@
                             <div class="col-sm-12">
                                 <div class="card detail-card">
                                     <div class="card-body py-3">
-                                        <div class="d-flex justify-content-between align-items-center flex-wrap">
+                                        <div class="d-flex justify-content-between align-items-center flex-wrap operation-summary">
                                             <div>
                                                 <div class="detail-eyebrow">Factura seleccionada</div>
                                                 <h6 class="mb-0">Factura {{textodato}}</h6>
                                             </div>
-                                            <span class="badge badge-pill"
-                                                [ngClass]="option === '0' ? 'badge-warning' : 'badge-danger'">
-                                                {{ option === '0' ? 'Anulaci&oacute;n' : 'Eliminaci&oacute;n l&oacute;gica' }}
+                                            <span class="badge badge-pill operation-badge"
+                                                [ngClass]="{
+                                                    'operation-anulacion': option === '0',
+                                                    'operation-eliminacion': option === '1',
+                                                    'operation-reasignacion': option === '2'
+                                                }">
+                                                {{ option === '0' ? 'Anulaci&oacute;n' : option === '1' ? 'Eliminaci&oacute;n l&oacute;gica' : 'Reasignaci&oacute;n' }}
                                             </span>
                                         </div>
                                         <div class="row mt-3">
@@ -368,6 +423,25 @@
                                                     <div><b>Existe en fec_factura:</b> {{ detalleOperacion?.tieneFacturaElectronica ? 'S&iacute;' : 'No' }}</div>
                                                 </div>
                                             </div>
+                                            <div class="col-md-12 mb-2" *ngIf="option === '2' && detalleOperacion?.siguienteNumeroFacturaReasignacion">
+                                                <div class="detail-box next-factura-box">
+                                                    <div class="detail-box-title">Vista previa de nueva factura</div>
+                                                    <div class="preview-grid">
+                                                        <div>
+                                                            <div class="preview-label">Factura actual</div>
+                                                            <div class="preview-value">{{ _factura.nrofactura || 'Sin número' }}</div>
+                                                        </div>
+                                                        <div>
+                                                            <div class="preview-label">Siguiente secuencial</div>
+                                                            <div class="preview-value">{{ detalleOperacion?.siguienteSecuencialReasignacion }}</div>
+                                                        </div>
+                                                        <div>
+                                                            <div class="preview-label">Nueva factura esperada</div>
+                                                            <div class="preview-value preview-value--strong">{{ detalleOperacion?.siguienteNumeroFacturaReasignacion }}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <div class="col-md-12 mb-2" *ngIf="detalleOperacion?.lecturas?.length">
                                                 <div class="detail-box">
                                                     <div class="detail-box-title">Lectura / emisi&oacute;n asociada</div>
@@ -387,63 +461,29 @@
                         </div>
                         <div class="row">
                             <div class="col-sm">
-                                <div class="card card-outline cardCliente">
-                                    <div class="card-body box-profile">
-                                        <!--  <h3 class="profile-username text-center"> Nueva {{txttitulo}}</h3> -->
-                                        <select class="from-control form-control-sm col-sm-12" [(ngModel)]="option"
-                                            (change)="changeTitulo($event)">
-                                            <option value=0>Anulaci&oacute;n</option>
-                                            <option value=1>Eliminaci&oacute;n</option>
-                                        </select>
-                                        <hr>
-                                        <div class="text-center">
-                                            <form [formGroup]="formBuscar">
-                                                <div class="row">
-                                                    <div class="col-sm-12">
-                                                        <div class="row">
-                                                            <div class="col-sm-5">
-                                                                <input class="form-control form-control-sm text-center"
-                                                                    type="text" placeholder="Planilla"
-                                                                    formControlName="idfactura"
-                                                                    (change)="changeIdfactura()">
-                                                            </div>
-                                                            <div class="col-sm-5">
-                                                                <input class="form-control form-control-sm text-center"
-                                                                    type="text" placeholder="Abonado"
-                                                                    formControlName="idabonado"
-                                                                    (change)="changeIdabonado()">
-                                                            </div>
-                                                            <div class="col-sm-2">
-
-                                                                <button class="btn btn-primary btn-sm" type="button"
-                                                                    data-toggle="modal" data-target="#_anulelimModal"
-                                                                    (click)="buscar()" [disabled]="campo === 0">
-                                                                    <i *ngIf="swbuscando" class="fa fa-spinner"></i>
-                                                                    <i *ngIf="!swbuscando" class="fa fa-search"></i>
-                                                                </button>
-                                                            </div>
-                                                            <div *ngIf="swbusca" class="col-sm-2 px-2">
-                                                                <input class="form-control form-control-sm text-center"
-                                                                    type="text" placeholder="Filtrar..."
-                                                                    [(ngModel)]="filtro"
-                                                                    [ngModelOptions]="{standalone: true}" />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="row mt-2">
-                                                    <div class="col-sm">
-                                                        <input type="text" class="form-control form-control-sm"
-                                                            value={{_cliente.nombre}} readonly>
-                                                    </div>
-                                                    <div class="col-sm-2">
-                                                        <button class="btn btn-success btn-sm" data-toggle="modal"
-                                                            data-target="#_bClienteModal"
-                                                            (click)="getFragmentToShow('cliente')"><i
-                                                                class="bi bi-people-fill"></i> </button>
-                                                    </div>
-                                                </div>
-                                            </form>
+                                <div class="card action-card card-outline">
+                                    <div class="card-body">
+                                        <div class="section-title">1. Tipo de operaci&oacute;n</div>
+                                        <div class="section-subtitle">Selecciona la acci&oacute;n que deseas ejecutar sobre la factura.</div>
+                                        <div class="operation-switcher mt-3">
+                                            <button type="button" class="operation-chip"
+                                                [ngClass]="{'active': option === '0'}"
+                                                (click)="option='0'; changeTitulo({target:{value:'0'}})">
+                                                <i class="bi bi-file-earmark-minus"></i>
+                                                <span>Anulaci&oacute;n</span>
+                                            </button>
+                                            <button type="button" class="operation-chip"
+                                                [ngClass]="{'active danger': option === '1'}"
+                                                (click)="option='1'; changeTitulo({target:{value:'1'}})">
+                                                <i class="bi bi-file-earmark-x"></i>
+                                                <span>Eliminaci&oacute;n</span>
+                                            </button>
+                                            <button type="button" class="operation-chip"
+                                                [ngClass]="{'active info': option === '2'}"
+                                                (click)="option='2'; changeTitulo({target:{value:'2'}})">
+                                                <i class="bi bi-arrow-repeat"></i>
+                                                <span>Reasignaci&oacute;n</span>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -451,53 +491,117 @@
                         </div>
                         <div class="row">
                             <div class="col-sm">
-                                <div class="card card-outline cardCliente">
-                                    <div class="card-body box-profile">
-                                        <h6 class="profile-username text-center"> Factura {{textodato}}</h6>
-                                        <hr>
-                                        <div class="text-center">
-                                            <form [formGroup]="f_factura">
-                                                <div class="row">
-                                                    <div class="col-sm-12">
-                                                        <div class="row">
-                                                            <div class="col-sm" *ngIf="swtitulo">
-                                                                <textarea
-                                                                    class="form-control form-control-sm text-center"
-                                                                    type="text" placeholder="Raz&oacute;n anulaci&oacute;n"
-                                                                    formControlName="razonanulacion"> </textarea>
-                                                            </div>
-                                                            <div class="col-sm" *ngIf="!swtitulo">
-                                                                <textarea
-                                                                    class="form-control form-control-sm text-center"
-                                                                    type="text" placeholder="Raz&oacute;n eliminaci&oacute;n"
-                                                                    formControlName="razoneliminacion"> </textarea>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                <div class="card action-card card-outline">
+                                    <div class="card-body">
+                                        <div class="section-title">2. Buscar y seleccionar factura</div>
+                                        <div class="section-subtitle">Busca por planilla, abonado o selecciona un cliente para cargar las facturas disponibles.</div>
+                                        <form [formGroup]="formBuscar" class="mt-3">
+                                            <div class="row">
+                                                <div class="col-md-4 mb-3">
+                                                    <label class="field-label">N&uacute;mero de planilla</label>
+                                                    <input class="form-control form-control-sm"
+                                                        type="text" placeholder="Ej. 12584"
+                                                        formControlName="idfactura"
+                                                        (change)="changeIdfactura()">
                                                 </div>
-                                                <div class="alert alert-light border mt-3 mb-0" *ngIf="textodato">
-                                                    <b>Validaci&oacute;n previa:</b>
-                                                    <span *ngIf="option === '0'"> se verificar&aacute; el estado en <code>fec_factura</code> y se guardar&aacute; la trazabilidad completa antes de eliminarla.</span>
-                                                    <span *ngIf="option === '1'"> se mostrar&aacute; la emisi&oacute;n y el consumo asociado para confirmar la baja.</span>
+                                                <div class="col-md-4 mb-3">
+                                                    <label class="field-label">Abonado</label>
+                                                    <input class="form-control form-control-sm"
+                                                        type="text" placeholder="Ej. 100245"
+                                                        formControlName="idabonado"
+                                                        (change)="changeIdabonado()">
                                                 </div>
-                                                <div class="row mt-3">
-                                                    <div class="col-sm">
-                                                        <button class="btn btn-success btn-sm" data-dismiss="modal"
-                                                            type="button">Cancelar
-                                                        </button>
-                                                    </div>
-                                                    <div class="col-sm">
-                                                        <button class="btn btn-outline-success btn-sm"
-                                                            type="button" (click)="actualizar()"
-                                                            [disabled]="!puedeGuardar">
-                                                            <span *ngIf="procesandoAccion" class="spinner-border spinner-border-sm mr-1"></span>
-                                                            {{ procesandoAccion ? 'Procesando...' : 'Aceptar' }}
-                                                        </button>
-                                                    </div>
+                                                <div class="col-md-4 mb-3 d-flex align-items-end">
+                                                    <button class="btn btn-primary btn-sm btn-block search-btn" type="button"
+                                                        data-toggle="modal" data-target="#_anulelimModal"
+                                                        (click)="buscar()" [disabled]="campo === 0">
+                                                        <i *ngIf="swbuscando" class="fa fa-spinner fa-spin mr-1"></i>
+                                                        <i *ngIf="!swbuscando" class="fa fa-search mr-1"></i>
+                                                        Buscar factura
+                                                    </button>
                                                 </div>
-                                            </form>
-                                        </div>
+                                            </div>
+                                            <div class="client-strip">
+                                                <div class="client-strip__info">
+                                                    <div class="field-label mb-1">Cliente seleccionado</div>
+                                                    <div class="client-strip__name">{{_cliente.nombre || 'Sin cliente seleccionado'}}</div>
+                                                </div>
+                                                <button class="btn btn-outline-success btn-sm"
+                                                    data-toggle="modal"
+                                                    data-target="#_bClienteModal"
+                                                    type="button"
+                                                    (click)="getFragmentToShow('cliente')">
+                                                    <i class="bi bi-people-fill mr-1"></i> Buscar cliente
+                                                </button>
+                                            </div>
+                                        </form>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm">
+                                <div class="card action-card card-outline">
+                                    <div class="card-body">
+                                        <div class="section-title">3. Confirmaci&oacute;n y motivo</div>
+                                        <div class="section-subtitle">Documenta la raz&oacute;n de la acci&oacute;n. Esta informaci&oacute;n quedar&aacute; registrada en el historial.</div>
+                                        <form [formGroup]="f_factura" class="mt-3">
+                                            <div class="action-highlight" *ngIf="textodato; else pendienteSeleccion">
+                                                <div class="action-highlight__label">Factura lista para procesar</div>
+                                                <div class="action-highlight__value">Factura {{textodato}}</div>
+                                            </div>
+                                            <ng-template #pendienteSeleccion>
+                                                <div class="action-highlight muted">
+                                                    <div class="action-highlight__label">Pendiente</div>
+                                                    <div class="action-highlight__value">Selecciona una factura antes de continuar</div>
+                                                </div>
+                                            </ng-template>
+
+                                            <div class="mt-3">
+                                                <label class="field-label">Motivo de la operaci&oacute;n</label>
+                                                <textarea *ngIf="option === '0'"
+                                                    class="form-control professional-textarea"
+                                                    rows="4"
+                                                    placeholder="Describe claramente por qu&eacute; se anula la factura"
+                                                    formControlName="razonanulacion"></textarea>
+                                                <textarea *ngIf="option === '1'"
+                                                    class="form-control professional-textarea"
+                                                    rows="4"
+                                                    placeholder="Describe claramente por qu&eacute; se elimina la factura"
+                                                    formControlName="razoneliminacion"></textarea>
+                                                <textarea *ngIf="option === '2'"
+                                                    class="form-control professional-textarea"
+                                                    rows="4"
+                                                    placeholder="Indica el motivo de la reasignaci&oacute;n del n&uacute;mero de factura"
+                                                    formControlName="razonreasignacion"></textarea>
+                                            </div>
+
+                                            <div class="alert action-note mt-3 mb-0" *ngIf="textodato">
+                                                <b>Validaci&oacute;n previa:</b>
+                                                <span *ngIf="option === '0'"> se verificar&aacute; el estado en <code>fec_factura</code> y se guardar&aacute; la trazabilidad completa antes de eliminarla.</span>
+                                                <span *ngIf="option === '1'"> se mostrar&aacute; la emisi&oacute;n y el consumo asociado para confirmar la baja.</span>
+                                                <span *ngIf="option === '2'"> se generar&aacute; un nuevo n&uacute;mero de factura con el secuencial del recaudador y quedar&aacute; el historial de reasignaci&oacute;n.</span>
+                                            </div>
+
+                                            <div class="action-footer mt-4">
+                                                <button class="btn btn-light border" data-dismiss="modal"
+                                                    type="button">Cancelar</button>
+                                                <button class="btn btn-success action-submit"
+                                                    type="button" (click)="actualizar()"
+                                                    [disabled]="!puedeGuardar">
+                                                    <span *ngIf="procesandoAccion" class="spinner-border spinner-border-sm mr-1"></span>
+                                                    {{ procesandoAccion ? 'Procesando...' : 'Confirmar operaci&oacute;n' }}
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" *ngIf="mensajeBusqueda && !textodato">
+                            <div class="col-sm-12">
+                                <div class="alert alert-info py-2 mt-2 mb-0">
+                                    {{ mensajeBusqueda }}
                                 </div>
                             </div>
                         </div>

@@ -68,3 +68,244 @@ width: 40px;
   color: #0f5c6a;
   margin-bottom: 0.5rem;
 }
+
+.action-card {
+  border: 1px solid #d9e6f2;
+  box-shadow: 0 12px 28px rgba(15, 92, 106, 0.08);
+  border-radius: 14px;
+  margin-top: 0.9rem;
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f5c6a;
+}
+
+.section-subtitle {
+  font-size: 0.84rem;
+  color: #6b7a88;
+  margin-top: 0.2rem;
+}
+
+.operation-summary {
+  gap: 0.75rem;
+}
+
+.operation-badge {
+  font-size: 0.82rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  color: #fff;
+}
+
+.operation-anulacion {
+  background: linear-gradient(135deg, #f0ad4e 0%, #d98b1f 100%);
+}
+
+.operation-eliminacion {
+  background: linear-gradient(135deg, #d9534f 0%, #b52b27 100%);
+}
+
+.operation-reasignacion {
+  background: linear-gradient(135deg, #17a2b8 0%, #0f6f80 100%);
+}
+
+.operation-switcher {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.operation-chip {
+  border: 1px solid #cfdde8;
+  background: #f8fbfd;
+  color: #35515f;
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.operation-chip:hover {
+  background: #eef6fa;
+}
+
+.operation-chip.active {
+  background: #fff7e7;
+  border-color: #f0ad4e;
+  color: #8a5a00;
+}
+
+.operation-chip.active.danger {
+  background: #fff1f1;
+  border-color: #d9534f;
+  color: #9d2521;
+}
+
+.operation-chip.active.info {
+  background: #eefbfd;
+  border-color: #17a2b8;
+  color: #0f6f80;
+}
+
+.field-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #56707c;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.search-btn {
+  height: 31px;
+}
+
+.client-strip {
+  margin-top: 0.5rem;
+  border: 1px solid #dde7ef;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #fcfdff 0%, #f3f8fb 100%);
+  padding: 0.9rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.client-strip__name {
+  font-size: 0.96rem;
+  font-weight: 600;
+  color: #21353f;
+}
+
+.professional-textarea {
+  min-height: 120px;
+  resize: vertical;
+  border-radius: 12px;
+  border: 1px solid #d3dfe8;
+  padding: 0.85rem 1rem;
+  line-height: 1.45;
+}
+
+.professional-textarea:focus {
+  border-color: #17a2b8;
+  box-shadow: 0 0 0 0.15rem rgba(23, 162, 184, 0.15);
+}
+
+.action-highlight {
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  background: linear-gradient(135deg, #eff9fb 0%, #f8fcfd 100%);
+  border: 1px solid #cfe8ee;
+}
+
+.action-highlight.muted {
+  background: #f7f9fb;
+  border-color: #dbe4ea;
+}
+
+.action-highlight__label {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #6b7a88;
+  letter-spacing: 0.06em;
+}
+
+.action-highlight__value {
+  margin-top: 0.2rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f3944;
+}
+
+.action-note {
+  background: #f7fbfd;
+  border: 1px solid #d8eaf0;
+  color: #35515f;
+  border-radius: 12px;
+}
+
+.action-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.action-submit {
+  min-width: 190px;
+}
+
+.next-factura-box {
+  border-color: #bfe8ef;
+  background: linear-gradient(135deg, #eefbfd 0%, #f8fdfe 100%);
+}
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.preview-label {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #5f7884;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.preview-value {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: #26404a;
+  word-break: break-word;
+}
+
+.preview-value--strong {
+  color: #0d6d7d;
+  font-size: 1.06rem;
+}
+
+.modal-profesional-anulaciones {
+  max-width: 1180px;
+  width: calc(100% - 2rem);
+}
+
+@media (max-width: 767.98px) {
+  .modal-profesional-anulaciones {
+    max-width: calc(100% - 1rem);
+    width: calc(100% - 1rem);
+    margin: 0.5rem auto;
+  }
+
+  .operation-switcher {
+    grid-template-columns: 1fr;
+  }
+
+  .client-strip {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .preview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .action-footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .action-submit {
+    min-width: 100%;
+  }
+}

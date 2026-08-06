@@ -44,10 +44,13 @@ export class AnulacionesBajasComponent implements OnInit {
 
   _fAnuladas: any;
   _fEliminadas: any;
+  _fReasignaciones: any[] = [];
   _fAnuladasBase: any[] = [];
   _fEliminadasBase: any[] = [];
+  _fReasignacionesBase: any[] = [];
   anuladasFiltradas: any[] = [];
   eliminadasFiltradas: any[] = [];
+  reasignacionesFiltradas: any[] = [];
   c_limit: number = 10;
   pageSize: number = 10;
   readonly pageSizeOptions: number[] = [10, 20, 50];
@@ -57,10 +60,15 @@ export class AnulacionesBajasComponent implements OnInit {
   eliminadasCurrentPage: number = 1;
   eliminadasTotalPages: number = 1;
   eliminadasTotalElements: number = 0;
+  reasignacionesCurrentPage: number = 1;
+  reasignacionesTotalPages: number = 1;
+  reasignacionesTotalElements: number = 0;
   sortAnuladasColumn: string = 'fechaanulacion';
   sortAnuladasDirection: 'asc' | 'desc' = 'desc';
   sortEliminadasColumn: string = 'fechaeliminacion';
   sortEliminadasDirection: 'asc' | 'desc' = 'desc';
+  sortReasignacionesColumn: string = 'fechareasignacion';
+  sortReasignacionesDirection: 'asc' | 'desc' = 'desc';
   txttitulo: string = 'Anulacion';
   swtitulo: boolean = true;
   //detalles factura
@@ -83,7 +91,7 @@ export class AnulacionesBajasComponent implements OnInit {
   sliceDate: string = new Date().toISOString().slice(0, 10);
   userAuth: number;
   selectedFragment: string = 'formNew';
-  size: string = 'sm';
+  size: string = 'xl';
   private readonly historicoStateKey = 'anulaciones-bajas-historico-state';
 
   constructor(
@@ -128,6 +136,7 @@ export class AnulacionesBajasComponent implements OnInit {
       razonanulacion: '',
       usuarioeliminacion: '',
       razoneliminacion: '',
+      razonreasignacion: '',
     });
     this.f_reportes = this.fb.group({
       opt: '0',
@@ -178,6 +187,7 @@ export class AnulacionesBajasComponent implements OnInit {
         : this.pageSize;
       this.anuladasCurrentPage = Number(state?.anuladasCurrentPage) || 1;
       this.eliminadasCurrentPage = Number(state?.eliminadasCurrentPage) || 1;
+      this.reasignacionesCurrentPage = Number(state?.reasignacionesCurrentPage) || 1;
       this.sortAnuladasColumn = state?.sortAnuladasColumn || this.sortAnuladasColumn;
       this.sortAnuladasDirection =
         state?.sortAnuladasDirection === 'asc' || state?.sortAnuladasDirection === 'desc'
@@ -190,6 +200,13 @@ export class AnulacionesBajasComponent implements OnInit {
         state?.sortEliminadasDirection === 'desc'
           ? state.sortEliminadasDirection
           : this.sortEliminadasDirection;
+      this.sortReasignacionesColumn =
+        state?.sortReasignacionesColumn || this.sortReasignacionesColumn;
+      this.sortReasignacionesDirection =
+        state?.sortReasignacionesDirection === 'asc' ||
+        state?.sortReasignacionesDirection === 'desc'
+          ? state.sortReasignacionesDirection
+          : this.sortReasignacionesDirection;
     } catch (error) {
       sessionStorage.removeItem(this.historicoStateKey);
     }
@@ -201,10 +218,13 @@ export class AnulacionesBajasComponent implements OnInit {
       pageSize: this.pageSize,
       anuladasCurrentPage: this.anuladasCurrentPage,
       eliminadasCurrentPage: this.eliminadasCurrentPage,
+      reasignacionesCurrentPage: this.reasignacionesCurrentPage,
       sortAnuladasColumn: this.sortAnuladasColumn,
       sortAnuladasDirection: this.sortAnuladasDirection,
       sortEliminadasColumn: this.sortEliminadasColumn,
       sortEliminadasDirection: this.sortEliminadasDirection,
+      sortReasignacionesColumn: this.sortReasignacionesColumn,
+      sortReasignacionesDirection: this.sortReasignacionesDirection,
     };
     sessionStorage.setItem(this.historicoStateKey, JSON.stringify(state));
   }
@@ -219,7 +239,7 @@ export class AnulacionesBajasComponent implements OnInit {
       this.txttitulo = 'SELECCIONAR FACTURA';
     }
     if (opt === 'formNew') {
-      this.size = this.textodato ? 'lg' : 'sm';
+      this.size = this.textodato ? 'xl' : 'xl';
       if (this.option === '0') {
         this.txttitulo = 'Nueva Anulacion';
         this.swtitulo = true;
@@ -229,6 +249,10 @@ export class AnulacionesBajasComponent implements OnInit {
         this.txttitulo = 'Nueva Eliminacion';
         this.swtitulo = false;
         //this.option = '1';
+      }
+      if (this.option === '2') {
+        this.txttitulo = 'Nueva Reasignacion';
+        this.swtitulo = false;
       }
     }
     this.selectedFragment = opt;
@@ -280,6 +304,9 @@ export class AnulacionesBajasComponent implements OnInit {
       if (this.option === '1') {
         this.getFacSinCobro();
       }
+      if (this.option === '2') {
+        this.getFacCobradas();
+      }
     }
     this.getFragmentToShow('facturas');
   }
@@ -317,6 +344,16 @@ export class AnulacionesBajasComponent implements OnInit {
       //this.option = '1';
       this.textodato = '';
     }
+    if (e.target.value === '2') {
+      this.txttitulo = 'Nueva Reasignacion';
+      this.swtitulo = false;
+      this.textodato = '';
+    }
+    if (e.target.value === '2') {
+      this.txttitulo = 'Nueva Reasignacion';
+      this.swtitulo = false;
+      this.textodato = '';
+    }
   }
   getAllFacAnuladas(limit: number) {
     this.facServicio.findAnulaciones(limit).subscribe({
@@ -342,10 +379,16 @@ export class AnulacionesBajasComponent implements OnInit {
       forkJoin({
         anuladas: this.facServicio.getByFecAnulaciones(desde, hasta),
         eliminadas: this.facServicio.getByFecEliminacion(desde, hasta),
+        reasignaciones: this.facServicio.getReasignaciones(),
       }).subscribe({
-        next: ({ anuladas, eliminadas }: any) => {
+        next: ({ anuladas, eliminadas, reasignaciones }: any) => {
           this._fAnuladasBase = Array.isArray(anuladas) ? anuladas : [];
           this._fEliminadasBase = Array.isArray(eliminadas) ? eliminadas : [];
+          this._fReasignacionesBase = Array.isArray(reasignaciones)
+            ? reasignaciones.filter((item: any) =>
+                this.reasignacionEnRango(item, desde, hasta)
+              )
+            : [];
           this.aplicarFiltrosHistoricoLocal();
         },
         error: (e) => console.error(e),
@@ -356,10 +399,14 @@ export class AnulacionesBajasComponent implements OnInit {
     forkJoin({
       anuladas: this.facServicio.findAnulaciones(this.c_limit),
       eliminadas: this.facServicio.findEliminadas(this.c_limit),
+      reasignaciones: this.facServicio.getReasignaciones(),
     }).subscribe({
-      next: ({ anuladas, eliminadas }: any) => {
+      next: ({ anuladas, eliminadas, reasignaciones }: any) => {
         this._fAnuladasBase = Array.isArray(anuladas) ? anuladas : [];
         this._fEliminadasBase = Array.isArray(eliminadas) ? eliminadas : [];
+        this._fReasignacionesBase = Array.isArray(reasignaciones)
+          ? reasignaciones
+          : [];
         this.aplicarFiltrosHistoricoLocal();
       },
       error: (e) => console.error(e),
@@ -369,6 +416,7 @@ export class AnulacionesBajasComponent implements OnInit {
   filtrarHistoricos(): void {
     this.anuladasCurrentPage = 1;
     this.eliminadasCurrentPage = 1;
+    this.reasignacionesCurrentPage = 1;
     this.guardarEstadoHistorico();
     this.cargarHistoricos();
   }
@@ -378,6 +426,7 @@ export class AnulacionesBajasComponent implements OnInit {
     const anio = fecha.getFullYear();
     this.anuladasCurrentPage = 1;
     this.eliminadasCurrentPage = 1;
+    this.reasignacionesCurrentPage = 1;
     this.formFiltrosHistorico.patchValue({
       cuenta: '',
       cliente: '',
@@ -398,6 +447,9 @@ export class AnulacionesBajasComponent implements OnInit {
     this.eliminadasFiltradas = this._fEliminadasBase.filter((item: any) =>
       this.coincideHistorico(item, cuenta, cliente)
     );
+    this.reasignacionesFiltradas = this._fReasignacionesBase.filter((item: any) =>
+      this.coincideReasignacion(item, cuenta, cliente)
+    );
     this.recalcularHistoricos();
   }
 
@@ -410,7 +462,28 @@ export class AnulacionesBajasComponent implements OnInit {
     return coincideCuenta && coincideCliente;
   }
 
-  toggleSort(tabla: 'anuladas' | 'eliminadas', columna: string): void {
+  private coincideReasignacion(item: any, cuenta: string, cliente: string): boolean {
+    const cuentaItem =
+      `${item?.idfactura ?? ''} ${item?.nrofacturaanterior ?? ''} ${item?.nrofacturanuevo ?? ''}`
+        .toLowerCase();
+    const clienteItem = `${item?.observacion ?? ''}`.toLowerCase();
+
+    const coincideCuenta = !cuenta || cuentaItem.includes(cuenta);
+    const coincideCliente = !cliente || clienteItem.includes(cliente);
+    return coincideCuenta && coincideCliente;
+  }
+
+  private reasignacionEnRango(item: any, desde: string, hasta: string): boolean {
+    if (!item?.fechareasignacion) {
+      return false;
+    }
+    const fecha = new Date(item.fechareasignacion);
+    const inicio = new Date(`${desde}T00:00:00`);
+    const fin = new Date(`${hasta}T23:59:59`);
+    return fecha >= inicio && fecha <= fin;
+  }
+
+  toggleSort(tabla: 'anuladas' | 'eliminadas' | 'reasignaciones', columna: string): void {
     if (tabla === 'anuladas') {
       if (this.sortAnuladasColumn === columna) {
         this.sortAnuladasDirection =
@@ -419,7 +492,7 @@ export class AnulacionesBajasComponent implements OnInit {
         this.sortAnuladasColumn = columna;
         this.sortAnuladasDirection = 'asc';
       }
-    } else {
+    } else if (tabla === 'eliminadas') {
       if (this.sortEliminadasColumn === columna) {
         this.sortEliminadasDirection =
           this.sortEliminadasDirection === 'asc' ? 'desc' : 'asc';
@@ -427,18 +500,32 @@ export class AnulacionesBajasComponent implements OnInit {
         this.sortEliminadasColumn = columna;
         this.sortEliminadasDirection = 'asc';
       }
+    } else {
+      if (this.sortReasignacionesColumn === columna) {
+        this.sortReasignacionesDirection =
+          this.sortReasignacionesDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.sortReasignacionesColumn = columna;
+        this.sortReasignacionesDirection = 'asc';
+      }
     }
     this.guardarEstadoHistorico();
     this.recalcularHistoricos();
   }
 
-  getSortIcon(tabla: 'anuladas' | 'eliminadas', columna: string): string {
+  getSortIcon(tabla: 'anuladas' | 'eliminadas' | 'reasignaciones', columna: string): string {
     const columnaActual =
-      tabla === 'anuladas' ? this.sortAnuladasColumn : this.sortEliminadasColumn;
+      tabla === 'anuladas'
+        ? this.sortAnuladasColumn
+        : tabla === 'eliminadas'
+        ? this.sortEliminadasColumn
+        : this.sortReasignacionesColumn;
     const direccionActual =
       tabla === 'anuladas'
         ? this.sortAnuladasDirection
-        : this.sortEliminadasDirection;
+        : tabla === 'eliminadas'
+        ? this.sortEliminadasDirection
+        : this.sortReasignacionesDirection;
 
     if (columnaActual !== columna) {
       return 'fa fa-sort text-muted';
@@ -447,7 +534,7 @@ export class AnulacionesBajasComponent implements OnInit {
     return direccionActual === 'asc' ? 'fa fa-sort-up' : 'fa fa-sort-down';
   }
 
-  cambiarPagina(tabla: 'anuladas' | 'eliminadas', delta: number): void {
+  cambiarPagina(tabla: 'anuladas' | 'eliminadas' | 'reasignaciones', delta: number): void {
     if (tabla === 'anuladas') {
       const nuevaPagina = this.anuladasCurrentPage + delta;
       if (nuevaPagina >= 1 && nuevaPagina <= this.anuladasTotalPages) {
@@ -458,15 +545,25 @@ export class AnulacionesBajasComponent implements OnInit {
       return;
     }
 
-    const nuevaPagina = this.eliminadasCurrentPage + delta;
-    if (nuevaPagina >= 1 && nuevaPagina <= this.eliminadasTotalPages) {
-      this.eliminadasCurrentPage = nuevaPagina;
+    if (tabla === 'eliminadas') {
+      const nuevaPagina = this.eliminadasCurrentPage + delta;
+      if (nuevaPagina >= 1 && nuevaPagina <= this.eliminadasTotalPages) {
+        this.eliminadasCurrentPage = nuevaPagina;
+        this.guardarEstadoHistorico();
+        this.paginarEliminadas();
+      }
+      return;
+    }
+
+    const nuevaPagina = this.reasignacionesCurrentPage + delta;
+    if (nuevaPagina >= 1 && nuevaPagina <= this.reasignacionesTotalPages) {
+      this.reasignacionesCurrentPage = nuevaPagina;
       this.guardarEstadoHistorico();
-      this.paginarEliminadas();
+      this.paginarReasignaciones();
     }
   }
 
-  irPagina(tabla: 'anuladas' | 'eliminadas', pagina: number): void {
+  irPagina(tabla: 'anuladas' | 'eliminadas' | 'reasignaciones', pagina: number): void {
     if (tabla === 'anuladas') {
       this.anuladasCurrentPage = pagina;
       this.guardarEstadoHistorico();
@@ -474,25 +571,39 @@ export class AnulacionesBajasComponent implements OnInit {
       return;
     }
 
-    this.eliminadasCurrentPage = pagina;
+    if (tabla === 'eliminadas') {
+      this.eliminadasCurrentPage = pagina;
+      this.guardarEstadoHistorico();
+      this.paginarEliminadas();
+      return;
+    }
+
+    this.reasignacionesCurrentPage = pagina;
     this.guardarEstadoHistorico();
-    this.paginarEliminadas();
+    this.paginarReasignaciones();
   }
 
   cambiarTamanoPagina(): void {
     this.anuladasCurrentPage = 1;
     this.eliminadasCurrentPage = 1;
+    this.reasignacionesCurrentPage = 1;
     this.guardarEstadoHistorico();
     this.recalcularHistoricos();
   }
 
-  paginasVisibles(tabla: 'anuladas' | 'eliminadas'): number[] {
+  paginasVisibles(tabla: 'anuladas' | 'eliminadas' | 'reasignaciones'): number[] {
     const totalPages =
-      tabla === 'anuladas' ? this.anuladasTotalPages : this.eliminadasTotalPages;
+      tabla === 'anuladas'
+        ? this.anuladasTotalPages
+        : tabla === 'eliminadas'
+        ? this.eliminadasTotalPages
+        : this.reasignacionesTotalPages;
     const currentPage =
       tabla === 'anuladas'
         ? this.anuladasCurrentPage
-        : this.eliminadasCurrentPage;
+        : tabla === 'eliminadas'
+        ? this.eliminadasCurrentPage
+        : this.reasignacionesCurrentPage;
     const inicio = Math.max(1, currentPage - 2);
     const fin = Math.min(totalPages, inicio + 4);
     const paginas: number[] = [];
@@ -507,8 +618,10 @@ export class AnulacionesBajasComponent implements OnInit {
   private recalcularHistoricos(): void {
     this.ordenarAnuladas();
     this.ordenarEliminadas();
+    this.ordenarReasignaciones();
     this.paginarAnuladas();
     this.paginarEliminadas();
+    this.paginarReasignaciones();
   }
 
   private ordenarAnuladas(): void {
@@ -551,6 +664,26 @@ export class AnulacionesBajasComponent implements OnInit {
     }
   }
 
+  private ordenarReasignaciones(): void {
+    const ordenadas = [...this.reasignacionesFiltradas];
+    ordenadas.sort((a: any, b: any) =>
+      this.compararValores(
+        this.obtenerValorOrden(a, this.sortReasignacionesColumn),
+        this.obtenerValorOrden(b, this.sortReasignacionesColumn),
+        this.sortReasignacionesDirection
+      )
+    );
+    this.reasignacionesFiltradas = ordenadas;
+    this.reasignacionesTotalElements = ordenadas.length;
+    this.reasignacionesTotalPages = Math.max(
+      1,
+      Math.ceil(this.reasignacionesTotalElements / this.pageSize)
+    );
+    if (this.reasignacionesCurrentPage > this.reasignacionesTotalPages) {
+      this.reasignacionesCurrentPage = this.reasignacionesTotalPages;
+    }
+  }
+
   private paginarAnuladas(): void {
     const inicio = (this.anuladasCurrentPage - 1) * this.pageSize;
     this._fAnuladas = this.anuladasFiltradas.slice(inicio, inicio + this.pageSize);
@@ -559,6 +692,14 @@ export class AnulacionesBajasComponent implements OnInit {
   private paginarEliminadas(): void {
     const inicio = (this.eliminadasCurrentPage - 1) * this.pageSize;
     this._fEliminadas = this.eliminadasFiltradas.slice(inicio, inicio + this.pageSize);
+  }
+
+  private paginarReasignaciones(): void {
+    const inicio = (this.reasignacionesCurrentPage - 1) * this.pageSize;
+    this._fReasignaciones = this.reasignacionesFiltradas.slice(
+      inicio,
+      inicio + this.pageSize
+    );
   }
 
   private obtenerValorOrden(item: any, columna: string): any {
@@ -581,6 +722,14 @@ export class AnulacionesBajasComponent implements OnInit {
         return item?.razonanulacion;
       case 'razoneliminacion':
         return item?.razoneliminacion;
+      case 'fechareasignacion':
+        return item?.fechareasignacion;
+      case 'nrofacturaanterior':
+        return item?.nrofacturaanterior;
+      case 'nrofacturanuevo':
+        return item?.nrofacturanuevo;
+      case 'observacion':
+        return item?.observacion;
       default:
         return item?.[columna];
     }
@@ -778,7 +927,7 @@ export class AnulacionesBajasComponent implements OnInit {
           this.swbuscando = false;
           this.mensajeBusqueda = 'La factura consultada no está cobrada o ya fue eliminada.';
         }
-        if (this.option === '1') {
+      if (this.option === '1') {
           if (datos.fechaeliminacion === null && datos.pagado === 0) {
             this.hidratarFacturasBusqueda([datos]);
             return;
@@ -787,6 +936,16 @@ export class AnulacionesBajasComponent implements OnInit {
           this.swbuscando = false;
           this.mensajeBusqueda =
             'La factura consultada no está pendiente de pago o ya fue eliminada.';
+        }
+        if (this.option === '2') {
+          if (datos.fechaeliminacion === null && datos.pagado === 1) {
+            this.hidratarFacturasBusqueda([datos]);
+            return;
+          }
+          this._facturas = [];
+          this.swbuscando = false;
+          this.mensajeBusqueda =
+            'La factura consultada debe estar cobrada y activa para reasignar su número.';
         }
       },
       error: (e) => {
@@ -812,6 +971,9 @@ export class AnulacionesBajasComponent implements OnInit {
         }
         if (this.option === '1') {
           this.getFacSinCobro();
+        }
+        if (this.option === '2') {
+          this.getFacCobradas();
         }
       },
       error: (e) => {
@@ -847,9 +1009,13 @@ export class AnulacionesBajasComponent implements OnInit {
   buscarCliente() {}
 
   get motivoActual(): string {
-    return this.option === '0'
-      ? this.f_factura?.value?.razonanulacion ?? ''
-      : this.f_factura?.value?.razoneliminacion ?? '';
+    if (this.option === '0') {
+      return this.f_factura?.value?.razonanulacion ?? '';
+    }
+    if (this.option === '1') {
+      return this.f_factura?.value?.razoneliminacion ?? '';
+    }
+    return this.f_factura?.value?.razonreasignacion ?? '';
   }
 
   abrirNuevoModal(): void {
@@ -861,6 +1027,7 @@ export class AnulacionesBajasComponent implements OnInit {
       razonanulacion: '',
       usuarioeliminacion: '',
       razoneliminacion: '',
+      razonreasignacion: '',
     });
     this.formBuscar.reset({
       idfactura: '',
@@ -928,9 +1095,32 @@ export class AnulacionesBajasComponent implements OnInit {
       return;
     }
 
-    const accion = this.option === '0' ? 'ANULACION' : 'ELIMINACION';
     const motivo = this.motivoActual.trim();
     this.procesandoAccion = true;
+
+    if (this.option === '2') {
+      this.s_factura
+        .reasignarNumeroFactura({
+          idfactura: this._factura.idfactura,
+          motivo,
+          idusuario: this.authService.idusuario,
+        })
+        .subscribe({
+          next: () => {
+            this.resetFormularioAccion();
+            this.cargarHistoricos();
+            $('#newAnulBajas').modal('hide');
+            this.procesandoAccion = false;
+          },
+          error: (e) => {
+            this.procesandoAccion = false;
+            console.error(e);
+          },
+        });
+      return;
+    }
+
+    const accion = this.option === '0' ? 'ANULACION' : 'ELIMINACION';
 
     this.s_factura
       .ejecutarAnulacionBaja({
