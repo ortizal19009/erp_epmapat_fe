@@ -638,6 +638,13 @@ export class FecfacturaService {
       fecfactura
     );
   }
+
+  getXmlPrevio(idfactura: number) {
+    return this.http.get(`${apiUrl}/api/sri/generar-xml-previo?idfactura=${idfactura}`, {
+      responseType: 'text',
+    });
+  }
+
   async generateXmlOfPago(idfactura: number): Promise<any> {
     //let url_prov = 'http://192.168.0.165:9090';//esta url es provicional para llenar la tabla fec_factura y proceder a crear los xml
     //let url_prov = 'http://localhost:8080';

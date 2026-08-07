@@ -47,6 +47,12 @@ export class FecfacturaComponent implements OnInit {
   _detalles: any;
   _pagos: any;
   impuestos: any = [];
+  validacionSriDetalle: any[] = [];
+  validacionSriResumen: any[] = [];
+  exportPreviewFactura: any = null;
+  exportPreviewDetalle: any[] = [];
+  exportPreviewResumen: any[] = [];
+  exportPreviewLoading = false;
   totalpreciounitario: number = 0;
   totalbaseimponible: number = 0;
   totaliva: number = 0;
@@ -55,6 +61,9 @@ export class FecfacturaComponent implements OnInit {
   estado: Boolean = false;
   btnRsend: Boolean = false;
   error: String = '';
+  errorTitle = 'Informacion de errores';
+  errorAlertClass = 'alert-warning';
+  errorIconClass = 'fa-exclamation-triangle';
   xml: String = '';
   txtDetails: boolean = true;
   porcNumber: number = 0;
@@ -272,6 +281,9 @@ export class FecfacturaComponent implements OnInit {
     this.conter = 0;
     this.datosDefinirAsync();
     this.swexportar = false;
+    this.exportPreviewFactura = null;
+    this.exportPreviewDetalle = [];
+    this.exportPreviewResumen = [];
     this.formExportar.value;
     if (
       this.formExportar.value.nrofactura != null &&
@@ -443,6 +455,29 @@ export class FecfacturaComponent implements OnInit {
     return true;
   }
 
+  async previewFacturaExportacion(factura: any) {
+    if (!factura?.idfactura) {
+      return;
+    }
+
+    this.exportPreviewLoading = true;
+    this.exportPreviewFactura = factura;
+    this.exportPreviewDetalle = [];
+    this.exportPreviewResumen = [];
+
+    try {
+      const validacion = await this.construirVistaPreviaTributaria(factura.idfactura);
+      this.exportPreviewDetalle = validacion.detalle;
+      this.exportPreviewResumen = validacion.resumen;
+    } catch (error) {
+      console.error(error);
+      this.swal('error', 'No se pudo construir la vista previa tributaria de la factura');
+      this.exportPreviewFactura = null;
+    } finally {
+      this.exportPreviewLoading = false;
+    }
+  }
+
   private async asegurarXmlAutorizadoDisponible(factura: Fecfactura): Promise<Fecfactura> {
     if (this.esXmlAutorizadoValido(factura?.xmlautorizado)) {
       return factura;
@@ -490,27 +525,7 @@ export class FecfacturaComponent implements OnInit {
   }
 
   exportar() {
-    /* this._factu
-    ras.forEach((item: any, index: number) => {
-      //await this._exportar(index);
-      // this.changeDato();
-      }); */
-    const numbers = interval(1000);
-    const takeFourNumbers = numbers.pipe(take(this._facturas.length));
-    takeFourNumbers.subscribe((x) => {
-      this.fecfacService
-        .expDesdeAbonados(this._facturas[x])
-        .then((item: any) => {
-          console.log('exportado', this._facturas[x].nrofactura);
-        });
-      this.porcNumber = x;
-      if (this._facturas.length - 1 === x) {
-        this.swfacturas = false;
-        this.swexportar = false;
-      }
-      this.conter = (x * 100) / this._facturas.length;
-    });
-    this._facturas.forEach(async (item: any) => {});
+    this.exportarFacturasValidadas();
   }
   async _exportar(i: number) {
     let j = 0;
@@ -1147,6 +1162,8 @@ export class FecfacturaComponent implements OnInit {
     this.totalgeneraldetalle = 0;
     this.totalpagado = 0;
     this.impuestos = [];
+    this.validacionSriDetalle = [];
+    this.validacionSriResumen = [];
     this.factura = factura;
     this.fec_facdetalleService
       .getFecDetalleByIdfactura(factura.idfactura)
@@ -1169,6 +1186,7 @@ export class FecfacturaComponent implements OnInit {
                     this.totaliva += valorIva;
                     this.totalgeneraldetalle += baseImponible + valorIva;
                   });
+                  this.construirValidacionSriLocal();
                 },
                 error: (e) => console.error(e),
               });
@@ -1199,12 +1217,34 @@ export class FecfacturaComponent implements OnInit {
   showError() {
     this.error = '';
     this.error = this.factura.errores;
-    this.txtDetails = !this.txtDetails;
+    this.errorTitle = 'Informacion de errores';
+    this.errorAlertClass = 'alert-warning';
+    this.errorIconClass = 'fa-exclamation-triangle';
+    this.txtDetails = false;
   }
   showXml() {
     this.error = '';
     this.error = this.factura.xmlautorizado;
-    this.txtDetails = !this.txtDetails;
+    this.errorTitle = 'XML autorizado';
+    this.errorAlertClass = 'alert-success';
+    this.errorIconClass = 'fa-file-code';
+    this.txtDetails = false;
+  }
+  async showXmlPrevio() {
+    try {
+      const xmlString = await firstValueFrom(
+        this.fecfacService.getXmlPrevio(this.factura.idfactura)
+      );
+
+      this.error = '';
+      this.error = String(xmlString || '');
+      this.errorTitle = 'XML sin firmar';
+      this.errorAlertClass = 'alert-info';
+      this.errorIconClass = 'fa-file-alt';
+      this.txtDetails = false;
+    } catch (error) {
+      console.error('Error al visualizar el XML previo:', error);
+    }
   }
   validarEstado(estado: any) {
     // Reset por defecto
@@ -1278,13 +1318,27 @@ export class FecfacturaComponent implements OnInit {
     }
 
     try {
+      const validacionPrevia = await this.construirVistaPreviaTributaria(idfactura);
+      this.validacionSriDetalle = validacionPrevia.detalle;
+      this.validacionSriResumen = validacionPrevia.resumen;
+
+      if (
+        this.tieneInconsistenciasSri(validacionPrevia.detalle) ||
+        this.tieneInconsistenciasSri(validacionPrevia.resumen)
+      ) {
+        this.swal('error', 'La factura tiene inconsistencias entre tarifa IVA y codigo porcentaje. Corrija antes de recrear.');
+        return;
+      }
+
       // 1) Eliminar factura en el backend
       await lastValueFrom(this.fecfacService.deleteFecFactura(idfactura));
       console.log('✅ Factura eliminada correctamente');
 
       // 2) Generar nuevamente (tu método ya es async)
-      await this.fecfacService.generateXmlOfPago(idfactura);
+      const respuesta: any = await this.fecfacService.generateXmlOfPago(idfactura);
       console.log('✅ Factura recreada y XML generado');
+      this.validacionSriDetalle = respuesta?.validacionSri?.detalle || [];
+      this.validacionSriResumen = respuesta?.validacionSri?.resumen || [];
 
       // 3) Opcional: recargar tabla/lista de facturas
       // this.loadFacturas();
@@ -1319,6 +1373,193 @@ export class FecfacturaComponent implements OnInit {
     const baseImponible = Number(impuesto?.baseimponible || 0);
     const tarifa = this.getTarifaPorCodigoPorcentaje(impuesto?.codigoporcentaje);
     return Math.round(baseImponible * (tarifa / 100) * 100) / 100;
+  }
+
+  getEtiquetaCodigoPorcentaje(codigoPorcentaje: any): string {
+    switch (String(codigoPorcentaje || '').trim()) {
+      case '0':
+        return 'IVA 0%';
+      case '2':
+        return 'IVA 12%';
+      case '3':
+        return 'IVA 14%';
+      case '4':
+        return 'IVA 15%';
+      case '5':
+        return 'IVA 5%';
+      default:
+        return `Código ${codigoPorcentaje || '-'}`;
+    }
+  }
+
+  isCodigoPorcentajeEsperado(codigoPorcentaje: any, tarifa: any): boolean {
+    return String(codigoPorcentaje || '').trim() === this.getCodigoPorcentajePorTarifa(Number(tarifa || 0));
+  }
+
+  tieneInconsistenciasSri(items: any[]): boolean {
+    return (items || []).some((item: any) =>
+      Number(item?.tarifa || 0) > 0 && !this.isCodigoPorcentajeEsperado(item?.codigoPorcentaje, item?.tarifa)
+    );
+  }
+
+  private normalizarPorcentajeIva(valor: any): number {
+    const numero = Number(valor || 0);
+    if (!Number.isFinite(numero) || numero <= 0) {
+      return 0;
+    }
+    return numero <= 1 ? Math.round(numero * 10000) / 100 : Math.round(numero * 100) / 100;
+  }
+
+  private getCodigoPorcentajePorTarifa(tarifa: number): string {
+    switch (Math.round(Number(tarifa || 0))) {
+      case 12:
+        return '2';
+      case 14:
+        return '3';
+      case 15:
+        return '4';
+      case 5:
+        return '5';
+      default:
+        return '0';
+    }
+  }
+
+  private async exportarFacturasValidadas(): Promise<void> {
+    if (!Array.isArray(this._facturas) || !this._facturas.length) {
+      this.swal('warning', 'No hay facturas para exportar');
+      return;
+    }
+
+    for (const factura of this._facturas) {
+      const validacion = await this.construirVistaPreviaTributaria(factura.idfactura);
+      if (this.tieneInconsistenciasSri(validacion.detalle) || this.tieneInconsistenciasSri(validacion.resumen)) {
+        this.exportPreviewFactura = factura;
+        this.exportPreviewDetalle = validacion.detalle;
+        this.exportPreviewResumen = validacion.resumen;
+        this.swal('error', `Se bloqueo la exportacion. La factura ${factura.nrofactura} tiene inconsistencias tributarias.`);
+        return;
+      }
+    }
+
+    const numbers = interval(1000);
+    const takeFourNumbers = numbers.pipe(take(this._facturas.length));
+    takeFourNumbers.subscribe((x) => {
+      this.fecfacService
+        .expDesdeAbonados(this._facturas[x])
+        .then(() => {
+          console.log('exportado', this._facturas[x].nrofactura);
+        });
+      this.porcNumber = x;
+      if (this._facturas.length - 1 === x) {
+        this.swfacturas = false;
+        this.swexportar = false;
+      }
+      this.conter = (x * 100) / this._facturas.length;
+    });
+  }
+
+  private async construirVistaPreviaTributaria(idfactura: number): Promise<{ detalle: any[]; resumen: any[] }> {
+    if (!this.empresa) {
+      await this.datosDefinirAsync();
+    }
+
+    const rubros = await this.rxfService.getDetalleByIdfacturaAsync(idfactura);
+    const porcentajeIva = this.normalizarPorcentajeIva(this.empresa?.porciva);
+    const codigoPorcentajeIva = this.getCodigoPorcentajePorTarifa(porcentajeIva);
+    const resumen = new Map<string, any>();
+
+    const detalle = (rubros || [])
+      .filter((rubro: any) => (Number(rubro?.cantidad || 0) > 0) || Number(rubro?.valorunitario || 0) !== 0)
+      .map((rubro: any) => {
+        const codigo = '2';
+        const aplicaIva = this.rubroGeneraIva(rubro);
+        const codigoPorcentaje = aplicaIva ? codigoPorcentajeIva : '0';
+        const tarifa = aplicaIva ? porcentajeIva : 0;
+        const cantidad = Number(rubro?.cantidad || 1);
+        const valorUnitario = Number(rubro?.valorunitario || 0);
+        const baseImponible = Math.round(cantidad * valorUnitario * 100) / 100;
+        const valor = Math.round(baseImponible * (tarifa / 100) * 100) / 100;
+        const key = `${codigo}|${codigoPorcentaje}`;
+
+        if (!resumen.has(key)) {
+          resumen.set(key, {
+            codigo,
+            codigoPorcentaje,
+            etiqueta: this.getEtiquetaCodigoPorcentaje(codigoPorcentaje),
+            tarifa,
+            baseImponible: 0,
+            valor: 0,
+          });
+        }
+
+        const acumulado = resumen.get(key);
+        acumulado.baseImponible += baseImponible;
+        acumulado.valor += valor;
+
+        return {
+          idfacturadetalle: rubro?.idrubroxfac ?? rubro?.idrubro_rubros?.idrubro ?? '-',
+          descripcion: rubro?.idrubro_rubros?.descripcion || rubro?.descripcion || 'Rubro',
+          codigo,
+          codigoPorcentaje,
+          etiqueta: this.getEtiquetaCodigoPorcentaje(codigoPorcentaje),
+          tarifa,
+          baseImponible,
+          valor,
+        };
+      });
+
+    return {
+      detalle,
+      resumen: Array.from(resumen.values()).map((item: any) => ({
+        ...item,
+        baseImponible: Math.round(item.baseImponible * 100) / 100,
+        valor: Math.round(item.valor * 100) / 100,
+      })),
+    };
+  }
+
+  private construirValidacionSriLocal(): void {
+    const resumen = new Map<string, any>();
+    this.validacionSriDetalle = (this.impuestos || []).map((imp: any) => {
+      const codigo = imp?.codigoimpuesto || '2';
+      const codigoPorcentaje = `${imp?.codigoporcentaje || '0'}`;
+      const tarifa = this.getTarifaPorCodigoPorcentaje(codigoPorcentaje);
+      const baseImponible = Number(imp?.baseimponible || 0);
+      const valor = this.calcularValorIva(imp);
+      const key = `${codigo}|${codigoPorcentaje}`;
+
+      if (!resumen.has(key)) {
+        resumen.set(key, {
+          codigo,
+          codigoPorcentaje,
+          tarifa,
+          etiqueta: this.getEtiquetaCodigoPorcentaje(codigoPorcentaje),
+          baseImponible: 0,
+          valor: 0,
+        });
+      }
+
+      const acumulado = resumen.get(key);
+      acumulado.baseImponible += baseImponible;
+      acumulado.valor += valor;
+
+      return {
+        idfacturadetalle: imp?.idfacturadetalle,
+        codigo,
+        codigoPorcentaje,
+        tarifa,
+        etiqueta: this.getEtiquetaCodigoPorcentaje(codigoPorcentaje),
+        baseImponible,
+        valor,
+      };
+    });
+
+    this.validacionSriResumen = Array.from(resumen.values()).map((item: any) => ({
+      ...item,
+      baseImponible: Math.round(item.baseImponible * 100) / 100,
+      valor: Math.round(item.valor * 100) / 100,
+    }));
   }
   getXmlAutorizadoSri(fecfactura: any) {
     this.fecfacService.setxml(fecfactura).subscribe({
@@ -1377,6 +1618,30 @@ export class FecfacturaComponent implements OnInit {
     // Liberar memoria
     window.URL.revokeObjectURL(url);
   }
+
+  async downloadXmlPrevio(factura: any) {
+    try {
+      const xmlString = await firstValueFrom(
+        this.fecfacService.getXmlPrevio(factura.idfactura)
+      );
+
+      if (!xmlString || xmlString.trim() === '') {
+        console.error('XML previo vacio');
+        return;
+      }
+
+      const blob = new Blob([xmlString], { type: 'application/xml' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `factura_previa_${factura.idfactura}.xml`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error al descargar el XML previo:', error);
+    }
+  }
+
   validarReenvio() {
     if (!this.factura?.fechaemision) {
       this.btnRsend = false;

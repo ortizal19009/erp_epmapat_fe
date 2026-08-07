@@ -537,6 +537,30 @@ export class AnulacionesBajasComponent implements OnInit {
     return direccionActual === 'asc' ? 'fa fa-sort-up' : 'fa fa-sort-down';
   }
 
+  getSortLabel(
+    tabla: 'anuladas' | 'eliminadas' | 'reasignaciones',
+    columna: string
+  ): string {
+    const columnaActual =
+      tabla === 'anuladas'
+        ? this.sortAnuladasColumn
+        : tabla === 'eliminadas'
+        ? this.sortEliminadasColumn
+        : this.sortReasignacionesColumn;
+    const direccionActual =
+      tabla === 'anuladas'
+        ? this.sortAnuladasDirection
+        : tabla === 'eliminadas'
+        ? this.sortEliminadasDirection
+        : this.sortReasignacionesDirection;
+
+    if (columnaActual !== columna) {
+      return 'Ordenar';
+    }
+
+    return direccionActual === 'asc' ? 'Asc' : 'Desc';
+  }
+
   cambiarPagina(tabla: 'anuladas' | 'eliminadas' | 'reasignaciones', delta: number): void {
     if (tabla === 'anuladas') {
       const nuevaPagina = this.anuladasCurrentPage + delta;

@@ -38,6 +38,13 @@ export class GeneradorxmlComponent implements OnInit {
   claveacceso: string;
   nrofactura: string;
   empresa: any;
+  resumenImpuestosSri: Array<{
+    codigo: string;
+    codigoPorcentaje: string;
+    tarifa: string;
+    baseImponible: number;
+    valor: number;
+  }> = [];
 
   constructor(
     private router: Router,
@@ -148,6 +155,7 @@ export class GeneradorxmlComponent implements OnInit {
 
   sumaRubros(i: number) {
     this.vecrubros = [];
+    this.resumenImpuestosSri = [];
     this.swprogressbar = true;
     this.rxfService.getByIdfactura(this._facturas[i].idfactura).subscribe({
       next: (datos) => {
@@ -167,6 +175,9 @@ export class GeneradorxmlComponent implements OnInit {
             valorunitario: datos[j].valorunitario,
             subtotal: baseImponible,
             swiva: datos[j].idrubro_rubros.swiva,
+            codigoImpuesto: '2',
+            codigoPorcentaje: resolverCodigoPorcentajeIva(this.porciva),
+            tarifa: normalizarPorcentajeIva(this.porciva).toString(),
             valoriva: valoriva,
             total: total,
           };
@@ -199,6 +210,7 @@ export class GeneradorxmlComponent implements OnInit {
         this.progreso = (i / this._facturas.length) * 100;
         if (i < this._facturas.length) this.sumaRubros(i);
         else {
+          this.resumenImpuestosSri = construirResumenImpuestosSri(this.vecrubros, this.porciva);
           this.swbuscando = false;
           this.txtbuscar = 'Buscar';
           this.swfincalc = true;
@@ -419,6 +431,8 @@ export class GeneradorxmlComponent implements OnInit {
       detalles,
     } = data;
 
+    const totalConImpuestos = construirTotalesImpuesto(detalles);
+
     return {
       _declaration: { _attributes: { version: '1.0', encoding: 'UTF-8' } },
       factura: {
@@ -447,14 +461,7 @@ export class GeneradorxmlComponent implements OnInit {
           direccionComprador: `${comprador.direccion} CUENTA ${cuenta}`,
           totalSinImpuestos: this.sumsubtotal.toFixed(2),
           totalDescuento: '0.00',
-          totalConImpuestos: {
-            totalImpuesto: {
-              codigo: '2',
-              codigoPorcentaje: '0',
-              baseImponible: this.sumsubtotal.toFixed(2),
-              valor: this.sumvaloriva.toFixed(2),
-            },
-          },
+          totalConImpuestos,
           propina: '0.00',
           importeTotal: this.sumtotal.toFixed(2),
           moneda: 'DOLAR',
@@ -513,7 +520,25 @@ export class GeneradorxmlComponent implements OnInit {
   /** Resetea UI */
   private resetFormulario() {
     this.swencuentra = false;
+    this.resumenImpuestosSri = [];
     this.formBuscar.controls['nrofactura'].setValue('');
+  }
+
+  getEtiquetaCodigoPorcentaje(codigoPorcentaje: string): string {
+    switch (`${codigoPorcentaje ?? ''}`) {
+      case '0':
+        return 'IVA 0%';
+      case '2':
+        return 'IVA 12%';
+      case '3':
+        return 'IVA 14%';
+      case '4':
+        return 'IVA 15%';
+      case '5':
+        return 'IVA 5%';
+      default:
+        return `Código ${codigoPorcentaje || '-'}`;
+    }
   }
 }
 
@@ -577,6 +602,10 @@ function resolverCodigoPorcentajeIva(porciva: number): string {
     return '2';
   }
 
+  if (porcentaje === 14) {
+    return '3';
+  }
+
   if (porcentaje === 15) {
     return '4';
   }
@@ -601,6 +630,81 @@ function calculosIVA(
     ? (Math.round(baseImponible * tasaDecimal * 100) / 100).toFixed(2)
     : '0.00';
   return [codigoPorcentaje, tarifa, valorIVA];
+}
+
+function construirTotalesImpuesto(detalles: Detalle[]) {
+  const acumulados = new Map<
+    string,
+    { codigo: string; codigoPorcentaje: string; baseImponible: number; valor: number }
+  >();
+
+  for (const detalle of detalles ?? []) {
+    for (const impuesto of detalle.impuestos ?? []) {
+      const codigo = impuesto?.codigo ?? '2';
+      const codigoPorcentaje = impuesto?.codigoPorcentaje ?? '0';
+      const key = `${codigo}|${codigoPorcentaje}`;
+      const base = Number(impuesto?.baseImponible ?? 0);
+      const valor = Number(impuesto?.valor ?? 0);
+
+      if (!acumulados.has(key)) {
+        acumulados.set(key, {
+          codigo,
+          codigoPorcentaje,
+          baseImponible: 0,
+          valor: 0,
+        });
+      }
+
+      const actual = acumulados.get(key)!;
+      actual.baseImponible += base;
+      actual.valor += valor;
+    }
+  }
+
+  const totalImpuesto = Array.from(acumulados.values()).map((item) => ({
+    codigo: item.codigo,
+    codigoPorcentaje: item.codigoPorcentaje,
+    baseImponible: item.baseImponible.toFixed(2),
+    valor: item.valor.toFixed(2),
+  }));
+
+  return {
+    totalImpuesto,
+  };
+}
+
+function construirResumenImpuestosSri(rubros: any[], porciva: number) {
+  const acumulados = new Map<
+    string,
+    { codigo: string; codigoPorcentaje: string; tarifa: string; baseImponible: number; valor: number }
+  >();
+
+  for (const rubro of rubros ?? []) {
+    const codigo = '2';
+    const codigoPorcentaje = rubro?.swiva ? resolverCodigoPorcentajeIva(porciva) : '0';
+    const tarifa = rubro?.swiva ? normalizarPorcentajeIva(porciva).toString() : '0';
+    const key = `${codigo}|${codigoPorcentaje}`;
+
+    if (!acumulados.has(key)) {
+      acumulados.set(key, {
+        codigo,
+        codigoPorcentaje,
+        tarifa,
+        baseImponible: 0,
+        valor: 0,
+      });
+    }
+
+    const actual = acumulados.get(key)!;
+    actual.baseImponible += Number(rubro?.subtotal ?? 0);
+    actual.valor += Number(rubro?.valoriva ?? 0);
+  }
+
+  return Array.from(acumulados.values()).map((item) => ({
+    ...item,
+    baseImponible: Number(item.baseImponible.toFixed(2)),
+    valor: Number(item.valor.toFixed(2)),
+  }));
 }
 
 //Código numérico de la Clave de acceso

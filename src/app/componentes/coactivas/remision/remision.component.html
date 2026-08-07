@@ -1,50 +1,54 @@
 <div class="content mt-1 pt-1 pl-0">
     <div class="container-fluid">
-        <div class="row m-0 px-0 py-1 justify-content-start cabecera border sombra">
-            <div class="col-sm-3">
-                <h4 class="m-0 font-weight-bold description"><i class="fa fa-list" aria-hidden="true"></i> Remisiones
-                    intereses y
-                    multas</h4>
+        <div class="row m-0 px-0 py-1 justify-content-start cabecera border sombra header-shell">
+            <div class="col-lg-4 col-md-12">
+                <div class="header-copy">
+                    <div class="header-eyebrow">Coactivas</div>
+                    <h4 class="m-0 font-weight-bold">Remisiones de intereses y multas</h4>
+                    <small class="text-white-50">Consulta, revisa y emite reportes de remisiones registradas.</small>
+                </div>
             </div>
-            <div class="col-sm-7">
+            <div class="col-lg-7 col-md-12 mt-3 mt-lg-0">
                 <form [formGroup]="f_buscar">
-                    <div class="row col-sm-12 mt-0 mb-0">
-                        <div class="col-sm-12">
-                            <div class="row">
-                                <div class="col-sm-3">
-                                    <input type="date" class="form-control form-control-sm" id="nombreIdentifi"
-                                        formControlName="desde" required minlength="4" />
-                                </div>
-                                <div class="col-sm-3">
-                                    <input type="date" class="form-control form-control-sm" id="nombreIdentifi"
-                                        formControlName="hasta" required minlength="4" />
-                                </div>
-                                <div class="col-sm-3">
-                                    <button class="btn btn-primary btn-sm"><i class="fa fa-search"></i></button>
-                                </div>
-                                <div class="col-sm-2 px-0">
-                                    <input type="text" class="form-control form-control-sm text-center"
-                                        placeholder="Filtrar..." [(ngModel)]="filtro" formControlName="filtro" />
-                                </div>
+                    <div class="filter-card">
+                        <div class="row">
+                            <div class="col-md-3 mb-2 mb-md-0">
+                                <label class="filter-label">Desde</label>
+                                <input type="date" class="form-control form-control-sm" formControlName="desde" />
+                            </div>
+                            <div class="col-md-3 mb-2 mb-md-0">
+                                <label class="filter-label">Hasta</label>
+                                <input type="date" class="form-control form-control-sm" formControlName="hasta" />
+                            </div>
+                            <div class="col-md-3 mb-2 mb-md-0">
+                                <label class="filter-label">Filtro rápido</label>
+                                <input type="text" class="form-control form-control-sm text-center"
+                                    placeholder="Cliente, cédula o cuenta" [(ngModel)]="filtro" formControlName="filtro" />
+                            </div>
+                            <div class="col-md-3 d-flex align-items-end">
+                                <button class="btn btn-light btn-sm w-100" type="button">
+                                    <i class="fa fa-search"></i> Visualizar
+                                </button>
                             </div>
                         </div>
                     </div>
                 </form>
             </div>
 
-            <div class="btn-group ml-auto mt-0">
+            <div class="btn-group ml-auto mt-3 mt-lg-0">
                 <button type="button" class="bg-transparent border-0 dropdown-toggle text-white" data-toggle="dropdown"
-                    aria-expanded="false"> <i class="bi-menu-button-wide text-white"></i>
+                    aria-expanded="false">
+                    <i class="bi-menu-button-wide text-white"></i>
                 </button>
                 <div class="dropdown-menu dropdown-menu-right bg-dark roboto">
                     <button class="dropdown-item" type="button" [routerLink]="['/add-remision']">
-                        <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo</button>
+                        <i class="bi-file-earmark-plus"></i>&nbsp; Nuevo
+                    </button>
                     <button class="dropdown-item" type="button" data-toggle="modal" data-target="#detalleCliente">
-                        <i class="bi bi-printer"></i>&nbsp; Imprimir </button>
-
+                        <i class="bi bi-printer"></i>&nbsp; Imprimir
+                    </button>
                 </div>
             </div>
-
         </div>
     </div>
 </div>
@@ -52,75 +56,93 @@
 <div class="container-fluid">
     <div class="row mb-0">
         <div class="col-sm">
-            <div class="card">
+            <div class="card remision-card">
                 <div class="card-body">
-                    <table class="table table-hover table-bordered table-sm sombra">
-                        <thead class="cabecera text-center">
-                            <tr>
-                                <th>N°</th>
-                                <th>Cliente</th>
-                                <th>Identificación</th>
-                                <th>Cuenta</th>
-                                <th>Cuotas</th>
-                                <th>Fecha</th>
-                                <th>Capital</th>
-                                <th>Intereses</th>
-                            </tr>
-                        </thead>
-                        <tbody class="">
-                            <tr *ngFor="let remision of _remisiones |filter:filtro; let i = index"
-                                (click)="getRemisionById(remision)" data-toggle="modal" data-target="#detallesModal">
-                                <td class="small text-center font-weight-bold">{{i+1}}</td>
-                                <td class="description">{{remision.idcliente_clientes.nombre}}</td>
-                                <td class="text-center">{{remision.idcliente_clientes.cedula}}</td>
-                                <td class="text-center">{{remision.idabonado_abonados.idabonado}}</td>
-                                <td class="text-right">{{remision.cuotas}} </td>
-                                <td class="text-right">{{remision.feccrea}} </td>
-                                <td class="text-right">{{remision.totcapital.toFixed(2)}} $</td>
-                                <td class="text-right">{{remision.totintereses.toFixed(2)}} $</td>
-                            </tr>
-                        </tbody>
-                        <caption class="small mark"> <strong>{{page+1}}/{{totalPages}}</strong> total registros
-                            {{totalElements}}
-                            <!--   <button class="btn btn-outline-primary btn-xs">&nbsp;&nbsp;Rango&nbsp;&nbsp;</button> -->
-                            <nav aria-label="Page navigation example">
-                                <ul class="pagination justify-content-end">
-                                    <li class="page-item">
-                                        <button class="btn btn-xs btn-primary" (click)="onPreviousPage()"> <span
-                                                aria-hidden="true">&laquo;</span>
-                                        </button>
-                                    </li>
-                                    <li class="page-item" *ngFor="let p of pages">
-                                        <button class="btn btn-xs btn-outline-primary" (click)="onGoToPage(p)"
-                                            [class.active]="p === page">
-                                            {{ p + 1 }}
-                                        </button>
-                                    </li>
-                                    <li class="page-item">
-                                        <button class="btn btn-xs btn-primary" (click)="onNextPage()"> <span
-                                                aria-hidden="true">&raquo;</span>
-                                        </button>
-                                    </li>
-                                </ul>
-                            </nav>
-                        </caption>
-                    </table>
+                    <div class="summary-strip mb-3">
+                        <div class="summary-pill">
+                            <span class="summary-label">Registros</span>
+                            <span class="summary-value">{{ totalElements }}</span>
+                        </div>
+                        <div class="summary-pill">
+                            <span class="summary-label">Página actual</span>
+                            <span class="summary-value">{{ page + 1 }} / {{ totalPages || 1 }}</span>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered table-sm remision-table mb-0">
+                            <thead class="cabecera text-center">
+                                <tr>
+                                    <th>N°</th>
+                                    <th>Cliente</th>
+                                    <th>Identificación</th>
+                                    <th>Cuenta</th>
+                                    <th>Cuotas</th>
+                                    <th>Fecha</th>
+                                    <th>Capital</th>
+                                    <th>Intereses</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let remision of _remisiones | filter:filtro; let i = index" class="remision-row"
+                                    (click)="getRemisionById(remision)" data-toggle="modal" data-target="#detallesModal">
+                                    <td class="small text-center font-weight-bold">{{ i + 1 }}</td>
+                                    <td>
+                                        <div class="table-primary-text">{{ getNombreCliente(remision) }}</div>
+                                    </td>
+                                    <td class="text-center">{{ getIdentificacionCliente(remision) }}</td>
+                                    <td class="text-center">{{ getCuenta(remision) }}</td>
+                                    <td class="text-right">{{ remision.cuotas }}</td>
+                                    <td class="text-center">{{ remision.feccrea | date:'yyyy-MM-dd' }}</td>
+                                    <td class="text-right">{{ remision.totcapital | number:'1.2-2' }} $</td>
+                                    <td class="text-right">{{ remision.totintereses | number:'1.2-2' }} $</td>
+                                    <td class="text-right font-weight-bold">{{ getTotalRemision(remision) | number:'1.2-2' }} $</td>
+                                </tr>
+                                <tr *ngIf="!_remisiones?.length">
+                                    <td colspan="9" class="text-center text-muted py-4">No hay remisiones registradas para mostrar.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex flex-wrap justify-content-between align-items-center border-top pt-3 mt-3">
+                        <small class="text-muted">
+                            {{ page + 1 }}/{{ totalPages || 1 }} páginas | Total registros: {{ totalElements }}
+                        </small>
+                        <nav aria-label="Paginación remisiones" class="mt-2 mt-md-0">
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item">
+                                    <button class="btn btn-outline-primary btn-xs mr-1" (click)="onPreviousPage()">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </button>
+                                </li>
+                                <li class="page-item mr-1" *ngFor="let p of pages">
+                                    <button class="btn btn-outline-primary btn-xs" (click)="onGoToPage(p)"
+                                        [class.active]="p === page">
+                                        {{ p + 1 }}
+                                    </button>
+                                </li>
+                                <li class="page-item">
+                                    <button class="btn btn-outline-primary btn-xs" (click)="onNextPage()">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
-
 </div>
 
-
-<!-- Modal-Visualizar-Reporte -->
 <div class="modal fade" id="detalleCliente" data-backdrop="static" data-keyboard="false" tabindex="-1"
     aria-labelledby="detalleClienteLabel" aria-hidden="true">
     <div class="modal-dialog modal-{{modalSize}}">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="detalleClienteLabel">Imprimir resumen remisión</h5>
+                <h5 class="modal-title" id="detalleClienteLabel">Imprimir resumen de remisiones</h5>
                 <button type="button" class="close" data-dismiss='modal' aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -146,145 +168,139 @@
                         </div>
                     </div>
                 </form>
-                <!-- <iframe id="pdfViewer" src="" width="100%" height="600px"></iframe> -->
                 <iframe id="pdfViewer" src="" *ngIf="!swimprimir" width="100%" height="600px"></iframe>
-
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-sm btn-success" data-dismiss='modal'>Cancelar</button>
-                <button type="button" class="btn btn-sm btn-outline-success"
-                    (click)="getRemByFeccrea()">Aceptar</button>
+                <button type="button" class="btn btn-sm btn-outline-success" (click)="getRemByFeccrea()">Aceptar</button>
             </div>
         </div>
     </div>
 </div>
-<!-- Modal-Visualizar-Detalles-Remision -->
+
 <div class="modal fade" id="detallesModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
     aria-labelledby="detallesModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-{{modalSize}}">
+    <div class="modal-dialog modal-{{modalSize}} modal-dialog-centered modal-profesional-remision">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="detallesModalLabel">Detalles Remisión</h5>
+                <h5 class="modal-title" id="detallesModalLabel">Detalle de remisión</h5>
                 <button type="button" class="close" data-dismiss='modal' aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <div class="container">
-                    <table class="table table-sm table-hover table-bordered">
-                        <tbody>
-                            <tr>
-                                <td>Cuenta: {{_abonado.idabonado}}</td>
-                                <td>Cliente: {{_cliente.nombre}}</td>
-                                <td>Identificación: {{_cliente.cedula}}</td>
-                            </tr>
-                            <tr>
-                                <td>Cuotas: {{remisionDetalles.cuotas}}</td>
-                                <td>Capital: {{remisionDetalles.totcapital}}</td>
-                                <td>Intereses: {{remisionDetalles.totintereses}}</td>
-                            </tr>
-                            <tr>
-                                <td>Documento: {{_documentos.nomdoc}}</td>
-
-                                <td colspan="2">Detalle: {{remisionDetalles.detalledocumento}}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="row">
-                        <div class="col-sm">
-                            <div class="card">
-                                <div class="card-header text-center">
-                                    <h5>Facturas anteriores</h5>
-                                </div>
-                                <div class="card-body">
-                                    <table class="table table-sm table-hover table-bordered">
-                                        <thead class="text-center">
-                                            <tr>
-                                                <th></th>
-                                                <th>Planilla</th>
-                                                <th>Módulo</th>
-                                                <th>Total</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr *ngFor="let afac of fac_anteriores; let i = index">
-                                                <td class="text-center">{{i+1}}</td>
-                                                <td>{{afac.idfactura_facturas.idfactura}}</td>
-                                                <td>{{afac.idfactura_facturas.idmodulo.descripcion}}</td>
-                                                <td class="text-right">
-                                                    {{afac.idfactura_facturas.totaltarifa.toFixed(2)}} $</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                            </div>
-
+                <div class="detail-shell">
+                    <div class="detail-top-grid">
+                        <div class="detail-box">
+                            <div class="detail-label">Cliente</div>
+                            <div class="detail-value">{{ _cliente.nombre || 'Sin cliente' }}</div>
                         </div>
-                        <div class="col-sm">
-                            <div class="card ">
-                                <div class="card-header text-center">
-                                    <h5>Facturas nuevas</h5>
-                                </div>
-                                <div class="card-body">
-                                    <table class="table table-sm table-hover table-bordered">
-                                        <thead class="text-center">
-                                            <tr>
-                                                <th></th>
-                                                <th>Planilla</th>
-                                                <th>Nro.factura</th>
-                                                <th>Módulo</th>
-                                                <th>Fec.pago</th>
-                                                <th>Total</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr *ngFor="let nfac of fac_nuevas; let i = index">
-                                                <td class="text-center">{{i+1}}</td>
-                                                <td>{{nfac.idfactura_facturas.idfactura}}</td>
-                                                <td>{{nfac.idfactura_facturas.nrofactura}}</td>
-                                                <td>{{nfac.idfactura_facturas.idmodulo.descripcion}}</td>
-                                                <td>{{nfac.idfactura_facturas.fechacobro}}</td>
-                                                <td class="text-right">
-                                                    {{nfac.idfactura_facturas.totaltarifa.toFixed(2)}} $</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
+                        <div class="detail-box">
+                            <div class="detail-label">Identificación</div>
+                            <div class="detail-value">{{ _cliente.cedula || '-' }}</div>
+                        </div>
+                        <div class="detail-box">
+                            <div class="detail-label">Cuenta</div>
+                            <div class="detail-value">{{ _abonado.idabonado || '-' }}</div>
+                        </div>
+                        <div class="detail-box">
+                            <div class="detail-label">Documento</div>
+                            <div class="detail-value">{{ _documentos.nomdoc || 'Sin documento' }}</div>
+                        </div>
+                        <div class="detail-box">
+                            <div class="detail-label">Cuotas</div>
+                            <div class="detail-value">{{ remisionDetalles.cuotas || 0 }}</div>
+                        </div>
+                        <div class="detail-box">
+                            <div class="detail-label">Capital + intereses</div>
+                            <div class="detail-value">{{ getTotalRemision(remisionDetalles) | number:'1.2-2' }} $</div>
                         </div>
                     </div>
 
+                    <div class="action-note p-3 mb-3">
+                        <strong>Detalle / referencia:</strong> {{ remisionDetalles.detalledocumento || 'Sin detalle registrado' }}
+                    </div>
 
+                    <div *ngIf="cargandoDetalle" class="text-center text-muted py-4">
+                        Cargando detalle de facturas...
+                    </div>
+
+                    <div class="row" *ngIf="!cargandoDetalle">
+                        <div class="col-lg-6 mb-3">
+                            <div class="card card-detalle-remision h-100">
+                                <div class="card-header text-center">
+                                    <h5 class="mb-0">Facturas anteriores</h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover table-bordered mb-0 tabla-detalle-remision">
+                                            <thead class="text-center">
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Planilla</th>
+                                                    <th>Módulo</th>
+                                                    <th>Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let afac of fac_anteriores; let i = index">
+                                                    <td class="text-center">{{ i + 1 }}</td>
+                                                    <td>{{ afac?.idfactura_facturas?.idfactura || '-' }}</td>
+                                                    <td>{{ afac?.idfactura_facturas?.idmodulo?.descripcion || '-' }}</td>
+                                                    <td class="text-right">{{ afac?.idfactura_facturas?.totaltarifa | number:'1.2-2' }} $</td>
+                                                </tr>
+                                                <tr *ngIf="!fac_anteriores?.length">
+                                                    <td colspan="4" class="text-center text-muted py-3">No hay facturas anteriores registradas.</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 mb-3">
+                            <div class="card card-detalle-remision h-100">
+                                <div class="card-header text-center">
+                                    <h5 class="mb-0">Facturas nuevas</h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover table-bordered mb-0 tabla-detalle-remision">
+                                            <thead class="text-center">
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Planilla</th>
+                                                    <th>Nro. factura</th>
+                                                    <th>Módulo</th>
+                                                    <th>Fec. pago</th>
+                                                    <th>Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let nfac of fac_nuevas; let i = index">
+                                                    <td class="text-center">{{ i + 1 }}</td>
+                                                    <td>{{ nfac?.idfactura_facturas?.idfactura || '-' }}</td>
+                                                    <td>{{ nfac?.idfactura_facturas?.nrofactura || '-' }}</td>
+                                                    <td>{{ nfac?.idfactura_facturas?.idmodulo?.descripcion || '-' }}</td>
+                                                    <td>{{ nfac?.idfactura_facturas?.fechacobro | date:'yyyy-MM-dd' }}</td>
+                                                    <td class="text-right">{{ nfac?.idfactura_facturas?.totaltarifa | number:'1.2-2' }} $</td>
+                                                </tr>
+                                                <tr *ngIf="!fac_nuevas?.length">
+                                                    <td colspan="6" class="text-center text-muted py-3">No hay facturas nuevas registradas.</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-sm btn-primary" (click)="impContrato()">Contrato</button>
                 <button type="button" class="btn btn-sm btn-outline-success" data-dismiss='modal'>Aceptar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<!-- Modal -->
-<div class="modal fade" id="impRemision" tabindex="-1" aria-labelledby="impRemisionLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="impRemisionLabel">Modal title</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <!--                 <iframe id="pdfViewer" src="" *ngIf="!swimprimir" width="100%" height="600px"></iframe>
- -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
             </div>
         </div>
     </div>

@@ -115,13 +115,28 @@ export class AddRemisionComponent implements OnInit {
     this.subtotal = 0;
     this.intereses = 0;
     this.total = 0;
-    this.s_abonados.getById(+this.f_buscar.value.cuenta!).subscribe({
-      next: (abonado: any) => {
+    this._facturas = [];
+    this._rubros = [];
+    const cuenta = Number(this.f_buscar.value.cuenta);
+    if (!cuenta) {
+      return;
+    }
+    this.s_abonados.getByidabonado(cuenta).subscribe({
+      next: (abonados: any) => {
+        const abonado = Array.isArray(abonados) ? abonados[0] : abonados;
+        if (!abonado) {
+          this.s_loading.hideLoading();
+          return;
+        }
         this._abonado = abonado;
         this._categoria = abonado.idcategoria_categorias;
         this._ruta = abonado.idruta_rutas;
-        this.getCliente(abonado.idresponsable.idcliente);
+        this.getCliente(abonado.idresponsable?.idcliente || abonado.idcliente_clientes?.idcliente);
       },
+      error: (e: any) => {
+        console.error(e);
+        this.s_loading.hideLoading();
+      }
     });
   }
   getAllDocuments() {

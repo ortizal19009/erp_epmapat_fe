@@ -65,3 +65,66 @@
 .text-danger {
   font-weight: bold;
 }
+
+.sri-validation-table th,
+.sri-validation-summary th {
+  white-space: nowrap;
+}
+
+.sri-validation-table td,
+.sri-validation-summary td {
+  vertical-align: middle;
+}
+
+.sri-validation-table tbody tr:hover,
+.sri-validation-summary tbody tr:hover {
+  background-color: #f4f8fb;
+}
+
+.sri-validation-summary tbody tr td:last-child {
+  color: #0b5394;
+}
+
+.export-preview-list {
+  max-height: 280px;
+  overflow: auto;
+}
+
+.export-preview-list thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #f8f9fa;
+}
+
+.sri-validation-table .badge,
+.sri-validation-summary .badge {
+  min-width: 2.5rem;
+}
+
+.table-danger td {
+  box-shadow: inset 0 0 0 9999px rgba(220, 53, 69, 0.06);
+}
+
+.xml-view-alert {
+  border-width: 1px;
+  border-style: solid;
+}
+
+.alert.xml-view-alert.alert-warning {
+  background: linear-gradient(135deg, #fff6d6 0%, #ffe8a3 100%);
+  border-color: #f0c36d;
+  color: #7a5200;
+}
+
+.alert.xml-view-alert.alert-success {
+  background: linear-gradient(135deg, #e3f8ea 0%, #c7efd5 100%);
+  border-color: #88d4a3;
+  color: #17653a;
+}
+
+.alert.xml-view-alert.alert-info {
+  background: linear-gradient(135deg, #e3f4ff 0%, #cbe8ff 100%);
+  border-color: #8fc6f3;
+  color: #0f4c75;
+}

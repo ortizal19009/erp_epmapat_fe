@@ -6,3 +6,53 @@
 
 .detalle { background-color: var(--bgcolor2); }
 .nuevoBG2 { background-color: var(--bgcolor2); }
+
+.validation-card {
+   border: 1px solid #d7e5ee;
+   border-radius: 16px;
+   background: linear-gradient(180deg, #fbfdff 0%, #f4f8fb 100%);
+   box-shadow: 0 12px 26px rgba(15, 84, 102, 0.08);
+   overflow: hidden;
+}
+
+.validation-card__header {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: center;
+   justify-content: space-between;
+   gap: 0.75rem;
+   padding: 1rem 1.1rem;
+   border-bottom: 1px solid #dbe7ef;
+   background: linear-gradient(135deg, #eff8fb 0%, #f8fcfd 100%);
+}
+
+.validation-card__eyebrow {
+   font-size: 0.72rem;
+   text-transform: uppercase;
+   letter-spacing: 0.06em;
+   color: #6b7a88;
+   font-weight: 700;
+   margin-bottom: 0.2rem;
+}
+
+.validation-chip {
+   background: #0f6f80;
+   color: #fff;
+   border-radius: 999px;
+   padding: 0.45rem 0.8rem;
+   font-size: 0.78rem;
+   font-weight: 700;
+}
+
+.validation-table thead,
+.summary-tax-table thead {
+   background: #0f6f80;
+   color: #fff;
+}
+
+.validation-table td,
+.validation-table th,
+.summary-tax-table td,
+.summary-tax-table th {
+   vertical-align: middle;
+}

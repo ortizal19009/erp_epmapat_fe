@@ -135,6 +135,75 @@
                   </table>
                </div>
 
+               <div *ngIf="swfincalc" class="validation-card mt-3">
+                  <div class="validation-card__header">
+                     <div>
+                        <div class="validation-card__eyebrow">Vista previa SRI</div>
+                        <h5 class="mb-0">Validación de impuestos antes de generar XML</h5>
+                     </div>
+                     <div class="validation-chip">
+                        {{ resumenImpuestosSri.length }} grupo(s) de impuesto
+                     </div>
+                  </div>
+
+                  <div class="table-responsive mb-3">
+                     <table class="table table-bordered table-sm mb-0 validation-table">
+                        <thead>
+                           <tr>
+                              <th>#</th>
+                              <th>Rubro</th>
+                              <th>Código</th>
+                              <th>Código %</th>
+                              <th>Etiqueta</th>
+                              <th>Tarifa</th>
+                              <th>Base imponible</th>
+                              <th>Valor IVA</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <tr *ngFor="let rubro of vecrubros; let i = index">
+                              <td class="text-center">{{ i + 1 }}</td>
+                              <td>{{ rubro.descripcion }}</td>
+                              <td class="text-center">{{ rubro.codigoImpuesto }}</td>
+                              <td class="text-center">{{ rubro.swiva ? rubro.codigoPorcentaje : '0' }}</td>
+                              <td>{{ getEtiquetaCodigoPorcentaje(rubro.swiva ? rubro.codigoPorcentaje : '0') }}</td>
+                              <td class="text-right">{{ rubro.swiva ? rubro.tarifa : '0' }}%</td>
+                              <td class="text-right">{{ rubro.subtotal | number:'1.2-2' }}</td>
+                              <td class="text-right">{{ rubro.valoriva | number:'1.2-2' }}</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+
+                  <div class="table-responsive">
+                     <table class="table table-bordered table-sm mb-0 summary-tax-table">
+                        <thead>
+                           <tr>
+                              <th>Código</th>
+                              <th>Código %</th>
+                              <th>Etiqueta</th>
+                              <th>Tarifa</th>
+                              <th>Base imponible total</th>
+                              <th>Valor total impuesto</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <tr *ngFor="let item of resumenImpuestosSri">
+                              <td class="text-center">{{ item.codigo }}</td>
+                              <td class="text-center">{{ item.codigoPorcentaje }}</td>
+                              <td>{{ getEtiquetaCodigoPorcentaje(item.codigoPorcentaje) }}</td>
+                              <td class="text-right">{{ item.tarifa }}%</td>
+                              <td class="text-right">{{ item.baseImponible | number:'1.2-2' }}</td>
+                              <td class="text-right font-weight-bold">{{ item.valor | number:'1.2-2' }}</td>
+                           </tr>
+                           <tr *ngIf="!resumenImpuestosSri.length">
+                              <td colspan="6" class="text-center text-muted py-3">No hay impuestos calculados para validar.</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+               </div>
+
             </div>
          </div>
 

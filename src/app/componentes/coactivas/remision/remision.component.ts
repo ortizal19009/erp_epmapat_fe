@@ -34,6 +34,7 @@ export class RemisionComponent implements OnInit {
   _cliente: Clientes = new Clientes();
   _abonado: Abonados = new Abonados();
   _documentos: Documentos = new Documentos();
+  cargandoDetalle: boolean = false;
 
   /* variables para hacer la paginación  */
   page: number = 0;
@@ -106,7 +107,7 @@ export class RemisionComponent implements OnInit {
         this.size = datos.size;
         this.page = datos.pageable.pageNumber;
         this.totalPages = datos.totalPages;
-        this.totalElements = datos.totalElemets;
+        this.totalElements = datos.totalElements ?? datos.totalElemets ?? 0;
         this.updatePages();
       },
       error: (e: any) => console.error(e),
@@ -189,13 +190,18 @@ export class RemisionComponent implements OnInit {
     this.fac_anteriores = [];
     this.fac_nuevas = [];
     this.modalSize = 'xl';
+    this.cargandoDetalle = true;
     this.remisionDetalles = remision;
     this._cliente = remision.idcliente_clientes;
     this._abonado = remision.idabonado_abonados;
     this._documentos = remision.iddocumento_documentos;
     let id = remision.idremision;
-    this.fac_anteriores = await this.getDetalleRemision(id, 1);
-    this.fac_nuevas = await this.getDetalleRemision(id, 2);
+    try {
+      this.fac_anteriores = await this.getDetalleRemision(id, 1);
+      this.fac_nuevas = await this.getDetalleRemision(id, 2);
+    } finally {
+      this.cargandoDetalle = false;
+    }
   }
 
   async getDetalleRemision(idremision: number, tipfac: number) {
@@ -238,6 +244,24 @@ export class RemisionComponent implements OnInit {
       this.remisionDetalles,
       this.fac_nuevas
     );
+  }
+
+  getNombreCliente(remision: any): string {
+    return remision?.idcliente_clientes?.nombre || 'Sin cliente';
+  }
+
+  getIdentificacionCliente(remision: any): string {
+    return remision?.idcliente_clientes?.cedula || '-';
+  }
+
+  getCuenta(remision: any): string | number {
+    return remision?.idabonado_abonados?.idabonado || '-';
+  }
+
+  getTotalRemision(remision: any): number {
+    const capital = Number(remision?.totcapital ?? 0);
+    const intereses = Number(remision?.totintereses ?? 0);
+    return capital + intereses;
   }
   /* Fin de configuracion de paginacion */
 }

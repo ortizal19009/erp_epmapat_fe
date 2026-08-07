@@ -222,14 +222,28 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <table class="table table-hover table-sm table-bordered mb-0">
+                                    <div class="table-responsive tabla-reasignaciones-wrapper">
+                                    <table class="table table-hover table-sm table-bordered mb-0 tabla-reasignaciones-pro">
+                                        <caption class="small mark px-2 py-1 text-left">
+                                            Reasignaciones registradas: <strong>{{reasignacionesTotalElements}}</strong>
+                                        </caption>
                                         <thead class="theadFacelectro">
                                             <tr class="text-center">
-                                                <th class="sortable-header" (click)="toggleSort('reasignaciones', 'idfactura')">Planilla <i [class]="getSortIcon('reasignaciones', 'idfactura')"></i></th>
-                                                <th class="sortable-header" (click)="toggleSort('reasignaciones', 'fechareasignacion')">Fecha <i [class]="getSortIcon('reasignaciones', 'fechareasignacion')"></i></th>
-                                                <th class="sortable-header" (click)="toggleSort('reasignaciones', 'nrofacturaanterior')">Factura anterior <i [class]="getSortIcon('reasignaciones', 'nrofacturaanterior')"></i></th>
-                                                <th class="sortable-header" (click)="toggleSort('reasignaciones', 'nrofacturanuevo')">Factura nueva <i [class]="getSortIcon('reasignaciones', 'nrofacturanuevo')"></i></th>
-                                                <th class="sortable-header" (click)="toggleSort('reasignaciones', 'observacion')">Motivo <i [class]="getSortIcon('reasignaciones', 'observacion')"></i></th>
+                                                <th class="sortable-header" (click)="toggleSort('reasignaciones', 'idfactura')">
+                                                    Planilla <i [class]="getSortIcon('reasignaciones', 'idfactura')"></i>
+                                                </th>
+                                                <th class="sortable-header" (click)="toggleSort('reasignaciones', 'fechareasignacion')">
+                                                    Fecha <i [class]="getSortIcon('reasignaciones', 'fechareasignacion')"></i>
+                                                </th>
+                                                <th class="sortable-header" (click)="toggleSort('reasignaciones', 'nrofacturaanterior')">
+                                                    Factura anterior <i [class]="getSortIcon('reasignaciones', 'nrofacturaanterior')"></i>
+                                                </th>
+                                                <th class="sortable-header" (click)="toggleSort('reasignaciones', 'nrofacturanuevo')">
+                                                    Factura nueva <i [class]="getSortIcon('reasignaciones', 'nrofacturanuevo')"></i>
+                                                </th>
+                                                <th class="sortable-header" (click)="toggleSort('reasignaciones', 'observacion')">
+                                                    Motivo <i [class]="getSortIcon('reasignaciones', 'observacion')"></i>
+                                                </th>
                                                 <th>Acciones</th>
                                             </tr>
                                         </thead>
@@ -237,22 +251,28 @@
                                             <tr *ngFor="let item of _fReasignaciones" class="fila">
                                                 <td class="text-center">{{item.idfactura}}</td>
                                                 <td class="text-center">{{item.fechareasignacion | date:'yyyy-MM-dd HH:mm'}}</td>
-                                                <td>{{item.nrofacturaanterior || '-'}}</td>
-                                                <td>{{item.nrofacturanuevo || '-'}}</td>
+                                                <td class="_description">{{item.nrofacturaanterior || '-'}}</td>
+                                                <td class="_description">{{item.nrofacturanuevo || '-'}}</td>
                                                 <td class="_description">{{item.observacion || 'Sin observación'}}</td>
-                                                <td class="text-center">
-                                                    <div class="btn-group btn-group-sm action-buttons-table">
-                                                        <button type="button" class="btn btn-outline-info" title="Ver detalle" (click)="verDetalleReasignacion(item)">
-                                                            <i class="fa fa-eye"></i>
+                                                <td class="text-center acciones-columna">
+                                                    <div class="dropdown d-inline-block">
+                                                        <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle reasignaciones-action-toggle"
+                                                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                            Opciones
                                                         </button>
-                                                        <button type="button" class="btn btn-outline-secondary" title="Descargar XML anterior"
-                                                            [disabled]="!item?.xmlanterior" (click)="descargarXmlReasignacion(item, 'anterior')">
-                                                            <i class="fa fa-download"></i> Ant.
-                                                        </button>
-                                                        <button type="button" class="btn btn-outline-secondary" title="Descargar XML nuevo"
-                                                            [disabled]="!item?.xmlnuevo" (click)="descargarXmlReasignacion(item, 'nuevo')">
-                                                            <i class="fa fa-download"></i> Nuevo
-                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right shadow-sm">
+                                                            <button type="button" class="dropdown-item" (click)="verDetalleReasignacion(item)">
+                                                                <i class="fa fa-eye text-info mr-2"></i> Ver detalle
+                                                            </button>
+                                                            <button type="button" class="dropdown-item" [disabled]="!item?.xmlanterior"
+                                                                (click)="descargarXmlReasignacion(item, 'anterior')">
+                                                                <i class="fa fa-download text-secondary mr-2"></i> Descargar XML anterior
+                                                            </button>
+                                                            <button type="button" class="dropdown-item" [disabled]="!item?.xmlnuevo"
+                                                                (click)="descargarXmlReasignacion(item, 'nuevo')">
+                                                                <i class="fa fa-download text-secondary mr-2"></i> Descargar XML nuevo
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -261,6 +281,7 @@
                                             </tr>
                                         </tbody>
                                     </table>
+                                    </div>
                                     <div class="d-flex flex-wrap justify-content-between align-items-center p-2 border-top bg-white">
                                         <small class="text-muted">
                                             {{reasignacionesTotalElements}} registros | P&aacute;gina {{reasignacionesCurrentPage}} de {{reasignacionesTotalPages}}
