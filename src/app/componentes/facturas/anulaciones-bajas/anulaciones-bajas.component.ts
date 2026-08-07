@@ -87,6 +87,9 @@ export class AnulacionesBajasComponent implements OnInit {
   /* SELECCIONAR LECTURA */
   _lectura: Lecturas = new Lecturas();
   detalleOperacion: any = null;
+  reasignacionSeleccionada: any = null;
+  xmlPreviewTitulo: string = '';
+  xmlPreviewContenido: string = '';
   procesandoAccion: boolean = false;
   sliceDate: string = new Date().toISOString().slice(0, 10);
   userAuth: number;
@@ -700,6 +703,159 @@ export class AnulacionesBajasComponent implements OnInit {
       inicio,
       inicio + this.pageSize
     );
+  }
+
+  verDetalleReasignacion(item: any): void {
+    this.reasignacionSeleccionada = item;
+    $('#reasignacionDetalleModal').modal('show');
+  }
+
+  verXmlReasignacion(tipo: 'anterior' | 'nuevo'): void {
+    if (!this.reasignacionSeleccionada) {
+      return;
+    }
+
+    const esAnterior = tipo === 'anterior';
+    this.xmlPreviewTitulo = esAnterior ? 'XML anterior' : 'XML nuevo';
+    this.xmlPreviewContenido = esAnterior
+      ? this.reasignacionSeleccionada?.xmlanterior || ''
+      : this.reasignacionSeleccionada?.xmlnuevo || '';
+    $('#xmlReasignacionModal').modal('show');
+  }
+
+  descargarXmlReasignacion(item: any, tipo: 'anterior' | 'nuevo'): void {
+    const esAnterior = tipo === 'anterior';
+    const contenido = esAnterior ? item?.xmlanterior : item?.xmlnuevo;
+    if (!contenido) {
+      return;
+    }
+
+    const numeroFactura = esAnterior
+      ? item?.nrofacturaanterior || item?.idfactura
+      : item?.nrofacturanuevo || item?.idfactura;
+    const nombreSeguro = `${numeroFactura}`.replace(/[^\w.-]+/g, '_');
+    const blob = new Blob([contenido], { type: 'application/xml;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${esAnterior ? 'xml_anterior' : 'xml_nuevo'}_${nombreSeguro}.xml`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  exportarReporteReasignaciones(): void {
+    const registros = Array.isArray(this.reasignacionesFiltradas)
+      ? this.reasignacionesFiltradas
+      : [];
+
+    if (!registros.length) {
+      return;
+    }
+
+    const headers = [
+      'Planilla',
+      'Fecha reasignacion',
+      'Factura anterior',
+      'Factura nueva',
+      'Clave acceso anterior',
+      'Clave acceso nueva',
+      'Estado anterior',
+      'Estado nuevo',
+      'Motivo',
+    ];
+
+    const rows = registros.map((item: any) => [
+      item?.idfactura ?? '',
+      this.formatearFechaReporte(item?.fechareasignacion),
+      item?.nrofacturaanterior ?? '',
+      item?.nrofacturanuevo ?? '',
+      item?.claveaccesoanterior ?? '',
+      item?.claveaccesonueva ?? '',
+      item?.estadoanterior ?? '',
+      item?.estadonuevo ?? '',
+      item?.observacion ?? '',
+    ]);
+
+    const csv = [headers, ...rows]
+      .map((row) =>
+        row.map((value: any) => `"${String(value ?? '').replace(/"/g, '""')}"`).join(',')
+      )
+      .join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `reporte_reasignaciones_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  generarPdfReasignaciones(): void {
+    const registros = Array.isArray(this.reasignacionesFiltradas)
+      ? this.reasignacionesFiltradas
+      : [];
+
+    if (!registros.length) {
+      return;
+    }
+
+    const doc = new jsPDF('l', 'mm', 'a4');
+    doc.setFontSize(14);
+    doc.text('Reporte de reasignaciones de facturas', 14, 14);
+    doc.setFontSize(9);
+    doc.text(
+      `Generado: ${this.formatearFechaReporte(new Date())} | Registros: ${registros.length}`,
+      14,
+      20
+    );
+
+    autoTable(doc, {
+      startY: 26,
+      head: [[
+        'Planilla',
+        'Fecha',
+        'Factura anterior',
+        'Factura nueva',
+        'Estado ant.',
+        'Estado nuevo',
+        'Motivo',
+      ]],
+      body: registros.map((item: any) => [
+        item?.idfactura ?? '',
+        this.formatearFechaReporte(item?.fechareasignacion),
+        item?.nrofacturaanterior ?? '',
+        item?.nrofacturanuevo ?? '',
+        item?.estadoanterior ?? '',
+        item?.estadonuevo ?? '',
+        item?.observacion ?? '',
+      ]),
+      styles: {
+        fontSize: 8,
+        cellPadding: 2,
+      },
+      headStyles: {
+        fillColor: [15, 92, 106],
+      },
+    });
+
+    doc.save(`reporte_reasignaciones_${new Date().toISOString().slice(0, 10)}.pdf`);
+  }
+
+  private formatearFechaReporte(valor: any): string {
+    if (!valor) {
+      return '';
+    }
+    const fecha = new Date(valor);
+    if (Number.isNaN(fecha.getTime())) {
+      return `${valor}`;
+    }
+    const yyyy = fecha.getFullYear();
+    const mm = `${fecha.getMonth() + 1}`.padStart(2, '0');
+    const dd = `${fecha.getDate()}`.padStart(2, '0');
+    const hh = `${fecha.getHours()}`.padStart(2, '0');
+    const mi = `${fecha.getMinutes()}`.padStart(2, '0');
+    return `${yyyy}-${mm}-${dd} ${hh}:${mi}`;
   }
 
   private obtenerValorOrden(item: any, columna: string): any {

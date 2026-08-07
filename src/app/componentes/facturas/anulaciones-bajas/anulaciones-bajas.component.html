@@ -207,6 +207,21 @@
                         <div class="tab-pane" id="reasignadas">
                             <div class="post">
                                 <div class="user-block mb-0">
+                                    <div class="d-flex flex-wrap justify-content-between align-items-center p-2 border-bottom bg-white">
+                                        <div class="text-muted small">
+                                            Historial con XML anterior y XML nuevo registrado para SRI.
+                                        </div>
+                                        <div class="btn-group btn-group-sm mt-2 mt-sm-0">
+                                            <button type="button" class="btn btn-outline-secondary" [disabled]="!reasignacionesFiltradas.length"
+                                                (click)="exportarReporteReasignaciones()">
+                                                <i class="fa fa-file-excel-o"></i> Exportar CSV
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary" [disabled]="!reasignacionesFiltradas.length"
+                                                (click)="generarPdfReasignaciones()">
+                                                <i class="fa fa-file-pdf-o"></i> Exportar PDF
+                                            </button>
+                                        </div>
+                                    </div>
                                     <table class="table table-hover table-sm table-bordered mb-0">
                                         <thead class="theadFacelectro">
                                             <tr class="text-center">
@@ -215,6 +230,7 @@
                                                 <th class="sortable-header" (click)="toggleSort('reasignaciones', 'nrofacturaanterior')">Factura anterior <i [class]="getSortIcon('reasignaciones', 'nrofacturaanterior')"></i></th>
                                                 <th class="sortable-header" (click)="toggleSort('reasignaciones', 'nrofacturanuevo')">Factura nueva <i [class]="getSortIcon('reasignaciones', 'nrofacturanuevo')"></i></th>
                                                 <th class="sortable-header" (click)="toggleSort('reasignaciones', 'observacion')">Motivo <i [class]="getSortIcon('reasignaciones', 'observacion')"></i></th>
+                                                <th>Acciones</th>
                                             </tr>
                                         </thead>
                                         <tbody class="bodyFacelectro">
@@ -224,9 +240,24 @@
                                                 <td>{{item.nrofacturaanterior || '-'}}</td>
                                                 <td>{{item.nrofacturanuevo || '-'}}</td>
                                                 <td class="_description">{{item.observacion || 'Sin observación'}}</td>
+                                                <td class="text-center">
+                                                    <div class="btn-group btn-group-sm action-buttons-table">
+                                                        <button type="button" class="btn btn-outline-info" title="Ver detalle" (click)="verDetalleReasignacion(item)">
+                                                            <i class="fa fa-eye"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-outline-secondary" title="Descargar XML anterior"
+                                                            [disabled]="!item?.xmlanterior" (click)="descargarXmlReasignacion(item, 'anterior')">
+                                                            <i class="fa fa-download"></i> Ant.
+                                                        </button>
+                                                        <button type="button" class="btn btn-outline-secondary" title="Descargar XML nuevo"
+                                                            [disabled]="!item?.xmlnuevo" (click)="descargarXmlReasignacion(item, 'nuevo')">
+                                                            <i class="fa fa-download"></i> Nuevo
+                                                        </button>
+                                                    </div>
+                                                </td>
                                             </tr>
                                             <tr *ngIf="!_fReasignaciones?.length">
-                                                <td colspan="5" class="text-center text-muted py-3">No hay reasignaciones para mostrar</td>
+                                                <td colspan="6" class="text-center text-muted py-3">No hay reasignaciones para mostrar</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -257,6 +288,108 @@
             </div>
         </div>
 
+    </div>
+
+    <div class="modal fade" id="reasignacionDetalleModal" tabindex="-1" aria-labelledby="reasignacionDetalleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reasignacionDetalleModalLabel">
+                        Evidencia de reasignación - Planilla {{ reasignacionSeleccionada?.idfactura }}
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" *ngIf="reasignacionSeleccionada">
+                    <div class="detail-box mb-3">
+                        <div class="preview-grid preview-grid--detail">
+                            <div>
+                                <div class="preview-label">Fecha</div>
+                                <div class="preview-value">{{ reasignacionSeleccionada?.fechareasignacion | date:'yyyy-MM-dd HH:mm' }}</div>
+                            </div>
+                            <div>
+                                <div class="preview-label">Factura anterior</div>
+                                <div class="preview-value">{{ reasignacionSeleccionada?.nrofacturaanterior || '-' }}</div>
+                            </div>
+                            <div>
+                                <div class="preview-label">Factura nueva</div>
+                                <div class="preview-value preview-value--strong">{{ reasignacionSeleccionada?.nrofacturanuevo || '-' }}</div>
+                            </div>
+                            <div>
+                                <div class="preview-label">Clave acceso anterior</div>
+                                <div class="preview-value">{{ reasignacionSeleccionada?.claveaccesoanterior || '-' }}</div>
+                            </div>
+                            <div>
+                                <div class="preview-label">Clave acceso nueva</div>
+                                <div class="preview-value">{{ reasignacionSeleccionada?.claveaccesonueva || '-' }}</div>
+                            </div>
+                            <div>
+                                <div class="preview-label">Estados SRI</div>
+                                <div class="preview-value">{{ reasignacionSeleccionada?.estadoanterior || '-' }} -> {{ reasignacionSeleccionada?.estadonuevo || '-' }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="xml-card">
+                                <div class="xml-card__header">
+                                    <span>XML anterior</span>
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-info" [disabled]="!reasignacionSeleccionada?.xmlanterior"
+                                            (click)="verXmlReasignacion('anterior')">Ver</button>
+                                        <button type="button" class="btn btn-outline-secondary" [disabled]="!reasignacionSeleccionada?.xmlanterior"
+                                            (click)="descargarXmlReasignacion(reasignacionSeleccionada, 'anterior')">Descargar</button>
+                                    </div>
+                                </div>
+                                <div class="xml-card__body">
+                                    {{ reasignacionSeleccionada?.xmlanterior ? 'XML preservado en historial.' : 'No existe XML anterior guardado.' }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="xml-card">
+                                <div class="xml-card__header">
+                                    <span>XML nuevo</span>
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-info" [disabled]="!reasignacionSeleccionada?.xmlnuevo"
+                                            (click)="verXmlReasignacion('nuevo')">Ver</button>
+                                        <button type="button" class="btn btn-outline-secondary" [disabled]="!reasignacionSeleccionada?.xmlnuevo"
+                                            (click)="descargarXmlReasignacion(reasignacionSeleccionada, 'nuevo')">Descargar</button>
+                                    </div>
+                                </div>
+                                <div class="xml-card__body">
+                                    {{ reasignacionSeleccionada?.xmlnuevo ? 'XML actualizado listo para revisión o trazabilidad.' : 'No existe XML nuevo guardado.' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="action-note p-3">
+                        <strong>Motivo:</strong> {{ reasignacionSeleccionada?.observacion || 'Sin observación' }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="xmlReasignacionModal" tabindex="-1" aria-labelledby="xmlReasignacionModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="xmlReasignacionModalLabel">{{ xmlPreviewTitulo }}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <pre class="xml-preview">{{ xmlPreviewContenido || 'No hay XML disponible para mostrar.' }}</pre>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Modal DetalleFactura -->

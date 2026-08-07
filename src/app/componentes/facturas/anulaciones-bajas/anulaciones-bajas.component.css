@@ -275,6 +275,52 @@ width: 40px;
   font-size: 1.06rem;
 }
 
+.preview-grid--detail {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.action-buttons-table {
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.xml-card {
+  border: 1px solid #d9e6f2;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #fbfdff 0%, #f4f8fb 100%);
+  height: 100%;
+}
+
+.xml-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid #dde7ef;
+  font-weight: 700;
+  color: #0f5c6a;
+}
+
+.xml-card__body {
+  padding: 1rem;
+  color: #4b6470;
+  min-height: 92px;
+}
+
+.xml-preview {
+  background: #0f1720;
+  color: #dceaf0;
+  border-radius: 12px;
+  padding: 1rem;
+  max-height: 65vh;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
 .modal-profesional-anulaciones {
   max-width: 1180px;
   width: calc(100% - 2rem);
@@ -297,6 +343,10 @@ width: 40px;
   }
 
   .preview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .preview-grid--detail {
     grid-template-columns: 1fr;
   }
 
