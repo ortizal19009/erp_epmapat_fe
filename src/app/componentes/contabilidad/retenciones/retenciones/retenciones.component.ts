@@ -9,7 +9,7 @@ import { DefinirService } from 'src/app/servicios/administracion/definir.service
 import { AirxreteService } from 'src/app/servicios/contabilidad/airxrete.service';
 import { FecReteimpuService } from 'src/app/servicios/contabilidad/fec-reteimpu.service';
 import { FecRetencionesService } from 'src/app/servicios/contabilidad/fec-retenciones.service';
-import { RetencionesSriService } from 'src/app/servicios/contabilidad/retenciones-sri.service';
+import { RetencionProcesadaResponse, RetencionesSriService } from 'src/app/servicios/contabilidad/retenciones-sri.service';
 import { RetencionesService } from 'src/app/servicios/contabilidad/retenciones.service';
 import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
 
@@ -503,14 +503,22 @@ export class RetencionesComponent implements OnInit, OnDestroy {
 
    async procesarSri(retencion: any) {
       const idretencion = this.getIdRetencion(retencion);
+      if (!idretencion) {
+         this.authService.swal('warning', 'No se pudo identificar la retención a procesar');
+         return;
+      }
       this.accionEnCursoId = idretencion;
       try {
-         const destinatario = this.getCorreoRetencion(retencion);
-         const asunto = `Retención ${this.getSecuencialArchivo(retencion)} autorizada`;
-         const mensaje = 'Adjuntamos su comprobante de retención autorizado en formato PDF.';
+         const xmlSinFirmar = await firstValueFrom(this.sriRetencionesService.descargarXmlSinFirmarPorId(idretencion));
+         const destinatario = this.getCorreoRetencion(retencion).trim();
          const resultado = await firstValueFrom(
-            this.sriRetencionesService.procesarPorId(idretencion, destinatario, asunto, mensaje)
+            this.sriRetencionesService.procesarXml(xmlSinFirmar, {
+               emailDestino: destinatario,
+               attempts: 30,
+               sleepMillis: 4000
+            })
          );
+         this.aplicarResultadoSriRetencion(retencion, resultado);
          const estadoResultado = this.normalizarEstadoSri(resultado?.estado);
          if (estadoResultado === 'PENDIENTE_AUTORIZACION' || estadoResultado === 'PENDIENTE' || estadoResultado === 'SIN_AUTORIZACION_EN_SRI') {
             this.authService.swal(
@@ -525,7 +533,7 @@ export class RetencionesComponent implements OnInit, OnDestroy {
          } else if (estadoResultado === 'YA_AUTORIZADA' || estadoResultado === 'CLAVE_DUPLICADA') {
             this.authService.swal('info', resultado?.detalle || 'La retención ya fue enviada o la clave de acceso está duplicada.');
          } else {
-            this.authService.swal('success', `Retención autorizada y enviada${resultado?.email ? ` a ${resultado.email}` : ''}`);
+            this.authService.swal('success', `Retención autorizada${resultado?.emailEncolado && resultado?.email ? ` y correo encolado a ${resultado.email}` : ''}`);
          }
          await this.cargarEstadosSri();
       } catch (error: any) {
@@ -778,6 +786,25 @@ export class RetencionesComponent implements OnInit, OnDestroy {
          return 'ERROR_ENVIO';
       }
       return texto;
+   }
+
+   private aplicarResultadoSriRetencion(retencion: any, resultado: RetencionProcesadaResponse | any): void {
+      if (!retencion || !resultado) {
+         return;
+      }
+      if (resultado?.estado) {
+         retencion.estado = resultado.estado;
+      }
+      if (resultado?.claveAcceso) {
+         retencion.claveacceso = resultado.claveAcceso;
+      }
+      if (resultado?.numeroAutorizacion) {
+         retencion.numautoriza = resultado.numeroAutorizacion;
+         retencion.numautoriza_e = resultado.numeroAutorizacion;
+      }
+      if (resultado?.fechaAutorizacion) {
+         retencion.fecautoriza = resultado.fechaAutorizacion;
+      }
    }
 
    private getSriErrorDetail(error: any, fallback: string): string {
