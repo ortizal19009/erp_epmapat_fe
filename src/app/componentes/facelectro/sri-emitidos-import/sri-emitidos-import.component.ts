@@ -6,6 +6,7 @@ import { FacturaService } from './../../../servicios/factura.service';
 import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
 import { SriEmitidoRow } from 'src/app/interfaces/fec_facturas/SriEmitidoRow';
 import { Router } from '@angular/router';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-sri-emitidos-import',
@@ -39,7 +40,7 @@ export class SriEmitidosImportComponent {
   archivoNombre = '';
 
   private API_XML_AUTORIZADO =
-    'http://192.168.0.33:9090/api/singsend/autorizacion';
+    `${((environment as any).SINGSEND_API_URL || environment.API_URL).replace(/\/$/, '')}/api/singsend/autorizacion`;
 
   constructor(
     private facturaService: FacturaService,

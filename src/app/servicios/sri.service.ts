@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 const apiUrl = environment.API_URL;
+const singsendUrl = ((environment as any).SINGSEND_API_URL || environment.API_URL).replace(/\/$/, '');
 const baseUrl = `${apiUrl}/api/sri`;
 
 @Injectable({
@@ -15,7 +16,7 @@ export class SriService {
     return this.http.post(`${baseUrl}/sendMail`, datos);
   }
   sendRetencion(xmlString: string): Observable<string> {
-    return this.http.post('http://192.168.0.90:8080/retencion', xmlString, {
+    return this.http.post(`${singsendUrl}/api/singsend/retencion/string`, xmlString, {
       headers: {
         'Content-Type': 'application/xml',
       },
@@ -23,7 +24,7 @@ export class SriService {
     });
   }
   sendFacturaElectronica(xmlPlano: string) {
-    return this.http.post(`${apiUrl}/api/singsend/factura`, xmlPlano,    {
+    return this.http.post(`${singsendUrl}/api/singsend/factura`, xmlPlano,    {
       responseType: 'json' // 👈 MUY IMPORTANTE
     });
   }

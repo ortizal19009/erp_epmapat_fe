@@ -15,6 +15,7 @@ import { LecturasService } from './lecturas.service';
 import { Abonados } from '../modelos/abonados';
 
 const apiUrl = environment.API_URL;
+const singsendUrl = ((environment as any).SINGSEND_API_URL || environment.API_URL).replace(/\/$/, '');
 const baseUrl = `${apiUrl}/fec_factura`;
 
 @Injectable({
@@ -626,7 +627,7 @@ export class FecfacturaService {
 
   getXmlAutorizadoSRI(claveAcceso: string) {
     return this.http.get(
-      `${apiUrl}/api/singsend/autorizacion?claveAcceso=${claveAcceso}`,
+      `${singsendUrl}/api/singsend/autorizacion?claveAcceso=${claveAcceso}`,
       { responseType: 'text' }
     );
   }

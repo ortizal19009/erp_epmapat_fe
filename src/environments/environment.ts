@@ -4,8 +4,8 @@
 
 export const environment = {
   production: false,
-  API_URL: 'http://localhost:9080',
-  GD_API_URL: 'http://localhost:9080',
+  API_URL: 'http://192.168.0.165:8080',
+  GD_API_URL: 'http://192.168.0.165:8080',
   SINGSEND_API_URL: 'http://192.168.0.33:9090',
   PRINT_BRIDGE_URL: 'http://localhost:8788',
   PRINT_BRIDGE_TOKEN: '',
