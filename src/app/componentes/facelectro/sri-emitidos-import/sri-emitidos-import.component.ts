@@ -1,12 +1,20 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { firstValueFrom } from 'rxjs';
-import { FacturaService } from './../../../servicios/factura.service';
-import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
-import { SriEmitidoRow } from 'src/app/interfaces/fec_facturas/SriEmitidoRow';
 import { Router } from '@angular/router';
-import { environment } from 'src/environments/environment';
+import { firstValueFrom } from 'rxjs';
+import { SriEmitidoRow } from 'src/app/interfaces/fec_facturas/SriEmitidoRow';
+import { LoadingService } from 'src/app/servicios/loading.service';
+import { FecfacturaService } from 'src/app/servicios/fecfactura.service';
+import { FacturaService } from 'src/app/servicios/factura.service';
+import {
+  SriAttachment,
+  SriAutorizacionResponse,
+  SriService,
+} from 'src/app/servicios/sri.service';
+
+type DocumentoManual = 'factura' | 'retencion';
+type TabSri = 'manual' | 'txt';
 
 @Component({
   selector: 'app-sri-emitidos-import',
@@ -16,6 +24,21 @@ import { environment } from 'src/environments/environment';
   standalone: true,
 })
 export class SriEmitidosImportComponent {
+  tabActiva: TabSri = 'manual';
+  tipoDocumentoManual: DocumentoManual = 'factura';
+  xmlManual = '';
+  xmlManualNombre = '';
+  claveAccesoManual = '';
+  ambienteManual = 2;
+  correoManual = '';
+  attemptsManual = 15;
+  sleepMillisManual = 4000;
+  procesandoManual = false;
+  consultandoManual = false;
+  resultadoManual: any = null;
+  mensajeManual = '';
+  errorManual = '';
+
   rows: SriEmitidoRow[] = [];
   headers: string[] = [];
   cargando = false;
@@ -39,29 +62,44 @@ export class SriEmitidosImportComponent {
   detectarCabecera: any = true;
   archivoNombre = '';
 
-  private API_XML_AUTORIZADO =
-    `${((environment as any).SINGSEND_API_URL || environment.API_URL).replace(/\/$/, '')}/api/singsend/autorizacion`;
+  private readonly apiXmlAutorizado = '/api/singsend/autorizacion';
 
   constructor(
     private facturaService: FacturaService,
     private fecFacturaService: FecfacturaService,
+    private sriService: SriService,
+    private loadingService: LoadingService,
     private router: Router
   ) {}
 
-  // =========================
-  // UI helpers
-  // =========================
+  setTab(tab: TabSri): void {
+    this.tabActiva = tab;
+  }
+
+  regresar() {
+    this.router.navigate(['/fecfactura']);
+  }
+
   limpiar(): void {
     this.rows = [];
     this.headers = [];
     this.q = '';
     this.soloErrores = false;
     this.archivoNombre = '';
-
     this.totalEnriq = 0;
     this.doneEnriq = 0;
     this.totalProc = 0;
     this.doneProc = 0;
+  }
+
+  limpiarManual(): void {
+    this.xmlManual = '';
+    this.xmlManualNombre = '';
+    this.claveAccesoManual = '';
+    this.correoManual = '';
+    this.resultadoManual = null;
+    this.mensajeManual = '';
+    this.errorManual = '';
   }
 
   async copiar(texto: string): Promise<void> {
@@ -78,9 +116,174 @@ export class SriEmitidosImportComponent {
     }
   }
 
-  // =========================
-  // 1) Cargar TXT + Parse + Enriquecer
-  // =========================
+  async onXmlManualSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.xmlManualNombre = file.name;
+    this.errorManual = '';
+
+    try {
+      const text = await file.text();
+      this.xmlManual = text;
+      this.claveAccesoManual = this.extraerClaveAcceso(text);
+    } catch (error) {
+      console.error(error);
+      this.errorManual = 'No se pudo leer el archivo XML seleccionado.';
+    }
+  }
+
+  async enviarXmlManual(): Promise<void> {
+    if (!this.xmlManual?.trim()) {
+      this.errorManual = 'Carga o pega un XML antes de enviar.';
+      return;
+    }
+
+    const erroresValidacion = this.validarXmlManualAntesDeEnviar(this.xmlManual.trim());
+    if (erroresValidacion.length > 0) {
+      this.errorManual = erroresValidacion.join(' | ');
+      return;
+    }
+
+    this.procesandoManual = true;
+    this.errorManual = '';
+    this.mensajeManual = '';
+    this.resultadoManual = null;
+    this.loadingService.showLoading();
+
+    try {
+      const xml = this.xmlManual.trim();
+      this.claveAccesoManual = this.extraerClaveAcceso(xml);
+
+      if (this.tipoDocumentoManual === 'retencion') {
+        const respuesta = await firstValueFrom(
+          this.sriService.procesarRetencionXml(xml, {
+            ambiente: this.ambienteManual,
+            emailDestino: this.correoManual || undefined,
+            attempts: this.attemptsManual,
+            sleepMillis: this.sleepMillisManual,
+          })
+        );
+
+        this.resultadoManual = respuesta;
+        this.claveAccesoManual =
+          respuesta?.claveAcceso || this.claveAccesoManual;
+        this.mensajeManual = this.buildResultadoLabel(respuesta);
+        return;
+      }
+
+      const respuesta = await firstValueFrom(
+        this.sriService.sendFacturaElectronica(xml)
+      );
+
+      this.resultadoManual = respuesta;
+      this.mensajeManual = this.buildResultadoLabel(respuesta);
+
+      const claveRespuesta =
+        respuesta?.claveAcceso ||
+        respuesta?.autorizacion?.claveAccesoConsultada ||
+        this.extraerClaveDesdeRespuestaFactura(respuesta);
+
+      if (claveRespuesta) {
+        this.claveAccesoManual = claveRespuesta;
+      }
+    } catch (error: any) {
+      console.error('Error al procesar XML manual:', error);
+      this.errorManual =
+        error?.error?.detalle ||
+        error?.error?.message ||
+        error?.error?.error ||
+        error?.message ||
+        'No se pudo procesar el XML en el SRI.';
+    } finally {
+      this.procesandoManual = false;
+      this.loadingService.hideLoading();
+    }
+  }
+
+  async consultarAutorizacionManual(): Promise<void> {
+    if (!this.xmlManual?.trim()) {
+      this.errorManual = 'Primero carga o pega el XML.';
+      return;
+    }
+
+    this.consultandoManual = true;
+    this.errorManual = '';
+    this.loadingService.showLoading();
+
+    try {
+      const respuesta = await firstValueFrom(
+        this.sriService.consultarAutorizacionPorXml(this.xmlManual.trim(), {
+          wait: true,
+          attempts: this.attemptsManual,
+          sleepMillis: this.sleepMillisManual,
+          includeXml: true,
+        })
+      );
+
+      this.resultadoManual = {
+        ...(this.resultadoManual || {}),
+        ...respuesta,
+      };
+      this.claveAccesoManual =
+        respuesta?.claveAcceso || this.claveAccesoManual;
+      this.mensajeManual = this.buildResultadoLabel(respuesta);
+    } catch (error: any) {
+      console.error('Error al consultar autorización:', error);
+      this.errorManual =
+        error?.error?.detalle ||
+        error?.error?.message ||
+        error?.error?.error ||
+        error?.message ||
+        'No se pudo consultar la autorización en el SRI.';
+    } finally {
+      this.consultandoManual = false;
+      this.loadingService.hideLoading();
+    }
+  }
+
+  descargarXmlAutorizadoManual(): void {
+    const xml = this.obtenerXmlAutorizadoManual();
+    if (!xml) {
+      this.errorManual = 'Aún no hay XML autorizado disponible para descargar.';
+      return;
+    }
+
+    const tipo = this.tipoDocumentoManual === 'retencion' ? 'retencion' : 'factura';
+    const clave = this.claveAccesoManual || 'sin-clave';
+    this.descargarTexto(xml, `${tipo}-${clave}-autorizado.xml`, 'application/xml');
+  }
+
+  descargarPdfManual(): void {
+    const pdfBase64 = this.obtenerPdfBase64Manual();
+    if (!pdfBase64) {
+      this.errorManual = 'Aún no hay PDF disponible en la respuesta del backend.';
+      return;
+    }
+
+    const tipo = this.tipoDocumentoManual === 'retencion' ? 'retencion' : 'factura';
+    const clave = this.claveAccesoManual || 'sin-clave';
+    this.descargarBase64(pdfBase64, `${tipo}-${clave}.pdf`, 'application/pdf');
+  }
+
+  totalEnriq = 0;
+  doneEnriq = 0;
+  totalProc = 0;
+  doneProc = 0;
+
+  get progresoEnriqPct(): number {
+    return this.totalEnriq
+      ? Math.round((this.doneEnriq / this.totalEnriq) * 100)
+      : 0;
+  }
+
+  get progresoProcPct(): number {
+    return this.totalProc
+      ? Math.round((this.doneProc / this.totalProc) * 100)
+      : 0;
+  }
+
   async onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -90,21 +293,19 @@ export class SriEmitidosImportComponent {
     this.cargando = true;
     this.rows = [];
     this.headers = [];
+    this.loadingService.showLoading();
 
     try {
       const text = await file.text();
       this.parseTxt(text);
-
-      // DEBUG: confirma que sí cargó filas
-      console.log('Filas parseadas:', this.rows.length, this.rows.slice(0, 3));
     } catch (e) {
       console.error(e);
       alert('No se pudo leer el archivo');
     } finally {
       this.cargando = false;
+      this.loadingService.hideLoading();
     }
 
-    // Enriquecer
     await this.enriquecerConFacturaERP();
   }
 
@@ -121,7 +322,6 @@ export class SriEmitidosImportComponent {
       return;
     }
 
-    // OJO: el TXT del SRI a veces viene separado por TAB o | o ;
     const delimiter = this.detectDelimiter(lines[0]);
 
     let startIndex = 0;
@@ -167,7 +367,7 @@ export class SriEmitidosImportComponent {
           importe_total: 0,
           raw,
           valido: false,
-          error: `Fila ${i + 1}: columnas insuficientes (${cols.length}). Delimitador='${delimiter === '\t' ? 'TAB' : delimiter}'`,
+          error: `Fila ${i + 1}: columnas insuficientes (${cols.length}).`,
           encontrada: false,
           idfactura: null,
           fechacobro: null,
@@ -188,7 +388,6 @@ export class SriEmitidosImportComponent {
         importe_total: this.toNumber(cols[7]),
         raw,
         valido: true,
-
         encontrada: false,
         idfactura: null,
         fechacobro: null,
@@ -213,34 +412,16 @@ export class SriEmitidosImportComponent {
 
     this.rows = parsed;
   }
-  totalEnriq = 0;
-  doneEnriq = 0;
 
-  totalProc = 0;
-  doneProc = 0;
-
-  get progresoEnriqPct(): number {
-    return this.totalEnriq
-      ? Math.round((this.doneEnriq / this.totalEnriq) * 100)
-      : 0;
-  }
-    regresar() {
-    this.router.navigate(['/fecfactura']);
-  }
-
-  get progresoProcPct(): number {
-    return this.totalProc
-      ? Math.round((this.doneProc / this.totalProc) * 100)
-      : 0;
-  }
-  // =========================
-  // 2) Enriquecer con Factura ERP
-  // =========================
-  private async _enriquecerConFacturaERP() {
+  private async enriquecerConFacturaERP() {
     const candidatas = this.rows.filter((r) => r.valido);
+
     if (candidatas.length === 0) return;
 
     this.cargandoEnriquecimiento = true;
+    this.totalEnriq = candidatas.length;
+    this.doneEnriq = 0;
+    this.loadingService.showLoading();
 
     for (const r of candidatas) {
       try {
@@ -252,45 +433,46 @@ export class SriEmitidosImportComponent {
           r.encontrada = false;
           r.estadoProceso = 'NO_ENCONTRADA';
           r.msg = 'No existe en ERP';
-          continue;
+        } else {
+          r.encontrada = true;
+          r.idfactura = factura[0].idfactura ?? null;
+          r.fechacobro = factura[0].fechacobro ?? null;
+          r.estadoProceso = 'ENCONTRADA';
+          r.msg = r.fechacobro ? 'Encontrada (cobrada)' : 'Encontrada';
         }
-
-        r.encontrada = true;
-        r.idfactura = factura.idfactura ?? null;
-        r.fechacobro = factura.fechacobro ?? null;
-        r.estadoProceso = 'ENCONTRADA';
-        r.msg = r.fechacobro ? 'Encontrada (cobrada)' : 'Encontrada';
       } catch {
         r.encontrada = false;
         r.estadoProceso = 'NO_ENCONTRADA';
         r.msg = 'No existe en ERP';
+      } finally {
+        this.doneEnriq++;
       }
     }
 
     this.cargandoEnriquecimiento = false;
+    this.loadingService.hideLoading();
   }
 
-  // =========================
-  // 3) Procesar: solo ENCONTRADAS
-  // =========================
-  async _procesarSeleccionadas() {
+  async procesarSeleccionadas() {
     const filas = this.rows.filter(
       (r) => r.valido && r.encontrada && !!r.idfactura,
     );
     if (filas.length === 0) return;
 
     this.cargandoProcesamiento = true;
+    this.totalProc = filas.length;
+    this.doneProc = 0;
+    this.loadingService.showLoading();
 
     for (const r of filas) {
       try {
-        // 1) Consultar FE por idfactura
         let fe: any = null;
         try {
           fe = await firstValueFrom(
             this.fecFacturaService.getByIdFactura(r.idfactura!),
           );
         } catch {
-          fe = null; // si no existe, seguimos
+          fe = null;
         }
 
         if (fe && (fe.estado === 'A' || fe.estado === 'O')) {
@@ -299,10 +481,9 @@ export class SriEmitidosImportComponent {
           continue;
         }
 
-        // 2) Obtener XML autorizado (string)
         const xmlAutorizado = await firstValueFrom(
           this.fecFacturaService.getXmlAutorizado(
-            this.API_XML_AUTORIZADO,
+            this.apiXmlAutorizado,
             r.clave_acceso,
           ),
         );
@@ -313,9 +494,8 @@ export class SriEmitidosImportComponent {
           continue;
         }
 
-        // 3) PATCH parcial (estado + clave + xml)
         await firstValueFrom(
-          this.fecFacturaService.patchSri(r.idfactura!, {
+          this.fecFacturaService.updateSriFields(r.idfactura!, {
             claveacceso: r.clave_acceso,
             xmlautorizado: xmlAutorizado,
             estado: 'O',
@@ -327,15 +507,15 @@ export class SriEmitidosImportComponent {
       } catch (e: any) {
         r.estadoProceso = 'ERROR';
         r.msg = e?.error?.message || e?.message || 'Error procesando';
+      } finally {
+        this.doneProc++;
       }
     }
 
     this.cargandoProcesamiento = false;
+    this.loadingService.hideLoading();
   }
 
-  // =========================
-  // Getters para UI
-  // =========================
   get totalOk(): number {
     return this.rows.filter((r) => r.valido).length;
   }
@@ -459,9 +639,6 @@ export class SriEmitidosImportComponent {
     }
   }
 
-  // =========================
-  // Helpers parse
-  // =========================
   private detectDelimiter(sampleLine: string): string {
     const candidates = ['|', ';', '\t', ','];
     let best = candidates[0];
@@ -489,118 +666,184 @@ export class SriEmitidosImportComponent {
     const lastDot = s.lastIndexOf('.');
 
     if (lastComma > lastDot) {
-      // coma decimal
       s = s.replace(/\./g, '').replace(',', '.');
     } else {
-      // punto decimal
       s = s.replace(/,/g, '');
     }
 
     const n = Number(s);
     return isNaN(n) ? 0 : n;
   }
-  private async enriquecerConFacturaERP() {
-    const candidatas = this.rows.filter((r) => r.valido);
 
-    if (candidatas.length === 0) return;
-
-    this.cargandoEnriquecimiento = true;
-
-    this.totalEnriq = candidatas.length;
-    this.doneEnriq = 0;
-
-    for (const r of candidatas) {
-      try {
-        const factura = await this.facturaService.async_getByNrofactura(
-          r.serie_comprobante,
-        );
-
-        if (!factura) {
-          r.encontrada = false;
-          r.estadoProceso = 'NO_ENCONTRADA';
-          r.msg = 'No existe en ERP';
-        } else {
-          r.encontrada = true;
-          r.idfactura = factura[0].idfactura ?? null;
-          r.fechacobro = factura[0].fechacobro ?? null;
-          r.estadoProceso = 'ENCONTRADA';
-          r.msg = r.fechacobro ? 'Encontrada (cobrada)' : 'Encontrada';
-        }
-      } catch {
-        r.encontrada = false;
-        r.estadoProceso = 'NO_ENCONTRADA';
-        r.msg = 'No existe en ERP';
-      } finally {
-        this.doneEnriq++;
-      }
-    }
-
-    this.cargandoEnriquecimiento = false;
+  private extraerClaveAcceso(xml: string): string {
+    const match = xml.match(/<claveAcceso>([^<]+)<\/claveAcceso>/i);
+    return match?.[1]?.trim() || '';
   }
 
-  async procesarSeleccionadas() {
-    console.log('PROCESANDO...');
-    const filas = this.rows.filter(
-      (r) => r.valido && r.encontrada && !!r.idfactura,
-    );
-    if (filas.length === 0) return;
+  private extraerValorTag(xml: string, tag: string): string {
+    const regex = new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`, 'i');
+    const match = xml.match(regex);
+    return match?.[1]?.trim() || '';
+  }
 
-    this.cargandoProcesamiento = true;
+  private validarXmlManualAntesDeEnviar(xml: string): string[] {
+    const errores: string[] = [];
+    const claveAcceso = this.extraerClaveAcceso(xml);
 
-    this.totalProc = filas.length;
-    this.doneProc = 0;
+    if (!claveAcceso) {
+      errores.push('El XML no contiene la etiqueta claveAcceso.');
+    }
 
-    for (const r of filas) {
-      try {
-        // 1) Consultar FE (si no existe, seguimos)
-        let fe: any = null;
-        try {
-          fe = await firstValueFrom(
-            this.fecFacturaService.getByIdFactura(r.idfactura!),
-          );
-        } catch {
-          fe = null;
-        }
+    if (this.tipoDocumentoManual === 'factura') {
+      const razonSocialComprador = this.extraerValorTag(xml, 'razonSocialComprador');
+      const identificacionComprador = this.extraerValorTag(xml, 'identificacionComprador');
+      const fechaEmision = this.extraerValorTag(xml, 'fechaEmision');
 
-        if (fe && (fe.estado === 'A' || fe.estado === 'O')) {
-          r.estadoProceso = 'SALTADA';
-          r.msg = `Sin cambios (estado=${fe.estado})`;
-          continue;
-        }
+      if (!razonSocialComprador) {
+        errores.push('La etiqueta razonSocialComprador está vacía.');
+      }
 
-        // 2) XML autorizado
-        const xmlAutorizado = await firstValueFrom(
-          this.fecFacturaService.getXmlAutorizado(
-            this.API_XML_AUTORIZADO,
-            r.clave_acceso,
-          ),
-        );
+      if (!identificacionComprador) {
+        errores.push('La etiqueta identificacionComprador está vacía.');
+      }
 
-        if (!xmlAutorizado || xmlAutorizado.trim().length < 20) {
-          r.estadoProceso = 'ERROR';
-          r.msg = 'No se obtuvo XML autorizado';
-          continue;
-        }
-
-        // 3) PATCH parcial
-        await firstValueFrom(
-          this.fecFacturaService.updateSriFields(r.idfactura!, {
-            claveacceso: r.clave_acceso,
-            xmlautorizado: xmlAutorizado,
-            estado: 'O',
-          }),
-        );
-
-        r.estadoProceso = 'ACTUALIZADA';
-        r.msg = 'Actualizada (clave + XML + estado O)';
-      } catch (e: any) {
-        r.estadoProceso = 'ERROR';
-        r.msg = e?.error?.message || e?.message || 'Error procesando';
-      } finally {
-        this.doneProc++;
+      if (!fechaEmision) {
+        errores.push('La etiqueta fechaEmision está vacía.');
       }
     }
 
-    this.cargandoProcesamiento = false;
+    if (this.tipoDocumentoManual === 'retencion') {
+      const razonSocialSujetoRetenido = this.extraerValorTag(xml, 'razonSocialSujetoRetenido');
+      const identificacionSujetoRetenido = this.extraerValorTag(xml, 'identificacionSujetoRetenido');
+      const periodoFiscal = this.extraerValorTag(xml, 'periodoFiscal');
+
+      if (!razonSocialSujetoRetenido) {
+        errores.push('La etiqueta razonSocialSujetoRetenido está vacía.');
+      }
+
+      if (!identificacionSujetoRetenido) {
+        errores.push('La etiqueta identificacionSujetoRetenido está vacía.');
+      }
+
+      if (!periodoFiscal) {
+        errores.push('La etiqueta periodoFiscal está vacía.');
+      }
+    }
+
+    return errores;
+  }
+
+  private buildResultadoLabel(resultado: any): string {
+    const estado =
+      resultado?.estado ||
+      resultado?.recepcionEstado ||
+      resultado?.autorizacion?.autorizaciones?.autorizacion?.[0]?.estado ||
+      '';
+    const detalle =
+      resultado?.mensaje ||
+      resultado?.detalle ||
+      resultado?.error ||
+      '';
+
+    return [estado, detalle].filter(Boolean).join(' - ');
+  }
+
+  private extraerClaveDesdeRespuestaFactura(respuesta: any): string {
+    const auth = respuesta?.autorizacion?.autorizaciones?.autorizacion?.[0];
+    if (!auth) {
+      return '';
+    }
+
+    const comprobante = auth?.comprobante || '';
+    return this.extraerClaveAcceso(comprobante);
+  }
+
+  private obtenerXmlAutorizadoManual(): string {
+    const resultado = this.resultadoManual;
+
+    if (!resultado) {
+      return '';
+    }
+
+    if (typeof resultado?.xmlAutorizado === 'string' && resultado.xmlAutorizado.trim()) {
+      return resultado.xmlAutorizado;
+    }
+
+    if (typeof resultado?.xmlAutorizadoBase64 === 'string' && resultado.xmlAutorizadoBase64.trim()) {
+      return this.base64ToText(resultado.xmlAutorizadoBase64);
+    }
+
+    if (typeof resultado === 'string' && resultado.trim().startsWith('<')) {
+      return resultado;
+    }
+
+    const comprobante =
+      resultado?.autorizacion?.autorizaciones?.autorizacion?.[0]?.comprobante ||
+      resultado?.autorizaciones?.[0]?.comprobante;
+
+    if (typeof comprobante === 'string' && comprobante.trim()) {
+      return comprobante;
+    }
+
+    return '';
+  }
+
+  private obtenerPdfBase64Manual(): string {
+    const resultado = this.resultadoManual;
+    if (!resultado) {
+      return '';
+    }
+
+    if (typeof resultado?.pdfBase64 === 'string' && resultado.pdfBase64.trim()) {
+      return resultado.pdfBase64;
+    }
+
+    const attachments = resultado?.attachments || resultado?.adjuntos || [];
+    const pdfAttachment = (attachments as SriAttachment[]).find((item) => {
+      const type = (item?.contentType || item?.mimeType || '').toLowerCase();
+      const name = (item?.fileName || item?.filename || '').toLowerCase();
+      return type.includes('pdf') || name.endsWith('.pdf');
+    });
+
+    return (
+      pdfAttachment?.base64Data ||
+      pdfAttachment?.dataBase64 ||
+      pdfAttachment?.contentBase64 ||
+      ''
+    );
+  }
+
+  private descargarTexto(texto: string, nombre: string, type: string): void {
+    const blob = new Blob([texto], { type });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = nombre;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  private descargarBase64(base64: string, nombre: string, mimeType: string): void {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+
+    const blob = new Blob([bytes], { type: mimeType });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = nombre;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  private base64ToText(base64: string): string {
+    try {
+      return decodeURIComponent(escape(atob(base64)));
+    } catch {
+      return atob(base64);
+    }
   }
 }

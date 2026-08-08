@@ -2,39 +2,25 @@
   border-radius: 14px;
 }
 
-.sri-header {
-  border-bottom: 1px solid rgba(0,0,0,.06);
+.xml-editor {
+  min-height: 420px;
+  resize: vertical;
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 0.82rem;
+  line-height: 1.35;
 }
 
-.sri-toolbar .form-control,
-.sri-toolbar .input-group-text,
-.sri-toolbar .btn {
-  border-radius: 10px;
-}
-
-.sri-progress {
-  background: #fff;
-  border: 1px solid rgba(0,0,0,.06);
+.resultado-json {
+  max-height: 420px;
+  overflow: auto;
+  background: #0f172a;
+  color: #e2e8f0;
   border-radius: 12px;
-  padding: 10px 12px;
+  padding: 14px;
+  font-size: 0.78rem;
+  line-height: 1.35;
 }
 
-.sri-table {
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
-.sri-thead th {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-}
-
-.sri-clave {
-  max-width: 320px;
+.font-monospace {
   word-break: break-all;
-}
-
-.sri-chips .badge {
-  padding: .45rem .65rem;
 }
