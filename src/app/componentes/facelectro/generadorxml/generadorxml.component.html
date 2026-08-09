@@ -241,6 +241,33 @@
                            </div>
                         </div>
                      </div>
+
+                     <div class="table-responsive mt-3" *ngIf="diagnosticoComprador.fuentes?.length">
+                        <table class="table table-bordered table-sm mb-0 summary-tax-table">
+                           <thead>
+                              <tr>
+                                 <th>Fuente</th>
+                                 <th>Nombre</th>
+                                 <th>Cédula</th>
+                                 <th>Dirección</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <tr *ngFor="let fuente of diagnosticoComprador.fuentes">
+                                 <td class="font-weight-bold">{{ fuente.etiqueta }}</td>
+                                 <td [ngClass]="{ 'text-danger font-weight-bold': !fuente.nombre }">
+                                    {{ fuente.nombre || 'VACÍO' }}
+                                 </td>
+                                 <td [ngClass]="{ 'text-danger font-weight-bold': !fuente.cedula }">
+                                    {{ fuente.cedula || 'VACÍO' }}
+                                 </td>
+                                 <td [ngClass]="{ 'text-warning font-weight-bold': !fuente.direccion }">
+                                    {{ fuente.direccion || 'SIN DIRECCIÓN' }}
+                                 </td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
                   </div>
                </div>
 

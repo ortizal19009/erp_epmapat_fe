@@ -51,6 +51,12 @@ export class GeneradorxmlComponent implements OnInit {
     nombre: string;
     cedula: string;
     direccion: string;
+    fuentes: Array<{
+      etiqueta: string;
+      nombre: string;
+      cedula: string;
+      direccion: string;
+    }>;
   } | null = null;
 
   constructor(
@@ -440,6 +446,26 @@ export class GeneradorxmlComponent implements OnInit {
         nombre,
         cedula,
         direccion,
+        fuentes: [
+          {
+            etiqueta: 'abonado.idresponsable',
+            nombre: clienteResponsable?.nombre?.trim() || '',
+            cedula: clienteResponsable?.cedula?.trim() || '',
+            direccion: clienteResponsable?.direccion?.trim() || '',
+          },
+          {
+            etiqueta: 'abonado.idcliente_clientes',
+            nombre: clienteAbonado?.nombre?.trim() || '',
+            cedula: clienteAbonado?.cedula?.trim() || '',
+            direccion: clienteAbonado?.direccion?.trim() || '',
+          },
+          {
+            etiqueta: 'factura.idcliente',
+            nombre: clienteFactura?.nombre?.trim() || '',
+            cedula: clienteFactura?.cedula?.trim() || '',
+            direccion: clienteFactura?.direccion?.trim() || '',
+          },
+        ],
       };
     }
 
@@ -467,6 +493,20 @@ export class GeneradorxmlComponent implements OnInit {
       nombre,
       cedula,
       direccion,
+      fuentes: [
+        {
+          etiqueta: 'factura.idcliente',
+          nombre: clienteFactura?.nombre?.trim() || '',
+          cedula: clienteFactura?.cedula?.trim() || '',
+          direccion: clienteFactura?.direccion?.trim() || '',
+        },
+        {
+          etiqueta: 'abonado.idcliente_clientes',
+          nombre: clienteAbonado?.nombre?.trim() || '',
+          cedula: clienteAbonado?.cedula?.trim() || '',
+          direccion: clienteAbonado?.direccion?.trim() || '',
+        },
+      ],
     };
   }
 
@@ -475,6 +515,12 @@ export class GeneradorxmlComponent implements OnInit {
     nombre: string;
     cedula: string;
     direccion: string;
+    fuentes: Array<{
+      etiqueta: string;
+      nombre: string;
+      cedula: string;
+      direccion: string;
+    }>;
   }): string[] {
     const errores: string[] = [];
 
