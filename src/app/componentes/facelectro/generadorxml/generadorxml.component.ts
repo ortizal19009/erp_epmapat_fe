@@ -285,6 +285,10 @@ export class GeneradorxmlComponent implements OnInit {
 
       // 2) Resolver datos del comprador (cliente efectivo)
       const comprador = this.getCompradorData(factura, abonado);
+      const erroresComprador = this.validarCompradorData(comprador);
+      if (erroresComprador.length > 0) {
+        throw new Error(erroresComprador.join(' | '));
+      }
 
       // 3) Construir valores base
       this.claveAcceso();
@@ -389,18 +393,57 @@ export class GeneradorxmlComponent implements OnInit {
         (factura.idmodulo?.idmodulo === 3 && factura.idabonado !== 0));
 
     if (usaAbonado) {
+      const nombre =
+        abonado!.idresponsable?.nombre?.trim() ||
+        factura.idcliente?.nombre?.trim() ||
+        this.formFactura?.value?.cliente?.trim() ||
+        '';
+      const cedula =
+        abonado!.idresponsable?.cedula?.trim() ||
+        factura.idcliente?.cedula?.trim() ||
+        '';
+      const direccion =
+        abonado!.direccionubicacion?.trim() ||
+        factura.idcliente?.direccion?.trim() ||
+        '';
+
       return {
-        nombre: abonado!.idresponsable?.nombre ?? '',
-        cedula: abonado!.idresponsable?.cedula ?? '',
-        direccion: abonado!.direccionubicacion ?? '',
+        nombre,
+        cedula,
+        direccion,
       };
     }
 
+    const nombre =
+      factura.idcliente?.nombre?.trim() ||
+      this.formFactura?.value?.cliente?.trim() ||
+      '';
+    const cedula = factura.idcliente?.cedula?.trim() || '';
+    const direccion = factura.idcliente?.direccion?.trim() || '';
+
     return {
-      nombre: factura.idcliente?.nombre ?? '',
-      cedula: factura.idcliente?.cedula ?? '',
-      direccion: factura.idcliente?.direccion ?? '',
+      nombre,
+      cedula,
+      direccion,
     };
+  }
+
+  private validarCompradorData(comprador: {
+    nombre: string;
+    cedula: string;
+    direccion: string;
+  }): string[] {
+    const errores: string[] = [];
+
+    if (!comprador?.nombre?.trim()) {
+      errores.push('La razon social del comprador está vacía');
+    }
+
+    if (!comprador?.cedula?.trim()) {
+      errores.push('La identificación del comprador está vacía');
+    }
+
+    return errores;
   }
 
   /** Construye el JSON para xml-js */
