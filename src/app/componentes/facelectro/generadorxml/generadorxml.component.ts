@@ -45,6 +45,13 @@ export class GeneradorxmlComponent implements OnInit {
     baseImponible: number;
     valor: number;
   }> = [];
+  errorGeneracionXml = '';
+  diagnosticoComprador: {
+    origen: string;
+    nombre: string;
+    cedula: string;
+    direccion: string;
+  } | null = null;
 
   constructor(
     private router: Router,
@@ -125,6 +132,8 @@ export class GeneradorxmlComponent implements OnInit {
     this.swfincalc = false;
     this.swgenerar = false;
     this.swencuentra = false;
+    this.errorGeneracionXml = '';
+    this.diagnosticoComprador = null;
     this.nrofactura = this.formBuscar.value.nrofactura;
     this.facService.getByNrofactura(this.nrofactura).subscribe({
       next: (datos) => {
@@ -266,6 +275,7 @@ export class GeneradorxmlComponent implements OnInit {
     if (!this._facturas?.length) return;
 
     this.swgenerar = true;
+    this.errorGeneracionXml = '';
 
     try {
       const factura = this._facturas[0];
@@ -285,6 +295,7 @@ export class GeneradorxmlComponent implements OnInit {
 
       // 2) Resolver datos del comprador (cliente efectivo)
       const comprador = this.getCompradorData(factura, abonado);
+      this.diagnosticoComprador = comprador;
       const erroresComprador = this.validarCompradorData(comprador);
       if (erroresComprador.length > 0) {
         throw new Error(erroresComprador.join(' | '));
@@ -380,6 +391,8 @@ export class GeneradorxmlComponent implements OnInit {
       });
     } catch (err) {
       console.error('Error generarXmlFile:', err);
+      this.errorGeneracionXml =
+        err instanceof Error ? err.message : 'No se pudo generar el XML.';
     } finally {
       this.swgenerar = false;
     }
@@ -387,6 +400,10 @@ export class GeneradorxmlComponent implements OnInit {
 
   /** Decide si usa datos del abonado o del cliente */
   private getCompradorData(factura: any, abonado: Abonados | null) {
+    const clienteFactura = factura?.idcliente ?? null;
+    const clienteResponsable = abonado?.idresponsable ?? null;
+    const clienteAbonado = abonado?.idcliente_clientes ?? null;
+
     const usaAbonado =
       abonado &&
       (factura.idmodulo?.idmodulo === 4 ||
@@ -394,20 +411,32 @@ export class GeneradorxmlComponent implements OnInit {
 
     if (usaAbonado) {
       const nombre =
-        abonado!.idresponsable?.nombre?.trim() ||
-        factura.idcliente?.nombre?.trim() ||
+        clienteResponsable?.nombre?.trim() ||
+        clienteAbonado?.nombre?.trim() ||
+        clienteFactura?.nombre?.trim() ||
         this.formFactura?.value?.cliente?.trim() ||
         '';
       const cedula =
-        abonado!.idresponsable?.cedula?.trim() ||
-        factura.idcliente?.cedula?.trim() ||
+        clienteResponsable?.cedula?.trim() ||
+        clienteAbonado?.cedula?.trim() ||
+        clienteFactura?.cedula?.trim() ||
         '';
       const direccion =
         abonado!.direccionubicacion?.trim() ||
-        factura.idcliente?.direccion?.trim() ||
+        clienteResponsable?.direccion?.trim() ||
+        clienteAbonado?.direccion?.trim() ||
+        clienteFactura?.direccion?.trim() ||
         '';
 
       return {
+        origen:
+          clienteResponsable?.nombre?.trim()
+            ? 'abonado.idresponsable'
+            : clienteAbonado?.nombre?.trim()
+            ? 'abonado.idcliente_clientes'
+            : clienteFactura?.nombre?.trim()
+            ? 'factura.idcliente'
+            : 'sin-datos',
         nombre,
         cedula,
         direccion,
@@ -415,13 +444,26 @@ export class GeneradorxmlComponent implements OnInit {
     }
 
     const nombre =
-      factura.idcliente?.nombre?.trim() ||
+      clienteFactura?.nombre?.trim() ||
+      clienteAbonado?.nombre?.trim() ||
       this.formFactura?.value?.cliente?.trim() ||
       '';
-    const cedula = factura.idcliente?.cedula?.trim() || '';
-    const direccion = factura.idcliente?.direccion?.trim() || '';
+    const cedula =
+      clienteFactura?.cedula?.trim() ||
+      clienteAbonado?.cedula?.trim() ||
+      '';
+    const direccion =
+      clienteFactura?.direccion?.trim() ||
+      clienteAbonado?.direccion?.trim() ||
+      '';
 
     return {
+      origen:
+        clienteFactura?.nombre?.trim()
+          ? 'factura.idcliente'
+          : clienteAbonado?.nombre?.trim()
+          ? 'abonado.idcliente_clientes'
+          : 'sin-datos',
       nombre,
       cedula,
       direccion,
@@ -429,6 +471,7 @@ export class GeneradorxmlComponent implements OnInit {
   }
 
   private validarCompradorData(comprador: {
+    origen: string;
     nombre: string;
     cedula: string;
     direccion: string;
