@@ -1,9 +1,17 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
+import * as ExcelJS from 'exceljs';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { AbonadosService } from 'src/app/servicios/abonados.service';
 import { EmisionService } from 'src/app/servicios/emision.service';
 import * as L from 'leaflet';
 import { RutasService } from 'src/app/servicios/rutas.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
+import { ConvenioService } from 'src/app/servicios/convenio.service';
+import { CuotasService } from 'src/app/servicios/cuotas.service';
+import { PdfService } from 'src/app/servicios/pdf.service';
+import { ClientesService } from 'src/app/servicios/clientes.service';
 
 @Component({
   selector: 'app-home',
@@ -22,9 +30,30 @@ export class HomeComponent implements OnInit, AfterViewInit {
   _rutas: any;
   _abonados: any[] = [];
   abonados: any;
+  abonadosDetalleLoading = false;
+  abonadosDetalleFiltro = '';
+  abonadosDetallePage = 0;
+  abonadosDetalleSize = 10;
   filtro: string = '';
   txtModal: string = 'DETALLES';
   hoy = new Date();
+  conveniosFechaDesde = '';
+  conveniosFechaHasta = '';
+  convenioStatsLoading = false;
+  convenioStats = {
+    total: 0,
+    cuotas0: 0,
+    masDeUnaCuota: 0,
+    totalConveniado: 0,
+    totalRecaudado: 0,
+    totalPendiente: 0,
+  };
+  conveniosStatsDetalle: any[] = [];
+  carteraVencidaFecha = '';
+  carteraVencidaLoading = false;
+  carteraVencidaDetalle: any[] = [];
+  carteraVencidaTotal = 0;
+  carteraVencidaClientes = 0;
 
   edificioMatriz: any = [0.8038125013453109, -77.72763063596486];
 
@@ -71,6 +100,10 @@ export class HomeComponent implements OnInit, AfterViewInit {
     private s_abonados: AbonadosService,
     private s_rutas: RutasService,
     private coloresService: ColoresService,
+    private convenioService: ConvenioService,
+    private cuotasService: CuotasService,
+    private pdfService: PdfService,
+    private clientesService: ClientesService,
   ) {}
 
   // ══════════════════════════════════════
@@ -86,6 +119,10 @@ export class HomeComponent implements OnInit, AfterViewInit {
     this.getResumenEmisiones(12);
     this.getDatosAbonados();
     this.getRutas();
+    this.carteraVencidaFecha = this.toInputDate(this.hoy);
+    void this.getCarteraVencidaResumen();
+    this.inicializarFiltroConvenios();
+    void this.cargarEstadisticasConvenios();
   }
 
   ngAfterViewInit(): void {
@@ -189,6 +226,29 @@ export class HomeComponent implements OnInit, AfterViewInit {
     this._ByEstados    = await this.s_abonados.getCuentasByEstado();
   }
 
+  async getCarteraVencidaResumen(): Promise<void> {
+    this.carteraVencidaLoading = true;
+
+    try {
+      const fecha = this.carteraVencidaFecha || this.toInputDate(this.hoy);
+      const datos: any = await this.clientesService.asynGetCVOfClientes(fecha);
+      const lista = Array.isArray(datos) ? datos : [];
+      this.carteraVencidaDetalle = lista;
+
+      this.carteraVencidaClientes = lista.length;
+      this.carteraVencidaTotal = lista.reduce((acc: number, item: any) => {
+        return acc + Number(item?.valor ?? 0);
+      }, 0);
+    } catch (error) {
+      console.error('Error al cargar cartera vencida', error);
+      this.carteraVencidaDetalle = [];
+      this.carteraVencidaClientes = 0;
+      this.carteraVencidaTotal = 0;
+    } finally {
+      this.carteraVencidaLoading = false;
+    }
+  }
+
   getRutas() {
     this.s_rutas.getNcuentasByRutas().subscribe({
       next: (datos: any) => (this._rutas = datos),
@@ -202,11 +262,38 @@ export class HomeComponent implements OnInit, AfterViewInit {
     this.drawAllCuentas();
   }
 
-  findCuentasByEstado(estado: any) {
-    this.s_abonados.getByEstado(estado.estado).subscribe({
-      next: (datos: any) => (this.abonados = datos),
-      error: (e: any) => console.error(e),
-    });
+  async findCuentasByEstado(estado: any): Promise<void> {
+    this.txtModal = `Abonados por estado: ${estado?.descripcion ?? ''}`;
+    this.abonadosDetalleFiltro = '';
+    this.abonadosDetallePage = 0;
+    this.abonadosDetalleLoading = true;
+
+    try {
+      const datos: any = await firstValueFrom(this.s_abonados.getByEstado(estado.estado));
+      this.abonados = await this.enriquecerAbonadosDetalle(Array.isArray(datos) ? datos : []);
+    } catch (e: any) {
+      console.error(e);
+      this.abonados = [];
+    } finally {
+      this.abonadosDetalleLoading = false;
+    }
+  }
+
+  async findCuentasByCategoria(categoria: any): Promise<void> {
+    this.txtModal = `Abonados por categoria: ${categoria?.descripcion ?? ''}`;
+    this.abonadosDetalleFiltro = '';
+    this.abonadosDetallePage = 0;
+    this.abonadosDetalleLoading = true;
+
+    try {
+      const datos: any = await firstValueFrom(this.s_abonados.getResAbonadoByCategoria(categoria.idcategoria));
+      this.abonados = await this.enriquecerAbonadosDetalle(Array.isArray(datos) ? datos : []);
+    } catch (e: any) {
+      console.error(e);
+      this.abonados = [];
+    } finally {
+      this.abonadosDetalleLoading = false;
+    }
   }
 
   // ══════════════════════════════════════
@@ -217,5 +304,789 @@ export class HomeComponent implements OnInit, AfterViewInit {
     if (!this._ByCategorias?.length) return 0;
     const max = Math.max(...this._ByCategorias.map((c: any) => c.ncuentas));
     return max > 0 ? (ncuentas / max) * 100 : 0;
+  }
+
+  inicializarFiltroConvenios(): void {
+    const hoy = new Date();
+    const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+    this.conveniosFechaDesde = this.toInputDate(primerDiaMes);
+    this.conveniosFechaHasta = this.toInputDate(hoy);
+  }
+
+  async cargarEstadisticasConvenios(): Promise<void> {
+    this.convenioStatsLoading = true;
+
+    try {
+      const convenios = await firstValueFrom(this.convenioService.getAll());
+      const filtrados = (Array.isArray(convenios) ? convenios : []).filter((convenio: any) =>
+        this.cumpleFiltroFechaConvenio(convenio?.feccrea)
+      );
+
+      const resumen = {
+        total: filtrados.length,
+        cuotas0: 0,
+        masDeUnaCuota: 0,
+        totalConveniado: 0,
+        totalRecaudado: 0,
+        totalPendiente: 0,
+      };
+
+      const detalleCuotas = await Promise.all(
+        filtrados.map(async (convenio: any) => {
+          try {
+            const cuotas = await firstValueFrom(this.cuotasService.getByIdconvenio(Number(convenio?.idconvenio)));
+            return { convenio, cuotas: Array.isArray(cuotas) ? cuotas : [] };
+          } catch (error) {
+            console.error('Error al obtener cuotas del convenio', convenio?.idconvenio, error);
+            return { convenio, cuotas: [] };
+          }
+        })
+      );
+
+      detalleCuotas.forEach(({ convenio, cuotas }) => {
+        const nroCuotas = Number(convenio?.cuotas ?? 0);
+        const totalConvenio = Number(convenio?.totalconvenio ?? 0);
+
+        if (nroCuotas === 0) resumen.cuotas0 += 1;
+        if (nroCuotas > 1) resumen.masDeUnaCuota += 1;
+
+        resumen.totalConveniado += totalConvenio;
+
+        const listaCuotas: any[] = Array.isArray(cuotas) ? cuotas : [];
+        const valores = { recaudado: 0, pendiente: 0 };
+
+        for (const cuota of listaCuotas) {
+          const valorCuota = Number(cuota?.idfactura?.totaltarifa ?? cuota?.idfactura?.valorbase ?? cuota?.totaltarifa ?? 0);
+          const pagada = Number(cuota?.idfactura?.pagado ?? 0) === 1;
+
+          if (pagada) valores.recaudado += valorCuota;
+          else valores.pendiente += valorCuota;
+        }
+
+        resumen.totalRecaudado += valores.recaudado;
+        resumen.totalPendiente += valores.pendiente;
+      });
+
+      this.convenioStats = resumen;
+      this.conveniosStatsDetalle = detalleCuotas.map(({ convenio, cuotas }) => {
+        const listaCuotas: any[] = Array.isArray(cuotas) ? cuotas : [];
+        let recaudado = 0;
+        let pendiente = 0;
+
+        for (const cuota of listaCuotas) {
+          const valorCuota = Number(cuota?.idfactura?.totaltarifa ?? cuota?.idfactura?.valorbase ?? cuota?.totaltarifa ?? 0);
+          const pagada = Number(cuota?.idfactura?.pagado ?? 0) === 1;
+          if (pagada) recaudado += valorCuota;
+          else pendiente += valorCuota;
+        }
+
+        return {
+          nroconvenio: convenio?.nroconvenio ?? '',
+          feccrea: convenio?.feccrea ?? '',
+          cuenta: convenio?.idabonado?.idabonado ?? convenio?.idabonado ?? '',
+          abonado: convenio?.nombre ?? convenio?.idabonado?.idcliente_clientes?.nombre ?? '',
+          cuotas: Number(convenio?.cuotas ?? 0),
+          totalConvenio: Number(convenio?.totalconvenio ?? 0),
+          recaudado,
+          pendiente,
+          estado: convenio?.estado ?? '',
+        };
+      });
+    } catch (error) {
+      console.error('Error al cargar estadísticas de convenios', error);
+      this.convenioStats = {
+        total: 0,
+        cuotas0: 0,
+        masDeUnaCuota: 0,
+        totalConveniado: 0,
+        totalRecaudado: 0,
+        totalPendiente: 0,
+      };
+      this.conveniosStatsDetalle = [];
+    } finally {
+      this.convenioStatsLoading = false;
+    }
+  }
+
+  async exportarConveniosExcel(): Promise<void> {
+    if (!this.conveniosStatsDetalle.length) return;
+
+    const workbook = new ExcelJS.Workbook();
+    const resumenSheet = workbook.addWorksheet('Resumen');
+    const detalleSheet = workbook.addWorksheet('Detalle');
+    const rango = this.getRangoConveniosTexto();
+
+    resumenSheet.addRow(['Reporte de estadisticas de convenios']);
+    resumenSheet.addRow(['Rango', rango]);
+    resumenSheet.addRow([]);
+    resumenSheet.addRow(['Indicador', 'Valor']);
+    [
+      ['Total convenios', this.convenioStats.total],
+      ['Convenios con cuotas 0', this.convenioStats.cuotas0],
+      ['Convenios con mas de 1 cuota', this.convenioStats.masDeUnaCuota],
+      ['Monto total conveniado', this.convenioStats.totalConveniado],
+      ['Monto recaudado', this.convenioStats.totalRecaudado],
+      ['Monto pendiente', this.convenioStats.totalPendiente],
+    ].forEach((row) => resumenSheet.addRow(row));
+
+    resumenSheet.getRow(4).font = { bold: true };
+    resumenSheet.columns = [{ width: 34 }, { width: 20 }];
+
+    detalleSheet.addRow([
+      'Nro convenio',
+      'Fecha creacion',
+      'Cuenta',
+      'Abonado',
+      'Cuotas',
+      'Total convenio',
+      'Recaudado',
+      'Pendiente',
+      'Estado',
+    ]);
+
+    this.conveniosStatsDetalle.forEach((item) => {
+      detalleSheet.addRow([
+        item.nroconvenio,
+        this.formatFecha(item.feccrea),
+        item.cuenta,
+        item.abonado,
+        item.cuotas,
+        item.totalConvenio,
+        item.recaudado,
+        item.pendiente,
+        this.getEstadoConvenioLabel(item.estado),
+      ]);
+    });
+
+    detalleSheet.getRow(1).font = { bold: true };
+    detalleSheet.columns = [
+      { width: 14 },
+      { width: 16 },
+      { width: 12 },
+      { width: 34 },
+      { width: 10 },
+      { width: 18 },
+      { width: 18 },
+      { width: 18 },
+      { width: 14 },
+    ];
+
+    [6, 7, 8].forEach((col) => {
+      detalleSheet.getColumn(col).numFmt = '$#,##0.00';
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = this.buildConveniosExportName('xlsx');
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  exportarConveniosPdf(): void {
+    if (!this.conveniosStatsDetalle.length) return;
+
+    const doc = new jsPDF('l', 'pt', 'a4');
+    this.pdfService.header('Estadisticas de convenios de pago', doc);
+    doc.setFontSize(10);
+    doc.text(`Rango: ${this.getRangoConveniosTexto()}`, 40, 88);
+
+    autoTable(doc, {
+      startY: 100,
+      theme: 'grid',
+      head: [['Indicador', 'Valor']],
+      body: [
+        ['Total convenios', this.convenioStats.total],
+        ['Convenios con cuotas 0', this.convenioStats.cuotas0],
+        ['Convenios con mas de 1 cuota', this.convenioStats.masDeUnaCuota],
+        ['Monto total conveniado', this.formatoMoneda(this.convenioStats.totalConveniado)],
+        ['Monto recaudado', this.formatoMoneda(this.convenioStats.totalRecaudado)],
+        ['Monto pendiente', this.formatoMoneda(this.convenioStats.totalPendiente)],
+      ],
+      margin: { left: 40, right: 40 },
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [41, 128, 185] },
+    });
+
+    autoTable(doc, {
+      startY: (doc as any).lastAutoTable.finalY + 18,
+      theme: 'grid',
+      head: [[
+        'Nro',
+        'Fecha',
+        'Cuenta',
+        'Abonado',
+        'Cuotas',
+        'Total',
+        'Recaudado',
+        'Pendiente',
+        'Estado',
+      ]],
+      body: this.conveniosStatsDetalle.map((item) => [
+        item.nroconvenio,
+        this.formatFecha(item.feccrea),
+        item.cuenta,
+        item.abonado,
+        item.cuotas,
+        this.formatoMoneda(item.totalConvenio),
+        this.formatoMoneda(item.recaudado),
+        this.formatoMoneda(item.pendiente),
+        this.getEstadoConvenioLabel(item.estado),
+      ]),
+      margin: { left: 20, right: 20, bottom: 20 },
+      styles: { fontSize: 7.5, cellPadding: 2 },
+      headStyles: { fillColor: [23, 162, 184] },
+      columnStyles: {
+        0: { cellWidth: 40 },
+        1: { cellWidth: 55 },
+        2: { cellWidth: 55 },
+        3: { cellWidth: 150 },
+        4: { cellWidth: 45 },
+        5: { cellWidth: 70 },
+        6: { cellWidth: 70 },
+        7: { cellWidth: 70 },
+        8: { cellWidth: 55 },
+      },
+    });
+
+    this.pdfService.setfooter(doc);
+    doc.save(this.buildConveniosExportName('pdf'));
+  }
+
+  exportarConveniosCsv(): void {
+    if (!this.conveniosStatsDetalle.length) return;
+
+    const encabezado = [
+      'Rango',
+      'Total convenios',
+      'Convenios con cuotas 0',
+      'Convenios con mas de 1 cuota',
+      'Monto total conveniado',
+      'Monto recaudado',
+      'Monto pendiente',
+    ];
+
+    const resumen = [
+      this.getRangoConveniosTexto(),
+      this.convenioStats.total,
+      this.convenioStats.cuotas0,
+      this.convenioStats.masDeUnaCuota,
+      this.convenioStats.totalConveniado.toFixed(2),
+      this.convenioStats.totalRecaudado.toFixed(2),
+      this.convenioStats.totalPendiente.toFixed(2),
+    ];
+
+    const detalleHeaders = [
+      'Nro convenio',
+      'Fecha creacion',
+      'Cuenta',
+      'Abonado',
+      'Cuotas',
+      'Total convenio',
+      'Recaudado',
+      'Pendiente',
+      'Estado',
+    ];
+
+    const detalleRows = this.conveniosStatsDetalle.map((item) => [
+      item.nroconvenio,
+      this.formatFecha(item.feccrea),
+      item.cuenta,
+      item.abonado,
+      item.cuotas,
+      item.totalConvenio.toFixed(2),
+      item.recaudado.toFixed(2),
+      item.pendiente.toFixed(2),
+      this.getEstadoConvenioLabel(item.estado),
+    ]);
+
+    const csv = [
+      encabezado,
+      resumen,
+      [],
+      detalleHeaders,
+      ...detalleRows,
+    ]
+      .map((row) => row.map((cell: any) => this.csvEscape(cell)).join(','))
+      .join('\r\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = this.buildConveniosExportName('csv');
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  async exportarCarteraVencidaExcel(): Promise<void> {
+    if (!this.carteraVencidaDetalle.length) return;
+
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Cartera vencida');
+
+    sheet.addRow(['Reporte de cartera vencida']);
+    sheet.addRow(['Fecha de corte', this.formatFecha(this.carteraVencidaFecha)]);
+    sheet.addRow(['Clientes con deuda', this.carteraVencidaClientes]);
+    sheet.addRow(['Total cartera vencida', this.carteraVencidaTotal]);
+    sheet.addRow([]);
+    sheet.addRow(['Cliente', 'Identificacion', 'Direccion', 'Telefono', 'Email', 'Valor']);
+
+    this.carteraVencidaDetalle.forEach((item: any) => {
+      sheet.addRow([
+        this.getCarteraClienteNombre(item),
+        this.getCarteraClienteCedula(item),
+        this.getCarteraClienteDireccion(item),
+        this.getCarteraClienteTelefono(item),
+        this.getCarteraClienteEmail(item),
+        Number(item?.valor ?? 0),
+      ]);
+    });
+
+    sheet.getRow(6).font = { bold: true };
+    sheet.columns = [
+      { width: 32 },
+      { width: 18 },
+      { width: 34 },
+      { width: 18 },
+      { width: 28 },
+      { width: 16 },
+    ];
+    sheet.getColumn(6).numFmt = '$#,##0.00';
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = this.buildCarteraVencidaExportName('xlsx');
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  exportarCarteraVencidaPdf(): void {
+    if (!this.carteraVencidaDetalle.length) return;
+
+    const doc = new jsPDF('l', 'pt', 'a4');
+    this.pdfService.header('Reporte de cartera vencida', doc);
+    doc.setFontSize(10);
+    doc.text(`Fecha de corte: ${this.formatFecha(this.carteraVencidaFecha)}`, 40, 88);
+    doc.text(`Clientes con deuda: ${this.carteraVencidaClientes}`, 40, 104);
+    doc.text(`Total cartera vencida: ${this.formatoMoneda(this.carteraVencidaTotal)}`, 40, 120);
+
+    autoTable(doc, {
+      startY: 136,
+      theme: 'grid',
+      head: [['Cliente', 'Identificacion', 'Direccion', 'Telefono', 'Email', 'Valor']],
+      body: this.carteraVencidaDetalle.map((item: any) => [
+        this.getCarteraClienteNombre(item),
+        this.getCarteraClienteCedula(item),
+        this.getCarteraClienteDireccion(item),
+        this.getCarteraClienteTelefono(item),
+        this.getCarteraClienteEmail(item),
+        this.formatoMoneda(Number(item?.valor ?? 0)),
+      ]),
+      margin: { left: 20, right: 20, bottom: 20 },
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [180, 35, 24] },
+      columnStyles: {
+        0: { cellWidth: 150 },
+        1: { cellWidth: 90 },
+        2: { cellWidth: 150 },
+        3: { cellWidth: 90 },
+        4: { cellWidth: 130 },
+        5: { cellWidth: 70 },
+      },
+    });
+
+    this.pdfService.setfooter(doc);
+    doc.save(this.buildCarteraVencidaExportName('pdf'));
+  }
+
+  exportarCarteraVencidaCsv(): void {
+    if (!this.carteraVencidaDetalle.length) return;
+
+    const csv = [
+      ['Reporte de cartera vencida'],
+      ['Fecha de corte', this.formatFecha(this.carteraVencidaFecha)],
+      ['Clientes con deuda', this.carteraVencidaClientes],
+      ['Total cartera vencida', this.carteraVencidaTotal.toFixed(2)],
+      [],
+      ['Cliente', 'Identificacion', 'Direccion', 'Telefono', 'Email', 'Valor'],
+      ...this.carteraVencidaDetalle.map((item: any) => [
+        this.getCarteraClienteNombre(item),
+        this.getCarteraClienteCedula(item),
+        this.getCarteraClienteDireccion(item),
+        this.getCarteraClienteTelefono(item),
+        this.getCarteraClienteEmail(item),
+        Number(item?.valor ?? 0).toFixed(2),
+      ]),
+    ]
+      .map((row) => row.map((cell: any) => this.csvEscape(cell)).join(','))
+      .join('\r\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = this.buildCarteraVencidaExportName('csv');
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  async exportarAbonadosModalExcel(): Promise<void> {
+    if (!this.abonadosFiltrados.length) return;
+
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Abonados');
+
+    sheet.addRow([this.txtModal]);
+    sheet.addRow(['Filtro aplicado', this.abonadosDetalleFiltro || 'Sin filtro']);
+    sheet.addRow([]);
+    sheet.addRow(['Cuenta', 'Cliente', 'Cedula', 'Telefono', 'Direccion', 'Categoria']);
+
+    this.abonadosFiltrados.forEach((abonado: any) => {
+      sheet.addRow([
+        abonado?.idabonado ?? '',
+        this.getAbonadoNombre(abonado),
+        this.getAbonadoCedula(abonado),
+        this.getAbonadoTelefono(abonado),
+        abonado?.direccionubicacion ?? '',
+        this.getAbonadoCategoria(abonado),
+      ]);
+    });
+
+    sheet.getRow(4).font = { bold: true };
+    sheet.columns = [
+      { width: 14 },
+      { width: 32 },
+      { width: 18 },
+      { width: 18 },
+      { width: 36 },
+      { width: 22 },
+    ];
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = this.buildAbonadosModalExportName('xlsx');
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  exportarAbonadosModalPdf(): void {
+    if (!this.abonadosFiltrados.length) return;
+
+    const doc = new jsPDF('l', 'pt', 'a4');
+    this.pdfService.header(this.txtModal, doc);
+    doc.setFontSize(10);
+    doc.text(`Filtro: ${this.abonadosDetalleFiltro || 'Sin filtro'}`, 40, 88);
+
+    autoTable(doc, {
+      startY: 100,
+      theme: 'grid',
+      head: [['Cuenta', 'Cliente', 'Cedula', 'Telefono', 'Direccion', 'Categoria']],
+      body: this.abonadosFiltrados.map((abonado: any) => [
+        abonado?.idabonado ?? '',
+        this.getAbonadoNombre(abonado),
+        this.getAbonadoCedula(abonado),
+        this.getAbonadoTelefono(abonado),
+        abonado?.direccionubicacion ?? '',
+        this.getAbonadoCategoria(abonado),
+      ]),
+      margin: { left: 20, right: 20, bottom: 20 },
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [41, 128, 185] },
+      columnStyles: {
+        0: { cellWidth: 55 },
+        1: { cellWidth: 140 },
+        2: { cellWidth: 85 },
+        3: { cellWidth: 85 },
+        4: { cellWidth: 150 },
+        5: { cellWidth: 90 },
+      },
+    });
+
+    this.pdfService.setfooter(doc);
+    doc.save(this.buildAbonadosModalExportName('pdf'));
+  }
+
+  exportarAbonadosModalCsv(): void {
+    if (!this.abonadosFiltrados.length) return;
+
+    const csv = [
+      [this.txtModal],
+      ['Filtro aplicado', this.abonadosDetalleFiltro || 'Sin filtro'],
+      [],
+      ['Cuenta', 'Cliente', 'Cedula', 'Telefono', 'Direccion', 'Categoria'],
+      ...this.abonadosFiltrados.map((abonado: any) => [
+        abonado?.idabonado ?? '',
+        this.getAbonadoNombre(abonado),
+        this.getAbonadoCedula(abonado),
+        this.getAbonadoTelefono(abonado),
+        abonado?.direccionubicacion ?? '',
+        this.getAbonadoCategoria(abonado),
+      ]),
+    ]
+      .map((row) => row.map((cell: any) => this.csvEscape(cell)).join(','))
+      .join('\r\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = this.buildAbonadosModalExportName('csv');
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  get abonadosFiltrados(): any[] {
+    const lista = Array.isArray(this.abonados) ? this.abonados : [];
+    const filtro = (this.abonadosDetalleFiltro ?? '').trim().toLowerCase();
+    if (!filtro) return lista;
+
+    return lista.filter((abonado: any) => {
+      const valores = [
+        abonado?.idabonado,
+        abonado?.idresponsable?.nombre,
+        abonado?.idcliente_clientes?.nombre,
+        abonado?.idcategoria_categorias?.descripcion,
+        abonado?.direccionubicacion,
+        abonado?.email,
+        abonado?.telefono,
+        abonado?.idresponsable?.telefono,
+        abonado?.idresponsable?.cedula,
+      ];
+      return valores.some((valor) => String(valor ?? '').toLowerCase().includes(filtro));
+    });
+  }
+
+  get abonadosDetalleTotal(): number {
+    return this.abonadosFiltrados.length;
+  }
+
+  get abonadosDetalleTotalPages(): number {
+    return this.abonadosDetalleTotal > 0 ? Math.ceil(this.abonadosDetalleTotal / this.abonadosDetalleSize) : 1;
+  }
+
+  get abonadosDetallePageItems(): any[] {
+    const inicio = this.abonadosDetallePage * this.abonadosDetalleSize;
+    return this.abonadosFiltrados.slice(inicio, inicio + this.abonadosDetalleSize);
+  }
+
+  get abonadosDetalleDesde(): number {
+    if (!this.abonadosDetalleTotal) return 0;
+    return this.abonadosDetallePage * this.abonadosDetalleSize + 1;
+  }
+
+  get abonadosDetalleHasta(): number {
+    if (!this.abonadosDetalleTotal) return 0;
+    return Math.min((this.abonadosDetallePage + 1) * this.abonadosDetalleSize, this.abonadosDetalleTotal);
+  }
+
+  onAbonadosDetalleFiltroChange(): void {
+    this.abonadosDetallePage = 0;
+  }
+
+  onAbonadosDetalleSizeChange(): void {
+    this.abonadosDetallePage = 0;
+  }
+
+  onAbonadosDetallePrev(): void {
+    if (this.abonadosDetallePage > 0) this.abonadosDetallePage -= 1;
+  }
+
+  onAbonadosDetalleNext(): void {
+    if (this.abonadosDetallePage + 1 < this.abonadosDetalleTotalPages) {
+      this.abonadosDetallePage += 1;
+    }
+  }
+
+  private cumpleFiltroFechaConvenio(fecha: any): boolean {
+    const fechaConvenio = this.toDate(fecha);
+    const fechaDesde = this.normalizarFecha(this.conveniosFechaDesde);
+    const fechaHasta = this.normalizarFecha(this.conveniosFechaHasta, true);
+
+    if (!fechaDesde && !fechaHasta) return true;
+    if (!fechaConvenio) return false;
+    if (fechaDesde && fechaConvenio < fechaDesde) return false;
+    if (fechaHasta && fechaConvenio > fechaHasta) return false;
+    return true;
+  }
+
+  private toInputDate(fecha: Date): string {
+    const year = fecha.getFullYear();
+    const month = String(fecha.getMonth() + 1).padStart(2, '0');
+    const day = String(fecha.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private toDate(fecha: any): Date | null {
+    if (!fecha) return null;
+    if (fecha instanceof Date) return fecha;
+
+    const date = new Date(fecha);
+    if (!Number.isNaN(date.getTime())) return date;
+
+    if (typeof fecha === 'string' && fecha.includes('/')) {
+      const [dd, mm, yyyy] = fecha.split('/').map(Number);
+      if (dd && mm && yyyy) return new Date(yyyy, mm - 1, dd);
+    }
+
+    return null;
+  }
+
+  private normalizarFecha(valor: any, finDelDia: boolean = false): Date | null {
+    const fecha = this.toDate(valor);
+    if (!fecha) return null;
+
+    const normalizada = new Date(fecha);
+    if (finDelDia) normalizada.setHours(23, 59, 59, 999);
+    else normalizada.setHours(0, 0, 0, 0);
+    return normalizada;
+  }
+
+  formatFecha(fecha: any): string {
+    const value = this.toDate(fecha);
+    return value ? value.toLocaleDateString('es-ES') : '';
+  }
+
+  private getRangoConveniosTexto(): string {
+    const desde = this.conveniosFechaDesde ? this.formatFecha(this.conveniosFechaDesde) : 'sin límite';
+    const hasta = this.conveniosFechaHasta ? this.formatFecha(this.conveniosFechaHasta) : 'sin límite';
+    return `${desde} al ${hasta}`;
+  }
+
+  private buildConveniosExportName(extension: 'pdf' | 'xlsx' | 'csv'): string {
+    const desde = this.conveniosFechaDesde || 'sin_desde';
+    const hasta = this.conveniosFechaHasta || 'sin_hasta';
+    return `estadisticas_convenios_${desde}_${hasta}.${extension}`;
+  }
+
+  private buildCarteraVencidaExportName(extension: 'pdf' | 'xlsx' | 'csv'): string {
+    const fecha = this.carteraVencidaFecha || this.toInputDate(this.hoy);
+    return `cartera_vencida_${fecha}.${extension}`;
+  }
+
+  private buildAbonadosModalExportName(extension: 'pdf' | 'xlsx' | 'csv'): string {
+    const base = this.txtModal
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '');
+    return `${base || 'abonados_detalle'}.${extension}`;
+  }
+
+  private formatoMoneda(valor: number): string {
+    return `$${Number(valor || 0).toFixed(2)}`;
+  }
+
+  private getEstadoConvenioLabel(estado: any): string {
+    switch (Number(estado)) {
+      case 1:
+        return 'Activo';
+      case 2:
+        return 'Anulado';
+      case 3:
+        return 'Pagado';
+      case 0:
+        return 'Eliminado';
+      default:
+        return String(estado ?? '');
+    }
+  }
+
+  getAbonadoNombre(abonado: any): string {
+    return abonado?.idresponsable?.nombre
+      || abonado?.idcliente_clientes?.nombre
+      || abonado?.nombre
+      || abonado?.responsable
+      || 'S/N';
+  }
+
+  getAbonadoCedula(abonado: any): string {
+    return abonado?.idresponsable?.cedula
+      || abonado?.idcliente_clientes?.cedula
+      || abonado?.cedula
+      || abonado?.identificacion
+      || '-';
+  }
+
+  getAbonadoTelefono(abonado: any): string {
+    return abonado?.idresponsable?.telefono
+      || abonado?.idcliente_clientes?.telefono
+      || abonado?.telefono
+      || abonado?.celular
+      || '-';
+  }
+
+  getAbonadoCategoria(abonado: any): string {
+    return abonado?.idcategoria_categorias?.descripcion || abonado?.categoria || 'S/C';
+  }
+
+  private async enriquecerAbonadosDetalle(lista: any[]): Promise<any[]> {
+    const detalle = await Promise.all(
+      lista.map(async (abonado: any) => {
+        const cuenta = Number(abonado?.idabonado ?? 0);
+        if (!cuenta) return abonado;
+
+        try {
+          const completo = await firstValueFrom(this.s_abonados.getById(cuenta));
+          return {
+            ...abonado,
+            ...completo,
+            idabonado: completo?.idabonado ?? abonado?.idabonado,
+            idresponsable: completo?.idresponsable ?? abonado?.idresponsable,
+            idcliente_clientes: completo?.idcliente_clientes ?? abonado?.idcliente_clientes,
+            idcategoria_categorias: completo?.idcategoria_categorias ?? abonado?.idcategoria_categorias,
+            direccionubicacion: completo?.direccionubicacion ?? abonado?.direccionubicacion,
+          };
+        } catch (error) {
+          console.error('No se pudo enriquecer abonado', cuenta, error);
+          return abonado;
+        }
+      })
+    );
+
+    return detalle;
+  }
+
+  private getCarteraClienteNombre(cliente: any): string {
+    return cliente?.nombre || cliente?.razonsocial || 'S/N';
+  }
+
+  private getCarteraClienteCedula(cliente: any): string {
+    return cliente?.cedula || cliente?.identificacion || '-';
+  }
+
+  private getCarteraClienteDireccion(cliente: any): string {
+    return cliente?.direccion || cliente?.direccionubicacion || '-';
+  }
+
+  private getCarteraClienteTelefono(cliente: any): string {
+    return cliente?.telefono || cliente?.celular || '-';
+  }
+
+  private getCarteraClienteEmail(cliente: any): string {
+    return cliente?.email || '-';
+  }
+
+  private csvEscape(value: any): string {
+    const text = String(value ?? '');
+    if (text.includes(',') || text.includes('"') || text.includes('\n')) {
+      return `"${text.replace(/"/g, '""')}"`;
+    }
+    return text;
   }
 }

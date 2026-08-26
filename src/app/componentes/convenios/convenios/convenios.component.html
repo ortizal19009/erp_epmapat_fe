@@ -62,6 +62,10 @@
         <h5 class="card-title mb-2">Filtros</h5>
         <form [formGroup]="formBuscar">
           <div class="filtros-convenios">
+            <input class="form-control form-control-sm" type="date" placeholder="Fecha desde"
+              formControlName="fechaDesde" />
+            <input class="form-control form-control-sm" type="date" placeholder="Fecha hasta"
+              formControlName="fechaHasta" />
             <input class="form-control form-control-sm" type="text" placeholder="Nombre" formControlName="nombre"
               (keyup.enter)="buscarConvenios()" />
             <select class="form-control form-control-sm" formControlName="estado">

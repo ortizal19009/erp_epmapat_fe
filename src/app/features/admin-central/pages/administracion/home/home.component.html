@@ -129,6 +129,124 @@
               </div>
             </div>
           </div>
+
+          <div class="col-sm-6 col-lg-3 col-xl mb-2">
+            <div class="summary-box h-100">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <div class="summary-label">Cartera vencida</div>
+                  <div class="summary-value mono money-value">${{ carteraVencidaTotal.toFixed(2) }}</div>
+                  <div class="summary-help">{{ carteraVencidaClientes }} clientes con valores vencidos al {{ formatFecha(carteraVencidaFecha) }}</div>
+                </div>
+                <div class="summary-icon tone-danger"><i class="bi bi-exclamation-triangle-fill"></i></div>
+              </div>
+              <div class="summary-inline-filter mt-2">
+                <div class="filter-input-group">
+                  <label class="filter-label">Fecha corte</label>
+                  <input type="date" class="form-control form-control-sm" [(ngModel)]="carteraVencidaFecha">
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-danger btn-home-action"
+                  (click)="getCarteraVencidaResumen()" [disabled]="carteraVencidaLoading">
+                  <i class="fa" [ngClass]="carteraVencidaLoading ? 'fa-spinner fa-spin' : 'fa-search'"></i>
+                  {{ carteraVencidaLoading ? 'Consultando' : 'Actualizar' }}
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary btn-home-action"
+                  (click)="exportarCarteraVencidaCsv()" [disabled]="carteraVencidaLoading || !carteraVencidaDetalle.length">
+                  <i class="bi bi-filetype-csv"></i> CSV
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-success btn-home-action"
+                  (click)="exportarCarteraVencidaExcel()" [disabled]="carteraVencidaLoading || !carteraVencidaDetalle.length">
+                  <i class="bi bi-file-earmark-excel"></i> Excel
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger btn-home-action"
+                  (click)="exportarCarteraVencidaPdf()" [disabled]="carteraVencidaLoading || !carteraVencidaDetalle.length">
+                  <i class="bi bi-file-earmark-pdf"></i> PDF
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-2 sombra border rounded detalle resumen-wrap px-3 py-3">
+        <div class="d-flex align-items-center justify-content-between flex-wrap mb-3">
+          <div>
+            <div class="small text-muted text-uppercase font-weight-bold">Convenios de pago</div>
+            <div class="small text-muted">Estadísticas filtradas por fecha de creación del convenio</div>
+          </div>
+          <div class="convenio-filtros">
+            <div class="filter-input-group">
+              <label class="filter-label">Desde</label>
+              <input type="date" class="form-control form-control-sm" [(ngModel)]="conveniosFechaDesde">
+            </div>
+            <div class="filter-input-group">
+              <label class="filter-label">Hasta</label>
+              <input type="date" class="form-control form-control-sm" [(ngModel)]="conveniosFechaHasta">
+            </div>
+            <div class="convenio-actions">
+              <button type="button" class="btn btn-sm btn-primary btn-home-action" (click)="cargarEstadisticasConvenios()" [disabled]="convenioStatsLoading">
+                <i class="fa" [ngClass]="convenioStatsLoading ? 'fa-spinner fa-spin' : 'fa-search'"></i>
+                {{ convenioStatsLoading ? 'Consultando' : 'Aplicar' }}
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary btn-home-action" (click)="exportarConveniosCsv()"
+                [disabled]="convenioStatsLoading || !conveniosStatsDetalle.length">
+                <i class="bi bi-filetype-csv"></i> CSV
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-success btn-home-action" (click)="exportarConveniosExcel()"
+                [disabled]="convenioStatsLoading || !conveniosStatsDetalle.length">
+                <i class="bi bi-file-earmark-excel"></i> Excel
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-danger btn-home-action" (click)="exportarConveniosPdf()"
+                [disabled]="convenioStatsLoading || !conveniosStatsDetalle.length">
+                <i class="bi bi-file-earmark-pdf"></i> PDF
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-6 col-lg-4 col-xl-2 mb-2">
+            <div class="summary-box h-100">
+              <div class="summary-label">Total convenios</div>
+              <div class="summary-value">{{ convenioStats.total }}</div>
+              <div class="summary-help">Creados en el rango seleccionado</div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-4 col-xl-2 mb-2">
+            <div class="summary-box h-100">
+              <div class="summary-label">Cuotas 0</div>
+              <div class="summary-value">{{ convenioStats.cuotas0 }}</div>
+              <div class="summary-help">Convenios sin cuotas registradas</div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-4 col-xl-2 mb-2">
+            <div class="summary-box h-100">
+              <div class="summary-label">Mas de 1 cuota</div>
+              <div class="summary-value">{{ convenioStats.masDeUnaCuota }}</div>
+              <div class="summary-help">Convenios fraccionados</div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-4 col-xl-2 mb-2">
+            <div class="summary-box h-100">
+              <div class="summary-label">Monto conveniado</div>
+              <div class="summary-value money-value mono">${{ convenioStats.totalConveniado.toFixed(2) }}</div>
+              <div class="summary-help">Total pasado a convenio</div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-4 col-xl-2 mb-2">
+            <div class="summary-box h-100">
+              <div class="summary-label">Recaudado</div>
+              <div class="summary-value money-value mono">${{ convenioStats.totalRecaudado.toFixed(2) }}</div>
+              <div class="summary-help">Cobrado en cuotas del convenio</div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-4 col-xl-2 mb-2">
+            <div class="summary-box h-100">
+              <div class="summary-label">Pendiente</div>
+              <div class="summary-value money-value mono">${{ convenioStats.totalPendiente.toFixed(2) }}</div>
+              <div class="summary-help">Valor faltante por recaudar</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -279,7 +397,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let c of _ByCategorias; let i = index">
+                  <tr *ngFor="let c of _ByCategorias; let i = index" class="clickable-row" (click)="findCuentasByCategoria(c)" data-toggle="modal" data-target="#detalles">
                     <td class="text-center text-muted mono">{{ i + 1 }}</td>
                     <td>{{ c.descripcion }}</td>
                     <td>
@@ -335,6 +453,44 @@
         </button>
       </div>
       <div class="modal-body detalle p-0">
+        <div class="px-3 py-2 border-bottom bg-light">
+          <div class="d-flex align-items-end justify-content-between flex-wrap modal-toolbar-gap">
+            <div class="modal-filter-box">
+              <label class="small font-weight-bold mb-1">Buscar en detalle</label>
+              <input type="text" class="form-control form-control-sm" [(ngModel)]="abonadosDetalleFiltro"
+                (ngModelChange)="onAbonadosDetalleFiltroChange()"
+                placeholder="Cuenta, cliente, categoria, cedula, telefono o direccion">
+            </div>
+            <div class="modal-export-actions">
+              <button type="button" class="btn btn-sm btn-outline-secondary btn-home-action" (click)="exportarAbonadosModalCsv()"
+                [disabled]="!abonadosFiltrados.length">
+                <i class="bi bi-filetype-csv"></i> CSV
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-success btn-home-action" (click)="exportarAbonadosModalExcel()"
+                [disabled]="!abonadosFiltrados.length">
+                <i class="bi bi-file-earmark-excel"></i> Excel
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-danger btn-home-action" (click)="exportarAbonadosModalPdf()"
+                [disabled]="!abonadosFiltrados.length">
+                <i class="bi bi-file-earmark-pdf"></i> PDF
+              </button>
+            </div>
+          </div>
+          <div class="d-flex align-items-center justify-content-between flex-wrap mt-2 modal-toolbar-gap">
+            <small class="text-muted">
+              Mostrando {{ abonadosDetalleDesde }} - {{ abonadosDetalleHasta }} de {{ abonadosDetalleTotal }} registros
+            </small>
+            <div class="d-flex align-items-center flex-wrap modal-toolbar-gap">
+              <label class="small font-weight-bold mb-0">Filas</label>
+              <select class="form-control form-control-sm modal-page-size" [(ngModel)]="abonadosDetalleSize"
+                (ngModelChange)="onAbonadosDetalleSizeChange()">
+                <option [ngValue]="10">10</option>
+                <option [ngValue]="20">20</option>
+                <option [ngValue]="50">50</option>
+              </select>
+            </div>
+          </div>
+        </div>
         <div class="table-responsive mb-0">
           <table class="table table-sm table-hover mb-0 admin-table">
             <thead>
@@ -342,24 +498,48 @@
                 <th class="text-center">#</th>
                 <th class="text-center">Cuenta</th>
                 <th>Cliente</th>
+                <th>Cedula</th>
+                <th>Telefono</th>
+                <th>Direccion</th>
                 <th>Categoria</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let a of abonados; let i = index">
-                <td class="text-center text-muted mono">{{ i + 1 }}</td>
-                <td class="text-center"><span class="badge badge-info badge-pill">{{ a.idabonado }}</span></td>
-                <td>{{ a.idresponsable.nombre || 'S/N' }}</td>
-                <td><span class="badge badge-light border">{{ a.idcategoria_categorias.descripcion || 'S/C' }}</span></td>
+              <tr *ngIf="abonadosDetalleLoading">
+                <td colspan="7" class="text-center py-4 text-muted">
+                  <i class="fa fa-spinner fa-spin mr-2"></i>Cargando información completa del abonado...
+                </td>
               </tr>
-              <tr *ngIf="!abonados?.length">
-                <td colspan="4" class="text-center py-4 text-muted">No existen abonados para el estado seleccionado.</td>
+              <tr *ngFor="let a of abonadosDetallePageItems; let i = index">
+                <td class="text-center text-muted mono">{{ abonadosDetalleDesde + i }}</td>
+                <td class="text-center"><span class="badge badge-info badge-pill">{{ a.idabonado }}</span></td>
+                <td>{{ getAbonadoNombre(a) }}</td>
+                <td>{{ getAbonadoCedula(a) }}</td>
+                <td>{{ getAbonadoTelefono(a) }}</td>
+                <td>{{ a.direccionubicacion || '-' }}</td>
+                <td><span class="badge badge-light border">{{ getAbonadoCategoria(a) }}</span></td>
+              </tr>
+              <tr *ngIf="!abonadosDetalleLoading && !abonadosFiltrados?.length">
+                <td colspan="7" class="text-center py-4 text-muted">No existen abonados para el criterio seleccionado.</td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
       <div class="modal-footer detalle py-2">
+        <div class="d-flex align-items-center justify-content-between flex-wrap w-100 modal-toolbar-gap">
+          <small class="text-muted">Página {{ abonadosDetallePage + 1 }} de {{ abonadosDetalleTotalPages }}</small>
+          <div class="d-flex align-items-center modal-toolbar-gap">
+            <button type="button" class="btn btn-sm btn-outline-primary" (click)="onAbonadosDetallePrev()"
+              [disabled]="abonadosDetallePage === 0">
+              <i class="bi bi-chevron-left"></i> Anterior
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-primary" (click)="onAbonadosDetalleNext()"
+              [disabled]="abonadosDetallePage + 1 >= abonadosDetalleTotalPages">
+              Siguiente <i class="bi bi-chevron-right"></i>
+            </button>
+          </div>
+        </div>
         <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Cerrar</button>
       </div>
     </div>

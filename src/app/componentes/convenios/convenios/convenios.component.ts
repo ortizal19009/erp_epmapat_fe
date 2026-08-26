@@ -56,6 +56,8 @@ export class ConveniosComponent implements OnInit {
     this.formBuscar = this.fb.group({
       desde: [''],
       hasta: [''],
+      fechaDesde: [''],
+      fechaHasta: [''],
       nombre: [''],
       estado: [''],
       vencimiento: [''],
@@ -71,6 +73,8 @@ export class ConveniosComponent implements OnInit {
       this.formBuscar.patchValue({
         desde: desdeGuardado,
         hasta: hastaGuardado,
+        fechaDesde: sessionStorage.getItem('fechaDesdeConvenio') ?? '',
+        fechaHasta: sessionStorage.getItem('fechaHastaConvenio') ?? '',
       });
       this.buscarConvenios();
     } else {
@@ -116,6 +120,8 @@ export class ConveniosComponent implements OnInit {
 
     sessionStorage.setItem('desdeconvenio', String(this.formBuscar.value.desde ?? ''));
     sessionStorage.setItem('hastaconvenio', String(this.formBuscar.value.hasta ?? ''));
+    sessionStorage.setItem('fechaDesdeConvenio', String(this.formBuscar.value.fechaDesde ?? ''));
+    sessionStorage.setItem('fechaHastaConvenio', String(this.formBuscar.value.fechaHasta ?? ''));
 
     const filtros = {
       ...this.getFiltrosBusqueda(),
@@ -161,9 +167,13 @@ export class ConveniosComponent implements OnInit {
   public listainicial() {
     sessionStorage.removeItem('desdeconvenio');
     sessionStorage.removeItem('hastaconvenio');
+    sessionStorage.removeItem('fechaDesdeConvenio');
+    sessionStorage.removeItem('fechaHastaConvenio');
     this.swdesdehasta = false;
     this.vencimientoCache.clear();
     this.formBuscar.patchValue({
+      fechaDesde: '',
+      fechaHasta: '',
       nombre: '',
       estado: '',
       vencimiento: '',
@@ -444,6 +454,8 @@ export class ConveniosComponent implements OnInit {
     const nombre = (this.formBuscar.value.nombre ?? '').trim();
     const estado = this.parseNumber(this.formBuscar.value.estado);
     const vencimiento = (this.formBuscar.value.vencimiento ?? '').trim();
+    const fechaDesde = (this.formBuscar.value.fechaDesde ?? '').trim();
+    const fechaHasta = (this.formBuscar.value.fechaHasta ?? '').trim();
     const minPendientes = this.parseNumber(this.formBuscar.value.minPendientes);
     const maxPendientes = this.parseNumber(this.formBuscar.value.maxPendientes);
     const cuenta = this.parseNumber(this.formBuscar.value.cuenta);
@@ -453,6 +465,8 @@ export class ConveniosComponent implements OnInit {
     return {
       nroDesde: usarFiltrosDirectosBackend ? null : this.parseNumber(this.formBuscar.value.desde),
       nroHasta: usarFiltrosDirectosBackend ? null : this.parseNumber(this.formBuscar.value.hasta),
+      fechaDesde,
+      fechaHasta,
       nombre,
       estado,
       vencimiento,
@@ -481,10 +495,14 @@ export class ConveniosComponent implements OnInit {
       }
     }
 
-    const filtro = (this.formBuscar.value.vencimiento ?? '').trim();
-    if (!filtro) return enriquecidos;
-
     return enriquecidos.filter((convenio) => {
+      if (!this.cumpleFiltroFechaCreacion(convenio)) {
+        return false;
+      }
+
+      const filtro = (this.formBuscar.value.vencimiento ?? '').trim();
+      if (!filtro) return true;
+
       const info = this.vencimientoCache.get(Number(convenio?.idconvenio));
       const vencido = info?.label === 'Vencido';
       return filtro === 'vencidos' ? vencido : !vencido;
@@ -554,6 +572,31 @@ export class ConveniosComponent implements OnInit {
     }
 
     return null;
+  }
+
+  private cumpleFiltroFechaCreacion(convenio: any): boolean {
+    const fechaConvenio = this.toDate(convenio?.feccrea);
+    const fechaDesde = this.normalizarFechaFiltro(this.formBuscar.value.fechaDesde);
+    const fechaHasta = this.normalizarFechaFiltro(this.formBuscar.value.fechaHasta, true);
+
+    if (!fechaDesde && !fechaHasta) return true;
+    if (!fechaConvenio) return false;
+    if (fechaDesde && fechaConvenio < fechaDesde) return false;
+    if (fechaHasta && fechaConvenio > fechaHasta) return false;
+    return true;
+  }
+
+  private normalizarFechaFiltro(valor: any, finDelDia: boolean = false): Date | null {
+    const fecha = this.toDate(valor);
+    if (!fecha) return null;
+
+    const normalizada = new Date(fecha);
+    if (finDelDia) {
+      normalizada.setHours(23, 59, 59, 999);
+    } else {
+      normalizada.setHours(0, 0, 0, 0);
+    }
+    return normalizada;
   }
 
   private async calcularVencimientoConvenio(convenio: any): Promise<{ label: string; css: string }> {
