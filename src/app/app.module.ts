@@ -306,6 +306,8 @@ import { ThWellbeingComponent } from './componentes/rrhh/th-wellbeing/th-wellbei
 import { ThConflictsComponent } from './componentes/rrhh/th-conflicts/th-conflicts.component';
 import { RemisionComponent } from './componentes/coactivas/remision/remision.component';
 import { AddRemisionComponent } from './componentes/coactivas/remision/add-remision/add-remision.component';
+import { CondonacionesComponent } from './componentes/coactivas/condonaciones/condonaciones.component';
+import { CondonacionesPendientesComponent } from './componentes/coactivas/condonaciones-pendientes/condonaciones-pendientes.component';
 import { SafePipe } from './pipes/safe.pipe';
 import { NtacreditoComponent } from './componentes/ntacredito/ntacredito.component';
 import { AddNtacreditoComponent } from './componentes/ntacredito/add-ntacredito/add-ntacredito.component';
@@ -641,6 +643,8 @@ import { UsuarioAutocompleteComponent } from './componentes/facelectro/usuario-a
     ThConflictsComponent,
     RemisionComponent,
     AddRemisionComponent,
+    CondonacionesComponent,
+    CondonacionesPendientesComponent,
     SafePipe,
     NtacreditoComponent,
     AddNtacreditoComponent,

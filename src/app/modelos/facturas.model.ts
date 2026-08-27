@@ -38,6 +38,8 @@ export class Facturas {
   interescobrado: number;
   swiva: number;
   swcondonar: Boolean;
+  swinteres: Boolean;
+  swmulta: Boolean;
   valornotacredito: number;
   secuencialfacilito: string;
   fechacompensacion: Date;

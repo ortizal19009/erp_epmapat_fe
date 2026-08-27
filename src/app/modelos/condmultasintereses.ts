@@ -7,5 +7,18 @@ export class Condmultaintereses {
   totalmultas: number;
   usucrea: number;
   feccrea: Date;
-  razoncondonacion: String;
+  razonExoneracion: String;
+  razoncondonacion?: String;
+  estado?: string;
+  usuarioCreador?: string;
+  idusaprueba?: number | null;
+  usuarioAprueba?: string | null;
+  fecaprobacion?: Date | null;
+  observacionAprobacion?: string | null;
+  idfactura?: number;
+  nrofactura?: string;
+  idcliente?: number;
+  abonado?: string;
+  cuenta?: number;
+  fechaFactura?: Date;
 }

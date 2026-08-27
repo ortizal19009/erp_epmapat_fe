@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { UsrxmodulosService } from '../servicios/administracion/usrxmodulos.service';
 import { AutorizaService } from '../compartida/autoriza.service';
+import { ColoresService } from '../compartida/colores.service';
 
 @Component({
   selector: 'app-main-sidebar',
@@ -14,12 +15,14 @@ export class MainSidebarComponent implements OnInit {
   private _sessionLog = new BehaviorSubject<boolean>(false);
   accessLoaded = false;
   enabledSections = new Set<string>();
+  puedeAprobarCondonaciones = false;
   private readonly mobileBreakpoint = 992;
 
   constructor(
     public authService: AutorizaService,
     private router: Router,
-    private usrxmodulosService: UsrxmodulosService
+    private usrxmodulosService: UsrxmodulosService,
+    private coloresService: ColoresService
   ) {}
 
   private normalizeAccessCode(code: any): string {
@@ -62,6 +65,7 @@ export class MainSidebarComponent implements OnInit {
     }
 
     this.loadSectionAccess();
+    this.loadCondonacionesApprovalAccess();
   }
 
   isOptionEnabled(modulo: number, i: number): boolean {
@@ -163,6 +167,29 @@ export class MainSidebarComponent implements OnInit {
   canAnySection(codes: string[]): boolean {
     if (this.authService.idusuario == 1) return true;
     return codes.some((c) => this.canSection(c));
+  }
+
+  private async loadCondonacionesApprovalAccess(): Promise<void> {
+    if (this.authService.idusuario == 1) {
+      this.puedeAprobarCondonaciones = true;
+      return;
+    }
+
+    const userId = this.resolveUserId();
+    if (!userId) {
+      this.puedeAprobarCondonaciones = false;
+      return;
+    }
+
+    try {
+      const permission = await this.coloresService.getRolePermission(
+        userId,
+        'condonaciones-pendientes'
+      );
+      this.puedeAprobarCondonaciones = permission >= 3;
+    } catch {
+      this.puedeAprobarCondonaciones = false;
+    }
   }
 
   closeSidebar(): void {

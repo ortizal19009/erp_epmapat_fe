@@ -2,7 +2,7 @@
 // `ng build` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
-export const environment = {
+/* export const environment = {
   production: false,
   API_URL: 'http://192.168.0.165:8080',
   GD_API_URL: 'http://192.168.0.165:8080',
@@ -14,9 +14,9 @@ export const environment = {
   //API_URL: 'http://192.168.0.165:8080'
   BACK: 1,
   API: 'Java/Spring',
-};
+}; */
 
-/* export const environment = {
+export const environment = {
   production: false,
   API_URL: 'http://localhost:9080',
   GD_API_URL: 'http://localhost:9080',
@@ -29,7 +29,7 @@ export const environment = {
   BACK: 1,
   API: 'Java/Spring',
 };
- */
+
 /*d
  * For easier debugging in development mode, you can import the following file
  * to ignore zone related error stack frames such as `zone.run`, `zoneDelegate.invokeTask`.

@@ -1,0 +1,159 @@
+<div class="content mt-1 pt-1 pl-0">
+  <div class="container-fluid">
+    <div class="row m-0 px-0 py-2 justify-content-start cabecera border sombra align-items-center">
+      <div class="col-sm-4">
+        <h4 class="m-0 font-weight-bold"><i class="bi bi-file-earmark-check"></i> Solicitud de exoneracion I/M/R</h4>
+      </div>
+      <div class="col-sm-5">
+        <form [formGroup]="f_buscar">
+          <div class="row">
+            <div class="col-sm-4">
+              <input type="text" class="form-control form-control-sm" placeholder="Cuenta" formControlName="cuenta">
+            </div>
+            <div class="col-sm-4">
+              <input type="date" class="form-control form-control-sm" formControlName="fechatope">
+            </div>
+            <div class="col-sm-4">
+              <button type="button" class="btn btn-primary btn-sm btn-block" (click)="buscarFacturas()">
+                <i class="fa fa-search"></i> Buscar
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="col-sm-2">
+        <input type="text" class="form-control form-control-sm" placeholder="Filtrar facturas..." [(ngModel)]="filtro">
+      </div>
+      <div class="col-sm-1 text-right">
+        <a [routerLink]="['/condonaciones-pendientes']" class="text-white">
+          <i class="bi bi-list-check"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid mt-2">
+  <div class="row">
+    <div class="col-lg-5">
+      <div class="card sombra mb-3">
+        <div class="card-header"><strong>Documento y motivo</strong></div>
+        <div class="card-body">
+          <form [formGroup]="f_solicitud">
+            <div class="form-group">
+              <label>Tipo de documento</label>
+              <select class="form-control form-control-sm" formControlName="documento">
+                <option [ngValue]="documento" *ngFor="let documento of documentos">{{ documento.nomdoc }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Numero de documento</label>
+              <input type="text" class="form-control form-control-sm" formControlName="numeroDocumento">
+              <small class="text-danger" *ngIf="f_solicitud.get('numeroDocumento')?.touched && f_solicitud.get('numeroDocumento')?.invalid">
+                El numero de documento es obligatorio.
+              </small>
+            </div>
+            <div class="form-group">
+              <label>Fecha del documento</label>
+              <input type="date" class="form-control form-control-sm" formControlName="fechaDocumento">
+            </div>
+            <div class="form-group mb-0">
+              <label>Razon de exoneracion</label>
+              <textarea rows="4" class="form-control form-control-sm" formControlName="razonExoneracion"
+                placeholder="Detalle la razon de la exoneracion"></textarea>
+              <small class="text-danger" *ngIf="f_solicitud.get('razonExoneracion')?.touched && f_solicitud.get('razonExoneracion')?.invalid">
+                La razon de exoneracion es obligatoria.
+              </small>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card sombra mb-3">
+        <div class="card-header"><strong>Abonado</strong></div>
+        <div class="card-body p-2">
+          <table class="table table-sm table-bordered mb-0">
+            <tbody>
+              <tr>
+                <td><strong>Cuenta:</strong> {{ abonado.idabonado || '-' }}</td>
+                <td><strong>Cliente:</strong> {{ cliente.nombre || '-' }}</td>
+              </tr>
+              <tr>
+                <td><strong>Identificacion:</strong> {{ cliente.cedula || '-' }}</td>
+                <td><strong>Direccion:</strong> {{ abonado.direccionubicacion || '-' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card sombra">
+        <div class="card-header"><strong>Resumen</strong></div>
+        <div class="card-body p-2">
+          <table class="table table-sm table-bordered mb-2">
+            <tbody>
+              <tr>
+                <td>Facturas seleccionadas</td>
+                <td class="text-right">{{ resumen.cantidad }}</td>
+              </tr>
+              <tr>
+                <td>Total capital</td>
+                <td class="text-right">{{ resumen.capital | number:'1.2-2' }} $</td>
+              </tr>
+              <tr>
+                <td>Intereses a exonerar</td>
+                <td class="text-right">{{ resumen.intereses | number:'1.2-2' }} $</td>
+              </tr>
+              <tr class="table-warning">
+                <td><strong>Total que dejara de cobrarse</strong></td>
+                <td class="text-right"><strong>{{ resumen.total | number:'1.2-2' }} $</strong></td>
+              </tr>
+            </tbody>
+          </table>
+          <button class="btn btn-success btn-sm btn-block" type="button" (click)="registrarSolicitud()">
+            Registrar solicitud
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-7">
+      <div class="card sombra">
+        <div class="card-header"><strong>Facturas candidatas</strong></div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-sm table-hover table-bordered mb-0">
+              <thead class="cabecera text-center">
+                <tr>
+                  <th>Sel.</th>
+                  <th>Factura</th>
+                  <th>Fecha</th>
+                  <th>Capital</th>
+                  <th>Interes</th>
+                  <th>Total</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let factura of facturas | filter:filtro">
+                  <td class="text-center">
+                    <input type="checkbox" [checked]="estaSeleccionada(factura.idfactura)" (change)="toggleFactura(factura, $event)">
+                  </td>
+                  <td>{{ factura.nrofactura || factura.idfactura }}</td>
+                  <td class="text-center">{{ factura.feccrea }}</td>
+                  <td class="text-right">{{ factura.capital | number:'1.2-2' }} $</td>
+                  <td class="text-right">{{ factura.interes | number:'1.2-2' }} $</td>
+                  <td class="text-right">{{ factura.totalActual | number:'1.2-2' }} $</td>
+                  <td class="text-center">{{ factura.estadoLabel }}</td>
+                </tr>
+                <tr *ngIf="!facturas.length">
+                  <td colspan="7" class="text-center text-muted py-4">No hay facturas cargadas para mostrar.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

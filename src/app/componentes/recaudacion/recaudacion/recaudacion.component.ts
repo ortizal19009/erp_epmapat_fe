@@ -745,7 +745,7 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
       this.cliente.email = this._cliente[0].idcliente_clientes.email;
       this.cliente.porcexonera = this._cliente[0].idcliente_clientes.porcexonera / 100;
       this.cliente.porcdiscapacidad = this._cliente[0].idcliente_clientes.porcdiscapacidad / 100;
-      this.sinCobro(this._cliente[0].idcliente_clientes.idcliente);
+      this.sinCobroPorCuenta(this._cliente[0].idabonado);
     }
 
     if (campo === 'identificacion') {
@@ -782,69 +782,81 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
     this.loadingService.showLoading();
     this.swbusca = 0;
 
-    this.facService.getFacSincobro(idcliente).subscribe({
-      next: async (sincobrar: any[]) => {
-        if (!sincobrar.length) {
-          this.swbusca = 2;
-          this.loadingService.hideLoading();
-          return;
-        }
-
-        // Procesar todos los items en paralelo
-        await Promise.all(
-          sincobrar.map(async (item: any, i: number) => {
-            item.interes = Number(await this.cInteres(item)) || 0;
-            if (item.idAbonado !== 0 && item.idmodulo !== 27) {
-              const abonado: Abonados = await this.getAbonado(item.idAbonado);
-              item.direccion = abonado.direccionubicacion;
-              item.responsablePago = abonado.idresponsable.nombre;
-              const emision: any = await this.getEmision(item.idfactura);
-              item.fechaemision = emision;
-              item.iva = 0;
-            } else {
-              const cliente: Clientes = await this.getCliente(item.idCliente);
-              item.direccion = cliente.direccion;
-              item.responsablePago = cliente.nombre;
-              item.fechaemision = item.feccrea;
-              const iva: any = await this.calIva(item.idfactura);
-              item.iva = (iva.length ? iva[0][1] : 0);
-            }
-            item.total = Number(item.total) + Number(item.interes) + Number(item.iva);
-
-            this.normalizarSeleccionInicial(item);
-          })
-        );
-
-        // Ordenar: primero por idAbonado (agrupando), luego por fechaemision dentro de cada grupo
-        const listaOrdenada = [...sincobrar].sort((a, b) => {
-          // Items sin abonado (idAbonado === 0 o idmodulo === 27) van al final
-          const aEsAbonado = a.idAbonado !== 0 && a.idmodulo !== 27;
-          const bEsAbonado = b.idAbonado !== 0 && b.idmodulo !== 27;
-
-          if (aEsAbonado && !bEsAbonado) return -1; // a va primero
-          if (!aEsAbonado && bEsAbonado) return 1;  // b va primero
-
-          // Ambos son abonados: agrupar por idAbonado
-          if (aEsAbonado && bEsAbonado) {
-            if (a.idAbonado !== b.idAbonado) {
-              return a.idAbonado - b.idAbonado; // Ordenar por idAbonado
-            }
-            // Mismo abonado: ordenar por fechaemision
-            return this.resolveFechaOrdenCobro(a) - this.resolveFechaOrdenCobro(b);
-          }
-
-          // Ambos sin abonado: ordenar por fechaemision
-          return this.resolveFechaOrdenCobro(a) - this.resolveFechaOrdenCobro(b);
-        });
-
-        this._sincobro = listaOrdenada;
-        this.listaFiltrada = [...listaOrdenada];
-
-        this.swbusca = 3;
+    this.recaCobroService.getSincobroByCliente(idcliente)
+      .then((sincobrar: any[]) => this.procesarListaSincobro(sincobrar || []))
+      .catch((e) => {
+        console.error(e);
         this.loadingService.hideLoading();
-      },
-      error: (e) => console.error(e),
+      });
+  }
+
+  sinCobroPorCuenta(cuenta: number) {
+    this.loadingService.showLoading();
+    this.swbusca = 0;
+
+    this.recaCobroService.getSincobroByCuenta(cuenta)
+      .then((sincobrar: any[]) => this.procesarListaSincobro(sincobrar || []))
+      .catch((e) => {
+        console.error(e);
+        this.loadingService.hideLoading();
+      });
+  }
+
+  private async procesarListaSincobro(sincobrar: any[]) {
+    if (!sincobrar.length) {
+      this.swbusca = 2;
+      this.loadingService.hideLoading();
+      return;
+    }
+
+    await Promise.all(
+      sincobrar.map(async (item: any) => {
+        const idAbonado = Number(item.idAbonado ?? item.idabonado ?? 0);
+        const idCliente = Number(item.idCliente ?? item.idcliente ?? 0);
+
+        item.idAbonado = idAbonado;
+        item.idCliente = idCliente;
+        item.interes = this.normalizarValorMonetario(item.interes);
+        if (idAbonado > 0 && item.idmodulo !== 27) {
+          const abonado: Abonados | null = await this.getAbonado(idAbonado);
+          item.direccion = abonado?.direccionubicacion ?? item.direccion ?? '';
+          item.responsablePago = abonado?.idresponsable?.nombre ?? item.responsablePago ?? '';
+          const emision: any = await this.getEmision(item.idfactura);
+          item.fechaemision = emision ?? item.fechaemision ?? item.feccrea;
+          item.iva = Number(item.iva ?? 0);
+        } else {
+          const cliente: Clientes | null = idCliente > 0 ? await this.getCliente(idCliente) : null;
+          item.direccion = cliente?.direccion ?? item.direccion ?? '';
+          item.responsablePago = cliente?.nombre ?? item.responsablePago ?? '';
+          item.fechaemision = item.feccrea;
+          item.iva = Number(item.iva ?? 0);
+        }
+        item.total = Number(item.total ?? 0);
+        this.normalizarSeleccionInicial(item);
+      })
+    );
+
+    const listaOrdenada = [...sincobrar].sort((a, b) => {
+      const aEsAbonado = a.idAbonado !== 0 && a.idmodulo !== 27;
+      const bEsAbonado = b.idAbonado !== 0 && b.idmodulo !== 27;
+
+      if (aEsAbonado && !bEsAbonado) return -1;
+      if (!aEsAbonado && bEsAbonado) return 1;
+
+      if (aEsAbonado && bEsAbonado) {
+        if (a.idAbonado !== b.idAbonado) {
+          return a.idAbonado - b.idAbonado;
+        }
+        return this.resolveFechaOrdenCobro(a) - this.resolveFechaOrdenCobro(b);
+      }
+
+      return this.resolveFechaOrdenCobro(a) - this.resolveFechaOrdenCobro(b);
     });
+
+    this._sincobro = listaOrdenada;
+    this.listaFiltrada = [...listaOrdenada];
+    this.swbusca = 3;
+    this.loadingService.hideLoading();
   }
 
   calcular(e: any, factura: any) {
@@ -866,10 +878,16 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
   }
 
   async getAbonado(idabonado: number): Promise<any> {
+    if (!idabonado || Number.isNaN(Number(idabonado))) {
+      return null;
+    }
     return this.aboService.getById(idabonado).toPromise();
   }
 
   async getCliente(idcliente: number): Promise<Clientes> {
+    if (!idcliente || Number.isNaN(Number(idcliente))) {
+      return null as any;
+    }
     return this.clieService.getListaById(idcliente).toPromise();
   }
 

@@ -69,7 +69,7 @@ export class AddFacturacionComponent implements OnInit {
     private liqfacService: LiquidafacService,
     private authService: AutorizaService,
     private loadingService: LoadingService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.formFacturacion = this.fb.group({
@@ -452,6 +452,8 @@ interface Planilla {
   valornotacredito: number;
   secuencialfacilito: string;
   fechacompensacion: Date;
+  swinteres: boolean;
+  swmulta: boolean;
 }
 
 interface Rubrosxpla {

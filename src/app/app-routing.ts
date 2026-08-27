@@ -287,6 +287,8 @@ import { ThWellbeingComponent } from './componentes/rrhh/th-wellbeing/th-wellbei
 import { ThConflictsComponent } from './componentes/rrhh/th-conflicts/th-conflicts.component';
 import { RemisionComponent } from './componentes/coactivas/remision/remision.component';
 import { AddRemisionComponent } from './componentes/coactivas/remision/add-remision/add-remision.component';
+import { CondonacionesComponent } from './componentes/coactivas/condonaciones/condonaciones.component';
+import { CondonacionesPendientesComponent } from './componentes/coactivas/condonaciones-pendientes/condonaciones-pendientes.component';
 import { DetallePlanillaComponent } from './componentes/facturas/detalle-planilla/detalle-planilla.component';
 import { NtacreditoComponent } from './componentes/ntacredito/ntacredito.component';
 import { AddNtacreditoComponent } from './componentes/ntacredito/add-ntacredito/add-ntacredito.component';
@@ -1179,6 +1181,8 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   { path: 'remision', component: RemisionComponent, canActivate: [AuthGuard] },
+  { path: 'condonaciones', component: CondonacionesComponent, canActivate: [AuthGuard] },
+  { path: 'condonaciones-pendientes', component: CondonacionesPendientesComponent, canActivate: [AuthGuard] },
   {
     path: 'add-remision',
     component: AddRemisionComponent,

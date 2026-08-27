@@ -1,0 +1,16 @@
+.sombra {
+  box-shadow: 0 0.35rem 1rem rgba(15, 23, 42, 0.08);
+}
+
+.cabecera {
+  background: linear-gradient(90deg, var(--bgcolor1, #0f766e), var(--bgcolor2, #155e75));
+  color: #fff;
+}
+
+.card-header {
+  background: #f8fafc;
+}
+
+textarea.form-control {
+  resize: vertical;
+}

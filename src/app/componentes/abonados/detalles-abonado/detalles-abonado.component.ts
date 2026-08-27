@@ -1026,36 +1026,8 @@ export class DetallesAbonadoComponent implements OnInit, AfterViewInit, OnDestro
     });
   }
   condonarDeudas() {
-    this.s_loading.showLoading();
-    let n_factura: Facturas = new Facturas();
-    //this.modalSize = 'sm';
-    this._sincobro.forEach((item: any) => {
-      n_factura = item;
-      n_factura.swcondonar = true;
-
-      this.facService.updateFacturas(n_factura).subscribe({
-        next: async (factura) => {
-          let multa: number = 0;
-          let _multa = await this.rubxfacService.getMultaByIdFactura(
-            item.idfactura
-          );
-          if (_multa.length > 0) {
-            multa = _multa[0].cantidad * _multa[0].valorunitario;
-          }
-          this.condonar.idfactura_facturas = item;
-          this.condonar.totalinteres = await this.cInteres(item);
-          this.condonar.totalmultas = multa;
-          this.condonar.feccrea = this.date;
-          this.condonar.usucrea = this.authService.idusuario;
-          this.condonar.razoncondonacion = this.razonCondonacion;
-          this.s_condonar.saveCondonacion(this.condonar).subscribe({
-            next: (datos: any) => {
-              this.s_loading.hideLoading();
-            },
-            error: (e) => console.error(e),
-          });
-        },
-      });
+    this.router.navigate(['/condonaciones'], {
+      queryParams: { cuenta: this._abonado?.idabonado || this.cuenta || null },
     });
   }
   razonCondonacionChange(e: any) {
