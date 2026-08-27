@@ -433,32 +433,26 @@ export class FecfacturaService {
     return this.http.get(`${baseUrl}/factura?idfactura=${idfactura}`);
   }
 
-  private extraerXmlAutorizado(payload: any): string {
-    if (typeof payload?.xmlAutorizado === 'string' && payload.xmlAutorizado.trim()) {
-      return payload.xmlAutorizado.trim();
+  private limpiarXmlAutorizadoRespuesta(rawXml: string): string {
+    const texto = String(rawXml || '').trim();
+    if (!texto) {
+      return '';
     }
 
-    if (typeof payload?.xmlAutorizadoBase64 === 'string' && payload.xmlAutorizadoBase64.trim()) {
-      return atob(payload.xmlAutorizadoBase64.trim());
+    const match = texto.match(/<xmlAutorizado>([\s\S]*?)<\/xmlAutorizado>/i);
+    if (match?.[1]?.trim()) {
+      return match[1].trim();
     }
 
-    const comprobante =
-      payload?.autorizacion?.autorizaciones?.autorizacion?.[0]?.comprobante ||
-      payload?.autorizaciones?.[0]?.comprobante ||
-      '';
-
-    return typeof comprobante === 'string' ? comprobante.trim() : '';
+    return texto;
   }
 
   getXmlAutorizadoSRI(claveAcceso: string) {
-    return this.http.get(`${sriApiV1Url}/autorizacion/${claveAcceso}`).pipe(
-      map((payload: any) => {
-        const xml = this.extraerXmlAutorizado(payload);
-        if (!xml) {
-          throw new Error(`No se encontro XML autorizado para la clave ${claveAcceso}.`);
-        }
-        return xml;
-      })
+    return this.http.get(
+      `${sriApiV1Url}/autorizacion/${claveAcceso}/xml`,
+      { responseType: 'text' }
+    ).pipe(
+      map((rawXml: string) => this.limpiarXmlAutorizadoRespuesta(rawXml))
     );
   }
 
