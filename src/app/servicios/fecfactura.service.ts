@@ -439,6 +439,17 @@ export class FecfacturaService {
       return '';
     }
 
+    if (texto.startsWith('{') && texto.endsWith('}')) {
+      try {
+        const payload = JSON.parse(texto);
+        const xmlAutorizado = String(payload?.xmlAutorizado || '').trim();
+        if (xmlAutorizado) {
+          return xmlAutorizado;
+        }
+      } catch {
+      }
+    }
+
     const match = texto.match(/<xmlAutorizado>([\s\S]*?)<\/xmlAutorizado>/i);
     if (match?.[1]?.trim()) {
       return match[1].trim();
