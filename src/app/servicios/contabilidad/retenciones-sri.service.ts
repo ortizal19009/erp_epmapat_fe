@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 export interface RetencionProcesadaResponse {
@@ -29,20 +29,111 @@ export interface RetencionProcesadaResponse {
   providedIn: 'root',
 })
 export class RetencionesSriService {
-  private readonly signSendBaseUrl = `${((environment as any).SINGSEND_API_URL || environment.API_URL).replace(/\/$/, '')}/api/singsend`;
-  private readonly baseUrl = `${((environment as any).SINGSEND_API_URL || environment.API_URL).replace(/\/$/, '')}/api/singsend/retenciones`;
+  private readonly sriBaseUrl = this.normalizeSriBaseUrl(
+    (environment as any).SINGSEND_API_URL || environment.API_URL
+  );
+  private readonly sriApiV1Url = `${this.sriBaseUrl}/api/v1`;
   private readonly erpBaseUrl = `${environment.API_URL.replace(/\/$/, '')}/api/sri/retenciones`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
+
+  private normalizeSriBaseUrl(rawUrl: string): string {
+    const cleanUrl = (rawUrl || '').replace(/\/$/, '');
+    if (!cleanUrl) {
+      return 'http://192.168.0.33:9096';
+    }
+
+    return cleanUrl
+      .replace('localhost:8080', 'localhost:9096')
+      .replace('localhost:9090', 'localhost:9096')
+      .replace('192.168.0.33:8080', '192.168.0.33:9096')
+      .replace('192.168.0.33:9090', '192.168.0.33:9096');
+  }
+
+  private obtenerAutorizacion(claveAcceso: string): Observable<any> {
+    return this.http.get(
+      `${this.sriApiV1Url}/retenciones/${encodeURIComponent(claveAcceso)}/autorizacion`
+    );
+  }
+
+  private extraerPdfBase64(payload: any): string {
+    if (typeof payload?.pdfBase64 === 'string' && payload.pdfBase64.trim()) {
+      return payload.pdfBase64.trim();
+    }
+
+    const attachments = payload?.attachments || payload?.adjuntos || [];
+    const pdfAttachment = attachments.find((item: any) => {
+      const type = String(item?.contentType || item?.mimeType || '').toLowerCase();
+      const name = String(item?.fileName || item?.filename || '').toLowerCase();
+      return type.includes('pdf') || name.endsWith('.pdf');
+    });
+
+    return String(
+      pdfAttachment?.base64Data ||
+      pdfAttachment?.dataBase64 ||
+      pdfAttachment?.contentBase64 ||
+      ''
+    ).trim();
+  }
+
+  private extraerXmlAutorizado(payload: any): string {
+    if (typeof payload?.xmlAutorizado === 'string' && payload.xmlAutorizado.trim()) {
+      return payload.xmlAutorizado.trim();
+    }
+
+    if (typeof payload?.xmlAutorizadoBase64 === 'string' && payload.xmlAutorizadoBase64.trim()) {
+      return atob(payload.xmlAutorizadoBase64.trim());
+    }
+
+    const comprobante =
+      payload?.autorizacion?.autorizaciones?.autorizacion?.[0]?.comprobante ||
+      payload?.autorizaciones?.[0]?.comprobante ||
+      '';
+
+    if (typeof comprobante === 'string' && comprobante.trim()) {
+      return comprobante.trim();
+    }
+
+    const attachments = payload?.attachments || payload?.adjuntos || [];
+    const xmlAttachment = attachments.find((item: any) => {
+      const type = String(item?.contentType || item?.mimeType || '').toLowerCase();
+      const name = String(item?.fileName || item?.filename || '').toLowerCase();
+      return type.includes('xml') || name.endsWith('.xml');
+    });
+
+    const xmlBase64 = String(
+      xmlAttachment?.base64Data ||
+      xmlAttachment?.dataBase64 ||
+      xmlAttachment?.contentBase64 ||
+      ''
+    ).trim();
+
+    return xmlBase64 ? atob(xmlBase64) : '';
+  }
+
+  private base64ToBlob(base64: string, mimeType: string): Blob {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return new Blob([bytes], { type: mimeType });
+  }
 
   streamRetenciones(): EventSource {
     return new EventSource(`${this.erpBaseUrl}/stream`);
   }
 
   generarPdf(claveAcceso: string): Observable<Blob> {
-    return this.http.get(`${this.baseUrl}/pdf?claveAcceso=${encodeURIComponent(claveAcceso)}`, {
-      responseType: 'blob',
-    });
+    return this.obtenerAutorizacion(claveAcceso).pipe(
+      map((payload) => {
+        const pdfBase64 = this.extraerPdfBase64(payload);
+        if (!pdfBase64) {
+          throw new Error('La API no devolvio el PDF autorizado de la retencion.');
+        }
+        return this.base64ToBlob(pdfBase64, 'application/pdf');
+      })
+    );
   }
 
   generarPdfPorId(idretencion: number): Observable<Blob> {
@@ -52,9 +143,15 @@ export class RetencionesSriService {
   }
 
   descargarXml(claveAcceso: string): Observable<string> {
-    return this.http.get(`${this.baseUrl}/xml?claveAcceso=${encodeURIComponent(claveAcceso)}`, {
-      responseType: 'text',
-    });
+    return this.obtenerAutorizacion(claveAcceso).pipe(
+      map((payload) => {
+        const xml = this.extraerXmlAutorizado(payload);
+        if (!xml) {
+          throw new Error('La API no devolvio el XML autorizado de la retencion.');
+        }
+        return xml;
+      })
+    );
   }
 
   descargarXmlSinFirmarPorId(idretencion: number): Observable<string> {
@@ -72,21 +169,7 @@ export class RetencionesSriService {
     attempts: number = 10,
     sleepMillis: number = 3000
   ): Observable<any> {
-    const params = new URLSearchParams();
-    params.set('claveAcceso', claveAcceso);
-    if (destinatario && destinatario.trim()) {
-      params.set('emailDestino', destinatario.trim());
-    }
-    params.set('wait', String(wait));
-    params.set('attempts', String(attempts));
-    params.set('sleepMillis', String(sleepMillis));
-    if (asunto && asunto.trim()) {
-      params.set('asunto', asunto.trim());
-    }
-    if (mensaje && mensaje.trim()) {
-      params.set('mensaje', mensaje.trim());
-    }
-    return this.http.post(`${this.baseUrl}/mail?${params.toString()}`, {});
+    return this.obtenerAutorizacion(claveAcceso);
   }
 
   reenviarCorreo(
@@ -98,21 +181,7 @@ export class RetencionesSriService {
     attempts: number = 10,
     sleepMillis: number = 3000
   ): Observable<any> {
-    const params = new URLSearchParams();
-    params.set('claveAcceso', claveAcceso);
-    if (destinatario && destinatario.trim()) {
-      params.set('emailDestino', destinatario.trim());
-    }
-    params.set('wait', String(wait));
-    params.set('attempts', String(attempts));
-    params.set('sleepMillis', String(sleepMillis));
-    if (asunto && asunto.trim()) {
-      params.set('asunto', asunto.trim());
-    }
-    if (mensaje && mensaje.trim()) {
-      params.set('mensaje', mensaje.trim());
-    }
-    return this.http.post(`${this.baseUrl}/mail?${params.toString()}`, {});
+    return this.obtenerAutorizacion(claveAcceso);
   }
 
   procesarPorId(
@@ -169,7 +238,7 @@ export class RetencionesSriService {
     }
 
     const query = params.toString();
-    const url = `${this.signSendBaseUrl}/retencion/procesar${query ? `?${query}` : ''}`;
+    const url = `${this.sriApiV1Url}/retenciones${query ? `?${query}` : ''}`;
     return this.http.post<RetencionProcesadaResponse>(url, formData);
   }
 

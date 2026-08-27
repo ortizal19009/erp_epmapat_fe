@@ -62,8 +62,6 @@ export class SriEmitidosImportComponent {
   detectarCabecera: any = true;
   archivoNombre = '';
 
-  private readonly apiXmlAutorizado = '/api/singsend/autorizacion';
-
   constructor(
     private facturaService: FacturaService,
     private fecFacturaService: FecfacturaService,
@@ -482,10 +480,7 @@ export class SriEmitidosImportComponent {
         }
 
         const xmlAutorizado = await firstValueFrom(
-          this.fecFacturaService.getXmlAutorizado(
-            this.apiXmlAutorizado,
-            r.clave_acceso,
-          ),
+          this.fecFacturaService.getXmlAutorizadoSRI(r.clave_acceso)
         );
 
         if (!xmlAutorizado || xmlAutorizado.trim().length < 20) {

@@ -217,6 +217,12 @@ export class FacturaService {
   getFacturasCVClientes(idcliente: number, date: any) {
     return this.http.get<Facturas[]>(`${baseUrl}/factCarteraVencida?idcliente=${idcliente}&date=${date}`);
   }
+  getCarteraVencidaConsumo(fecha: string) {
+    return this.http.get<any[]>(`${baseUrl}/reportes/CV_consumo?fecha=${fecha}`);
+  }
+  getCarteraVencidaNoConsumo(fecha: string) {
+    return this.http.get<any[]>(`${baseUrl}/reportes/CV_noconsumo?fecha=${fecha}`);
+  }
   getFacSincobro(idcliente: number) {
     return this.http.get<Facturas[]>(
       `${baseUrl}/facSincobrar?idcliente=${idcliente}`

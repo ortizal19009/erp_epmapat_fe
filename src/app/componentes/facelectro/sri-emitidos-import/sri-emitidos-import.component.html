@@ -26,17 +26,11 @@
         <div class="card detalle sombra border-0 sri-card">
           <div class="card-body py-2">
             <div class="btn-group btn-group-sm">
-              <button
-                type="button"
-                class="btn"
-                [ngClass]="tabActiva === 'manual' ? 'btn-primary' : 'btn-outline-primary'"
-                (click)="setTab('manual')">
+              <button type="button" class="btn"
+                [ngClass]="tabActiva === 'manual' ? 'btn-primary' : 'btn-outline-primary'" (click)="setTab('manual')">
                 XML manual
               </button>
-              <button
-                type="button"
-                class="btn"
-                [ngClass]="tabActiva === 'txt' ? 'btn-primary' : 'btn-outline-primary'"
+              <button type="button" class="btn" [ngClass]="tabActiva === 'txt' ? 'btn-primary' : 'btn-outline-primary'"
                 (click)="setTab('txt')">
                 Importar TXT SRI
               </button>
@@ -77,83 +71,57 @@
 
                 <div class="form-group col-md-4">
                   <label class="small font-weight-bold">Archivo XML</label>
-                  <input
-                    class="form-control form-control-sm"
-                    type="file"
-                    accept=".xml,text/xml,application/xml"
+                  <input class="form-control form-control-sm" type="file" accept=".xml,text/xml,application/xml"
                     (change)="onXmlManualSelected($event)">
                 </div>
 
                 <div class="form-group col-md-6">
                   <label class="small font-weight-bold">Correo destino opcional</label>
-                  <input
-                    class="form-control form-control-sm"
-                    type="email"
-                    [(ngModel)]="correoManual"
+                  <input class="form-control form-control-sm" type="email" [(ngModel)]="correoManual"
                     placeholder="cliente@correo.com">
                 </div>
 
                 <div class="form-group col-md-3">
                   <label class="small font-weight-bold">Intentos consulta</label>
-                  <input
-                    class="form-control form-control-sm text-center"
-                    type="number"
-                    min="1"
+                  <input class="form-control form-control-sm text-center" type="number" min="1"
                     [(ngModel)]="attemptsManual">
                 </div>
 
                 <div class="form-group col-md-3">
                   <label class="small font-weight-bold">Espera ms</label>
-                  <input
-                    class="form-control form-control-sm text-center"
-                    type="number"
-                    min="500"
-                    step="500"
+                  <input class="form-control form-control-sm text-center" type="number" min="500" step="500"
                     [(ngModel)]="sleepMillisManual">
                 </div>
 
                 <div class="form-group col-12 mb-2">
                   <label class="small font-weight-bold">XML</label>
-                  <textarea
-                    class="form-control form-control-sm xml-editor"
-                    [(ngModel)]="xmlManual"
-                    placeholder="Pega aquí el XML sin firmar..."
-                  ></textarea>
+                  <textarea class="form-control form-control-sm xml-editor" [(ngModel)]="xmlManual"
+                    placeholder="Pega aquí el XML sin firmar..."></textarea>
                 </div>
               </div>
 
               <div class="d-flex flex-wrap">
-                <button
-                  class="btn btn-primary btn-sm mr-2 mb-2"
-                  (click)="enviarXmlManual()"
+                <button class="btn btn-primary btn-sm mr-2 mb-2" (click)="enviarXmlManual()"
                   [disabled]="procesandoManual || consultandoManual">
                   <i class="bi bi-send"></i>&nbsp; Enviar al SRI
                 </button>
 
-                <button
-                  class="btn btn-outline-info btn-sm mr-2 mb-2"
-                  (click)="consultarAutorizacionManual()"
+                <button class="btn btn-outline-info btn-sm mr-2 mb-2" (click)="consultarAutorizacionManual()"
                   [disabled]="procesandoManual || consultandoManual || !xmlManual">
                   <i class="bi bi-search"></i>&nbsp; Consultar autorización
                 </button>
 
-                <button
-                  class="btn btn-outline-success btn-sm mr-2 mb-2"
-                  (click)="descargarXmlAutorizadoManual()"
+                <button class="btn btn-outline-success btn-sm mr-2 mb-2" (click)="descargarXmlAutorizadoManual()"
                   [disabled]="!resultadoManual">
                   <i class="bi bi-filetype-xml"></i>&nbsp; Descargar XML autorizado
                 </button>
 
-                <button
-                  class="btn btn-outline-danger btn-sm mr-2 mb-2"
-                  (click)="descargarPdfManual()"
+                <button class="btn btn-outline-danger btn-sm mr-2 mb-2" (click)="descargarPdfManual()"
                   [disabled]="!resultadoManual">
                   <i class="bi bi-file-earmark-pdf"></i>&nbsp; Descargar PDF
                 </button>
 
-                <button
-                  class="btn btn-outline-secondary btn-sm mb-2"
-                  (click)="limpiarManual()"
+                <button class="btn btn-outline-secondary btn-sm mb-2" (click)="limpiarManual()"
                   [disabled]="procesandoManual || consultandoManual">
                   <i class="bi bi-trash3"></i>&nbsp; Limpiar
                 </button>
@@ -241,7 +209,8 @@
               <div class="row align-items-end">
                 <div class="col-12 col-lg-5 mb-2">
                   <label class="small text-muted font-weight-bold mb-1">Archivo TXT</label>
-                  <input class="form-control form-control-sm" type="file" accept=".txt" (change)="onFileSelected($event)" />
+                  <input class="form-control form-control-sm" type="file" accept=".txt"
+                    (change)="onFileSelected($event)" />
                 </div>
 
                 <div class="col-12 col-md-6 col-lg-3 mb-2">
@@ -270,9 +239,7 @@
                 </div>
 
                 <div class="col-6 col-md-3 col-lg-2 mb-2">
-                  <button
-                    class="btn btn-primary btn-sm w-100"
-                    (click)="procesarSeleccionadas()"
+                  <button class="btn btn-primary btn-sm w-100" (click)="procesarSeleccionadas()"
                     [disabled]="rows.length===0 || cargando || cargandoProcesamiento || cargandoEnriquecimiento">
                     <i class="bi bi-play-circle"></i>&nbsp;
                     <span *ngIf="!cargandoProcesamiento">Procesar</span>
@@ -302,9 +269,7 @@
                     <span class="font-weight-bold">{{ doneProc }}/{{ totalProc }} ({{ progresoProcPct }}%)</span>
                   </div>
                   <div class="progress" style="height: 10px;">
-                    <div
-                      class="progress-bar progress-bar-striped progress-bar-animated"
-                      role="progressbar"
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
                       [style.width.%]="progresoProcPct"></div>
                   </div>
                 </div>
@@ -339,16 +304,25 @@
                   <thead class="thead-dark" style="position: sticky; top: 0; z-index: 2;">
                     <tr class="text-center">
                       <th style="width:50px">#</th>
-                      <th role="button" (click)="toggleSort('serie_comprobante')">Serie {{ getSortIcon('serie_comprobante') }}</th>
-                      <th style="min-width:260px" role="button" (click)="toggleSort('clave_acceso')">Clave acceso {{ getSortIcon('clave_acceso') }}</th>
-                      <th role="button" (click)="toggleSort('fecha_emision')">Emisión {{ getSortIcon('fecha_emision') }}</th>
-                      <th role="button" (click)="toggleSort('fecha_autorizacion')">Autorización {{ getSortIcon('fecha_autorizacion') }}</th>
-                      <th class="text-right" role="button" (click)="toggleSort('valor_sin_impuestos')">Sin imp. {{ getSortIcon('valor_sin_impuestos') }}</th>
+                      <th role="button" (click)="toggleSort('serie_comprobante')">Serie {{
+                        getSortIcon('serie_comprobante') }}</th>
+                      <th style="min-width:260px" role="button" (click)="toggleSort('clave_acceso')">Clave acceso {{
+                        getSortIcon('clave_acceso') }}</th>
+                      <th role="button" (click)="toggleSort('fecha_emision')">Emisión {{ getSortIcon('fecha_emision') }}
+                      </th>
+                      <th role="button" (click)="toggleSort('fecha_autorizacion')">Autorización {{
+                        getSortIcon('fecha_autorizacion') }}</th>
+                      <th class="text-right" role="button" (click)="toggleSort('valor_sin_impuestos')">Sin imp. {{
+                        getSortIcon('valor_sin_impuestos') }}</th>
                       <th class="text-right" role="button" (click)="toggleSort('iva')">IVA {{ getSortIcon('iva') }}</th>
-                      <th class="text-right" role="button" (click)="toggleSort('importe_total')">Total {{ getSortIcon('importe_total') }}</th>
-                      <th style="min-width:90px" role="button" (click)="toggleSort('idfactura')">ID {{ getSortIcon('idfactura') }}</th>
-                      <th style="min-width:140px" role="button" (click)="toggleSort('fechacobro')">Cobro {{ getSortIcon('fechacobro') }}</th>
-                      <th style="min-width:220px" role="button" (click)="toggleSort('estadoProceso')">Estado {{ getSortIcon('estadoProceso') }}</th>
+                      <th class="text-right" role="button" (click)="toggleSort('importe_total')">Total {{
+                        getSortIcon('importe_total') }}</th>
+                      <th style="min-width:90px" role="button" (click)="toggleSort('idfactura')">ID {{
+                        getSortIcon('idfactura') }}</th>
+                      <th style="min-width:140px" role="button" (click)="toggleSort('fechacobro')">Cobro {{
+                        getSortIcon('fechacobro') }}</th>
+                      <th style="min-width:220px" role="button" (click)="toggleSort('estadoProceso')">Estado {{
+                        getSortIcon('estadoProceso') }}</th>
                     </tr>
                   </thead>
 
@@ -362,7 +336,8 @@
                       <td class="text-center font-weight-bold">{{ r.serie_comprobante }}</td>
                       <td>
                         <span class="font-monospace small">{{ r.clave_acceso }}</span>
-                        <button class="btn btn-link btn-sm p-0 ml-2" (click)="copiar(r.clave_acceso)" title="Copiar clave">
+                        <button class="btn btn-link btn-sm p-0 ml-2" (click)="copiar(r.clave_acceso)"
+                          title="Copiar clave">
                           <i class="bi bi-clipboard"></i>
                         </button>
                       </td>

@@ -1,4 +1,10 @@
 {
+  "/sri-api": {
+    "target": "http://192.168.0.33:9096",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "warn"
+  },
   "/bridge": {
     "target": "http://localhost:8787",
     "secure": false,

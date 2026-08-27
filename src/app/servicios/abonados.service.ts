@@ -219,7 +219,7 @@ export class AbonadosService {
   }
 
   getResAbonadoByCategoria(idcategoria: number) {
-    return this.http.get(`${baseUrl}/resabonado/categoria?idcategoria=${idcategoria}`);
+    return this.http.get(`${baseUrl}/categoria/${idcategoria}`);
   }
 
   getCuentasByCategoria() {

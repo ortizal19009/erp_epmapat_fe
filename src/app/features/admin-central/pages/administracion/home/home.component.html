@@ -39,23 +39,6 @@
         </div>
       </div>
 
-      <div class="mt-2 sombra border rounded detalle quick-access px-3 py-3">
-        <div class="d-flex align-items-center justify-content-between flex-wrap">
-          <div class="mb-2 mb-md-0">
-            <div class="small text-uppercase font-weight-bold quick-label">Acceso directo</div>
-            <h6 class="m-0 font-weight-bold">Configuracion de puente de impresion</h6>
-            <small class="text-muted">Define la Epson TM-T88V, las copias por defecto y prueba la impresora desde administracion central.</small>
-          </div>
-          <div class="d-flex align-items-center flex-wrap">
-            <span class="badge badge-light border mr-2 mb-2 mb-md-0">TM-T88V</span>
-            <span class="badge badge-light border mr-2 mb-2 mb-md-0">Puente local</span>
-            <a routerLink="/admin/configuracion-impresion" class="btn btn-sm btn-primary btn-quick">
-              <i class="bi bi-printer-fill mr-1"></i>Abrir configuracion
-            </a>
-          </div>
-        </div>
-      </div>
-
       <div class="mt-2 sombra border rounded detalle resumen-wrap px-3 py-3">
         <div class="d-flex align-items-center justify-content-between flex-wrap mb-2">
           <div>
@@ -136,7 +119,12 @@
                 <div>
                   <div class="summary-label">Cartera vencida</div>
                   <div class="summary-value mono money-value">${{ carteraVencidaTotal.toFixed(2) }}</div>
-                  <div class="summary-help">{{ carteraVencidaClientes }} clientes con valores vencidos al {{ formatFecha(carteraVencidaFecha) }}</div>
+                  <div class="summary-help">
+                    {{ carteraVencidaClientes }} clientes y {{ carteraVencidaDetalle.length }} planillas vencidas al {{ formatFecha(carteraVencidaFecha) }}
+                  </div>
+                  <div class="summary-help mt-1">
+                    {{ carteraVencidaConsumo }} de consumo y {{ carteraVencidaNoConsumo }} de no consumo
+                  </div>
                 </div>
                 <div class="summary-icon tone-danger"><i class="bi bi-exclamation-triangle-fill"></i></div>
               </div>
@@ -150,18 +138,24 @@
                   <i class="fa" [ngClass]="carteraVencidaLoading ? 'fa-spinner fa-spin' : 'fa-search'"></i>
                   {{ carteraVencidaLoading ? 'Consultando' : 'Actualizar' }}
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary btn-home-action"
-                  (click)="exportarCarteraVencidaCsv()" [disabled]="carteraVencidaLoading || !carteraVencidaDetalle.length">
-                  <i class="bi bi-filetype-csv"></i> CSV
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-success btn-home-action"
-                  (click)="exportarCarteraVencidaExcel()" [disabled]="carteraVencidaLoading || !carteraVencidaDetalle.length">
-                  <i class="bi bi-file-earmark-excel"></i> Excel
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-danger btn-home-action"
-                  (click)="exportarCarteraVencidaPdf()" [disabled]="carteraVencidaLoading || !carteraVencidaDetalle.length">
-                  <i class="bi bi-file-earmark-pdf"></i> PDF
-                </button>
+                <div class="dropdown">
+                  <button type="button" class="btn btn-sm btn-outline-secondary btn-home-action dropdown-toggle"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                    [disabled]="carteraVencidaLoading || !carteraVencidaDetalle.length">
+                    <i class="bi bi-download mr-1"></i> Exportar
+                  </button>
+                  <div class="dropdown-menu dropdown-menu-right export-dropdown-menu">
+                    <button class="dropdown-item" type="button" (click)="exportarCarteraVencidaCsv()">
+                      <i class="bi bi-filetype-csv mr-2 text-secondary"></i> CSV
+                    </button>
+                    <button class="dropdown-item" type="button" (click)="exportarCarteraVencidaExcel()">
+                      <i class="bi bi-file-earmark-excel mr-2 text-success"></i> Excel
+                    </button>
+                    <button class="dropdown-item" type="button" (click)="exportarCarteraVencidaPdf()">
+                      <i class="bi bi-file-earmark-pdf mr-2 text-danger"></i> PDF
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -188,18 +182,24 @@
                 <i class="fa" [ngClass]="convenioStatsLoading ? 'fa-spinner fa-spin' : 'fa-search'"></i>
                 {{ convenioStatsLoading ? 'Consultando' : 'Aplicar' }}
               </button>
-              <button type="button" class="btn btn-sm btn-outline-secondary btn-home-action" (click)="exportarConveniosCsv()"
-                [disabled]="convenioStatsLoading || !conveniosStatsDetalle.length">
-                <i class="bi bi-filetype-csv"></i> CSV
-              </button>
-              <button type="button" class="btn btn-sm btn-outline-success btn-home-action" (click)="exportarConveniosExcel()"
-                [disabled]="convenioStatsLoading || !conveniosStatsDetalle.length">
-                <i class="bi bi-file-earmark-excel"></i> Excel
-              </button>
-              <button type="button" class="btn btn-sm btn-outline-danger btn-home-action" (click)="exportarConveniosPdf()"
-                [disabled]="convenioStatsLoading || !conveniosStatsDetalle.length">
-                <i class="bi bi-file-earmark-pdf"></i> PDF
-              </button>
+              <div class="dropdown">
+                <button type="button" class="btn btn-sm btn-outline-secondary btn-home-action dropdown-toggle"
+                  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                  [disabled]="convenioStatsLoading || !conveniosStatsDetalle.length">
+                  <i class="bi bi-download mr-1"></i> Exportar
+                </button>
+                <div class="dropdown-menu dropdown-menu-right export-dropdown-menu">
+                  <button class="dropdown-item" type="button" (click)="exportarConveniosCsv()">
+                    <i class="bi bi-filetype-csv mr-2 text-secondary"></i> CSV
+                  </button>
+                  <button class="dropdown-item" type="button" (click)="exportarConveniosExcel()">
+                    <i class="bi bi-file-earmark-excel mr-2 text-success"></i> Excel
+                  </button>
+                  <button class="dropdown-item" type="button" (click)="exportarConveniosPdf()">
+                    <i class="bi bi-file-earmark-pdf mr-2 text-danger"></i> PDF
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -228,6 +228,27 @@
           </div>
           <div class="col-sm-6 col-lg-4 col-xl-2 mb-2">
             <div class="summary-box h-100">
+              <div class="summary-label">Eliminados</div>
+              <div class="summary-value">{{ convenioStats.eliminados }}</div>
+              <div class="summary-help">Convenios con estado eliminado</div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-4 col-xl-2 mb-2">
+            <div class="summary-box h-100">
+              <div class="summary-label">Anulados</div>
+              <div class="summary-value">{{ convenioStats.anulados }}</div>
+              <div class="summary-help">Convenios anulados en el rango</div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-4 col-xl-2 mb-2">
+            <div class="summary-box h-100">
+              <div class="summary-label">Pagados</div>
+              <div class="summary-value">{{ convenioStats.pagados }}</div>
+              <div class="summary-help">Convenios totalmente pagados</div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-4 col-xl-2 mb-2">
+            <div class="summary-box h-100">
               <div class="summary-label">Monto conveniado</div>
               <div class="summary-value money-value mono">${{ convenioStats.totalConveniado.toFixed(2) }}</div>
               <div class="summary-help">Total pasado a convenio</div>
@@ -246,6 +267,49 @@
               <div class="summary-value money-value mono">${{ convenioStats.totalPendiente.toFixed(2) }}</div>
               <div class="summary-help">Valor faltante por recaudar</div>
             </div>
+          </div>
+        </div>
+
+        <div class="table-shell mt-3" *ngIf="conveniosStatsDetalle.length">
+          <div class="table-shell-head">
+            <div>
+              <div class="table-shell-title">Detalle de convenios</div>
+              <small class="text-muted">Auditoría rápida de valores por convenio dentro del rango seleccionado.</small>
+            </div>
+            <span class="badge badge-light border">{{ conveniosStatsDetalle.length }} convenios</span>
+          </div>
+          <div class="table-responsive mb-0">
+            <table class="table table-sm table-hover mb-0 admin-table admin-table-compact">
+              <thead>
+                <tr>
+                  <th>Nro</th>
+                  <th>Fecha</th>
+                  <th>Cuenta</th>
+                  <th>Abonado</th>
+                  <th class="text-center">Cuotas</th>
+                  <th class="text-right">Conveniado</th>
+                  <th class="text-right">Recaudado</th>
+                  <th class="text-right">Pendiente</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of conveniosStatsDetalle | slice:0:12">
+                  <td class="mono">{{ item.nroconvenio || '-' }}</td>
+                  <td>{{ formatFecha(item.feccrea) }}</td>
+                  <td class="mono">{{ item.cuenta || '-' }}</td>
+                  <td>{{ item.abonado || 'S/N' }}</td>
+                  <td class="text-center">{{ item.cuotas }}</td>
+                  <td class="text-right mono">{{ formatoMoneda(item.totalConvenio) }}</td>
+                  <td class="text-right mono text-success font-weight-bold">{{ formatoMoneda(item.recaudado) }}</td>
+                  <td class="text-right mono text-warning font-weight-bold">{{ formatoMoneda(item.pendiente) }}</td>
+                  <td><span class="badge badge-light border">{{ getEstadoConvenioLabel(item.estado) }}</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="px-3 py-2 border-top bg-light small text-muted" *ngIf="conveniosStatsDetalle.length > 12">
+            Mostrando los primeros 12 convenios. El reporte completo sigue disponible en exportación.
           </div>
         </div>
       </div>
@@ -303,41 +367,50 @@
           </div>
           <span class="badge badge-primary mt-2 mt-lg-0">Ultimas {{ _resumenEmisiones?.length || 0 }}</span>
         </div>
-        <div class="table-responsive mb-0">
-          <table class="table table-sm table-hover mb-0 admin-table">
-            <thead>
-              <tr>
-                <th class="text-center">#</th>
-                <th>Emision</th>
-                <th class="text-center">Abonados</th>
-                <th class="text-center">M3</th>
-                <th class="text-right">Emitido</th>
-                <th class="text-right">Cobrado</th>
-                <th class="text-right">Pendiente</th>
-                <th class="text-center">Avance</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let r of _resumenEmisiones; let i = index">
-                <td class="text-center text-muted mono">{{ i + 1 }}</td>
-                <td><span class="badge badge-light border mono">{{ r.emision }}</span></td>
-                <td class="text-center">{{ r.ncuentas }}</td>
-                <td class="text-center"><span class="badge badge-primary badge-pill">{{ r.m3 }} m3</span></td>
-                <td class="text-right mono">${{ r.valemision.toFixed(2) }}</td>
-                <td class="text-right mono text-success font-weight-bold">${{ r.total_pagado.toFixed(2) }}</td>
-                <td class="text-right mono text-warning font-weight-bold">${{ r.total_pendiente.toFixed(2) }}</td>
-                <td class="text-center progress-cell">
-                  <div class="progress progress-sm mx-auto">
-                    <div class="progress-bar" role="progressbar" [style.width.%]="r.valemision > 0 ? (r.total_pagado / r.valemision * 100) : 0"></div>
-                  </div>
-                  <small class="text-muted mono d-block mt-1">{{ r.valemision > 0 ? (r.total_pagado / r.valemision * 100).toFixed(0) : 0 }}%</small>
-                </td>
-              </tr>
-              <tr *ngIf="!_resumenEmisiones?.length">
-                <td colspan="8" class="text-center py-4 text-muted">Sin informacion de emisiones disponible.</td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="table-shell">
+          <div class="table-shell-head">
+            <div>
+              <div class="table-shell-title">Histórico de emisiones</div>
+              <small class="text-muted">Vista resumida con avance de cobro por emisión.</small>
+            </div>
+            <span class="badge badge-light border">{{ _resumenEmisiones?.length || 0 }} registros</span>
+          </div>
+          <div class="table-responsive mb-0">
+            <table class="table table-sm table-hover mb-0 admin-table admin-table-compact">
+              <thead>
+                <tr>
+                  <th class="text-center">#</th>
+                  <th>Emision</th>
+                  <th class="text-center">Abonados</th>
+                  <th class="text-center">M3</th>
+                  <th class="text-right">Emitido</th>
+                  <th class="text-right">Cobrado</th>
+                  <th class="text-right">Pendiente</th>
+                  <th class="text-center">Avance</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let r of _resumenEmisiones; let i = index">
+                  <td class="text-center text-muted mono">{{ i + 1 }}</td>
+                  <td><span class="badge badge-light border mono">{{ r.emision }}</span></td>
+                  <td class="text-center">{{ r.ncuentas }}</td>
+                  <td class="text-center"><span class="badge badge-primary badge-pill">{{ r.m3 }} m3</span></td>
+                  <td class="text-right mono">${{ r.valemision.toFixed(2) }}</td>
+                  <td class="text-right mono text-success font-weight-bold">${{ r.total_pagado.toFixed(2) }}</td>
+                  <td class="text-right mono text-warning font-weight-bold">${{ r.total_pendiente.toFixed(2) }}</td>
+                  <td class="text-center progress-cell">
+                    <div class="progress progress-sm mx-auto">
+                      <div class="progress-bar" role="progressbar" [style.width.%]="r.valemision > 0 ? (r.total_pagado / r.valemision * 100) : 0"></div>
+                    </div>
+                    <small class="text-muted mono d-block mt-1">{{ r.valemision > 0 ? (r.total_pagado / r.valemision * 100).toFixed(0) : 0 }}%</small>
+                  </td>
+                </tr>
+                <tr *ngIf="!_resumenEmisiones?.length">
+                  <td colspan="8" class="text-center py-4 text-muted">Sin informacion de emisiones disponible.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -351,29 +424,38 @@
               </div>
               <span class="badge badge-warning">{{ _ByEstados?.length || 0 }}</span>
             </div>
-            <div class="table-responsive mb-0">
-              <table class="table table-sm table-hover mb-0 admin-table">
-                <thead>
-                  <tr>
-                    <th class="text-center">#</th>
-                    <th>Estado</th>
-                    <th class="text-center">Cuentas</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let e of _ByEstados; let i = index" class="clickable-row" (click)="findCuentasByEstado(e)" data-toggle="modal" data-target="#detalles">
-                    <td class="text-center text-muted mono">{{ i + 1 }}</td>
-                    <td>
-                      <span class="status-dot mr-2" [ngClass]="e.estado == 1 ? 'status-dot-active' : 'status-dot-muted'"></span>
-                      {{ e.descripcion }}
-                    </td>
-                    <td class="text-center"><span class="badge badge-light border">{{ e.ncuentas }}</span></td>
-                  </tr>
-                  <tr *ngIf="!_ByEstados?.length">
-                    <td colspan="3" class="text-center py-4 text-muted">Sin estados disponibles.</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="table-shell table-shell-tight">
+              <div class="table-shell-head">
+                <div>
+                  <div class="table-shell-title">Estados de abonados</div>
+                  <small class="text-muted">Selecciona una fila para ver el detalle completo.</small>
+                </div>
+                <span class="badge badge-light border">{{ totalAbonados || 0 }} cuentas</span>
+              </div>
+              <div class="table-responsive mb-0">
+                <table class="table table-sm table-hover mb-0 admin-table admin-table-compact">
+                  <thead>
+                    <tr>
+                      <th class="text-center">#</th>
+                      <th>Estado</th>
+                      <th class="text-center">Cuentas</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let e of _ByEstados; let i = index" class="clickable-row" (click)="findCuentasByEstado(e)" data-toggle="modal" data-target="#detalles">
+                      <td class="text-center text-muted mono">{{ i + 1 }}</td>
+                      <td>
+                        <span class="status-dot mr-2" [ngClass]="e.estado == 1 ? 'status-dot-active' : 'status-dot-muted'"></span>
+                        {{ e.descripcion }}
+                      </td>
+                      <td class="text-center"><span class="badge badge-light border">{{ e.ncuentas }}</span></td>
+                    </tr>
+                    <tr *ngIf="!_ByEstados?.length">
+                      <td colspan="3" class="text-center py-4 text-muted">Sin estados disponibles.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
@@ -387,31 +469,40 @@
               </div>
               <span class="badge badge-secondary">{{ _ByCategorias?.length || 0 }}</span>
             </div>
-            <div class="table-responsive mb-0">
-              <table class="table table-sm table-hover mb-0 admin-table">
-                <thead>
-                  <tr>
-                    <th class="text-center">#</th>
-                    <th>Categoria</th>
-                    <th class="text-center">Cuentas</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let c of _ByCategorias; let i = index" class="clickable-row" (click)="findCuentasByCategoria(c)" data-toggle="modal" data-target="#detalles">
-                    <td class="text-center text-muted mono">{{ i + 1 }}</td>
-                    <td>{{ c.descripcion }}</td>
-                    <td>
-                      <div class="d-flex align-items-center">
-                        <div class="mini-bar mr-2 flex-fill"><span [style.width.%]="getCategoriaPct(c.ncuentas)"></span></div>
-                        <small class="mono text-muted">{{ c.ncuentas }}</small>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr *ngIf="!_ByCategorias?.length">
-                    <td colspan="3" class="text-center py-4 text-muted">Sin categorias disponibles.</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="table-shell table-shell-tight">
+              <div class="table-shell-head">
+                <div>
+                  <div class="table-shell-title">Categorías comerciales</div>
+                  <small class="text-muted">Haz clic para abrir el listado de cuentas por categoría.</small>
+                </div>
+                <span class="badge badge-light border">{{ _ByCategorias?.length || 0 }} categorías</span>
+              </div>
+              <div class="table-responsive mb-0">
+                <table class="table table-sm table-hover mb-0 admin-table admin-table-compact">
+                  <thead>
+                    <tr>
+                      <th class="text-center">#</th>
+                      <th>Categoria</th>
+                      <th class="text-center">Cuentas</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let c of _ByCategorias; let i = index" class="clickable-row" (click)="findCuentasByCategoria(c)" data-toggle="modal" data-target="#detalles">
+                      <td class="text-center text-muted mono">{{ i + 1 }}</td>
+                      <td>{{ c.descripcion }}</td>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="mini-bar mr-2 flex-fill"><span [style.width.%]="getCategoriaPct(c.ncuentas)"></span></div>
+                          <small class="mono text-muted">{{ c.ncuentas }}</small>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr *ngIf="!_ByCategorias?.length">
+                      <td colspan="3" class="text-center py-4 text-muted">Sin categorias disponibles.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
@@ -444,16 +535,33 @@
 </div>
 
 <div class="modal fade" id="detalles" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="detallesLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
     <div class="modal-content form-elegante border-0">
       <div class="modal-header cabecera text-white py-2 px-3">
-        <h6 class="modal-title font-weight-bold"><i class="bi bi-list-ul mr-2"></i>{{ txtModal }}</h6>
+        <div>
+          <h6 class="modal-title font-weight-bold mb-0"><i class="bi bi-list-ul mr-2"></i>{{ txtModal }}</h6>
+          <small class="d-block text-white-50 mt-1">Consulta detallada de clientes con búsqueda, paginación y exportación.</small>
+        </div>
         <button type="button" class="close text-white m-0" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body detalle p-0">
-        <div class="px-3 py-2 border-bottom bg-light">
+        <div class="modal-summary-strip px-3 py-2 border-bottom">
+          <div class="modal-summary-chip">
+            <span class="modal-summary-label">Registros</span>
+            <strong>{{ abonadosDetalleTotal }}</strong>
+          </div>
+          <div class="modal-summary-chip">
+            <span class="modal-summary-label">Página actual</span>
+            <strong>{{ abonadosDetallePage + 1 }} / {{ abonadosDetalleTotalPages }}</strong>
+          </div>
+          <div class="modal-summary-chip">
+            <span class="modal-summary-label">Visibles</span>
+            <strong>{{ abonadosDetalleDesde }} - {{ abonadosDetalleHasta }}</strong>
+          </div>
+        </div>
+        <div class="px-3 py-3 border-bottom bg-light">
           <div class="d-flex align-items-end justify-content-between flex-wrap modal-toolbar-gap">
             <div class="modal-filter-box">
               <label class="small font-weight-bold mb-1">Buscar en detalle</label>
@@ -462,18 +570,24 @@
                 placeholder="Cuenta, cliente, categoria, cedula, telefono o direccion">
             </div>
             <div class="modal-export-actions">
-              <button type="button" class="btn btn-sm btn-outline-secondary btn-home-action" (click)="exportarAbonadosModalCsv()"
-                [disabled]="!abonadosFiltrados.length">
-                <i class="bi bi-filetype-csv"></i> CSV
-              </button>
-              <button type="button" class="btn btn-sm btn-outline-success btn-home-action" (click)="exportarAbonadosModalExcel()"
-                [disabled]="!abonadosFiltrados.length">
-                <i class="bi bi-file-earmark-excel"></i> Excel
-              </button>
-              <button type="button" class="btn btn-sm btn-outline-danger btn-home-action" (click)="exportarAbonadosModalPdf()"
-                [disabled]="!abonadosFiltrados.length">
-                <i class="bi bi-file-earmark-pdf"></i> PDF
-              </button>
+              <div class="dropdown">
+                <button type="button" class="btn btn-sm btn-outline-secondary btn-home-action dropdown-toggle"
+                  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                  [disabled]="!abonadosFiltrados.length">
+                  <i class="bi bi-download mr-1"></i> Exportar
+                </button>
+                <div class="dropdown-menu dropdown-menu-right export-dropdown-menu">
+                  <button class="dropdown-item" type="button" (click)="exportarAbonadosModalCsv()">
+                    <i class="bi bi-filetype-csv mr-2 text-secondary"></i> CSV
+                  </button>
+                  <button class="dropdown-item" type="button" (click)="exportarAbonadosModalExcel()">
+                    <i class="bi bi-file-earmark-excel mr-2 text-success"></i> Excel
+                  </button>
+                  <button class="dropdown-item" type="button" (click)="exportarAbonadosModalPdf()">
+                    <i class="bi bi-file-earmark-pdf mr-2 text-danger"></i> PDF
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
           <div class="d-flex align-items-center justify-content-between flex-wrap mt-2 modal-toolbar-gap">
@@ -491,56 +605,61 @@
             </div>
           </div>
         </div>
-        <div class="table-responsive mb-0">
-          <table class="table table-sm table-hover mb-0 admin-table">
-            <thead>
-              <tr>
-                <th class="text-center">#</th>
-                <th class="text-center">Cuenta</th>
-                <th>Cliente</th>
-                <th>Cedula</th>
-                <th>Telefono</th>
-                <th>Direccion</th>
-                <th>Categoria</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngIf="abonadosDetalleLoading">
-                <td colspan="7" class="text-center py-4 text-muted">
-                  <i class="fa fa-spinner fa-spin mr-2"></i>Cargando información completa del abonado...
-                </td>
-              </tr>
-              <tr *ngFor="let a of abonadosDetallePageItems; let i = index">
-                <td class="text-center text-muted mono">{{ abonadosDetalleDesde + i }}</td>
-                <td class="text-center"><span class="badge badge-info badge-pill">{{ a.idabonado }}</span></td>
-                <td>{{ getAbonadoNombre(a) }}</td>
-                <td>{{ getAbonadoCedula(a) }}</td>
-                <td>{{ getAbonadoTelefono(a) }}</td>
-                <td>{{ a.direccionubicacion || '-' }}</td>
-                <td><span class="badge badge-light border">{{ getAbonadoCategoria(a) }}</span></td>
-              </tr>
-              <tr *ngIf="!abonadosDetalleLoading && !abonadosFiltrados?.length">
-                <td colspan="7" class="text-center py-4 text-muted">No existen abonados para el criterio seleccionado.</td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="table-shell modal-table-shell">
+          <div class="table-responsive mb-0">
+            <table class="table table-sm table-hover mb-0 admin-table admin-table-compact modal-detail-table">
+              <thead>
+                <tr>
+                  <th class="text-center">#</th>
+                  <th class="text-center">Cuenta</th>
+                  <th>Cliente</th>
+                  <th>Cedula</th>
+                  <th>Telefono</th>
+                  <th>Direccion</th>
+                  <th>Categoria</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="abonadosDetalleLoading">
+                  <td colspan="7" class="text-center py-4 text-muted">
+                    <i class="fa fa-spinner fa-spin mr-2"></i>Cargando información completa del abonado...
+                  </td>
+                </tr>
+                <tr *ngFor="let a of abonadosDetallePageItems; let i = index">
+                  <td class="text-center text-muted mono">{{ abonadosDetalleDesde + i }}</td>
+                  <td class="text-center"><span class="badge badge-info badge-pill">{{ a.idabonado }}</span></td>
+                  <td class="font-weight-600">{{ getAbonadoNombre(a) }}</td>
+                  <td>{{ getAbonadoCedula(a) }}</td>
+                  <td>{{ getAbonadoTelefono(a) }}</td>
+                  <td>{{ a.direccionubicacion || '-' }}</td>
+                  <td><span class="badge badge-light border">{{ getAbonadoCategoria(a) }}</span></td>
+                </tr>
+                <tr *ngIf="!abonadosDetalleLoading && !abonadosFiltrados?.length">
+                  <td colspan="7" class="text-center py-4 text-muted">No existen abonados para el criterio seleccionado.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-      <div class="modal-footer detalle py-2">
+      <div class="modal-footer detalle py-3">
         <div class="d-flex align-items-center justify-content-between flex-wrap w-100 modal-toolbar-gap">
-          <small class="text-muted">Página {{ abonadosDetallePage + 1 }} de {{ abonadosDetalleTotalPages }}</small>
+          <div class="modal-pagination-note">
+            <small class="text-muted d-block">Paginación del detalle</small>
+            <strong>Página {{ abonadosDetallePage + 1 }} de {{ abonadosDetalleTotalPages }}</strong>
+          </div>
           <div class="d-flex align-items-center modal-toolbar-gap">
-            <button type="button" class="btn btn-sm btn-outline-primary" (click)="onAbonadosDetallePrev()"
+            <button type="button" class="btn btn-sm btn-outline-primary btn-modal-nav" (click)="onAbonadosDetallePrev()"
               [disabled]="abonadosDetallePage === 0">
               <i class="bi bi-chevron-left"></i> Anterior
             </button>
-            <button type="button" class="btn btn-sm btn-outline-primary" (click)="onAbonadosDetalleNext()"
+            <button type="button" class="btn btn-sm btn-outline-primary btn-modal-nav" (click)="onAbonadosDetalleNext()"
               [disabled]="abonadosDetallePage + 1 >= abonadosDetalleTotalPages">
               Siguiente <i class="bi bi-chevron-right"></i>
             </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary btn-modal-close" data-dismiss="modal">Cerrar</button>
           </div>
         </div>
-        <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Cerrar</button>
       </div>
     </div>
   </div>

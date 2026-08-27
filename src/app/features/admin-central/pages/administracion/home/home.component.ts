@@ -9,9 +9,10 @@ import * as L from 'leaflet';
 import { RutasService } from 'src/app/servicios/rutas.service';
 import { ColoresService } from 'src/app/compartida/colores.service';
 import { ConvenioService } from 'src/app/servicios/convenio.service';
-import { CuotasService } from 'src/app/servicios/cuotas.service';
 import { PdfService } from 'src/app/servicios/pdf.service';
 import { ClientesService } from 'src/app/servicios/clientes.service';
+import { CategoriaService } from 'src/app/servicios/categoria.service';
+import { FacturaService } from 'src/app/servicios/factura.service';
 
 @Component({
   selector: 'app-home',
@@ -27,6 +28,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   _resumenEmisiones: any;
   _ByEstados: any;
   _ByCategorias: any;
+  categoriasCatalogo: any[] = [];
   _rutas: any;
   _abonados: any[] = [];
   abonados: any;
@@ -44,6 +46,9 @@ export class HomeComponent implements OnInit, AfterViewInit {
     total: 0,
     cuotas0: 0,
     masDeUnaCuota: 0,
+    eliminados: 0,
+    anulados: 0,
+    pagados: 0,
     totalConveniado: 0,
     totalRecaudado: 0,
     totalPendiente: 0,
@@ -54,6 +59,8 @@ export class HomeComponent implements OnInit, AfterViewInit {
   carteraVencidaDetalle: any[] = [];
   carteraVencidaTotal = 0;
   carteraVencidaClientes = 0;
+  carteraVencidaConsumo = 0;
+  carteraVencidaNoConsumo = 0;
 
   edificioMatriz: any = [0.8038125013453109, -77.72763063596486];
 
@@ -101,9 +108,10 @@ export class HomeComponent implements OnInit, AfterViewInit {
     private s_rutas: RutasService,
     private coloresService: ColoresService,
     private convenioService: ConvenioService,
-    private cuotasService: CuotasService,
     private pdfService: PdfService,
     private clientesService: ClientesService,
+    private categoriaService: CategoriaService,
+    private facturaService: FacturaService,
   ) {}
 
   // ══════════════════════════════════════
@@ -224,6 +232,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   async getDatosAbonados() {
     this._ByCategorias = await this.s_abonados.getCuentasByCategoria();
     this._ByEstados    = await this.s_abonados.getCuentasByEstado();
+    this.categoriasCatalogo = await firstValueFrom(this.categoriaService.getListCategoria());
   }
 
   async getCarteraVencidaResumen(): Promise<void> {
@@ -231,19 +240,33 @@ export class HomeComponent implements OnInit, AfterViewInit {
 
     try {
       const fecha = this.carteraVencidaFecha || this.toInputDate(this.hoy);
-      const datos: any = await this.clientesService.asynGetCVOfClientes(fecha);
-      const lista = Array.isArray(datos) ? datos : [];
+      const [consumo, noConsumo] = await Promise.all([
+        firstValueFrom(this.facturaService.getCarteraVencidaConsumo(fecha)),
+        firstValueFrom(this.facturaService.getCarteraVencidaNoConsumo(fecha)),
+      ]);
+      this.carteraVencidaConsumo = Array.isArray(consumo) ? consumo.length : 0;
+      this.carteraVencidaNoConsumo = Array.isArray(noConsumo) ? noConsumo.length : 0;
+      const lista = [
+        ...(Array.isArray(consumo) ? consumo : []),
+        ...(Array.isArray(noConsumo) ? noConsumo : []),
+      ];
       this.carteraVencidaDetalle = lista;
 
-      this.carteraVencidaClientes = lista.length;
+      this.carteraVencidaClientes = new Set(
+        lista
+          .map((item: any) => this.buildCarteraClienteKey(item))
+          .filter((key: string) => !!key)
+      ).size;
       this.carteraVencidaTotal = lista.reduce((acc: number, item: any) => {
-        return acc + Number(item?.valor ?? 0);
+        return acc + this.getCarteraValor(item);
       }, 0);
     } catch (error) {
       console.error('Error al cargar cartera vencida', error);
       this.carteraVencidaDetalle = [];
       this.carteraVencidaClientes = 0;
       this.carteraVencidaTotal = 0;
+      this.carteraVencidaConsumo = 0;
+      this.carteraVencidaNoConsumo = 0;
     } finally {
       this.carteraVencidaLoading = false;
     }
@@ -286,7 +309,13 @@ export class HomeComponent implements OnInit, AfterViewInit {
     this.abonadosDetalleLoading = true;
 
     try {
-      const datos: any = await firstValueFrom(this.s_abonados.getResAbonadoByCategoria(categoria.idcategoria));
+      const idcategoria = this.resolverIdCategoria(categoria);
+      if (!idcategoria) {
+        this.abonados = [];
+        return;
+      }
+
+      const datos: any = await firstValueFrom(this.s_abonados.getResAbonadoByCategoria(idcategoria));
       this.abonados = await this.enriquecerAbonadosDetalle(Array.isArray(datos) ? datos : []);
     } catch (e: any) {
       console.error(e);
@@ -308,8 +337,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
 
   inicializarFiltroConvenios(): void {
     const hoy = new Date();
-    const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-    this.conveniosFechaDesde = this.toInputDate(primerDiaMes);
+    this.conveniosFechaDesde = '2000-01-01';
     this.conveniosFechaHasta = this.toInputDate(hoy);
   }
 
@@ -317,7 +345,21 @@ export class HomeComponent implements OnInit, AfterViewInit {
     this.convenioStatsLoading = true;
 
     try {
-      const convenios = await firstValueFrom(this.convenioService.getAll());
+      const preview = await firstValueFrom(this.convenioService.buscarConvenios({
+        fechaDesde: this.conveniosFechaDesde || null,
+        fechaHasta: this.conveniosFechaHasta || null,
+        page: 0,
+        size: 1,
+      }));
+      const total = Number(preview?.totalElements ?? 0);
+      const size = total > 0 ? total : 2000;
+      const respuesta = await firstValueFrom(this.convenioService.buscarConvenios({
+        fechaDesde: this.conveniosFechaDesde || null,
+        fechaHasta: this.conveniosFechaHasta || null,
+        page: 0,
+        size,
+      }));
+      const convenios = Array.isArray(respuesta?.content) ? respuesta.content : [];
       const filtrados = (Array.isArray(convenios) ? convenios : []).filter((convenio: any) =>
         this.cumpleFiltroFechaConvenio(convenio?.feccrea)
       );
@@ -326,60 +368,37 @@ export class HomeComponent implements OnInit, AfterViewInit {
         total: filtrados.length,
         cuotas0: 0,
         masDeUnaCuota: 0,
+        eliminados: 0,
+        anulados: 0,
+        pagados: 0,
         totalConveniado: 0,
         totalRecaudado: 0,
         totalPendiente: 0,
       };
 
-      const detalleCuotas = await Promise.all(
-        filtrados.map(async (convenio: any) => {
-          try {
-            const cuotas = await firstValueFrom(this.cuotasService.getByIdconvenio(Number(convenio?.idconvenio)));
-            return { convenio, cuotas: Array.isArray(cuotas) ? cuotas : [] };
-          } catch (error) {
-            console.error('Error al obtener cuotas del convenio', convenio?.idconvenio, error);
-            return { convenio, cuotas: [] };
-          }
-        })
-      );
+      const detalleConvenios = filtrados.map((convenio: any) => {
+        const valores = this.calcularValoresConvenio(convenio);
+        return { convenio, ...valores };
+      });
 
-      detalleCuotas.forEach(({ convenio, cuotas }) => {
+      detalleConvenios.forEach(({ convenio, recaudado, pendiente }) => {
         const nroCuotas = Number(convenio?.cuotas ?? 0);
         const totalConvenio = Number(convenio?.totalconvenio ?? 0);
+        const estadoConvenio = Number(convenio?.estado ?? -999);
 
         if (nroCuotas === 0) resumen.cuotas0 += 1;
         if (nroCuotas > 1) resumen.masDeUnaCuota += 1;
+        if (estadoConvenio === 0) resumen.eliminados += 1;
+        if (estadoConvenio === 2) resumen.anulados += 1;
+        if (estadoConvenio === 3) resumen.pagados += 1;
 
         resumen.totalConveniado += totalConvenio;
-
-        const listaCuotas: any[] = Array.isArray(cuotas) ? cuotas : [];
-        const valores = { recaudado: 0, pendiente: 0 };
-
-        for (const cuota of listaCuotas) {
-          const valorCuota = Number(cuota?.idfactura?.totaltarifa ?? cuota?.idfactura?.valorbase ?? cuota?.totaltarifa ?? 0);
-          const pagada = Number(cuota?.idfactura?.pagado ?? 0) === 1;
-
-          if (pagada) valores.recaudado += valorCuota;
-          else valores.pendiente += valorCuota;
-        }
-
-        resumen.totalRecaudado += valores.recaudado;
-        resumen.totalPendiente += valores.pendiente;
+        resumen.totalRecaudado += recaudado;
+        resumen.totalPendiente += pendiente;
       });
 
       this.convenioStats = resumen;
-      this.conveniosStatsDetalle = detalleCuotas.map(({ convenio, cuotas }) => {
-        const listaCuotas: any[] = Array.isArray(cuotas) ? cuotas : [];
-        let recaudado = 0;
-        let pendiente = 0;
-
-        for (const cuota of listaCuotas) {
-          const valorCuota = Number(cuota?.idfactura?.totaltarifa ?? cuota?.idfactura?.valorbase ?? cuota?.totaltarifa ?? 0);
-          const pagada = Number(cuota?.idfactura?.pagado ?? 0) === 1;
-          if (pagada) recaudado += valorCuota;
-          else pendiente += valorCuota;
-        }
-
+      this.conveniosStatsDetalle = detalleConvenios.map(({ convenio, recaudado, pendiente }) => {
         return {
           nroconvenio: convenio?.nroconvenio ?? '',
           feccrea: convenio?.feccrea ?? '',
@@ -398,6 +417,9 @@ export class HomeComponent implements OnInit, AfterViewInit {
         total: 0,
         cuotas0: 0,
         masDeUnaCuota: 0,
+        eliminados: 0,
+        anulados: 0,
+        pagados: 0,
         totalConveniado: 0,
         totalRecaudado: 0,
         totalPendiente: 0,
@@ -424,6 +446,9 @@ export class HomeComponent implements OnInit, AfterViewInit {
       ['Total convenios', this.convenioStats.total],
       ['Convenios con cuotas 0', this.convenioStats.cuotas0],
       ['Convenios con mas de 1 cuota', this.convenioStats.masDeUnaCuota],
+      ['Convenios eliminados', this.convenioStats.eliminados],
+      ['Convenios anulados', this.convenioStats.anulados],
+      ['Convenios pagados', this.convenioStats.pagados],
       ['Monto total conveniado', this.convenioStats.totalConveniado],
       ['Monto recaudado', this.convenioStats.totalRecaudado],
       ['Monto pendiente', this.convenioStats.totalPendiente],
@@ -503,6 +528,9 @@ export class HomeComponent implements OnInit, AfterViewInit {
         ['Total convenios', this.convenioStats.total],
         ['Convenios con cuotas 0', this.convenioStats.cuotas0],
         ['Convenios con mas de 1 cuota', this.convenioStats.masDeUnaCuota],
+        ['Convenios eliminados', this.convenioStats.eliminados],
+        ['Convenios anulados', this.convenioStats.anulados],
+        ['Convenios pagados', this.convenioStats.pagados],
         ['Monto total conveniado', this.formatoMoneda(this.convenioStats.totalConveniado)],
         ['Monto recaudado', this.formatoMoneda(this.convenioStats.totalRecaudado)],
         ['Monto pendiente', this.formatoMoneda(this.convenioStats.totalPendiente)],
@@ -565,6 +593,9 @@ export class HomeComponent implements OnInit, AfterViewInit {
       'Total convenios',
       'Convenios con cuotas 0',
       'Convenios con mas de 1 cuota',
+      'Convenios eliminados',
+      'Convenios anulados',
+      'Convenios pagados',
       'Monto total conveniado',
       'Monto recaudado',
       'Monto pendiente',
@@ -575,6 +606,9 @@ export class HomeComponent implements OnInit, AfterViewInit {
       this.convenioStats.total,
       this.convenioStats.cuotas0,
       this.convenioStats.masDeUnaCuota,
+      this.convenioStats.eliminados,
+      this.convenioStats.anulados,
+      this.convenioStats.pagados,
       this.convenioStats.totalConveniado.toFixed(2),
       this.convenioStats.totalRecaudado.toFixed(2),
       this.convenioStats.totalPendiente.toFixed(2),
@@ -634,29 +668,35 @@ export class HomeComponent implements OnInit, AfterViewInit {
     sheet.addRow(['Clientes con deuda', this.carteraVencidaClientes]);
     sheet.addRow(['Total cartera vencida', this.carteraVencidaTotal]);
     sheet.addRow([]);
-    sheet.addRow(['Cliente', 'Identificacion', 'Direccion', 'Telefono', 'Email', 'Valor']);
+    sheet.addRow(['Cliente', 'Cuenta', 'Factura', 'Modulo', 'Identificacion', 'Direccion', 'Telefono', 'Email', 'Valor']);
 
     this.carteraVencidaDetalle.forEach((item: any) => {
       sheet.addRow([
         this.getCarteraClienteNombre(item),
+        this.getCarteraClienteCuenta(item),
+        this.getCarteraClienteFactura(item),
+        this.getCarteraClienteModulo(item),
         this.getCarteraClienteCedula(item),
         this.getCarteraClienteDireccion(item),
         this.getCarteraClienteTelefono(item),
         this.getCarteraClienteEmail(item),
-        Number(item?.valor ?? 0),
+        this.getCarteraValor(item),
       ]);
     });
 
     sheet.getRow(6).font = { bold: true };
     sheet.columns = [
       { width: 32 },
+      { width: 14 },
+      { width: 14 },
+      { width: 22 },
       { width: 18 },
       { width: 34 },
       { width: 18 },
       { width: 28 },
       { width: 16 },
     ];
-    sheet.getColumn(6).numFmt = '$#,##0.00';
+    sheet.getColumn(9).numFmt = '$#,##0.00';
 
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], {
@@ -683,25 +723,31 @@ export class HomeComponent implements OnInit, AfterViewInit {
     autoTable(doc, {
       startY: 136,
       theme: 'grid',
-      head: [['Cliente', 'Identificacion', 'Direccion', 'Telefono', 'Email', 'Valor']],
+      head: [['Cliente', 'Cuenta', 'Factura', 'Modulo', 'Identificacion', 'Direccion', 'Telefono', 'Email', 'Valor']],
       body: this.carteraVencidaDetalle.map((item: any) => [
         this.getCarteraClienteNombre(item),
+        this.getCarteraClienteCuenta(item),
+        this.getCarteraClienteFactura(item),
+        this.getCarteraClienteModulo(item),
         this.getCarteraClienteCedula(item),
         this.getCarteraClienteDireccion(item),
         this.getCarteraClienteTelefono(item),
         this.getCarteraClienteEmail(item),
-        this.formatoMoneda(Number(item?.valor ?? 0)),
+        this.formatoMoneda(this.getCarteraValor(item)),
       ]),
       margin: { left: 20, right: 20, bottom: 20 },
       styles: { fontSize: 8, cellPadding: 2 },
       headStyles: { fillColor: [180, 35, 24] },
       columnStyles: {
-        0: { cellWidth: 150 },
-        1: { cellWidth: 90 },
-        2: { cellWidth: 150 },
-        3: { cellWidth: 90 },
-        4: { cellWidth: 130 },
-        5: { cellWidth: 70 },
+        0: { cellWidth: 135 },
+        1: { cellWidth: 55 },
+        2: { cellWidth: 60 },
+        3: { cellWidth: 85 },
+        4: { cellWidth: 80 },
+        5: { cellWidth: 120 },
+        6: { cellWidth: 75 },
+        7: { cellWidth: 120 },
+        8: { cellWidth: 65 },
       },
     });
 
@@ -718,14 +764,17 @@ export class HomeComponent implements OnInit, AfterViewInit {
       ['Clientes con deuda', this.carteraVencidaClientes],
       ['Total cartera vencida', this.carteraVencidaTotal.toFixed(2)],
       [],
-      ['Cliente', 'Identificacion', 'Direccion', 'Telefono', 'Email', 'Valor'],
+      ['Cliente', 'Cuenta', 'Factura', 'Modulo', 'Identificacion', 'Direccion', 'Telefono', 'Email', 'Valor'],
       ...this.carteraVencidaDetalle.map((item: any) => [
         this.getCarteraClienteNombre(item),
+        this.getCarteraClienteCuenta(item),
+        this.getCarteraClienteFactura(item),
+        this.getCarteraClienteModulo(item),
         this.getCarteraClienteCedula(item),
         this.getCarteraClienteDireccion(item),
         this.getCarteraClienteTelefono(item),
         this.getCarteraClienteEmail(item),
-        Number(item?.valor ?? 0).toFixed(2),
+        this.getCarteraValor(item).toFixed(2),
       ]),
     ]
       .map((row) => row.map((cell: any) => this.csvEscape(cell)).join(','))
@@ -988,11 +1037,81 @@ export class HomeComponent implements OnInit, AfterViewInit {
     return `${base || 'abonados_detalle'}.${extension}`;
   }
 
-  private formatoMoneda(valor: number): string {
+  private getCarteraValor(item: any): number {
+    return Number(item?.valor ?? item?.total ?? item?.totalFactura ?? 0);
+  }
+
+  private buildCarteraClienteKey(item: any): string {
+    const idcliente = Number(item?.idcliente ?? 0);
+    if (idcliente > 0) {
+      return `cli:${idcliente}`;
+    }
+
+    const cuenta = Number(item?.cuenta ?? 0);
+    if (cuenta > 0) {
+      return `cta:${cuenta}`;
+    }
+
+    const cedula = String(item?.cedula ?? '').trim();
+    if (cedula) {
+      return `ced:${cedula}`;
+    }
+
+    const nombre = String(item?.nombre ?? '').trim().toLowerCase();
+    return nombre ? `nom:${nombre}` : '';
+  }
+
+  formatoMoneda(valor: number): string {
     return `$${Number(valor || 0).toFixed(2)}`;
   }
 
-  private getEstadoConvenioLabel(estado: any): string {
+  private calcularValoresConvenio(convenio: any): { recaudado: number; pendiente: number } {
+    const totalConvenio = Number(convenio?.totalconvenio ?? 0);
+    const estadoConvenio = Number(convenio?.estado ?? -1);
+    const cuotas = Math.max(Number(convenio?.cuotas ?? 0), 0);
+    const facPagadas = Math.max(Number(convenio?.facpagadas ?? 0), 0);
+
+    if (totalConvenio <= 0) {
+      return { recaudado: 0, pendiente: 0 };
+    }
+
+    if (estadoConvenio === 3) {
+      return { recaudado: totalConvenio, pendiente: 0 };
+    }
+
+    const cuotainicial = Math.max(Number(convenio?.cuotainicial ?? 0), 0);
+    const pagomensual = Math.max(Number(convenio?.pagomensual ?? 0), 0);
+    const cuotafinal = Math.max(Number(convenio?.cuotafinal ?? 0), 0);
+
+    const valoresCuotas: number[] = [];
+
+    if (cuotainicial > 0) {
+      valoresCuotas.push(cuotainicial);
+    }
+
+    if (cuotas > 0) {
+      for (let i = 0; i < cuotas; i++) {
+        const esUltima = i === cuotas - 1;
+        valoresCuotas.push(esUltima ? (cuotafinal || pagomensual) : pagomensual);
+      }
+    }
+
+    let recaudado = 0;
+    for (let i = 0; i < Math.min(facPagadas, valoresCuotas.length); i++) {
+      recaudado += Number(valoresCuotas[i] ?? 0);
+    }
+
+    if (recaudado <= 0 && facPagadas > 0) {
+      recaudado = totalConvenio;
+    }
+
+    recaudado = Math.min(recaudado, totalConvenio);
+    const pendiente = Math.max(totalConvenio - recaudado, 0);
+
+    return { recaudado, pendiente };
+  }
+
+  getEstadoConvenioLabel(estado: any): string {
     switch (Number(estado)) {
       case 1:
         return 'Activo';
@@ -1066,20 +1185,46 @@ export class HomeComponent implements OnInit, AfterViewInit {
     return cliente?.nombre || cliente?.razonsocial || 'S/N';
   }
 
+  private getCarteraClienteCuenta(cliente: any): string {
+    return String(cliente?.cuenta ?? cliente?.idabonado ?? 'S/D');
+  }
+
+  private getCarteraClienteFactura(cliente: any): string {
+    return String(cliente?.factura ?? cliente?.planilla ?? cliente?.idfactura ?? 'S/D');
+  }
+
+  private getCarteraClienteModulo(cliente: any): string {
+    return String(cliente?.modulo ?? 'S/D');
+  }
+
   private getCarteraClienteCedula(cliente: any): string {
-    return cliente?.cedula || cliente?.identificacion || '-';
+    return cliente?.cedula || cliente?.identificacion || 'S/D';
   }
 
   private getCarteraClienteDireccion(cliente: any): string {
-    return cliente?.direccion || cliente?.direccionubicacion || '-';
+    return cliente?.direccion || cliente?.direccionubicacion || 'S/D';
   }
 
   private getCarteraClienteTelefono(cliente: any): string {
-    return cliente?.telefono || cliente?.celular || '-';
+    return cliente?.telefono || cliente?.celular || 'S/D';
   }
 
   private getCarteraClienteEmail(cliente: any): string {
-    return cliente?.email || '-';
+    return cliente?.email || 'S/D';
+  }
+
+  private resolverIdCategoria(categoria: any): number {
+    const directo = Number(categoria?.idcategoria ?? categoria?.id_categoria ?? categoria?.categoria ?? 0);
+    if (directo) return directo;
+
+    const descripcion = String(categoria?.descripcion ?? '').trim().toLowerCase();
+    if (!descripcion) return 0;
+
+    const encontrada = (this.categoriasCatalogo || []).find((item: any) =>
+      String(item?.descripcion ?? '').trim().toLowerCase() === descripcion
+    );
+
+    return Number(encontrada?.idcategoria ?? 0);
   }
 
   private csvEscape(value: any): string {

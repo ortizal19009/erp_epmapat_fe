@@ -114,6 +114,8 @@ export class ConvenioService {
     filtros: {
       nroDesde?: number | null;
       nroHasta?: number | null;
+      fechaDesde?: string | null;
+      fechaHasta?: string | null;
       nombre?: string | null;
       estado?: number | null;
       minPendientes?: number | null;
@@ -129,6 +131,12 @@ export class ConvenioService {
 
     if (filtros.nroDesde != null) params = params.set('nroDesde', String(filtros.nroDesde));
     if (filtros.nroHasta != null) params = params.set('nroHasta', String(filtros.nroHasta));
+
+    const fechaDesde = (filtros.fechaDesde ?? '').trim();
+    if (fechaDesde) params = params.set('fechaDesde', fechaDesde);
+
+    const fechaHasta = (filtros.fechaHasta ?? '').trim();
+    if (fechaHasta) params = params.set('fechaHasta', fechaHasta);
 
     const nombre = (filtros.nombre ?? '').trim();
     if (nombre) params = params.set('nombre', nombre);

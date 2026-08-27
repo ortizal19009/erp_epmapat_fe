@@ -1,10 +1,26 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 const apiUrl = environment.API_URL;
-const singsendUrl = ((environment as any).SINGSEND_API_URL || environment.API_URL).replace(/\/$/, '');
+const normalizeSriBaseUrl = (rawUrl: string): string => {
+  const cleanUrl = (rawUrl || '').replace(/\/$/, '');
+  if (!cleanUrl) {
+    return 'http://192.168.0.33:9096';
+  }
+
+  return cleanUrl
+    .replace('localhost:8080', 'localhost:9096')
+    .replace('localhost:9090', 'localhost:9096')
+    .replace('192.168.0.33:8080', '192.168.0.33:9096')
+    .replace('192.168.0.33:9090', '192.168.0.33:9096');
+};
+
+const singsendUrl = normalizeSriBaseUrl(
+  (environment as any).SINGSEND_API_URL || environment.API_URL
+);
+const sriApiV1Url = `${singsendUrl}/api/v1`;
 const baseUrl = `${apiUrl}/api/sri`;
 
 export interface SriAttachment {
@@ -34,7 +50,24 @@ export interface SriAutorizacionResponse {
   providedIn: 'root',
 })
 export class SriService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
+
+  private extraerXmlAutorizado(payload: any): string {
+    if (typeof payload?.xmlAutorizado === 'string' && payload.xmlAutorizado.trim()) {
+      return payload.xmlAutorizado.trim();
+    }
+
+    if (typeof payload?.xmlAutorizadoBase64 === 'string' && payload.xmlAutorizadoBase64.trim()) {
+      return atob(payload.xmlAutorizadoBase64.trim());
+    }
+
+    const comprobante =
+      payload?.autorizacion?.autorizaciones?.autorizacion?.[0]?.comprobante ||
+      payload?.autorizaciones?.[0]?.comprobante ||
+      '';
+
+    return typeof comprobante === 'string' ? comprobante.trim() : '';
+  }
 
   sendEmailNotification(datos: any) {
     console.log(datos);
@@ -42,7 +75,7 @@ export class SriService {
   }
 
   sendRetencion(xmlString: string): Observable<string> {
-    return this.http.post(`${singsendUrl}/api/singsend/retencion/string`, xmlString, {
+    return this.http.post(`${sriApiV1Url}/retenciones`, xmlString, {
       headers: {
         'Content-Type': 'application/xml',
       },
@@ -51,8 +84,10 @@ export class SriService {
   }
 
   sendFacturaElectronica(xmlPlano: string): Observable<any> {
-    return this.http.post(`${singsendUrl}/api/singsend/factura`, xmlPlano, {
-      responseType: 'json',
+    return this.http.post(`${sriApiV1Url}/facturas`, xmlPlano, {
+      headers: {
+        'Content-Type': 'application/xml',
+      },
     });
   }
 
@@ -90,7 +125,7 @@ export class SriService {
     }
 
     const query = params.toString();
-    const url = `${singsendUrl}/api/singsend/retencion/procesar${query ? `?${query}` : ''}`;
+    const url = `${sriApiV1Url}/retenciones${query ? `?${query}` : ''}`;
     return this.http.post(url, formData);
   }
 
@@ -110,7 +145,7 @@ export class SriService {
     params.set('includeXml', String(options?.includeXml ?? true));
 
     return this.http.post<SriAutorizacionResponse>(
-      `${singsendUrl}/api/singsend/autorizacion/by-xml?${params.toString()}`,
+      `${sriApiV1Url}/autorizacion/by-xml?${params.toString()}`,
       xml,
       {
         headers: {
@@ -122,8 +157,15 @@ export class SriService {
 
   descargarAutorizacionXml(claveAcceso: string): Observable<string> {
     return this.http.get(
-      `${singsendUrl}/api/singsend/autorizacion?claveAcceso=${encodeURIComponent(claveAcceso)}&download=false&returnXml=true`,
-      { responseType: 'text' }
+      `${sriApiV1Url}/autorizacion/${encodeURIComponent(claveAcceso)}`
+    ).pipe(
+      map((payload: any) => {
+        const xml = this.extraerXmlAutorizado(payload);
+        if (!xml) {
+          throw new Error(`No se encontro XML autorizado para la clave ${claveAcceso}.`);
+        }
+        return xml;
+      })
     );
   }
 }

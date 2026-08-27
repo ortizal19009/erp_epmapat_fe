@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Fecfactura } from '../modelos/fecfactura.model';
-import { Observable, firstValueFrom, from, interval, lastValueFrom, tap } from 'rxjs';
+import { Observable, firstValueFrom, lastValueFrom, map, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AutorizaService } from '../compartida/autoriza.service';
 import { DefinirService } from './administracion/definir.service';
@@ -15,16 +15,29 @@ import { LecturasService } from './lecturas.service';
 import { Abonados } from '../modelos/abonados';
 
 const apiUrl = environment.API_URL;
-const singsendUrl = ((environment as any).SINGSEND_API_URL || environment.API_URL).replace(/\/$/, '');
+const normalizeSriBaseUrl = (rawUrl: string): string => {
+  const cleanUrl = (rawUrl || '').replace(/\/$/, '');
+  if (!cleanUrl) {
+    return 'http://192.168.0.33:9096';
+  }
+
+  return cleanUrl
+    .replace('localhost:8080', 'localhost:9096')
+    .replace('localhost:9090', 'localhost:9096')
+    .replace('192.168.0.33:8080', '192.168.0.33:9096')
+    .replace('192.168.0.33:9090', '192.168.0.33:9096');
+};
+
+const singsendUrl = normalizeSriBaseUrl(
+  ((environment as any).SINGSEND_API_URL || 'http://192.168.0.33:9096')
+);
+const sriApiV1Url = `${singsendUrl}/api/v1`;
 const baseUrl = `${apiUrl}/fec_factura`;
 
 @Injectable({
   providedIn: 'root',
 })
 export class FecfacturaService {
-  httpGet(API_XML_AUTORIZADO: string, arg1: { claveAcceso: string; }): Observable<unknown> {
-    throw new Error('Method not implemented.');
-  }
   empresa: any;
   //formExportar: FormGroup;
   swbotones: boolean = false;
@@ -75,7 +88,7 @@ export class FecfacturaService {
     private aboService: AbonadosService,
     private s_usuario: UsuarioService,
     private s_lecturas: LecturasService
-  ) {}
+  ) { }
 
   private esRubroActivo(rubro: any): boolean {
     const estados = [
@@ -233,11 +246,9 @@ export class FecfacturaService {
       fecfactura.identificacioncomprador = abonado.idresponsable.cedula;
       fecfactura.direccioncomprador = abonado.direccionubicacion;
       fecfactura.referencia = factura.idabonado;
-      fecfactura.concepto = `${
-        fecEmision.getMonth() + 1
-      } del ${fecEmision.getFullYear()} Nro medidor: ${
-        lecturas[0].idabonado_abonados.nromedidor
-      }`;
+      fecfactura.concepto = `${fecEmision.getMonth() + 1
+        } del ${fecEmision.getFullYear()} Nro medidor: ${lecturas[0].idabonado_abonados.nromedidor
+        }`;
     } else {
       fecfactura.razonsocialcomprador = factura.idcliente.nombre;
       fecfactura.identificacioncomprador = factura.idcliente.cedula;
@@ -350,7 +361,7 @@ export class FecfacturaService {
     });
   }
 
-    // PUT /sri/{idfactura}
+  // PUT /sri/{idfactura}
   updateSriFields(
     idfactura: number,
     payload: { claveacceso: string; xmlautorizado: string; estado: string }
@@ -379,175 +390,8 @@ export class FecfacturaService {
     try {
       const def = await this.defService.getByIddefinirAsync(1);
       this.empresa = def;
-    } catch (error) {}
+    } catch (error) { }
   }
-  // OBSOLETO / REVISAR:
-  // Flujo legacy de armado manual de fec_factura en cliente.
-  async buildFactura(factura: any) {
-    this._facturas = factura;
-    let i = 0;
-    let usuario = await this.s_usuario.getByIdusuarioAsync(
-      factura.usuariocobro
-    );
-    let fecfactura = {} as Fec_factura;
-    fecfactura.idfactura = factura.idfactura;
-    this.claveAcceso(i);
-    fecfactura.claveacceso = this.claveacceso;
-    fecfactura.secuencial = factura.nrofactura.slice(8, 18);
-    fecfactura.estado = 'I';
-    fecfactura.establecimiento = factura.nrofactura.slice(0, 3);
-    fecfactura.puntoemision = factura.nrofactura.slice(4, 7);
-    fecfactura.direccionestablecimiento = this.empresa.direccion;
-    fecfactura.fechaemision = factura.fechacobro;
-    fecfactura.tipoidentificacioncomprador =
-      factura.idcliente.idtpidentifica_tpidentifica.codigo;
-    if (
-      (factura.idmodulo.idmodulo === 3 && factura.idabonado > 0) ||
-      factura.idmodulo.idmodulo === 4
-    ) {
-      const abonado: Abonados = await this.getAbonado(factura.idabonado);
-      const _lectura = await this.getLectura(factura.idfactura);
-      let fecEmision: Date = new Date(_lectura[0].fechaemision);
-      fecfactura.razonsocialcomprador = abonado.idresponsable.nombre;
-      fecfactura.identificacioncomprador = abonado.idresponsable.cedula;
-      fecfactura.direccioncomprador = abonado.direccionubicacion;
-      fecfactura.referencia = factura.idabonado;
-      fecfactura.concepto = `${
-        fecEmision.getMonth() + 1
-      } del ${fecEmision.getFullYear()} Nro medidor: ${
-        _lectura[0].idabonado_abonados.nromedidor
-      }`;
-    } else {
-      fecfactura.razonsocialcomprador = factura.idcliente.nombre;
-      fecfactura.identificacioncomprador = factura.idcliente.cedula;
-      fecfactura.concepto = 'OTROS SERVICIOS';
-      fecfactura.referencia = 'S/N';
-      fecfactura.direccioncomprador = factura.idcliente.direccion;
-    }
-    fecfactura.telefonocomprador = factura.idcliente.telefono;
-    fecfactura.emailcomprador = factura.idcliente.email;
-    //fecfactura.referencia = factura.idabonado;
-    fecfactura.recaudador = usuario.nomusu;
-    this.tipocobro = factura.formapago;
-    this.save(fecfactura).subscribe({
-      next: (resp: any) => {
-        let codImpuesto = 0;
-        if (resp.fechacobro <= '2024-03-31') {
-          codImpuesto = 2;
-        } else {
-          codImpuesto = 4;
-        }
-        this.buildDetalle(fecfactura, codImpuesto);
-      },
-      error: (e) => console.error(e),
-    });
-  }
-  // OBSOLETO / REVISAR:
-  // Parte del flujo legacy de construccion FE en frontend.
-  buildDetalle(resp: any, codImpuesto: any) {
-    this.rxfService
-      .getRubrosAsync(resp.idfactura)
-      .then((_facturaxrubros: any) => {
-        /* POR CADA RUBRO QUE TIENE LA FACTURA ARMO EL OBJETO DETALLE PARA GUARDARLO */
-        this.sumaTotal = 0;
-        _facturaxrubros.forEach((rxf: any, i: number) => {
-          let detalle = {} as Fec_factura_detalles;
-          let basImponible: number = 0;
-          detalle.idfacturadetalle = rxf.idrubroxfac;
-          detalle.idfactura = rxf.idfactura_facturas.idfactura;
-          detalle.codigoprincipal = rxf.idrubro_rubros.idrubro;
-          detalle.descripcion = rxf.idrubro_rubros.descripcion;
-          detalle.cantidad = rxf.cantidad;
-          detalle.preciounitario = rxf.valorunitario;
-          detalle.descuento = 0;
-          basImponible += rxf.cantidad * rxf.valorunitario;
-          this.sumaTotal += rxf.valorunitario;
-          this.fec_facdetalleService.saveFacDetalle(detalle).subscribe({
-            next: (datos: any) => {},
-            error: (e) => console.error(e),
-            complete: () => {
-              this.buildDetalleImpuesto(rxf, codImpuesto, basImponible, i);
-            },
-          });
-        });
-        return _facturaxrubros[0].idfactura_facturas;
-      })
-      .then((detalles: any) => {
-        this.buildPago(detalles, this.sumaTotal);
-      })
-      .catch();
-  }
-  // OBSOLETO / REVISAR:
-  // Parte del flujo legacy de construccion FE en frontend.
-  buildDetalleImpuesto(
-    rxf: any,
-    codImpuesto: any,
-    basImponible: number,
-    i: number
-  ) {
-    let iva = 0;
-    if (rxf.idrubro_rubros.swiva === true) {
-      if ((codImpuesto = 2)) {
-        iva = rxf.valorunitario * 0.12;
-      }
-      if ((codImpuesto = 4)) {
-        iva = rxf.valorunitario * 0.15;
-      }
-    } else {
-      codImpuesto = 0;
-    }
-    this.sumaTotal += rxf.cantidad * rxf.valorunitario + iva;
-    let secuencialImpuestos: String = rxf.idrubroxfac.toString() + i;
-    /* MIENTRAS GUARDO EL DETALLE ARMO EL OBJETO DETALLE IMPUESTO */
-    let detalleImpuesto = {} as Fec_factura_detalles_impuestos;
-    detalleImpuesto.idfacturadetalleimpuestos = +secuencialImpuestos!;
-    detalleImpuesto.idfacturadetalle = rxf.idrubroxfac;
-    detalleImpuesto.codigoimpuesto = '2';
-    detalleImpuesto.codigoporcentaje = codImpuesto.toString();
-    detalleImpuesto.baseimponible = basImponible;
-    this.fec_facdetimpService
-      .saveFacDetalleImpuesto(detalleImpuesto)
-      .then((dato) => {});
-  }
-  // OBSOLETO / REVISAR:
-  // Parte del flujo legacy de construccion FE en frontend.
-  buildPago(resp: any, total: number) {
-    let pagos = {} as Fec_factura_pagos;
-    switch (this.tipocobro.toString()) {
-      case '1':
-        pagos.formapago = '01';
-        break;
-      case '3':
-        pagos.formapago = '01';
-        break;
-      case '4':
-        pagos.formapago = '20';
-        break;
-      case '5':
-        pagos.formapago = '19';
-        break;
-      case '6':
-        pagos.formapago = '01';
-        break;
-      case '7':
-        pagos.formapago = '20';
-        break;
-    }
-    let secuencialPagos: String = resp.idfactura.toString() + 0; //cambiar el 0 por un valor autoincrementable cuando sea mas de una factura
-    pagos.idfacturapagos = +secuencialPagos!;
-    pagos.idfactura = resp.idfactura;
-    pagos.total = total;
-    pagos.plazo = 0;
-    pagos.unidadtiempo = 'dias';
-    this.fec_facPagosService.saveFacPago(pagos).subscribe({
-      next: (datos) => {},
-      error: (e) => console.error(e),
-    });
-  }
-  // OBSOLETO / REVISAR:
-  // Exportacion legacy que arma fec_factura desde frontend.
-
-
   async getAbonado(idabonado: number): Promise<any> {
     const abo = await this.aboService.getById(idabonado).toPromise();
     return abo;
@@ -585,51 +429,112 @@ export class FecfacturaService {
     this.claveacceso = this.claveacceso + verificador; //Dígito Verificador (Módulo 11)
   }
 
-  // OBSOLETO / REVISAR:
-  // Grabacion de pagos FE desde frontend.
-  pagos = (resp: any, sumaTotal: number) => {
-    let pagos = {} as Fec_factura_pagos;
-    switch (this.tipocobro.toString()) {
-      case '1':
-        pagos.formapago = '01';
-        break;
-      case '3':
-        pagos.formapago = '01';
-        break;
-      case '4':
-        pagos.formapago = '20';
-        break;
-      case '5':
-        pagos.formapago = '19';
-        break;
-      case '6':
-        pagos.formapago = '01';
-        break;
-      case '7':
-        pagos.formapago = '20';
-        break;
-    }
-    let secuencialPagos: String = resp.idfactura.toString() + 0; //cambiar el 0 por un valor autoincrementable cuando sea mas de una factura
-    pagos.idfacturapagos = +secuencialPagos!;
-    pagos.idfactura = resp.idfactura;
-    pagos.total = sumaTotal;
-    pagos.plazo = 0;
-    pagos.unidadtiempo = 'dias';
-    this.fec_facPagosService.saveFacPago(pagos).subscribe({
-      next: (datos) => {},
-      error: (e) => console.error(e),
-    });
-  };
-
   getByIdFactura(idfactura: number) {
     return this.http.get(`${baseUrl}/factura?idfactura=${idfactura}`);
   }
 
+  private extraerXmlAutorizado(payload: any): string {
+    if (typeof payload?.xmlAutorizado === 'string' && payload.xmlAutorizado.trim()) {
+      return payload.xmlAutorizado.trim();
+    }
+
+    if (typeof payload?.xmlAutorizadoBase64 === 'string' && payload.xmlAutorizadoBase64.trim()) {
+      return atob(payload.xmlAutorizadoBase64.trim());
+    }
+
+    const comprobante =
+      payload?.autorizacion?.autorizaciones?.autorizacion?.[0]?.comprobante ||
+      payload?.autorizaciones?.[0]?.comprobante ||
+      '';
+
+    return typeof comprobante === 'string' ? comprobante.trim() : '';
+  }
+
   getXmlAutorizadoSRI(claveAcceso: string) {
-    return this.http.get(
-      `${singsendUrl}/api/singsend/autorizacion?claveAcceso=${claveAcceso}`,
-      { responseType: 'text' }
+    return this.http.get(`${sriApiV1Url}/autorizacion/${claveAcceso}`).pipe(
+      map((payload: any) => {
+        const xml = this.extraerXmlAutorizado(payload);
+        if (!xml) {
+          throw new Error(`No se encontro XML autorizado para la clave ${claveAcceso}.`);
+        }
+        return xml;
+      })
     );
+  }
+
+  getSriFacturaById(idfactura: number) {
+    return this.http.get(`${sriApiV1Url}/facturas/${idfactura}`);
+  }
+
+  consultarAutorizacionPorClave(claveAcceso: string) {
+    return this.http.get(`${sriApiV1Url}/autorizacion/${claveAcceso}`);
+  }
+
+  consultarAutorizacionDesdeXml(xml: string) {
+    return this.http.post(`${sriApiV1Url}/autorizacion/by-xml`, xml, {
+      headers: { 'Content-Type': 'application/xml' },
+    });
+  }
+
+  listarDocumentosSri(params?: Record<string, any>) {
+    let httpParams = new HttpParams();
+    Object.entries(params || {}).forEach(([key, value]) => {
+      if (value !== null && value !== undefined && value !== '') {
+        httpParams = httpParams.set(key, String(value));
+      }
+    });
+    return this.http.get(`${sriApiV1Url}/documentos`, { params: httpParams });
+  }
+
+  getDocumentoSri(uuid: string) {
+    return this.http.get(`${sriApiV1Url}/documentos/${uuid}`);
+  }
+
+  descargarXmlAutorizado(uuid: string) {
+    return this.http.get(`${sriApiV1Url}/documentos/${uuid}/xml`, {
+      responseType: 'blob',
+    });
+  }
+
+  descargarRide(uuid: string) {
+    return this.http.get(`${sriApiV1Url}/documentos/${uuid}/ride`, {
+      responseType: 'blob',
+    });
+  }
+
+  descargarZipDocumento(uuid: string) {
+    return this.http.get(`${sriApiV1Url}/documentos/${uuid}/zip`, {
+      responseType: 'blob',
+    });
+  }
+
+  consultarEstadoErp(uuid: string) {
+    return this.http.get(`${sriApiV1Url}/erp/${uuid}/estado`);
+  }
+
+  pingSri() {
+    return this.http.get(`${sriApiV1Url}/erp/ping`);
+  }
+
+  procesarFacturaSri(payload: any) {
+    return this.http.post(`${sriApiV1Url}/facturas`, payload);
+  }
+
+  procesarFacturaDesdeErp(idfactura: number | any) {
+    const body = typeof idfactura === 'object' ? idfactura : { idfactura };
+    return this.http.post(`${sriApiV1Url}/erp/factura`, body);
+  }
+
+  validarFacturaSri(payload: any) {
+    return this.http.post(`${sriApiV1Url}/facturas/validar`, payload);
+  }
+
+  procesarRetencionSri(payload: any) {
+    return this.http.post(`${sriApiV1Url}/retenciones`, payload);
+  }
+
+  validarRetencionSri(payload: any) {
+    return this.http.post(`${sriApiV1Url}/retenciones/validar`, payload);
   }
 
   setxml(fecfactura: any) {
@@ -647,11 +552,9 @@ export class FecfacturaService {
   }
 
   async generateXmlOfPago(idfactura: number): Promise<any> {
-    //let url_prov = 'http://192.168.0.165:9090';//esta url es provicional para llenar la tabla fec_factura y proceder a crear los xml
-    //let url_prov = 'http://localhost:8080';
     try {
       return await firstValueFrom(
-        this.http.get(`${baseUrl}/createFacElectro?idfactura=${idfactura}`)
+        this.procesarFacturaDesdeErp(idfactura)
       );
     } catch (error) {
       throw this.buildFacturaElectronicaError(error, idfactura);
@@ -671,7 +574,7 @@ export class FecfacturaService {
 
       return new Error(
         backendMessage ||
-          `No se pudo generar la factura electrónica para la factura ${idfactura}.`
+        `No se pudo generar la factura electrónica para la factura ${idfactura}.`
       );
     }
 
