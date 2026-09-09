@@ -47,6 +47,10 @@ export class VentanasService {
       return this.http.post<void>(`${baseUrl}/catalogo-modulos`, catalogo);
    }
 
+   createCatalogoVentana(nombre: string, iderpmodulo: number): Observable<any> {
+      return this.http.post<any>(`${baseUrl}/catalogo-modulos/ventana`, { nombre, iderpmodulo });
+   }
+
    getPermisosUsuario(idusuario: number): Observable<any[]> {
       return this.http.get<any[]>(`${baseUrl}/usuario/${idusuario}`);
    }

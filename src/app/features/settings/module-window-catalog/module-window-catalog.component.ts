@@ -19,7 +19,10 @@ export class ModuleWindowCatalogComponent implements OnInit {
   catalogoModulosVentanas: any[] = [];
   cargando = false;
   guardando = false;
+  creandoVentana = false;
   canManageAccess = false;
+  nuevaVentanaNombre = '';
+  nuevoModuloId: number | null = null;
 
   constructor(
     public auth: AutorizaService,
@@ -106,6 +109,35 @@ export class ModuleWindowCatalogComponent implements OnInit {
       },
       error: (error) => {
         this.guardando = false;
+        this.mostrarError(error);
+      },
+    });
+  }
+
+  crearVentana(): void {
+    if (this.creandoVentana) return;
+
+    const nombre = this.nuevaVentanaNombre.trim().toLowerCase();
+    if (!/^[a-z0-9][a-z0-9/_-]{0,99}$/.test(nombre)) {
+      this.auth.swal('warning', 'Use un identificador de ruta, por ejemplo: mi-nueva-ventana.');
+      return;
+    }
+    if (!this.nuevoModuloId) {
+      this.auth.swal('warning', 'Seleccione el módulo WEB responsable.');
+      return;
+    }
+
+    this.creandoVentana = true;
+    this.ventanasService.createCatalogoVentana(nombre, this.nuevoModuloId).subscribe({
+      next: () => {
+        this.creandoVentana = false;
+        this.nuevaVentanaNombre = '';
+        this.nuevoModuloId = null;
+        this.auth.swal('success', 'Ventana creada y asignada al módulo seleccionado.');
+        this.cargarCatalogo();
+      },
+      error: (error) => {
+        this.creandoVentana = false;
         this.mostrarError(error);
       },
     });

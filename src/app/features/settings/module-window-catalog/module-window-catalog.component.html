@@ -10,6 +10,28 @@
 
   <div class="card shadow-sm border-0">
     <div class="card-body p-3 p-lg-4">
+      <section class="new-window mb-4">
+        <div>
+          <h5 class="mb-1">Nueva ventana</h5>
+          <small class="text-muted">Registre el identificador de la ruta Angular y asígnelo al módulo que controlará el acceso.</small>
+        </div>
+        <div class="new-window__fields">
+          <input
+            class="form-control form-control-sm"
+            [(ngModel)]="nuevaVentanaNombre"
+            placeholder="ejemplo: mi-nueva-ventana"
+            [disabled]="creandoVentana || cargando"
+          />
+          <select class="custom-select custom-select-sm" [(ngModel)]="nuevoModuloId" [disabled]="creandoVentana || cargando">
+            <option [ngValue]="null">Módulo WEB responsable</option>
+            <option *ngFor="let modulo of webModules" [ngValue]="modulo.iderpmodulo">{{ modulo.descripcion }}</option>
+          </select>
+          <button class="btn btn-primary btn-sm" type="button" (click)="crearVentana()" [disabled]="creandoVentana || cargando">
+            {{ creandoVentana ? 'Creando...' : 'Crear ventana' }}
+          </button>
+        </div>
+      </section>
+
       <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
         <div>
           <h5 class="m-0">Asignaciones de ventanas</h5>
