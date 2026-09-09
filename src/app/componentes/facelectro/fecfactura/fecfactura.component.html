@@ -643,7 +643,8 @@
                 </a>
 
                 <a class="dropdown-item" href="javascript:void(0)" *ngIf="idusuario == 1" (click)="reCreateFactura(factura.idfactura)">
-                  <i class="fas fa-repeat text-warning mr-2"></i> Re-crear
+                  <i class="fas mr-2" [ngClass]="recreandoFactura ? 'fa-spinner fa-spin text-warning' : 'fa-repeat text-warning'"></i>
+                  {{ recreandoFactura ? 'Re-creando...' : 'Re-crear' }}
                 </a>
               </div>
             </div>

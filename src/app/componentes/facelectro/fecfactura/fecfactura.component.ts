@@ -32,6 +32,7 @@ export class FecfacturaComponent implements OnInit {
   formReenvio: FormGroup;
   swbotones: boolean = false;
   swcalculando: boolean = false;
+  recreandoFactura: boolean = false;
   txtcalculando = 'Calculando';
   _facturas: any;
   swexportar: boolean;
@@ -1305,7 +1306,7 @@ export class FecfacturaComponent implements OnInit {
     });
   }
   async reCreateFactura(idfactura: number) {
-    if (!idfactura) {
+    if (!idfactura || this.recreandoFactura) {
       return;
     }
 
@@ -1318,6 +1319,7 @@ export class FecfacturaComponent implements OnInit {
     }
 
     try {
+      this.recreandoFactura = true;
       const validacionPrevia = await this.construirVistaPreviaTributaria(idfactura);
       this.validacionSriDetalle = validacionPrevia.detalle;
       this.validacionSriResumen = validacionPrevia.resumen;
@@ -1335,7 +1337,9 @@ export class FecfacturaComponent implements OnInit {
       console.log('✅ Factura eliminada correctamente');
 
       // 2) Generar nuevamente (tu método ya es async)
-      const respuesta: any = await this.fecfacService.generateXmlOfPago(idfactura);
+      const respuesta: any = await lastValueFrom(
+        this.fecfacService.asegurarFacturaElectronica(idfactura)
+      );
       console.log('✅ Factura recreada y XML generado');
       this.validacionSriDetalle = respuesta?.validacionSri?.detalle || [];
       this.validacionSriResumen = respuesta?.validacionSri?.resumen || [];
@@ -1351,6 +1355,8 @@ export class FecfacturaComponent implements OnInit {
           ? err.message
           : 'Ocurrió un error al recrear la factura';
       this.swal('error', mensaje);
+    } finally {
+      this.recreandoFactura = false;
     }
   }
 
