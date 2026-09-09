@@ -249,13 +249,12 @@ export class AddRecaudaComponent implements OnInit {
   }
 
   private recalcularTotalSeleccionado() {
-    this.totalapagar = this.fencola.reduce((acc: number, f: any) => {
-      const total = Number(f?.total ?? 0);
-      return acc + total;
-    }, 0);
+    this.totalapagar = this.redondearMonedaUp(this.fencola.reduce((acc: number, f: any) => {
+      return acc + this.redondearMonedaUp(Number(f?.total ?? 0));
+    }, 0));
 
     this.f_cobrar.patchValue({
-      acobrar: Number(this.totalapagar.toFixed(2)),
+      acobrar: this.totalapagar,
     });
     this.actualizarFormaCobroDesdeNotaCredito();
   }
@@ -994,7 +993,7 @@ export class AddRecaudaComponent implements OnInit {
     // no se arma en este componente, sino en el backend cuando se ejecuta
     // `recaCobroService.cobrarFacturas(obj)`.
     let dinero: number = +this.f_cobrar.value.dinero!;
-    let apagar: number = +this.totalapagar!.toFixed(2);
+    let apagar: number = this.redondearMonedaUp(this.totalapagar);
     let facturas: any[] = [];
     let facturasSeleccionadas: any[] = [];
     let autentification = 1;
@@ -1003,9 +1002,9 @@ export class AddRecaudaComponent implements OnInit {
       facturas.push(item.idfactura);
       facturasSeleccionadas.push({ ...item });
     });
-    recaudacion.totalpagar = this.totalapagar;
+    recaudacion.totalpagar = apagar;
     recaudacion.recaudador = autentification;
-    recaudacion.valor = this.totalapagar;
+    recaudacion.valor = apagar;
     recaudacion.recibo = dinero;
     recaudacion.cambio = dinero - apagar;
     recaudacion.ncvalor = Number(this.f_cobrar.value.ncvalor) || 0;
@@ -1567,6 +1566,14 @@ export class AddRecaudaComponent implements OnInit {
         vuelto: 0,
       });
     }
+  }
+
+  private redondearMonedaUp(valor: number): number {
+    if (!Number.isFinite(valor)) return 0;
+    const normalizado = Number(valor.toFixed(10));
+    return normalizado >= 0
+      ? Math.ceil(normalizado * 100 - 1e-8) / 100
+      : Math.floor(normalizado * 100 + 1e-8) / 100;
   }
 }
 interface SinCobrarVisual {

@@ -215,8 +215,7 @@ export class RecaudacionReportsService {
             this.interes = item.valorunitario;
           } */
         });
-        this.total += this.interes + this.iva;
-        this.subtotal += this.total - this.interes - this.iva;
+        this.recalcularTotalesComprobante();
         doc.setFontSize(10);
         autoTable(doc, {
           margin: { left: 10 },
@@ -373,8 +372,7 @@ export class RecaudacionReportsService {
           }
         });
 
-        this.total += this.interes + this.iva;
-        this.subtotal += this.total - this.interes - this.iva;
+        this.recalcularTotalesComprobante();
         doc.setFontSize(10);
         doc.text('REIMPRESIóN', 140, 110);
         autoTable(doc, {
@@ -549,8 +547,7 @@ export class RecaudacionReportsService {
                 this.interes = factura.interescobrado;
               });
 
-              this.total += this.interes + this.iva;
-              this.subtotal += this.total - this.interes - this.iva;
+              this.recalcularTotalesComprobante();
 
               doc.setFontSize(10);
               autoTable(doc, {
@@ -711,6 +708,29 @@ export class RecaudacionReportsService {
 
   private redondearValorRubro(item: any): number {
     const valor = Number(item?.valorunitario || 0) * Number(item?.cantidad || 0);
-    return Math.round((valor + Number.EPSILON) * 100) / 100;
+    if (!Number.isFinite(valor)) {
+      return 0;
+    }
+
+    // Mantiene la misma regla UP del cobro sin elevar por imprecisiones binarias.
+    const normalizado = Number(valor.toFixed(10));
+    return normalizado >= 0
+      ? Math.ceil(normalizado * 100 - 1e-8) / 100
+      : Math.floor(normalizado * 100 + 1e-8) / 100;
+  }
+
+  private recalcularTotalesComprobante(): void {
+    this.subtotal = this.redondearImporte(this.total);
+    this.interes = this.redondearImporte(Number(this.interes || 0));
+    this.iva = this.redondearImporte(Number(this.iva || 0));
+    this.total = this.redondearImporte(this.subtotal + this.interes + this.iva);
+  }
+
+  private redondearImporte(valor: number): number {
+    if (!Number.isFinite(valor)) return 0;
+    const normalizado = Number(valor.toFixed(10));
+    return normalizado >= 0
+      ? Math.ceil(normalizado * 100 - 1e-8) / 100
+      : Math.floor(normalizado * 100 + 1e-8) / 100;
   }
 }

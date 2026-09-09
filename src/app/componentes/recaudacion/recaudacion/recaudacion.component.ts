@@ -1178,10 +1178,13 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
 
   private redondearMonedaUp(valor: number): number {
     if (!Number.isFinite(valor)) return 0;
+    // JSON/JavaScript puede representar 10.79 como 10.790000000000001.
+    // Normalizar antes de aplicar UP evita cobrar un centavo inexistente.
+    const normalizado = Number(valor.toFixed(10));
     const factor = 100;
-    const ajustado = valor >= 0
-      ? Math.ceil((valor - Number.EPSILON) * factor)
-      : Math.floor((valor + Number.EPSILON) * factor);
+    const ajustado = normalizado >= 0
+      ? Math.ceil(normalizado * factor - 1e-8)
+      : Math.floor(normalizado * factor + 1e-8);
     return ajustado / factor;
   }
 
@@ -1645,7 +1648,7 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
     if (!Number.isFinite(parsed) || parsed <= 0) {
       return 0;
     }
-    return Math.round(parsed * 100) / 100;
+    return this.redondearMonedaUp(parsed);
   }
 
   // =====================
