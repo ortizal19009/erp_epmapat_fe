@@ -43,6 +43,10 @@ export class VentanasService {
       return this.http.get<any[]>(`${baseUrl}/catalogo-modulos`);
    }
 
+   getAuditoriaCatalogoModulosVentanas(): Observable<any> {
+      return this.http.get<any>(`${baseUrl}/catalogo-modulos/auditoria`);
+   }
+
    saveCatalogoModulosVentanas(catalogo: any[]): Observable<void> {
       return this.http.post<void>(`${baseUrl}/catalogo-modulos`, catalogo);
    }

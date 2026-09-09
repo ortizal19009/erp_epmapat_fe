@@ -17,7 +17,8 @@ import { LecturasService } from 'src/app/servicios/lecturas.service';
 import { RecaudaxcajaService } from 'src/app/servicios/recaudaxcaja.service';
 import { RubroxfacService } from 'src/app/servicios/rubroxfac.service';
 import { LoadingService } from 'src/app/servicios/loading.service';
-import { firstValueFrom } from 'rxjs';
+import { RecaudacionCobroService } from 'src/app/servicios/recaudacion-cobro.service';
+import { firstValueFrom, timeout } from 'rxjs';
 
 @Component({
   selector: 'app-transferencias',
@@ -70,6 +71,7 @@ export class TransferenciasComponent implements OnInit {
     private authSvc: AutorizaService,
     private fecFacturaS: FecfacturaService,
     private loadingService: LoadingService,
+    private recaudacionCobroService: RecaudacionCobroService,
   ) { }
 
   ngOnInit(): void {
@@ -446,19 +448,39 @@ export class TransferenciasComponent implements OnInit {
     this.estadoGeneracionFactura.clear();
     this.loadingService.showLoading();
     try {
+      const idsFacturas = facturasSeleccionadas
+        .map((factura: any) => Number(factura.idfactura))
+        .filter((idfactura: number) => Number.isFinite(idfactura) && idfactura > 0);
+      const respuesta = await firstValueFrom(
+        this.recaudacionCobroService.transferirFacturas(idsFacturas, this.authService.idusuario)
+      );
+
+      const numerosPorFactura = new Map(
+        (respuesta.facturas || []).map(item => [Number(item.idfactura), item.nrofactura])
+      );
+      for (const factura of facturasSeleccionadas) {
+        const idfactura = Number(factura.idfactura);
+        factura.nrofactura = numerosPorFactura.get(idfactura) || factura.nrofactura;
+        factura.estado = 3;
+      }
+      const ultimoNumero = respuesta.facturas?.[respuesta.facturas.length - 1]?.nrofactura;
+      if (ultimoNumero) this._nroFactura = ultimoNumero;
+      this.swtransferido = true;
+
       for (const factura of facturasSeleccionadas) {
         const idfactura = Number(factura.idfactura);
         this.estadoGeneracionFactura.set(idfactura, 'generando');
         try {
-          await this.transferirFactura(factura);
-          factura.estado = 3;
+          await this.prepararFacturaElectronicaTransferencia(idfactura);
           this.estadoGeneracionFactura.set(idfactura, 'generada');
         } catch (error) {
           this.estadoGeneracionFactura.set(idfactura, 'error');
-          console.error(`No se pudo transferir o generar la factura electrónica ${idfactura}:`, error);
+          console.error(`No se pudo generar la estructura electrónica de la factura ${idfactura}:`, error);
         }
       }
-      this.swtransferido = true;
+    } catch (error) {
+      console.error('No se pudo completar la transferencia:', error);
+      alert(error instanceof Error ? error.message : 'No se pudo completar la transferencia.');
     } finally {
       this.transferenciaEnProceso = false;
       this.loadingService.hideLoading();
@@ -586,9 +608,15 @@ export class TransferenciasComponent implements OnInit {
   }
 
   private async generarFacturaElectronicaTransferencia(idfactura: number): Promise<void> {
-    await firstValueFrom(this.fecFacturaS.asegurarFacturaElectronica(idfactura));
-    await this.fecFacturaS.generateXmlOfPago(idfactura);
+    await this.prepararFacturaElectronicaTransferencia(idfactura);
   }
+
+  private async prepararFacturaElectronicaTransferencia(idfactura: number): Promise<void> {
+    await firstValueFrom(
+      this.fecFacturaS.asegurarFacturaElectronica(idfactura).pipe(timeout(20000))
+    );
+  }
+
 
   abrirCaja() {
     this.s_cajas.getByIdUsuario(this.authService.idusuario).subscribe({

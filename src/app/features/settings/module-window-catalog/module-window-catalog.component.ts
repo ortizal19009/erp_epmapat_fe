@@ -17,6 +17,7 @@ import { VentanasService } from 'src/app/servicios/administracion/ventanas.servi
 export class ModuleWindowCatalogComponent implements OnInit {
   allModules: any[] = [];
   catalogoModulosVentanas: any[] = [];
+  auditoriaCatalogo: any = null;
   cargando = false;
   guardando = false;
   creandoVentana = false;
@@ -90,11 +91,19 @@ export class ModuleWindowCatalogComponent implements OnInit {
               iderpmodulo: item.iderpmodulo == null ? null : Number(item.iderpmodulo),
             }));
             this.cargando = false;
+            this.cargarAuditoriaCatalogo();
           },
           error: (error) => this.mostrarError(error),
         });
       },
       error: (error) => this.mostrarError(error),
+    });
+  }
+
+  private cargarAuditoriaCatalogo(): void {
+    this.ventanasService.getAuditoriaCatalogoModulosVentanas().subscribe({
+      next: (auditoria: any) => (this.auditoriaCatalogo = auditoria),
+      error: (error) => console.error('No se pudo cargar la auditoría del catálogo', error),
     });
   }
 

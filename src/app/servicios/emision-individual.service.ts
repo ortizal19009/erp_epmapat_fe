@@ -13,6 +13,24 @@ export class EmisionIndividualService {
   saveEmisionIndividual(datoEmIn: EmisionIndividual) {
     return this.http.post(`${baseUrl}`, datoEmIn);
   }
+  crearRefacturacion(datos: {
+    idemision: number;
+    idabonado: number;
+    idrutaxemision: number;
+    idlecturaanterior: number;
+    lecturaanterior: number;
+    lecturaactual: number;
+    idnovedad?: number | null;
+    idusuario: number;
+    swmulta: boolean;
+  }) {
+    return this.http.post<{
+      idfactura: number;
+      idlectura: number;
+      idemisionindividual: number;
+      total: number;
+    }>(`${baseUrl}/refacturacion`, datos);
+  }
   getByIdEmision(idemision: number) {
     return this.http.get<EmisionIndividual[]>(
       `${baseUrl}/idemision?idemision=${idemision}`

@@ -556,6 +556,13 @@ export class FecfacturaService {
     });
   }
 
+  recuperarXmlAutorizado(idfactura: number): Observable<Fecfactura> {
+    return this.http.post<Fecfactura>(
+      `${baseUrl}/${encodeURIComponent(String(idfactura))}/recuperar-xml-autorizado`,
+      null
+    );
+  }
+
   asegurarFacturaElectronica(idfactura: number): Observable<any> {
     return this.http.get(`${baseUrl}/createFacElectro`, {
       params: new HttpParams().set('idfactura', idfactura.toString()),

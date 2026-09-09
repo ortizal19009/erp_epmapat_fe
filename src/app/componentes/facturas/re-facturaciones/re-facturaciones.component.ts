@@ -460,8 +460,18 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
         nuevarutaxemi = { idrutaxemision: 0 };
       }
 
-      // 3) generar lectura individual (crea planilla + lectura + calcula valores + crea emision_individual dentro de planilla())
-      await this.generaLecturaIndividual(nuevarutaxemi, novedad);
+      const respuesta = await firstValueFrom(this.s_emisionindividual.crearRefacturacion({
+        idemision: Number(this.f_emisionIndividual.value.emision),
+        idabonado: Number(this.abonado.idabonado),
+        idrutaxemision: Number(nuevarutaxemi.idrutaxemision),
+        idlecturaanterior: Number(this._lectura?.idlectura),
+        lecturaanterior: Number(this.f_lecturas.value.lecturaanterior),
+        lecturaactual: Number(this.f_lecturas.value.lecturaactual),
+        idnovedad: novedad?.idnovedad ?? null,
+        idusuario: Number(this.authService.idusuario),
+        swmulta: !!this.swMulta,
+      }));
+      this.idfactura = respuesta.idfactura;
 
       // 4) marcar OK y refrescar lista
       this.guardadoOk = true;
@@ -472,6 +482,12 @@ export class ReFacturacionesComponent implements OnInit, OnDestroy {
     } catch (e) {
       console.error('Error al guardar refacturación', e);
       this.guardadoOk = false;
+      this.authService.swal(
+        'error',
+        e instanceof Error
+          ? e.message
+          : 'No se pudo guardar la re-facturación. No se registraron cambios parciales.',
+      );
     } finally {
       this.cargando = false;
     }

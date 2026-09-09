@@ -256,7 +256,7 @@
                         {{ sincobro.direccion }}
                       </td>
                       <td class="text-center date-cell small">
-                        {{ sincobro.fechaemision | date:'dd/MM/yyyy' }}
+                        {{ formatearPeriodoEmision(sincobro.fechaemision) }}
                       </td>
                       <td class="module-name small">{{ sincobro.modulo }}</td>
                       <td class="text-right amount-cell">
@@ -693,6 +693,5 @@
     </div>
   </div>
 </div>
-
 
 

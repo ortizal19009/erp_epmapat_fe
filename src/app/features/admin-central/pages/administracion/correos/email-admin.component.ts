@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Subscription, forkJoin, of, timer } from 'rxjs';
+import { Subscription, of, timer } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { EmailAdminService } from './email-admin.service';
 import {
@@ -235,21 +235,18 @@ export class EmailAdminComponent implements OnInit, OnDestroy {
   loadAll(): void {
     this.loading = true;
     this.errorMessage = '';
-    forkJoin({
-      accounts: this.emailAdminService.getAccounts(),
-      summary: this.emailAdminService.getEmailSummary(),
-      blacklist: this.emailAdminService.getBlacklist(),
-    }).subscribe({
-      next: ({ accounts, summary, blacklist }) => {
+    this.emailAdminService.getAccounts().subscribe({
+      next: (accounts) => {
         this.accounts = accounts;
-        this.emailSummary = summary;
-        this.blacklist = blacklist;
-        this.ensureBlacklistPageInRange();
         if (this.testAccountId && !this.accounts.some((item) => item.id === this.testAccountId)) {
           this.testAccountId = null;
         }
-        this.loadEmailPage();
         this.loading = false;
+        this.loadSummary();
+        this.loadBlacklist();
+        if (this.activeSection === 'emails') {
+          this.loadEmailPage();
+        }
       },
       error: () => {
         this.errorMessage = 'No fue posible cargar el modulo de correos. Intenta nuevamente.';
@@ -322,6 +319,16 @@ export class EmailAdminComponent implements OnInit, OnDestroy {
         this.handleActionError(error, 'No fue posible cargar la cuenta para edicion.');
       },
     });
+  }
+
+  selectSection(section: 'accounts' | 'emails' | 'blacklist'): void {
+    this.activeSection = section;
+    if (section === 'emails' && this.emails.length === 0) {
+      this.loadEmailPage();
+    }
+    if (section === 'blacklist' && this.blacklist.length === 0) {
+      this.loadBlacklist();
+    }
   }
 
   submitAccount(): void {
@@ -785,6 +792,23 @@ export class EmailAdminComponent implements OnInit, OnDestroy {
       error: (error: any) => {
         this.handleActionError(error, 'No fue posible cargar los correos emitidos.');
       },
+    });
+  }
+
+  private loadSummary(): void {
+    this.emailAdminService.getEmailSummary().subscribe({
+      next: (summary) => this.emailSummary = summary,
+      error: () => this.showToast('No fue posible actualizar el resumen de correos.', 'warning'),
+    });
+  }
+
+  private loadBlacklist(): void {
+    this.emailAdminService.getBlacklist().subscribe({
+      next: (blacklist) => {
+        this.blacklist = blacklist;
+        this.ensureBlacklistPageInRange();
+      },
+      error: () => this.showToast('No fue posible cargar la lista negra de correos.', 'warning'),
     });
   }
 }

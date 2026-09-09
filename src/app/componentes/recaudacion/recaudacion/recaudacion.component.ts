@@ -1066,6 +1066,21 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
     return Number.isNaN(time) ? 0 : time;
   }
 
+  formatearPeriodoEmision(fecha: string | Date | null | undefined): string {
+    if (!fecha) return '-';
+
+    const valor = typeof fecha === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(fecha)
+      ? new Date(`${fecha}T00:00:00`)
+      : new Date(fecha);
+    if (Number.isNaN(valor.getTime())) return '-';
+
+    const meses = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+    ];
+    return `${meses[valor.getMonth()]} ${valor.getFullYear()}`;
+  }
+
   valCheckBox(sincobro: any, swcobrado: any) {
     const cuenta = Number(sincobro?.idAbonado ?? sincobro?.idabonado ?? 0);
     if (swcobrado === true) {
@@ -1155,10 +1170,19 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
     let suma = 0;
     this._sincobro.forEach((item) => {
       if (item.pagado === true || item.pagado === 1) {
-        suma += Number(item.total || 0);
+        suma += this.redondearMonedaUp(Number(item.total || 0));
       }
     });
-    this.acobrar = +suma.toFixed(2)!;
+    this.acobrar = this.redondearMonedaUp(suma);
+  }
+
+  private redondearMonedaUp(valor: number): number {
+    if (!Number.isFinite(valor)) return 0;
+    const factor = 100;
+    const ajustado = valor >= 0
+      ? Math.ceil((valor - Number.EPSILON) * factor)
+      : Math.floor((valor + Number.EPSILON) * factor);
+    return ajustado / factor;
   }
 
   // =====================
@@ -2046,11 +2070,8 @@ export class RecaudacionComponent implements OnInit, OnDestroy {
     try {
       const items: MergeItem[] = (this._sincobro || [])
         .filter((s: any) => s.procesada && s.pagado)
-        .map((s: any) => ({
-          idfactura: s.idfactura,
-          idmodulo: s.idmodulo,
-          idAbonado: s.idAbonado,
-        }));
+        .map((s: any) => ({ idfactura: Number(s.idfactura) }))
+        .filter((s: MergeItem) => Number.isFinite(s.idfactura) && s.idfactura > 0);
 
       if (!items.length) {
         this.swal('info', 'No hay facturas procesadas para unificar.');

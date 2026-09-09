@@ -28,13 +28,13 @@
               <button class="dropdown-item text-white" type="button" *ngIf="activeSection === 'blacklist'" (click)="openBlacklistModal()">
                 <i class="bi bi-shield-plus"></i>&nbsp; Nuevo bloqueo
               </button>
-              <button class="dropdown-item text-white" type="button" (click)="activeSection = 'accounts'">
+              <button class="dropdown-item text-white" type="button" (click)="selectSection('accounts')">
                 <i class="bi bi-send-check"></i>&nbsp; Cuentas de envío
               </button>
-              <button class="dropdown-item text-white" type="button" (click)="activeSection = 'emails'">
+              <button class="dropdown-item text-white" type="button" (click)="selectSection('emails')">
                 <i class="bi bi-inbox"></i>&nbsp; Correos emitidos
               </button>
-              <button class="dropdown-item text-white" type="button" (click)="activeSection = 'blacklist'">
+              <button class="dropdown-item text-white" type="button" (click)="selectSection('blacklist')">
                 <i class="bi bi-shield-slash"></i>&nbsp; Lista negra
               </button>
             </div>
@@ -75,13 +75,13 @@
 
       <div class="mt-2 sombra border rounded detalle p-2">
         <div class="d-flex flex-wrap align-items-center">
-          <button type="button" class="btn btn-sm mr-2 mb-2 section-btn" [ngClass]="activeSection === 'accounts' ? 'btn-info' : 'btn-outline-secondary'" (click)="activeSection = 'accounts'">
+          <button type="button" class="btn btn-sm mr-2 mb-2 section-btn" [ngClass]="activeSection === 'accounts' ? 'btn-info' : 'btn-outline-secondary'" (click)="selectSection('accounts')">
             <i class="bi bi-send-check"></i>&nbsp; Cuentas de envío
           </button>
-          <button type="button" class="btn btn-sm mr-2 mb-2 section-btn" [ngClass]="activeSection === 'emails' ? 'btn-info' : 'btn-outline-secondary'" (click)="activeSection = 'emails'">
+          <button type="button" class="btn btn-sm mr-2 mb-2 section-btn" [ngClass]="activeSection === 'emails' ? 'btn-info' : 'btn-outline-secondary'" (click)="selectSection('emails')">
             <i class="bi bi-inbox"></i>&nbsp; Correos emitidos
           </button>
-          <button type="button" class="btn btn-sm mb-2 section-btn" [ngClass]="activeSection === 'blacklist' ? 'btn-info' : 'btn-outline-secondary'" (click)="activeSection = 'blacklist'">
+          <button type="button" class="btn btn-sm mb-2 section-btn" [ngClass]="activeSection === 'blacklist' ? 'btn-info' : 'btn-outline-secondary'" (click)="selectSection('blacklist')">
             <i class="bi bi-shield-slash"></i>&nbsp; Lista negra
           </button>
         </div>

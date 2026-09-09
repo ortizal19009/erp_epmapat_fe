@@ -56,6 +56,16 @@ export interface RecaudacionCobroResponse {
   numeroFacturaSiguiente?: string;
 }
 
+export interface TransferenciaFacturaResultado {
+  idfactura: number;
+  nrofactura: string;
+}
+
+export interface TransferenciaFacturasResponse {
+  facturas: TransferenciaFacturaResultado[];
+  caja: RecaudacionCajaDTO;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -124,6 +134,13 @@ export class RecaudacionCobroService {
     return this.http.post<RecaudacionCobroResponse>(
       `${baseUrl}/cobrar`,
       request
+    );
+  }
+
+  transferirFacturas(facturas: number[], idusuario: number) {
+    return this.http.post<TransferenciaFacturasResponse>(
+      `${baseUrl}/transferencias`,
+      { facturas, idusuario }
     );
   }
 }

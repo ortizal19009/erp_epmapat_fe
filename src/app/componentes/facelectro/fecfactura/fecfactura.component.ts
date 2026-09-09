@@ -1561,11 +1561,51 @@ export class FecfacturaComponent implements OnInit {
       valor: Math.round(item.valor * 100) / 100,
     }));
   }
-  getXmlAutorizadoSri(fecfactura: any) {
-    this.fecfacService.setxml(fecfactura).subscribe({
-      next: (datos: any) => {},
-      error: (e: any) => console.error(e),
-    });
+  async actualizarXmlAutorizado(fecfactura: Fecfactura): Promise<void> {
+    const idfactura = Number(fecfactura?.idfactura);
+    if (!Number.isFinite(idfactura) || idfactura <= 0) {
+      this.swal('warning', 'No se encontró una factura electrónica válida.');
+      return;
+    }
+
+    try {
+      const actualizada = await firstValueFrom(this.fecfacService.recuperarXmlAutorizado(idfactura));
+      this.aplicarActualizacionXmlAutorizado(fecfactura, actualizada);
+
+      if (this.esXmlAutorizadoValido(actualizada?.xmlautorizado)) {
+        this.swal('success', 'XML autorizado recuperado y estado actualizado correctamente.');
+      } else {
+        this.swal('info', 'La factura fue actualizada, pero el SRI todavía no entrega el XML autorizado.');
+      }
+    } catch (error) {
+      console.error('No se pudo actualizar el XML autorizado:', error);
+      this.swal('error', 'No se pudo consultar o actualizar el XML autorizado.');
+    }
+  }
+
+  private aplicarActualizacionXmlAutorizado(destino: Fecfactura, origen: Fecfactura): void {
+    if (!origen) return;
+
+    const actualizar = (factura: Fecfactura | undefined | null): void => {
+      if (!factura || Number(factura.idfactura) !== Number(origen.idfactura)) return;
+      factura.xmlautorizado = origen.xmlautorizado;
+      factura.estado = origen.estado;
+      factura.errores = origen.errores;
+      factura.claveacceso = origen.claveacceso;
+      (factura as any).fechaautorizacion = (origen as any).fechaautorizacion;
+      (factura as any).fechaultimo_intento = (origen as any).fechaultimo_intento;
+      (factura as any).intentosautorizacion = (origen as any).intentosautorizacion;
+    };
+
+    actualizar(destino);
+    actualizar(this.factura);
+    this.fecFacturasBase.forEach(actualizar);
+    this.fecFacturasFiltradas.forEach(actualizar);
+    (this.fec_facturas || []).forEach(actualizar);
+    this.fecFacturasBase = [...this.fecFacturasBase];
+    this.fecFacturasFiltradas = [...this.fecFacturasFiltradas];
+    this.fec_facturas = [...(this.fec_facturas || [])];
+    this.marcarFilaActualizada(origen.idfactura);
   }
   async getFacturaPDF(idfactura: number) {
     try {
